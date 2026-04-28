@@ -4,9 +4,10 @@
 // 신규/수정 모두 처리. is_system=true 엔트리는 편집 불가.
 
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Loader2, X, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, X, Trash2, ChevronLeft, ChevronRight, MapPin, Users } from "lucide-react";
 import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/planners/calendar-rules";
 import { KIND_LABELS, KIND_COLORS } from "@/lib/planners/calendar-rules";
+import type { TaskQuadrant } from "@/lib/planners/types";
 import {
     getLunarDate, lunarToSolar, getLunarMonths, getLunarMonthDays,
     LUNAR_YEARS, LUNAR_YEARS_ANNIVERSARY,
@@ -77,7 +78,7 @@ interface Props {
     /** 기본 시작일 — 신규 생성 시 (YYYY-MM-DD) */
     defaultDate?: string;
     /** 업무(Task) 추가 콜백 */
-    onTaskCreated?: (task: { text: string; time?: string | null; project_id?: string | null; priority?: "low" | "normal" | "high" | null }) => void;
+    onTaskCreated?: (task: { text: string; time?: string | null; project_id?: string | null; priority?: TaskQuadrant | null; memo?: string | null }) => void;
     /** 업무 프로젝트 목록 */
     activeProjects?: Array<{ id: string; title: string; color: string | null }>;
 }
@@ -99,7 +100,11 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [taskText, setTaskText] = useState("");
     const [taskTime, setTaskTime] = useState("");
     const [taskProjectId, setTaskProjectId] = useState("");
-    const [taskPriority, setTaskPriority] = useState<"low" | "normal" | "high" | null>(null);
+    const [taskPriority, setTaskPriority] = useState<TaskQuadrant | null>(null);
+    const [taskMemo, setTaskMemo] = useState("");
+    // 미팅 탭 전용 상태
+    const [withWhom, setWithWhom] = useState("");
+    const [location, setLocation] = useState("");
 
     // 모바일 키보드 올라올 때 바텀시트 위로 밀어올리기
     useEffect(() => {
@@ -132,8 +137,9 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
     useEffect(() => {
         if (!open) return;
-        setTab((initial?.kind as CalendarKind) || "meeting");
-        setTaskText(""); setTaskTime(""); setTaskProjectId("");
+        setTab(initial?.kind ? (initial.kind as CalendarKind) : (onTaskCreated ? "task" : "meeting"));
+        setTaskText(""); setTaskTime(""); setTaskProjectId(""); setTaskMemo(""); setTaskPriority(null);
+        setWithWhom(initial?.with_whom || ""); setLocation(initial?.location || "");
         setTitle(initial?.title || "");
         setDescription(initial?.description || "");
         const sd = initial?.start_date || defaultDate || todayStr();
@@ -192,6 +198,8 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                 recurrence,
                 recurrence_until: recurrenceUntil || null,
                 status: null,
+                with_whom: kind === "meeting" ? (withWhom.trim() || null) : null,
+                location:  kind === "meeting" ? (location.trim() || null) : null,
             };
             const url = isEdit ? `/api/planners/calendar/${initial!.id}` : "/api/planners/calendar";
             const method = isEdit ? "PATCH" : "POST";
@@ -254,6 +262,21 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                         </div>
                     ) : (
                         <div className="flex flex-wrap gap-1.5">
+                            {/* 업무 탭 — 항상 첫 번째 */}
+                            {onTaskCreated && (
+                                <button
+                                    type="button"
+                                    onClick={() => setTab("task")}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                                        tab === "task"
+                                            ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/40"
+                                            : "bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E] shrink-0" />
+                                    업무
+                                </button>
+                            )}
                             {EDITABLE_KINDS.map((k) => {
                                 const active = tab === k;
                                 const c = KIND_COLORS[k];
@@ -271,49 +294,75 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     </button>
                                 );
                             })}
-                            {/* 업무 탭 */}
-                            {onTaskCreated && (
-                                <button
-                                    type="button"
-                                    onClick={() => setTab("task")}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                                        tab === "task"
-                                            ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/40"
-                                            : "bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
-                                    }`}
-                                >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E] shrink-0" />
-                                    업무
-                                </button>
-                            )}
                         </div>
                     )}
 
                     {/* ── 업무 탭 폼 ── */}
                     {tab === "task" && (
-                        <div className="space-y-4 py-1">
+                        <div className="space-y-5 py-1">
+                            {/* 할 일 */}
                             <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">할 일</label>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">할 일</label>
                                 <input
                                     type="text"
                                     value={taskText}
                                     onChange={(e) => setTaskText(e.target.value)}
-                                    placeholder="업무 내용 입력"
-                                    className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                    placeholder="업무 내용을 입력하세요"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20"
                                     autoFocus
                                 />
                             </div>
+
+                            {/* 경중완급 사분면 */}
                             <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">시간 (선택)</label>
-                                <TimeSelect value={taskTime} onChange={setTaskTime} />
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">경중완급 (선택)</label>
+                                <div className="flex flex-col items-center gap-1">
+                                    <span className="text-[9px] text-neutral-300 tracking-widest uppercase">급 (긴급)</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] text-neutral-300 w-5 text-right">경</span>
+                                        <div className="grid grid-cols-2 rounded-xl overflow-hidden border border-neutral-200 shadow-sm w-[200px]">
+                                            {([
+                                                { q: "급경" as TaskQuadrant, label: "급경", sub: "긴급·쉬운", activeCls: "bg-amber-500 text-white", idleCls: "bg-amber-50 hover:bg-amber-100 text-amber-700", borderCls: "border-b border-r border-neutral-200" },
+                                                { q: "급중" as TaskQuadrant, label: "급중", sub: "긴급·중요", activeCls: "bg-rose-500 text-white",   idleCls: "bg-rose-50 hover:bg-rose-100 text-rose-700",   borderCls: "border-b border-neutral-200" },
+                                                { q: "완경" as TaskQuadrant, label: "완경", sub: "여유·쉬운", activeCls: "bg-neutral-500 text-white", idleCls: "bg-neutral-50 hover:bg-neutral-100 text-neutral-500", borderCls: "border-r border-neutral-200" },
+                                                { q: "완중" as TaskQuadrant, label: "완중", sub: "여유·중요", activeCls: "bg-sky-500 text-white",     idleCls: "bg-sky-50 hover:bg-sky-100 text-sky-700",       borderCls: "" },
+                                            ] as const).map(({ q, label, sub, activeCls, idleCls, borderCls }) => (
+                                                <button
+                                                    key={q}
+                                                    type="button"
+                                                    onClick={() => setTaskPriority(taskPriority === q ? null : q)}
+                                                    className={`py-3 text-center transition-colors ${borderCls} ${taskPriority === q ? activeCls : idleCls}`}
+                                                >
+                                                    <div className="text-sm font-bold leading-none">{label}</div>
+                                                    <div className={`text-[9px] mt-0.5 ${taskPriority === q ? "opacity-80" : "opacity-60"}`}>{sub}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <span className="text-[9px] text-neutral-300 w-5">중</span>
+                                    </div>
+                                    <span className="text-[9px] text-neutral-300 tracking-widest uppercase">완 (여유)</span>
+                                </div>
                             </div>
+
+                            {/* 시간 */}
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시간 (선택)</label>
+                                <input
+                                    type="time"
+                                    value={taskTime}
+                                    onChange={(e) => setTaskTime(e.target.value)}
+                                    className="text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
+                                />
+                            </div>
+
+                            {/* 프로젝트 */}
                             {activeProjects.length > 0 && (
                                 <div>
-                                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">프로젝트 (선택)</label>
+                                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">프로젝트 (선택)</label>
                                     <select
                                         value={taskProjectId}
                                         onChange={(e) => setTaskProjectId(e.target.value)}
-                                        className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white"
+                                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
                                     >
                                         <option value="">프로젝트 없음</option>
                                         {activeProjects.map(p => (
@@ -322,49 +371,63 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     </select>
                                 </div>
                             )}
+
+                            {/* 메모 */}
                             <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">경중완급 (선택)</label>
-                                <div className="flex items-center gap-2">
-                                    {([null, "low", "normal", "high"] as const).map((p) => {
-                                        const meta: Record<string, { label: string; cls: string }> = {
-                                            low:    { label: "경", cls: "text-neutral-500 bg-neutral-100 border-neutral-300 hover:bg-neutral-200" },
-                                            normal: { label: "중", cls: "text-sky-600    bg-sky-50    border-sky-300    hover:bg-sky-100"    },
-                                            high:   { label: "급", cls: "text-rose-600   bg-rose-50   border-rose-300   hover:bg-rose-100"   },
-                                        };
-                                        const isActive = taskPriority === p;
-                                        if (p === null) {
-                                            return (
-                                                <button key="none" type="button"
-                                                    onClick={() => setTaskPriority(null)}
-                                                    className={`text-xs px-2 py-1 rounded border transition-colors ${isActive ? "bg-neutral-200 border-neutral-400 text-neutral-700" : "bg-white border-neutral-200 text-neutral-400 hover:bg-neutral-50"}`}
-                                                >없음</button>
-                                            );
-                                        }
-                                        const m = meta[p];
-                                        return (
-                                            <button key={p} type="button"
-                                                onClick={() => setTaskPriority(p)}
-                                                className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${m.cls} ${isActive ? "ring-2 ring-offset-1 ring-current opacity-100" : "opacity-60"}`}
-                                            >{m.label}</button>
-                                        );
-                                    })}
-                                </div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">메모 (선택)</label>
+                                <textarea
+                                    value={taskMemo}
+                                    onChange={(e) => setTaskMemo(e.target.value)}
+                                    placeholder="추가 메모"
+                                    rows={2}
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] resize-none"
+                                />
                             </div>
                         </div>
                     )}
 
                     {/* ── 캘린더 엔트리 폼 (미팅·기념일) ── */}
                     {tab !== "task" && <><div>
-                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">제목</label>
+                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">제목</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             disabled={isReadOnly}
                             placeholder={kindPlaceholder(kind)}
-                            className="w-full text-sm border-b border-neutral-200 focus:outline-none focus:border-[#0F766E] py-1.5 disabled:bg-transparent"
+                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 disabled:bg-neutral-50 disabled:text-neutral-500"
                         />
                     </div>
+
+                    {/* 미팅 전용: 누구와 + 장소 */}
+                    {kind === "meeting" && !isReadOnly && (
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">
+                                    <Users className="h-3 w-3" /> 누구와 (선택)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={withWhom}
+                                    onChange={(e) => setWithWhom(e.target.value)}
+                                    placeholder="예: 홍길동, 팀장"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">
+                                    <MapPin className="h-3 w-3" /> 장소 (선택)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    placeholder="예: 2층 회의실"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Date — 양력/음력 토글 입력 */}
                     <div className="space-y-2">
@@ -570,6 +633,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         time: taskTime || null,
                                         project_id: taskProjectId || null,
                                         priority: taskPriority,
+                                        memo: taskMemo.trim() || null,
                                     });
                                     onClose();
                                 }}

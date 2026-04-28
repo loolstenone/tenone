@@ -47,14 +47,18 @@ export interface PlannerIdentity {
     updated_at: string;
 }
 
+export type TaskQuadrant = '급중' | '급경' | '완중' | '완경';
+
 export interface PlannerTask {
     id: string;
     text: string;
     status: 'todo' | 'done' | 'carried' | 'cancelled';
     parent_id?: string | null;
-    priority?: 'low' | 'normal' | 'high' | null;
+    /** 경중완급 사분면 — 급중(긴급·중요) | 급경(긴급·쉬운) | 완중(여유·중요) | 완경(여유·쉬운) */
+    priority?: TaskQuadrant | null;
     time?: string | null;
     project_id?: string | null;   // Phase 2 — 프로젝트 태그
+    memo?: string | null;         // 업무 메모
 }
 
 export interface PlannerDaily {

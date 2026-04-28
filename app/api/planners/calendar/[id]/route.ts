@@ -30,6 +30,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     else if (typeof body.status === "string" && VALID_STATUS.includes(body.status))
         patch.status = body.status;
     if (typeof body.color === "string" || body.color === null) patch.color = body.color;
+    if (typeof body.with_whom === "string") patch.with_whom = body.with_whom.trim().slice(0, 200) || null;
+    else if (body.with_whom === null) patch.with_whom = null;
+    if (typeof body.location === "string") patch.location = body.location.trim().slice(0, 200) || null;
+    else if (body.location === null) patch.location = null;
 
     const admin = createAdminClient();
     const { error } = await admin

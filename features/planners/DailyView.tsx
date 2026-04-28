@@ -22,12 +22,13 @@ import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
-type TaskPriority = 'low' | 'normal' | 'high';
+type TaskPriority = '급중' | '급경' | '완중' | '완경';
 
 const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: string }> = {
-    low:    { label: "경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200",  dotCls: "bg-neutral-400" },
-    normal: { label: "중", cls: "text-sky-600    bg-sky-50    border-sky-200",          dotCls: "bg-sky-500"     },
-    high:   { label: "급", cls: "text-rose-600   bg-rose-50   border-rose-200",         dotCls: "bg-rose-500"    },
+    '급중': { label: "급중", cls: "text-rose-600   bg-rose-50   border-rose-200",     dotCls: "bg-rose-500"    },
+    '급경': { label: "급경", cls: "text-amber-600  bg-amber-50  border-amber-200",    dotCls: "bg-amber-500"   },
+    '완중': { label: "완중", cls: "text-sky-600    bg-sky-50    border-sky-200",       dotCls: "bg-sky-500"     },
+    '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
 };
 type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
@@ -199,9 +200,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
-    const [newTaskText, setNewTaskText] = useState("");
-    const [newTaskTime, setNewTaskTime] = useState("");
-    const [newTaskProjectId, setNewTaskProjectId] = useState<string>("");
+    // (인라인 Task 입력 제거 — 모달로 통합)
     // 활성 프로젝트 목록 (Task 태그용)
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [carrying, setCarrying] = useState(false);
@@ -542,23 +541,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 setPendingInfo({ count: 0, days: 0, oldest: null });
             }
         } finally { setCarrying(false); }
-    }
-
-    function addTask() {
-        if (!newTaskText.trim()) return;
-        const newTask: PlannerTask = {
-            id: `t_${Date.now()}`,
-            text: newTaskText.trim(),
-            status: 'todo',
-            time: newTaskTime.trim() || null,
-            project_id: newTaskProjectId || null,
-        };
-        const next = [...tasks, newTask];
-        setTasks(next);
-        setNewTaskText("");
-        setNewTaskTime("");
-        // newTaskProjectId 유지 — 같은 프로젝트로 연속 추가
-        save({ tasks: next });
     }
 
     function updateTaskPriority(taskId: string, priority: PlannerTask["priority"]) {
@@ -950,7 +932,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                             <PriorityBadge
                                                                 priority={t.priority as TaskPriority}
                                                                 onClick={() => updateTaskPriority(t.id,
-                                                                    t.priority === "low" ? "normal" : t.priority === "normal" ? "high" : null
+                                                                    QUADRANT_CYCLE[t.priority as TaskPriority]
                                                                 )}
                                                             />
                                                         )}
@@ -994,42 +976,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         ))}
                                     </div>
 
-                                    {/* 4. 할 일 추가 입력 */}
-                                    <div className="mt-3 pt-3 border-t border-neutral-100">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <Plus className="h-4 w-4 text-neutral-300 shrink-0" />
-                                            <input
-                                                type="time"
-                                                value={newTaskTime}
-                                                onChange={(e) => setNewTaskTime(e.target.value)}
-                                                className="text-sm text-neutral-700 w-[110px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
-                                            />
-                                            {activeProjects.length > 0 && (
-                                                <select
-                                                    value={newTaskProjectId}
-                                                    onChange={(e) => setNewTaskProjectId(e.target.value)}
-                                                    title="프로젝트 태그 (선택)"
-                                                    className="text-sm text-neutral-600 max-w-[140px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
-                                                >
-                                                    <option value="">프로젝트 없음</option>
-                                                    {activeProjects.map(p => (
-                                                        <option key={p.id} value={p.id}>{p.title}</option>
-                                                    ))}
-                                                </select>
-                                            )}
-                                            <input
-                                                type="text"
-                                                value={newTaskText}
-                                                onChange={(e) => setNewTaskText(e.target.value)}
-                                                onKeyDown={(e) => { if (e.key === "Enter") addTask(); }}
-                                                onFocus={(e) => {
-                                                    setTimeout(() => e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
-                                                }}
-                                                placeholder="업무 입력 후 Enter"
-                                                className="flex-1 min-w-0 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
-                                            />
-                                        </div>
-                                    </div>
+                                    {/* 업무 추가는 + 버튼(CalendarEntryEditor 모달)으로 통합 */}
                                 </section>
                             );
                         })()}
@@ -1517,6 +1464,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         time: t.time ?? null,
                         project_id: t.project_id ?? null,
                         priority: t.priority ?? null,
+                        memo: t.memo ?? null,
                     };
                     const next = [...tasks, newTask];
                     setTasks(next);
@@ -1859,7 +1807,14 @@ interface TaskRowProps {
     onDragEnd: () => void;
 }
 
-/** 우선순위 뱃지 — 클릭하면 순환: 없음→경→중→급→없음 */
+const QUADRANT_CYCLE: Record<TaskPriority, TaskPriority | null> = {
+    '급중': '급경',
+    '급경': '완중',
+    '완중': '완경',
+    '완경': null,
+};
+
+/** 우선순위 뱃지 — 클릭 시 사분면 순환 */
 function PriorityBadge({ priority, onClick }: { priority: TaskPriority | null; onClick: () => void }) {
     if (!priority) return null;
     const m = PRIORITY_META[priority];
@@ -1868,35 +1823,46 @@ function PriorityBadge({ priority, onClick }: { priority: TaskPriority | null; o
             type="button"
             onClick={(e) => { e.stopPropagation(); onClick(); }}
             className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${m.cls}`}
-            title="클릭: 경→중→급→없음"
+            title="클릭: 사분면 순환"
         >
             {m.label}
         </button>
     );
 }
 
-/** 우선순위 선택기 — 없음/경/중/급 버튼 4개 */
+/** 우선순위 선택기 — 2×2 사분면 미니 피커 */
 function PriorityPicker({ value, onChange }: { value: PlannerTask["priority"]; onChange: (p: PlannerTask["priority"]) => void }) {
-    const options: Array<{ key: PlannerTask["priority"]; label: string; cls: string }> = [
-        { key: null,     label: "없음", cls: "text-neutral-400 bg-white border-neutral-200 hover:bg-neutral-50" },
-        { key: "low",    label: "경",   cls: PRIORITY_META.low.cls },
-        { key: "normal", label: "중",   cls: PRIORITY_META.normal.cls },
-        { key: "high",   label: "급",   cls: PRIORITY_META.high.cls },
+    const quads: Array<{ q: TaskPriority; activeCls: string; borderCls: string }> = [
+        { q: "급경", activeCls: "bg-amber-400 text-white",   borderCls: "border-b border-r border-neutral-200" },
+        { q: "급중", activeCls: "bg-rose-500 text-white",    borderCls: "border-b border-neutral-200" },
+        { q: "완경", activeCls: "bg-neutral-400 text-white", borderCls: "border-r border-neutral-200" },
+        { q: "완중", activeCls: "bg-sky-500 text-white",     borderCls: "" },
     ];
     return (
-        <div className="flex items-center gap-1">
-            {options.map(o => (
+        <div className="flex flex-col items-start gap-0.5 bg-white border border-neutral-200 rounded-lg shadow-lg p-2 w-[100px]">
+            <div className="grid grid-cols-2 w-full rounded overflow-hidden border border-neutral-200">
+                {quads.map(({ q, activeCls, borderCls }) => (
+                    <button
+                        key={q}
+                        type="button"
+                        onClick={() => onChange(value === q ? null : q)}
+                        className={`py-1.5 text-center text-[10px] font-bold transition-colors ${borderCls} ${
+                            value === q ? activeCls : "bg-white hover:bg-neutral-50 text-neutral-500"
+                        }`}
+                    >
+                        {q}
+                    </button>
+                ))}
+            </div>
+            {value && (
                 <button
-                    key={String(o.key)}
                     type="button"
-                    onClick={() => onChange(o.key)}
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors ${
-                        value === o.key ? o.cls : "text-neutral-300 bg-white border-neutral-100 hover:bg-neutral-50"
-                    }`}
+                    onClick={() => onChange(null)}
+                    className="w-full text-[9px] text-neutral-400 hover:text-neutral-600 text-center pt-1"
                 >
-                    {o.label}
+                    없음
                 </button>
-            ))}
+            )}
         </div>
     );
 }
@@ -1991,7 +1957,7 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                 <PriorityBadge
                     priority={task.priority as TaskPriority}
                     onClick={() => onPriorityChange?.(
-                        task.priority === "low" ? "normal" : task.priority === "normal" ? "high" : null
+                        QUADRANT_CYCLE[task.priority as TaskPriority]
                     )}
                 />
             )}
@@ -1999,11 +1965,11 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
             {!task.priority && onPriorityChange && (
                 <button
                     type="button"
-                    onClick={() => onPriorityChange("low")}
+                    onClick={() => onPriorityChange("급중")}
                     className="opacity-0 group-hover:opacity-100 shrink-0 text-[10px] text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
                     title="우선순위 설정"
                 >
-                    경중
+                    급중
                 </button>
             )}
 

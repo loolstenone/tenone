@@ -73,6 +73,10 @@ export interface CalendarEntry {
     status: "todo" | "done" | "carried" | "canceled" | null;
     color: string | null;
     country: string | null;
+    /** 미팅: 참석자 (누구와) */
+    with_whom: string | null;
+    /** 미팅: 장소 */
+    location: string | null;
     is_system: boolean;
     created_at: string;
     updated_at: string;

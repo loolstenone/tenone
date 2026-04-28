@@ -67,6 +67,7 @@ export async function POST(req: Request) {
         start_date, start_time, end_time,
         recurrence, recurrence_until,
         status, color, country,
+        with_whom, location,
     } = body as Record<string, unknown>;
 
     if (!kind || !(VALID_KINDS as string[]).includes(kind as string)) {
@@ -97,6 +98,8 @@ export async function POST(req: Request) {
             status: st,
             color: typeof color === "string" ? color : null,
             country: typeof country === "string" ? country : null,
+            with_whom: typeof with_whom === "string" && with_whom ? with_whom.trim().slice(0, 200) : null,
+            location: typeof location === "string" && location ? location.trim().slice(0, 200) : null,
         })
         .select()
         .single();
