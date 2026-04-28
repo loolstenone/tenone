@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getAdmin() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+}
 
 export async function GET(req: Request) {
+    const supabaseAdmin = getAdmin();
     const url = new URL(req.url);
     const status = url.searchParams.get("status"); // 'new'|'read'|'in_progress'|'resolved'|'archived'|null
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
@@ -38,6 +41,7 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+    const supabaseAdmin = getAdmin();
     const body = await req.json().catch(() => ({}));
     const { id, status, priority, notes } = body as { id: string; status?: string; priority?: string; notes?: string | null };
     if (!id) return NextResponse.json({ error: "missing_id" }, { status: 400 });
@@ -61,6 +65,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const supabaseAdmin = getAdmin();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "missing_id" }, { status: 400 });
