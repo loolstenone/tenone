@@ -31,7 +31,7 @@ const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: 
     '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
 };
 type CornellRow = { id: string; cue: string; note: string };
-type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
+type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting' | 'canvas'; templateKey?: string; templateLabel?: string; canvas_id?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
 
 export const RESULT_CATEGORIES = [
     { key: "summary",  label: "정리",     hint: "오늘을 정리하면" },
@@ -641,6 +641,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (n.type === 'handwriting') {
                 return { id: n.id, type: n.type, title: n.title, cue: '', content: '', summary: n.summary, handwriting: n.handwriting ?? { strokes: [], width: 600, height: 320 } };
             }
+            if (n.type === 'canvas') {
+                return { id: n.id, type: n.type, canvas_id: n.canvas_id, title: n.title, cue: '', content: '', summary: '' };
+            }
             return { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows }), summary: n.summary };
         }));
     }
@@ -661,6 +664,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setNotesList(next);
         save({ notes: serializeNotes(next) });
         setShowTemplatePicker(false);
+        setExpandedNote(newNote);
         Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "daily" });
     }
 
@@ -981,237 +985,16 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             );
                         })()}
 
-                        {/* Notes 목록 — 드래그로 순서 변경 가능 */}
-                        {notesList.map((note, noteIdx) => (
-                        <div
-                            key={note.id}
-                            draggable
-                            onDragStart={() => { noteDragRef.current = { dragIdx: noteIdx, overIdx: noteIdx }; }}
-                            onDragOver={(e) => { e.preventDefault(); if (noteDragRef.current) noteDragRef.current.overIdx = noteIdx; }}
-                            onDrop={() => {
-                                if (!noteDragRef.current) return;
-                                const { dragIdx, overIdx } = noteDragRef.current;
-                                if (dragIdx === overIdx) return;
-                                const next = [...notesList];
-                                const [moved] = next.splice(dragIdx, 1);
-                                next.splice(overIdx, 0, moved);
-                                setNotesList(next);
-                                save({ notes: serializeNotes(next) });
-                                noteDragRef.current = null;
-                            }}
-                            onDragEnd={() => { noteDragRef.current = null; }}
-                            className="group/note-drag relative"
-                        >
-                            {/* 드래그 핸들 */}
-                            <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
-                                <GripVertical className="h-4 w-4 text-neutral-300" />
-                            </div>
-                        {note.type === 'template' ? (
-                            /* Template block */
-                            <TemplateNoteBlock
-                                key={note.id}
-                                note={note}
-                                notesList={notesList}
-                                setNotesList={setNotesList}
-                                save={save}
-                                serializeNotesFn={serializeNotes}
-                                onExpand={() => setExpandedNote(note)}
-                            />
-                        ) : note.type === 'handwriting' ? (
-                            /* Handwriting block */
-                            <section key={note.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-                                <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
-                                    <input
-                                        value={note.title}
-                                        onChange={(e) => {
-                                            const next = notesList.map(n => n.id === note.id ? { ...n, title: e.target.value } : n);
-                                            setNotesList(next);
-                                        }}
-                                        onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="손글씨 메모"
-                                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
-                                    />
-                                    <div className="flex items-center gap-1 ml-2 shrink-0">
-                                        <button
-                                            onClick={() => setExpandedNote(note)}
-                                            className="text-neutral-300 hover:text-neutral-600 transition-colors"
-                                            title="크게 보기"
-                                        >
-                                            <Maximize2 className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                const next = notesList.filter(n => n.id !== note.id);
-                                                setNotesList(next);
-                                                save({ notes: serializeNotes(next) });
-                                            }}
-                                            className="text-neutral-300 hover:text-red-400 transition-colors"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-                                {/* 리스트 상태: 고정 높이 프리뷰 — 편집은 크게 보기(모달)에서 */}
-                                <div
-                                    className="relative h-32 overflow-hidden cursor-pointer group"
-                                    onClick={() => setExpandedNote(note)}
-                                >
-                                    <div className="pointer-events-none px-3 pt-2">
-                                        <HandNote
-                                            value={note.handwriting ?? null}
-                                            onChange={() => {}}
-                                            height={120}
-                                        />
-                                    </div>
-                                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-xs text-neutral-500 flex items-center gap-1">
-                                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
-                                        </span>
-                                    </div>
-                                </div>
-                            </section>
-                        ) : (
-                            /* Cornell Note block */
-                            <section key={note.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-                                {/* Title row — 행 컬럼과 같은 구조(왼쪽 w-6 패딩)로 시작점 일치 */}
-                                <div className="flex items-center justify-between pl-10 pr-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
-                                    <input
-                                        value={note.title}
-                                        onChange={(e) => {
-                                            const next = notesList.map(n => n.id === note.id ? { ...n, title: e.target.value } : n);
-                                            setNotesList(next);
-                                        }}
-                                        onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="기본 노트"
-                                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
-                                    />
-                                    <div className="flex items-center gap-1 ml-2 shrink-0">
-                                        <button
-                                            onClick={() => setExpandedNote(note)}
-                                            className="text-neutral-300 hover:text-neutral-600 transition-colors"
-                                        >
-                                            <Maximize2 className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                const next = notesList.filter(n => n.id !== note.id);
-                                                setNotesList(next);
-                                                save({ notes: serializeNotes(next) });
-                                            }}
-                                            className="text-neutral-300 hover:text-red-400 transition-colors"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Cornell rows — 리스트 뷰 고정 높이 */}
-                                <div className="divide-y divide-neutral-100 max-h-[220px] overflow-y-auto">
-                                    {note.rows.map((row, rIdx) => (
-                                        <div key={row.id} className="flex group/row">
-                                            {/* Delete button — always rendered, invisible when only 1 row */}
-                                            <button
-                                                onClick={() => {
-                                                    if (note.rows.length <= 1) return;
-                                                    const rows = note.rows.filter((_, i) => i !== rIdx);
-                                                    const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                                    setNotesList(next);
-                                                    save({ notes: serializeNotes(next) });
-                                                }}
-                                                className={`shrink-0 w-6 flex items-start justify-center pt-2.5 transition-colors text-neutral-300 hover:text-red-400 ${note.rows.length <= 1 ? 'invisible' : ''}`}
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </button>
-                                            {/* Cue cell */}
-                                            <div className="w-[22%] shrink-0 relative border-l border-neutral-200">
-                                                <div aria-hidden className="invisible whitespace-pre-wrap break-words text-xs px-3 py-2 leading-relaxed min-h-[2.5rem]">{row.cue + '\n'}</div>
-                                                <textarea
-                                                    value={row.cue}
-                                                    onChange={(e) => {
-                                                        const rows = note.rows.map((r, i) => i === rIdx ? { ...r, cue: e.target.value } : r);
-                                                        const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                                        setNotesList(next);
-                                                    }}
-                                                    onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                                    placeholder="키워드"
-                                                    className="absolute inset-0 w-full h-full text-xs text-neutral-600 placeholder:text-neutral-300 focus:outline-none bg-transparent resize-none px-3 py-2 leading-relaxed"
-                                                />
-                                            </div>
-                                            {/* Note cell */}
-                                            <div className="flex-1 relative border-l border-neutral-200">
-                                                <div aria-hidden className="invisible whitespace-pre-wrap break-words text-sm px-4 py-2 leading-relaxed min-h-[2.5rem]">{row.note + '\n'}</div>
-                                                <textarea
-                                                    value={row.note}
-                                                    onChange={(e) => {
-                                                        const rows = note.rows.map((r, i) => i === rIdx ? { ...r, note: e.target.value } : r);
-                                                        const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                                        setNotesList(next);
-                                                    }}
-                                                    onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                                            e.preventDefault();
-                                                            const newRow: CornellRow = { id: `r_${Date.now()}`, cue: '', note: '' };
-                                                            const rows = [...note.rows.slice(0, rIdx + 1), newRow, ...note.rows.slice(rIdx + 1)];
-                                                            const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                                            setNotesList(next);
-                                                        } else if (e.key === 'Backspace' && row.note === '' && row.cue === '' && rIdx > 0) {
-                                                            e.preventDefault();
-                                                            const rows = note.rows.filter((_, i) => i !== rIdx);
-                                                            const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                                            setNotesList(next);
-                                                            save({ notes: serializeNotes(next) });
-                                                        }
-                                                    }}
-                                                    placeholder={rIdx === 0 ? "자유롭게 기록…" : ""}
-                                                    className="absolute inset-0 w-full h-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none px-4 py-2 leading-relaxed"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* Add row */}
-                                <div className="border-t border-dashed border-neutral-200">
-                                    <button
-                                        onClick={() => {
-                                            const rows = [...note.rows, { id: `r_${Date.now()}`, cue: '', note: '' }];
-                                            const next = notesList.map(n => n.id === note.id ? { ...n, rows } : n);
-                                            setNotesList(next);
-                                        }}
-                                        className="w-full py-1.5 text-[10px] text-neutral-300 hover:text-[#0F766E] transition-colors"
-                                    >
-                                        + 행 추가
-                                    </button>
-                                </div>
-
-                                {/* Summary row */}
-                                <div className="border-t border-neutral-200 bg-neutral-50/40">
-                                    <p className="px-4 pt-2 pb-0.5 text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">요약</p>
-                                    <textarea
-                                        value={note.summary}
-                                        onChange={(e) => {
-                                            const next = notesList.map(n => n.id === note.id ? { ...n, summary: e.target.value } : n);
-                                            setNotesList(next);
-                                        }}
-                                        onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="핵심을 한두 줄로 요약…"
-                                        rows={2}
-                                        className="w-full text-xs text-neutral-700 placeholder:text-neutral-300 focus:outline-none bg-transparent resize-none px-4 py-1 pb-3 leading-relaxed"
-                                    />
-                                </div>
-                            </section>
-                        )}
-                        </div>
-                        ))}
-
-                        {/* 노트 추가 버튼 — 목록 맨 아래 */}
+                        {/* 노트 추가 버튼 */}
                         <div className="grid grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'cornell').length + 1;
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
+                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
+                                    const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
+                                    setExpandedNote(newNote);
                                 }}
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
@@ -1221,9 +1004,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'handwriting').length + 1;
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${idx}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
+                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${idx}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } };
+                                    const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
+                                    setExpandedNote(newNote);
                                 }}
                                 title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
@@ -1240,14 +1025,20 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </button>
                             <button
                                 onClick={async () => {
+                                    const idx = notesList.filter(n => n.type === 'canvas').length + 1;
+                                    const title = `캔버스 ${idx}`;
                                     const res = await fetch("/api/planners/canvases", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({ title: `${date} 캔버스` }),
+                                        body: JSON.stringify({ title }),
                                     });
                                     if (res.ok) {
                                         const d = await res.json();
-                                        router.push(`/planners/app/canvas/${d.canvas.id}`);
+                                        const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'canvas', canvas_id: d.canvas.id, title, cue: '', content: '', summary: '', rows: [] };
+                                        const next = [...notesList, newNote];
+                                        setNotesList(next);
+                                        save({ notes: serializeNotes(next) });
+                                        setExpandedNote(newNote);
                                     } else {
                                         setSaveError("캔버스 생성 실패 — 잠시 후 다시 시도해 주세요.");
                                         setTimeout(() => setSaveError(null), 4000);
@@ -1260,6 +1051,67 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 캔버스
                             </button>
                         </div>
+
+                        {/* Notes 목록 — 2열 카드 그리드, 클릭 시 확장 모달 */}
+                        {notesList.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2">
+                            {notesList.map((note, noteIdx) => {
+                                const previewText =
+                                    note.type === 'handwriting' ? '손글씨 메모'
+                                    : note.type === 'canvas' ? '자유 캔버스'
+                                    : note.type === 'template' ? (note.content || note.templateLabel || '템플릿 노트')
+                                    : (note.rows[0]?.note || note.summary || '');
+                                return (
+                                <div
+                                    key={note.id}
+                                    draggable
+                                    onDragStart={() => { noteDragRef.current = { dragIdx: noteIdx, overIdx: noteIdx }; }}
+                                    onDragOver={(e) => { e.preventDefault(); if (noteDragRef.current) noteDragRef.current.overIdx = noteIdx; }}
+                                    onDrop={() => {
+                                        if (!noteDragRef.current) return;
+                                        const { dragIdx, overIdx } = noteDragRef.current;
+                                        if (dragIdx === overIdx) return;
+                                        const next = [...notesList];
+                                        const [moved] = next.splice(dragIdx, 1);
+                                        next.splice(overIdx, 0, moved);
+                                        setNotesList(next);
+                                        save({ notes: serializeNotes(next) });
+                                        noteDragRef.current = null;
+                                    }}
+                                    onDragEnd={() => { noteDragRef.current = null; }}
+                                    onClick={() => setExpandedNote(note)}
+                                    className="group relative bg-white border border-neutral-200 rounded-xl p-3 cursor-pointer hover:border-neutral-300 hover:shadow-sm transition-all"
+                                >
+                                    {/* 상단: 타입 뱃지 + 삭제 */}
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-medium">
+                                            {note.type === 'handwriting' ? '손글씨' : note.type === 'template' ? '템플릿' : note.type === 'canvas' ? '캔버스' : '기본'}
+                                        </span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const next = notesList.filter(n => n.id !== note.id);
+                                                setNotesList(next);
+                                                save({ notes: serializeNotes(next) });
+                                            }}
+                                            className="text-neutral-300 hover:text-red-400 transition-colors"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                    {/* 제목 */}
+                                    <p className="text-xs font-medium text-neutral-800 truncate mb-1">{note.title || '제목 없음'}</p>
+                                    {/* 미리보기 텍스트 */}
+                                    <p className="text-[10px] text-neutral-400 line-clamp-2 leading-relaxed">{previewText || '비어 있음'}</p>
+                                    {/* 드래그 핸들 */}
+                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-30 transition-opacity cursor-grab active:cursor-grabbing">
+                                        <GripVertical className="h-3.5 w-3.5 text-neutral-400" />
+                                    </div>
+                                </div>
+                                );
+                            })}
+                        </div>
+                        )}
 
                     </div>
 
@@ -1477,9 +1329,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {expandedNote && (() => {
                 const isTpl = expandedNote.type === 'template';
                 const isHand = expandedNote.type === 'handwriting';
+                const isCanvas = expandedNote.type === 'canvas';
                 const tplMeta = isTpl ? { id: expandedNote.id, key: expandedNote.templateKey ?? '', label: expandedNote.title, body_md: expandedNote.content } : null;
                 const tplHasGrid = tplMeta ? isSpecialTemplate(tplMeta) : false;
                 const dataKey = tplMeta ? tplDataKey(expandedNote.id) : '';
+                // 자동 생성 제목 여부 — 힌트 스타일(이탤릭·흐림) 적용
+                const isAutoTitle = /^(기본 노트|손글씨|캔버스) \d+$/.test(expandedNote.title)
+                    || (isTpl && expandedNote.title === (expandedNote.templateLabel ?? ''));
                 function saveAndClose() {
                     const next = notesList.map(n => n.id === expandedNote!.id ? expandedNote! : n);
                     setNotesList(next);
@@ -1488,16 +1344,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 }
                 return (
                     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-[5vh_5vw]">
-                        <div className={`bg-white rounded-xl w-full h-full flex flex-col shadow-2xl overflow-hidden ${isTpl ? 'border-t-4 border-violet-400' : ''}`}>
+                        <div className={`bg-white rounded-xl w-full h-full flex flex-col shadow-2xl overflow-hidden ${isTpl ? 'border-t-4 border-violet-400' : isCanvas ? 'border-t-4 border-sky-400' : ''}`}>
                             {/* Header */}
-                            <div className={`px-6 py-3 border-b border-neutral-200 flex items-center gap-3 ${isTpl ? 'bg-violet-50' : 'bg-neutral-50'}`}>
+                            <div className={`px-6 py-3 border-b border-neutral-200 flex items-center gap-3 ${isTpl ? 'bg-violet-50' : isCanvas ? 'bg-sky-50' : 'bg-neutral-50'}`}>
                                 {isTpl && <LayoutTemplate className="h-4 w-4 text-violet-400 shrink-0" />}
+                                {isCanvas && <ImageIcon className="h-4 w-4 text-sky-400 shrink-0" />}
                                 <input
                                     type="text"
                                     value={expandedNote.title}
                                     onChange={(e) => setExpandedNote({ ...expandedNote, title: e.target.value })}
-                                    placeholder="제목"
-                                    className={`flex-1 text-base font-semibold bg-transparent focus:outline-none ${isTpl ? 'text-violet-700' : 'text-neutral-900'} placeholder:text-neutral-400`}
+                                    placeholder="제목을 입력하세요"
+                                    className={`flex-1 text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
+                                        isAutoTitle
+                                            ? 'italic font-normal text-neutral-400'
+                                            : isTpl ? 'font-semibold text-violet-700' : isCanvas ? 'font-semibold text-sky-700' : 'font-semibold text-neutral-900'
+                                    }`}
                                 />
                                 <button
                                     onClick={() => saveAndClose()}
@@ -1507,7 +1368,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 </button>
                             </div>
                             {/* Body */}
-                            {isHand ? (
+                            {isCanvas ? (
+                                <iframe
+                                    src={`/planners/app/canvas/${expandedNote.canvas_id}`}
+                                    className="flex-1 w-full border-0"
+                                    title={expandedNote.title}
+                                />
+                            ) : isHand ? (
                                 <div className="flex-1 overflow-auto p-6 bg-neutral-50/30">
                                     <HandNote
                                         value={expandedNote.handwriting ?? null}

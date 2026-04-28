@@ -66,55 +66,47 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                     + 첫 프로젝트 만들기
                 </Link>
             ) : (
-                <ul className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
                     {projects.map((p) => {
                         const meta = getCategoryMeta(p.category);
                         const progressColor = p.color || meta.color;
                         return (
-                            <li key={p.id} className="group">
-                                <Link
-                                    href={`/planners/app/projects/${p.id}`}
-                                    className="block rounded-lg p-2 hover:bg-neutral-50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: progressColor }} />
-                                        <span className="text-sm text-neutral-800 truncate flex-1">{p.title}</span>
-                                        <ArrowUpRight className="h-3 w-3 text-neutral-300 group-hover:text-[#0F766E] shrink-0" />
+                            <Link
+                                key={p.id}
+                                href={`/planners/app/projects/${p.id}`}
+                                className="group relative block bg-white border border-neutral-200 rounded-xl p-3 hover:border-neutral-300 hover:shadow-sm transition-all"
+                            >
+                                {/* 카테고리 뱃지 + 화살표 */}
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: meta.color }}>{meta.label}</span>
+                                    <ArrowUpRight className="h-3 w-3 text-neutral-300 group-hover:text-[#0F766E] transition-colors shrink-0" />
+                                </div>
+                                {/* 제목 */}
+                                <p className="text-xs font-medium text-neutral-800 truncate mb-1.5">{p.title}</p>
+                                {/* 진행률 바 */}
+                                {p.progress > 0 && (
+                                    <div className="h-1 bg-neutral-100 rounded-full overflow-hidden mb-1.5">
+                                        <div
+                                            className="h-full rounded-full transition-all"
+                                            style={{ width: `${Math.min(100, p.progress)}%`, backgroundColor: progressColor }}
+                                        />
                                     </div>
-                                    {/* 메타 라인: 카테고리 + D-N + 오늘 task */}
-                                    <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 ml-3.5 flex-wrap">
-                                        <span style={{ color: meta.color }}>{meta.label}</span>
-                                        {p.days_left !== null && (
-                                            <>
-                                                <span className="text-neutral-300">·</span>
-                                                <span className={p.days_left < 0 ? "text-rose-500" : p.days_left <= 7 ? "text-amber-600" : ""}>
-                                                    {p.days_left < 0 ? `D+${-p.days_left}` : p.days_left === 0 ? "D-Day" : `D-${p.days_left}`}
-                                                </span>
-                                            </>
-                                        )}
-                                        {p.today_task_count > 0 && (
-                                            <>
-                                                <span className="text-neutral-300">·</span>
-                                                <span className="text-[#0F766E]">
-                                                    오늘 {p.today_task_done}/{p.today_task_count}
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                    {/* 진행률 바 */}
-                                    {p.progress > 0 && (
-                                        <div className="ml-3.5 mt-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full rounded-full transition-all"
-                                                style={{ width: `${Math.min(100, p.progress)}%`, backgroundColor: progressColor }}
-                                            />
-                                        </div>
+                                )}
+                                {/* 메타: D-N + 오늘 task */}
+                                <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 flex-wrap">
+                                    {p.days_left !== null && (
+                                        <span className={p.days_left < 0 ? "text-rose-500" : p.days_left <= 7 ? "text-amber-600" : ""}>
+                                            {p.days_left < 0 ? `D+${-p.days_left}` : p.days_left === 0 ? "D-Day" : `D-${p.days_left}`}
+                                        </span>
                                     )}
-                                </Link>
-                            </li>
+                                    {p.today_task_count > 0 && (
+                                        <span className="text-[#0F766E]">{p.today_task_done}/{p.today_task_count}</span>
+                                    )}
+                                </div>
+                            </Link>
                         );
                     })}
-                </ul>
+                </div>
             )}
         </section>
     );
