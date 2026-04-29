@@ -79,7 +79,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <PlannersThemeProvider />
             <PwaRegister />
             <Suspense><WelcomeTracker /></Suspense>
-            <div className="min-h-screen bg-[#FAFAF7] flex flex-col">
+            <div className="planners-app-shell min-h-screen bg-[#FAFAF7] flex flex-col">
                 <AppTopNav
                     mode={plannerUser?.mode ?? 'all_in_one'}
                     userName={member.name || undefined}

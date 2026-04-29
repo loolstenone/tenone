@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, LayoutTemplate, MessageSquarePlus } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, MessageSquarePlus } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -281,7 +281,12 @@ export function AppTopNav({
             <UniverseMobileMenu
                 open={menuOpen}
                 onClose={() => setMenuOpen(false)}
-                brandName="PP AI"
+                brandName="Planner's Planner AI"
+                brandNode={
+                    <span className="font-serif text-neutral-900">
+                        Planner&apos;s Planner<sup className="text-[8px] font-sans font-bold text-[#0F766E] ml-0.5 align-super">AI</sup>
+                    </span>
+                }
                 bgClass="bg-white"
                 textTone="dark"
             >
@@ -352,15 +357,6 @@ export function AppTopNav({
                 >
                     <Settings className="h-4 w-4 text-neutral-400" />
                     <span>설정</span>
-                </Link>
-                <div className="h-px bg-neutral-100 my-1" />
-                <Link
-                    href="/planners/app/templates"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
-                >
-                    <LayoutTemplate className="h-4 w-4 text-neutral-400" />
-                    <span>템플릿</span>
                 </Link>
                 <div className="h-px bg-neutral-100 my-1" />
                 <button

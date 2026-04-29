@@ -29,8 +29,10 @@ import clsx from "clsx";
 interface UniverseMobileMenuProps {
     open: boolean;
     onClose: () => void;
-    /** 브랜드명 (헤더 라벨) */
+    /** 브랜드명 (헤더 라벨, 텍스트) — aria-label 및 brandNode 미지정 시 표시용 */
     brandName?: string;
+    /** 브랜드명 시각 노드 (서식 있는 라벨용 — 예: 윗첨자). 지정 시 brandName 대신 표시 */
+    brandNode?: ReactNode;
     /** 패널 배경 — Tailwind class 또는 inline style */
     bgClass?: string;
     bgStyle?: React.CSSProperties;
@@ -46,6 +48,7 @@ export function UniverseMobileMenu({
     open,
     onClose,
     brandName = "메뉴",
+    brandNode,
     bgClass,
     bgStyle,
     textTone = "light",
@@ -93,7 +96,7 @@ export function UniverseMobileMenu({
                         "text-sm font-semibold",
                         isDark ? "text-white/70" : "text-neutral-700"
                     )}>
-                        {brandName}
+                        {brandNode ?? brandName}
                     </span>
                     <button
                         onClick={onClose}

@@ -78,7 +78,33 @@ html.planners-dark {
 html.planners-dark .planners-app-shell {
   background-color: var(--planners-bg);
   color-scheme: dark;
+  color: var(--planners-text);
 }
+
+/* 카드/섹션 배경·경계·텍스트 — bg-white·bg-neutral-50·borders 일괄 반전 */
+html.planners-dark .planners-app-shell [class~="bg-white"] {
+  background-color: var(--planners-surface) !important;
+}
+html.planners-dark .planners-app-shell [class~="bg-neutral-50"],
+html.planners-dark .planners-app-shell [class~="bg-neutral-100"] {
+  background-color: var(--planners-bg-alt) !important;
+}
+html.planners-dark .planners-app-shell [class~="border-neutral-100"],
+html.planners-dark .planners-app-shell [class~="border-neutral-200"],
+html.planners-dark .planners-app-shell [class~="border-neutral-300"] {
+  border-color: var(--planners-border) !important;
+}
+html.planners-dark .planners-app-shell [class~="text-neutral-900"],
+html.planners-dark .planners-app-shell [class~="text-neutral-800"],
+html.planners-dark .planners-app-shell [class~="text-neutral-700"] {
+  color: var(--planners-text) !important;
+}
+html.planners-dark .planners-app-shell [class~="text-neutral-600"],
+html.planners-dark .planners-app-shell [class~="text-neutral-500"],
+html.planners-dark .planners-app-shell [class~="text-neutral-400"] {
+  color: var(--planners-text-sub) !important;
+}
+/* sticky 헤더(top nav)는 배경이 별도 — bg-white 룰로 잘 잡힘 */
 /* Tailwind v4 dark: variant 가 .planners-dark 안에서 작동하도록 등록 */
 @custom-variant planners-dark (&:where(.planners-dark, .planners-dark *));
 

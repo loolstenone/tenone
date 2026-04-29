@@ -3,20 +3,29 @@
 import { useEffect } from "react";
 
 const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
-    teal:     { hex: "#0F766E", dark: "#0d5e56" },
-    coral:    { hex: "#C2553D", dark: "#a34533" },
-    slate:    { hex: "#475569", dark: "#334155" },
-    rose:     { hex: "#BE185D", dark: "#9d1353" },
-    amber:    { hex: "#B45309", dark: "#92400e" },
-    indigo:   { hex: "#4338CA", dark: "#3730a3" },
-    violet:   { hex: "#7C3AED", dark: "#6D28D9" },
-    crimson:  { hex: "#DC2626", dark: "#B91C1C" },
-    brown:    { hex: "#92400E", dark: "#78350f" },
-    sky:      { hex: "#0369A1", dark: "#075985" },
-    plum:     { hex: "#86198F", dark: "#701A75" },
-    navy:     { hex: "#1E40AF", dark: "#1e3a8a" },
+    // 무채색
     mono:     { hex: "#171717", dark: "#0a0a0a" },
     charcoal: { hex: "#374151", dark: "#1f2937" },
+    slate:    { hex: "#475569", dark: "#334155" },
+    // 갈색 · 노랑 · 오렌지 계열
+    brown:    { hex: "#92400E", dark: "#78350f" },
+    mustard:  { hex: "#A16207", dark: "#854d0e" },
+    amber:    { hex: "#B45309", dark: "#92400e" },
+    orange:   { hex: "#C2410C", dark: "#9A3412" },
+    coral:    { hex: "#C2553D", dark: "#a34533" },
+    // 빨강 · 핑크
+    crimson:  { hex: "#DC2626", dark: "#B91C1C" },
+    rose:     { hex: "#BE185D", dark: "#9d1353" },
+    // 보라 · 파랑
+    plum:     { hex: "#86198F", dark: "#701A75" },
+    violet:   { hex: "#7C3AED", dark: "#6D28D9" },
+    indigo:   { hex: "#4338CA", dark: "#3730a3" },
+    navy:     { hex: "#1E40AF", dark: "#1e3a8a" },
+    sky:      { hex: "#0369A1", dark: "#075985" },
+    // 청록 · 녹색
+    teal:     { hex: "#0F766E", dark: "#0d5e56" },
+    emerald:  { hex: "#047857", dark: "#065F46" },
+    olive:    { hex: "#4D7C0F", dark: "#3F6212" },
 };
 
 // 모든 Planners 컴포넌트가 하드코딩하는 기본 teal 색상

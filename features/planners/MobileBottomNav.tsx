@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export const MOBILE_NAV_STORAGE_KEY = "planners-mobile-nav";
-export const MOBILE_NAV_DEFAULT: string[] = ["index", "today", "projects", "identity", "search"];
+export const MOBILE_NAV_DEFAULT: string[] = ["index", "projects", "today", "identity", "search"];
 
 export const ALL_NAV_OPTIONS = [
     { id: "index",    label: "인덱스",   icon: LayoutGrid,    href: "/planners/app/index" },

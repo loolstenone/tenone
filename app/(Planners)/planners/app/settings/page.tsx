@@ -9,6 +9,8 @@ import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, applyPlannersRadius, type PlannersThemeMode, type PlannersRadius } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
+import { SettingsLayout, GroupMarker } from "@/features/planners/SettingsLayout";
+import { SettingsStylePresets, matchPreset, type SettingsPreset } from "@/features/planners/SettingsStylePresets";
 
 const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -199,6 +201,8 @@ export default function SettingsPage() {
     const [projectsLoading, setProjectsLoading] = useState(false);
     const [newProjectTitle, setNewProjectTitle] = useState("");
     const [creatingProject, setCreatingProject] = useState(false);
+    // 모바일에서 스타일 고급 컨트롤(화면모드·컬러·모서리·폰트) 펼치기
+    const [styleAdvancedOpen, setStyleAdvancedOpen] = useState(false);
 
     const showToast = useCallback((text: string, ok = true) => {
         setToastMsg({ text, ok });
@@ -589,21 +593,26 @@ export default function SettingsPage() {
         } finally { setSampleLoading(false); }
     }
 
+    // 18색 — 색상환 순서로 (무채색 → 갈색·노랑·오렌지 → 빨강·핑크 → 보라·파랑 → 청록·녹색)
     const COLOR_THEMES = [
         { key: "mono",     label: "Mono",     hex: "#171717" },
         { key: "charcoal", label: "Charcoal", hex: "#374151" },
-        { key: "teal",     label: "Teal",     hex: "#0F766E" },
-        { key: "navy",     label: "Navy",     hex: "#1E40AF" },
-        { key: "indigo",   label: "Indigo",   hex: "#4338CA" },
-        { key: "violet",   label: "Violet",   hex: "#7C3AED" },
-        { key: "plum",     label: "Plum",     hex: "#86198F" },
-        { key: "rose",     label: "Rose",     hex: "#BE185D" },
-        { key: "crimson",  label: "Crimson",  hex: "#DC2626" },
-        { key: "coral",    label: "Coral",    hex: "#C2553D" },
-        { key: "amber",    label: "Amber",    hex: "#B45309" },
-        { key: "brown",    label: "Brown",    hex: "#92400E" },
-        { key: "sky",      label: "Sky",      hex: "#0369A1" },
         { key: "slate",    label: "Slate",    hex: "#475569" },
+        { key: "brown",    label: "Brown",    hex: "#92400E" },
+        { key: "mustard",  label: "Mustard",  hex: "#A16207" },
+        { key: "amber",    label: "Amber",    hex: "#B45309" },
+        { key: "orange",   label: "Orange",   hex: "#C2410C" },
+        { key: "coral",    label: "Coral",    hex: "#C2553D" },
+        { key: "crimson",  label: "Crimson",  hex: "#DC2626" },
+        { key: "rose",     label: "Rose",     hex: "#BE185D" },
+        { key: "plum",     label: "Plum",     hex: "#86198F" },
+        { key: "violet",   label: "Violet",   hex: "#7C3AED" },
+        { key: "indigo",   label: "Indigo",   hex: "#4338CA" },
+        { key: "navy",     label: "Navy",     hex: "#1E40AF" },
+        { key: "sky",      label: "Sky",      hex: "#0369A1" },
+        { key: "teal",     label: "Teal",     hex: "#0F766E" },
+        { key: "emerald",  label: "Emerald",  hex: "#047857" },
+        { key: "olive",    label: "Olive",    hex: "#4D7C0F" },
     ];
 
     const RADIUS_THEMES: { key: PlannersRadius; label: string; desc: string; preview: string }[] = [
@@ -698,23 +707,42 @@ export default function SettingsPage() {
         return <div className="max-w-3xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
 
+    // 현재 적용된 5개 토큰이 어떤 프리셋과 일치하는지
+    const currentPresetKey = matchPreset(colorTheme, radiusTheme, fontFamily, userFontFamily, themeMode);
+
+    /** 프리셋 적용 — state 동기화 + 영구 저장. 시각 적용은 SettingsStylePresets 내부에서 즉시 호출됨. */
+    function applyPreset(p: SettingsPreset) {
+        setColorTheme(p.color);
+        setRadiusTheme(p.radius);
+        setFontFamily(p.font);
+        setUserFontFamily(p.userFont);
+        setThemeMode(p.mode);
+        localStorage.setItem("planners_color_theme", p.color);
+        localStorage.setItem("planners_radius_theme", p.radius);
+        localStorage.setItem("planners_font_family", p.font);
+        localStorage.setItem("planners_user_font", p.userFont);
+        localStorage.setItem("planners_theme_mode", p.mode);
+    }
+
     return (
-        <div className="max-w-3xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            <div className="flex items-center gap-3 mb-8">
+        <SettingsLayout>
+            <div className="flex items-center gap-3 mb-6">
                 <Settings className="h-6 w-6 text-[#0F766E]" />
-                <h1 className="font-serif text-3xl text-neutral-900">Settings</h1>
+                <h1 className="font-serif text-3xl text-neutral-900">설정</h1>
                 {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
             </div>
 
-            <div className="space-y-6">
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">모드</h2>
+            <div className="space-y-5 [&_section]:scroll-mt-32 [&_section]:lg:scroll-mt-24">
+                {/* ── 01 시작 ── */}
+                <GroupMarker group="start" no="01" label="시작" />
+                <section id="sec-mode" className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">사용 수준</h2>
                     <div className="grid grid-cols-2 gap-3">
                         {(["weekly", "all_in_one"] as PlannerMode[]).map((m) => (
                             <button
                                 key={m}
                                 onClick={async () => { setMode(m); await save({ mode: m }); router.refresh(); }}
-                                className={`py-3 px-2 rounded-lg text-sm transition-colors border-2 text-left ${
+                                className={`py-3 px-3 rounded-lg text-sm transition-colors border-2 text-left ${
                                     mode === m
                                         ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold"
                                         : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
@@ -722,13 +750,15 @@ export default function SettingsPage() {
                             >
                                 {m === "weekly" ? (
                                     <span>
-                                        <span className="block font-semibold">Weekly</span>
-                                        <span className="block text-[11px] font-normal opacity-60">간단 모드</span>
+                                        <span className="block font-semibold">Easily</span>
+                                        <span className="block text-[11px] font-normal opacity-70 leading-snug mt-0.5">간단 모드</span>
+                                        <span className="block text-[10px] font-normal opacity-50 leading-snug mt-1">일간 · 주간 · 월간 · 연간 · 연락처 · 아이덴티티 · 커뮤니티</span>
                                     </span>
                                 ) : (
                                     <span>
                                         <span className="block font-semibold">All in One</span>
-                                        <span className="block text-[11px] font-normal opacity-60">전문가 모드</span>
+                                        <span className="block text-[11px] font-normal opacity-70 leading-snug mt-0.5">전문가 모드</span>
+                                        <span className="block text-[10px] font-normal opacity-50 leading-snug mt-1">모든 기능 · 프로젝트 · 캔버스 · 템플릿까지 전부 사용</span>
                                     </span>
                                 )}
                             </button>
@@ -737,7 +767,7 @@ export default function SettingsPage() {
                 </section>
 
                 {/* 역할 */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-role" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-1">
                         <h2 className="text-sm font-semibold text-neutral-900">나의 역할</h2>
                         {userRole && (
@@ -778,27 +808,39 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
-                {/* 앱 설치 */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                    <h2 className="text-sm font-semibold text-neutral-900 mb-2">앱 설치</h2>
-                    <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                        홈 화면에 PP AI 아이콘을 추가하면 브라우저 주소창 없이 앱처럼 빠르게 열 수 있습니다.
-                        Android · iPhone · iPad · PC 모두 지원하며, 모든 기능은 웹과 동일하게 작동합니다.
-                    </p>
-                    <InstallButton
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                {/* ── 02 스타일 ── */}
+                <GroupMarker group="style" no="02" label="스타일" />
+
+                {/* 스타일 프리셋 — 모바일은 이걸 주(主)로, 고급 컨트롤은 토글; PC는 빠른 출발점 */}
+                <section id="sec-style-presets" className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <div className="flex items-baseline justify-between mb-1">
+                        <h2 className="text-sm font-semibold text-neutral-900">스타일 프리셋</h2>
+                        <span className="text-[10px] text-neutral-400">5개 토큰 한 번에 적용</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 mb-4">한 번 탭으로 화면 모드 · 컬러 · 모서리 · 폰트 2종을 동시에 바꿉니다.</p>
+                    <SettingsStylePresets
+                        activePresetKey={currentPresetKey}
+                        onApply={applyPreset}
+                    />
+                    {/* 모바일 전용: 고급 설정 토글 */}
+                    <button
+                        type="button"
+                        onClick={() => setStyleAdvancedOpen(o => !o)}
+                        className="lg:hidden mt-4 w-full flex items-center justify-center gap-1 py-2 text-xs text-neutral-500 hover:text-[#0F766E] transition-colors"
                     >
-                        <Download className="h-3.5 w-3.5" />
-                        앱 설치
-                    </InstallButton>
+                        {styleAdvancedOpen ? "고급 설정 접기 ▲" : "고급 설정 직접 조정 ▼"}
+                    </button>
                 </section>
 
+                {/* 모바일에서는 styleAdvancedOpen 일 때만 — PC는 항상 표시 */}
+                <div className={`space-y-5 ${styleAdvancedOpen ? "" : "hidden lg:block lg:space-y-5"}`}>
+
                 {/* Display Mode — 라이트 / 다크 / 시스템 */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-display" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h2 className="text-sm font-semibold text-neutral-900">표시 모드</h2>
-                            <p className="text-[11px] text-neutral-400 mt-0.5">라이트 · 다크 · 시스템 자동 (Phase 1 인프라 — 컴포넌트별 다크 적용은 점진 마이그레이션)</p>
+                            <h2 className="text-sm font-semibold text-neutral-900">화면 모드</h2>
+                            <p className="text-[11px] text-neutral-400 mt-0.5">배터리 절약, 눈 피로 감소 등을 위해 필요한 모드를 선택하세요.</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -828,7 +870,7 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Color Theme */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-color" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">컬러 테마</h2>
                     <div className="flex items-center gap-3 flex-wrap">
                         {COLOR_THEMES.map((t) => {
@@ -860,7 +902,7 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Radius Theme */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-radius" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">모서리</h2>
                     <div className="grid grid-cols-3 gap-3">
                         {RADIUS_THEMES.map((r) => {
@@ -887,7 +929,7 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Font Selection */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-font" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">폰트</h2>
                     <div className="space-y-6">
                         {/* 시스템 폰트 */}
@@ -987,7 +1029,13 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                </div>
+                {/* /스타일 고급 컨트롤 wrapper */}
+
+                {/* ── 03 기능 ── */}
+                <GroupMarker group="behavior" no="03" label="기능" />
+
+                <section id="sec-ai" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">AI 비서</h2>
                     <div className="space-y-4">
                         <div>
@@ -1233,8 +1281,11 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
+                {/* ── 04 기술 ── */}
+                <GroupMarker group="tech" no="04" label="기술" />
+
                 {/* 외부 연동 */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <section id="sec-integrations" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">외부 연동</h2>
                     <div className="space-y-3">
                         <IntegrationRow
@@ -1528,6 +1579,21 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                {/* 앱 설치 — 기술 그룹으로 이동 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-2">앱 설치</h2>
+                    <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                        사용하고 계신 브라우저의 삼점 메뉴(⋮)를 통해 <span className="font-medium text-neutral-700">Planner&apos;s Planner</span>를 홈 화면에 추가하시면 일반 앱처럼 사용하실 수 있습니다.
+                        Android · iPhone · iPad · PC 모두 지원하며, 모든 기능은 웹과 동일하게 작동합니다.
+                    </p>
+                    <InstallButton
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                    >
+                        <Download className="h-3.5 w-3.5" />
+                        앱 설치 상세
+                    </InstallButton>
+                </section>
+
                 {/* 데이터 백업 */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-1">데이터 백업</h2>
@@ -1589,9 +1655,6 @@ export default function SettingsPage() {
                                     구독 시작
                                 </Link>
                             </div>
-                            <p className="text-[10px] text-neutral-400">
-                                종이 플래너 구매자 → lools@tenone.biz 로 무료 활성화 요청
-                            </p>
                         </div>
                     )}
                 </section>
@@ -1626,7 +1689,7 @@ export default function SettingsPage() {
                     {toastMsg.text}
                 </div>
             )}
-        </div>
+        </SettingsLayout>
     );
 }
 
@@ -1664,7 +1727,7 @@ function MobileNavSection() {
         <section className="bg-white border border-neutral-200 rounded-xl p-5 md:hidden">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">하단 메뉴</h2>
+                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">스마트폰 하단 메뉴</h2>
                     <p className="text-[11px] text-neutral-400 mt-0.5">5개 선택 ({selected.length}/5)</p>
                 </div>
                 <button
