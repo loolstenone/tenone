@@ -1387,7 +1387,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         })()}
 
                         {/* 노트 추가 버튼 */}
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'cornell').length + 1;
