@@ -62,10 +62,14 @@ export function SettingsLayout({ children }: Props) {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10" ref={containerRef}>
+        <div className="pp-settings max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10" ref={containerRef}>
             {/* ── 모바일 sticky pill row ── */}
             <nav
-                className="lg:hidden sticky top-12 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-2 bg-white/95 backdrop-blur border-b border-neutral-100 mb-5"
+                className="lg:hidden sticky top-12 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-2 backdrop-blur mb-5"
+                style={{
+                    backgroundColor: "color-mix(in srgb, var(--pp-bg) 92%, transparent)",
+                    borderBottom: "1px solid var(--pp-line-soft)",
+                }}
                 aria-label="설정 그룹"
             >
                 <div
@@ -78,11 +82,11 @@ export function SettingsLayout({ children }: Props) {
                             <button
                                 key={g.key}
                                 onClick={() => jumpTo(g)}
-                                className={`shrink-0 flex items-baseline gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                                    active
-                                        ? "bg-[#0F766E] text-white"
-                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                                }`}
+                                className="shrink-0 flex items-baseline gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors"
+                                style={{
+                                    backgroundColor: active ? "var(--pp-ink)" : "var(--pp-surface-alt)",
+                                    color: active ? "var(--pp-ink-on)" : "var(--pp-ink-3)",
+                                }}
                             >
                                 <span className="font-mono text-[9px] opacity-60">{g.no}</span>
                                 {g.label}
@@ -96,24 +100,23 @@ export function SettingsLayout({ children }: Props) {
             <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-10 lg:items-start">
                 {/* PC sticky 좌측 nav — aside 자체가 sticky (top-16 = 64px, AppTopNav 48px + 16px 여백) */}
                 <aside className="hidden lg:block lg:sticky lg:top-16 lg:self-start lg:h-fit">
-                    <nav
-                        className="space-y-0.5"
-                        aria-label="설정 그룹"
-                    >
-                        <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-neutral-400 mb-3 px-2">Sections</p>
+                    <nav className="space-y-0.5" aria-label="설정 그룹">
+                        <p className="pp-eyebrow mb-3 px-2">Sections</p>
                         {SETTINGS_GROUPS.map(g => {
                             const active = activeGroup === g.key;
                             return (
                                 <button
                                     key={g.key}
                                     onClick={() => jumpTo(g)}
-                                    className={`group w-full flex items-baseline gap-2 px-2 py-1.5 rounded text-left transition-colors ${
-                                        active
-                                            ? "text-[#0F766E]"
-                                            : "text-neutral-500 hover:text-neutral-900"
-                                    }`}
+                                    className="group w-full flex items-baseline gap-2 px-2 py-1.5 rounded text-left transition-colors"
+                                    style={{ color: active ? "var(--pp-ink)" : "var(--pp-ink-3)" }}
+                                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--pp-ink)"; }}
+                                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--pp-ink-3)"; }}
                                 >
-                                    <span className={`font-mono text-[10px] tracking-widest ${active ? "text-[#0F766E]" : "text-neutral-300"}`}>
+                                    <span
+                                        className="font-mono text-[10px] tracking-widest"
+                                        style={{ color: active ? "var(--pp-ink)" : "var(--pp-ink-4)" }}
+                                    >
                                         {g.no}
                                     </span>
                                     <span className={`text-sm ${active ? "font-semibold" : "font-normal"}`}>
@@ -143,9 +146,8 @@ export function GroupMarker({ group, label, no }: { group: SettingsGroup["key"];
             data-group-marker={group}
             className="pt-2 pb-1 mt-2 first:mt-0"
         >
-            <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-neutral-400">
-                {no} · {label}
-            </p>
+            {/* IntersectionObserver는 wrapper 자체를 관찰. 시각 라벨은 모바일에서만 노출 (PC는 좌측 nav가 담당) */}
+            <p className="pp-eyebrow lg:opacity-0 lg:select-none lg:pointer-events-none">{no} · {label}</p>
         </div>
     );
 }

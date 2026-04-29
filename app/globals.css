@@ -108,6 +108,93 @@ html.planners-dark .planners-app-shell [class~="text-neutral-400"] {
 /* Tailwind v4 dark: variant 가 .planners-dark 안에서 작동하도록 등록 */
 @custom-variant planners-dark (&:where(.planners-dark, .planners-dark *));
 
+/* ── Planner's Settings 페이지 토큰 시스템 (Stage 3 파일럿) ──────────────────
+   .pp-settings 스코프로 디자인 토큰을 노출. 새 컴포넌트는 var(--pp-*) 사용.
+   기존 Tailwind 하드코드(bg-white·border-neutral-200·text-neutral-*)는
+   page-wide planners-app-shell 규칙이 다크에서 매핑하므로 그대로 동작.
+   다른 페이지로 점진 마이그레이션할 때 이 토큰 어휘를 그대로 가져갈 수 있음.
+   참조: design_handoff_planners_settings/tokens.css */
+.pp-settings {
+  /* Surface */
+  --pp-bg:           #FAFAF7;  /* page bg — 오프화이트 */
+  --pp-surface:      #FFFFFF;
+  --pp-surface-alt:  #F5F4F0;
+  --pp-line:         #E5E2DA;
+  --pp-line-soft:    #EFECE5;
+  --pp-line-strong:  #C9C5BA;
+
+  /* Text */
+  --pp-ink:          #0E0E0E;
+  --pp-ink-2:        #3D3D3D;
+  --pp-ink-3:        #767670;
+  --pp-ink-4:        #A8A59D;
+  --pp-ink-on:       #FAFAF7;
+
+  /* Accent — PlannersThemeProvider의 --planners-accent 와 동기화 */
+  --pp-accent:       var(--planners-accent, #0F766E);
+
+  /* Spacing 4pt grid */
+  --pp-card-p:       24px;
+  --pp-section-y:    20px;
+
+  /* Type tracking */
+  --pp-tracking-mono: 0.18em;
+}
+
+html.planners-dark .pp-settings {
+  --pp-bg:           #0E0E0E;
+  --pp-surface:      #161616;
+  --pp-surface-alt:  #1C1C1C;
+  --pp-line:         #2A2A2A;
+  --pp-line-soft:    #1F1F1F;
+  --pp-line-strong:  #3A3A3A;
+
+  --pp-ink:          #F2EFE8;
+  --pp-ink-2:        #C7C3B9;
+  --pp-ink-3:        #8E8B82;
+  --pp-ink-4:        #6A675F;
+  --pp-ink-on:       #0E0E0E;
+}
+
+/* ── pp-card · pp-eyebrow 유틸 (점진 마이그레이션용 alias 클래스) ── */
+.pp-card {
+  background-color: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  border-radius: 12px;
+  padding: var(--pp-card-p);
+}
+.pp-eyebrow {
+  font-family: ui-monospace, "JetBrains Mono", "Geist Mono", "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: var(--pp-tracking-mono);
+  text-transform: uppercase;
+  color: var(--pp-ink-4);
+}
+
+/* ── .pp-settings 안에서 기존 Tailwind 유틸 → 토큰 시멘틱 매핑 ──
+   다른 페이지 영향 0. 점진 마이그레이션을 거치지 않은 기존 섹션 JSX도
+   라이트/다크 모두 토큰값을 따른다. */
+.pp-settings [class~="bg-white"]      { background-color: var(--pp-surface)     !important; }
+.pp-settings [class~="bg-neutral-50"] { background-color: var(--pp-surface-alt) !important; }
+.pp-settings [class~="bg-neutral-100"]{ background-color: var(--pp-surface-alt) !important; }
+
+.pp-settings [class~="border-neutral-100"] { border-color: var(--pp-line-soft)   !important; }
+.pp-settings [class~="border-neutral-200"] { border-color: var(--pp-line)        !important; }
+.pp-settings [class~="border-neutral-300"] { border-color: var(--pp-line-strong) !important; }
+
+.pp-settings [class~="text-neutral-900"] { color: var(--pp-ink)   !important; }
+.pp-settings [class~="text-neutral-800"] { color: var(--pp-ink)   !important; }
+.pp-settings [class~="text-neutral-700"] { color: var(--pp-ink-2) !important; }
+.pp-settings [class~="text-neutral-600"] { color: var(--pp-ink-2) !important; }
+.pp-settings [class~="text-neutral-500"] { color: var(--pp-ink-3) !important; }
+.pp-settings [class~="text-neutral-400"] { color: var(--pp-ink-4) !important; }
+.pp-settings [class~="text-neutral-300"] { color: var(--pp-ink-4) !important; }
+
+/* placeholder도 톤 다운 — 라이트와 다크 양쪽 자연스럽게 */
+.pp-settings [class*="placeholder:text-neutral"] ::placeholder,
+.pp-settings input::placeholder,
+.pp-settings textarea::placeholder { color: var(--pp-ink-4); opacity: 1; }
+
 /* AI 사이드패널 open 시 — 우하단 floating CTA(베타 피드백 등) 자동 숨김 */
 body.pp-ai-panel-open .pp-hide-when-ai-open { display: none !important; }
 

@@ -126,22 +126,22 @@ export function SettingsStylePresets({ activePresetKey, onApply, mobile = false 
                             applyPlannersUserFont(p.userFont);
                             applyPlannersThemeMode(p.mode);
                         }}
-                        className={`group flex flex-col items-stretch gap-2 p-3 border-2 rounded-lg text-left transition-all ${
-                            active
-                                ? "border-[#0F766E] bg-[#0F766E]/5"
-                                : "border-neutral-200 hover:border-neutral-400 bg-white"
-                        }`}
+                        className="group flex flex-col items-stretch gap-2 p-3 rounded-lg text-left transition-all"
+                        style={{
+                            border: `2px solid ${active ? "var(--pp-ink)" : "var(--pp-line)"}`,
+                            backgroundColor: active ? "var(--pp-surface-alt)" : "var(--pp-surface)",
+                        }}
                     >
-                        {/* Mini visualization — bg + 카드 + accent */}
+                        {/* Mini visualization — bg + 카드 + accent (실제 프리셋 스왓치 — 토큰 영향 받지 않음) */}
                         <div
-                            className="relative h-14 rounded-md overflow-hidden border"
-                            style={{ backgroundColor: p.swatch.bg, borderColor: active ? "#0F766E" : "rgba(0,0,0,0.06)" }}
+                            className="relative h-14 rounded-md overflow-hidden"
+                            style={{ backgroundColor: p.swatch.bg, border: "1px solid rgba(0,0,0,0.08)" }}
                         >
                             <div
-                                className="absolute left-2 top-2 right-6 bottom-2 rounded-sm border"
+                                className="absolute left-2 top-2 right-6 bottom-2 rounded-sm"
                                 style={{
                                     backgroundColor: p.swatch.surface,
-                                    borderColor: "rgba(0,0,0,0.08)",
+                                    border: "1px solid rgba(0,0,0,0.08)",
                                 }}
                             />
                             <span
@@ -150,10 +150,13 @@ export function SettingsStylePresets({ activePresetKey, onApply, mobile = false 
                             />
                         </div>
                         <div className="min-w-0">
-                            <p className={`text-xs font-semibold truncate ${active ? "text-[#0F766E]" : "text-neutral-800"}`}>
+                            <p
+                                className="text-xs font-semibold truncate"
+                                style={{ color: active ? "var(--pp-ink)" : "var(--pp-ink-2)" }}
+                            >
                                 {p.label}
                             </p>
-                            <p className="text-[10px] text-neutral-400 truncate">{p.desc}</p>
+                            <p className="text-[10px] truncate" style={{ color: "var(--pp-ink-4)" }}>{p.desc}</p>
                         </div>
                     </button>
                 );
