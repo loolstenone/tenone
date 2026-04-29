@@ -17,12 +17,8 @@ const ROUTE_KEYS: Record<string, string> = {
     p: "/planners/app/projects",
     c: "/planners/app/contacts",
     s: "/planners/app/search",
-    n: "/planners/app/ai-briefing", // n = note·brain·noon
-};
-
-// 페이지 이동이 아닌 액션 단축키
-const ACTION_KEYS: Record<string, () => void> = {
-    b: () => window.dispatchEvent(new CustomEvent("pp-ai-panel-toggle")), // B = Bot/Briefing 사이드패널
+    n: "/planners/app/ai-briefing",
+    b: "/planners/app/ai-briefing",
 };
 
 const SHORTCUTS_LIST = [
@@ -37,7 +33,7 @@ const SHORTCUTS_LIST = [
     { keys: ["C"], desc: "연락처로 이동" },
     { keys: ["N"], desc: "AI 브리핑으로 이동" },
     { keys: ["S"], desc: "검색으로 이동" },
-    { keys: ["B"], desc: "AI 비서 사이드패널 토글" },
+    { keys: ["B"], desc: "AI 브리핑으로 이동" },
     { keys: ["G"], desc: "다른 페이지로 이동 (= 명령 팔레트)" },
     { keys: ["ESC"], desc: "모달·팔레트 닫기" },
 ];
@@ -84,15 +80,8 @@ export function KeyboardShortcuts() {
                 return;
             }
 
-            // 액션 단축키 (라우트 이동 아님)
-            const key = e.key.toLowerCase();
-            const action = ACTION_KEYS[key];
-            if (action) {
-                e.preventDefault();
-                action();
-                return;
-            }
             // 라우트 점프
+            const key = e.key.toLowerCase();
             const route = ROUTE_KEYS[key];
             if (route) {
                 e.preventDefault();
