@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { SettingsLivePreview } from "./SettingsLivePreview";
 
 export type SettingsGroup = {
     key: "start" | "style" | "behavior" | "tech";
@@ -62,7 +63,7 @@ export function SettingsLayout({ children }: Props) {
     }
 
     return (
-        <div className="pp-settings max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10" ref={containerRef}>
+        <div className="pp-settings max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10" ref={containerRef}>
             {/* ── 모바일 sticky pill row ── */}
             <nav
                 className="lg:hidden sticky top-12 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-2 backdrop-blur mb-5"
@@ -96,8 +97,12 @@ export function SettingsLayout({ children }: Props) {
                 </div>
             </nav>
 
-            {/* ── 본문 grid (PC: 사이드바 + main, 모바일: 1열). items-start로 aside가 콘텐츠 높이만 차지 ── */}
-            <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-10 lg:items-start">
+            {/* ── 본문 grid ──
+                  모바일(<lg): 1열 (preview 미표시)
+                  lg(1024+): 2열 (사이드바 + main)
+                  xl(1280+): 3열 (사이드바 + main + Live Preview)
+                  items-start로 aside·preview가 콘텐츠 높이만 차지 (sticky 정상 작동) */}
+            <div className="lg:grid lg:grid-cols-[200px_1fr] xl:grid-cols-[180px_1fr_400px] lg:gap-8 xl:gap-10 lg:items-start">
                 {/* PC sticky 좌측 nav — aside 자체가 sticky (top-16 = 64px, AppTopNav 48px + 16px 여백) */}
                 <aside className="hidden lg:block lg:sticky lg:top-16 lg:self-start lg:h-fit">
                     <nav className="space-y-0.5" aria-label="설정 그룹">
@@ -132,6 +137,11 @@ export function SettingsLayout({ children }: Props) {
                 <main className="min-w-0">
                     {children}
                 </main>
+
+                {/* xl+ Live Preview — sticky 우측 */}
+                <aside className="hidden xl:block xl:sticky xl:top-16 xl:self-start xl:h-fit">
+                    <SettingsLivePreview />
+                </aside>
             </div>
         </div>
     );
