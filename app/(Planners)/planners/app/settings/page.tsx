@@ -1556,7 +1556,7 @@ export default function SettingsPage() {
 
             {/* Toast */}
             {toastMsg && (
-                <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm transition-all ${
+                <div className={`fixed bottom-20 md:bottom-6 right-6 z-[9000] flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm transition-all ${
                     toastMsg.ok ? "bg-[#0F766E] text-white" : "bg-red-600 text-white"
                 }`}>
                     {toastMsg.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
