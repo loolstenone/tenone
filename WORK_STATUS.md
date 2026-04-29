@@ -1,6 +1,53 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-29 (세션 101 — Planners Role System Phase 4 완성)
+> 마지막 업데이트: 2026-04-29 (세션 102 — Planners Settings 디자인 시스템 4단계)
+
+---
+
+## 세션 102 핵심 성과 (2026-04-29)
+
+### Planners — Settings 페이지 디자인 시스템 4단계 (Stage 1+2+3+4)
+
+Claude Design 핸드오프 (`design_handoff_planners_settings/`) 기반 Settings 페이지 재구축.
+
+**Stage 1+2 — IA 재편 + 모바일 프리셋** (`5b4f7581`)
+- 4그룹 IA: **시작 / 스타일 / 기능 / 기술**
+- PC: 좌측 200px sticky 사이드바 (IntersectionObserver로 활성 자동 갱신)
+- 모바일: 상단 sticky 가로 pill row
+- 8개 프리셋 (5개 토큰 한 번 탭 적용): Mono Light · Cream Serif · Editorial · Slate Pro · Black Ink · Campus Mint · Campus Blush · Designer Mono
+- 모바일은 프리셋 메인, 개별 컨트롤은 "고급 설정 ▼" 토글
+- 컬러 14 → 18색 (Mustard · Orange · Emerald · Olive 추가)
+
+**Stage 3 — 디자인 토큰 시스템** (`d06c7eb5`)
+- `.pp-settings` 스코프 토큰 11종 (라이트+다크 양쪽)
+- 기존 Tailwind 유틸리티 → 토큰 시멘틱 자동 매핑
+- `pp-card` · `pp-eyebrow` alias 유틸
+
+**Stage 4 — Live Preview 패널** (`36285661`)
+- xl+(1280px) 우측 sticky 400px 패널
+- Daily · Project · AI Briefing 3탭
+- 컬러·모서리·폰트·다크모드 즉시 반영 (CSS 변수)
+
+### 신규 파일 (3개)
+- `features/planners/SettingsLayout.tsx` — 4그룹 IA + sticky nav + 3컬럼 grid xl+
+- `features/planners/SettingsStylePresets.tsx` — 8개 프리셋 갤러리
+- `features/planners/SettingsLivePreview.tsx` — Daily/Project/AI 라이브 프리뷰
+
+### 부수 작업 (이번 세션 다른 커밋들)
+- `de3aa289` HandNote Canvas+RAF 재작성 — 필기 입력 끊김 해소
+- `e2c03b05` 인덱스 PC/태블릿 2열 레이아웃 + AI 브리핑 탭 제거
+- `865c9713` AI 브리핑 네비 전체 제거 (FAB만 유지)
+- `c6c3a3b9` 상단 탭 템플릿 추가 (아이덴티티 다음)
+- `0a7ed6bb` DailyView 우측 컬럼 단일 셀 래핑 (미니달력 위치 정렬)
+- 햄버거 메뉴 헤더 PP AI → Planner's Planner^AI (UniverseMobileMenu.brandNode SSOT)
+- 하단 메뉴 기본 순서: 인덱스·프로젝트·오늘·PI·검색
+- 화면 모드(다크) 작동 — planners-app-shell + bg/border/text 일괄 반전
+
+### 다음 할 것
+- xl+ 모니터에서 Live Preview 실제 동작 확인 (요구 폭 1280px 이상)
+- Settings 외 페이지 다크모드 검증 (Daily/Weekly/Monthly 카드 색상 전환 확인)
+- 모바일 Live Preview FAB + bottom sheet (선택)
+- 토큰을 Daily/Weekly/Monthly로 확장 — `.pp-settings` 패턴을 다른 뷰로 (선택)
 
 ---
 

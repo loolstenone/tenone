@@ -113,6 +113,11 @@
 - SearchView — 풀텍스트
 - PurchaseView — 결제
 - CopyToAiButton — Claude/ChatGPT/Gemini deep link
+- **Settings 디자인 시스템 (세션 102)**
+  - SettingsLayout — 4그룹 IA(시작/스타일/기능/기술) · PC sticky 사이드바 · 모바일 가로 pill row · IntersectionObserver 활성 자동 갱신 · xl+ 3컬럼 grid (사이드바·main·preview)
+  - SettingsStylePresets — 8개 프리셋(Mono Light·Cream Serif·Editorial·Slate Pro·Black Ink·Campus Mint·Campus Blush·Designer Mono) · 컬러·모서리·system폰트·user폰트·모드 5개 토큰 한 번에 적용 · matchPreset() 헬퍼
+  - SettingsLivePreview — xl+(1280px) 우측 sticky 라이브 프리뷰 · Daily/Project/AI 3탭 · CSS 변수(--pp-*, --planners-accent, --planners-font, --planners-user-font)로 즉시 반영
+  - 토큰: `app/globals.css` `.pp-settings` 스코프 11종(라이트+다크) — 핸드오프 design_handoff_planners_settings/tokens.css 참조
 
 ### 라이브러리 (lib/planners/)
 - types.ts — 타입 정의 + getISOWeek/getWeekBoundaries
@@ -334,7 +339,8 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 100 (2026-04-29)** — **CanvasEditor Excalidraw → tldraw 마이그레이션** (MIT 무료, 워터마크 없음) · `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot` + `getSvgAsImage` 썸네일 |
+| **Phase** | **세션 102 (2026-04-29)** — **Settings 디자인 시스템 4단계 완성** (Claude Design 핸드오프 기반) · 4그룹 IA(시작/스타일/기능/기술) + PC 200px sticky 사이드바 + 모바일 가로 pill row · 8개 프리셋(Mono Light·Cream Serif·Editorial·Slate Pro·Black Ink·Campus Mint·Campus Blush·Designer Mono) — 5개 토큰(컬러·모서리·system폰트·user폰트·모드) 한 번 탭 적용 · `.pp-settings` 토큰 시스템(11종 라이트+다크) · xl+(1280px) Live Preview 우측 sticky 패널(Daily/Project/AI 3탭) — CSS 변수로 즉시 반영 · 컬러 18색(Mustard·Orange·Emerald·Olive 추가) · 화면 모드 작동(planners-app-shell + 일괄 반전) |
+| **Phase 100** | 세션 100 (2026-04-29) — **CanvasEditor Excalidraw → tldraw 마이그레이션** (MIT 무료, 워터마크 없음) · `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot` + `getSvgAsImage` 썸네일 |
 | **Phase 96** | 세션 96 (2026-04-28) — **협업자 RLS 권한 강제 완료** (resolveRole() owner/editor/viewer 3단계 · viewer PATCH 403 · editor owner-only 필드 차단 · userRole 클라이언트 반환 · 역할 배지 + ShareField/CollaboratorField 오너만 노출) · **이월 작업 전체 완료** (TemplatesView 754줄+7개 grid 파일 분리 확인 · 포트폴리오 모드 /planners/portfolio/[memberId] 확인) · 배포 전 블로커 5개 사용자 액션 대기 |
 | **Phase 93** | 세션 93 — 통합 캘린더 시스템(`planners_calendar_entries` 단일 테이블 + `calendar-rules.ts` SSOT 5 kinds × 4 views 노출 룰) · 4-View 통합 렌더 · 공공데이터 자동 반영(KR 공휴일 30 + 24절기 시드 + cron 매년 1/1) · Daily 우측 재구성 · 트래킹 7종 · MonthlyAnalytics·YearlyAnalytics 3-탭 · Canvas storageKey fix · Settings upsert + SaveAllBar · 구독 + 런칭 프로모션
 | **Phase 92** | 세션 92 (2026-04-27) — 모바일 PWA(orientation any · AppMonthBar 모바일 숨김) · HandNote 종합 개선(펜 4종·스타일러스 지우개 자동 감지·팜 리젝션·캔버스 자동 확장 · perfect-freehand 추가) · AI 브리핑 통합(midday 타입 + 시간대 자동 추론 + 단일 채팅 UI · 이메일 기본 OFF) · Weekly 순서 재정렬(GPR→Vrief→주간 계획) · Monthly 재정렬(테마/목표→집중 영역→일정→회고)+월간 통계(5종 task 분포·에너지·일간 계획) · **Community 사이트화** (`/planners/community` 공개 읽기, 로그인 회원 작성, 카테고리 4종 · 앱 메뉴는 외부 링크) · **PP AI 워크스페이스 슬롯 통일** (UniverseUtilityBar `workspacePath`, HeRo·SmarComm 패턴) · **온보딩 루프 fix** (`storageKey: tenone-auth` · auth_id→email→자동생성 3단계 · super_admin/staff/manager 게이트 우회 · 마스터 DB 마킹) (2026-04-27 세션 92) |

@@ -4,6 +4,78 @@
 
 ---
 
+## 2026-04-29 — 세션 102 · Planners Settings 디자인 시스템 4단계
+
+### 장소
+사무실
+
+### 핵심
+Claude Design 핸드오프(`design_handoff_planners_settings/`) 기반 Settings 페이지를 4단계로 재구축.
+
+**Stage 1+2** — IA 재편 + 모바일 프리셋 (`5b4f7581`)
+- 4그룹 IA: 시작 / 스타일 / 기능 / 기술
+- PC: 좌측 200px sticky 사이드바 nav (IntersectionObserver로 활성 자동 갱신)
+- 모바일: 상단 sticky 가로 pill row
+- 8개 스타일 프리셋 (5개 토큰 한 번 탭 적용): Mono Light · Cream Serif · Editorial · Slate Pro · Black Ink · Campus Mint · Campus Blush · Designer Mono
+- 모바일은 프리셋이 메인 — 개별 컨트롤은 "고급 설정 ▼" 토글
+- 앱 설치 섹션 시작 → 기술 그룹 이동
+- 컬러 테마 14 → 18색 (Mustard · Orange · Emerald · Olive 추가)
+
+**Stage 3** — 디자인 토큰 시스템 (`d06c7eb5`)
+- `.pp-settings` 스코프 토큰 11종 (bg/surface/surface-alt/line/line-soft/line-strong/ink/ink-2/ink-3/ink-4/ink-on/accent) — 라이트와 다크 변형
+- `pp-card` · `pp-eyebrow` 유틸 alias (점진 마이그레이션용)
+- 기존 Tailwind 유틸(bg-white·bg-neutral-{50,100}·border-neutral-{100,200,300}·text-neutral-{300~900}) → 토큰 시멘틱 매핑
+- 다른 페이지 영향 0 — 토큰 어휘는 후속 마이그레이션에 그대로 사용 가능
+
+**Stage 4** — Live Preview 패널 (`36285661`)
+- xl+(1280px) 우측 sticky 라이브 프리뷰 (400px)
+- Daily / Project / AI Briefing 3개 탭
+- 컬러·모서리·폰트·다크모드를 CSS 변수로 자동 갱신 — 별도 props 불필요
+- 하단 토큰 stamp 라벨
+
+**부수 작업**
+- `0a7ed6bb` DailyView 우측 컬럼 단일 셀 래핑 (미니달력 위치 정렬)
+- `c6c3a3b9` 상단 탭 템플릿 추가 (아이덴티티 다음)
+- `865c9713` AI 브리핑 네비 전체 제거 + 인덱스 사이드바 정리
+- `ec8adc08` 인덱스 레이아웃 중복 렌더 제거
+- `e2c03b05` 인덱스 페이지 2열 레이아웃 + AI 브리핑 탭 제거
+- `de3aa289` HandNote Canvas+RAF 재작성 (필기 입력 고도화)
+- 햄버거 메뉴 헤더: PP AI → "Planner's Planner^AI" (윗첨자) — `UniverseMobileMenu.brandNode` SSOT prop 추가
+- 햄버거 하단 중복 템플릿 제거
+- 하단 메뉴 기본 순서: 인덱스·프로젝트·오늘·PI·검색
+- 화면 모드 작동 (planners-app-shell 클래스 + 일괄 반전 CSS)
+
+### 변경 파일
+**신규**:
+- `features/planners/SettingsLayout.tsx` — 4그룹 IA 래퍼 (sticky nav · IntersectionObserver · 3컬럼 grid xl+)
+- `features/planners/SettingsStylePresets.tsx` — 8개 프리셋 카드 갤러리 + matchPreset() 헬퍼
+- `features/planners/SettingsLivePreview.tsx` — Daily/Project/AI 3탭 라이브 프리뷰
+
+**수정**:
+- `app/(Planners)/planners/app/settings/page.tsx` — SettingsLayout 래핑, 그룹 마커 4개, 섹션 ID, 앱 설치 이동, 컬러 18색, 라벨 갱신, 종이 플래너 안내 제거
+- `app/(Planners)/planners/app/layout.tsx` — `planners-app-shell` 클래스 부착
+- `app/globals.css` — `.pp-settings` 토큰 시스템 + 시멘틱 매핑 + 다크 일괄 반전
+- `features/planners/PlannersThemeProvider.tsx` — COLOR_MAP 18색 동기화 (Mustard·Orange·Emerald·Olive 추가)
+- `features/planners/AppTopNav.tsx` — 햄버거 헤더 brandNode + 중복 템플릿 제거 + 윗첨자 AI
+- `components/UniverseMobileMenu.tsx` — `brandNode` prop 추가 (SSOT)
+- `features/planners/MobileBottomNav.tsx` — 기본 순서 인덱스·프로젝트·오늘·PI·검색
+- `features/planners/DailyView.tsx` — 우측 컬럼 단일 셀 래핑
+- `features/planners/HandNote.tsx`, `IndexView.tsx`, `CommandPalette.tsx`, `KeyboardShortcuts.tsx`, `PlannersUtilityLinks.tsx` — 부수 정리
+
+### 결정사항
+- **Live Preview는 xl+에서만** — lg(1024-1279)는 main 폭이 부족해 2-col 유지. 모바일 bottom sheet은 후속 stage
+- **토큰은 Settings 한정 파일럿** — 다른 페이지로의 점진 마이그레이션은 후속. 토큰 어휘는 SSOT
+- **Cormorant Garamond 등 핸드오프 폰트는 도입 안 함** — 폰트 6종 호스팅 부담. 사용자가 토큰으로 바꿀 수 있음
+- **Maison W/M/S/B 4-배경톤은 도입 안 함** — 라이트/다크 2개로 충분. 추후 확장 가능
+
+### 다음 할 것
+- xl+ 모니터에서 Live Preview 실제 동작 확인 (1280px 이상)
+- 다크모드 전체 페이지 검증 (Settings 외)
+- 모바일 Live Preview FAB + bottom sheet (선택)
+- 토큰을 Daily/Weekly/Monthly로 확장 (선택)
+
+---
+
 ## 2026-04-29 — 세션 101 · Planners Role System Phase 4 완성
 
 ### 장소
