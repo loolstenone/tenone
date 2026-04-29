@@ -1514,18 +1514,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
+                    {/* ── 우측 컬럼 (col 3) — 단일 셀로 묶어 좌측 길이와 무관하게 흐름. 모바일은 contents로 펼쳐 order 유지 ── */}
+                    <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1">
+
                     {/* 달력 — tablet+ only */}
-                    <div className="hidden md:block md:col-start-3">
+                    <div className="hidden md:block">
                         <DailyMiniMonth date={date} />
                     </div>
 
                     {/* 2. 향후 일정 & 업무 — mobile order 2 */}
-                    <div className="order-2 md:order-none md:col-start-3">
+                    <div className="order-2 md:order-none">
                         <UpcomingSchedule date={date} />
                     </div>
 
                     {/* 3. 일간 기록 — mobile order 3 */}
-                    <div className="order-3 md:order-none md:col-start-3">
+                    <div className="order-3 md:order-none">
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
@@ -1632,12 +1635,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     </div>
 
                     {/* 5. 프로젝트 — mobile order 5 */}
-                    <div className="order-5 md:order-none md:col-start-3">
+                    <div className="order-5 md:order-none">
                         <DailyProjectsCard date={date} />
                     </div>
 
                     {/* 6. 오늘 한 장면 — mobile order 6 */}
-                    <div className="order-6 md:order-none md:col-start-3">
+                    <div className="order-6 md:order-none">
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-3">
                                 <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘 한 장면</h2>
@@ -1686,6 +1689,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </div>
                         </section>
                     </div>
+
+                    </div>
+                    {/* /우측 컬럼 wrapper */}
 
                 </div>
             )}
