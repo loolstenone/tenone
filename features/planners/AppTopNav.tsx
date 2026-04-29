@@ -28,6 +28,7 @@ const TABS: Tab[] = [
     { href: "/planners/app/canvas",      label: "캔버스",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/identity",    label: "아이덴티티",  modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/templates",   label: "템플릿",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one"], external: true },
 ];
 
