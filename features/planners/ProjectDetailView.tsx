@@ -11,6 +11,7 @@ import { ProjectRetroModal } from "./ProjectRetroModal";
 import { CoverPicker } from "./CoverPicker";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { ConfirmSheet } from "./ConfirmSheet";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
 
 // 통합 페이지의 각 섹션 — Tab 컴포넌트가 자체 카드를 갖고 있으므로 헤더만 plain 렌더
@@ -52,6 +53,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     const [retroOpen, setRetroOpen] = useState(false);
     const [userRole, setUserRole] = useState<"owner" | "editor" | "viewer">("owner");
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     async function reload() {
         const res = await fetch(`/api/planners/projects/${projectId}`);
@@ -239,17 +241,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                                 </p>
                             </div>
                             <button
-                                onClick={async () => {
-                                    const title = (project.title ?? "(제목 없음)") as string;
-                                    if (!confirm(`"${title}" 프로젝트를 영구 삭제할까요?`)) return;
-                                    const res = await fetch(`/api/planners/projects/${projectId}`, { method: "DELETE" });
-                                    if (res.ok) {
-                                        window.location.href = "/planners/app/projects";
-                                    } else {
-                                        const d = await res.json().catch(() => ({}));
-                                        alert(`삭제 실패: ${d.message || d.error || res.status}`);
-                                    }
-                                }}
+                                onClick={() => setConfirmDeleteOpen(true)}
                                 className="shrink-0 px-3 py-1.5 text-xs bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors font-medium"
                             >
                                 영구 삭제
@@ -258,6 +250,23 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                     </section>
                 )}
             </div>
+
+            <ConfirmSheet
+                open={confirmDeleteOpen}
+                message={`"${project?.title ?? "(제목 없음)"}" 프로젝트를 영구 삭제할까요?`}
+                description="노트·업무·마일스톤·Vrief·GPR 모두 영구 삭제됩니다. 되돌릴 수 없습니다."
+                onConfirm={async () => {
+                    setConfirmDeleteOpen(false);
+                    const res = await fetch(`/api/planners/projects/${projectId}`, { method: "DELETE" });
+                    if (res.ok) {
+                        window.location.href = "/planners/app/projects";
+                    } else {
+                        const d = await res.json().catch(() => ({}));
+                        alert(`삭제 실패: ${d.message || d.error || res.status}`);
+                    }
+                }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
 
             {/* 5F 회고 모달 */}
             <ProjectRetroModal
@@ -434,6 +443,7 @@ function ShareField({ project }: { project: PlannerProject }) {
     const [token, setToken] = useState(project.public_token ?? "");
     const [busy, setBusy] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [confirmRevokeOpen, setConfirmRevokeOpen] = useState(false);
     const isPublic = project.visibility === "public_link" && !!token;
 
     async function makePublic() {
@@ -448,7 +458,6 @@ function ShareField({ project }: { project: PlannerProject }) {
     }
 
     async function revoke() {
-        if (!confirm("공개 링크를 철회하시겠습니까? 기존 URL은 더 이상 작동하지 않습니다.")) return;
         setBusy(true);
         try {
             await fetch(`/api/planners/projects/${project.id}/share`, { method: "DELETE" });
@@ -505,7 +514,7 @@ function ShareField({ project }: { project: PlannerProject }) {
                         </a>
                     </div>
                     <button
-                        onClick={revoke}
+                        onClick={() => setConfirmRevokeOpen(true)}
                         disabled={busy}
                         className="text-[11px] text-rose-500 hover:underline disabled:opacity-50"
                     >
@@ -513,6 +522,14 @@ function ShareField({ project }: { project: PlannerProject }) {
                     </button>
                 </div>
             )}
+            <ConfirmSheet
+                open={confirmRevokeOpen}
+                message="공개 링크를 철회할까요?"
+                description="기존 URL은 더 이상 작동하지 않게 됩니다."
+                confirmLabel="철회"
+                onConfirm={() => { setConfirmRevokeOpen(false); revoke(); }}
+                onCancel={() => setConfirmRevokeOpen(false)}
+            />
         </Field>
     );
 }

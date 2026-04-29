@@ -82,6 +82,13 @@ export const STYLE_PRESETS: SettingsPreset[] = [
         swatch: { bg: "#FAFAF7", surface: "#FFFFFF", accent: "#171717" },
         color: "mono", radius: "soft", font: "mono", userFont: "mono", mode: "light",
     },
+    {
+        key: "walnut_dark",
+        label: "Walnut Dark",
+        desc: "짙은 갈색 · 가죽 · 앤틱",
+        swatch: { bg: "#2C1608", surface: "#3D2210", accent: "#D4A062" },
+        color: "brown", radius: "soft", font: "strong-serif", userFont: "serif", mode: "dark",
+    },
 ];
 
 /**
@@ -111,7 +118,7 @@ interface Props {
 
 export function SettingsStylePresets({ activePresetKey, onApply, mobile = false }: Props) {
     return (
-        <div className={mobile ? "grid grid-cols-2 gap-2.5" : "grid grid-cols-2 md:grid-cols-4 gap-3"}>
+        <div className={mobile ? "grid grid-cols-2 gap-2.5" : "grid grid-cols-3 gap-3"}>
             {STYLE_PRESETS.map((p) => {
                 const active = activePresetKey === p.key;
                 return (
@@ -132,22 +139,48 @@ export function SettingsStylePresets({ activePresetKey, onApply, mobile = false 
                             backgroundColor: active ? "var(--pp-surface-alt)" : "var(--pp-surface)",
                         }}
                     >
-                        {/* Mini visualization — bg + 카드 + accent (실제 프리셋 스왓치 — 토큰 영향 받지 않음) */}
+                        {/* Mini visualization — 실제 플래너 느낌의 미니 UI */}
                         <div
-                            className="relative h-14 rounded-md overflow-hidden"
+                            className="relative h-24 rounded-md overflow-hidden"
                             style={{ backgroundColor: p.swatch.bg, border: "1px solid rgba(0,0,0,0.08)" }}
                         >
+                            {/* 카드 서피스 */}
                             <div
-                                className="absolute left-2 top-2 right-6 bottom-2 rounded-sm"
+                                className="absolute left-2.5 top-2.5 right-8 bottom-2.5 overflow-hidden flex flex-col"
                                 style={{
                                     backgroundColor: p.swatch.surface,
-                                    border: "1px solid rgba(0,0,0,0.08)",
+                                    border: `1px solid rgba(${p.mode === "dark" ? "255,255,255" : "0,0,0"},0.08)`,
+                                    borderRadius: p.radius === "sharp" ? "2px" : p.radius === "subtle" ? "4px" : "6px",
                                 }}
-                            />
-                            <span
-                                className="absolute right-2 top-2 h-3 w-3 rounded-full"
+                            >
+                                {/* 액센트 헤더 스트립 */}
+                                <div style={{ height: "4px", backgroundColor: p.swatch.accent, flexShrink: 0 }} />
+                                <div className="flex-1 px-2 py-1.5 flex flex-col justify-between">
+                                    {/* 날짜/타이틀 행 */}
+                                    <div className="flex items-center gap-1.5">
+                                        <div style={{ height: "8px", width: "8px", borderRadius: "2px", backgroundColor: p.swatch.accent, opacity: 0.85, flexShrink: 0 }} />
+                                        <div style={{ height: "2.5px", width: "45%", borderRadius: "1px", backgroundColor: p.swatch.accent, opacity: 0.6 }} />
+                                    </div>
+                                    {/* 구분선 */}
+                                    <div style={{ height: "1px", backgroundColor: p.mode === "dark" ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }} />
+                                    {/* 태스크 라인 3개 */}
+                                    {([80, 62, 72] as number[]).map((w, i) => (
+                                        <div key={i} className="flex items-center gap-1.5">
+                                            <div style={{ height: "5px", width: "5px", borderRadius: "1px", border: `1.5px solid rgba(${p.mode === "dark" ? "255,255,255" : "0,0,0"},0.18)`, flexShrink: 0 }} />
+                                            <div style={{ height: "2px", width: `${w}%`, borderRadius: "1px", backgroundColor: p.mode === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.11)" }} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* 액센트 도트 */}
+                            <div
+                                className="absolute right-2.5 top-2.5 h-3.5 w-3.5 rounded-full shadow-sm"
                                 style={{ backgroundColor: p.swatch.accent }}
                             />
+                            {/* 다크모드 힌트 */}
+                            {p.mode === "dark" && (
+                                <div className="absolute right-2.5 bottom-2.5 text-[9px] leading-none" style={{ color: "rgba(255,255,255,0.35)" }}>◗</div>
+                            )}
                         </div>
                         <div className="min-w-0">
                             <p

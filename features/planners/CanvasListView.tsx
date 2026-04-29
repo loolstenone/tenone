@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2, Pencil, Trash2, ImageIcon } from "lucide-react";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 interface CanvasRow {
     id: string;
@@ -20,6 +21,7 @@ export function CanvasListView() {
     const [rows, setRows] = useState<CanvasRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     async function load() {
         setLoading(true);
@@ -50,7 +52,6 @@ export function CanvasListView() {
     }
 
     async function remove(id: string) {
-        if (!confirm("이 캔버스를 삭제할까요?")) return;
         await fetch(`/api/planners/canvases/${id}`, { method: "DELETE" });
         setRows(prev => prev.filter(r => r.id !== id));
     }
@@ -116,7 +117,7 @@ export function CanvasListView() {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); remove(row.id); }}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteId(row.id); }}
                                     className="text-neutral-300 hover:text-rose-500 transition-colors shrink-0"
                                     title="삭제"
                                 >
@@ -127,6 +128,12 @@ export function CanvasListView() {
                     ))}
                 </div>
             )}
+            <ConfirmSheet
+                open={!!confirmDeleteId}
+                message="이 캔버스를 삭제할까요?"
+                onConfirm={() => { const id = confirmDeleteId!; setConfirmDeleteId(null); remove(id); }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
         </div>
     );
 }

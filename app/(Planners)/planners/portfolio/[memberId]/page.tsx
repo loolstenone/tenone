@@ -1,4 +1,5 @@
 // 포트폴리오 페이지 — 한 사용자의 모든 공개 프로젝트 갤러리 (인증 불필요)
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -7,6 +8,35 @@ import { ChevronLeft, CheckCircle2, Calendar, FolderKanban } from "lucide-react"
 import { getCategoryMeta } from "@/lib/planners/project-categories";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(
+    { params }: { params: Promise<{ memberId: string }> }
+): Promise<Metadata> {
+    const { memberId } = await params;
+    const admin = createAdminClient();
+    const { data: owner } = await admin
+        .from("members")
+        .select("name")
+        .eq("id", memberId)
+        .maybeSingle();
+    if (!owner) return { title: "포트폴리오를 찾을 수 없습니다" };
+
+    const { count } = await admin
+        .from("planners_projects")
+        .select("id", { count: "exact", head: true })
+        .eq("member_id", memberId)
+        .eq("visibility", "public_link");
+
+    const ownerName = owner.name ?? "익명";
+    const title = `${ownerName}의 프로젝트 포트폴리오 — Planner's`;
+    const description = `${ownerName}이(가) Planner's Planner AI로 기록한 공개 프로젝트 ${count ?? 0}개`;
+
+    return {
+        title,
+        description,
+        openGraph: { title, description },
+    };
+}
 
 interface PortfolioProject {
     id: string;
@@ -40,19 +70,19 @@ async function loadPortfolio(memberId: string) {
 
     if (!owner || !projects || projects.length === 0) return null;
 
-    const milestoneStats = await Promise.all(
-        projects.map(async (p) => {
-            const { data: ms } = await admin
-                .from("planners_project_milestones")
-                .select("id, done_at")
-                .eq("project_id", p.id);
-            const total = ms?.length ?? 0;
-            const done = ms?.filter((m) => m.done_at).length ?? 0;
-            return { id: p.id, total, done };
-        })
-    );
+    // 마일스톤 단일 쿼리 (N+1 방지)
+    const projectIds = projects.map((p) => p.id);
+    const { data: allMilestones } = await admin
+        .from("planners_project_milestones")
+        .select("id, project_id, done_at")
+        .in("project_id", projectIds);
 
-    const statsMap = Object.fromEntries(milestoneStats.map(s => [s.id, s]));
+    const statsMap: Record<string, { id: string; total: number; done: number }> = {};
+    for (const m of allMilestones ?? []) {
+        statsMap[m.project_id] ??= { id: m.project_id, total: 0, done: 0 };
+        statsMap[m.project_id].total++;
+        if (m.done_at) statsMap[m.project_id].done++;
+    }
 
     return {
         owner: owner as Owner,

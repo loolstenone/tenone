@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Trash2, Check } from "lucide-react";
+import { ConfirmSheet } from "./ConfirmSheet";
 import type { Editor, TLEditorSnapshot } from "tldraw";
 // getSvgAsImage은 클라이언트 전용이라 dynamic import로 처리
 import "tldraw/tldraw.css";
@@ -33,6 +34,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [savedAt, setSavedAt] = useState<Date | null>(null);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const editorRef = useRef<Editor | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const thumbDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -147,7 +149,6 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     }, [canvasId, canvas]);
 
     async function deleteCanvas() {
-        if (!confirm("이 캔버스를 영구 삭제할까요?")) return;
         await fetch(`/api/planners/canvases/${canvasId}`, { method: "DELETE" });
         window.location.href = "/planners/app/canvas";
     }
@@ -193,7 +194,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                     ) : null}
                 </div>
                 <button
-                    onClick={deleteCanvas}
+                    onClick={() => setConfirmDeleteOpen(true)}
                     className="text-neutral-300 hover:text-rose-500 transition-colors"
                     title="캔버스 삭제"
                 >
@@ -205,6 +206,12 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
             <div className="flex-1 min-h-0">
                 <Tldraw onMount={handleMount} />
             </div>
+            <ConfirmSheet
+                open={confirmDeleteOpen}
+                message="이 캔버스를 영구 삭제할까요?"
+                onConfirm={() => { setConfirmDeleteOpen(false); deleteCanvas(); }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
         </div>
     );
 }

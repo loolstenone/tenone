@@ -74,6 +74,8 @@ export function applyPlannersTheme(key: string) {
 [class~="hover:bg-[${BASE}]/5"]:hover{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
 [class~="hover:bg-[${BASE}]/10"]:hover{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
 [class~="text-[${BASE}]/70"]{color:color-mix(in srgb,${h} 70%,transparent)!important}
+[class~="bg-[${BASE}]/[0.025]"]{background-color:color-mix(in srgb,${h} 2.5%,transparent)!important}
+[class~="bg-[${BASE}]/[0.04]"]{background-color:color-mix(in srgb,${h} 4%,transparent)!important}
 [class~="bg-[${BASE_DARK}]"]{background-color:${d}!important}
 [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:${d}!important}
 [class~="text-[${BASE_DARK}]"]{color:${d}!important}

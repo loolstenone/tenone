@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-04-30 — 세션 103 · Planners Settings 모듈 분리
+
+### 장소
+사무실
+
+### 핵심
+Settings page.tsx (1,799줄) → 슬림 쉘(367줄) + 5개 feature 모듈 리팩토링 완료.
+
+**신규 파일 (5개)**
+- `features/planners/settings/SettingsTheme.tsx`
+- `features/planners/settings/SettingsAi.tsx`
+- `features/planners/settings/SettingsNotifications.tsx`
+- `features/planners/settings/SettingsIntegrations.tsx`
+- `features/planners/settings/SettingsExport.tsx`
+
+**변경 파일**
+- `app/(Planners)/planners/app/settings/page.tsx` — 1,799줄 → 367줄 슬림 쉘
+
+### 주요 결정
+- shell이 API fetch → initial* props 세팅 → loading guard → 자식 마운트 패턴
+- 각 모듈 자체 도메인 state, `save(patch)` 콜백은 shell에서 1회 정의
+- push/disconnect 등 비동기 UI 상태는 각 모듈에서 local state로 관리
+- TypeScript 에러 0 (기존 파일 pre-existing 에러만 존재)
+
+---
+
 ## 2026-04-29 — 세션 102 · Planners Settings 디자인 시스템 4단계
 
 ### 장소

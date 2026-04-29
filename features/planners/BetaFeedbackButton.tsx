@@ -48,7 +48,7 @@ export function BetaFeedbackButton() {
             </button>
 
             {open && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
                         <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
                             <div>

@@ -25,6 +25,7 @@ import {
 } from "react";
 import { getStroke } from "perfect-freehand";
 import { Eraser, Undo2, Redo2, RotateCcw, Pencil, SlidersHorizontal } from "lucide-react";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -199,6 +200,8 @@ export function HandNote({
     const effectiveErase = eraserMode || stylusEraser;
     const height  = fillHeight && fillH > 0 ? fillH : Math.max(autoH, value?.height ?? initH);
     const strokes = value?.strokes ?? [];
+
+    const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
@@ -478,7 +481,7 @@ export function HandNote({
     // ── Clear all ─────────────────────────────────────────────────────────────
 
     function clearAll() {
-        if (!strokes.length || !confirm("이 손글씨를 모두 지울까요?")) return;
+        if (!strokes.length) return;
         commitUndo(strokes);
         onChange({ strokes: [], width: width || 600, height: initH });
         setAutoH(initH);
@@ -726,7 +729,7 @@ export function HandNote({
 
                     {/* 전체 지우기 */}
                     <button
-                        onClick={clearAll}
+                        onClick={() => setConfirmClearOpen(true)}
                         disabled={!strokes.length}
                         type="button"
                         className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
@@ -821,6 +824,13 @@ export function HandNote({
                 )}
             </div>
         </div>
+        <ConfirmSheet
+            open={confirmClearOpen}
+            message="이 손글씨를 모두 지울까요?"
+            confirmLabel="지우기"
+            onConfirm={() => { setConfirmClearOpen(false); clearAll(); }}
+            onCancel={() => setConfirmClearOpen(false)}
+        />
         </div>
     );
 }

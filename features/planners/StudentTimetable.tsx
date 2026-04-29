@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { ChevronDown, ChevronUp, GraduationCap, X } from "lucide-react";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 // ── 상수 ──────────────────────────────────────────────────────────────
 const DAYS = ["월", "화", "수", "목", "금"] as const;
@@ -126,6 +127,7 @@ export function StudentTimetable() {
     const [data, setData]         = useState<TimetableData>(loadData);
     const [editing, setEditing]   = useState<string | null>(null); // cellKey
     const [collapsed, setCollapsed] = useState(false);
+    const [confirmClearKey, setConfirmClearKey] = useState<string | null>(null);
 
     const handleSave = useCallback((cellKey: string, val: { name: string; room: string; color: string }) => {
         setData(prev => {
@@ -231,9 +233,16 @@ export function StudentTimetable() {
                     initial={data[editing]}
                     onSave={v => handleSave(editing, v)}
                     onClose={() => setEditing(null)}
-                    onClear={() => handleClear(editing)}
+                    onClear={() => setConfirmClearKey(editing)}
                 />
             )}
+
+            <ConfirmSheet
+                open={confirmClearKey !== null}
+                message="이 수업을 삭제하시겠어요?"
+                onConfirm={() => { if (confirmClearKey) handleClear(confirmClearKey); setConfirmClearKey(null); }}
+                onCancel={() => setConfirmClearKey(null)}
+            />
         </section>
     );
 }

@@ -13,6 +13,7 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
 import { useAuth } from "@/lib/auth-context";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 const CATEGORY_ICONS: Record<string, typeof FolderKanban> = {
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
@@ -38,6 +39,7 @@ export function ProjectsView() {
     const [newCategory, setNewCategory] = useState<ProjectCategory>("custom");
     const [filter, setFilter] = useState<"all" | "active" | "completed" | "archived">("active");
     const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | null>(null);
+    const [confirmDeleteProject, setConfirmDeleteProject] = useState<{ id: string; title: string } | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -60,10 +62,7 @@ export function ProjectsView() {
         })();
     }, []);
 
-    async function deleteProject(id: string, title: string, e: React.MouseEvent) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!confirm(`"${title}" 프로젝트를 영구 삭제할까요? 노트·태스크·마일스톤 모두 함께 삭제됩니다.`)) return;
+    async function deleteProject(id: string) {
         const res = await fetch(`/api/planners/projects/${id}`, { method: "DELETE" });
         if (res.ok) {
             setProjects(prev => prev.filter(p => p.id !== id));
@@ -258,7 +257,7 @@ export function ProjectsView() {
                         >
                             {/* 호버 시 삭제 버튼 — 우상단 */}
                             <button
-                                onClick={(e) => deleteProject(p.id, p.title, e)}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteProject({ id: p.id, title: p.title }); }}
                                 title="프로젝트 삭제"
                                 className="absolute top-2 right-2 p-1.5 rounded text-neutral-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all"
                             >
@@ -301,6 +300,13 @@ export function ProjectsView() {
                     ))}
                 </div>
             )}
+            <ConfirmSheet
+                open={!!confirmDeleteProject}
+                message={`"${confirmDeleteProject?.title}" 프로젝트를 영구 삭제할까요?`}
+                description="노트·태스크·마일스톤 모두 함께 삭제됩니다."
+                onConfirm={() => { const p = confirmDeleteProject!; setConfirmDeleteProject(null); deleteProject(p.id); }}
+                onCancel={() => setConfirmDeleteProject(null)}
+            />
         </div>
     );
 }

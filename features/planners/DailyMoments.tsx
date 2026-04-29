@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Upload, X, Loader2, Trash2, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 interface Moment {
     id: string;
@@ -37,6 +38,7 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
     const [uploading, setUploading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<Partial<Moment>>({});
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement | null>(null);
 
     async function load() {
@@ -103,7 +105,6 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
     }
 
     async function deleteMoment(id: string) {
-        if (!confirm("이 장면을 삭제할까요?")) return;
         await fetch(`/api/planners/moments/${id}`, { method: "DELETE" });
         load();
     }
@@ -168,7 +169,7 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
                                 key={m.id}
                                 m={m}
                                 onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at }); }}
-                                onDelete={() => deleteMoment(m.id)}
+                                onDelete={() => setConfirmDeleteId(m.id)}
                             />
                         ))}
                     </div>
@@ -187,16 +188,23 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
                             key={m.id}
                             m={m}
                             onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at }); }}
-                            onDelete={() => deleteMoment(m.id)}
+                            onDelete={() => setConfirmDeleteId(m.id)}
                         />
                     ))}
                 </div>
             )}
 
+            <ConfirmSheet
+                open={!!confirmDeleteId}
+                message="이 장면을 삭제할까요?"
+                onConfirm={() => { const id = confirmDeleteId!; setConfirmDeleteId(null); deleteMoment(id); }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
+
             {/* 편집 모달 */}
             {editingId && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setEditingId(null)}>
-                    <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-0 sm:p-4" onClick={() => setEditingId(null)}>
+                    <div className="bg-white w-full sm:max-w-md rounded-b-2xl sm:rounded-2xl p-5 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-sm font-semibold text-neutral-900">한 장면 메모</h3>
                             <button onClick={() => setEditingId(null)} className="text-neutral-400">

@@ -19,16 +19,18 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-    { href: "/planners/app/index",       label: "인덱스",       modes: ["weekly", "all_in_one"] },
+    // ── Easily + All in One (스케줄러 중심)
+    { href: "/planners/app/index",       label: "인덱스",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly",     label: "월간",        modes: ["all_in_one"] },
-    { href: "/planners/app/yearly",      label: "연간",        modes: ["all_in_one"] },
-    { href: "/planners/app/projects",    label: "프로젝트",    modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/canvas",      label: "캔버스",      modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/identity",    label: "아이덴티티",  modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/templates",   label: "템플릿",      modes: ["weekly", "all_in_one"] },
+    // ── All in One 전용
+    { href: "/planners/app/projects",    label: "프로젝트",    modes: ["all_in_one"] },
+    { href: "/planners/app/canvas",      label: "캔버스",      modes: ["all_in_one"] },
+    { href: "/planners/app/templates",   label: "템플릿",      modes: ["all_in_one"] },
     { href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one"], external: true },
 ];
 

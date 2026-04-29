@@ -310,7 +310,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     }
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="pp-view max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header */}
             {(() => {
                 const sM = days[0].getMonth() + 1;

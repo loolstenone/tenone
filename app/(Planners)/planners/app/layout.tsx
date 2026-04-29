@@ -87,7 +87,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     subscriptionStatus={plannerUser?.subscription_status ?? 'free'}
                 />
                 <div className="flex flex-1 min-h-0">
-                    <main className="flex-1 overflow-x-hidden min-w-0 pb-14 md:pb-0">
+                    <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
                         {children}
                     </main>
                     <AppMonthBar />

@@ -9,6 +9,7 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import { ConfirmSheet } from "./ConfirmSheet";
 import { useSwipeNav } from "./useSwipeNav";
 import {
     KIND_COLORS,
@@ -87,6 +88,8 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const [goals, setGoals] = useState<Array<{ id: string; text: string; done?: boolean }>>([]);
     const [newGoal, setNewGoal] = useState("");
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
+    const [confirmGoalId, setConfirmGoalId] = useState<string | null>(null);
+    const [confirmFocusIdx, setConfirmFocusIdx] = useState<number | null>(null);
 
     // 활성 프로젝트 목록 — 집중 영역 빠른 추가용
     // 조건: status='active' AND 프로젝트 기간이 보고 있는 월과 겹침
@@ -316,7 +319,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const yearRange = Array.from({ length: 10 }, (_, i) => 2024 + i);
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="pp-view max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const now = new Date();
@@ -431,7 +434,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                 {g.text}
                                             </span>
                                             <button
-                                                onClick={() => removeGoal(g.id)}
+                                                onClick={() => setConfirmGoalId(g.id)}
                                                 className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
                                             >
                                                 <Trash2 className="h-3 w-3" />
@@ -487,7 +490,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                     <span>{f}</span>
                                                 )}
                                                 <button
-                                                    onClick={() => removeFocusArea(i)}
+                                                    onClick={() => setConfirmFocusIdx(i)}
                                                     title="제거"
                                                     className="opacity-60 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity"
                                                 >
@@ -672,6 +675,19 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                 initial={calEditing ?? undefined}
                 defaultDate={calDefaultDate}
             />
+
+            <ConfirmSheet
+                open={confirmGoalId !== null}
+                message="이 목표를 삭제하시겠어요?"
+                onConfirm={() => { if (confirmGoalId) removeGoal(confirmGoalId); setConfirmGoalId(null); }}
+                onCancel={() => setConfirmGoalId(null)}
+            />
+            <ConfirmSheet
+                open={confirmFocusIdx !== null}
+                message="이 집중 영역을 제거하시겠어요?"
+                onConfirm={() => { if (confirmFocusIdx !== null) removeFocusArea(confirmFocusIdx); setConfirmFocusIdx(null); }}
+                onCancel={() => setConfirmFocusIdx(null)}
+            />
         </div>
     );
 }
@@ -843,7 +859,7 @@ function TrackingSummary({ stats, series }: { stats: TrackingStats; series: Trac
                         <AvgCard label="만족도" value={stats.satisfaction_avg} suffix="/5" color="bg-amber-500" />
                         <AvgCard label="기분" value={stats.mood_avg} suffix="/5" color="bg-rose-400" />
                     </div>
-                    <SparkRow data={series.map((s) => ({ x: s.date, y: s.energy }))} color="#0F766E" max={5} label="에너지" />
+                    <SparkRow data={series.map((s) => ({ x: s.date, y: s.energy }))} color="var(--planners-accent, #0F766E)" max={5} label="에너지" />
                     <SparkRow data={series.map((s) => ({ x: s.date, y: s.satisfaction }))} color="#F59E0B" max={5} label="만족도" />
                     <SparkRow data={series.map((s) => ({ x: s.date, y: s.mood }))} color="#FB7185" max={5} label="기분" />
                 </div>
@@ -929,15 +945,15 @@ function SparkRow({ data, color, max, label }: { data: Array<{ x: string; y: num
         <div className="flex items-center gap-2 mt-2 first:mt-3">
             <span className="text-[10px] text-neutral-400 w-12 shrink-0">{label}</span>
             <svg viewBox={`0 0 ${w} ${h}`} className="flex-1 h-7" preserveAspectRatio="none">
-                <path d={area} fill={color} fillOpacity={0.08} />
-                <path d={path} stroke={color} strokeWidth={1.4} fill="none" vectorEffect="non-scaling-stroke" />
+                <path d={area} style={{ fill: color, fillOpacity: 0.08 }} />
+                <path d={path} style={{ stroke: color }} strokeWidth={1.4} fill="none" vectorEffect="non-scaling-stroke" />
                 {/* 첫·마지막 포인트만 점 표시 */}
                 {points.length > 1 && (() => {
                     const lastP = points[points.length - 1];
                     const px = w;
                     const norm = flat ? 0.5 : (lastP.y - lo) / span;
                     const py = padTop + (1 - norm) * drawH;
-                    return <circle cx={px} cy={py} r={1.4} fill={color} vectorEffect="non-scaling-stroke" />;
+                    return <circle cx={px} cy={py} r={1.4} style={{ fill: color }} vectorEffect="non-scaling-stroke" />;
                 })()}
             </svg>
             <span className="text-[9px] text-neutral-500 font-mono w-20 text-right shrink-0 tabular-nums">

@@ -1,4 +1,5 @@
 // 공개 프로젝트 페이지 (인증 불필요)
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -6,6 +7,27 @@ import { ChevronLeft, Calendar, CheckCircle2 } from "lucide-react";
 import { getCategoryMeta } from "@/lib/planners/project-categories";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(
+    { params }: { params: Promise<{ token: string }> }
+): Promise<Metadata> {
+    const { token } = await params;
+    const data = await loadByToken(token);
+    if (!data) return { title: "프로젝트를 찾을 수 없습니다" };
+
+    const { project, owner } = data;
+    const ownerName = owner?.name ?? "Planner's";
+    const title = `${project.title} — ${ownerName}의 프로젝트`;
+    const description = project.retrospective?.fact?.trim()
+        ? project.retrospective.fact.slice(0, 120)
+        : `${ownerName}이(가) Planner's Planner AI로 기록한 프로젝트입니다.`;
+
+    return {
+        title,
+        description,
+        openGraph: { title, description },
+    };
+}
 
 interface PublicProject {
     id: string; title: string; color: string | null; category: string | null;

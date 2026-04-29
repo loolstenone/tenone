@@ -32,15 +32,17 @@ interface NavItem {
 
 // Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
 const NAV: NavItem[] = [
+    // ── Easily + All in One (스케줄러 중심)
     { href: "/planners/app/index",       label: "홈",          icon: LayoutGrid,      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/daily",       label: "오늘",        icon: Sun,             modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["all_in_one"] },
-    { href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["all_in_one"] },
-    { href: "/planners/app/identity",    label: "아이덴티티",  icon: Compass,         modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/identity",    label: "아이덴티티",  icon: Compass,         modes: ["weekly", "all_in_one"] },
+    // ── All in One 전용
+    { href: "/planners/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
+    { href: "/planners/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
     { href: "/planners/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one"], external: true },
     // 템플릿 / AI 브리핑 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
@@ -144,7 +146,7 @@ export function AppSidebar({
                 </InstallButton>
                 <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
                     <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
-                        {mode === "weekly" ? "주간" : "올인원"}
+                        {mode === "weekly" ? "Easily" : "All in One"}
                     </span>
                     {subscriptionStatus === 'active' && (
                         <span className="inline-block text-[10px] px-2 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded">

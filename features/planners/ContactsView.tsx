@@ -8,6 +8,7 @@ import {
     Star, Copy, Check, Building2, MapPin, Briefcase, Download, CheckSquare, Square, Clock
 } from "lucide-react";
 import { AddressPickerButton } from "./AddressPicker";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 // ── vCard 파서 유틸 ─────────────────────────────────────────────
 // iPhone·Android·Outlook export 호환을 위해 다음을 처리한다:
@@ -531,6 +532,11 @@ export function ContactsView() {
     // 인스타식 무한 스크롤 — visibleRows를 50개씩 점진 노출
     const PAGE_SIZE = 50;
     const [renderLimit, setRenderLimit] = useState(PAGE_SIZE);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+    const [confirmDeleteLabel, setConfirmDeleteLabel] = useState<string | null>(null);
+    const [confirmAutoMerge, setConfirmAutoMerge] = useState(false);
+    const [confirmImportMerge, setConfirmImportMerge] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -712,7 +718,6 @@ export function ContactsView() {
     }
 
     async function remove(id: string) {
-        if (!confirm("연락처를 삭제할까요?")) return;
         setDeleting(id);
         await fetch(`/api/planners/contacts?id=${id}`, { method: "DELETE" });
         setDeleting(null);
@@ -778,7 +783,6 @@ export function ContactsView() {
     // 일괄 삭제 (bulk endpoint 사용 — 1번 요청)
     async function bulkDelete() {
         if (selectedIds.size === 0) return;
-        if (!confirm(`${selectedIds.size.toLocaleString("ko-KR")}명을 삭제할까요?`)) return;
         const ids = [...selectedIds];
         const idSet = new Set(ids);
         const CHUNK = 1000;
@@ -886,7 +890,6 @@ export function ContactsView() {
         }
     }
     async function deleteLabel(name: string) {
-        if (!confirm(`라벨 "${name}"을 모든 연락처에서 제거할까요? (연락처는 남습니다)`)) return;
         const r = await fetch(`/api/planners/contacts/labels?name=${encodeURIComponent(name)}`, { method: "DELETE" });
         if (r.ok) {
             const d = await r.json();
@@ -1142,7 +1145,8 @@ export function ContactsView() {
         }
         setDupModalOpen(true);
     }
-    async function autoMergeAll() {
+    const autoMergeToDeleteRef = useRef<string[]>([]);
+    function autoMergeAll() {
         const groups = findDuplicateGroups();
         // 각 그룹에서 가장 정보가 많은 항목을 유지하고 나머지 삭제
         const toDelete: string[] = [];
@@ -1158,7 +1162,12 @@ export function ContactsView() {
             for (let i = 1; i < ranked.length; i++) toDelete.push(ranked[i].id);
         }
         if (toDelete.length === 0) return;
-        if (!confirm(`${toDelete.length.toLocaleString("ko-KR")}건의 중복을 자동 병합(삭제)할까요? (정보가 많은 항목 유지)`)) return;
+        autoMergeToDeleteRef.current = toDelete;
+        setConfirmAutoMerge(true);
+    }
+    async function executeAutoMerge() {
+        const toDelete = autoMergeToDeleteRef.current;
+        if (toDelete.length === 0) return;
         // 1000개씩 나누어 bulk delete
         const CHUNK = 1000;
         let totalDeleted = 0;
@@ -1352,7 +1361,7 @@ export function ContactsView() {
                                         const next = prompt(`"${l}" 새 이름:`, l);
                                         if (next && next.trim() && next.trim() !== l) renameLabel(l, next.trim());
                                     }}
-                                    onDelete={() => deleteLabel(l)}
+                                    onDelete={() => setConfirmDeleteLabel(l)}
                                 />
                             ))}
                             {/* 그룹은 동일 섹션 안에서 dot 색상만 다르게 (사용자에겐 라벨처럼 보임) */}
@@ -1395,11 +1404,7 @@ export function ContactsView() {
                     {/* 라벨 동기화 (필드 채우기) */}
                     {contacts.length > 0 && (
                         <button
-                            onClick={() => {
-                                if (!confirm("기존 연락처에 vCard·CSV의 라벨·빈 필드를 병합합니다 (덮어쓰기 X). 계속할까요?")) return;
-                                (window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode = true;
-                                fileRef.current?.click();
-                            }}
+                            onClick={() => setConfirmImportMerge(true)}
                             disabled={importing}
                             className="flex items-center gap-2.5 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100 rounded-r-full transition-colors text-left disabled:opacity-60"
                             title="이미 가져온 연락처에 라벨·회사·생일 등 빈 필드를 vCard·CSV에서 추가 채움"
@@ -1536,7 +1541,7 @@ export function ContactsView() {
                                 </button>
                             )}
                             <button
-                                onClick={bulkDelete}
+                                onClick={() => setConfirmBulkDelete(true)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-rose-500 hover:bg-rose-600 rounded transition-colors"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -1604,7 +1609,7 @@ export function ContactsView() {
                                                 anySelected={selectedIds.size > 0}
                                                 onToggleSelect={() => toggleSelected(c.id)}
                                                 onEdit={() => openEdit(c)}
-                                                onDelete={() => remove(c.id)}
+                                                onDelete={() => setConfirmDeleteId(c.id)}
                                                 onToggleFavorite={() => toggleFavorite(c)}
                                                 onCopy={copyText}
                                                 onRecordContact={() => recordContact(c.id)}
@@ -1632,7 +1637,7 @@ export function ContactsView() {
                                                 anySelected={selectedIds.size > 0}
                                                 onToggleSelect={() => toggleSelected(c.id)}
                                                 onEdit={() => openEdit(c)}
-                                                onDelete={() => remove(c.id)}
+                                                onDelete={() => setConfirmDeleteId(c.id)}
                                                 onToggleFavorite={() => toggleFavorite(c)}
                                                 onCopy={copyText}
                                                 onRecordContact={() => recordContact(c.id)}
@@ -1687,7 +1692,7 @@ export function ContactsView() {
                                             anySelected={selectedIds.size > 0}
                                             onToggleSelect={() => toggleSelected(c.id)}
                                             onEdit={() => openEdit(c)}
-                                            onDelete={() => remove(c.id)}
+                                            onDelete={() => setConfirmDeleteId(c.id)}
                                             onToggleFavorite={() => toggleFavorite(c)}
                                             onCopy={copyText}
                                             onRecordContact={() => recordContact(c.id)}
@@ -1808,6 +1813,48 @@ export function ContactsView() {
                     onClose={() => setDupModalOpen(false)}
                 />
             )}
+
+            {/* 삭제 확인 시트들 */}
+            <ConfirmSheet
+                open={!!confirmDeleteId}
+                message="연락처를 삭제할까요?"
+                onConfirm={() => { const id = confirmDeleteId!; setConfirmDeleteId(null); remove(id); }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
+            <ConfirmSheet
+                open={confirmBulkDelete}
+                message={`${selectedIds.size.toLocaleString("ko-KR")}명을 삭제할까요?`}
+                onConfirm={() => { setConfirmBulkDelete(false); bulkDelete(); }}
+                onCancel={() => setConfirmBulkDelete(false)}
+            />
+            <ConfirmSheet
+                open={!!confirmDeleteLabel}
+                message={`라벨 "${confirmDeleteLabel}"을 모든 연락처에서 제거할까요?`}
+                description="연락처 자체는 삭제되지 않습니다."
+                onConfirm={() => { const name = confirmDeleteLabel!; setConfirmDeleteLabel(null); deleteLabel(name); }}
+                onCancel={() => setConfirmDeleteLabel(null)}
+            />
+            <ConfirmSheet
+                open={confirmAutoMerge}
+                message={`${autoMergeToDeleteRef.current.length.toLocaleString("ko-KR")}건의 중복을 자동 병합할까요?`}
+                description="정보가 많은 항목을 유지하고 나머지를 삭제합니다."
+                confirmLabel="병합"
+                onConfirm={() => { setConfirmAutoMerge(false); executeAutoMerge(); }}
+                onCancel={() => setConfirmAutoMerge(false)}
+            />
+            <ConfirmSheet
+                open={confirmImportMerge}
+                message="라벨·빈 필드를 vCard·CSV에서 병합할까요?"
+                description="기존 연락처를 덮어쓰지 않고 빈 필드만 채웁니다."
+                confirmLabel="계속"
+                danger={false}
+                onConfirm={() => {
+                    setConfirmImportMerge(false);
+                    (window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode = true;
+                    fileRef.current?.click();
+                }}
+                onCancel={() => setConfirmImportMerge(false)}
+            />
         </div>
     );
 }

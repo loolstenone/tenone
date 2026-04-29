@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, LayoutGrid, UserCircle2, CalendarRange, FolderKanban, LayoutTemplate, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, CalendarRange, FolderKanban, LayoutTemplate, User } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import type { PlannerRole } from "@/lib/planners/types";
 import { PLANNER_ROLE_META } from "@/lib/planners/types";
@@ -144,7 +144,7 @@ export function IndexView() {
         if (userRole && roleTemplates.length > 0) return (
             <>
                 <div className="flex items-center gap-1.5 mb-2.5">
-                    <UserCircle2 className="h-3.5 w-3.5 text-teal-600" />
+                    <User className="h-3.5 w-3.5 text-teal-600" />
                     <span className="text-[10px] font-semibold text-teal-700 uppercase tracking-wide">{PLANNER_ROLE_META[userRole].label} 추천</span>
                 </div>
                 <div className="space-y-1.5">
@@ -194,42 +194,51 @@ export function IndexView() {
                 <PlannersUtilityLinks className="sm:ml-auto" />
             </div>
 
+            {/* ── 헤더 바로 아래: 퍼스널 아이덴티티 + 연간 목표 ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 pb-6 border-b border-neutral-100">
+                {/* 퍼스널 아이덴티티 */}
+                <div>
+                    <Link href="/planners/app/identity" className="flex items-center gap-1.5 mb-2 group">
+                        <User className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">퍼스널 아이덴티티 →</p>
+                    </Link>
+                    {vision ? (
+                        <div className="space-y-1">
+                            {vision.split("\n").filter(Boolean).map((line, i) => (
+                                <p key={i} className={`leading-snug ${i === 0 ? "text-sm font-medium text-neutral-800" : "text-xs text-neutral-500"}`}>{line}</p>
+                            ))}
+                            {mission && <p className="text-xs text-neutral-400 mt-0.5 pt-1 border-t border-neutral-100">{mission.split("\n")[0]}</p>}
+                        </div>
+                    ) : (
+                        <Link href="/planners/app/identity" className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
+                            비전·미션·핵심가치를 입력해보세요 →
+                        </Link>
+                    )}
+                </div>
+
+                {/* 연간 목표 */}
+                <div>
+                    <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="flex items-center gap-1.5 mb-2 group">
+                        <CalendarRange className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">연간 목표 →</p>
+                    </Link>
+                    {yearlyTheme ? (
+                        <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block">
+                            <p className="text-sm font-medium text-neutral-800 hover:text-[#0F766E] transition-colors">{yearlyTheme}</p>
+                        </Link>
+                    ) : (
+                        <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
+                            올해의 목표를 설정해보세요 →
+                        </Link>
+                    )}
+                </div>
+            </div>
+
             {/* ── 메인 2열 레이아웃 ── */}
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 lg:items-start">
 
                 {/* ────── 좌: 연간 달력 ────── */}
                 <section className="flex-1 min-w-0 order-2 lg:order-1">
-
-                    {/* 모바일 전용 — 아이덴티티 + 목표 달력 위에 표시 */}
-                    <div className="lg:hidden space-y-5 mb-8">
-                        {/* 퍼스널 아이덴티티 */}
-                        <div>
-                            <Link href="/planners/app/identity" className="inline-block text-[10px] font-semibold uppercase tracking-widest text-neutral-400 hover:text-[#0F766E] transition-colors mb-2">
-                                퍼스널 아이덴티티 →
-                            </Link>
-                            {vision ? (
-                                <div className="space-y-1">
-                                    {vision.split("\n").filter(Boolean).map((line, i) => (
-                                        <p key={i} className={`text-neutral-800 leading-snug ${i === 0 ? "text-sm font-medium" : "text-xs text-neutral-500"}`}>{line}</p>
-                                    ))}
-                                    {mission && <p className="text-xs text-neutral-400 mt-0.5">{mission.split("\n")[0]}</p>}
-                                </div>
-                            ) : (
-                                <p className="text-xs text-neutral-300 italic">비전을 입력해보세요</p>
-                            )}
-                        </div>
-                        {/* 연간 목표 */}
-                        {yearlyTheme && (
-                            <div>
-                                <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="inline-block text-[10px] font-semibold uppercase tracking-widest text-neutral-400 hover:text-[#0F766E] transition-colors mb-2">
-                                    연간 목표 →
-                                </Link>
-                                <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block">
-                                    <p className="text-sm font-medium text-neutral-800 hover:text-[#0F766E] transition-colors">{yearlyTheme}</p>
-                                </Link>
-                            </div>
-                        )}
-                    </div>
 
                     {/* 연간 달력 그리드 */}
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">연간 달력</p>
@@ -297,24 +306,16 @@ export function IndexView() {
                 {/* ────── 우: 사이드바 — PC·태블릿(lg+)만 표시 ────── */}
                 <aside className="hidden lg:flex flex-col gap-6 w-64 xl:w-72 shrink-0 order-1 lg:order-2">
 
-                    {/* 퍼스널 아이덴티티 */}
+                    {/* 프로젝트 */}
                     <div>
-                        <Link href="/planners/app/identity" className="flex items-center gap-1.5 mb-2.5 group">
-                            <User className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
-                            <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">퍼스널 아이덴티티 →</p>
-                        </Link>
-                        {vision ? (
-                            <div className="space-y-1">
-                                {vision.split("\n").filter(Boolean).map((line, i) => (
-                                    <p key={i} className={`leading-snug ${i === 0 ? "text-sm font-medium text-neutral-800" : "text-xs text-neutral-400"}`}>{line}</p>
-                                ))}
-                                {mission && <p className="text-xs text-neutral-400 mt-0.5 pt-1 border-t border-neutral-100">{mission.split("\n")[0]}</p>}
+                        <div className="flex items-center justify-between mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                                <FolderKanban className="h-3.5 w-3.5 text-neutral-400" />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">프로젝트</p>
                             </div>
-                        ) : (
-                            <Link href="/planners/app/identity" className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
-                                비전·미션·핵심가치를 입력해보세요 →
-                            </Link>
-                        )}
+                            <Link href="/planners/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                        </div>
+                        {renderProjects()}
                     </div>
 
                     <div className="h-px bg-neutral-100" />
@@ -329,39 +330,6 @@ export function IndexView() {
                             <Link href="/planners/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
                         </div>
                         {renderTemplates()}
-                    </div>
-
-                    <div className="h-px bg-neutral-100" />
-
-                    {/* 연간 목표 */}
-                    <div>
-                        <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="flex items-center gap-1.5 mb-2.5 group">
-                            <CalendarRange className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
-                            <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">연간 목표 →</p>
-                        </Link>
-                        {yearlyTheme ? (
-                            <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block">
-                                <p className="text-sm font-medium text-neutral-800 hover:text-[#0F766E] transition-colors">{yearlyTheme}</p>
-                            </Link>
-                        ) : (
-                            <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
-                                올해의 목표를 설정해보세요 →
-                            </Link>
-                        )}
-                    </div>
-
-                    <div className="h-px bg-neutral-100" />
-
-                    {/* 프로젝트 */}
-                    <div>
-                        <div className="flex items-center justify-between mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                                <FolderKanban className="h-3.5 w-3.5 text-neutral-400" />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">프로젝트</p>
-                            </div>
-                            <Link href="/planners/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
-                        </div>
-                        {renderProjects()}
                     </div>
 
                 </aside>

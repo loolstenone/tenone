@@ -4,6 +4,7 @@
 // 신규/수정 모두 처리. is_system=true 엔트리는 편집 불가.
 
 import { useEffect, useState, useMemo, useRef } from "react";
+import { ConfirmSheet } from "./ConfirmSheet";
 import { Loader2, X, Trash2, ChevronLeft, ChevronRight, MapPin, Users } from "lucide-react";
 import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/planners/calendar-rules";
 import { KIND_LABELS, KIND_COLORS } from "@/lib/planners/calendar-rules";
@@ -94,7 +95,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [recurrence, setRecurrence] = useState<RecurrenceUnit>("none");
     const [recurrenceUntil, setRecurrenceUntil] = useState("");
     const [saving, setSaving] = useState(false);
-    const [kbOffset, setKbOffset] = useState(0);  // 모바일 키보드 오프셋
+    const [confirmOpen, setConfirmOpen] = useState(false);
 
     // 업무 탭 전용 상태
     const [taskText, setTaskText] = useState("");
@@ -105,23 +106,6 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     // 미팅 탭 전용 상태
     const [withWhom, setWithWhom] = useState("");
     const [location, setLocation] = useState("");
-
-    // 모바일 키보드 올라올 때 바텀시트 위로 밀어올리기
-    useEffect(() => {
-        if (!open || typeof window === "undefined" || !window.visualViewport) return;
-        const vv = window.visualViewport!;
-        function onResize() {
-            // visualViewport.offsetTop 이 키보드 높이만큼 증가
-            const offset = window.innerHeight - vv.height - vv.offsetTop;
-            setKbOffset(Math.max(0, offset));
-        }
-        vv.addEventListener("resize", onResize);
-        vv.addEventListener("scroll", onResize);
-        return () => {
-            vv.removeEventListener("resize", onResize);
-            vv.removeEventListener("scroll", onResize);
-        };
-    }, [open]);
 
     // 날짜 입력 모드 토글
     const [isLunar, setIsLunar] = useState(false);
@@ -228,7 +212,6 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
     async function remove() {
         if (!isEdit || !initial?.id) return;
-        if (!confirm("이 일정을 삭제할까요?")) return;
         const res = await fetch(`/api/planners/calendar/${initial.id}`, { method: "DELETE" });
         if (res.ok) {
             onDeleted?.(initial.id);
@@ -239,10 +222,10 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const allowedRecurrences = RECURRENCE_OPTIONS.filter((o) => o.allowedKinds.includes(kind));
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={onClose}>
+        <>
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={onClose}>
             <div
-                className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[600px] shadow-2xl transition-transform duration-150"
-                style={{ transform: `translateY(-${kbOffset}px)` }}
+                className="bg-white w-full sm:max-w-lg rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[600px] shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200 shrink-0">
@@ -642,7 +625,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                         <div>
                             {isEdit && (
                                 <button
-                                    onClick={remove}
+                                    onClick={() => setConfirmOpen(true)}
                                     type="button"
                                     className="inline-flex items-center gap-1 px-2 py-1.5 text-xs text-rose-500 hover:bg-rose-50 rounded"
                                 >
@@ -683,6 +666,13 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                 )}
             </div>
         </div>
+        <ConfirmSheet
+            open={confirmOpen}
+            message="이 일정을 삭제할까요?"
+            onConfirm={() => { setConfirmOpen(false); remove(); }}
+            onCancel={() => setConfirmOpen(false)}
+        />
+        </>
     );
 }
 

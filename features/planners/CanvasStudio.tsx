@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { Editor, TLEditorSnapshot } from "tldraw";
 import "tldraw/tldraw.css";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 const Tldraw = dynamic(
     async () => (await import("tldraw")).Tldraw,
@@ -143,6 +144,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     const [editor, setEditor]       = useState<Editor | null>(null);
     const [bgTemplate, setBgTemplate] = useState<BgTemplate>("blank");
     const [exporting, setExporting] = useState(false);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
@@ -277,7 +279,6 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
 
     // ── 삭제 ───────────────────────────────────────────────────────────────
     async function deleteCanvas() {
-        if (!confirm("이 캔버스를 영구 삭제할까요?")) return;
         await fetch(`/api/planners/canvases/${canvasId}`, { method: "DELETE" });
         window.location.href = "/planners/app/canvas";
     }
@@ -343,7 +344,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
                 </div>
 
                 <button
-                    onClick={deleteCanvas}
+                    onClick={() => setConfirmDeleteOpen(true)}
                     className="text-neutral-300 hover:text-rose-500 transition-colors shrink-0"
                     title="캔버스 삭제"
                 >
@@ -367,7 +368,12 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
 
                 {/* tldraw 기본 Toolbar(하단)가 도구 선택 담당 — 중복 제거 */}
             </div>
-
+            <ConfirmSheet
+                open={confirmDeleteOpen}
+                message="이 캔버스를 영구 삭제할까요?"
+                onConfirm={() => { setConfirmDeleteOpen(false); deleteCanvas(); }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
         </div>
     );
 }

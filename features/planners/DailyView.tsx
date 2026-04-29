@@ -22,6 +22,7 @@ import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type TaskPriority = '급중' | '급경' | '완중' | '완경';
@@ -82,6 +83,7 @@ function TemplateNoteBlock({
     serializeNotesFn: (list: NoteItem[]) => string;
     onExpand: () => void;
 }) {
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const dataKey = tplDataKey(note.id);
     const [fwData, setFwData] = useState<FrameworkData>(() => {
         if (typeof window === 'undefined') return {};
@@ -162,18 +164,24 @@ function TemplateNoteBlock({
                     <Maximize2 className="h-3.5 w-3.5" />
                 </button>
                 <button
-                    onClick={() => {
-                        if (!confirm(`"${note.title || '이 노트'}"를 삭제할까요?`)) return;
-                        const next = notesList.filter(n => n.id !== note.id);
-                        setNotesList(next);
-                        save({ notes: serializeNotesFn(next) });
-                    }}
+                    onClick={() => setConfirmDeleteOpen(true)}
                     title="삭제"
                     className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
                 >
                     <Trash2 className="h-3.5 w-3.5" />
                 </button>
             </div>
+            <ConfirmSheet
+                open={confirmDeleteOpen}
+                message={`"${note.title || '이 노트'}"를 삭제할까요?`}
+                onConfirm={() => {
+                    setConfirmDeleteOpen(false);
+                    const next = notesList.filter(n => n.id !== note.id);
+                    setNotesList(next);
+                    save({ notes: serializeNotesFn(next) });
+                }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
             {/* Body: interactive grid or markdown fallback */}
             {grid ? (
                 <div className="px-4 py-3">{grid}</div>
@@ -318,13 +326,13 @@ function DailyNoteCard({
     serializeNotesFn: (list: NoteItem[]) => string;
     onExpand: () => void;
 }) {
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     function updateTitle(v: string) {
         const next = notesList.map(n => n.id === note.id ? { ...n, title: v } : n);
         setNotesList(next);
     }
     function commitTitle() { save({ notes: serializeNotesFn(notesList) }); }
     function remove() {
-        if (!confirm(`"${note.title || '이 노트'}"를 삭제할까요?`)) return;
         const next = notesList.filter(n => n.id !== note.id);
         setNotesList(next);
         save({ notes: serializeNotesFn(next) });
@@ -393,7 +401,7 @@ function DailyNoteCard({
                     <Maximize2 className="h-3.5 w-3.5" />
                 </button>
                 <button
-                    onClick={remove}
+                    onClick={() => setConfirmDeleteOpen(true)}
                     title="삭제"
                     className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
                 >
@@ -449,6 +457,12 @@ function DailyNoteCard({
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
                 </div>
             )}
+            <ConfirmSheet
+                open={confirmDeleteOpen}
+                message={`"${note.title || '이 노트'}"를 삭제할까요?`}
+                onConfirm={() => { setConfirmDeleteOpen(false); remove(); }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
         </section>
     );
 }
@@ -1075,7 +1089,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     }
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 overflow-x-hidden">
+        <div ref={swipeRef} className="pp-view max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 overflow-x-hidden">
             {/* Header — 모바일은 세로 스택, 데스크톱은 가로 분리 */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
                 <div className="min-w-0 flex items-start gap-2 md:gap-3">
@@ -1360,10 +1374,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             );
                         })()}
 
-                    </div>
-
-                    {/* 4. 노트 추가 */}
-                    <div className="order-4 md:order-none md:col-span-2 space-y-4">
+                        {/* 4. 노트 추가 — 일정&업무 바로 아래 (같은 col-span-2 컨테이너) */}
 
                         {/* 노트 추가 버튼 */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -1968,8 +1979,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
             {/* 미완 업무 불러오기 Modal */}
             {showPendingModal && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-0 sm:px-4" onClick={() => setShowPendingModal(false)}>
-                    <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[80vh] sm:h-auto sm:max-h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 px-0 sm:px-4" onClick={() => setShowPendingModal(false)}>
+                    <div className="bg-white w-full sm:max-w-lg rounded-b-2xl sm:rounded-2xl flex flex-col h-[80vh] sm:h-auto sm:max-h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">
@@ -2119,8 +2130,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
             {/* Template Picker Modal */}
             {showTemplatePicker && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={() => setShowTemplatePicker(false)}>
-                    <div className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={() => setShowTemplatePicker(false)}>
+                    <div className="bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">
@@ -2750,31 +2761,19 @@ function UpcomingSchedule({ date }: { date: string }) {
                     <ChevronRight className="h-3.5 w-3.5" />
                 </button>
             </div>
-            <div className="space-y-3">
-                {sections.map(({ kind, label }) => {
+            <div className="space-y-0.5">
+                {sections.map(({ kind }) => {
                     const items = groups[kind];
                     if (items.length === 0) return null;
-                    const c = KIND_COLORS[kind];
                     return (
-                        <div key={kind}>
-                            <div className={`flex items-center gap-1.5 mb-1.5 px-1 py-0.5 rounded ${c.bg}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                                <span className={`text-[10px] font-semibold uppercase tracking-wider ${c.text}`}>{label}</span>
-                            </div>
-                            <ul className="pl-1">
-                                {items.map((o, i) => renderItem(o, i))}
-                            </ul>
-                        </div>
+                        <ul key={kind} className="pl-1">
+                            {items.map((o, i) => renderItem(o, i))}
+                        </ul>
                     );
                 })}
                 {taskItems.length > 0 && (
-                    <div>
-                        <div className="flex items-center gap-1.5 mb-1.5 px-1 py-0.5 rounded bg-teal-50">
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-teal-500" />
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-teal-700">업무</span>
-                        </div>
-                        <ul className="pl-1">
-                            {taskItems.map((o, i) => {
+                    <ul className="pl-1">
+                        {taskItems.map((o, i) => {
                                 const d = new Date(o.date + "T00:00:00");
                                 const days = Math.round((d.getTime() - today.getTime()) / 86400000);
                                 const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
@@ -2800,11 +2799,26 @@ function UpcomingSchedule({ date }: { date: string }) {
                                 );
                             })}
                         </ul>
-                    </div>
                 )}
                 {total === 0 && (
                     <div className="text-[11px] text-neutral-400 text-center py-6">
                         {loading ? "불러오는 중…" : `${from} ~ ${to} 일정 없음`}
+                    </div>
+                )}
+                {total > 0 && (
+                    <div className="flex items-center gap-3 pt-2 mt-1 border-t border-neutral-100">
+                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-rose-500" />
+                            기념일
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-sky-500" />
+                            미팅
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-teal-500" />
+                            업무
+                        </span>
                     </div>
                 )}
             </div>

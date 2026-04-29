@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2, Gift, X } from "lucide-react";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { ConfirmSheet } from "./ConfirmSheet";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry } from "@/lib/planners/calendar-rules";
@@ -48,6 +49,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     const [anniversaries, setAnniversaries] = useState<Anniversary[]>([]);
     const [editingDate, setEditingDate] = useState<string | null>(null);
     const [editingLabel, setEditingLabel] = useState("");
+    const [confirmGoalId, setConfirmGoalId] = useState<string | null>(null);
     const [editingType, setEditingType] = useState<'anniversary' | 'event'>('event');
     const [editingRelationship, setEditingRelationship] = useState("");
     // 캘린더 엔트리 (신규 통합 시스템)
@@ -228,7 +230,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     );
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="pp-view max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const isCurrentYear = year === new Date().getFullYear();
@@ -322,7 +324,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                     {g.text}
                                                 </span>
                                                 <button
-                                                    onClick={() => removeGoal(g.id)}
+                                                    onClick={() => setConfirmGoalId(g.id)}
                                                     className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
                                                 >
                                                     <Trash2 className="h-3 w-3" />
@@ -570,6 +572,13 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                 initial={calEditing ?? undefined}
                 defaultDate={`${year}-01-01`}
             />
+
+            <ConfirmSheet
+                open={confirmGoalId !== null}
+                message="이 목표를 삭제하시겠어요?"
+                onConfirm={() => { if (confirmGoalId) removeGoal(confirmGoalId); setConfirmGoalId(null); }}
+                onCancel={() => setConfirmGoalId(null)}
+            />
         </div>
     );
 }
@@ -763,7 +772,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
                         values={months.map((m) => m.exercise_minutes)}
                         secondary={months.map((m) => m.exercise_days)}
                         secondaryLabel="운동일"
-                        color="#0F766E"
+                        color="var(--planners-accent, #0F766E)"
                     />
                 </div>
             )}

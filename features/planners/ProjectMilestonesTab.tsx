@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Check } from "lucide-react";
 import type { PlannerProjectMilestone } from "@/lib/planners/types";
 import { localDateStr } from "@/lib/planners/types";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate, projectEndDate }: {
     projectId: string;
@@ -19,6 +20,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
     const [saving, setSaving] = useState(false);
     const [newTitle, setNewTitle] = useState("");
     const [newDue, setNewDue] = useState("");
+    const [confirmDeleteMilestone, setConfirmDeleteMilestone] = useState<PlannerProjectMilestone | null>(null);
 
     async function load() {
         setLoading(true);
@@ -78,7 +80,6 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
     }
 
     async function remove(m: PlannerProjectMilestone) {
-        if (!confirm(`"${m.title}" 마일스톤을 삭제할까요?`)) return;
         setMilestones(milestones.filter(x => x.id !== m.id));
         await fetch(`/api/planners/projects/${projectId}/milestones?id=${m.id}`, { method: "DELETE" });
     }
@@ -165,7 +166,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
                                     }`}
                                 />
                                 <button
-                                    onClick={() => remove(m)}
+                                    onClick={() => setConfirmDeleteMilestone(m)}
                                     className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-rose-500 transition-opacity"
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -201,6 +202,12 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
                     </button>
                 </div>
             </section>
+            <ConfirmSheet
+                open={!!confirmDeleteMilestone}
+                message={`"${confirmDeleteMilestone?.title}" 마일스톤을 삭제할까요?`}
+                onConfirm={() => { const m = confirmDeleteMilestone!; setConfirmDeleteMilestone(null); remove(m); }}
+                onCancel={() => setConfirmDeleteMilestone(null)}
+            />
         </div>
     );
 }

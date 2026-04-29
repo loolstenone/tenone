@@ -10,6 +10,7 @@ import { Track } from "@/lib/analytics";
 import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, extractTextPart, setTextPart, setHandPart, type HandNoteData } from "./HandNote";
 import { CornellRowsInline, type CornellRow } from "./DailyView";
 import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -73,6 +74,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     });
     const [expandedNote, setExpandedNote] = useState<ProjectNote | null>(null);
     const [flashNoteId, setFlashNoteId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
 
     async function load() {
@@ -222,7 +224,6 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     }
 
     async function deleteNote(id: string) {
-        if (!confirm("이 노트를 삭제할까요?")) return;
         setSaving(true);
         try {
             await fetch(`/api/planners/projects/${projectId}/notes/${id}`, { method: "DELETE" });
@@ -414,7 +415,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                 isFirst={i === 0}
                                 isLast={i === notes.length - 1}
                                 onUpdate={(p) => updateNote(note.id, p)}
-                                onDelete={() => deleteNote(note.id)}
+                                onDelete={() => setConfirmDeleteId(note.id)}
                                 onMoveUp={() => reorder(note.id, "up")}
                                 onMoveDown={() => reorder(note.id, "down")}
                                 onExpand={() => setExpandedNote(note)}
@@ -436,14 +437,21 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 />
             )}
 
+            <ConfirmSheet
+                open={!!confirmDeleteId}
+                message={`"${notes.find(n => n.id === confirmDeleteId)?.title || '이 노트'}"를 삭제할까요?`}
+                onConfirm={() => { const id = confirmDeleteId!; setConfirmDeleteId(null); deleteNote(id); }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
+
             {/* Template picker */}
             {picker && (
                 <div
-                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4"
+                    className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 px-0 sm:px-4"
                     onClick={() => setPicker(false)}
                 >
                     <div
-                        className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl"
+                        className="bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}

@@ -8,6 +8,7 @@ import {
     BookOpenCheck, Lightbulb, Coffee, ThumbsUp, LogIn,
 } from "lucide-react";
 import { loginHref } from "@/lib/login-href";
+import { ConfirmSheet } from "./ConfirmSheet";
 
 type Category = "review" | "case" | "suggestion" | "life";
 
@@ -304,8 +305,8 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-end md:items-center justify-center p-0 md:p-6">
-            <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-start md:items-center justify-center p-0 md:p-6">
+            <div className="bg-white rounded-b-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
                     <h2 className="text-sm font-semibold text-neutral-900">새 글</h2>
                     <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700 text-sm">취소</button>
@@ -371,6 +372,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
     const [comment, setComment] = useState("");
     const [posting, setPosting] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     async function load() {
         setLoading(true);
@@ -418,7 +420,6 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
 
     async function deletePost() {
         if (!post?.is_mine) return;
-        if (!confirm("이 글을 삭제할까요?")) return;
         const res = await fetch(`/api/planners/community/${postId}`, { method: "DELETE" });
         if (res.ok) { onChanged(); onClose(); }
     }
@@ -434,7 +435,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
                         <ChevronLeft className="h-4 w-4" /> 목록
                     </button>
                     {post?.is_mine && (
-                        <button onClick={deletePost} className="text-xs text-red-500 hover:underline">삭제</button>
+                        <button onClick={() => setConfirmDelete(true)} className="text-xs text-red-500 hover:underline">삭제</button>
                     )}
                 </header>
 
@@ -521,6 +522,12 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
                     )}
                 </div>
             </div>
+            <ConfirmSheet
+                open={confirmDelete}
+                message="이 글을 삭제할까요?"
+                onConfirm={() => { setConfirmDelete(false); deletePost(); }}
+                onCancel={() => setConfirmDelete(false)}
+            />
         </div>
     );
 }

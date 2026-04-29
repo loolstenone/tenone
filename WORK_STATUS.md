@@ -1,6 +1,31 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-29 (세션 102 — Planners Settings 디자인 시스템 4단계)
+> 마지막 업데이트: 2026-04-30 (세션 103 — Planners Settings 모듈 분리)
+
+---
+
+## 세션 103 핵심 성과 (2026-04-30)
+
+### Planners — Settings page.tsx 모듈 분리 완성
+
+`app/(Planners)/planners/app/settings/page.tsx` 1,799줄 → 367줄 슬림 쉘로 리팩토링.
+
+**5개 feature 모듈 생성** (`features/planners/settings/`)
+- `SettingsTheme.tsx` — 컬러·모서리·폰트·다크모드 (Group 02)
+- `SettingsAi.tsx` — AI 브리핑 시간·톤·컨텍스트·트래킹·국가·프로젝트 링크 (Group 03)
+- `SettingsNotifications.tsx` — 이메일/Web Push 알림 (Group 04 알림)
+- `SettingsIntegrations.tsx` — Google Calendar·Todoist 연동 (Group 04 연동)
+- `SettingsExport.tsx` — 앱 설치·데이터 백업·구독 현황 (Group 05)
+
+**슬림 쉘 패턴**
+- shell이 API fetch + initial* 상태 세팅 → loading guard → 자식 컴포넌트 마운트
+- 각 모듈이 자체 도메인 state 소유, `save(patch)` 공유 콜백
+- TypeScript 에러 0 확인
+
+### 다음 할 것
+- Settings 외 페이지 다크모드 검증 (Daily/Weekly/Monthly 카드 색상 전환)
+- xl+ 모니터에서 Live Preview 실제 동작 확인 (1280px 이상)
+- 배포 블로커 해소: PWA 아이콘 2개 · Toss 가맹점 · Vercel 환경변수 · Google OAuth · Supabase Redirect URL
 
 ---
 
