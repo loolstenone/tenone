@@ -479,6 +479,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [faith, setFaith] = useState<number | null>(null);
     const [faithNote, setFaithNote] = useState("");
     const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
     const [upcomingEntries, setUpcomingEntries] = useState<CalendarEntry[]>([]);
     const [calEditorOpen, setCalEditorOpen] = useState(false);
@@ -591,6 +592,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             ? d.user.daily_tracking_metrics
                             : ["satisfaction"]
                     );
+                    if (d.user?.user_role) setUserRole(d.user.user_role);
                 } else {
                     setTrackingMetrics(["satisfaction"]);
                 }
@@ -1425,6 +1427,39 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <ImageIcon className="h-3.5 w-3.5" />
                                 캔버스
                             </button>
+                            {/* 연구원 전용 — 연구노트 */}
+                            {userRole === "researcher" && (
+                                <button
+                                    onClick={() => {
+                                        const idx = notesList.filter(n => n.type === 'cornell').length + 1;
+                                        const researchCues = [
+                                            { id: "cue_q",  cue: "🔬 연구 질문",  note: "" },
+                                            { id: "cue_h",  cue: "💡 가설",       note: "" },
+                                            { id: "cue_m",  cue: "📐 방법·도구",  note: "" },
+                                            { id: "cue_o",  cue: "📊 관찰·데이터",note: "" },
+                                            { id: "cue_i",  cue: "🧠 해석·인사이트", note: "" },
+                                            { id: "cue_n",  cue: "➡️ 다음 스텝",  note: "" },
+                                        ];
+                                        const newNote: NoteItem = {
+                                            id: `n_${Date.now()}`,
+                                            type: "cornell",
+                                            title: `연구노트 ${idx}`,
+                                            cue: "",
+                                            content: "",
+                                            summary: "",
+                                            rows: researchCues,
+                                        };
+                                        const next = [...notesList, newNote];
+                                        setNotesList(next);
+                                        save({ notes: serializeNotes(next) });
+                                    }}
+                                    title="연구노트 — 질문·가설·방법·관찰·해석·다음 스텝"
+                                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-teal-200 rounded-lg text-xs text-teal-600 hover:border-teal-400 hover:bg-teal-50 transition-colors"
+                                >
+                                    <span className="text-sm leading-none">🔬</span>
+                                    연구노트
+                                </button>
+                            )}
                         </div>
 
                         {/* Notes 목록 — 프로젝트와 동일 패턴: 전체 너비 인라인 렌더 */}

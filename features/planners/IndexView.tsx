@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, UserCircle2 } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
+import type { PlannerRole } from "@/lib/planners/types";
+import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { useSwipeNav } from "./useSwipeNav";
 
@@ -51,6 +53,7 @@ interface Identity {
     mission_statement?: string; vision_walls?: string;
     inside_values?: string[];
 }
+interface RoleTemplate { id: string; key: string; label: string; category: string; role_tags?: string[] }
 
 export function IndexView() {
     const now = new Date();
@@ -61,6 +64,8 @@ export function IndexView() {
     const [projectsLoaded, setProjectsLoaded] = useState(false);
     const [identity, setIdentity] = useState<Identity | null>(null);
     const [yearlyTheme, setYearlyTheme] = useState<string>("");
+    const [userRole, setUserRole] = useState<PlannerRole | null>(null);
+    const [roleTemplates, setRoleTemplates] = useState<RoleTemplate[]>([]);
 
     useEffect(() => {
         fetch("/api/planners/projects")
@@ -75,6 +80,19 @@ export function IndexView() {
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.yearly) setYearlyTheme(d.yearly.theme || ""); })
             .catch(() => {});
+        // 역할 + 템플릿 병렬 fetch
+        Promise.all([
+            fetch("/api/planners/settings").then(r => r.ok ? r.json() : null),
+            fetch("/api/planners/templates").then(r => r.ok ? r.json() : null),
+        ]).then(([settings, tplData]) => {
+            const role = settings?.user?.user_role as PlannerRole | null | undefined;
+            if (role) {
+                setUserRole(role);
+                const all: RoleTemplate[] = tplData?.templates ?? [];
+                const matched = all.filter((t: RoleTemplate) => t.role_tags?.includes(role));
+                setRoleTemplates(matched.slice(0, 5));
+            }
+        }).catch(() => {});
     }, []);
 
     const vision = identity?.vision_statement ?? identity?.vision_roof ?? identity?.inside_vision ?? "";
@@ -256,20 +274,54 @@ export function IndexView() {
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
                         <Link href="/planners/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
                     </div>
-                    <div className="space-y-2">
-                        <Link href="/planners/app/templates?category=framework" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
-                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">프레임워크북</span>
-                            <span className="text-[10px] text-neutral-400">26</span>
-                        </Link>
-                        <Link href="/planners/app/templates?category=schedule" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
-                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">일정</span>
-                            <span className="text-[10px] text-neutral-400">19</span>
-                        </Link>
-                        <Link href="/planners/app/templates?category=note" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
-                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">노트</span>
-                            <span className="text-[10px] text-neutral-400">64</span>
-                        </Link>
-                    </div>
+                    {userRole && roleTemplates.length > 0 ? (
+                        <>
+                            {/* 역할 배지 */}
+                            <div className="flex items-center gap-1.5 mb-2.5">
+                                <UserCircle2 className="h-3.5 w-3.5 text-teal-600" />
+                                <span className="text-[10px] font-semibold text-teal-700 uppercase tracking-wide">
+                                    {PLANNER_ROLE_META[userRole].label} 추천
+                                </span>
+                            </div>
+                            {/* 역할 매칭 템플릿 목록 */}
+                            <div className="space-y-1.5 mb-3">
+                                {roleTemplates.map((tpl, i) => (
+                                    <Link
+                                        key={tpl.id}
+                                        href="/planners/app/templates?category=my_role"
+                                        className="flex items-center gap-2 py-1 border-b border-neutral-100 hover:border-teal-300 group transition-colors"
+                                    >
+                                        <span className="text-[11px] text-neutral-300 font-mono w-5 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                                        <span className="flex-1 text-xs text-neutral-700 group-hover:text-teal-700 transition-colors truncate">
+                                            {tpl.label}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                            <Link
+                                href="/planners/app/templates?category=my_role"
+                                className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:underline font-medium"
+                            >
+                                <UserCircle2 className="h-3 w-3" />
+                                내 역할 전체 보기 →
+                            </Link>
+                        </>
+                    ) : (
+                        <div className="space-y-2">
+                            <Link href="/planners/app/templates?category=framework" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                                <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">프레임워크북</span>
+                                <span className="text-[10px] text-neutral-400">26</span>
+                            </Link>
+                            <Link href="/planners/app/templates?category=schedule" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                                <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">일정</span>
+                                <span className="text-[10px] text-neutral-400">19</span>
+                            </Link>
+                            <Link href="/planners/app/templates?category=note" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                                <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">노트</span>
+                                <span className="text-[10px] text-neutral-400">64</span>
+                            </Link>
+                        </div>
+                    )}
                 </section>
 
             </div>

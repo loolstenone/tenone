@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
-    ChevronRight, Heart, Copy, Check, TrendingUp,
+    ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2,
 } from "lucide-react";
+import type { PlannerRole } from "@/lib/planners/types";
+import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { isSpecialTemplate as isSpecial, exportFrameworkText as exportFwText, tplDataKey } from "@/lib/planners/templates";
 import {
     type FrameworkData as SharedFrameworkData,
@@ -29,6 +31,7 @@ interface Template {
     label: string;
     description: string | null;
     body_md: string;
+    role_tags?: string[];
 }
 
 export type FrameworkData = SharedFrameworkData;
@@ -351,7 +354,7 @@ const RECOMMENDED_KEYS = [
 ] as const;
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────────────
-const VALID_CATS = ["all", "framework", "schedule", "note", "recommended", "favorites"] as const;
+const VALID_CATS = ["all", "my_role", "framework", "schedule", "note", "recommended", "favorites"] as const;
 type CatType = typeof VALID_CATS[number];
 
 export function TemplatesView() {
@@ -369,6 +372,7 @@ export function TemplatesView() {
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [copied, setCopied] = useState(false);
     const [tplData, setTplData] = useState<FrameworkData>({});
+    const [userRole, setUserRole] = useState<PlannerRole | null>(null);
 
     useEffect(() => {
         try {
@@ -385,10 +389,17 @@ export function TemplatesView() {
     useEffect(() => {
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/templates`);
-            if (res.ok) {
-                const d = await res.json();
+            const [tplRes, settingsRes] = await Promise.all([
+                fetch(`/api/planners/templates`),
+                fetch(`/api/planners/settings`),
+            ]);
+            if (tplRes.ok) {
+                const d = await tplRes.json();
                 setTemplates(d.templates || []);
+            }
+            if (settingsRes.ok) {
+                const s = await settingsRes.json();
+                if (s.user?.user_role) setUserRole(s.user.user_role as PlannerRole);
             }
             setLoading(false);
         })();
@@ -421,11 +432,26 @@ export function TemplatesView() {
         } catch { /* noop */ }
     }
 
+    const isRoleMatch = useCallback((t: Template) =>
+        userRole && t.role_tags && t.role_tags.length > 0
+            ? t.role_tags.includes(userRole)
+            : false
+    , [userRole]);
+
     const filtered = useMemo(() => {
         let list = templates;
         if (cat === "favorites") list = list.filter(t => favorites.has(t.id));
         else if (cat === "recommended") list = list.filter(t => (RECOMMENDED_KEYS as readonly string[]).includes(t.key));
+        else if (cat === "my_role") list = list.filter(t => isRoleMatch(t));
         else if (cat !== "all") list = list.filter(t => t.category === cat);
+        // "all" 탭: 역할 매칭 템플릿 상단 정렬
+        if (cat === "all" && userRole) {
+            list = [...list].sort((a, b) => {
+                const aMatch = isRoleMatch(a) ? 0 : 1;
+                const bMatch = isRoleMatch(b) ? 0 : 1;
+                return aMatch - bMatch;
+            });
+        }
         if (query.trim()) {
             const q = query.toLowerCase();
             list = list.filter(t =>
@@ -435,19 +461,20 @@ export function TemplatesView() {
             );
         }
         return list;
-    }, [templates, cat, query, favorites]);
+    }, [templates, cat, query, favorites, isRoleMatch, userRole]);
 
     const counts = useMemo(() => {
-        const c = { all: templates.length, framework: 0, schedule: 0, note: 0, recommended: 0, favorites: 0 };
+        const c: Record<string, number> = { all: templates.length, my_role: 0, framework: 0, schedule: 0, note: 0, recommended: 0, favorites: 0 };
         templates.forEach(t => {
             if (t.category === "framework") c.framework++;
             else if (t.category === "schedule") c.schedule++;
             else if (t.category === "note") c.note++;
             if ((RECOMMENDED_KEYS as readonly string[]).includes(t.key)) c.recommended++;
             if (favorites.has(t.id)) c.favorites++;
+            if (isRoleMatch(t)) c.my_role++;
         });
         return c;
-    }, [templates, favorites]);
+    }, [templates, favorites, isRoleMatch]);
 
     const grouped = useMemo(() => {
         const groups: Record<string, Template[]> = {};
@@ -459,8 +486,10 @@ export function TemplatesView() {
         return groups;
     }, [filtered]);
 
+    const roleLabel = userRole ? PLANNER_ROLE_META[userRole]?.label : null;
     const TABS = [
         { id: "all" as const, label: "전체" },
+        { id: "my_role" as const, label: roleLabel ?? "내 역할" },
         { id: "framework" as const, label: "FrameWorkBook" },
         { id: "schedule" as const, label: "Schedule" },
         { id: "note" as const, label: "Note" },
@@ -495,10 +524,11 @@ export function TemplatesView() {
             {/* 탭 필터 */}
             <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
                 {TABS.map(tab => {
-                    const meta = tab.id !== "all" && tab.id !== "favorites" && tab.id !== "recommended" ? CATEGORY_META[tab.id] : null;
                     const isActive = cat === tab.id;
                     const isFav = tab.id === "favorites";
                     const isRec = tab.id === "recommended";
+                    const isMyRole = tab.id === "my_role";
+                    const meta = !isMyRole && tab.id !== "all" && !isFav && !isRec ? CATEGORY_META[tab.id] : null;
                     return (
                         <button
                             key={tab.id}
@@ -509,16 +539,21 @@ export function TemplatesView() {
                                         ? "bg-slate-900 text-white"
                                         : isRec
                                             ? "bg-amber-500 text-white"
-                                            : "bg-[#0F766E] text-white"
+                                            : isMyRole
+                                                ? "bg-teal-600 text-white"
+                                                : "bg-[#0F766E] text-white"
                                     : isFav
                                         ? "bg-white border border-neutral-200 text-slate-700 hover:bg-slate-50"
                                         : isRec
                                             ? "bg-white border border-amber-200 text-amber-700 hover:bg-amber-50"
-                                            : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                                            : isMyRole
+                                                ? "bg-white border border-teal-200 text-teal-700 hover:bg-teal-50"
+                                                : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                             }`}
                         >
                             {isFav && <Heart className="h-3 w-3" fill={isActive ? "currentColor" : "none"} />}
                             {isRec && <TrendingUp className="h-3 w-3" />}
+                            {isMyRole && <UserCircle2 className="h-3 w-3" />}
                             {meta && <span className="opacity-70">{meta.icon}</span>}
                             {tab.label}
                             {counts[tab.id] > 0 && (
@@ -535,10 +570,38 @@ export function TemplatesView() {
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">
-                    {cat === "favorites"
-                        ? <><Heart className="h-8 w-8 mx-auto mb-3 text-neutral-200" />즐겨찾기한 템플릿이 없습니다.<br /><span className="text-xs">카드의 하트를 눌러 저장하세요.</span></>
-                        : query ? `"${query}"에 대한 템플릿이 없습니다.` : "등록된 템플릿이 없습니다."
-                    }
+                    {cat === "favorites" ? (
+                        <>
+                            <Heart className="h-8 w-8 mx-auto mb-3 text-neutral-200" />
+                            즐겨찾기한 템플릿이 없습니다.<br />
+                            <span className="text-xs">카드의 하트를 눌러 저장하세요.</span>
+                        </>
+                    ) : cat === "my_role" && !userRole ? (
+                        <>
+                            <UserCircle2 className="h-8 w-8 mx-auto mb-3 text-neutral-200" />
+                            <p className="text-sm text-neutral-500 mb-1">역할을 설정하지 않았습니다.</p>
+                            <p className="text-xs text-neutral-400 mb-4">설정에서 나의 역할을 선택하면 맞춤 템플릿을 추천해드립니다.</p>
+                            <a
+                                href="/planners/app/settings"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-teal-600 text-white text-xs font-medium hover:bg-teal-700 transition-colors"
+                            >
+                                <UserCircle2 className="h-3.5 w-3.5" />
+                                역할 설정하기
+                            </a>
+                        </>
+                    ) : cat === "my_role" ? (
+                        <>
+                            <UserCircle2 className="h-8 w-8 mx-auto mb-3 text-neutral-200" />
+                            <p className="text-sm text-neutral-500 mb-1">
+                                {PLANNER_ROLE_META[userRole!]?.label} 맞춤 템플릿을 준비 중입니다.
+                            </p>
+                            <p className="text-xs text-neutral-400">전체 탭에서 다른 템플릿을 살펴보세요.</p>
+                        </>
+                    ) : query ? (
+                        `"${query}"에 대한 템플릿이 없습니다.`
+                    ) : (
+                        "등록된 템플릿이 없습니다."
+                    )}
                 </div>
             ) : cat === "all" ? (
                 <div className="space-y-8">
@@ -569,17 +632,32 @@ export function TemplatesView() {
                     })}
                 </div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {filtered.map(tpl => (
-                        <TemplateCard
-                            key={tpl.id}
-                            tpl={tpl}
-                            isFavorite={favorites.has(tpl.id)}
-                            onToggleFavorite={(e) => toggleFavorite(tpl.id, e)}
-                            onClick={() => setSelected(tpl)}
-                        />
-                    ))}
-                </div>
+                <>
+                    {cat === "my_role" && userRole && (
+                        <div className="flex items-center gap-3 mb-5 px-4 py-3 rounded-xl bg-teal-50 border border-teal-100">
+                            <UserCircle2 className="h-5 w-5 text-teal-600 shrink-0" />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-teal-800">
+                                    {PLANNER_ROLE_META[userRole].label} 맞춤 템플릿
+                                </p>
+                                <p className="text-xs text-teal-600 mt-0.5">
+                                    {PLANNER_ROLE_META[userRole].desc} — {filtered.length}개 추천
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {filtered.map(tpl => (
+                            <TemplateCard
+                                key={tpl.id}
+                                tpl={tpl}
+                                isFavorite={favorites.has(tpl.id)}
+                                onToggleFavorite={(e) => toggleFavorite(tpl.id, e)}
+                                onClick={() => setSelected(tpl)}
+                            />
+                        ))}
+                    </div>
+                </>
             )}
 
             {/* 모달 */}

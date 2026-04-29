@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-04-29 — 세션 101 · Planners Role System Phase 4 완성
+
+### 장소
+사무실
+
+### 변경 파일
+- `features/planners/TemplatesView.tsx` — my_role 탭 teal 스타일 + empty state 3종 + 역할 배너
+- `features/planners/IndexView.tsx` — 역할 기반 템플릿 추천 (settings+templates 병렬 fetch)
+- `features/planners/WeeklyView.tsx` — role=student 시 StudentTimetable 렌더, userRole fetch
+- `features/planners/DailyView.tsx` — role=researcher 시 연구노트 5번째 버튼, userRole state
+- `features/planners/StudentTimetable.tsx` (신규) — 월~금×8교시 시간표 그리드, 팝오버 편집, localStorage
+- `app/(Planners)/CLAUDE.md` — StudentTimetable·연구노트·role-system SQL 문서화
+- `WORK_STATUS.md`, `CHANGELOG.md`
+
+### SQL
+- `sql/planners-role-system.sql` — Supabase Prod 적용 완료 (HTTP 201)
+  - `planners_users.user_role` 컬럼 (CHECK 10종 역할)
+  - `planners_templates.role_tags TEXT[]` + 키워드 시드
+
+### 결정사항
+- role_tags 빈 배열 = 모든 역할에 노출 (공통 템플릿)
+- 연구노트는 별도 note type 추가 없이 Cornell 노트에 사전 cue 입력으로 구현 (DB 변경 0)
+- 시간표 데이터는 localStorage (1기기 1시간표 — 학기별 변경 고려시 나중에 DB 이관)
+
+---
+
 ## 2026-04-29 — 세션 100 · Planners 캔버스 Excalidraw → tldraw 마이그레이션
 
 ### 장소

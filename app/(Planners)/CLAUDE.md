@@ -103,7 +103,8 @@
 - IdentityView — Vision/Mission/KR (Weekly) + Inside-Out/Outside-In/Vision House (All in One)
 - ProjectsView · ProjectDetailView · ProjectNotesTab — 프로젝트 목록/상세/노트
 - CoverPicker · CoverRender — 15종 Cover
-- TemplatesView — 59종 카탈로그 + 27개 인터랙티브 그리드 컴포넌트 (2026-04-25 세션 87: 전 템플릿 시각 편집 완성)
+- TemplatesView — 59종 카탈로그 + 27개 인터랙티브 그리드 + my_role 탭 (역할 필터링 + empty state + teal 헤더 배너)
+- StudentTimetable — 대학생 역할 시 WeeklyView에 학기 시간표 (월~금 × 8교시, localStorage 저장, 색상별 과목 셀)
 - AiBriefingView — 아침/저녁 브리핑 생성·이력
 - ContactsView — 연락처 목록/그룹/검색/편집/vCard import
 - AddressPicker — Daum Postcode lazy-load 모달 (Contacts 주소 필드)
@@ -137,6 +138,7 @@
 
 ### SQL (sql/planners-*.sql)
 - planners-app · planners-app-v2 · planners-templates · planners-templates-phase2 · planners-aggregation · planners-payments · planners-security-hardening · planners-notifications · planners-covers · planners-anniversaries · planners-integrations
+- **planners-role-system** — `planners_users.user_role` 컬럼 + `planners_templates.role_tags[]` + 키워드 시드 (2026-04-29 적용 완료)
 
 ### PWA 자산 (public/)
 - planners-manifest.json · planners-sw.js
@@ -249,7 +251,9 @@
   · 양력/음력 토글 (한 곳에서 전환) — 표기는 `YYYY-MM-DD` 통일
   · 음력은 단일 트리거 + 캘린더 그리드 팝오버 (드롭다운 3개 X)
 - **인라인 task 추가**: Daily/Weekly 셀 하단에 `+` 입력. Enter 또는 blur로 저장 → `planners_daily.tasks`
-- **노트/캔버스 추가**: Daily/Project 본문 하단의 4개 버튼 (기본 노트·손글씨·템플릿·캔버스)
+- **노트/캔버스 추가**: Daily/Project 본문 하단의 버튼
+  · 공통 4개: 기본 노트·손글씨·템플릿·캔버스
+  · 연구원(`researcher`) 역할 추가 시 5번째 "연구노트" 버튼 노출 (질문→가설→방법→관찰→해석→다음스텝 6행 코넬 노트 자동 생성)
 
 ### 4) 데이터 SSOT
 - **task**: `planners_daily.tasks` JSON 배열 — Daily에서 입력하든 Weekly에서 입력하든 같은 row 업데이트

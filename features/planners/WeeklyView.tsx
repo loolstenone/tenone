@@ -8,10 +8,12 @@ import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
+import type { PlannerRole } from "@/lib/planners/types";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
 import { useSwipeNav } from "./useSwipeNav";
 import { KIND_COLORS, KIND_LABELS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
+import { StudentTimetable } from "./StudentTimetable";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 const DAYS_KO = ["일","월","화","수","목","금","토"];
@@ -61,6 +63,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<PlannerRole | null>(null);
 
     const boundaries = getWeekBoundaries(year, week);
 
@@ -83,11 +86,14 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     }
 
-    // 활성 프로젝트 1회 로드
+    // 활성 프로젝트 + 역할 1회 로드
     useEffect(() => {
         fetch("/api/planners/projects?status=active&limit=30")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.projects) setActiveProjects(d.projects); });
+        fetch("/api/planners/settings")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.user?.user_role) setUserRole(d.user.user_role as PlannerRole); });
     }, []);
 
     useEffect(() => {
@@ -559,6 +565,9 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             </div>
                         </section>
                     )}
+
+                    {/* 대학생 시간표 */}
+                    {userRole === "student" && <StudentTimetable />}
 
                     {/* 주간 회고 */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">

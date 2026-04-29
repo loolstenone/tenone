@@ -1,6 +1,39 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-29 (세션 100 — Planners CanvasEditor Excalidraw → tldraw 마이그레이션)
+> 마지막 업데이트: 2026-04-29 (세션 101 — Planners Role System Phase 4 완성)
+
+---
+
+## 세션 101 핵심 성과 (2026-04-29)
+
+### Planners — Role System Phase 4 (전문 뷰)
+
+**TemplatesView — my_role 탭 완성**
+- `my_role` 탭 버튼: teal 색상 + `UserCircle2` 아이콘 (isFav/isRec와 동일한 특수 처리 패턴)
+- Empty state 3-케이스: (1) 역할 미설정 → 설정 페이지 링크 버튼 (2) 역할 있지만 템플릿 없음 → "준비 중" (3) 기본
+- 탭 활성 시 teal 헤더 배너 (역할명 + 설명 + 개수)
+
+**IndexView — 역할 기반 템플릿 추천**
+- settings + templates 병렬 fetch → role_tags 필터링 → 상위 5개 번호 목록 표시
+- 역할 있을 때: teal 배지 + "내 역할 전체 보기 →" 링크
+- 역할 없을 때: 기존 카테고리 링크 (프레임워크/일정/노트) 유지
+
+**WeeklyView — 대학생 시간표**
+- role=student 시 주간 회고 위에 `<StudentTimetable />` 렌더
+- `features/planners/StudentTimetable.tsx` 신규: 월~금 × 8교시 그리드, 셀 클릭 → 팝오버 편집, 6색 선택, localStorage 저장
+
+**DailyView — 연구원 연구노트**
+- role=researcher 시 노트 추가 그리드에 "연구노트" 5번째 버튼 노출
+- 클릭 시 6행 코넬 노트 자동 생성: 연구질문·가설·방법·관찰·해석·다음스텝 사전 입력
+
+**SQL 적용**
+- `planners-role-system.sql` Supabase 실행 완료 (HTTP 201)
+  - `planners_users.user_role TEXT CHECK(...)` 컬럼 추가
+  - `planners_templates.role_tags TEXT[]` 컬럼 + 키워드 시드
+
+### 다음 할 것
+- `@excalidraw/excalidraw` 패키지 `package.json`에서 제거 (불필요 — tldraw 전환 후)
+- 배포 후 기존 캔버스 "데이터 없음" 안내 또는 일괄 삭제 여부 결정
 
 ---
 
@@ -11,10 +44,6 @@
 - `CanvasEditor.tsx` 전체 재작성: `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot`
 - 썸네일: `editor.getSvgString()` + `getSvgAsImage()` → JPEG base64 → DB PATCH
 - 기존 Excalidraw DB 데이터는 형식 불일치 → try/catch로 빈 캔버스 폴백
-
-### 다음 할 것
-- 배포 후 기존 캔버스 "데이터 없음" 안내 또는 일괄 삭제 여부 결정
-- `@excalidraw/excalidraw` 패키지 `package.json`에서 제거 (불필요)
 
 ---
 
