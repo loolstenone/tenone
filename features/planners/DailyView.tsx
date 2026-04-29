@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
@@ -1057,33 +1057,34 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const isToday = date === localDateStr(new Date());
     const lunar = getLunarDate(date);
 
-    function weatherEmoji(code: number) {
-        if (code === 0) return "☀️";
-        if (code <= 2) return "🌤️";
-        if (code <= 3) return "☁️";
-        if (code <= 48) return "🌫️";
-        if (code <= 57) return "🌧️";
-        if (code <= 67) return "🌧️";
-        if (code <= 77) return "❄️";
-        if (code <= 82) return "🌦️";
-        if (code <= 86) return "🌨️";
-        if (code <= 99) return "⛈️";
-        return "🌡️";
+    function WeatherIcon({ code, className }: { code: number; className?: string }) {
+        const cls = className ?? "h-3.5 w-3.5";
+        if (code === 0) return <Sun className={cls} />;
+        if (code <= 2)  return <Cloud className={cls} />;
+        if (code <= 3)  return <Cloud className={cls} />;
+        if (code <= 48) return <CloudFog className={cls} />;
+        if (code <= 57) return <CloudDrizzle className={cls} />;
+        if (code <= 67) return <CloudRain className={cls} />;
+        if (code <= 77) return <CloudSnow className={cls} />;
+        if (code <= 82) return <CloudRain className={cls} />;
+        if (code <= 86) return <CloudSnow className={cls} />;
+        if (code <= 99) return <CloudLightning className={cls} />;
+        return <Thermometer className={cls} />;
     }
 
     return (
         <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 overflow-x-hidden">
             {/* Header — 모바일은 세로 스택, 데스크톱은 가로 분리 */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
-                <div className="min-w-0">
-                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                        <button
-                            onClick={() => navigateDate(-1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </button>
-                        <div className="flex items-center gap-2 min-w-0">
+                <div className="min-w-0 flex items-start gap-2 md:gap-3">
+                    <button
+                        onClick={() => navigateDate(-1)}
+                        className="mt-1 w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap">
                                 {formattedDate}
                             </h1>
@@ -1092,37 +1093,38 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     오늘
                                 </span>
                             )}
+                            <button
+                                onClick={() => navigateDate(1)}
+                                className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => navigateDate(1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
+                        <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                            {weather && (
+                                <span className="inline-flex items-center gap-1 text-neutral-500">
+                                    <WeatherIcon code={weather.code} />
+                                    {weather.temp}°C
+                                </span>
+                            )}
+                            <span>{weekday}</span>
+                            {lunar && (
+                                <span className="text-neutral-300">
+                                    음력 {lunar.isLeap ? "윤" : ""}{lunar.month}월 {lunar.day}일
+                                </span>
+                            )}
+                            {HOLIDAYS[date] && (
+                                <span className={`text-xs font-medium ${
+                                    HOLIDAYS[date].type === 'holiday' ? 'text-rose-400' :
+                                    HOLIDAYS[date].type === 'memorial' ? 'text-rose-300' :
+                                    HOLIDAYS[date].type === 'commemoration' ? 'text-amber-600' :
+                                    'text-emerald-500'
+                                }`}>
+                                    · {HOLIDAYS[date].label}
+                                </span>
+                            )}
+                        </p>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
-                        {weather && (
-                            <span className="text-neutral-600">
-                                {weatherEmoji(weather.code)} {weather.temp}°C
-                            </span>
-                        )}
-                        <span>{weekday}</span>
-                        {lunar && (
-                            <span className="text-neutral-300">
-                                음력 {lunar.isLeap ? "윤" : ""}{lunar.month}월 {lunar.day}일
-                            </span>
-                        )}
-                        {HOLIDAYS[date] && (
-                            <span className={`text-xs font-medium ${
-                                HOLIDAYS[date].type === 'holiday' ? 'text-rose-400' :
-                                HOLIDAYS[date].type === 'memorial' ? 'text-rose-300' :
-                                HOLIDAYS[date].type === 'commemoration' ? 'text-amber-600' :
-                                'text-emerald-500'
-                            }`}>
-                                · {HOLIDAYS[date].label}
-                            </span>
-                        )}
-                    </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <PlannersUtilityLinks />
