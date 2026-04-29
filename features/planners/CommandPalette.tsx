@@ -241,7 +241,6 @@ export function CommandPalette({ open, onClose }: Props) {
         { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/planners/app/contacts") },
         { id: "go_identity",  label: "아이덴티티",    icon: Compass,         section: "이동",            keywords: "identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/identity") },
         { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/planners/app/templates") },
-        { id: "go_briefing",  label: "AI 브리핑",     icon: Sparkles,        section: "이동",            keywords: "ai briefing 브리핑 비서", run: () => go("/planners/app/ai-briefing") },
         { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/planners/app/search") },
         { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/planners/app/tasks") },
         { id: "go_settings",  label: "설정",          icon: SettingsIcon,    section: "이동",            keywords: "settings 설정", run: () => go("/planners/app/settings") },

@@ -294,32 +294,8 @@ export function IndexView() {
                     </div>
                 </section>
 
-                {/* ────── 우: 인덱스 사이드바 — PC·태블릿(lg+)만 표시 ────── */}
+                {/* ────── 우: 사이드바 — PC·태블릿(lg+)만 표시 ────── */}
                 <aside className="hidden lg:flex flex-col gap-6 w-64 xl:w-72 shrink-0 order-1 lg:order-2">
-
-                    {/* 인덱스 — 섹션 빠른 이동 */}
-                    <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-2">인덱스</p>
-                        <nav className="space-y-px">
-                            {[
-                                { href: "/planners/app/daily",               label: "일간",       sub: "오늘 일정·노트" },
-                                { href: "/planners/app/weekly",              label: "주간",       sub: "이번 주 계획" },
-                                { href: "/planners/app/monthly",             label: "월간",       sub: "월 달력·목표" },
-                                { href: `/planners/app/yearly?year=${year}`, label: "연간",       sub: `${year}년 로드맵` },
-                                { href: "/planners/app/projects",            label: "프로젝트",   sub: "목표·마일스톤" },
-                                { href: "/planners/app/templates",           label: "템플릿",     sub: "프레임워크·노트" },
-                                { href: "/planners/app/canvas",              label: "캔버스",     sub: "자유 스케치" },
-                                { href: "/planners/app/identity",            label: "아이덴티티", sub: "비전·미션·가치" },
-                            ].map(item => (
-                                <Link key={item.href} href={item.href} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-neutral-50 group transition-colors">
-                                    <span className="text-sm font-medium text-neutral-700 group-hover:text-[#0F766E] transition-colors">{item.label}</span>
-                                    <span className="text-[10px] text-neutral-300 group-hover:text-neutral-400 transition-colors">{item.sub}</span>
-                                </Link>
-                            ))}
-                        </nav>
-                    </div>
-
-                    <div className="h-px bg-neutral-100" />
 
                     {/* 퍼스널 아이덴티티 */}
                     <div>
@@ -339,6 +315,20 @@ export function IndexView() {
                                 비전·미션·핵심가치를 입력해보세요 →
                             </Link>
                         )}
+                    </div>
+
+                    <div className="h-px bg-neutral-100" />
+
+                    {/* 템플릿 */}
+                    <div>
+                        <div className="flex items-center justify-between mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                                <LayoutTemplate className="h-3.5 w-3.5 text-neutral-400" />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
+                            </div>
+                            <Link href="/planners/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                        </div>
+                        {renderTemplates()}
                     </div>
 
                     <div className="h-px bg-neutral-100" />
@@ -372,20 +362,6 @@ export function IndexView() {
                             <Link href="/planners/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
                         </div>
                         {renderProjects()}
-                    </div>
-
-                    <div className="h-px bg-neutral-100" />
-
-                    {/* 템플릿 */}
-                    <div>
-                        <div className="flex items-center justify-between mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                                <LayoutTemplate className="h-3.5 w-3.5 text-neutral-400" />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
-                            </div>
-                            <Link href="/planners/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
-                        </div>
-                        {renderTemplates()}
                     </div>
 
                 </aside>

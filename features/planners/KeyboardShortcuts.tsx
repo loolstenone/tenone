@@ -17,8 +17,6 @@ const ROUTE_KEYS: Record<string, string> = {
     p: "/planners/app/projects",
     c: "/planners/app/contacts",
     s: "/planners/app/search",
-    n: "/planners/app/ai-briefing",
-    b: "/planners/app/ai-briefing",
 };
 
 const SHORTCUTS_LIST = [
@@ -31,9 +29,7 @@ const SHORTCUTS_LIST = [
     { keys: ["Y"], desc: "연간으로 이동" },
     { keys: ["P"], desc: "프로젝트로 이동" },
     { keys: ["C"], desc: "연락처로 이동" },
-    { keys: ["N"], desc: "AI 브리핑으로 이동" },
     { keys: ["S"], desc: "검색으로 이동" },
-    { keys: ["B"], desc: "AI 브리핑으로 이동" },
     { keys: ["G"], desc: "다른 페이지로 이동 (= 명령 팔레트)" },
     { keys: ["ESC"], desc: "모달·팔레트 닫기" },
 ];
