@@ -4,16 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-    LayoutGrid, Sparkles, Sun, FolderKanban, User,
+    LayoutGrid, Sun, FolderKanban, User,
     CalendarDays, Calendar, CalendarRange, Users, Search, Settings,
 } from "lucide-react";
 
 export const MOBILE_NAV_STORAGE_KEY = "planners-mobile-nav";
-export const MOBILE_NAV_DEFAULT: string[] = ["index", "briefing", "today", "projects", "identity"];
+export const MOBILE_NAV_DEFAULT: string[] = ["index", "today", "projects", "identity", "search"];
 
 export const ALL_NAV_OPTIONS = [
-    { id: "index",    label: "홈",     icon: LayoutGrid,   href: "/planners/app/index" },
-    { id: "briefing", label: "AI브리핑", icon: Sparkles,    href: "/planners/app/ai-briefing" },
+    { id: "index",    label: "인덱스",  icon: LayoutGrid,   href: "/planners/app/index" },
     { id: "today",    label: "오늘",    icon: Sun,          href: "/planners/app/today" },
     { id: "weekly",   label: "주간",    icon: CalendarDays, href: "/planners/app/weekly" },
     { id: "monthly",  label: "월간",    icon: Calendar,     href: "/planners/app/monthly" },

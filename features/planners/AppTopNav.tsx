@@ -19,7 +19,7 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-    { href: "/planners/app/index",       label: "홈",          modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/index",       label: "인덱스",       modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/monthly",     label: "월간",        modes: ["all_in_one"] },
@@ -360,14 +360,6 @@ export function AppTopNav({
                 >
                     <LayoutTemplate className="h-4 w-4 text-neutral-400" />
                     <span>템플릿</span>
-                </Link>
-                <Link
-                    href="/planners/app/ai-briefing"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
-                >
-                    <Sparkles className="h-4 w-4 text-neutral-400" />
-                    <span>AI 브리핑</span>
                 </Link>
                 <div className="h-px bg-neutral-100 my-1" />
                 <button
