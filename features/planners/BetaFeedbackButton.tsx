@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { MessageSquarePlus, X, Send, Check } from "lucide-react";
 import { trackPlanners } from "@/lib/planners/analytics";
@@ -12,6 +12,12 @@ export function BetaFeedbackButton() {
     const [text, setText] = useState("");
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
+
+    useEffect(() => {
+        const onOpen = () => setOpen(true);
+        window.addEventListener("planners-feedback-open", onOpen);
+        return () => window.removeEventListener("planners-feedback-open", onOpen);
+    }, []);
 
     async function handleSubmit() {
         if (!text.trim()) return;
@@ -35,7 +41,7 @@ export function BetaFeedbackButton() {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="pp-hide-when-ai-open fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-full shadow-lg hover:bg-[#0d5e56] transition-colors text-sm font-medium"
+                className="pp-hide-when-ai-open hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-full shadow-lg hover:bg-[#0d5e56] transition-colors text-sm font-medium"
             >
                 <MessageSquarePlus className="h-4 w-4" />
                 <span>피드백</span>

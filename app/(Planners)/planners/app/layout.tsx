@@ -9,6 +9,7 @@ import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
 import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
 import { KeyboardShortcuts } from "@/features/planners/KeyboardShortcuts";
 import { AiBriefingFab } from "@/features/planners/AiBriefingFab";
+import { MobileBottomNav } from "@/features/planners/MobileBottomNav";
 import { getPlannerUser } from "@/lib/planners/client";
 import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
 
@@ -86,7 +87,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     subscriptionStatus={plannerUser?.subscription_status ?? 'free'}
                 />
                 <div className="flex flex-1 min-h-0">
-                    <main className="flex-1 overflow-x-hidden min-w-0">
+                    <main className="flex-1 overflow-x-hidden min-w-0 pb-14 md:pb-0">
                         {children}
                     </main>
                     <AppMonthBar />
@@ -95,6 +96,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <BetaFeedbackButton />
             <KeyboardShortcuts />
             <AiBriefingFab />
+            <MobileBottomNav />
         </>
     );
 }

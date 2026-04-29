@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
 import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, type PlannersThemeMode } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
+import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
 
 interface Integration {
     id: string;
@@ -1488,6 +1489,9 @@ export default function SettingsPage() {
                     )}
                 </section>
 
+                {/* 모바일 하단 메뉴 */}
+                <MobileNavSection />
+
                 {/* 변경사항 일괄 저장 — 자동 저장이 안 되는 경우 마지막 보루 */}
                 <SaveAllBar
                     onSave={async () => {
@@ -1516,6 +1520,80 @@ export default function SettingsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+function MobileNavSection() {
+    const [selected, setSelected] = useState<string[]>(MOBILE_NAV_DEFAULT);
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(MOBILE_NAV_STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length === 5) setSelected(parsed);
+            }
+        } catch {}
+    }, []);
+
+    function toggle(id: string) {
+        setSelected(prev => {
+            let next: string[];
+            if (prev.includes(id)) {
+                next = prev.filter(i => i !== id);
+            } else {
+                if (prev.length >= 5) return prev;
+                next = [...prev, id];
+            }
+            localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(next));
+            window.dispatchEvent(new CustomEvent("planners-mobile-nav-change"));
+            return next;
+        });
+    }
+
+    const full = selected.length >= 5;
+
+    return (
+        <section className="bg-white border border-neutral-200 rounded-xl p-5 md:hidden">
+            <div className="flex items-center justify-between mb-4">
+                <div>
+                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">하단 메뉴</h2>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">5개 선택 ({selected.length}/5)</p>
+                </div>
+                <button
+                    onClick={() => {
+                        setSelected(MOBILE_NAV_DEFAULT);
+                        localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(MOBILE_NAV_DEFAULT));
+                        window.dispatchEvent(new CustomEvent("planners-mobile-nav-change"));
+                    }}
+                    className="text-[11px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                >
+                    기본값으로
+                </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+                {ALL_NAV_OPTIONS.map((opt: { id: string; label: string }) => {
+                    const on = selected.includes(opt.id);
+                    return (
+                        <button
+                            key={opt.id}
+                            onClick={() => toggle(opt.id)}
+                            disabled={!on && full}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                                on
+                                    ? "bg-[#0F766E] text-white border-[#0F766E]"
+                                    : full
+                                    ? "bg-neutral-50 text-neutral-300 border-neutral-100 cursor-not-allowed"
+                                    : "bg-white text-neutral-600 border-neutral-200 hover:border-[#0F766E] hover:text-[#0F766E]"
+                            }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${on ? "bg-white" : "bg-neutral-300"}`} />
+                            {opt.label}
+                        </button>
+                    );
+                })}
+            </div>
+        </section>
     );
 }
 

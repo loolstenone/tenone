@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, LayoutTemplate } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, LayoutTemplate, MessageSquarePlus } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -369,6 +369,14 @@ export function AppTopNav({
                     <Sparkles className="h-4 w-4 text-neutral-400" />
                     <span>AI 브리핑</span>
                 </Link>
+                <div className="h-px bg-neutral-100 my-1" />
+                <button
+                    onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent("planners-feedback-open")); }}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <MessageSquarePlus className="h-4 w-4 text-neutral-400" />
+                    <span>피드백 보내기</span>
+                </button>
             </UniverseMobileMenu>
         </header>
     );
