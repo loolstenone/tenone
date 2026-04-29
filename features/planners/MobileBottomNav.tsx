@@ -64,8 +64,10 @@ export function MobileBottomNav() {
             <div className="flex items-stretch h-14">
                 {navItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + "?") ||
-                        (item.id === "index" && pathname === "/planners/app");
+                    const isActive = pathname === item.href ||
+                        pathname.startsWith(item.href + "?") ||
+                        (item.id === "index" && pathname === "/planners/app") ||
+                        (item.id === "today" && pathname.startsWith("/planners/app/daily"));
                     return (
                         <Link
                             key={item.id}
