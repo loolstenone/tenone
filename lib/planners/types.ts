@@ -5,10 +5,40 @@ export type SubscriptionStatus = 'free' | 'active' | 'expired';
 export type AiTone = 'professional' | 'friendly' | 'brief';
 export type ProjectStatus = 'active' | 'completed' | 'archived' | 'paused';
 
+/**
+ * 사용자 역할 — 템플릿 추천·AI 브리핑 컨텍스트·특화 뷰에 활용
+ * null = 미선택 (온보딩 스킵 가능)
+ */
+export type PlannerRole =
+    | 'office_worker'   // 직장인
+    | 'student'         // 대학생
+    | 'researcher'      // 연구원/교수
+    | 'designer'        // 디자이너
+    | 'developer'       // 개발자
+    | 'creator'         // 크리에이터
+    | 'sales'           // 영업
+    | 'planner'         // 기획자
+    | 'athlete'         // 운동/피트니스
+    | 'entrepreneur';   // 창업가/프리랜서
+
+export const PLANNER_ROLE_META: Record<PlannerRole, { label: string; desc: string }> = {
+    office_worker: { label: '직장인',         desc: '업무·회의·보고·프로젝트' },
+    student:       { label: '대학생',         desc: '수업·과제·시험·시간표' },
+    researcher:    { label: '연구원/교수',     desc: '논문·실험·강의·문헌' },
+    designer:      { label: '디자이너',        desc: '브리프·무드보드·피드백' },
+    developer:     { label: '개발자',         desc: '스프린트·이슈·회고' },
+    creator:       { label: '크리에이터',      desc: '콘텐츠 캘린더·스크립트' },
+    sales:         { label: '영업',           desc: '고객·파이프라인·팔로업' },
+    planner:       { label: '기획자',         desc: '전략·프레임워크·브리프' },
+    athlete:       { label: '운동/피트니스',   desc: '트레이닝 로그·루틴' },
+    entrepreneur:  { label: '창업가/프리랜서', desc: '린캔버스·OKR·네트워킹' },
+};
+
 export interface PlannerUser {
     id: string;
     member_id: string;
     mode: PlannerMode;
+    user_role: PlannerRole | null;
     subscription_status: SubscriptionStatus;
     subscription_expires_at: string | null;
     subscription_price: number;

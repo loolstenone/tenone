@@ -28,6 +28,7 @@ interface BriefingContext {
     memberId: string;
     date: string;
     memberName?: string;
+    userRole?: string | null;
     identity?: {
         vision?: string | null;
         mission?: string | null;
@@ -76,7 +77,7 @@ export async function gatherContext(memberId: string, date: string): Promise<Bri
 
     const [member, plannerUser, identity, todayDaily, yestDaily, weekly, monthly, projects] = await Promise.all([
         admin.from("members").select("name").eq("id", memberId).maybeSingle(),
-        admin.from("planners_users").select("mode, ai_tone").eq("member_id", memberId).maybeSingle(),
+        admin.from("planners_users").select("mode, ai_tone, user_role").eq("member_id", memberId).maybeSingle(),
         admin.from("planners_identities").select("vision_statement, mission_statement, key_results").eq("member_id", memberId).maybeSingle(),
         admin.from("planners_daily").select("tasks").eq("member_id", memberId).eq("date", date).maybeSingle(),
         admin.from("planners_daily").select("tasks, daily_result").eq("member_id", memberId).eq("date", yesterdayStr).maybeSingle(),
@@ -121,13 +122,27 @@ export async function gatherContext(memberId: string, date: string): Promise<Bri
             })) ?? [],
         tone: (plannerUser.data?.ai_tone as "professional" | "friendly" | "brief") ?? "friendly",
         mode: (plannerUser.data?.mode as "weekly" | "all_in_one") ?? "weekly",
+        userRole: plannerUser.data?.user_role ?? null,
     };
 }
 
 /**
  * 브리핑 시스템 프롬프트
  */
-function systemPrompt(type: BriefingType, tone: string): string {
+const ROLE_CONTEXT_KO: Record<string, string> = {
+    office_worker: "직장인 — 업무 보고·회의·마감·프로젝트 중심으로 언급하세요.",
+    student:       "대학생 — 수업·과제·시험·시간표 중심으로 언급하세요.",
+    researcher:    "연구원/교수 — 논문·실험·강의·문헌 진행 중심으로 언급하세요.",
+    designer:      "디자이너 — 클라이언트·브리프·피드백·마감 중심으로 언급하세요.",
+    developer:     "개발자 — 스프린트·이슈·PR·배포 일정 중심으로 언급하세요.",
+    creator:       "크리에이터 — 콘텐츠 업로드 일정·아이디어·제작 진도 중심으로 언급하세요.",
+    sales:         "영업 — 고객 미팅·파이프라인·팔로업·목표 대비 실적 중심으로 언급하세요.",
+    planner:       "기획자 — 전략·마일스톤·의사결정·브리프 중심으로 언급하세요.",
+    athlete:       "운동/피트니스 — 오늘 루틴·회복 상태·주간 볼륨 중심으로 언급하세요.",
+    entrepreneur:  "창업가/프리랜서 — OKR·네트워킹·린 실험·수익 목표 중심으로 언급하세요.",
+};
+
+function systemPrompt(type: BriefingType, tone: string, userRole?: string | null): string {
     const toneGuide = {
         professional: "전문적이고 간결한 어투. 경어 사용. 군더더기 없이.",
         friendly: "따뜻하고 친근한 어투. 격려와 응원을 섞어서.",
@@ -140,6 +155,10 @@ function systemPrompt(type: BriefingType, tone: string): string {
         ? "당신은 Planner's Planner AI의 중간 점검 비서입니다. 오전을 돌아보고 남은 시간의 우선순위를 다잡도록 돕습니다."
         : "당신은 Planner's Planner AI의 저녁 정리 비서입니다. 사용자가 오늘을 의미 있게 마무리하고 내일을 준비하도록 돕습니다.";
 
+    const roleGuide = userRole && ROLE_CONTEXT_KO[userRole]
+        ? `- 사용자 역할: ${ROLE_CONTEXT_KO[userRole]}`
+        : "";
+
     return `${role}
 
 핵심 원칙:
@@ -148,7 +167,7 @@ function systemPrompt(type: BriefingType, tone: string): string {
 - 지시하지 않고 **질문과 비춤**으로 사용자의 도모를 살려냅니다.
 - 이모지는 섹션 구분에 최소로만 (📌 🎯 🚀 ✅ 📝 같은 구조 표시). 감정 이모지 금지.
 - 한국어. ${toneGuide}
-- 300~500자. 불필요한 반복·사족 금지.
+- 300~500자. 불필요한 반복·사족 금지.${roleGuide ? `\n${roleGuide}` : ""}
 
 ${type === "morning"
     ? `아침 브리핑 구조:
@@ -264,7 +283,7 @@ export async function generateBriefing(
     const msg = await client.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: systemPrompt(type, ctx.tone),
+        system: systemPrompt(type, ctx.tone, ctx.userRole),
         messages: [
             {
                 role: "user",

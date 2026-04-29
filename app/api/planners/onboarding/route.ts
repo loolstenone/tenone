@@ -87,6 +87,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const {
         mode,
+        user_role,
         ai_morning_time,
         ai_evening_time,
         ai_tone,
@@ -101,6 +102,7 @@ export async function POST(req: Request) {
             {
                 member_id: member.id,
                 mode,
+                user_role: user_role ?? null,
                 ai_morning_time,
                 ai_evening_time,
                 ai_tone,

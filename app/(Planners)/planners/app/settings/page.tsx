@@ -2,12 +2,26 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus, Sun, Moon, Monitor } from "lucide-react";
+import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus, Sun, Moon, Monitor, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
 import Link from "next/link";
-import type { PlannerMode, AiTone } from "@/lib/planners/types";
+import type { PlannerMode, AiTone, PlannerRole } from "@/lib/planners/types";
+import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, applyPlannersRadius, type PlannersThemeMode, type PlannersRadius } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
+
+const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
+    office_worker: Briefcase,
+    student:       GraduationCap,
+    researcher:    FlaskConical,
+    designer:      Palette,
+    developer:     Code2,
+    creator:       Clapperboard,
+    sales:         TrendingUp,
+    planner:       Map,
+    athlete:       Dumbbell,
+    entrepreneur:  Rocket,
+};
 
 interface Integration {
     id: string;
@@ -165,6 +179,7 @@ export default function SettingsPage() {
     const [countryPref, setCountryPref] = useState<string[]>(["KR"]);
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<PlannerRole | null>(null);
     const [colorTheme, setColorTheme] = useState("teal");
     const [radiusTheme, setRadiusTheme] = useState<PlannersRadius>("soft");
     const [fontFamily, setFontFamily] = useState("sans");
@@ -216,6 +231,7 @@ export default function SettingsPage() {
                 const d = await res.json();
                 if (d.user) {
                     setMode(d.user.mode);
+                    if (d.user.user_role) setUserRole(d.user.user_role as PlannerRole);
                     setMorning(d.user.ai_morning_time?.slice(0, 5) || "08:00");
                     setEvening(d.user.ai_evening_time?.slice(0, 5) || "21:00");
                     setTone(d.user.ai_tone);
@@ -673,6 +689,11 @@ export default function SettingsPage() {
         applyPlannersRadius(key);
     }
 
+    async function changeRole(key: PlannerRole | null) {
+        setUserRole(key);
+        await save({ user_role: key });
+    }
+
     if (loading) {
         return <div className="max-w-3xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
@@ -712,6 +733,48 @@ export default function SettingsPage() {
                                 )}
                             </button>
                         ))}
+                    </div>
+                </section>
+
+                {/* 역할 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-1">
+                        <h2 className="text-sm font-semibold text-neutral-900">나의 역할</h2>
+                        {userRole && (
+                            <button
+                                onClick={() => changeRole(null)}
+                                className="text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors"
+                            >
+                                선택 해제
+                            </button>
+                        )}
+                    </div>
+                    <p className="text-xs text-neutral-400 mb-4">역할에 맞는 템플릿과 AI 브리핑을 추천합니다.</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {(Object.keys(PLANNER_ROLE_META) as PlannerRole[]).map((r) => {
+                            const Icon = ROLE_ICONS[r];
+                            const meta = PLANNER_ROLE_META[r];
+                            const active = userRole === r;
+                            return (
+                                <button
+                                    key={r}
+                                    onClick={() => changeRole(active ? null : r)}
+                                    className={`flex items-center gap-2.5 px-3 py-2.5 border-2 rounded-lg text-left transition-all ${
+                                        active
+                                            ? "border-[#0F766E] bg-[#0F766E]/5"
+                                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                                    }`}
+                                >
+                                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#0F766E]" : "text-neutral-400"}`} />
+                                    <div className="min-w-0">
+                                        <p className={`text-xs font-semibold truncate ${active ? "text-[#0F766E]" : "text-neutral-700"}`}>
+                                            {meta.label}
+                                        </p>
+                                        <p className="text-[10px] text-neutral-400 truncate">{meta.desc}</p>
+                                    </div>
+                                </button>
+                            );
+                        })}
                     </div>
                 </section>
 

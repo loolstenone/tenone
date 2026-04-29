@@ -2,12 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import type { PlannerMode, AiTone } from "@/lib/planners/types";
+import type { PlannerMode, AiTone, PlannerRole } from "@/lib/planners/types";
+import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { trackPlanners } from "@/lib/planners/analytics";
 
-type Step = "welcome" | "mode" | "ai" | "identity_lite" | "done";
+type Step = "welcome" | "mode" | "role" | "ai" | "identity_lite" | "done";
+
+const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
+    office_worker: Briefcase,
+    student:       GraduationCap,
+    researcher:    FlaskConical,
+    designer:      Palette,
+    developer:     Code2,
+    creator:       Clapperboard,
+    sales:         TrendingUp,
+    planner:       Map,
+    athlete:       Dumbbell,
+    entrepreneur:  Rocket,
+};
 
 export default function OnboardingPage() {
     const router = useRouter();
@@ -15,6 +29,7 @@ export default function OnboardingPage() {
 
     const [step, setStep] = useState<Step>("welcome");
     const [mode, setMode] = useState<PlannerMode>("weekly");
+    const [role, setRole] = useState<PlannerRole | null>(null);
     const [morningTime, setMorningTime] = useState("08:00");
     const [eveningTime, setEveningTime] = useState("21:00");
     const [tone, setTone] = useState<AiTone>("friendly");
@@ -40,6 +55,7 @@ export default function OnboardingPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     mode,
+                    user_role: role,
                     ai_morning_time: morningTime,
                     ai_evening_time: eveningTime,
                     ai_tone: tone,
@@ -75,8 +91,8 @@ export default function OnboardingPage() {
             <div className="w-full max-w-2xl">
                 {/* Progress */}
                 <div className="flex items-center gap-2 mb-10">
-                    {(["welcome", "mode", "ai", "identity_lite"] as Step[]).map((s, i) => {
-                        const order = ["welcome", "mode", "ai", "identity_lite"];
+                    {(["welcome", "mode", "role", "ai", "identity_lite"] as Step[]).map((s, i) => {
+                        const order = ["welcome", "mode", "role", "ai", "identity_lite"];
                         const current = order.indexOf(step);
                         const done = i < current;
                         const active = i === current;
@@ -127,7 +143,7 @@ export default function OnboardingPage() {
                 {step === "mode" && (
                     <div className="space-y-6">
                         <div>
-                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">1 / 3</p>
+                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">1 / 4</p>
                             <h2 className="font-serif text-2xl text-neutral-900">어떤 모드로 시작할까요?</h2>
                             <p className="text-sm text-neutral-500 mt-2">언제든 설정에서 바꿀 수 있습니다.</p>
                         </div>
@@ -182,7 +198,7 @@ export default function OnboardingPage() {
                                 <ArrowLeft className="h-4 w-4" /> 뒤로
                             </button>
                             <button
-                                onClick={() => setStep("ai")}
+                                onClick={() => setStep("role")}
                                 className="flex items-center gap-2 px-6 py-2.5 bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors"
                             >
                                 다음 <ArrowRight className="h-4 w-4" />
@@ -191,10 +207,65 @@ export default function OnboardingPage() {
                     </div>
                 )}
 
+                {step === "role" && (
+                    <div className="space-y-6">
+                        <div>
+                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">2 / 4</p>
+                            <h2 className="font-serif text-2xl text-neutral-900">나는 주로 어떤 역할인가요?</h2>
+                            <p className="text-sm text-neutral-500 mt-2">
+                                선택한 역할에 맞는 템플릿과 AI 브리핑을 추천합니다.
+                                <span className="text-neutral-400"> 언제든 설정에서 바꿀 수 있습니다.</span>
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {(Object.keys(PLANNER_ROLE_META) as PlannerRole[]).map((r) => {
+                                const Icon = ROLE_ICONS[r];
+                                const meta = PLANNER_ROLE_META[r];
+                                const active = role === r;
+                                return (
+                                    <button
+                                        key={r}
+                                        onClick={() => setRole(active ? null : r)}
+                                        className={`text-left p-4 border-2 rounded-xl transition-all ${
+                                            active
+                                                ? "border-[#0F766E] bg-[#0F766E]/5"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300"
+                                        }`}
+                                    >
+                                        <Icon className={`h-5 w-5 mb-2 ${active ? "text-[#0F766E]" : "text-neutral-400"}`} />
+                                        <p className={`text-sm font-semibold ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>
+                                            {meta.label}
+                                        </p>
+                                        <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">
+                                            {meta.desc}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex justify-between pt-2">
+                            <button
+                                onClick={() => setStep("mode")}
+                                className="flex items-center gap-2 px-4 py-2 text-neutral-500 hover:text-neutral-900 transition-colors"
+                            >
+                                <ArrowLeft className="h-4 w-4" /> 뒤로
+                            </button>
+                            <button
+                                onClick={() => setStep("ai")}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors"
+                            >
+                                {role ? "다음" : "건너뛰기"} <ArrowRight className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {step === "ai" && (
                     <div className="space-y-6">
                         <div>
-                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">2 / 3</p>
+                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">3 / 4</p>
                             <h2 className="font-serif text-2xl text-neutral-900">AI 비서 설정</h2>
                             <p className="text-sm text-neutral-500 mt-2">아침 브리핑과 저녁 정리 시간을 정하세요.</p>
                         </div>
@@ -247,7 +318,7 @@ export default function OnboardingPage() {
 
                         <div className="flex justify-between pt-4">
                             <button
-                                onClick={() => setStep("mode")}
+                                onClick={() => setStep("role")}
                                 className="flex items-center gap-2 px-4 py-2 text-neutral-500 hover:text-neutral-900 transition-colors"
                             >
                                 <ArrowLeft className="h-4 w-4" /> 뒤로
@@ -265,7 +336,7 @@ export default function OnboardingPage() {
                 {step === "identity_lite" && (
                     <div className="space-y-6">
                         <div>
-                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">3 / 3</p>
+                            <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">4 / 4</p>
                             <h2 className="font-serif text-2xl text-neutral-900 flex items-center gap-2">
                                 <Compass className="h-5 w-5 text-[#0F766E]" /> 당신이 도모(圖謀)하는 것은 무엇입니까?
                             </h2>
