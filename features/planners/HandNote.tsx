@@ -157,22 +157,26 @@ export function HandNote({
     const outerRef        = useRef<HTMLDivElement>(null);
     const [fillH, setFillH] = useState(0);
     const svgRef          = useRef<SVGSVGElement>(null);
-    const paletteRef      = useRef<HTMLDivElement>(null);  // 팝오버 자체 (외부클릭 감지용)
-    const paletteBtnRef   = useRef<HTMLButtonElement>(null); // 무지개 버튼 (위치 기준)
+    const canvasRef       = useRef<HTMLCanvasElement>(null); // 라이브 스트로크 오버레이
+    const paletteRef      = useRef<HTMLDivElement>(null);
+    const paletteBtnRef   = useRef<HTMLButtonElement>(null);
     const [palettePos, setPalettePos] = useState({ top: 0, left: 0 });
 
-    // Undo / redo (ref → 렌더링 없이 스택 관리, forceUpdate로 버튼 disabled 갱신)
+    // Undo / redo
     const undoRef    = useRef<HandStroke[][]>([]);
     const redoRef    = useRef<HandStroke[][]>([]);
-    const [stackVer, setStackVer] = useState(0);   // undo/redo disabled 갱신 트리거
+    const [stackVer, setStackVer] = useState(0);
     const bumpVer    = () => setStackVer(v => v + 1);
 
     // 포인터 다운 시 캡처 (undo 커밋용)
     const preActionRef = useRef<HandStroke[] | null>(null);
 
-    // 드로잉 상태
+    // ─ 드로잉 Ref (state 대신 → React re-render 없음) ─
+    const drawingRef  = useRef<number[][] | null>(null); // 현재 스트로크 포인트
+    const rafRef      = useRef<number | null>(null);     // requestAnimationFrame handle
+
+    // 드로잉 상태 (React state — UI 업데이트 필요한 것만)
     const [width,        setWidth]        = useState(0);
-    const [drawing,      setDrawing]      = useState<number[][] | null>(null);
     const [penType,      setPenType]      = useState<PenType>("pen");
     const [color,        setColor]        = useState(QUICK_COLORS[0]);
     const [size,         setSize]         = useState(PEN_PRESETS.pen.baseSize);
@@ -182,6 +186,10 @@ export function HandNote({
     const [stylusEraser, setStylusEraser] = useState(false);
     const [penOnly,      setPenOnly]      = useState(false);
     const [autoH,        setAutoH]        = useState(value?.height ?? initH);
+
+    // RAF 콜백에서 항상 최신 펜 설정을 읽기 위한 ref (stale closure 방지)
+    const penStateRef = useRef({ penType, color, size, stabilizer });
+    penStateRef.current = { penType, color, size, stabilizer };
 
     // 팔레트
     const [showPalette,  setShowPalette]  = useState(false);
@@ -295,6 +303,45 @@ export function HandNote({
             onChange({ strokes: next, width: width || (value?.width ?? 600), height });
     }
 
+    // ── Canvas live render (RAF — React re-render 없음) ───────────────────────
+
+    function renderToCanvas() {
+        rafRef.current = null;
+        const canvas = canvasRef.current;
+        const points = drawingRef.current;
+        if (!canvas || !points || points.length < 2) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const { penType: pt, color: cl, size: sz, stabilizer: stab } = penStateRef.current;
+        const p = PEN_PRESETS[pt];
+        const stroke = getStroke(points, {
+            size: sz,
+            thinning:         p.thinning,
+            smoothing:        p.smoothing,
+            streamline:       stab ?? p.streamline,
+            easing:           (t) => t,
+            simulatePressure: p.simulatePressure,
+        });
+        if (!stroke.length) return;
+        const dpr = window.devicePixelRatio || 1;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = cl;
+        ctx.beginPath();
+        const [fx, fy] = stroke[0];
+        ctx.moveTo(fx, fy);
+        for (let i = 0; i < stroke.length - 1; i++) {
+            const [x0, y0] = stroke[i];
+            const [x1, y1] = stroke[i + 1];
+            ctx.quadraticCurveTo(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
     // ── Pointer events ────────────────────────────────────────────────────────
 
     function onPointerDown(e: ReactPointerEvent<SVGSVGElement>) {
@@ -319,32 +366,72 @@ export function HandNote({
             // 연필: 포인트 레벨 노이즈로 거친 질감
             const nx = penType === "pencil" ? x + (Math.random() - 0.5) * 1.2 : x;
             const ny = penType === "pencil" ? y + (Math.random() - 0.5) * 1.2 : y;
-            setDrawing([[nx, ny, e.pressure || 0.5]]);
+            drawingRef.current = [[nx, ny, e.pressure || 0.5]];
+
+            // 캔버스 DPR 동기화 (포인터 다운 시 1회)
+            const canvas = canvasRef.current;
+            if (canvas) {
+                const dpr = window.devicePixelRatio || 1;
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+                    canvas.width  = Math.round(w * dpr);
+                    canvas.height = Math.round(h * dpr);
+                }
+            }
         }
         e.preventDefault();
     }
 
     function onPointerMove(e: ReactPointerEvent<SVGSVGElement>) {
         if (penOnly && e.pointerType !== "pen") return;
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
 
         if (eraserMode || stylusEraser) {
-            if (e.buttons > 0) eraseAt(x, y);
+            if (e.buttons > 0) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                eraseAt(e.clientX - rect.left, e.clientY - rect.top);
+            }
             return;
         }
-        if (!drawing) return;
+        if (!drawingRef.current) return;
 
-        const nx = penType === "pencil" ? x + (Math.random() - 0.5) * 1.2 : x;
-        const ny = penType === "pencil" ? y + (Math.random() - 0.5) * 1.2 : y;
-        setDrawing(prev => prev ? [...prev, [nx, ny, e.pressure || 0.5]] : null);
+        const rect = e.currentTarget.getBoundingClientRect();
+
+        // getCoalescedEvents — 스타일러스 서브프레임 포인트 포착
+        const rawEvents: PointerEvent[] =
+            typeof e.nativeEvent.getCoalescedEvents === "function"
+                ? e.nativeEvent.getCoalescedEvents()
+                : [e.nativeEvent];
+
+        for (const ce of rawEvents) {
+            const x = ce.clientX - rect.left;
+            const y = ce.clientY - rect.top;
+            const nx = penType === "pencil" ? x + (Math.random() - 0.5) * 1.2 : x;
+            const ny = penType === "pencil" ? y + (Math.random() - 0.5) * 1.2 : y;
+            drawingRef.current.push([nx, ny, ce.pressure || 0.5]);
+        }
+
+        // RAF 스케줄 (이미 예약돼 있으면 중복 방지)
+        if (rafRef.current === null) {
+            rafRef.current = requestAnimationFrame(renderToCanvas);
+        }
         e.preventDefault();
     }
 
     function onPointerUp() {
         const wasErasing = effectiveErase;
         setStylusEraser(false);
+
+        // 진행 중인 RAF 취소 + 캔버스 클리어
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+        }
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        }
 
         const pre = preActionRef.current;
         preActionRef.current = null;
@@ -360,24 +447,23 @@ export function HandNote({
             }
         }
 
-        if (!drawing || drawing.length < 2) {
-            setDrawing(null);
-            return;
-        }
+        const points = drawingRef.current;
+        drawingRef.current = null;
 
-        const yMax = drawing.reduce((m, [, y]) => Math.max(m, y), 0);
+        if (!points || points.length < 2) return;
+
+        const yMax = points.reduce((m, [, y]) => Math.max(m, y), 0);
         maybeExpand(yMax);
 
         // 드로잉 undo 커밋
         if (pre !== null) commitUndo(pre);
 
-        const newStroke: HandStroke = { points: drawing, color, size, penType, streamline: stabilizer };
+        const newStroke: HandStroke = { points, color, size, penType, streamline: stabilizer };
         onChange({
             strokes: [...strokes, newStroke],
             width:   width || (value?.width ?? 600),
             height:  Math.max(height, yMax + 40),
         });
-        setDrawing(null);
     }
 
     // ── Pen selection ─────────────────────────────────────────────────────────
@@ -400,7 +486,7 @@ export function HandNote({
 
     // ── Derived ───────────────────────────────────────────────────────────────
 
-    const isEmpty   = strokes.length === 0 && !drawing;
+    const isEmpty   = strokes.length === 0;
     const touchAct  = penOnly ? "pan-y" : "none";
     const canUndo   = undoRef.current.length > 0;
     const canRedo   = redoRef.current.length > 0;
@@ -679,8 +765,9 @@ export function HandNote({
                 </div>
             )}
 
-            {/* ── SVG Canvas ── */}
+            {/* ── SVG + Canvas overlay ── */}
             <div className="relative" style={{ height, minHeight }}>
+                {/* 확정된 스트로크 — SVG */}
                 <svg
                     ref={svgRef}
                     width="100%"
@@ -706,14 +793,20 @@ export function HandNote({
                             opacity={PEN_PRESETS[s.penType ?? "pen"].opacity}
                         />
                     ))}
-                    {drawing && drawing.length > 1 && (
-                        <path
-                            d={strokeToPath(drawing, size, penType, stabilizer)}
-                            fill={color}
-                            opacity={PEN_PRESETS[penType].opacity * 0.85}
-                        />
-                    )}
                 </svg>
+
+                {/* 라이브 스트로크 캔버스 — React re-render 없이 RAF로 직접 렌더 */}
+                <canvas
+                    ref={canvasRef}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none",
+                    }}
+                />
 
                 {isEmpty && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
