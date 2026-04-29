@@ -619,8 +619,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             {cell.inMonth && (() => {
                                                 const dayEntries = entriesByDate[cell.date] ?? [];
                                                 const personal = dayEntries.find(e => e.kind === "anniversary")
-                                                    ?? dayEntries.find(e => e.kind === "meeting")
-                                                    ?? dayEntries.find(e => e.kind === "todo");
+                                                    ?? dayEntries.find(e => e.kind === "meeting");
                                                 if (!personal) return null;
                                                 const c = KIND_COLORS[personal.kind];
                                                 return (

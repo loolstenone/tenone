@@ -51,6 +51,7 @@ interface Identity {
     mission_statement?: string; vision_walls?: string;
     inside_values?: string[];
 }
+interface YearlyGoal { id: string; text: string; quarter?: number; done?: boolean; }
 
 export function IndexView() {
     const now = new Date();
@@ -60,6 +61,8 @@ export function IndexView() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [projectsLoaded, setProjectsLoaded] = useState(false);
     const [identity, setIdentity] = useState<Identity | null>(null);
+    const [yearlyTheme, setYearlyTheme] = useState<string>("");
+    const [yearlyGoals, setYearlyGoals] = useState<YearlyGoal[]>([]);
 
     useEffect(() => {
         fetch("/api/planners/projects")
@@ -69,6 +72,15 @@ export function IndexView() {
         fetch("/api/planners/identity")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.identity) setIdentity(d.identity); })
+            .catch(() => {});
+        fetch(`/api/planners/yearly?year=${now.getFullYear()}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (d?.yearly) {
+                    setYearlyTheme(d.yearly.theme || "");
+                    setYearlyGoals(d.yearly.goals || []);
+                }
+            })
             .catch(() => {});
     }, []);
 
@@ -103,7 +115,9 @@ export function IndexView() {
 
             {/* ── 1. 퍼스널 아이덴티티 ── */}
             <section>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-2">퍼스널 아이덴티티</p>
+                <Link href="/planners/app/identity" className="inline-block text-[10px] font-semibold uppercase tracking-widest text-neutral-400 hover:text-[#0F766E] transition-colors mb-2">
+                    퍼스널 아이덴티티 →
+                </Link>
                 {vision ? (
                     <div className="mb-3 space-y-1">
                         {vision.split("\n").filter(Boolean).map((line, i) => (
@@ -125,6 +139,33 @@ export function IndexView() {
                     <Link href="/planners/app/identity" className="text-xs text-[#0F766E] hover:underline transition-colors font-medium">전체 →</Link>
                 </div>
             </section>
+
+            {/* ── 1.5. 올해의 목표 ── */}
+            {(yearlyTheme || yearlyGoals.length > 0) && (
+                <section>
+                    <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="inline-block text-[10px] font-semibold uppercase tracking-widest text-neutral-400 hover:text-[#0F766E] transition-colors mb-2">
+                        올해의 목표 →
+                    </Link>
+                    {yearlyTheme && (
+                        <Link href={`/planners/app/yearly?year=${now.getFullYear()}`} className="block mb-2">
+                            <p className="text-sm font-medium text-neutral-800 hover:text-[#0F766E] transition-colors">{yearlyTheme}</p>
+                        </Link>
+                    )}
+                    {yearlyGoals.length > 0 && (
+                        <div className="space-y-1">
+                            {yearlyGoals.slice(0, 5).map((g) => (
+                                <Link key={g.id} href={`/planners/app/yearly?year=${now.getFullYear()}`} className="flex items-center gap-2 group">
+                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${g.done ? "bg-[#0F766E]" : "bg-neutral-300"}`} />
+                                    <span className={`text-xs leading-snug group-hover:text-[#0F766E] transition-colors ${g.done ? "line-through text-neutral-300" : "text-neutral-600"}`}>{g.text}</span>
+                                </Link>
+                            ))}
+                            {yearlyGoals.length > 5 && (
+                                <p className="text-[10px] text-neutral-300 pl-3.5">+{yearlyGoals.length - 5}개 더</p>
+                            )}
+                        </div>
+                    )}
+                </section>
+            )}
 
             {/* ── 2. 연간 달력 (모바일 2열, 태블릿+ 3열, 대화면 4열) ── */}
             <section>
