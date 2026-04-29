@@ -30,7 +30,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
             const res = await fetch(url);
             if (res.ok) {
                 const d = await res.json();
-                setProjects((d.projects ?? []).slice(0, 6));
+                setProjects((d.projects ?? []).slice(0, 4));
             }
         } finally {
             setLoading(false);

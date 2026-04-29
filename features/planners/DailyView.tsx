@@ -1361,31 +1361,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     {/* 4. 노트 추가 */}
                     <div className="order-4 md:order-none md:col-span-2 space-y-4">
 
-                        {/* 오늘 추천 템플릿 — 칩 형태 배너 (Project와 동일 패턴) */}
-                        {(() => {
-                            const recs = DAILY_RECOMMENDED
-                                .map(k => tplList.find(t => t.key === k))
-                                .filter((t): t is NonNullable<typeof t> => !!t)
-                                .slice(0, 6);
-                            if (recs.length === 0) return null;
-                            return (
-                                <div className="bg-violet-50/50 border border-violet-100 rounded-xl px-4 py-3">
-                                    <p className="text-[10px] uppercase tracking-widest text-violet-600 mb-2">오늘 추천 템플릿</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {recs.map((t) => (
-                                            <button
-                                                key={t.id}
-                                                onClick={() => insertTemplate(t)}
-                                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-violet-200 rounded-full text-xs text-violet-700 hover:bg-violet-100 hover:border-violet-400 transition-colors"
-                                            >
-                                                <LayoutTemplate className="h-3 w-3" /> {t.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
                         {/* 노트 추가 버튼 */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <button
@@ -2124,7 +2099,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     className="flex-1 text-sm bg-transparent focus:outline-none text-neutral-900 placeholder:text-neutral-400"
                                 />
                             </div>
-                            <div className="flex gap-1 overflow-x-auto">
+                            <div className="flex flex-wrap gap-1">
                                 {["all", "favs", "recommended", "framework", "schedule", "note"].map((c) => (
                                     <button
                                         key={c}

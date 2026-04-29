@@ -283,25 +283,6 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
 
     return (
         <div className="space-y-4">
-            {/* 추천 템플릿 — 카테고리 기반 */}
-            {recommendedTpls.length > 0 && (
-                <div className="bg-violet-50/50 border border-violet-100 rounded-xl px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-widest text-violet-600 mb-2">이 프로젝트 추천 템플릿</p>
-                    <div className="flex flex-wrap gap-1.5">
-                        {recommendedTpls.map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => insertFromTemplate(t)}
-                                disabled={saving}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-violet-200 rounded-full text-xs text-violet-700 hover:bg-violet-100 hover:border-violet-400 transition-colors disabled:opacity-50"
-                            >
-                                <LayoutTemplate className="h-3 w-3" /> {t.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
             {/* Action bar — 4종 노트 옵션 */}
             <div className="grid grid-cols-4 gap-2">
                 <button
@@ -486,7 +467,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                     className="flex-1 text-sm bg-transparent focus:outline-none text-neutral-900 placeholder:text-neutral-400"
                                 />
                             </div>
-                            <div className="flex gap-1 overflow-x-auto">
+                            <div className="flex flex-wrap gap-1">
                                 {(["all", "favs", "recommended", "framework", "schedule", "note"] as const).map((c) => (
                                     <button
                                         key={c}
