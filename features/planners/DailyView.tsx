@@ -231,7 +231,7 @@ export function CornellRowsInline({
     return (
         <div className="px-4 py-3">
             {/* 컬럼 헤더 */}
-            <div className="grid grid-cols-[140px_1fr_auto] gap-3 text-[10px] uppercase tracking-widest text-neutral-300 mb-1.5 px-1">
+            <div className="grid grid-cols-[min(140px,35%)_1fr_auto] gap-3 text-[10px] uppercase tracking-widest text-neutral-300 mb-1.5 px-1">
                 <span>단서 · 키워드</span>
                 <span>노트</span>
                 <span></span>
@@ -241,7 +241,7 @@ export function CornellRowsInline({
             ) : (
                 <div className="space-y-1">
                     {rows.map((r) => (
-                        <div key={r.id} className="group grid grid-cols-[140px_1fr_auto] gap-3 items-start">
+                        <div key={r.id} className="group grid grid-cols-[min(140px,35%)_1fr_auto] gap-3 items-start">
                             <input
                                 type="text"
                                 value={r.cue}
@@ -1072,7 +1072,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     }
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 overflow-x-hidden">
             {/* Header — 모바일은 세로 스택, 데스크톱은 가로 분리 */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
                 <div className="min-w-0">
@@ -1140,9 +1140,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
-                <div className="grid md:grid-cols-3 gap-6">
-                    {/* Tasks (col 2) */}
-                    <div className="md:col-span-2 space-y-4">
+                <div className="grid md:grid-cols-3 gap-6 items-start">
+                    {/* 1. 일정 & 업무 */}
+                    <div className="order-1 md:order-none md:col-span-2 space-y-4">
                         <ExternalEventsBanner date={date} />
 
                         {/* ── 통합 타임테이블 (일정 + 업무) ── */}
@@ -1356,6 +1356,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             );
                         })()}
 
+                    </div>
+
+                    {/* 4. 노트 추가 */}
+                    <div className="order-4 md:order-none md:col-span-2 space-y-4">
+
                         {/* 오늘 추천 템플릿 — 칩 형태 배너 (Project와 동일 패턴) */}
                         {(() => {
                             const recs = DAILY_RECOMMENDED
@@ -1497,17 +1502,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
-                    {/* Right column — 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 */}
-                    <div className="space-y-4">
-                        {/* 1. 당월 달력 — 모바일에서 숨김 */}
-                        <div className="hidden md:block">
-                            <DailyMiniMonth date={date} />
-                        </div>
+                    {/* 달력 — tablet+ only */}
+                    <div className="hidden md:block md:col-start-3">
+                        <DailyMiniMonth date={date} />
+                    </div>
 
-                        {/* 2. 향후 4주 일정·미팅 */}
+                    {/* 2. 향후 일정 & 업무 — mobile order 2 */}
+                    <div className="order-2 md:order-none md:col-start-3">
                         <UpcomingSchedule date={date} />
+                    </div>
 
-                        {/* 3. 트래킹 */}
+                    {/* 3. 일간 기록 — mobile order 3 */}
+                    <div className="order-3 md:order-none md:col-start-3">
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
@@ -1611,10 +1617,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </section>
                         )}
 
-                        {/* 4. 진행중인 프로젝트 */}
-                        <DailyProjectsCard date={date} />
+                    </div>
 
-                        {/* 5. 오늘 한 장면 — 한 줄 + 사진/동영상 (통합) */}
+                    {/* 5. 프로젝트 — mobile order 5 */}
+                    <div className="order-5 md:order-none md:col-start-3">
+                        <DailyProjectsCard date={date} />
+                    </div>
+
+                    {/* 6. 오늘 한 장면 — mobile order 6 */}
+                    <div className="order-6 md:order-none md:col-start-3">
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-3">
                                 <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘 한 장면</h2>
@@ -1662,8 +1673,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <DailyMomentsAuto date={date} compact />
                             </div>
                         </section>
-
                     </div>
+
                 </div>
             )}
 

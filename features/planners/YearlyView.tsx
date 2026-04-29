@@ -55,7 +55,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     const [calEditorOpen, setCalEditorOpen] = useState(false);
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [activeQuarter, setActiveQuarter] = useState(1);
-    const [viewMode, setViewMode] = useState<"Q" | "H" | "Y">("Y"); // 분기/반기/연간 — 기본 연간
+    const [viewMode, setViewMode] = useState<"Q" | "H" | "Y">("Y"); // 분기/반기/연간 — 기본 연간 (모바일은 분기)
     const [yearStartMonth, setYearStartMonth] = useState(1);   // 1~12
     const [joinYear, setJoinYear] = useState<number | null>(null);
 
@@ -212,6 +212,14 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
         }
         return 31;
     }
+
+    // 모바일: 분기 뷰 기본값
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+            setViewMode("Q");
+            setActiveQuarter(Math.ceil((new Date().getMonth() + 1) / 3));
+        }
+    }, []);
 
     // 스와이프 내비게이션
     const swipeRef = useSwipeNav(

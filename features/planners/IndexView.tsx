@@ -45,9 +45,11 @@ function buildMonth(year: number, mIdx: number): CalCell[][] {
     return rows;
 }
 
-interface Project {
-    id: string;
-    title: string;
+interface Project { id: string; title: string }
+interface Identity {
+    vision_statement?: string; vision_roof?: string; inside_vision?: string;
+    mission_statement?: string; vision_walls?: string;
+    inside_values?: string[];
 }
 
 export function IndexView() {
@@ -57,16 +59,21 @@ export function IndexView() {
     const [year, setYear] = useState(now.getFullYear());
     const [projects, setProjects] = useState<Project[]>([]);
     const [projectsLoaded, setProjectsLoaded] = useState(false);
+    const [identity, setIdentity] = useState<Identity | null>(null);
 
     useEffect(() => {
         fetch("/api/planners/projects")
             .then(r => r.ok ? r.json() : null)
-            .then(d => {
-                if (d?.projects) setProjects(d.projects.slice(0, 20));
-                setProjectsLoaded(true);
-            })
-            .catch(() => { setProjectsLoaded(true); });
+            .then(d => { if (d?.projects) setProjects(d.projects.slice(0, 20)); setProjectsLoaded(true); })
+            .catch(() => setProjectsLoaded(true));
+        fetch("/api/planners/identity")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.identity) setIdentity(d.identity); })
+            .catch(() => {});
     }, []);
+
+    const vision = identity?.vision_statement ?? identity?.vision_roof ?? identity?.inside_vision ?? "";
+    const mission = identity?.mission_statement ?? identity?.vision_walls ?? "";
 
     const swipeRef = useSwipeNav(
         () => setYear(y => y + 1),
@@ -74,9 +81,10 @@ export function IndexView() {
     );
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
-            {/* Header — 모바일은 세로 스택 */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-8 md:space-y-12">
+
+            {/* ── 헤더 ── */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3">
                 <div className="flex items-center gap-2">
                     <LayoutGrid className="h-6 w-6 text-[#0F766E]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">인덱스</h1>
@@ -93,11 +101,35 @@ export function IndexView() {
                 <PlannersUtilityLinks className="sm:ml-auto" />
             </div>
 
-            {/* 모바일: 단일 컬럼 / 태블릿+: 3컬럼 */}
-            <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr_1fr] gap-x-10 gap-y-8 items-start">
+            {/* ── 1. 퍼스널 아이덴티티 ── */}
+            <section>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-2">퍼스널 아이덴티티</p>
+                {vision ? (
+                    <div className="mb-3 space-y-1">
+                        {vision.split("\n").filter(Boolean).map((line, i) => (
+                            <p key={i} className={`text-neutral-800 leading-snug ${i === 0 ? "text-sm font-medium" : "text-xs text-neutral-500"}`}>
+                                {line}
+                            </p>
+                        ))}
+                        {mission && (
+                            <p className="text-xs text-neutral-400 mt-0.5">{mission.split("\n")[0]}</p>
+                        )}
+                    </div>
+                ) : (
+                    <p className="text-xs text-neutral-300 italic mb-3">비전을 입력해보세요</p>
+                )}
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                    <Link href="/planners/app/identity" className="text-xs text-neutral-500 hover:text-[#0F766E] transition-colors">비전</Link>
+                    <Link href="/planners/app/identity" className="text-xs text-neutral-500 hover:text-[#0F766E] transition-colors">미션</Link>
+                    <Link href="/planners/app/identity" className="text-xs text-neutral-500 hover:text-[#0F766E] transition-colors">핵심가치</Link>
+                    <Link href="/planners/app/identity" className="text-xs text-[#0F766E] hover:underline transition-colors font-medium">전체 →</Link>
+                </div>
+            </section>
 
-                {/* ── Left: 12-month calendar (모바일 2열, 태블릿+ 3열) ── */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-6 sm:gap-y-8">
+            {/* ── 2. 연간 달력 (모바일 2열, 태블릿+ 3열, 대화면 4열) ── */}
+            <section>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">연간 달력</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-6">
                     {MONTHS_KO.map((monthName, mIdx) => {
                         const rows = buildMonth(year, mIdx);
                         return (
@@ -107,7 +139,6 @@ export function IndexView() {
                                         {monthName}
                                     </div>
                                 </Link>
-
                                 <div className="grid grid-cols-[28px_repeat(7,1fr)] mt-0.5 mb-px">
                                     <div />
                                     {["M", "T", "W", "T", "F", "S", "S"].map((d, di) => (
@@ -116,7 +147,6 @@ export function IndexView() {
                                         </div>
                                     ))}
                                 </div>
-
                                 {rows.map((row, ri) => (
                                     <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
                                         <Link
@@ -152,42 +182,41 @@ export function IndexView() {
                         );
                     })}
                 </div>
+            </section>
 
-                {/* ── Center: Project ── */}
-                <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">프로젝트</p>
+            {/* ── 3. 프로젝트 + 템플릿 ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12">
+
+                {/* 프로젝트 */}
+                <section>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">프로젝트</p>
+                        <Link href="/planners/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                    </div>
                     {!projectsLoaded ? (
                         <div className="space-y-1.5">
-                            {Array.from({ length: 10 }).map((_, i) => (
+                            {Array.from({ length: 8 }).map((_, i) => (
                                 <div key={i} className="flex items-center gap-2">
-                                    <span className="text-[11px] text-neutral-200 font-mono w-6 shrink-0">
-                                        {String(i + 1).padStart(2, "0")}
-                                    </span>
+                                    <span className="text-[11px] text-neutral-200 font-mono w-6 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                                     <span className="flex-1 border-b border-neutral-100 pb-0.5" />
                                 </div>
                             ))}
                         </div>
                     ) : projects.length === 0 ? (
                         <div className="space-y-1.5">
-                            {Array.from({ length: 10 }).map((_, i) => (
+                            {Array.from({ length: 8 }).map((_, i) => (
                                 <div key={i} className="flex items-center gap-2">
-                                    <span className="text-[11px] text-neutral-300 font-mono w-6 shrink-0">
-                                        {String(i + 1).padStart(2, "0")}
-                                    </span>
+                                    <span className="text-[11px] text-neutral-300 font-mono w-6 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                                     <span className="flex-1 border-b border-neutral-100 pb-0.5" />
                                 </div>
                             ))}
-                            <Link href="/planners/app/projects" className="mt-3 inline-block text-[10px] text-[#0F766E] hover:underline">
-                                + 만들기
-                            </Link>
+                            <Link href="/planners/app/projects" className="mt-3 inline-block text-[10px] text-[#0F766E] hover:underline">+ 만들기</Link>
                         </div>
                     ) : (
                         <div className="space-y-1.5">
                             {projects.map((project, i) => (
                                 <div key={project.id} className="flex items-center gap-2">
-                                    <span className="text-[11px] text-neutral-400 font-mono w-6 shrink-0">
-                                        {String(i + 1).padStart(2, "0")}
-                                    </span>
+                                    <span className="text-[11px] text-neutral-400 font-mono w-6 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                                     <Link
                                         href={`/planners/app/projects/${project.id}`}
                                         className="flex-1 border-b border-neutral-200 text-xs text-neutral-700 hover:text-[#0F766E] hover:border-[#0F766E] transition-colors pb-0.5 truncate"
@@ -198,29 +227,29 @@ export function IndexView() {
                             ))}
                         </div>
                     )}
-                </div>
+                </section>
 
-                {/* ── Right: Templates ── */}
-                <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">템플릿</p>
-                    <Link href="/planners/app/templates?category=note" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        노트 <span className="text-[10px] font-normal text-neutral-400">64</span>
-                    </Link>
-                    <Link href="/planners/app/templates?category=schedule" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        일정 <span className="text-[10px] font-normal text-neutral-400">19</span>
-                    </Link>
-                    <Link href="/planners/app/templates?category=framework" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        프레임워크북 <span className="text-[10px] font-normal text-neutral-400">26</span>
-                    </Link>
-                    <div className="border-t border-neutral-100 pt-2 space-y-2">
-                        <Link href="/planners/app/templates?category=cover" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                            표지
+                {/* 템플릿 */}
+                <section>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
+                        <Link href="/planners/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                    </div>
+                    <div className="space-y-2">
+                        <Link href="/planners/app/templates?category=framework" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">프레임워크북</span>
+                            <span className="text-[10px] text-neutral-400">26</span>
                         </Link>
-                        <Link href="/planners/app/identity" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                            퍼스널 아이덴티티
+                        <Link href="/planners/app/templates?category=schedule" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">일정</span>
+                            <span className="text-[10px] text-neutral-400">19</span>
+                        </Link>
+                        <Link href="/planners/app/templates?category=note" className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
+                            <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">노트</span>
+                            <span className="text-[10px] text-neutral-400">64</span>
                         </Link>
                     </div>
-                </div>
+                </section>
 
             </div>
         </div>

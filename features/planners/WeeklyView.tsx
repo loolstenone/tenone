@@ -380,8 +380,9 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                 : "text-neutral-800";
                             const dayColor = isSun ? "text-rose-400" : isSat ? "text-blue-400" : "text-neutral-400";
 
-                            // 절기 / 기념일 / 공휴일 (calendar entries)
-                            const specialEntries = entries.filter(e => e.kind === "solar_term" || e.kind === "anniversary" || e.kind === "public_holiday");
+                            // 절기 / 공휴일 (국가) / 개인 기념일 분리
+                            const publicEntries = entries.filter(e => e.kind === "solar_term" || e.kind === "public_holiday");
+                            const anniversaryEntries = entries.filter(e => e.kind === "anniversary");
                             const meetingEntries = entries.filter(e => e.kind === "meeting");
 
                             const todoTasks = dayData.tasks.filter(t => t.status === "todo" || t.status === "done");
@@ -415,117 +416,113 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         isToday ? "bg-[#0F766E]/[0.025]" : "bg-white"
                                     } ${dragOverDate === ds ? "ring-2 ring-[#0F766E] ring-inset bg-[#0F766E]/[0.04]" : ""}`}
                                 >
-                                    {/* 좌측: 날짜 정보 */}
-                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 px-4 py-3 flex flex-col gap-1.5">
-                                        {/* 날짜 헤더 */}
-                                        <div className="flex items-baseline gap-1.5 mb-0.5">
+                                    {/* 좌측: 날짜 정보 — 수직 구조 */}
+                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 px-3 py-3 flex flex-col gap-1 overflow-hidden">
+
+                                        {/* ① 날짜 요일 + 화살표 */}
+                                        <div className="flex items-baseline gap-1">
                                             <span className={`font-serif text-2xl leading-none font-light ${dateColor}`}>
                                                 {String(d.getDate()).padStart(2, "0")}
                                             </span>
                                             <span className={`text-xs font-medium ${dayColor}`}>{DAYS_KO[d.getDay()]}</span>
-                                            {isToday && <span className="text-[9px] text-[#0F766E] font-semibold ml-0.5">오늘</span>}
-                                            <span className="ml-auto flex items-center gap-1">
+                                            <Link
+                                                href={`/planners/app/daily?date=${ds}`}
+                                                title="Daily 보기"
+                                                className="ml-auto p-0.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors shrink-0"
+                                            >
+                                                <ArrowUpRight className="h-3 w-3" />
+                                            </Link>
+                                        </div>
+
+                                        {/* ② 오늘 표시 + 날씨 */}
+                                        {(isToday || dayData.weather) && (
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                {isToday && (
+                                                    <span className="text-[9px] text-[#0F766E] font-semibold bg-[#0F766E]/10 px-1.5 py-0.5 rounded-full leading-none">오늘</span>
+                                                )}
                                                 {dayData.weather && (
-                                                    <span className="text-[10px] text-neutral-500">
+                                                    <span className="text-[10px] text-neutral-400">
                                                         {weatherEmoji(dayData.weather.code)} {dayData.weather.temp}°
                                                     </span>
                                                 )}
-                                                <button
-                                                    onClick={() => { setCalEditing(null); setCalDefaultDate(ds); setCalEditorOpen(true); }}
-                                                    title="이 날 일정 추가"
-                                                    className="p-0.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                </button>
-                                                <Link
-                                                    href={`/planners/app/daily?date=${ds}`}
-                                                    title="Daily 보기"
-                                                    className="p-0.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    <ArrowUpRight className="h-3 w-3" />
-                                                </Link>
-                                            </span>
-                                        </div>
+                                            </div>
+                                        )}
 
-                                        {/* 음력 */}
+                                        {/* ③ 음력 */}
                                         {lunar && (
                                             <p className="text-[9px] text-neutral-300 font-mono leading-none">
-                                                음력 {lunar.isLeap ? "윤" : ""}{lunar.month}월 {lunar.day}일
+                                                음{lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
                                             </p>
                                         )}
 
-                                        {/* 공휴일 */}
-                                        {holiday && (
-                                            <p className={`text-[10px] font-medium leading-tight ${
-                                                holiday.type === "holiday" ? "text-rose-500" :
-                                                holiday.type === "memorial" ? "text-rose-400" :
-                                                holiday.type === "commemoration" ? "text-amber-600" :
-                                                "text-emerald-600"
-                                            }`}>
-                                                {holiday.label}
-                                            </p>
+                                        {/* ④ 국가 기념일 · 절기 */}
+                                        {(holiday || publicEntries.length > 0) && (
+                                            <div className="space-y-0.5">
+                                                {holiday && (
+                                                    <p className={`text-[10px] leading-tight truncate ${
+                                                        holiday.type === "holiday" ? "text-rose-500" :
+                                                        holiday.type === "memorial" ? "text-rose-400" :
+                                                        holiday.type === "commemoration" ? "text-amber-600" :
+                                                        "text-emerald-600"
+                                                    }`}>{holiday.label}</p>
+                                                )}
+                                                {publicEntries.map((e) => (
+                                                    <p key={e.id} className={`text-[10px] leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
+                                                        {e.title}
+                                                    </p>
+                                                ))}
+                                            </div>
                                         )}
 
-                                        {/* 절기 / 기념일 (calendar entries) */}
-                                        {specialEntries.map((e) => {
-                                            const c = KIND_COLORS[e.kind as CalendarKind];
-                                            return (
-                                                <p key={e.id} className={`text-[10px] leading-tight flex items-center gap-1 ${c.text}`}>
-                                                    <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
-                                                    <span className="truncate">{e.title}</span>
-                                                </p>
-                                            );
-                                        })}
-
-                                        {/* 미팅/일정 */}
-                                        {meetingEntries.map((e) => {
-                                            const c = KIND_COLORS[e.kind as CalendarKind];
-                                            return (
-                                                <button
-                                                    key={e.id}
-                                                    onClick={() => { setCalEditing(e); setCalEditorOpen(true); }}
-                                                    className={`text-[10px] leading-tight flex items-center gap-1 text-left hover:opacity-80 transition-opacity ${c.text}`}
-                                                >
-                                                    <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
-                                                    <span className="truncate">{e.start_time ? `${e.start_time.slice(0,5)} ` : ""}{e.title}</span>
-                                                </button>
-                                            );
-                                        })}
-
-                                        {/* 업무 (Daily tasks) — 드래그하여 다른 날짜로 이동 */}
-                                        {todoTasks.length > 0 && (
-                                            <div className="mt-0.5 space-y-0.5">
-                                                {todoTasks.slice(0, 5).map((t) => {
+                                        {/* ⑤ 개인 기념일 · 일정(미팅) · 업무 */}
+                                        {(anniversaryEntries.length > 0 || meetingEntries.length > 0 || todoTasks.length > 0) && (
+                                            <div className="space-y-0.5 mt-0.5">
+                                                {anniversaryEntries.map((e) => (
+                                                    <p key={e.id} className={`text-[10px] leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
+                                                        {e.title}
+                                                    </p>
+                                                ))}
+                                                {meetingEntries.map((e) => (
+                                                    <button
+                                                        key={e.id}
+                                                        onClick={() => { setCalEditing(e); setCalEditorOpen(true); }}
+                                                        className={`w-full text-[10px] leading-tight text-left truncate hover:opacity-80 transition-opacity ${KIND_COLORS[e.kind as CalendarKind].text}`}
+                                                    >
+                                                        {e.start_time ? `${e.start_time.slice(0,5)} ` : ""}{e.title}
+                                                    </button>
+                                                ))}
+                                                {todoTasks.slice(0, 4).map((t) => {
                                                     const origIdx = dayData.tasks.indexOf(t);
                                                     return (
                                                         <div
                                                             key={origIdx}
                                                             draggable
-                                                            onDragStart={(e) => {
-                                                                e.dataTransfer.effectAllowed = "move";
-                                                                e.dataTransfer.setData(
-                                                                    "application/x-pp-task",
-                                                                    JSON.stringify({ fromDate: ds, taskIndex: origIdx })
-                                                                );
+                                                            onDragStart={(ev) => {
+                                                                ev.dataTransfer.effectAllowed = "move";
+                                                                ev.dataTransfer.setData("application/x-pp-task", JSON.stringify({ fromDate: ds, taskIndex: origIdx }));
                                                             }}
                                                             title="끌어서 다른 날짜로 이동"
                                                             className={`text-[10px] leading-tight truncate cursor-grab active:cursor-grabbing select-none ${
                                                                 t.status === "done" ? "text-neutral-300 line-through" : "text-neutral-600"
                                                             }`}
-                                                        >
-                                                            · {t.text}
-                                                        </div>
+                                                        >· {t.text}</div>
                                                     );
                                                 })}
-                                                {todoTasks.length > 5 && (
-                                                    <p className="text-[9px] text-neutral-400">+{todoTasks.length - 5}개</p>
+                                                {todoTasks.length > 4 && (
+                                                    <p className="text-[9px] text-neutral-400">+{todoTasks.length - 4}개</p>
                                                 )}
                                             </div>
                                         )}
 
-                                        {/* 아무것도 없을 때 */}
-                                        {!holiday && specialEntries.length === 0 && meetingEntries.length === 0 && todoTasks.length === 0 && (
-                                            <p className="text-[10px] text-neutral-200">—</p>
+                                        {/* 빈 날 — + 버튼 */}
+                                        {!holiday && publicEntries.length === 0 && anniversaryEntries.length === 0 && meetingEntries.length === 0 && todoTasks.length === 0 && (
+                                            <button
+                                                onClick={() => { setCalEditing(null); setCalDefaultDate(ds); setCalEditorOpen(true); }}
+                                                title="이 날 일정 추가"
+                                                className="p-0.5 rounded text-neutral-200 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors w-fit"
+                                            >
+                                                <Plus className="h-3 w-3" />
+                                            </button>
                                         )}
                                     </div>
 

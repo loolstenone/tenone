@@ -37,6 +37,7 @@ export function ProjectsView() {
     const [newTitle, setNewTitle] = useState("");
     const [newCategory, setNewCategory] = useState<ProjectCategory>("custom");
     const [filter, setFilter] = useState<"all" | "active" | "completed" | "archived">("active");
+    const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -99,7 +100,9 @@ export function ProjectsView() {
         }
     }
 
-    const filtered = filter === "all" ? projects : projects.filter(p => p.status === filter);
+    const filtered = projects
+        .filter(p => filter === "all" || p.status === filter)
+        .filter(p => !categoryFilter || p.category === categoryFilter);
     const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
@@ -126,8 +129,8 @@ export function ProjectsView() {
                 </div>
             </div>
 
-            {/* Filter */}
-            <div className="flex items-center gap-1 mb-6">
+            {/* 상태 탭 + 새 프로젝트 버튼 */}
+            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
                 {(["active", "completed", "archived", "all"] as const).map((f) => (
                     <button
                         key={f}
@@ -141,18 +144,45 @@ export function ProjectsView() {
                         {f === "active" ? "진행중" : f === "completed" ? "완료" : f === "archived" ? "보관" : "전체"}
                     </button>
                 ))}
+                <button
+                    onClick={() => setShowForm(v => !v)}
+                    className="ml-auto flex items-center gap-1 px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors shrink-0"
+                >
+                    <Plus className="h-3.5 w-3.5" /> 새 프로젝트
+                </button>
             </div>
 
-            {/* New project — 캔버스 패턴 통일: 점선 박스 → 클릭 시 폼 펼침 */}
-            {!showForm ? (
+            {/* 카테고리 필터 */}
+            <div className="flex items-center gap-1.5 mb-5 flex-wrap">
                 <button
-                    onClick={() => setShowForm(true)}
-                    className="w-full mb-6 flex items-center justify-center gap-2 py-4 border-2 border-dashed border-neutral-200 rounded-xl text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors text-sm"
+                    onClick={() => setCategoryFilter(null)}
+                    className={`px-2.5 py-0.5 text-xs rounded-full transition-colors ${
+                        !categoryFilter ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                    }`}
                 >
-                    <Plus className="h-4 w-4" />
-                    새 프로젝트 만들기
+                    전체
                 </button>
-            ) : (
+                {PROJECT_CATEGORIES.map((c) => {
+                    const Icon = CATEGORY_ICONS[c.icon] ?? Sparkles;
+                    const active = categoryFilter === c.key;
+                    return (
+                        <button
+                            key={c.key}
+                            onClick={() => setCategoryFilter(active ? null : c.key)}
+                            className={`flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full transition-colors ${
+                                active ? "text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                            }`}
+                            style={active ? { backgroundColor: c.color } : undefined}
+                        >
+                            <Icon className="h-3 w-3" />
+                            {c.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* New project form */}
+            {showForm && (
                 <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 space-y-3">
                     <div className="flex items-center gap-3">
                         <Plus className="h-4 w-4 text-neutral-400" />

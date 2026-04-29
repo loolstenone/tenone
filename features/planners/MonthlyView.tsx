@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
@@ -79,6 +79,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     const [theme, setTheme] = useState("");
     const [focusInput, setFocusInput] = useState("");
@@ -454,29 +455,33 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                     </section>
 
                     {/* 2) 집중 영역 — 활성 프로젝트 토글 + 자유 텍스트 */}
-                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                        <div className="flex items-baseline gap-2 mb-1">
+                    <section className="bg-white border border-neutral-200 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
                             <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">FOCUS</span>
                             <h2 className="text-sm font-semibold text-neutral-800">집중 영역</h2>
+                            <button
+                                onClick={() => setShowSuggestions(v => !v)}
+                                className="ml-auto flex items-center gap-0.5 text-[11px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                            >
+                                제시 항목 <ChevronDown className={`h-3 w-3 transition-transform ${showSuggestions ? "rotate-180" : ""}`} />
+                            </button>
                         </div>
-                        <p className="text-[11px] text-neutral-500 mb-3">이번 달 깊이 들어갈 프로젝트와 키워드.</p>
 
                         {/* 선택된 집중 영역 — 위, 강조 */}
                         {(monthly?.focus_areas ?? []).length > 0 ? (
-                            <div className="mb-4 bg-[#0F766E]/5 border border-[#0F766E]/20 rounded-lg p-3">
-                                <p className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold mb-2">이달 집중 ({(monthly?.focus_areas ?? []).length})</p>
-                                <div className="flex flex-wrap gap-2">
+                            <div className="mb-2 bg-[#0F766E]/5 border border-[#0F766E]/20 rounded-lg p-2">
+                                <div className="flex flex-wrap gap-1.5">
                                     {(monthly?.focus_areas ?? []).map((f, i) => {
                                         const matched = activeProjects.find(p => p.title === f);
                                         return (
-                                            <span key={i} className="group inline-flex items-center gap-1.5 bg-[#0F766E] text-white text-sm px-3 py-1.5 rounded-full font-medium shadow-sm">
+                                            <span key={i} className="group inline-flex items-center gap-1 bg-[#0F766E] text-white text-xs px-2 py-0.5 rounded-full font-medium">
                                                 {matched ? (
                                                     <Link
                                                         href={`/planners/app/projects/${matched.id}`}
                                                         title="프로젝트로 이동"
                                                         className="hover:underline inline-flex items-center gap-0.5"
                                                     >
-                                                        {f} <ArrowUpRight className="h-3.5 w-3.5" />
+                                                        {f} <ArrowUpRight className="h-3 w-3" />
                                                     </Link>
                                                 ) : (
                                                     <span>{f}</span>
@@ -486,7 +491,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                     title="제거"
                                                     className="opacity-60 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity"
                                                 >
-                                                    <Trash2 className="h-3 w-3" />
+                                                    <Trash2 className="h-2.5 w-2.5" />
                                                 </button>
                                             </span>
                                         );
@@ -494,43 +499,47 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 </div>
                             </div>
                         ) : (
-                            <div className="mb-4 border border-dashed border-neutral-200 rounded-lg py-4 text-center">
-                                <p className="text-xs text-neutral-400">아래 활성 프로젝트에서 클릭해 이달 집중 영역에 추가하세요.</p>
+                            <div className="mb-2 border border-dashed border-neutral-200 rounded-lg py-2 text-center">
+                                <p className="text-[11px] text-neutral-400">제시 항목에서 클릭하거나 직접 입력하세요.</p>
                             </div>
                         )}
 
-                        {/* 활성 프로젝트 — 후보 풀, 약하게 */}
-                        {activeProjects.length > 0 && (
-                            <div className="mb-3 pb-3 border-b border-neutral-100">
-                                <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">이달 진행 중 활성 프로젝트 ({activeProjects.length}) — 클릭으로 추가</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {activeProjects.map((p) => {
-                                        const added = (monthly?.focus_areas ?? []).includes(p.title);
-                                        return (
-                                            <button
-                                                key={p.id}
-                                                onClick={() => {
-                                                    if (added) {
-                                                        const idx = (monthly?.focus_areas ?? []).indexOf(p.title);
-                                                        if (idx >= 0) removeFocusArea(idx);
-                                                    } else {
-                                                        const next = [...(monthly?.focus_areas ?? []), p.title];
-                                                        save({ focus_areas: next });
-                                                        setMonthly(m => m ? { ...m, focus_areas: next } : { year, month, theme: null, focus_areas: next, goals: [], reflection: null });
-                                                    }
-                                                }}
-                                                className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                                                    added
-                                                        ? "bg-neutral-100 border-neutral-200 text-neutral-400 line-through"
-                                                        : "bg-white border-neutral-200 text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E]"
-                                                }`}
-                                                style={!added && p.color ? { borderLeftColor: p.color, borderLeftWidth: 3 } : undefined}
-                                            >
-                                                {added ? "추가됨" : "+"} {p.title}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                        {/* 제시 항목 — 펼침 시 활성 프로젝트 표시 */}
+                        {showSuggestions && (
+                            <div className="mb-2 pb-2 border-b border-neutral-100">
+                                <p className="text-[10px] text-neutral-400 mb-1.5">프로젝트 — 클릭으로 추가</p>
+                                {activeProjects.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {activeProjects.map((p) => {
+                                            const added = (monthly?.focus_areas ?? []).includes(p.title);
+                                            return (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => {
+                                                        if (added) {
+                                                            const idx = (monthly?.focus_areas ?? []).indexOf(p.title);
+                                                            if (idx >= 0) removeFocusArea(idx);
+                                                        } else {
+                                                            const next = [...(monthly?.focus_areas ?? []), p.title];
+                                                            save({ focus_areas: next });
+                                                            setMonthly(m => m ? { ...m, focus_areas: next } : { year, month, theme: null, focus_areas: next, goals: [], reflection: null });
+                                                        }
+                                                    }}
+                                                    className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                                                        added
+                                                            ? "bg-neutral-100 border-neutral-200 text-neutral-400 line-through"
+                                                            : "bg-white border-neutral-200 text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E]"
+                                                    }`}
+                                                    style={!added && p.color ? { borderLeftColor: p.color, borderLeftWidth: 3 } : undefined}
+                                                >
+                                                    {added ? "✓" : "+"} {p.title}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-[11px] text-neutral-300">이달 활성 프로젝트가 없습니다.</p>
+                                )}
                             </div>
                         )}
 
@@ -542,7 +551,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 value={focusInput}
                                 onChange={(e) => setFocusInput(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") addFocusArea(); }}
-                                placeholder="키워드·영역 자유 입력 후 Enter (예: 영업 활동, 글쓰기 루틴)"
+                                placeholder="키워드·영역 직접 입력 후 Enter"
                                 className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
                             />
                         </div>
@@ -576,64 +585,51 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
                                         >
-                                            <div className="flex items-start justify-between gap-1">
-                                                <div className="flex items-start gap-1 min-w-0">
-                                                    <span className={`text-sm font-medium shrink-0 ${
+                                            {/* Row 1: 날짜 + 음력 */}
+                                            <div className="flex items-center justify-between gap-0.5">
+                                                <div className="flex items-center gap-1 min-w-0">
+                                                    <span className={`text-sm shrink-0 ${
                                                         isToday ? "text-[#0F766E] font-bold" :
                                                         !cell.inMonth ? "text-neutral-300" :
-                                                        isHoliday || isSunday ? "text-red-500" :
-                                                        "text-neutral-900"
+                                                        isHoliday || isSunday ? "text-red-500 font-medium" :
+                                                        "text-neutral-800"
                                                     }`}>
                                                         {cell.dom}
                                                     </span>
-                                                    {cell.inMonth && (holiday || lunar) && (
-                                                        <div className="flex flex-col leading-tight pt-px">
-                                                            {lunar && (
-                                                                <span className="text-[9px] text-neutral-300">
-                                                                    {lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
-                                                                </span>
-                                                            )}
-                                                            {holiday && (
-                                                                <span className={`text-[9px] truncate ${
-                                                                    holiday.type === "holiday" ? "text-red-500 font-medium" :
-                                                                    holiday.type === "memorial" ? "text-rose-400" :
-                                                                    holiday.type === "commemoration" ? "text-amber-600" :
-                                                                    "text-emerald-600"
-                                                                }`}>
-                                                                    {holiday.label}
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                    {cell.inMonth && lunar && (
+                                                        <span className="text-[9px] text-neutral-300 leading-tight">
+                                                            {lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
+                                                        </span>
                                                     )}
                                                 </div>
-                                                {isToday && <span className="text-[9px] px-1 py-0.5 bg-[#0F766E] text-white rounded shrink-0">오늘</span>}
+                                                {isToday && <span className="text-[9px] px-1 bg-[#0F766E] text-white rounded shrink-0 leading-4">오</span>}
                                             </div>
-                                            {/* 할일 텍스트 */}
-                                            {hit && hit.task_texts.length > 0 && (
-                                                <div className="mt-1 space-y-0.5">
-                                                    {hit.task_texts.map((t, i) => (
-                                                        <p key={i} className="text-[9px] text-neutral-500 leading-tight truncate">{t}</p>
-                                                    ))}
-                                                </div>
+                                            {/* Row 2: 절기/국가기념일 1개 */}
+                                            {cell.inMonth && holiday && (
+                                                <p className={`text-[9px] leading-tight truncate mt-0.5 ${
+                                                    holiday.type === "holiday" ? "text-red-500 font-medium" :
+                                                    holiday.type === "memorial" ? "text-rose-400" :
+                                                    holiday.type === "commemoration" ? "text-amber-600" :
+                                                    "text-emerald-600"
+                                                }`}>
+                                                    {holiday.label}
+                                                </p>
                                             )}
-                                            {/* 캘린더 엔트리 — 셀별 dot/title */}
-                                            {entriesByDate[cell.date]?.length > 0 && (
-                                                <div className="mt-1 space-y-0.5">
-                                                    {entriesByDate[cell.date].slice(0, 3).map((e) => {
-                                                        const c = KIND_COLORS[e.kind];
-                                                        const titleOnly = monthlyDisplayMode(e.kind) === "title";
-                                                        return (
-                                                            <div key={e.id} className={`flex items-center gap-1 text-[9px] leading-tight ${c.text}`}>
-                                                                <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
-                                                                <span className="truncate">{titleOnly ? e.title : `${e.start_time?.slice(0, 5) || ""} ${e.title}`.trim()}</span>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    {entriesByDate[cell.date].length > 3 && (
-                                                        <p className="text-[9px] text-neutral-400">+{entriesByDate[cell.date].length - 3}</p>
-                                                    )}
-                                                </div>
-                                            )}
+                                            {/* Row 3: 개인기념일/미팅/업무 1개 */}
+                                            {cell.inMonth && (() => {
+                                                const dayEntries = entriesByDate[cell.date] ?? [];
+                                                const personal = dayEntries.find(e => e.kind === "anniversary")
+                                                    ?? dayEntries.find(e => e.kind === "meeting")
+                                                    ?? dayEntries.find(e => e.kind === "todo");
+                                                if (!personal) return null;
+                                                const c = KIND_COLORS[personal.kind];
+                                                return (
+                                                    <div className={`flex items-center gap-0.5 text-[9px] leading-tight mt-0.5 ${c.text}`}>
+                                                        <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
+                                                        <span className="truncate">{personal.title}</span>
+                                                    </div>
+                                                );
+                                            })()}
                                         </Link>
                                     );
                                 })}
