@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus, Sun, Moon, Monitor } from "lucide-react";
 import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
-import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, type PlannersThemeMode } from "@/features/planners/PlannersThemeProvider";
+import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, applyPlannersRadius, type PlannersThemeMode, type PlannersRadius } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
 
@@ -166,6 +166,7 @@ export default function SettingsPage() {
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
     const [colorTheme, setColorTheme] = useState("teal");
+    const [radiusTheme, setRadiusTheme] = useState<PlannersRadius>("soft");
     const [fontFamily, setFontFamily] = useState("sans");
     const [themeMode, setThemeMode] = useState<PlannersThemeMode>("system");
     const [userFontFamily, setUserFontFamily] = useState("serif");
@@ -199,6 +200,8 @@ export default function SettingsPage() {
             if (savedUserFont) setUserFontFamily(savedUserFont);
             const savedMode = localStorage.getItem("planners_theme_mode") as PlannersThemeMode | null;
             if (savedMode === "light" || savedMode === "dark" || savedMode === "system") setThemeMode(savedMode);
+            const savedRadius = localStorage.getItem("planners_radius_theme") as PlannersRadius | null;
+            if (savedRadius === "sharp" || savedRadius === "subtle" || savedRadius === "soft") setRadiusTheme(savedRadius);
             try {
                 const savedCustom = localStorage.getItem("planners_custom_fonts");
                 if (savedCustom) setCustomFonts(JSON.parse(savedCustom));
@@ -571,18 +574,26 @@ export default function SettingsPage() {
     }
 
     const COLOR_THEMES = [
-        { key: "teal",    label: "Teal",    hex: "#0F766E" },
-        { key: "coral",   label: "Coral",   hex: "#C2553D" },
-        { key: "slate",   label: "Slate",   hex: "#475569" },
-        { key: "rose",    label: "Rose",    hex: "#BE185D" },
-        { key: "amber",   label: "Amber",   hex: "#B45309" },
-        { key: "indigo",  label: "Indigo",  hex: "#4338CA" },
-        { key: "violet",  label: "Violet",  hex: "#7C3AED" },
-        { key: "crimson", label: "Crimson", hex: "#DC2626" },
-        { key: "brown",   label: "Brown",   hex: "#92400E" },
-        { key: "sky",     label: "Sky",     hex: "#0369A1" },
-        { key: "plum",    label: "Plum",    hex: "#86198F" },
-        { key: "navy",    label: "Navy",    hex: "#1E40AF" },
+        { key: "mono",     label: "Mono",     hex: "#171717" },
+        { key: "charcoal", label: "Charcoal", hex: "#374151" },
+        { key: "teal",     label: "Teal",     hex: "#0F766E" },
+        { key: "navy",     label: "Navy",     hex: "#1E40AF" },
+        { key: "indigo",   label: "Indigo",   hex: "#4338CA" },
+        { key: "violet",   label: "Violet",   hex: "#7C3AED" },
+        { key: "plum",     label: "Plum",     hex: "#86198F" },
+        { key: "rose",     label: "Rose",     hex: "#BE185D" },
+        { key: "crimson",  label: "Crimson",  hex: "#DC2626" },
+        { key: "coral",    label: "Coral",    hex: "#C2553D" },
+        { key: "amber",    label: "Amber",    hex: "#B45309" },
+        { key: "brown",    label: "Brown",    hex: "#92400E" },
+        { key: "sky",      label: "Sky",      hex: "#0369A1" },
+        { key: "slate",    label: "Slate",    hex: "#475569" },
+    ];
+
+    const RADIUS_THEMES: { key: PlannersRadius; label: string; desc: string; preview: string }[] = [
+        { key: "sharp",  label: "Sharp",  desc: "각진 모서리",   preview: "0px" },
+        { key: "subtle", label: "Subtle", desc: "살짝 둥근",     preview: "4px" },
+        { key: "soft",   label: "Soft",   desc: "기본 (둥근)",   preview: "12px" },
     ];
 
     const PP_FONT_OPTIONS = [
@@ -654,6 +665,12 @@ export default function SettingsPage() {
         setUserFontFamily(key);
         localStorage.setItem("planners_user_font", key);
         applyPlannersUserFont(key);
+    }
+
+    function applyRadius(key: PlannersRadius) {
+        setRadiusTheme(key);
+        localStorage.setItem("planners_radius_theme", key);
+        applyPlannersRadius(key);
     }
 
     if (loading) {
@@ -773,6 +790,33 @@ export default function SettingsPage() {
                                     <span className={`text-[10px] font-mono ${active ? "text-neutral-900 font-semibold" : "text-neutral-400"}`}>
                                         {t.label}
                                     </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* Radius Theme */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">모서리</h2>
+                    <div className="grid grid-cols-3 gap-3">
+                        {RADIUS_THEMES.map((r) => {
+                            const active = radiusTheme === r.key;
+                            return (
+                                <button
+                                    key={r.key}
+                                    onClick={() => applyRadius(r.key)}
+                                    className={`flex flex-col items-center gap-2 p-3 border-2 transition-colors ${
+                                        active
+                                            ? "border-[#0F766E] bg-[#0F766E]/5"
+                                            : "border-neutral-200 hover:border-neutral-300"
+                                    }`}
+                                >
+                                    <div className="w-8 h-8 bg-neutral-900" style={{ borderRadius: r.preview }} />
+                                    <span className={`text-xs font-semibold ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
+                                        {r.label}
+                                    </span>
+                                    <span className="text-[10px] text-neutral-400">{r.desc}</span>
                                 </button>
                             );
                         })}

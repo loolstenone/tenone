@@ -3,18 +3,20 @@
 import { useEffect } from "react";
 
 const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
-    teal:    { hex: "#0F766E", dark: "#0d5e56" },
-    coral:   { hex: "#C2553D", dark: "#a34533" },
-    slate:   { hex: "#475569", dark: "#334155" },
-    rose:    { hex: "#BE185D", dark: "#9d1353" },
-    amber:   { hex: "#B45309", dark: "#92400e" },
-    indigo:  { hex: "#4338CA", dark: "#3730a3" },
-    violet:  { hex: "#7C3AED", dark: "#6D28D9" },
-    crimson: { hex: "#DC2626", dark: "#B91C1C" },
-    brown:   { hex: "#92400E", dark: "#78350f" },
-    sky:     { hex: "#0369A1", dark: "#075985" },
-    plum:    { hex: "#86198F", dark: "#701A75" },
-    navy:    { hex: "#1E40AF", dark: "#1e3a8a" },
+    teal:     { hex: "#0F766E", dark: "#0d5e56" },
+    coral:    { hex: "#C2553D", dark: "#a34533" },
+    slate:    { hex: "#475569", dark: "#334155" },
+    rose:     { hex: "#BE185D", dark: "#9d1353" },
+    amber:    { hex: "#B45309", dark: "#92400e" },
+    indigo:   { hex: "#4338CA", dark: "#3730a3" },
+    violet:   { hex: "#7C3AED", dark: "#6D28D9" },
+    crimson:  { hex: "#DC2626", dark: "#B91C1C" },
+    brown:    { hex: "#92400E", dark: "#78350f" },
+    sky:      { hex: "#0369A1", dark: "#075985" },
+    plum:     { hex: "#86198F", dark: "#701A75" },
+    navy:     { hex: "#1E40AF", dark: "#1e3a8a" },
+    mono:     { hex: "#171717", dark: "#0a0a0a" },
+    charcoal: { hex: "#374151", dark: "#1f2937" },
 };
 
 // 모든 Planners 컴포넌트가 하드코딩하는 기본 teal 색상
@@ -121,6 +123,37 @@ export function applyPlannersUserFont(key: string) {
     el.textContent = `textarea,input[type="text"]{font-family:${fontValue}!important}`;
 }
 
+// ── 모서리 반경 테마 ─────────────────────────────────────────────
+// sharp: 각짐 (0~2px) | subtle: 살짝 (4px) | soft: 기본 (현재 그대로)
+export type PlannersRadius = "sharp" | "subtle" | "soft";
+
+export function applyPlannersRadius(key: PlannersRadius) {
+    let el = document.getElementById("planners-radius-override");
+    if (!el) {
+        el = document.createElement("style");
+        el.id = "planners-radius-override";
+        document.head.appendChild(el);
+    }
+
+    if (key === "soft") {
+        el.textContent = "";
+        return;
+    }
+
+    const lg = key === "sharp" ? "2px" : "6px";
+    const md = key === "sharp" ? "2px" : "4px";
+    const sm = key === "sharp" ? "1px" : "3px";
+
+    // rounded-full (아바타·배지) 은 유지 — 그 외만 재정의
+    el.textContent = `
+.rounded-3xl:not(.rounded-full),.rounded-2xl:not(.rounded-full),.rounded-xl:not(.rounded-full){border-radius:${lg}!important}
+.rounded-lg:not(.rounded-full){border-radius:${lg}!important}
+.rounded-md:not(.rounded-full){border-radius:${md}!important}
+.rounded:not(.rounded-full){border-radius:${sm}!important}
+.rounded-sm:not(.rounded-full){border-radius:${sm}!important}
+`;
+}
+
 // ── 라이트/다크 모드 (Phase 1 인프라) ─────────────────────────────
 // mode: "light" | "dark" | "system"
 // .planners-dark 클래스를 documentElement에 토글. 다른 브랜드 영향 없음.
@@ -140,10 +173,12 @@ export function PlannersThemeProvider() {
         const storedFont = localStorage.getItem("planners_font_family") || "sans";
         const storedUserFont = localStorage.getItem("planners_user_font") || "serif";
         const storedMode = (localStorage.getItem("planners_theme_mode") as PlannersThemeMode) || "system";
+        const storedRadius = (localStorage.getItem("planners_radius_theme") as PlannersRadius) || "soft";
         applyPlannersTheme(storedTheme);
         applyPlannersFont(storedFont);
         applyPlannersUserFont(storedUserFont);
         applyPlannersThemeMode(storedMode);
+        applyPlannersRadius(storedRadius);
 
         // mode 변경 이벤트 — SettingsView 토글 시 즉시 반영
         function onModeChange(e: Event) {
