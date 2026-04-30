@@ -32,10 +32,6 @@ export default async function CanvasEmbedPage({ params }: Props) {
     }
 
     const { id } = await params;
-    // embed=true 고정 — 이 라우트는 embed 전용
-    return (
-        <div className="fixed inset-0 bg-neutral-50">
-            <CanvasStudio canvasId={id} embed />
-        </div>
-    );
+    // embed=true 고정 — 이 라우트는 embed 전용 (PlannersChrome에서 header/footer 제외됨)
+    return <CanvasStudio canvasId={id} embed />;
 }
