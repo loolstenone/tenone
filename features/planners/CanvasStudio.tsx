@@ -150,25 +150,31 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
     const bgTemplateRef = useRef<BgTemplate>("blank");
 
-    // ── embed 모드: 컨테이너가 실제 크기를 가진 후에만 tldraw 마운트 ────────────
-    // 문제: 모달 flex 레이아웃이 settle되기 전에 tldraw가 마운트되면 0×0으로 인식해
-    //       내부 div가 display:none 상태로 고정됨
+    // ── tldraw 마운트 타이밍 제어 ──────────────────────────────────────────────
+    // 문제: tldraw가 0×0 컨테이너에 마운트되면 내부 div가 display:none으로 고정됨
+    //   - loading=true 중에는 ref가 null → 기존 useEffect([embed])가 무효
+    //   - embed 모달뿐 아니라 standalone(fixed inset-0)도 flex settle 전에 마운트될 수 있음
+    // 해결: loading 완료 후 ResizeObserver로 실제 크기 확인 → tlReady=true 시점에 마운트
     const tlContainerRef = useRef<HTMLDivElement>(null);
-    const [tlReady, setTlReady] = useState(!embed); // standalone은 즉시 ready
+    const [tlReady, setTlReady] = useState(false); // 항상 false로 시작, ResizeObserver가 트리거
     useEffect(() => {
-        if (!embed) return;
+        if (loading) return; // 데이터 로드 완료 후에만 실행 (이전에는 ref가 null이었음)
         const el = tlContainerRef.current;
         if (!el) return;
-        const check = () => {
+        let done = false;
+        const activate = () => {
+            if (done) return;
             if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                done = true;
                 setTlReady(true);
+                ro.disconnect();
             }
         };
-        check(); // 이미 크기 있으면 즉시
-        const ro = new ResizeObserver(check);
+        const ro = new ResizeObserver(activate);
         ro.observe(el);
+        activate(); // 이미 크기 있으면 즉시 트리거
         return () => ro.disconnect();
-    }, [embed]);
+    }, [loading]); // loading이 false가 될 때 실행
 
     // ── 펜 전용 모드 (글로벌 pp-pen-mode 이벤트 수신) ────────────────────────
     const editorRef = useRef<Editor | null>(null);
@@ -332,13 +338,12 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         <div className={shellCls}
             style={embed ? undefined : { paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-            {/* 상단 바 */}
+            {/* 상단 바 — embed 모드에서는 숨김 (DailyView/ProjectNotesTab 모달 헤더가 대신 처리) */}
+            {!embed && (
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
-                {!embed && (
-                    <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
-                        <ChevronLeft className="h-4 w-4" />
-                    </Link>
-                )}
+                <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
+                    <ChevronLeft className="h-4 w-4" />
+                </Link>
 
                 <input
                     type="text"
@@ -379,6 +384,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     <Trash2 className="h-4 w-4" />
                 </button>
             </header>
+            )} {/* !embed 헤더 끝 */}
 
             {/* tldraw 무한 캔버스 + 배경 오버레이 */}
             {/* ref로 크기 감지 → tlReady 후 tldraw 마운트 (embed 모드 0×0 타이밍 버그 방지) */}
