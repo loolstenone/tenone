@@ -1766,7 +1766,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 }
                 return (
                     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-[5vh_5vw]">
-                        <div className={`bg-white rounded-xl w-full h-full flex flex-col shadow-2xl overflow-hidden ${isTpl ? 'border-t-4 border-violet-400' : isCanvas ? 'border-t-4 border-sky-400' : ''}`}>
+                        {/* pp-view: fixed 모달은 planners-app-shell 밖 → pp-view로 다크모드 토큰 적용 */}
+                        <div className={`pp-view bg-white rounded-xl w-full h-full flex flex-col shadow-2xl overflow-hidden ${isTpl ? 'border-t-4 border-violet-400' : isCanvas ? 'border-t-4 border-sky-400' : ''}`}>
                             {/* Header */}
                             <div className={`px-6 py-3 border-b border-neutral-200 flex items-center gap-3 ${isTpl ? 'bg-violet-50' : isCanvas ? 'bg-sky-50' : 'bg-neutral-50'}`}>
                                 {isTpl && <LayoutTemplate className="h-4 w-4 text-violet-400 shrink-0" />}
@@ -2133,7 +2134,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {/* Template Picker Modal */}
             {showTemplatePicker && (
                 <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={() => setShowTemplatePicker(false)}>
-                    <div className="bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="pp-view bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">

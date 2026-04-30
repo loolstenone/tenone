@@ -451,7 +451,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                     onClick={() => setPicker(false)}
                 >
                     <div
-                        className="bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl"
+                        className="pp-view bg-white w-full sm:max-w-xl rounded-b-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -898,7 +898,8 @@ function NoteExpandModal({
 
     return (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-[5vh_5vw]">
-            <div className="bg-white rounded-xl w-full h-full flex flex-col shadow-2xl">
+            {/* pp-view: fixed 모달은 planners-app-shell 밖 → pp-view로 다크모드 토큰 적용 */}
+            <div className="pp-view bg-white rounded-xl w-full h-full flex flex-col shadow-2xl">
                 {/* Header */}
                 <div className="px-6 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-3">
                     {isTpl && <LayoutTemplate className="h-4 w-4 text-[#0F766E] shrink-0" />}

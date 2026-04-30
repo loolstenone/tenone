@@ -201,13 +201,23 @@ html.planners-dark .planners-app-shell [class~="divide-neutral-200"] > * {
 
 /* ── .pp-view — Daily/Weekly/Monthly/Yearly 토큰 매핑 (.pp-settings 와 동일 패턴) ──
    각 뷰 루트 div에 pp-view 클래스를 붙여 Tailwind neutral 유틸 → --pp-* 토큰으로 매핑.
-   라이트/다크 모두 토큰값을 따른다. */
+   라이트/다크 모두 토큰값을 따른다.
+   [class~="X"]  = 자식 선택자 (자식 요소의 X 클래스)
+   [class~="X"] + 셀프 선택자 (pp-view 자기 자신에 bg-white 등이 붙은 경우 — 고정 모달 패널) */
+/* 배경 — 자기 자신 + 자식 모두 커버 */
+.pp-view[class~="bg-white"],
 .pp-view [class~="bg-white"]       { background-color: var(--pp-surface)     !important; }
+.pp-view[class~="bg-neutral-50"],
 .pp-view [class~="bg-neutral-50"]  { background-color: var(--pp-surface-alt) !important; }
+.pp-view[class~="bg-neutral-100"],
 .pp-view [class~="bg-neutral-100"] { background-color: var(--pp-surface-alt) !important; }
 
+/* 테두리 — 자기 자신 + 자식 */
+.pp-view[class~="border-neutral-100"],
 .pp-view [class~="border-neutral-100"] { border-color: var(--pp-line-soft)   !important; }
+.pp-view[class~="border-neutral-200"],
 .pp-view [class~="border-neutral-200"] { border-color: var(--pp-line)        !important; }
+.pp-view[class~="border-neutral-300"],
 .pp-view [class~="border-neutral-300"] { border-color: var(--pp-line-strong) !important; }
 
 /* divide-y — border-neutral-* 룰로는 자식 구분선을 못 잡음, 별도 매핑
