@@ -535,8 +535,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [expandedNotePage, setExpandedNotePage] = useState(0);
     const [allCornellPages, setAllCornellPages] = useState<{ rows: CornellRow[]; summary: string }[]>([]);
     const [allHandPages, setAllHandPages] = useState<HandNoteData[]>([]);
+    const [imgFootprint, setImgFootprint] = useState(0);
     const [editingNoteIds, setEditingNoteIds] = useState<Set<string>>(new Set());
     const [shareCopied, setShareCopied] = useState(false);
+    // 코넬 노트 컬럼 헤더 높이 측정 (이미지 푸트프린트 오프셋 보정)
+    const cornellHeaderRef = useRef<HTMLDivElement>(null);
     // 노트 드래그 순서 변경
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
     // 코넬 노트 — Enter 후 새 행 포커스 추적
@@ -651,7 +654,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
     // 모달 열릴 때 페이지 파싱
     useEffect(() => {
-        if (!expandedNote) { setExpandedNotePage(0); setAllCornellPages([]); setAllHandPages([]); return; }
+        if (!expandedNote) { setExpandedNotePage(0); setAllCornellPages([]); setAllHandPages([]); setImgFootprint(0); return; }
         setExpandedNotePage(0);
         const isHandMode = expandedNote.type === 'handwriting'
             || (expandedNote.type !== 'template' && expandedNote.type !== 'canvas' && !!expandedNote.handMode);
@@ -2050,11 +2053,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         value={expandedNote.handwriting ?? null}
                                         onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
                                         fillHeight
+                                        onImageFootprintChange={(px) => setImgFootprint(px)}
                                     >
                                         {/* 코넬 노트 본문 — HandNote children: 텍스트 모드 시 포인터 이벤트 활성 */}
                                         <div className="flex flex-col h-full overflow-hidden">
                                             {/* Column headers */}
-                                            <div className="flex border-b border-neutral-100 shrink-0">
+                                            <div ref={cornellHeaderRef} className="flex border-b border-neutral-100 shrink-0">
                                                 <div className="w-6 shrink-0" aria-hidden />
                                                 <div className="w-[22%] shrink-0 border-l border-neutral-200 px-4 py-2">
                                                     <p className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">단서 · 키워드</p>
@@ -2067,7 +2071,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 </div>
                                             </div>
                                             {/* Rows — leading-8(32px) for proper Cornell notebook ruling */}
-                                            <div className="flex-1 overflow-y-auto divide-y divide-neutral-100">
+                                            <div
+                                                className="flex-1 overflow-y-auto divide-y divide-neutral-100"
+                                                style={imgFootprint > 0 ? { paddingTop: Math.max(0, imgFootprint - (cornellHeaderRef.current?.offsetHeight ?? 36)) } : undefined}
+                                            >
                                                 {(expandedNote.rows ?? []).map((row, rIdx) => (
                                                     <div key={row.id} className="flex group/row">
                                                         {/* Delete button */}
@@ -2848,10 +2855,11 @@ function UpcomingSchedule({ date }: { date: string }) {
     const [loading, setLoading] = useState(false);
 
     const { from, to } = useMemo(() => {
-        const d1 = new Date(date + "T00:00:00"); d1.setDate(d1.getDate() + 1 + offset);
-        const d2 = new Date(date + "T00:00:00"); d2.setDate(d2.getDate() + 28 + offset);
+        const today = localDateStr(new Date());
+        const d1 = new Date(today + "T00:00:00"); d1.setDate(d1.getDate() + 1 + offset);
+        const d2 = new Date(today + "T00:00:00"); d2.setDate(d2.getDate() + 28 + offset);
         return { from: localDateStr(d1), to: localDateStr(d2) };
-    }, [date, offset]);
+    }, [offset]);
 
     useEffect(() => {
         let cancelled = false;
@@ -2875,50 +2883,72 @@ function UpcomingSchedule({ date }: { date: string }) {
         return () => { cancelled = true; };
     }, [from, to]);
 
-    const groups = useMemo(() => {
-        const kinds: CalendarKind[] = ["anniversary", "meeting"];
-        const result: Record<string, Array<{ date: string; entry: CalendarEntry }>> = {
-            anniversary: [], meeting: [],
-        };
+    // 캘린더 + 업무 통합 단일 리스트 (날짜 오름차순)
+    const flatItems = useMemo(() => {
+        type FlatItem =
+            | { kind: CalendarKind; date: string; entry: CalendarEntry; task?: undefined }
+            | { kind: "task";       date: string; task: UpcomingTask;   entry?: undefined };
+        const out: FlatItem[] = [];
+
+        // 캘린더 엔트리 (anniversary, meeting)
+        const calKinds: CalendarKind[] = ["anniversary", "meeting"];
         entries.forEach((e) => {
-            if (!kinds.includes(e.kind as CalendarKind)) return;
+            if (!calKinds.includes(e.kind as CalendarKind)) return;
             expandOccurrences(e, from, to).forEach((o) => {
-                result[e.kind].push({ date: o.date, entry: e });
+                out.push({ kind: e.kind as CalendarKind, date: o.date, entry: e });
             });
         });
-        kinds.forEach(k => result[k].sort((a, b) => a.date.localeCompare(b.date)));
-        return result;
-    }, [entries, from, to]);
 
-    // 업무 — planners_daily.tasks 평탄화 (취소·완료 제외)
-    const taskItems = useMemo(() => {
-        const out: Array<{ date: string; task: UpcomingTask }> = [];
+        // 업무 (취소·완료 제외)
         for (const row of taskRows) {
             for (const t of row.tasks) {
                 if (!t || !t.text) continue;
                 if (t.status === "cancelled" || t.status === "done") continue;
-                out.push({ date: row.date, task: t });
+                out.push({ kind: "task", date: row.date, task: t });
             }
         }
+
         out.sort((a, b) => a.date.localeCompare(b.date));
         return out;
-    }, [taskRows]);
+    }, [entries, taskRows, from, to]);
 
-    const total = Object.values(groups).reduce((s, arr) => s + arr.length, 0) + taskItems.length;
+    const total = flatItems.length;
     // offset === 0 + 데이터 없음 → 카드 자체 숨김 (오늘 기준 향후 4주 무일정)
     // offset !== 0 + 데이터 없음 → 카드 유지 (과거·미래로 이동 중인 사용자)
     if (total === 0 && offset === 0) return null;
 
-    const today = new Date(date + "T00:00:00");
+    const today = new Date(localDateStr(new Date()) + "T00:00:00");
 
-    function renderItem(o: { date: string; entry: CalendarEntry }, i: number) {
+    function renderFlatItem(o: typeof flatItems[number], i: number) {
         const d = new Date(o.date + "T00:00:00");
         const days = Math.round((d.getTime() - today.getTime()) / 86400000);
         const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
         const dow  = DAY_KO[d.getDay()];
+        const dStr = days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`;
+
+        if (o.kind === "task") {
+            const isMs = o.task.source === "milestone";
+            return (
+                <li key={`task-${o.date}-${o.task.id}-${i}`}>
+                    <a
+                        href={`/planners/app/daily?date=${o.date}`}
+                        className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
+                    >
+                        <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
+                        <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
+                            {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
+                        </span>
+                        <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
+                        {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[#0F766E]/10 text-[#0F766E]">MS</span>}
+                        <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">{dStr}</span>
+                    </a>
+                </li>
+            );
+        }
+
         const c = KIND_COLORS[o.entry.kind as CalendarKind];
         return (
-            <li key={i} className="border-b border-neutral-50 last:border-0">
+            <li key={`cal-${o.date}-${o.entry.id}-${i}`}>
                 <a
                     href={`/planners/app/daily?date=${o.date}`}
                     className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
@@ -2928,18 +2958,11 @@ function UpcomingSchedule({ date }: { date: string }) {
                         {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
                     </span>
                     <span className="flex-1 truncate text-xs text-neutral-700">{o.entry.title}</span>
-                    <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">
-                        {days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`}
-                    </span>
+                    <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">{dStr}</span>
                 </a>
             </li>
         );
     }
-
-    const sections: Array<{ kind: CalendarKind; label: string }> = [
-        { kind: "anniversary", label: "기념일" },
-        { kind: "meeting",     label: "미팅" },
-    ];
 
     return (
         <section className="bg-white border border-neutral-200 rounded-xl p-4">
@@ -2972,44 +2995,11 @@ function UpcomingSchedule({ date }: { date: string }) {
                     <ChevronRight className="h-3.5 w-3.5" />
                 </button>
             </div>
-            <div className="space-y-0.5">
-                {sections.map(({ kind }) => {
-                    const items = groups[kind];
-                    if (items.length === 0) return null;
-                    return (
-                        <ul key={kind} className="pl-1">
-                            {items.map((o, i) => renderItem(o, i))}
-                        </ul>
-                    );
-                })}
-                {taskItems.length > 0 && (
+            <div>
+                {flatItems.length > 0 && (
                     <ul className="pl-1">
-                        {taskItems.map((o, i) => {
-                                const d = new Date(o.date + "T00:00:00");
-                                const days = Math.round((d.getTime() - today.getTime()) / 86400000);
-                                const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
-                                const dow = DAY_KO[d.getDay()];
-                                const isMs = o.task.source === "milestone";
-                                return (
-                                    <li key={`${o.date}-${o.task.id}-${i}`} className="border-b border-neutral-50 last:border-0">
-                                        <a
-                                            href={`/planners/app/daily?date=${o.date}`}
-                                            className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
-                                        >
-                                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
-                                            <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
-                                                {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
-                                            </span>
-                                            <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
-                                            {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[#0F766E]/10 text-[#0F766E]">MS</span>}
-                                            <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">
-                                                {days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`}
-                                            </span>
-                                        </a>
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                        {flatItems.map((o, i) => renderFlatItem(o, i))}
+                    </ul>
                 )}
                 {total === 0 && (
                     <div className="text-[11px] text-neutral-400 text-center py-6">

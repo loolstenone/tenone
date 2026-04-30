@@ -239,6 +239,44 @@ html.planners-dark .pp-view [class~="divide-neutral-200"] > * { border-color: rg
 .pp-view input::placeholder,
 .pp-view textarea::placeholder { color: var(--pp-ink-4); opacity: 1; }
 
+/* ── .pp-view 다크모드 — 유채색 카드 오버라이드 ──────────────────────────────
+   task priority(급중/급경/완중) · 캘린더 엔트리 · 노트 헤더 색상.
+   neutral 은 위 토큰 매핑으로 충분, 유채색(rose/red/amber/sky/violet)은 별도 처리.
+   배경: 해당 색 12% 알파 오버레이 / 텍스트: 400계열(라이트) / 테두리: 25% 알파 */
+
+/* 배경 */
+html.planners-dark .pp-view [class~="bg-rose-50"],
+html.planners-dark .pp-view [class~="bg-rose-50/50"]   { background-color: rgba(244,  63,  94, 0.12) !important; }
+html.planners-dark .pp-view [class~="bg-red-50"]        { background-color: rgba(239,  68,  68, 0.12) !important; }
+html.planners-dark .pp-view [class~="bg-amber-50"],
+html.planners-dark .pp-view [class~="bg-amber-100"]     { background-color: rgba(245, 158,  11, 0.12) !important; }
+html.planners-dark .pp-view [class~="bg-sky-50"]        { background-color: rgba( 14, 165, 233, 0.12) !important; }
+html.planners-dark .pp-view [class~="bg-violet-50"],
+html.planners-dark .pp-view [class~="bg-violet-50/20"],
+html.planners-dark .pp-view [class~="bg-violet-50/40"]  { background-color: rgba(139,  92, 246, 0.08) !important; }
+html.planners-dark .pp-view [class~="bg-teal-50"]       { background-color: rgba( 20, 184, 166, 0.10) !important; }
+
+/* 텍스트 */
+html.planners-dark .pp-view [class~="text-rose-700"],
+html.planners-dark .pp-view [class~="text-rose-600"]    { color: #fb7185 !important; }
+html.planners-dark .pp-view [class~="text-red-700"],
+html.planners-dark .pp-view [class~="text-red-600"]     { color: #f87171 !important; }
+html.planners-dark .pp-view [class~="text-amber-700"],
+html.planners-dark .pp-view [class~="text-amber-600"]   { color: #fbbf24 !important; }
+html.planners-dark .pp-view [class~="text-sky-700"],
+html.planners-dark .pp-view [class~="text-sky-600"]     { color: #38bdf8 !important; }
+html.planners-dark .pp-view [class~="text-violet-700"]  { color: #a78bfa !important; }
+html.planners-dark .pp-view [class~="text-teal-600"]    { color: #2dd4bf !important; }
+
+/* 테두리 */
+html.planners-dark .pp-view [class~="border-rose-200"]   { border-color: rgba(244,  63,  94, 0.25) !important; }
+html.planners-dark .pp-view [class~="border-red-200"]    { border-color: rgba(239,  68,  68, 0.25) !important; }
+html.planners-dark .pp-view [class~="border-amber-200"]  { border-color: rgba(245, 158,  11, 0.25) !important; }
+html.planners-dark .pp-view [class~="border-sky-200"]    { border-color: rgba( 14, 165, 233, 0.25) !important; }
+html.planners-dark .pp-view [class~="border-violet-100"],
+html.planners-dark .pp-view [class~="border-violet-400"] { border-color: rgba(139,  92, 246, 0.35) !important; }
+html.planners-dark .pp-view [class~="border-teal-200"]   { border-color: rgba( 20, 184, 166, 0.25) !important; }
+
 /* AI 사이드패널 open 시 — 우하단 floating CTA(베타 피드백 등) 자동 숨김 */
 body.pp-ai-panel-open .pp-hide-when-ai-open { display: none !important; }
 

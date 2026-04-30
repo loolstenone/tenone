@@ -24,7 +24,7 @@ import {
     type PointerEvent as ReactPointerEvent,
 } from "react";
 import { getStroke } from "perfect-freehand";
-import { Eraser, Undo2, Redo2, RotateCcw, Pencil, PenLine, SlidersHorizontal, ImagePlus, MousePointer2, Trash2 } from "lucide-react";
+import { Eraser, Undo2, Redo2, RotateCcw, Pencil, PenLine, SlidersHorizontal, ImagePlus, MousePointer2, Trash2, Lasso, ZoomOut } from "lucide-react";
 import { ConfirmSheet } from "./ConfirmSheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -68,6 +68,8 @@ interface HandNoteProps {
     fillHeight?: boolean;
     /** 아래에 콘텐츠(코넬 노트 등)를 깔고 투명 SVG로 덮는 오버레이 모드 */
     children?: React.ReactNode;
+    /** 이미지 하단 끝 y 좌표(논리 px)를 알려주는 콜백 — 오버레이 콘텐츠가 이미지 아래로 밀리도록 padding 계산에 사용 */
+    onImageFootprintChange?: (px: number) => void;
 }
 
 // ─── Pen Presets ──────────────────────────────────────────────────────────────
@@ -174,6 +176,44 @@ function getSVGPoint(
     return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
+function pointInPoly(x: number, y: number, poly: number[][]): boolean {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const [xi, yi] = poly[i], [xj, yj] = poly[j];
+        if (((yi > y) !== (yj > y)) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)
+            inside = !inside;
+    }
+    return inside;
+}
+function strokeInLasso(s: HandStroke, poly: number[][]): boolean {
+    return s.points.some(([x, y]) => pointInPoly(x, y, poly));
+}
+function areaEraseStrokes(strokes: HandStroke[], cx: number, cy: number, r: number): HandStroke[] {
+    const out: HandStroke[] = [];
+    for (const s of strokes) {
+        let seg: number[][] = [];
+        for (const pt of s.points) {
+            const [px, py] = pt;
+            if ((px - cx) ** 2 + (py - cy) ** 2 <= r * r) {
+                if (seg.length >= 2) out.push({ ...s, points: seg });
+                seg = [];
+            } else { seg.push(pt); }
+        }
+        if (seg.length >= 2) out.push({ ...s, points: seg });
+    }
+    return out;
+}
+function maybeStraighten(pts: number[][]): number[][] {
+    if (pts.length < 3) return pts;
+    let arcLen = 0;
+    for (let i = 1; i < pts.length; i++)
+        arcLen += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    const directLen = Math.hypot(pts[pts.length - 1][0] - pts[0][0], pts[pts.length - 1][1] - pts[0][1]);
+    if (arcLen > 0 && directLen / arcLen > 0.95)
+        return [pts[0], pts[pts.length - 1]];
+    return pts;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function HandNote({
@@ -185,6 +225,7 @@ export function HandNote({
     minHeight,
     fillHeight = false,
     children,
+    onImageFootprintChange,
 }: HandNoteProps) {
     // DOM
     const containerRef    = useRef<HTMLDivElement>(null);
@@ -221,6 +262,7 @@ export function HandNote({
     const [selectMode,   setSelectMode]   = useState(false); // 이미지 선택/이동 모드
     const [selectedId,   setSelectedId]   = useState<string | null>(null);
     const dragImgRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
+    const resizeRef  = useRef<{ handle: string; startX: number; startY: number; origImg: HandImage } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [autoH,        setAutoH]        = useState(value?.height ?? initH);
 
@@ -244,6 +286,30 @@ export function HandNote({
     const [isDark, setIsDark] = useState(false);
     /** 오버레이 모드(children 제공 시): true=그리기, false=텍스트 편집 */
     const [drawEnabled, setDrawEnabled] = useState(false);
+
+    // ── Samsung Notes 업그레이드 refs ─────────────────────────────────────────
+    // Viewport (pan/zoom): x,y = viewBox origin offset, s = scale
+    const [vp, setVp] = useState({ x: 0, y: 0, s: 1 });
+    const vpRef = useRef({ x: 0, y: 0, s: 1 });
+    // Palm rejection: active pen pointerIds
+    const activePenIdsRef = useRef<Set<number>>(new Set());
+    // Touch tracking for pinch/pan
+    const touchPtsRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+    // Pinch snapshot: canvas-coords midpoint + viewport at pinch start
+    const pinchRef = useRef<{ pivX: number; pivY: number; vpSnap: { x: number; y: number; s: number }; d0: number } | null>(null);
+    // One-finger pan snapshot
+    const pan1Ref = useRef<{ cx: number; cy: number; vpSnap: { x: number; y: number; s: number } } | null>(null);
+    // Real pressure detection
+    const isRealPressureRef = useRef(false);
+    // Eraser type: "stroke" | "area"
+    const [eraserType, setEraserType] = useState<"stroke" | "area">("stroke");
+    // Area erase cursor position (SVG coords)
+    const [areaEraseCursor, setAreaEraseCursor] = useState<{ x: number; y: number } | null>(null);
+    // Lasso mode
+    const [lassoMode, setLassoMode] = useState(false);
+    const lassoRef = useRef<number[][] | null>(null);
+    const [lassoPreview, setLassoPreview] = useState<number[][] | null>(null);
+    const [selectedIdxs, setSelectedIdxs] = useState<Set<number>>(new Set());
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
@@ -276,6 +342,17 @@ export function HandNote({
         ro.observe(outerRef.current);
         return () => ro.disconnect();
     }, [fillHeight]);
+
+    // 이미지 푸트프린트 변경 알림 — 오버레이 아래 콘텐츠(Cornell 노트 등)가 이미지 아래로 밀리도록
+    useEffect(() => {
+        if (!onImageFootprintChange) return;
+        const imgs = value?.images ?? [];
+        const bottom = imgs.length > 0 ? Math.max(...imgs.map(img => img.y + img.h)) : 0;
+        // fillHeight 모드: viewBox 논리 px → CSS 실제 px 변환
+        const viewboxH = value?.height ?? initH;
+        const scale = (fillHeight && fillH > 0 && viewboxH > 0) ? fillH / viewboxH : 1;
+        onImageFootprintChange(bottom * scale);
+    }, [value?.images, onImageFootprintChange, fillHeight, fillH, value?.height, initH]);
 
     // 팔레트 외부 클릭 시 닫기 (팝오버 자체 + 열기 버튼은 제외)
     useEffect(() => {
@@ -372,14 +449,14 @@ export function HandNote({
         const sx = vb.width  > 0 ? (svgRect.width  / vb.width)  * dpr : dpr;
         const sy = vb.height > 0 ? (svgRect.height / vb.height) * dpr : dpr;
 
-        const scaledPts = points.map(([lx, ly, pr]) => [lx * sx, ly * sy, pr]);
+        const scaledPts = points.map(([lx, ly, pr]) => [(lx - vb.x) * sx, (ly - vb.y) * sy, pr]);
         const stroke = getStroke(scaledPts, {
             size: sz * Math.min(sx, sy),  // brush size도 동일 스케일 적용
             thinning:         p.thinning,
             smoothing:        p.smoothing,
             streamline:       stab ?? p.streamline,
             easing:           (t) => t,
-            simulatePressure: p.simulatePressure,
+            simulatePressure: p.simulatePressure && !isRealPressureRef.current,
         });
         if (!stroke.length) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -399,13 +476,71 @@ export function HandNote({
         ctx.restore();
     }
 
+    // ── Image resize handle hit-test ─────────────────────────────────────────
+
+    const HANDLE_HIT_R = 8;
+
+    function getResizeHandle(img: HandImage, x: number, y: number): string | null {
+        const cx = img.x + img.w / 2, cy = img.y + img.h / 2;
+        const candidates = [
+            { id: "nw", hx: img.x,         hy: img.y          },
+            { id: "n",  hx: cx,             hy: img.y          },
+            { id: "ne", hx: img.x + img.w,  hy: img.y          },
+            { id: "e",  hx: img.x + img.w,  hy: cy             },
+            { id: "se", hx: img.x + img.w,  hy: img.y + img.h  },
+            { id: "s",  hx: cx,             hy: img.y + img.h  },
+            { id: "sw", hx: img.x,          hy: img.y + img.h  },
+            { id: "w",  hx: img.x,          hy: cy             },
+        ];
+        for (const c of candidates) {
+            if (Math.abs(x - c.hx) <= HANDLE_HIT_R && Math.abs(y - c.hy) <= HANDLE_HIT_R) return c.id;
+        }
+        return null;
+    }
+
     // ── Pointer events ────────────────────────────────────────────────────────
 
     function onPointerDown(e: ReactPointerEvent<SVGSVGElement>) {
         if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 5) return;
-        // 오버레이 텍스트 모드: SVG pointer-events가 none이므로 이 핸들러는 호출되지 않음
-        // (아래 SVG style의 pointerEvents 참조)
-        if (children !== undefined && !drawEnabled) return;
+        // 오버레이 모드: drawEnabled=false여도 선택/이동 모드는 허용
+        if (children !== undefined && !drawEnabled && !selectMode && !lassoMode) return;
+
+        // ── Palm rejection ─────────────────────────────────────────────────────
+        if (e.pointerType === "pen") {
+            activePenIdsRef.current.add(e.pointerId);
+            // 실제 필압 감지 (pen + pressure > 0 이면 실제 스타일러스)
+            if (e.pressure > 0 && e.pressure < 1) isRealPressureRef.current = true;
+        }
+        if (e.pointerType === "touch") {
+            // 펜이 활성이면 터치 완전 무시
+            if (activePenIdsRef.current.size > 0) { e.preventDefault(); return; }
+            touchPtsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            const touches = touchPtsRef.current;
+            if (touches.size === 2) {
+                // 두 손가락: 핀치 시작
+                const pts = [...touches.values()];
+                const cx = (pts[0].x + pts[1].x) / 2;
+                const cy = (pts[0].y + pts[1].y) / 2;
+                const d0 = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                const rect = svgRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const sw = rect.width;
+                    const vSnap = { ...vpRef.current };
+                    const pivX = vSnap.x + (cx - rect.left) / sw * (canonW / vSnap.s);
+                    const pivY = vSnap.y + (cy - rect.top) / rect.height * (height / vSnap.s);
+                    pinchRef.current = { pivX, pivY, vpSnap: vSnap, d0 };
+                }
+                pan1Ref.current = null;
+                drawingRef.current = null;
+                e.preventDefault(); return;
+            } else if (touches.size === 1 && vpRef.current.s > 1) {
+                // 한 손가락 + 줌 상태: 패닝
+                pan1Ref.current = { cx: e.clientX, cy: e.clientY, vpSnap: { ...vpRef.current } };
+                drawingRef.current = null;
+                e.preventDefault(); return;
+            }
+            // 한 손가락 + 줌=1: 일반 드로잉으로 진행
+        }
 
         const isEraserBtn =
             e.pointerType === "pen" && (e.button === 5 || (e.buttons & 32) === 32);
@@ -417,7 +552,25 @@ export function HandNote({
         // ── 선택/이동 모드 ─────────────────────────────────────────────────────
         if (selectMode) {
             const imgs = value?.images ?? [];
-            // z-order 역순으로 hit-test (나중에 그린 게 위에)
+            if (selectedId) {
+                const selImg = imgs.find(img => img.id === selectedId);
+                if (selImg) {
+                    const delCx = selImg.x + selImg.w - 10, delCy = selImg.y + 10;
+                    if (Math.hypot(x - delCx, y - delCy) <= 12) {
+                        const newImgs = imgs.filter(i => i.id !== selImg.id);
+                        onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: newImgs });
+                        setSelectedId(null);
+                        e.preventDefault();
+                        return;
+                    }
+                    const hitHandle = getResizeHandle(selImg, x, y);
+                    if (hitHandle) {
+                        resizeRef.current = { handle: hitHandle, startX: x, startY: y, origImg: { ...selImg } };
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
             const hit = [...imgs].reverse().find(img =>
                 x >= img.x && x <= img.x + img.w && y >= img.y && y <= img.y + img.h
             );
@@ -432,11 +585,22 @@ export function HandNote({
             return;
         }
 
+        // ── 올가미 모드 ────────────────────────────────────────────────────────
+        if (lassoMode) {
+            lassoRef.current = [[x, y]];
+            setLassoPreview([[x, y]]);
+            e.preventDefault(); return;
+        }
+
         // 이번 제스처의 "이전 상태" 캡처 (undo 커밋용)
         preActionRef.current = [...(value?.strokes ?? [])];
 
         if (eraserMode || isEraserBtn) {
-            eraseAt(x, y);
+            if (eraserType === "area") {
+                setAreaEraseCursor({ x, y });
+            } else {
+                eraseAt(x, y);
+            }
         } else {
             // 연필: 포인트 레벨 노이즈로 거친 질감
             const nx = penType === "pencil" ? x + (Math.random() - 0.5) * 1.2 : x;
@@ -459,9 +623,51 @@ export function HandNote({
     }
 
     function onPointerMove(e: ReactPointerEvent<SVGSVGElement>) {
-        // 오버레이 텍스트 모드에서는 SVG pointer-events가 none이므로 이 핸들러 호출 안 됨
-        // (방어적 가드)
-        if (children !== undefined && !drawEnabled) return;
+        if (children !== undefined && !drawEnabled && !selectMode && !lassoMode) return;
+
+        // ── 핀치 줌/팬 ─────────────────────────────────────────────────────────
+        if (e.pointerType === "touch") {
+            touchPtsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            const pinch = pinchRef.current;
+            if (pinch && touchPtsRef.current.size >= 2) {
+                const pts = [...touchPtsRef.current.values()];
+                const cx = (pts[0].x + pts[1].x) / 2;
+                const cy = (pts[0].y + pts[1].y) / 2;
+                const d = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                const rect = svgRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const sw = rect.width;
+                    const newS = Math.max(1, Math.min(5, pinch.vpSnap.s * (d / pinch.d0)));
+                    const newX = pinch.pivX - (cx - rect.left) / sw * (canonW / newS);
+                    const newY = pinch.pivY - (cy - rect.top) / rect.height * (height / newS);
+                    const maxX = canonW - canonW / newS, maxY = height - height / newS;
+                    const clampedX = Math.max(0, Math.min(maxX, newX));
+                    const clampedY = Math.max(0, Math.min(maxY, newY));
+                    const newVp = { x: clampedX, y: clampedY, s: newS };
+                    vpRef.current = newVp;
+                    setVp(newVp);
+                }
+                e.preventDefault(); return;
+            }
+            const pan1 = pan1Ref.current;
+            if (pan1 && touchPtsRef.current.size === 1) {
+                const dx = e.clientX - pan1.cx;
+                const dy = e.clientY - pan1.cy;
+                const rect = svgRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const sw = rect.width;
+                    const s = pan1.vpSnap.s;
+                    const newX = pan1.vpSnap.x - dx / sw * (canonW / s);
+                    const newY = pan1.vpSnap.y - dy / rect.height * (height / s);
+                    const maxX = canonW - canonW / s, maxY = height - height / s;
+                    const newVp = { x: Math.max(0, Math.min(maxX, newX)), y: Math.max(0, Math.min(maxY, newY)), s };
+                    vpRef.current = newVp;
+                    setVp(newVp);
+                }
+                e.preventDefault(); return;
+            }
+            if (pinchRef.current || pan1Ref.current) { e.preventDefault(); return; }
+        }
 
         // ── 이미지 드래그 이동 ──────────────────────────────────────────────────
         if (selectMode && dragImgRef.current && e.buttons > 0) {
@@ -474,12 +680,69 @@ export function HandNote({
             e.preventDefault();
             return;
         }
+        // ── 이미지 리사이즈 ────────────────────────────────────────────────────
+        if (selectMode && resizeRef.current && e.buttons > 0) {
+            const { x, y } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+            const { handle, startX, startY, origImg } = resizeRef.current;
+            const dx = x - startX, dy = y - startY;
+            const MIN = 20;
+            let { x: nx, y: ny, w: nw, h: nh } = origImg;
+            if      (handle === "nw") { nx = origImg.x + dx; ny = origImg.y + dy; nw = origImg.w - dx; nh = origImg.h - dy; }
+            else if (handle === "n")  { ny = origImg.y + dy; nh = origImg.h - dy; }
+            else if (handle === "ne") { nw = origImg.w + dx; ny = origImg.y + dy; nh = origImg.h - dy; }
+            else if (handle === "e")  { nw = origImg.w + dx; }
+            else if (handle === "se") { nw = origImg.w + dx; nh = origImg.h + dy; }
+            else if (handle === "s")  { nh = origImg.h + dy; }
+            else if (handle === "sw") { nx = origImg.x + dx; nw = origImg.w - dx; nh = origImg.h + dy; }
+            else if (handle === "w")  { nx = origImg.x + dx; nw = origImg.w - dx; }
+            if (e.shiftKey && "nw ne se sw".includes(handle)) {
+                const ratio = origImg.w / origImg.h;
+                if (Math.abs(nw - origImg.w) >= Math.abs(nh - origImg.h)) {
+                    nh = nw / ratio;
+                    if (handle === "nw" || handle === "ne") ny = origImg.y + origImg.h - nh;
+                } else {
+                    nw = nh * ratio;
+                    if (handle === "nw" || handle === "sw") nx = origImg.x + origImg.w - nw;
+                }
+            }
+            if (nw < MIN) { if ("nw sw w".includes(handle)) nx = origImg.x + origImg.w - MIN; nw = MIN; }
+            if (nh < MIN) { if ("nw ne n".includes(handle)) ny = origImg.y + origImg.h - MIN; nh = MIN; }
+            const imgs = (value?.images ?? []).map(img =>
+                img.id === origImg.id ? { ...img, x: nx, y: ny, w: nw, h: nh } : img
+            );
+            onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: imgs });
+            e.preventDefault();
+            return;
+        }
         if (selectMode) return;
+
+        // ── 올가미 드로우 ──────────────────────────────────────────────────────
+        if (lassoMode && lassoRef.current && e.buttons > 0) {
+            const { x, y } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+            lassoRef.current.push([x, y]);
+            setLassoPreview([...lassoRef.current]);
+            e.preventDefault(); return;
+        }
 
         if (eraserMode || stylusEraser) {
             if (e.buttons > 0) {
                 const { x: ex, y: ey } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
-                eraseAt(ex, ey);
+                if (eraserType === "area") {
+                    const r = size * 3;
+                    setAreaEraseCursor({ x: ex, y: ey });
+                    const newStrokes = areaEraseStrokes(value?.strokes ?? [], ex, ey, r);
+                    if (newStrokes.length !== (value?.strokes ?? []).length ||
+                        newStrokes.reduce((s, st) => s + st.points.length, 0) !== (value?.strokes ?? []).reduce((s, st) => s + st.points.length, 0)) {
+                        onChange({ ...(value ?? { strokes: [], width: canonW, height }), strokes: newStrokes });
+                    }
+                } else {
+                    eraseAt(ex, ey);
+                }
+            } else {
+                if (eraserType === "area") {
+                    const { x: ex, y: ey } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+                    setAreaEraseCursor({ x: ex, y: ey });
+                }
             }
             return;
         }
@@ -499,16 +762,42 @@ export function HandNote({
             drawingRef.current.push([nx, ny, ce.pressure || 0.5]);
         }
 
-        // RAF 스케줄 (이미 예약돼 있으면 중복 방지)
         if (rafRef.current === null) {
             rafRef.current = requestAnimationFrame(renderToCanvas);
         }
         e.preventDefault();
     }
 
-    function onPointerUp() {
-        // 이미지 드래그 종료
+    function onPointerUp(e?: ReactPointerEvent<SVGSVGElement>) {
+        // ── 터치 포인터 정리 ────────────────────────────────────────────────────
+        if (e && e.pointerType === "touch") {
+            touchPtsRef.current.delete(e.pointerId);
+            if (touchPtsRef.current.size < 2) pinchRef.current = null;
+            if (touchPtsRef.current.size === 0) pan1Ref.current = null;
+        }
+        if (e && e.pointerType === "pen") {
+            activePenIdsRef.current.delete(e.pointerId);
+            if (activePenIdsRef.current.size === 0) isRealPressureRef.current = false;
+        }
+
+        // ── 올가미 닫기 ────────────────────────────────────────────────────────
+        if (lassoMode && lassoRef.current && lassoRef.current.length >= 3) {
+            const poly = lassoRef.current;
+            const hits = new Set<number>();
+            (value?.strokes ?? []).forEach((s, i) => {
+                if (strokeInLasso(s, poly)) hits.add(i);
+            });
+            setSelectedIdxs(hits);
+            lassoRef.current = null;
+            setLassoPreview(null);
+            return;
+        }
+        lassoRef.current = null;
+        setLassoPreview(null);
+
+        // 이미지 드래그/리사이즈 종료
         if (dragImgRef.current) { dragImgRef.current = null; return; }
+        if (resizeRef.current)  { resizeRef.current  = null; return; }
 
         const wasErasing = effectiveErase;
         setStylusEraser(false);
@@ -527,10 +816,12 @@ export function HandNote({
         const pre = preActionRef.current;
         preActionRef.current = null;
 
-        // 지우개 undo 커밋 (스트로크가 실제로 줄었을 때만)
+        // 지우개 undo 커밋 (포인트 총수가 줄었을 때 — 영역 지우개가 스트로크를 쪼개도 감지)
         if (wasErasing && pre !== null) {
             const cur = value?.strokes ?? [];
-            if (cur.length !== pre.length) {
+            const preTotal = pre.reduce((s, st) => s + st.points.length, 0);
+            const curTotal = cur.reduce((s, st) => s + st.points.length, 0);
+            if (curTotal < preTotal) {
                 undoRef.current.push(pre);
                 if (undoRef.current.length > MAX_UNDO) undoRef.current.shift();
                 redoRef.current = [];
@@ -549,13 +840,16 @@ export function HandNote({
         // 드로잉 undo 커밋
         if (pre !== null) commitUndo(pre);
 
+        // ── 직선 보조 ──────────────────────────────────────────────────────────
+        const finalPoints = maybeStraighten(points);
+
         const svgH = fillHeight
-            ? height  // fillHeight 모드: 현재 논리 높이 유지
+            ? height
             : Math.max(height, yMax + 40);
-        const newStroke: HandStroke = { points, color, size, penType, streamline: stabilizer };
+        const newStroke: HandStroke = { points: finalPoints, color, size, penType, streamline: stabilizer };
         onChange({
             strokes: [...strokes, newStroke],
-            width:   value?.width || width || 600,  // 캐노니컬 폭 유지 (기기마다 달라지지 않게)
+            width:   value?.width || width || 600,
             height:  svgH,
         });
     }
@@ -889,17 +1183,77 @@ export function HandNote({
                         <SlidersHorizontal className="h-3 w-3" />
                     </button>
 
-                    {/* 지우개 */}
+                    {/* 지우개 (클릭마다 stroke→area→off 순환) */}
                     <button
-                        onClick={() => setEraserMode(m => !m)}
+                        onClick={() => {
+                            if (!eraserMode) {
+                                setEraserMode(true); setEraserType("stroke");
+                                setLassoMode(false);
+                            } else if (eraserType === "stroke") {
+                                setEraserType("area");
+                            } else {
+                                setEraserMode(false); setAreaEraseCursor(null);
+                            }
+                        }}
                         type="button"
                         className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
                             effectiveErase ? "bg-rose-100 text-rose-600" : "text-neutral-500 hover:bg-neutral-200"
                         }`}
-                        title="지우개"
+                        title={eraserMode ? (eraserType === "stroke" ? "지우개: 획 단위 (클릭해서 영역 지우개로)" : "지우개: 영역 (클릭해서 끄기)") : "지우개 켜기"}
                     >
                         <Eraser className="h-3.5 w-3.5" />
+                        {eraserMode && eraserType === "area" && (
+                            <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        )}
                     </button>
+
+                    {/* 올가미 선택 */}
+                    <button
+                        onClick={() => {
+                            setLassoMode(m => !m);
+                            setEraserMode(false);
+                            if (lassoMode) setSelectedIdxs(new Set());
+                        }}
+                        type="button"
+                        className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                            lassoMode ? "bg-blue-100 text-blue-600" : "text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                        title="올가미 선택"
+                    >
+                        <Lasso className="h-3.5 w-3.5" />
+                    </button>
+
+                    {/* 선택 삭제 */}
+                    {selectedIdxs.size > 0 && (
+                        <button
+                            onClick={() => {
+                                const cur = value?.strokes ?? [];
+                                const pre = [...cur];
+                                const newStrokes = cur.filter((_, i) => !selectedIdxs.has(i));
+                                commitUndo(pre);
+                                onChange({ ...(value ?? { strokes: [], width: canonW, height }), strokes: newStrokes });
+                                setSelectedIdxs(new Set());
+                                setLassoMode(false);
+                            }}
+                            type="button"
+                            className="w-6 h-6 rounded flex items-center justify-center bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                            title={`선택 획 삭제 (${selectedIdxs.size}개)`}
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+
+                    {/* 줌 리셋 */}
+                    {vp.s > 1 && (
+                        <button
+                            onClick={() => { const nv = { x: 0, y: 0, s: 1 }; vpRef.current = nv; setVp(nv); }}
+                            type="button"
+                            className="w-6 h-6 rounded flex items-center justify-center text-neutral-500 hover:bg-neutral-200 transition-colors"
+                            title="줌 초기화"
+                        >
+                            <ZoomOut className="h-3.5 w-3.5" />
+                        </button>
+                    )}
 
                     {/* Undo */}
                     <button
@@ -984,7 +1338,7 @@ export function HandNote({
                     ref={svgRef}
                     width="100%"
                     height={fillHeight ? "100%" : height}
-                    viewBox={`0 0 ${canonW} ${height}`}
+                    viewBox={`${vp.x} ${vp.y} ${canonW / vp.s} ${height / vp.s}`}
                     preserveAspectRatio={fillHeight ? "none" : "xMinYMin meet"}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
@@ -992,10 +1346,10 @@ export function HandNote({
                     onPointerLeave={onPointerUp}
                     style={{
                         touchAction: touchAct,
-                        cursor: (children !== undefined && !drawEnabled) ? "default" : (effectiveErase ? "cell" : "crosshair"),
+                        cursor: (children !== undefined && !drawEnabled && !selectMode && !lassoMode) ? "default" : (selectMode || lassoMode) ? "default" : (effectiveErase ? "cell" : "crosshair"),
                         // 오버레이 모드: 텍스트 모드(drawEnabled=false)에선 none → 클릭이 children 텍스트영역에 직접 전달
-                        // 그리기 모드(drawEnabled=true)에선 all → SVG가 포인터 이벤트 캡처
-                        pointerEvents: (children !== undefined && !drawEnabled) ? "none" : "all",
+                        // 선택/올가미 모드이면 drawEnabled 무관하게 이벤트 허용
+                        pointerEvents: (children !== undefined && !drawEnabled && !selectMode && !lassoMode) ? "none" : "all",
                         ...(children !== undefined ? {
                             position: "absolute" as const,
                             top: 0, right: 0, bottom: 0, left: 0,
@@ -1024,27 +1378,37 @@ export function HandNote({
                                 preserveAspectRatio="xMidYMid meet"
                                 style={{ cursor: selectMode ? "move" : "default" }}
                             />
-                            {/* 선택 핸들 */}
+                            {/* 선택 오버레이 + 리사이즈 핸들 */}
                             {selectedId === img.id && (
                                 <>
                                     <rect x={img.x - 2} y={img.y - 2}
                                         width={img.w + 4} height={img.h + 4}
                                         fill="none" stroke="#0F766E" strokeWidth="1.5"
                                         strokeDasharray="5 3" />
-                                    {/* 삭제 버튼 (우상단) */}
-                                    <g
-                                        style={{ cursor: "pointer" }}
-                                        onClick={() => {
-                                            const imgs = (value?.images ?? []).filter(i => i.id !== img.id);
-                                            onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: imgs });
-                                            setSelectedId(null);
-                                        }}
-                                    >
-                                        <circle cx={img.x + img.w + 2} cy={img.y - 2} r={8} fill="#ef4444" />
-                                        <text x={img.x + img.w + 2} y={img.y + 2}
+                                    {/* 삭제 버튼 (우상단 안쪽 — viewBox 밖으로 안 잘리게) */}
+                                    <g style={{ cursor: "pointer" }}>
+                                        <circle cx={img.x + img.w - 10} cy={img.y + 10} r={9} fill="#ef4444" />
+                                        <text x={img.x + img.w - 10} y={img.y + 14}
                                             textAnchor="middle" fill="white"
-                                            fontSize="10" fontWeight="bold">✕</text>
+                                            fontSize="11" fontWeight="bold">✕</text>
                                     </g>
+                                    {/* 리사이즈 핸들 8개 */}
+                                    {([
+                                        { id: "nw", hx: img.x,           hy: img.y,             cur: "nw-resize" },
+                                        { id: "n",  hx: img.x+img.w/2,   hy: img.y,             cur: "n-resize"  },
+                                        { id: "ne", hx: img.x+img.w,     hy: img.y,             cur: "ne-resize" },
+                                        { id: "e",  hx: img.x+img.w,     hy: img.y+img.h/2,     cur: "e-resize"  },
+                                        { id: "se", hx: img.x+img.w,     hy: img.y+img.h,       cur: "se-resize" },
+                                        { id: "s",  hx: img.x+img.w/2,   hy: img.y+img.h,       cur: "s-resize"  },
+                                        { id: "sw", hx: img.x,           hy: img.y+img.h,       cur: "sw-resize" },
+                                        { id: "w",  hx: img.x,           hy: img.y+img.h/2,     cur: "w-resize"  },
+                                    ] as const).map(h => (
+                                        <rect key={h.id}
+                                            x={h.hx - 4} y={h.hy - 4} width={8} height={8} rx={1.5}
+                                            fill="white" stroke="#0F766E" strokeWidth="1.5"
+                                            style={{ cursor: h.cur }}
+                                        />
+                                    ))}
                                 </>
                             )}
                         </g>
@@ -1058,6 +1422,39 @@ export function HandNote({
                             opacity={PEN_PRESETS[s.penType ?? "pen"].opacity}
                         />
                     ))}
+                    {/* 올가미 선택 하이라이트 */}
+                    {selectedIdxs.size > 0 && strokes.map((s, i) =>
+                        selectedIdxs.has(i) ? (
+                            <path
+                                key={`sel-${i}`}
+                                d={strokeToPath(s.points, s.size, s.penType ?? "pen", s.streamline)}
+                                fill="#3b82f6"
+                                opacity={0.35}
+                            />
+                        ) : null
+                    )}
+                    {/* 올가미 드로우 미리보기 */}
+                    {lassoPreview && lassoPreview.length >= 2 && (
+                        <polyline
+                            points={lassoPreview.map(([x, y]) => `${x},${y}`).join(" ")}
+                            fill="rgba(59,130,246,0.08)"
+                            stroke="#3b82f6"
+                            strokeWidth={1.5 / vp.s}
+                            strokeDasharray={`${6 / vp.s} ${3 / vp.s}`}
+                        />
+                    )}
+                    {/* 영역 지우개 커서 */}
+                    {(eraserMode || stylusEraser) && eraserType === "area" && areaEraseCursor && (
+                        <circle
+                            cx={areaEraseCursor.x}
+                            cy={areaEraseCursor.y}
+                            r={size * 3}
+                            fill="rgba(239,68,68,0.08)"
+                            stroke="#ef4444"
+                            strokeWidth={1 / vp.s}
+                            strokeDasharray={`${4 / vp.s} ${2 / vp.s}`}
+                        />
+                    )}
                 </svg>
 
                 {/* 라이브 스트로크 캔버스 — React re-render 없이 RAF로 직접 렌더 */}
