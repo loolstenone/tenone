@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus } from "lucide-react";
@@ -368,7 +368,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
             ) : (
                 <div className="space-y-3">
                     {/* 7일 세로 목록 */}
-                    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white divide-y divide-neutral-100">
+                    <div className="border border-neutral-200 planners-dark:border-white/[0.07] rounded-xl overflow-hidden bg-white divide-y divide-neutral-100 planners-dark:divide-white/[0.07]">
                         {days.map((d) => {
                             const ds = dsOf(d);
                             const dayData = dayDataMap[ds] ?? { tasks: [], memo: "", weather: null };
@@ -423,7 +423,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     } ${dragOverDate === ds ? "ring-2 ring-[#0F766E] ring-inset bg-[#0F766E]/[0.04]" : ""}`}
                                 >
                                     {/* 좌측: 날짜 정보 — 수직 구조 */}
-                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 px-3 py-3 flex flex-col gap-1 overflow-hidden">
+                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 planners-dark:border-white/[0.07] px-3 py-3 flex flex-col gap-1 overflow-hidden">
 
                                         {/* ① 날짜 요일 + 화살표 */}
                                         <div className="flex items-baseline gap-1">
@@ -444,10 +444,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {(isToday || dayData.weather) && (
                                             <div className="flex items-center gap-1.5 flex-wrap">
                                                 {isToday && (
-                                                    <span className="text-[9px] text-[#0F766E] font-semibold bg-[#0F766E]/10 px-1.5 py-0.5 rounded-full leading-none">오늘</span>
+                                                    <span className="text-[9px] md:text-[11px] text-[#0F766E] font-semibold bg-[#0F766E]/10 px-1.5 py-0.5 rounded-full leading-none">오늘</span>
                                                 )}
                                                 {dayData.weather && (
-                                                    <span className="text-[10px] text-neutral-400">
+                                                    <span className="text-[10px] md:text-xs text-neutral-400">
                                                         {weatherEmoji(dayData.weather.code)} {dayData.weather.temp}°
                                                     </span>
                                                 )}
@@ -456,7 +456,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 
                                         {/* ③ 음력 */}
                                         {lunar && (
-                                            <p className="text-[9px] text-neutral-300 font-mono leading-none">
+                                            <p className="text-[9px] md:text-[11px] text-neutral-300 font-mono leading-none">
                                                 음{lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
                                             </p>
                                         )}
@@ -465,7 +465,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {(holiday || publicEntries.length > 0) && (
                                             <div className="space-y-0.5">
                                                 {holiday && (
-                                                    <p className={`text-[10px] leading-tight truncate ${
+                                                    <p className={`text-[10px] md:text-xs leading-tight truncate ${
                                                         holiday.type === "holiday" ? "text-rose-500" :
                                                         holiday.type === "memorial" ? "text-rose-400" :
                                                         holiday.type === "commemoration" ? "text-amber-600" :
@@ -473,7 +473,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                     }`}>{holiday.label}</p>
                                                 )}
                                                 {publicEntries.map((e) => (
-                                                    <p key={e.id} className={`text-[10px] leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
+                                                    <p key={e.id} className={`text-[10px] md:text-xs leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
                                                         {e.title}
                                                     </p>
                                                 ))}
@@ -484,7 +484,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {(anniversaryEntries.length > 0 || meetingEntries.length > 0 || todoTasks.length > 0) && (
                                             <div className="space-y-0.5 mt-0.5">
                                                 {anniversaryEntries.map((e) => (
-                                                    <p key={e.id} className={`text-[10px] leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
+                                                    <p key={e.id} className={`text-[10px] md:text-xs leading-tight truncate ${KIND_COLORS[e.kind as CalendarKind].text}`}>
                                                         {e.title}
                                                     </p>
                                                 ))}
@@ -492,7 +492,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                     <button
                                                         key={e.id}
                                                         onClick={() => { setCalEditing(e); setCalEditorOpen(true); }}
-                                                        className={`w-full text-[10px] leading-tight text-left truncate hover:opacity-80 transition-opacity ${KIND_COLORS[e.kind as CalendarKind].text}`}
+                                                        className={`w-full text-[10px] md:text-xs leading-tight text-left truncate hover:opacity-80 transition-opacity ${KIND_COLORS[e.kind as CalendarKind].text}`}
                                                     >
                                                         {e.start_time ? `${e.start_time.slice(0,5)} ` : ""}{e.title}
                                                     </button>
@@ -508,14 +508,14 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                                 ev.dataTransfer.setData("application/x-pp-task", JSON.stringify({ fromDate: ds, taskIndex: origIdx }));
                                                             }}
                                                             title="끌어서 다른 날짜로 이동"
-                                                            className={`text-[10px] leading-tight truncate cursor-grab active:cursor-grabbing select-none ${
+                                                            className={`text-[10px] md:text-xs leading-tight truncate cursor-grab active:cursor-grabbing select-none ${
                                                                 t.status === "done" ? "text-neutral-300 line-through" : "text-neutral-600"
                                                             }`}
                                                         >· {t.text}</div>
                                                     );
                                                 })}
                                                 {todoTasks.length > 4 && (
-                                                    <p className="text-[9px] text-neutral-400">+{todoTasks.length - 4}개</p>
+                                                    <p className="text-[9px] md:text-[11px] text-neutral-400">+{todoTasks.length - 4}개</p>
                                                 )}
                                             </div>
                                         )}

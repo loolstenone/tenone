@@ -115,8 +115,8 @@ export function SettingsLayout({ children }: Props) {
                   lg(1024+): 2열 (사이드바 + main)
                   xl(1280+): 3열 (사이드바 + main + Live Preview)
                   items-start로 aside·preview가 콘텐츠 높이만 차지 (sticky 정상 작동) */}
-            <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-8 lg:items-start">
-                {/* PC sticky 좌측 nav — aside 자체가 sticky (top-16 = 64px, AppTopNav 48px + 16px 여백) */}
+            <div className="lg:grid lg:grid-cols-[200px_1fr] xl:grid-cols-[200px_1fr_380px] lg:gap-8 lg:items-start">
+                {/* PC sticky 좌측 nav */}
                 <aside className="hidden lg:block lg:sticky lg:top-16 lg:self-start lg:h-fit">
                     <nav className="space-y-0.5" aria-label="설정 그룹">
                         <p className="pp-eyebrow mb-3 px-2">Sections</p>
@@ -146,11 +146,15 @@ export function SettingsLayout({ children }: Props) {
                     </nav>
                 </aside>
 
-                {/* main content — 자식이 직접 섹션 그리고 그룹 마커는 자식에서 삽입 */}
+                {/* main content */}
                 <main className="min-w-0">
                     {children}
                 </main>
 
+                {/* xl+ 우측 Live Preview 패널 */}
+                <div className="hidden xl:block xl:sticky xl:top-16 xl:self-start xl:h-fit">
+                    <SettingsLivePreview />
+                </div>
             </div>
 
             {/* ── 모바일 FAB (< xl 에서만 노출) ── */}

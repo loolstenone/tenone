@@ -59,7 +59,7 @@ export function MobileBottomNav() {
         .filter(Boolean) as typeof ALL_NAV_OPTIONS[number][];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white border-t border-neutral-200 safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white planners-dark:bg-[#161616] border-t border-neutral-200 planners-dark:border-[#2A2A2A] safe-area-inset-bottom">
             <div className="flex items-stretch h-14">
                 {navItems.map((item) => {
                     const Icon = item.icon;
@@ -72,7 +72,7 @@ export function MobileBottomNav() {
                             key={item.id}
                             href={item.href}
                             className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
-                                isActive ? "text-[#0F766E]" : "text-neutral-400"
+                                isActive ? "text-[#0F766E]" : "text-neutral-400 planners-dark:text-neutral-500"
                             }`}
                         >
                             <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
@@ -82,7 +82,7 @@ export function MobileBottomNav() {
                 })}
             </div>
             {/* iPhone 홈 인디케이터 safe area */}
-            <div className="h-safe-area-inset-bottom bg-white" />
+            <div className="h-safe-area-inset-bottom bg-white planners-dark:bg-[#161616]" />
         </nav>
     );
 }

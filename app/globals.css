@@ -122,10 +122,11 @@ html.planners-dark .planners-app-shell [class~="text-neutral-300"],
 html.planners-dark .planners-app-shell [class~="text-neutral-200"] {
   color: #555555 !important;
 }
-/* divide-neutral-* — [class~="border-neutral-*"]로는 자식 구분선을 못 잡음 */
-html.planners-dark .planners-app-shell [class~="divide-neutral-100"] > * + *,
-html.planners-dark .planners-app-shell [class~="divide-neutral-200"] > * + * {
-  border-color: var(--planners-border) !important;
+/* divide-neutral-* — Tailwind v4는 :not(:last-child)에 border-bottom 사용.
+   > * + * 는 첫 자식을 놓치므로 > * 로 전체 자식 대상 */
+html.planners-dark .planners-app-shell [class~="divide-neutral-100"] > *,
+html.planners-dark .planners-app-shell [class~="divide-neutral-200"] > * {
+  border-color: rgba(255,255,255,0.05) !important;
 }
 /* sticky 헤더(top nav)는 배경이 별도 — bg-white 룰로 잘 잡힘 */
 /* Tailwind v4 dark: variant 가 .planners-dark 안에서 작동하도록 등록 */
@@ -208,6 +209,13 @@ html.planners-dark .planners-app-shell [class~="divide-neutral-200"] > * + * {
 .pp-view [class~="border-neutral-100"] { border-color: var(--pp-line-soft)   !important; }
 .pp-view [class~="border-neutral-200"] { border-color: var(--pp-line)        !important; }
 .pp-view [class~="border-neutral-300"] { border-color: var(--pp-line-strong) !important; }
+
+/* divide-y — border-neutral-* 룰로는 자식 구분선을 못 잡음, 별도 매핑
+   Tailwind v4는 :not(:last-child)에 border-bottom 사용 → > * 로 전체 자식 대상 */
+.pp-view [class~="divide-neutral-100"] > *,
+.pp-view [class~="divide-neutral-200"] > * { border-color: var(--pp-line-soft) !important; }
+html.planners-dark .pp-view [class~="divide-neutral-100"] > *,
+html.planners-dark .pp-view [class~="divide-neutral-200"] > * { border-color: rgba(255,255,255,0.05) !important; }
 
 .pp-view [class~="text-neutral-900"] { color: var(--pp-ink)   !important; }
 .pp-view [class~="text-neutral-800"] { color: var(--pp-ink)   !important; }
