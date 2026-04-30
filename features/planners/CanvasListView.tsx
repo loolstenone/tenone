@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, ImageIcon, CalendarDays, FolderOpen, Layers } from "lucide-react";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { ConfirmSheet } from "./ConfirmSheet";
+
+type CanvasOrigin =
+    | { type: "daily"; date: string }
+    | { type: "project"; projectId: string; projectTitle: string }
+    | { type: "standalone" };
 
 interface CanvasRow {
     id: string;
@@ -14,6 +19,34 @@ interface CanvasRow {
     is_archived: boolean;
     created_at: string;
     updated_at: string;
+    origin: CanvasOrigin;
+}
+
+function OriginBadge({ origin }: { origin: CanvasOrigin }) {
+    if (origin.type === "daily") {
+        const parts = origin.date.split("-");
+        const label = `${parts[0]}.${parts[1]}.${parts[2]}`;
+        return (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-50 text-sky-600 border border-sky-100">
+                <CalendarDays className="h-2.5 w-2.5" />
+                {label}
+            </span>
+        );
+    }
+    if (origin.type === "project") {
+        return (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-50 text-violet-600 border border-violet-100 max-w-[120px] truncate">
+                <FolderOpen className="h-2.5 w-2.5 shrink-0" />
+                <span className="truncate">{origin.projectTitle}</span>
+            </span>
+        );
+    }
+    return (
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-50 text-neutral-400 border border-neutral-100">
+            <Layers className="h-2.5 w-2.5" />
+            독립
+        </span>
+    );
 }
 
 export function CanvasListView() {
@@ -97,28 +130,43 @@ export function CanvasListView() {
                         <Link
                             key={row.id}
                             href={`/planners/app/canvas/${row.id}`}
-                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#0F766E] transition-colors"
+                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#0F766E] hover:shadow-sm transition-all"
                         >
                             {/* Thumbnail */}
-                            <div className="aspect-[4/3] bg-neutral-50 border-b border-neutral-100 flex items-center justify-center">
+                            <div className="aspect-[4/3] bg-neutral-50 border-b border-neutral-100 relative overflow-hidden">
                                 {row.thumbnail_url ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={row.thumbnail_url} alt={row.title} className="w-full h-full object-cover" />
                                 ) : (
-                                    <Pencil className="h-8 w-8 text-neutral-300 group-hover:text-[#0F766E]/40 transition-colors" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                                        {/* 격자 패턴 미리보기 배경 */}
+                                        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <pattern id={`grid-${row.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0F766E" strokeWidth="0.5" />
+                                                </pattern>
+                                            </defs>
+                                            <rect width="100%" height="100%" fill={`url(#grid-${row.id})`} />
+                                        </svg>
+                                        <Pencil className="h-7 w-7 text-neutral-200 group-hover:text-[#0F766E]/30 transition-colors relative z-10" />
+                                        <span className="text-[10px] text-neutral-300 group-hover:text-[#0F766E]/40 transition-colors relative z-10">미리보기 없음</span>
+                                    </div>
                                 )}
                             </div>
                             {/* Footer */}
-                            <div className="px-4 py-3 flex items-center justify-between gap-2">
+                            <div className="px-3 py-2.5 flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-neutral-900 truncate group-hover:text-[#0F766E]">{row.title}</p>
-                                    <p className="text-[11px] text-neutral-400 mt-0.5">
-                                        {new Date(row.updated_at).toLocaleDateString("ko-KR")}
-                                    </p>
+                                    <p className="text-sm font-medium text-neutral-900 truncate group-hover:text-[#0F766E] leading-snug">{row.title}</p>
+                                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                        <OriginBadge origin={row.origin ?? { type: "standalone" }} />
+                                        <span className="text-[10px] text-neutral-300">
+                                            {new Date(row.updated_at).toLocaleDateString("ko-KR")}
+                                        </span>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteId(row.id); }}
-                                    className="text-neutral-300 hover:text-rose-500 transition-colors shrink-0"
+                                    className="text-neutral-300 hover:text-rose-500 transition-colors shrink-0 mt-0.5"
                                     title="삭제"
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />

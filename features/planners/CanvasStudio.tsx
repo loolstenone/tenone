@@ -243,21 +243,17 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }, [editor, saveCanvas]);
 
     // ── tldraw 마운트 콜백 ─────────────────────────────────────────────────
-    // snapshot을 ref(snapshotRef)로 읽어 deps에서 제거 → 참조 안정화
-    // tldraw v4는 onMount 참조가 바뀌면 cleanup→재호출하므로 불안정한 참조는 버그 원인
+    // snapshot은 <Tldraw snapshot={...}> prop으로 전달 → onMount에서 loadSnapshot 제거
+    // loadSnapshot을 onMount 안에서 호출하면 tldraw가 컨테이너 크기를 0으로 재감지하는 버그 발생
     const handleMount = useCallback((ed: Editor) => {
         setEditor(ed);
         editorRef.current = ed;
-        // 마운트 시 현재 펜 모드 상태 반영
         const penMode = localStorage.getItem("pp-pen-mode") === "1";
-        ed.updateInstanceState({ isPenMode: penMode });
-        if (snapshotRef.current) {
-            try {
-                ed.loadSnapshot(snapshotRef.current);
-                // 저장된 스냅샷에 isGridMode=true가 있어도 초기화 (모눈종이 잔류 방지)
-                ed.updateInstanceState({ isGridMode: false });
-            } catch { /* 새 캔버스로 시작 */ }
-        }
+        // snapshot prop이 내부적으로 로드된 뒤 gridMode·penMode 적용 (rAF로 타이밍 보장)
+        requestAnimationFrame(() => {
+            if (!editorRef.current) return;
+            editorRef.current.updateInstanceState({ isPenMode: penMode, isGridMode: false });
+        });
         const unsub = ed.store.listen(
             () => {
                 if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -266,8 +262,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             { scope: "document", source: "user" },
         );
         return unsub;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [saveCanvas]); // snapshot은 ref로 읽음 — deps 불필요
+    }, [saveCanvas]);
 
     // ── PNG 내보내기 ────────────────────────────────────────────────────────
     const exportPng = useCallback(async () => {
@@ -394,24 +389,25 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             </header>
             )} {/* !embed 헤더 끝 */}
 
-            {/* tldraw 무한 캔버스 + 배경 오버레이 */}
-            {/* ref로 크기 감지 → tlReady 후 tldraw 마운트 (embed 모드 0×0 타이밍 버그 방지) */}
-            {/* overflow-hidden: tldraw fixed-position 요소가 부모 밖으로 새지 않도록 */}
-            <div ref={tlContainerRef} className="flex-1 overflow-hidden relative" style={{ minHeight: 0 }}>
-                {tlReady ? (
-                    /* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */
-                    <BgCtx.Provider value={bgTemplate}>
-                        <Tldraw
-                            onMount={handleMount}
-                            components={TL_COMPONENTS}
-                            /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
-                        />
-                    </BgCtx.Provider>
-                ) : (
-                    <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
-                    </div>
-                )}
+            {/* tldraw 무한 캔버스 */}
+            {/* absolute inset-0 래퍼: flex-1 자식에서 height:100% 미작동 문제 방지 */}
+            {/* snapshot prop: loadSnapshot을 onMount에서 호출하면 tldraw가 0×0으로 재감지 → blank 버그 */}
+            <div ref={tlContainerRef} className="flex-1 min-h-0 relative">
+                <div className="absolute inset-0">
+                    {tlReady ? (
+                        <BgCtx.Provider value={bgTemplate}>
+                            <Tldraw
+                                snapshot={snapshot ?? undefined}
+                                onMount={handleMount}
+                                components={TL_COMPONENTS}
+                            />
+                        </BgCtx.Provider>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
+                        </div>
+                    )}
+                </div>
             </div>
             <ConfirmSheet
                 open={confirmDeleteOpen}
