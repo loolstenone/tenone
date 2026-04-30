@@ -1901,6 +1901,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     </button>
                                 )}
                                 <button
+                                    onClick={() => setExpandedNote(null)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 text-neutral-600 rounded-lg text-sm hover:bg-neutral-100 transition-colors"
+                                >
+                                    그냥 닫기
+                                </button>
+                                <button
                                     onClick={() => saveAndClose()}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
                                 >

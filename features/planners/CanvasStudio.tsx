@@ -149,6 +149,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
     const bgTemplateRef = useRef<BgTemplate>("blank");
+    // snapshot을 ref로 유지 → handleMount 클로저에서 참조 (deps에서 제거해 참조 안정화)
+    const snapshotRef = useRef<TLEditorSnapshot | null>(null);
 
     // ── tldraw 마운트 타이밍 제어 ──────────────────────────────────────────────
     // 문제: tldraw가 0×0 컨테이너에 마운트되면 내부 div가 display:none으로 고정됨
@@ -205,7 +207,10 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             if (!canvas) { setNotFound(true); setLoading(false); return; }
             setTitle(canvas.title ?? "새 캔버스");
             if (canvas.data?.bgTemplate) setBgTemplate(canvas.data.bgTemplate as BgTemplate);
-            if (canvas.data?.tldraw) setSnapshot(canvas.data.tldraw as TLEditorSnapshot);
+            if (canvas.data?.tldraw) {
+                setSnapshot(canvas.data.tldraw as TLEditorSnapshot);
+                snapshotRef.current = canvas.data.tldraw as TLEditorSnapshot;
+            }
             setLoading(false);
         })();
         return () => { cancelled = true; };
@@ -238,15 +243,17 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }, [editor, saveCanvas]);
 
     // ── tldraw 마운트 콜백 ─────────────────────────────────────────────────
+    // snapshot을 ref(snapshotRef)로 읽어 deps에서 제거 → 참조 안정화
+    // tldraw v4는 onMount 참조가 바뀌면 cleanup→재호출하므로 불안정한 참조는 버그 원인
     const handleMount = useCallback((ed: Editor) => {
         setEditor(ed);
         editorRef.current = ed;
         // 마운트 시 현재 펜 모드 상태 반영
         const penMode = localStorage.getItem("pp-pen-mode") === "1";
         ed.updateInstanceState({ isPenMode: penMode });
-        if (snapshot) {
+        if (snapshotRef.current) {
             try {
-                ed.loadSnapshot(snapshot);
+                ed.loadSnapshot(snapshotRef.current);
                 // 저장된 스냅샷에 isGridMode=true가 있어도 초기화 (모눈종이 잔류 방지)
                 ed.updateInstanceState({ isGridMode: false });
             } catch { /* 새 캔버스로 시작 */ }
@@ -259,7 +266,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             { scope: "document", source: "user" },
         );
         return unsub;
-    }, [snapshot, saveCanvas]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [saveCanvas]); // snapshot은 ref로 읽음 — deps 불필요
 
     // ── PNG 내보내기 ────────────────────────────────────────────────────────
     const exportPng = useCallback(async () => {
@@ -388,23 +396,22 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
 
             {/* tldraw 무한 캔버스 + 배경 오버레이 */}
             {/* ref로 크기 감지 → tlReady 후 tldraw 마운트 (embed 모드 0×0 타이밍 버그 방지) */}
-            <div ref={tlContainerRef} className="flex-1 min-h-0 relative">
-                <div className="absolute inset-0">
-                    {tlReady ? (
-                        /* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */
-                        <BgCtx.Provider value={bgTemplate}>
-                            <Tldraw
-                                onMount={handleMount}
-                                components={TL_COMPONENTS}
-                                /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
-                            />
-                        </BgCtx.Provider>
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
-                        </div>
-                    )}
-                </div>
+            {/* overflow-hidden: tldraw fixed-position 요소가 부모 밖으로 새지 않도록 */}
+            <div ref={tlContainerRef} className="flex-1 overflow-hidden relative" style={{ minHeight: 0 }}>
+                {tlReady ? (
+                    /* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */
+                    <BgCtx.Provider value={bgTemplate}>
+                        <Tldraw
+                            onMount={handleMount}
+                            components={TL_COMPONENTS}
+                            /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
+                        />
+                    </BgCtx.Provider>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
+                    </div>
+                )}
             </div>
             <ConfirmSheet
                 open={confirmDeleteOpen}
