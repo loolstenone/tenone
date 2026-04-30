@@ -854,11 +854,14 @@ function NoteExpandModal({
         setContent(isHandwritingContent(content) ? setTextPart(content, v) : v);
     }
 
-    // Cornell
+    // Cornell — 손글씨 ↔ 코넬 전환 후에도 rows 보존
+    // content가 HW 형식일 때: Cornell JSON이 .text에 내장돼 있음 → extractTextPart로 꺼내서 파싱
     const cornellData = useMemo(() => {
         if (isTpl || isHand || isCanvas || !content) return null;
         try {
-            const parsed = JSON.parse(content);
+            const raw = isHandwritingContent(content) ? extractTextPart(content) : content;
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
             if (parsed?._cornell && Array.isArray(parsed.rows)) {
                 return { rows: parsed.rows as CornellRow[], summary: typeof parsed.summary === "string" ? parsed.summary : "" };
             }
@@ -867,7 +870,9 @@ function NoteExpandModal({
     }, [content, isTpl, isHand, isCanvas]);
     const isCornell = cornellData !== null;
     function saveCornellModal(rows: CornellRow[], summary: string) {
-        setContent(JSON.stringify({ _cornell: true, rows, summary }));
+        const cornellJson = JSON.stringify({ _cornell: true, rows, summary });
+        // HW 형식이면 .text만 업데이트 → strokes 보존; 일반 텍스트면 그대로 저장
+        setContent(isHandwritingContent(content) ? setTextPart(content, cornellJson) : cornellJson);
     }
     function saveHand(next: HandNoteData) {
         setContent(setHandPart(content, next));

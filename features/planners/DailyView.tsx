@@ -34,7 +34,7 @@ const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: 
     '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
 };
 export type CornellRow = { id: string; cue: string; note: string };
-type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting' | 'canvas'; templateKey?: string; templateLabel?: string; canvas_id?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
+type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting' | 'canvas'; handMode?: boolean; templateKey?: string; templateLabel?: string; canvas_id?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
 
 export const RESULT_CATEGORIES = [
     { key: "summary",  label: "정리",     hint: "오늘을 정리하면" },
@@ -739,7 +739,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     content: typeof n.content === 'string' ? n.content : "",
                                     summary: typeof n.summary === 'string' ? n.summary : "",
                                     rows: type === 'cornell' ? parseCornellRows(n as Record<string, string>) : [],
-                                    handwriting: type === 'handwriting' && n.handwriting && typeof n.handwriting === 'object' ? n.handwriting as HandNoteData : undefined,
+                                    // Cornell+손글씨 공존: type 무관하게 handwriting 필드 복원
+                                    handwriting: n.handwriting && typeof n.handwriting === 'object' ? n.handwriting as HandNoteData : undefined,
                                 };
                             });
                         } else {
@@ -1028,7 +1029,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (n.type === 'canvas') {
                 return { id: n.id, type: n.type, canvas_id: n.canvas_id, title: n.title, cue: '', content: '', summary: '' };
             }
-            return { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows, summary: n.summary || "" }), summary: n.summary };
+            // Cornell (기본) — handwriting 필드가 있으면 함께 보존 (손글씨+타이핑 공존)
+            const cornellBase = { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows, summary: n.summary || "" }), summary: n.summary };
+            return n.handwriting ? { ...cornellBase, handwriting: n.handwriting } : cornellBase;
         }));
     }
 
@@ -1733,25 +1736,26 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {/* Note Expand Modal */}
             {expandedNote && (() => {
                 const isTpl = expandedNote.type === 'template';
-                const isHand = expandedNote.type === 'handwriting';
                 const isCanvas = expandedNote.type === 'canvas';
                 const tplMeta = isTpl ? { id: expandedNote.id, key: expandedNote.templateKey ?? '', label: expandedNote.title, body_md: expandedNote.content } : null;
                 const tplHasGrid = tplMeta ? isSpecialTemplate(tplMeta) : false;
                 const dataKey = tplMeta ? tplDataKey(expandedNote.id) : '';
+                // 손글씨 모드: type이 handwriting이거나, cornell 노트에서 handMode=true 일 때
+                const isHand = expandedNote.type === 'handwriting'
+                    || (expandedNote.type !== 'template' && expandedNote.type !== 'canvas' && !!expandedNote.handMode);
                 // 자동 생성 제목 여부 — 힌트 스타일(이탤릭·흐림) 적용
                 const isAutoTitle = /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(expandedNote.title)
                     || (isTpl && expandedNote.title === (expandedNote.templateLabel ?? ''));
                 function toggleHandwriting() {
                     if (isHand) {
-                        // 손글씨 → 텍스트: 스트로크 보존, 텍스트 복원
-                        setExpandedNote({ ...expandedNote!, type: 'cornell', content: expandedNote!.handwriting?.text ?? '' });
+                        // 손글씨 → 텍스트/코넬: type 변경 없이 handMode만 false
+                        // strokes는 expandedNote.handwriting에 그대로 보존됨
+                        setExpandedNote({ ...expandedNote!, handMode: false });
                     } else {
-                        // 텍스트 → 손글씨: 기존 텍스트를 handwriting.text에 보존
-                        const prev = expandedNote!.handwriting;
-                        const nextHand: HandNoteData = prev
-                            ? { ...prev, text: expandedNote!.content || '' }
-                            : { strokes: [], width: 800, height: 480, text: expandedNote!.content || '' };
-                        setExpandedNote({ ...expandedNote!, type: 'handwriting', handwriting: nextHand });
+                        // 텍스트/코넬 → 손글씨: type 변경 없이 handMode만 true
+                        // 기존 strokes가 없으면 빈 캔버스 초기화, rows는 그대로 보존
+                        const hand = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                        setExpandedNote({ ...expandedNote!, handMode: true, handwriting: hand });
                     }
                 }
                 function saveAndClose() {
@@ -1804,7 +1808,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             {/* Body */}
                             {isCanvas ? (
                                 <iframe
-                                    src={`/planners/app/canvas/${expandedNote.canvas_id}`}
+                                    src={`/planners/app/canvas/${expandedNote.canvas_id}?embed=1`}
                                     className="flex-1 w-full border-0"
                                     title={expandedNote.title}
                                 />

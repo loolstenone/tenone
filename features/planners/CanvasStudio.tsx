@@ -133,7 +133,7 @@ const TL_COMPONENTS = {
 
 // ─── 메인 CanvasStudio ─────────────────────────────────────────────────────
 
-export function CanvasStudio({ canvasId }: { canvasId: string }) {
+export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; embed?: boolean }) {
     const [title, setTitle]         = useState("새 캔버스");
     const [loading, setLoading]     = useState(true);
     const [saving, setSaving]       = useState(false);
@@ -284,33 +284,39 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     }
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
+    const shellCls = embed
+        ? "flex flex-col bg-neutral-50 w-full h-full"
+        : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
+
     if (loading) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center text-neutral-400 text-sm gap-2 bg-neutral-50 z-50">
+            <div className={`${shellCls} items-center justify-center text-neutral-400 text-sm gap-2`}>
                 <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 스튜디오 불러오는 중…
             </div>
         );
     }
     if (notFound) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-neutral-50 z-50">
+            <div className={`${shellCls} items-center justify-center`}>
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
-                    <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
+                    {!embed && <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="fixed inset-0 flex flex-col bg-neutral-50 z-50"
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        <div className={shellCls}
+            style={embed ? undefined : { paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
             {/* 상단 바 */}
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
-                <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
-                    <ChevronLeft className="h-4 w-4" />
-                </Link>
+                {!embed && (
+                    <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
+                        <ChevronLeft className="h-4 w-4" />
+                    </Link>
+                )}
 
                 <input
                     type="text"
