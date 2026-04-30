@@ -150,6 +150,26 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
     const bgTemplateRef = useRef<BgTemplate>("blank");
 
+    // ── embed 모드: 컨테이너가 실제 크기를 가진 후에만 tldraw 마운트 ────────────
+    // 문제: 모달 flex 레이아웃이 settle되기 전에 tldraw가 마운트되면 0×0으로 인식해
+    //       내부 div가 display:none 상태로 고정됨
+    const tlContainerRef = useRef<HTMLDivElement>(null);
+    const [tlReady, setTlReady] = useState(!embed); // standalone은 즉시 ready
+    useEffect(() => {
+        if (!embed) return;
+        const el = tlContainerRef.current;
+        if (!el) return;
+        const check = () => {
+            if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                setTlReady(true);
+            }
+        };
+        check(); // 이미 크기 있으면 즉시
+        const ro = new ResizeObserver(check);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [embed]);
+
     // ── 펜 전용 모드 (글로벌 pp-pen-mode 이벤트 수신) ────────────────────────
     const editorRef = useRef<Editor | null>(null);
     useEffect(() => {
@@ -361,20 +381,24 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             </header>
 
             {/* tldraw 무한 캔버스 + 배경 오버레이 */}
-            {/* absolute inset-0 로 tldraw 에 명시적 크기 전달 (flex-1만으로는 tldraw가 높이 0으로 인식) */}
-            <div className="flex-1 min-h-0 relative">
+            {/* ref로 크기 감지 → tlReady 후 tldraw 마운트 (embed 모드 0×0 타이밍 버그 방지) */}
+            <div ref={tlContainerRef} className="flex-1 min-h-0 relative">
                 <div className="absolute inset-0">
-                    {/* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */}
-                    <BgCtx.Provider value={bgTemplate}>
-                        <Tldraw
-                            onMount={handleMount}
-                            components={TL_COMPONENTS}
-                            /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
-                        />
-                    </BgCtx.Provider>
+                    {tlReady ? (
+                        /* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */
+                        <BgCtx.Provider value={bgTemplate}>
+                            <Tldraw
+                                onMount={handleMount}
+                                components={TL_COMPONENTS}
+                                /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
+                            />
+                        </BgCtx.Provider>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
+                        </div>
+                    )}
                 </div>
-
-                {/* tldraw 기본 Toolbar(하단)가 도구 선택 담당 — 중복 제거 */}
             </div>
             <ConfirmSheet
                 open={confirmDeleteOpen}
