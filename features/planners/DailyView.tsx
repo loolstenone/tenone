@@ -387,7 +387,7 @@ function DailyNoteCard({
                     onChange={(e) => updateTitle(e.target.value)}
                     onBlur={commitTitle}
                     placeholder={placeholder}
-                    className={`flex-1 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
+                    className={`flex-1 min-w-0 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
                         isAutoTitle
                             ? "italic font-light text-neutral-400"
                             : "font-medium text-neutral-700"
@@ -453,8 +453,6 @@ function DailyNoteCard({
                     ) : (
                         <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
                     )}
-                    {/* 잘린 콘텐츠 fade */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
                 </div>
             )}
             <ConfirmSheet
@@ -1160,7 +1158,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             ) : (
                 <div className="grid md:grid-cols-3 gap-6 items-start">
                     {/* 1. 일정 & 업무 */}
-                    <div className="order-1 md:order-none md:col-span-2 space-y-4">
+                    <div className="order-1 md:order-none md:col-span-2 space-y-4 min-w-0">
                         <ExternalEventsBanner date={date} />
 
                         {/* ── 통합 타임테이블 (일정 + 업무) ── */}

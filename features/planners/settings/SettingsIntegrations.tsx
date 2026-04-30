@@ -227,7 +227,7 @@ export function SettingsIntegrations({ showToast }: Props) {
             const res = await fetch("/api/planners/integrations/todoist/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                showToast(`${d.imported}개 태스크 import 완료`);
+                showToast(`${d.imported}개 할 일 가져오기 완료`);
                 await reloadIntegrations();
             } else {
                 const d = await res.json();
@@ -264,7 +264,7 @@ export function SettingsIntegrations({ showToast }: Props) {
             const res = await fetch("/api/planners/integrations/notion/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                showToast(`${d.imported}개 태스크 import 완료`);
+                showToast(`${d.imported}개 할 일 가져오기 완료`);
                 await reloadIntegrations();
             } else {
                 const d = await res.json();
@@ -417,7 +417,7 @@ export function SettingsIntegrations({ showToast }: Props) {
                     <div className="pt-2 border-t border-neutral-100" />
                     <IntegrationRow
                         name="Todoist"
-                        desc="오늘의 Todoist 태스크를 Daily로 import"
+                        desc="오늘의 Todoist 할 일을 플래너로 가져오기"
                         integration={integrations.find(i => i.provider === "todoist" && i.status === "active")}
                         connectHref="#"
                         onConnectClick={() => setTodoistModal(true)}
@@ -431,7 +431,7 @@ export function SettingsIntegrations({ showToast }: Props) {
                     <div className="pt-2 border-t border-neutral-100" />
                     <IntegrationRow
                         name="Notion"
-                        desc="Notion DB의 미완료 태스크를 Daily로 import"
+                        desc="Notion의 미완료 할 일을 플래너로 가져오기"
                         integration={integrations.find(i => i.provider === "notion" && i.status === "active")}
                         connectHref="#"
                         onConnectClick={() => setNotionModal(true)}
@@ -479,13 +479,13 @@ export function SettingsIntegrations({ showToast }: Props) {
                     <div className="bg-white rounded-xl max-w-md w-full p-5">
                         <h3 className="font-semibold text-neutral-900 mb-2">Todoist 연결</h3>
                         <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                            Todoist 웹 → Settings → Integrations → Developer → API 토큰 복사 후 붙여넣기
+                            Todoist 앱 → 설정 → 연동 → 개발자 → API 토큰을 복사해 아래에 붙여넣기
                         </p>
                         <input
                             type="text"
                             value={todoistToken}
                             onChange={e => setTodoistToken(e.target.value)}
-                            placeholder="API 토큰 붙여넣기"
+                            placeholder="API 토큰을 여기에 붙여넣기"
                             className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
                             autoFocus
                         />

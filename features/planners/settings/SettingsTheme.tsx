@@ -155,9 +155,8 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
 
             {/* 스타일 프리셋 */}
             <section id="sec-style-presets" className="bg-white border border-neutral-200 rounded-xl p-6">
-                <div className="flex items-baseline justify-between mb-1">
+                <div className="mb-1">
                     <h2 className="text-sm font-semibold text-neutral-900">스타일 프리셋</h2>
-                    <span className="text-[10px] text-neutral-400">5개 토큰 한 번에 적용</span>
                 </div>
                 <p className="text-xs text-neutral-400 mb-4">한 번 탭으로 화면 모드 · 컬러 · 모서리 · 폰트 2종을 동시에 바꿉니다.</p>
                 <SettingsStylePresets
@@ -209,12 +208,15 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                             );
                         })}
                     </div>
+                    {themeMode === "system" && (
+                        <p className="mt-2 text-[11px] text-neutral-400">사용하고 있는 기기의 설정에 따릅니다.</p>
+                    )}
                 </section>
 
                 {/* 컬러 테마 */}
                 <section id="sec-color" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">컬러 테마</h2>
-                    <div className="grid grid-cols-9 gap-x-4 gap-y-3">
+                    <div className="grid grid-cols-6 sm:grid-cols-9 gap-x-4 gap-y-3">
                         {COLOR_THEMES.map((t) => {
                             const active = colorTheme === t.key;
                             return (
@@ -274,10 +276,10 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                 <section id="sec-font" className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">폰트</h2>
                     <div className="space-y-6">
-                        {/* 시스템 폰트 */}
+                        {/* 화면 글꼴 */}
                         <div>
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">시스템 폰트</p>
-                            <p className="text-[10px] text-neutral-400 mb-3">메뉴·버튼·라벨 등 앱 UI에 적용</p>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">화면 글꼴</p>
+                            <p className="text-[10px] text-neutral-400 mb-3">메뉴·버튼·라벨 등 화면 전체에 적용</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {PP_FONT_OPTIONS.map((f) => {
                                     const active = fontFamily === f.key;
@@ -297,10 +299,10 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                 })}
                             </div>
                         </div>
-                        {/* 사용자 폰트 */}
+                        {/* 입력 글꼴 */}
                         <div>
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">사용자 폰트</p>
-                            <p className="text-[10px] text-neutral-400 mb-3">노트·할 일 등 직접 입력한 내용에 적용</p>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">입력 글꼴</p>
+                            <p className="text-[10px] text-neutral-400 mb-3">노트·할 일 등 직접 입력하는 내용에 적용</p>
                             <div className="grid grid-cols-3 gap-2 mb-3">
                                 {PP_FONT_OPTIONS.map((f) => {
                                     const active = userFontFamily === f.key;
@@ -319,7 +321,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                     );
                                 })}
                             </div>
-                            <p className="text-[10px] text-neutral-400 mb-2">커스텀 — CSS font-family 이름을 직접 입력하세요. 예: &apos;Noto Sans KR&apos;, Georgia</p>
+                            <p className="text-[10px] text-neutral-400 mb-2">직접 입력 — 글꼴 이름을 입력하세요. 예: &apos;Noto Sans KR&apos;, Georgia</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {customFonts.map((cf, idx) => {
                                     const key = `custom_${idx}`;

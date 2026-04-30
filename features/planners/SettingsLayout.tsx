@@ -103,7 +103,6 @@ export function SettingsLayout({ children }: Props) {
                                     color: active ? "var(--pp-ink-on)" : "var(--pp-ink-3)",
                                 }}
                             >
-                                <span className="font-mono text-[9px] opacity-60">{g.no}</span>
                                 {g.label}
                             </button>
                         );
@@ -237,7 +236,7 @@ export function GroupMarker({ group, label, no }: { group: SettingsGroup["key"];
             className="pt-2 pb-1 mt-2 first:mt-0"
         >
             {/* IntersectionObserver는 wrapper 자체를 관찰. 시각 라벨은 모바일에서만 노출 (PC는 좌측 nav가 담당) */}
-            <p className="pp-eyebrow lg:opacity-0 lg:select-none lg:pointer-events-none">{no} · {label}</p>
+            <p className="pp-eyebrow lg:opacity-0 lg:select-none lg:pointer-events-none">{label}</p>
         </div>
     );
 }

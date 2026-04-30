@@ -307,7 +307,7 @@ export function AppTopNav({
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
                                     active
                                         ? "bg-[#0F766E] text-white font-medium"
-                                        : "text-neutral-700 hover:bg-neutral-50"
+                                        : "text-neutral-700 hover:bg-neutral-500/10"
                                 }`}
                             >
                                 <span>{tab.label}</span>
@@ -339,7 +339,7 @@ export function AppTopNav({
                 <Link
                     href="/planners/app/search"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
                     <Search className="h-4 w-4 text-neutral-400" />
                     <span>검색</span>
@@ -347,7 +347,7 @@ export function AppTopNav({
                 <Link
                     href="/planners/app/help"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
                     <HelpCircle className="h-4 w-4 text-neutral-400" />
                     <span>도움말 / FAQ</span>
@@ -355,7 +355,7 @@ export function AppTopNav({
                 <Link
                     href="/planners/app/settings"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
                     <Settings className="h-4 w-4 text-neutral-400" />
                     <span>설정</span>
@@ -363,7 +363,7 @@ export function AppTopNav({
                 <div className="h-px bg-neutral-100 my-1" />
                 <button
                     onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent("planners-feedback-open")); }}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
                     <MessageSquarePlus className="h-4 w-4 text-neutral-400" />
                     <span>피드백 보내기</span>

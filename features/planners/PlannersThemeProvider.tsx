@@ -22,6 +22,7 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     indigo:   { hex: "#4338CA", dark: "#3730a3" },
     navy:     { hex: "#1E40AF", dark: "#1e3a8a" },
     sky:      { hex: "#0369A1", dark: "#075985" },
+    walnut:   { hex: "#D4A062", dark: "#B8803E" },
     // 청록 · 녹색
     teal:     { hex: "#0F766E", dark: "#0d5e56" },
     emerald:  { hex: "#047857", dark: "#065F46" },
@@ -67,13 +68,31 @@ export function applyPlannersTheme(key: string) {
 [class~="from-[${BASE}]"]{--tw-gradient-from:${h}!important}
 [class~="to-[${BASE}]"]{--tw-gradient-to:${h}!important}
 [class~="ring-[${BASE}]"]{--tw-ring-color:${h}!important}
+[class~="focus:ring-[${BASE}]"]:focus{--tw-ring-color:${h}!important}
 [class~="accent-[${BASE}]"]{accent-color:${h}!important}
 [class~="bg-[${BASE}]/5"]{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
 [class~="bg-[${BASE}]/10"]{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
+[class~="bg-[${BASE}]/15"]{background-color:color-mix(in srgb,${h} 15%,transparent)!important}
 [class~="bg-[${BASE}]/20"]{background-color:color-mix(in srgb,${h} 20%,transparent)!important}
+[class~="bg-[${BASE}]/90"]{background-color:color-mix(in srgb,${h} 90%,transparent)!important}
 [class~="hover:bg-[${BASE}]/5"]:hover{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
 [class~="hover:bg-[${BASE}]/10"]:hover{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
+[class~="hover:bg-[${BASE}]/20"]:hover{background-color:color-mix(in srgb,${h} 20%,transparent)!important}
+[class~="hover:bg-[${BASE}]/90"]:hover{background-color:color-mix(in srgb,${h} 90%,transparent)!important}
+[class~="text-[${BASE}]/40"]{color:color-mix(in srgb,${h} 40%,transparent)!important}
+[class~="text-[${BASE}]/60"]{color:color-mix(in srgb,${h} 60%,transparent)!important}
 [class~="text-[${BASE}]/70"]{color:color-mix(in srgb,${h} 70%,transparent)!important}
+[class~="border-[${BASE}]/10"]{border-color:color-mix(in srgb,${h} 10%,transparent)!important}
+[class~="border-[${BASE}]/20"]{border-color:color-mix(in srgb,${h} 20%,transparent)!important}
+[class~="border-[${BASE}]/30"]{border-color:color-mix(in srgb,${h} 30%,transparent)!important}
+[class~="border-[${BASE}]/40"]{border-color:color-mix(in srgb,${h} 40%,transparent)!important}
+[class~="hover:border-[${BASE}]/40"]:hover{border-color:color-mix(in srgb,${h} 40%,transparent)!important}
+[class~="focus:ring-[${BASE}]/20"]:focus{--tw-ring-color:color-mix(in srgb,${h} 20%,transparent)!important}
+[class~="focus:ring-[${BASE}]/30"]:focus{--tw-ring-color:color-mix(in srgb,${h} 30%,transparent)!important}
+[class~="from-[${BASE}]/5"]{--tw-gradient-from:color-mix(in srgb,${h} 5%,transparent)!important}
+[class~="to-[${BASE}]/10"]{--tw-gradient-to:color-mix(in srgb,${h} 10%,transparent)!important}
+.group:hover [class~="group-hover:text-[${BASE}]"]{color:${h}!important}
+.group:hover [class~="group-hover:text-[${BASE}]/40"]{color:color-mix(in srgb,${h} 40%,transparent)!important}
 [class~="bg-[${BASE}]/[0.025]"]{background-color:color-mix(in srgb,${h} 2.5%,transparent)!important}
 [class~="bg-[${BASE}]/[0.04]"]{background-color:color-mix(in srgb,${h} 4%,transparent)!important}
 [class~="bg-[${BASE_DARK}]"]{background-color:${d}!important}

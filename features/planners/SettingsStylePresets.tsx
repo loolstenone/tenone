@@ -86,8 +86,8 @@ export const STYLE_PRESETS: SettingsPreset[] = [
         key: "walnut_dark",
         label: "Walnut Dark",
         desc: "짙은 갈색 · 가죽 · 앤틱",
-        swatch: { bg: "#2C1608", surface: "#3D2210", accent: "#D4A062" },
-        color: "brown", radius: "soft", font: "strong-serif", userFont: "serif", mode: "dark",
+        swatch: { bg: "#161616", surface: "#1A1208", accent: "#D4A062" },
+        color: "walnut", radius: "soft", font: "strong-serif", userFont: "serif", mode: "dark",
     },
 ];
 
@@ -118,7 +118,7 @@ interface Props {
 
 export function SettingsStylePresets({ activePresetKey, onApply, mobile = false }: Props) {
     return (
-        <div className={mobile ? "grid grid-cols-2 gap-2.5" : "grid grid-cols-3 gap-3"}>
+        <div className={mobile ? "grid grid-cols-2 gap-2.5" : "grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3"}>
             {STYLE_PRESETS.map((p) => {
                 const active = activePresetKey === p.key;
                 return (
