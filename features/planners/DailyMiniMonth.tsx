@@ -83,38 +83,38 @@ export function DailyMiniMonth({ date }: Props) {
     }
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-                <button onClick={() => navigate(-1)} className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400">
-                    <ChevronLeft className="h-3 w-3" />
+        <section className="bg-white border border-neutral-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+                <button onClick={() => navigate(-1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400">
+                    <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
                 <Link
                     href={`/planners/app/monthly?year=${year}&month=${month}`}
-                    className="text-[11px] font-semibold text-neutral-700 hover:text-[#0F766E]"
+                    className="text-xs font-semibold text-neutral-700 hover:text-[#0F766E]"
                 >
                     {year}년 {month}월
                 </Link>
-                <button onClick={() => navigate(1)} className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400">
-                    <ChevronRight className="h-3 w-3" />
+                <button onClick={() => navigate(1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400">
+                    <ChevronRight className="h-3.5 w-3.5" />
                 </button>
             </div>
-            <div className="grid grid-cols-[18px_repeat(7,1fr)] gap-px text-center mb-0.5">
-                <span className="text-[7px] text-neutral-300">W</span>
+            <div className="grid grid-cols-[20px_repeat(7,1fr)] gap-0.5 text-center mb-2">
+                <span className="text-[8px] text-neutral-300 leading-none self-center">W</span>
                 {["월", "화", "수", "목", "금", "토", "일"].map((d, i) => (
-                    <span key={d} className={`text-[8px] ${i >= 5 ? (i === 6 ? "text-rose-400" : "text-rose-300") : "text-neutral-400"}`}>
+                    <span key={d} className={`text-[9px] font-medium ${i >= 5 ? (i === 6 ? "text-rose-400" : "text-rose-300") : "text-neutral-400"}`}>
                         {d}
                     </span>
                 ))}
             </div>
             {/* 주 단위로 행 분할 — 좌측에 W주차 표시 */}
-            <div className="space-y-px">
+            <div className="space-y-0.5">
                 {Array.from({ length: cells.length / 7 }, (_, rowIdx) => {
                     const rowCells = cells.slice(rowIdx * 7, rowIdx * 7 + 7);
                     const firstDate = new Date(rowCells[0].date + "T00:00:00Z");
                     const { week } = getISOWeek(firstDate);
                     const weekYear = rowCells[0].date.slice(0, 4);
                     return (
-                        <div key={rowIdx} className="grid grid-cols-[18px_repeat(7,1fr)] gap-px">
+                        <div key={rowIdx} className="grid grid-cols-[20px_repeat(7,1fr)] gap-0.5">
                             <Link
                                 href={`/planners/app/weekly?year=${weekYear}&week=${week}`}
                                 title={`W${week} 주간 보기`}
@@ -134,7 +134,7 @@ export function DailyMiniMonth({ date }: Props) {
                                     <Link
                                         key={c.date}
                                         href={`/planners/app/daily?date=${c.date}`}
-                                        className={`relative flex items-center justify-center text-[10px] rounded py-[3px] transition-colors
+                                        className={`relative flex items-center justify-center text-[11px] rounded-md py-1.5 transition-colors
                                             ${isToday ? "bg-[#0F766E] text-white font-semibold"
                                             : !c.inMonth ? "text-neutral-200"
                                             : isHol || isSun ? "text-rose-500 hover:bg-rose-50"
@@ -144,7 +144,7 @@ export function DailyMiniMonth({ date }: Props) {
                                     >
                                         {c.dom}
                                         {hasEntry && !isToday && (
-                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-[#0F766E]" />
+                                            <span className="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#0F766E]" />
                                         )}
                                     </Link>
                                 );
