@@ -23,6 +23,7 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
+import { CanvasStudio } from "./CanvasStudio";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type TaskPriority = '급중' | '급경' | '완중' | '완경';
@@ -1908,11 +1909,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </div>
                             {/* Body */}
                             {isCanvas ? (
-                                <iframe
-                                    src={`/planners/canvas/${expandedNote.canvas_id}`}
-                                    className="flex-1 w-full border-0"
-                                    title={expandedNote.title}
-                                />
+                                <div className="flex-1 min-h-0 relative overflow-hidden">
+                                    <CanvasStudio canvasId={expandedNote.canvas_id!} embed />
+                                </div>
                             ) : isHand ? (
                                 <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                                     <HandNote

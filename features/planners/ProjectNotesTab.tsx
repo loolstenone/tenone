@@ -11,6 +11,7 @@ import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting,
 import { CornellRowsInline, type CornellRow } from "./DailyView";
 import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
 import { ConfirmSheet } from "./ConfirmSheet";
+import { CanvasStudio } from "./CanvasStudio";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -1029,12 +1030,8 @@ function NoteExpandModal({
                 </div>
                 {/* Body */}
                 {isCanvas && canvasInfo ? (
-                    <div className="flex-1 min-h-0">
-                        <iframe
-                            src={`/planners/canvas/${canvasInfo.canvasId}`}
-                            className="w-full h-full border-0"
-                            title="Canvas"
-                        />
+                    <div className="flex-1 min-h-0 relative overflow-hidden">
+                        <CanvasStudio canvasId={canvasInfo.canvasId} embed />
                     </div>
                 ) : grid ? (
                     <div className="flex-1 p-6 overflow-auto">{grid}</div>

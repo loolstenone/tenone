@@ -284,8 +284,11 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
-    // embed/standalone 모두 fixed inset-0 z-50 — iframe 안에서도 뷰포트 전체를 채움
-    const shellCls = "fixed inset-0 flex flex-col bg-neutral-50 z-50";
+    // embed: 모달 안에 직접 렌더 → absolute inset-0 (부모가 relative)
+    // standalone: fixed inset-0 z-50 로 AppLayout 전체 덮음
+    const shellCls = embed
+        ? "absolute inset-0 flex flex-col bg-neutral-50"
+        : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
 
     if (loading) {
         return (
