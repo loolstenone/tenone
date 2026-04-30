@@ -24,7 +24,7 @@ import {
     type PointerEvent as ReactPointerEvent,
 } from "react";
 import { getStroke } from "perfect-freehand";
-import { Eraser, Undo2, Redo2, RotateCcw, Pencil, SlidersHorizontal } from "lucide-react";
+import { Eraser, Undo2, Redo2, RotateCcw, Pencil, PenLine, SlidersHorizontal, ImagePlus, MousePointer2, Trash2 } from "lucide-react";
 import { ConfirmSheet } from "./ConfirmSheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -39,10 +39,20 @@ export interface HandStroke {
     streamline?: number;
 }
 
+export interface HandImage {
+    id: string;
+    src: string;    // dataURL
+    x: number;     // viewBox 논리 좌표
+    y: number;
+    w: number;     // 논리 너비
+    h: number;     // 논리 높이
+}
+
 export interface HandNoteData {
     strokes: HandStroke[];
     width: number;
     height: number;
+    images?: HandImage[];   // 삽입 이미지 목록
     /** 같은 노트의 텍스트 모드 본문 — 손글씨와 공존 보존 (모드 전환 시 사라지지 않음) */
     text?: string;
     _pages?: HandNoteData[];  // multi-page: 추가 페이지 데이터
@@ -56,6 +66,8 @@ interface HandNoteProps {
     placeholder?: string;
     minHeight?: number;
     fillHeight?: boolean;
+    /** 아래에 콘텐츠(코넬 노트 등)를 깔고 투명 SVG로 덮는 오버레이 모드 */
+    children?: React.ReactNode;
 }
 
 // ─── Pen Presets ──────────────────────────────────────────────────────────────
@@ -143,6 +155,25 @@ function nearStroke(s: HandStroke, x: number, y: number, r: number): boolean {
     return false;
 }
 
+/** 화면 좌표 → SVG viewBox 논리 좌표 변환 (viewBox 스케일 자동 반영) */
+function getSVGPoint(
+    svg: SVGSVGElement,
+    clientX: number,
+    clientY: number,
+): { x: number; y: number } {
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+        const pt = svg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const p = pt.matrixTransform(ctm.inverse());
+        return { x: p.x, y: p.y };
+    }
+    // fallback: viewBox 없을 때
+    const rect = svg.getBoundingClientRect();
+    return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function HandNote({
@@ -153,6 +184,7 @@ export function HandNote({
     placeholder = "Apple Pencil · S Pen 또는 마우스로 직접 쓰세요",
     minHeight,
     fillHeight = false,
+    children,
 }: HandNoteProps) {
     // DOM
     const containerRef    = useRef<HTMLDivElement>(null);
@@ -186,7 +218,10 @@ export function HandNote({
     const [showStab,     setShowStab]     = useState(false);
     const [eraserMode,   setEraserMode]   = useState(false);
     const [stylusEraser, setStylusEraser] = useState(false);
-    const [penOnly,      setPenOnly]      = useState(false);
+    const [selectMode,   setSelectMode]   = useState(false); // 이미지 선택/이동 모드
+    const [selectedId,   setSelectedId]   = useState<string | null>(null);
+    const dragImgRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [autoH,        setAutoH]        = useState(value?.height ?? initH);
 
     // RAF 콜백에서 항상 최신 펜 설정을 읽기 위한 ref (stale closure 방지)
@@ -201,9 +236,14 @@ export function HandNote({
     const effectiveErase = eraserMode || stylusEraser;
     const height  = fillHeight && fillH > 0 ? fillH : Math.max(autoH, value?.height ?? initH);
     const strokes = value?.strokes ?? [];
+    // 캐노니컬 폭: 저장된 value.width 우선 → 처음 그릴 때만 현재 컨테이너 폭 사용
+    // 이 값을 viewBox 기준으로 써야 화면 크기가 달라도 스트로크가 잘리지 않고 비례 축소됨
+    const canonW = value?.width || width || 600;
 
     const [confirmClearOpen, setConfirmClearOpen] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    /** 오버레이 모드(children 제공 시): true=그리기, false=텍스트 편집 */
+    const [drawEnabled, setDrawEnabled] = useState(false);
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
@@ -218,15 +258,9 @@ export function HandNote({
         return () => obs.disconnect();
     }, []);
 
-    // 글로벌 펜 전용 모드 동기화 (pp-pen-mode CustomEvent)
+    // pp-pen-mode 레거시 설정 초기화 (버튼 제거 후 이전 localStorage 값 클리어)
     useEffect(() => {
-        // 초기값 반영
-        setPenOnly(localStorage.getItem("pp-pen-mode") === "1");
-        const handler = (e: Event) => {
-            setPenOnly((e as CustomEvent<{ enabled: boolean }>).detail.enabled);
-        };
-        window.addEventListener("pp-pen-mode", handler);
-        return () => window.removeEventListener("pp-pen-mode", handler);
+        localStorage.removeItem("pp-pen-mode");
     }, []);
 
     useEffect(() => {
@@ -268,7 +302,7 @@ export function HandNote({
         if (!undoRef.current.length) return;
         const prev = undoRef.current.pop()!;
         redoRef.current.push([...(value?.strokes ?? [])]);
-        onChange({ strokes: prev, width: width || (value?.width ?? 600), height });
+        onChange({ strokes: prev, width: value?.width || width || 600, height });
         bumpVer();
     }, [value, onChange, width, height]);
 
@@ -276,7 +310,7 @@ export function HandNote({
         if (!redoRef.current.length) return;
         const next = redoRef.current.pop()!;
         undoRef.current.push([...(value?.strokes ?? [])]);
-        onChange({ strokes: next, width: width || (value?.width ?? 600), height });
+        onChange({ strokes: next, width: value?.width || width || 600, height });
         bumpVer();
     }, [value, onChange, width, height]);
 
@@ -315,7 +349,7 @@ export function HandNote({
         const cur = value?.strokes ?? [];
         const next = cur.filter(s => !nearStroke(s, x, y, size + 8));
         if (next.length !== cur.length)
-            onChange({ strokes: next, width: width || (value?.width ?? 600), height });
+            onChange({ strokes: next, width: value?.width || width || 600, height });
     }
 
     // ── Canvas live render (RAF — React re-render 없음) ───────────────────────
@@ -323,14 +357,24 @@ export function HandNote({
     function renderToCanvas() {
         rafRef.current = null;
         const canvas = canvasRef.current;
+        const svg    = svgRef.current;
         const points = drawingRef.current;
-        if (!canvas || !points || points.length < 2) return;
+        if (!canvas || !svg || !points || points.length < 2) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
         const { penType: pt, color: cl, size: sz, stabilizer: stab } = penStateRef.current;
         const p = PEN_PRESETS[pt];
-        const stroke = getStroke(points, {
-            size: sz,
+
+        // viewBox 논리 좌표 → 캔버스 물리 픽셀 변환 스케일
+        const vb      = svg.viewBox.baseVal;
+        const svgRect = svg.getBoundingClientRect();
+        const dpr     = window.devicePixelRatio || 1;
+        const sx = vb.width  > 0 ? (svgRect.width  / vb.width)  * dpr : dpr;
+        const sy = vb.height > 0 ? (svgRect.height / vb.height) * dpr : dpr;
+
+        const scaledPts = points.map(([lx, ly, pr]) => [lx * sx, ly * sy, pr]);
+        const stroke = getStroke(scaledPts, {
+            size: sz * Math.min(sx, sy),  // brush size도 동일 스케일 적용
             thinning:         p.thinning,
             smoothing:        p.smoothing,
             streamline:       stab ?? p.streamline,
@@ -338,10 +382,8 @@ export function HandNote({
             simulatePressure: p.simulatePressure,
         });
         if (!stroke.length) return;
-        const dpr = window.devicePixelRatio || 1;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        ctx.scale(dpr, dpr);
         ctx.globalAlpha = p.opacity;
         ctx.fillStyle = cl;
         ctx.beginPath();
@@ -360,17 +402,35 @@ export function HandNote({
     // ── Pointer events ────────────────────────────────────────────────────────
 
     function onPointerDown(e: ReactPointerEvent<SVGSVGElement>) {
-        if (penOnly && e.pointerType !== "pen") return;
         if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 5) return;
+        // 오버레이 텍스트 모드: SVG pointer-events가 none이므로 이 핸들러는 호출되지 않음
+        // (아래 SVG style의 pointerEvents 참조)
+        if (children !== undefined && !drawEnabled) return;
 
         const isEraserBtn =
             e.pointerType === "pen" && (e.button === 5 || (e.buttons & 32) === 32);
         setStylusEraser(isEraserBtn);
 
         e.currentTarget.setPointerCapture(e.pointerId);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const { x, y } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+
+        // ── 선택/이동 모드 ─────────────────────────────────────────────────────
+        if (selectMode) {
+            const imgs = value?.images ?? [];
+            // z-order 역순으로 hit-test (나중에 그린 게 위에)
+            const hit = [...imgs].reverse().find(img =>
+                x >= img.x && x <= img.x + img.w && y >= img.y && y <= img.y + img.h
+            );
+            if (hit) {
+                setSelectedId(hit.id);
+                dragImgRef.current = { id: hit.id, ox: x - hit.x, oy: y - hit.y };
+            } else {
+                setSelectedId(null);
+                dragImgRef.current = null;
+            }
+            e.preventDefault();
+            return;
+        }
 
         // 이번 제스처의 "이전 상태" 캡처 (undo 커밋용)
         preActionRef.current = [...(value?.strokes ?? [])];
@@ -399,18 +459,31 @@ export function HandNote({
     }
 
     function onPointerMove(e: ReactPointerEvent<SVGSVGElement>) {
-        if (penOnly && e.pointerType !== "pen") return;
+        // 오버레이 텍스트 모드에서는 SVG pointer-events가 none이므로 이 핸들러 호출 안 됨
+        // (방어적 가드)
+        if (children !== undefined && !drawEnabled) return;
+
+        // ── 이미지 드래그 이동 ──────────────────────────────────────────────────
+        if (selectMode && dragImgRef.current && e.buttons > 0) {
+            const { x, y } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+            const { id, ox, oy } = dragImgRef.current;
+            const imgs = (value?.images ?? []).map(img =>
+                img.id === id ? { ...img, x: x - ox, y: y - oy } : img
+            );
+            onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: imgs });
+            e.preventDefault();
+            return;
+        }
+        if (selectMode) return;
 
         if (eraserMode || stylusEraser) {
             if (e.buttons > 0) {
-                const rect = e.currentTarget.getBoundingClientRect();
-                eraseAt(e.clientX - rect.left, e.clientY - rect.top);
+                const { x: ex, y: ey } = getSVGPoint(e.currentTarget, e.clientX, e.clientY);
+                eraseAt(ex, ey);
             }
             return;
         }
         if (!drawingRef.current) return;
-
-        const rect = e.currentTarget.getBoundingClientRect();
 
         // getCoalescedEvents — 스타일러스 서브프레임 포인트 포착
         const rawEvents: PointerEvent[] =
@@ -418,9 +491,9 @@ export function HandNote({
                 ? e.nativeEvent.getCoalescedEvents()
                 : [e.nativeEvent];
 
+        const svg = e.currentTarget;
         for (const ce of rawEvents) {
-            const x = ce.clientX - rect.left;
-            const y = ce.clientY - rect.top;
+            const { x, y } = getSVGPoint(svg, ce.clientX, ce.clientY);
             const nx = penType === "pencil" ? x + (Math.random() - 0.5) * 1.2 : x;
             const ny = penType === "pencil" ? y + (Math.random() - 0.5) * 1.2 : y;
             drawingRef.current.push([nx, ny, ce.pressure || 0.5]);
@@ -434,6 +507,9 @@ export function HandNote({
     }
 
     function onPointerUp() {
+        // 이미지 드래그 종료
+        if (dragImgRef.current) { dragImgRef.current = null; return; }
+
         const wasErasing = effectiveErase;
         setStylusEraser(false);
 
@@ -474,12 +550,12 @@ export function HandNote({
         if (pre !== null) commitUndo(pre);
 
         const svgH = fillHeight
-            ? (svgRef.current?.clientHeight ?? height)
+            ? height  // fillHeight 모드: 현재 논리 높이 유지
             : Math.max(height, yMax + 40);
         const newStroke: HandStroke = { points, color, size, penType, streamline: stabilizer };
         onChange({
             strokes: [...strokes, newStroke],
-            width:   width || (value?.width ?? 600),
+            width:   value?.width || width || 600,  // 캐노니컬 폭 유지 (기기마다 달라지지 않게)
             height:  svgH,
         });
     }
@@ -502,10 +578,68 @@ export function HandNote({
         setAutoH(initH);
     }
 
+    // ── Image insert ──────────────────────────────────────────────────────────
+
+    function insertImageFile(file: File) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const src = reader.result as string;
+            const img = new window.Image();
+            img.onload = () => {
+                const maxW = canonW * 0.7;
+                const scale = Math.min(1, maxW / img.naturalWidth);
+                const w = img.naturalWidth * scale;
+                const h = img.naturalHeight * scale;
+                const cx = (canonW - w) / 2;
+                const cy = height * 0.1;
+                const newImg: HandImage = { id: `img_${Date.now()}`, src, x: cx, y: cy, w, h };
+                const prevImgs = value?.images ?? [];
+                onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: [...prevImgs, newImg] });
+                if (!fillHeight) setAutoH(a => Math.max(a, cy + h + 60));
+                setSelectMode(true);
+                setSelectedId(newImg.id);
+            };
+            img.src = src;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 이미지 붙이기 (Ctrl+V)
+    useEffect(() => {
+        const handler = (e: ClipboardEvent) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (const item of Array.from(items)) {
+                if (item.type.startsWith("image/")) {
+                    const file = item.getAsFile();
+                    if (file) { e.preventDefault(); insertImageFile(file); return; }
+                }
+            }
+        };
+        window.addEventListener("paste", handler);
+        return () => window.removeEventListener("paste", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value, canonW, height]);
+
+    // 선택된 이미지 Delete/Backspace로 삭제
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (!selectedId || !selectMode) return;
+            if (e.key === "Delete" || e.key === "Backspace") {
+                const imgs = (value?.images ?? []).filter(img => img.id !== selectedId);
+                onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: imgs });
+                setSelectedId(null);
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedId, selectMode, value, canonW, height]);
+
     // ── Derived ───────────────────────────────────────────────────────────────
 
     const isEmpty   = strokes.length === 0;
-    const touchAct  = penOnly ? "pan-y" : "none";
+    const touchAct  = "none";
     const canUndo   = undoRef.current.length > 0;
     const canRedo   = redoRef.current.length > 0;
 
@@ -532,7 +666,7 @@ export function HandNote({
         <div ref={outerRef} className={fillHeight ? "flex-1 min-h-0 flex flex-col" : undefined}>
         <div
             ref={containerRef}
-            className={`relative bg-white border border-neutral-200 rounded-lg overflow-hidden select-none ${fillHeight ? "flex flex-col flex-1 min-h-0" : ""} ${className}`}
+            className={`relative overflow-hidden select-none ${children !== undefined ? "bg-transparent border-0 rounded-none" : "bg-white border border-neutral-200 rounded-lg"} ${fillHeight ? "flex flex-col flex-1 min-h-0" : ""} ${className}`}
         >
             {/* ── Toolbar ── */}
             <div
@@ -547,7 +681,7 @@ export function HandNote({
                             onClick={() => selectPen(t)}
                             type="button"
                             title={PEN_PRESETS[t].label}
-                            className={`px-1.5 h-5 text-[10px] rounded transition-colors whitespace-nowrap ${
+                            className={`px-2 h-6 text-xs rounded transition-colors whitespace-nowrap ${
                                 penType === t && !effectiveErase
                                     ? "bg-[#0F766E] text-white"
                                     : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
@@ -703,6 +837,46 @@ export function HandNote({
 
                 {/* 우측 액션 버튼들 */}
                 <div className="ml-auto flex items-center gap-0.5 shrink-0">
+                    {/* 이미지 삽입 */}
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        type="button"
+                        title="이미지 삽입 (또는 Ctrl+V 붙이기)"
+                        className="w-6 h-6 rounded flex items-center justify-center text-neutral-500 hover:bg-neutral-200 transition-colors"
+                    >
+                        <ImagePlus className="h-3.5 w-3.5" />
+                    </button>
+                    {/* 선택/이동 모드 */}
+                    <button
+                        onClick={() => { setSelectMode(m => !m); setEraserMode(false); }}
+                        type="button"
+                        title="이미지 선택·이동"
+                        className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                            selectMode ? "bg-sky-100 text-sky-600" : "text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                    >
+                        <MousePointer2 className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="w-px h-3 bg-neutral-300 shrink-0" />
+                    {/* 오버레이 모드: 그리기 ↔ 텍스트 토글 (children 있을 때만) */}
+                    {children !== undefined && (
+                        <>
+                            <button
+                                onClick={() => setDrawEnabled(d => !d)}
+                                type="button"
+                                title={drawEnabled ? "텍스트 편집 모드로 전환" : "손글씨 그리기 모드로 전환"}
+                                className={`flex items-center gap-1 px-2 h-6 text-xs rounded transition-colors mr-0.5 ${
+                                    drawEnabled
+                                        ? "bg-[#0F766E] text-white"
+                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
+                                }`}
+                            >
+                                <PenLine className="h-2.5 w-2.5" />
+                                {drawEnabled ? "그리기 중" : "그리기"}
+                            </button>
+                            <div className="w-px h-3 bg-neutral-300 shrink-0 mx-0.5" />
+                        </>
+                    )}
                     {/* 손 떨림 보정 */}
                     <button
                         onClick={() => setShowStab(s => !s)}
@@ -795,27 +969,87 @@ export function HandNote({
                 className={fillHeight ? "flex-1 min-h-0 relative overflow-hidden" : "relative"}
                 style={fillHeight ? undefined : { height, minHeight }}
             >
+                {/* 오버레이 모드: children(코넬 노트 등)을 아래에 깔기 */}
+                {children !== undefined && (
+                    <div
+                        className="absolute inset-0 overflow-auto"
+                        style={{ pointerEvents: drawEnabled ? "none" : "auto" }}
+                    >
+                        {children}
+                    </div>
+                )}
+
                 {/* 확정된 스트로크 — SVG */}
                 <svg
                     ref={svgRef}
                     width="100%"
                     height={fillHeight ? "100%" : height}
+                    viewBox={`0 0 ${canonW} ${height}`}
+                    preserveAspectRatio={fillHeight ? "none" : "xMinYMin meet"}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
                     onPointerUp={onPointerUp}
                     onPointerLeave={onPointerUp}
                     style={{
                         touchAction: touchAct,
-                        cursor: effectiveErase ? "cell" : "crosshair",
-                        background: isDark ? [
-                            "linear-gradient(to right, transparent 198px, rgba(220,60,60,0.20) 198px, rgba(220,60,60,0.20) 200px, transparent 200px)",
-                            "repeating-linear-gradient(transparent 0 31px, rgba(255,255,255,0.06) 31px 32px)"
-                        ].join(", ") : [
-                            "linear-gradient(to right, transparent 198px, rgba(200,30,30,0.12) 198px, rgba(200,30,30,0.12) 200px, transparent 200px)",
-                            "repeating-linear-gradient(transparent 0 31px, rgba(15,23,42,0.04) 31px 32px)"
-                        ].join(", "),
+                        cursor: (children !== undefined && !drawEnabled) ? "default" : (effectiveErase ? "cell" : "crosshair"),
+                        // 오버레이 모드: 텍스트 모드(drawEnabled=false)에선 none → 클릭이 children 텍스트영역에 직접 전달
+                        // 그리기 모드(drawEnabled=true)에선 all → SVG가 포인터 이벤트 캡처
+                        pointerEvents: (children !== undefined && !drawEnabled) ? "none" : "all",
+                        ...(children !== undefined ? {
+                            position: "absolute" as const,
+                            top: 0, right: 0, bottom: 0, left: 0,
+                            background: "transparent",
+                        } : {
+                            background: isDark ? [
+                                "linear-gradient(to right, transparent 198px, rgba(220,60,60,0.20) 198px, rgba(220,60,60,0.20) 200px, transparent 200px)",
+                                "repeating-linear-gradient(transparent 0 31px, rgba(255,255,255,0.06) 31px 32px)"
+                            ].join(", ") : [
+                                "linear-gradient(to right, transparent 198px, rgba(200,30,30,0.12) 198px, rgba(200,30,30,0.12) 200px, transparent 200px)",
+                                "repeating-linear-gradient(transparent 0 31px, rgba(15,23,42,0.04) 31px 32px)"
+                            ].join(", "),
+                        }),
                     }}
                 >
+                    {/* 삽입 이미지 — 스트로크 아래 레이어 (자리 차지: 흰 배경 + 이미지) */}
+                    {(value?.images ?? []).map(img => (
+                        <g key={img.id}>
+                            {/* 텍스트/배경 위를 가리는 흰 사각형 (자리 차지) */}
+                            <rect x={img.x} y={img.y} width={img.w} height={img.h}
+                                fill={isDark ? "#1e1e2e" : "white"} />
+                            <image
+                                href={img.src}
+                                x={img.x} y={img.y}
+                                width={img.w} height={img.h}
+                                preserveAspectRatio="xMidYMid meet"
+                                style={{ cursor: selectMode ? "move" : "default" }}
+                            />
+                            {/* 선택 핸들 */}
+                            {selectedId === img.id && (
+                                <>
+                                    <rect x={img.x - 2} y={img.y - 2}
+                                        width={img.w + 4} height={img.h + 4}
+                                        fill="none" stroke="#0F766E" strokeWidth="1.5"
+                                        strokeDasharray="5 3" />
+                                    {/* 삭제 버튼 (우상단) */}
+                                    <g
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            const imgs = (value?.images ?? []).filter(i => i.id !== img.id);
+                                            onChange({ ...(value ?? { strokes: [], width: canonW, height }), images: imgs });
+                                            setSelectedId(null);
+                                        }}
+                                    >
+                                        <circle cx={img.x + img.w + 2} cy={img.y - 2} r={8} fill="#ef4444" />
+                                        <text x={img.x + img.w + 2} y={img.y + 2}
+                                            textAnchor="middle" fill="white"
+                                            fontSize="10" fontWeight="bold">✕</text>
+                                    </g>
+                                </>
+                            )}
+                        </g>
+                    ))}
+                    {/* 확정된 펜 스트로크 */}
                     {strokes.map((s, i) => (
                         <path
                             key={i}
@@ -839,7 +1073,8 @@ export function HandNote({
                     }}
                 />
 
-                {isEmpty && (
+                {/* 빈 캔버스 안내 — 오버레이 모드에서는 표시 안 함 */}
+                {isEmpty && children === undefined && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="text-center px-4">
                             <Pencil className="h-5 w-5 mx-auto text-neutral-400 mb-1" />
@@ -852,6 +1087,18 @@ export function HandNote({
                 )}
             </div>
         </div>
+        {/* 이미지 파일 선택 input (숨김) */}
+        <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) insertImageFile(file);
+                e.target.value = "";  // 같은 파일 재선택 가능하도록 초기화
+            }}
+        />
         <ConfirmSheet
             open={confirmClearOpen}
             message="이 손글씨를 모두 지울까요?"

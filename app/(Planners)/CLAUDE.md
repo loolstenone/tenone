@@ -345,7 +345,8 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 103 (2026-04-30)** — **Settings page.tsx 모듈 분리 완성** (1,799줄 → 367줄 슬림 쉘 · 5개 feature 모듈: SettingsTheme·SettingsAi·SettingsNotifications·SettingsIntegrations·SettingsExport · TypeScript 에러 0) |
+| **Phase** | **세션 104 (2026-04-30)** — **HandNote 이미지·뷰박스·코넬 UX 개선** · SVG viewBox + getSVGPoint 좌표계 통일 (다기기 스트로크 비율 보존) · HandImage 타입 + 이미지 삽입(파일/붙이기)/선택/이동/삭제 · renderToCanvas viewBox 스케일 보정 · SVG pointer-events 텍스트↔드로우 토글 · 코넬 엔터→신규행 포커스(cornellFocusPendingId callback ref) · Summary·Page controls 배경색 통일 |
+| **Phase 103** | **세션 103 (2026-04-30)** — **Settings page.tsx 모듈 분리 완성** (1,799줄 → 367줄 슬림 쉘 · 5개 feature 모듈: SettingsTheme·SettingsAi·SettingsNotifications·SettingsIntegrations·SettingsExport · TypeScript 에러 0) |
 | **Phase 102** | **세션 102 (2026-04-29)** — **Settings 디자인 시스템 4단계 완성** (Claude Design 핸드오프 기반) · 4그룹 IA(시작/스타일/기능/기술) + PC 200px sticky 사이드바 + 모바일 가로 pill row · 8개 프리셋(Mono Light·Cream Serif·Editorial·Slate Pro·Black Ink·Campus Mint·Campus Blush·Designer Mono) — 5개 토큰(컬러·모서리·system폰트·user폰트·모드) 한 번 탭 적용 · `.pp-settings` 토큰 시스템(11종 라이트+다크) · xl+(1280px) Live Preview 우측 sticky 패널(Daily/Project/AI 3탭) — CSS 변수로 즉시 반영 · 컬러 18색(Mustard·Orange·Emerald·Olive 추가) · 화면 모드 작동(planners-app-shell + 일괄 반전) |
 | **Phase 100** | 세션 100 (2026-04-29) — **CanvasEditor Excalidraw → tldraw 마이그레이션** (MIT 무료, 워터마크 없음) · `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot` + `getSvgAsImage` 썸네일 |
 | **Phase 96** | 세션 96 (2026-04-28) — **협업자 RLS 권한 강제 완료** (resolveRole() owner/editor/viewer 3단계 · viewer PATCH 403 · editor owner-only 필드 차단 · userRole 클라이언트 반환 · 역할 배지 + ShareField/CollaboratorField 오너만 노출) · **이월 작업 전체 완료** (TemplatesView 754줄+7개 grid 파일 분리 확인 · 포트폴리오 모드 /planners/portfolio/[memberId] 확인) · 배포 전 블로커 5개 사용자 액션 대기 |

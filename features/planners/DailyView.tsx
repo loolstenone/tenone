@@ -539,6 +539,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [shareCopied, setShareCopied] = useState(false);
     // 노트 드래그 순서 변경
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
+    // 코넬 노트 — Enter 후 새 행 포커스 추적
+    const cornellFocusPendingId = useRef<string | null>(null);
 
     function toggleEditing(id: string) {
         setEditingNoteIds(prev => {
@@ -659,16 +661,33 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             setAllHandPages(pages);
             setAllCornellPages([]);
         } else if (expandedNote.type !== 'template' && expandedNote.type !== 'canvas') {
+            let cornellPages: { rows: CornellRow[]; summary: string }[] = [];
             try {
                 const raw = expandedNote.content;
                 const parsed = raw ? JSON.parse(raw) : null;
                 if (parsed?._cornell && Array.isArray(parsed._pages) && parsed._pages.length > 0) {
-                    setAllCornellPages(parsed._pages);
+                    cornellPages = parsed._pages;
                 } else {
-                    setAllCornellPages([{ rows: expandedNote.rows, summary: expandedNote.summary }]);
+                    cornellPages = [{ rows: expandedNote.rows, summary: expandedNote.summary }];
                 }
-            } catch { setAllCornellPages([{ rows: expandedNote.rows, summary: expandedNote.summary }]); }
-            setAllHandPages([]);
+            } catch { cornellPages = [{ rows: expandedNote.rows, summary: expandedNote.summary }]; }
+            setAllCornellPages(cornellPages);
+            // 코넬 노트에도 손글씨 레이어 페이지를 함께 로드 (페이지 수 동기화)
+            const hw = expandedNote.handwriting as (HandNoteData & { _pages?: HandNoteData[] }) | undefined;
+            if (hw?._pages && hw._pages.length > 0) {
+                // 저장된 손글씨 페이지 수가 코넬 페이지 수와 다를 경우 맞춰줌
+                const baseHands = hw._pages;
+                const synced = cornellPages.map((_, i) => baseHands[i] ?? { strokes: [], width: 800, height: 480 });
+                setAllHandPages(synced);
+            } else if (hw) {
+                const first: HandNoteData = { strokes: hw.strokes, width: hw.width, height: hw.height };
+                const synced = cornellPages.map((_, i) => i === 0 ? first : { strokes: [], width: 800, height: 480 });
+                setAllHandPages(synced);
+                // 첫 페이지 손글씨를 expandedNote에 반영
+                setExpandedNote(prev => prev ? { ...prev, handwriting: first } : prev);
+            } else {
+                setAllHandPages(cornellPages.map(() => ({ strokes: [], width: 800, height: 480 })));
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expandedNote?.id]);
@@ -1801,17 +1820,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 }
                 function saveAndClose() {
                     let noteToSave = { ...expandedNote! };
-                    // 현재 페이지 저장
+                    // 현재 페이지를 배열에 반영
                     const updatedCornellPages = allCornellPages.length > 0
                         ? allCornellPages.map((p, i) => i === expandedNotePage ? { rows: noteToSave.rows, summary: noteToSave.summary } : p)
                         : [];
                     const updatedHandPages = allHandPages.length > 0
                         ? allHandPages.map((p, i) => i === expandedNotePage ? (noteToSave.handwriting ?? p) : p)
                         : [];
-                    // 멀티페이지 embed
+                    // 코넬 멀티페이지 embed
                     if (updatedCornellPages.length > 1) {
                         noteToSave = { ...noteToSave, rows: updatedCornellPages[0].rows, summary: updatedCornellPages[0].summary, _cornellPages: updatedCornellPages };
                     }
+                    // 손글씨 페이지 embed (코넬 노트에서도 항상 저장)
                     if (updatedHandPages.length > 1) {
                         noteToSave = { ...noteToSave, handwriting: { ...(updatedHandPages[0] ?? { strokes: [], width: 800, height: 480 }), _pages: updatedHandPages } as HandNoteData };
                     } else if (updatedHandPages.length === 1) {
@@ -1824,21 +1844,52 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 }
                 function switchCornellPage(newIdx: number) {
                     if (newIdx < 0 || newIdx >= allCornellPages.length) return;
-                    const updatedPages = [...allCornellPages];
-                    updatedPages[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
-                    setAllCornellPages(updatedPages);
-                    const target = updatedPages[newIdx];
-                    setExpandedNote({ ...expandedNote!, rows: target.rows, summary: target.summary });
+                    // 현재 코넬 페이지 저장
+                    const updatedCornell = [...allCornellPages];
+                    updatedCornell[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
+                    setAllCornellPages(updatedCornell);
+                    // 현재 손글씨 페이지 저장
+                    const updatedHand = [...allHandPages];
+                    updatedHand[expandedNotePage] = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                    setAllHandPages(updatedHand);
+                    // 대상 페이지 로드
+                    const target = updatedCornell[newIdx];
+                    const targetHand = updatedHand[newIdx] ?? { strokes: [], width: 800, height: 480 };
+                    setExpandedNote({ ...expandedNote!, rows: target.rows, summary: target.summary, handwriting: targetHand });
                     setExpandedNotePage(newIdx);
                 }
                 function addCornellPage() {
-                    const newPage = { rows: [{ id: `r_${Date.now()}`, cue: '', note: '' }], summary: '' };
-                    const updatedPages = [...allCornellPages];
-                    updatedPages[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
-                    updatedPages.push(newPage);
-                    setAllCornellPages(updatedPages);
-                    setExpandedNote({ ...expandedNote!, rows: newPage.rows, summary: '' });
-                    setExpandedNotePage(updatedPages.length - 1);
+                    const newCornell = { rows: [{ id: `r_${Date.now()}`, cue: '', note: '' }], summary: '' };
+                    const updatedCornell = [...allCornellPages];
+                    updatedCornell[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
+                    updatedCornell.push(newCornell);
+                    setAllCornellPages(updatedCornell);
+                    // 손글씨 페이지도 함께 추가
+                    const newHand: HandNoteData = { strokes: [], width: 800, height: 480 };
+                    const updatedHand = [...allHandPages];
+                    updatedHand[expandedNotePage] = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                    updatedHand.push(newHand);
+                    setAllHandPages(updatedHand);
+                    setExpandedNote({ ...expandedNote!, rows: newCornell.rows, summary: '', handwriting: newHand });
+                    setExpandedNotePage(updatedCornell.length - 1);
+                }
+                function deleteCornellPage() {
+                    if (allCornellPages.length <= 1) return;
+                    // 현재 페이지 포함해 저장
+                    const updatedCornell = [...allCornellPages];
+                    updatedCornell[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
+                    const updatedHand = [...allHandPages];
+                    updatedHand[expandedNotePage] = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                    // 현재 페이지 제거
+                    const newCornell = updatedCornell.filter((_, i) => i !== expandedNotePage);
+                    const newHand = updatedHand.filter((_, i) => i !== expandedNotePage);
+                    const newIdx = Math.min(expandedNotePage, newCornell.length - 1);
+                    const target = newCornell[newIdx];
+                    const targetHand = newHand[newIdx] ?? { strokes: [], width: 800, height: 480 };
+                    setAllCornellPages(newCornell);
+                    setAllHandPages(newHand);
+                    setExpandedNote({ ...expandedNote!, rows: target.rows, summary: target.summary, handwriting: targetHand });
+                    setExpandedNotePage(newIdx);
                 }
                 function switchHandPage(newIdx: number) {
                     if (newIdx < 0 || newIdx >= allHandPages.length) return;
@@ -1884,22 +1935,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         }`}
                                     />
                                 </div>
-                                {!isTpl && !isCanvas && (
-                                    <button
-                                        onClick={toggleHandwriting}
-                                        title={isHand ? "텍스트 모드로 전환" : "손글씨 레이어로 전환"}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-                                            isHand
-                                                ? "bg-[#0F766E] text-white hover:bg-[#0d5e56]"
-                                                : "border border-neutral-200 text-neutral-600 hover:bg-neutral-100"
-                                        }`}
-                                    >
-                                        {isHand
-                                            ? <><Type className="h-3.5 w-3.5" /> 텍스트</>
-                                            : <><PenLine className="h-3.5 w-3.5" /> 손글씨</>
-                                        }
-                                    </button>
-                                )}
+                                {/* 헤더 손글씨 토글 제거 — HandNote 툴바 내부에서 그리기/텍스트 전환 */}
                                 <button
                                     onClick={() => setExpandedNote(null)}
                                     className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 text-neutral-600 rounded-lg text-sm hover:bg-neutral-100 transition-colors"
@@ -2009,110 +2045,141 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 </div>
                             ) : (
                                 <div className="flex-1 flex flex-col overflow-hidden">
-                                    {/* Column headers — 행의 삭제 버튼(w-6)과 폭 정렬 */}
-                                    <div className="flex border-b border-neutral-100 shrink-0">
-                                        <div className="w-6 shrink-0" aria-hidden />
-                                        <div className="w-[22%] shrink-0 border-l border-neutral-200 px-4 py-2">
-                                            <p className="text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">단서 · 키워드</p>
-                                        </div>
-                                        <div className="flex-1 border-l border-neutral-200 flex items-center justify-between px-4 py-2">
-                                            <p className="text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">노트</p>
-                                            <p className="text-[9px] text-neutral-300 hidden sm:block">
-                                                <kbd className="font-mono">Enter</kbd> 새 주제 &nbsp;·&nbsp; <kbd className="font-mono">Shift+Enter</kbd> 줄바꿈
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {/* Rows */}
-                                    <div className="flex-1 overflow-y-auto divide-y divide-neutral-100">
-                                        {(expandedNote.rows ?? []).map((row, rIdx) => (
-                                            <div key={row.id} className="flex group/row">
-                                                {/* Delete button — always rendered, invisible when only 1 row */}
-                                                <button
-                                                    onClick={() => {
-                                                        if ((expandedNote.rows ?? []).length <= 1) return;
-                                                        const rows = (expandedNote.rows ?? []).filter((_, i) => i !== rIdx);
-                                                        setExpandedNote({ ...expandedNote, rows });
-                                                    }}
-                                                    className={`shrink-0 w-6 flex items-start justify-center pt-3.5 transition-colors text-neutral-300 hover:text-red-400 ${(expandedNote.rows ?? []).length <= 1 ? 'invisible' : ''}`}
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                </button>
-                                                {/* Cue cell */}
-                                                <div className="w-[22%] shrink-0 relative border-l border-neutral-200">
-                                                    <div aria-hidden className="invisible whitespace-pre-wrap break-words text-sm px-4 py-3 leading-relaxed min-h-[3rem]">{row.cue + '\n'}</div>
-                                                    <textarea
-                                                        value={row.cue}
-                                                        onChange={(e) => {
-                                                            const rows = (expandedNote.rows ?? []).map((r, i) => i === rIdx ? { ...r, cue: e.target.value } : r);
-                                                            setExpandedNote({ ...expandedNote, rows });
-                                                        }}
-                                                        placeholder="키워드"
-                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-600 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
-                                                    />
+                                    {/* HandNote가 코넬 노트를 children으로 감쌈: 툴바(펜·색상·그리기 토글) + 투명 SVG 오버레이 */}
+                                    <HandNote
+                                        value={expandedNote.handwriting ?? null}
+                                        onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
+                                        fillHeight
+                                    >
+                                        {/* 코넬 노트 본문 — HandNote children: 텍스트 모드 시 포인터 이벤트 활성 */}
+                                        <div className="flex flex-col h-full overflow-hidden">
+                                            {/* Column headers */}
+                                            <div className="flex border-b border-neutral-100 shrink-0">
+                                                <div className="w-6 shrink-0" aria-hidden />
+                                                <div className="w-[22%] shrink-0 border-l border-neutral-200 px-4 py-2">
+                                                    <p className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">단서 · 키워드</p>
                                                 </div>
-                                                {/* Note cell */}
-                                                <div className="flex-1 relative border-l border-neutral-200">
-                                                    <div aria-hidden className="invisible whitespace-pre-wrap break-words text-sm px-4 py-3 leading-relaxed min-h-[3rem]">{row.note + '\n'}</div>
-                                                    <textarea
-                                                        value={row.note}
-                                                        onChange={(e) => {
-                                                            const rows = (expandedNote.rows ?? []).map((r, i) => i === rIdx ? { ...r, note: e.target.value } : r);
-                                                            setExpandedNote({ ...expandedNote, rows });
-                                                        }}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                                e.preventDefault();
-                                                                const newRow: CornellRow = { id: `r_${Date.now()}`, cue: '', note: '' };
-                                                                const rows = [...(expandedNote.rows ?? []).slice(0, rIdx + 1), newRow, ...(expandedNote.rows ?? []).slice(rIdx + 1)];
-                                                                setExpandedNote({ ...expandedNote, rows });
-                                                            }
-                                                        }}
-                                                        placeholder={rIdx === 0 ? "이 키워드에 대한 노트" : ""}
-                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
-                                                    />
+                                                <div className="flex-1 border-l border-neutral-200 flex items-center justify-between px-4 py-2">
+                                                    <p className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">노트</p>
+                                                    <p className="text-[10px] text-neutral-400 hidden sm:block">
+                                                        <kbd className="font-mono">Enter</kbd> 새 주제 &nbsp;·&nbsp; <kbd className="font-mono">Shift+Enter</kbd> 줄바꿈
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                    {/* Add row */}
-                                    <div className="border-t border-dashed border-neutral-200 shrink-0">
-                                        <button
-                                            onClick={() => {
-                                                const rows = [...(expandedNote.rows ?? []), { id: `r_${Date.now()}`, cue: '', note: '' }];
-                                                setExpandedNote({ ...expandedNote, rows });
-                                            }}
-                                            className="w-full py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#0F766E] hover:not-italic transition-colors"
-                                        >
-                                            + 행 추가
-                                        </button>
-                                    </div>
-                                    {/* Summary */}
-                                    <div className="border-t border-neutral-200 bg-neutral-50/40 shrink-0">
-                                        <p className="px-4 pt-2 pb-0.5 text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">요약</p>
-                                        <textarea
-                                            value={expandedNote.summary}
-                                            onChange={(e) => setExpandedNote({ ...expandedNote, summary: e.target.value })}
-                                            placeholder="이 노트의 핵심 한 줄"
-                                            rows={3}
-                                            className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-relaxed"
-                                        />
-                                    </div>
-                                    {/* 페이지 네비게이션 */}
-                                    <div className="shrink-0 border-t border-dashed border-neutral-200 px-4 py-2 flex items-center justify-between bg-neutral-50/40">
-                                        <div className="flex items-center gap-2">
-                                            <button onClick={() => switchCornellPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
-                                                className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
-                                                <ChevronLeft className="h-3.5 w-3.5" />
-                                            </button>
-                                            <span className="text-xs text-neutral-400 tabular-nums">{expandedNotePage + 1} / {allCornellPages.length || 1}</span>
-                                            <button onClick={() => switchCornellPage(expandedNotePage + 1)} disabled={expandedNotePage >= (allCornellPages.length || 1) - 1}
-                                                className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
-                                                <ChevronRight className="h-3.5 w-3.5" />
-                                            </button>
+                                            {/* Rows — leading-8(32px) for proper Cornell notebook ruling */}
+                                            <div className="flex-1 overflow-y-auto divide-y divide-neutral-100">
+                                                {(expandedNote.rows ?? []).map((row, rIdx) => (
+                                                    <div key={row.id} className="flex group/row">
+                                                        {/* Delete button */}
+                                                        <button
+                                                            onClick={() => {
+                                                                if ((expandedNote.rows ?? []).length <= 1) return;
+                                                                const rows = (expandedNote.rows ?? []).filter((_, i) => i !== rIdx);
+                                                                setExpandedNote({ ...expandedNote, rows });
+                                                            }}
+                                                            className={`shrink-0 w-6 flex items-start justify-center pt-3 transition-colors text-neutral-300 hover:text-red-400 ${(expandedNote.rows ?? []).length <= 1 ? 'invisible' : ''}`}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </button>
+                                                        {/* Cue cell */}
+                                                        <div className="w-[22%] shrink-0 relative border-l border-neutral-200">
+                                                            <div aria-hidden className="invisible whitespace-pre-wrap break-words text-sm px-4 py-3 leading-8 min-h-[32px]">{row.cue + '\n'}</div>
+                                                            <textarea
+                                                                value={row.cue}
+                                                                onChange={(e) => {
+                                                                    const rows = (expandedNote.rows ?? []).map((r, i) => i === rIdx ? { ...r, cue: e.target.value } : r);
+                                                                    setExpandedNote({ ...expandedNote, rows });
+                                                                }}
+                                                                placeholder="키워드"
+                                                                className="absolute inset-0 w-full h-full text-sm text-neutral-600 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-8"
+                                                            />
+                                                        </div>
+                                                        {/* Note cell */}
+                                                        <div className="flex-1 relative border-l border-neutral-200">
+                                                            <div aria-hidden className="invisible whitespace-pre-wrap break-words text-sm px-4 py-3 leading-8 min-h-[32px]">{row.note + '\n'}</div>
+                                                            <textarea
+                                                                ref={(el) => {
+                                                                    if (el && cornellFocusPendingId.current === row.id) {
+                                                                        el.focus();
+                                                                        cornellFocusPendingId.current = null;
+                                                                    }
+                                                                }}
+                                                                value={row.note}
+                                                                onChange={(e) => {
+                                                                    const rows = (expandedNote.rows ?? []).map((r, i) => i === rIdx ? { ...r, note: e.target.value } : r);
+                                                                    setExpandedNote({ ...expandedNote, rows });
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        e.preventDefault();
+                                                                        const newRow: CornellRow = { id: `r_${Date.now()}`, cue: '', note: '' };
+                                                                        cornellFocusPendingId.current = newRow.id;
+                                                                        const rows = [...(expandedNote.rows ?? []).slice(0, rIdx + 1), newRow, ...(expandedNote.rows ?? []).slice(rIdx + 1)];
+                                                                        setExpandedNote({ ...expandedNote, rows });
+                                                                    }
+                                                                }}
+                                                                placeholder={rIdx === 0 ? "이 키워드에 대한 노트" : ""}
+                                                                className="absolute inset-0 w-full h-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-8"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {/* Add row */}
+                                            <div className="border-t border-dashed border-neutral-200 shrink-0">
+                                                <button
+                                                    onClick={() => {
+                                                        const rows = [...(expandedNote.rows ?? []), { id: `r_${Date.now()}`, cue: '', note: '' }];
+                                                        setExpandedNote({ ...expandedNote, rows });
+                                                    }}
+                                                    className="w-full py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#0F766E] hover:not-italic transition-colors"
+                                                >
+                                                    + 행 추가
+                                                </button>
+                                            </div>
+                                            {/* Summary */}
+                                            <div className="border-t border-neutral-200 shrink-0">
+                                                <p className="px-4 pt-2 pb-0.5 text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">요약</p>
+                                                <textarea
+                                                    value={expandedNote.summary}
+                                                    onChange={(e) => setExpandedNote({ ...expandedNote, summary: e.target.value })}
+                                                    placeholder="이 노트의 핵심 한 줄"
+                                                    rows={3}
+                                                    className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-8"
+                                                />
+                                            </div>
                                         </div>
-                                        <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
-                                            <Plus className="h-3 w-3" /> 새 페이지
-                                        </button>
+                                    </HandNote>
+                                    {/* 페이지 컨트롤 — 3열 그리드 (삭제 | ← 페이지 → | 새 페이지) */}
+                                    <div className="shrink-0 border-t border-dashed border-neutral-200">
+                                        <div className="grid grid-cols-3 items-center px-3 py-2">
+                                            <div className="flex justify-start">
+                                                <button
+                                                    onClick={deleteCornellPage}
+                                                    disabled={allCornellPages.length <= 1}
+                                                    className="flex items-center gap-1 text-xs text-neutral-400 hover:text-rose-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    title="현재 페이지 삭제"
+                                                >
+                                                    <Trash2 className="h-3 w-3" /> 페이지 삭제
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button onClick={() => switchCornellPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
+                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                                </button>
+                                                <span className="text-xs text-neutral-500 tabular-nums font-medium">{expandedNotePage + 1} / {allCornellPages.length || 1}</span>
+                                                <button onClick={() => switchCornellPage(expandedNotePage + 1)} disabled={expandedNotePage >= (allCornellPages.length || 1) - 1}
+                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                                    <ChevronRight className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
+                                                    <Plus className="h-3 w-3" /> 새 페이지
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}

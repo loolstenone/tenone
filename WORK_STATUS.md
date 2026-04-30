@@ -1,6 +1,41 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-30 (세션 103 — Planners Settings 모듈 분리)
+> 마지막 업데이트: 2026-04-30 (세션 104 — HandNote 고도화: 이미지 삽입·선택·이동 + 자리차지 + viewBox 스케일 + Cornell UX)
+
+---
+
+## 세션 104 핵심 성과 (2026-04-30)
+
+### Planners — HandNote & DailyView Cornell 고도화
+
+**HandNote.tsx 주요 변경**
+
+1. **viewBox 스케일 수정** — 스트로크가 저장된 캔버스 폭(`value.width`)을 캐노니컬로 유지, 화면이 좁아져도 오른쪽이 잘리지 않고 비례 축소됨. `getSVGPoint()` 유틸로 화면→SVG 논리 좌표 자동 변환.
+
+2. **이미지 삽입** — 툴바 `ImagePlus` 버튼(파일 선택) + `Ctrl+V` 클립보드 붙이기 두 가지 경로. 삽입 즉시 선택 모드 진입, 캔버스 중앙 배치, 하단 자동 확장.
+
+3. **이미지 선택·이동 모드** — `MousePointer2` 툴바 버튼으로 전환. z-order 역순 hit-test, 드래그 이동, 우상단 ✕ 버튼 또는 `Delete/Backspace`로 삭제.
+
+4. **자리 차지** — 이미지 뒤 흰 `<rect>` 삽입 → 코넬 텍스트·배경 가림. 스트로크는 이미지 위 레이어. 다크모드 대응(`#1e1e2e`).
+
+5. **`HandImage` 타입** 추가, `HandNoteData.images?: HandImage[]` 확장 (기존 데이터 하위 호환).
+
+6. **width 캐노니컬 보존** — undo/redo/erase/onPointerUp 모두 `value?.width || width || 600` 우선 유지.
+
+**DailyView.tsx 주요 변경**
+
+- **Cornell Enter → 자동 커서 이동** — `cornellFocusPendingId` ref + textarea 콜백 ref 패턴, Enter 치면 새 행 삽입 + 해당 note textarea에 즉시 포커스.
+- **요약·페이지 컨트롤 배경 통일** — `bg-neutral-50/40` 제거 → 본문과 동일 투명 배경.
+- **Cornell SVG pointer-events 개선** — 텍스트 모드: SVG `none` → 클릭이 textarea에 직접 전달(커서 위치·텍스트 선택 정상 동작). 그리기 모드: SVG `all`.
+
+**MonthlyView.tsx** — 기존 소규모 수정 포함.
+
+### 다음 할 것
+
+- HandNote 이미지 크기 조절 핸들 (resize handles — Phase 2)
+- 이미지 "자리 차지" → Cornell row 높이 자동 확장 연동 (Phase 2)
+- Settings 다크모드 검증 (Daily/Weekly/Monthly 카드 색상 전환)
+- 배포 블로커 해소: PWA 아이콘 2개 · Toss 가맹점 · Vercel 환경변수 · Google OAuth · Supabase Redirect URL
 
 ---
 

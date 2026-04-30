@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-04-30 — 세션 104 · HandNote 이미지·뷰박스·코넬 UX 개선
+
+### 장소
+사무실
+
+### 핵심
+HandNote SVG viewBox 비율 보존, 이미지 삽입/선택/이동, 코넬 엔터→커서 이동, 배경색 통일.
+
+**변경 파일**
+- `features/planners/HandNote.tsx` — viewBox + getSVGPoint 좌표 변환, HandImage 타입, 이미지 삽입(파일/붙이기)/선택/이동/삭제, renderToCanvas 스케일 보정, SVG pointer-events 텍스트↔드로우 토글
+- `features/planners/DailyView.tsx` — 코넬 엔터 시 신규 행 포커스(cornellFocusPendingId callback ref), Summary·Page controls 배경색 본문과 통일
+
+### 주요 결정
+- 캐노니컬 폭(`canonW` = 첫 드로우 시 고정) + `viewBox` → 다른 기기에서도 스트로크 비율 유지
+- `getSVGPoint(svg, clientX, clientY)` → `getScreenCTM().inverse()` 로 viewBox 좌표 자동 변환
+- 이미지 좌표 = viewBox 논리 좌표계 (스트로크와 동일 공간)
+- 이미지 "자리 차지": 이미지 뒤에 흰 `<rect>` 렌더 → 코넬 텍스트 커버
+- 텍스트 모드 SVG `pointer-events: none` → 브라우저가 textarea 직접 처리 (cursor 정확)
+- 드로우 모드 SVG `pointer-events: all` → SVG가 모든 이벤트 캡처
+
+---
+
 ## 2026-04-30 — 세션 103 · Planners Settings 모듈 분리
 
 ### 장소
