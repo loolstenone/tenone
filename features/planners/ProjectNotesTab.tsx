@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, LayoutTemplate, X, Maximize2, Pencil, PenLine, Eye, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
+import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, LayoutTemplate, X, Maximize2, Pencil, PenLine, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
@@ -77,6 +77,8 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     const [flashNoteId, setFlashNoteId] = useState<string | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
+    // canvasId → thumbnail_url 맵
+    const [canvasMap, setCanvasMap] = useState<Record<string, string | null>>({});
 
     async function load() {
         setLoading(true);
@@ -85,6 +87,25 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
             const d = await res.json();
             const list: ProjectNote[] = d.notes || [];
             setNotes(list);
+
+            // 캔버스 노트가 있으면 썸네일 일괄 로드
+            const canvasIds = list
+                .map(n => parseCanvasMarker(n.content)?.canvasId)
+                .filter((id): id is string => !!id);
+            if (canvasIds.length > 0) {
+                try {
+                    const cRes = await fetch("/api/planners/canvases");
+                    if (cRes.ok) {
+                        const cData = await cRes.json();
+                        const map: Record<string, string | null> = {};
+                        for (const c of cData.canvases ?? []) {
+                            if (canvasIds.includes(c.id)) map[c.id] = c.thumbnail_url ?? null;
+                        }
+                        setCanvasMap(map);
+                    }
+                } catch { /* 썸네일 실패해도 노트 목록은 그대로 */ }
+            }
+
             // 첫 진입 시 노트 0개면 기본 코넬 노트 1개 자동 생성 (Daily와 동일)
             if (list.length === 0) {
                 try {
@@ -376,8 +397,10 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                     </p>
                 </div>
             ) : (
-                <div className="space-y-3">
-                    {notes.map((note, i) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {notes.map((note, i) => {
+                        const canvasId = parseCanvasMarker(note.content)?.canvasId ?? null;
+                        return (
                         <div
                             key={note.id}
                             draggable
@@ -387,14 +410,11 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                 if (!noteDragRef.current) return;
                                 const { dragIdx, overIdx } = noteDragRef.current;
                                 if (dragIdx === overIdx) { noteDragRef.current = null; return; }
-                                // order_index 스왑 방식 대신 전체 재정렬
                                 const next = [...notes];
                                 const [moved] = next.splice(dragIdx, 1);
                                 next.splice(overIdx, 0, moved);
-                                // order_index 재부여
                                 const reindexed = next.map((n, idx) => ({ ...n, order_index: idx }));
                                 setNotes(reindexed);
-                                // 서버에 일괄 저장
                                 reindexed.forEach(n => {
                                     fetch(`/api/planners/projects/${projectId}/notes/${n.id}`, {
                                         method: "PATCH",
@@ -406,23 +426,18 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                             }}
                             onDragEnd={() => { noteDragRef.current = null; }}
                             id={`note-${note.id}`}
-                            className={`group/note-drag relative transition-shadow rounded-xl ${flashNoteId === note.id ? "ring-2 ring-violet-300 ring-offset-2 shadow-lg" : ""}`}
+                            className={`transition-shadow rounded-xl ${flashNoteId === note.id ? "ring-2 ring-violet-300 ring-offset-2 shadow-lg" : ""}`}
                         >
-                            <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
-                                <GripVertical className="h-4 w-4 text-neutral-300" />
-                            </div>
                             <NoteCard
                                 note={note}
-                                isFirst={i === 0}
-                                isLast={i === notes.length - 1}
+                                canvasThumbnail={canvasId ? (canvasMap[canvasId] ?? null) : null}
                                 onUpdate={(p) => updateNote(note.id, p)}
                                 onDelete={() => setConfirmDeleteId(note.id)}
-                                onMoveUp={() => reorder(note.id, "up")}
-                                onMoveDown={() => reorder(note.id, "down")}
                                 onExpand={() => setExpandedNote(note)}
                             />
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
@@ -559,31 +574,24 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
 
 function NoteCard({
     note,
-    isFirst,
-    isLast,
+    canvasThumbnail,
     onUpdate,
     onDelete,
-    onMoveUp,
-    onMoveDown,
     onExpand,
 }: {
     note: ProjectNote;
-    isFirst: boolean;
-    isLast: boolean;
+    canvasThumbnail: string | null;
     onUpdate: (p: Partial<ProjectNote>) => void;
     onDelete: () => void;
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onExpand: () => void;
 }) {
     const [title, setTitle] = useState(note.title || "");
-    const [content, setContent] = useState(note.content || "");
-    const [editing, setEditing] = useState(false);
+    const [editingTitle, setEditingTitle] = useState(false);
+    const content = note.content || "";
 
     useEffect(() => {
         setTitle(note.title || "");
-        setContent(note.content || "");
-    }, [note.id, note.title, note.content]);
+    }, [note.id, note.title]);
 
     // Canvas detection (캔버스 ID 임베드 마커)
     const canvasInfo = parseCanvasMarker(content);
@@ -635,174 +643,116 @@ function NoteCard({
     }, [content, isTpl, isHand, isCanvas]);
     const isCornell = cornellData !== null;
 
-    const lastCornellRef = useRef<string>("");
-    function saveCornell(rows: CornellRow[], summary: string) {
-        const next = JSON.stringify({ _cornell: true, rows, summary });
-        lastCornellRef.current = next;
-        setContent(next);
-    }
-    function commitCornell() {
-        // blur 시 서버 저장 — 최신 content를 ref로 보장
-        const final = lastCornellRef.current || content;
-        onUpdate({ content: final });
-    }
+    // 카드는 미리보기 전용. 편집은 NoteExpandModal에서만.
 
-    function saveHandwriting(next: HandNoteData) {
-        const text = setHandPart(content, next);
-        setContent(text);
-        onUpdate({ content: text });
-    }
-    function saveText(newText: string) {
-        const updated = setTextPart(content, newText);
-        setContent(updated);
-        onUpdate({ content: updated });
-    }
-    function toggleHandwriting() {
-        if (isHand) {
-            // 손글씨 → 텍스트: 데이터 보존, 모드만 전환
-            setHandMode(false);
-            setEditing(true);
-        } else {
-            // 텍스트 → 손글씨: 기존 손글씨가 없으면 빈 캔버스로 초기화하되, 텍스트는 .text에 보존
-            if (!isHandwritingContent(content)) {
-                const empty: HandNoteData = { strokes: [], width: 600, height: 240 };
-                const merged = setHandPart(content, empty);
-                setContent(merged);
-                onUpdate({ content: merged });
-            }
-            setHandMode(true);
-        }
-    }
+    // 노트 타입 라벨 + 아이콘
+    const typeLabel = isCanvas ? "캔버스" : isHand ? "손글씨" : isTpl ? (tplInfo?.label || "템플릿") : "노트";
+    const TypeIcon = isCanvas ? ImageIcon : isHand ? PenLine : isTpl ? LayoutTemplate : Type;
+    const typeColor = isCanvas ? "text-sky-500" : isHand ? "text-amber-500" : isTpl ? "text-violet-500" : "text-neutral-400";
+    const displayTitle = title && !/^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(title) && title !== tplInfo?.label
+        ? title : typeLabel;
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-2 border-b border-neutral-100 bg-neutral-50 flex items-center gap-2">
-                <div className="flex items-center gap-0.5">
-                    <button
-                        onClick={onMoveUp}
-                        disabled={isFirst}
-                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
-                    >
-                        <ChevronUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                        onClick={onMoveDown}
-                        disabled={isLast}
-                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
-                    >
-                        <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
+        <section
+            className="group/card bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#0F766E] hover:shadow-sm transition-all cursor-pointer"
+            onClick={onExpand}
+        >
+            {/* ── 프리뷰 영역 (4:3 비율) ── */}
+            <div className="aspect-[4/3] relative bg-neutral-50 border-b border-neutral-100 overflow-hidden">
+                {isCanvas ? (
+                    canvasThumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={canvasThumbnail} alt={title} className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                            <svg className="absolute inset-0 w-full h-full opacity-[0.05]" xmlns="http://www.w3.org/2000/svg">
+                                <defs><pattern id={`ng-${note.id}`} width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0F766E" strokeWidth="0.5" /></pattern></defs>
+                                <rect width="100%" height="100%" fill={`url(#ng-${note.id})`} />
+                            </svg>
+                            <ImageIcon className="h-6 w-6 text-neutral-200 relative z-10" />
+                            <span className="text-[10px] text-neutral-300 relative z-10">미리보기 없음</span>
+                        </div>
+                    )
+                ) : isHand ? (
+                    <div className="pointer-events-none p-2 scale-[0.6] origin-top-left w-[167%] h-[167%]">
+                        <HandNote value={handData} onChange={() => {}} height={180} />
+                    </div>
+                ) : isCornell && cornellData ? (
+                    <div className="p-3 text-[10px] leading-relaxed overflow-hidden h-full relative">
+                        {cornellData.rows.some(r => r.cue || r.note) ? (
+                            <div className="space-y-1">
+                                {cornellData.rows.slice(0, 6).map((r) => (
+                                    <div key={r.id} className="flex gap-1.5">
+                                        {r.cue && <span className="text-[#0F766E] font-medium shrink-0 w-14 truncate">{r.cue}</span>}
+                                        <span className="text-neutral-600 line-clamp-1">{r.note}</span>
+                                    </div>
+                                ))}
+                                {cornellData.summary && <p className="text-neutral-400 italic line-clamp-2 pt-1 border-t border-neutral-100 mt-1">{cornellData.summary}</p>}
+                            </div>
+                        ) : (
+                            <p className="text-neutral-300 italic text-center pt-6">빈 노트</p>
+                        )}
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-neutral-50 to-transparent" />
+                    </div>
+                ) : isTpl ? (
+                    <div className="p-3 text-[10px] overflow-hidden h-full relative">
+                        <div className="flex items-center gap-1.5 mb-2">
+                            <LayoutTemplate className="h-3 w-3 text-violet-400 shrink-0" />
+                            <span className="text-violet-600 font-medium truncate">{tplInfo?.label || "템플릿"}</span>
+                        </div>
+                        <p className="text-neutral-500 line-clamp-6 whitespace-pre-wrap">{(tplInfo?.body || "").replace(/<!--.*?-->/gs, "").replace(/[#*`]/g, "").trim() || "빈 템플릿"}</p>
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-neutral-50 to-transparent" />
+                    </div>
+                ) : (
+                    <div className="p-3 text-[10px] overflow-hidden h-full relative">
+                        {(extractTextPart(content) || "").trim() ? (
+                            <p className="text-neutral-600 whitespace-pre-wrap line-clamp-[8]">{extractTextPart(content)}</p>
+                        ) : (
+                            <p className="text-neutral-300 italic text-center pt-6">빈 노트</p>
+                        )}
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-neutral-50 to-transparent" />
+                    </div>
+                )}
+                {/* hover 오버레이 */}
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
                 </div>
-                {isTpl && <LayoutTemplate className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />}
-                {isCanvas && <ImageIcon className="h-3.5 w-3.5 text-sky-500 shrink-0" />}
-                {(() => {
-                    const isAutoTitle = !title || /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(title) || title === tplInfo?.label;
-                    return (
+            </div>
+
+            {/* ── 푸터 ── */}
+            <div className="px-3 py-2 flex items-center justify-between gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <div className="min-w-0 flex-1" onClick={onExpand}>
+                    {editingTitle ? (
                         <input
+                            autoFocus
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            onBlur={() => onUpdate({ title })}
-                            placeholder={
-                                isTpl ? (tplInfo?.label || "이 템플릿으로 기록할 주제 한 줄")
-                                : isCanvas ? "예: 동선 스케치"
-                                : isHand ? "예: 회의 메모 · 손글씨 정리"
-                                : "예: 인터뷰 메모 / 자료 정리"
-                            }
-                            className={`flex-1 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
-                                isAutoTitle
-                                    ? "italic font-light text-neutral-400"
-                                    : "font-medium text-neutral-700"
-                            }`}
+                            onBlur={() => { setEditingTitle(false); onUpdate({ title }); }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") { setEditingTitle(false); onUpdate({ title }); }
+                                if (e.key === "Escape") { setEditingTitle(false); setTitle(note.title || ""); }
+                            }}
+                            className="w-full text-xs font-medium bg-transparent focus:outline-none text-neutral-900"
+                            onClick={(e) => e.stopPropagation()}
                         />
-                    );
-                })()}
-                {/* 편집·손글씨 토글은 모달 안으로 이동 — 카드는 미리보기 전용 */}
+                    ) : (
+                        <p
+                            className="text-xs font-medium text-neutral-800 truncate leading-snug"
+                            onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(true); }}
+                        >{displayTitle}</p>
+                    )}
+                    <div className="flex items-center gap-1 mt-0.5">
+                        <TypeIcon className={`h-2.5 w-2.5 shrink-0 ${typeColor}`} />
+                        <span className="text-[9px] text-neutral-300">{new Date(note.updated_at).toLocaleDateString("ko-KR")}</span>
+                    </div>
+                </div>
                 <button
-                    onClick={onExpand}
-                    title="크게 보기"
-                    className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
-                >
-                    <Maximize2 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                    onClick={onDelete}
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    className="shrink-0 w-6 h-6 rounded flex items-center justify-center text-neutral-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
                     title="삭제"
-                    className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
-                >
-                    <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                ><Trash2 className="h-3 w-3" /></button>
             </div>
-            {isCanvas ? (
-                <div
-                    onClick={onExpand}
-                    className="px-4 py-8 text-center cursor-pointer hover:bg-neutral-50 transition-colors"
-                >
-                    <ImageIcon className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
-                    <p className="text-xs text-neutral-500">자유 캔버스 — 클릭해서 그리기</p>
-                </div>
-            ) : grid ? (
-                <div className="p-4">{grid}</div>
-            ) : isCornell && cornellData ? (
-                // 코넬 — 미리보기 (편집은 모달)
-                <div onClick={onExpand} className="px-4 py-3 cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative">
-                    {cornellData.rows.length > 0 && cornellData.rows.some(r => r.cue || r.note) ? (
-                        <div className="space-y-1.5">
-                            {cornellData.rows.map((r) => (
-                                <div key={r.id} className="grid grid-cols-[140px_1fr] gap-3 text-sm">
-                                    <span className="text-[#0F766E] font-medium truncate">{r.cue || <span className="text-neutral-300 italic">키워드</span>}</span>
-                                    <span className="text-neutral-700 whitespace-pre-wrap line-clamp-2">{r.note || <span className="text-neutral-300 italic">노트</span>}</span>
-                                </div>
-                            ))}
-                            {cornellData.summary && (
-                                <p className="pt-2 mt-2 border-t border-neutral-100 text-xs text-neutral-600 italic line-clamp-2">{cornellData.summary}</p>
-                            )}
-                        </div>
-                    ) : (
-                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
-                    )}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
-                </div>
-            ) : isHand ? (
-                // 리스트: 고정 높이 프리뷰 — 편집은 크게 보기(모달)에서
-                <div
-                    className="relative h-48 overflow-hidden cursor-pointer group"
-                    onClick={onExpand}
-                >
-                    <div className="pointer-events-none px-3 pt-2">
-                        <HandNote value={handData} onChange={() => {}} height={180} />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs text-neutral-500 flex items-center gap-1">
-                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
-                        </span>
-                    </div>
-                </div>
-            ) : (
-                /* 마크다운 노트 — 미리보기 (편집은 모달) */
-                <div
-                    onClick={onExpand}
-                    className="px-4 py-3 text-sm text-neutral-900 leading-relaxed cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative
-                        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
-                        [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
-                        [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-2
-                        [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2
-                        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2 [&_li]:mb-0.5
-                        [&_strong]:font-semibold
-                        [&_table]:w-full [&_table]:border-collapse [&_table]:mb-3 [&_table]:text-xs
-                        [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:bg-neutral-50 [&_th]:font-semibold
-                        [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1
-                        [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
-                        [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
-                >
-                    {((tplInfo ? tplInfo.body : extractTextPart(content)) || "").trim() ? (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : extractTextPart(content)) || ""}</ReactMarkdown>
-                    ) : (
-                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
-                    )}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
-                </div>
-            )}
         </section>
     );
 }

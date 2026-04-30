@@ -46,13 +46,16 @@ const STATUS_TONE: Record<string, string> = {
     archived: "bg-neutral-100 text-neutral-500 border border-neutral-200",
 };
 
+type ProjectTab = "milestones" | "tasks" | "notes";
+
 export function ProjectDetailView({ projectId }: { projectId: string }) {
     const [project, setProject] = useState<PlannerProject | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [retroOpen, setRetroOpen] = useState(false);
     const [userRole, setUserRole] = useState<"owner" | "editor" | "viewer">("owner");
-    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<ProjectTab>("milestones");
+    const [coverOpen, setCoverOpen] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     async function reload() {
@@ -190,47 +193,71 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 </div>
             </header>
 
-            {/* DailyView 패턴 — 탭 없이 한 페이지에 우선순위 흐름으로 세로 배치 */}
+            {/* ── 서브 탭 네비게이션 ── */}
+            <div className="flex items-center gap-0 border-b border-neutral-200 mb-6">
+                {([
+                    { key: "milestones" as ProjectTab, label: "마일스톤", icon: Flag },
+                    { key: "tasks"      as ProjectTab, label: "업무",     icon: ListTodo },
+                    { key: "notes"      as ProjectTab, label: "노트",     icon: NotebookPen },
+                ] as { key: ProjectTab; label: string; icon: React.ComponentType<{ className?: string }> }[]).map(({ key, label, icon: Icon }) => (
+                    <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                            activeTab === key
+                                ? "border-[#0F766E] text-[#0F766E]"
+                                : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-200"
+                        }`}
+                    >
+                        <Icon className="h-3.5 w-3.5" />
+                        {label}
+                    </button>
+                ))}
+            </div>
+
+            {/* ── 탭 컨텐츠 ── */}
             <div className="space-y-5">
 
-                {/* 1. 마일스톤 — 다음 행동이 가장 명확. 가장 위 */}
-                <SectionCard icon={Flag} title="마일스톤" hint="체크리스트 + 간트 + 진행률">
-                    <ProjectMilestonesTab
-                        projectId={projectId}
-                        projectColor={project.color || "#0F766E"}
-                        projectStartDate={project.start_date}
-                        projectEndDate={project.end_date}
-                    />
-                </SectionCard>
+                {/* 마일스톤 탭 */}
+                {activeTab === "milestones" && (
+                    <>
+                        <ProjectMilestonesTab
+                            projectId={projectId}
+                            projectColor={project.color || "#0F766E"}
+                            projectStartDate={project.start_date}
+                            projectEndDate={project.end_date}
+                        />
 
-                {/* 2. 업무 — 오늘·이번주 진행할 일 */}
-                <SectionCard icon={ListTodo} title="업무" hint="이 프로젝트의 모든 업무 합산">
+                        {/* 표지 · 설정 — 마일스톤 탭 하단 */}
+                        <section className="bg-white border border-neutral-200 rounded-xl">
+                            <button
+                                onClick={() => setCoverOpen(o => !o)}
+                                className="w-full flex items-center gap-2 px-5 py-3 text-left"
+                            >
+                                <SettingsIcon className="h-3.5 w-3.5 text-neutral-400" />
+                                <h2 className="text-xs tracking-widest text-neutral-400 flex-1">표지 · 프로젝트 설정</h2>
+                                {coverOpen ? <ChevronUp className="h-3.5 w-3.5 text-neutral-400" /> : <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />}
+                            </button>
+                            {coverOpen && (
+                                <div className="px-5 pb-5 border-t border-neutral-100 pt-5">
+                                    <CoverTab project={project} save={saveProject} userRole={userRole} />
+                                </div>
+                            )}
+                        </section>
+                    </>
+                )}
+
+                {/* 업무 탭 */}
+                {activeTab === "tasks" && (
                     <ProjectTasksTab projectId={projectId} projectColor={project.color || "#0F766E"} />
-                </SectionCard>
+                )}
 
-                {/* 노트 — 기록·아이디어 (기본 노트·손글씨·템플릿·캔버스) */}
-                <SectionCard icon={NotebookPen} title="노트" hint="프로젝트 작업 기록">
-                    <NotesTab projectId={projectId} projectCategory={project.category ?? null} />
-                </SectionCard>
+                {/* 노트 탭 */}
+                {activeTab === "notes" && (
+                    <ProjectNotesTab projectId={projectId} projectCategory={project.category ?? null} />
+                )}
 
-                {/* 5. 표지·설정 — 보조. 접기 가능 */}
-                <section className="bg-white border border-neutral-200 rounded-xl">
-                    <button
-                        onClick={() => setSettingsOpen(o => !o)}
-                        className="w-full flex items-center gap-2 px-5 py-3 text-left"
-                    >
-                        <SettingsIcon className="h-3.5 w-3.5 text-neutral-400" />
-                        <h2 className="text-xs tracking-widest text-neutral-400 flex-1">표지 · 설정</h2>
-                        {settingsOpen ? <ChevronUp className="h-3.5 w-3.5 text-neutral-400" /> : <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />}
-                    </button>
-                    {settingsOpen && (
-                        <div className="px-5 pb-5 border-t border-neutral-100 pt-5">
-                            <CoverTab project={project} save={saveProject} userRole={userRole} />
-                        </div>
-                    )}
-                </section>
-
-                {/* 6. 프로젝트 삭제 — 오너만, 항상 표시 (접기 X) */}
+                {/* 프로젝트 삭제 — 오너만, 모든 탭 하단 공통 표시 */}
                 {userRole === "owner" && (
                     <section className="bg-rose-50/40 border border-rose-200 rounded-xl p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -619,7 +646,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-function NotesTab({ projectId, projectCategory }: { projectId: string; projectCategory: string | null }) {
-    return <ProjectNotesTab projectId={projectId} projectCategory={projectCategory} />;
-}
 
