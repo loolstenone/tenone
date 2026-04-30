@@ -7,7 +7,6 @@ import type { PlannerMode, AiTone, PlannerRole } from "@/lib/planners/types";
 import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
 import { SettingsLayout, GroupMarker } from "@/features/planners/SettingsLayout";
-import { SettingsLivePreview } from "@/features/planners/SettingsLivePreview";
 import { SettingsTheme } from "@/features/planners/settings/SettingsTheme";
 import { SettingsAi } from "@/features/planners/settings/SettingsAi";
 import { SettingsNotifications } from "@/features/planners/settings/SettingsNotifications";
@@ -128,8 +127,10 @@ export default function SettingsPage() {
                 {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
             </div>
 
-            {/* ── 01 시작 — 전체 폭 ── */}
+            {/* ── 전체 섹션 — SettingsLayout의 3열 그리드(사이드바+메인+Live Preview)가 처리 ── */}
             <div className="space-y-5 [&_section]:scroll-mt-32 [&_section]:lg:scroll-mt-24">
+
+                {/* 01 시작 */}
                 <GroupMarker group="start" no="01" label="시작" />
 
                 {/* 사용 수준 */}
@@ -203,61 +204,50 @@ export default function SettingsPage() {
                         })}
                     </div>
                 </section>
+
+                {/* 02 스타일 */}
+                <SettingsTheme save={save} showToast={showToast} />
+
+                {/* 03 기능 — AI + 알림 */}
+                <SettingsAi
+                    initialTone={initialTone}
+                    initialContextScope={initialContextScope}
+                    initialTrackingMetrics={initialTrackingMetrics}
+                    initialCountryPref={initialCountryPref}
+                    initialProjectLinks={initialProjectLinks}
+                    save={save}
+                    showToast={showToast}
+                />
+                <SettingsNotifications
+                    initialEmail={initialEmail}
+                    initialPush={initialPush}
+                    initialPushSupported={initialPushSupported}
+                    initialPushPermission={initialPushPermission}
+                    save={save}
+                    showToast={showToast}
+                />
+
+                {/* 04 기술 — 연동 */}
+                <SettingsIntegrations showToast={showToast} />
+
+                {/* 05 내보내기·구독 */}
+                <SettingsExport sub={sub} showToast={showToast} />
+
+                {/* 모바일 하단 메뉴 */}
+                <MobileNavSection />
+
+                {/* 변경사항 일괄 저장 */}
+                <SaveAllBar
+                    onSave={async () => {
+                        await save({
+                            mode,
+                            ai_morning_time: morning + ":00",
+                            ai_evening_time: evening + ":00",
+                        });
+                    }}
+                    saving={saving}
+                />
             </div>
-
-            {/* ── 02~05 스타일·기능·기술·내보내기: xl+ 우측 Live Preview sticky ── */}
-            <div className="xl:grid xl:grid-cols-[1fr_360px] xl:gap-8 xl:items-start mt-5">
-                <div className="space-y-5 [&_section]:scroll-mt-32 [&_section]:lg:scroll-mt-24">
-
-                    {/* 02 스타일 */}
-                    <SettingsTheme save={save} showToast={showToast} />
-
-                    {/* 03 기능 — AI + 알림 */}
-                    <SettingsAi
-                        initialTone={initialTone}
-                        initialContextScope={initialContextScope}
-                        initialTrackingMetrics={initialTrackingMetrics}
-                        initialCountryPref={initialCountryPref}
-                        initialProjectLinks={initialProjectLinks}
-                        save={save}
-                        showToast={showToast}
-                    />
-                    <SettingsNotifications
-                        initialEmail={initialEmail}
-                        initialPush={initialPush}
-                        initialPushSupported={initialPushSupported}
-                        initialPushPermission={initialPushPermission}
-                        save={save}
-                        showToast={showToast}
-                    />
-
-                    {/* 04 기술 — 연동 */}
-                    <SettingsIntegrations showToast={showToast} />
-
-                    {/* 05 내보내기·구독 */}
-                    <SettingsExport sub={sub} showToast={showToast} />
-
-                    {/* 모바일 하단 메뉴 */}
-                    <MobileNavSection />
-
-                    {/* 변경사항 일괄 저장 */}
-                    <SaveAllBar
-                        onSave={async () => {
-                            await save({
-                                mode,
-                                ai_morning_time: morning + ":00",
-                                ai_evening_time: evening + ":00",
-                            });
-                        }}
-                        saving={saving}
-                    />
-                </div>{/* ← 좌 컬럼 end */}
-
-                {/* xl+ Live Preview — 스타일 섹션부터 sticky */}
-                <div className="hidden xl:block xl:sticky xl:top-16 xl:self-start xl:h-fit">
-                    <SettingsLivePreview />
-                </div>
-            </div>{/* ← 2컬럼 그리드 end */}
 
             {/* Toast */}
             {toastMsg && (
