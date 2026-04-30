@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, PenLine, Eye, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
+import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, LayoutTemplate, X, Maximize2, Pencil, PenLine, Eye, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
@@ -820,6 +820,26 @@ function NoteExpandModal({
     const [editing, setEditing] = useState(false);
     // null = content으로 자동 감지, false = HW 스트로크 보존하면서 텍스트 모드 강제
     const [handModeOverride, setHandModeOverride] = useState<boolean | null>(null);
+    const [pageIdx, setPageIdx] = useState(0);
+    const [allCornellPages, setAllCornellPages] = useState<{ rows: CornellRow[]; summary: string }[]>(() => {
+        const c = note.content || '';
+        if (parseTemplateMarker(c) || parseCanvasMarker(c) || isHandwritingContent(c)) return [];
+        try {
+            const parsed = JSON.parse(c);
+            if (parsed?._cornell) {
+                if (Array.isArray(parsed._pages) && parsed._pages.length > 0) return parsed._pages;
+                return [{ rows: Array.isArray(parsed.rows) ? parsed.rows : [], summary: parsed.summary || '' }];
+            }
+        } catch { /* */ }
+        return [];
+    });
+    const [allHandPages, setAllHandPages] = useState<HandNoteData[]>(() => {
+        const c = note.content || '';
+        if (!isHandwritingContent(c)) return [];
+        const hw = parseHandwriting(c) as (HandNoteData & { _pages?: HandNoteData[] }) | null;
+        if (!hw) return [{ strokes: [], width: 800, height: 480 }];
+        return hw._pages ?? [{ strokes: hw.strokes, width: hw.width, height: hw.height }];
+    });
 
     const canvasInfo = parseCanvasMarker(content);
     const isCanvas = !!canvasInfo;
@@ -891,8 +911,64 @@ function NoteExpandModal({
         }
     }
 
+    function switchCornellPage(newIdx: number) {
+        if (newIdx < 0 || newIdx >= allCornellPages.length) return;
+        const updatedPages = [...allCornellPages];
+        if (cornellData) updatedPages[pageIdx] = { rows: cornellData.rows, summary: cornellData.summary };
+        setAllCornellPages(updatedPages);
+        const target = updatedPages[newIdx];
+        const newJson = JSON.stringify({ _cornell: true, rows: target.rows, summary: target.summary });
+        setContent(isHandwritingContent(content) ? setTextPart(content, newJson) : newJson);
+        setPageIdx(newIdx);
+    }
+    function addCornellPage() {
+        const newPage = { rows: [{ id: `r_${Date.now()}`, cue: '', note: '' } as CornellRow], summary: '' };
+        const updatedPages = [...allCornellPages];
+        if (cornellData) updatedPages[pageIdx] = { rows: cornellData.rows, summary: cornellData.summary };
+        updatedPages.push(newPage);
+        setAllCornellPages(updatedPages);
+        const newJson = JSON.stringify({ _cornell: true, rows: newPage.rows, summary: '' });
+        setContent(isHandwritingContent(content) ? setTextPart(content, newJson) : newJson);
+        setPageIdx(updatedPages.length - 1);
+    }
+    function switchHandPage(newIdx: number) {
+        if (newIdx < 0 || newIdx >= allHandPages.length) return;
+        const updatedPages = [...allHandPages];
+        const currentHw = parseHandwriting(content);
+        if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
+        setAllHandPages(updatedPages);
+        const target = updatedPages[newIdx];
+        setContent(`<!-- planners:handwriting -->\n${JSON.stringify(target)}`);
+        setPageIdx(newIdx);
+    }
+    function addHandPage() {
+        const newPage: HandNoteData = { strokes: [], width: 800, height: 480 };
+        const updatedPages = [...allHandPages];
+        const currentHw = parseHandwriting(content);
+        if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
+        updatedPages.push(newPage);
+        setAllHandPages(updatedPages);
+        setContent(`<!-- planners:handwriting -->\n${JSON.stringify(newPage)}`);
+        setPageIdx(updatedPages.length - 1);
+    }
     function handleClose() {
-        onSave({ title, content });
+        let finalContent = content;
+        // Cornell 멀티페이지: _pages embed
+        if (isCornell && allCornellPages.length > 1) {
+            const updatedPages = [...allCornellPages];
+            if (cornellData) updatedPages[pageIdx] = { rows: cornellData.rows, summary: cornellData.summary };
+            const newJson = JSON.stringify({ _cornell: true, rows: updatedPages[0].rows, summary: updatedPages[0].summary, _pages: updatedPages });
+            finalContent = isHandwritingContent(content) ? setTextPart(content, newJson) : newJson;
+        }
+        // Hand 멀티페이지: _pages embed
+        if (isHand && allHandPages.length > 1) {
+            const updatedPages = [...allHandPages];
+            const currentHw = parseHandwriting(content);
+            if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
+            const newHw = { ...(updatedPages[0] ?? { strokes: [], width: 800, height: 480 }), _pages: updatedPages };
+            finalContent = `<!-- planners:handwriting -->\n${JSON.stringify(newHw)}`;
+        }
+        onSave({ title, content: finalContent });
         onClose();
     }
 
@@ -963,17 +1039,52 @@ function NoteExpandModal({
                 ) : grid ? (
                     <div className="flex-1 p-6 overflow-auto">{grid}</div>
                 ) : isHand ? (
-                    <div className="flex-1 min-h-0 flex flex-col overflow-auto">
+                    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                         <HandNote value={handData} onChange={saveHand} fillHeight />
+                        {allHandPages.length > 1 && (
+                            <div className="shrink-0 border-t border-neutral-100 bg-neutral-50/60 px-4 py-2 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => switchHandPage(pageIdx - 1)} disabled={pageIdx <= 0}
+                                        className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
+                                        <ChevronLeft className="h-3.5 w-3.5" />
+                                    </button>
+                                    <span className="text-xs text-neutral-400 tabular-nums">{pageIdx + 1} / {allHandPages.length}</span>
+                                    <button onClick={() => switchHandPage(pageIdx + 1)} disabled={pageIdx >= allHandPages.length - 1}
+                                        className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
+                                        <ChevronRight className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                                <button onClick={addHandPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
+                                    <Plus className="h-3 w-3" /> 새 페이지
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : isCornell && cornellData ? (
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1 overflow-auto flex flex-col">
                         <CornellRowsInline
                             rows={cornellData.rows}
                             summary={cornellData.summary}
                             onChange={saveCornellModal}
                             onCommit={() => { /* 모달 닫을 때 일괄 저장 */ }}
                         />
+                        {/* 페이지 네비게이션 */}
+                        <div className="shrink-0 border-t border-dashed border-neutral-200 px-4 py-2 flex items-center justify-between bg-neutral-50/40">
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => switchCornellPage(pageIdx - 1)} disabled={pageIdx <= 0}
+                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                </button>
+                                <span className="text-xs text-neutral-400 tabular-nums">{pageIdx + 1} / {allCornellPages.length || 1}</span>
+                                <button onClick={() => switchCornellPage(pageIdx + 1)} disabled={pageIdx >= (allCornellPages.length || 1) - 1}
+                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                    <ChevronRight className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
+                            <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
+                                <Plus className="h-3 w-3" /> 새 페이지
+                            </button>
+                        </div>
                     </div>
                 ) : editing ? (
                     <div className="flex-1 p-6 overflow-auto">

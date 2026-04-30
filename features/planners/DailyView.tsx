@@ -34,7 +34,17 @@ const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: 
     '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
 };
 export type CornellRow = { id: string; cue: string; note: string };
-type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting' | 'canvas'; handMode?: boolean; templateKey?: string; templateLabel?: string; canvas_id?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
+type NoteItem = {
+    id: string;
+    type?: 'cornell' | 'template' | 'handwriting' | 'canvas';
+    handMode?: boolean;
+    templateKey?: string;
+    templateLabel?: string;
+    canvas_id?: string;
+    title: string; cue: string; content: string; summary: string; rows: CornellRow[];
+    handwriting?: HandNoteData;
+    _cornellPages?: { rows: CornellRow[]; summary: string }[];
+};
 
 export const RESULT_CATEGORIES = [
     { key: "summary",  label: "정리",     hint: "오늘을 정리하면" },
@@ -521,6 +531,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         catch { return new Set(); }
     });
     const [expandedNote, setExpandedNote] = useState<NoteItem | null>(null);
+    const [expandedNotePage, setExpandedNotePage] = useState(0);
+    const [allCornellPages, setAllCornellPages] = useState<{ rows: CornellRow[]; summary: string }[]>([]);
+    const [allHandPages, setAllHandPages] = useState<HandNoteData[]>([]);
     const [editingNoteIds, setEditingNoteIds] = useState<Set<string>>(new Set());
     const [shareCopied, setShareCopied] = useState(false);
     // 노트 드래그 순서 변경
@@ -632,6 +645,32 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
+
+    // 모달 열릴 때 페이지 파싱
+    useEffect(() => {
+        if (!expandedNote) { setExpandedNotePage(0); setAllCornellPages([]); setAllHandPages([]); return; }
+        setExpandedNotePage(0);
+        const isHandMode = expandedNote.type === 'handwriting'
+            || (expandedNote.type !== 'template' && expandedNote.type !== 'canvas' && !!expandedNote.handMode);
+        if (isHandMode) {
+            const hw = expandedNote.handwriting as (HandNoteData & { _pages?: HandNoteData[] }) | undefined;
+            const pages = hw?._pages ?? (hw ? [{ strokes: hw.strokes, width: hw.width, height: hw.height }] : [{ strokes: [], width: 800, height: 480 }]);
+            setAllHandPages(pages);
+            setAllCornellPages([]);
+        } else if (expandedNote.type !== 'template' && expandedNote.type !== 'canvas') {
+            try {
+                const raw = expandedNote.content;
+                const parsed = raw ? JSON.parse(raw) : null;
+                if (parsed?._cornell && Array.isArray(parsed._pages) && parsed._pages.length > 0) {
+                    setAllCornellPages(parsed._pages);
+                } else {
+                    setAllCornellPages([{ rows: expandedNote.rows, summary: expandedNote.summary }]);
+                }
+            } catch { setAllCornellPages([{ rows: expandedNote.rows, summary: expandedNote.summary }]); }
+            setAllHandPages([]);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [expandedNote?.id]);
 
     // 추천 템플릿 칩 노출용 — 진입 시 템플릿 목록 사전 로드
     useEffect(() => {
@@ -1029,8 +1068,16 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (n.type === 'canvas') {
                 return { id: n.id, type: n.type, canvas_id: n.canvas_id, title: n.title, cue: '', content: '', summary: '' };
             }
-            // Cornell (기본) — handwriting 필드가 있으면 함께 보존 (손글씨+타이핑 공존)
-            const cornellBase = { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows, summary: n.summary || "" }), summary: n.summary };
+            // Cornell — 멀티페이지 지원
+            const allPages = n._cornellPages ?? [{ rows: n.rows, summary: n.summary }];
+            const page0 = allPages[0] ?? { rows: n.rows, summary: n.summary };
+            const cornellContent = {
+                _cornell: true,
+                rows: page0.rows,
+                summary: page0.summary,
+                ...(allPages.length > 1 ? { _pages: allPages } : {}),
+            };
+            const cornellBase = { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify(cornellContent), summary: page0.summary };
             return n.handwriting ? { ...cornellBase, handwriting: n.handwriting } : cornellBase;
         }));
     }
@@ -1759,10 +1806,63 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     }
                 }
                 function saveAndClose() {
-                    const next = notesList.map(n => n.id === expandedNote!.id ? expandedNote! : n);
+                    let noteToSave = { ...expandedNote! };
+                    // 현재 페이지 저장
+                    const updatedCornellPages = allCornellPages.length > 0
+                        ? allCornellPages.map((p, i) => i === expandedNotePage ? { rows: noteToSave.rows, summary: noteToSave.summary } : p)
+                        : [];
+                    const updatedHandPages = allHandPages.length > 0
+                        ? allHandPages.map((p, i) => i === expandedNotePage ? (noteToSave.handwriting ?? p) : p)
+                        : [];
+                    // 멀티페이지 embed
+                    if (updatedCornellPages.length > 1) {
+                        noteToSave = { ...noteToSave, rows: updatedCornellPages[0].rows, summary: updatedCornellPages[0].summary, _cornellPages: updatedCornellPages };
+                    }
+                    if (updatedHandPages.length > 1) {
+                        noteToSave = { ...noteToSave, handwriting: { ...(updatedHandPages[0] ?? { strokes: [], width: 800, height: 480 }), _pages: updatedHandPages } as HandNoteData };
+                    } else if (updatedHandPages.length === 1) {
+                        noteToSave = { ...noteToSave, handwriting: updatedHandPages[0] };
+                    }
+                    const next = notesList.map(n => n.id === noteToSave.id ? noteToSave : n);
                     setNotesList(next);
                     save({ notes: serializeNotes(next) });
                     setExpandedNote(null);
+                }
+                function switchCornellPage(newIdx: number) {
+                    if (newIdx < 0 || newIdx >= allCornellPages.length) return;
+                    const updatedPages = [...allCornellPages];
+                    updatedPages[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
+                    setAllCornellPages(updatedPages);
+                    const target = updatedPages[newIdx];
+                    setExpandedNote({ ...expandedNote!, rows: target.rows, summary: target.summary });
+                    setExpandedNotePage(newIdx);
+                }
+                function addCornellPage() {
+                    const newPage = { rows: [{ id: `r_${Date.now()}`, cue: '', note: '' }], summary: '' };
+                    const updatedPages = [...allCornellPages];
+                    updatedPages[expandedNotePage] = { rows: expandedNote!.rows, summary: expandedNote!.summary };
+                    updatedPages.push(newPage);
+                    setAllCornellPages(updatedPages);
+                    setExpandedNote({ ...expandedNote!, rows: newPage.rows, summary: '' });
+                    setExpandedNotePage(updatedPages.length - 1);
+                }
+                function switchHandPage(newIdx: number) {
+                    if (newIdx < 0 || newIdx >= allHandPages.length) return;
+                    const updatedPages = [...allHandPages];
+                    updatedPages[expandedNotePage] = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                    setAllHandPages(updatedPages);
+                    const target = updatedPages[newIdx];
+                    setExpandedNote({ ...expandedNote!, handwriting: target });
+                    setExpandedNotePage(newIdx);
+                }
+                function addHandPage() {
+                    const newPage: HandNoteData = { strokes: [], width: 800, height: 480 };
+                    const updatedPages = [...allHandPages];
+                    updatedPages[expandedNotePage] = expandedNote!.handwriting ?? { strokes: [], width: 800, height: 480 };
+                    updatedPages.push(newPage);
+                    setAllHandPages(updatedPages);
+                    setExpandedNote({ ...expandedNote!, handwriting: newPage });
+                    setExpandedNotePage(updatedPages.length - 1);
                 }
                 return (
                     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-[5vh_5vw]">
@@ -1814,12 +1914,30 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     title={expandedNote.title}
                                 />
                             ) : isHand ? (
-                                <div className="flex-1 min-h-0 flex flex-col overflow-auto">
+                                <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                                     <HandNote
                                         value={expandedNote.handwriting ?? null}
                                         onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
                                         fillHeight
                                     />
+                                    {allHandPages.length > 1 && (
+                                        <div className="shrink-0 border-t border-neutral-100 bg-neutral-50/60 px-4 py-2 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={() => switchHandPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
+                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
+                                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                                </button>
+                                                <span className="text-xs text-neutral-400 tabular-nums">{expandedNotePage + 1} / {allHandPages.length}</span>
+                                                <button onClick={() => switchHandPage(expandedNotePage + 1)} disabled={expandedNotePage >= allHandPages.length - 1}
+                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
+                                                    <ChevronRight className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                            <button onClick={addHandPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
+                                                <Plus className="h-3 w-3" /> 새 페이지
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ) : isTpl && tplHasGrid && tplMeta ? (
                                 <div className="flex-1 overflow-auto p-6 bg-violet-50/20">
@@ -1972,6 +2090,23 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             rows={3}
                                             className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-relaxed"
                                         />
+                                    </div>
+                                    {/* 페이지 네비게이션 */}
+                                    <div className="shrink-0 border-t border-dashed border-neutral-200 px-4 py-2 flex items-center justify-between bg-neutral-50/40">
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => switchCornellPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
+                                                className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                                <ChevronLeft className="h-3.5 w-3.5" />
+                                            </button>
+                                            <span className="text-xs text-neutral-400 tabular-nums">{expandedNotePage + 1} / {allCornellPages.length || 1}</span>
+                                            <button onClick={() => switchCornellPage(expandedNotePage + 1)} disabled={expandedNotePage >= (allCornellPages.length || 1) - 1}
+                                                className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-400 transition-colors">
+                                                <ChevronRight className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                        <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
+                                            <Plus className="h-3 w-3" /> 새 페이지
+                                        </button>
                                     </div>
                                 </div>
                             )}

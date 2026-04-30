@@ -45,6 +45,7 @@ export interface HandNoteData {
     height: number;
     /** 같은 노트의 텍스트 모드 본문 — 손글씨와 공존 보존 (모드 전환 시 사라지지 않음) */
     text?: string;
+    _pages?: HandNoteData[];  // multi-page: 추가 페이지 데이터
 }
 
 interface HandNoteProps {
@@ -294,6 +295,7 @@ export function HandNote({
     // ── Canvas auto-expand ────────────────────────────────────────────────────
 
     function maybeExpand(yMax: number) {
+        if (fillHeight) return;
         setAutoH(h => yMax > h - 40 ? h + 240 : h);
     }
 
@@ -461,11 +463,14 @@ export function HandNote({
         // 드로잉 undo 커밋
         if (pre !== null) commitUndo(pre);
 
+        const svgH = fillHeight
+            ? (svgRef.current?.clientHeight ?? height)
+            : Math.max(height, yMax + 40);
         const newStroke: HandStroke = { points, color, size, penType, streamline: stabilizer };
         onChange({
             strokes: [...strokes, newStroke],
             width:   width || (value?.width ?? 600),
-            height:  Math.max(height, yMax + 40),
+            height:  svgH,
         });
     }
 
@@ -514,14 +519,14 @@ export function HandNote({
     // ── Render ────────────────────────────────────────────────────────────────
 
     return (
-        <div ref={outerRef} className={fillHeight ? "flex-1 min-h-0" : undefined}>
+        <div ref={outerRef} className={fillHeight ? "flex-1 min-h-0 flex flex-col" : undefined}>
         <div
             ref={containerRef}
-            className={`relative bg-white border border-slate-200 rounded-lg overflow-hidden select-none ${className}`}
+            className={`relative bg-white border border-slate-200 rounded-lg overflow-hidden select-none ${fillHeight ? "flex flex-col flex-1 min-h-0" : ""} ${className}`}
         >
             {/* ── Toolbar ── */}
             <div
-                className="flex items-center gap-1.5 px-2 py-1.5 border-b border-slate-100 bg-slate-50/60 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                className={`flex items-center gap-1.5 px-2 py-1.5 border-b border-slate-100 bg-slate-50/60 overflow-x-auto [&::-webkit-scrollbar]:hidden ${fillHeight ? "shrink-0" : ""}`}
                 style={{ scrollbarWidth: "none" }}
             >
                 {/* Pen types */}
@@ -742,7 +747,7 @@ export function HandNote({
 
             {/* ── 손 떨림 보정 슬라이더 (토글) ── */}
             {showStab && (
-                <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-100 bg-violet-50/50">
+                <div className={`flex items-center gap-2 px-3 py-1.5 border-b border-slate-100 bg-violet-50/50 ${fillHeight ? "shrink-0" : ""}`}>
                     <SlidersHorizontal className="h-3 w-3 text-violet-500 shrink-0" />
                     <span className="text-[10px] text-violet-600 shrink-0 font-medium">손 떨림 보정</span>
                     <input
@@ -769,12 +774,15 @@ export function HandNote({
             )}
 
             {/* ── SVG + Canvas overlay ── */}
-            <div className="relative" style={{ height, minHeight }}>
+            <div
+                className={fillHeight ? "flex-1 min-h-0 relative overflow-hidden" : "relative"}
+                style={fillHeight ? undefined : { height, minHeight }}
+            >
                 {/* 확정된 스트로크 — SVG */}
                 <svg
                     ref={svgRef}
                     width="100%"
-                    height={height}
+                    height={fillHeight ? "100%" : height}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
                     onPointerUp={onPointerUp}

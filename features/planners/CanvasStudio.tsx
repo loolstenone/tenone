@@ -285,7 +285,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
     const shellCls = embed
-        ? "flex flex-col bg-neutral-50 w-full h-full"
+        ? "fixed inset-0 flex flex-col bg-neutral-50"
         : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
 
     if (loading) {
