@@ -203,10 +203,20 @@ export function HandNote({
     const strokes = value?.strokes ?? [];
 
     const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+    const [isDark, setIsDark] = useState(false);
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
     useEffect(() => setRecentColors(loadRecent()), []);
+
+    // planners-dark 감지 — SVG 배경·팔레트 팝업 적응
+    useEffect(() => {
+        const check = () => setIsDark(document.documentElement.classList.contains('planners-dark'));
+        check();
+        const obs = new MutationObserver(check);
+        obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => obs.disconnect();
+    }, []);
 
     // 글로벌 펜 전용 모드 동기화 (pp-pen-mode CustomEvent)
     useEffect(() => {
@@ -522,11 +532,11 @@ export function HandNote({
         <div ref={outerRef} className={fillHeight ? "flex-1 min-h-0 flex flex-col" : undefined}>
         <div
             ref={containerRef}
-            className={`relative bg-white border border-slate-200 rounded-lg overflow-hidden select-none ${fillHeight ? "flex flex-col flex-1 min-h-0" : ""} ${className}`}
+            className={`relative bg-white border border-neutral-200 rounded-lg overflow-hidden select-none ${fillHeight ? "flex flex-col flex-1 min-h-0" : ""} ${className}`}
         >
             {/* ── Toolbar ── */}
             <div
-                className={`flex items-center gap-1.5 px-2 py-1.5 border-b border-slate-100 bg-slate-50/60 overflow-x-auto [&::-webkit-scrollbar]:hidden ${fillHeight ? "shrink-0" : ""}`}
+                className={`flex items-center gap-1.5 px-2 py-1.5 border-b border-neutral-200 bg-neutral-50 overflow-x-auto [&::-webkit-scrollbar]:hidden ${fillHeight ? "shrink-0" : ""}`}
                 style={{ scrollbarWidth: "none" }}
             >
                 {/* Pen types */}
@@ -539,8 +549,8 @@ export function HandNote({
                             title={PEN_PRESETS[t].label}
                             className={`px-1.5 h-5 text-[10px] rounded transition-colors whitespace-nowrap ${
                                 penType === t && !effectiveErase
-                                    ? "bg-slate-900 text-white"
-                                    : "bg-white text-slate-500 hover:bg-slate-100 border border-slate-200"
+                                    ? "bg-[#0F766E] text-white"
+                                    : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
                             }`}
                         >
                             {PEN_PRESETS[t].label}
@@ -548,7 +558,7 @@ export function HandNote({
                     ))}
                 </div>
 
-                <div className="w-px h-3 bg-slate-200 shrink-0" />
+                <div className="w-px h-3 bg-neutral-300 shrink-0" />
 
                 {/* 색상 퀵 스와치 + 팔레트 오프너 */}
                 <div className="relative flex items-center gap-0.5 shrink-0">
@@ -560,7 +570,7 @@ export function HandNote({
                             title={c}
                             className={`rounded-full border-2 transition-all shrink-0 ${
                                 color === c && !effectiveErase
-                                    ? "ring-2 ring-offset-1 ring-slate-500 scale-110 border-white"
+                                    ? "ring-2 ring-offset-1 ring-[#0F766E] scale-110 border-white"
                                     : "border-white hover:scale-110"
                             }`}
                             style={{ backgroundColor: c, width: 14, height: 14 }}
@@ -579,24 +589,24 @@ export function HandNote({
                         }}
                         type="button"
                         title="색상 팔레트"
-                        className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-slate-500 transition-all shrink-0"
+                        className="w-5 h-5 rounded-full border-2 border-neutral-300 hover:border-neutral-500 transition-all shrink-0"
                         style={{ background: "conic-gradient(#f87171, #fb923c, #facc15, #4ade80, #60a5fa, #a78bfa, #f87171)" }}
                     />
 
-                    {/* 팔레트 팝오버 — fixed로 overflow-hidden 탈출 */}
+                    {/* 팔레트 팝오버 — fixed로 overflow-hidden 탈출. 색상 선택기라 항상 라이트 모드 */}
                     {showPalette && (
                         <div
                             ref={paletteRef}
-                            className="fixed z-[9999] bg-white border border-slate-200 rounded-xl shadow-2xl p-3 w-52"
-                            style={{ top: palettePos.top, left: palettePos.left }}
+                            className="fixed z-[9999] rounded-xl shadow-2xl p-3 w-52"
+                            style={{ top: palettePos.top, left: palettePos.left, background: '#ffffff', border: '1px solid #e5e7eb', color: '#111827' }}
                         >
                             {/* 현재 색상 */}
-                            <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-slate-100">
+                            <div className="flex items-center gap-2 mb-2.5 pb-2" style={{ borderBottom: '1px solid #f1f5f9' }}>
                                 <div
-                                    className="w-7 h-7 rounded-lg border border-slate-200 shadow-inner"
-                                    style={{ backgroundColor: color }}
+                                    className="w-7 h-7 rounded-lg shadow-inner"
+                                    style={{ backgroundColor: color, border: '1px solid #e5e7eb' }}
                                 />
-                                <span className="text-[11px] text-slate-500 font-mono">{color.toUpperCase()}</span>
+                                <span className="text-[11px] font-mono" style={{ color: '#6b7280' }}>{color.toUpperCase()}</span>
                             </div>
 
                             {/* 20색 그리드 */}
@@ -607,18 +617,22 @@ export function HandNote({
                                         onClick={() => pickColor(c)}
                                         type="button"
                                         title={c}
-                                        className={`w-7 h-7 rounded-md border-2 transition-all hover:scale-110 ${
-                                            color === c ? "border-slate-600 scale-110" : "border-slate-100 hover:border-slate-300"
-                                        } ${c === "#FFFFFF" ? "shadow-inner" : ""}`}
-                                        style={{ backgroundColor: c }}
+                                        className={`w-7 h-7 rounded-md transition-all hover:scale-110 ${
+                                            c === "#FFFFFF" ? "shadow-inner" : ""
+                                        }`}
+                                        style={{
+                                            backgroundColor: c,
+                                            border: color === c ? '2px solid #374151' : '2px solid #f1f5f9',
+                                            transform: color === c ? 'scale(1.1)' : undefined,
+                                        }}
                                     />
                                 ))}
                             </div>
 
                             {/* 최근 사용 */}
                             {recentColors.length > 0 && (
-                                <div className="mb-2.5 pt-2 border-t border-slate-100">
-                                    <p className="text-[9px] text-slate-400 mb-1.5 uppercase tracking-wide">최근 사용</p>
+                                <div className="mb-2.5 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+                                    <p className="text-[9px] mb-1.5 uppercase tracking-wide" style={{ color: '#9ca3af' }}>최근 사용</p>
                                     <div className="flex gap-1 flex-wrap">
                                         {recentColors.map((c, i) => (
                                             <button
@@ -626,10 +640,11 @@ export function HandNote({
                                                 onClick={() => pickColor(c)}
                                                 type="button"
                                                 title={c}
-                                                className={`w-5 h-5 rounded border-2 hover:scale-110 transition-all ${
-                                                    color === c ? "border-slate-600" : "border-slate-100"
-                                                }`}
-                                                style={{ backgroundColor: c }}
+                                                className="w-5 h-5 rounded hover:scale-110 transition-all"
+                                                style={{
+                                                    backgroundColor: c,
+                                                    border: color === c ? '2px solid #374151' : '2px solid #f1f5f9',
+                                                }}
                                             />
                                         ))}
                                     </div>
@@ -637,19 +652,21 @@ export function HandNote({
                             )}
 
                             {/* HEX 직접 입력 */}
-                            <div className="flex gap-1 pt-2 border-t border-slate-100">
+                            <div className="flex gap-1 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
                                 <input
                                     type="text"
                                     value={hexInput}
                                     onChange={e => setHexInput(e.target.value)}
                                     placeholder="#RRGGBB"
-                                    className="flex-1 text-[11px] px-2 py-1 border border-slate-200 rounded-lg font-mono outline-none focus:border-slate-400 bg-slate-50"
+                                    className="flex-1 text-[11px] px-2 py-1 rounded-lg font-mono outline-none"
+                                    style={{ border: '1px solid #e5e7eb', background: '#f8fafc', color: '#111827' }}
                                     onKeyDown={e => { if (e.key === "Enter") applyHex(); }}
                                 />
                                 <button
                                     type="button"
                                     onClick={applyHex}
-                                    className="px-2 py-1 bg-slate-900 text-white text-[10px] rounded-lg hover:bg-slate-700 transition-colors"
+                                    className="px-2 py-1 text-[10px] rounded-lg transition-colors"
+                                    style={{ background: '#111827', color: '#ffffff' }}
                                 >
                                     ✓
                                 </button>
@@ -658,7 +675,7 @@ export function HandNote({
                     )}
                 </div>
 
-                <div className="w-px h-3 bg-slate-200 shrink-0" />
+                <div className="w-px h-3 bg-neutral-300 shrink-0" />
 
                 {/* 두께 슬라이더 */}
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -691,7 +708,7 @@ export function HandNote({
                         onClick={() => setShowStab(s => !s)}
                         type="button"
                         className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-                            showStab ? "bg-violet-100 text-violet-600" : "text-slate-400 hover:bg-slate-100"
+                            showStab ? "bg-violet-100 text-violet-600" : "text-neutral-500 hover:bg-neutral-200"
                         }`}
                         title="손 떨림 보정 (Stabilizer)"
                     >
@@ -703,7 +720,7 @@ export function HandNote({
                         onClick={() => setEraserMode(m => !m)}
                         type="button"
                         className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-                            effectiveErase ? "bg-rose-100 text-rose-600" : "text-slate-400 hover:bg-slate-100"
+                            effectiveErase ? "bg-rose-100 text-rose-600" : "text-neutral-500 hover:bg-neutral-200"
                         }`}
                         title="지우개"
                     >
@@ -715,7 +732,7 @@ export function HandNote({
                         onClick={undo}
                         disabled={!canUndo}
                         type="button"
-                        className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="w-6 h-6 rounded flex items-center justify-center text-neutral-500 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="실행 취소 (Ctrl+Z)"
                     >
                         <Undo2 className="h-3.5 w-3.5" />
@@ -726,7 +743,7 @@ export function HandNote({
                         onClick={redo}
                         disabled={!canRedo}
                         type="button"
-                        className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="w-6 h-6 rounded flex items-center justify-center text-neutral-500 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="다시 실행 (Ctrl+Shift+Z)"
                     >
                         <Redo2 className="h-3.5 w-3.5" />
@@ -737,7 +754,7 @@ export function HandNote({
                         onClick={() => setConfirmClearOpen(true)}
                         disabled={!strokes.length}
                         type="button"
-                        className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="w-6 h-6 rounded flex items-center justify-center text-neutral-500 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="전체 지우기"
                     >
                         <RotateCcw className="h-3.5 w-3.5" />
@@ -747,7 +764,7 @@ export function HandNote({
 
             {/* ── 손 떨림 보정 슬라이더 (토글) ── */}
             {showStab && (
-                <div className={`flex items-center gap-2 px-3 py-1.5 border-b border-slate-100 bg-violet-50/50 ${fillHeight ? "shrink-0" : ""}`}>
+                <div className={`flex items-center gap-2 px-3 py-1.5 border-b border-neutral-200 bg-violet-50/50 ${fillHeight ? "shrink-0" : ""}`}>
                     <SlidersHorizontal className="h-3 w-3 text-violet-500 shrink-0" />
                     <span className="text-[10px] text-violet-600 shrink-0 font-medium">손 떨림 보정</span>
                     <input
@@ -790,7 +807,10 @@ export function HandNote({
                     style={{
                         touchAction: touchAct,
                         cursor: effectiveErase ? "cell" : "crosshair",
-                        background: [
+                        background: isDark ? [
+                            "linear-gradient(to right, transparent 198px, rgba(220,60,60,0.20) 198px, rgba(220,60,60,0.20) 200px, transparent 200px)",
+                            "repeating-linear-gradient(transparent 0 31px, rgba(255,255,255,0.06) 31px 32px)"
+                        ].join(", ") : [
                             "linear-gradient(to right, transparent 198px, rgba(200,30,30,0.12) 198px, rgba(200,30,30,0.12) 200px, transparent 200px)",
                             "repeating-linear-gradient(transparent 0 31px, rgba(15,23,42,0.04) 31px 32px)"
                         ].join(", "),
@@ -822,9 +842,9 @@ export function HandNote({
                 {isEmpty && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="text-center px-4">
-                            <Pencil className="h-5 w-5 mx-auto text-slate-300 mb-1" />
-                            <p className="text-xs text-slate-400 italic">{placeholder}</p>
-                            <p className="text-[10px] text-slate-300 mt-1">
+                            <Pencil className="h-5 w-5 mx-auto text-neutral-400 mb-1" />
+                            <p className="text-xs text-neutral-500 italic">{placeholder}</p>
+                            <p className="text-[10px] text-neutral-400 mt-1">
                                 팜 리젝션 ✋ · 취소 Ctrl+Z · 다시 Ctrl+Shift+Z
                             </p>
                         </div>

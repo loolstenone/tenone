@@ -1429,30 +1429,23 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
-                                    const idx = notesList.filter(n => n.type === 'cornell').length + 1;
-                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
+                                    const idx = notesList.filter(n => n.type === 'cornell' || !n.type).length + 1;
+                                    const newNote: NoteItem = {
+                                        id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`,
+                                        cue: "", content: "", summary: "",
+                                        rows: [{ id: 'r1', cue: '', note: '' }],
+                                        // 드로잉 레이어 기본 탑재 — 헤더 "손글씨" 토글로 언제든 사용
+                                        handwriting: { strokes: [], width: 800, height: 480 },
+                                    };
                                     const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
+                                title="텍스트·코넬 노트 + 손글씨 레이어 포함"
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Plus className="h-3.5 w-3.5" />
                                 기본 노트
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const idx = notesList.filter(n => n.type === 'handwriting').length + 1;
-                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${idx}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } };
-                                    const next = [...notesList, newNote];
-                                    setNotesList(next);
-                                    save({ notes: serializeNotes(next) });
-                                }}
-                                title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
-                                className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
-                            >
-                                <Pencil className="h-3.5 w-3.5" />
-                                손글씨
                             </button>
                             <button
                                 onClick={openTemplatePicker}
@@ -1894,10 +1887,17 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 {!isTpl && !isCanvas && (
                                     <button
                                         onClick={toggleHandwriting}
-                                        title={isHand ? "텍스트 모드로 전환" : "손글씨 모드로 전환"}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors shrink-0"
+                                        title={isHand ? "텍스트 모드로 전환" : "손글씨 레이어로 전환"}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
+                                            isHand
+                                                ? "bg-[#0F766E] text-white hover:bg-[#0d5e56]"
+                                                : "border border-neutral-200 text-neutral-600 hover:bg-neutral-100"
+                                        }`}
                                     >
-                                        {isHand ? <><Type className="h-3.5 w-3.5" /> 텍스트</> : <><PenLine className="h-3.5 w-3.5" /> 손글씨</>}
+                                        {isHand
+                                            ? <><Type className="h-3.5 w-3.5" /> 텍스트</>
+                                            : <><PenLine className="h-3.5 w-3.5" /> 손글씨</>
+                                        }
                                     </button>
                                 )}
                                 <button
@@ -1925,24 +1925,25 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
                                         fillHeight
                                     />
-                                    {allHandPages.length > 1 && (
-                                        <div className="shrink-0 border-t border-neutral-100 bg-neutral-50/60 px-4 py-2 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={() => switchHandPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
-                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
-                                                    <ChevronLeft className="h-3.5 w-3.5" />
-                                                </button>
-                                                <span className="text-xs text-neutral-400 tabular-nums">{expandedNotePage + 1} / {allHandPages.length}</span>
-                                                <button onClick={() => switchHandPage(expandedNotePage + 1)} disabled={expandedNotePage >= allHandPages.length - 1}
-                                                    className="p-1 rounded hover:bg-neutral-100 disabled:opacity-30 text-neutral-500 transition-colors">
-                                                    <ChevronRight className="h-3.5 w-3.5" />
-                                                </button>
-                                            </div>
-                                            <button onClick={addHandPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
-                                                <Plus className="h-3 w-3" /> 새 페이지
+                                    {/* 페이지 컨트롤 — 항상 표시 (페이지가 1개여도 추가 가능) */}
+                                    <div className="shrink-0 border-t border-neutral-100 bg-neutral-50 px-4 py-2 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => switchHandPage(expandedNotePage - 1)} disabled={expandedNotePage <= 0}
+                                                className="p-1 rounded hover:bg-neutral-200 disabled:opacity-30 text-neutral-500 transition-colors">
+                                                <ChevronLeft className="h-3.5 w-3.5" />
+                                            </button>
+                                            <span className="text-xs text-neutral-500 tabular-nums font-medium">
+                                                {expandedNotePage + 1} / {allHandPages.length}
+                                            </span>
+                                            <button onClick={() => switchHandPage(expandedNotePage + 1)} disabled={expandedNotePage >= allHandPages.length - 1}
+                                                className="p-1 rounded hover:bg-neutral-200 disabled:opacity-30 text-neutral-500 transition-colors">
+                                                <ChevronRight className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
-                                    )}
+                                        <button onClick={addHandPage} className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors font-medium">
+                                            <Plus className="h-3 w-3" /> 새 페이지
+                                        </button>
+                                    </div>
                                 </div>
                             ) : isTpl && tplHasGrid && tplMeta ? (
                                 <div className="flex-1 overflow-auto p-6 bg-violet-50/20">

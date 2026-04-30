@@ -609,8 +609,8 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             </div>
                                             {/* Row 2: 절기/국가기념일 1개 */}
                                             {cell.inMonth && holiday && (
-                                                <p className={`text-[9px] leading-tight truncate mt-0.5 ${
-                                                    holiday.type === "holiday" ? "text-red-500 font-medium" :
+                                                <p className={`text-[10px] leading-tight truncate mt-0.5 ${
+                                                    holiday.type === "holiday" ? "text-red-500" :
                                                     holiday.type === "memorial" ? "text-rose-400" :
                                                     holiday.type === "commemoration" ? "text-amber-600" :
                                                     "text-emerald-600"
@@ -626,7 +626,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                 if (!personal) return null;
                                                 const c = KIND_COLORS[personal.kind];
                                                 return (
-                                                    <div className={`flex items-center gap-0.5 text-[9px] leading-tight mt-0.5 ${c.text}`}>
+                                                    <div className={`flex items-center gap-0.5 text-[10px] leading-tight mt-0.5 ${c.text}`}>
                                                         <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
                                                         <span className="truncate">{personal.title}</span>
                                                     </div>
