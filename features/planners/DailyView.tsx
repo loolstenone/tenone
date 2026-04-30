@@ -1909,7 +1909,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             {/* Body */}
                             {isCanvas ? (
                                 <iframe
-                                    src={`/planners/app/canvas/${expandedNote.canvas_id}?embed=1`}
+                                    src={`/planners/canvas/${expandedNote.canvas_id}`}
                                     className="flex-1 w-full border-0"
                                     title={expandedNote.title}
                                 />

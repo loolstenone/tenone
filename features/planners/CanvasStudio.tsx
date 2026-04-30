@@ -284,8 +284,11 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
-    // embed 여부와 관계없이 z-50 필수 — AppTopNav(z-40)·MobileBottomNav 위에 canvas가 올라와야 함
-    const shellCls = "fixed inset-0 flex flex-col bg-neutral-50 z-50";
+    // embed 라우트(/planners/canvas/[id])는 AppLayout 없이 렌더 → 단순 fill-parent
+    // standalone(/planners/app/canvas/[id])은 AppLayout 위에 z-50으로 올라옴
+    const shellCls = embed
+        ? "absolute inset-0 flex flex-col bg-neutral-50"
+        : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
 
     if (loading) {
         return (

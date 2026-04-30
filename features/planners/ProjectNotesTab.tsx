@@ -1031,7 +1031,7 @@ function NoteExpandModal({
                 {isCanvas && canvasInfo ? (
                     <div className="flex-1 min-h-0">
                         <iframe
-                            src={`/planners/app/canvas/${canvasInfo.canvasId}?embed=1`}
+                            src={`/planners/canvas/${canvasInfo.canvasId}`}
                             className="w-full h-full border-0"
                             title="Canvas"
                         />
