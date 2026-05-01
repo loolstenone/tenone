@@ -52,6 +52,9 @@ export function AppTopNav({
     // Time Tracking 토글 — 마운트 시 server prop으로 시드 후 localStorage·custom event가 권한
     // (이전엔 [showTimeTracking] deps useEffect가 prop 변경마다 state를 덮어써 토글이 풀리는 버그 발생)
     const [timeTrackingClient, setTimeTrackingClient] = useState(showTimeTracking);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
     useEffect(() => {
         if (typeof window === "undefined") return;
         // 마운트 시: localStorage에 값 있으면 우선, 없으면 server prop으로 시드
@@ -71,19 +74,29 @@ export function AppTopNav({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // showTimeTracking을 deps에 넣지 않음 — server prop이 router.refresh로 늦게 도달해도 client state를 덮어쓰지 않도록
 
-    if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
-    const visibleTabs = TABS
-        .filter((t) => t.modes.includes(mode))
-        .filter((t) => t.href !== "/planners/app/time" || timeTrackingClient);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-
     // 브라우저 전체화면 상태 동기화
     useEffect(() => {
         function onChange() { setIsFullscreen(!!document.fullscreenElement); }
         document.addEventListener("fullscreenchange", onChange);
         return () => document.removeEventListener("fullscreenchange", onChange);
     }, []);
+
+    // 라우트 변경 시 햄버거 메뉴 자동 닫기
+    useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+    // ESC 로 닫기
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [menuOpen]);
+
+    // 모든 hook 선언이 끝난 후에만 early return — Rules of Hooks 준수
+    if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
+    const visibleTabs = TABS
+        .filter((t) => t.modes.includes(mode))
+        .filter((t) => t.href !== "/planners/app/time" || timeTrackingClient);
 
     async function toggleFullscreen() {
         try {
@@ -96,17 +109,6 @@ export function AppTopNav({
             console.warn("fullscreen toggle failed", e);
         }
     }
-
-    // 라우트 변경 시 햄버거 메뉴 자동 닫기
-    useEffect(() => { setMenuOpen(false); }, [pathname]);
-
-    // ESC 로 닫기
-    useEffect(() => {
-        if (!menuOpen) return;
-        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [menuOpen]);
 
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">

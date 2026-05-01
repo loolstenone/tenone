@@ -1,16 +1,20 @@
 "use client";
 
+// Excalidraw 캔버스 에디터 — SSR 회피 + 자동 저장 + 제목 편집.
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Trash2, Check } from "lucide-react";
 import { ConfirmSheet } from "./ConfirmSheet";
-import type { Editor, TLEditorSnapshot } from "tldraw";
-// getSvgAsImage은 클라이언트 전용이라 dynamic import로 처리
-import "tldraw/tldraw.css";
+import "@excalidraw/excalidraw/index.css";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import type { AppState } from "@excalidraw/excalidraw/types";
 
-const Tldraw = dynamic(
-    async () => (await import("tldraw")).Tldraw,
+// 클라이언트 전용 — SSR 시점에 window 의존하므로 dynamic import 필수
+const Excalidraw = dynamic(
+    async () => (await import("@excalidraw/excalidraw")).Excalidraw,
     { ssr: false, loading: () => <CanvasLoading /> },
 );
 
@@ -22,10 +26,15 @@ function CanvasLoading() {
     );
 }
 
+interface CanvasData {
+    elements: ExcalidrawElement[];
+    appState?: Partial<AppState>;
+}
+
 interface CanvasRow {
     id: string;
     title: string;
-    data: TLEditorSnapshot | null;
+    data: CanvasData;
 }
 
 export function CanvasEditor({ canvasId }: { canvasId: string }) {
@@ -35,7 +44,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     const [saving, setSaving] = useState(false);
     const [savedAt, setSavedAt] = useState<Date | null>(null);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-    const editorRef = useRef<Editor | null>(null);
+    const apiRef = useRef<ExcalidrawImperativeAPI | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const thumbDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,13 +64,13 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         return () => { cancelled = true; };
     }, [canvasId]);
 
-    const saveData = useCallback(async (snapshot: TLEditorSnapshot) => {
+    const saveData = useCallback(async (data: CanvasData) => {
         setSaving(true);
         try {
             await fetch(`/api/planners/canvases/${canvasId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ data: snapshot }),
+                body: JSON.stringify({ data }),
             });
             setSavedAt(new Date());
         } finally {
@@ -70,22 +79,19 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     }, [canvasId]);
 
     const saveThumbnail = useCallback(async () => {
-        const editor = editorRef.current;
-        if (!editor) return;
-        const allShapeIds = editor.getCurrentPageShapeIds();
-        if (allShapeIds.size === 0) return;
+        if (!apiRef.current) return;
+        const elements = apiRef.current.getSceneElements();
+        if (elements.length === 0) return;
         try {
-            const result = await editor.getSvgString([...allShapeIds], { padding: 16 });
-            if (!result) return;
-            const { getSvgAsImage } = await import("tldraw");
-            const blob = await getSvgAsImage(result.svg, {
-                type: "jpeg",
+            const { exportToBlob } = await import("@excalidraw/excalidraw");
+            const blob = await exportToBlob({
+                elements: [...elements],
+                appState: { exportBackground: true },
+                files: apiRef.current.getFiles(),
+                maxWidthOrHeight: 400,
                 quality: 0.65,
-                width: Math.round(result.width),
-                height: Math.round(result.height),
-                pixelRatio: 0.5,
+                mimeType: "image/jpeg",
             });
-            if (!blob) return;
             const dataUrl: string = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result as string);
@@ -102,42 +108,6 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         }
     }, [canvasId]);
 
-    const handleMount = useCallback((editor: Editor) => {
-        editorRef.current = editor;
-
-        if (canvas?.data) {
-            import("tldraw").then(({ loadSnapshot }) => {
-                try {
-                    loadSnapshot(editor.store, canvas.data!);
-                } catch {
-                    // 기존 데이터 형식 불일치 시 빈 캔버스로 시작
-                }
-            });
-        }
-
-        const cleanupListen = editor.store.listen(
-            () => {
-                if (debounceRef.current) clearTimeout(debounceRef.current);
-                debounceRef.current = setTimeout(() => {
-                    import("tldraw").then(({ getSnapshot }) => {
-                        const snapshot = getSnapshot(editor.store);
-                        saveData(snapshot);
-                    });
-                }, 1500);
-
-                if (thumbDebounceRef.current) clearTimeout(thumbDebounceRef.current);
-                thumbDebounceRef.current = setTimeout(saveThumbnail, 5000);
-            },
-            { scope: "document" },
-        );
-
-        return () => {
-            cleanupListen();
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            if (thumbDebounceRef.current) clearTimeout(thumbDebounceRef.current);
-        };
-    }, [canvas, saveData, saveThumbnail]);
-
     const saveTitle = useCallback(async (next: string) => {
         if (!canvas || next === canvas.title) return;
         await fetch(`/api/planners/canvases/${canvasId}`, {
@@ -147,6 +117,25 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         });
         setCanvas({ ...canvas, title: next });
     }, [canvasId, canvas]);
+
+    function onChange(elements: readonly ExcalidrawElement[], appState: AppState) {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            const slimAppState: Partial<AppState> = {
+                viewBackgroundColor: appState.viewBackgroundColor,
+                gridSize: appState.gridSize,
+                zoom: appState.zoom,
+                scrollX: appState.scrollX,
+                scrollY: appState.scrollY,
+                theme: appState.theme,
+            };
+            saveData({ elements: [...elements] as ExcalidrawElement[], appState: slimAppState });
+        }, 1500);
+
+        // 썸네일은 5초 debounce — 데이터 저장보다 느슨하게
+        if (thumbDebounceRef.current) clearTimeout(thumbDebounceRef.current);
+        thumbDebounceRef.current = setTimeout(saveThumbnail, 5000);
+    }
 
     async function deleteCanvas() {
         await fetch(`/api/planners/canvases/${canvasId}`, { method: "DELETE" });
@@ -172,9 +161,9 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     }
 
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col bg-neutral-50">
             {/* Topbar */}
-            <header className="flex items-center gap-3 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
+            <header className="flex items-center gap-3 px-4 py-2 bg-white border-b border-neutral-200 shrink-0">
                 <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700">
                     <ChevronLeft className="h-4 w-4" />
                 </Link>
@@ -202,9 +191,39 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                 </button>
             </header>
 
-            {/* tldraw — 풀 화면 */}
+            {/* Excalidraw — 풀 도구 활성화 (그림 그리기 본격 모드) */}
             <div className="flex-1 min-h-0">
-                <Tldraw onMount={handleMount} />
+                <Excalidraw
+                    excalidrawAPI={(api) => { apiRef.current = api; }}
+                    initialData={{
+                        elements: canvas.data?.elements ?? [],
+                        appState: {
+                            ...(canvas.data?.appState ?? {}),
+                            // 라이브러리 패널 기본 닫혀 있도록 (사용자가 열어서 사용)
+                            openSidebar: undefined,
+                        },
+                        scrollToContent: true,
+                    }}
+                    onChange={onChange}
+                    langCode="ko-KR"
+                    handleKeyboardGlobally={false}
+                    UIOptions={{
+                        canvasActions: {
+                            // 모든 캔버스 액션 노출
+                            export: { saveFileToDisk: true },
+                            saveAsImage: true,
+                            loadScene: true,
+                            saveToActiveFile: false,        // .excalidraw 파일 자동 저장 (내부 저장이 우선이므로 비활성)
+                            toggleTheme: true,
+                            clearCanvas: true,
+                            changeViewBackgroundColor: true,
+                        },
+                        // 도형 라이브러리 활성화 — 미리 만든 도형 모음을 가져와 쓸 수 있게
+                        tools: { image: true },
+                        // 환영 화면 비활성 (개인 캔버스라 매번 보일 필요 없음)
+                        welcomeScreen: false,
+                    }}
+                />
             </div>
             <ConfirmSheet
                 open={confirmDeleteOpen}
