@@ -241,7 +241,12 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                 <button onClick={() => setYear(year - 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
-                                <div className="flex items-center gap-2 min-w-0">
+                                <div
+                                    className={`flex items-center gap-2 min-w-0 ${
+                                        isCurrentYear ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                    }`}
+                                    title={isCurrentYear ? "올해" : undefined}
+                                >
                                     <div ref={yearPickerRef} className="relative">
                                         <button
                                             onClick={() => setShowYearPicker(v => !v)}
@@ -263,11 +268,6 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                             </div>
                                         )}
                                     </div>
-                                    {isCurrentYear && (
-                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
-                                            올해
-                                        </span>
-                                    )}
                                 </div>
                                 <button onClick={() => setYear(year + 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronRight className="h-4 w-4" />

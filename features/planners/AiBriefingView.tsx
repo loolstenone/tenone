@@ -106,7 +106,7 @@ export function AiBriefingView() {
     const Greet = TYPE_META[suggested].icon;
 
     return (
-        <div className="max-w-3xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <header className="flex items-center gap-2.5 mb-5">
                 <Sparkles className="h-5 w-5 text-[#0F766E]" />
                 <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">AI 브리핑</h1>

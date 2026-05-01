@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, MessageSquarePlus } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -49,16 +49,34 @@ export function AppTopNav({
     showTimeTracking?: boolean;
 }) {
     const pathname = usePathname();
+    // Time Tracking 토글 — 마운트 시 server prop으로 시드 후 localStorage·custom event가 권한
+    // (이전엔 [showTimeTracking] deps useEffect가 prop 변경마다 state를 덮어써 토글이 풀리는 버그 발생)
+    const [timeTrackingClient, setTimeTrackingClient] = useState(showTimeTracking);
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        // 마운트 시: localStorage에 값 있으면 우선, 없으면 server prop으로 시드
+        const stored = localStorage.getItem("pp-time-tracking");
+        if (stored !== null) {
+            setTimeTrackingClient(stored === "1");
+        } else {
+            localStorage.setItem("pp-time-tracking", showTimeTracking ? "1" : "0");
+        }
+        // Settings 토글 즉시 반영
+        const handler = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            setTimeTrackingClient(!!detail?.enabled);
+        };
+        window.addEventListener("pp-time-tracking-change", handler);
+        return () => window.removeEventListener("pp-time-tracking-change", handler);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // showTimeTracking을 deps에 넣지 않음 — server prop이 router.refresh로 늦게 도달해도 client state를 덮어쓰지 않도록
+
     if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
     const visibleTabs = TABS
         .filter((t) => t.modes.includes(mode))
-        .filter((t) => t.href !== "/planners/app/time" || showTimeTracking);
+        .filter((t) => t.href !== "/planners/app/time" || timeTrackingClient);
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [isPenMode, setIsPenMode] = useState(() => {
-        if (typeof window === "undefined") return false;
-        return localStorage.getItem("pp-pen-mode") === "1";
-    });
 
     // 브라우저 전체화면 상태 동기화
     useEffect(() => {
@@ -77,27 +95,6 @@ export function AppTopNav({
         } catch (e) {
             console.warn("fullscreen toggle failed", e);
         }
-    }
-
-    // 펜 전용 모드 — capture phase 터치 차단 (팜 리젝션)
-    useEffect(() => {
-        if (!isPenMode) return;
-        const block = (e: PointerEvent) => {
-            if (e.pointerType === "touch") e.stopImmediatePropagation();
-        };
-        document.addEventListener("pointerdown", block, { capture: true });
-        document.addEventListener("pointermove", block, { capture: true });
-        return () => {
-            document.removeEventListener("pointerdown", block, { capture: true });
-            document.removeEventListener("pointermove", block, { capture: true });
-        };
-    }, [isPenMode]);
-
-    function togglePenMode() {
-        const next = !isPenMode;
-        setIsPenMode(next);
-        localStorage.setItem("pp-pen-mode", next ? "1" : "0");
-        window.dispatchEvent(new CustomEvent("pp-pen-mode", { detail: { enabled: next } }));
     }
 
     // 라우트 변경 시 햄버거 메뉴 자동 닫기
@@ -213,20 +210,6 @@ export function AppTopNav({
                 >
                     <Settings className="h-4 w-4" />
                 </Link>
-
-                {/* 펜 전용 모드 — 손바닥 터치 차단 (팜 리젝션) */}
-                <button
-                    type="button"
-                    onClick={togglePenMode}
-                    title={isPenMode ? "펜 전용 모드 해제" : "펜 전용 모드 (손 터치 차단)"}
-                    className={`p-1.5 rounded transition-colors ${
-                        isPenMode
-                            ? "bg-[#0F766E]/15 text-[#0F766E]"
-                            : "text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/10"
-                    }`}
-                >
-                    <PenLine className="h-4 w-4" />
-                </button>
 
                 {/* 전체화면 토글 — 주소창·탭 숨김 */}
                 <button

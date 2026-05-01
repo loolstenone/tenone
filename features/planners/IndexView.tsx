@@ -98,6 +98,10 @@ export function IndexView() {
     const vision = identity?.vision_statement ?? identity?.vision_roof ?? identity?.inside_vision ?? "";
     const mission = identity?.mission_statement ?? identity?.vision_walls ?? "";
 
+    // 분기(Quarter) — 현재 월이 속한 분기 0~3
+    const currentQuarter = Math.floor(now.getMonth() / 3);
+    const isCurrentYear = year === now.getFullYear();
+
     const swipeRef = useSwipeNav(
         () => setYear(y => y + 1),
         () => setYear(y => y - 1),
@@ -174,7 +178,7 @@ export function IndexView() {
     }
 
     return (
-        <div ref={swipeRef} className="max-w-screen-xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
 
             {/* ── 헤더 ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
@@ -182,13 +186,28 @@ export function IndexView() {
                     <LayoutGrid className="h-6 w-6 text-[#0F766E]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">인덱스</h1>
                     <div className="flex items-center gap-0.5 ml-1">
-                        <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
+                        <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors" aria-label="이전 해">
                             <ChevronLeft className="h-4 w-4" />
                         </button>
-                        <span className="text-sm font-medium text-neutral-500 w-10 text-center">{year}</span>
-                        <button onClick={() => setYear(y => y + 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
+                        <span
+                            className={`text-sm font-medium text-neutral-700 min-w-[60px] text-center tabular-nums ${
+                                isCurrentYear ? "underline decoration-[#0F766E] decoration-2 underline-offset-[5px]" : ""
+                            }`}
+                            title={isCurrentYear ? "올해" : undefined}
+                        >
+                            {year}
+                        </span>
+                        <button onClick={() => setYear(y => y + 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors" aria-label="다음 해">
                             <ChevronRight className="h-4 w-4" />
                         </button>
+                        {!isCurrentYear && (
+                            <button
+                                onClick={() => setYear(now.getFullYear())}
+                                className="ml-1 px-2 py-0.5 text-[10px] font-medium text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors rounded"
+                            >
+                                올해로
+                            </button>
+                        )}
                     </div>
                 </div>
                 <PlannersUtilityLinks className="sm:ml-auto" />
@@ -240,45 +259,63 @@ export function IndexView() {
                 {/* ────── 좌: 연간 달력 ────── */}
                 <section className="flex-1 min-w-0 order-2 lg:order-1">
 
-                    {/* 연간 달력 그리드 */}
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">연간 달력</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-5 gap-y-6">
-                        {MONTHS_KO.map((monthName, mIdx) => {
-                            const rows = buildMonth(year, mIdx);
+                    {/* 연간 달력 — 분기별 3개월씩 4행 */}
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">연간 달력 · 분기별 3개월</p>
+                    <div className="space-y-6">
+                        {[0, 1, 2, 3].map(qIdx => {
+                            const isCurrentQ = isCurrentYear && qIdx === currentQuarter;
                             return (
-                                <div key={mIdx}>
-                                    <Link href={`/planners/app/monthly?year=${year}&month=${mIdx + 1}`}>
-                                        <div className="bg-neutral-500 text-white text-center text-[11px] font-semibold py-1 hover:bg-[#0F766E] transition-colors">
-                                            {monthName}
-                                        </div>
-                                    </Link>
-                                    <div className="grid grid-cols-[28px_repeat(7,1fr)] mt-0.5 mb-px">
-                                        <div />
-                                        {["M", "T", "W", "T", "F", "S", "S"].map((d, di) => (
-                                            <div key={di} className={`text-center text-[10px] font-medium ${di >= 5 ? "text-pink-400" : "text-neutral-400"}`}>{d}</div>
-                                        ))}
+                                <div key={qIdx}>
+                                    <p className={`text-[10px] font-semibold uppercase tracking-widest mb-2 ${
+                                        isCurrentQ ? "text-[#0F766E] underline decoration-2 underline-offset-[4px]" : "text-neutral-300"
+                                    }`}>
+                                        Q{qIdx + 1} · {MONTHS_KO[qIdx * 3]}–{MONTHS_KO[qIdx * 3 + 2]}
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-5">
+                                        {[0, 1, 2].map(mOffset => {
+                                            const monthIdx = qIdx * 3 + mOffset;
+                                            const rows = buildMonth(year, monthIdx);
+                                            const isCurrentMonth = isCurrentYear && monthIdx === now.getMonth();
+                                            return (
+                                                <div key={monthIdx}>
+                                                    <Link href={`/planners/app/monthly?year=${year}&month=${monthIdx + 1}`}>
+                                                        <div className={`text-center text-[11px] font-semibold py-1 transition-colors ${
+                                                            isCurrentMonth ? "bg-[#0F766E] text-white" : "bg-neutral-500 text-white hover:bg-[#0F766E]"
+                                                        }`}>
+                                                            {MONTHS_KO[monthIdx]}
+                                                        </div>
+                                                    </Link>
+                                                    <div className="grid grid-cols-[28px_repeat(7,1fr)] mt-0.5 mb-px">
+                                                        <div />
+                                                        {["M", "T", "W", "T", "F", "S", "S"].map((d, di) => (
+                                                            <div key={di} className={`text-center text-[10px] font-medium ${di >= 5 ? "text-pink-400" : "text-neutral-400"}`}>{d}</div>
+                                                        ))}
+                                                    </div>
+                                                    {rows.map((row, ri) => (
+                                                        <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
+                                                            <Link href={`/planners/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5">
+                                                                W{String(row[0].week).padStart(2, "0")}
+                                                            </Link>
+                                                            {row.map((cell, ci) => {
+                                                                const isToday = cell.date === todayStr;
+                                                                const isWeekend = ci >= 5;
+                                                                return (
+                                                                    <Link key={ci} href={`/planners/app/daily?date=${cell.date}`}
+                                                                        className={`text-center text-[11px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
+                                                                            isToday ? "bg-[#0F766E]/10 text-[#0F766E] font-bold underline decoration-[#0F766E] decoration-2 underline-offset-[3px]"
+                                                                            : !cell.inMonth ? "text-neutral-200"
+                                                                            : isWeekend ? "text-pink-400"
+                                                                            : "text-neutral-600"
+                                                                        }`}
+                                                                    >{cell.dom}</Link>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                    {rows.map((row, ri) => (
-                                        <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
-                                            <Link href={`/planners/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5">
-                                                W{String(row[0].week).padStart(2, "0")}
-                                            </Link>
-                                            {row.map((cell, ci) => {
-                                                const isToday = cell.date === todayStr;
-                                                const isWeekend = ci >= 5;
-                                                return (
-                                                    <Link key={ci} href={`/planners/app/daily?date=${cell.date}`}
-                                                        className={`text-center text-[11px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
-                                                            isToday ? "bg-[#0F766E]/10 text-[#0F766E] font-bold"
-                                                            : !cell.inMonth ? "text-neutral-200"
-                                                            : isWeekend ? "text-pink-400"
-                                                            : "text-neutral-600"
-                                                        }`}
-                                                    >{cell.dom}</Link>
-                                                );
-                                            })}
-                                        </div>
-                                    ))}
                                 </div>
                             );
                         })}

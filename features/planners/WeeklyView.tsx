@@ -375,14 +375,14 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap">
+                                    <h1
+                                        className={`font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap ${
+                                            todayInWeek ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                        }`}
+                                        title={todayInWeek ? "이번 주" : undefined}
+                                    >
                                         {rangeText}
                                     </h1>
-                                    {todayInWeek && (
-                                        <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
-                                            이번 주
-                                        </span>
-                                    )}
                                 </div>
                                 <button onClick={() => navigateWeek(1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronRight className="h-4 w-4" />
@@ -698,7 +698,12 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 
                                         {/* ① 날짜 요일 + 화살표 */}
                                         <div className="flex items-baseline gap-1">
-                                            <span className={`font-serif text-2xl leading-none font-light ${dateColor}`}>
+                                            <span
+                                                className={`font-serif text-2xl leading-none font-light ${dateColor} ${
+                                                    isToday ? "underline decoration-[#0F766E] decoration-2 underline-offset-[5px]" : ""
+                                                }`}
+                                                title={isToday ? "오늘" : undefined}
+                                            >
                                                 {String(d.getDate()).padStart(2, "0")}
                                             </span>
                                             <span className={`text-xs font-medium ${dayColor}`}>{DAYS_KO[d.getDay()]}</span>
@@ -711,12 +716,9 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             </Link>
                                         </div>
 
-                                        {/* ② 오늘 표시 + 날씨 */}
-                                        {(isToday || dayData.weather) && (
+                                        {/* ② 날씨 */}
+                                        {dayData.weather && (
                                             <div className="flex items-center gap-1.5 flex-wrap">
-                                                {isToday && (
-                                                    <span className="text-[9px] md:text-[11px] text-[#0F766E] font-semibold bg-[#0F766E]/10 px-1.5 py-0.5 rounded-full leading-none">오늘</span>
-                                                )}
                                                 {dayData.weather && (
                                                     <span className="inline-flex items-center gap-0.5 text-[10px] md:text-xs text-neutral-400">
                                                         <WeatherIcon code={dayData.weather.code} />

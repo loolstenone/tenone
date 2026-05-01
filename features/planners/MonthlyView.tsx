@@ -332,7 +332,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 <button onClick={() => navigateMonth(-1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
-                                <div className="flex items-center gap-2 min-w-0">
+                                <div
+                                    className={`flex items-center gap-2 min-w-0 ${
+                                        isCurrentMonth ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                    }`}
+                                    title={isCurrentMonth ? "이번 달" : undefined}
+                                >
                                     <div ref={yearRef} className="relative">
                                         <button
                                             onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
@@ -369,11 +374,6 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             </div>
                                         )}
                                     </div>
-                                    {isCurrentMonth && (
-                                        <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
-                                            이번 달
-                                        </span>
-                                    )}
                                 </div>
                                 <button onClick={() => navigateMonth(1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronRight className="h-4 w-4" />

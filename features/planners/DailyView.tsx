@@ -1335,14 +1335,14 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     </button>
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap">
+                            <h1
+                                className={`font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap ${
+                                    isToday ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                }`}
+                                title={isToday ? "오늘" : undefined}
+                            >
                                 {formattedDate}
                             </h1>
-                            {isToday && (
-                                <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
-                                    오늘
-                                </span>
-                            )}
                             <button
                                 onClick={() => navigateDate(1)}
                                 className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
@@ -1357,16 +1357,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     {weather.temp}°C
                                 </span>
                             )}
-                            {weather?.sunrise && (
-                                <span className="inline-flex items-center gap-1 text-neutral-400 text-xs">
-                                    <Sunrise className="h-3 w-3" />{weather.sunrise}
-                                </span>
-                            )}
-                            {weather?.sunset && (
-                                <span className="inline-flex items-center gap-1 text-neutral-400 text-xs">
-                                    <Sunset className="h-3 w-3" />{weather.sunset}
-                                </span>
-                            )}
+                            {/* 일출/일몰은 시간 트래킹 페이지로 이동 */}
                             {tzMismatch && (
                                 <button
                                     onClick={() => {
@@ -1380,108 +1371,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     {tzMismatch.split("/").pop()?.replace(/_/g, " ")}
                                 </button>
                             )}
-                            {/* 출퇴근 소요시간 칩 */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => setCommuteOpen(o => !o)}
-                                    className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
-                                    title="출퇴근 소요시간"
-                                >
-                                    <ArrowDownToLine className="h-3 w-3" />
-                                    {commute?.depart
-                                        ? <span>{commute.depart}{commute.arrive ? ` → ${commute.arrive}` : ""}{commute.minutes ? ` (${commute.minutes}분)` : ""}</span>
-                                        : <span>출퇴근</span>
-                                    }
-                                </button>
-                                {commuteOpen && (
-                                    <div className="absolute top-6 left-0 z-50 bg-white border border-neutral-200 rounded-xl shadow-lg p-3 w-56 space-y-2">
-                                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium">출퇴근 소요시간</p>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label className="text-[10px] text-neutral-400">출근 시각</label>
-                                                <input
-                                                    type="time"
-                                                    value={commuteDepart}
-                                                    onChange={e => setCommuteDepart(e.target.value)}
-                                                    className="w-full text-sm bg-transparent text-neutral-800 focus:outline-none mt-0.5"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] text-neutral-400">퇴근 시각</label>
-                                                <input
-                                                    type="time"
-                                                    value={commuteArrive}
-                                                    onChange={e => setCommuteArrive(e.target.value)}
-                                                    className="w-full text-sm bg-transparent text-neutral-800 focus:outline-none mt-0.5"
-                                                />
-                                            </div>
-                                        </div>
-                                        {commuteDepart && commuteArrive && (() => {
-                                            const [dh, dm] = commuteDepart.split(":").map(Number);
-                                            const [ah, am] = commuteArrive.split(":").map(Number);
-                                            const mins = (ah * 60 + am) - (dh * 60 + dm);
-                                            return mins > 0 ? (
-                                                <p className="text-xs text-neutral-500 text-center">소요 {mins}분</p>
-                                            ) : null;
-                                        })()}
-                                        <div className="flex gap-2 pt-1">
-                                            <button
-                                                disabled={commuteSaving || (!commuteDepart && !commuteArrive)}
-                                                onClick={async () => {
-                                                    setCommuteSaving(true);
-                                                    try {
-                                                        const saves: Promise<Response>[] = [];
-                                                        // 출근: 기존 row가 있으면 PATCH, 없으면 POST (중복 INSERT 방지)
-                                                        if (commuteDepart) {
-                                                            const url = departId ? `/api/planners/routines?id=${departId}` : "/api/planners/routines";
-                                                            saves.push(fetch(url, {
-                                                                method: departId ? "PATCH" : "POST",
-                                                                headers: { "Content-Type": "application/json" },
-                                                                body: JSON.stringify({ date, activity: "출근", category: "transport", start_time: commuteDepart, end_time: null, note: null }),
-                                                            }));
-                                                        }
-                                                        if (commuteArrive) {
-                                                            const url = arriveId ? `/api/planners/routines?id=${arriveId}` : "/api/planners/routines";
-                                                            saves.push(fetch(url, {
-                                                                method: arriveId ? "PATCH" : "POST",
-                                                                headers: { "Content-Type": "application/json" },
-                                                                body: JSON.stringify({ date, activity: "퇴근", category: "transport", start_time: commuteArrive, end_time: null, note: null }),
-                                                            }));
-                                                        }
-                                                        const results = await Promise.all(saves);
-                                                        // 새로 INSERT 된 항목은 id를 캐시 (다음 저장 시 PATCH 되도록)
-                                                        let idx = 0;
-                                                        if (commuteDepart && !departId) {
-                                                            const j = await results[idx++].json().catch(() => null);
-                                                            if (j?.routine?.id) setDepartId(j.routine.id);
-                                                        } else if (commuteDepart) idx++;
-                                                        if (commuteArrive && !arriveId) {
-                                                            const j = await results[idx]?.json().catch(() => null);
-                                                            if (j?.routine?.id) setArriveId(j.routine.id);
-                                                        }
-                                                        const [dh, dm] = (commuteDepart || "0:0").split(":").map(Number);
-                                                        const [ah, am] = (commuteArrive || "0:0").split(":").map(Number);
-                                                        const mins = commuteDepart && commuteArrive ? (ah * 60 + am) - (dh * 60 + dm) : null;
-                                                        setCommute({ depart: commuteDepart || null, arrive: commuteArrive || null, minutes: mins && mins > 0 ? mins : null });
-                                                        setCommuteOpen(false);
-                                                    } finally {
-                                                        setCommuteSaving(false);
-                                                    }
-                                                }}
-                                                className="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[#0F766E] text-white disabled:opacity-40 hover:bg-[#0d5e56] transition-colors"
-                                            >
-                                                {commuteSaving ? "저장 중…" : "저장"}
-                                            </button>
-                                            <button
-                                                onClick={() => setCommuteOpen(false)}
-                                                className="px-3 py-1.5 rounded-lg text-xs text-neutral-500 hover:bg-neutral-100 transition-colors"
-                                            >
-                                                닫기
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
                             <span>{weekday}</span>
                             {lunar && (
                                 <span className="text-neutral-300">
@@ -1496,11 +1385,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     'text-emerald-500'
                                 }`}>
                                     · {HOLIDAYS[date].label}
-                                </span>
-                            )}
-                            {!saving && lastSavedAt && (
-                                <span className="text-xs text-neutral-300">
-                                    · {lastSavedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨
                                 </span>
                             )}
                         </div>
@@ -1528,9 +1412,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
-                <div className="grid md:grid-cols-3 gap-6 items-start">
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-6 md:items-start">
+                  {/* 좌측 컬럼 (tasks + notes) — 모바일은 contents로 풀어 order 적용, 데스크톱은 flex */}
+                  <div className="contents md:flex md:flex-col md:gap-6 md:col-span-2 md:col-start-1 md:row-start-1 min-w-0">
                     {/* 1. 일정 & 업무 */}
-                    <div className="order-1 md:order-none md:col-span-2 space-y-4 min-w-0">
+                    <div className="order-1 md:order-none space-y-4 min-w-0">
                         <ExternalEventsBanner date={date} />
 
                         {/* ── 통합 타임테이블 (일정 + 업무) ── */}
@@ -1770,8 +1656,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
-                    {/* 4. 노트 — mobile: order-3 (향후 일정 다음), desktop: col-span-2 row-2 */}
-                    <div className="order-3 md:order-none md:col-span-2 space-y-4 min-w-0">
+                    {/* 4. 노트 — mobile: order-3 (향후 일정 다음), desktop: 좌측 컬럼 두번째 */}
+                    <div className="order-3 md:order-none space-y-4 min-w-0">
                         {/* 노트 추가 — 일정&업무 바로 아래 (같은 col-span-2 컨테이너) */}
 
                         {/* 노트 추가 버튼 */}
@@ -1917,7 +1803,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     </div>
 
                     {/* ── 우측 컬럼 (col 3) — 모바일은 contents로 펼쳐 order 유지, 데스크톱은 flex col + row-span-2로 노트행도 커버 ── */}
-                    <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1 md:row-span-2">
+                  </div>{/* /좌측 컬럼 */}
+
+                  {/* 우측 컬럼 — 모바일은 contents로 풀어 order 적용, 데스크톱은 flex */}
+                  <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1">
 
                     {/* 달력 — tablet+ only */}
                     <div className="hidden md:block">

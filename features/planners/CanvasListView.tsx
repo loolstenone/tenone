@@ -94,7 +94,7 @@ export function CanvasListView() {
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <Pencil className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">캔버스</h1>
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">캔버스</h1>
                 </div>
                 <PlannersUtilityLinks />
             </div>

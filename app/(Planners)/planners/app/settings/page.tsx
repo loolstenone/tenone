@@ -172,7 +172,15 @@ export default function SettingsPage() {
                                 </p>
                             </div>
                             <button
-                                onClick={async () => { const next = !timeTracking; setTimeTracking(next); await save({ time_tracking: next }); router.refresh(); }}
+                                onClick={async () => {
+                                    const next = !timeTracking;
+                                    setTimeTracking(next);
+                                    // 즉시 클라이언트 동기화 — AppTopNav가 listen
+                                    localStorage.setItem("pp-time-tracking", next ? "1" : "0");
+                                    window.dispatchEvent(new CustomEvent("pp-time-tracking-change", { detail: { enabled: next } }));
+                                    await save({ time_tracking: next });
+                                    router.refresh();
+                                }}
                                 className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#0F766E]" : "bg-neutral-200"}`}
                             >
                                 <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-1 ${timeTracking ? "translate-x-4" : "translate-x-0"}`} />

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Loader2, MapPin, X, Calendar } from "lucide-react";
+import { Plus, Trash2, Loader2, MapPin, X, Calendar, Clock, Sunrise, Sunset } from "lucide-react";
 import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
+import { PageShell, PageHeader } from "./PageShell";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -124,6 +125,25 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     }
 
     useEffect(() => { load(date); }, [date]);
+
+    // 일출/일몰 — 위치 권한 있으면 Open-Meteo에서 가져옴
+    const [solar, setSolar] = useState<{ sunrise: string | null; sunset: string | null }>({ sunrise: null, sunset: null });
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+                const { latitude: lat, longitude: lon } = pos.coords;
+                const res = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&start_date=${date}&end_date=${date}`
+                );
+                if (!res.ok) return;
+                const d = await res.json();
+                const sunrise = d.daily?.sunrise?.[0]?.slice(11, 16) ?? null;
+                const sunset  = d.daily?.sunset?.[0]?.slice(11, 16)  ?? null;
+                setSolar({ sunrise, sunset });
+            } catch { /* silent */ }
+        }, () => { /* 권한 거부 — silent */ }, { timeout: 8000, maximumAge: 60 * 60 * 1000 });
+    }, [date]);
 
     // 오늘이면 현재 시각 슬롯으로 스크롤
     useEffect(() => {
@@ -298,62 +318,133 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     const totalTracked = Object.values(catTotals).reduce((a, b) => a + b, 0);
     const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
 
+    // 추가 통계 — 시간대별 분포 / 활동 top / 종료 미입력 카운트
+    const PERIODS = [
+        { key: "morning",   label: "오전",   range: [6 * 60, 12 * 60] as [number, number] },
+        { key: "afternoon", label: "오후",   range: [12 * 60, 18 * 60] as [number, number] },
+        { key: "evening",   label: "저녁",   range: [18 * 60, 22 * 60] as [number, number] },
+        { key: "night",     label: "심야",   range: [22 * 60, 24 * 60 + 6 * 60] as [number, number] },
+    ];
+    const periodTotals: Record<string, number> = {};
+    for (const r of timedRoutines) {
+        const s = parseMinutes(r.start_time);
+        const e = parseMinutes(r.end_time);
+        if (s === null || e === null || e <= s) continue;
+        for (const p of PERIODS) {
+            const overlap = Math.max(0, Math.min(e, p.range[1]) - Math.max(s, p.range[0]));
+            if (overlap > 0) periodTotals[p.key] = (periodTotals[p.key] ?? 0) + overlap;
+        }
+    }
+
+    // 활동 빈도 Top 5
+    const activityCount: Record<string, number> = {};
+    for (const r of routines) activityCount[r.activity] = (activityCount[r.activity] ?? 0) + 1;
+    const activityTop = Object.entries(activityCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    const incompleteCount = routines.filter(r => r.start_time && !r.end_time).length;
+    const totalEntries = routines.length;
+    const completionPct = totalEntries > 0 ? Math.round(((totalEntries - incompleteCount) / totalEntries) * 100) : 0;
+
     return (
-        <div className="flex flex-col min-h-screen bg-white planners-dark:bg-[#111]">
-
-            {/* ── 헤더 ─────────────────────────────────── */}
-            <div className="sticky top-0 z-20 bg-white/95 planners-dark:bg-[#111]/95 backdrop-blur border-b border-neutral-100 planners-dark:border-[#2A2A2A] px-4 py-3">
-                <div className="flex items-center gap-2 max-w-lg mx-auto">
-                    <button
-                        onClick={() => setDate(d => shiftDate(d, -1))}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
-                        aria-label="이전 날"
-                    >
-                        <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-base font-semibold text-neutral-900 planners-dark:text-neutral-100 truncate">
-                            {fmtHeader(date)}
-                        </h1>
-                        {date === today && (
-                            <span className="text-[10px] text-[#0F766E] font-medium uppercase tracking-wide">Today</span>
+        <PageShell>
+            <PageHeader
+                icon={<Clock className="h-6 w-6" />}
+                title={fmtHeader(date)}
+                state={date === today ? "today" : null}
+                onPrev={() => setDate(d => shiftDate(d, -1))}
+                onNext={() => setDate(d => shiftDate(d, 1))}
+                right={
+                    <>
+                        {date !== today && (
+                            <button
+                                onClick={() => setDate(today)}
+                                className="p-1.5 rounded-lg text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
+                                title="오늘로 이동"
+                                aria-label="오늘로 이동"
+                            >
+                                <Calendar className="h-4 w-4" />
+                            </button>
                         )}
-                    </div>
-                    <button
-                        onClick={() => setDate(d => shiftDate(d, 1))}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
-                        aria-label="다음 날"
-                    >
-                        <ChevronRight className="h-5 w-5" />
-                    </button>
-                    {date !== today && (
                         <button
-                            onClick={() => setDate(today)}
-                            className="px-2 py-1.5 rounded-lg text-[11px] font-medium text-neutral-500 hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
-                            title="오늘로 이동"
+                            onClick={() => openSlot(nowSlot ?? "09:00")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
                         >
-                            <Calendar className="h-4 w-4" />
+                            <Plus className="h-4 w-4" />
+                            시간 추가
                         </button>
-                    )}
-                    <button
-                        onClick={() => openSlot(nowSlot ?? "09:00")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
-                    >
-                        <Plus className="h-4 w-4" />
-                        시간 추가
-                    </button>
+                    </>
+                }
+            />
+
+            {/* 오류 토스트 — 3열 위 공통 */}
+            {errorMsg && (
+                <div className="mt-3 max-w-lg mx-auto bg-rose-50 planners-dark:bg-rose-900/20 border border-rose-200 planners-dark:border-rose-800 rounded-lg px-3 py-2 text-xs text-rose-700 planners-dark:text-rose-300 flex items-center gap-2">
+                    <span className="flex-1">{errorMsg}</span>
+                    <button onClick={() => setErrorMsg(null)} className="p-0.5 hover:bg-rose-100 planners-dark:hover:bg-rose-900/30 rounded"><X className="h-3 w-3" /></button>
                 </div>
-            </div>
+            )}
 
-            <div className="flex-1 px-4 pb-24 max-w-lg w-full mx-auto">
+            {/* 3열 레이아웃 — 좌(통계) · 중(타임라인) · 우(분석) */}
+            <div className="mt-4 lg:grid lg:grid-cols-[220px_minmax(0,1fr)_220px] lg:gap-6 lg:items-start">
 
-                {/* 오류 토스트 */}
-                {errorMsg && (
-                    <div className="mt-3 bg-rose-50 planners-dark:bg-rose-900/20 border border-rose-200 planners-dark:border-rose-800 rounded-lg px-3 py-2 text-xs text-rose-700 planners-dark:text-rose-300 flex items-center gap-2">
-                        <span className="flex-1">{errorMsg}</span>
-                        <button onClick={() => setErrorMsg(null)} className="p-0.5 hover:bg-rose-100 planners-dark:hover:bg-rose-900/30 rounded"><X className="h-3 w-3" /></button>
-                    </div>
-                )}
+                {/* ── 좌 사이드 — 카테고리·기록 요약 ─────────────── */}
+                <aside className="hidden lg:flex flex-col gap-4 sticky top-4">
+                    <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">카테고리</p>
+                        {catSorted.length > 0 ? (
+                            <div className="space-y-1.5">
+                                {catSorted.map(([key, mins]) => {
+                                    const pct = totalTracked > 0 ? (mins / totalTracked) * 100 : 0;
+                                    return (
+                                        <div key={key} className="text-xs">
+                                            <div className="flex items-center justify-between gap-1 mb-0.5">
+                                                <span className="flex items-center gap-1.5 text-neutral-600 planners-dark:text-neutral-300 truncate">
+                                                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
+                                                    {catMeta(key).label}
+                                                </span>
+                                                <span className="text-[10px] text-neutral-400 tabular-nums shrink-0">{fmtMinutes(mins)}</span>
+                                            </div>
+                                            <div className="h-1 bg-neutral-100 planners-dark:bg-[#252525] rounded-full overflow-hidden">
+                                                <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: catMeta(key).hex }} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                <div className="flex items-center justify-between pt-2 mt-2 border-t border-neutral-100 planners-dark:border-[#2A2A2A] text-[11px] text-neutral-500">
+                                    <span>총 활성</span>
+                                    <span className="tabular-nums font-medium">{fmtMinutes(totalTracked)}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
+                                종료 시각을 입력하면 카테고리별 시간이 합산됩니다.
+                            </p>
+                        )}
+                    </section>
+
+                    <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">기록 요약</p>
+                        <div className="space-y-2 text-xs text-neutral-600 planners-dark:text-neutral-300">
+                            <div className="flex items-center justify-between">
+                                <span>총 항목</span>
+                                <span className="tabular-nums font-medium">{totalEntries}건</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span>완료 입력</span>
+                                <span className="tabular-nums font-medium">{completionPct}%</span>
+                            </div>
+                            {incompleteCount > 0 && (
+                                <div className="flex items-center justify-between text-amber-600 planners-dark:text-amber-400">
+                                    <span>종료 미입력</span>
+                                    <span className="tabular-nums font-medium">{incompleteCount}건</span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                </aside>
+
+                {/* ── 중앙 — 24h 바 + 세로 타임라인 ─────────────── */}
+                <div className="max-w-lg mx-auto lg:mx-0 lg:max-w-none w-full">
 
                 {/* ── 24h 미니 바 ──────────────────────── */}
                 <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4 mt-4">
@@ -393,8 +484,9 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                             ))}
                         </div>
                     </div>
+                    {/* 모바일에서만 — 데스크톱은 좌측 사이드 패널에서 표시 */}
                     {catSorted.length > 0 ? (
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2.5 items-center">
+                        <div className="lg:hidden flex flex-wrap gap-x-3 gap-y-1 mt-2.5 items-center">
                             {catSorted.map(([key, mins]) => (
                                 <span key={key} className="flex items-center gap-1 text-[10px] text-neutral-400">
                                     <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
@@ -404,7 +496,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                             <span className="text-[10px] text-neutral-300 ml-auto">총 {fmtMinutes(totalTracked)}</span>
                         </div>
                     ) : timedRoutines.length > 0 && (
-                        <p className="text-[10px] text-neutral-300 mt-2.5">
+                        <p className="lg:hidden text-[10px] text-neutral-300 mt-2.5">
                             종료 시각을 입력하면 시간이 합산됩니다
                         </p>
                     )}
@@ -569,8 +661,96 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                         )}
                     </div>
                 )}
-            </div>
-        </div>
+                </div>{/* /center column */}
+
+                {/* ── 우 사이드 — 시간대 분포 + 활동 Top ─────────── */}
+                <aside className="hidden lg:flex flex-col gap-4 sticky top-4">
+                    <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">시간대 분포</p>
+                        {Object.keys(periodTotals).length > 0 ? (
+                            <div className="space-y-1.5">
+                                {PERIODS.map(p => {
+                                    const mins = periodTotals[p.key] ?? 0;
+                                    const pct = totalTracked > 0 ? (mins / totalTracked) * 100 : 0;
+                                    if (mins === 0) return null;
+                                    return (
+                                        <div key={p.key} className="text-xs">
+                                            <div className="flex items-center justify-between gap-1 mb-0.5">
+                                                <span className="text-neutral-600 planners-dark:text-neutral-300">{p.label}</span>
+                                                <span className="text-[10px] text-neutral-400 tabular-nums shrink-0">{fmtMinutes(mins)}</span>
+                                            </div>
+                                            <div className="h-1 bg-neutral-100 planners-dark:bg-[#252525] rounded-full overflow-hidden">
+                                                <div className="h-full rounded-full bg-[#0F766E]" style={{ width: `${pct}%` }} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
+                                기록을 추가하면 오전/오후/저녁/심야 분포가 표시됩니다.
+                            </p>
+                        )}
+                    </section>
+
+                    <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">활동 Top</p>
+                        {activityTop.length > 0 ? (
+                            <ol className="space-y-1.5">
+                                {activityTop.map(([name, count], i) => (
+                                    <li key={name} className="flex items-center gap-2 text-xs">
+                                        <span className="text-[10px] text-neutral-300 w-3 shrink-0 tabular-nums">{i + 1}</span>
+                                        <span className="text-neutral-700 planners-dark:text-neutral-200 flex-1 truncate">{name}</span>
+                                        {count > 1 && <span className="text-[10px] text-neutral-400 shrink-0">×{count}</span>}
+                                    </li>
+                                ))}
+                            </ol>
+                        ) : (
+                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
+                                오늘의 활동이 없습니다.
+                            </p>
+                        )}
+                    </section>
+
+                    {date === today && (
+                        <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">현재 시각</p>
+                            <p className="font-mono text-2xl text-neutral-800 planners-dark:text-neutral-100 tabular-nums">
+                                {nowSlot ?? "—"}
+                            </p>
+                            <p className="text-[10px] text-neutral-400 mt-0.5">KST · 30분 단위</p>
+                        </section>
+                    )}
+
+                    {(solar.sunrise || solar.sunset) && (
+                        <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4">
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">일출 · 일몰</p>
+                            <div className="space-y-1.5 text-xs">
+                                {solar.sunrise && (
+                                    <div className="flex items-center justify-between text-neutral-600 planners-dark:text-neutral-300">
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <Sunrise className="h-3.5 w-3.5 text-amber-400" />
+                                            일출
+                                        </span>
+                                        <span className="font-mono tabular-nums">{solar.sunrise}</span>
+                                    </div>
+                                )}
+                                {solar.sunset && (
+                                    <div className="flex items-center justify-between text-neutral-600 planners-dark:text-neutral-300">
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <Sunset className="h-3.5 w-3.5 text-orange-400" />
+                                            일몰
+                                        </span>
+                                        <span className="font-mono tabular-nums">{solar.sunset}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    )}
+                </aside>
+
+            </div>{/* /3-col grid */}
+        </PageShell>
     );
 }
 

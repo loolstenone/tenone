@@ -68,20 +68,20 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
 
     if (loading) {
         return (
-            <div className="max-w-4xl mx-auto px-4 md:px-10 py-12">
+            <div className="max-w-6xl mx-auto px-4 md:px-10 py-12">
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
             {/* Header */}
             <div className="mb-2 flex items-start justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
                         <Compass className="h-6 w-6 text-[#0F766E]" />
-                        <h1 className="font-serif text-3xl text-neutral-900">퍼스널 아이덴티티</h1>
+                        <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">퍼스널 아이덴티티</h1>
                         {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     </div>
                     <p className="text-sm text-neutral-500 mt-2">
