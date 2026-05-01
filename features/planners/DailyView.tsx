@@ -26,6 +26,7 @@ import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CanvasStudio } from "./CanvasStudio";
+import { VoiceRecordButton } from "./VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
@@ -1715,6 +1716,25 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <ImageIcon className="h-3.5 w-3.5" />
                                 캔버스
                             </button>
+                            {/* 음성 녹음 → 텍스트 변환 후 새 노트 */}
+                            <VoiceRecordButton
+                                onTranscribed={(text) => {
+                                    const idx = notesList.filter(n => n.type === 'cornell' || !n.type).length + 1;
+                                    const newNote: NoteItem = {
+                                        id: `n_${Date.now()}`,
+                                        type: 'cornell',
+                                        title: `음성 메모 ${idx}`,
+                                        cue: "🎤 음성",
+                                        content: text,
+                                        summary: "",
+                                        rows: [{ id: 'r1', cue: '🎤', note: text }],
+                                        handwriting: { strokes: [], width: 800, height: 480 },
+                                    };
+                                    const next = [...notesList, newNote];
+                                    setNotesList(next);
+                                    save({ notes: serializeNotes(next) });
+                                }}
+                            />
                             {/* 연구원 전용 — 연구노트 */}
                             {userRole === "researcher" && (
                                 <button
