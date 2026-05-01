@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown, Cloud, Sun, Clock, Navigation, Mic, MicOff } from "lucide-react";
+import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown, Cloud, Sun, Clock, Navigation, Mic, MicOff, ShieldAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GroupMarker } from "@/features/planners/SettingsLayout";
+import { PermissionGuideModal } from "@/features/planners/PermissionGuideModal";
 
 // ── 타입 ──────────────────────────────────────────────────────────────────────
 
@@ -47,10 +48,15 @@ const LOCATION_SERVICES = [
     {
         icon: MapPin,
         name: "장소 태깅",
-        desc: "시간 트래킹 입력 시 현재 위치명 자동 채움 (역지오코딩)",
-        stats: ["역지오코딩으로 도로/도시명 자동", "장소별 통계는 향후 추가 예정"],
+        desc: "시간 트래킹 입력 시 「장소」 버튼 → 현재 위치명·도로 자동 채움",
+        stats: [
+            "활동 입력란: 도로명+번지 또는 동/구 자동",
+            "메모 입력란: 도시+도로 보강",
+            "권한 거부 시 단계별 복구 가이드 모달 자동 안내",
+            "장소별 통계 누적은 향후 단계",
+        ],
         source: "OpenStreetMap (Nominatim)",
-        status: "soon" as const,
+        status: "active" as const,
     },
 ] satisfies { icon: LucideIcon; name: string; desc: string; stats: string[]; source: string; status: "active" | "soon" | "planned" }[];
 
@@ -248,6 +254,9 @@ export function SettingsIntegrations({ showToast }: Props) {
     const [micPermission, setMicPermission] = useState<PermissionState | null>(null);
     const [micLoading, setMicLoading]       = useState(false);
     const [micSupported, setMicSupported]   = useState<boolean | null>(null);
+
+    // 권한 복구 가이드 모달 — denied 상태에서 사용자가 다시 켜도록 안내
+    const [permGuide, setPermGuide] = useState<null | "geolocation" | "microphone">(null);
 
     // 모달 상태
     const [todoistModal, setTodoistModal] = useState(false);
@@ -680,8 +689,8 @@ export function SettingsIntegrations({ showToast }: Props) {
                     <div>
                         <p className="text-sm text-neutral-900">위치 접근</p>
                         {locationPermission === "denied" ? (
-                            <p className="text-xs text-red-500 mt-0.5">
-                                브라우저 설정 → 위치 권한을 허용해 주세요
+                            <p className="text-xs text-rose-500 mt-0.5">
+                                브라우저에서 위치 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : locationPermission === "granted" ? (
                             <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
@@ -693,9 +702,13 @@ export function SettingsIntegrations({ showToast }: Props) {
                     </div>
 
                     {locationPermission === "denied" ? (
-                        <span className="text-[10px] px-2 py-1 bg-red-50 text-red-500 rounded-lg">
-                            권한 거부됨
-                        </span>
+                        <button
+                            onClick={() => setPermGuide("geolocation")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs hover:bg-rose-600 transition-colors"
+                        >
+                            <ShieldAlert className="h-3 w-3" />
+                            권한 다시 켜기
+                        </button>
                     ) : locationPermission === "granted" ? (
                         <button
                             onClick={() => toggleLocation(!locationEnabled)}
@@ -762,8 +775,8 @@ export function SettingsIntegrations({ showToast }: Props) {
                                 <span className="text-neutral-400">Chrome · Edge · Safari 권장 (Firefox는 미지원)</span>
                             </p>
                         ) : micPermission === "denied" ? (
-                            <p className="text-xs text-red-500 mt-0.5">
-                                브라우저 설정 → 마이크 권한을 허용해 주세요
+                            <p className="text-xs text-rose-500 mt-0.5">
+                                브라우저에서 마이크 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : micPermission === "granted" ? (
                             <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
@@ -780,9 +793,13 @@ export function SettingsIntegrations({ showToast }: Props) {
                             지원 안 됨
                         </span>
                     ) : micPermission === "denied" ? (
-                        <span className="shrink-0 text-[10px] px-2 py-1 bg-red-50 text-red-500 rounded-lg">
-                            권한 거부됨
-                        </span>
+                        <button
+                            onClick={() => setPermGuide("microphone")}
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs hover:bg-rose-600 transition-colors"
+                        >
+                            <ShieldAlert className="h-3 w-3" />
+                            권한 다시 켜기
+                        </button>
                     ) : micPermission === "granted" ? (
                         <span className="shrink-0 text-[10px] px-2 py-1 bg-[#0F766E]/10 text-[#0F766E] rounded-lg flex items-center gap-1">
                             <Check className="h-3 w-3" />
@@ -982,6 +999,26 @@ export function SettingsIntegrations({ showToast }: Props) {
                     </div>
                 </div>
             )}
+
+            {/* 권한 복구 가이드 — denied 상태에서 사용자가 직접 허용하도록 단계별 안내 */}
+            <PermissionGuideModal
+                open={permGuide !== null}
+                onClose={() => setPermGuide(null)}
+                permission={permGuide ?? "geolocation"}
+                onRetry={async () => {
+                    if (permGuide === "geolocation") await requestLocation();
+                    else if (permGuide === "microphone") await requestMicrophone();
+                }}
+                onGranted={() => {
+                    if (permGuide === "geolocation") {
+                        setLocationPermission("granted");
+                        showToast("위치 권한이 허용되었습니다");
+                    } else if (permGuide === "microphone") {
+                        setMicPermission("granted");
+                        showToast("마이크 권한이 허용되었습니다");
+                    }
+                }}
+            />
         </>
     );
 }

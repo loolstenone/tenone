@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Plus, Trash2, Loader2, MapPin, X, Calendar, Clock, Sunrise, Sunset } from "lucide-react";
 import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
 import { PageShell, PageHeader } from "./PageShell";
+import { PermissionGuideModal } from "./PermissionGuideModal";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -101,6 +102,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     const [saving, setSaving] = useState(false);
     const [locLoading, setLocLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [permGuideOpen, setPermGuideOpen] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const nowRef = useRef<HTMLDivElement>(null);
@@ -185,9 +187,14 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
             }
         } catch (e: unknown) {
             const err = e as GeolocationPositionError | Error;
-            if ("code" in err && err.code === 1) setErrorMsg("위치 권한이 거부되었습니다");
-            else if ("code" in err && err.code === 3) setErrorMsg("위치 조회 시간 초과");
-            else setErrorMsg("위치 조회 오류");
+            if ("code" in err && err.code === 1) {
+                // 권한 거부 — 정적 메시지 대신 복구 가이드 모달 띄움
+                setPermGuideOpen(true);
+            } else if ("code" in err && err.code === 3) {
+                setErrorMsg("위치 조회 시간 초과");
+            } else {
+                setErrorMsg("위치 조회 오류");
+            }
         } finally {
             setLocLoading(false);
         }
@@ -776,6 +783,15 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                 </aside>
 
             </div>{/* /3-col grid */}
+
+            {/* 위치 권한 복구 가이드 — 거부된 권한을 사용자가 다시 켤 수 있도록 단계 안내 */}
+            <PermissionGuideModal
+                open={permGuideOpen}
+                onClose={() => setPermGuideOpen(false)}
+                permission="geolocation"
+                onRetry={async () => { await autoLocation(); }}
+                onGranted={() => { void autoLocation(); }}
+            />
         </PageShell>
     );
 }
