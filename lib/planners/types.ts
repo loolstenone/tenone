@@ -49,6 +49,7 @@ export interface PlannerUser {
     ai_tone: AiTone;
     ai_context_scope: string[];
     onboarding_completed: boolean;
+    time_tracking: boolean;
     created_at: string;
     updated_at: string;
 }

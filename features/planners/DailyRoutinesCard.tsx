@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { ListChecks, Plus, Trash2, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { ROUTINE_CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
 
 type Routine = {
     id: string;
@@ -12,24 +13,6 @@ type Routine = {
     category: string;
     note: string | null;
 };
-
-const ROUTINE_CATEGORIES: { key: string; label: string; color: string }[] = [
-    { key: "general",   label: "일반",   color: "bg-neutral-400" },
-    { key: "work",      label: "업무",   color: "bg-blue-500" },
-    { key: "exercise",  label: "운동",   color: "bg-green-500" },
-    { key: "meal",      label: "식사",   color: "bg-orange-400" },
-    { key: "study",     label: "학습",   color: "bg-indigo-500" },
-    { key: "leisure",   label: "여가",   color: "bg-violet-400" },
-    { key: "rest",      label: "휴식",   color: "bg-teal-400" },
-    { key: "social",    label: "모임",   color: "bg-amber-400" },
-    { key: "faith",     label: "신앙",   color: "bg-purple-500" },
-    { key: "health",    label: "건강",   color: "bg-rose-400" },
-    { key: "transport", label: "이동",   color: "bg-sky-400" },
-];
-
-function catMeta(key: string) {
-    return ROUTINE_CATEGORIES.find(c => c.key === key) ?? ROUTINE_CATEGORIES[0];
-}
 
 function fmtTime(t: string | null) {
     if (!t) return "";
@@ -154,7 +137,7 @@ export function DailyRoutinesCard({ date }: { date: string }) {
                                         className="group flex items-start gap-3 py-2 px-1 rounded-lg hover:bg-neutral-50 planners-dark:hover:bg-[#252525] transition-colors"
                                     >
                                         <div className="mt-1.5 shrink-0">
-                                            <div className={`h-2 w-2 rounded-full ${meta.color}`} />
+                                            <div className={`h-2 w-2 rounded-full ${meta.dot}`} />
                                         </div>
 
                                         <div className="flex-1 min-w-0">
@@ -181,7 +164,7 @@ export function DailyRoutinesCard({ date }: { date: string }) {
 
                                         <button
                                             onClick={() => deleteRoutine(r.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 rounded text-neutral-300 hover:text-rose-400 transition-all shrink-0"
+                                            className="md:opacity-0 md:group-hover:opacity-100 p-1.5 rounded text-neutral-300 hover:text-rose-400 transition-all shrink-0"
                                             title="삭제"
                                         >
                                             <Trash2 className="h-3.5 w-3.5" />

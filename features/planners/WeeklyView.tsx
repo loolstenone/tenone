@@ -13,6 +13,7 @@ import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
 import { useSwipeNav } from "./useSwipeNav";
 import { KIND_COLORS, KIND_LABELS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
+import { CATEGORY_SOFT_COLORS as CATEGORY_COLORS } from "@/lib/planners/categories";
 import { StudentTimetable } from "./StudentTimetable";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
@@ -43,19 +44,6 @@ interface Routine {
     category: string;
 }
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-    work:      { bg: "bg-teal-50",    text: "text-teal-700",    border: "border-l-teal-500" },
-    exercise:  { bg: "bg-green-50",   text: "text-green-700",   border: "border-l-green-500" },
-    meal:      { bg: "bg-orange-50",  text: "text-orange-700",  border: "border-l-orange-500" },
-    study:     { bg: "bg-blue-50",    text: "text-blue-700",    border: "border-l-blue-500" },
-    leisure:   { bg: "bg-purple-50",  text: "text-purple-700",  border: "border-l-purple-500" },
-    rest:      { bg: "bg-pink-50",    text: "text-pink-700",    border: "border-l-pink-500" },
-    social:    { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-l-amber-500" },
-    faith:     { bg: "bg-indigo-50",  text: "text-indigo-700",  border: "border-l-indigo-500" },
-    health:    { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-l-emerald-500" },
-    transport: { bg: "bg-yellow-50",  text: "text-yellow-700",  border: "border-l-yellow-500" },
-    general:   { bg: "bg-neutral-50", text: "text-neutral-700", border: "border-l-neutral-400" },
-};
 const SCHEDULE_START = 6 * 60;
 const SLOT_HEIGHT = 56;
 const HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
@@ -533,8 +521,22 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                         </div>
                                                         {/* 시간 그리드 */}
                                                         <div
-                                                            className={`relative cursor-pointer ${isToday ? "bg-[#0F766E]/[0.015]" : ""}`}
+                                                            className={`group/grid relative cursor-pointer transition-colors hover:bg-[#0F766E]/[0.025] ${isToday ? "bg-[#0F766E]/[0.015]" : ""}`}
                                                             style={{ height: HOURS.length * SLOT_HEIGHT }}
+                                                            title="빈 시간대를 클릭해 일정 추가 (30분 단위)"
+                                                            onMouseMove={(e) => {
+                                                                if ((e.target as HTMLElement).closest("[data-cal-entry]")) {
+                                                                    e.currentTarget.style.setProperty("--hover-show", "0");
+                                                                    return;
+                                                                }
+                                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                                const offsetY = e.clientY - rect.top;
+                                                                const slotIdx = Math.round(offsetY / (SLOT_HEIGHT / 2));
+                                                                const top = Math.max(0, Math.min(slotIdx * (SLOT_HEIGHT / 2), HOURS.length * SLOT_HEIGHT));
+                                                                e.currentTarget.style.setProperty("--hover-top", `${top}px`);
+                                                                e.currentTarget.style.setProperty("--hover-show", "1");
+                                                            }}
+                                                            onMouseLeave={(e) => e.currentTarget.style.setProperty("--hover-show", "0")}
                                                             onClick={(e) => {
                                                                 // 이미 배치된 이벤트 클릭 시 무시
                                                                 if ((e.target as HTMLElement).closest("[data-cal-entry]")) return;
@@ -560,6 +562,19 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                                     <div className="absolute w-full border-t border-neutral-100/40 planners-dark:border-white/[0.025]" style={{ top: (h - 6) * SLOT_HEIGHT + SLOT_HEIGHT / 2 }} />
                                                                 </div>
                                                             ))}
+                                                            {/* 호버 시 30분 슬롯 미리보기 — 점선 + "+ 일정" 칩 */}
+                                                            <div
+                                                                className="hidden md:flex absolute left-0 right-0 pointer-events-none border-t border-dashed border-[#0F766E]/50 z-[5] items-start"
+                                                                style={{
+                                                                    top: "var(--hover-top, 0px)",
+                                                                    opacity: "var(--hover-show, 0)",
+                                                                    transition: "opacity 80ms",
+                                                                }}
+                                                            >
+                                                                <span className="text-[9px] font-medium text-white bg-[#0F766E] px-1 py-px rounded-sm leading-tight ml-0.5 -mt-px">
+                                                                    + 일정
+                                                                </span>
+                                                            </div>
                                                             {/* 루틴 이벤트 */}
                                                             {dayRoutines.filter(r => r.start_time).map(r => {
                                                                 const startMin = timeToMinutes(r.start_time!);

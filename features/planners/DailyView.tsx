@@ -637,15 +637,19 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         }
     }, []);
 
-    // 출퇴근 소요시간 — transport 카테고리 루틴에서 로드
+    // 출퇴근 소요시간 — transport 카테고리 + activity가 정확히 "출근"/"퇴근"인 루틴만
+    const [departId, setDepartId] = useState<string | null>(null);
+    const [arriveId, setArriveId] = useState<string | null>(null);
     useEffect(() => {
         (async () => {
             const res = await fetch(`/api/planners/routines?date=${date}`);
             if (!res.ok) return;
             const d = await res.json();
             const transport = (d.routines ?? []).filter((r: { category: string }) => r.category === "transport");
-            const departItem = transport.find((r: { activity: string }) => r.activity.includes("출근"));
-            const arriveItem = transport.find((r: { activity: string }) => r.activity.includes("퇴근"));
+            const departItem = transport.find((r: { activity: string }) => r.activity === "출근");
+            const arriveItem = transport.find((r: { activity: string }) => r.activity === "퇴근");
+            setDepartId(departItem?.id ?? null);
+            setArriveId(arriveItem?.id ?? null);
             const depart = departItem?.start_time?.slice(0, 5) ?? null;
             const arrive = arriveItem?.start_time?.slice(0, 5) ?? null;
             let minutes: number | null = null;
@@ -1426,22 +1430,35 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 onClick={async () => {
                                                     setCommuteSaving(true);
                                                     try {
-                                                        const saves: Promise<unknown>[] = [];
+                                                        const saves: Promise<Response>[] = [];
+                                                        // 출근: 기존 row가 있으면 PATCH, 없으면 POST (중복 INSERT 방지)
                                                         if (commuteDepart) {
-                                                            saves.push(fetch("/api/planners/routines", {
-                                                                method: "POST",
+                                                            const url = departId ? `/api/planners/routines?id=${departId}` : "/api/planners/routines";
+                                                            saves.push(fetch(url, {
+                                                                method: departId ? "PATCH" : "POST",
                                                                 headers: { "Content-Type": "application/json" },
                                                                 body: JSON.stringify({ date, activity: "출근", category: "transport", start_time: commuteDepart, end_time: null, note: null }),
                                                             }));
                                                         }
                                                         if (commuteArrive) {
-                                                            saves.push(fetch("/api/planners/routines", {
-                                                                method: "POST",
+                                                            const url = arriveId ? `/api/planners/routines?id=${arriveId}` : "/api/planners/routines";
+                                                            saves.push(fetch(url, {
+                                                                method: arriveId ? "PATCH" : "POST",
                                                                 headers: { "Content-Type": "application/json" },
                                                                 body: JSON.stringify({ date, activity: "퇴근", category: "transport", start_time: commuteArrive, end_time: null, note: null }),
                                                             }));
                                                         }
-                                                        await Promise.all(saves);
+                                                        const results = await Promise.all(saves);
+                                                        // 새로 INSERT 된 항목은 id를 캐시 (다음 저장 시 PATCH 되도록)
+                                                        let idx = 0;
+                                                        if (commuteDepart && !departId) {
+                                                            const j = await results[idx++].json().catch(() => null);
+                                                            if (j?.routine?.id) setDepartId(j.routine.id);
+                                                        } else if (commuteDepart) idx++;
+                                                        if (commuteArrive && !arriveId) {
+                                                            const j = await results[idx]?.json().catch(() => null);
+                                                            if (j?.routine?.id) setArriveId(j.routine.id);
+                                                        }
                                                         const [dh, dm] = (commuteDepart || "0:0").split(":").map(Number);
                                                         const [ah, am] = (commuteArrive || "0:0").split(":").map(Number);
                                                         const mins = commuteDepart && commuteArrive ? (ah * 60 + am) - (dh * 60 + dm) : null;

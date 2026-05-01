@@ -139,7 +139,7 @@ export function AppSidebar({
                     <span>도움말</span>
                 </Link>
                 <InstallButton
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-neutral-50 transition-colors"
                 >
                     <Download className="h-4 w-4" />
                     <span>앱 설치</span>

@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+
+// Settings 토글 변경 후 router.refresh() 시 stale 데이터 방지 — 항상 동적 렌더
+export const dynamic = "force-dynamic";
 import { AppTopNav } from "@/features/planners/AppTopNav";
 import { AppMonthBar } from "@/features/planners/AppMonthBar";
 import { PwaRegister } from "@/features/planners/PwaRegister";
@@ -85,6 +88,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     userName={member.name || undefined}
                     avatarUrl={member.avatar_url || undefined}
                     subscriptionStatus={plannerUser?.subscription_status ?? 'free'}
+                    showTimeTracking={plannerUser?.time_tracking ?? false}
                 />
                 <div className="flex flex-1 min-h-0">
                     <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">

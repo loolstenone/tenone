@@ -244,20 +244,21 @@ export function SettingsAi({
                                             프로젝트화
                                         </button>
                                     )}
-                                    <label className="cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={checked}
-                                            onChange={(e) => {
-                                                const next = e.target.checked
-                                                    ? [...trackingMetrics, m.key]
-                                                    : trackingMetrics.filter((k) => k !== m.key);
-                                                setTrackingMetrics(next);
-                                                save({ daily_tracking_metrics: next });
-                                            }}
-                                            className="w-4 h-4 accent-[#0F766E]"
-                                        />
-                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const next = checked
+                                                ? trackingMetrics.filter(k => k !== m.key)
+                                                : [...trackingMetrics, m.key];
+                                            setTrackingMetrics(next);
+                                            save({ daily_tracking_metrics: next });
+                                        }}
+                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                            checked ? "bg-[#0F766E] border-[#0F766E]" : "border-neutral-300 bg-white"
+                                        }`}
+                                    >
+                                        {checked && <Check className="h-3 w-3 text-white" />}
+                                    </button>
                                 </div>
                             </div>
                         );
@@ -280,29 +281,28 @@ export function SettingsAi({
                     ].map((c) => {
                         const checked = countryPref.includes(c.code);
                         return (
-                            <label
+                            <div
                                 key={c.code}
+                                onClick={() => {
+                                    const next = checked
+                                        ? countryPref.filter((k) => k !== c.code)
+                                        : [...countryPref, c.code];
+                                    const final = next.length === 0 ? ["KR"] : next;
+                                    setCountryPref(final);
+                                    save({ country_pref: final });
+                                }}
                                 className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer"
                             >
                                 <div>
                                     <p className="text-sm text-neutral-900">{c.label}</p>
                                     <p className="text-xs text-neutral-500 mt-0.5">{c.hint}</p>
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={(e) => {
-                                        const next = e.target.checked
-                                            ? [...countryPref, c.code]
-                                            : countryPref.filter((k) => k !== c.code);
-                                        // 최소 한 국가는 유지 (한국 default)
-                                        const final = next.length === 0 ? ["KR"] : next;
-                                        setCountryPref(final);
-                                        save({ country_pref: final });
-                                    }}
-                                    className="w-4 h-4 accent-[#0F766E]"
-                                />
-                            </label>
+                                <span className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${
+                                    checked ? "bg-[#0F766E] border-[#0F766E]" : "border-neutral-300 bg-white"
+                                }`}>
+                                    {checked && <Check className="h-3 w-3 text-white" />}
+                                </span>
+                            </div>
                         );
                     })}
                 </div>

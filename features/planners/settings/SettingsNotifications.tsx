@@ -103,12 +103,12 @@ export function SettingsNotifications({
                             setNotifyEmail(!notifyEmail);
                             save({ notify_email_briefing: !notifyEmail });
                         }}
-                        className={`w-11 h-6 rounded-full transition-colors relative ${
-                            notifyEmail ? "bg-[#0F766E]" : "bg-neutral-300"
+                        className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
+                            notifyEmail ? "bg-[#0F766E]" : "bg-neutral-200"
                         }`}
                     >
-                        <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
-                            notifyEmail ? "translate-x-[18px]" : "translate-x-0"
+                        <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                            notifyEmail ? "translate-x-4" : "translate-x-0"
                         }`} />
                     </button>
                 </div>
@@ -129,12 +129,12 @@ export function SettingsNotifications({
                         <button
                             onClick={() => notifyPush ? disablePush() : enablePush()}
                             disabled={pushLoading}
-                            className={`w-11 h-6 rounded-full transition-colors relative disabled:opacity-60 ${
-                                notifyPush ? "bg-[#0F766E]" : "bg-neutral-300"
+                            className={`shrink-0 relative w-10 h-6 rounded-full transition-colors disabled:opacity-60 ${
+                                notifyPush ? "bg-[#0F766E]" : "bg-neutral-200"
                             }`}
                         >
-                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
-                                notifyPush ? "translate-x-[18px]" : "translate-x-0"
+                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                                notifyPush ? "translate-x-4" : "translate-x-0"
                             }`} />
                         </button>
                     )}

@@ -90,6 +90,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [confirmGoalId, setConfirmGoalId] = useState<string | null>(null);
     const [confirmFocusIdx, setConfirmFocusIdx] = useState<number | null>(null);
+    const [goalsOpen, setGoalsOpen] = useState(true);
 
     // 활성 프로젝트 목록 — 집중 영역 빠른 추가용
     // 조건: status='active' AND 프로젝트 기간이 보고 있는 월과 겹침
@@ -335,7 +336,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     <div ref={yearRef} className="relative">
                                         <button
                                             onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
-                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
                                         >
                                             {year}년
                                         </button>
@@ -353,7 +354,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     <div ref={monthRef} className="relative">
                                         <button
                                             onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
-                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
                                         >
                                             {month}월
                                         </button>
@@ -369,7 +370,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                         )}
                                     </div>
                                     {isCurrentMonth && (
-                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                        <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
                                             이번 달
                                         </span>
                                     )}
@@ -409,50 +410,57 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     placeholder="예: 몰입의 달"
                                     className="w-full text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base"
                                 />
-                                <p className="text-[11px] text-neutral-400 mt-2 italic leading-relaxed">
-                                    이달 한 단어로 무엇을 도모(圖謀)할 것인가.
-                                </p>
                             </div>
                             {/* 우: 월간 목표 체크리스트 */}
                             <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">월간 목표</label>
-                                <div className="space-y-1.5">
-                                    {goals.length === 0 && (
-                                        <p className="text-xs text-neutral-400 py-1">이달에 이루고 싶은 것을 추가해 보세요.</p>
-                                    )}
-                                    {goals.map((g) => (
-                                        <div key={g.id} className="group flex items-center gap-3 py-1">
-                                            <button
-                                                onClick={() => toggleGoal(g.id)}
-                                                className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
-                                                    g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
-                                                }`}
-                                            >
-                                                {g.done && "V"}
-                                            </button>
-                                            <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
-                                                {g.text}
-                                            </span>
-                                            <button
-                                                onClick={() => setConfirmGoalId(g.id)}
-                                                className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
-                                            >
-                                                <Trash2 className="h-3 w-3" />
-                                            </button>
+                                <button
+                                    onClick={() => setGoalsOpen(v => !v)}
+                                    className="flex items-center gap-1.5 mb-2 group"
+                                >
+                                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">월간 목표</span>
+                                    <ChevronDown className={`h-3 w-3 text-neutral-400 transition-transform ${goalsOpen ? "" : "-rotate-90"}`} />
+                                </button>
+                                {goalsOpen && (
+                                    <>
+                                        <div className="space-y-1.5">
+                                            {goals.length === 0 && (
+                                                <p className="text-xs text-neutral-400 py-1">이달에 이루고 싶은 것을 추가해 보세요.</p>
+                                            )}
+                                            {goals.map((g) => (
+                                                <div key={g.id} className="group flex items-center gap-3 py-1">
+                                                    <button
+                                                        onClick={() => toggleGoal(g.id)}
+                                                        className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
+                                                            g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
+                                                        }`}
+                                                    >
+                                                        {g.done && "V"}
+                                                    </button>
+                                                    <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
+                                                        {g.text}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => setConfirmGoalId(g.id)}
+                                                        className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
-                                    <Plus className="h-3.5 w-3.5 text-neutral-400" />
-                                    <input
-                                        type="text"
-                                        value={newGoal}
-                                        onChange={(e) => setNewGoal(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
-                                        placeholder="목표 추가"
-                                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
-                                    />
-                                </div>
+                                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
+                                            <Plus className="h-3.5 w-3.5 text-neutral-400" />
+                                            <input
+                                                type="text"
+                                                value={newGoal}
+                                                onChange={(e) => setNewGoal(e.target.value)}
+                                                onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
+                                                placeholder="목표 추가"
+                                                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                                            />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </section>
@@ -584,7 +592,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                         <Link
                                             key={cell.date}
                                             href={`/planners/app/daily?date=${cell.date}`}
-                                            className={`aspect-square md:aspect-auto md:min-h-[96px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
+                                            className={`aspect-square md:aspect-auto md:min-h-[120px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
                                         >
@@ -607,28 +615,41 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                 </div>
                                                 {isToday && <span className="text-[9px] px-1 bg-[#0F766E] text-white rounded shrink-0 leading-4">오</span>}
                                             </div>
-                                            {/* Row 2: 절기/국가기념일 1개 */}
-                                            {cell.inMonth && holiday && (
-                                                <p className={`text-[10px] leading-tight truncate mt-0.5 ${
-                                                    holiday.type === "holiday" ? "text-red-500" :
-                                                    holiday.type === "memorial" ? "text-rose-400" :
-                                                    holiday.type === "commemoration" ? "text-amber-600" :
-                                                    "text-emerald-600"
-                                                }`}>
-                                                    {holiday.label}
-                                                </p>
-                                            )}
-                                            {/* Row 3: 개인기념일/미팅/업무 1개 */}
+                                            {/* Row 2+: 공휴일·절기·기념일·업무 통합 최대 3개 */}
                                             {cell.inMonth && (() => {
-                                                const dayEntries = entriesByDate[cell.date] ?? [];
-                                                const personal = dayEntries.find(e => e.kind === "anniversary")
-                                                    ?? dayEntries.find(e => e.kind === "meeting");
-                                                if (!personal) return null;
-                                                const c = KIND_COLORS[personal.kind];
+                                                type DisplayItem = {
+                                                    key: string;
+                                                    label: string;
+                                                    kind: "public_holiday" | "solar_term" | "anniversary" | "meeting" | "task";
+                                                };
+                                                const items: DisplayItem[] = [];
+                                                // 1순위: 사용자 calEntries
+                                                for (const e of (entriesByDate[cell.date] ?? [])) {
+                                                    items.push({ key: e.id, label: e.title, kind: e.kind as DisplayItem["kind"] });
+                                                }
+                                                // 2순위: 정적 공휴일/절기 (중복 제외)
+                                                if (holiday && !items.some(i => i.label === holiday.label)) {
+                                                    const kind: DisplayItem["kind"] = holiday.type === "solar_term" ? "solar_term" : "public_holiday";
+                                                    // 공휴일·추모일은 앞에, 절기·기념일은 뒤에
+                                                    if (holiday.type === "holiday" || holiday.type === "memorial") {
+                                                        items.unshift({ key: `hol-${cell.date}`, label: holiday.label, kind });
+                                                    } else {
+                                                        items.push({ key: `hol-${cell.date}`, label: holiday.label, kind });
+                                                    }
+                                                }
+                                                const visible = items.slice(0, 3);
+                                                if (visible.length === 0) return null;
                                                 return (
-                                                    <div className={`flex items-center gap-0.5 text-[10px] leading-tight mt-0.5 ${c.text}`}>
-                                                        <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
-                                                        <span className="truncate">{personal.title}</span>
+                                                    <div className="flex flex-col gap-[1px] mt-0.5">
+                                                        {visible.map(item => {
+                                                            const c = KIND_COLORS[item.kind];
+                                                            return (
+                                                                <div key={item.key} className={`flex items-center gap-0.5 text-[10px] leading-tight ${c.text}`}>
+                                                                    <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
+                                                                    <span className="truncate">{item.label}</span>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 );
                                             })()}

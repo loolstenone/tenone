@@ -32,11 +32,12 @@ export async function POST(req: Request) {
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
     const body = await req.json();
-    const { date, activity, start_time, end_time, category, note } = body;
+    const { date, activity, start_time, end_time, category, note, level } = body;
 
     if (!date || !activity) return NextResponse.json({ error: "date, activity required" }, { status: 400 });
 
     const cat = VALID_CATEGORIES.includes(category) ? category : "general";
+    const lvl = Number.isInteger(level) && level >= 1 && level <= 5 ? level : null;
 
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
             end_time: end_time || null,
             category: cat,
             note: note?.trim() || null,
+            level: lvl,
         })
         .select()
         .single();
@@ -85,7 +87,7 @@ export async function PATCH(req: Request) {
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
     const body = await req.json();
-    const allowed = ["activity", "start_time", "end_time", "category", "note"];
+    const allowed = ["activity", "start_time", "end_time", "category", "note", "level"];
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const key of allowed) {
         if (key in body) patch[key] = body[key];

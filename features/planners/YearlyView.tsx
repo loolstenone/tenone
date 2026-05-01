@@ -245,7 +245,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                     <div ref={yearPickerRef} className="relative">
                                         <button
                                             onClick={() => setShowYearPicker(v => !v)}
-                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
                                         >
                                             {year}년
                                         </button>

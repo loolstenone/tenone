@@ -25,6 +25,7 @@ const TABS: Tab[] = [
     { href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/time",        label: "시간",        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/identity",    label: "아이덴티티",  modes: ["weekly", "all_in_one"] },
     // ── All in One 전용
@@ -39,15 +40,19 @@ export function AppTopNav({
     userName,
     avatarUrl,
     subscriptionStatus = "free",
+    showTimeTracking = true,
 }: {
     mode: PlannerMode;
     userName?: string;
     avatarUrl?: string;
     subscriptionStatus?: SubscriptionStatus;
+    showTimeTracking?: boolean;
 }) {
     const pathname = usePathname();
     if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
-    const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
+    const visibleTabs = TABS
+        .filter((t) => t.modes.includes(mode))
+        .filter((t) => t.href !== "/planners/app/time" || showTimeTracking);
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isPenMode, setIsPenMode] = useState(() => {

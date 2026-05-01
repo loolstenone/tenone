@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { MapPin, Plus, Trash2, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Bookmark, Plus, Trash2, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 type Place = {
     id: string;
@@ -14,13 +14,14 @@ type Place = {
     note: string | null;
 };
 
+// 방문 장소 전용 카테고리 — routines와 별개의 분류
+// (이동 시간은 일과 기록의 transport 카테고리에서 관리하므로 여기서는 제외)
 const PLACE_CATEGORIES: { key: string; label: string; color: string }[] = [
     { key: "general",   label: "일반",   color: "bg-neutral-400" },
     { key: "work",      label: "업무",   color: "bg-blue-500" },
     { key: "meal",      label: "식사",   color: "bg-orange-400" },
     { key: "exercise",  label: "운동",   color: "bg-green-500" },
     { key: "leisure",   label: "여가",   color: "bg-violet-400" },
-    { key: "transport", label: "이동",   color: "bg-sky-400" },
     { key: "home",      label: "집",     color: "bg-teal-500" },
     { key: "shopping",  label: "쇼핑",   color: "bg-pink-400" },
     { key: "medical",   label: "의료",   color: "bg-red-400" },
@@ -119,8 +120,8 @@ export function DailyPlacesCard({ date }: { date: string }) {
                     onClick={() => setCollapsed(c => !c)}
                     className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 planners-dark:text-neutral-500 hover:text-neutral-600 transition-colors"
                 >
-                    <MapPin className="h-3.5 w-3.5" />
-                    이동 기록
+                    <Bookmark className="h-3.5 w-3.5" />
+                    방문 장소
                     {collapsed
                         ? <ChevronDown className="h-3 w-3 ml-1" />
                         : <ChevronUp className="h-3 w-3 ml-1" />
@@ -129,7 +130,7 @@ export function DailyPlacesCard({ date }: { date: string }) {
                 <button
                     onClick={() => { setAdding(a => !a); setTimeout(() => nameRef.current?.focus(), 50); }}
                     className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 planners-dark:hover:text-neutral-200 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
-                    title="장소 추가"
+                    title="방문 장소 추가"
                 >
                     <Plus className="h-4 w-4" />
                 </button>
@@ -143,7 +144,7 @@ export function DailyPlacesCard({ date }: { date: string }) {
                         </div>
                     ) : places.length === 0 && !adding ? (
                         <p className="text-xs text-neutral-300 planners-dark:text-neutral-600 text-center py-4 italic">
-                            오늘 방문한 장소를 기록하세요
+                            오늘 방문한 장소를 기록하세요 (이동 시간은 일과 기록에서)
                         </p>
                     ) : (
                         <div className="space-y-1.5">
@@ -195,7 +196,7 @@ export function DailyPlacesCard({ date }: { date: string }) {
 
                                         <button
                                             onClick={() => deletePlace(p.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 rounded text-neutral-300 hover:text-rose-400 transition-all shrink-0"
+                                            className="md:opacity-0 md:group-hover:opacity-100 p-1.5 rounded text-neutral-300 hover:text-rose-400 transition-all shrink-0"
                                             title="삭제"
                                         >
                                             <Trash2 className="h-3.5 w-3.5" />

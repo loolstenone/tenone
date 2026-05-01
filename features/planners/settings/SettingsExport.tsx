@@ -67,6 +67,7 @@ export function SettingsExport({ sub, showToast: _showToast }: Props) {
                     Android · iPhone · iPad · PC 모두 지원하며, 모든 기능은 웹과 동일하게 작동합니다.
                 </p>
                 <InstallButton
+                    hideWhenInstalled={false}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
                 >
                     <Download className="h-3.5 w-3.5" />
@@ -127,9 +128,9 @@ export function SettingsExport({ sub, showToast: _showToast }: Props) {
                         <p className="text-xs text-neutral-500">
                             {sub.status === "expired" ? "구독이 만료되었습니다." : "아직 구독하지 않으셨습니다."}
                         </p>
-                        <div className="bg-gradient-to-br from-[#0F766E]/5 to-amber-50 border border-[#0F766E]/20 rounded-lg p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-amber-700 font-semibold mb-1">
-                                🎉 런칭 프로모션
+                        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+                                런칭 프로모션
                             </p>
                             <p className="text-sm font-semibold text-neutral-900 mb-2">첫 1년 19,000원</p>
                             <ul className="text-[11px] text-neutral-600 space-y-0.5 mb-3">

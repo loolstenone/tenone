@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown } from "lucide-react";
+import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown, Cloud, Sun, Clock, Navigation } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { GroupMarker } from "@/features/planners/SettingsLayout";
 
 // ── 타입 ──────────────────────────────────────────────────────────────────────
@@ -20,7 +21,7 @@ interface Integration {
 
 const LOCATION_SERVICES = [
     {
-        icon: "🌤",
+        icon: Cloud,
         name: "날씨",
         desc: "오늘 날짜 상단에 현재 날씨 카드 자동 표시",
         stats: ["기온 / 체감온도", "날씨 아이콘 (맑음·흐림·비·눈)", "습도 · 풍속", "강수확률 · UV지수"],
@@ -28,7 +29,7 @@ const LOCATION_SERVICES = [
         status: "active" as const,
     },
     {
-        icon: "🌅",
+        icon: Sun,
         name: "일출 / 일몰",
         desc: "Today 뷰 타임라인에 일출·일몰 시각 표시",
         stats: ["일출 시각 (현지 기준)", "일몰 시각 (현지 기준)", "낮 길이 자동 계산"],
@@ -36,7 +37,7 @@ const LOCATION_SERVICES = [
         status: "soon" as const,
     },
     {
-        icon: "🕐",
+        icon: Clock,
         name: "타임존 자동 감지",
         desc: "이동 시 현지 시간 기준으로 일정 뷰 자동 전환",
         stats: ["브라우저 Intl API 기반 감지", "타임존 변경 시 즉시 반영", "일정 생성 시 현지 시각 기준"],
@@ -44,7 +45,7 @@ const LOCATION_SERVICES = [
         status: "soon" as const,
     },
     {
-        icon: "📍",
+        icon: MapPin,
         name: "장소 태깅",
         desc: "일정·할 일 저장 시 현재 위치명 자동 첨부",
         stats: ["위치명 자동 완성 (역지오코딩)", "지도 링크 첨부 가능", "장소별 일정 통계"],
@@ -52,14 +53,14 @@ const LOCATION_SERVICES = [
         status: "planned" as const,
     },
     {
-        icon: "🚇",
+        icon: Navigation,
         name: "출퇴근 소요시간",
         desc: "집·사무실 이동 예상 시간을 Today 뷰 상단에 표시",
         stats: ["실시간 교통 반영 소요 시간", "대중교통 / 자가용 선택", "출발 권장 시각 알림"],
         source: "지도 API",
         status: "planned" as const,
     },
-] satisfies { icon: string; name: string; desc: string; stats: string[]; source: string; status: "active" | "soon" | "planned" }[];
+] satisfies { icon: LucideIcon; name: string; desc: string; stats: string[]; source: string; status: "active" | "soon" | "planned" }[];
 
 function LocationServiceList() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -74,14 +75,14 @@ function LocationServiceList() {
                             onClick={() => setOpenIndex(open ? null : i)}
                             className="w-full flex items-center gap-3 py-3 text-left"
                         >
-                            <span className="text-base leading-none shrink-0">{s.icon}</span>
+                            {(() => { const Icon = s.icon; return <Icon className="h-4 w-4 text-neutral-400 shrink-0" />; })()}
                             <div className="flex-1 min-w-0 flex items-center gap-2">
                                 <span className="text-sm font-medium text-neutral-900">{s.name}</span>
                                 <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded ${
                                     s.status === "active"
                                         ? "bg-[#0F766E]/10 text-[#0F766E]"
                                         : s.status === "soon"
-                                        ? "bg-amber-50 text-amber-600"
+                                        ? "bg-neutral-100 text-neutral-500"
                                         : "bg-neutral-100 text-neutral-400"
                                 }`}>
                                     {s.status === "active" ? "활성" : s.status === "soon" ? "개발 중" : "예정"}
@@ -657,12 +658,12 @@ export function SettingsIntegrations({ showToast }: Props) {
                     ) : locationPermission === "granted" ? (
                         <button
                             onClick={() => toggleLocation(!locationEnabled)}
-                            className={`w-11 h-6 rounded-full transition-colors relative ${
-                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-300"
+                            className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
+                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-200"
                             }`}
                         >
-                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
-                                locationEnabled ? "translate-x-[18px]" : "translate-x-0"
+                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                                locationEnabled ? "translate-x-4" : "translate-x-0"
                             }`} />
                         </button>
                     ) : (
