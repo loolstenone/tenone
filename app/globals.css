@@ -109,6 +109,16 @@ html.planners-dark .planners-app-shell [class~="hover:bg-neutral-200"]:hover {
   background-color: #2A2A2A !important;
 }
 
+/* PP AI Canvas — Excalidraw UI 정리 (혼란 제거)
+   - 라이브러리 버튼·환영 메시지·도움 토스트 숨김
+   - 우리의 PenPalette가 펜·색상·지우개 전담
+   - Excalidraw 기본 toolbar(텍스트·도형·화살표 등)는 유지 — 보조 도구로 활용 */
+.pp-canvas .layer-ui__wrapper__top-right { display: none !important; }
+.pp-canvas .welcome-screen-decor { display: none !important; }
+.pp-canvas .HintViewer { display: none !important; }
+/* 상단 toolbar는 띄우되 PenPalette 아래로 위치 (PenPalette = top: 8px) */
+.pp-canvas .App-toolbar { margin-top: 48px; }
+
 /* 존재하지 않는 날짜(N/A) 셀 — 회색 블록 대신 미세 사선 패턴
    Excel·Notion·Linear가 사용하는 "해당 없음" 표준 표현 */
 .pp-cell-na {
