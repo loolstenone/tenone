@@ -35,6 +35,7 @@ export default function SettingsPage() {
     const [evening, setEvening] = useState("21:00");
     const [sub, setSub] = useState<{ status: string; expires: string | null; is_pdf_buyer: boolean }>({ status: "free", expires: null, is_pdf_buyer: false });
     const [userRole, setUserRole] = useState<PlannerRole | null>(null);
+    const [timeTracking, setTimeTracking] = useState(false);
     const [toastMsg, setToastMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
     // 자식 컴포넌트 초기값 — API 응답 후 loading guard 통과 시 이미 설정됨
@@ -64,6 +65,7 @@ export default function SettingsPage() {
                 const d = await res.json();
                 if (d.user) {
                     setMode(d.user.mode);
+                    setTimeTracking(!!d.user.time_tracking);
                     if (d.user.user_role) setUserRole(d.user.user_role as PlannerRole);
                     setMorning(d.user.ai_morning_time?.slice(0, 5) || "08:00");
                     setEvening(d.user.ai_evening_time?.slice(0, 5) || "21:00");
@@ -160,6 +162,22 @@ export default function SettingsPage() {
                                 )}
                             </button>
                         ))}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-neutral-100">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="min-w-0">
+                                <p className="text-sm font-medium text-neutral-700">+ Time Tracking</p>
+                                <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
+                                    시간 단위로 사용자의 행동 데이터를 기반으로 일상을 기록해 줍니다.
+                                </p>
+                            </div>
+                            <button
+                                onClick={async () => { const next = !timeTracking; setTimeTracking(next); await save({ time_tracking: next }); router.refresh(); }}
+                                className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#0F766E]" : "bg-neutral-200"}`}
+                            >
+                                <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-1 ${timeTracking ? "translate-x-4" : "translate-x-0"}`} />
+                            </button>
+                        </div>
                     </div>
                 </section>
 

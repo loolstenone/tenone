@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
@@ -529,7 +529,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [pendingGroups, setPendingGroups] = useState<Array<{ date: string; tasks: Array<{ id: string; text: string; priority?: string | null; time?: string | null }> }>>([]);
     const [pendingLoading, setPendingLoading] = useState(false);
     const [selectedPendingIds, setSelectedPendingIds] = useState<Set<string>>(new Set());
-    const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
+    const [weather, setWeather] = useState<{ temp: number; code: number; sunrise?: string; sunset?: string } | null>(null);
+    const [tzMismatch, setTzMismatch] = useState<string | null>(null); // 홈 타임존과 다를 때 현재 TZ
+    const [commute, setCommute] = useState<{ depart: string | null; arrive: string | null; minutes: number | null } | null>(null);
+    const [commuteOpen, setCommuteOpen] = useState(false);
+    const [commuteDepart, setCommuteDepart] = useState("");
+    const [commuteArrive, setCommuteArrive] = useState("");
+    const [commuteSaving, setCommuteSaving] = useState(false);
     const [showTemplatePicker, setShowTemplatePicker] = useState(false);
     const [tplList, setTplList] = useState<Array<{ id: string; key: string; category: string; subcategory: string | null; label: string; description: string | null; body_md: string }>>([]);
     const [tplLoading, setTplLoading] = useState(false);
@@ -589,13 +595,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         async function fetchWeather(lat: number, lon: number) {
             try {
                 const res = await fetch(
-                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=sunrise,sunset&timezone=auto`
                 );
                 if (!res.ok) return;
                 const d = await res.json();
                 const temp = Math.round(d.current.temperature_2m);
                 const code = d.current.weather_code;
-                setWeather({ temp, code });
+                const sunrise = d.daily?.sunrise?.[0]?.slice(11, 16) ?? undefined;
+                const sunset = d.daily?.sunset?.[0]?.slice(11, 16) ?? undefined;
+                setWeather({ temp, code, sunrise, sunset });
                 save({ weather_temp: temp, weather_code: code });
             } catch { /* silent */ }
         }
@@ -617,6 +625,41 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // 타임존 자동 감지 — 홈 타임존과 다르면 뱃지 표시
+    useEffect(() => {
+        const current = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const home = localStorage.getItem("planners_home_timezone");
+        if (!home) {
+            localStorage.setItem("planners_home_timezone", current);
+        } else if (home !== current) {
+            setTzMismatch(current);
+        }
+    }, []);
+
+    // 출퇴근 소요시간 — transport 카테고리 루틴에서 로드
+    useEffect(() => {
+        (async () => {
+            const res = await fetch(`/api/planners/routines?date=${date}`);
+            if (!res.ok) return;
+            const d = await res.json();
+            const transport = (d.routines ?? []).filter((r: { category: string }) => r.category === "transport");
+            const departItem = transport.find((r: { activity: string }) => r.activity.includes("출근"));
+            const arriveItem = transport.find((r: { activity: string }) => r.activity.includes("퇴근"));
+            const depart = departItem?.start_time?.slice(0, 5) ?? null;
+            const arrive = arriveItem?.start_time?.slice(0, 5) ?? null;
+            let minutes: number | null = null;
+            if (depart && arrive) {
+                const [dh, dm] = depart.split(":").map(Number);
+                const [ah, am] = arrive.split(":").map(Number);
+                minutes = (ah * 60 + am) - (dh * 60 + dm);
+                if (minutes < 0) minutes = null;
+            }
+            setCommute({ depart, arrive, minutes });
+            setCommuteDepart(depart ?? "");
+            setCommuteArrive(arrive ?? "");
+        })();
+    }, [date]);
 
     // 데일리 트래킹 사용자 설정 (Settings 에서 켠 항목만, 미설정 시 만족도 기본)
     useEffect(() => {
@@ -1292,7 +1335,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 {formattedDate}
                             </h1>
                             {isToday && (
-                                <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
                                     오늘
                                 </span>
                             )}
@@ -1303,13 +1346,125 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>
-                        <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                        <div className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
                             {weather && (
                                 <span className="inline-flex items-center gap-1 text-neutral-500">
                                     <WeatherIcon code={weather.code} />
                                     {weather.temp}°C
                                 </span>
                             )}
+                            {weather?.sunrise && (
+                                <span className="inline-flex items-center gap-1 text-neutral-400 text-xs">
+                                    <Sunrise className="h-3 w-3" />{weather.sunrise}
+                                </span>
+                            )}
+                            {weather?.sunset && (
+                                <span className="inline-flex items-center gap-1 text-neutral-400 text-xs">
+                                    <Sunset className="h-3 w-3" />{weather.sunset}
+                                </span>
+                            )}
+                            {tzMismatch && (
+                                <button
+                                    onClick={() => {
+                                        localStorage.setItem("planners_home_timezone", tzMismatch);
+                                        setTzMismatch(null);
+                                    }}
+                                    className="inline-flex items-center gap-1 text-amber-400 text-xs hover:text-amber-300 transition-colors"
+                                    title={`현재 타임존: ${tzMismatch} — 클릭하면 홈으로 저장`}
+                                >
+                                    <Globe className="h-3 w-3" />
+                                    {tzMismatch.split("/").pop()?.replace(/_/g, " ")}
+                                </button>
+                            )}
+                            {/* 출퇴근 소요시간 칩 */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setCommuteOpen(o => !o)}
+                                    className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
+                                    title="출퇴근 소요시간"
+                                >
+                                    <ArrowDownToLine className="h-3 w-3" />
+                                    {commute?.depart
+                                        ? <span>{commute.depart}{commute.arrive ? ` → ${commute.arrive}` : ""}{commute.minutes ? ` (${commute.minutes}분)` : ""}</span>
+                                        : <span>출퇴근</span>
+                                    }
+                                </button>
+                                {commuteOpen && (
+                                    <div className="absolute top-6 left-0 z-50 bg-white border border-neutral-200 rounded-xl shadow-lg p-3 w-56 space-y-2">
+                                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium">출퇴근 소요시간</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="text-[10px] text-neutral-400">출근 시각</label>
+                                                <input
+                                                    type="time"
+                                                    value={commuteDepart}
+                                                    onChange={e => setCommuteDepart(e.target.value)}
+                                                    className="w-full text-sm bg-transparent text-neutral-800 focus:outline-none mt-0.5"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-neutral-400">퇴근 시각</label>
+                                                <input
+                                                    type="time"
+                                                    value={commuteArrive}
+                                                    onChange={e => setCommuteArrive(e.target.value)}
+                                                    className="w-full text-sm bg-transparent text-neutral-800 focus:outline-none mt-0.5"
+                                                />
+                                            </div>
+                                        </div>
+                                        {commuteDepart && commuteArrive && (() => {
+                                            const [dh, dm] = commuteDepart.split(":").map(Number);
+                                            const [ah, am] = commuteArrive.split(":").map(Number);
+                                            const mins = (ah * 60 + am) - (dh * 60 + dm);
+                                            return mins > 0 ? (
+                                                <p className="text-xs text-neutral-500 text-center">소요 {mins}분</p>
+                                            ) : null;
+                                        })()}
+                                        <div className="flex gap-2 pt-1">
+                                            <button
+                                                disabled={commuteSaving || (!commuteDepart && !commuteArrive)}
+                                                onClick={async () => {
+                                                    setCommuteSaving(true);
+                                                    try {
+                                                        const saves: Promise<unknown>[] = [];
+                                                        if (commuteDepart) {
+                                                            saves.push(fetch("/api/planners/routines", {
+                                                                method: "POST",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ date, activity: "출근", category: "transport", start_time: commuteDepart, end_time: null, note: null }),
+                                                            }));
+                                                        }
+                                                        if (commuteArrive) {
+                                                            saves.push(fetch("/api/planners/routines", {
+                                                                method: "POST",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ date, activity: "퇴근", category: "transport", start_time: commuteArrive, end_time: null, note: null }),
+                                                            }));
+                                                        }
+                                                        await Promise.all(saves);
+                                                        const [dh, dm] = (commuteDepart || "0:0").split(":").map(Number);
+                                                        const [ah, am] = (commuteArrive || "0:0").split(":").map(Number);
+                                                        const mins = commuteDepart && commuteArrive ? (ah * 60 + am) - (dh * 60 + dm) : null;
+                                                        setCommute({ depart: commuteDepart || null, arrive: commuteArrive || null, minutes: mins && mins > 0 ? mins : null });
+                                                        setCommuteOpen(false);
+                                                    } finally {
+                                                        setCommuteSaving(false);
+                                                    }
+                                                }}
+                                                className="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[#0F766E] text-white disabled:opacity-40 hover:bg-[#0d5e56] transition-colors"
+                                            >
+                                                {commuteSaving ? "저장 중…" : "저장"}
+                                            </button>
+                                            <button
+                                                onClick={() => setCommuteOpen(false)}
+                                                className="px-3 py-1.5 rounded-lg text-xs text-neutral-500 hover:bg-neutral-100 transition-colors"
+                                            >
+                                                닫기
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             <span>{weekday}</span>
                             {lunar && (
                                 <span className="text-neutral-300">
@@ -1331,7 +1486,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     · {lastSavedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨
                                 </span>
                             )}
-                        </p>
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1450,14 +1605,27 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                     <button
                                                         key={entry.id}
                                                         onClick={() => { setCalEditing(entry); setCalEditorOpen(true); }}
-                                                        className="w-full flex items-center gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
+                                                        className="w-full flex items-start gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
                                                     >
-                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                                                        <span className="flex-1 text-xs text-neutral-800">{entry.title}</span>
-                                                        {entry.description && (
-                                                            <span className="text-[11px] text-neutral-400 truncate max-w-[120px]">{entry.description}</span>
-                                                        )}
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.bg} ${c.text}`}>미팅</span>
+                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${c.dot}`} />
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className="text-xs text-neutral-800">{entry.title}</span>
+                                                            {(entry.location || entry.with_whom) && (
+                                                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                                    {entry.location && (
+                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                            <MapPin className="h-2.5 w-2.5" />{entry.location}
+                                                                        </span>
+                                                                    )}
+                                                                    {entry.with_whom && (
+                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                            <Users className="h-2.5 w-2.5" />{entry.with_whom}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${c.bg} ${c.text}`}>미팅</span>
                                                     </button>
                                                 );
                                             })}
@@ -1479,19 +1647,30 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                     <button
                                                         key={`m-${item.entry.id}-${i}`}
                                                         onClick={() => { setCalEditing(item.entry); setCalEditorOpen(true); }}
-                                                        className="w-full flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 text-left group"
+                                                        className="w-full flex items-start gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 text-left group"
                                                     >
-                                                        <span className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center ${c.ring} border-sky-300`} />
-                                                        <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
+                                                        <span className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center mt-0.5 ${c.ring} border-sky-300`} />
+                                                        <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px] mt-0.5">
                                                             {ampm} {t}
                                                         </span>
-                                                        <span className="flex-1 text-xs text-neutral-800">{item.entry.title}</span>
-                                                        {item.entry.description && (
-                                                            <span className="text-[11px] text-neutral-400 truncate max-w-[130px] hidden sm:block">
-                                                                {item.entry.description}
-                                                            </span>
-                                                        )}
-                                                        <span className="text-[9px] text-sky-500 opacity-40 group-hover:opacity-80">미팅</span>
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className="text-xs text-neutral-800">{item.entry.title}</span>
+                                                            {(item.entry.location || item.entry.with_whom) && (
+                                                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                                    {item.entry.location && (
+                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                            <MapPin className="h-2.5 w-2.5" />{item.entry.location}
+                                                                        </span>
+                                                                    )}
+                                                                    {item.entry.with_whom && (
+                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                            <Users className="h-2.5 w-2.5" />{item.entry.with_whom}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[9px] text-sky-500 opacity-40 group-hover:opacity-80 mt-0.5">미팅</span>
                                                     </button>
                                                 );
                                             } else {

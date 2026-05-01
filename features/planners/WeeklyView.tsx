@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus, LayoutList, CalendarDays, Sun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, Thermometer } from "lucide-react";
 import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
@@ -34,18 +34,53 @@ interface DayData {
     weather: { temp: number; code: number } | null;
 }
 
-function weatherEmoji(code: number) {
-    if (code === 0) return "☀️";
-    if (code <= 2) return "🌤️";
-    if (code <= 3) return "☁️";
-    if (code <= 48) return "🌫️";
-    if (code <= 57) return "🌧️";
-    if (code <= 67) return "🌧️";
-    if (code <= 77) return "❄️";
-    if (code <= 82) return "🌦️";
-    if (code <= 86) return "🌨️";
-    if (code <= 99) return "⛈️";
-    return "🌡️";
+interface Routine {
+    id: string;
+    date: string;
+    activity: string;
+    start_time: string | null;
+    end_time: string | null;
+    category: string;
+}
+
+const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+    work:      { bg: "bg-teal-50",    text: "text-teal-700",    border: "border-l-teal-500" },
+    exercise:  { bg: "bg-green-50",   text: "text-green-700",   border: "border-l-green-500" },
+    meal:      { bg: "bg-orange-50",  text: "text-orange-700",  border: "border-l-orange-500" },
+    study:     { bg: "bg-blue-50",    text: "text-blue-700",    border: "border-l-blue-500" },
+    leisure:   { bg: "bg-purple-50",  text: "text-purple-700",  border: "border-l-purple-500" },
+    rest:      { bg: "bg-pink-50",    text: "text-pink-700",    border: "border-l-pink-500" },
+    social:    { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-l-amber-500" },
+    faith:     { bg: "bg-indigo-50",  text: "text-indigo-700",  border: "border-l-indigo-500" },
+    health:    { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-l-emerald-500" },
+    transport: { bg: "bg-yellow-50",  text: "text-yellow-700",  border: "border-l-yellow-500" },
+    general:   { bg: "bg-neutral-50", text: "text-neutral-700", border: "border-l-neutral-400" },
+};
+const SCHEDULE_START = 6 * 60;
+const SLOT_HEIGHT = 56;
+const HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+
+function timeToMinutes(time: string): number {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + (m ?? 0);
+}
+function minuteToTop(minutes: number): number {
+    return ((minutes - SCHEDULE_START) / 60) * SLOT_HEIGHT;
+}
+
+function WeatherIcon({ code, className }: { code: number; className?: string }) {
+    const cls = className ?? "h-3 w-3";
+    if (code === 0) return <Sun className={cls} />;
+    if (code <= 2)  return <Cloud className={cls} />;
+    if (code <= 3)  return <Cloud className={cls} />;
+    if (code <= 48) return <CloudFog className={cls} />;
+    if (code <= 57) return <CloudDrizzle className={cls} />;
+    if (code <= 67) return <CloudRain className={cls} />;
+    if (code <= 77) return <CloudSnow className={cls} />;
+    if (code <= 82) return <CloudRain className={cls} />;
+    if (code <= 86) return <CloudSnow className={cls} />;
+    if (code <= 99) return <CloudLightning className={cls} />;
+    return <Thermometer className={cls} />;
 }
 
 export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; initialWeek: number }) {
@@ -64,6 +99,9 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [dragOverDate, setDragOverDate] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<PlannerRole | null>(null);
+    const [weekViewMode, setWeekViewMode] = useState<"list" | "schedule">("list");
+    const [routinesByDate, setRoutinesByDate] = useState<Record<string, Routine[]>>({});
+    const [routinesLoading, setRoutinesLoading] = useState(false);
 
     const boundaries = getWeekBoundaries(year, week);
 
@@ -162,6 +200,26 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         })();
         return () => { cancelled = true; };
     }, [year, week]);
+
+    useEffect(() => {
+        if (weekViewMode !== "schedule") return;
+        let cancelled = false;
+        (async () => {
+            setRoutinesLoading(true);
+            const dayDates = days.map(dsOf);
+            const results = await Promise.all(
+                dayDates.map(ds => fetch(`/api/planners/routines?date=${ds}`).then(r => r.ok ? r.json() : { routines: [] }))
+            );
+            if (cancelled) return;
+            const byDate: Record<string, Routine[]> = {};
+            for (let i = 0; i < dayDates.length; i++) {
+                byDate[dayDates[i]] = results[i].routines ?? [];
+            }
+            setRoutinesByDate(byDate);
+            setRoutinesLoading(false);
+        })();
+        return () => { cancelled = true; };
+    }, [weekViewMode, year, week]);
 
     async function save(patch: Partial<PlannerWeekly>) {
         setSaving(true);
@@ -324,7 +382,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 return (
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
                                 <button onClick={() => navigateWeek(-1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
@@ -333,7 +391,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {rangeText}
                                     </h1>
                                     {todayInWeek && (
-                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                        <span className="px-1.5 py-px bg-[#0F766E] text-white text-[9px] font-semibold rounded shrink-0">
                                             이번 주
                                         </span>
                                     )}
@@ -349,6 +407,22 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             </p>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center border border-neutral-200 rounded-lg overflow-hidden">
+                                <button
+                                    onClick={() => setWeekViewMode("list")}
+                                    title="목록 보기"
+                                    className={`p-1.5 transition-colors ${weekViewMode === "list" ? "bg-neutral-100 text-neutral-700" : "text-neutral-400 hover:text-neutral-600"}`}
+                                >
+                                    <LayoutList className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                    onClick={() => setWeekViewMode("schedule")}
+                                    title="스케줄 보기"
+                                    className={`p-1.5 transition-colors ${weekViewMode === "schedule" ? "bg-neutral-100 text-neutral-700" : "text-neutral-400 hover:text-neutral-600"}`}
+                                >
+                                    <CalendarDays className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
                             <button
                                 onClick={() => { setCalEditing(null); setCalDefaultDate(undefined); setCalEditorOpen(true); }}
                                 title="일정 추가"
@@ -367,7 +441,189 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 <div className="py-20 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
                 <div className="space-y-3">
-                    {/* 7일 세로 목록 */}
+                    {weekViewMode === "schedule" ? (
+                        /* ── 스케줄 보기 (Google Calendar 스타일) ── */
+                        (() => {
+                            const now = new Date();
+                            const nowMin = now.getHours() * 60 + now.getMinutes();
+                            const nowTop = minuteToTop(nowMin);
+                            return (
+                                <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
+                                    {routinesLoading ? (
+                                        <div className="py-20 text-center text-neutral-400 text-sm">로딩 중…</div>
+                                    ) : (
+                                        <div className="flex overflow-x-auto">
+                                            {/* 시간 라벨 컬럼 */}
+                                            <div className="shrink-0 w-14 border-r border-neutral-100">
+                                                <div className="h-14 border-b border-neutral-100 flex items-end justify-end pb-1 pr-2">
+                                                    <span className="text-[8px] text-neutral-300 font-mono">GMT+9</span>
+                                                </div>
+                                                <div className="min-h-[28px] border-b border-neutral-100" />
+                                                <div className="relative" style={{ height: HOURS.length * SLOT_HEIGHT }}>
+                                                    {HOURS.map(h => (
+                                                        <div key={h} className="absolute w-full flex justify-end pr-2" style={{ top: (h - 6) * SLOT_HEIGHT - 7 }}>
+                                                            <span className="text-[9px] text-neutral-300 font-mono">
+                                                                {String(h).padStart(2, "0")}:00
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            {/* 7일 컬럼 */}
+                                            {days.map(d => {
+                                                const ds = dsOf(d);
+                                                const isSun = d.getDay() === 0;
+                                                const isSat = d.getDay() === 6;
+                                                const isToday = ds === today;
+                                                const dayRoutines = routinesByDate[ds] ?? [];
+                                                const dayEntries = entriesByDate[ds] ?? [];
+                                                const holiday = HOLIDAYS[ds];
+                                                // calEntries 기반 종일 항목
+                                                const allDayEntries = dayEntries.filter(e =>
+                                                    !e.start_time &&
+                                                    (e.kind === "public_holiday" || e.kind === "solar_term" || e.kind === "anniversary")
+                                                );
+                                                // 정적 공휴일/절기 — calEntries에 중복 없을 때만 추가
+                                                const staticHolidayItems: { label: string; kind: "public_holiday" | "solar_term" }[] = [];
+                                                if (holiday) {
+                                                    const alreadyCovered = allDayEntries.some(e => e.title === holiday.label);
+                                                    if (!alreadyCovered) {
+                                                        staticHolidayItems.push({
+                                                            label: holiday.label,
+                                                            kind: holiday.type === "solar_term" ? "solar_term" : "public_holiday",
+                                                        });
+                                                    }
+                                                }
+                                                const timedEntries = dayEntries.filter(e => e.start_time && (e.kind === "meeting" || e.kind === "task"));
+                                                return (
+                                                    <div key={ds} className="flex-1 min-w-[80px] border-r border-neutral-100 last:border-r-0">
+                                                        {/* 헤더 */}
+                                                        <div className={`h-14 border-b border-neutral-100 flex flex-col items-center justify-center gap-0.5 ${isToday ? "bg-[#0F766E]/[0.02]" : ""}`}>
+                                                            <span className={`text-[9px] font-medium tracking-wider ${isSun ? "text-rose-400" : isSat ? "text-blue-400" : "text-neutral-400"}`}>
+                                                                {DAYS_KO[d.getDay()]}
+                                                            </span>
+                                                            {isToday ? (
+                                                                <span className="w-7 h-7 rounded-full bg-[#0F766E] flex items-center justify-center text-sm font-semibold text-white leading-none">
+                                                                    {d.getDate()}
+                                                                </span>
+                                                            ) : (
+                                                                <span className={`text-sm font-semibold leading-none ${isSun ? "text-rose-500" : isSat ? "text-blue-500" : "text-neutral-700"}`}>
+                                                                    {d.getDate()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {/* 종일 이벤트 행 */}
+                                                        <div className={`min-h-[28px] border-b border-neutral-100 planners-dark:border-white/[0.06] px-0.5 py-0.5 flex flex-col gap-0.5 ${isToday ? "bg-[#0F766E]/[0.02]" : ""}`}>
+                                                            {staticHolidayItems.map(h => {
+                                                                const c = KIND_COLORS[h.kind];
+                                                                return (
+                                                                    <div key={h.label} className={`text-[10px] font-medium leading-tight px-1 py-0.5 rounded ${c.bg} ${c.text} truncate`}>
+                                                                        {h.label}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {allDayEntries.map(e => {
+                                                                const c = KIND_COLORS[e.kind as CalendarKind];
+                                                                return (
+                                                                    <div key={e.id} className={`text-[10px] font-medium leading-tight px-1 py-0.5 rounded ${c.bg} ${c.text} truncate`}>
+                                                                        {e.title}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {/* 시간 그리드 */}
+                                                        <div
+                                                            className={`relative cursor-pointer ${isToday ? "bg-[#0F766E]/[0.015]" : ""}`}
+                                                            style={{ height: HOURS.length * SLOT_HEIGHT }}
+                                                            onClick={(e) => {
+                                                                // 이미 배치된 이벤트 클릭 시 무시
+                                                                if ((e.target as HTMLElement).closest("[data-cal-entry]")) return;
+                                                                const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                                                                const offsetY = e.clientY - rect.top;
+                                                                const rawMin = SCHEDULE_START + (offsetY / SLOT_HEIGHT) * 60;
+                                                                const snappedMin = Math.round(rawMin / 30) * 30;
+                                                                const clamped = Math.max(SCHEDULE_START, Math.min(snappedMin, 22 * 60));
+                                                                const hh = String(Math.floor(clamped / 60)).padStart(2, "0");
+                                                                const mm = String(clamped % 60).padStart(2, "0");
+                                                                const endMin = Math.min(clamped + 60, 23 * 60);
+                                                                const ehh = String(Math.floor(endMin / 60)).padStart(2, "0");
+                                                                const emm = String(endMin % 60).padStart(2, "0");
+                                                                setCalDefaultDate(ds);
+                                                                setCalEditing({ kind: "meeting", start_time: `${hh}:${mm}`, end_time: `${ehh}:${emm}` } as any);
+                                                                setCalEditorOpen(true);
+                                                            }}
+                                                        >
+                                                            {/* 시간선 정시 + 30분 */}
+                                                            {HOURS.map(h => (
+                                                                <div key={h}>
+                                                                    <div className="absolute w-full border-t border-neutral-100/70 planners-dark:border-white/[0.05]" style={{ top: (h - 6) * SLOT_HEIGHT }} />
+                                                                    <div className="absolute w-full border-t border-neutral-100/40 planners-dark:border-white/[0.025]" style={{ top: (h - 6) * SLOT_HEIGHT + SLOT_HEIGHT / 2 }} />
+                                                                </div>
+                                                            ))}
+                                                            {/* 루틴 이벤트 */}
+                                                            {dayRoutines.filter(r => r.start_time).map(r => {
+                                                                const startMin = timeToMinutes(r.start_time!);
+                                                                const endMin = r.end_time ? timeToMinutes(r.end_time) : startMin + 60;
+                                                                const top = minuteToTop(Math.max(startMin, SCHEDULE_START));
+                                                                const height = Math.max(((endMin - startMin) / 60) * SLOT_HEIGHT, 18);
+                                                                const colors = CATEGORY_COLORS[r.category] ?? CATEGORY_COLORS.general;
+                                                                return (
+                                                                    <div
+                                                                        key={r.id}
+                                                                        data-cal-entry
+                                                                        className={`absolute left-0.5 right-0.5 rounded border-l-2 px-1 py-0.5 overflow-hidden ${colors.bg} ${colors.text} ${colors.border}`}
+                                                                        style={{ top, height }}
+                                                                    >
+                                                                        <p className="text-[11px] font-medium leading-tight truncate">{r.activity}</p>
+                                                                        {height > 30 && (
+                                                                            <p className="text-[10px] opacity-60 leading-tight mt-0.5">
+                                                                                {r.start_time}{r.end_time ? `–${r.end_time}` : ""}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {/* 캘린더 엔트리 (미팅 — 시간 있는 것) */}
+                                                            {timedEntries.map(e => {
+                                                                const startMin = timeToMinutes(e.start_time!);
+                                                                const endMin = e.end_time ? timeToMinutes(e.end_time) : startMin + 60;
+                                                                const top = minuteToTop(Math.max(startMin, SCHEDULE_START));
+                                                                const height = Math.max(((endMin - startMin) / 60) * SLOT_HEIGHT, 18);
+                                                                const c = KIND_COLORS[e.kind as CalendarKind];
+                                                                return (
+                                                                    <div
+                                                                        key={e.id}
+                                                                        data-cal-entry
+                                                                        className={`absolute left-0.5 right-0.5 rounded border-l-2 border-l-sky-400 px-1 py-0.5 overflow-hidden ${c.bg} ${c.text}`}
+                                                                        style={{ top, height }}
+                                                                    >
+                                                                        <p className="text-[11px] font-medium leading-tight truncate">{e.title}</p>
+                                                                        {height > 30 && (
+                                                                            <p className="text-[10px] opacity-60 leading-tight mt-0.5">
+                                                                                {e.start_time}{e.end_time ? `–${e.end_time}` : ""}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {/* 현재 시간 인디케이터 (오늘 컬럼만) */}
+                                                            {isToday && nowMin >= SCHEDULE_START && nowMin <= 22 * 60 + 59 && (
+                                                                <div className="absolute w-full flex items-center pointer-events-none z-10" style={{ top: nowTop - 1 }}>
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 -ml-0.5" />
+                                                                    <div className="flex-1 h-px bg-rose-400" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()
+                    ) : (
+                    /* ── 목록 보기 ── */
                     <div className="border border-neutral-200 planners-dark:border-white/[0.07] rounded-xl overflow-hidden bg-white divide-y divide-neutral-100 planners-dark:divide-white/[0.07]">
                         {days.map((d) => {
                             const ds = dsOf(d);
@@ -447,8 +703,9 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                     <span className="text-[9px] md:text-[11px] text-[#0F766E] font-semibold bg-[#0F766E]/10 px-1.5 py-0.5 rounded-full leading-none">오늘</span>
                                                 )}
                                                 {dayData.weather && (
-                                                    <span className="text-[10px] md:text-xs text-neutral-400">
-                                                        {weatherEmoji(dayData.weather.code)} {dayData.weather.temp}°
+                                                    <span className="inline-flex items-center gap-0.5 text-[10px] md:text-xs text-neutral-400">
+                                                        <WeatherIcon code={dayData.weather.code} />
+                                                        {dayData.weather.temp}°
                                                     </span>
                                                 )}
                                             </div>
@@ -552,6 +809,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             );
                         })}
                     </div>
+                    )} {/* end list/schedule toggle */}
 
                     {/* 주간 통계 */}
                     {summary && summary.days_recorded > 0 && (
