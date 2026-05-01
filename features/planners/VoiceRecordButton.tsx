@@ -146,49 +146,56 @@ export function VoiceRecordButton({ onTranscribed, className, label = "녹음" }
         return `${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
     }
 
-    if (recording) {
-        return (
-            <div className="col-span-3 md:col-span-4 flex items-center gap-2 px-3 py-2 border border-rose-300 bg-rose-50 planners-dark:bg-rose-900/10 rounded-lg">
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
-                </span>
-                <span className="text-xs font-medium text-rose-700 planners-dark:text-rose-300 tabular-nums shrink-0">
-                    {fmtDuration(duration)}
-                </span>
-                <span className="text-xs text-neutral-600 planners-dark:text-neutral-300 flex-1 truncate italic">
-                    {interim || finalTranscriptRef.current || "말씀해 주세요…"}
-                </span>
-                <button
-                    onClick={() => stop(true)}
-                    className="shrink-0 px-3 py-1 rounded-lg text-xs font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
-                >
-                    완료
-                </button>
-                <button
-                    onClick={() => stop(false)}
-                    className="shrink-0 p-1 rounded text-neutral-400 hover:text-rose-500 transition-colors"
-                    title="취소"
-                >
-                    <MicOff className="h-3.5 w-3.5" />
-                </button>
-            </div>
-        );
-    }
-
     return (
         <>
             <button
                 onClick={start}
-                title={supported === false ? "이 브라우저는 음성 인식을 지원하지 않습니다" : "음성 녹음 → 텍스트 노트"}
-                disabled={supported === false}
+                title={supported === false ? "이 브라우저는 음성 인식을 지원하지 않습니다" : "음성 녹음 → 텍스트"}
+                disabled={supported === false || recording}
                 className={className ?? "flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-rose-400 hover:text-rose-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"}
             >
-                {supported === null ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mic className="h-3.5 w-3.5" />}
-                {label}
+                {supported === null
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : recording
+                        ? <span className="relative flex h-2.5 w-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
+                          </span>
+                        : <Mic className="h-3.5 w-3.5" />}
+                {label && <span>{label}</span>}
             </button>
+
+            {/* 녹음 중 — 화면 하단 고정 토스트 (위치 무관하게 일관) */}
+            {recording && typeof document !== "undefined" && (
+                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[min(640px,calc(100vw-32px))] flex items-center gap-2 px-4 py-3 border border-rose-300 bg-white planners-dark:bg-[#1C1C1C] shadow-lg rounded-xl">
+                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
+                    </span>
+                    <span className="text-xs font-medium text-rose-700 planners-dark:text-rose-300 tabular-nums shrink-0">
+                        {fmtDuration(duration)}
+                    </span>
+                    <span className="text-xs text-neutral-600 planners-dark:text-neutral-300 flex-1 truncate italic min-w-0">
+                        {interim || finalTranscriptRef.current || "말씀해 주세요…"}
+                    </span>
+                    <button
+                        onClick={() => stop(true)}
+                        className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
+                    >
+                        완료
+                    </button>
+                    <button
+                        onClick={() => stop(false)}
+                        className="shrink-0 p-1.5 rounded text-neutral-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                        title="취소"
+                    >
+                        <MicOff className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+
             {errorMsg && (
-                <div className="col-span-3 md:col-span-4 text-[11px] text-rose-500 px-2 py-1">
+                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 shadow">
                     {errorMsg}
                 </div>
             )}

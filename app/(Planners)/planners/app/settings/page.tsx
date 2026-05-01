@@ -145,8 +145,8 @@ export default function SettingsPage() {
                                 onClick={async () => { setMode(m); await save({ mode: m }); router.refresh(); }}
                                 className={`py-3 px-3 rounded-lg text-sm transition-colors border-2 text-left ${
                                     mode === m
-                                        ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold"
-                                        : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
+                                        ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold planners-dark:!bg-[#0F766E]/20 planners-dark:!text-[#5EEAD4] planners-dark:!border-[#5EEAD4]"
+                                        : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 planners-dark:!bg-[#252525] planners-dark:!border-[#444] planners-dark:!text-neutral-300"
                                 }`}
                             >
                                 {m === "weekly" ? (
@@ -168,7 +168,9 @@ export default function SettingsPage() {
                             <div className="min-w-0">
                                 <p className="text-sm font-medium text-neutral-700">+ Time Tracking</p>
                                 <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
-                                    시간 단위로 사용자의 행동 데이터를 기반으로 일상을 기록해 줍니다.
+                                    시간 단위로 행동 데이터를 기록합니다.
+                                    <br />
+                                    ON 시 상단 메뉴에 <span className="font-medium text-[#0F766E]">「시간」</span> 탭이 노출됩니다.
                                 </p>
                             </div>
                             <button
@@ -181,9 +183,9 @@ export default function SettingsPage() {
                                     await save({ time_tracking: next });
                                     router.refresh();
                                 }}
-                                className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#0F766E]" : "bg-neutral-200"}`}
+                                className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"}`}
                             >
-                                <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-1 ${timeTracking ? "translate-x-4" : "translate-x-0"}`} />
+                                <span className={`block w-4 h-4 !bg-white rounded-full shadow transition-transform mx-1 ${timeTracking ? "translate-x-4" : "translate-x-0"}`} />
                             </button>
                         </div>
                     </div>

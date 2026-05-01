@@ -259,67 +259,81 @@ export function IndexView() {
                 {/* ────── 좌: 연간 달력 ────── */}
                 <section className="flex-1 min-w-0 order-2 lg:order-1">
 
-                    {/* 연간 달력 — 분기별 3개월씩 4행 */}
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">연간 달력 · 분기별 3개월</p>
-                    <div className="space-y-6">
-                        {[0, 1, 2, 3].map(qIdx => {
-                            const isCurrentQ = isCurrentYear && qIdx === currentQuarter;
+                    {/* 연간 달력 — 모바일: 2개월×6행 평면 / sm+: 분기별 3개월×4행 */}
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-4">
+                        <span className="sm:hidden">연간 달력</span>
+                        <span className="hidden sm:inline">연간 달력 · 분기별 3개월</span>
+                    </p>
+                    {(() => {
+                        const renderMonth = (monthIdx: number) => {
+                            const rows = buildMonth(year, monthIdx);
+                            const isCurrentMonth = isCurrentYear && monthIdx === now.getMonth();
                             return (
-                                <div key={qIdx}>
-                                    <p className={`text-[10px] font-semibold uppercase tracking-widest mb-2 ${
-                                        isCurrentQ ? "text-[#0F766E] underline decoration-2 underline-offset-[4px]" : "text-neutral-300"
-                                    }`}>
-                                        Q{qIdx + 1} · {MONTHS_KO[qIdx * 3]}–{MONTHS_KO[qIdx * 3 + 2]}
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-5">
-                                        {[0, 1, 2].map(mOffset => {
-                                            const monthIdx = qIdx * 3 + mOffset;
-                                            const rows = buildMonth(year, monthIdx);
-                                            const isCurrentMonth = isCurrentYear && monthIdx === now.getMonth();
-                                            return (
-                                                <div key={monthIdx}>
-                                                    <Link href={`/planners/app/monthly?year=${year}&month=${monthIdx + 1}`}>
-                                                        <div className={`text-center text-[11px] font-semibold py-1 transition-colors ${
-                                                            isCurrentMonth ? "bg-[#0F766E] text-white" : "bg-neutral-500 text-white hover:bg-[#0F766E]"
-                                                        }`}>
-                                                            {MONTHS_KO[monthIdx]}
-                                                        </div>
-                                                    </Link>
-                                                    <div className="grid grid-cols-[28px_repeat(7,1fr)] mt-0.5 mb-px">
-                                                        <div />
-                                                        {["M", "T", "W", "T", "F", "S", "S"].map((d, di) => (
-                                                            <div key={di} className={`text-center text-[10px] font-medium ${di >= 5 ? "text-pink-400" : "text-neutral-400"}`}>{d}</div>
-                                                        ))}
-                                                    </div>
-                                                    {rows.map((row, ri) => (
-                                                        <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
-                                                            <Link href={`/planners/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5">
-                                                                W{String(row[0].week).padStart(2, "0")}
-                                                            </Link>
-                                                            {row.map((cell, ci) => {
-                                                                const isToday = cell.date === todayStr;
-                                                                const isWeekend = ci >= 5;
-                                                                return (
-                                                                    <Link key={ci} href={`/planners/app/daily?date=${cell.date}`}
-                                                                        className={`text-center text-[11px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
-                                                                            isToday ? "bg-[#0F766E]/10 text-[#0F766E] font-bold underline decoration-[#0F766E] decoration-2 underline-offset-[3px]"
-                                                                            : !cell.inMonth ? "text-neutral-200"
-                                                                            : isWeekend ? "text-pink-400"
-                                                                            : "text-neutral-600"
-                                                                        }`}
-                                                                    >{cell.dom}</Link>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            );
-                                        })}
+                                <div key={monthIdx}>
+                                    <Link href={`/planners/app/monthly?year=${year}&month=${monthIdx + 1}`}>
+                                        <div className={`text-center text-[11px] font-semibold py-1 transition-colors ${
+                                            isCurrentMonth ? "bg-[#0F766E] text-white" : "bg-neutral-500 text-white hover:bg-[#0F766E]"
+                                        }`}>
+                                            {MONTHS_KO[monthIdx]}
+                                        </div>
+                                    </Link>
+                                    <div className="grid grid-cols-[28px_repeat(7,1fr)] mt-0.5 mb-px">
+                                        <div />
+                                        {["M", "T", "W", "T", "F", "S", "S"].map((d, di) => (
+                                            <div key={di} className={`text-center text-[10px] font-medium ${di >= 5 ? "text-pink-400" : "text-neutral-400"}`}>{d}</div>
+                                        ))}
                                     </div>
+                                    {rows.map((row, ri) => (
+                                        <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
+                                            <Link href={`/planners/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5">
+                                                W{String(row[0].week).padStart(2, "0")}
+                                            </Link>
+                                            {row.map((cell, ci) => {
+                                                const isToday = cell.date === todayStr;
+                                                const isWeekend = ci >= 5;
+                                                return (
+                                                    <Link key={ci} href={`/planners/app/daily?date=${cell.date}`}
+                                                        className={`text-center text-[11px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
+                                                            isToday ? "bg-[#0F766E]/10 text-[#0F766E] font-bold underline decoration-[#0F766E] decoration-2 underline-offset-[3px]"
+                                                            : !cell.inMonth ? "text-neutral-200"
+                                                            : isWeekend ? "text-pink-400"
+                                                            : "text-neutral-600"
+                                                        }`}
+                                                    >{cell.dom}</Link>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
                                 </div>
                             );
-                        })}
-                    </div>
+                        };
+                        return (
+                            <>
+                                {/* 모바일 — Q 그룹 없이 12개월 평면 2열 */}
+                                <div className="sm:hidden grid grid-cols-2 gap-x-3 gap-y-5">
+                                    {Array.from({ length: 12 }, (_, i) => renderMonth(i))}
+                                </div>
+                                {/* sm+ — 분기별 3개월씩 */}
+                                <div className="hidden sm:block space-y-6">
+                                    {[0, 1, 2, 3].map(qIdx => {
+                                        const isCurrentQ = isCurrentYear && qIdx === currentQuarter;
+                                        return (
+                                            <div key={qIdx}>
+                                                <p className={`text-[10px] font-semibold uppercase tracking-widest mb-2 ${
+                                                    isCurrentQ ? "text-[#0F766E] underline decoration-2 underline-offset-[4px]" : "text-neutral-300"
+                                                }`}>
+                                                    Q{qIdx + 1} · {MONTHS_KO[qIdx * 3]}–{MONTHS_KO[qIdx * 3 + 2]}
+                                                </p>
+                                                <div className="grid grid-cols-3 gap-x-5 gap-y-5">
+                                                    {[0, 1, 2].map(mOffset => renderMonth(qIdx * 3 + mOffset))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        );
+                    })()}
 
                     {/* 모바일 전용 — 프로젝트 + 템플릿 달력 아래 표시 */}
                     <div className="lg:hidden mt-8 grid grid-cols-1 sm:grid-cols-2 gap-8">

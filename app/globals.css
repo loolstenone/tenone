@@ -102,6 +102,12 @@ html.planners-dark .planners-app-shell [class~="bg-neutral-50"],
 html.planners-dark .planners-app-shell [class~="bg-neutral-100"] {
   background-color: var(--planners-bg-alt) !important;
 }
+/* hover 변형 — 다크 모드에서 hover:bg-neutral-50/100/200 이 밝은색으로 튀는 문제 방지 */
+html.planners-dark .planners-app-shell [class~="hover:bg-neutral-50"]:hover,
+html.planners-dark .planners-app-shell [class~="hover:bg-neutral-100"]:hover,
+html.planners-dark .planners-app-shell [class~="hover:bg-neutral-200"]:hover {
+  background-color: #2A2A2A !important;
+}
 html.planners-dark .planners-app-shell [class~="border-neutral-100"],
 html.planners-dark .planners-app-shell [class~="border-neutral-200"],
 html.planners-dark .planners-app-shell [class~="border-neutral-300"] {

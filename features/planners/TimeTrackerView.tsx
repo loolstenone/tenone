@@ -448,23 +448,44 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
 
                 {/* ── 24h 미니 바 ──────────────────────── */}
                 <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-100 planners-dark:border-[#2A2A2A] rounded-xl p-4 mt-4">
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">24시간 타임라인</p>
+                    <div className="flex items-center justify-between mb-2.5">
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400">24시간 타임라인</p>
+                        {totalTracked > 0 && (
+                            <p className="text-[10px] text-neutral-400 tabular-nums">
+                                기록 <span className="text-neutral-600 planners-dark:text-neutral-200 font-medium">{fmtMinutes(totalTracked)}</span>
+                                <span className="ml-1 text-neutral-300">· {Math.round((totalTracked / 1440) * 100)}%/일</span>
+                            </p>
+                        )}
+                    </div>
                     <div className="relative">
-                        <div className="h-5 bg-neutral-100 planners-dark:bg-[#252525] rounded-lg overflow-hidden">
+                        {/* 3시간 단위 가이드 라인 */}
+                        <div className="absolute inset-0 h-9 pointer-events-none">
+                            {[3, 6, 9, 12, 15, 18, 21].map(h => (
+                                <div key={h} className="absolute top-0 h-full w-px bg-neutral-200/40 planners-dark:bg-white/[0.04]" style={{ left: `${(h / 24) * 100}%` }} />
+                            ))}
+                        </div>
+                        <div className="h-9 bg-neutral-100 planners-dark:bg-[#252525] rounded-lg overflow-hidden relative">
                             {timedRoutines.map(r => {
                                 const s = parseMinutes(r.start_time);
                                 const e = parseMinutes(r.end_time);
                                 if (s === null) return null;
                                 const left  = (s / 1440) * 100;
                                 const width = e !== null && e > s ? ((e - s) / 1440) * 100 : 0.7;
+                                const isWide = width >= 4; // 약 1시간 이상이면 라벨 표시
                                 return (
                                     <div
                                         key={r.id}
-                                        className="absolute top-0 h-full opacity-80 hover:opacity-100 transition-opacity rounded-sm cursor-pointer"
+                                        className="absolute top-0 h-full opacity-90 hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center overflow-hidden px-1"
                                         style={{ left: `${left}%`, width: `${Math.max(width, 0.7)}%`, backgroundColor: catMeta(r.category).hex }}
                                         title={`${r.activity} ${fmtTime(r.start_time)}${r.end_time ? `–${fmtTime(r.end_time)}` : ""}`}
                                         onClick={() => openEdit(r)}
-                                    />
+                                    >
+                                        {isWide && (
+                                            <span className="text-[9px] font-medium text-white/95 truncate leading-tight drop-shadow-sm">
+                                                {r.activity}
+                                            </span>
+                                        )}
+                                    </div>
                                 );
                             })}
                             {/* 현재 시각 마커 */}
@@ -472,31 +493,36 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                 const m = parseMinutes(nowSlotKST());
                                 if (m === null) return null;
                                 return (
-                                    <div className="absolute top-0 h-full z-10 flex flex-col items-center" style={{ left: `${(m / 1440) * 100}%` }}>
-                                        <div className="w-px h-full bg-neutral-600/40" />
+                                    <div className="absolute top-0 h-full z-10" style={{ left: `${(m / 1440) * 100}%` }}>
+                                        <div className="w-0.5 h-full bg-rose-500" />
+                                        <div className="absolute -top-1 -left-[3px] w-2 h-2 rounded-full bg-rose-500 shadow-sm" />
                                     </div>
                                 );
                             })()}
                         </div>
                         <div className="flex justify-between mt-1">
                             {[0, 3, 6, 9, 12, 15, 18, 21].map(h => (
-                                <span key={h} className="text-[9px] text-neutral-300">{h}시</span>
+                                <span key={h} className="text-[9px] text-neutral-300 tabular-nums">{h}시</span>
                             ))}
                         </div>
                     </div>
-                    {/* 모바일에서만 — 데스크톱은 좌측 사이드 패널에서 표시 */}
+                    {/* 카테고리 범례 — 항상 표시 (액션 색상 매핑) */}
                     {catSorted.length > 0 ? (
-                        <div className="lg:hidden flex flex-wrap gap-x-3 gap-y-1 mt-2.5 items-center">
-                            {catSorted.map(([key, mins]) => (
-                                <span key={key} className="flex items-center gap-1 text-[10px] text-neutral-400">
-                                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
-                                    {catMeta(key).label} {fmtMinutes(mins)}
-                                </span>
-                            ))}
-                            <span className="text-[10px] text-neutral-300 ml-auto">총 {fmtMinutes(totalTracked)}</span>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 pt-3 border-t border-neutral-100 planners-dark:border-[#2A2A2A] items-center">
+                            {catSorted.map(([key, mins]) => {
+                                const pct = totalTracked > 0 ? Math.round((mins / totalTracked) * 100) : 0;
+                                return (
+                                    <span key={key} className="flex items-center gap-1.5 text-[10px] text-neutral-500 planners-dark:text-neutral-400">
+                                        <span className="h-2 w-2 rounded-sm shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
+                                        <span className="text-neutral-700 planners-dark:text-neutral-200">{catMeta(key).label}</span>
+                                        <span className="tabular-nums">{fmtMinutes(mins)}</span>
+                                        <span className="text-neutral-300">{pct}%</span>
+                                    </span>
+                                );
+                            })}
                         </div>
                     ) : timedRoutines.length > 0 && (
-                        <p className="lg:hidden text-[10px] text-neutral-300 mt-2.5">
+                        <p className="text-[10px] text-neutral-300 mt-2.5">
                             종료 시각을 입력하면 시간이 합산됩니다
                         </p>
                     )}
@@ -550,10 +576,10 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                     {/* 시간 라벨 */}
                                     <span className={`ml-3 w-10 text-[11px] shrink-0 mt-0.5 tabular-nums ${
                                         isNow
-                                            ? "text-[#0F766E] font-semibold"
+                                            ? "text-[#0F766E] planners-dark:text-[#5EEAD4] font-semibold"
                                             : items.length > 0
-                                                ? "text-neutral-600 planners-dark:text-neutral-300 font-medium"
-                                                : "text-neutral-300 planners-dark:text-neutral-600"
+                                                ? "text-neutral-600 planners-dark:text-neutral-200 font-medium"
+                                                : "text-neutral-400 planners-dark:text-neutral-500"
                                     }`}>
                                         {slot}
                                     </span>
@@ -612,7 +638,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                                             </button>
                                                             <button
                                                                 onClick={() => deleteEntry(r.id)}
-                                                                className="md:opacity-0 md:group-hover/row:opacity-100 p-1.5 text-neutral-300 hover:text-rose-400 transition-all shrink-0 mt-0.5"
+                                                                className="p-1.5 text-neutral-300 hover:text-rose-400 transition-colors shrink-0 mt-0.5"
                                                                 aria-label="삭제"
                                                             >
                                                                 <Trash2 className="h-3.5 w-3.5" />
@@ -620,23 +646,23 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                                         </div>
                                                     )
                                                 ))}
-                                                {/* 이 슬롯에 항목 추가 — 모바일은 항상 보임, 데스크톱은 hover */}
+                                                {/* 이 슬롯에 항목 추가 — 항상 표시 (일관성) */}
                                                 <button
                                                     onClick={() => openSlot(slot)}
-                                                    className="md:opacity-0 md:group-hover:opacity-100 flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-all"
+                                                    className="flex items-center gap-1 text-[10px] text-neutral-300 hover:text-[#0F766E] transition-colors"
                                                 >
                                                     <Plus className="h-3 w-3" /> 추가
                                                 </button>
                                             </div>
                                         ) : (
-                                            /* 빈 슬롯: 모바일 항상 + 표시, 데스크톱 hover */
+                                            /* 빈 슬롯: 항상 표시 (일관성) */
                                             <button
                                                 onClick={() => openSlot(slot)}
-                                                className="md:opacity-0 md:group-hover:opacity-100 inline-flex items-center gap-1 text-neutral-300 hover:text-[#0F766E] transition-all py-1 pr-3 -my-1"
+                                                className="inline-flex items-center gap-1 text-neutral-300 hover:text-[#0F766E] transition-colors py-1 pr-3 -my-1"
                                                 aria-label={`${slot} 시간 추가`}
                                             >
                                                 <Plus className="h-3.5 w-3.5" />
-                                                <span className="md:hidden text-[10px]">추가</span>
+                                                <span className="text-[10px]">추가</span>
                                             </button>
                                         )}
                                     </div>

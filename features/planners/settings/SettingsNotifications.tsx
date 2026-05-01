@@ -104,10 +104,10 @@ export function SettingsNotifications({
                             save({ notify_email_briefing: !notifyEmail });
                         }}
                         className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
-                            notifyEmail ? "bg-[#0F766E]" : "bg-neutral-200"
+                            notifyEmail ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"
                         }`}
                     >
-                        <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                        <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${
                             notifyEmail ? "translate-x-4" : "translate-x-0"
                         }`} />
                     </button>
@@ -130,10 +130,10 @@ export function SettingsNotifications({
                             onClick={() => notifyPush ? disablePush() : enablePush()}
                             disabled={pushLoading}
                             className={`shrink-0 relative w-10 h-6 rounded-full transition-colors disabled:opacity-60 ${
-                                notifyPush ? "bg-[#0F766E]" : "bg-neutral-200"
+                                notifyPush ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"
                             }`}
                         >
-                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${
                                 notifyPush ? "translate-x-4" : "translate-x-0"
                             }`} />
                         </button>

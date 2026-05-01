@@ -347,6 +347,24 @@ function DailyNoteCard({
         setNotesList(next);
     }
     function commitTitle() { save({ notes: serializeNotesFn(notesList) }); }
+    /** 녹음 결과 텍스트를 이 노트에 append — content + 마지막 row.note */
+    function appendTranscription(text: string) {
+        const stamp = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+        const fragment = `[🎤 ${stamp}] ${text}`;
+        const next = notesList.map(n => {
+            if (n.id !== note.id) return n;
+            const newContent = n.content ? `${n.content}\n${fragment}` : fragment;
+            const rows = (n.rows && n.rows.length > 0) ? [...n.rows] : [{ id: 'r1', cue: '', note: '' }];
+            const last = rows[rows.length - 1];
+            rows[rows.length - 1] = {
+                ...last,
+                note: last.note ? `${last.note}\n${fragment}` : fragment,
+            };
+            return { ...n, content: newContent, rows };
+        });
+        setNotesList(next);
+        save({ notes: serializeNotesFn(next) });
+    }
     function remove() {
         const next = notesList.filter(n => n.id !== note.id);
         setNotesList(next);
@@ -408,6 +426,14 @@ function DailyNoteCard({
                             : "font-medium text-neutral-700"
                     }`}
                 />
+                {/* 음성 녹음 → 이 노트에 텍스트 append */}
+                {note.type !== 'canvas' && (
+                    <VoiceRecordButton
+                        onTranscribed={appendTranscription}
+                        label=""
+                        className="w-6 h-6 rounded hover:bg-rose-50 flex items-center justify-center text-neutral-400 hover:text-rose-500 shrink-0"
+                    />
+                )}
                 <button
                     onClick={onExpand}
                     title="크게 보기"

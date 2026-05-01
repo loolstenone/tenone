@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown, Cloud, Sun, Clock, Navigation } from "lucide-react";
+import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown, Cloud, Sun, Clock, Navigation, Mic, MicOff } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GroupMarker } from "@/features/planners/SettingsLayout";
 
@@ -244,6 +244,11 @@ export function SettingsIntegrations({ showToast }: Props) {
     const [locationEnabled, setLocationEnabled]       = useState(false);
     const [locationLoading, setLocationLoading]       = useState(false);
 
+    // 마이크 권한 (음성 메모·노트 녹음 기능에서 사용)
+    const [micPermission, setMicPermission] = useState<PermissionState | null>(null);
+    const [micLoading, setMicLoading]       = useState(false);
+    const [micSupported, setMicSupported]   = useState<boolean | null>(null);
+
     // 모달 상태
     const [todoistModal, setTodoistModal] = useState(false);
     const [todoistToken, setTodoistToken] = useState("");
@@ -269,6 +274,21 @@ export function SettingsIntegrations({ showToast }: Props) {
             navigator.permissions.query({ name: "geolocation" as PermissionName }).then(result => {
                 setLocationPermission(result.state);
                 result.onchange = () => setLocationPermission(result.state as PermissionState);
+            }).catch(() => {});
+        }
+
+        // 마이크 — Web Speech API & getUserMedia 지원 여부
+        if (typeof window !== "undefined") {
+            const speechOK = !!(window as Window & { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown }).SpeechRecognition
+                || !!(window as Window & { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
+            const mediaOK = !!navigator.mediaDevices?.getUserMedia;
+            setMicSupported(speechOK || mediaOK);
+        }
+        // 마이크 권한 상태 — 일부 브라우저(Firefox)는 microphone permission API 미지원
+        if (typeof navigator !== "undefined" && navigator.permissions) {
+            navigator.permissions.query({ name: "microphone" as PermissionName }).then(result => {
+                setMicPermission(result.state);
+                result.onchange = () => setMicPermission(result.state as PermissionState);
             }).catch(() => {});
         }
 
@@ -341,6 +361,35 @@ export function SettingsIntegrations({ showToast }: Props) {
         });
         setLocationEnabled(next);
         showToast(next ? "위치 서비스 활성화됨" : "위치 서비스 비활성화됨");
+    }
+
+    // ── 마이크 권한 ────────────────────────────────────────────────────────────────
+
+    async function requestMicrophone() {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            showToast("이 브라우저는 마이크 접근을 지원하지 않습니다", false);
+            return;
+        }
+        setMicLoading(true);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // 권한 확인 즉시 stream을 닫음 — 실제 녹음은 음성 버튼에서 다시 요청
+            stream.getTracks().forEach(t => t.stop());
+            setMicPermission("granted");
+            showToast("마이크 권한 허용됨");
+        } catch (e: unknown) {
+            const err = e as { name?: string };
+            if (err.name === "NotAllowedError") {
+                setMicPermission("denied");
+                showToast("마이크 권한이 거부되었습니다", false);
+            } else if (err.name === "NotFoundError") {
+                showToast("마이크를 찾을 수 없습니다", false);
+            } else {
+                showToast("마이크 접근 오류", false);
+            }
+        } finally {
+            setMicLoading(false);
+        }
     }
 
     // ── Google Calendar ────────────────────────────────────────────────────────
@@ -651,10 +700,10 @@ export function SettingsIntegrations({ showToast }: Props) {
                         <button
                             onClick={() => toggleLocation(!locationEnabled)}
                             className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
-                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-200"
+                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"
                             }`}
                         >
-                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${
                                 locationEnabled ? "translate-x-4" : "translate-x-0"
                             }`} />
                         </button>
@@ -687,6 +736,86 @@ export function SettingsIntegrations({ showToast }: Props) {
                         )}
                     </div>
                     <LocationServiceList />
+                </div>
+            </section>
+
+            {/* ── 마이크 / 음성 녹음 ───────────────────────────────────────── */}
+            <section id="sec-microphone" className="bg-white border border-neutral-200 rounded-xl p-6 mt-4">
+                <div className="flex items-start gap-2 mb-4">
+                    <Mic className="h-4 w-4 text-neutral-400 mt-0.5 shrink-0" />
+                    <div>
+                        <h2 className="text-sm font-semibold text-neutral-900">마이크 / 음성 녹음</h2>
+                        <p className="text-xs text-neutral-400 mt-0.5">
+                            음성 메모와 노트 녹음 기능에서 사용. 일간 페이지의 「녹음」 버튼·노트 카드 🎤 아이콘
+                        </p>
+                    </div>
+                </div>
+
+                {/* 권한 상태 + 컨트롤 */}
+                <div className="flex items-start justify-between">
+                    <div className="min-w-0">
+                        <p className="text-sm text-neutral-900">마이크 접근</p>
+                        {micSupported === false ? (
+                            <p className="text-xs text-red-500 mt-0.5">
+                                이 브라우저는 음성 녹음을 지원하지 않습니다
+                                <br />
+                                <span className="text-neutral-400">Chrome · Edge · Safari 권장 (Firefox는 미지원)</span>
+                            </p>
+                        ) : micPermission === "denied" ? (
+                            <p className="text-xs text-red-500 mt-0.5">
+                                브라우저 설정 → 마이크 권한을 허용해 주세요
+                            </p>
+                        ) : micPermission === "granted" ? (
+                            <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
+                        ) : (
+                            <p className="text-xs text-neutral-500 mt-0.5">
+                                녹음 시작 시 브라우저가 권한을 요청합니다
+                            </p>
+                        )}
+                    </div>
+
+                    {micSupported === false ? (
+                        <span className="shrink-0 text-[10px] px-2 py-1 bg-red-50 text-red-500 rounded-lg flex items-center gap-1">
+                            <MicOff className="h-3 w-3" />
+                            지원 안 됨
+                        </span>
+                    ) : micPermission === "denied" ? (
+                        <span className="shrink-0 text-[10px] px-2 py-1 bg-red-50 text-red-500 rounded-lg">
+                            권한 거부됨
+                        </span>
+                    ) : micPermission === "granted" ? (
+                        <span className="shrink-0 text-[10px] px-2 py-1 bg-[#0F766E]/10 text-[#0F766E] rounded-lg flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            허용됨
+                        </span>
+                    ) : (
+                        <button
+                            onClick={requestMicrophone}
+                            disabled={micLoading}
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                        >
+                            {micLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mic className="h-3 w-3" />}
+                            마이크 허용하기
+                        </button>
+                    )}
+                </div>
+
+                {/* 사용처 */}
+                <div className="mt-5 pt-4 border-t border-neutral-100">
+                    <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium mb-2">사용처</p>
+                    <ul className="space-y-1 text-xs text-neutral-600">
+                        <li className="flex items-center gap-1.5">
+                            <span className="h-1 w-1 rounded-full bg-neutral-400" />
+                            <span>일간 노트 도구 — 「녹음」 버튼 (새 음성 메모 노트 생성)</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                            <span className="h-1 w-1 rounded-full bg-neutral-400" />
+                            <span>각 노트 카드 헤더 🎤 — 기존 노트에 음성 텍스트 추가</span>
+                        </li>
+                    </ul>
+                    <p className="text-[10px] text-neutral-400 mt-3 leading-relaxed">
+                        Web Speech API(ko-KR)로 음성을 텍스트로 변환합니다. 오디오 파일은 저장하지 않으며 텍스트만 노트에 보관됩니다.
+                    </p>
                 </div>
             </section>
 

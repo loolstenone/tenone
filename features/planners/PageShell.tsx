@@ -74,7 +74,7 @@ export function PageHeader({
                         <ChevronLeft className="h-5 w-5" />
                     </button>
                 )}
-                {icon && <span className="text-[#0F766E] shrink-0 inline-flex items-center">{icon}</span>}
+                {icon && <span className="text-[#0F766E] planners-dark:text-[#5EEAD4] shrink-0 inline-flex items-center">{icon}</span>}
                 <h1
                     className={`font-serif text-2xl md:text-3xl text-neutral-900 planners-dark:text-neutral-100 whitespace-nowrap ${
                         state ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""

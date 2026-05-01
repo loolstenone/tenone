@@ -67,49 +67,63 @@ export function applyPlannersTheme(key: string) {
         return;
     }
 
+    // 다크 모드에서 사용할 밝은 버전 — accent를 60% 흰색과 섞어 어두운 배경에서 가시성 확보
+    // (mono/charcoal 등 어두운 테마에서 다크 배경과 동일색이 되는 문제 방지)
+    const dh = `color-mix(in srgb,${h} 40%,white)`;
+
     // 컴포넌트들이 BASE(#0F766E / #0d5e56)를 하드코딩하므로
     // 새 테마 색상으로 치환하는 CSS를 주입한다.
-    el.textContent = `
-[class~="bg-[${BASE}]"]{background-color:${h}!important}
-[class~="hover:bg-[${BASE}]"]:hover{background-color:${h}!important}
-[class~="text-[${BASE}]"]{color:${h}!important}
-[class~="hover:text-[${BASE}]"]:hover{color:${h}!important}
-[class~="border-[${BASE}]"]{border-color:${h}!important}
-[class~="hover:border-[${BASE}]"]:hover{border-color:${h}!important}
-[class~="focus:border-[${BASE}]"]:focus{border-color:${h}!important}
-[class~="from-[${BASE}]"]{--tw-gradient-from:${h}!important}
-[class~="to-[${BASE}]"]{--tw-gradient-to:${h}!important}
-[class~="ring-[${BASE}]"]{--tw-ring-color:${h}!important}
-[class~="focus:ring-[${BASE}]"]:focus{--tw-ring-color:${h}!important}
-[class~="accent-[${BASE}]"]{accent-color:${h}!important}
-[class~="bg-[${BASE}]/5"]{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
-[class~="bg-[${BASE}]/10"]{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
-[class~="bg-[${BASE}]/15"]{background-color:color-mix(in srgb,${h} 15%,transparent)!important}
-[class~="bg-[${BASE}]/20"]{background-color:color-mix(in srgb,${h} 20%,transparent)!important}
-[class~="bg-[${BASE}]/90"]{background-color:color-mix(in srgb,${h} 90%,transparent)!important}
-[class~="hover:bg-[${BASE}]/5"]:hover{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
-[class~="hover:bg-[${BASE}]/10"]:hover{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
-[class~="hover:bg-[${BASE}]/20"]:hover{background-color:color-mix(in srgb,${h} 20%,transparent)!important}
-[class~="hover:bg-[${BASE}]/90"]:hover{background-color:color-mix(in srgb,${h} 90%,transparent)!important}
-[class~="text-[${BASE}]/40"]{color:color-mix(in srgb,${h} 40%,transparent)!important}
-[class~="text-[${BASE}]/60"]{color:color-mix(in srgb,${h} 60%,transparent)!important}
-[class~="text-[${BASE}]/70"]{color:color-mix(in srgb,${h} 70%,transparent)!important}
-[class~="border-[${BASE}]/10"]{border-color:color-mix(in srgb,${h} 10%,transparent)!important}
-[class~="border-[${BASE}]/20"]{border-color:color-mix(in srgb,${h} 20%,transparent)!important}
-[class~="border-[${BASE}]/30"]{border-color:color-mix(in srgb,${h} 30%,transparent)!important}
-[class~="border-[${BASE}]/40"]{border-color:color-mix(in srgb,${h} 40%,transparent)!important}
-[class~="hover:border-[${BASE}]/40"]:hover{border-color:color-mix(in srgb,${h} 40%,transparent)!important}
-[class~="focus:ring-[${BASE}]/20"]:focus{--tw-ring-color:color-mix(in srgb,${h} 20%,transparent)!important}
-[class~="focus:ring-[${BASE}]/30"]:focus{--tw-ring-color:color-mix(in srgb,${h} 30%,transparent)!important}
-[class~="from-[${BASE}]/5"]{--tw-gradient-from:color-mix(in srgb,${h} 5%,transparent)!important}
-[class~="to-[${BASE}]/10"]{--tw-gradient-to:color-mix(in srgb,${h} 10%,transparent)!important}
-.group:hover [class~="group-hover:text-[${BASE}]"]{color:${h}!important}
-.group:hover [class~="group-hover:text-[${BASE}]/40"]{color:color-mix(in srgb,${h} 40%,transparent)!important}
-[class~="bg-[${BASE}]/[0.025]"]{background-color:color-mix(in srgb,${h} 2.5%,transparent)!important}
-[class~="bg-[${BASE}]/[0.04]"]{background-color:color-mix(in srgb,${h} 4%,transparent)!important}
+    // 라이트 모드 = theme.hex 그대로 / 다크 모드 = 밝게 보정된 버전 (.planners-dark 스코프)
+    function block(accent: string, isDark: boolean) {
+        const scope = isDark ? "html.planners-dark " : "";
+        return `
+${scope}[class~="bg-[${BASE}]"]{background-color:${accent}!important}
+${scope}[class~="hover:bg-[${BASE}]"]:hover{background-color:${accent}!important}
+${scope}[class~="text-[${BASE}]"]{color:${accent}!important}
+${scope}[class~="hover:text-[${BASE}]"]:hover{color:${accent}!important}
+${scope}[class~="border-[${BASE}]"]{border-color:${accent}!important}
+${scope}[class~="hover:border-[${BASE}]"]:hover{border-color:${accent}!important}
+${scope}[class~="focus:border-[${BASE}]"]:focus{border-color:${accent}!important}
+${scope}[class~="from-[${BASE}]"]{--tw-gradient-from:${accent}!important}
+${scope}[class~="to-[${BASE}]"]{--tw-gradient-to:${accent}!important}
+${scope}[class~="ring-[${BASE}]"]{--tw-ring-color:${accent}!important}
+${scope}[class~="focus:ring-[${BASE}]"]:focus{--tw-ring-color:${accent}!important}
+${scope}[class~="accent-[${BASE}]"]{accent-color:${accent}!important}
+${scope}[class~="bg-[${BASE}]/5"]{background-color:color-mix(in srgb,${accent} 5%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/10"]{background-color:color-mix(in srgb,${accent} 10%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/15"]{background-color:color-mix(in srgb,${accent} 15%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/20"]{background-color:color-mix(in srgb,${accent} 20%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/90"]{background-color:color-mix(in srgb,${accent} 90%,transparent)!important}
+${scope}[class~="hover:bg-[${BASE}]/5"]:hover{background-color:color-mix(in srgb,${accent} 5%,transparent)!important}
+${scope}[class~="hover:bg-[${BASE}]/10"]:hover{background-color:color-mix(in srgb,${accent} 10%,transparent)!important}
+${scope}[class~="hover:bg-[${BASE}]/20"]:hover{background-color:color-mix(in srgb,${accent} 20%,transparent)!important}
+${scope}[class~="hover:bg-[${BASE}]/90"]:hover{background-color:color-mix(in srgb,${accent} 90%,transparent)!important}
+${scope}[class~="text-[${BASE}]/40"]{color:color-mix(in srgb,${accent} 40%,transparent)!important}
+${scope}[class~="text-[${BASE}]/60"]{color:color-mix(in srgb,${accent} 60%,transparent)!important}
+${scope}[class~="text-[${BASE}]/70"]{color:color-mix(in srgb,${accent} 70%,transparent)!important}
+${scope}[class~="border-[${BASE}]/10"]{border-color:color-mix(in srgb,${accent} 10%,transparent)!important}
+${scope}[class~="border-[${BASE}]/20"]{border-color:color-mix(in srgb,${accent} 20%,transparent)!important}
+${scope}[class~="border-[${BASE}]/30"]{border-color:color-mix(in srgb,${accent} 30%,transparent)!important}
+${scope}[class~="border-[${BASE}]/40"]{border-color:color-mix(in srgb,${accent} 40%,transparent)!important}
+${scope}[class~="hover:border-[${BASE}]/40"]:hover{border-color:color-mix(in srgb,${accent} 40%,transparent)!important}
+${scope}[class~="focus:ring-[${BASE}]/20"]:focus{--tw-ring-color:color-mix(in srgb,${accent} 20%,transparent)!important}
+${scope}[class~="focus:ring-[${BASE}]/30"]:focus{--tw-ring-color:color-mix(in srgb,${accent} 30%,transparent)!important}
+${scope}[class~="from-[${BASE}]/5"]{--tw-gradient-from:color-mix(in srgb,${accent} 5%,transparent)!important}
+${scope}[class~="to-[${BASE}]/10"]{--tw-gradient-to:color-mix(in srgb,${accent} 10%,transparent)!important}
+${scope}.group:hover [class~="group-hover:text-[${BASE}]"]{color:${accent}!important}
+${scope}.group:hover [class~="group-hover:text-[${BASE}]/40"]{color:color-mix(in srgb,${accent} 40%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/[0.025]"]{background-color:color-mix(in srgb,${accent} 2.5%,transparent)!important}
+${scope}[class~="bg-[${BASE}]/[0.04]"]{background-color:color-mix(in srgb,${accent} 4%,transparent)!important}
+`;
+    }
+
+    el.textContent = block(h, false) + block(dh, true) + `
 [class~="bg-[${BASE_DARK}]"]{background-color:${d}!important}
 [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:${d}!important}
 [class~="text-[${BASE_DARK}]"]{color:${d}!important}
+html.planners-dark [class~="bg-[${BASE_DARK}]"]{background-color:color-mix(in srgb,${d} 40%,white)!important}
+html.planners-dark [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:color-mix(in srgb,${d} 40%,white)!important}
+html.planners-dark [class~="text-[${BASE_DARK}]"]{color:color-mix(in srgb,${d} 40%,white)!important}
 `;
 }
 
