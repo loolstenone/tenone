@@ -704,9 +704,9 @@ export function SettingsIntegrations({ showToast }: Props) {
                     {locationPermission === "denied" ? (
                         <button
                             onClick={() => setPermGuide("geolocation")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs hover:bg-rose-600 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
                         >
-                            <ShieldAlert className="h-3 w-3" />
+                            <ShieldAlert className="h-3 w-3 text-rose-200" />
                             권한 다시 켜기
                         </button>
                     ) : locationPermission === "granted" ? (
@@ -795,9 +795,9 @@ export function SettingsIntegrations({ showToast }: Props) {
                     ) : micPermission === "denied" ? (
                         <button
                             onClick={() => setPermGuide("microphone")}
-                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs hover:bg-rose-600 transition-colors"
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
                         >
-                            <ShieldAlert className="h-3 w-3" />
+                            <ShieldAlert className="h-3 w-3 text-rose-200" />
                             권한 다시 켜기
                         </button>
                     ) : micPermission === "granted" ? (
