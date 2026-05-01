@@ -128,23 +128,39 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
 
     useEffect(() => { load(date); }, [date]);
 
-    // 일출/일몰 — 위치 권한 있으면 Open-Meteo에서 가져옴
+    // 일출/일몰 + 현재 위치명 — 위치 권한 있으면 Open-Meteo + Nominatim 역지오코딩
     const [solar, setSolar] = useState<{ sunrise: string | null; sunset: string | null }>({ sunrise: null, sunset: null });
+    const [placeName, setPlaceName] = useState<string | null>(null);
+    const [locDenied, setLocDenied] = useState(false);
     useEffect(() => {
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
                 const { latitude: lat, longitude: lon } = pos.coords;
-                const res = await fetch(
+                // 일출·일몰 (Open-Meteo)
+                const solarRes = await fetch(
                     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&start_date=${date}&end_date=${date}`
                 );
-                if (!res.ok) return;
-                const d = await res.json();
-                const sunrise = d.daily?.sunrise?.[0]?.slice(11, 16) ?? null;
-                const sunset  = d.daily?.sunset?.[0]?.slice(11, 16)  ?? null;
-                setSolar({ sunrise, sunset });
+                if (solarRes.ok) {
+                    const d = await solarRes.json();
+                    const sunrise = d.daily?.sunrise?.[0]?.slice(11, 16) ?? null;
+                    const sunset  = d.daily?.sunset?.[0]?.slice(11, 16)  ?? null;
+                    setSolar({ sunrise, sunset });
+                }
+                // 장소명 (Nominatim 역지오코딩) — 도시 + 동/구 정도만
+                const placeRes = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko&zoom=14`
+                );
+                if (placeRes.ok) {
+                    const p = await placeRes.json();
+                    const a = p.address ?? {};
+                    const local = a.suburb ?? a.neighbourhood ?? a.quarter ?? a.borough ?? a.city_district;
+                    const city = a.city ?? a.town ?? a.county ?? a.state;
+                    const label = local && city ? `${city} ${local}` : local ?? city ?? null;
+                    setPlaceName(label);
+                }
             } catch { /* silent */ }
-        }, () => { /* 권한 거부 — silent */ }, { timeout: 8000, maximumAge: 60 * 60 * 1000 });
+        }, () => { setLocDenied(true); }, { timeout: 8000, maximumAge: 60 * 60 * 1000 });
     }, [date]);
 
     // 오늘이면 현재 시각 슬롯으로 스크롤
@@ -379,6 +395,45 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                 <div className="mt-3 max-w-lg mx-auto bg-rose-50 planners-dark:bg-rose-900/20 border border-rose-200 planners-dark:border-rose-800 rounded-lg px-3 py-2 text-xs text-rose-700 planners-dark:text-rose-300 flex items-center gap-2">
                     <span className="flex-1">{errorMsg}</span>
                     <button onClick={() => setErrorMsg(null)} className="p-0.5 hover:bg-rose-100 planners-dark:hover:bg-rose-900/30 rounded"><X className="h-3 w-3" /></button>
+                </div>
+            )}
+
+            {/* 컨텍스트 스트립 — 장소·일출·일몰·현재시각. 모바일·데스크톱 공통 노출 */}
+            {(placeName || solar.sunrise || solar.sunset || nowSlot || locDenied) && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+                    {placeName && (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-700 planners-dark:text-neutral-200">
+                            <MapPin className="h-3.5 w-3.5 text-[#0F766E]" />
+                            <span className="font-medium">{placeName}</span>
+                        </span>
+                    )}
+                    {solar.sunrise && (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-600 planners-dark:text-neutral-300">
+                            <Sunrise className="h-3.5 w-3.5 text-amber-400" />
+                            <span className="font-mono tabular-nums">{solar.sunrise}</span>
+                        </span>
+                    )}
+                    {solar.sunset && (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-600 planners-dark:text-neutral-300">
+                            <Sunset className="h-3.5 w-3.5 text-orange-400" />
+                            <span className="font-mono tabular-nums">{solar.sunset}</span>
+                        </span>
+                    )}
+                    {date === today && nowSlot && (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-600 planners-dark:text-neutral-300 ml-auto">
+                            <Clock className="h-3.5 w-3.5 text-neutral-400" />
+                            <span className="font-mono tabular-nums">{nowSlot}</span>
+                        </span>
+                    )}
+                    {locDenied && !placeName && (
+                        <button
+                            onClick={() => setPermGuideOpen(true)}
+                            className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                        >
+                            <MapPin className="h-3 w-3" />
+                            위치 허용 시 장소·일출·일몰 자동 표시
+                        </button>
+                    )}
                 </div>
             )}
 
