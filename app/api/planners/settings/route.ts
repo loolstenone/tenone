@@ -18,7 +18,7 @@ export async function GET() {
     if (!Array.isArray(user.daily_tracking_metrics) || (user.daily_tracking_metrics as unknown[]).length === 0) {
         user.daily_tracking_metrics = ["satisfaction"];
     }
-    return NextResponse.json({ user });
+    return NextResponse.json({ user, memberId });
 }
 
 export async function POST(req: Request) {

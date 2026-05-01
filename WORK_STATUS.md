@@ -34,7 +34,7 @@
 
 - HandNote 이미지 크기 조절 핸들 (resize handles — Phase 2)
 - 이미지 "자리 차지" → Cornell row 높이 자동 확장 연동 (Phase 2)
-- Settings 다크모드 검증 (Daily/Weekly/Monthly 카드 색상 전환)
+- ~~Settings 다크모드 검증~~ ✅ bg-neutral-200/300/400 dark override 적용 완료 (세션 105)
 - 배포 블로커 해소: PWA 아이콘 2개 · Toss 가맹점 · Vercel 환경변수 · Google OAuth · Supabase Redirect URL
 
 ---

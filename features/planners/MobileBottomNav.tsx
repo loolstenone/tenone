@@ -63,7 +63,9 @@ export function MobileBottomNav() {
             <div className="flex items-stretch h-14">
                 {navItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href ||
+                    const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(item.href + "/") ||
                         pathname.startsWith(item.href + "?") ||
                         (item.id === "index" && pathname === "/planners/app") ||
                         (item.id === "today" && pathname.startsWith("/planners/app/daily"));
@@ -72,8 +74,9 @@ export function MobileBottomNav() {
                             key={item.id}
                             href={item.href}
                             className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
-                                isActive ? "text-[#0F766E]" : "text-neutral-400 planners-dark:text-neutral-500"
+                                isActive ? "" : "text-neutral-400 planners-dark:text-neutral-500"
                             }`}
+                            style={isActive ? { color: "var(--planners-accent-nav)" } : undefined}
                         >
                             <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                             <span className="text-[9px] font-medium leading-none tracking-tight">{item.label}</span>

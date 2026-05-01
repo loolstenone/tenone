@@ -14,6 +14,8 @@ import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/planners/template-reco
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyProjectsCard } from "./DailyProjectsCard";
+import { DailyPlacesCard } from "./DailyPlacesCard";
+import { DailyRoutinesCard } from "./DailyRoutinesCard";
 import { useSwipeNav } from "./useSwipeNav";
 import { DailyMiniMonth } from "./DailyMiniMonth";
 import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
@@ -24,6 +26,7 @@ import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CanvasStudio } from "./CanvasStudio";
+import { createClient } from "@/lib/supabase/client";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type TaskPriority = '급중' | '급경' | '완중' | '완경';
@@ -511,6 +514,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [memberId, setMemberId] = useState<string | null>(null);
+    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+    const [syncConflict, setSyncConflict] = useState(false);
+    const lastSaveTimeRef = useRef<number>(0);
+    const offlineQueueKey = "planners_offline_queue";
     // (인라인 Task 입력 제거 — 모달로 통합)
     // 활성 프로젝트 목록 (Task 태그용)
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
@@ -624,6 +633,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             : ["satisfaction"]
                     );
                     if (d.user?.user_role) setUserRole(d.user.user_role);
+                    if (d.memberId) setMemberId(d.memberId);
                 } else {
                     setTrackingMetrics(["satisfaction"]);
                 }
@@ -631,6 +641,74 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         })();
         return () => { cancelled = true; };
     }, []);
+
+    // 온라인/오프라인 감지 + 재연결 시 큐 플러시
+    useEffect(() => {
+        function handleOnline() {
+            setIsOnline(true);
+            flushOfflineQueue();
+        }
+        function handleOffline() { setIsOnline(false); }
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Supabase Realtime — 다른 기기 변경 감지 → 자동 refetch
+    useEffect(() => {
+        if (!memberId) return;
+        const supabase = createClient();
+        const channel = supabase
+            .channel(`planners_daily:${memberId}:${date}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "planners_daily",
+                    filter: `member_id=eq.${memberId}`,
+                },
+                (payload) => {
+                    const row = payload.new as { date?: string; updated_at?: string } | undefined;
+                    if (!row || row.date !== date) return;
+                    // 내가 저장한 지 3초 이내면 무시 (자기 변경 반영 방지)
+                    if (Date.now() - lastSaveTimeRef.current < 3000) return;
+                    // 다른 기기 변경 → 최신 데이터 refetch
+                    fetch(`/api/planners/daily?date=${date}`)
+                        .then((r) => r.ok ? r.json() : null)
+                        .then((data) => {
+                            if (!data?.daily) return;
+                            const d = data.daily;
+                            setTasks(d.tasks || []);
+                            setNotesList(
+                                Array.isArray(d.notes_list) && d.notes_list.length > 0
+                                    ? d.notes_list
+                                    : [makeDefaultCornellNote()]
+                            );
+                            setEnergy(d.energy_level ?? null);
+                            setSatisfaction(d.satisfaction_level ?? null);
+                            setMood(d.mood ?? null);
+                            setExerciseType(d.exercise_type ?? ""); setExerciseMinutes(d.exercise_minutes ?? "");
+                            setExerciseDistance(d.exercise_distance ?? ""); setExerciseNote(d.exercise_note ?? "");
+                            setBpSys(d.bp_systolic ?? ""); setBpDia(d.bp_diastolic ?? "");
+                            setBloodSugar(d.blood_sugar ?? ""); setBodyWeight(d.body_weight ?? "");
+                            setBodyTemp(d.body_temp ?? ""); setHealthNote(d.health_note ?? "");
+                            setStudy(d.study_level ?? null); setStudyNote(d.study_note ?? "");
+                            setFaith(d.faith_level ?? null); setFaithNote(d.faith_note ?? "");
+                            setResult(d.daily_result || ""); setResultCategory(d.daily_result_category ?? "");
+                            setSyncConflict(true);
+                            setTimeout(() => setSyncConflict(false), 3000);
+                        })
+                        .catch(() => { /* silent */ });
+                }
+            )
+            .subscribe();
+        return () => { supabase.removeChannel(channel); };
+    }, [date, memberId]);
 
     // 캘린더 엔트리 (당일 + 반복 row 전체) — 날짜 변경 시 refetch
     useEffect(() => {
@@ -762,6 +840,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         let cancelled = false;
         (async () => {
             setLoading(true);
+            setWeather(null);
             const res = await fetch(`/api/planners/daily?date=${date}`);
             if (cancelled) return;
             if (res.ok) {
@@ -838,6 +917,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     if (data.daily.weather_temp != null && data.daily.weather_code != null) {
                         setWeather({ temp: data.daily.weather_temp, code: data.daily.weather_code });
                     }
+                    if (data.daily.updated_at) {
+                        setLastSavedAt(new Date(data.daily.updated_at));
+                    }
                 } else {
                     setTasks([]);
                     setNotesList([makeDefaultCornellNote()]);
@@ -856,15 +938,49 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         return () => { cancelled = true; };
     }, [date]);
 
+    async function flushOfflineQueue() {
+        try {
+            const raw = localStorage.getItem(offlineQueueKey);
+            if (!raw) return;
+            const queue: Array<{ date: string; patch: Partial<PlannerDaily> }> = JSON.parse(raw);
+            if (!queue.length) return;
+            localStorage.removeItem(offlineQueueKey);
+            for (const item of queue) {
+                await fetch(`/api/planners/daily`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ date: item.date, ...item.patch }),
+                });
+            }
+        } catch { /* silent */ }
+    }
+
     async function save(patch: Partial<PlannerDaily>) {
+        if (!isOnline) {
+            try {
+                const raw = localStorage.getItem(offlineQueueKey);
+                const queue = raw ? JSON.parse(raw) : [];
+                // merge patches for same date
+                const idx = queue.findIndex((q: { date: string }) => q.date === date);
+                if (idx >= 0) queue[idx].patch = { ...queue[idx].patch, ...patch };
+                else queue.push({ date, patch });
+                localStorage.setItem(offlineQueueKey, JSON.stringify(queue));
+                setSaveError("오프라인 — 재연결 시 자동 저장됩니다.");
+                setTimeout(() => setSaveError(null), 3000);
+            } catch { /* silent */ }
+            return;
+        }
         setSaving(true);
+        lastSaveTimeRef.current = Date.now();
         try {
             const res = await fetch(`/api/planners/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, ...patch }),
             });
-            if (!res.ok) {
+            if (res.ok) {
+                setLastSavedAt(new Date());
+            } else {
                 const err = await res.json().catch(() => ({}));
                 console.error("daily save failed", { patch: Object.keys(patch), err });
                 setSaveError("저장 실패 — 잠시 후 다시 시도해 주세요.");
@@ -1210,11 +1326,22 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     · {HOLIDAYS[date].label}
                                 </span>
                             )}
+                            {!saving && lastSavedAt && (
+                                <span className="text-xs text-neutral-300">
+                                    · {lastSavedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <PlannersUtilityLinks />
+                    {!isOnline && (
+                        <span className="text-xs text-amber-500 font-medium">오프라인</span>
+                    )}
+                    {syncConflict && (
+                        <span className="text-xs text-sky-500 font-medium">다른 기기에서 동기화됨</span>
+                    )}
                     {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                 </div>
             </div>
@@ -1445,10 +1572,14 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             );
                         })()}
 
-                        {/* 4. 노트 추가 — 일정&업무 바로 아래 (같은 col-span-2 컨테이너) */}
+                    </div>
+
+                    {/* 4. 노트 — mobile: order-3 (향후 일정 다음), desktop: col-span-2 row-2 */}
+                    <div className="order-3 md:order-none md:col-span-2 space-y-4 min-w-0">
+                        {/* 노트 추가 — 일정&업무 바로 아래 (같은 col-span-2 컨테이너) */}
 
                         {/* 노트 추가 버튼 */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'cornell' || !n.type).length + 1;
@@ -1589,21 +1720,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
-                    {/* ── 우측 컬럼 (col 3) — 단일 셀로 묶어 좌측 길이와 무관하게 흐름. 모바일은 contents로 펼쳐 order 유지 ── */}
-                    <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1">
+                    {/* ── 우측 컬럼 (col 3) — 모바일은 contents로 펼쳐 order 유지, 데스크톱은 flex col + row-span-2로 노트행도 커버 ── */}
+                    <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1 md:row-span-2">
 
                     {/* 달력 — tablet+ only */}
                     <div className="hidden md:block">
                         <DailyMiniMonth date={date} />
                     </div>
 
-                    {/* 2. 향후 일정 & 업무 — mobile order 2 */}
+                    {/* 2. 향후 일정 & 업무 — mobile order 2 (일정&업무 바로 다음) */}
                     <div className="order-2 md:order-none">
                         <UpcomingSchedule date={date} />
                     </div>
 
-                    {/* 3. 일간 기록 — mobile order 3 */}
-                    <div className="order-3 md:order-none">
+                    {/* 4. 일간 기록 — mobile order 4 (노트 다음) */}
+                    <div className="order-4 md:order-none">
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
@@ -1763,6 +1894,16 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <DailyMomentsAuto date={date} compact />
                             </div>
                         </section>
+                    </div>
+
+                    {/* 이동 기록 */}
+                    <div className="order-7 md:order-none">
+                        <DailyPlacesCard date={date} />
+                    </div>
+
+                    {/* 일과 기록 */}
+                    <div className="order-8 md:order-none">
+                        <DailyRoutinesCard date={date} />
                     </div>
 
                     </div>

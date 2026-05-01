@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw } from "lucide-react";
+import { Loader2, Check, Link as LinkIcon, Unplug, RefreshCw, MapPin, ChevronDown } from "lucide-react";
 import { GroupMarker } from "@/features/planners/SettingsLayout";
 
 // ── 타입 ──────────────────────────────────────────────────────────────────────
@@ -14,6 +14,102 @@ interface Integration {
     external_email: string | null;
     external_name: string | null;
     last_sync_at: string | null;
+}
+
+// ── LocationServiceList ────────────────────────────────────────────────────────
+
+const LOCATION_SERVICES = [
+    {
+        icon: "🌤",
+        name: "날씨",
+        desc: "오늘 날짜 상단에 현재 날씨 카드 자동 표시",
+        stats: ["기온 / 체감온도", "날씨 아이콘 (맑음·흐림·비·눈)", "습도 · 풍속", "강수확률 · UV지수"],
+        source: "Open-Meteo",
+        status: "active" as const,
+    },
+    {
+        icon: "🌅",
+        name: "일출 / 일몰",
+        desc: "Today 뷰 타임라인에 일출·일몰 시각 표시",
+        stats: ["일출 시각 (현지 기준)", "일몰 시각 (현지 기준)", "낮 길이 자동 계산"],
+        source: "Open-Meteo",
+        status: "soon" as const,
+    },
+    {
+        icon: "🕐",
+        name: "타임존 자동 감지",
+        desc: "이동 시 현지 시간 기준으로 일정 뷰 자동 전환",
+        stats: ["브라우저 Intl API 기반 감지", "타임존 변경 시 즉시 반영", "일정 생성 시 현지 시각 기준"],
+        source: "Intl API",
+        status: "soon" as const,
+    },
+    {
+        icon: "📍",
+        name: "장소 태깅",
+        desc: "일정·할 일 저장 시 현재 위치명 자동 첨부",
+        stats: ["위치명 자동 완성 (역지오코딩)", "지도 링크 첨부 가능", "장소별 일정 통계"],
+        source: "Kakao Maps / OSM",
+        status: "planned" as const,
+    },
+    {
+        icon: "🚇",
+        name: "출퇴근 소요시간",
+        desc: "집·사무실 이동 예상 시간을 Today 뷰 상단에 표시",
+        stats: ["실시간 교통 반영 소요 시간", "대중교통 / 자가용 선택", "출발 권장 시각 알림"],
+        source: "지도 API",
+        status: "planned" as const,
+    },
+] satisfies { icon: string; name: string; desc: string; stats: string[]; source: string; status: "active" | "soon" | "planned" }[];
+
+function LocationServiceList() {
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+    return (
+        <div className="divide-y divide-neutral-100">
+            {LOCATION_SERVICES.map((s, i) => {
+                const open = openIndex === i;
+                return (
+                    <div key={s.name}>
+                        <button
+                            onClick={() => setOpenIndex(open ? null : i)}
+                            className="w-full flex items-center gap-3 py-3 text-left"
+                        >
+                            <span className="text-base leading-none shrink-0">{s.icon}</span>
+                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                                <span className="text-sm font-medium text-neutral-900">{s.name}</span>
+                                <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded ${
+                                    s.status === "active"
+                                        ? "bg-[#0F766E]/10 text-[#0F766E]"
+                                        : s.status === "soon"
+                                        ? "bg-amber-50 text-amber-600"
+                                        : "bg-neutral-100 text-neutral-400"
+                                }`}>
+                                    {s.status === "active" ? "활성" : s.status === "soon" ? "개발 중" : "예정"}
+                                </span>
+                            </div>
+                            <ChevronDown
+                                className={`h-3.5 w-3.5 text-neutral-300 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+                            />
+                        </button>
+                        {open && (
+                            <div className="pb-3 pl-9">
+                                <p className="text-xs text-neutral-500 mb-2">{s.desc}</p>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-2">
+                                    {s.stats.map(stat => (
+                                        <span key={stat} className="text-[11px] text-neutral-400 flex items-center gap-1">
+                                            <span className="inline-block w-1 h-1 rounded-full bg-neutral-300 shrink-0" />
+                                            {stat}
+                                        </span>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-neutral-300">데이터: {s.source}</p>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 // ── IntegrationRow ─────────────────────────────────────────────────────────────
@@ -150,6 +246,11 @@ export function SettingsIntegrations({ showToast }: Props) {
     const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
     const [disconnecting, setDisconnecting]         = useState(false);
 
+    // 위치 서비스
+    const [locationPermission, setLocationPermission] = useState<PermissionState | null>(null);
+    const [locationEnabled, setLocationEnabled]       = useState(false);
+    const [locationLoading, setLocationLoading]       = useState(false);
+
     // 모달 상태
     const [todoistModal, setTodoistModal] = useState(false);
     const [todoistToken, setTodoistToken] = useState("");
@@ -170,6 +271,19 @@ export function SettingsIntegrations({ showToast }: Props) {
     // ── 초기화: 연동 목록 + URL 쿼리 토스트 ──────────────────────────────────
 
     useEffect(() => {
+        // 위치 권한 상태 초기화
+        if (typeof navigator !== "undefined" && navigator.permissions) {
+            navigator.permissions.query({ name: "geolocation" as PermissionName }).then(result => {
+                setLocationPermission(result.state);
+                result.onchange = () => setLocationPermission(result.state as PermissionState);
+            }).catch(() => {});
+        }
+
+        // 위치 서비스 선호도 로드
+        fetch("/api/planners/settings")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.user?.location_enabled) setLocationEnabled(true); });
+
         // 연동 목록 로드
         fetch("/api/planners/integrations")
             .then(r => r.ok ? r.json() : null)
@@ -200,6 +314,40 @@ export function SettingsIntegrations({ showToast }: Props) {
             const d = await r.json();
             setIntegrations(d.integrations || []);
         }
+    }
+
+    // ── 위치 서비스 ───────────────────────────────────────────────────────────────
+
+    async function requestLocation() {
+        setLocationLoading(true);
+        try {
+            await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+            });
+            setLocationPermission("granted");
+            await fetch("/api/planners/settings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ location_enabled: true }),
+            });
+            setLocationEnabled(true);
+            showToast("위치 서비스 허용됨");
+        } catch {
+            if (locationPermission !== "granted") setLocationPermission("denied");
+            showToast("위치 접근이 거부되었습니다", false);
+        } finally {
+            setLocationLoading(false);
+        }
+    }
+
+    async function toggleLocation(next: boolean) {
+        await fetch("/api/planners/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location_enabled: next }),
+        });
+        setLocationEnabled(next);
+        showToast(next ? "위치 서비스 활성화됨" : "위치 서비스 비활성화됨");
     }
 
     // ── Google Calendar ────────────────────────────────────────────────────────
@@ -470,6 +618,82 @@ export function SettingsIntegrations({ showToast }: Props) {
                         onConfirm={() => confirmDisconnect("ical")}
                         onCancel={() => setPendingDisconnect(null)}
                     />
+                </div>
+            </section>
+
+            {/* 위치 서비스 */}
+            <section id="sec-location" className="bg-white border border-neutral-200 rounded-xl p-6 mt-4">
+                <div className="flex items-start gap-2 mb-4">
+                    <MapPin className="h-4 w-4 text-neutral-400 mt-0.5 shrink-0" />
+                    <div>
+                        <h2 className="text-sm font-semibold text-neutral-900">위치 서비스</h2>
+                        <p className="text-xs text-neutral-400 mt-0.5">
+                            현재 위치를 기반으로 날씨·일출일몰·타임존을 자동 설정합니다
+                        </p>
+                    </div>
+                </div>
+
+                {/* 권한 상태 + 컨트롤 */}
+                <div className="flex items-start justify-between">
+                    <div>
+                        <p className="text-sm text-neutral-900">위치 접근</p>
+                        {locationPermission === "denied" ? (
+                            <p className="text-xs text-red-500 mt-0.5">
+                                브라우저 설정 → 위치 권한을 허용해 주세요
+                            </p>
+                        ) : locationPermission === "granted" ? (
+                            <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
+                        ) : (
+                            <p className="text-xs text-neutral-500 mt-0.5">
+                                허용 시 날씨·일출·타임존이 자동으로 채워집니다
+                            </p>
+                        )}
+                    </div>
+
+                    {locationPermission === "denied" ? (
+                        <span className="text-[10px] px-2 py-1 bg-red-50 text-red-500 rounded-lg">
+                            권한 거부됨
+                        </span>
+                    ) : locationPermission === "granted" ? (
+                        <button
+                            onClick={() => toggleLocation(!locationEnabled)}
+                            className={`w-11 h-6 rounded-full transition-colors relative ${
+                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-300"
+                            }`}
+                        >
+                            <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
+                                locationEnabled ? "translate-x-[18px]" : "translate-x-0"
+                            }`} />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={requestLocation}
+                            disabled={locationLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                        >
+                            {locationLoading ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                                <MapPin className="h-3 w-3" />
+                            )}
+                            위치 허용하기
+                        </button>
+                    )}
+                </div>
+
+                {/* 서비스 목록 — 항상 노출 (미허용 시 미리보기) */}
+                <div className={`mt-5 pt-4 border-t border-neutral-100 ${
+                    !(locationPermission === "granted" && locationEnabled) ? "opacity-50" : ""
+                }`}>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium">
+                            제공 데이터
+                        </p>
+                        {!(locationPermission === "granted" && locationEnabled) && (
+                            <span className="text-[10px] text-neutral-400">위치 허용 후 활성화</span>
+                        )}
+                    </div>
+                    <LocationServiceList />
                 </div>
             </section>
 

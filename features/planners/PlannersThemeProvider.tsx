@@ -39,6 +39,18 @@ export function applyPlannersTheme(key: string) {
     root.style.setProperty("--planners-accent", theme.hex);
     root.style.setProperty("--planners-accent-dark", theme.dark);
 
+    // --planners-accent-nav: 다크 모드 네비에서 사용할 밝은 버전 (어두운 배경에서도 잘 보임)
+    let navEl = document.getElementById("planners-nav-accent-style");
+    if (!navEl) {
+        navEl = document.createElement("style");
+        navEl.id = "planners-nav-accent-style";
+        document.head.appendChild(navEl);
+    }
+    navEl.textContent = `
+        :root { --planners-accent-nav: var(--planners-accent); }
+        .planners-dark { --planners-accent-nav: color-mix(in srgb, var(--planners-accent) 50%, white); }
+    `;
+
     let el = document.getElementById("planners-theme-override");
     if (!el) {
         el = document.createElement("style");
