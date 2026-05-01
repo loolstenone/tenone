@@ -108,6 +108,24 @@ html.planners-dark .planners-app-shell [class~="hover:bg-neutral-100"]:hover,
 html.planners-dark .planners-app-shell [class~="hover:bg-neutral-200"]:hover {
   background-color: #2A2A2A !important;
 }
+
+/* 존재하지 않는 날짜(N/A) 셀 — 회색 블록 대신 미세 사선 패턴
+   Excel·Notion·Linear가 사용하는 "해당 없음" 표준 표현 */
+.pp-cell-na {
+  background-color: transparent !important;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 4px,
+    rgba(0, 0, 0, 0.04) 4px 5px
+  );
+}
+html.planners-dark .pp-cell-na {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 4px,
+    rgba(255, 255, 255, 0.05) 4px 5px
+  );
+}
 html.planners-dark .planners-app-shell [class~="border-neutral-100"],
 html.planners-dark .planners-app-shell [class~="border-neutral-200"],
 html.planners-dark .planners-app-shell [class~="border-neutral-300"] {

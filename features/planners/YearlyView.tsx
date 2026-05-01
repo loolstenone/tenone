@@ -499,7 +499,11 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                         const label = entry ? entry.title : holiday ? holiday.label : "·";
                                                         const titleAttr = entry ? `[${entry.kind}] ${entry.title}` : holiday ? `[${holiday.type}] ${holiday.label}` : `${m}/${d}`;
                                                         return (
-                                                            <td key={m} className={`p-0.5 overflow-hidden ${disabled ? "bg-neutral-50/50" : ""}`}>
+                                                            <td
+                                                                key={m}
+                                                                className={`p-0.5 overflow-hidden ${disabled ? "pp-cell-na" : ""}`}
+                                                                aria-hidden={disabled || undefined}
+                                                            >
                                                                 {!disabled && (
                                                                     <button
                                                                         onClick={() => openDayEditor(m, d)}
