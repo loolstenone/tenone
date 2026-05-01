@@ -1,18 +1,34 @@
 "use client";
 
-import { useCallback, useContext, createContext, useEffect, useRef, useState } from "react";
+// Excalidraw 기반 캔버스 스튜디오 — tldraw에서 마이그레이션 (라이선스 회피)
+//
+// 보존:
+//  · 배경 템플릿 (blank / dots / grid / lines) — CSS 오버레이
+//  · 자동 저장 (1.5s debounce) + 제목 편집 + 삭제(ConfirmSheet)
+//  · embed 모드 vs standalone 셸 분기
+//  · PNG 내보내기
+//
+// 변경:
+//  · tldraw → @excalidraw/excalidraw
+//  · DB 스키마: data.tldraw → data.excalidraw ({elements, appState, files})
+//  · 기존 tldraw 데이터를 가진 캔버스는 빈 화면으로 시작 + "이전 형식" 안내 배너
+//  · 펜 전용 모드는 제거 (Excalidraw 직접 동등물 없음 — touch-action으로 우회 가능하나 별도 작업)
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
     ChevronLeft, Loader2, Trash2, Check,
-    Download, LayoutGrid, ChevronDown,
+    Download, LayoutGrid, ChevronDown, AlertTriangle,
 } from "lucide-react";
-import type { Editor, TLEditorSnapshot } from "tldraw";
-import "tldraw/tldraw.css";
+import "@excalidraw/excalidraw/index.css";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 import { ConfirmSheet } from "./ConfirmSheet";
 
-const Tldraw = dynamic(
-    async () => (await import("tldraw")).Tldraw,
+const Excalidraw = dynamic(
+    async () => (await import("@excalidraw/excalidraw")).Excalidraw,
     { ssr: false, loading: () => <StudioLoading /> },
 );
 
@@ -28,11 +44,11 @@ function StudioLoading() {
 
 type BgTemplate = "blank" | "dots" | "grid" | "lines";
 
-const BG_OPTIONS: { key: BgTemplate; label: string; preview: string }[] = [
-    { key: "blank", label: "없음",   preview: "bg-white" },
-    { key: "dots",  label: "점 격자", preview: "bg-white" },
-    { key: "grid",  label: "모눈",   preview: "bg-white" },
-    { key: "lines", label: "줄",     preview: "bg-white" },
+const BG_OPTIONS: { key: BgTemplate; label: string }[] = [
+    { key: "blank", label: "없음" },
+    { key: "dots",  label: "점 격자" },
+    { key: "grid",  label: "모눈" },
+    { key: "lines", label: "줄" },
 ];
 
 function bgStyle(t: BgTemplate): React.CSSProperties {
@@ -108,28 +124,13 @@ function BgSelector({
     );
 }
 
-// ─── tldraw Background 슬롯 (CSS 오버레이 대신 내부에서 렌더) ────────────────
+// ─── DB 스키마 ──────────────────────────────────────────────────────────────
 
-const BgCtx = createContext<BgTemplate>("blank");
-
-function TlBackground() {
-    const t = useContext(BgCtx);
-    if (t === "blank") return null;
-    return <div className="absolute inset-0 pointer-events-none" style={bgStyle(t)} />;
+interface ExcalidrawSceneData {
+    elements: readonly ExcalidrawElement[];
+    appState?: Partial<AppState>;
+    files?: BinaryFiles;
 }
-
-// components 객체 안정 참조 — Background 교체 + 우리 헤더와 겹치는 tldraw 기본 UI 숨김
-// MenuPanel(좌상단 메인메뉴)·PageMenu·SharePanel(우상단)은 우리 헤더가 대체하므로 제거
-const TL_COMPONENTS = {
-    Background: TlBackground,
-    MenuPanel: null,
-    PageMenu: null,
-    SharePanel: null,
-    NavigationPanel: null,
-    DebugPanel: null,
-    DebugMenu: null,
-    HelpMenu: null,
-};
 
 // ─── 메인 CanvasStudio ─────────────────────────────────────────────────────
 
@@ -139,59 +140,17 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     const [saving, setSaving]       = useState(false);
     const [savedAt, setSavedAt]     = useState<Date | null>(null);
     const [notFound, setNotFound]   = useState(false);
-    const [snapshot, setSnapshot]   = useState<TLEditorSnapshot | null>(null);
+    const [initialScene, setInitialScene] = useState<ExcalidrawSceneData | null>(null);
     const [titleDirty, setTitleDirty] = useState(false);
-    const [editor, setEditor]       = useState<Editor | null>(null);
     const [bgTemplate, setBgTemplate] = useState<BgTemplate>("blank");
     const [exporting, setExporting] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [legacyWarning, setLegacyWarning] = useState(false);
 
+    const apiRef = useRef<ExcalidrawImperativeAPI | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
     const bgTemplateRef = useRef<BgTemplate>("blank");
-    // snapshot을 ref로 유지 → handleMount 클로저에서 참조 (deps에서 제거해 참조 안정화)
-    const snapshotRef = useRef<TLEditorSnapshot | null>(null);
 
-    // ── tldraw 마운트 타이밍 제어 ──────────────────────────────────────────────
-    // 문제: tldraw가 0×0 컨테이너에 마운트되면 내부 div가 display:none으로 고정됨
-    //   - loading=true 중에는 ref가 null → 기존 useEffect([embed])가 무효
-    //   - embed 모달뿐 아니라 standalone(fixed inset-0)도 flex settle 전에 마운트될 수 있음
-    // 해결: loading 완료 후 ResizeObserver로 실제 크기 확인 → tlReady=true 시점에 마운트
-    const tlContainerRef = useRef<HTMLDivElement>(null);
-    const [tlReady, setTlReady] = useState(false); // 항상 false로 시작, ResizeObserver가 트리거
-    useEffect(() => {
-        if (loading) return; // 데이터 로드 완료 후에만 실행 (이전에는 ref가 null이었음)
-        const el = tlContainerRef.current;
-        if (!el) return;
-        let done = false;
-        const activate = () => {
-            if (done) return;
-            if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-                done = true;
-                setTlReady(true);
-                ro.disconnect();
-            }
-        };
-        const ro = new ResizeObserver(activate);
-        ro.observe(el);
-        activate(); // 이미 크기 있으면 즉시 트리거
-        return () => ro.disconnect();
-    }, [loading]); // loading이 false가 될 때 실행
-
-    // ── 펜 전용 모드 (글로벌 pp-pen-mode 이벤트 수신) ────────────────────────
-    const editorRef = useRef<Editor | null>(null);
-    useEffect(() => {
-        // 초기값: localStorage 참조
-        const initial = localStorage.getItem("pp-pen-mode") === "1";
-        if (editorRef.current) editorRef.current.updateInstanceState({ isPenMode: initial });
-
-        const handler = (e: Event) => {
-            const enabled = (e as CustomEvent<{ enabled: boolean }>).detail.enabled;
-            if (editorRef.current) editorRef.current.updateInstanceState({ isPenMode: enabled });
-        };
-        window.addEventListener("pp-pen-mode", handler);
-        return () => window.removeEventListener("pp-pen-mode", handler);
-    }, []);
     bgTemplateRef.current = bgTemplate;
 
     // ── 초기 로드 ──────────────────────────────────────────────────────────
@@ -207,9 +166,14 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             if (!canvas) { setNotFound(true); setLoading(false); return; }
             setTitle(canvas.title ?? "새 캔버스");
             if (canvas.data?.bgTemplate) setBgTemplate(canvas.data.bgTemplate as BgTemplate);
-            if (canvas.data?.tldraw) {
-                setSnapshot(canvas.data.tldraw as TLEditorSnapshot);
-                snapshotRef.current = canvas.data.tldraw as TLEditorSnapshot;
+            // Excalidraw 데이터 우선 로드, 없으면 legacy tldraw 데이터 → 빈 화면 + 경고
+            if (canvas.data?.excalidraw) {
+                setInitialScene(canvas.data.excalidraw as ExcalidrawSceneData);
+            } else if (canvas.data?.tldraw) {
+                setLegacyWarning(true);
+                setInitialScene({ elements: [], appState: { viewBackgroundColor: "transparent" } });
+            } else {
+                setInitialScene({ elements: [], appState: { viewBackgroundColor: "transparent" } });
             }
             setLoading(false);
         })();
@@ -217,70 +181,69 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }, [canvasId]);
 
     // ── 캔버스 데이터 저장 ─────────────────────────────────────────────────
-    const saveCanvas = useCallback(async (ed: Editor) => {
-        const snap = ed.getSnapshot();
+    const saveCanvas = useCallback(async () => {
+        const api = apiRef.current;
+        if (!api) return;
+        const elements = api.getSceneElements();
+        const appState = api.getAppState();
+        const files = api.getFiles();
+        // viewBackgroundColor·collaborators 등 노이즈 필드 제거 — 직렬화 가벼움 + DB 호환
+        const cleanAppState: Partial<AppState> = {
+            viewBackgroundColor: "transparent",
+            gridSize: appState.gridSize,
+            zoom: appState.zoom,
+            scrollX: appState.scrollX,
+            scrollY: appState.scrollY,
+        };
         setSaving(true);
         try {
             await fetch(`/api/planners/canvases/${canvasId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ data: { tldraw: snap, bgTemplate: bgTemplateRef.current } }),
+                body: JSON.stringify({
+                    data: {
+                        excalidraw: { elements, appState: cleanAppState, files },
+                        bgTemplate: bgTemplateRef.current,
+                    },
+                }),
             });
             setSavedAt(new Date());
+            if (legacyWarning) setLegacyWarning(false); // 새로 저장 → 경고 해제
         } finally {
             setSaving(false);
         }
-    }, [canvasId]);
+    }, [canvasId, legacyWarning]);
 
-    // bgTemplate 변경 즉시 저장
+    // ── Excalidraw onChange — 사용자 변경 디바운스 저장 ──────────────────────
+    const onSceneChange = useCallback(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => { void saveCanvas(); }, 1500);
+    }, [saveCanvas]);
+
+    // bgTemplate 변경 시 즉시 저장
     const handleBgChange = useCallback((t: BgTemplate) => {
         setBgTemplate(t);
         bgTemplateRef.current = t;
-        if (editor) {
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => saveCanvas(editor), 800);
-        }
-    }, [editor, saveCanvas]);
-
-    // ── tldraw 마운트 콜백 ─────────────────────────────────────────────────
-    // snapshot은 <Tldraw snapshot={...}> prop으로 전달 → onMount에서 loadSnapshot 제거
-    // loadSnapshot을 onMount 안에서 호출하면 tldraw가 컨테이너 크기를 0으로 재감지하는 버그 발생
-    const handleMount = useCallback((ed: Editor) => {
-        setEditor(ed);
-        editorRef.current = ed;
-        const penMode = localStorage.getItem("pp-pen-mode") === "1";
-        // snapshot prop이 내부적으로 로드된 뒤 gridMode·penMode 적용 (rAF로 타이밍 보장)
-        requestAnimationFrame(() => {
-            if (!editorRef.current) return;
-            editorRef.current.updateInstanceState({ isPenMode: penMode, isGridMode: false });
-        });
-        const unsub = ed.store.listen(
-            () => {
-                if (debounceRef.current) clearTimeout(debounceRef.current);
-                debounceRef.current = setTimeout(() => saveCanvas(ed), 1500);
-            },
-            { scope: "document", source: "user" },
-        );
-        return unsub;
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => { void saveCanvas(); }, 800);
     }, [saveCanvas]);
 
     // ── PNG 내보내기 ────────────────────────────────────────────────────────
     const exportPng = useCallback(async () => {
-        if (!editor || exporting) return;
+        const api = apiRef.current;
+        if (!api || exporting) return;
+        const elements = api.getSceneElements();
+        if (!elements.length) { alert("캔버스에 내용이 없습니다."); return; }
         setExporting(true);
         try {
-            const tldraw = await import("tldraw");
-            const shapes = editor.getCurrentPageShapes();
-            if (!shapes.length) { alert("캔버스에 내용이 없습니다."); return; }
-            const result = await editor.getSvgString(shapes);
-            if (!result) return;
-            const blob = await tldraw.getSvgAsImage(result.svg, {
-                type: "png",
-                width: result.width,
-                height: result.height,
-                pixelRatio: 2,
+            const { exportToBlob } = await import("@excalidraw/excalidraw");
+            const blob = await exportToBlob({
+                elements,
+                appState: { ...api.getAppState(), exportBackground: bgTemplate !== "blank", exportWithDarkMode: false },
+                files: api.getFiles(),
+                mimeType: "image/png",
+                quality: 0.92,
             });
-            if (!blob) return;
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -292,7 +255,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         } finally {
             setExporting(false);
         }
-    }, [editor, exporting, title]);
+    }, [exporting, title, bgTemplate]);
 
     // ── 제목 저장 ──────────────────────────────────────────────────────────
     async function saveTitle(next: string) {
@@ -313,8 +276,6 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
-    // embed: 모달 안에 직접 렌더 → absolute inset-0 (부모가 relative)
-    // standalone: fixed inset-0 z-50 로 AppLayout 전체 덮음
     const shellCls = embed
         ? "absolute inset-0 flex flex-col bg-neutral-50"
         : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
@@ -338,10 +299,11 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     }
 
     return (
-        <div className={shellCls}
+        <div
+            className={shellCls}
             style={embed ? undefined : { paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-            {/* 상단 바 — embed 모드에서는 숨김 (DailyView/ProjectNotesTab 모달 헤더가 대신 처리) */}
+            {/* 상단 바 — embed 모드에서는 숨김 */}
             {!embed && (
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
                 <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
@@ -357,10 +319,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     placeholder="캔버스 제목"
                 />
 
-                {/* 배경 템플릿 선택 */}
                 <BgSelector value={bgTemplate} onChange={handleBgChange} />
 
-                {/* PNG 내보내기 */}
                 <button
                     onClick={exportPng}
                     disabled={exporting}
@@ -370,7 +330,6 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                 </button>
 
-                {/* 저장 상태 */}
                 <div className="flex items-center gap-1 text-xs text-neutral-400 shrink-0">
                     {saving || titleDirty ? (
                         <><Loader2 className="h-3 w-3 animate-spin" /> 저장 중</>
@@ -387,28 +346,49 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     <Trash2 className="h-4 w-4" />
                 </button>
             </header>
-            )} {/* !embed 헤더 끝 */}
+            )}
 
-            {/* tldraw 무한 캔버스 */}
-            {/* absolute inset-0 래퍼: flex-1 자식에서 height:100% 미작동 문제 방지 */}
-            {/* snapshot prop: loadSnapshot을 onMount에서 호출하면 tldraw가 0×0으로 재감지 → blank 버그 */}
-            <div ref={tlContainerRef} className="flex-1 min-h-0 relative">
-                <div className="absolute inset-0">
-                    {tlReady ? (
-                        <BgCtx.Provider value={bgTemplate}>
-                            <Tldraw
-                                snapshot={snapshot ?? undefined}
-                                onMount={handleMount}
-                                components={TL_COMPONENTS}
-                            />
-                        </BgCtx.Provider>
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-neutral-400 text-sm gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 준비 중…
-                        </div>
-                    )}
+            {/* 레거시 데이터 경고 — tldraw 스냅샷이 있던 캔버스 */}
+            {legacyWarning && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs text-amber-800 shrink-0">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    <span className="flex-1">
+                        이전 형식의 캔버스 데이터가 있어 빈 화면으로 시작합니다. 새로 작성하면 자동 저장됩니다.
+                    </span>
+                </div>
+            )}
+
+            {/* Excalidraw 캔버스 */}
+            <div className="flex-1 min-h-0 relative">
+                {/* 배경 템플릿 — Excalidraw 아래 z-0 */}
+                {bgTemplate !== "blank" && (
+                    <div className="absolute inset-0 pointer-events-none z-0" style={bgStyle(bgTemplate)} />
+                )}
+                <div className="absolute inset-0 z-10">
+                    <Excalidraw
+                        excalidrawAPI={(api) => { apiRef.current = api; }}
+                        initialData={initialScene
+                            ? { ...initialScene, appState: { ...initialScene.appState, viewBackgroundColor: "transparent" } }
+                            : { elements: [], appState: { viewBackgroundColor: "transparent" } }}
+                        onChange={onSceneChange}
+                        langCode="ko-KR"
+                        UIOptions={{
+                            canvasActions: {
+                                export: { saveFileToDisk: true },
+                                saveAsImage: true,
+                                loadScene: true,
+                                saveToActiveFile: false,
+                                toggleTheme: true,
+                                clearCanvas: true,
+                                changeViewBackgroundColor: false, // 배경은 우리 BgSelector가 전담
+                            },
+                            tools: { image: true },
+                            welcomeScreen: false,
+                        }}
+                    />
                 </div>
             </div>
+
             <ConfirmSheet
                 open={confirmDeleteOpen}
                 message="이 캔버스를 영구 삭제할까요?"
