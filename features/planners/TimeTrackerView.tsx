@@ -361,25 +361,16 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                 onPrev={() => setDate(d => shiftDate(d, -1))}
                 onNext={() => setDate(d => shiftDate(d, 1))}
                 right={
-                    <>
-                        {date !== today && (
-                            <button
-                                onClick={() => setDate(today)}
-                                className="p-1.5 rounded-lg text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
-                                title="오늘로 이동"
-                                aria-label="오늘로 이동"
-                            >
-                                <Calendar className="h-4 w-4" />
-                            </button>
-                        )}
+                    date !== today ? (
                         <button
-                            onClick={() => openSlot(nowSlot ?? "09:00")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
+                            onClick={() => setDate(today)}
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
+                            title="오늘로 이동"
+                            aria-label="오늘로 이동"
                         >
-                            <Plus className="h-4 w-4" />
-                            시간 추가
+                            <Calendar className="h-4 w-4" />
                         </button>
-                    </>
+                    ) : undefined
                 }
             />
 
