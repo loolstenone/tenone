@@ -1,0 +1,33 @@
+// PP Canvas Engine — 공개 API
+//
+// wrapper 컴포넌트 (HandNote, PpCanvas)는 이 파일에서만 import 한다.
+// 내부 구조는 자유롭게 리팩토링 가능 — 공개 API만 안정적으로 유지.
+
+export { CanvasEngine } from "./engine";
+export { HistoryStack } from "./history";
+
+export type {
+    CanvasDocument,
+    CanvasElement,
+    BaseElement,
+    ElementType,
+    StrokeElement,
+    RectElement,
+    EllipseElement,
+    DiamondElement,
+    ArrowElement,
+    LineElement,
+    TextElement,
+    ImageElement,
+    ToolMode,
+    Viewport,
+    BackgroundTemplate,
+    PenKind,
+    EngineEvents,
+} from "./types";
+
+export { createEmptyDocument, createElementId } from "./types";
+
+// 레이어 유틸
+export { strokeToPath, resolveStrokeStyle, getPenProfile } from "./layers/strokes";
+export { getBackgroundStyle, getBackgroundLabel, BACKGROUND_TEMPLATES } from "./layers/background";
