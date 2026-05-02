@@ -335,11 +335,20 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                 </button>
 
-                <div className="flex items-center gap-1 text-xs text-neutral-400 shrink-0">
+                <div
+                    className="shrink-0 flex items-center justify-center w-7 h-7"
+                    title={
+                        saving || titleDirty
+                            ? "저장 중"
+                            : savedAt
+                                ? `저장됨 (${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })})`
+                                : ""
+                    }
+                >
                     {saving || titleDirty ? (
-                        <><Loader2 className="h-3 w-3 animate-spin" /> 저장 중</>
+                        <Loader2 className="h-3.5 w-3.5 text-neutral-400 animate-spin" />
                     ) : savedAt ? (
-                        <><Check className="h-3 w-3 text-[#0F766E]" /> {savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨</>
+                        <Check className="h-3.5 w-3.5 text-[#0F766E]" />
                     ) : null}
                 </div>
 
