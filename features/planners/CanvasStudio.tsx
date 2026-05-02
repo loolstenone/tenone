@@ -26,7 +26,7 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 import { ConfirmSheet } from "./ConfirmSheet";
-import { CanvasPenPalette } from "./CanvasPenPalette";
+import { CanvasToolbar } from "./CanvasToolbar";
 
 const Excalidraw = dynamic(
     async () => (await import("@excalidraw/excalidraw")).Excalidraw,
@@ -389,7 +389,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     />
                 </div>
                 {/* PP AI 펜 팔레트 — Excalidraw 위에 floating */}
-                <CanvasPenPalette apiRef={apiRef} />
+                <CanvasToolbar apiRef={apiRef} />
             </div>
 
             <ConfirmSheet
