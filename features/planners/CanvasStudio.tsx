@@ -147,6 +147,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     const [exporting, setExporting] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [legacyWarning, setLegacyWarning] = useState(false);
+    const [selectedCount, setSelectedCount] = useState(0);
 
     const apiRef = useRef<ExcalidrawImperativeAPI | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -215,8 +216,11 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         }
     }, [canvasId, legacyWarning]);
 
-    // ── Excalidraw onChange — 사용자 변경 디바운스 저장 ──────────────────────
-    const onSceneChange = useCallback(() => {
+    // ── Excalidraw onChange — 사용자 변경 디바운스 저장 + 선택 추적 ──────────
+    const onSceneChange = useCallback((_els: readonly ExcalidrawElement[], appState: AppState) => {
+        const sel = appState.selectedElementIds ?? {};
+        const count = Object.keys(sel).filter(id => sel[id]).length;
+        setSelectedCount(prev => prev !== count ? count : prev);
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => { void saveCanvas(); }, 1500);
     }, [saveCanvas]);
@@ -279,7 +283,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
     const shellCls = embed
         ? "absolute inset-0 flex flex-col bg-neutral-50"
-        : "fixed inset-0 flex flex-col bg-neutral-50 z-50";
+        : "fixed inset-0 flex flex-col bg-neutral-50 z-[9100]";
 
     if (loading) {
         return (
@@ -389,7 +393,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     />
                 </div>
                 {/* PP AI 펜 팔레트 — Excalidraw 위에 floating */}
-                <CanvasToolbar apiRef={apiRef} />
+                <CanvasToolbar apiRef={apiRef} selectedCount={selectedCount} />
             </div>
 
             <ConfirmSheet

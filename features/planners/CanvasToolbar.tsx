@@ -10,6 +10,7 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import {
     Pen, Pencil, Highlighter, Eraser, MousePointer2,
     Square, Circle, ArrowRight, Type, Undo2, Redo2, Diamond, Plus,
+    Image as ImageIcon, MoveUp, MoveDown, ChevronsUp, ChevronsDown, MoreHorizontal,
 } from "lucide-react";
 
 // ─── 펜 프리셋 ──────────────────────────────────────────────────────────────
@@ -122,29 +123,34 @@ type ActiveTool =
 
 interface Props {
     apiRef: React.RefObject<ExcalidrawImperativeAPI | null>;
+    /** 현재 선택된 엘리먼트 ID 수 — 0이면 레이어 버튼 숨김 */
+    selectedCount?: number;
 }
 
-export function CanvasToolbar({ apiRef }: Props) {
+export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
     const [active, setActive] = useState<ActiveTool>({ mode: "selection" });
     const [color, setColor] = useState<string>(QUICK_COLORS[0].hex);
     // 굵기는 펜 프리셋 변경 시 그 펜의 기본 굵기로 리셋, 사용자가 슬라이더로 override 가능
     const [width, setWidth] = useState<number>(PEN_PRESETS[0].width);
     const [colorOpen, setColorOpen] = useState(false);
     const [widthOpen, setWidthOpen] = useState(false);
+    const [moreOpen, setMoreOpen] = useState(false);
     const [recentColors, setRecentColors] = useState<string[]>([]);
     const [hexInput, setHexInput] = useState("");
 
     const colorPopRef = useRef<HTMLDivElement>(null);
     const widthPopRef = useRef<HTMLDivElement>(null);
+    const morePopRef = useRef<HTMLDivElement>(null);
     const colorBtnRef = useRef<HTMLButtonElement>(null);
     const widthBtnRef = useRef<HTMLButtonElement>(null);
+    const moreBtnRef = useRef<HTMLButtonElement>(null);
 
     // ── 최초 로드 시 최근 색상 복원 ──────────────────────────────────────────
     useEffect(() => setRecentColors(loadRecent()), []);
 
     // ── 팝오버 외부 클릭 시 닫기 ──────────────────────────────────────────
     useEffect(() => {
-        if (!colorOpen && !widthOpen) return;
+        if (!colorOpen && !widthOpen && !moreOpen) return;
         function onClick(e: MouseEvent) {
             const t = e.target as Node;
             if (colorOpen && !colorPopRef.current?.contains(t) && !colorBtnRef.current?.contains(t)) {
@@ -153,10 +159,13 @@ export function CanvasToolbar({ apiRef }: Props) {
             if (widthOpen && !widthPopRef.current?.contains(t) && !widthBtnRef.current?.contains(t)) {
                 setWidthOpen(false);
             }
+            if (moreOpen && !morePopRef.current?.contains(t) && !moreBtnRef.current?.contains(t)) {
+                setMoreOpen(false);
+            }
         }
         document.addEventListener("mousedown", onClick);
         return () => document.removeEventListener("mousedown", onClick);
-    }, [colorOpen, widthOpen]);
+    }, [colorOpen, widthOpen, moreOpen]);
 
     // ── undo/redo: Excalidraw가 키보드 단축키만 노출 → DOM에 키 이벤트 디스패치 ─
     const dispatchKey = useCallback((key: string, opts: KeyboardEventInit = {}) => {
@@ -246,6 +255,48 @@ export function CanvasToolbar({ apiRef }: Props) {
         setActive({ mode });
         api.setActiveTool({ type: mode });
     }, [apiRef]);
+
+    // ── 이미지 삽입 ──────────────────────────────────────────────────────────
+    const insertImage = useCallback(() => {
+        const api = apiRef.current;
+        if (!api) return;
+        // Excalidraw 이미지 도구 — 클릭 시 파일 선택 다이얼로그가 자동으로 뜸
+        api.setActiveTool({ type: "image" });
+    }, [apiRef]);
+
+    // ── 레이어 순서 변경 ─────────────────────────────────────────────────────
+    // selectedCount > 0일 때만 동작. 선택 엘리먼트를 배열 내에서 이동.
+    const reorderSelection = useCallback((dir: "front" | "back" | "forward" | "backward") => {
+        const api = apiRef.current;
+        if (!api) return;
+        const elements = api.getSceneElements();
+        const sel = api.getAppState().selectedElementIds;
+        const selIdSet = new Set(Object.keys(sel).filter(id => sel[id]));
+        if (selIdSet.size === 0) return;
+
+        const others = elements.filter(e => !selIdSet.has(e.id));
+        const selected = elements.filter(e => selIdSet.has(e.id));
+
+        let next: typeof elements;
+        if (dir === "front") {
+            next = [...others, ...selected];
+        } else if (dir === "back") {
+            next = [...selected, ...others];
+        } else {
+            // forward/backward: 한 칸씩 이동 (간단 구현)
+            const arr = [...elements];
+            const indices = arr.map((e, i) => selIdSet.has(e.id) ? i : -1).filter(i => i >= 0);
+            const range = dir === "forward" ? [...indices].reverse() : indices;
+            for (const i of range) {
+                const swap = dir === "forward" ? i + 1 : i - 1;
+                if (swap < 0 || swap >= arr.length || selIdSet.has(arr[swap].id)) continue;
+                [arr[i], arr[swap]] = [arr[swap], arr[i]];
+            }
+            next = arr;
+        }
+        api.updateScene({ elements: next });
+    }, [apiRef]);
+
 
     // ── 키보드 단축키 ─────────────────────────────────────────────────────
     useEffect(() => {
@@ -352,21 +403,29 @@ export function CanvasToolbar({ apiRef }: Props) {
 
             <Divider />
 
-            {/* ── 인라인 7색 ─────────────────────────────────────────────── */}
-            {QUICK_COLORS.map(c => (
-                <button
-                    key={c.hex}
-                    onClick={() => !colorsDisabled && applyColor(c.hex)}
-                    disabled={colorsDisabled}
-                    title={c.name}
-                    className={`shrink-0 w-6 h-6 rounded-full border-2 transition-all ${
-                        color.toLowerCase() === c.hex.toLowerCase() && !colorsDisabled
-                            ? "border-neutral-900 planners-dark:border-white scale-110"
-                            : "border-white planners-dark:border-[#1c1c1c] hover:scale-105"
-                    } ${colorsDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
-                    style={{ backgroundColor: c.hex }}
-                />
-            ))}
+            {/* ── 인라인 7색 (sm 이상에서만 — 모바일은 "+"만) ─────────────── */}
+            <div className="hidden sm:flex items-center gap-0.5">
+                {QUICK_COLORS.map(c => (
+                    <button
+                        key={c.hex}
+                        onClick={() => !colorsDisabled && applyColor(c.hex)}
+                        disabled={colorsDisabled}
+                        title={c.name}
+                        className={`shrink-0 w-6 h-6 rounded-full border-2 transition-all ${
+                            color.toLowerCase() === c.hex.toLowerCase() && !colorsDisabled
+                                ? "border-neutral-900 planners-dark:border-white scale-110"
+                                : "border-white planners-dark:border-[#1c1c1c] hover:scale-105"
+                        } ${colorsDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
+                        style={{ backgroundColor: c.hex }}
+                    />
+                ))}
+            </div>
+
+            {/* ── 모바일: 현재 색상 미리보기 (color picker 트리거 옆) ──────── */}
+            <div className="sm:hidden shrink-0 w-5 h-5 rounded-full border-2 border-white planners-dark:border-[#1c1c1c]"
+                 style={{ backgroundColor: color, opacity: colorsDisabled ? 0.3 : 1 }}
+                 title={`현재 색상: ${color}`}
+            />
 
             {/* ── 색상 팝오버 트리거 ─────────────────────────────────────── */}
             <div className="relative shrink-0">
@@ -454,22 +513,48 @@ export function CanvasToolbar({ apiRef }: Props) {
                 )}
             </div>
 
-            <Divider />
+            {/* ── 도형·텍스트·이미지 (md 이상) ─────────────────────────────── */}
+            <div className="hidden md:flex items-center gap-0.5">
+                <Divider />
 
-            {SHAPES.map(s => (
-                <ToolButton
-                    key={s.kind}
-                    title={s.label}
-                    active={active.mode === "shape" && active.shape === s.kind}
-                    onClick={() => selectShape(s.kind)}
-                >
-                    {s.icon}
+                {SHAPES.map(s => (
+                    <ToolButton
+                        key={s.kind}
+                        title={s.label}
+                        active={active.mode === "shape" && active.shape === s.kind}
+                        onClick={() => selectShape(s.kind)}
+                    >
+                        {s.icon}
+                    </ToolButton>
+                ))}
+
+                <ToolButton title="텍스트 (T)" active={active.mode === "text"} onClick={selectText}>
+                    <Type className="h-4 w-4" />
                 </ToolButton>
-            ))}
 
-            <ToolButton title="텍스트 (T)" active={active.mode === "text"} onClick={selectText}>
-                <Type className="h-4 w-4" />
-            </ToolButton>
+                <ToolButton title="이미지 삽입 (I)" onClick={insertImage}>
+                    <ImageIcon className="h-4 w-4" />
+                </ToolButton>
+            </div>
+
+            {/* ── 레이어 순서 (선택 있을 때만, md 이상) ─────────────────────── */}
+            {selectedCount > 0 && (
+                <div className="hidden md:flex items-center gap-0.5">
+                    <Divider />
+                    <ToolButton title="맨 앞으로" onClick={() => reorderSelection("front")}>
+                        <ChevronsUp className="h-4 w-4" />
+                    </ToolButton>
+                    <ToolButton title="앞으로" onClick={() => reorderSelection("forward")}>
+                        <MoveUp className="h-4 w-4" />
+                    </ToolButton>
+                    <ToolButton title="뒤로" onClick={() => reorderSelection("backward")}>
+                        <MoveDown className="h-4 w-4" />
+                    </ToolButton>
+                    <ToolButton title="맨 뒤로" onClick={() => reorderSelection("back")}>
+                        <ChevronsDown className="h-4 w-4" />
+                    </ToolButton>
+                </div>
+            )}
 
             <Divider />
 
@@ -477,14 +562,103 @@ export function CanvasToolbar({ apiRef }: Props) {
                 <Eraser className="h-4 w-4" />
             </ToolButton>
 
-            <Divider />
+            {/* ── 더보기 (md 미만에서만 보임) ──────────────────────────────── */}
+            <div className="md:hidden relative shrink-0">
+                <button
+                    ref={moreBtnRef}
+                    onClick={() => { setMoreOpen(o => !o); setColorOpen(false); setWidthOpen(false); }}
+                    title="도형·텍스트·이미지·레이어"
+                    className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                        moreOpen
+                            ? "bg-[#0F766E] text-white"
+                            : "text-neutral-500 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                    }`}
+                >
+                    <MoreHorizontal className="h-4 w-4" />
+                </button>
+                {moreOpen && (
+                    <div
+                        ref={morePopRef}
+                        className="absolute top-full mt-2 right-0 w-56 p-2 bg-white planners-dark:bg-[#1c1c1c] border border-neutral-200 planners-dark:border-[#2a2a2a] rounded-xl shadow-xl"
+                    >
+                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">도형</div>
+                        <div className="grid grid-cols-4 gap-1 mb-2">
+                            {SHAPES.map(s => (
+                                <button
+                                    key={s.kind}
+                                    onClick={() => { selectShape(s.kind); setMoreOpen(false); }}
+                                    title={s.label}
+                                    className={`flex items-center justify-center h-9 rounded-lg transition-colors ${
+                                        active.mode === "shape" && active.shape === s.kind
+                                            ? "bg-[#0F766E] text-white"
+                                            : "text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                    }`}
+                                >
+                                    {s.icon}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 mb-2">
+                            <button
+                                onClick={() => { selectText(); setMoreOpen(false); }}
+                                className={`flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs transition-colors ${
+                                    active.mode === "text"
+                                        ? "bg-[#0F766E] text-white"
+                                        : "text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                }`}
+                            >
+                                <Type className="h-3.5 w-3.5" /> 텍스트
+                            </button>
+                            <button
+                                onClick={() => { insertImage(); setMoreOpen(false); }}
+                                className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                            >
+                                <ImageIcon className="h-3.5 w-3.5" /> 이미지
+                            </button>
+                        </div>
+                        {selectedCount > 0 && (
+                            <>
+                                <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">레이어 순서</div>
+                                <div className="grid grid-cols-4 gap-1 mb-2">
+                                    <button onClick={() => { reorderSelection("front"); setMoreOpen(false); }} title="맨 앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                        <ChevronsUp className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => { reorderSelection("forward"); setMoreOpen(false); }} title="앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                        <MoveUp className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => { reorderSelection("backward"); setMoreOpen(false); }} title="뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                        <MoveDown className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => { reorderSelection("back"); setMoreOpen(false); }} title="맨 뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                        <ChevronsDown className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                        {/* 모바일 전용: undo/redo */}
+                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">실행</div>
+                        <div className="grid grid-cols-2 gap-1">
+                            <button onClick={() => { undo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                <Undo2 className="h-3.5 w-3.5" /> 취소
+                            </button>
+                            <button onClick={() => { redo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                <Redo2 className="h-3.5 w-3.5" /> 다시
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
 
-            <ToolButton title="실행 취소 (Ctrl+Z)" onClick={undo}>
-                <Undo2 className="h-4 w-4" />
-            </ToolButton>
-            <ToolButton title="다시 실행 (Ctrl+Shift+Z)" onClick={redo}>
-                <Redo2 className="h-4 w-4" />
-            </ToolButton>
+            {/* ── undo/redo (md 이상에서만 인라인) ─────────────────────────── */}
+            <div className="hidden md:flex items-center gap-0.5">
+                <Divider />
+                <ToolButton title="실행 취소 (Ctrl+Z)" onClick={undo}>
+                    <Undo2 className="h-4 w-4" />
+                </ToolButton>
+                <ToolButton title="다시 실행 (Ctrl+Shift+Z)" onClick={redo}>
+                    <Redo2 className="h-4 w-4" />
+                </ToolButton>
+            </div>
         </div>
     );
 }

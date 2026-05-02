@@ -120,6 +120,19 @@ html.planners-dark .planners-app-shell [class~="hover:bg-neutral-200"]:hover {
 .pp-canvas .panelColumn                 { display: none !important; }
 /* 도움말 dialog 트리거 (?) — 키보드 단축키만 노출, UI 제거 */
 .pp-canvas .help-icon                   { display: none !important; }
+/* 모바일 전용 Excalidraw UI — 우측 떠 있는 라이브러리·자물쇠·손 도구 등 */
+.pp-canvas .App-mobile-menu,
+.pp-canvas .mobile-misc-tools-container,
+.pp-canvas .App-toolbar__extra-tools-trigger,
+.pp-canvas .layer-ui__wrapper__footer-left,
+.pp-canvas .island-trigger,
+.pp-canvas .ToolIcon__library,
+.pp-canvas .ToolIcon__lock,
+.pp-canvas [data-testid="pen-mode"],
+.pp-canvas [aria-label*="라이브러리"],
+.pp-canvas [aria-label*="library"],
+.pp-canvas [aria-label*="잠금"],
+.pp-canvas [aria-label*="lock"]         { display: none !important; }
 /* 줌·undo/redo 영역(footer-center)은 유지 — PP Toolbar의 보조 */
 
 /* 존재하지 않는 날짜(N/A) 셀 — 회색 블록 대신 미세 사선 패턴
