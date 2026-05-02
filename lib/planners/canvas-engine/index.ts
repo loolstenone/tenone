@@ -42,3 +42,7 @@ export { PanZoomController, screenToCanvas, canvasToScreen } from "./interaction
 
 // 직렬화
 export { serialize, deserialize } from "./serialize";
+
+// 레거시 포맷 어댑터
+export { toCanvasDocument, toHandNoteData } from "./adapters/handnote";
+export type { LegacyHandNoteData, LegacyHandStroke, LegacyHandImage } from "./adapters/handnote";
