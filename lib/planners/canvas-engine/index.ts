@@ -31,3 +31,14 @@ export { createEmptyDocument, createElementId } from "./types";
 // 레이어 유틸
 export { strokeToPath, resolveStrokeStyle, getPenProfile } from "./layers/strokes";
 export { getBackgroundStyle, getBackgroundLabel, BACKGROUND_TEMPLATES } from "./layers/background";
+
+// 렌더 (Canvas 2D 라이브 stroke)
+export { renderLiveStroke, clearLiveStroke, makeLiveContext } from "./render";
+export type { LiveStrokeContext, LiveStrokeStyle } from "./render";
+
+// 인터랙션 유틸
+export { PalmRejection } from "./interaction/palm-rejection";
+export { PanZoomController, screenToCanvas, canvasToScreen } from "./interaction/pan-zoom";
+
+// 직렬화
+export { serialize, deserialize } from "./serialize";
