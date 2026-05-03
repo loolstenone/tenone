@@ -1,6 +1,57 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-30 (세션 104 — HandNote 고도화: 이미지 삽입·선택·이동 + 자리차지 + viewBox 스케일 + Cornell UX)
+> 마지막 업데이트: 2026-05-03 (세션 105 — PP Canvas Engine 골격 + Toolbar 24색·굵기·이미지·레이어·모바일 + 이력서·활동거점·노트 페이지 삭제 확인)
+
+---
+
+## 세션 105 핵심 성과 (2026-05-03)
+
+### Canvas Engine 신설 (`lib/planners/canvas-engine/`) — Phase 1 골격
+
+HandNote와 CanvasStudio를 통합할 자체 캔버스 엔진의 뼈대 구축. tldraw·Excalidraw 의존성 점진 제거 목표.
+
+**모듈 구성**
+- `types.ts` — CanvasDocument · CanvasElement union(stroke/rect/ellipse/diamond/arrow/line/text/image) · ToolMode · PenKind 6종 · Viewport · BackgroundTemplate
+- `engine.ts` — CanvasEngine 클래스: CRUD · 선택 · 도구 · 뷰포트 · 이벤트 · undo/redo 위임
+- `history.ts` — HistoryStack (최대 50단계, structuredClone 스냅샷)
+- `render.ts` — Canvas 2D 라이브 stroke 렌더(RAF용) + makeLiveContext 헬퍼
+- `layers/strokes.ts` — perfect-freehand 래퍼 + 6종 펜 프로파일(pen/pencil/fountain/marker/highlighter/brush)
+- `layers/background.ts` — blank/dots/grid/lines 템플릿 CSS 스타일
+- `interaction/palm-rejection.ts` — 스타일러스 활성 시 손바닥 입력 무시
+- `interaction/pan-zoom.ts` — 1손가락 pan + 2손가락 pinch + 마우스 휠 zoom
+- `serialize.ts` — JSON 직렬화 + 버전 마이그레이션 골격
+- `adapters/handnote.ts` — HandNoteData ↔ CanvasDocument 양방향 어댑터
+- `adapters/handnote-storage.ts` — `__HW__` 마커 직렬화 헬퍼 6종 (HandNote에서 추출)
+
+**계획서**: `docs/PP_Canvas_Engine_Plan.md` — 6단계 ~10주 로드맵 (Core → Shapes → Selection → Text → Polish → Migration)
+
+### Canvas Toolbar 고도화 (`features/planners/CanvasToolbar.tsx`)
+
+- **색상**: 인라인 7색 + "+" 버튼으로 팝오버 (24색 4×6 그리드 / 최근 사용 8개 / HEX 입력 / 네이티브 색상 픽커)
+- **굵기**: 펜·도형 모드에서 노출, 4 프리셋(가는·기본·굵은·매우굵은) + 0.5–32px 슬라이더
+- **이미지 삽입**: Excalidraw image tool 트리거 (캔버스 클릭 시 파일 선택)
+- **레이어 순서**: 선택 시 4단계(맨앞/앞/뒤/맨뒤) 노출. updateScene으로 elements 직접 재정렬
+- **모바일 반응형**: md 미만에서 도형/텍스트/이미지/레이어/undo/redo 모두 "더보기" 메뉴로 흡수, 인라인은 핵심 7개만
+- **선택 시 크기/회전**: Excalidraw 네이티브 핸들이 캔버스 위에 표시 (별도 작업 불필요)
+
+### Canvas Studio (`features/planners/CanvasStudio.tsx`)
+
+- 풀스크린 z-index 50 → 9100 (planner 모바일 nav z-8900 위로)
+- 저장 상태: 텍스트 "오전 09:45 저장됨" 제거, 회전 Loader/체크 아이콘만 (시각·텍스트는 hover 툴팁)
+- selectedElementIds count 추적 → CanvasToolbar에 prop 전달
+- globals.css: Excalidraw 모바일 사이드 UI(라이브러리·자물쇠·손)·협업 아바타 추가 숨김 + Next.js dev portal(N) 숨김
+
+### Planners 신규 기능 3종
+
+- **이력서 섹션** (IdentityView): 학력·경력·자격증·기술·언어·수상 6 블록 + sticky 서브 네비. `planners_identities.resume` JSONB 컬럼 추가
+- **활동 거점** (Settings): SettingsBases 컴포넌트 — 사무실·집·학습·운동·카페·기타 6 type, 빠른 추가·기본 거점 별표. `planners_users.activity_bases` JSONB 컬럼 추가
+- **노트 페이지 삭제 확인** (DailyView): 코넬 노트 "페이지 삭제" 버튼 즉시 삭제 → ConfirmSheet 추가 ("N 중 i페이지" 표시)
+
+### 다음 할 것
+
+- **Phase 1.9 HandNote 본체 재작성** (다음 세션 메인) — CanvasEngine 기반 전면 교체. 데이터 레이어는 어댑터로 이미 분리됨
+- Canvas Engine Phase 2 (도형 layer 추출)
+- 배포 블로커 5종 그대로
 
 ---
 

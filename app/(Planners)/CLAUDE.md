@@ -124,6 +124,12 @@
     - `features/planners/settings/SettingsNotifications.tsx` — 이메일/Push 알림 (Group 04 일부)
     - `features/planners/settings/SettingsIntegrations.tsx` — Google Calendar·Todoist 연동 (Group 04 일부)
     - `features/planners/settings/SettingsExport.tsx` — 앱 설치·데이터 백업·구독 현황 (Group 05)
+    - `features/planners/settings/SettingsBases.tsx` — 활동 거점(사무실·집·학습·운동·카페·기타) 입력 (세션 105)
+- **Canvas Engine (세션 105)**
+  - `lib/planners/canvas-engine/` — 자체 캔버스 엔진 골격(HandNote+CanvasStudio 통합 목표). types·engine·history·render·layers·interaction·serialize·adapters 8 모듈
+  - `docs/PP_Canvas_Engine_Plan.md` — 6단계 ~10주 로드맵 (Core → Shapes → Selection → Text → Polish → Migration)
+  - `features/planners/CanvasToolbar.tsx` — 24색 팔레트·펜 굵기·이미지·레이어 순서·모바일 더보기
+  - `features/planners/IdentityView.tsx` — 이력서 섹션(학력·경력·자격증·기술·언어·수상) + sticky 서브 네비
 
 ### 라이브러리 (lib/planners/)
 - types.ts — 타입 정의 + getISOWeek/getWeekBoundaries
@@ -345,7 +351,8 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 104 (2026-04-30)** — **HandNote 이미지·뷰박스·코넬 UX 개선** · SVG viewBox + getSVGPoint 좌표계 통일 (다기기 스트로크 비율 보존) · HandImage 타입 + 이미지 삽입(파일/붙이기)/선택/이동/삭제 · renderToCanvas viewBox 스케일 보정 · SVG pointer-events 텍스트↔드로우 토글 · 코넬 엔터→신규행 포커스(cornellFocusPendingId callback ref) · Summary·Page controls 배경색 통일 |
+| **Phase** | **세션 105 (2026-05-03)** — **PP Canvas Engine 골격 + Toolbar 고도화 + 이력서/활동거점/노트 삭제 확인** · `lib/planners/canvas-engine/` 신규 모듈(types·engine·history·render·layers·interaction·serialize·adapters) + 6단계 ~10주 로드맵 docs/PP_Canvas_Engine_Plan.md · CanvasToolbar 24색 팔레트 팝오버(HEX·픽커·최근8) + 펜 굵기 슬라이더(0.5~32px) + 이미지·레이어 순서(맨앞/앞/뒤/맨뒤) + 모바일 "더보기" 메뉴 · CanvasStudio z-9100(모바일 nav 위) + 저장 아이콘만 · IdentityView 이력서 섹션(학력·경력·자격증·기술·언어·수상) + sticky 서브 네비 · SettingsBases 활동 거점(사무실·집·학습·운동·카페·기타 6 type) · DailyView 코넬 페이지 삭제 ConfirmSheet · HandNote __HW__ 직렬화 헬퍼를 canvas-engine/adapters로 추출 · `planners_identities.resume`·`planners_users.activity_bases` JSONB 컬럼 추가 |
+| **Phase 104** | 세션 104 (2026-04-30) — HandNote 이미지·뷰박스·코넬 UX 개선 · SVG viewBox + getSVGPoint 좌표계 통일 · HandImage 타입 + 이미지 삽입(파일/붙이기)/선택/이동/삭제 · renderToCanvas viewBox 스케일 보정 · 코넬 엔터→신규행 포커스 |
 | **Phase 103** | **세션 103 (2026-04-30)** — **Settings page.tsx 모듈 분리 완성** (1,799줄 → 367줄 슬림 쉘 · 5개 feature 모듈: SettingsTheme·SettingsAi·SettingsNotifications·SettingsIntegrations·SettingsExport · TypeScript 에러 0) |
 | **Phase 102** | **세션 102 (2026-04-29)** — **Settings 디자인 시스템 4단계 완성** (Claude Design 핸드오프 기반) · 4그룹 IA(시작/스타일/기능/기술) + PC 200px sticky 사이드바 + 모바일 가로 pill row · 8개 프리셋(Mono Light·Cream Serif·Editorial·Slate Pro·Black Ink·Campus Mint·Campus Blush·Designer Mono) — 5개 토큰(컬러·모서리·system폰트·user폰트·모드) 한 번 탭 적용 · `.pp-settings` 토큰 시스템(11종 라이트+다크) · xl+(1280px) Live Preview 우측 sticky 패널(Daily/Project/AI 3탭) — CSS 변수로 즉시 반영 · 컬러 18색(Mustard·Orange·Emerald·Olive 추가) · 화면 모드 작동(planners-app-shell + 일괄 반전) |
 | **Phase 100** | 세션 100 (2026-04-29) — **CanvasEditor Excalidraw → tldraw 마이그레이션** (MIT 무료, 워터마크 없음) · `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot` + `getSvgAsImage` 썸네일 |

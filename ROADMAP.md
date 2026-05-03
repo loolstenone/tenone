@@ -1,6 +1,22 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-04-24 (세션 84 — Planner's Planner AI MVP 완성)
+> 마지막 업데이트: 2026-05-03 (세션 105 — PP Canvas Engine 골격 + Toolbar 고도화)
+
+---
+
+## 🎨 PP Canvas Engine (세션 105 시작 — 6단계 ~10주)
+
+> HandNote(필기·SVG)와 CanvasStudio(자유 캔버스·Excalidraw)를 통합하는 자체 엔진. 외부 라이선스 의존 점진 제거.
+
+- [x] **Phase 1 — Core 골격** (세션 105): types · engine · history · render(Canvas 2D 라이브) · strokes(perfect-freehand 6펜) · background · palm-rejection · pan-zoom · serialize · adapters(handnote + handnote-storage)
+- [ ] **Phase 1.9 — HandNote 본체 재작성** (다음 세션 메인): CanvasEngine 기반 전면 교체. 어댑터 이미 준비됨
+- [ ] **Phase 2 — Shapes**: rect/ellipse/diamond/arrow/line 도형 layer
+- [ ] **Phase 3 — Selection**: 단일/멀티 선택 + 변형 핸들 + 회전
+- [ ] **Phase 4 — Text**: 텍스트 엘리먼트 + 인라인 편집
+- [ ] **Phase 5 — Polish**: 키보드 단축키 · 컨텍스트 메뉴 · 그리드 스냅 · 가이드
+- [ ] **Phase 6 — Migration**: Excalidraw 제거 + 기존 데이터 마이그레이션
+
+상세: `docs/PP_Canvas_Engine_Plan.md`
 
 ---
 

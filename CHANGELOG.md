@@ -4,6 +4,49 @@
 
 ---
 
+## 2026-05-03 — 세션 105 · PP Canvas Engine 골격 + Toolbar 고도화 + 이력서/활동거점
+
+### 장소
+사무실
+
+### 결정사항
+- HandNote와 CanvasStudio 통합용 **자체 캔버스 엔진** 구축 결정 (tldraw/Excalidraw 의존 점진 제거 목표). 6단계 ~10주 로드맵 → `docs/PP_Canvas_Engine_Plan.md`
+- HandNote 본체 재작성은 다세션 작업으로 분리. 이번 세션은 데이터 레이어(__HW__ 마커 헬퍼)만 어댑터로 분리해 안전 진입점 확보
+- CanvasStudio 풀스크린 z-index 50 → 9100 (planner 모바일 nav z-8900 위로)
+- 저장 상태 표시는 텍스트 제거, 아이콘만(시각은 hover)
+- Canvas 툴바 mobile 반응형: md 미만은 핵심 7개만 인라인, 나머지는 "더보기" 팝오버
+- 이력서/활동거점은 신규 JSONB 컬럼 (`planners_identities.resume`, `planners_users.activity_bases`)으로 도입
+
+### 추가
+- `lib/planners/canvas-engine/` — 신규 모듈 (types/engine/history/render/layers/interaction/serialize/adapters)
+- `docs/PP_Canvas_Engine_Plan.md` — 아키텍처 결정 문서
+- `features/planners/settings/SettingsBases.tsx` — 활동 거점 입력 UI
+- `sql/planners-resume-bases.sql` — 신규 컬럼 마이그레이션 (적용 완료)
+- `lib/planners/types.ts` — `ResumeData` · `ActivityBase` 타입
+
+### 변경
+- `features/planners/CanvasToolbar.tsx` — 24색 팔레트 팝오버 / 펜 굵기 슬라이더 / 이미지 / 레이어 순서 / 모바일 더보기 메뉴
+- `features/planners/CanvasStudio.tsx` — z-9100, 저장 아이콘만, selectedCount 추적
+- `features/planners/IdentityView.tsx` — sticky 서브 네비 + 이력서 섹션 6 블록
+- `app/(Planners)/planners/app/settings/page.tsx` — SettingsBases 통합
+- `features/planners/DailyView.tsx` — 코넬 노트 "페이지 삭제" ConfirmSheet 추가
+- `features/planners/HandNote.tsx` — 직렬화 헬퍼 6종을 canvas-engine adapter로 이동(re-export 유지, 외부 호환)
+- `app/globals.css` — Excalidraw 협업 아바타·라이브러리 등 모바일 UI 추가 숨김 / Next.js dev portal 숨김
+
+### 커밋
+- 2c66bf3a · feat(planners): Canvas Engine — render/interaction/serialize 추가
+- a47c136f · feat(planners): Canvas 툴바 — 24색 + 펜 굵기
+- 34b59bbc · feat(planners): Canvas — 이미지·레이어·모바일 반응형
+- 02a740d8 · fix(planners): Canvas 저장 상태 — 아이콘만
+- 2e065a67 · fix(planners): Canvas — Next.js dev indicator(N) 숨김
+- 41d799c4 · feat(planners): 이력서 + 활동 거점 + 노트 페이지 삭제 확인
+- b4eda1c8 · refactor(planners): HandNote 직렬화 헬퍼 → canvas-engine/adapters
+
+### 다음 세션 진입점
+- **Phase 1.9 HandNote 본체 재작성** — CanvasEngine 기반 전면 교체. 어댑터(handnote.ts·handnote-storage.ts) 이미 준비됨
+
+---
+
 ## 2026-04-30 — 세션 104 · HandNote 이미지·뷰박스·코넬 UX 개선
 
 ### 장소
