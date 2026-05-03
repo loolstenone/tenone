@@ -79,14 +79,42 @@ export interface PlannerIdentity {
     updated_at: string;
 }
 
-// 이력서 — 학력·경력·자격증·기술·언어·수상 (구조화된 자기 이력)
+// 이력서 — 인적사항·학력·경력·수상·강의·심사·기타활동 (PDF 이력서 표준)
 export interface ResumeData {
+    /** 인적사항 */
+    personal?: {
+        name_ko?: string;
+        name_en?: string;
+        name_hanja?: string;
+        birth?: string;        // YYYY-MM-DD or 자유 형식
+        address?: string;
+        phone?: string;
+        email?: string;
+        homepage?: string;
+        photo_url?: string;
+    };
+    /** 학력 — 최신순 */
     education?: Array<{ id: string; school: string; major?: string; period?: string; status?: string }>;
+    /** 병적 사항 */
+    military?: { period?: string; status?: string; notes?: string };
+    /** 경력 — 최신순 */
     career?: Array<{ id: string; company: string; role?: string; period?: string; description?: string }>;
+    /** 수상 경력 */
+    awards?: Array<{ id: string; year?: string; title: string; project?: string; client?: string; org?: string }>;
+    /** 업무 경험 분야 (ATL/BTL/디지털/브랜드 컨설팅 등) */
+    experience_areas?: Array<{ id: string; area: string; description?: string }>;
+    /** 브랜드 카테고리 경험 (금융/육아/헬스케어 등) */
+    brand_categories?: Array<{ id: string; category: string; brands: string }>;
+    /** 강의 경력 */
+    lectures?: Array<{ id: string; org: string; topic?: string; year?: string }>;
+    /** 심사 경력 */
+    judging?: Array<{ id: string; org: string; period?: string; role?: string }>;
+    /** 기타 활동 (운영중/종료 사이트·커뮤니티) */
+    side_projects?: Array<{ id: string; name: string; url?: string; status: "active" | "ended"; period?: string; description?: string }>;
+    /** 자격증 / 기술 / 언어 (선택) */
     certifications?: Array<{ id: string; name: string; issuer?: string; year?: string }>;
     skills?: Array<{ id: string; name: string; level?: "초급" | "중급" | "고급" | "전문" }>;
     languages?: Array<{ id: string; name: string; level?: string }>;
-    awards?: Array<{ id: string; title: string; year?: string; org?: string }>;
 }
 
 // 활동 거점 — 사무실·집·체육관 등. 시간 트래커·캘린더 자동 라벨링용
