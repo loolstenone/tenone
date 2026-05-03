@@ -44,6 +44,11 @@ export type { LiveStrokeContext, LiveStrokeStyle } from "./render";
 // 인터랙션 유틸
 export { PalmRejection } from "./interaction/palm-rejection";
 export { PanZoomController, screenToCanvas, canvasToScreen } from "./interaction/pan-zoom";
+export {
+    elementBoundingBox, multiBoundingBox, selectionGeometry,
+    hitHandle, applyResize, applyRotation,
+} from "./interaction/selection";
+export type { HandleId, BoundingBox, SelectionGeometry } from "./interaction/selection";
 
 // 직렬화
 export { serialize, deserialize } from "./serialize";
