@@ -46,3 +46,13 @@ export { serialize, deserialize } from "./serialize";
 // 레거시 포맷 어댑터
 export { toCanvasDocument, toHandNoteData } from "./adapters/handnote";
 export type { LegacyHandNoteData, LegacyHandStroke, LegacyHandImage } from "./adapters/handnote";
+
+// 레거시 직렬화 헬퍼 (HandNote __HW__ 마커 형식)
+export {
+    isHandwritingContent,
+    parseHandwriting,
+    serializeHandwriting,
+    extractTextPart,
+    setTextPart,
+    setHandPart,
+} from "./adapters/handnote-storage";

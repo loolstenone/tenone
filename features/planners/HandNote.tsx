@@ -1507,46 +1507,14 @@ export function HandNote({
     );
 }
 
-// ─── 직렬화 헬퍼 (DailyView 등에서 import해서 사용) ──────────────────────────
-
-const HW_MARKER = "<!-- planners:handwriting -->";
-
-export function isHandwritingContent(content: string | null | undefined): boolean {
-    return !!content && content.startsWith(HW_MARKER);
-}
-
-export function parseHandwriting(content: string | null | undefined): HandNoteData | null {
-    if (!content?.startsWith(HW_MARKER)) return null;
-    try {
-        const parsed = JSON.parse(content.slice(HW_MARKER.length).trim());
-        return Array.isArray(parsed?.strokes) ? (parsed as HandNoteData) : null;
-    } catch { return null; }
-}
-
-export function serializeHandwriting(data: HandNoteData): string {
-    return `${HW_MARKER}\n${JSON.stringify(data)}`;
-}
-
-/** content에서 텍스트 본문만 꺼내기 — 손글씨 모드에서도 .text가 있으면 그걸 반환 */
-export function extractTextPart(content: string | null | undefined): string {
-    if (!content) return "";
-    if (content.startsWith(HW_MARKER)) {
-        return parseHandwriting(content)?.text ?? "";
-    }
-    return content;
-}
-
-/** 텍스트 본문만 갱신 — 기존 손글씨가 있으면 보존, 없으면 평문 저장 */
-export function setTextPart(content: string | null | undefined, newText: string): string {
-    if (content?.startsWith(HW_MARKER)) {
-        const data = parseHandwriting(content) ?? { strokes: [], width: 600, height: 240 };
-        return serializeHandwriting({ ...data, text: newText });
-    }
-    return newText;
-}
-
-/** content를 손글씨 모드로 전환(또는 갱신) — 기존 텍스트는 .text 로 보존 */
-export function setHandPart(content: string | null | undefined, hand: HandNoteData): string {
-    const prevText = extractTextPart(content);
-    return serializeHandwriting({ ...hand, text: hand.text ?? prevText });
-}
+// ─── 직렬화 헬퍼 ────────────────────────────────────────────────────────────
+// 실제 구현은 lib/planners/canvas-engine/adapters/handnote-storage.ts로 이동.
+// 외부 사용처(DailyView, ProjectNotesTab 등)는 기존대로 import 가능 (re-export).
+export {
+    isHandwritingContent,
+    parseHandwriting,
+    serializeHandwriting,
+    extractTextPart,
+    setTextPart,
+    setHandPart,
+} from "@/lib/planners/canvas-engine/adapters/handnote-storage";
