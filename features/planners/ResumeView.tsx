@@ -4,15 +4,40 @@
 // PDF 표준 이력서 구조 (인적사항·학력·병적·경력·수상·업무경험·브랜드·강의·심사·기타활동)
 // IdentityView와 별도 페이지로 분리됨 (한 페이지에 다 넣지 않음).
 
-import { useEffect, useState } from "react";
-import { FileText, Loader2, Plus, Trash2, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, FileText, Loader2, Plus, Printer, Share2, Trash2, User, X } from "lucide-react";
 import type { PlannerIdentity, ResumeData } from "@/lib/planners/types";
 import { IdentitySubNav } from "./IdentitySubNav";
+import { useAuth } from "@/lib/auth-context";
+import { createClient } from "@/lib/supabase/client";
+
+/* ── 이력서 사진 리사이즈 (max 600px, WebP) ── */
+function resizeResumePhoto(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => {
+            const MAX = 600;
+            let w = img.width, h = img.height;
+            if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+            else { w = Math.round(w * MAX / h); h = MAX; }
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return reject(new Error("Canvas not supported"));
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob failed")), "image/webp", 0.85);
+        };
+        img.onerror = () => reject(new Error("Image load failed"));
+        img.src = URL.createObjectURL(file);
+    });
+}
 
 export function ResumeView() {
+    const { user } = useAuth();
     const [data, setData] = useState<Partial<PlannerIdentity>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [shareToast, setShareToast] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -54,27 +79,91 @@ export function ResumeView() {
     const resume: ResumeData = data.resume ?? {};
     const updateResume = (patch: ResumeData) => save({ resume: { ...resume, ...patch } });
 
+    function handlePrint() {
+        window.print();
+    }
+
+    async function handleShare() {
+        const url = typeof window !== "undefined" ? window.location.href : "";
+        const name = resume.personal?.name_ko || "이력서";
+        const title = `${name} 이력서`;
+        const text = `${name}님의 이력서`;
+        try {
+            if (typeof navigator !== "undefined" && (navigator as Navigator).share) {
+                await (navigator as Navigator).share({ title, text, url });
+                return;
+            }
+        } catch {
+            /* fall through to clipboard */
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+            setShareToast("링크가 복사되었습니다");
+            setTimeout(() => setShareToast(null), 2000);
+        } catch {
+            setShareToast("복사 실패");
+            setTimeout(() => setShareToast(null), 2000);
+        }
+    }
+
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
+        <div className="resume-root max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
+            <style>{`
+                @media print {
+                    @page { size: A4; margin: 14mm; }
+                    body { background: #fff !important; }
+                    .resume-no-print { display: none !important; }
+                    .resume-root { max-width: 100% !important; padding: 0 !important; }
+                    .resume-root section { break-inside: avoid; border: 1px solid #e5e5e5 !important; box-shadow: none !important; padding: 14px !important; margin-bottom: 8px !important; }
+                    .resume-root input, .resume-root textarea, .resume-root select {
+                        border: none !important; background: transparent !important; padding: 0 !important;
+                        color: #111 !important; -webkit-appearance: none; appearance: none;
+                    }
+                    .resume-root textarea { resize: none !important; }
+                }
+            `}</style>
+
             {/* Header */}
-            <div className="mb-2">
-                <div className="flex items-center gap-3">
+            <div className="mb-2 resume-no-print">
+                <div className="flex items-center gap-3 flex-wrap">
                     <FileText className="h-6 w-6 text-[#0F766E]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">이력서</h1>
                     {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                    <div className="ml-auto flex items-center gap-2">
+                        <button
+                            onClick={handlePrint}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                            <Printer className="h-3.5 w-3.5" /> PDF 저장
+                        </button>
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#0F766E] text-white rounded-lg hover:bg-[#115e58] transition-colors"
+                        >
+                            <Share2 className="h-3.5 w-3.5" /> 공유
+                        </button>
+                    </div>
                 </div>
                 <p className="text-sm text-neutral-500 mt-2">
                     살아온 궤적 — 학력·경력·수상·강의·심사·활동. 비전·미션의 토대가 된다.
                 </p>
+                {shareToast && (
+                    <div className="mt-2 inline-block text-xs px-3 py-1.5 bg-neutral-900 text-white rounded">
+                        {shareToast}
+                    </div>
+                )}
             </div>
 
-            <IdentitySubNav active="resume" />
+            <div className="resume-no-print">
+                <IdentitySubNav active="resume" />
+            </div>
 
             {/* ── 인적 사항 ────────────────────────────────────────── */}
             <Section badge="01" title="인적 사항" icon={<User className="h-4 w-4 text-[#0F766E]" />}>
                 <PersonalBlock
                     value={resume.personal ?? {}}
                     onSave={(p) => updateResume({ personal: p })}
+                    userId={user?.id}
                 />
             </Section>
 
@@ -199,14 +288,62 @@ function Section({ badge, title, icon, children }: {
 }
 
 /* ── 인적 사항 블록 ───────────────────────────────────── */
-function PersonalBlock({ value, onSave }: {
+function PersonalBlock({ value, onSave, userId }: {
     value: NonNullable<ResumeData["personal"]>;
     onSave: (v: NonNullable<ResumeData["personal"]>) => void;
+    userId?: string;
 }) {
     const [v, setV] = useState(value);
+    const [pending, setPending] = useState<{ file: File; previewUrl: string } | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
     useEffect(() => setV(value), [value]);
     const update = (k: keyof typeof v, val: string) => setV(prev => ({ ...prev, [k]: val }));
     const commit = () => onSave(v);
+
+    function pickFile(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setPending({ file, previewUrl: URL.createObjectURL(file) });
+        if (fileRef.current) fileRef.current.value = "";
+    }
+
+    async function confirmPhoto() {
+        if (!pending || !userId) return;
+        setUploading(true);
+        try {
+            const supabase = createClient();
+            const blob = await resizeResumePhoto(pending.file);
+            const path = `resume-photos/${userId}/${Date.now()}.webp`;
+            const { error } = await supabase.storage.from("avatars").upload(path, blob, {
+                upsert: true, contentType: "image/webp",
+            });
+            if (error) throw error;
+            const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+            const next = { ...v, photo_url: publicUrl };
+            setV(next);
+            onSave(next);
+            URL.revokeObjectURL(pending.previewUrl);
+            setPending(null);
+        } catch (err) {
+            console.error("Resume photo upload failed:", err);
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    function cancelPhoto() {
+        if (pending) URL.revokeObjectURL(pending.previewUrl);
+        setPending(null);
+    }
+
+    function removePhoto() {
+        const next = { ...v, photo_url: undefined };
+        setV(next);
+        onSave(next);
+    }
+
+    const photoSrc = pending?.previewUrl || v.photo_url;
 
     const F = ({ label, k, placeholder, full }: { label: string; k: keyof typeof v; placeholder?: string; full?: boolean }) => (
         <div className={full ? "md:col-span-2" : ""}>
@@ -223,15 +360,69 @@ function PersonalBlock({ value, onSave }: {
     );
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <F label="이름 (한글)" k="name_ko" placeholder="홍길동" />
-            <F label="이름 (영문)" k="name_en" placeholder="Gildong Hong" />
-            <F label="한자" k="name_hanja" placeholder="洪吉童" />
-            <F label="생년월일" k="birth" placeholder="1990-01-01" />
-            <F label="주소" k="address" placeholder="서울시…" full />
-            <F label="휴대전화" k="phone" placeholder="010-…" />
-            <F label="이메일" k="email" placeholder="you@example.com" />
-            <F label="홈페이지" k="homepage" placeholder="https://…" full />
+        <div className="flex flex-col md:flex-row gap-6">
+            {/* 사진 */}
+            <div className="shrink-0 flex md:block justify-center">
+                <div className="relative w-32 h-40 md:w-36 md:h-44 bg-neutral-100 border border-neutral-200 rounded-lg overflow-hidden group">
+                    {photoSrc ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={photoSrc} alt="이력서 사진" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-neutral-300 gap-1">
+                            <User className="h-10 w-10" />
+                            <span className="text-[10px]">3×4 사진</span>
+                        </div>
+                    )}
+                    {!pending && (
+                        <button
+                            onClick={() => fileRef.current?.click()}
+                            className="resume-no-print absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
+                            aria-label="사진 업로드"
+                        >
+                            <Camera className="h-6 w-6 text-white" />
+                        </button>
+                    )}
+                </div>
+                <input ref={fileRef} type="file" accept="image/*" onChange={pickFile} className="hidden" />
+                {pending ? (
+                    <div className="resume-no-print flex gap-1 mt-2 justify-center md:justify-start">
+                        <button
+                            onClick={confirmPhoto}
+                            disabled={uploading}
+                            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-[#0F766E] text-white rounded hover:bg-[#115e58] disabled:opacity-50"
+                        >
+                            {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                            저장
+                        </button>
+                        <button
+                            onClick={cancelPhoto}
+                            disabled={uploading}
+                            className="flex items-center gap-1 px-2 py-1 text-[11px] border border-neutral-200 rounded text-neutral-600 hover:bg-neutral-50"
+                        >
+                            <X className="h-3 w-3" /> 취소
+                        </button>
+                    </div>
+                ) : v.photo_url ? (
+                    <button
+                        onClick={removePhoto}
+                        className="resume-no-print mt-2 text-[11px] text-neutral-400 hover:text-red-500 ml-3 md:ml-0"
+                    >
+                        사진 삭제
+                    </button>
+                ) : null}
+            </div>
+
+            {/* 필드 */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <F label="이름 (한글)" k="name_ko" placeholder="홍길동" />
+                <F label="이름 (영문)" k="name_en" placeholder="Gildong Hong" />
+                <F label="한자" k="name_hanja" placeholder="洪吉童" />
+                <F label="생년월일" k="birth" placeholder="1990-01-01" />
+                <F label="주소" k="address" placeholder="서울시…" full />
+                <F label="휴대전화" k="phone" placeholder="010-…" />
+                <F label="이메일" k="email" placeholder="you@example.com" />
+                <F label="홈페이지" k="homepage" placeholder="https://…" full />
+            </div>
         </div>
     );
 }
