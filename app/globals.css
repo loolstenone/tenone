@@ -133,7 +133,18 @@ html.planners-dark .planners-app-shell [class~="hover:bg-neutral-200"]:hover {
 .pp-canvas [aria-label*="library"],
 .pp-canvas [aria-label*="잠금"],
 .pp-canvas [aria-label*="lock"]         { display: none !important; }
+/* 협업·사용자 아바타 — 단일 사용자 모드여도 첫 글자가 좌하단에 떠 있음 */
+.pp-canvas .UserList,
+.pp-canvas .Avatar,
+.pp-canvas .collab-button,
+.pp-canvas .CollabButton,
+.pp-canvas .layer-ui__wrapper__footer-left .Stack,
+.pp-canvas .layer-ui__wrapper__footer-bottom-left { display: none !important; }
 /* 줌·undo/redo 영역(footer-center)은 유지 — PP Toolbar의 보조 */
+
+/* Next.js dev tools 인디케이터(N 로고) — 캔버스 풀스크린 시야 방해 */
+/* (프로덕션에선 자동으로 사라짐) */
+nextjs-portal { display: none !important; }
 
 /* 존재하지 않는 날짜(N/A) 셀 — 회색 블록 대신 미세 사선 패턴
    Excel·Notion·Linear가 사용하는 "해당 없음" 표준 표현 */
