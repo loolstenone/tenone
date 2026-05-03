@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Settings, Loader2, Check, X, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
-import type { PlannerMode, AiTone, PlannerRole } from "@/lib/planners/types";
+import type { PlannerMode, AiTone, PlannerRole, ActivityBase } from "@/lib/planners/types";
 import { PLANNER_ROLE_META } from "@/lib/planners/types";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
 import { SettingsLayout, GroupMarker } from "@/features/planners/SettingsLayout";
@@ -12,6 +12,7 @@ import { SettingsAi } from "@/features/planners/settings/SettingsAi";
 import { SettingsNotifications } from "@/features/planners/settings/SettingsNotifications";
 import { SettingsIntegrations } from "@/features/planners/settings/SettingsIntegrations";
 import { SettingsExport } from "@/features/planners/settings/SettingsExport";
+import { SettingsBases } from "@/features/planners/settings/SettingsBases";
 
 const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -52,6 +53,7 @@ export default function SettingsPage() {
         try { return JSON.parse(localStorage.getItem("planners_tracking_projects") || "{}"); }
         catch { return {}; }
     });
+    const [initialBases, setInitialBases] = useState<ActivityBase[]>([]);
 
     const showToast = useCallback((text: string, ok = true) => {
         setToastMsg({ text, ok });
@@ -75,6 +77,7 @@ export default function SettingsPage() {
                     if (d.user.ai_context_scope?.length) setInitialContextScope(d.user.ai_context_scope);
                     setInitialTrackingMetrics(Array.isArray(d.user.daily_tracking_metrics) ? d.user.daily_tracking_metrics : []);
                     setInitialCountryPref(Array.isArray(d.user.country_pref) && d.user.country_pref.length > 0 ? d.user.country_pref : ["KR"]);
+                    if (Array.isArray(d.user.activity_bases)) setInitialBases(d.user.activity_bases);
                     setSub({
                         status: d.user.subscription_status || "free",
                         expires: d.user.subscription_expires_at || null,
@@ -243,6 +246,11 @@ export default function SettingsPage() {
                     initialTrackingMetrics={initialTrackingMetrics}
                     initialCountryPref={initialCountryPref}
                     initialProjectLinks={initialProjectLinks}
+                    save={save}
+                    showToast={showToast}
+                />
+                <SettingsBases
+                    initialBases={initialBases}
                     save={save}
                     showToast={showToast}
                 />

@@ -579,6 +579,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [allHandPages, setAllHandPages] = useState<HandNoteData[]>([]);
     const [imgFootprint, setImgFootprint] = useState(0);
     const [editingNoteIds, setEditingNoteIds] = useState<Set<string>>(new Set());
+    const [confirmDeletePage, setConfirmDeletePage] = useState(false);
     const [shareCopied, setShareCopied] = useState(false);
     // 코넬 노트 컬럼 헤더 높이 측정 (이미지 푸트프린트 오프셋 보정)
     const cornellHeaderRef = useRef<HTMLDivElement>(null);
@@ -2434,7 +2435,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         <div className="grid grid-cols-3 items-center px-3 py-2">
                                             <div className="flex justify-start">
                                                 <button
-                                                    onClick={deleteCornellPage}
+                                                    onClick={() => setConfirmDeletePage(true)}
                                                     disabled={allCornellPages.length <= 1}
                                                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-rose-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                                     title="현재 페이지 삭제"
@@ -2457,6 +2458,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0d5e56] transition-colors">
                                                     <Plus className="h-3 w-3" /> 새 페이지
                                                 </button>
+                                                <ConfirmSheet
+                                                    open={confirmDeletePage}
+                                                    message={`현재 페이지를 삭제할까요?\n${allCornellPages.length} 중 ${expandedNotePage + 1}페이지`}
+                                                    onConfirm={() => { setConfirmDeletePage(false); deleteCornellPage(); }}
+                                                    onCancel={() => setConfirmDeletePage(false)}
+                                                />
                                             </div>
                                         </div>
                                     </div>

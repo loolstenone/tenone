@@ -75,7 +75,30 @@ export interface PlannerIdentity {
     mission_statement: string | null;
     key_results: Array<{ id: string; category: string; text: string }>;
     execution_plan: string | null;
+    resume?: ResumeData;
     updated_at: string;
+}
+
+// 이력서 — 학력·경력·자격증·기술·언어·수상 (구조화된 자기 이력)
+export interface ResumeData {
+    education?: Array<{ id: string; school: string; major?: string; period?: string; status?: string }>;
+    career?: Array<{ id: string; company: string; role?: string; period?: string; description?: string }>;
+    certifications?: Array<{ id: string; name: string; issuer?: string; year?: string }>;
+    skills?: Array<{ id: string; name: string; level?: "초급" | "중급" | "고급" | "전문" }>;
+    languages?: Array<{ id: string; name: string; level?: string }>;
+    awards?: Array<{ id: string; title: string; year?: string; org?: string }>;
+}
+
+// 활동 거점 — 사무실·집·체육관 등. 시간 트래커·캘린더 자동 라벨링용
+export interface ActivityBase {
+    id: string;
+    name: string;
+    type: "home" | "office" | "study" | "gym" | "cafe" | "other";
+    address?: string;
+    lat?: number;
+    lng?: number;
+    color?: string;
+    isPrimary?: boolean;
 }
 
 export type TaskQuadrant = '급중' | '급경' | '완중' | '완경';

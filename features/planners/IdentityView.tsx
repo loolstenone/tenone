@@ -15,11 +15,13 @@
 //  · Key Results       : key_results (실행 계획은 폐기 — KR과 중복)
 
 import { useEffect, useMemo, useState } from "react";
-import { Compass, Loader2, Plus, Trash2 } from "lucide-react";
-import type { PlannerIdentity } from "@/lib/planners/types";
+import { Compass, Loader2, Plus, Trash2, FileText } from "lucide-react";
+import type { PlannerIdentity, ResumeData } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 
 const CATEGORIES = ["업무", "학업", "건강", "가족", "관계", "재무", "취미", "기타"];
+
+const SKILL_LEVELS = ["초급", "중급", "고급", "전문"] as const;
 
 export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
     const [data, setData] = useState<Partial<PlannerIdentity>>({});
@@ -91,8 +93,29 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                 <PlannersUtilityLinks />
             </div>
 
+            {/* 서브 네비게이션 — 페이지 내 앵커 점프 */}
+            <nav className="sticky top-12 z-20 -mx-4 md:-mx-10 px-4 md:px-10 py-2 bg-[#FAFAF7]/95 backdrop-blur border-b border-neutral-200/70 flex items-center gap-1 overflow-x-auto">
+                {[
+                    { id: "vision", label: "비전" },
+                    { id: "mission", label: "미션·역할" },
+                    { id: "values", label: "가치·강점" },
+                    ...(mode === "all_in_one" ? [{ id: "outside", label: "외부" }] : []),
+                    { id: "kr", label: "Key Results" },
+                    { id: "resume", label: "이력서" },
+                ].map(s => (
+                    <a
+                        key={s.id}
+                        href={`#${s.id}`}
+                        className="shrink-0 text-xs px-3 py-1.5 rounded-full text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
+                    >
+                        {s.label}
+                    </a>
+                ))}
+            </nav>
+
             {/* ① Roof — 비전 (한 줄) */}
             <Section
+                id="vision"
                 badge="ROOF"
                 title="비전"
                 hint="도달하고자 하는 최종 지점. 한 문장으로 적는다."
@@ -108,6 +131,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
 
             {/* ② Walls — 미션 / 역할 */}
             <Section
+                id="mission"
                 badge="WALLS"
                 title="미션 · 역할"
                 hint="비전을 떠받치는 역할들. 한 줄에 · 로 구분한다."
@@ -124,6 +148,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                 <>
                     {/* ③ Foundation — 본질 (가치관·강점) */}
                     <Section
+                        id="values"
                         badge="FOUNDATION"
                         title="본질"
                         hint="모든 것을 떠받치는 나의 가치관과 강점."
@@ -155,6 +180,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
 
                     {/* ④ Context — 외부 환경 */}
                     <Section
+                        id="outside"
                         badge="CONTEXT"
                         title="외부 환경"
                         hint="내가 서 있는 자리와 주변에 열려 있는 기회."
@@ -191,16 +217,22 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                 items={data.key_results ?? []}
                 onSave={(arr) => save({ key_results: arr })}
             />
+
+            {/* ⑥ Resume — 이력서 (학력·경력·자격증·기술·언어·수상) */}
+            <ResumeSection
+                value={data.resume ?? {}}
+                onSave={(r) => save({ resume: r })}
+            />
         </div>
     );
 }
 
 /* ── 공통 카드 셸 ──────────────────────────────────────── */
-function Section({ badge, title, hint, children, accent }: {
-    badge: string; title: string; hint?: string; children: React.ReactNode; accent?: boolean;
+function Section({ id, badge, title, hint, children, accent }: {
+    id?: string; badge: string; title: string; hint?: string; children: React.ReactNode; accent?: boolean;
 }) {
     return (
-        <section className={`bg-white rounded-xl p-6 ${accent ? "border-2 border-[#0F766E]/30" : "border border-neutral-200"}`}>
+        <section id={id} className={`bg-white rounded-xl p-6 scroll-mt-28 ${accent ? "border-2 border-[#0F766E]/30" : "border border-neutral-200"}`}>
             <div className="mb-3">
                 <div className="flex items-baseline gap-2">
                     <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">{badge}</span>
@@ -304,7 +336,7 @@ function KeyResultsSection({ items, onSave }: {
     }
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-6">
+        <section id="kr" className="bg-white border border-neutral-200 rounded-xl p-6 scroll-mt-28">
             <div className="flex items-center justify-between mb-3">
                 <div>
                     <div className="flex items-baseline gap-2">
@@ -352,5 +384,181 @@ function KeyResultsSection({ items, onSave }: {
                 ))}
             </div>
         </section>
+    );
+}
+
+/* ── 이력서 섹션 ───────────────────────────────────────── */
+function ResumeSection({ value, onSave }: {
+    value: ResumeData;
+    onSave: (r: ResumeData) => void;
+}) {
+    const update = (patch: Partial<ResumeData>) => onSave({ ...value, ...patch });
+
+    return (
+        <section id="resume" className="bg-white border border-neutral-200 rounded-xl p-6 scroll-mt-28">
+            <div className="flex items-baseline gap-2 mb-1">
+                <FileText className="h-4 w-4 text-[#0F766E]" />
+                <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">RESUME</span>
+                <h2 className="text-sm font-semibold text-neutral-800">이력서</h2>
+            </div>
+            <p className="text-xs text-neutral-500 mb-5">살아온 궤적 — 학력·경력·자격·기술·언어·수상. 비전·미션의 토대가 된다.</p>
+
+            <div className="space-y-5">
+                <ResumeListBlock
+                    title="학력"
+                    items={value.education ?? []}
+                    onChange={(arr) => update({ education: arr })}
+                    placeholders={{ school: "학교명", major: "전공", period: "기간 (예: 2018.03–2022.02)", status: "졸업/재학" }}
+                    fields={["school", "major", "period", "status"]}
+                    keyField="school"
+                />
+                <ResumeListBlock
+                    title="경력"
+                    items={value.career ?? []}
+                    onChange={(arr) => update({ career: arr })}
+                    placeholders={{ company: "회사명", role: "직무·직책", period: "기간", description: "주요 업무·성과" }}
+                    fields={["company", "role", "period", "description"]}
+                    keyField="company"
+                    multilineField="description"
+                />
+                <ResumeListBlock
+                    title="자격증"
+                    items={value.certifications ?? []}
+                    onChange={(arr) => update({ certifications: arr })}
+                    placeholders={{ name: "자격명", issuer: "발급기관", year: "취득년도" }}
+                    fields={["name", "issuer", "year"]}
+                    keyField="name"
+                />
+                <ResumeListBlock
+                    title="기술"
+                    items={value.skills ?? []}
+                    onChange={(arr) => update({ skills: arr })}
+                    placeholders={{ name: "기술·도구명", level: "수준" }}
+                    fields={["name", "level"]}
+                    keyField="name"
+                    selectField={{ key: "level", options: SKILL_LEVELS }}
+                />
+                <ResumeListBlock
+                    title="언어"
+                    items={value.languages ?? []}
+                    onChange={(arr) => update({ languages: arr })}
+                    placeholders={{ name: "언어 (예: 영어)", level: "수준 (예: 비즈니스 수준)" }}
+                    fields={["name", "level"]}
+                    keyField="name"
+                />
+                <ResumeListBlock
+                    title="수상"
+                    items={value.awards ?? []}
+                    onChange={(arr) => update({ awards: arr })}
+                    placeholders={{ title: "수상명", org: "기관", year: "년도" }}
+                    fields={["title", "org", "year"]}
+                    keyField="title"
+                />
+            </div>
+        </section>
+    );
+}
+
+/* 이력서 항목 1블록 — 학력/경력/자격/기술/언어/수상 공통 패턴 */
+function ResumeListBlock<T extends { id: string }>({
+    title, items, onChange, placeholders, fields, keyField, multilineField, selectField,
+}: {
+    title: string;
+    items: T[];
+    onChange: (arr: T[]) => void;
+    placeholders: Partial<Record<keyof T, string>>;
+    fields: (keyof T)[];
+    keyField: keyof T;
+    multilineField?: keyof T;
+    selectField?: { key: keyof T; options: readonly string[] };
+}) {
+    const [list, setList] = useState<T[]>(items);
+    useEffect(() => setList(items), [items]);
+
+    function add() {
+        const blank = { id: `r_${Date.now()}` } as T;
+        const next = [...list, blank];
+        setList(next);
+        onChange(next);
+    }
+    function patch(id: string, p: Partial<T>) {
+        setList(prev => prev.map(it => it.id === id ? { ...it, ...p } : it));
+    }
+    function commit() { onChange(list); }
+    function remove(id: string) {
+        const next = list.filter(it => it.id !== id);
+        setList(next);
+        onChange(next);
+    }
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-semibold text-neutral-700">{title}</h3>
+                <button onClick={add} className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 rounded transition-colors">
+                    <Plus className="h-3 w-3" /> 추가
+                </button>
+            </div>
+            {list.length === 0 ? (
+                <p className="text-xs text-neutral-400 py-3 text-center bg-neutral-50 rounded">아직 항목이 없습니다.</p>
+            ) : (
+                <div className="space-y-1.5">
+                    {list.map(item => (
+                        <div key={item.id} className="group bg-neutral-50 rounded-lg px-3 py-2 space-y-1.5">
+                            <div className="flex items-start gap-2">
+                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    {fields.filter(f => f !== multilineField).map(f => {
+                                        if (selectField && f === selectField.key) {
+                                            return (
+                                                <select
+                                                    key={String(f)}
+                                                    value={(item[f] as string) ?? ""}
+                                                    onChange={(e) => patch(item.id, { [f]: e.target.value || undefined } as Partial<T>)}
+                                                    onBlur={commit}
+                                                    className="text-xs bg-white border border-neutral-200 rounded px-2 py-1 text-neutral-700 focus:outline-none"
+                                                >
+                                                    <option value="">선택</option>
+                                                    {selectField.options.map(o => <option key={o} value={o}>{o}</option>)}
+                                                </select>
+                                            );
+                                        }
+                                        const isKey = f === keyField;
+                                        return (
+                                            <input
+                                                key={String(f)}
+                                                type="text"
+                                                value={(item[f] as string) ?? ""}
+                                                onChange={(e) => patch(item.id, { [f]: e.target.value } as Partial<T>)}
+                                                onBlur={commit}
+                                                placeholder={placeholders[f]}
+                                                className={`bg-transparent focus:outline-none border-b border-neutral-200 pb-1 text-xs placeholder:text-neutral-300 ${
+                                                    isKey ? "font-medium text-neutral-900" : "text-neutral-700"
+                                                }`}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                                <button
+                                    onClick={() => remove(item.id)}
+                                    className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity shrink-0 mt-1"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
+                            {multilineField && (
+                                <textarea
+                                    value={(item[multilineField] as string) ?? ""}
+                                    onChange={(e) => patch(item.id, { [multilineField]: e.target.value } as Partial<T>)}
+                                    onBlur={commit}
+                                    placeholder={placeholders[multilineField]}
+                                    rows={2}
+                                    className="w-full text-xs text-neutral-700 bg-transparent focus:outline-none resize-none border-t border-neutral-200/70 pt-1.5 placeholder:text-neutral-300"
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
