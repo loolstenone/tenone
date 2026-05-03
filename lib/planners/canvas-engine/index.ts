@@ -31,6 +31,11 @@ export { createEmptyDocument, createElementId } from "./types";
 // 레이어 유틸
 export { strokeToPath, resolveStrokeStyle, getPenProfile } from "./layers/strokes";
 export { getBackgroundStyle, getBackgroundLabel, BACKGROUND_TEMPLATES } from "./layers/background";
+export {
+    rectToPath, ellipseToPath, diamondToPath, lineToPath,
+    arrowToGeometry, strokeDashArray, shapeToRender,
+} from "./layers/shapes";
+export type { ShapeRenderData, ArrowGeometry } from "./layers/shapes";
 
 // 렌더 (Canvas 2D 라이브 stroke)
 export { renderLiveStroke, clearLiveStroke, makeLiveContext } from "./render";
