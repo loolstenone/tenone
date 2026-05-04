@@ -7,10 +7,15 @@
 //   - 미디어 있음 → /api/myverse/moments/upload + POST /moments
 //   - 장소명 있음 → POST /places (서버가 routines로 자동 미러)
 //   - 장소명 없고 활동만 있음 → POST /routines (서버가 places로 자동 미러)
+//
+// 음식 분석:
+//   - 카테고리 "식사" + 이미지 있을 때 → POST /api/myverse/moments/analyze-food
+//   - Haiku Vision이 음식 항목 + 영양 추정 → 사용자 확인 → moments에 nutrition 저장
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Video, X, Loader2, MapPin, Clock } from "lucide-react";
+import { Camera, Video, X, Loader2, MapPin, Clock, Utensils, ChevronDown } from "lucide-react";
 import type { ActivityBase } from "@/lib/myverse/types";
+import type { FoodItem, FoodAnalysis } from "@/app/api/myverse/moments/analyze-food/route";
 import exifr from "exifr";
 
 const PLACE_CATEGORIES = [
@@ -23,6 +28,13 @@ const PLACE_CATEGORIES = [
     { key: "shopping", label: "쇼핑"   },
     { key: "medical", label: "의료"    },
     { key: "social",   label: "모임"   },
+];
+
+const PORTION_OPTIONS = [
+    { value: 0.5,  label: "½인분" },
+    { value: 1.0,  label: "1인분" },
+    { value: 1.5,  label: "1.5인분" },
+    { value: 2.0,  label: "2인분" },
 ];
 
 interface MediaItem {
@@ -48,6 +60,12 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
     const [text, setText] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // 음식 분석 상태
+    const [analyzingFood, setAnalyzingFood] = useState(false);
+    const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+    const [foodAnalyzed, setFoodAnalyzed] = useState(false);
+
     const fileRef = useRef<HTMLInputElement>(null);
     const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -65,13 +83,11 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     pick: ["DateTimeOriginal", "GPSLatitude", "GPSLongitude"],
                 });
                 if (!exif) return;
-                // 촬영 시각 → HH:MM
                 if (exif.DateTimeOriginal instanceof Date) {
                     const h = String(exif.DateTimeOriginal.getHours()).padStart(2, "0");
                     const m = String(exif.DateTimeOriginal.getMinutes()).padStart(2, "0");
                     setTime(`${h}:${m}`);
                 }
-                // GPS → Nominatim 역지오코딩
                 if (exif.GPSLatitude != null && exif.GPSLongitude != null) {
                     const lat = exif.GPSLatitude;
                     const lon = exif.GPSLongitude;
@@ -113,6 +129,14 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         setTimeout(() => textRef.current?.focus(), 100);
     }, []);
 
+    // 카테고리 변경 시 식사 아닌 경우 분석 결과 초기화
+    useEffect(() => {
+        if (category !== "meal") {
+            setFoodItems([]);
+            setFoodAnalyzed(false);
+        }
+    }, [category]);
+
     function pickFiles(files: FileList | null) {
         if (!files || files.length === 0) return;
         const next: MediaItem[] = [];
@@ -125,6 +149,9 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
             });
         }
         setMedia(prev => [...prev, ...next]);
+        // 새 미디어 추가 시 기존 분석 초기화
+        setFoodItems([]);
+        setFoodAnalyzed(false);
     }
 
     function removeMedia(idx: number) {
@@ -134,6 +161,58 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
             if (removed) URL.revokeObjectURL(removed.preview);
             return arr;
         });
+        setFoodItems([]);
+        setFoodAnalyzed(false);
+    }
+
+    async function analyzeFood() {
+        const imageItem = media.find(m => m.kind === "image");
+        if (!imageItem) return;
+
+        setAnalyzingFood(true);
+        setError(null);
+        try {
+            const form = new FormData();
+            form.append("file", imageItem.file);
+            const res = await fetch("/api/myverse/moments/analyze-food", { method: "POST", body: form });
+            if (!res.ok) throw new Error("분석에 실패했어요");
+            const data = await res.json() as FoodAnalysis;
+            if (data.foods.length === 0) {
+                setError("음식을 찾지 못했어요. 음식이 잘 보이는 사진을 사용해주세요.");
+                return;
+            }
+            setFoodItems(data.foods);
+            setFoodAnalyzed(true);
+        } catch (e) {
+            setError((e as Error).message);
+        } finally {
+            setAnalyzingFood(false);
+        }
+    }
+
+    function updatePortion(idx: number, portion: number) {
+        setFoodItems(prev => prev.map((f, i) => i === idx ? { ...f, portion } : f));
+    }
+
+    function removeFood(idx: number) {
+        setFoodItems(prev => prev.filter((_, i) => i !== idx));
+    }
+
+    function calcTotal() {
+        return foodItems.reduce(
+            (acc, f) => ({
+                calories: acc.calories + Math.round(f.calories * f.portion),
+                protein:  acc.protein  + Math.round(f.protein  * f.portion),
+                carbs:    acc.carbs    + Math.round(f.carbs    * f.portion),
+                fat:      acc.fat      + Math.round(f.fat      * f.portion),
+            }),
+            { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
+    }
+
+    function buildNutrition(): FoodAnalysis | null {
+        if (!foodAnalyzed || foodItems.length === 0) return null;
+        return { foods: foodItems, total: calcTotal() };
     }
 
     function durationMin(): number | null {
@@ -145,7 +224,6 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
     }
 
     async function save() {
-        // 빈 입력 체크 — 미디어, 장소명, 활동/글 중 하나라도 있어야
         if (media.length === 0 && !placeName.trim() && !text.trim()) {
             setError("사진·장소·내용 중 최소 하나는 입력해주세요");
             return;
@@ -153,7 +231,6 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         setSaving(true);
         setError(null);
         try {
-            // 1) 장소가 있으면 places 등록 (routines는 서버에서 자동 미러)
             if (placeName.trim()) {
                 const res = await fetch("/api/myverse/places", {
                     method: "POST",
@@ -169,7 +246,6 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 });
                 if (!res.ok) throw new Error("장소 저장 실패");
             } else if (text.trim() && time) {
-                // 장소명 없이 활동·시간만 있으면 routines 직접 등록 (places로 자동 미러)
                 await fetch("/api/myverse/routines", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -184,10 +260,11 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 });
             }
 
-            // 2) 미디어 업로드 + moments 등록
             const happenedAt = time
                 ? new Date(`${date}T${time}:00+09:00`).toISOString()
                 : new Date().toISOString();
+            const nutrition = buildNutrition();
+
             for (const m of media) {
                 const form = new FormData();
                 form.append("file", m.file);
@@ -207,6 +284,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                         happened_at: happenedAt,
                         location: placeName.trim() || null,
                         activity: null,
+                        nutrition,
                     }),
                 });
             }
@@ -219,6 +297,9 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
             setSaving(false);
         }
     }
+
+    const showFoodAnalyze = category === "meal" && media.some(m => m.kind === "image");
+    const total = foodItems.length > 0 ? calcTotal() : null;
 
     return (
         <div className="bg-neutral-50 planners-dark:bg-[#1A1A1A] rounded-lg p-4 space-y-3 border border-neutral-200 planners-dark:border-[#2A2A2A]">
@@ -270,7 +351,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 <span className="text-[10px] text-neutral-300 ml-auto">{media.length > 0 && `${media.length}개 첨부됨`}</span>
             </div>
 
-            {/* 본문 — 글 (캡션 + 활동 메모 겸용) */}
+            {/* 본문 */}
             <textarea
                 ref={textRef}
                 value={text}
@@ -280,7 +361,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 className="w-full text-sm bg-transparent text-neutral-800 planners-dark:text-neutral-100 placeholder:text-neutral-300 placeholder:italic focus:outline-none resize-none border-b border-neutral-200 planners-dark:border-[#2A2A2A] pb-2"
             />
 
-            {/* 장소 — 거점 칩 + 직접 입력 */}
+            {/* 장소 */}
             <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                     <MapPin className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
@@ -308,7 +389,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 )}
             </div>
 
-            {/* 시간 + 카테고리 */}
+            {/* 시간 */}
             <div className="flex flex-wrap items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
                 <input
@@ -327,6 +408,8 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     className="text-xs bg-white planners-dark:bg-[#111] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 planners-dark:text-neutral-200 focus:outline-none focus:border-[#0F766E]"
                 />
             </div>
+
+            {/* 카테고리 */}
             <div className="flex flex-wrap gap-1">
                 {PLACE_CATEGORIES.map(c => (
                     <button
@@ -344,9 +427,95 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 ))}
             </div>
 
+            {/* 음식 분석 패널 — 식사 카테고리 + 이미지 있을 때만 */}
+            {showFoodAnalyze && (
+                <div className="border border-orange-100 planners-dark:border-orange-900/30 rounded-lg overflow-hidden">
+                    {!foodAnalyzed ? (
+                        <button
+                            type="button"
+                            onClick={analyzeFood}
+                            disabled={analyzingFood}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-orange-50 planners-dark:bg-orange-900/20 text-orange-600 planners-dark:text-orange-400 text-xs font-medium hover:bg-orange-100 planners-dark:hover:bg-orange-900/30 disabled:opacity-60 transition-colors"
+                        >
+                            {analyzingFood ? (
+                                <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    AI가 음식을 분석 중…
+                                </>
+                            ) : (
+                                <>
+                                    <Utensils className="h-3.5 w-3.5" />
+                                    음식 분석해서 열량 기록하기
+                                </>
+                            )}
+                        </button>
+                    ) : (
+                        <div className="bg-orange-50 planners-dark:bg-orange-900/10 p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-medium text-orange-700 planners-dark:text-orange-400 flex items-center gap-1">
+                                    <Utensils className="h-3 w-3" /> 음식 분석 결과
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => { setFoodItems([]); setFoodAnalyzed(false); }}
+                                    className="text-[10px] text-neutral-400 hover:text-neutral-600"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+
+                            {/* 음식 항목 목록 */}
+                            <div className="space-y-1.5">
+                                {foodItems.map((food, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 bg-white planners-dark:bg-[#1A1A1A] rounded px-2 py-1.5">
+                                        <span className="flex-1 text-xs text-neutral-700 planners-dark:text-neutral-200 truncate">{food.name}</span>
+                                        <span className="text-[10px] text-orange-500 font-medium shrink-0">
+                                            {Math.round(food.calories * food.portion)}kcal
+                                        </span>
+                                        {/* 분량 선택 */}
+                                        <div className="relative shrink-0">
+                                            <select
+                                                value={food.portion}
+                                                onChange={(e) => updatePortion(idx, Number(e.target.value))}
+                                                className="appearance-none text-[10px] bg-neutral-100 planners-dark:bg-[#2A2A2A] text-neutral-600 planners-dark:text-neutral-300 rounded px-1.5 py-0.5 pr-4 focus:outline-none cursor-pointer"
+                                            >
+                                                {PORTION_OPTIONS.map(o => (
+                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown className="absolute right-0.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-neutral-400 pointer-events-none" />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeFood(idx)}
+                                            className="text-neutral-300 hover:text-neutral-500 shrink-0"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* 합계 */}
+                            {total && foodItems.length > 0 && (
+                                <div className="flex items-center justify-between pt-1 border-t border-orange-100 planners-dark:border-orange-900/30">
+                                    <span className="text-[10px] text-neutral-400">합계</span>
+                                    <div className="flex items-center gap-2 text-[10px] text-neutral-500">
+                                        <span className="text-orange-600 font-semibold">{total.calories}kcal</span>
+                                        <span>단백질 {total.protein}g</span>
+                                        <span>탄수화물 {total.carbs}g</span>
+                                        <span>지방 {total.fat}g</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {error && <p className="text-[11px] text-rose-500">{error}</p>}
 
-            {/* 액션 — 작은 버튼 */}
+            {/* 액션 */}
             <div className="flex items-center justify-end gap-1.5 pt-1">
                 <button
                     type="button"

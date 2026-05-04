@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const {
         date, media_type, media_url, thumbnail_url,
         caption, happened_at, with_whom, location, activity,
-        width, height, duration_sec, file_size,
+        width, height, duration_sec, file_size, nutrition,
     } = body as Record<string, unknown>;
 
     if (!date || typeof date !== "string") return NextResponse.json({ error: "missing_date" }, { status: 400 });
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
             height: typeof height === "number" ? height : null,
             duration_sec: typeof duration_sec === "number" ? duration_sec : null,
             file_size:    typeof file_size    === "number" ? file_size    : null,
+            nutrition:    nutrition != null ? nutrition : null,
         })
         .select()
         .single();
