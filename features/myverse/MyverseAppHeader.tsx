@@ -2,10 +2,13 @@
 
 // Myverse 앱 헤더 — 인디고 브랜드 + 우측 유틸리티 바
 // 로고 클릭 시 Verse 통합 타임라인으로 이동.
+// + 버튼은 Quick Capture 시트 토글.
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Bell, Plus, Search } from "lucide-react";
+import { QuickCaptureSheet } from "./QuickCaptureSheet";
 
 interface Props {
     name: string | null;
@@ -14,6 +17,7 @@ interface Props {
 }
 
 export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
+    const [captureOpen, setCaptureOpen] = useState(false);
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
             <div className="flex items-center justify-between px-4 h-12">
@@ -35,6 +39,7 @@ export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
                         <Search className="h-4 w-4" />
                     </button>
                     <button
+                        onClick={() => setCaptureOpen(true)}
                         title="Quick Capture (사진·메모·음성·위치)"
                         className="p-1.5 rounded-md text-neutral-500 hover:text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors"
                     >
@@ -67,6 +72,7 @@ export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
                     </Link>
                 </div>
             </div>
+            <QuickCaptureSheet open={captureOpen} onClose={() => setCaptureOpen(false)} />
         </header>
     );
 }
