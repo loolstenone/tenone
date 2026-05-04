@@ -36,8 +36,8 @@ interface NavItem {
 // Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
 const NAV: NavItem[] = [
     // ── Easily + All in One + Custom (스케줄러 중심)
-    { key: "index",     href: "/planners/app/index",       label: "홈",          icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
-    { key: "daily",     href: "/planners/app/daily",       label: "오늘",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
+    { key: "index",     href: "/planners/app/index",       label: "인덱스",      icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/planners/app/daily",       label: "일간",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
     { key: "weekly",    href: "/planners/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
     { key: "monthly",   href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
     { key: "yearly",    href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },

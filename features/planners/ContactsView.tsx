@@ -1722,7 +1722,7 @@ export function ContactsView() {
                 {/* 가나다 사이드 인덱스 — viewport 우측에 fixed (md 이상에서 노출).
                     클릭 시 해당 letter만 필터링 — 전체 렌더 X (성능). All = 전체 렌더 모드. */}
                 {contacts.length > 20 && isCompactView && (
-                    <div className="hidden md:flex flex-col items-center fixed right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 backdrop-blur-sm rounded-lg py-2 px-1 shadow-md border border-neutral-200 text-[10px] text-neutral-400 select-none max-h-[80vh] overflow-y-auto">
+                    <div className="hidden md:flex flex-col items-center fixed right-2 top-1/2 -translate-y-1/2 z-30 bg-white rounded-lg py-2 px-1 shadow-md border border-neutral-200 text-[10px] select-none max-h-[80vh] overflow-y-auto planners-dark:!bg-[#252525] planners-dark:!border-[#444]">
                         {/* All — 전체 보기 */}
                         <button
                             onClick={() => setLetterFilter(letterFilter === "all" ? "top" : "all")}
@@ -1747,8 +1747,8 @@ export function ContactsView() {
                                         selected
                                             ? "bg-[#0F766E] text-white font-bold"
                                             : active
-                                                ? "text-neutral-700 hover:text-[#0F766E] hover:bg-[#0F766E]/10 cursor-pointer font-medium"
-                                                : "text-neutral-300 cursor-default"
+                                                ? "text-neutral-900 hover:text-[#0F766E] hover:bg-[#0F766E]/10 cursor-pointer font-semibold planners-dark:!text-neutral-100"
+                                                : "text-neutral-500 cursor-default planners-dark:!text-neutral-400"
                                     }`}
                                 >{ch}</button>
                             );

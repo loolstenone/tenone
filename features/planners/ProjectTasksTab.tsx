@@ -157,27 +157,31 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                         </section>
                     )}
 
-                    {/* 필터 */}
-                    <div className="flex items-center gap-1.5">
+                    {/* 상태 탭 — IdentitySubNav 일관 패턴 */}
+                    <nav className="flex items-center gap-1 border-b border-neutral-200">
                         {([
                             { k: "all" as const,     label: "전체" },
                             { k: "todo" as const,    label: "미완" },
                             { k: "done" as const,    label: "완료" },
                             { k: "carried" as const, label: "이월" },
-                        ]).map(({ k, label }) => (
-                            <button
-                                key={k}
-                                onClick={() => setFilter(k)}
-                                className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                                    filter === k
-                                        ? "bg-[#0F766E] text-white"
-                                        : "bg-white border border-neutral-200 text-neutral-500 hover:bg-neutral-50"
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
+                        ]).map(({ k, label }) => {
+                            const isActive = filter === k;
+                            return (
+                                <button
+                                    key={k}
+                                    onClick={() => setFilter(k)}
+                                    className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
+                                        isActive
+                                            ? "text-[#0F766E] font-semibold"
+                                            : "text-neutral-500 hover:text-neutral-900"
+                                    }`}
+                                >
+                                    {label}
+                                    {isActive && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />}
+                                </button>
+                            );
+                        })}
+                    </nav>
 
                     {/* 업무 리스트 (날짜 그룹) */}
                     {filtered.length === 0 ? (
