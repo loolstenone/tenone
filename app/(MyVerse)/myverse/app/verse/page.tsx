@@ -1,229 +1,321 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Orbit, TrendingUp, Tag, Calendar, Star } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { fetchVerseTimeline, fetchLogs, fetchDreams, fetchProjects, fetchTasks } from "@/lib/myverse-supabase";
-import type { VerseEvent } from "@/lib/myverse-supabase";
+// Verse — 9 영역 통합 타임라인 + 6단계 줌 + X년 전 오늘 + 사람 횡단 필터
+//
+// 줌 단계:
+//   day:    개별 항목 시간순 (최근 30일 기본)
+//   week:   주간 — 일별 영역 분포
+//   month:  월간 — 주별 영역 분포
+//   quarter: 분기 — 월별 영역 분포
+//   year:   연간 — 분기별 영역 분포
+//   life:   평생 — 연도별 영역 분포
 
-/* ── 타입 스타일 ── */
-const TYPE_STYLE: Record<string, { color: string; label: string }> = {
-    log: { color: "bg-indigo-500", label: "기록" },
-    dream: { color: "bg-purple-500", label: "목표" },
-    task: { color: "bg-emerald-500", label: "할일" },
-    project: { color: "bg-amber-500", label: "프로젝트" },
-    ai: { color: "bg-cyan-500", label: "AI" },
+import { useEffect, useState, useMemo } from "react";
+import { Loader2, Camera, Clock, MapPin, Calendar, Orbit, Filter, Users } from "lucide-react";
+import { DOMAINS, DOMAIN_KEYS } from "@/lib/myverse/domains";
+import type { DomainKey } from "@/lib/myverse/domains";
+
+type Zoom = "day" | "week" | "month" | "quarter" | "year" | "life";
+
+const ZOOM_LABELS: Record<Zoom, string> = {
+    day: "일", week: "주", month: "월", quarter: "분기", year: "년", life: "평생",
 };
 
-/* ── 날짜 포맷 ── */
-function formatEventDate(dateStr: string) {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+// 줌별 기본 fetch 범위
+const ZOOM_DAYS: Record<Zoom, number> = {
+    day: 30, week: 90, month: 365, quarter: 730, year: 1825, life: 18250,
+};
 
-    if (diffDays === 0) return "오늘";
-    if (diffDays === 1) return "어제";
-    if (diffDays < 7) return `${diffDays}일 전`;
-
-    return d.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+interface DayItem {
+    type: "moment" | "routine" | "place" | "calendar";
+    id: string;
+    date: string;
+    domain: string | null;
+    sortKey: string;
+    [k: string]: unknown;
 }
 
-/* ── 그룹핑 (연도별) ── */
-function groupByYear(events: VerseEvent[]): Record<string, VerseEvent[]> {
-    const groups: Record<string, VerseEvent[]> = {};
-    for (const e of events) {
-        const year = new Date(e.created_at).getFullYear().toString();
-        if (!groups[year]) groups[year] = [];
-        groups[year].push(e);
-    }
-    return groups;
+interface BucketSummary {
+    key: string;
+    domains: Record<string, number>;
+    total: number;
+}
+
+interface OnThisDayGroup {
+    year: number;
+    years_ago: number;
+    items: Array<{ type: string; date: string; [k: string]: unknown }>;
 }
 
 export default function VersePage() {
-    const [userId, setUserId] = useState<string | null>(null);
-    const [view, setView] = useState<"timeline" | "keywords" | "stats">("timeline");
-    const [events, setEvents] = useState<VerseEvent[]>([]);
-    const [stats, setStats] = useState({ totalLogs: 0, totalDays: 0, goalsCompleted: 0, projectsDone: 0 });
+    const [zoom, setZoom] = useState<Zoom>("day");
+    const [domainFilter, setDomainFilter] = useState<DomainKey | null>(null);
+    const [items, setItems] = useState<DayItem[]>([]);
+    const [summary, setSummary] = useState<BucketSummary[]>([]);
+    const [onThisDay, setOnThisDay] = useState<OnThisDayGroup[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 초기 데이터 로드
     useEffect(() => {
-        const load = async () => {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-            setUserId(user.id);
+        let cancelled = false;
+        (async () => {
+            setLoading(true);
+            try {
+                const days = ZOOM_DAYS[zoom];
+                const today = new Date();
+                const from = new Date(today.getTime() - days * 86400000).toISOString().slice(0, 10);
+                const to = today.toISOString().slice(0, 10);
+                const params = new URLSearchParams({ from, to, zoom });
+                if (domainFilter) params.set("domain", domainFilter);
+                const res = await fetch(`/api/myverse/verse?${params}`);
+                if (!res.ok) return;
+                const json = await res.json();
+                if (cancelled) return;
+                if (zoom === "day") {
+                    setItems(json.items ?? []);
+                    setSummary([]);
+                } else {
+                    setSummary(json.summary ?? []);
+                    setItems([]);
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [zoom, domainFilter]);
 
-            // 타임라인 + 통계 병렬 로드
-            const [timeline, logsRes, dreamsRes, projectsRes, tasksRes] = await Promise.all([
-                fetchVerseTimeline(user.id, 50),
-                fetchLogs(user.id, 500),
-                fetchDreams(user.id),
-                fetchProjects(user.id),
-                fetchTasks(user.id),
-            ]);
-
-            setEvents(timeline);
-
-            // 통계 계산
-            const uniqueDays = new Set(logsRes.logs.map(l => l.created_at.slice(0, 10))).size;
-            setStats({
-                totalLogs: logsRes.logs.length,
-                totalDays: uniqueDays,
-                goalsCompleted: dreamsRes.dreams.filter(d => d.status === 'completed').length,
-                projectsDone: projectsRes.projects.filter(p => p.status === 'completed').length,
-            });
-
-            setLoading(false);
-        };
-        load();
+    // X년 전 오늘
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch("/api/myverse/verse/on-this-day");
+                if (res.ok) {
+                    const j = await res.json();
+                    setOnThisDay(j.groups ?? []);
+                }
+            } catch { /* silent */ }
+        })();
     }, []);
 
-    // 키워드 추출 (간이 — 로그 내용에서 빈도수 높은 단어)
-    const extractKeywords = () => {
-        const logEvents = events.filter(e => e.type === 'log');
-        if (logEvents.length === 0) return [];
-
-        const wordCount: Record<string, number> = {};
-        logEvents.forEach(e => {
-            const words = e.title.split(/\s+/).filter(w => w.length > 1);
-            words.forEach(w => { wordCount[w] = (wordCount[w] || 0) + 1; });
-        });
-
-        return Object.entries(wordCount)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10)
-            .map(([text, count]) => ({
-                text,
-                size: count >= 3 ? "lg" : count >= 2 ? "md" : "sm",
-            }));
-    };
-
-    if (loading) {
-        return (
-            <div className="max-w-lg mx-auto px-4 py-6 flex items-center justify-center min-h-[60vh]">
-                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
-    }
-
-    const yearGroups = groupByYear(events);
-    const keywords = extractKeywords();
-
     return (
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-            {/* 헤더 */}
-            <div>
-                <h1 className="text-xl font-bold flex items-center gap-2">
-                    <Orbit size={20} className="text-indigo-400" /> 내 우주
-                </h1>
-                <p className="text-xs text-slate-500 mt-1">내 인생을 한눈에</p>
-            </div>
-
-            {/* 뷰 전환 */}
-            <div className="flex gap-1 bg-white/5 rounded-xl p-1">
-                {[
-                    { id: "timeline" as const, label: "타임라인", icon: Calendar },
-                    { id: "keywords" as const, label: "키워드", icon: Tag },
-                    { id: "stats" as const, label: "성장", icon: TrendingUp },
-                ].map(v => (
-                    <button key={v.id} onClick={() => setView(v.id)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${
-                            view === v.id ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
-                        }`}>
-                        <v.icon size={13} /> {v.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* 타임라인 뷰 */}
-            {view === "timeline" && (
-                <div className="space-y-6">
-                    {Object.keys(yearGroups).length > 0 ? (
-                        Object.entries(yearGroups)
-                            .sort(([a], [b]) => Number(b) - Number(a))
-                            .map(([year, yearEvents]) => (
-                                <div key={year}>
-                                    <h2 className="text-lg font-bold text-indigo-400 mb-3">{year}</h2>
-                                    <div className="space-y-3 border-l-2 border-white/10 ml-2 pl-4">
-                                        {yearEvents.map((e, i) => {
-                                            const style = TYPE_STYLE[e.type] || TYPE_STYLE.log;
-                                            return (
-                                                <div key={i} className="relative">
-                                                    <div className={`absolute -left-[22px] top-1.5 h-2.5 w-2.5 rounded-full ${style.color}`} />
-                                                    <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-[10px] text-slate-500">{formatEventDate(e.created_at)}</span>
-                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full text-white ${style.color}`}>{style.label}</span>
-                                                        </div>
-                                                        <p className="text-sm font-medium">{e.title}</p>
-                                                        {e.description && <p className="text-xs text-slate-400 mt-0.5">{e.description}</p>}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            ))
-                    ) : (
-                        <p className="text-sm text-slate-500 bg-white/[0.03] border border-white/5 rounded-xl p-6 text-center">
-                            아직 타임라인이 비어 있어요. LOG, DREAM, WORK 탭에서 데이터를 쌓아보세요.
-                        </p>
-                    )}
-                </div>
-            )}
-
-            {/* 키워드 뷰 */}
-            {view === "keywords" && (
-                <div className="space-y-6">
-                    {keywords.length > 0 ? (
-                        <div>
-                            <h3 className="text-sm font-semibold text-slate-400 mb-3">내 키워드</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {keywords.map(w => (
-                                    <span key={w.text}
-                                        className={`px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.03] ${
-                                            w.size === "lg" ? "text-base font-bold text-indigo-400" :
-                                            w.size === "md" ? "text-sm font-medium text-slate-300" :
-                                            "text-xs text-slate-500"
-                                        }`}>
-                                        {w.text}
-                                    </span>
-                                ))}
-                            </div>
+        <div>
+            <header className="px-6 pt-6 pb-3 border-b border-neutral-200 bg-white">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Orbit className="h-3 w-3 text-[#6366F1]" />
+                            <span className="text-[10px] uppercase tracking-widest text-[#6366F1]">Verse</span>
                         </div>
-                    ) : null}
-                    <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4 text-center">
-                        <p className="text-xs text-slate-500">데이터가 더 쌓이면 키워드 변화 추이를 볼 수 있어요</p>
+                        <h1 className="text-2xl font-serif text-neutral-900">통합 타임라인</h1>
+                        <p className="text-xs text-neutral-500 mt-1">9 영역 × 사람 × 시간 — 모든 흔적이 한 자리</p>
                     </div>
                 </div>
-            )}
+            </header>
 
-            {/* 성장 뷰 */}
-            {view === "stats" && (
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { label: "기록", value: stats.totalLogs, unit: "개", icon: "\ud83d\udcdd" },
-                            { label: "활동 일수", value: stats.totalDays, unit: "일", icon: "\ud83d\udcc5" },
-                            { label: "달성한 목표", value: stats.goalsCompleted, unit: "개", icon: "\ud83c\udfaf" },
-                            { label: "완료 프로젝트", value: stats.projectsDone, unit: "개", icon: "\ud83d\udcbc" },
-                        ].map(s => (
-                            <div key={s.label} className="bg-white/[0.03] border border-white/5 rounded-xl p-4 text-center">
-                                <span className="text-xl">{s.icon}</span>
-                                <p className="text-2xl font-bold mt-1">{s.value}<span className="text-xs text-slate-500 ml-1">{s.unit}</span></p>
-                                <p className="text-[10px] text-slate-500 mt-0.5">{s.label}</p>
+            {/* 줌 + 영역 필터 */}
+            <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-neutral-100 bg-white sticky top-0 z-10">
+                <div className="flex items-center gap-1 bg-neutral-100 rounded-lg p-0.5">
+                    {(Object.keys(ZOOM_LABELS) as Zoom[]).map(z => (
+                        <button
+                            key={z}
+                            onClick={() => setZoom(z)}
+                            className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                                zoom === z
+                                    ? "bg-white text-[#6366F1] font-semibold shadow-sm"
+                                    : "text-neutral-500 hover:text-neutral-900"
+                            }`}
+                        >
+                            {ZOOM_LABELS[z]}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex items-center gap-1 ml-auto">
+                    <Filter className="h-3 w-3 text-neutral-400" />
+                    <button
+                        onClick={() => setDomainFilter(null)}
+                        className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
+                            !domainFilter ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                    >
+                        전체
+                    </button>
+                    {DOMAIN_KEYS.map(d => (
+                        <button
+                            key={d}
+                            onClick={() => setDomainFilter(d)}
+                            className="px-2 py-0.5 text-[10px] rounded-full transition-colors"
+                            style={
+                                domainFilter === d
+                                    ? { backgroundColor: DOMAINS[d].color_hex, color: "white" }
+                                    : { backgroundColor: "#f5f5f5", color: "#6b7280" }
+                            }
+                        >
+                            {DOMAINS[d].label_ko}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* X년 전 오늘 */}
+            {onThisDay.length > 0 && (
+                <section className="bg-gradient-to-br from-[#6366F1]/5 to-[#A855F7]/5 border-b border-neutral-100 px-6 py-4">
+                    <h2 className="text-[10px] uppercase tracking-widest text-[#6366F1] mb-2 flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> X년 전 오늘
+                    </h2>
+                    <div className="space-y-2">
+                        {onThisDay.slice(0, 3).map(g => (
+                            <div key={g.year} className="bg-white rounded-lg p-3 border border-neutral-200">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-sm font-semibold text-neutral-900">{g.years_ago}년 전 ({g.year})</span>
+                                    <span className="text-[10px] text-neutral-400">{g.items.length}건</span>
+                                </div>
+                                <div className="text-xs text-neutral-600 line-clamp-2">
+                                    {g.items.slice(0, 3).map((it, i) => (
+                                        <span key={i}>
+                                            {i > 0 && " · "}
+                                            {summarizeItem(it)}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         ))}
                     </div>
+                </section>
+            )}
 
-                    <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-xl p-4 text-center">
-                        <Star size={20} className="text-indigo-400 mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-indigo-300">3개월 뒤 더 자세한 분석이 열려요</p>
-                        <p className="text-xs text-slate-400 mt-1">패턴 분석, 성장 그래프, 인생 키워드 변화</p>
-                    </div>
-                </div>
+            {/* 본문 */}
+            <div className="p-4">
+                {loading ? (
+                    <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
+                ) : zoom === "day" ? (
+                    items.length === 0 ? (
+                        <p className="text-center text-sm text-neutral-400 italic py-12">아직 기록이 없습니다</p>
+                    ) : (
+                        <div className="space-y-2 max-w-2xl mx-auto">
+                            {items.map(it => <TimelineItem key={`${it.type}-${it.id}`} item={it} />)}
+                        </div>
+                    )
+                ) : (
+                    summary.length === 0 ? (
+                        <p className="text-center text-sm text-neutral-400 italic py-12">아직 기록이 없습니다</p>
+                    ) : (
+                        <div className="space-y-1.5 max-w-2xl mx-auto">
+                            {summary.map(b => <BucketRow key={b.key} bucket={b} />)}
+                        </div>
+                    )
+                )}
+            </div>
+        </div>
+    );
+}
+
+function TimelineItem({ item }: { item: DayItem }) {
+    const meta = item.domain && DOMAIN_KEYS.includes(item.domain as DomainKey) ? DOMAINS[item.domain as DomainKey] : null;
+    const Icon = item.type === "moment" ? Camera
+        : item.type === "routine" ? Clock
+        : item.type === "place" ? MapPin
+        : Calendar;
+
+    return (
+        <div className="bg-white border border-neutral-200 rounded-lg p-3 flex gap-3">
+            <div className="shrink-0 flex flex-col items-center">
+                <div
+                    className="h-2 w-2 rounded-full mt-1.5"
+                    style={{ backgroundColor: meta?.color_hex ?? "#9CA3AF" }}
+                />
+                <div className="text-[10px] text-neutral-400 tabular-nums mt-1.5">{formatDate(item.date)}</div>
+            </div>
+            <Icon className="h-3.5 w-3.5 text-neutral-300 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+                {summaryText(item)}
+            </div>
+            {meta && (
+                <span
+                    className="shrink-0 text-[9px] uppercase tracking-wider px-1.5 py-px rounded self-start mt-1"
+                    style={{ backgroundColor: `${meta.color_hex}15`, color: meta.color_hex }}
+                >
+                    {meta.label_ko}
+                </span>
             )}
         </div>
     );
+}
+
+function summaryText(item: DayItem) {
+    if (item.type === "moment") {
+        const url = item.media_url as string | undefined;
+        return (
+            <div className="flex items-start gap-2">
+                {url && (
+                    <div className="shrink-0 h-10 w-10 rounded bg-neutral-100 overflow-hidden">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                )}
+                <p className="text-sm text-neutral-800 line-clamp-2">
+                    {(item.caption as string | null) || <span className="text-neutral-300 italic">캡션 없음</span>}
+                </p>
+            </div>
+        );
+    }
+    if (item.type === "routine") {
+        return <p className="text-sm text-neutral-800">{item.activity as string}</p>;
+    }
+    if (item.type === "place") {
+        return <p className="text-sm text-neutral-800">{item.place_name as string}</p>;
+    }
+    if (item.type === "calendar") {
+        return <p className="text-sm text-neutral-800">{item.title as string}</p>;
+    }
+    return null;
+}
+
+function summarizeItem(it: { type: string; [k: string]: unknown }): string {
+    if (it.type === "moment") return (it.caption as string | null) ?? "사진";
+    if (it.type === "routine") return (it.activity as string | null) ?? "활동";
+    if (it.type === "calendar") return (it.title as string | null) ?? "일정";
+    return "기록";
+}
+
+function BucketRow({ bucket }: { bucket: BucketSummary }) {
+    const max = bucket.total;
+    return (
+        <div className="bg-white border border-neutral-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-medium text-neutral-900 tabular-nums">{bucket.key}</span>
+                <span className="text-[10px] text-neutral-400">{bucket.total}건</span>
+            </div>
+            <div className="flex h-2 rounded-full overflow-hidden bg-neutral-100">
+                {DOMAIN_KEYS.map(d => {
+                    const count = bucket.domains[d] ?? 0;
+                    if (count === 0) return null;
+                    const pct = (count / max) * 100;
+                    return (
+                        <div
+                            key={d}
+                            className="h-full"
+                            style={{ width: `${pct}%`, backgroundColor: DOMAINS[d].color_hex }}
+                            title={`${DOMAINS[d].label_ko}: ${count}건`}
+                        />
+                    );
+                })}
+            </div>
+            <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
+                {DOMAIN_KEYS.map(d => {
+                    const count = bucket.domains[d] ?? 0;
+                    if (count === 0) return null;
+                    return (
+                        <span key={d} className="flex items-center gap-1 text-[10px] text-neutral-500">
+                            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: DOMAINS[d].color_hex }} />
+                            <span>{DOMAINS[d].label_ko} {count}</span>
+                        </span>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function formatDate(d: string): string {
+    const dt = new Date(d + "T00:00:00+09:00");
+    return `${dt.getMonth() + 1}/${dt.getDate()}`;
 }
