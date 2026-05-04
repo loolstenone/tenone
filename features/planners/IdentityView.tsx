@@ -1,6 +1,6 @@
 "use client";
 
-// 퍼스널 아이덴티티 — 단일 페이지 5섹션 (탭·중복 제거)
+// 퍼스널 — 비전 하우스 (단일 페이지 5섹션)
 // SSOT: 비전 하우스 메타포 (Foundation → Walls → Roof) + 외부 환경 + 올해 실행
 //
 // 필드 매핑 (구 → 신, 데이터 손실 없이 우선순위로 fallback):
@@ -82,7 +82,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                 <div>
                     <div className="flex items-center gap-3">
                         <Compass className="h-6 w-6 text-[#0F766E]" />
-                        <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">퍼스널 아이덴티티</h1>
+                        <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">퍼스널</h1>
                         {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     </div>
                     <p className="text-sm text-neutral-500 mt-2">

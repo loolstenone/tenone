@@ -164,7 +164,7 @@ export function IndexView() {
         return (
             <div className="space-y-2">
                 {[
-                    { href: "framework", label: "프레임워크북", count: 26 },
+                    { href: "framework", label: "프레임워크", count: 26 },
                     { href: "schedule",  label: "일정",         count: 19 },
                     { href: "note",      label: "노트",         count: 64 },
                 ].map(cat => (
@@ -213,13 +213,13 @@ export function IndexView() {
                 <PlannersUtilityLinks className="sm:ml-auto" />
             </div>
 
-            {/* ── 헤더 바로 아래: 퍼스널 아이덴티티 + 연간 목표 ── */}
+            {/* ── 헤더 바로 아래: 퍼스널 + 연간 목표 ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 pb-6 border-b border-neutral-100">
-                {/* 퍼스널 아이덴티티 */}
+                {/* 퍼스널 */}
                 <div>
-                    <Link href="/planners/app/identity" className="flex items-center gap-1.5 mb-2 group">
+                    <Link href="/planners/app/personal" className="flex items-center gap-1.5 mb-2 group">
                         <User className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">퍼스널 아이덴티티 →</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">퍼스널 →</p>
                     </Link>
                     {vision ? (
                         <div className="space-y-1">
@@ -229,7 +229,7 @@ export function IndexView() {
                             {mission && <p className="text-xs text-neutral-400 mt-0.5 pt-1 border-t border-neutral-100">{mission.split("\n")[0]}</p>}
                         </div>
                     ) : (
-                        <Link href="/planners/app/identity" className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
+                        <Link href="/planners/app/personal" className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
                             비전·미션·핵심가치를 입력해보세요 →
                         </Link>
                     )}

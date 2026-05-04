@@ -128,24 +128,32 @@ export function ProjectsView() {
                 </div>
             </div>
 
-            {/* 상태 탭 + 새 프로젝트 버튼 */}
-            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                {(["active", "completed", "archived", "all"] as const).map((f) => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                            filter === f
-                                ? "bg-[#0F766E] text-white"
-                                : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-                        }`}
-                    >
-                        {f === "active" ? "진행중" : f === "completed" ? "완료" : f === "archived" ? "보관" : "전체"}
-                    </button>
-                ))}
+            {/* 상태 탭 + 새 프로젝트 버튼 — IdentitySubNav 일관 패턴 */}
+            <div className="flex items-end justify-between gap-2 border-b border-neutral-200 mb-4">
+                <nav className="flex items-center gap-1 -mb-px overflow-x-auto">
+                    {(["active", "completed", "archived", "all"] as const).map((f) => {
+                        const isActive = filter === f;
+                        return (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
+                                    isActive
+                                        ? "text-[#0F766E] font-semibold"
+                                        : "text-neutral-500 hover:text-neutral-900"
+                                }`}
+                            >
+                                {f === "active" ? "진행중" : f === "completed" ? "완료" : f === "archived" ? "보관" : "전체"}
+                                {isActive && (
+                                    <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />
+                                )}
+                            </button>
+                        );
+                    })}
+                </nav>
                 <button
                     onClick={() => setShowForm(v => !v)}
-                    className="ml-auto flex items-center gap-1 px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors shrink-0"
+                    className="flex items-center gap-1 px-3 py-1.5 mb-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors shrink-0"
                 >
                     <Plus className="h-3.5 w-3.5" /> 새 프로젝트
                 </button>

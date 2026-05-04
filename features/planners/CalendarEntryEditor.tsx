@@ -440,7 +440,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
                         {!isLunar ? (
                             /* ─── 양력: native date picker (한 곳) ─── */
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <input
                                     type="date"
                                     value={startDate}
@@ -452,13 +452,13 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
                                 />
                                 {kind !== "anniversary" && (
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
                                         <input
                                             type="time"
                                             value={startTime}
                                             onChange={(e) => setStartTime(e.target.value)}
                                             disabled={isReadOnly}
-                                            className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
                                         />
                                         <span className="text-xs text-neutral-300">~</span>
                                         <input
@@ -466,7 +466,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                             value={endTime}
                                             onChange={(e) => setEndTime(e.target.value)}
                                             disabled={isReadOnly}
-                                            className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
                                         />
                                     </div>
                                 )}
@@ -474,7 +474,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                         ) : (
                             /* ─── 음력: 단일 버튼 + 캘린더 팝오버 (한 곳) ─── */
                             <div className="space-y-2">
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <div className="relative shrink-0">
                                         <button
                                             type="button"
@@ -550,13 +550,13 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         )}
                                     </div>
                                     {kind !== "anniversary" && (
-                                        <div className="flex items-center gap-1.5 mt-1">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
                                             <input
                                                 type="time"
                                                 value={startTime}
                                                 onChange={(e) => setStartTime(e.target.value)}
                                                 disabled={isReadOnly}
-                                                className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
                                             />
                                             <span className="text-xs text-neutral-300">~</span>
                                             <input
@@ -564,7 +564,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                                 value={endTime}
                                                 onChange={(e) => setEndTime(e.target.value)}
                                                 disabled={isReadOnly}
-                                                className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
                                             />
                                         </div>
                                     )}

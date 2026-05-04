@@ -18,7 +18,7 @@ export const ALL_NAV_OPTIONS = [
     { id: "monthly",  label: "월간",    icon: Calendar,     href: "/planners/app/monthly" },
     { id: "yearly",   label: "연간",    icon: CalendarRange, href: "/planners/app/yearly" },
     { id: "projects", label: "프로젝트", icon: FolderKanban, href: "/planners/app/projects" },
-    { id: "identity", label: "PI",      icon: User,         href: "/planners/app/identity" },
+    { id: "identity", label: "퍼스널",  icon: User,         href: "/planners/app/personal" },
     { id: "contacts", label: "연락처",  icon: Users,        href: "/planners/app/contacts" },
     { id: "search",   label: "검색",    icon: Search,       href: "/planners/app/search" },
     { id: "settings", label: "설정",    icon: Settings,     href: "/planners/app/settings" },

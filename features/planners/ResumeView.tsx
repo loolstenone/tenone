@@ -1,6 +1,6 @@
 "use client";
 
-// 이력서 페이지 — /planners/app/identity/resume
+// 이력서 페이지 — /planners/app/personal/resume
 // PDF 표준 이력서 구조 (인적사항·학력·병적·경력·수상·업무경험·브랜드·강의·심사·기타활동)
 // IdentityView와 별도 페이지로 분리됨 (한 페이지에 다 넣지 않음).
 

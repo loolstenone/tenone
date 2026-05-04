@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -19,10 +20,12 @@ import {
     Pencil,
     MessageCircle,
 } from "lucide-react";
-import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
+import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/planners/types";
+import { REQUIRED_MENU_KEYS } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 
 interface NavItem {
+    key: string;
     href: string;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -32,18 +35,18 @@ interface NavItem {
 
 // Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
 const NAV: NavItem[] = [
-    // ── Easily + All in One (스케줄러 중심)
-    { href: "/planners/app/index",       label: "홈",          icon: LayoutGrid,      modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/daily",       label: "오늘",        icon: Sun,             modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/identity",    label: "아이덴티티",  icon: Compass,         modes: ["weekly", "all_in_one"] },
+    // ── Easily + All in One + Custom (스케줄러 중심)
+    { key: "index",     href: "/planners/app/index",       label: "홈",          icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/planners/app/daily",       label: "오늘",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
+    { key: "weekly",    href: "/planners/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
+    { key: "monthly",   href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
+    { key: "yearly",    href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
+    { key: "contacts",  href: "/planners/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
+    { key: "personal",  href: "/planners/app/personal",    label: "퍼스널",      icon: Compass,         modes: ["weekly", "all_in_one", "custom"] },
     // ── All in One 전용
-    { href: "/planners/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
-    { href: "/planners/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
-    { href: "/planners/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one"], external: true },
+    { key: "projects",  href: "/planners/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
+    { key: "canvas",    href: "/planners/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
+    { key: "community", href: "/planners/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one", "custom"], external: true },
     // 템플릿 / AI 브리핑 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
@@ -52,14 +55,50 @@ export function AppSidebar({
     userName,
     subscriptionStatus = 'free',
     subscriptionExpires,
+    customMenus = [],
 }: {
     mode: PlannerMode;
     userName?: string;
     subscriptionStatus?: SubscriptionStatus;
     subscriptionExpires?: string | null;
+    customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
-    const visibleNav = NAV.filter((n) => n.modes.includes(mode));
+    const [modeClient, setModeClient] = useState<PlannerMode>(mode);
+    const [customMenusClient, setCustomMenusClient] = useState<CustomMenuKey[]>(customMenus);
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const storedMode = localStorage.getItem("pp-mode");
+        if (storedMode === "weekly" || storedMode === "all_in_one" || storedMode === "custom") {
+            setModeClient(storedMode);
+        }
+        const stored = localStorage.getItem("pp-custom-menus");
+        if (stored !== null) {
+            try { setCustomMenusClient(JSON.parse(stored) as CustomMenuKey[]); } catch { /* ignore */ }
+        }
+        const menusHandler = (e: Event) => {
+            const d = (e as CustomEvent).detail;
+            if (Array.isArray(d?.menus)) setCustomMenusClient(d.menus as CustomMenuKey[]);
+        };
+        const modeHandler = (e: Event) => {
+            const d = (e as CustomEvent).detail;
+            if (d?.mode) setModeClient(d.mode as PlannerMode);
+        };
+        window.addEventListener("pp-custom-menus-change", menusHandler);
+        window.addEventListener("pp-mode-change", modeHandler);
+        return () => {
+            window.removeEventListener("pp-custom-menus-change", menusHandler);
+            window.removeEventListener("pp-mode-change", modeHandler);
+        };
+    }, []);
+    const requiredKeys = new Set<string>(REQUIRED_MENU_KEYS);
+    const visibleNav = NAV.filter((n) => {
+        if (modeClient === "custom") {
+            if (requiredKeys.has(n.key)) return true;
+            return customMenusClient.includes(n.key as CustomMenuKey);
+        }
+        return n.modes.includes(modeClient);
+    });
 
     return (
         <aside className="w-60 shrink-0 bg-white border-r border-neutral-200 flex flex-col h-screen sticky top-0">

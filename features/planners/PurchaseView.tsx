@@ -133,7 +133,7 @@ export function PurchaseView() {
                                 "능동 AI 브리핑 (아침·점심·저녁 정리)",
                                 "Personal Identity · Yearly · Monthly · Weekly · Daily",
                                 "Project Book (Vrief 4단계 + GPR 7필드)",
-                                "Templates 109종 (Schedule·Note·FrameWorkBook)",
+                                "템플릿 109종 (스케줄·노트·프레임워크)",
                                 "전체 기록 풀텍스트 검색",
                                 "Copy-to-AI (Claude·ChatGPT·Gemini 심층 검증)",
                                 "모든 기기 동기화",

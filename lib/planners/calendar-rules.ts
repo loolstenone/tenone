@@ -71,7 +71,7 @@ export interface CalendarEntry {
     end_time: string | null;
     recurrence: RecurrenceUnit;
     recurrence_until: string | null;
-    status: "todo" | "done" | "carried" | "canceled" | null;
+    status: "todo" | "done" | "carried" | "canceled" | "hold" | "moved" | null;
     color: string | null;
     country: string | null;
     /** 미팅: 참석자 (누구와) */

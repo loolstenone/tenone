@@ -434,7 +434,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                             g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
                                                         }`}
                                                     >
-                                                        {g.done && "V"}
+                                                        {g.done && "✓"}
                                                     </button>
                                                     <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
                                                         {g.text}
@@ -592,7 +592,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                         <Link
                                             key={cell.date}
                                             href={`/planners/app/daily?date=${cell.date}`}
-                                            className={`aspect-square md:aspect-auto md:min-h-[120px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
+                                            className={`min-h-[88px] md:min-h-[120px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
                                         >
@@ -644,9 +644,9 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                         {visible.map(item => {
                                                             const c = KIND_COLORS[item.kind];
                                                             return (
-                                                                <div key={item.key} className={`flex items-center gap-0.5 text-[10px] leading-tight ${c.text}`}>
-                                                                    <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
-                                                                    <span className="truncate">{item.label}</span>
+                                                                <div key={item.key} className={`flex items-start gap-0.5 text-[10px] leading-tight ${c.text}`}>
+                                                                    <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0 mt-1`} />
+                                                                    <span className="line-clamp-3 break-words">{item.label}</span>
                                                                 </div>
                                                             );
                                                         })}

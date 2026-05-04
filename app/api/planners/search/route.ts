@@ -162,7 +162,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: "Personal Identity",
             snippet: snippet(text, q),
-            href: `/planners/app/identity`,
+            href: `/planners/app/personal`,
         });
     });
 

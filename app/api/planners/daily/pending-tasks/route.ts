@@ -1,4 +1,4 @@
-// 과거 N일 미완료 태스크 목록 반환 (선택적 이월을 위한 preview API)
+// 과거 N일 미완료(todo) + 보류(hold) 태스크 목록 반환 (선택적 이월을 위한 preview API)
 // GET /api/planners/daily/pending-tasks?date=YYYY-MM-DD&days=60
 
 import { NextResponse } from "next/server";
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
     const groups: Array<{ date: string; tasks: Task[] }> = [];
     for (const row of data ?? []) {
         const todos = ((row.tasks as Task[]) || []).filter(
-            (t) => t.status === "todo" && t.text.trim() && !todayTexts.has(t.text.trim())
+            (t) => (t.status === "todo" || t.status === "hold") && t.text.trim() && !todayTexts.has(t.text.trim())
         );
         if (todos.length > 0) {
             groups.push({ date: row.date as string, tasks: todos });

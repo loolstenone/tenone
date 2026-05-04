@@ -99,19 +99,21 @@ export function CanvasListView() {
                 <PlannersUtilityLinks />
             </div>
 
-            <p className="text-sm text-neutral-500 mb-6">
+            <p className="text-sm text-neutral-500 mb-4">
                 펜·도형·텍스트·화살표를 자유롭게. Apple Pencil · S Pen · 마우스 모두 지원합니다.
             </p>
 
-            {/* New */}
-            <button
-                onClick={createNew}
-                disabled={creating}
-                className="w-full flex items-center justify-center gap-2 py-4 mb-6 border-2 border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors disabled:opacity-50"
-            >
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                {creating ? "캔버스 생성 중…" : "새 캔버스 만들기"}
-            </button>
+            {/* 새 캔버스 — Projects와 동일 패턴 (상단 우측 teal pill) */}
+            <div className="flex justify-end mb-4">
+                <button
+                    onClick={createNew}
+                    disabled={creating}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                >
+                    {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    {creating ? "캔버스 생성 중…" : "새 캔버스"}
+                </button>
+            </div>
 
             {/* List */}
             {loading ? (

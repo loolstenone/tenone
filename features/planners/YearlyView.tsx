@@ -318,7 +318,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                         g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
                                                     }`}
                                                 >
-                                                    {g.done && "V"}
+                                                    {g.done && "✓"}
                                                 </button>
                                                 <span className={`flex-1 text-xs leading-tight ${g.done ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                                     {g.text}

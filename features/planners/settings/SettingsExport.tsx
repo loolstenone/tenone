@@ -79,7 +79,7 @@ export function SettingsExport({ sub, showToast: _showToast }: Props) {
             <section className="bg-white border border-neutral-200 rounded-xl p-6">
                 <h2 className="text-sm font-semibold text-neutral-900 mb-1">데이터 백업</h2>
                 <p className="text-xs text-neutral-500 mb-4">
-                    설정·일별·주별·월별·연간·아이덴티티·프로젝트 데이터를 JSON 파일로 내보냅니다.
+                    설정·일별·주별·월별·연간·퍼스널·프로젝트 데이터를 JSON 파일로 내보냅니다.
                 </p>
                 <button
                     onClick={exportBackup}

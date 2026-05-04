@@ -89,6 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     avatarUrl={member.avatar_url || undefined}
                     subscriptionStatus={plannerUser?.subscription_status ?? 'free'}
                     showTimeTracking={plannerUser?.time_tracking ?? false}
+                    customMenus={(plannerUser?.custom_menus as ("weekly" | "monthly" | "yearly" | "time" | "contacts" | "canvas")[] | undefined) ?? []}
                 />
                 <div className="flex flex-1 min-h-0">
                     <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">

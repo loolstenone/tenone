@@ -32,7 +32,7 @@ const SOURCE_LABEL: Record<string, string> = {
     project: "프로젝트",
     project_note: "노트",
     briefing: "브리핑",
-    identity: "아이덴티티",
+    identity: "퍼스널",
 };
 
 export function SearchView({ initialQuery }: { initialQuery: string }) {

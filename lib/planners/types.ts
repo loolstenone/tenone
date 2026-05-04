@@ -1,6 +1,14 @@
 // Planner's Planner AI — 타입 정의
 
-export type PlannerMode = 'weekly' | 'all_in_one';
+export type PlannerMode = 'weekly' | 'all_in_one' | 'custom';
+
+/** Custom 모드에서 토글 가능한 메뉴 키 (필수 메뉴 제외). */
+export type CustomMenuKey = 'weekly' | 'monthly' | 'yearly' | 'time' | 'contacts' | 'canvas';
+
+/** Custom 모드에서 항상 노출되는 필수 메뉴 키. */
+export const REQUIRED_MENU_KEYS = ['index', 'daily', 'personal', 'templates', 'community'] as const;
+
+export const CUSTOM_TOGGLE_KEYS: CustomMenuKey[] = ['weekly', 'monthly', 'yearly', 'time', 'contacts', 'canvas'];
 export type SubscriptionStatus = 'free' | 'active' | 'expired';
 export type AiTone = 'professional' | 'friendly' | 'brief';
 export type ProjectStatus = 'active' | 'completed' | 'archived' | 'paused';
@@ -50,6 +58,7 @@ export interface PlannerUser {
     ai_context_scope: string[];
     onboarding_completed: boolean;
     time_tracking: boolean;
+    custom_menus: CustomMenuKey[];
     created_at: string;
     updated_at: string;
 }
@@ -134,13 +143,18 @@ export type TaskQuadrant = '급중' | '급경' | '완중' | '완경';
 export interface PlannerTask {
     id: string;
     text: string;
-    status: 'todo' | 'done' | 'carried' | 'cancelled';
+    /** todo·done·carried(자동이월)·cancelled·hold(보류)·moved(다른 날로 수동 이동) */
+    status: 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
     parent_id?: string | null;
     /** 경중완급 사분면 — 급중(긴급·중요) | 급경(긴급·쉬운) | 완중(여유·중요) | 완경(여유·쉬운) */
     priority?: TaskQuadrant | null;
     time?: string | null;
     project_id?: string | null;   // Phase 2 — 프로젝트 태그
     memo?: string | null;         // 업무 메모
+    /** moved 상태일 때 이동된 대상 날짜 (YYYY-MM-DD) */
+    moved_to?: string | null;
+    /** 다른 날에서 이동되어 들어온 경우 출처 날짜 */
+    moved_from?: string | null;
 }
 
 export interface PlannerDaily {

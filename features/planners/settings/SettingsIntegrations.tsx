@@ -231,11 +231,13 @@ function IntegrationRow({
 
 interface Props {
     showToast: (text: string, ok?: boolean) => void;
+    /** 위치 서비스 섹션 직후에 인접 렌더할 콘텐츠 (예: 활동 거점) */
+    afterLocationSlot?: React.ReactNode;
 }
 
 // ── SettingsIntegrations ───────────────────────────────────────────────────────
 
-export function SettingsIntegrations({ showToast }: Props) {
+export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -751,6 +753,8 @@ export function SettingsIntegrations({ showToast }: Props) {
                     <LocationServiceList />
                 </div>
             </section>
+
+            {afterLocationSlot}
 
             {/* ── 마이크 / 음성 녹음 ───────────────────────────────────────── */}
             <section id="sec-microphone" className="bg-white border border-neutral-200 rounded-xl p-6 mt-4">

@@ -239,7 +239,7 @@ export function CommandPalette({ open, onClose }: Props) {
         { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/planners/app/projects") },
         { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/planners/app/canvas") },
         { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/planners/app/contacts") },
-        { id: "go_identity",  label: "아이덴티티",    icon: Compass,         section: "이동",            keywords: "identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/identity") },
+        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/personal") },
         { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/planners/app/templates") },
         { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/planners/app/search") },
         { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/planners/app/tasks") },

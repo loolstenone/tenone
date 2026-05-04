@@ -13,7 +13,7 @@ interface GP { data: FrameworkData; onChange: (key: string, val: string) => void
 
 function GuideBox({ children }: { children: React.ReactNode }) {
     return (
-        <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed mb-3">
+        <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed mb-3">
             💡 {children}
         </div>
     );
@@ -48,8 +48,8 @@ export function SwotGrid({ data, onChange }: GP) {
                 <span className="text-slate-300">↑↓</span>
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Harmful</span>
             </div>
-            <div className="mt-3 rounded-lg p-3 bg-stone-50 border-2 border-stone-300">
-                <p className="text-xs font-bold text-stone-900">TOWS · 전략 도출 (SO/WO/ST/WT)</p>
+            <div className="mt-3 rounded-lg p-3 bg-neutral-50 border border-neutral-200">
+                <p className="text-xs font-bold text-neutral-900">TOWS · 전략 도출 (SO/WO/ST/WT)</p>
                 <p className="text-[10px] text-slate-500 mb-1">강점으로 기회 잡기 / 약점 보완하며 기회 잡기 / 강점으로 위협 막기 / 약점·위협 회피</p>
                 <CellTextarea cellKey="swot_strategy" value={data["swot_strategy"] ?? ""} onChange={onChange} placeholder={"SO: 운영 데이터 + 시장 성장 → 카테고리 1위 굳히기\nWO: 모바일 앱 + AI 도구 → PWA 강화로 우회"} />
             </div>
@@ -285,15 +285,15 @@ export function QuadrantBlankGrid({ data, onChange }: GP) {
 
 export function KanoGrid({ data, onChange }: GP) {
     const cells = [
-        { key: "kano_attractive",   label: "Attractive · 감동 품질",       sub: "있으면 매우 만족, 없어도 불만 아님", color: "bg-slate-50 border-slate-400",     text: "text-slate-900",
+        { key: "kano_attractive",   label: "Attractive · 감동 품질",       sub: "있으면 매우 만족, 없어도 불만 아님", color: "bg-neutral-50 border-neutral-300",     text: "text-slate-900",
           ph: "예: 자동 주간 브리핑 (예상 못한 가치)" },
-        { key: "kano_performance",  label: "One-dimensional · 성과 품질",  sub: "많을수록 만족, 적을수록 불만",       color: "bg-slate-50 border-slate-300",     text: "text-slate-800",
+        { key: "kano_performance",  label: "One-dimensional · 성과 품질",  sub: "많을수록 만족, 적을수록 불만",       color: "bg-neutral-50 border-neutral-200",     text: "text-slate-800",
           ph: "예: 응답 속도 / 동시 접속자 수 / 통계 정밀도" },
-        { key: "kano_must",         label: "Must-be · 당연한 품질",        sub: "있으면 당연, 없으면 극도 불만",       color: "bg-stone-50 border-stone-300",     text: "text-stone-800",
+        { key: "kano_must",         label: "Must-be · 당연한 품질",        sub: "있으면 당연, 없으면 극도 불만",       color: "bg-neutral-50 border-neutral-200",     text: "text-neutral-800",
           ph: "예: 로그인·결제 안정성 / 데이터 백업" },
         { key: "kano_indifferent",  label: "Indifferent · 무관심",         sub: "있어도 없어도 상관없음",              color: "bg-neutral-100 border-neutral-300", text: "text-neutral-600",
           ph: "예: 다크 모드 (특정 사용자만 신경)" },
-        { key: "kano_reverse",      label: "Reverse · 역품질",             sub: "있을수록 불만, 없을수록 만족",       color: "bg-slate-50 border-slate-300",     text: "text-stone-700",
+        { key: "kano_reverse",      label: "Reverse · 역품질",             sub: "있을수록 불만, 없을수록 만족",       color: "bg-neutral-50 border-neutral-200",     text: "text-neutral-700",
           ph: "예: 과한 알림·배너·온보딩 강제" },
     ];
     return (

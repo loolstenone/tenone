@@ -1,4 +1,4 @@
-// 누적 미완료 카운트: today 기준 과거 N일 안의 status='todo' 합계.
+// 누적 미처리 카운트: today 기준 과거 N일 안의 status='todo' + 'hold' 합계.
 // DailyView 가 이월 버튼을 노출/숨길지 결정할 때 사용.
 
 import { NextResponse } from "next/server";
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     let oldest: string | null = null;
     for (const row of data ?? []) {
         const tasks = ((row.tasks as Task[]) || []);
-        const pending = tasks.filter((t) => t.status === "todo").length;
+        const pending = tasks.filter((t) => t.status === "todo" || t.status === "hold").length;
         if (pending > 0) {
             count += pending;
             daysWithPending += 1;

@@ -38,7 +38,7 @@ export type FrameworkData = SharedFrameworkData;
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string; bar: string }> = {
     framework: {
-        label: "프레임워크북",
+        label: "프레임워크",
         icon: <BookOpen className="h-3 w-3" />,
         color: "text-slate-800",
         bg: "bg-slate-50 border-slate-200",
@@ -490,9 +490,9 @@ export function TemplatesView() {
     const TABS = [
         { id: "all" as const, label: "전체" },
         { id: "my_role" as const, label: roleLabel ?? "내 역할" },
-        { id: "framework" as const, label: "FrameWorkBook" },
-        { id: "schedule" as const, label: "Schedule" },
-        { id: "note" as const, label: "Note" },
+        { id: "framework" as const, label: "프레임워크" },
+        { id: "schedule" as const, label: "스케줄" },
+        { id: "note" as const, label: "노트" },
         { id: "recommended" as const, label: "추천" },
         { id: "favorites" as const, label: "즐겨찾기" },
     ];
@@ -506,7 +506,7 @@ export function TemplatesView() {
                 <h1 className="font-serif text-3xl text-neutral-900">템플릿</h1>
             </div>
             <p className="text-sm text-neutral-500 mb-8">
-                기획자의 사고 틀. Schedule · Note · FrameWorkBook. 프레임워크는 바로 채워 쓸 수 있습니다.
+                기획자의 사고 틀. 스케줄 · 노트 · 프레임워크. 일간·프로젝트 노트로 불러와 채울 수 있습니다.
             </p>
 
             {/* Search */}
@@ -521,48 +521,31 @@ export function TemplatesView() {
                 />
             </div>
 
-            {/* 탭 필터 */}
-            <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+            {/* 탭 필터 — IdentitySubNav 일관 패턴 (밑줄 + active teal) */}
+            <nav className="flex items-center gap-1 border-b border-neutral-200 mb-6 overflow-x-auto pb-px">
                 {TABS.map(tab => {
                     const isActive = cat === tab.id;
-                    const isFav = tab.id === "favorites";
-                    const isRec = tab.id === "recommended";
-                    const isMyRole = tab.id === "my_role";
-                    const meta = !isMyRole && tab.id !== "all" && !isFav && !isRec ? CATEGORY_META[tab.id] : null;
                     return (
                         <button
                             key={tab.id}
                             onClick={() => setCat(tab.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition-colors shrink-0 ${
+                            className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
-                                    ? isFav
-                                        ? "bg-slate-900 text-white"
-                                        : isRec
-                                            ? "bg-amber-500 text-white"
-                                            : isMyRole
-                                                ? "bg-teal-600 text-white"
-                                                : "bg-[#0F766E] text-white"
-                                    : isFav
-                                        ? "bg-white border border-neutral-200 text-slate-700 hover:bg-slate-50"
-                                        : isRec
-                                            ? "bg-white border border-amber-200 text-amber-700 hover:bg-amber-50"
-                                            : isMyRole
-                                                ? "bg-white border border-teal-200 text-teal-700 hover:bg-teal-50"
-                                                : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                                    ? "text-[#0F766E] font-semibold"
+                                    : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
-                            {isFav && <Heart className="h-3 w-3" fill={isActive ? "currentColor" : "none"} />}
-                            {isRec && <TrendingUp className="h-3 w-3" />}
-                            {isMyRole && <UserCircle2 className="h-3 w-3" />}
-                            {meta && <span className="opacity-70">{meta.icon}</span>}
                             {tab.label}
                             {counts[tab.id] > 0 && (
-                                <span className="opacity-60">({counts[tab.id]})</span>
+                                <span className="ml-1 opacity-60 text-xs">({counts[tab.id]})</span>
+                            )}
+                            {isActive && (
+                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />
                             )}
                         </button>
                     );
                 })}
-            </div>
+            </nav>
 
             {loading ? (
                 <div className="py-16 text-center">
@@ -611,10 +594,9 @@ export function TemplatesView() {
                         const meta = CATEGORY_META[catKey];
                         return (
                             <div key={catKey}>
-                                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border mb-3 w-fit ${meta.bg}`}>
-                                    <span className={meta.color}>{meta.icon}</span>
-                                    <span className={`text-xs font-semibold ${meta.color}`}>{meta.label}</span>
-                                    <span className={`text-[10px] opacity-60 ${meta.color}`}>{items.length}개</span>
+                                <div className="flex items-baseline gap-2 mb-3">
+                                    <h3 className="text-xs uppercase tracking-widest text-neutral-400">{meta.label}</h3>
+                                    <span className="text-[10px] text-neutral-300">{items.length}</span>
                                 </div>
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {items.map(tpl => (
@@ -789,15 +771,13 @@ function TemplateCard({
         .filter(Boolean);
 
     return (
-        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[#0F766E]/40 hover:shadow-sm transition-all overflow-hidden cursor-pointer">
-            <div className={`h-1 w-full ${meta?.bar ?? "bg-neutral-300"}`} />
-
+        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[#0F766E]/40 hover:shadow-sm transition-all cursor-pointer">
             <button
                 onClick={onToggleFavorite}
                 className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all z-10 ${
                     isFavorite
                         ? "text-slate-700 bg-slate-100 opacity-100"
-                        : "text-neutral-300 bg-white/80 opacity-0 group-hover:opacity-100"
+                        : "text-neutral-300 bg-white opacity-0 group-hover:opacity-100"
                 }`}
                 title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기"}
             >
@@ -805,49 +785,26 @@ function TemplateCard({
             </button>
 
             <div className="p-4" onClick={onClick}>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                    <span className={`flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border ${meta?.bg} ${meta?.color}`}>
-                        {meta?.icon}
-                        {meta?.label || tpl.category}
-                    </span>
-                    {tpl.subcategory && (
-                        <span className="text-[9px] text-neutral-400 truncate">{tpl.subcategory}</span>
-                    )}
-                    {isSpecial && (
-                        <span className="text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
-                            채울 수 있음
-                        </span>
-                    )}
-                </div>
+                {tpl.subcategory && (
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">{tpl.subcategory}</p>
+                )}
 
-                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-2 group-hover:text-[#0F766E] transition-colors pr-6">
+                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[#0F766E] transition-colors pr-6">
                     {tpl.label}
                 </h4>
 
                 {tpl.description && (
-                    <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2 mb-3">
+                    <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2 mb-2">
                         {tpl.description}
                     </p>
                 )}
 
-                {previewLines.length > 0 && !isSpecial && (
-                    <div className="bg-neutral-50 rounded-md px-3 py-2 space-y-0.5">
+                {previewLines.length > 0 && (
+                    <ul className="space-y-0.5 mt-2">
                         {previewLines.map((l, i) => (
-                            <div key={i} className="flex items-center gap-1.5">
-                                <span className="w-1 h-1 rounded-full bg-neutral-300 shrink-0" />
-                                <span className="text-[10px] text-neutral-400 truncate">{l}</span>
-                            </div>
+                            <li key={i} className="text-[11px] text-neutral-400 leading-snug truncate">· {l}</li>
                         ))}
-                    </div>
-                )}
-
-                {isSpecial && (
-                    <div className="bg-slate-50 rounded-md px-3 py-2 flex items-center gap-2">
-                        <div className="grid grid-cols-2 gap-0.5 shrink-0">
-                            {[0,1,2,3].map(n => <div key={n} className="w-3 h-3 rounded-sm bg-slate-300" />)}
-                        </div>
-                        <span className="text-[10px] text-slate-500">클릭해서 바로 채우기</span>
-                    </div>
+                    </ul>
                 )}
             </div>
         </div>

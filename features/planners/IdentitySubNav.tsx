@@ -1,14 +1,14 @@
 "use client";
 
-// 아이덴티티 서브 네비 — "비전 하우스" / "이력서" 두 개의 별도 페이지로 분기.
+// 퍼스널 서브 네비 — "비전 하우스" / "이력서" 두 개의 별도 페이지로 분기.
 // 디자인은 AppTopNav 메인 탭과 동일한 단일 패턴(밑줄 + active teal)을 채택해
 // 페이지 위에서 일관되게 보이도록 한다.
 
 import Link from "next/link";
 
 const TABS = [
-    { id: "vision", label: "비전 하우스",  href: "/planners/app/identity" },
-    { id: "resume", label: "이력서",       href: "/planners/app/identity/resume" },
+    { id: "vision", label: "비전 하우스",  href: "/planners/app/personal" },
+    { id: "resume", label: "이력서",       href: "/planners/app/personal/resume" },
 ] as const;
 
 export type IdentityTab = (typeof TABS)[number]["id"];

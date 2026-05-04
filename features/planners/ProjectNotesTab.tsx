@@ -507,7 +507,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                                         }`}
                                     >
-                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "프레임워크북" : c === "schedule" ? "일정" : "노트"}
+                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "프레임워크" : c === "schedule" ? "스케줄" : "노트"}
                                     </button>
                                 ))}
                             </div>

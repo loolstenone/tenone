@@ -21,7 +21,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode; color: string }
 
 const STATUS_ICONS: Record<string, string> = {
     todo: "□",
-    done: "V",
+    done: "✓",
     carried: "→",
     cancelled: "✕",
 };

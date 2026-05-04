@@ -5,7 +5,7 @@ import { getMemberId } from "@/lib/planners/auth";
 export const dynamic = "force-dynamic";
 
 const VALID_RECURRENCE = ["none", "daily", "weekly", "monthly", "yearly"];
-const VALID_STATUS = ["todo", "done", "carried", "canceled"];
+const VALID_STATUS = ["todo", "done", "carried", "canceled", "hold", "moved"];
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const memberId = await getMemberId();

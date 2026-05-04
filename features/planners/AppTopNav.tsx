@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus } from "lucide-react";
-import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
+import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/planners/types";
+import { REQUIRED_MENU_KEYS } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 
 interface Tab {
+    key: string;
     href: string;
     label: string;
     modes: PlannerMode[];
@@ -19,20 +21,20 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-    // ── Easily + All in One (스케줄러 중심)
-    { href: "/planners/app/index",       label: "인덱스",      modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/time",        label: "시간",        modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/identity",    label: "아이덴티티",  modes: ["weekly", "all_in_one"] },
+    // ── Easily + All in One + Custom (스케줄러 중심)
+    { key: "index",     href: "/planners/app/index",       label: "인덱스",      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one", "custom"] },
+    { key: "weekly",    href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
+    { key: "monthly",   href: "/planners/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
+    { key: "yearly",    href: "/planners/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
+    { key: "time",      href: "/planners/app/time",        label: "시간",        modes: ["weekly", "all_in_one"] },
+    { key: "contacts",  href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
+    { key: "personal",  href: "/planners/app/personal",    label: "퍼스널",      modes: ["weekly", "all_in_one", "custom"] },
     // ── All in One 전용
-    { href: "/planners/app/projects",    label: "프로젝트",    modes: ["all_in_one"] },
-    { href: "/planners/app/canvas",      label: "캔버스",      modes: ["all_in_one"] },
-    { href: "/planners/app/templates",   label: "템플릿",      modes: ["all_in_one"] },
-    { href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one"], external: true },
+    { key: "projects",  href: "/planners/app/projects",    label: "프로젝트",    modes: ["all_in_one"] },
+    { key: "canvas",    href: "/planners/app/canvas",      label: "캔버스",      modes: ["all_in_one"] },
+    { key: "templates", href: "/planners/app/templates",   label: "템플릿",      modes: ["all_in_one", "custom"] },
+    { key: "community", href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one", "custom"], external: true },
 ];
 
 export function AppTopNav({
@@ -41,12 +43,14 @@ export function AppTopNav({
     avatarUrl,
     subscriptionStatus = "free",
     showTimeTracking = true,
+    customMenus = [],
 }: {
     mode: PlannerMode;
     userName?: string;
     avatarUrl?: string;
     subscriptionStatus?: SubscriptionStatus;
     showTimeTracking?: boolean;
+    customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
     // Time Tracking 토글 — 마운트 시 server prop으로 시드 후 localStorage·custom event가 권한
@@ -92,11 +96,48 @@ export function AppTopNav({
         return () => window.removeEventListener("keydown", onKey);
     }, [menuOpen]);
 
+    // Mode + Custom Menus: localStorage에서 즉시 반영 (router.refresh 왕복 기다리지 않음)
+    const [modeClient, setModeClient] = useState<PlannerMode>(mode);
+    const [customMenusClient, setCustomMenusClient] = useState<CustomMenuKey[]>(customMenus);
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const storedMode = localStorage.getItem("pp-mode");
+        if (storedMode === "weekly" || storedMode === "all_in_one" || storedMode === "custom") {
+            setModeClient(storedMode);
+        }
+        const stored = localStorage.getItem("pp-custom-menus");
+        if (stored !== null) {
+            try { setCustomMenusClient(JSON.parse(stored) as CustomMenuKey[]); } catch { /* ignore */ }
+        }
+        const menusHandler = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (Array.isArray(detail?.menus)) setCustomMenusClient(detail.menus as CustomMenuKey[]);
+        };
+        const modeHandler = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail?.mode) setModeClient(detail.mode as PlannerMode);
+        };
+        window.addEventListener("pp-custom-menus-change", menusHandler);
+        window.addEventListener("pp-mode-change", modeHandler);
+        return () => {
+            window.removeEventListener("pp-custom-menus-change", menusHandler);
+            window.removeEventListener("pp-mode-change", modeHandler);
+        };
+    }, []);
+
     // 모든 hook 선언이 끝난 후에만 early return — Rules of Hooks 준수
     if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
+    const requiredKeys = new Set<string>(REQUIRED_MENU_KEYS);
     const visibleTabs = TABS
-        .filter((t) => t.modes.includes(mode))
-        .filter((t) => t.href !== "/planners/app/time" || timeTrackingClient);
+        .filter((t) => {
+            if (modeClient === "custom") {
+                if (t.key === "time") return timeTrackingClient;          // time tab은 time_tracking SSOT
+                if (requiredKeys.has(t.key)) return true;
+                return customMenusClient.includes(t.key as CustomMenuKey);
+            }
+            return t.modes.includes(modeClient);
+        })
+        .filter((t) => t.key !== "time" || timeTrackingClient);
 
     async function toggleFullscreen() {
         try {

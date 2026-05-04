@@ -1,6 +1,6 @@
-// Daily 누적 이월: 과거 N일 동안 누적된 미완료(todo) 태스크를 오늘로 모두 가져온다.
+// Daily 누적 이월: 과거 N일 동안 누적된 미완료(todo) + 보류(hold) 태스크를 오늘로 모두 가져온다.
 // - 범위: 기본 60일 (요청 body.days 로 조정 가능, 최대 180)
-// - 각 과거 날짜의 status='todo' 태스크를 → 오늘에 추가하고
+// - 각 과거 날짜의 status='todo'·'hold' 태스크를 → 오늘에 추가하고
 //   해당 과거 row 의 그 태스크는 status='carried' 로 변경
 // - 'carried' 는 "이미 다음날로 옮긴 시도가 있었음" 을 의미하므로 다시 끌어오지 않는다
 //   (실제 미완 사본은 그 다음 어딘가의 todo 로 살아있어 자연스럽게 누적됨)
@@ -69,7 +69,8 @@ export async function POST(req: Request) {
         touched: false,
     }));
 
-    const hasAny = sources.some((s) => s.tasks.some((t) => t.status === "todo"));
+    const isPending = (st: string) => st === "todo" || st === "hold";
+    const hasAny = sources.some((s) => s.tasks.some((t) => isPending(t.status)));
     if (!hasAny) {
         return NextResponse.json({ status: "empty", carried: 0, scanned_days: pastRows?.length ?? 0 });
     }
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
         const src = sources[i];
         for (let j = 0; j < src.tasks.length; j++) {
             const t = src.tasks[j];
-            if (t.status !== "todo") continue;
+            if (!isPending(t.status)) continue;
             const key = t.text.trim();
             if (!key || seen.has(key)) continue;
             seen.add(key);

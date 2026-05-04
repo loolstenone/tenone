@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users, CalendarDays } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
@@ -29,7 +29,7 @@ import { CanvasStudio } from "./CanvasStudio";
 import { VoiceRecordButton } from "./VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
-type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
+type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
 type TaskPriority = '급중' | '급경' | '완중' | '완경';
 
 const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: string }> = {
@@ -551,6 +551,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     // 활성 프로젝트 목록 (Task 태그용)
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [carrying, setCarrying] = useState(false);
+    const [moveTaskId, setMoveTaskId] = useState<string | null>(null);
+    const [moveDate, setMoveDate] = useState<string>("");
+    const [moveTime, setMoveTime] = useState<string>("");
     const [pendingInfo, setPendingInfo] = useState<{ count: number; days: number; oldest: string | null } | null>(null);
     const [showPendingModal, setShowPendingModal] = useState(false);
     const [pendingGroups, setPendingGroups] = useState<Array<{ date: string; tasks: Array<{ id: string; text: string; priority?: string | null; time?: string | null }> }>>([]);
@@ -1187,13 +1190,86 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         save({ tasks: next });
     }
 
+    /** 미팅(calendar entry) 처리 결과 사이클 — task와 동일한 4단계 (변경은 CalendarEntryEditor) */
+    async function cycleEntryStatus(entry: CalendarEntry) {
+        const order = ['todo', 'done', 'hold', 'canceled'] as const;  // 미팅은 'canceled' (한 l)
+        const cur = (entry.status === 'carried' || entry.status === 'moved' || !entry.status)
+            ? 'todo'
+            : (entry.status as typeof order[number]);
+        const idx = order.indexOf(cur);
+        const next = order[(idx + 1) % order.length];
+        // 낙관적 업데이트
+        setCalEntries(prev => prev.map(e => e.id === entry.id ? { ...e, status: next } : e));
+        try {
+            await fetch(`/api/planners/calendar/${entry.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: next }),
+            });
+        } catch (e) {
+            console.error('cycleEntryStatus failed', e);
+        }
+    }
+
     function cycleStatus(taskId: string) {
-        const order: TaskStatus[] = ['todo', 'done', 'carried', 'cancelled'];
-        const next = tasks.map(t => {
-            if (t.id !== taskId) return t;
-            const idx = order.indexOf(t.status as TaskStatus);
-            return { ...t, status: order[(idx + 1) % order.length] };
-        });
+        // 사이클: 미완 → 완료 → 보류 → 취소 → 미완 (계속 순환)
+        // 변경(이동)은 캘린더 아이콘으로만 트리거 — 사이클에 포함하지 않음(멈춤 방지)
+        // (carried/moved 상태에서 클릭하면 todo로 리셋 후 순환 시작)
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        const cur = (task.status === 'carried' || task.status === 'moved') ? 'todo' : (task.status as TaskStatus);
+        const order: TaskStatus[] = ['todo', 'done', 'hold', 'cancelled'];
+        const idx = order.indexOf(cur);
+        const nextStatus = order[(idx + 1) % order.length];
+        const next = tasks.map(t => t.id === taskId ? { ...t, status: nextStatus } : t);
+        setTasks(next);
+        save({ tasks: next });
+    }
+
+    /** 작업을 다른 날짜·시간으로 변경
+     *  · 원본: status='moved', moved_to=newDate (흔적 보존)
+     *  · 대상: 새 task로 추가 (moved_from=현재 날짜, time=newTime|null)
+     */
+    async function moveTask(taskId: string, newDate: string, newTime?: string | null) {
+        if (!newDate) return;
+        const original = tasks.find(t => t.id === taskId);
+        if (!original) return;
+        const sameDay = newDate === date;
+        const normalizedTime = newTime ? newTime.slice(0, 5) : null;
+        // 1) 같은 날 + 시간만 변경: 기존 task의 time만 업데이트
+        if (sameDay) {
+            if ((original.time ?? null) === normalizedTime) return;
+            const next = tasks.map(t => t.id === taskId ? { ...t, time: normalizedTime } : t);
+            setTasks(next);
+            save({ tasks: next });
+            return;
+        }
+        // 2) 다른 날: 대상 daily 가져와서 새 task 추가
+        try {
+            const res = await fetch(`/api/planners/daily?date=${newDate}`);
+            const d = res.ok ? await res.json() : { daily: null };
+            const targetTasks: PlannerTask[] = Array.isArray(d.daily?.tasks) ? d.daily.tasks : [];
+            const newTask: PlannerTask = {
+                ...original,
+                id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                status: 'todo',
+                time: normalizedTime,
+                moved_from: date,
+                moved_to: null,
+            };
+            await fetch(`/api/planners/daily`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: newDate, tasks: [...targetTasks, newTask] }),
+            });
+        } catch (e) {
+            console.error('moveTask target write failed', e);
+            return;
+        }
+        // 3) 현재 daily 업데이트 (원본 표시 + moved_to 기록)
+        const next = tasks.map(t =>
+            t.id === taskId ? { ...t, status: 'moved' as TaskStatus, moved_to: newDate } : t
+        );
         setTasks(next);
         save({ tasks: next });
     }
@@ -1453,9 +1529,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             const todayOccurrences = calEntries.flatMap(e =>
                                 expandOccurrences(e, date, date).map(o => ({ ...o }))
                             );
-                            // 하루 종일: 기념일·공휴일·절기
+                            // 하루 종일: 공휴일·절기 (기념일은 별도 컬럼에서 표시 → 제외)
                             const allDayEntries = todayOccurrences.filter(o =>
-                                o.entry.kind === "anniversary" || o.entry.kind === "public_holiday" || o.entry.kind === "solar_term"
+                                o.entry.kind === "public_holiday" || o.entry.kind === "solar_term"
                             );
                             // 시간 있는 미팅
                             const timedMeetings = todayOccurrences
@@ -1532,32 +1608,51 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             })}
                                             {untimedMeetings.map(({ entry }) => {
                                                 const c = KIND_COLORS[entry.kind];
+                                                const st = entry.status;
+                                                const strike = st === 'done' || st === 'canceled' || st === 'moved';
                                                 return (
-                                                    <button
+                                                    <div
                                                         key={entry.id}
-                                                        onClick={() => { setCalEditing(entry); setCalEditorOpen(true); }}
-                                                        className="w-full flex items-start gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
+                                                        className="group flex items-start gap-2.5 px-1 py-1 rounded hover:bg-neutral-50"
                                                     >
-                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${c.dot}`} />
-                                                        <div className="flex-1 min-w-0">
-                                                            <span className="text-xs text-neutral-800">{entry.title}</span>
-                                                            {(entry.location || entry.with_whom) && (
-                                                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                                                    {entry.location && (
-                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
-                                                                            <MapPin className="h-2.5 w-2.5" />{entry.location}
-                                                                        </span>
-                                                                    )}
-                                                                    {entry.with_whom && (
-                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
-                                                                            <Users className="h-2.5 w-2.5" />{entry.with_whom}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${c.bg} ${c.text}`}>미팅</span>
-                                                    </button>
+                                                        <button
+                                                            onClick={() => cycleEntryStatus(entry)}
+                                                            title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
+                                                            className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 mt-0.5 ${
+                                                                st === 'done'      ? 'bg-[#0F766E] border-[#0F766E] text-white'
+                                                                : st === 'hold'    ? 'bg-amber-200 border-amber-300 text-amber-800'
+                                                                : st === 'canceled'? 'bg-neutral-300 border-neutral-300 text-white'
+                                                                : st === 'moved'   ? 'bg-violet-500 border-violet-500 text-white'
+                                                                : 'border-sky-300 hover:border-[#0F766E]'
+                                                            }`}
+                                                        >
+                                                            {st === 'done' ? '✓' : st === 'hold' ? '⏸' : st === 'canceled' ? '✕' : st === 'moved' ? '→' : ''}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { setCalEditing(entry); setCalEditorOpen(true); }}
+                                                            className="flex-1 min-w-0 flex items-start gap-2.5 text-left"
+                                                        >
+                                                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${c.dot}`} />
+                                                            <div className="flex-1 min-w-0">
+                                                                <span className={`text-xs ${strike ? 'text-neutral-400 line-through' : 'text-neutral-800'}`}>{entry.title}</span>
+                                                                {(entry.location || entry.with_whom) && (
+                                                                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                                        {entry.location && (
+                                                                            <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                                <MapPin className="h-2.5 w-2.5" />{entry.location}
+                                                                            </span>
+                                                                        )}
+                                                                        {entry.with_whom && (
+                                                                            <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                                <Users className="h-2.5 w-2.5" />{entry.with_whom}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${c.bg} ${c.text}`}>미팅</span>
+                                                        </button>
+                                                    </div>
                                                 );
                                             })}
                                         </div>
@@ -1574,35 +1669,53 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 const t = item.time.slice(0, 5);
                                                 const h = parseInt(t.split(":")[0], 10);
                                                 const ampm = h < 12 ? "오전" : "오후";
+                                                const st = item.entry.status;
+                                                const strike = st === 'done' || st === 'canceled' || st === 'moved';
                                                 return (
-                                                    <button
+                                                    <div
                                                         key={`m-${item.entry.id}-${i}`}
-                                                        onClick={() => { setCalEditing(item.entry); setCalEditorOpen(true); }}
-                                                        className="w-full flex items-start gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 text-left group"
+                                                        className="group flex items-start gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50"
                                                     >
-                                                        <span className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center mt-0.5 ${c.ring} border-sky-300`} />
-                                                        <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px] mt-0.5">
-                                                            {ampm} {t}
-                                                        </span>
-                                                        <div className="flex-1 min-w-0">
-                                                            <span className="text-xs text-neutral-800">{item.entry.title}</span>
-                                                            {(item.entry.location || item.entry.with_whom) && (
-                                                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                                                    {item.entry.location && (
-                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
-                                                                            <MapPin className="h-2.5 w-2.5" />{item.entry.location}
-                                                                        </span>
-                                                                    )}
-                                                                    {item.entry.with_whom && (
-                                                                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
-                                                                            <Users className="h-2.5 w-2.5" />{item.entry.with_whom}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <span className="text-[9px] text-sky-500 opacity-40 group-hover:opacity-80 mt-0.5">미팅</span>
-                                                    </button>
+                                                        <button
+                                                            onClick={() => cycleEntryStatus(item.entry)}
+                                                            title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
+                                                            className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 mt-0.5 ${
+                                                                st === 'done'      ? 'bg-[#0F766E] border-[#0F766E] text-white'
+                                                                : st === 'hold'    ? 'bg-amber-200 border-amber-300 text-amber-800'
+                                                                : st === 'canceled'? 'bg-neutral-300 border-neutral-300 text-white'
+                                                                : st === 'moved'   ? 'bg-violet-500 border-violet-500 text-white'
+                                                                : `${c.ring} border-sky-300 hover:border-[#0F766E]`
+                                                            }`}
+                                                        >
+                                                            {st === 'done' ? '✓' : st === 'hold' ? '⏸' : st === 'canceled' ? '✕' : st === 'moved' ? '→' : ''}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { setCalEditing(item.entry); setCalEditorOpen(true); }}
+                                                            className="flex-1 min-w-0 flex items-start gap-2.5 text-left"
+                                                        >
+                                                            <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px] mt-0.5">
+                                                                {ampm} {t}
+                                                            </span>
+                                                            <div className="flex-1 min-w-0">
+                                                                <span className={`text-xs ${strike ? 'text-neutral-400 line-through' : 'text-neutral-800'}`}>{item.entry.title}</span>
+                                                                {(item.entry.location || item.entry.with_whom) && (
+                                                                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                                        {item.entry.location && (
+                                                                            <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                                <MapPin className="h-2.5 w-2.5" />{item.entry.location}
+                                                                            </span>
+                                                                        )}
+                                                                        {item.entry.with_whom && (
+                                                                            <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+                                                                                <Users className="h-2.5 w-2.5" />{item.entry.with_whom}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-[9px] text-sky-500 opacity-40 group-hover:opacity-80 mt-0.5">미팅</span>
+                                                        </button>
+                                                    </div>
                                                 );
                                             } else {
                                                 // task with time
@@ -1610,21 +1723,22 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 const timeStr = (t.time || "").slice(0, 5);
                                                 const h = parseInt(timeStr.split(":")[0], 10);
                                                 const ampm = h < 12 ? "오전" : "오후";
-                                                const strike = t.status === "done" || t.status === "cancelled";
-                                                const taskIdx = tasks.findIndex(x => x.id === t.id);
+                                                const strike = t.status === "done" || t.status === "cancelled" || t.status === "moved";
                                                 return (
                                                     <div key={`t-${t.id}`} className="flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 group">
                                                         <button
                                                             onClick={() => cycleStatus(t.id)}
-                                                            title="클릭: 미완 → 완료 → 이월 → 취소"
+                                                            title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
                                                             className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 ${
                                                                 t.status === "done"      ? "bg-[#0F766E] border-[#0F766E] text-white"
                                                                 : t.status === "carried" ? "bg-amber-500 border-amber-500 text-white"
+                                                                : t.status === "moved"   ? "bg-violet-500 border-violet-500 text-white"
+                                                                : t.status === "hold"    ? "bg-amber-200 border-amber-300 text-amber-800"
                                                                 : t.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
                                                                 : "border-neutral-300 hover:border-[#0F766E]"
                                                             }`}
                                                         >
-                                                            {t.status === "done" ? "V" : t.status === "carried" ? "→" : t.status === "cancelled" ? "X" : ""}
+                                                            {t.status === "done" ? "✓" : t.status === "carried" ? "→" : t.status === "moved" ? "→" : t.status === "hold" ? "⏸" : t.status === "cancelled" ? "✕" : ""}
                                                         </button>
                                                         <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
                                                             {ampm} {timeStr}
@@ -1639,7 +1753,20 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                         )}
                                                         <span className={`flex-1 text-xs ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                                             {t.text}
+                                                            {t.status === "moved" && t.moved_to && (
+                                                                <span className="ml-2 text-[10px] text-violet-500 not-italic no-underline">→ {t.moved_to.slice(5)} 변경</span>
+                                                            )}
+                                                            {t.moved_from && t.status !== "moved" && (
+                                                                <span className="ml-2 text-[10px] text-violet-400 no-underline">({t.moved_from.slice(5)} 변경)</span>
+                                                            )}
                                                         </span>
+                                                        <button
+                                                            onClick={() => { setMoveTaskId(t.id); setMoveDate(date); setMoveTime(t.time?.slice(0,5) || ""); }}
+                                                            title="다른 날짜로 변경"
+                                                            className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-violet-500 transition-all"
+                                                        >
+                                                            <CalendarDays className="h-3.5 w-3.5" />
+                                                        </button>
                                                         <button
                                                             onClick={() => removeTask(t.id)}
                                                             className="text-neutral-300 hover:text-rose-400 transition-colors"
@@ -1668,6 +1795,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 onTimeChange={(time) => updateTaskTime(t.id, time)}
                                                 onPriorityChange={(p) => updateTaskPriority(t.id, p)}
                                                 onProjectChange={(pid) => updateTaskProject(t.id, pid)}
+                                                onMove={() => { setMoveTaskId(t.id); setMoveDate(date); setMoveTime(t.time?.slice(0,5) || ""); }}
                                                 projects={activeProjects}
                                                 onDragStart={() => onDragStart(idx)}
                                                 onDragOver={(e) => onDragOver(e, idx)}
@@ -1681,6 +1809,73 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 </section>
                             );
                         })()}
+
+                        {/* ── 작업 변경(다른 날짜로) 모달 ── */}
+                        {moveTaskId && (
+                            <div className="fixed inset-0 z-[9200] flex items-center justify-center bg-black/40 px-4" onClick={() => setMoveTaskId(null)}>
+                                <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <CalendarDays className="h-4 w-4 text-violet-500" />
+                                        <h3 className="text-sm font-semibold text-neutral-900">다른 날짜로 변경</h3>
+                                    </div>
+                                    <p className="text-xs text-neutral-500 mb-3">
+                                        선택한 작업의 날짜·시간을 변경합니다. 다른 날로 옮긴 경우 원본은 취소선과 「→ 변경」 표시로 흔적이 남고, 대상 날짜에 새 작업으로 등장합니다.
+                                    </p>
+                                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                                        <div>
+                                            <label className="block text-[10px] text-neutral-400 uppercase tracking-wider mb-1">날짜</label>
+                                            <input
+                                                type="date"
+                                                value={moveDate}
+                                                onChange={(e) => setMoveDate(e.target.value)}
+                                                className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-violet-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] text-neutral-400 uppercase tracking-wider mb-1">시간 (선택)</label>
+                                            <div className="flex items-center gap-1">
+                                                <input
+                                                    type="time"
+                                                    value={moveTime}
+                                                    onChange={(e) => setMoveTime(e.target.value)}
+                                                    className="text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-violet-400 w-[120px]"
+                                                />
+                                                {moveTime && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setMoveTime("")}
+                                                        className="text-neutral-400 hover:text-rose-500 text-xs px-1"
+                                                        title="시간 지우기"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-4">
+                                        <button
+                                            onClick={() => setMoveTaskId(null)}
+                                            className="text-xs px-3 py-1.5 text-neutral-500 hover:text-neutral-700"
+                                        >
+                                            취소
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (moveTaskId && moveDate) {
+                                                    await moveTask(moveTaskId, moveDate, moveTime || null);
+                                                }
+                                                setMoveTaskId(null);
+                                            }}
+                                            disabled={!moveDate}
+                                            className="text-xs px-3 py-1.5 bg-violet-500 text-white rounded hover:bg-violet-600 disabled:opacity-50"
+                                        >
+                                            변경
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                     </div>
 
@@ -2666,7 +2861,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                                         }`}
                                     >
-                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "FrameWorkBook" : c === "schedule" ? "Schedule" : "Note"}
+                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "프레임워크" : c === "schedule" ? "스케줄" : "노트"}
                                     </button>
                                 ))}
                             </div>
@@ -2777,6 +2972,7 @@ interface TaskRowProps {
     onTimeChange: (time: string) => void;
     onPriorityChange?: (p: PlannerTask["priority"]) => void;
     onProjectChange?: (projectId: string | null) => void;
+    onMove?: () => void;
     projects?: Array<{ id: string; title: string; color: string | null }>;
     onDragStart: () => void;
     onDragOver: (e: React.DragEvent) => void;
@@ -2844,9 +3040,9 @@ function PriorityPicker({ value, onChange }: { value: PlannerTask["priority"]; o
     );
 }
 
-function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriorityChange, onProjectChange, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
+function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriorityChange, onProjectChange, onMove, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
     const [editingTime, setEditingTime] = useState(false);
-    const strike = task.status === 'done' || task.status === 'cancelled';
+    const strike = task.status === 'done' || task.status === 'cancelled' || task.status === 'moved';
 
     return (
         <div
@@ -2867,18 +3063,22 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
             {/* Status button */}
             <button
                 onClick={onCycle}
-                title="클릭: 미완 → 완료 → 이월 → 취소"
+                title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs font-bold transition-colors shrink-0 ${
                     task.status === 'done'
                         ? "bg-[#0F766E] border-[#0F766E] text-white"
                         : task.status === 'carried'
                         ? "bg-amber-500 border-amber-500 text-white"
+                        : task.status === 'moved'
+                        ? "bg-violet-500 border-violet-500 text-white"
+                        : task.status === 'hold'
+                        ? "bg-amber-200 border-amber-300 text-amber-800"
                         : task.status === 'cancelled'
                         ? "bg-neutral-300 border-neutral-300 text-white"
                         : "border-neutral-300 text-neutral-300 hover:border-[#0F766E] hover:text-[#0F766E]"
                 }`}
             >
-                {task.status === 'done' ? 'V' : task.status === 'carried' ? '→' : task.status === 'cancelled' ? 'X' : '·'}
+                {task.status === 'done' ? '✓' : task.status === 'carried' ? '→' : task.status === 'moved' ? '→' : task.status === 'hold' ? '⏸' : task.status === 'cancelled' ? '✕' : '·'}
             </button>
 
             {/* Time badge */}
@@ -2975,6 +3175,17 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                 );
             })()}
 
+            {/* Move (다른 날짜로 이동) */}
+            {onMove && (
+                <button
+                    onClick={onMove}
+                    title="다른 날짜로 변경"
+                    className="text-neutral-300 hover:text-violet-500 transition-opacity shrink-0 opacity-0 group-hover:opacity-100"
+                >
+                    <CalendarDays className="h-3.5 w-3.5" />
+                </button>
+            )}
+
             {/* Remove */}
             <button
                 onClick={onRemove}
@@ -2986,6 +3197,12 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
             {/* Task text — 모바일 2번째 줄, 데스크톱 인라인 */}
             <span className={`basis-full sm:basis-auto sm:flex-1 sm:min-w-0 order-last sm:order-none pl-6 sm:pl-0 text-xs leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
                 {task.text}
+                {task.status === 'moved' && task.moved_to && (
+                    <span className="ml-2 text-[10px] text-violet-500 not-italic no-underline">→ {task.moved_to.slice(5)} 변경</span>
+                )}
+                {task.moved_from && task.status !== 'moved' && (
+                    <span className="ml-2 text-[10px] text-violet-400 no-underline">({task.moved_from.slice(5)} 변경)</span>
+                )}
             </span>
         </div>
     );
