@@ -17,8 +17,8 @@ import { DailyEntryComposer } from "./DailyEntryComposer";
 import { Camera as CameraIconForCard } from "lucide-react";
 
 // 통합 일일 카드 — 한 헤더, 한 "+" 버튼이 사진/장소/일과를 한 번에 등록하는 composer를 토글
-function UnifiedDayCard({ date }: { date: string }) {
-    const [open, setOpen] = useState(false);
+function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boolean }) {
+    const [open, setOpen] = useState(initialOpen ?? false);
     const [version, setVersion] = useState(0); // saved 후 자식 reload 트리거
     return (
         <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl mt-3 overflow-hidden">
@@ -550,7 +550,7 @@ function DailyNoteCard({
     );
 }
 
-export function DailyView({ initialDate }: { initialDate: string }) {
+export function DailyView({ initialDate, autoCompose }: { initialDate: string; autoCompose?: boolean }) {
     const router = useRouter();
     const [date, setDate] = useState(initialDate);
     // URL ?date= 변경 시 state 동기화 (미니 캘린더·향후 일정 등에서 같은 페이지 내 날짜 점프)
@@ -2087,7 +2087,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         )}
 
                         {/* 오늘의 한 장면 — 사진 + 방문 장소 + 일과 기록 통합 (소셜 포스트형 단일 입력기) */}
-                        <UnifiedDayCard date={date} />
+                        <UnifiedDayCard date={date} initialOpen={autoCompose} />
 
 
                     </div>
@@ -2220,52 +2220,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         <DailyProjectsCard date={date} />
                     </div>
 
-                    {/* 6. 오늘 한 장면 — mobile order 6 */}
-                    <div className="order-6 md:order-none">
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘 한 장면</h2>
-                                <button
-                                    onClick={shareResult}
-                                    title={shareCopied ? "복사됨!" : "공유하기"}
-                                    className={`p-1.5 rounded transition-colors ${shareCopied ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
-                                >
-                                    <Share2 className="h-3.5 w-3.5" />
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-1 mb-2.5">
-                                {RESULT_CATEGORIES.map((c) => {
-                                    const active = resultCategory === c.key;
-                                    return (
-                                        <button
-                                            key={c.key}
-                                            onClick={() => {
-                                                const next = active ? "" : c.key;
-                                                setResultCategory(next);
-                                                save({ daily_result_category: next || null });
-                                            }}
-                                            className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
-                                                active
-                                                    ? "bg-[#0F766E] text-white"
-                                                    : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                                            }`}
-                                            title={c.hint}
-                                        >
-                                            {c.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <textarea
-                                value={result}
-                                onChange={(e) => setResult(e.target.value)}
-                                onBlur={() => save({ daily_result: result })}
-                                placeholder={resultCategoryHint(resultCategory)}
-                                rows={4}
-                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none"
-                            />
-                        </section>
-                    </div>
 
                     {/* 방문 장소·일과 기록은 좌측 "오늘의 한 장면" 카드에 통합됨 */}
 

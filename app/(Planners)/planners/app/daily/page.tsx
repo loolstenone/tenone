@@ -9,8 +9,8 @@ function todayKST(): string {
     return fmt.format(new Date()); // en-CA → YYYY-MM-DD
 }
 
-export default async function DailyPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
+export default async function DailyPage({ searchParams }: { searchParams: Promise<{ date?: string; compose?: string }> }) {
     const params = await searchParams;
     const date = params.date || todayKST();
-    return <DailyView initialDate={date} />;
+    return <DailyView initialDate={date} autoCompose={params.compose === "1"} />;
 }

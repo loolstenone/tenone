@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
     LayoutGrid, Sun, FolderKanban, User,
-    CalendarDays, Calendar, CalendarRange, Users, Search, Settings,
+    CalendarDays, Calendar, CalendarRange, Users, Search, Settings, Camera,
 } from "lucide-react";
 
 export const MOBILE_NAV_STORAGE_KEY = "planners-mobile-nav";
@@ -58,10 +58,51 @@ export function MobileBottomNav() {
         .map(id => ALL_NAV_OPTIONS.find(o => o.id === id))
         .filter(Boolean) as typeof ALL_NAV_OPTIONS[number][];
 
+    // 5개 슬롯을 카메라 버튼 기준으로 앞 2개 / 뒤 2개로 분리 (중앙 카메라 포함 총 5 슬롯)
+    const leftItems = navItems.slice(0, 2);
+    const rightItems = navItems.slice(2, 4);
+
     return (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white planners-dark:bg-[#161616] border-t border-neutral-200 planners-dark:border-[#2A2A2A] safe-area-inset-bottom">
             <div className="flex items-stretch h-14">
-                {navItems.map((item) => {
+                {/* 좌측 2개 */}
+                {leftItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(item.href + "/") ||
+                        pathname.startsWith(item.href + "?") ||
+                        (item.id === "index" && pathname === "/myverse/app") ||
+                        (item.id === "today" && pathname.startsWith("/myverse/app/daily"));
+                    return (
+                        <Link
+                            key={item.id}
+                            href={item.href}
+                            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
+                                isActive ? "" : "text-neutral-400 planners-dark:text-neutral-500"
+                            }`}
+                            style={isActive ? { color: "var(--planners-accent-nav)" } : undefined}
+                        >
+                            <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
+                            <span className="text-[9px] font-medium leading-none tracking-tight">{item.label}</span>
+                        </Link>
+                    );
+                })}
+
+                {/* 중앙 카메라 버튼 */}
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <Link
+                        href="/myverse/app/daily?compose=1"
+                        className="flex items-center justify-center w-12 h-12 rounded-full -mt-5 shadow-lg active:scale-95 transition-transform"
+                        style={{ background: "var(--planners-accent-nav, #0F766E)" }}
+                        aria-label="오늘의 한 장면 기록"
+                    >
+                        <Camera className="h-5 w-5 text-white stroke-[1.5]" />
+                    </Link>
+                </div>
+
+                {/* 우측 2개 */}
+                {rightItems.map((item) => {
                     const Icon = item.icon;
                     const isActive =
                         pathname === item.href ||
