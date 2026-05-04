@@ -300,11 +300,92 @@
 | Public holiday kind | `KIND_COLORS.public_holiday` (red) |
 | Solar term kind | `KIND_COLORS.solar_term` (neutral) |
 
-### 8) 상단 탭 (메인 메뉴)
-`Index · Today · Weekly · Monthly · Yearly · P.I · Project · Canvas · Contact · Community↗`
+### 8) 상단 탭 (메인 메뉴) 🟢 SSOT — 매번 같음
 
-- **AI Briefing은 메인 탭에 두지 않는다** — Daily 우측 "AI 정리" 카드 또는 본문 서브링크로만
-- **Templates는 메인 탭에 두지 않는다** — 각 뷰(Weekly/Monthly/Yearly) 우측 상단 버튼으로
+**표기 순서 (왼쪽→오른쪽, 모두 한국어)**:
+`인덱스 · 일간 · 주간 · 월간 · 연간 · 연락처 · 퍼스널 · 프로젝트 · 캔버스 · 템플릿 · 커뮤니티↗`
+
+- 한 사람의 시간을 다른 줌으로 보는 4-View(일간·주간·월간·연간)가 중심
+- 시간(Time Tracking)은 사용자가 켤 때만 추가 노출
+- 영문 라벨 금지: ~~Index, Today, P.I, Project, Canvas, Templates~~
+- **AI Briefing/템플릿은 메인 탭에 두지 않는다** — 각 뷰 본문에서 호출
+
+**SSOT 파일**: `features/planners/AppTopNav.tsx` `TABS` 배열. 라벨 변경은 이 한 곳에서만.
+
+### 8-A) 본문 서브 메뉴 (Sub-Nav) 🟢 SSOT
+
+**단일 패턴**: 밑줄 + active teal. `IdentitySubNav.tsx` 양식을 모든 곳에서 재현.
+
+```tsx
+<nav className="flex items-center gap-1 border-b border-neutral-200 mb-4">
+  {TABS.map(tab => {
+    const isActive = active === tab.id;
+    return (
+      <button
+        key={tab.id}
+        onClick={() => setActive(tab.id)}
+        className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
+          isActive
+            ? "text-[#0F766E] font-semibold"
+            : "text-neutral-500 hover:text-neutral-900"
+        }`}
+      >
+        {tab.label}
+        {tab.count != null && <span className="ml-1 opacity-60 text-xs">({tab.count})</span>}
+        {isActive && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />}
+      </button>
+    );
+  })}
+</nav>
+```
+
+**적용 대상**: 퍼스널/이력서, 템플릿(전체·대학생·프레임워크·스케줄·노트·추천·즐겨찾기), 프로젝트 상태(진행중·완료·보관·전체), 새 페이지 추가 시 무조건 이 패턴.
+
+**금지 패턴**:
+- ❌ 컬러 pill 혼합 (active=teal pill, fav=slate pill, recommended=amber pill 등)
+- ❌ 둥근 카드형 탭 + 보더 강조
+- ❌ 탭마다 아이콘 색상 다르게 — 아이콘은 라벨 옆 작게 1색만
+
+### 8-B) 보조 필터 (카테고리·역할 등) ⚪
+
+서브 메뉴 다음 줄에 **rounded-full pill**로 노출. active=`bg-neutral-800 text-white` / inactive=`bg-neutral-100 text-neutral-500`. 카테고리 컬러가 의미를 가질 때만 active 시 컬러 적용.
+
+서브 메뉴와 시각적으로 구분되도록 작게(`text-xs px-2.5 py-0.5`) 유지.
+
+### 8-C) 추가/수정/삭제 버튼 🟢 SSOT
+
+**1. 새로 만들기 (페이지 우상단 1차 CTA)**
+```tsx
+<button className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors">
+  <Plus className="h-3.5 w-3.5" /> 새 X
+</button>
+```
+- 위치: 페이지 헤더 우측 또는 sub-nav 라인 우측
+- 라벨: `새 프로젝트` / `새 캔버스` / `새 노트` (간결한 명사)
+- ❌ 금지: 풀너비 dashed border 박스 (`border-2 border-dashed`) — 빈 상태 안내용으로만 허용
+
+**2. 카드/행 안의 추가 (인라인 +)**
+```tsx
+<button className="p-1.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors">
+  <Plus className="h-3.5 w-3.5" />
+</button>
+```
+- 위치: 카드 헤더 우측, 또는 리스트 마지막 행
+- 아이콘만 (텍스트 X), title 속성으로 설명
+
+**3. 수정 (Edit/Pencil)**
+- 항목 hover 시 노출되는 작은 아이콘. `opacity-0 group-hover:opacity-100`
+- `<Pencil className="h-3.5 w-3.5" />` neutral-300 → `text-[#0F766E]` on hover
+
+**4. 삭제**
+- 같은 패턴, `<Trash2 className="h-3.5 w-3.5" />` neutral-300 → `text-rose-500` on hover
+- 영구 삭제 또는 의미 큰 삭제는 ConfirmSheet 모달로 한 번 더 확인
+- 노트·캔버스처럼 가벼운 삭제는 즉시 삭제(undo 토스트 권장)
+
+**5. 처리 결과 사이클** (task/meeting status)
+- 단일 status 버튼 클릭 = 사이클 전환: 미완(`·`) → 완료(`✓`) → 보류(`⏸`) → 취소(`✕`) → 미완 (반복, 멈춤 없음)
+- 변경(이동)은 별도 우측 캘린더 아이콘 → 모달 (날짜+시간 선택)
+- 색상: done `bg-[#0F766E]` / hold `bg-amber-200` / canceled `bg-neutral-300` / moved `bg-violet-500`
 
 ### 9) 4-View 줌 모델 (논리적 일관성)
 ```
