@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ArrowRight } from "lucide-react";
-import { getISOWeek } from "@/lib/planners/types";
-import type { PlannerWeekly } from "@/lib/planners/types";
+import { getISOWeek } from "@/lib/myverse/types";
+import type { PlannerWeekly } from "@/lib/myverse/types";
 
 export function ThisWeekCard({ date }: { date: string }) {
     const [weekly, setWeekly] = useState<PlannerWeekly | null>(null);
@@ -16,7 +16,7 @@ export function ThisWeekCard({ date }: { date: string }) {
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/weekly?year=${year}&week=${week}`);
+            const res = await fetch(`/api/myverse/weekly?year=${year}&week=${week}`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
@@ -39,7 +39,7 @@ export function ThisWeekCard({ date }: { date: string }) {
                     </h2>
                 </div>
                 <Link
-                    href={`/planners/app/weekly?year=${year}&week=${week}`}
+                    href={`/myverse/app/weekly?year=${year}&week=${week}`}
                     className="text-[10px] text-[#0F766E] hover:underline inline-flex items-center gap-0.5"
                 >
                     열기 <ArrowRight className="h-3 w-3" />
@@ -71,7 +71,7 @@ export function ThisWeekCard({ date }: { date: string }) {
                 </div>
             ) : (
                 <Link
-                    href={`/planners/app/weekly?year=${year}&week=${week}`}
+                    href={`/myverse/app/weekly?year=${year}&week=${week}`}
                     className="block text-xs text-neutral-600 leading-relaxed hover:text-[#0F766E] transition-colors"
                 >
                     이번 주의 핵심을 아직 쓰지 않았어요.<br />

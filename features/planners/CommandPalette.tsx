@@ -28,7 +28,7 @@ interface Props {
     onClose: () => void;
 }
 
-// AI 파싱 결과 액션 — /api/planners/ai/parse-input 응답
+// AI 파싱 결과 액션 — /api/myverse/ai/parse-input 응답
 interface AiAction {
     tool: "create_task" | "create_event" | "create_note";
     input: Record<string, unknown>;
@@ -89,7 +89,7 @@ export function CommandPalette({ open, onClose }: Props) {
                 setTimeout(() => {
                     if (text.trim().length >= 2) {
                         // askAi 직접 호출 대신 query 가 set 된 다음 tick 에서 처리
-                        void fetch("/api/planners/ai/parse-input", {
+                        void fetch("/api/myverse/ai/parse-input", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ text, today: todayStr() }),
@@ -128,7 +128,7 @@ export function CommandPalette({ open, onClose }: Props) {
         setAiBusy(true);
         setAiError(null);
         try {
-            const res = await fetch("/api/planners/ai/parse-input", {
+            const res = await fetch("/api/myverse/ai/parse-input", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text, today: todayStr() }),
@@ -161,20 +161,20 @@ export function CommandPalette({ open, onClose }: Props) {
                     const text = a.input.text as string;
                     const time = (a.input.time as string | null) ?? null;
                     const priority = (a.input.priority as string | null) ?? null;
-                    const r = await fetch(`/api/planners/daily?date=${date}`);
+                    const r = await fetch(`/api/myverse/daily?date=${date}`);
                     const cur = r.ok ? await r.json() : null;
                     const tasks = Array.isArray(cur?.daily?.tasks) ? cur.daily.tasks : [];
                     tasks.push({
                         id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
                         text, status: "todo", time, priority,
                     });
-                    await fetch(`/api/planners/daily`, {
+                    await fetch(`/api/myverse/daily`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ date, tasks }),
                     });
                 } else if (a.tool === "create_event") {
-                    await fetch(`/api/planners/calendar`, {
+                    await fetch(`/api/myverse/calendar`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -189,11 +189,11 @@ export function CommandPalette({ open, onClose }: Props) {
                 } else if (a.tool === "create_note") {
                     const date = (a.input.date as string) || todayStr();
                     const content = a.input.content as string;
-                    const r = await fetch(`/api/planners/daily?date=${date}`);
+                    const r = await fetch(`/api/myverse/daily?date=${date}`);
                     const cur = r.ok ? await r.json() : null;
                     const prev = (cur?.daily?.notes ?? "") as string;
                     const next = prev ? `${prev}\n\n${content}` : content;
-                    await fetch(`/api/planners/daily`, {
+                    await fetch(`/api/myverse/daily`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ date, notes: next }),
@@ -214,14 +214,14 @@ export function CommandPalette({ open, onClose }: Props) {
     const createCanvas = useCallback(async () => {
         setCreating("canvas");
         try {
-            const res = await fetch("/api/planners/canvases", {
+            const res = await fetch("/api/myverse/canvases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: "새 캔버스", data: {} }),
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/planners/app/canvas/${d.canvas.id}`);
+                router.push(`/myverse/app/canvas/${d.canvas.id}`);
                 onClose();
             }
         } finally {
@@ -231,25 +231,25 @@ export function CommandPalette({ open, onClose }: Props) {
 
     const commands: Command[] = useMemo(() => [
         // 이동
-        { id: "go_index",     label: "인덱스",        icon: LayoutGrid,      section: "이동", shortcut: "I", keywords: "index 인덱스 홈", run: () => go("/planners/app/index") },
-        { id: "go_today",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/planners/app/today") },
-        { id: "go_weekly",    label: "주간",          icon: CalendarDays,    section: "이동", shortcut: "W", keywords: "weekly 주간", run: () => go("/planners/app/weekly") },
-        { id: "go_monthly",   label: "월간",          icon: CalendarRange,   section: "이동", shortcut: "M", keywords: "monthly 월간", run: () => go("/planners/app/monthly") },
-        { id: "go_yearly",    label: "연간",          icon: CalendarClock,   section: "이동", shortcut: "Y", keywords: "yearly 연간", run: () => go("/planners/app/yearly") },
-        { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/planners/app/projects") },
-        { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/planners/app/canvas") },
-        { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/planners/app/contacts") },
-        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/personal") },
-        { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/planners/app/templates") },
-        { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/planners/app/search") },
-        { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/planners/app/tasks") },
-        { id: "go_settings",  label: "설정",          icon: SettingsIcon,    section: "이동",            keywords: "settings 설정", run: () => go("/planners/app/settings") },
-        { id: "go_help",      label: "도움말",        icon: HelpCircle,      section: "이동",            keywords: "help 도움말 헬프", run: () => go("/planners/app/help") },
+        { id: "go_index",     label: "인덱스",        icon: LayoutGrid,      section: "이동", shortcut: "I", keywords: "index 인덱스 홈", run: () => go("/myverse/app/index") },
+        { id: "go_today",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/myverse/app/today") },
+        { id: "go_weekly",    label: "주간",          icon: CalendarDays,    section: "이동", shortcut: "W", keywords: "weekly 주간", run: () => go("/myverse/app/weekly") },
+        { id: "go_monthly",   label: "월간",          icon: CalendarRange,   section: "이동", shortcut: "M", keywords: "monthly 월간", run: () => go("/myverse/app/monthly") },
+        { id: "go_yearly",    label: "연간",          icon: CalendarClock,   section: "이동", shortcut: "Y", keywords: "yearly 연간", run: () => go("/myverse/app/yearly") },
+        { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/myverse/app/projects") },
+        { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/myverse/app/canvas") },
+        { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/myverse/app/contacts") },
+        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/myverse/app/personal") },
+        { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/myverse/app/templates") },
+        { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/myverse/app/search") },
+        { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/myverse/app/tasks") },
+        { id: "go_settings",  label: "설정",          icon: SettingsIcon,    section: "이동",            keywords: "settings 설정", run: () => go("/myverse/app/settings") },
+        { id: "go_help",      label: "도움말",        icon: HelpCircle,      section: "이동",            keywords: "help 도움말 헬프", run: () => go("/myverse/app/help") },
 
         // 만들기
         { id: "new_canvas",   label: "새 캔버스 만들기",   icon: Pen,           section: "만들기", keywords: "canvas new 새 캔버스 그림", run: createCanvas },
-        { id: "new_project",  label: "새 프로젝트 만들기", icon: FolderKanban,  section: "만들기", keywords: "project new 새 프로젝트", run: () => go("/planners/app/projects?new=1") },
-        { id: "new_contact",  label: "새 연락처 추가",    icon: Users,         section: "만들기", keywords: "contact new 새 연락처", run: () => go("/planners/app/contacts?new=1") },
+        { id: "new_project",  label: "새 프로젝트 만들기", icon: FolderKanban,  section: "만들기", keywords: "project new 새 프로젝트", run: () => go("/myverse/app/projects?new=1") },
+        { id: "new_contact",  label: "새 연락처 추가",    icon: Users,         section: "만들기", keywords: "contact new 새 연락처", run: () => go("/myverse/app/contacts?new=1") },
 
         // 도움말
         { id: "shortcuts",    label: "단축키 보기",        icon: Keyboard,      section: "도움말", keywords: "shortcuts keyboard 단축키 키보드", run: () => { window.dispatchEvent(new CustomEvent("pp-show-shortcuts")); onClose(); } },

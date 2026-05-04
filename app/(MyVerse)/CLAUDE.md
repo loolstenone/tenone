@@ -161,10 +161,11 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **Phase 0 완료 (2026-05-04 세션 107)** — DB 5축·9영역·visibility·handle 기반 + 백필 + SSOT 모듈 + 핸들 모달 |
-| **다음 Phase** | Phase 1 — `/myverse/app/*` 라우트 신설 + 4 Pillars 사이드바 (1주 예정) |
-| **이월** | Phase 2~10 (계획서 참조) |
-| **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private |
+| **Phase** | **세션 107 (2026-05-04)** — Planner's Planner를 마이버스로 완전 흡수. DB(`planners_*` 29테이블+13함수 → `myverse_*` RENAME), API(71 라우트 이동), lib(21 모듈 병합), 라우트 미러링(28개), 미들웨어 308 redirect + /api rewrite, 풀 화면 앱 셸, 인디고 #6366F1 브랜딩, HandNote "그리기" 토글 제거, 워크스페이스 통합 |
+| **이전 Phase** | Phase 0 완료 — DB 5축·9영역·visibility·handle 기반 + 백필 + SSOT 모듈 + 핸들 모달 |
+| **다음 Phase** | features/planners → features/myverse/planner 리네이밍 · PWA 아이콘 인디고 M 로고 · Toss 가맹점 승인 · Notion TASK 템플릿 패턴 흡수("오늘 한 장 + 3버튼", "초집중모드", 한국형 태그) · 풀 화면 모드 4 Pillars 진입점 결정 |
+| **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 |
+| **주요 결정 (세션 107)** | ① PP → 마이버스 단일화 (옵션 A) · ② 9 영역 SSOT 확립 · ③ DB·API·lib·route 4개 layer 모두 myverse 접두사 통일 · ④ planners.tenone.biz는 마이버스 콘텐츠 직접 서비스 · ⑤ AppTopNav를 마이버스 인디고로 리브랜딩 후 풀 화면 셸로 사용 · ⑥ HandNote 펜 선택 = 즉시 그리기 (토글 제거) · ⑦ /myverse/app/daily는 PP 일간 뷰, 9-domain '일상'은 /lifestyle |
 
 ---
 

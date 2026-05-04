@@ -13,11 +13,11 @@ import { loginHref } from "@/lib/login-href";
 // Planner's 브랜드 메뉴 — 로고가 홈 역할이므로 "Planner's" 메뉴 제거 (중복 제거)
 // 정렬 원칙: 학습 → 도구 → 실천 → 성과
 const navItems = [
-    { name: "Planning",          href: "/planners/planning",     desc: "기획의 방법론" },
-    { name: "Planner's Planner", href: "/planners/planner-tool", desc: "PDF · AI 도구" },
-    { name: "Programs",          href: "/planners/programs",     desc: "교육 프로그램" },
-    { name: "GPR",               href: "/planners/gpr",          desc: "성과 관리" },
-    { name: "커뮤니티",           href: "/planners/community",    desc: "사용자 후기·사례" },
+    { name: "Planning",          href: "/myverse/planning",     desc: "기획의 방법론" },
+    { name: "Planner's Planner", href: "/myverse/planner-tool", desc: "PDF · AI 도구" },
+    { name: "Programs",          href: "/myverse/programs",     desc: "교육 프로그램" },
+    { name: "GPR",               href: "/myverse/gpr",          desc: "성과 관리" },
+    { name: "커뮤니티",           href: "/myverse/community",    desc: "사용자 후기·사례" },
 ];
 
 export function PlannersHeader() {
@@ -31,7 +31,7 @@ export function PlannersHeader() {
     };
 
     // PP AI App 진입 경로 — 인증 상태에 따라 동적 라우팅
-    const ppAiHref = isAuthenticated ? "/planners/app" : "/planners/planner-tool#pp-ai";
+    const ppAiHref = isAuthenticated ? "/myverse/app" : "/myverse/planner-tool#pp-ai";
 
     return (
         <>
@@ -81,13 +81,13 @@ export function PlannersHeader() {
                         </Link>
                     )}
                     <UniverseUtilityBar
-                        aboutPath="/planners/about"
-                        profilePath="/planners/my"
+                        aboutPath="/myverse/about"
+                        profilePath="/myverse/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
                         siteId="planners"
                         siteName="Planner's"
-                        workspacePath="/planners/app"
+                        workspacePath="/myverse/app"
                         workspaceLabel="PP AI"
                     />
                 </div>
@@ -113,7 +113,7 @@ export function PlannersHeader() {
             textTone="light"
             footer={
                 isAuthenticated ? (
-                    <Link href="/planners/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-200 hover:text-white">마이페이지</Link>
+                    <Link href="/myverse/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-200 hover:text-white">마이페이지</Link>
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>

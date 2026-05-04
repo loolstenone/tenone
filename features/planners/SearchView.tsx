@@ -52,7 +52,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
             setLoading(true);
             setSearched(true);
             try {
-                const res = await fetch(`/api/planners/search?q=${encodeURIComponent(query.trim())}`);
+                const res = await fetch(`/api/myverse/planner-search?q=${encodeURIComponent(query.trim())}`);
                 if (res.ok) {
                     const d = await res.json();
                     setHits(d.hits || []);

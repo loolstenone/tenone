@@ -17,7 +17,7 @@ const PERIODS = [
     { label: "8교시", time: "17:00–18:00" },
 ] as const;
 
-const LS_KEY = "planners_student_timetable";
+const LS_KEY = "myverse_student_timetable";
 
 type CellKey = string; // e.g. "월-1"
 type TimetableData = Record<CellKey, { name: string; room: string; color: string }>;

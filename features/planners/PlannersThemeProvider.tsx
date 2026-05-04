@@ -27,6 +27,8 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     teal:     { hex: "#0F766E", dark: "#0d5e56" },
     emerald:  { hex: "#047857", dark: "#065F46" },
     olive:    { hex: "#4D7C0F", dark: "#3F6212" },
+    // Myverse 브랜드 인디고 (기본값) — `bg-[#0F766E]` 클래스를 인디고로 오버라이드
+    myverse:  { hex: "#6366F1", dark: "#4F46E5" },
 };
 
 // 모든 Planners 컴포넌트가 하드코딩하는 기본 teal 색상
@@ -141,7 +143,7 @@ export function applyPlannersFont(key: string) {
     if (key.startsWith("custom_")) {
         const idx = parseInt(key.slice(7), 10);
         try {
-            const stored = localStorage.getItem("planners_custom_fonts");
+            const stored = localStorage.getItem("myverse_custom_fonts");
             const customs: string[] = stored ? JSON.parse(stored) : [];
             fontValue = customs[idx] ? customs[idx] : FONT_MAP.sans;
         } catch {
@@ -159,7 +161,7 @@ export function applyPlannersUserFont(key: string) {
     if (key.startsWith("custom_")) {
         const idx = parseInt(key.slice(7), 10);
         try {
-            const stored = localStorage.getItem("planners_custom_fonts");
+            const stored = localStorage.getItem("myverse_custom_fonts");
             const customs: string[] = stored ? JSON.parse(stored) : [];
             fontValue = customs[idx] ? customs[idx] : FONT_MAP.serif;
         } catch {
@@ -225,11 +227,11 @@ export function applyPlannersThemeMode(mode: PlannersThemeMode) {
 
 export function PlannersThemeProvider() {
     useEffect(() => {
-        const storedTheme = localStorage.getItem("planners_color_theme") || "teal";
-        const storedFont = localStorage.getItem("planners_font_family") || "sans";
-        const storedUserFont = localStorage.getItem("planners_user_font") || "serif";
-        const storedMode = (localStorage.getItem("planners_theme_mode") as PlannersThemeMode) || "system";
-        const storedRadius = (localStorage.getItem("planners_radius_theme") as PlannersRadius) || "soft";
+        const storedTheme = localStorage.getItem("myverse_color_theme") || "myverse";
+        const storedFont = localStorage.getItem("myverse_font_family") || "sans";
+        const storedUserFont = localStorage.getItem("myverse_user_font") || "serif";
+        const storedMode = (localStorage.getItem("myverse_theme_mode") as PlannersThemeMode) || "system";
+        const storedRadius = (localStorage.getItem("myverse_radius_theme") as PlannersRadius) || "soft";
         applyPlannersTheme(storedTheme);
         applyPlannersFont(storedFont);
         applyPlannersUserFont(storedUserFont);
@@ -244,7 +246,7 @@ export function PlannersThemeProvider() {
         // 시스템 다크 모드 변경 감지 (mode === "system" 일 때)
         const mq = window.matchMedia("(prefers-color-scheme: dark)");
         function onSystemChange() {
-            const cur = (localStorage.getItem("planners_theme_mode") as PlannersThemeMode) || "system";
+            const cur = (localStorage.getItem("myverse_theme_mode") as PlannersThemeMode) || "system";
             if (cur === "system") applyPlannersThemeMode("system");
         }
         window.addEventListener("pp-theme-mode-change", onModeChange as EventListener);

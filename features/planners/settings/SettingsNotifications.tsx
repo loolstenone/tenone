@@ -56,7 +56,7 @@ export function SettingsNotifications({
                 applicationServerKey: urlBase64ToUint8Array(vapidPublic) as BufferSource,
             });
             const json = sub.toJSON();
-            await fetch("/api/planners/push/subscribe", {
+            await fetch("/api/myverse/push/subscribe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(json),
@@ -71,7 +71,7 @@ export function SettingsNotifications({
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
             if (sub) {
-                await fetch("/api/planners/push/subscribe", {
+                await fetch("/api/myverse/push/subscribe", {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ endpoint: sub.endpoint }),

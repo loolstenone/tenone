@@ -23,7 +23,7 @@ IF v_member_id IS NULL THEN
 END IF;
 
 -- ── 1. 유저 설정 + 구독 ──────────────────────────────────────
-INSERT INTO planners_users (
+INSERT INTO myverse_users (
     member_id, subscription_status, subscription_expires_at,
     mode, onboarding_completed, ai_tone,
     ai_morning_time, ai_evening_time,
@@ -43,7 +43,7 @@ ON CONFLICT (member_id) DO UPDATE SET
     updated_at = now();
 
 -- ── 2. Personal Identity ─────────────────────────────────────
-INSERT INTO planners_identities (
+INSERT INTO myverse_identities (
     member_id,
     inside_who, inside_values, inside_strengths, inside_vision,
     outside_position, outside_perception, outside_opportunities,
@@ -88,7 +88,7 @@ ON CONFLICT (member_id) DO UPDATE SET
     updated_at = now();
 
 -- ── 3. Yearly Plan 2026 ───────────────────────────────────────
-INSERT INTO planners_yearly (member_id, year, theme, goals, reflection) VALUES (
+INSERT INTO myverse_yearly (member_id, year, theme, goals, reflection) VALUES (
     v_member_id, 2026,
     '브랜드의 언어를 찾다',
     '[
@@ -105,7 +105,7 @@ ON CONFLICT (member_id, year) DO UPDATE SET
     theme = EXCLUDED.theme, goals = EXCLUDED.goals, updated_at = now();
 
 -- ── 4. Monthly Plans (1~12월) ─────────────────────────────────
-INSERT INTO planners_monthly (member_id, year, month, theme, focus_areas, goals, reflection) VALUES
+INSERT INTO myverse_monthly (member_id, year, month, theme, focus_areas, goals, reflection) VALUES
 (v_member_id, 2026,  1, '새로운 시작, 단단한 전략',
  ARRAY['Galaxy S26 착수', 'Q1 전략 수립', '팀 역할 재정비'],
  '[{"id":"m01_1","text":"Galaxy S26 크리에이티브 브리프 완성","done":true},{"id":"m01_2","text":"신년 OT 발표 성공","done":true},{"id":"m01_3","text":"2026 연간 캠페인 캘린더 수립","done":true}]'::jsonb,
@@ -173,7 +173,7 @@ ON CONFLICT (member_id, year, month) DO UPDATE SET
     updated_at = now();
 
 -- ── 5. Weekly Plans (W1~W53, 2026) ───────────────────────────
-INSERT INTO planners_weekly (member_id, year, week, week_start, week_end,
+INSERT INTO myverse_weekly (member_id, year, week, week_start, week_end,
     vrief_what, vrief_why, vrief_how,
     gpr_goal, gpr_plan, gpr_result, reflection) VALUES
 
@@ -238,7 +238,7 @@ ON CONFLICT (member_id, year, week) DO UPDATE SET
     reflection = EXCLUDED.reflection, updated_at = now();
 
 -- ── 6. Projects ───────────────────────────────────────────────
-INSERT INTO planners_projects (id, member_id, title, status, start_date, end_date, completed_at, color, order_index) VALUES
+INSERT INTO myverse_projects (id, member_id, title, status, start_date, end_date, completed_at, color, order_index) VALUES
 (v_proj1, v_member_id, 'Galaxy S26 런칭 캠페인',     'completed', '2026-01-02', '2026-03-31', '2026-03-31 18:00:00+09', '#1428A0', 1),
 (v_proj2, v_member_id, '현대차 EV 브랜드 리포지셔닝', 'completed', '2026-02-11', '2026-07-31', '2026-07-31 18:00:00+09', '#002C5F', 2),
 (v_proj3, v_member_id, '롯데백화점 봄 시즌 캠페인',   'completed', '2026-02-25', '2026-05-31', '2026-05-31 18:00:00+09', '#E60012', 3),
@@ -248,7 +248,7 @@ INSERT INTO planners_projects (id, member_id, title, status, start_date, end_dat
 ON CONFLICT (id) DO NOTHING;
 
 -- ── 7. Project Vriefs ──────────────────────────────────────────
-INSERT INTO planners_project_vriefs (project_id,
+INSERT INTO myverse_project_vriefs (project_id,
     research_situation, research_data, research_insight,
     hypothesis_statement, hypothesis_assumptions, hypothesis_risks,
     validation_method, validation_findings, validation_conclusion,
@@ -302,7 +302,7 @@ INSERT INTO planners_project_vriefs (project_id,
 ON CONFLICT (project_id) DO NOTHING;
 
 -- ── 8. Project GPRs ──────────────────────────────────────────
-INSERT INTO planners_project_gprs (project_id, goal, key_results, plan, progress, obstacles, learnings, result) VALUES
+INSERT INTO myverse_project_gprs (project_id, goal, key_results, plan, progress, obstacles, learnings, result) VALUES
 (v_proj1,
  'Galaxy S26 캠페인으로 MZ 세대의 삼성 AI 인지도와 구매 의향을 동시에 높인다',
  ARRAY['인지도 +15p', '구매 의향 +20p', '유튜브 조회수 500만', '캠페인 기간 내 KPI 108% 달성'],
@@ -355,7 +355,7 @@ INSERT INTO planners_project_gprs (project_id, goal, key_results, plan, progress
 ON CONFLICT (project_id) DO NOTHING;
 
 -- ── 9. Project Notes ─────────────────────────────────────────
-INSERT INTO planners_project_notes (project_id, title, content, order_index) VALUES
+INSERT INTO myverse_project_notes (project_id, title, content, order_index) VALUES
 (v_proj1, 'Galaxy S26 크리에이티브 브리프', E'## 캠페인 목표\n- MZ 세대 Samsung AI 인지도 +15p\n- 구매 의향 +20p\n\n## 핵심 타깃\n- 25-35세 MZ세대, 스마트폰 헤비 유저\n- AI 기능에 관심은 있으나 실제 활용법 모르는 층\n\n## 크리에이티브 방향\n"AI가 일상이 되다" — 스펙이 아닌 라이프스타일\n\n## 채널\nTV 15초 · 유튜브 30초+6초 · 인스타 릴스\n\n## 일정\n- 1/21 컨셉 승인\n- 2/4-6 촬영\n- 3/9 LIVE', 1),
 (v_proj1, '촬영 현장 노트', E'## 촬영일: 2026.02.04-06\n**감독**: 박준서\n**로케이션**: 서울 도심 오피스 · 한강공원 · 홍대 카페\n\n## 완료된 씬\n- ☑ 오피스 AI 활용 씬 (아침 루틴)\n- ☑ 한강 야외 촬영 (이동 중 AI)\n- ☑ 카페 소셜 공유 씬\n- ☑ 클로즈업 제품 씬\n\n## 특이사항\n오후 빛이 예상보다 좋았다. 한강 씬을 추가로 찍어뒀다 (감독 제안)', 2),
 (v_proj2, '현대차 EV 전략 방향 노트', E'## 포지셔닝\n"테슬라 = 미래 기술" vs "현대 = 현재의 감성적 삶"\n\n## 코어 아이디어\n"내 삶의 리듬으로" — EV가 나의 라이프스타일에 맞춰 움직인다\n\n## 타깃\n- Primary: 30-40대 도시 직장인 (첫 EV 구매 고려층)\n- Secondary: MZ 얼리어답터\n\n## 차별화 포인트\n1. 감성 > 기술 스펙\n2. 도시-자연 연결 모티프\n3. 운전자 라이프스타일 중심\n\n## 클라이언트 피드백 (4/16)\n"이 방향이 정확히 우리가 원하는 것" — GO!', 1),
@@ -365,9 +365,9 @@ ON CONFLICT DO NOTHING;
 
 -- ── 10. Contacts ──────────────────────────────────────────────
 -- (기존 연락처 없을 때만 삽입)
-IF (SELECT COUNT(*) FROM planners_contacts WHERE member_id = v_member_id) = 0 THEN
+IF (SELECT COUNT(*) FROM myverse_contacts WHERE member_id = v_member_id) = 0 THEN
 
-INSERT INTO planners_contacts (member_id, name, phone, email, organization, title, relationship, group_name, is_favorite, note) VALUES
+INSERT INTO myverse_contacts (member_id, name, phone, email, organization, title, relationship, group_name, is_favorite, note) VALUES
 -- 클라이언트 (6명)
 (v_member_id,'이준호','010-2345-6789','junho.lee@samsung.com','삼성전자','마케팅팀 부장','직장','클라이언트',true,'Galaxy S26 담당. 디테일에 강하고 빠른 피드백 선호. 점심은 한식. 의사결정이 명확해서 일하기 좋음.'),
 (v_member_id,'김민지','010-3456-7890','minji.kim@hyundai.com','현대자동차','브랜드전략팀 과장','직장','클라이언트',true,'EV 브랜드 담당. MZ 타깃 이해도 높음. 카카오 메시지 선호. 주 1회 주간 보고 원함.'),
@@ -398,9 +398,9 @@ END IF;
 
 -- ── 11. Calendar Entries ──────────────────────────────────────
 -- (기존 없을 때만)
-IF (SELECT COUNT(*) FROM planners_calendar_entries WHERE member_id = v_member_id AND is_system = false) = 0 THEN
+IF (SELECT COUNT(*) FROM myverse_calendar_entries WHERE member_id = v_member_id AND is_system = false) = 0 THEN
 
-INSERT INTO planners_calendar_entries (member_id, kind, title, description, start_date, start_time, end_time, recurrence) VALUES
+INSERT INTO myverse_calendar_entries (member_id, kind, title, description, start_date, start_time, end_time, recurrence) VALUES
 -- 미팅 (meeting)
 (v_member_id,'meeting','삼성전자 Galaxy S26 신년 OT','2026년 캠페인 방향 오리엔테이션','2026-01-07','14:00','17:00','none'),
 (v_member_id,'meeting','Galaxy S26 크리에이티브 컨셉 1차 PT','크리에이티브 방향 1차 발표','2026-01-14','15:00','17:00','none'),
@@ -449,7 +449,7 @@ INSERT INTO planners_calendar_entries (member_id, kind, title, description, star
 END IF;
 
 -- ── 12. Daily Plans (주요 날짜 ~45일) ────────────────────────
-INSERT INTO planners_daily (date, member_id, tasks, notes, energy_level, satisfaction_level, mood_level, daily_result) VALUES
+INSERT INTO myverse_daily (date, member_id, tasks, notes, energy_level, satisfaction_level, mood_level, daily_result) VALUES
 
 ('2026-01-02'::date, v_member_id, '[{"id":"d0102_1","text":"2026년 업무 개시 — 팀 킥오프 미팅","status":"done"},{"id":"d0102_2","text":"Galaxy S26 브리프 초안 작성 시작","status":"done"},{"id":"d0102_3","text":"2026 연간 캠페인 캘린더 검토","status":"done"},{"id":"d0102_4","text":"팀원별 역할 분장 확인","status":"done"}]'::jsonb, E'새해 첫 출근. 팀 분위기가 좋다. 올해도 잘 해보자.\n\n2026 목표:\n- 6개 캠페인 KPI 100% 이상\n- 신규 클라이언트 2개 이상\n- 포트폴리오 정리', 4, 4, 5, '팀 킥오프 성공, S26 브리프 방향 잡음'),
 

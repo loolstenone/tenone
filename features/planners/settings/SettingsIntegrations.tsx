@@ -304,12 +304,12 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         }
 
         // 위치 서비스 선호도 로드
-        fetch("/api/planners/settings")
+        fetch("/api/myverse/settings")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.user?.location_enabled) setLocationEnabled(true); });
 
         // 연동 목록 로드
-        fetch("/api/planners/integrations")
+        fetch("/api/myverse/integrations")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d) setIntegrations(d.integrations || []); });
 
@@ -333,7 +333,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     // ── 헬퍼: 연동 목록 새로고침 ──────────────────────────────────────────────
 
     async function reloadIntegrations() {
-        const r = await fetch("/api/planners/integrations");
+        const r = await fetch("/api/myverse/integrations");
         if (r.ok) {
             const d = await r.json();
             setIntegrations(d.integrations || []);
@@ -349,7 +349,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                 navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
             });
             setLocationPermission("granted");
-            await fetch("/api/planners/settings", {
+            await fetch("/api/myverse/settings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ location_enabled: true }),
@@ -365,7 +365,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     }
 
     async function toggleLocation(next: boolean) {
-        await fetch("/api/planners/settings", {
+        await fetch("/api/myverse/settings", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ location_enabled: next }),
@@ -408,7 +408,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     async function syncGoogle() {
         setSyncing("google_calendar");
         try {
-            const res = await fetch("/api/planners/integrations/google/sync", { method: "POST" });
+            const res = await fetch("/api/myverse/integrations/google/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
                 showToast(`${d.synced}개 이벤트 동기화 완료`);
@@ -425,7 +425,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     async function syncTodoist() {
         setSyncing("todoist");
         try {
-            const res = await fetch("/api/planners/integrations/todoist/sync", { method: "POST" });
+            const res = await fetch("/api/myverse/integrations/todoist/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
                 showToast(`${d.imported}개 할 일 가져오기 완료`);
@@ -441,7 +441,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         if (!todoistToken.trim()) return;
         setTodoistSubmit(true);
         try {
-            const res = await fetch("/api/planners/integrations/todoist/connect", {
+            const res = await fetch("/api/myverse/integrations/todoist/connect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token: todoistToken.trim() }),
@@ -462,7 +462,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     async function syncNotion() {
         setSyncing("notion");
         try {
-            const res = await fetch("/api/planners/integrations/notion/sync", { method: "POST" });
+            const res = await fetch("/api/myverse/integrations/notion/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
                 showToast(`${d.imported}개 할 일 가져오기 완료`);
@@ -478,7 +478,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         if (!notionToken.trim()) return;
         setNotionSubmit(true);
         try {
-            const res = await fetch("/api/planners/integrations/notion/connect", {
+            const res = await fetch("/api/myverse/integrations/notion/connect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token: notionToken.trim() }),
@@ -499,7 +499,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     async function syncSlack() {
         setSyncing("slack");
         try {
-            const res = await fetch("/api/planners/integrations/slack/sync", { method: "POST" });
+            const res = await fetch("/api/myverse/integrations/slack/sync", { method: "POST" });
             if (res.ok) {
                 showToast("Slack으로 브리핑 전송 완료");
             } else {
@@ -513,7 +513,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         if (!slackWebhook.trim()) return;
         setSlackSubmit(true);
         try {
-            const res = await fetch("/api/planners/integrations/slack/connect", {
+            const res = await fetch("/api/myverse/integrations/slack/connect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ webhook_url: slackWebhook.trim() }),
@@ -534,7 +534,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
     async function syncIcal() {
         setSyncing("ical");
         try {
-            const res = await fetch("/api/planners/integrations/ical/sync", { method: "POST" });
+            const res = await fetch("/api/myverse/integrations/ical/sync", { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
                 showToast(`${d.synced}개 이벤트 동기화 완료`);
@@ -550,7 +550,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         if (!icalUrl.trim()) return;
         setIcalSubmit(true);
         try {
-            const res = await fetch("/api/planners/integrations/ical/connect", {
+            const res = await fetch("/api/myverse/integrations/ical/connect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ feed_url: icalUrl.trim() }),
@@ -578,7 +578,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         setPendingDisconnect(null);
         setDisconnecting(true);
         try {
-            await fetch("/api/planners/integrations", {
+            await fetch("/api/myverse/integrations", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ provider }),
@@ -607,7 +607,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         name="Google Calendar"
                         desc="구글 캘린더 일정을 Monthly·Weekly·Today에 자동 유입"
                         integration={integrations.find(i => i.provider === "google_calendar" && i.status === "active")}
-                        connectHref="/api/planners/integrations/google/connect"
+                        connectHref="/api/myverse/integrations/google/connect"
                         onSync={syncGoogle}
                         onDisconnect={() => disconnectIntegration("google_calendar")}
                         syncing={syncing === "google_calendar"}

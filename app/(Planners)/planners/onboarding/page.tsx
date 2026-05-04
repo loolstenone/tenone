@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import type { PlannerMode, AiTone, PlannerRole } from "@/lib/planners/types";
-import { PLANNER_ROLE_META } from "@/lib/planners/types";
-import { trackPlanners } from "@/lib/planners/analytics";
+import type { PlannerMode, AiTone, PlannerRole } from "@/lib/myverse/types";
+import { PLANNER_ROLE_META } from "@/lib/myverse/types";
+import { trackPlanners } from "@/lib/myverse/analytics";
 
 type Step = "welcome" | "mode" | "role" | "ai" | "identity_lite" | "done";
 
@@ -44,13 +44,13 @@ export default function OnboardingPage() {
     }, [isLoading, isAuthenticated, router]);
 
     useEffect(() => {
-        if (step !== "done") trackPlanners("planners_onboarding_step", { step });
+        if (step !== "done") trackPlanners("myverse_onboarding_step", { step });
     }, [step]);
 
     async function handleFinish() {
         setSaving(true);
         try {
-            const res = await fetch("/api/planners/onboarding", {
+            const res = await fetch("/api/myverse/onboarding", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -70,7 +70,7 @@ export default function OnboardingPage() {
                 setSaving(false);
                 return;
             }
-            trackPlanners("planners_onboarding_complete", { mode, ai_tone: tone });
+            trackPlanners("myverse_onboarding_complete", { mode, ai_tone: tone });
             // 하드 네비게이션 — 서버 레이아웃이 onboarding_completed 를 새로 읽도록 보장
             window.location.assign("/planners/app");
         } catch (e) {

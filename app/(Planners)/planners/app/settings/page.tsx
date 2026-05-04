@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Settings, Loader2, Check, X, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
-import type { PlannerMode, AiTone, PlannerRole, ActivityBase, CustomMenuKey } from "@/lib/planners/types";
-import { PLANNER_ROLE_META, CUSTOM_TOGGLE_KEYS } from "@/lib/planners/types";
+import type { PlannerMode, AiTone, PlannerRole, ActivityBase, CustomMenuKey } from "@/lib/myverse/types";
+import { PLANNER_ROLE_META, CUSTOM_TOGGLE_KEYS } from "@/lib/myverse/types";
 import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
 import { SettingsLayout, GroupMarker } from "@/features/planners/SettingsLayout";
 import { SettingsTheme } from "@/features/planners/settings/SettingsTheme";
@@ -51,7 +51,7 @@ export default function SettingsPage() {
     const [initialPushPermission, setInitialPushPermission] = useState<NotificationPermission>("default");
     const [initialProjectLinks] = useState<Record<string, string | null>>(() => {
         if (typeof window === "undefined") return {};
-        try { return JSON.parse(localStorage.getItem("planners_tracking_projects") || "{}"); }
+        try { return JSON.parse(localStorage.getItem("myverse_tracking_projects") || "{}"); }
         catch { return {}; }
     });
     const [initialBases, setInitialBases] = useState<ActivityBase[]>([]);
@@ -63,7 +63,7 @@ export default function SettingsPage() {
 
     useEffect(() => {
         (async () => {
-            const res = await fetch(`/api/planners/settings`);
+            const res = await fetch(`/api/myverse/settings`);
             if (res.ok) {
                 const d = await res.json();
                 if (d.user) {
@@ -99,7 +99,7 @@ export default function SettingsPage() {
     async function save(patch: Record<string, unknown>) {
         setSaving(true);
         try {
-            const res = await fetch(`/api/planners/settings`, {
+            const res = await fetch(`/api/myverse/settings`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patch),

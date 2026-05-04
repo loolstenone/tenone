@@ -20,8 +20,8 @@ import {
     Pencil,
     MessageCircle,
 } from "lucide-react";
-import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/planners/types";
-import { REQUIRED_MENU_KEYS } from "@/lib/planners/types";
+import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
+import { REQUIRED_MENU_KEYS } from "@/lib/myverse/types";
 import { InstallButton } from "./InstallButton";
 
 interface NavItem {
@@ -36,17 +36,17 @@ interface NavItem {
 // Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
 const NAV: NavItem[] = [
     // ── Easily + All in One + Custom (스케줄러 중심)
-    { key: "index",     href: "/planners/app/index",       label: "인덱스",      icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
-    { key: "daily",     href: "/planners/app/daily",       label: "일간",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
-    { key: "weekly",    href: "/planners/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
-    { key: "monthly",   href: "/planners/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
-    { key: "yearly",    href: "/planners/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
-    { key: "contacts",  href: "/planners/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
-    { key: "personal",  href: "/planners/app/personal",    label: "퍼스널",      icon: Compass,         modes: ["weekly", "all_in_one", "custom"] },
+    { key: "index",     href: "/myverse/app/index",       label: "인덱스",      icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/myverse/app/daily",       label: "일간",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
+    { key: "weekly",    href: "/myverse/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
+    { key: "monthly",   href: "/myverse/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
+    { key: "yearly",    href: "/myverse/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
+    { key: "contacts",  href: "/myverse/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
+    { key: "personal",  href: "/myverse/app/personal",    label: "퍼스널",      icon: Compass,         modes: ["weekly", "all_in_one", "custom"] },
     // ── All in One 전용
-    { key: "projects",  href: "/planners/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
-    { key: "canvas",    href: "/planners/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
-    { key: "community", href: "/planners/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one", "custom"], external: true },
+    { key: "projects",  href: "/myverse/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
+    { key: "canvas",    href: "/myverse/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
+    { key: "community", href: "/myverse/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one", "custom"], external: true },
     // 템플릿 / AI 브리핑 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
@@ -104,7 +104,7 @@ export function AppSidebar({
         <aside className="w-60 shrink-0 bg-white border-r border-neutral-200 flex flex-col h-screen sticky top-0">
             {/* Brand */}
             <div className="px-5 py-5 border-b border-neutral-100">
-                <Link href="/planners/app" className="inline-flex items-center gap-2">
+                <Link href="/myverse/app" className="inline-flex items-center gap-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-md shrink-0" />
                     <span className="inline-flex items-baseline gap-1">
@@ -120,7 +120,7 @@ export function AppSidebar({
             {/* Search */}
             <div className="px-3 pt-3">
                 <Link
-                    href="/planners/app/search"
+                    href="/myverse/app/search"
                     className="flex items-center gap-2 px-3 py-2 text-xs text-neutral-500 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
                 >
                     <Search className="h-3.5 w-3.5" />
@@ -156,9 +156,9 @@ export function AppSidebar({
             {/* Footer */}
             <div className="px-3 pb-4 pt-2 border-t border-neutral-100 space-y-1">
                 <Link
-                    href="/planners/app/settings"
+                    href="/myverse/app/settings"
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        pathname.startsWith("/planners/app/settings")
+                        pathname.startsWith("/myverse/app/settings")
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-600 hover:bg-neutral-50"
                     }`}
@@ -167,9 +167,9 @@ export function AppSidebar({
                     <span>설정</span>
                 </Link>
                 <Link
-                    href="/planners/app/help"
+                    href="/myverse/app/help"
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        pathname.startsWith("/planners/app/help")
+                        pathname.startsWith("/myverse/app/help")
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-600 hover:bg-neutral-50"
                     }`}
@@ -196,7 +196,7 @@ export function AppSidebar({
 
                 {subscriptionStatus !== 'active' && (
                     <Link
-                        href="/planners/purchase"
+                        href="/myverse/purchase"
                         className="mx-3 mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-br from-[#0F766E] to-[#0d5e56] text-white rounded-lg text-xs hover:opacity-90 transition-opacity"
                     >
                         <Sparkles className="h-3.5 w-3.5" />

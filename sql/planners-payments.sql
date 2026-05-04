@@ -3,7 +3,7 @@
 -- Toss Payments 연동 + 관리자 수동 활성화
 -- ═══════════════════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS planners_payments (
+CREATE TABLE IF NOT EXISTS myverse_payments (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id            UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   order_id             TEXT UNIQUE NOT NULL,
@@ -24,18 +24,18 @@ CREATE TABLE IF NOT EXISTS planners_payments (
   updated_at           TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_payments_member   ON planners_payments(member_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_planners_payments_order    ON planners_payments(order_id);
-CREATE INDEX IF NOT EXISTS idx_planners_payments_status   ON planners_payments(status);
+CREATE INDEX IF NOT EXISTS idx_myverse_payments_member   ON myverse_payments(member_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_myverse_payments_order    ON myverse_payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_myverse_payments_status   ON myverse_payments(status);
 
-ALTER TABLE planners_payments ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "본인 읽기" ON planners_payments;
-CREATE POLICY "본인 읽기" ON planners_payments
+ALTER TABLE myverse_payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "본인 읽기" ON myverse_payments;
+CREATE POLICY "본인 읽기" ON myverse_payments
   FOR SELECT
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
 -- ── 결제 성공 시 구독 활성화 함수 ────────────────────────────────
-CREATE OR REPLACE FUNCTION planners_activate_subscription(
+CREATE OR REPLACE FUNCTION myverse_activate_subscription(
     _member_id UUID,
     _years INTEGER DEFAULT 1,
     _source TEXT DEFAULT 'toss'
@@ -48,7 +48,7 @@ DECLARE
     _new_expires TIMESTAMPTZ;
 BEGIN
     SELECT subscription_expires_at INTO _current_expires
-    FROM planners_users
+    FROM myverse_users
     WHERE member_id = _member_id;
 
     -- 현재 만료일이 미래면 연장, 아니면 오늘부터
@@ -58,7 +58,7 @@ BEGIN
         _new_expires := _now + (_years || ' years')::INTERVAL;
     END IF;
 
-    INSERT INTO planners_users (member_id, subscription_status, subscription_expires_at, updated_at)
+    INSERT INTO myverse_users (member_id, subscription_status, subscription_expires_at, updated_at)
     VALUES (_member_id, 'active', _new_expires, _now)
     ON CONFLICT (member_id) DO UPDATE
     SET subscription_status = 'active',
@@ -68,22 +68,22 @@ END;
 $$;
 
 -- ── PDF 구매자 자동 매칭 ──────────────────────────────────────────
--- planners_users.is_pdf_buyer 수동 플래그 기반 (관리자가 Badak Mall 주문 확인 후 설정)
+-- myverse_users.is_pdf_buyer 수동 플래그 기반 (관리자가 Badak Mall 주문 확인 후 설정)
 -- is_pdf_buyer=true + 무료 구독 1년 자동 활성화
-CREATE OR REPLACE FUNCTION planners_activate_pdf_buyer(_member_id UUID)
+CREATE OR REPLACE FUNCTION myverse_activate_pdf_buyer(_member_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    UPDATE planners_users
+    UPDATE myverse_users
     SET is_pdf_buyer = true,
         pdf_buyer_verified_at = now(),
         updated_at = now()
     WHERE member_id = _member_id;
 
-    PERFORM planners_activate_subscription(_member_id, 1, 'pdf_buyer');
+    PERFORM myverse_activate_subscription(_member_id, 1, 'pdf_buyer');
 
-    INSERT INTO planners_payments (
+    INSERT INTO myverse_payments (
         member_id, order_id, amount, status, source,
         subscription_years, subscription_starts, subscription_ends,
         paid_at, meta
@@ -104,14 +104,14 @@ END;
 $$;
 
 -- ── 구독 만료 일괄 처리 (매일 크론) ──────────────────────────────
-CREATE OR REPLACE FUNCTION planners_expire_subscriptions()
+CREATE OR REPLACE FUNCTION myverse_expire_subscriptions()
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
     _count INTEGER;
 BEGIN
-    UPDATE planners_users
+    UPDATE myverse_users
     SET subscription_status = 'expired', updated_at = now()
     WHERE subscription_status = 'active'
       AND subscription_expires_at IS NOT NULL

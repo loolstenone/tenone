@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users, CalendarDays } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
-import { localDateStr } from "@/lib/planners/types";
-import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
-import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
-import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
+import type { PlannerDaily, PlannerTask } from "@/lib/myverse/types";
+import { localDateStr } from "@/lib/myverse/types";
+import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
+import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/myverse/templates";
+import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/myverse/template-recommendations";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyEntryComposer } from "./DailyEntryComposer";
@@ -62,7 +62,7 @@ import { DailyPlacesCard } from "./DailyPlacesCard";
 import { DailyRoutinesCard } from "./DailyRoutinesCard";
 import { useSwipeNav } from "./useSwipeNav";
 import { DailyMiniMonth } from "./DailyMiniMonth";
-import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
+import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEntry, type CalendarKind } from "@/lib/myverse/calendar-rules";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
@@ -590,7 +590,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
     const [syncConflict, setSyncConflict] = useState(false);
     const lastSaveTimeRef = useRef<number>(0);
-    const offlineQueueKey = "planners_offline_queue";
+    const offlineQueueKey = "myverse_offline_queue";
     // (인라인 Task 입력 제거 — 모달로 통합)
     // 활성 프로젝트 목록 (Task 태그용)
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
@@ -617,7 +617,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [tplCat, setTplCat] = useState("all");
     const [tplFavs, setTplFavs] = useState<Set<string>>(() => {
         if (typeof window === "undefined") return new Set();
-        try { return new Set(JSON.parse(localStorage.getItem("planners_fav_templates") || "[]")); }
+        try { return new Set(JSON.parse(localStorage.getItem("myverse_fav_templates") || "[]")); }
         catch { return new Set(); }
     });
     const [expandedNote, setExpandedNote] = useState<NoteItem | null>(null);
@@ -704,9 +704,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     // 타임존 자동 감지 — 홈 타임존과 다르면 뱃지 표시
     useEffect(() => {
         const current = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const home = localStorage.getItem("planners_home_timezone");
+        const home = localStorage.getItem("myverse_home_timezone");
         if (!home) {
-            localStorage.setItem("planners_home_timezone", current);
+            localStorage.setItem("myverse_home_timezone", current);
         } else if (home !== current) {
             setTzMismatch(current);
         }
@@ -717,7 +717,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [arriveId, setArriveId] = useState<string | null>(null);
     useEffect(() => {
         (async () => {
-            const res = await fetch(`/api/planners/routines?date=${date}`);
+            const res = await fetch(`/api/myverse/routines?date=${date}`);
             if (!res.ok) return;
             const d = await res.json();
             const transport = (d.routines ?? []).filter((r: { category: string }) => r.category === "transport");
@@ -745,7 +745,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         let cancelled = false;
         (async () => {
             try {
-                const res = await fetch('/api/planners/settings');
+                const res = await fetch('/api/myverse/settings');
                 if (cancelled) return;
                 if (res.ok) {
                     const d = await res.json();
@@ -785,13 +785,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         if (!memberId) return;
         const supabase = createClient();
         const channel = supabase
-            .channel(`planners_daily:${memberId}:${date}`)
+            .channel(`myverse_daily:${memberId}:${date}`)
             .on(
                 "postgres_changes",
                 {
                     event: "*",
                     schema: "public",
-                    table: "planners_daily",
+                    table: "myverse_daily",
                     filter: `member_id=eq.${memberId}`,
                 },
                 (payload: { new?: unknown }) => {
@@ -800,7 +800,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     // 내가 저장한 지 3초 이내면 무시 (자기 변경 반영 방지)
                     if (Date.now() - lastSaveTimeRef.current < 3000) return;
                     // 다른 기기 변경 → 최신 데이터 refetch
-                    fetch(`/api/planners/daily?date=${date}`)
+                    fetch(`/api/myverse/daily?date=${date}`)
                         .then((r) => r.ok ? r.json() : null)
                         .then((data) => {
                             if (!data?.daily) return;
@@ -837,7 +837,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         let cancelled = false;
         (async () => {
             try {
-                const res = await fetch(`/api/planners/calendar?from=${date}&to=${date}`);
+                const res = await fetch(`/api/myverse/calendar?from=${date}&to=${date}`);
                 if (cancelled || !res.ok) return;
                 const d = await res.json();
                 setCalEntries(d.entries ?? []);
@@ -847,7 +847,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     }, [date]);
 
     function refetchCalendar() {
-        fetch(`/api/planners/calendar?from=${date}&to=${date}`)
+        fetch(`/api/myverse/calendar?from=${date}&to=${date}`)
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
@@ -900,7 +900,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         if (tplList.length > 0) return;
         (async () => {
             try {
-                const res = await fetch("/api/planners/templates");
+                const res = await fetch("/api/myverse/templates");
                 if (res.ok) {
                     const d = await res.json();
                     setTplList(d.templates || []);
@@ -921,7 +921,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         const to = d2.toISOString().slice(0, 10);
         (async () => {
             try {
-                const res = await fetch(`/api/planners/calendar?from=${from}&to=${to}`);
+                const res = await fetch(`/api/myverse/calendar?from=${from}&to=${to}`);
                 if (cancelled || !res.ok) return;
                 const j = await res.json();
                 setUpcomingEntries(j.entries ?? []);
@@ -934,7 +934,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await fetch(`/api/planners/projects`);
+            const res = await fetch(`/api/myverse/projects`);
             if (cancelled || !res.ok) return;
             const d = await res.json();
             const all: Array<{ id: string; title: string; color: string | null; status: string }> = d.projects ?? [];
@@ -947,7 +947,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await fetch(`/api/planners/daily/pending-count?date=${date}&days=60`);
+            const res = await fetch(`/api/myverse/daily/pending-count?date=${date}&days=60`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
@@ -963,7 +963,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         (async () => {
             setLoading(true);
             setWeather(null);
-            const res = await fetch(`/api/planners/daily?date=${date}`);
+            const res = await fetch(`/api/myverse/daily?date=${date}`);
             if (cancelled) return;
             if (res.ok) {
                 const data = await res.json();
@@ -1068,7 +1068,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (!queue.length) return;
             localStorage.removeItem(offlineQueueKey);
             for (const item of queue) {
-                await fetch(`/api/planners/daily`, {
+                await fetch(`/api/myverse/daily`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ date: item.date, ...item.patch }),
@@ -1095,7 +1095,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setSaving(true);
         lastSaveTimeRef.current = Date.now();
         try {
-            const res = await fetch(`/api/planners/daily`, {
+            const res = await fetch(`/api/myverse/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, ...patch }),
@@ -1120,7 +1120,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     async function carryOverPending() {
         setCarrying(true);
         try {
-            const res = await fetch(`/api/planners/daily/carry-over`, {
+            const res = await fetch(`/api/myverse/daily/carry-over`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, days: 60 }),
@@ -1128,7 +1128,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (res.ok) {
                 const d = await res.json();
                 if (d.carried > 0) {
-                    const r2 = await fetch(`/api/planners/daily?date=${date}`);
+                    const r2 = await fetch(`/api/myverse/daily?date=${date}`);
                     if (r2.ok) {
                         const data = await r2.json();
                         if (data.daily) setTasks(data.daily.tasks || []);
@@ -1145,7 +1145,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setPendingLoading(true);
         setSelectedPendingIds(new Set());
         try {
-            const res = await fetch(`/api/planners/daily/pending-tasks?date=${date}&days=60`);
+            const res = await fetch(`/api/myverse/daily/pending-tasks?date=${date}&days=60`);
             if (res.ok) {
                 const d = await res.json();
                 const groups = d.groups ?? [];
@@ -1200,7 +1200,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             // 2. 원본 날짜에서 carried 처리 (각 날짜의 전체 tasks 불러와서 선택 항목만 carried)
             await Promise.all(
                 Array.from(sourceUpdates.entries()).map(async ([srcDate, selectedIds]) => {
-                    const r = await fetch(`/api/planners/daily?date=${srcDate}`);
+                    const r = await fetch(`/api/myverse/daily?date=${srcDate}`);
                     if (!r.ok) return;
                     const d = await r.json();
                     if (!d.daily?.tasks) return;
@@ -1208,7 +1208,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     const updated = (d.daily.tasks as PlannerTask[]).map(t =>
                         idSet.has(t.id) ? { ...t, status: 'carried' } : t
                     );
-                    await fetch(`/api/planners/daily`, {
+                    await fetch(`/api/myverse/daily`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ date: srcDate, tasks: updated }),
@@ -1245,7 +1245,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         // 낙관적 업데이트
         setCalEntries(prev => prev.map(e => e.id === entry.id ? { ...e, status: next } : e));
         try {
-            await fetch(`/api/planners/calendar/${entry.id}`, {
+            await fetch(`/api/myverse/calendar/${entry.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: next }),
@@ -1290,7 +1290,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         }
         // 2) 다른 날: 대상 daily 가져와서 새 task 추가
         try {
-            const res = await fetch(`/api/planners/daily?date=${newDate}`);
+            const res = await fetch(`/api/myverse/daily?date=${newDate}`);
             const d = res.ok ? await res.json() : { daily: null };
             const targetTasks: PlannerTask[] = Array.isArray(d.daily?.tasks) ? d.daily.tasks : [];
             const newTask: PlannerTask = {
@@ -1301,7 +1301,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 moved_from: date,
                 moved_to: null,
             };
-            await fetch(`/api/planners/daily`, {
+            await fetch(`/api/myverse/daily`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ date: newDate, tasks: [...targetTasks, newTask] }),
@@ -1371,7 +1371,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         if (tplList.length === 0) {
             setTplLoading(true);
             try {
-                const res = await fetch("/api/planners/templates");
+                const res = await fetch("/api/myverse/templates");
                 if (res.ok) {
                     const d = await res.json();
                     setTplList(d.templates || []);
@@ -1386,7 +1386,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setTplFavs(prev => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id); else next.add(id);
-            try { localStorage.setItem("planners_fav_templates", JSON.stringify([...next])); } catch { /* ignore */ }
+            try { localStorage.setItem("myverse_fav_templates", JSON.stringify([...next])); } catch { /* ignore */ }
             return next;
         });
     }
@@ -1441,7 +1441,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         d.setDate(d.getDate() + deltaDays);
         const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         setDate(newDate);
-        router.replace(`/planners/app/daily?date=${newDate}`);
+        router.replace(`/myverse/app/daily?date=${newDate}`);
     }
 
     // 스와이프 내비게이션 (모바일 터치)
@@ -1509,7 +1509,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             {tzMismatch && (
                                 <button
                                     onClick={() => {
-                                        localStorage.setItem("planners_home_timezone", tzMismatch);
+                                        localStorage.setItem("myverse_home_timezone", tzMismatch);
                                         setTzMismatch(null);
                                     }}
                                     className="inline-flex items-center gap-1 text-amber-400 text-xs hover:text-amber-300 transition-colors"
@@ -1960,7 +1960,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 onClick={async () => {
                                     const idx = notesList.filter(n => n.type === 'canvas').length + 1;
                                     const title = `캔버스 ${idx}`;
-                                    const res = await fetch("/api/planners/canvases", {
+                                    const res = await fetch("/api/myverse/canvases", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/json" },
                                         body: JSON.stringify({ title }),
@@ -2115,7 +2115,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xs uppercase tracking-widest text-neutral-400">일간 기록</h2>
                                     <Link
-                                        href="/planners/app/settings#tracking"
+                                        href="/myverse/app/settings#tracking"
                                         className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
                                         title="트래킹 항목 수정"
                                     >
@@ -3397,8 +3397,8 @@ function UpcomingSchedule({ date }: { date: string }) {
         let cancelled = false;
         setLoading(true);
         Promise.all([
-            fetch(`/api/planners/calendar?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
-            fetch(`/api/planners/daily/range?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
+            fetch(`/api/myverse/calendar?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
+            fetch(`/api/myverse/daily/range?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
         ])
             .then(([cal, daily]) => {
                 if (cancelled) return;
@@ -3463,7 +3463,7 @@ function UpcomingSchedule({ date }: { date: string }) {
             return (
                 <li key={`task-${o.date}-${o.task.id}-${i}`}>
                     <a
-                        href={`/planners/app/daily?date=${o.date}`}
+                        href={`/myverse/app/daily?date=${o.date}`}
                         className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                     >
                         <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
@@ -3482,7 +3482,7 @@ function UpcomingSchedule({ date }: { date: string }) {
         return (
             <li key={`cal-${o.date}-${o.entry.id}-${i}`}>
                 <a
-                    href={`/planners/app/daily?date=${o.date}`}
+                    href={`/myverse/app/daily?date=${o.date}`}
                     className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                 >
                     <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${c.dot}`} />

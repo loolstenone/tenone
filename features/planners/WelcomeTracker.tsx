@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { trackPlanners } from "@/lib/planners/analytics";
+import { trackPlanners } from "@/lib/myverse/analytics";
 
 export function WelcomeTracker() {
     const params = useSearchParams();
     useEffect(() => {
         if (params.get("welcome") === "1") {
-            trackPlanners("planners_subscription_started");
+            trackPlanners("myverse_subscription_started");
         }
     }, [params]);
     return null;

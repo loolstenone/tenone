@@ -857,10 +857,19 @@ export function HandNote({
     // ── Pen selection ─────────────────────────────────────────────────────────
 
     function selectPen(t: PenType) {
+        // 같은 펜을 다시 클릭하면 그리기 모드 해제 (텍스트 입력으로 복귀)
+        if (penType === t && drawEnabled && !selectMode && !lassoMode && !eraserMode) {
+            setDrawEnabled(false);
+            return;
+        }
         setPenType(t);
         setSize(PEN_PRESETS[t].baseSize);
         setEraserMode(false);
         setStabilizer(undefined);
+        // 펜 선택 = 즉시 그리기 모드 진입 (별도 "그리기" 토글 불필요)
+        setDrawEnabled(true);
+        setSelectMode(false);
+        setLassoMode(false);
     }
 
     // ── Clear all ─────────────────────────────────────────────────────────────
@@ -974,12 +983,14 @@ export function HandNote({
                             key={t}
                             onClick={() => selectPen(t)}
                             type="button"
-                            title={PEN_PRESETS[t].label}
                             className={`px-2 h-6 text-xs rounded transition-colors whitespace-nowrap ${
-                                penType === t && !effectiveErase
+                                penType === t && drawEnabled && !effectiveErase && !selectMode && !lassoMode
                                     ? "bg-[#0F766E] text-white"
-                                    : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
+                                    : penType === t
+                                        ? "bg-neutral-200 text-neutral-700 border border-neutral-300"
+                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
                             }`}
+                            title={`${PEN_PRESETS[t].label}${penType === t && drawEnabled ? " (다시 누르면 그리기 종료)" : ""}`}
                         >
                             {PEN_PRESETS[t].label}
                         </button>
@@ -1142,7 +1153,7 @@ export function HandNote({
                     </button>
                     {/* 선택/이동 모드 */}
                     <button
-                        onClick={() => { setSelectMode(m => !m); setEraserMode(false); }}
+                        onClick={() => { const next = !selectMode; setSelectMode(next); setEraserMode(false); setLassoMode(false); if (next) setDrawEnabled(true); }}
                         type="button"
                         title="이미지 선택·이동"
                         className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
@@ -1152,25 +1163,7 @@ export function HandNote({
                         <MousePointer2 className="h-3.5 w-3.5" />
                     </button>
                     <div className="w-px h-3 bg-neutral-300 shrink-0" />
-                    {/* 오버레이 모드: 그리기 ↔ 텍스트 토글 (children 있을 때만) */}
-                    {children !== undefined && (
-                        <>
-                            <button
-                                onClick={() => setDrawEnabled(d => !d)}
-                                type="button"
-                                title={drawEnabled ? "텍스트 편집 모드로 전환" : "손글씨 그리기 모드로 전환"}
-                                className={`flex items-center gap-1 px-2 h-6 text-xs rounded transition-colors mr-0.5 ${
-                                    drawEnabled
-                                        ? "bg-[#0F766E] text-white"
-                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
-                                }`}
-                            >
-                                <PenLine className="h-2.5 w-2.5" />
-                                {drawEnabled ? "그리기 중" : "그리기"}
-                            </button>
-                            <div className="w-px h-3 bg-neutral-300 shrink-0 mx-0.5" />
-                        </>
-                    )}
+                    {/* "그리기" 토글 제거 — 펜 선택 시 자동 진입, 선택/올가미/지우개 클릭 시 자동 해제 */}
                     {/* 손 떨림 보정 */}
                     <button
                         onClick={() => setShowStab(s => !s)}
@@ -1188,7 +1181,7 @@ export function HandNote({
                         onClick={() => {
                             if (!eraserMode) {
                                 setEraserMode(true); setEraserType("stroke");
-                                setLassoMode(false);
+                                setLassoMode(false); setSelectMode(false); setDrawEnabled(true);
                             } else if (eraserType === "stroke") {
                                 setEraserType("area");
                             } else {
@@ -1207,18 +1200,20 @@ export function HandNote({
                         )}
                     </button>
 
-                    {/* 올가미 선택 */}
+                    {/* 매직 선택 (올가미) */}
                     <button
                         onClick={() => {
-                            setLassoMode(m => !m);
-                            setEraserMode(false);
+                            const next = !lassoMode;
+                            setLassoMode(next);
+                            setEraserMode(false); setSelectMode(false);
+                            if (next) setDrawEnabled(true);
                             if (lassoMode) setSelectedIdxs(new Set());
                         }}
                         type="button"
                         className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
                             lassoMode ? "bg-blue-100 text-blue-600" : "text-neutral-500 hover:bg-neutral-200"
                         }`}
-                        title="올가미 선택"
+                        title="매직 선택 (올가미)"
                     >
                         <Lasso className="h-3.5 w-3.5" />
                     </button>
@@ -1508,7 +1503,7 @@ export function HandNote({
 }
 
 // ─── 직렬화 헬퍼 ────────────────────────────────────────────────────────────
-// 실제 구현은 lib/planners/canvas-engine/adapters/handnote-storage.ts로 이동.
+// 실제 구현은 lib/myverse/canvas-engine/adapters/handnote-storage.ts로 이동.
 // 외부 사용처(DailyView, ProjectNotesTab 등)는 기존대로 import 가능 (re-export).
 export {
     isHandwritingContent,
@@ -1517,4 +1512,4 @@ export {
     extractTextPart,
     setTextPart,
     setHandPart,
-} from "@/lib/planners/canvas-engine/adapters/handnote-storage";
+} from "@/lib/myverse/canvas-engine/adapters/handnote-storage";

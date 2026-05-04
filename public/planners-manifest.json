@@ -1,13 +1,13 @@
 {
-  "name": "Planner's Planner AI",
-  "short_name": "PP AI",
-  "description": "우리는 모두 기획자다. 적어도 자기 인생에서 만큼은.",
-  "start_url": "/planners/app",
-  "scope": "/planners/",
+  "name": "Myverse",
+  "short_name": "Myverse",
+  "description": "My Universe — 9 영역 자동 정리 + 능동 AI 플래너 + @handle 공개",
+  "start_url": "/myverse/app",
+  "scope": "/myverse/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#FAFAF7",
-  "theme_color": "#0F766E",
+  "theme_color": "#6366F1",
   "lang": "ko",
   "dir": "ltr",
   "categories": ["productivity", "lifestyle"],
@@ -27,19 +27,19 @@
   ],
   "shortcuts": [
     {
-      "name": "Today",
-      "short_name": "Today",
-      "url": "/planners/app/today"
+      "name": "오늘",
+      "short_name": "오늘",
+      "url": "/myverse/app/today"
     },
     {
-      "name": "Weekly",
-      "short_name": "Weekly",
-      "url": "/planners/app/weekly"
+      "name": "주간",
+      "short_name": "주간",
+      "url": "/myverse/app/weekly"
     },
     {
-      "name": "AI Briefing",
-      "short_name": "Briefing",
-      "url": "/planners/app/ai-briefing"
+      "name": "AI 브리핑",
+      "short_name": "브리핑",
+      "url": "/myverse/app/ai-briefing"
     }
   ]
 }

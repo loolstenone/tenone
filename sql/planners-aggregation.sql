@@ -4,7 +4,7 @@
 -- ═══════════════════════════════════════════════════════════════
 
 -- ── 주간 요약 (Daily → Weekly Result 섹션 보조) ────────────────
-CREATE OR REPLACE FUNCTION planners_weekly_summary(
+CREATE OR REPLACE FUNCTION myverse_weekly_summary(
     _member_id UUID,
     _year INTEGER,
     _week INTEGER
@@ -25,7 +25,7 @@ DECLARE
     _day RECORD;
 BEGIN
     SELECT week_start, week_end INTO _week_start, _week_end
-    FROM planners_weekly
+    FROM myverse_weekly
     WHERE member_id = _member_id AND year = _year AND week = _week;
 
     IF _week_start IS NULL THEN
@@ -36,7 +36,7 @@ BEGIN
 
     FOR _day IN
         SELECT date, tasks, notes, notes_secondary, energy_level, daily_result
-        FROM planners_daily
+        FROM myverse_daily
         WHERE member_id = _member_id
           AND date BETWEEN _week_start AND _week_end
     LOOP
@@ -63,7 +63,7 @@ BEGIN
     END LOOP;
 
     SELECT AVG(energy_level)::numeric(4,2) INTO _energy_avg
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND date BETWEEN _week_start AND _week_end
       AND energy_level IS NOT NULL;
@@ -86,7 +86,7 @@ END;
 $$;
 
 -- ── 월간 요약 (Weekly → Monthly) ───────────────────────────────
-CREATE OR REPLACE FUNCTION planners_monthly_summary(
+CREATE OR REPLACE FUNCTION myverse_monthly_summary(
     _member_id UUID,
     _year INTEGER,
     _month INTEGER
@@ -111,7 +111,7 @@ BEGIN
 
     FOR _day IN
         SELECT tasks, energy_level
-        FROM planners_daily
+        FROM myverse_daily
         WHERE member_id = _member_id
           AND date BETWEEN _first_day AND _last_day
     LOOP
@@ -130,13 +130,13 @@ BEGIN
     END LOOP;
 
     SELECT AVG(energy_level)::numeric(4,2) INTO _energy_avg
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND date BETWEEN _first_day AND _last_day
       AND energy_level IS NOT NULL;
 
     SELECT COUNT(*) INTO _projects_completed
-    FROM planners_projects
+    FROM myverse_projects
     WHERE member_id = _member_id
       AND completed_at BETWEEN _first_day AND (_last_day + INTERVAL '1 day');
 
@@ -158,7 +158,7 @@ END;
 $$;
 
 -- ── 연간 요약 ────────────────────────────────────────────────────
-CREATE OR REPLACE FUNCTION planners_yearly_summary(
+CREATE OR REPLACE FUNCTION myverse_yearly_summary(
     _member_id UUID,
     _year INTEGER
 ) RETURNS JSONB
@@ -176,7 +176,7 @@ BEGIN
         COUNT(*) FILTER (WHERE jsonb_typeof(tasks) = 'array'),
         COUNT(*)
     INTO _days_with_tasks, _days_recorded
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND EXTRACT(YEAR FROM date) = _year;
 
@@ -185,18 +185,18 @@ BEGIN
          WHERE (e->>'status') = 'done')
     ), 0)
     INTO _done_count
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND EXTRACT(YEAR FROM date) = _year
       AND jsonb_typeof(tasks) = 'array';
 
     SELECT COUNT(*) INTO _projects_completed
-    FROM planners_projects
+    FROM myverse_projects
     WHERE member_id = _member_id
       AND EXTRACT(YEAR FROM completed_at) = _year;
 
     SELECT COUNT(*) INTO _projects_total
-    FROM planners_projects
+    FROM myverse_projects
     WHERE member_id = _member_id
       AND (
           EXTRACT(YEAR FROM created_at) = _year OR

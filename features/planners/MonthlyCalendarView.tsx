@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getISOWeek } from "@/lib/planners/types";
+import { getISOWeek } from "@/lib/myverse/types";
 
 const MONTHS_EN = [
     "January", "February", "March", "April", "May", "June",
@@ -97,7 +97,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                     return (
                         <div key={mIdx}>
                             {/* Month name → monthly detail */}
-                            <Link href={`/planners/app/monthly?year=${year}&month=${mIdx + 1}`}>
+                            <Link href={`/myverse/app/monthly?year=${year}&month=${mIdx + 1}`}>
                                 <div className="bg-neutral-500 text-white text-center text-[11px] font-semibold py-1 hover:bg-[#0F766E] transition-colors">
                                     {monthName}
                                 </div>
@@ -121,7 +121,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                                 <div key={ri} className="grid grid-cols-[26px_repeat(7,1fr)]">
                                     {/* Week number → weekly view */}
                                     <Link
-                                        href={`/planners/app/weekly?year=${year}&week=${row[0].week}`}
+                                        href={`/myverse/app/weekly?year=${year}&week=${row[0].week}`}
                                         className="flex items-center justify-end pr-1 text-[8px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5"
                                     >
                                         W{String(row[0].week).padStart(2, "0")}
@@ -134,7 +134,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                                         return (
                                             <Link
                                                 key={ci}
-                                                href={`/planners/app/daily?date=${cell.date}`}
+                                                href={`/myverse/app/daily?date=${cell.date}`}
                                                 className={`text-center text-[10px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
                                                     isToday
                                                         ? "bg-[#0F766E]/10 text-[#0F766E] font-bold"

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus } from "lucide-react";
-import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/planners/types";
-import { REQUIRED_MENU_KEYS } from "@/lib/planners/types";
+import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
+import { REQUIRED_MENU_KEYS } from "@/lib/myverse/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
@@ -22,19 +22,19 @@ interface Tab {
 
 const TABS: Tab[] = [
     // ── Easily + All in One + Custom (스케줄러 중심)
-    { key: "index",     href: "/planners/app/index",       label: "인덱스",      modes: ["weekly", "all_in_one", "custom"] },
-    { key: "daily",     href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one", "custom"] },
-    { key: "weekly",    href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
-    { key: "monthly",   href: "/planners/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
-    { key: "yearly",    href: "/planners/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
-    { key: "time",      href: "/planners/app/time",        label: "시간",        modes: ["weekly", "all_in_one"] },
-    { key: "contacts",  href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
-    { key: "personal",  href: "/planners/app/personal",    label: "퍼스널",      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "index",     href: "/myverse/app/index",       label: "인덱스",      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/myverse/app/daily",       label: "일간",        modes: ["weekly", "all_in_one", "custom"] },
+    { key: "weekly",    href: "/myverse/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
+    { key: "monthly",   href: "/myverse/app/monthly",     label: "월간",        modes: ["weekly", "all_in_one"] },
+    { key: "yearly",    href: "/myverse/app/yearly",      label: "연간",        modes: ["weekly", "all_in_one"] },
+    { key: "time",      href: "/myverse/app/time",        label: "시간",        modes: ["weekly", "all_in_one"] },
+    { key: "contacts",  href: "/myverse/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
+    { key: "personal",  href: "/myverse/app/personal",    label: "퍼스널",      modes: ["weekly", "all_in_one", "custom"] },
     // ── All in One 전용
-    { key: "projects",  href: "/planners/app/projects",    label: "프로젝트",    modes: ["all_in_one"] },
-    { key: "canvas",    href: "/planners/app/canvas",      label: "캔버스",      modes: ["all_in_one"] },
-    { key: "templates", href: "/planners/app/templates",   label: "템플릿",      modes: ["all_in_one", "custom"] },
-    { key: "community", href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one", "custom"], external: true },
+    { key: "projects",  href: "/myverse/app/projects",    label: "프로젝트",    modes: ["all_in_one"] },
+    { key: "canvas",    href: "/myverse/app/canvas",      label: "캔버스",      modes: ["all_in_one"] },
+    { key: "templates", href: "/myverse/app/templates",   label: "템플릿",      modes: ["all_in_one", "custom"] },
+    { key: "community", href: "/myverse/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one", "custom"], external: true },
 ];
 
 export function AppTopNav({
@@ -126,7 +126,7 @@ export function AppTopNav({
     }, []);
 
     // 모든 hook 선언이 끝난 후에만 early return — Rules of Hooks 준수
-    if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
+    if (/^\/myverse\/app\/canvas\/.+/.test(pathname)) return null;
     const requiredKeys = new Set<string>(REQUIRED_MENU_KEYS);
     const visibleTabs = TABS
         .filter((t) => {
@@ -154,11 +154,10 @@ export function AppTopNav({
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand — 모바일: 아이콘만, sm+: 전체 텍스트 */}
-            <Link href="/planners/app" className="flex items-center gap-1.5 mr-1 shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-6 h-6 rounded shrink-0" />
+            <Link href="/myverse/app" className="flex items-center gap-1.5 mr-1 shrink-0">
+                <span className="w-6 h-6 rounded bg-[#6366F1] text-white flex items-center justify-center text-xs font-bold shrink-0">M</span>
                 <span className="hidden sm:inline font-serif text-sm text-neutral-900 whitespace-nowrap">
-                    Planner&apos;s Planner<sup className="text-[8px] font-sans font-bold text-[#0F766E] ml-0.5 align-super">AI</sup>
+                    Myverse<sup className="text-[8px] font-sans font-bold text-[#6366F1] ml-0.5 align-super">App</sup>
                 </span>
             </Link>
 
@@ -184,7 +183,7 @@ export function AppTopNav({
                             rel={tab.external ? "noopener" : undefined}
                             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
                                 active
-                                    ? "bg-[#0F766E] text-white"
+                                    ? "bg-[#6366F1] text-white"
                                     : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                             }`}
                         >
@@ -209,22 +208,22 @@ export function AppTopNav({
             <div className="hidden md:flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
                 {subscriptionStatus !== "active" && (
                     <Link
-                        href="/planners/purchase"
-                        className="flex items-center gap-1 px-2 py-1 mr-1 bg-gradient-to-br from-[#0F766E] to-[#0d5e56] text-white rounded text-[10px] font-medium hover:opacity-90 transition-opacity"
+                        href="/myverse/purchase"
+                        className="flex items-center gap-1 px-2 py-1 mr-1 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white rounded text-[10px] font-medium hover:opacity-90 transition-opacity"
                     >
                         <Sparkles className="h-3 w-3" />
                         <span>구독</span>
                     </Link>
                 )}
 
-                <InstallButton className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors inline-flex">
+                <InstallButton className="p-1.5 rounded text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors inline-flex">
                     <Download className="h-4 w-4" />
                 </InstallButton>
 
                 <Link
-                    href="/planners/app/search"
+                    href="/myverse/app/search"
                     className={`p-1.5 rounded transition-colors ${
-                        pathname === "/planners/app/search"
+                        pathname === "/myverse/app/search"
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
                     }`}
@@ -233,9 +232,9 @@ export function AppTopNav({
                 </Link>
 
                 <Link
-                    href="/planners/app/help"
+                    href="/myverse/app/help"
                     className={`p-1.5 rounded transition-colors ${
-                        pathname.startsWith("/planners/app/help")
+                        pathname.startsWith("/myverse/app/help")
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
                     }`}
@@ -244,9 +243,9 @@ export function AppTopNav({
                 </Link>
 
                 <Link
-                    href="/planners/app/settings"
+                    href="/myverse/app/settings"
                     className={`p-1.5 rounded transition-colors ${
-                        pathname.startsWith("/planners/app/settings")
+                        pathname.startsWith("/myverse/app/settings")
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
                     }`}
@@ -259,7 +258,7 @@ export function AppTopNav({
                     type="button"
                     onClick={toggleFullscreen}
                     title={isFullscreen ? "전체화면 종료 (Esc)" : "전체화면 (주소창·탭 숨김)"}
-                    className="p-1.5 rounded text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors"
+                    className="p-1.5 rounded text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors"
                 >
                     {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </button>
@@ -274,7 +273,7 @@ export function AppTopNav({
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
                         ) : (
-                            <span className="h-full w-full bg-[#0F766E]/10 flex items-center justify-center text-[10px] font-bold text-[#0F766E]">
+                            <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
                                 {userName[0]}
                             </span>
                         )}
@@ -294,7 +293,7 @@ export function AppTopNav({
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
                         ) : (
-                            <span className="h-full w-full bg-[#0F766E]/10 flex items-center justify-center text-[10px] font-bold text-[#0F766E]">
+                            <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
                                 {userName[0]}
                             </span>
                         )}
@@ -314,10 +313,10 @@ export function AppTopNav({
             <UniverseMobileMenu
                 open={menuOpen}
                 onClose={() => setMenuOpen(false)}
-                brandName="Planner's Planner AI"
+                brandName="Myverse App"
                 brandNode={
                     <span className="font-serif text-neutral-900">
-                        Planner&apos;s Planner<sup className="text-[8px] font-sans font-bold text-[#0F766E] ml-0.5 align-super">AI</sup>
+                        Myverse<sup className="text-[8px] font-sans font-bold text-[#6366F1] ml-0.5 align-super">App</sup>
                     </span>
                 }
                 bgClass="bg-white"
@@ -337,7 +336,7 @@ export function AppTopNav({
                                 onClick={() => !tab.external && setMenuOpen(false)}
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
                                     active
-                                        ? "bg-[#0F766E] text-white font-medium"
+                                        ? "bg-[#6366F1] text-white font-medium"
                                         : "text-neutral-700 hover:bg-neutral-500/10"
                                 }`}
                             >
@@ -354,21 +353,21 @@ export function AppTopNav({
                 {/* 유틸리티 */}
                 {subscriptionStatus !== "active" && (
                     <Link
-                        href="/planners/purchase"
+                        href="/myverse/purchase"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-[#0F766E] bg-[#0F766E]/5 hover:bg-[#0F766E]/10"
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-[#6366F1] bg-[#6366F1]/5 hover:bg-[#6366F1]/10"
                     >
                         <Sparkles className="h-4 w-4" />
                         <span className="flex-1">구독</span>
-                        <span className="text-[10px] text-[#0F766E]/60">PP AI 1년 무제한</span>
+                        <span className="text-[10px] text-[#6366F1]/60">PP AI 1년 무제한</span>
                     </Link>
                 )}
                 <InstallButton className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 w-full text-left">
-                    <Download className="h-4 w-4 text-[#0F766E]" />
+                    <Download className="h-4 w-4 text-[#6366F1]" />
                     <span>앱 설치</span>
                 </InstallButton>
                 <Link
-                    href="/planners/app/search"
+                    href="/myverse/app/search"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
@@ -376,7 +375,7 @@ export function AppTopNav({
                     <span>검색</span>
                 </Link>
                 <Link
-                    href="/planners/app/help"
+                    href="/myverse/app/help"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
@@ -384,7 +383,7 @@ export function AppTopNav({
                     <span>도움말 / FAQ</span>
                 </Link>
                 <Link
-                    href="/planners/app/settings"
+                    href="/myverse/app/settings"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >

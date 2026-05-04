@@ -6,9 +6,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getHoliday } from "@/lib/planners/holidays";
-import { expandOccurrences, isVisible, type CalendarEntry } from "@/lib/planners/calendar-rules";
-import { getISOWeek } from "@/lib/planners/types";
+import { getHoliday } from "@/lib/myverse/holidays";
+import { expandOccurrences, isVisible, type CalendarEntry } from "@/lib/myverse/calendar-rules";
+import { getISOWeek } from "@/lib/myverse/types";
 
 interface Props {
     date: string;  // YYYY-MM-DD (현재 보고 있는 날짜)
@@ -30,7 +30,7 @@ export function DailyMiniMonth({ date }: Props) {
         const first = `${year}-${pad(month)}-01`;
         const lastD = new Date(year, month, 0).getDate();
         const last = `${year}-${pad(month)}-${pad(lastD)}`;
-        fetch(`/api/planners/calendar?from=${first}&to=${last}`)
+        fetch(`/api/myverse/calendar?from=${first}&to=${last}`)
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setEntries(d.entries); })
             .catch(() => {});
@@ -89,7 +89,7 @@ export function DailyMiniMonth({ date }: Props) {
                     <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
                 <Link
-                    href={`/planners/app/monthly?year=${year}&month=${month}`}
+                    href={`/myverse/app/monthly?year=${year}&month=${month}`}
                     className="text-xs font-semibold text-neutral-700 hover:text-[#0F766E]"
                 >
                     {year}년 {month}월
@@ -116,7 +116,7 @@ export function DailyMiniMonth({ date }: Props) {
                     return (
                         <div key={rowIdx} className="grid grid-cols-[20px_repeat(7,1fr)] gap-0.5">
                             <Link
-                                href={`/planners/app/weekly?year=${weekYear}&week=${week}`}
+                                href={`/myverse/app/weekly?year=${weekYear}&week=${week}`}
                                 title={`W${week} 주간 보기`}
                                 className="flex items-center justify-center text-[8px] text-neutral-300 hover:text-[#0F766E] font-mono leading-none"
                             >
@@ -133,7 +133,7 @@ export function DailyMiniMonth({ date }: Props) {
                                 return (
                                     <Link
                                         key={c.date}
-                                        href={`/planners/app/daily?date=${c.date}`}
+                                        href={`/myverse/app/daily?date=${c.date}`}
                                         className={`relative flex items-center justify-center text-[11px] rounded-md py-1.5 transition-colors
                                             ${isToday ? "bg-[#0F766E] text-white font-semibold"
                                             : !c.inMonth ? "text-neutral-200"

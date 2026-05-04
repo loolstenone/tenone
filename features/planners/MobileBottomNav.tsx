@@ -12,16 +12,16 @@ export const MOBILE_NAV_STORAGE_KEY = "planners-mobile-nav";
 export const MOBILE_NAV_DEFAULT: string[] = ["index", "projects", "today", "identity", "search"];
 
 export const ALL_NAV_OPTIONS = [
-    { id: "index",    label: "인덱스",   icon: LayoutGrid,    href: "/planners/app/index" },
-    { id: "today",    label: "오늘",     icon: Sun,           href: "/planners/app/today" },
-    { id: "weekly",   label: "주간",    icon: CalendarDays, href: "/planners/app/weekly" },
-    { id: "monthly",  label: "월간",    icon: Calendar,     href: "/planners/app/monthly" },
-    { id: "yearly",   label: "연간",    icon: CalendarRange, href: "/planners/app/yearly" },
-    { id: "projects", label: "프로젝트", icon: FolderKanban, href: "/planners/app/projects" },
-    { id: "identity", label: "퍼스널",  icon: User,         href: "/planners/app/personal" },
-    { id: "contacts", label: "연락처",  icon: Users,        href: "/planners/app/contacts" },
-    { id: "search",   label: "검색",    icon: Search,       href: "/planners/app/search" },
-    { id: "settings", label: "설정",    icon: Settings,     href: "/planners/app/settings" },
+    { id: "index",    label: "인덱스",   icon: LayoutGrid,    href: "/myverse/app/index" },
+    { id: "today",    label: "오늘",     icon: Sun,           href: "/myverse/app/today" },
+    { id: "weekly",   label: "주간",    icon: CalendarDays, href: "/myverse/app/weekly" },
+    { id: "monthly",  label: "월간",    icon: Calendar,     href: "/myverse/app/monthly" },
+    { id: "yearly",   label: "연간",    icon: CalendarRange, href: "/myverse/app/yearly" },
+    { id: "projects", label: "프로젝트", icon: FolderKanban, href: "/myverse/app/projects" },
+    { id: "identity", label: "퍼스널",  icon: User,         href: "/myverse/app/personal" },
+    { id: "contacts", label: "연락처",  icon: Users,        href: "/myverse/app/contacts" },
+    { id: "search",   label: "검색",    icon: Search,       href: "/myverse/app/search" },
+    { id: "settings", label: "설정",    icon: Settings,     href: "/myverse/app/settings" },
 ] as const;
 
 export type NavOptionId = typeof ALL_NAV_OPTIONS[number]["id"];
@@ -67,8 +67,8 @@ export function MobileBottomNav() {
                         pathname === item.href ||
                         pathname.startsWith(item.href + "/") ||
                         pathname.startsWith(item.href + "?") ||
-                        (item.id === "index" && pathname === "/planners/app") ||
-                        (item.id === "today" && pathname.startsWith("/planners/app/daily"));
+                        (item.id === "index" && pathname === "/myverse/app") ||
+                        (item.id === "today" && pathname.startsWith("/myverse/app/daily"));
                     return (
                         <Link
                             key={item.id}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Sparkles, Copy, Check, X, Pencil, RotateCcw } from "lucide-react";
-import { trackPlanners } from "@/lib/planners/analytics";
+import { trackPlanners } from "@/lib/myverse/analytics";
 
 const AI_TARGETS = [
     { key: "claude", label: "Claude", url: "https://claude.ai/new?q=" },
@@ -46,7 +46,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
     function openExternal(url: string, target: string) {
         const encoded = encodeURIComponent(activePrompt);
         navigator.clipboard.writeText(activePrompt).catch(() => {});
-        trackPlanners("planners_copy_to_ai", { target });
+        trackPlanners("myverse_copy_to_ai", { target });
         window.open(url + encoded.slice(0, 4000), "_blank");
     }
 

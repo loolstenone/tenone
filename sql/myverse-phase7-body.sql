@@ -1,7 +1,7 @@
 -- Myverse Phase 7-A: BODY 영역 데이터 — 운동·식사·수면 구조화 컬럼
 -- 적용일: 2026-05-04
 --
--- 새 테이블 만들지 않고 기존 planners_daily_routines를 확장:
+-- 새 테이블 만들지 않고 기존 myverse_daily_routines를 확장:
 --   body_subtype: 'workout' | 'meal' | 'sleep' | null
 --   body_data JSONB: subtype별 구조화 필드
 --
@@ -9,17 +9,17 @@
 -- 식사: { meal_type:'breakfast'|'lunch'|'dinner'|'snack', items:[{name, calories?, protein?, carbs?, fat?, source?:'openfoodfacts:barcode'}] }
 -- 수면: { duration_min, quality:1-5, deep_min?, rem_min?, source?:'healthkit'|'manual' }
 
-ALTER TABLE planners_daily_routines
+ALTER TABLE myverse_daily_routines
     ADD COLUMN IF NOT EXISTS body_subtype TEXT,
     ADD COLUMN IF NOT EXISTS body_data JSONB;
 
-ALTER TABLE planners_daily_routines DROP CONSTRAINT IF EXISTS routines_body_subtype_check;
-ALTER TABLE planners_daily_routines
+ALTER TABLE myverse_daily_routines DROP CONSTRAINT IF EXISTS routines_body_subtype_check;
+ALTER TABLE myverse_daily_routines
     ADD CONSTRAINT routines_body_subtype_check
     CHECK (body_subtype IS NULL OR body_subtype IN ('workout', 'meal', 'sleep'));
 
 CREATE INDEX IF NOT EXISTS idx_routines_body_subtype
-    ON planners_daily_routines(member_id, body_subtype, date DESC)
+    ON myverse_daily_routines(member_id, body_subtype, date DESC)
     WHERE body_subtype IS NOT NULL;
 
 -- 외부 헬스 동기화 토큰·메타 (Apple Health·Google Fit·Samsung Health)

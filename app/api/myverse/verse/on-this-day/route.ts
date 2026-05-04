@@ -5,7 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     // SQL: WHERE TO_CHAR(date, 'MM-DD') = '05-04' AND date < ref
     // Supabase에서 raw RPC가 가장 깔끔. 일단 client-side filter로 fetch (성능은 추후 개선).
     const { data: moments } = await admin
-        .from("planners_daily_moments")
+        .from("myverse_daily_moments")
         .select("id, date, happened_at, caption, media_url, media_type, domain")
         .eq("member_id", memberId)
         .lt("date", ref)
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         .limit(1000);
 
     const { data: routines } = await admin
-        .from("planners_daily_routines")
+        .from("myverse_daily_routines")
         .select("id, date, start_time, activity, domain, body_subtype")
         .eq("member_id", memberId)
         .lt("date", ref)
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
         .limit(1000);
 
     const { data: calendar } = await admin
-        .from("planners_calendar_entries")
+        .from("myverse_calendar_entries")
         .select("id, date, title, kind, domain")
         .eq("member_id", memberId)
         .lt("date", ref)

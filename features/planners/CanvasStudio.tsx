@@ -160,7 +160,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/canvases/${canvasId}`, { cache: "no-store" });
+            const res = await fetch(`/api/myverse/canvases/${canvasId}`, { cache: "no-store" });
             if (cancelled) return;
             if (!res.ok) { setNotFound(true); setLoading(false); return; }
             const json = await res.json();
@@ -199,7 +199,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         };
         setSaving(true);
         try {
-            await fetch(`/api/planners/canvases/${canvasId}`, {
+            await fetch(`/api/myverse/canvases/${canvasId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -267,7 +267,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         const t = next.trim() || "새 캔버스";
         setTitle(t);
         setTitleDirty(false);
-        await fetch(`/api/planners/canvases/${canvasId}`, {
+        await fetch(`/api/myverse/canvases/${canvasId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title: t }),
@@ -276,8 +276,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
 
     // ── 삭제 ───────────────────────────────────────────────────────────────
     async function deleteCanvas() {
-        await fetch(`/api/planners/canvases/${canvasId}`, { method: "DELETE" });
-        window.location.href = "/planners/app/canvas";
+        await fetch(`/api/myverse/canvases/${canvasId}`, { method: "DELETE" });
+        window.location.href = "/myverse/app/canvas";
     }
 
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
@@ -297,7 +297,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             <div className={`${shellCls} items-center justify-center`}>
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
-                    {!embed && <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>}
+                    {!embed && <Link href="/myverse/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>}
                 </div>
             </div>
         );
@@ -311,7 +311,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             {/* 상단 바 — embed 모드에서는 숨김 */}
             {!embed && (
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
-                <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
+                <Link href="/myverse/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
                     <ChevronLeft className="h-4 w-4" />
                 </Link>
 

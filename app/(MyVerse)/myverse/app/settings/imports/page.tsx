@@ -27,7 +27,7 @@ const TARGETS: ImportTarget[] = [
         label: "Instagram / Facebook",
         description: "사진·영상 + 캡션을 9 영역으로 자동 분류",
         accept: ".zip",
-        endpoint: "/api/planners/moments/import-meta",
+        endpoint: "/api/myverse/moments/import-meta",
         icon: Archive,
         instructions: "Instagram: 설정 → 정보 다운로드 → JSON / Facebook: 설정 → 정보 다운로드 → JSON",
     },

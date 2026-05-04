@@ -4,7 +4,7 @@
 -- 학생 8종에 이어 athlete·creator·designer·developer·sales 약한 역할 보강.
 -- 일부는 다중 역할 공유.
 
-INSERT INTO planners_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
+INSERT INTO myverse_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
 
 -- ─────────── athlete (운동) ───────────
 ('training_plan', 'framework', '운동', '주간 훈련 플랜', '주차 단위 강도·볼륨 분배',

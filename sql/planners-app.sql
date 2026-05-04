@@ -4,7 +4,7 @@
 -- ═══════════════════════════════════════════════════════════════
 
 -- ── 1. 유저 설정 + 구독 ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_users (
+CREATE TABLE IF NOT EXISTS myverse_users (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id             UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   subscription_status   TEXT NOT NULL DEFAULT 'free'
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS planners_users (
 );
 
 -- ── 2. Personal Identity ────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_identities (
+CREATE TABLE IF NOT EXISTS myverse_identities (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id             UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   -- Inside-Out
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS planners_identities (
 );
 
 -- ── 3. Yearly Plan ──────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_yearly (
+CREATE TABLE IF NOT EXISTS myverse_yearly (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id    UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   year         INTEGER NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS planners_yearly (
 );
 
 -- ── 4. Monthly Plan ─────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_monthly (
+CREATE TABLE IF NOT EXISTS myverse_monthly (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id    UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   year         INTEGER NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS planners_monthly (
 );
 
 -- ── 5. Weekly Plan (Light Vrief + GPR) ─────────────────────────
-CREATE TABLE IF NOT EXISTS planners_weekly (
+CREATE TABLE IF NOT EXISTS myverse_weekly (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id    UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   year         INTEGER NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS planners_weekly (
 );
 
 -- ── 6. Daily Plan + Notes ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_daily (
+CREATE TABLE IF NOT EXISTS myverse_daily (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id       UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   date            DATE NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS planners_daily (
 );
 
 -- ── 7. Projects ─────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_projects (
+CREATE TABLE IF NOT EXISTS myverse_projects (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id    UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   title        TEXT NOT NULL,
@@ -124,9 +124,9 @@ CREATE TABLE IF NOT EXISTS planners_projects (
 );
 
 -- ── 8. Project Vrief (Full 4-stage Objective Brief) ────────────
-CREATE TABLE IF NOT EXISTS planners_project_vriefs (
+CREATE TABLE IF NOT EXISTS myverse_project_vriefs (
   id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id              UUID NOT NULL REFERENCES planners_projects(id) ON DELETE CASCADE,
+  project_id              UUID NOT NULL REFERENCES myverse_projects(id) ON DELETE CASCADE,
   -- Stage 1: 조사·분석
   research_situation      TEXT,
   research_data           JSONB DEFAULT '[]',
@@ -149,9 +149,9 @@ CREATE TABLE IF NOT EXISTS planners_project_vriefs (
 );
 
 -- ── 9. Project GPR (Result Brief, 7 fields) ─────────────────────
-CREATE TABLE IF NOT EXISTS planners_project_gprs (
+CREATE TABLE IF NOT EXISTS myverse_project_gprs (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id   UUID NOT NULL REFERENCES planners_projects(id) ON DELETE CASCADE,
+  project_id   UUID NOT NULL REFERENCES myverse_projects(id) ON DELETE CASCADE,
   goal         TEXT,
   key_results  TEXT[],
   plan         TEXT,
@@ -164,9 +164,9 @@ CREATE TABLE IF NOT EXISTS planners_project_gprs (
 );
 
 -- ── 10. Project Notes ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_project_notes (
+CREATE TABLE IF NOT EXISTS myverse_project_notes (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id   UUID NOT NULL REFERENCES planners_projects(id) ON DELETE CASCADE,
+  project_id   UUID NOT NULL REFERENCES myverse_projects(id) ON DELETE CASCADE,
   title        TEXT,
   content      TEXT,
   order_index  INTEGER DEFAULT 0,
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS planners_project_notes (
 );
 
 -- ── 11. AI Briefings ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_ai_briefings (
+CREATE TABLE IF NOT EXISTS myverse_ai_briefings (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id         UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   briefing_type     TEXT NOT NULL CHECK (briefing_type IN ('morning', 'evening')),
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS planners_ai_briefings (
 );
 
 -- ── 12. AI 사용량 추적 ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS planners_ai_usage (
+CREATE TABLE IF NOT EXISTS myverse_ai_usage (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id         UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   usage_date        DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -200,97 +200,97 @@ CREATE TABLE IF NOT EXISTS planners_ai_usage (
 );
 
 -- ── 인덱스 ──────────────────────────────────────────────────────
-CREATE INDEX IF NOT EXISTS idx_planners_daily_member_date     ON planners_daily(member_id, date DESC);
-CREATE INDEX IF NOT EXISTS idx_planners_weekly_member         ON planners_weekly(member_id, year, week);
-CREATE INDEX IF NOT EXISTS idx_planners_monthly_member        ON planners_monthly(member_id, year, month);
-CREATE INDEX IF NOT EXISTS idx_planners_yearly_member         ON planners_yearly(member_id, year);
-CREATE INDEX IF NOT EXISTS idx_planners_projects_member       ON planners_projects(member_id, status);
-CREATE INDEX IF NOT EXISTS idx_planners_notes_project         ON planners_project_notes(project_id, order_index);
-CREATE INDEX IF NOT EXISTS idx_planners_briefings_member_date ON planners_ai_briefings(member_id, briefing_date DESC);
+CREATE INDEX IF NOT EXISTS idx_myverse_daily_member_date     ON myverse_daily(member_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_myverse_weekly_member         ON myverse_weekly(member_id, year, week);
+CREATE INDEX IF NOT EXISTS idx_myverse_monthly_member        ON myverse_monthly(member_id, year, month);
+CREATE INDEX IF NOT EXISTS idx_myverse_yearly_member         ON myverse_yearly(member_id, year);
+CREATE INDEX IF NOT EXISTS idx_myverse_projects_member       ON myverse_projects(member_id, status);
+CREATE INDEX IF NOT EXISTS idx_myverse_notes_project         ON myverse_project_notes(project_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_myverse_briefings_member_date ON myverse_ai_briefings(member_id, briefing_date DESC);
 
 -- ── RLS 활성화 ──────────────────────────────────────────────────
-ALTER TABLE planners_users           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_identities      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_yearly          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_monthly         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_weekly          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_daily           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_projects        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_project_vriefs  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_project_gprs    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_project_notes   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_ai_briefings    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE planners_ai_usage        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_users           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_identities      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_yearly          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_monthly         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_weekly          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_daily           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_projects        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_project_vriefs  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_project_gprs    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_project_notes   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_ai_briefings    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_ai_usage        ENABLE ROW LEVEL SECURITY;
 
 -- ── RLS 정책 (본인 데이터만) ─────────────────────────────────────
--- planners_users
-DROP POLICY IF EXISTS "본인만" ON planners_users;
-CREATE POLICY "본인만" ON planners_users
+-- myverse_users
+DROP POLICY IF EXISTS "본인만" ON myverse_users;
+CREATE POLICY "본인만" ON myverse_users
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_identities
-DROP POLICY IF EXISTS "본인만" ON planners_identities;
-CREATE POLICY "본인만" ON planners_identities
+-- myverse_identities
+DROP POLICY IF EXISTS "본인만" ON myverse_identities;
+CREATE POLICY "본인만" ON myverse_identities
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_yearly
-DROP POLICY IF EXISTS "본인만" ON planners_yearly;
-CREATE POLICY "본인만" ON planners_yearly
+-- myverse_yearly
+DROP POLICY IF EXISTS "본인만" ON myverse_yearly;
+CREATE POLICY "본인만" ON myverse_yearly
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_monthly
-DROP POLICY IF EXISTS "본인만" ON planners_monthly;
-CREATE POLICY "본인만" ON planners_monthly
+-- myverse_monthly
+DROP POLICY IF EXISTS "본인만" ON myverse_monthly;
+CREATE POLICY "본인만" ON myverse_monthly
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_weekly
-DROP POLICY IF EXISTS "본인만" ON planners_weekly;
-CREATE POLICY "본인만" ON planners_weekly
+-- myverse_weekly
+DROP POLICY IF EXISTS "본인만" ON myverse_weekly;
+CREATE POLICY "본인만" ON myverse_weekly
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_daily
-DROP POLICY IF EXISTS "본인만" ON planners_daily;
-CREATE POLICY "본인만" ON planners_daily
+-- myverse_daily
+DROP POLICY IF EXISTS "본인만" ON myverse_daily;
+CREATE POLICY "본인만" ON myverse_daily
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_projects
-DROP POLICY IF EXISTS "본인만" ON planners_projects;
-CREATE POLICY "본인만" ON planners_projects
+-- myverse_projects
+DROP POLICY IF EXISTS "본인만" ON myverse_projects;
+CREATE POLICY "본인만" ON myverse_projects
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_project_vriefs (project 소유자 통해 확인)
-DROP POLICY IF EXISTS "본인만" ON planners_project_vriefs;
-CREATE POLICY "본인만" ON planners_project_vriefs
+-- myverse_project_vriefs (project 소유자 통해 확인)
+DROP POLICY IF EXISTS "본인만" ON myverse_project_vriefs;
+CREATE POLICY "본인만" ON myverse_project_vriefs
   USING (project_id IN (
-    SELECT p.id FROM planners_projects p
+    SELECT p.id FROM myverse_projects p
     JOIN members m ON m.id = p.member_id
     WHERE m.email = auth.jwt()->>'email'
   ));
 
--- planners_project_gprs
-DROP POLICY IF EXISTS "본인만" ON planners_project_gprs;
-CREATE POLICY "본인만" ON planners_project_gprs
+-- myverse_project_gprs
+DROP POLICY IF EXISTS "본인만" ON myverse_project_gprs;
+CREATE POLICY "본인만" ON myverse_project_gprs
   USING (project_id IN (
-    SELECT p.id FROM planners_projects p
+    SELECT p.id FROM myverse_projects p
     JOIN members m ON m.id = p.member_id
     WHERE m.email = auth.jwt()->>'email'
   ));
 
--- planners_project_notes
-DROP POLICY IF EXISTS "본인만" ON planners_project_notes;
-CREATE POLICY "본인만" ON planners_project_notes
+-- myverse_project_notes
+DROP POLICY IF EXISTS "본인만" ON myverse_project_notes;
+CREATE POLICY "본인만" ON myverse_project_notes
   USING (project_id IN (
-    SELECT p.id FROM planners_projects p
+    SELECT p.id FROM myverse_projects p
     JOIN members m ON m.id = p.member_id
     WHERE m.email = auth.jwt()->>'email'
   ));
 
--- planners_ai_briefings
-DROP POLICY IF EXISTS "본인만" ON planners_ai_briefings;
-CREATE POLICY "본인만" ON planners_ai_briefings
+-- myverse_ai_briefings
+DROP POLICY IF EXISTS "본인만" ON myverse_ai_briefings;
+CREATE POLICY "본인만" ON myverse_ai_briefings
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
--- planners_ai_usage
-DROP POLICY IF EXISTS "본인만" ON planners_ai_usage;
-CREATE POLICY "본인만" ON planners_ai_usage
+-- myverse_ai_usage
+DROP POLICY IF EXISTS "본인만" ON myverse_ai_usage;
+CREATE POLICY "본인만" ON myverse_ai_usage
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));

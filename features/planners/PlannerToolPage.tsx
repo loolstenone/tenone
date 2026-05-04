@@ -220,7 +220,7 @@ function PlannersPlannerSection() {
             </ul>
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                href="/planners/purchase"
+                href="/myverse/purchase"
                 className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0d5e56] transition-colors"
               >
                 지금 시작하기 <ArrowRight size={14} />
@@ -234,7 +234,7 @@ function PlannersPlannerSection() {
             </div>
             <p className="text-xs text-[#999] mt-4 leading-relaxed">
               종이 플래너&apos;s 플래너(2026 All In One) 구매자는{" "}
-              <Link href="/planners/purchase" className="text-[#0F766E] underline">1년 무료 제공</Link>.
+              <Link href="/myverse/purchase" className="text-[#0F766E] underline">1년 무료 제공</Link>.
               <br />
               모든 기능은 웹에서 그대로 작동 — 별도 앱스토어 다운로드 없이 홈 화면에 추가만 하면 됩니다.
             </p>

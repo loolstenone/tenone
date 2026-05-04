@@ -7,7 +7,7 @@ export async function GET() {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     const { data, error } = await supabaseAdmin
-        .from("planners_ai_briefings")
+        .from("myverse_ai_briefings")
         .select("id, member_id, briefing_date, briefing_type, created_at, content")
         .order("created_at", { ascending: false })
         .limit(200);
@@ -17,7 +17,7 @@ export async function GET() {
     // Join member emails
     const memberIds = [...new Set((data || []).map((b) => b.member_id))];
     const { data: members } = await supabaseAdmin
-        .from("planners_users")
+        .from("myverse_users")
         .select("member_id, email")
         .in("member_id", memberIds);
 

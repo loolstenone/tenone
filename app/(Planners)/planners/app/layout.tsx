@@ -13,7 +13,7 @@ import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
 import { KeyboardShortcuts } from "@/features/planners/KeyboardShortcuts";
 import { AiBriefingFab } from "@/features/planners/AiBriefingFab";
 import { MobileBottomNav } from "@/features/planners/MobileBottomNav";
-import { getPlannerUser } from "@/lib/planners/client";
+import { getPlannerUser } from "@/lib/myverse/client";
 import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
 
 async function getMember() {

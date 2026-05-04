@@ -77,18 +77,18 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
     // localStorage 초기화
     useEffect(() => {
         if (typeof window === "undefined") return;
-        const savedTheme  = localStorage.getItem("planners_color_theme");
-        const savedFont   = localStorage.getItem("planners_font_family");
-        const savedUser   = localStorage.getItem("planners_user_font");
-        const savedMode   = localStorage.getItem("planners_theme_mode") as PlannersThemeMode | null;
-        const savedRadius = localStorage.getItem("planners_radius_theme") as PlannersRadius | null;
+        const savedTheme  = localStorage.getItem("myverse_color_theme");
+        const savedFont   = localStorage.getItem("myverse_font_family");
+        const savedUser   = localStorage.getItem("myverse_user_font");
+        const savedMode   = localStorage.getItem("myverse_theme_mode") as PlannersThemeMode | null;
+        const savedRadius = localStorage.getItem("myverse_radius_theme") as PlannersRadius | null;
         if (savedTheme)  setColorTheme(savedTheme);
         if (savedFont)   setFontFamily(savedFont);
         if (savedUser)   setUserFontFamily(savedUser);
         if (savedMode === "light" || savedMode === "dark" || savedMode === "system") setThemeMode(savedMode);
         if (savedRadius === "sharp" || savedRadius === "subtle" || savedRadius === "soft") setRadiusTheme(savedRadius);
         try {
-            const savedCustom = localStorage.getItem("planners_custom_fonts");
+            const savedCustom = localStorage.getItem("myverse_custom_fonts");
             if (savedCustom) setCustomFonts(JSON.parse(savedCustom));
         } catch { /* ignore */ }
     }, []);
@@ -97,32 +97,32 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
 
     function applyTheme(key: string) {
         setColorTheme(key);
-        localStorage.setItem("planners_color_theme", key);
+        localStorage.setItem("myverse_color_theme", key);
         applyPlannersTheme(key);
     }
 
     function applyMode(mode: PlannersThemeMode) {
         setThemeMode(mode);
-        localStorage.setItem("planners_theme_mode", mode);
+        localStorage.setItem("myverse_theme_mode", mode);
         applyPlannersThemeMode(mode);
         window.dispatchEvent(new CustomEvent("pp-theme-mode-change", { detail: { mode } }));
     }
 
     function applyFont(key: string) {
         setFontFamily(key);
-        localStorage.setItem("planners_font_family", key);
+        localStorage.setItem("myverse_font_family", key);
         applyPlannersFont(key);
     }
 
     function applyUserFont(key: string) {
         setUserFontFamily(key);
-        localStorage.setItem("planners_user_font", key);
+        localStorage.setItem("myverse_user_font", key);
         applyPlannersUserFont(key);
     }
 
     function applyRadius(key: PlannersRadius) {
         setRadiusTheme(key);
-        localStorage.setItem("planners_radius_theme", key);
+        localStorage.setItem("myverse_radius_theme", key);
         applyPlannersRadius(key);
     }
 
@@ -132,11 +132,11 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
         setFontFamily(p.font);
         setUserFontFamily(p.userFont);
         setThemeMode(p.mode);
-        localStorage.setItem("planners_color_theme",  p.color);
-        localStorage.setItem("planners_radius_theme", p.radius);
-        localStorage.setItem("planners_font_family",  p.font);
-        localStorage.setItem("planners_user_font",    p.userFont);
-        localStorage.setItem("planners_theme_mode",   p.mode);
+        localStorage.setItem("myverse_color_theme",  p.color);
+        localStorage.setItem("myverse_radius_theme", p.radius);
+        localStorage.setItem("myverse_font_family",  p.font);
+        localStorage.setItem("myverse_user_font",    p.userFont);
+        localStorage.setItem("myverse_theme_mode",   p.mode);
         applyPlannersTheme(p.color);
         applyPlannersRadius(p.radius);
         applyPlannersFont(p.font);
@@ -359,7 +359,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                                         const next = [...customFonts];
                                                         next[idx] = e.target.value;
                                                         setCustomFonts(next);
-                                                        localStorage.setItem("planners_custom_fonts", JSON.stringify(next));
+                                                        localStorage.setItem("myverse_custom_fonts", JSON.stringify(next));
                                                         if (userFontFamily === key) applyUserFont(key);
                                                     }}
                                                     className="w-full text-[10px] border border-neutral-200 rounded px-1.5 py-1 focus:outline-none focus:border-[#0F766E] bg-white text-neutral-700 placeholder:text-neutral-300"

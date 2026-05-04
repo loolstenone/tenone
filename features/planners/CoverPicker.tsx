@@ -32,7 +32,7 @@ export function CoverPicker({
     useEffect(() => {
         if (!open || covers.length > 0) return;
         setLoading(true);
-        fetch("/api/planners/covers").then(async (r) => {
+        fetch("/api/myverse/covers").then(async (r) => {
             if (r.ok) {
                 const d = await r.json();
                 setCovers(d.covers || []);

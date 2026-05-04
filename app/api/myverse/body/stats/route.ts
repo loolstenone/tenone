@@ -1,6 +1,6 @@
 // BODY 통계 API
 import { NextResponse } from "next/server";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { getBodyStats } from "@/lib/myverse/body/stats";
 
 export const dynamic = "force-dynamic";

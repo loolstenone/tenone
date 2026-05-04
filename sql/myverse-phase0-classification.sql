@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS myverse_classification_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    target_table TEXT NOT NULL,        -- 'planners_daily_moments' 등
+    target_table TEXT NOT NULL,        -- 'myverse_daily_moments' 등
     target_id UUID NOT NULL,
     status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','running','done','failed')),
     classifier_version INT NOT NULL DEFAULT 1,

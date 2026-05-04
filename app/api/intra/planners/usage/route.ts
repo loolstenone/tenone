@@ -7,7 +7,7 @@ export async function GET() {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     const { data: usage, error } = await supabaseAdmin
-        .from("planners_ai_usage")
+        .from("myverse_ai_usage")
         .select("member_id, year_month, morning_count, evening_count, total_count")
         .order("year_month", { ascending: false })
         .limit(500);
@@ -16,7 +16,7 @@ export async function GET() {
 
     const memberIds = [...new Set((usage || []).map((u) => u.member_id))];
     const { data: members } = await supabaseAdmin
-        .from("planners_users")
+        .from("myverse_users")
         .select("member_id, email")
         .in("member_id", memberIds);
 

@@ -22,7 +22,7 @@ export function ExternalEventsBanner({ date }: { date: string }) {
         (async () => {
             const from = `${date}T00:00:00Z`;
             const to = `${date}T23:59:59Z`;
-            const res = await fetch(`/api/planners/external-events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+            const res = await fetch(`/api/myverse/external-events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();

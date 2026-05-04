@@ -3,7 +3,7 @@
 -- Google Calendar · Todoist · Notion · Slack ...
 -- ═══════════════════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS planners_integrations (
+CREATE TABLE IF NOT EXISTS myverse_integrations (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id       UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   provider        TEXT NOT NULL CHECK (provider IN ('google_calendar', 'todoist', 'notion', 'slack', 'kakao')),
@@ -22,16 +22,16 @@ CREATE TABLE IF NOT EXISTS planners_integrations (
   UNIQUE(member_id, provider)
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_integrations_member ON planners_integrations(member_id);
-CREATE INDEX IF NOT EXISTS idx_planners_integrations_provider ON planners_integrations(provider, status);
+CREATE INDEX IF NOT EXISTS idx_myverse_integrations_member ON myverse_integrations(member_id);
+CREATE INDEX IF NOT EXISTS idx_myverse_integrations_provider ON myverse_integrations(provider, status);
 
-ALTER TABLE planners_integrations ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "본인만" ON planners_integrations;
-CREATE POLICY "본인만" ON planners_integrations
+ALTER TABLE myverse_integrations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "본인만" ON myverse_integrations;
+CREATE POLICY "본인만" ON myverse_integrations
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));
 
 -- 외부 캘린더 이벤트 캐시 (성능 최적화 + 오프라인 조회)
-CREATE TABLE IF NOT EXISTS planners_external_events (
+CREATE TABLE IF NOT EXISTS myverse_external_events (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   member_id       UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   provider        TEXT NOT NULL,
@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS planners_external_events (
   UNIQUE(member_id, provider, external_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_external_events_member_date ON planners_external_events(member_id, start_at);
+CREATE INDEX IF NOT EXISTS idx_myverse_external_events_member_date ON myverse_external_events(member_id, start_at);
 
-ALTER TABLE planners_external_events ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "본인만" ON planners_external_events;
-CREATE POLICY "본인만" ON planners_external_events
+ALTER TABLE myverse_external_events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "본인만" ON myverse_external_events;
+CREATE POLICY "본인만" ON myverse_external_events
   USING (member_id IN (SELECT id FROM members WHERE email = auth.jwt()->>'email'));

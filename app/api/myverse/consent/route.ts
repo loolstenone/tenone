@@ -4,7 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +29,7 @@ export async function GET() {
 
     const admin = createAdminClient();
     const { data } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("auto_capture_consent")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -55,7 +55,7 @@ export async function PATCH(req: Request) {
 
     // 현재 row 가져와서 JSONB 머지
     const { data: row } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("auto_capture_consent")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -64,7 +64,7 @@ export async function PATCH(req: Request) {
     const next = { ...current, [key]: granted };
 
     const { error } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .upsert(
             { member_id: memberId, auto_capture_consent: next, updated_at: new Date().toISOString() },
             { onConflict: "member_id" }

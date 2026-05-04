@@ -13,6 +13,9 @@ import {
     Heart, Coffee, Users,
     BookOpen, Calendar, Navigation, Plane,
     Orbit, AtSign, Bot, Settings, Shield, Archive,
+    Sun, CalendarDays, CalendarRange, CalendarClock,
+    UserSquare2, FolderKanban, Contact2, FileText, Palette, Search as SearchIcon, Timer,
+    ListChecks, Hash, Sparkles, HelpCircle,
 } from "lucide-react";
 
 interface NavItem {
@@ -24,7 +27,7 @@ interface NavItem {
 }
 
 interface PillarGroup {
-    key: "me" | "do" | "time" | "share" | "system";
+    key: "me" | "do" | "time" | "planner" | "share" | "system";
     label: string;
     icon: React.ElementType;
     items: NavItem[];
@@ -37,7 +40,7 @@ const PILLARS: PillarGroup[] = [
         icon: User,
         items: [
             { label: "BODY",       href: "/myverse/app/body",     icon: Heart,  color: "#10B981" },
-            { label: "일상",       href: "/myverse/app/daily",    icon: Coffee, color: "#F59E0B" },
+            { label: "일상",       href: "/myverse/app/lifestyle", icon: Coffee, color: "#F59E0B" },
             { label: "관계",       href: "/myverse/app/relation", icon: Users,  color: "#EF4444" },
         ],
     },
@@ -61,6 +64,27 @@ const PILLARS: PillarGroup[] = [
         ],
     },
     {
+        key: "planner",
+        label: "플래너",
+        icon: CalendarDays,
+        items: [
+            { label: "오늘",       href: "/myverse/app/today",       icon: Sun,           color: "#6366F1" },
+            { label: "주간",       href: "/myverse/app/weekly",      icon: CalendarRange, color: "#6366F1" },
+            { label: "월간",       href: "/myverse/app/monthly",     icon: CalendarDays,  color: "#6366F1" },
+            { label: "연간",       href: "/myverse/app/yearly",      icon: CalendarClock, color: "#6366F1" },
+            { label: "퍼스널",     href: "/myverse/app/personal",    icon: UserSquare2,   color: "#6366F1" },
+            { label: "프로젝트",   href: "/myverse/app/projects",    icon: FolderKanban,  color: "#6366F1" },
+            { label: "업무",       href: "/myverse/app/tasks",       icon: ListChecks,    color: "#6366F1" },
+            { label: "연락처",     href: "/myverse/app/contacts",    icon: Contact2,      color: "#6366F1" },
+            { label: "템플릿",     href: "/myverse/app/templates",   icon: FileText,      color: "#6366F1" },
+            { label: "캔버스",     href: "/myverse/app/canvas",      icon: Palette,       color: "#6366F1" },
+            { label: "검색",       href: "/myverse/app/search",      icon: SearchIcon,    color: "#6366F1" },
+            { label: "시간",       href: "/myverse/app/time",        icon: Timer,         color: "#6366F1" },
+            { label: "인덱스",     href: "/myverse/app/index",       icon: Hash,          color: "#6366F1" },
+            { label: "AI 브리핑",  href: "/myverse/app/ai-briefing", icon: Sparkles,      color: "#6366F1" },
+        ],
+    },
+    {
         key: "share",
         label: "나누기",
         icon: Share2,
@@ -75,8 +99,10 @@ const PILLARS: PillarGroup[] = [
         label: "시스템",
         icon: Settings,
         items: [
-            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive, color: "#6366F1" },
-            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,  color: "#6B7280" },
+            { label: "설정",            href: "/myverse/app/settings",         icon: Settings, color: "#6B7280" },
+            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive,  color: "#6366F1" },
+            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,   color: "#6B7280" },
+            { label: "도움말",          href: "/myverse/app/help",             icon: HelpCircle, color: "#6B7280" },
         ],
     },
 ];
@@ -150,10 +176,10 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
                 <div className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시간 줌</div>
                 <div className="flex flex-wrap gap-1">
                     {[
-                        { l: "일",   h: "/planners/app/daily" },
-                        { l: "주",   h: "/planners/app/weekly" },
-                        { l: "월",   h: "/planners/app/monthly" },
-                        { l: "년",   h: "/planners/app/yearly" },
+                        { l: "일",   h: "/myverse/app/today" },
+                        { l: "주",   h: "/myverse/app/weekly" },
+                        { l: "월",   h: "/myverse/app/monthly" },
+                        { l: "년",   h: "/myverse/app/yearly" },
                     ].map(z => (
                         <Link
                             key={z.h}

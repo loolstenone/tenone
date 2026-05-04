@@ -8,7 +8,7 @@
 //   { items: [{ name, brand?, calories, protein, carbs, fat, source: 'openfoodfacts:{code}' }] }
 
 import { NextResponse } from "next/server";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 

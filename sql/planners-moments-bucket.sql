@@ -18,12 +18,12 @@ ON CONFLICT (id) DO UPDATE SET
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- 본인 폴더(memberId/...) 만 읽기/쓰기
-DROP POLICY IF EXISTS planners_moments_select ON storage.objects;
-CREATE POLICY planners_moments_select ON storage.objects
+DROP POLICY IF EXISTS myverse_moments_select ON storage.objects;
+CREATE POLICY myverse_moments_select ON storage.objects
     FOR SELECT USING (bucket_id = 'planners-moments');
 
-DROP POLICY IF EXISTS planners_moments_insert ON storage.objects;
-CREATE POLICY planners_moments_insert ON storage.objects
+DROP POLICY IF EXISTS myverse_moments_insert ON storage.objects;
+CREATE POLICY myverse_moments_insert ON storage.objects
     FOR INSERT WITH CHECK (
         bucket_id = 'planners-moments'
         AND (storage.foldername(name))[1] IN (
@@ -31,8 +31,8 @@ CREATE POLICY planners_moments_insert ON storage.objects
         )
     );
 
-DROP POLICY IF EXISTS planners_moments_update ON storage.objects;
-CREATE POLICY planners_moments_update ON storage.objects
+DROP POLICY IF EXISTS myverse_moments_update ON storage.objects;
+CREATE POLICY myverse_moments_update ON storage.objects
     FOR UPDATE USING (
         bucket_id = 'planners-moments'
         AND (storage.foldername(name))[1] IN (
@@ -40,8 +40,8 @@ CREATE POLICY planners_moments_update ON storage.objects
         )
     );
 
-DROP POLICY IF EXISTS planners_moments_delete ON storage.objects;
-CREATE POLICY planners_moments_delete ON storage.objects
+DROP POLICY IF EXISTS myverse_moments_delete ON storage.objects;
+CREATE POLICY myverse_moments_delete ON storage.objects
     FOR DELETE USING (
         bucket_id = 'planners-moments'
         AND (storage.foldername(name))[1] IN (

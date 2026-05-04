@@ -2,7 +2,7 @@
 -- 대학생 시간표 템플릿 (세션 105 — 누락 보완)
 -- ============================================================
 
-INSERT INTO planners_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
+INSERT INTO myverse_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
 ('class_timetable', 'note', '학습', '학기 시간표', '월~금 × 1~9교시 — 과목·강의실·교수',
 '## 학기 정보
 - 학기:

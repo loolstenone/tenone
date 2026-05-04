@@ -2,7 +2,7 @@
 -- Planner's Planner AI — Templates 라이브러리 (20종 MVP)
 -- ═══════════════════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS planners_templates (
+CREATE TABLE IF NOT EXISTS myverse_templates (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key          TEXT UNIQUE NOT NULL,
   category     TEXT NOT NULL CHECK (category IN ('schedule', 'note', 'framework')),
@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS planners_templates (
   created_at   TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_templates_category ON planners_templates(category);
+CREATE INDEX IF NOT EXISTS idx_myverse_templates_category ON myverse_templates(category);
 
 -- ── MVP 20종 시드 ───────────────────────────────────────────────
 
-INSERT INTO planners_templates(key, category, subcategory, label, description, body_md) VALUES
+INSERT INTO myverse_templates(key, category, subcategory, label, description, body_md) VALUES
 -- ── Framework (10종) ───────────────────────────────────────────
 ('swot', 'framework', 'strategy', 'SWOT 분석',
  '강점·약점·기회·위협을 4분면으로 정리',
@@ -450,6 +450,6 @@ ON CONFLICT (key) DO UPDATE SET
   body_md = EXCLUDED.body_md;
 
 -- RLS (읽기는 모두에게 허용)
-ALTER TABLE planners_templates ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "모두 읽기" ON planners_templates;
-CREATE POLICY "모두 읽기" ON planners_templates FOR SELECT USING (true);
+ALTER TABLE myverse_templates ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "모두 읽기" ON myverse_templates;
+CREATE POLICY "모두 읽기" ON myverse_templates FOR SELECT USING (true);

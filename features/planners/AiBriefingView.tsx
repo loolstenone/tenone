@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Sparkles, Sun, Sunrise, Moon, Loader2, Send } from "lucide-react";
-import type { PlannerBriefing } from "@/lib/planners/types";
+import type { PlannerBriefing } from "@/lib/myverse/types";
 import { Track } from "@/lib/analytics";
 
 type BriefingType = "morning" | "midday" | "evening";
@@ -44,7 +44,7 @@ export function AiBriefingView() {
 
     async function load(silent = false) {
         if (!silent) setLoading(true);
-        const res = await fetch(`/api/planners/briefing`);
+        const res = await fetch(`/api/myverse/briefing`);
         if (res.ok) {
             const d = await res.json();
             setBriefings(d.briefings || []);
@@ -65,7 +65,7 @@ export function AiBriefingView() {
         setGenerating(true);
         const startedAt = Date.now();
         try {
-            const res = await fetch(`/api/planners/briefing/generate`, {
+            const res = await fetch(`/api/myverse/briefing/generate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type, date: today }),
@@ -230,7 +230,7 @@ export function AiBriefingView() {
                             })}
                         </div>
                         <p className="text-[10px] text-neutral-400 mt-2 italic">
-                            이메일/푸시는 <Link href="/planners/app/settings" className="underline hover:text-neutral-700">설정</Link>에서 따로 켤 수 있습니다.
+                            이메일/푸시는 <Link href="/myverse/app/settings" className="underline hover:text-neutral-700">설정</Link>에서 따로 켤 수 있습니다.
                         </p>
                     </div>
                 </div>

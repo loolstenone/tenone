@@ -26,7 +26,7 @@ export function SettingsExport({ sub, showToast }: Props) {
         try {
             const form = new FormData();
             form.append("file", file);
-            const res = await fetch("/api/planners/moments/import-meta", { method: "POST", body: form });
+            const res = await fetch("/api/myverse/moments/import-meta", { method: "POST", body: form });
             const json = await res.json().catch(() => ({}));
             if (!res.ok) {
                 showToast(`백업 가져오기 실패: ${json.error || res.status}${json.hint ? " · " + json.hint : ""}`, false);
@@ -44,13 +44,13 @@ export function SettingsExport({ sub, showToast }: Props) {
         setExporting(true);
         try {
             const [settingsRes, dailyRes, weeklyRes, monthlyRes, yearlyRes, identityRes, projectsRes] = await Promise.all([
-                fetch("/api/planners/settings"),
-                fetch("/api/planners/daily"),
-                fetch("/api/planners/weekly"),
-                fetch("/api/planners/monthly"),
-                fetch("/api/planners/yearly"),
-                fetch("/api/planners/identity"),
-                fetch("/api/planners/projects"),
+                fetch("/api/myverse/settings"),
+                fetch("/api/myverse/daily"),
+                fetch("/api/myverse/weekly"),
+                fetch("/api/myverse/monthly"),
+                fetch("/api/myverse/yearly"),
+                fetch("/api/myverse/identity"),
+                fetch("/api/myverse/projects"),
             ]);
             const backup = {
                 exported_at: new Date().toISOString(),
@@ -169,7 +169,7 @@ export function SettingsExport({ sub, showToast }: Props) {
                             </p>
                         )}
                         <Link
-                            href="/planners/purchase"
+                            href="/myverse/purchase"
                             className="inline-flex items-center gap-1.5 text-xs text-[#0F766E] hover:underline"
                         >
                             구독 연장 <ExternalLink className="h-3 w-3" />
@@ -191,7 +191,7 @@ export function SettingsExport({ sub, showToast }: Props) {
                                 <li>• Google Calendar / Notion / Slack 연동</li>
                             </ul>
                             <Link
-                                href="/planners/purchase"
+                                href="/myverse/purchase"
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
                             >
                                 구독 시작

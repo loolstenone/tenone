@@ -25,7 +25,7 @@ export function PurchaseView() {
 
     useEffect(() => {
         if (isLoading || !isAuthenticated) return;
-        fetch("/api/planners/settings").then(async r => {
+        fetch("/api/myverse/settings").then(async r => {
             if (r.ok) {
                 const d = await r.json();
                 if (d.user) {
@@ -44,7 +44,7 @@ export function PurchaseView() {
         if (!user || !window.TossPayments) return;
         setLoading(true);
         try {
-            const orderRes = await fetch("/api/planners/payment/request", {
+            const orderRes = await fetch("/api/myverse/payment/request", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amount: PRICE_KRW, years: 1 }),
@@ -59,8 +59,8 @@ export function PurchaseView() {
                 orderName: "Planner's Planner AI 1년 구독",
                 customerEmail: user.email,
                 customerName: user.name || user.email,
-                successUrl: `${window.location.origin}/api/planners/payment/success`,
-                failUrl: `${window.location.origin}/planners/purchase?failed=1`,
+                successUrl: `${window.location.origin}/api/myverse/payment/success`,
+                failUrl: `${window.location.origin}/myverse/purchase?failed=1`,
             });
         } catch (e) {
             console.error(e);
@@ -74,7 +74,7 @@ export function PurchaseView() {
     }
 
     if (!isAuthenticated) {
-        router.replace("/login?redirect=/planners/purchase");
+        router.replace("/login?redirect=/myverse/purchase");
         return null;
     }
 
@@ -108,7 +108,7 @@ export function PurchaseView() {
                                 </p>
                             )}
                             <button
-                                onClick={() => router.push("/planners/app")}
+                                onClick={() => router.push("/myverse/app")}
                                 className="mt-3 text-sm text-[#0F766E] hover:underline"
                             >
                                 앱으로 이동 →

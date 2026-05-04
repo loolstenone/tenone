@@ -12,7 +12,7 @@ import { HandleRegisterModal } from "./HandleRegisterModal";
 import type { Visibility } from "@/lib/myverse/domains";
 
 interface Props {
-    targetTable: string;        // 'planners_daily_moments' 등
+    targetTable: string;        // 'myverse_daily_moments' 등
     targetId: string;           // row id
     initial: Visibility;
     /** 사용자의 현재 핸들 — null이면 첫 public 시 등록 모달 */

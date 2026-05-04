@@ -7,15 +7,15 @@
 //   - "{year}_MONTH.json" Semantic Location History
 //
 // 파싱:
-//   - placeVisit → planners_daily_places (place_name, lat/lng, duration_min)
-//   - activitySegment → planners_daily_routines (이동, domain=move)
+//   - placeVisit → myverse_daily_places (place_name, lat/lng, duration_min)
+//   - activitySegment → myverse_daily_routines (이동, domain=move)
 //
 // dedup: (member_id, date, visited_at, place_name) / (date, start_time, activity)
 
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -187,7 +187,7 @@ export async function POST(req: Request) {
     for (const p of allPlaces) {
         try {
             const { data: existing } = await admin
-                .from("planners_daily_places")
+                .from("myverse_daily_places")
                 .select("id")
                 .eq("member_id", memberId)
                 .eq("date", p.date)
@@ -196,7 +196,7 @@ export async function POST(req: Request) {
                 .maybeSingle();
             if (existing) { placesSkip++; continue; }
 
-            await admin.from("planners_daily_places").insert({
+            await admin.from("myverse_daily_places").insert({
                 member_id: memberId,
                 date: p.date,
                 visited_at: p.visited_at,
@@ -218,7 +218,7 @@ export async function POST(req: Request) {
     for (const s of allSegments) {
         try {
             const { data: existing } = await admin
-                .from("planners_daily_routines")
+                .from("myverse_daily_routines")
                 .select("id")
                 .eq("member_id", memberId)
                 .eq("date", s.date)
@@ -227,7 +227,7 @@ export async function POST(req: Request) {
                 .maybeSingle();
             if (existing) { segSkip++; continue; }
 
-            await admin.from("planners_daily_routines").insert({
+            await admin.from("myverse_daily_routines").insert({
                 member_id: memberId,
                 date: s.date,
                 start_time: s.start_time,

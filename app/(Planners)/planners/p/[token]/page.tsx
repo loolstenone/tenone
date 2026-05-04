@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ChevronLeft, Calendar, CheckCircle2 } from "lucide-react";
-import { getCategoryMeta } from "@/lib/planners/project-categories";
+import { getCategoryMeta } from "@/lib/myverse/project-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +44,7 @@ interface PublicOwner { name: string | null; avatar_url: string | null }
 async function loadByToken(token: string) {
     const admin = createAdminClient();
     const { data: project } = await admin
-        .from("planners_projects")
+        .from("myverse_projects")
         .select("id, member_id, title, color, category, status, start_date, end_date, completed_at, retrospective, tags")
         .eq("public_token", token)
         .eq("visibility", "public_link")
@@ -52,8 +52,8 @@ async function loadByToken(token: string) {
     if (!project) return null;
 
     const [{ data: notes }, { data: milestones }, { data: owner }] = await Promise.all([
-        admin.from("planners_project_notes").select("id, title, content, order_index").eq("project_id", project.id).order("order_index"),
-        admin.from("planners_project_milestones").select("id, title, description, due_date, done_at, order_index").eq("project_id", project.id).order("order_index"),
+        admin.from("myverse_project_notes").select("id, title, content, order_index").eq("project_id", project.id).order("order_index"),
+        admin.from("myverse_project_milestones").select("id, title, description, due_date, done_at, order_index").eq("project_id", project.id).order("order_index"),
         admin.from("members").select("name, avatar_url").eq("id", project.member_id).maybeSingle(),
     ]);
 

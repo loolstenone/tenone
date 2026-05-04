@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Plus, Trash2, Loader2, MapPin, X, Calendar, Clock, Sunrise, Sunset } from "lucide-react";
-import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
+import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/myverse/categories";
 import { PageShell, PageHeader } from "./PageShell";
 import { PermissionGuideModal } from "./PermissionGuideModal";
-import type { ActivityBase } from "@/lib/planners/types";
+import type { ActivityBase } from "@/lib/myverse/types";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -139,7 +139,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/planners/settings");
+                const res = await fetch("/api/myverse/settings");
                 if (!res.ok) return;
                 const json = await res.json();
                 const raw = (json.user?.activity_bases ?? []) as ActivityBase[];
@@ -152,7 +152,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     async function load(d: string) {
         setLoading(true);
         try {
-            const res = await fetch(`/api/planners/routines?date=${d}`);
+            const res = await fetch(`/api/myverse/routines?date=${d}`);
             if (res.ok) {
                 const json = await res.json();
                 setRoutines(json.routines ?? []);
@@ -335,7 +335,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
             };
 
             if (editingId) {
-                const res = await fetch(`/api/planners/routines?id=${editingId}`, {
+                const res = await fetch(`/api/myverse/routines?id=${editingId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
@@ -348,7 +348,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                     setErrorMsg("저장 실패");
                 }
             } else {
-                const res = await fetch("/api/planners/routines", {
+                const res = await fetch("/api/myverse/routines", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
@@ -369,7 +369,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     }
 
     async function deleteEntry(id: string) {
-        const res = await fetch(`/api/planners/routines?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/routines?id=${id}`, { method: "DELETE" });
         if (res.ok) setRoutines(prev => prev.filter(r => r.id !== id));
         else setErrorMsg("삭제 실패");
     }

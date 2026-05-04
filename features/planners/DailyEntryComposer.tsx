@@ -4,13 +4,13 @@
 // "오늘의 한 장면" 카드 헤더의 "+" 단일 버튼이 이 composer를 토글한다.
 //
 // 저장 동작 (입력된 필드만 처리):
-//   - 미디어 있음 → /api/planners/moments/upload + POST /moments
+//   - 미디어 있음 → /api/myverse/moments/upload + POST /moments
 //   - 장소명 있음 → POST /places (서버가 routines로 자동 미러)
 //   - 장소명 없고 활동만 있음 → POST /routines (서버가 places로 자동 미러)
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Video, X, Loader2, MapPin, Clock } from "lucide-react";
-import type { ActivityBase } from "@/lib/planners/types";
+import type { ActivityBase } from "@/lib/myverse/types";
 
 const PLACE_CATEGORIES = [
     { key: "general",  label: "일반"   },
@@ -53,7 +53,7 @@ export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/planners/settings");
+                const res = await fetch("/api/myverse/settings");
                 if (!res.ok) return;
                 const json = await res.json();
                 const arr = (json.user?.activity_bases ?? []) as ActivityBase[];
@@ -105,7 +105,7 @@ export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
         try {
             // 1) 장소가 있으면 places 등록 (routines는 서버에서 자동 미러)
             if (placeName.trim()) {
-                const res = await fetch("/api/planners/places", {
+                const res = await fetch("/api/myverse/places", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -120,7 +120,7 @@ export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
                 if (!res.ok) throw new Error("장소 저장 실패");
             } else if (text.trim() && time) {
                 // 장소명 없이 활동·시간만 있으면 routines 직접 등록 (places로 자동 미러)
-                await fetch("/api/planners/routines", {
+                await fetch("/api/myverse/routines", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -142,10 +142,10 @@ export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
                 const form = new FormData();
                 form.append("file", m.file);
                 form.append("date", date);
-                const upRes = await fetch("/api/planners/moments/upload", { method: "POST", body: form });
+                const upRes = await fetch("/api/myverse/moments/upload", { method: "POST", body: form });
                 if (!upRes.ok) continue;
                 const up = await upRes.json();
-                await fetch("/api/planners/moments", {
+                await fetch("/api/myverse/moments", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

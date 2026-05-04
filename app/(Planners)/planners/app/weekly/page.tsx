@@ -1,5 +1,5 @@
 import { WeeklyView } from "@/features/planners/WeeklyView";
-import { getISOWeek } from "@/lib/planners/types";
+import { getISOWeek } from "@/lib/myverse/types";
 
 export default async function WeeklyPage({ searchParams }: { searchParams: Promise<{ year?: string; week?: string }> }) {
     const params = await searchParams;

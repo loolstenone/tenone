@@ -13,11 +13,11 @@ export function PlannersFooter() {
                 {
                     title: "Menu",
                     links: [
-                        { label: "Planning", href: "/planners/planning" },
-                        { label: "Planner's Planner", href: "/planners/planner-tool" },
-                        { label: "Programs", href: "/planners/programs" },
-                        { label: "GPR", href: "/planners/gpr" },
-                        { label: "앱 설치", href: "/planners/install" },
+                        { label: "Planning", href: "/myverse/planning" },
+                        { label: "Planner's Planner", href: "/myverse/planner-tool" },
+                        { label: "Programs", href: "/myverse/programs" },
+                        { label: "GPR", href: "/myverse/gpr" },
+                        { label: "앱 설치", href: "/myverse/install" },
                     ],
                 },
                 {

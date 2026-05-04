@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, LayoutTemplate, X, Maximize2, Pencil, PenLine, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
+import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/myverse/templates";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { Track } from "@/lib/analytics";
 import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, extractTextPart, setTextPart, setHandPart, type HandNoteData } from "./HandNote";
 import { CornellRowsInline, type CornellRow } from "./DailyView";
-import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
+import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/myverse/template-recommendations";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CanvasStudio } from "./CanvasStudio";
 
@@ -70,7 +70,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     const [categoryFilter, setCategoryFilter] = useState<"all" | "favs" | "recommended" | "framework" | "schedule" | "note">("all");
     const [tplFavs, setTplFavs] = useState<Set<string>>(() => {
         if (typeof window === "undefined") return new Set();
-        try { return new Set(JSON.parse(localStorage.getItem("planners_fav_templates") || "[]")); }
+        try { return new Set(JSON.parse(localStorage.getItem("myverse_fav_templates") || "[]")); }
         catch { return new Set(); }
     });
     const [expandedNote, setExpandedNote] = useState<ProjectNote | null>(null);
@@ -82,7 +82,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
 
     async function load() {
         setLoading(true);
-        const res = await fetch(`/api/planners/projects/${projectId}/notes`);
+        const res = await fetch(`/api/myverse/projects/${projectId}/notes`);
         if (res.ok) {
             const d = await res.json();
             const list: ProjectNote[] = d.notes || [];
@@ -94,7 +94,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 .filter((id): id is string => !!id);
             if (canvasIds.length > 0) {
                 try {
-                    const cRes = await fetch("/api/planners/canvases");
+                    const cRes = await fetch("/api/myverse/canvases");
                     if (cRes.ok) {
                         const cData = await cRes.json();
                         const map: Record<string, string | null> = {};
@@ -114,7 +114,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                         rows: [{ id: "r1", cue: "", note: "" }],
                         summary: "",
                     });
-                    const r2 = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                    const r2 = await fetch(`/api/myverse/projects/${projectId}/notes`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ title: "기본 노트 1", content: cornellContent }),
@@ -136,7 +136,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         if (!projectCategory || templates.length > 0) return;
         (async () => {
             try {
-                const res = await fetch(`/api/planners/templates`);
+                const res = await fetch(`/api/myverse/templates`);
                 if (res.ok) {
                     const d = await res.json();
                     setTemplates(d.templates || []);
@@ -155,7 +155,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 rows: [{ id: "r1", cue: "", note: "" }],
                 summary: "",
             });
-            const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
+            const res = await fetch(`/api/myverse/projects/${projectId}/notes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: `기본 노트 ${idx}`, content: cornellContent }),
@@ -180,7 +180,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         if (templates.length === 0) {
             setTplLoading(true);
             try {
-                const res = await fetch(`/api/planners/templates`);
+                const res = await fetch(`/api/myverse/templates`);
                 if (res.ok) {
                     const d = await res.json();
                     setTemplates(d.templates || []);
@@ -195,7 +195,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         setTplFavs(prev => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id); else next.add(id);
-            try { localStorage.setItem("planners_fav_templates", JSON.stringify([...next])); } catch { /* ignore */ }
+            try { localStorage.setItem("myverse_fav_templates", JSON.stringify([...next])); } catch { /* ignore */ }
             return next;
         });
     }
@@ -206,7 +206,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
             const body = resolveTemplateContent(tpl);
             const content = buildTemplateContent(tpl.key, tpl.label, body);
             // 사용자가 자기 제목을 쓰도록 title은 빈 값 (placeholder가 템플릿 이름 안내)
-            const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
+            const res = await fetch(`/api/myverse/projects/${projectId}/notes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: "", content }),
@@ -236,7 +236,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     async function updateNote(id: string, patch: Partial<ProjectNote>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/projects/${projectId}/notes/${id}`, {
+            await fetch(`/api/myverse/projects/${projectId}/notes/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patch),
@@ -248,7 +248,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     async function deleteNote(id: string) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/projects/${projectId}/notes/${id}`, { method: "DELETE" });
+            await fetch(`/api/myverse/projects/${projectId}/notes/${id}`, { method: "DELETE" });
             setNotes(notes.filter(n => n.id !== id));
         } finally { setSaving(false); }
     }
@@ -267,12 +267,12 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         }).sort((x, y) => x.order_index - y.order_index));
 
         await Promise.all([
-            fetch(`/api/planners/projects/${projectId}/notes/${a.id}`, {
+            fetch(`/api/myverse/projects/${projectId}/notes/${a.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ order_index: b.order_index }),
             }),
-            fetch(`/api/planners/projects/${projectId}/notes/${b.id}`, {
+            fetch(`/api/myverse/projects/${projectId}/notes/${b.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ order_index: a.order_index }),
@@ -317,7 +317,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 </button>
                 <button
                     onClick={async () => {
-                        const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                        const res = await fetch(`/api/myverse/projects/${projectId}/notes`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
@@ -352,7 +352,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                         try {
                             const idx = notes.filter(n => parseCanvasMarker(n.content)).length + 1;
                             const cTitle = `캔버스 ${idx}`;
-                            const cRes = await fetch("/api/planners/canvases", {
+                            const cRes = await fetch("/api/myverse/canvases", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ title: cTitle }),
@@ -364,7 +364,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                             }
                             const cData = await cRes.json();
                             const canvasId = cData.canvas.id as string;
-                            const nRes = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                            const nRes = await fetch(`/api/myverse/projects/${projectId}/notes`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ title: cTitle, content: buildCanvasContent(canvasId) }),
@@ -416,7 +416,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                 const reindexed = next.map((n, idx) => ({ ...n, order_index: idx }));
                                 setNotes(reindexed);
                                 reindexed.forEach(n => {
-                                    fetch(`/api/planners/projects/${projectId}/notes/${n.id}`, {
+                                    fetch(`/api/myverse/projects/${projectId}/notes/${n.id}`, {
                                         method: "PATCH",
                                         headers: { "Content-Type": "application/json" },
                                         body: JSON.stringify({ order_index: n.order_index }),

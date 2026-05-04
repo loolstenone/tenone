@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, X, Sparkles, ArrowRight } from "lucide-react";
-import type { PlannerProject, ProjectRetrospective } from "@/lib/planners/types";
+import type { PlannerProject, ProjectRetrospective } from "@/lib/myverse/types";
 
 const FIELDS: Array<{ key: keyof Omit<ProjectRetrospective, "completed_at">; label: string; hint: string; rows: number }> = [
     { key: "fact",     label: "Fact (사실)",        hint: "이 프로젝트에서 실제로 무엇을 했는가? 구체적으로 1-3 문장.", rows: 3 },
@@ -54,7 +54,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
                 ...retro,
                 completed_at: new Date().toISOString(),
             };
-            const res = await fetch(`/api/planners/projects/${project.id}`, {
+            const res = await fetch(`/api/myverse/projects/${project.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -90,7 +90,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
         }
         setPushingKr(true);
         try {
-            const idRes = await fetch(`/api/planners/identity`);
+            const idRes = await fetch(`/api/myverse/identity`);
             if (!idRes.ok) { alert("Identity 조회 실패"); return; }
             const idData = await idRes.json();
             const existing: Array<{ id: string; category: string; text: string }> = idData.identity?.key_results ?? [];
@@ -100,7 +100,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
                 text,
             }));
             const next = [...existing, ...newKrs];
-            const upRes = await fetch(`/api/planners/identity`, {
+            const upRes = await fetch(`/api/myverse/identity`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ key_results: next }),

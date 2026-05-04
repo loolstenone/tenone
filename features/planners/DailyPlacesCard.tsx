@@ -62,7 +62,7 @@ export function DailyPlacesCard({ date, bare = false, hideAdd = false }: { date:
     async function load() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/planners/places?date=${date}`);
+            const res = await fetch(`/api/myverse/places?date=${date}`);
             if (res.ok) {
                 const d = await res.json();
                 setPlaces(d.places ?? []);
@@ -76,7 +76,7 @@ export function DailyPlacesCard({ date, bare = false, hideAdd = false }: { date:
 
     async function addPlace() {
         if (!inputName.trim()) return;
-        const res = await fetch("/api/planners/places", {
+        const res = await fetch("/api/myverse/places", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -105,7 +105,7 @@ export function DailyPlacesCard({ date, bare = false, hideAdd = false }: { date:
     }
 
     async function deletePlace(id: string) {
-        const res = await fetch(`/api/planners/places?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/places?id=${id}`, { method: "DELETE" });
         if (res.ok) setPlaces(prev => prev.filter(p => p.id !== id));
     }
 

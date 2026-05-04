@@ -4,9 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
-import { getISOWeek } from "@/lib/planners/types";
+import { getISOWeek } from "@/lib/myverse/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
+import { getHoliday, getLunarDate } from "@/lib/myverse/holidays";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { ConfirmSheet } from "./ConfirmSheet";
@@ -17,7 +17,7 @@ import {
     expandOccurrences,
     isVisible,
     type CalendarEntry,
-} from "@/lib/planners/calendar-rules";
+} from "@/lib/myverse/calendar-rules";
 
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -101,7 +101,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         const lastDay = new Date(year, month, 0).getDate();
         const monthLast = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
-        fetch(`/api/planners/projects`)
+        fetch(`/api/myverse/projects`)
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (cancelled) return;
@@ -194,11 +194,11 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
             const lastDate = new Date(year, month, 0).getDate();
             const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`;
             const [monthlyRes, hitsRes, summaryRes, trackingRes, calRes] = await Promise.all([
-                fetch(`/api/planners/monthly?year=${year}&month=${month}`),
-                fetch(`/api/planners/daily/month-hits?year=${year}&month=${month}`),
-                fetch(`/api/planners/summary?scope=monthly&year=${year}&month=${month}`),
-                fetch(`/api/planners/daily/month-tracking?year=${year}&month=${month}`),
-                fetch(`/api/planners/calendar?from=${firstDay}&to=${lastDay}`),
+                fetch(`/api/myverse/monthly?year=${year}&month=${month}`),
+                fetch(`/api/myverse/daily/month-hits?year=${year}&month=${month}`),
+                fetch(`/api/myverse/summary?scope=monthly&year=${year}&month=${month}`),
+                fetch(`/api/myverse/daily/month-tracking?year=${year}&month=${month}`),
+                fetch(`/api/myverse/calendar?from=${firstDay}&to=${lastDay}`),
             ]);
             if (cancelled) return;
             if (monthlyRes.ok) {
@@ -237,7 +237,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     async function save(patch: Partial<MonthlyData>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/monthly`, {
+            await fetch(`/api/myverse/monthly`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ year, month, ...patch }),
@@ -253,7 +253,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         if (newMonth < 1) { newYear -= 1; newMonth = 12; }
         if (newMonth > 12) { newYear += 1; newMonth = 1; }
         // URL과 state 동시 갱신 — 좌측 월 바도 함께 업데이트
-        router.push(`/planners/app/monthly?year=${newYear}&month=${newMonth}`);
+        router.push(`/myverse/app/monthly?year=${newYear}&month=${newMonth}`);
     }
 
     // 스와이프 내비게이션
@@ -499,7 +499,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             <span key={i} className="group inline-flex items-center gap-1 bg-[#0F766E] text-white text-xs px-2 py-0.5 rounded-full font-medium">
                                                 {matched ? (
                                                     <Link
-                                                        href={`/planners/app/projects/${matched.id}`}
+                                                        href={`/myverse/app/projects/${matched.id}`}
                                                         title="프로젝트로 이동"
                                                         className="hover:underline inline-flex items-center gap-0.5"
                                                     >
@@ -602,7 +602,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     return (
                                         <Link
                                             key={cell.date}
-                                            href={`/planners/app/daily?date=${cell.date}`}
+                                            href={`/myverse/app/daily?date=${cell.date}`}
                                             className={`min-h-[88px] md:min-h-[120px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
@@ -695,12 +695,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                 open={calEditorOpen}
                 onClose={() => { setCalEditorOpen(false); setCalEditing(null); setCalDefaultDate(undefined); }}
                 onSaved={() => {
-                    fetch(`/api/planners/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
+                    fetch(`/api/myverse/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
                         .then((r) => r.ok ? r.json() : null)
                         .then((d) => { if (d?.entries) setCalEntries(d.entries); });
                 }}
                 onDeleted={() => {
-                    fetch(`/api/planners/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
+                    fetch(`/api/myverse/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
                         .then((r) => r.ok ? r.json() : null)
                         .then((d) => { if (d?.entries) setCalEntries(d.entries); });
                 }}

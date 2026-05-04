@@ -3,7 +3,7 @@
 -- ============================================================
 -- 기존: OKR/린캔버스/BMC/전략 시드만 → 창업 단계별 핵심 6종 추가.
 
-INSERT INTO planners_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
+INSERT INTO myverse_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
 
 ('customer_discovery', 'framework', '창업', '고객 발굴 인터뷰', '문제 검증 5가지 질문',
 '## 인터뷰 정보

@@ -9,16 +9,16 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 
 const ALLOWED_TABLES = new Set([
-    "planners_daily_moments",
-    "planners_daily_places",
-    "planners_daily_routines",
-    "planners_calendar_entries",
-    "planners_projects",
+    "myverse_daily_moments",
+    "myverse_daily_places",
+    "myverse_daily_routines",
+    "myverse_calendar_entries",
+    "myverse_projects",
 ]);
 
 const ALLOWED_CHANNELS = new Set([
@@ -26,11 +26,11 @@ const ALLOWED_CHANNELS = new Set([
 ]);
 
 const TABLE_TO_PATH: Record<string, string> = {
-    planners_daily_moments: "m",
-    planners_daily_places: "p",
-    planners_daily_routines: "r",
-    planners_calendar_entries: "e",
-    planners_projects: "proj",
+    myverse_daily_moments: "m",
+    myverse_daily_places: "p",
+    myverse_daily_routines: "r",
+    myverse_calendar_entries: "e",
+    myverse_projects: "proj",
 };
 
 export async function POST(req: Request) {

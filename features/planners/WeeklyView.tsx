@@ -3,17 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus, LayoutList, CalendarDays, Sun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, Thermometer } from "lucide-react";
 import Link from "next/link";
-import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
-import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
+import { getWeekBoundaries, getISOWeek } from "@/lib/myverse/types";
+import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { trackPlanners } from "@/lib/planners/analytics";
-import type { PlannerWeekly } from "@/lib/planners/types";
-import type { PlannerRole } from "@/lib/planners/types";
+import { trackPlanners } from "@/lib/myverse/analytics";
+import type { PlannerWeekly } from "@/lib/myverse/types";
+import type { PlannerRole } from "@/lib/myverse/types";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
-import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
+import type { CalendarEntry, CalendarKind } from "@/lib/myverse/calendar-rules";
 import { useSwipeNav } from "./useSwipeNav";
-import { KIND_COLORS, KIND_LABELS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
-import { CATEGORY_SOFT_COLORS as CATEGORY_COLORS } from "@/lib/planners/categories";
+import { KIND_COLORS, KIND_LABELS, expandOccurrences, isVisible } from "@/lib/myverse/calendar-rules";
+import { CATEGORY_SOFT_COLORS as CATEGORY_COLORS } from "@/lib/myverse/categories";
 import { StudentTimetable } from "./StudentTimetable";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
@@ -114,10 +114,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 
     // 활성 프로젝트 + 역할 1회 로드
     useEffect(() => {
-        fetch("/api/planners/projects?status=active&limit=30")
+        fetch("/api/myverse/projects?status=active&limit=30")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.projects) setActiveProjects(d.projects); });
-        fetch("/api/planners/settings")
+        fetch("/api/myverse/settings")
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d?.user?.user_role) setUserRole(d.user.user_role as PlannerRole); });
     }, []);
@@ -128,10 +128,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
             setLoading(true);
             const dayDates = days.map(dsOf);
             const [weekRes, sumRes, calRes, ...dailyResults] = await Promise.all([
-                fetch(`/api/planners/weekly?year=${year}&week=${week}`),
-                fetch(`/api/planners/summary?scope=weekly&year=${year}&week=${week}`),
-                fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`),
-                ...dayDates.map(ds => fetch(`/api/planners/daily?date=${ds}`)),
+                fetch(`/api/myverse/weekly?year=${year}&week=${week}`),
+                fetch(`/api/myverse/summary?scope=weekly&year=${year}&week=${week}`),
+                fetch(`/api/myverse/calendar?from=${boundaries.start}&to=${boundaries.end}`),
+                ...dayDates.map(ds => fetch(`/api/myverse/daily?date=${ds}`)),
             ]);
             if (cancelled) return;
 
@@ -196,7 +196,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
             setRoutinesLoading(true);
             const dayDates = days.map(dsOf);
             const results = await Promise.all(
-                dayDates.map(ds => fetch(`/api/planners/routines?date=${ds}`).then(r => r.ok ? r.json() : { routines: [] }))
+                dayDates.map(ds => fetch(`/api/myverse/routines?date=${ds}`).then(r => r.ok ? r.json() : { routines: [] }))
             );
             if (cancelled) return;
             const byDate: Record<string, Routine[]> = {};
@@ -212,7 +212,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     async function save(patch: Partial<PlannerWeekly>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/weekly`, {
+            await fetch(`/api/myverse/weekly`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -222,7 +222,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     ...patch,
                 }),
             });
-            trackPlanners("planners_weekly_saved", { year, week, field: Object.keys(patch)[0] });
+            trackPlanners("myverse_weekly_saved", { year, week, field: Object.keys(patch)[0] });
         } finally {
             setSaving(false);
         }
@@ -257,7 +257,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 
     async function saveMemoForDay(ds: string, content: string) {
         try {
-            const res = await fetch(`/api/planners/daily?date=${ds}`);
+            const res = await fetch(`/api/myverse/daily?date=${ds}`);
             const d = res.ok ? await res.json() : null;
             let arr: Array<Record<string, unknown>>;
             try {
@@ -277,7 +277,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     cue: "", content: cornellContent, summary: "",
                 });
             }
-            await fetch(`/api/planners/daily`, {
+            await fetch(`/api/myverse/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date: ds, notes: JSON.stringify(arr) }),
@@ -286,7 +286,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     }
 
     function refetchCalendar() {
-        fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`)
+        fetch(`/api/myverse/calendar?from=${boundaries.start}&to=${boundaries.end}`)
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
@@ -308,12 +308,12 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         // server save (병렬)
         try {
             await Promise.all([
-                fetch(`/api/planners/daily`, {
+                fetch(`/api/myverse/daily`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ date: fromDate, tasks: fromTasks }),
                 }),
-                fetch(`/api/planners/daily`, {
+                fetch(`/api/myverse/daily`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ date: toDate, tasks: toTasks }),
@@ -326,7 +326,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         // calDefaultDate가 있으면 그 날, 없으면 오늘
         const targetDate = calDefaultDate || today;
         try {
-            const r = await fetch(`/api/planners/daily?date=${targetDate}`);
+            const r = await fetch(`/api/myverse/daily?date=${targetDate}`);
             const d = r.ok ? await r.json() : null;
             const existing = Array.isArray(d?.daily?.tasks) ? d.daily.tasks : [];
             const newTask = {
@@ -339,7 +339,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 memo: task.memo ?? null,
             };
             const updated = [...existing, newTask];
-            await fetch(`/api/planners/daily`, {
+            await fetch(`/api/myverse/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date: targetDate, tasks: updated }),
@@ -708,7 +708,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             </span>
                                             <span className={`text-xs font-medium ${dayColor}`}>{DAYS_KO[d.getDay()]}</span>
                                             <Link
-                                                href={`/planners/app/daily?date=${ds}`}
+                                                href={`/myverse/app/daily?date=${ds}`}
                                                 title="Daily 보기"
                                                 className="ml-auto p-0.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors shrink-0"
                                             >

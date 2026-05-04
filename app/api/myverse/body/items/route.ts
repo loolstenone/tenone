@@ -1,7 +1,7 @@
 // BODY 항목 목록 API — subtype별 (workout/meal/sleep)
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
     const admin = createAdminClient();
     const { data } = await admin
-        .from("planners_daily_routines")
+        .from("myverse_daily_routines")
         .select("id, date, start_time, end_time, activity, body_subtype, body_data, visibility")
         .eq("member_id", memberId)
         .eq("body_subtype", subtype)

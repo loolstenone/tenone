@@ -13,11 +13,11 @@ BEGIN
         RETURN;
     END IF;
 
-    -- planners_identities row 보장
-    INSERT INTO planners_identities (member_id) VALUES (v_member_id)
+    -- myverse_identities row 보장
+    INSERT INTO myverse_identities (member_id) VALUES (v_member_id)
     ON CONFLICT (member_id) DO NOTHING;
 
-    UPDATE planners_identities SET resume = jsonb_build_object(
+    UPDATE myverse_identities SET resume = jsonb_build_object(
         'personal', jsonb_build_object(
             'name_ko', '전천일',
             'name_en', 'Cheonil, Jeon',

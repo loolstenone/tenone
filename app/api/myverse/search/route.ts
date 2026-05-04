@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { isValidDomain } from "@/lib/myverse/domains";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
     const [moments, routines, places, calendar] = await Promise.all([
         withDomain(
             admin
-                .from("planners_daily_moments")
+                .from("myverse_daily_moments")
                 .select("id, date, happened_at, caption, media_url, media_type, content_axis, domain, visibility")
                 .eq("member_id", memberId)
                 .gte("date", sinceStr)
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
         ).order("happened_at", { ascending: false, nullsFirst: false }).limit(30),
         withDomain(
             admin
-                .from("planners_daily_routines")
+                .from("myverse_daily_routines")
                 .select("id, date, start_time, activity, note, content_axis, domain, visibility")
                 .eq("member_id", memberId)
                 .gte("date", sinceStr)
@@ -59,7 +59,7 @@ export async function GET(req: Request) {
         ).order("date", { ascending: false }).limit(30),
         withDomain(
             admin
-                .from("planners_daily_places")
+                .from("myverse_daily_places")
                 .select("id, date, visited_at, place_name, address, content_axis, domain, visibility")
                 .eq("member_id", memberId)
                 .gte("date", sinceStr)
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
         ).order("date", { ascending: false }).limit(30),
         withDomain(
             admin
-                .from("planners_calendar_entries")
+                .from("myverse_calendar_entries")
                 .select("id, date, title, start_time, content_axis, domain, visibility")
                 .eq("member_id", memberId)
                 .gte("date", sinceStr)

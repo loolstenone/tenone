@@ -9,14 +9,14 @@ import { CommandPalette } from "./CommandPalette";
 import { Keyboard, X } from "lucide-react";
 
 const ROUTE_KEYS: Record<string, string> = {
-    i: "/planners/app/index",
-    t: "/planners/app/today",
-    w: "/planners/app/weekly",
-    m: "/planners/app/monthly",
-    y: "/planners/app/yearly",
-    p: "/planners/app/projects",
-    c: "/planners/app/contacts",
-    s: "/planners/app/search",
+    i: "/myverse/app/index",
+    t: "/myverse/app/today",
+    w: "/myverse/app/weekly",
+    m: "/myverse/app/monthly",
+    y: "/myverse/app/yearly",
+    p: "/myverse/app/projects",
+    c: "/myverse/app/contacts",
+    s: "/myverse/app/search",
 };
 
 const SHORTCUTS_LIST = [

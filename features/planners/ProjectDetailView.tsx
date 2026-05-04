@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Loader2, NotebookPen, ListTodo, Flag, Settings as SettingsIcon, ChevronDown, ChevronUp } from "lucide-react";
-import type { PlannerProject, ProjectCollaborator } from "@/lib/planners/types";
+import type { PlannerProject, ProjectCollaborator } from "@/lib/myverse/types";
 import { ProjectNotesTab } from "./ProjectNotesTab";
 import { ProjectTasksTab } from "./ProjectTasksTab";
 import { ProjectMilestonesTab } from "./ProjectMilestonesTab";
@@ -12,7 +12,7 @@ import { CoverPicker } from "./CoverPicker";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { ConfirmSheet } from "./ConfirmSheet";
-import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
+import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/myverse/project-categories";
 
 // 통합 페이지의 각 섹션 — Tab 컴포넌트가 자체 카드를 갖고 있으므로 헤더만 plain 렌더
 function SectionCard({ icon: Icon, title, hint, children }: {
@@ -59,7 +59,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     async function reload() {
-        const res = await fetch(`/api/planners/projects/${projectId}`);
+        const res = await fetch(`/api/myverse/projects/${projectId}`);
         if (res.ok) {
             const d = await res.json();
             setProject(d.project);
@@ -79,7 +79,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         if (userRole === "viewer") return;
         setSaving(true);
         try {
-            await fetch(`/api/planners/projects/${projectId}`, {
+            await fetch(`/api/myverse/projects/${projectId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ project: patch }),
@@ -124,7 +124,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Breadcrumb + utility */}
             <div className="flex items-center justify-between mb-5">
-                <Link href="/planners/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                <Link href="/myverse/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                     <ChevronLeft className="h-4 w-4" /> 프로젝트
                 </Link>
                 <PlannersUtilityLinks />
@@ -284,9 +284,9 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 description="노트·업무·마일스톤·Vrief·GPR 모두 영구 삭제됩니다. 되돌릴 수 없습니다."
                 onConfirm={async () => {
                     setConfirmDeleteOpen(false);
-                    const res = await fetch(`/api/planners/projects/${projectId}`, { method: "DELETE" });
+                    const res = await fetch(`/api/myverse/projects/${projectId}`, { method: "DELETE" });
                     if (res.ok) {
-                        window.location.href = "/planners/app/projects";
+                        window.location.href = "/myverse/app/projects";
                     } else {
                         const d = await res.json().catch(() => ({}));
                         alert(`삭제 실패: ${d.message || d.error || res.status}`);
@@ -318,7 +318,7 @@ function CoverTab({ project, save, userRole }: { project: PlannerProject; save: 
     const [pickerOpen, setPickerOpen] = useState(false);
 
     useEffect(() => {
-        fetch(`/api/planners/covers`).then(async (r) => {
+        fetch(`/api/myverse/covers`).then(async (r) => {
             if (!r.ok) return;
             const d = await r.json();
             const found = (d.covers || []).find((c: { key: string }) => c.key === (project.cover_id || "teal_solid"));
@@ -476,7 +476,7 @@ function ShareField({ project }: { project: PlannerProject }) {
     async function makePublic() {
         setBusy(true);
         try {
-            const res = await fetch(`/api/planners/projects/${project.id}/share`, { method: "POST" });
+            const res = await fetch(`/api/myverse/projects/${project.id}/share`, { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
                 setToken(d.token);
@@ -487,12 +487,12 @@ function ShareField({ project }: { project: PlannerProject }) {
     async function revoke() {
         setBusy(true);
         try {
-            await fetch(`/api/planners/projects/${project.id}/share`, { method: "DELETE" });
+            await fetch(`/api/myverse/projects/${project.id}/share`, { method: "DELETE" });
             setToken("");
         } finally { setBusy(false); }
     }
 
-    const url = typeof window !== "undefined" && token ? `${window.location.origin}/planners/p/${token}` : "";
+    const url = typeof window !== "undefined" && token ? `${window.location.origin}/myverse/p/${token}` : "";
 
     async function copyUrl() {
         if (!url) return;

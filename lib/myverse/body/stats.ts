@@ -57,7 +57,7 @@ export async function getBodyStats(memberId: string, days = 90): Promise<BodySta
     const sinceStr = since.toISOString().slice(0, 10);
 
     const { data: rows } = await admin
-        .from("planners_daily_routines")
+        .from("myverse_daily_routines")
         .select("date, body_subtype, body_data, start_time, end_time")
         .eq("member_id", memberId)
         .eq("domain", "body")

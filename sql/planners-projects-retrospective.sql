@@ -1,5 +1,5 @@
 -- Phase 5: 프로젝트 회고 (5F) 저장
-ALTER TABLE planners_projects
+ALTER TABLE myverse_projects
     ADD COLUMN IF NOT EXISTS retrospective jsonb;
 
 -- retrospective JSON 형식:

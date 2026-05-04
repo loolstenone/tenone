@@ -3,10 +3,10 @@
 // 도메인 피드 — 한 영역(예: body, work)에 속한 모든 capture 데이터를 시간순으로 표시
 //
 // 데이터 소스 (해당 도메인 필터):
-//   - planners_daily_moments (사진·영상)
-//   - planners_daily_routines (시간 사용)
-//   - planners_daily_places (방문 장소)
-//   - planners_calendar_entries (일정)
+//   - myverse_daily_moments (사진·영상)
+//   - myverse_daily_routines (시간 사용)
+//   - myverse_daily_places (방문 장소)
+//   - myverse_calendar_entries (일정)
 //
 // 사용처: /myverse/app/{body,work,study,daily,schedule,move,travel,relation}/page.tsx
 
@@ -86,10 +86,10 @@ export function DomainFeed({ domain, days = 30, handle = null }: Props) {
 }
 
 const TYPE_TO_TABLE: Record<string, string> = {
-    moment: "planners_daily_moments",
-    routine: "planners_daily_routines",
-    place: "planners_daily_places",
-    calendar: "planners_calendar_entries",
+    moment: "myverse_daily_moments",
+    routine: "myverse_daily_routines",
+    place: "myverse_daily_places",
+    calendar: "myverse_calendar_entries",
 };
 
 function FeedItemCard({ item, domainColor, handle }: { item: FeedItem; domainColor: string; handle: string | null }) {

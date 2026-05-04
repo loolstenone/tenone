@@ -1,12 +1,12 @@
 "use client";
 
-// 이력서 페이지 — /planners/app/personal/resume
+// 이력서 페이지 — /myverse/app/personal/resume
 // PDF 표준 이력서 구조 (인적사항·학력·병적·경력·수상·업무경험·브랜드·강의·심사·기타활동)
 // IdentityView와 별도 페이지로 분리됨 (한 페이지에 다 넣지 않음).
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, FileText, Loader2, Plus, Printer, Share2, Trash2, User, X } from "lucide-react";
-import type { PlannerIdentity, ResumeData } from "@/lib/planners/types";
+import type { PlannerIdentity, ResumeData } from "@/lib/myverse/types";
 import { IdentitySubNav } from "./IdentitySubNav";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
@@ -42,7 +42,7 @@ export function ResumeView() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await fetch(`/api/planners/identity`);
+            const res = await fetch(`/api/myverse/identity`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
@@ -58,7 +58,7 @@ export function ResumeView() {
         setData(next);
         setSaving(true);
         try {
-            await fetch(`/api/planners/identity`, {
+            await fetch(`/api/myverse/identity`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patch),

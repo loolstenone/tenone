@@ -4,8 +4,8 @@
 -- 수정: SELECT value FROM jsonb_array_elements(...) → _task JSONB 변수로 직접 받음
 -- 적용일: 2026-05-04
 
--- planners_monthly_summary
-CREATE OR REPLACE FUNCTION public.planners_monthly_summary(_member_id uuid, _year integer, _month integer)
+-- myverse_monthly_summary
+CREATE OR REPLACE FUNCTION public.myverse_monthly_summary(_member_id uuid, _year integer, _month integer)
 RETURNS jsonb
 LANGUAGE plpgsql
 STABLE
@@ -30,7 +30,7 @@ BEGIN
 
     FOR _day IN
         SELECT tasks, energy_level
-        FROM planners_daily
+        FROM myverse_daily
         WHERE member_id = _member_id
           AND date BETWEEN _first_day AND _last_day
     LOOP
@@ -54,13 +54,13 @@ BEGIN
     END LOOP;
 
     SELECT AVG(energy_level)::numeric(4,2) INTO _energy_avg
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND date BETWEEN _first_day AND _last_day
       AND energy_level IS NOT NULL;
 
     SELECT COUNT(*) INTO _projects_completed
-    FROM planners_projects
+    FROM myverse_projects
     WHERE member_id = _member_id
       AND completed_at BETWEEN _first_day AND (_last_day + INTERVAL '1 day');
 
@@ -83,8 +83,8 @@ BEGIN
 END;
 $$;
 
--- planners_weekly_summary
-CREATE OR REPLACE FUNCTION public.planners_weekly_summary(_member_id uuid, _year integer, _week integer)
+-- myverse_weekly_summary
+CREATE OR REPLACE FUNCTION public.myverse_weekly_summary(_member_id uuid, _year integer, _week integer)
 RETURNS jsonb
 LANGUAGE plpgsql
 STABLE
@@ -103,7 +103,7 @@ DECLARE
     _status TEXT;
 BEGIN
     SELECT week_start, week_end INTO _week_start, _week_end
-    FROM planners_weekly
+    FROM myverse_weekly
     WHERE member_id = _member_id AND year = _year AND week = _week;
 
     IF _week_start IS NULL THEN
@@ -114,7 +114,7 @@ BEGIN
 
     FOR _day IN
         SELECT date, tasks, notes, notes_secondary, energy_level, daily_result
-        FROM planners_daily
+        FROM myverse_daily
         WHERE member_id = _member_id
           AND date BETWEEN _week_start AND _week_end
     LOOP
@@ -142,7 +142,7 @@ BEGIN
     END LOOP;
 
     SELECT AVG(energy_level)::numeric(4,2) INTO _energy_avg
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND date BETWEEN _week_start AND _week_end
       AND energy_level IS NOT NULL;

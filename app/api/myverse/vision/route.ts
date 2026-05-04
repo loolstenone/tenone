@@ -11,7 +11,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { DOMAIN_KEYS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
 
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
     // 동의 확인
     const { data: planner } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("auto_capture_consent")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -101,9 +101,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "invalid_domain", parsed }, { status: 500 });
         }
 
-        // 사용량 카운트 (planners_ai_usage 재활용 — 실패해도 Vision 결과 반환)
+        // 사용량 카운트 (myverse_ai_usage 재활용 — 실패해도 Vision 결과 반환)
         try {
-            await admin.from("planners_ai_usage").insert({
+            await admin.from("myverse_ai_usage").insert({
                 member_id: memberId,
                 used_at: new Date().toISOString(),
                 kind: "vision_classify",

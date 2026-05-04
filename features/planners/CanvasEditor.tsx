@@ -52,7 +52,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/canvases/${canvasId}`, { cache: "no-store" });
+            const res = await fetch(`/api/myverse/canvases/${canvasId}`, { cache: "no-store" });
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
@@ -67,7 +67,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     const saveData = useCallback(async (data: CanvasData) => {
         setSaving(true);
         try {
-            await fetch(`/api/planners/canvases/${canvasId}`, {
+            await fetch(`/api/myverse/canvases/${canvasId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ data }),
@@ -98,7 +98,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                 reader.onerror = reject;
                 reader.readAsDataURL(blob);
             });
-            await fetch(`/api/planners/canvases/${canvasId}`, {
+            await fetch(`/api/myverse/canvases/${canvasId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ thumbnail_url: dataUrl }),
@@ -110,7 +110,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
 
     const saveTitle = useCallback(async (next: string) => {
         if (!canvas || next === canvas.title) return;
-        await fetch(`/api/planners/canvases/${canvasId}`, {
+        await fetch(`/api/myverse/canvases/${canvasId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title: next }),
@@ -138,8 +138,8 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     }
 
     async function deleteCanvas() {
-        await fetch(`/api/planners/canvases/${canvasId}`, { method: "DELETE" });
-        window.location.href = "/planners/app/canvas";
+        await fetch(`/api/myverse/canvases/${canvasId}`, { method: "DELETE" });
+        window.location.href = "/myverse/app/canvas";
     }
 
     if (loading) {
@@ -154,7 +154,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
             <div className="h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
-                    <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
+                    <Link href="/myverse/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
                 </div>
             </div>
         );
@@ -164,7 +164,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         <div className="h-screen flex flex-col bg-neutral-50">
             {/* Topbar */}
             <header className="flex items-center gap-3 px-4 py-2 bg-white border-b border-neutral-200 shrink-0">
-                <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700">
+                <Link href="/myverse/app/canvas" className="text-neutral-400 hover:text-neutral-700">
                     <ChevronLeft className="h-4 w-4" />
                 </Link>
                 <input

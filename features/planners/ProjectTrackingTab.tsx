@@ -54,7 +54,7 @@ export function ProjectTrackingTab({ projectId, projectColor }: { projectId: str
         (async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/planners/projects/${projectId}/tracking`);
+                const res = await fetch(`/api/myverse/projects/${projectId}/tracking`);
                 if (res.ok) {
                     const d = await res.json();
                     setData(d);

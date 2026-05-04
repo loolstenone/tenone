@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getPlannerUser } from "@/lib/planners/client";
+import { getPlannerUser } from "@/lib/myverse/client";
 import { IdentityView } from "@/features/planners/IdentityView";
 
 export default async function IdentityPage() {

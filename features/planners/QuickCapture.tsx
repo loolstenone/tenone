@@ -10,9 +10,9 @@ import { useRouter } from "next/navigation";
 import { Plus, X, ListTodo, FileText, Pen, Loader2 } from "lucide-react";
 
 const HIDDEN_PATHS = [
-    "/planners/app/canvas/", // 캔버스 에디터에서는 숨김
-    "/planners/onboarding",
-    "/planners/purchase",
+    "/myverse/app/canvas/", // 캔버스 에디터에서는 숨김
+    "/myverse/onboarding",
+    "/myverse/purchase",
 ];
 
 export function QuickCapture() {
@@ -83,11 +83,11 @@ export function QuickCapture() {
         try {
             // Daily 페이지의 tasks 배열에 append
             const date = todayStr();
-            const getRes = await fetch(`/api/planners/daily?date=${date}`, { cache: "no-store" });
+            const getRes = await fetch(`/api/myverse/daily?date=${date}`, { cache: "no-store" });
             const cur = getRes.ok ? await getRes.json() : { daily: { tasks: [] } };
             const tasks = Array.isArray(cur.daily?.tasks) ? cur.daily.tasks : [];
             tasks.push({ text: text.trim(), status: "todo" });
-            const res = await fetch(`/api/planners/daily`, {
+            const res = await fetch(`/api/myverse/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, tasks }),
@@ -107,11 +107,11 @@ export function QuickCapture() {
         try {
             // Daily 페이지의 note 필드에 append (개행 + 새 텍스트)
             const date = todayStr();
-            const getRes = await fetch(`/api/planners/daily?date=${date}`, { cache: "no-store" });
+            const getRes = await fetch(`/api/myverse/daily?date=${date}`, { cache: "no-store" });
             const cur = getRes.ok ? await getRes.json() : { daily: { notes: "" } };
             const prev = (cur.daily?.notes ?? "") as string;
             const next = prev ? `${prev}\n\n${text.trim()}` : text.trim();
-            const res = await fetch(`/api/planners/daily`, {
+            const res = await fetch(`/api/myverse/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, notes: next }),
@@ -128,14 +128,14 @@ export function QuickCapture() {
     async function createCanvasAndOpen() {
         setSubmitting(true);
         try {
-            const res = await fetch("/api/planners/canvases", {
+            const res = await fetch("/api/myverse/canvases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: "새 캔버스", data: {} }),
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/planners/app/canvas/${d.canvas.id}`);
+                router.push(`/myverse/app/canvas/${d.canvas.id}`);
                 setOpen(false);
             }
         } finally {

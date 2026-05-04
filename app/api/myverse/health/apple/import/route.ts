@@ -7,8 +7,8 @@
 //   <Record type="HKCategoryTypeIdentifierSleepAnalysis" startDate=... endDate=... value="HKCategoryValueSleepAnalysisAsleep..." />
 //
 // 결과:
-//   - 운동 → planners_daily_routines (domain=body, body_subtype=workout, body_data)
-//   - 수면 → planners_daily_routines (domain=body, body_subtype=sleep)
+//   - 운동 → myverse_daily_routines (domain=body, body_subtype=workout, body_data)
+//   - 수면 → myverse_daily_routines (domain=body, body_subtype=sleep)
 //   - 걸음 수는 일별 합계로 → 추후 확장
 //
 // XML이 100MB+ 까지 크니 stream 처리 필요. MVP는 100MB 한도 + sax-style 파싱.
@@ -16,7 +16,7 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
         try {
             // dedup: (member_id, date, start_time, body_subtype)
             const { data: existing } = await admin
-                .from("planners_daily_routines")
+                .from("myverse_daily_routines")
                 .select("id")
                 .eq("member_id", memberId)
                 .eq("date", rec.date)
@@ -192,7 +192,7 @@ export async function POST(req: Request) {
                 .maybeSingle();
             if (existing) { skipped++; continue; }
 
-            const { error } = await admin.from("planners_daily_routines").insert({
+            const { error } = await admin.from("myverse_daily_routines").insert({
                 member_id: memberId,
                 date: rec.date,
                 start_time: rec.start_time,

@@ -81,7 +81,7 @@ export function QuickCaptureSheet({ open, onClose, onSaved }: Props) {
                 const form = new FormData();
                 form.append("file", p.file);
                 form.append("date", date);
-                const upRes = await fetch("/api/planners/moments/upload", { method: "POST", body: form });
+                const upRes = await fetch("/api/myverse/moments/upload", { method: "POST", body: form });
                 if (!upRes.ok) continue;
                 const up = await upRes.json();
                 uploaded.push({
@@ -117,7 +117,7 @@ export function QuickCaptureSheet({ open, onClose, onSaved }: Props) {
             }
 
             // 3) 메모만 있는 경우 — daily 영역에 텍스트 모먼트로 (간소화: 일단 미지원, 모먼트는 미디어 동반 필수)
-            // TODO: 메모 only는 planners_daily_routines 또는 별도 quick_notes 테이블로
+            // TODO: 메모 only는 myverse_daily_routines 또는 별도 quick_notes 테이블로
 
             setSaved(result);
             onSaved?.();

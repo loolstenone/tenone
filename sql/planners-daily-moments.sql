@@ -1,5 +1,5 @@
 -- 오늘의 한 장면 — 이미지/동영상 + 5W1H 메타
-CREATE TABLE IF NOT EXISTS planners_daily_moments (
+CREATE TABLE IF NOT EXISTS myverse_daily_moments (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id   UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
     date        DATE NOT NULL,
@@ -19,13 +19,13 @@ CREATE TABLE IF NOT EXISTS planners_daily_moments (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_moments_member_date
-    ON planners_daily_moments(member_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_myverse_moments_member_date
+    ON myverse_daily_moments(member_id, date DESC);
 
-ALTER TABLE planners_daily_moments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_daily_moments ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS planners_moments_self ON planners_daily_moments;
-CREATE POLICY planners_moments_self ON planners_daily_moments
+DROP POLICY IF EXISTS myverse_moments_self ON myverse_daily_moments;
+CREATE POLICY myverse_moments_self ON myverse_daily_moments
     FOR ALL USING (
         member_id IN (SELECT id FROM members WHERE email = (auth.jwt() ->> 'email'))
     ) WITH CHECK (
@@ -33,7 +33,7 @@ CREATE POLICY planners_moments_self ON planners_daily_moments
     );
 
 -- updated_at 트리거
-CREATE OR REPLACE FUNCTION planners_moments_touch()
+CREATE OR REPLACE FUNCTION myverse_moments_touch()
 RETURNS TRIGGER LANGUAGE plpgsql
 SET search_path = public, pg_temp
 AS $$
@@ -42,10 +42,10 @@ BEGIN
     RETURN NEW;
 END $$;
 
-DROP TRIGGER IF EXISTS planners_moments_touch_trg ON planners_daily_moments;
-CREATE TRIGGER planners_moments_touch_trg
-BEFORE UPDATE ON planners_daily_moments
-FOR EACH ROW EXECUTE FUNCTION planners_moments_touch();
+DROP TRIGGER IF EXISTS myverse_moments_touch_trg ON myverse_daily_moments;
+CREATE TRIGGER myverse_moments_touch_trg
+BEFORE UPDATE ON myverse_daily_moments
+FOR EACH ROW EXECUTE FUNCTION myverse_moments_touch();
 
 -- Storage 버킷 (Supabase): planners-moments
 -- 사용자가 직접 Dashboard 에서 만들거나, 클라이언트가 시도하면서 자동 생성됨.

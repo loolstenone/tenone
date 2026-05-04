@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2, MapPin, Home, Briefcase, BookOpen, Dumbbell, Coffee, Building2, Star, Crosshair, Loader2 } from "lucide-react";
-import type { ActivityBase } from "@/lib/planners/types";
+import type { ActivityBase } from "@/lib/myverse/types";
 
 const TYPE_META: Record<ActivityBase["type"], { label: string; icon: React.ElementType }> = {
     home:   { label: "집",        icon: Home },

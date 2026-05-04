@@ -7,8 +7,8 @@
 import Link from "next/link";
 
 const TABS = [
-    { id: "vision", label: "비전 하우스",  href: "/planners/app/personal" },
-    { id: "resume", label: "이력서",       href: "/planners/app/personal/resume" },
+    { id: "vision", label: "비전 하우스",  href: "/myverse/app/personal" },
+    { id: "resume", label: "이력서",       href: "/myverse/app/personal/resume" },
 ] as const;
 
 export type IdentityTab = (typeof TABS)[number]["id"];

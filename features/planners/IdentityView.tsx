@@ -16,7 +16,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Compass, Loader2, Plus, Trash2 } from "lucide-react";
-import type { PlannerIdentity } from "@/lib/planners/types";
+import type { PlannerIdentity } from "@/lib/myverse/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { IdentitySubNav } from "./IdentitySubNav";
 
@@ -31,7 +31,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/identity`);
+            const res = await fetch(`/api/myverse/identity`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
@@ -47,7 +47,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
         setData(next);
         setSaving(true);
         try {
-            await fetch(`/api/planners/identity`, {
+            await fetch(`/api/myverse/identity`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patch),

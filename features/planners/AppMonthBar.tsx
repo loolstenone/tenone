@@ -6,11 +6,11 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
 const CALENDAR_PATHS = [
-    "/planners/app/index",
-    "/planners/app/daily",
-    "/planners/app/weekly",
-    "/planners/app/monthly",
-    "/planners/app/yearly",
+    "/myverse/app/index",
+    "/myverse/app/daily",
+    "/myverse/app/weekly",
+    "/myverse/app/monthly",
+    "/myverse/app/yearly",
 ];
 
 function MonthBarInner() {
@@ -25,7 +25,7 @@ function MonthBarInner() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    const isMonthlyPage = pathname === "/planners/app/monthly";
+    const isMonthlyPage = pathname === "/myverse/app/monthly";
     const activeYear = isMonthlyPage && searchParams.get("year")
         ? parseInt(searchParams.get("year")!)
         : currentYear;
@@ -34,7 +34,7 @@ function MonthBarInner() {
         : currentMonth;
 
     function handleClick(month: number) {
-        router.push(`/planners/app/monthly?year=${activeYear}&month=${month}`);
+        router.push(`/myverse/app/monthly?year=${activeYear}&month=${month}`);
     }
 
     return (

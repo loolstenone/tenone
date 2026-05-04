@@ -6,7 +6,7 @@
 --   기본 OFF·명시 동의: 갤러리·GPS·캘린더·헬스·메일 등 백그라운드 수집
 --   절대 금지: 마이크 상시 녹음·화면 캡처·키보드 모니터링
 
-ALTER TABLE planners_users
+ALTER TABLE myverse_users
     ADD COLUMN IF NOT EXISTS auto_capture_consent JSONB DEFAULT '{
         "gallery_scan":      false,
         "gps_background":    false,

@@ -1,5 +1,4 @@
-import { MyVerseHeader } from "@/features/myverse/MyVerseHeader";
-import { MyVerseFooter } from "@/features/myverse/MyVerseFooter";
+import { MyVerseChromeHeader, MyVerseChromeFooter, MyVerseChromeMain } from "@/features/myverse/MyVerseChrome";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -28,11 +27,9 @@ export default function MyVerseLayout({
 }>) {
     return (
         <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-            <MyVerseHeader />
-            <main className="flex-1 pt-14">
-                {children}
-            </main>
-            <MyVerseFooter />
+            <MyVerseChromeHeader />
+            <MyVerseChromeMain>{children}</MyVerseChromeMain>
+            <MyVerseChromeFooter />
         </div>
     );
 }

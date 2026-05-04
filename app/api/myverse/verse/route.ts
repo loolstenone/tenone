@@ -11,7 +11,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { isValidDomain } from "@/lib/myverse/domains";
 
 export const dynamic = "force-dynamic";
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
 
     const momentsQ = withFilters(
         admin
-            .from("planners_daily_moments")
+            .from("myverse_daily_moments")
             .select("id, date, happened_at, caption, media_url, media_type, domain, sub_tags, visibility, people_axis")
             .eq("member_id", memberId)
             .gte("date", fromStr)
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
 
     const routinesQ = withFilters(
         admin
-            .from("planners_daily_routines")
+            .from("myverse_daily_routines")
             .select("id, date, start_time, end_time, activity, body_subtype, body_data, domain, sub_tags, visibility, people_axis")
             .eq("member_id", memberId)
             .gte("date", fromStr)
@@ -70,7 +70,7 @@ export async function GET(req: Request) {
 
     const placesQ = withFilters(
         admin
-            .from("planners_daily_places")
+            .from("myverse_daily_places")
             .select("id, date, visited_at, place_name, address, domain, sub_tags, visibility, people_axis")
             .eq("member_id", memberId)
             .gte("date", fromStr)
@@ -79,7 +79,7 @@ export async function GET(req: Request) {
 
     const calendarQ = withFilters(
         admin
-            .from("planners_calendar_entries")
+            .from("myverse_calendar_entries")
             .select("id, date, title, start_time, kind, domain, visibility, people_axis")
             .eq("member_id", memberId)
             .gte("date", fromStr)

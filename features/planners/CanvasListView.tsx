@@ -58,7 +58,7 @@ export function CanvasListView() {
 
     async function load() {
         setLoading(true);
-        const res = await fetch("/api/planners/canvases", { cache: "no-store" });
+        const res = await fetch("/api/myverse/canvases", { cache: "no-store" });
         if (res.ok) {
             const d = await res.json();
             setRows(d.canvases ?? []);
@@ -70,14 +70,14 @@ export function CanvasListView() {
     async function createNew() {
         setCreating(true);
         try {
-            const res = await fetch("/api/planners/canvases", {
+            const res = await fetch("/api/myverse/canvases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: "새 캔버스" }),
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/planners/app/canvas/${d.canvas.id}`);
+                router.push(`/myverse/app/canvas/${d.canvas.id}`);
             }
         } finally {
             setCreating(false);
@@ -85,7 +85,7 @@ export function CanvasListView() {
     }
 
     async function remove(id: string) {
-        await fetch(`/api/planners/canvases/${id}`, { method: "DELETE" });
+        await fetch(`/api/myverse/canvases/${id}`, { method: "DELETE" });
         setRows(prev => prev.filter(r => r.id !== id));
     }
 
@@ -131,7 +131,7 @@ export function CanvasListView() {
                     {rows.map(row => (
                         <Link
                             key={row.id}
-                            href={`/planners/app/canvas/${row.id}`}
+                            href={`/myverse/app/canvas/${row.id}`}
                             className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#0F766E] hover:shadow-sm transition-all"
                         >
                             {/* Thumbnail */}

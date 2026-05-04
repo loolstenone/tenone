@@ -1,13 +1,13 @@
 "use client";
 
 // 프로젝트별 업무 합산 뷰 — Daily에서 project_id로 태깅된 모든 업무를 한 곳에 모음
-// 데이터 소스: planners_daily.tasks (단일 SSOT)
+// 데이터 소스: myverse_daily.tasks (단일 SSOT)
 // "업무" = task — 유니버스 전반에서 통일된 표기
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus } from "lucide-react";
-import { localDateStr } from "@/lib/planners/types";
+import { localDateStr } from "@/lib/myverse/types";
 
 interface TaskItem {
     date: string;
@@ -51,7 +51,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
     async function load() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/planners/projects/${projectId}/tasks`);
+            const res = await fetch(`/api/myverse/projects/${projectId}/tasks`);
             if (res.ok) {
                 const d = await res.json();
                 setItems(d.items ?? []);
@@ -69,7 +69,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
         if (!text || !newDate) return;
         setAdding(true);
         try {
-            const res = await fetch(`/api/planners/projects/${projectId}/tasks`, {
+            const res = await fetch(`/api/myverse/projects/${projectId}/tasks`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date: newDate, text }),
@@ -130,7 +130,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                 <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-8 px-5 text-center">
                     <p className="text-sm text-neutral-500 mb-1">아직 연결된 업무가 없어요.</p>
                     <p className="text-xs text-neutral-400 leading-relaxed">
-                        위에서 직접 추가하거나, <Link href="/planners/app/today" className="text-[#0F766E] hover:underline">일간</Link>·<Link href="/planners/app/weekly" className="text-[#0F766E] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
+                        위에서 직접 추가하거나, <Link href="/myverse/app/today" className="text-[#0F766E] hover:underline">일간</Link>·<Link href="/myverse/app/weekly" className="text-[#0F766E] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
                     </p>
                 </div>
             ) : (
@@ -200,7 +200,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="text-xs font-semibold text-neutral-500 font-mono">{date}</h3>
                                     <Link
-                                        href={`/planners/app/daily?date=${date}`}
+                                        href={`/myverse/app/daily?date=${date}`}
                                         className="inline-flex items-center gap-0.5 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
                                     >
                                         일간 <ArrowUpRight className="h-2.5 w-2.5" />

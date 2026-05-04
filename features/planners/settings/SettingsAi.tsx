@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles, FolderOpen, Plus, X, Check } from "lucide-react";
-import type { AiTone } from "@/lib/planners/types";
+import type { AiTone } from "@/lib/myverse/types";
 import { GroupMarker } from "@/features/planners/SettingsLayout";
 
 const METRIC_LABELS: Record<string, string> = {
@@ -52,7 +52,7 @@ export function SettingsAi({
         setSampleLoading(true);
         setSampleText(null);
         try {
-            const res = await fetch("/api/planners/briefing/generate", {
+            const res = await fetch("/api/myverse/briefing/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type: "morning" }),
@@ -70,7 +70,7 @@ export function SettingsAi({
         setProjectPickerMetric(metricKey);
         setProjectsLoading(true);
         try {
-            const res = await fetch("/api/planners/projects");
+            const res = await fetch("/api/myverse/projects");
             if (res.ok) {
                 const d = await res.json();
                 setProjects((d.projects || []).filter((p: Project) => p.status !== "completed"));
@@ -81,7 +81,7 @@ export function SettingsAi({
     function linkProject(metricKey: string, projectId: string | null) {
         const next = { ...projectLinks, [metricKey]: projectId };
         setProjectLinks(next);
-        if (typeof window !== "undefined") localStorage.setItem("planners_tracking_projects", JSON.stringify(next));
+        if (typeof window !== "undefined") localStorage.setItem("myverse_tracking_projects", JSON.stringify(next));
         setProjectPickerMetric(null);
         setNewProjectTitle("");
     }
@@ -90,7 +90,7 @@ export function SettingsAi({
         if (!newProjectTitle.trim()) return;
         setCreatingProject(true);
         try {
-            const res = await fetch("/api/planners/projects", {
+            const res = await fetch("/api/myverse/projects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

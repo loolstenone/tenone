@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 // ===== Hero Section =====
 function HeroSection() {
   const { isAuthenticated } = useAuth();
-  const ppAiHref = isAuthenticated ? "/planners/app" : "/planners/planner-tool#pp-ai";
+  const ppAiHref = isAuthenticated ? "/myverse/app" : "/myverse/planner-tool#pp-ai";
   return (
     <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-16 lg:px-24 py-20 md:py-28">
       <div className="max-w-3xl">
@@ -45,14 +45,14 @@ function HeroSection() {
             <ArrowRight size={16} />
           </Link>
           <Link
-            href="/planners/planning"
+            href="/myverse/planning"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a1a] text-white text-sm tracking-wide hover:bg-[#333] transition-colors"
           >
             기획자가 되는 법
             <ArrowRight size={16} />
           </Link>
           <Link
-            href="/planners/planner-tool"
+            href="/myverse/planner-tool"
             className="inline-flex items-center gap-2 px-6 py-3 border border-[#1a1a1a] text-[#1a1a1a] text-sm tracking-wide hover:bg-[#f5f5f5] transition-colors"
           >
             도구 보기 (PDF·AI)
@@ -73,7 +73,7 @@ function HeroSection() {
 // ===== PP AI 강조 섹션 — 헤더 메뉴와 중복 안 되는 신규 콘텐츠 =====
 function PPAISpotlight() {
   const { isAuthenticated } = useAuth();
-  const ppAiHref = isAuthenticated ? "/planners/app" : "/planners/planner-tool#pp-ai";
+  const ppAiHref = isAuthenticated ? "/myverse/app" : "/myverse/planner-tool#pp-ai";
   return (
     <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-gradient-to-br from-[#0F766E]/5 via-white to-[#0F766E]/10 border-y border-[#0F766E]/10">
       <div className="max-w-4xl mx-auto">
@@ -113,7 +113,7 @@ function PPAISpotlight() {
             <ArrowRight size={16} />
           </Link>
           <Link
-            href="/planners/planner-tool"
+            href="/myverse/planner-tool"
             className="inline-flex items-center gap-2 px-6 py-3 text-[#0F766E] text-sm hover:underline"
           >
             기능 자세히 보기

@@ -24,22 +24,22 @@ export async function fetchDomainStats(ctx: AggregateContext) {
     // 4 capture 테이블에서 도메인별 카운트·시간
     const [moments, routines, places, calendar] = await Promise.all([
         admin
-            .from("planners_daily_moments")
+            .from("myverse_daily_moments")
             .select("domain, date")
             .eq("member_id", ctx.member_id)
             .gte("date", sinceStr),
         admin
-            .from("planners_daily_routines")
+            .from("myverse_daily_routines")
             .select("domain, date, start_time, end_time, category, activity")
             .eq("member_id", ctx.member_id)
             .gte("date", sinceStr),
         admin
-            .from("planners_daily_places")
+            .from("myverse_daily_places")
             .select("domain, date, place_name, duration_min")
             .eq("member_id", ctx.member_id)
             .gte("date", sinceStr),
         admin
-            .from("planners_calendar_entries")
+            .from("myverse_calendar_entries")
             .select("domain, date, kind, title")
             .eq("member_id", ctx.member_id)
             .gte("date", sinceStr),
@@ -90,7 +90,7 @@ export async function fetchTopPeople(ctx: AggregateContext, limit = 10) {
     // capture 테이블 4개 합산
     const counts: Record<string, { count: number; last_seen: string }> = {};
 
-    for (const table of ["planners_daily_moments", "planners_daily_routines", "planners_daily_places", "planners_calendar_entries"]) {
+    for (const table of ["myverse_daily_moments", "myverse_daily_routines", "myverse_daily_places", "myverse_calendar_entries"]) {
         const { data } = await admin
             .from(table)
             .select("people_axis, date")
@@ -115,7 +115,7 @@ export async function fetchTopPeople(ctx: AggregateContext, limit = 10) {
 
     // contacts 정보 fetch
     const { data: contacts } = await admin
-        .from("planners_contacts")
+        .from("myverse_contacts")
         .select("id, name, company")
         .in("id", top.map(t => t.contact_id));
 
@@ -135,7 +135,7 @@ export async function fetchTopPlaces(ctx: AggregateContext, limit = 10) {
     const sinceStr = since.toISOString().slice(0, 10);
 
     const { data } = await admin
-        .from("planners_daily_places")
+        .from("myverse_daily_places")
         .select("place_name, domain, duration_min, date")
         .eq("member_id", ctx.member_id)
         .gte("date", sinceStr);
@@ -162,7 +162,7 @@ export async function fetchWeeklyTrend(ctx: AggregateContext) {
     const sinceStr = since.toISOString().slice(0, 10);
 
     const { data } = await admin
-        .from("planners_daily_routines")
+        .from("myverse_daily_routines")
         .select("date, domain, start_time, end_time")
         .eq("member_id", ctx.member_id)
         .gte("date", sinceStr);

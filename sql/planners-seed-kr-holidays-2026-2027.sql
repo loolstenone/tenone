@@ -10,12 +10,12 @@
 --
 -- 결정: 시스템(공휴일·절기) 엔트리는 member_id NULL 허용으로 스키마 변경 + RLS 에 시스템 row 노출 정책 추가.
 
-ALTER TABLE planners_calendar_entries
+ALTER TABLE myverse_calendar_entries
     ALTER COLUMN member_id DROP NOT NULL;
 
 -- 시스템(member_id IS NULL) 엔트리는 모든 사용자가 SELECT 가능
-DROP POLICY IF EXISTS planners_calendar_select ON planners_calendar_entries;
-CREATE POLICY planners_calendar_select ON planners_calendar_entries
+DROP POLICY IF EXISTS myverse_calendar_select ON myverse_calendar_entries;
+CREATE POLICY myverse_calendar_select ON myverse_calendar_entries
     FOR SELECT USING (
         member_id IS NULL  -- 시스템 엔트리
         OR
@@ -26,10 +26,10 @@ CREATE POLICY planners_calendar_select ON planners_calendar_entries
 -- 단, 시스템 엔트리 INSERT 는 service_role 만 가능 (RLS bypass)
 
 -- 기존 시드 정리
-DELETE FROM planners_calendar_entries WHERE is_system = true AND country = 'KR';
+DELETE FROM myverse_calendar_entries WHERE is_system = true AND country = 'KR';
 
 -- 2026 한국 법정공휴일 (음력 공휴일은 양력 환산 하드코딩)
-INSERT INTO planners_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
+INSERT INTO myverse_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
     ('public_holiday', '신정',         '2026-01-01', 'none', true, 'KR', '#DC2626'),
     ('public_holiday', '설날 연휴',     '2026-02-16', 'none', true, 'KR', '#DC2626'),
     ('public_holiday', '설날',         '2026-02-17', 'none', true, 'KR', '#DC2626'),
@@ -47,7 +47,7 @@ INSERT INTO planners_calendar_entries (kind, title, start_date, recurrence, is_s
     ('public_holiday', '성탄절',        '2026-12-25', 'none', true, 'KR', '#DC2626');
 
 -- 2026 24절기
-INSERT INTO planners_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
+INSERT INTO myverse_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
     ('solar_term', '소한', '2026-01-05', 'none', true, 'KR', '#94A3B8'),
     ('solar_term', '대한', '2026-01-20', 'none', true, 'KR', '#94A3B8'),
     ('solar_term', '입춘', '2026-02-04', 'none', true, 'KR', '#94A3B8'),
@@ -74,7 +74,7 @@ INSERT INTO planners_calendar_entries (kind, title, start_date, recurrence, is_s
     ('solar_term', '동지', '2026-12-22', 'none', true, 'KR', '#94A3B8');
 
 -- 2027 법정공휴일
-INSERT INTO planners_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
+INSERT INTO myverse_calendar_entries (kind, title, start_date, recurrence, is_system, country, color) VALUES
     ('public_holiday', '신정',         '2027-01-01', 'none', true, 'KR', '#DC2626'),
     ('public_holiday', '설날 연휴',     '2027-02-06', 'none', true, 'KR', '#DC2626'),
     ('public_holiday', '설날',         '2027-02-07', 'none', true, 'KR', '#DC2626'),

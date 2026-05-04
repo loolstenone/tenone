@@ -3,7 +3,7 @@
 -- 프로젝트 Cover 선택 (색 × 패턴 × 상징)
 -- ═══════════════════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS planners_covers (
+CREATE TABLE IF NOT EXISTS myverse_covers (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key           TEXT UNIQUE NOT NULL,
   label         TEXT NOT NULL,
@@ -16,12 +16,12 @@ CREATE TABLE IF NOT EXISTS planners_covers (
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
-ALTER TABLE planners_covers ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "모두 읽기" ON planners_covers;
-CREATE POLICY "모두 읽기" ON planners_covers FOR SELECT USING (true);
+ALTER TABLE myverse_covers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "모두 읽기" ON myverse_covers;
+CREATE POLICY "모두 읽기" ON myverse_covers FOR SELECT USING (true);
 
 -- 15종 시드
-INSERT INTO planners_covers(key, label, description, pattern, primary_color, accent_color, emoji, order_index) VALUES
+INSERT INTO myverse_covers(key, label, description, pattern, primary_color, accent_color, emoji, order_index) VALUES
 ('teal_solid',    'Teal Solid',     '기본 · 플래너 브랜드 색',        'solid',    '#0F766E', NULL,      '📘',  1),
 ('charcoal',      'Charcoal',       '정제된 · 업무 기획',             'solid',    '#1F2937', NULL,      '📓',  2),
 ('ivory',         'Ivory',          '클래식 · 따뜻한 미색',           'paper',    '#F5F3ED', '#8B7355', '📖',  3),

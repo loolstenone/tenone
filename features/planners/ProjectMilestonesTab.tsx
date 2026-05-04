@@ -5,8 +5,8 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Check } from "lucide-react";
-import type { PlannerProjectMilestone } from "@/lib/planners/types";
-import { localDateStr } from "@/lib/planners/types";
+import type { PlannerProjectMilestone } from "@/lib/myverse/types";
+import { localDateStr } from "@/lib/myverse/types";
 import { ConfirmSheet } from "./ConfirmSheet";
 
 export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate, projectEndDate }: {
@@ -25,7 +25,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
     async function load() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/planners/projects/${projectId}/milestones`);
+            const res = await fetch(`/api/myverse/projects/${projectId}/milestones`);
             if (res.ok) {
                 const d = await res.json();
                 setMilestones(d.milestones ?? []);
@@ -40,7 +40,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
         if (!newTitle.trim()) return;
         setSaving(true);
         try {
-            const res = await fetch(`/api/planners/projects/${projectId}/milestones`, {
+            const res = await fetch(`/api/myverse/projects/${projectId}/milestones`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -62,7 +62,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
         const next = m.done_at ? null : new Date().toISOString();
         const updated = milestones.map(x => x.id === m.id ? { ...x, done_at: next } : x);
         setMilestones(updated);
-        await fetch(`/api/planners/projects/${projectId}/milestones`, {
+        await fetch(`/api/myverse/projects/${projectId}/milestones`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: m.id, done_at: next }),
@@ -72,7 +72,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
     async function update(m: PlannerProjectMilestone, patch: Partial<PlannerProjectMilestone>) {
         const updated = milestones.map(x => x.id === m.id ? { ...x, ...patch } : x);
         setMilestones(updated);
-        await fetch(`/api/planners/projects/${projectId}/milestones`, {
+        await fetch(`/api/myverse/projects/${projectId}/milestones`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: m.id, ...patch }),
@@ -81,7 +81,7 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
 
     async function remove(m: PlannerProjectMilestone) {
         setMilestones(milestones.filter(x => x.id !== m.id));
-        await fetch(`/api/planners/projects/${projectId}/milestones?id=${m.id}`, { method: "DELETE" });
+        await fetch(`/api/myverse/projects/${projectId}/milestones?id=${m.id}`, { method: "DELETE" });
     }
 
     if (loading) {

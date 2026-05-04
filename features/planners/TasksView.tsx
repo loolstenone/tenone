@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { CheckSquare, ChevronRight, ArrowRight, X, Clock, RotateCcw } from "lucide-react";
-import type { PlannerTask } from "@/lib/planners/types";
+import type { PlannerTask } from "@/lib/myverse/types";
 
 interface TaskWithDate extends PlannerTask {
     date: string;
@@ -50,7 +50,7 @@ export function TasksView() {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const r = await fetch("/api/planners/tasks");
+            const r = await fetch("/api/myverse/tasks");
             if (!r.ok) return;
             const d = await r.json();
             setGrouped(d.grouped);
@@ -151,7 +151,7 @@ export function TasksView() {
                         <div key={date}>
                             <div className="flex items-center gap-2 mb-2">
                                 <Link
-                                    href={`/planners/app/daily?date=${date}`}
+                                    href={`/myverse/app/daily?date=${date}`}
                                     className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[#0F766E] transition-colors group"
                                 >
                                     <span className="font-mono">{formatDate(date)}</span>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { ListChecks, Plus, Trash2, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import { ROUTINE_CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
+import { ROUTINE_CATEGORIES, categoryMeta as catMeta } from "@/lib/myverse/categories";
 
 type Routine = {
     id: string;
@@ -42,7 +42,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
     async function load() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/planners/routines?date=${date}`);
+            const res = await fetch(`/api/myverse/routines?date=${date}`);
             if (res.ok) {
                 const d = await res.json();
                 setRoutines(d.routines ?? []);
@@ -56,7 +56,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
 
     async function addRoutine() {
         if (!inputActivity.trim()) return;
-        const res = await fetch("/api/planners/routines", {
+        const res = await fetch("/api/myverse/routines", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -85,7 +85,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
     }
 
     async function deleteRoutine(id: string) {
-        const res = await fetch(`/api/planners/routines?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/routines?id=${id}`, { method: "DELETE" });
         if (res.ok) setRoutines(prev => prev.filter(r => r.id !== id));
     }
 

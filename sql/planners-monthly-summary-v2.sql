@@ -2,7 +2,7 @@
 -- 기존 done_tasks·carried_tasks 외에 todo_count·canceled_count 추가하여
 -- 월간 통계 UI에서 5종(전체·미완·완료·이월·취소) 비율 표시 가능
 
-CREATE OR REPLACE FUNCTION planners_monthly_summary(
+CREATE OR REPLACE FUNCTION myverse_monthly_summary(
     _member_id UUID,
     _year INTEGER,
     _month INTEGER
@@ -31,7 +31,7 @@ BEGIN
 
     FOR _day IN
         SELECT tasks, energy_level
-        FROM planners_daily
+        FROM myverse_daily
         WHERE member_id = _member_id
           AND date BETWEEN _first_day AND _last_day
     LOOP
@@ -56,13 +56,13 @@ BEGIN
     END LOOP;
 
     SELECT AVG(energy_level)::numeric(4,2) INTO _energy_avg
-    FROM planners_daily
+    FROM myverse_daily
     WHERE member_id = _member_id
       AND date BETWEEN _first_day AND _last_day
       AND energy_level IS NOT NULL;
 
     SELECT COUNT(*) INTO _projects_completed
-    FROM planners_projects
+    FROM myverse_projects
     WHERE member_id = _member_id
       AND completed_at BETWEEN _first_day AND (_last_day + INTERVAL '1 day');
 

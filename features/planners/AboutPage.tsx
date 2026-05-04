@@ -113,7 +113,7 @@ export function AboutPage() {
                                 Vision → Reality → Issue → Execution → Feedback.
                                 기획의 5단계. 현실을 직시하고 실행 가능한 방향을 찾는 체계.
                             </p>
-                            <Link href="/planners/planning" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
+                            <Link href="/myverse/planning" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
                                 자세히 →
                             </Link>
                         </div>
@@ -123,7 +123,7 @@ export function AboutPage() {
                                 Goal · Plan · Result.
                                 목표를 세우고, 실행하고, 돌아본다. 평가가 아닌 성장의 프로토콜.
                             </p>
-                            <Link href="/planners/gpr" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
+                            <Link href="/myverse/gpr" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
                                 자세히 →
                             </Link>
                         </div>
@@ -133,7 +133,7 @@ export function AboutPage() {
                                 아침엔 브리핑하고, 저녁엔 정리한다.
                                 능동 AI 비서가 당신의 하루를 함께 설계한다.
                             </p>
-                            <Link href="/planners/planner-tool" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
+                            <Link href="/myverse/planner-tool" className="inline-block mt-4 text-xs text-teal-200 underline underline-offset-2 hover:text-white transition-colors">
                                 자세히 →
                             </Link>
                         </div>
@@ -152,13 +152,13 @@ export function AboutPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                        href="/planners/app"
+                        href="/myverse/app"
                         className="inline-block bg-[#0F766E] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors"
                     >
                         PP AI 시작하기
                     </Link>
                     <Link
-                        href="/planners/programs"
+                        href="/myverse/programs"
                         className="inline-block border border-neutral-200 text-neutral-700 text-sm font-medium px-6 py-3 rounded-lg hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                     >
                         교육 프로그램 보기

@@ -430,9 +430,23 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 ## 현재 상태
 
+> ⚠️ **세션 107 (2026-05-04) — Planner's Planner는 Myverse로 흡수되었다.** 이 가이드는 레거시 참조용으로 보존되며, 실 운영은 [Myverse 가이드](../app/(MyVerse)/CLAUDE.md)를 따른다.
+>
+> **마이그레이션 요약**:
+> - DB: `planners_*` 29 테이블 + 13 함수 → `myverse_*` RENAME (sql/myverse-rename-planners-to-myverse.sql)
+> - API: `app/api/planners/*` 71 라우트 → `app/api/myverse/*` (외부 호출자 호환을 위해 미들웨어 0a번에 `/api/planners/*` → `/api/myverse/*` 내부 rewrite 유지)
+> - lib: `lib/planners/*` 21 모듈 → `lib/myverse/*` 병합
+> - URL: `planners.tenone.biz` 프리픽스 → `/myverse`. `/planners/*` → `/myverse/*` 308 영구 리디렉트
+> - 라우트: PP 28개 라우트(시간뷰·도구·마케팅) `/myverse/*`에 재-export로 미러링
+> - 브랜딩: AppTopNav "Planner's Planner AI" → **Myverse**<sup>App</sup>, 인디고 #6366F1. PlannersThemeProvider 기본 테마 `myverse`(인디고)
+> - 풀 화면 앱: `/myverse/app/*` 진입 시 마케팅 헤더/푸터 숨김 (MyVerseChrome). 4 Pillars 사이드바·MyverseAppHeader 제거 → AppTopNav만 남는 풀 화면 셸
+> - features/planners/ 67개 파일은 디렉토리명 그대로 유지 (다음 세션에 features/myverse/planner/로 리네이밍 예정)
+
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 106 (2026-05-04)** — **거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트** · SettingsBases lat/lng 등록 UI(Crosshair 버튼 + 주소 blur 자동 지오코딩) · TimeTrackerView Haversine 150m 거점 매칭 → 거점 이름이 활동 라벨, 매칭 실패 시 Nominatim 폴백 · InlineForm 등록된 거점 칩 빠른 선택 · POST `/places`↔`/routines` 서버 측 dedup 미러링(date+name+time 키, 카테고리 매핑) · `POST /api/planners/moments/import-meta` JSZip으로 Meta GDPR ZIP 그대로 파싱(Instagram posts/stories + Facebook your_posts) → planners-moments 버킷 업로드 → planners_daily_moments INSERT(촬영 일자·캡션·Mojibake 한글 복원, dedup 안전) · DailyMoments 헤더 "백업" 버튼 추가 · DailyView "오늘의 한 장면"을 한 줄 카드 우측에서 노트 리스트 아래로 이동 |
+| **현재 진입점** | https://myverse.kr · https://planners.tenone.biz (자동 리디렉트) · /myverse/app |
+| **레거시 가이드 시작** | 아래 Phase 106 ~ Phase 92 |
+| **Phase 106** | 세션 106 (2026-05-04) — **거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트** · SettingsBases lat/lng 등록 UI(Crosshair 버튼 + 주소 blur 자동 지오코딩) · TimeTrackerView Haversine 150m 거점 매칭 → 거점 이름이 활동 라벨, 매칭 실패 시 Nominatim 폴백 · InlineForm 등록된 거점 칩 빠른 선택 · POST `/places`↔`/routines` 서버 측 dedup 미러링(date+name+time 키, 카테고리 매핑) · `POST /api/planners/moments/import-meta` JSZip으로 Meta GDPR ZIP 그대로 파싱(Instagram posts/stories + Facebook your_posts) → planners-moments 버킷 업로드 → planners_daily_moments INSERT(촬영 일자·캡션·Mojibake 한글 복원, dedup 안전) · DailyMoments 헤더 "백업" 버튼 추가 · DailyView "오늘의 한 장면"을 한 줄 카드 우측에서 노트 리스트 아래로 이동 |
 | **Phase 105** | 세션 105 (2026-05-03) — **PP Canvas Engine 골격 + Toolbar 고도화 + 이력서/활동거점/노트 삭제 확인** · `lib/planners/canvas-engine/` 신규 모듈(types·engine·history·render·layers·interaction·serialize·adapters) + 6단계 ~10주 로드맵 docs/PP_Canvas_Engine_Plan.md · CanvasToolbar 24색 팔레트 팝오버(HEX·픽커·최근8) + 펜 굵기 슬라이더(0.5~32px) + 이미지·레이어 순서(맨앞/앞/뒤/맨뒤) + 모바일 "더보기" 메뉴 · CanvasStudio z-9100(모바일 nav 위) + 저장 아이콘만 · IdentityView 이력서 섹션(학력·경력·자격증·기술·언어·수상) + sticky 서브 네비 · SettingsBases 활동 거점(사무실·집·학습·운동·카페·기타 6 type) · DailyView 코넬 페이지 삭제 ConfirmSheet · HandNote __HW__ 직렬화 헬퍼를 canvas-engine/adapters로 추출 · `planners_identities.resume`·`planners_users.activity_bases` JSONB 컬럼 추가 |
 | **Phase 104** | 세션 104 (2026-04-30) — HandNote 이미지·뷰박스·코넬 UX 개선 · SVG viewBox + getSVGPoint 좌표계 통일 · HandImage 타입 + 이미지 삽입(파일/붙이기)/선택/이동/삭제 · renderToCanvas viewBox 스케일 보정 · 코넬 엔터→신규행 포커스 |
 | **Phase 103** | **세션 103 (2026-04-30)** — **Settings page.tsx 모듈 분리 완성** (1,799줄 → 367줄 슬림 쉘 · 5개 feature 모듈: SettingsTheme·SettingsAi·SettingsNotifications·SettingsIntegrations·SettingsExport · TypeScript 에러 0) |

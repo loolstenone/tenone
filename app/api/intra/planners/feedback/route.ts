@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
 
     let q = supabaseAdmin
-        .from("planners_feedback")
+        .from("myverse_feedback")
         .select("id, user_id, user_email, message, user_agent, page_path, status, priority, notes, handled_at, created_at, updated_at")
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -26,14 +26,14 @@ export async function GET(req: Request) {
 
     // counts by status
     const { data: counts } = await supabaseAdmin
-        .rpc("planners_feedback_counts")
+        .rpc("myverse_feedback_counts")
         .select();
     // RPC 가 없으면 fallback group-by 시뮬레이션 (가벼우니 in-app aggregation)
     let stats: Record<string, number> = {};
     if (Array.isArray(counts)) {
         for (const r of counts as Array<{ status: string; n: number }>) stats[r.status] = r.n;
     } else {
-        const { data: all } = await supabaseAdmin.from("planners_feedback").select("status");
+        const { data: all } = await supabaseAdmin.from("myverse_feedback").select("status");
         for (const r of all ?? []) stats[r.status] = (stats[r.status] ?? 0) + 1;
     }
 
@@ -57,7 +57,7 @@ export async function PATCH(req: Request) {
     }
 
     const { error } = await supabaseAdmin
-        .from("planners_feedback")
+        .from("myverse_feedback")
         .update(patch)
         .eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -69,7 +69,7 @@ export async function DELETE(req: Request) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "missing_id" }, { status: 400 });
-    const { error } = await supabaseAdmin.from("planners_feedback").delete().eq("id", id);
+    const { error } = await supabaseAdmin.from("myverse_feedback").delete().eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
 }

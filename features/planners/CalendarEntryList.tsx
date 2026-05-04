@@ -4,8 +4,8 @@
 // Monthly/Yearly 는 캘린더 셀 안에 dot/title 만 보여주므로 별도 렌더 사용
 
 import { Plus, Repeat, Lock } from "lucide-react";
-import type { CalendarEntry, ViewScope } from "@/lib/planners/calendar-rules";
-import { entriesForView, KIND_COLORS, KIND_LABELS, monthlyDisplayMode } from "@/lib/planners/calendar-rules";
+import type { CalendarEntry, ViewScope } from "@/lib/myverse/calendar-rules";
+import { entriesForView, KIND_COLORS, KIND_LABELS, monthlyDisplayMode } from "@/lib/myverse/calendar-rules";
 
 interface Props {
     entries: CalendarEntry[];

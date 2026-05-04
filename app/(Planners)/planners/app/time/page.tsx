@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { TimeTrackerView } from "@/features/planners/TimeTrackerView";
-import { getPlannerUser } from "@/lib/planners/client";
+import { getPlannerUser } from "@/lib/myverse/client";
 
 export const dynamic = "force-dynamic";
 

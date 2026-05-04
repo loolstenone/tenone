@@ -5,7 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ChevronLeft, CheckCircle2, Calendar, FolderKanban } from "lucide-react";
-import { getCategoryMeta } from "@/lib/planners/project-categories";
+import { getCategoryMeta } from "@/lib/myverse/project-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export async function generateMetadata(
     if (!owner) return { title: "포트폴리오를 찾을 수 없습니다" };
 
     const { count } = await admin
-        .from("planners_projects")
+        .from("myverse_projects")
         .select("id", { count: "exact", head: true })
         .eq("member_id", memberId)
         .eq("visibility", "public_link");
@@ -61,7 +61,7 @@ async function loadPortfolio(memberId: string) {
     const [{ data: owner }, { data: projects }] = await Promise.all([
         admin.from("members").select("id, name, avatar_url").eq("id", memberId).maybeSingle(),
         admin
-            .from("planners_projects")
+            .from("myverse_projects")
             .select("id, title, color, category, status, start_date, end_date, completed_at, public_token, tags")
             .eq("member_id", memberId)
             .eq("visibility", "public_link")
@@ -73,7 +73,7 @@ async function loadPortfolio(memberId: string) {
     // 마일스톤 단일 쿼리 (N+1 방지)
     const projectIds = projects.map((p) => p.id);
     const { data: allMilestones } = await admin
-        .from("planners_project_milestones")
+        .from("myverse_project_milestones")
         .select("id, project_id, done_at")
         .in("project_id", projectIds);
 

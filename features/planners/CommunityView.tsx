@@ -55,7 +55,7 @@ interface Comment {
 }
 
 export function CommunityView() {
-    const pathname = usePathname() || "/planners/community";
+    const pathname = usePathname() || "/myverse/community";
     const [posts, setPosts] = useState<Post[]>([]);
     const [filter, setFilter] = useState<Category | "all">("all");
     const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ export function CommunityView() {
 
     async function load(cat: Category | "all" = filter) {
         setLoading(true);
-        const url = cat === "all" ? "/api/planners/community" : `/api/planners/community?category=${cat}`;
+        const url = cat === "all" ? "/api/myverse/community" : `/api/myverse/community?category=${cat}`;
         const res = await fetch(url);
         if (res.ok) {
             const d = await res.json();
@@ -96,7 +96,7 @@ export function CommunityView() {
                 ? { ...p, i_liked: !liked, like_count: p.like_count + (liked ? -1 : 1) }
                 : p
         ));
-        await fetch(`/api/planners/community/${post.id}/likes`, {
+        await fetch(`/api/myverse/community/${post.id}/likes`, {
             method: liked ? "DELETE" : "POST",
         });
     }
@@ -287,7 +287,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
         if (!title.trim() || !content.trim()) return;
         setSaving(true);
         try {
-            const res = await fetch("/api/planners/community", {
+            const res = await fetch("/api/myverse/community", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ category, title, content }),
@@ -365,7 +365,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
 }
 
 function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: () => void; onChanged: () => void }) {
-    const pathname = usePathname() || "/planners/community";
+    const pathname = usePathname() || "/myverse/community";
     const [post, setPost] = useState<Post | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -376,7 +376,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
 
     async function load() {
         setLoading(true);
-        const res = await fetch(`/api/planners/community/${postId}`);
+        const res = await fetch(`/api/myverse/community/${postId}`);
         if (res.ok) {
             const d = await res.json();
             setPost(d.post);
@@ -391,7 +391,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
         if (!comment.trim()) return;
         setPosting(true);
         try {
-            const res = await fetch(`/api/planners/community/${postId}/comments`, {
+            const res = await fetch(`/api/myverse/community/${postId}/comments`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content: comment }),
@@ -414,13 +414,13 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
         }
         const liked = post.i_liked;
         setPost({ ...post, i_liked: !liked, like_count: post.like_count + (liked ? -1 : 1) });
-        await fetch(`/api/planners/community/${postId}/likes`, { method: liked ? "DELETE" : "POST" });
+        await fetch(`/api/myverse/community/${postId}/likes`, { method: liked ? "DELETE" : "POST" });
         onChanged();
     }
 
     async function deletePost() {
         if (!post?.is_mine) return;
-        const res = await fetch(`/api/planners/community/${postId}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/community/${postId}`, { method: "DELETE" });
         if (res.ok) { onChanged(); onClose(); }
     }
 

@@ -7,11 +7,11 @@ import {
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
     LayoutGrid, Trash2,
 } from "lucide-react";
-import type { PlannerProject } from "@/lib/planners/types";
+import type { PlannerProject } from "@/lib/myverse/types";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
-import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
+import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/myverse/project-categories";
 import { useAuth } from "@/lib/auth-context";
 import { ConfirmSheet } from "./ConfirmSheet";
 
@@ -45,8 +45,8 @@ export function ProjectsView() {
         (async () => {
             setLoading(true);
             const [pRes, cRes] = await Promise.all([
-                fetch(`/api/planners/projects`),
-                fetch(`/api/planners/covers`),
+                fetch(`/api/myverse/projects`),
+                fetch(`/api/myverse/covers`),
             ]);
             if (pRes.ok) {
                 const d = await pRes.json();
@@ -63,7 +63,7 @@ export function ProjectsView() {
     }, []);
 
     async function deleteProject(id: string) {
-        const res = await fetch(`/api/planners/projects/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/projects/${id}`, { method: "DELETE" });
         if (res.ok) {
             setProjects(prev => prev.filter(p => p.id !== id));
         } else {
@@ -77,7 +77,7 @@ export function ProjectsView() {
         setCreating(true);
         try {
             const meta = getCategoryMeta(newCategory);
-            const res = await fetch(`/api/planners/projects`, {
+            const res = await fetch(`/api/myverse/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -115,7 +115,7 @@ export function ProjectsView() {
                 <div className="flex items-center gap-2">
                     {hasPublicProjects && user?.id && (
                         <Link
-                            href={`/planners/portfolio/${user.id}`}
+                            href={`/myverse/portfolio/${user.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0F766E] border border-[#0F766E] rounded-lg hover:bg-[#0F766E] hover:text-white transition-colors"
@@ -261,7 +261,7 @@ export function ProjectsView() {
                     {filtered.map((p) => (
                         <Link
                             key={p.id}
-                            href={`/planners/app/projects/${p.id}`}
+                            href={`/myverse/app/projects/${p.id}`}
                             className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#0F766E] hover:shadow-sm transition-all group relative"
                         >
                             {/* 호버 시 삭제 버튼 — 우상단 */}

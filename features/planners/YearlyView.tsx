@@ -7,10 +7,10 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
-import type { CalendarEntry } from "@/lib/planners/calendar-rules";
-import { KIND_COLORS } from "@/lib/planners/calendar-rules";
+import type { CalendarEntry } from "@/lib/myverse/calendar-rules";
+import { KIND_COLORS } from "@/lib/myverse/calendar-rules";
 import { useSwipeNav } from "./useSwipeNav";
-import { HOLIDAYS } from "@/lib/planners/holidays";
+import { HOLIDAYS } from "@/lib/myverse/holidays";
 
 interface Anniversary {
     id: string;
@@ -66,7 +66,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
         let cancelled = false;
         (async () => {
             try {
-                const res = await fetch('/api/planners/settings');
+                const res = await fetch('/api/myverse/settings');
                 if (cancelled || !res.ok) return;
                 const d = await res.json();
                 if (typeof d.user?.year_start_month === "number") {
@@ -95,8 +95,8 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
         (async () => {
             setLoading(true);
             const [res, calRes] = await Promise.all([
-                fetch(`/api/planners/yearly?year=${year}`),
-                fetch(`/api/planners/calendar?from=${year}-01-01&to=${year}-12-31`),
+                fetch(`/api/myverse/yearly?year=${year}`),
+                fetch(`/api/myverse/calendar?from=${year}-01-01&to=${year}-12-31`),
             ]);
             if (cancelled) return;
             if (res.ok) {
@@ -124,7 +124,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     async function save(patch: Partial<YearlyData>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/yearly`, {
+            await fetch(`/api/myverse/yearly`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ year, ...patch }),
@@ -575,12 +575,12 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                 open={calEditorOpen}
                 onClose={() => { setCalEditorOpen(false); setCalEditing(null); }}
                 onSaved={() => {
-                    fetch(`/api/planners/calendar?from=${year}-01-01&to=${year}-12-31`)
+                    fetch(`/api/myverse/calendar?from=${year}-01-01&to=${year}-12-31`)
                         .then((r) => r.ok ? r.json() : null)
                         .then((d) => { if (d?.entries) setCalEntries(d.entries); });
                 }}
                 onDeleted={() => {
-                    fetch(`/api/planners/calendar?from=${year}-01-01&to=${year}-12-31`)
+                    fetch(`/api/myverse/calendar?from=${year}-01-01&to=${year}-12-31`)
                         .then((r) => r.ok ? r.json() : null)
                         .then((d) => { if (d?.entries) setCalEntries(d.entries); });
                 }}
@@ -628,7 +628,7 @@ function YearlyAnalytics({ year }: { year: number }) {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await fetch(`/api/planners/daily/year-tracking?year=${year}`);
+            const res = await fetch(`/api/myverse/daily/year-tracking?year=${year}`);
             if (cancelled || !res.ok) return;
             const d = await res.json();
             setData({ months: d.months, one_liners: d.one_liners, totals: d.totals });

@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FolderKanban, Plus, Loader2, ArrowUpRight } from "lucide-react";
-import { getCategoryMeta } from "@/lib/planners/project-categories";
+import { getCategoryMeta } from "@/lib/myverse/project-categories";
 
 interface DashboardProject {
     id: string;
@@ -26,7 +26,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
     async function load() {
         setLoading(true);
         try {
-            const url = `/api/planners/projects/dashboard${date ? `?date=${date}` : ""}`;
+            const url = `/api/myverse/projects/dashboard${date ? `?date=${date}` : ""}`;
             const res = await fetch(url);
             if (res.ok) {
                 const d = await res.json();
@@ -46,7 +46,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                     프로젝트
                 </h2>
                 <Link
-                    href="/planners/app/projects"
+                    href="/myverse/app/projects"
                     className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E]"
                     title="프로젝트 목록"
                 >
@@ -60,7 +60,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                 </div>
             ) : projects.length === 0 ? (
                 <Link
-                    href="/planners/app/projects"
+                    href="/myverse/app/projects"
                     className="block w-full py-3 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 text-center hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                 >
                     + 첫 프로젝트 만들기
@@ -73,7 +73,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                         return (
                             <Link
                                 key={p.id}
-                                href={`/planners/app/projects/${p.id}`}
+                                href={`/myverse/app/projects/${p.id}`}
                                 className="group relative block bg-white border border-neutral-200 rounded-xl p-3 hover:border-neutral-300 hover:shadow-sm transition-all"
                             >
                                 {/* 카테고리 뱃지 + 화살표 */}

@@ -3,7 +3,7 @@
 // 호출 비용 통제:
 //   - 룰 분류 confidence >= 0.6 → 룰 결과 그대로 사용 (LLM 호출 X)
 //   - confidence < 0.6 일 때만 Haiku 호출
-//   - 사용자별 일일 quota (planners_users.ai_daily_calls)
+//   - 사용자별 일일 quota (myverse_users.ai_daily_calls)
 
 import Anthropic from "@anthropic-ai/sdk";
 import { DOMAIN_KEYS } from "../domains";

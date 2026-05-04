@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { localDateStr } from "@/lib/planners/types";
+import { localDateStr } from "@/lib/myverse/types";
 import {
     Users, Plus, Search, Phone, Mail, Tag, X, ChevronDown,
     Pencil, Trash2, Upload, User, Cake, Loader2,
@@ -548,7 +548,7 @@ export function ContactsView() {
 
     async function load() {
         setLoading(true);
-        const res = await fetch("/api/planners/contacts", { cache: "no-store" });
+        const res = await fetch("/api/myverse/contacts", { cache: "no-store" });
         if (res.ok) {
             const d = await res.json();
             setContacts(d.contacts ?? []);
@@ -708,9 +708,9 @@ export function ContactsView() {
             labels: form.labels || [],
         };
         if (editing) {
-            await fetch("/api/planners/contacts", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...payload }) });
+            await fetch("/api/myverse/contacts", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...payload }) });
         } else {
-            await fetch("/api/planners/contacts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            await fetch("/api/myverse/contacts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         }
         setSaving(false);
         setModalOpen(false);
@@ -719,7 +719,7 @@ export function ContactsView() {
 
     async function remove(id: string) {
         setDeleting(id);
-        await fetch(`/api/planners/contacts?id=${id}`, { method: "DELETE" });
+        await fetch(`/api/myverse/contacts?id=${id}`, { method: "DELETE" });
         setDeleting(null);
         setContacts(prev => prev.filter(c => c.id !== id));
         showToast("삭제되었습니다.");
@@ -731,7 +731,7 @@ export function ContactsView() {
         setFavoritingId(c.id);
         setContacts(prev => prev.map(x => x.id === c.id ? { ...x, is_favorite: next } : x));
         try {
-            const r = await fetch("/api/planners/contacts", {
+            const r = await fetch("/api/myverse/contacts", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: c.id, is_favorite: next }),
@@ -789,7 +789,7 @@ export function ContactsView() {
         let totalDeleted = 0;
         for (let i = 0; i < ids.length; i += CHUNK) {
             const slice = ids.slice(i, i + CHUNK);
-            const r = await fetch("/api/planners/contacts", {
+            const r = await fetch("/api/myverse/contacts", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ids: slice }),
@@ -846,7 +846,7 @@ export function ContactsView() {
     async function applyLabelsToSelected(add: string[], remove: string[] = []) {
         if (selectedIds.size === 0) return;
         const ids = [...selectedIds];
-        const r = await fetch("/api/planners/contacts/labels", {
+        const r = await fetch("/api/myverse/contacts/labels", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ids, add, remove }),
@@ -870,7 +870,7 @@ export function ContactsView() {
     }
     async function renameLabel(from: string, to: string) {
         if (!to.trim() || from === to) return;
-        const r = await fetch("/api/planners/contacts/labels", {
+        const r = await fetch("/api/myverse/contacts/labels", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ from, to }),
@@ -890,7 +890,7 @@ export function ContactsView() {
         }
     }
     async function deleteLabel(name: string) {
-        const r = await fetch(`/api/planners/contacts/labels?name=${encodeURIComponent(name)}`, { method: "DELETE" });
+        const r = await fetch(`/api/myverse/contacts/labels?name=${encodeURIComponent(name)}`, { method: "DELETE" });
         if (r.ok) {
             const d = await r.json();
             setContacts(prev => prev.map(c =>
@@ -921,7 +921,7 @@ export function ContactsView() {
         if (!parsed) { showToast("입력 형식을 인식하지 못했습니다", false); return; }
         setQuickAdding(true);
         try {
-            const r = await fetch("/api/planners/contacts", {
+            const r = await fetch("/api/myverse/contacts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(parsed),
@@ -945,7 +945,7 @@ export function ContactsView() {
         // optimistic
         setContacts(prev => prev.map(c => c.id === id ? { ...c, last_contacted_at: now } : c));
         try {
-            await fetch("/api/planners/contacts", {
+            await fetch("/api/myverse/contacts", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id, last_contacted_at: now }),
@@ -956,7 +956,7 @@ export function ContactsView() {
     // ── 수동 병합 ─────────────────────────────────────
     async function performMerge(keepId: string, mergeIds: string[], merged: Partial<Contact>) {
         // 1) keep 행을 merged 데이터로 update
-        const r = await fetch("/api/planners/contacts", {
+        const r = await fetch("/api/myverse/contacts", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: keepId, ...merged }),
@@ -964,7 +964,7 @@ export function ContactsView() {
         if (!r.ok) { showToast("병합 실패", false); return; }
         // 2) 나머지 ids 삭제
         if (mergeIds.length > 0) {
-            await fetch("/api/planners/contacts", {
+            await fetch("/api/myverse/contacts", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ids: mergeIds }),
@@ -986,7 +986,7 @@ export function ContactsView() {
             const slice = ids.slice(i, i + CHUNK);
             const results = await Promise.all(
                 slice.map(id =>
-                    fetch("/api/planners/contacts", {
+                    fetch("/api/myverse/contacts", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ id, ...patch }),
@@ -1049,7 +1049,7 @@ export function ContactsView() {
                 let merged = 0;
                 for (let i = 0; i < parsed.length; i += CHUNK) {
                     const slice = parsed.slice(i, i + CHUNK);
-                    const r = await fetch("/api/planners/contacts", {
+                    const r = await fetch("/api/myverse/contacts", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ contacts: slice, skip_duplicates: true, merge_labels: mergeLabels }),
@@ -1173,7 +1173,7 @@ export function ContactsView() {
         let totalDeleted = 0;
         for (let i = 0; i < toDelete.length; i += CHUNK) {
             const slice = toDelete.slice(i, i + CHUNK);
-            const r = await fetch("/api/planners/contacts", {
+            const r = await fetch("/api/myverse/contacts", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ids: slice }),
@@ -1807,7 +1807,7 @@ export function ContactsView() {
                     groups={findDuplicateGroups()}
                     onAutoMerge={autoMergeAll}
                     onDeleteOne={async (id) => {
-                        await fetch(`/api/planners/contacts?id=${id}`, { method: "DELETE" });
+                        await fetch(`/api/myverse/contacts?id=${id}`, { method: "DELETE" });
                         load();
                     }}
                     onClose={() => setDupModalOpen(false)}

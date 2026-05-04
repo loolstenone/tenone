@@ -27,12 +27,12 @@ IF v_member_id IS NULL THEN
 END IF;
 
 -- ── 1. 기존 예시(category_example 태그) 삭제 ─────────────────
-DELETE FROM planners_projects
+DELETE FROM myverse_projects
 WHERE member_id = v_member_id
   AND tags @> ARRAY['category_example'];
 
 -- ── 2. 프로젝트 본체 ─────────────────────────────────────────
-INSERT INTO planners_projects (
+INSERT INTO myverse_projects (
     id, member_id, title, status, start_date, end_date, completed_at,
     color, order_index, category, custom_fields, tracking_metrics, tags
 ) VALUES
@@ -110,7 +110,7 @@ INSERT INTO planners_projects (
 );
 
 -- ── 3. Vrief (R-H-V-S 4단계) ─────────────────────────────────
-INSERT INTO planners_project_vriefs (
+INSERT INTO myverse_project_vriefs (
     project_id,
     research_situation, research_data, research_insight,
     hypothesis_statement, hypothesis_assumptions, hypothesis_risks,
@@ -239,7 +239,7 @@ INSERT INTO planners_project_vriefs (
 );
 
 -- ── 4. GPR ───────────────────────────────────────────────────
-INSERT INTO planners_project_gprs (project_id, goal, key_results, plan, progress, obstacles, learnings, result) VALUES
+INSERT INTO myverse_project_gprs (project_id, goal, key_results, plan, progress, obstacles, learnings, result) VALUES
 (v_p_learn, 'AICPA REG 1차 합격 (75점 이상)',
  ARRAY['Becker 80% 완강','모의 평균 75+','약점 Individual Tax 30시간 보강','9/15 합격'],
  '주 20시간 + 모의 월 1회 + 약점 집중', 42,
@@ -268,7 +268,7 @@ INSERT INTO planners_project_gprs (project_id, goal, key_results, plan, progress
  '월 1on1 + 격주 운영 + 분기 리뷰의 단일 사이클', 40, NULL, NULL, NULL);
 
 -- ── 5. 마일스톤 (카테고리별 4~5개) ──────────────────────────
-INSERT INTO planners_project_milestones (project_id, title, description, due_date, done_at, order_index) VALUES
+INSERT INTO myverse_project_milestones (project_id, title, description, due_date, done_at, order_index) VALUES
 -- 학습
 (v_p_learn, 'Becker 1회독 완료', '강의 80% + 챕터 노트', '2026-06-30', '2026-07-02 22:00:00+09', 1),
 (v_p_learn, '모의시험 5회 평균 70+', '5월부터 월 1회', '2026-08-15', NULL, 2),
@@ -315,7 +315,7 @@ INSERT INTO planners_project_milestones (project_id, title, description, due_dat
 (v_p_ops, '연말 OKR 75% + 만족도 4.5', NULL, '2026-12-31', NULL, 4);
 
 -- ── 6. 노트 (카테고리별 1~2개 — 카테고리의 의미를 시연) ─────
-INSERT INTO planners_project_notes (project_id, title, content, order_index) VALUES
+INSERT INTO myverse_project_notes (project_id, title, content, order_index) VALUES
 (v_p_learn, '학습 루틴 표준화',
  E'## 평일 루틴\n- 05:30~07:00 새벽 학습 (Becker 강의 + 노트)\n- 출근 지하철 50분: 어휘·기출 모바일 복습\n- 22:00~23:00 챕터 정리\n\n## 주말 루틴\n- 토 09:00~13:00 모의·약점 보강\n- 일 14:00~17:00 한 주 종합 정리\n\n## 약점 (Individual Tax)\n- IRA 분배 / Sec 121 / Self-Employment Tax\n- 별도 30h 블록으로 6월 후반에 집중', 1),
 (v_p_biz, 'MVP 1기능 — 인터뷰 자동 요약',

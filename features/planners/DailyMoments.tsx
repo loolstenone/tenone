@@ -51,7 +51,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
 
     async function load() {
         setLoading(true);
-        const res = await fetch(`/api/planners/moments?date=${date}`);
+        const res = await fetch(`/api/myverse/moments?date=${date}`);
         if (res.ok) {
             const d = await res.json();
             setMoments(d.moments ?? []);
@@ -67,7 +67,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
             const form = new FormData();
             form.append("file", file);
             form.append("date", date);
-            const upRes = await fetch("/api/planners/moments/upload", { method: "POST", body: form });
+            const upRes = await fetch("/api/myverse/moments/upload", { method: "POST", body: form });
             if (!upRes.ok) {
                 const err = await upRes.json().catch(() => ({}));
                 alert(`업로드 실패: ${err.error || err.message || upRes.status}`);
@@ -92,7 +92,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                     body.height = dims.height;
                 } catch { /* ignore */ }
             }
-            const res = await fetch("/api/planners/moments", {
+            const res = await fetch("/api/myverse/moments", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
@@ -122,7 +122,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
         try {
             const form = new FormData();
             form.append("file", file);
-            const res = await fetch("/api/planners/moments/import-meta", { method: "POST", body: form });
+            const res = await fetch("/api/myverse/moments/import-meta", { method: "POST", body: form });
             const json = await res.json().catch(() => ({}));
             if (!res.ok) {
                 alert(`백업 가져오기 실패: ${json.error || res.status}${json.hint ? "\n" + json.hint : ""}`);
@@ -138,13 +138,13 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
     }
 
     async function deleteMoment(id: string) {
-        await fetch(`/api/planners/moments/${id}`, { method: "DELETE" });
+        await fetch(`/api/myverse/moments/${id}`, { method: "DELETE" });
         load();
     }
 
     async function saveEdit() {
         if (!editingId) return;
-        await fetch(`/api/planners/moments/${editingId}`, {
+        await fetch(`/api/myverse/moments/${editingId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editForm),

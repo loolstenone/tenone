@@ -4,7 +4,7 @@
 -- 역할 'student'에 매칭되는 핵심 템플릿이 부족 → 8종 신규 추가.
 -- 일부는 다른 역할과 공유(연구원/직장인 등).
 
-INSERT INTO planners_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
+INSERT INTO myverse_templates (key, category, subcategory, label, description, body_md, role_tags) VALUES
 
 ('semester_plan', 'note', '학습', '학기 계획서', '한 학기 큰 그림 — 과목/목표/위험요소',
 '## 학기 정보

@@ -6,9 +6,9 @@ import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
     ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2,
 } from "lucide-react";
-import type { PlannerRole } from "@/lib/planners/types";
-import { PLANNER_ROLE_META } from "@/lib/planners/types";
-import { isSpecialTemplate as isSpecial, exportFrameworkText as exportFwText, tplDataKey } from "@/lib/planners/templates";
+import type { PlannerRole } from "@/lib/myverse/types";
+import { PLANNER_ROLE_META } from "@/lib/myverse/types";
+import { isSpecialTemplate as isSpecial, exportFrameworkText as exportFwText, tplDataKey } from "@/lib/myverse/templates";
 import {
     type FrameworkData as SharedFrameworkData,
 } from "./template-grids/_shared";
@@ -336,7 +336,7 @@ function renderMd(md: string): React.ReactNode {
 }
 
 // ── localStorage 키 ──────────────────────────────────────────────────
-const FAV_KEY = "planners_tpl_favorites";
+const FAV_KEY = "myverse_tpl_favorites";
 const dataKey = tplDataKey;
 
 // ── 추천 템플릿 (사용 빈도 기준 Top 10) ──────────────────────────────
@@ -390,8 +390,8 @@ export function TemplatesView() {
         (async () => {
             setLoading(true);
             const [tplRes, settingsRes] = await Promise.all([
-                fetch(`/api/planners/templates`),
-                fetch(`/api/planners/settings`),
+                fetch(`/api/myverse/templates`),
+                fetch(`/api/myverse/settings`),
             ]);
             if (tplRes.ok) {
                 const d = await tplRes.json();
@@ -565,7 +565,7 @@ export function TemplatesView() {
                             <p className="text-sm text-neutral-500 mb-1">역할을 설정하지 않았습니다.</p>
                             <p className="text-xs text-neutral-400 mb-4">설정에서 나의 역할을 선택하면 맞춤 템플릿을 추천해드립니다.</p>
                             <a
-                                href="/planners/app/settings"
+                                href="/myverse/app/settings"
                                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-teal-600 text-white text-xs font-medium hover:bg-teal-700 transition-colors"
                             >
                                 <UserCircle2 className="h-3.5 w-3.5" />

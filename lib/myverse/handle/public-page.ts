@@ -2,9 +2,9 @@
 //
 // 한 사용자의 visibility='public' 콘텐츠를 5섹션으로 집계:
 //   1. 프로필 헤더 (members)
-//   2. 프로페셔널 (planners_identities.resume)
-//   3. 포트폴리오 (planners_projects WHERE visibility='public')
-//   4. 다이어리 하이라이트 (planners_daily_moments WHERE visibility='public', 최근 12개)
+//   2. 프로페셔널 (myverse_identities.resume)
+//   3. 포트폴리오 (myverse_projects WHERE visibility='public')
+//   4. 다이어리 하이라이트 (myverse_daily_moments WHERE visibility='public', 최근 12개)
 //   5. 외부 링크 (members.affiliations + 직접 입력 추가 예정)
 //
 // anon 클라이언트로 호출 가능 — RLS는 visibility='public' row만 조회 허용해야 함.
@@ -73,9 +73,9 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
 
     if (!profile) return null;
 
-    // 2) 이력서 (planners_identities.resume JSONB)
+    // 2) 이력서 (myverse_identities.resume JSONB)
     const { data: identity } = await admin
-        .from("planners_identities")
+        .from("myverse_identities")
         .select("resume")
         .eq("member_id", profile.member_id)
         .maybeSingle();
@@ -91,7 +91,7 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
 
     // 3) 포트폴리오 (visibility='public')
     const { data: projects } = await admin
-        .from("planners_projects")
+        .from("myverse_projects")
         .select("id, title, description, cover_url, updated_at")
         .eq("member_id", profile.member_id)
         .eq("visibility", "public")
@@ -100,7 +100,7 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
 
     // 4) 다이어리 하이라이트
     const { data: moments } = await admin
-        .from("planners_daily_moments")
+        .from("myverse_daily_moments")
         .select("id, date, happened_at, caption, media_url, media_type, domain")
         .eq("member_id", profile.member_id)
         .eq("visibility", "public")
@@ -134,7 +134,7 @@ export async function getPublicMoment(handle: string, momentId: string): Promise
     if (!profile) return null;
 
     const { data: moment } = await admin
-        .from("planners_daily_moments")
+        .from("myverse_daily_moments")
         .select("id, date, happened_at, caption, media_url, media_type, domain, visibility")
         .eq("id", momentId)
         .eq("member_id", profile.member_id)

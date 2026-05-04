@@ -1,6 +1,54 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-04 (세션 106 — 거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트)
+> 마지막 업데이트: 2026-05-04 (세션 107 — Planner's Planner를 마이버스로 완전 흡수)
+
+---
+
+## 세션 107 핵심 성과 (2026-05-04)
+
+### 의사결정
+- **PP → 마이버스 단일화**: PP가 마이버스 비전(개인 일상 관리·기록·성장)으로 수렴 중. 옵션 A 채택. 9 영역 SSOT(BODY·업무·공부·일상·일정·여행·이동·관계·_people) + 5 채집 행동 + 5축 메타데이터 SSOT 확립
+
+### DB
+- 테이블 29개 + 함수 13개 `planners_*` → `myverse_*` RENAME (인덱스·FK·RLS·트리거 자동 추적, 함수 본문 늦은 바인딩 재작성)
+- `sql/myverse-rename-planners-to-myverse.sql` 적용 완료, 잔여 `planners_*` 객체 0건
+- 코드 178개 파일 일괄 sed
+- `members.affiliations[]`에 `'myverse'` 자동 등록 (온보딩 API + 백필 1명)
+
+### 라우트 + 미들웨어
+- `/myverse/app/*` 14개 PP 시간뷰·도구 라우트 미러링 (today·weekly·monthly·yearly·daily·tasks·index·settings·search·time·canvas·contacts·templates·personal·projects·ai-briefing·help·canvas/[id])
+- `/myverse/{about,canvas,community,gpr,install,my,offline,onboarding,p,planner-tool,planning,portfolio,programs,purchase}` 14개 비-app 페이지 미러링
+- 미들웨어 0a: `/api/planners/*` → `/api/myverse/*` 내부 rewrite (Toss·Google OAuth·Cron 호환)
+- 미들웨어 0b: `/planners/*` → `/myverse/*` 308 영구 리디렉트
+- `lib/domain-registry.ts`: planners.tenone.biz 프리픽스 `/planners` → `/myverse`
+- 충돌 해소: `/myverse/app/daily`(PP 일간 뷰) vs 9-domain 일상 → 9-domain은 `/lifestyle`로 분리
+
+### API + lib 디렉토리 병합
+- `app/api/planners/*` 71개 라우트 → `app/api/myverse/*` (충돌 search → `planner-search`)
+- `lib/planners/*` 21개 모듈 → `lib/myverse/*`
+- 53개 클라이언트 fetch URL 갱신, 모든 `@/lib/planners` → `@/lib/myverse`
+- features/planners 67개 파일 `/planners/...` → `/myverse/...`
+
+### 풀 화면 앱 셸 + 인디고 브랜딩
+- `/myverse/app/*` 진입 시 마케팅 헤더/푸터 숨김 (`MyVerseChrome` 클라이언트 래퍼)
+- `MyverseAppHeader`·4 Pillars `MyverseSidebar` 제거 → AppTopNav만 노출 (PP 시절 풀 화면 셸 패턴)
+- `app/(MyVerse)/myverse/app/layout.tsx`: PP 핵심 chrome 흡수 (PlannersThemeProvider · PwaRegister · BetaFeedbackButton · KeyboardShortcuts · AiBriefingFab · MobileBottomNav · WelcomeTracker · AppMonthBar)
+- AppTopNav 로고: "Planner's Planner AI" → **Myverse**<sup>App</sup>, teal `#0F766E` → 인디고 `#6366F1`
+- PlannersThemeProvider 기본 테마 `teal` → `myverse`(인디고). 모든 하드코딩 teal 클래스가 CSS 오버라이드로 인디고로 매핑
+- `UniverseUtilityBar.WORKSPACE_REGISTRY`: 옛 `planners` + 옛 `myverse` 제거 → 통합 `myverse` (`/myverse/app`)
+- `public/planners-manifest.json` 리브랜딩 (Myverse · /myverse · #6366F1)
+
+### HandNote (기본 노트) UX 개선
+- "그리기" 버튼 제거 — 펜 선택 시 즉시 그리기 모드 진입, 같은 펜 다시 클릭 시 해제
+- 이미지 선택·매직 선택(올가미)·지우개 클릭 시 자동 그리기 레이어 활성화
+- 시각 상태 3단계: teal 활성 / 회색 활성(펜 선택만) / 비활성
+
+### 다음 할 일
+- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반)
+- PWA 아이콘 인디고 M 로고로 교체 (현재 `planners-icon-192.png` 그대로)
+- Toss 가맹점 승인 + Vercel 환경변수 설정
+- Notion `TASK` 템플릿 인사이트 흡수: "오늘 한 장 + 3버튼" 메인 홈, "초집중모드" 1급 기능, 분류에 한국형 태그(`감사3개`·`감정 일기`)
+- 풀 화면 모드에서 4 Pillars + 9-domain 진입점 결정 (현재 비노출 상태)
 
 ---
 

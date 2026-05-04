@@ -32,7 +32,7 @@ export async function GET() {
 
     const admin = createAdminClient();
     const { data } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select(`
             member_id,
             mode,

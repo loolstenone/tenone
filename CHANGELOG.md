@@ -4,6 +4,57 @@
 
 ---
 
+## 2026-05-04 — 세션 107 · Planner's Planner를 마이버스로 완전 흡수 (DB·API·라이브러리·라우트·브랜딩 통합)
+
+### 장소
+사무실
+
+### 결정사항
+- **PP → 마이버스 단일화**: PP가 마이버스 비전(개인 일상 관리·기록·성장)으로 수렴 중. 옵션 A(마이버스 단일화) 채택
+- **9 영역 SSOT** 확립: BODY · 업무 · 공부 · 일상 · 일정 · 여행 · 이동 · 관계 + _people(횡단). 5축 메타데이터 (time · geo · people · content · context). 5 채집 행동 (사진 · 영상 · 위치 · 음성 · 글쓰기)
+- **DB 명명 통일**: `planners_*` 29개 테이블 + 13개 함수 → `myverse_*` 일괄 RENAME. 인덱스·FK·RLS 자동 추적, 함수 본문은 늦은 바인딩이라 명시 재작성
+- **URL 통일**: planners.tenone.biz 프리픽스 `/planners` → `/myverse`. `/planners/*`는 308 영구 리디렉트, `/api/planners/*`는 내부 rewrite로 외부 호출자(Toss·Google OAuth·Cron) 호환 유지
+- **풀 화면 앱**: `/myverse/app/*` 진입 시 마이버스 마케팅 헤더/푸터 숨김. AppTopNav만 남는 PP-스타일 풀 화면. 4 Pillars 사이드바·MyverseAppHeader 모두 제거
+- **인디고 브랜딩**: PlannersThemeProvider 기본 테마 `teal` → `myverse`(인디고 #6366F1). 하드코딩된 #0F766E를 CSS 오버라이드로 자동 인디고화
+- **HandNote "그리기" 토글 제거**: 펜 선택 = 즉시 그리기 모드. 같은 펜 다시 클릭 = 해제. 도구 클릭 시 자동 활성화
+- **`/myverse/app/daily` = PP 일간 뷰**, 9-domain 일상은 `/lifestyle`로 분리
+
+### 추가
+- `sql/myverse-rename-planners-to-myverse.sql` — 테이블·함수 일괄 RENAME + 함수 본문 재작성
+- `app/(MyVerse)/myverse/app/{today,weekly,monthly,yearly,tasks,index,settings,search,time,canvas/[id],contacts,templates,personal,projects,ai-briefing,help}/page.tsx` — PP 라우트 재-export
+- `app/(MyVerse)/myverse/{about,canvas,community,gpr,install,my,offline,onboarding,p,planner-tool,planning,portfolio,programs,purchase}/page.tsx` — PP 비-app 페이지 재-export
+- `app/(MyVerse)/myverse/app/lifestyle/page.tsx` — 9-domain 일상(daily key) 페이지 (충돌 회피)
+- `features/myverse/MyVerseChrome.tsx` — 마케팅 헤더/푸터를 /app 경로에서 자동 숨김
+- `app/api/myverse/*` 71개 라우트 (planners/* 이동, search → planner-search 리네이밍)
+- `lib/myverse/*` 21개 모듈 (planners/* 병합)
+
+### 수정
+- `middleware.ts` — 0a번 `/api/planners/*` rewrite, 0b번 `/planners/*` 308 redirect
+- `lib/domain-registry.ts` — planners.tenone.biz 프리픽스 갱신
+- `app/(MyVerse)/myverse/app/layout.tsx` — PP 핵심 chrome 흡수 (Theme·Pwa·Beta·Keyboard·AiBriefing·MobileBottom·Welcome·MonthBar), 마이버스 헤더/사이드바 제거
+- `app/(MyVerse)/layout.tsx` — MyVerseChrome 래퍼 사용
+- `features/planners/AppTopNav.tsx` — 로고 Myverse<sup>App</sup>, 인디고 컬러, regex `/planners/app/canvas` → `/myverse/app/canvas`
+- `features/planners/PlannersThemeProvider.tsx` — `myverse` 테마 추가, 기본값 `teal` → `myverse`
+- `features/planners/HandNote.tsx` — 그리기 토글 제거, 펜 선택 시 자동 진입, 같은 펜 재클릭 시 해제
+- `components/UniverseUtilityBar.tsx` — WORKSPACE_REGISTRY 정리 (옛 planners + 옛 myverse → 통합 myverse)
+- `app/api/myverse/onboarding/route.ts` — affiliations에 'myverse' 자동 등록
+- `public/planners-manifest.json` — Myverse 리브랜딩 (#6366F1, /myverse scope)
+- 178개 파일 `planners_*` → `myverse_*` 코드 sed
+- 53개 클라이언트 파일 `/api/planners/...` → `/api/myverse/...`
+- features/planners 67개 파일 `/planners/...` URL → `/myverse/...`
+
+### 삭제
+- `app/(MyVerse)/myverse/app/{ai,dream,log,plan,work}/page.tsx` — 옛 myverse_* 7탭 중 5개 (PP 라우트 흡수로 대체, work는 DomainPage('work')로 재생성)
+
+### 다음 할 일
+- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신)
+- PWA 아이콘 인디고 M 로고로 교체
+- Toss 가맹점 승인 · Vercel 환경변수 설정 · Google OAuth 자격
+- Notion `TASK` 템플릿 인사이트 흡수: "오늘 한 장 + 3버튼" 메인 홈, "초집중모드" 1급 기능, 분류에 한국형 태그(`감사3개`·`감정 일기`)
+- 풀 화면 모드에서 4 Pillars + 9-domain 진입점 결정
+
+---
+
 ## 2026-05-04 — 세션 106 · 거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트
 
 ### 장소

@@ -6,13 +6,13 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { Loader2, X, Trash2, ChevronLeft, ChevronRight, MapPin, Users } from "lucide-react";
-import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/planners/calendar-rules";
-import { KIND_LABELS, KIND_COLORS } from "@/lib/planners/calendar-rules";
-import type { TaskQuadrant } from "@/lib/planners/types";
+import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/myverse/calendar-rules";
+import { KIND_LABELS, KIND_COLORS } from "@/lib/myverse/calendar-rules";
+import type { TaskQuadrant } from "@/lib/myverse/types";
 import {
     getLunarDate, lunarToSolar, getLunarMonths, getLunarMonthDays,
     LUNAR_YEARS, LUNAR_YEARS_ANNIVERSARY,
-} from "@/lib/planners/holidays";
+} from "@/lib/myverse/holidays";
 
 type EditableEntry = Omit<CalendarEntry, "id" | "member_id" | "is_system" | "created_at" | "updated_at"> & {
     id?: string;
@@ -185,7 +185,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                 with_whom: kind === "meeting" ? (withWhom.trim() || null) : null,
                 location:  kind === "meeting" ? (location.trim() || null) : null,
             };
-            const url = isEdit ? `/api/planners/calendar/${initial!.id}` : "/api/planners/calendar";
+            const url = isEdit ? `/api/myverse/calendar/${initial!.id}` : "/api/myverse/calendar";
             const method = isEdit ? "PATCH" : "POST";
             const res = await fetch(url, {
                 method,
@@ -212,7 +212,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
     async function remove() {
         if (!isEdit || !initial?.id) return;
-        const res = await fetch(`/api/planners/calendar/${initial.id}`, { method: "DELETE" });
+        const res = await fetch(`/api/myverse/calendar/${initial.id}`, { method: "DELETE" });
         if (res.ok) {
             onDeleted?.(initial.id);
             onClose();

@@ -75,7 +75,7 @@ const registry: Record<string, DomainEntry> = {
     'townity.tenone.biz':       { prefix: '/townity',    siteId: 'townity' },
     'naturebox.tenone.biz':     { prefix: '/naturebox',  siteId: 'naturebox' },
     'jakka.tenone.biz':         { prefix: '/jakka',      siteId: 'jakka' },
-    'planners.tenone.biz':      { prefix: '/planners',   siteId: 'planners' },
+    'planners.tenone.biz':      { prefix: '/myverse',    siteId: 'myverse' },
     'wio.tenone.biz':           { prefix: '/wio',        siteId: 'wio' },
     'wiki.tenone.biz':          { prefix: '/wiki',       siteId: 'wiki' },
     // ChangeUp

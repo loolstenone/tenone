@@ -189,9 +189,9 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
     },
     // ── Planner's
     {
-        key: "planners_feedback_new",
+        key: "myverse_feedback_new",
         label: "PP AI 베타 피드백",
-        table: "planners_feedback",
+        table: "myverse_feedback",
         filter: { column: "status", value: "new" },
         href: "/intra/planners/feedback",
         brand_id: "planners",

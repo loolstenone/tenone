@@ -14,7 +14,7 @@ import {
     Copy,
     QrCode,
 } from "lucide-react";
-import { usePwaInstall } from "@/lib/planners/use-pwa-install";
+import { usePwaInstall } from "@/lib/myverse/use-pwa-install";
 
 type Platform = "ios" | "android" | "desktop" | "unknown";
 
@@ -27,7 +27,7 @@ function detectPlatform(): Platform {
     return "desktop";
 }
 
-const APP_URL = "https://planners.tenone.biz/planners/app";
+const APP_URL = "https://planners.tenone.biz/myverse/app";
 
 export function InstallView() {
     const [platform, setPlatform] = useState<Platform>("unknown");

@@ -8,6 +8,21 @@ const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/r
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    // 0a. /api/planners/* → /api/myverse/* 내부 rewrite (외부 호출자 호환: Toss, Google OAuth, Cron)
+    //     URL은 그대로 유지하면서 새 핸들러로 라우팅.
+    if (pathname.startsWith('/api/planners/')) {
+        const url = request.nextUrl.clone();
+        url.pathname = pathname.replace(/^\/api\/planners\//, '/api/myverse/');
+        return NextResponse.rewrite(url, { request });
+    }
+
+    // 0b. /planners/* → /myverse/* 308 영구 리디렉트 (Planner's Planner를 마이버스로 흡수)
+    if (pathname.startsWith('/planners')) {
+        const url = request.nextUrl.clone();
+        url.pathname = pathname.replace(/^\/planners/, '/myverse');
+        return NextResponse.redirect(url, 308);
+    }
+
     // /auth/* 경로는 세션 갱신/검증 건너뛰기 (pass-through)
     // 이유: getSession()이 stale 세션 감지 시 code-verifier까지 같이 제거하여
     //      OAuth/recovery 콜백에서 PKCE 교환 실패 (PKCE code verifier not found)

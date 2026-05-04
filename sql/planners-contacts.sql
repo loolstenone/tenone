@@ -1,8 +1,8 @@
--- planners_contacts table
+-- myverse_contacts table
 -- Drop and recreate with member_id (consistent with other planners tables)
-DROP TABLE IF EXISTS planners_contacts CASCADE;
+DROP TABLE IF EXISTS myverse_contacts CASCADE;
 
-CREATE TABLE planners_contacts (
+CREATE TABLE myverse_contacts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -16,14 +16,14 @@ CREATE TABLE planners_contacts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_planners_contacts_member_id ON planners_contacts(member_id);
-CREATE INDEX IF NOT EXISTS idx_planners_contacts_group ON planners_contacts(member_id, group_name);
+CREATE INDEX IF NOT EXISTS idx_myverse_contacts_member_id ON myverse_contacts(member_id);
+CREATE INDEX IF NOT EXISTS idx_myverse_contacts_group ON myverse_contacts(member_id, group_name);
 
 -- RLS (via member_id join, admin client bypasses RLS so this is a safety net)
-ALTER TABLE planners_contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE myverse_contacts ENABLE ROW LEVEL SECURITY;
 
 -- Admin client (service role) bypasses RLS; anon/user access blocked by default
-CREATE POLICY "planners_contacts_own" ON planners_contacts
+CREATE POLICY "myverse_contacts_own" ON myverse_contacts
     FOR ALL
     USING (
         member_id IN (
@@ -37,14 +37,14 @@ CREATE POLICY "planners_contacts_own" ON planners_contacts
     );
 
 -- updated_at trigger
-CREATE OR REPLACE FUNCTION update_planners_contacts_updated_at()
+CREATE OR REPLACE FUNCTION update_myverse_contacts_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql
 SET search_path = public, pg_temp
 AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_planners_contacts_updated_at ON planners_contacts;
-CREATE TRIGGER trg_planners_contacts_updated_at
-    BEFORE UPDATE ON planners_contacts
-    FOR EACH ROW EXECUTE FUNCTION update_planners_contacts_updated_at();
+DROP TRIGGER IF EXISTS trg_myverse_contacts_updated_at ON myverse_contacts;
+CREATE TRIGGER trg_myverse_contacts_updated_at
+    BEFORE UPDATE ON myverse_contacts
+    FOR EACH ROW EXECUTE FUNCTION update_myverse_contacts_updated_at();

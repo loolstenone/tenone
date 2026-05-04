@@ -8,7 +8,7 @@
 //
 // 처리:
 //   1. ZIP 풀고 미디어 파일별 EXIF 추출 (서버 사이드 — exifr Node 모드)
-//   2. Storage 업로드 + planners_daily_moments INSERT
+//   2. Storage 업로드 + myverse_daily_moments INSERT
 //   3. 분류 엔진 v1로 9 영역 자동 라우팅
 //   4. dedup: (member, date, file_size, happened_at)
 
@@ -16,7 +16,7 @@ import { NextResponse } from "next/server";
 import JSZip from "jszip";
 import exifr from "exifr";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { classify } from "@/lib/myverse/classification/rules";
 
 export const maxDuration = 300;
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     // 사용자 거점 fetch (분류 엔진 입력)
     const { data: planner } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("activity_bases")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
 
             // dedup
             const { data: existing } = await admin
-                .from("planners_daily_moments")
+                .from("myverse_daily_moments")
                 .select("id")
                 .eq("member_id", memberId)
                 .eq("date", date)
@@ -166,7 +166,7 @@ export async function POST(req: Request) {
             const { data: pub } = admin.storage.from("planners-moments").getPublicUrl(path);
             const mediaType = VIDEO_EXT.has(ext) ? "video" : "image";
 
-            const { error: dbErr } = await admin.from("planners_daily_moments").insert({
+            const { error: dbErr } = await admin.from("myverse_daily_moments").insert({
                 member_id: memberId,
                 date,
                 media_type: mediaType,

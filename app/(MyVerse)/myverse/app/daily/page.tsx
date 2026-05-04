@@ -1,3 +1,2 @@
-import { DomainPage } from "@/features/myverse/DomainPage";
+export { default } from "@/app/(Planners)/planners/app/daily/page";
 export const dynamic = "force-dynamic";
-export default function Page() { return <DomainPage domain="daily" />; }

@@ -3,7 +3,7 @@
 -- FrameWorkBook 15 + Schedule 10 + Note 15
 -- ═══════════════════════════════════════════════════════════════
 
-INSERT INTO planners_templates(key, category, subcategory, label, description, body_md) VALUES
+INSERT INTO myverse_templates(key, category, subcategory, label, description, body_md) VALUES
 
 -- ─── FrameWorkBook +15 ─────────────────────────────────────────
 ('rice', 'framework', 'prioritization', 'RICE 우선순위',

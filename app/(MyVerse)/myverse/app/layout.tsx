@@ -4,11 +4,20 @@
 // 기존 7 탭(me·log·plan·dream·work·ai·verse)도 사이드바를 통해 접근 가능 (점진적 통합).
 
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getPlannerUser } from "@/lib/planners/client";
-import { MyverseSidebar } from "@/features/myverse/MyverseSidebar";
-import { MyverseAppHeader } from "@/features/myverse/MyverseAppHeader";
+import { getPlannerUser } from "@/lib/myverse/client";
+import { AppTopNav } from "@/features/planners/AppTopNav";
+import { AppMonthBar } from "@/features/planners/AppMonthBar";
+import { PwaRegister } from "@/features/planners/PwaRegister";
+import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
+import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
+import { KeyboardShortcuts } from "@/features/planners/KeyboardShortcuts";
+import { AiBriefingFab } from "@/features/planners/AiBriefingFab";
+import { MobileBottomNav } from "@/features/planners/MobileBottomNav";
+import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
+import type { PlannerMode, CustomMenuKey } from "@/lib/myverse/types";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +64,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     if (!privileged) {
         if (!plannerUser || !plannerUser.onboarding_completed) {
-            redirect("/planners/onboarding");
+            redirect("/myverse/onboarding");
         }
         if (
             plannerUser.subscription_status === "active" &&
@@ -65,25 +74,35 @@ export default async function MyverseAppLayout({ children }: { children: React.R
             plannerUser.subscription_status = "expired";
         }
         if (plannerUser.subscription_status === "expired") {
-            redirect("/planners/purchase?expired=1");
+            redirect("/myverse/purchase?expired=1");
         }
     }
 
-    const handle = (member as { handle?: string | null }).handle ?? null;
-
     return (
-        <div className="min-h-screen bg-neutral-50 flex flex-col">
-            <MyverseAppHeader
-                name={member.name ?? null}
-                handle={handle}
-                avatarUrl={member.avatar_url ?? null}
-            />
-            <div className="flex flex-1 min-h-0">
-                <MyverseSidebar handle={handle} />
-                <main className="flex-1 min-w-0 overflow-x-clip pb-20 md:pb-6">
-                    {children}
-                </main>
+        <>
+            <PlannersThemeProvider />
+            <PwaRegister />
+            <Suspense><WelcomeTracker /></Suspense>
+            <div className="planners-app-shell min-h-screen bg-neutral-50 flex flex-col">
+                <AppTopNav
+                    mode={(plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom" ? plannerUser.mode : "weekly") as PlannerMode}
+                    userName={member.name || undefined}
+                    avatarUrl={member.avatar_url || undefined}
+                    subscriptionStatus={plannerUser?.subscription_status ?? "free"}
+                    showTimeTracking={plannerUser?.time_tracking ?? false}
+                    customMenus={(plannerUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
+                />
+                <div className="flex flex-1 min-h-0">
+                    <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
+                        {children}
+                    </main>
+                    <AppMonthBar />
+                </div>
             </div>
-        </div>
+            <BetaFeedbackButton />
+            <KeyboardShortcuts />
+            <AiBriefingFab />
+            <MobileBottomNav />
+        </>
     );
 }

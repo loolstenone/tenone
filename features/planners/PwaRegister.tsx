@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePwaInstall } from "@/lib/planners/use-pwa-install";
+import { usePwaInstall } from "@/lib/myverse/use-pwa-install";
 
 export function PwaRegister() {
     // beforeinstallprompt 글로벌 캡처를 가장 빨리 초기화 — 사용자가 어떤 페이지에 진입하든 install 가능 상태 추적
@@ -12,7 +12,7 @@ export function PwaRegister() {
         if (process.env.NODE_ENV !== "production") return;
 
         const reg = navigator.serviceWorker.register("/planners-sw.js", {
-            scope: "/planners/",
+            scope: "/myverse/",
         });
         reg.catch((err) => console.warn("SW register failed", err));
     }, []);

@@ -24,7 +24,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { classify } from "@/lib/myverse/classification/rules";
 import type { TimeAxis, GeoAxis } from "@/lib/myverse/domains";
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     // 사용자 거점 fetch (분류 엔진 입력)
     const { data: planner } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("activity_bases")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
             // dedup 체크
             const { data: existing } = await admin
-                .from("planners_daily_moments")
+                .from("myverse_daily_moments")
                 .select("id")
                 .eq("member_id", memberId)
                 .eq("date", date)
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
                 bases: typedBases,
             });
 
-            const { error } = await admin.from("planners_daily_moments").insert({
+            const { error } = await admin.from("myverse_daily_moments").insert({
                 member_id: memberId,
                 date,
                 media_type: item.media_type,

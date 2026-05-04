@@ -32,7 +32,7 @@ export async function GET() {
 
     const admin = createAdminClient();
     const { data } = await admin
-        .from("planners_payments")
+        .from("myverse_payments")
         .select(`
             id, member_id, order_id, amount, status, source, paid_at, created_at,
             members!inner(email)

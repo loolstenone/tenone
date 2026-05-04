@@ -2,8 +2,8 @@
 -- 적용일: 2026-05-04 (세션 107 — Myverse 통합 마이그레이션)
 --
 -- 7개 capture 테이블에 일괄 추가:
---   planners_daily_moments / planners_daily_places / planners_daily_routines
---   planners_daily / planners_calendar_entries / planners_projects / planners_contacts
+--   myverse_daily_moments / myverse_daily_places / myverse_daily_routines
+--   myverse_daily / myverse_calendar_entries / myverse_projects / myverse_contacts
 --
 -- 추가 컬럼:
 --   domain TEXT (9 영역 enum)
@@ -18,12 +18,12 @@ DO $$
 DECLARE
     t TEXT;
     targets TEXT[] := ARRAY[
-        'planners_daily_moments',
-        'planners_daily_places',
-        'planners_daily_routines',
-        'planners_calendar_entries',
-        'planners_projects',
-        'planners_contacts'
+        'myverse_daily_moments',
+        'myverse_daily_places',
+        'myverse_daily_routines',
+        'myverse_calendar_entries',
+        'myverse_projects',
+        'myverse_contacts'
     ];
 BEGIN
     FOREACH t IN ARRAY targets LOOP
@@ -44,8 +44,8 @@ BEGIN
     END LOOP;
 END $$;
 
--- planners_daily 는 컨테이너 row이므로 도메인은 daily 고정, visibility만 의미
-ALTER TABLE planners_daily
+-- myverse_daily 는 컨테이너 row이므로 도메인은 daily 고정, visibility만 의미
+ALTER TABLE myverse_daily
     ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'private';
 
 -- 9 영역 검증 (각 테이블에 동일 패턴) — 8 도메인 + relation
@@ -53,12 +53,12 @@ DO $$
 DECLARE
     t TEXT;
     targets TEXT[] := ARRAY[
-        'planners_daily_moments',
-        'planners_daily_places',
-        'planners_daily_routines',
-        'planners_calendar_entries',
-        'planners_projects',
-        'planners_contacts'
+        'myverse_daily_moments',
+        'myverse_daily_places',
+        'myverse_daily_routines',
+        'myverse_calendar_entries',
+        'myverse_projects',
+        'myverse_contacts'
     ];
 BEGIN
     FOREACH t IN ARRAY targets LOOP
@@ -94,15 +94,15 @@ BEGIN
     END LOOP;
 END $$;
 
--- planners_daily 의 visibility CHECK
-ALTER TABLE planners_daily DROP CONSTRAINT IF EXISTS planners_daily_visibility_check;
-ALTER TABLE planners_daily
-    ADD CONSTRAINT planners_daily_visibility_check
+-- myverse_daily 의 visibility CHECK
+ALTER TABLE myverse_daily DROP CONSTRAINT IF EXISTS myverse_daily_visibility_check;
+ALTER TABLE myverse_daily
+    ADD CONSTRAINT myverse_daily_visibility_check
     CHECK (visibility IN ('private','friends','public'));
 
 -- 인덱스 (분류·공개 페이지 쿼리 가속)
-CREATE INDEX IF NOT EXISTS idx_moments_domain ON planners_daily_moments(member_id, domain, date DESC);
-CREATE INDEX IF NOT EXISTS idx_moments_visibility_public ON planners_daily_moments(member_id, date DESC) WHERE visibility = 'public';
-CREATE INDEX IF NOT EXISTS idx_routines_domain ON planners_daily_routines(member_id, domain, date DESC);
-CREATE INDEX IF NOT EXISTS idx_places_domain ON planners_daily_places(member_id, domain, date DESC);
-CREATE INDEX IF NOT EXISTS idx_projects_visibility_public ON planners_projects(member_id, updated_at DESC) WHERE visibility = 'public';
+CREATE INDEX IF NOT EXISTS idx_moments_domain ON myverse_daily_moments(member_id, domain, date DESC);
+CREATE INDEX IF NOT EXISTS idx_moments_visibility_public ON myverse_daily_moments(member_id, date DESC) WHERE visibility = 'public';
+CREATE INDEX IF NOT EXISTS idx_routines_domain ON myverse_daily_routines(member_id, domain, date DESC);
+CREATE INDEX IF NOT EXISTS idx_places_domain ON myverse_daily_places(member_id, domain, date DESC);
+CREATE INDEX IF NOT EXISTS idx_projects_visibility_public ON myverse_projects(member_id, updated_at DESC) WHERE visibility = 'public';

@@ -12,7 +12,7 @@ import { LoginModal } from "@/components/LoginModal";
 // 새 브랜드 추가 시 여기 한 줄만 추가하면 전 사이트에서 자동 반영.
 interface WorkspaceEntry { brandId: string; label: string; path: string; description?: string; }
 const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
-    { brandId: "planners",     label: "Planner's Planner AI", path: "/planners/app",   description: "능동 AI 플래너" },
+    { brandId: "myverse",      label: "Myverse",              path: "/myverse/app",     description: "9 영역 자동 정리 + 능동 AI 플래너 + @handle 공개" },
     { brandId: "badak",        label: "Badak",                path: "/badak/my",        description: "기획자 네트워크" },
     { brandId: "madleague",    label: "MAD League",           path: "/madleague/my",    description: "현역·OB" },
     { brandId: "madleap",      label: "MADLeap",              path: "/madleap/my",      description: "교육 프로그램" },
@@ -20,7 +20,6 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
     { brandId: "wio",          label: "WIO",                  path: "/wio/app",         description: "업무 자동화 OS" },
     { brandId: "smarcomm",     label: "SmarComm",             path: "/dashboard",       description: "마케팅 OS" },
     { brandId: "youinone",     label: "YouInOne",             path: "/youinone/my",     description: "크루 정산" },
-    { brandId: "myverse",      label: "Myverse",              path: "/myverse/my",      description: "셀프 디스커버리" },
     { brandId: "mindle",       label: "Mindle",               path: "/mindle/my",       description: "트렌드 콘텐츠" },
     { brandId: "brandgravity", label: "Brand Gravity",        path: "/brandgravity/my", description: "브랜드 진단" },
     { brandId: "jakka",        label: "Jakka",                path: "/jakka/my",        description: "창작자 마켓" },

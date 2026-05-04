@@ -1,7 +1,7 @@
--- planners_daily 에 운동/건강 트래킹 컬럼 추가
+-- myverse_daily 에 운동/건강 트래킹 컬럼 추가
 -- 사용자가 Settings 에서 켠 항목만 입력 노출
 
-ALTER TABLE planners_daily
+ALTER TABLE myverse_daily
     -- 운동: 종류·시간(분)·거리(km)·메모
     ADD COLUMN IF NOT EXISTS exercise_type     TEXT,
     ADD COLUMN IF NOT EXISTS exercise_minutes  INTEGER,

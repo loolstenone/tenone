@@ -3,18 +3,18 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 
 export const dynamic = "force-dynamic";
 
 const ALLOWED_TABLES = new Set([
-    "planners_daily_moments",
-    "planners_daily_places",
-    "planners_daily_routines",
-    "planners_calendar_entries",
-    "planners_projects",
-    "planners_contacts",
-    "planners_daily",
+    "myverse_daily_moments",
+    "myverse_daily_places",
+    "myverse_daily_routines",
+    "myverse_calendar_entries",
+    "myverse_projects",
+    "myverse_contacts",
+    "myverse_daily",
 ]);
 
 const ALLOWED_VIS = new Set(["private", "friends", "public"]);

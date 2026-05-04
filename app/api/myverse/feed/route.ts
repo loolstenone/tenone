@@ -3,7 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import { isValidDomain } from "@/lib/myverse/domains";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
     // 4개 capture 테이블에서 동시 fetch
     const [moments, routines, places, calendar] = await Promise.all([
         admin
-            .from("planners_daily_moments")
+            .from("myverse_daily_moments")
             .select("id, date, happened_at, caption, media_url, media_type, visibility")
             .eq("member_id", memberId)
             .eq("domain", domain)
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
             .order("happened_at", { ascending: false, nullsFirst: false })
             .limit(50),
         admin
-            .from("planners_daily_routines")
+            .from("myverse_daily_routines")
             .select("id, date, start_time, end_time, activity, note, visibility")
             .eq("member_id", memberId)
             .eq("domain", domain)
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
             .order("start_time", { ascending: false, nullsFirst: false })
             .limit(50),
         admin
-            .from("planners_daily_places")
+            .from("myverse_daily_places")
             .select("id, date, visited_at, place_name, address, visibility")
             .eq("member_id", memberId)
             .eq("domain", domain)
@@ -55,7 +55,7 @@ export async function GET(req: Request) {
             .order("visited_at", { ascending: false, nullsFirst: false })
             .limit(50),
         admin
-            .from("planners_calendar_entries")
+            .from("myverse_calendar_entries")
             .select("id, date, title, start_time, visibility")
             .eq("member_id", memberId)
             .eq("domain", domain)

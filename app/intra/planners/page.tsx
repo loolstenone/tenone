@@ -90,7 +90,7 @@ export default function IntraPlannersPage() {
         if (!targetEmail.trim()) return;
         setSubmitting(true);
         try {
-            const res = await fetch("/api/planners/admin/activate", {
+            const res = await fetch("/api/myverse/admin/activate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ target_email: targetEmail.trim(), source, years }),

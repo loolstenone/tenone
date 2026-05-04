@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberId } from "@/lib/myverse/auth";
 import {
     fetchDomainStats,
     fetchTopPeople,
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
     // 구독 상태 + 일일 한도 체크
     const { data: planner } = await admin
-        .from("planners_users")
+        .from("myverse_users")
         .select("subscription_status")
         .eq("member_id", memberId)
         .maybeSingle();
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
         // 오늘 사용량 카운트
         const today = new Date().toISOString().slice(0, 10);
         const { count } = await admin
-            .from("planners_ai_usage")
+            .from("myverse_ai_usage")
             .select("id", { count: "exact", head: true })
             .eq("member_id", memberId)
             .eq("kind", "myverse_chat")
@@ -127,7 +127,7 @@ ${JSON.stringify(weeklyTrend.slice(-8), null, 0)}`;
             .join("");
 
         // 사용량 기록
-        await admin.from("planners_ai_usage").insert({
+        await admin.from("myverse_ai_usage").insert({
             member_id: memberId,
             used_at: new Date().toISOString(),
             kind: "myverse_chat",
