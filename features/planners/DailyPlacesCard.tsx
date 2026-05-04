@@ -45,7 +45,7 @@ function fmtDuration(min: number | null) {
     return m ? `${h}시간 ${m}분` : `${h}시간`;
 }
 
-export function DailyPlacesCard({ date }: { date: string }) {
+export function DailyPlacesCard({ date, bare = false }: { date: string; bare?: boolean }) {
     const [places, setPlaces] = useState<Place[]>([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
@@ -109,13 +109,14 @@ export function DailyPlacesCard({ date }: { date: string }) {
         if (res.ok) setPlaces(prev => prev.filter(p => p.id !== id));
     }
 
+    const Wrapper = bare ? "div" : "section";
     return (
-        <section
-            className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl"
+        <Wrapper
+            className={bare ? "" : "bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl"}
             style={{ color: "var(--planners-font, inherit)" }}
         >
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]">
+            <div className={`flex items-center justify-between ${bare ? "px-5 pt-4 pb-2" : "px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]"}`}>
                 <button
                     onClick={() => setCollapsed(c => !c)}
                     className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 planners-dark:text-neutral-500 hover:text-neutral-600 transition-colors"
@@ -287,6 +288,6 @@ export function DailyPlacesCard({ date }: { date: string }) {
                     )}
                 </div>
             )}
-        </section>
+        </Wrapper>
     );
 }

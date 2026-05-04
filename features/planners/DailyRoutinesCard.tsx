@@ -26,7 +26,7 @@ function fmtRange(start: string | null, end: string | null) {
     return `~${fmtTime(end)}`;
 }
 
-export function DailyRoutinesCard({ date }: { date: string }) {
+export function DailyRoutinesCard({ date, bare = false }: { date: string; bare?: boolean }) {
     const [routines, setRoutines] = useState<Routine[]>([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
@@ -89,13 +89,14 @@ export function DailyRoutinesCard({ date }: { date: string }) {
         if (res.ok) setRoutines(prev => prev.filter(r => r.id !== id));
     }
 
+    const Wrapper = bare ? "div" : "section";
     return (
-        <section
-            className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl"
+        <Wrapper
+            className={bare ? "" : "bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl"}
             style={{ color: "var(--planners-font, inherit)" }}
         >
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]">
+            <div className={`flex items-center justify-between ${bare ? "px-5 pt-4 pb-2" : "px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]"}`}>
                 <button
                     onClick={() => setCollapsed(c => !c)}
                     className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 planners-dark:text-neutral-500 hover:text-neutral-600 transition-colors"
@@ -253,6 +254,6 @@ export function DailyRoutinesCard({ date }: { date: string }) {
                     )}
                 </div>
             )}
-        </section>
+        </Wrapper>
     );
 }

@@ -2042,9 +2042,17 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         </div>
                         )}
 
-                        {/* 오늘의 한 장면 — 노트 아래 (이전엔 한 줄 카드 우측에 있었음) */}
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5 mt-3">
-                            <DailyMomentsAuto date={date} />
+                        {/* 오늘의 한 장면 — 사진 + 방문 장소 + 일과 기록 통합 */}
+                        <section className="bg-white border border-neutral-200 rounded-xl mt-3 overflow-hidden">
+                            <div className="p-5">
+                                <DailyMomentsAuto date={date} />
+                            </div>
+                            <div className="border-t border-neutral-100">
+                                <DailyPlacesCard date={date} bare />
+                            </div>
+                            <div className="border-t border-neutral-100">
+                                <DailyRoutinesCard date={date} bare />
+                            </div>
                         </section>
 
                     </div>
@@ -2224,15 +2232,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         </section>
                     </div>
 
-                    {/* 이동 기록 */}
-                    <div className="order-7 md:order-none">
-                        <DailyPlacesCard date={date} />
-                    </div>
-
-                    {/* 일과 기록 */}
-                    <div className="order-8 md:order-none">
-                        <DailyRoutinesCard date={date} />
-                    </div>
+                    {/* 방문 장소·일과 기록은 좌측 "오늘의 한 장면" 카드에 통합됨 */}
 
                     </div>
                     {/* /우측 컬럼 wrapper */}
