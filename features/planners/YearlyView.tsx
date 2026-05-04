@@ -289,13 +289,24 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                     {/* 올해의 목표 (테마) */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-6 min-w-0 overflow-hidden">
                         <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">올해의 목표</label>
-                        <input
-                            type="text"
+                        <textarea
                             value={theme}
                             onChange={(e) => setTheme(e.target.value)}
                             onBlur={() => save({ theme })}
                             placeholder="예: 깊이의 해"
-                            className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent border-b border-neutral-200 pb-2 truncate"
+                            rows={1}
+                            onInput={(e) => {
+                                const t = e.currentTarget;
+                                t.style.height = 'auto';
+                                t.style.height = `${t.scrollHeight}px`;
+                            }}
+                            ref={(el) => {
+                                if (el && el.scrollHeight > el.clientHeight) {
+                                    el.style.height = 'auto';
+                                    el.style.height = `${el.scrollHeight}px`;
+                                }
+                            }}
+                            className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent border-b border-neutral-200 pb-2 resize-none overflow-hidden break-keep leading-snug"
                         />
                     </section>
 

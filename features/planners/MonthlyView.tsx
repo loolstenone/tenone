@@ -402,13 +402,24 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             {/* 좌: 테마 (큰 인용) */}
                             <div className="md:border-r md:border-neutral-100 md:pr-6 min-w-0">
                                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">이달의 테마</label>
-                                <input
-                                    type="text"
+                                <textarea
                                     value={theme}
                                     onChange={(e) => setTheme(e.target.value)}
                                     onBlur={() => save({ theme })}
                                     placeholder="예: 몰입의 달"
-                                    className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base truncate"
+                                    rows={1}
+                                    onInput={(e) => {
+                                        const t = e.currentTarget;
+                                        t.style.height = 'auto';
+                                        t.style.height = `${t.scrollHeight}px`;
+                                    }}
+                                    ref={(el) => {
+                                        if (el && el.scrollHeight > el.clientHeight) {
+                                            el.style.height = 'auto';
+                                            el.style.height = `${el.scrollHeight}px`;
+                                        }
+                                    }}
+                                    className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base resize-none overflow-hidden break-keep leading-snug"
                                 />
                             </div>
                             {/* 우: 월간 목표 체크리스트 */}
