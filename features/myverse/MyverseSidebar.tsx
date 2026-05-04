@@ -12,7 +12,7 @@ import {
     User, Briefcase, Clock, Share2,
     Heart, Coffee, Users,
     BookOpen, Calendar, Navigation, Plane,
-    Orbit, AtSign, Bot, Settings, Shield,
+    Orbit, AtSign, Bot, Settings, Shield, Archive,
 } from "lucide-react";
 
 interface NavItem {
@@ -75,7 +75,8 @@ const PILLARS: PillarGroup[] = [
         label: "시스템",
         icon: Settings,
         items: [
-            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield, color: "#6B7280" },
+            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive, color: "#6366F1" },
+            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,  color: "#6B7280" },
         ],
     },
 ];
