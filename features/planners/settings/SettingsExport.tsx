@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Download, Check, ExternalLink } from "lucide-react";
+import { useRef, useState } from "react";
+import { Loader2, Download, Check, ExternalLink, Archive } from "lucide-react";
 import Link from "next/link";
 import { InstallButton } from "@/features/planners/InstallButton";
 
@@ -16,8 +16,29 @@ interface Props {
     showToast: (text: string, ok?: boolean) => void;
 }
 
-export function SettingsExport({ sub, showToast: _showToast }: Props) {
+export function SettingsExport({ sub, showToast }: Props) {
     const [exporting, setExporting] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const zipRef = useRef<HTMLInputElement | null>(null);
+
+    async function importMetaZip(file: File) {
+        setImporting(true);
+        try {
+            const form = new FormData();
+            form.append("file", file);
+            const res = await fetch("/api/planners/moments/import-meta", { method: "POST", body: form });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                showToast(`백업 가져오기 실패: ${json.error || res.status}${json.hint ? " · " + json.hint : ""}`, false);
+                return;
+            }
+            showToast(`가져옴 ${json.imported ?? 0}건 · 건너뜀 ${json.skipped ?? 0}건 · 총 ${json.total ?? 0}건`);
+        } catch (e) {
+            showToast(`오류: ${(e as Error).message}`, false);
+        } finally {
+            setImporting(false);
+        }
+    }
 
     async function exportBackup() {
         setExporting(true);
@@ -88,6 +109,37 @@ export function SettingsExport({ sub, showToast: _showToast }: Props) {
                 >
                     {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     {exporting ? "내보내는 중…" : "JSON으로 내보내기"}
+                </button>
+            </section>
+
+            {/* SNS 백업 가져오기 — Instagram / Facebook 미디어 자동 임포트 */}
+            <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-neutral-900 mb-1">SNS 백업 가져오기</h2>
+                <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                    Instagram·Facebook의 GDPR 백업 ZIP을 그대로 업로드하면, 사진·동영상이 촬영 일자와 캡션과 함께 자동으로 "오늘의 한 장면"에 등록됩니다.
+                    <br />
+                    <span className="text-neutral-400">
+                        ※ Instagram: 설정 → 정보 다운로드 → JSON 형식 / Facebook: 설정 → 정보 다운로드 → JSON
+                    </span>
+                </p>
+                <input
+                    ref={zipRef}
+                    type="file"
+                    accept=".zip,application/zip"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) importMetaZip(file);
+                        e.target.value = "";
+                    }}
+                    className="hidden"
+                />
+                <button
+                    onClick={() => zipRef.current?.click()}
+                    disabled={importing}
+                    className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                >
+                    {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4" />}
+                    {importing ? "가져오는 중…" : "ZIP 선택"}
                 </button>
             </section>
 

@@ -30,9 +30,14 @@ interface Props {
     memberId?: string;  // members.id (Storage 폴더 prefix)
     /** "한 줄" 카드 안에 임베드될 때 — 헤더/타이틀 생략, 폼만 노출 */
     compact?: boolean;
+    /** 헤더 "추가"·"백업" 버튼 숨김 (외부 통합 composer 사용 시) */
+    hideAdd?: boolean;
+    hideBackup?: boolean;
+    /** 빈 상태일 때 큰 dashed 박스 대신 한 줄 안내만 (외부 composer 사용 시) */
+    minimalEmpty?: boolean;
 }
 
-export function DailyMoments({ date, memberId, compact = false }: Props) {
+export function DailyMoments({ date, memberId, compact = false, hideAdd = false, hideBackup = false, minimalEmpty = false }: Props) {
     const [moments, setMoments] = useState<Moment[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -158,23 +163,27 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
                         오늘의 한 장면
                     </h2>
                     <div className="flex items-center gap-1">
-                        <button
-                            onClick={onPickZip}
-                            disabled={importing || uploading}
-                            title="Instagram / Facebook 백업 ZIP 가져오기"
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-500 hover:text-[#0F766E] hover:bg-[#0F766E]/5 disabled:opacity-50"
-                        >
-                            {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Archive className="h-3 w-3" />}
-                            {importing ? "가져오는 중…" : "백업"}
-                        </button>
-                        <button
-                            onClick={onPick}
-                            disabled={uploading}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 disabled:opacity-50"
-                        >
-                            {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                            {uploading ? "업로드 중…" : "추가"}
-                        </button>
+                        {!hideBackup && (
+                            <button
+                                onClick={onPickZip}
+                                disabled={importing || uploading}
+                                title="Instagram / Facebook 백업 ZIP 가져오기"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-500 hover:text-[#0F766E] hover:bg-[#0F766E]/5 disabled:opacity-50"
+                            >
+                                {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Archive className="h-3 w-3" />}
+                                {importing ? "가져오는 중…" : "백업"}
+                            </button>
+                        )}
+                        {!hideAdd && (
+                            <button
+                                onClick={onPick}
+                                disabled={uploading}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 disabled:opacity-50"
+                            >
+                                {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                                {uploading ? "업로드 중…" : "추가"}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
@@ -212,13 +221,17 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
             {loading ? (
                 <div className="text-sm text-neutral-300 italic py-2">로딩 중…</div>
             ) : moments.length === 0 ? (
-                <button
-                    onClick={onPick}
-                    disabled={uploading}
-                    className="w-full py-6 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
-                >
-                    {uploading ? <Loader2 className="h-4 w-4 animate-spin inline" /> : "📷 사진 또는 동영상 추가"}
-                </button>
+                minimalEmpty ? (
+                    <p className="text-[11px] text-neutral-300 italic py-1">아직 등록된 사진이 없습니다</p>
+                ) : (
+                    <button
+                        onClick={onPick}
+                        disabled={uploading}
+                        className="w-full py-6 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                    >
+                        {uploading ? <Loader2 className="h-4 w-4 animate-spin inline" /> : "📷 사진 또는 동영상 추가"}
+                    </button>
+                )
             ) : compact ? (
                 <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-1.5">
@@ -384,7 +397,24 @@ function readImageDimensions(file: File): Promise<{ width: number; height: numbe
 }
 
 // useAuth 사용 wrapper — DailyView 에서 props 없이 쓸 수 있도록
-export function DailyMomentsAuto({ date, compact }: { date: string; compact?: boolean }) {
+export function DailyMomentsAuto({
+    date, compact, hideAdd, hideBackup, minimalEmpty,
+}: {
+    date: string;
+    compact?: boolean;
+    hideAdd?: boolean;
+    hideBackup?: boolean;
+    minimalEmpty?: boolean;
+}) {
     const { user } = useAuth();
-    return <DailyMoments date={date} memberId={user?.id} compact={compact} />;
+    return (
+        <DailyMoments
+            date={date}
+            memberId={user?.id}
+            compact={compact}
+            hideAdd={hideAdd}
+            hideBackup={hideBackup}
+            minimalEmpty={minimalEmpty}
+        />
+    );
 }

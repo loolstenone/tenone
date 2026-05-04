@@ -26,7 +26,7 @@ function fmtRange(start: string | null, end: string | null) {
     return `~${fmtTime(end)}`;
 }
 
-export function DailyRoutinesCard({ date, bare = false }: { date: string; bare?: boolean }) {
+export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { date: string; bare?: boolean; hideAdd?: boolean }) {
     const [routines, setRoutines] = useState<Routine[]>([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
@@ -108,13 +108,15 @@ export function DailyRoutinesCard({ date, bare = false }: { date: string; bare?:
                         : <ChevronUp className="h-3 w-3 ml-1" />
                     }
                 </button>
-                <button
-                    onClick={() => { setAdding(a => !a); setTimeout(() => activityRef.current?.focus(), 50); }}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 planners-dark:hover:text-neutral-200 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
-                    title="일과 추가"
-                >
-                    <Plus className="h-4 w-4" />
-                </button>
+                {!hideAdd && (
+                    <button
+                        onClick={() => { setAdding(a => !a); setTimeout(() => activityRef.current?.focus(), 50); }}
+                        className="p-1 rounded text-neutral-400 hover:text-neutral-700 planners-dark:hover:text-neutral-200 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
+                        title="일과 추가"
+                    >
+                        <Plus className="h-3.5 w-3.5" />
+                    </button>
+                )}
             </div>
 
             {!collapsed && (
@@ -124,9 +126,11 @@ export function DailyRoutinesCard({ date, bare = false }: { date: string; bare?:
                             <Loader2 className="h-4 w-4 animate-spin text-neutral-300" />
                         </div>
                     ) : routines.length === 0 && !adding ? (
-                        <p className="text-xs text-neutral-300 planners-dark:text-neutral-600 text-center py-4 italic">
-                            오늘의 일과를 기록하세요
-                        </p>
+                        hideAdd ? null : (
+                            <p className="text-xs text-neutral-300 planners-dark:text-neutral-600 text-center py-4 italic">
+                                오늘의 일과를 기록하세요
+                            </p>
+                        )
                     ) : (
                         <div className="space-y-1.5">
                             {routines.map((r) => {

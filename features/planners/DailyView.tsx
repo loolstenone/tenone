@@ -13,6 +13,50 @@ import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/pla
 import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
+import { DailyEntryComposer } from "./DailyEntryComposer";
+import { Camera as CameraIconForCard } from "lucide-react";
+
+// 통합 일일 카드 — 한 헤더, 한 "+" 버튼이 사진/장소/일과를 한 번에 등록하는 composer를 토글
+function UnifiedDayCard({ date }: { date: string }) {
+    const [open, setOpen] = useState(false);
+    const [version, setVersion] = useState(0); // saved 후 자식 reload 트리거
+    return (
+        <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl mt-3 overflow-hidden">
+            {/* 단일 헤더 */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]">
+                <h2 className="text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                    <CameraIconForCard className="h-3.5 w-3.5" />
+                    오늘의 한 장면
+                </h2>
+                <button
+                    onClick={() => setOpen(o => !o)}
+                    className="p-1 rounded text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
+                    title="새 항목 등록"
+                >
+                    <Plus className={`h-4 w-4 transition-transform ${open ? "rotate-45" : ""}`} />
+                </button>
+            </div>
+            {open && (
+                <div className="px-5 pt-4 pb-2">
+                    <DailyEntryComposer
+                        date={date}
+                        onClose={() => setOpen(false)}
+                        onSaved={() => setVersion(v => v + 1)}
+                    />
+                </div>
+            )}
+            <div className="p-5" key={`m-${version}`}>
+                <DailyMomentsAuto date={date} hideAdd hideBackup minimalEmpty />
+            </div>
+            <div className="border-t border-neutral-100 planners-dark:border-[#2A2A2A]" key={`p-${version}`}>
+                <DailyPlacesCard date={date} bare hideAdd />
+            </div>
+            <div className="border-t border-neutral-100 planners-dark:border-[#2A2A2A]" key={`r-${version}`}>
+                <DailyRoutinesCard date={date} bare hideAdd />
+            </div>
+        </section>
+    );
+}
 import { DailyProjectsCard } from "./DailyProjectsCard";
 import { DailyPlacesCard } from "./DailyPlacesCard";
 import { DailyRoutinesCard } from "./DailyRoutinesCard";
@@ -2042,18 +2086,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         </div>
                         )}
 
-                        {/* 오늘의 한 장면 — 사진 + 방문 장소 + 일과 기록 통합 */}
-                        <section className="bg-white border border-neutral-200 rounded-xl mt-3 overflow-hidden">
-                            <div className="p-5">
-                                <DailyMomentsAuto date={date} />
-                            </div>
-                            <div className="border-t border-neutral-100">
-                                <DailyPlacesCard date={date} bare />
-                            </div>
-                            <div className="border-t border-neutral-100">
-                                <DailyRoutinesCard date={date} bare />
-                            </div>
-                        </section>
+                        {/* 오늘의 한 장면 — 사진 + 방문 장소 + 일과 기록 통합 (소셜 포스트형 단일 입력기) */}
+                        <UnifiedDayCard date={date} />
+
 
                     </div>
 
