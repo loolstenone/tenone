@@ -1,84 +1,89 @@
-'use client';
+// Myverse 앱 쉘 — 서버 사이드 인증 + 4 Pillars 사이드바 + 인디고 테마
+//
+// Phase 1: PP /planners/app 의 인증·구독 게이트 패턴을 그대로 흡수.
+// 기존 7 탭(me·log·plan·dream·work·ai·verse)도 사이드바를 통해 접근 가능 (점진적 통합).
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { User, BookOpen, Calendar, Target, Briefcase, Bot, Orbit } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { redirect } from "next/navigation";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { getPlannerUser } from "@/lib/planners/client";
+import { MyverseSidebar } from "@/features/myverse/MyverseSidebar";
+import { MyverseAppHeader } from "@/features/myverse/MyverseAppHeader";
 
-const TABS = [
-  { key: 'me',    label: 'ME',    href: '/myverse/app',          icon: User },
-  { key: 'log',   label: 'LOG',   href: '/myverse/app/log',      icon: BookOpen },
-  { key: 'plan',  label: 'PLAN',  href: '/myverse/app/plan',     icon: Calendar },
-  { key: 'dream', label: 'DREAM', href: '/myverse/app/dream',    icon: Target },
-  { key: 'work',  label: 'WORK',  href: '/myverse/app/work',     icon: Briefcase },
-  { key: 'ai',    label: 'AI',    href: '/myverse/app/ai',       icon: Bot },
-  { key: 'verse', label: 'VERSE', href: '/myverse/app/verse',    icon: Orbit },
-] as const;
+export const dynamic = "force-dynamic";
 
-export default function MyVerseAppLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }: { data: { user: { id: string } | null } }) => {
-      if (!data.user) {
-        router.replace('/myverse');
-      } else {
-        setAuthChecked(true);
-      }
-    });
-  }, [router]);
-
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen bg-[#0B0D17] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+async function getMember() {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() { return cookieStore.getAll(); },
+                setAll() { /* read-only */ },
+            },
+            auth: { storageKey: "tenone-auth" },
+        }
     );
-  }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const activeTab = TABS.find(
-    (t) => pathname === t.href || (t.key !== 'me' && pathname.startsWith(t.href + '/'))
-  )?.key ?? 'me';
+    const { data: member } = await supabase
+        .from("members")
+        .select("id, name, email, avatar_url, handle, member_roles!member_roles_member_id_fkey(role,is_active)")
+        .eq("email", user.email!)
+        .maybeSingle();
+    return member;
+}
 
-  return (
-    <div className="min-h-screen bg-[#0B0D17] text-white flex flex-col">
-      {/* Content area */}
-      <main className="flex-1 pb-20 max-w-lg mx-auto w-full">
-        {children}
-      </main>
+const PRIVILEGED = new Set(["super_admin", "staff", "manager"]);
+type RoleRow = { role: string; is_active: boolean };
 
-      {/* Bottom tab bar */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 bg-[#0B0D17]/95 backdrop-blur-lg border-t border-white/5">
-        <div className="max-w-lg mx-auto flex">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.key;
-            const Icon = tab.icon;
-            return (
-              <Link
-                key={tab.key}
-                href={tab.href}
-                className={`flex-1 flex flex-col items-center py-2 gap-0.5 transition-colors ${
-                  isActive
-                    ? 'text-indigo-400'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{tab.label}</span>
-                {isActive && (
-                  <span className="absolute top-0 w-6 h-0.5 bg-indigo-400 rounded-full" />
-                )}
-              </Link>
-            );
-          })}
+function isPrivileged(member: { member_roles?: RoleRow[] | null } | null): boolean {
+    if (!member?.member_roles) return false;
+    return member.member_roles.some(r => r.is_active && PRIVILEGED.has(r.role));
+}
+
+export default async function MyverseAppLayout({ children }: { children: React.ReactNode }) {
+    const member = await getMember();
+    if (!member) {
+        redirect("/login?redirect=/myverse/app");
+    }
+
+    const plannerUser = await getPlannerUser(member.id);
+    const privileged = isPrivileged(member as { member_roles?: RoleRow[] | null });
+
+    if (!privileged) {
+        if (!plannerUser || !plannerUser.onboarding_completed) {
+            redirect("/planners/onboarding");
+        }
+        if (
+            plannerUser.subscription_status === "active" &&
+            plannerUser.subscription_expires_at &&
+            new Date(plannerUser.subscription_expires_at) < new Date()
+        ) {
+            plannerUser.subscription_status = "expired";
+        }
+        if (plannerUser.subscription_status === "expired") {
+            redirect("/planners/purchase?expired=1");
+        }
+    }
+
+    const handle = (member as { handle?: string | null }).handle ?? null;
+
+    return (
+        <div className="min-h-screen bg-neutral-50 flex flex-col">
+            <MyverseAppHeader
+                name={member.name ?? null}
+                handle={handle}
+                avatarUrl={member.avatar_url ?? null}
+            />
+            <div className="flex flex-1 min-h-0">
+                <MyverseSidebar handle={handle} />
+                <main className="flex-1 min-w-0 overflow-x-clip pb-20 md:pb-6">
+                    {children}
+                </main>
+            </div>
         </div>
-      </nav>
-    </div>
-  );
+    );
 }
