@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 import { Loader2, Camera, MapPin, Clock, Calendar } from "lucide-react";
 import type { DomainKey } from "@/lib/myverse/domains";
 import { DOMAINS } from "@/lib/myverse/domains";
+import { ShareButton } from "./ShareButton";
+import { VisibilityToggle } from "./VisibilityToggle";
 
 type FeedItem =
     | { type: "moment"; id: string; date: string; happened_at: string | null; caption: string | null; media_url: string; media_type: "image" | "video"; visibility: string }
@@ -24,9 +26,11 @@ type FeedItem =
 interface Props {
     domain: DomainKey;
     days?: number;            // 최근 N일 (기본 30)
+    /** 사용자 핸들 — Share 버튼 표시 위해 필요 */
+    handle?: string | null;
 }
 
-export function DomainFeed({ domain, days = 30 }: Props) {
+export function DomainFeed({ domain, days = 30, handle = null }: Props) {
     const [items, setItems] = useState<FeedItem[]>([]);
     const [loading, setLoading] = useState(true);
     const meta = DOMAINS[domain];
@@ -75,16 +79,30 @@ export function DomainFeed({ domain, days = 30 }: Props) {
     return (
         <div className="space-y-3 p-4">
             {items.map(item => (
-                <FeedItemCard key={`${item.type}-${item.id}`} item={item} domainColor={meta.color_hex} />
+                <FeedItemCard key={`${item.type}-${item.id}`} item={item} domainColor={meta.color_hex} handle={handle} />
             ))}
         </div>
     );
 }
 
-function FeedItemCard({ item, domainColor }: { item: FeedItem; domainColor: string }) {
+const TYPE_TO_TABLE: Record<string, string> = {
+    moment: "planners_daily_moments",
+    routine: "planners_daily_routines",
+    place: "planners_daily_places",
+    calendar: "planners_calendar_entries",
+};
+
+function FeedItemCard({ item, domainColor, handle }: { item: FeedItem; domainColor: string; handle: string | null }) {
     const dateLabel = formatDate(item.date);
+    const table = TYPE_TO_TABLE[item.type];
+    const title = "caption" in item ? (item.caption ?? undefined)
+                : "activity" in item ? item.activity
+                : "place_name" in item ? item.place_name
+                : "title" in item ? item.title
+                : undefined;
+    const imageUrl = item.type === "moment" ? item.media_url : undefined;
     return (
-        <div className="bg-white border border-neutral-200 rounded-lg p-3 flex gap-3">
+        <div className="bg-white border border-neutral-200 rounded-lg p-3 flex gap-3 group">
             <div className="shrink-0 flex flex-col items-center">
                 <div
                     className="h-2 w-2 rounded-full mt-1.5"
@@ -98,11 +116,23 @@ function FeedItemCard({ item, domainColor }: { item: FeedItem; domainColor: stri
                 {item.type === "place" && <PlaceRow item={item} />}
                 {item.type === "calendar" && <CalendarRow item={item} />}
             </div>
-            {item.visibility !== "private" && (
-                <span className="shrink-0 text-[9px] uppercase tracking-wider px-1.5 py-px rounded bg-emerald-50 text-emerald-600 self-start mt-1">
-                    {item.visibility === "public" ? "공개" : "친구"}
-                </span>
-            )}
+            <div className="shrink-0 flex items-start gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <VisibilityToggle
+                    targetTable={table}
+                    targetId={item.id}
+                    initial={item.visibility as "private" | "friends" | "public"}
+                    handle={handle}
+                />
+                <ShareButton
+                    table={table}
+                    id={item.id}
+                    title={title}
+                    text={title}
+                    imageUrl={imageUrl}
+                    visibility={item.visibility as "private" | "friends" | "public"}
+                    handle={handle}
+                />
+            </div>
         </div>
     );
 }
