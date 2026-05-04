@@ -28,6 +28,7 @@
     "@tiptap/starter-kit": "^3.20.4",
     "clsx": "^2.1.1",
     "fuse.js": "^7.3.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.563.0",
     "lunar-javascript": "^1.7.7",
     "next": "16.1.6",

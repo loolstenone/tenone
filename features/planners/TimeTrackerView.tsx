@@ -5,6 +5,7 @@ import { Plus, Trash2, Loader2, MapPin, X, Calendar, Clock, Sunrise, Sunset } fr
 import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/planners/categories";
 import { PageShell, PageHeader } from "./PageShell";
 import { PermissionGuideModal } from "./PermissionGuideModal";
+import type { ActivityBase } from "@/lib/planners/types";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -74,6 +75,31 @@ function nowSlotKST(): string {
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+// Haversine — 두 좌표 간 거리(미터)
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371000;
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// 좌표가 등록된 거점 반경 안에 있으면 가장 가까운 거점 반환 (기본 150m)
+function nearestBase(lat: number, lng: number, bases: ActivityBase[], radius = 150): ActivityBase | null {
+    let best: ActivityBase | null = null;
+    let bestDist = Infinity;
+    for (const b of bases) {
+        if (b.lat == null || b.lng == null) continue;
+        const d = distanceMeters(lat, lng, b.lat, b.lng);
+        if (d <= radius && d < bestDist) {
+            best = b;
+            bestDist = d;
+        }
+    }
+    return best;
+}
+
 // 시작 시각 + 1시간을 디폴트 종료 시각으로
 function defaultEndFor(start: string): string {
     const m = parseMinutes(start);
@@ -107,6 +133,20 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const nowRef = useRef<HTMLDivElement>(null);
     const nowSlot = date === today ? nowSlotKST() : null;
+
+    // 등록된 활동 거점 (Settings > 활동 거점) — 자동 위치 매칭에 사용
+    const [bases, setBases] = useState<ActivityBase[]>([]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch("/api/planners/settings");
+                if (!res.ok) return;
+                const json = await res.json();
+                const raw = (json.user?.activity_bases ?? []) as ActivityBase[];
+                if (Array.isArray(raw)) setBases(raw);
+            } catch { /* silent */ }
+        })();
+    }, []);
 
     // 데이터 로드
     async function load(d: string) {
@@ -183,6 +223,16 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                 navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 })
             );
             const { latitude: lat, longitude: lon } = pos.coords;
+
+            // 1) 등록된 거점이 가까이 있으면 거점 이름을 활동 라벨로 사용
+            const matched = nearestBase(lat, lon, bases);
+            if (matched) {
+                setInActivity(prev => prev || matched.name);
+                if (matched.address) setInNote(prev => prev || matched.address!);
+                return;
+            }
+
+            // 2) 거점 매칭 실패 시 Nominatim 역지오코딩 사용 (기존 로직)
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`
             );
@@ -652,6 +702,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                                 onSave={submitForm}
                                                 onCancel={closeForm}
                                                 onLocation={autoLocation}
+                                                bases={bases}
                                             />
                                         ) : items.length > 0 ? (
                                             <div className="space-y-2">
@@ -670,6 +721,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                                             onSave={submitForm}
                                                             onCancel={closeForm}
                                                             onLocation={autoLocation}
+                                                            bases={bases}
                                                         />
                                                     ) : (
                                                         <div key={r.id} className="group/row flex items-start justify-between gap-2">
@@ -848,6 +900,7 @@ function InlineForm({
     inputRef, activity, setActivity, start, setStart, end, setEnd,
     cat, setCat, note, setNote,
     saving, locLoading, isEdit, onSave, onCancel, onLocation,
+    bases,
 }: {
     inputRef: React.RefObject<HTMLInputElement | null>;
     activity: string; setActivity: (v: string) => void;
@@ -857,6 +910,7 @@ function InlineForm({
     note: string; setNote: (v: string) => void;
     saving: boolean; locLoading: boolean; isEdit: boolean;
     onSave: () => void; onCancel: () => void; onLocation: () => void;
+    bases: ActivityBase[];
 }) {
     return (
         <div className="bg-neutral-50 planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#333] rounded-xl p-3 space-y-2.5">
@@ -884,6 +938,26 @@ function InlineForm({
                     }
                 </button>
             </div>
+
+            {/* 등록된 거점 빠른 선택 — Settings에서 등록한 거점 한 번에 채움 */}
+            {bases.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                    {bases.map(b => (
+                        <button
+                            key={b.id}
+                            type="button"
+                            onClick={() => {
+                                setActivity(b.name);
+                                if (b.address) setNote(b.address);
+                            }}
+                            className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-100 planners-dark:bg-[#2A2A2A] text-neutral-600 planners-dark:text-neutral-300 hover:bg-[#0F766E]/10 hover:text-[#0F766E] transition-colors"
+                            title={b.address ?? b.name}
+                        >
+                            {b.name}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* 시작/종료 시각 — 30분 단위로 보정해도 자유 입력 가능 */}
             <div className="flex items-center gap-2">

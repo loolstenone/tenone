@@ -1,6 +1,39 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-03 (세션 105 — PP Canvas Engine 골격 + Toolbar 24색·굵기·이미지·레이어·모바일 + 이력서·활동거점·노트 페이지 삭제 확인)
+> 마지막 업데이트: 2026-05-04 (세션 106 — 거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트)
+
+---
+
+## 세션 106 핵심 성과 (2026-05-04)
+
+### Phase 1 — 활동 거점 좌표화 + 시간 트래킹 자동 위치 매칭
+- **SettingsBases**: Crosshair 버튼으로 현재 위치를 거점에 등록 (navigator.geolocation + Nominatim 역지오코딩으로 주소도 자동 채움). 주소 입력 blur 시 좌표 없으면 자동 정지오코딩. 좌표 등록 시 행 아래 lat/lng 표시
+- **TimeTrackerView**: 마운트 시 `/api/planners/settings`에서 activity_bases 로드. 자동 위치 입력 시 Haversine 거리 계산으로 거점 반경 150m 내 매칭 → 거점 이름이 활동 라벨로(예: "사무실"). 매칭 실패 시 기존 Nominatim 폴백
+- **InlineForm 거점 칩**: 등록된 거점을 클릭 한 번으로 활동·주소 채움
+
+### Phase 2 — 일간 places ↔ 시간 routines 양방향 미러링
+- POST `/places` → `planners_daily_routines`에 dedup 후 자동 INSERT (date+activity+start_time 키). duration_min → end_time 계산
+- POST `/routines` → `planners_daily_places`에 dedup 후 자동 INSERT (date+place_name+visited_at 키). end-start → duration_min 계산
+- 카테고리 매핑 함수 (`mapToPlacesCategory`/`mapToRoutinesCategory`) — 매칭 안되면 general
+- UPDATE/PATCH는 미러링 안 함 (편집은 한쪽만 — 의도된 분리)
+
+### Phase 3 — Instagram / Facebook 백업 ZIP 임포트
+- `POST /api/planners/moments/import-meta` — JSZip으로 ZIP 그대로 파싱 (압축 해제 불필요)
+- Instagram `posts_1.json` / `stories.json` + Facebook `your_posts_*.json` 자동 인식
+- Mojibake(latin1→UTF-8) 한국어 캡션 자동 복원
+- 미디어를 `planners-moments` 버킷에 업로드 → `planners_daily_moments` INSERT (촬영 일자·캡션·happened_at)
+- dedup: (member_id, date, file_size, happened_at) 기준 — 재임포트 안전
+- 200MB / 5분 타임아웃 / 응답에 imported·skipped·total·errors[]
+- DailyMoments 헤더에 "백업" 버튼 추가 (Archive 아이콘) + 결과 토스트
+
+### 다음 할 일
+- TimeTracker 컨텍스트 스트립 placeName도 거점 매칭 우선 (현재는 Nominatim 결과만)
+- DailyMoments 위치 필드 보강 (Meta 백업 EXIF 위치 추출)
+- Daily places 추가 UI에 거점 칩 빠른 선택
+
+---
+
+## 세션 105 핵심 성과 (2026-05-03 — 이전)
 
 ---
 

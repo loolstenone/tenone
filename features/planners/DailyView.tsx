@@ -2042,6 +2042,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         </div>
                         )}
 
+                        {/* 오늘의 한 장면 — 노트 아래 (이전엔 한 줄 카드 우측에 있었음) */}
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5 mt-3">
+                            <DailyMomentsAuto date={date} />
+                        </section>
+
                     </div>
 
                     {/* ── 우측 컬럼 (col 3) — 모바일은 contents로 펼쳐 order 유지, 데스크톱은 flex col + row-span-2로 노트행도 커버 ── */}
@@ -2214,12 +2219,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 onBlur={() => save({ daily_result: result })}
                                 placeholder={resultCategoryHint(resultCategory)}
                                 rows={4}
-                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none mb-3"
+                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none"
                             />
-                            {/* 사진/동영상 첨부 — 같은 카드 안에서 한 장면 완성 */}
-                            <div className="border-t border-neutral-100 pt-3">
-                                <DailyMomentsAuto date={date} compact />
-                            </div>
                         </section>
                     </div>
 

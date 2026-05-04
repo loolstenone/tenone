@@ -6,6 +6,12 @@ export const dynamic = "force-dynamic";
 
 const VALID_CATEGORIES = ["general", "work", "exercise", "meal", "study", "leisure", "rest", "social", "faith", "health", "transport"];
 
+// places 테이블 카테고리 (일부만 routines와 겹침) — 매핑 시 사용
+const PLACES_CATEGORIES = ["general", "work", "meal", "exercise", "leisure", "transport", "home", "shopping", "medical", "social"];
+function mapToPlacesCategory(c: string): string {
+    return PLACES_CATEGORIES.includes(c) ? c : "general";
+}
+
 /** GET /api/planners/routines?date=YYYY-MM-DD */
 export async function GET(req: Request) {
     const memberId = await getMemberId();
@@ -56,6 +62,39 @@ export async function POST(req: Request) {
         .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // ── 일간 장소(places) 미러링 — 같은 날짜/이름/시각 row 없으면 자동 추가 ──
+    try {
+        const placeName = activity.trim();
+        const visitedAt = start_time || null;
+        const { data: existing } = await admin
+            .from("planners_daily_places")
+            .select("id")
+            .eq("member_id", memberId)
+            .eq("date", date)
+            .eq("place_name", placeName)
+            .eq("visited_at", visitedAt)
+            .maybeSingle();
+        if (!existing) {
+            const duration = (start_time && end_time) ? (() => {
+                const [sh, sm] = start_time.split(":").map(Number);
+                const [eh, em] = end_time.split(":").map(Number);
+                const d = (eh * 60 + em) - (sh * 60 + sm);
+                return d > 0 ? d : null;
+            })() : null;
+            await admin.from("planners_daily_places").insert({
+                member_id: memberId,
+                date,
+                place_name: placeName,
+                visited_at: visitedAt,
+                address: note?.trim() || null,
+                category: mapToPlacesCategory(cat),
+                duration_min: duration,
+                note: null,
+            });
+        }
+    } catch { /* mirror 실패는 본 작업에 영향 없음 */ }
+
     return NextResponse.json({ routine: data });
 }
 

@@ -4,7 +4,7 @@
 // 시간 트래커·캘린더에서 자동 라벨링/자동완성에 활용
 
 import { useState } from "react";
-import { Plus, Trash2, MapPin, Home, Briefcase, BookOpen, Dumbbell, Coffee, Building2, Star } from "lucide-react";
+import { Plus, Trash2, MapPin, Home, Briefcase, BookOpen, Dumbbell, Coffee, Building2, Star, Crosshair, Loader2 } from "lucide-react";
 import type { ActivityBase } from "@/lib/planners/types";
 
 const TYPE_META: Record<ActivityBase["type"], { label: string; icon: React.ElementType }> = {
@@ -22,12 +22,79 @@ interface Props {
     showToast: (text: string, ok?: boolean) => void;
 }
 
-export function SettingsBases({ initialBases, save, showToast: _showToast }: Props) {
+export function SettingsBases({ initialBases, save, showToast }: Props) {
     const [bases, setBases] = useState<ActivityBase[]>(initialBases);
+    const [pickingId, setPickingId] = useState<string | null>(null);
 
     function commit(next: ActivityBase[]) {
         setBases(next);
         void save({ activity_bases: next });
+    }
+
+    /** 주소 → Nominatim 지오코딩 → lat/lng 채움 */
+    async function geocodeAddress(id: string, address: string) {
+        if (!address.trim()) return;
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&accept-language=ko`
+            );
+            if (!res.ok) return;
+            const arr = await res.json();
+            if (Array.isArray(arr) && arr[0]?.lat && arr[0]?.lon) {
+                const lat = parseFloat(arr[0].lat);
+                const lng = parseFloat(arr[0].lon);
+                const next = bases.map(b => b.id === id ? { ...b, lat, lng } : b);
+                commit(next);
+                showToast("좌표 등록됨");
+            } else {
+                showToast("주소를 찾지 못했습니다", false);
+            }
+        } catch {
+            showToast("지오코딩 실패", false);
+        }
+    }
+
+    /** 현재 위치를 거점 좌표로 등록 + 역지오코딩으로 주소 자동 입력 */
+    async function pickCurrentLocation(id: string) {
+        if (!navigator.geolocation) {
+            showToast("이 브라우저는 위치 정보를 지원하지 않습니다", false);
+            return;
+        }
+        setPickingId(id);
+        try {
+            const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 })
+            );
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            // 역지오코딩으로 주소 자동 채움 (현재 주소 비어 있을 때만)
+            let nextAddress: string | undefined;
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`
+                );
+                if (res.ok) {
+                    const d = await res.json();
+                    nextAddress = d.display_name;
+                }
+            } catch { /* silent */ }
+            const next = bases.map(b => b.id === id ? {
+                ...b,
+                lat, lng,
+                address: b.address || nextAddress,
+            } : b);
+            commit(next);
+            showToast("현재 위치 등록됨");
+        } catch (e) {
+            const err = e as GeolocationPositionError | Error;
+            if ("code" in err && err.code === 1) {
+                showToast("위치 권한이 거부되었습니다", false);
+            } else {
+                showToast("위치 조회 실패", false);
+            }
+        } finally {
+            setPickingId(null);
+        }
     }
 
     function add(type: ActivityBase["type"]) {
@@ -122,15 +189,37 @@ export function SettingsBases({ initialBases, save, showToast: _showToast }: Pro
                                             <option key={t} value={t}>{TYPE_META[t].label}</option>
                                         ))}
                                     </select>
-                                    <input
-                                        type="text"
-                                        value={base.address ?? ""}
-                                        onChange={e => update(base.id, { address: e.target.value })}
-                                        onBlur={commitField}
-                                        placeholder="주소 (선택)"
-                                        className="text-xs text-neutral-700 bg-transparent focus:outline-none border-b border-neutral-200 pb-1 placeholder:text-neutral-300"
-                                    />
+                                    <div className="flex flex-col gap-0.5">
+                                        <input
+                                            type="text"
+                                            value={base.address ?? ""}
+                                            onChange={e => update(base.id, { address: e.target.value })}
+                                            onBlur={() => {
+                                                commitField();
+                                                if (base.address && base.lat == null) {
+                                                    void geocodeAddress(base.id, base.address);
+                                                }
+                                            }}
+                                            placeholder="주소 (선택)"
+                                            className="text-xs text-neutral-700 bg-transparent focus:outline-none border-b border-neutral-200 pb-1 placeholder:text-neutral-300"
+                                        />
+                                        {base.lat != null && base.lng != null && (
+                                            <span className="text-[10px] text-neutral-400 tabular-nums">
+                                                {base.lat.toFixed(5)}, {base.lng.toFixed(5)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={() => pickCurrentLocation(base.id)}
+                                    disabled={pickingId === base.id}
+                                    title="현재 위치로 좌표 등록"
+                                    className="shrink-0 mt-1 text-neutral-400 hover:text-[#0F766E] disabled:opacity-50"
+                                >
+                                    {pickingId === base.id
+                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        : <Crosshair className="h-3.5 w-3.5" />}
+                                </button>
                                 <button
                                     onClick={() => setPrimary(base.id)}
                                     title={base.isPrimary ? "기본 거점" : "기본 거점으로 지정"}

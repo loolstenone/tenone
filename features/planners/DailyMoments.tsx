@@ -4,7 +4,7 @@
 // 사진을 추가하면 클라이언트가 Supabase Storage(planners-moments)에 직접 업로드.
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Upload, X, Loader2, Trash2, Pencil } from "lucide-react";
+import { Camera, Upload, X, Loader2, Trash2, Pencil, Archive } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { ConfirmSheet } from "./ConfirmSheet";
 
@@ -39,7 +39,10 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<Partial<Moment>>({});
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [importing, setImporting] = useState(false);
+    const [importResult, setImportResult] = useState<{ imported: number; skipped: number; total: number } | null>(null);
     const fileRef = useRef<HTMLInputElement | null>(null);
+    const zipRef = useRef<HTMLInputElement | null>(null);
 
     async function load() {
         setLoading(true);
@@ -104,6 +107,31 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
         fileRef.current?.click();
     }
 
+    function onPickZip() {
+        zipRef.current?.click();
+    }
+
+    async function importZip(file: File) {
+        setImporting(true);
+        setImportResult(null);
+        try {
+            const form = new FormData();
+            form.append("file", file);
+            const res = await fetch("/api/planners/moments/import-meta", { method: "POST", body: form });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                alert(`백업 가져오기 실패: ${json.error || res.status}${json.hint ? "\n" + json.hint : ""}`);
+                return;
+            }
+            setImportResult({ imported: json.imported ?? 0, skipped: json.skipped ?? 0, total: json.total ?? 0 });
+            await load();
+        } catch (e) {
+            alert(`백업 가져오기 오류: ${(e as Error).message}`);
+        } finally {
+            setImporting(false);
+        }
+    }
+
     async function deleteMoment(id: string) {
         await fetch(`/api/planners/moments/${id}`, { method: "DELETE" });
         load();
@@ -129,16 +157,46 @@ export function DailyMoments({ date, memberId, compact = false }: Props) {
                         <Camera className="h-3.5 w-3.5" />
                         오늘의 한 장면
                     </h2>
-                    <button
-                        onClick={onPick}
-                        disabled={uploading}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 disabled:opacity-50"
-                    >
-                        {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                        {uploading ? "업로드 중…" : "추가"}
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={onPickZip}
+                            disabled={importing || uploading}
+                            title="Instagram / Facebook 백업 ZIP 가져오기"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-500 hover:text-[#0F766E] hover:bg-[#0F766E]/5 disabled:opacity-50"
+                        >
+                            {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Archive className="h-3 w-3" />}
+                            {importing ? "가져오는 중…" : "백업"}
+                        </button>
+                        <button
+                            onClick={onPick}
+                            disabled={uploading}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 disabled:opacity-50"
+                        >
+                            {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                            {uploading ? "업로드 중…" : "추가"}
+                        </button>
+                    </div>
+                </div>
+            )}
+            {importResult && (
+                <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded text-[11px] text-emerald-700 flex items-center justify-between">
+                    <span>가져옴 {importResult.imported}건 · 건너뜀 {importResult.skipped}건 · 총 {importResult.total}건</span>
+                    <button onClick={() => setImportResult(null)} className="p-0.5 hover:bg-emerald-100 rounded">
+                        <X className="h-3 w-3" />
                     </button>
                 </div>
             )}
+            <input
+                ref={zipRef}
+                type="file"
+                accept=".zip,application/zip"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) importZip(file);
+                    e.target.value = "";
+                }}
+                className="hidden"
+            />
             <input
                 ref={fileRef}
                 type="file"

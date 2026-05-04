@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-05-04 — 세션 106 · 거점 좌표 매칭 + 일간↔시간 양방향 미러링 + Meta 백업 임포트
+
+### 장소
+사무실
+
+### 결정사항
+- **활동 거점 좌표화**: SettingsBases에 lat/lng 등록 UI 추가 (Crosshair 버튼 = navigator.geolocation + Nominatim 역지오코딩 / 주소 blur 시 좌표 없으면 자동 정지오코딩). 좌표는 시간 트래킹 자동 위치 매칭에 사용
+- **TimeTrackerView 자동 위치 우선순위**: 거점 반경 150m 내 매칭 → 거점 이름을 활동 라벨로 / 매칭 실패 시 기존 Nominatim 폴백
+- **InlineForm 거점 칩**: 등록된 거점을 한 클릭으로 활동·주소 채움
+- **일간 places ↔ 시간 routines 양방향 미러링**: 한쪽에 추가하면 서버 측에서 dedup 후 자동 INSERT (date+name+time 기준). UPDATE/PATCH는 미러 안 함 (편집은 한쪽만 — 의도된 분리)
+- **Meta GDPR 백업 임포트**: Instagram/Facebook ZIP을 압축 해제 없이 그대로 업로드 → JSZip 파싱 → posts/stories JSON 인식 → 미디어를 planners-moments 버킷에 업로드 → planners_daily_moments INSERT (촬영 일자·캡션·Mojibake 한글 복원). dedup으로 재임포트 안전
+
+### 추가
+- `app/api/planners/moments/import-meta/route.ts` — Meta GDPR ZIP 임포트 (200MB / 5분 / dedup)
+- jszip 의존성
+
+### 수정
+- `features/planners/settings/SettingsBases.tsx` — Crosshair 버튼·좌표 표시·자동 지오코딩
+- `features/planners/TimeTrackerView.tsx` — bases 로드·Haversine·nearestBase·InlineForm 거점 칩
+- `features/planners/DailyMoments.tsx` — "백업" 버튼 + ZIP input + 임포트 결과 토스트
+- `features/planners/DailyView.tsx` — "오늘의 한 장면"을 한 줄 카드 우측에서 노트 리스트 아래로 이동 (단독 섹션)
+- `app/api/planners/places/route.ts` — POST 후 routines 미러
+- `app/api/planners/routines/route.ts` — POST 후 places 미러
+
+### 다음 할 일
+- TimeTrackerView 컨텍스트 스트립 placeName도 거점 매칭 우선 적용 (현재는 Nominatim 도시+동만)
+- DailyMoments에서 location 필드 보강 (Meta 백업 EXIF 위치 추출)
+- Daily places 추가 모달에서 거점 칩 빠른 선택 (TimeTracker처럼)
+
+---
+
 ## 2026-05-03 — 세션 105 · PP Canvas Engine 골격 + Toolbar 고도화 + 이력서/활동거점
 
 ### 장소
