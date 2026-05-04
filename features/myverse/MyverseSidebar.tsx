@@ -65,8 +65,8 @@ const PILLARS: PillarGroup[] = [
         label: "나누기",
         icon: Share2,
         items: [
-            { label: "Verse 타임라인", href: "/myverse/app/verse", icon: Orbit, color: "#6366F1" },
-            { label: "AI 코칭",        href: "/myverse/app/ai",    icon: Bot,   color: "#6366F1" },
+            { label: "Verse 타임라인", href: "/myverse/app/verse",  icon: Orbit, color: "#6366F1" },
+            { label: "AI 코칭",        href: "/myverse/app/coach", icon: Bot,   color: "#6366F1" },
             // @handle은 동적으로 채움
         ],
     },
