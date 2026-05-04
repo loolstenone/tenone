@@ -48,11 +48,26 @@ export async function middleware(request: NextRequest) {
     // 보안 검증이 필요한 경우는 API Route에서 getUser() 직접 호출
     await supabase.auth.getSession();
 
-    // 2a. /@handle → /profile/@handle (pretty URL)
+    // 2a. /@handle → 호스트별 분기
+    //     myverse.kr → /myverse/{handle} (Myverse 공개 페이지)
+    //     그 외      → /profile/{handle} (유니버스 프로필)
     const atHandleMatch = pathname.match(/^\/@([^/]+)$/);
     if (atHandleMatch) {
         const url = request.nextUrl.clone();
-        url.pathname = `/profile/${atHandleMatch[1]}`;
+        const isMyverseHost = reqDomain === "myverse.kr" || reqDomain === "www.myverse.kr" || reqDomain === "myverse.tenone.biz";
+        url.pathname = isMyverseHost
+            ? `/myverse/${atHandleMatch[1]}`
+            : `/profile/${atHandleMatch[1]}`;
+        const rewrite = NextResponse.rewrite(url, { request });
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
+        return rewrite;
+    }
+
+    // 2a-2. /myverse/@handle (pretty URL within myverse path) → /myverse/{handle}
+    const myverseAtMatch = pathname.match(/^\/myverse\/@([^/]+)(\/.*)?$/);
+    if (myverseAtMatch) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/myverse/${myverseAtMatch[1]}${myverseAtMatch[2] ?? ""}`;
         const rewrite = NextResponse.rewrite(url, { request });
         response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
         return rewrite;
