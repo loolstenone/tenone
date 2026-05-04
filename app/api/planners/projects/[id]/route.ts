@@ -12,17 +12,18 @@ async function resolveRole(
     email: string,
     selectFields = '*'
 ): Promise<{ project: Record<string, unknown>; userRole: UserRole } | null> {
-    const { data: project } = await admin
+    const { data: projectRaw } = await admin
         .from('planners_projects')
         .select(selectFields)
         .eq('id', id)
         .maybeSingle();
 
-    if (!project) return null;
+    if (!projectRaw) return null;
+    const project = projectRaw as unknown as Record<string, unknown>;
 
     if (project.member_id === memberId) return { project, userRole: "owner" };
 
-    const collabs: Collaborator[] = project.collaborators ?? [];
+    const collabs: Collaborator[] = (project.collaborators as Collaborator[] | null) ?? [];
     const collab = collabs.find(c => c.email === email);
     if (!collab) return null;
 

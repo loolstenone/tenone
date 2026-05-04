@@ -71,7 +71,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         const noteField = NOTE_FIELDS[m];
         if (!field) continue;
         const points: Array<{ date: string; value: number; note?: string | null }> = [];
-        for (const row of (daily ?? []) as Array<Record<string, unknown>>) {
+        for (const row of (daily ?? []) as unknown as Array<Record<string, unknown>>) {
             const v = row[field];
             if (v === null || v === undefined) continue;
             const num = typeof v === "number" ? v : parseFloat(String(v));

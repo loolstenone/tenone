@@ -27,7 +27,10 @@ export default async function IdentityPage() {
             .maybeSingle();
         if (member) {
             const plannerUser = await getPlannerUser(member.id);
-            mode = plannerUser?.mode ?? "weekly";
+            // custom 모드는 IdentityView 입장에서 all_in_one 기능셋과 동일
+            mode = plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom"
+                ? "all_in_one"
+                : "weekly";
         }
     }
 

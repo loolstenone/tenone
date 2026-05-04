@@ -794,7 +794,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     table: "planners_daily",
                     filter: `member_id=eq.${memberId}`,
                 },
-                (payload) => {
+                (payload: { new?: unknown }) => {
                     const row = payload.new as { date?: string; updated_at?: string } | undefined;
                     if (!row || row.date !== date) return;
                     // 내가 저장한 지 3초 이내면 무시 (자기 변경 반영 방지)
@@ -3418,7 +3418,7 @@ function UpcomingSchedule({ date }: { date: string }) {
     // 캘린더 + 업무 통합 단일 리스트 (날짜 오름차순)
     const flatItems = useMemo(() => {
         type FlatItem =
-            | { kind: CalendarKind; date: string; entry: CalendarEntry; task?: undefined }
+            | { kind: Exclude<CalendarKind, "task">; date: string; entry: CalendarEntry; task?: undefined }
             | { kind: "task";       date: string; task: UpcomingTask;   entry?: undefined };
         const out: FlatItem[] = [];
 
@@ -3427,7 +3427,7 @@ function UpcomingSchedule({ date }: { date: string }) {
         entries.forEach((e) => {
             if (!calKinds.includes(e.kind as CalendarKind)) return;
             expandOccurrences(e, from, to).forEach((o) => {
-                out.push({ kind: e.kind as CalendarKind, date: o.date, entry: e });
+                out.push({ kind: e.kind as Exclude<CalendarKind, "task">, date: o.date, entry: e });
             });
         });
 

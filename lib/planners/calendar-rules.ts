@@ -4,6 +4,7 @@
 export type CalendarKind =
     | "anniversary"
     | "meeting"
+    | "task"
     | "public_holiday"
     | "solar_term";
 
@@ -27,6 +28,7 @@ export const VISIBILITY: Record<CalendarKind, VisibilityRule> = {
     public_holiday: { daily: true, weekly: true, monthly: "full",  yearly: true },
     solar_term:     { daily: true, weekly: true, monthly: "full",  yearly: true },
     meeting:        { daily: true, weekly: true, monthly: "title", yearly: false },
+    task:           { daily: true, weekly: true, monthly: "title", yearly: false },
 };
 
 /** 종류별 기본 색상 (Tailwind 클래스 또는 hex) */
@@ -35,6 +37,7 @@ export const KIND_COLORS: Record<CalendarKind, { dot: string; bg: string; text: 
     public_holiday: { dot: "bg-red-500",     bg: "bg-red-50",     text: "text-red-700",     ring: "ring-red-200" },
     solar_term:     { dot: "bg-neutral-400", bg: "bg-neutral-50", text: "text-neutral-600", ring: "ring-neutral-200" },
     meeting:        { dot: "bg-sky-500",     bg: "bg-sky-50",     text: "text-sky-700",     ring: "ring-sky-200" },
+    task:           { dot: "bg-teal-500",    bg: "bg-teal-50",    text: "text-teal-700",    ring: "ring-teal-200" },
 };
 
 /** 한국어 라벨 */
@@ -43,6 +46,7 @@ export const KIND_LABELS: Record<CalendarKind, string> = {
     public_holiday: "공휴일",
     solar_term:     "절기",
     meeting:        "미팅",
+    task:           "업무",
 };
 
 /** 어떤 kind 가 어떤 view 에 노출되는지 boolean 반환 */
