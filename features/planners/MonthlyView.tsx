@@ -398,9 +398,9 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">DIRECTION</span>
                             <h2 className="text-sm font-semibold text-neutral-800">이달의 방향</h2>
                         </div>
-                        <div className="grid md:grid-cols-[1fr_1.3fr] gap-6">
+                        <div className="grid md:grid-cols-[1fr_1.3fr] gap-6 min-w-0">
                             {/* 좌: 테마 (큰 인용) */}
-                            <div className="md:border-r md:border-neutral-100 md:pr-6">
+                            <div className="md:border-r md:border-neutral-100 md:pr-6 min-w-0">
                                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">이달의 테마</label>
                                 <input
                                     type="text"
@@ -408,7 +408,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     onChange={(e) => setTheme(e.target.value)}
                                     onBlur={() => save({ theme })}
                                     placeholder="예: 몰입의 달"
-                                    className="w-full text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base"
+                                    className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base truncate"
                                 />
                             </div>
                             {/* 우: 월간 목표 체크리스트 */}

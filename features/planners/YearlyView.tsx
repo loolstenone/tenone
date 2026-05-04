@@ -287,7 +287,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
             ) : (
                 <div className="space-y-6">
                     {/* 올해의 목표 (테마) */}
-                    <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <section className="bg-white border border-neutral-200 rounded-xl p-6 min-w-0 overflow-hidden">
                         <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">올해의 목표</label>
                         <input
                             type="text"
@@ -295,7 +295,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                             onChange={(e) => setTheme(e.target.value)}
                             onBlur={() => save({ theme })}
                             placeholder="예: 깊이의 해"
-                            className="w-full text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent border-b border-neutral-200 pb-2"
+                            className="block w-full max-w-full text-xl md:text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent border-b border-neutral-200 pb-2 truncate"
                         />
                     </section>
 
