@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import {
     LayoutGrid, Sun, FolderKanban, User,
     CalendarDays, Calendar, CalendarRange, Users, Search, Settings, Camera,
@@ -39,6 +39,8 @@ function loadSaved(): string[] {
 
 export function MobileBottomNav() {
     const pathname = usePathname();
+    const router = useRouter();
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const [itemIds, setItemIds] = useState<string[]>(MOBILE_NAV_DEFAULT);
 
     useEffect(() => {
@@ -53,6 +55,21 @@ export function MobileBottomNav() {
             window.removeEventListener("planners-mobile-nav-change", () => {});
         };
     }, []);
+
+    function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const dataUrl = ev.target?.result as string;
+            sessionStorage.setItem("planners-pending-capture", dataUrl);
+            sessionStorage.setItem("planners-pending-capture-type", file.type);
+            sessionStorage.setItem("planners-pending-capture-name", file.name);
+            router.push("/myverse/app/daily?compose=1");
+        };
+        reader.readAsDataURL(file);
+        e.target.value = "";
+    }
 
     const navItems = itemIds
         .map(id => ALL_NAV_OPTIONS.find(o => o.id === id))
@@ -91,14 +108,22 @@ export function MobileBottomNav() {
 
                 {/* 중앙 카메라 버튼 */}
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <Link
-                        href="/myverse/app/daily?compose=1"
+                    <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={handleCameraCapture}
+                    />
+                    <button
+                        onClick={() => cameraInputRef.current?.click()}
                         className="flex items-center justify-center w-12 h-12 rounded-full -mt-5 shadow-lg active:scale-95 transition-transform"
                         style={{ background: "var(--planners-accent-nav, #0F766E)" }}
                         aria-label="오늘의 한 장면 기록"
                     >
                         <Camera className="h-5 w-5 text-white stroke-[1.5]" />
-                    </Link>
+                    </button>
                 </div>
 
                 {/* 우측 2개 */}

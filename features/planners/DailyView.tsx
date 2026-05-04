@@ -20,6 +20,23 @@ import { Camera as CameraIconForCard } from "lucide-react";
 function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boolean }) {
     const [open, setOpen] = useState(initialOpen ?? false);
     const [version, setVersion] = useState(0); // saved 후 자식 reload 트리거
+    const [pendingImage, setPendingImage] = useState<File | null>(null);
+
+    useEffect(() => {
+        if (!initialOpen) return;
+        const dataUrl = sessionStorage.getItem("planners-pending-capture");
+        const mimeType = sessionStorage.getItem("planners-pending-capture-type") ?? "image/jpeg";
+        const fileName = sessionStorage.getItem("planners-pending-capture-name") ?? "capture.jpg";
+        if (!dataUrl) return;
+        sessionStorage.removeItem("planners-pending-capture");
+        sessionStorage.removeItem("planners-pending-capture-type");
+        sessionStorage.removeItem("planners-pending-capture-name");
+        fetch(dataUrl)
+            .then(r => r.blob())
+            .then(blob => setPendingImage(new File([blob], fileName, { type: mimeType })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <section className="bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl mt-3 overflow-hidden">
             {/* 단일 헤더 */}
@@ -42,6 +59,7 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
                         date={date}
                         onClose={() => setOpen(false)}
                         onSaved={() => setVersion(v => v + 1)}
+                        initialImage={pendingImage}
                     />
                 </div>
             )}

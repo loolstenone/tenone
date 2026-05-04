@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Video, X, Loader2, MapPin, Clock } from "lucide-react";
 import type { ActivityBase } from "@/lib/myverse/types";
+import exifr from "exifr";
 
 const PLACE_CATEGORIES = [
     { key: "general",  label: "일반"   },
@@ -34,9 +35,10 @@ interface Props {
     date: string;             // YYYY-MM-DD
     onClose: () => void;
     onSaved: () => void;      // 저장 완료 시 부모가 데이터 reload
+    initialImage?: File | null;
 }
 
-export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
+export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Props) {
     const [bases, setBases] = useState<ActivityBase[]>([]);
     const [media, setMedia] = useState<MediaItem[]>([]);
     const [placeName, setPlaceName] = useState("");
@@ -48,6 +50,54 @@ export function DailyEntryComposer({ date, onClose, onSaved }: Props) {
     const [error, setError] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const textRef = useRef<HTMLTextAreaElement>(null);
+
+    // 카메라 버튼에서 넘어온 이미지 사전 로드 + EXIF 메타 추출
+    useEffect(() => {
+        if (!initialImage) return;
+        setMedia([{
+            file: initialImage,
+            preview: URL.createObjectURL(initialImage),
+            kind: "image",
+        }]);
+        (async () => {
+            try {
+                const exif = await exifr.parse(initialImage, {
+                    pick: ["DateTimeOriginal", "GPSLatitude", "GPSLongitude"],
+                });
+                if (!exif) return;
+                // 촬영 시각 → HH:MM
+                if (exif.DateTimeOriginal instanceof Date) {
+                    const h = String(exif.DateTimeOriginal.getHours()).padStart(2, "0");
+                    const m = String(exif.DateTimeOriginal.getMinutes()).padStart(2, "0");
+                    setTime(`${h}:${m}`);
+                }
+                // GPS → Nominatim 역지오코딩
+                if (exif.GPSLatitude != null && exif.GPSLongitude != null) {
+                    const lat = exif.GPSLatitude;
+                    const lon = exif.GPSLongitude;
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=ko`,
+                        { headers: { "User-Agent": "myverse-app" } }
+                    );
+                    if (res.ok) {
+                        const geo = await res.json();
+                        const addr = geo.address ?? {};
+                        const name =
+                            addr.amenity ??
+                            addr.shop ??
+                            addr.building ??
+                            addr.road ??
+                            addr.neighbourhood ??
+                            addr.suburb ??
+                            addr.city_district ??
+                            addr.city ??
+                            geo.display_name?.split(",")[0] ?? "";
+                        if (name) setPlaceName(name);
+                    }
+                }
+            } catch { /* EXIF 없는 사진이면 무시 */ }
+        })();
+    }, [initialImage]);
 
     // 거점 로드 — 빠른 선택 칩
     useEffect(() => {
