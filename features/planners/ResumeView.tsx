@@ -309,7 +309,7 @@ export function ResumeView() {
             </div>
 
             {/* ── 01 인적 사항 (필수) ──────────────────── */}
-            <Section num="01" title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[#6366F1]" />}>
+            <Section title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[#6366F1]" />}>
                 <PersonalBlock
                     value={resume.personal ?? {}}
                     onSave={(p) => updateResume({ personal: p })}
@@ -319,7 +319,7 @@ export function ResumeView() {
 
             {/* ── 02 학력 사항 ─────────────────────────── */}
             {isActive("education") && (
-                <Section num="02" title="학력 사항">
+                <Section title="학력 사항">
                     <ListBlock
                         items={resume.education ?? []}
                         onChange={(arr) => updateResume({ education: arr })}
@@ -332,7 +332,7 @@ export function ResumeView() {
 
             {/* ── 03 병적 사항 ─────────────────────────── */}
             {isActive("military") && (
-                <Section num="03" title="병적 사항">
+                <Section title="병적 사항">
                     <MilitaryBlock
                         value={resume.military ?? {}}
                         onSave={(m) => updateResume({ military: m })}
@@ -342,7 +342,7 @@ export function ResumeView() {
 
             {/* ── 04 경력 사항 ─────────────────────────── */}
             {isActive("career") && (
-                <Section num="04" title="경력 사항">
+                <Section title="경력 사항">
                     <ListBlock
                         items={resume.career ?? []}
                         onChange={(arr) => updateResume({ career: arr })}
@@ -356,7 +356,7 @@ export function ResumeView() {
 
             {/* ── 05 수상 경력 ─────────────────────────── */}
             {isActive("awards") && (
-                <Section num="05" title="수상 경력">
+                <Section title="수상 경력">
                     <ListBlock
                         items={resume.awards ?? []}
                         onChange={(arr) => updateResume({ awards: arr })}
@@ -369,7 +369,7 @@ export function ResumeView() {
 
             {/* ── 06 자격증 ────────────────────────────── */}
             {isActive("certifications") && (
-                <Section num="06" title="자격증">
+                <Section title="자격증">
                     <ListBlock
                         items={resume.certifications ?? []}
                         onChange={(arr) => updateResume({ certifications: arr })}
@@ -382,7 +382,7 @@ export function ResumeView() {
 
             {/* ── 07 어학 ──────────────────────────────── */}
             {isActive("languages") && (
-                <Section num="07" title="어학">
+                <Section title="어학">
                     <ListBlock
                         items={resume.languages ?? []}
                         onChange={(arr) => updateResume({ languages: arr })}
@@ -395,7 +395,7 @@ export function ResumeView() {
 
             {/* ── 08 강의 경력 ─────────────────────────── */}
             {isActive("lectures") && (
-                <Section num="08" title="강의 경력">
+                <Section title="강의 경력">
                     <ListBlock
                         items={resume.lectures ?? []}
                         onChange={(arr) => updateResume({ lectures: arr })}
@@ -408,7 +408,7 @@ export function ResumeView() {
 
             {/* ── 09 심사 경력 ─────────────────────────── */}
             {isActive("judging") && (
-                <Section num="09" title="심사 경력">
+                <Section title="심사 경력">
                     <ListBlock
                         items={resume.judging ?? []}
                         onChange={(arr) => updateResume({ judging: arr })}
@@ -421,7 +421,7 @@ export function ResumeView() {
 
             {/* ── 10 포트폴리오 ─────────────────────────── */}
             {isActive("portfolio") && (
-                <Section num="10" title="포트폴리오">
+                <Section title="포트폴리오">
                     <ListBlock
                         items={resume.portfolio ?? []}
                         onChange={(arr) => updateResume({ portfolio: arr })}
@@ -435,7 +435,7 @@ export function ResumeView() {
 
             {/* ── 11 기타 활동 ─────────────────────────── */}
             {isActive("side_projects") && (
-                <Section num="11" title="기타 활동">
+                <Section title="기타 활동">
                     <ListBlock
                         items={resume.side_projects ?? []}
                         onChange={(arr) => updateResume({ side_projects: arr })}
@@ -450,7 +450,7 @@ export function ResumeView() {
 
             {/* ── 12 자기소개 ──────────────────────────── */}
             {isActive("self_introduction") && (
-                <Section num="12" title="자기소개">
+                <Section title="자기소개">
                     <TextareaSection
                         value={resume.self_introduction ?? ""}
                         onSave={(v) => updateResume({ self_introduction: v })}
@@ -462,7 +462,7 @@ export function ResumeView() {
 
             {/* ── 13 지원 동기 ─────────────────────────── */}
             {isActive("motivation") && (
-                <Section num="13" title="지원 동기">
+                <Section title="지원 동기">
                     <TextareaSection
                         value={resume.motivation ?? ""}
                         onSave={(v) => updateResume({ motivation: v })}
@@ -474,7 +474,7 @@ export function ResumeView() {
 
             {/* ── 14 직무 역량 ─────────────────────────── */}
             {isActive("competency") && (
-                <Section num="14" title="직무 역량">
+                <Section title="직무 역량">
                     <TextareaSection
                         value={resume.competency ?? ""}
                         onSave={(v) => updateResume({ competency: v })}
@@ -486,7 +486,7 @@ export function ResumeView() {
 
             {/* ── 15 입사후 포부 ────────────────────────── */}
             {isActive("aspiration") && (
-                <Section num="15" title="입사후 포부">
+                <Section title="입사후 포부">
                     <TextareaSection
                         value={resume.aspiration ?? ""}
                         onSave={(v) => updateResume({ aspiration: v })}
@@ -498,7 +498,7 @@ export function ResumeView() {
 
             {/* ── 16 요점 정리 ─────────────────────────── */}
             {isActive("summary") && (
-                <Section num="16" title="요점 정리">
+                <Section title="요점 정리">
                     <TextareaSection
                         value={resume.summary ?? ""}
                         onSave={(v) => updateResume({ summary: v })}
@@ -518,14 +518,13 @@ export function ResumeView() {
 }
 
 /* ── 섹션 카드 셸 ─────────────────────────────────────── */
-function Section({ num, title, icon, children }: {
-    num: string; title: string; icon?: React.ReactNode; children: React.ReactNode;
+function Section({ title, icon, children }: {
+    title: string; icon?: React.ReactNode; children: React.ReactNode;
 }) {
     return (
         <section className="resume-section bg-white border border-neutral-200 rounded-xl p-5 myverse-dark:bg-neutral-900 myverse-dark:border-neutral-800">
             <div className="resume-section-header flex items-center gap-2 mb-4">
                 {icon}
-                <span className="badge text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">{num}</span>
                 <h2 className="text-sm font-semibold text-neutral-800 myverse-dark:text-neutral-200">{title}</h2>
             </div>
             {children}
