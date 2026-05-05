@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { ClientRedirect } from "@/components/ClientRedirect";
 import { TimeTrackerView } from "@/features/myverse/planner/TimeTrackerView";
 import { getPlannerUser } from "@/lib/myverse/client";
 
@@ -48,7 +48,7 @@ async function checkAccess(): Promise<{ allowed: boolean }> {
 
 export default async function TimePage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
     const { allowed } = await checkAccess();
-    if (!allowed) redirect("/myverse/app/settings?section=mode");
+    if (!allowed) return <ClientRedirect to="/myverse/app/settings?section=mode" />;
 
     const params = await searchParams;
     const date = params.date || todayKST();

@@ -1,5 +1,6 @@
 // /myverse/app — 진입 시 오늘 페이지로 자동 이동
-import { redirect } from "next/navigation";
+import { ClientRedirect } from "@/components/ClientRedirect";
+
 export default function Page() {
-    redirect("/myverse/app/today");
+    return <ClientRedirect to="/myverse/app/today" />;
 }
