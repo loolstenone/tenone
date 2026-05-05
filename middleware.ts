@@ -8,6 +8,11 @@ const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/r
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    // 0. layout/page에서 pathname 식별을 위한 x-pathname 헤더 (SSR header())
+    //    /myverse/app/layout.tsx가 onboarding 하위 경로를 인증 게이트에서 제외할 때 사용.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-pathname', pathname);
+
     // 00. RSC prefetch는 layout의 인증 게이트가 redirect를 발산할 때 Next.js 16 dev router가
     //     stale 큐에 박혀 무한 루프를 만든다. 인증이 필요한 보호 경로에 대해선 prefetch를 차단.
     const isPrefetch = request.headers.get('next-router-prefetch') === '1'
@@ -24,7 +29,7 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/planners/')) {
         const url = request.nextUrl.clone();
         url.pathname = pathname.replace(/^\/api\/planners\//, '/api/myverse/');
-        return NextResponse.rewrite(url, { request });
+        return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     }
 
     // 0b. /planners/* → /myverse/* 308 영구 리디렉트 (Planner's Planner를 마이버스로 흡수)
@@ -47,11 +52,11 @@ export async function middleware(request: NextRequest) {
     // 이유: getSession()이 stale 세션 감지 시 code-verifier까지 같이 제거하여
     //      OAuth/recovery 콜백에서 PKCE 교환 실패 (PKCE code verifier not found)
     if (pathname.startsWith('/auth/')) {
-        return NextResponse.next({ request });
+        return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     // 1. Supabase 세션 갱신 (모든 요청에서)
-    let response = NextResponse.next({ request });
+    let response = NextResponse.next({ request: { headers: requestHeaders } });
 
     // 도메인별 쿠키 범위 결정 (domain-registry 단일 진실 소스)
     const hostname = request.headers.get('host') || '';
@@ -93,7 +98,7 @@ export async function middleware(request: NextRequest) {
         url.pathname = isMyverseHost
             ? `/myverse/${atHandleMatch[1]}`
             : `/profile/${atHandleMatch[1]}`;
-        const rewrite = NextResponse.rewrite(url, { request });
+        const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
         response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
         return rewrite;
     }
@@ -103,7 +108,7 @@ export async function middleware(request: NextRequest) {
     if (myverseAtMatch) {
         const url = request.nextUrl.clone();
         url.pathname = `/myverse/${myverseAtMatch[1]}${myverseAtMatch[2] ?? ""}`;
-        const rewrite = NextResponse.rewrite(url, { request });
+        const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
         response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
         return rewrite;
     }
@@ -113,7 +118,7 @@ export async function middleware(request: NextRequest) {
     if (atProfileMatch) {
         const url = request.nextUrl.clone();
         url.pathname = `/profile/${atProfileMatch[1]}`;
-        const rewrite = NextResponse.rewrite(url, { request });
+        const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
         response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
         return rewrite;
     }
@@ -133,7 +138,7 @@ export async function middleware(request: NextRequest) {
     url.pathname = `${prefix}${pathname === '/' ? '' : pathname}`;
 
     // rewrite with session cookies preserved
-    const rewriteResponse = NextResponse.rewrite(url, { request });
+    const rewriteResponse = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     // 세션 쿠키를 rewrite 응답에도 복사
     response.cookies.getAll().forEach(cookie => {
         rewriteResponse.cookies.set(cookie.name, cookie.value);

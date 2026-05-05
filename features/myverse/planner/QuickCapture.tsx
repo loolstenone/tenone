@@ -11,7 +11,7 @@ import { Plus, X, ListTodo, FileText, Pen, Loader2 } from "lucide-react";
 
 const HIDDEN_PATHS = [
     "/myverse/app/canvas/", // 캔버스 에디터에서는 숨김
-    "/myverse/onboarding",
+    "/myverse/app/onboarding",
     "/myverse/purchase",
 ];
 

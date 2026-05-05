@@ -5,7 +5,7 @@
 
 import { Suspense } from "react";
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
@@ -21,7 +21,12 @@ import type { PlannerMode, CustomMenuKey, PlannerUser } from "@/lib/myverse/type
 
 export const dynamic = "force-dynamic";
 
-async function getMemberWithPlanner() {
+type AuthState =
+    | { kind: "no_session" }
+    | { kind: "no_member"; email: string }
+    | { kind: "ok"; member: Record<string, unknown> };
+
+async function getAuthState(): Promise<AuthState> {
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,15 +40,26 @@ async function getMemberWithPlanner() {
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) return { kind: "no_session" };
 
     const admin = createAdminClient();
-    const { data: member } = await admin
-        .from("members")
-        .select("id, name, email, avatar_url, handle, member_roles!member_roles_member_id_fkey(role,is_active), myverse_users!myverse_users_member_id_fkey(*)")
-        .eq("email", user.email!)
-        .maybeSingle();
-    return member;
+    const SELECT = "id, name, email, avatar_url, handle, auth_id, member_roles!member_roles_member_id_fkey(role,is_active), myverse_users!myverse_users_member_id_fkey(*)";
+
+    // 1) auth_id로 먼저 (가장 정확) — onboarding API와 동일한 우선순위
+    let { data: member } = await admin.from("members").select(SELECT).eq("auth_id", user.id).maybeSingle();
+
+    // 2) auth_id 비어 있으면 email로 — 중복 row 있을 수 있어 가장 최근 것
+    if (!member && user.email) {
+        const { data: byEmail } = await admin
+            .from("members").select(SELECT)
+            .eq("email", user.email)
+            .order("created_at", { ascending: false })
+            .limit(1);
+        member = byEmail?.[0] ?? null;
+    }
+
+    if (!member) return { kind: "no_member", email: user.email! };
+    return { kind: "ok", member };
 }
 
 const PRIVILEGED = new Set(["super_admin", "staff", "manager"]);
@@ -55,18 +71,45 @@ function isPrivileged(member: { member_roles?: RoleRow[] | null } | null): boole
 }
 
 export default async function MyverseAppLayout({ children }: { children: React.ReactNode }) {
-    const data = await getMemberWithPlanner();
-    if (!data) {
+    // 온보딩은 layout 인증 게이트·앱 셸을 우회 (자체 페이지에서 클라이언트 인증 처리)
+    // 이렇게 하면 /myverse/app/onboarding URL을 유지하면서 layout 무한 redirect 루프를 회피.
+    const h = await headers();
+    const pathname = h.get('x-pathname') || '';
+    const isOnboarding = pathname === '/myverse/app/onboarding' || pathname.startsWith('/myverse/app/onboarding/');
+    if (isOnboarding) {
+        return <>{children}</>;
+    }
+
+    const state = await getAuthState();
+
+    // 세션 없음 → 로그인. /login에서 인증되면 redirect 파라미터로 돌아옴.
+    if (state.kind === "no_session") {
         return <ClientRedirect to="/login?redirect=/myverse/app" />;
     }
 
-    const { myverse_users, ...member } = data as typeof data & { myverse_users?: PlannerUser[] };
+    // 세션 있는데 members row 없음 → 온보딩으로 (무한 루프 방지)
+    // 이전 버그: /login으로 보내면 /login은 authenticated 감지 → router.replace('/myverse/app')
+    // → layout 재진입 → ClientRedirect → /login → ... 무한 깜빡임.
+    if (state.kind === "no_member") {
+        return <ClientRedirect to="/myverse/app/onboarding" />;
+    }
+
+    const data = state.member as {
+        id: string;
+        name: string | null;
+        email: string;
+        avatar_url: string | null;
+        handle: string | null;
+        member_roles?: RoleRow[] | null;
+        myverse_users?: PlannerUser[];
+    };
+    const { myverse_users, ...member } = data;
     const plannerUser: PlannerUser | null = myverse_users?.[0] ?? null;
-    const privileged = isPrivileged(member as { member_roles?: RoleRow[] | null });
+    const privileged = isPrivileged(member);
 
     if (!privileged) {
         if (!plannerUser || !plannerUser.onboarding_completed) {
-            return <ClientRedirect to="/myverse/onboarding" />;
+            return <ClientRedirect to="/myverse/app/onboarding" />;
         }
         if (
             plannerUser.subscription_status === "active" &&

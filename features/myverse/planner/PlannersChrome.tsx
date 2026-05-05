@@ -8,7 +8,6 @@ export function PlannersChrome({ children }: { children: React.ReactNode }) {
     const pathname = usePathname() || "";
     const isAppShell =
         pathname.startsWith("/myverse/app") ||
-        pathname.startsWith("/myverse/onboarding") ||
         pathname.startsWith("/myverse/purchase") ||
         pathname.startsWith("/myverse/canvas"); // embed 전용 라우트 — header/footer 없이 렌더
 

@@ -39,7 +39,7 @@ export default function OnboardingPage() {
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.replace("/login?redirect=/myverse/onboarding");
+            router.replace("/login?redirect=/myverse/app/onboarding");
         }
     }, [isLoading, isAuthenticated, router]);
 
@@ -71,7 +71,7 @@ export default function OnboardingPage() {
                 return;
             }
             trackPlanners("myverse_onboarding_complete", { mode, ai_tone: tone });
-            window.location.assign("/myverse/app");
+            window.location.assign("/myverse/app/today");
         } catch (e) {
             console.error("onboarding fetch error", e);
             alert(`네트워크 오류: ${(e as Error).message}\n다시 시도해 주세요.`);
