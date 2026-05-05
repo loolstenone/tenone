@@ -94,11 +94,10 @@ export function SettingsLayout({ children }: Props) {
                             <button
                                 key={g.key}
                                 onClick={() => jumpTo(g)}
-                                className={`relative shrink-0 flex items-baseline gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
+                                className={`relative shrink-0 px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
                                     active ? "text-[#6366F1] font-semibold" : "text-neutral-500 hover:text-neutral-900"
                                 }`}
                             >
-                                <span className="font-mono text-[10px] tracking-widest opacity-60">{g.no}</span>
                                 {g.label}
                                 {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />}
                             </button>

@@ -1,0 +1,210 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+    Compass,
+    Sun,
+    CalendarDays,
+    CalendarRange,
+    CalendarClock,
+    FolderKanban,
+    Sparkles,
+    Settings,
+    Search,
+    HelpCircle,
+    Users,
+    LayoutGrid,
+    LayoutTemplate,
+    Download,
+    Pencil,
+    MessageCircle,
+} from "lucide-react";
+import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
+import { REQUIRED_MENU_KEYS } from "@/lib/myverse/types";
+import { InstallButton } from "./InstallButton";
+
+interface NavItem {
+    key: string;
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    modes: PlannerMode[];
+    external?: boolean;
+}
+
+// Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
+const NAV: NavItem[] = [
+    // ── Easily + All in One + Custom (스케줄러 중심)
+    { key: "index",     href: "/myverse/app/index",       label: "인덱스",      icon: LayoutGrid,      modes: ["weekly", "all_in_one", "custom"] },
+    { key: "daily",     href: "/myverse/app/daily",       label: "일간",        icon: Sun,             modes: ["weekly", "all_in_one", "custom"] },
+    { key: "weekly",    href: "/myverse/app/weekly",      label: "주간",        icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
+    { key: "monthly",   href: "/myverse/app/monthly",     label: "월간",        icon: CalendarRange,   modes: ["weekly", "all_in_one"] },
+    { key: "yearly",    href: "/myverse/app/yearly",      label: "연간",        icon: CalendarClock,   modes: ["weekly", "all_in_one"] },
+    { key: "contacts",  href: "/myverse/app/contacts",    label: "연락처",      icon: Users,           modes: ["weekly", "all_in_one"] },
+    { key: "personal",  href: "/myverse/app/personal",    label: "퍼스널",      icon: Compass,         modes: ["weekly", "all_in_one", "custom"] },
+    // ── All in One 전용
+    { key: "projects",  href: "/myverse/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
+    { key: "canvas",    href: "/myverse/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
+    { key: "templates", href: "/myverse/app/templates",   label: "템플릿",      icon: LayoutTemplate,  modes: ["all_in_one", "custom"] },
+    { key: "community", href: "/myverse/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one", "custom"], external: true },
+];
+
+export function AppSidebar({
+    mode,
+    userName,
+    subscriptionStatus = 'free',
+    subscriptionExpires,
+    customMenus = [],
+}: {
+    mode: PlannerMode;
+    userName?: string;
+    subscriptionStatus?: SubscriptionStatus;
+    subscriptionExpires?: string | null;
+    customMenus?: CustomMenuKey[];
+}) {
+    const pathname = usePathname();
+    const [modeClient, setModeClient] = useState<PlannerMode>(mode);
+    const [customMenusClient, setCustomMenusClient] = useState<CustomMenuKey[]>(customMenus);
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const storedMode = localStorage.getItem("pp-mode");
+        if (storedMode === "weekly" || storedMode === "all_in_one" || storedMode === "custom") {
+            setModeClient(storedMode);
+        }
+        const stored = localStorage.getItem("pp-custom-menus");
+        if (stored !== null) {
+            try { setCustomMenusClient(JSON.parse(stored) as CustomMenuKey[]); } catch { /* ignore */ }
+        }
+        const menusHandler = (e: Event) => {
+            const d = (e as CustomEvent).detail;
+            if (Array.isArray(d?.menus)) setCustomMenusClient(d.menus as CustomMenuKey[]);
+        };
+        const modeHandler = (e: Event) => {
+            const d = (e as CustomEvent).detail;
+            if (d?.mode) setModeClient(d.mode as PlannerMode);
+        };
+        window.addEventListener("pp-custom-menus-change", menusHandler);
+        window.addEventListener("pp-mode-change", modeHandler);
+        return () => {
+            window.removeEventListener("pp-custom-menus-change", menusHandler);
+            window.removeEventListener("pp-mode-change", modeHandler);
+        };
+    }, []);
+    const requiredKeys = new Set<string>(REQUIRED_MENU_KEYS);
+    const visibleNav = NAV.filter((n) => {
+        if (modeClient === "custom") {
+            if (requiredKeys.has(n.key)) return true;
+            return customMenusClient.includes(n.key as CustomMenuKey);
+        }
+        return n.modes.includes(modeClient);
+    });
+
+    return (
+        <aside className="w-60 shrink-0 bg-white border-r border-neutral-200 flex flex-col h-screen sticky top-0">
+            {/* Brand */}
+            <div className="px-5 py-5 border-b border-neutral-100">
+                <Link href="/myverse/app" className="inline-flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/Myverse_logo_black.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-md shrink-0" />
+                    <span className="inline-flex items-baseline gap-1">
+                        <span className="text-base font-bold text-neutral-900 leading-none">Myverse</span>
+                        <sup className="text-[10px] font-semibold text-[#6366F1] tracking-widest">AI</sup>
+                    </span>
+                </Link>
+                {userName && (
+                    <p className="text-xs text-neutral-500 mt-3">안녕하세요, {userName}님</p>
+                )}
+            </div>
+
+            {/* Search */}
+            <div className="px-3 pt-3">
+                <Link
+                    href="/myverse/app/search"
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-neutral-500 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                >
+                    <Search className="h-3.5 w-3.5" />
+                    <span>검색…</span>
+                </Link>
+            </div>
+
+            {/* Nav */}
+            <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+                {visibleNav.map((item) => {
+                    const active = !item.external && (pathname === item.href || pathname.startsWith(item.href + "/"));
+                    const Icon = item.icon;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            target={item.external ? "_blank" : undefined}
+                            rel={item.external ? "noopener" : undefined}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                                active
+                                    ? "bg-[#6366F1] text-white"
+                                    : "text-neutral-700 hover:bg-neutral-100"
+                            }`}
+                        >
+                            <Icon className="h-4 w-4" />
+                            <span className="flex-1">{item.label}</span>
+                            {item.external && <span className="text-[10px] text-neutral-400">↗</span>}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Footer */}
+            <div className="px-3 pb-4 pt-2 border-t border-neutral-100 space-y-1">
+                <Link
+                    href="/myverse/app/settings"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        pathname.startsWith("/myverse/app/settings")
+                            ? "bg-neutral-100 text-neutral-900"
+                            : "text-neutral-600 hover:bg-neutral-50"
+                    }`}
+                >
+                    <Settings className="h-4 w-4" />
+                    <span>설정</span>
+                </Link>
+                <Link
+                    href="/myverse/app/help"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        pathname.startsWith("/myverse/app/help")
+                            ? "bg-neutral-100 text-neutral-900"
+                            : "text-neutral-600 hover:bg-neutral-50"
+                    }`}
+                >
+                    <HelpCircle className="h-4 w-4" />
+                    <span>도움말</span>
+                </Link>
+                <InstallButton
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-neutral-50 transition-colors"
+                >
+                    <Download className="h-4 w-4" />
+                    <span>앱 설치</span>
+                </InstallButton>
+                <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
+                    <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
+                        {mode === "weekly" ? "Easily" : "All in One"}
+                    </span>
+                    {subscriptionStatus === 'active' && (
+                        <span className="inline-block text-[10px] px-2 py-0.5 bg-[#6366F1]/10 text-[#6366F1] rounded">
+                            활성
+                        </span>
+                    )}
+                </div>
+
+                {subscriptionStatus !== 'active' && (
+                    <Link
+                        href="/myverse/purchase"
+                        className="mx-3 mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white rounded-lg text-xs hover:opacity-90 transition-opacity"
+                    >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>1년 구독 시작</span>
+                    </Link>
+                )}
+            </div>
+        </aside>
+    );
+}

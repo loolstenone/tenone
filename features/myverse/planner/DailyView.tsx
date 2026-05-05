@@ -742,6 +742,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
     const [arriveId, setArriveId] = useState<string | null>(null);
     useEffect(() => {
         (async () => {
+            try {
             const res = await fetch(`/api/myverse/routines?date=${date}`);
             if (!res.ok) return;
             const d = await res.json();
@@ -762,6 +763,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
             setCommute({ depart, arrive, minutes });
             setCommuteDepart(depart ?? "");
             setCommuteArrive(arrive ?? "");
+            } catch { /* silent */ }
         })();
     }, [date]);
 
@@ -993,6 +995,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
         (async () => {
             setLoading(true);
             setWeather(null);
+            try {
             const res = await fetch(`/api/myverse/daily?date=${date}`);
             if (cancelled) return;
             if (res.ok) {
@@ -1085,7 +1088,9 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     setResultCategory("");
                 }
             }
-            setLoading(false);
+            } catch { /* silent */ } finally {
+                if (!cancelled) setLoading(false);
+            }
         })();
         return () => { cancelled = true; };
     }, [date]);
