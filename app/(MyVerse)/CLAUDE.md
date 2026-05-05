@@ -161,10 +161,11 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 108 (2026-05-05)** — AI 브리핑 일일 한도(3회/일) rate limiting 추가 (`app/api/myverse/briefing/generate/route.ts`) · PWA 아이콘 인디고 M 로고 완료 (`public/planners-icon-192.png` · `planners-icon-512.png`) |
-| **이전 Phase** | 세션 107 — Planner's Planner를 마이버스로 완전 흡수. DB(`planners_*` 29테이블+13함수 → `myverse_*` RENAME), API(71 라우트 이동), lib(21 모듈 병합), 라우트 미러링(28개), 미들웨어 308 redirect + /api rewrite, 풀 화면 앱 셸, 인디고 #6366F1 브랜딩 |
-| **다음 Phase** | features/planners → features/myverse/planner 리네이밍 · Toss 가맹점 승인 · Notion TASK 템플릿 패턴 흡수("오늘 한 장 + 3버튼", "초집중모드", 한국형 태그) · 풀 화면 모드 4 Pillars 진입점 결정 |
-| **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 |
+| **Phase** | **세션 111 (2026-05-06)** — Myverse 앱 로그인 무한 깜빡임 종결 (DB FK 125개 RENAME · ClientRedirect · onboarding URL 이전) |
+| **이전 Phase** | 세션 110 — Daily UI 7개선 / 세션 109 — 9-domain 진입점 / 세션 108 — AI 브리핑 rate limiting · PWA 아이콘 / 세션 107 — PP → Myverse 단일화 |
+| **다음 Phase** | features/planners → features/myverse/planner 폴더 완전 리네이밍 · PWA 아이콘 인디고 M 교체 · Toss 가맹점 승인 + Vercel env · /myverse/app/onboarding 모바일 viewport 점검 |
+| **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **주요 결정 (세션 111)** | ① 무한 깜빡임 진짜 원인 = stale FK 이름 → REST join 실패 → plannerUser=null 오판 (이전 세션들이 잡지 못한 root cause) · ② 온보딩 URL `/myverse/onboarding` → `/myverse/app/onboarding` 이전 (앱 셸 하위) · ③ middleware x-pathname 헤더 주입으로 layout 경로 식별 · ④ members 조회 auth_id 우선 (email은 중복 row 방어 fallback) · ⑤ SW v2로 옛 PWA 사용자 자가 업그레이드 · ⑥ /planners 매칭은 정확 경로만 (정적 자산 보호) |
 | **주요 결정 (세션 107)** | ① PP → 마이버스 단일화 (옵션 A) · ② 9 영역 SSOT 확립 · ③ DB·API·lib·route 4개 layer 모두 myverse 접두사 통일 · ④ planners.tenone.biz는 마이버스 콘텐츠 직접 서비스 · ⑤ AppTopNav를 마이버스 인디고로 리브랜딩 후 풀 화면 셸로 사용 · ⑥ HandNote 펜 선택 = 즉시 그리기 (토글 제거) · ⑦ /myverse/app/daily는 PP 일간 뷰, 9-domain '일상'은 /lifestyle |
 
 ---
@@ -177,3 +178,7 @@
 - ❌ 핸들을 가입 즉시 강제 (첫 공개 시점)
 - ❌ 분류 결과를 사용자 동의 없이 외부 LLM으로 보내기
 - ❌ 9 영역 외 임의 도메인 키 추가 (lib/myverse/domains.ts SSOT 통과 필수)
+- ❌ `/myverse/app/*` layout·page에서 server `redirect()` 사용 (Next.js 16 dev router prefetch 무한 큐 트리거) — 반드시 `<ClientRedirect to="...">` 사용
+- ❌ Supabase REST join hint를 옛 `planners_*_member_id_fkey` 이름으로 작성 (세션 111에서 모두 `myverse_*_member_id_fkey`로 RENAME 완료)
+- ❌ members 조회를 email만으로 (중복 row 시 잘못된 row 반환) — 반드시 `auth_id` 우선
+- ❌ middleware의 `/planners` redirect를 `startsWith('/planners')`로 (정적 자산 `/planners-sw.js`·`/planners-icon-*.png` 까지 잡힘) — 반드시 `=== '/planners'` 또는 `startsWith('/planners/')`

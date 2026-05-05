@@ -1,6 +1,64 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-05 (세션 109 — 9-domain 모바일 메뉴 추가 완료)
+> 마지막 업데이트: 2026-05-06 (세션 111 — Myverse 무한 깜빡임 종결 + 온보딩 URL 이전)
+
+---
+
+## 세션 111 핵심 성과 (2026-05-06, 집)
+
+### 무한 깜빡임 (Myverse 앱 로그인) 종결
+**진짜 원인**: DB의 myverse_* 테이블 FK 제약 이름이 옛 `planners_*_member_id_fkey`를 그대로 보존 → Supabase REST의 hint resolver가 `myverse_users_member_id_fkey`를 못 찾아 join 실패 → `plannerUser=null` → 온보딩 미완료로 오판 → /onboarding ↔ /myverse/app 무한 ping-pong
+
+**조치 (이번 세션 4 commits, 모두 master 푸시 완료)**:
+- 85536fdf — 누락된 MyVerse 페이지 24개 + lib/canvas-engine 추적 추가 (이전 세션 잔여)
+- 0280afec — server `redirect()` 3건 → `<ClientRedirect>` 변환 (today/page.tsx, time/page.tsx, page.tsx)
+- b47c5d98 — SW v2: 옛 /planners/* 캐시 강제 삭제 + prefetch 응답 캐싱 차단 (`public/planners-sw.js`)
+- fde0ab3a — middleware /planners 매칭에서 정적 자산(/planners-sw.js, /planners-icon-*.png) 제외 → 옛 PWA 사용자 SW 자가 업그레이드 가능
+- **22aa83f7 — 핵심 수정**:
+  1. **DB**: stale FK 125개 일괄 RENAME (`planners_*` → `myverse_*`, 모든 myverse_* 테이블 검사 후)
+  2. middleware: x-pathname 헤더 주입 → layout이 현재 경로 식별 가능
+  3. /myverse/onboarding/page.tsx → /myverse/app/onboarding/page.tsx 이전 (앱 셸 하위로)
+  4. layout: x-pathname=/myverse/app/onboarding 이면 인증 게이트 우회 (children만 렌더)
+  5. layout: members 조회 우선순위 auth_id → email(중복 row 시 가장 최근)
+  6. PlannersChrome / QuickCapture: 옛 /myverse/onboarding 경로 정리
+  7. 온보딩 완료 후 → /myverse/app/today 직접 이동 (불필요 redirect 1회 제거)
+  8. ClientRedirect 컴포넌트 도입 (server redirect()로 인한 Next.js 16 dev router prefetch 무한 큐 회피)
+
+**남은 잔재**:
+- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반)
+- Toss 가맹점 승인 + Vercel 환경변수 설정
+- ssoflicker: myverse.kr/login 진입 시 SSO chain으로 tenone.biz/login 까지 1~2회 화면 점프(loop는 아님). 현재 표준 패턴(전 외부 도메인 동일)이라 보류 — 추후 myverse.kr 자체 로그인 강화 검토
+
+### 다음 할 일 (사무실에서)
+> 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
+
+1. **features/planners → features/myverse/planner 폴더 완전 리네이밍**
+   - 현재 settings/* 일부만 이동된 상태 (세션 110)
+   - `features/planners/` 트리 통째로 `features/myverse/planner/`로 이동
+   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/planner/*`)
+   - 전역 sed 후 `npx tsc --noEmit` + `npm run build`로 검증
+   - 충돌 가능: `features/myverse/planner/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
+
+2. **PWA 아이콘 인디고 M 로고 교체**
+   - 현재 `public/planners-icon-192.png` / `512.png` 그대로 (옛 PP 로고)
+   - `public/planners-manifest.json`은 인디고 #6366F1로 리브랜딩 됐지만 아이콘은 그대로
+   - Myverse 인디고 M 마크 디자인 → 192/512 PNG 생성 → 기존 파일 교체
+   - SW v2가 이미 캐시 강제 삭제하므로 사용자 다음 방문 시 자동 갱신
+
+3. **Toss 가맹점 승인 + Vercel 환경변수**
+   - 가맹점 승인 신청 진행 (대표자 신분증·사업자등록증)
+   - 승인 후 발급되는 client·secret 키를 Vercel `TOSS_CLIENT_KEY`·`TOSS_SECRET_KEY` 추가
+   - 현재 결제 라우트는 `/api/myverse/payments/*`에 코드는 있지만 실 결제 미연동
+
+4. **/myverse/app/onboarding 화면 점검 (URL 이전 후 첫 작동 확인)**
+   - 새 URL로 진입 시 PlannersChrome이 헤더/푸터를 안 띄우는지 (정상)
+   - 완료 후 /myverse/app/today 진입이 매끄러운지
+   - 모바일 viewport에서 4 step (welcome→mode→role→ai→identity_lite) UI 깨짐 없는지
+
+5. **SSO 점프 UX 개선 검토 (낮은 우선순위)**
+   - myverse.kr/login 첫 진입 시 SSO 자동 발사로 tenone.biz/login 으로 점프하는 UX
+   - 옵션 A: myverse.kr 자체에 풀 로그인 폼 (현재 sso_attempted 우회 후 보이는 화면)을 우선 노출, "tenone 계정으로 로그인" 버튼만 SSO 트리거
+   - 옵션 B: 그대로 유지 (전 외부 도메인 일관성)
 
 ---
 

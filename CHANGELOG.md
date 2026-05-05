@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-05-06 — 세션 111 · Myverse 무한 깜빡임 종결 + 온보딩 URL 이전
+
+### 장소
+집
+
+### 핵심 결정사항
+- **무한 깜빡임의 진짜 원인 발견**: Supabase의 myverse_* 테이블 FK 제약 이름이 옛 `planners_*_member_id_fkey` 그대로 → REST hint resolver가 join 못 풀어 plannerUser=null → 온보딩 미완료 오판
+- 옛 PWA 사용자가 SW를 자가 업그레이드할 수 있어야 — 정적 자산 경로(`/planners-sw.js`, `/planners-icon-*.png`)가 middleware의 `/planners` 308 redirect에 잡히면 안 됨
+- 온보딩 URL을 앱 셸 하위(`/myverse/app/onboarding`)로 이전 — 향후 PWA 통합·풀 화면 대비
+
+### DB 변경
+- `myverse_*` 테이블의 stale 제약 125개 일괄 RENAME (`planners_*` → `myverse_*`)
+- 영향: PK·FK·CHECK·UNIQUE 모두 포함 (FK만 끊겼던 게 아니라 정합성 차원에서 전부 정리)
+
+### 변경 파일
+- `middleware.ts` — x-pathname 헤더 주입 (server header()로 layout이 경로 식별), `/planners` 매칭을 정확 경로(`=== '/planners'` 또는 `startsWith('/planners/')`)로 좁힘, prefetch 무한 큐 차단 조건 정리
+- `app/(MyVerse)/myverse/app/layout.tsx` — getMemberWithPlanner → getAuthState 3-state(no_session/no_member/ok), members 조회 auth_id 우선·email fallback, x-pathname=/myverse/app/onboarding 우회, no_member case → /onboarding으로 분기 (기존엔 /login으로 보내서 무한 루프)
+- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — `/myverse/onboarding/page.tsx`에서 이전, /login redirect 파라미터 갱신, 완료 후 /myverse/app/today로 직접 이동
+- `components/ClientRedirect.tsx` — server redirect()의 Next.js 16 dev router prefetch 무한 큐 회피용 client redirect (`window.location.replace`)
+- `app/(MyVerse)/myverse/app/page.tsx` · `today/page.tsx` · `time/page.tsx` — server `redirect()` → `<ClientRedirect>` 변환
+- `public/planners-sw.js` — v2: CACHE_NAME `pp-ai-v1` → `myverse-app-v2`, activate 시 옛 캐시 전부 삭제, fetch 핸들러는 `/myverse/*` 외 모든 경로 패스, prefetch 응답은 캐시하지 않음
+- `features/myverse/planner/PlannersChrome.tsx` · `QuickCapture.tsx` — 옛 `/myverse/onboarding` 경로 제거
+
+### 커밋 (master)
+- 85536fdf — fix: 누락된 MyVerse 페이지 24개 + lib/canvas-engine 추적 추가
+- 0280afec — fix(myverse): 추가 server redirect 3건 → ClientRedirect 변환
+- b47c5d98 — fix(myverse/pwa): SW v2 — 옛 /planners/* 캐시 강제 삭제 + prefetch 응답 캐싱 차단
+- fde0ab3a — fix(middleware): /planners 매칭에서 정적 자산 제외
+- 22aa83f7 — fix(myverse/app): 무한 깜빡임 종결 + 온보딩 URL을 /myverse/app 하위로
+
+### 다음 작업 (사무실)
+1. features/planners → features/myverse/planner 폴더 완전 리네이밍 (78개 import 갱신, sed + tsc + build)
+2. PWA 아이콘 인디고 M 로고 교체 (`public/planners-icon-192.png`/`512.png`)
+3. Toss 가맹점 승인 + Vercel 환경변수 (`TOSS_CLIENT_KEY`·`TOSS_SECRET_KEY`)
+4. /myverse/app/onboarding 화면 점검 (모바일 viewport, 4 step UI)
+5. (낮은 우선순위) myverse.kr/login SSO 점프 UX 검토
+
+---
+
 ## 2026-05-05 — 세션 110 · Daily Planner UI 7가지 개선 (Quick Actions 재편·설정 레이아웃 슬림화·단축키 사용자 선택)
 
 ### 장소
