@@ -1,27 +1,27 @@
 // Myverse 앱 쉘 — 서버 사이드 인증 + 4 Pillars 사이드바 + 인디고 테마
 //
-// Phase 1: PP /planners/app 의 인증·구독 게이트 패턴을 그대로 흡수.
-// 기존 7 탭(me·log·plan·dream·work·ai·verse)도 사이드바를 통해 접근 가능 (점진적 통합).
+// SmarComm·WIO 패턴 — server redirect()는 Next.js 16 dev router의 prefetch 무한 루프 버그를
+// 트리거하므로 인증 게이트는 ClientRedirect 컴포넌트로 처리. server는 항상 200 응답.
 
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getPlannerUser } from "@/lib/myverse/client";
-import { AppTopNav } from "@/features/planners/AppTopNav";
-import { AppMonthBar } from "@/features/planners/AppMonthBar";
-import { PwaRegister } from "@/features/planners/PwaRegister";
-import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
-import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
-import { KeyboardShortcuts } from "@/features/planners/KeyboardShortcuts";
-import { AiBriefingFab } from "@/features/planners/AiBriefingFab";
-import { MobileBottomNav } from "@/features/planners/MobileBottomNav";
-import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
-import type { PlannerMode, CustomMenuKey } from "@/lib/myverse/types";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ClientRedirect } from "@/components/ClientRedirect";
+import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
+import { AppMonthBar } from "@/features/myverse/planner/AppMonthBar";
+import { PwaRegister } from "@/features/myverse/planner/PwaRegister";
+import { BetaFeedbackButton } from "@/features/myverse/planner/BetaFeedbackButton";
+import { WelcomeTracker } from "@/features/myverse/planner/WelcomeTracker";
+import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
+import { AiBriefingFab } from "@/features/myverse/planner/AiBriefingFab";
+import { MobileBottomNav } from "@/features/myverse/planner/MobileBottomNav";
+import { PlannersThemeProvider } from "@/features/myverse/planner/PlannersThemeProvider";
+import type { PlannerMode, CustomMenuKey, PlannerUser } from "@/lib/myverse/types";
 
 export const dynamic = "force-dynamic";
 
-async function getMember() {
+async function getMemberWithPlanner() {
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,9 +37,10 @@ async function getMember() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const { data: member } = await supabase
+    const admin = createAdminClient();
+    const { data: member } = await admin
         .from("members")
-        .select("id, name, email, avatar_url, handle, member_roles!member_roles_member_id_fkey(role,is_active)")
+        .select("id, name, email, avatar_url, handle, member_roles!member_roles_member_id_fkey(role,is_active), myverse_users!myverse_users_member_id_fkey(*)")
         .eq("email", user.email!)
         .maybeSingle();
     return member;
@@ -54,17 +55,18 @@ function isPrivileged(member: { member_roles?: RoleRow[] | null } | null): boole
 }
 
 export default async function MyverseAppLayout({ children }: { children: React.ReactNode }) {
-    const member = await getMember();
-    if (!member) {
-        redirect("/login?redirect=/myverse/app");
+    const data = await getMemberWithPlanner();
+    if (!data) {
+        return <ClientRedirect to="/login?redirect=/myverse/app" />;
     }
 
-    const plannerUser = await getPlannerUser(member.id);
+    const { myverse_users, ...member } = data as typeof data & { myverse_users?: PlannerUser[] };
+    const plannerUser: PlannerUser | null = myverse_users?.[0] ?? null;
     const privileged = isPrivileged(member as { member_roles?: RoleRow[] | null });
 
     if (!privileged) {
         if (!plannerUser || !plannerUser.onboarding_completed) {
-            redirect("/myverse/onboarding");
+            return <ClientRedirect to="/myverse/onboarding" />;
         }
         if (
             plannerUser.subscription_status === "active" &&
@@ -74,7 +76,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
             plannerUser.subscription_status = "expired";
         }
         if (plannerUser.subscription_status === "expired") {
-            redirect("/myverse/purchase?expired=1");
+            return <ClientRedirect to="/myverse/purchase?expired=1" />;
         }
     }
 

@@ -8,6 +8,17 @@ const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/r
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    // 00. RSC prefetch는 layout의 인증 게이트가 redirect를 발산할 때 Next.js 16 dev router가
+    //     stale 큐에 박혀 무한 루프를 만든다. 인증이 필요한 보호 경로에 대해선 prefetch를 차단.
+    const isPrefetch = request.headers.get('next-router-prefetch') === '1'
+        || request.headers.get('purpose') === 'prefetch'
+        || request.headers.get('rsc') === '1'
+        || request.headers.get('next-router-state-tree') !== null
+        || request.nextUrl.searchParams.has('_rsc');
+    if (isPrefetch && (pathname.startsWith('/myverse/app') || pathname.startsWith('/planners'))) {
+        return new NextResponse(null, { status: 204 });
+    }
+
     // 0a. /api/planners/* → /api/myverse/* 내부 rewrite (외부 호출자 호환: Toss, Google OAuth, Cron)
     //     URL은 그대로 유지하면서 새 핸들러로 라우팅.
     if (pathname.startsWith('/api/planners/')) {
@@ -17,7 +28,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // 0b. /planners/* → /myverse/* 308 영구 리디렉트 (Planner's Planner를 마이버스로 흡수)
+    //     RSC prefetch는 308을 따라가다 stale 큐 무한 루프를 일으키므로 prefetch에는 redirect 안 함
     if (pathname.startsWith('/planners')) {
+        const isPrefetch = request.headers.get('next-router-prefetch') === '1'
+            || request.headers.get('purpose') === 'prefetch'
+            || request.headers.get('rsc') === '1';
+        if (isPrefetch) {
+            return new NextResponse(null, { status: 204 });
+        }
         const url = request.nextUrl.clone();
         url.pathname = pathname.replace(/^\/planners/, '/myverse');
         return NextResponse.redirect(url, 308);
