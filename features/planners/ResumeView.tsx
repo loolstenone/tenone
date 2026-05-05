@@ -276,6 +276,23 @@ export function ResumeView() {
                         color: #444 !important;
                         padding-top: 1px !important;
                     }
+                    /* 경력 description — list-item-row를 2열 그리드로, description을 오른쪽 열에 */
+                    .resume-career-section .list-item-row {
+                        display: grid !important;
+                        grid-template-columns: 72pt 1fr !important;
+                        column-gap: 12px !important;
+                    }
+                    .resume-career-section .list-item-row > div:first-child {
+                        grid-column: 1 / -1 !important;
+                    }
+                    .resume-career-description {
+                        grid-column: 2 !important;
+                        border-top: none !important;
+                        padding-top: 1px !important;
+                        margin-top: 0 !important;
+                        font-size: 8.5pt !important;
+                        color: #444 !important;
+                    }
                     /* 인증 문구 — 우측 정렬 */
                     .resume-auth {
                         text-align: right !important;
@@ -430,6 +447,7 @@ export function ResumeView() {
                         placeholders={{ period: "기간 (예: 2022.01–현재)", company: "회사명", role: "직책·팀", description: "주요 업무·클라이언트" }}
                         keyField="company"
                         multilineField="description"
+                        multilineClassName="resume-career-description"
                     />
                 </Section>
             )}
@@ -440,8 +458,8 @@ export function ResumeView() {
                     <ListBlock
                         items={resume.awards ?? []}
                         onChange={(arr) => updateResume({ awards: arr })}
-                        fields={["year", "title", "project", "client", "org"]}
-                        placeholders={{ year: "년도", title: "수상명", project: "캠페인·작품", client: "클라이언트", org: "주관 기관" }}
+                        fields={["title", "project", "client", "org", "year"]}
+                        placeholders={{ title: "수상명", project: "캠페인·작품", client: "클라이언트", org: "주관 기관", year: "년도" }}
                         keyField="title"
                     />
                 </Section>
@@ -479,9 +497,9 @@ export function ResumeView() {
                     <ListBlock
                         items={resume.lectures ?? []}
                         onChange={(arr) => updateResume({ lectures: arr })}
-                        fields={["year", "org", "topic"]}
-                        placeholders={{ year: "년도", org: "기관·학교", topic: "주제·과목" }}
-                        keyField="org"
+                        fields={["topic", "org", "year"]}
+                        placeholders={{ topic: "주제·과목", org: "기관·학교", year: "년도" }}
+                        keyField="topic"
                     />
                 </Section>
             )}
@@ -492,9 +510,9 @@ export function ResumeView() {
                     <ListBlock
                         items={resume.judging ?? []}
                         onChange={(arr) => updateResume({ judging: arr })}
-                        fields={["period", "org", "role"]}
-                        placeholders={{ period: "기간", org: "심사 기관", role: "역할·분야" }}
-                        keyField="org"
+                        fields={["role", "org", "period"]}
+                        placeholders={{ role: "역할·분야", org: "심사 기관", period: "기간" }}
+                        keyField="role"
                     />
                 </Section>
             )}
@@ -780,7 +798,7 @@ function PersonalBlock({ value, onSave, userId }: {
                 <F label="주소" k="address" placeholder="서울시 마포구…" full />
                 <F label="휴대전화" k="phone" placeholder="010-0000-0000" />
                 <F label="이메일" k="email" placeholder="you@example.com" />
-                <F label="홈페이지" k="homepage" placeholder="https://…" full />
+                <F label="홈페이지 / SNS" k="homepage" placeholder="https://…" full />
             </div>
         </div>
     );
@@ -825,7 +843,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 /* ── 반복 항목 블록 ───────────────────────────────────── */
 function ListBlock<T extends { id: string; status?: string }>({
-    items, onChange, fields, placeholders, keyField, multilineField, selectField,
+    items, onChange, fields, placeholders, keyField, multilineField, multilineClassName, selectField,
 }: {
     items: T[];
     onChange: (arr: T[]) => void;
@@ -833,6 +851,7 @@ function ListBlock<T extends { id: string; status?: string }>({
     placeholders: Partial<Record<keyof T, string>>;
     keyField: keyof T;
     multilineField?: keyof T;
+    multilineClassName?: string;
     selectField?: { key: keyof T; options: readonly string[] };
 }) {
     const [list, setList] = useState<T[]>(items);
@@ -919,7 +938,7 @@ function ListBlock<T extends { id: string; status?: string }>({
                                     onBlur={commit}
                                     placeholder={placeholders[multilineField]}
                                     rows={2}
-                                    className="w-full text-xs text-neutral-700 bg-transparent focus:outline-none resize-none border-t border-neutral-200/70 pt-1.5 placeholder:text-neutral-300 myverse-dark:border-neutral-700 myverse-dark:text-neutral-300"
+                                    className={`w-full text-xs text-neutral-700 bg-transparent focus:outline-none resize-none border-t border-neutral-200/70 pt-1.5 placeholder:text-neutral-300 myverse-dark:border-neutral-700 myverse-dark:text-neutral-300${multilineClassName ? ` ${multilineClassName}` : ""}`}
                                 />
                             )}
                         </div>
