@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { Settings, Loader2, Check, X, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
 import type { PlannerMode, AiTone, PlannerRole, ActivityBase, CustomMenuKey } from "@/lib/myverse/types";
 import { PLANNER_ROLE_META, CUSTOM_TOGGLE_KEYS } from "@/lib/myverse/types";
-import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/planners/MobileBottomNav";
-import { SettingsLayout, GroupMarker } from "@/features/planners/SettingsLayout";
-import { SettingsTheme } from "@/features/planners/settings/SettingsTheme";
-import { SettingsAi } from "@/features/planners/settings/SettingsAi";
-import { SettingsNotifications } from "@/features/planners/settings/SettingsNotifications";
-import { SettingsIntegrations } from "@/features/planners/settings/SettingsIntegrations";
-import { SettingsExport } from "@/features/planners/settings/SettingsExport";
-import { SettingsBases } from "@/features/planners/settings/SettingsBases";
+import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/myverse/planner/MobileBottomNav";
+import { SettingsLayout, GroupMarker } from "@/features/myverse/planner/SettingsLayout";
+import { SettingsTheme } from "@/features/myverse/planner/settings/SettingsTheme";
+import { SettingsAi } from "@/features/myverse/planner/settings/SettingsAi";
+import { SettingsNotifications } from "@/features/myverse/planner/settings/SettingsNotifications";
+import { SettingsIntegrations } from "@/features/myverse/planner/settings/SettingsIntegrations";
+import { SettingsExport } from "@/features/myverse/planner/settings/SettingsExport";
+import { SettingsBases } from "@/features/myverse/planner/settings/SettingsBases";
 
 const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -44,6 +44,7 @@ export default function SettingsPage() {
     const [initialTone, setInitialTone] = useState<AiTone>("friendly");
     const [initialContextScope, setInitialContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
     const [initialTrackingMetrics, setInitialTrackingMetrics] = useState<string[]>([]);
+    const [initialNoteShortcuts, setInitialNoteShortcuts] = useState<string[]>(["gratitude", "emotion"]);
     const [initialCountryPref, setInitialCountryPref] = useState<string[]>(["KR"]);
     const [initialEmail, setInitialEmail] = useState(true);
     const [initialPush, setInitialPush] = useState(false);
@@ -78,6 +79,7 @@ export default function SettingsPage() {
                     setInitialPush(!!d.user.notify_push_briefing);
                     if (d.user.ai_context_scope?.length) setInitialContextScope(d.user.ai_context_scope);
                     setInitialTrackingMetrics(Array.isArray(d.user.daily_tracking_metrics) ? d.user.daily_tracking_metrics : []);
+                    setInitialNoteShortcuts(Array.isArray(d.user.daily_note_shortcuts) ? d.user.daily_note_shortcuts : ["gratitude", "emotion"]);
                     setInitialCountryPref(Array.isArray(d.user.country_pref) && d.user.country_pref.length > 0 ? d.user.country_pref : ["KR"]);
                     if (Array.isArray(d.user.activity_bases)) setInitialBases(d.user.activity_bases);
                     setSub({
@@ -313,6 +315,7 @@ export default function SettingsPage() {
                     initialTone={initialTone}
                     initialContextScope={initialContextScope}
                     initialTrackingMetrics={initialTrackingMetrics}
+                    initialNoteShortcuts={initialNoteShortcuts}
                     initialCountryPref={initialCountryPref}
                     initialProjectLinks={initialProjectLinks}
                     save={save}

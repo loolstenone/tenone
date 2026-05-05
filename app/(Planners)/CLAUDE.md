@@ -114,7 +114,7 @@
 - PurchaseView — 결제
 - CopyToAiButton — Claude/ChatGPT/Gemini deep link
 - **Settings 디자인 시스템 (세션 102)**
-  - SettingsLayout — 4그룹 IA(시작/스타일/기능/기술) · PC sticky 사이드바 · 모바일 가로 pill row · IntersectionObserver 활성 자동 갱신 · xl+ 3컬럼 grid (사이드바·main·preview)
+  - SettingsLayout — 4그룹 IA(시작/스타일/기능/기술) · 전 breakpoint 상단 sticky pill row(사이드바 제거) · IntersectionObserver 활성 자동 갱신 · xl+ 2컬럼 grid (main·preview)
   - SettingsStylePresets — 8개 프리셋(Mono Light·Cream Serif·Editorial·Slate Pro·Black Ink·Campus Mint·Campus Blush·Designer Mono) · 컬러·모서리·system폰트·user폰트·모드 5개 토큰 한 번에 적용 · matchPreset() 헬퍼
   - SettingsLivePreview — xl+(1280px) 우측 sticky 라이브 프리뷰 · Daily/Project/AI 3탭 · CSS 변수(--pp-*, --planners-accent, --planners-font, --planners-user-font)로 즉시 반영
   - 토큰: `app/globals.css` `.pp-settings` 스코프 11종(라이트+다크) — 핸드오프 design_handoff_planners_settings/tokens.css 참조
@@ -310,7 +310,7 @@
 - 영문 라벨 금지: ~~Index, Today, P.I, Project, Canvas, Templates~~
 - **AI Briefing/템플릿은 메인 탭에 두지 않는다** — 각 뷰 본문에서 호출
 
-**SSOT 파일**: `features/planners/AppTopNav.tsx` `TABS` 배열. 라벨 변경은 이 한 곳에서만.
+**SSOT 파일**: `features/myverse/planner/AppTopNav.tsx` `TABS` 배열. 라벨 변경은 이 한 곳에서만. 현재 탭 순서: 인덱스 · **오늘** · 주간 · 월간 · 연간 · 연락처 · 퍼스널 · 프로젝트 · 캔버스 · 템플릿 · 커뮤니티↗ ("일간" → "오늘" 세션 110 변경)
 
 ### 8-A) 본문 서브 메뉴 (Sub-Nav) 🟢 SSOT
 

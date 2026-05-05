@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-04 (세션 107 — Planner's Planner를 마이버스로 완전 흡수)
+> 마지막 업데이트: 2026-05-05 (세션 109 — 9-domain 모바일 메뉴 추가 완료)
 
 ---
 
@@ -44,11 +44,48 @@
 - 시각 상태 3단계: teal 활성 / 회색 활성(펜 선택만) / 비활성
 
 ### 다음 할 일
-- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반)
+- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반 — 세션 110에서 부분 완료, settings/* 계열만 이동됨)
 - PWA 아이콘 인디고 M 로고로 교체 (현재 `planners-icon-192.png` 그대로)
 - Toss 가맹점 승인 + Vercel 환경변수 설정
-- Notion `TASK` 템플릿 인사이트 흡수: "오늘 한 장 + 3버튼" 메인 홈, "초집중모드" 1급 기능, 분류에 한국형 태그(`감사3개`·`감정 일기`)
-- 풀 화면 모드에서 4 Pillars + 9-domain 진입점 결정 (현재 비노출 상태)
+- ✅ Notion `TASK` 템플릿 인사이트 흡수 완료 (세션 108)
+- ✅ 풀 화면 모드 4 Pillars + 9-domain 진입점 완료 (세션 109)
+    - 데스크톱: AppTopNav 우측 `LayoutGrid` 버튼 → 3컬럼 드롭다운 (나/일/시간)
+    - 모바일: 햄버거 메뉴 내 "9 영역" 섹션 (나→일→시간 순, 아이콘+컬러)
+
+---
+
+## 세션 110 핵심 성과 (2026-05-05)
+
+### Daily Planner UI 7가지 개선 (features/myverse/planner/)
+- **"일간" → "오늘"** — AppTopNav.tsx TABS 배열 label 변경
+- **"기록하기" 삭제** — DailyView Quick Action Row 1에서 중복 버튼 제거
+- **템플릿·캔버스·녹음 위로 올리기** — DailyView 노트 섹션에서 Quick Action Row 2로 이동 (기본 노트·템플릿·캔버스·녹음 + 조건부 단축키)
+- **감사 3가지·감정 일기 → 사용자 선택 사항** — `daily_note_shortcuts` 설정 추가 (SettingsAi.tsx 체크박스 · settings/page.tsx state + API 로드 + 프롭 전달 · DailyView 조건부 렌더)
+- **"일간 트래킹" → "일간 기록"** — SettingsAi.tsx 섹션 헤더 리네이밍
+- **버튼 디자인 타입 일관성** — Quick Actions 전체 `rounded-xl px-3 py-2 bg-white border border-neutral-200 shadow-sm` 통일
+- **설정 좌측 사이드바 → 서브 메뉴 위치로** — SettingsLayout.tsx: PC 200px sticky aside 제거 · pill nav `lg:hidden` 제거(전 breakpoint 노출) · grid `xl:grid-cols-[1fr_380px]` 2컬럼으로 슬림화
+
+---
+
+## 세션 109 핵심 성과 (2026-05-05)
+
+### 9-domain 진입점 완성 — AppTopNav 데스크톱 + 모바일 양면
+- **데스크톱** (`features/myverse/planner/AppTopNav.tsx`): 우측 유틸리티 영역에 `LayoutGrid` 버튼 → 3컬럼 드롭다운
+  - 나(BODY·일상·관계) / 일(업무·공부) / 시간(일정·이동·여행) 컬럼
+  - 아이콘 컬러, active 상태 감지, 라우트 이동 시 자동 닫힘, 외부 클릭 닫힘
+- **모바일** 햄버거 메뉴 내 "9 영역" 섹션 추가 (탭 nav 아래, 구분선 위)
+  - 나→일→시간 순, 각 도메인 아이콘+라벨, active 하이라이트
+
+---
+
+## 세션 108 핵심 성과 (2026-05-05)
+
+### Notion TASK 인사이트 흡수 — DailyView Quick Action Bar 개편
+- **Quick Action Bar 2열 구조로 재편** (`features/myverse/planner/DailyView.tsx`)
+  - 1열: 할 일 / 기록하기 / **초집중 시작** (gradient primary CTA, font-semibold, active:scale-95 — 1급 기능으로 격상)
+  - 2열: 🙏 감사 3가지 (amber) + 💭 감정 일기 (rose) — 상단에서 즉시 접근 가능
+  - 컨테이너: `mb-5 mt-1 space-y-2` (여백 + 수직 스택)
+- **중복 제거**: 노트 추가 섹션의 감사3가지·감정일기 버튼 삭제 (Quick Action Bar로 통합)
 
 ---
 

@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-05-05 — 세션 110 · Daily Planner UI 7가지 개선 (Quick Actions 재편·설정 레이아웃 슬림화·단축키 사용자 선택)
+
+### 장소
+사무실
+
+### 변경 파일
+- `features/myverse/planner/AppTopNav.tsx` — "일간" → "오늘" 탭 리네이밍
+- `features/myverse/planner/DailyView.tsx` — "기록하기" 삭제, 템플릿·캔버스·녹음 Quick Action Row 2로 이동, daily_note_shortcuts 조건부 렌더
+- `features/myverse/planner/settings/SettingsAi.tsx` — "일간 트래킹" → "일간 기록", `daily_note_shortcuts` 체크박스 설정 추가
+- `app/(Planners)/planners/app/settings/page.tsx` — `initialNoteShortcuts` state, API 로드, SettingsAi 프롭 전달
+- `features/myverse/planner/SettingsLayout.tsx` — PC 좌측 사이드바(aside) 제거, pill nav 전 breakpoint 노출, xl+ 2컬럼 grid
+
+### 결정사항
+- `daily_note_shortcuts` 기본값: `["gratitude","emotion"]` — 기존 사용자는 기존 단축키 유지
+- 설정 레이아웃은 pill nav 단일로 통일 (PC/모바일 동일) — 왼쪽 aside 제거로 main 영역 더 넓어짐
+
+---
+
 ## 2026-05-04 — 세션 107 · Planner's Planner를 마이버스로 완전 흡수 (DB·API·라이브러리·라우트·브랜딩 통합)
 
 ### 장소
