@@ -145,43 +145,44 @@ export function ResumeView() {
         <div className="resume-root max-w-4xl mx-auto px-4 md:px-10 py-6 space-y-5">
             <style>{`
                 @media print {
-                    @page { size: A4 portrait; margin: 16mm 14mm; }
+                    @page { size: A4 portrait; margin: 18mm 16mm; }
                     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                    body, html { background: #fff !important; }
+                    body, html { background: #fff !important; font-family: 'Malgun Gothic', '맑은 고딕', sans-serif !important; }
                     .resume-no-print { display: none !important; }
                     .resume-root {
                         max-width: 100% !important;
                         padding: 0 !important;
                         margin: 0 !important;
-                        space-y: 0 !important;
                     }
                     .resume-root > * + * { margin-top: 0 !important; }
                     .resume-section {
                         break-inside: avoid;
-                        border: 1px solid #d4d4d4 !important;
+                        border: none !important;
+                        border-top: 2px solid #111 !important;
                         box-shadow: none !important;
                         border-radius: 0 !important;
-                        padding: 10px 12px !important;
-                        margin-bottom: 5px !important;
+                        padding: 8px 0 12px !important;
+                        margin-bottom: 0 !important;
                         background: #fff !important;
                     }
                     .resume-section-header {
-                        border-bottom: 1px solid #e5e5e5;
-                        padding-bottom: 4px;
-                        margin-bottom: 8px;
+                        border-bottom: none !important;
+                        padding-bottom: 5px !important;
+                        margin-bottom: 6px !important;
                     }
                     .resume-section-header .badge { display: none; }
                     .resume-section-header h2 {
-                        font-size: 10pt !important;
-                        font-weight: 700 !important;
-                        color: #111 !important;
+                        font-size: 10.5pt !important;
+                        font-weight: 800 !important;
+                        color: #000 !important;
+                        letter-spacing: 0.04em !important;
                     }
                     input, textarea, select {
                         border: none !important;
                         background: transparent !important;
                         padding: 0 !important;
                         margin: 0 !important;
-                        color: #111 !important;
+                        color: #1a1a1a !important;
                         font-size: 9pt !important;
                         -webkit-appearance: none;
                         appearance: none;
@@ -189,25 +190,99 @@ export function ResumeView() {
                         outline: none !important;
                         box-shadow: none !important;
                         border-bottom: none !important;
+                        line-height: 1.55 !important;
                     }
                     textarea { height: auto !important; overflow: visible !important; }
-                    label { font-size: 7.5pt !important; color: #888 !important; }
+                    label {
+                        font-size: 7pt !important;
+                        color: #666 !important;
+                        letter-spacing: 0.06em !important;
+                        text-transform: uppercase !important;
+                    }
                     .list-item-row {
                         border: none !important;
+                        border-bottom: 1px solid #e8e8e8 !important;
                         background: transparent !important;
-                        padding: 2px 0 !important;
+                        padding: 3px 0 !important;
                     }
                     .resume-auth {
                         break-inside: avoid;
-                        margin-top: 20px !important;
-                        border-top: 1px solid #d4d4d4 !important;
-                        padding-top: 12px !important;
+                        margin-top: 30px !important;
+                        border-top: 1px solid #999 !important;
+                        padding-top: 16px !important;
+                        text-align: center !important;
+                    }
+                    .resume-auth p { font-size: 9.5pt !important; color: #111 !important; line-height: 1.9 !important; }
+                    .resume-auth .auth-date { font-size: 9pt !important; color: #444 !important; }
+                    .resume-photo img { width: 108px !important; height: 135px !important; object-fit: cover; border: 1px solid #ccc !important; }
+                    .add-btn, .remove-btn, .photo-overlay, .photo-actions { display: none !important; }
+                    /* 인적 사항 — 웹과 동일한 가로 레이아웃 */
+                    .resume-personal-outer {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        gap: 16px !important;
+                        align-items: flex-start !important;
+                    }
+                    .resume-personal-fields {
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 8px 16px !important;
+                        flex: 1 !important;
+                    }
+                    .resume-col-full {
+                        grid-column: span 2 !important;
+                    }
+                    /* 병적 사항 — 3열 유지 */
+                    .resume-military-fields {
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr 1fr !important;
+                        gap: 8px 16px !important;
+                    }
+                    /* 인쇄 전용 제목 */
+                    .resume-print-title {
+                        display: block !important;
+                        text-align: center !important;
+                        padding-bottom: 14px !important;
+                        margin-bottom: 4px !important;
+                        border-bottom: 2px solid #111 !important;
+                    }
+                    .resume-print-title h1 {
+                        font-size: 22pt !important;
+                        font-weight: 900 !important;
+                        letter-spacing: 0.55em !important;
+                        color: #000 !important;
+                        margin: 0 !important;
+                    }
+                    /* 섹션 헤더 — 레터스페이싱 */
+                    .resume-section-header h2 {
+                        letter-spacing: 0.15em !important;
+                    }
+                    /* 목록 아이템 내부 그리드 — 2열 복원 */
+                    .resume-list-grid {
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 3px 12px !important;
+                    }
+                    /* 경력 사항 — 날짜(좁은 왼쪽) | 내용(오른쪽) */
+                    .resume-career-section .resume-list-grid {
+                        grid-template-columns: 72pt 1fr !important;
+                        gap: 2px 12px !important;
+                    }
+                    .resume-career-section .resume-list-grid > *:nth-child(n+2) {
+                        grid-column: 2 !important;
+                        grid-row: auto !important;
+                    }
+                    .resume-career-section .resume-list-grid > *:first-child {
+                        font-size: 8.5pt !important;
+                        color: #444 !important;
+                        padding-top: 1px !important;
+                    }
+                    /* 인증 문구 — 우측 정렬 */
+                    .resume-auth {
                         text-align: right !important;
                     }
-                    .resume-auth p { font-size: 9pt !important; color: #333 !important; }
-                    .resume-auth .auth-name { font-size: 9.5pt !important; font-weight: 600 !important; }
-                    .resume-photo img { width: 108px !important; height: 135px !important; object-fit: cover; }
-                    .add-btn, .remove-btn, .photo-overlay, .photo-actions { display: none !important; }
+                    .resume-auth p, .resume-auth .auth-date {
+                        text-align: right !important;
+                    }
                 }
             `}</style>
 
@@ -308,6 +383,11 @@ export function ResumeView() {
                 </div>
             </div>
 
+            {/* ── 인쇄 전용 제목 (화면에서는 숨김) ─────── */}
+            <div className="resume-print-title hidden">
+                <h1>이 력 서</h1>
+            </div>
+
             {/* ── 01 인적 사항 (필수) ──────────────────── */}
             <Section title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[#6366F1]" />}>
                 <PersonalBlock
@@ -342,7 +422,7 @@ export function ResumeView() {
 
             {/* ── 04 경력 사항 ─────────────────────────── */}
             {isActive("career") && (
-                <Section title="경력 사항">
+                <Section title="경력 사항" className="resume-career-section">
                     <ListBlock
                         items={resume.career ?? []}
                         onChange={(arr) => updateResume({ career: arr })}
@@ -509,20 +589,17 @@ export function ResumeView() {
             )}
 
             {/* ── 인증 문구 ─────────────────────────────── */}
-            <AuthDeclaration
-                name={resume.personal?.name_ko ?? ""}
-                dateStr={todayStr}
-            />
+            <AuthDeclaration dateStr={todayStr} />
         </div>
     );
 }
 
 /* ── 섹션 카드 셸 ─────────────────────────────────────── */
-function Section({ title, icon, children }: {
-    title: string; icon?: React.ReactNode; children: React.ReactNode;
+function Section({ title, icon, children, className }: {
+    title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
     return (
-        <section className="resume-section bg-white border border-neutral-200 rounded-xl p-5 myverse-dark:bg-neutral-900 myverse-dark:border-neutral-800">
+        <section className={`resume-section bg-white border border-neutral-200 rounded-xl p-5 myverse-dark:bg-neutral-900 myverse-dark:border-neutral-800${className ? ` ${className}` : ""}`}>
             <div className="resume-section-header flex items-center gap-2 mb-4">
                 {icon}
                 <h2 className="text-sm font-semibold text-neutral-800 myverse-dark:text-neutral-200">{title}</h2>
@@ -554,29 +631,15 @@ function TextareaSection({ value, onSave, placeholder, rows }: {
 }
 
 /* ── 인증 문구 ────────────────────────────────────────── */
-function AuthDeclaration({ name, dateStr }: { name: string; dateStr: string }) {
-    const [localName, setLocalName] = useState(name);
-    useEffect(() => setLocalName(name), [name]);
+function AuthDeclaration({ dateStr }: { dateStr: string }) {
     return (
-        <div className="resume-auth mt-2 pt-5 border-t border-neutral-200 myverse-dark:border-neutral-700">
-            <p className="text-sm text-neutral-600 myverse-dark:text-neutral-400 text-center mb-3">
-                위 경력 사항은 사실과 다르지 않음을 증명합니다.
+        <div className="resume-auth mt-6 pt-5 border-t border-neutral-200 myverse-dark:border-neutral-700 text-center">
+            <p className="text-sm text-neutral-600 myverse-dark:text-neutral-400">
+                상기 내용은 사실과 다름없음을 증명합니다.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-neutral-700 myverse-dark:text-neutral-300">
-                <span>{dateStr}</span>
-                <span className="flex items-center gap-2">
-                    <span className="text-neutral-400 text-xs resume-no-print">성명</span>
-                    <input
-                        type="text"
-                        value={localName}
-                        onChange={(e) => setLocalName(e.target.value)}
-                        placeholder="성명을 입력하세요"
-                        className="auth-name bg-transparent border-b border-neutral-300 focus:outline-none text-center font-semibold w-28 text-sm pb-0.5 placeholder:text-neutral-300 myverse-dark:border-neutral-600 myverse-dark:text-neutral-200 resume-no-print-border"
-                    />
-                    <span className="hidden print:inline font-semibold">{localName}</span>
-                    <span className="text-neutral-400 text-xs">(서명)</span>
-                </span>
-            </div>
+            <p className="auth-date text-sm text-neutral-500 myverse-dark:text-neutral-400 mt-2">
+                {dateStr}
+            </p>
         </div>
     );
 }
@@ -642,7 +705,7 @@ function PersonalBlock({ value, onSave, userId }: {
     const F = ({ label, k, placeholder, full }: {
         label: string; k: keyof typeof v; placeholder?: string; full?: boolean;
     }) => (
-        <div className={full ? "md:col-span-2" : ""}>
+        <div className={full ? "md:col-span-2 resume-col-full" : ""}>
             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">{label}</label>
             <input
                 type="text"
@@ -656,7 +719,7 @@ function PersonalBlock({ value, onSave, userId }: {
     );
 
     return (
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="resume-personal-outer flex flex-col md:flex-row gap-6">
             {/* 사진 */}
             <div className="resume-photo shrink-0 flex md:block justify-center">
                 <div className="relative w-28 h-36 md:w-32 md:h-40 bg-neutral-100 border border-neutral-200 rounded overflow-hidden group myverse-dark:bg-neutral-800 myverse-dark:border-neutral-700">
@@ -709,7 +772,7 @@ function PersonalBlock({ value, onSave, userId }: {
             </div>
 
             {/* 필드 */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="resume-personal-fields flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <F label="이름 (한글)" k="name_ko" placeholder="홍길동" />
                 <F label="이름 (영문)" k="name_en" placeholder="Gildong Hong" />
                 <F label="한자" k="name_hanja" placeholder="洪吉童" />
@@ -734,7 +797,7 @@ function MilitaryBlock({ value, onSave }: {
     const commit = () => onSave(v);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="resume-military-fields grid grid-cols-1 md:grid-cols-3 gap-4">
             {(["period", "status", "notes"] as const).map(k => (
                 <Field key={k} label={k === "period" ? "기간" : k === "status" ? "구분" : "비고"}>
                     <input
@@ -810,7 +873,7 @@ function ListBlock<T extends { id: string; status?: string }>({
                     {list.map(item => (
                         <div key={item.id} className="list-item-row group bg-neutral-50 rounded-lg px-3 py-2 space-y-1.5 myverse-dark:bg-neutral-800">
                             <div className="flex items-start gap-2">
-                                <div className={`flex-1 grid gap-2 grid-cols-1 ${cols}`}>
+                                <div className={`resume-list-grid flex-1 grid gap-2 grid-cols-1 ${cols}`}>
                                     {inlineFields.map(f => {
                                         if (selectField && f === selectField.key) {
                                             return (
