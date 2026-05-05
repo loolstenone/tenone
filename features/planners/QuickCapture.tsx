@@ -153,7 +153,7 @@ export function QuickCapture() {
                 className={`fixed bottom-5 right-5 z-[7900] w-12 h-12 rounded-full shadow-lg transition-all flex items-center justify-center ${
                     open
                         ? "bg-neutral-900 text-white"
-                        : "bg-[#0F766E] text-white hover:bg-[#0d5e56] hover:scale-105"
+                        : "bg-[#6366F1] text-white hover:bg-[#4F46E5] hover:scale-105"
                 }`}
             >
                 {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
@@ -168,7 +168,7 @@ export function QuickCapture() {
                                 onClick={() => setMode("task")}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
                             >
-                                <ListTodo className="h-4 w-4 text-[#0F766E]" />
+                                <ListTodo className="h-4 w-4 text-[#6366F1]" />
                                 <span className="flex-1">할 일</span>
                                 <span className="text-[10px] text-neutral-400">오늘에 추가</span>
                             </button>
@@ -185,7 +185,7 @@ export function QuickCapture() {
                                 disabled={submitting}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
                             >
-                                {submitting ? <Loader2 className="h-4 w-4 animate-spin text-[#0F766E]" /> : <Pen className="h-4 w-4 text-purple-600" />}
+                                {submitting ? <Loader2 className="h-4 w-4 animate-spin text-[#6366F1]" /> : <Pen className="h-4 w-4 text-purple-600" />}
                                 <span className="flex-1">캔버스</span>
                                 <span className="text-[10px] text-neutral-400">새로 만들기</span>
                             </button>
@@ -205,14 +205,14 @@ export function QuickCapture() {
                                 onChange={(e) => setText(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") submitTask(); }}
                                 placeholder="할 일 한 줄"
-                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#0F766E]"
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#6366F1]"
                             />
                             <div className="flex items-center gap-2 justify-end">
                                 <button onClick={() => setMode("menu")} className="text-xs text-neutral-400 hover:text-neutral-700 px-2">취소</button>
                                 <button
                                     onClick={submitTask}
                                     disabled={submitting || !text.trim()}
-                                    className="px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                    className="px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                                 >
                                     {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "추가"}
                                 </button>
@@ -235,14 +235,14 @@ export function QuickCapture() {
                                 }}
                                 placeholder="떠오른 생각… (Cmd+Enter 저장)"
                                 rows={4}
-                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#0F766E] resize-none"
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#6366F1] resize-none"
                             />
                             <div className="flex items-center gap-2 justify-end">
                                 <button onClick={() => setMode("menu")} className="text-xs text-neutral-400 hover:text-neutral-700 px-2">취소</button>
                                 <button
                                     onClick={submitNote}
                                     disabled={submitting || !text.trim()}
-                                    className="px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                    className="px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                                 >
                                     {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "저장"}
                                 </button>

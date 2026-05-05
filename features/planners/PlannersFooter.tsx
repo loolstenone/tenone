@@ -7,7 +7,7 @@ export function PlannersFooter() {
         <UniverseFooter
             brandName="Planner's Planner"
             tagline="우리는 모두 기획자다 — 적어도 자기 인생에서 만큼은."
-            accentColor="#0F766E"
+            accentColor="#6366F1"
             dark={true}
             linkColumns={[
                 {

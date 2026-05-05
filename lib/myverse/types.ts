@@ -120,10 +120,26 @@ export interface ResumeData {
     judging?: Array<{ id: string; org: string; period?: string; role?: string }>;
     /** 기타 활동 (운영중/종료 사이트·커뮤니티) */
     side_projects?: Array<{ id: string; name: string; url?: string; status: "active" | "ended"; period?: string; description?: string }>;
-    /** 자격증 / 기술 / 언어 (선택) */
+    /** 자격증 */
     certifications?: Array<{ id: string; name: string; issuer?: string; year?: string }>;
+    /** 기술 */
     skills?: Array<{ id: string; name: string; level?: "초급" | "중급" | "고급" | "전문" }>;
-    languages?: Array<{ id: string; name: string; level?: string }>;
+    /** 어학 */
+    languages?: Array<{ id: string; name: string; level?: string; score?: string }>;
+    /** 포트폴리오 (기간·프로젝트명·내용) */
+    portfolio?: Array<{ id: string; period?: string; project?: string; description?: string }>;
+    /** 자기소개 */
+    self_introduction?: string;
+    /** 지원동기 */
+    motivation?: string;
+    /** 직무역량 */
+    competency?: string;
+    /** 입사후포부 */
+    aspiration?: string;
+    /** 요점정리 */
+    summary?: string;
+    /** 활성 섹션 ID 목록 (사용자가 체크한 것) */
+    active_sections?: string[];
 }
 
 // 활동 거점 — 사무실·집·체육관 등. 시간 트래커·캘린더 자동 라벨링용

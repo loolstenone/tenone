@@ -159,7 +159,7 @@
 
 ### PWA 자산 (public/)
 - planners-manifest.json · planners-sw.js
-- ⚠️ 배포 전 필요: planners-icon-192.png · planners-icon-512.png
+- planners-icon-192.png · planners-icon-512.png — Myverse 인디고 M 로고 (2026-05-05 완료)
 
 ---
 

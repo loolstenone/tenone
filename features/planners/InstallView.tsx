@@ -27,7 +27,7 @@ function detectPlatform(): Platform {
     return "desktop";
 }
 
-const APP_URL = "https://planners.tenone.biz/myverse/app";
+const APP_URL = "https://myverse.kr/myverse/app";
 
 export function InstallView() {
     const [platform, setPlatform] = useState<Platform>("unknown");
@@ -59,8 +59,8 @@ export function InstallView() {
 
     return (
         <div className="max-w-3xl mx-auto px-6 md:px-10 py-10 md:py-14">
-            <Link href="/planners" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 mb-6 transition-colors">
-                <ChevronLeft className="h-4 w-4" /> Planner&apos;s Planner
+            <Link href="/myverse" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 mb-6 transition-colors">
+                <ChevronLeft className="h-4 w-4" /> Myverse
             </Link>
 
             {/* Hero */}
@@ -68,20 +68,20 @@ export function InstallView() {
                 <div className="flex items-center gap-4 mb-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="/planners-icon-192.png"
-                        alt="PP AI"
+                        src="/Myverse_logo_black.png"
+                        alt="Myverse"
                         className="w-16 h-16 rounded-2xl shadow-lg shadow-black/10 shrink-0"
                     />
                     <div>
                         <h1 className="font-serif text-3xl text-neutral-900 leading-tight">
-                            Planner&apos;s Planner<sup className="text-xs font-bold text-[#0F766E] ml-0.5">AI</sup>
+                            Myverse<sup className="text-xs font-bold text-[#6366F1] ml-0.5">AI</sup>
                         </h1>
                         <p className="text-sm text-neutral-500 mt-1">홈 화면에 설치하면 앱처럼 빠르게 열립니다.</p>
                     </div>
                 </div>
 
                 {installed ? (
-                    <div className="flex items-center gap-2 px-4 py-3 bg-[#0F766E]/10 border border-[#0F766E]/20 rounded-xl text-[#0F766E] text-sm">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-xl text-[#6366F1] text-sm">
                         <Check className="h-4 w-4" />
                         이미 홈 화면에 설치되어 있어요. 홈에서 아이콘을 눌러 시작하세요.
                     </div>
@@ -110,7 +110,7 @@ export function InstallView() {
                             onClick={() => setPlatform(key)}
                             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px ${
                                 active
-                                    ? "border-[#0F766E] text-[#0F766E] font-semibold"
+                                    ? "border-[#6366F1] text-[#6366F1] font-semibold"
                                     : "border-transparent text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
@@ -133,10 +133,10 @@ export function InstallView() {
                             <button
                                 onClick={triggerInstall}
                                 disabled={installing}
-                                className="w-full mt-3 px-4 py-3 bg-[#0F766E] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5e56] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="w-full mt-3 px-4 py-3 bg-[#6366F1] text-white rounded-lg text-sm font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                             >
                                 <Download className="h-4 w-4" />
-                                {installing ? "설치 중…" : "Planner's Planner AI 설치"}
+                                {installing ? "설치 중…" : "Myverse AI 설치"}
                             </button>
                         </ActionCard>
                     ) : (
@@ -190,7 +190,7 @@ export function InstallView() {
                             <button
                                 onClick={triggerInstall}
                                 disabled={installing}
-                                className="w-full mt-3 px-4 py-3 bg-[#0F766E] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5e56] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="w-full mt-3 px-4 py-3 bg-[#6366F1] text-white rounded-lg text-sm font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                             >
                                 <Download className="h-4 w-4" />
                                 {installing ? "설치 중…" : "PC에 설치"}
@@ -223,10 +223,10 @@ export function InstallView() {
                 <div className="grid sm:grid-cols-2 gap-3">
                     <button
                         onClick={copyUrl}
-                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#0F766E] hover:bg-[#0F766E]/5 transition-colors text-left"
+                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-colors text-left"
                     >
                         <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
-                            {copied ? <Check className="h-4 w-4 text-[#0F766E]" /> : <Copy className="h-4 w-4 text-neutral-500" />}
+                            {copied ? <Check className="h-4 w-4 text-[#6366F1]" /> : <Copy className="h-4 w-4 text-neutral-500" />}
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-neutral-900">{copied ? "복사됨" : "주소 복사"}</p>
@@ -237,7 +237,7 @@ export function InstallView() {
                         href={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(APP_URL)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#0F766E] hover:bg-[#0F766E]/5 transition-colors text-left"
+                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-colors text-left"
                     >
                         <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
                             <QrCode className="h-4 w-4 text-neutral-500" />
@@ -253,13 +253,13 @@ export function InstallView() {
             {/* Notes */}
             <div className="mt-10 p-5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-600 leading-relaxed">
                 <p className="font-semibold text-neutral-900 mb-2">설치하면 무엇이 좋아지나요?</p>
-                <ul className="space-y-1 list-disc list-inside marker:text-[#0F766E]">
+                <ul className="space-y-1 list-disc list-inside marker:text-[#6366F1]">
                     <li>홈 화면 아이콘으로 한 번에 진입 — 브라우저 주소창 입력 불필요</li>
                     <li>전체 화면 모드 (브라우저 UI 가림) 로 노트·일정에 집중</li>
                     <li>오프라인에서도 최근에 본 페이지 열람 가능</li>
                 </ul>
                 <p className="font-semibold text-neutral-900 mt-4 mb-2">앱 스토어 (Play Store · App Store) 에는 없나요?</p>
-                <p>현재 PP AI 는 <b className="text-neutral-900">PWA (Progressive Web App)</b> 형태로만 제공됩니다.
+                <p>현재 Myverse는 <b className="text-neutral-900">PWA (Progressive Web App)</b> 형태로만 제공됩니다.
                     설치 파일을 별도로 받지 않고, 위 절차로 홈 화면에 추가하면 네이티브 앱과 동일하게 사용됩니다.
                     모든 기능은 웹과 100% 동일합니다.</p>
             </div>
@@ -290,7 +290,7 @@ function ActionCard({
     return (
         <div className="bg-white border border-neutral-200 rounded-xl p-5">
             <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#0F766E]/10 text-[#0F766E] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center shrink-0">
                     <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">

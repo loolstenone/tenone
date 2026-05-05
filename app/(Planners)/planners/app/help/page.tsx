@@ -265,12 +265,12 @@ export default function HelpPage() {
             {/* 헤더 */}
             <header className="mb-8 md:mb-12">
                 <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="h-6 w-6 text-[#0F766E] planners-dark:text-[#5EEAD4]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 planners-dark:text-neutral-100">
+                    <BookOpen className="h-6 w-6 text-[#6366F1] myverse-dark:text-[#A5B4FC]" />
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100">
                         사용 가이드
                     </h1>
                 </div>
-                <p className="text-sm text-neutral-500 planners-dark:text-neutral-400 leading-relaxed max-w-xl">
+                <p className="text-sm text-neutral-500 myverse-dark:text-neutral-400 leading-relaxed max-w-xl">
                     Planner&apos;s Planner AI의 모든 기능을 한 권으로 정리했습니다.
                     필요한 곳을 펼쳐보세요 — 머무르며 다음 페이지를 만들어 가세요.
                 </p>
@@ -291,8 +291,8 @@ export default function HelpPage() {
                                         href={`#${s.id}`}
                                         className={`flex items-center gap-2 text-xs py-1.5 px-2 -mx-2 rounded transition-colors ${
                                             active
-                                                ? "text-[#0F766E] planners-dark:text-[#5EEAD4] font-medium bg-[#0F766E]/5"
-                                                : "text-neutral-500 planners-dark:text-neutral-400 hover:text-[#0F766E]"
+                                                ? "text-[#6366F1] myverse-dark:text-[#A5B4FC] font-medium bg-[#6366F1]/5"
+                                                : "text-neutral-500 myverse-dark:text-neutral-400 hover:text-[#6366F1]"
                                         }`}
                                     >
                                         <s.icon className="h-3 w-3 shrink-0" />
@@ -310,17 +310,17 @@ export default function HelpPage() {
                         <section
                             key={s.id}
                             id={s.id}
-                            className="scroll-mt-24 bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl px-5 py-6 md:px-7 md:py-7"
+                            className="scroll-mt-24 bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-xl px-5 py-6 md:px-7 md:py-7"
                         >
                             <div className="flex items-start gap-3 mb-3">
-                                <span className="shrink-0 mt-1 text-[#0F766E] planners-dark:text-[#5EEAD4]">
+                                <span className="shrink-0 mt-1 text-[#6366F1] myverse-dark:text-[#A5B4FC]">
                                     <s.icon className="h-5 w-5" />
                                 </span>
                                 <div className="min-w-0">
-                                    <h2 className="font-serif text-lg md:text-xl text-neutral-900 planners-dark:text-neutral-100 leading-tight">
+                                    <h2 className="font-serif text-lg md:text-xl text-neutral-900 myverse-dark:text-neutral-100 leading-tight">
                                         {s.title}
                                     </h2>
-                                    <p className="text-sm text-neutral-600 planners-dark:text-neutral-300 leading-relaxed mt-2">
+                                    <p className="text-sm text-neutral-600 myverse-dark:text-neutral-300 leading-relaxed mt-2">
                                         {s.intro}
                                     </p>
                                 </div>
@@ -331,11 +331,11 @@ export default function HelpPage() {
                                     {s.steps.map((step, i) => (
                                         <li key={i} className="text-sm">
                                             <div className="flex items-start gap-2">
-                                                <ChevronRight className="h-3.5 w-3.5 text-[#0F766E] planners-dark:text-[#5EEAD4] mt-1 shrink-0" />
+                                                <ChevronRight className="h-3.5 w-3.5 text-[#6366F1] myverse-dark:text-[#A5B4FC] mt-1 shrink-0" />
                                                 <div className="min-w-0">
-                                                    <span className="font-medium text-neutral-800 planners-dark:text-neutral-200">{step.label}</span>
+                                                    <span className="font-medium text-neutral-800 myverse-dark:text-neutral-200">{step.label}</span>
                                                     {step.detail && (
-                                                        <p className="text-neutral-600 planners-dark:text-neutral-400 text-xs mt-0.5 leading-relaxed">
+                                                        <p className="text-neutral-600 myverse-dark:text-neutral-400 text-xs mt-0.5 leading-relaxed">
                                                             {step.detail}
                                                         </p>
                                                     )}
@@ -347,14 +347,14 @@ export default function HelpPage() {
                             )}
 
                             {s.paragraphs && (
-                                <div className="mt-4 pl-8 space-y-2 text-sm text-neutral-600 planners-dark:text-neutral-300 leading-relaxed">
+                                <div className="mt-4 pl-8 space-y-2 text-sm text-neutral-600 myverse-dark:text-neutral-300 leading-relaxed">
                                     {s.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
                                 </div>
                             )}
 
                             {s.tip && (
-                                <div className="mt-5 ml-8 px-3 py-2.5 bg-[#0F766E]/5 border-l-2 border-[#0F766E]/40 rounded-r text-xs text-neutral-700 planners-dark:text-neutral-300 leading-relaxed">
-                                    <span className="font-medium text-[#0F766E] planners-dark:text-[#5EEAD4] mr-1.5">팁</span>
+                                <div className="mt-5 ml-8 px-3 py-2.5 bg-[#6366F1]/5 border-l-2 border-[#6366F1]/40 rounded-r text-xs text-neutral-700 myverse-dark:text-neutral-300 leading-relaxed">
+                                    <span className="font-medium text-[#6366F1] myverse-dark:text-[#A5B4FC] mr-1.5">팁</span>
                                     {s.tip}
                                 </div>
                             )}
@@ -362,20 +362,20 @@ export default function HelpPage() {
                     ))}
 
                     {/* 추가 문의 — 마지막 카드 */}
-                    <section className="bg-[#0F766E]/5 border border-[#0F766E]/20 rounded-xl px-5 py-6 md:px-7 md:py-7">
+                    <section className="bg-[#6366F1]/5 border border-[#6366F1]/20 rounded-xl px-5 py-6 md:px-7 md:py-7">
                         <div className="flex items-start gap-3">
-                            <Mail className="h-5 w-5 text-[#0F766E] planners-dark:text-[#5EEAD4] mt-0.5 shrink-0" />
+                            <Mail className="h-5 w-5 text-[#6366F1] myverse-dark:text-[#A5B4FC] mt-0.5 shrink-0" />
                             <div>
-                                <h2 className="font-serif text-lg text-neutral-900 planners-dark:text-neutral-100">
+                                <h2 className="font-serif text-lg text-neutral-900 myverse-dark:text-neutral-100">
                                     더 궁금한 것이 있다면
                                 </h2>
-                                <p className="text-sm text-neutral-600 planners-dark:text-neutral-300 mt-2 leading-relaxed">
+                                <p className="text-sm text-neutral-600 myverse-dark:text-neutral-300 mt-2 leading-relaxed">
                                     이 가이드에 없는 질문, 아이디어, 불편함은 직접 만든 사람에게 전해주세요.
                                     영업일 기준 1~2일 안에 답장드립니다.
                                 </p>
                                 <a
                                     href="mailto:lools@tenone.biz"
-                                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-[#0F766E] planners-dark:text-[#5EEAD4] hover:underline font-medium"
+                                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-[#6366F1] myverse-dark:text-[#A5B4FC] hover:underline font-medium"
                                 >
                                     <Mail className="h-3.5 w-3.5" />
                                     lools@tenone.biz

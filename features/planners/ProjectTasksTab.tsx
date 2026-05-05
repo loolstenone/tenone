@@ -31,7 +31,7 @@ interface Stats {
 
 const STATUS_META: Record<string, { icon: typeof Circle; label: string; cls: string }> = {
     todo: { icon: Circle, label: "미완", cls: "text-neutral-400" },
-    done: { icon: CheckCircle2, label: "완료", cls: "text-[#0F766E]" },
+    done: { icon: CheckCircle2, label: "완료", cls: "text-[#6366F1]" },
     carried: { icon: RotateCw, label: "이월", cls: "text-amber-500" },
     cancelled: { icon: XIcon, label: "취소", cls: "text-neutral-300 line-through" },
 };
@@ -106,7 +106,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                     type="date"
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="text-xs px-2 py-1.5 border border-neutral-200 rounded font-mono focus:outline-none focus:border-[#0F766E]"
+                    className="text-xs px-2 py-1.5 border border-neutral-200 rounded font-mono focus:outline-none focus:border-[#6366F1]"
                 />
                 <input
                     type="text"
@@ -119,7 +119,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                 <button
                     onClick={addTask}
                     disabled={adding || !newText.trim() || !newDate}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white text-xs rounded hover:bg-[#0d5e56] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white text-xs rounded hover:bg-[#4F46E5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
                 >
                     {adding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                     추가
@@ -130,7 +130,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                 <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-8 px-5 text-center">
                     <p className="text-sm text-neutral-500 mb-1">아직 연결된 업무가 없어요.</p>
                     <p className="text-xs text-neutral-400 leading-relaxed">
-                        위에서 직접 추가하거나, <Link href="/myverse/app/today" className="text-[#0F766E] hover:underline">일간</Link>·<Link href="/myverse/app/weekly" className="text-[#0F766E] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
+                        위에서 직접 추가하거나, <Link href="/myverse/app/today" className="text-[#6366F1] hover:underline">일간</Link>·<Link href="/myverse/app/weekly" className="text-[#6366F1] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
                     </p>
                 </div>
             ) : (
@@ -151,7 +151,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                             <div className="grid grid-cols-4 gap-2 text-center text-xs">
                                 <Cell label="전체" value={stats.total} />
                                 <Cell label="미완" value={stats.todo} accent="text-neutral-700" />
-                                <Cell label="완료" value={stats.done} accent="text-[#0F766E]" />
+                                <Cell label="완료" value={stats.done} accent="text-[#6366F1]" />
                                 <Cell label="이월" value={stats.carried} accent="text-amber-600" />
                             </div>
                         </section>
@@ -172,12 +172,12 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                     onClick={() => setFilter(k)}
                                     className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
                                         isActive
-                                            ? "text-[#0F766E] font-semibold"
+                                            ? "text-[#6366F1] font-semibold"
                                             : "text-neutral-500 hover:text-neutral-900"
                                     }`}
                                 >
                                     {label}
-                                    {isActive && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />}
+                                    {isActive && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />}
                                 </button>
                             );
                         })}
@@ -201,7 +201,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                     <h3 className="text-xs font-semibold text-neutral-500 font-mono">{date}</h3>
                                     <Link
                                         href={`/myverse/app/daily?date=${date}`}
-                                        className="inline-flex items-center gap-0.5 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                                        className="inline-flex items-center gap-0.5 text-[10px] text-neutral-400 hover:text-[#6366F1] transition-colors"
                                     >
                                         일간 <ArrowUpRight className="h-2.5 w-2.5" />
                                     </Link>
@@ -216,13 +216,13 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                             <li key={i.task.id} className="flex items-center gap-2 py-0.5">
                                                 <Icon className={`h-3.5 w-3.5 shrink-0 ${meta.cls}`} />
                                                 {i.task.time && (
-                                                    <span className="text-[10px] text-[#0F766E] font-mono shrink-0">{i.task.time.slice(0, 5)}</span>
+                                                    <span className="text-[10px] text-[#6366F1] font-mono shrink-0">{i.task.time.slice(0, 5)}</span>
                                                 )}
                                                 <span className={`text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
                                                     {i.task.text}
                                                 </span>
                                                 {isMilestone && (
-                                                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#0F766E]/10 text-[#0F766E] shrink-0">마일스톤</span>
+                                                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1] shrink-0">마일스톤</span>
                                                 )}
                                             </li>
                                         );

@@ -168,7 +168,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                 onClick={onPickZip}
                                 disabled={importing || uploading}
                                 title="Instagram / Facebook 백업 ZIP 가져오기"
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-500 hover:text-[#0F766E] hover:bg-[#0F766E]/5 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-500 hover:text-[#6366F1] hover:bg-[#6366F1]/5 disabled:opacity-50"
                             >
                                 {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Archive className="h-3 w-3" />}
                                 {importing ? "가져오는 중…" : "백업"}
@@ -178,7 +178,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                             <button
                                 onClick={onPick}
                                 disabled={uploading}
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#6366F1] hover:bg-[#6366F1]/10 disabled:opacity-50"
                             >
                                 {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                                 {uploading ? "업로드 중…" : "추가"}
@@ -227,7 +227,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                     <button
                         onClick={onPick}
                         disabled={uploading}
-                        className="w-full py-6 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                        className="w-full py-6 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors disabled:opacity-50"
                     >
                         {uploading ? <Loader2 className="h-4 w-4 animate-spin inline" /> : "📷 사진 또는 동영상 추가"}
                     </button>
@@ -247,7 +247,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                     <button
                         onClick={onPick}
                         disabled={uploading}
-                        className="w-full py-2 border border-dashed border-neutral-300 rounded text-[11px] text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] disabled:opacity-50"
+                        className="w-full py-2 border border-dashed border-neutral-300 rounded text-[11px] text-neutral-400 hover:border-[#6366F1] hover:text-[#6366F1] disabled:opacity-50"
                     >
                         {uploading ? "업로드 중…" : "+ 한 장면 더 추가"}
                     </button>
@@ -288,7 +288,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     value={editForm.caption ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, caption: e.target.value })}
                                     rows={2}
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] resize-none placeholder:text-neutral-300 placeholder:italic"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] resize-none placeholder:text-neutral-300 placeholder:italic"
                                     placeholder="이 순간을 한 줄로 적어 보세요"
                                 />
                             </Field>
@@ -297,7 +297,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     type="datetime-local"
                                     value={editForm.happened_at ? editForm.happened_at.slice(0, 16) : ""}
                                     onChange={(e) => setEditForm({ ...editForm, happened_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
                                 />
                             </Field>
                             <Field label="누구와">
@@ -306,7 +306,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     value={editForm.with_whom ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, with_whom: e.target.value })}
                                     placeholder="예: 가족, 동료, 혼자"
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] placeholder:text-neutral-300 placeholder:italic"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-300 placeholder:italic"
                                 />
                             </Field>
                             <Field label="어디서">
@@ -315,7 +315,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     value={editForm.location ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                                     placeholder="예: 한강공원, 카페, 사무실"
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] placeholder:text-neutral-300 placeholder:italic"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-300 placeholder:italic"
                                 />
                             </Field>
                             <Field label="무엇을">
@@ -324,13 +324,13 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     value={editForm.activity ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, activity: e.target.value })}
                                     placeholder="예: 산책, 회의, 휴식"
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] placeholder:text-neutral-300 placeholder:italic"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-300 placeholder:italic"
                                 />
                             </Field>
                         </div>
                         <div className="flex justify-end gap-2 mt-5">
                             <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900">취소</button>
-                            <button onClick={saveEdit} className="px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded hover:bg-[#0d5e56]">저장</button>
+                            <button onClick={saveEdit} className="px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded hover:bg-[#4F46E5]">저장</button>
                         </div>
                     </div>
                 </div>

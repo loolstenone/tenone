@@ -65,7 +65,7 @@ export const STYLE_PRESETS: SettingsPreset[] = [
         key: "campus_mint",
         label: "Campus Mint",
         desc: "학생 · 민트 · 둥근",
-        swatch: { bg: "#FAFAF7", surface: "#FFFFFF", accent: "#0F766E" },
+        swatch: { bg: "#FAFAF7", surface: "#FFFFFF", accent: "#6366F1" },
         color: "teal", radius: "soft", font: "round", userFont: "round", mode: "light",
     },
     {

@@ -81,7 +81,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
             <div className="mb-2 flex items-start justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
-                        <Compass className="h-6 w-6 text-[#0F766E]" />
+                        <Compass className="h-6 w-6 text-[#6366F1]" />
                         <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">퍼스널</h1>
                         {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     </div>
@@ -208,10 +208,10 @@ function Section({ id, badge, title, hint, children, accent }: {
     id?: string; badge: string; title: string; hint?: string; children: React.ReactNode; accent?: boolean;
 }) {
     return (
-        <section id={id} className={`bg-white rounded-xl p-6 scroll-mt-28 ${accent ? "border-2 border-[#0F766E]/30" : "border border-neutral-200"}`}>
+        <section id={id} className={`bg-white rounded-xl p-6 scroll-mt-28 ${accent ? "border-2 border-[#6366F1]/30" : "border border-neutral-200"}`}>
             <div className="mb-3">
                 <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">{badge}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">{badge}</span>
                     <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
                 </div>
                 {hint && <p className="text-xs text-neutral-500 mt-1">{hint}</p>}
@@ -316,14 +316,14 @@ function KeyResultsSection({ items, onSave }: {
             <div className="flex items-center justify-between mb-3">
                 <div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">KEY RESULTS</span>
+                        <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">KEY RESULTS</span>
                         <h2 className="text-sm font-semibold text-neutral-800">올해 핵심 실행</h2>
                     </div>
                     <p className="text-xs text-neutral-500 mt-1">비전·미션을 구체 행동으로 끌어내리는 항목.</p>
                 </div>
                 <button
                     onClick={add}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white text-xs rounded hover:bg-[#0d5e56] transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white text-xs rounded hover:bg-[#4F46E5] transition-colors"
                 >
                     <Plus className="h-3 w-3" /> 추가
                 </button>

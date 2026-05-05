@@ -36,7 +36,7 @@ const COLOR_THEMES = [
     { key: "indigo",   label: "Indigo",  hex: "#4338CA" },
     { key: "navy",     label: "Navy",    hex: "#1E40AF" },
     { key: "sky",      label: "Sky",     hex: "#0369A1" },
-    { key: "teal",     label: "Teal",    hex: "#0F766E" },
+    { key: "teal",     label: "Teal",    hex: "#6366F1" },
     { key: "emerald",  label: "Emerald", hex: "#047857" },
     { key: "olive",    label: "Olive",   hex: "#4D7C0F" },
 ];
@@ -167,7 +167,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                 <button
                     type="button"
                     onClick={() => setStyleAdvancedOpen(o => !o)}
-                    className="lg:hidden mt-4 w-full flex items-center justify-center gap-1 py-2 text-xs text-neutral-500 hover:text-[#0F766E] transition-colors"
+                    className="lg:hidden mt-4 w-full flex items-center justify-center gap-1 py-2 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors"
                 >
                     {styleAdvancedOpen ? "고급 설정 접기 ▲" : "고급 설정 직접 조정 ▼"}
                 </button>
@@ -198,7 +198,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                     onClick={() => applyMode(m.key)}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
                                         active
-                                            ? "border-[#0F766E] text-[#0F766E] bg-[#0F766E]/5"
+                                            ? "border-[#6366F1] text-[#6366F1] bg-[#6366F1]/5"
                                             : "border-neutral-200 text-neutral-500 hover:border-neutral-300 hover:text-neutral-700"
                                     }`}
                                 >
@@ -257,12 +257,12 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                     onClick={() => applyRadius(r.key)}
                                     className={`flex flex-col items-center gap-2 p-3 border-2 transition-colors ${
                                         active
-                                            ? "border-[#0F766E] bg-[#0F766E]/5"
+                                            ? "border-[#6366F1] bg-[#6366F1]/5"
                                             : "border-neutral-200 hover:border-neutral-300"
                                     }`}
                                 >
                                     <div className="w-8 h-8" style={{ borderRadius: r.preview, backgroundColor: "var(--pp-ink)" }} />
-                                    <span className={`text-xs font-semibold ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
+                                    <span className={`text-xs font-semibold ${active ? "text-[#6366F1]" : "text-neutral-600"}`}>
                                         {r.label}
                                     </span>
                                     <span className="text-[10px] text-neutral-400">{r.desc}</span>
@@ -288,11 +288,11 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                             key={f.key}
                                             onClick={() => applyFont(f.key)}
                                             className={`flex flex-col py-3 px-3 rounded-lg text-left border-2 transition-colors ${
-                                                active ? "border-[#0F766E] bg-[#0F766E]/5" : "border-neutral-200 hover:border-neutral-300"
+                                                active ? "border-[#6366F1] bg-[#6366F1]/5" : "border-neutral-200 hover:border-neutral-300"
                                             }`}
                                         >
-                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>Aa</span>
-                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>{f.label}</span>
+                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#6366F1]" : "text-neutral-900"}`}>Aa</span>
+                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#6366F1]" : "text-neutral-600"}`}>{f.label}</span>
                                             <span className="text-[10px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
                                         </button>
                                     );
@@ -311,11 +311,11 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                             key={f.key}
                                             onClick={() => applyUserFont(f.key)}
                                             className={`flex flex-col py-3 px-3 rounded-lg text-left border-2 transition-colors ${
-                                                active ? "border-[#0F766E] bg-[#0F766E]/5" : "border-neutral-200 hover:border-neutral-300"
+                                                active ? "border-[#6366F1] bg-[#6366F1]/5" : "border-neutral-200 hover:border-neutral-300"
                                             }`}
                                         >
-                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>Aa</span>
-                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>{f.label}</span>
+                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#6366F1]" : "text-neutral-900"}`}>Aa</span>
+                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#6366F1]" : "text-neutral-600"}`}>{f.label}</span>
                                             <span className="text-[10px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
                                         </button>
                                     );
@@ -330,23 +330,23 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                         <div
                                             key={idx}
                                             className={`rounded-lg border-2 transition-colors overflow-hidden ${
-                                                active ? "border-[#0F766E]" : "border-neutral-200"
+                                                active ? "border-[#6366F1]" : "border-neutral-200"
                                             }`}
                                         >
                                             <button
                                                 onClick={() => { if (cf.trim()) applyUserFont(key); }}
                                                 disabled={!cf.trim()}
                                                 className={`w-full py-3 px-3 text-left transition-colors disabled:opacity-40 ${
-                                                    active ? "bg-[#0F766E]/5" : "hover:bg-neutral-50"
+                                                    active ? "bg-[#6366F1]/5" : "hover:bg-neutral-50"
                                                 }`}
                                             >
                                                 <span
-                                                    className={`block text-xl mb-1 ${active ? "text-[#0F766E]" : "text-neutral-900"}`}
+                                                    className={`block text-xl mb-1 ${active ? "text-[#6366F1]" : "text-neutral-900"}`}
                                                     style={{ fontFamily: cf.trim() || undefined }}
                                                 >
                                                     Aa
                                                 </span>
-                                                <span className={`block text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-400"}`}>
+                                                <span className={`block text-xs font-semibold leading-tight ${active ? "text-[#6366F1]" : "text-neutral-400"}`}>
                                                     커스텀 {idx + 1}
                                                 </span>
                                             </button>
@@ -362,7 +362,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                                         localStorage.setItem("myverse_custom_fonts", JSON.stringify(next));
                                                         if (userFontFamily === key) applyUserFont(key);
                                                     }}
-                                                    className="w-full text-[10px] border border-neutral-200 rounded px-1.5 py-1 focus:outline-none focus:border-[#0F766E] bg-white text-neutral-700 placeholder:text-neutral-300"
+                                                    className="w-full text-[10px] border border-neutral-200 rounded px-1.5 py-1 focus:outline-none focus:border-[#6366F1] bg-white text-neutral-700 placeholder:text-neutral-300"
                                                 />
                                             </div>
                                         </div>

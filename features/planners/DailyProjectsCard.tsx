@@ -47,7 +47,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                 </h2>
                 <Link
                     href="/myverse/app/projects"
-                    className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E]"
+                    className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#6366F1]"
                     title="프로젝트 목록"
                 >
                     <Plus className="h-3 w-3" /> 추가
@@ -61,7 +61,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
             ) : projects.length === 0 ? (
                 <Link
                     href="/myverse/app/projects"
-                    className="block w-full py-3 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 text-center hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                    className="block w-full py-3 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 text-center hover:border-[#6366F1] hover:text-[#6366F1] transition-colors"
                 >
                     + 첫 프로젝트 만들기
                 </Link>
@@ -79,7 +79,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                                 {/* 카테고리 뱃지 + 화살표 */}
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: meta.color }}>{meta.label}</span>
-                                    <ArrowUpRight className="h-3 w-3 text-neutral-300 group-hover:text-[#0F766E] transition-colors shrink-0" />
+                                    <ArrowUpRight className="h-3 w-3 text-neutral-300 group-hover:text-[#6366F1] transition-colors shrink-0" />
                                 </div>
                                 {/* 제목 */}
                                 <p className="text-xs font-medium text-neutral-800 truncate mb-1.5">{p.title}</p>
@@ -100,7 +100,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                                         </span>
                                     )}
                                     {p.today_task_count > 0 && (
-                                        <span className="text-[#0F766E]">{p.today_task_done}/{p.today_task_count}</span>
+                                        <span className="text-[#6366F1]">{p.today_task_done}/{p.today_task_count}</span>
                                     )}
                                 </div>
                             </Link>

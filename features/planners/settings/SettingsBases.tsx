@@ -133,7 +133,7 @@ export function SettingsBases({ initialBases, save, showToast }: Props) {
     return (
         <section id="sec-bases" className="bg-white border border-neutral-200 rounded-xl p-6">
             <div className="flex items-baseline gap-2 mb-1">
-                <MapPin className="h-4 w-4 text-[#0F766E]" />
+                <MapPin className="h-4 w-4 text-[#6366F1]" />
                 <h2 className="text-sm font-semibold text-neutral-900">활동 거점</h2>
             </div>
             <p className="text-xs text-neutral-500 mb-4">
@@ -148,7 +148,7 @@ export function SettingsBases({ initialBases, save, showToast }: Props) {
                         <button
                             key={t}
                             onClick={() => add(t)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-600 hover:text-[#0F766E] border border-neutral-200 hover:border-[#0F766E] rounded-full transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-600 hover:text-[#6366F1] border border-neutral-200 hover:border-[#6366F1] rounded-full transition-colors"
                         >
                             <Icon className="h-3.5 w-3.5" />
                             <Plus className="h-3 w-3 -ml-0.5" />
@@ -169,7 +169,7 @@ export function SettingsBases({ initialBases, save, showToast }: Props) {
                         const Icon = TYPE_META[base.type].icon;
                         return (
                             <div key={base.id} className="group flex items-start gap-2 bg-neutral-50 rounded-lg px-3 py-2.5">
-                                <Icon className="h-4 w-4 text-[#0F766E] shrink-0 mt-1" />
+                                <Icon className="h-4 w-4 text-[#6366F1] shrink-0 mt-1" />
                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     <input
                                         type="text"
@@ -214,7 +214,7 @@ export function SettingsBases({ initialBases, save, showToast }: Props) {
                                     onClick={() => pickCurrentLocation(base.id)}
                                     disabled={pickingId === base.id}
                                     title="현재 위치로 좌표 등록"
-                                    className="shrink-0 mt-1 text-neutral-400 hover:text-[#0F766E] disabled:opacity-50"
+                                    className="shrink-0 mt-1 text-neutral-400 hover:text-[#6366F1] disabled:opacity-50"
                                 >
                                     {pickingId === base.id
                                         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

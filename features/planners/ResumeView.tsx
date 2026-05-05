@@ -1,17 +1,39 @@
 "use client";
 
-// 이력서 페이지 — /myverse/app/personal/resume
-// PDF 표준 이력서 구조 (인적사항·학력·병적·경력·수상·업무경험·브랜드·강의·심사·기타활동)
-// IdentityView와 별도 페이지로 분리됨 (한 페이지에 다 넣지 않음).
+// 이력서 빌더 — /myverse/app/personal/resume
+// 16개 섹션 선택형 + window.print() A4 문서 출력
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, FileText, Loader2, Plus, Printer, Share2, Trash2, User, X } from "lucide-react";
+import { Camera, Check, ChevronDown, FileText, Loader2, Plus, Printer, Share2, Trash2, User, X } from "lucide-react";
 import type { PlannerIdentity, ResumeData } from "@/lib/myverse/types";
 import { IdentitySubNav } from "./IdentitySubNav";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 
-/* ── 이력서 사진 리사이즈 (max 600px, WebP) ── */
+/* ── 섹션 정의 (16개) ──────────────────────────────────── */
+const SECTION_DEFS = [
+    { id: "personal",          label: "인적 사항",   required: true  },
+    { id: "education",         label: "학력 사항",   required: false },
+    { id: "military",          label: "병적 사항",   required: false },
+    { id: "career",            label: "경력 사항",   required: false },
+    { id: "awards",            label: "수상 경력",   required: false },
+    { id: "certifications",    label: "자격증",      required: false },
+    { id: "languages",         label: "어학",        required: false },
+    { id: "lectures",          label: "강의 경력",   required: false },
+    { id: "judging",           label: "심사 경력",   required: false },
+    { id: "portfolio",         label: "포트폴리오",  required: false },
+    { id: "side_projects",     label: "기타 활동",   required: false },
+    { id: "self_introduction", label: "자기소개",    required: false },
+    { id: "motivation",        label: "지원 동기",   required: false },
+    { id: "competency",        label: "직무 역량",   required: false },
+    { id: "aspiration",        label: "입사후 포부", required: false },
+    { id: "summary",           label: "요점 정리",   required: false },
+] as const;
+
+type SectionId = typeof SECTION_DEFS[number]["id"];
+const DEFAULT_ACTIVE: SectionId[] = ["personal", "education", "career", "awards"];
+
+/* ── 사진 리사이즈 ─────────────────────────────────────── */
 function resizeResumePhoto(file: File): Promise<Blob> {
     return new Promise((resolve, reject) => {
         const img = new window.Image();
@@ -32,12 +54,14 @@ function resizeResumePhoto(file: File): Promise<Blob> {
     });
 }
 
+/* ── 메인 컴포넌트 ─────────────────────────────────────── */
 export function ResumeView() {
     const { user } = useAuth();
     const [data, setData] = useState<Partial<PlannerIdentity>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [shareToast, setShareToast] = useState<string | null>(null);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -70,32 +94,40 @@ export function ResumeView() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto px-4 md:px-10 py-12">
+            <div className="max-w-4xl mx-auto px-4 md:px-10 py-12">
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             </div>
         );
     }
 
     const resume: ResumeData = data.resume ?? {};
-    const updateResume = (patch: ResumeData) => save({ resume: { ...resume, ...patch } });
+    const activeSections: SectionId[] = (resume.active_sections as SectionId[]) ?? DEFAULT_ACTIVE;
 
-    function handlePrint() {
-        window.print();
+    function updateResume(patch: Partial<ResumeData>) {
+        save({ resume: { ...resume, ...patch } });
+    }
+
+    function toggleSection(id: SectionId, required: boolean) {
+        if (required) return;
+        const next = activeSections.includes(id)
+            ? activeSections.filter(s => s !== id)
+            : [...activeSections, id];
+        updateResume({ active_sections: next });
+    }
+
+    function isActive(id: SectionId) {
+        return activeSections.includes(id);
     }
 
     async function handleShare() {
         const url = typeof window !== "undefined" ? window.location.href : "";
         const name = resume.personal?.name_ko || "이력서";
-        const title = `${name} 이력서`;
-        const text = `${name}님의 이력서`;
         try {
             if (typeof navigator !== "undefined" && (navigator as Navigator).share) {
-                await (navigator as Navigator).share({ title, text, url });
+                await (navigator as Navigator).share({ title: `${name} 이력서`, text: `${name}님의 이력서`, url });
                 return;
             }
-        } catch {
-            /* fall through to clipboard */
-        }
+        } catch { /* fall through */ }
         try {
             await navigator.clipboard.writeText(url);
             setShareToast("링크가 복사되었습니다");
@@ -106,46 +138,102 @@ export function ResumeView() {
         }
     }
 
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+
     return (
-        <div className="resume-root max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
+        <div className="resume-root max-w-4xl mx-auto px-4 md:px-10 py-6 space-y-5">
             <style>{`
                 @media print {
-                    @page { size: A4; margin: 14mm; }
-                    body { background: #fff !important; }
+                    @page { size: A4 portrait; margin: 16mm 14mm; }
+                    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    body, html { background: #fff !important; }
                     .resume-no-print { display: none !important; }
-                    .resume-root { max-width: 100% !important; padding: 0 !important; }
-                    .resume-root section { break-inside: avoid; border: 1px solid #e5e5e5 !important; box-shadow: none !important; padding: 14px !important; margin-bottom: 8px !important; }
-                    .resume-root input, .resume-root textarea, .resume-root select {
-                        border: none !important; background: transparent !important; padding: 0 !important;
-                        color: #111 !important; -webkit-appearance: none; appearance: none;
+                    .resume-root {
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        space-y: 0 !important;
                     }
-                    .resume-root textarea { resize: none !important; }
+                    .resume-root > * + * { margin-top: 0 !important; }
+                    .resume-section {
+                        break-inside: avoid;
+                        border: 1px solid #d4d4d4 !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        padding: 10px 12px !important;
+                        margin-bottom: 5px !important;
+                        background: #fff !important;
+                    }
+                    .resume-section-header {
+                        border-bottom: 1px solid #e5e5e5;
+                        padding-bottom: 4px;
+                        margin-bottom: 8px;
+                    }
+                    .resume-section-header .badge { display: none; }
+                    .resume-section-header h2 {
+                        font-size: 10pt !important;
+                        font-weight: 700 !important;
+                        color: #111 !important;
+                    }
+                    input, textarea, select {
+                        border: none !important;
+                        background: transparent !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        color: #111 !important;
+                        font-size: 9pt !important;
+                        -webkit-appearance: none;
+                        appearance: none;
+                        resize: none !important;
+                        outline: none !important;
+                        box-shadow: none !important;
+                        border-bottom: none !important;
+                    }
+                    textarea { height: auto !important; overflow: visible !important; }
+                    label { font-size: 7.5pt !important; color: #888 !important; }
+                    .list-item-row {
+                        border: none !important;
+                        background: transparent !important;
+                        padding: 2px 0 !important;
+                    }
+                    .resume-auth {
+                        break-inside: avoid;
+                        margin-top: 20px !important;
+                        border-top: 1px solid #d4d4d4 !important;
+                        padding-top: 12px !important;
+                        text-align: right !important;
+                    }
+                    .resume-auth p { font-size: 9pt !important; color: #333 !important; }
+                    .resume-auth .auth-name { font-size: 9.5pt !important; font-weight: 600 !important; }
+                    .resume-photo img { width: 108px !important; height: 135px !important; object-fit: cover; }
+                    .add-btn, .remove-btn, .photo-overlay, .photo-actions { display: none !important; }
                 }
             `}</style>
 
-            {/* Header */}
-            <div className="mb-2 resume-no-print">
+            {/* ── 상단 헤더 ─────────────────────────────── */}
+            <div className="resume-no-print">
                 <div className="flex items-center gap-3 flex-wrap">
-                    <FileText className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">이력서</h1>
+                    <FileText className="h-5 w-5 text-[#6366F1]" />
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100">이력서</h1>
                     {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     <div className="ml-auto flex items-center gap-2">
                         <button
-                            onClick={handlePrint}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            onClick={() => window.print()}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors myverse-dark:border-neutral-700 myverse-dark:text-neutral-300 myverse-dark:hover:bg-neutral-800"
                         >
                             <Printer className="h-3.5 w-3.5" /> PDF 저장
                         </button>
                         <button
                             onClick={handleShare}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#0F766E] text-white rounded-lg hover:bg-[#115e58] transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors"
                         >
                             <Share2 className="h-3.5 w-3.5" /> 공유
                         </button>
                     </div>
                 </div>
-                <p className="text-sm text-neutral-500 mt-2">
-                    살아온 궤적 — 학력·경력·수상·강의·심사·활동. 비전·미션의 토대가 된다.
+                <p className="text-xs text-neutral-500 mt-1.5">
+                    구성할 섹션을 선택하고 내용을 작성하세요. PDF 저장으로 문서 이력서를 출력할 수 있습니다.
                 </p>
                 {shareToast && (
                     <div className="mt-2 inline-block text-xs px-3 py-1.5 bg-neutral-900 text-white rounded">
@@ -158,8 +246,70 @@ export function ResumeView() {
                 <IdentitySubNav active="resume" />
             </div>
 
-            {/* ── 인적 사항 ────────────────────────────────────────── */}
-            <Section badge="01" title="인적 사항" icon={<User className="h-4 w-4 text-[#0F766E]" />}>
+            {/* ── 섹션 선택기 ──────────────────────────── */}
+            <div className="resume-no-print">
+                {/* 데스크탑: 가로 스크롤 스트립 */}
+                <div className="hidden md:flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                    {SECTION_DEFS.map(s => {
+                        const active = isActive(s.id);
+                        return (
+                            <button
+                                key={s.id}
+                                onClick={() => toggleSection(s.id, s.required)}
+                                disabled={s.required}
+                                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
+                                    active
+                                        ? "bg-[#6366F1] text-white"
+                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 myverse-dark:bg-neutral-800 myverse-dark:text-neutral-400 myverse-dark:hover:bg-neutral-700"
+                                } ${s.required ? "opacity-70 cursor-default" : "cursor-pointer"}`}
+                            >
+                                {s.label}
+                                {s.required && <span className="ml-1 opacity-60 text-[10px]">필수</span>}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* 모바일: 접힘 메뉴 */}
+                <div className="md:hidden">
+                    <button
+                        onClick={() => setMobileOpen(o => !o)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 myverse-dark:bg-neutral-800 myverse-dark:border-neutral-700 myverse-dark:text-neutral-300"
+                    >
+                        <span>
+                            구성 섹션 선택 <span className="text-neutral-400 text-xs">({activeSections.length}개 선택됨)</span>
+                        </span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${mobileOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {mobileOpen && (
+                        <div className="mt-1 p-3 bg-neutral-50 border border-neutral-200 rounded-lg myverse-dark:bg-neutral-800 myverse-dark:border-neutral-700">
+                            <div className="flex flex-wrap gap-1.5">
+                                {SECTION_DEFS.map(s => {
+                                    const active = isActive(s.id);
+                                    return (
+                                        <button
+                                            key={s.id}
+                                            onClick={() => { toggleSection(s.id, s.required); }}
+                                            disabled={s.required}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                                                active
+                                                    ? "bg-[#6366F1] text-white"
+                                                    : "bg-white text-neutral-500 border border-neutral-200 myverse-dark:bg-neutral-700 myverse-dark:border-neutral-600 myverse-dark:text-neutral-300"
+                                            } ${s.required ? "opacity-70 cursor-default" : ""}`}
+                                        >
+                                            {s.label}
+                                            {s.required && <span className="ml-1 opacity-60 text-[10px]">필수</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* ── 01 인적 사항 (필수) ──────────────────── */}
+            <Section num="01" title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[#6366F1]" />}>
                 <PersonalBlock
                     value={resume.personal ?? {}}
                     onSave={(p) => updateResume({ personal: p })}
@@ -167,123 +317,268 @@ export function ResumeView() {
                 />
             </Section>
 
-            {/* ── 학력 ──────────────────────────────────────────── */}
-            <Section badge="02" title="학력">
-                <ListBlock
-                    items={resume.education ?? []}
-                    onChange={(arr) => updateResume({ education: arr })}
-                    fields={["period", "school", "major", "status"]}
-                    placeholders={{ period: "기간", school: "학교명", major: "전공", status: "졸업/재학/석사" }}
-                    keyField="school"
-                />
-            </Section>
+            {/* ── 02 학력 사항 ─────────────────────────── */}
+            {isActive("education") && (
+                <Section num="02" title="학력 사항">
+                    <ListBlock
+                        items={resume.education ?? []}
+                        onChange={(arr) => updateResume({ education: arr })}
+                        fields={["period", "school", "major", "status"]}
+                        placeholders={{ period: "기간", school: "학교명", major: "전공", status: "졸업/재학/석사" }}
+                        keyField="school"
+                    />
+                </Section>
+            )}
 
-            {/* ── 병적 사항 ────────────────────────────────────── */}
-            <Section badge="03" title="병적 사항">
-                <MilitaryBlock
-                    value={resume.military ?? {}}
-                    onSave={(m) => updateResume({ military: m })}
-                />
-            </Section>
+            {/* ── 03 병적 사항 ─────────────────────────── */}
+            {isActive("military") && (
+                <Section num="03" title="병적 사항">
+                    <MilitaryBlock
+                        value={resume.military ?? {}}
+                        onSave={(m) => updateResume({ military: m })}
+                    />
+                </Section>
+            )}
 
-            {/* ── 경력 ────────────────────────────────────────── */}
-            <Section badge="04" title="경력 사항">
-                <ListBlock
-                    items={resume.career ?? []}
-                    onChange={(arr) => updateResume({ career: arr })}
-                    fields={["period", "company", "role", "description"]}
-                    placeholders={{ period: "기간 (예: 2022.01–현재)", company: "회사명", role: "직책·팀", description: "주요 클라이언트·업무" }}
-                    keyField="company"
-                    multilineField="description"
-                />
-            </Section>
+            {/* ── 04 경력 사항 ─────────────────────────── */}
+            {isActive("career") && (
+                <Section num="04" title="경력 사항">
+                    <ListBlock
+                        items={resume.career ?? []}
+                        onChange={(arr) => updateResume({ career: arr })}
+                        fields={["period", "company", "role", "description"]}
+                        placeholders={{ period: "기간 (예: 2022.01–현재)", company: "회사명", role: "직책·팀", description: "주요 업무·클라이언트" }}
+                        keyField="company"
+                        multilineField="description"
+                    />
+                </Section>
+            )}
 
-            {/* ── 수상 경력 ──────────────────────────────────── */}
-            <Section badge="05" title="수상 경력">
-                <ListBlock
-                    items={resume.awards ?? []}
-                    onChange={(arr) => updateResume({ awards: arr })}
-                    fields={["year", "title", "project", "client"]}
-                    placeholders={{ year: "년도", title: "수상명", project: "캠페인·작품", client: "클라이언트" }}
-                    keyField="title"
-                />
-            </Section>
+            {/* ── 05 수상 경력 ─────────────────────────── */}
+            {isActive("awards") && (
+                <Section num="05" title="수상 경력">
+                    <ListBlock
+                        items={resume.awards ?? []}
+                        onChange={(arr) => updateResume({ awards: arr })}
+                        fields={["year", "title", "project", "client", "org"]}
+                        placeholders={{ year: "년도", title: "수상명", project: "캠페인·작품", client: "클라이언트", org: "주관 기관" }}
+                        keyField="title"
+                    />
+                </Section>
+            )}
 
-            {/* ── 업무 경험 분야 ───────────────────────────── */}
-            <Section badge="06" title="업무 경험 분야">
-                <ListBlock
-                    items={resume.experience_areas ?? []}
-                    onChange={(arr) => updateResume({ experience_areas: arr })}
-                    fields={["area", "description"]}
-                    placeholders={{ area: "분야 (ATL/BTL/디지털/브랜드 컨설팅 등)", description: "구체 업무" }}
-                    keyField="area"
-                    multilineField="description"
-                />
-            </Section>
+            {/* ── 06 자격증 ────────────────────────────── */}
+            {isActive("certifications") && (
+                <Section num="06" title="자격증">
+                    <ListBlock
+                        items={resume.certifications ?? []}
+                        onChange={(arr) => updateResume({ certifications: arr })}
+                        fields={["name", "issuer", "year"]}
+                        placeholders={{ name: "자격증명", issuer: "발행 기관", year: "취득 년도" }}
+                        keyField="name"
+                    />
+                </Section>
+            )}
 
-            {/* ── 브랜드 카테고리 경험 ──────────────────────── */}
-            <Section badge="07" title="브랜드 카테고리 경험">
-                <ListBlock
-                    items={resume.brand_categories ?? []}
-                    onChange={(arr) => updateResume({ brand_categories: arr })}
-                    fields={["category", "brands"]}
-                    placeholders={{ category: "카테고리 (금융/육아/헬스케어 등)", brands: "브랜드·클라이언트 목록" }}
-                    keyField="category"
-                    multilineField="brands"
-                />
-            </Section>
+            {/* ── 07 어학 ──────────────────────────────── */}
+            {isActive("languages") && (
+                <Section num="07" title="어학">
+                    <ListBlock
+                        items={resume.languages ?? []}
+                        onChange={(arr) => updateResume({ languages: arr })}
+                        fields={["name", "level", "score"]}
+                        placeholders={{ name: "언어 (영어, 일어 등)", level: "수준 (비즈니스/생활회화 등)", score: "점수 (TOEIC 900 등)" }}
+                        keyField="name"
+                    />
+                </Section>
+            )}
 
-            {/* ── 강의 경력 ──────────────────────────────────── */}
-            <Section badge="08" title="강의 경력">
-                <ListBlock
-                    items={resume.lectures ?? []}
-                    onChange={(arr) => updateResume({ lectures: arr })}
-                    fields={["year", "org", "topic"]}
-                    placeholders={{ year: "년도", org: "기관·학교", topic: "주제·과목" }}
-                    keyField="org"
-                />
-            </Section>
+            {/* ── 08 강의 경력 ─────────────────────────── */}
+            {isActive("lectures") && (
+                <Section num="08" title="강의 경력">
+                    <ListBlock
+                        items={resume.lectures ?? []}
+                        onChange={(arr) => updateResume({ lectures: arr })}
+                        fields={["year", "org", "topic"]}
+                        placeholders={{ year: "년도", org: "기관·학교", topic: "주제·과목" }}
+                        keyField="org"
+                    />
+                </Section>
+            )}
 
-            {/* ── 심사 경력 ──────────────────────────────────── */}
-            <Section badge="09" title="심사 경력">
-                <ListBlock
-                    items={resume.judging ?? []}
-                    onChange={(arr) => updateResume({ judging: arr })}
-                    fields={["period", "org", "role"]}
-                    placeholders={{ period: "기간", org: "심사 기관", role: "역할·분야" }}
-                    keyField="org"
-                />
-            </Section>
+            {/* ── 09 심사 경력 ─────────────────────────── */}
+            {isActive("judging") && (
+                <Section num="09" title="심사 경력">
+                    <ListBlock
+                        items={resume.judging ?? []}
+                        onChange={(arr) => updateResume({ judging: arr })}
+                        fields={["period", "org", "role"]}
+                        placeholders={{ period: "기간", org: "심사 기관", role: "역할·분야" }}
+                        keyField="org"
+                    />
+                </Section>
+            )}
 
-            {/* ── 기타 활동 (운영중·종료) ──────────────────── */}
-            <Section badge="10" title="기타 활동">
-                <ListBlock
-                    items={resume.side_projects ?? []}
-                    onChange={(arr) => updateResume({ side_projects: arr })}
-                    fields={["status", "period", "name", "description"]}
-                    placeholders={{ status: "active/ended", period: "기간", name: "프로젝트·사이트명 (URL)", description: "설명" }}
-                    keyField="name"
-                    multilineField="description"
-                    selectField={{ key: "status", options: ["active", "ended"] }}
-                />
-            </Section>
+            {/* ── 10 포트폴리오 ─────────────────────────── */}
+            {isActive("portfolio") && (
+                <Section num="10" title="포트폴리오">
+                    <ListBlock
+                        items={resume.portfolio ?? []}
+                        onChange={(arr) => updateResume({ portfolio: arr })}
+                        fields={["period", "project", "description"]}
+                        placeholders={{ period: "기간", project: "프로젝트명", description: "주요 내용·역할·성과" }}
+                        keyField="project"
+                        multilineField="description"
+                    />
+                </Section>
+            )}
+
+            {/* ── 11 기타 활동 ─────────────────────────── */}
+            {isActive("side_projects") && (
+                <Section num="11" title="기타 활동">
+                    <ListBlock
+                        items={resume.side_projects ?? []}
+                        onChange={(arr) => updateResume({ side_projects: arr })}
+                        fields={["status", "period", "name", "description"]}
+                        placeholders={{ status: "상태", period: "기간", name: "프로젝트·사이트명", description: "설명·URL" }}
+                        keyField="name"
+                        multilineField="description"
+                        selectField={{ key: "status", options: ["active", "ended"] as const }}
+                    />
+                </Section>
+            )}
+
+            {/* ── 12 자기소개 ──────────────────────────── */}
+            {isActive("self_introduction") && (
+                <Section num="12" title="자기소개">
+                    <TextareaSection
+                        value={resume.self_introduction ?? ""}
+                        onSave={(v) => updateResume({ self_introduction: v })}
+                        placeholder="본인의 강점, 경험, 가치관을 중심으로 자유롭게 작성하세요."
+                        rows={6}
+                    />
+                </Section>
+            )}
+
+            {/* ── 13 지원 동기 ─────────────────────────── */}
+            {isActive("motivation") && (
+                <Section num="13" title="지원 동기">
+                    <TextareaSection
+                        value={resume.motivation ?? ""}
+                        onSave={(v) => updateResume({ motivation: v })}
+                        placeholder="해당 기업·직무에 지원하는 이유를 구체적으로 작성하세요."
+                        rows={5}
+                    />
+                </Section>
+            )}
+
+            {/* ── 14 직무 역량 ─────────────────────────── */}
+            {isActive("competency") && (
+                <Section num="14" title="직무 역량">
+                    <TextareaSection
+                        value={resume.competency ?? ""}
+                        onSave={(v) => updateResume({ competency: v })}
+                        placeholder="해당 직무에서 발휘할 수 있는 역량과 경험을 작성하세요."
+                        rows={5}
+                    />
+                </Section>
+            )}
+
+            {/* ── 15 입사후 포부 ────────────────────────── */}
+            {isActive("aspiration") && (
+                <Section num="15" title="입사후 포부">
+                    <TextareaSection
+                        value={resume.aspiration ?? ""}
+                        onSave={(v) => updateResume({ aspiration: v })}
+                        placeholder="입사 후 단기·장기 목표와 기여 방향을 작성하세요."
+                        rows={5}
+                    />
+                </Section>
+            )}
+
+            {/* ── 16 요점 정리 ─────────────────────────── */}
+            {isActive("summary") && (
+                <Section num="16" title="요점 정리">
+                    <TextareaSection
+                        value={resume.summary ?? ""}
+                        onSave={(v) => updateResume({ summary: v })}
+                        placeholder="이력서 전체를 압축한 핵심 요약을 작성하세요."
+                        rows={4}
+                    />
+                </Section>
+            )}
+
+            {/* ── 인증 문구 ─────────────────────────────── */}
+            <AuthDeclaration
+                name={resume.personal?.name_ko ?? ""}
+                dateStr={todayStr}
+            />
         </div>
     );
 }
 
-/* ── 카드 셸 ──────────────────────────────────────────── */
-function Section({ badge, title, icon, children }: {
-    badge: string; title: string; icon?: React.ReactNode; children: React.ReactNode;
+/* ── 섹션 카드 셸 ─────────────────────────────────────── */
+function Section({ num, title, icon, children }: {
+    num: string; title: string; icon?: React.ReactNode; children: React.ReactNode;
 }) {
     return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+        <section className="resume-section bg-white border border-neutral-200 rounded-xl p-5 myverse-dark:bg-neutral-900 myverse-dark:border-neutral-800">
+            <div className="resume-section-header flex items-center gap-2 mb-4">
                 {icon}
-                <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">{badge}</span>
-                <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
+                <span className="badge text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">{num}</span>
+                <h2 className="text-sm font-semibold text-neutral-800 myverse-dark:text-neutral-200">{title}</h2>
             </div>
             {children}
         </section>
+    );
+}
+
+/* ── 텍스트 섹션 (자기소개 등 단순 textarea) ─────────── */
+function TextareaSection({ value, onSave, placeholder, rows }: {
+    value: string;
+    onSave: (v: string) => void;
+    placeholder?: string;
+    rows?: number;
+}) {
+    const [v, setV] = useState(value);
+    useEffect(() => setV(value), [value]);
+    return (
+        <textarea
+            value={v}
+            onChange={(e) => setV(e.target.value)}
+            onBlur={() => onSave(v)}
+            placeholder={placeholder}
+            rows={rows ?? 5}
+            className="w-full text-sm text-neutral-800 bg-transparent focus:outline-none resize-none placeholder:text-neutral-300 leading-relaxed myverse-dark:text-neutral-200"
+        />
+    );
+}
+
+/* ── 인증 문구 ────────────────────────────────────────── */
+function AuthDeclaration({ name, dateStr }: { name: string; dateStr: string }) {
+    const [localName, setLocalName] = useState(name);
+    useEffect(() => setLocalName(name), [name]);
+    return (
+        <div className="resume-auth mt-2 pt-5 border-t border-neutral-200 myverse-dark:border-neutral-700">
+            <p className="text-sm text-neutral-600 myverse-dark:text-neutral-400 text-center mb-3">
+                위 경력 사항은 사실과 다르지 않음을 증명합니다.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-neutral-700 myverse-dark:text-neutral-300">
+                <span>{dateStr}</span>
+                <span className="flex items-center gap-2">
+                    <span className="text-neutral-400 text-xs resume-no-print">성명</span>
+                    <input
+                        type="text"
+                        value={localName}
+                        onChange={(e) => setLocalName(e.target.value)}
+                        placeholder="성명을 입력하세요"
+                        className="auth-name bg-transparent border-b border-neutral-300 focus:outline-none text-center font-semibold w-28 text-sm pb-0.5 placeholder:text-neutral-300 myverse-dark:border-neutral-600 myverse-dark:text-neutral-200 resume-no-print-border"
+                    />
+                    <span className="hidden print:inline font-semibold">{localName}</span>
+                    <span className="text-neutral-400 text-xs">(서명)</span>
+                </span>
+            </div>
+        </div>
     );
 }
 
@@ -345,7 +640,9 @@ function PersonalBlock({ value, onSave, userId }: {
 
     const photoSrc = pending?.previewUrl || v.photo_url;
 
-    const F = ({ label, k, placeholder, full }: { label: string; k: keyof typeof v; placeholder?: string; full?: boolean }) => (
+    const F = ({ label, k, placeholder, full }: {
+        label: string; k: keyof typeof v; placeholder?: string; full?: boolean;
+    }) => (
         <div className={full ? "md:col-span-2" : ""}>
             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">{label}</label>
             <input
@@ -354,7 +651,7 @@ function PersonalBlock({ value, onSave, userId }: {
                 onChange={(e) => update(k, e.target.value)}
                 onBlur={commit}
                 placeholder={placeholder}
-                className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300"
+                className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300 myverse-dark:border-neutral-700 myverse-dark:text-neutral-100"
             />
         </div>
     );
@@ -362,34 +659,34 @@ function PersonalBlock({ value, onSave, userId }: {
     return (
         <div className="flex flex-col md:flex-row gap-6">
             {/* 사진 */}
-            <div className="shrink-0 flex md:block justify-center">
-                <div className="relative w-32 h-40 md:w-36 md:h-44 bg-neutral-100 border border-neutral-200 rounded-lg overflow-hidden group">
+            <div className="resume-photo shrink-0 flex md:block justify-center">
+                <div className="relative w-28 h-36 md:w-32 md:h-40 bg-neutral-100 border border-neutral-200 rounded overflow-hidden group myverse-dark:bg-neutral-800 myverse-dark:border-neutral-700">
                     {photoSrc ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={photoSrc} alt="이력서 사진" className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-neutral-300 gap-1">
-                            <User className="h-10 w-10" />
+                            <User className="h-8 w-8" />
                             <span className="text-[10px]">3×4 사진</span>
                         </div>
                     )}
                     {!pending && (
                         <button
                             onClick={() => fileRef.current?.click()}
-                            className="resume-no-print absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
+                            className="photo-overlay resume-no-print absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
                             aria-label="사진 업로드"
                         >
-                            <Camera className="h-6 w-6 text-white" />
+                            <Camera className="h-5 w-5 text-white" />
                         </button>
                     )}
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" onChange={pickFile} className="hidden" />
                 {pending ? (
-                    <div className="resume-no-print flex gap-1 mt-2 justify-center md:justify-start">
+                    <div className="photo-actions resume-no-print flex gap-1 mt-2 justify-center md:justify-start">
                         <button
                             onClick={confirmPhoto}
                             disabled={uploading}
-                            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-[#0F766E] text-white rounded hover:bg-[#115e58] disabled:opacity-50"
+                            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50"
                         >
                             {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
                             저장
@@ -405,7 +702,7 @@ function PersonalBlock({ value, onSave, userId }: {
                 ) : v.photo_url ? (
                     <button
                         onClick={removePhoto}
-                        className="resume-no-print mt-2 text-[11px] text-neutral-400 hover:text-red-500 ml-3 md:ml-0"
+                        className="photo-actions resume-no-print mt-2 text-[11px] text-neutral-400 hover:text-red-500 md:ml-0 ml-3"
                     >
                         사진 삭제
                     </button>
@@ -418,8 +715,8 @@ function PersonalBlock({ value, onSave, userId }: {
                 <F label="이름 (영문)" k="name_en" placeholder="Gildong Hong" />
                 <F label="한자" k="name_hanja" placeholder="洪吉童" />
                 <F label="생년월일" k="birth" placeholder="1990-01-01" />
-                <F label="주소" k="address" placeholder="서울시…" full />
-                <F label="휴대전화" k="phone" placeholder="010-…" />
+                <F label="주소" k="address" placeholder="서울시 마포구…" full />
+                <F label="휴대전화" k="phone" placeholder="010-0000-0000" />
                 <F label="이메일" k="email" placeholder="you@example.com" />
                 <F label="홈페이지" k="homepage" placeholder="https://…" full />
             </div>
@@ -439,36 +736,18 @@ function MilitaryBlock({ value, onSave }: {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Field label="기간">
-                <input
-                    type="text"
-                    value={v.period ?? ""}
-                    onChange={(e) => update("period", e.target.value)}
-                    onBlur={commit}
-                    placeholder="1997.07.01 ~ 1999.08.31"
-                    className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300"
-                />
-            </Field>
-            <Field label="구분">
-                <input
-                    type="text"
-                    value={v.status ?? ""}
-                    onChange={(e) => update("status", e.target.value)}
-                    onBlur={commit}
-                    placeholder="만기 제대 / 면제 / 미필"
-                    className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300"
-                />
-            </Field>
-            <Field label="비고">
-                <input
-                    type="text"
-                    value={v.notes ?? ""}
-                    onChange={(e) => update("notes", e.target.value)}
-                    onBlur={commit}
-                    placeholder="병과·계급 등"
-                    className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300"
-                />
-            </Field>
+            {(["period", "status", "notes"] as const).map(k => (
+                <Field key={k} label={k === "period" ? "기간" : k === "status" ? "구분" : "비고"}>
+                    <input
+                        type="text"
+                        value={v[k] ?? ""}
+                        onChange={(e) => update(k, e.target.value)}
+                        onBlur={commit}
+                        placeholder={k === "period" ? "1997.07 ~ 1999.08" : k === "status" ? "만기제대 / 면제 / 미필" : "병과·계급 등"}
+                        className="w-full bg-transparent focus:outline-none border-b border-neutral-200 pb-1.5 text-sm text-neutral-900 placeholder:text-neutral-300 myverse-dark:border-neutral-700 myverse-dark:text-neutral-100"
+                    />
+                </Field>
+            ))}
         </div>
     );
 }
@@ -482,7 +761,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-/* ── 반복 항목 블록 (학력/경력/수상/업무경험/등) ─────────── */
+/* ── 반복 항목 블록 ───────────────────────────────────── */
 function ListBlock<T extends { id: string; status?: string }>({
     items, onChange, fields, placeholders, keyField, multilineField, selectField,
 }: {
@@ -514,22 +793,25 @@ function ListBlock<T extends { id: string; status?: string }>({
     }
 
     const inlineFields = fields.filter(f => f !== multilineField);
+    const cols = inlineFields.length <= 2 ? "sm:grid-cols-2" : inlineFields.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4";
 
     return (
         <div>
-            <div className="flex justify-end mb-2">
-                <button onClick={add} className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 rounded transition-colors">
+            <div className="add-btn flex justify-end mb-2 resume-no-print">
+                <button onClick={add} className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#6366F1] hover:bg-[#6366F1]/10 rounded transition-colors">
                     <Plus className="h-3 w-3" /> 추가
                 </button>
             </div>
             {list.length === 0 ? (
-                <p className="text-xs text-neutral-400 py-3 text-center bg-neutral-50 rounded">아직 항목이 없습니다.</p>
+                <p className="text-xs text-neutral-400 py-3 text-center bg-neutral-50 rounded resume-no-print myverse-dark:bg-neutral-800">
+                    아직 항목이 없습니다.
+                </p>
             ) : (
                 <div className="space-y-1.5">
                     {list.map(item => (
-                        <div key={item.id} className="group bg-neutral-50 rounded-lg px-3 py-2 space-y-1.5">
+                        <div key={item.id} className="list-item-row group bg-neutral-50 rounded-lg px-3 py-2 space-y-1.5 myverse-dark:bg-neutral-800">
                             <div className="flex items-start gap-2">
-                                <div className={`flex-1 grid gap-2 grid-cols-1 ${inlineFields.length === 2 ? "sm:grid-cols-2" : inlineFields.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}>
+                                <div className={`flex-1 grid gap-2 grid-cols-1 ${cols}`}>
                                     {inlineFields.map(f => {
                                         if (selectField && f === selectField.key) {
                                             return (
@@ -538,10 +820,10 @@ function ListBlock<T extends { id: string; status?: string }>({
                                                     value={(item[f] as string) ?? ""}
                                                     onChange={(e) => patch(item.id, { [f]: e.target.value || undefined } as Partial<T>)}
                                                     onBlur={commit}
-                                                    className="text-xs bg-white border border-neutral-200 rounded px-2 py-1 text-neutral-700 focus:outline-none"
+                                                    className="text-xs bg-white border border-neutral-200 rounded px-2 py-1 text-neutral-700 focus:outline-none myverse-dark:bg-neutral-700 myverse-dark:border-neutral-600 myverse-dark:text-neutral-300"
                                                 >
-                                                    <option value="">선택</option>
-                                                    {selectField.options.map(o => <option key={o} value={o}>{o}</option>)}
+                                                    <option value="">상태</option>
+                                                    {selectField.options.map(o => <option key={o} value={o}>{o === "active" ? "운영 중" : "종료"}</option>)}
                                                 </select>
                                             );
                                         }
@@ -554,8 +836,8 @@ function ListBlock<T extends { id: string; status?: string }>({
                                                 onChange={(e) => patch(item.id, { [f]: e.target.value } as Partial<T>)}
                                                 onBlur={commit}
                                                 placeholder={placeholders[f]}
-                                                className={`bg-transparent focus:outline-none border-b border-neutral-200 pb-1 text-xs placeholder:text-neutral-300 ${
-                                                    isKey ? "font-medium text-neutral-900" : "text-neutral-700"
+                                                className={`bg-transparent focus:outline-none border-b border-neutral-200 pb-1 text-xs placeholder:text-neutral-300 myverse-dark:border-neutral-600 ${
+                                                    isKey ? "font-medium text-neutral-900 myverse-dark:text-neutral-100" : "text-neutral-700 myverse-dark:text-neutral-300"
                                                 }`}
                                             />
                                         );
@@ -563,7 +845,7 @@ function ListBlock<T extends { id: string; status?: string }>({
                                 </div>
                                 <button
                                     onClick={() => remove(item.id)}
-                                    className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity shrink-0 mt-1"
+                                    className="remove-btn opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity shrink-0 mt-1 resume-no-print"
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -575,7 +857,7 @@ function ListBlock<T extends { id: string; status?: string }>({
                                     onBlur={commit}
                                     placeholder={placeholders[multilineField]}
                                     rows={2}
-                                    className="w-full text-xs text-neutral-700 bg-transparent focus:outline-none resize-none border-t border-neutral-200/70 pt-1.5 placeholder:text-neutral-300"
+                                    className="w-full text-xs text-neutral-700 bg-transparent focus:outline-none resize-none border-t border-neutral-200/70 pt-1.5 placeholder:text-neutral-300 myverse-dark:border-neutral-700 myverse-dark:text-neutral-300"
                                 />
                             )}
                         </div>

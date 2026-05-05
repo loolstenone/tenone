@@ -33,6 +33,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "unsupported_format" }, { status: 400 });
     }
 
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+    if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ error: "file_too_large", maxMB: 20 }, { status: 413 });
+    }
+
     const bytes = await file.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");
     const mediaType = file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif";
@@ -87,7 +92,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "parse_failed" }, { status: 500 });
     }
 
-    const foods: FoodItem[] = (parsed.foods ?? []).map((f: FoodItem) => ({
+    const foods: FoodItem[] = (parsed.foods ?? []).slice(0, 20).map((f: FoodItem) => ({
         name: String(f.name ?? ""),
         calories: Math.round(Number(f.calories) || 0),
         protein: Math.round(Number(f.protein) || 0),

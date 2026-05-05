@@ -113,7 +113,7 @@ export function AddressPickerButton({
             <button
                 type="button"
                 onClick={openModal}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-600 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors ${className}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-600 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors ${className}`}
                 title="우편번호로 주소 빠르게 찾기"
             >
                 <Search className="h-3 w-3" />
@@ -131,7 +131,7 @@ export function AddressPickerButton({
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-[#0F766E]" />
+                                <MapPin className="h-4 w-4 text-[#6366F1]" />
                                 <span className="text-sm font-semibold text-neutral-900">주소 검색</span>
                             </div>
                             <button

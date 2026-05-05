@@ -38,7 +38,7 @@ function HeroSection() {
         <div className="mt-12 flex flex-col sm:flex-row flex-wrap gap-3">
           <Link
             href={ppAiHref}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F766E] text-white text-sm font-medium tracking-wide hover:bg-[#0d5e56] transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white text-sm font-medium tracking-wide hover:bg-[#4F46E5] transition-colors shadow-sm"
           >
             <Sparkles size={16} />
             {isAuthenticated ? "PP AI 앱 열기" : "Planner's Planner AI 시작"}
@@ -75,13 +75,13 @@ function PPAISpotlight() {
   const { isAuthenticated } = useAuth();
   const ppAiHref = isAuthenticated ? "/myverse/app" : "/myverse/planner-tool#pp-ai";
   return (
-    <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-gradient-to-br from-[#0F766E]/5 via-white to-[#0F766E]/10 border-y border-[#0F766E]/10">
+    <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-gradient-to-br from-[#6366F1]/5 via-white to-[#6366F1]/10 border-y border-[#6366F1]/10">
       <div className="max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0F766E] text-white text-xs font-semibold rounded-full mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#6366F1] text-white text-xs font-semibold rounded-full mb-6">
           <Sparkles size={12} /> Now Live
         </div>
         <h2 className="font-serif text-3xl md:text-5xl text-[#1a1a1a] tracking-tight mb-6">
-          Planner&apos;s Planner <span className="text-[#0F766E]">AI</span>
+          Planner&apos;s Planner <span className="text-[#6366F1]">AI</span>
         </h2>
         <p className="text-lg md:text-xl text-[#444] leading-relaxed max-w-2xl mb-8">
           22년 기획 노하우를 담은 종이 플래너에 능동 AI 비서를 더했다.
@@ -90,15 +90,15 @@ function PPAISpotlight() {
           </span>
         </p>
         <div className="grid sm:grid-cols-3 gap-4 mb-10 text-sm">
-          <div className="border-l-2 border-[#0F766E] pl-4">
+          <div className="border-l-2 border-[#6366F1] pl-4">
             <p className="font-semibold text-[#1a1a1a]">아침 브리핑</p>
             <p className="text-[#666] text-xs mt-1">오늘 할 일·집중 포인트·날씨까지 한눈에</p>
           </div>
-          <div className="border-l-2 border-[#0F766E] pl-4">
+          <div className="border-l-2 border-[#6366F1] pl-4">
             <p className="font-semibold text-[#1a1a1a]">저녁 회고</p>
             <p className="text-[#666] text-xs mt-1">하루를 정리하고 내일을 미리 기획</p>
           </div>
-          <div className="border-l-2 border-[#0F766E] pl-4">
+          <div className="border-l-2 border-[#6366F1] pl-4">
             <p className="font-semibold text-[#1a1a1a]">59종 템플릿</p>
             <p className="text-[#666] text-xs mt-1">SWOT·OKR·만다라트 시각 편집</p>
           </div>
@@ -106,7 +106,7 @@ function PPAISpotlight() {
         <div className="flex flex-col sm:flex-row gap-3 items-start">
           <Link
             href={ppAiHref}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F766E] text-white text-sm font-semibold rounded hover:bg-[#0d5e56] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white text-sm font-semibold rounded hover:bg-[#4F46E5] transition-colors"
           >
             <Sparkles size={16} />
             {isAuthenticated ? "PP AI 앱 열기" : "1년 19,000원으로 시작"}
@@ -114,7 +114,7 @@ function PPAISpotlight() {
           </Link>
           <Link
             href="/myverse/planner-tool"
-            className="inline-flex items-center gap-2 px-6 py-3 text-[#0F766E] text-sm hover:underline"
+            className="inline-flex items-center gap-2 px-6 py-3 text-[#6366F1] text-sm hover:underline"
           >
             기능 자세히 보기
             <ArrowRight size={14} />

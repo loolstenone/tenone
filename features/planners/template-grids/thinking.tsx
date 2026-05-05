@@ -267,8 +267,8 @@ export function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; on
                 </table>
             </div>
             <div className="flex gap-2">
-                <button onClick={addOption} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 옵션</button>
-                <button onClick={addCriterion} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 기준</button>
+                <button onClick={addOption} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">+ 옵션</button>
+                <button onClick={addCriterion} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">+ 기준</button>
             </div>
 
             {/* Decision + sanity check */}

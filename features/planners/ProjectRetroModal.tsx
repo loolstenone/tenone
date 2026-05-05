@@ -137,7 +137,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
                     {!savedRetro ? (
                         <>
                             <p className="text-xs text-neutral-500 leading-relaxed">
-                                이 프로젝트의 의미를 5F 구조로 정리합니다. <span className="text-[#0F766E]">Finding</span>은 Identity의 Key Results 후보로 환류됩니다.
+                                이 프로젝트의 의미를 5F 구조로 정리합니다. <span className="text-[#6366F1]">Finding</span>은 Identity의 Key Results 후보로 환류됩니다.
                             </p>
                             {FIELDS.map(({ key, label, hint, rows }) => (
                                 <div key={key}>
@@ -147,7 +147,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
                                         onChange={(e) => setRetro({ ...retro, [key]: e.target.value })}
                                         rows={rows}
                                         placeholder={hint}
-                                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] resize-none placeholder:text-neutral-300 placeholder:italic"
+                                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] resize-none placeholder:text-neutral-300 placeholder:italic"
                                     />
                                 </div>
                             ))}
@@ -204,7 +204,7 @@ export function ProjectRetroModal({ open, project, onClose, onSaved }: {
                             <button
                                 onClick={save}
                                 disabled={saving}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                                 저장하고 완료

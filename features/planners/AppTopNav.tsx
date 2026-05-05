@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
@@ -155,9 +156,15 @@ export function AppTopNav({
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand — 모바일: 아이콘만, sm+: 전체 텍스트 */}
             <Link href="/myverse/app" className="flex items-center gap-1.5 mr-1 shrink-0">
-                <span className="w-6 h-6 rounded bg-[#6366F1] text-white flex items-center justify-center text-xs font-bold shrink-0">M</span>
-                <span className="hidden sm:inline font-serif text-sm text-neutral-900 whitespace-nowrap">
-                    Myverse<sup className="text-[8px] font-sans font-bold text-[#6366F1] ml-0.5 align-super">App</sup>
+                <Image
+                    src="/Myverse_logo_black.png"
+                    alt="Myverse"
+                    width={24}
+                    height={24}
+                    className="shrink-0"
+                />
+                <span className="hidden sm:inline font-sans font-semibold text-sm text-neutral-900 tracking-tight whitespace-nowrap">
+                    Myverse
                 </span>
             </Link>
 
@@ -315,8 +322,8 @@ export function AppTopNav({
                 onClose={() => setMenuOpen(false)}
                 brandName="Myverse App"
                 brandNode={
-                    <span className="font-serif text-neutral-900">
-                        Myverse<sup className="text-[8px] font-sans font-bold text-[#6366F1] ml-0.5 align-super">App</sup>
+                    <span className="font-sans font-semibold text-neutral-900 tracking-tight">
+                        Myverse
                     </span>
                 }
                 bgClass="bg-white"
@@ -359,7 +366,7 @@ export function AppTopNav({
                     >
                         <Sparkles className="h-4 w-4" />
                         <span className="flex-1">구독</span>
-                        <span className="text-[10px] text-[#6366F1]/60">PP AI 1년 무제한</span>
+                        <span className="text-[10px] text-[#6366F1]/60">Myverse AI 1년 무제한</span>
                     </Link>
                 )}
                 <InstallButton className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 w-full text-left">
@@ -392,7 +399,7 @@ export function AppTopNav({
                 </Link>
                 <div className="h-px bg-neutral-100 my-1" />
                 <button
-                    onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent("planners-feedback-open")); }}
+                    onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent("myverse-feedback-open")); }}
                     className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-500/10"
                 >
                     <MessageSquarePlus className="h-4 w-4 text-neutral-400" />

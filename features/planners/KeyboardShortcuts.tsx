@@ -110,7 +110,7 @@ export function KeyboardShortcuts() {
                     >
                         <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
                             <div className="flex items-center gap-2">
-                                <Keyboard className="h-4 w-4 text-[#0F766E]" />
+                                <Keyboard className="h-4 w-4 text-[#6366F1]" />
                                 <h2 className="font-serif text-lg text-neutral-900">단축키</h2>
                             </div>
                             <button

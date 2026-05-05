@@ -126,7 +126,7 @@ export function SettingsAi({
                                     onClick={() => { setTone(t); save({ ai_tone: t }); }}
                                     className={`py-2 text-sm rounded-lg transition-colors ${
                                         tone === t
-                                            ? "bg-[#0F766E] text-white"
+                                            ? "bg-[#6366F1] text-white"
                                             : "bg-neutral-50 text-neutral-600 hover:bg-neutral-100"
                                     }`}
                                 >
@@ -159,7 +159,7 @@ export function SettingsAi({
                                         }}
                                         className={`px-3 py-1.5 text-xs rounded-full transition-colors border ${
                                             on
-                                                ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E]"
+                                                ? "border-[#6366F1] bg-[#6366F1]/5 text-[#6366F1]"
                                                 : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
                                         }`}
                                     >
@@ -173,7 +173,7 @@ export function SettingsAi({
                         <button
                             onClick={generateSample}
                             disabled={sampleLoading}
-                            className="flex items-center gap-1.5 text-xs text-[#0F766E] hover:underline disabled:opacity-50"
+                            className="flex items-center gap-1.5 text-xs text-[#6366F1] hover:underline disabled:opacity-50"
                         >
                             {sampleLoading
                                 ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -221,7 +221,7 @@ export function SettingsAi({
                                     {checked && linkedProjectId && (
                                         <button
                                             onClick={() => linkProject(m.key, null)}
-                                            className="mt-1 flex items-center gap-1 text-[10px] text-[#0F766E] hover:text-red-500 transition-colors"
+                                            className="mt-1 flex items-center gap-1 text-[10px] text-[#6366F1] hover:text-red-500 transition-colors"
                                             title="프로젝트 연결 해제"
                                         >
                                             <FolderOpen className="h-2.5 w-2.5" />
@@ -236,7 +236,7 @@ export function SettingsAi({
                                             title="프로젝트와 연결"
                                             className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
                                                 linkedProjectId
-                                                    ? "bg-[#0F766E]/10 text-[#0F766E] hover:bg-[#0F766E]/20"
+                                                    ? "bg-[#6366F1]/10 text-[#6366F1] hover:bg-[#6366F1]/20"
                                                     : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
                                             }`}
                                         >
@@ -254,7 +254,7 @@ export function SettingsAi({
                                             save({ daily_tracking_metrics: next });
                                         }}
                                         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                                            checked ? "bg-[#0F766E] border-[#0F766E]" : "border-neutral-300 bg-white"
+                                            checked ? "bg-[#6366F1] border-[#6366F1]" : "border-neutral-300 bg-white"
                                         }`}
                                     >
                                         {checked && <Check className="h-3 w-3 text-white" />}
@@ -298,7 +298,7 @@ export function SettingsAi({
                                     <p className="text-xs text-neutral-500 mt-0.5">{c.hint}</p>
                                 </div>
                                 <span className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${
-                                    checked ? "bg-[#0F766E] border-[#0F766E]" : "border-neutral-300 bg-white"
+                                    checked ? "bg-[#6366F1] border-[#6366F1]" : "border-neutral-300 bg-white"
                                 }`}>
                                     {checked && <Check className="h-3 w-3 text-white" />}
                                 </span>
@@ -336,13 +336,13 @@ export function SettingsAi({
                                 onChange={(e) => setNewProjectTitle(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") createAndLinkProject(projectPickerMetric); }}
                                 placeholder="새 프로젝트 이름 입력"
-                                className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0F766E]"
+                                className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#6366F1]"
                                 autoFocus
                             />
                             <button
                                 onClick={() => createAndLinkProject(projectPickerMetric)}
                                 disabled={creatingProject || !newProjectTitle.trim()}
-                                className="flex items-center gap-1 px-3 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50 shrink-0"
+                                className="flex items-center gap-1 px-3 py-2 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50 shrink-0"
                             >
                                 {creatingProject ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                                 만들기
@@ -370,7 +370,7 @@ export function SettingsAi({
                                                 onClick={() => linkProject(projectPickerMetric, p.id)}
                                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors border ${
                                                     isLinked
-                                                        ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-medium"
+                                                        ? "border-[#6366F1] bg-[#6366F1]/5 text-[#6366F1] font-medium"
                                                         : "border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
                                                 }`}
                                             >

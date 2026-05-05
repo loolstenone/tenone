@@ -108,7 +108,7 @@ export function AiBriefingView() {
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <header className="flex items-center gap-2.5 mb-5">
-                <Sparkles className="h-5 w-5 text-[#0F766E]" />
+                <Sparkles className="h-5 w-5 text-[#6366F1]" />
                 <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">AI 브리핑</h1>
             </header>
 
@@ -205,7 +205,7 @@ export function AiBriefingView() {
                             <button
                                 onClick={() => generate("auto")}
                                 disabled={generating}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                             >
                                 <Send className="h-4 w-4" />
                                 지금 시각에 맞춰 브리핑 받기 <span className="text-[10px] opacity-80">({TYPE_META[suggested].label})</span>

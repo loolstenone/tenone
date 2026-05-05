@@ -109,7 +109,7 @@ export function ProjectsView() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <FolderKanban className="h-6 w-6 text-[#0F766E]" />
+                    <FolderKanban className="h-6 w-6 text-[#6366F1]" />
                     <h1 className="font-serif text-3xl text-neutral-900">프로젝트</h1>
                 </div>
                 <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export function ProjectsView() {
                             href={`/myverse/portfolio/${user.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0F766E] border border-[#0F766E] rounded-lg hover:bg-[#0F766E] hover:text-white transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#6366F1] border border-[#6366F1] rounded-lg hover:bg-[#6366F1] hover:text-white transition-colors"
                         >
                             <LayoutGrid className="h-3.5 w-3.5" />
                             내 포트폴리오
@@ -132,7 +132,7 @@ export function ProjectsView() {
             <div className="flex justify-end mb-2">
                 <button
                     onClick={() => setShowForm(v => !v)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors shrink-0"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors shrink-0"
                 >
                     <Plus className="h-3.5 w-3.5" /> 새 프로젝트
                 </button>
@@ -147,13 +147,13 @@ export function ProjectsView() {
                             onClick={() => setFilter(f)}
                             className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
-                                    ? "text-[#0F766E] font-semibold"
+                                    ? "text-[#6366F1] font-semibold"
                                     : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
                             {f === "active" ? "진행중" : f === "completed" ? "완료" : f === "archived" ? "보관" : "전체"}
                             {isActive && (
-                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />
+                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />
                             )}
                         </button>
                     );
@@ -215,7 +215,7 @@ export function ProjectsView() {
                         <button
                             onClick={createProject}
                             disabled={creating || !newTitle.trim()}
-                            className="px-4 py-1.5 text-sm bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                            className="px-4 py-1.5 text-sm bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                         >
                             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
                         </button>
@@ -262,7 +262,7 @@ export function ProjectsView() {
                         <Link
                             key={p.id}
                             href={`/myverse/app/projects/${p.id}`}
-                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#0F766E] hover:shadow-sm transition-all group relative"
+                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#6366F1] hover:shadow-sm transition-all group relative"
                         >
                             {/* 호버 시 삭제 버튼 — 우상단 */}
                             <button
@@ -278,11 +278,11 @@ export function ProjectsView() {
                                 ) : (
                                     <div
                                         className="w-10 h-14 rounded-md shrink-0"
-                                        style={{ backgroundColor: p.color || "#0F766E" }}
+                                        style={{ backgroundColor: p.color || "#6366F1" }}
                                     />
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-neutral-900 group-hover:text-[#0F766E] transition-colors">
+                                    <h3 className="font-semibold text-neutral-900 group-hover:text-[#6366F1] transition-colors">
                                         {p.title}
                                     </h3>
                                     <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500 flex-wrap">

@@ -89,7 +89,7 @@ export function SettingsExport({ sub, showToast }: Props) {
                 </p>
                 <InstallButton
                     hideWhenInstalled={false}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5] transition-colors"
                 >
                     <Download className="h-3.5 w-3.5" />
                     앱 설치 상세
@@ -150,8 +150,8 @@ export function SettingsExport({ sub, showToast }: Props) {
                 {sub.status === "active" ? (
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-[#0F766E]" />
-                            <span className="text-sm font-semibold text-[#0F766E]">활성 구독</span>
+                            <Check className="h-4 w-4 text-[#6366F1]" />
+                            <span className="text-sm font-semibold text-[#6366F1]">활성 구독</span>
                         </div>
                         <div className="bg-neutral-50 rounded-lg p-3 space-y-1">
                             <p className="text-[10px] uppercase tracking-widest text-neutral-400">이용 중</p>
@@ -170,7 +170,7 @@ export function SettingsExport({ sub, showToast }: Props) {
                         )}
                         <Link
                             href="/myverse/purchase"
-                            className="inline-flex items-center gap-1.5 text-xs text-[#0F766E] hover:underline"
+                            className="inline-flex items-center gap-1.5 text-xs text-[#6366F1] hover:underline"
                         >
                             구독 연장 <ExternalLink className="h-3 w-3" />
                         </Link>
@@ -192,7 +192,7 @@ export function SettingsExport({ sub, showToast }: Props) {
                             </ul>
                             <Link
                                 href="/myverse/purchase"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors"
                             >
                                 구독 시작
                             </Link>

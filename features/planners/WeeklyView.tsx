@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus, LayoutList, CalendarDays, Sun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, Thermometer } from "lucide-react";
@@ -377,7 +377,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                 <div className="flex items-center gap-2 min-w-0">
                                     <h1
                                         className={`font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap ${
-                                            todayInWeek ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                            todayInWeek ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
                                         }`}
                                         title={todayInWeek ? "이번 주" : undefined}
                                     >
@@ -414,7 +414,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             <button
                                 onClick={() => { setCalEditing(null); setCalDefaultDate(undefined); setCalEditorOpen(true); }}
                                 title="일정 추가"
-                                className="p-1.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors"
+                                className="p-1.5 rounded text-neutral-300 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors"
                             >
                                 <Plus className="h-3.5 w-3.5" />
                             </button>
@@ -486,12 +486,12 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                 return (
                                                     <div key={ds} className="flex-1 min-w-[80px] border-r border-neutral-100 last:border-r-0">
                                                         {/* 헤더 */}
-                                                        <div className={`h-14 border-b border-neutral-100 flex flex-col items-center justify-center gap-0.5 ${isToday ? "bg-[#0F766E]/[0.02]" : ""}`}>
+                                                        <div className={`h-14 border-b border-neutral-100 flex flex-col items-center justify-center gap-0.5 ${isToday ? "bg-[#6366F1]/[0.02]" : ""}`}>
                                                             <span className={`text-[9px] font-medium tracking-wider ${isSun ? "text-rose-400" : isSat ? "text-blue-400" : "text-neutral-400"}`}>
                                                                 {DAYS_KO[d.getDay()]}
                                                             </span>
                                                             {isToday ? (
-                                                                <span className="w-7 h-7 rounded-full bg-[#0F766E] flex items-center justify-center text-sm font-semibold text-white leading-none">
+                                                                <span className="w-7 h-7 rounded-full bg-[#6366F1] flex items-center justify-center text-sm font-semibold text-white leading-none">
                                                                     {d.getDate()}
                                                                 </span>
                                                             ) : (
@@ -501,7 +501,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                             )}
                                                         </div>
                                                         {/* 종일 이벤트 행 */}
-                                                        <div className={`min-h-[28px] border-b border-neutral-100 planners-dark:border-white/[0.06] px-0.5 py-0.5 flex flex-col gap-0.5 ${isToday ? "bg-[#0F766E]/[0.02]" : ""}`}>
+                                                        <div className={`min-h-[28px] border-b border-neutral-100 myverse-dark:border-white/[0.06] px-0.5 py-0.5 flex flex-col gap-0.5 ${isToday ? "bg-[#6366F1]/[0.02]" : ""}`}>
                                                             {staticHolidayItems.map(h => {
                                                                 const c = KIND_COLORS[h.kind];
                                                                 return (
@@ -521,7 +521,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                         </div>
                                                         {/* 시간 그리드 */}
                                                         <div
-                                                            className={`group/grid relative cursor-pointer transition-colors hover:bg-[#0F766E]/[0.025] ${isToday ? "bg-[#0F766E]/[0.015]" : ""}`}
+                                                            className={`group/grid relative cursor-pointer transition-colors hover:bg-[#6366F1]/[0.025] ${isToday ? "bg-[#6366F1]/[0.015]" : ""}`}
                                                             style={{ height: HOURS.length * SLOT_HEIGHT }}
                                                             title="빈 시간대를 클릭해 일정 추가 (30분 단위)"
                                                             onMouseMove={(e) => {
@@ -558,20 +558,20 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                             {/* 시간선 정시 + 30분 */}
                                                             {HOURS.map(h => (
                                                                 <div key={h}>
-                                                                    <div className="absolute w-full border-t border-neutral-100/70 planners-dark:border-white/[0.05]" style={{ top: (h - 6) * SLOT_HEIGHT }} />
-                                                                    <div className="absolute w-full border-t border-neutral-100/40 planners-dark:border-white/[0.025]" style={{ top: (h - 6) * SLOT_HEIGHT + SLOT_HEIGHT / 2 }} />
+                                                                    <div className="absolute w-full border-t border-neutral-100/70 myverse-dark:border-white/[0.05]" style={{ top: (h - 6) * SLOT_HEIGHT }} />
+                                                                    <div className="absolute w-full border-t border-neutral-100/40 myverse-dark:border-white/[0.025]" style={{ top: (h - 6) * SLOT_HEIGHT + SLOT_HEIGHT / 2 }} />
                                                                 </div>
                                                             ))}
                                                             {/* 호버 시 30분 슬롯 미리보기 — 점선 + "+ 일정" 칩 */}
                                                             <div
-                                                                className="hidden md:flex absolute left-0 right-0 pointer-events-none border-t border-dashed border-[#0F766E]/50 z-[5] items-start"
+                                                                className="hidden md:flex absolute left-0 right-0 pointer-events-none border-t border-dashed border-[#6366F1]/50 z-[5] items-start"
                                                                 style={{
                                                                     top: "var(--hover-top, 0px)",
                                                                     opacity: "var(--hover-show, 0)",
                                                                     transition: "opacity 80ms",
                                                                 }}
                                                             >
-                                                                <span className="text-[9px] font-medium text-white bg-[#0F766E] px-1 py-px rounded-sm leading-tight ml-0.5 -mt-px">
+                                                                <span className="text-[9px] font-medium text-white bg-[#6366F1] px-1 py-px rounded-sm leading-tight ml-0.5 -mt-px">
                                                                     + 일정
                                                                 </span>
                                                             </div>
@@ -639,7 +639,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                         })()
                     ) : (
                     /* ── 목록 보기 ── */
-                    <div className="border border-neutral-200 planners-dark:border-white/[0.07] rounded-xl overflow-hidden bg-white divide-y divide-neutral-100 planners-dark:divide-white/[0.07]">
+                    <div className="border border-neutral-200 myverse-dark:border-white/[0.07] rounded-xl overflow-hidden bg-white divide-y divide-neutral-100 myverse-dark:divide-white/[0.07]">
                         {days.map((d) => {
                             const ds = dsOf(d);
                             const dayData = dayDataMap[ds] ?? { tasks: [], memo: "", weather: null };
@@ -651,7 +651,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             const isToday = ds === today;
 
                             const dateColor = isToday
-                                ? "text-[#0F766E]"
+                                ? "text-[#6366F1]"
                                 : isSun ? "text-rose-500"
                                 : isSat ? "text-blue-500"
                                 : "text-neutral-800";
@@ -690,17 +690,17 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         setDragOverDate(null);
                                     }}
                                     className={`flex min-h-[100px] transition-colors ${
-                                        isToday ? "bg-[#0F766E]/[0.025]" : "bg-white"
-                                    } ${dragOverDate === ds ? "ring-2 ring-[#0F766E] ring-inset bg-[#0F766E]/[0.04]" : ""}`}
+                                        isToday ? "bg-[#6366F1]/[0.025]" : "bg-white"
+                                    } ${dragOverDate === ds ? "ring-2 ring-[#6366F1] ring-inset bg-[#6366F1]/[0.04]" : ""}`}
                                 >
                                     {/* 좌측: 날짜 정보 — 수직 구조 */}
-                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 planners-dark:border-white/[0.07] px-3 py-3 flex flex-col gap-1 overflow-hidden">
+                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 myverse-dark:border-white/[0.07] px-3 py-3 flex flex-col gap-1 overflow-hidden">
 
                                         {/* ① 날짜 요일 + 화살표 */}
                                         <div className="flex items-baseline gap-1">
                                             <span
                                                 className={`font-serif text-2xl leading-none font-light ${dateColor} ${
-                                                    isToday ? "underline decoration-[#0F766E] decoration-2 underline-offset-[5px]" : ""
+                                                    isToday ? "underline decoration-[#6366F1] decoration-2 underline-offset-[5px]" : ""
                                                 }`}
                                                 title={isToday ? "오늘" : undefined}
                                             >
@@ -710,7 +710,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             <Link
                                                 href={`/myverse/app/daily?date=${ds}`}
                                                 title="Daily 보기"
-                                                className="ml-auto p-0.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors shrink-0"
+                                                className="ml-auto p-0.5 rounded text-neutral-300 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors shrink-0"
                                             >
                                                 <ArrowUpRight className="h-3 w-3" />
                                             </Link>
@@ -799,7 +799,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             <button
                                                 onClick={() => { setCalEditing(null); setCalDefaultDate(ds); setCalEditorOpen(true); }}
                                                 title="이 날 일정 추가"
-                                                className="p-0.5 rounded text-neutral-200 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors w-fit"
+                                                className="p-0.5 rounded text-neutral-200 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors w-fit"
                                             >
                                                 <Plus className="h-3 w-3" />
                                             </button>

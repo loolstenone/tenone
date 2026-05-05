@@ -61,7 +61,7 @@ export function BrainstormGrid({ data, onChange }: { data: FrameworkData; onChan
                         </div>
                     ))}
                 </div>
-                <button onClick={add} className="w-full py-2 border-t border-neutral-100 text-xs text-neutral-400 hover:bg-neutral-50 hover:text-[#0F766E]">+ 아이디어 추가</button>
+                <button onClick={add} className="w-full py-2 border-t border-neutral-100 text-xs text-neutral-400 hover:bg-neutral-50 hover:text-[#6366F1]">+ 아이디어 추가</button>
             </div>
 
             <LabeledBox label="Criteria · 선정 기준" valKey="bs_criteria" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-slate-800" placeholder={"예: 1주 내 시범 가능 / 외부 자원 X / 핵심 가치 강화"} />

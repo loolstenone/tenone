@@ -10,7 +10,7 @@ export function LabeledInput({ label, valKey, data, onChange, placeholder, type 
             <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">{label}</span>
             <input type={type} value={data[valKey] ?? ""} onChange={e => onChange(valKey, e.target.value)}
                 placeholder={placeholder}
-                className="w-full mt-1 px-2 py-1.5 text-xs bg-white border border-neutral-200 rounded focus:outline-none focus:border-[#0F766E]" />
+                className="w-full mt-1 px-2 py-1.5 text-xs bg-white border border-neutral-200 rounded focus:outline-none focus:border-[#6366F1]" />
         </label>
     );
 }

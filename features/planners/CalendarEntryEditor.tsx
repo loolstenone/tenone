@@ -35,7 +35,7 @@ function TimeSelect({
     disabled?: boolean;
 }) {
     const [h, m] = value ? value.split(":") : ["", ""];
-    const selectCls = "text-sm border border-neutral-200 rounded px-1.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50 disabled:cursor-not-allowed";
+    const selectCls = "text-sm border border-neutral-200 rounded px-1.5 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white disabled:opacity-50 disabled:cursor-not-allowed";
     return (
         <div className="flex items-center gap-1">
             <select
@@ -252,11 +252,11 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     onClick={() => setTab("task")}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                                         tab === "task"
-                                            ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/40"
+                                            ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/40"
                                             : "bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
                                     }`}
                                 >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E] shrink-0" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#6366F1] shrink-0" />
                                     업무
                                 </button>
                             )}
@@ -291,7 +291,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     value={taskText}
                                     onChange={(e) => setTaskText(e.target.value)}
                                     placeholder="업무 내용을 입력하세요"
-                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]/20"
                                     autoFocus
                                 />
                             </div>
@@ -303,7 +303,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     type="time"
                                     value={taskTime}
                                     onChange={(e) => setTaskTime(e.target.value)}
-                                    className="text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
+                                    className="text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] bg-white"
                                 />
                             </div>
 
@@ -349,7 +349,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     <select
                                         value={taskProjectId}
                                         onChange={(e) => setTaskProjectId(e.target.value)}
-                                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
+                                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] bg-white"
                                     >
                                         <option value="">프로젝트 없음</option>
                                         {activeProjects.map(p => (
@@ -367,7 +367,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     onChange={(e) => setTaskMemo(e.target.value)}
                                     placeholder="추가 메모"
                                     rows={2}
-                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] resize-none"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] resize-none"
                                 />
                             </div>
                         </div>
@@ -382,7 +382,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                             onChange={(e) => setTitle(e.target.value)}
                             disabled={isReadOnly}
                             placeholder={kindPlaceholder(kind)}
-                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 disabled:bg-neutral-50 disabled:text-neutral-500"
+                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]/20 disabled:bg-neutral-50 disabled:text-neutral-500"
                         />
                     </div>
 
@@ -398,7 +398,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     value={withWhom}
                                     onChange={(e) => setWithWhom(e.target.value)}
                                     placeholder="예: 홍길동, 팀장"
-                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]"
                                 />
                             </div>
                             <div>
@@ -410,7 +410,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                     placeholder="예: 2층 회의실"
-                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]"
                                 />
                             </div>
                         </div>
@@ -449,7 +449,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         syncLunarFromSolar(e.target.value);
                                     }}
                                     disabled={isReadOnly}
-                                    className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
+                                    className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
                                 />
                                 {kind !== "anniversary" && (
                                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -458,7 +458,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                             value={startTime}
                                             onChange={(e) => setStartTime(e.target.value)}
                                             disabled={isReadOnly}
-                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white disabled:opacity-50"
                                         />
                                         <span className="text-xs text-neutral-300">~</span>
                                         <input
@@ -466,7 +466,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                             value={endTime}
                                             onChange={(e) => setEndTime(e.target.value)}
                                             disabled={isReadOnly}
-                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white disabled:opacity-50"
                                         />
                                     </div>
                                 )}
@@ -480,7 +480,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                             type="button"
                                             onClick={() => setLunarPickerOpen((o) => !o)}
                                             disabled={isReadOnly}
-                                            className="w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 text-left bg-white focus:outline-none focus:border-[#0F766E]"
+                                            className="w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 text-left bg-white focus:outline-none focus:border-[#6366F1]"
                                         >
                                             {lunarYear}-{String(lunarMonth).padStart(2, "0")}{lunarMonthLeap ? "(윤)" : ""}-{String(lunarDay).padStart(2, "0")}
                                         </button>
@@ -523,7 +523,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                                                     setLunarMonthLeap(isLeap);
                                                                     applyLunar(lunarYear, month, lunarDay, isLeap);
                                                                 }}
-                                                                className={`text-xs py-1 rounded ${active ? "bg-[#0F766E] text-white" : "hover:bg-neutral-100 text-neutral-600"}`}>
+                                                                className={`text-xs py-1 rounded ${active ? "bg-[#6366F1] text-white" : "hover:bg-neutral-100 text-neutral-600"}`}>
                                                                 {isLeap ? "윤" : ""}{month}
                                                             </button>
                                                         );
@@ -540,7 +540,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                                                     applyLunar(lunarYear, lunarMonth, d, lunarMonthLeap);
                                                                     setLunarPickerOpen(false);
                                                                 }}
-                                                                className={`text-xs py-1 rounded ${active ? "bg-[#0F766E] text-white" : "hover:bg-neutral-100 text-neutral-700"}`}>
+                                                                className={`text-xs py-1 rounded ${active ? "bg-[#6366F1] text-white" : "hover:bg-neutral-100 text-neutral-700"}`}>
                                                                 {d}
                                                             </button>
                                                         );
@@ -556,7 +556,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                                 value={startTime}
                                                 onChange={(e) => setStartTime(e.target.value)}
                                                 disabled={isReadOnly}
-                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white disabled:opacity-50"
                                             />
                                             <span className="text-xs text-neutral-300">~</span>
                                             <input
@@ -564,7 +564,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                                 value={endTime}
                                                 onChange={(e) => setEndTime(e.target.value)}
                                                 disabled={isReadOnly}
-                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                                className="w-[110px] text-sm border border-neutral-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white disabled:opacity-50"
                                             />
                                         </div>
                                     )}
@@ -584,7 +584,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                 value={recurrence}
                                 onChange={(e) => setRecurrence(e.target.value as RecurrenceUnit)}
                                 disabled={isReadOnly}
-                                className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white"
+                                className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] bg-white"
                             >
                                 {allowedRecurrences.map((o) => (
                                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -599,7 +599,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     value={recurrenceUntil}
                                     onChange={(e) => setRecurrenceUntil(e.target.value)}
                                     disabled={isReadOnly}
-                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
+                                    className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
                                 />
                             </div>
                         )}
@@ -613,7 +613,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                             onChange={(e) => setDescription(e.target.value)}
                             disabled={isReadOnly}
                             rows={3}
-                            className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] resize-none"
+                            className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] resize-none"
                         />
                     </div>
                     </>}  {/* end tab !== "task" */}
@@ -648,7 +648,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     });
                                     onClose();
                                 }}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 추가
                             </button>
@@ -656,7 +656,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                             <button
                                 onClick={submit}
                                 disabled={saving || !title.trim()}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                                 {isEdit ? "저장" : "추가"}

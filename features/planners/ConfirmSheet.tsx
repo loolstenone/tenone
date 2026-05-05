@@ -47,7 +47,7 @@ export function ConfirmSheet({
                         className={`px-4 py-2 text-sm text-white rounded-lg transition-colors ${
                             danger
                                 ? "bg-rose-500 hover:bg-rose-600"
-                                : "bg-[#0F766E] hover:bg-[#0F766E]/90"
+                                : "bg-[#6366F1] hover:bg-[#6366F1]/90"
                         }`}
                     >
                         {confirmLabel}

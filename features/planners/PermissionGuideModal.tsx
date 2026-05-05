@@ -303,20 +303,20 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
 
     return (
         <div className="fixed inset-0 z-[200] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <div className="bg-white planners-dark:bg-[#1C1C1C] w-full sm:max-w-md sm:rounded-xl rounded-t-2xl border border-neutral-200 planners-dark:border-[#2A2A2A] shadow-xl max-h-[90vh] flex flex-col">
+            <div className="bg-white myverse-dark:bg-[#1C1C1C] w-full sm:max-w-md sm:rounded-xl rounded-t-2xl border border-neutral-200 myverse-dark:border-[#2A2A2A] shadow-xl max-h-[90vh] flex flex-col">
                 {/* 헤더 */}
-                <div className="flex items-start justify-between p-5 pb-3 border-b border-neutral-100 planners-dark:border-[#2A2A2A]">
+                <div className="flex items-start justify-between p-5 pb-3 border-b border-neutral-100 myverse-dark:border-[#2A2A2A]">
                     <div>
-                        <h3 className="text-sm font-semibold text-neutral-900 planners-dark:text-neutral-100">
+                        <h3 className="text-sm font-semibold text-neutral-900 myverse-dark:text-neutral-100">
                             {permKo} 권한 다시 켜기
                         </h3>
-                        <p className="text-xs text-neutral-500 planners-dark:text-neutral-400 mt-1">
+                        <p className="text-xs text-neutral-500 myverse-dark:text-neutral-400 mt-1">
                             거부된 권한은 브라우저 자체 설정에서만 해제할 수 있습니다
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1 rounded hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
+                        className="p-1 rounded hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
                         aria-label="닫기"
                     >
                         <X className="h-4 w-4" />
@@ -326,31 +326,31 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                 {/* 본문 */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
                     {/* 감지된 기기·브라우저 칩 + 수동 변경 */}
-                    <div className="border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-lg p-3">
+                    <div className="border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-lg p-3">
                         <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                                 {guide.formFactor === "mobile"
-                                    ? <Smartphone className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />
-                                    : <Monitor className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />}
+                                    ? <Smartphone className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />
+                                    : <Monitor className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />}
                                 <div className="min-w-0">
                                     <p className="text-[10px] uppercase tracking-wider text-neutral-400">
                                         {overrideId ? "수동 선택" : "자동 감지된 환경"}
                                     </p>
-                                    <p className="text-xs font-medium text-neutral-800 planners-dark:text-neutral-200 truncate">
+                                    <p className="text-xs font-medium text-neutral-800 myverse-dark:text-neutral-200 truncate">
                                         {guide.name}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowPicker(p => !p)}
-                                className="shrink-0 flex items-center gap-1 text-[10px] text-neutral-500 planners-dark:text-neutral-400 hover:text-[#0F766E] transition-colors px-2 py-1 rounded border border-neutral-200 planners-dark:border-[#2A2A2A]"
+                                className="shrink-0 flex items-center gap-1 text-[10px] text-neutral-500 myverse-dark:text-neutral-400 hover:text-[#6366F1] transition-colors px-2 py-1 rounded border border-neutral-200 myverse-dark:border-[#2A2A2A]"
                             >
                                 다른 브라우저인가요?
                                 <ChevronDown className={`h-3 w-3 transition-transform ${showPicker ? "rotate-180" : ""}`} />
                             </button>
                         </div>
                         {showPicker && (
-                            <div className="mt-3 pt-3 border-t border-neutral-100 planners-dark:border-[#2A2A2A] grid grid-cols-2 gap-1.5">
+                            <div className="mt-3 pt-3 border-t border-neutral-100 myverse-dark:border-[#2A2A2A] grid grid-cols-2 gap-1.5">
                                 {MANUAL_BROWSERS.map(b => {
                                     const selected = activeId === b.id;
                                     return (
@@ -359,8 +359,8 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                                             onClick={() => { setOverrideId(b.id); setShowPicker(false); }}
                                             className={`text-left text-[11px] px-2 py-1.5 rounded transition-colors ${
                                                 selected
-                                                    ? "bg-[#0F766E]/10 text-[#0F766E] font-medium"
-                                                    : "text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-50 planners-dark:hover:bg-[#252525]"
+                                                    ? "bg-[#6366F1]/10 text-[#6366F1] font-medium"
+                                                    : "text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-50 myverse-dark:hover:bg-[#252525]"
                                             }`}
                                         >
                                             {b.label}
@@ -370,7 +370,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                                 {overrideId && (
                                     <button
                                         onClick={() => { setOverrideId(null); setShowPicker(false); }}
-                                        className="col-span-2 text-[10px] text-neutral-400 hover:text-[#0F766E] py-1"
+                                        className="col-span-2 text-[10px] text-neutral-400 hover:text-[#6366F1] py-1"
                                     >
                                         ↺ 자동 감지로 되돌리기
                                     </button>
@@ -380,27 +380,27 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     </div>
 
                     {/* 자동 감지 안내 */}
-                    <div className="flex items-start gap-2 px-3 py-2 bg-[#0F766E]/10 border border-[#0F766E]/20 rounded-lg">
-                        <Info className="h-3.5 w-3.5 text-[#0F766E] mt-0.5 shrink-0" />
-                        <p className="text-[11px] text-[#0F766E] leading-relaxed">
+                    <div className="flex items-start gap-2 px-3 py-2 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-lg">
+                        <Info className="h-3.5 w-3.5 text-[#6366F1] mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-[#6366F1] leading-relaxed">
                             아래 단계대로 권한을 허용하면 <strong>이 창이 자동으로 닫힙니다</strong>. 별도 새로고침 없이 즉시 인식됩니다.
                         </p>
                     </div>
 
                     {/* 직접 이동 링크 (Chrome·Edge·Firefox만) */}
                     {guide.settingsUrl && (
-                        <div className="border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-lg p-3">
+                        <div className="border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-lg p-3">
                             <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">설정 페이지 주소</p>
                             <div className="flex items-center gap-2">
-                                <code className="flex-1 text-xs bg-neutral-50 planners-dark:bg-[#252525] px-2 py-1.5 rounded font-mono text-neutral-800 planners-dark:text-neutral-200 truncate">
+                                <code className="flex-1 text-xs bg-neutral-50 myverse-dark:bg-[#252525] px-2 py-1.5 rounded font-mono text-neutral-800 myverse-dark:text-neutral-200 truncate">
                                     {guide.settingsUrl}
                                 </code>
                                 <button
                                     onClick={handleCopy}
-                                    className="shrink-0 p-1.5 rounded hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] text-neutral-500 transition-colors"
+                                    className="shrink-0 p-1.5 rounded hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] text-neutral-500 transition-colors"
                                     title="주소 복사"
                                 >
-                                    {copied ? <Check className="h-3.5 w-3.5 text-[#0F766E]" /> : <Copy className="h-3.5 w-3.5" />}
+                                    {copied ? <Check className="h-3.5 w-3.5 text-[#6366F1]" /> : <Copy className="h-3.5 w-3.5" />}
                                 </button>
                             </div>
                             <p className="text-[10px] text-neutral-400 mt-1.5 flex items-center gap-1">
@@ -414,10 +414,10 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     <ol className="space-y-2.5">
                         {guide.steps.map((step, i) => (
                             <li key={i} className="flex gap-3">
-                                <span className="shrink-0 w-5 h-5 rounded-full bg-[#0F766E]/10 text-[#0F766E] text-[11px] font-semibold flex items-center justify-center mt-0.5">
+                                <span className="shrink-0 w-5 h-5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[11px] font-semibold flex items-center justify-center mt-0.5">
                                     {i + 1}
                                 </span>
-                                <span className="text-xs text-neutral-700 planners-dark:text-neutral-300 leading-relaxed">{step}</span>
+                                <span className="text-xs text-neutral-700 myverse-dark:text-neutral-300 leading-relaxed">{step}</span>
                             </li>
                         ))}
                     </ol>
@@ -426,7 +426,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     {currentState && (
                         <div className="text-[10px] text-neutral-400 text-center pt-2">
                             현재 상태: <span className={`font-medium ${
-                                currentState === "granted" ? "text-[#0F766E]"
+                                currentState === "granted" ? "text-[#6366F1]"
                                 : currentState === "denied" ? "text-rose-500"
                                 : "text-amber-500"
                             }`}>
@@ -440,17 +440,17 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                 </div>
 
                 {/* 푸터 — 다시 시도 */}
-                <div className="p-4 border-t border-neutral-100 planners-dark:border-[#2A2A2A] flex gap-2">
+                <div className="p-4 border-t border-neutral-100 myverse-dark:border-[#2A2A2A] flex gap-2">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-50 planners-dark:hover:bg-[#2A2A2A] transition-colors"
+                        className="px-4 py-2 text-sm rounded-lg text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-50 myverse-dark:hover:bg-[#2A2A2A] transition-colors"
                     >
                         나중에
                     </button>
                     <button
                         onClick={handleRetry}
                         disabled={retrying}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors disabled:opacity-60"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
                     >
                         {retrying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                         지금 다시 시도

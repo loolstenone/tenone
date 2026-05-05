@@ -243,14 +243,14 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                 </button>
                                 <div
                                     className={`flex items-center gap-2 min-w-0 ${
-                                        isCurrentYear ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                                        isCurrentYear ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
                                     }`}
                                     title={isCurrentYear ? "올해" : undefined}
                                 >
                                     <div ref={yearPickerRef} className="relative">
                                         <button
                                             onClick={() => setShowYearPicker(v => !v)}
-                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#6366F1] transition-colors whitespace-nowrap"
                                         >
                                             {year}년
                                         </button>
@@ -260,7 +260,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                     <button
                                                         key={y}
                                                         onClick={() => { setYear(y); setShowYearPicker(false); }}
-                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#6366F1] font-semibold" : "text-neutral-700"}`}
                                                     >
                                                         {y}년
                                                     </button>
@@ -326,7 +326,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                 <button
                                                     onClick={() => toggleGoal(g.id)}
                                                     className={`shrink-0 w-3.5 h-3.5 mt-0.5 rounded border-2 flex items-center justify-center text-[9px] font-bold transition-colors ${
-                                                        g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
+                                                        g.done ? "bg-[#6366F1] border-[#6366F1] text-white" : "border-neutral-300 hover:border-neutral-500"
                                                     }`}
                                                 >
                                                     {g.done && "✓"}
@@ -369,7 +369,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                 type="button"
                                 onClick={addGoal}
                                 disabled={!newGoal.trim()}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white text-xs rounded hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white text-xs rounded hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 <Plus className="h-3 w-3" /> 추가
                             </button>
@@ -379,7 +379,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                     {/* Anniversary & Big Event — 분기별 그리드 (행=일, 열=월) */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <Gift className="h-4 w-4 text-[#0F766E]" />
+                            <Gift className="h-4 w-4 text-[#6366F1]" />
                             <h2 className="text-sm font-semibold text-neutral-900">기념일 & 중요 이벤트</h2>
                             <span className="text-[10px] text-neutral-400">· {anniversaries.length}개 등록</span>
                         </div>
@@ -434,7 +434,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                 onClick={() => setActiveQuarter(q)}
                                                 className={`flex-1 py-1.5 text-[10px] font-medium rounded transition-colors ${
                                                     activeQuarter === q
-                                                        ? "bg-[#0F766E] text-white"
+                                                        ? "bg-[#6366F1] text-white"
                                                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
                                                 }`}
                                             >
@@ -547,7 +547,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                 <span className="w-2 h-2 rounded-full bg-red-500" /> 기념일
                             </span>
                             <span className="flex items-center gap-1">
-                                <span className="w-2 h-2 rounded-full bg-[#0F766E]" /> 행사
+                                <span className="w-2 h-2 rounded-full bg-[#6366F1]" /> 행사
                             </span>
                         </div>
                     </section>
@@ -652,7 +652,7 @@ function YearlyAnalytics({ year }: { year: number }) {
                         onClick={() => setTab(t.k)}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             tab === t.k
-                                ? "text-[#0F766E] border-b-2 border-[#0F766E] -mb-px"
+                                ? "text-[#6366F1] border-b-2 border-[#6366F1] -mb-px"
                                 : "text-neutral-500 hover:text-neutral-900"
                         }`}
                     >
@@ -772,7 +772,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
                         labels={monthLabels}
                         max={5}
                         series={[
-                            { label: "에너지",   color: "#0F766E", values: months.map((m) => m.energy_avg) },
+                            { label: "에너지",   color: "#6366F1", values: months.map((m) => m.energy_avg) },
                             { label: "만족도",   color: "#F59E0B", values: months.map((m) => m.satisfaction_avg) },
                             { label: "기분",     color: "#FB7185", values: months.map((m) => m.mood_avg) },
                         ]}
@@ -787,7 +787,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
                         values={months.map((m) => m.exercise_minutes)}
                         secondary={months.map((m) => m.exercise_days)}
                         secondaryLabel="운동일"
-                        color="var(--planners-accent, #0F766E)"
+                        color="var(--planners-accent, #6366F1)"
                     />
                 </div>
             )}

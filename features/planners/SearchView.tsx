@@ -76,7 +76,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center gap-3 mb-6">
-                <Search className="h-6 w-6 text-[#0F766E]" />
+                <Search className="h-6 w-6 text-[#6366F1]" />
                 <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">검색</h1>
             </div>
 
@@ -87,7 +87,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Daily · Weekly · Notes · Projects · AI 브리핑 전체 검색…"
-                    className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#0F766E]"
+                    className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
                     autoFocus
                 />
                 {loading && (
@@ -123,7 +123,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                                         <Link
                                             key={hit.id}
                                             href={hit.href}
-                                            className="block bg-white border border-neutral-200 rounded-xl p-4 hover:border-[#0F766E] hover:bg-[#0F766E]/5 transition-all"
+                                            className="block bg-white border border-neutral-200 rounded-xl p-4 hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-all"
                                         >
                                             <p className="text-sm font-semibold text-neutral-900">{hit.title}</p>
                                             {hit.snippet && (

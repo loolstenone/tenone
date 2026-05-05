@@ -294,7 +294,7 @@ function renderMd(md: string): React.ReactNode {
                 const text = lines[i].slice(6);
                 items.push(
                     <li key={i} className="flex items-start gap-2 py-0.5">
-                        <span className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded border-2 flex items-center justify-center text-[9px] font-bold ${checked ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300"}`}>
+                        <span className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded border-2 flex items-center justify-center text-[9px] font-bold ${checked ? "bg-[#6366F1] border-[#6366F1] text-white" : "border-neutral-300"}`}>
                             {checked && ""}
                         </span>
                         <span className={`text-xs leading-snug ${checked ? "line-through text-neutral-400" : "text-neutral-700"}`}>{inlineRender(text)}</span>
@@ -502,7 +502,7 @@ export function TemplatesView() {
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center gap-3 mb-2">
-                <LayoutTemplate className="h-6 w-6 text-[#0F766E]" />
+                <LayoutTemplate className="h-6 w-6 text-[#6366F1]" />
                 <h1 className="font-serif text-3xl text-neutral-900">템플릿</h1>
             </div>
             <p className="text-sm text-neutral-500 mb-8">
@@ -517,7 +517,7 @@ export function TemplatesView() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="이름·설명 검색"
-                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#0F766E]"
+                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
                 />
             </div>
 
@@ -531,7 +531,7 @@ export function TemplatesView() {
                             onClick={() => setCat(tab.id)}
                             className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
-                                    ? "text-[#0F766E] font-semibold"
+                                    ? "text-[#6366F1] font-semibold"
                                     : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
@@ -540,7 +540,7 @@ export function TemplatesView() {
                                 <span className="ml-1 opacity-60 text-xs">({counts[tab.id]})</span>
                             )}
                             {isActive && (
-                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#0F766E]" />
+                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />
                             )}
                         </button>
                     );
@@ -740,7 +740,7 @@ export function TemplatesView() {
                                 onClick={copyToClipboard}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
                             >
-                                {copied ? <Check className="h-3 w-3 text-[#0F766E]" /> : <Copy className="h-3 w-3" />}
+                                {copied ? <Check className="h-3 w-3 text-[#6366F1]" /> : <Copy className="h-3 w-3" />}
                                 {copied ? "복사됨" : hasData ? "내용 복사" : "마크다운 복사"}
                             </button>
                         </div>
@@ -771,7 +771,7 @@ function TemplateCard({
         .filter(Boolean);
 
     return (
-        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[#0F766E]/40 hover:shadow-sm transition-all cursor-pointer">
+        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1]/40 hover:shadow-sm transition-all cursor-pointer">
             <button
                 onClick={onToggleFavorite}
                 className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all z-10 ${
@@ -789,7 +789,7 @@ function TemplateCard({
                     <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">{tpl.subcategory}</p>
                 )}
 
-                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[#0F766E] transition-colors pr-6">
+                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[#6366F1] transition-colors pr-6">
                     {tpl.label}
                 </h4>
 

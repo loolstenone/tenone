@@ -167,20 +167,20 @@ export function VoiceRecordButton({ onTranscribed, className, label = "녹음" }
 
             {/* 녹음 중 — 화면 하단 고정 토스트 (위치 무관하게 일관) */}
             {recording && typeof document !== "undefined" && (
-                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[min(640px,calc(100vw-32px))] flex items-center gap-2 px-4 py-3 border border-rose-300 bg-white planners-dark:bg-[#1C1C1C] shadow-lg rounded-xl">
+                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[min(640px,calc(100vw-32px))] flex items-center gap-2 px-4 py-3 border border-rose-300 bg-white myverse-dark:bg-[#1C1C1C] shadow-lg rounded-xl">
                     <span className="relative flex h-2.5 w-2.5 shrink-0">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
                     </span>
-                    <span className="text-xs font-medium text-rose-700 planners-dark:text-rose-300 tabular-nums shrink-0">
+                    <span className="text-xs font-medium text-rose-700 myverse-dark:text-rose-300 tabular-nums shrink-0">
                         {fmtDuration(duration)}
                     </span>
-                    <span className="text-xs text-neutral-600 planners-dark:text-neutral-300 flex-1 truncate italic min-w-0">
+                    <span className="text-xs text-neutral-600 myverse-dark:text-neutral-300 flex-1 truncate italic min-w-0">
                         {interim || finalTranscriptRef.current || "말씀해 주세요…"}
                     </span>
                     <button
                         onClick={() => stop(true)}
-                        className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#0F766E] text-white hover:bg-[#0d5e56] transition-colors"
+                        className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#6366F1] text-white hover:bg-[#4F46E5] transition-colors"
                     >
                         완료
                     </button>

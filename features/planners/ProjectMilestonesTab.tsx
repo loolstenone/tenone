@@ -141,8 +141,8 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
                                     onClick={() => toggleDone(m)}
                                     className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${
                                         isDone
-                                            ? "border-[#0F766E] bg-[#0F766E] text-white"
-                                            : "border-neutral-300 hover:border-[#0F766E]"
+                                            ? "border-[#6366F1] bg-[#6366F1] text-white"
+                                            : "border-neutral-300 hover:border-[#6366F1]"
                                     }`}
                                 >
                                     {isDone && <Check className="h-3 w-3" />}
@@ -191,12 +191,12 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
                         type="date"
                         value={newDue}
                         onChange={(e) => setNewDue(e.target.value)}
-                        className="text-xs text-neutral-500 bg-white border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-[#0F766E]"
+                        className="text-xs text-neutral-500 bg-white border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-[#6366F1]"
                     />
                     <button
                         onClick={add}
                         disabled={saving || !newTitle.trim()}
-                        className="px-3 py-1 text-xs bg-[#0F766E] text-white rounded hover:bg-[#0d5e56] disabled:opacity-50"
+                        className="px-3 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50"
                     >
                         추가
                     </button>

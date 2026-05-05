@@ -57,6 +57,7 @@ export async function POST(req: Request) {
             category: cat,
             note: note?.trim() || null,
             level: lvl,
+            capture_mode: "manual",
         })
         .select()
         .single();

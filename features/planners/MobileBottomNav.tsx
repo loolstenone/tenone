@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
     LayoutGrid, Sun, FolderKanban, User,
-    CalendarDays, Calendar, CalendarRange, Users, Search, Settings, Camera,
+    CalendarDays, Calendar, CalendarRange, Users, Search, Settings,
 } from "lucide-react";
 
-export const MOBILE_NAV_STORAGE_KEY = "planners-mobile-nav";
+export const MOBILE_NAV_STORAGE_KEY = "myverse-mobile-nav";
+const LEGACY_NAV_STORAGE_KEY = "planners-mobile-nav";
 export const MOBILE_NAV_DEFAULT: string[] = ["index", "projects", "today", "identity", "search"];
 
 export const ALL_NAV_OPTIONS = [
@@ -30,17 +31,26 @@ function loadSaved(): string[] {
     if (typeof window === "undefined") return MOBILE_NAV_DEFAULT;
     try {
         const raw = localStorage.getItem(MOBILE_NAV_STORAGE_KEY);
-        if (!raw) return MOBILE_NAV_DEFAULT;
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length === 5) return parsed;
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length === 5) return parsed;
+        }
+        // migrate from legacy key
+        const legacy = localStorage.getItem(LEGACY_NAV_STORAGE_KEY);
+        if (legacy) {
+            const parsed = JSON.parse(legacy);
+            if (Array.isArray(parsed) && parsed.length === 5) {
+                localStorage.setItem(MOBILE_NAV_STORAGE_KEY, legacy);
+                localStorage.removeItem(LEGACY_NAV_STORAGE_KEY);
+                return parsed;
+            }
+        }
     } catch {}
     return MOBILE_NAV_DEFAULT;
 }
 
 export function MobileBottomNav() {
     const pathname = usePathname();
-    const router = useRouter();
-    const cameraInputRef = useRef<HTMLInputElement>(null);
     const [itemIds, setItemIds] = useState<string[]>(MOBILE_NAV_DEFAULT);
 
     useEffect(() => {
@@ -48,42 +58,23 @@ export function MobileBottomNav() {
         const onStorage = (e: StorageEvent) => {
             if (e.key === MOBILE_NAV_STORAGE_KEY) setItemIds(loadSaved());
         };
+        const onNavChange = () => setItemIds(loadSaved());
         window.addEventListener("storage", onStorage);
-        window.addEventListener("planners-mobile-nav-change", () => setItemIds(loadSaved()));
+        window.addEventListener("myverse-mobile-nav-change", onNavChange);
         return () => {
             window.removeEventListener("storage", onStorage);
-            window.removeEventListener("planners-mobile-nav-change", () => {});
+            window.removeEventListener("myverse-mobile-nav-change", onNavChange);
         };
     }, []);
-
-    function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const dataUrl = ev.target?.result as string;
-            sessionStorage.setItem("planners-pending-capture", dataUrl);
-            sessionStorage.setItem("planners-pending-capture-type", file.type);
-            sessionStorage.setItem("planners-pending-capture-name", file.name);
-            router.push("/myverse/app/daily?compose=1");
-        };
-        reader.readAsDataURL(file);
-        e.target.value = "";
-    }
 
     const navItems = itemIds
         .map(id => ALL_NAV_OPTIONS.find(o => o.id === id))
         .filter(Boolean) as typeof ALL_NAV_OPTIONS[number][];
 
-    // 5개 슬롯을 카메라 버튼 기준으로 앞 2개 / 뒤 2개로 분리 (중앙 카메라 포함 총 5 슬롯)
-    const leftItems = navItems.slice(0, 2);
-    const rightItems = navItems.slice(2, 4);
-
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white planners-dark:bg-[#161616] border-t border-neutral-200 planners-dark:border-[#2A2A2A] safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white myverse-dark:bg-[#161616] border-t border-neutral-200 myverse-dark:border-[#2A2A2A] safe-area-inset-bottom">
             <div className="flex items-stretch h-14">
-                {/* 좌측 2개 */}
-                {leftItems.map((item) => {
+                {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive =
                         pathname === item.href ||
@@ -96,51 +87,7 @@ export function MobileBottomNav() {
                             key={item.id}
                             href={item.href}
                             className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
-                                isActive ? "" : "text-neutral-400 planners-dark:text-neutral-500"
-                            }`}
-                            style={isActive ? { color: "var(--planners-accent-nav)" } : undefined}
-                        >
-                            <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
-                            <span className="text-[9px] font-medium leading-none tracking-tight">{item.label}</span>
-                        </Link>
-                    );
-                })}
-
-                {/* 중앙 카메라 버튼 */}
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <input
-                        ref={cameraInputRef}
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        className="hidden"
-                        onChange={handleCameraCapture}
-                    />
-                    <button
-                        onClick={() => cameraInputRef.current?.click()}
-                        className="flex items-center justify-center w-12 h-12 rounded-full -mt-5 shadow-lg active:scale-95 transition-transform"
-                        style={{ background: "var(--planners-accent-nav, #0F766E)" }}
-                        aria-label="오늘의 한 장면 기록"
-                    >
-                        <Camera className="h-5 w-5 text-white stroke-[1.5]" />
-                    </button>
-                </div>
-
-                {/* 우측 2개 */}
-                {rightItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive =
-                        pathname === item.href ||
-                        pathname.startsWith(item.href + "/") ||
-                        pathname.startsWith(item.href + "?") ||
-                        (item.id === "index" && pathname === "/myverse/app") ||
-                        (item.id === "today" && pathname.startsWith("/myverse/app/daily"));
-                    return (
-                        <Link
-                            key={item.id}
-                            href={item.href}
-                            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
-                                isActive ? "" : "text-neutral-400 planners-dark:text-neutral-500"
+                                isActive ? "" : "text-neutral-400 myverse-dark:text-neutral-500"
                             }`}
                             style={isActive ? { color: "var(--planners-accent-nav)" } : undefined}
                         >
@@ -151,7 +98,7 @@ export function MobileBottomNav() {
                 })}
             </div>
             {/* iPhone 홈 인디케이터 safe area */}
-            <div className="h-safe-area-inset-bottom bg-white planners-dark:bg-[#161616]" />
+            <div className="h-safe-area-inset-bottom bg-white myverse-dark:bg-[#161616]" />
         </nav>
     );
 }

@@ -86,7 +86,7 @@ export function PurchaseView() {
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <p className="text-xs uppercase tracking-widest text-[#0F766E] mb-3">Ten:One™</p>
+                        <p className="text-xs uppercase tracking-widest text-[#6366F1] mb-3">Ten:One™</p>
                         <h1 className="font-serif text-4xl md:text-5xl text-neutral-900 leading-tight">
                             Planner&apos;s Planner AI
                         </h1>
@@ -97,10 +97,10 @@ export function PurchaseView() {
 
                     {/* 현재 상태 */}
                     {status && status.subscription_status === "active" && (
-                        <div className="bg-[#0F766E]/10 border border-[#0F766E]/30 rounded-xl p-5 mb-6">
+                        <div className="bg-[#6366F1]/10 border border-[#6366F1]/30 rounded-xl p-5 mb-6">
                             <div className="flex items-center gap-2 mb-1">
-                                <Check className="h-4 w-4 text-[#0F766E]" />
-                                <p className="text-sm font-semibold text-[#0F766E]">활성 구독</p>
+                                <Check className="h-4 w-4 text-[#6366F1]" />
+                                <p className="text-sm font-semibold text-[#6366F1]">활성 구독</p>
                             </div>
                             {status.expires && (
                                 <p className="text-xs text-neutral-600">
@@ -109,7 +109,7 @@ export function PurchaseView() {
                             )}
                             <button
                                 onClick={() => router.push("/myverse/app")}
-                                className="mt-3 text-sm text-[#0F766E] hover:underline"
+                                className="mt-3 text-sm text-[#6366F1] hover:underline"
                             >
                                 앱으로 이동 →
                             </button>
@@ -117,10 +117,10 @@ export function PurchaseView() {
                     )}
 
                     {/* 가격 카드 */}
-                    <div className="bg-white border-2 border-[#0F766E] rounded-2xl p-8 md:p-10">
+                    <div className="bg-white border-2 border-[#6366F1] rounded-2xl p-8 md:p-10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="h-4 w-4 text-[#0F766E]" />
-                            <p className="text-xs font-semibold text-[#0F766E] uppercase tracking-widest">연간 구독</p>
+                            <Sparkles className="h-4 w-4 text-[#6366F1]" />
+                            <p className="text-xs font-semibold text-[#6366F1] uppercase tracking-widest">연간 구독</p>
                         </div>
 
                         <div className="flex items-baseline gap-2 mb-6">
@@ -139,7 +139,7 @@ export function PurchaseView() {
                                 "모든 기기 동기화",
                             ].map((f, i) => (
                                 <li key={i} className="flex items-start gap-3 text-sm text-neutral-700">
-                                    <Check className="h-4 w-4 text-[#0F766E] shrink-0 mt-0.5" />
+                                    <Check className="h-4 w-4 text-[#6366F1] shrink-0 mt-0.5" />
                                     <span>{f}</span>
                                 </li>
                             ))}
@@ -149,7 +149,7 @@ export function PurchaseView() {
                             <button
                                 onClick={handlePay}
                                 disabled={loading}
-                                className="w-full py-4 bg-[#0F766E] text-white rounded-xl font-semibold hover:bg-[#0d5e56] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-[#6366F1] text-white rounded-xl font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> 처리 중…</> : "1년 구독 시작"}
                             </button>
@@ -165,8 +165,8 @@ export function PurchaseView() {
                     <div className="mt-6 bg-white border border-neutral-200 rounded-xl p-5 text-center">
                         <p className="text-sm text-neutral-700 font-medium">종이 플래너'스 플래너 구매자이신가요?</p>
                         <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
-                            Badak Mall에서 2026 플래너를 구매하셨다면 1년 구독을 <strong className="text-[#0F766E]">무료로</strong> 제공해 드립니다.<br />
-                            <a href="mailto:lools@tenone.biz?subject=PP AI 구독 무료 활성화 요청" className="text-[#0F766E] hover:underline">
+                            Badak Mall에서 2026 플래너를 구매하셨다면 1년 구독을 <strong className="text-[#6366F1]">무료로</strong> 제공해 드립니다.<br />
+                            <a href="mailto:lools@tenone.biz?subject=PP AI 구독 무료 활성화 요청" className="text-[#6366F1] hover:underline">
                                 lools@tenone.biz로 주문번호와 함께 문의
                             </a>
                         </p>

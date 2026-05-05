@@ -68,16 +68,16 @@ export function PageHeader({
                     <button
                         type="button"
                         onClick={onPrev}
-                        className="p-1 rounded hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
+                        className="p-1 rounded hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
                         aria-label="이전"
                     >
                         <ChevronLeft className="h-5 w-5" />
                     </button>
                 )}
-                {icon && <span className="text-[#0F766E] planners-dark:text-[#5EEAD4] shrink-0 inline-flex items-center">{icon}</span>}
+                {icon && <span className="text-[#6366F1] myverse-dark:text-[#5EEAD4] shrink-0 inline-flex items-center">{icon}</span>}
                 <h1
-                    className={`font-serif text-2xl md:text-3xl text-neutral-900 planners-dark:text-neutral-100 whitespace-nowrap ${
-                        state ? "underline decoration-[#0F766E] decoration-2 underline-offset-[6px]" : ""
+                    className={`font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100 whitespace-nowrap ${
+                        state ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
                     }`}
                     title={state ? STATE_LABEL[state] : undefined}
                 >
@@ -87,7 +87,7 @@ export function PageHeader({
                     <button
                         type="button"
                         onClick={onNext}
-                        className="p-1 rounded hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
+                        className="p-1 rounded hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] text-neutral-400 transition-colors"
                         aria-label="다음"
                     >
                         <ChevronRight className="h-5 w-5" />
@@ -96,7 +96,7 @@ export function PageHeader({
                 {right && <div className="ml-auto flex items-center gap-2">{right}</div>}
             </div>
             {subtitle && (
-                <div className="text-sm text-neutral-500 planners-dark:text-neutral-400 mt-1">
+                <div className="text-sm text-neutral-500 myverse-dark:text-neutral-400 mt-1">
                     {subtitle}
                 </div>
             )}

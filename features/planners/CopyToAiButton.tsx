@@ -54,7 +54,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#0F766E]/30 text-[#0F766E] rounded-lg text-xs hover:bg-[#0F766E]/5 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#6366F1]/30 text-[#6366F1] rounded-lg text-xs hover:bg-[#6366F1]/5 transition-colors"
             >
                 <Sparkles className="h-3.5 w-3.5" /> Copy to AI
             </button>
@@ -88,7 +88,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
                                         onClick={() => setEditing(!editing)}
                                         className={`flex items-center gap-0.5 px-2 py-1 border rounded text-[10px] transition-colors ${
                                             editing
-                                                ? "bg-[#0F766E] border-[#0F766E] text-white"
+                                                ? "bg-[#6366F1] border-[#6366F1] text-white"
                                                 : "bg-white border-neutral-200 text-neutral-500 hover:text-neutral-900"
                                         }`}
                                     >
@@ -100,7 +100,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
                                         value={editedPrompt || fullPrompt}
                                         onChange={(e) => setEditedPrompt(e.target.value)}
                                         rows={10}
-                                        className="w-full bg-neutral-50 border border-[#0F766E]/30 rounded-lg p-3 text-[10px] text-neutral-700 font-mono leading-relaxed resize-none focus:outline-none focus:border-[#0F766E]"
+                                        className="w-full bg-neutral-50 border border-[#6366F1]/30 rounded-lg p-3 text-[10px] text-neutral-700 font-mono leading-relaxed resize-none focus:outline-none focus:border-[#6366F1]"
                                         autoFocus
                                     />
                                 ) : (
@@ -118,7 +118,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
                                     <button
                                         key={t.key}
                                         onClick={() => openExternal(t.url, t.key)}
-                                        className="px-3 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
+                                        className="px-3 py-2 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors"
                                     >
                                         {t.label}
                                     </button>

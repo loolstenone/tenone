@@ -15,8 +15,8 @@ export function BetaFeedbackButton() {
 
     useEffect(() => {
         const onOpen = () => setOpen(true);
-        window.addEventListener("planners-feedback-open", onOpen);
-        return () => window.removeEventListener("planners-feedback-open", onOpen);
+        window.addEventListener("myverse-feedback-open", onOpen);
+        return () => window.removeEventListener("myverse-feedback-open", onOpen);
     }, []);
 
     async function handleSubmit() {
@@ -41,7 +41,7 @@ export function BetaFeedbackButton() {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="pp-hide-when-ai-open hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-full shadow-lg hover:bg-[#0d5e56] transition-colors text-sm font-medium"
+                className="pp-hide-when-ai-open hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-2 px-4 py-2.5 bg-[#6366F1] text-white rounded-full shadow-lg hover:bg-[#4F46E5] transition-colors text-sm font-medium"
             >
                 <MessageSquarePlus className="h-4 w-4" />
                 <span>피드백</span>
@@ -61,7 +61,7 @@ export function BetaFeedbackButton() {
                         </div>
                         <div className="p-5 space-y-4">
                             {sent ? (
-                                <div className="flex items-center gap-3 py-6 justify-center text-[#0F766E]">
+                                <div className="flex items-center gap-3 py-6 justify-center text-[#6366F1]">
                                     <Check className="h-5 w-5" />
                                     <span className="font-medium">전송됐습니다. 감사합니다!</span>
                                 </div>
@@ -72,13 +72,13 @@ export function BetaFeedbackButton() {
                                         onChange={(e) => setText(e.target.value)}
                                         placeholder="어떤 점이 불편하셨나요? 어떤 기능이 있으면 좋겠나요?"
                                         rows={5}
-                                        className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#0F766E] resize-none"
+                                        className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1] resize-none"
                                         autoFocus
                                     />
                                     <button
                                         onClick={handleSubmit}
                                         disabled={sending || !text.trim()}
-                                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                                     >
                                         {sending ? "전송 중…" : <><Send className="h-4 w-4" /> 보내기</>}
                                     </button>

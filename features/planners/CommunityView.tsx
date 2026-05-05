@@ -113,20 +113,20 @@ export function CommunityView() {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <header className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2.5">
-                    <Sparkles className="h-5 w-5 text-[#0F766E]" />
+                    <Sparkles className="h-5 w-5 text-[#6366F1]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">커뮤니티</h1>
                 </div>
                 {authenticated ? (
                     <button
                         onClick={startWrite}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5] transition-colors"
                     >
                         <Plus className="h-3.5 w-3.5" /> 글쓰기
                     </button>
                 ) : (
                     <Link
                         href={loginHref(pathname)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 border border-[#0F766E] text-[#0F766E] rounded-lg text-sm font-medium hover:bg-[#0F766E]/5 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 border border-[#6366F1] text-[#6366F1] rounded-lg text-sm font-medium hover:bg-[#6366F1]/5 transition-colors"
                     >
                         <LogIn className="h-3.5 w-3.5" /> 로그인하고 쓰기
                     </Link>
@@ -175,14 +175,14 @@ export function CommunityView() {
                     {authenticated ? (
                         <button
                             onClick={startWrite}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56]"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5]"
                         >
                             <Plus className="h-4 w-4" /> 첫 글 쓰기
                         </button>
                     ) : (
                         <Link
                             href={loginHref(pathname)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#0F766E] text-[#0F766E] rounded-lg text-sm font-medium hover:bg-[#0F766E]/5"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#6366F1] text-[#6366F1] rounded-lg text-sm font-medium hover:bg-[#6366F1]/5"
                         >
                             <LogIn className="h-4 w-4" /> 로그인하고 쓰기
                         </Link>
@@ -260,7 +260,7 @@ function Avatar({ name, url }: { name: string; url: string | null }) {
         return <img src={url} alt={name} className="h-9 w-9 rounded-full object-cover shrink-0" />;
     }
     return (
-        <div className="h-9 w-9 rounded-full bg-[#0F766E]/10 flex items-center justify-center text-xs font-bold text-[#0F766E] shrink-0">
+        <div className="h-9 w-9 rounded-full bg-[#6366F1]/10 flex items-center justify-center text-xs font-bold text-[#6366F1] shrink-0">
             {name[0]}
         </div>
     );
@@ -353,7 +353,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
                     <button
                         onClick={submit}
                         disabled={saving || !title.trim() || !content.trim()}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                     >
                         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                         등록
@@ -507,7 +507,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
                             <button
                                 onClick={submitComment}
                                 disabled={posting || !comment.trim()}
-                                className="px-4 py-2 bg-[#0F766E] text-white rounded-full text-sm font-medium hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="px-4 py-2 bg-[#6366F1] text-white rounded-full text-sm font-medium hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : "등록"}
                             </button>
@@ -515,7 +515,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
                     ) : (
                         <Link
                             href={loginHref(pathname)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[#0F766E] text-[#0F766E] rounded-full text-sm font-medium hover:bg-[#0F766E]/5"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[#6366F1] text-[#6366F1] rounded-full text-sm font-medium hover:bg-[#6366F1]/5"
                         >
                             <LogIn className="h-3.5 w-3.5" /> 로그인하고 댓글 달기
                         </Link>

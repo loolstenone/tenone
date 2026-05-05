@@ -92,14 +92,14 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
     const Wrapper = bare ? "div" : "section";
     return (
         <Wrapper
-            className={bare ? "" : "bg-white planners-dark:bg-[#1C1C1C] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded-xl"}
+            className={bare ? "" : "bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-xl"}
             style={{ color: "var(--planners-font, inherit)" }}
         >
             {/* 헤더 */}
-            <div className={`flex items-center justify-between ${bare ? "px-5 pt-4 pb-2" : "px-5 py-3.5 border-b border-neutral-100 planners-dark:border-[#2A2A2A]"}`}>
+            <div className={`flex items-center justify-between ${bare ? "px-5 pt-4 pb-2" : "px-5 py-3.5 border-b border-neutral-100 myverse-dark:border-[#2A2A2A]"}`}>
                 <button
                     onClick={() => setCollapsed(c => !c)}
-                    className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 planners-dark:text-neutral-500 hover:text-neutral-600 transition-colors"
+                    className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 myverse-dark:text-neutral-500 hover:text-neutral-600 transition-colors"
                 >
                     <ListChecks className="h-3.5 w-3.5" />
                     일과 기록
@@ -111,7 +111,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                 {!hideAdd && (
                     <button
                         onClick={() => { setAdding(a => !a); setTimeout(() => activityRef.current?.focus(), 50); }}
-                        className="p-1 rounded text-neutral-400 hover:text-neutral-700 planners-dark:hover:text-neutral-200 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
+                        className="p-1 rounded text-neutral-400 hover:text-neutral-700 myverse-dark:hover:text-neutral-200 hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] transition-colors"
                         title="일과 추가"
                     >
                         <Plus className="h-3.5 w-3.5" />
@@ -127,7 +127,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                         </div>
                     ) : routines.length === 0 && !adding ? (
                         hideAdd ? null : (
-                            <p className="text-xs text-neutral-300 planners-dark:text-neutral-600 text-center py-4 italic">
+                            <p className="text-xs text-neutral-300 myverse-dark:text-neutral-600 text-center py-4 italic">
                                 오늘의 일과를 기록하세요
                             </p>
                         )
@@ -139,7 +139,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                 return (
                                     <div
                                         key={r.id}
-                                        className="group flex items-start gap-3 py-2 px-1 rounded-lg hover:bg-neutral-50 planners-dark:hover:bg-[#252525] transition-colors"
+                                        className="group flex items-start gap-3 py-2 px-1 rounded-lg hover:bg-neutral-50 myverse-dark:hover:bg-[#252525] transition-colors"
                                     >
                                         <div className="mt-1.5 shrink-0">
                                             <div className={`h-2 w-2 rounded-full ${meta.dot}`} />
@@ -147,10 +147,10 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-baseline gap-2 flex-wrap">
-                                                <span className="text-sm font-medium text-neutral-800 planners-dark:text-neutral-100 truncate">
+                                                <span className="text-sm font-medium text-neutral-800 myverse-dark:text-neutral-100 truncate">
                                                     {r.activity}
                                                 </span>
-                                                <span className="text-[10px] text-neutral-400 planners-dark:text-neutral-500 shrink-0">
+                                                <span className="text-[10px] text-neutral-400 myverse-dark:text-neutral-500 shrink-0">
                                                     {meta.label}
                                                 </span>
                                             </div>
@@ -161,7 +161,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                                 </div>
                                             )}
                                             {r.note && (
-                                                <p className="text-xs text-neutral-500 planners-dark:text-neutral-400 mt-0.5 line-clamp-1 italic">
+                                                <p className="text-xs text-neutral-500 myverse-dark:text-neutral-400 mt-0.5 line-clamp-1 italic">
                                                     {r.note}
                                                 </p>
                                             )}
@@ -182,7 +182,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
 
                     {/* 입력 폼 */}
                     {adding && (
-                        <div className="border border-neutral-200 planners-dark:border-[#333] rounded-xl p-3 space-y-2 mt-2">
+                        <div className="border border-neutral-200 myverse-dark:border-[#333] rounded-xl p-3 space-y-2 mt-2">
                             <input
                                 ref={activityRef}
                                 type="text"
@@ -190,7 +190,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                 onChange={e => setInputActivity(e.target.value)}
                                 onKeyDown={e => { if (e.key === "Enter") addRoutine(); if (e.key === "Escape") setAdding(false); }}
                                 placeholder="활동 내용"
-                                className="w-full text-sm bg-transparent text-neutral-800 planners-dark:text-neutral-100 placeholder:text-neutral-300 focus:outline-none"
+                                className="w-full text-sm bg-transparent text-neutral-800 myverse-dark:text-neutral-100 placeholder:text-neutral-300 focus:outline-none"
                             />
 
                             <div className="flex gap-2">
@@ -200,7 +200,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                         type="time"
                                         value={inputStart}
                                         onChange={e => setInputStart(e.target.value)}
-                                        className="w-full text-sm bg-transparent text-neutral-700 planners-dark:text-neutral-200 focus:outline-none mt-0.5"
+                                        className="w-full text-sm bg-transparent text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none mt-0.5"
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -209,7 +209,7 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                         type="time"
                                         value={inputEnd}
                                         onChange={e => setInputEnd(e.target.value)}
-                                        className="w-full text-sm bg-transparent text-neutral-700 planners-dark:text-neutral-200 focus:outline-none mt-0.5"
+                                        className="w-full text-sm bg-transparent text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none mt-0.5"
                                     />
                                 </div>
                             </div>
@@ -222,8 +222,8 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                         onClick={() => setInputCat(c.key)}
                                         className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
                                             inputCat === c.key
-                                                ? "bg-[#0F766E] text-white"
-                                                : "bg-neutral-100 planners-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-200"
+                                                ? "bg-[#6366F1] text-white"
+                                                : "bg-neutral-100 myverse-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-200"
                                         }`}
                                     >
                                         {c.label}
@@ -236,20 +236,20 @@ export function DailyRoutinesCard({ date, bare = false, hideAdd = false }: { dat
                                 value={inputNote}
                                 onChange={e => setInputNote(e.target.value)}
                                 placeholder="메모 (선택)"
-                                className="w-full text-xs bg-transparent text-neutral-600 planners-dark:text-neutral-300 placeholder:text-neutral-300 focus:outline-none"
+                                className="w-full text-xs bg-transparent text-neutral-600 myverse-dark:text-neutral-300 placeholder:text-neutral-300 focus:outline-none"
                             />
 
                             <div className="flex gap-2 pt-1">
                                 <button
                                     onClick={addRoutine}
                                     disabled={!inputActivity.trim()}
-                                    className="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[#0F766E] text-white disabled:opacity-40 hover:bg-[#0d5e56] transition-colors"
+                                    className="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[#6366F1] text-white disabled:opacity-40 hover:bg-[#4F46E5] transition-colors"
                                 >
                                     추가
                                 </button>
                                 <button
                                     onClick={() => setAdding(false)}
-                                    className="px-3 py-1.5 rounded-lg text-xs text-neutral-500 hover:bg-neutral-100 planners-dark:hover:bg-[#2A2A2A] transition-colors"
+                                    className="px-3 py-1.5 rounded-lg text-xs text-neutral-500 hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] transition-colors"
                                 >
                                     취소
                                 </button>

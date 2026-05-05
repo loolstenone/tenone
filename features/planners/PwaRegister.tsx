@@ -20,7 +20,7 @@ export function PwaRegister() {
     return (
         <>
             <link rel="manifest" href="/planners-manifest.json" />
-            <meta name="theme-color" content="#0F766E" />
+            <meta name="theme-color" content="#6366F1" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
             <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             <meta name="apple-mobile-web-app-title" content="PP AI" />

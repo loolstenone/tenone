@@ -30,7 +30,7 @@ export function AboutPage() {
         <div className="bg-white text-[#1a1a1a] min-h-screen">
             {/* 히어로 */}
             <section className="px-6 py-20 md:py-28 max-w-3xl mx-auto text-center">
-                <p className="text-xs uppercase tracking-widest text-[#0F766E] mb-4">About Planner&apos;s</p>
+                <p className="text-xs uppercase tracking-widest text-[#6366F1] mb-4">About Planner&apos;s</p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-6">
                     우리는 모두 기획자다
                 </h1>
@@ -71,10 +71,10 @@ export function AboutPage() {
                         <div className="space-y-8">
                             {TIMELINE.map((item) => (
                                 <div key={item.year} className="flex items-start gap-6">
-                                    <span className="w-10 text-right text-sm font-mono text-[#0F766E] font-semibold shrink-0 pt-0.5">
+                                    <span className="w-10 text-right text-sm font-mono text-[#6366F1] font-semibold shrink-0 pt-0.5">
                                         {item.year}
                                     </span>
-                                    <div className="w-6 h-6 rounded-full border-2 border-[#0F766E] bg-white shrink-0 mt-0.5 z-10" />
+                                    <div className="w-6 h-6 rounded-full border-2 border-[#6366F1] bg-white shrink-0 mt-0.5 z-10" />
                                     <p className="text-neutral-600 text-sm leading-relaxed pt-0.5">{item.event}</p>
                                 </div>
                             ))}
@@ -103,7 +103,7 @@ export function AboutPage() {
             </section>
 
             {/* 방법론 요약 */}
-            <section className="px-6 py-16 bg-[#0F766E]">
+            <section className="px-6 py-16 bg-[#6366F1]">
                 <div className="max-w-2xl mx-auto">
                     <h2 className="text-xs uppercase tracking-widest text-teal-200 mb-10">핵심 방법론</h2>
                     <div className="grid md:grid-cols-3 gap-8">
@@ -153,13 +153,13 @@ export function AboutPage() {
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                         href="/myverse/app"
-                        className="inline-block bg-[#0F766E] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors"
+                        className="inline-block bg-[#6366F1] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors"
                     >
                         PP AI 시작하기
                     </Link>
                     <Link
                         href="/myverse/programs"
-                        className="inline-block border border-neutral-200 text-neutral-700 text-sm font-medium px-6 py-3 rounded-lg hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                        className="inline-block border border-neutral-200 text-neutral-700 text-sm font-medium px-6 py-3 rounded-lg hover:border-[#6366F1] hover:text-[#6366F1] transition-colors"
                     >
                         교육 프로그램 보기
                     </Link>

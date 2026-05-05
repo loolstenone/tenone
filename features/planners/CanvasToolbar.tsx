@@ -59,7 +59,7 @@ const QUICK_COLORS = [
     { hex: "#dc2626", name: "빨강" },
     { hex: "#ea580c", name: "주황" },
     { hex: "#16a34a", name: "녹색" },
-    { hex: "#0F766E", name: "청록" },
+    { hex: "#6366F1", name: "청록" },
     { hex: "#7c3aed", name: "보라" },
 ];
 
@@ -70,7 +70,7 @@ const EXTENDED_COLORS = [
     // 따뜻
     "#7f1d1d", "#dc2626", "#ea580c", "#f59e0b", "#eab308", "#84cc16",
     // 차가움
-    "#16a34a", "#10b981", "#0F766E", "#0891b2", "#3b82f6", "#1e40af",
+    "#16a34a", "#10b981", "#6366F1", "#0891b2", "#3b82f6", "#1e40af",
     // 강조
     "#7c3aed", "#a855f7", "#ec4899", "#f43f5e", "#fde047", "#ffffff",
 ];
@@ -323,7 +323,7 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
     const widthVisible = active.mode === "freedraw" || active.mode === "shape";
 
     return (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-0.5 px-1.5 py-1.5 bg-white/95 planners-dark:bg-[#1c1c1c]/95 backdrop-blur border border-neutral-200 planners-dark:border-[#2a2a2a] rounded-full shadow-md">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-0.5 px-1.5 py-1.5 bg-white/95 myverse-dark:bg-[#1c1c1c]/95 backdrop-blur border border-neutral-200 myverse-dark:border-[#2a2a2a] rounded-full shadow-md">
             <ToolButton title="선택 (V)" active={active.mode === "selection"} onClick={() => selectTool("selection")}>
                 <MousePointer2 className="h-4 w-4" />
             </ToolButton>
@@ -352,8 +352,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                             title={`굵기: ${width.toFixed(1)}px`}
                             className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
                                 widthOpen
-                                    ? "bg-[#0F766E] text-white"
-                                    : "text-neutral-500 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                    ? "bg-[#6366F1] text-white"
+                                    : "text-neutral-500 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
                             }`}
                         >
                             <span
@@ -364,9 +364,9 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                         {widthOpen && (
                             <div
                                 ref={widthPopRef}
-                                className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-56 p-3 bg-white planners-dark:bg-[#1c1c1c] border border-neutral-200 planners-dark:border-[#2a2a2a] rounded-xl shadow-xl"
+                                className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-56 p-3 bg-white myverse-dark:bg-[#1c1c1c] border border-neutral-200 myverse-dark:border-[#2a2a2a] rounded-xl shadow-xl"
                             >
-                                <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 mb-2">굵기</div>
+                                <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 mb-2">굵기</div>
                                 <div className="grid grid-cols-4 gap-1.5 mb-3">
                                     {WIDTH_PRESETS.map(p => (
                                         <button
@@ -375,11 +375,11 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                             title={p.label}
                                             className={`flex flex-col items-center justify-center h-12 rounded-lg border transition-colors ${
                                                 Math.abs(width - p.value) < 0.01
-                                                    ? "border-[#0F766E] bg-[#0F766E]/10"
-                                                    : "border-neutral-200 planners-dark:border-[#2a2a2a] hover:bg-neutral-50 planners-dark:hover:bg-[#252525]"
+                                                    ? "border-[#6366F1] bg-[#6366F1]/10"
+                                                    : "border-neutral-200 myverse-dark:border-[#2a2a2a] hover:bg-neutral-50 myverse-dark:hover:bg-[#252525]"
                                             }`}
                                         >
-                                            <span className="block rounded-full bg-neutral-700 planners-dark:bg-neutral-200" style={{ width: p.value * 1.5, height: p.value * 1.5 }} />
+                                            <span className="block rounded-full bg-neutral-700 myverse-dark:bg-neutral-200" style={{ width: p.value * 1.5, height: p.value * 1.5 }} />
                                         </button>
                                     ))}
                                 </div>
@@ -390,9 +390,9 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                     step={0.5}
                                     value={width}
                                     onChange={e => applyWidth(parseFloat(e.target.value))}
-                                    className="w-full accent-[#0F766E]"
+                                    className="w-full accent-[#6366F1]"
                                 />
-                                <div className="text-center text-xs text-neutral-500 planners-dark:text-neutral-400 mt-1">
+                                <div className="text-center text-xs text-neutral-500 myverse-dark:text-neutral-400 mt-1">
                                     {width.toFixed(1)}px
                                 </div>
                             </div>
@@ -413,8 +413,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                         title={c.name}
                         className={`shrink-0 w-6 h-6 rounded-full border-2 transition-all ${
                             color.toLowerCase() === c.hex.toLowerCase() && !colorsDisabled
-                                ? "border-neutral-900 planners-dark:border-white scale-110"
-                                : "border-white planners-dark:border-[#1c1c1c] hover:scale-105"
+                                ? "border-neutral-900 myverse-dark:border-white scale-110"
+                                : "border-white myverse-dark:border-[#1c1c1c] hover:scale-105"
                         } ${colorsDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
                         style={{ backgroundColor: c.hex }}
                     />
@@ -422,7 +422,7 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
             </div>
 
             {/* ── 모바일: 현재 색상 미리보기 (color picker 트리거 옆) ──────── */}
-            <div className="sm:hidden shrink-0 w-5 h-5 rounded-full border-2 border-white planners-dark:border-[#1c1c1c]"
+            <div className="sm:hidden shrink-0 w-5 h-5 rounded-full border-2 border-white myverse-dark:border-[#1c1c1c]"
                  style={{ backgroundColor: color, opacity: colorsDisabled ? 0.3 : 1 }}
                  title={`현재 색상: ${color}`}
             />
@@ -436,8 +436,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                     title="더 많은 색상"
                     className={`flex items-center justify-center w-7 h-7 rounded-full border border-dashed transition-colors ${
                         colorOpen
-                            ? "border-[#0F766E] bg-[#0F766E]/10 text-[#0F766E]"
-                            : "border-neutral-300 planners-dark:border-[#3a3a3a] text-neutral-500 planners-dark:text-neutral-400 hover:border-neutral-400"
+                            ? "border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]"
+                            : "border-neutral-300 myverse-dark:border-[#3a3a3a] text-neutral-500 myverse-dark:text-neutral-400 hover:border-neutral-400"
                     } ${colorsDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
                 >
                     <Plus className="h-3.5 w-3.5" />
@@ -445,9 +445,9 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                 {colorOpen && (
                     <div
                         ref={colorPopRef}
-                        className="absolute top-full mt-2 right-0 w-72 p-3 bg-white planners-dark:bg-[#1c1c1c] border border-neutral-200 planners-dark:border-[#2a2a2a] rounded-xl shadow-xl"
+                        className="absolute top-full mt-2 right-0 w-72 p-3 bg-white myverse-dark:bg-[#1c1c1c] border border-neutral-200 myverse-dark:border-[#2a2a2a] rounded-xl shadow-xl"
                     >
-                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 mb-1.5">팔레트</div>
+                        <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 mb-1.5">팔레트</div>
                         <div className="grid grid-cols-6 gap-1.5 mb-3">
                             {EXTENDED_COLORS.map(hex => (
                                 <button
@@ -456,8 +456,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                     title={hex}
                                     className={`w-7 h-7 rounded-md border-2 transition-transform hover:scale-110 ${
                                         color.toLowerCase() === hex.toLowerCase()
-                                            ? "border-neutral-900 planners-dark:border-white"
-                                            : "border-neutral-200 planners-dark:border-[#2a2a2a]"
+                                            ? "border-neutral-900 myverse-dark:border-white"
+                                            : "border-neutral-200 myverse-dark:border-[#2a2a2a]"
                                     }`}
                                     style={{ backgroundColor: hex }}
                                 />
@@ -466,14 +466,14 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
 
                         {recentColors.length > 0 && (
                             <>
-                                <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 mb-1.5">최근 사용</div>
+                                <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 mb-1.5">최근 사용</div>
                                 <div className="flex flex-wrap gap-1.5 mb-3">
                                     {recentColors.map(hex => (
                                         <button
                                             key={hex}
                                             onClick={() => applyColor(hex)}
                                             title={hex}
-                                            className="w-6 h-6 rounded-full border border-neutral-200 planners-dark:border-[#2a2a2a] hover:scale-110 transition-transform"
+                                            className="w-6 h-6 rounded-full border border-neutral-200 myverse-dark:border-[#2a2a2a] hover:scale-110 transition-transform"
                                             style={{ backgroundColor: hex }}
                                         />
                                     ))}
@@ -481,7 +481,7 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                             </>
                         )}
 
-                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 mb-1.5">HEX</div>
+                        <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 mb-1.5">HEX</div>
                         <div className="flex items-center gap-1.5">
                             <span className="text-xs text-neutral-400">#</span>
                             <input
@@ -491,15 +491,15 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                 onKeyDown={e => { if (e.key === "Enter") commitHex(); }}
                                 placeholder="0F766E"
                                 maxLength={7}
-                                className="flex-1 px-2 py-1 text-xs font-mono bg-neutral-50 planners-dark:bg-[#262626] border border-neutral-200 planners-dark:border-[#2a2a2a] rounded outline-none focus:border-[#0F766E]"
+                                className="flex-1 px-2 py-1 text-xs font-mono bg-neutral-50 myverse-dark:bg-[#262626] border border-neutral-200 myverse-dark:border-[#2a2a2a] rounded outline-none focus:border-[#6366F1]"
                             />
                             <button
                                 onClick={commitHex}
-                                className="shrink-0 px-2.5 py-1 text-xs bg-[#0F766E] text-white rounded hover:bg-[#0d6660] whitespace-nowrap"
+                                className="shrink-0 px-2.5 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#0d6660] whitespace-nowrap"
                             >
                                 적용
                             </button>
-                            <label className="cursor-pointer w-7 h-7 flex items-center justify-center rounded border border-neutral-200 planners-dark:border-[#2a2a2a] hover:bg-neutral-50 planners-dark:hover:bg-[#252525]" title="색상 선택기">
+                            <label className="cursor-pointer w-7 h-7 flex items-center justify-center rounded border border-neutral-200 myverse-dark:border-[#2a2a2a] hover:bg-neutral-50 myverse-dark:hover:bg-[#252525]" title="색상 선택기">
                                 <input
                                     type="color"
                                     value={color}
@@ -570,8 +570,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                     title="도형·텍스트·이미지·레이어"
                     className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
                         moreOpen
-                            ? "bg-[#0F766E] text-white"
-                            : "text-neutral-500 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                            ? "bg-[#6366F1] text-white"
+                            : "text-neutral-500 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
                     }`}
                 >
                     <MoreHorizontal className="h-4 w-4" />
@@ -579,9 +579,9 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                 {moreOpen && (
                     <div
                         ref={morePopRef}
-                        className="absolute top-full mt-2 right-0 w-56 p-2 bg-white planners-dark:bg-[#1c1c1c] border border-neutral-200 planners-dark:border-[#2a2a2a] rounded-xl shadow-xl"
+                        className="absolute top-full mt-2 right-0 w-56 p-2 bg-white myverse-dark:bg-[#1c1c1c] border border-neutral-200 myverse-dark:border-[#2a2a2a] rounded-xl shadow-xl"
                     >
-                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">도형</div>
+                        <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 px-2 py-1">도형</div>
                         <div className="grid grid-cols-4 gap-1 mb-2">
                             {SHAPES.map(s => (
                                 <button
@@ -590,8 +590,8 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                     title={s.label}
                                     className={`flex items-center justify-center h-9 rounded-lg transition-colors ${
                                         active.mode === "shape" && active.shape === s.kind
-                                            ? "bg-[#0F766E] text-white"
-                                            : "text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                            ? "bg-[#6366F1] text-white"
+                                            : "text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
                                     }`}
                                 >
                                     {s.icon}
@@ -603,45 +603,45 @@ export function CanvasToolbar({ apiRef, selectedCount = 0 }: Props) {
                                 onClick={() => { selectText(); setMoreOpen(false); }}
                                 className={`flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs transition-colors ${
                                     active.mode === "text"
-                                        ? "bg-[#0F766E] text-white"
-                                        : "text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                        ? "bg-[#6366F1] text-white"
+                                        : "text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
                                 }`}
                             >
                                 <Type className="h-3.5 w-3.5" /> 텍스트
                             </button>
                             <button
                                 onClick={() => { insertImage(); setMoreOpen(false); }}
-                                className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                                className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
                             >
                                 <ImageIcon className="h-3.5 w-3.5" /> 이미지
                             </button>
                         </div>
                         {selectedCount > 0 && (
                             <>
-                                <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">레이어 순서</div>
+                                <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 px-2 py-1">레이어 순서</div>
                                 <div className="grid grid-cols-4 gap-1 mb-2">
-                                    <button onClick={() => { reorderSelection("front"); setMoreOpen(false); }} title="맨 앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                    <button onClick={() => { reorderSelection("front"); setMoreOpen(false); }} title="맨 앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                         <ChevronsUp className="h-4 w-4" />
                                     </button>
-                                    <button onClick={() => { reorderSelection("forward"); setMoreOpen(false); }} title="앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                    <button onClick={() => { reorderSelection("forward"); setMoreOpen(false); }} title="앞으로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                         <MoveUp className="h-4 w-4" />
                                     </button>
-                                    <button onClick={() => { reorderSelection("backward"); setMoreOpen(false); }} title="뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                    <button onClick={() => { reorderSelection("backward"); setMoreOpen(false); }} title="뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                         <MoveDown className="h-4 w-4" />
                                     </button>
-                                    <button onClick={() => { reorderSelection("back"); setMoreOpen(false); }} title="맨 뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                                    <button onClick={() => { reorderSelection("back"); setMoreOpen(false); }} title="맨 뒤로" className="flex items-center justify-center h-9 rounded-lg text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                         <ChevronsDown className="h-4 w-4" />
                                     </button>
                                 </div>
                             </>
                         )}
                         {/* 모바일 전용: undo/redo */}
-                        <div className="text-[11px] font-medium text-neutral-500 planners-dark:text-neutral-400 px-2 py-1">실행</div>
+                        <div className="text-[11px] font-medium text-neutral-500 myverse-dark:text-neutral-400 px-2 py-1">실행</div>
                         <div className="grid grid-cols-2 gap-1">
-                            <button onClick={() => { undo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                            <button onClick={() => { undo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                 <Undo2 className="h-3.5 w-3.5" /> 취소
                             </button>
-                            <button onClick={() => { redo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]">
+                            <button onClick={() => { redo(); setMoreOpen(false); }} className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]">
                                 <Redo2 className="h-3.5 w-3.5" /> 다시
                             </button>
                         </div>
@@ -674,13 +674,13 @@ function ToolButton({
     active?: boolean;
     activeColor?: "teal" | "rose";
 }) {
-    const activeCls = activeColor === "rose" ? "bg-rose-500 text-white" : "bg-[#0F766E] text-white";
+    const activeCls = activeColor === "rose" ? "bg-rose-500 text-white" : "bg-[#6366F1] text-white";
     return (
         <button
             onClick={onClick}
             title={title}
             className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
-                active ? activeCls : "text-neutral-500 planners-dark:text-neutral-300 hover:bg-neutral-100 planners-dark:hover:bg-[#2a2a2a]"
+                active ? activeCls : "text-neutral-500 myverse-dark:text-neutral-300 hover:bg-neutral-100 myverse-dark:hover:bg-[#2a2a2a]"
             }`}
         >
             {children}
@@ -689,5 +689,5 @@ function ToolButton({
 }
 
 function Divider() {
-    return <div className="w-px h-5 bg-neutral-200 planners-dark:bg-[#2a2a2a] shrink-0 mx-0.5" />;
+    return <div className="w-px h-5 bg-neutral-200 myverse-dark:bg-[#2a2a2a] shrink-0 mx-0.5" />;
 }

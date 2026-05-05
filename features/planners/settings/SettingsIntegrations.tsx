@@ -78,7 +78,7 @@ function LocationServiceList() {
                                 <span className="text-sm font-medium text-neutral-900">{s.name}</span>
                                 <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded ${
                                     s.status === "active"
-                                        ? "bg-[#0F766E]/10 text-[#0F766E]"
+                                        ? "bg-[#6366F1]/10 text-[#6366F1]"
                                         : s.status === "soon"
                                         ? "bg-neutral-100 text-neutral-500"
                                         : "bg-neutral-100 text-neutral-400"
@@ -145,7 +145,7 @@ function IntegrationRow({
                 <div className="flex items-center gap-2">
                     <p className="text-sm text-neutral-900 font-medium">{name}</p>
                     {connected && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded">
+                        <span className="text-[10px] px-1.5 py-0.5 bg-[#6366F1]/10 text-[#6366F1] rounded">
                             Connected
                         </span>
                     )}
@@ -210,14 +210,14 @@ function IntegrationRow({
                 ) : onConnectClick ? (
                     <button
                         onClick={onConnectClick}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors"
                     >
                         <LinkIcon className="h-3 w-3" /> Connect
                     </button>
                 ) : (
                     <a
                         href={connectHref}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors"
                     >
                         <LinkIcon className="h-3 w-3" /> Connect
                     </a>
@@ -695,7 +695,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                                 브라우저에서 위치 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : locationPermission === "granted" ? (
-                            <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
+                            <p className="text-xs text-[#6366F1] mt-0.5">✓ 브라우저 권한 허용됨</p>
                         ) : (
                             <p className="text-xs text-neutral-500 mt-0.5">
                                 허용 시 날씨·일출·타임존이 자동으로 채워집니다
@@ -706,7 +706,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                     {locationPermission === "denied" ? (
                         <button
                             onClick={() => setPermGuide("geolocation")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors"
                         >
                             <ShieldAlert className="h-3 w-3 text-rose-200" />
                             권한 다시 켜기
@@ -715,7 +715,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         <button
                             onClick={() => toggleLocation(!locationEnabled)}
                             className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
-                                locationEnabled ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"
+                                locationEnabled ? "bg-[#6366F1]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"
                             }`}
                         >
                             <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${
@@ -726,7 +726,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         <button
                             onClick={requestLocation}
                             disabled={locationLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                         >
                             {locationLoading ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -783,7 +783,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                                 브라우저에서 마이크 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : micPermission === "granted" ? (
-                            <p className="text-xs text-[#0F766E] mt-0.5">✓ 브라우저 권한 허용됨</p>
+                            <p className="text-xs text-[#6366F1] mt-0.5">✓ 브라우저 권한 허용됨</p>
                         ) : (
                             <p className="text-xs text-neutral-500 mt-0.5">
                                 녹음 시작 시 브라우저가 권한을 요청합니다
@@ -799,13 +799,13 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                     ) : micPermission === "denied" ? (
                         <button
                             onClick={() => setPermGuide("microphone")}
-                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors"
                         >
                             <ShieldAlert className="h-3 w-3 text-rose-200" />
                             권한 다시 켜기
                         </button>
                     ) : micPermission === "granted" ? (
-                        <span className="shrink-0 text-[10px] px-2 py-1 bg-[#0F766E]/10 text-[#0F766E] rounded-lg flex items-center gap-1">
+                        <span className="shrink-0 text-[10px] px-2 py-1 bg-[#6366F1]/10 text-[#6366F1] rounded-lg flex items-center gap-1">
                             <Check className="h-3 w-3" />
                             허용됨
                         </span>
@@ -813,7 +813,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         <button
                             onClick={requestMicrophone}
                             disabled={micLoading}
-                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-xs hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                         >
                             {micLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mic className="h-3 w-3" />}
                             마이크 허용하기
@@ -853,7 +853,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             value={todoistToken}
                             onChange={e => setTodoistToken(e.target.value)}
                             placeholder="API 토큰을 여기에 붙여넣기"
-                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#6366F1]"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2 mt-4">
@@ -866,7 +866,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             <button
                                 onClick={connectTodoist}
                                 disabled={todoistSubmit || !todoistToken.trim()}
-                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {todoistSubmit ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -894,7 +894,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             value={notionToken}
                             onChange={e => setNotionToken(e.target.value)}
                             placeholder="secret_..."
-                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#6366F1]"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2 mt-4">
@@ -907,7 +907,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             <button
                                 onClick={connectNotion}
                                 disabled={notionSubmit || !notionToken.trim()}
-                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {notionSubmit ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -935,7 +935,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             value={slackWebhook}
                             onChange={e => setSlackWebhook(e.target.value)}
                             placeholder="https://hooks.slack.com/services/..."
-                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#6366F1]"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2 mt-4">
@@ -948,7 +948,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             <button
                                 onClick={connectSlack}
                                 disabled={slackSubmit || !slackWebhook.trim()}
-                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {slackSubmit ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -977,7 +977,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             value={icalUrl}
                             onChange={e => setIcalUrl(e.target.value)}
                             placeholder="webcal:// 또는 https://..."
-                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#6366F1]"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2 mt-4">
@@ -990,7 +990,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             <button
                                 onClick={connectIcal}
                                 disabled={icalSubmit || !icalUrl.trim()}
-                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] disabled:opacity-50"
                             >
                                 {icalSubmit ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

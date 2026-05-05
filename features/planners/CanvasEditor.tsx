@@ -154,7 +154,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
             <div className="h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
-                    <Link href="/myverse/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
+                    <Link href="/myverse/app/canvas" className="text-sm text-[#6366F1] hover:underline">목록으로</Link>
                 </div>
             </div>
         );
@@ -179,7 +179,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                     {saving ? (
                         <><Loader2 className="h-3 w-3 animate-spin" /> 저장 중</>
                     ) : savedAt ? (
-                        <><Check className="h-3 w-3 text-[#0F766E]" /> {savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨</>
+                        <><Check className="h-3 w-3 text-[#6366F1]" /> {savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 저장됨</>
                     ) : null}
                 </div>
                 <button

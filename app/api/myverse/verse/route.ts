@@ -1,7 +1,8 @@
 // Verse 통합 타임라인 API — 9 영역 모든 capture 데이터를 시간순 통합
-// GET /api/myverse/verse?from=YYYY-MM-DD&to=YYYY-MM-DD&domain=&person_id=&zoom=day|week|month|quarter|year|life
+// GET /api/myverse/verse?from=YYYY-MM-DD&to=YYYY-MM-DD&domain=&person_id=&zoom=hour|day|week|month|quarter|year|life
 //
 // zoom별 응답:
+//   hour:   시간별 요약 (단일 날짜 기준, HH 키)
 //   day:    개별 항목 시간순 (최대 200건)
 //   week:   일별 요약 (영역별 카운트)
 //   month:  주별 요약
@@ -16,9 +17,9 @@ import { isValidDomain } from "@/lib/myverse/domains";
 
 export const dynamic = "force-dynamic";
 
-type ZoomLevel = "day" | "week" | "month" | "quarter" | "year" | "life";
+type ZoomLevel = "hour" | "day" | "week" | "month" | "quarter" | "year" | "life";
 
-const VALID_ZOOMS: Set<ZoomLevel> = new Set(["day", "week", "month", "quarter", "year", "life"]);
+const VALID_ZOOMS: Set<ZoomLevel> = new Set(["hour", "day", "week", "month", "quarter", "year", "life"]);
 
 export async function GET(req: Request) {
     const memberId = await getMemberId();
@@ -111,6 +112,22 @@ export async function GET(req: Request) {
     }));
 
     items.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+    // zoom hour — sortKey의 시간 파트로 버킷팅 (00~23), 오름차순
+    if (zoomParam === "hour") {
+        const buckets: Record<string, Record<string, number>> = {};
+        for (const it of items) {
+            const timePart = (it.sortKey as string).split("T")[1] ?? "00:00";
+            const hour = timePart.slice(0, 2);
+            buckets[hour] ??= {};
+            const dom = (it.domain as string | null) ?? "daily";
+            buckets[hour][dom] = (buckets[hour][dom] ?? 0) + 1;
+        }
+        const summary = Object.entries(buckets)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([key, domains]) => ({ key, domains, total: Object.values(domains).reduce((a, b) => a + b, 0) }));
+        return NextResponse.json({ zoom: "hour", from: fromStr, to: toStr, summary, item_count: items.length });
+    }
 
     // zoom day는 그대로 200건
     if (zoomParam === "day") {

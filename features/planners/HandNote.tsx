@@ -100,7 +100,7 @@ const PALETTE: string[] = [
     "#0F172A", "#374151", "#6B7280", "#D1D5DB", "#FFFFFF",
     "#1E3A8A", "#1E40AF", "#3B82F6", "#93C5FD", "#BFDBFE",
     "#9F1239", "#DC2626", "#F97316", "#EAB308", "#B45309",
-    "#166534", "#16A34A", "#0F766E", "#0E7490", "#7C3AED",
+    "#166534", "#16A34A", "#6366F1", "#0E7490", "#7C3AED",
 ];
 
 // 퀵 선택 기본 5색
@@ -315,9 +315,9 @@ export function HandNote({
 
     useEffect(() => setRecentColors(loadRecent()), []);
 
-    // planners-dark 감지 — SVG 배경·팔레트 팝업 적응
+    // myverse-dark 감지 — SVG 배경·팔레트 팝업 적응
     useEffect(() => {
-        const check = () => setIsDark(document.documentElement.classList.contains('planners-dark'));
+        const check = () => setIsDark(document.documentElement.classList.contains('myverse-dark'));
         check();
         const obs = new MutationObserver(check);
         obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
@@ -985,7 +985,7 @@ export function HandNote({
                             type="button"
                             className={`px-2 h-6 text-xs rounded transition-colors whitespace-nowrap ${
                                 penType === t && drawEnabled && !effectiveErase && !selectMode && !lassoMode
-                                    ? "bg-[#0F766E] text-white"
+                                    ? "bg-[#6366F1] text-white"
                                     : penType === t
                                         ? "bg-neutral-200 text-neutral-700 border border-neutral-300"
                                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
@@ -1009,7 +1009,7 @@ export function HandNote({
                             title={c}
                             className={`rounded-full border-2 transition-all shrink-0 ${
                                 color === c && !effectiveErase
-                                    ? "ring-2 ring-offset-1 ring-[#0F766E] scale-110 border-white"
+                                    ? "ring-2 ring-offset-1 ring-[#6366F1] scale-110 border-white"
                                     : "border-white hover:scale-110"
                             }`}
                             style={{ backgroundColor: c, width: 14, height: 14 }}
@@ -1378,7 +1378,7 @@ export function HandNote({
                                 <>
                                     <rect x={img.x - 2} y={img.y - 2}
                                         width={img.w + 4} height={img.h + 4}
-                                        fill="none" stroke="#0F766E" strokeWidth="1.5"
+                                        fill="none" stroke="#6366F1" strokeWidth="1.5"
                                         strokeDasharray="5 3" />
                                     {/* 삭제 버튼 (우상단 안쪽 — viewBox 밖으로 안 잘리게) */}
                                     <g style={{ cursor: "pointer" }}>
@@ -1400,7 +1400,7 @@ export function HandNote({
                                     ] as const).map(h => (
                                         <rect key={h.id}
                                             x={h.hx - 4} y={h.hy - 4} width={8} height={8} rx={1.5}
-                                            fill="white" stroke="#0F766E" strokeWidth="1.5"
+                                            fill="white" stroke="#6366F1" strokeWidth="1.5"
                                             style={{ cursor: h.cur }}
                                         />
                                     ))}

@@ -129,7 +129,7 @@ export default function SettingsPage() {
     return (
         <SettingsLayout>
             <div className="flex items-center gap-3 mb-6">
-                <Settings className="h-6 w-6 text-[#0F766E]" />
+                <Settings className="h-6 w-6 text-[#6366F1]" />
                 <h1 className="font-serif text-3xl text-neutral-900">설정</h1>
                 {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
             </div>
@@ -156,8 +156,8 @@ export default function SettingsPage() {
                                 }}
                                 className={`py-3 px-3 rounded-lg text-sm transition-colors border-2 text-left ${
                                     mode === m
-                                        ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold planners-dark:!bg-[#0F766E]/20 planners-dark:!text-[#5EEAD4] planners-dark:!border-[#5EEAD4]"
-                                        : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 planners-dark:!bg-[#252525] planners-dark:!border-[#444] planners-dark:!text-neutral-300"
+                                        ? "border-[#6366F1] bg-[#6366F1]/5 text-[#6366F1] font-semibold myverse-dark:!bg-[#6366F1]/20 myverse-dark:!text-[#A5B4FC] myverse-dark:!border-[#A5B4FC]"
+                                        : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 myverse-dark:!bg-[#252525] myverse-dark:!border-[#444] myverse-dark:!text-neutral-300"
                                 }`}
                             >
                                 {m === "weekly" ? (
@@ -224,7 +224,7 @@ export default function SettingsPage() {
                                                     router.refresh();
                                                 }
                                             }}
-                                            className={`shrink-0 w-10 h-6 rounded-full transition-colors ${enabled ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"}`}
+                                            className={`shrink-0 w-10 h-6 rounded-full transition-colors ${enabled ? "bg-[#6366F1]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"}`}
                                         >
                                             <span className={`block w-4 h-4 !bg-white rounded-full shadow transition-transform mx-1 ${enabled ? "translate-x-4" : "translate-x-0"}`} />
                                         </button>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
                                 <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
                                     시간 단위로 행동 데이터를 기록합니다.
                                     <br />
-                                    ON 시 상단 메뉴에 <span className="font-medium text-[#0F766E]">「시간」</span> 탭이 노출됩니다.
+                                    ON 시 상단 메뉴에 <span className="font-medium text-[#6366F1]">「시간」</span> 탭이 노출됩니다.
                                 </p>
                             </div>
                             <button
@@ -254,7 +254,7 @@ export default function SettingsPage() {
                                     await save({ time_tracking: next });
                                     router.refresh();
                                 }}
-                                className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#0F766E]" : "bg-neutral-300 planners-dark:bg-[#3a3a3a]"}`}
+                                className={`shrink-0 w-10 h-6 rounded-full transition-colors ${timeTracking ? "bg-[#6366F1]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"}`}
                             >
                                 <span className={`block w-4 h-4 !bg-white rounded-full shadow transition-transform mx-1 ${timeTracking ? "translate-x-4" : "translate-x-0"}`} />
                             </button>
@@ -288,13 +288,13 @@ export default function SettingsPage() {
                                     onClick={() => changeRole(active ? null : r)}
                                     className={`flex items-center gap-2.5 px-3 py-2.5 border-2 rounded-lg text-left transition-all ${
                                         active
-                                            ? "border-[#0F766E] bg-[#0F766E]/5"
+                                            ? "border-[#6366F1] bg-[#6366F1]/5"
                                             : "border-neutral-200 hover:border-neutral-300 bg-white"
                                     }`}
                                 >
-                                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#0F766E]" : "text-neutral-400"}`} />
+                                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#6366F1]" : "text-neutral-400"}`} />
                                     <div className="min-w-0">
-                                        <p className={`text-xs font-semibold truncate ${active ? "text-[#0F766E]" : "text-neutral-700"}`}>
+                                        <p className={`text-xs font-semibold truncate ${active ? "text-[#6366F1]" : "text-neutral-700"}`}>
                                             {meta.label}
                                         </p>
                                         <p className="text-[10px] text-neutral-400 truncate">{meta.desc}</p>
@@ -361,7 +361,7 @@ export default function SettingsPage() {
             {/* Toast */}
             {toastMsg && (
                 <div className={`fixed bottom-20 md:bottom-6 right-6 z-[9000] flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm transition-all ${
-                    toastMsg.ok ? "bg-[#0F766E] text-white" : "bg-red-600 text-white"
+                    toastMsg.ok ? "bg-[#6366F1] text-white" : "bg-red-600 text-white"
                 }`}>
                     {toastMsg.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
                     {toastMsg.text}
@@ -414,7 +414,7 @@ function MobileNavSection() {
                         localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(MOBILE_NAV_DEFAULT));
                         window.dispatchEvent(new CustomEvent("planners-mobile-nav-change"));
                     }}
-                    className="text-[11px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                    className="text-[11px] text-neutral-400 hover:text-[#6366F1] transition-colors"
                 >
                     기본값으로
                 </button>
@@ -429,10 +429,10 @@ function MobileNavSection() {
                             disabled={!on && full}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
                                 on
-                                    ? "bg-[#0F766E] text-white border-[#0F766E]"
+                                    ? "bg-[#6366F1] text-white border-[#6366F1]"
                                     : full
                                     ? "bg-neutral-50 text-neutral-300 border-neutral-100 cursor-not-allowed"
-                                    : "bg-white text-neutral-600 border-neutral-200 hover:border-[#0F766E] hover:text-[#0F766E]"
+                                    : "bg-white text-neutral-600 border-neutral-200 hover:border-[#6366F1] hover:text-[#6366F1]"
                             }`}
                         >
                             <span className={`w-2 h-2 rounded-full shrink-0 ${on ? "bg-white" : "bg-neutral-300"}`} />
@@ -457,7 +457,7 @@ function SaveAllBar({ onSave, saving }: { onSave: () => Promise<void>; saving: b
             <button
                 onClick={onSave}
                 disabled={saving}
-                className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] disabled:opacity-50"
+                className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#4F46E5] disabled:opacity-50"
             >
                 {saving ? "저장 중…" : "전체 저장"}
             </button>

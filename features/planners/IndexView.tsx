@@ -127,7 +127,7 @@ export function IndexView() {
                         <span className="flex-1 border-b border-neutral-100 pb-0.5" />
                     </div>
                 ))}
-                <Link href="/myverse/app/projects" className="mt-2 inline-block text-[10px] text-[#0F766E] hover:underline">+ 만들기</Link>
+                <Link href="/myverse/app/projects" className="mt-2 inline-block text-[10px] text-[#6366F1] hover:underline">+ 만들기</Link>
             </div>
         );
         return (
@@ -135,7 +135,7 @@ export function IndexView() {
                 {projects.map((project, i) => (
                     <div key={project.id} className="flex items-center gap-2">
                         <span className="text-[11px] text-neutral-400 font-mono w-6 shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                        <Link href={`/myverse/app/projects/${project.id}`} className="flex-1 border-b border-neutral-200 text-xs text-neutral-700 hover:text-[#0F766E] hover:border-[#0F766E] transition-colors pb-0.5 truncate">
+                        <Link href={`/myverse/app/projects/${project.id}`} className="flex-1 border-b border-neutral-200 text-xs text-neutral-700 hover:text-[#6366F1] hover:border-[#6366F1] transition-colors pb-0.5 truncate">
                             {project.title}
                         </Link>
                     </div>
@@ -168,8 +168,8 @@ export function IndexView() {
                     { href: "schedule",  label: "일정",         count: 19 },
                     { href: "note",      label: "노트",         count: 64 },
                 ].map(cat => (
-                    <Link key={cat.href} href={`/myverse/app/templates?category=${cat.href}`} className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#0F766E] group transition-colors">
-                        <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#0F766E] transition-colors">{cat.label}</span>
+                    <Link key={cat.href} href={`/myverse/app/templates?category=${cat.href}`} className="flex items-center justify-between py-1 border-b border-neutral-100 hover:border-[#6366F1] group transition-colors">
+                        <span className="text-sm font-semibold text-neutral-700 group-hover:text-[#6366F1] transition-colors">{cat.label}</span>
                         <span className="text-[10px] text-neutral-400">{cat.count}</span>
                     </Link>
                 ))}
@@ -183,7 +183,7 @@ export function IndexView() {
             {/* ── 헤더 ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
                 <div className="flex items-center gap-2">
-                    <LayoutGrid className="h-6 w-6 text-[#0F766E]" />
+                    <LayoutGrid className="h-6 w-6 text-[#6366F1]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">인덱스</h1>
                     <div className="flex items-center gap-0.5 ml-1">
                         <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors" aria-label="이전 해">
@@ -191,7 +191,7 @@ export function IndexView() {
                         </button>
                         <span
                             className={`text-sm font-medium text-neutral-700 min-w-[60px] text-center tabular-nums ${
-                                isCurrentYear ? "underline decoration-[#0F766E] decoration-2 underline-offset-[5px]" : ""
+                                isCurrentYear ? "underline decoration-[#6366F1] decoration-2 underline-offset-[5px]" : ""
                             }`}
                             title={isCurrentYear ? "올해" : undefined}
                         >
@@ -203,7 +203,7 @@ export function IndexView() {
                         {!isCurrentYear && (
                             <button
                                 onClick={() => setYear(now.getFullYear())}
-                                className="ml-1 px-2 py-0.5 text-[10px] font-medium text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors rounded"
+                                className="ml-1 px-2 py-0.5 text-[10px] font-medium text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors rounded"
                             >
                                 올해로
                             </button>
@@ -218,8 +218,8 @@ export function IndexView() {
                 {/* 퍼스널 */}
                 <div>
                     <Link href="/myverse/app/personal" className="flex items-center gap-1.5 mb-2 group">
-                        <User className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">퍼스널 →</p>
+                        <User className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#6366F1] transition-colors" />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#6366F1] transition-colors">퍼스널 →</p>
                     </Link>
                     {vision ? (
                         <div className="space-y-1">
@@ -229,7 +229,7 @@ export function IndexView() {
                             {mission && <p className="text-xs text-neutral-400 mt-0.5 pt-1 border-t border-neutral-100">{mission.split("\n")[0]}</p>}
                         </div>
                     ) : (
-                        <Link href="/myverse/app/personal" className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
+                        <Link href="/myverse/app/personal" className="block text-xs text-neutral-300 italic hover:text-[#6366F1] transition-colors">
                             비전·미션·핵심가치를 입력해보세요 →
                         </Link>
                     )}
@@ -238,15 +238,15 @@ export function IndexView() {
                 {/* 연간 목표 */}
                 <div>
                     <Link href={`/myverse/app/yearly?year=${now.getFullYear()}`} className="flex items-center gap-1.5 mb-2 group">
-                        <CalendarRange className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#0F766E] transition-colors" />
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#0F766E] transition-colors">연간 목표 →</p>
+                        <CalendarRange className="h-3.5 w-3.5 text-neutral-400 group-hover:text-[#6366F1] transition-colors" />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 group-hover:text-[#6366F1] transition-colors">연간 목표 →</p>
                     </Link>
                     {yearlyTheme ? (
                         <Link href={`/myverse/app/yearly?year=${now.getFullYear()}`} className="block">
-                            <p className="text-sm font-medium text-neutral-800 hover:text-[#0F766E] transition-colors">{yearlyTheme}</p>
+                            <p className="text-sm font-medium text-neutral-800 hover:text-[#6366F1] transition-colors">{yearlyTheme}</p>
                         </Link>
                     ) : (
-                        <Link href={`/myverse/app/yearly?year=${now.getFullYear()}`} className="block text-xs text-neutral-300 italic hover:text-[#0F766E] transition-colors">
+                        <Link href={`/myverse/app/yearly?year=${now.getFullYear()}`} className="block text-xs text-neutral-300 italic hover:text-[#6366F1] transition-colors">
                             올해의 목표를 설정해보세요 →
                         </Link>
                     )}
@@ -272,7 +272,7 @@ export function IndexView() {
                                 <div key={monthIdx}>
                                     <Link href={`/myverse/app/monthly?year=${year}&month=${monthIdx + 1}`}>
                                         <div className={`text-center text-[11px] font-semibold py-1 transition-colors ${
-                                            isCurrentMonth ? "bg-[#0F766E] text-white" : "bg-neutral-500 text-white hover:bg-[#0F766E]"
+                                            isCurrentMonth ? "bg-[#6366F1] text-white" : "bg-neutral-500 text-white hover:bg-[#6366F1]"
                                         }`}>
                                             {MONTHS_KO[monthIdx]}
                                         </div>
@@ -285,7 +285,7 @@ export function IndexView() {
                                     </div>
                                     {rows.map((row, ri) => (
                                         <div key={ri} className="grid grid-cols-[28px_repeat(7,1fr)]">
-                                            <Link href={`/myverse/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#0F766E] transition-colors leading-5">
+                                            <Link href={`/myverse/app/weekly?year=${year}&week=${row[0].week}`} className="flex items-center justify-end pr-1 text-[9px] text-neutral-300 hover:text-[#6366F1] transition-colors leading-5">
                                                 W{String(row[0].week).padStart(2, "0")}
                                             </Link>
                                             {row.map((cell, ci) => {
@@ -294,7 +294,7 @@ export function IndexView() {
                                                 return (
                                                     <Link key={ci} href={`/myverse/app/daily?date=${cell.date}`}
                                                         className={`text-center text-[11px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
-                                                            isToday ? "bg-[#0F766E]/10 text-[#0F766E] font-bold underline decoration-[#0F766E] decoration-2 underline-offset-[3px]"
+                                                            isToday ? "bg-[#6366F1]/10 text-[#6366F1] font-bold underline decoration-[#6366F1] decoration-2 underline-offset-[3px]"
                                                             : !cell.inMonth ? "text-neutral-200"
                                                             : isWeekend ? "text-pink-400"
                                                             : "text-neutral-600"
@@ -320,7 +320,7 @@ export function IndexView() {
                                         return (
                                             <div key={qIdx}>
                                                 <p className={`text-[10px] font-semibold uppercase tracking-widest mb-2 ${
-                                                    isCurrentQ ? "text-[#0F766E] underline decoration-2 underline-offset-[4px]" : "text-neutral-300"
+                                                    isCurrentQ ? "text-[#6366F1] underline decoration-2 underline-offset-[4px]" : "text-neutral-300"
                                                 }`}>
                                                     Q{qIdx + 1} · {MONTHS_KO[qIdx * 3]}–{MONTHS_KO[qIdx * 3 + 2]}
                                                 </p>
@@ -340,14 +340,14 @@ export function IndexView() {
                         <section>
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">프로젝트</p>
-                                <Link href="/myverse/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                                <Link href="/myverse/app/projects" className="text-[10px] text-[#6366F1] hover:underline">전체 →</Link>
                             </div>
                             {renderProjects()}
                         </section>
                         <section>
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
-                                <Link href="/myverse/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                                <Link href="/myverse/app/templates" className="text-[10px] text-[#6366F1] hover:underline">전체 →</Link>
                             </div>
                             {renderTemplates()}
                         </section>
@@ -364,7 +364,7 @@ export function IndexView() {
                                 <FolderKanban className="h-3.5 w-3.5 text-neutral-400" />
                                 <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">프로젝트</p>
                             </div>
-                            <Link href="/myverse/app/projects" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                            <Link href="/myverse/app/projects" className="text-[10px] text-[#6366F1] hover:underline">전체 →</Link>
                         </div>
                         {renderProjects()}
                     </div>
@@ -378,7 +378,7 @@ export function IndexView() {
                                 <LayoutTemplate className="h-3.5 w-3.5 text-neutral-400" />
                                 <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">템플릿</p>
                             </div>
-                            <Link href="/myverse/app/templates" className="text-[10px] text-[#0F766E] hover:underline">전체 →</Link>
+                            <Link href="/myverse/app/templates" className="text-[10px] text-[#6366F1] hover:underline">전체 →</Link>
                         </div>
                         {renderTemplates()}
                     </div>

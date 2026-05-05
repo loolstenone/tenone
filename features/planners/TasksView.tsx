@@ -14,7 +14,7 @@ type SortKey = "time_asc" | "time_desc" | "alpha";
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode; color: string }[] = [
     { key: "todo",      label: "미완",  icon: <Clock className="h-3.5 w-3.5" />,        color: "text-neutral-600" },
-    { key: "done",      label: "완료",  icon: <CheckSquare className="h-3.5 w-3.5" />,  color: "text-[#0F766E]" },
+    { key: "done",      label: "완료",  icon: <CheckSquare className="h-3.5 w-3.5" />,  color: "text-[#6366F1]" },
     { key: "carried",   label: "이월",  icon: <ArrowRight className="h-3.5 w-3.5" />,   color: "text-blue-500" },
     { key: "cancelled", label: "취소",  icon: <X className="h-3.5 w-3.5" />,            color: "text-neutral-400" },
 ];
@@ -93,14 +93,14 @@ export function TasksView() {
                             onClick={() => setActiveTab(tab.key)}
                             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
                                 active
-                                    ? "border-[#0F766E] text-[#0F766E]"
+                                    ? "border-[#6366F1] text-[#6366F1]"
                                     : "border-transparent text-neutral-500 hover:text-neutral-800"
                             }`}
                         >
-                            <span className={active ? "text-[#0F766E]" : tab.color}>{tab.icon}</span>
+                            <span className={active ? "text-[#6366F1]" : tab.color}>{tab.icon}</span>
                             {tab.label}
                             <span className={`text-xs px-1.5 py-0.5 rounded-full font-mono ${
-                                active ? "bg-[#0F766E]/10 text-[#0F766E]" : "bg-neutral-100 text-neutral-400"
+                                active ? "bg-[#6366F1]/10 text-[#6366F1]" : "bg-neutral-100 text-neutral-400"
                             }`}>
                                 {count}
                             </span>
@@ -152,7 +152,7 @@ export function TasksView() {
                             <div className="flex items-center gap-2 mb-2">
                                 <Link
                                     href={`/myverse/app/daily?date=${date}`}
-                                    className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[#0F766E] transition-colors group"
+                                    className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors group"
                                 >
                                     <span className="font-mono">{formatDate(date)}</span>
                                     <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -163,7 +163,7 @@ export function TasksView() {
                                 {tasks.map((task) => (
                                     <li key={task.id} className="flex items-start gap-2.5">
                                         <span className={`text-xs font-mono mt-0.5 shrink-0 w-4 text-center ${
-                                            task.status === "done" ? "text-[#0F766E]" :
+                                            task.status === "done" ? "text-[#6366F1]" :
                                             task.status === "carried" ? "text-blue-400" :
                                             task.status === "cancelled" ? "text-neutral-300" :
                                             "text-neutral-400"

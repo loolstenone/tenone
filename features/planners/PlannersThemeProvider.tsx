@@ -24,16 +24,16 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     sky:      { hex: "#0369A1", dark: "#075985" },
     walnut:   { hex: "#D4A062", dark: "#B8803E" },
     // 청록 · 녹색
-    teal:     { hex: "#0F766E", dark: "#0d5e56" },
+    teal:     { hex: "#6366F1", dark: "#4F46E5" },
     emerald:  { hex: "#047857", dark: "#065F46" },
     olive:    { hex: "#4D7C0F", dark: "#3F6212" },
-    // Myverse 브랜드 인디고 (기본값) — `bg-[#0F766E]` 클래스를 인디고로 오버라이드
+    // Myverse 브랜드 인디고 (기본값) — `bg-[#6366F1]` 클래스를 인디고로 오버라이드
     myverse:  { hex: "#6366F1", dark: "#4F46E5" },
 };
 
 // 모든 Planners 컴포넌트가 하드코딩하는 기본 teal 색상
-const BASE = "#0F766E";
-const BASE_DARK = "#0d5e56";
+const BASE = "#6366F1";
+const BASE_DARK = "#4F46E5";
 
 export function applyPlannersTheme(key: string) {
     const theme = COLOR_MAP[key] ?? COLOR_MAP.teal;
@@ -50,7 +50,7 @@ export function applyPlannersTheme(key: string) {
     }
     navEl.textContent = `
         :root { --planners-accent-nav: var(--planners-accent); }
-        .planners-dark { --planners-accent-nav: color-mix(in srgb, var(--planners-accent) 50%, white); }
+        .myverse-dark { --planners-accent-nav: color-mix(in srgb, var(--planners-accent) 50%, white); }
     `;
 
     let el = document.getElementById("planners-theme-override");
@@ -73,11 +73,11 @@ export function applyPlannersTheme(key: string) {
     // (mono/charcoal 등 어두운 테마에서 다크 배경과 동일색이 되는 문제 방지)
     const dh = `color-mix(in srgb,${h} 40%,white)`;
 
-    // 컴포넌트들이 BASE(#0F766E / #0d5e56)를 하드코딩하므로
+    // 컴포넌트들이 BASE(#6366F1 / #4F46E5)를 하드코딩하므로
     // 새 테마 색상으로 치환하는 CSS를 주입한다.
-    // 라이트 모드 = theme.hex 그대로 / 다크 모드 = 밝게 보정된 버전 (.planners-dark 스코프)
+    // 라이트 모드 = theme.hex 그대로 / 다크 모드 = 밝게 보정된 버전 (.myverse-dark 스코프)
     function block(accent: string, isDark: boolean) {
-        const scope = isDark ? "html.planners-dark " : "";
+        const scope = isDark ? "html.myverse-dark " : "";
         return `
 ${scope}[class~="bg-[${BASE}]"]{background-color:${accent}!important}
 ${scope}[class~="hover:bg-[${BASE}]"]:hover{background-color:${accent}!important}
@@ -123,9 +123,9 @@ ${scope}[class~="bg-[${BASE}]/[0.04]"]{background-color:color-mix(in srgb,${acce
 [class~="bg-[${BASE_DARK}]"]{background-color:${d}!important}
 [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:${d}!important}
 [class~="text-[${BASE_DARK}]"]{color:${d}!important}
-html.planners-dark [class~="bg-[${BASE_DARK}]"]{background-color:color-mix(in srgb,${d} 40%,white)!important}
-html.planners-dark [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:color-mix(in srgb,${d} 40%,white)!important}
-html.planners-dark [class~="text-[${BASE_DARK}]"]{color:color-mix(in srgb,${d} 40%,white)!important}
+html.myverse-dark [class~="bg-[${BASE_DARK}]"]{background-color:color-mix(in srgb,${d} 40%,white)!important}
+html.myverse-dark [class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:color-mix(in srgb,${d} 40%,white)!important}
+html.myverse-dark [class~="text-[${BASE_DARK}]"]{color:color-mix(in srgb,${d} 40%,white)!important}
 `;
 }
 
@@ -214,14 +214,14 @@ export function applyPlannersRadius(key: PlannersRadius) {
 
 // ── 라이트/다크 모드 (Phase 1 인프라) ─────────────────────────────
 // mode: "light" | "dark" | "system"
-// .planners-dark 클래스를 documentElement에 토글. 다른 브랜드 영향 없음.
+// .myverse-dark 클래스를 documentElement에 토글. 다른 브랜드 영향 없음.
 export type PlannersThemeMode = "light" | "dark" | "system";
 
 export function applyPlannersThemeMode(mode: PlannersThemeMode) {
     const root = document.documentElement;
     const dark = mode === "dark"
         || (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    root.classList.toggle("planners-dark", dark);
+    root.classList.toggle("myverse-dark", dark);
     root.dataset.plannersMode = mode;
 }
 
@@ -254,8 +254,8 @@ export function PlannersThemeProvider() {
         return () => {
             window.removeEventListener("pp-theme-mode-change", onModeChange as EventListener);
             mq.removeEventListener("change", onSystemChange);
-            // 다른 브랜드로 이동 시 .planners-dark 제거 (영향 차단)
-            document.documentElement.classList.remove("planners-dark");
+            // 다른 브랜드로 이동 시 .myverse-dark 제거 (영향 차단)
+            document.documentElement.classList.remove("myverse-dark");
             delete document.documentElement.dataset.plannersMode;
         };
     }, []);

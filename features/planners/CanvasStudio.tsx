@@ -113,7 +113,7 @@ function BgSelector({
                             key={o.key}
                             onClick={() => { onChange(o.key); setOpen(false); }}
                             className={`w-full text-left px-3 py-1.5 text-xs hover:bg-neutral-50 transition-colors ${
-                                o.key === value ? "text-[#0F766E] font-semibold" : "text-neutral-700"
+                                o.key === value ? "text-[#6366F1] font-semibold" : "text-neutral-700"
                             }`}
                         >
                             {o.label}
@@ -297,7 +297,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             <div className={`${shellCls} items-center justify-center`}>
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
-                    {!embed && <Link href="/myverse/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>}
+                    {!embed && <Link href="/myverse/app/canvas" className="text-sm text-[#6366F1] hover:underline">목록으로</Link>}
                 </div>
             </div>
         );
@@ -348,7 +348,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     {saving || titleDirty ? (
                         <Loader2 className="h-3.5 w-3.5 text-neutral-400 animate-spin" />
                     ) : savedAt ? (
-                        <Check className="h-3.5 w-3.5 text-[#0F766E]" />
+                        <Check className="h-3.5 w-3.5 text-[#6366F1]" />
                     ) : null}
                 </div>
 

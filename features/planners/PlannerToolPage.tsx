@@ -25,23 +25,23 @@ function PlannersPlannerSection() {
         </p>
 
         {/* 앱 다운로드 — 타이틀 바로 아래 */}
-        <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 p-5 bg-white border border-[#0F766E]/20 rounded-lg max-w-2xl">
+        <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 p-5 bg-white border border-[#6366F1]/20 rounded-lg max-w-2xl">
           <div className="flex items-center gap-3 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/planners-icon-192.png"
-              alt="PP AI"
+              src="/Myverse_logo_black.png"
+              alt="Myverse"
               className="w-12 h-12 rounded-xl shadow-md shadow-black/10 shrink-0"
             />
             <div>
               <p className="text-sm font-semibold text-[#1a1a1a] leading-tight">
-                Planner&apos;s Planner<sup className="text-[9px] font-bold text-[#0F766E] ml-0.5">AI</sup>
+                Myverse<sup className="text-[9px] font-bold text-[#6366F1] ml-0.5">AI</sup>
               </p>
               <p className="text-[11px] text-[#666] mt-0.5">홈 화면에 설치 · Android · iOS · PC</p>
             </div>
           </div>
           <InstallButton
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-semibold rounded-lg hover:bg-[#0d5e56] transition-colors sm:ml-auto shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#6366F1] text-white text-sm font-semibold rounded-lg hover:bg-[#4F46E5] transition-colors sm:ml-auto shrink-0"
           >
             <Download size={14} />
             앱 다운로드
@@ -138,7 +138,7 @@ function PlannersPlannerSection() {
         <div id="pp-ai" className="mt-20 border-t border-[#e0e0e0] pt-12">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Planner&apos;s Planner AI</h3>
-            <span className="text-xs px-2 py-0.5 bg-[#0F766E] text-white tracking-widest uppercase">
+            <span className="text-xs px-2 py-0.5 bg-[#6366F1] text-white tracking-widest uppercase">
               Now Live
             </span>
           </div>
@@ -199,7 +199,7 @@ function PlannersPlannerSection() {
           </div>
 
           {/* CTA + 가격 */}
-          <div className="mt-12 border border-[#0F766E] bg-white p-8 max-w-2xl">
+          <div className="mt-12 border border-[#6366F1] bg-white p-8 max-w-2xl">
             <div className="flex items-baseline gap-2 mb-4">
               <span className="font-serif text-4xl text-[#1a1a1a]">19,000</span>
               <span className="text-[#666]">원 / 연</span>
@@ -213,7 +213,7 @@ function PlannersPlannerSection() {
                 "Copy-to-AI 심층 검증",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <Check size={14} className="text-[#0F766E] shrink-0 mt-0.5" />
+                  <Check size={14} className="text-[#6366F1] shrink-0 mt-0.5" />
                   <span>{f}</span>
                 </li>
               ))}
@@ -221,12 +221,12 @@ function PlannersPlannerSection() {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/myverse/purchase"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-[#6366F1] text-white text-sm font-medium hover:bg-[#4F46E5] transition-colors"
               >
                 지금 시작하기 <ArrowRight size={14} />
               </Link>
               <InstallButton
-                className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#0F766E]/30 text-[#0F766E] text-sm font-medium hover:bg-[#0F766E]/5 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#6366F1]/30 text-[#6366F1] text-sm font-medium hover:bg-[#6366F1]/5 transition-colors"
               >
                 <Download size={14} />
                 앱 설치 <Smartphone size={12} className="opacity-60" />
@@ -234,7 +234,7 @@ function PlannersPlannerSection() {
             </div>
             <p className="text-xs text-[#999] mt-4 leading-relaxed">
               종이 플래너&apos;s 플래너(2026 All In One) 구매자는{" "}
-              <Link href="/myverse/purchase" className="text-[#0F766E] underline">1년 무료 제공</Link>.
+              <Link href="/myverse/purchase" className="text-[#6366F1] underline">1년 무료 제공</Link>.
               <br />
               모든 기능은 웹에서 그대로 작동 — 별도 앱스토어 다운로드 없이 홈 화면에 추가만 하면 됩니다.
             </p>

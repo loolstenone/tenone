@@ -78,17 +78,14 @@ export function SettingsLayout({ children }: Props) {
 
     return (
         <div className="pp-settings max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10" ref={containerRef}>
-            {/* ── 모바일 sticky pill row ── */}
+            {/* ── 모바일 sticky 탭 row ── */}
             <nav
-                className="lg:hidden sticky top-12 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-2 backdrop-blur mb-5"
-                style={{
-                    backgroundColor: "color-mix(in srgb, var(--pp-bg) 92%, transparent)",
-                    borderBottom: "1px solid var(--pp-line-soft)",
-                }}
+                className="lg:hidden sticky top-12 z-30 -mx-4 md:-mx-6 px-4 md:px-6 backdrop-blur mb-5"
+                style={{ backgroundColor: "color-mix(in srgb, var(--pp-bg) 92%, transparent)" }}
                 aria-label="설정 그룹"
             >
                 <div
-                    className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                    className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-neutral-200"
                     style={{ scrollbarWidth: "none" }}
                 >
                     {SETTINGS_GROUPS.map(g => {
@@ -97,13 +94,13 @@ export function SettingsLayout({ children }: Props) {
                             <button
                                 key={g.key}
                                 onClick={() => jumpTo(g)}
-                                className="shrink-0 flex items-baseline gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors"
-                                style={{
-                                    backgroundColor: active ? "var(--pp-ink)" : "var(--pp-surface-alt)",
-                                    color: active ? "var(--pp-ink-on)" : "var(--pp-ink-3)",
-                                }}
+                                className={`relative shrink-0 flex items-baseline gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
+                                    active ? "text-[#6366F1] font-semibold" : "text-neutral-500 hover:text-neutral-900"
+                                }`}
                             >
+                                <span className="font-mono text-[10px] tracking-widest opacity-60">{g.no}</span>
                                 {g.label}
+                                {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />}
                             </button>
                         );
                     })}
@@ -126,15 +123,11 @@ export function SettingsLayout({ children }: Props) {
                                 <button
                                     key={g.key}
                                     onClick={() => jumpTo(g)}
-                                    className="group w-full flex items-baseline gap-2 px-2 py-1.5 rounded text-left transition-colors"
-                                    style={{ color: active ? "var(--pp-ink)" : "var(--pp-ink-3)" }}
-                                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--pp-ink)"; }}
-                                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--pp-ink-3)"; }}
+                                    className={`w-full flex items-baseline gap-2 px-2 py-1.5 rounded text-left transition-colors ${
+                                        active ? "text-[#6366F1]" : "text-neutral-400 hover:text-neutral-800"
+                                    }`}
                                 >
-                                    <span
-                                        className="font-mono text-[10px] tracking-widest"
-                                        style={{ color: active ? "var(--pp-ink)" : "var(--pp-ink-4)" }}
-                                    >
+                                    <span className="font-mono text-[10px] tracking-widest opacity-70">
                                         {g.no}
                                     </span>
                                     <span className={`text-sm ${active ? "font-semibold" : "font-normal"}`}>

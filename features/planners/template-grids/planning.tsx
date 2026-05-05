@@ -69,7 +69,7 @@ export function TimeBlockGrid({ data, onChange }: { data: FrameworkData; onChang
                     </div>
                 ))}
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 블록 추가</button>
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">+ 블록 추가</button>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <LabeledBox label="Wins · 잘 지킨 블록" valKey="tb_wins" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-slate-900" placeholder="예: 09~11 캠페인 리포트 완성 (90분 풀집중)" />
                 <LabeledBox label="Slips · 못 지킨 이유·재배치" valKey="tb_slips" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-neutral-800" placeholder="예: 14시 협업 블록 미팅 연장 → 분석은 내일 오전으로" />

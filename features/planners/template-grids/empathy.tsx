@@ -415,7 +415,7 @@ export function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (k
                     </tbody>
                 </table>
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">
                 + 항목 추가
             </button>
 
@@ -813,7 +813,7 @@ export function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: 
                     </div>
                 ))}
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">
                 + 항목 추가
             </button>
             {/* 시각화 */}
@@ -989,7 +989,7 @@ export function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChan
                     </tbody>
                 </table>
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#6366F1] hover:border-[#6366F1]">
                 + 단계 추가
             </button>
 

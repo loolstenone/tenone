@@ -5,7 +5,7 @@
  *
  * 핸드오프 디자인의 우측 패널. 사용자가 컬러·모서리·폰트·다크모드를 바꾸면
  * 즉시 시각적으로 반영된다. 전부 CSS 변수(--pp-*, --planners-accent, --planners-font,
- * --planners-user-font, html.planners-dark)를 통해 자동 갱신되므로 별도 props 불필요.
+ * --planners-user-font, html.myverse-dark)를 통해 자동 갱신되므로 별도 props 불필요.
  *
  * 3개 탭: 일간 · 프로젝트 · AI
  */

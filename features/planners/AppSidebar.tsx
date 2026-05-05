@@ -16,6 +16,7 @@ import {
     HelpCircle,
     Users,
     LayoutGrid,
+    LayoutTemplate,
     Download,
     Pencil,
     MessageCircle,
@@ -46,8 +47,8 @@ const NAV: NavItem[] = [
     // ── All in One 전용
     { key: "projects",  href: "/myverse/app/projects",    label: "프로젝트",    icon: FolderKanban,    modes: ["all_in_one"] },
     { key: "canvas",    href: "/myverse/app/canvas",      label: "캔버스",      icon: Pencil,          modes: ["all_in_one"] },
+    { key: "templates", href: "/myverse/app/templates",   label: "템플릿",      icon: LayoutTemplate,  modes: ["all_in_one", "custom"] },
     { key: "community", href: "/myverse/community",       label: "커뮤니티",    icon: MessageCircle,   modes: ["weekly", "all_in_one", "custom"], external: true },
-    // 템플릿 / AI 브리핑 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
 export function AppSidebar({
@@ -106,10 +107,10 @@ export function AppSidebar({
             <div className="px-5 py-5 border-b border-neutral-100">
                 <Link href="/myverse/app" className="inline-flex items-center gap-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-md shrink-0" />
+                    <img src="/Myverse_logo_black.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-md shrink-0" />
                     <span className="inline-flex items-baseline gap-1">
-                        <span className="text-base font-bold text-neutral-900 leading-none">Planner&apos;s Planner</span>
-                        <sup className="text-[10px] font-semibold text-[#0F766E] tracking-widest">AI</sup>
+                        <span className="text-base font-bold text-neutral-900 leading-none">Myverse</span>
+                        <sup className="text-[10px] font-semibold text-[#6366F1] tracking-widest">AI</sup>
                     </span>
                 </Link>
                 {userName && (
@@ -141,7 +142,7 @@ export function AppSidebar({
                             rel={item.external ? "noopener" : undefined}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                                 active
-                                    ? "bg-[#0F766E] text-white"
+                                    ? "bg-[#6366F1] text-white"
                                     : "text-neutral-700 hover:bg-neutral-100"
                             }`}
                         >
@@ -188,7 +189,7 @@ export function AppSidebar({
                         {mode === "weekly" ? "Easily" : "All in One"}
                     </span>
                     {subscriptionStatus === 'active' && (
-                        <span className="inline-block text-[10px] px-2 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded">
+                        <span className="inline-block text-[10px] px-2 py-0.5 bg-[#6366F1]/10 text-[#6366F1] rounded">
                             활성
                         </span>
                     )}
@@ -197,7 +198,7 @@ export function AppSidebar({
                 {subscriptionStatus !== 'active' && (
                     <Link
                         href="/myverse/purchase"
-                        className="mx-3 mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-br from-[#0F766E] to-[#0d5e56] text-white rounded-lg text-xs hover:opacity-90 transition-opacity"
+                        className="mx-3 mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white rounded-lg text-xs hover:opacity-90 transition-opacity"
                     >
                         <Sparkles className="h-3.5 w-3.5" />
                         <span>1년 구독 시작</span>

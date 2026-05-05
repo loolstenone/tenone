@@ -318,7 +318,7 @@ export function CommandPalette({ open, onClose }: Props) {
                 {/* 검색 입력 */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
                     {creating ? (
-                        <Loader2 className="h-4 w-4 text-[#0F766E] animate-spin shrink-0" />
+                        <Loader2 className="h-4 w-4 text-[#6366F1] animate-spin shrink-0" />
                     ) : (
                         <Search className="h-4 w-4 text-neutral-400 shrink-0" />
                     )}
@@ -337,7 +337,7 @@ export function CommandPalette({ open, onClose }: Props) {
                         className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
                             listening
                                 ? "bg-rose-500 text-white animate-pulse"
-                                : "text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/10"
+                                : "text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/10"
                         }`}
                     >
                         {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
@@ -347,17 +347,17 @@ export function CommandPalette({ open, onClose }: Props) {
 
                 {/* AI 미리보기 — 파싱 결과 */}
                 {aiResult && (
-                    <div className="px-4 py-3 border-b border-[#0F766E]/20 bg-[#0F766E]/[0.04]">
+                    <div className="px-4 py-3 border-b border-[#6366F1]/20 bg-[#6366F1]/[0.04]">
                         <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="h-3.5 w-3.5 text-[#0F766E]" />
-                            <span className="text-[11px] font-semibold text-[#0F766E] uppercase tracking-widest">AI 분석 결과</span>
+                            <Sparkles className="h-3.5 w-3.5 text-[#6366F1]" />
+                            <span className="text-[11px] font-semibold text-[#6366F1] uppercase tracking-widest">AI 분석 결과</span>
                             <button onClick={() => { setAiResult(null); setAiError(null); }} className="ml-auto text-[10px] text-neutral-400 hover:text-neutral-700">취소</button>
                         </div>
                         <p className="text-[11px] text-neutral-500 mb-2">{aiResult.summary}</p>
                         <ul className="space-y-1 mb-3">
                             {aiResult.actions.map((a, i) => (
                                 <li key={i} className="text-xs text-neutral-700 flex items-start gap-2">
-                                    <span className="mt-0.5 inline-block w-12 shrink-0 text-[10px] font-mono text-[#0F766E] uppercase">
+                                    <span className="mt-0.5 inline-block w-12 shrink-0 text-[10px] font-mono text-[#6366F1] uppercase">
                                         {a.tool === "create_task" ? "할 일" : a.tool === "create_event" ? "일정" : "노트"}
                                     </span>
                                     <span className="flex-1">
@@ -384,7 +384,7 @@ export function CommandPalette({ open, onClose }: Props) {
                         <button
                             onClick={commitActions}
                             disabled={aiBusy}
-                            className="w-full px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                            className="w-full px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
                         >
                             {aiBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowRight className="h-3 w-3" />}
                             {aiBusy ? "등록 중…" : "전부 등록"}
@@ -403,16 +403,16 @@ export function CommandPalette({ open, onClose }: Props) {
                         <button
                             onClick={askAi}
                             disabled={aiBusy}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors bg-[#0F766E]/[0.04] hover:bg-[#0F766E]/10 border border-dashed border-[#0F766E]/30 disabled:opacity-50"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors bg-[#6366F1]/[0.04] hover:bg-[#6366F1]/10 border border-dashed border-[#6366F1]/30 disabled:opacity-50"
                         >
                             {aiBusy
-                                ? <Loader2 className="h-4 w-4 text-[#0F766E] animate-spin shrink-0" />
-                                : <Sparkles className="h-4 w-4 text-[#0F766E] shrink-0" />}
+                                ? <Loader2 className="h-4 w-4 text-[#6366F1] animate-spin shrink-0" />
+                                : <Sparkles className="h-4 w-4 text-[#6366F1] shrink-0" />}
                             <span className="flex-1 text-sm text-neutral-700">
-                                <span className="text-[#0F766E] font-semibold">AI: </span>
+                                <span className="text-[#6366F1] font-semibold">AI: </span>
                                 <span className="text-neutral-500">「{query.length > 32 ? query.slice(0, 32) + "…" : query}」</span> 자연어로 등록
                             </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-[#0F766E]/30 text-[#0F766E]">⌘↵</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-[#6366F1]/30 text-[#6366F1]">⌘↵</span>
                         </button>
                     </div>
                 )}
@@ -436,19 +436,19 @@ export function CommandPalette({ open, onClose }: Props) {
                                             onMouseEnter={() => setActiveIndex(idx)}
                                             onClick={() => c.run()}
                                             className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
-                                                active ? "bg-[#0F766E]/10 text-[#0F766E]" : "text-neutral-700 hover:bg-neutral-50"
+                                                active ? "bg-[#6366F1]/10 text-[#6366F1]" : "text-neutral-700 hover:bg-neutral-50"
                                             }`}
                                         >
-                                            <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#0F766E]" : "text-neutral-400"}`} />
+                                            <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#6366F1]" : "text-neutral-400"}`} />
                                             <span className="flex-1 text-sm">{c.label}</span>
                                             {c.shortcut && (
                                                 <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
-                                                    active ? "border-[#0F766E]/30 text-[#0F766E]" : "border-neutral-200 text-neutral-400"
+                                                    active ? "border-[#6366F1]/30 text-[#6366F1]" : "border-neutral-200 text-neutral-400"
                                                 }`}>
                                                     {c.shortcut}
                                                 </span>
                                             )}
-                                            {active && <ArrowRight className="h-3 w-3 text-[#0F766E]" />}
+                                            {active && <ArrowRight className="h-3 w-3 text-[#6366F1]" />}
                                         </button>
                                     );
                                 })}

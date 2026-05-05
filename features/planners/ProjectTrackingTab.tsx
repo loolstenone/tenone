@@ -37,7 +37,7 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 const METRIC_COLORS: Record<string, string> = {
-    energy: "#0F766E",
+    energy: "#6366F1",
     satisfaction: "#F59E0B",
     mood: "#FB7185",
     study: "#0EA5E9",

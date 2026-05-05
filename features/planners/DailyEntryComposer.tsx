@@ -11,11 +11,18 @@
 // 음식 분석:
 //   - 카테고리 "식사" + 이미지 있을 때 → POST /api/myverse/moments/analyze-food
 //   - Haiku Vision이 음식 항목 + 영양 추정 → 사용자 확인 → moments에 nutrition 저장
+//
+// 운동 분석:
+//   - 카테고리 "운동" + 이미지 있을 때 → POST /api/myverse/moments/analyze-exercise
+//   - Haiku Vision이 운동 종류·부위·강도 추정 → 사용자가 운동 시간 입력 → moments에 exercise 저장
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Video, X, Loader2, MapPin, Clock, Utensils, ChevronDown } from "lucide-react";
+import { Camera, Video, X, Loader2, MapPin, Clock, Utensils, ChevronDown, Dumbbell, Flame, Smile, BookOpen } from "lucide-react";
 import type { ActivityBase } from "@/lib/myverse/types";
 import type { FoodItem, FoodAnalysis } from "@/app/api/myverse/moments/analyze-food/route";
+import type { ExerciseAnalysis } from "@/app/api/myverse/moments/analyze-exercise/route";
+import type { LeisureAnalysis } from "@/app/api/myverse/moments/analyze-leisure/route";
+import type { StudyAnalysis } from "@/app/api/myverse/moments/analyze-study/route";
 import exifr from "exifr";
 
 const PLACE_CATEGORIES = [
@@ -24,6 +31,7 @@ const PLACE_CATEGORIES = [
     { key: "meal",     label: "식사"   },
     { key: "exercise", label: "운동"   },
     { key: "leisure",  label: "여가"   },
+    { key: "study",    label: "공부"   },
     { key: "home",     label: "집"     },
     { key: "shopping", label: "쇼핑"   },
     { key: "medical", label: "의료"    },
@@ -65,6 +73,24 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
     const [analyzingFood, setAnalyzingFood] = useState(false);
     const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
     const [foodAnalyzed, setFoodAnalyzed] = useState(false);
+
+    // 운동 분석 상태
+    const [analyzingExercise, setAnalyzingExercise] = useState(false);
+    const [exerciseData, setExerciseData] = useState<ExerciseAnalysis | null>(null);
+    const [exerciseAnalyzed, setExerciseAnalyzed] = useState(false);
+    const [exerciseDuration, setExerciseDuration] = useState(30);
+
+    // 여가 분석 상태
+    const [analyzingLeisure, setAnalyzingLeisure] = useState(false);
+    const [leisureData, setLeisureData] = useState<LeisureAnalysis | null>(null);
+    const [leisureAnalyzed, setLeisureAnalyzed] = useState(false);
+    const [leisureDuration, setLeisureDuration] = useState(60);
+
+    // 공부 분석 상태
+    const [analyzingStudy, setAnalyzingStudy] = useState(false);
+    const [studyData, setStudyData] = useState<StudyAnalysis | null>(null);
+    const [studyAnalyzed, setStudyAnalyzed] = useState(false);
+    const [studyDuration, setStudyDuration] = useState(60);
 
     const fileRef = useRef<HTMLInputElement>(null);
     const textRef = useRef<HTMLTextAreaElement>(null);
@@ -129,11 +155,23 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         setTimeout(() => textRef.current?.focus(), 100);
     }, []);
 
-    // 카테고리 변경 시 식사 아닌 경우 분석 결과 초기화
+    // 카테고리 변경 시 분석 결과 초기화
     useEffect(() => {
         if (category !== "meal") {
             setFoodItems([]);
             setFoodAnalyzed(false);
+        }
+        if (category !== "exercise") {
+            setExerciseData(null);
+            setExerciseAnalyzed(false);
+        }
+        if (category !== "leisure") {
+            setLeisureData(null);
+            setLeisureAnalyzed(false);
+        }
+        if (category !== "study") {
+            setStudyData(null);
+            setStudyAnalyzed(false);
         }
     }, [category]);
 
@@ -152,6 +190,12 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         // 새 미디어 추가 시 기존 분석 초기화
         setFoodItems([]);
         setFoodAnalyzed(false);
+        setExerciseData(null);
+        setExerciseAnalyzed(false);
+        setLeisureData(null);
+        setLeisureAnalyzed(false);
+        setStudyData(null);
+        setStudyAnalyzed(false);
     }
 
     function removeMedia(idx: number) {
@@ -163,6 +207,12 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         });
         setFoodItems([]);
         setFoodAnalyzed(false);
+        setExerciseData(null);
+        setExerciseAnalyzed(false);
+        setLeisureData(null);
+        setLeisureAnalyzed(false);
+        setStudyData(null);
+        setStudyAnalyzed(false);
     }
 
     async function analyzeFood() {
@@ -215,6 +265,104 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
         return { foods: foodItems, total: calcTotal() };
     }
 
+    async function analyzeExercise() {
+        const imageItem = media.find(m => m.kind === "image");
+        if (!imageItem) return;
+
+        setAnalyzingExercise(true);
+        setError(null);
+        try {
+            const form = new FormData();
+            form.append("file", imageItem.file);
+            form.append("duration_min", String(exerciseDuration));
+            const res = await fetch("/api/myverse/moments/analyze-exercise", { method: "POST", body: form });
+            if (!res.ok) throw new Error("분석에 실패했어요");
+            const data = await res.json() as { exercise: ExerciseAnalysis };
+            if (!data.exercise.type) {
+                setError("운동 장면을 찾지 못했어요. 운동하는 모습이 잘 보이는 사진을 사용해주세요.");
+                return;
+            }
+            setExerciseData({ ...data.exercise, duration_min: exerciseDuration });
+            setExerciseAnalyzed(true);
+        } catch (e) {
+            setError((e as Error).message);
+        } finally {
+            setAnalyzingExercise(false);
+        }
+    }
+
+    function buildExercise(): ExerciseAnalysis | null {
+        if (!exerciseAnalyzed || !exerciseData) return null;
+        const caloriesPerMin = exerciseData.intensity === "high" ? 9 : exerciseData.intensity === "medium" ? 6 : 4;
+        return {
+            ...exerciseData,
+            duration_min: exerciseDuration,
+            calories_burned: Math.round(caloriesPerMin * exerciseDuration),
+        };
+    }
+
+    async function analyzeLeisure() {
+        const imageItem = media.find(m => m.kind === "image");
+        if (!imageItem) return;
+
+        setAnalyzingLeisure(true);
+        setError(null);
+        try {
+            const form = new FormData();
+            form.append("file", imageItem.file);
+            form.append("duration_min", String(leisureDuration));
+            const res = await fetch("/api/myverse/moments/analyze-leisure", { method: "POST", body: form });
+            if (!res.ok) throw new Error("분석에 실패했어요");
+            const data = await res.json() as { leisure: LeisureAnalysis };
+            if (!data.leisure.activity) {
+                setError("여가 활동을 찾지 못했어요. 활동이 잘 보이는 사진을 사용해주세요.");
+                return;
+            }
+            setLeisureData({ ...data.leisure, duration_min: leisureDuration });
+            setLeisureAnalyzed(true);
+        } catch (e) {
+            setError((e as Error).message);
+        } finally {
+            setAnalyzingLeisure(false);
+        }
+    }
+
+    function buildLeisure(): LeisureAnalysis | null {
+        if (!leisureAnalyzed || !leisureData) return null;
+        return { ...leisureData, duration_min: leisureDuration };
+    }
+
+    async function analyzeStudy() {
+        const imageItem = media.find(m => m.kind === "image");
+        if (!imageItem) return;
+
+        setAnalyzingStudy(true);
+        setError(null);
+        try {
+            const form = new FormData();
+            form.append("file", imageItem.file);
+            form.append("duration_min", String(studyDuration));
+            const res = await fetch("/api/myverse/moments/analyze-study", { method: "POST", body: form });
+            if (!res.ok) throw new Error("분석에 실패했어요");
+            const data = await res.json() as { study: StudyAnalysis };
+            if (!data.study.subject) {
+                setError("공부 장면을 찾지 못했어요. 교재·화면이 잘 보이는 사진을 사용해주세요.");
+                return;
+            }
+            setStudyData({ ...data.study, duration_min: studyDuration });
+            setStudyAnalyzed(true);
+        } catch (e) {
+            setError((e as Error).message);
+        } finally {
+            setAnalyzingStudy(false);
+        }
+    }
+
+    function buildStudy(): StudyAnalysis | null {
+        if (!studyAnalyzed || !studyData) return null;
+        return { ...studyData, duration_min: studyDuration };
+    }
+
     function durationMin(): number | null {
         if (!time || !endTime) return null;
         const [sh, sm] = time.split(":").map(Number);
@@ -264,6 +412,9 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 ? new Date(`${date}T${time}:00+09:00`).toISOString()
                 : new Date().toISOString();
             const nutrition = buildNutrition();
+            const exercise = buildExercise();
+            const leisure = buildLeisure();
+            const study = buildStudy();
 
             for (const m of media) {
                 const form = new FormData();
@@ -285,6 +436,9 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                         location: placeName.trim() || null,
                         activity: null,
                         nutrition,
+                        exercise,
+                        leisure,
+                        study,
                     }),
                 });
             }
@@ -299,15 +453,40 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
     }
 
     const showFoodAnalyze = category === "meal" && media.some(m => m.kind === "image");
+    const showExerciseAnalyze = category === "exercise" && media.some(m => m.kind === "image");
+    const showLeisureAnalyze = category === "leisure" && media.some(m => m.kind === "image");
+    const showStudyAnalyze = category === "study" && media.some(m => m.kind === "image");
     const total = foodItems.length > 0 ? calcTotal() : null;
 
+    const MOOD_LABEL: Record<string, string> = { relaxing: "느긋함", exciting: "신남", social: "함께", creative: "창작" };
+    const MOOD_COLOR: Record<string, string> = {
+        relaxing: "text-violet-500 bg-violet-50 myverse-dark:bg-violet-900/20",
+        exciting:  "text-amber-500 bg-amber-50 myverse-dark:bg-amber-900/20",
+        social:    "text-pink-500 bg-pink-50 myverse-dark:bg-pink-900/20",
+        creative:  "text-teal-500 bg-teal-50 myverse-dark:bg-teal-900/20",
+    };
+
+    const FOCUS_LABEL: Record<string, string> = { light: "훑어보기", moderate: "집중", deep: "몰입" };
+    const FOCUS_COLOR: Record<string, string> = {
+        light:    "text-emerald-500 bg-emerald-50 myverse-dark:bg-emerald-900/20",
+        moderate: "text-green-600 bg-green-50 myverse-dark:bg-green-900/20",
+        deep:     "text-teal-700 bg-teal-50 myverse-dark:bg-teal-900/20",
+    };
+
+    const INTENSITY_LABEL: Record<string, string> = { low: "저강도", medium: "중강도", high: "고강도" };
+    const INTENSITY_COLOR: Record<string, string> = {
+        low: "text-blue-500 bg-blue-50 myverse-dark:bg-blue-900/20",
+        medium: "text-amber-500 bg-amber-50 myverse-dark:bg-amber-900/20",
+        high: "text-rose-500 bg-rose-50 myverse-dark:bg-rose-900/20",
+    };
+
     return (
-        <div className="bg-neutral-50 planners-dark:bg-[#1A1A1A] rounded-lg p-4 space-y-3 border border-neutral-200 planners-dark:border-[#2A2A2A]">
+        <div className="bg-neutral-50 myverse-dark:bg-[#1A1A1A] rounded-lg p-4 space-y-3 border border-neutral-200 myverse-dark:border-[#2A2A2A]">
             {/* 미디어 영역 */}
             {media.length > 0 && (
                 <div className="grid grid-cols-4 gap-1.5">
                     {media.map((m, i) => (
-                        <div key={i} className="relative aspect-square bg-neutral-200 planners-dark:bg-[#2A2A2A] rounded overflow-hidden group">
+                        <div key={i} className="relative aspect-square bg-neutral-200 myverse-dark:bg-[#2A2A2A] rounded overflow-hidden group">
                             {m.kind === "image" ? (
                                 <img src={m.preview} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -337,14 +516,14 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#0F766E] hover:bg-white planners-dark:hover:bg-[#252525] rounded transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#6366F1] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
                 >
                     <Camera className="h-3.5 w-3.5" /> 사진
                 </button>
                 <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#0F766E] hover:bg-white planners-dark:hover:bg-[#252525] rounded transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#6366F1] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
                 >
                     <Video className="h-3.5 w-3.5" /> 동영상
                 </button>
@@ -358,7 +537,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 onChange={(e) => setText(e.target.value)}
                 placeholder="오늘 있었던 일, 첨부한 사진·영상에 대해 한 줄 적어보세요…"
                 rows={3}
-                className="w-full text-sm bg-transparent text-neutral-800 planners-dark:text-neutral-100 placeholder:text-neutral-300 placeholder:italic focus:outline-none resize-none border-b border-neutral-200 planners-dark:border-[#2A2A2A] pb-2"
+                className="w-full text-sm bg-transparent text-neutral-800 myverse-dark:text-neutral-100 placeholder:text-neutral-300 placeholder:italic focus:outline-none resize-none border-b border-neutral-200 myverse-dark:border-[#2A2A2A] pb-2"
             />
 
             {/* 장소 */}
@@ -370,7 +549,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                         value={placeName}
                         onChange={(e) => setPlaceName(e.target.value)}
                         placeholder="장소 (예: 사무실, 카페, 공원)"
-                        className="flex-1 text-xs bg-transparent focus:outline-none text-neutral-700 planners-dark:text-neutral-200 placeholder:text-neutral-300 border-b border-neutral-200 planners-dark:border-[#2A2A2A] pb-1"
+                        className="flex-1 text-xs bg-transparent focus:outline-none text-neutral-700 myverse-dark:text-neutral-200 placeholder:text-neutral-300 border-b border-neutral-200 myverse-dark:border-[#2A2A2A] pb-1"
                     />
                 </div>
                 {bases.length > 0 && (
@@ -380,7 +559,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                                 key={b.id}
                                 type="button"
                                 onClick={() => setPlaceName(b.name)}
-                                className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200 planners-dark:bg-[#2A2A2A] text-neutral-600 planners-dark:text-neutral-300 hover:bg-[#0F766E]/10 hover:text-[#0F766E] transition-colors"
+                                className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-600 myverse-dark:text-neutral-300 hover:bg-[#6366F1]/10 hover:text-[#6366F1] transition-colors"
                             >
                                 {b.name}
                             </button>
@@ -397,7 +576,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     step={1800}
-                    className="text-xs bg-white planners-dark:bg-[#111] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 planners-dark:text-neutral-200 focus:outline-none focus:border-[#0F766E]"
+                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
                 />
                 <span className="text-[10px] text-neutral-300">~</span>
                 <input
@@ -405,7 +584,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     step={1800}
-                    className="text-xs bg-white planners-dark:bg-[#111] border border-neutral-200 planners-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 planners-dark:text-neutral-200 focus:outline-none focus:border-[#0F766E]"
+                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
                 />
             </div>
 
@@ -418,8 +597,8 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                         onClick={() => setCategory(c.key)}
                         className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
                             category === c.key
-                                ? "bg-[#0F766E] text-white"
-                                : "bg-neutral-200 planners-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-300"
+                                ? "bg-[#6366F1] text-white"
+                                : "bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-300"
                         }`}
                     >
                         {c.label}
@@ -429,13 +608,13 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
 
             {/* 음식 분석 패널 — 식사 카테고리 + 이미지 있을 때만 */}
             {showFoodAnalyze && (
-                <div className="border border-orange-100 planners-dark:border-orange-900/30 rounded-lg overflow-hidden">
+                <div className="border border-orange-100 myverse-dark:border-orange-900/30 rounded-lg overflow-hidden">
                     {!foodAnalyzed ? (
                         <button
                             type="button"
                             onClick={analyzeFood}
                             disabled={analyzingFood}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-orange-50 planners-dark:bg-orange-900/20 text-orange-600 planners-dark:text-orange-400 text-xs font-medium hover:bg-orange-100 planners-dark:hover:bg-orange-900/30 disabled:opacity-60 transition-colors"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-orange-50 myverse-dark:bg-orange-900/20 text-orange-600 myverse-dark:text-orange-400 text-xs font-medium hover:bg-orange-100 myverse-dark:hover:bg-orange-900/30 disabled:opacity-60 transition-colors"
                         >
                             {analyzingFood ? (
                                 <>
@@ -450,9 +629,9 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                             )}
                         </button>
                     ) : (
-                        <div className="bg-orange-50 planners-dark:bg-orange-900/10 p-3 space-y-2">
+                        <div className="bg-orange-50 myverse-dark:bg-orange-900/10 p-3 space-y-2">
                             <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-medium text-orange-700 planners-dark:text-orange-400 flex items-center gap-1">
+                                <span className="text-[11px] font-medium text-orange-700 myverse-dark:text-orange-400 flex items-center gap-1">
                                     <Utensils className="h-3 w-3" /> 음식 분석 결과
                                 </span>
                                 <button
@@ -467,8 +646,8 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                             {/* 음식 항목 목록 */}
                             <div className="space-y-1.5">
                                 {foodItems.map((food, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 bg-white planners-dark:bg-[#1A1A1A] rounded px-2 py-1.5">
-                                        <span className="flex-1 text-xs text-neutral-700 planners-dark:text-neutral-200 truncate">{food.name}</span>
+                                    <div key={idx} className="flex items-center gap-2 bg-white myverse-dark:bg-[#1A1A1A] rounded px-2 py-1.5">
+                                        <span className="flex-1 text-xs text-neutral-700 myverse-dark:text-neutral-200 truncate">{food.name}</span>
                                         <span className="text-[10px] text-orange-500 font-medium shrink-0">
                                             {Math.round(food.calories * food.portion)}kcal
                                         </span>
@@ -477,7 +656,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                                             <select
                                                 value={food.portion}
                                                 onChange={(e) => updatePortion(idx, Number(e.target.value))}
-                                                className="appearance-none text-[10px] bg-neutral-100 planners-dark:bg-[#2A2A2A] text-neutral-600 planners-dark:text-neutral-300 rounded px-1.5 py-0.5 pr-4 focus:outline-none cursor-pointer"
+                                                className="appearance-none text-[10px] bg-neutral-100 myverse-dark:bg-[#2A2A2A] text-neutral-600 myverse-dark:text-neutral-300 rounded px-1.5 py-0.5 pr-4 focus:outline-none cursor-pointer"
                                             >
                                                 {PORTION_OPTIONS.map(o => (
                                                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -498,7 +677,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
 
                             {/* 합계 */}
                             {total && foodItems.length > 0 && (
-                                <div className="flex items-center justify-between pt-1 border-t border-orange-100 planners-dark:border-orange-900/30">
+                                <div className="flex items-center justify-between pt-1 border-t border-orange-100 myverse-dark:border-orange-900/30">
                                     <span className="text-[10px] text-neutral-400">합계</span>
                                     <div className="flex items-center gap-2 text-[10px] text-neutral-500">
                                         <span className="text-orange-600 font-semibold">{total.calories}kcal</span>
@@ -513,6 +692,271 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 </div>
             )}
 
+            {/* 여가 분석 패널 — 여가 카테고리 + 이미지 있을 때만 */}
+            {showLeisureAnalyze && (
+                <div className="border border-violet-100 myverse-dark:border-violet-900/30 rounded-lg overflow-hidden">
+                    {!leisureAnalyzed ? (
+                        <button
+                            type="button"
+                            onClick={analyzeLeisure}
+                            disabled={analyzingLeisure}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-violet-50 myverse-dark:bg-violet-900/20 text-violet-600 myverse-dark:text-violet-400 text-xs font-medium hover:bg-violet-100 myverse-dark:hover:bg-violet-900/30 disabled:opacity-60 transition-colors"
+                        >
+                            {analyzingLeisure ? (
+                                <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    AI가 여가 활동을 분석 중…
+                                </>
+                            ) : (
+                                <>
+                                    <Smile className="h-3.5 w-3.5" />
+                                    여가 활동 분석해서 기록하기
+                                </>
+                            )}
+                        </button>
+                    ) : leisureData && (
+                        <div className="bg-violet-50 myverse-dark:bg-violet-900/10 p-3 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-medium text-violet-700 myverse-dark:text-violet-400 flex items-center gap-1">
+                                    <Smile className="h-3 w-3" /> 여가 분석 결과
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => { setLeisureData(null); setLeisureAnalyzed(false); }}
+                                    className="text-[10px] text-neutral-400 hover:text-neutral-600"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+
+                            {/* 활동명 + 무드 뱃지 */}
+                            <div className="flex items-center gap-2">
+                                <span className="flex-1 text-sm font-medium text-neutral-800 myverse-dark:text-neutral-100">
+                                    {leisureData.activity || "여가"}
+                                </span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${MOOD_COLOR[leisureData.mood]}`}>
+                                    {MOOD_LABEL[leisureData.mood]}
+                                </span>
+                            </div>
+
+                            {/* 카테고리 칩 */}
+                            {leisureData.category && (
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="px-2 py-0.5 text-[10px] rounded-full bg-white myverse-dark:bg-[#1A1A1A] text-neutral-500 border border-neutral-200 myverse-dark:border-[#2A2A2A]">
+                                        {leisureData.category}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* 여가 시간 입력 */}
+                            <div className="flex items-center gap-3">
+                                <label className="text-[10px] text-neutral-500 shrink-0">여가 시간</label>
+                                <input
+                                    type="range"
+                                    min={15}
+                                    max={480}
+                                    step={15}
+                                    value={leisureDuration}
+                                    onChange={(e) => setLeisureDuration(Number(e.target.value))}
+                                    className="flex-1 accent-violet-500"
+                                />
+                                <span className="text-[11px] font-medium text-neutral-700 myverse-dark:text-neutral-200 shrink-0 w-12 text-right">
+                                    {leisureDuration >= 60
+                                        ? `${Math.floor(leisureDuration / 60)}시간${leisureDuration % 60 > 0 ? ` ${leisureDuration % 60}분` : ""}`
+                                        : `${leisureDuration}분`}
+                                </span>
+                            </div>
+
+                            {/* 구분선 */}
+                            <div className="pt-1 border-t border-violet-100 myverse-dark:border-violet-900/30">
+                                <span className="text-[10px] text-neutral-400">
+                                    {leisureData.category} · {leisureDuration >= 60
+                                        ? `${Math.floor(leisureDuration / 60)}시간 ${leisureDuration % 60 > 0 ? `${leisureDuration % 60}분` : ""}`.trim()
+                                        : `${leisureDuration}분`} 기록됨
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* 공부 분석 패널 — 공부 카테고리 + 이미지 있을 때만 */}
+            {showStudyAnalyze && (
+                <div className="border border-emerald-100 myverse-dark:border-emerald-900/30 rounded-lg overflow-hidden">
+                    {!studyAnalyzed ? (
+                        <button
+                            type="button"
+                            onClick={analyzeStudy}
+                            disabled={analyzingStudy}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-50 myverse-dark:bg-emerald-900/20 text-emerald-600 myverse-dark:text-emerald-400 text-xs font-medium hover:bg-emerald-100 myverse-dark:hover:bg-emerald-900/30 disabled:opacity-60 transition-colors"
+                        >
+                            {analyzingStudy ? (
+                                <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    AI가 공부 내용을 분석 중…
+                                </>
+                            ) : (
+                                <>
+                                    <BookOpen className="h-3.5 w-3.5" />
+                                    공부 내용 분석해서 기록하기
+                                </>
+                            )}
+                        </button>
+                    ) : studyData && (
+                        <div className="bg-emerald-50 myverse-dark:bg-emerald-900/10 p-3 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-medium text-emerald-700 myverse-dark:text-emerald-400 flex items-center gap-1">
+                                    <BookOpen className="h-3 w-3" /> 공부 분석 결과
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => { setStudyData(null); setStudyAnalyzed(false); }}
+                                    className="text-[10px] text-neutral-400 hover:text-neutral-600"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+
+                            {/* 과목 + 집중도 뱃지 */}
+                            <div className="flex items-center gap-2">
+                                <span className="flex-1 text-sm font-medium text-neutral-800 myverse-dark:text-neutral-100">
+                                    {studyData.subject || "공부"}
+                                </span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${FOCUS_COLOR[studyData.focus]}`}>
+                                    {FOCUS_LABEL[studyData.focus]}
+                                </span>
+                            </div>
+
+                            {/* 세부 주제 */}
+                            {studyData.topic && studyData.topic !== studyData.subject && (
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="px-2 py-0.5 text-[10px] rounded-full bg-white myverse-dark:bg-[#1A1A1A] text-neutral-500 border border-neutral-200 myverse-dark:border-[#2A2A2A]">
+                                        {studyData.topic}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* 공부 시간 입력 */}
+                            <div className="flex items-center gap-3">
+                                <label className="text-[10px] text-neutral-500 shrink-0">공부 시간</label>
+                                <input
+                                    type="range"
+                                    min={15}
+                                    max={480}
+                                    step={15}
+                                    value={studyDuration}
+                                    onChange={(e) => setStudyDuration(Number(e.target.value))}
+                                    className="flex-1 accent-emerald-500"
+                                />
+                                <span className="text-[11px] font-medium text-neutral-700 myverse-dark:text-neutral-200 shrink-0 w-12 text-right">
+                                    {studyDuration >= 60
+                                        ? `${Math.floor(studyDuration / 60)}시간${studyDuration % 60 > 0 ? ` ${studyDuration % 60}분` : ""}`
+                                        : `${studyDuration}분`}
+                                </span>
+                            </div>
+
+                            {/* 구분선 */}
+                            <div className="pt-1 border-t border-emerald-100 myverse-dark:border-emerald-900/30">
+                                <span className="text-[10px] text-neutral-400">
+                                    {studyData.subject} · {studyDuration >= 60
+                                        ? `${Math.floor(studyDuration / 60)}시간 ${studyDuration % 60 > 0 ? `${studyDuration % 60}분` : ""}`.trim()
+                                        : `${studyDuration}분`} 기록됨
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* 운동 분석 패널 — 운동 카테고리 + 이미지 있을 때만 */}
+            {showExerciseAnalyze && (
+                <div className="border border-blue-100 myverse-dark:border-blue-900/30 rounded-lg overflow-hidden">
+                    {!exerciseAnalyzed ? (
+                        <button
+                            type="button"
+                            onClick={analyzeExercise}
+                            disabled={analyzingExercise}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-50 myverse-dark:bg-blue-900/20 text-blue-600 myverse-dark:text-blue-400 text-xs font-medium hover:bg-blue-100 myverse-dark:hover:bg-blue-900/30 disabled:opacity-60 transition-colors"
+                        >
+                            {analyzingExercise ? (
+                                <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    AI가 운동을 분석 중…
+                                </>
+                            ) : (
+                                <>
+                                    <Dumbbell className="h-3.5 w-3.5" />
+                                    운동 분석해서 칼로리 기록하기
+                                </>
+                            )}
+                        </button>
+                    ) : exerciseData && (
+                        <div className="bg-blue-50 myverse-dark:bg-blue-900/10 p-3 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-medium text-blue-700 myverse-dark:text-blue-400 flex items-center gap-1">
+                                    <Dumbbell className="h-3 w-3" /> 운동 분석 결과
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => { setExerciseData(null); setExerciseAnalyzed(false); }}
+                                    className="text-[10px] text-neutral-400 hover:text-neutral-600"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+
+                            {/* 운동 종류 + 강도 */}
+                            <div className="flex items-center gap-2">
+                                <span className="flex-1 text-sm font-medium text-neutral-800 myverse-dark:text-neutral-100">
+                                    {exerciseData.type || "운동"}
+                                </span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${INTENSITY_COLOR[exerciseData.intensity]}`}>
+                                    {INTENSITY_LABEL[exerciseData.intensity]}
+                                </span>
+                            </div>
+
+                            {/* 운동 부위 칩 */}
+                            {exerciseData.muscle_groups.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    {exerciseData.muscle_groups.map((g, i) => (
+                                        <span key={i} className="px-2 py-0.5 text-[10px] rounded-full bg-white myverse-dark:bg-[#1A1A1A] text-neutral-500 border border-neutral-200 myverse-dark:border-[#2A2A2A]">
+                                            {g}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* 운동 시간 입력 */}
+                            <div className="flex items-center gap-3">
+                                <label className="text-[10px] text-neutral-500 shrink-0">운동 시간</label>
+                                <input
+                                    type="range"
+                                    min={5}
+                                    max={180}
+                                    step={5}
+                                    value={exerciseDuration}
+                                    onChange={(e) => setExerciseDuration(Number(e.target.value))}
+                                    className="flex-1 accent-blue-500"
+                                />
+                                <span className="text-[11px] font-medium text-neutral-700 myverse-dark:text-neutral-200 shrink-0 w-12 text-right">
+                                    {exerciseDuration}분
+                                </span>
+                            </div>
+
+                            {/* 소모 칼로리 */}
+                            <div className="flex items-center justify-between pt-1 border-t border-blue-100 myverse-dark:border-blue-900/30">
+                                <span className="text-[10px] text-neutral-400 flex items-center gap-1">
+                                    <Flame className="h-3 w-3 text-blue-400" /> 예상 소모
+                                </span>
+                                <span className="text-blue-600 font-semibold text-sm">
+                                    {Math.round((exerciseData.intensity === "high" ? 9 : exerciseData.intensity === "medium" ? 6 : 4) * exerciseDuration)}kcal
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {error && <p className="text-[11px] text-rose-500">{error}</p>}
 
             {/* 액션 */}
@@ -520,7 +964,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 <button
                     type="button"
                     onClick={onClose}
-                    className="px-2.5 py-1 text-xs text-neutral-500 hover:text-neutral-800 planners-dark:hover:text-neutral-200 transition-colors"
+                    className="px-2.5 py-1 text-xs text-neutral-500 hover:text-neutral-800 myverse-dark:hover:text-neutral-200 transition-colors"
                 >
                     취소
                 </button>
@@ -528,7 +972,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     type="button"
                     onClick={save}
                     disabled={saving}
-                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[#0F766E] text-white rounded hover:bg-[#0d5e56] disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50 transition-colors"
                 >
                     {saving && <Loader2 className="h-3 w-3 animate-spin" />}
                     {saving ? "등록 중…" : "등록"}
