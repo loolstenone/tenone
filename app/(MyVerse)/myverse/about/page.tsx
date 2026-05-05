@@ -1,2 +1,15 @@
-export { default } from "@/app/(Planners)/planners/about/page";
-export const dynamic = "force-dynamic";
+import type { Metadata } from "next";
+import { AboutPage } from "@/features/myverse/planner/AboutPage";
+
+export const metadata: Metadata = {
+    title: "About — 마이버스 이야기",
+    description: "22년 기획 현장에서 탄생한 플래너. 도구가 아니라 사고 체계를 훈련하는 방법론 — Vrief, GPR, Principle 10.",
+    openGraph: {
+        title: "About — 마이버스 이야기 | 마이버스",
+        description: "생각한대로 살지 않으면, 사는대로 생각하게 된다.",
+    },
+};
+
+export default function Page() {
+    return <AboutPage />;
+}

@@ -1,2 +1,6 @@
-export { default } from "@/app/(Planners)/planners/app/templates/page";
-export const dynamic = "force-dynamic";
+import { Suspense } from "react";
+import { TemplatesView } from "@/features/myverse/planner/TemplatesView";
+
+export default function TemplatesPage() {
+    return <Suspense><TemplatesView /></Suspense>;
+}

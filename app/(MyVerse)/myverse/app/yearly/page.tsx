@@ -1,2 +1,7 @@
-export { default } from "@/app/(Planners)/planners/app/yearly/page";
-export const dynamic = "force-dynamic";
+import { YearlyView } from "@/features/myverse/planner/YearlyView";
+
+export default async function YearlyPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
+    const params = await searchParams;
+    const year = params.year ? parseInt(params.year, 10) : new Date().getFullYear();
+    return <YearlyView initialYear={year} />;
+}

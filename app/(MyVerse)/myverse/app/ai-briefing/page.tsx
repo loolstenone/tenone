@@ -1,2 +1,5 @@
-export { default } from "@/app/(Planners)/planners/app/ai-briefing/page";
-export const dynamic = "force-dynamic";
+import { AiBriefingView } from "@/features/myverse/planner/AiBriefingView";
+
+export default function AiBriefingPage() {
+    return <AiBriefingView />;
+}

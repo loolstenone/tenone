@@ -1,2 +1,5 @@
-export { default } from "@/app/(Planners)/planners/app/tasks/page";
-export const dynamic = "force-dynamic";
+import { TasksView } from "@/features/myverse/planner/TasksView";
+
+export default function TasksPage() {
+    return <TasksView />;
+}

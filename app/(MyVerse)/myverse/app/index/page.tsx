@@ -1,2 +1,5 @@
-export { default } from "@/app/(Planners)/planners/app/index/page";
-export const dynamic = "force-dynamic";
+import { IndexView } from "@/features/myverse/planner/IndexView";
+
+export default function IndexPage() {
+    return <IndexView />;
+}

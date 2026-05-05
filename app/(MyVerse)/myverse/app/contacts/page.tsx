@@ -1,2 +1,7 @@
-export { default } from "@/app/(Planners)/planners/app/contacts/page";
-export const dynamic = "force-dynamic";
+import { ContactsView } from "@/features/myverse/planner/ContactsView";
+
+export const metadata = { title: "Contacts" };
+
+export default function ContactsPage() {
+    return <ContactsView />;
+}

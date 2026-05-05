@@ -1,2 +1,5 @@
-export { default } from "@/app/(Planners)/planners/purchase/page";
-export const dynamic = "force-dynamic";
+import { PurchaseView } from "@/features/myverse/planner/PurchaseView";
+
+export default function PurchasePage() {
+    return <PurchaseView />;
+}
