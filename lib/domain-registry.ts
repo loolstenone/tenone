@@ -147,3 +147,48 @@ export function isExternalDomain(hostname: string): boolean {
     const host = hostname.split(':')[0];
     return getAllExternalDomains().includes(host);
 }
+
+// ── 사이트별 도메인 목록 (인트라 사이트 관리 UI용) ──
+
+export interface SiteDomainEntry {
+    domain: string;
+    type: 'independent' | 'subdomain' | 'path';
+    status: 'connected' | 'external';
+}
+
+// brandgravity 도메인은 registry에서 siteId:'tenone'으로 등록 (리라이트 경로 때문).
+// 도메인 목록 표시 시에는 brandgravity 사이트로 오버라이드한다.
+const SITE_DOMAIN_OVERRIDES: Partial<Record<SiteIdentifier, SiteDomainEntry[]>> = {
+    brandgravity: [
+        { domain: 'brandgravity.co.kr', type: 'independent', status: 'connected' },
+        { domain: 'brandgravity.tenone.biz', type: 'subdomain', status: 'connected' },
+    ],
+};
+
+// 인트라 전용 — 도메인 목록 표시에서 제외
+const INTERNAL_DOMAINS = new Set(['auth.tenone.biz', 'intra.tenone.biz']);
+
+/**
+ * siteId에 해당하는 실제 운영 도메인 목록을 반환한다.
+ * domain-registry.ts 단일 진실 소스 기반 — DB domains 컬럼 무관.
+ */
+export function getDomainsBySiteId(siteId: SiteIdentifier): SiteDomainEntry[] {
+    if (SITE_DOMAIN_OVERRIDES[siteId]) return SITE_DOMAIN_OVERRIDES[siteId]!;
+
+    const result: SiteDomainEntry[] = siteId === 'tenone'
+        ? [{ domain: 'tenone.biz', type: 'independent', status: 'connected' }]
+        : [];
+
+    for (const [domain, entry] of Object.entries(registry)) {
+        if (entry.siteId !== siteId) continue;
+        if (domain.startsWith('www.')) continue;
+        if (INTERNAL_DOMAINS.has(domain)) continue;
+        result.push({
+            domain,
+            type: domain.endsWith('.tenone.biz') ? 'subdomain' : 'independent',
+            status: 'connected',
+        });
+    }
+
+    return result.filter((d, i) => result.findIndex(x => x.domain === d.domain) === i);
+}

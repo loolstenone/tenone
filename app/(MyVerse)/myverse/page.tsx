@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Bot, Camera, Calendar, Tag, Moon, Share2, Zap, Link2, Download, Smartphone, Shield, Sparkles, Mail, MessageCircle, Fingerprint, Star } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 /* ── fade-in ── */
 function useFadeIn() {
@@ -41,6 +44,9 @@ function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
 }
 
 export default function MyVersePage() {
+    const { isAuthenticated, isLoading } = useAuth();
+    const router = useRouter();
+    const [loginOpen, setLoginOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -83,10 +89,23 @@ export default function MyVersePage() {
                         <br />
                         서비스는 사라져도 내 기록은 남는다.
                     </p>
-                    <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="mt-10 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
-                        Personal Blackbox 신청 <ArrowRight className="h-4 w-4" />
-                    </button>
+                    {!isLoading && isAuthenticated ? (
+                        <button onClick={() => router.push('/myverse/app')}
+                            className="mt-10 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
+                            앱으로 이동 <ArrowRight className="h-4 w-4" />
+                        </button>
+                    ) : (
+                        <div className="mt-10 flex flex-col sm:flex-row items-center gap-3">
+                            <button onClick={() => setLoginOpen(true)}
+                                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
+                                시작하기 <ArrowRight className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="text-sm text-neutral-400 hover:text-neutral-600 transition">
+                                출시 소식 받기
+                            </button>
+                        </div>
+                    )}
                     <p className="mt-4 text-xs text-neutral-400 flex items-center justify-center gap-2">
                         <Smartphone className="h-3.5 w-3.5" /> iOS + Android &middot; 곧 출시
                     </p>
@@ -368,6 +387,8 @@ export default function MyVersePage() {
                     <p className="mt-6 text-xs text-neutral-400">iOS + Android &middot; 곧 출시 &middot; WIO by Ten:One&trade;</p>
                 </div>
             </section>
+
+            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#6366F1" defaultTab="signup" />
 
             {/* ═══ Contact ═══ */}
             <section className="py-16 px-5 border-t border-neutral-100">

@@ -40,21 +40,11 @@ export default function AuthCallbackPage() {
                 return;
             }
 
-            // 소셜 신규 가입 온보딩 체크
-            if (sessionData?.user) {
-                const { data: member } = await supabase
-                    .from('members')
-                    .select('onboarding_completed')
-                    .eq('auth_id', sessionData.user.id)
-                    .single();
-                if (member && member.onboarding_completed === false) {
-                    router.replace('/onboarding');
-                    return;
-                }
-            }
-
             if (pendingRedirect) {
-                router.replace(pendingRedirect);
+                // /*/app/onboarding 으로 돌아오면 완료된 사용자가 온보딩에 갇히는 루프 발생.
+                // 대신 /*/app 으로 보내면 각 서비스 layout이 신규/기존 여부에 따라 라우팅한다.
+                const safeRedirect = pendingRedirect.replace(/\/app\/onboarding(\/.*)?$/, '/app');
+                router.replace(safeRedirect);
             } else {
                 const defaultNext = window.location.hostname.includes('smarcomm') ? '/dashboard' : '/';
                 router.replace(next !== '/' ? next : defaultNext);

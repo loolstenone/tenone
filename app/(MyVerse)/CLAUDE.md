@@ -161,9 +161,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 111 (2026-05-06)** — Myverse 앱 로그인 무한 깜빡임 종결 (DB FK 125개 RENAME · ClientRedirect · onboarding URL 이전) |
-| **이전 Phase** | 세션 110 — Daily UI 7개선 / 세션 109 — 9-domain 진입점 / 세션 108 — AI 브리핑 rate limiting · PWA 아이콘 / 세션 107 — PP → Myverse 단일화 |
-| **다음 Phase** | features/planners → features/myverse/planner 폴더 완전 리네이밍 · PWA 아이콘 인디고 M 교체 · Toss 가맹점 승인 + Vercel env · /myverse/app/onboarding 모바일 viewport 점검 |
+| **Phase** | **세션 112 (2026-05-06)** — Myverse 로그인 UI 브랜드 통일 (`/myverse/login` 전용 페이지 · LoginModal indigo) |
+| **이전 Phase** | 세션 111 — 무한 깜빡임 종결 (DB FK RENAME · ClientRedirect) / 세션 110 — Daily UI 7개선 / 세션 109 — 9-domain 진입점 |
+| **다음 Phase** | features/planners → features/myverse/planner 폴더 완전 리네이밍 · PWA 아이콘 인디고 M 교체 · Toss 가맹점 승인 + Vercel env |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
 | **주요 결정 (세션 111)** | ① 무한 깜빡임 진짜 원인 = stale FK 이름 → REST join 실패 → plannerUser=null 오판 (이전 세션들이 잡지 못한 root cause) · ② 온보딩 URL `/myverse/onboarding` → `/myverse/app/onboarding` 이전 (앱 셸 하위) · ③ middleware x-pathname 헤더 주입으로 layout 경로 식별 · ④ members 조회 auth_id 우선 (email은 중복 row 방어 fallback) · ⑤ SW v2로 옛 PWA 사용자 자가 업그레이드 · ⑥ /planners 매칭은 정확 경로만 (정적 자산 보호) |
 | **주요 결정 (세션 107)** | ① PP → 마이버스 단일화 (옵션 A) · ② 9 영역 SSOT 확립 · ③ DB·API·lib·route 4개 layer 모두 myverse 접두사 통일 · ④ planners.tenone.biz는 마이버스 콘텐츠 직접 서비스 · ⑤ AppTopNav를 마이버스 인디고로 리브랜딩 후 풀 화면 셸로 사용 · ⑥ HandNote 펜 선택 = 즉시 그리기 (토글 제거) · ⑦ /myverse/app/daily는 PP 일간 뷰, 9-domain '일상'은 /lifestyle |

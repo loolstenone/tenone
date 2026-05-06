@@ -43,22 +43,37 @@ async function getAuthState(): Promise<AuthState> {
     if (!user) return { kind: "no_session" };
 
     const admin = createAdminClient();
-    const SELECT = "id, name, email, avatar_url, handle, auth_id, member_roles!member_roles_member_id_fkey(role,is_active), myverse_users!myverse_users_member_id_fkey(*)";
 
-    // 1) auth_id로 먼저 (가장 정확) — onboarding API와 동일한 우선순위
-    let { data: member } = await admin.from("members").select(SELECT).eq("auth_id", user.id).maybeSingle();
+    // members 기본 쿼리 — FK join 없이 안정적으로 조회
+    const BASE = "id, name, email, avatar_url, handle, auth_id";
 
-    // 2) auth_id 비어 있으면 email로 — 중복 row 있을 수 있어 가장 최근 것
-    if (!member && user.email) {
+    // 1) auth_id로 먼저
+    let { data: baseMember } = await admin.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
+
+    // 2) auth_id 비어 있으면 email로
+    if (!baseMember && user.email) {
         const { data: byEmail } = await admin
-            .from("members").select(SELECT)
+            .from("members").select(BASE)
             .eq("email", user.email)
             .order("created_at", { ascending: false })
             .limit(1);
-        member = byEmail?.[0] ?? null;
+        baseMember = byEmail?.[0] ?? null;
     }
 
-    if (!member) return { kind: "no_member", email: user.email! };
+    if (!baseMember) return { kind: "no_member", email: user.email! };
+
+    // member_roles + myverse_users 별도 조회 — JOIN 실패로 baseMember=null 되는 것 방지
+    const [{ data: roles }, { data: myverseRows }] = await Promise.all([
+        admin.from("member_roles").select("role,is_active").eq("member_id", baseMember.id),
+        admin.from("myverse_users").select("*").eq("member_id", baseMember.id).limit(1),
+    ]);
+
+    const member = {
+        ...baseMember,
+        member_roles: roles ?? [],
+        myverse_users: myverseRows ?? [],
+    };
+
     return { kind: "ok", member };
 }
 
@@ -77,6 +92,14 @@ export default async function MyverseAppLayout({ children }: { children: React.R
     const pathname = h.get('x-pathname') || '';
     const isOnboarding = pathname === '/myverse/app/onboarding' || pathname.startsWith('/myverse/app/onboarding/');
     if (isOnboarding) {
+        // 이미 완료한 사용자 또는 privileged → today로 바로
+        const s = await getAuthState();
+        if (s.kind === "ok") {
+            const mu = (s.member as { myverse_users?: PlannerUser[] }).myverse_users?.[0];
+            if (isPrivileged(s.member as { member_roles?: RoleRow[] }) || mu?.onboarding_completed) {
+                return <ClientRedirect to="/myverse/app/today" />;
+            }
+        }
         return <>{children}</>;
     }
 
@@ -84,13 +107,15 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     // 세션 없음 → 로그인. /login에서 인증되면 redirect 파라미터로 돌아옴.
     if (state.kind === "no_session") {
-        return <ClientRedirect to="/login?redirect=/myverse/app" />;
+        return <ClientRedirect to="/myverse/login?redirect=/myverse/app" />;
     }
 
     // 세션 있는데 members row 없음 → 온보딩으로 (무한 루프 방지)
-    // 이전 버그: /login으로 보내면 /login은 authenticated 감지 → router.replace('/myverse/app')
-    // → layout 재진입 → ClientRedirect → /login → ... 무한 깜빡임.
+    // 단, 이미 onboarding URL에 있으면 무한 루프 — children 그대로 렌더
     if (state.kind === "no_member") {
+        const currentPath = (await headers()).get('x-pathname') || '';
+        const alreadyOnboarding = currentPath === '/myverse/app/onboarding' || currentPath.startsWith('/myverse/app/onboarding/') || currentPath === '/app/onboarding';
+        if (alreadyOnboarding) return <>{children}</>;
         return <ClientRedirect to="/myverse/app/onboarding" />;
     }
 

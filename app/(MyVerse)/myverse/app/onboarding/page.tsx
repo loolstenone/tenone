@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket, SlidersHorizontal } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { PlannerMode, AiTone, PlannerRole } from "@/lib/myverse/types";
 import { PLANNER_ROLE_META } from "@/lib/myverse/types";
@@ -39,9 +39,25 @@ export default function OnboardingPage() {
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.replace("/login?redirect=/myverse/app/onboarding");
+            // /myverse/app/onboarding 을 redirect 파라미터로 쓰면 로그인 후 다시 이 페이지로 와서
+            // 완료된 사용자도 계속 온보딩에 갇히는 루프가 생긴다.
+            // 대신 /myverse/app 으로 보내면 layout이 신규/기존 여부에 따라 올바르게 라우팅한다.
+            router.replace("/login?redirect=/myverse/app");
         }
     }, [isLoading, isAuthenticated, router]);
+
+    // 이미 온보딩 완료한 사용자 → today로
+    useEffect(() => {
+        if (!isAuthenticated || isLoading) return;
+        fetch("/api/myverse/settings")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (d?.user?.onboarding_completed) {
+                    window.location.replace("/myverse/app/today");
+                }
+            })
+            .catch(() => {});
+    }, [isAuthenticated, isLoading]);
 
     useEffect(() => {
         if (step !== "done") trackPlanners("myverse_onboarding_step", { step });
@@ -86,7 +102,7 @@ export default function OnboardingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center px-6 py-12">
+        <div className="min-h-screen bg-[#FAFAF7] flex items-start justify-center px-6 pt-16 pb-12">
             <div className="w-full max-w-2xl">
                 <div className="flex items-center gap-2 mb-10">
                     {(["welcome", "mode", "role", "ai", "identity_lite"] as Step[]).map((s, i) => {
@@ -129,12 +145,21 @@ export default function OnboardingPage() {
                                 당신은 방향만 잡으세요.
                             </p>
                         </div>
-                        <button
-                            onClick={() => setStep("mode")}
-                            className="mt-8 flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors"
-                        >
-                            시작하기 <ArrowRight className="h-4 w-4" />
-                        </button>
+                        <div className="mt-8 flex items-center gap-4">
+                            <button
+                                onClick={() => setStep("mode")}
+                                className="flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors"
+                            >
+                                설정하고 시작하기 <ArrowRight className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={handleFinish}
+                                disabled={saving}
+                                className="text-sm text-neutral-400 hover:text-neutral-600 transition-colors disabled:opacity-50"
+                            >
+                                기본 설정으로 바로 시작
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -143,7 +168,11 @@ export default function OnboardingPage() {
                         <div>
                             <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">1 / 4</p>
                             <h2 className="font-serif text-2xl text-neutral-900">어떤 모드로 시작할까요?</h2>
-                            <p className="text-sm text-neutral-500 mt-2">언제든 설정에서 바꿀 수 있습니다.</p>
+                        </div>
+
+                        <div className="text-sm text-neutral-500 leading-relaxed space-y-1">
+                            <p>가볍게 스케줄 관리하는 것으로 시작하셔도 좋습니다.</p>
+                            <p>처음부터 의욕적으로 고급 모드를 사용해도 어려울 것은 없습니다.</p>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
@@ -157,13 +186,11 @@ export default function OnboardingPage() {
                             >
                                 <div className="flex items-center gap-2 mb-3">
                                     <CalendarMini />
-                                    <span className="text-xs font-semibold text-[#6366F1] uppercase tracking-wider">Weekly</span>
                                     <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-600 rounded">추천</span>
                                 </div>
-                                <p className="font-semibold text-neutral-900">주간 단위 실행</p>
+                                <p className="font-semibold text-neutral-900">Easy mode</p>
                                 <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
-                                    Weekly + Daily + Project + Identity(간소)<br />
-                                    빠른 진입, 부담 없음
+                                    일간, 주간, 월간, 연간 스케줄 중심
                                 </p>
                             </button>
 
@@ -177,18 +204,18 @@ export default function OnboardingPage() {
                             >
                                 <div className="flex items-center gap-2 mb-3">
                                     <Layers className="h-4 w-4 text-[#6366F1]" />
-                                    <span className="text-xs font-semibold text-[#6366F1] uppercase tracking-wider">All in One</span>
                                     <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-600 rounded">고급</span>
                                 </div>
-                                <p className="font-semibold text-neutral-900">전체 구조 활용</p>
+                                <p className="font-semibold text-neutral-900">All in one mode</p>
                                 <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
-                                    Yearly + Monthly + Weekly + Daily + Project + Identity + Templates<br />
-                                    기획자·경영자·대학원생
+                                    모든 기능 + 프로젝트, 캔버스, 템플릿까지 모두 사용
                                 </p>
                             </button>
                         </div>
 
-                        <div className="flex justify-between pt-4">
+                        <p className="text-xs text-neutral-400">상세 모드는 설정에서 추가로 할 수 있습니다.</p>
+
+                        <div className="flex justify-between pt-2">
                             <button
                                 onClick={() => setStep("welcome")}
                                 className="flex items-center gap-2 px-4 py-2 text-neutral-500 hover:text-neutral-900 transition-colors"
@@ -209,10 +236,10 @@ export default function OnboardingPage() {
                     <div className="space-y-6">
                         <div>
                             <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">2 / 4</p>
-                            <h2 className="font-serif text-2xl text-neutral-900">나는 주로 어떤 역할인가요?</h2>
-                            <p className="text-sm text-neutral-500 mt-2">
-                                선택한 역할에 맞는 템플릿과 AI 브리핑을 추천합니다.
-                                <span className="text-neutral-400"> 언제든 설정에서 바꿀 수 있습니다.</span>
+                            <h2 className="font-serif text-2xl text-neutral-900">주로 어떤 일을 하시나요?</h2>
+                            <p className="text-sm text-neutral-500 mt-2 leading-relaxed">
+                                선택한 일에 맞는 템플릿과 AI 브리핑을 맞춤으로 제공해 드립니다.<br />
+                                <span className="text-neutral-400">대학생에서 직장인으로, 기획자에서 개발자로, 크리에이터로 — 언제든 설정에서 바꿀 수 있습니다.</span>
                             </p>
                         </div>
 
@@ -265,33 +292,17 @@ export default function OnboardingPage() {
                         <div>
                             <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">3 / 4</p>
                             <h2 className="font-serif text-2xl text-neutral-900">AI 비서 설정</h2>
-                            <p className="text-sm text-neutral-500 mt-2">아침 브리핑과 저녁 정리 시간을 정하세요.</p>
+                            <p className="text-sm text-neutral-500 mt-2">어떤 AI 비서 스타일을 원하세요?</p>
                         </div>
 
                         <div className="space-y-5">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                                    <label className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
-                                        <Sun className="h-3.5 w-3.5" /> 아침 브리핑
-                                    </label>
-                                    <input
-                                        type="time"
-                                        value={morningTime}
-                                        onChange={(e) => setMorningTime(e.target.value)}
-                                        className="w-full text-lg font-medium text-neutral-900 focus:outline-none"
-                                    />
-                                </div>
-                                <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                                    <label className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
-                                        <Moon className="h-3.5 w-3.5" /> 저녁 정리
-                                    </label>
-                                    <input
-                                        type="time"
-                                        value={eveningTime}
-                                        onChange={(e) => setEveningTime(e.target.value)}
-                                        className="w-full text-lg font-medium text-neutral-900 focus:outline-none"
-                                    />
-                                </div>
+                            <div className="space-y-1">
+                                <p className="text-sm text-neutral-600 leading-relaxed">
+                                    아침 출근, 오늘 할 일을 정리하거나 잠들기 전 하루를 되돌아볼 때.
+                                </p>
+                                <p className="text-sm text-neutral-600 leading-relaxed">
+                                    일의 우선순위를 정리할 때, 고민하지 마시고 AI의 도움을 받으세요.
+                                </p>
                             </div>
 
                             <div className="bg-white border border-neutral-200 rounded-lg p-4">

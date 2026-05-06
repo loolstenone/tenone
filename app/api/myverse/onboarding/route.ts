@@ -28,21 +28,21 @@ export async function POST(req: Request) {
         .eq('auth_id', user.id)
         .maybeSingle();
 
-    // 2) 없으면 email 로 fallback (legacy 데이터 호환)
+    // 2) 없으면 email 로 fallback — limit(1)으로 중복 row시 PGRST116 에러 방지
     if (!member && user.email) {
-        const { data: byEmail } = await admin
+        const { data: rows } = await admin
             .from('members')
             .select('id')
             .eq('email', user.email)
-            .maybeSingle();
+            .limit(1);
+        const byEmail = rows?.[0] ?? null;
         if (byEmail) {
-            // auth_id 가 비어 있던 경우 보강
             await admin.from('members').update({ auth_id: user.id }).eq('id', byEmail.id);
             member = byEmail;
         }
     }
 
-    // 3) 그래도 없으면 자동 생성 (auth-context 동기화 누락 케이스 보강)
+    // 3) 그래도 없으면 자동 생성
     if (!member) {
         const userName = (user.user_metadata?.full_name as string | undefined)
             || (user.user_metadata?.name as string | undefined)
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
                     || (user.user_metadata?.picture as string | undefined)
                     || null,
                 role: 'Member',
-                origin_site: 'planners.tenone.biz',
+                origin_site: 'myverse.kr',
                 intra_access: false,
                 module_access: [],
                 affiliations: [],
@@ -73,15 +73,31 @@ export async function POST(req: Request) {
             })
             .select('id')
             .single();
+
         if (insertErr || !newMember) {
-            console.error('onboarding members auto-create failed', insertErr);
-            return NextResponse.json({ error: 'member_create_failed', message: insertErr?.message }, { status: 500 });
+            // INSERT 실패 시 (email 유니크 충돌 등) 마지막으로 email 재조회
+            if (user.email) {
+                const { data: retryRows } = await admin
+                    .from('members')
+                    .select('id')
+                    .eq('email', user.email)
+                    .limit(1);
+                const found = retryRows?.[0] ?? null;
+                if (found) {
+                    await admin.from('members').update({ auth_id: user.id }).eq('id', found.id);
+                    member = found;
+                }
+            }
+            if (!member) {
+                console.error('onboarding members auto-create failed', insertErr);
+                return NextResponse.json({ error: 'member_create_failed', message: insertErr?.message }, { status: 500 });
+            }
+        } else {
+            await admin.from('member_roles').insert({
+                member_id: newMember.id, role: 'member', context: 'universe',
+            }).then(() => {});
+            member = newMember;
         }
-        // member_roles 기본 row
-        await admin.from('member_roles').insert({
-            member_id: newMember.id, role: 'member', context: 'universe',
-        });
-        member = newMember;
     }
 
     const body = await req.json();

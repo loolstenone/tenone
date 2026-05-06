@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-05-06 — 세션 112 · Myverse 로그인 UI 통일 + 사이트 토글 수정 + 도메인 현실 반영
+
+### 장소
+집
+
+### 핵심 결정사항
+- `/myverse/login` 독립 페이지 생성 — tenone 로그인 전체 페이지 대신 마이버스 전용 `LoginModal` 팝업 방식
+- `ums_sites.is_open` + `domains` 컬럼 마이그레이션 + admin API 라우트로 RLS 우회 — 토글 버그 2종 동시 해결
+- `domain-registry.ts` SSOT 기반 도메인 목록 표시 — DB `domains` 컬럼 대신 레지스트리 직접 조회
+
+### 변경 파일
+- `app/(MyVerse)/myverse/login/page.tsx` (신규) — 마이버스 전용 로그인 게이트 (LoginModal indigo)
+- `app/(MyVerse)/myverse/app/layout.tsx` — no_session → `/myverse/login?redirect=/myverse/app`
+- `app/(MyVerse)/myverse/page.tsx` — 랜딩 CTA 인증 인식 (로그인 시 "앱으로 이동")
+- `app/api/sites/toggle/route.ts` (신규) — admin 클라이언트 기반 is_open 토글 API
+- `lib/supabase/site-configs.ts` — toggleSiteOpen() → fetch('/api/sites/toggle')
+- `lib/domain-registry.ts` — getDomainsBySiteId() 추가 (SiteDomainEntry 인터페이스 포함)
+- `app/intra/ums/sites/list/page.tsx` — 도메인 목록 getDomainsBySiteId() 호출로 교체
+
+### DB 변경 (Supabase MCP)
+- `ums_sites`: `is_open BOOLEAN NOT NULL DEFAULT true`, `domains JSONB NOT NULL DEFAULT '[]'` 추가
+- `site_configs` VIEW 재생성 (두 컬럼 포함)
+
+---
+
 ## 2026-05-06 — 세션 111 · Myverse 무한 깜빡임 종결 + 온보딩 URL 이전
 
 ### 장소

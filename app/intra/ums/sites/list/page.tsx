@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteConfigs, type SiteIdentifier } from "@/lib/site-config";
 import { upsertSiteConfig, getAllSiteConfigs, toggleSiteOpen, type SiteConfigRow } from "@/lib/supabase/site-configs";
+import { getDomainsBySiteId } from "@/lib/domain-registry";
 import {
     Globe, ExternalLink, Search, Settings,
     LayoutGrid, Check, Loader2, AlertCircle, Image as ImageIcon, Link2, Crown,
@@ -72,7 +73,7 @@ export default function SitesListPage() {
         tagline: row.tagline ?? undefined,
         fromDB: true,
         isOpen: row.is_open,
-        domains: row.domains || [],
+        domains: getDomainsBySiteId(row.site_id as SiteIdentifier),
     }), []);
 
     const staticToEntry = useCallback((id: string, c: (typeof siteConfigs)[SiteIdentifier]): SiteEntry => ({
@@ -89,7 +90,7 @@ export default function SitesListPage() {
         tagline: c.tagline,
         fromDB: false,
         isOpen: true,
-        domains: [],
+        domains: getDomainsBySiteId(id as SiteIdentifier),
     }), []);
 
     const allSites: SiteEntry[] = dbConfigs.length > 0

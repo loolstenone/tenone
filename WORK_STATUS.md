@@ -1,6 +1,57 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-06 (세션 111 — Myverse 무한 깜빡임 종결 + 온보딩 URL 이전)
+> 마지막 업데이트: 2026-05-06 (세션 112 — Myverse 로그인 UI 통일 + 인트라 사이트 토글 수정 + 도메인 현실 반영)
+
+---
+
+## 세션 112 핵심 성과 (2026-05-06, 집)
+
+### 1. Myverse 로그인 UI 브랜드 통일
+- **문제**: `/myverse/app` 비인증 접근 시 tenone.biz `/login` 전체 페이지로 이동(검은 버튼, 핸들 탭 없음) → 마이버스 인디고 브랜딩과 불일치
+- **조치**: `/myverse/login/page.tsx` 신규 생성 — 인증 시 `?redirect` 파라미터로 복귀, 미인증 시 `LoginModal` 팝업(indigo `#6366F1`), 모달 닫으면 `/myverse` 랜딩으로
+- `app/(MyVerse)/myverse/app/layout.tsx` — `no_session` 리다이렉트 `/login?redirect=/myverse/app` → `/myverse/login?redirect=/myverse/app`
+- `app/(MyVerse)/myverse/page.tsx` — 랜딩 CTA 인증 인식: 로그인 상태면 "앱으로 이동", 비로그인이면 "시작하기"(LoginModal signup) + "출시 소식 받기"
+
+### 2. 인트라 사이트 열기/닫기 토글 수정
+- **문제**: toggle이 아무 효과 없음 — 두 가지 버그 복합:
+  1. `ums_sites` 테이블에 `is_open` 컬럼 없음 → DB 에러
+  2. `ums_sites_super_admin` RLS 정책이 `members.account_type` 체크 → `member_roles.role` 기반인 lools에게 차단
+- **조치**:
+  - Supabase 마이그레이션: `ums_sites`에 `is_open BOOLEAN NOT NULL DEFAULT true` + `domains JSONB NOT NULL DEFAULT '[]'` 추가, `site_configs` VIEW 재생성
+  - `app/api/sites/toggle/route.ts` 신규 — admin 클라이언트(RLS 우회)로 `ums_sites.is_open` 업데이트, `member_roles` 기반 권한 확인
+  - `lib/supabase/site-configs.ts` — `toggleSiteOpen()` 직접 Supabase 호출 → `/api/sites/toggle` fetch로 변경
+
+### 3. 인트라 도메인 관리 현실 반영
+- **문제**: 사이트 상세의 "도메인" 섹션이 항상 빈 목록 (DB `domains` 컬럼이 `[]`)
+- **조치**:
+  - `lib/domain-registry.ts` — `getDomainsBySiteId(siteId)` 함수 추가 (registry SSOT 기반)
+    - `www.*` 중복 제거, 내부 전용(`auth.tenone.biz`, `intra.tenone.biz`) 제외
+    - `brandgravity` 오버라이드 (registry에서 siteId: 'tenone'으로 등록됨)
+    - `tenone` 하드코딩 (`tenone.biz` — registry 미등록)
+    - `.tenone.biz` → '서브', 나머지 → '독립' 자동 분류
+  - `app/intra/ums/sites/list/page.tsx` — `dbToEntry`·`staticToEntry` 모두 `getDomainsBySiteId()` 호출로 교체
+
+### 다음 할 일 (사무실에서)
+> 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
+
+1. **features/planners → features/myverse/planner 폴더 완전 리네이밍**
+   - 현재 settings/* 일부만 이동된 상태 (세션 110)
+   - `features/planners/` 트리 통째로 `features/myverse/planner/`로 이동
+   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/planner/*`)
+   - 전역 sed 후 `npx tsc --noEmit` + `npm run build`로 검증
+   - 충돌 가능: `features/myverse/planner/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
+
+2. **PWA 아이콘 인디고 M 로고 교체**
+   - 현재 `public/planners-icon-192.png` / `512.png` 그대로 (옛 PP 로고)
+   - Myverse 인디고 M 마크 디자인 → 192/512 PNG 생성 → 기존 파일 교체
+
+3. **Toss 가맹점 승인 + Vercel 환경변수**
+   - 가맹점 승인 신청 진행 (대표자 신분증·사업자등록증)
+   - 승인 후 발급되는 client·secret 키를 Vercel `TOSS_CLIENT_KEY`·`TOSS_SECRET_KEY` 추가
+
+4. **/myverse/app/onboarding 화면 점검 (URL 이전 후 첫 작동 확인)**
+   - 새 URL로 진입 시 PlannersChrome이 헤더/푸터를 안 띄우는지 (정상)
+   - 완료 후 /myverse/app/today 진입이 매끄러운지
 
 ---
 

@@ -105,16 +105,16 @@ export async function upsertSiteConfig(
     return getSiteConfig(siteId);
 }
 
-// ── 사이트 열기/닫기 토글 (ums_sites 직접) ──
+// ── 사이트 열기/닫기 토글 (admin API 경유 — RLS 우회) ──
 export async function toggleSiteOpen(siteId: SiteIdentifier, isOpen: boolean): Promise<void> {
-    const { error } = await supabase
-        .from('ums_sites')
-        .update({ is_open: isOpen, updated_at: new Date().toISOString() })
-        .eq('slug', siteId);
-
-    if (error) {
-        console.error('[toggleSiteOpen]', error.message);
-        throw error;
+    const res = await fetch('/api/sites/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ siteId, isOpen }),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'toggle failed' }));
+        throw new Error(err.error || '상태 변경 실패');
     }
 }
 
