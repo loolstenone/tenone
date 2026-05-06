@@ -1,3 +1,3 @@
-import { DomainPage } from "@/features/myverse/DomainPage";
+import { WorkView } from "@/features/myverse/planner/WorkView";
 export const dynamic = "force-dynamic";
-export default function Page() { return <DomainPage domain="work" />; }
+export default function Page() { return <WorkView />; }
