@@ -8,7 +8,6 @@ import { Menu, X, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 // Planner's 브랜드 메뉴 — 로고가 홈 역할이므로 "Planner's" 메뉴 제거 (중복 제거)
 // 정렬 원칙: 학습 → 도구 → 실천 → 성과
@@ -116,7 +115,7 @@ export function PlannersHeader() {
                     <Link href="/myverse/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-200 hover:text-white">마이페이지</Link>
                 ) : (
                     <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
+                        <Link href={`/myverse/login?redirect=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
                         <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
                     </div>
                 )

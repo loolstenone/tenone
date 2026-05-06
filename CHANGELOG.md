@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-05-07 — 세션 113 · MyVerseHeader 모바일 버튼 수정 + 9영역 통합 연구
+
+### 장소
+집
+
+### 핵심 결정사항
+- `MyVerseHeader` 모바일 햄버거 버튼: `overflow-hidden` + 네거티브 마진이 클리핑 원인 → 제거 후 `flex md:hidden` + `shrink-0` 명시
+- 9영역 통합 연구: 기존 개발 현황(MyverseSidebar·AppTopNav 드롭다운·도메인 page.tsx) 파악 완료 — 다음 세션에서 옵션 결정
+
+### 변경 파일
+- `features/myverse/MyVerseHeader.tsx` — 모바일 햄버거 버튼 표시 수정
+- `middleware.ts` — myverse.kr/login → /myverse/login 리라이트 (세션 112 잔여)
+- `features/myverse/planner/PlannersHeader.tsx` — loginHref → /myverse/login 직접 URL (세션 112 잔여)
+- `features/myverse/planner/CommunityView.tsx` — loginHref → myverse 전용 href (세션 112 잔여)
+- `features/myverse/planner/TimeTrackerView.tsx` — 타임트래커 대규모 리팩토링 (아이콘·상태 교체)
+
+---
+
 ## 2026-05-06 — 세션 112 · Myverse 로그인 UI 통일 + 사이트 토글 수정 + 도메인 현실 반영
 
 ### 장소

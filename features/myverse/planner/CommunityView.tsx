@@ -7,7 +7,8 @@ import {
     Sparkles, MessageCircle, Heart, ChevronLeft, Plus, Loader2,
     BookOpenCheck, Lightbulb, Coffee, ThumbsUp, LogIn,
 } from "lucide-react";
-import { loginHref } from "@/lib/login-href";
+const myverseLoginHref = (redirect: string) =>
+    `/myverse/login${redirect && redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`;
 import { ConfirmSheet } from "./ConfirmSheet";
 
 type Category = "review" | "case" | "suggestion" | "life";
@@ -86,7 +87,7 @@ export function CommunityView() {
 
     async function toggleLike(post: Post) {
         if (!authenticated) {
-            window.location.href = loginHref(pathname);
+            window.location.href = myverseLoginHref(pathname);
             return;
         }
         const liked = post.i_liked;
@@ -103,7 +104,7 @@ export function CommunityView() {
 
     function startWrite() {
         if (!authenticated) {
-            window.location.href = loginHref(pathname);
+            window.location.href = myverseLoginHref(pathname);
             return;
         }
         setComposerOpen(true);
@@ -125,7 +126,7 @@ export function CommunityView() {
                     </button>
                 ) : (
                     <Link
-                        href={loginHref(pathname)}
+                        href={myverseLoginHref(pathname)}
                         className="flex items-center gap-1.5 px-3 py-1.5 border border-[#6366F1] text-[#6366F1] rounded-lg text-sm font-medium hover:bg-[#6366F1]/5 transition-colors"
                     >
                         <LogIn className="h-3.5 w-3.5" /> 로그인하고 쓰기
@@ -181,7 +182,7 @@ export function CommunityView() {
                         </button>
                     ) : (
                         <Link
-                            href={loginHref(pathname)}
+                            href={myverseLoginHref(pathname)}
                             className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#6366F1] text-[#6366F1] rounded-lg text-sm font-medium hover:bg-[#6366F1]/5"
                         >
                             <LogIn className="h-4 w-4" /> 로그인하고 쓰기
@@ -409,7 +410,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
     async function toggleLike() {
         if (!post) return;
         if (!authenticated) {
-            window.location.href = loginHref(pathname);
+            window.location.href = myverseLoginHref(pathname);
             return;
         }
         const liked = post.i_liked;
@@ -514,7 +515,7 @@ function PostDetail({ postId, onClose, onChanged }: { postId: string; onClose: (
                         </>
                     ) : (
                         <Link
-                            href={loginHref(pathname)}
+                            href={myverseLoginHref(pathname)}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[#6366F1] text-[#6366F1] rounded-full text-sm font-medium hover:bg-[#6366F1]/5"
                         >
                             <LogIn className="h-3.5 w-3.5" /> 로그인하고 댓글 달기

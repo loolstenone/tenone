@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
+import { loginHref } from "@/lib/login-href";
 
 const PREFIX = '/myverse';
 const navItems = [
@@ -21,13 +23,14 @@ const navItems = [
 export function MyVerseHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => pathname.startsWith(href);
 
     return (
         <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100">
-            <nav className="mx-auto max-w-6xl px-5 flex h-14 items-center justify-between">
+            <nav className="w-full px-4 flex h-14 items-center justify-between">
                 {/* Logo */}
                 <Link href={PREFIX} className="flex items-center gap-2 shrink-0">
                     <span className="text-neutral-900 font-bold text-lg tracking-tight">Myverse</span>
@@ -53,7 +56,7 @@ export function MyVerseHeader() {
                 </div>
 
                 {/* Right: UniverseUtilityBar + Mobile toggle */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <div className="hidden md:flex">
                         <UniverseUtilityBar
                             aboutPath="/myverse/service"
@@ -67,7 +70,7 @@ export function MyVerseHeader() {
                     </div>
                     <button
                         onClick={() => setMobileOpen(!mobileOpen)}
-                        className="md:hidden p-2 text-neutral-500"
+                        className="flex md:hidden p-2 text-neutral-500 hover:text-neutral-900"
                         aria-label="메뉴"
                     >
                         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -83,7 +86,45 @@ export function MyVerseHeader() {
             brandName="Myverse"
             bgClass="bg-white"
             textTone="dark"
+            footer={
+                isAuthenticated ? (
+                    <Link
+                        href="/myverse/my"
+                        onClick={() => setMobileOpen(false)}
+                        className="block text-sm text-neutral-500 hover:text-neutral-900"
+                    >
+                        마이페이지
+                    </Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link
+                            href={loginHref(pathname)}
+                            onClick={() => setMobileOpen(false)}
+                            className="text-sm text-neutral-500 hover:text-neutral-900"
+                        >
+                            로그인
+                        </Link>
+                        <Link
+                            href="/signup"
+                            onClick={() => setMobileOpen(false)}
+                            className="text-sm text-neutral-500 hover:text-neutral-900"
+                        >
+                            가입
+                        </Link>
+                    </div>
+                )
+            }
         >
+            {/* 앱 진입 CTA */}
+            <Link
+                href={isAuthenticated ? "/myverse/app" : "/myverse/login"}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg mb-3 hover:bg-indigo-700 transition-colors"
+            >
+                <Sparkles className="h-4 w-4" />
+                {isAuthenticated ? "내 Myverse 열기" : "Myverse 시작하기"}
+            </Link>
+
             {navItems.map((item) => (
                 <Link
                     key={item.href}

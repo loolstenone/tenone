@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, Trash2, Loader2, MapPin, X, Calendar, Clock, Sunrise, Sunset } from "lucide-react";
+import { MapPin, Calendar, RefreshCw, Wifi, WifiOff, Camera, Clock, Sunrise, Sunset } from "lucide-react";
 import { ROUTINE_CATEGORIES as CATEGORIES, categoryMeta as catMeta } from "@/lib/myverse/categories";
 import { PageShell, PageHeader } from "./PageShell";
-import { PermissionGuideModal } from "./PermissionGuideModal";
-import type { ActivityBase } from "@/lib/myverse/types";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -22,27 +20,44 @@ type Routine = {
     domain?: string;
 };
 
-function CaptureBadge({ mode }: { mode?: string }) {
-    if (!mode || mode === "manual") return null;
-    if (mode === "imported") return (
-        <span className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded bg-violet-50 text-violet-400 font-medium leading-none shrink-0">
-            임포트
-        </span>
-    );
-    if (mode === "auto") return (
-        <span className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-400 font-medium leading-none shrink-0">
-            자동
-        </span>
-    );
-    return null;
-}
+type Place = {
+    id: string;
+    place_name: string;
+    visited_at: string | null;
+    duration_min: number | null;
+    category: string;
+};
 
-// 30분 단위 슬롯 전체 (00:00 ~ 23:30)
-const ALL_SLOTS: string[] = [];
-for (let h = 0; h < 24; h++) {
-    ALL_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
-    ALL_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
-}
+type Moment = {
+    id: string;
+    happened_at: string | null;
+    caption: string | null;
+    media_type: string;
+};
+
+type ExternalEvent = {
+    id: string;
+    provider: string;
+    title: string;
+    start_at: string;
+    end_at: string | null;
+    location: string | null;
+    color: string | null;
+    calendar_name: string | null;
+};
+
+type Integration = {
+    id: string;
+    provider: string;
+    status: string;
+    external_email: string | null;
+    external_name: string | null;
+    sync_direction: string | null;
+    last_sync_at: string | null;
+    created_at: string;
+};
+
+type HourlyEntry = { key: string; total: number; domains: Record<string, number> };
 
 // ─── 헬퍼 ────────────────────────────────────────────────
 
@@ -82,47 +97,103 @@ function shiftDate(dateStr: string, days: number): string {
 
 function fmtHeader(dateStr: string): string {
     const [y, m, d] = dateStr.split("-").map(Number);
-    return `${y}년 ${m}월 ${d}일`;
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const dt = new Date(dateStr + "T00:00:00+09:00");
+    const dow = days[dt.getDay()];
+    return `${y}년 ${m}월 ${d}일 (${dow})`;
 }
 
 function nowSlotKST(): string {
     const kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
     const h = kst.getHours();
-    const m = kst.getMinutes() >= 30 ? 30 : 0;
+    const m = kst.getMinutes();
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-// Haversine — 두 좌표 간 거리(미터)
-function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371000;
-    const toRad = (d: number) => (d * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLng = toRad(lng2 - lng1);
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+function nowMinutesKST(): number {
+    const kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    return kst.getHours() * 60 + kst.getMinutes();
 }
 
-// 좌표가 등록된 거점 반경 안에 있으면 가장 가까운 거점 반환 (기본 150m)
-function nearestBase(lat: number, lng: number, bases: ActivityBase[], radius = 150): ActivityBase | null {
-    let best: ActivityBase | null = null;
-    let bestDist = Infinity;
-    for (const b of bases) {
-        if (b.lat == null || b.lng == null) continue;
-        const d = distanceMeters(lat, lng, b.lat, b.lng);
-        if (d <= radius && d < bestDist) {
-            best = b;
-            bestDist = d;
-        }
+// ISO string → KST HH:MM
+function isoToKST(iso: string): string {
+    try {
+        const d = new Date(iso);
+        return new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Seoul",
+            hour: "2-digit", minute: "2-digit", hour12: false,
+        }).format(d);
+    } catch {
+        return "";
     }
-    return best;
 }
 
-// 시작 시각 + 1시간을 디폴트 종료 시각으로
-function defaultEndFor(start: string): string {
-    const m = parseMinutes(start);
-    if (m === null) return "";
-    const e = Math.min(m + 60, 23 * 60 + 30);
-    return `${String(Math.floor(e / 60)).padStart(2, "0")}:${String(e % 60).padStart(2, "0")}`;
+// ISO string → KST minute offset (0–1440)
+function isoToKSTMinutes(iso: string): number {
+    const t = isoToKST(iso);
+    return parseMinutes(t) ?? 0;
+}
+
+// WMO 날씨 코드 → 한국어 레이블 + 이모지
+function weatherLabel(code: number): { emoji: string; label: string } {
+    if (code === 0) return { emoji: "☀️", label: "맑음" };
+    if (code <= 3) return { emoji: "⛅", label: "구름 조금" };
+    if (code <= 48) return { emoji: "🌫️", label: "안개" };
+    if (code <= 55) return { emoji: "🌦️", label: "이슬비" };
+    if (code <= 65) return { emoji: "🌧️", label: "비" };
+    if (code <= 75) return { emoji: "❄️", label: "눈" };
+    if (code <= 82) return { emoji: "🌦️", label: "소나기" };
+    if (code <= 99) return { emoji: "⛈️", label: "뇌우" };
+    return { emoji: "🌡️", label: "날씨 정보" };
+}
+
+// provider 표시명
+function providerLabel(p: string): string {
+    switch (p) {
+        case "google_calendar": return "Google";
+        case "ical": return "iCal";
+        case "notion": return "Notion";
+        case "slack": return "Slack";
+        default: return p;
+    }
+}
+
+// provider 컬러
+function providerColor(p: string): string {
+    switch (p) {
+        case "google_calendar": return "#4285F4";
+        case "ical": return "#FF6B6B";
+        default: return "#6366F1";
+    }
+}
+
+// relative time (last sync 등)
+function relTime(iso: string | null): string {
+    if (!iso) return "없음";
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return "방금";
+    if (m < 60) return `${m}분 전`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}시간 전`;
+    return `${Math.floor(h / 24)}일 전`;
+}
+
+// ─── 서브 컴포넌트 ────────────────────────────────────────
+
+function SourceBadge({ source }: { source: "calendar" | "gps" | "routine" | "moment" }) {
+    const map = {
+        calendar: { label: "캘린더", cls: "bg-blue-50 text-blue-500" },
+        gps: { label: "GPS", cls: "bg-emerald-50 text-emerald-500" },
+        routine: { label: "일정", cls: "bg-indigo-50 text-indigo-400" },
+        moment: { label: "순간", cls: "bg-amber-50 text-amber-500" },
+    };
+    const { label, cls } = map[source];
+    return (
+        <span className={`inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-medium leading-none shrink-0 ${cls}`}>
+            {label}
+        </span>
+    );
 }
 
 // ─── 메인 컴포넌트 ────────────────────────────────────────
@@ -130,1048 +201,665 @@ function defaultEndFor(start: string): string {
 export function TimeTrackerView({ initialDate }: { initialDate: string }) {
     const today = todayKST();
     const [date, setDate] = useState(initialDate);
+
+    // 데이터
     const [routines, setRoutines] = useState<Routine[]>([]);
-    const [places, setPlaces] = useState<Array<{ id: string; place_name: string; visited_at: string | null; duration_min: number | null; category: string }>>([]);
-    const [moments, setMoments] = useState<Array<{ id: string; happened_at: string | null; caption: string | null; media_type: string }>>([]);
-    const [hourlyData, setHourlyData] = useState<Array<{ key: string; total: number; domains: Record<string, number> }>>([]);
+    const [places, setPlaces] = useState<Place[]>([]);
+    const [moments, setMoments] = useState<Moment[]>([]);
+    const [hourlyData, setHourlyData] = useState<HourlyEntry[]>([]);
+    const [externalEvents, setExternalEvents] = useState<ExternalEvent[]>([]);
+    const [integrations, setIntegrations] = useState<Integration[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+
+    // 위치/날씨/일출
+    const [geoName, setGeoName] = useState<string | null>(null);
+    const [sunrise, setSunrise] = useState<string | null>(null);
+    const [sunset, setSunset] = useState<string | null>(null);
+    const [tempMax, setTempMax] = useState<number | null>(null);
+    const [tempMin, setTempMin] = useState<number | null>(null);
+    const [weatherCode, setWeatherCode] = useState<number | null>(null);
     const [showDawn, setShowDawn] = useState(false);
 
-    // 인라인 추가/수정 폼
-    const [addingSlot, setAddingSlot] = useState<string | null>(null);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [inActivity, setInActivity] = useState("");
-    const [inStart, setInStart] = useState("");
-    const [inEnd, setInEnd] = useState("");
-    const [inCat, setInCat] = useState("general");
-    const [inNote, setInNote] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [locLoading, setLocLoading] = useState(false);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [permGuideOpen, setPermGuideOpen] = useState(false);
-
-    const inputRef = useRef<HTMLInputElement>(null);
     const nowRef = useRef<HTMLDivElement>(null);
-    const nowSlot = date === today ? nowSlotKST() : null;
+    const nowMin = date === today ? nowMinutesKST() : null;
 
-    // 등록된 활동 거점 (Settings > 활동 거점) — 자동 위치 매칭에 사용
-    const [bases, setBases] = useState<ActivityBase[]>([]);
-    useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch("/api/myverse/settings");
-                if (!res.ok) return;
-                const json = await res.json();
-                const raw = (json.user?.activity_bases ?? []) as ActivityBase[];
-                if (Array.isArray(raw)) setBases(raw);
-            } catch { /* silent */ }
-        })();
-    }, []);
+    // 통합 연동 상태
+    const googleCal = integrations.find(i => i.provider === "google_calendar");
+    const calConnected = googleCal?.status === "connected";
 
-    // 데이터 로드
+    // ─ 데이터 로드
+
     async function load(d: string) {
         setLoading(true);
         try {
-            const [routinesRes, placesRes, momentsRes, verseRes] = await Promise.all([
+            const [routinesRes, placesRes, momentsRes, verseRes, extRes] = await Promise.all([
                 fetch(`/api/myverse/routines?date=${d}`),
                 fetch(`/api/myverse/places?date=${d}`),
                 fetch(`/api/myverse/moments?date=${d}`),
                 fetch(`/api/myverse/verse?from=${d}&to=${d}&zoom=hour`),
+                fetch(`/api/myverse/external-events?from=${d}T00:00:00&to=${d}T23:59:59`),
             ]);
-            if (routinesRes.ok) {
-                const json = await routinesRes.json();
-                setRoutines(json.routines ?? []);
-            } else {
-                setErrorMsg("불러오기 실패 — 잠시 후 다시 시도하세요");
-            }
-            if (placesRes.ok) {
-                const json = await placesRes.json();
-                setPlaces(json.places ?? []);
-            }
-            if (momentsRes.ok) {
-                const json = await momentsRes.json();
-                setMoments(json.moments ?? []);
-            }
-            if (verseRes.ok) {
-                const json = await verseRes.json();
-                setHourlyData(json.summary ?? []);
-            }
-        } catch {
-            setErrorMsg("네트워크 오류");
-        } finally {
+            if (routinesRes.ok) { const j = await routinesRes.json(); setRoutines(j.routines ?? []); }
+            if (placesRes.ok) { const j = await placesRes.json(); setPlaces(j.places ?? []); }
+            if (momentsRes.ok) { const j = await momentsRes.json(); setMoments(j.moments ?? []); }
+            if (verseRes.ok) { const j = await verseRes.json(); setHourlyData(j.summary ?? []); }
+            if (extRes.ok) { const j = await extRes.json(); setExternalEvents(j.events ?? []); }
+        } catch { /* silent */ } finally {
             setLoading(false);
         }
     }
 
+    async function loadIntegrations() {
+        try {
+            const res = await fetch("/api/myverse/integrations");
+            if (res.ok) { const j = await res.json(); setIntegrations(j.integrations ?? []); }
+        } catch { /* silent */ }
+    }
+
+    // 위치 + 일출·일몰
+    async function loadGeo() {
+        try {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude: lat, longitude: lng } = pos.coords;
+                const [geoRes, sunRes] = await Promise.all([
+                    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`),
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia%2FSeoul&forecast_days=1`),
+                ]);
+                if (geoRes.ok) {
+                    const g = await geoRes.json();
+                    const addr = g.address;
+                    setGeoName(addr?.neighbourhood ?? addr?.suburb ?? addr?.quarter ?? addr?.town ?? addr?.city ?? null);
+                }
+                if (sunRes.ok) {
+                    const s = await sunRes.json();
+                    const sr = s.daily?.sunrise?.[0] as string | undefined;
+                    const ss = s.daily?.sunset?.[0] as string | undefined;
+                    if (sr) setSunrise(isoToKST(sr));
+                    if (ss) setSunset(isoToKST(ss));
+                    const tMax = s.daily?.temperature_2m_max?.[0] as number | undefined;
+                    const tMin = s.daily?.temperature_2m_min?.[0] as number | undefined;
+                    const wc = s.daily?.weathercode?.[0] as number | undefined;
+                    if (tMax != null) setTempMax(Math.round(tMax));
+                    if (tMin != null) setTempMin(Math.round(tMin));
+                    if (wc != null) setWeatherCode(wc);
+                }
+            }, undefined, { timeout: 5000 });
+        } catch { /* silent */ }
+    }
+
     useEffect(() => { load(date); }, [date]);
+    useEffect(() => { loadIntegrations(); loadGeo(); }, []);
 
-    // 일출/일몰 + 현재 위치명 — 위치 권한 있으면 Open-Meteo + Nominatim 역지오코딩
-    const [solar, setSolar] = useState<{ sunrise: string | null; sunset: string | null }>({ sunrise: null, sunset: null });
-    const [placeName, setPlaceName] = useState<string | null>(null);
-    const [locDenied, setLocDenied] = useState(false);
+    // 현재 시각 라인 스크롤
     useEffect(() => {
-        if (!navigator.geolocation) return;
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            try {
-                const { latitude: lat, longitude: lon } = pos.coords;
-                // 일출·일몰 (Open-Meteo)
-                const solarRes = await fetch(
-                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&start_date=${date}&end_date=${date}`
-                );
-                if (solarRes.ok) {
-                    const d = await solarRes.json();
-                    const sunrise = d.daily?.sunrise?.[0]?.slice(11, 16) ?? null;
-                    const sunset  = d.daily?.sunset?.[0]?.slice(11, 16)  ?? null;
-                    setSolar({ sunrise, sunset });
-                }
-                // 장소명 (Nominatim 역지오코딩) — 도시 + 동/구 정도만
-                const placeRes = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko&zoom=14`
-                );
-                if (placeRes.ok) {
-                    const p = await placeRes.json();
-                    const a = p.address ?? {};
-                    const local = a.suburb ?? a.neighbourhood ?? a.quarter ?? a.borough ?? a.city_district;
-                    const city = a.city ?? a.town ?? a.county ?? a.state;
-                    const label = local && city ? `${city} ${local}` : local ?? city ?? null;
-                    setPlaceName(label);
-                }
-            } catch { /* silent */ }
-        }, () => { setLocDenied(true); }, { timeout: 8000, maximumAge: 60 * 60 * 1000 });
-    }, [date]);
-
-    // 오늘이면 현재 시각 슬롯으로 스크롤
-    useEffect(() => {
-        if (!loading && nowRef.current) {
-            setTimeout(() => nowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+        if (nowRef.current) {
+            nowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     }, [loading]);
 
-    // 현재 위치 자동 입력 (Nominatim 역지오코딩)
-    async function autoLocation() {
-        if (!navigator.geolocation) {
-            setErrorMsg("이 브라우저는 위치 정보를 지원하지 않습니다");
-            return;
-        }
-        setLocLoading(true);
-        setErrorMsg(null);
+    // Google Calendar 동기화
+    async function syncGoogleCalendar() {
+        if (!calConnected || syncing) return;
+        setSyncing(true);
         try {
-            const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 })
-            );
-            const { latitude: lat, longitude: lon } = pos.coords;
-
-            // 1) 등록된 거점이 가까이 있으면 거점 이름을 활동 라벨로 사용
-            const matched = nearestBase(lat, lon, bases);
-            if (matched) {
-                setInActivity(prev => prev || matched.name);
-                if (matched.address) setInNote(prev => prev || matched.address!);
-                return;
-            }
-
-            // 2) 거점 매칭 실패 시 Nominatim 역지오코딩 사용 (기존 로직)
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`
-            );
-            if (res.ok) {
-                const data = await res.json();
-                const a = data.address ?? {};
-                const road = a.road ?? a.pedestrian ?? a.footway ?? "";
-                const num  = a.house_number ?? "";
-                const sub  = a.neighbourhood ?? a.suburb ?? a.quarter ?? "";
-                const city = a.city ?? a.town ?? a.county ?? "";
-                const label = [road, num].filter(Boolean).join(" ") || sub || city;
-                const detail = (city && road) ? `${city} ${road}`.trim() : "";
-                if (label) setInActivity(prev => prev || label);
-                if (detail) setInNote(prev => prev || detail);
-                if (!label && !detail) setErrorMsg("위치를 찾지 못했습니다");
-            } else {
-                setErrorMsg("위치 조회 실패");
-            }
-        } catch (e: unknown) {
-            const err = e as GeolocationPositionError | Error;
-            if ("code" in err && err.code === 1) {
-                // 권한 거부 — 정적 메시지 대신 복구 가이드 모달 띄움
-                setPermGuideOpen(true);
-            } else if ("code" in err && err.code === 3) {
-                setErrorMsg("위치 조회 시간 초과");
-            } else {
-                setErrorMsg("위치 조회 오류");
-            }
-        } finally {
-            setLocLoading(false);
+            await fetch("/api/myverse/integrations/google/sync", { method: "POST" });
+            await Promise.all([load(date), loadIntegrations()]);
+        } catch { /* silent */ } finally {
+            setSyncing(false);
         }
     }
 
-    function openSlot(time: string) {
-        setEditingId(null);
-        setAddingSlot(time);
-        setInActivity("");
-        setInStart(time);
-        setInEnd(defaultEndFor(time));
-        setInCat("general");
-        setInNote("");
-        setErrorMsg(null);
-        setTimeout(() => inputRef.current?.focus(), 60);
-    }
+    // ─ 타임라인 아이템 통합 (시간순 정렬)
 
-    function openEdit(r: Routine) {
-        setAddingSlot(null);
-        setEditingId(r.id);
-        setInActivity(r.activity);
-        setInStart(fmtTime(r.start_time) || "");
-        setInEnd(fmtTime(r.end_time) || (r.start_time ? defaultEndFor(fmtTime(r.start_time)) : ""));
-        setInCat(r.category);
-        setInNote(r.note ?? "");
-        setErrorMsg(null);
-        setTimeout(() => inputRef.current?.focus(), 60);
-    }
+    type TimelineItem =
+        | { kind: "event"; data: ExternalEvent; startMin: number; endMin: number }
+        | { kind: "routine"; data: Routine; startMin: number; endMin: number }
+        | { kind: "place"; data: Place; startMin: number }
+        | { kind: "moment"; data: Moment; startMin: number };
 
-    function closeForm() {
-        setAddingSlot(null);
-        setEditingId(null);
-        setInActivity("");
-        setInNote("");
-        setErrorMsg(null);
-    }
+    const timelineItems: TimelineItem[] = [
+        ...externalEvents
+            .filter(e => e.start_at)
+            .map(e => ({
+                kind: "event" as const,
+                data: e,
+                startMin: isoToKSTMinutes(e.start_at),
+                endMin: e.end_at ? isoToKSTMinutes(e.end_at) : isoToKSTMinutes(e.start_at) + 60,
+            })),
+        ...routines
+            .filter(r => r.start_time)
+            .map(r => ({
+                kind: "routine" as const,
+                data: r,
+                startMin: parseMinutes(r.start_time) ?? 0,
+                endMin: parseMinutes(r.end_time) ?? (parseMinutes(r.start_time) ?? 0) + 60,
+            })),
+        ...places
+            .filter(p => p.visited_at)
+            .map(p => ({
+                kind: "place" as const,
+                data: p,
+                startMin: isoToKSTMinutes(p.visited_at!),
+            })),
+        ...moments
+            .filter(m => m.happened_at)
+            .map(m => ({
+                kind: "moment" as const,
+                data: m,
+                startMin: isoToKSTMinutes(m.happened_at!),
+            })),
+    ].sort((a, b) => a.startMin - b.startMin);
 
-    function sortRoutines(arr: Routine[]): Routine[] {
-        return [...arr].sort((a, b) => {
-            if (!a.start_time) return 1;
-            if (!b.start_time) return -1;
-            return a.start_time.localeCompare(b.start_time);
-        });
-    }
+    // 카테고리별 집계 (routine 기준)
+    const catStats = CATEGORIES.reduce((acc, cat) => {
+        const items = routines.filter(r => r.category === cat.key);
+        const total = items.reduce((s, r) => {
+            const sm = parseMinutes(r.start_time);
+            const em = parseMinutes(r.end_time);
+            return s + (sm != null && em != null ? em - sm : 0);
+        }, 0);
+        if (total > 0) acc[cat.key] = total;
+        return acc;
+    }, {} as Record<string, number>);
 
-    function validateTimes(): string | null {
-        if (!inStart) return null; // start 없으면 종일 항목으로 허용
-        if (inEnd) {
-            const s = parseMinutes(inStart);
-            const e = parseMinutes(inEnd);
-            if (s !== null && e !== null && e <= s) return "종료 시각은 시작보다 늦어야 합니다";
-        }
-        return null;
-    }
+    const totalTrackedMin = Object.values(catStats).reduce((a, b) => a + b, 0);
 
-    async function submitForm() {
-        if (!inActivity.trim()) return;
-        const err = validateTimes();
-        if (err) { setErrorMsg(err); return; }
+    // 상위 3 장소
+    const topPlaces = [...places]
+        .sort((a, b) => (b.duration_min ?? 0) - (a.duration_min ?? 0))
+        .slice(0, 3);
 
-        setSaving(true);
-        setErrorMsg(null);
-        try {
-            const body = {
-                date,
-                activity: inActivity.trim(),
-                start_time: inStart || null,
-                end_time: inEnd || null,
-                category: inCat,
-                note: inNote.trim() || null,
-                level: 3,
-            };
+    // 24h 바 데이터 (hourly → 48 slots 시각화)
+    const maxHourly = Math.max(...hourlyData.map(h => h.total), 1);
 
-            if (editingId) {
-                const res = await fetch(`/api/myverse/routines?id=${editingId}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-                if (res.ok) {
-                    const json = await res.json();
-                    setRoutines(prev => sortRoutines(prev.map(r => r.id === editingId ? json.routine : r)));
-                    closeForm();
-                } else {
-                    setErrorMsg("저장 실패");
-                }
-            } else {
-                const res = await fetch("/api/myverse/routines", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-                if (res.ok) {
-                    const json = await res.json();
-                    setRoutines(prev => sortRoutines([...prev, json.routine]));
-                    closeForm();
-                } else {
-                    setErrorMsg("저장 실패");
-                }
-            }
-        } catch {
-            setErrorMsg("네트워크 오류");
-        } finally {
-            setSaving(false);
-        }
-    }
+    // ─ 렌더
 
-    async function deleteEntry(id: string) {
-        const res = await fetch(`/api/myverse/routines?id=${id}`, { method: "DELETE" });
-        if (res.ok) setRoutines(prev => prev.filter(r => r.id !== id));
-        else setErrorMsg("삭제 실패");
-    }
-
-    // 표시할 슬롯: 기본 6시 이후, 토글하면 새벽 포함
-    const slots = showDawn
-        ? ALL_SLOTS
-        : ALL_SLOTS.filter(s => parseInt(s.split(":")[0]) >= 6);
-
-    // 24h 바 계산
-    const timedRoutines = routines.filter(r => r.start_time);
-    const catTotals: Record<string, number> = {};
-    for (const r of timedRoutines) {
-        const s = parseMinutes(r.start_time);
-        const e = parseMinutes(r.end_time);
-        if (s !== null && e !== null && e > s)
-            catTotals[r.category] = (catTotals[r.category] ?? 0) + (e - s);
-    }
-    const totalTracked = Object.values(catTotals).reduce((a, b) => a + b, 0);
-    const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
-
-    // 갭 감지 — 활동 시간대(06:00~now/22:00)에서 미기록 30분 슬롯 집합
-    const nowMinutesForGap = date === today ? (parseMinutes(nowSlotKST()) ?? (22 * 60)) : 22 * 60;
-    const GAP_ACTIVE_START = 6 * 60;
-    const coveredIntervals: Array<[number, number]> = [];
-    for (const r of timedRoutines) {
-        if (!r.end_time) continue;
-        const cs = parseMinutes(r.start_time)!;
-        const ce = parseMinutes(r.end_time)!;
-        if (ce > cs) coveredIntervals.push([cs, ce]);
-        else if (ce < cs) coveredIntervals.push([cs, 1440]); // 자정 넘기는 수면 — 당일 구간만
-    }
-    const gapSlots = new Set<string>();
-    for (const s of ALL_SLOTS) {
-        const slotMin = parseMinutes(s);
-        if (slotMin === null || slotMin < GAP_ACTIVE_START || slotMin >= nowMinutesForGap) continue;
-        if (routines.some(r => r.start_time?.slice(0, 5) === s)) continue;
-        if (!coveredIntervals.some(([cs, ce]) => cs < slotMin + 30 && ce > slotMin)) gapSlots.add(s);
-    }
-
-    // 추가 통계 — 시간대별 분포 / 활동 top / 종료 미입력 카운트
-    const PERIODS = [
-        { key: "morning",   label: "오전",   range: [6 * 60, 12 * 60] as [number, number] },
-        { key: "afternoon", label: "오후",   range: [12 * 60, 18 * 60] as [number, number] },
-        { key: "evening",   label: "저녁",   range: [18 * 60, 22 * 60] as [number, number] },
-        { key: "night",     label: "심야",   range: [22 * 60, 24 * 60 + 6 * 60] as [number, number] },
-    ];
-    const periodTotals: Record<string, number> = {};
-    for (const r of timedRoutines) {
-        const s = parseMinutes(r.start_time);
-        const e = parseMinutes(r.end_time);
-        if (s === null || e === null || e <= s) continue;
-        for (const p of PERIODS) {
-            const overlap = Math.max(0, Math.min(e, p.range[1]) - Math.max(s, p.range[0]));
-            if (overlap > 0) periodTotals[p.key] = (periodTotals[p.key] ?? 0) + overlap;
-        }
-    }
-
-    // 활동 빈도 Top 5
-    const activityCount: Record<string, number> = {};
-    for (const r of routines) activityCount[r.activity] = (activityCount[r.activity] ?? 0) + 1;
-    const activityTop = Object.entries(activityCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-    const incompleteCount = routines.filter(r => r.start_time && !r.end_time).length;
-    const totalEntries = routines.length;
-    const completionPct = totalEntries > 0 ? Math.round(((totalEntries - incompleteCount) / totalEntries) * 100) : 0;
-
-    const maxHourly = hourlyData.length > 0 ? Math.max(...hourlyData.map(d => d.total)) : 1;
+    const TIMELINE_HEIGHT = 48 * 30; // 1440px (30px per 30min slot)
+    const PX_PER_MIN = TIMELINE_HEIGHT / (24 * 60);
 
     return (
         <PageShell>
             <PageHeader
-                icon={<Clock className="h-6 w-6" />}
                 title={fmtHeader(date)}
-                state={date === today ? "today" : null}
-                onPrev={() => setDate(d => shiftDate(d, -1))}
-                onNext={() => setDate(d => shiftDate(d, 1))}
+                onPrev={() => setDate(shiftDate(date, -1))}
+                onNext={() => setDate(shiftDate(date, 1))}
                 right={
                     date !== today ? (
                         <button
                             onClick={() => setDate(today)}
-                            className="p-1.5 rounded-lg text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors"
-                            title="오늘로 이동"
-                            aria-label="오늘로 이동"
+                            className="text-xs text-indigo-300 hover:text-white px-2 py-1 rounded border border-white/10 hover:border-white/20 transition-colors"
                         >
-                            <Calendar className="h-4 w-4" />
+                            오늘
                         </button>
                     ) : undefined
                 }
             />
 
-            {/* 오류 토스트 — 3열 위 공통 */}
-            {errorMsg && (
-                <div className="mt-3 max-w-lg mx-auto bg-rose-50 myverse-dark:bg-rose-900/20 border border-rose-200 myverse-dark:border-rose-800 rounded-lg px-3 py-2 text-xs text-rose-700 myverse-dark:text-rose-300 flex items-center gap-2">
-                    <span className="flex-1">{errorMsg}</span>
-                    <button onClick={() => setErrorMsg(null)} className="p-0.5 hover:bg-rose-100 myverse-dark:hover:bg-rose-900/30 rounded"><X className="h-3 w-3" /></button>
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-300 border-t-indigo-600" />
                 </div>
-            )}
+            ) : (
+                <div className="flex gap-4 h-full overflow-hidden">
 
-            {/* 컨텍스트 스트립 — 장소·일출·일몰·현재시각. 모바일·데스크톱 공통 노출 */}
-            {(placeName || solar.sunrise || solar.sunset || nowSlot || locDenied) && (
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
-                    {placeName && (
-                        <span className="inline-flex items-center gap-1.5 text-neutral-700 myverse-dark:text-neutral-200">
-                            <MapPin className="h-3.5 w-3.5 text-[#6366F1]" />
-                            <span className="font-medium">{placeName}</span>
-                        </span>
-                    )}
-                    {solar.sunrise && (
-                        <span className="inline-flex items-center gap-1.5 text-neutral-600 myverse-dark:text-neutral-300">
-                            <Sunrise className="h-3.5 w-3.5 text-amber-400" />
-                            <span className="font-mono tabular-nums">{solar.sunrise}</span>
-                        </span>
-                    )}
-                    {solar.sunset && (
-                        <span className="inline-flex items-center gap-1.5 text-neutral-600 myverse-dark:text-neutral-300">
-                            <Sunset className="h-3.5 w-3.5 text-orange-400" />
-                            <span className="font-mono tabular-nums">{solar.sunset}</span>
-                        </span>
-                    )}
-                    {date === today && nowSlot && (
-                        <span className="inline-flex items-center gap-1.5 text-neutral-600 myverse-dark:text-neutral-300 ml-auto">
-                            <Clock className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="font-mono tabular-nums">{nowSlot}</span>
-                        </span>
-                    )}
-                    {locDenied && !placeName && (
-                        <button
-                            onClick={() => setPermGuideOpen(true)}
-                            className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-[#6366F1] transition-colors"
-                        >
-                            <MapPin className="h-3 w-3" />
-                            위치 허용 시 장소·일출·일몰 자동 표시
-                        </button>
-                    )}
-                </div>
-            )}
+                    {/* ── 좌측: 데이터 소스 상태 + 요약 ── */}
+                    <div className="w-52 shrink-0 flex flex-col gap-3 overflow-y-auto pr-1">
 
-            {/* 3열 레이아웃 — 좌(통계) · 중(타임라인) · 우(분석) */}
-            <div className="mt-4 lg:grid lg:grid-cols-[220px_minmax(0,1fr)_220px] lg:gap-6 lg:items-start">
+                        {/* 데이터 소스 연동 */}
+                        <div className="bg-white/5 rounded-xl p-3">
+                            <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider mb-2">데이터 소스</div>
 
-                {/* ── 좌 사이드 — 카테고리·기록 요약 ─────────────── */}
-                <aside className="hidden lg:flex flex-col gap-4 sticky top-4">
-                    <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">카테고리</p>
-                        {catSorted.length > 0 ? (
-                            <div className="space-y-1.5">
-                                {catSorted.map(([key, mins]) => {
-                                    const pct = totalTracked > 0 ? (mins / totalTracked) * 100 : 0;
-                                    return (
-                                        <div key={key} className="text-xs">
-                                            <div className="flex items-center justify-between gap-1 mb-0.5">
-                                                <span className="flex items-center gap-1.5 text-neutral-600 myverse-dark:text-neutral-300 truncate">
-                                                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
-                                                    {catMeta(key).label}
-                                                </span>
-                                                <span className="text-[10px] text-neutral-400 tabular-nums shrink-0">{fmtMinutes(mins)}</span>
-                                            </div>
-                                            <div className="h-1 bg-neutral-100 myverse-dark:bg-[#252525] rounded-full overflow-hidden">
-                                                <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: catMeta(key).hex }} />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                <div className="flex items-center justify-between pt-2 mt-2 border-t border-neutral-100 myverse-dark:border-[#2A2A2A] text-[11px] text-neutral-500">
-                                    <span>총 활성</span>
-                                    <span className="tabular-nums font-medium">{fmtMinutes(totalTracked)}</span>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
-                                종료 시각을 입력하면 카테고리별 시간이 합산됩니다.
-                            </p>
-                        )}
-                    </section>
-
-                    <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">기록 요약</p>
-                        <div className="space-y-2 text-xs text-neutral-600 myverse-dark:text-neutral-300">
-                            <div className="flex items-center justify-between">
-                                <span>총 항목</span>
-                                <span className="tabular-nums font-medium">{totalEntries}건</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span>완료 입력</span>
-                                <span className="tabular-nums font-medium">{completionPct}%</span>
-                            </div>
-                            {incompleteCount > 0 && (
-                                <div className="flex items-center justify-between text-amber-600 myverse-dark:text-amber-400">
-                                    <span>종료 미입력</span>
-                                    <span className="tabular-nums font-medium">{incompleteCount}건</span>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-                </aside>
-
-                {/* ── 중앙 — 24h 바 + 세로 타임라인 ─────────────── */}
-                <div className="max-w-lg mx-auto lg:mx-0 lg:max-w-none w-full">
-
-                {/* ── 24h 미니 바 ──────────────────────── */}
-                <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4 mt-4">
-                    <div className="flex items-center justify-between mb-2.5">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400">24시간 타임라인</p>
-                        {totalTracked > 0 && (
-                            <p className="text-[10px] text-neutral-400 tabular-nums">
-                                기록 <span className="text-neutral-600 myverse-dark:text-neutral-200 font-medium">{fmtMinutes(totalTracked)}</span>
-                                <span className="ml-1 text-neutral-300">· {Math.round((totalTracked / 1440) * 100)}%/일</span>
-                            </p>
-                        )}
-                    </div>
-                    <div className="relative">
-                        {/* 3시간 단위 가이드 라인 */}
-                        <div className="absolute inset-0 h-9 pointer-events-none">
-                            {[3, 6, 9, 12, 15, 18, 21].map(h => (
-                                <div key={h} className="absolute top-0 h-full w-px bg-neutral-200/40 myverse-dark:bg-white/[0.04]" style={{ left: `${(h / 24) * 100}%` }} />
-                            ))}
-                        </div>
-                        <div className="h-9 bg-neutral-100 myverse-dark:bg-[#252525] rounded-lg overflow-hidden relative">
-                            {timedRoutines.flatMap(r => {
-                                const s = parseMinutes(r.start_time);
-                                const e = parseMinutes(r.end_time);
-                                if (s === null) return [];
-                                const title = `${r.activity} ${fmtTime(r.start_time)}${r.end_time ? `–${fmtTime(r.end_time)}` : ""}`;
-                                const color = catMeta(r.category).hex;
-                                const isOvernight = e !== null && e < s;
-                                // 자정 넘기는 블록 → 두 세그먼트로 분할
-                                const segs: Array<{ key: string; left: number; w: number }> = isOvernight
-                                    ? [
-                                        { key: `${r.id}-a`, left: (s / 1440) * 100, w: ((1440 - s) / 1440) * 100 },
-                                        ...(e! > 0 ? [{ key: `${r.id}-b`, left: 0, w: (e! / 1440) * 100 }] : []),
-                                      ]
-                                    : [{ key: r.id, left: (s / 1440) * 100, w: e !== null && e > s ? ((e - s) / 1440) * 100 : 0.7 }];
-                                return segs.map(seg => (
-                                    <div
-                                        key={seg.key}
-                                        className="absolute top-0 h-full opacity-90 hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center overflow-hidden px-1"
-                                        style={{ left: `${seg.left}%`, width: `${Math.max(seg.w, 0.7)}%`, backgroundColor: color }}
-                                        title={title}
-                                        onClick={() => openEdit(r)}
-                                    >
-                                        {seg.w >= 4 && (
-                                            <span className="text-[9px] font-medium text-white/95 truncate leading-tight drop-shadow-sm">
-                                                {r.activity}
-                                            </span>
+                            {/* Google Calendar */}
+                            <div className="flex items-center justify-between py-1.5 border-b border-white/5">
+                                <div className="flex items-center gap-2">
+                                    {calConnected ? (
+                                        <Wifi className="h-3.5 w-3.5 text-blue-400" />
+                                    ) : (
+                                        <WifiOff className="h-3.5 w-3.5 text-white/30" />
+                                    )}
+                                    <div>
+                                        <div className="text-xs font-medium text-white/80">Google Cal</div>
+                                        {calConnected && googleCal?.last_sync_at && (
+                                            <div className="text-[10px] text-white/30">{relTime(googleCal.last_sync_at)}</div>
+                                        )}
+                                        {!calConnected && (
+                                            <div className="text-[10px] text-white/30">미연결</div>
                                         )}
                                     </div>
-                                ));
-                            })}
-                            {/* 현재 시각 마커 */}
-                            {date === today && (() => {
-                                const m = parseMinutes(nowSlotKST());
-                                if (m === null) return null;
-                                return (
-                                    <div className="absolute top-0 h-full z-10" style={{ left: `${(m / 1440) * 100}%` }}>
-                                        <div className="w-0.5 h-full bg-rose-500" />
-                                        <div className="absolute -top-1 -left-[3px] w-2 h-2 rounded-full bg-rose-500 shadow-sm" />
+                                </div>
+                                {calConnected && (
+                                    <button
+                                        onClick={syncGoogleCalendar}
+                                        disabled={syncing}
+                                        className="p-1 rounded hover:bg-white/10 transition-colors disabled:opacity-50"
+                                        title="동기화"
+                                    >
+                                        <RefreshCw className={`h-3 w-3 text-blue-400 ${syncing ? "animate-spin" : ""}`} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* GPS 위치 */}
+                            <div className="flex items-center gap-2 py-1.5 border-b border-white/5">
+                                <MapPin className={`h-3.5 w-3.5 ${geoName ? "text-emerald-400" : "text-white/30"}`} />
+                                <div>
+                                    <div className="text-xs font-medium text-white/80">GPS</div>
+                                    <div className="text-[10px] text-white/30">{geoName ?? "위치 없음"}</div>
+                                </div>
+                            </div>
+
+                            {/* 날씨 */}
+                            {weatherCode != null && (
+                                <div className="flex items-center justify-between py-1.5 border-b border-white/5">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-base leading-none">{weatherLabel(weatherCode).emoji}</span>
+                                        <div>
+                                            <div className="text-xs font-medium text-white/80">{weatherLabel(weatherCode).label}</div>
+                                            {tempMax != null && tempMin != null && (
+                                                <div className="text-[10px] text-white/40">
+                                                    {tempMax}° / {tempMin}°
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* 일출·일몰 */}
+                            {(sunrise || sunset) && (
+                                <div className="flex items-center gap-3 py-1.5 border-b border-white/5">
+                                    <div className="flex items-center gap-1">
+                                        <Sunrise className="h-3 w-3 text-amber-400" />
+                                        <span className="text-[10px] text-white/50">{sunrise}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Sunset className="h-3 w-3 text-orange-400" />
+                                        <span className="text-[10px] text-white/50">{sunset}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 외부 이벤트 개수 */}
+                            <div className="flex items-center gap-2 py-1.5">
+                                <Calendar className="h-3.5 w-3.5 text-blue-400" />
+                                <div>
+                                    <div className="text-xs font-medium text-white/80">캘린더 이벤트</div>
+                                    <div className="text-[10px] text-white/30">{externalEvents.length}개</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 시간 요약 */}
+                        <div className="bg-white/5 rounded-xl p-3">
+                            <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider mb-2">기록 요약</div>
+                            {totalTrackedMin > 0 ? (
+                                <>
+                                    <div className="text-lg font-bold text-white">{fmtMinutes(totalTrackedMin)}</div>
+                                    <div className="text-[10px] text-white/40 mb-2">기록된 시간</div>
+                                    <div className="space-y-1.5">
+                                        {Object.entries(catStats)
+                                            .sort(([, a], [, b]) => b - a)
+                                            .slice(0, 5)
+                                            .map(([cat, min]) => {
+                                                const meta = catMeta(cat);
+                                                const pct = Math.round((min / totalTrackedMin) * 100);
+                                                return (
+                                                    <div key={cat} className="flex items-center gap-2">
+                                                        <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: meta?.hex ?? "#6366F1" }} />
+                                                        <div className="flex-1 text-[10px] text-white/60 truncate">{meta?.label ?? cat}</div>
+                                                        <div className="text-[10px] text-white/40">{pct}%</div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-[10px] text-white/30">기록 없음</div>
+                            )}
+                        </div>
+
+                        {/* 주요 장소 */}
+                        {topPlaces.length > 0 && (
+                            <div className="bg-white/5 rounded-xl p-3">
+                                <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider mb-2">주요 장소</div>
+                                <div className="space-y-2">
+                                    {topPlaces.map(p => (
+                                        <div key={p.id} className="flex items-center gap-2">
+                                            <MapPin className="h-3 w-3 text-emerald-400 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-xs text-white/80 truncate">{p.place_name}</div>
+                                                {p.duration_min && (
+                                                    <div className="text-[10px] text-white/30">{fmtMinutes(p.duration_min)}</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 순간(사진) */}
+                        {moments.length > 0 && (
+                            <div className="bg-white/5 rounded-xl p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Camera className="h-3.5 w-3.5 text-amber-400" />
+                                    <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider">순간</div>
+                                </div>
+                                <div className="text-sm font-medium text-white">{moments.length}개</div>
+                                <div className="text-[10px] text-white/30">오늘 기록된 사진·영상</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ── 중앙: 24h 타임라인 ── */}
+                    <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+                        {/* 24h 미니바 */}
+                        <div className="h-6 bg-white/5 rounded-lg mb-3 relative overflow-hidden flex shrink-0">
+                            {/* 일출~일몰 배경 */}
+                            {sunrise && sunset && (() => {
+                                const srMin = parseMinutes(sunrise) ?? 0;
+                                const ssMin = parseMinutes(sunset) ?? 1440;
+                                return (
+                                    <div
+                                        className="absolute top-0 bottom-0 bg-amber-500/10"
+                                        style={{ left: `${(srMin / 1440) * 100}%`, width: `${((ssMin - srMin) / 1440) * 100}%` }}
+                                    />
                                 );
                             })()}
+                            {/* 외부 이벤트 */}
+                            {externalEvents.map(e => {
+                                const s = isoToKSTMinutes(e.start_at);
+                                const en = e.end_at ? isoToKSTMinutes(e.end_at) : s + 60;
+                                return (
+                                    <div
+                                        key={e.id}
+                                        className="absolute top-1 bottom-1 rounded-sm opacity-80"
+                                        style={{
+                                            left: `${(s / 1440) * 100}%`,
+                                            width: `${Math.max(((en - s) / 1440) * 100, 0.5)}%`,
+                                            backgroundColor: providerColor(e.provider),
+                                        }}
+                                        title={e.title}
+                                    />
+                                );
+                            })}
+                            {/* 루틴 */}
+                            {routines.filter(r => r.start_time).map(r => {
+                                const s = parseMinutes(r.start_time) ?? 0;
+                                const e = parseMinutes(r.end_time) ?? s + 60;
+                                const meta = catMeta(r.category);
+                                return (
+                                    <div
+                                        key={r.id}
+                                        className="absolute top-1.5 bottom-1.5 rounded-sm opacity-60"
+                                        style={{
+                                            left: `${(s / 1440) * 100}%`,
+                                            width: `${Math.max(((e - s) / 1440) * 100, 0.3)}%`,
+                                            backgroundColor: meta?.hex ?? "#6366F1",
+                                        }}
+                                    />
+                                );
+                            })}
+                            {/* 현재 시각 마커 */}
+                            {nowMin != null && (
+                                <div
+                                    className="absolute top-0 bottom-0 w-0.5 bg-red-400"
+                                    style={{ left: `${(nowMin / 1440) * 100}%` }}
+                                />
+                            )}
+                            {/* 시간 눈금 */}
+                            {[6, 12, 18].map(h => (
+                                <div
+                                    key={h}
+                                    className="absolute top-0 bottom-0 w-px bg-white/10"
+                                    style={{ left: `${(h / 24) * 100}%` }}
+                                />
+                            ))}
                         </div>
-                        {/* 장소 핀 + 순간 마커 */}
-                        {(places.some(p => p.visited_at) || moments.some(m => m.happened_at)) && (
-                            <div className="relative h-4 mt-1">
+
+                        {/* 세로 타임라인 */}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="relative" style={{ height: TIMELINE_HEIGHT }}>
+
+                                {/* 시간 눈금선 */}
+                                {Array.from({ length: 25 }, (_, h) => (
+                                    <div
+                                        key={h}
+                                        className="absolute left-0 right-0 flex items-center"
+                                        style={{ top: h * 60 * PX_PER_MIN }}
+                                    >
+                                        <span className="text-[10px] text-white/20 w-10 shrink-0 text-right pr-2 leading-none">
+                                            {h < 24 ? `${String(h).padStart(2, "0")}:00` : ""}
+                                        </span>
+                                        <div className="flex-1 h-px bg-white/5" />
+                                    </div>
+                                ))}
+
+                                {/* 새벽 토글 배경 */}
+                                {!showDawn && (
+                                    <button
+                                        onClick={() => setShowDawn(true)}
+                                        className="absolute left-10 right-0 flex items-center justify-center text-[10px] text-white/20 hover:text-white/40 transition-colors z-10"
+                                        style={{ top: 0, height: 6 * 60 * PX_PER_MIN }}
+                                    >
+                                        새벽 (0–6시) 펼치기
+                                    </button>
+                                )}
+
+                                {/* 일출~일몰 배경 */}
+                                {sunrise && sunset && (() => {
+                                    const srMin = parseMinutes(sunrise) ?? 0;
+                                    const ssMin = parseMinutes(sunset) ?? 1440;
+                                    return (
+                                        <div
+                                            className="absolute left-10 right-0 bg-amber-500/5 pointer-events-none"
+                                            style={{
+                                                top: srMin * PX_PER_MIN,
+                                                height: (ssMin - srMin) * PX_PER_MIN,
+                                            }}
+                                        />
+                                    );
+                                })()}
+
+                                {/* 현재 시각 라인 */}
+                                {nowMin != null && (
+                                    <div
+                                        ref={nowRef}
+                                        className="absolute left-10 right-0 flex items-center gap-1 z-20 pointer-events-none"
+                                        style={{ top: nowMin * PX_PER_MIN - 1 }}
+                                    >
+                                        <div className="h-2 w-2 rounded-full bg-red-400 shrink-0" />
+                                        <div className="flex-1 h-0.5 bg-red-400/60" />
+                                        <span className="text-[10px] text-red-400 pr-2">{nowSlotKST()}</span>
+                                    </div>
+                                )}
+
+                                {/* 장소 방문 핀 */}
                                 {places.filter(p => p.visited_at).map(p => {
-                                    const m = parseMinutes(p.visited_at);
-                                    if (m === null) return null;
-                                    const left = (m / 1440) * 100;
+                                    const min = isoToKSTMinutes(p.visited_at!);
                                     return (
                                         <div
                                             key={p.id}
-                                            className="absolute top-0 -translate-x-1/2 z-20"
-                                            style={{ left: `${left}%` }}
-                                            title={`📍 ${p.place_name} ${fmtTime(p.visited_at)}${p.duration_min ? ` (${fmtMinutes(p.duration_min)})` : ""}`}
+                                            className="absolute left-10 flex items-center gap-1 z-10"
+                                            style={{ top: min * PX_PER_MIN - 6 }}
                                         >
-                                            <MapPin className="h-3 w-3 text-rose-400" />
+                                            <div className="h-3 w-3 rounded-full bg-emerald-400/80 flex items-center justify-center shrink-0">
+                                                <MapPin className="h-2 w-2 text-white" />
+                                            </div>
+                                            <span className="text-[10px] text-emerald-300/70 truncate max-w-[120px]">{p.place_name}</span>
                                         </div>
                                     );
                                 })}
+
+                                {/* 순간(사진) 핀 */}
                                 {moments.filter(m => m.happened_at).map(m => {
-                                    const mins = parseMinutes(m.happened_at);
-                                    if (mins === null) return null;
-                                    const left = (mins / 1440) * 100;
+                                    const min = isoToKSTMinutes(m.happened_at!);
                                     return (
                                         <div
                                             key={m.id}
-                                            className="absolute top-1 -translate-x-1/2 z-20 w-1.5 h-1.5 rounded-full bg-amber-400 border border-white shadow-sm"
-                                            style={{ left: `${left}%` }}
-                                            title={`📷 ${fmtTime(m.happened_at)}${m.caption ? ` · ${m.caption}` : ""}`}
-                                        />
+                                            className="absolute right-2 flex items-center gap-1 z-10"
+                                            style={{ top: min * PX_PER_MIN - 6 }}
+                                            title={m.caption ?? "순간"}
+                                        >
+                                            <Camera className="h-3 w-3 text-amber-400/70" />
+                                        </div>
                                     );
                                 })}
-                            </div>
-                        )}
-                        <div className="flex justify-between mt-1">
-                            {[0, 3, 6, 9, 12, 15, 18, 21].map(h => (
-                                <span key={h} className="text-[9px] text-neutral-300 tabular-nums">{h}시</span>
-                            ))}
-                        </div>
-                    </div>
-                    {/* 카테고리 범례 — 항상 표시 (액션 색상 매핑) */}
-                    {catSorted.length > 0 ? (
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 pt-3 border-t border-neutral-100 myverse-dark:border-[#2A2A2A] items-center">
-                            {catSorted.map(([key, mins]) => {
-                                const pct = totalTracked > 0 ? Math.round((mins / totalTracked) * 100) : 0;
-                                return (
-                                    <span key={key} className="flex items-center gap-1.5 text-[10px] text-neutral-500 myverse-dark:text-neutral-400">
-                                        <span className="h-2 w-2 rounded-sm shrink-0" style={{ backgroundColor: catMeta(key).hex }} />
-                                        <span className="text-neutral-700 myverse-dark:text-neutral-200">{catMeta(key).label}</span>
-                                        <span className="tabular-nums">{fmtMinutes(mins)}</span>
-                                        <span className="text-neutral-300">{pct}%</span>
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    ) : timedRoutines.length > 0 && (
-                        <p className="text-[10px] text-neutral-300 mt-2.5">
-                            종료 시각을 입력하면 시간이 합산됩니다
-                        </p>
-                    )}
-                </section>
 
-                {/* ── 세로 타임라인 ────────────────────── */}
-                {loading ? (
-                    <div className="flex justify-center py-16">
-                        <Loader2 className="h-5 w-5 animate-spin text-neutral-200" />
-                    </div>
-                ) : (
-                    <div className="relative mt-4">
-                        {/* 세로 연결선 */}
-                        <div className="absolute left-[7px] top-0 bottom-0 w-px bg-neutral-200 myverse-dark:bg-[#2A2A2A]" />
-
-                        {/* 새벽 시간대 토글 */}
-                        {!showDawn && (
-                            <button
-                                onClick={() => setShowDawn(true)}
-                                className="w-full text-[10px] text-neutral-300 hover:text-neutral-500 myverse-dark:hover:text-neutral-400 py-2 text-center transition-colors"
-                            >
-                                ↑ 새벽 (0–5시) 보기
-                            </button>
-                        )}
-
-                        {slots.map(slot => {
-                            const items = routines.filter(r => r.start_time?.slice(0, 5) === slot);
-                            const isNow    = slot === nowSlot;
-                            const isAdding = addingSlot === slot;
-                            const hasContent = items.length > 0 || isAdding;
-                            const meta = items.length > 0 ? catMeta(items[0].category) : null;
-
-                            return (
-                                <div
-                                    key={slot}
-                                    ref={isNow ? nowRef : undefined}
-                                    className={`flex items-start gap-0 group ${hasContent ? "py-3" : "py-[5px]"}`}
-                                >
-                                    {/* ○ 원형 마커 */}
-                                    <div
-                                        className={`relative z-10 shrink-0 mt-[3px] w-[15px] h-[15px] rounded-full border-2 transition-colors ${
-                                            items.length > 0
-                                                ? "border-transparent"
-                                                : isNow
-                                                    ? "border-neutral-500 bg-neutral-200 myverse-dark:bg-[#444]"
-                                                    : gapSlots.has(slot)
-                                                        ? "border-amber-200 myverse-dark:border-amber-800/50 bg-white myverse-dark:bg-[#111]"
-                                                        : "border-neutral-300 bg-white myverse-dark:bg-[#111]"
-                                        }`}
-                                        style={meta ? { backgroundColor: meta.hex, borderColor: meta.hex } : undefined}
-                                    />
-
-                                    {/* 시간 라벨 */}
-                                    <span className={`ml-3 w-10 text-[11px] shrink-0 mt-0.5 tabular-nums ${
-                                        isNow
-                                            ? "text-[#6366F1] myverse-dark:text-[#A5B4FC] font-semibold"
-                                            : items.length > 0
-                                                ? "text-neutral-600 myverse-dark:text-neutral-200 font-medium"
-                                                : "text-neutral-400 myverse-dark:text-neutral-500"
-                                    }`}>
-                                        {slot}
-                                    </span>
-
-                                    {/* 콘텐츠 영역 */}
-                                    <div className="flex-1 min-w-0 ml-3">
-                                        {isAdding && !editingId ? (
-                                            <InlineForm
-                                                inputRef={inputRef}
-                                                activity={inActivity} setActivity={setInActivity}
-                                                start={inStart} setStart={setInStart}
-                                                end={inEnd} setEnd={setInEnd}
-                                                cat={inCat} setCat={setInCat}
-                                                note={inNote} setNote={setInNote}
-                                                saving={saving} locLoading={locLoading}
-                                                isEdit={false}
-                                                onSave={submitForm}
-                                                onCancel={closeForm}
-                                                onLocation={autoLocation}
-                                                bases={bases}
-                                            />
-                                        ) : items.length > 0 ? (
-                                            <div className="space-y-2">
-                                                {items.map(r => (
-                                                    editingId === r.id ? (
-                                                        <InlineForm
-                                                            key={r.id}
-                                                            inputRef={inputRef}
-                                                            activity={inActivity} setActivity={setInActivity}
-                                                            start={inStart} setStart={setInStart}
-                                                            end={inEnd} setEnd={setInEnd}
-                                                            cat={inCat} setCat={setInCat}
-                                                            note={inNote} setNote={setInNote}
-                                                            saving={saving} locLoading={locLoading}
-                                                            isEdit={true}
-                                                            onSave={submitForm}
-                                                            onCancel={closeForm}
-                                                            onLocation={autoLocation}
-                                                            bases={bases}
-                                                        />
-                                                    ) : (
-                                                        <div key={r.id} className="group/row flex items-start justify-between gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => openEdit(r)}
-                                                                className="text-left min-w-0 flex-1 hover:bg-neutral-50 myverse-dark:hover:bg-[#1A1A1A] rounded -mx-1 px-1 py-0.5 transition-colors"
-                                                            >
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <p className="text-sm text-neutral-800 myverse-dark:text-neutral-200 leading-snug">
-                                                                        {r.activity}
-                                                                    </p>
-                                                                    <CaptureBadge mode={r.capture_mode} />
-                                                                </div>
-                                                                {r.note && (
-                                                                    <p className="text-[11px] text-neutral-400 mt-0.5">{r.note}</p>
-                                                                )}
-                                                                <span className="text-[9px] text-neutral-300 uppercase tracking-wide">
-                                                                    {catMeta(r.category).label}
-                                                                    {r.end_time ? ` · ${fmtTime(r.start_time)}–${fmtTime(r.end_time)}` : ` · ${fmtTime(r.start_time)} (종료 미입력)`}
-                                                                </span>
-                                                            </button>
-                                                            <button
-                                                                onClick={() => deleteEntry(r.id)}
-                                                                className="p-1.5 text-neutral-300 hover:text-rose-400 transition-colors shrink-0 mt-0.5"
-                                                                aria-label="삭제"
-                                                            >
-                                                                <Trash2 className="h-3.5 w-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    )
-                                                ))}
-                                                {/* 이 슬롯에 항목 추가 — 항상 표시 (일관성) */}
-                                                <button
-                                                    onClick={() => openSlot(slot)}
-                                                    className="flex items-center gap-1 text-[10px] text-neutral-300 hover:text-[#6366F1] transition-colors"
-                                                >
-                                                    <Plus className="h-3 w-3" /> 추가
-                                                </button>
-                                            </div>
-                                        ) : gapSlots.has(slot) ? (
-                                            /* 갭 슬롯: 미기록 활동 구간 — 앰버 프롬프트 */
-                                            <button
-                                                onClick={() => openSlot(slot)}
-                                                className="inline-flex items-center gap-1.5 group/gap py-1 pr-3 -my-1 transition-colors"
-                                                aria-label={`${slot} 기록 없음 — 추가`}
-                                            >
-                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-300/70 myverse-dark:bg-amber-600/50 group-hover/gap:bg-[#6366F1]/50 transition-colors shrink-0" />
-                                                <span className="text-[10px] text-amber-400/70 myverse-dark:text-amber-500/60 group-hover/gap:text-[#6366F1] transition-colors">기록 없음</span>
-                                                <Plus className="h-3 w-3 text-neutral-300 group-hover/gap:text-[#6366F1] transition-colors opacity-0 group-hover/gap:opacity-100" />
-                                            </button>
-                                        ) : (
-                                            /* 빈 슬롯: 일반 */
-                                            <button
-                                                onClick={() => openSlot(slot)}
-                                                className="inline-flex items-center gap-1 text-neutral-300 hover:text-[#6366F1] transition-colors py-1 pr-3 -my-1"
-                                                aria-label={`${slot} 시간 추가`}
-                                            >
-                                                <Plus className="h-3.5 w-3.5" />
-                                                <span className="text-[10px]">추가</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* 데이터 없을 때 안내 */}
-                        {routines.length === 0 && !addingSlot && (
-                            <div className="text-center py-12">
-                                <p className="text-xs text-neutral-300 italic mb-3">
-                                    오늘의 시간 사용을 기록하세요
-                                </p>
-                                <button
-                                    onClick={() => openSlot(nowSlot ?? "09:00")}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[#6366F1]/10 text-[#6366F1] hover:bg-[#6366F1]/15 transition-colors"
-                                >
-                                    <Plus className="h-4 w-4" />
-                                    첫 시간 추가
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-                </div>{/* /center column */}
-
-                {/* ── 우 사이드 — 시간대 분포 + 활동 Top ─────────── */}
-                <aside className="hidden lg:flex flex-col gap-4 sticky top-4">
-                    <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">시간대 분포</p>
-                        {Object.keys(periodTotals).length > 0 ? (
-                            <div className="space-y-1.5">
-                                {PERIODS.map(p => {
-                                    const mins = periodTotals[p.key] ?? 0;
-                                    const pct = totalTracked > 0 ? (mins / totalTracked) * 100 : 0;
-                                    if (mins === 0) return null;
+                                {/* 외부 이벤트 블록 */}
+                                {externalEvents.map(e => {
+                                    const s = isoToKSTMinutes(e.start_at);
+                                    const en = e.end_at ? isoToKSTMinutes(e.end_at) : s + 60;
+                                    const h = Math.max((en - s) * PX_PER_MIN, 20);
                                     return (
-                                        <div key={p.key} className="text-xs">
-                                            <div className="flex items-center justify-between gap-1 mb-0.5">
-                                                <span className="text-neutral-600 myverse-dark:text-neutral-300">{p.label}</span>
-                                                <span className="text-[10px] text-neutral-400 tabular-nums shrink-0">{fmtMinutes(mins)}</span>
+                                        <div
+                                            key={e.id}
+                                            className="absolute left-12 right-14 rounded-md px-2 py-1 overflow-hidden z-10"
+                                            style={{
+                                                top: s * PX_PER_MIN,
+                                                height: h,
+                                                backgroundColor: `${providerColor(e.provider)}20`,
+                                                borderLeft: `2px solid ${providerColor(e.provider)}`,
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[10px] font-medium text-white/80 truncate flex-1">{e.title}</span>
+                                                <span className="text-[9px] text-white/30 shrink-0">{providerLabel(e.provider)}</span>
                                             </div>
-                                            <div className="h-1 bg-neutral-100 myverse-dark:bg-[#252525] rounded-full overflow-hidden">
-                                                <div className="h-full rounded-full bg-[#6366F1]" style={{ width: `${pct}%` }} />
+                                            {h > 28 && e.location && (
+                                                <div className="text-[9px] text-white/40 truncate mt-0.5">{e.location}</div>
+                                            )}
+                                            {h > 36 && (
+                                                <div className="text-[9px] text-white/30 mt-0.5">
+                                                    {fmtTime(isoToKST(e.start_at))} – {e.end_at ? fmtTime(isoToKST(e.end_at)) : ""}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                                {/* 루틴 블록 (참고 레이어) */}
+                                {routines.filter(r => r.start_time).map(r => {
+                                    const s = parseMinutes(r.start_time) ?? 0;
+                                    const e = parseMinutes(r.end_time) ?? s + 60;
+                                    const h = Math.max((e - s) * PX_PER_MIN, 18);
+                                    const meta = catMeta(r.category);
+                                    return (
+                                        <div
+                                            key={r.id}
+                                            className="absolute right-2 rounded px-2 py-0.5 overflow-hidden z-10 border border-white/5"
+                                            style={{
+                                                top: s * PX_PER_MIN,
+                                                height: h,
+                                                width: 100,
+                                                backgroundColor: `${meta?.hex ?? "#6366F1"}15`,
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <div
+                                                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                                                    style={{ backgroundColor: meta?.hex ?? "#6366F1" }}
+                                                />
+                                                <span className="text-[9px] text-white/60 truncate">{r.activity}</span>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        ) : (
-                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
-                                기록을 추가하면 오전/오후/저녁/심야 분포가 표시됩니다.
-                            </p>
-                        )}
-                    </section>
+                        </div>
+                    </div>
 
-                    <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">시간별 활동</p>
-                        {hourlyData.length > 0 ? (
-                            <>
-                                <div className="flex gap-px">
-                                    {Array.from({ length: 24 }, (_, h) => {
-                                        const key = String(h).padStart(2, "0");
-                                        const cell = hourlyData.find(d => d.key === key);
-                                        const total = cell?.total ?? 0;
-                                        const opacity = total > 0 ? 0.15 + (total / maxHourly) * 0.85 : 0;
-                                        return (
-                                            <div
-                                                key={h}
-                                                title={`${key}:00 · ${total}건`}
-                                                className="flex-1 h-5 rounded-[1px]"
-                                                style={{ backgroundColor: total > 0 ? `rgba(99,102,241,${opacity.toFixed(2)})` : undefined, minWidth: 0 }}
-                                            />
-                                        );
-                                    })}
+                    {/* ── 우측: 시간대 분포 ── */}
+                    <div className="w-44 shrink-0 flex flex-col gap-3 overflow-y-auto pl-1">
+
+                        {/* 시간대별 활동 밀도 */}
+                        <div className="bg-white/5 rounded-xl p-3">
+                            <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider mb-2">시간대 활동</div>
+                            {hourlyData.length > 0 ? (
+                                <div className="space-y-0.5">
+                                    {hourlyData
+                                        .filter(h => parseInt(h.key) >= (showDawn ? 0 : 6))
+                                        .slice(0, showDawn ? 24 : 18)
+                                        .map(h => {
+                                            const pct = Math.round((h.total / maxHourly) * 100);
+                                            return (
+                                                <div key={h.key} className="flex items-center gap-1.5">
+                                                    <span className="text-[9px] text-white/30 w-8 shrink-0 text-right">{h.key}:00</span>
+                                                    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-indigo-400 rounded-full"
+                                                            style={{ width: `${pct}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-[9px] text-white/30 w-4 shrink-0">{h.total > 0 ? h.total : ""}</span>
+                                                </div>
+                                            );
+                                        })}
                                 </div>
-                                <div className="flex justify-between mt-1">
-                                    {[0, 6, 12, 18, 23].map(h => (
-                                        <span key={h} className="text-[9px] text-neutral-300 tabular-nums">{h}시</span>
-                                    ))}
+                            ) : (
+                                <div className="text-[10px] text-white/30">데이터 없음</div>
+                            )}
+                        </div>
+
+                        {/* 미연결 소스 안내 */}
+                        {!calConnected && (
+                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
+                                <div className="flex items-center gap-1.5 mb-1.5">
+                                    <Calendar className="h-3.5 w-3.5 text-blue-400" />
+                                    <span className="text-[10px] font-medium text-blue-300">캘린더 연동</span>
                                 </div>
-                            </>
-                        ) : (
-                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
-                                기록을 추가하면 시간별 활동 밀도가 표시됩니다.
-                            </p>
-                        )}
-                    </section>
-
-                    <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">활동 Top</p>
-                        {activityTop.length > 0 ? (
-                            <ol className="space-y-1.5">
-                                {activityTop.map(([name, count], i) => (
-                                    <li key={name} className="flex items-center gap-2 text-xs">
-                                        <span className="text-[10px] text-neutral-300 w-3 shrink-0 tabular-nums">{i + 1}</span>
-                                        <span className="text-neutral-700 myverse-dark:text-neutral-200 flex-1 truncate">{name}</span>
-                                        {count > 1 && <span className="text-[10px] text-neutral-400 shrink-0">×{count}</span>}
-                                    </li>
-                                ))}
-                            </ol>
-                        ) : (
-                            <p className="text-[11px] text-neutral-300 italic leading-relaxed">
-                                오늘의 활동이 없습니다.
-                            </p>
-                        )}
-                    </section>
-
-                    {date === today && (
-                        <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">현재 시각</p>
-                            <p className="font-mono text-2xl text-neutral-800 myverse-dark:text-neutral-100 tabular-nums">
-                                {nowSlot ?? "—"}
-                            </p>
-                            <p className="text-[10px] text-neutral-400 mt-0.5">KST · 30분 단위</p>
-                        </section>
-                    )}
-
-                    {(solar.sunrise || solar.sunset) && (
-                        <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-100 myverse-dark:border-[#2A2A2A] rounded-xl p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2.5">일출 · 일몰</p>
-                            <div className="space-y-1.5 text-xs">
-                                {solar.sunrise && (
-                                    <div className="flex items-center justify-between text-neutral-600 myverse-dark:text-neutral-300">
-                                        <span className="inline-flex items-center gap-1.5">
-                                            <Sunrise className="h-3.5 w-3.5 text-amber-400" />
-                                            일출
-                                        </span>
-                                        <span className="font-mono tabular-nums">{solar.sunrise}</span>
-                                    </div>
-                                )}
-                                {solar.sunset && (
-                                    <div className="flex items-center justify-between text-neutral-600 myverse-dark:text-neutral-300">
-                                        <span className="inline-flex items-center gap-1.5">
-                                            <Sunset className="h-3.5 w-3.5 text-orange-400" />
-                                            일몰
-                                        </span>
-                                        <span className="font-mono tabular-nums">{solar.sunset}</span>
-                                    </div>
-                                )}
+                                <p className="text-[10px] text-blue-200/60 leading-relaxed">
+                                    Google Calendar를 연동하면 일정이 자동으로 타임라인에 표시됩니다.
+                                </p>
+                                <a
+                                    href="/myverse/app/settings"
+                                    className="mt-2 block text-center text-[10px] text-blue-300 hover:text-blue-200 transition-colors"
+                                >
+                                    설정에서 연동하기 →
+                                </a>
                             </div>
-                        </section>
-                    )}
-                </aside>
+                        )}
 
-            </div>{/* /3-col grid */}
+                        {/* 데이터 소스 범례 */}
+                        <div className="bg-white/5 rounded-xl p-3">
+                            <div className="text-[10px] text-white/40 font-medium uppercase tracking-wider mb-2">범례</div>
+                            <div className="space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-2 w-3 rounded-sm" style={{ backgroundColor: providerColor("google_calendar") }} />
+                                    <span className="text-[10px] text-white/50">Google Calendar</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-2 w-3 rounded-sm bg-indigo-400/60" />
+                                    <span className="text-[10px] text-white/50">오늘 기록</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="h-2.5 w-2.5 text-emerald-400" />
+                                    <span className="text-[10px] text-white/50">GPS 장소</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Camera className="h-2.5 w-2.5 text-amber-400" />
+                                    <span className="text-[10px] text-white/50">사진·영상</span>
+                                </div>
+                            </div>
+                        </div>
 
-            {/* 위치 권한 복구 가이드 — 거부된 권한을 사용자가 다시 켤 수 있도록 단계 안내 */}
-            <PermissionGuideModal
-                open={permGuideOpen}
-                onClose={() => setPermGuideOpen(false)}
-                permission="geolocation"
-                onRetry={async () => { await autoLocation(); }}
-                onGranted={() => { void autoLocation(); }}
-            />
-        </PageShell>
-    );
-}
-
-// ─── 인라인 추가/수정 폼 ───────────────────────────────────────
-
-function InlineForm({
-    inputRef, activity, setActivity, start, setStart, end, setEnd,
-    cat, setCat, note, setNote,
-    saving, locLoading, isEdit, onSave, onCancel, onLocation,
-    bases,
-}: {
-    inputRef: React.RefObject<HTMLInputElement | null>;
-    activity: string; setActivity: (v: string) => void;
-    start: string; setStart: (v: string) => void;
-    end: string; setEnd: (v: string) => void;
-    cat: string; setCat: (v: string) => void;
-    note: string; setNote: (v: string) => void;
-    saving: boolean; locLoading: boolean; isEdit: boolean;
-    onSave: () => void; onCancel: () => void; onLocation: () => void;
-    bases: ActivityBase[];
-}) {
-    return (
-        <div className="bg-neutral-50 myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#333] rounded-xl p-3 space-y-2.5">
-            {/* 활동 입력 + 위치 자동 버튼 */}
-            <div className="flex items-center gap-2">
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={activity}
-                    onChange={e => setActivity(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") onSave(); if (e.key === "Escape") onCancel(); }}
-                    placeholder="무엇을 했나요? (또는 위치)"
-                    className="flex-1 text-sm bg-transparent text-neutral-800 myverse-dark:text-neutral-100 placeholder:text-neutral-300 focus:outline-none min-w-0"
-                />
-                <button
-                    type="button"
-                    onClick={onLocation}
-                    disabled={locLoading}
-                    title="현재 위치 자동 입력"
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-[#6366F1] hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] transition-colors disabled:opacity-40"
-                >
-                    {locLoading
-                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        : <MapPin className="h-3.5 w-3.5" />
-                    }
-                </button>
-            </div>
-
-            {/* 등록된 거점 빠른 선택 — Settings에서 등록한 거점 한 번에 채움 */}
-            {bases.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                    {bases.map(b => (
-                        <button
-                            key={b.id}
-                            type="button"
-                            onClick={() => {
-                                setActivity(b.name);
-                                if (b.address) setNote(b.address);
-                            }}
-                            className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-100 myverse-dark:bg-[#2A2A2A] text-neutral-600 myverse-dark:text-neutral-300 hover:bg-[#6366F1]/10 hover:text-[#6366F1] transition-colors"
-                            title={b.address ?? b.name}
-                        >
-                            {b.name}
-                        </button>
-                    ))}
+                        {/* 현재 시각 */}
+                        {date === today && (
+                            <div className="bg-white/5 rounded-xl p-3">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-3.5 w-3.5 text-red-400" />
+                                    <div>
+                                        <div className="text-[10px] text-white/40">현재 시각</div>
+                                        <div className="text-sm font-medium text-white">{nowSlotKST()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
-
-            {/* 시작/종료 시각 — 30분 단위로 보정해도 자유 입력 가능 */}
-            <div className="flex items-center gap-2">
-                <label className="text-[10px] text-neutral-400 uppercase tracking-wide w-8 shrink-0">시작</label>
-                <input
-                    type="time"
-                    value={start}
-                    onChange={e => setStart(e.target.value)}
-                    step={1800}
-                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#333] rounded px-2 py-1 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
-                />
-                <label className="text-[10px] text-neutral-400 uppercase tracking-wide w-8 shrink-0 ml-2">종료</label>
-                <input
-                    type="time"
-                    value={end}
-                    onChange={e => setEnd(e.target.value)}
-                    step={1800}
-                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#333] rounded px-2 py-1 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
-                />
-            </div>
-
-            {/* 상세 메모 / 위치 */}
-            <input
-                type="text"
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                placeholder="상세 위치 또는 메모 (선택)"
-                className="w-full text-xs bg-transparent text-neutral-500 myverse-dark:text-neutral-400 placeholder:text-neutral-300 focus:outline-none"
-            />
-
-            {/* 카테고리 */}
-            <div className="flex flex-wrap gap-1">
-                {CATEGORIES.map(c => (
-                    <button
-                        key={c.key}
-                        type="button"
-                        onClick={() => setCat(c.key)}
-                        className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
-                            cat === c.key
-                                ? "text-white"
-                                : "bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-300"
-                        }`}
-                        style={cat === c.key ? { backgroundColor: c.hex } : undefined}
-                    >
-                        {c.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* 저장/취소 */}
-            <div className="flex items-center gap-2">
-                <button
-                    type="button"
-                    onClick={onSave}
-                    disabled={saving || !activity.trim()}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#6366F1] text-white disabled:opacity-40 hover:bg-[#4F46E5] transition-colors"
-                >
-                    {saving ? "저장…" : isEdit ? "수정" : "추가"}
-                </button>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 myverse-dark:hover:bg-[#2A2A2A] transition-colors"
-                >
-                    <X className="h-3.5 w-3.5" />
-                </button>
-            </div>
-        </div>
+        </PageShell>
     );
 }

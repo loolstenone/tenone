@@ -161,11 +161,13 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 112 (2026-05-06)** — Myverse 로그인 UI 브랜드 통일 (`/myverse/login` 전용 페이지 · LoginModal indigo) |
-| **이전 Phase** | 세션 111 — 무한 깜빡임 종결 (DB FK RENAME · ClientRedirect) / 세션 110 — Daily UI 7개선 / 세션 109 — 9-domain 진입점 |
-| **다음 Phase** | features/planners → features/myverse/planner 폴더 완전 리네이밍 · PWA 아이콘 인디고 M 교체 · Toss 가맹점 승인 + Vercel env |
+| **Phase** | **세션 113 (2026-05-07)** — MyVerseHeader 모바일 햄버거 버튼 수정 + 9영역 통합 연구 완료 |
+| **이전 Phase** | 세션 112 — Myverse 로그인 UI 브랜드 통일 (`/myverse/login`) / 세션 111 — 무한 깜빡임 종결 / 세션 110 — Daily UI 7개선 |
+| **다음 Phase** | 9영역 통합 방향 결정(옵션A사이드바복원/옵션B드롭다운SSOT/옵션C하단탭) · Toss 가맹점 승인 + Vercel env |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
 | **주요 결정 (세션 111)** | ① 무한 깜빡임 진짜 원인 = stale FK 이름 → REST join 실패 → plannerUser=null 오판 (이전 세션들이 잡지 못한 root cause) · ② 온보딩 URL `/myverse/onboarding` → `/myverse/app/onboarding` 이전 (앱 셸 하위) · ③ middleware x-pathname 헤더 주입으로 layout 경로 식별 · ④ members 조회 auth_id 우선 (email은 중복 row 방어 fallback) · ⑤ SW v2로 옛 PWA 사용자 자가 업그레이드 · ⑥ /planners 매칭은 정확 경로만 (정적 자산 보호) |
+| **주요 결정 (세션 113)** | ① `MyVerseHeader` 모바일 버튼: overflow-hidden+네거티브마진 제거, flex md:hidden 명시 · ② 9영역 통합 현황 파악: MyverseSidebar(미사용), AppTopNav 드롭다운(하드코딩), 도메인 page.tsx 전체 구현됨 · ③ 다음 세션에서 통합 옵션(A/B/C) 결정 필요 |
+| **주요 결정 (세션 112)** | ① `/myverse/login` 전용 페이지 신규 생성 (LoginModal indigo) · ② middleware에 myverse.kr/login → /myverse/login 리라이트 추가 · ③ PlannersHeader·CommunityView loginHref → myverse 직접 URL |
 | **주요 결정 (세션 107)** | ① PP → 마이버스 단일화 (옵션 A) · ② 9 영역 SSOT 확립 · ③ DB·API·lib·route 4개 layer 모두 myverse 접두사 통일 · ④ planners.tenone.biz는 마이버스 콘텐츠 직접 서비스 · ⑤ AppTopNav를 마이버스 인디고로 리브랜딩 후 풀 화면 셸로 사용 · ⑥ HandNote 펜 선택 = 즉시 그리기 (토글 제거) · ⑦ /myverse/app/daily는 PP 일간 뷰, 9-domain '일상'은 /lifestyle |
 
 ---

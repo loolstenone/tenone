@@ -1,6 +1,49 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-06 (세션 112 — Myverse 로그인 UI 통일 + 인트라 사이트 토글 수정 + 도메인 현실 반영)
+> 마지막 업데이트: 2026-05-07 (세션 113 — MyVerseHeader 모바일 버튼 수정 + 9영역 통합 연구 + 세션 112 잔여 커밋)
+
+---
+
+## 세션 113 핵심 성과 (2026-05-07)
+
+### 1. MyVerseHeader 모바일 햄버거 버튼 미표시 수정
+- **문제**: 실기기에서 모바일 햄버거 버튼이 보이지 않음
+- **원인**: `overflow-hidden` 클리핑 + `-mr-1` 네거티브 마진으로 버튼이 경계 밖으로 밀림 + `md:hidden` 단독 사용(flex 미명시)
+- **조치**: `overflow-hidden` 제거, `-mr-1` 제거, `flex md:hidden` 명시, `shrink-0` 추가
+
+### 2. 9영역 통합 연구 (코드 변경 없음)
+- **현황 파악**:
+  - `MyverseSidebar.tsx` — 4Pillars+9영역 완전 구현됨, 앱 레이아웃에서 현재 미사용
+  - `AppTopNav.tsx` LayoutGrid 드롭다운 — 9영역 3컬럼 하드코딩 구현 중 (SSOT 미참조)
+  - 도메인 page.tsx — body/lifestyle/relation/work/study/schedule/move/travel 모두 구현됨
+- **옵션 도출**:
+  - **옵션 A**: `MyverseSidebar` 복원 — 앱 레이아웃에 사이드바 재삽입
+  - **옵션 B**: `AppTopNav` LayoutGrid 드롭다운 — SSOT 연결 + 디자인 개선
+  - **옵션 C**: `MobileBottomNav`에 9영역 탭 추가
+
+### 3. 세션 112 잔여 변경 커밋
+- `middleware.ts` — myverse.kr/login → /myverse/login 리라이트 추가
+- `PlannersHeader.tsx` — `loginHref` → `/myverse/login?redirect=` 직접 URL
+- `CommunityView.tsx` — `loginHref` → myverse 전용 로그인 href 인라인
+- `TimeTrackerView.tsx` — 대규모 리팩토링 (아이콘 교체, 카메라/Wi-Fi 상태 추가)
+
+### 다음 할 일
+> 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
+
+1. **9영역 통합 방향 결정 및 구현 (옵션 A/B/C 중 선택)**
+   - 옵션 B 권장: `AppTopNav.tsx` LayoutGrid 드롭다운에서 하드코딩 → `DOMAINS` SSOT 참조로 교체
+   - `lib/myverse/domains.ts`의 `DOMAINS` 배열 + `PILLARS` 그룹으로 3컬럼 그리드 렌더
+   - 이후 `MyverseSidebar`도 동일 SSOT 참조로 통일
+
+2. **features/planners → features/myverse/planner 폴더 완전 리네이밍** ← 이미 완료됨 (세션 이전)
+   - WORK_STATUS 업데이트: 완료 처리
+
+3. **PWA 아이콘 인디고 M 로고 교체** ← 이미 완료됨 (세션 이전 commit 확인)
+   - WORK_STATUS 업데이트: 완료 처리
+
+4. **Toss 가맹점 승인 + Vercel 환경변수**
+   - 가맹점 승인 신청 진행 (대표자 신분증·사업자등록증)
+   - 승인 후 발급되는 client·secret 키를 Vercel 환경변수에 추가
 
 ---
 

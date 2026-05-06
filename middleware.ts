@@ -130,6 +130,18 @@ export async function middleware(request: NextRequest) {
 
     if (pathname.startsWith(prefix)) return response;
 
+    // 3a. Myverse 전용: myverse.kr/login → /myverse/login 리라이트
+    //     루트 /login 페이지에는 외부 도메인 감지 시 SSO 자동 발사 코드가 있어서,
+    //     myverse.kr/login이 /login skipPath를 타면 의도치 않은 SSO → tenone.biz/login으로 튕김.
+    const isMyverseDomain = reqDomain === 'myverse.kr' || reqDomain === 'www.myverse.kr' || reqDomain === 'myverse.tenone.biz';
+    if (isMyverseDomain && pathname === '/login') {
+        const url = request.nextUrl.clone();
+        url.pathname = '/myverse/login';
+        const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+        response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+        return rw;
+    }
+
     if (skipPaths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {
         return response;
     }
