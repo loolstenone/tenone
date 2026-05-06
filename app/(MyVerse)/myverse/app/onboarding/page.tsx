@@ -108,25 +108,25 @@ export default function OnboardingPage() {
                 {step === "welcome" && (
                     <div className="space-y-6">
                         <div>
-                            <p className="text-xs uppercase tracking-widest text-[#6366F1] mb-3">Ten:One™</p>
-                            <h1 className="font-serif text-3xl md:text-4xl text-neutral-900 leading-tight">
-                                우리는 모두 기획자다.<br />적어도 자기 인생에서 만큼은.
+                            <p className="text-xs tracking-widest text-[#6366F1] mb-3" style={{ fontVariant: "normal", textTransform: "none" }}>Ten:One™</p>
+                            <h1 className="font-serif normal-case text-3xl md:text-4xl text-neutral-900 leading-tight">
+                                우리는 모두 기획자다.
                             </h1>
+                            <p className="font-serif normal-case text-xl md:text-2xl text-neutral-500 leading-snug mt-1">
+                                적어도 자기 인생에서 만큼은.
+                            </p>
                         </div>
                         <div className="space-y-3 text-neutral-600 leading-relaxed">
                             <p>
-                                마이버스 AI는 단순 일정 관리가 아닙니다.
+                                마이버스는 단순한 일정관리가 아닙니다.
                             </p>
                             <p>
-                                나의 정체성을 정립하고, 목표를 세우고, 매일의 실행으로 연결하는 <strong className="text-neutral-900">자기 성취 플랫폼</strong>입니다.
+                                나의 정체성을 정립하고, 목표를 세우고<br />
+                                매일의 실행으로 연결하는 <strong className="text-neutral-900">자기 성장 플랫폼</strong>입니다.
                             </p>
                             <p>
-                                AI 비서가 매일 아침 브리핑하고 저녁에 정리합니다.<br />
+                                AI 비서가 매일 브리핑하고 당신의 성장을 돕습니다.<br />
                                 당신은 방향만 잡으세요.
-                            </p>
-                            <p className="font-serif text-neutral-900 pt-4 border-t border-neutral-200 mt-4 italic">
-                                생각한대로 살지 않으면,<br />
-                                사는대로 생각하게 된다.
                             </p>
                         </div>
                         <button
