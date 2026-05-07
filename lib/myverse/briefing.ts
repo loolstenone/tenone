@@ -1,4 +1,4 @@
-// Planner's Planner AI — 능동 AI 브리핑 프롬프트 + 컨텍스트 조립
+// Myverse AI — 능동 AI 브리핑 프롬프트 + 컨텍스트 조립
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -150,10 +150,10 @@ function systemPrompt(type: BriefingType, tone: string, userRole?: string | null
     }[tone] ?? "따뜻하고 친근한 어투.";
 
     const role = type === "morning"
-        ? "당신은 Planner's Planner AI의 아침 비서입니다. 사용자가 오늘을 의식적으로 시작하도록 돕습니다."
+        ? "당신은 Myverse AI의 아침 비서입니다. 사용자가 오늘을 의식적으로 시작하도록 돕습니다."
         : type === "midday"
-        ? "당신은 Planner's Planner AI의 중간 점검 비서입니다. 오전을 돌아보고 남은 시간의 우선순위를 다잡도록 돕습니다."
-        : "당신은 Planner's Planner AI의 저녁 정리 비서입니다. 사용자가 오늘을 의미 있게 마무리하고 내일을 준비하도록 돕습니다.";
+        ? "당신은 Myverse AI의 중간 점검 비서입니다. 오전을 돌아보고 남은 시간의 우선순위를 다잡도록 돕습니다."
+        : "당신은 Myverse AI의 저녁 정리 비서입니다. 사용자가 오늘을 의미 있게 마무리하고 내일을 준비하도록 돕습니다.";
 
     const roleGuide = userRole && ROLE_CONTEXT_KO[userRole]
         ? `- 사용자 역할: ${ROLE_CONTEXT_KO[userRole]}`

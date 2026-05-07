@@ -1,10 +1,81 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-07 (세션 114 — 9영역 SSOT 통합 + 사이드바 복원 + 로그인 리다이렉트 버그 수정 + 온보딩 루프 수정)
+> 마지막 업데이트: 2026-05-08 (세션 115 — Myverse 코드베이스 Planners 흔적 일괄 제거)
 
 ---
 
-## 세션 114 핵심 성과 (2026-05-07)
+## 세션 115 핵심 성과 (2026-05-08)
+
+### Phase 3 — Planner's → Myverse 리네임 (myverse 스코프)
+
+**대상**: `features/myverse/`, `app/(MyVerse)/`, `app/api/myverse/`, `lib/myverse/`
+
+#### 1. JS 함수·타입 (Source of Truth)
+- `lib/myverse/analytics.ts` — `trackPlanners` → `trackMyverse` (`trackPlannersEvent` 공용 import는 유지)
+- `features/myverse/app/MyverseThemeProvider.tsx` — `applyPlanners*` → `applyMyverse*`, `Planners{Radius,ThemeMode}` → `Myverse{Radius,ThemeMode}`, `dataset.plannersMode` → `dataset.myverseMode`
+- 호출자 동기화: `SettingsTheme.tsx`, `SettingsStylePresets.tsx`, `BetaFeedbackButton.tsx`, `CopyToAiButton.tsx`, `WelcomeTracker.tsx`, `WeeklyView.tsx`, `onboarding/page.tsx`
+
+#### 2. CSS 변수·DOM ID·클래스
+- `--planners-{accent,accent-dark,accent-nav,font,user-font,bg,bg-alt,surface,text,text-sub,border}` → `--myverse-*` (globals.css + 모든 consumers)
+- `data-planners-font` → `data-myverse-font`
+- DOM id `planners-{theme-override,nav-accent-style,user-font-style,radius-override}` → `myverse-*`
+- 클래스 `.planners-app-shell` → `.myverse-app-shell` (globals.css + layout.tsx + ProjectNotesTab + DailyView)
+- 호출자: MonthlyView, YearlyView, MobileBottomNav, SettingsLivePreview, DailyPlacesCard, DailyRoutinesCard
+
+#### 3. URL·UI copy
+- `/planners/purchase` / `/planners/app?welcome=1` → `/myverse/*` (payment success, coach, chat upgrade_url)
+- "Planner's Planner AI" / "Planner's AI" / "Planner's Planner" → "Myverse" / "Myverse AI"
+- AboutPage, MyverseHomePage, ProgramsPage, PurchaseView, CommunityView, CanvasToolPage, MyverseHeader, SettingsExport, briefing/notifications/slack lib, ai/chat·daily-summary·feedback·slack-sync API
+- `MyverseHeader` — 로고 "Planner's" → "Myverse", `/planners` 링크 → `/myverse`, `siteId/siteName/brandName` 통일
+- `admin/activate` — `brand:planners` → `brand:myverse`
+- `feedback` API — 발신자/제목 Myverse AI, 인트라 인박스 URL `/intra/myverse/feedback`
+
+### 다음 할 일 (이월 — 우선순위 순)
+
+#### 🔴 DB·Storage·인프라 마이그레이션 필요
+1. **Storage 버킷 `planners-moments` → `myverse-moments`**
+   - 영향: `apple-photos`, `ingest/moments`, `moments/[id]`, `moments/upload`, `moments/import-meta`, `DailyMoments.tsx` 주석
+   - 절차: 새 버킷 생성 → 객체 복사 → 코드 참조 일괄 교체 → 옛 버킷 정리
+2. **PWA 자산 `/planners-sw.js`, `/planners-manifest.json` → `/myverse-*`**
+   - 파일: `features/myverse/app/PwaRegister.tsx` (lines 14, 22)
+   - 캐시된 SW 자가 업그레이드 패턴 필요 (세션 111 SW v2 방식 재활용)
+3. **HTML 마커 마이그레이션 — DB 컨텐츠 본문**
+   - `<!-- planners:handwriting -->`, `<!-- planners:tpl=... -->`, `planners:canvas=` (legacy)
+   - 파일: `ProjectNotesTab.tsx`, `lib/myverse/canvas-engine/adapters/handnote-storage.ts`, `app/api/myverse/canvases/route.ts`
+   - canvas 마커는 이미 `(myverse|planners)` 양립. 신규 작성은 myverse, DB 일괄 마이그 스크립트 필요
+
+#### 🟡 변수·키 네이밍 (런타임 영향 없음)
+4. **`plannerUser` → `myverseUser` 변수 리네임**
+   - 파일: layout.tsx, personal/page.tsx, time/page.tsx, briefing.ts, chat/route.ts, apple-photos, ingest/moments, vision/route.ts
+5. **localStorage 키 마이그레이션** (사용자 데이터 보존 정책 필요)
+   - `planners-mobile-nav` (MobileBottomNav.tsx, settings/page.tsx event 2곳)
+   - `planners-recent-colors` (HandNote.tsx)
+   - 백업 파일명 `planners-backup-${dateStr}.json` (SettingsExport.tsx:72)
+   - window 플래그 `__plannersImportMergeMode` (ContactsView.tsx 4곳)
+   - CustomEvent `planners-mobile-nav-change`
+
+#### 🟡 도메인·외부 노출
+6. **하드코딩 `https://planners.tenone.biz` → `https://myverse.kr`**
+   - `lib/myverse/google-calendar.ts:22` (baseUrl fallback)
+   - `lib/myverse/notifications.ts:83-85` (이메일 본문 링크)
+7. **vCard PRODID** `Planners Contacts` (ContactsView.tsx:259) — 표준 라벨 정리
+
+#### 🟢 UI 잔여 — "PP AI" 약어
+8. **"PP AI" 약어 일괄 정리** — 사용자 입장에서 정체불명. "Myverse AI"로 통일
+   - HeroSection (PP AI Spotlight), CanvasToolPage, MobileBottomNav 등
+
+#### ⚪️ 유니버스 공용 (스코프 외 — 별도 결정 필요)
+9. `lib/analytics.ts` `trackPlannersEvent` — 유니버스 공용 GA4 wrapper. `trackUniverseEvent` 등으로 리네임 시 모든 브랜드 영향. 보류 권장.
+
+#### ⚪️ Canvas Engine 본 작업 (이전 세션부터 이월)
+10. PpCanvas.tsx — Image element 지원 [🔴]
+11. PNG/SVG export — `lib/myverse/canvas-engine/export.ts` 생성 [🔴]
+12. 레이어 정렬 키보드 단축키 [🟡]
+13. 텍스트 서식 컨트롤 [🟡]
+
+---
+
+## 세션 114 (2026-05-07)
 
 ### 1. Myverse 9영역 SSOT 통합 (옵션 A 선택)
 - `lib/myverse/domains.ts` — `DomainMeta`에 `app_href` 필드 추가 (사이드바·드롭다운 공통 href SSOT)
@@ -12,7 +83,7 @@
 - `features/myverse/MyverseSidebar.tsx` — 4 Pillars + 9영역 SSOT 기반 완전 재작성
   - `DOMAIN_ICON_MAP`, `PILLAR_ICON_MAP` 맵핑 추가
   - `LOCAL_GROUPS` (플래너/나누기/시스템) 섹션 유지
-- `features/myverse/planner/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
+- `features/myverse/app/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
   - 하드코딩 9영역 → `DOMAINS`, `PILLARS` import 참조로 교체
 - `app/(MyVerse)/myverse/app/layout.tsx` — `MyverseSidebar` 복원 (layout에 삽입)
 
@@ -81,12 +152,12 @@
 ### 다음 할 일 (사무실에서)
 > 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
 
-1. **features/planners → features/myverse/planner 폴더 완전 리네이밍**
+1. **features/planners → features/myverse/app 폴더 완전 리네이밍**
    - 현재 settings/* 일부만 이동된 상태 (세션 110)
-   - `features/planners/` 트리 통째로 `features/myverse/planner/`로 이동
-   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/planner/*`)
+   - `features/planners/` 트리 통째로 `features/myverse/app/`로 이동
+   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/app/*`)
    - 전역 sed 후 `npx tsc --noEmit` + `npm run build`로 검증
-   - 충돌 가능: `features/myverse/planner/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
+   - 충돌 가능: `features/myverse/app/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
 
 2. **PWA 아이콘 인디고 M 로고 교체**
    - 현재 `public/planners-icon-192.png` / `512.png` 그대로 (옛 PP 로고)
@@ -123,19 +194,19 @@
   8. ClientRedirect 컴포넌트 도입 (server redirect()로 인한 Next.js 16 dev router prefetch 무한 큐 회피)
 
 **남은 잔재**:
-- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반)
+- features/planners → features/myverse/app 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반)
 - Toss 가맹점 승인 + Vercel 환경변수 설정
 - ssoflicker: myverse.kr/login 진입 시 SSO chain으로 tenone.biz/login 까지 1~2회 화면 점프(loop는 아님). 현재 표준 패턴(전 외부 도메인 동일)이라 보류 — 추후 myverse.kr 자체 로그인 강화 검토
 
 ### 다음 할 일 (사무실에서)
 > 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
 
-1. **features/planners → features/myverse/planner 폴더 완전 리네이밍**
+1. **features/planners → features/myverse/app 폴더 완전 리네이밍**
    - 현재 settings/* 일부만 이동된 상태 (세션 110)
-   - `features/planners/` 트리 통째로 `features/myverse/planner/`로 이동
-   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/planner/*`)
+   - `features/planners/` 트리 통째로 `features/myverse/app/`로 이동
+   - 영향 받는 import: 78개 컴포넌트 (`@/features/planners/*` → `@/features/myverse/app/*`)
    - 전역 sed 후 `npx tsc --noEmit` + `npm run build`로 검증
-   - 충돌 가능: `features/myverse/planner/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
+   - 충돌 가능: `features/myverse/app/` 안에 이미 일부 파일 있음 — diff 확인하며 머지
 
 2. **PWA 아이콘 인디고 M 로고 교체**
    - 현재 `public/planners-icon-192.png` / `512.png` 그대로 (옛 PP 로고)
@@ -200,7 +271,7 @@
 - 시각 상태 3단계: teal 활성 / 회색 활성(펜 선택만) / 비활성
 
 ### 다음 할 일
-- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반 — 세션 110에서 부분 완료, settings/* 계열만 이동됨)
+- features/planners → features/myverse/app 폴더 리네이밍 (78개 컴포넌트 import 갱신 동반 — 세션 110에서 부분 완료, settings/* 계열만 이동됨)
 - PWA 아이콘 인디고 M 로고로 교체 (현재 `planners-icon-192.png` 그대로)
 - Toss 가맹점 승인 + Vercel 환경변수 설정
 - ✅ Notion `TASK` 템플릿 인사이트 흡수 완료 (세션 108)
@@ -212,7 +283,7 @@
 
 ## 세션 110 핵심 성과 (2026-05-05)
 
-### Daily Planner UI 7가지 개선 (features/myverse/planner/)
+### Daily Planner UI 7가지 개선 (features/myverse/app/)
 - **"일간" → "오늘"** — AppTopNav.tsx TABS 배열 label 변경
 - **"기록하기" 삭제** — DailyView Quick Action Row 1에서 중복 버튼 제거
 - **템플릿·캔버스·녹음 위로 올리기** — DailyView 노트 섹션에서 Quick Action Row 2로 이동 (기본 노트·템플릿·캔버스·녹음 + 조건부 단축키)
@@ -226,7 +297,7 @@
 ## 세션 109 핵심 성과 (2026-05-05)
 
 ### 9-domain 진입점 완성 — AppTopNav 데스크톱 + 모바일 양면
-- **데스크톱** (`features/myverse/planner/AppTopNav.tsx`): 우측 유틸리티 영역에 `LayoutGrid` 버튼 → 3컬럼 드롭다운
+- **데스크톱** (`features/myverse/app/AppTopNav.tsx`): 우측 유틸리티 영역에 `LayoutGrid` 버튼 → 3컬럼 드롭다운
   - 나(BODY·일상·관계) / 일(업무·공부) / 시간(일정·이동·여행) 컬럼
   - 아이콘 컬러, active 상태 감지, 라우트 이동 시 자동 닫힘, 외부 클릭 닫힘
 - **모바일** 햄버거 메뉴 내 "9 영역" 섹션 추가 (탭 nav 아래, 구분선 위)
@@ -237,7 +308,7 @@
 ## 세션 108 핵심 성과 (2026-05-05)
 
 ### Notion TASK 인사이트 흡수 — DailyView Quick Action Bar 개편
-- **Quick Action Bar 2열 구조로 재편** (`features/myverse/planner/DailyView.tsx`)
+- **Quick Action Bar 2열 구조로 재편** (`features/myverse/app/DailyView.tsx`)
   - 1열: 할 일 / 기록하기 / **초집중 시작** (gradient primary CTA, font-semibold, active:scale-95 — 1급 기능으로 격상)
   - 2열: 🙏 감사 3가지 (amber) + 💭 감정 일기 (rose) — 상단에서 즉시 접근 가능
   - 컨테이너: `mb-5 mt-1 space-y-2` (여백 + 수직 스택)

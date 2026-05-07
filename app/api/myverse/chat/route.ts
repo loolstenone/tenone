@@ -78,7 +78,7 @@ export async function POST(req: Request) {
                 error: "daily_limit_reached",
                 limit: FREE_DAILY_LIMIT,
                 hint: "구독하면 무제한 사용 가능합니다",
-                upgrade_url: "/planners/purchase",
+                upgrade_url: "/myverse/purchase",
             }, { status: 429 });
         }
     }

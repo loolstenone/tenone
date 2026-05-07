@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket, SlidersHorizontal } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import type { PlannerMode, AiTone, PlannerRole } from "@/lib/myverse/types";
-import { PLANNER_ROLE_META } from "@/lib/myverse/types";
-import { trackPlanners } from "@/lib/myverse/analytics";
+import type { MyverseMode, AiTone, MyverseRole } from "@/lib/myverse/types";
+import { MYVERSE_ROLE_META } from "@/lib/myverse/types";
+import { trackMyverse } from "@/lib/myverse/analytics";
 
 type Step = "welcome" | "mode" | "role" | "ai" | "identity_lite" | "done";
 
-const ROLE_ICONS: Record<PlannerRole, React.ElementType> = {
+const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
     office_worker: Briefcase,
     student:       GraduationCap,
     researcher:    FlaskConical,
@@ -28,8 +28,8 @@ export default function OnboardingPage() {
     const { isAuthenticated, isLoading } = useAuth();
 
     const [step, setStep] = useState<Step>("welcome");
-    const [mode, setMode] = useState<PlannerMode>("weekly");
-    const [role, setRole] = useState<PlannerRole | null>(null);
+    const [mode, setMode] = useState<MyverseMode>("weekly");
+    const [role, setRole] = useState<MyverseRole | null>(null);
     const [morningTime, setMorningTime] = useState("08:00");
     const [eveningTime, setEveningTime] = useState("21:00");
     const [tone, setTone] = useState<AiTone>("friendly");
@@ -60,7 +60,7 @@ export default function OnboardingPage() {
     }, [isAuthenticated, isLoading]);
 
     useEffect(() => {
-        if (step !== "done") trackPlanners("myverse_onboarding_step", { step });
+        if (step !== "done") trackMyverse("myverse_onboarding_step", { step });
     }, [step]);
 
     async function handleFinish() {
@@ -86,7 +86,7 @@ export default function OnboardingPage() {
                 setSaving(false);
                 return;
             }
-            trackPlanners("myverse_onboarding_complete", { mode, ai_tone: tone });
+            trackMyverse("myverse_onboarding_complete", { mode, ai_tone: tone });
             window.location.assign("/myverse/app/today");
         } catch (e) {
             console.error("onboarding fetch error", e);
@@ -246,9 +246,9 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {(Object.keys(PLANNER_ROLE_META) as PlannerRole[]).map((r) => {
+                            {(Object.keys(MYVERSE_ROLE_META) as MyverseRole[]).map((r) => {
                                 const Icon = ROLE_ICONS[r];
-                                const meta = PLANNER_ROLE_META[r];
+                                const meta = MYVERSE_ROLE_META[r];
                                 const active = role === r;
                                 return (
                                     <button

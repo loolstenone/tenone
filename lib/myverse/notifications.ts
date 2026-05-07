@@ -1,4 +1,4 @@
-// Planner's Planner AI — 알림 발송 (이메일 + Web Push)
+// Myverse AI — 알림 발송 (이메일 + Web Push)
 
 import { Resend } from "resend";
 import { buildFromHeader, DEFAULT_SENDERS } from "@/lib/email/senders";
@@ -39,7 +39,7 @@ export async function sendBriefingEmail(params: {
 
     try {
         await resend.emails.send({
-            from: buildFromHeader(DEFAULT_SENDERS.noreply, "Planner's Planner AI"),
+            from: buildFromHeader(DEFAULT_SENDERS.noreply, "Myverse AI"),
             to: email,
             subject,
             html,
@@ -70,7 +70,7 @@ function renderBriefingHtml({ name, type, content, date }: { name?: string | nul
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:32px 24px;">
   <tr><td>
     <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${color};margin:0 0 8px;">
-      Planner's Planner AI · ${date}
+      Myverse AI · ${date}
     </p>
     <h1 style="font-family:Georgia,serif;font-size:28px;line-height:1.3;color:#111827;margin:0 0 8px;">
       ${heading}

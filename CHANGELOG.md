@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-05-08 — 세션 115 · Myverse 코드베이스 Planners 흔적 일괄 제거 (Phase 3)
+
+### 장소
+집
+
+### 핵심 결정사항
+- "Planner's"는 별도 브랜드 — Myverse 코드 안에 잔존하면 안 됨 (이전 세션 결정 강화)
+- 스코프 한정: `features/myverse/`, `app/(MyVerse)/`, `app/api/myverse/`, `lib/myverse/` 만. `intra/planners`·`MyverseRole.'planner'` 직무명·`lib/analytics.ts` 공용 함수는 보존
+- DB·Storage·SW·HTML 마커 등 인프라 마이그레이션이 필요한 항목은 의도적으로 이월 (코드만 바꾸면 깨짐)
+
+### 변경 파일
+- **JS 함수/타입**: `lib/myverse/analytics.ts`, `features/myverse/app/MyverseThemeProvider.tsx` + 호출자 7개 (SettingsTheme, SettingsStylePresets, BetaFeedbackButton, CopyToAiButton, WelcomeTracker, WeeklyView, onboarding)
+- **CSS·DOM**: `app/globals.css` (변수·클래스), 호출자 9개 (layout, ProjectNotesTab, DailyView, MonthlyView, YearlyView, MobileBottomNav, SettingsLivePreview, DailyPlacesCard, DailyRoutinesCard)
+- **URL·UI copy**: AboutPage, MyverseHomePage, ProgramsPage, PurchaseView, CommunityView, CanvasToolPage, MyverseHeader, SettingsExport
+- **API·lib**: payment/success, coach, chat, admin/activate, ai/parse-input, ai/chat, daily/ai-summary, feedback, integrations/slack/sync, briefing, calendar-rules, client, google-calendar, notifications, slack
+
+### 위험 관리
+- 라인 엔딩(LF/CRLF) 노이즈 다수 감지 — 작업 외 파일은 staging에서 제외 (실제 변경 파일만 add)
+- `MyverseRole`의 `planner` 문자열 값(직무 "기획자")은 의도적으로 보존
+- canvas 마커는 `(myverse|planners)` 양립 패턴 유지 — 옛 컨텐츠 호환
+
+### 이월 (다음 세션)
+WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage 3개, 변수·키 2개, 도메인 2개, UI 1개, Canvas Engine 4개)
+
+---
+
 ## 2026-05-07 — 세션 114 · 9영역 SSOT 통합 + 사이드바 복원 + 로그인 리다이렉트 버그 수정
 
 ### 장소
@@ -17,7 +43,7 @@
 ### 변경 파일
 - `lib/myverse/domains.ts` — `DomainMeta.app_href` 추가
 - `features/myverse/MyverseSidebar.tsx` — SSOT 기반 완전 재작성
-- `features/myverse/planner/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
+- `features/myverse/app/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
 - `app/(MyVerse)/myverse/app/layout.tsx` — 사이드바 복원 + `getAuthState` 강화
 - `app/(MyVerse)/myverse/app/onboarding/page.tsx` — 첫 페이지 카피 수정
 - `app/login/page.tsx` — 강제 `/intra` 리다이렉트 2곳 제거
@@ -37,9 +63,9 @@
 ### 변경 파일
 - `features/myverse/MyVerseHeader.tsx` — 모바일 햄버거 버튼 표시 수정
 - `middleware.ts` — myverse.kr/login → /myverse/login 리라이트 (세션 112 잔여)
-- `features/myverse/planner/PlannersHeader.tsx` — loginHref → /myverse/login 직접 URL (세션 112 잔여)
-- `features/myverse/planner/CommunityView.tsx` — loginHref → myverse 전용 href (세션 112 잔여)
-- `features/myverse/planner/TimeTrackerView.tsx` — 타임트래커 대규모 리팩토링 (아이콘·상태 교체)
+- `features/myverse/app/PlannersHeader.tsx` — loginHref → /myverse/login 직접 URL (세션 112 잔여)
+- `features/myverse/app/CommunityView.tsx` — loginHref → myverse 전용 href (세션 112 잔여)
+- `features/myverse/app/TimeTrackerView.tsx` — 타임트래커 대규모 리팩토링 (아이콘·상태 교체)
 
 ---
 
@@ -89,7 +115,7 @@
 - `components/ClientRedirect.tsx` — server redirect()의 Next.js 16 dev router prefetch 무한 큐 회피용 client redirect (`window.location.replace`)
 - `app/(MyVerse)/myverse/app/page.tsx` · `today/page.tsx` · `time/page.tsx` — server `redirect()` → `<ClientRedirect>` 변환
 - `public/planners-sw.js` — v2: CACHE_NAME `pp-ai-v1` → `myverse-app-v2`, activate 시 옛 캐시 전부 삭제, fetch 핸들러는 `/myverse/*` 외 모든 경로 패스, prefetch 응답은 캐시하지 않음
-- `features/myverse/planner/PlannersChrome.tsx` · `QuickCapture.tsx` — 옛 `/myverse/onboarding` 경로 제거
+- `features/myverse/app/PlannersChrome.tsx` · `QuickCapture.tsx` — 옛 `/myverse/onboarding` 경로 제거
 
 ### 커밋 (master)
 - 85536fdf — fix: 누락된 MyVerse 페이지 24개 + lib/canvas-engine 추적 추가
@@ -99,7 +125,7 @@
 - 22aa83f7 — fix(myverse/app): 무한 깜빡임 종결 + 온보딩 URL을 /myverse/app 하위로
 
 ### 다음 작업 (사무실)
-1. features/planners → features/myverse/planner 폴더 완전 리네이밍 (78개 import 갱신, sed + tsc + build)
+1. features/planners → features/myverse/app 폴더 완전 리네이밍 (78개 import 갱신, sed + tsc + build)
 2. PWA 아이콘 인디고 M 로고 교체 (`public/planners-icon-192.png`/`512.png`)
 3. Toss 가맹점 승인 + Vercel 환경변수 (`TOSS_CLIENT_KEY`·`TOSS_SECRET_KEY`)
 4. /myverse/app/onboarding 화면 점검 (모바일 viewport, 4 step UI)
@@ -113,11 +139,11 @@
 사무실
 
 ### 변경 파일
-- `features/myverse/planner/AppTopNav.tsx` — "일간" → "오늘" 탭 리네이밍
-- `features/myverse/planner/DailyView.tsx` — "기록하기" 삭제, 템플릿·캔버스·녹음 Quick Action Row 2로 이동, daily_note_shortcuts 조건부 렌더
-- `features/myverse/planner/settings/SettingsAi.tsx` — "일간 트래킹" → "일간 기록", `daily_note_shortcuts` 체크박스 설정 추가
+- `features/myverse/app/AppTopNav.tsx` — "일간" → "오늘" 탭 리네이밍
+- `features/myverse/app/DailyView.tsx` — "기록하기" 삭제, 템플릿·캔버스·녹음 Quick Action Row 2로 이동, daily_note_shortcuts 조건부 렌더
+- `features/myverse/app/settings/SettingsAi.tsx` — "일간 트래킹" → "일간 기록", `daily_note_shortcuts` 체크박스 설정 추가
 - `app/(Planners)/planners/app/settings/page.tsx` — `initialNoteShortcuts` state, API 로드, SettingsAi 프롭 전달
-- `features/myverse/planner/SettingsLayout.tsx` — PC 좌측 사이드바(aside) 제거, pill nav 전 breakpoint 노출, xl+ 2컬럼 grid
+- `features/myverse/app/SettingsLayout.tsx` — PC 좌측 사이드바(aside) 제거, pill nav 전 breakpoint 노출, xl+ 2컬럼 grid
 
 ### 결정사항
 - `daily_note_shortcuts` 기본값: `["gratitude","emotion"]` — 기존 사용자는 기존 단축키 유지
@@ -168,7 +194,7 @@
 - `app/(MyVerse)/myverse/app/{ai,dream,log,plan,work}/page.tsx` — 옛 myverse_* 7탭 중 5개 (PP 라우트 흡수로 대체, work는 DomainPage('work')로 재생성)
 
 ### 다음 할 일
-- features/planners → features/myverse/planner 폴더 리네이밍 (78개 컴포넌트 import 갱신)
+- features/planners → features/myverse/app 폴더 리네이밍 (78개 컴포넌트 import 갱신)
 - PWA 아이콘 인디고 M 로고로 교체
 - Toss 가맹점 승인 · Vercel 환경변수 설정 · Google OAuth 자격
 - Notion `TASK` 템플릿 인사이트 흡수: "오늘 한 장 + 3버튼" 메인 홈, "초집중모드" 1급 기능, 분류에 한국형 태그(`감사3개`·`감정 일기`)

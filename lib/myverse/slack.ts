@@ -8,7 +8,7 @@ export async function verifyWebhook(webhookUrl: string): Promise<{ ok: boolean }
     const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: "✅ Planner's AI Slack 연결 완료!" }),
+        body: JSON.stringify({ text: "✅ Myverse AI Slack 연결 완료!" }),
     });
     return { ok: res.ok };
 }
@@ -40,7 +40,7 @@ export async function sendToSlack(memberId: string, text: string): Promise<{ ok:
                 },
                 {
                     type: "context",
-                    elements: [{ type: "mrkdwn", text: "🗓️ *Planner's AI* 브리핑" }],
+                    elements: [{ type: "mrkdwn", text: "🗓️ *Myverse AI* 브리핑" }],
                 },
             ],
         }),

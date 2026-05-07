@@ -56,10 +56,10 @@ export async function POST(req: Request) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                from: "Planner's AI <noreply@tenone.biz>",
+                from: "Myverse AI <noreply@tenone.biz>",
                 to: ["lools@tenone.biz"],
-                subject: "[PP AI 베타 피드백]",
-                text: `사용자: ${user?.email ?? "anonymous"}\n경로: ${page_path ?? "-"}\n\n${message.trim()}\n\n---\n인트라 인박스: https://tenone.biz/intra/planners/feedback${inserted?.id ? `?id=${inserted.id}` : ""}`,
+                subject: "[Myverse AI 베타 피드백]",
+                text: `사용자: ${user?.email ?? "anonymous"}\n경로: ${page_path ?? "-"}\n\n${message.trim()}\n\n---\n인트라 인박스: https://tenone.biz/intra/myverse/feedback${inserted?.id ? `?id=${inserted.id}` : ""}`,
             }),
         }).catch(() => {});
     }

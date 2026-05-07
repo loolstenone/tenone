@@ -1,4 +1,4 @@
-// Planner's AI — 자연어 입력 파서
+// Myverse AI — 자연어 입력 파서
 // 사용자가 "내일 3시 강남 미팅" 같이 입력하면 Claude Haiku tool_use 로
 // task / event / note 로 분리 등록한다.
 // Phase 2 — A1 자연어 입력 SSOT

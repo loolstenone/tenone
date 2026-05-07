@@ -1,4 +1,4 @@
-// Planner's Planner AI — Google Calendar 연동
+// Myverse AI — Google Calendar 연동
 // OAuth 2.0 flow + 이벤트 fetch + 토큰 refresh
 
 import { createAdminClient } from "@/lib/supabase/admin";

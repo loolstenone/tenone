@@ -1,5 +1,5 @@
 // 관리자 전용: PDF 구매자 / 수동 / 베타 테스터 구독 활성화
-// super_admin 또는 manager(brand:planners) 권한 필요
+// super_admin 또는 manager(brand:myverse) 권한 필요
 
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
@@ -37,7 +37,7 @@ async function requireAdmin(): Promise<{ ok: true; memberId: string } | { ok: fa
     const isAdmin = (roles ?? []).some(
         (r: { role: string; context: string | null }) =>
             r.role === "super_admin" ||
-            (r.role === "manager" && (r.context === "brand:planners" || r.context === "global"))
+            (r.role === "manager" && (r.context === "brand:myverse" || r.context === "global"))
     );
     if (!isAdmin) return { ok: false, error: "forbidden" };
 

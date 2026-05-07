@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const amountStr = url.searchParams.get("amount");
 
     if (!paymentKey || !orderId || !amountStr) {
-        return NextResponse.redirect(new URL("/planners/purchase?failed=missing_params", req.url));
+        return NextResponse.redirect(new URL("/myverse/purchase?failed=missing_params", req.url));
     }
 
     const amount = parseInt(amountStr, 10);
@@ -27,13 +27,13 @@ export async function GET(req: Request) {
         .maybeSingle();
 
     if (!order || order.amount !== amount) {
-        return NextResponse.redirect(new URL("/planners/purchase?failed=order_mismatch", req.url));
+        return NextResponse.redirect(new URL("/myverse/purchase?failed=order_mismatch", req.url));
     }
 
     const secretKey = process.env.TOSS_SECRET_KEY;
     if (!secretKey) {
         console.error("TOSS_SECRET_KEY not configured");
-        return NextResponse.redirect(new URL("/planners/purchase?failed=config", req.url));
+        return NextResponse.redirect(new URL("/myverse/purchase?failed=config", req.url));
     }
 
     // Toss confirm API 호출
@@ -54,7 +54,7 @@ export async function GET(req: Request) {
             .from("myverse_payments")
             .update({ status: "failed", meta: err, updated_at: new Date().toISOString() })
             .eq("order_id", orderId);
-        return NextResponse.redirect(new URL(`/planners/purchase?failed=confirm`, req.url));
+        return NextResponse.redirect(new URL(`/myverse/purchase?failed=confirm`, req.url));
     }
 
     const tossData = await confirmRes.json();
@@ -87,5 +87,5 @@ export async function GET(req: Request) {
         _source: "toss",
     });
 
-    return NextResponse.redirect(new URL("/planners/app?welcome=1", req.url));
+    return NextResponse.redirect(new URL("/myverse/app?welcome=1", req.url));
 }

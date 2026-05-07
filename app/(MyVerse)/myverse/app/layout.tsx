@@ -8,17 +8,17 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientRedirect } from "@/components/ClientRedirect";
-import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
-import { AppMonthBar } from "@/features/myverse/planner/AppMonthBar";
-import { PwaRegister } from "@/features/myverse/planner/PwaRegister";
-import { BetaFeedbackButton } from "@/features/myverse/planner/BetaFeedbackButton";
-import { WelcomeTracker } from "@/features/myverse/planner/WelcomeTracker";
-import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
-import { AiBriefingFab } from "@/features/myverse/planner/AiBriefingFab";
-import { MobileBottomNav } from "@/features/myverse/planner/MobileBottomNav";
+import { AppTopNav } from "@/features/myverse/app/AppTopNav";
+import { AppMonthBar } from "@/features/myverse/app/AppMonthBar";
+import { PwaRegister } from "@/features/myverse/app/PwaRegister";
+import { BetaFeedbackButton } from "@/features/myverse/app/BetaFeedbackButton";
+import { WelcomeTracker } from "@/features/myverse/app/WelcomeTracker";
+import { KeyboardShortcuts } from "@/features/myverse/app/KeyboardShortcuts";
+import { AiBriefingFab } from "@/features/myverse/app/AiBriefingFab";
+import { MobileBottomNav } from "@/features/myverse/app/MobileBottomNav";
 import { MyverseSidebar } from "@/features/myverse/MyverseSidebar";
-import { PlannersThemeProvider } from "@/features/myverse/planner/PlannersThemeProvider";
-import type { PlannerMode, CustomMenuKey, PlannerUser } from "@/lib/myverse/types";
+import { MyverseThemeProvider } from "@/features/myverse/app/MyverseThemeProvider";
+import type { MyverseMode, CustomMenuKey, MyverseUser } from "@/lib/myverse/types";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +107,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         // 이미 완료한 사용자 또는 privileged → today로 바로
         const s = await getAuthState();
         if (s.kind === "ok") {
-            const mu = (s.member as { myverse_users?: PlannerUser[] }).myverse_users?.[0];
+            const mu = (s.member as { myverse_users?: MyverseUser[] }).myverse_users?.[0];
             if (isPrivileged(s.member as { member_roles?: RoleRow[] }) || mu?.onboarding_completed) {
                 return <ClientRedirect to="/myverse/app/today" />;
             }
@@ -138,10 +138,10 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         avatar_url: string | null;
         handle: string | null;
         member_roles?: RoleRow[] | null;
-        myverse_users?: PlannerUser[];
+        myverse_users?: MyverseUser[];
     };
     const { myverse_users, ...member } = data;
-    const plannerUser: PlannerUser | null = myverse_users?.[0] ?? null;
+    const plannerUser: MyverseUser | null = myverse_users?.[0] ?? null;
     const privileged = isPrivileged(member);
 
     if (!privileged) {
@@ -162,12 +162,12 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     return (
         <>
-            <PlannersThemeProvider />
+            <MyverseThemeProvider />
             <PwaRegister />
             <Suspense><WelcomeTracker /></Suspense>
-            <div className="planners-app-shell min-h-screen bg-neutral-50 flex flex-col">
+            <div className="myverse-app-shell min-h-screen bg-neutral-50 flex flex-col">
                 <AppTopNav
-                    mode={(plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom" ? plannerUser.mode : "weekly") as PlannerMode}
+                    mode={(plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom" ? plannerUser.mode : "weekly") as MyverseMode}
                     userName={member.name || undefined}
                     avatarUrl={member.avatar_url || undefined}
                     subscriptionStatus={plannerUser?.subscription_status ?? "free"}

@@ -1,4 +1,4 @@
-// Planner's AI 채팅 — 사이드패널의 대화 백엔드
+// Myverse AI 채팅 — 사이드패널의 대화 백엔드
 // 사용자의 현재 컨텍스트(오늘 날짜·요약·이번주 task) 를 system 에 자동 주입.
 // Phase 2 — A2 AI 채팅 사이드패널
 
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
 
     const context = await gatherContext(member.id, today);
 
-    const systemPrompt = `당신은 "${member.name ?? "사용자"}" 의 Planner's AI 비서입니다.
+    const systemPrompt = `당신은 "${member.name ?? "사용자"}" 의 Myverse AI 비서입니다.
 역할: 오늘·이번주의 우선순위 정리, 부담 분석, 다음 행동 제안, 미완 업무 처리 가이드.
 
 원칙:

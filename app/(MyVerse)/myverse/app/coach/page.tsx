@@ -150,7 +150,7 @@ export default function CoachPage() {
                         <div className="flex-1">
                             <p>{error}</p>
                             {quotaReached && (
-                                <a href="/planners/purchase" className="inline-block mt-1 text-[#6366F1] underline">
+                                <a href="/myverse/purchase" className="inline-block mt-1 text-[#6366F1] underline">
                                     구독하기 →
                                 </a>
                             )}

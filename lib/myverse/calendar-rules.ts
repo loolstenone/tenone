@@ -1,4 +1,4 @@
-// Planner's Planner AI — 캘린더 엔트리 노출/표시 규칙 SSOT
+// Myverse AI — 캘린더 엔트리 노출/표시 규칙 SSOT
 // 모든 View(Daily/Weekly/Monthly/Yearly)는 이 룰만 참조해 렌더링한다.
 
 export type CalendarKind =

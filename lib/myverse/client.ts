@@ -1,29 +1,29 @@
-// Planner's Planner AI — Supabase 클라이언트 헬퍼
+// Myverse AI — Supabase 클라이언트 헬퍼
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { PlannerUser, PlannerIdentity, PlannerDaily, PlannerWeekly, PlannerProject } from './types';
+import type { MyverseUser, MyverseIdentity, MyverseDaily, MyverseWeekly, MyverseProject } from './types';
 
-export async function getPlannerUser(memberId: string): Promise<PlannerUser | null> {
+export async function getMyverseUser(memberId: string): Promise<MyverseUser | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_users')
         .select('*')
         .eq('member_id', memberId)
         .maybeSingle();
-    return data as PlannerUser | null;
+    return data as MyverseUser | null;
 }
 
-export async function createPlannerUser(memberId: string, data: Partial<PlannerUser>): Promise<PlannerUser | null> {
+export async function createMyverseUser(memberId: string, data: Partial<MyverseUser>): Promise<MyverseUser | null> {
     const supabase = createAdminClient();
     const { data: row } = await supabase
         .from('myverse_users')
         .insert({ member_id: memberId, ...data })
         .select()
         .single();
-    return row as PlannerUser | null;
+    return row as MyverseUser | null;
 }
 
-export async function updatePlannerUser(memberId: string, patch: Partial<PlannerUser>): Promise<void> {
+export async function updateMyverseUser(memberId: string, patch: Partial<MyverseUser>): Promise<void> {
     const supabase = createAdminClient();
     await supabase
         .from('myverse_users')
@@ -31,17 +31,17 @@ export async function updatePlannerUser(memberId: string, patch: Partial<Planner
         .eq('member_id', memberId);
 }
 
-export async function getIdentity(memberId: string): Promise<PlannerIdentity | null> {
+export async function getIdentity(memberId: string): Promise<MyverseIdentity | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_identities')
         .select('*')
         .eq('member_id', memberId)
         .maybeSingle();
-    return data as PlannerIdentity | null;
+    return data as MyverseIdentity | null;
 }
 
-export async function upsertIdentity(memberId: string, patch: Partial<PlannerIdentity>): Promise<void> {
+export async function upsertIdentity(memberId: string, patch: Partial<MyverseIdentity>): Promise<void> {
     const supabase = createAdminClient();
     await supabase
         .from('myverse_identities')
@@ -51,7 +51,7 @@ export async function upsertIdentity(memberId: string, patch: Partial<PlannerIde
         );
 }
 
-export async function getDaily(memberId: string, date: string): Promise<PlannerDaily | null> {
+export async function getDaily(memberId: string, date: string): Promise<MyverseDaily | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_daily')
@@ -59,10 +59,10 @@ export async function getDaily(memberId: string, date: string): Promise<PlannerD
         .eq('member_id', memberId)
         .eq('date', date)
         .maybeSingle();
-    return data as PlannerDaily | null;
+    return data as MyverseDaily | null;
 }
 
-export async function upsertDaily(memberId: string, date: string, patch: Partial<PlannerDaily>): Promise<PlannerDaily | null> {
+export async function upsertDaily(memberId: string, date: string, patch: Partial<MyverseDaily>): Promise<MyverseDaily | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_daily')
@@ -72,10 +72,10 @@ export async function upsertDaily(memberId: string, date: string, patch: Partial
         )
         .select()
         .single();
-    return data as PlannerDaily | null;
+    return data as MyverseDaily | null;
 }
 
-export async function getWeekly(memberId: string, year: number, week: number): Promise<PlannerWeekly | null> {
+export async function getWeekly(memberId: string, year: number, week: number): Promise<MyverseWeekly | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_weekly')
@@ -84,7 +84,7 @@ export async function getWeekly(memberId: string, year: number, week: number): P
         .eq('year', year)
         .eq('week', week)
         .maybeSingle();
-    return data as PlannerWeekly | null;
+    return data as MyverseWeekly | null;
 }
 
 export async function upsertWeekly(
@@ -93,8 +93,8 @@ export async function upsertWeekly(
     week: number,
     weekStart: string,
     weekEnd: string,
-    patch: Partial<PlannerWeekly>
-): Promise<PlannerWeekly | null> {
+    patch: Partial<MyverseWeekly>
+): Promise<MyverseWeekly | null> {
     const supabase = createAdminClient();
     const { data } = await supabase
         .from('myverse_weekly')
@@ -112,23 +112,23 @@ export async function upsertWeekly(
         )
         .select()
         .single();
-    return data as PlannerWeekly | null;
+    return data as MyverseWeekly | null;
 }
 
-export async function listProjects(memberId: string, status?: string): Promise<PlannerProject[]> {
+export async function listProjects(memberId: string, status?: string): Promise<MyverseProject[]> {
     const supabase = createAdminClient();
     let q = supabase.from('myverse_projects').select('*').eq('member_id', memberId).order('order_index');
     if (status) q = q.eq('status', status);
     const { data } = await q;
-    return (data ?? []) as PlannerProject[];
+    return (data ?? []) as MyverseProject[];
 }
 
-export async function createProject(memberId: string, data: Partial<PlannerProject>): Promise<PlannerProject | null> {
+export async function createProject(memberId: string, data: Partial<MyverseProject>): Promise<MyverseProject | null> {
     const supabase = createAdminClient();
     const { data: row } = await supabase
         .from('myverse_projects')
         .insert({ member_id: memberId, ...data })
         .select()
         .single();
-    return row as PlannerProject | null;
+    return row as MyverseProject | null;
 }
