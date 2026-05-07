@@ -5,6 +5,8 @@
 //   일(Do): 업무 · 공부
 //   시간(Time): 일정 · 이동 · 여행
 //   나누기(Share): Verse 통합 타임라인 · @handle 공개 페이지
+//
+// 9 영역 SSOT: lib/myverse/domains.ts (DOMAINS · PILLARS · app_href)
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,53 +18,46 @@ import {
     Sun, CalendarDays, CalendarRange, CalendarClock,
     UserSquare2, FolderKanban, Contact2, FileText, Palette, Search as SearchIcon, Timer,
     ListChecks, Hash, Sparkles, HelpCircle,
+    type LucideIcon,
 } from "lucide-react";
+import { DOMAINS, PILLARS, type DomainKey, type PillarKey } from "@/lib/myverse/domains";
 
+// ── 아이콘 맵 (icon_name → Lucide component) ──────────────────
+const DOMAIN_ICON_MAP: Record<DomainKey, LucideIcon> = {
+    body:     Heart,
+    daily:    Coffee,
+    relation: Users,
+    work:     Briefcase,
+    study:    BookOpen,
+    schedule: Calendar,
+    move:     Navigation,
+    travel:   Plane,
+};
+
+const PILLAR_ICON_MAP: Record<PillarKey, LucideIcon> = {
+    me:    User,
+    do:    Briefcase,
+    time:  Clock,
+    share: Share2,
+};
+
+// ── 플래너·나누기·시스템 — 9영역 SSOT 밖의 앱 전용 항목 ──────
 interface NavItem {
     label: string;
     href: string;
-    icon: React.ElementType;
+    icon: LucideIcon;
     color?: string;
     note?: string;
 }
 
-interface PillarGroup {
-    key: "me" | "do" | "time" | "planner" | "share" | "system";
+interface LocalGroup {
+    key: string;
     label: string;
-    icon: React.ElementType;
+    icon: LucideIcon;
     items: NavItem[];
 }
 
-const PILLARS: PillarGroup[] = [
-    {
-        key: "me",
-        label: "나",
-        icon: User,
-        items: [
-            { label: "BODY",       href: "/myverse/app/body",     icon: Heart,  color: "#10B981" },
-            { label: "일상",       href: "/myverse/app/lifestyle", icon: Coffee, color: "#F59E0B" },
-            { label: "관계",       href: "/myverse/app/relation", icon: Users,  color: "#EF4444" },
-        ],
-    },
-    {
-        key: "do",
-        label: "일",
-        icon: Briefcase,
-        items: [
-            { label: "업무",       href: "/myverse/app/work",  icon: Briefcase, color: "#3B82F6" },
-            { label: "공부",       href: "/myverse/app/study", icon: BookOpen,  color: "#A855F7" },
-        ],
-    },
-    {
-        key: "time",
-        label: "시간",
-        icon: Clock,
-        items: [
-            { label: "일정",       href: "/myverse/app/schedule", icon: Calendar,   color: "#0F766E" },
-            { label: "이동",       href: "/myverse/app/move",     icon: Navigation, color: "#6B7280" },
-            { label: "여행",       href: "/myverse/app/travel",   icon: Plane,      color: "#EC4899" },
-        ],
-    },
+const LOCAL_GROUPS: LocalGroup[] = [
     {
         key: "planner",
         label: "플래너",
@@ -91,7 +86,7 @@ const PILLARS: PillarGroup[] = [
         items: [
             { label: "Verse 타임라인", href: "/myverse/app/verse",  icon: Orbit, color: "#6366F1" },
             { label: "AI 코칭",        href: "/myverse/app/coach", icon: Bot,   color: "#6366F1" },
-            // @handle은 동적으로 채움
+            // @handle은 아래에서 동적으로 렌더
         ],
     },
     {
@@ -99,14 +94,57 @@ const PILLARS: PillarGroup[] = [
         label: "시스템",
         icon: Settings,
         items: [
-            { label: "설정",            href: "/myverse/app/settings",         icon: Settings, color: "#6B7280" },
-            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive,  color: "#6366F1" },
-            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,   color: "#6B7280" },
+            { label: "설정",            href: "/myverse/app/settings",         icon: Settings,   color: "#6B7280" },
+            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive,    color: "#6366F1" },
+            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,     color: "#6B7280" },
             { label: "도움말",          href: "/myverse/app/help",             icon: HelpCircle, color: "#6B7280" },
         ],
     },
 ];
 
+// ── 공통 NavLink ───────────────────────────────────────────────
+function NavLink({
+    href,
+    icon: Icon,
+    label,
+    color,
+    active,
+}: {
+    href: string;
+    icon: LucideIcon;
+    label: string;
+    color?: string;
+    active: boolean;
+}) {
+    return (
+        <Link
+            href={href}
+            className={`flex items-center gap-2 px-4 py-1.5 text-sm transition-colors ${
+                active
+                    ? "text-[#6366F1] bg-[#6366F1]/5 font-semibold border-r-2 border-[#6366F1]"
+                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+            }`}
+        >
+            <Icon
+                className="h-3.5 w-3.5"
+                style={!active && color ? { color } : undefined}
+            />
+            <span className="flex-1">{label}</span>
+        </Link>
+    );
+}
+
+// ── 섹션 헤더 ─────────────────────────────────────────────────
+function SectionHeader({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+    return (
+        <div className="px-4 mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-neutral-400">
+            <Icon className="h-3 w-3" />
+            {label}
+        </div>
+    );
+}
+
+// ── 메인 컴포넌트 ─────────────────────────────────────────────
 export function MyverseSidebar({ handle }: { handle: string | null }) {
     const pathname = usePathname();
 
@@ -115,41 +153,59 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
         return pathname.startsWith(href + "/");
     }
 
+    // SSOT 기반 9영역 pillar 그룹 (me / do / time)
+    const domainPillars = PILLARS.filter(p => p.domains && p.domains.length > 0);
+
     return (
         <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-neutral-200 bg-white">
             <div className="flex-1 overflow-y-auto py-4">
-                {PILLARS.map((pillar, idx) => (
+
+                {/* ── 9영역 (SSOT) ── */}
+                {domainPillars.map((pillar, idx) => (
                     <div key={pillar.key} className={idx > 0 ? "mt-4" : ""}>
-                        <div className="px-4 mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-neutral-400">
-                            <pillar.icon className="h-3 w-3" />
-                            {pillar.label}
-                        </div>
+                        <SectionHeader
+                            icon={PILLAR_ICON_MAP[pillar.key]}
+                            label={pillar.label_ko}
+                        />
                         <ul className="space-y-px">
-                            {pillar.items.map(item => {
-                                const Icon = item.icon;
-                                const active = isActive(item.href);
+                            {(pillar.domains ?? []).map(domainKey => {
+                                const domain = DOMAINS[domainKey];
+                                const active = isActive(domain.app_href);
                                 return (
-                                    <li key={item.href}>
-                                        <Link
-                                            href={item.href}
-                                            className={`flex items-center gap-2 px-4 py-1.5 text-sm transition-colors ${
-                                                active
-                                                    ? "text-[#6366F1] bg-[#6366F1]/5 font-semibold border-r-2 border-[#6366F1]"
-                                                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
-                                            }`}
-                                        >
-                                            <Icon
-                                                className="h-3.5 w-3.5"
-                                                style={!active && item.color ? { color: item.color } : undefined}
-                                            />
-                                            <span className="flex-1">{item.label}</span>
-                                        </Link>
+                                    <li key={domainKey}>
+                                        <NavLink
+                                            href={domain.app_href}
+                                            icon={DOMAIN_ICON_MAP[domainKey]}
+                                            label={domain.label_ko}
+                                            color={domain.color_hex}
+                                            active={active}
+                                        />
                                     </li>
                                 );
                             })}
+                        </ul>
+                    </div>
+                ))}
+
+                {/* ── 플래너·나누기·시스템 (앱 전용) ── */}
+                {LOCAL_GROUPS.map(group => (
+                    <div key={group.key} className="mt-4">
+                        <SectionHeader icon={group.icon} label={group.label} />
+                        <ul className="space-y-px">
+                            {group.items.map(item => (
+                                <li key={item.href}>
+                                    <NavLink
+                                        href={item.href}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        color={item.color}
+                                        active={isActive(item.href)}
+                                    />
+                                </li>
+                            ))}
 
                             {/* 나누기 그룹 — @handle 동적 노출 */}
-                            {pillar.key === "share" && (
+                            {group.key === "share" && (
                                 <li>
                                     <Link
                                         href={handle ? `/myverse/${handle}` : "/myverse/app/settings/handle"}
@@ -176,10 +232,10 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
                 <div className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시간 줌</div>
                 <div className="flex flex-wrap gap-1">
                     {[
-                        { l: "일",   h: "/myverse/app/today" },
-                        { l: "주",   h: "/myverse/app/weekly" },
-                        { l: "월",   h: "/myverse/app/monthly" },
-                        { l: "년",   h: "/myverse/app/yearly" },
+                        { l: "일", h: "/myverse/app/today" },
+                        { l: "주", h: "/myverse/app/weekly" },
+                        { l: "월", h: "/myverse/app/monthly" },
+                        { l: "년", h: "/myverse/app/yearly" },
                     ].map(z => (
                         <Link
                             key={z.h}

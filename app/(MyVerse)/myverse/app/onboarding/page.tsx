@@ -134,14 +134,16 @@ export default function OnboardingPage() {
                         </div>
                         <div className="space-y-3 text-neutral-600 leading-relaxed">
                             <p>
-                                마이버스는 단순한 일정관리가 아닙니다.
+                                마이버스는 단순한 일정관리가 아닙니다.<br />
+                                <strong className="text-neutral-900">퍼스널 OS</strong>입니다.
                             </p>
                             <p>
                                 나의 정체성을 정립하고, 목표를 세우고<br />
-                                매일의 실행으로 연결하는 <strong className="text-neutral-900">자기 성장 플랫폼</strong>입니다.
+                                매일의 실행으로 연결하고 결과를 만들어 내는<br />
+                                <strong className="text-neutral-900">자기 성장 플랫폼</strong>입니다.
                             </p>
                             <p>
-                                AI 비서가 매일 브리핑하고 당신의 성장을 돕습니다.<br />
+                                AI 비서가 매일 브리핑하고 당신의 성공을 돕습니다.<br />
                                 당신은 방향만 잡으세요.
                             </p>
                         </div>

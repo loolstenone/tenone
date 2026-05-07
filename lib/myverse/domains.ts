@@ -27,6 +27,8 @@ export interface DomainMeta {
     color_tw: string;       // Tailwind class prefix (예: "emerald" → bg-emerald-500)
     icon_name: string;       // Lucide 아이콘 이름
     description: string;
+    /** 앱 내 페이지 경로 — 사이드바·드롭다운 등 모든 UI가 이 값을 참조 */
+    app_href: string;
     /** 이 도메인으로 분류되기 위한 결정적 단서 (우선순위 순) */
     rule_hints: string[];
     /** Pillar 그룹핑 — 사이드바 4 Pillars 멘탈 모델 */
@@ -42,6 +44,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "emerald",
         icon_name: "Heart",
         description: "운동·식사·수면 — 몸의 흔적",
+        app_href: "/myverse/app/body",
         rule_hints: [
             "헬스킷·구글핏 동기화 데이터",
             "헬스장·체육관 GPS",
@@ -58,6 +61,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "blue",
         icon_name: "Briefcase",
         description: "회의·프로젝트·업무 노트",
+        app_href: "/myverse/app/work",
         rule_hints: [
             "캘린더 미팅 매칭",
             "사무실 거점 GPS",
@@ -75,6 +79,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "purple",
         icon_name: "BookOpen",
         description: "강의·필기·자기학습",
+        app_href: "/myverse/app/study",
         rule_hints: [
             "강의 영상 시청 시간 누적",
             "OCR로 추출한 학습 텍스트",
@@ -91,6 +96,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "amber",
         icon_name: "Coffee",
         description: "일기·기분·자유 기록",
+        app_href: "/myverse/app/lifestyle",  // /app/daily는 플래너 오늘 뷰
         rule_hints: [
             "집 거점 GPS",
             "여가 시간대 (저녁·주말)",
@@ -106,6 +112,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "teal",
         icon_name: "Calendar",
         description: "캘린더 약속·기념일·공휴일",
+        app_href: "/myverse/app/schedule",
         rule_hints: [
             "캘린더 직접 입력",
             "공휴일·기념일 등 시간 의미 강한 항목",
@@ -120,6 +127,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "pink",
         icon_name: "Plane",
         description: "여행 — 평소 거점에서 30km+ 이탈, 1박 이상",
+        app_href: "/myverse/app/travel",
         rule_hints: [
             "평소 거점에서 30km 이상 이탈",
             "1박 이상 체류",
@@ -136,6 +144,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "gray",
         icon_name: "Navigation",
         description: "GPS 자동 — 일/주/월/년 동선",
+        app_href: "/myverse/app/move",
         rule_hints: [
             "GPS 백그라운드 추적",
             "이동 거리·수단·시간 자동 추정",
@@ -150,6 +159,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "red",
         icon_name: "Users",
         description: "사람과의 만남 — 횡단축 'people'은 모든 영역을 가로지름",
+        app_href: "/myverse/app/relation",
         rule_hints: [
             "얼굴 인식으로 contacts 매칭",
             "미팅 참석자 자동 등록",

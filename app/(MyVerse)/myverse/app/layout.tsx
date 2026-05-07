@@ -16,6 +16,7 @@ import { WelcomeTracker } from "@/features/myverse/planner/WelcomeTracker";
 import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
 import { AiBriefingFab } from "@/features/myverse/planner/AiBriefingFab";
 import { MobileBottomNav } from "@/features/myverse/planner/MobileBottomNav";
+import { MyverseSidebar } from "@/features/myverse/MyverseSidebar";
 import { PlannersThemeProvider } from "@/features/myverse/planner/PlannersThemeProvider";
 import type { PlannerMode, CustomMenuKey, PlannerUser } from "@/lib/myverse/types";
 
@@ -47,10 +48,18 @@ async function getAuthState(): Promise<AuthState> {
     // members 기본 쿼리 — FK join 없이 안정적으로 조회
     const BASE = "id, name, email, avatar_url, handle, auth_id";
 
-    // 1) auth_id로 먼저
-    let { data: baseMember } = await admin.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
+    // 1) 세션 기반 anon client로 조회 — RLS: auth.uid() = auth_id (SERVICE_ROLE_KEY 불필요)
+    let { data: baseMember, error: anonErr } = await supabase.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
 
-    // 2) auth_id 비어 있으면 email로
+    // 2) anon 실패 시 admin client로 재시도
+    if (!baseMember) {
+        if (anonErr) console.error("[myverse/app/layout] members anon lookup error:", anonErr.message);
+        const { data: adminMember, error: adminErr } = await admin.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
+        if (adminErr) console.error("[myverse/app/layout] members admin lookup error:", adminErr.message);
+        baseMember = adminMember;
+    }
+
+    // 3) auth_id 미매핑 → email로 fallback
     if (!baseMember && user.email) {
         const { data: byEmail } = await admin
             .from("members").select(BASE)
@@ -62,11 +71,14 @@ async function getAuthState(): Promise<AuthState> {
 
     if (!baseMember) return { kind: "no_member", email: user.email! };
 
-    // member_roles + myverse_users 별도 조회 — JOIN 실패로 baseMember=null 되는 것 방지
-    const [{ data: roles }, { data: myverseRows }] = await Promise.all([
+    // member_roles + myverse_users 별도 조회
+    const [{ data: roles, error: rolesErr }, { data: myverseRows, error: myverseErr }] = await Promise.all([
         admin.from("member_roles").select("role,is_active").eq("member_id", baseMember.id),
         admin.from("myverse_users").select("*").eq("member_id", baseMember.id).limit(1),
     ]);
+
+    if (rolesErr) console.error("[myverse/app/layout] member_roles error:", rolesErr.message);
+    if (myverseErr) console.error("[myverse/app/layout] myverse_users error:", myverseErr.message);
 
     const member = {
         ...baseMember,
@@ -163,6 +175,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                     customMenus={(plannerUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
                 <div className="flex flex-1 min-h-0">
+                    <MyverseSidebar handle={member.handle} />
                     <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
                         {children}
                     </main>

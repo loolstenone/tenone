@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-05-07 — 세션 114 · 9영역 SSOT 통합 + 사이드바 복원 + 로그인 리다이렉트 버그 수정
+
+### 장소
+집
+
+### 핵심 결정사항
+- 9영역 통합 옵션 A 선택: `MyverseSidebar` 복원 (옵션 B·C 보류)
+- `getAuthState()` anon 우선 조회로 전환 — admin 클라이언트 실패 시 온보딩 루프 방지
+- 로그인 리다이렉트 버그 3곳 수정: useEffect·handleSubmit의 `canIntra?'/intra'` 제거, social login `auth_redirect` 쿠키 `/myverse/login` 인식 추가
+
+### 변경 파일
+- `lib/myverse/domains.ts` — `DomainMeta.app_href` 추가
+- `features/myverse/MyverseSidebar.tsx` — SSOT 기반 완전 재작성
+- `features/myverse/planner/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
+- `app/(MyVerse)/myverse/app/layout.tsx` — 사이드바 복원 + `getAuthState` 강화
+- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — 첫 페이지 카피 수정
+- `app/login/page.tsx` — 강제 `/intra` 리다이렉트 2곳 제거
+- `lib/auth-context.tsx` — social login `isAuthPage` endsWith 추가
+
+---
+
 ## 2026-05-07 — 세션 113 · MyVerseHeader 모바일 버튼 수정 + 9영역 통합 연구
 
 ### 장소

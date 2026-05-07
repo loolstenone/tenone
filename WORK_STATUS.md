@@ -1,42 +1,46 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-07 (세션 113 — MyVerseHeader 모바일 버튼 수정 + 9영역 통합 연구 + 세션 112 잔여 커밋)
+> 마지막 업데이트: 2026-05-07 (세션 114 — 9영역 SSOT 통합 + 사이드바 복원 + 로그인 리다이렉트 버그 수정 + 온보딩 루프 수정)
 
 ---
 
-## 세션 113 핵심 성과 (2026-05-07)
+## 세션 114 핵심 성과 (2026-05-07)
 
-### 1. MyVerseHeader 모바일 햄버거 버튼 미표시 수정
-- **문제**: 실기기에서 모바일 햄버거 버튼이 보이지 않음
-- **원인**: `overflow-hidden` 클리핑 + `-mr-1` 네거티브 마진으로 버튼이 경계 밖으로 밀림 + `md:hidden` 단독 사용(flex 미명시)
-- **조치**: `overflow-hidden` 제거, `-mr-1` 제거, `flex md:hidden` 명시, `shrink-0` 추가
+### 1. Myverse 9영역 SSOT 통합 (옵션 A 선택)
+- `lib/myverse/domains.ts` — `DomainMeta`에 `app_href` 필드 추가 (사이드바·드롭다운 공통 href SSOT)
+  - `daily` → `/myverse/app/lifestyle` (주의: /app/daily는 플래너 뷰)
+- `features/myverse/MyverseSidebar.tsx` — 4 Pillars + 9영역 SSOT 기반 완전 재작성
+  - `DOMAIN_ICON_MAP`, `PILLAR_ICON_MAP` 맵핑 추가
+  - `LOCAL_GROUPS` (플래너/나누기/시스템) 섹션 유지
+- `features/myverse/planner/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
+  - 하드코딩 9영역 → `DOMAINS`, `PILLARS` import 참조로 교체
+- `app/(MyVerse)/myverse/app/layout.tsx` — `MyverseSidebar` 복원 (layout에 삽입)
 
-### 2. 9영역 통합 연구 (코드 변경 없음)
-- **현황 파악**:
-  - `MyverseSidebar.tsx` — 4Pillars+9영역 완전 구현됨, 앱 레이아웃에서 현재 미사용
-  - `AppTopNav.tsx` LayoutGrid 드롭다운 — 9영역 3컬럼 하드코딩 구현 중 (SSOT 미참조)
-  - 도메인 page.tsx — body/lifestyle/relation/work/study/schedule/move/travel 모두 구현됨
-- **옵션 도출**:
-  - **옵션 A**: `MyverseSidebar` 복원 — 앱 레이아웃에 사이드바 재삽입
-  - **옵션 B**: `AppTopNav` LayoutGrid 드롭다운 — SSOT 연결 + 디자인 개선
-  - **옵션 C**: `MobileBottomNav`에 9영역 탭 추가
+### 2. 로그인 리다이렉트 버그 수정 (3곳)
+- `app/login/page.tsx` useEffect — `canIntraAccess ? '/intra'` 강제 이동 제거
+- `app/login/page.tsx` handleSubmit — 동일 패턴 제거
+- `lib/auth-context.tsx` `loginWithGoogle/loginWithKakao` — `/myverse/login` 등 브랜드 로그인 페이지도 auth page로 인식 (`endsWith('/login')`) → `?redirect=` 파라미터 정확히 보존
 
-### 3. 세션 112 잔여 변경 커밋
-- `middleware.ts` — myverse.kr/login → /myverse/login 리라이트 추가
-- `PlannersHeader.tsx` — `loginHref` → `/myverse/login?redirect=` 직접 URL
-- `CommunityView.tsx` — `loginHref` → myverse 전용 로그인 href 인라인
-- `TimeTrackerView.tsx` — 대규모 리팩토링 (아이콘 교체, 카메라/Wi-Fi 상태 추가)
+### 3. 온보딩 루프 수정
+- `app/(MyVerse)/myverse/app/layout.tsx` `getAuthState()` 개선
+  - admin 클라이언트 단독 의존 → **세션 기반 anon 클라이언트 우선 조회** (RLS `auth.uid() = auth_id`)
+  - anon 실패 시 admin 재시도 → email fallback 순
+  - 조회 실패 시 `console.error` 로그 추가 (개발 서버 터미널에서 원인 즉시 확인)
+- `lib/auth-context.tsx` — `isAuthPage` 판단에 `endsWith` 추가
+
+### 4. 온보딩 첫 페이지 카피 수정
+- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — "퍼스널 OS" 추가, "성장을 돕습니다" → "성공을 돕습니다"
 
 ### 다음 할 일
-> 우선순위 순. 각 항목은 현재 코드에서 바로 시작 가능하도록 구체적으로.
+> 우선순위 순.
 
-1. **9영역 통합 방향 결정 및 구현 (옵션 A/B/C 중 선택)**
-   - 옵션 B 권장: `AppTopNav.tsx` LayoutGrid 드롭다운에서 하드코딩 → `DOMAINS` SSOT 참조로 교체
-   - `lib/myverse/domains.ts`의 `DOMAINS` 배열 + `PILLARS` 그룹으로 3컬럼 그리드 렌더
-   - 이후 `MyverseSidebar`도 동일 SSOT 참조로 통일
+1. **온보딩 루프 원인 확인** — 개발 서버(`npm run dev`) 터미널에서 `[myverse/app/layout]` 에러 로그 확인
+   - 에러 발생 시 `SUPABASE_SERVICE_ROLE_KEY` `.env.local` 설정 점검
+   - 에러 없는데도 온보딩 간다면 `isPrivileged` 분기 로직 추가 점검
 
-2. **features/planners → features/myverse/planner 폴더 완전 리네이밍** ← 이미 완료됨 (세션 이전)
-   - WORK_STATUS 업데이트: 완료 처리
+2. **Toss 가맹점 승인 + Vercel 환경 변수 설정**
+
+3. **myverse_users 구독 만료 체크 로직 검증** — `subscription_status=active` + `subscription_expires_at` 있는 경우
 
 3. **PWA 아이콘 인디고 M 로고 교체** ← 이미 완료됨 (세션 이전 commit 확인)
    - WORK_STATUS 업데이트: 완료 처리

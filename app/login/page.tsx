@@ -143,16 +143,13 @@ function LoginForm() {
     useEffect(() => {
         // isSubdomain 확인 전에는 리다이렉트 안 함 (race condition 방지)
         if (!isLoading && isAuthenticated && isSubdomain !== null) {
-            if (isSubdomain) {
-                router.replace(redirectTo !== '/' ? redirectTo : '/');
-                return;
-            }
-            const canIntraAccess = user?.accountType && user.accountType !== 'member';
-            const defaultRedirect = isMadLeague ? '/madleague' : canIntraAccess ? '/intra' : '/';
+            // 어디서 접근했든 ?redirect= 파라미터 우선, 없으면 브랜드 홈
+            // account type 기반 강제 이동 금지 — 접근한 곳으로 돌아가는 것이 원칙
+            const defaultRedirect = isMadLeague ? '/madleague' : '/';
             const autoRedirect = redirectTo !== '/' ? redirectTo : defaultRedirect;
             router.replace(autoRedirect);
         }
-    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague, isSubdomain]);
+    }, [isLoading, isAuthenticated, router, redirectTo, isMadLeague, isSubdomain]);
 
     if (isLoading || isAuthenticated) {
         return (
@@ -172,8 +169,7 @@ function LoginForm() {
                 if (isSubdomain) {
                     router.push(redirectTo !== '/' ? redirectTo : '/');
                 } else {
-                    const canIntra = result.user?.accountType && result.user.accountType !== 'member';
-                    const defaultDest = isMadLeague ? '/madleague' : canIntra ? '/intra' : '/';
+                    const defaultDest = isMadLeague ? '/madleague' : '/';
                     const dest = redirectTo !== '/' ? redirectTo : defaultDest;
                     router.push(dest);
                 }

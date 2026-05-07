@@ -485,8 +485,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Google 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithGoogle = useCallback(async () => {
-        const returnPath = window.location.pathname;
-        if (returnPath !== '/login' && returnPath !== '/signup' && returnPath !== '/') {
+        const pathname = window.location.pathname;
+        const isAuthPage = pathname === '/login' || pathname === '/signup'
+            || pathname.endsWith('/login') || pathname.endsWith('/signup');
+        // /login?redirect=X 에서 소셜 로그인 시 redirect 파라미터를 쿠키에 보존
+        const searchRedirect = isAuthPage ? new URLSearchParams(window.location.search).get('redirect') : null;
+        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' ? pathname : null);
+        if (returnPath) {
             document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
         }
         const redirectTo = `${window.location.origin}/auth/callback`;
@@ -500,8 +505,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Kakao 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithKakao = useCallback(async () => {
-        const returnPath = window.location.pathname;
-        if (returnPath !== '/login' && returnPath !== '/signup' && returnPath !== '/') {
+        const pathname = window.location.pathname;
+        const isAuthPage = pathname === '/login' || pathname === '/signup'
+            || pathname.endsWith('/login') || pathname.endsWith('/signup');
+        const searchRedirect = isAuthPage ? new URLSearchParams(window.location.search).get('redirect') : null;
+        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' ? pathname : null);
+        if (returnPath) {
             document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
         }
         const redirectTo = `${window.location.origin}/auth/callback`;

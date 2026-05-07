@@ -4,12 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus, LayoutGrid, Heart, Coffee, Users, Briefcase, BookOpen, Calendar, Navigation, Plane } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, MessageSquarePlus, LayoutGrid, Heart, Coffee, Users, Briefcase, BookOpen, Calendar, Navigation, Plane, type LucideIcon } from "lucide-react";
+import { DOMAINS, PILLARS, type DomainKey } from "@/lib/myverse/domains";
 import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
 import { REQUIRED_MENU_KEYS } from "@/lib/myverse/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
+
+// 9영역 아이콘 맵 — domains.ts SSOT와 Lucide 컴포넌트 연결
+const DOMAIN_ICON_MAP: Record<DomainKey, LucideIcon> = {
+    body:     Heart,
+    daily:    Coffee,
+    relation: Users,
+    work:     Briefcase,
+    study:    BookOpen,
+    schedule: Calendar,
+    move:     Navigation,
+    travel:   Plane,
+};
+
+// SSOT 기반 pillar 그룹 (me/do/time)
+const DOMAIN_PILLARS = PILLARS.filter(p => p.domains && p.domains.length > 0);
 
 interface Tab {
     key: string;
@@ -258,71 +274,31 @@ export function AppTopNav({
 
                     {pillarsOpen && (
                         <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl border border-neutral-200 shadow-2xl z-50 p-3 grid grid-cols-3 gap-3">
-                            {/* 나 (Me) */}
-                            <div>
-                                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-2 px-1">나</p>
-                                {[
-                                    { label: "BODY",   href: "/myverse/app/body",      icon: Heart,  color: "#10B981" },
-                                    { label: "일상",   href: "/myverse/app/lifestyle", icon: Coffee, color: "#F59E0B" },
-                                    { label: "관계",   href: "/myverse/app/relation",  icon: Users,  color: "#EF4444" },
-                                ].map(d => {
-                                    const Icon = d.icon;
-                                    const active = pathname.startsWith(d.href);
-                                    return (
-                                        <Link key={d.href} href={d.href} onClick={() => setPillarsOpen(false)}
-                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-colors mb-0.5 ${
-                                                active ? "bg-neutral-100 font-semibold text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                                            }`}
-                                        >
-                                            <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: d.color }} />
-                                            {d.label}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                            {/* 일 (Do) */}
-                            <div>
-                                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-2 px-1">일</p>
-                                {[
-                                    { label: "업무", href: "/myverse/app/work",  icon: Briefcase, color: "#3B82F6" },
-                                    { label: "공부", href: "/myverse/app/study", icon: BookOpen,  color: "#A855F7" },
-                                ].map(d => {
-                                    const Icon = d.icon;
-                                    const active = pathname.startsWith(d.href);
-                                    return (
-                                        <Link key={d.href} href={d.href} onClick={() => setPillarsOpen(false)}
-                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-colors mb-0.5 ${
-                                                active ? "bg-neutral-100 font-semibold text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                                            }`}
-                                        >
-                                            <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: d.color }} />
-                                            {d.label}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                            {/* 시간 (Time) */}
-                            <div>
-                                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-2 px-1">시간</p>
-                                {[
-                                    { label: "일정", href: "/myverse/app/schedule", icon: Calendar,   color: "#0F766E" },
-                                    { label: "이동", href: "/myverse/app/move",     icon: Navigation, color: "#6B7280" },
-                                    { label: "여행", href: "/myverse/app/travel",   icon: Plane,      color: "#EC4899" },
-                                ].map(d => {
-                                    const Icon = d.icon;
-                                    const active = pathname.startsWith(d.href);
-                                    return (
-                                        <Link key={d.href} href={d.href} onClick={() => setPillarsOpen(false)}
-                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-colors mb-0.5 ${
-                                                active ? "bg-neutral-100 font-semibold text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                                            }`}
-                                        >
-                                            <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: d.color }} />
-                                            {d.label}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
+                            {DOMAIN_PILLARS.map(pillar => (
+                                <div key={pillar.key}>
+                                    <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-2 px-1">
+                                        {pillar.label_ko}
+                                    </p>
+                                    {(pillar.domains ?? []).map(domainKey => {
+                                        const domain = DOMAINS[domainKey];
+                                        const Icon = DOMAIN_ICON_MAP[domainKey];
+                                        const active = pathname.startsWith(domain.app_href);
+                                        return (
+                                            <Link
+                                                key={domainKey}
+                                                href={domain.app_href}
+                                                onClick={() => setPillarsOpen(false)}
+                                                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-colors mb-0.5 ${
+                                                    active ? "bg-neutral-100 font-semibold text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                                                }`}
+                                            >
+                                                <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: domain.color_hex }} />
+                                                {domain.label_ko}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -454,35 +430,21 @@ export function AppTopNav({
                     })}
                 </div>
 
-                {/* 9 영역 — 나·일·시간 */}
+                {/* 9 영역 — SSOT */}
                 <div className="h-px bg-neutral-100 my-1" />
                 <div className="py-1.5">
                     <p className="px-3 mb-1 text-[9px] uppercase tracking-widest text-neutral-400">9 영역</p>
-                    {[
-                        { pillar: "나",   items: [
-                            { label: "BODY", href: "/myverse/app/body",      icon: Heart,      color: "#10B981" },
-                            { label: "일상", href: "/myverse/app/lifestyle", icon: Coffee,     color: "#F59E0B" },
-                            { label: "관계", href: "/myverse/app/relation",  icon: Users,      color: "#EF4444" },
-                        ]},
-                        { pillar: "일",   items: [
-                            { label: "업무", href: "/myverse/app/work",      icon: Briefcase,  color: "#3B82F6" },
-                            { label: "공부", href: "/myverse/app/study",     icon: BookOpen,   color: "#A855F7" },
-                        ]},
-                        { pillar: "시간", items: [
-                            { label: "일정", href: "/myverse/app/schedule",  icon: Calendar,   color: "#0F766E" },
-                            { label: "이동", href: "/myverse/app/move",      icon: Navigation, color: "#6B7280" },
-                            { label: "여행", href: "/myverse/app/travel",    icon: Plane,      color: "#EC4899" },
-                        ]},
-                    ].map(({ pillar, items }) => (
-                        <div key={pillar}>
-                            <p className="px-3 mt-1.5 mb-0.5 text-[9px] text-neutral-400 font-medium">{pillar}</p>
-                            {items.map(d => {
-                                const Icon = d.icon;
-                                const active = pathname.startsWith(d.href);
+                    {DOMAIN_PILLARS.map(pillar => (
+                        <div key={pillar.key}>
+                            <p className="px-3 mt-1.5 mb-0.5 text-[9px] text-neutral-400 font-medium">{pillar.label_ko}</p>
+                            {(pillar.domains ?? []).map(domainKey => {
+                                const domain = DOMAINS[domainKey];
+                                const Icon = DOMAIN_ICON_MAP[domainKey];
+                                const active = pathname.startsWith(domain.app_href);
                                 return (
                                     <Link
-                                        key={d.href}
-                                        href={d.href}
+                                        key={domainKey}
+                                        href={domain.app_href}
                                         onClick={() => setMenuOpen(false)}
                                         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                                             active
@@ -490,8 +452,8 @@ export function AppTopNav({
                                                 : "text-neutral-700 hover:bg-neutral-50"
                                         }`}
                                     >
-                                        <Icon className="h-4 w-4 shrink-0" style={{ color: d.color }} />
-                                        <span>{d.label}</span>
+                                        <Icon className="h-4 w-4 shrink-0" style={{ color: domain.color_hex }} />
+                                        <span>{domain.label_ko}</span>
                                     </Link>
                                 );
                             })}
