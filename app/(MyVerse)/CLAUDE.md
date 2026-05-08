@@ -165,9 +165,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 116 (2026-05-08)** — Planners → Myverse 인프라 마이그레이션 Phase 4: Storage·PWA·DB 마커·변수·localStorage·도메인·링크·UI copy 전부 완료 |
-| **이전 Phase** | 세션 115 — JS 함수·CSS·DOM ID·URL copy 제거 / 세션 114 — 9영역 SSOT 통합 / 세션 112 — 로그인 UI 통일 |
-| **다음 Phase** | (1) `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요, 4개 파일 이전) · (2) vCard PRODID Planners Contacts 정리 · (3) Canvas Engine 본 작업 · (4) Toss 가맹점 승인 + Vercel 환경변수 |
+| **Phase** | **세션 117 (2026-05-08)** — Canvas Engine Phase 2 완료 + vCard 정리 |
+| **이전 Phase** | 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 완료 / 세션 115 — JS 함수·CSS·DOM ID 제거 |
+| **다음 Phase** | (1) `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요) · (2) Toss 가맹점 승인 + Vercel 환경변수 |
+| **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
 | **주요 결정 (세션 114)** | ① 9영역 통합 옵션A 선택: `MyverseSidebar` 복원 + `AppTopNav` LayoutGrid 드롭다운 SSOT 연결 · ② `lib/myverse/domains.ts`에 `app_href` 추가 (daily→/lifestyle 특이 케이스 주의) · ③ `getAuthState()` anon 우선 → admin 재시도 구조로 변경 (SERVICE_ROLE_KEY 의존 제거) · ④ 로그인 강제 `/intra` 리다이렉트 제거 (CLAUDE.md 원칙 1.2.1 준수) · ⑤ social login `isAuthPage` endsWith('/login') 추가 → 브랜드 로그인 페이지에서 `?redirect=` 보존 |

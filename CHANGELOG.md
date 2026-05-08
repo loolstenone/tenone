@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-05-08 — 세션 117 · Canvas Engine Phase 2 완료 + vCard 정리
+
+### 장소
+집
+
+### 핵심 결정사항
+- Canvas Engine image 지원: 파일 피커 삽입 + Ctrl+V 붙여넣기
+- PNG/SVG 내보내기: SVG 문자열 생성 → Blob URL → offscreen canvas PNG 방식
+- 레이어 정렬: zIndex 대신 배열 순서 기반 (bringToFront/sendToBack/bringForward/sendBackward)
+- 텍스트 서식: TextElement에 bold/italic 추가, 선택 시 플로팅 서식 바
+
+### 변경 파일
+- `features/myverse/planner/ContactsView.tsx` — vCard PRODID Myverse Contacts
+- `lib/canvas-engine/export.ts` — 신규: SVG/PNG 내보내기 유틸리티
+- `lib/canvas-engine/index.ts` — export 재export 추가
+- `lib/canvas-engine/types.ts` — TextElement bold/italic 필드
+- `lib/canvas-engine/engine.ts` — bringToFront/sendToBack/bringForward/sendBackward
+- `features/myverse/planner/PpCanvas.tsx` — image 렌더·삽입·레이어 단축키·텍스트 서식 바
+- `features/myverse/planner/PpCanvasToolbar.tsx` — ImagePlus + Download(PNG/SVG) 버튼
+
+### 이월
+- `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요)
+- Toss 가맹점 승인 + Vercel 환경변수 (사용자 직접)
+
+---
+
 ## 2026-05-08 — 세션 116 · Planners → Myverse 인프라 마이그레이션 Phase 4
 
 ### 장소

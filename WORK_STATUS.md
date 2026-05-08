@@ -1,6 +1,40 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-08 (세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4)
+> 마지막 업데이트: 2026-05-08 (세션 117 — Canvas Engine + vCard 마무리)
+
+---
+
+## 세션 117 핵심 성과 (2026-05-08)
+
+### Canvas Engine Phase 2 완료 + vCard 정리
+
+#### ✅ 완료
+
+1. **vCard PRODID** `Planners Contacts` → `Myverse Contacts` (ContactsView.tsx:259)
+2. **Canvas Engine — Image element 지원**
+   - `PpCanvas.tsx`: `ElementPath` image 렌더, move/resize/rotate/duplicate 핸들러, 파일 피커(`<input type="file">`), Ctrl+V 클립보드 붙여넣기
+   - `PpCanvasToolbar.tsx`: `ImagePlus` 버튼 + `Download` 드롭다운(PNG/SVG) 추가
+3. **Canvas Engine — PNG/SVG 내보내기**
+   - `lib/canvas-engine/export.ts` 신규: `exportToSVGString`, `exportToPNG`, `downloadSVG`, `computeExportBounds`
+   - `lib/canvas-engine/index.ts` 재export 추가
+4. **Canvas Engine — 레이어 정렬 단축키**
+   - `engine.ts`: `bringToFront`, `sendToBack`, `bringForward`, `sendBackward` 메서드
+   - `PpCanvas.tsx`: `Ctrl+]` 앞으로/`Ctrl+[` 뒤로, `Ctrl+Shift+]` 맨 앞/`Ctrl+Shift+[` 맨 뒤
+5. **Canvas Engine — 텍스트 서식 컨트롤**
+   - `types.ts`: `TextElement` `bold?` / `italic?` 필드 추가
+   - `PpCanvas.tsx`: 단일 텍스트 선택 시 서식 바(B·I·정렬·폰트크기), `Ctrl+B`·`Ctrl+I` 단축키
+   - `export.ts`: SVG 내보내기 bold/italic 반영
+
+#### 남은 이월 항목
+
+##### 🔴 데이터 이전 (service role key 필요)
+- `scripts/migrate-moments-bucket.js` 실행 — `.env.local`에 `SUPABASE_SERVICE_ROLE_KEY=` 추가 후 `node scripts/migrate-moments-bucket.js`
+
+##### 🟡 외부 작업 (사용자 직접)
+- **Toss 가맹점 승인 + Vercel 환경변수** 설정
+
+##### ⚪️ 유니버스 공용 (보류)
+- `lib/analytics.ts` `trackPlannersEvent` — 전 브랜드 영향, 보류 권장
 
 ---
 
