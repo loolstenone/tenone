@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Archive, Heart, MapPin, Camera, CheckCircle2 } from "lucide-react";
+import { SettingsLayout } from "@/features/myverse/planner/SettingsLayout";
 
 interface ImportTarget {
     key: string;
@@ -123,6 +124,7 @@ export default function ImportsPage() {
     }
 
     return (
+        <SettingsLayout>
         <div>
             <header className="px-6 pt-6 pb-3 border-b border-neutral-200 bg-white">
                 <div className="flex items-center gap-2 mb-1 text-[10px] uppercase tracking-widest text-[#6366F1]">
@@ -215,5 +217,6 @@ export default function ImportsPage() {
                 )}
             </div>
         </div>
+        </SettingsLayout>
     );
 }

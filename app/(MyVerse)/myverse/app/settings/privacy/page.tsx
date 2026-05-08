@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Shield, ShieldCheck, ShieldOff } from "lucide-react";
+import { SettingsLayout } from "@/features/myverse/planner/SettingsLayout";
 
 interface ConsentRow {
     key: string;
@@ -68,6 +69,7 @@ export default function PrivacyPage() {
     }
 
     return (
+        <SettingsLayout>
         <div className="max-w-2xl mx-auto p-6">
             <header className="mb-6">
                 <div className="flex items-center gap-2 mb-1 text-[10px] uppercase tracking-widest text-neutral-400">
@@ -138,5 +140,6 @@ export default function PrivacyPage() {
                 언제든 OFF로 되돌릴 수 있고, 모든 자동 수집 데이터는 일괄 다운로드·영구 삭제 가능합니다.
             </p>
         </div>
+        </SettingsLayout>
     );
 }

@@ -14,7 +14,7 @@ import {
     User, Briefcase, Clock, Share2,
     Heart, Coffee, Users,
     BookOpen, Calendar, Navigation, Plane,
-    Orbit, AtSign, Bot, Settings, Shield, Archive, HelpCircle,
+    Orbit, AtSign, Bot, Settings, HelpCircle,
     type LucideIcon,
 } from "lucide-react";
 import { DOMAINS, PILLARS, type DomainKey, type PillarKey } from "@/lib/myverse/domains";
@@ -70,10 +70,8 @@ const LOCAL_GROUPS: LocalGroup[] = [
         label: "시스템",
         icon: Settings,
         items: [
-            { label: "설정",            href: "/myverse/app/settings",         icon: Settings,   color: "#6B7280" },
-            { label: "백업 가져오기",   href: "/myverse/app/settings/imports", icon: Archive,    color: "#6366F1" },
-            { label: "사생활",          href: "/myverse/app/settings/privacy", icon: Shield,     color: "#6B7280" },
-            { label: "도움말",          href: "/myverse/app/help",             icon: HelpCircle, color: "#6B7280" },
+            { label: "설정",   href: "/myverse/app/settings", icon: Settings,   color: "#6B7280" },
+            { label: "도움말", href: "/myverse/app/help",     icon: HelpCircle, color: "#6B7280" },
         ],
     },
 ];
