@@ -141,21 +141,21 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         myverse_users?: MyverseUser[];
     };
     const { myverse_users, ...member } = data;
-    const plannerUser: MyverseUser | null = myverse_users?.[0] ?? null;
+    const myverseUser: MyverseUser | null = myverse_users?.[0] ?? null;
     const privileged = isPrivileged(member);
 
     if (!privileged) {
-        if (!plannerUser || !plannerUser.onboarding_completed) {
+        if (!myverseUser || !myverseUser.onboarding_completed) {
             return <ClientRedirect to="/myverse/app/onboarding" />;
         }
         if (
-            plannerUser.subscription_status === "active" &&
-            plannerUser.subscription_expires_at &&
-            new Date(plannerUser.subscription_expires_at) < new Date()
+            myverseUser.subscription_status === "active" &&
+            myverseUser.subscription_expires_at &&
+            new Date(myverseUser.subscription_expires_at) < new Date()
         ) {
-            plannerUser.subscription_status = "expired";
+            myverseUser.subscription_status = "expired";
         }
-        if (plannerUser.subscription_status === "expired") {
+        if (myverseUser.subscription_status === "expired") {
             return <ClientRedirect to="/myverse/purchase?expired=1" />;
         }
     }
@@ -167,12 +167,12 @@ export default async function MyverseAppLayout({ children }: { children: React.R
             <Suspense><WelcomeTracker /></Suspense>
             <div className="myverse-app-shell min-h-screen bg-neutral-50 flex flex-col">
                 <AppTopNav
-                    mode={(plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom" ? plannerUser.mode : "weekly") as MyverseMode}
+                    mode={(myverseUser?.mode === "all_in_one" || myverseUser?.mode === "custom" ? myverseUser.mode : "weekly") as MyverseMode}
                     userName={member.name || undefined}
                     avatarUrl={member.avatar_url || undefined}
-                    subscriptionStatus={plannerUser?.subscription_status ?? "free"}
-                    showTimeTracking={plannerUser?.time_tracking ?? false}
-                    customMenus={(plannerUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
+                    subscriptionStatus={myverseUser?.subscription_status ?? "free"}
+                    showTimeTracking={myverseUser?.time_tracking ?? false}
+                    customMenus={(myverseUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
                 <div className="flex flex-1 min-h-0">
                     <MyverseSidebar handle={member.handle} />

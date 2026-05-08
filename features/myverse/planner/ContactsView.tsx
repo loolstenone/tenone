@@ -1042,7 +1042,7 @@ export function ContactsView() {
                 }
                 // 1000개씩 chunk → bulk POST.
                 // mergeLabels=true면 기존 매칭 연락처에 라벨/빈 필드 병합 update.
-                const mergeLabels = !!(window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode;
+                const mergeLabels = !!(window as unknown as { __myverseImportMergeMode?: boolean }).__myverseImportMergeMode;
                 const CHUNK = 1000;
                 let inserted = 0;
                 let skipped = 0;
@@ -1074,7 +1074,7 @@ export function ContactsView() {
                 } else {
                     showToast("가져오기 실패", false);
                 }
-                (window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode = false;
+                (window as unknown as { __myverseImportMergeMode?: boolean }).__myverseImportMergeMode = false;
             } finally {
                 setImporting(false);
             }
@@ -1384,7 +1384,7 @@ export function ContactsView() {
                     {/* 가져오기 (vCard·CSV 자동 감지) */}
                     <button
                         onClick={() => {
-                            (window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode = false;
+                            (window as unknown as { __myverseImportMergeMode?: boolean }).__myverseImportMergeMode = false;
                             fileRef.current?.click();
                         }}
                         disabled={importing}
@@ -1850,7 +1850,7 @@ export function ContactsView() {
                 danger={false}
                 onConfirm={() => {
                     setConfirmImportMerge(false);
-                    (window as unknown as { __plannersImportMergeMode?: boolean }).__plannersImportMergeMode = true;
+                    (window as unknown as { __myverseImportMergeMode?: boolean }).__myverseImportMergeMode = true;
                     fileRef.current?.click();
                 }}
                 onCancel={() => setConfirmImportMerge(false)}

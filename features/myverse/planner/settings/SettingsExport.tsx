@@ -69,7 +69,7 @@ export function SettingsExport({ sub, showToast }: Props) {
             const d = new Date();
             const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
             a.href = url;
-            a.download = `planners-backup-${dateStr}.json`;
+            a.download = `myverse-backup-${dateStr}.json`;
             a.click();
             URL.revokeObjectURL(url);
         } finally {

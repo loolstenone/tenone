@@ -75,7 +75,7 @@ export async function gatherContext(memberId: string, date: string): Promise<Bri
     const month = parseInt(date.slice(5, 7), 10);
     const yearNum = parseInt(date.slice(0, 4), 10);
 
-    const [member, plannerUser, identity, todayDaily, yestDaily, weekly, monthly, projects] = await Promise.all([
+    const [member, myverseUser, identity, todayDaily, yestDaily, weekly, monthly, projects] = await Promise.all([
         admin.from("members").select("name").eq("id", memberId).maybeSingle(),
         admin.from("myverse_users").select("mode, ai_tone, user_role").eq("member_id", memberId).maybeSingle(),
         admin.from("myverse_identities").select("vision_statement, mission_statement, key_results").eq("member_id", memberId).maybeSingle(),
@@ -120,9 +120,9 @@ export async function gatherContext(memberId: string, date: string): Promise<Bri
                     ? p.myverse_project_gprs[0]?.progress ?? 0
                     : p.myverse_project_gprs?.progress ?? 0,
             })) ?? [],
-        tone: (plannerUser.data?.ai_tone as "professional" | "friendly" | "brief") ?? "friendly",
-        mode: (plannerUser.data?.mode as "weekly" | "all_in_one") ?? "weekly",
-        userRole: plannerUser.data?.user_role ?? null,
+        tone: (myverseUser?.data?.ai_tone as "professional" | "friendly" | "brief") ?? "friendly",
+        mode: (myverseUser?.data?.mode as "weekly" | "all_in_one") ?? "weekly",
+        userRole: myverseUser?.data?.user_role ?? null,
     };
 }
 

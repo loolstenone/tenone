@@ -76,7 +76,7 @@ export function MyverseHeader() {
                             title="마이버스 AI 시작하기"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
-                            <span>PP AI 시작</span>
+                            <span>Myverse 시작</span>
                         </Link>
                     )}
                     <UniverseUtilityBar
@@ -87,7 +87,7 @@ export function MyverseHeader() {
                         siteId="myverse"
                         siteName="Myverse"
                         workspacePath="/myverse/app"
-                        workspaceLabel="PP AI"
+                        workspaceLabel="Myverse"
                     />
                 </div>
 
@@ -127,7 +127,7 @@ export function MyverseHeader() {
                 className="flex items-center gap-2 px-3 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 font-semibold rounded mb-3"
             >
                 <Sparkles className="h-4 w-4" />
-                {isAuthenticated ? "PP AI 앱 열기" : "PP AI 시작하기"}
+                {isAuthenticated ? "Myverse 앱 열기" : "Myverse 시작하기"}
             </Link>
             {navItems.map((item) => (
                 <Link

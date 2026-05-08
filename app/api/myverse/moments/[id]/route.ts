@@ -52,12 +52,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     // storage 파일 best-effort 삭제
     if (row?.media_url) {
-        const path = extractStoragePath(row.media_url, "planners-moments");
-        if (path) await admin.storage.from("planners-moments").remove([path]);
+        const path = extractStoragePath(row.media_url, "myverse-moments");
+        if (path) await admin.storage.from("myverse-moments").remove([path]);
     }
     if (row?.thumbnail_url) {
-        const path = extractStoragePath(row.thumbnail_url, "planners-moments");
-        if (path) await admin.storage.from("planners-moments").remove([path]);
+        const path = extractStoragePath(row.thumbnail_url, "myverse-moments");
+        if (path) await admin.storage.from("myverse-moments").remove([path]);
     }
     return NextResponse.json({ ok: true });
 }

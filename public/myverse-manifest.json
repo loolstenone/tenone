@@ -1,0 +1,45 @@
+{
+  "name": "Myverse",
+  "short_name": "Myverse",
+  "description": "My Universe — 9 영역 자동 정리 + 능동 AI 플래너 + @handle 공개",
+  "start_url": "/myverse/app",
+  "scope": "/myverse/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FAFAF7",
+  "theme_color": "#6366F1",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/myverse-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/myverse-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "오늘",
+      "short_name": "오늘",
+      "url": "/myverse/app/today"
+    },
+    {
+      "name": "주간",
+      "short_name": "주간",
+      "url": "/myverse/app/weekly"
+    },
+    {
+      "name": "AI 브리핑",
+      "short_name": "브리핑",
+      "url": "/myverse/app/ai-briefing"
+    }
+  ]
+}

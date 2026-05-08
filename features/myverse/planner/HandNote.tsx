@@ -113,13 +113,25 @@ const PALETTE: string[] = [
 // 퀵 선택 기본 5색
 const QUICK_COLORS = ["#0F172A", "#1E40AF", "#9F1239", "#166534", "#B45309"];
 
-const RECENT_KEY = "planners-recent-colors";
+const RECENT_KEY = "myverse-recent-colors";
+const LEGACY_RECENT_KEY = "planners-recent-colors";
 const MAX_RECENT = 8;
 const MAX_UNDO   = 50;
 
 function loadRecent(): string[] {
     if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]"); } catch { return []; }
+    try {
+        const current = localStorage.getItem(RECENT_KEY);
+        if (current) return JSON.parse(current);
+        // 레거시 키 마이그레이션
+        const legacy = localStorage.getItem(LEGACY_RECENT_KEY);
+        if (legacy) {
+            localStorage.setItem(RECENT_KEY, legacy);
+            localStorage.removeItem(LEGACY_RECENT_KEY);
+            return JSON.parse(legacy);
+        }
+        return [];
+    } catch { return []; }
 }
 
 function persistRecent(color: string) {

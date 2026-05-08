@@ -45,7 +45,7 @@ export async function GET() {
 
     // ── origin 매핑 (canvasId → origin) ─────────────────────────────────
     const originMap: Record<string, CanvasOrigin> = {};
-    const canvasMarkerRe = /<!--\s*planners:canvas=([a-zA-Z0-9_-]+)\s*-->/;
+    const canvasMarkerRe = /<!--\s*(?:myverse|planners):canvas=([a-zA-Z0-9_-]+)\s*-->/;
 
     // 1) 프로젝트 노트 참조 확인
     try {
@@ -64,7 +64,7 @@ export async function GET() {
                 .from("myverse_project_notes")
                 .select("content, project_id")
                 .in("project_id", projectIds)
-                .ilike("content", "%planners:canvas=%");
+                .or("content.ilike.%myverse:canvas=%,content.ilike.%planners:canvas=%");
 
             for (const ref of pnRefs ?? []) {
                 const m = (ref.content as string | null)?.match(canvasMarkerRe);

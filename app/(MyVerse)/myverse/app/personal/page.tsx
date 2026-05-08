@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getPlannerUser } from "@/lib/myverse/client";
+import { getMyverseUser } from "@/lib/myverse/client";
 import { IdentityView } from "@/features/myverse/planner/IdentityView";
 
 export default async function IdentityPage() {
@@ -26,8 +26,8 @@ export default async function IdentityPage() {
             .eq("email", user.email!)
             .maybeSingle();
         if (member) {
-            const plannerUser = await getPlannerUser(member.id);
-            mode = plannerUser?.mode === "all_in_one" || plannerUser?.mode === "custom"
+            const myverseUser = await getMyverseUser(member.id);
+            mode = myverseUser?.mode === "all_in_one" || myverseUser?.mode === "custom"
                 ? "all_in_one"
                 : "weekly";
         }

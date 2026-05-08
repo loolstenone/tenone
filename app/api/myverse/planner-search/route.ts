@@ -86,7 +86,7 @@ export async function GET(req: Request) {
             title: `Daily · ${r.date}`,
             snippet: snippet(text, q),
             date: r.date,
-            href: `/planners/app/today?date=${r.date}`,
+            href: `/myverse/app/today?date=${r.date}`,
         });
     });
 
@@ -97,7 +97,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: `Weekly · ${r.year} W${String(r.week).padStart(2, "0")}`,
             snippet: snippet(text, q),
-            href: `/planners/app/weekly?year=${r.year}&week=${r.week}`,
+            href: `/myverse/app/weekly?year=${r.year}&week=${r.week}`,
         });
     });
 
@@ -108,7 +108,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: `Monthly · ${r.year}.${String(r.month).padStart(2, "0")}`,
             snippet: snippet(text, q),
-            href: `/planners/app/monthly?year=${r.year}&month=${r.month}`,
+            href: `/myverse/app/monthly?year=${r.year}&month=${r.month}`,
         });
     });
 
@@ -119,7 +119,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: `Yearly · ${r.year}`,
             snippet: snippet(text, q),
-            href: `/planners/app/yearly?year=${r.year}`,
+            href: `/myverse/app/yearly?year=${r.year}`,
         });
     });
 
@@ -129,7 +129,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: `Project · ${r.title}`,
             snippet: r.title,
-            href: `/planners/app/projects/${r.id}`,
+            href: `/myverse/app/projects/${r.id}`,
         });
     });
 
@@ -140,7 +140,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: `Note · ${r.title || "(무제)"}`,
             snippet: snippet(text, q),
-            href: `/planners/app/projects/${r.project_id}`,
+            href: `/myverse/app/projects/${r.project_id}`,
         });
     });
 
@@ -151,7 +151,7 @@ export async function GET(req: Request) {
             title: `${r.briefing_type === "morning" ? "아침" : r.briefing_type === "midday" ? "중간" : "저녁"} 브리핑 · ${r.briefing_date}`,
             snippet: snippet(r.content, q),
             date: r.briefing_date,
-            href: `/planners/app/ai-briefing`,
+            href: `/myverse/app/ai-briefing`,
         });
     });
 
@@ -162,7 +162,7 @@ export async function GET(req: Request) {
             id: r.id,
             title: "Personal Identity",
             snippet: snippet(text, q),
-            href: `/planners/app/personal`,
+            href: `/myverse/app/personal`,
         });
     });
 

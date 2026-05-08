@@ -128,7 +128,7 @@ export function AboutPage() {
                             </Link>
                         </div>
                         <div>
-                            <h3 className="text-white font-semibold text-lg mb-3">PP AI</h3>
+                            <h3 className="text-white font-semibold text-lg mb-3">Myverse AI</h3>
                             <p className="text-teal-100 text-sm leading-relaxed">
                                 아침엔 브리핑하고, 저녁엔 정리한다.
                                 능동 AI 비서가 당신의 하루를 함께 설계한다.
@@ -155,7 +155,7 @@ export function AboutPage() {
                         href="/myverse/app"
                         className="inline-block bg-[#6366F1] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors"
                     >
-                        PP AI 시작하기
+                        Myverse 시작하기
                     </Link>
                     <Link
                         href="/myverse/programs"

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { TimeTrackerView } from "@/features/myverse/planner/TimeTrackerView";
-import { getPlannerUser } from "@/lib/myverse/client";
+import { getMyverseUser } from "@/lib/myverse/client";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +42,8 @@ async function checkAccess(): Promise<{ allowed: boolean }> {
     const isPrivileged = m.member_roles?.some(r => r.is_active && PRIVILEGED.has(r.role)) ?? false;
     if (isPrivileged) return { allowed: true };
 
-    const planner = await getPlannerUser((member as { id: string }).id);
-    return { allowed: !!planner?.time_tracking };
+    const myverseUser = await getMyverseUser((member as { id: string }).id);
+    return { allowed: !!myverseUser?.time_tracking };
 }
 
 export default async function TimePage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {

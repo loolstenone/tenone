@@ -225,11 +225,11 @@ export async function POST(req: Request) {
 
             const path = `${memberId}/${date}/meta_${item.timestamp}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
             const { error: upErr } = await admin.storage
-                .from("planners-moments")
+                .from("myverse-moments")
                 .upload(path, buffer, { contentType: TYPE_MAP[ext] ?? "application/octet-stream", upsert: false });
             if (upErr) { errors.push(`${item.uri}: ${upErr.message}`); continue; }
 
-            const { data: pub } = admin.storage.from("planners-moments").getPublicUrl(path);
+            const { data: pub } = admin.storage.from("myverse-moments").getPublicUrl(path);
             const mediaType = VIDEO_EXT.has(ext) ? "video" : "image";
 
             const { error: dbErr } = await admin.from("myverse_daily_moments").insert({

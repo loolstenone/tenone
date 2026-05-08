@@ -1,7 +1,7 @@
 "use client";
 
 // 오늘의 한 장면 — 이미지/동영상 업로드 + 5W1H 메타
-// 사진을 추가하면 클라이언트가 Supabase Storage(planners-moments)에 직접 업로드.
+// 사진을 추가하면 클라이언트가 Supabase Storage(myverse-moments)에 직접 업로드.
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Upload, X, Loader2, Trash2, Pencil, Archive } from "lucide-react";

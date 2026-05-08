@@ -39,14 +39,14 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: upErr } = await admin.storage
-        .from("planners-moments")
+        .from("myverse-moments")
         .upload(path, buffer, { contentType: file.type, upsert: false });
     if (upErr) {
         console.error("moment upload err", upErr);
         return NextResponse.json({ error: "upload_failed", message: upErr.message }, { status: 500 });
     }
 
-    const { data: pub } = admin.storage.from("planners-moments").getPublicUrl(path);
+    const { data: pub } = admin.storage.from("myverse-moments").getPublicUrl(path);
 
     return NextResponse.json({
         url: pub.publicUrl,

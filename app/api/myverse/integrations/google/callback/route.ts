@@ -11,16 +11,16 @@ export async function GET(req: Request) {
     const error = url.searchParams.get("error");
 
     if (error) {
-        return NextResponse.redirect(new URL(`/planners/app/settings?google_error=${error}`, req.url));
+        return NextResponse.redirect(new URL(`/myverse/app/settings?google_error=${error}`, req.url));
     }
     if (!code || !state) {
-        return NextResponse.redirect(new URL("/planners/app/settings?google_error=missing_code", req.url));
+        return NextResponse.redirect(new URL("/myverse/app/settings?google_error=missing_code", req.url));
     }
 
     const cookieStore = await cookies();
     const savedState = cookieStore.get("pp_google_state")?.value;
     if (!savedState || savedState !== state) {
-        return NextResponse.redirect(new URL("/planners/app/settings?google_error=state_mismatch", req.url));
+        return NextResponse.redirect(new URL("/myverse/app/settings?google_error=state_mismatch", req.url));
     }
 
     const supabase = createServerClient(
@@ -34,15 +34,15 @@ export async function GET(req: Request) {
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.redirect(new URL("/login?redirect=/planners/app/settings", req.url));
+    if (!user) return NextResponse.redirect(new URL("/login?redirect=/myverse/app/settings", req.url));
 
     const { data: member } = await supabase.from("members").select("id").eq("email", user.email!).maybeSingle();
-    if (!member) return NextResponse.redirect(new URL("/planners/app/settings?google_error=member_not_found", req.url));
+    if (!member) return NextResponse.redirect(new URL("/myverse/app/settings?google_error=member_not_found", req.url));
 
     // 토큰 교환
     const tokens = await exchangeCodeForTokens(code);
     if (!tokens) {
-        return NextResponse.redirect(new URL("/planners/app/settings?google_error=token_exchange_failed", req.url));
+        return NextResponse.redirect(new URL("/myverse/app/settings?google_error=token_exchange_failed", req.url));
     }
 
     // 사용자 정보 조회
@@ -65,5 +65,5 @@ export async function GET(req: Request) {
         updated_at: new Date().toISOString(),
     }, { onConflict: "member_id,provider" });
 
-    return NextResponse.redirect(new URL("/planners/app/settings?google=connected", req.url));
+    return NextResponse.redirect(new URL("/myverse/app/settings?google=connected", req.url));
 }

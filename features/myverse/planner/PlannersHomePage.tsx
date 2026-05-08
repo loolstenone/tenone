@@ -41,7 +41,7 @@ function HeroSection() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white text-sm font-medium tracking-wide hover:bg-[#4F46E5] transition-colors shadow-sm"
           >
             <Sparkles size={16} />
-            {isAuthenticated ? "PP AI 앱 열기" : "마이버스 AI 시작"}
+            {isAuthenticated ? "Myverse 앱 열기" : "마이버스 AI 시작"}
             <ArrowRight size={16} />
           </Link>
           <Link
@@ -109,7 +109,7 @@ function PPAISpotlight() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#6366F1] text-white text-sm font-semibold rounded hover:bg-[#4F46E5] transition-colors"
           >
             <Sparkles size={16} />
-            {isAuthenticated ? "PP AI 앱 열기" : "1년 19,000원으로 시작"}
+            {isAuthenticated ? "Myverse 앱 열기" : "1년 19,000원으로 시작"}
             <ArrowRight size={16} />
           </Link>
           <Link

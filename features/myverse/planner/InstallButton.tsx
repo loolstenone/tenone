@@ -55,7 +55,7 @@ export function InstallButton({
     }
 
     const computedTitle = title
-        ?? (canInstall ? "PP AI 를 홈 화면에 설치합니다" : "설치 안내 보기 (iOS 등)");
+        ?? (canInstall ? "Myverse를 홈 화면에 설치합니다" : "설치 안내 보기 (iOS 등)");
 
     return (
         <Link

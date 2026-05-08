@@ -15,8 +15,8 @@ import { CanvasStudio } from "./CanvasStudio";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
-//   <!-- planners:tpl=<key>|label=<label> -->\n<body>
-const TPL_MARKER_RE = /^<!--\s*planners:tpl=([a-z0-9_-]+)(?:\|label=([^>]*?))?\s*-->\n?/;
+//   <!-- myverse:tpl=<key>|label=<label> -->\n<body>
+const TPL_MARKER_RE = /^<!--\s*(?:myverse|planners):tpl=([a-z0-9_-]+)(?:\|label=([^>]*?))?\s*-->\n?/;
 function parseTemplateMarker(content: string | null): { key: string; label: string; body: string } | null {
     if (!content) return null;
     const m = content.match(TPL_MARKER_RE);
@@ -24,7 +24,7 @@ function parseTemplateMarker(content: string | null): { key: string; label: stri
     return { key: m[1], label: (m[2] ?? '').trim(), body: content.slice(m[0].length) };
 }
 function buildTemplateContent(key: string, label: string, body: string): string {
-    return `<!-- planners:tpl=${key}|label=${label.replace(/[\r\n>]/g, ' ').trim()} -->\n${body}`;
+    return `<!-- myverse:tpl=${key}|label=${label.replace(/[\r\n>]/g, ' ').trim()} -->\n${body}`;
 }
 
 // 캔버스 노트 마커 — 캔버스 id를 노트 content에 임베드 (DB 마이그레이션 없이)
@@ -149,7 +149,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     async function addBlankNote() {
         setSaving(true);
         try {
-            const idx = notes.filter(n => !(n.content ?? "").includes("planners:handwriting") && !(n.content ?? "").includes("planners-template")).length + 1;
+            const idx = notes.filter(n => !(n.content ?? "").includes("myverse:handwriting") && !(n.content ?? "").includes("planners-template")).length + 1;
             // 코넬 포맷으로 생성 — Daily와 동일한 SSOT 형식
             const cornellContent = JSON.stringify({
                 _cornell: true,
@@ -322,8 +322,8 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                title: `손글씨 ${notes.filter(n => (n.content ?? "").includes("planners:handwriting")).length + 1}`,
-                                content: "<!-- planners:handwriting -->\n" + JSON.stringify({ strokes: [], width: 600, height: 320 })
+                                title: `손글씨 ${notes.filter(n => (n.content ?? "").includes("myverse:handwriting")).length + 1}`,
+                                content: "<!-- myverse:handwriting -->\n" + JSON.stringify({ strokes: [], width: 600, height: 320 })
                             }),
                         });
                         if (res.ok) {
@@ -890,7 +890,7 @@ function NoteExpandModal({
         if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
         setAllHandPages(updatedPages);
         const target = updatedPages[newIdx];
-        setContent(`<!-- planners:handwriting -->\n${JSON.stringify(target)}`);
+        setContent(`<!-- myverse:handwriting -->\n${JSON.stringify(target)}`);
         setPageIdx(newIdx);
     }
     function addHandPage() {
@@ -900,7 +900,7 @@ function NoteExpandModal({
         if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
         updatedPages.push(newPage);
         setAllHandPages(updatedPages);
-        setContent(`<!-- planners:handwriting -->\n${JSON.stringify(newPage)}`);
+        setContent(`<!-- myverse:handwriting -->\n${JSON.stringify(newPage)}`);
         setPageIdx(updatedPages.length - 1);
     }
     function handleClose() {
@@ -918,7 +918,7 @@ function NoteExpandModal({
             const currentHw = parseHandwriting(content);
             if (currentHw) updatedPages[pageIdx] = { strokes: currentHw.strokes, width: currentHw.width, height: currentHw.height };
             const newHw = { ...(updatedPages[0] ?? { strokes: [], width: 800, height: 480 }), _pages: updatedPages };
-            finalContent = `<!-- planners:handwriting -->\n${JSON.stringify(newHw)}`;
+            finalContent = `<!-- myverse:handwriting -->\n${JSON.stringify(newHw)}`;
         }
         onSave({ title, content: finalContent });
         onClose();

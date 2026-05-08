@@ -166,7 +166,7 @@ export function PurchaseView() {
                         <p className="text-sm text-neutral-700 font-medium">종이 플래너'스 플래너 구매자이신가요?</p>
                         <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
                             Badak Mall에서 2026 플래너를 구매하셨다면 1년 구독을 <strong className="text-[#6366F1]">무료로</strong> 제공해 드립니다.<br />
-                            <a href="mailto:lools@tenone.biz?subject=PP AI 구독 무료 활성화 요청" className="text-[#6366F1] hover:underline">
+                            <a href="mailto:lools@tenone.biz?subject=Myverse 구독 무료 활성화 요청" className="text-[#6366F1] hover:underline">
                                 lools@tenone.biz로 주문번호와 함께 문의
                             </a>
                         </p>

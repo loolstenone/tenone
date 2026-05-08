@@ -383,7 +383,7 @@ function MobileNavSection() {
                 next = [...prev, id];
             }
             localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(next));
-            window.dispatchEvent(new CustomEvent("planners-mobile-nav-change"));
+            window.dispatchEvent(new CustomEvent("myverse-mobile-nav-change"));
             return next;
         });
     }
@@ -401,7 +401,7 @@ function MobileNavSection() {
                     onClick={() => {
                         setSelected(MOBILE_NAV_DEFAULT);
                         localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(MOBILE_NAV_DEFAULT));
-                        window.dispatchEvent(new CustomEvent("planners-mobile-nav-change"));
+                        window.dispatchEvent(new CustomEvent("myverse-mobile-nav-change"));
                     }}
                     className="text-[11px] text-neutral-400 hover:text-[#6366F1] transition-colors"
                 >

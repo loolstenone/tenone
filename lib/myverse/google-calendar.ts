@@ -19,7 +19,7 @@ export function getClientConfig(): { clientId: string; clientSecret: string; red
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     if (!clientId || !clientSecret) return null;
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://planners.tenone.biz";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://myverse.kr";
     return {
         clientId,
         clientSecret,
