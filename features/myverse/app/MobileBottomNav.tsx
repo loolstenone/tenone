@@ -10,19 +10,26 @@ import {
 
 export const MOBILE_NAV_STORAGE_KEY = "myverse-mobile-nav";
 const LEGACY_NAV_STORAGE_KEY = "planners-mobile-nav";
-export const MOBILE_NAV_DEFAULT: string[] = ["index", "projects", "today", "identity", "search"];
+// 5 lane SSOT 기반 모바일 하단 네비 (세션 119 IA)
+export const MOBILE_NAV_DEFAULT: string[] = ["today", "record", "ai", "connect", "search"];
 
 export const ALL_NAV_OPTIONS = [
-    { id: "index",    label: "인덱스",   icon: LayoutGrid,    href: "/myverse/app/index" },
+    // ── Lane 5
     { id: "today",    label: "오늘",     icon: Sun,           href: "/myverse/app/today" },
-    { id: "weekly",   label: "주간",    icon: CalendarDays, href: "/myverse/app/weekly" },
-    { id: "monthly",  label: "월간",    icon: Calendar,     href: "/myverse/app/monthly" },
-    { id: "yearly",   label: "연간",    icon: CalendarRange, href: "/myverse/app/yearly" },
+    { id: "record",   label: "기록",     icon: LayoutGrid,    href: "/myverse/app/traces" },
+    { id: "ai",       label: "AI",       icon: CalendarDays,  href: "/myverse/app/ask" },
+    { id: "connect",  label: "연결",     icon: Users,         href: "/myverse/app/feed" },
+    // ── 도구 lane (선택)
     { id: "projects", label: "프로젝트", icon: FolderKanban, href: "/myverse/app/projects" },
-    { id: "identity", label: "퍼스널",  icon: User,         href: "/myverse/app/personal" },
-    { id: "contacts", label: "연락처",  icon: Users,        href: "/myverse/app/contacts" },
-    { id: "search",   label: "검색",    icon: Search,       href: "/myverse/app/search" },
-    { id: "settings", label: "설정",    icon: Settings,     href: "/myverse/app/settings" },
+    { id: "identity", label: "퍼스널",   icon: User,         href: "/myverse/app/personal" },
+    { id: "contacts", label: "연락처",   icon: Calendar,     href: "/myverse/app/contacts" },
+    // ── 시간 줌 (도구)
+    { id: "weekly",   label: "주간",     icon: CalendarDays, href: "/myverse/app/weekly" },
+    { id: "monthly",  label: "월간",     icon: Calendar,     href: "/myverse/app/monthly" },
+    { id: "yearly",   label: "연간",     icon: CalendarRange, href: "/myverse/app/yearly" },
+    // ── 시스템
+    { id: "search",   label: "검색",     icon: Search,       href: "/myverse/app/search" },
+    { id: "settings", label: "설정",     icon: Settings,     href: "/myverse/app/settings" },
 ] as const;
 
 export type NavOptionId = typeof ALL_NAV_OPTIONS[number]["id"];
@@ -72,7 +79,7 @@ export function MobileBottomNav() {
         .filter(Boolean) as typeof ALL_NAV_OPTIONS[number][];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white myverse-dark:bg-[#161616] border-t border-neutral-200 myverse-dark:border-[#2A2A2A] safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white myverse-dark:bg-[#08080E]/95 myverse-dark:backdrop-blur-xl border-t border-neutral-200 myverse-dark:border-white/8 safe-area-inset-bottom">
             <div className="flex items-stretch h-14">
                 {navItems.map((item) => {
                     const Icon = item.icon;
@@ -98,7 +105,7 @@ export function MobileBottomNav() {
                 })}
             </div>
             {/* iPhone 홈 인디케이터 safe area */}
-            <div className="h-safe-area-inset-bottom bg-white myverse-dark:bg-[#161616]" />
+            <div className="h-safe-area-inset-bottom bg-white myverse-dark:bg-[#08080E]" />
         </nav>
     );
 }

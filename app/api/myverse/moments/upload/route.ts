@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
+import { extractExif, reverseGeocode } from "@/lib/myverse/exif";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -38,20 +39,38 @@ export async function POST(req: Request) {
     const admin = createAdminClient();
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: upErr } = await admin.storage
-        .from("myverse-moments")
-        .upload(path, buffer, { contentType: file.type, upsert: false });
-    if (upErr) {
-        console.error("moment upload err", upErr);
-        return NextResponse.json({ error: "upload_failed", message: upErr.message }, { status: 500 });
+    // EXIF 추출 (이미지만) — 업로드와 병렬
+    const isImage = file.type.startsWith("image/");
+    const [uploadRes, exif] = await Promise.all([
+        admin.storage.from("myverse-moments").upload(path, buffer, { contentType: file.type, upsert: false }),
+        isImage ? extractExif(buffer) : Promise.resolve(null),
+    ]);
+
+    if (uploadRes.error) {
+        console.error("moment upload err", uploadRes.error);
+        return NextResponse.json({ error: "upload_failed", message: uploadRes.error.message }, { status: 500 });
     }
 
     const { data: pub } = admin.storage.from("myverse-moments").getPublicUrl(path);
+
+    // GPS가 있으면 역지오코딩 (실패시 좌표 fallback)
+    let location: string | null = null;
+    if (exif?.gps) {
+        location = await reverseGeocode(exif.gps);
+    }
 
     return NextResponse.json({
         url: pub.publicUrl,
         media_type: file.type.startsWith("video/") ? "video" : "image",
         file_size: file.size,
         path,
+        exif: exif ? {
+            happened_at: exif.happened_at,
+            gps: exif.gps,
+            location,
+            width: exif.width,
+            height: exif.height,
+            camera: exif.make ? `${exif.make}${exif.model ? " " + exif.model : ""}` : null,
+        } : null,
     });
 }

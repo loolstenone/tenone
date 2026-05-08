@@ -7,7 +7,9 @@
 //   나누기(Share): Verse 통합 타임라인 · @handle 공개 페이지
 //
 // 9 영역 SSOT: lib/myverse/domains.ts (DOMAINS · PILLARS · app_href)
+// 자동 배지: GET /api/myverse/domains/activity 로 최근 7일 도메인별 활동 수.
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -83,12 +85,14 @@ function NavLink({
     label,
     color,
     active,
+    badge,
 }: {
     href: string;
     icon: LucideIcon;
     label: string;
     color?: string;
     active: boolean;
+    badge?: number;
 }) {
     return (
         <Link
@@ -104,6 +108,18 @@ function NavLink({
                 style={!active && color ? { color } : undefined}
             />
             <span className="flex-1">{label}</span>
+            {badge && badge > 0 ? (
+                <span
+                    className={`text-[10px] tabular-nums px-1.5 rounded-full ${
+                        active
+                            ? "bg-[#6366F1] text-white"
+                            : "bg-neutral-100 text-neutral-500"
+                    }`}
+                    title="최근 7일 활동"
+                >
+                    {badge > 99 ? "99+" : badge}
+                </span>
+            ) : null}
         </Link>
     );
 }
@@ -121,6 +137,7 @@ function SectionHeader({ icon: Icon, label }: { icon: LucideIcon; label: string 
 // ── 메인 컴포넌트 ─────────────────────────────────────────────
 export function MyverseSidebar({ handle }: { handle: string | null }) {
     const pathname = usePathname();
+    const [counts, setCounts] = useState<Partial<Record<DomainKey, number>>>({});
 
     function isActive(href: string): boolean {
         if (href === pathname) return true;
@@ -129,6 +146,23 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
 
     // SSOT 기반 9영역 pillar 그룹 (me / do / time)
     const domainPillars = PILLARS.filter(p => p.domains && p.domains.length > 0);
+
+    // 자동 배지 — 최근 7일 도메인별 활동 (포커스 복귀 시 갱신)
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            try {
+                const r = await fetch("/api/myverse/domains/activity");
+                if (!r.ok) return;
+                const d = await r.json();
+                if (!cancelled) setCounts(d.counts ?? {});
+            } catch {}
+        }
+        void load();
+        const onVis = () => { if (document.visibilityState === "visible") void load(); };
+        document.addEventListener("visibilitychange", onVis);
+        return () => { cancelled = true; document.removeEventListener("visibilitychange", onVis); };
+    }, []);
 
     return (
         <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-neutral-200 bg-white">
@@ -153,6 +187,7 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
                                             label={domain.label_ko}
                                             color={domain.color_hex}
                                             active={active}
+                                            badge={counts[domainKey]}
                                         />
                                     </li>
                                 );

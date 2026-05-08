@@ -298,7 +298,7 @@ export default function HelpPage() {
                         <section
                             key={s.id}
                             id={s.id}
-                            className="scroll-mt-24 bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-xl px-5 py-6 md:px-7 md:py-7"
+                            className="scroll-mt-24 bg-white myverse-dark:bg-white/[0.03] border border-neutral-200 myverse-dark:border-white/8 rounded-xl px-5 py-6 md:px-7 md:py-7"
                         >
                             <div className="flex items-start gap-3 mb-3">
                                 <span className="shrink-0 mt-1 text-[#6366F1] myverse-dark:text-[#A5B4FC]">

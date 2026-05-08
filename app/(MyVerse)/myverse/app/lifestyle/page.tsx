@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Loader2, Coffee, Plus, X, Smile, Frown, Meh, SmilePlus, Angry, Image as ImageIcon, Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CoachInsightCard } from "@/features/myverse/app/CoachInsightCard";
 
 type Mood = 1 | 2 | 3 | 4 | 5;
 
@@ -110,6 +111,9 @@ export default function LifestylePage() {
             </header>
 
             <div className="p-4">
+                <div className="mb-4">
+                    <CoachInsightCard autoGenerate={false} />
+                </div>
                 {loading ? (
                     <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
                 ) : dates.length === 0 ? (

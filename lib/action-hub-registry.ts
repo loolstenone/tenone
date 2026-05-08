@@ -198,6 +198,16 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "cs",
         priority: "normal",
     },
+    {
+        key: "myverse_moment_reports_open",
+        label: "Myverse 모먼트 신고",
+        table: "myverse_moment_reports",
+        filter: { column: "status", value: "open" },
+        href: "/intra/ums/myverse/reports",
+        brand_id: "myverse",
+        category: "moderation",
+        priority: "high",
+    },
 ];
 
 /** category별 라벨 */

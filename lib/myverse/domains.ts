@@ -188,9 +188,89 @@ export interface PillarMeta {
 export const PILLARS: PillarMeta[] = [
     { key: "me",    label_ko: "나",     icon_name: "User",      domains: ["body", "daily", "relation"] },
     { key: "do",    label_ko: "일",     icon_name: "Briefcase", domains: ["work", "study"] },
-    { key: "time",  label_ko: "시간",   icon_name: "Clock",     domains: ["schedule"] },
+    { key: "time",  label_ko: "시간",   icon_name: "Clock",     domains: ["schedule", "move", "travel"] },
     { key: "share", label_ko: "나누기", icon_name: "Share2" },
 ];
+
+// ── Lane SSOT — 5 lane 1차 네비게이션 (IA 재구성, 세션 119~) ─────────
+//
+// IA 진단: 시간 줌 9개 + AI surface 6개 + 소셜 surface 5개로 분산됨.
+// 사용자 멘탈 모델은 (오늘/기록/AI/연결/도구) 4동사로 수렴 → Lane으로 표현.
+//
+// PILLARS는 Lane "기록" 안의 9영역 그룹핑으로만 의미를 가짐 (사용자에게 직접 노출되지 않음).
+
+export type LaneKey = "today" | "record" | "ai" | "connect" | "work";
+
+export interface LaneMeta {
+    key: LaneKey;
+    label_ko: string;
+    icon_name: string;          // Lucide
+    app_href: string;            // 진입점
+    description: string;
+}
+
+export const LANES: LaneMeta[] = [
+    {
+        key: "today",
+        label_ko: "오늘",
+        icon_name: "Sunrise",
+        app_href: "/myverse/app/today",
+        description: "지금·여기 — 흔적, 일과, 코치 카드, 빠른 기록 한 화면",
+    },
+    {
+        key: "record",
+        label_ko: "기록",
+        icon_name: "Camera",
+        app_href: "/myverse/app/traces",
+        description: "흔적 타임라인 — 9영역 필터·시간 줌·사람 횡단축",
+    },
+    {
+        key: "ai",
+        label_ko: "AI",
+        icon_name: "Sparkles",
+        app_href: "/myverse/app/ask",
+        description: "묻기·코치·일기·캡슐 — 내 데이터의 AI 통찰",
+    },
+    {
+        key: "connect",
+        label_ko: "연결",
+        icon_name: "Share2",
+        app_href: "/myverse/app/feed",
+        description: "피드·DM·Verse·@handle — 외부와의 연결",
+    },
+    {
+        key: "work",
+        label_ko: "도구",
+        icon_name: "LayoutTemplate",
+        app_href: "/myverse/app/projects",
+        description: "프로젝트·캔버스·작업·템플릿 — Planner's 자산 (Easy 모드 숨김 가능)",
+    },
+];
+
+/** Lane 키 → 그 lane에 속하는 페이지 경로 prefix들 — 활성 상태 판정용 */
+export const LANE_PATHS: Record<LaneKey, string[]> = {
+    today: ["/myverse/app/today", "/myverse/app/index", "/myverse/app/daily"],
+    record: [
+        "/myverse/app/traces",
+        "/myverse/app/lifestyle",
+        "/myverse/app/body", "/myverse/app/work", "/myverse/app/study",
+        "/myverse/app/relation", "/myverse/app/schedule", "/myverse/app/move",
+        "/myverse/app/travel", "/myverse/app/with",
+        "/myverse/app/weekly", "/myverse/app/monthly", "/myverse/app/yearly",
+    ],
+    ai: ["/myverse/app/ask", "/myverse/app/coach", "/myverse/app/diary", "/myverse/app/insights", "/myverse/app/capsules", "/myverse/app/ai-briefing"],
+    connect: ["/myverse/app/feed", "/myverse/app/dm", "/myverse/app/verse", "/myverse/app/notifications"],
+    work: ["/myverse/app/projects", "/myverse/app/canvas", "/myverse/app/tasks", "/myverse/app/templates", "/myverse/app/contacts", "/myverse/app/personal"],
+};
+
+export function laneForPath(pathname: string): LaneKey | null {
+    for (const lane of LANES) {
+        if (LANE_PATHS[lane.key].some(p => pathname === p || pathname.startsWith(p + "/"))) {
+            return lane.key;
+        }
+    }
+    return null;
+}
 
 /** 캡처 모드 */
 export type CaptureMode = "active" | "auto" | "imported";

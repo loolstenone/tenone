@@ -139,6 +139,17 @@ export default function PrivacyPage() {
                 동의 변경 이력은 <code>myverse_consent_log</code>에 감사 추적됩니다.
                 언제든 OFF로 되돌릴 수 있고, 모든 자동 수집 데이터는 일괄 다운로드·영구 삭제 가능합니다.
             </p>
+
+            <div className="mt-8 pt-6 border-t border-neutral-100">
+                <p className="text-xs font-semibold text-neutral-700 mb-2">데이터 권리</p>
+                <a href="/myverse/app/settings/privacy/export"
+                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-700 hover:bg-neutral-50">
+                    내 데이터 다운로드 (JSON) →
+                </a>
+                <p className="text-[11px] text-neutral-400 mt-2">
+                    GDPR 데이터 이동권 — Myverse가 보관 중인 내 모든 데이터를 한 파일로 받을 수 있습니다.
+                </p>
+            </div>
         </div>
         </SettingsLayout>
     );

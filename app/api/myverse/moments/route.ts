@@ -61,10 +61,22 @@ export async function POST(req: Request) {
             exercise:     exercise  != null ? exercise  : null,
             leisure:      leisure   != null ? leisure   : null,
             study:        study     != null ? study     : null,
+            visibility:   "private",  // 기본 비공개 — 사용자가 흔적 모달에서 명시적으로 공개 선택해야 함
         })
         .select()
         .single();
 
     if (error || !data) return NextResponse.json({ error: error?.message || "insert_failed" }, { status: 500 });
+
+    // 백그라운드 AI 자동 분류 — 이미지 한정, 응답은 기다리지 않음
+    if (data.media_type === "image") {
+        const origin = new URL(req.url).origin;
+        const cookie = req.headers.get("cookie") ?? "";
+        fetch(`${origin}/api/myverse/moments/${data.id}/classify`, {
+            method: "POST",
+            headers: { cookie },
+        }).catch(e => console.warn("[moments] auto-classify failed:", e));
+    }
+
     return NextResponse.json({ moment: data });
 }

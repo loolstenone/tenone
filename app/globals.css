@@ -68,12 +68,12 @@ html[data-myverse-font] button:not(.font-serif) {
    다른 브랜드에는 영향 없음 (.myverse-dark 가 없으면 비활성).
    현 단계는 인프라만 — 컴포넌트별 시각 적용은 후속 PR에서 점진 마이그레이션. */
 html.myverse-dark {
-  --myverse-bg: #0f0f0f;
-  --myverse-bg-alt: #1a1a1a;
-  --myverse-surface: #161616;
+  --myverse-bg: #08080E;
+  --myverse-bg-alt: #0D0D15;
+  --myverse-surface: #11111C;
   --myverse-text: #f5f5f5;
   --myverse-text-sub: #a3a3a3;
-  --myverse-border: #2a2a2a;
+  --myverse-border: #1E1E2E;
 
   /* pp-settings 다크 토큰 — :root 라이트 토큰을 오버라이드 */
   --pp-bg:           #0E0E0E;
@@ -106,7 +106,7 @@ html.myverse-dark .myverse-app-shell [class~="bg-neutral-100"] {
 html.myverse-dark .myverse-app-shell [class~="hover:bg-neutral-50"]:hover,
 html.myverse-dark .myverse-app-shell [class~="hover:bg-neutral-100"]:hover,
 html.myverse-dark .myverse-app-shell [class~="hover:bg-neutral-200"]:hover {
-  background-color: #2A2A2A !important;
+  background-color: #1A1A24 !important;
 }
 
 

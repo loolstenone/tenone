@@ -14,6 +14,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Loader2, Camera, Clock, MapPin, Calendar, Orbit, Filter, Users } from "lucide-react";
 import { DOMAINS, DOMAIN_KEYS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
+import { LaneSubNav, CONNECT_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
 
 type Zoom = "day" | "week" | "month" | "quarter" | "year" | "life";
 
@@ -99,6 +100,7 @@ export default function VersePage() {
 
     return (
         <div>
+            <LaneSubNav tabs={CONNECT_LANE_TABS} />
             <header className="px-6 pt-6 pb-3 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>

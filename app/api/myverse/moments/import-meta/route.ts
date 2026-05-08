@@ -241,6 +241,8 @@ export async function POST(req: Request) {
                 happened_at: happenedAt,
                 location: item.location?.slice(0, 200) ?? null,
                 file_size: buffer.byteLength,
+                capture_mode: "imported",
+                visibility: "private",  // 백업 임포트는 항상 비공개로 시작
             });
             if (dbErr) { errors.push(`${item.uri}: ${dbErr.message}`); continue; }
             imported++;

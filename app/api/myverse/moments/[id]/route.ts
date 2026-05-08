@@ -17,6 +17,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (typeof body.with_whom === "string")   patch.with_whom = body.with_whom.slice(0, 200);
     if (typeof body.location === "string")    patch.location = body.location.slice(0, 200);
     if (typeof body.activity === "string")    patch.activity = body.activity.slice(0, 200);
+    if (body.visibility === "private" || body.visibility === "friends" || body.visibility === "public") {
+        patch.visibility = body.visibility;
+    }
 
     const admin = createAdminClient();
     const { error } = await admin

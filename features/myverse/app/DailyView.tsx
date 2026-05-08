@@ -40,9 +40,9 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
     }, []);
 
     return (
-        <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-xl mt-3 overflow-hidden">
+        <section className="bg-white myverse-dark:bg-white/[0.03] border border-neutral-200 myverse-dark:border-white/8 rounded-xl mt-3 overflow-hidden">
             {/* 단일 헤더 */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 myverse-dark:border-[#2A2A2A]">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 myverse-dark:border-white/8">
                 <h2 className="text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
                     <CameraIconForCard className="h-3.5 w-3.5" />
                     오늘의 한 장면
@@ -69,10 +69,10 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
             <div className="p-5" key={`m-${version}`}>
                 <DailyMomentsAuto date={date} hideAdd hideBackup minimalEmpty />
             </div>
-            <div className="border-t border-neutral-100 myverse-dark:border-[#2A2A2A]" key={`p-${version}`}>
+            <div className="border-t border-neutral-100 myverse-dark:border-white/8" key={`p-${version}`}>
                 <DailyPlacesCard date={date} bare hideAdd />
             </div>
-            <div className="border-t border-neutral-100 myverse-dark:border-[#2A2A2A]" key={`r-${version}`}>
+            <div className="border-t border-neutral-100 myverse-dark:border-white/8" key={`r-${version}`}>
                 <DailyRoutinesCard date={date} bare hideAdd />
             </div>
         </section>

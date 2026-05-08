@@ -166,7 +166,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
             <MyverseThemeProvider />
             <PwaRegister />
             <Suspense><WelcomeTracker /></Suspense>
-            <div className="myverse-app-shell min-h-screen bg-neutral-50 flex flex-col">
+            <div className="myverse-app-shell min-h-screen bg-neutral-50 myverse-dark:bg-[#08080E] flex flex-col">
                 <AppTopNav
                     mode={(myverseUser?.mode === "all_in_one" || myverseUser?.mode === "custom" ? myverseUser.mode : "weekly") as MyverseMode}
                     userName={member.name || undefined}

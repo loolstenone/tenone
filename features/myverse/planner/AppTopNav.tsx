@@ -9,19 +9,23 @@ import {
     Menu, Maximize, Minimize, MessageSquarePlus,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
+import { LANE_PATHS, type LaneKey } from "@/lib/myverse/domains";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
-// ── 탭 목록 SSOT ──────────────────────────────────────────────
+// ── 5 Lane SSOT 1차 네비 (세션 119 IA 정리) ───────────────────
+//  오늘 / 기록 / AI / 연결 + 도구 + 커뮤니티 (외부)
 const TABS = [
-    { key: "index",     label: "인덱스",   href: "/myverse/app/index" },
-    { key: "today",     label: "오늘",     href: "/myverse/app/daily" },
-    { key: "trace",     label: "흔적",     href: "/myverse/app/time" },
-    { key: "contacts",  label: "연락처",   href: "/myverse/app/contacts" },
-    { key: "personal",  label: "퍼스널",   href: "/myverse/app/personal" },
+    // 핵심 4 lane
+    { key: "today",     label: "오늘",     href: "/myverse/app/today" },
+    { key: "record",    label: "기록",     href: "/myverse/app/traces" },
+    { key: "ai",        label: "AI",       href: "/myverse/app/ask" },
+    { key: "connect",   label: "연결",     href: "/myverse/app/feed" },
+    // 도구 lane
     { key: "projects",  label: "프로젝트", href: "/myverse/app/projects" },
     { key: "canvas",    label: "캔버스",   href: "/myverse/app/canvas" },
     { key: "templates", label: "템플릿",   href: "/myverse/app/templates" },
+    { key: "personal",  label: "퍼스널",   href: "/myverse/app/personal" },
     { key: "community", label: "커뮤니티", href: "/myverse/community", external: true },
 ] as const;
 
@@ -84,7 +88,12 @@ export function AppTopNav({
             ? "bg-neutral-100 text-neutral-900"
             : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"}`;
 
-    const currentLabel = TABS.find(t => pathname === t.href || pathname.startsWith(t.href + "/"))?.label ?? "";
+    const currentLabel = TABS.find(t => {
+        const lanePaths = LANE_PATHS[t.key as LaneKey];
+        return lanePaths
+            ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
+            : (pathname === t.href || pathname.startsWith(t.href + "/"));
+    })?.label ?? "";
 
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
@@ -104,8 +113,11 @@ export function AppTopNav({
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
                 {TABS.map((tab) => {
+                    const lanePaths = LANE_PATHS[tab.key as LaneKey];
                     const active = !("external" in tab && tab.external) && (
-                        pathname === tab.href || pathname.startsWith(tab.href + "/")
+                        lanePaths
+                            ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
+                            : (pathname === tab.href || pathname.startsWith(tab.href + "/"))
                     );
                     return (
                         <Link
@@ -219,7 +231,12 @@ export function AppTopNav({
             >
                 <div className="py-1">
                     {TABS.map((tab) => {
-                        const active = !("external" in tab && tab.external) && (pathname === tab.href || pathname.startsWith(tab.href + "/"));
+                        const lanePaths = LANE_PATHS[tab.key as LaneKey];
+                        const active = !("external" in tab && tab.external) && (
+                            lanePaths
+                                ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
+                                : (pathname === tab.href || pathname.startsWith(tab.href + "/"))
+                        );
                         return (
                             <Link
                                 key={tab.key}
