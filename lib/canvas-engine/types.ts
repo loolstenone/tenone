@@ -130,6 +130,8 @@ export interface TextElement extends BaseElement {
     fontFamily: string;     // CSS 폰트 패밀리
     color: string;
     align: "left" | "center" | "right";
+    bold?: boolean;
+    italic?: boolean;
     /** 자동 줄바꿈 너비 — undefined면 텍스트 길이만큼 자동 */
     maxWidth?: number;
 }

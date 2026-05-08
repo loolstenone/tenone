@@ -91,6 +91,59 @@ export class CanvasEngine {
         this.emit("select", Array.from(this.selectedIds));
     }
 
+    // ── 레이어 순서 변경 ──────────────────────────────────────────────────
+    bringToFront(ids: string[]): void {
+        const set  = new Set(ids);
+        const stay = this.doc.elements.filter(e => !set.has(e.id));
+        const top  = this.doc.elements.filter(e =>  set.has(e.id));
+        if (!top.length) return;
+        this.history.push(this.doc);
+        this.doc = { ...this.doc, elements: [...stay, ...top] };
+        this.emit("change", this.doc);
+    }
+
+    sendToBack(ids: string[]): void {
+        const set    = new Set(ids);
+        const stay   = this.doc.elements.filter(e => !set.has(e.id));
+        const bottom = this.doc.elements.filter(e =>  set.has(e.id));
+        if (!bottom.length) return;
+        this.history.push(this.doc);
+        this.doc = { ...this.doc, elements: [...bottom, ...stay] };
+        this.emit("change", this.doc);
+    }
+
+    bringForward(ids: string[]): void {
+        const set  = new Set(ids);
+        const els  = [...this.doc.elements];
+        let changed = false;
+        for (let i = els.length - 2; i >= 0; i--) {
+            if (set.has(els[i].id) && !set.has(els[i + 1].id)) {
+                [els[i], els[i + 1]] = [els[i + 1], els[i]];
+                changed = true;
+            }
+        }
+        if (!changed) return;
+        this.history.push(this.doc);
+        this.doc = { ...this.doc, elements: els };
+        this.emit("change", this.doc);
+    }
+
+    sendBackward(ids: string[]): void {
+        const set  = new Set(ids);
+        const els  = [...this.doc.elements];
+        let changed = false;
+        for (let i = 1; i < els.length; i++) {
+            if (set.has(els[i].id) && !set.has(els[i - 1].id)) {
+                [els[i], els[i - 1]] = [els[i - 1], els[i]];
+                changed = true;
+            }
+        }
+        if (!changed) return;
+        this.history.push(this.doc);
+        this.doc = { ...this.doc, elements: els };
+        this.emit("change", this.doc);
+    }
+
     removeElements(ids: string[]): void {
         const idSet = new Set(ids);
         const next = this.doc.elements.filter(e => !idSet.has(e.id));

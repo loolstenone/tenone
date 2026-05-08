@@ -197,6 +197,8 @@ function ElementPath({ el }: { el: CanvasElement }) {
                 opacity={te.opacity / 100}
                 fontSize={te.fontSize}
                 fontFamily={te.fontFamily}
+                fontWeight={te.bold ? "bold" : "normal"}
+                fontStyle={te.italic ? "italic" : "normal"}
                 fill={te.color}
                 textAnchor={(anchorMap[te.align] ?? "start") as "start" | "middle" | "end"}
             >
@@ -643,6 +645,22 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
                     const newIds = dups.map(el => el.id);
                     selectedIdsRef.current = newIds;
                     setSelectedIds(newIds);
+                } else if (e.key === "b" && (e.ctrlKey || e.metaKey) && ids.length === 1) {
+                    e.preventDefault();
+                    const el = eng.serialize().elements.find(x => x.id === ids[0]);
+                    if (el?.type === "text") { eng.updateElement(ids[0], { bold: !el.bold }); setElements([...eng.serialize().elements]); }
+                } else if (e.key === "i" && (e.ctrlKey || e.metaKey) && ids.length === 1) {
+                    e.preventDefault();
+                    const el = eng.serialize().elements.find(x => x.id === ids[0]);
+                    if (el?.type === "text") { eng.updateElement(ids[0], { italic: !el.italic }); setElements([...eng.serialize().elements]); }
+                } else if (e.key === "]" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    if (e.shiftKey) { eng.bringToFront(ids); } else { eng.bringForward(ids); }
+                    setElements([...eng.serialize().elements]);
+                } else if (e.key === "[" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    if (e.shiftKey) { eng.sendToBack(ids); } else { eng.sendBackward(ids); }
+                    setElements([...eng.serialize().elements]);
                 }
             }
             if (e.key === "Escape") {
@@ -1417,6 +1435,14 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
                         minWidth:     80,
                         fontSize:     `${16 * zoom}px`,
                         fontFamily:   "system-ui, sans-serif",
+                        fontWeight:   (() => {
+                            const el = engineRef.current?.serialize().elements.find(e => e.id === editingTextId);
+                            return el?.type === "text" && el.bold ? "bold" : "normal";
+                        })(),
+                        fontStyle:    (() => {
+                            const el = engineRef.current?.serialize().elements.find(e => e.id === editingTextId);
+                            return el?.type === "text" && el.italic ? "italic" : "normal";
+                        })(),
                         lineHeight:   1.4,
                         color:        lastColorRef.current,
                         background:   "rgba(255,255,255,0.85)",
@@ -1432,6 +1458,51 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
                     rows={1}
                 />
             )}
+
+            {/* 텍스트 서식 바 — 단일 텍스트 선택 시 */}
+            {(() => {
+                if (selectedIds.length !== 1) return null;
+                const selEl = elements.find(e => e.id === selectedIds[0]);
+                if (!selEl || selEl.type !== "text") return null;
+                const te = selEl as TextElement;
+                if (!selGeo) return null;
+                const barY = (selGeo.bbox.y - viewport.y) * zoom - 44;
+                const barX = ((selGeo.bbox.x + selGeo.bbox.width / 2) - viewport.x) * zoom;
+                const btn  = "flex items-center justify-center w-7 h-7 rounded transition-colors text-xs font-medium";
+                const on   = "bg-[#6366F1] text-white";
+                const off  = "text-neutral-300 hover:bg-white/10";
+                const sep  = <div className="w-px h-5 bg-white/15 mx-0.5" />;
+                return (
+                    <div
+                        className="absolute pointer-events-auto flex items-center gap-0.5 bg-neutral-900/95 backdrop-blur-sm border border-white/10 rounded-xl px-2 py-1 shadow-xl z-50 select-none"
+                        style={{ left: barX, top: Math.max(4, barY), transform: "translateX(-50%)" }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <button className={`${btn} font-bold ${te.bold ? on : off}`}
+                            onMouseDown={(e) => { e.preventDefault(); engineRef.current?.updateElement(te.id, { bold: !te.bold }); setElements([...engineRef.current!.serialize().elements]); }}
+                            title="굵게 (Ctrl+B)">B</button>
+                        <button className={`${btn} italic ${te.italic ? on : off}`}
+                            onMouseDown={(e) => { e.preventDefault(); engineRef.current?.updateElement(te.id, { italic: !te.italic }); setElements([...engineRef.current!.serialize().elements]); }}
+                            title="기울임 (Ctrl+I)">I</button>
+                        {sep}
+                        {(["left","center","right"] as const).map(align => (
+                            <button key={align} className={`${btn} ${te.align === align ? on : off}`}
+                                onMouseDown={(e) => { e.preventDefault(); engineRef.current?.updateElement(te.id, { align }); setElements([...engineRef.current!.serialize().elements]); }}
+                                title={align === "left" ? "왼쪽" : align === "center" ? "가운데" : "오른쪽"}>
+                                {align === "left" ? "⇤" : align === "center" ? "↔" : "⇥"}
+                            </button>
+                        ))}
+                        {sep}
+                        <button className={`${btn} ${off}`}
+                            onMouseDown={(e) => { e.preventDefault(); const fs = Math.max(8, te.fontSize - 2); engineRef.current?.updateElement(te.id, { fontSize: fs }); setElements([...engineRef.current!.serialize().elements]); }}
+                            title="글자 작게">−</button>
+                        <span className="text-xs text-neutral-400 min-w-[28px] text-center">{te.fontSize}</span>
+                        <button className={`${btn} ${off}`}
+                            onMouseDown={(e) => { e.preventDefault(); const fs = Math.min(96, te.fontSize + 2); engineRef.current?.updateElement(te.id, { fontSize: fs }); setElements([...engineRef.current!.serialize().elements]); }}
+                            title="글자 크게">+</button>
+                    </div>
+                );
+            })()}
 
             {/* 이미지 파일 입력 (hidden) */}
             <input

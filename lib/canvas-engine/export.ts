@@ -40,7 +40,9 @@ function elementToSVG(el: CanvasElement): string {
         const tspans     = te.text.split("\n").map((line, i) =>
             `<tspan x="${te.x}" y="${te.y + te.fontSize + i * lh}">${esc(line || " ")}</tspan>`
         ).join("");
-        const inner = `<text opacity="${opacity}" font-size="${te.fontSize}" font-family="${esc(te.fontFamily)}" fill="${te.color}" text-anchor="${anchor}">${tspans}</text>`;
+        const fw    = te.bold   ? "bold"   : "normal";
+        const fs    = te.italic ? "italic" : "normal";
+        const inner = `<text opacity="${opacity}" font-size="${te.fontSize}" font-family="${esc(te.fontFamily)}" font-weight="${fw}" font-style="${fs}" fill="${te.color}" text-anchor="${anchor}">${tspans}</text>`;
         if (rot === 0) return inner;
         return `<g transform="rotate(${deg} ${te.x} ${te.y + te.fontSize / 2})">${inner}</g>`;
     }
