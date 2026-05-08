@@ -5,9 +5,10 @@
 // 후속 Phase에서 필터/검색/AI 분류/임포트 강화 추가.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Calendar, Search, Sparkles, X, MapPin, Users, Activity, Clock, ImageOff, Image as ImageIcon, Video, Filter, Upload, Loader2, Globe } from "lucide-react";
+import { Camera, Calendar, Search, Sparkles, X, MapPin, Users, Activity, Clock, ImageOff, Image as ImageIcon, Video, Filter, Upload, Loader2, Globe, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { DOMAINS, type DomainKey } from "@/lib/myverse/domains";
+import { useSearchParams } from "next/navigation";
+import { DOMAINS, DOMAIN_KEYS, type DomainKey } from "@/lib/myverse/domains";
 import { OnThisDayCard } from "./OnThisDayCard";
 import { SimilarMoments } from "./SimilarMoments";
 
@@ -66,14 +67,26 @@ function daysAgo(n: number): string {
 }
 
 export function TracesTimelineView() {
-    const [period, setPeriod] = useState<Period>("month");
+    const sp = useSearchParams();
+    const initialDomain = (sp?.get("domain") ?? null) as DomainKey | null;
+    const initialPerson = sp?.get("person") ?? null;
+    const initialQuery = sp?.get("q") ?? "";
+    const initialPeriod = sp?.get("period") as Period | null;
+
+    const [period, setPeriod] = useState<Period>(
+        initialPeriod && ["week", "month", "quarter", "year", "all"].includes(initialPeriod)
+            ? initialPeriod
+            : "month"
+    );
     const [moments, setMoments] = useState<Moment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [query, setQuery] = useState("");
+    const [query, setQuery] = useState(initialQuery);
     const [selected, setSelected] = useState<Moment | null>(null);
     const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
-    const [domainFilter, setDomainFilter] = useState<DomainKey | null>(null);
-    const [personFilter, setPersonFilter] = useState<string | null>(null);
+    const [domainFilter, setDomainFilter] = useState<DomainKey | null>(
+        initialDomain && DOMAIN_KEYS.includes(initialDomain) ? initialDomain : null
+    );
+    const [personFilter, setPersonFilter] = useState<string | null>(initialPerson);
     const [placeFilter, setPlaceFilter] = useState<string | null>(null);
     const [uploading, setUploading] = useState<{ current: number; total: number } | null>(null);
     const [myHandle, setMyHandle] = useState<string | null>(null);
@@ -390,6 +403,18 @@ export function TracesTimelineView() {
                                     </FacetChip>
                                 );
                             })}
+                            {/* 활성 도메인 깊이 보기 */}
+                            {domainFilter && DOMAINS[domainFilter] && (
+                                <Link
+                                    href={DOMAINS[domainFilter].app_href}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full border border-dashed transition-colors hover:bg-neutral-50"
+                                    style={{ color: DOMAINS[domainFilter].color_hex, borderColor: DOMAINS[domainFilter].color_hex }}
+                                    title={`${DOMAINS[domainFilter].label_ko} 영역 깊이 보기 — 통계·전용 도구`}
+                                >
+                                    {DOMAINS[domainFilter].label_ko} 영역 →
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                </Link>
+                            )}
                         </div>
                     )}
 

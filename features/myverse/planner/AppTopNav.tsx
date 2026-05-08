@@ -14,18 +14,14 @@ import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 // ── 5 Lane SSOT 1차 네비 (세션 119 IA 정리) ───────────────────
-//  오늘 / 기록 / AI / 연결 + 도구 + 커뮤니티 (외부)
+//  오늘 / 기록 / AI / 연결 / 도구 / 커뮤니티(외부)
+//  도구 lane은 진입 후 LaneSubNav로 6 도구(프로젝트·할 일·캔버스·템플릿·연락처·퍼스널) 전환.
 const TABS = [
-    // 핵심 4 lane
     { key: "today",     label: "오늘",     href: "/myverse/app/today" },
     { key: "record",    label: "기록",     href: "/myverse/app/traces" },
     { key: "ai",        label: "AI",       href: "/myverse/app/ask" },
     { key: "connect",   label: "연결",     href: "/myverse/app/feed" },
-    // 도구 lane
-    { key: "projects",  label: "프로젝트", href: "/myverse/app/projects" },
-    { key: "canvas",    label: "캔버스",   href: "/myverse/app/canvas" },
-    { key: "templates", label: "템플릿",   href: "/myverse/app/templates" },
-    { key: "personal",  label: "퍼스널",   href: "/myverse/app/personal" },
+    { key: "work",      label: "도구",     href: "/myverse/app/projects" },
     { key: "community", label: "커뮤니티", href: "/myverse/community", external: true },
 ] as const;
 

@@ -27,6 +27,15 @@ export const CONNECT_LANE_TABS: SubTab[] = [
     { key: "notifications", label: "알림",   href: "/myverse/app/notifications" },
 ];
 
+export const WORK_LANE_TABS: SubTab[] = [
+    { key: "projects",  label: "프로젝트", href: "/myverse/app/projects" },
+    { key: "tasks",     label: "할 일",    href: "/myverse/app/tasks" },
+    { key: "canvas",    label: "캔버스",   href: "/myverse/app/canvas" },
+    { key: "templates", label: "템플릿",   href: "/myverse/app/templates" },
+    { key: "contacts",  label: "연락처",   href: "/myverse/app/contacts" },
+    { key: "personal",  label: "퍼스널",   href: "/myverse/app/personal" },
+];
+
 export function LaneSubNav({ tabs, accent = "#6366F1" }: { tabs: SubTab[]; accent?: string }) {
     const pathname = usePathname();
 

@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getMyverseUser } from "@/lib/myverse/client";
 import { IdentityView } from "@/features/myverse/planner/IdentityView";
+import { LaneSubNav, WORK_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
 
 export default async function IdentityPage() {
     const cookieStore = await cookies();
@@ -33,5 +34,10 @@ export default async function IdentityPage() {
         }
     }
 
-    return <IdentityView mode={mode} />;
+    return (
+        <>
+            <LaneSubNav tabs={WORK_LANE_TABS} />
+            <IdentityView mode={mode} />
+        </>
+    );
 }

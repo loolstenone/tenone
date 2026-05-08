@@ -87,8 +87,7 @@ export function MobileBottomNav() {
                         pathname === item.href ||
                         pathname.startsWith(item.href + "/") ||
                         pathname.startsWith(item.href + "?") ||
-                        (item.id === "index" && pathname === "/myverse/app") ||
-                        (item.id === "today" && pathname.startsWith("/myverse/app/daily"));
+                        (item.id === "today" && (pathname === "/myverse/app" || pathname.startsWith("/myverse/app/daily") || pathname.startsWith("/myverse/app/index")));
                     return (
                         <Link
                             key={item.id}

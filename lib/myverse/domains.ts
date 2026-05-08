@@ -257,10 +257,14 @@ export const LANE_PATHS: Record<LaneKey, string[]> = {
         "/myverse/app/relation", "/myverse/app/schedule", "/myverse/app/move",
         "/myverse/app/travel", "/myverse/app/with",
         "/myverse/app/weekly", "/myverse/app/monthly", "/myverse/app/yearly",
+        "/myverse/app/time",
     ],
     ai: ["/myverse/app/ask", "/myverse/app/coach", "/myverse/app/diary", "/myverse/app/insights", "/myverse/app/capsules", "/myverse/app/ai-briefing"],
     connect: ["/myverse/app/feed", "/myverse/app/dm", "/myverse/app/verse", "/myverse/app/notifications"],
-    work: ["/myverse/app/projects", "/myverse/app/canvas", "/myverse/app/tasks", "/myverse/app/templates", "/myverse/app/contacts", "/myverse/app/personal"],
+    work: [
+        "/myverse/app/projects", "/myverse/app/canvas", "/myverse/app/tasks",
+        "/myverse/app/templates", "/myverse/app/contacts", "/myverse/app/personal",
+    ],
 };
 
 export function laneForPath(pathname: string): LaneKey | null {
