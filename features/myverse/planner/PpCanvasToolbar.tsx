@@ -5,7 +5,7 @@ import {
     Undo2, Redo2, Hand, Eraser, MousePointer2,
     Pen, Pencil, PenLine, PenTool, Highlighter, Paintbrush,
     Square, Circle, Diamond, ArrowRight, Minus,
-    LayoutGrid, Type,
+    LayoutGrid, Type, ImagePlus, Download,
 } from "lucide-react";
 import type { BackgroundTemplate, PenKind, ToolMode } from "@/lib/canvas-engine";
 import { BACKGROUND_TEMPLATES, getBackgroundLabel } from "@/lib/canvas-engine";
@@ -45,12 +45,15 @@ export interface PpCanvasToolbarProps {
     onRedo: () => void;
     background: BackgroundTemplate;
     onBgChange: (bg: BackgroundTemplate) => void;
+    onInsertImage?: () => void;
+    onExport?: (format: "png" | "svg") => void;
 }
 
 export function PpCanvasToolbar({
     tool, onToolChange,
     canUndo, onUndo, canRedo, onRedo,
     background, onBgChange,
+    onInsertImage, onExport,
 }: PpCanvasToolbarProps) {
     const [color, setColor] = useState<string>(
         tool.mode === "stroke" ? tool.color
@@ -66,10 +69,11 @@ export function PpCanvasToolbar({
     const [activeShape, setActiveShape] = useState<ShapeKind>(
         tool.mode === "shape" ? (tool.shape as ShapeKind) : "rect"
     );
-    const [bgOpen, setBgOpen] = useState(false);
-    const bgRef = useRef<HTMLDivElement>(null);
+    const [bgOpen,     setBgOpen]     = useState(false);
+    const [exportOpen, setExportOpen] = useState(false);
+    const bgRef     = useRef<HTMLDivElement>(null);
+    const exportRef = useRef<HTMLDivElement>(null);
 
-    // 배경 드롭다운 외부 클릭 닫기
     useEffect(() => {
         if (!bgOpen) return;
         const h = (e: MouseEvent) => {
@@ -78,6 +82,15 @@ export function PpCanvasToolbar({
         document.addEventListener("mousedown", h);
         return () => document.removeEventListener("mousedown", h);
     }, [bgOpen]);
+
+    useEffect(() => {
+        if (!exportOpen) return;
+        const h = (e: MouseEvent) => {
+            if (!exportRef.current?.contains(e.target as Node)) setExportOpen(false);
+        };
+        document.addEventListener("mousedown", h);
+        return () => document.removeEventListener("mousedown", h);
+    }, [exportOpen]);
 
     function selectPen(pen: PenKind) {
         setActivePen(pen);
@@ -187,6 +200,19 @@ export function PpCanvasToolbar({
 
             {divider}
 
+            {/* 이미지 삽입 */}
+            {onInsertImage && (
+                <button
+                    onClick={onInsertImage}
+                    title="이미지 삽입"
+                    className={`${base} ${idle}`}
+                >
+                    <ImagePlus className="h-4 w-4" />
+                </button>
+            )}
+
+            {divider}
+
             {/* 지우개 + 이동 */}
             <button
                 onClick={() => onToolChange({ mode: "eraser" })}
@@ -275,6 +301,37 @@ export function PpCanvasToolbar({
                     </div>
                 )}
             </div>
+            {/* 내보내기 */}
+            {onExport && (
+                <>
+                    {divider}
+                    <div ref={exportRef} className="relative">
+                        <button
+                            onClick={() => setExportOpen((p) => !p)}
+                            title="내보내기"
+                            className={`${base} ${exportOpen ? active : idle}`}
+                        >
+                            <Download className="h-4 w-4" />
+                        </button>
+                        {exportOpen && (
+                            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-neutral-800 border border-white/10 rounded-xl shadow-xl py-1 min-w-[100px] z-10">
+                                <button
+                                    onClick={() => { onExport("png"); setExportOpen(false); }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors"
+                                >
+                                    PNG 다운로드
+                                </button>
+                                <button
+                                    onClick={() => { onExport("svg"); setExportOpen(false); }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors"
+                                >
+                                    SVG 다운로드
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }

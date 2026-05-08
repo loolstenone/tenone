@@ -53,6 +53,16 @@ export type { HandleId, BoundingBox, SelectionGeometry } from "./interaction/sel
 // 직렬화
 export { serialize, deserialize } from "./serialize";
 
+// 내보내기 (PNG / SVG)
+export {
+    exportToSVGString,
+    exportToPNG,
+    downloadDataURL,
+    downloadSVG,
+    computeExportBounds,
+} from "./export";
+export type { ExportBounds } from "./export";
+
 // 레거시 포맷 어댑터
 export { toCanvasDocument, toHandNoteData } from "./adapters/handnote";
 export type { LegacyHandNoteData, LegacyHandStroke, LegacyHandImage } from "./adapters/handnote";

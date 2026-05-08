@@ -41,12 +41,13 @@ import type {
     ArrowElement,
     LineElement,
     TextElement,
+    ImageElement,
     ShapeRenderData,
     HandleId,
     BoundingBox,
     SelectionGeometry,
 } from "@/lib/canvas-engine";
-import { makeLiveContext, renderLiveStroke, clearLiveStroke } from "@/lib/canvas-engine";
+import { makeLiveContext, renderLiveStroke, clearLiveStroke, exportToPNG, downloadSVG } from "@/lib/canvas-engine";
 import { PpCanvasToolbar } from "./PpCanvasToolbar";
 
 // ?�?�?� ?�???�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
@@ -65,6 +66,7 @@ export interface PpCanvasProps {
     initialDoc?: CanvasDocument;
     onSave?: (doc: CanvasDocument) => void;
     className?: string;
+    exportFilename?: string;
 }
 
 // ?�?�?� ?�퍼: ?�형 ?�리먼트 ?�성 ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
@@ -213,6 +215,28 @@ function ElementPath({ el }: { el: CanvasElement }) {
         );
     }
 
+    if (el.type === "image") {
+        const ie = el as ImageElement;
+        const rot2 = ie.rotation ?? 0;
+        const deg2 = (rot2 * 180) / Math.PI;
+        const imgEl = (
+            // eslint-disable-next-line @next/next/no-img-element
+            <image
+                href={ie.src}
+                x={ie.x}
+                y={ie.y}
+                width={ie.width}
+                height={ie.height}
+                opacity={ie.opacity / 100}
+                preserveAspectRatio="xMidYMid meet"
+            />
+        );
+        if (rot2 === 0) return imgEl;
+        const cx = ie.x + ie.width / 2;
+        const cy = ie.y + ie.height / 2;
+        return <g transform={`rotate(${deg2} ${cx} ${cy})`}>{imgEl}</g>;
+    }
+
     const rd: ShapeRenderData | null = shapeToRender(el);
     if (!rd) return null;
 
@@ -345,6 +369,7 @@ function computeMovePatch(el: CanvasElement, dx: number, dy: number): Partial<Ca
         case "line": case "arrow":
             return { points: (el as LineElement).points.map(([x, y]) => [x + dx, y + dy] as [number, number]) };
         case "text":
+        case "image":
             return { x: el.x + dx, y: el.y + dy };
         default: return {};
     }
@@ -357,7 +382,7 @@ function computeResizePatch(el: CanvasElement, origBbox: BoundingBox, newBbox: B
         return [newBbox.x + (x - origBbox.x) * scaleX, newBbox.y + (y - origBbox.y) * scaleY];
     }
     switch (el.type) {
-        case "rect": case "ellipse": case "diamond":
+        case "rect": case "ellipse": case "diamond": case "image":
             return { x: newBbox.x, y: newBbox.y, width: newBbox.width, height: newBbox.height };
         case "line": case "arrow":
             return { points: (el as LineElement).points.map(([x, y]) => scalePoint(x, y) as [number, number]) };
@@ -383,9 +408,9 @@ function computeRotatePatch(
         return [pivot.x + dx * cos - dy * sin, pivot.y + dx * sin + dy * cos];
     }
     switch (el.type) {
-        case "rect": case "ellipse": case "diamond": {
-            const w = (el as RectElement).width;
-            const h = (el as RectElement).height;
+        case "rect": case "ellipse": case "diamond": case "image": {
+            const w = (el as RectElement | ImageElement).width;
+            const h = (el as RectElement | ImageElement).height;
             const [ncx, ncy] = rotPt(el.x + w / 2, el.y + h / 2);
             return { x: ncx - w / 2, y: ncy - h / 2, rotation: newRotation };
         }
@@ -420,15 +445,14 @@ function duplicateElement(el: CanvasElement, offset = 16): CanvasElement {
         case "line": case "arrow":
             return { ...el, id: newId, zIndex: now, points: (el as LineElement).points.map(([x, y]) => [x + offset, y + offset] as [number, number]) };
         case "text":
+        case "image":
             return { ...el, id: newId, zIndex: now, x: el.x + offset, y: el.y + offset };
-        default:
-            return { ...el, id: newId, zIndex: now };
     }
 }
 
 // ?�?�?� 메인 컴포?�트 ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
 
-export default function PpCanvas({ initialDoc, onSave, className }: PpCanvasProps) {
+export default function PpCanvas({ initialDoc, onSave, className, exportFilename = "canvas" }: PpCanvasProps) {
     // ?�?� UI ?�태
     const [elements,   setElements]   = useState<CanvasElement[]>([]);
     const [viewport,   setViewport]   = useState<Viewport>({ x: 0, y: 0, zoom: 1 });
@@ -456,8 +480,8 @@ export default function PpCanvas({ initialDoc, onSave, className }: PpCanvasProp
     const panZoomRef   = useRef<PanZoomController | null>(null);
     const palmRef      = useRef<PalmRejection>(new PalmRejection());
 
-    // ?�?� ?�???�?�머
-    const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const saveTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fileInputRef  = useRef<HTMLInputElement>(null);
 
     // ?�?� stale-closure 방�? ref
     const toolRef         = useRef<ToolMode>(tool);
@@ -628,9 +652,114 @@ export default function PpCanvas({ initialDoc, onSave, className }: PpCanvasProp
                 selDragRef.current = { mode: "none", startCx: 0, startCy: 0, origElements: new Map(), didMove: false };
             }
         };
+
+        const onPaste = async (e: ClipboardEvent) => {
+            if (textareaRef.current && document.activeElement === textareaRef.current) return;
+            const items = Array.from(e.clipboardData?.items ?? []);
+            const imgItem = items.find((it) => it.type.startsWith("image/"));
+            if (!imgItem) return;
+            e.preventDefault();
+            const file = imgItem.getAsFile();
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const src = ev.target?.result as string;
+                if (!src) return;
+                const img = new Image();
+                img.onload = () => {
+                    const vp  = viewportRef.current;
+                    const cw  = containerRef.current?.clientWidth  ?? 800;
+                    const ch  = containerRef.current?.clientHeight ?? 600;
+                    const maxW = (cw / vp.zoom) * 0.6;
+                    const maxH = (ch / vp.zoom) * 0.6;
+                    const scale = Math.min(1, maxW / img.naturalWidth, maxH / img.naturalHeight);
+                    const w = img.naturalWidth  * scale;
+                    const h = img.naturalHeight * scale;
+                    const cx = vp.x + cw / vp.zoom / 2 - w / 2;
+                    const cy = vp.y + ch / vp.zoom / 2 - h / 2;
+                    const now = Date.now();
+                    const el: ImageElement = {
+                        id: createElementId(), type: "image", zIndex: now,
+                        x: cx, y: cy, width: w, height: h,
+                        rotation: 0, opacity: 100,
+                        createdAt: now, updatedAt: now,
+                        src,
+                    };
+                    engineRef.current?.addElement(el);
+                };
+                img.src = src;
+            };
+            reader.readAsDataURL(file);
+        };
+
         window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
+        window.addEventListener("paste", onPaste);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            window.removeEventListener("paste", onPaste);
+        };
     }, []);
+
+    // 이미지 삽입 핸들러
+    function handleInsertImage() {
+        fileInputRef.current?.click();
+    }
+
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = "";
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const src = ev.target?.result as string;
+            if (!src) return;
+            const img = new Image();
+            img.onload = () => {
+                const vp  = viewportRef.current;
+                const cw  = containerRef.current?.clientWidth  ?? 800;
+                const ch  = containerRef.current?.clientHeight ?? 600;
+                const maxW = (cw / vp.zoom) * 0.6;
+                const maxH = (ch / vp.zoom) * 0.6;
+                const scale = Math.min(1, maxW / img.naturalWidth, maxH / img.naturalHeight);
+                const w = img.naturalWidth  * scale;
+                const h = img.naturalHeight * scale;
+                const cx = vp.x + cw / vp.zoom / 2 - w / 2;
+                const cy = vp.y + ch / vp.zoom / 2 - h / 2;
+                const now = Date.now();
+                const el: ImageElement = {
+                    id: createElementId(), type: "image", zIndex: now,
+                    x: cx, y: cy, width: w, height: h,
+                    rotation: 0, opacity: 100,
+                    createdAt: now, updatedAt: now,
+                    src,
+                };
+                engineRef.current?.addElement(el);
+            };
+            img.src = src;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // PNG / SVG 내보내기
+    async function handleExport(format: "png" | "svg") {
+        const eng = engineRef.current;
+        if (!eng) return;
+        const doc = eng.serialize();
+        const name = exportFilename;
+        if (format === "svg") {
+            downloadSVG(doc, `${name}.svg`);
+        } else {
+            try {
+                const dataUrl = await exportToPNG(doc, 2);
+                const a = document.createElement("a");
+                a.href     = dataUrl;
+                a.download = `${name}.png`;
+                a.click();
+            } catch (err) {
+                console.error("PNG 내보내기 실패:", err);
+            }
+        }
+    }
 
     // ?�?� 5. ?�동 ?�???�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
 
@@ -1304,7 +1433,16 @@ export default function PpCanvas({ initialDoc, onSave, className }: PpCanvasProp
                 />
             )}
 
-            {/* ?�바 */}
+            {/* 이미지 파일 입력 (hidden) */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+            />
+
+            {/* 툴바 */}
             <PpCanvasToolbar
                 tool={tool}
                 onToolChange={handleToolChange}
@@ -1330,6 +1468,8 @@ export default function PpCanvas({ initialDoc, onSave, className }: PpCanvasProp
                 }}
                 background={background}
                 onBgChange={handleBgChange}
+                onInsertImage={handleInsertImage}
+                onExport={handleExport}
             />
         </div>
     );
