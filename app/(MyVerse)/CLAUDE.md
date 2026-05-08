@@ -165,10 +165,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 115 (2026-05-08)** — Myverse 코드베이스 Planners 흔적 일괄 제거 (Phase 3): JS 함수·CSS 변수·DOM ID·클래스·URL·UI copy 전부 myverse로 통일 |
-| **이전 Phase** | 세션 114 — 9영역 SSOT 통합 / 세션 113 — MyVerseHeader 모바일 버튼 / 세션 112 — Myverse 로그인 UI 통일 |
-| **다음 Phase** | DB/Storage 마이그레이션 (`planners-moments` 버킷, PWA 자산, HTML 마커) → 변수 리네임 (`plannerUser` → `myverseUser`) → localStorage 키 마이그 → 도메인 하드코딩 정리 → "PP AI" UI 약어 통일 · WORK_STATUS.md 우선순위 13개 |
-| **세션 115 결정** | ① 스코프 한정: `features/myverse`·`app/(MyVerse)`·`app/api/myverse`·`lib/myverse` (4개 디렉토리). `intra/planners`·`MyverseRole.'planner'` 직무명·`lib/analytics.ts` 공용 함수 보존 · ② CSS 변수 `--planners-*` → `--myverse-*` 일괄 (globals.css + 모든 consumers 동기화) · ③ 클래스 `.planners-app-shell` → `.myverse-app-shell` · ④ "Planner's Planner AI"/"Planner's AI" 사용자 노출 UI copy 전부 "Myverse"/"Myverse AI"로 · ⑤ 라인 엔딩 노이즈 감지 — staging 정밀 관리 |
+| **Phase** | **세션 116 (2026-05-08)** — Planners → Myverse 인프라 마이그레이션 Phase 4: Storage·PWA·DB 마커·변수·localStorage·도메인·링크·UI copy 전부 완료 |
+| **이전 Phase** | 세션 115 — JS 함수·CSS·DOM ID·URL copy 제거 / 세션 114 — 9영역 SSOT 통합 / 세션 112 — 로그인 UI 통일 |
+| **다음 Phase** | (1) `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요, 4개 파일 이전) · (2) vCard PRODID Planners Contacts 정리 · (3) Canvas Engine 본 작업 · (4) Toss 가맹점 승인 + Vercel 환경변수 |
+| **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
 | **주요 결정 (세션 114)** | ① 9영역 통합 옵션A 선택: `MyverseSidebar` 복원 + `AppTopNav` LayoutGrid 드롭다운 SSOT 연결 · ② `lib/myverse/domains.ts`에 `app_href` 추가 (daily→/lifestyle 특이 케이스 주의) · ③ `getAuthState()` anon 우선 → admin 재시도 구조로 변경 (SERVICE_ROLE_KEY 의존 제거) · ④ 로그인 강제 `/intra` 리다이렉트 제거 (CLAUDE.md 원칙 1.2.1 준수) · ⑤ social login `isAuthPage` endsWith('/login') 추가 → 브랜드 로그인 페이지에서 `?redirect=` 보존 |
 | **주요 결정 (세션 111)** | ① 무한 깜빡임 진짜 원인 = stale FK 이름 → REST join 실패 → plannerUser=null 오판 (이전 세션들이 잡지 못한 root cause) · ② 온보딩 URL `/myverse/onboarding` → `/myverse/app/onboarding` 이전 (앱 셸 하위) · ③ middleware x-pathname 헤더 주입으로 layout 경로 식별 · ④ members 조회 auth_id 우선 (email은 중복 row 방어 fallback) · ⑤ SW v2로 옛 PWA 사용자 자가 업그레이드 · ⑥ /planners 매칭은 정확 경로만 (정적 자산 보호) |

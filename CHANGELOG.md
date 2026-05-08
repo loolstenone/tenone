@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-05-08 — 세션 116 · Planners → Myverse 인프라 마이그레이션 Phase 4
+
+### 장소
+집
+
+### 핵심 결정사항
+- Planner's 브랜드(planners.tenone.biz)는 독립 브랜드로 유지 — Myverse 내부의 "Planner's Planner" 앱 흔적만 제거
+- Storage 실 데이터 이전(4개 파일)은 service role key 필요 — 스크립트 생성 후 이월
+- DB 마커(handwriting 2 / tpl 5 / canvas 1) 마이그레이션 즉시 실행 완료
+- HW_MARKER 쓰기: myverse:handwriting, 읽기: 양쪽 호환 (LEGACY_HW_MARKER)
+
+### 변경 파일
+- **Storage**: `app/api/myverse/moments/*`, `import/apple-photos` — `planners-moments` → `myverse-moments`
+- **PWA**: `public/myverse-{sw.js,manifest.json,icon-*.png}` 신규, `features/myverse/app/PwaRegister.tsx` 신규, `planner/PwaRegister.tsx` 삭제
+- **마커**: `lib/myverse/canvas-engine/adapters/handnote-storage.ts`, `features/myverse/planner/ProjectNotesTab.tsx`, `features/myverse/app/ProjectNotesTab.tsx`, `app/api/myverse/canvases/route.ts`
+- **변수·import**: `layout.tsx`, `personal/page.tsx`, `time/page.tsx`, `lib/myverse/briefing.ts`
+- **localStorage·CustomEvent**: `HandNote.tsx`, `ContactsView.tsx`, `settings/page.tsx`, `SettingsExport.tsx` (x2)
+- **도메인·링크**: `google-calendar.ts`, `notifications.ts`, `google/callback/route.ts`, `planner-search/route.ts`
+- **UI copy**: "PP AI" → "Myverse"/"Myverse AI" — `AboutPage.tsx`, `Header.tsx`, `HomePage.tsx`, `PurchaseView.tsx`, `InstallButton.tsx` (각 app/ + planner/)
+- **스크립트**: `scripts/migrate-moments-bucket.js`, `scripts/migrate-note-markers.js` 신규
+
+### 이월
+- `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요)
+- vCard PRODID `Planners Contacts` (ContactsView.tsx:259)
+- Canvas Engine 본 작업 (Image element, export 등)
+
+---
+
 ## 2026-05-08 — 세션 115 · Myverse 코드베이스 Planners 흔적 일괄 제거 (Phase 3)
 
 ### 장소

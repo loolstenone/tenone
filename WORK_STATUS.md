@@ -1,6 +1,48 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-08 (세션 115 — Myverse 코드베이스 Planners 흔적 일괄 제거)
+> 마지막 업데이트: 2026-05-08 (세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4)
+
+---
+
+## 세션 116 핵심 성과 (2026-05-08)
+
+### Phase 4 — 인프라·마커·변수·UI 마이그레이션
+
+#### ✅ 완료된 항목 (이전 이월에서 처리)
+
+1. **Storage 버킷 `myverse-moments` 생성** + RLS 4개 + 코드 참조 교체 (6파일)
+   - `scripts/migrate-moments-bucket.js` — 실 데이터 4개 이전용 (SUPABASE_SERVICE_ROLE_KEY 필요)
+2. **PWA 자산** — `myverse-sw.js` (v3 캐시), `myverse-manifest.json`, `myverse-icon-{192,512}.png`
+   - `features/myverse/app/PwaRegister.tsx` 신규 (layout.tsx 기대 위치) — `planner/PwaRegister.tsx` 삭제
+3. **HTML 마커 DB 마이그레이션 실행** — `planners:handwriting`(2) + `planners:tpl`(5) + `planners:canvas`(1)
+   - `handnote-storage.ts`: HW_MARKER 신규 myverse:, LEGACY 읽기 양립
+   - `ProjectNotesTab.tsx` (planner/ + app/): TPL_MARKER_RE 양립, 쓰기 myverse:
+   - `canvases/route.ts`: 정규식·쿼리 (myverse|planners) 양립
+   - `scripts/migrate-note-markers.js` 재실행용 스크립트 생성
+4. **변수 리네임** — `plannerUser` → `myverseUser` (layout, personal, time, briefing.ts), `getPlannerUser` → `getMyverseUser`
+5. **localStorage 키** — `myverse-mobile-nav-change` CustomEvent, `myverse-recent-colors`(레거시 자동 이전), `__myverseImportMergeMode`, `myverse-backup-*.json`
+6. **도메인 하드코딩** — `planners.tenone.biz` → `myverse.kr` (google-calendar.ts, notifications.ts)
+7. **링크** — `google/callback/route.ts` → `/myverse/app/settings`, `planner-search/route.ts` → `/myverse/app/*`
+8. **"PP AI" UI copy** → "Myverse"/"Myverse AI" (AboutPage, Header, HomePage, PurchaseView, InstallButton x2)
+
+#### 남은 이월 항목
+
+##### 🔴 데이터 이전 (service role key 필요)
+- `scripts/migrate-moments-bucket.js` 실행 — Supabase Storage 파일 4개 이전 (planners-moments → myverse-moments)
+  - `.env.local`에 `SUPABASE_SERVICE_ROLE_KEY=` 추가 후 실행
+
+##### 🟡 잔존 정리
+- **vCard PRODID** `Planners Contacts` (ContactsView.tsx:259) — 부가 정리
+- **Toss 가맹점 승인 + Vercel 환경변수** 설정
+
+##### ⚪️ 유니버스 공용 (보류)
+- `lib/analytics.ts` `trackPlannersEvent` — 전 브랜드 영향, 보류 권장
+
+##### ⚪️ Canvas Engine 이전 이월
+- PpCanvas.tsx — Image element 지원 [🔴]
+- PNG/SVG export — `lib/myverse/canvas-engine/export.ts` [🔴]
+- 레이어 정렬 키보드 단축키 [🟡]
+- 텍스트 서식 컨트롤 [🟡]
 
 ---
 
