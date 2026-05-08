@@ -5,13 +5,13 @@ import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, LayoutTemplate, X, Ma
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/myverse/templates";
-import { renderFramework, type FrameworkData } from "./TemplatesView";
+import { renderFramework, type FrameworkData } from "../planner/TemplatesView";
 import { Track } from "@/lib/analytics";
-import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, extractTextPart, setTextPart, setHandPart, type HandNoteData } from "./HandNote";
+import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, extractTextPart, setTextPart, setHandPart, type HandNoteData } from "../planner/HandNote";
 import { CornellRowsInline, type CornellRow } from "./DailyView";
 import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/myverse/template-recommendations";
-import { ConfirmSheet } from "./ConfirmSheet";
-import { CanvasStudio } from "./CanvasStudio";
+import { ConfirmSheet } from "../planner/ConfirmSheet";
+import { CanvasStudio } from "../planner/CanvasStudio";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:

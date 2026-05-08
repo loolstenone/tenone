@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
 import { getISOWeek } from "@/lib/myverse/types";
-import { MyverseUtilityLinks } from "./MyverseUtilityLinks";
+import { PlannersUtilityLinks as MyverseUtilityLinks } from "../planner/PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/myverse/holidays";
-import { CalendarEntryList } from "./CalendarEntryList";
-import { CalendarEntryEditor } from "./CalendarEntryEditor";
-import { ConfirmSheet } from "./ConfirmSheet";
-import { useSwipeNav } from "./useSwipeNav";
+import { CalendarEntryList } from "../planner/CalendarEntryList";
+import { CalendarEntryEditor } from "../planner/CalendarEntryEditor";
+import { ConfirmSheet } from "../planner/ConfirmSheet";
+import { useSwipeNav } from "../planner/useSwipeNav";
 import {
     KIND_COLORS,
     monthlyDisplayMode,

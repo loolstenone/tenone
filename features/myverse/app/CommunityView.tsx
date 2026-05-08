@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 const myverseLoginHref = (redirect: string) =>
     `/myverse/login${redirect && redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`;
-import { ConfirmSheet } from "./ConfirmSheet";
+import { ConfirmSheet } from "../planner/ConfirmSheet";
 
 type Category = "review" | "case" | "suggestion" | "life";
 

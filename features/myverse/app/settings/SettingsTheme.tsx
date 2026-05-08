@@ -16,7 +16,7 @@ import {
     matchPreset,
     type SettingsPreset,
 } from "@/features/myverse/app/SettingsStylePresets";
-import { GroupMarker } from "@/features/myverse/app/SettingsLayout";
+import { GroupMarker } from "@/features/myverse/planner/SettingsLayout";
 
 // ── 상수 ─────────────────────────────────────────────────────────────────────
 

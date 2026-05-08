@@ -10,7 +10,7 @@ import {
   Download,
   Smartphone,
 } from "lucide-react";
-import { InstallButton } from "@/features/myverse/app/InstallButton";
+import { InstallButton } from "@/features/myverse/planner/InstallButton";
 
 // ===== Myverse Tool Section =====
 function MyverseToolSection() {

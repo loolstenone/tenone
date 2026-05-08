@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/myverse/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { trackPlanners } from "@/lib/myverse/analytics";
+import { trackMyverse } from "@/lib/myverse/analytics";
 import type { PlannerWeekly } from "@/lib/myverse/types";
 import type { PlannerRole } from "@/lib/myverse/types";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
@@ -222,7 +222,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     ...patch,
                 }),
             });
-            trackPlanners("myverse_weekly_saved", { year, week, field: Object.keys(patch)[0] });
+            trackMyverse("myverse_weekly_saved", { year, week, field: Object.keys(patch)[0] });
         } finally {
             setSaving(false);
         }

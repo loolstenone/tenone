@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { MessageSquarePlus, X, Send, Check } from "lucide-react";
-import { trackPlanners } from "@/lib/myverse/analytics";
+import { trackMyverse } from "@/lib/myverse/analytics";
 
 export function BetaFeedbackButton() {
     const pathname = usePathname();
@@ -28,7 +28,7 @@ export function BetaFeedbackButton() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: text.trim(), page_path: pathname }),
             });
-            trackPlanners("myverse_beta_feedback_sent");
+            trackMyverse("myverse_beta_feedback_sent");
             setSent(true);
             setText("");
             setTimeout(() => { setSent(false); setOpen(false); }, 2000);

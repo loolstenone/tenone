@@ -3,13 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2, Gift, X } from "lucide-react";
-import { MyverseUtilityLinks } from "./MyverseUtilityLinks";
-import { ConfirmSheet } from "./ConfirmSheet";
-import { CalendarEntryList } from "./CalendarEntryList";
-import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import { PlannersUtilityLinks as MyverseUtilityLinks } from "../planner/PlannersUtilityLinks";
+import { ConfirmSheet } from "../planner/ConfirmSheet";
+import { CalendarEntryList } from "../planner/CalendarEntryList";
+import { CalendarEntryEditor } from "../planner/CalendarEntryEditor";
 import type { CalendarEntry } from "@/lib/myverse/calendar-rules";
 import { KIND_COLORS } from "@/lib/myverse/calendar-rules";
-import { useSwipeNav } from "./useSwipeNav";
+import { useSwipeNav } from "../planner/useSwipeNav";
 import { HOLIDAYS } from "@/lib/myverse/holidays";
 
 interface Anniversary {

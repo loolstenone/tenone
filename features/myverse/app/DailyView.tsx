@@ -11,11 +11,11 @@ import { localDateStr } from "@/lib/myverse/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/myverse/templates";
 import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/myverse/template-recommendations";
-import { CalendarEntryEditor } from "./CalendarEntryEditor";
-import { DailyMomentsAuto } from "./DailyMoments";
-import { DailyEntryComposer } from "./DailyEntryComposer";
-import { DailyHealthStats } from "./DailyHealthStats";
-import { FocusModeOverlay } from "./FocusModeOverlay";
+import { CalendarEntryEditor } from "../planner/CalendarEntryEditor";
+import { DailyMomentsAuto } from "../planner/DailyMoments";
+import { DailyEntryComposer } from "../planner/DailyEntryComposer";
+import { DailyHealthStats } from "../planner/DailyHealthStats";
+import { FocusModeOverlay } from "../planner/FocusModeOverlay";
 import { Camera as CameraIconForCard } from "lucide-react";
 
 // 통합 일일 카드 — 한 헤더, 한 "+" 버튼이 사진/장소/일과를 한 번에 등록하는 composer를 토글
@@ -78,20 +78,20 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
         </section>
     );
 }
-import { DailyProjectsCard } from "./DailyProjectsCard";
+import { DailyProjectsCard } from "../planner/DailyProjectsCard";
 import { DailyPlacesCard } from "./DailyPlacesCard";
 import { DailyRoutinesCard } from "./DailyRoutinesCard";
-import { useSwipeNav } from "./useSwipeNav";
-import { DailyMiniMonth } from "./DailyMiniMonth";
+import { useSwipeNav } from "../planner/useSwipeNav";
+import { DailyMiniMonth } from "../planner/DailyMiniMonth";
 import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEntry, type CalendarKind } from "@/lib/myverse/calendar-rules";
-import { renderFramework, type FrameworkData } from "./TemplatesView";
-import { ExternalEventsBanner } from "./ExternalEventsBanner";
-import { MyverseUtilityLinks } from "./MyverseUtilityLinks";
+import { renderFramework, type FrameworkData } from "../planner/TemplatesView";
+import { ExternalEventsBanner } from "../planner/ExternalEventsBanner";
+import { PlannersUtilityLinks as MyverseUtilityLinks } from "../planner/PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
-import { HandNote, type HandNoteData } from "./HandNote";
-import { ConfirmSheet } from "./ConfirmSheet";
-import { CanvasStudio } from "./CanvasStudio";
-import { VoiceRecordButton } from "./VoiceRecordButton";
+import { HandNote, type HandNoteData } from "../planner/HandNote";
+import { ConfirmSheet } from "../planner/ConfirmSheet";
+import { CanvasStudio } from "../planner/CanvasStudio";
+import { VoiceRecordButton } from "../planner/VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';

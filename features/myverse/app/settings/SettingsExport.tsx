@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Loader2, Download, Check, ExternalLink, Archive } from "lucide-react";
 import Link from "next/link";
-import { InstallButton } from "@/features/myverse/app/InstallButton";
+import { InstallButton } from "@/features/myverse/planner/InstallButton";
 
 interface Sub {
     status: string;

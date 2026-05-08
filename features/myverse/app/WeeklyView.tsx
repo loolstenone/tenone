@@ -5,16 +5,16 @@ import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus, LayoutList, Cal
 import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/myverse/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
-import { MyverseUtilityLinks } from "./MyverseUtilityLinks";
+import { PlannersUtilityLinks as MyverseUtilityLinks } from "../planner/PlannersUtilityLinks";
 import { trackMyverse } from "@/lib/myverse/analytics";
 import type { MyverseWeekly } from "@/lib/myverse/types";
 import type { MyverseRole } from "@/lib/myverse/types";
-import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import { CalendarEntryEditor } from "../planner/CalendarEntryEditor";
 import type { CalendarEntry, CalendarKind } from "@/lib/myverse/calendar-rules";
-import { useSwipeNav } from "./useSwipeNav";
+import { useSwipeNav } from "../planner/useSwipeNav";
 import { KIND_COLORS, KIND_LABELS, expandOccurrences, isVisible } from "@/lib/myverse/calendar-rules";
 import { CATEGORY_SOFT_COLORS as CATEGORY_COLORS } from "@/lib/myverse/categories";
-import { StudentTimetable } from "./StudentTimetable";
+import { StudentTimetable } from "../planner/StudentTimetable";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 const DAYS_KO = ["일","월","화","수","목","금","토"];

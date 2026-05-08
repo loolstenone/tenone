@@ -14,10 +14,7 @@ import {
     User, Briefcase, Clock, Share2,
     Heart, Coffee, Users,
     BookOpen, Calendar, Navigation, Plane,
-    Orbit, AtSign, Bot, Settings, Shield, Archive,
-    Sun, CalendarDays, CalendarRange, CalendarClock,
-    UserSquare2, FolderKanban, Contact2, FileText, Palette, Search as SearchIcon, Timer,
-    ListChecks, Hash, Sparkles, HelpCircle,
+    Orbit, AtSign, Bot, Settings, Shield, Archive, HelpCircle,
     type LucideIcon,
 } from "lucide-react";
 import { DOMAINS, PILLARS, type DomainKey, type PillarKey } from "@/lib/myverse/domains";
@@ -58,27 +55,6 @@ interface LocalGroup {
 }
 
 const LOCAL_GROUPS: LocalGroup[] = [
-    {
-        key: "planner",
-        label: "플래너",
-        icon: CalendarDays,
-        items: [
-            { label: "오늘",       href: "/myverse/app/today",       icon: Sun,           color: "#6366F1" },
-            { label: "주간",       href: "/myverse/app/weekly",      icon: CalendarRange, color: "#6366F1" },
-            { label: "월간",       href: "/myverse/app/monthly",     icon: CalendarDays,  color: "#6366F1" },
-            { label: "연간",       href: "/myverse/app/yearly",      icon: CalendarClock, color: "#6366F1" },
-            { label: "퍼스널",     href: "/myverse/app/personal",    icon: UserSquare2,   color: "#6366F1" },
-            { label: "프로젝트",   href: "/myverse/app/projects",    icon: FolderKanban,  color: "#6366F1" },
-            { label: "업무",       href: "/myverse/app/tasks",       icon: ListChecks,    color: "#6366F1" },
-            { label: "연락처",     href: "/myverse/app/contacts",    icon: Contact2,      color: "#6366F1" },
-            { label: "템플릿",     href: "/myverse/app/templates",   icon: FileText,      color: "#6366F1" },
-            { label: "캔버스",     href: "/myverse/app/canvas",      icon: Palette,       color: "#6366F1" },
-            { label: "검색",       href: "/myverse/app/search",      icon: SearchIcon,    color: "#6366F1" },
-            { label: "시간",       href: "/myverse/app/time",        icon: Timer,         color: "#6366F1" },
-            { label: "인덱스",     href: "/myverse/app/index",       icon: Hash,          color: "#6366F1" },
-            { label: "AI 브리핑",  href: "/myverse/app/ai-briefing", icon: Sparkles,      color: "#6366F1" },
-        ],
-    },
     {
         key: "share",
         label: "나누기",
@@ -227,26 +203,6 @@ export function MyverseSidebar({ handle }: { handle: string | null }) {
                 ))}
             </div>
 
-            {/* 푸터 — 시간 줌 (Daily/Weekly/Monthly/Yearly) */}
-            <div className="border-t border-neutral-200 px-4 py-3">
-                <div className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시간 줌</div>
-                <div className="flex flex-wrap gap-1">
-                    {[
-                        { l: "일", h: "/myverse/app/today" },
-                        { l: "주", h: "/myverse/app/weekly" },
-                        { l: "월", h: "/myverse/app/monthly" },
-                        { l: "년", h: "/myverse/app/yearly" },
-                    ].map(z => (
-                        <Link
-                            key={z.h}
-                            href={z.h}
-                            className="px-2 py-0.5 text-[11px] rounded bg-neutral-100 text-neutral-600 hover:bg-[#6366F1]/10 hover:text-[#6366F1] transition-colors"
-                        >
-                            {z.l}
-                        </Link>
-                    ))}
-                </div>
-            </div>
         </aside>
     );
 }

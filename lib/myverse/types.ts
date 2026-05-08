@@ -352,3 +352,14 @@ export function localDateStr(d: Date): string {
 export function todayString(): string {
     return localDateStr(new Date());
 }
+
+// Myverse aliases — session 115 rename (Planner* → Myverse*)
+export type MyverseMode = PlannerMode;
+export type MyverseUser = PlannerUser;
+export type MyverseRole = PlannerRole;
+export const MYVERSE_ROLE_META = PLANNER_ROLE_META;
+export type MyverseDaily = PlannerDaily;
+export type MyverseTask = PlannerTask;
+export type MyverseWeekly = PlannerWeekly;
+export type MyverseIdentity = PlannerIdentity;
+export type MyverseProject = PlannerProject;
