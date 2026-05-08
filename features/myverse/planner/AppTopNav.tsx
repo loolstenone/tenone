@@ -12,6 +12,13 @@ import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myver
 import { LANE_PATHS, type LaneKey } from "@/lib/myverse/domains";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
+import { AI_LANE_TABS, CONNECT_LANE_TABS, WORK_LANE_TABS, type SubTab } from "@/features/myverse/app/LaneSubNav";
+
+const SUB_TABS: Partial<Record<LaneKey, SubTab[]>> = {
+    ai: AI_LANE_TABS,
+    connect: CONNECT_LANE_TABS,
+    work: WORK_LANE_TABS,
+};
 
 // ── 5 Lane SSOT 1차 네비 (세션 119 IA 정리) ───────────────────
 //  오늘 / 기록 / AI / 연결 / 도구 / 커뮤니티(외부)
@@ -233,20 +240,41 @@ export function AppTopNav({
                                 ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
                                 : (pathname === tab.href || pathname.startsWith(tab.href + "/"))
                         );
+                        const subs = SUB_TABS[tab.key as LaneKey];
                         return (
-                            <Link
-                                key={tab.key}
-                                href={tab.href}
-                                target={"external" in tab && tab.external ? "_blank" : undefined}
-                                rel={"external" in tab && tab.external ? "noopener" : undefined}
-                                onClick={() => !("external" in tab && tab.external) && setMenuOpen(false)}
-                                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                                    active ? "bg-[#6366F1] text-white font-medium" : "text-neutral-700 hover:bg-neutral-100"
-                                }`}
-                            >
-                                <span>{tab.label}</span>
-                                {"external" in tab && tab.external && <span className="text-[9px] opacity-50">↗</span>}
-                            </Link>
+                            <div key={tab.key}>
+                                <Link
+                                    href={tab.href}
+                                    target={"external" in tab && tab.external ? "_blank" : undefined}
+                                    rel={"external" in tab && tab.external ? "noopener" : undefined}
+                                    onClick={() => !("external" in tab && tab.external) && setMenuOpen(false)}
+                                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                                        active ? "bg-[#6366F1] text-white font-medium" : "text-neutral-700 hover:bg-neutral-100"
+                                    }`}
+                                >
+                                    <span>{tab.label}</span>
+                                    {"external" in tab && tab.external && <span className="text-[9px] opacity-50">↗</span>}
+                                </Link>
+                                {active && subs && (
+                                    <div className="mt-0.5 mb-1 ml-3 pl-3 border-l border-neutral-200 flex flex-col gap-0.5">
+                                        {subs.map(s => {
+                                            const sActive = pathname === s.href || pathname.startsWith(s.href + "/");
+                                            return (
+                                                <Link
+                                                    key={s.key}
+                                                    href={s.href}
+                                                    onClick={() => setMenuOpen(false)}
+                                                    className={`px-2.5 py-2 rounded-md text-xs transition-colors ${
+                                                        sActive ? "text-[#6366F1] font-medium bg-[#6366F1]/5" : "text-neutral-600 hover:bg-neutral-100"
+                                                    }`}
+                                                >
+                                                    {s.label}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         );
                     })}
                 </div>
