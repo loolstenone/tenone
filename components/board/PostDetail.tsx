@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User, Lock, X, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import DOMPurify from 'isomorphic-dompurify';
 import CommentSection from "./CommentSection";
 import type { Post, Attachment } from "@/types/board";
 
@@ -238,7 +239,7 @@ export default function PostDetail({
                     prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:italic
                     [&_img]:max-w-full [&_img]:h-auto"
                 style={{ color: "var(--tn-text-sub)" }}
-                dangerouslySetInnerHTML={{ __html: post.content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
             />
 
             {/* 첨부파일 */}

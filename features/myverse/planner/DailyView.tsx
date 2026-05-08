@@ -87,6 +87,7 @@ import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEn
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { ViewToggle } from "./ViewToggle";
 import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
@@ -597,7 +598,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
     const [faith, setFaith] = useState<number | null>(null);
     const [faithNote, setFaithNote] = useState("");
     const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
-    const [noteShortcuts, setNoteShortcuts] = useState<string[]>(["gratitude", "emotion"]);
+    const [noteShortcuts, setNoteShortcuts] = useState<string[]>([]);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
     const [upcomingEntries, setUpcomingEntries] = useState<CalendarEntry[]>([]);
@@ -784,7 +785,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     setNoteShortcuts(
                         Array.isArray(d.user?.daily_note_shortcuts)
                             ? d.user.daily_note_shortcuts
-                            : ["gratitude", "emotion"]
+                            : []
                     );
                     if (d.user?.user_role) setUserRole(d.user.user_role);
                     if (d.memberId) setMemberId(d.memberId);
@@ -1574,6 +1575,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
+                    <ViewToggle current="daily" />
                     <PlannersUtilityLinks />
                     {!isOnline && (
                         <span className="text-xs text-amber-500 font-medium">오프라인</span>
@@ -1675,6 +1677,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                         </button>
                         {/* 음성 녹음 */}
                         <VoiceRecordButton
+                            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-600 hover:border-rose-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm"
                             onTranscribed={(text) => {
                                 const idx = notesList.filter(n => n.type === 'cornell' || !n.type).length + 1;
                                 const newNote: NoteItem = {
@@ -2497,13 +2500,22 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     setExpandedNotePage(updatedPages.length - 1);
                 }
                 return (
-                    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-[5vh_5vw]">
-                        {/* pp-view: fixed 모달은 planners-app-shell 밖 → pp-view로 다크모드 토큰 적용 */}
-                        <div className={`pp-view bg-white rounded-xl w-full h-full flex flex-col shadow-2xl overflow-hidden ${isTpl ? 'border-t-4 border-violet-400' : isCanvas ? 'border-t-4 border-sky-400' : ''}`}>
-                            {/* Header */}
-                            <div className={`px-6 py-3 border-b border-neutral-200 flex items-center gap-3 ${isTpl ? 'bg-violet-50' : isCanvas ? 'bg-sky-50' : 'bg-neutral-50'}`}>
-                                {isTpl && <LayoutTemplate className="h-4 w-4 text-violet-400 shrink-0" />}
-                                {isCanvas && <ImageIcon className="h-4 w-4 text-sky-500 shrink-0" />}
+                    <div className="fixed inset-0 z-[9100] flex flex-col bg-white">
+                        {/* pp-view: fixed 전체화면 → pp-view로 다크모드 토큰 적용 */}
+                        <div className="pp-view bg-white w-full h-full flex flex-col overflow-hidden">
+                            {/* Header — 모든 노트 타입 동일 레이아웃 */}
+                            <div className="px-5 py-3 border-b border-neutral-200 flex items-center gap-3 bg-white shrink-0">
+                                {/* 타입 배지 */}
+                                <span className={`shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                                    isTpl    ? 'bg-violet-100 text-violet-600'
+                                    : isCanvas ? 'bg-sky-100 text-sky-600'
+                                    : isHand   ? 'bg-amber-100 text-amber-600'
+                                    : 'bg-neutral-100 text-neutral-500'
+                                }`}>
+                                    {isTpl    && <LayoutTemplate className="h-3 w-3" />}
+                                    {isCanvas && <ImageIcon className="h-3 w-3" />}
+                                    {isTpl ? '템플릿' : isCanvas ? '캔버스' : isHand ? '손글씨' : '노트'}
+                                </span>
                                 <div className="flex-1 min-w-0">
                                     <input
                                         type="text"
@@ -2518,22 +2530,21 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         className={`w-full text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
                                             isAutoTitle
                                                 ? 'italic font-light text-neutral-400'
-                                                : isTpl ? 'font-semibold text-violet-700' : isCanvas ? 'font-semibold text-sky-700' : 'font-semibold text-neutral-900'
+                                                : 'font-semibold text-neutral-900'
                                         }`}
                                     />
                                 </div>
-                                {/* 헤더 손글씨 토글 제거 — HandNote 툴바 내부에서 그리기/텍스트 전환 */}
                                 <button
                                     onClick={() => setExpandedNote(null)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 text-neutral-600 rounded-lg text-sm hover:bg-neutral-100 transition-colors"
+                                    className="shrink-0 px-3 py-1.5 border border-neutral-200 text-neutral-500 rounded-lg text-sm hover:bg-neutral-50 transition-colors"
                                 >
-                                    그냥 닫기
+                                    취소
                                 </button>
                                 <button
                                     onClick={() => saveAndClose()}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors"
+                                    className="shrink-0 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors font-medium"
                                 >
-                                    저장 후 닫기
+                                    저장
                                 </button>
                             </div>
                             {/* Body */}

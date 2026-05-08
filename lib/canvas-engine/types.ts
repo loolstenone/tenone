@@ -150,6 +150,7 @@ export interface ImageElement extends BaseElement {
 
 export type ToolMode =
     | { mode: "selection" }
+    | { mode: "lasso" }
     | { mode: "stroke"; pen: PenKind; color: string; size: number; opacity: number }
     | { mode: "shape"; shape: "rect" | "ellipse" | "diamond" | "arrow" | "line"; color: string }
     | { mode: "text" }

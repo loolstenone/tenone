@@ -43,7 +43,19 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
+    const securityHeaders = [
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+    ];
+
     return [
+      // 보안 헤더 — 전체 경로
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
       // 마케팅/랜딩 페이지 — 1시간 캐시 (ISR 대체)
       {
         source: '/(about|brands|history|universe|works)',

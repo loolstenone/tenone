@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { ArrowLeft, Link2, Check, Calendar, Tag } from "lucide-react";
 import Link from "next/link";
+import DOMPurify from 'isomorphic-dompurify';
 
 interface PostData {
     id: string;
@@ -96,7 +97,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     )}
 
                     {post.content ? (
-                        <div className="prose prose-neutral max-w-none leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }} />
+                        <div className="prose prose-neutral max-w-none leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                     ) : (
                         <div className="py-12 text-center border border-dashed tn-border">
                             <p className="text-sm tn-text-sub">상세 내용이 아직 작성되지 않았습니다.</p>

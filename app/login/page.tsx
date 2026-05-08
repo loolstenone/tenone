@@ -14,6 +14,16 @@ import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
 import { signupHref } from '@/lib/login-href';
 
+// Open Redirect 방어 — 반드시 상대 경로(/)로 시작해야 함
+function safeRedirect(raw: string | null, fallback = '/'): string {
+    if (!raw) return fallback;
+    // //evil.com, https://evil.com 등 외부 URL 차단
+    if (/^(https?:)?\/\//.test(raw)) return fallback;
+    // 반드시 /로 시작
+    if (!raw.startsWith('/')) return fallback;
+    return raw;
+}
+
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
     const { login, isAuthenticated, isLoading } = useAuth();
@@ -40,7 +50,7 @@ function SmarCommLoginForm() {
 
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
-        const rawPending = searchParams.get('redirect') || '/dashboard';
+        const rawPending = safeRedirect(searchParams.get('redirect'), '/dashboard');
         const pendingRedirect = rawPending === '/workspace' ? '/dashboard' : rawPending;
         if (pendingRedirect !== '/') {
             document.cookie = `auth_redirect=${encodeURIComponent(pendingRedirect)};path=/;max-age=300;SameSite=Lax`;
@@ -55,7 +65,7 @@ function SmarCommLoginForm() {
     };
     const handleGoogle = () => handleSocialLogin('google');
     const handleKakao = () => handleSocialLogin('kakao');
-    const rawRedirect = searchParams.get('redirect') || '/dashboard';
+    const rawRedirect = safeRedirect(searchParams.get('redirect'), '/dashboard');
     // /workspace는 설명 페이지 → 실제 작업공간인 /dashboard로 교체
     const redirectTo = rawRedirect === '/workspace' ? '/dashboard' : rawRedirect;
     const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +134,7 @@ function SmarCommLoginForm() {
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get('redirect') || '/';
+    const redirectTo = safeRedirect(searchParams.get('redirect'));
     const { login, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading, user } = useAuth();
     const { site, siteId, isMadLeague } = useSite();
     const [email, setEmail] = useState('');
@@ -390,7 +400,7 @@ function LoginPageInner() {
                 const searchParams = new URLSearchParams(window.location.search);
                 // SSO 에러로 돌아온 경우는 스킵 (무한루프 방지)
                 if (!searchParams.get('error')?.startsWith('sso_')) {
-                    const finalPath = searchParams.get('redirect') || '/';
+                    const finalPath = safeRedirect(searchParams.get('redirect'));
                     const ssoUrl = new URL('https://tenone.biz/api/sso/initiate');
                     ssoUrl.searchParams.set('origin', window.location.origin);
                     ssoUrl.searchParams.set('final', finalPath);

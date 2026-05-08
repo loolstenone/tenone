@@ -13,7 +13,30 @@ function getSupabaseAdmin() {
   return _adminClient;
 }
 
+// 호출자가 super_admin인지 검증
+async function verifySuperAdmin(req: NextRequest): Promise<{ ok: boolean; error?: NextResponse }> {
+    const token = req.headers.get('authorization')?.replace('Bearer ', '');
+    if (!token) return { ok: false, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+
+    const { data: { user }, error } = await getSupabaseAdmin().auth.getUser(token);
+    if (error || !user) return { ok: false, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+
+    const { data: member } = await getSupabaseAdmin()
+        .from('member_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'super_admin')
+        .eq('is_active', true)
+        .maybeSingle();
+
+    if (!member) return { ok: false, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
+    return { ok: true };
+}
+
 export async function POST(req: NextRequest) {
+    const auth = await verifySuperAdmin(req);
+    if (!auth.ok) return auth.error!;
+
     try {
         const body = await req.json();
         const {

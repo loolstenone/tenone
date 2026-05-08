@@ -169,7 +169,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             )}
 
             {/* 캔버스 영역 */}
-            <div className="flex-1 min-h-0 relative pp-canvas">
+            <div className="flex-1 min-h-0 relative">
                 <PpCanvas
                     initialDoc={initialDoc ?? undefined}
                     onSave={handlePpSave}

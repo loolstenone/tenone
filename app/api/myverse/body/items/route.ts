@@ -32,3 +32,34 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ items: data ?? [] });
 }
+
+export async function POST(req: Request) {
+    const memberId = await getMemberId();
+    if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+
+    const body = await req.json();
+    const { subtype, date, start_time, end_time, activity, body_data } = body;
+    if (!subtype || !ALLOWED.has(subtype)) return NextResponse.json({ error: "invalid_subtype" }, { status: 400 });
+    if (!activity) return NextResponse.json({ error: "activity_required" }, { status: 400 });
+
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+    const admin = createAdminClient();
+    const { data, error } = await admin
+        .from("myverse_daily_routines")
+        .insert({
+            member_id: memberId,
+            date: date || today,
+            start_time: start_time || null,
+            end_time: end_time || null,
+            activity,
+            body_subtype: subtype,
+            body_data: body_data ?? {},
+            domain: "body",
+            visibility: "private",
+        })
+        .select("id, date, start_time, end_time, activity, body_subtype, body_data, visibility")
+        .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ item: data }, { status: 201 });
+}

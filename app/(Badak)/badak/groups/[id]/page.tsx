@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, use } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -1101,7 +1102,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <div className="rounded-xl px-4 py-4"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <div className="text-sm leading-7 text-white/55 whitespace-pre-line"
-                dangerouslySetInnerHTML={{ __html: group.guide.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/75 font-medium">$1</strong>') }} />
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(group.guide.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/75 font-medium">$1</strong>')) }} />
             </div>
           )}
 

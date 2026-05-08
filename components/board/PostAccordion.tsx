@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import DOMPurify from 'isomorphic-dompurify';
 import type { Post } from "@/types/board";
 
 interface PostAccordionProps {
@@ -29,7 +30,7 @@ export default function PostAccordion({ post, accentColor = "#171717" }: PostAcc
                         <div
                             className="prose prose-sm prose-neutral dark:prose-invert max-w-none text-sm leading-relaxed"
                             style={{ color: "var(--tn-text-sub)" }}
-                            dangerouslySetInnerHTML={{ __html: post.content }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                         />
                     ) : (
                         <p className="text-sm" style={{ color: "var(--tn-text-muted)" }}>

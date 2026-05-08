@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/myverse/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/myverse/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { ViewToggle } from "./ViewToggle";
 import { trackMyverse } from "@/lib/myverse/analytics";
 import type { PlannerWeekly } from "@/lib/myverse/types";
 import type { PlannerRole } from "@/lib/myverse/types";
@@ -418,6 +419,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             >
                                 <Plus className="h-3.5 w-3.5" />
                             </button>
+                            <ViewToggle current="weekly" />
                             <PlannersUtilityLinks />
                             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300" />}
                         </div>

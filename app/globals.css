@@ -109,38 +109,6 @@ html.myverse-dark .myverse-app-shell [class~="hover:bg-neutral-200"]:hover {
   background-color: #2A2A2A !important;
 }
 
-/* PP AI Canvas — Excalidraw 기본 UI 전부 숨김 (PP Toolbar 단일 진실 소스) */
-.pp-canvas .layer-ui__wrapper__top-right { display: none !important; }
-.pp-canvas .welcome-screen-decor       { display: none !important; }
-.pp-canvas .HintViewer                  { display: none !important; }
-.pp-canvas .App-toolbar                 { display: none !important; }
-/* 우측 사이드 속성 패널 — 선택 시 나오는 선 색상·굵기·불투명도 등 */
-.pp-canvas .Island.App-menu__left,
-.pp-canvas .layer-ui__wrapper__top-left,
-.pp-canvas .panelColumn                 { display: none !important; }
-/* 도움말 dialog 트리거 (?) — 키보드 단축키만 노출, UI 제거 */
-.pp-canvas .help-icon                   { display: none !important; }
-/* 모바일 전용 Excalidraw UI — 우측 떠 있는 라이브러리·자물쇠·손 도구 등 */
-.pp-canvas .App-mobile-menu,
-.pp-canvas .mobile-misc-tools-container,
-.pp-canvas .App-toolbar__extra-tools-trigger,
-.pp-canvas .layer-ui__wrapper__footer-left,
-.pp-canvas .island-trigger,
-.pp-canvas .ToolIcon__library,
-.pp-canvas .ToolIcon__lock,
-.pp-canvas [data-testid="pen-mode"],
-.pp-canvas [aria-label*="라이브러리"],
-.pp-canvas [aria-label*="library"],
-.pp-canvas [aria-label*="잠금"],
-.pp-canvas [aria-label*="lock"]         { display: none !important; }
-/* 협업·사용자 아바타 — 단일 사용자 모드여도 첫 글자가 좌하단에 떠 있음 */
-.pp-canvas .UserList,
-.pp-canvas .Avatar,
-.pp-canvas .collab-button,
-.pp-canvas .CollabButton,
-.pp-canvas .layer-ui__wrapper__footer-left .Stack,
-.pp-canvas .layer-ui__wrapper__footer-bottom-left { display: none !important; }
-/* 줌·undo/redo 영역(footer-center)은 유지 — PP Toolbar의 보조 */
 
 /* Next.js dev tools 인디케이터(N 로고) — 캔버스 풀스크린 시야 방해 */
 /* (프로덕션에선 자동으로 사라짐) */

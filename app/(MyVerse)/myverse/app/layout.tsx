@@ -16,7 +16,6 @@ import { WelcomeTracker } from "@/features/myverse/app/WelcomeTracker";
 import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
 import { AiBriefingFab } from "@/features/myverse/planner/AiBriefingFab";
 import { MobileBottomNav } from "@/features/myverse/app/MobileBottomNav";
-import { MyverseSidebar } from "@/features/myverse/MyverseSidebar";
 import { MyverseThemeProvider } from "@/features/myverse/app/MyverseThemeProvider";
 import type { MyverseMode, CustomMenuKey, MyverseUser } from "@/lib/myverse/types";
 
@@ -177,7 +176,6 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                     customMenus={(myverseUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
                 <div className="flex flex-1 min-h-0">
-                    <MyverseSidebar handle={member.handle} />
                     <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
                         {children}
                     </main>

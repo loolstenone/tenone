@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock, Eye, Bookmark, Share2, ChevronRight, Tag, ThumbsUp, MessageCircle } from "lucide-react";
 import { findArticle, statusBadge, trends } from "@/lib/mindle/trend-data";
+import DOMPurify from 'isomorphic-dompurify';
 
 export default function TrendDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -84,13 +85,13 @@ export default function TrendDetailPage() {
                                 <div key={i} className="my-3">
                                     {para.split('\n').map((line, j) => (
                                         <p key={j} className="text-neutral-300 text-sm leading-relaxed mb-1.5"
-                                           dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }} />
+                                           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')) }} />
                                     ))}
                                 </div>
                             );
                         }
                         return <p key={i} className="text-neutral-300 text-sm leading-relaxed mb-4"
-                                  dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }} />;
+                                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(para.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')) }} />;
                     })}
                 </article>
 

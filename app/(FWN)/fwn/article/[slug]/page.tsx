@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
+import DOMPurify from 'isomorphic-dompurify';
 import {
   fetchFWNArticle,
   fetchFWNArticles,
@@ -161,7 +162,7 @@ export default function FWNArticlePage() {
           {/* 본문 HTML */}
           <div
             className="fwn-article-body"
-            dangerouslySetInnerHTML={{ __html: article.body }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.body) }}
           />
         </div>
       </article>

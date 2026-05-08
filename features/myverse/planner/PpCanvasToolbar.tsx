@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-    Undo2, Redo2, Hand, Eraser, MousePointer2,
-    Pen, Pencil, PenLine, PenTool, Highlighter, Paintbrush,
+    Undo2, Redo2, Hand, Eraser, MousePointer2, Lasso,
+    Pen, Pencil, PenTool, Paintbrush, Highlighter, Brush,
     Square, Circle, Diamond, ArrowRight, Minus,
     LayoutGrid, Type, ImagePlus, Download,
 } from "lucide-react";
@@ -11,19 +11,18 @@ import type { BackgroundTemplate, PenKind, ToolMode } from "@/lib/canvas-engine"
 import { BACKGROUND_TEMPLATES, getBackgroundLabel } from "@/lib/canvas-engine";
 
 const QUICK_COLORS = [
-    "#1e1e1e", "#ef4444", "#f97316", "#eab308",
-    "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899",
+    "#1e1e1e", "#ef4444", "#3b82f6", "#22c55e", "#eab308",
 ] as const;
 
 type ShapeKind = "rect" | "ellipse" | "diamond" | "arrow" | "line";
 
 const PEN_TOOLS: { pen: PenKind; icon: React.ElementType; label: string }[] = [
-    { pen: "pen",         icon: Pen,         label: "펜" },
-    { pen: "pencil",      icon: Pencil,      label: "연필" },
-    { pen: "fountain",    icon: PenLine,     label: "만년필" },
-    { pen: "marker",      icon: PenTool,     label: "마커" },
-    { pen: "highlighter", icon: Highlighter, label: "형광펜" },
-    { pen: "brush",       icon: Paintbrush,  label: "브러쉬" },
+    { pen: "pen",         icon: Pen,          label: "펜" },
+    { pen: "pencil",      icon: Pencil,       label: "연필" },
+    { pen: "fountain",    icon: PenTool,      label: "만년필" },
+    { pen: "marker",      icon: Paintbrush,   label: "마커" },
+    { pen: "highlighter", icon: Highlighter,  label: "형광펜" },
+    { pen: "brush",       icon: Brush,        label: "브러쉬" },
 ];
 
 const SHAPE_TOOLS: { shape: ShapeKind; icon: React.ElementType; label: string }[] = [
@@ -119,6 +118,7 @@ export function PpCanvasToolbar({
     }
 
     const isSelection = tool.mode === "selection";
+    const isLasso  = tool.mode === "lasso";
     const isStroke = tool.mode === "stroke";
     const isShape  = tool.mode === "shape";
     const isText   = tool.mode === "text";
@@ -129,7 +129,10 @@ export function PpCanvasToolbar({
     const divider = <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />;
 
     return (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-neutral-900/95 backdrop-blur-sm border border-white/10 rounded-2xl px-3 py-2 shadow-2xl z-50 select-none overflow-x-auto max-w-[calc(100vw-2rem)]">
+        <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-neutral-900/95 backdrop-blur-sm border border-white/10 rounded-2xl px-3 py-2 shadow-2xl z-50 select-none overflow-x-auto max-w-[calc(100vw-2rem)]"
+            onPointerDown={(e) => e.stopPropagation()}
+        >
             {/* Undo / Redo */}
             <button
                 onClick={onUndo}
@@ -157,6 +160,13 @@ export function PpCanvasToolbar({
                 className={`${base} ${isSelection ? active : idle}`}
             >
                 <MousePointer2 className="h-4 w-4" />
+            </button>
+            <button
+                onClick={() => onToolChange({ mode: "lasso" })}
+                title="올가미 선택"
+                className={`${base} ${isLasso ? active : idle}`}
+            >
+                <Lasso className="h-4 w-4" />
             </button>
 
             {divider}
@@ -245,6 +255,20 @@ export function PpCanvasToolbar({
                         }}
                     />
                 ))}
+                {/* 커스텀 컬러 피커 */}
+                <label
+                    title="커스텀 색상"
+                    className="relative w-5 h-5 rounded-full border-2 border-dashed border-neutral-500 hover:border-white cursor-pointer flex items-center justify-center shrink-0 overflow-hidden transition-colors"
+                    style={{ borderColor: !QUICK_COLORS.includes(color as typeof QUICK_COLORS[number]) ? "white" : undefined }}
+                >
+                    <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => changeColor(e.target.value)}
+                        className="absolute opacity-0 w-full h-full cursor-pointer"
+                    />
+                    <span className="text-[8px] leading-none text-neutral-400 select-none pointer-events-none">+</span>
+                </label>
             </div>
 
             {/* 크기 프리셋 (펜 모드에서만) */}

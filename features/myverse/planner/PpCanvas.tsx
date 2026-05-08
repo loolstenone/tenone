@@ -357,6 +357,18 @@ function hitHandleCanvas(geo: SelectionGeometry, cx: number, cy: number, zoom: n
     return null;
 }
 
+function pointInPolygon(px: number, py: number, poly: [number, number][]): boolean {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0], yi = poly[i][1];
+        const xj = poly[j][0], yj = poly[j][1];
+        if (((yi > py) !== (yj > py)) && (px < ((xj - xi) * (py - yi)) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
 function boxIntersects(bbox: BoundingBox, box: { x: number; y: number; w: number; h: number }): boolean {
     return bbox.x < box.x + box.w && bbox.x + bbox.width  > box.x &&
            bbox.y < box.y + box.h && bbox.y + bbox.height > box.y;
@@ -489,6 +501,11 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
     const toolRef         = useRef<ToolMode>(tool);
     const viewportRef     = useRef<Viewport>({ x: 0, y: 0, zoom: 1 });
     const selectedIdsRef  = useRef<string[]>([]);
+
+    // 올가미(lasso) 상태
+    const [lassoPoints, setLassoPoints] = useState<[number, number][]>([]);
+    const lassoPointsRef = useRef<[number, number][]>([]);
+    const isLassoingRef  = useRef(false);
 
     // ?�?� ?�택 ?�래�??�태 머신
     interface SelDrag {
@@ -1065,6 +1082,14 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
             const fakeEls = Array.from(drag.origElements.values())
                 .map(el => ({ ...el, ...computeResizePatch(el, drag.origBbox!, newBbox) })) as CanvasElement[];
             setResizePreviewGeo(selectionGeometry(fakeEls));
+
+            // 실시간으로 선택 엘리먼트도 시각적으로 리사이즈
+            const ob = drag.origBbox;
+            const scaleX = ob.width  > 0 ? newBbox.width  / ob.width  : 1;
+            const scaleY = ob.height > 0 ? newBbox.height / ob.height : 1;
+            const t = `translate(${newBbox.x} ${newBbox.y}) scale(${scaleX} ${scaleY}) translate(${-ob.x} ${-ob.y})`;
+            selectedGroupRef.current?.setAttribute("transform", t);
+
             selDragRef.current.didMove = true;
             return;
         }
@@ -1117,6 +1142,7 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
                     id, patch: computeResizePatch(origEl, drag.origBbox!, newBbox),
                 })),
             );
+            selectedGroupRef.current?.setAttribute("transform", "");
             setResizePreviewGeo(null);
         } else if (drag.mode === "rotate" && drag.didMove && drag.origPivot) {
             const newRot = applyRotation(
@@ -1176,6 +1202,11 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
 
         if (t.mode === "selection") {
             onPointerDownSelection(e, canvas.x, canvas.y);
+        } else if (t.mode === "lasso") {
+            isLassoingRef.current = true;
+            lassoPointsRef.current = [[canvas.x, canvas.y]];
+            setLassoPoints([[canvas.x, canvas.y]]);
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
         } else if (t.mode === "stroke") {
             isDrawingRef.current = true;
             livePointsRef.current = [[canvas.x, canvas.y, e.pressure || 0.5]];
@@ -1220,6 +1251,12 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
 
         if (t.mode === "selection") {
             onPointerMoveSelection(e, canvas.x, canvas.y);
+        } else if (t.mode === "lasso" && isLassoingRef.current) {
+            lassoPointsRef.current = [...lassoPointsRef.current, [canvas.x, canvas.y]];
+            // 6포인트마다 React 상태 업데이트 (너무 잦은 리렌더 방지)
+            if (lassoPointsRef.current.length % 6 === 0) {
+                setLassoPoints([...lassoPointsRef.current]);
+            }
         } else if (t.mode === "stroke" && isDrawingRef.current) {
             livePointsRef.current.push([canvas.x, canvas.y, e.pressure || 0.5]);
         } else if (t.mode === "shape" && shapeStartRef.current) {
@@ -1250,6 +1287,26 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
         if (t.mode === "selection") {
             const canvas = clientToCanvas(e.clientX, e.clientY);
             onPointerUpSelection(e, canvas.x, canvas.y);
+        } else if (t.mode === "lasso" && isLassoingRef.current) {
+            isLassoingRef.current = false;
+            const pts = lassoPointsRef.current;
+            lassoPointsRef.current = [];
+            setLassoPoints([]);
+            if (pts.length >= 3 && engineRef.current) {
+                const selected = engineRef.current.serialize().elements
+                    .filter(el => {
+                        const bbox = elementBoundingBox(el);
+                        const cx = bbox.x + bbox.width  / 2;
+                        const cy = bbox.y + bbox.height / 2;
+                        return pointInPolygon(cx, cy, pts);
+                    })
+                    .map(el => el.id);
+                const merged = e.shiftKey
+                    ? [...new Set([...selectedIdsRef.current, ...selected])]
+                    : selected;
+                selectedIdsRef.current = merged;
+                setSelectedIds(merged);
+            }
         } else if (t.mode === "stroke" && isDrawingRef.current) {
             isDrawingRef.current = false;
             commitStroke(t as ToolMode & { mode: "stroke" });
@@ -1272,6 +1329,9 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
         livePointsRef.current = [];
         shapeStartRef.current = null;
         setGhostShape(null);
+        isLassoingRef.current = false;
+        lassoPointsRef.current = [];
+        setLassoPoints([]);
 
         const canvas = overlayRef.current;
         const svg    = svgRef.current;
@@ -1289,6 +1349,7 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
             case "eraser": return "cell";
             case "stroke": return "crosshair";
             case "shape":  return "crosshair";
+            case "lasso":  return "crosshair";
             case "text":   return "text";
             default:       return "default";
         }
@@ -1381,6 +1442,20 @@ export default function PpCanvas({ initialDoc, onSave, className, exportFilename
                 {ghostShape && tool.mode === "shape" && (
                     <GhostPath ghost={ghostShape} />
                 )}
+                {/* 올가미 선택 경로 */}
+                {lassoPoints.length >= 2 && (
+                    <polyline
+                        points={lassoPoints.map(([x, y]) => `${x},${y}`).join(" ")}
+                        fill="#6366F1"
+                        fillOpacity={0.08}
+                        stroke="#6366F1"
+                        strokeWidth={1.5 / zoom}
+                        strokeDasharray={`${5 / zoom} ${3 / zoom}`}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                )}
+
                 {/* 박스 ?�택 */}
                 {boxSelectRect && (
                     <rect

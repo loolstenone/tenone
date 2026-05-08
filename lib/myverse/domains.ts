@@ -188,7 +188,7 @@ export interface PillarMeta {
 export const PILLARS: PillarMeta[] = [
     { key: "me",    label_ko: "나",     icon_name: "User",      domains: ["body", "daily", "relation"] },
     { key: "do",    label_ko: "일",     icon_name: "Briefcase", domains: ["work", "study"] },
-    { key: "time",  label_ko: "시간",   icon_name: "Clock",     domains: ["schedule", "move", "travel"] },
+    { key: "time",  label_ko: "시간",   icon_name: "Clock",     domains: ["schedule"] },
     { key: "share", label_ko: "나누기", icon_name: "Share2" },
 ];
 

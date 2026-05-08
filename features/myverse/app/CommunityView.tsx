@@ -345,7 +345,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="내용을 자유롭게 적어 주세요. 다른 PP 사용자들에게 도움이 됩니다."
+                        placeholder="내용을 자유롭게 적어 주세요. 다른 Myverse 사용자들에게 도움이 됩니다."
                         rows={10}
                         className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none resize-none leading-relaxed"
                     />

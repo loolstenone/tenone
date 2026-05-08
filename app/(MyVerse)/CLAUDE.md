@@ -165,9 +165,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 117 (2026-05-08)** — Canvas Engine Phase 2 완료 + vCard 정리 |
-| **이전 Phase** | 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 완료 / 세션 115 — JS 함수·CSS·DOM ID 제거 |
+| **Phase** | **세션 118 (2026-05-08)** — 올가미 선택·리사이즈 실시간·PP흔적·보안점검 |
+| **이전 Phase** | 세션 117 — Canvas Engine Phase 2 (image, export, 레이어, 텍스트 서식) / 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 |
 | **다음 Phase** | (1) `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요) · (2) Toss 가맹점 승인 + Vercel 환경변수 |
+| **세션 118 결정** | ① 올가미 선택(lasso): ray casting `pointInPolygon()`, SVG polyline 시각화 · ② resize 실시간: SVG DOM translate/scale/translate 직접 적용 · ③ PP 흔적 제거: CommunityView 텍스트, globals.css 죽은 블록, CanvasStudio div 클래스 · ④ 전체화면 노트 뷰: DailyView/ProjectNotesTab z-[9100] + 타입 배지 pill + 취소/저장 버튼 |
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |

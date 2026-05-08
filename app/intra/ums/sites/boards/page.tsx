@@ -5,6 +5,7 @@ import {
     Settings, FileText, Users, Search, Pencil, Trash2, Plus, X,
 } from "lucide-react";
 import { PageHeader, TabNav } from "@/components/intra/IntraUI";
+import DOMPurify from 'isomorphic-dompurify';
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { useBumsFilter, SiteFilterDropdown } from "../../layout";
@@ -340,7 +341,7 @@ export default function BoardsManagementPage() {
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-6">
                                         {viewingPost.excerpt && <p className="text-sm text-neutral-500 mb-4 italic">{viewingPost.excerpt}</p>}
-                                        <div className="text-sm text-neutral-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: viewingPost.content || "(본문 없음)" }} />
+                                        <div className="text-sm text-neutral-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(viewingPost.content || "(본문 없음)") }} />
                                     </div>
                                     <div className="p-4 border-t border-neutral-100 flex justify-end gap-2">
                                         <button onClick={() => { setViewingPost(null); router.push(`/intra/bums/content?edit=${viewingPost.id}`); }}

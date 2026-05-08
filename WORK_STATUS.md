@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-08 (세션 117 — Canvas Engine + vCard 마무리)
+> 마지막 업데이트: 2026-05-08 (세션 118 — 캔버스 올가미 선택·리사이즈 실시간·PP흔적·보안점검)
+
+---
+
+## 세션 118 핵심 성과 (2026-05-08)
+
+### 캔버스 올가미 선택 + 리사이즈 실시간 반영 + 보안 점검
+
+#### ✅ 완료
+
+1. **PpCanvas — 올가미(lasso) 선택 도구**
+   - `ToolMode`에 `{ mode: "lasso" }` 추가 (`types.ts`)
+   - `PpCanvasToolbar.tsx`: Lasso 아이콘 버튼 추가
+   - `PpCanvas.tsx`: `pointInPolygon()` (ray casting), lasso pointer 이벤트, SVG `<polyline>` 렌더
+
+2. **PpCanvas — resize 실시간 시각 반영**
+   - 기존: handle 위치만 업데이트, 요소 자체는 포인터업 후에야 반영
+   - 수정: SVG DOM transform 직접 조작 (`translate/scale/translate`) → 드래그 중 실시간 반영
+
+3. **PP 브랜딩 흔적 제거**
+   - `CommunityView.tsx`: "다른 PP 사용자들에게" → "다른 Myverse 사용자들에게"
+   - `app/globals.css`: 죽은 `pp-canvas` Excalidraw CSS 블록 삭제
+   - `CanvasStudio.tsx`: `div.pp-canvas` 클래스 제거
+
+4. **DailyView.tsx / ProjectNotesTab.tsx — 노트 확장 전체화면 + UI 통일**
+   - `z-[9100]` 전체화면, 통일된 흰 헤더 + 컬러 타입 배지 pill
+   - "그냥 닫기"→"취소", "저장 후 닫기"→"저장"
+
+5. **보안 점검 3건 (CRITICAL) 수정**
+   - `create-staff` API: 인증 완전 누락 → `verifySuperAdmin()` Bearer 토큰 + super_admin 검증 추가
+   - `subscription/access` API: 타인 userId 조회 가능 → 세션 기반 자기 검증 + staff 예외 추가
+   - XSS `dangerouslySetInnerHTML` 9개 파일: `isomorphic-dompurify` 설치 + `DOMPurify.sanitize()` 적용
+     (stars/[slug], fwn/article/[slug], newsroom/[id], works/[id], PostDetail, PostAccordion, boards, trends/[id], groups/[id])
+   - 보안 헤더: `next.config.ts`에 X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy 추가
+   - Open Redirect: `/login`에 `safeRedirect()` 검증 함수 추가
+
+#### 남은 이월 항목
+
+##### 🔴 데이터 이전 (service role key 필요)
+- `scripts/migrate-moments-bucket.js` 실행 — `.env.local`에 `SUPABASE_SERVICE_ROLE_KEY=` 추가 후 `node scripts/migrate-moments-bucket.js`
+
+##### 🟡 외부 작업 (사용자 직접)
+- **Toss 가맹점 승인 + Vercel 환경변수** 설정
+
+##### ⚪️ 보안 권고 (낮은 우선순위)
+- Rate Limiting: 인증 API 분당 제한 (Upstash Redis 등)
 
 ---
 

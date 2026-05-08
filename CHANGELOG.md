@@ -4,6 +4,46 @@
 
 ---
 
+## 2026-05-08 — 세션 118 · 올가미 선택·리사이즈 실시간·PP흔적·보안점검
+
+### 장소
+집
+
+### 핵심 결정사항
+- 올가미 선택: ray casting `pointInPolygon()`, SVG `<polyline>` 시각화
+- resize 실시간: SVG DOM 직접 `translate/scale/translate` 복합 transform (React 리렌더 없이)
+- 보안: `isomorphic-dompurify` 도입, `safeRedirect()` Open Redirect 방어, 보안 헤더 전역 설정
+
+### 변경 파일
+- `lib/canvas-engine/types.ts` — ToolMode lasso 추가
+- `features/myverse/planner/PpCanvasToolbar.tsx` — Lasso 버튼, white border 비교 오류 수정
+- `features/myverse/planner/PpCanvas.tsx` — 올가미 선택, resize 실시간 SVG transform
+- `features/myverse/app/CommunityView.tsx` — PP → Myverse 사용자 텍스트
+- `features/myverse/app/DailyView.tsx` — 전체화면 + 통일 헤더 + 취소/저장
+- `features/myverse/app/ProjectNotesTab.tsx` — 전체화면 + 통일 헤더 + 취소/저장
+- `features/myverse/planner/CanvasStudio.tsx` — pp-canvas 클래스 제거
+- `app/globals.css` — Excalidraw 죽은 CSS 블록 삭제
+- `app/api/admin/create-staff/route.ts` — verifySuperAdmin() 추가 (CRITICAL 보안)
+- `app/api/subscription/access/route.ts` — 세션 인증 + 자기 검증 (CRITICAL 보안)
+- `app/(Badak)/badak/stars/[slug]/page.tsx` — DOMPurify XSS 수정
+- `app/(FWN)/fwn/article/[slug]/page.tsx` — DOMPurify XSS 수정
+- `app/(TenOne)/newsroom/[id]/page.tsx` — DOMPurify XSS 수정
+- `app/(TenOne)/works/[id]/page.tsx` — DOMPurify XSS 수정
+- `components/board/PostDetail.tsx` — DOMPurify XSS 수정
+- `components/board/PostAccordion.tsx` — DOMPurify XSS 수정
+- `app/intra/ums/sites/boards/page.tsx` — DOMPurify XSS 수정
+- `app/(Mindle)/mindle/trends/[id]/page.tsx` — DOMPurify XSS 수정
+- `app/(Badak)/badak/groups/[id]/page.tsx` — DOMPurify XSS 수정
+- `app/login/page.tsx` — safeRedirect() Open Redirect 방어
+- `next.config.ts` — 보안 헤더 전역 (X-Frame-Options 등)
+- `package.json` / `package-lock.json` — isomorphic-dompurify 의존성
+
+### 이월
+- `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요)
+- Toss 가맹점 승인 + Vercel 환경변수 (사용자 직접)
+
+---
+
 ## 2026-05-08 — 세션 117 · Canvas Engine Phase 2 완료 + vCard 정리
 
 ### 장소
