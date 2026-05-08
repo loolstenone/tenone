@@ -254,9 +254,11 @@ export function MyverseThemeProvider() {
         return () => {
             window.removeEventListener("pp-theme-mode-change", onModeChange as EventListener);
             mq.removeEventListener("change", onSystemChange);
-            // 다른 브랜드로 이동 시 .myverse-dark 제거 (영향 차단)
-            document.documentElement.classList.remove("myverse-dark");
-            delete document.documentElement.dataset.myverseMode;
+            // 다른 브랜드로 이동 시에만 .myverse-dark 제거 (myverse 내 탭 이동 시 flash 방지)
+            if (!window.location.pathname.startsWith("/myverse")) {
+                document.documentElement.classList.remove("myverse-dark");
+                delete document.documentElement.dataset.myverseMode;
+            }
         };
     }, []);
 

@@ -162,6 +162,8 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     return (
         <>
+            {/* 다크모드 flash 방지 — React hydration 전에 동기적으로 실행 */}
+            <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('myverse_theme_mode')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('myverse-dark');}catch(e){}})()` }} />
             <MyverseThemeProvider />
             <PwaRegister />
             <Suspense><WelcomeTracker /></Suspense>
