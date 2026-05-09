@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2, Gift, X } from "lucide-react";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { ViewToggle } from "./ViewToggle";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
@@ -276,7 +275,6 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                             </div>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                            <ViewToggle current="yearly" />
                             <PlannersUtilityLinks />
                             {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                         </div>

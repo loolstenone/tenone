@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
 import { getISOWeek } from "@/lib/myverse/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { ViewToggle } from "./ViewToggle";
 import { getHoliday, getLunarDate } from "@/lib/myverse/holidays";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
@@ -382,7 +381,6 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             </div>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                            <ViewToggle current="monthly" />
                             <PlannersUtilityLinks />
                             {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                         </div>

@@ -87,7 +87,6 @@ import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEn
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
-import { ViewToggle } from "./ViewToggle";
 import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
@@ -1575,7 +1574,6 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <ViewToggle current="daily" />
                     <PlannersUtilityLinks />
                     {!isOnline && (
                         <span className="text-xs text-amber-500 font-medium">오프라인</span>

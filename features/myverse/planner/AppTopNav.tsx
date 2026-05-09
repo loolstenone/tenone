@@ -101,7 +101,7 @@ export function AppTopNav({
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand */}
-            <Link href="/myverse/app" className="flex items-center gap-1.5 mr-1 shrink-0">
+            <Link href="/myverse" className="flex items-center gap-1.5 mr-1 shrink-0">
                 <Image src="/Myverse_logo_black.png" alt="Myverse" width={24} height={24} className="shrink-0" />
                 <span className="hidden sm:inline font-sans font-semibold text-sm text-neutral-900 tracking-tight whitespace-nowrap">
                     Myverse

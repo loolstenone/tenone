@@ -13,11 +13,19 @@ export interface SubTab {
 }
 
 export const AI_LANE_TABS: SubTab[] = [
-    { key: "ask",      label: "묻기",       href: "/myverse/app/ask" },
-    { key: "coach",    label: "코치",       href: "/myverse/app/coach" },
-    { key: "diary",    label: "일기 초안",  href: "/myverse/app/diary" },
-    { key: "insights", label: "인사이트",   href: "/myverse/app/insights" },
-    { key: "capsules", label: "캡슐",       href: "/myverse/app/capsules" },
+    { key: "ask",      label: "묻기",     href: "/myverse/app/ask" },
+    { key: "coach",    label: "코치",     href: "/myverse/app/coach" },
+    { key: "diary",    label: "일기",     href: "/myverse/app/diary" },
+    { key: "insights", label: "인사이트", href: "/myverse/app/insights" },
+    { key: "capsules", label: "캡슐",     href: "/myverse/app/capsules" },
+];
+
+// 기록 lane — 흔적 타임라인 + 시간 줌 (일간은 lane "오늘"이 담당)
+export const RECORD_LANE_TABS: SubTab[] = [
+    { key: "traces",  label: "흔적", href: "/myverse/app/traces" },
+    { key: "weekly",  label: "주간", href: "/myverse/app/weekly" },
+    { key: "monthly", label: "월간", href: "/myverse/app/monthly" },
+    { key: "yearly",  label: "연간", href: "/myverse/app/yearly" },
 ];
 
 export const CONNECT_LANE_TABS: SubTab[] = [

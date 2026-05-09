@@ -4,32 +4,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-    LayoutGrid, Sun, FolderKanban, User,
+    LayoutGrid, Sun, FolderKanban, User, Sparkles, Wrench,
     CalendarDays, Calendar, CalendarRange, Users, Search, Settings,
 } from "lucide-react";
 
 export const MOBILE_NAV_STORAGE_KEY = "myverse-mobile-nav";
 const LEGACY_NAV_STORAGE_KEY = "planners-mobile-nav";
-// 5 lane SSOT 기반 모바일 하단 네비 (세션 119 IA)
-export const MOBILE_NAV_DEFAULT: string[] = ["today", "record", "ai", "connect", "search"];
+// 5 lane SSOT 기반 모바일 하단 네비 (세션 121 — 도구 lane 포함)
+export const MOBILE_NAV_DEFAULT: string[] = ["today", "record", "ai", "connect", "work"];
 
 export const ALL_NAV_OPTIONS = [
-    // ── Lane 5
+    // ── 5 Lane (1차 SSOT)
     { id: "today",    label: "오늘",     icon: Sun,           href: "/myverse/app/today" },
     { id: "record",   label: "기록",     icon: LayoutGrid,    href: "/myverse/app/traces" },
-    { id: "ai",       label: "AI",       icon: CalendarDays,  href: "/myverse/app/ask" },
+    { id: "ai",       label: "AI",       icon: Sparkles,      href: "/myverse/app/ask" },
     { id: "connect",  label: "연결",     icon: Users,         href: "/myverse/app/feed" },
-    // ── 도구 lane (선택)
-    { id: "projects", label: "프로젝트", icon: FolderKanban, href: "/myverse/app/projects" },
-    { id: "identity", label: "퍼스널",   icon: User,         href: "/myverse/app/personal" },
-    { id: "contacts", label: "연락처",   icon: Calendar,     href: "/myverse/app/contacts" },
+    { id: "work",     label: "도구",     icon: Wrench,        href: "/myverse/app/projects" },
+    // ── 도구 lane 직접 진입 (커스터마이즈용)
+    { id: "projects", label: "프로젝트", icon: FolderKanban,  href: "/myverse/app/projects" },
+    { id: "identity", label: "퍼스널",   icon: User,          href: "/myverse/app/personal" },
+    { id: "contacts", label: "연락처",   icon: Calendar,      href: "/myverse/app/contacts" },
     // ── 시간 줌 (도구)
-    { id: "weekly",   label: "주간",     icon: CalendarDays, href: "/myverse/app/weekly" },
-    { id: "monthly",  label: "월간",     icon: Calendar,     href: "/myverse/app/monthly" },
+    { id: "weekly",   label: "주간",     icon: CalendarDays,  href: "/myverse/app/weekly" },
+    { id: "monthly",  label: "월간",     icon: Calendar,      href: "/myverse/app/monthly" },
     { id: "yearly",   label: "연간",     icon: CalendarRange, href: "/myverse/app/yearly" },
     // ── 시스템
-    { id: "search",   label: "검색",     icon: Search,       href: "/myverse/app/search" },
-    { id: "settings", label: "설정",     icon: Settings,     href: "/myverse/app/settings" },
+    { id: "search",   label: "검색",     icon: Search,        href: "/myverse/app/search" },
+    { id: "settings", label: "설정",     icon: Settings,      href: "/myverse/app/settings" },
 ] as const;
 
 export type NavOptionId = typeof ALL_NAV_OPTIONS[number]["id"];
@@ -87,7 +88,11 @@ export function MobileBottomNav() {
                         pathname === item.href ||
                         pathname.startsWith(item.href + "/") ||
                         pathname.startsWith(item.href + "?") ||
-                        (item.id === "today" && (pathname === "/myverse/app" || pathname.startsWith("/myverse/app/daily") || pathname.startsWith("/myverse/app/index")));
+                        (item.id === "today" && (pathname === "/myverse/app" || pathname.startsWith("/myverse/app/daily") || pathname.startsWith("/myverse/app/index"))) ||
+                        (item.id === "work" && (pathname.startsWith("/myverse/app/projects") || pathname.startsWith("/myverse/app/tasks") || pathname.startsWith("/myverse/app/canvas") || pathname.startsWith("/myverse/app/templates") || pathname.startsWith("/myverse/app/contacts") || pathname.startsWith("/myverse/app/personal"))) ||
+                        (item.id === "ai" && (pathname.startsWith("/myverse/app/ask") || pathname.startsWith("/myverse/app/coach") || pathname.startsWith("/myverse/app/diary") || pathname.startsWith("/myverse/app/insights") || pathname.startsWith("/myverse/app/capsules"))) ||
+                        (item.id === "connect" && (pathname.startsWith("/myverse/app/feed") || pathname.startsWith("/myverse/app/dm") || pathname.startsWith("/myverse/app/verse") || pathname.startsWith("/myverse/app/notifications"))) ||
+                        (item.id === "record" && (pathname.startsWith("/myverse/app/traces") || pathname.startsWith("/myverse/app/weekly") || pathname.startsWith("/myverse/app/monthly") || pathname.startsWith("/myverse/app/yearly") || pathname.startsWith("/myverse/app/body") || pathname.startsWith("/myverse/app/work") || pathname.startsWith("/myverse/app/study") || pathname.startsWith("/myverse/app/lifestyle") || pathname.startsWith("/myverse/app/schedule") || pathname.startsWith("/myverse/app/travel") || pathname.startsWith("/myverse/app/move") || pathname.startsWith("/myverse/app/relation") || pathname.startsWith("/myverse/app/with") || pathname.startsWith("/myverse/app/time")));
                     return (
                         <Link
                             key={item.id}
