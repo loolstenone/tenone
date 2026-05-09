@@ -161,6 +161,17 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     return (
         <>
+            {/* Stitch 디자인 폰트·아이콘 (Hanken Grotesk / Inter / Material Symbols) — 세션 122 */}
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+                rel="stylesheet"
+            />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+                rel="stylesheet"
+            />
             {/* 다크모드 flash 방지 — React hydration 전에 동기적으로 실행 */}
             <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('myverse_theme_mode')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('myverse-dark');}catch(e){}})()` }} />
             <MyverseThemeProvider />
