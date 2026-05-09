@@ -89,7 +89,7 @@ export function AskMyverseView() {
                     내 디지털 분신에게 묻기
                 </h1>
                 <p className="text-sm text-neutral-500 mt-1">
-                    그동안 쌓인 흔적·일정·기록을 한 줄 질문으로 불러옵니다
+                    내가 묻는 즉시 답하는 1:1 대화 — 흔적·일정·기록을 한 줄 질문으로
                 </p>
             </div>
 

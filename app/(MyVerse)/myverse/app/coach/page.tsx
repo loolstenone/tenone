@@ -35,7 +35,8 @@ export default function CoachPage() {
             <LaneSubNav tabs={AI_LANE_TABS} />
             {/* 헤더 */}
             <header className="px-6 pt-4 pb-0 border-b border-neutral-200 bg-white shrink-0">
-                <h1 className="text-xl font-serif text-neutral-900 mb-3">AI 코치</h1>
+                <h1 className="text-xl font-serif text-neutral-900">AI 코치</h1>
+                <p className="text-xs text-neutral-500 mt-0.5 mb-3">묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트</p>
                 {/* 탭 — 채팅 제거 (ask로 일원화) */}
                 <div className="flex gap-0">
                     {[
