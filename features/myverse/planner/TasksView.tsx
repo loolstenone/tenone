@@ -75,11 +75,24 @@ export function TasksView() {
     const byDate = groupByDate(current).map(([date, tasks]) => [date, sortTasks(tasks)] as [string, TaskWithDate[]]);
 
     return (
-        <div className="max-w-2xl mx-auto px-6 md:px-10 py-8">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <h1 className="font-serif text-2xl text-neutral-900">할 일</h1>
-                <span className="text-sm text-neutral-400">· 상태별 모아보기</span>
+        <div className="max-w-2xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            {/* Header — Stitch 디자인 정렬 (세션 122) */}
+            <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        check_box
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">TASKS</span>
+                </div>
+                <div className="flex items-baseline gap-3">
+                    <h1
+                        className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                    >
+                        할 일
+                    </h1>
+                    <span className="text-sm text-neutral-400">상태별 모아보기</span>
+                </div>
             </div>
 
             {/* Tab bar */}

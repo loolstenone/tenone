@@ -94,15 +94,22 @@ export function SocialFeedView() {
     }, [mode]);
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-            {/* 헤더 */}
-            <div className="mb-4">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                    <Compass className="h-3.5 w-3.5" />
-                    FEED
+        <div className="max-w-2xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            {/* 헤더 — Stitch 디자인 정렬 (세션 122) */}
+            <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        rss_feed
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">FEED</span>
                 </div>
-                <h1 className="text-3xl font-semibold text-neutral-900">피드</h1>
-                <p className="text-sm text-neutral-500 mt-1">
+                <h1
+                    className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                    style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                >
+                    피드
+                </h1>
+                <p className="text-sm text-neutral-500 mt-1.5">
                     팔로우한 사람들의 공개 흔적이 모입니다
                 </p>
             </div>

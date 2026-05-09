@@ -78,17 +78,25 @@ export function AskMyverseView() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8 flex flex-col h-[calc(100vh-3rem-3.5rem)] sm:h-[calc(100vh-3rem)]">
-            {/* 헤더 */}
-            <div className="mb-4 shrink-0">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    ASK MYVERSE
+        <div
+            className="max-w-3xl mx-auto px-5 py-8 sm:px-6 flex flex-col h-[calc(100vh-3rem-3.5rem)] sm:h-[calc(100vh-3rem)]"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+        >
+            {/* 헤더 — Stitch 디자인 정렬 (세션 122) */}
+            <div className="mb-6 shrink-0">
+                <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        auto_awesome
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">ASK MYVERSE</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900">
+                <h1
+                    className="text-[26px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                    style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                >
                     내 디지털 분신에게 묻기
                 </h1>
-                <p className="text-sm text-neutral-500 mt-1">
+                <p className="text-sm text-neutral-500 mt-1.5">
                     내가 묻는 즉시 답하는 1:1 대화 — 흔적·일정·기록을 한 줄 질문으로
                 </p>
             </div>
