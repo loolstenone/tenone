@@ -1205,16 +1205,28 @@ export function ContactsView() {
             )}
             {/* Header — 타이틀 + 카운트 only. 모든 액션은 사이드바(lg+) 또는 모바일 폴백.
                 선택 시 액션은 테이블 위 컨텍스트 액션바로 이동. */}
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                    <Users className="h-6 w-6 text-[#6366F1]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">연락처</h1>
-                    {!loading && (
-                        <span className="text-xs text-neutral-500 ml-1">
-                            전체 {contacts.length.toLocaleString("ko-KR")}명
-                            {favoritesCount > 0 && <span className="ml-2 text-amber-600">⭐ {favoritesCount.toLocaleString("ko-KR")}</span>}
+            <div className="flex items-start justify-between mb-6 flex-wrap gap-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                <div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            contacts
                         </span>
-                    )}
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">CONTACTS</span>
+                    </div>
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                        <h1
+                            className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                        >
+                            연락처
+                        </h1>
+                        {!loading && (
+                            <span className="text-sm text-neutral-500">
+                                전체 {contacts.length.toLocaleString("ko-KR")}명
+                                {favoritesCount > 0 && <span className="ml-2 text-amber-600">⭐ {favoritesCount.toLocaleString("ko-KR")}</span>}
+                            </span>
+                        )}
+                    </div>
                 </div>
                 {/* 모바일 전용 (사이드바 숨김 화면)에만 액션 폴백 */}
                 <div className="lg:hidden flex items-center gap-2">

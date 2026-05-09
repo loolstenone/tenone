@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, Loader2, ChevronLeft, ChevronRight, Calendar, Save, RefreshCw } from "lucide-react";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 function todayKST(): string {
     return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
@@ -96,18 +97,13 @@ export function AiDiaryView() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-            {/* 헤더 */}
-            <div className="mb-6">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    AI DIARY
-                </div>
-                <h1 className="text-3xl font-semibold text-neutral-900">하루를 한 줄로</h1>
-                <p className="text-sm text-neutral-500 mt-1">
-                    오늘의 흔적·일과·장소를 모아 AI가 한 문장으로 묶어줍니다 — 그 위에 내 말을 더하세요
-                </p>
-            </div>
+        <div className="max-w-3xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="edit_note"
+                label="AI DIARY"
+                title="하루를 한 줄로"
+                subtitle="오늘의 흔적·일과·장소를 모아 AI가 한 문장으로 묶어줍니다 — 그 위에 내 말을 더하세요"
+            />
 
             {/* 날짜 네비 */}
             <div className="flex items-center justify-between mb-4 bg-white border border-neutral-200 rounded-xl px-3 py-2">

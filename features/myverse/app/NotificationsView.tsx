@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, UserPlus, Heart, MessageCircle, Reply, Check } from "lucide-react";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface Notification {
     id: string;
@@ -67,28 +68,24 @@ export function NotificationsView() {
     const unread = notifs.filter(n => !n.read_at);
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-            <div className="mb-6 flex items-start justify-between gap-3">
-                <div>
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                        <Bell className="h-3.5 w-3.5" />
-                        NOTIFICATIONS
-                    </div>
-                    <h1 className="text-3xl font-semibold text-neutral-900">알림</h1>
-                    <p className="text-sm text-neutral-500 mt-1">
-                        {unread.length > 0 ? `${unread.length}개의 새 알림` : "모두 확인했어요"}
-                    </p>
-                </div>
-                {unread.length > 0 && (
-                    <button
-                        onClick={markAllRead}
-                        className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-700 hover:text-[#6366F1] text-xs font-medium rounded-lg"
-                    >
-                        <Check className="h-3 w-3" />
-                        모두 읽음
-                    </button>
-                )}
-            </div>
+        <div className="max-w-2xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="notifications"
+                label="NOTIFICATIONS"
+                title="알림"
+                subtitle={unread.length > 0 ? `${unread.length}개의 새 알림` : "모두 확인했어요"}
+                actions={
+                    unread.length > 0 ? (
+                        <button
+                            onClick={markAllRead}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-700 hover:text-[#6366F1] text-xs font-medium rounded-lg"
+                        >
+                            <Check className="h-3 w-3" />
+                            모두 읽음
+                        </button>
+                    ) : undefined
+                }
+            />
 
             {loading ? (
                 <div className="space-y-2">

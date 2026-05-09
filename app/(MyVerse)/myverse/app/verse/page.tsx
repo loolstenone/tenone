@@ -15,6 +15,7 @@ import { Loader2, Camera, Clock, MapPin, Calendar, Orbit, Filter, Users } from "
 import { DOMAINS, DOMAIN_KEYS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
 import { LaneSubNav, CONNECT_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 type Zoom = "day" | "week" | "month" | "quarter" | "year" | "life";
 
@@ -99,20 +100,16 @@ export default function VersePage() {
     }, []);
 
     return (
-        <div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             <LaneSubNav tabs={CONNECT_LANE_TABS} />
-            <header className="px-6 pt-6 pb-3 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Orbit className="h-3 w-3 text-[#6366F1]" />
-                            <span className="text-[10px] uppercase tracking-widest text-[#6366F1]">Verse</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">통합 타임라인</h1>
-                        <p className="text-xs text-neutral-500 mt-1">9 영역 × 사람 × 시간 — 모든 흔적이 한 자리</p>
-                    </div>
-                </div>
-            </header>
+            <div className="px-5 sm:px-10 pt-8 pb-3 bg-neutral-50">
+                <LaneHeader
+                    icon="orbit"
+                    label="VERSE"
+                    title="통합 타임라인"
+                    subtitle="9 영역 × 사람 × 시간 — 모든 흔적이 한 자리"
+                />
+            </div>
 
             {/* 줌 + 영역 필터 */}
             <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-neutral-100 bg-white sticky top-0 z-10">

@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { Lock, Unlock, Mail, Plus, X, Calendar, Loader2, Trash2 } from "lucide-react";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface Capsule {
     id: string;
@@ -73,27 +74,22 @@ export function TimeCapsulesView() {
     const pending = capsules.filter(c => c.status === "pending");
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-            {/* 헤더 */}
-            <div className="mb-6 flex items-start justify-between gap-3">
-                <div>
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                        <Mail className="h-3.5 w-3.5" />
-                        TIME CAPSULE
-                    </div>
-                    <h1 className="text-3xl font-semibold text-neutral-900">타임 캡슐</h1>
-                    <p className="text-sm text-neutral-500 mt-1">
-                        미래의 나에게 보내는 잠긴 메시지 — 정해진 날에 다시 만나요
-                    </p>
-                </div>
-                <button
-                    onClick={() => setComposing(true)}
-                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-xs font-medium transition-colors"
-                >
-                    <Plus className="h-3.5 w-3.5" />
-                    새 캡슐
-                </button>
-            </div>
+        <div className="max-w-4xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="redeem"
+                label="TIME CAPSULE"
+                title="타임 캡슐"
+                subtitle="미래의 나에게 보내는 잠긴 메시지 — 정해진 날에 다시 만나요"
+                actions={
+                    <button
+                        onClick={() => setComposing(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-xs font-medium transition-colors"
+                    >
+                        <Plus className="h-3.5 w-3.5" />
+                        새 캡슐
+                    </button>
+                }
+            />
 
             {loading ? (
                 <div className="text-sm text-neutral-400 italic">불러오는 중…</div>

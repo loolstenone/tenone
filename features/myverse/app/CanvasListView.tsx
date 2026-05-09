@@ -90,11 +90,21 @@ export function CanvasListView() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                    <Pencil className="h-6 w-6 text-[#6366F1]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">캔버스</h1>
+        <div className="max-w-6xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div className="flex items-start justify-between mb-8 gap-3">
+                <div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            draw
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">CANVAS</span>
+                    </div>
+                    <h1
+                        className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                    >
+                        캔버스
+                    </h1>
                 </div>
                 <MyverseUtilityLinks />
             </div>

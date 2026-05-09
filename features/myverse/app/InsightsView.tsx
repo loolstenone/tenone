@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, MapPin, Users, Calendar, TrendingUp, Clock, Activity, Hash } from "lucide-react";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 import { DOMAINS, type DomainKey } from "@/lib/myverse/domains";
 
 type Period = "month" | "quarter" | "year";
@@ -63,18 +64,13 @@ export function InsightsView() {
     }, [period]);
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-            {/* 헤더 */}
-            <div className="mb-6">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    INSIGHTS
-                </div>
-                <h1 className="text-3xl font-semibold text-neutral-900">인사이트</h1>
-                <p className="text-sm text-neutral-500 mt-1">
-                    내가 보지 못한 패턴 — 누구·어디·언제·무엇을
-                </p>
-            </div>
+        <div className="max-w-6xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="insights"
+                label="INSIGHTS"
+                title="인사이트"
+                subtitle="내가 보지 못한 패턴 — 누구·어디·언제·무엇을"
+            />
 
             {/* 기간 토글 */}
             <div className="flex gap-1 mb-5">

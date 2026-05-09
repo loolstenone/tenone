@@ -500,14 +500,24 @@ export function TemplatesView() {
     const hasData = Object.values(tplData).some(v => v.trim());
 
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
-            <div className="flex items-center gap-3 mb-2">
-                <LayoutTemplate className="h-6 w-6 text-[#6366F1]" />
-                <h1 className="font-serif text-3xl text-neutral-900">템플릿</h1>
+        <div className="max-w-6xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        dashboard_customize
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">TEMPLATES</span>
+                </div>
+                <h1
+                    className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                    style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                >
+                    템플릿
+                </h1>
+                <p className="text-sm text-neutral-500 mt-1.5 mb-2">
+                    기획자의 사고 틀. 스케줄 · 노트 · 프레임워크. 일간·프로젝트 노트로 불러와 채울 수 있습니다.
+                </p>
             </div>
-            <p className="text-sm text-neutral-500 mb-8">
-                기획자의 사고 틀. 스케줄 · 노트 · 프레임워크. 일간·프로젝트 노트로 불러와 채울 수 있습니다.
-            </p>
 
             {/* Search */}
             <div className="relative mb-4">

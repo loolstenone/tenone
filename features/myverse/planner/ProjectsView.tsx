@@ -105,12 +105,22 @@ export function ProjectsView() {
     const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                    <FolderKanban className="h-6 w-6 text-[#6366F1]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">프로젝트</h1>
+        <div className="max-w-6xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            {/* Header — Stitch 정렬 (세션 122) */}
+            <div className="flex items-start justify-between mb-8 gap-3">
+                <div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            folder_managed
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">PROJECTS</span>
+                    </div>
+                    <h1
+                        className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                    >
+                        프로젝트
+                    </h1>
                 </div>
                 <div className="flex items-center gap-2">
                     {hasPublicProjects && user?.id && (

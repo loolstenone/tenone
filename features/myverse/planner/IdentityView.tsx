@@ -77,15 +77,25 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
-            {/* Header */}
-            <div className="mb-2 flex items-start justify-between gap-4">
+            {/* Header — Stitch 정렬 (세션 122) */}
+            <div className="mb-6 flex items-start justify-between gap-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
                 <div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            person
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">PERSONAL</span>
+                    </div>
                     <div className="flex items-center gap-3">
-                        <Compass className="h-6 w-6 text-[#6366F1]" />
-                        <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">퍼스널</h1>
+                        <h1
+                            className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                        >
+                            퍼스널
+                        </h1>
                         {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     </div>
-                    <p className="text-sm text-neutral-500 mt-2">
+                    <p className="text-sm text-neutral-500 mt-1.5">
                         나는 누구인가. 나는 무엇을 도모(圖謀)하고 있는가.
                     </p>
                 </div>
