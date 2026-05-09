@@ -121,6 +121,27 @@
 
 ## 핵심 파일
 
+### IA SSOT — 5 Lane (세션 119~120)
+
+> 사용자 멘탈 모델은 **오늘 / 기록 / AI / 연결 / 도구** 5동사로 수렴 → Lane으로 표현.
+> PILLARS는 Lane "기록" 안의 9영역 그룹핑으로만 의미를 가짐 (사용자에게 직접 노출 X).
+
+| 파일 | 역할 |
+|------|------|
+| `lib/myverse/domains.ts` | LANES·LANE_PATHS·laneForPath SSOT (5 Lane: today/record/ai/connect/work) |
+| `features/myverse/planner/AppTopNav.tsx` | 1차 네비 (5 Lane + 커뮤니티 외부) — 데스크톱 탭 + 모바일 햄버거 (lane별 서브탭 펼침) |
+| `features/myverse/app/LaneSubNav.tsx` | 2차 네비 SSOT — `AI_LANE_TABS`·`CONNECT_LANE_TABS`·`WORK_LANE_TABS` |
+| `features/myverse/app/DomainBackLink.tsx` | 9영역 → traces 역방향 CTA — `?domain=` 필터로 복귀 |
+
+**Lane 별 서브탭:**
+- AI: 묻기·코치·일기 초안·인사이트·캡슐
+- 연결: 피드·DM·Verse·알림
+- 도구: 프로젝트·할 일·캔버스·템플릿·연락처·퍼스널
+
+**ask vs coach 구분 카피 (세션 120):**
+- ask = "내가 묻는 즉시 답하는 1:1 대화"
+- coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
+
 ### Phase 0 (완료)
 | 파일 | 역할 |
 |------|------|
@@ -165,7 +186,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 118 (2026-05-08)** — 올가미 선택·리사이즈 실시간·PP흔적·보안점검 |
+| **Phase** | **세션 120 (2026-05-09)** — IA 5-Lane 마무리 + 모바일 햄버거 서브탭 + 9영역↔traces 역방향 CTA |
+| **이전 Phase** | 세션 119 — IA 재구성 (4-Pillar mess → 5-Lane), LaneSubNav, traces ?domain= 딥링크 |
+| **Phase 118** | **세션 118 (2026-05-08)** — 올가미 선택·리사이즈 실시간·PP흔적·보안점검 |
 | **이전 Phase** | 세션 117 — Canvas Engine Phase 2 (image, export, 레이어, 텍스트 서식) / 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 |
 | **다음 Phase** | (1) `scripts/migrate-moments-bucket.js` 실행 (SUPABASE_SERVICE_ROLE_KEY 필요) · (2) Toss 가맹점 승인 + Vercel 환경변수 |
 | **세션 118 결정** | ① 올가미 선택(lasso): ray casting `pointInPolygon()`, SVG polyline 시각화 · ② resize 실시간: SVG DOM translate/scale/translate 직접 적용 · ③ PP 흔적 제거: CommunityView 텍스트, globals.css 죽은 블록, CanvasStudio div 클래스 · ④ 전체화면 노트 뷰: DailyView/ProjectNotesTab z-[9100] + 타입 배지 pill + 취소/저장 버튼 |
@@ -191,3 +214,7 @@
 - ❌ Supabase REST join hint를 옛 `planners_*_member_id_fkey` 이름으로 작성 (세션 111에서 모두 `myverse_*_member_id_fkey`로 RENAME 완료)
 - ❌ members 조회를 email만으로 (중복 row 시 잘못된 row 반환) — 반드시 `auth_id` 우선
 - ❌ middleware의 `/planners` redirect를 `startsWith('/planners')`로 (정적 자산 `/planners-sw.js`·`/planners-icon-*.png` 까지 잡힘) — 반드시 `=== '/planners'` 또는 `startsWith('/planners/')`
+- ❌ 1차 네비에 새 lane 추가 — 5 Lane SSOT(`LANES`)에 추가하고 `LANE_PATHS`에 prefix 등록할 것
+- ❌ 새 페이지가 lane 안에 있을 때 `LaneSubNav` 누락 — 사용자가 lane 안 서브탭 전환 못 함
+- ❌ 9영역 페이지에서 `DomainBackLink` 누락 — traces 회유 동선 끊김
+- ❌ 도구 lane을 드롭다운으로 만들기 — 서브메뉴 패턴(LaneSubNav)이 SSOT
