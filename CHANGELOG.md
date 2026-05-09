@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-05-09 — 세션 120 · Myverse IA 마무리 (모바일 햄버거 + 양방향 회유)
+
+### 장소
+집
+
+### 핵심 결정사항
+- 도구 lane은 드롭다운이 아니라 **서브메뉴**(LaneSubNav) — AI/연결과 동일 패턴
+- 모바일 햄버거에서 활성 lane 아래에 서브탭 들여쓰기 펼침 → 모바일에서도 도구 6종 즉시 접근
+- 9영역 → traces 회유: `DomainBackLink` 표준 컴포넌트 신설, 8개 영역 페이지 헤더에 적용
+- ask vs coach 카피 차별화: "묻는 즉시 답" vs "먼저 보내는 브리핑"
+
+### 변경 파일
+- `features/myverse/planner/AppTopNav.tsx` — 도구 일반 탭 복원 + 모바일 서브탭 펼침
+- `features/myverse/app/LaneSubNav.tsx` — `WORK_LANE_TABS` export 추가
+- `features/myverse/app/DomainBackLink.tsx` — 신규 (traces 역방향 CTA)
+- `features/myverse/app/AppTopNav.tsx` — 삭제 (중복 파일)
+- `app/(MyVerse)/myverse/app/{projects,canvas,tasks,templates,contacts,personal}/page.tsx` — `<LaneSubNav tabs={WORK_LANE_TABS}>` 임베드
+- `app/(MyVerse)/myverse/app/{body,study,lifestyle,schedule,travel,move,relation}/page.tsx` — `<DomainBackLink>` 헤더 적용
+- `features/myverse/planner/WorkView.tsx` — `<DomainBackLink domain="work">` 추가
+- `features/myverse/app/AskMyverseView.tsx` — ask 카피 보강
+- `app/(MyVerse)/myverse/app/coach/page.tsx` — coach 부제 추가
+- `app/(MyVerse)/CLAUDE.md` — IA SSOT 섹션 신설 + 금지 4항목 + 세션 120 상태
+
+### 커밋
+- `dcaea35d` 도구 lane 서브메뉴 패턴 + IA 5-Lane 마무리
+- `8521859b` 모바일 햄버거에 lane 서브탭 펼침 노출
+- `c8a1815b` 9영역 → traces 역방향 CTA (DomainBackLink)
+- `a2e7b91f` ask vs coach 차별화 부제
+- `f6013bf0` CLAUDE.md 5-Lane SSOT + 세션 120 반영
+
+### 다음 할 일
+- **GTM `TenOne_Tag` 트리거 교체** (사용자 직접): `All Pages` → `CE - page_view`로 변경 후 컨테이너 게시. 절차는 CLAUDE.md 부록 G.1.
+- **데스크톱 1406px 우측 영역 미렌더** 환경 이슈: 실서버 배포 후 재확인 (Bell·LayoutGrid·feed 링크 표시 여부)
+
+---
+
 ## 2026-05-08 — 세션 118 · 올가미 선택·리사이즈 실시간·PP흔적·보안점검
 
 ### 장소

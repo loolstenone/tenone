@@ -1,6 +1,65 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-08 (세션 118 — 캔버스 올가미 선택·리사이즈 실시간·PP흔적·보안점검)
+> 마지막 업데이트: 2026-05-09 (세션 120 — Myverse IA 마무리: 모바일 햄버거 서브탭 + 9영역↔traces 양방향)
+
+---
+
+## 세션 120 핵심 성과 (2026-05-09)
+
+### Myverse IA 5-Lane 정리 마감
+
+#### ✅ 완료
+
+1. **도구 lane 서브메뉴 패턴 (드롭다운 → 탭)**
+   - `LaneSubNav.tsx`: `WORK_LANE_TABS` 추가 (프로젝트·할 일·캔버스·템플릿·연락처·퍼스널)
+   - 6개 도구 페이지에 `<LaneSubNav>` 임베드
+   - `planner/AppTopNav.tsx`: 드롭다운 제거, 도구를 일반 탭으로 복원
+   - `features/myverse/app/AppTopNav.tsx` (중복 파일) 삭제
+
+2. **모바일 햄버거 lane 서브탭 펼침**
+   - 활성 lane(AI/연결/도구) 아래에 서브탭 들여쓰기 렌더
+   - `SUB_TABS` 매핑 + LaneSubNav 정의 재사용
+
+3. **9영역 → traces 역방향 CTA**
+   - `features/myverse/app/DomainBackLink.tsx` 신규 — `?domain=` 필터로 traces 복귀
+   - body·work·study·daily(lifestyle)·schedule·travel·move·relation 8개 페이지 헤더에 적용
+   - WorkView도 적용 (work는 컴포넌트 안에 헤더 있음)
+
+4. **ask vs coach 차별화 카피**
+   - ask: "내가 묻는 즉시 답하는 1:1 대화 — 흔적·일정·기록을 한 줄 질문으로"
+   - coach: "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
+
+5. **Myverse 브랜드 CLAUDE.md 갱신**
+   - IA SSOT 섹션 신설 (LANES·LANE_PATHS·LaneSubNav·DomainBackLink)
+   - 절대 하지 말 것 4항목 추가 (lane 무단 추가, LaneSubNav 누락, DomainBackLink 누락, 도구 드롭다운)
+   - 현재 상태 세션 120으로 갱신
+
+#### 처리 보류
+
+- **/myverse/app/index 라우트 제거**: 11개 파일이 별칭 참조 — ClientRedirect 유지가 합리적
+- **데스크톱 우측 영역 미렌더 (1406px)**: 환경 이슈, 실서버 재확인 필요
+- **GTM `TenOne_Tag` 트리거 교체**: 사용자 직접 작업 (CLAUDE.md 부록 G.1)
+
+---
+
+## 세션 119 핵심 성과 (2026-05-09)
+
+### Myverse IA 재구성 — 4-Pillar 혼란 → 5-Lane
+
+#### ✅ 완료
+
+1. **5-Lane SSOT 도입**
+   - `lib/myverse/domains.ts`: `LANES`·`LANE_PATHS`·`laneForPath()` 추가
+   - 5 동사 멘탈 모델: 오늘 / 기록 / AI / 연결 / 도구
+
+2. **2차 네비 LaneSubNav**
+   - `AI_LANE_TABS` (묻기·코치·일기·인사이트·캡슐)
+   - `CONNECT_LANE_TABS` (피드·DM·Verse·알림)
+   - 9개 lane 페이지에 임베드
+
+3. **today 정규 홈 + index 별칭 redirect**
+4. **traces ?domain·?person·?q·?period 딥링크 + Suspense wrap**
+5. **TracesTimelineView "도메인 깊이 보기" 링크**
 
 ---
 
