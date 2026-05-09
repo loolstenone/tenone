@@ -175,12 +175,17 @@ export function DMView({ initialMemberId, initialThreadId }: { initialMemberId?:
     }, [messages.length]);
 
     return (
-        <div className="flex h-[calc(100vh-3rem)] bg-white">
+        <div className="flex h-[calc(100vh-3rem)] bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             {/* 좌측 — 스레드 목록 */}
             <aside className={`${activeId ? "hidden md:flex" : "flex"} flex-col w-full md:w-72 border-r border-neutral-200 shrink-0`}>
                 <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
-                    <h1 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
-                        <MessageCircle className="h-4 w-4 text-indigo-500" />
+                    <h1
+                        className="text-base font-medium text-neutral-900 flex items-center gap-1.5 tracking-tight"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                    >
+                        <span className="material-symbols-outlined text-[18px]" style={{ color: "#6366F1", fontVariationSettings: "'FILL' 1" }}>
+                            chat
+                        </span>
                         메시지
                     </h1>
                     <button onClick={() => setSearchOpen(v => !v)}
