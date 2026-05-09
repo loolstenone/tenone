@@ -3,34 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-    LayoutGrid, Sun, FolderKanban, User, Sparkles, Wrench,
-    CalendarDays, Calendar, CalendarRange, Users, Search, Settings,
-} from "lucide-react";
 
 export const MOBILE_NAV_STORAGE_KEY = "myverse-mobile-nav";
 const LEGACY_NAV_STORAGE_KEY = "planners-mobile-nav";
-// 5 lane SSOT 기반 모바일 하단 네비 (세션 121 — 도구 lane 포함, 검색은 헤더로)
+// 5 lane SSOT 기반 모바일 하단 네비 (세션 122 — Material Symbols 전환)
 export const MOBILE_NAV_DEFAULT: string[] = ["today", "record", "ai", "connect", "work"];
 
+// icon = Material Symbol 이름 (font ligature)
 export const ALL_NAV_OPTIONS = [
     // ── 5 Lane (1차 SSOT)
-    { id: "today",    label: "오늘",     icon: Sun,           href: "/myverse/app/today" },
-    { id: "record",   label: "기록",     icon: LayoutGrid,    href: "/myverse/app/traces" },
-    { id: "ai",       label: "AI",       icon: Sparkles,      href: "/myverse/app/ask" },
-    { id: "connect",  label: "연결",     icon: Users,         href: "/myverse/app/feed" },
-    { id: "work",     label: "도구",     icon: Wrench,        href: "/myverse/app/projects" },
+    { id: "today",    label: "오늘",     icon: "wb_twilight",    href: "/myverse/app/today" },
+    { id: "record",   label: "기록",     icon: "photo_library",  href: "/myverse/app/traces" },
+    { id: "ai",       label: "AI",       icon: "auto_awesome",   href: "/myverse/app/ask" },
+    { id: "connect",  label: "연결",     icon: "link",           href: "/myverse/app/feed" },
+    { id: "work",     label: "도구",     icon: "architecture",   href: "/myverse/app/projects" },
     // ── 도구 lane 직접 진입 (커스터마이즈용)
-    { id: "projects", label: "프로젝트", icon: FolderKanban,  href: "/myverse/app/projects" },
-    { id: "identity", label: "퍼스널",   icon: User,          href: "/myverse/app/personal" },
-    { id: "contacts", label: "연락처",   icon: Calendar,      href: "/myverse/app/contacts" },
+    { id: "projects", label: "프로젝트", icon: "folder_managed", href: "/myverse/app/projects" },
+    { id: "identity", label: "퍼스널",   icon: "person",         href: "/myverse/app/personal" },
+    { id: "contacts", label: "연락처",   icon: "contacts",       href: "/myverse/app/contacts" },
     // ── 시간 줌 (도구)
-    { id: "weekly",   label: "주간",     icon: CalendarDays,  href: "/myverse/app/weekly" },
-    { id: "monthly",  label: "월간",     icon: Calendar,      href: "/myverse/app/monthly" },
-    { id: "yearly",   label: "연간",     icon: CalendarRange, href: "/myverse/app/yearly" },
+    { id: "weekly",   label: "주간",     icon: "calendar_view_week",  href: "/myverse/app/weekly" },
+    { id: "monthly",  label: "월간",     icon: "calendar_month",      href: "/myverse/app/monthly" },
+    { id: "yearly",   label: "연간",     icon: "event_note",          href: "/myverse/app/yearly" },
     // ── 시스템
-    { id: "search",   label: "검색",     icon: Search,        href: "/myverse/app/search" },
-    { id: "settings", label: "설정",     icon: Settings,      href: "/myverse/app/settings" },
+    { id: "search",   label: "검색",     icon: "search",         href: "/myverse/app/search" },
+    { id: "settings", label: "설정",     icon: "tune",           href: "/myverse/app/settings" },
 ] as const;
 
 export type NavOptionId = typeof ALL_NAV_OPTIONS[number]["id"];
@@ -83,7 +80,6 @@ export function MobileBottomNav() {
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[8900] bg-white myverse-dark:bg-[#161616] border-t border-neutral-200 myverse-dark:border-[#2A2A2A] safe-area-inset-bottom">
             <div className="flex items-stretch h-14">
                 {navItems.map((item) => {
-                    const Icon = item.icon;
                     const isActive =
                         pathname === item.href ||
                         pathname.startsWith(item.href + "/") ||
@@ -106,7 +102,12 @@ export function MobileBottomNav() {
                             }`}
                             style={isActive ? { color: "var(--planners-accent-nav)" } : undefined}
                         >
-                            <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
+                            <span
+                                className="material-symbols-outlined text-[22px] leading-none"
+                                style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                            >
+                                {item.icon}
+                            </span>
                             <span className="text-[9px] font-medium leading-none tracking-tight">{item.label}</span>
                         </Link>
                     );
