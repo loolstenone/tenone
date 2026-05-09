@@ -5,6 +5,7 @@ import { Loader2, Coffee, Plus, X, Smile, Frown, Meh, SmilePlus, Angry, Image as
 import { createClient } from "@/lib/supabase/client";
 import { CoachInsightCard } from "@/features/myverse/app/CoachInsightCard";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 type Mood = 1 | 2 | 3 | 4 | 5;
 
@@ -91,25 +92,24 @@ export default function LifestylePage() {
     const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
     return (
-        <div>
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="daily" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <Coffee className="h-3 w-3 text-amber-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-amber-500">Daily</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">일상</h1>
-                        <p className="text-xs text-neutral-500 mt-1">일기·기분·자유 기록</p>
-                    </div>
-                    <button
-                        onClick={() => setAddOpen(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-amber-500 text-white hover:bg-amber-600 rounded-lg"
-                    >
-                        <Plus className="h-3.5 w-3.5" /> 기록
-                    </button>
-                </div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="coffee"
+                    label="DAILY"
+                    title="일상"
+                    subtitle="일기·기분·자유 기록"
+                    accent="#F59E0B"
+                    backLink={<DomainBackLink domain="daily" />}
+                    actions={
+                        <button
+                            onClick={() => setAddOpen(true)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-amber-500 text-white hover:bg-amber-600 rounded-lg"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> 기록
+                        </button>
+                    }
+                />
             </header>
 
             <div className="p-4">

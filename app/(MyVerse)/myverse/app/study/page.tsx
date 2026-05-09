@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Loader2, BookOpen, Plus, X, Play, Square, Clock, Target, Flame, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface StudySession {
     id: string;
@@ -125,23 +126,22 @@ export default function StudyPage() {
     })();
 
     return (
-        <div>
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="study" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <BookOpen className="h-3 w-3 text-purple-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-purple-500">Study</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">공부</h1>
-                        <p className="text-xs text-neutral-500 mt-1">강의·필기·자기학습</p>
-                    </div>
-                    <button onClick={() => setAddOpen(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-500 text-white hover:bg-purple-600 rounded-lg">
-                        <Plus className="h-3.5 w-3.5" /> 직접 입력
-                    </button>
-                </div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="auto_stories"
+                    label="STUDY"
+                    title="공부"
+                    subtitle="강의·필기·자기학습"
+                    accent="#A855F7"
+                    backLink={<DomainBackLink domain="study" />}
+                    actions={
+                        <button onClick={() => setAddOpen(true)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-500 text-white hover:bg-purple-600 rounded-lg">
+                            <Plus className="h-3.5 w-3.5" /> 직접 입력
+                        </button>
+                    }
+                />
             </header>
 
             {/* 통계 카드 */}

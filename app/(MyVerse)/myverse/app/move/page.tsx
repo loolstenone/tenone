@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Navigation, Plus, X, MapPin, Train, Car, Bus, Bike, Footprints, Plane } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface MoveEntry {
     id: string;
@@ -93,25 +94,24 @@ export default function MovePage() {
     const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
     return (
-        <div>
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="move" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <Navigation className="h-3 w-3 text-gray-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-gray-500">Move</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">이동</h1>
-                        <p className="text-xs text-neutral-500 mt-1">동선·체크인·이동 기록</p>
-                    </div>
-                    <button
-                        onClick={() => setAddOpen(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg"
-                    >
-                        <Plus className="h-3.5 w-3.5" /> 체크인
-                    </button>
-                </div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="navigation"
+                    label="MOVE"
+                    title="이동"
+                    subtitle="동선·체크인·이동 기록"
+                    accent="#6B7280"
+                    backLink={<DomainBackLink domain="move" />}
+                    actions={
+                        <button
+                            onClick={() => setAddOpen(true)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> 체크인
+                        </button>
+                    }
+                />
             </header>
 
             {/* Stats */}

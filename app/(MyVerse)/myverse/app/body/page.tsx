@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Heart, Flame, Moon, Apple, Upload, TrendingUp, Plus, X, Dumbbell, UtensilsCrossed, BedDouble } from "lucide-react";
 import type { BodyStats } from "@/lib/myverse/body/stats";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 type Tab = "workout" | "meal" | "sleep";
 
@@ -82,38 +83,37 @@ export default function BodyPage() {
     }
 
     return (
-        <div className="relative">
-            {/* 헤더 */}
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="body" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <Heart className="h-3 w-3 text-emerald-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-emerald-500">Body</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">BODY</h1>
-                        <p className="text-xs text-neutral-500 mt-1">운동·식사·수면 — 몸의 흔적</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => fileRef.current?.click()}
-                            disabled={importing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-100 text-neutral-700 hover:bg-neutral-200 rounded-lg disabled:opacity-50"
-                        >
-                            {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                            {importing ? "가져오는 중…" : "Apple Health"}
-                        </button>
-                        <button
-                            onClick={() => openAdd(tab)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg"
-                        >
-                            <Plus className="h-3.5 w-3.5" /> 기록 추가
-                        </button>
-                    </div>
-                    <input ref={fileRef} type="file" accept=".xml,.zip" className="hidden"
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) importApple(f); e.target.value = ""; }} />
-                </div>
+        <div className="relative" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            {/* 헤더 — Stitch 정렬 + 도메인 컬러 (세션 122) */}
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="favorite"
+                    label="BODY"
+                    title="BODY"
+                    subtitle="운동·식사·수면 — 몸의 흔적"
+                    accent="#10B981"
+                    backLink={<DomainBackLink domain="body" />}
+                    actions={
+                        <>
+                            <button
+                                onClick={() => fileRef.current?.click()}
+                                disabled={importing}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-100 text-neutral-700 hover:bg-neutral-200 rounded-lg disabled:opacity-50"
+                            >
+                                {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                                {importing ? "가져오는 중…" : "Apple Health"}
+                            </button>
+                            <button
+                                onClick={() => openAdd(tab)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg"
+                            >
+                                <Plus className="h-3.5 w-3.5" /> 기록 추가
+                            </button>
+                        </>
+                    }
+                />
+                <input ref={fileRef} type="file" accept=".xml,.zip" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) importApple(f); e.target.value = ""; }} />
                 {importResult && (
                     <div className="mt-3 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded text-[11px] text-emerald-700">
                         가져옴 {importResult.inserted}건 · 건너뜀 {importResult.skipped}건

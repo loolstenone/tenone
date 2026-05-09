@@ -10,7 +10,7 @@
 
 import type { ReactNode } from "react";
 
-const ACCENT = "#6366F1";
+const DEFAULT_ACCENT = "#6366F1";
 
 export function LaneHeader({
     icon,
@@ -18,17 +18,23 @@ export function LaneHeader({
     title,
     subtitle,
     actions,
+    accent,
+    backLink,
 }: {
     icon: string;            // Material Symbol 이름 (auto_awesome, photo_library 등)
     label: string;            // "ASK MYVERSE", "TRACES" 등
     title: string;            // "흔적", "AI 코치" 등
     subtitle?: string;        // 부제
     actions?: ReactNode;      // 우측 버튼 슬롯
+    accent?: string;          // 라벨/아이콘 컬러 (9영역 등 — 기본 인디고)
+    backLink?: ReactNode;      // h1 위에 뒤로가기 링크 (DomainBackLink 등)
 }) {
+    const color = accent ?? DEFAULT_ACCENT;
     return (
         <div className="mb-6 flex items-start justify-between gap-3">
             <div>
-                <div className="flex items-center gap-2 mb-2" style={{ color: ACCENT }}>
+                {backLink && <div className="mb-2">{backLink}</div>}
+                <div className="flex items-center gap-2 mb-2" style={{ color }}>
                     <span
                         className="material-symbols-outlined text-base"
                         style={{ fontVariationSettings: "'FILL' 1" }}

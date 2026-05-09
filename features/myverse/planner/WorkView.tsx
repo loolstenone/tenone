@@ -7,6 +7,7 @@ import {
     CheckCircle2, Circle, Ban, LayoutGrid,
 } from "lucide-react";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 // ─── 타입 ──────────────────────────────────────────────
 type Quadrant = "급중" | "급경" | "완중" | "완경";
@@ -542,26 +543,27 @@ export function WorkView() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6">
-            {/* 헤더 */}
-            <div className="mb-2"><DomainBackLink domain="work" /></div>
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-[#3B82F6]" />
-                    <h1 className="font-serif text-2xl text-neutral-900">일정 업무</h1>
-                    <span className="text-xs text-neutral-400 mt-0.5">{works.filter(w => w.status === "active").length}건 진행 중</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setShowDone(v => !v)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${showDone ? "bg-neutral-100 border-neutral-300 text-neutral-700" : "border-neutral-200 text-neutral-500 hover:border-neutral-300"}`}>
-                        {showDone ? "완료 숨기기" : "완료 보기"}
-                    </button>
-                    <button onClick={() => setAddingWork(true)}
-                        className="flex items-center gap-1.5 text-xs bg-[#3B82F6] text-white rounded-lg px-3 py-1.5 hover:bg-blue-600 transition-colors">
-                        <Plus className="h-3.5 w-3.5" /> 업무 추가
-                    </button>
-                </div>
-            </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="work"
+                label="WORK"
+                title="일정 업무"
+                subtitle={`${works.filter(w => w.status === "active").length}건 진행 중`}
+                accent="#3B82F6"
+                backLink={<DomainBackLink domain="work" />}
+                actions={
+                    <>
+                        <button onClick={() => setShowDone(v => !v)}
+                            className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${showDone ? "bg-neutral-100 border-neutral-300 text-neutral-700" : "border-neutral-200 text-neutral-500 hover:border-neutral-300"}`}>
+                            {showDone ? "완료 숨기기" : "완료 보기"}
+                        </button>
+                        <button onClick={() => setAddingWork(true)}
+                            className="flex items-center gap-1.5 text-xs bg-[#3B82F6] text-white rounded-lg px-3 py-1.5 hover:bg-blue-600 transition-colors">
+                            <Plus className="h-3.5 w-3.5" /> 업무 추가
+                        </button>
+                    </>
+                }
+            />
 
             {addingWork && (
                 <div className="mb-6">

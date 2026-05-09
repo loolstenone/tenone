@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Plane, Plus, X, MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface TravelEntry {
     id: string;
@@ -74,25 +75,24 @@ export default function TravelPage() {
     const totalCities = new Set(items.map(it => (it.body_data as Record<string, unknown> | null)?.destination as string | undefined).filter(Boolean)).size;
 
     return (
-        <div>
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="travel" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <Plane className="h-3 w-3 text-pink-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-pink-500">Travel</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">여행</h1>
-                        <p className="text-xs text-neutral-500 mt-1">떠났던 모든 여행의 기록</p>
-                    </div>
-                    <button
-                        onClick={() => setAddOpen(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-pink-500 text-white hover:bg-pink-600 rounded-lg"
-                    >
-                        <Plus className="h-3.5 w-3.5" /> 여행 추가
-                    </button>
-                </div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="flight"
+                    label="TRAVEL"
+                    title="여행"
+                    subtitle="떠났던 모든 여행의 기록"
+                    accent="#EC4899"
+                    backLink={<DomainBackLink domain="travel" />}
+                    actions={
+                        <button
+                            onClick={() => setAddOpen(true)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-pink-500 text-white hover:bg-pink-600 rounded-lg"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> 여행 추가
+                        </button>
+                    }
+                />
             </header>
 
             {/* Stats */}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Users, Plus, X, User, Phone, Mail, Tag, Search, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface Contact {
     id: string;
@@ -82,30 +83,29 @@ export default function RelationPage() {
     function openAdd(kind: "contact" | "meeting") { setAddKind(kind); setAddOpen(true); }
 
     return (
-        <div>
-            <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <DomainBackLink domain="relation" />
-                        <div className="flex items-center gap-2 mb-1 mt-2">
-                            <Users className="h-3 w-3 text-red-500" />
-                            <span className="text-[10px] uppercase tracking-widest text-red-500">Relation</span>
-                        </div>
-                        <h1 className="text-2xl font-serif text-neutral-900">관계</h1>
-                        <p className="text-xs text-neutral-500 mt-1">사람과의 만남 기록</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={() => openAdd("meeting")} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-lg">
-                            <MessageSquare className="h-3.5 w-3.5" /> 만남 기록
-                        </button>
-                        <button onClick={() => openAdd("contact")} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white hover:bg-red-600 rounded-lg">
-                            <Plus className="h-3.5 w-3.5" /> 연락처
-                        </button>
-                    </div>
-                </div>
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+                <LaneHeader
+                    icon="diversity_3"
+                    label="RELATION"
+                    title="관계"
+                    subtitle="사람과의 만남 기록"
+                    accent="#EF4444"
+                    backLink={<DomainBackLink domain="relation" />}
+                    actions={
+                        <>
+                            <button onClick={() => openAdd("meeting")} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-lg">
+                                <MessageSquare className="h-3.5 w-3.5" /> 만남 기록
+                            </button>
+                            <button onClick={() => openAdd("contact")} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white hover:bg-red-600 rounded-lg">
+                                <Plus className="h-3.5 w-3.5" /> 연락처
+                            </button>
+                        </>
+                    }
+                />
 
                 {/* 탭 */}
-                <div className="flex gap-1 mt-4 border-b border-neutral-200 -mx-6 px-6">
+                <div className="flex gap-1 mt-4 border-b border-neutral-200 -mx-5 px-5 sm:-mx-10 sm:px-10">
                     {([
                         { key: "contacts", label: `연락처 ${contacts.length}` },
                         { key: "meetings", label: `만남 기록 ${meetings.length}` },
