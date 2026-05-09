@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Eye, X, Check } from "lucide-react";
 import { SettingsLivePreview } from "./SettingsLivePreview";
+import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 export const SETTINGS_TABS = [
     { key: "start",    label: "시작",          href: "/myverse/app/settings/start" },
@@ -36,7 +37,13 @@ export function SettingsLayout({ children, toast }: Props) {
     }, [previewOpen]);
 
     return (
-        <div className="pp-settings max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
+        <div className="pp-settings max-w-7xl mx-auto px-5 md:px-6 lg:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <LaneHeader
+                icon="tune"
+                label="SETTINGS"
+                title="설정"
+                subtitle="모드·스타일·기능·기술·백업·사생활을 한 곳에서 관리합니다"
+            />
 
             {/* ── 탭 nav ── */}
             <nav
