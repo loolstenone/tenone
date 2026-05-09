@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Loader2, Coffee, Plus, X, Smile, Frown, Meh, SmilePlus, Angry, Image as ImageIcon, Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { CoachInsightCard } from "@/features/myverse/app/CoachInsightCard";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 type Mood = 1 | 2 | 3 | 4 | 5;
 
@@ -94,7 +95,8 @@ export default function LifestylePage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="daily" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <Coffee className="h-3 w-3 text-amber-500" />
                             <span className="text-[10px] uppercase tracking-widest text-amber-500">Daily</span>
                         </div>

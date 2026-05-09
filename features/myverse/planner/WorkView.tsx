@@ -6,6 +6,7 @@ import {
     Clock, User, AlignLeft, Pencil, Trash2, MoveRight,
     CheckCircle2, Circle, Ban, LayoutGrid,
 } from "lucide-react";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 // ─── 타입 ──────────────────────────────────────────────
 type Quadrant = "급중" | "급경" | "완중" | "완경";
@@ -543,6 +544,7 @@ export function WorkView() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
             {/* 헤더 */}
+            <div className="mb-2"><DomainBackLink domain="work" /></div>
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <Briefcase className="h-5 w-5 text-[#3B82F6]" />

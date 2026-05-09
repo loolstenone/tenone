@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Heart, Flame, Moon, Apple, Upload, TrendingUp, Plus, X, Dumbbell, UtensilsCrossed, BedDouble } from "lucide-react";
 import type { BodyStats } from "@/lib/myverse/body/stats";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 type Tab = "workout" | "meal" | "sleep";
 
@@ -86,7 +87,8 @@ export default function BodyPage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="body" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <Heart className="h-3 w-3 text-emerald-500" />
                             <span className="text-[10px] uppercase tracking-widest text-emerald-500">Body</span>
                         </div>

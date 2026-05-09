@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Users, Plus, X, User, Phone, Mail, Tag, Search, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 interface Contact {
     id: string;
@@ -85,7 +86,8 @@ export default function RelationPage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="relation" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <Users className="h-3 w-3 text-red-500" />
                             <span className="text-[10px] uppercase tracking-widest text-red-500">Relation</span>
                         </div>

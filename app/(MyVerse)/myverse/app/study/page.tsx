@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Loader2, BookOpen, Plus, X, Play, Square, Clock, Target, Flame, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 interface StudySession {
     id: string;
@@ -128,7 +129,8 @@ export default function StudyPage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="study" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <BookOpen className="h-3 w-3 text-purple-500" />
                             <span className="text-[10px] uppercase tracking-widest text-purple-500">Study</span>
                         </div>

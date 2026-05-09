@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Navigation, Plus, X, MapPin, Train, Car, Bus, Bike, Footprints, Plane } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 interface MoveEntry {
     id: string;
@@ -96,7 +97,8 @@ export default function MovePage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="move" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <Navigation className="h-3 w-3 text-gray-500" />
                             <span className="text-[10px] uppercase tracking-widest text-gray-500">Move</span>
                         </div>

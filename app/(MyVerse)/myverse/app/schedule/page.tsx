@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Calendar, Plus, X, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 
 interface CalEvent {
     id: string;
@@ -95,7 +96,8 @@ export default function SchedulePage() {
             <header className="px-6 pt-6 pb-4 border-b border-neutral-200 bg-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <DomainBackLink domain="schedule" />
+                        <div className="flex items-center gap-2 mb-1 mt-2">
                             <Calendar className="h-3 w-3 text-teal-600" />
                             <span className="text-[10px] uppercase tracking-widest text-teal-600">Schedule</span>
                         </div>
