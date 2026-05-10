@@ -38,7 +38,7 @@ function MonthBarInner() {
     }
 
     return (
-        <nav className="hidden md:flex w-10 shrink-0 flex-col items-center py-3 gap-0.5 sticky top-12 h-[calc(100vh-3rem)] border-l border-neutral-100 bg-white overflow-y-auto">
+        <nav className="hidden md:flex fixed top-12 right-0 bottom-0 w-10 z-30 flex-col items-center py-3 gap-0.5 border-l border-neutral-100 myverse-dark:border-white/8 bg-white myverse-dark:bg-[#0D0D15] overflow-y-auto">
             <span className="text-[9px] font-mono text-neutral-300 mb-1 tracking-tight">{activeYear}</span>
             {MONTHS.map((label, idx) => {
                 const month = idx + 1;

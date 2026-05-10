@@ -40,14 +40,7 @@ const NAV: NavSection[] = [
                     { key: "insights", label: "인사이트", icon: "insights",  href: `${BASE}/insights` },
                 ],
             },
-            {
-                label: "MUKKI",
-                items: [
-                    { key: "ask",   label: "무끼", icon: "auto_awesome", href: `${BASE}/ask` },
-                    { key: "diary", label: "일기", icon: "edit_note",    href: `${BASE}/diary` },
-                    { key: "coach", label: "코치", icon: "psychology",   href: `${BASE}/coach` },
-                ],
-            },
+            // MUKKI(무끼/일기/코치) — 사이드바 제거. 우측 하단 플로팅 AI 버튼으로 통합.
         ],
     },
     {
@@ -73,7 +66,7 @@ export function AppSideNav() {
     const pathname = usePathname();
 
     return (
-        <aside className="hidden md:flex w-52 shrink-0 bg-white myverse-dark:bg-[#0D0D15] border-r border-neutral-200 myverse-dark:border-white/8 flex-col h-[calc(100vh-3rem)] sticky top-12 overflow-hidden">
+        <aside className="hidden md:flex fixed top-12 left-0 bottom-0 w-52 z-30 bg-white myverse-dark:bg-[#0D0D15] border-r border-neutral-200 myverse-dark:border-white/8 flex-col overflow-hidden">
             <nav className="flex-1 overflow-y-auto px-2 py-3 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
                 {NAV.map((section, si) => (
                     <div key={section.section} className={si > 0 ? "mt-1 pt-3 border-t border-neutral-100 myverse-dark:border-white/8" : ""}>
@@ -121,8 +114,8 @@ export function AppSideNav() {
                 ))}
             </nav>
 
-            {/* Footer utility */}
-            <div className="px-2 pb-3 pt-2 border-t border-neutral-100 myverse-dark:border-white/8 space-y-0.5">
+            {/* Footer utility — mt-auto로 항상 하단 고정 (nav가 짧을 때 떠 있는 현상 방지) */}
+            <div className="mt-auto px-2 pb-3 pt-2 border-t border-neutral-100 myverse-dark:border-white/8 space-y-0.5">
                 <Link
                     href="/myverse/app/settings"
                     className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${

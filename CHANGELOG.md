@@ -4,6 +4,53 @@
 
 ---
 
+## 2026-05-11 — 세션 125 · Myverse 무끼 플로팅 + SNS 포스팅 + 카드 분리 + 레이아웃 fixed
+
+### 장소
+집
+
+### 무끼 플로팅 통합
+- 사이드바 MUKKI 그룹 제거 → 신규 `MukkiFab.tsx` 우측 하단 그라디언트 FAB
+- 모드 탭 [무끼/일기/코치] + 채팅 인터페이스 (대화는 state-only, 저장 X)
+- 신규 `/api/myverse/mukki/intent` — 한국어 정규식 파서 + 캘린더 자동 생성
+
+### SNS 포스팅 시스템
+- DB 마이그레이션: `myverse_daily_moments`에 `body TEXT` + `media_type='text'` + `media_url` nullable
+- 신규 `SnsPostComposer.tsx` — 자유 글/사진/영상 멀티 + 피드 공개 토글
+- `<ShareButton>` Web Share API + clipboard fallback
+- 메타(장소·시간·함께·카테고리) 입력 시 places/routines 미러 INSERT
+
+### 카드 분리 + 흔적 통합
+- DailyView 3 카드 분리: `TodaySceneCard` + `DailyPlacesCard` + `DailyRoutinesCard`
+- 신규 `/api/myverse/traces` — moments + places + routines UNION
+
+### 레이아웃 fixed 전환
+- TopNav `fixed top-0 z-40` / SideNav `fixed top-12 left-0 bottom-0 z-30` / MonthBar `fixed top-12 right-0 bottom-0 z-30`
+- main `pt-12 md:ml-52 md:mr-10`
+
+### UX 개선
+- 코넬 제목 Enter → 첫 단서 자동 포커스
+- "단서·키워드" → "제목, 단서, 키워드", "한 줄" → "요약"
+- 사이드바 footer `mt-auto` — 부동 현상 수정
+- 오늘의 한 장면 중복 헤더 제거 (compact prop)
+- 텍스트 카드 배지 충돌 해소 — POST 좌상, 🌐 좌하, 액션 우상
+- 텍스트 카드 가독성 강화 (font-medium, neutral-50, pt-8)
+
+### 용어 정리
+- "내 Verse" 폐기 → "내 페이지" / "피드에 공개하기"
+
+### 템플릿 그리드 반응형
+- aspect-square 제거, grid-cols-1 sm:grid-cols-2, max-w-3xl/2xl
+
+### 변경 파일
+- 신규: `features/myverse/app/MukkiFab.tsx` · `features/myverse/planner/SnsPostComposer.tsx` · `app/api/myverse/mukki/intent/route.ts` · `app/api/myverse/traces/route.ts` · `sql/myverse-moments-text-posts.sql`
+- 수정: `features/myverse/app/AppSideNav.tsx` · `features/myverse/app/TracesTimelineView.tsx` · `features/myverse/planner/AppTopNav.tsx` · `features/myverse/planner/AppMonthBar.tsx` · `features/myverse/planner/DailyView.tsx` · `features/myverse/planner/DailyMoments.tsx` · `features/myverse/planner/template-grids/{_shared,quadrants,empathy}.tsx` · `app/(Myverse)/myverse/app/layout.tsx` · `app/(Myverse)/myverse/app/{daily,weekly,monthly,yearly}/page.tsx` · `app/api/myverse/moments/route.ts`
+
+### DB 마이그레이션
+- `sql/myverse-moments-text-posts.sql` — Prod 적용 완료 (HTTP 201)
+
+---
+
 ## 2026-05-11 — 세션 124 · Myverse IA 재구성 + 명함 + 노트/캔버스 미리보기 + 캔버스 저장 버그
 
 ### 장소

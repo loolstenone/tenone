@@ -131,7 +131,7 @@ export function AppTopNav({
     )?.label ?? "";
 
     return (
-        <header className="sticky top-0 z-40 bg-white myverse-dark:bg-[#0D0D15] border-b border-neutral-200 myverse-dark:border-white/8 flex items-center h-12 px-3 gap-2 shrink-0">
+        <header className="fixed top-0 left-0 right-0 z-40 bg-white myverse-dark:bg-[#0D0D15] border-b border-neutral-200 myverse-dark:border-white/8 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand */}
             <Link href="/myverse/app/daily" className="flex items-center gap-1.5 mr-1 shrink-0">
                 <Image src="/Myverse_logo_black.png" alt="Myverse" width={24} height={24} className="shrink-0" />

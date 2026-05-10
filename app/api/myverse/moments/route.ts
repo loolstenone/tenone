@@ -31,13 +31,22 @@ export async function POST(req: Request) {
     const body = await req.json();
     const {
         date, media_type, media_url, thumbnail_url,
-        caption, happened_at, with_whom, location, activity,
+        caption, body: postBody, happened_at, with_whom, location, activity,
         width, height, duration_sec, file_size, nutrition, exercise, leisure, study,
+        visibility,
     } = body as Record<string, unknown>;
 
     if (!date || typeof date !== "string") return NextResponse.json({ error: "missing_date" }, { status: 400 });
-    if (media_type !== "image" && media_type !== "video") return NextResponse.json({ error: "invalid_media_type" }, { status: 400 });
-    if (!media_url || typeof media_url !== "string") return NextResponse.json({ error: "missing_media_url" }, { status: 400 });
+    if (media_type !== "image" && media_type !== "video" && media_type !== "text") return NextResponse.json({ error: "invalid_media_type" }, { status: 400 });
+    if (media_type === "image" || media_type === "video") {
+        if (!media_url || typeof media_url !== "string") return NextResponse.json({ error: "missing_media_url" }, { status: 400 });
+    }
+    if (media_type === "text") {
+        const hasContent = (typeof postBody === "string" && postBody.trim().length > 0)
+            || (typeof caption === "string" && caption.trim().length > 0);
+        if (!hasContent) return NextResponse.json({ error: "missing_text_content" }, { status: 400 });
+    }
+    const vis = visibility === "public" ? "public" : "private";
 
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -46,9 +55,10 @@ export async function POST(req: Request) {
             member_id: memberId,
             date,
             media_type,
-            media_url,
+            media_url:   media_type === "text" ? null : (media_url as string),
             thumbnail_url: typeof thumbnail_url === "string" ? thumbnail_url : null,
             caption: typeof caption === "string" ? caption.slice(0, 500) : null,
+            body:    typeof postBody === "string" ? postBody.slice(0, 4000) : null,
             happened_at: typeof happened_at === "string" ? happened_at : null,
             with_whom: typeof with_whom === "string" ? with_whom.slice(0, 200) : null,
             location:  typeof location  === "string" ? location.slice(0, 200) : null,
@@ -61,7 +71,7 @@ export async function POST(req: Request) {
             exercise:     exercise  != null ? exercise  : null,
             leisure:      leisure   != null ? leisure   : null,
             study:        study     != null ? study     : null,
-            visibility:   "private",  // 기본 비공개 — 사용자가 흔적 모달에서 명시적으로 공개 선택해야 함
+            visibility:   vis,
         })
         .select()
         .single();

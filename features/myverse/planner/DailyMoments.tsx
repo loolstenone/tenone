@@ -11,7 +11,9 @@ import { ConfirmSheet } from "./ConfirmSheet";
 interface Moment {
     id: string;
     date: string;
-    media_type: "image" | "video";
+    media_type: "image" | "video" | "text";
+    body?: string | null;
+    visibility?: "public" | "private" | null;
     media_url: string;
     thumbnail_url: string | null;
     caption: string | null;
@@ -341,17 +343,25 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
 
 function MomentCard({ m, onEdit, onDelete }: { m: Moment; onEdit: () => void; onDelete: () => void }) {
     const meta = [m.with_whom, m.location, m.activity].filter(Boolean).join(" · ");
+    const isPublic = m.visibility === "public";
     return (
         <div className="group relative rounded-lg overflow-hidden bg-neutral-100">
-            <div className="aspect-square">
-                {m.media_type === "image" ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={m.media_url} alt={m.caption || ""} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                    <video src={m.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
-                )}
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between">
+            {m.media_type === "text" ? (
+                <div className="aspect-square px-3.5 pt-8 pb-7 flex flex-col bg-gradient-to-br from-violet-50 via-white to-indigo-50 myverse-dark:from-violet-500/15 myverse-dark:via-neutral-900 myverse-dark:to-indigo-500/15">
+                    <p className="text-[12px] text-neutral-900 myverse-dark:text-neutral-50 font-medium leading-relaxed line-clamp-[7] whitespace-pre-wrap">{m.body || m.caption || "..."}</p>
+                    {meta && <p className="text-[10px] text-neutral-500 myverse-dark:text-neutral-300 mt-auto pt-1.5 line-clamp-1">{meta}</p>}
+                </div>
+            ) : (
+                <div className="aspect-square">
+                    {m.media_type === "image" ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={m.media_url ?? ""} alt={m.caption || ""} className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                        <video src={m.media_url ?? ""} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                    )}
+                </div>
+            )}
+            <div className={`absolute inset-0 ${m.media_type === "text" ? "bg-black/0 group-hover:bg-black/5" : "bg-gradient-to-t from-black/60 via-transparent to-transparent"} opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between`}>
                 <div className="flex items-center justify-end gap-1">
                     <button onClick={onEdit} className="p-1 bg-white/90 text-neutral-700 rounded text-[11px]" title="편집">
                         <Pencil className="h-3 w-3" />
@@ -360,15 +370,25 @@ function MomentCard({ m, onEdit, onDelete }: { m: Moment; onEdit: () => void; on
                         <Trash2 className="h-3 w-3" />
                     </button>
                 </div>
-                {(m.caption || meta) && (
+                {m.media_type !== "text" && (m.caption || meta) && (
                     <div className="text-white">
                         {m.caption && <p className="text-[11px] leading-tight line-clamp-2">{m.caption}</p>}
                         {meta && <p className="text-[10px] text-white/80 mt-0.5 line-clamp-1">{meta}</p>}
                     </div>
                 )}
             </div>
+            {/* 좌상단 — 타입 배지 */}
             {m.media_type === "video" && (
-                <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">VIDEO</span>
+                <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] font-medium px-1.5 py-0.5 rounded">VIDEO</span>
+            )}
+            {m.media_type === "text" && (
+                <span className="absolute top-1.5 left-1.5 bg-violet-500/95 text-white text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded">POST</span>
+            )}
+            {/* 좌하단 — 공개 칩 (hover 액션과 충돌 회피) */}
+            {isPublic && (
+                <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-0.5 bg-emerald-500/95 text-white text-[9px] font-medium px-1.5 py-0.5 rounded" title="피드 공개">
+                    🌐 공개
+                </span>
             )}
         </div>
     );

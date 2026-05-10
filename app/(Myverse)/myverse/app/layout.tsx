@@ -15,7 +15,7 @@ import { PwaRegister } from "@/features/myverse/app/PwaRegister";
 import { BetaFeedbackButton } from "@/features/myverse/app/BetaFeedbackButton";
 import { WelcomeTracker } from "@/features/myverse/app/WelcomeTracker";
 import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
-import { AiBriefingFab } from "@/features/myverse/planner/AiBriefingFab";
+import { MukkiFab } from "@/features/myverse/app/MukkiFab";
 import { MobileBottomNav } from "@/features/myverse/app/MobileBottomNav";
 import { MyverseThemeProvider } from "@/features/myverse/app/MyverseThemeProvider";
 import type { MyverseMode, CustomMenuKey, MyverseUser } from "@/lib/myverse/types";
@@ -187,9 +187,9 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                     showTimeTracking={myverseUser?.time_tracking ?? false}
                     customMenus={(myverseUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
-                <div className="flex flex-1 min-h-0">
+                <div className="flex flex-1 min-h-0 pt-12">
                     <AppSideNav />
-                    <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
+                    <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0 md:ml-52 md:mr-10">
                         {children}
                     </main>
                     <AppMonthBar />
@@ -197,7 +197,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
             </div>
             <BetaFeedbackButton />
             <KeyboardShortcuts />
-            <AiBriefingFab />
+            <MukkiFab />
             <MobileBottomNav />
         </>
     );

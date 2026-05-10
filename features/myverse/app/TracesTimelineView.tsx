@@ -279,14 +279,14 @@ export function TracesTimelineView() {
                 <div className="shrink-0 flex items-center gap-1.5">
                     {myHandle && (
                         <Link
-                            href={`/myverse/v/${myHandle}`}
+                            href={`/myverse/${myHandle}`}
                             target="_blank"
                             rel="noopener"
-                            title="내 공개 Verse 페이지"
+                            title="내 공개 핸들 페이지"
                             className="inline-flex items-center gap-1 px-2.5 py-2 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-600 hover:text-[#6366F1] rounded-lg text-xs font-medium transition-colors"
                         >
                             <Globe className="h-3.5 w-3.5" />
-                            내 Verse
+                            내 페이지
                         </Link>
                     )}
                     <button
@@ -766,7 +766,7 @@ function MomentDetailModal({ moment, onClose, onClassified }: {
         // 공개 전환 시 명시적 동의 — 비공개 전환은 즉시
         if (next === "public") {
             const ok = confirm(
-                "이 흔적을 공개로 전환하면 내 Verse 페이지(myverse.kr/@핸들)에서 누구나 볼 수 있어요.\n진행할까요?"
+                "이 흔적을 공개로 전환하면 내 핸들 페이지(myverse.kr/@핸들) · 피드에서 누구나 볼 수 있어요.\n진행할까요?"
             );
             if (!ok) return;
         }
@@ -925,7 +925,7 @@ function MomentDetailModal({ moment, onClose, onClassified }: {
                                 : "text-neutral-600 border border-neutral-200 hover:bg-neutral-50"
                         }`}
                     >
-                        {visibility === "public" ? "🌐 공개됨 — 클릭해 비공개로" : "🔒 비공개 — 내 Verse에 공개하기"}
+                        {visibility === "public" ? "🌐 공개됨 — 클릭해 비공개로" : "🔒 비공개 — 피드에 공개하기"}
                     </button>
 
                     <Link

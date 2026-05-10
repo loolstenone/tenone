@@ -1,6 +1,71 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-11 (세션 124 — Myverse IA 재구성 + 명함 + 노트/캔버스 미리보기 + 캔버스 저장 버그 수정)
+> 마지막 업데이트: 2026-05-11 (세션 125 — Myverse 무끼 플로팅 + SNS 포스팅 + 카드 분리 + 흔적 통합 API + 레이아웃 fixed)
+
+---
+
+## 세션 125 핵심 성과 (2026-05-11)
+
+### 무끼 플로팅 AI 통합
+- 사이드바 MUKKI 그룹(무끼/일기/코치) 제거 → 우측 하단 그라디언트 FAB로 통합
+- 신규 `MukkiFab.tsx` — 드로어 오버레이 (모드 탭 [무끼/일기/코치] + 채팅 + 입력)
+- 대화 자체는 저장 X (state-only). **의도는 마이버스 서비스에 자동 반영**
+- 신규 `/api/myverse/mukki/intent` — 한국어 정규식 파서 (5월 20일 오후 2시 LG CNS 김철중 미팅 → calendar 자동 생성, with_whom 추출)
+- `/ask`·`/diary`·`/coach` 페이지에서는 FAB 숨김 (중복 회피)
+
+### SNS 포스팅 시스템 (오늘의 한 장면 고도화)
+- DB: `myverse_daily_moments` 확장 — `media_type='text'` 추가, `media_url` nullable, `body TEXT` 컬럼
+- 신규 `SnsPostComposer.tsx` — Instagram 감성 (자유 글 + 사진/영상 멀티 첨부 + 피드 공개 토글 + 게시)
+- `<ShareButton>` 컴포넌트 — Web Share API + clipboard fallback
+- 메타 입력 [상세 ▾] — 장소·시간·함께·카테고리 (collapsible)
+- 미러 저장: 장소시 `myverse_daily_places`, 카테고리·시간시 `myverse_daily_routines`에도 INSERT
+
+### IA 분리 — 3 카드 독립
+- `UnifiedDayCard` (3 in 1 통합) → `TodaySceneCard` + `<DailyPlacesCard>` + `<DailyRoutinesCard>` 독립 sibling
+- 각 카드 자체 헤더·자체 입력 보유
+
+### 흔적 통합 API
+- 신규 `/api/myverse/traces` — moments + places + routines UNION
+- 정규화 `UnifiedTrace` shape: `source: "moment"|"place"|"routine"` 구분자, `happened_at` 정렬
+
+### 레이아웃 fixed 전환
+- TopNav: `sticky top-0` → `fixed top-0 z-40`
+- AppSideNav: `sticky top-12 h-[calc(100vh-3rem)]` → `fixed top-12 left-0 bottom-0 w-52 z-30`
+- AppMonthBar: `sticky top-12` → `fixed top-12 right-0 bottom-0 w-10 z-30`
+- main: `pt-12 md:ml-52 md:mr-10` 보정
+
+### 코넬 노트 UX
+- 제목 Enter → 첫 단서 입력란 자동 포커스 (`data-cornell-cue="first"`)
+- "단서 · 키워드" → "제목, 단서, 키워드"
+- "이 노트의 핵심 한 줄" → "이 노트의 핵심 요약"
+
+### 핸들 페이지 용어 정리
+- "내 Verse" 폐기 → "내 페이지" / "피드에 공개하기"
+- TracesTimelineView 옛 `/v/{handle}` → `/myverse/{handle}` 신경로
+
+### 텍스트 카드 가독성
+- 배지 충돌 해소: 좌상단=POST, 좌하단=🌐 공개, 우상단=hover 액션 (편집/삭제)
+- 본문 `text-[12px] font-medium`, 다크모드 `text-neutral-50` 강화
+- 패딩 `pt-8 pb-7` — 배지 영역 확보
+
+### 메뉴 라벨 + 시간 줌
+- "오늘"으로 메뉴 라벨 복귀 (라우트는 `/daily` 메인 유지)
+- 4 페이지(daily/weekly/monthly/yearly) 우측 상단 [일간|주간|월간|연간] ViewToggle 공통
+
+### 사이드바 footer 부동 수정
+- AppSideNav footer `<div>`에 `mt-auto` 추가 — 콘텐츠 짧을 때도 하단 고정
+
+### 오늘의 한 장면 중복 헤더 제거
+- DailyView UnifiedDayCard에서 `DailyMomentsAuto compact` 추가 — 내부 헤더 숨김
+
+### 템플릿 그리드 Instagram 비례
+- `aspect-square` 제거, `grid-cols-1 sm:grid-cols-2`, `max-w-3xl/2xl mx-auto`
+- 적용: `_shared.tsx`(QuadrantGrid) · `quadrants.tsx`(SWOT/4P/PEST/9-Box/MoSCoW/Kano/QuadrantBlank) · `empathy.tsx`(Ikigai/메타)
+
+#### 처리 보류
+- TracesTimelineView UI 통합 — places/routines를 텍스트 카드로 렌더 (현재는 moments만 그리드)
+- 무끼 의도 파서 LLM 확장 (Phase 2: Claude API tool calling 7개 도구)
+- 포스트 편집 모달의 visibility 토글 + 직접 [공유] 버튼
 
 ---
 

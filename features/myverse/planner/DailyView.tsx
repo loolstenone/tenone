@@ -13,15 +13,16 @@ import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/myv
 import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/myverse/template-recommendations";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
+import { SnsPostComposer } from "./SnsPostComposer";
 import { DailyEntryComposer } from "./DailyEntryComposer";
 import { DailyHealthStats } from "./DailyHealthStats";
 import { FocusModeOverlay } from "./FocusModeOverlay";
 import { Camera as CameraIconForCard } from "lucide-react";
 
-// 통합 일일 카드 — 한 헤더, 한 "+" 버튼이 사진/장소/일과를 한 번에 등록하는 composer를 토글
-function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boolean }) {
+// 오늘의 한 장면 — SNS 포스팅 (사진·영상·자유 글) 전용 카드
+function TodaySceneCard({ date, initialOpen }: { date: string; initialOpen?: boolean }) {
     const [open, setOpen] = useState(initialOpen ?? false);
-    const [version, setVersion] = useState(0); // saved 후 자식 reload 트리거
+    const [version, setVersion] = useState(0);
     const [pendingImage, setPendingImage] = useState<File | null>(null);
 
     useEffect(() => {
@@ -41,7 +42,6 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
 
     return (
         <section className="bg-white myverse-dark:bg-[#1C1C1C] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded-xl mt-3 overflow-hidden">
-            {/* 단일 헤더 */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-100 myverse-dark:border-[#2A2A2A]">
                 <h2 className="text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
                     <CameraIconForCard className="h-3.5 w-3.5" />
@@ -50,15 +50,15 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
                 <button
                     onClick={() => setOpen(o => !o)}
                     className="p-1 rounded text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors"
-                    title="새 항목 등록"
+                    title="새 포스트 작성"
                 >
                     <Plus className={`h-4 w-4 transition-transform ${open ? "rotate-45" : ""}`} />
                 </button>
             </div>
             <DailyHealthStats date={date} version={version} />
             {open && (
-                <div className="px-5 pt-4 pb-2">
-                    <DailyEntryComposer
+                <div className="px-5 pt-4 pb-3 border-b border-neutral-100 myverse-dark:border-[#2A2A2A]">
+                    <SnsPostComposer
                         date={date}
                         onClose={() => setOpen(false)}
                         onSaved={() => setVersion(v => v + 1)}
@@ -67,13 +67,7 @@ function UnifiedDayCard({ date, initialOpen }: { date: string; initialOpen?: boo
                 </div>
             )}
             <div className="p-5" key={`m-${version}`}>
-                <DailyMomentsAuto date={date} hideAdd hideBackup minimalEmpty />
-            </div>
-            <div className="border-t border-neutral-100 myverse-dark:border-[#2A2A2A]" key={`p-${version}`}>
-                <DailyPlacesCard date={date} bare hideAdd />
-            </div>
-            <div className="border-t border-neutral-100 myverse-dark:border-[#2A2A2A]" key={`r-${version}`}>
-                <DailyRoutinesCard date={date} bare hideAdd />
+                <DailyMomentsAuto date={date} compact hideAdd hideBackup minimalEmpty />
             </div>
         </section>
     );
@@ -2261,8 +2255,18 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                         </div>
                         )}
 
-                        {/* 오늘의 한 장면 — 사진 + 방문 장소 + 일과 기록 통합 (소셜 포스트형 단일 입력기) */}
-                        <UnifiedDayCard date={date} initialOpen={autoCompose} />
+                        {/* 오늘의 한 장면 — SNS 포스팅 (사진·영상·자유 글) */}
+                        <TodaySceneCard date={date} initialOpen={autoCompose} />
+
+                        {/* 방문 장소 — 흔적 입력 (장소·시간·카테고리) */}
+                        <section className="mt-3">
+                            <DailyPlacesCard date={date} />
+                        </section>
+
+                        {/* 일과 기록 — 흔적 입력 (활동·시간·카테고리) */}
+                        <section className="mt-3">
+                            <DailyRoutinesCard date={date} />
+                        </section>
 
 
                     </div>
