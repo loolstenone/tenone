@@ -53,6 +53,8 @@ export interface UtilityBarConfig {
     hideAbout?: boolean;
     /** 알림 숨김 (랜딩 페이지 등에서) */
     hideNotifications?: boolean;
+    /** WORK 드롭다운 숨김 (브랜드 본진 사이트 — 도메인 자체가 곧 워크스페이스인 경우) */
+    hideWorkspaces?: boolean;
     searchPath?: string;
     siteId?: string;
     siteName?: string;
@@ -213,7 +215,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                 {!config.hideAuth && isAuthenticated ? (
                     <>
                         {/* Work Space 드롭다운 — affiliations 기반 자동 또는 명시적 workspaces */}
-                        {workspaces.length > 0 && (
+                        {!config.hideWorkspaces && workspaces.length > 0 && (
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => { setWsOpen(o => !o); setNotiOpen(false); }}

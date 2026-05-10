@@ -26,7 +26,7 @@ export default function MyVerseLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
+        <div className="min-h-screen bg-white text-neutral-900 flex flex-col overflow-x-hidden">
             <MyVerseChromeHeader />
             <MyVerseChromeMain>{children}</MyVerseChromeMain>
             <MyVerseChromeFooter />

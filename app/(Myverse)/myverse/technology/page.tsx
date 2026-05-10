@@ -48,14 +48,15 @@ function UniversalRecordSection() {
                         </h2>
                         <p className="mt-4 text-neutral-400 leading-relaxed">
                             Instagram 사진이든, 카카오톡 대화든, 구글 캘린더 일정이든
-                            모든 출처의 데이터가 하나의 Universal Record 포맷으로 변환됩니다.
+                            모든 출처의 데이터를 하나의 Universal Record 포맷으로 변환하는 것을 목표로 합니다.
+                            기본 포맷은 정의되어 있으며, 출처별 파서와 자동 분류는 단계적으로 도입됩니다.
                         </p>
                         <div className="mt-6 space-y-3">
                             {[
-                                { label: "밥 사진", result: "food_photo → \"돈까스\", 일식, 봉피양" },
-                                { label: "약 봉투 사진", result: "document_photo → \"타이레놀 500mg\", 건강" },
-                                { label: "합격증 사진", result: "document_photo → \"SQLD 자격증\", 성장" },
-                                { label: "음성 48분", result: "voice_memo → 텍스트 변환, 핵심 요약" },
+                                { label: "사진", result: "타입·시간·위치 메타데이터 추출 (제공)" },
+                                { label: "Vision 자동 태깅", result: "음식·문서·인물 인식 (도입 예정)" },
+                                { label: "음성", result: "STT 텍스트 변환 + 요약 (베타)" },
+                                { label: "위치", result: "Reverse geocoding + 거점 매칭 (제공)" },
                             ].map((e) => (
                                 <div key={e.label} className="flex items-start gap-3 text-sm">
                                     <span className="text-indigo-400 mt-0.5">→</span>
@@ -125,12 +126,12 @@ function SovereigntySection() {
 /* ── Tech Stack ── */
 function StackSection() {
     const stack = [
-        { layer: "App", tech: "React Native (iOS + Android)", icon: Plug },
-        { layer: "Local", tech: "SQLite (로컬 우선 저장)", icon: HardDrive },
-        { layer: "Backend", tech: "Kotlin / Spring Boot", icon: Server },
-        { layer: "Database", tech: "PostgreSQL + TimescaleDB", icon: Database },
-        { layer: "Vector", tech: "pgvector (AI 임베딩)", icon: Code2 },
-        { layer: "AI", tech: "Claude API + RAG", icon: Shield },
+        { layer: "Web", tech: "Next.js 16 + React 19 (현재 운영)", icon: Plug },
+        { layer: "App", tech: "iOS · Android 네이티브 (출시 예정)", icon: Plug },
+        { layer: "Database", tech: "PostgreSQL (Supabase)", icon: Database },
+        { layer: "Storage", tech: "Supabase Storage (사진·영상)", icon: HardDrive },
+        { layer: "AI", tech: "Claude API · RAG 단계 도입", icon: Shield },
+        { layer: "Auth", tech: "Supabase Auth (이메일·OAuth)", icon: Server },
     ];
 
     return (
@@ -161,13 +162,13 @@ function StackSection() {
 /* ── Parser Architecture ── */
 function ParserSection() {
     const parsers = [
-        "instagram.py — JSON export 파싱",
-        "facebook.py — JSON export 파싱",
-        "kakaotalk.py — txt export 파싱",
-        "twitter.py — archive.zip 파싱",
-        "google_cal.py — CalDAV / API 연동",
-        "apple_health.py — HealthKit export 파싱",
-        "base.py — 공통 인터페이스",
+        "base — 공통 인터페이스 (제공)",
+        "instagram — JSON export 파싱 (베타)",
+        "kakaotalk — txt export 파싱 (베타)",
+        "google_cal — OAuth 연동 (개발 중)",
+        "facebook — JSON export 파싱 (예정)",
+        "twitter — archive.zip 파싱 (예정)",
+        "apple_health — HealthKit 연동 (예정)",
     ];
 
     return (

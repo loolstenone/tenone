@@ -1,6 +1,81 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-09 (세션 120 — Myverse IA 마무리: 모바일 햄버거 서브탭 + 9영역↔traces 양방향)
+> 마지막 업데이트: 2026-05-10 (세션 123 — Myverse 사이트↔앱 통합 + Personal OS 정렬 + LinkedIn 벤치마킹)
+
+---
+
+## 세션 123 핵심 성과 (2026-05-10)
+
+### Myverse 사이트↔앱 통합 5 Phase
+
+1. **route group 캐논컬화**: `(MyVerse)` → `(Myverse)` (78 파일 git rename + 9 문서)
+2. **middleware 통합 라우팅**: `myverse.kr/today` 깔끔 URL + `/app/X` → `/X` 308 + 인증 시 `/` → `/today` 302
+3. **헤더 디스패처**: 비인증 "Myverse 시작하기" CTA + WORK 드롭다운 Myverse에서 숨김
+4. **/pricing 신설**: Free/Pro 2티어 + 제공/베타/Phase 2 SSOT 라벨
+5. **/about 재작성**: Personal OS 3원칙 (운영·소유·성장)
+
+### Personal OS 메시지 통일
+- "My Universe" 폐기 → **Myverse · Personal OS · 나를 운영하는 OS**
+- site-config·헤더 서브타이틀·푸터·랜딩 hero·CLAUDE.md 일괄
+
+### 마케팅 5p 허구성 정비
+- service / technology / philosophy / roadmap / team — 미구현 단정형 → 베타/예정/비전 라벨
+
+### LinkedIn 벤치마킹 → 노션 친화 5 패턴
+1. Cmd+K 명령 팔레트 (이미 구현 검증)
+2. `/` 슬래시 키 → `/traces?compose=1` 직행
+3. Traces 갤러리/리스트 토글 + localStorage
+4. @handle 페이지 LinkedIn hero (커버·아바타·stats·share)
+5. Privacy 인디케이터 — 갤러리 타일 🔒/🌐 + 리스트 인라인 칩
+
+### 버그 수정
+- 마케팅 페이지 모바일 헤더 햄버거 viewport 밖으로 밀리던 overflow (`w-[500px]` 데코 블러 → `overflow-x-hidden`)
+
+#### 처리 보류
+- 124 파일 `/myverse/app/X` → `/X` 일괄 치환 (localhost 위험, middleware redirect로 충분)
+- About philosophy+team 통합 (콘텐츠 디자인 별도)
+- Calendar/Map view (Phase 2)
+
+---
+
+## 세션 122 핵심 성과 (2026-05-09)
+
+### Myverse Stitch 디자인 시스템 1차 도입
+
+#### ✅ 완료
+
+1. **/today 대시보드 리뉴얼**
+   - `features/myverse/app/TodayDashboard.tsx` 신규 — Stitch Bento 레이아웃
+   - 시간대별 인사 + AI Coach 카드 + 오늘의 흔적 가로 스크롤 + 다음 4시간 타임라인
+   - `app/(Myverse)/myverse/app/today/page.tsx` 서버 컴포넌트화 (members.name 패스)
+
+2. **/coach 재디자인 — Stitch Bento**
+   - Hero Briefing 카드 (첫 문장 추출) + Weekly Balance 9도메인 바 차트 + Recent Capsules 그리드
+   - PlannerBriefing 타입(content만 존재)에 맞춰 score/summary 의존 제거
+
+3. **폰트 + 아이콘 시스템 도입**
+   - Hanken Grotesk + Inter + Material Symbols Outlined Google Fonts
+   - 모바일 bottom nav: Lucide → Material Symbols (FILL 1/0 토글)
+
+4. **LaneHeader 공용 컴포넌트 (SSOT)**
+   - `features/myverse/app/LaneHeader.tsx` — indigo label + Hanken h1 + subtitle + actions + accent + backLink slot
+   - 11개 페이지 헤더 일관 정렬: today/coach/traces/feed/ask/tasks/settings + 9영역 8개
+
+5. **9영역 페이지 헤더 정렬**
+   - body/study/lifestyle/schedule/travel/move/relation/work 모두 LaneHeader + DomainBackLink
+   - 도메인별 accent 컬러 prop으로 오버라이드 (BODY=#10B981, STUDY=#A855F7 등)
+
+6. **/dm 헤더 통일** — chat Material Symbol + Hanken Grotesk
+
+7. **/traces 타임라인 마커**
+   - 월별 섹션에 vertical line + 원형 마커 추가 (Stitch Digital Archive 패턴)
+   - 그리드 밀도 보존 + 타임라인 회유성 강화
+
+#### 처리 보류
+
+- **카드 라운드/그림자 토큰 통일** — 영향 범위 큼, 추후 일괄
+- **Hover 톤 일관화** — 분산된 부분 많음, 추후
+- **alternating 좌우 배치** — 그리드 밀도와 충돌, 보류
 
 ---
 
@@ -188,7 +263,7 @@
 
 ### Phase 3 — Planner's → Myverse 리네임 (myverse 스코프)
 
-**대상**: `features/myverse/`, `app/(MyVerse)/`, `app/api/myverse/`, `lib/myverse/`
+**대상**: `features/myverse/`, `app/(Myverse)/`, `app/api/myverse/`, `lib/myverse/`
 
 #### 1. JS 함수·타입 (Source of Truth)
 - `lib/myverse/analytics.ts` — `trackPlanners` → `trackMyverse` (`trackPlannersEvent` 공용 import는 유지)
@@ -265,7 +340,7 @@
   - `LOCAL_GROUPS` (플래너/나누기/시스템) 섹션 유지
 - `features/myverse/app/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
   - 하드코딩 9영역 → `DOMAINS`, `PILLARS` import 참조로 교체
-- `app/(MyVerse)/myverse/app/layout.tsx` — `MyverseSidebar` 복원 (layout에 삽입)
+- `app/(Myverse)/myverse/app/layout.tsx` — `MyverseSidebar` 복원 (layout에 삽입)
 
 ### 2. 로그인 리다이렉트 버그 수정 (3곳)
 - `app/login/page.tsx` useEffect — `canIntraAccess ? '/intra'` 강제 이동 제거
@@ -273,14 +348,14 @@
 - `lib/auth-context.tsx` `loginWithGoogle/loginWithKakao` — `/myverse/login` 등 브랜드 로그인 페이지도 auth page로 인식 (`endsWith('/login')`) → `?redirect=` 파라미터 정확히 보존
 
 ### 3. 온보딩 루프 수정
-- `app/(MyVerse)/myverse/app/layout.tsx` `getAuthState()` 개선
+- `app/(Myverse)/myverse/app/layout.tsx` `getAuthState()` 개선
   - admin 클라이언트 단독 의존 → **세션 기반 anon 클라이언트 우선 조회** (RLS `auth.uid() = auth_id`)
   - anon 실패 시 admin 재시도 → email fallback 순
   - 조회 실패 시 `console.error` 로그 추가 (개발 서버 터미널에서 원인 즉시 확인)
 - `lib/auth-context.tsx` — `isAuthPage` 판단에 `endsWith` 추가
 
 ### 4. 온보딩 첫 페이지 카피 수정
-- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — "퍼스널 OS" 추가, "성장을 돕습니다" → "성공을 돕습니다"
+- `app/(Myverse)/myverse/app/onboarding/page.tsx` — "퍼스널 OS" 추가, "성장을 돕습니다" → "성공을 돕습니다"
 
 ### 다음 할 일
 > 우선순위 순.
@@ -307,8 +382,8 @@
 ### 1. Myverse 로그인 UI 브랜드 통일
 - **문제**: `/myverse/app` 비인증 접근 시 tenone.biz `/login` 전체 페이지로 이동(검은 버튼, 핸들 탭 없음) → 마이버스 인디고 브랜딩과 불일치
 - **조치**: `/myverse/login/page.tsx` 신규 생성 — 인증 시 `?redirect` 파라미터로 복귀, 미인증 시 `LoginModal` 팝업(indigo `#6366F1`), 모달 닫으면 `/myverse` 랜딩으로
-- `app/(MyVerse)/myverse/app/layout.tsx` — `no_session` 리다이렉트 `/login?redirect=/myverse/app` → `/myverse/login?redirect=/myverse/app`
-- `app/(MyVerse)/myverse/page.tsx` — 랜딩 CTA 인증 인식: 로그인 상태면 "앱으로 이동", 비로그인이면 "시작하기"(LoginModal signup) + "출시 소식 받기"
+- `app/(Myverse)/myverse/app/layout.tsx` — `no_session` 리다이렉트 `/login?redirect=/myverse/app` → `/myverse/login?redirect=/myverse/app`
+- `app/(Myverse)/myverse/page.tsx` — 랜딩 CTA 인증 인식: 로그인 상태면 "앱으로 이동", 비로그인이면 "시작하기"(LoginModal signup) + "출시 소식 받기"
 
 ### 2. 인트라 사이트 열기/닫기 토글 수정
 - **문제**: toggle이 아무 효과 없음 — 두 가지 버그 복합:
@@ -439,7 +514,7 @@
 ### 풀 화면 앱 셸 + 인디고 브랜딩
 - `/myverse/app/*` 진입 시 마케팅 헤더/푸터 숨김 (`MyVerseChrome` 클라이언트 래퍼)
 - `MyverseAppHeader`·4 Pillars `MyverseSidebar` 제거 → AppTopNav만 노출 (PP 시절 풀 화면 셸 패턴)
-- `app/(MyVerse)/myverse/app/layout.tsx`: PP 핵심 chrome 흡수 (PlannersThemeProvider · PwaRegister · BetaFeedbackButton · KeyboardShortcuts · AiBriefingFab · MobileBottomNav · WelcomeTracker · AppMonthBar)
+- `app/(Myverse)/myverse/app/layout.tsx`: PP 핵심 chrome 흡수 (PlannersThemeProvider · PwaRegister · BetaFeedbackButton · KeyboardShortcuts · AiBriefingFab · MobileBottomNav · WelcomeTracker · AppMonthBar)
 - AppTopNav 로고: "Planner's Planner AI" → **Myverse**<sup>App</sup>, teal `#0F766E` → 인디고 `#6366F1`
 - PlannersThemeProvider 기본 테마 `teal` → `myverse`(인디고). 모든 하드코딩 teal 클래스가 CSS 오버라이드로 인디고로 매핑
 - `UniverseUtilityBar.WORKSPACE_REGISTRY`: 옛 `planners` + 옛 `myverse` 제거 → 통합 `myverse` (`/myverse/app`)

@@ -7,7 +7,7 @@ export function MyVerseFooter() {
     return (
         <UniverseFooter
             brandName="Myverse"
-            tagline="Personal Blackbox · 셀프 디스커버리"
+            tagline="Personal OS — 나를 운영하는 OS"
             accentColor="#6366f1"
             linkColumns={[
                 {

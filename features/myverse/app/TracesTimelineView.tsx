@@ -88,6 +88,14 @@ export function TracesTimelineView() {
     );
     const [personFilter, setPersonFilter] = useState<string | null>(initialPerson);
     const [placeFilter, setPlaceFilter] = useState<string | null>(null);
+    const [view, setView] = useState<"gallery" | "list">(() => {
+        if (typeof window === "undefined") return "gallery";
+        const saved = localStorage.getItem("myverse-traces-view");
+        return saved === "list" ? "list" : "gallery";
+    });
+    useEffect(() => {
+        if (typeof window !== "undefined") localStorage.setItem("myverse-traces-view", view);
+    }, [view]);
     const [uploading, setUploading] = useState<{ current: number; total: number } | null>(null);
     const [myHandle, setMyHandle] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement | null>(null);
@@ -362,6 +370,29 @@ export function TracesTimelineView() {
                         className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-3 py-2 text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
                     />
                 </div>
+                {/* View 토글 — 갤러리/리스트 (Notion 스타일) */}
+                <div className="inline-flex bg-neutral-100 rounded-lg p-0.5 self-start">
+                    <button
+                        onClick={() => setView("gallery")}
+                        title="갤러리"
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
+                            view === "gallery" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-sm">grid_view</span>
+                        갤러리
+                    </button>
+                    <button
+                        onClick={() => setView("list")}
+                        title="리스트"
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
+                            view === "list" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-sm">view_list</span>
+                        리스트
+                    </button>
+                </div>
             </div>
 
             {/* 패싯 필터 — 미디어·도메인·사람·장소 */}
@@ -493,28 +524,56 @@ export function TracesTimelineView() {
             ) : filtered.length === 0 ? (
                 <NoSearchResult query={query} onClear={() => setQuery("")} />
             ) : (
-                <div className="space-y-8">
-                    {byMonth.map(([ym, items]) => (
-                        <section key={ym}>
-                            <div className="flex items-baseline gap-3 mb-3 sticky top-12 bg-neutral-50 myverse-dark:bg-[#08080E] py-2 z-10">
-                                <h2 className="text-base font-semibold text-neutral-800">
-                                    {fmtMonth(ym)}
-                                </h2>
-                                <span className="text-xs text-neutral-400">
-                                    {items.length}건
-                                </span>
-                            </div>
-                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1.5 sm:gap-2">
-                                {items.map(m => (
-                                    <MomentTile
-                                        key={m.id}
-                                        m={m}
-                                        onClick={() => setSelected(m)}
-                                    />
-                                ))}
-                            </div>
-                        </section>
-                    ))}
+                <div className="relative pl-6 sm:pl-8">
+                    {/* 타임라인 세로선 */}
+                    <div
+                        className="absolute left-[7px] sm:left-[9px] top-2 bottom-2 w-px bg-neutral-200 myverse-dark:bg-white/10"
+                        aria-hidden
+                    />
+                    <div className="space-y-10">
+                        {byMonth.map(([ym, items]) => (
+                            <section key={ym} className="relative">
+                                {/* 원형 마커 */}
+                                <span
+                                    className="absolute -left-6 sm:-left-8 top-3 h-3.5 w-3.5 rounded-full bg-white myverse-dark:bg-[#08080E] border-2"
+                                    style={{ borderColor: "#6366F1" }}
+                                    aria-hidden
+                                />
+                                <div className="flex items-baseline gap-3 mb-3 sticky top-12 bg-neutral-50 myverse-dark:bg-[#08080E] py-2 z-10">
+                                    <h2
+                                        className="text-base font-semibold text-neutral-800 myverse-dark:text-white"
+                                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                                    >
+                                        {fmtMonth(ym)}
+                                    </h2>
+                                    <span className="text-xs text-neutral-400">
+                                        {items.length}건
+                                    </span>
+                                </div>
+                                {view === "gallery" ? (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1.5 sm:gap-2">
+                                        {items.map(m => (
+                                            <MomentTile
+                                                key={m.id}
+                                                m={m}
+                                                onClick={() => setSelected(m)}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1">
+                                        {items.map(m => (
+                                            <MomentRow
+                                                key={m.id}
+                                                m={m}
+                                                onClick={() => setSelected(m)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -557,6 +616,69 @@ function FacetChip({ active, onClick, icon, color, children }: {
     );
 }
 
+function MomentRow({ m, onClick }: { m: Moment; onClick: () => void }) {
+    const domainMeta = m.domain ? DOMAINS[m.domain] : null;
+    const time = m.happened_at ? new Date(m.happened_at) : null;
+    const dateStr = time ? `${String(time.getMonth() + 1).padStart(2, "0")}.${String(time.getDate()).padStart(2, "0")}` : "";
+    const timeStr = time ? `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}` : "";
+    return (
+        <button
+            onClick={onClick}
+            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-neutral-100 myverse-dark:hover:bg-white/5 transition-colors text-left"
+        >
+            {/* 썸네일 */}
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-neutral-100 flex-shrink-0">
+                {m.media_type === "image" ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={m.thumbnail_url || m.media_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                        <span className="material-symbols-outlined text-base">videocam</span>
+                    </div>
+                )}
+            </div>
+            {/* 본문 */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-neutral-400 tabular-nums">{dateStr} {timeStr}</span>
+                    {domainMeta && (
+                        <span
+                            className="text-[9px] font-medium text-white px-1.5 py-0.5 rounded"
+                            style={{ backgroundColor: domainMeta.color_hex }}
+                        >
+                            {domainMeta.label_ko}
+                        </span>
+                    )}
+                    {/* Privacy 인디케이터 */}
+                    <span
+                        className={`inline-flex items-center gap-0.5 text-[9px] font-medium px-1.5 py-0.5 rounded ${
+                            m.visibility === "public"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-neutral-100 text-neutral-500"
+                        }`}
+                        title={m.visibility === "public" ? "공개" : "비공개"}
+                    >
+                        <span className="material-symbols-outlined text-[10px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            {m.visibility === "public" ? "public" : "lock"}
+                        </span>
+                        {m.visibility === "public" ? "공개" : "비공개"}
+                    </span>
+                </div>
+                <div className="text-sm text-neutral-800 myverse-dark:text-neutral-200 truncate mt-0.5">
+                    {m.caption || (m.location ?? "기록")}
+                </div>
+            </div>
+            {/* 위치 */}
+            {m.location && (
+                <div className="hidden sm:flex items-center gap-0.5 text-[11px] text-neutral-400 max-w-[160px] truncate">
+                    <MapPin className="h-3 w-3" />
+                    <span className="truncate">{m.location}</span>
+                </div>
+            )}
+        </button>
+    );
+}
+
 function StatCard({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
     return (
         <div className="bg-white border border-neutral-200 rounded-lg px-4 py-3">
@@ -595,6 +717,20 @@ function MomentTile({ m, onClick }: { m: Moment; onClick: () => void }) {
             {m.media_type === "video" && (
                 <span className="absolute top-1 left-1 bg-black/70 text-white text-[8px] px-1 py-0.5 rounded">VIDEO</span>
             )}
+            {/* Privacy 인디케이터 — Myverse는 default private */}
+            <span
+                className={`absolute bottom-1 left-1 inline-flex items-center justify-center w-4 h-4 rounded-full shadow-sm text-[9px] ${
+                    m.visibility === "public"
+                        ? "bg-emerald-500/90 text-white"
+                        : "bg-black/55 text-white"
+                }`}
+                title={m.visibility === "public" ? "공개" : "비공개"}
+                aria-label={m.visibility === "public" ? "공개" : "비공개"}
+            >
+                <span className="material-symbols-outlined text-[10px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {m.visibility === "public" ? "public" : "lock"}
+                </span>
+            </span>
             {domainMeta && (
                 <span
                     className="absolute top-1 right-1 text-[8px] font-medium text-white px-1.5 py-0.5 rounded shadow-sm"

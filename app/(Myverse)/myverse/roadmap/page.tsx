@@ -24,7 +24,7 @@ function Hero() {
                     로드맵
                 </h1>
                 <p className="mt-6 text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-                    My Universe가 완성되어 가는 여정
+                    Myverse가 완성되어 가는 여정
                 </p>
             </div>
         </section>
@@ -36,33 +36,33 @@ const phases = [
     {
         phase: "Phase 1",
         title: "Foundation",
-        period: "MVP — 6개월",
+        period: "현재 진행 중",
         icon: Database,
         status: "current" as const,
-        description: "개인 프로필, 데이터 보관함, 기본 대시보드",
+        description: "웹 앱 + 데이터 보관함 + 9 영역 SSOT + 기본 타임라인",
         milestones: [
-            "React Native 앱 세팅",
-            "Universal Record 스키마",
-            "Instagram / KakaoTalk / Facebook 파서",
-            "통합 타임라인 UI",
+            "Universal Record 스키마 + 9 영역 분류",
+            "통합 타임라인 + 흔적 그리드",
+            "Quick Capture (사진·음성·메모)",
+            "@handle 공개 페이지",
+            "Instagram·KakaoTalk·Google Calendar 임포트 (베타)",
             "온보딩 플로우 (어둠 → 점 → 성장)",
-            "Quick Capture (음성/사진/메모)",
-            "자연어 검색",
-            "베타 100명 → 앱스토어",
+            "iOS·Android 네이티브 앱 (예정)",
         ],
     },
     {
         phase: "Phase 2",
         title: "Intelligence",
-        period: "6~12개월",
+        period: "다음 단계",
         icon: Brain,
         status: "upcoming" as const,
-        description: "AI 맞춤 큐레이션, 패턴 분석, 인사이트 리포트",
+        description: "AI 코치 정식·패턴 분석·인사이트 리포트",
         milestones: [
-            "자동 기록 고도화 (위치, 결제, 스크린타임)",
-            "Twitter/X, YouTube, 네이버 파서",
-            "Apple Health / 삼성 헬스 연동",
-            "성장 시스템 고도화",
+            "AI 코치 (일일 브리핑·주간 리포트) 정식",
+            "교차 인사이트 (영역 간 패턴)",
+            "Vision 자동 태깅 (음식·문서·인물)",
+            "위치·결제·헬스 자동 기록 (사용자 동의 후)",
+            "Twitter / YouTube 임포터",
         ],
     },
     {
@@ -82,14 +82,14 @@ const phases = [
     {
         phase: "Phase 4",
         title: "Universe",
-        period: "18개월~",
+        period: "장기 비전",
         icon: Globe,
         status: "upcoming" as const,
-        description: "완성된 개인 세계관, 커뮤니티, 크로스 에이전트",
+        description: "개인 세계관, 커뮤니티, 크로스 에이전트",
         milestones: [
-            "마이데이터 API 연동 (금융/의료/통신)",
+            "마이데이터 API 연동 (금융·의료·통신, 검토 단계)",
             "외부 서비스 접속 구조",
-            "접근 권한 관리",
+            "접근 권한 관리 (granular)",
             "디지털 유산",
         ],
     },

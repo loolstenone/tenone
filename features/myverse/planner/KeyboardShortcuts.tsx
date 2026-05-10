@@ -22,6 +22,7 @@ const ROUTE_KEYS: Record<string, string> = {
 const SHORTCUTS_LIST = [
     { keys: ["⌘K", "Ctrl+K"], desc: "명령 팔레트 열기" },
     { keys: ["?"], desc: "이 단축키 치트시트" },
+    { keys: ["/"], desc: "빠른 기록 (흔적 작성)" },
     { keys: ["I"], desc: "인덱스로 이동" },
     { keys: ["T"], desc: "일간으로 이동" },
     { keys: ["W"], desc: "주간으로 이동" },
@@ -66,6 +67,13 @@ export function KeyboardShortcuts() {
             if (e.key === "?") {
                 e.preventDefault();
                 setCheatOpen(true);
+                return;
+            }
+
+            // / — 빠른 기록(Traces 작성 모드 직행) — 노션 슬래시 명령 패턴
+            if (e.key === "/") {
+                e.preventDefault();
+                router.push("/myverse/app/traces?compose=1");
                 return;
             }
 

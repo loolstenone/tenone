@@ -136,7 +136,7 @@ function HiringSection() {
                         함께할 동료를 찾습니다
                     </h2>
                     <p className="mt-4 text-neutral-400 max-w-lg mx-auto">
-                        &ldquo;혼자는 힘들다, 함께할 동료가 필요하다.&rdquo;
+                        Myverse는 Ten:One™ Universe 안에서 시작되는 작은 팀입니다. 아래는 향후 영입 예정인 포지션입니다.
                     </p>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -186,6 +186,7 @@ function CultureSection() {
                 <div className="text-center mb-12">
                     <p className="text-indigo-400 font-medium text-sm mb-3">CULTURE</p>
                     <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">일하는 원칙</h2>
+                    <p className="mt-3 text-sm text-neutral-500">Ten:One™ Universe 전사 공통 가치 — Myverse도 이 원칙 위에서 일합니다.</p>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3">
                     {principles.map((p, i) => (

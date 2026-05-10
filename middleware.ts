@@ -5,6 +5,18 @@ import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증·프로필은 전 도메인 공유)
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
 
+// Myverse 앱 라우트 SSOT — myverse.kr 도메인에서 prefix 없이 노출되는 앱 첫 세그먼트 목록
+// 예: myverse.kr/today → 내부 /myverse/app/today
+const MYVERSE_APP_ROUTES = new Set([
+    'today', 'traces', 'ask', 'coach', 'diary', 'insights', 'capsules',
+    'feed', 'dm', 'verse', 'notifications',
+    'projects', 'tasks', 'canvas', 'templates', 'contacts', 'personal',
+    'body', 'work', 'study', 'lifestyle', 'schedule', 'travel', 'move', 'relation',
+    'weekly', 'monthly', 'yearly', 'daily',
+    'search', 'settings', 'onboarding', 'help', 'index',
+    'time', 'with', 'ai-briefing',
+]);
+
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
@@ -130,6 +142,20 @@ export async function middleware(request: NextRequest) {
 
     if (pathname.startsWith(prefix)) return response;
 
+    // 3a-pre. Myverse 자동 랜딩: 로그인 사용자가 myverse.kr/ 접근 시 → /today 302
+    //     LinkedIn 패턴 — 인증 사용자에게 마케팅 랜딩은 무의미, 바로 앱 진입
+    {
+        const isMyverseDomainEarly = reqDomain === 'myverse.kr' || reqDomain === 'www.myverse.kr' || reqDomain === 'myverse.tenone.biz';
+        if (isMyverseDomainEarly && pathname === '/' && !isPrefetch) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/today';
+                return NextResponse.redirect(url, 302);
+            }
+        }
+    }
+
     // 3a. Myverse 전용: myverse.kr/login → /myverse/login 리라이트
     //     루트 /login 페이지에는 외부 도메인 감지 시 SSO 자동 발사 코드가 있어서,
     //     myverse.kr/login이 /login skipPath를 타면 의도치 않은 SSO → tenone.biz/login으로 튕김.
@@ -140,6 +166,27 @@ export async function middleware(request: NextRequest) {
         const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
         response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
         return rw;
+    }
+
+    // 3b. Myverse 깔끔 URL: 레거시 /app/X 직접 URL → /X 308 영구 리디렉트
+    //     LinkedIn 패턴 — 앱 라우트는 prefix 없이 도메인 직속으로 노출
+    if (isMyverseDomain && pathname.startsWith('/app/') && !isPrefetch) {
+        const url = request.nextUrl.clone();
+        url.pathname = pathname.replace(/^\/app\//, '/');
+        return NextResponse.redirect(url, 308);
+    }
+
+    // 3c. Myverse 앱 라우트: /today, /traces 등 → 내부 /myverse/app/X rewrite
+    //     사용자에는 깔끔 URL, 폴더 구조는 그대로
+    if (isMyverseDomain) {
+        const firstSeg = pathname.split('/')[1];
+        if (firstSeg && MYVERSE_APP_ROUTES.has(firstSeg)) {
+            const url = request.nextUrl.clone();
+            url.pathname = `/myverse/app${pathname}`;
+            const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+            response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+            return rw;
+        }
     }
 
     if (skipPaths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {

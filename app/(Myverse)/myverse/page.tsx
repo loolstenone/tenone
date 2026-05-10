@@ -78,16 +78,16 @@ export default function MyVersePage() {
                         </span>
                     </p>
                     <h1 className="text-[clamp(2.2rem,6vw,4.5rem)] font-black leading-[1.1] tracking-tight">
-                        나의 디지털 흔적은
+                        나를 운영하는
                         <br />
                         <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-                            내 것이어야 한다
+                            Personal OS
                         </span>
                     </h1>
                     <p className="mt-6 text-lg text-neutral-500 leading-relaxed">
-                        사진이나 메모를 AI가 정리해준다.
+                        사진·메모·일정·관계가 자동 정리되는 나만의 OS.
                         <br />
-                        서비스는 사라져도 내 기록은 남는다.
+                        기록·분류·분석·실행을 하나로.
                     </p>
                     {!isLoading && isAuthenticated ? (
                         <button onClick={() => router.push('/myverse/app')}
@@ -226,7 +226,7 @@ export default function MyVersePage() {
                         만들기로 했다.
                     </h2>
                     <p className="mt-8 text-xl text-neutral-400 font-light tracking-wide" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                        My Universe — Myverse
+                        Myverse — Personal OS
                     </p>
                     <p className="mt-8 text-neutral-500 leading-relaxed">
                         사진을 찍는다. AI가 정리한다.
@@ -340,7 +340,7 @@ export default function MyVersePage() {
                 <div ref={s7.ref} className={`${s7.className} max-w-5xl mx-auto px-5 text-center`}>
                     <p className="text-indigo-600 font-semibold text-sm mb-2">WHY MYVERSE</p>
                     <h2 className="text-3xl sm:text-4xl font-bold mb-12">
-                        나의 디지털 흔적은<br /><span className="text-indigo-600">나의 것이어야 한다</span>
+                        나의 일상은<br /><span className="text-indigo-600">나만의 OS로 운영된다</span>
                     </h2>
                     <div className="grid md:grid-cols-3 gap-6">
                         {[
@@ -395,8 +395,8 @@ export default function MyVersePage() {
                 <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
                     <div>
                         <h3 className="font-bold mb-2">Myverse</h3>
-                        <p className="text-sm text-neutral-500">디지털 속 나의 기록</p>
-                        <p className="text-xs text-neutral-400">Personal Blackbox</p>
+                        <p className="text-sm text-neutral-500">나를 운영하는 OS</p>
+                        <p className="text-xs text-neutral-400">Personal OS</p>
                     </div>
                     <div>
                         <h3 className="font-bold mb-2">Contact</h3>

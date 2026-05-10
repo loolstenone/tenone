@@ -1,17 +1,20 @@
 # Myverse 브랜드 가이드
 
-> **My Universe** — 디지털 속 나를 키운다. "Personal Black Box for the Digital Age"
+> **Myverse** — 나를 운영하는 OS · Personal OS
 >
-> **3원칙**
-> - 나의 일상을 기록하고 관리하고 성장하고
-> - 내가 선택한 것들만 외부에 공유하고
-> - 지금까지의 디지털 흔적은 나의 것이다
+> **3원칙 (OS 톤)**
+> - **운영한다** — 사진·메모·일정·관계가 자동으로 정리되는 시스템
+> - **소유한다** — 내 데이터, 내 OS, 내 결정 (서비스가 사라져도 기록은 남는다)
+> - **성장한다** — AI가 패턴을 보여주고, 나는 더 잘 살 수 있도록
+>
+> **메타포 레이어** — 외부 마케팅: Personal OS / 내부 철학: Personal Black Box (philosophy 페이지에서만 사용)
 
 ---
 
 ## 정체성
 
-- **한 줄 소개**: 9 영역으로 자동 정리되는 개인 데이터 통합 + AI 코칭 + 선택 공개 핸들
+- **한 줄 소개**: 나를 운영하는 OS — 9 영역 자동 정리 + AI 코칭 + 선택 공개 핸들
+- **포지셔닝**: Personal OS (외부) / Personal Black Box (내부 철학)
 - **톤앤매너**: 미래적·개인화·신뢰. 데이터 주권.
 - **주 컬러**: 인디고 `#6366F1`
 - **메인 도메인**: `myverse.kr` (개인 공개 페이지: `myverse.kr/@handle`)
@@ -163,8 +166,8 @@
 | `features/myverse/MyVerseHeader.tsx` · `MyVerseFooter.tsx` | 공통 헤더·푸터 |
 
 ### 앱 (Phase 1~ 진행)
-- `app/(MyVerse)/myverse/app/layout.tsx` — 앱 셸 (auth gate + sidebar + AppTopNav)
-- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — 온보딩 (5단계)
+- `app/(Myverse)/myverse/app/layout.tsx` — 앱 셸 (auth gate + sidebar + AppTopNav)
+- `app/(Myverse)/myverse/app/onboarding/page.tsx` — 온보딩 (5단계)
 - `features/myverse/MyverseSidebar.tsx` — 4Pillars + 9영역 SSOT 사이드바 (**세션114 복원**)
 - `features/myverse/app/AppTopNav.tsx` — 상단 네비 (LayoutGrid 드롭다운 SSOT 연결)
 - `lib/myverse/domains.ts` — 9영역 SSOT (app_href 포함)
@@ -186,7 +189,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 120 (2026-05-09)** — IA 5-Lane 마무리 + 모바일 햄버거 서브탭 + 9영역↔traces 역방향 CTA |
+| **Phase** | **세션 123 (2026-05-10)** — 사이트↔앱 통합 + Personal OS 메시지 정렬 + 마케팅 5p 허구성 정비 + LinkedIn 벤치마킹 (노션 친화 5 패턴) |
+| **세션 122 (2026-05-09)** | Myverse Stitch 디자인 1차 — 폰트(Hanken Grotesk·Inter·Material Symbols) + LaneHeader SSOT + Today/Coach 재디자인 + Traces 타임라인 마커 |
+| **세션 121** | IA QA 6건 수정 — 5-Lane 마감 |
 | **이전 Phase** | 세션 119 — IA 재구성 (4-Pillar mess → 5-Lane), LaneSubNav, traces ?domain= 딥링크 |
 | **Phase 118** | **세션 118 (2026-05-08)** — 올가미 선택·리사이즈 실시간·PP흔적·보안점검 |
 | **이전 Phase** | 세션 117 — Canvas Engine Phase 2 (image, export, 레이어, 텍스트 서식) / 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 |

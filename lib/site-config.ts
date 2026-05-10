@@ -404,10 +404,10 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         tagline: '정선의 자연을 담다. 한소농장에서 전하는 건강한 먹거리.',
     },
     myverse: {
-        id: 'myverse', name: 'My Universe', logoText: 'My Universe', logoStyle: 'text' as const,
+        id: 'myverse', name: 'Myverse', logoText: 'Myverse', logoStyle: 'text' as const,
         faviconUrl: '/brands/myverse/favicon.png', appleTouchIcon: '/brands/myverse/favicon.png',
         colors: { primary: '#6366F1', primaryDark: '#4F46E5', secondary: '#818CF8', headerBg: '#0B0D17', headerText: '#ffffff', footerBg: '#0B0D17', footerText: '#a3a3a3', accent: '#6366F1' },
-        meta: { title: 'My Universe — 디지털 속 나를 키운다', description: '흩어져 있는 나의 기록을 모으고, AI가 나를 알아가고, 디지털 세상에서 나를 대표하는 Personal Black Box.', keywords: ['My Universe', 'MyVerse', 'AI 에이전트', '개인화', '데이터 주권', 'Personal Black Box', 'Ten:One'] },
+        meta: { title: 'Myverse — 나를 운영하는 OS', description: '기록·분류·분석·실행을 하나로. 사진·메모·일정·관계가 자동 정리되는 Personal OS.', keywords: ['Myverse', 'Personal OS', 'AI 에이전트', '개인화', '데이터 주권', 'Ten:One'] },
         homePath: '/myverse', signupPath: '/signup', domain: 'myverse.tenone.biz',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },

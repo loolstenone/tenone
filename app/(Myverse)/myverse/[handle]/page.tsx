@@ -15,6 +15,7 @@ import { AtSign, Calendar, ExternalLink } from "lucide-react";
 import { getPublicPageData } from "@/lib/myverse/handle/public-page";
 import { DOMAINS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
+import { ShareButton } from "@/features/myverse/handle/ShareButton";
 
 export const dynamic = "force-dynamic";   // 공개 페이지는 매 요청 갱신 (visibility 토글 즉시 반영)
 export const revalidate = 0;
@@ -50,45 +51,59 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
     return (
         <div className="min-h-screen bg-neutral-50">
             <main className="max-w-2xl mx-auto px-4 py-8">
-                {/* 1. 프로필 헤더 */}
-                <header className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-                    <div className="flex items-start gap-4">
-                        {profile.avatar_url ? (
-                            <Image
-                                src={profile.avatar_url}
-                                alt={profile.name ?? handle}
-                                width={72}
-                                height={72}
-                                className="rounded-full object-cover shrink-0"
-                            />
-                        ) : (
-                            <div className="h-18 w-18 rounded-full bg-gradient-to-br from-[#6366F1] to-[#A855F7] flex items-center justify-center text-white text-2xl font-bold shrink-0">
-                                {(profile.name ?? handle).charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                            <h1 className="text-xl font-semibold text-neutral-900 truncate">
-                                {profile.name ?? `@${profile.handle}`}
-                            </h1>
-                            <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
-                                <AtSign className="h-3 w-3" />
-                                <span className="font-mono">{profile.handle}</span>
-                                <span className="mx-1">·</span>
-                                <Calendar className="h-3 w-3" />
-                                <span>{new Date(profile.joined_at).getFullYear()}년부터</span>
-                            </div>
-                            {profile.affiliations.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                    {profile.affiliations.map(a => (
-                                        <span
-                                            key={a}
-                                            className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-100 text-neutral-600"
-                                        >
-                                            {a}
-                                        </span>
-                                    ))}
+                {/* 1. 프로필 hero — LinkedIn 스타일 (큰 아바타·이름·핸들·통계·공유) */}
+                <header className="bg-white rounded-2xl mb-6 shadow-sm overflow-hidden">
+                    {/* 커버 (인디고 그라디언트) */}
+                    <div className="h-24 bg-gradient-to-br from-[#6366F1] via-[#818CF8] to-[#A855F7]" />
+                    <div className="px-6 pb-6 -mt-12">
+                        <div className="flex items-end justify-between gap-3 mb-4">
+                            {profile.avatar_url ? (
+                                <Image
+                                    src={profile.avatar_url}
+                                    alt={profile.name ?? handle}
+                                    width={88}
+                                    height={88}
+                                    className="rounded-full object-cover shrink-0 border-4 border-white shadow-md"
+                                />
+                            ) : (
+                                <div className="h-22 w-22 rounded-full bg-gradient-to-br from-[#6366F1] to-[#A855F7] flex items-center justify-center text-white text-3xl font-bold shrink-0 border-4 border-white shadow-md">
+                                    {(profile.name ?? handle).charAt(0).toUpperCase()}
                                 </div>
                             )}
+                            <div className="mb-1">
+                                <ShareButton url={`/@${profile.handle}`} name={profile.name ?? `@${profile.handle}`} />
+                            </div>
+                        </div>
+                        <h1
+                            className="text-2xl font-bold text-neutral-900 leading-tight"
+                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                        >
+                            {profile.name ?? `@${profile.handle}`}
+                        </h1>
+                        <div className="flex items-center gap-1 text-xs text-neutral-500 mt-1">
+                            <AtSign className="h-3 w-3" />
+                            <span className="font-mono">{profile.handle}</span>
+                            <span className="mx-1">·</span>
+                            <Calendar className="h-3 w-3" />
+                            <span>{new Date(profile.joined_at).getFullYear()}년부터</span>
+                        </div>
+                        {profile.affiliations.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-3">
+                                {profile.affiliations.map(a => (
+                                    <span
+                                        key={a}
+                                        className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-100 text-neutral-600"
+                                    >
+                                        {a}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {/* Stats row — LinkedIn 스타일 (공개 콘텐츠만 카운트) */}
+                        <div className="flex items-center gap-5 mt-4 pt-4 border-t border-neutral-100 text-xs">
+                            <Stat label="공개 흔적" value={moments.length} />
+                            <Stat label="포트폴리오" value={projects.length} />
+                            <Stat label="이력" value={resume_sections.length} />
                         </div>
                     </div>
                 </header>
@@ -185,6 +200,15 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
                     </a>
                 </footer>
             </main>
+        </div>
+    );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+    return (
+        <div>
+            <div className="text-base font-semibold text-neutral-900 leading-none">{value.toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-widest text-neutral-400 mt-1">{label}</div>
         </div>
     );
 }

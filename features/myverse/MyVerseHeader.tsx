@@ -14,6 +14,7 @@ const PREFIX = '/myverse';
 const navItems = [
     { name: "서비스", href: `${PREFIX}/service` },
     { name: "기술", href: `${PREFIX}/technology` },
+    { name: "가격", href: `${PREFIX}/pricing` },
     { name: "철학", href: `${PREFIX}/philosophy` },
     { name: "팀", href: `${PREFIX}/team` },
     { name: "로드맵", href: `${PREFIX}/roadmap` },
@@ -34,7 +35,7 @@ export function MyVerseHeader() {
                 {/* Logo */}
                 <Link href={PREFIX} className="flex items-center gap-2 shrink-0">
                     <span className="text-neutral-900 font-bold text-lg tracking-tight">Myverse</span>
-                    <span className="text-neutral-400 text-xs hidden sm:inline">Personal Blackbox</span>
+                    <span className="text-neutral-400 text-xs hidden sm:inline">Personal OS</span>
                 </Link>
 
                 {/* Desktop Nav */}
@@ -55,8 +56,18 @@ export function MyVerseHeader() {
                     ))}
                 </div>
 
-                {/* Right: UniverseUtilityBar + Mobile toggle */}
+                {/* Right: (비인증 시만) 가입 CTA + UniverseUtilityBar + Mobile toggle
+                    인증 시 앱 진입은 우측 WORK 드롭다운(UniverseUtilityBar)이 SSOT — 중복 노출 금지 */}
                 <div className="flex items-center gap-2 shrink-0">
+                    {!isAuthenticated && (
+                        <Link
+                            href="/myverse/login"
+                            className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-full transition-colors"
+                        >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Myverse 시작하기
+                        </Link>
+                    )}
                     <div className="hidden md:flex">
                         <UniverseUtilityBar
                             aboutPath="/myverse/service"
@@ -66,6 +77,7 @@ export function MyVerseHeader() {
                             searchPlaceholder="Myverse 검색"
                             siteId="myverse"
                             siteName="Myverse"
+                            hideWorkspaces
                         />
                     </div>
                     <button

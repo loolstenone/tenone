@@ -4,6 +4,105 @@
 
 ---
 
+## 2026-05-10 — 세션 123 · Myverse 사이트↔앱 통합 + Personal OS 정렬 + LinkedIn 벤치마킹
+
+### 장소
+집
+
+### 핵심 결정사항
+- **사이트↔앱 통합**: middleware 기반 깔끔 URL — `myverse.kr/today`처럼 prefix 없는 URL을 사용자에게 노출
+- **포지셔닝**: "My Universe" 폐기 → **Myverse · Personal OS · 나를 운영하는 OS** 단일화
+- **로그인 정책**: 인증 시 `myverse.kr/` → `/today` 자동 302 (LinkedIn 패턴)
+- **WORK 드롭다운**: Myverse 본진에선 숨김 — `hideWorkspaces` opt-in (28개 브랜드 영향 없음)
+- **마케팅 5p 허구성 정비**: 제공/베타/Phase 2 라벨 SSOT — 미구현 기능을 단정형으로 표현 안 함
+- **Pricing ↔ Roadmap 정렬**: Pro = "Phase 2 출시 예정" 명시, "Pro 출시 알림 받기" CTA로 정직화
+- **`/about` 재작성**: Planner's 시절 컨텐츠 폐기 → Myverse 정체성 + 3원칙 OS톤
+- **노션 친화 패턴 5건**: Cmd+K(검증) · `/` 캡처 · Traces 갤러리·리스트 토글 · @handle LinkedIn hero · Privacy 인디케이터
+
+### 변경 파일
+
+**Phase 1 — route group 캐논컬화** (78 파일 git rename)
+- `app/(MyVerse)/` → `app/(Myverse)/` + 9개 문서 경로 갱신
+
+**Phase 2 — middleware 통합 라우팅**
+- `middleware.ts` — `MYVERSE_APP_ROUTES` SSOT, `/app/X` → `/X` 308 redirect, 인증 시 `/` → `/today` 302
+
+**Phase 3 — 헤더 디스패처**
+- `features/myverse/MyVerseHeader.tsx` — 비인증 시만 CTA + hideWorkspaces
+- `components/UniverseUtilityBar.tsx` — `hideWorkspaces` prop 신설
+
+**Phase 5 — Pricing + About**
+- `app/(Myverse)/myverse/pricing/page.tsx` — Free(현재)/Pro(Phase 2) 2티어 + Status 라벨
+- `app/(Myverse)/myverse/about/page.tsx` — Personal OS 3원칙으로 재작성
+
+**버그 수정**
+- `app/(Myverse)/layout.tsx` — `overflow-x-hidden` (모바일 헤더 햄버거 viewport 밖으로 밀리던 이슈)
+
+**Personal OS 메시지 통일**
+- `lib/site-config.ts` — name/title/description/keywords
+- `features/myverse/MyVerseHeader.tsx` 서브타이틀, `MyVerseFooter.tsx` tagline
+- `app/(Myverse)/myverse/page.tsx` — hero h1 "나를 운영하는 / Personal OS" + 3곳 카피
+
+**마케팅 5p 허구성 정비**
+- service/technology/philosophy/roadmap/team — 미구현 단정형 → 베타/예정/비전 라벨
+
+**LinkedIn 벤치마킹 (5 패턴)**
+- `features/myverse/planner/KeyboardShortcuts.tsx` — `/` 키 → `/traces?compose=1`
+- `features/myverse/app/TracesTimelineView.tsx` — view 토글 + `MomentRow` + privacy 인디케이터
+- `app/(Myverse)/myverse/[handle]/page.tsx` — LinkedIn hero (커버·아바타·stats·share)
+- `features/myverse/handle/ShareButton.tsx` — 신규 (Web Share API + clipboard)
+
+### 보류
+- 124 파일 링크 일괄 치환 (localhost 위험으로 middleware redirect로 충분)
+- About philosophy+team 통합 (콘텐츠 디자인 별도)
+- Calendar/Map view (Phase 2)
+
+---
+
+## 2026-05-09 — 세션 122 · Myverse Stitch 디자인 1차
+
+### 장소
+집
+
+### 핵심 결정사항
+- **인디고 #6366F1 유지** (Stitch steel blue 채택 안 함) — 브랜드 일관성 우선
+- **폰트 도입 확정**: Hanken Grotesk(헤드라인) + Inter(본문) + Material Symbols Outlined(아이콘)
+- **Today를 대시보드로** — 별도 dashboard 페이지 만들지 않고 today에 brief/오늘의 흔적/타임라인 통합
+- **LaneHeader SSOT** — 25+ 페이지에 헤더 패턴 복제하지 않고 공용 컴포넌트 1개로 흡수
+- **/traces 타임라인**: 풀 vertical timeline은 그리드 밀도 손상 → 월별 섹션 마커로 절충
+
+### 변경 파일
+- `features/myverse/app/TodayDashboard.tsx` — 신규 (Stitch Bento 대시보드)
+- `app/(Myverse)/myverse/app/today/page.tsx` — 서버 컴포넌트화 + members.name 전달
+- `app/(Myverse)/myverse/app/coach/page.tsx` — Bento 재디자인 (Briefing/Weekly Balance/Capsules)
+- `app/(Myverse)/myverse/app/layout.tsx` — Google Fonts preconnect + 3종 link
+- `features/myverse/app/LaneHeader.tsx` — 신규 (indigo label + Hanken h1 + accent + backLink slot)
+- `features/myverse/planner/MobileBottomNav.tsx` · `features/myverse/app/MobileBottomNav.tsx` — Lucide → Material Symbols
+- `features/myverse/app/TracesTimelineView.tsx` — 헤더 LaneHeader + 월별 섹션 vertical line + 원형 마커
+- `features/myverse/app/DMView.tsx` — 좌측 헤더 chat 심볼 + Hanken Grotesk
+- `features/myverse/planner/SettingsLayout.tsx` — LaneHeader 적용
+- `app/(Myverse)/myverse/app/{feed,ask,tasks}/page.tsx` — 헤더 LaneHeader 정렬
+- `app/(Myverse)/myverse/app/{body,study,lifestyle,schedule,travel,move,relation}/page.tsx` — LaneHeader + accent + DomainBackLink
+- `features/myverse/planner/WorkView.tsx` — LaneHeader 통합
+
+### 커밋
+- `6edd9dee` /today 대시보드 리뉴얼
+- `c047f687` /coach 재디자인
+- `4c4bc3e0` /traces 헤더
+- `8b0bf4c5` /feed /ask /tasks 헤더
+- `f6a885ae` LaneHeader 공용 컴포넌트
+- `33f42f73` /settings 헤더
+- `f369c9e1` 9영역 LaneHeader
+- `a46cb855` 모바일 bottom nav Material Symbols
+- `65b81a9f` /dm 헤더
+
+### 보류
+- 카드 라운드/그림자 토큰 통일 (영향 범위 큼)
+- Hover 톤 일관화 (분산)
+- 타임라인 alternating 좌우 (밀도 손상)
+
+---
+
 ## 2026-05-09 — 세션 120 · Myverse IA 마무리 (모바일 햄버거 + 양방향 회유)
 
 ### 장소
@@ -20,12 +119,12 @@
 - `features/myverse/app/LaneSubNav.tsx` — `WORK_LANE_TABS` export 추가
 - `features/myverse/app/DomainBackLink.tsx` — 신규 (traces 역방향 CTA)
 - `features/myverse/app/AppTopNav.tsx` — 삭제 (중복 파일)
-- `app/(MyVerse)/myverse/app/{projects,canvas,tasks,templates,contacts,personal}/page.tsx` — `<LaneSubNav tabs={WORK_LANE_TABS}>` 임베드
-- `app/(MyVerse)/myverse/app/{body,study,lifestyle,schedule,travel,move,relation}/page.tsx` — `<DomainBackLink>` 헤더 적용
+- `app/(Myverse)/myverse/app/{projects,canvas,tasks,templates,contacts,personal}/page.tsx` — `<LaneSubNav tabs={WORK_LANE_TABS}>` 임베드
+- `app/(Myverse)/myverse/app/{body,study,lifestyle,schedule,travel,move,relation}/page.tsx` — `<DomainBackLink>` 헤더 적용
 - `features/myverse/planner/WorkView.tsx` — `<DomainBackLink domain="work">` 추가
 - `features/myverse/app/AskMyverseView.tsx` — ask 카피 보강
-- `app/(MyVerse)/myverse/app/coach/page.tsx` — coach 부제 추가
-- `app/(MyVerse)/CLAUDE.md` — IA SSOT 섹션 신설 + 금지 4항목 + 세션 120 상태
+- `app/(Myverse)/myverse/app/coach/page.tsx` — coach 부제 추가
+- `app/(Myverse)/CLAUDE.md` — IA SSOT 섹션 신설 + 금지 4항목 + 세션 120 상태
 
 ### 커밋
 - `dcaea35d` 도구 lane 서브메뉴 패턴 + IA 5-Lane 마무리
@@ -141,7 +240,7 @@
 
 ### 핵심 결정사항
 - "Planner's"는 별도 브랜드 — Myverse 코드 안에 잔존하면 안 됨 (이전 세션 결정 강화)
-- 스코프 한정: `features/myverse/`, `app/(MyVerse)/`, `app/api/myverse/`, `lib/myverse/` 만. `intra/planners`·`MyverseRole.'planner'` 직무명·`lib/analytics.ts` 공용 함수는 보존
+- 스코프 한정: `features/myverse/`, `app/(Myverse)/`, `app/api/myverse/`, `lib/myverse/` 만. `intra/planners`·`MyverseRole.'planner'` 직무명·`lib/analytics.ts` 공용 함수는 보존
 - DB·Storage·SW·HTML 마커 등 인프라 마이그레이션이 필요한 항목은 의도적으로 이월 (코드만 바꾸면 깨짐)
 
 ### 변경 파일
@@ -174,8 +273,8 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 - `lib/myverse/domains.ts` — `DomainMeta.app_href` 추가
 - `features/myverse/MyverseSidebar.tsx` — SSOT 기반 완전 재작성
 - `features/myverse/app/AppTopNav.tsx` — LayoutGrid 드롭다운 SSOT 연결
-- `app/(MyVerse)/myverse/app/layout.tsx` — 사이드바 복원 + `getAuthState` 강화
-- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — 첫 페이지 카피 수정
+- `app/(Myverse)/myverse/app/layout.tsx` — 사이드바 복원 + `getAuthState` 강화
+- `app/(Myverse)/myverse/app/onboarding/page.tsx` — 첫 페이지 카피 수정
 - `app/login/page.tsx` — 강제 `/intra` 리다이렉트 2곳 제거
 - `lib/auth-context.tsx` — social login `isAuthPage` endsWith 추가
 
@@ -210,9 +309,9 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 - `domain-registry.ts` SSOT 기반 도메인 목록 표시 — DB `domains` 컬럼 대신 레지스트리 직접 조회
 
 ### 변경 파일
-- `app/(MyVerse)/myverse/login/page.tsx` (신규) — 마이버스 전용 로그인 게이트 (LoginModal indigo)
-- `app/(MyVerse)/myverse/app/layout.tsx` — no_session → `/myverse/login?redirect=/myverse/app`
-- `app/(MyVerse)/myverse/page.tsx` — 랜딩 CTA 인증 인식 (로그인 시 "앱으로 이동")
+- `app/(Myverse)/myverse/login/page.tsx` (신규) — 마이버스 전용 로그인 게이트 (LoginModal indigo)
+- `app/(Myverse)/myverse/app/layout.tsx` — no_session → `/myverse/login?redirect=/myverse/app`
+- `app/(Myverse)/myverse/page.tsx` — 랜딩 CTA 인증 인식 (로그인 시 "앱으로 이동")
 - `app/api/sites/toggle/route.ts` (신규) — admin 클라이언트 기반 is_open 토글 API
 - `lib/supabase/site-configs.ts` — toggleSiteOpen() → fetch('/api/sites/toggle')
 - `lib/domain-registry.ts` — getDomainsBySiteId() 추가 (SiteDomainEntry 인터페이스 포함)
@@ -240,10 +339,10 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 
 ### 변경 파일
 - `middleware.ts` — x-pathname 헤더 주입 (server header()로 layout이 경로 식별), `/planners` 매칭을 정확 경로(`=== '/planners'` 또는 `startsWith('/planners/')`)로 좁힘, prefetch 무한 큐 차단 조건 정리
-- `app/(MyVerse)/myverse/app/layout.tsx` — getMemberWithPlanner → getAuthState 3-state(no_session/no_member/ok), members 조회 auth_id 우선·email fallback, x-pathname=/myverse/app/onboarding 우회, no_member case → /onboarding으로 분기 (기존엔 /login으로 보내서 무한 루프)
-- `app/(MyVerse)/myverse/app/onboarding/page.tsx` — `/myverse/onboarding/page.tsx`에서 이전, /login redirect 파라미터 갱신, 완료 후 /myverse/app/today로 직접 이동
+- `app/(Myverse)/myverse/app/layout.tsx` — getMemberWithPlanner → getAuthState 3-state(no_session/no_member/ok), members 조회 auth_id 우선·email fallback, x-pathname=/myverse/app/onboarding 우회, no_member case → /onboarding으로 분기 (기존엔 /login으로 보내서 무한 루프)
+- `app/(Myverse)/myverse/app/onboarding/page.tsx` — `/myverse/onboarding/page.tsx`에서 이전, /login redirect 파라미터 갱신, 완료 후 /myverse/app/today로 직접 이동
 - `components/ClientRedirect.tsx` — server redirect()의 Next.js 16 dev router prefetch 무한 큐 회피용 client redirect (`window.location.replace`)
-- `app/(MyVerse)/myverse/app/page.tsx` · `today/page.tsx` · `time/page.tsx` — server `redirect()` → `<ClientRedirect>` 변환
+- `app/(Myverse)/myverse/app/page.tsx` · `today/page.tsx` · `time/page.tsx` — server `redirect()` → `<ClientRedirect>` 변환
 - `public/planners-sw.js` — v2: CACHE_NAME `pp-ai-v1` → `myverse-app-v2`, activate 시 옛 캐시 전부 삭제, fetch 핸들러는 `/myverse/*` 외 모든 경로 패스, prefetch 응답은 캐시하지 않음
 - `features/myverse/app/PlannersChrome.tsx` · `QuickCapture.tsx` — 옛 `/myverse/onboarding` 경로 제거
 
@@ -298,9 +397,9 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 
 ### 추가
 - `sql/myverse-rename-planners-to-myverse.sql` — 테이블·함수 일괄 RENAME + 함수 본문 재작성
-- `app/(MyVerse)/myverse/app/{today,weekly,monthly,yearly,tasks,index,settings,search,time,canvas/[id],contacts,templates,personal,projects,ai-briefing,help}/page.tsx` — PP 라우트 재-export
-- `app/(MyVerse)/myverse/{about,canvas,community,gpr,install,my,offline,onboarding,p,planner-tool,planning,portfolio,programs,purchase}/page.tsx` — PP 비-app 페이지 재-export
-- `app/(MyVerse)/myverse/app/lifestyle/page.tsx` — 9-domain 일상(daily key) 페이지 (충돌 회피)
+- `app/(Myverse)/myverse/app/{today,weekly,monthly,yearly,tasks,index,settings,search,time,canvas/[id],contacts,templates,personal,projects,ai-briefing,help}/page.tsx` — PP 라우트 재-export
+- `app/(Myverse)/myverse/{about,canvas,community,gpr,install,my,offline,onboarding,p,planner-tool,planning,portfolio,programs,purchase}/page.tsx` — PP 비-app 페이지 재-export
+- `app/(Myverse)/myverse/app/lifestyle/page.tsx` — 9-domain 일상(daily key) 페이지 (충돌 회피)
 - `features/myverse/MyVerseChrome.tsx` — 마케팅 헤더/푸터를 /app 경로에서 자동 숨김
 - `app/api/myverse/*` 71개 라우트 (planners/* 이동, search → planner-search 리네이밍)
 - `lib/myverse/*` 21개 모듈 (planners/* 병합)
@@ -308,8 +407,8 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 ### 수정
 - `middleware.ts` — 0a번 `/api/planners/*` rewrite, 0b번 `/planners/*` 308 redirect
 - `lib/domain-registry.ts` — planners.tenone.biz 프리픽스 갱신
-- `app/(MyVerse)/myverse/app/layout.tsx` — PP 핵심 chrome 흡수 (Theme·Pwa·Beta·Keyboard·AiBriefing·MobileBottom·Welcome·MonthBar), 마이버스 헤더/사이드바 제거
-- `app/(MyVerse)/layout.tsx` — MyVerseChrome 래퍼 사용
+- `app/(Myverse)/myverse/app/layout.tsx` — PP 핵심 chrome 흡수 (Theme·Pwa·Beta·Keyboard·AiBriefing·MobileBottom·Welcome·MonthBar), 마이버스 헤더/사이드바 제거
+- `app/(Myverse)/layout.tsx` — MyVerseChrome 래퍼 사용
 - `features/planners/AppTopNav.tsx` — 로고 Myverse<sup>App</sup>, 인디고 컬러, regex `/planners/app/canvas` → `/myverse/app/canvas`
 - `features/planners/PlannersThemeProvider.tsx` — `myverse` 테마 추가, 기본값 `teal` → `myverse`
 - `features/planners/HandNote.tsx` — 그리기 토글 제거, 펜 선택 시 자동 진입, 같은 펜 재클릭 시 해제
@@ -321,7 +420,7 @@ WORK_STATUS.md "다음 할 일" 섹션 참조 — 우선순위 13개 (DB/Storage
 - features/planners 67개 파일 `/planners/...` URL → `/myverse/...`
 
 ### 삭제
-- `app/(MyVerse)/myverse/app/{ai,dream,log,plan,work}/page.tsx` — 옛 myverse_* 7탭 중 5개 (PP 라우트 흡수로 대체, work는 DomainPage('work')로 재생성)
+- `app/(Myverse)/myverse/app/{ai,dream,log,plan,work}/page.tsx` — 옛 myverse_* 7탭 중 5개 (PP 라우트 흡수로 대체, work는 DomainPage('work')로 재생성)
 
 ### 다음 할 일
 - features/planners → features/myverse/app 폴더 리네이밍 (78개 컴포넌트 import 갱신)

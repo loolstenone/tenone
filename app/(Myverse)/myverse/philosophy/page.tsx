@@ -83,21 +83,21 @@ const transitions = [
     {
         num: "3",
         title: "나를 알아간다",
-        desc: "AI가 나의 소비 패턴, 수면 패턴, 관계 패턴, 감정 패턴을 이해한다. 하지만 나서지 않는다. 오래 사귄 친구처럼, 조심스럽게.",
+        desc: "기록이 충분히 쌓이면 AI가 소비·수면·관계·감정 패턴을 읽기 시작한다. 그러나 나서지 않는다. 오래 사귄 친구처럼, 조심스럽게. (단계적 도입)",
         value: "\"비서가 아니라 영혼의 단짝\"",
         icon: Brain,
     },
     {
         num: "4",
         title: "나를 대표한다",
-        desc: "AI가 나를 충분히 알게 되면, 디지털 세상에서 나를 대표할 수 있게 된다. 더 이상 앱이 아니라 디지털 세상에서의 나 자신.",
+        desc: "AI가 나를 충분히 알게 되면, 디지털 세상에서 나를 대표할 수 있게 된다. 더 이상 앱이 아니라 디지털 세상에서의 나 자신. (장기 비전)",
         value: "\"내가 직접 가지 않아도 된다\"",
         icon: User,
     },
     {
         num: "5",
         title: "세상이 나에게 접속한다",
-        desc: "패러다임이 뒤집힌다. 내가 서비스에 접속하는 게 아니라, 서비스가 나에게 접속한다. 내가 허락한 만큼만.",
+        desc: "언젠가 패러다임이 뒤집힌다. 내가 서비스에 접속하는 게 아니라, 서비스가 나에게 접속한다. 내가 허락한 만큼만. (장기 비전)",
         value: "\"여기에 내가 있다. 만나러 와라.\"",
         icon: Globe,
     },
@@ -108,8 +108,9 @@ function TransitionsSection() {
         <section className="py-24 lg:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <p className="text-indigo-400 font-medium text-sm mb-3">FIVE TRANSITIONS</p>
+                    <p className="text-indigo-400 font-medium text-sm mb-3">FIVE TRANSITIONS · 비전 로드맵</p>
                     <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">다섯 번의 전환</h2>
+                    <p className="mt-3 text-sm text-neutral-500">현재는 1·2단계를 개발 중이며, 3단계 이후는 단계적으로 도입됩니다.</p>
                 </div>
 
                 <div className="space-y-6 max-w-3xl mx-auto">
