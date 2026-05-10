@@ -103,6 +103,7 @@ export function AiDiaryView() {
                 label="AI DIARY"
                 title="하루를 한 줄로"
                 subtitle="오늘의 흔적·일과·장소를 모아 AI가 한 문장으로 묶어줍니다 — 그 위에 내 말을 더하세요"
+                status="beta"
             />
 
             {/* 날짜 네비 */}

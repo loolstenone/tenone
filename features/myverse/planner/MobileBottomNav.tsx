@@ -12,7 +12,7 @@ export const MOBILE_NAV_DEFAULT: string[] = ["today", "record", "ai", "connect",
 // icon = Material Symbol 이름 (font ligature)
 export const ALL_NAV_OPTIONS = [
     // ── 5 Lane (1차 SSOT)
-    { id: "today",    label: "오늘",     icon: "wb_twilight",    href: "/myverse/app/today" },
+    { id: "today",    label: "오늘",     icon: "wb_twilight",    href: "/myverse/app/daily" },
     { id: "record",   label: "기록",     icon: "photo_library",  href: "/myverse/app/traces" },
     { id: "ai",       label: "AI",       icon: "auto_awesome",   href: "/myverse/app/ask" },
     { id: "connect",  label: "연결",     icon: "link",           href: "/myverse/app/feed" },

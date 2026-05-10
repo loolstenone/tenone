@@ -16,7 +16,6 @@ const navItems = [
     { name: "마이버스 도구", href: "/myverse/planner-tool", desc: "PDF · AI 도구" },
     { name: "Programs",          href: "/myverse/programs",     desc: "교육 프로그램" },
     { name: "GPR",               href: "/myverse/gpr",          desc: "성과 관리" },
-    { name: "커뮤니티",           href: "/myverse/community",    desc: "사용자 후기·사례" },
 ];
 
 export function PlannersHeader() {

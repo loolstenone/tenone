@@ -86,7 +86,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Daily · Weekly · Notes · Projects · AI 브리핑 전체 검색…"
+                    placeholder="오늘 · 흔적 · 무끼 · 프로젝트 · 캔버스 · 연락처 전체 검색…"
                     className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
                     autoFocus
                 />

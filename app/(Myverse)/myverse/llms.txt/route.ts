@@ -61,9 +61,9 @@ export async function GET() {
 - /team — 팀 소개
 - /contact — 연락
 - /@handle — 사용자 공개 페이지 (선택 공개 콘텐츠만)
-- /app/{body,work,study,daily,schedule,travel,move,relation} — 9 영역 (로그인)
-- /app/verse — 통합 타임라인 6단계 줌
-- /app/coach — AI 코칭 "나와의 대화"
+- /app/{body,work,study,daily,schedule,travel,move,relation} — 9 영역 (로그인, traces ?domain= 으로 흡수)
+- /app/traces — 9 영역 통합 타임라인 (도메인 필터 지원)
+- /app/ask — Mukki AI (mode=ask|diary|coach 단일 인터페이스)
 - /app/settings/imports — 외부 백업 가져오기 허브
 - /app/settings/privacy — 자동 수집 동의 토글
 

@@ -1,13 +1,14 @@
-import { AskMyverseView } from "@/features/myverse/app/AskMyverseView";
-import { LaneSubNav, AI_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
+import { Suspense } from "react";
+import { AskMyverseView, type MukkiMode } from "@/features/myverse/app/AskMyverseView";
 
 export const dynamic = "force-dynamic";
 
-export default function AskPage() {
+export default async function AskPage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
+    const params = await searchParams;
+    const mode: MukkiMode = params.mode === "diary" ? "diary" : params.mode === "coach" ? "coach" : "ask";
     return (
-        <>
-            <LaneSubNav tabs={AI_LANE_TABS} />
-            <AskMyverseView />
-        </>
+        <Suspense>
+            <AskMyverseView initialMode={mode} />
+        </Suspense>
     );
 }

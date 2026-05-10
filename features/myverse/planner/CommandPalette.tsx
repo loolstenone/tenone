@@ -232,7 +232,7 @@ export function CommandPalette({ open, onClose }: Props) {
     const commands: Command[] = useMemo(() => [
         // 이동
         { id: "go_index",     label: "인덱스",        icon: LayoutGrid,      section: "이동", shortcut: "I", keywords: "index 인덱스 홈", run: () => go("/myverse/app/index") },
-        { id: "go_today",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/myverse/app/today") },
+        { id: "go_daily",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/myverse/app/daily") },
         { id: "go_weekly",    label: "주간",          icon: CalendarDays,    section: "이동", shortcut: "W", keywords: "weekly 주간", run: () => go("/myverse/app/weekly") },
         { id: "go_monthly",   label: "월간",          icon: CalendarRange,   section: "이동", shortcut: "M", keywords: "monthly 월간", run: () => go("/myverse/app/monthly") },
         { id: "go_yearly",    label: "연간",          icon: CalendarClock,   section: "이동", shortcut: "Y", keywords: "yearly 연간", run: () => go("/myverse/app/yearly") },

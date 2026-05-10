@@ -86,7 +86,7 @@ export async function GET(req: Request) {
             title: `Daily · ${r.date}`,
             snippet: snippet(text, q),
             date: r.date,
-            href: `/myverse/app/today?date=${r.date}`,
+            href: `/myverse/app/daily?date=${r.date}`,
         });
     });
 

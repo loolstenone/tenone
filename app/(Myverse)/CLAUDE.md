@@ -189,7 +189,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 123 (2026-05-10)** — 사이트↔앱 통합 + Personal OS 메시지 정렬 + 마케팅 5p 허구성 정비 + LinkedIn 벤치마킹 (노션 친화 5 패턴) |
+| **Phase** | **세션 124 (2026-05-11)** — IA 재구성(INSIDE/OUTSIDE) + 핸들 URL 정비(`/v` 폐기 → `/[handle]`) + 디지털 명함 SSOT(DigitalCard) + 노트 4종 미리보기 통일(h-48) + 캔버스 저장 버그 수정(unmount flush) + 모달 템플릿 입력 버그 수정(TemplateGridEditor) + 템플릿 그리드 Instagram 비례 + ViewToggle 4 페이지 공통 + PP→CanvasEditor 리네이밍 |
+| **세션 123 (2026-05-10)** | 사이트↔앱 통합 + Personal OS 메시지 정렬 + 마케팅 5p 허구성 정비 + LinkedIn 벤치마킹 (노션 친화 5 패턴) |
 | **세션 122 (2026-05-09)** | Myverse Stitch 디자인 1차 — 폰트(Hanken Grotesk·Inter·Material Symbols) + LaneHeader SSOT + Today/Coach 재디자인 + Traces 타임라인 마커 |
 | **세션 121** | IA QA 6건 수정 — 5-Lane 마감 |
 | **이전 Phase** | 세션 119 — IA 재구성 (4-Pillar mess → 5-Lane), LaneSubNav, traces ?domain= 딥링크 |
@@ -200,6 +201,7 @@
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **세션 124 결정** | ① IA INSIDE(ENGINE/PERSONAL/BLACKBOX/MUKKI) + OUTSIDE(피드/프로필/명함) — 5 Lane 폐기 · ② `/today` → `/daily` 메인 통합. 메뉴 라벨은 "오늘", 라우트는 `/daily`. 시간 줌 4 페이지 ViewToggle 공통 노출 · ③ `/myverse/v/[handle]` 폐기 → `/myverse/[handle]` (`HandleSubNav` [공개 흔적][프로필][명함]) · ④ DigitalCard SSOT (myverse·wio 양쪽). publicUrl 컨벤션: `myverse.kr/{handle}/card` · ⑤ 노트 4종 `h-48 + Maximize2 hover overlay` 통일. 캔버스 미리보기 = 콘텐츠 only(CanvasPreview) · ⑥ 캔버스 저장 unmount flush (PpCanvas/CanvasEditor) · ⑦ 모달 템플릿 입력은 `TemplateGridEditor` 컴포넌트로 격리, useState로 즉시 재렌더 · ⑧ 템플릿 그리드 `aspect-square` 제거, `grid-cols-1 sm:grid-cols-2` Instagram 패턴 · ⑨ PP 잔재: `PpCanvas`→`CanvasEditor`, `PpCanvasToolbar`→`CanvasEditorToolbar` (DB `data.ppcanvas` 키만 호환 유지) |
 | **주요 결정 (세션 114)** | ① 9영역 통합 옵션A 선택: `MyverseSidebar` 복원 + `AppTopNav` LayoutGrid 드롭다운 SSOT 연결 · ② `lib/myverse/domains.ts`에 `app_href` 추가 (daily→/lifestyle 특이 케이스 주의) · ③ `getAuthState()` anon 우선 → admin 재시도 구조로 변경 (SERVICE_ROLE_KEY 의존 제거) · ④ 로그인 강제 `/intra` 리다이렉트 제거 (CLAUDE.md 원칙 1.2.1 준수) · ⑤ social login `isAuthPage` endsWith('/login') 추가 → 브랜드 로그인 페이지에서 `?redirect=` 보존 |
 | **주요 결정 (세션 111)** | ① 무한 깜빡임 진짜 원인 = stale FK 이름 → REST join 실패 → plannerUser=null 오판 (이전 세션들이 잡지 못한 root cause) · ② 온보딩 URL `/myverse/onboarding` → `/myverse/app/onboarding` 이전 (앱 셸 하위) · ③ middleware x-pathname 헤더 주입으로 layout 경로 식별 · ④ members 조회 auth_id 우선 (email은 중복 row 방어 fallback) · ⑤ SW v2로 옛 PWA 사용자 자가 업그레이드 · ⑥ /planners 매칭은 정확 경로만 (정적 자산 보호) |
 | **주요 결정 (세션 112)** | ① `/myverse/login` 전용 페이지 신규 생성 (LoginModal indigo) · ② middleware에 myverse.kr/login → /myverse/login 리라이트 추가 · ③ PlannersHeader·CommunityView loginHref → myverse 직접 URL |

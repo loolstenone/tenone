@@ -51,6 +51,13 @@ export default function MyVersePage() {
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
+    // 로그인 상태면 서비스 페이지로 자동 이동 — 마케팅 랜딩은 비로그인 진입 전용
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.replace("/myverse/app/daily");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
     const handleSubmit = async () => {
         if (!email.trim() || submitting) return;
         setSubmitting(true);

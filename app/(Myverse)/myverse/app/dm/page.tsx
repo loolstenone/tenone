@@ -8,7 +8,6 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { DMView } from "@/features/myverse/app/DMView";
-import { LaneSubNav, CONNECT_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
 
 function DMPageInner() {
     const sp = useSearchParams();
@@ -19,11 +18,8 @@ function DMPageInner() {
 
 export default function DMPage() {
     return (
-        <>
-            <LaneSubNav tabs={CONNECT_LANE_TABS} />
-            <Suspense fallback={<div className="p-6 text-sm text-neutral-400">불러오는 중…</div>}>
-                <DMPageInner />
-            </Suspense>
-        </>
+        <Suspense fallback={<div className="p-6 text-sm text-neutral-400">불러오는 중…</div>}>
+            <DMPageInner />
+        </Suspense>
     );
 }

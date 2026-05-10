@@ -214,8 +214,8 @@ export const LANES: LaneMeta[] = [
         key: "today",
         label_ko: "오늘",
         icon_name: "Sunrise",
-        app_href: "/myverse/app/today",
-        description: "지금·여기 — 흔적, 일과, 코치 카드, 빠른 기록 한 화면",
+        app_href: "/myverse/app/daily",
+        description: "오늘·일간 통합 — 흔적, 할일, 일정, 노트, 프로젝트 한 화면",
     },
     {
         key: "record",
@@ -249,7 +249,7 @@ export const LANES: LaneMeta[] = [
 
 /** Lane 키 → 그 lane에 속하는 페이지 경로 prefix들 — 활성 상태 판정용 */
 export const LANE_PATHS: Record<LaneKey, string[]> = {
-    today: ["/myverse/app/today", "/myverse/app/index", "/myverse/app/daily"],
+    today: ["/myverse/app/daily", "/myverse/app/today", "/myverse/app/index"],
     record: [
         "/myverse/app/traces",
         "/myverse/app/lifestyle",

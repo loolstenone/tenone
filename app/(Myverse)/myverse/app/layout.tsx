@@ -9,6 +9,7 @@ import { cookies, headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
+import { AppSideNav } from "@/features/myverse/app/AppSideNav";
 import { AppMonthBar } from "@/features/myverse/planner/AppMonthBar";
 import { PwaRegister } from "@/features/myverse/app/PwaRegister";
 import { BetaFeedbackButton } from "@/features/myverse/app/BetaFeedbackButton";
@@ -108,7 +109,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         if (s.kind === "ok") {
             const mu = (s.member as { myverse_users?: MyverseUser[] }).myverse_users?.[0];
             if (isPrivileged(s.member as { member_roles?: RoleRow[] }) || mu?.onboarding_completed) {
-                return <ClientRedirect to="/myverse/app/today" />;
+                return <ClientRedirect to="/myverse/app/daily" />;
             }
         }
         return <>{children}</>;
@@ -187,6 +188,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                     customMenus={(myverseUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
                 <div className="flex flex-1 min-h-0">
+                    <AppSideNav />
                     <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0">
                         {children}
                     </main>

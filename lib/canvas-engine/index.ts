@@ -1,6 +1,6 @@
-// PP Canvas Engine — 공개 API
+// Canvas Engine — 공개 API
 //
-// wrapper 컴포넌트 (HandNote, PpCanvas)는 이 파일에서만 import 한다.
+// wrapper 컴포넌트 (HandNote, CanvasEditor)는 이 파일에서만 import 한다.
 // 내부 구조는 자유롭게 리팩토링 가능 — 공개 API만 안정적으로 유지.
 
 export { CanvasEngine } from "./engine";

@@ -134,6 +134,24 @@ export function TodayDashboard({ initialDate, userName }: { initialDate?: string
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
             <main className="max-w-6xl mx-auto px-5 md:px-10 pt-6 md:pt-10">
+                {/* ── 시간 줌 링크 (일/주/월/연) ───────────────────────── */}
+                <nav className="flex justify-end gap-1 mb-4 text-xs">
+                    {[
+                        { label: "일간", href: "/myverse/app/daily" },
+                        { label: "주간", href: "/myverse/app/weekly" },
+                        { label: "월간", href: "/myverse/app/monthly" },
+                        { label: "연간", href: "/myverse/app/yearly" },
+                    ].map(z => (
+                        <Link
+                            key={z.href}
+                            href={z.href}
+                            className="px-3 py-1.5 rounded-lg text-neutral-500 hover:bg-white hover:text-neutral-900 transition-colors"
+                        >
+                            {z.label}
+                        </Link>
+                    ))}
+                </nav>
+
                 {/* ── Date & Greeting ─────────────────────────────────── */}
                 <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                     <div>

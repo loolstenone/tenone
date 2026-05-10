@@ -1,13 +1,8 @@
-import { AiDiaryView } from "@/features/myverse/app/AiDiaryView";
-import { LaneSubNav, AI_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
+// 일기 — 무끼 통합 (세션 124). /ask?mode=diary 로 redirect.
+import { ClientRedirect } from "@/components/ClientRedirect";
 
 export const dynamic = "force-dynamic";
 
-export default function DiaryPage() {
-    return (
-        <>
-            <LaneSubNav tabs={AI_LANE_TABS} />
-            <AiDiaryView />
-        </>
-    );
+export default function DiaryRedirectPage() {
+    return <ClientRedirect to="/myverse/app/ask?mode=diary" />;
 }

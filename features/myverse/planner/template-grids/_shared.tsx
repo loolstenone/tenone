@@ -82,9 +82,9 @@ export function QuadrantGrid({
     onChange: (k: string, v: string) => void;
 }) {
     return (
-        <div className="my-3 select-none">
-            {/* 상단 X축 — Low ← X → High (표준 컨벤션) */}
-            <div className="flex items-center justify-center mb-3 ml-9">
+        <div className="my-3 select-none w-full max-w-3xl mx-auto">
+            {/* 상단 X축 — 모바일에서는 Y축 컬럼이 사라지므로 ml-0, sm+는 ml-10 */}
+            <div className="flex items-center justify-center mb-3 sm:ml-10">
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{axisXLow}</span>
                 <span className="mx-2 text-slate-300">←</span>
                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-700">{axisX}</span>
@@ -92,26 +92,31 @@ export function QuadrantGrid({
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{axisXHigh}</span>
             </div>
             <div className="flex gap-2">
-                {/* Y축 — 위 High, 아래 Low (표준 컨벤션, transform 기반 회전으로 다국어 일관) */}
-                <div className="flex flex-col items-center justify-between shrink-0 w-8 py-2">
+                {/* Y축 — 모바일은 숨기고 sm+에서만 노출 (모바일은 셀이 1열 스택) */}
+                <div className="hidden sm:flex flex-col items-center justify-between shrink-0 w-10 py-2 self-stretch">
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYHigh}</span>
-                    <div className="flex flex-col items-center justify-center flex-1 gap-1">
+                    <div className="flex flex-col items-center justify-center flex-1 gap-2">
                         <span className="text-slate-300 leading-none">↑</span>
-                        <span className="inline-block -rotate-90 whitespace-nowrap text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 my-3">{axisY}</span>
+                        <span className="inline-block -rotate-90 whitespace-nowrap text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 my-4">{axisY}</span>
                         <span className="text-slate-300 leading-none">↓</span>
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYLow}</span>
                 </div>
-                {/* 2x2 그리드 */}
-                <div className="flex-1 grid grid-cols-2 gap-2">
+                {/* 그리드 — 모바일 1열 스택, sm+ 2x2. 비례 고정 X, 콘텐츠 자율. */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {quads.map((q) => (
                         <div
                             key={q.key}
-                            className={`rounded-md p-3 min-h-32 transition-shadow hover:shadow-sm ${q.color}`}
+                            className={`rounded-md p-3 transition-shadow hover:shadow-sm flex flex-col min-h-[140px] sm:min-h-[180px] ${q.color}`}
                         >
                             <p className={`text-[11px] font-bold tracking-wide uppercase ${q.text}`}>{q.label}</p>
                             <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.desc}</p>
-                            <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} />
+                            <textarea
+                                value={data[q.key] ?? ""}
+                                onChange={e => onChange(q.key, e.target.value)}
+                                placeholder="내용을 입력하세요…"
+                                className="w-full flex-1 resize-none bg-transparent text-[11px] text-slate-700 placeholder:text-slate-300 placeholder:italic focus:outline-none leading-relaxed font-normal mt-1.5"
+                            />
                         </div>
                     ))}
                 </div>

@@ -1,6 +1,69 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-10 (세션 123 — Myverse 사이트↔앱 통합 + Personal OS 정렬 + LinkedIn 벤치마킹)
+> 마지막 업데이트: 2026-05-11 (세션 124 — Myverse IA 재구성 + 명함 + 노트/캔버스 미리보기 + 캔버스 저장 버그 수정)
+
+---
+
+## 세션 124 핵심 성과 (2026-05-11)
+
+### IA 재구성 — INSIDE/OUTSIDE 사이드바
+- 5 Lane → INSIDE(ENGINE/PERSONAL/BLACKBOX/MUKKI) + OUTSIDE(피드/프로필/명함)
+- `/today` → `/daily` 통합 (메뉴 라벨 "오늘", 라우트 `/daily` 메인). 4개 시간 줌 페이지(daily/weekly/monthly/yearly)에 [일간|주간|월간|연간] ViewToggle 공통 노출
+- 신규 `features/myverse/app/AppSideNav.tsx` — sticky `top-12` h-calc, INSIDE/OUTSIDE 그룹
+- AppTopNav 모바일 햄버거 + 아바타 알림 배지(60s 폴링) + 검색/캡처
+
+### 핸들 URL 재구조 — `/myverse/v/[handle]` 폐기
+- `/myverse/[handle]` 메인 (이미 존재한 LinkedIn-style page 재활용)
+- `[handle]/layout.tsx` + `HandleSubNav` — [공개 흔적] [프로필] [명함] sticky 서브탭
+- `[handle]/profile/page.tsx` (프로페셔널·포트폴리오 전용 뷰) + `[handle]/card/page.tsx` (받는 사람 시점 명함)
+- 레거시 `/v/[handle]/*` → ClientRedirect로 새 경로 이전 (QR 호환)
+- middleware `/@handle` rewrite 그대로 작동
+
+### 디지털 명함 SSOT — `components/DigitalCard.tsx`
+- 5 액션: 공유 / vCard / 링크 / QR / 이미지
+- QR: `qrcode` 패키지 client-side · vCard 3.0 RFC 6350 · PNG: `html-to-image` pixelRatio 2
+- 사용처: `/myverse/app/card` (인디고) · `/wio/app/my/card` (WIO 블루) · `/myverse/[handle]/card` (받는 사람)
+- `MyProfileCard`에 `theme` ("light"|"dark") + `universeProfileHref` prop 추가 (21 브랜드 호환 — 기본 dark)
+
+### 노트 4종 미리보기 통일
+- 손글씨·캔버스·코넬·템플릿 모두 `h-48 cursor-pointer group + Maximize2 hover overlay` 패턴
+- **캔버스 미리보기**: `<CanvasStudio embed>` (툴바 포함) → 신규 `CanvasPreview.tsx` (썸네일/SVG 직접 렌더, 콘텐츠 only) 교체
+- **템플릿**: 인라인 인터랙티브 grid → 미리보기 (`pointer-events-none`) + 클릭 시 모달 확장
+- **코넬**: max-h-64 → h-48 통일 + hover overlay 추가
+
+### 캔버스 저장 버그 수정
+- 1.5s 디바운스 후 발화하는 자동 저장이 모달 빠른 닫기 시 unmount cleanup의 `clearTimeout`으로 취소되어 데이터 유실
+- 수정: cleanup에서 대기 타이머 있으면 즉시 flush(`onSave(engine.serialize())`) 후 destroy
+
+### 모달 템플릿 입력 버그 수정
+- 확장 모달의 `renderFramework`가 localStorage에만 쓰고 React state 갱신 X → 입력해도 stale 표시
+- 신규 `TemplateGridEditor` 컴포넌트 — `useState<FrameworkData>` + onChange 시 localStorage + state 동시 업데이트
+
+### 템플릿 그리드 비례 정비 (Instagram 패턴)
+- `aspect-square` 고정 제거 — 콘텐츠 자율
+- `grid-cols-1 sm:grid-cols-2` 모바일 스택 / 태블릿+ 그리드
+- `max-w-3xl mx-auto` (사분면) / `max-w-2xl mx-auto` (스택) — 와이드 스크린 절대 안 늘어남
+- Y축 컬럼 모바일 hidden, sm+ 노출
+- 적용: `_shared.tsx`(QuadrantGrid) · `quadrants.tsx`(SWOT/4P/PEST/9-Box/MoSCoW/Kano/QuadrantBlank) · `empathy.tsx`(Ikigai 4원 + 메타 입력 행)
+
+### 코넬 노트 UX 개선
+- 제목 입력 중 Enter → 첫 단서 입력란 자동 포커스 (`data-cornell-cue="first"` 마킹)
+- 컬럼 헤더: "단서 · 키워드" → "제목, 단서, 키워드"
+- 요약 placeholder: "이 노트의 핵심 한 줄" → "이 노트의 핵심 요약"
+
+### 시간 줌 페이지 ViewToggle 공통 적용
+- 4개 페이지(daily/weekly/monthly/yearly) 우측 상단 [일간|주간|월간|연간] 토글
+- ViewToggle: key "today" → "daily", href `/today` → `/daily`
+
+### PP(Planner's Planner) 잔재 정리
+- `PpCanvas.tsx` → `CanvasEditor.tsx` (git mv 히스토리 보존)
+- `PpCanvasToolbar.tsx` → `CanvasEditorToolbar.tsx`
+- 컴포넌트명·Props·주석 일괄 갱신 (DB의 `data.ppcanvas` 키는 레거시 호환 유지, 코멘트 명시)
+
+#### 처리 보류
+- DailyView 3,650줄 코드 분할 리팩토링
+- 사이트 차단 토글·미리보기 기능 (사생활 토글)
+- 마이그레이션 `/myverse/app/X` → `/X` 일괄 치환 (124 파일, middleware 308로 충분)
 
 ---
 

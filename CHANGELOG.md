@@ -4,6 +4,61 @@
 
 ---
 
+## 2026-05-11 — 세션 124 · Myverse IA 재구성 + 명함 + 노트/캔버스 미리보기 + 캔버스 저장 버그
+
+### 장소
+집
+
+### IA 재구성 (INSIDE/OUTSIDE)
+- 5 Lane → INSIDE(ENGINE/PERSONAL/BLACKBOX/MUKKI) + OUTSIDE(피드/프로필/명함)
+- `/today` → `/daily` 통합 — 메뉴 라벨 "오늘", 라우트 `/daily` 메인 (DailyView 풍부한 대시보드)
+- 4 시간 줌 페이지(daily/weekly/monthly/yearly) 우측 상단 [일간|주간|월간|연간] ViewToggle 공통 노출
+
+### 핸들 URL 재구조
+- `/myverse/v/[handle]` → `/myverse/[handle]` (이미 존재한 LinkedIn-style page 재활용)
+- `[handle]/layout.tsx` + `HandleSubNav` — [공개 흔적] [프로필] [명함] sticky 서브탭
+- `[handle]/profile`·`[handle]/card` 신설 / 레거시 `/v/[handle]/*` ClientRedirect
+- middleware `/@handle` rewrite 작동
+
+### 디지털 명함 SSOT
+- 신규 `components/DigitalCard.tsx` — 공유/vCard/링크/QR/이미지 5 액션
+- `qrcode` (client) + vCard 3.0 + html-to-image PNG
+- 사용처: myverse/app/card · wio/app/my/card · myverse/[handle]/card
+- `MyProfileCard` light/dark theme prop 추가 (21 브랜드 호환)
+
+### 노트 4종 미리보기 통일
+- `h-48 cursor-pointer + Maximize2 hover overlay` 패턴
+- 캔버스: `<CanvasStudio embed>` → 신규 `CanvasPreview.tsx` (썸네일/SVG 직접, 툴바 없음)
+- 템플릿: 인라인 인터랙티브 → `pointer-events-none` 미리보기 + 클릭 모달
+- 코넬: max-h-64 → h-48 + hover overlay
+
+### 버그 수정
+- **캔버스 저장 유실**: PpCanvas unmount cleanup의 clearTimeout이 1.5s 디바운스 저장 취소 → cleanup에서 즉시 flush 후 destroy
+- **모달 템플릿 입력 안됨**: localStorage만 갱신하고 state 미갱신 → `TemplateGridEditor` 신규 컴포넌트로 분리, useState로 즉시 재렌더
+- **사이드바 헤더에 가려짐**: AppSideNav `h-screen sticky top-0` → `h-[calc(100vh-3rem)] sticky top-12`
+
+### 템플릿 그리드 Instagram 비례
+- `aspect-square` 제거, `grid-cols-1 sm:grid-cols-2`, `max-w-3xl/2xl mx-auto`
+- Y축 컬럼 모바일 hidden, sm+ 노출
+- 적용: `_shared.tsx` · `quadrants.tsx`(전 7종) · `empathy.tsx`(Ikigai/메타)
+
+### 코넬 노트 UX
+- 제목 Enter → 첫 단서 자동 포커스 (`data-cornell-cue="first"`)
+- "단서 · 키워드" → "제목, 단서, 키워드"
+- "이 노트의 핵심 한 줄" → "이 노트의 핵심 요약"
+
+### PP 잔재 제거
+- `PpCanvas.tsx` → `CanvasEditor.tsx` (git mv)
+- `PpCanvasToolbar.tsx` → `CanvasEditorToolbar.tsx`
+- 컴포넌트·Props·주석 갱신, DB `data.ppcanvas` 키만 레거시 호환 유지
+
+### 변경 파일
+- 신규: `app/(Myverse)/myverse/[handle]/{layout,profile/page,card/page}.tsx` · `app/(Myverse)/myverse/app/card/page.tsx` · `app/(WIO)/wio/app/my/card/page.tsx` · `components/DigitalCard.tsx` · `features/myverse/app/{AppSideNav,MyverseProfileView,ReceivedCardView}.tsx` · `features/myverse/handle/HandleSubNav.tsx` · `features/myverse/planner/CanvasPreview.tsx`
+- rename: `PpCanvas.tsx` → `CanvasEditor.tsx`, `PpCanvasToolbar.tsx` → `CanvasEditorToolbar.tsx`
+- 수정: `app/(Myverse)/myverse/app/{daily,weekly,monthly,yearly,today,layout,page,index/page,onboarding/page,ask,coach,diary,...}/page.tsx` · `app/(Myverse)/myverse/page.tsx` · `app/(Myverse)/myverse/v/[handle]/{page,card/page}.tsx` · `app/(WIO)/wio/app/my/card/page.tsx` · `features/myverse/{MyverseAppHeader,planner/{AppTopNav,CommandPalette,KeyboardShortcuts,MobileBottomNav,ProjectTasksTab,SearchView,ViewToggle,DailyView,template-grids/_shared.tsx,template-grids/quadrants.tsx,template-grids/empathy.tsx,CanvasEditor,CanvasEditorToolbar,CanvasStudio}}.tsx` · `lib/myverse/domains.ts` · `lib/canvas-engine/index.ts` · `app/api/myverse/v/[handle]/route.ts`
+
+---
+
 ## 2026-05-10 — 세션 123 · Myverse 사이트↔앱 통합 + Personal OS 정렬 + LinkedIn 벤치마킹
 
 ### 장소

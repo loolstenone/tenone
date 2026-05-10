@@ -1,9 +1,8 @@
 "use client";
 
-// PP Canvas Engine 기반 캔버스 스튜디오
-//
-// Phase 6: Excalidraw 제거 → PP Canvas 단독 엔진
-// 데이터 저장: /api/myverse/canvases/:id (data.ppcanvas: CanvasDocument)
+// 캔버스 스튜디오 — CanvasEditor 풀스크린 래퍼.
+// 헤더(제목·저장 상태·삭제) + 본문(CanvasEditor).
+// 데이터 저장: /api/myverse/canvases/:id (data.ppcanvas: CanvasDocument — 키는 레거시 호환 위해 유지)
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -12,7 +11,7 @@ import {
 } from "lucide-react";
 import type { CanvasDocument } from "@/lib/canvas-engine";
 import { ConfirmSheet } from "./ConfirmSheet";
-import PpCanvas from "./PpCanvas";
+import CanvasEditor from "./CanvasEditor";
 
 // ─── 로딩 / 에러 UI ─────────────────────────────────────────────────────────
 
@@ -56,8 +55,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         return () => { cancelled = true; };
     }, [canvasId]);
 
-    // ─── PP Canvas 저장 ────────────────────────────────────────────────────
-    const handlePpSave = useCallback(async (doc: CanvasDocument) => {
+    // ─── 캔버스 저장 — data.ppcanvas 키는 레거시 호환 ────────────────────
+    const handleCanvasSave = useCallback(async (doc: CanvasDocument) => {
         setSaving(true);
         try {
             await fetch(`/api/myverse/canvases/${canvasId}`, {
@@ -170,9 +169,9 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
 
             {/* 캔버스 영역 */}
             <div className="flex-1 min-h-0 relative">
-                <PpCanvas
+                <CanvasEditor
                     initialDoc={initialDoc ?? undefined}
-                    onSave={handlePpSave}
+                    onSave={handleCanvasSave}
                     className="absolute inset-0"
                 />
             </div>

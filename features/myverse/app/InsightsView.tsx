@@ -70,6 +70,7 @@ export function InsightsView() {
                 label="INSIGHTS"
                 title="인사이트"
                 subtitle="내가 보지 못한 패턴 — 누구·어디·언제·무엇을"
+                status="phase2"
             />
 
             {/* 기간 토글 */}

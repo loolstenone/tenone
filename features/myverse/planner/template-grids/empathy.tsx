@@ -27,7 +27,7 @@ export function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChan
     return (
         <div className="my-2 space-y-2">
             {/* Persona meta */}
-            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-2 gap-2">
+            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <LabeledInput label="Persona · 누구를 위해?" valKey="em_persona" data={data} onChange={onChange} placeholder="예: 30대 1인 마케터 박지현" />
                 <LabeledInput label="Goal · 그가 원하는 것" valKey="em_goal" data={data} onChange={onChange} placeholder="예: 야근 없이 캠페인 효율 ↑" />
             </div>
@@ -88,7 +88,7 @@ export function MandalartGrid({ data, onChange }: { data: FrameworkData; onChang
     return (
         <div className="my-2 space-y-2">
             {/* 메타 + 가이드 */}
-            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-2 gap-2">
+            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <LabeledInput label="기간" valKey="mdl_period" data={data} onChange={onChange} placeholder="2026년 · Q2 · 100일 챌린지" />
                 <LabeledInput label="검토 주기" valKey="mdl_review" data={data} onChange={onChange} placeholder="매주 일요일 · 매월 1일" />
             </div>
@@ -485,7 +485,7 @@ export function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange:
     return (
         <div className="my-2 space-y-2">
             {/* 메타 */}
-            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-2 gap-2">
+            <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <LabeledInput label="발생일" valKey="why_date" data={data} onChange={onChange} placeholder="2026-04-27" />
                 <LabeledInput label="관련자·시스템" valKey="why_owner" data={data} onChange={onChange} placeholder="결제팀 · 결제 API" />
             </div>
@@ -565,7 +565,7 @@ export function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: 
             </div>
 
             {/* 4대 원 */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-300">
                     <p className="text-xs font-bold text-neutral-700">LOVE · 좋아하는 것</p>
                     <p className="text-[10px] text-neutral-500 mb-1">시간 가는 줄 모르는 일 · 하기만 해도 즐거움</p>

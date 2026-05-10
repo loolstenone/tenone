@@ -11,7 +11,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { AtSign, Calendar, ExternalLink } from "lucide-react";
+import { AtSign, Calendar } from "lucide-react";
 import { getPublicPageData } from "@/lib/myverse/handle/public-page";
 import { DOMAINS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
@@ -49,8 +49,7 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
     const { profile, resume_sections, projects, moments } = data;
 
     return (
-        <div className="min-h-screen bg-neutral-50">
-            <main className="max-w-2xl mx-auto px-4 py-8">
+        <main className="max-w-2xl mx-auto px-4 py-8">
                 {/* 1. 프로필 hero — LinkedIn 스타일 (큰 아바타·이름·핸들·통계·공유) */}
                 <header className="bg-white rounded-2xl mb-6 shadow-sm overflow-hidden">
                     {/* 커버 (인디고 그라디언트) */}
@@ -190,17 +189,7 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
                     </div>
                 )}
 
-                {/* 푸터 */}
-                <footer className="mt-8 text-center">
-                    <a
-                        href="/myverse"
-                        className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-[#6366F1]"
-                    >
-                        Powered by Myverse <ExternalLink className="h-3 w-3" />
-                    </a>
-                </footer>
             </main>
-        </div>
     );
 }
 

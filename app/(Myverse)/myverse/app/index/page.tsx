@@ -4,5 +4,5 @@
 import { ClientRedirect } from "@/components/ClientRedirect";
 
 export default function IndexPage() {
-    return <ClientRedirect to="/myverse/app/today" />;
+    return <ClientRedirect to="/myverse/app/daily" />;
 }

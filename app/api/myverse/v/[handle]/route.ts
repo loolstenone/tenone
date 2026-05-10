@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ handle:
 
     const { data: member, error: mErr } = await admin
         .from("members")
-        .select("id, name, handle, avatar_url, bio")
+        .select("id, name, handle, avatar_url, bio, email, phone, company")
         .eq("handle", handle)
         .maybeSingle();
 
@@ -62,6 +62,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ handle:
             handle: member.handle,
             avatar_url: member.avatar_url,
             bio: member.bio ?? null,
+            // 명함 모드(/v/{handle}/card)에서 사용. 사생활 토글은 후속 작업 (현재 모두 공개).
+            email: member.email ?? null,
+            phone: member.phone ?? null,
+            company: member.company ?? null,
         },
         stats: {
             moments_count: moments.length,

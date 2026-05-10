@@ -27,16 +27,16 @@ export function SwotGrid({ data, onChange }: GP) {
         { key: "t", label: "Threats",       sub: "외부 · 부정", tone: "muted"     as const, ph: "예: 빅테크 진입 가능성 / 가격 경쟁 / API 의존" },
     ];
     return (
-        <div className="my-3 select-none">
+        <div className="my-3 select-none w-full max-w-3xl mx-auto">
             <GuideBox><span className="font-semibold">SWOT (Albert Humphrey)</span> · 내부(S/W)와 외부(O/T) 분리. 단순 나열 X — TOWS 매칭(SO·WO·ST·WT)으로 전략 도출까지 가야 의미.</GuideBox>
             <div className="flex items-center justify-center mb-3">
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Internal</span>
                 <span className="mx-2 text-slate-300">↔</span>
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">External</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {cells.map(q => (
-                    <div key={q.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
+                    <div key={q.key} className={`rounded-md p-3 min-h-[140px] sm:min-h-[180px] flex flex-col ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
                         <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[q.tone]}`}>{q.label}</p>
                         <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.sub}</p>
                         <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} placeholder={q.ph} />
@@ -65,11 +65,11 @@ export function FourPGrid({ data, onChange }: GP) {
         { key: "promotion", label: "Promotion", sub: "프로모션·커뮤니케이션", tone: "muted"     as const, ph: "예: 콘텐츠 마케팅 + 인플 5명 / 뉴스레터 / 추천 보상" },
     ];
     return (
-        <div className="my-3">
+        <div className="my-3 w-full max-w-3xl mx-auto">
             <GuideBox><span className="font-semibold">McCarthy 4P Marketing Mix</span> · 마케팅의 4 레버. 4개 일관성이 핵심 — Premium 가격에 동네 유통 X. 7P 확장(People·Process·Physical evidence)도.</GuideBox>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {cells.map(q => (
-                    <div key={q.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
+                    <div key={q.key} className={`rounded-md p-3 min-h-[140px] sm:min-h-[180px] flex flex-col ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
                         <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[q.tone]}`}>{q.label}</p>
                         <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.sub}</p>
                         <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} placeholder={q.ph} />
@@ -135,9 +135,9 @@ export function NineBoxGrid({ data, onChange }: GP) {
         "Low-High":  { label: "Trusted Professional",  tone: "secondary" },
     };
     return (
-        <div className="my-3 select-none">
+        <div className="my-3 select-none w-full max-w-3xl mx-auto">
             <GuideBox><span className="font-semibold">McKinsey 9-Box (Talent Grid)</span> · 성과 × 잠재력으로 인재 분류. Star는 다음 리더 트랙, Core는 안정 파트너, Under는 코칭 또는 결단.</GuideBox>
-            <div className="flex items-center justify-center mb-3 ml-16">
+            <div className="flex items-center justify-center mb-3 sm:ml-9">
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Low</span>
                 <span className="mx-2 text-slate-300">←</span>
                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-700">Performance</span>
@@ -145,7 +145,7 @@ export function NineBoxGrid({ data, onChange }: GP) {
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">High</span>
             </div>
             <div className="flex gap-2">
-                <div className="flex flex-col items-center justify-between shrink-0 w-7 py-2">
+                <div className="hidden sm:flex flex-col items-center justify-between shrink-0 w-9 py-2 self-stretch">
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">High</span>
                     <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 inline-block -rotate-90 whitespace-nowrap">Potential</span>
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">Low</span>
@@ -201,11 +201,11 @@ export function PestGrid({ data, onChange }: GP) {
         { key: "technological", label: "Technological", sub: "기술·혁신",      tone: "muted"     as const, ph: "예: AI·LLM 보편화 / PWA 성숙 / 모바일 결제 인프라" },
     ];
     return (
-        <div className="my-3">
+        <div className="my-3 w-full max-w-3xl mx-auto">
             <GuideBox><span className="font-semibold">PEST(LE) Analysis</span> · 외부 거시환경 4축. 6개월~3년 시계로 — 통제할 수 없지만 대응해야 하는 변수. 각 항목에 영향 강도(↑/→/↓)까지.</GuideBox>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {cells.map(c => (
-                    <div key={c.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
+                    <div key={c.key} className={`rounded-md p-3 min-h-[140px] sm:min-h-[180px] flex flex-col ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
                         <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[c.tone]}`}>{c.label}</p>
                         <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{c.sub}</p>
                         <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
@@ -224,7 +224,7 @@ export function MoscowGrid({ data, onChange }: GP) {
         { key: "wont",   label: "Won't have",  sub: "이번엔 제외 · 차기 검토", tone: "muted"     as const, ph: "예: 네이티브 앱 / 다국어 / 팀 워크스페이스 (V2)" },
     ];
     return (
-        <div className="my-3 space-y-2">
+        <div className="my-3 space-y-2 w-full max-w-2xl mx-auto">
             <GuideBox><span className="font-semibold">DSDM MoSCoW</span> · 우선순위를 4단계로 명확히. <span className="font-semibold">Must는 60% 이내</span>로 — 그 이상이면 진짜 Must가 아님. Won&apos;t를 명시하는 게 핵심.</GuideBox>
             {cells.map(c => (
                 <div key={c.key} className={`rounded-md p-3 ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
@@ -243,9 +243,9 @@ export function QuadrantBlankGrid({ data, onChange }: GP) {
     const axisX = data["q_axis_x"] ?? "";
     const axisY = data["q_axis_y"] ?? "";
     return (
-        <div className="my-2 space-y-3">
+        <div className="my-2 space-y-3 w-full max-w-3xl mx-auto">
             <GuideBox><span className="font-semibold">자유 사분면</span> · 어떤 두 축이든 — 가치 vs 노력, 비용 vs 수익, 빈도 vs 영향 등. 옵션을 시각적으로 분류해 결정 시간 단축.</GuideBox>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">X축 라벨</span>
                     <input
@@ -297,7 +297,7 @@ export function KanoGrid({ data, onChange }: GP) {
           ph: "예: 과한 알림·배너·온보딩 강제" },
     ];
     return (
-        <div className="my-2 space-y-1.5">
+        <div className="my-2 space-y-1.5 w-full max-w-2xl mx-auto">
             <GuideBox><span className="font-semibold">Noriaki Kano Model</span> · 기능 추가가 만족도에 미치는 영향은 <span className="font-semibold">선형이 아님</span>. Must-be 깨지면 다 무용. Attractive 발견이 차별화.</GuideBox>
             {cells.map(c => (
                 <div key={c.key} className={`rounded-lg p-3 border ${c.color}`}>

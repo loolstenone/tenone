@@ -16,6 +16,7 @@ const MY_TABS = [
   { label: '내 평가', href: '/wio/app/my/evaluation' },
   { label: '내 업무', href: '/wio/app/my/work' },
   { label: '기안/결재', href: '/wio/app/my/approval' },
+  { label: '명함', href: '/wio/app/my/card' },
 ];
 
 /* ── 기분 이모지 ── */

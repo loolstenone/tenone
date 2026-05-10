@@ -8,28 +8,51 @@ import {
     Search, Settings, HelpCircle, Sparkles, Download,
     Menu, Maximize, Minimize, MessageSquarePlus,
 } from "lucide-react";
-import type { PlannerMode, SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
-import { LANE_PATHS, type LaneKey } from "@/lib/myverse/domains";
+import type { SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { AI_LANE_TABS, CONNECT_LANE_TABS, WORK_LANE_TABS, type SubTab } from "@/features/myverse/app/LaneSubNav";
 
-const SUB_TABS: Partial<Record<LaneKey, SubTab[]>> = {
-    ai: AI_LANE_TABS,
-    connect: CONNECT_LANE_TABS,
-    work: WORK_LANE_TABS,
-};
+const BASE = "/myverse/app";
 
-// ── 5 Lane SSOT 1차 네비 (세션 119 IA 정리) ───────────────────
-//  오늘 / 기록 / AI / 연결 / 도구 / 커뮤니티(외부)
-//  도구 lane은 진입 후 LaneSubNav로 6 도구(프로젝트·할 일·캔버스·템플릿·연락처·퍼스널) 전환.
-const TABS = [
-    { key: "today",     label: "오늘",     href: "/myverse/app/today" },
-    { key: "record",    label: "기록",     href: "/myverse/app/traces" },
-    { key: "ai",        label: "AI",       href: "/myverse/app/ask" },
-    { key: "connect",   label: "연결",     href: "/myverse/app/feed" },
-    { key: "work",      label: "도구",     href: "/myverse/app/projects" },
-    { key: "community", label: "커뮤니티", href: "/myverse/community", external: true },
+// 모바일 햄버거 메뉴용 INSIDE/OUTSIDE 구조
+const MOBILE_SECTIONS = [
+    {
+        section: "INSIDE",
+        groups: [
+            { label: "ENGINE", items: [
+                { key: "today",     label: "오늘",     href: `${BASE}/daily` },
+                { key: "projects",  label: "프로젝트", href: `${BASE}/projects` },
+                { key: "canvas",    label: "캔버스",   href: `${BASE}/canvas` },
+                { key: "templates", label: "템플릿",   href: `${BASE}/templates` },
+                { key: "contacts",  label: "연락처",   href: `${BASE}/contacts` },
+            ]},
+            { label: "PERSONAL", items: [
+                { key: "personal",  label: "비전하우스", href: `${BASE}/personal` },
+                { key: "resume",    label: "이력서",    href: `${BASE}/personal/resume` },
+                { key: "portfolio", label: "포트폴리오", href: `${BASE}/portfolio` },
+            ]},
+            { label: "BLACKBOX", items: [
+                { key: "traces",   label: "흔적",     href: `${BASE}/traces` },
+                { key: "capsules", label: "타임캡슐", href: `${BASE}/capsules` },
+                { key: "insights", label: "인사이트", href: `${BASE}/insights` },
+            ]},
+            { label: "MUKKI", items: [
+                { key: "ask",   label: "무끼", href: `${BASE}/ask` },
+                { key: "diary", label: "일기", href: `${BASE}/diary` },
+                { key: "coach", label: "코치", href: `${BASE}/coach` },
+            ]},
+        ],
+    },
+    {
+        section: "OUTSIDE",
+        groups: [
+            { label: null, items: [
+                { key: "feed",    label: "피드",   href: `${BASE}/feed` },
+                { key: "profile", label: "프로필", href: `${BASE}/profile` },
+                { key: "card",    label: "명함",   href: `${BASE}/card` },
+            ]},
+        ],
+    },
 ] as const;
 
 export function AppTopNav({
@@ -44,19 +67,36 @@ export function AppTopNav({
     userName?: string;
     avatarUrl?: string;
     subscriptionStatus?: SubscriptionStatus;
-    mode?: PlannerMode;
+    mode?: string;
     showTimeTracking?: boolean;
     customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [unread, setUnread] = useState(0);
 
     useEffect(() => {
         function onChange() { setIsFullscreen(!!document.fullscreenElement); }
         document.addEventListener("fullscreenchange", onChange);
         return () => document.removeEventListener("fullscreenchange", onChange);
     }, []);
+
+    // 알림 unread 카운트 — 60초 폴링 + pathname 변경 시 재조회
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            try {
+                const r = await fetch("/api/myverse/notifications", { cache: "no-store" });
+                if (!r.ok) return;
+                const d = await r.json();
+                if (!cancelled) setUnread(Number(d.unread_count ?? 0));
+            } catch { /* noop */ }
+        }
+        load();
+        const t = setInterval(load, 60_000);
+        return () => { cancelled = true; clearInterval(t); };
+    }, [pathname]);
 
     useEffect(() => { setMenuOpen(false); }, [pathname]);
 
@@ -79,65 +119,31 @@ export function AppTopNav({
         }
     }
 
-    const tabCls = (active: boolean) =>
-        `px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
-            active
-                ? "bg-[#6366F1] text-white"
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-        }`;
-
     const iconCls = (active: boolean) =>
         `p-1.5 rounded transition-colors ${active
             ? "bg-neutral-100 text-neutral-900"
             : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"}`;
 
-    const currentLabel = TABS.find(t => {
-        const lanePaths = LANE_PATHS[t.key as LaneKey];
-        return lanePaths
-            ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
-            : (pathname === t.href || pathname.startsWith(t.href + "/"));
-    })?.label ?? "";
+    // 현재 페이지 라벨 — 모바일 헤더용
+    const allMobileItems = MOBILE_SECTIONS.flatMap(s => s.groups.flatMap(g => g.items));
+    const currentLabel = allMobileItems.find(it =>
+        pathname === it.href || pathname.startsWith(it.href + "/")
+    )?.label ?? "";
 
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
+        <header className="sticky top-0 z-40 bg-white myverse-dark:bg-[#0D0D15] border-b border-neutral-200 myverse-dark:border-white/8 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand */}
-            <Link href="/myverse" className="flex items-center gap-1.5 mr-1 shrink-0">
+            <Link href="/myverse/app/daily" className="flex items-center gap-1.5 mr-1 shrink-0">
                 <Image src="/Myverse_logo_black.png" alt="Myverse" width={24} height={24} className="shrink-0" />
-                <span className="hidden sm:inline font-sans font-semibold text-sm text-neutral-900 tracking-tight whitespace-nowrap">
+                <span className="hidden sm:inline font-sans font-semibold text-sm text-neutral-900 myverse-dark:text-neutral-100 tracking-tight whitespace-nowrap">
                     Myverse
                 </span>
             </Link>
 
-            <div className="hidden md:block w-px h-4 bg-neutral-200 shrink-0" />
+            <div className="hidden md:block w-px h-4 bg-neutral-200 myverse-dark:bg-white/8 shrink-0" />
 
-            {/* ── 데스크톱 탭 ─────────────────────────────── */}
-            <nav
-                className="hidden md:flex items-center gap-0.5 flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-                {TABS.map((tab) => {
-                    const lanePaths = LANE_PATHS[tab.key as LaneKey];
-                    const active = !("external" in tab && tab.external) && (
-                        lanePaths
-                            ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
-                            : (pathname === tab.href || pathname.startsWith(tab.href + "/"))
-                    );
-                    return (
-                        <Link
-                            key={tab.key}
-                            href={tab.href}
-                            target={"external" in tab && tab.external ? "_blank" : undefined}
-                            rel={"external" in tab && tab.external ? "noopener" : undefined}
-                            className={tabCls(active)}
-                        >
-                            {tab.label}
-                            {"external" in tab && tab.external && (
-                                <span className="ml-0.5 text-[9px] opacity-50">↗</span>
-                            )}
-                        </Link>
-                    );
-                })}
-            </nav>
+            {/* 데스크톱: 사이드바가 네비를 담당 — 가운데는 비워둠 (flex spacer) */}
+            <div className="hidden md:flex flex-1" />
 
             {/* 모바일: 현재 페이지명 */}
             <div className="flex md:hidden flex-1 min-w-0 items-center">
@@ -145,7 +151,7 @@ export function AppTopNav({
             </div>
 
             {/* ── 데스크톱 우측 아이콘 ─────────────────────── */}
-            <div className="hidden md:flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
+            <div className="hidden md:flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100 myverse-dark:border-white/8">
                 {subscriptionStatus !== "active" && (
                     <Link
                         href="/myverse/purchase"
@@ -183,9 +189,9 @@ export function AppTopNav({
 
                 {userName && (
                     <Link
-                        href="/profile"
-                        className="ml-1 h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
-                        title="유니버스 프로필"
+                        href="/myverse/app/notifications"
+                        className="ml-1 relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
+                        title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
                     >
                         {avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -195,6 +201,11 @@ export function AppTopNav({
                                 {userName[0]}
                             </span>
                         )}
+                        {unread > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                {unread > 99 ? "99+" : unread}
+                            </span>
+                        )}
                     </Link>
                 )}
             </div>
@@ -202,13 +213,22 @@ export function AppTopNav({
             {/* ── 모바일 우측 — 아바타 + 햄버거 ──────────── */}
             <div className="md:hidden flex items-center gap-1.5 shrink-0 pl-1 ml-auto border-l border-neutral-100">
                 {userName && (
-                    <Link href="/profile" className="h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity">
+                    <Link
+                        href="/myverse/app/notifications"
+                        title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
+                        className="relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
+                    >
                         {avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
                         ) : (
                             <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
                                 {userName[0]}
+                            </span>
+                        )}
+                        {unread > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                {unread > 99 ? "99+" : unread}
                             </span>
                         )}
                     </Link>
@@ -233,50 +253,43 @@ export function AppTopNav({
                 textTone="dark"
             >
                 <div className="py-1">
-                    {TABS.map((tab) => {
-                        const lanePaths = LANE_PATHS[tab.key as LaneKey];
-                        const active = !("external" in tab && tab.external) && (
-                            lanePaths
-                                ? lanePaths.some(p => pathname === p || pathname.startsWith(p + "/"))
-                                : (pathname === tab.href || pathname.startsWith(tab.href + "/"))
-                        );
-                        const subs = SUB_TABS[tab.key as LaneKey];
-                        return (
-                            <div key={tab.key}>
-                                <Link
-                                    href={tab.href}
-                                    target={"external" in tab && tab.external ? "_blank" : undefined}
-                                    rel={"external" in tab && tab.external ? "noopener" : undefined}
-                                    onClick={() => !("external" in tab && tab.external) && setMenuOpen(false)}
-                                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                                        active ? "bg-[#6366F1] text-white font-medium" : "text-neutral-700 hover:bg-neutral-100"
-                                    }`}
-                                >
-                                    <span>{tab.label}</span>
-                                    {"external" in tab && tab.external && <span className="text-[9px] opacity-50">↗</span>}
-                                </Link>
-                                {active && subs && (
-                                    <div className="mt-0.5 mb-1 ml-3 pl-3 border-l border-neutral-200 flex flex-col gap-0.5">
-                                        {subs.map(s => {
-                                            const sActive = pathname === s.href || pathname.startsWith(s.href + "/");
-                                            return (
-                                                <Link
-                                                    key={s.key}
-                                                    href={s.href}
-                                                    onClick={() => setMenuOpen(false)}
-                                                    className={`px-2.5 py-2 rounded-md text-xs transition-colors ${
-                                                        sActive ? "text-[#6366F1] font-medium bg-[#6366F1]/5" : "text-neutral-600 hover:bg-neutral-100"
-                                                    }`}
-                                                >
-                                                    {s.label}
-                                                </Link>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                    {MOBILE_SECTIONS.map((section, si) => (
+                        <div key={section.section} className={si > 0 ? "mt-2 pt-2 border-t border-neutral-100" : ""}>
+                            <div className="px-3 pb-1">
+                                <span className="text-[9px] font-semibold tracking-widest text-neutral-400 uppercase">
+                                    {section.section}
+                                </span>
                             </div>
-                        );
-                    })}
+                            {section.groups.map((group, gi) => (
+                                <div key={gi} className={gi > 0 ? "mt-1.5" : ""}>
+                                    {group.label && (
+                                        <div className="px-3 py-1">
+                                            <span className="text-[9px] font-medium tracking-wider text-neutral-300 uppercase">
+                                                {group.label}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {group.items.map(item => {
+                                        const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                                        return (
+                                            <Link
+                                                key={item.key}
+                                                href={item.href}
+                                                onClick={() => setMenuOpen(false)}
+                                                className={`flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                                                    active
+                                                        ? "bg-[#6366F1]/10 text-[#6366F1] font-medium"
+                                                        : "text-neutral-700 hover:bg-neutral-100"
+                                                }`}
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
 
                 <div className="h-px bg-neutral-100 my-1" />

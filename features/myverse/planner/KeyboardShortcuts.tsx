@@ -10,7 +10,7 @@ import { Keyboard, X } from "lucide-react";
 
 const ROUTE_KEYS: Record<string, string> = {
     i: "/myverse/app/index",
-    t: "/myverse/app/today",
+    t: "/myverse/app/daily",
     w: "/myverse/app/weekly",
     m: "/myverse/app/monthly",
     y: "/myverse/app/yearly",

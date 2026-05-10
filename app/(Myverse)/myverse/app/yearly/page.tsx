@@ -1,13 +1,15 @@
 import { YearlyView } from "@/features/myverse/planner/YearlyView";
-import { LaneSubNav, RECORD_LANE_TABS } from "@/features/myverse/app/LaneSubNav";
+import { ViewToggle } from "@/features/myverse/planner/ViewToggle";
 
 export default async function YearlyPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
     const params = await searchParams;
     const year = params.year ? parseInt(params.year, 10) : new Date().getFullYear();
     return (
-        <>
-            <LaneSubNav tabs={RECORD_LANE_TABS} />
+        <div>
+            <div className="flex justify-end px-4 pt-3">
+                <ViewToggle current="yearly" />
+            </div>
             <YearlyView initialYear={year} />
-        </>
+        </div>
     );
 }

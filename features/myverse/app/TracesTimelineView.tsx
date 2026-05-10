@@ -985,11 +985,11 @@ function EmptyState() {
             </p>
             <div className="flex items-center justify-center gap-2 flex-wrap">
                 <Link
-                    href="/myverse/app/today"
+                    href="/myverse/app/daily"
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-xs font-medium hover:bg-[#4F46E5] transition-colors"
                 >
                     <Camera className="h-3.5 w-3.5" />
-                    오늘에서 추가
+                    일간에서 추가
                 </Link>
                 <Link
                     href="/myverse/app/settings/imports"

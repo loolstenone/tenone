@@ -9,6 +9,7 @@
 //   <LaneHeader icon="settings" label="SETTINGS" title="설정" subtitle="..." />
 
 import type { ReactNode } from "react";
+import { BetaBadge } from "./BetaBadge";
 
 const DEFAULT_ACCENT = "#6366F1";
 
@@ -20,6 +21,7 @@ export function LaneHeader({
     actions,
     accent,
     backLink,
+    status,
 }: {
     icon: string;            // Material Symbol 이름 (auto_awesome, photo_library 등)
     label: string;            // "ASK MYVERSE", "TRACES" 등
@@ -28,6 +30,7 @@ export function LaneHeader({
     actions?: ReactNode;      // 우측 버튼 슬롯
     accent?: string;          // 라벨/아이콘 컬러 (9영역 등 — 기본 인디고)
     backLink?: ReactNode;      // h1 위에 뒤로가기 링크 (DomainBackLink 등)
+    status?: "beta" | "phase2";  // 페이지 상태 (h1 옆에 배지)
 }) {
     const color = accent ?? DEFAULT_ACCENT;
     return (
@@ -46,10 +49,11 @@ export function LaneHeader({
                     </span>
                 </div>
                 <h1
-                    className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 myverse-dark:text-white leading-tight"
+                    className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 myverse-dark:text-white leading-tight flex items-center gap-2 flex-wrap"
                     style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                 >
                     {title}
+                    {status && <BetaBadge status={status} />}
                 </h1>
                 {subtitle && (
                     <p className="text-sm text-neutral-500 myverse-dark:text-neutral-400 mt-1.5">

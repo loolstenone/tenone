@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Users as UsersIcon, MapPin, Compass, Globe, RefreshCw, Loader2, UserPlus } from "lucide-react";
+import { Heart, MessageCircle, Users as UsersIcon, MapPin, Compass, Globe, RefreshCw, Loader2, UserPlus, Send } from "lucide-react";
 import { DOMAINS, type DomainKey } from "@/lib/myverse/domains";
 import { ReportBlockMenu } from "./ReportBlockMenu";
 
@@ -95,23 +95,33 @@ export function SocialFeedView() {
 
     return (
         <div className="max-w-2xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            {/* 헤더 — Stitch 디자인 정렬 (세션 122) */}
-            <div className="mb-6">
-                <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
-                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        rss_feed
-                    </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-widest">FEED</span>
+            {/* 헤더 — Stitch 디자인 정렬 + DM 진입 (세션 124, SNS 스타일) */}
+            <div className="mb-6 flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            rss_feed
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">FEED</span>
+                    </div>
+                    <h1
+                        className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                    >
+                        피드
+                    </h1>
+                    <p className="text-sm text-neutral-500 mt-1.5">
+                        팔로우한 사람들의 공개 흔적이 모입니다
+                    </p>
                 </div>
-                <h1
-                    className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
-                    style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                <Link
+                    href="/myverse/app/dm"
+                    title="메시지"
+                    aria-label="메시지"
+                    className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100 hover:text-[#6366F1] transition-colors mt-1"
                 >
-                    피드
-                </h1>
-                <p className="text-sm text-neutral-500 mt-1.5">
-                    팔로우한 사람들의 공개 흔적이 모입니다
-                </p>
+                    <Send className="h-5 w-5" />
+                </Link>
             </div>
 
             {/* 모드 토글 */}

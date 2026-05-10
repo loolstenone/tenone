@@ -91,6 +91,7 @@ import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { CanvasStudio } from "./CanvasStudio";
+import { CanvasPreview } from "./CanvasPreview";
 import { VoiceRecordButton } from "./VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
@@ -148,6 +149,31 @@ function makeDefaultCornellNote(): NoteItem {
 }
 
 // ── Template note block (interactive grid) ──────────────────────────
+// 확장 모달용 템플릿 그리드 에디터 — localStorage 동기화 + React state로 즉시 재렌더.
+function TemplateGridEditor({
+    dataKey,
+    templateKey,
+    templateLabel,
+}: {
+    dataKey: string;
+    templateKey: string;
+    templateLabel: string;
+}) {
+    const [data, setData] = useState<FrameworkData>(() => {
+        if (typeof window === "undefined") return {};
+        try { return JSON.parse(localStorage.getItem(dataKey) || "{}"); }
+        catch { return {}; }
+    });
+    const onChange = useCallback((k: string, v: string) => {
+        setData(prev => {
+            const next = { ...prev, [k]: v };
+            try { localStorage.setItem(dataKey, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
+    }, [dataKey]);
+    return <>{renderFramework(templateKey, templateLabel, data, onChange)}</>;
+}
+
 function TemplateNoteBlock({
     note,
     notesList,
@@ -262,27 +288,38 @@ function TemplateNoteBlock({
                 }}
                 onCancel={() => setConfirmDeleteOpen(false)}
             />
-            {/* Body: interactive grid or markdown fallback */}
-            {grid ? (
-                <div className="px-4 py-3">{grid}</div>
-            ) : (
-                <div
-                    className="px-4 py-3 text-sm text-neutral-900 leading-relaxed min-h-[8rem]
-                        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
-                        [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
-                        [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-2
-                        [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2
-                        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2 [&_li]:mb-0.5
-                        [&_strong]:font-semibold
-                        [&_table]:w-full [&_table]:border-collapse [&_table]:mb-3 [&_table]:text-xs
-                        [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:bg-neutral-50 [&_th]:font-semibold
-                        [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1
-                        [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
-                        [&_blockquote]:border-l-4 [&_blockquote]:border-violet-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
-                >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{note.content || "*내용 없음*"}</ReactMarkdown>
+            {/* Body: 인라인 편집 X — 손글씨·캔버스·노트와 동일하게 미리보기 전용. 클릭 시 onExpand */}
+            <div
+                onClick={onExpand}
+                className="relative h-48 overflow-hidden cursor-pointer group hover:bg-neutral-50/50 transition-colors"
+            >
+                {grid ? (
+                    <div className="absolute inset-0 px-4 py-3 pointer-events-none [transform-origin:top_left]">
+                        {grid}
+                    </div>
+                ) : note.content ? (
+                    <div
+                        className="absolute inset-0 px-4 py-3 text-xs text-neutral-700 leading-relaxed pointer-events-none
+                            [&_h1]:text-sm [&_h1]:font-bold [&_h1]:mb-1
+                            [&_h2]:text-xs [&_h2]:font-semibold [&_h2]:mb-1
+                            [&_h3]:text-xs [&_h3]:font-semibold
+                            [&_p]:mb-1 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:mb-1
+                            [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mb-1 [&_li]:mb-0.5
+                            [&_strong]:font-semibold"
+                    >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{note.content}</ReactMarkdown>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-xs text-neutral-400">
+                        템플릿 비어 있음 — 클릭해 작성
+                    </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <span className="text-xs text-neutral-500 flex items-center gap-1">
+                        <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                    </span>
                 </div>
-            )}
+            </div>
         </section>
     );
 }
@@ -320,7 +357,7 @@ export function CornellRowsInline({
         <div className="px-4 py-3">
             {/* 컬럼 헤더 */}
             <div className="grid grid-cols-[min(140px,35%)_1fr_auto] gap-3 text-[10px] uppercase tracking-widest text-neutral-300 mb-1.5 px-1">
-                <span>단서 · 키워드</span>
+                <span>제목, 단서, 키워드</span>
                 <span>노트</span>
                 <span></span>
             </div>
@@ -328,7 +365,7 @@ export function CornellRowsInline({
                 <p className="text-xs text-neutral-300 py-3 text-center italic">행이 없습니다 · 아래 + 행 추가</p>
             ) : (
                 <div className="space-y-1">
-                    {rows.map((r) => (
+                    {rows.map((r, ri) => (
                         <div key={r.id} className="group grid grid-cols-[min(140px,35%)_1fr_auto] gap-3 items-start">
                             <input
                                 type="text"
@@ -336,6 +373,7 @@ export function CornellRowsInline({
                                 onChange={(e) => updateRow(r.id, { cue: e.target.value })}
                                 onBlur={onCommit}
                                 placeholder="키워드"
+                                data-cornell-cue={ri === 0 ? "first" : undefined}
                                 className="text-sm text-[#6366F1] font-medium bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light py-1"
                             />
                             <textarea
@@ -376,7 +414,7 @@ export function CornellRowsInline({
                     value={summary}
                     onChange={(e) => setSummaryVal(e.target.value)}
                     onBlur={onCommit}
-                    placeholder="이 노트의 핵심 한 줄"
+                    placeholder="이 노트의 핵심 요약"
                     rows={1}
                     className="w-full text-xs text-neutral-600 italic bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light resize-none leading-relaxed"
                     onInput={(e) => {
@@ -536,14 +574,27 @@ function DailyNoteCard({
             ) : note.type === 'canvas' ? (
                 <div
                     onClick={onExpand}
-                    className="px-4 py-8 text-center cursor-pointer hover:bg-neutral-50 transition-colors"
+                    className="relative h-48 overflow-hidden cursor-pointer group bg-neutral-50"
                 >
-                    <ImageIcon className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
-                    <p className="text-xs text-neutral-500">자유 캔버스 — 클릭해서 그리기</p>
+                    {note.canvas_id ? (
+                        <div className="pointer-events-none absolute inset-0">
+                            <CanvasPreview canvasId={note.canvas_id} />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-xs text-neutral-400 gap-1">
+                            <ImageIcon className="h-6 w-6 text-neutral-300" />
+                            자유 캔버스 — 클릭해서 그리기
+                        </div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                        </span>
+                    </div>
                 </div>
             ) : (
-                /* cornell — 미리보기 (편집은 모달) */
-                <div onClick={onExpand} className="px-4 py-3 cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative">
+                /* cornell — 미리보기 (편집은 모달) — 손글씨·캔버스와 동일 h-48 */
+                <div onClick={onExpand} className="relative h-48 overflow-hidden cursor-pointer group hover:bg-neutral-50/50 transition-colors px-4 py-3">
                     {(note.rows && note.rows.length > 0 && note.rows.some(r => r.cue || r.note)) ? (
                         <div className="space-y-1.5">
                             {note.rows.map((r) => (
@@ -557,8 +608,13 @@ function DailyNoteCard({
                             )}
                         </div>
                     ) : (
-                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
+                        <div className="flex items-center justify-center h-full text-xs text-neutral-400">내용 없음 — 클릭해 작성</div>
                     )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                        </span>
+                    </div>
                 </div>
             )}
             <ConfirmSheet
@@ -2519,6 +2575,14 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         type="text"
                                         value={expandedNote.title}
                                         onChange={(e) => setExpandedNote({ ...expandedNote, title: e.target.value })}
+                                        onKeyDown={(e) => {
+                                            // 제목에서 Enter → 코넬 첫 단서 입력란으로 커서 이동
+                                            if (e.key === 'Enter' && !isHand && !isCanvas && !isTpl) {
+                                                e.preventDefault();
+                                                const first = document.querySelector<HTMLInputElement>('[data-cornell-cue="first"]');
+                                                first?.focus();
+                                            }
+                                        }}
                                         placeholder={
                                             isTpl ? "이 템플릿으로 기록할 주제 한 줄"
                                             : isCanvas ? "예: 동선 스케치 / 와이어프레임"
@@ -2579,22 +2643,11 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 </div>
                             ) : isTpl && tplHasGrid && tplMeta ? (
                                 <div className="flex-1 overflow-auto p-6 bg-violet-50/20">
-                                    {renderFramework(
-                                        tplMeta.key,
-                                        tplMeta.label,
-                                        (() => {
-                                            try { return JSON.parse(localStorage.getItem(dataKey) || '{}'); }
-                                            catch { return {}; }
-                                        })(),
-                                        (k, v) => {
-                                            const cur = (() => {
-                                                try { return JSON.parse(localStorage.getItem(dataKey) || '{}'); }
-                                                catch { return {}; }
-                                            })();
-                                            const next = { ...cur, [k]: v };
-                                            localStorage.setItem(dataKey, JSON.stringify(next));
-                                        }
-                                    )}
+                                    <TemplateGridEditor
+                                        dataKey={dataKey}
+                                        templateKey={tplMeta.key}
+                                        templateLabel={tplMeta.label}
+                                    />
                                 </div>
                             ) : isTpl ? (
                                 <div className="flex-1 flex flex-col overflow-hidden">
@@ -2743,7 +2796,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 <textarea
                                                     value={expandedNote.summary}
                                                     onChange={(e) => setExpandedNote({ ...expandedNote, summary: e.target.value })}
-                                                    placeholder="이 노트의 핵심 한 줄"
+                                                    placeholder="이 노트의 핵심 요약"
                                                     rows={3}
                                                     className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-8"
                                                 />

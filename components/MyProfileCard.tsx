@@ -22,6 +22,10 @@ interface MyProfileCardProps {
     siteBadge?: string;
     /** 프로필 카드 하단에 사이트별 추가 콘텐츠 */
     children?: React.ReactNode;
+    /** 카드 테마 — 기본 dark (21개 브랜드 호환). light 컨텍스트(마이버스 앱 셸)에선 "light" */
+    theme?: "light" | "dark";
+    /** Universe Profile 링크. null = 숨김. 기본은 tenone.biz/profile */
+    universeProfileHref?: string | null;
 }
 
 /**
@@ -34,8 +38,28 @@ interface MyProfileCardProps {
  * - Universe Profile 링크
  * - children: 사이트별 프로필 추가 정보 (동아리, 직무 등)
  */
-export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCardProps) {
+export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark", universeProfileHref }: MyProfileCardProps) {
     const { user, isStaff, logout } = useAuth();
+    const isLight = theme === "light";
+
+    // 테마별 클래스
+    const cardCls = isLight
+        ? "rounded-2xl border border-neutral-200 bg-white overflow-hidden mb-8 shadow-sm"
+        : "rounded-2xl border border-neutral-700/50 bg-neutral-900/50 overflow-hidden mb-8";
+    const nameCls = isLight ? "text-lg font-bold text-neutral-900 truncate" : "text-lg font-bold text-white truncate";
+    const emailCls = isLight ? "text-sm text-neutral-500 truncate" : "text-sm text-neutral-400 truncate";
+    const handleCls = isLight ? "text-xs text-neutral-400 hover:text-neutral-700 transition-colors shrink-0" : "text-xs text-neutral-500 hover:text-neutral-300 transition-colors shrink-0";
+    const handleEmptyCls = isLight ? "text-xs text-neutral-500 hover:text-amber-600 transition-colors shrink-0 border border-neutral-300 rounded px-1.5 py-0.5" : "text-xs text-neutral-600 hover:text-amber-400 transition-colors shrink-0 border border-neutral-700 rounded px-1.5 py-0.5";
+    const staffBadgeCls = isLight ? "text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-900/8 text-neutral-700" : "text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white";
+    const companyCls = isLight ? "text-xs text-neutral-500 flex items-center gap-1" : "text-xs text-neutral-500 flex items-center gap-1";
+    const infoBoxCls = isLight ? "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-50 mb-4" : "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-800/50 mb-4";
+    const childrenBoxCls = isLight ? "p-4 rounded-xl bg-neutral-50 mb-4" : "p-4 rounded-xl bg-neutral-800/50 mb-4";
+    const universeLinkCls = isLight ? "flex items-center gap-3 p-3 rounded-xl border border-neutral-200 hover:border-neutral-400 transition-colors group" : "flex items-center gap-3 p-3 rounded-xl border border-neutral-700/50 hover:border-neutral-500 transition-colors group";
+    const universeIconCls = isLight ? "h-4 w-4 text-neutral-400 group-hover:text-neutral-700 transition-colors" : "h-4 w-4 text-neutral-500 group-hover:text-white transition-colors";
+    const universePrimaryCls = isLight ? "text-xs font-medium text-neutral-600 group-hover:text-neutral-900 transition-colors" : "text-xs font-medium text-neutral-400 group-hover:text-white transition-colors";
+    const universeSecondaryCls = isLight ? "text-xs text-neutral-400" : "text-xs text-neutral-600";
+    const universeChevronCls = isLight ? "h-3.5 w-3.5 text-neutral-400 group-hover:text-neutral-600 transition-colors" : "h-3.5 w-3.5 text-neutral-600 group-hover:text-neutral-400 transition-colors";
+    const deleteBtnCls = isLight ? "text-xs text-neutral-400 hover:text-rose-500 transition-colors flex items-center gap-1 ml-auto" : "text-xs text-neutral-600 hover:text-rose-400 transition-colors flex items-center gap-1 ml-auto";
     const router = useRouter();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState('');
@@ -63,8 +87,13 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
 
     const initials = user.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
 
+    // Universe Profile 링크 결정 — null이면 숨김, undefined(기본)이면 tenone.biz
+    const upHref = universeProfileHref === null
+        ? null
+        : universeProfileHref ?? (user.handle ? `https://tenone.biz/profile/@${user.handle}` : "https://tenone.biz/profile");
+
     return (
-        <div className="rounded-2xl border border-neutral-700/50 bg-neutral-900/50 overflow-hidden mb-8">
+        <div className={cardCls}>
             {/* 컬러 스트라이프 */}
             <div className="h-1" style={{ backgroundColor: accentColor }} />
 
@@ -82,24 +111,22 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                         </div>
                     )}
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-bold text-white truncate">{user.name}</h2>
+                        <h2 className={nameCls}>{user.name}</h2>
                         <div className="flex items-center gap-2">
-                            <p className="text-sm text-neutral-400 truncate">{user.email}</p>
+                            <p className={emailCls}>{user.email}</p>
                             {user.handle ? (
-                                <a href={`/profile/@${user.handle}`}
-                                    className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors shrink-0">
+                                <a href={`/profile/@${user.handle}`} className={handleCls}>
                                     @{user.handle}
                                 </a>
                             ) : (
-                                <Link href="/profile"
-                                    className="text-xs text-neutral-600 hover:text-amber-400 transition-colors shrink-0 border border-neutral-700 rounded px-1.5 py-0.5">
+                                <Link href="/profile" className={handleEmptyCls}>
                                     핸들 수정
                                 </Link>
                             )}
                         </div>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             {isStaff && (
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white">Staff</span>
+                                <span className={staffBadgeCls}>Staff</span>
                             )}
                             {siteBadge && (
                                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -108,7 +135,7 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                                 </span>
                             )}
                             {user.company && (
-                                <span className="text-xs text-neutral-500 flex items-center gap-1">
+                                <span className={companyCls}>
                                     <Building2 className="h-3 w-3" /> {user.company}
                                 </span>
                             )}
@@ -117,36 +144,38 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                 </div>
 
                 {/* 기본 정보 그리드 */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-800/50 mb-4">
-                    <InfoCell label="연락처" value={user.phone ? formatPhone(user.phone) : '-'} />
-                    <InfoCell label="소속" value={user.company || '-'} />
-                    <InfoCell label="가입일" value={user.createdAt?.substring(0, 10) || '-'} />
+                <div className={infoBoxCls}>
+                    <InfoCell label="연락처" value={user.phone ? formatPhone(user.phone) : '-'} theme={theme} />
+                    <InfoCell label="소속" value={user.company || '-'} theme={theme} />
+                    <InfoCell label="가입일" value={user.createdAt?.substring(0, 10) || '-'} theme={theme} />
                 </div>
 
                 {/* 사이트별 추가 프로필 */}
                 {children && (
-                    <div className="p-4 rounded-xl bg-neutral-800/50 mb-4">
+                    <div className={childrenBoxCls}>
                         {children}
                     </div>
                 )}
 
-                {/* Universe Profile 링크 */}
-                <Link href={user.handle ? `https://tenone.biz/profile/@${user.handle}` : 'https://tenone.biz/profile'} className="flex items-center gap-3 p-3 rounded-xl border border-neutral-700/50 hover:border-neutral-500 transition-colors group">
-                    <Globe className="h-4 w-4 text-neutral-500 group-hover:text-white transition-colors" />
-                    <div className="flex-1">
-                        <p className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors">Universe Profile</p>
-                        <p className="text-xs text-neutral-600">
-                            {user.handle ? `tenone.biz/profile/@${user.handle} · 수정` : '프로필 수정 · 전체 서비스 관리'}
-                        </p>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
-                </Link>
+                {/* Universe Profile 링크 (null이면 숨김) */}
+                {upHref && (
+                    <Link href={upHref} className={universeLinkCls}>
+                        <Globe className={universeIconCls} />
+                        <div className="flex-1">
+                            <p className={universePrimaryCls}>Universe Profile</p>
+                            <p className={universeSecondaryCls}>
+                                {user.handle ? `tenone.biz/profile/@${user.handle} · 수정` : '프로필 수정 · 전체 서비스 관리'}
+                            </p>
+                        </div>
+                        <ChevronRight className={universeChevronCls} />
+                    </Link>
+                )}
 
                 {/* 계정 탈퇴 */}
                 <div className="mt-3 text-right">
                     <button
                         onClick={() => { setShowDeleteModal(true); setDeleteConfirm(''); setDeleteError(''); }}
-                        className="text-xs text-neutral-600 hover:text-rose-400 transition-colors flex items-center gap-1 ml-auto"
+                        className={deleteBtnCls}
                     >
                         <Trash2 className="h-3 w-3" /> 계정 탈퇴
                     </button>
@@ -194,11 +223,13 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
     );
 }
 
-function InfoCell({ label, value }: { label: string; value: string }) {
+function InfoCell({ label, value, theme = "dark" }: { label: string; value: string; theme?: "light" | "dark" }) {
+    const labelCls = theme === "light" ? "text-xs font-medium text-neutral-500 mb-0.5" : "text-xs font-medium text-neutral-500 mb-0.5";
+    const valueCls = theme === "light" ? "text-sm text-neutral-900" : "text-sm text-neutral-300";
     return (
         <div>
-            <div className="text-xs font-medium text-neutral-500 mb-0.5">{label}</div>
-            <div className="text-sm text-neutral-300">{value}</div>
+            <div className={labelCls}>{label}</div>
+            <div className={valueCls}>{value}</div>
         </div>
     );
 }
