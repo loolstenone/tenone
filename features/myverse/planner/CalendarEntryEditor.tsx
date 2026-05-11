@@ -101,7 +101,6 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [taskText, setTaskText] = useState("");
     const [taskTime, setTaskTime] = useState("");
     const [taskProjectId, setTaskProjectId] = useState("");
-    const [taskPriority, setTaskPriority] = useState<TaskQuadrant | null>(null);
     const [taskMemo, setTaskMemo] = useState("");
     // 미팅 탭 전용 상태
     const [withWhom, setWithWhom] = useState("");
@@ -122,7 +121,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     useEffect(() => {
         if (!open) return;
         setTab(initial?.kind ? (initial.kind as CalendarKind) : (onTaskCreated ? "task" : "meeting"));
-        setTaskText(""); setTaskTime(""); setTaskProjectId(""); setTaskMemo(""); setTaskPriority(null);
+        setTaskText(""); setTaskTime(""); setTaskProjectId(""); setTaskMemo("");
         setWithWhom(initial?.with_whom || ""); setLocation(initial?.location || "");
         setTitle(initial?.title || "");
         setDescription(initial?.description || "");
@@ -305,41 +304,6 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     onChange={(e) => setTaskTime(e.target.value)}
                                     className="text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] bg-white"
                                 />
-                            </div>
-
-                            {/* 경중완급 사분면 — 단색 */}
-                            <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">경중완급 (선택)</label>
-                                <div className="flex flex-col items-center gap-1">
-                                    <span className="text-[9px] text-neutral-300">급</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[9px] text-neutral-300 w-4 text-right">경</span>
-                                        <div className="grid grid-cols-2 rounded-lg overflow-hidden border border-neutral-200 w-[180px]">
-                                            {([
-                                                { q: "급경" as TaskQuadrant, sub: "긴급·쉬운", bCls: "border-b border-r border-neutral-200" },
-                                                { q: "급중" as TaskQuadrant, sub: "긴급·중요", bCls: "border-b border-neutral-200" },
-                                                { q: "완경" as TaskQuadrant, sub: "여유·쉬운", bCls: "border-r border-neutral-200" },
-                                                { q: "완중" as TaskQuadrant, sub: "여유·중요", bCls: "" },
-                                            ] as const).map(({ q, sub, bCls }) => (
-                                                <button
-                                                    key={q}
-                                                    type="button"
-                                                    onClick={() => setTaskPriority(taskPriority === q ? null : q)}
-                                                    className={`py-2.5 text-center transition-colors ${bCls} ${
-                                                        taskPriority === q
-                                                            ? "bg-neutral-900 text-white"
-                                                            : "bg-white hover:bg-neutral-50 text-neutral-600"
-                                                    }`}
-                                                >
-                                                    <div className="text-xs font-semibold leading-none">{q}</div>
-                                                    <div className="text-[9px] mt-0.5 opacity-50">{sub}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <span className="text-[9px] text-neutral-300 w-4">중</span>
-                                    </div>
-                                    <span className="text-[9px] text-neutral-300">완</span>
-                                </div>
                             </div>
 
                             {/* 프로젝트 */}
@@ -643,7 +607,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         text: taskText.trim(),
                                         time: taskTime || null,
                                         project_id: taskProjectId || null,
-                                        priority: taskPriority,
+                                        priority: null,
                                         memo: taskMemo.trim() || null,
                                     });
                                     onClose();

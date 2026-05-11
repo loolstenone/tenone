@@ -88,6 +88,20 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
         window.location.href = "/myverse/app/canvas";
     }
 
+    // ─── 텍스트 → 태스크 승격 ─────────────────────────────────────────────
+    async function handlePromoteText(text: string) {
+        if (!text.trim()) return;
+        await fetch("/api/myverse/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: text.trim(),
+                source: "note",
+                source_note_id: canvasId ?? null,
+            }),
+        });
+    }
+
     // ─── 렌더 ──────────────────────────────────────────────────────────────
     const shellCls = embed
         ? "absolute inset-0 flex flex-col bg-neutral-50"
@@ -172,6 +186,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                 <CanvasEditor
                     initialDoc={initialDoc ?? undefined}
                     onSave={handleCanvasSave}
+                    onPromoteText={handlePromoteText}
                     className="absolute inset-0"
                 />
             </div>

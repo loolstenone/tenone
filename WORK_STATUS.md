@@ -1,6 +1,74 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-11 (세션 127 — Personal OS 통합: 사이드바 접힘 + 브랜드 자산 + 메일/캘린더 + 마케팅 페이지 통합)
+> 마지막 업데이트: 2026-05-13 (세션 128 — 프로젝트·간트·칸반·미완 트리·UX 대청소)
+
+---
+
+## 세션 128 핵심 성과 (2026-05-12 → 2026-05-13)
+
+### 1. 일정 & 업무 카드 — 칸반/리스트 토글 + 위계
+- `taskColumn(status)` 단일 SSOT: 계획=todo/carried/hold/moved, 진행=doing, 완료=done/cancelled
+- `DailyKanban` 신규 — 컬럼 3개 + 미팅 시간 헤더(`10:00 대강의실`) + 메인/서브 들여쓰기 + 드래그&드롭으로 status 변경 + 다크모드 가독성
+- 리스트 뷰에도 메인-서브 위계 트리(좌측 회색 라인 + 들여쓰기) 적용 — `SubtaskRow` 컴포넌트
+- 헤더에 [리스트 | 칸반] 토글 (localStorage 영속화)
+- PlannerTask 타입에 `doing` status 추가
+
+### 2. 공휴일·절기 ↔ 개인 일정 분리
+- 헤더에 이미 표시되는 공휴일·절기는 일정&업무 카드에서 제외 (개인 미팅·할 일만)
+
+### 3. 경중완급(우선순위) 시스템 완전 제거
+- DailyTaskRow: PRIORITY_META · QUADRANT_CYCLE · PriorityBadge · PriorityPicker · TaskPriority 삭제
+- DailyView: 인라인 priority 렌더·updateTaskPriority·미완 모달의 priority 배지 제거
+- CalendarEntryEditor: 2×2 사분면 피커 + state 제거
+- `priority` 필드는 데이터 호환 위해 타입 유지(UI엔 안 나옴)
+
+### 4. 프로젝트 등록 고도화 + 모달화
+- 새 프로젝트 폼 → 팝업 모달(`max-w-xl`, 백드롭 블러, ESC/외부클릭 닫기)
+- 추가 필드: **시작일 / 종료일(마감) / 목표 한 줄 / 마일스톤(선택)** — title+due_date 페어
+- 마일스톤 입력 시 `myverse_project_milestones` 테이블에 INSERT (milestone-sync가 자동으로 일정&업무에 `ms_` 마커 생성)
+- 종료일 입력 시 `myverse_calendar_entries` anniversary로 자동 등록
+
+### 5. 프로젝트 상세 페이지 — 리스트/칸반/간트 (404 해결)
+- 신규 라우트: `app/(Myverse)/myverse/app/projects/[id]/page.tsx` (이전엔 페이지 없어서 404)
+- ProjectTasksTab에 [리스트/칸반/간트] view toggle 추가
+- 업무 탭은 `ms_` 접두사 마커 필터 아웃 (마일스톤 탭과 중복 제거)
+- 마일스톤·업무 혼란 해소: 마일스톤은 큰 단계(milestones 테이블), 업무는 실행 액션(daily.tasks)
+
+### 6. 간트 차트 고도화 (4단계)
+- **막대 너비** = `duration_days × colWidth`, 막대에 `1d`/`5d` 라벨
+- **드래그 늘리기** — 막대 우측 1.5px 핸들 (`cursor-ew-resize`)
+- **막대 이동** — 본문 잡고 좌우 드래그 → 시작일 변경 (daily 행 간 자동 이관)
+- **편집 팝오버** — 업무명 클릭 → 시작일 date picker + 기간 number input
+- **자율 헤더** — 총 일수 기준 자동 줌: ≤30 일 / ≤90 3일 / ≤365 주 / >365 월 (월/주 시작은 major tick 굵게)
+- **수동 줌 토글** — 우측 상단 [자동/일/주/월]
+- **오늘 표시줄** — 빨간 세로 라인 + "오늘" 라벨
+- **마일스톤 ◆ 다이아몬드 마커** — `myverse_project_milestones` fetch, 별도 행에 옅은 보라 배경
+- **범례** — 좌측 상단 (계획·진행·완료·마일스톤·오늘)
+
+### 7. 미완 업무 호출 — 메인+서브 동반
+- API `/api/myverse/daily/pending-tasks`: 미완(todo/hold) 메인 + 그 모든 서브(완료·취소 포함) 함께 반환
+- 모달 UI: 메인만 체크박스, 서브는 들여쓰기 + 상태 배지(✓/·/⏸/✕) + 옅은 회색 배경, 완료 서브 line-through
+- 이월 로직: 메인 선택 시 미완 서브 자동 동반, 새 ID 생성하며 `parent_id` 맵핑 보존 → 부모-자식 관계 그대로 이전
+
+### 8. 노트 → Task 승격 다양화
+- CanvasEditor: 텍스트 도구바에 `＋태스크` 버튼 (`onPromoteText` prop)
+- CanvasStudio: `source: "note"` + `source_note_id: canvasId`로 POST
+- TemplatesView: "태스크로 승격" 버튼 (500자 절단, ✓ 피드백)
+
+### 9. 사이드바 토글 위치 이동
+- 좌측 사이드바 토글 버튼: footer 하단 → **우측 상단**으로 이동
+- `absolute` 포지셔닝 — 레이아웃 공간 차지 0
+
+### 10. 신규 API + DB 필드
+- `PATCH/DELETE /api/myverse/daily/[date]/task/[taskId]` — 단일 task 패치 (날짜 이동 시 daily 행 간 자동 이관)
+- `PlannerTask.duration_days` 추가 (간트 막대 폭용, 기본 1)
+- `PlannerTask.status`에 `doing` 추가
+
+### 11. Hydration 에러 fix
+- `app/layout.tsx` `<html>`에 `suppressHydrationWarning` — myverse 다크모드 인라인 스크립트(`myverse-dark` 클래스 추가)와 React hydration 충돌 해결
+
+### 12. 폐기
+- **TimeBlock 기능 삭제** — `features/myverse/planner/TimeBlockTimeline.tsx` 파일 제거, DailyView import/state/UI 전부 제거. API 라우트와 `myverse_timeblocks` DB 테이블은 유지(사용 없음).
 
 ---
 
@@ -73,16 +141,21 @@
 
 ## 다음 세션 시작 시 할 일
 
+### 사용자 명시 — 다음 작업 방향
+> **"프로젝트, 템플릿 고도화, 마인드 맵 등 툴을 고도화"**
+
 ### 운영 사용자 직접 조치 필요
 1. GCP 콘솔에서 Gmail API 활성화
 2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
 
-### 기능 확장
-1. **TimeBlock UI** — Today 화면에 드래그 가능한 타임라인 컴포넌트 (현재 API만 있음)
-2. **Task.type 배지 UI** — DailyTaskRow에 finance/people/milestone 시각화
-3. **노트 → Task 승격 다양화** — 캔버스/템플릿/HandNote에서도 승격
+### 기능 확장 (세션 128 잔여)
+1. **프로젝트 도구 고도화** — 칸반/간트에서 드래그&드롭으로 status 변경, 의존성 화살표, 마일스톤 ◆ 드래그로 due_date 이동
+2. **템플릿 고도화** — 더 많은 프레임워크, 변수 치환, 템플릿 → 마일스톤 자동 변환
+3. **마인드맵** — 캔버스 엔진 위에 마인드맵 모드 (방사형 노드 + 자동 레이아웃)
 4. **Person Company 정규화** — Stage 2: companyName(텍스트) → Company 엔티티 분리
 5. **브랜드 자산 → DigitalCard PNG 캡처에 포함** — 현재 UI 렌더만, 이미지 저장 시 자산 미반영
+6. **간트 좌측 시작일 핸들** — 현재는 본문 드래그가 이동, 좌측 핸들로 시작일만 조정 가능하게
+7. **간트 마일스톤 ◆ 드래그** — 현재 마커는 정적, 클릭/드래그로 due_date 편집
 
 ---
 

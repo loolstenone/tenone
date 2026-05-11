@@ -105,7 +105,20 @@ export function AppSideNav() {
                 collapsed ? "w-14" : "w-52"
             }`}
         >
-            <nav className="flex-1 overflow-y-auto px-2 py-3 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+            {/* 우측 상단 접기 토글 — absolute로 공간 차지 안 함 */}
+            <button
+                type="button"
+                onClick={toggle}
+                aria-label={collapsed ? "사이드바 펼치기" : "사이드바 접기"}
+                title={collapsed ? "사이드바 펼치기" : "사이드바 접기"}
+                className={`absolute top-1.5 ${collapsed ? "left-1/2 -translate-x-1/2" : "right-1.5"} z-10 flex items-center justify-center w-6 h-6 rounded-md text-neutral-400 myverse-dark:text-neutral-500 hover:bg-neutral-100 myverse-dark:hover:bg-white/10 hover:text-neutral-700 myverse-dark:hover:text-neutral-200 transition-colors`}
+            >
+                <span className="material-symbols-outlined text-[16px] leading-none">
+                    {collapsed ? "chevron_right" : "chevron_left"}
+                </span>
+            </button>
+
+            <nav className={`flex-1 overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden ${collapsed ? "pt-8" : "py-3"}`} style={{ scrollbarWidth: "none" }}>
                 {NAV.map((section, si) => (
                     <div key={section.section} className={si > 0 ? "mt-1 pt-3 border-t border-neutral-100 myverse-dark:border-white/8" : ""}>
                         {/* Section header — 접힘 시 작은 점으로 대체 */}
@@ -167,19 +180,6 @@ export function AppSideNav() {
                     {!collapsed && <span>앱 설치</span>}
                 </InstallButton>
 
-                {/* 토글 버튼 — 사이드바 최하단 */}
-                <button
-                    type="button"
-                    onClick={toggle}
-                    aria-label={collapsed ? "사이드바 펼치기" : "사이드바 접기"}
-                    title={collapsed ? "사이드바 펼치기" : "사이드바 접기"}
-                    className={`mt-1 relative group flex items-center ${collapsed ? "justify-center" : "gap-2.5"} px-2.5 py-1.5 rounded-lg text-xs text-neutral-400 myverse-dark:text-neutral-500 hover:bg-neutral-50 myverse-dark:hover:bg-white/5 hover:text-neutral-700 transition-colors w-full text-left`}
-                >
-                    <span className="material-symbols-outlined text-[16px] leading-none shrink-0">
-                        {collapsed ? "chevron_right" : "chevron_left"}
-                    </span>
-                    {!collapsed && <span>접기</span>}
-                </button>
             </div>
         </aside>
     );

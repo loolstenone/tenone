@@ -145,6 +145,26 @@
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
 
+### 프로젝트·간트·칸반·미완 트리 (세션 128)
+| 파일 | 역할 |
+|------|------|
+| `features/myverse/planner/DailyKanban.tsx` | **신규** — 칸반(계획/진행/완료) + 미팅 시간 헤더 그룹핑 + 메인/서브 카드 + 드래그&드롭 status 변경 + 프로젝트 태그 |
+| `features/myverse/planner/DailyView.tsx` | 리스트/칸반 토글, SubtaskRow 컴포넌트(리스트 위계), 공휴일/절기 제외, 경중완급 UI 제거 |
+| `features/myverse/planner/DailyTaskRow.tsx` | PRIORITY_META/QUADRANT_CYCLE/PriorityBadge/PriorityPicker 삭제 |
+| `features/myverse/planner/CalendarEntryEditor.tsx` | 2×2 사분면 피커 제거 |
+| `features/myverse/planner/ProjectsView.tsx` | 새 프로젝트 → **팝업 모달**, 일정/목표/마일스톤 입력 → milestones API로 등록, 종료일 → calendar 자동 등록 |
+| `features/myverse/planner/ProjectTasksTab.tsx` | **리스트/칸반/간트 toggle**, ms_ 마커 필터, ProjectKanbanView, ProjectGanttView(드래그/리사이즈/팝오버/오늘선/마일스톤◆/자율헤더) |
+| `app/(Myverse)/myverse/app/projects/[id]/page.tsx` | **신규 라우트** — 이전 404 해결 |
+| `features/myverse/planner/CanvasEditor.tsx` | `onPromoteText` prop — 텍스트 도구바에 ＋태스크 |
+| `features/myverse/planner/CanvasStudio.tsx` | `handlePromoteText()` 연결 |
+| `features/myverse/planner/TemplatesView.tsx` | 모달에 "태스크로 승격" 버튼 |
+| `features/myverse/app/AppSideNav.tsx` | 접기 토글 → 우측 상단 absolute (공간 0) |
+| `app/api/myverse/daily/[date]/task/[taskId]/route.ts` | **신규** PATCH/DELETE — 단일 task 패치, 날짜 이동 시 daily 행 간 자동 이관 |
+| `app/api/myverse/daily/pending-tasks/route.ts` | 미완 메인 + 서브(완료/취소 포함) 동반 반환 |
+| `lib/myverse/types.ts` (PlannerTask) | `duration_days` 추가, status에 `doing` 추가 |
+| `app/layout.tsx` | `<html>`에 `suppressHydrationWarning` (다크모드 flash 방지 스크립트와 충돌 fix) |
+| 폐기: `features/myverse/planner/TimeBlockTimeline.tsx` | 삭제. API/DB는 미사용 잔존 |
+
 ### Personal OS 통합 (세션 127) — Note→Task 승격 / 캘린더 양방향 / 브랜드 자산 SSOT / TimeBlock / Person 정규화
 | 파일 | 역할 |
 |------|------|
@@ -231,7 +251,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 125 (2026-05-11)** — 무끼 플로팅(MukkiFab) + SNS 포스팅 시스템(moments text 타입 + SnsPostComposer + 미러 저장) + 3 카드 분리(TodayScene/Places/Routines) + 흔적 통합 API(/traces UNION) + 레이아웃 fixed 전환(TopNav/SideNav/MonthBar) + 코넬 UX + Verse 용어 폐기 |
+| **Phase** | **세션 128 (2026-05-13)** — 일정&업무 칸반/리스트 토글 + 메인/서브 위계 트리 + 경중완급 폐기 + 프로젝트 모달화·간트 4단계 고도화(드래그/리사이즈/팝오버/자율헤더+오늘선+마일스톤◆) + 미완 호출 시 메인+서브 동반 + 사이드바 토글 우측 상단 absolute + Hydration suppressHydrationWarning + TimeBlock UI 폐기 |
+| **세션 127 (2026-05-11)** | Personal OS 통합 — 사이드바 접힘 + 브랜드 자산 SSOT + 메일/캘린더 양방향 + 무끼 LLM 확장 + 마케팅 페이지 통합(story+philosophy+about) + DailyView 3,158줄 분할 |
 | **세션 124 (2026-05-11)** | IA 재구성(INSIDE/OUTSIDE) + 핸들 URL 정비(`/v` 폐기 → `/[handle]`) + 디지털 명함 SSOT(DigitalCard) + 노트 4종 미리보기 통일(h-48) + 캔버스 저장 버그 수정(unmount flush) + 모달 템플릿 입력 버그 수정(TemplateGridEditor) + 템플릿 그리드 Instagram 비례 + ViewToggle 4 페이지 공통 + PP→CanvasEditor 리네이밍 |
 | **세션 123 (2026-05-10)** | 사이트↔앱 통합 + Personal OS 메시지 정렬 + 마케팅 5p 허구성 정비 + LinkedIn 벤치마킹 (노션 친화 5 패턴) |
 | **세션 122 (2026-05-09)** | Myverse Stitch 디자인 1차 — 폰트(Hanken Grotesk·Inter·Material Symbols) + LaneHeader SSOT + Today/Coach 재디자인 + Traces 타임라인 마커 |

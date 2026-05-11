@@ -162,8 +162,8 @@ export type TaskType = 'normal' | 'milestone' | 'finance' | 'people' | 'admin';
 export interface PlannerTask {
     id: string;
     text: string;
-    /** todo·done·carried(자동이월)·cancelled·hold(보류)·moved(다른 날로 수동 이동) */
-    status: 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
+    /** todo·doing(진행)·done·carried(자동이월)·cancelled·hold(보류)·moved(다른 날로 수동 이동) */
+    status: 'todo' | 'doing' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
     parent_id?: string | null;
     /** 경중완급 사분면 — 급중(긴급·중요) | 급경(긴급·쉬운) | 완중(여유·중요) | 완경(여유·쉬운) */
     priority?: TaskQuadrant | null;
@@ -190,6 +190,8 @@ export interface PlannerTask {
     source_email_id?: string | null;
     /** 생성 시각 (승격된 task 식별용) */
     created_at?: string | null;
+    /** 간트 차트용 — 지속 일수 (기본 1, 시작=date, 종료=date+duration_days-1) */
+    duration_days?: number | null;
 }
 
 export interface PlannerDaily {
