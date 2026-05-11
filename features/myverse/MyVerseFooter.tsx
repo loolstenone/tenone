@@ -13,17 +13,8 @@ export function MyVerseFooter() {
                 {
                     title: "Menu",
                     links: [
-                        { label: "서비스", href: "/myverse/service" },
-                        { label: "기술", href: "/myverse/technology" },
-                        { label: "철학", href: "/myverse/philosophy" },
-                        { label: "팀", href: "/myverse/team" },
-                        { label: "로드맵", href: "/myverse/roadmap" },
-                    ],
-                },
-                {
-                    title: "Contact",
-                    links: [
-                        { label: "문의", href: "/myverse/contact" },
+                        { label: "브랜드 스토리", href: "/myverse/story" },
+                        { label: "가격", href: "/myverse/pricing" },
                     ],
                 },
             ]}

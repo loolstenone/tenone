@@ -43,7 +43,7 @@ export function ReceivedCardView({ member }: { member: Member }) {
                         M
                     </div>
                     <span className="text-sm font-semibold text-neutral-900 tracking-tight group-hover:text-[#6366F1] transition-colors">
-                        Myverse
+                        myverse
                     </span>
                 </Link>
                 <span className="text-[10px] uppercase tracking-widest text-neutral-400">

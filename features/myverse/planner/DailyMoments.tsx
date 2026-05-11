@@ -4,7 +4,7 @@
 // 사진을 추가하면 클라이언트가 Supabase Storage(myverse-moments)에 직접 업로드.
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Upload, X, Loader2, Trash2, Pencil, Archive } from "lucide-react";
+import { Camera, Upload, X, Loader2, Trash2, Pencil, Archive, Share2, Globe, Lock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { ConfirmSheet } from "./ConfirmSheet";
 
@@ -241,7 +241,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                             <MomentCard
                                 key={m.id}
                                 m={m}
-                                onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at }); }}
+                                onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at, visibility: m.visibility ?? "private" }); }}
                                 onDelete={() => setConfirmDeleteId(m.id)}
                             />
                         ))}
@@ -260,7 +260,7 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                         <MomentCard
                             key={m.id}
                             m={m}
-                            onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at }); }}
+                            onEdit={() => { setEditingId(m.id); setEditForm({ caption: m.caption, with_whom: m.with_whom, location: m.location, activity: m.activity, happened_at: m.happened_at, visibility: m.visibility ?? "private" }); }}
                             onDelete={() => setConfirmDeleteId(m.id)}
                         />
                     ))}
@@ -329,10 +329,49 @@ export function DailyMoments({ date, memberId, compact = false, hideAdd = false,
                                     className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-300 placeholder:italic"
                                 />
                             </Field>
+
+                            {/* 공개 설정 */}
+                            <Field label="공개 설정">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditForm(f => ({ ...f, visibility: f.visibility === "public" ? "private" : "public" }))}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                        editForm.visibility === "public"
+                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                            : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >
+                                    {editForm.visibility === "public"
+                                        ? <><Globe className="h-3 w-3" />피드에 공개됨</>
+                                        : <><Lock className="h-3 w-3" />나만 보기</>}
+                                </button>
+                            </Field>
                         </div>
-                        <div className="flex justify-end gap-2 mt-5">
-                            <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900">취소</button>
-                            <button onClick={saveEdit} className="px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded hover:bg-[#4F46E5]">저장</button>
+
+                        <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-100">
+                            {/* [공유] 버튼 — 공개 상태일 때만 활성 */}
+                            <button
+                                type="button"
+                                disabled={editForm.visibility !== "public"}
+                                onClick={async () => {
+                                    const text = editForm.caption || "마이버스 순간";
+                                    const url = window.location.origin + "/myverse/app/traces";
+                                    if (navigator.share) {
+                                        try { await navigator.share({ title: text, url }); } catch { /* cancelled */ }
+                                    } else {
+                                        await navigator.clipboard.writeText(url);
+                                        alert("링크를 복사했어요.");
+                                    }
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-neutral-200 text-neutral-500 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                title={editForm.visibility !== "public" ? "공개로 전환 후 공유 가능" : "외부 공유"}
+                            >
+                                <Share2 className="h-3 w-3" />공유
+                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900">취소</button>
+                                <button onClick={saveEdit} className="px-4 py-1.5 bg-[#6366F1] text-white text-sm rounded hover:bg-[#4F46E5]">저장</button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -89,15 +89,20 @@ import { CanvasPreview } from "./CanvasPreview";
 import { VoiceRecordButton } from "./VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
-type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
-type TaskPriority = '급중' | '급경' | '완중' | '완경';
+// TaskPriority, TaskStatus, PRIORITY_META, QUADRANT_CYCLE, TaskRowProps, PriorityBadge, PriorityPicker, TaskRow
+// → DailyTaskRow.tsx로 이동
+import {
+    type TaskStatus, type TaskPriority, type TaskRowProps,
+    PRIORITY_META, QUADRANT_CYCLE,
+    PriorityBadge, PriorityPicker, TaskRow,
+} from "./DailyTaskRow";
 
-const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: string }> = {
-    '급중': { label: "급중", cls: "text-rose-600   bg-rose-50   border-rose-200",     dotCls: "bg-rose-500"    },
-    '급경': { label: "급경", cls: "text-amber-600  bg-amber-50  border-amber-200",    dotCls: "bg-amber-500"   },
-    '완중': { label: "완중", cls: "text-sky-600    bg-sky-50    border-sky-200",       dotCls: "bg-sky-500"     },
-    '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
-};
+// ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow → DailyTrackingBlocks.tsx로 이동
+import { ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow } from "./DailyTrackingBlocks";
+import type { ExerciseBlockProps, HealthBlockProps, TrackingRowWithNoteProps, TrackingRowProps } from "./DailyTrackingBlocks";
+
+// UpcomingSchedule → UpcomingSchedule.tsx로 이동
+import { UpcomingSchedule } from "./UpcomingSchedule";
 export type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = {
     id: string;
@@ -324,11 +329,15 @@ export function CornellRowsInline({
     summary,
     onChange,
     onCommit,
+    sourceNoteId,
+    onPromoted,
 }: {
     rows: CornellRow[];
     summary: string;
     onChange: (rows: CornellRow[], summary: string) => void;
     onCommit: () => void;
+    sourceNoteId?: string;
+    onPromoted?: (taskId: string) => void;
 }) {
     function updateRow(id: string, patch: Partial<CornellRow>) {
         onChange(rows.map(r => r.id === id ? { ...r, ...patch } : r), summary);
@@ -345,6 +354,28 @@ export function CornellRowsInline({
     }
     function setSummaryVal(v: string) {
         onChange(rows, v);
+    }
+    async function promoteToTask(row: CornellRow) {
+        const text = (row.cue || row.note).trim();
+        if (!text) return;
+        try {
+            const res = await fetch("/api/myverse/tasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text: row.cue ? `${row.cue}${row.note ? `: ${row.note}` : ""}` : row.note,
+                    source: "note",
+                    source_note_id: sourceNoteId ?? null,
+                    source_block_id: row.id,
+                }),
+            });
+            if (res.ok) {
+                const { task } = await res.json();
+                onPromoted?.(task.id);
+            }
+        } catch (e) {
+            console.error("[cornell promote to task]", e);
+        }
     }
 
     return (
@@ -383,13 +414,24 @@ export function CornellRowsInline({
                                     t.style.height = `${t.scrollHeight}px`;
                                 }}
                             />
-                            <button
-                                onClick={() => removeRow(r.id)}
-                                title="행 삭제"
-                                className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-red-500 transition-opacity p-1"
-                            >
-                                <Trash2 className="h-3 w-3" />
-                            </button>
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => promoteToTask(r)}
+                                    title="Task로 보내기 (오늘 할 일에 추가)"
+                                    className="text-neutral-300 hover:text-[#6366F1] p-1"
+                                >
+                                    <span className="material-symbols-outlined text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 0" }}>
+                                        playlist_add_check
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => removeRow(r.id)}
+                                    title="행 삭제"
+                                    className="text-neutral-300 hover:text-red-500 p-1"
+                                >
+                                    <Trash2 className="h-3 w-3" />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -3145,563 +3187,9 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
     );
 }
 
-interface TaskRowProps {
-    task: PlannerTask;
-    index: number;
-    isDragOver: boolean;
-    onCycle: () => void;
-    onRemove: () => void;
-    onTimeChange: (time: string) => void;
-    onPriorityChange?: (p: PlannerTask["priority"]) => void;
-    onProjectChange?: (projectId: string | null) => void;
-    onMove?: () => void;
-    projects?: Array<{ id: string; title: string; color: string | null }>;
-    onDragStart: () => void;
-    onDragOver: (e: React.DragEvent) => void;
-    onDrop: () => void;
-    onDragEnd: () => void;
-}
+// TaskRowProps, QUADRANT_CYCLE, PriorityBadge, PriorityPicker, TaskRow
+// → DailyTaskRow.tsx (imported above)
 
-const QUADRANT_CYCLE: Record<TaskPriority, TaskPriority | null> = {
-    '급중': '급경',
-    '급경': '완중',
-    '완중': '완경',
-    '완경': null,
-};
-
-/** 우선순위 뱃지 — 클릭 시 사분면 순환 */
-function PriorityBadge({ priority, onClick }: { priority: TaskPriority | null; onClick: () => void }) {
-    if (!priority) return null;
-    const m = PRIORITY_META[priority];
-    return (
-        <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${m.cls}`}
-            title="클릭: 사분면 순환"
-        >
-            {m.label}
-        </button>
-    );
-}
-
-/** 우선순위 선택기 — 2×2 사분면 미니 피커 */
-function PriorityPicker({ value, onChange }: { value: PlannerTask["priority"]; onChange: (p: PlannerTask["priority"]) => void }) {
-    const quads: Array<{ q: TaskPriority; activeCls: string; borderCls: string }> = [
-        { q: "급경", activeCls: "bg-amber-400 text-white",   borderCls: "border-b border-r border-neutral-200" },
-        { q: "급중", activeCls: "bg-rose-500 text-white",    borderCls: "border-b border-neutral-200" },
-        { q: "완경", activeCls: "bg-neutral-400 text-white", borderCls: "border-r border-neutral-200" },
-        { q: "완중", activeCls: "bg-sky-500 text-white",     borderCls: "" },
-    ];
-    return (
-        <div className="flex flex-col items-start gap-0.5 bg-white border border-neutral-200 rounded-lg shadow-lg p-2 w-[100px]">
-            <div className="grid grid-cols-2 w-full rounded overflow-hidden border border-neutral-200">
-                {quads.map(({ q, activeCls, borderCls }) => (
-                    <button
-                        key={q}
-                        type="button"
-                        onClick={() => onChange(value === q ? null : q)}
-                        className={`py-1.5 text-center text-[10px] font-bold transition-colors ${borderCls} ${
-                            value === q ? activeCls : "bg-white hover:bg-neutral-50 text-neutral-500"
-                        }`}
-                    >
-                        {q}
-                    </button>
-                ))}
-            </div>
-            {value && (
-                <button
-                    type="button"
-                    onClick={() => onChange(null)}
-                    className="w-full text-[9px] text-neutral-400 hover:text-neutral-600 text-center pt-1"
-                >
-                    없음
-                </button>
-            )}
-        </div>
-    );
-}
-
-function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriorityChange, onProjectChange, onMove, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
-    const [editingTime, setEditingTime] = useState(false);
-    const strike = task.status === 'done' || task.status === 'cancelled' || task.status === 'moved';
-
-    return (
-        <div
-            draggable
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            onDragEnd={onDragEnd}
-            className={`group flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 rounded transition-colors ${
-                isDragOver ? "bg-neutral-50 border-t-2 border-[#6366F1]" : ""
-            }`}
-        >
-            {/* Drag handle */}
-            <button className="cursor-grab text-neutral-300 hover:text-neutral-500 shrink-0 touch-none">
-                <GripVertical className="h-3.5 w-3.5" />
-            </button>
-
-            {/* Status button */}
-            <button
-                onClick={onCycle}
-                title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
-                className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs font-bold transition-colors shrink-0 ${
-                    task.status === 'done'
-                        ? "bg-[#6366F1] border-[#6366F1] text-white"
-                        : task.status === 'carried'
-                        ? "bg-amber-500 border-amber-500 text-white"
-                        : task.status === 'moved'
-                        ? "bg-violet-500 border-violet-500 text-white"
-                        : task.status === 'hold'
-                        ? "bg-amber-200 border-amber-300 text-amber-800"
-                        : task.status === 'cancelled'
-                        ? "bg-neutral-300 border-neutral-300 text-white"
-                        : "border-neutral-300 text-neutral-300 hover:border-[#6366F1] hover:text-[#6366F1]"
-                }`}
-            >
-                {task.status === 'done' ? '✓' : task.status === 'carried' ? '→' : task.status === 'moved' ? '→' : task.status === 'hold' ? '⏸' : task.status === 'cancelled' ? '✕' : '·'}
-            </button>
-
-            {/* Time badge */}
-            {editingTime ? (
-                <span className="inline-flex items-center gap-0.5 shrink-0">
-                    <input
-                        type="time"
-                        defaultValue={task.time || ""}
-                        autoFocus
-                        onChange={(e) => onTimeChange(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === 'Escape') {
-                                onTimeChange((e.target as HTMLInputElement).value);
-                                setEditingTime(false);
-                            }
-                        }}
-                        className="text-xs w-[68px] border border-[#6366F1] rounded px-1 py-0.5 focus:outline-none"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setEditingTime(false)}
-                        className="px-1.5 py-0.5 rounded bg-[#6366F1] text-white text-xs font-semibold hover:bg-[#4F46E5]"
-                        title="확인"
-                    >
-                        확인
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => { onTimeChange(""); setEditingTime(false); }}
-                        className="px-1 py-0.5 rounded text-neutral-400 hover:text-rose-500 text-xs"
-                        title="시간 지우기"
-                    >
-                        ×
-                    </button>
-                </span>
-            ) : (
-                <button
-                    onClick={() => setEditingTime(true)}
-                    className={`text-xs shrink-0 px-1.5 py-0.5 rounded transition-colors ${
-                        task.time
-                            ? "text-[#6366F1] bg-[#6366F1]/10 hover:bg-[#6366F1]/20"
-                            : "text-neutral-300 hover:text-neutral-400"
-                    }`}
-                    title="시간 설정"
-                >
-                    {task.time ? task.time.slice(0, 5) : <Clock className="h-3 w-3" />}
-                </button>
-            )}
-
-            {/* 우선순위 뱃지 (있을 때만) */}
-            {task.priority && PRIORITY_META[task.priority as TaskPriority] && (
-                <PriorityBadge
-                    priority={task.priority as TaskPriority}
-                    onClick={() => onPriorityChange?.(
-                        QUADRANT_CYCLE[task.priority as TaskPriority]
-                    )}
-                />
-            )}
-            {/* 우선순위 없을 때 — hover 시 빠른 설정 버튼 */}
-            {!task.priority && onPriorityChange && (
-                <button
-                    type="button"
-                    onClick={() => onPriorityChange("급중")}
-                    className="shrink-0 text-xs text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
-                    title="우선순위 설정"
-                >
-                    급중
-                </button>
-            )}
-
-            {/* 모바일 스페이서 — project+delete를 우측으로 밀기 */}
-            <span className="flex-1 sm:hidden" />
-
-            {/* Project tag (선택 가능) */}
-            {projects.length > 0 && onProjectChange && (() => {
-                const project = task.project_id ? projects.find(p => p.id === task.project_id) : null;
-                return (
-                    <select
-                        value={task.project_id ?? ""}
-                        onChange={(e) => onProjectChange(e.target.value || null)}
-                        title={project ? `프로젝트: ${project.title}` : "프로젝트 태그"}
-                        className={`shrink-0 text-xs max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
-                            project
-                                ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
-                                : "text-neutral-300 border-transparent opacity-40"
-                        }`}
-                        style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}
-                    >
-                        <option value="">— 프로젝트 —</option>
-                        {projects.map(p => (
-                            <option key={p.id} value={p.id}>{p.title}</option>
-                        ))}
-                    </select>
-                );
-            })()}
-
-            {/* Move (다른 날짜로 이동) */}
-            {onMove && (
-                <button
-                    onClick={onMove}
-                    title="다른 날짜로 변경"
-                    className="text-neutral-300 hover:text-violet-500 transition-opacity shrink-0 opacity-0 group-hover:opacity-100"
-                >
-                    <CalendarDays className="h-3.5 w-3.5" />
-                </button>
-            )}
-
-            {/* Remove */}
-            <button
-                onClick={onRemove}
-                className="text-neutral-300 hover:text-red-500 transition-opacity shrink-0"
-            >
-                <Trash2 className="h-3.5 w-3.5" />
-            </button>
-
-            {/* Task text — 모바일 2번째 줄, 데스크톱 인라인 */}
-            <span className={`basis-full sm:basis-auto sm:flex-1 sm:min-w-0 order-last sm:order-none pl-6 sm:pl-0 text-xs leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
-                {task.text}
-                {task.status === 'moved' && task.moved_to && (
-                    <span className="ml-2 text-[10px] text-violet-500 not-italic no-underline">→ {task.moved_to.slice(5)} 변경</span>
-                )}
-                {task.moved_from && task.status !== 'moved' && (
-                    <span className="ml-2 text-[10px] text-violet-400 no-underline">({task.moved_from.slice(5)} 변경)</span>
-                )}
-            </span>
-        </div>
-    );
-}
-
-interface ExerciseBlockProps {
-    type: string; minutes: string; distance: string; note: string;
-    onChange: (patch: { type?: string; minutes?: string; distance?: string; note?: string }) => void;
-    onSave: () => void;
-}
-
-function ExerciseBlock({ type, minutes, distance, note, onChange, onSave }: ExerciseBlockProps) {
-    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]";
-    return (
-        <div>
-            <p className="text-xs font-semibold text-neutral-700 mb-2">운동 <span className="text-[10px] text-neutral-400 ml-1 font-normal">종류·시간·거리</span></p>
-            <div className="grid grid-cols-2 gap-2">
-                <input className={cls + " col-span-2"} placeholder="종류 (예: 러닝, 웨이트, 요가)" value={type} onChange={(e) => onChange({ type: e.target.value })} onBlur={onSave} />
-                <input className={cls} placeholder="시간 (분)" value={minutes} onChange={(e) => onChange({ minutes: e.target.value.replace(/[^0-9]/g, "") })} onBlur={onSave} inputMode="numeric" />
-                <input className={cls} placeholder="거리 (km)" value={distance} onChange={(e) => onChange({ distance: e.target.value.replace(/[^0-9.]/g, "") })} onBlur={onSave} inputMode="decimal" />
-                <input className={cls + " col-span-2 text-xs"} placeholder="메모" value={note} onChange={(e) => onChange({ note: e.target.value })} onBlur={onSave} />
-            </div>
-        </div>
-    );
-}
-
-interface HealthBlockProps {
-    sys: string; dia: string; sugar: string; weight: string; temp: string; note: string;
-    onChange: (patch: { sys?: string; dia?: string; sugar?: string; weight?: string; temp?: string; note?: string }) => void;
-    onSave: () => void;
-}
-
-function HealthBlock({ sys, dia, sugar, weight, temp, note, onChange, onSave }: HealthBlockProps) {
-    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]";
-    const onlyNum = (v: string, dec = false) => v.replace(dec ? /[^0-9.]/g : /[^0-9]/g, "");
-    return (
-        <div>
-            <p className="text-xs font-semibold text-neutral-700 mb-2">건강 <span className="text-[10px] text-neutral-400 ml-1 font-normal">혈압·혈당·체중·체온</span></p>
-            <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                    <input className={cls} placeholder="수축기 (mmHg)" value={sys} onChange={(e) => onChange({ sys: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
-                    <input className={cls} placeholder="이완기 (mmHg)" value={dia} onChange={(e) => onChange({ dia: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
-                </div>
-                <input className={cls} placeholder="혈당 (mg/dL)" value={sugar} onChange={(e) => onChange({ sugar: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
-                <div className="grid grid-cols-2 gap-2">
-                    <input className={cls} placeholder="체중 (kg)" value={weight} onChange={(e) => onChange({ weight: onlyNum(e.target.value, true) })} onBlur={onSave} inputMode="decimal" />
-                    <input className={cls} placeholder="체온 (°C)" value={temp} onChange={(e) => onChange({ temp: onlyNum(e.target.value, true) })} onBlur={onSave} inputMode="decimal" />
-                </div>
-                <input className={cls + " text-xs"} placeholder="메모 (증상·복약 등)" value={note} onChange={(e) => onChange({ note: e.target.value })} onBlur={onSave} />
-            </div>
-        </div>
-    );
-}
-
-interface TrackingRowWithNoteProps {
-    label: string; hint: string; value: number | null; activeColor: string;
-    note: string; placeholder: string;
-    onPick: (n: number) => void;
-    onClear: () => void;
-    onNoteChange: (v: string) => void;
-    onNoteBlur: () => void;
-}
-
-function TrackingRowWithNote(p: TrackingRowWithNoteProps) {
-    return (
-        <div>
-            <TrackingRow
-                label={p.label} hint={p.hint} value={p.value}
-                activeColor={p.activeColor}
-                onPick={p.onPick} onClear={p.onClear}
-            />
-            <input
-                type="text"
-                value={p.note}
-                onChange={(e) => p.onNoteChange(e.target.value)}
-                onBlur={p.onNoteBlur}
-                placeholder={p.placeholder}
-                className="w-full mt-1.5 text-xs border border-neutral-200 rounded px-2 py-1 placeholder:text-neutral-300 placeholder:italic focus:outline-none focus:border-[#6366F1]"
-            />
-        </div>
-    );
-}
-
-interface TrackingRowProps {
-    label: string;
-    hint: string;
-    value: number | null;
-    activeColor: string;
-    onPick: (n: number) => void;
-    onClear: () => void;
-}
-
-function TrackingRow({ label, hint, value, activeColor, onPick, onClear }: TrackingRowProps) {
-    return (
-        <div>
-            <div className="flex items-baseline justify-between mb-1.5">
-                <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-semibold text-neutral-700">{label}</span>
-                    <span className="text-[10px] text-neutral-400">{hint}</span>
-                </div>
-                {value !== null && (
-                    <button
-                        onClick={onClear}
-                        className="text-[10px] text-neutral-300 hover:text-rose-500 transition-colors"
-                        title="해제"
-                    >
-                        해제
-                    </button>
-                )}
-            </div>
-            <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                        key={n}
-                        onClick={() => onPick(n)}
-                        className={`flex-1 max-w-[40px] h-7 rounded text-xs font-medium transition-colors ${
-                            value && n <= value
-                                ? `${activeColor} text-white`
-                                : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
-                        }`}
-                    >
-                        {n}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-// 향후 4주 일정 컴팩트 리스트
-const DAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
-
-interface UpcomingTask {
-    id: string;
-    text: string;
-    status: string;
-    project_id?: string | null;
-    source?: string;
-    time?: string | null;
-}
-
-function UpcomingSchedule({ date }: { date: string }) {
-    const [offset, setOffset] = useState(0);
-    const [entries, setEntries] = useState<CalendarEntry[]>([]);
-    const [taskRows, setTaskRows] = useState<Array<{ date: string; tasks: UpcomingTask[] }>>([]);
-    const [loading, setLoading] = useState(false);
-
-    const { from, to } = useMemo(() => {
-        const today = localDateStr(new Date());
-        const d1 = new Date(today + "T00:00:00"); d1.setDate(d1.getDate() + 1 + offset);
-        const d2 = new Date(today + "T00:00:00"); d2.setDate(d2.getDate() + 28 + offset);
-        return { from: localDateStr(d1), to: localDateStr(d2) };
-    }, [offset]);
-
-    useEffect(() => {
-        let cancelled = false;
-        setLoading(true);
-        Promise.all([
-            fetch(`/api/myverse/calendar?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
-            fetch(`/api/myverse/daily/range?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
-        ])
-            .then(([cal, daily]) => {
-                if (cancelled) return;
-                if (cal?.entries) setEntries(cal.entries);
-                if (daily?.rows) {
-                    const rows = (daily.rows as Array<{ date: string; tasks: unknown }>)
-                        .map(r => ({ date: r.date, tasks: Array.isArray(r.tasks) ? (r.tasks as UpcomingTask[]) : [] }))
-                        .filter(r => r.tasks.length > 0);
-                    setTaskRows(rows);
-                }
-            })
-            .catch(() => {})
-            .finally(() => { if (!cancelled) setLoading(false); });
-        return () => { cancelled = true; };
-    }, [from, to]);
-
-    // 캘린더 + 업무 통합 단일 리스트 (날짜 오름차순)
-    const flatItems = useMemo(() => {
-        type FlatItem =
-            | { kind: Exclude<CalendarKind, "task">; date: string; entry: CalendarEntry; task?: undefined }
-            | { kind: "task";       date: string; task: UpcomingTask;   entry?: undefined };
-        const out: FlatItem[] = [];
-
-        // 캘린더 엔트리 (anniversary, meeting)
-        const calKinds: CalendarKind[] = ["anniversary", "meeting"];
-        entries.forEach((e) => {
-            if (!calKinds.includes(e.kind as CalendarKind)) return;
-            expandOccurrences(e, from, to).forEach((o) => {
-                out.push({ kind: e.kind as Exclude<CalendarKind, "task">, date: o.date, entry: e });
-            });
-        });
-
-        // 업무 (취소·완료 제외)
-        for (const row of taskRows) {
-            for (const t of row.tasks) {
-                if (!t || !t.text) continue;
-                if (t.status === "cancelled" || t.status === "done") continue;
-                out.push({ kind: "task", date: row.date, task: t });
-            }
-        }
-
-        out.sort((a, b) => a.date.localeCompare(b.date));
-        return out;
-    }, [entries, taskRows, from, to]);
-
-    const total = flatItems.length;
-    // offset === 0 + 데이터 없음 → 카드 자체 숨김 (오늘 기준 향후 4주 무일정)
-    // offset !== 0 + 데이터 없음 → 카드 유지 (과거·미래로 이동 중인 사용자)
-    if (total === 0 && offset === 0) return null;
-
-    const today = new Date(localDateStr(new Date()) + "T00:00:00");
-
-    function renderFlatItem(o: typeof flatItems[number], i: number) {
-        const d = new Date(o.date + "T00:00:00");
-        const days = Math.round((d.getTime() - today.getTime()) / 86400000);
-        const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
-        const dow  = DAY_KO[d.getDay()];
-        const dStr = days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`;
-
-        if (o.kind === "task") {
-            const isMs = o.task.source === "milestone";
-            return (
-                <li key={`task-${o.date}-${o.task.id}-${i}`}>
-                    <a
-                        href={`/myverse/app/daily?date=${o.date}`}
-                        className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
-                    >
-                        <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
-                        <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
-                            {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
-                        </span>
-                        <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
-                        {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[#6366F1]/10 text-[#6366F1]">MS</span>}
-                        <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">{dStr}</span>
-                    </a>
-                </li>
-            );
-        }
-
-        const c = KIND_COLORS[o.entry.kind as CalendarKind];
-        return (
-            <li key={`cal-${o.date}-${o.entry.id}-${i}`}>
-                <a
-                    href={`/myverse/app/daily?date=${o.date}`}
-                    className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
-                >
-                    <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${c.dot}`} />
-                    <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
-                        {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
-                    </span>
-                    <span className="flex-1 truncate text-xs text-neutral-700">{o.entry.title}</span>
-                    <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">{dStr}</span>
-                </a>
-            </li>
-        );
-    }
-
-    return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-4">
-            <div className="flex items-center gap-1 mb-3">
-                <button
-                    onClick={() => setOffset(o => o - 28)}
-                    title="이전 4주"
-                    className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors"
-                >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-                <div className="flex-1 text-center">
-                    <h2 className="text-xs font-medium text-neutral-600">
-                        {offset < 0 ? "과거 일정 & 업무" : offset > 0 ? "다음 일정 & 업무" : "향후 일정 & 업무"}
-                    </h2>
-                    {offset !== 0 && (
-                        <button
-                            onClick={() => setOffset(0)}
-                            className="text-[9px] text-neutral-400 hover:text-[#6366F1] transition-colors mt-0.5"
-                        >
-                            오늘로 ↺
-                        </button>
-                    )}
-                </div>
-                <button
-                    onClick={() => setOffset(o => o + 28)}
-                    title="다음 4주"
-                    className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors"
-                >
-                    <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-            </div>
-            <div>
-                {flatItems.length > 0 && (
-                    <ul className="pl-1">
-                        {flatItems.map((o, i) => renderFlatItem(o, i))}
-                    </ul>
-                )}
-                {total === 0 && (
-                    <div className="text-[11px] text-neutral-400 text-center py-6">
-                        {loading ? "불러오는 중…" : `${from} ~ ${to} 일정 없음`}
-                    </div>
-                )}
-                {total > 0 && (
-                    <div className="flex items-center gap-3 pt-2 mt-1 border-t border-neutral-100">
-                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-rose-500" />
-                            기념일
-                        </span>
-                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-sky-500" />
-                            미팅
-                        </span>
-                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-teal-500" />
-                            업무
-                        </span>
-                    </div>
-                )}
-            </div>
-        </section>
-    );
-}
+// ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow → DailyTrackingBlocks.tsx (imported above)
+// UpcomingSchedule → UpcomingSchedule.tsx (imported above)
 

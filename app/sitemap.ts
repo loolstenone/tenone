@@ -83,12 +83,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
         // ── Myverse ── (마이버스 단일 브랜드 통합 — 9 영역 + 공개 핸들)
         { url: `${baseUrl}/myverse`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-        { url: `${baseUrl}/myverse/philosophy`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-        { url: `${baseUrl}/myverse/service`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-        { url: `${baseUrl}/myverse/technology`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-        { url: `${baseUrl}/myverse/roadmap`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-        { url: `${baseUrl}/myverse/team`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-        { url: `${baseUrl}/myverse/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
+        { url: `${baseUrl}/myverse/story`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/myverse/pricing`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
 
         // ── Mindle ──
         { url: `${baseUrl}/mindle`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },

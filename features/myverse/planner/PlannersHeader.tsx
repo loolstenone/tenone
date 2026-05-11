@@ -79,7 +79,7 @@ export function PlannersHeader() {
                         </Link>
                     )}
                     <UniverseUtilityBar
-                        aboutPath="/myverse/about"
+                        aboutPath="/myverse/story"
                         profilePath="/myverse/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"

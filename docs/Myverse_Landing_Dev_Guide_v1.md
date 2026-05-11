@@ -460,7 +460,7 @@ Mobile:   480px 이하 — 폰트 축소, 카드 세로 배치
 
 ```html
 <meta property="og:title" content="Myverse — Personal Blackbox">
-<meta property="og:description" content="나의 디지털 흔적은 내 것이어야 한다. 사진 찍으면 AI가 정리하고, 서비스가 사라져도 내 기록은 남는다.">
+<meta property="og:description" content="나의 디지털 흔적은 내 것이어야 한다. 사진 찍으면 AI가 정리하고, 서비스는 사라져도 나의 기록은 남는다.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="[OG 이미지 URL — 1200x630, 어두운 배경에 Myverse 로고 + 카피]">
 <meta name="twitter:card" content="summary_large_image">

@@ -4,7 +4,7 @@
 >
 > **3원칙 (OS 톤)**
 > - **운영한다** — 사진·메모·일정·관계가 자동으로 정리되는 시스템
-> - **소유한다** — 내 데이터, 내 OS, 내 결정 (서비스가 사라져도 기록은 남는다)
+> - **소유한다** — 내 데이터, 내 OS, 내 결정 (서비스는 사라져도 나의 기록은 남는다)
 > - **성장한다** — AI가 패턴을 보여주고, 나는 더 잘 살 수 있도록
 >
 > **메타포 레이어** — 외부 마케팅: Personal OS / 내부 철학: Personal Black Box (philosophy 페이지에서만 사용)
@@ -144,6 +144,48 @@
 **ask vs coach 구분 카피 (세션 120):**
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
+
+### Personal OS 통합 (세션 127) — Note→Task 승격 / 캘린더 양방향 / 브랜드 자산 SSOT / TimeBlock / Person 정규화
+| 파일 | 역할 |
+|------|------|
+| `lib/myverse/google-calendar-push.ts` | `myverse_calendar_entries` → Google Calendar 양방향 헬퍼 (push/update/delete) |
+| `app/api/myverse/calendar/route.ts` | POST 시 Google에 자동 푸시 (meeting/anniversary) |
+| `app/api/myverse/calendar/[id]/route.ts` | PATCH/DELETE 시 Google에도 반영 |
+| `app/api/myverse/email-imports/route.ts` | Triage `task` → `myverse_daily.tasks` INSERT, Triage `event` → `myverse_calendar_entries` INSERT |
+| `components/DigitalCard.tsx` | `brandAssets` prop — 로고/태그라인/팔레트/링크 자동 노출 |
+| `app/(Myverse)/myverse/app/card/page.tsx` | `show_on_card=true` 자산 fetch → DigitalCard에 전달 |
+| `app/(Myverse)/myverse/[handle]/page.tsx` | `show_on_portfolio=true + visibility=public` 자산을 hero에 렌더 (태그라인·로고·팔레트·미션·외부링크) |
+| `lib/myverse/handle/public-page.ts` | `getPublicPageData` 가 `brand_assets` 도 반환 |
+| `sql/myverse-brand-assets-bucket.sql` | `brand-assets` Storage 버킷 (public, 5MB, RLS = 본인 폴더만) |
+| `features/myverse/personal/BrandAssetsView.tsx` | 파일 업로드 UI 추가 (`storage.from('brand-assets').upload()`) |
+| `app/api/myverse/tasks/route.ts` | **POST 추가** — Note/Email/Inbox에서 Task 승격 + source 메타 |
+| `features/myverse/planner/DailyView.tsx` (CornellRowsInline) | 행마다 "Task로 보내기" 버튼 (playlist_add_check 아이콘) |
+| `lib/myverse/types.ts` (PlannerTask) | **확장** — `type/amount/currency/assignee_person_id/source*` 필드 |
+| `sql/myverse-calendar-google-link.sql` | `google_event_id`/`google_synced_at` 컬럼 |
+| `sql/myverse-contacts-person-normalize.sql` | `person_type(self/internal/external)` + `company_name/role/tags/avatar_url` |
+| `sql/myverse-timeblocks.sql` | `myverse_timeblocks` 신설 — Task ↔ 시간 슬롯 (Today 타임라인) |
+| `app/api/myverse/timeblocks/route.ts` | TimeBlock CRUD |
+| `sql/myverse-templates-personal-os.sql` | Daily/Weekly Review/Project Kickoff 템플릿 시드 |
+| `app/api/myverse/integrations/gmail/sync/route.ts` | Claude Haiku LLM 분류 (confidence<0.6 시 키워드 fallback) |
+
+### 사이드바 접힘 + 브랜드 자산 + 메일/캘린더 (세션 126)
+| 파일 | 역할 |
+|------|------|
+| `features/myverse/app/SidebarCollapseContext.tsx` | 사이드바 접힘 상태 SSOT (localStorage 영속화) |
+| `features/myverse/app/MainContent.tsx` | 메인 컨텐츠 좌측 여백 동적 (`md:ml-52` ↔ `md:ml-14`) |
+| `features/myverse/app/AppSideNav.tsx` | 접힘 시 아이콘만 + hover tooltip + 토글 버튼 |
+| `features/myverse/personal/BrandAssetsView.tsx` | 브랜드 자산 SSOT — logo/palette/typography/tagline/mission/image/link/template |
+| `app/api/myverse/brand-assets/route.ts` | CRUD API — `myverse_brand_assets` |
+| `sql/myverse-brand-assets.sql` | DDL + RLS + 트리거 |
+| `sql/myverse-email-imports.sql` | Gmail 임포트 캐시 (메타·snippet만) + Triage state |
+| `app/api/myverse/integrations/google/calendar/event/route.ts` | 캘린더 이벤트 POST/PATCH/DELETE (2-way sync write) |
+| `app/api/myverse/integrations/gmail/sync/route.ts` | Gmail 최근 7일 메타 임포트 + 키워드 분류 (receipt/invite/newsletter) |
+| `app/api/myverse/email-imports/route.ts` | 임포트된 메일 조회 + Triage (inbox→task/event/archive) |
+| `features/myverse/app/GoogleCalendarIntegration.tsx` | 캘린더 연결 UI |
+| `features/myverse/app/GmailIntegration.tsx` | 메일 연결 UI + Triage |
+| `lib/myverse/google-calendar.ts` | SCOPES에 `gmail.readonly` 추가 — **기존 사용자는 재연결 필요** |
+| 사이드바 PERSONAL | 비전하우스 / 이력서 / 브랜드 / 포트폴리오 |
+| 설정 > 외부 연결 | Google 캘린더 · Gmail · Google Photos · Apple Health |
 
 ### Phase 0 (완료)
 | 파일 | 역할 |

@@ -7,18 +7,29 @@ export async function GET() {
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
     const admin = createAdminClient();
-    const { data } = await admin
-        .from('myverse_users')
-        .select('*')
-        .eq('member_id', memberId)
-        .maybeSingle();
+    const [{ data }, { data: member }] = await Promise.all([
+        admin
+            .from('myverse_users')
+            .select('*')
+            .eq('member_id', memberId)
+            .maybeSingle(),
+        admin
+            .from('members')
+            .select('handle')
+            .eq('id', memberId)
+            .maybeSingle(),
+    ]);
 
     // row 없거나 metrics 미설정이면 기본값 주입
     const user = (data ?? {}) as Record<string, unknown>;
     if (!Array.isArray(user.daily_tracking_metrics) || (user.daily_tracking_metrics as unknown[]).length === 0) {
         user.daily_tracking_metrics = ["satisfaction"];
     }
-    return NextResponse.json({ user, memberId });
+    // page_visible 기본값 (row 없는 신규 사용자)
+    if (!('page_visible' in user)) {
+        user.page_visible = true;
+    }
+    return NextResponse.json({ user, memberId, handle: member?.handle ?? null });
 }
 
 export async function POST(req: Request) {

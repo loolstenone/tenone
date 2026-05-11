@@ -46,7 +46,14 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
     const data = await getPublicPageData(handle);
     if (!data) notFound();
 
-    const { profile, resume_sections, projects, moments } = data;
+    const { profile, resume_sections, projects, moments, brand_assets } = data;
+
+    // 브랜드 자산 정리 — type별 첫 row
+    const primaryLogo = brand_assets.find(a => a.type === "logo" && a.is_primary) ?? brand_assets.find(a => a.type === "logo");
+    const primaryTagline = brand_assets.find(a => a.type === "tagline" && a.is_primary) ?? brand_assets.find(a => a.type === "tagline");
+    const primaryMission = brand_assets.find(a => a.type === "mission" && a.is_primary) ?? brand_assets.find(a => a.type === "mission");
+    const primaryPalette = brand_assets.find(a => a.type === "palette" && a.is_primary) ?? brand_assets.find(a => a.type === "palette");
+    const brandLinks = brand_assets.filter(a => a.type === "link");
 
     return (
         <main className="max-w-2xl mx-auto px-4 py-8">
@@ -96,6 +103,65 @@ export default async function PublicHandlePage({ params }: { params: Promise<{ h
                                         {a}
                                     </span>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* 브랜드 자산 — 태그라인 */}
+                        {primaryTagline && (
+                            <p className="mt-3 text-sm italic text-neutral-700">
+                                &ldquo;{((primaryTagline.data as { text?: string } | null)?.text) ?? primaryTagline.title}&rdquo;
+                            </p>
+                        )}
+
+                        {/* 브랜드 자산 — 로고 + 컬러팔레트 */}
+                        {(primaryLogo?.file_url || primaryPalette) && (
+                            <div className="flex items-center gap-4 mt-3">
+                                {primaryLogo?.file_url && (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img src={primaryLogo.file_url} alt={primaryLogo.title} className="h-7 w-auto object-contain" />
+                                )}
+                                {primaryPalette && (() => {
+                                    const colors = ((primaryPalette.data as { colors?: Array<{ hex?: string }> } | null)?.colors) ?? [];
+                                    if (colors.length === 0) return null;
+                                    return (
+                                        <div className="flex items-center gap-1">
+                                            {colors.slice(0, 5).map((c, i) => (
+                                                <span
+                                                    key={i}
+                                                    className="h-4 w-4 rounded-full border border-neutral-200"
+                                                    style={{ backgroundColor: c.hex ?? "#ccc" }}
+                                                    title={c.hex}
+                                                />
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
+
+                        {/* 브랜드 자산 — 외부 링크 */}
+                        {brandLinks.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                                {brandLinks.map(l => {
+                                    const url = ((l.data as { url?: string } | null)?.url);
+                                    if (!url) return null;
+                                    return (
+                                        <a key={l.id} href={url} target="_blank" rel="noopener noreferrer"
+                                           className="text-[11px] px-2 py-0.5 rounded-md border border-neutral-200 text-neutral-600 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors">
+                                            {l.title}
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* 브랜드 자산 — 미션 (페이지 하단 별도 박스) */}
+                        {primaryMission && (
+                            <div className="mt-4 p-3 rounded-lg bg-gradient-to-br from-[#6366F1]/5 to-[#A855F7]/5 border border-[#6366F1]/10">
+                                <p className="text-[10px] uppercase tracking-widest text-[#6366F1] mb-1 font-semibold">MISSION</p>
+                                <p className="text-sm text-neutral-800 leading-relaxed">
+                                    {((primaryMission.data as { text?: string } | null)?.text) ?? primaryMission.title}
+                                </p>
                             </div>
                         )}
                         {/* Stats row — LinkedIn 스타일 (공개 콘텐츠만 카운트) */}

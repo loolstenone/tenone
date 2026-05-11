@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
 import type { CalendarKind } from "@/lib/myverse/calendar-rules";
+import { pushToGoogle } from "@/lib/myverse/google-calendar-push";
 
 export const dynamic = "force-dynamic";
 
@@ -105,5 +106,25 @@ export async function POST(req: Request) {
         .single();
 
     if (error || !data) return NextResponse.json({ error: error?.message || "insert_failed" }, { status: 500 });
+
+    // Google Calendar 연결돼 있으면 자동 푸시 (meeting/anniversary 만)
+    if (kind === "meeting" || kind === "anniversary") {
+        const googleId = await pushToGoogle(memberId, {
+            title: data.title,
+            description: data.description,
+            location: data.location,
+            start_date: data.start_date,
+            start_time: data.start_time,
+            end_time: data.end_time,
+        });
+        if (googleId) {
+            await admin
+                .from("myverse_calendar_entries")
+                .update({ google_event_id: googleId, google_synced_at: new Date().toISOString() })
+                .eq("id", data.id);
+            data.google_event_id = googleId;
+        }
+    }
+
     return NextResponse.json({ entry: data });
 }

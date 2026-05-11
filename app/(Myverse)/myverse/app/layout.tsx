@@ -10,6 +10,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
 import { AppSideNav } from "@/features/myverse/app/AppSideNav";
+import { MainContent } from "@/features/myverse/app/MainContent";
+import { SidebarCollapseProvider } from "@/features/myverse/app/SidebarCollapseContext";
 import { AppMonthBar } from "@/features/myverse/planner/AppMonthBar";
 import { PwaRegister } from "@/features/myverse/app/PwaRegister";
 import { BetaFeedbackButton } from "@/features/myverse/app/BetaFeedbackButton";
@@ -187,13 +189,13 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                     showTimeTracking={myverseUser?.time_tracking ?? false}
                     customMenus={(myverseUser?.custom_menus as CustomMenuKey[] | undefined) ?? []}
                 />
-                <div className="flex flex-1 min-h-0 pt-12">
-                    <AppSideNav />
-                    <main className="flex-1 [overflow-x:clip] min-w-0 pb-14 md:pb-0 md:ml-52 md:mr-10">
-                        {children}
-                    </main>
-                    <AppMonthBar />
-                </div>
+                <SidebarCollapseProvider>
+                    <div className="flex flex-1 min-h-0 pt-12">
+                        <AppSideNav />
+                        <MainContent>{children}</MainContent>
+                        <AppMonthBar />
+                    </div>
+                </SidebarCollapseProvider>
             </div>
             <BetaFeedbackButton />
             <KeyboardShortcuts />

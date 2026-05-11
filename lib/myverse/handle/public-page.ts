@@ -45,11 +45,21 @@ export interface PublicMoment {
     domain: string | null;
 }
 
+export interface PublicBrandAsset {
+    id: string;
+    type: "logo" | "palette" | "typography" | "image" | "template" | "link" | "tagline" | "mission";
+    title: string;
+    file_url: string | null;
+    data: Record<string, unknown>;
+    is_primary: boolean;
+}
+
 export interface PublicPageData {
     profile: PublicProfile;
     resume_sections: ResumeSection[];
     projects: PublicProject[];
     moments: PublicMoment[];
+    brand_assets: PublicBrandAsset[];
 }
 
 const SECTION_LABELS: Record<ResumeSection["type"], string> = {
@@ -72,6 +82,16 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
         .maybeSingle();
 
     if (!profile) return null;
+
+    // 1-b) page_visible 체크 — false 시 비공개 처리
+    const { data: userSettings } = await admin
+        .from("myverse_users")
+        .select("page_visible")
+        .eq("member_id", profile.member_id)
+        .maybeSingle();
+
+    // row 없으면 기본값 true (신규 사용자)
+    if (userSettings && userSettings.page_visible === false) return null;
 
     // 2) 이력서 (myverse_identities.resume JSONB)
     const { data: identity } = await admin
@@ -108,6 +128,17 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
         .order("created_at", { ascending: false })
         .limit(12);
 
+    // 5) 브랜드 자산 (show_on_portfolio=true + visibility=public)
+    const { data: brandAssets } = await admin
+        .from("myverse_brand_assets")
+        .select("id, type, title, file_url, data, is_primary")
+        .eq("member_id", profile.member_id)
+        .eq("show_on_portfolio", true)
+        .eq("visibility", "public")
+        .order("is_primary", { ascending: false })
+        .order("type")
+        .order("order_index");
+
     return {
         profile: {
             handle: profile.handle,
@@ -120,6 +151,7 @@ export async function getPublicPageData(handle: string): Promise<PublicPageData 
         resume_sections,
         projects: (projects ?? []) as PublicProject[],
         moments: (moments ?? []) as PublicMoment[],
+        brand_assets: (brandAssets ?? []) as PublicBrandAsset[],
     };
 }
 

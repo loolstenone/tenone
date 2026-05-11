@@ -156,6 +156,9 @@ export interface ActivityBase {
 
 export type TaskQuadrant = '급중' | '급경' | '완중' | '완경';
 
+/** Personal OS Task 분류 — 일정/비용/인력/관리/일반 */
+export type TaskType = 'normal' | 'milestone' | 'finance' | 'people' | 'admin';
+
 export interface PlannerTask {
     id: string;
     text: string;
@@ -171,6 +174,22 @@ export interface PlannerTask {
     moved_to?: string | null;
     /** 다른 날에서 이동되어 들어온 경우 출처 날짜 */
     moved_from?: string | null;
+    /** Personal OS — 일정 통합 운영: 일반/마일스톤/비용/인력/관리 */
+    type?: TaskType | null;
+    /** type='finance' 일 때 사용 */
+    amount?: number | null;
+    currency?: string | null;
+    vendor_person_id?: string | null;
+    /** type='people' 일 때 — 담당 Person */
+    assignee_person_id?: string | null;
+    waiting_on_person_id?: string | null;
+    /** 출처 추적 (note/email/calendar에서 승격) */
+    source?: 'note' | 'email' | 'calendar' | 'inbox' | null;
+    source_note_id?: string | null;
+    source_block_id?: string | null;
+    source_email_id?: string | null;
+    /** 생성 시각 (승격된 task 식별용) */
+    created_at?: string | null;
 }
 
 export interface PlannerDaily {

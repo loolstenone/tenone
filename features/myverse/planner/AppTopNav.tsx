@@ -247,8 +247,8 @@ export function AppTopNav({
             <UniverseMobileMenu
                 open={menuOpen}
                 onClose={() => setMenuOpen(false)}
-                brandName="Myverse App"
-                brandNode={<span className="font-sans font-semibold text-neutral-900 tracking-tight">Myverse</span>}
+                brandName="Myverse"
+                brandNode={<span className="font-sans font-semibold text-neutral-900 tracking-tight">myverse</span>}
                 bgClass="bg-white"
                 textTone="dark"
             >

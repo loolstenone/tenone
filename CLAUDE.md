@@ -71,10 +71,14 @@ INTEL 레이어에 속하며, 외부 정보를 유니버스에 들여오는 "눈
 ### 핵심 명령어
 
 ```bash
-npm run dev        # 개발 서버
 npm run build      # 프로덕션 빌드
 npm run lint       # ESLint
 ```
+
+> ⚠️ **`npm run dev` 직접 실행 금지** — 반드시 `preview_start` 도구를 사용한다.
+> 직접 실행 시 좀비 프로세스가 포트를 점유하거나 Turbopack 캐시 손상 시 수동 복구가 필요해진다.
+> `preview_start`는 Claude Code가 서버 수명을 직접 관리해 이 문제를 방지한다.
+> 설정 파일: `.claude/launch.json` (`name: "dev"`, `port: 3000`)
 
 ### 프로젝트 구조
 
@@ -1347,7 +1351,8 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 | **push는 "작업 종료" 또는 명시적 배포 요청 시 1회만** | push 1회 = Vercel 빌드 1회 = 크레딧 소진 | 2026-04-13: 세션 중 18회 push → $1.95 / 2026-04-15: "실서버 반영" 1회 요청에 이후 변경마다 계속 push |
 | **`vercel deploy` / `npm run deploy:*` 직접 실행 금지** | 중복 빌드 발생 — git push가 유일한 배포 경로 | 2026-04-13: Claude가 직접 deploy 18회 |
 | **commit은 로컬에서 자유** | 로컬 commit = $0 | — |
-| **`npm run dev`로 로컬 확인** | 로컬 서버 = $0 | — |
+| **로컬 확인은 `preview_start "dev"` 도구 사용** | 서버 수명 자동 관리 — 좀비 프로세스·포트 충돌·캐시 손상 방지 | 2026-05-11: `npm run dev` 직접 실행 → Turbopack 패닉 크래시 → 포트 3000 좀비 점유 |
+| **`npm run dev` 직접 Bash 실행 금지** | 크래시 후 Windows PID가 포트 잡은 채 남음 — bash kill 불가 | 동일 |
 | **On-Demand 상한 $100 설정됨** | 초과 과금 방어 | — |
 | **서브에이전트는 Haiku로** | 토큰 비용 80% 절감 | — |
 | **기본 모델은 Sonnet** | Opus는 복잡한 아키텍처/디버깅만 | — |
@@ -1422,6 +1427,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 
 ### 배포·Git
 - ❌ `vercel deploy` / `npm run deploy:*` 직접 실행
+- ❌ `npm run dev` Bash 직접 실행 — 반드시 `preview_start "dev"` 도구 사용
 - ❌ 작업 중간 push (크레딧 소진)
 - ❌ master 외 브랜치에서 작업
 - ❌ pull 없이 로컬 파일만 보고 시작

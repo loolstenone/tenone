@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Bot, Camera, Calendar, Tag, Moon, Share2, Zap, Link2, Download, Smartphone, Shield, Sparkles, Mail, MessageCircle, Fingerprint, Star } from "lucide-react";
+import { ArrowRight, Bot, Camera, Calendar, Tag, Moon, Share2, Zap, Link2, Download, Smartphone, Shield, Sparkles, Fingerprint, Star, Instagram, MessageSquare, Heart, Activity, Lock, HardDrive, Trash2, FileJson } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 
@@ -19,6 +19,98 @@ function useFadeIn() {
         return () => obs.disconnect();
     }, []);
     return { ref, className: `transition-all duration-700 ${v ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}` };
+}
+
+/* ── Hero rotator ── */
+const HERO_SLIDES = [
+    { eyebrow: "나를 운영하는",      headline: "Personal OS",          gradient: true  },
+    { eyebrow: "나의 디지털 흔적은", headline: "내것이어야 한다.",       gradient: false },
+    { eyebrow: "기록이 쌓이면",      headline: "나의 성장이 된다.",      gradient: false },
+    { eyebrow: "서비스는 사라져도",   headline: "나의 기록은 남는다.",    gradient: false },
+] as const;
+
+// [x, y] offset — 새 텍스트가 들어오는 방향 (enter) / 나가는 방향 (exit)
+const DIR_ENTER = [
+    { x:   0, y:  44 },   // 위로 올라옴 → 아래에서 진입
+    { x: -44, y:   0 },   // 오른쪽으로 밀림 → 왼쪽에서 진입
+    { x:   0, y: -44 },   // 아래로 내려옴 → 위에서 진입
+    { x:  44, y:   0 },   // 왼쪽으로 밀림 → 오른쪽에서 진입
+] as const;
+const DIR_EXIT = [
+    { x:   0, y: -44 },
+    { x:  44, y:   0 },
+    { x:   0, y:  44 },
+    { x: -44, y:   0 },
+] as const;
+
+type HeroPhase = "idle" | "exiting" | "entering";
+
+function HeroRotator() {
+    const [slideIdx, setSlideIdx] = useState(0);
+    const [dirIdx,   setDirIdx]   = useState(0);
+    const [phase,    setPhase]    = useState<HeroPhase>("idle");
+
+    useEffect(() => {
+        const t = setInterval(() => {
+            setPhase("exiting");
+            setTimeout(() => {
+                setSlideIdx(p => (p + 1) % HERO_SLIDES.length);
+                setDirIdx(p   => (p + 1) % 4);
+                setPhase("entering");
+                // double rAF: entering 위치에서 렌더 → transition 시작
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() => setPhase("idle"))
+                );
+            }, 380);
+        }, 4200);
+        return () => clearInterval(t);
+    }, []);
+
+    const slide = HERO_SLIDES[slideIdx];
+    const enter = DIR_ENTER[dirIdx];
+    const exit  = DIR_EXIT[dirIdx];
+
+    const style: React.CSSProperties =
+        phase === "exiting"  ? { transform: `translate(${exit.x}px,${exit.y}px)`,  opacity: 0, transition: "transform 360ms cubic-bezier(0.4,0,1,1), opacity 280ms ease" } :
+        phase === "entering" ? { transform: `translate(${enter.x}px,${enter.y}px)`, opacity: 0, transition: "none" } :
+        /* idle */             { transform: "translate(0,0)",                        opacity: 1, transition: "transform 480ms cubic-bezier(0.34,1.2,0.64,1), opacity 420ms ease" };
+
+    return (
+        <div className="relative text-center select-none">
+            {/* 회전 텍스트 */}
+            <div className="overflow-hidden" style={{ minHeight: "clamp(120px,22vw,220px)" }}>
+                <div style={style}>
+                    <p
+                        className="text-[clamp(1rem,2.8vw,1.4rem)] font-medium tracking-tight mb-2"
+                        style={{ color: "#9CA3AF" }}
+                    >
+                        {slide.eyebrow}
+                    </p>
+                    <h1 className="text-[clamp(2.6rem,7.5vw,5.5rem)] font-black leading-[1.05] tracking-tight">
+                        {slide.gradient ? (
+                            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                                {slide.headline}
+                            </span>
+                        ) : (
+                            <span className="text-neutral-900">{slide.headline}</span>
+                        )}
+                    </h1>
+                </div>
+            </div>
+
+            {/* 슬라이드 도트 */}
+            <div className="flex items-center justify-center gap-1.5 mt-7">
+                {HERO_SLIDES.map((_, i) => (
+                    <span
+                        key={i}
+                        className={`block rounded-full transition-all duration-300 ${
+                            i === slideIdx ? "w-5 h-1.5 bg-indigo-500" : "w-1.5 h-1.5 bg-neutral-200"
+                        }`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
 }
 
 /* ── counter ── */
@@ -54,7 +146,7 @@ export default function MyVersePage() {
     // 로그인 상태면 서비스 페이지로 자동 이동 — 마케팅 랜딩은 비로그인 진입 전용
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.replace("/myverse/app/daily");
+            router.replace("/Myverse/app/daily");
         }
     }, [isLoading, isAuthenticated, router]);
 
@@ -76,45 +168,86 @@ export default function MyVersePage() {
     return (
         <div>
             {/* ═══ 1. HERO ═══ */}
-            <section className="min-h-[85vh] flex items-center justify-center px-5 relative">
-                <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-indigo-100/60 blur-[150px]" />
-                <div ref={s1.ref} className={`${s1.className} text-center max-w-3xl relative`}>
-                    <p className="text-sm mb-6">
-                        <span className="bg-gradient-to-r from-neutral-500 via-neutral-400 to-neutral-300 bg-clip-text text-transparent">
+            <section className="min-h-[90vh] flex items-center justify-center px-5 relative overflow-hidden">
+                {/* 배경 글로우 */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-indigo-100/50 blur-[180px] pointer-events-none" />
+                <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full bg-purple-100/40 blur-[120px] pointer-events-none" />
+
+                <div ref={s1.ref} className={`${s1.className} w-full max-w-3xl relative`}>
+                    {/* 상단 뱃지 */}
+                    <div className="flex justify-center mb-10">
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold tracking-wide">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
                             안녕! 싸이월드, 카카오스토리 ㅠㅠ
                         </span>
-                    </p>
-                    <h1 className="text-[clamp(2.2rem,6vw,4.5rem)] font-black leading-[1.1] tracking-tight">
-                        나를 운영하는
-                        <br />
-                        <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-                            Personal OS
-                        </span>
-                    </h1>
-                    <p className="mt-6 text-lg text-neutral-500 leading-relaxed">
+                    </div>
+
+                    {/* 회전 헤드라인 */}
+                    <HeroRotator />
+
+                    {/* 고정 서브 카피 */}
+                    <p className="mt-8 text-base sm:text-lg text-neutral-400 leading-relaxed text-center max-w-xl mx-auto">
                         사진·메모·일정·관계가 자동 정리되는 나만의 OS.
-                        <br />
+                        <br className="hidden sm:block" />
                         기록·분류·분석·실행을 하나로.
                     </p>
-                    {!isLoading && isAuthenticated ? (
-                        <button onClick={() => router.push('/myverse/app')}
-                            className="mt-10 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
-                            앱으로 이동 <ArrowRight className="h-4 w-4" />
-                        </button>
-                    ) : (
-                        <div className="mt-10 flex flex-col sm:flex-row items-center gap-3">
-                            <button onClick={() => setLoginOpen(true)}
-                                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
-                                시작하기 <ArrowRight className="h-4 w-4" />
+
+                    {/* CTA */}
+                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        {!isLoading && isAuthenticated ? (
+                            <button onClick={() => router.push('/Myverse/app')}
+                                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-xl shadow-indigo-500/30 text-base">
+                                앱으로 이동 <ArrowRight className="h-4 w-4" />
                             </button>
-                            <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
-                                className="text-sm text-neutral-400 hover:text-neutral-600 transition">
-                                출시 소식 받기
-                            </button>
-                        </div>
-                    )}
-                    <p className="mt-4 text-xs text-neutral-400 flex items-center justify-center gap-2">
+                        ) : (
+                            <>
+                                <button onClick={() => setLoginOpen(true)}
+                                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-xl shadow-indigo-500/30 text-base">
+                                    시작하기 <ArrowRight className="h-4 w-4" />
+                                </button>
+                                <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="text-sm text-neutral-400 hover:text-neutral-700 transition px-4 py-3">
+                                    출시 소식 받기
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    <p className="mt-5 text-xs text-neutral-400 flex items-center justify-center gap-2">
                         <Smartphone className="h-3.5 w-3.5" /> iOS + Android &middot; 곧 출시
+                    </p>
+                </div>
+            </section>
+
+            {/* ═══ 1-B. ATTENTION SHIFT ═══ */}
+            <section className="py-24 lg:py-32 px-5">
+                <div className="max-w-3xl mx-auto text-center">
+                    <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-3">your attention</p>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
+                        SNS에 나를 보여주기 위해
+                        <br className="hidden sm:block" />
+                        쏟아온 시간들.
+                    </h2>
+                    <p className="text-lg text-neutral-500 leading-relaxed mb-8">
+                        다른 사람의 시선을 위해 다듬은 피드, 좋아요 숫자, 알고리즘이 정한 순서.
+                        <br className="hidden sm:block" />
+                        그 시간을 이제 <span className="text-neutral-800 font-semibold">나에게</span> 쓸 수 있다면.
+                    </p>
+                    <div className="grid sm:grid-cols-3 gap-3 mt-12 text-sm">
+                        {[
+                            { icon: "🎭", before: "남에게 보여줄 나", after: "나에게 솔직한 나" },
+                            { icon: "📊", before: "남의 알고리즘",   after: "내 흐름" },
+                            { icon: "⏳", before: "휘발되는 피드",    after: "쌓이는 기록" },
+                        ].map((row, i) => (
+                            <div key={i} className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm">
+                                <div className="text-2xl mb-2">{row.icon}</div>
+                                <p className="text-xs text-neutral-400 line-through mb-1">{row.before}</p>
+                                <p className="text-sm font-semibold text-neutral-900">{row.after}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="mt-10 text-sm text-neutral-400 italic">
+                        Myverse는 보여주는 도구가 아니라, 나에게 집중하는 시간입니다.
                     </p>
                 </div>
             </section>
@@ -123,7 +256,7 @@ export default function MyVersePage() {
             <section className="py-24 lg:py-32 px-5 bg-neutral-50">
                 <div ref={s2.ref} className={`${s2.className} max-w-5xl mx-auto`}>
                     <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-3">your records</p>
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-12">당신의 기록은 안전합니까?</h2>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-12">당신의 디지털 기록은 당신의 것입니까?</h2>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {[
                             { num: 32847, suffix: '장', label: '스마트폰 사진', sub: '정리한 적 없다', hl: false },
@@ -141,8 +274,6 @@ export default function MyVersePage() {
                         ))}
                     </div>
                     <p className="text-center text-neutral-500 mt-10 text-sm font-medium leading-relaxed">
-                        플랫폼이 닫히면, 알려주지도 않는다.
-                        <br />
                         <span className="text-neutral-400">서비스가 사라지면, 나의 추억도.</span>
                     </p>
                 </div>
@@ -224,6 +355,38 @@ export default function MyVersePage() {
                 </div>
             </section>
 
+            {/* ═══ 3-B. DATA SOURCES ═══ */}
+            <section className="py-24 lg:py-32 px-5 bg-neutral-50">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-12">
+                        <p className="text-indigo-600 font-semibold text-xs tracking-widest uppercase mb-3">DATA SOURCES</p>
+                        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">흩어진 나를 데려오기</h2>
+                        <p className="mt-4 text-sm text-neutral-500 max-w-lg mx-auto">
+                            각 플랫폼에서 데이터를 내려받거나 연동하면, Myverse가 하나로 모읍니다.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
+                        {[
+                            { icon: Instagram,       name: "Instagram",       type: "파일 임포트" },
+                            { icon: MessageSquare,   name: "KakaoTalk",       type: "파일 임포트" },
+                            { icon: Calendar,        name: "Google Calendar", type: "OAuth 연동" },
+                            { icon: Smartphone,      name: "Facebook",        type: "파일 임포트" },
+                            { icon: Heart,           name: "Apple Health",    type: "시스템 연동" },
+                            { icon: Activity,        name: "삼성 헬스",        type: "시스템 연동" },
+                        ].map(s => (
+                            <div key={s.name} className="p-4 rounded-xl bg-white border border-neutral-200 text-center hover:border-indigo-200 transition-colors">
+                                <s.icon className="h-5 w-5 text-indigo-600 mx-auto mb-2" />
+                                <p className="text-sm font-medium text-neutral-900">{s.name}</p>
+                                <p className="text-[10px] text-neutral-400 mt-1">{s.type}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-center text-xs text-neutral-400 mt-6">
+                        + Twitter/X · YouTube · 네이버 블로그 · 금융 마이데이터 · 의료 마이데이터 (단계적 도입)
+                    </p>
+                </div>
+            </section>
+
             {/* ═══ 4. BRIDGE ═══ */}
             <section className="py-28 lg:py-36 px-5">
                 <div ref={s4.ref} className={`${s4.className} max-w-3xl mx-auto text-center`}>
@@ -257,7 +420,7 @@ export default function MyVersePage() {
                             <p className="mt-4 text-neutral-500 leading-relaxed">
                                 인스타, 페이스북, X에 올린 기록은 플랫폼 것입니다.
                                 <br />
-                                Myverse는 나의 것입니다. 서비스가 사라져도 내 기록은 남습니다.
+                                Myverse는 나의 것입니다. 서비스는 사라져도 나의 기록은 남습니다.
                             </p>
                             <ul className="mt-6 space-y-3">
                                 {['사진 찍으면 AI가 자동 분류', '캘린더 대조로 맥락 태깅', '매일 저녁 하루 요약'].map(t => (
@@ -304,6 +467,81 @@ export default function MyVersePage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══ 5-B. DATA SOVEREIGNTY ═══ */}
+            <section className="py-24 lg:py-32 px-5">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-12">
+                        <p className="text-indigo-600 font-semibold text-xs tracking-widest uppercase mb-3">DATA SOVEREIGNTY</p>
+                        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">데이터 주권 5원칙</h2>
+                        <p className="mt-4 text-sm text-neutral-500 max-w-lg mx-auto">
+                            서비스는 사라져도, 나의 기록은 남는다.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 max-w-5xl mx-auto">
+                        {[
+                            { icon: Lock,      title: "소유",      desc: "사용자 소유. Myverse는 보관 대행." },
+                            { icon: HardDrive, title: "로컬 우선", desc: "핵심 데이터는 디바이스. 클라우드는 동기화." },
+                            { icon: Trash2,    title: "완전 삭제", desc: "탈퇴 시 즉시 전량 파기. 유예 없음." },
+                            { icon: Download,  title: "이식성",    desc: "전체 데이터 원클릭 내보내기. JSON + 원본 미디어." },
+                            { icon: FileJson,  title: "생존성",    desc: "Myverse가 사라져도 표준 포맷으로 존속." },
+                        ].map(s => (
+                            <div key={s.title} className="p-5 rounded-xl bg-white border border-neutral-200 text-center shadow-sm">
+                                <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
+                                    <s.icon className="h-5 w-5 text-emerald-600" />
+                                </div>
+                                <h3 className="font-semibold text-sm text-neutral-900 mb-1">{s.title}</h3>
+                                <p className="text-[11px] text-neutral-500 leading-relaxed">{s.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══ 5-C. UNIVERSAL RECORD (Tech) ═══ */}
+            <section className="py-24 lg:py-32 px-5 bg-neutral-900 text-neutral-100">
+                <div className="max-w-5xl mx-auto">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <p className="text-indigo-400 font-semibold text-xs tracking-widest uppercase mb-3">UNIVERSAL RECORD</p>
+                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                                하나의 포맷으로 정규화
+                            </h2>
+                            <p className="text-neutral-400 leading-relaxed mb-5">
+                                Instagram 사진이든, 카카오톡 대화든, 구글 캘린더 일정이든
+                                모든 출처를 하나의 Universal Record 포맷으로 변환합니다.
+                                새 서비스 추가 시 파서만 작성하면 됩니다.
+                            </p>
+                            <div className="space-y-2 text-sm">
+                                {[
+                                    "사진 — 타입·시간·위치 메타 추출 (제공)",
+                                    "Vision 자동 태깅 — 음식·문서·인물 인식 (도입 예정)",
+                                    "음성 — STT 텍스트 변환 + 요약 (베타)",
+                                    "위치 — Reverse geocoding + 거점 매칭 (제공)",
+                                ].map(t => (
+                                    <div key={t} className="flex items-start gap-2 text-neutral-400">
+                                        <span className="text-indigo-400 mt-0.5">→</span>
+                                        <span>{t}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="p-5 rounded-2xl bg-neutral-800 border border-neutral-700 font-mono text-[12px] text-neutral-400 leading-relaxed">
+                            <p className="text-indigo-400 mb-2">Record &#123;</p>
+                            <p className="ml-4">id          <span className="text-neutral-500">고유 식별자</span></p>
+                            <p className="ml-4">source      <span className="text-neutral-500">instagram | kakaotalk | camera | ...</span></p>
+                            <p className="ml-4">type        <span className="text-neutral-500">post | message | event | food_photo | ...</span></p>
+                            <p className="ml-4">timestamp   <span className="text-neutral-500">2026-05-11T19:30:00+09:00</span></p>
+                            <p className="ml-4">location    <span className="text-neutral-500">&#123; lat, lng, name &#125;</span></p>
+                            <p className="ml-4">content     <span className="text-neutral-500">&#123; text, media[], metadata &#125;</span></p>
+                            <p className="ml-4">ai_tags     <span className="text-neutral-500">&#123; category, objects[], mood &#125;</span></p>
+                            <p className="ml-4">embedding   <span className="text-neutral-500">[ AI 벡터 ]</span></p>
+                            <p className="ml-4">privacy     <span className="text-neutral-500">private | shared</span></p>
+                            <p className="text-indigo-400">&#125;</p>
                         </div>
                     </div>
                 </div>
@@ -396,29 +634,6 @@ export default function MyVersePage() {
             </section>
 
             <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#6366F1" defaultTab="signup" />
-
-            {/* ═══ Contact ═══ */}
-            <section className="py-16 px-5 border-t border-neutral-100">
-                <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
-                    <div>
-                        <h3 className="font-bold mb-2">Myverse</h3>
-                        <p className="text-sm text-neutral-500">나를 운영하는 OS</p>
-                        <p className="text-xs text-neutral-400">Personal OS</p>
-                    </div>
-                    <div>
-                        <h3 className="font-bold mb-2">Contact</h3>
-                        <div className="flex flex-col gap-2 text-sm text-neutral-500">
-                            <a href="https://tenone.biz/contact" className="hover:text-neutral-700 transition flex items-center gap-2"><Mail className="h-3.5 w-3.5" />tenone.biz/contact</a>
-                            <a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-700 transition flex items-center gap-2"><MessageCircle className="h-3.5 w-3.5" />Kakao Open Chat</a>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="font-bold mb-2">Community</h3>
-                        <p className="text-sm text-neutral-500 mb-3">Myverse에 바라는 점, 아이디어를 나눠주세요.</p>
-                        <Link href="/myverse/contact" className="text-sm text-indigo-600 hover:text-indigo-500 transition">의견 남기기 &rarr;</Link>
-                    </div>
-                </div>
-            </section>
         </div>
     );
 }

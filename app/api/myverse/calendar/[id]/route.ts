@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
+import { updateOnGoogle, deleteOnGoogle } from "@/lib/myverse/google-calendar-push";
 
 export const dynamic = "force-dynamic";
 
@@ -36,14 +37,34 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     else if (body.location === null) patch.location = null;
 
     const admin = createAdminClient();
-    const { error } = await admin
+    const { data: updated, error } = await admin
         .from("myverse_calendar_entries")
         .update(patch)
         .eq("id", id)
         .eq("member_id", memberId)
-        .eq("is_system", false);
+        .eq("is_system", false)
+        .select()
+        .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Google 연동된 엔트리면 Google에도 PATCH
+    if (updated?.google_event_id) {
+        await updateOnGoogle(memberId, {
+            title: updated.title,
+            description: updated.description,
+            location: updated.location,
+            start_date: updated.start_date,
+            start_time: updated.start_time,
+            end_time: updated.end_time,
+            google_event_id: updated.google_event_id,
+        });
+        await admin
+            .from("myverse_calendar_entries")
+            .update({ google_synced_at: new Date().toISOString() })
+            .eq("id", id);
+    }
+
     return NextResponse.json({ ok: true });
 }
 
@@ -53,6 +74,15 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const admin = createAdminClient();
+
+    // 삭제 전 google_event_id 조회
+    const { data: existing } = await admin
+        .from("myverse_calendar_entries")
+        .select("google_event_id")
+        .eq("id", id)
+        .eq("member_id", memberId)
+        .maybeSingle();
+
     const { error } = await admin
         .from("myverse_calendar_entries")
         .delete()
@@ -61,5 +91,10 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
         .eq("is_system", false);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (existing?.google_event_id) {
+        await deleteOnGoogle(memberId, existing.google_event_id);
+    }
+
     return NextResponse.json({ ok: true });
 }

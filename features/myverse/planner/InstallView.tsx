@@ -74,7 +74,7 @@ export function InstallView() {
                     />
                     <div>
                         <h1 className="font-serif text-3xl text-neutral-900 leading-tight">
-                            Myverse<sup className="text-xs font-bold text-[#6366F1] ml-0.5">AI</sup>
+                            myverse<sup className="text-xs font-bold text-[#6366F1] ml-0.5">AI</sup>
                         </h1>
                         <p className="text-sm text-neutral-500 mt-1">홈 화면에 설치하면 앱처럼 빠르게 열립니다.</p>
                     </div>

@@ -1,6 +1,88 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-11 (세션 125 — Myverse 무끼 플로팅 + SNS 포스팅 + 카드 분리 + 흔적 통합 API + 레이아웃 fixed)
+> 마지막 업데이트: 2026-05-11 (세션 127 — Personal OS 통합: 사이드바 접힘 + 브랜드 자산 + 메일/캘린더 + 마케팅 페이지 통합)
+
+---
+
+## 세션 127 핵심 성과 (2026-05-11)
+
+### 1. 마이버스 무끼 LLM 확장 + 포스트 편집·DailyView 분할
+- 무끼 의도 파서를 Claude Haiku tool calling으로 확장 (7개 도구: 일정/할일/연락처/노트/모먼트/장소/루틴)
+- DailyMoments 편집 모달에 visibility 토글 + Web Share 공유 버튼
+- DailyView 3,707줄 → 3,158줄 분할 (`DailyTaskRow`/`DailyTrackingBlocks`/`UpcomingSchedule`)
+
+### 2. 사이드바 접힘 (Claude 스타일)
+- `SidebarCollapseContext` + `MainContent` (좌측 여백 `md:ml-52` ↔ `md:ml-14`)
+- `AppSideNav`: 접힘 시 아이콘만 + 우측 hover tooltip + 토글 버튼
+- localStorage `myverse_sidebar_collapsed` 영속화
+
+### 3. 사이트 차단 토글·미리보기 (사생활)
+- `myverse_users.page_visible BOOLEAN` 컬럼
+- `/settings/privacy` 최상단 토글 + 방문자 화면 미리보기 (공개/비공개 즉시 전환)
+- `lib/myverse/handle/public-page.ts`에 page_visible 게이트
+
+### 4. 퍼스널 — 브랜드 자산 SSOT
+- `myverse_brand_assets` (8 type: logo/palette/typography/tagline/mission/image/link/template)
+- `brand-assets` Storage 버킷 + 파일 업로드 UI
+- 명함 자동 노출 (`show_on_card`) + @handle 페이지 hero 자동 렌더 (`show_on_portfolio`)
+- 사이드바 PERSONAL에 "브랜드" 메뉴
+
+### 5. 메일/캘린더 양방향
+- Google Calendar **read + write**: `myverse_calendar_entries.google_event_id`, POST/PATCH/DELETE 자동 푸시
+- Gmail 임포트: OAuth scope `gmail.readonly` 추가, 최근 7일 메타 캐시
+- **Triage 실행**: 메일 → Task/Event 자동 생성 + sourceEmailId 추적
+- Claude Haiku LLM 분류 (confidence<0.6 시 키워드 fallback)
+- 통합 페이지: Calendar/Gmail/Photos/Health 4개 카드
+
+### 6. Personal OS 인프라
+- `PlannerTask` 확장: `type/amount/currency/assignee_person_id/source*`
+- `myverse_contacts`: `person_type(self/internal/external)/company_name/role/tags`
+- `myverse_timeblocks` 신설 (Task ↔ 시간 슬롯)
+- 노트 → Task 승격: CornellRowsInline 행마다 버튼 + `/api/myverse/tasks` POST
+- 템플릿 시드: Daily/Weekly Review/Project Kickoff
+
+### 7. 마케팅 페이지 통합
+- 헤더 nav: 로드맵·문의·서비스·기술·철학·팀·About 제거 → **브랜드 스토리 + 가격** 2개
+- `/myverse/story` 신규 — 어둠의 점/흩뿌린 조각/3원칙/다섯 번의 전환/Personal Black Box (philosophy + about 통합)
+- Home에 추가: ATTENTION SHIFT 섹션, 데이터 소스 6개, 데이터 주권 5원칙, Universal Record (다크 코드 블록)
+- 페이지 삭제: /about /team /philosophy /service /technology (내용 통합 후)
+- 우상단 유틸리티 바: ABOUT 버튼 hideAbout
+- 로고만 소문자 `myverse` (본문/메타/CTA는 Myverse 유지)
+
+### 8. 카피 수정
+- "서비스는 사라져도 / 나의 기록은 남는다" (이전 자라져도 → 사라져도 + 나의 기록)
+- "기록이 쌓이면 / 나의 성장이 된다" (이전 역사 → 성장)
+- 랜딩 화살표 인디케이터 ↑→↓← 삭제
+- "당신의 기록은 안전합니까?" → "당신의 디지털 기록은 당신의 것입니까?"
+- "플랫폼이 닫히면, 알려주지도 않는다" 한 줄 삭제
+
+### 9. 개발 원칙 추가 (CLAUDE.md)
+- `npm run dev` 직접 실행 금지 → `preview_start "dev"` 도구 사용 강제
+- 사고 이력: 2026-05-11 Turbopack 캐시 손상 → 좀비 프로세스 → 포트 점유
+
+### 10. DB 마이그레이션 8건 (Prod 실행 완료)
+1. `myverse-page-visible.sql` (사이트 차단 토글)
+2. `myverse-brand-assets.sql` + `myverse-brand-assets-bucket.sql`
+3. `myverse-email-imports.sql`
+4. `myverse-calendar-google-link.sql`
+5. `myverse-contacts-person-normalize.sql`
+6. `myverse-timeblocks.sql`
+7. `myverse-templates-personal-os.sql`
+
+---
+
+## 다음 세션 시작 시 할 일
+
+### 운영 사용자 직접 조치 필요
+1. GCP 콘솔에서 Gmail API 활성화
+2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
+
+### 기능 확장
+1. **TimeBlock UI** — Today 화면에 드래그 가능한 타임라인 컴포넌트 (현재 API만 있음)
+2. **Task.type 배지 UI** — DailyTaskRow에 finance/people/milestone 시각화
+3. **노트 → Task 승격 다양화** — 캔버스/템플릿/HandNote에서도 승격
+4. **Person Company 정규화** — Stage 2: companyName(텍스트) → Company 엔티티 분리
+5. **브랜드 자산 → DigitalCard PNG 캡처에 포함** — 현재 UI 렌더만, 이미지 저장 시 자산 미반영
 
 ---
 

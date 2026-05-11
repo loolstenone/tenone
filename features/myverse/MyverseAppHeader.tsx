@@ -26,7 +26,7 @@ export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
                         M
                     </div>
                     <div className="hidden sm:block">
-                        <div className="text-sm font-semibold text-neutral-900 leading-none">Myverse</div>
+                        <div className="text-sm font-semibold text-neutral-900 leading-none">myverse</div>
                         <div className="text-[10px] text-neutral-400 mt-0.5">My Universe</div>
                     </div>
                 </Link>

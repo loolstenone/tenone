@@ -38,7 +38,7 @@ export function MyverseHeader() {
                 {/* Logo — 명확히 분리된 좌측 그룹 */}
                 <Link href="/myverse" className="shrink-0 flex items-center group">
                     <span className="text-lg font-bold tracking-tight text-white group-hover:text-teal-100 transition-colors">
-                        Myverse
+                        myverse
                     </span>
                     <span className="ml-1 text-[9px] font-semibold text-teal-300 tracking-widest uppercase">AI</span>
                 </Link>
@@ -79,7 +79,7 @@ export function MyverseHeader() {
                         </Link>
                     )}
                     <UniverseUtilityBar
-                        aboutPath="/myverse/about"
+                        aboutPath="/myverse/story"
                         profilePath="/myverse/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"

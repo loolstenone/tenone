@@ -38,7 +38,7 @@ export async function GET(req: Request) {
     const sources = (url.searchParams.get("sources") ?? "moment,place,routine").split(",");
 
     const admin = createAdminClient();
-    const tasks: Promise<UnifiedTrace[]>[] = [];
+    const tasks: PromiseLike<UnifiedTrace[]>[] = [];
 
     if (sources.includes("moment")) {
         let q = admin.from("myverse_daily_moments")

@@ -1,12 +1,13 @@
 "use client";
 
 // 마이버스 디지털 명함 — 공통 DigitalCard 컴포넌트 사용
-// QR 데이터: 마이버스 공개 핸들 페이지 URL (/myverse/v/{handle})
+// QR 데이터: 마이버스 공개 핸들 페이지 URL (/myverse/{handle}/card)
+// 브랜드 자산: show_on_card=true 인 자산을 자동 노출
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { AuthGate } from "@/components/AuthGate";
-import { DigitalCard } from "@/components/DigitalCard";
+import { DigitalCard, type CardBrandAsset } from "@/components/DigitalCard";
 
 const ACCENT = "#6366F1";
 
@@ -20,9 +21,8 @@ export default function CardPage() {
 
 function CardInner() {
     const { user } = useAuth();
+    const [brandAssets, setBrandAssets] = useState<CardBrandAsset[]>([]);
 
-    // QR이 가리키는 곳 = 받는 사람 시점 명함 페이지 (/v/{handle}/card)
-    // 받는 사람이 연락처·vCard·다시 공유 가능. /v/{handle} (SNS 톤)과 분리.
     const publicUrl = useMemo(() => {
         if (!user?.handle) return "";
         if (typeof window !== "undefined") {
@@ -30,6 +30,20 @@ function CardInner() {
         }
         return `https://myverse.kr/${user.handle}/card`;
     }, [user?.handle]);
+
+    // show_on_card=true 자산 fetch
+    useEffect(() => {
+        if (!user) return;
+        let cancelled = false;
+        fetch("/api/myverse/brand-assets?card_only=1")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (cancelled || !d?.assets) return;
+                setBrandAssets(d.assets as CardBrandAsset[]);
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [user]);
 
     if (!user) return null;
 
@@ -48,6 +62,7 @@ function CardInner() {
                 title="디지털 명함"
                 description="QR을 스캔하거나 링크를 공유해 마이버스 프로필을 전달하세요"
                 noHandleNotice="프로필에서 @handle을 등록하면 공개 페이지 링크와 QR 코드가 생성됩니다."
+                brandAssets={brandAssets}
             />
         </div>
     );

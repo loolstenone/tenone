@@ -9,6 +9,16 @@ import QRCode from "qrcode";
 import { toPng } from "html-to-image";
 import { Mail, Phone, Building2, Share2, Copy, Check, ExternalLink, Download, BookUser, ImageDown } from "lucide-react";
 
+/** 명함에 노출되는 브랜드 자산 (DigitalCard 표시용 최소 형태) */
+export interface CardBrandAsset {
+    id: string;
+    type: "logo" | "palette" | "typography" | "image" | "template" | "link" | "tagline" | "mission";
+    title: string;
+    file_url?: string | null;
+    data?: Record<string, unknown>;
+    is_primary?: boolean;
+}
+
 export interface DigitalCardProps {
     name?: string | null;
     handle?: string | null;
@@ -28,6 +38,8 @@ export interface DigitalCardProps {
     description?: string;
     /** 핸들 미설정 시 안내 메시지. null이면 안내 숨김. */
     noHandleNotice?: string | null;
+    /** show_on_card=true 인 브랜드 자산 — 카드 하단에 자동 렌더링 */
+    brandAssets?: CardBrandAsset[];
 }
 
 /** vCard line escape — 콤마·세미콜론·줄바꿈만 (RFC 6350 간소화) */
@@ -55,6 +67,7 @@ export function DigitalCard({
     title = "디지털 명함",
     description = "QR을 스캔하거나 링크를 공유해 프로필을 전달하세요",
     noHandleNotice,
+    brandAssets,
 }: DigitalCardProps) {
     const [copied, setCopied] = useState(false);
     const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -240,6 +253,11 @@ export function DigitalCard({
                     )}
                 </div>
 
+                {/* 브랜드 자산 섹션 (show_on_card=true 인 것만) */}
+                {brandAssets && brandAssets.length > 0 && (
+                    <BrandAssetsSection assets={brandAssets} accent={accent} />
+                )}
+
                 {/* 푸터: 공개 링크 */}
                 {publicUrl && (
                     <div className="mt-6 pt-5 border-t border-neutral-100">
@@ -307,6 +325,81 @@ export function DigitalCard({
             {!handle && noHandleNotice && (
                 <div className="mt-5 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900">
                     <p className="text-xs leading-relaxed">{noHandleNotice}</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/** 브랜드 자산을 카드 내부에 렌더 — 로고/태그라인/팔레트/링크 */
+function BrandAssetsSection({ assets, accent }: { assets: CardBrandAsset[]; accent: string }) {
+    const logos = assets.filter(a => a.type === "logo" && a.file_url);
+    const taglines = assets.filter(a => a.type === "tagline");
+    const palettes = assets.filter(a => a.type === "palette");
+    const links = assets.filter(a => a.type === "link");
+
+    const primaryTagline = taglines.find(t => t.is_primary) ?? taglines[0];
+    const primaryLogo = logos.find(l => l.is_primary) ?? logos[0];
+    const primaryPalette = palettes.find(p => p.is_primary) ?? palettes[0];
+
+    if (!primaryTagline && !primaryLogo && !primaryPalette && links.length === 0) return null;
+
+    return (
+        <div className="mt-6 pt-5 border-t border-neutral-100 space-y-3">
+            {/* 로고 + 태그라인 */}
+            {(primaryLogo || primaryTagline) && (
+                <div className="flex items-center gap-3">
+                    {primaryLogo && primaryLogo.file_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={primaryLogo.file_url} alt={primaryLogo.title} className="h-8 w-auto object-contain" />
+                    )}
+                    {primaryTagline && (
+                        <p className="text-sm text-neutral-700 italic" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
+                            &ldquo;{(primaryTagline.data as { text?: string } | undefined)?.text ?? primaryTagline.title}&rdquo;
+                        </p>
+                    )}
+                </div>
+            )}
+
+            {/* 컬러 팔레트 */}
+            {primaryPalette && (() => {
+                const colors = (primaryPalette.data as { colors?: Array<{ hex?: string }> } | undefined)?.colors ?? [];
+                if (colors.length === 0) return null;
+                return (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 mr-1">PALETTE</span>
+                        {colors.slice(0, 6).map((c, i) => (
+                            <span
+                                key={i}
+                                className="h-4 w-4 rounded-full border border-neutral-200"
+                                style={{ backgroundColor: c.hex ?? "#ccc" }}
+                                title={c.hex}
+                            />
+                        ))}
+                    </div>
+                );
+            })()}
+
+            {/* 외부 링크 */}
+            {links.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                    {links.map(l => {
+                        const url = (l.data as { url?: string } | undefined)?.url;
+                        if (!url) return null;
+                        return (
+                            <a
+                                key={l.id}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-neutral-200 hover:border-current transition-colors"
+                                style={{ color: accent }}
+                            >
+                                <ExternalLink className="h-2.5 w-2.5" />
+                                {l.title}
+                            </a>
+                        );
+                    })}
                 </div>
             )}
         </div>

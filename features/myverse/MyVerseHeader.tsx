@@ -11,14 +11,11 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const PREFIX = '/myverse';
+// Home(logo) + 브랜드 스토리(철학+About 통합) + 가격
+// 우상단 유틸리티 바의 About은 /myverse/story 와 같은 페이지를 가리킴 (브랜드 nav와 SSOT 통일)
 const navItems = [
-    { name: "서비스", href: `${PREFIX}/service` },
-    { name: "기술", href: `${PREFIX}/technology` },
+    { name: "브랜드 스토리", href: `${PREFIX}/story` },
     { name: "가격", href: `${PREFIX}/pricing` },
-    { name: "철학", href: `${PREFIX}/philosophy` },
-    { name: "팀", href: `${PREFIX}/team` },
-    { name: "로드맵", href: `${PREFIX}/roadmap` },
-    { name: "문의", href: `${PREFIX}/contact` },
 ];
 
 export function MyVerseHeader() {
@@ -34,7 +31,7 @@ export function MyVerseHeader() {
             <nav className="w-full px-4 flex h-14 items-center justify-between">
                 {/* Logo */}
                 <Link href={PREFIX} className="flex items-center gap-2 shrink-0">
-                    <span className="text-neutral-900 font-bold text-lg tracking-tight">Myverse</span>
+                    <span className="text-neutral-900 font-bold text-lg tracking-tight lowercase">myverse</span>
                     <span className="text-neutral-400 text-xs hidden sm:inline">Personal OS</span>
                 </Link>
 
@@ -70,13 +67,14 @@ export function MyVerseHeader() {
                     )}
                     <div className="hidden md:flex">
                         <UniverseUtilityBar
-                            aboutPath="/myverse/service"
+                            aboutPath="/myverse/story"
                             profilePath="/myverse/my"
                             signupPath="/signup"
                             accentColor="#6366f1"
                             searchPlaceholder="Myverse 검색"
                             siteId="myverse"
                             siteName="Myverse"
+                            hideAbout
                             hideWorkspaces
                         />
                     </div>
