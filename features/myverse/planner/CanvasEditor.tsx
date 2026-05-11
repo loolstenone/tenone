@@ -62,6 +62,7 @@ interface GhostShape {
 export interface CanvasEditorProps {
     initialDoc?: CanvasDocument;
     onSave?: (doc: CanvasDocument) => void;
+    onPromoteText?: (text: string) => void;
     className?: string;
     exportFilename?: string;
 }
@@ -463,7 +464,7 @@ function duplicateElement(el: CanvasElement, offset = 16): CanvasElement {
 
 // ?�?�?� 메인 컴포?�트 ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
 
-export default function CanvasEditor({ initialDoc, onSave, className, exportFilename = "canvas" }: CanvasEditorProps) {
+export default function CanvasEditor({ initialDoc, onSave, onPromoteText, className, exportFilename = "canvas" }: CanvasEditorProps) {
     // ?�?� UI ?�태
     const [elements,   setElements]   = useState<CanvasElement[]>([]);
     const [viewport,   setViewport]   = useState<Viewport>({ x: 0, y: 0, zoom: 1 });
@@ -1584,6 +1585,18 @@ export default function CanvasEditor({ initialDoc, onSave, className, exportFile
                         <button className={`${btn} ${off}`}
                             onMouseDown={(e) => { e.preventDefault(); const fs = Math.min(96, te.fontSize + 2); engineRef.current?.updateElement(te.id, { fontSize: fs }); setElements([...engineRef.current!.serialize().elements]); }}
                             title="글자 크게">+</button>
+                        {onPromoteText && (
+                            <>
+                                {sep}
+                                <button
+                                    className={`${btn} text-[10px] px-1.5 w-auto ${off}`}
+                                    onMouseDown={(e) => { e.preventDefault(); if (te.text.trim()) onPromoteText(te.text.trim()); }}
+                                    title="태스크로 승격"
+                                >
+                                    ＋태스크
+                                </button>
+                            </>
+                        )}
                     </div>
                 );
             })()}

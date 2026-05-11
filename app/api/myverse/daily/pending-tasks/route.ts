@@ -12,6 +12,10 @@ interface Task {
     priority?: string | null;
     time?: string | null;
     source_date?: string | null;
+    parent_id?: string | null;
+    duration_days?: number | null;
+    type?: string | null;
+    project_id?: string | null;
 }
 
 export async function GET(req: Request) {
@@ -49,15 +53,39 @@ export async function GET(req: Request) {
         ((todayRow?.tasks as Task[]) || []).map((t) => t.text.trim())
     );
 
-    // 날짜별 todo 태스크 (이미 오늘에 있는 것은 제외)
+    // 날짜별 미완 메인 태스크 + 그 메인의 모든 서브태스크(완료 포함) 동반 호출
     const groups: Array<{ date: string; tasks: Task[] }> = [];
     for (const row of data ?? []) {
-        const todos = ((row.tasks as Task[]) || []).filter(
-            (t) => (t.status === "todo" || t.status === "hold") && t.text.trim() && !todayTexts.has(t.text.trim())
+        const all = (row.tasks as Task[]) || [];
+        // 미완(todo/hold) 메인 (parent_id 없음) 만 추림
+        const pendingParents = all.filter(
+            (t) =>
+                !t.parent_id &&
+                (t.status === "todo" || t.status === "hold") &&
+                t.text.trim() &&
+                !todayTexts.has(t.text.trim())
         );
-        if (todos.length > 0) {
-            groups.push({ date: row.date as string, tasks: todos });
+        if (pendingParents.length === 0) continue;
+
+        // parent_id 기준 서브 그룹핑 (상태 무관)
+        const subsByParent = new Map<string, Task[]>();
+        for (const t of all) {
+            if (t.parent_id) {
+                const arr = subsByParent.get(t.parent_id) ?? [];
+                arr.push(t);
+                subsByParent.set(t.parent_id, arr);
+            }
         }
+
+        // 메인 + 서브 순서로 평탄화 (UI에서 parent_id로 트리 렌더 가능)
+        const ordered: Task[] = [];
+        for (const p of pendingParents) {
+            ordered.push(p);
+            const subs = subsByParent.get(p.id) ?? [];
+            ordered.push(...subs);
+        }
+
+        groups.push({ date: row.date as string, tasks: ordered });
     }
 
     return NextResponse.json({ groups });

@@ -37,6 +37,10 @@ export function ProjectsView() {
     const [showForm, setShowForm] = useState(false);
     const [newTitle, setNewTitle] = useState("");
     const [newCategory, setNewCategory] = useState<ProjectCategory>("custom");
+    const [newStartDate, setNewStartDate] = useState("");
+    const [newEndDate, setNewEndDate] = useState("");
+    const [newGoal, setNewGoal] = useState("");
+    const [newMilestones, setNewMilestones] = useState<Array<{ title: string; due_date: string }>>([]);
     const [filter, setFilter] = useState<"all" | "active" | "completed" | "archived">("active");
     const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | null>(null);
     const [confirmDeleteProject, setConfirmDeleteProject] = useState<{ id: string; title: string } | null>(null);
@@ -84,14 +88,52 @@ export function ProjectsView() {
                     title: newTitle.trim(),
                     category: newCategory,
                     tracking_metrics: meta.suggested_metrics,
+                    start_date: newStartDate || null,
+                    end_date: newEndDate || null,
+                    custom_fields: newGoal.trim() ? { goal: newGoal.trim() } : undefined,
                 }),
             });
             if (res.ok) {
                 const d = await res.json();
-                setProjects([...projects, d.project]);
+                const created = d.project;
+                setProjects([...projects, created]);
                 Track.projectCreate({ has_title: !!newTitle.trim() });
+
+                // 마일스톤 → 프로젝트 마일스톤 테이블에 등록 (일정 자동 동기화는 milestone-sync가 처리)
+                const validMs = newMilestones.filter(m => m.title.trim() && m.due_date);
+                for (let i = 0; i < validMs.length; i++) {
+                    const m = validMs[i];
+                    await fetch(`/api/myverse/projects/${created.id}/milestones`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            title: m.title.trim(),
+                            due_date: m.due_date,
+                            order_index: i,
+                        }),
+                    }).catch(() => {});
+                }
+
+                // 종료일 → 마감 일정 entry로 추가 (선택)
+                if (newEndDate) {
+                    await fetch(`/api/myverse/calendar`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            kind: "anniversary",
+                            title: `${newTitle.trim()} 마감`,
+                            start_date: newEndDate,
+                            color: created.color || meta.color,
+                        }),
+                    }).catch(() => {});
+                }
+
                 setNewTitle("");
                 setNewCategory("custom");
+                setNewStartDate("");
+                setNewEndDate("");
+                setNewGoal("");
+                setNewMilestones([]);
                 setShowForm(false);
             }
         } finally {
@@ -148,7 +190,7 @@ export function ProjectsView() {
                 </button>
             </div>
             {/* 상태 탭 — IdentitySubNav 일관 패턴 */}
-            <nav className="flex items-center gap-1 border-b border-neutral-200 mb-4 overflow-x-auto">
+            <nav className="flex items-center gap-1 border-b border-neutral-200 mb-4 flex-wrap">
                 {(["active", "completed", "archived", "all"] as const).map((f) => {
                     const isActive = filter === f;
                     return (
@@ -199,9 +241,28 @@ export function ProjectsView() {
                 })}
             </div>
 
-            {/* New project form */}
+            {/* New project — 모달 */}
             {showForm && (
-                <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 space-y-3">
+                <div
+                    className="fixed inset-0 z-[9200] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+                    onClick={() => { setShowForm(false); }}
+                >
+                    <div
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+                            <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                                <FolderKanban className="h-4 w-4 text-[#6366F1]" />
+                                새 프로젝트
+                            </h3>
+                            <button
+                                onClick={() => setShowForm(false)}
+                                className="text-neutral-400 hover:text-neutral-700 text-xl leading-none"
+                            >
+                                ×
+                            </button>
+                        </div>
                     <div className="flex items-center gap-3">
                         <Plus className="h-4 w-4 text-neutral-400" />
                         <input
@@ -255,6 +316,84 @@ export function ProjectsView() {
                                 );
                             })}
                         </div>
+                    </div>
+
+                    {/* 일정 · 목표 — 입력 시 일정&업무에 자동 반영 */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시작일</p>
+                            <input
+                                type="date"
+                                value={newStartDate}
+                                onChange={(e) => setNewStartDate(e.target.value)}
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">종료일 (마감)</p>
+                            <input
+                                type="date"
+                                value={newEndDate}
+                                onChange={(e) => setNewEndDate(e.target.value)}
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">목표 한 줄</p>
+                        <input
+                            type="text"
+                            value={newGoal}
+                            onChange={(e) => setNewGoal(e.target.value)}
+                            placeholder="이 프로젝트를 끝내면 무엇이 달라지는가"
+                            className="w-full text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                        />
+                    </div>
+
+                    {/* 마일스톤 (선택) — 추가 시 일정&업무에 자동 등록 */}
+                    <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400">마일스톤 (선택)</p>
+                            <button
+                                type="button"
+                                onClick={() => setNewMilestones(prev => [...prev, { title: "", due_date: newEndDate || newStartDate || "" }])}
+                                className="text-[10px] text-[#6366F1] hover:text-[#4F46E5] flex items-center gap-0.5"
+                            >
+                                <Plus className="h-3 w-3" /> 마일스톤 추가
+                            </button>
+                        </div>
+                        {newMilestones.length === 0 ? (
+                            <p className="text-[11px] text-neutral-300">마일스톤을 추가하면 해당 날짜 일정&업무에 자동 등록됩니다.</p>
+                        ) : (
+                            <div className="space-y-1.5">
+                                {newMilestones.map((m, i) => (
+                                    <div key={i} className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={m.title}
+                                            onChange={(e) => setNewMilestones(prev => prev.map((x, j) => j === i ? { ...x, title: e.target.value } : x))}
+                                            placeholder="마일스톤 이름"
+                                            className="flex-1 text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                        />
+                                        <input
+                                            type="date"
+                                            value={m.due_date}
+                                            onChange={(e) => setNewMilestones(prev => prev.map((x, j) => j === i ? { ...x, due_date: e.target.value } : x))}
+                                            className="text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewMilestones(prev => prev.filter((_, j) => j !== i))}
+                                            className="text-neutral-300 hover:text-rose-500"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     </div>
                 </div>
             )}

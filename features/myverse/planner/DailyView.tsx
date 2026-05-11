@@ -89,13 +89,12 @@ import { CanvasPreview } from "./CanvasPreview";
 import { VoiceRecordButton } from "./VoiceRecordButton";
 import { createClient } from "@/lib/supabase/client";
 
-// TaskPriority, TaskStatus, PRIORITY_META, QUADRANT_CYCLE, TaskRowProps, PriorityBadge, PriorityPicker, TaskRow
-// → DailyTaskRow.tsx로 이동
+// TaskStatus, TaskRowProps, TaskRow → DailyTaskRow.tsx
 import {
-    type TaskStatus, type TaskPriority, type TaskRowProps,
-    PRIORITY_META, QUADRANT_CYCLE,
-    PriorityBadge, PriorityPicker, TaskRow,
+    type TaskStatus, type TaskRowProps,
+    TaskRow,
 } from "./DailyTaskRow";
+import { DailyKanban, TaskViewToggle } from "./DailyKanban";
 
 // ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow → DailyTrackingBlocks.tsx로 이동
 import { ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow } from "./DailyTrackingBlocks";
@@ -709,12 +708,23 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
     // 활성 프로젝트 목록 (Task 태그용)
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [carrying, setCarrying] = useState(false);
+    const [taskView, setTaskView] = useState<'list' | 'kanban'>(() => {
+        if (typeof window === 'undefined') return 'list';
+        return (window.localStorage.getItem('myverse_task_view') as 'list' | 'kanban') || 'list';
+    });
+    function toggleTaskView() {
+        setTaskView(v => {
+            const next = v === 'list' ? 'kanban' : 'list';
+            try { window.localStorage.setItem('myverse_task_view', next); } catch {}
+            return next;
+        });
+    }
     const [moveTaskId, setMoveTaskId] = useState<string | null>(null);
     const [moveDate, setMoveDate] = useState<string>("");
     const [moveTime, setMoveTime] = useState<string>("");
     const [pendingInfo, setPendingInfo] = useState<{ count: number; days: number; oldest: string | null } | null>(null);
     const [showPendingModal, setShowPendingModal] = useState(false);
-    const [pendingGroups, setPendingGroups] = useState<Array<{ date: string; tasks: Array<{ id: string; text: string; priority?: string | null; time?: string | null }> }>>([]);
+    const [pendingGroups, setPendingGroups] = useState<Array<{ date: string; tasks: Array<{ id: string; text: string; priority?: string | null; time?: string | null; status?: string; parent_id?: string | null }> }>>([]);
     const [pendingLoading, setPendingLoading] = useState(false);
     const [selectedPendingIds, setSelectedPendingIds] = useState<Set<string>>(new Set());
     const [weather, setWeather] = useState<{ temp: number; code: number; sunrise?: string; sunset?: string } | null>(null);
@@ -1290,35 +1300,48 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
         if (selectedPendingIds.size === 0) { setShowPendingModal(false); return; }
         setCarrying(true);
         try {
-            // 선택된 태스크만 수집
-            const toImport: Array<{ id: string; text: string; priority?: string | null; time?: string | null; source_date: string }> = [];
-            const sourceUpdates: Map<string, Array<{ id: string; text: string; status: string; priority?: string | null; time?: string | null }>> = new Map();
+            // 선택된 메인 태스크 + 그 서브태스크(미완만)를 함께 이월
+            type ToImport = { id: string; text: string; priority?: string | null; time?: string | null; status?: string; parent_id?: string | null; source_date: string };
+            const toImport: ToImport[] = [];
+            const sourceUpdates: Map<string, Array<{ id: string; text: string; status: string }>> = new Map();
 
             for (const group of pendingGroups) {
+                // 메인 (parent_id 없음) 중 선택된 것 + 그 서브 (미완만)
+                const carryIds: string[] = [];
                 for (const t of group.tasks) {
-                    // 해당 date의 전체 tasks를 가져와야 carried 처리가 정확 — 여기선 간단하게 처리
-                    if (selectedPendingIds.has(t.id)) {
+                    if (!t.parent_id && selectedPendingIds.has(t.id)) {
                         toImport.push({ ...t, source_date: group.date });
+                        carryIds.push(t.id);
                     }
                 }
-                // source_date별 변경할 task id 목록
-                const selectedInGroup = group.tasks.filter(t => selectedPendingIds.has(t.id)).map(t => t.id);
-                if (selectedInGroup.length > 0) {
-                    sourceUpdates.set(group.date, selectedInGroup.map(id => ({ id, status: 'carried' } as { id: string; text: string; status: string })));
+                // 서브태스크 동반 — 메인이 선택된 경우, 그 메인의 서브 중 todo/hold 만 이월
+                for (const t of group.tasks) {
+                    if (t.parent_id && carryIds.includes(t.parent_id) && (t.status === "todo" || t.status === "hold" || !t.status)) {
+                        toImport.push({ ...t, source_date: group.date });
+                        carryIds.push(t.id);
+                    }
+                }
+                if (carryIds.length > 0) {
+                    sourceUpdates.set(group.date, carryIds.map(id => ({ id, status: 'carried' } as { id: string; text: string; status: string })));
                 }
             }
 
             if (toImport.length === 0) { setShowPendingModal(false); return; }
 
-            // 1. 오늘 tasks에 추가
+            // 1. 오늘 tasks에 추가 — 부모/자식 관계 보존
+            const idMap = new Map<string, string>();
+            for (const t of toImport) {
+                idMap.set(t.id, `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+            }
             const newTasks: PlannerTask[] = toImport.map(t => ({
-                id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                id: idMap.get(t.id)!,
                 text: t.text,
                 status: "todo" as const,
                 time: null,
                 project_id: null,
                 priority: (t.priority as PlannerTask["priority"]) ?? null,
                 memo: null,
+                parent_id: t.parent_id ? (idMap.get(t.parent_id) ?? null) : null,
             }));
             const next = [...tasks, ...newTasks];
             setTasks(next);
@@ -1343,8 +1366,8 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                 })
             );
 
-            // 3. pendingInfo 리셋
-            const remaining = pendingGroups.flatMap(g => g.tasks).filter(t => !selectedPendingIds.has(t.id)).length;
+            // 3. pendingInfo 리셋 (메인 기준)
+            const remaining = pendingGroups.flatMap(g => g.tasks).filter(t => !t.parent_id && !selectedPendingIds.has(t.id)).length;
             if (remaining === 0) setPendingInfo({ count: 0, days: 0, oldest: null });
             else setPendingInfo(prev => prev ? { ...prev, count: remaining } : null);
 
@@ -1353,12 +1376,6 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
         } finally {
             setCarrying(false);
         }
-    }
-
-    function updateTaskPriority(taskId: string, priority: PlannerTask["priority"]) {
-        const next = tasks.map(t => t.id === taskId ? { ...t, priority } : t);
-        setTasks(next);
-        save({ tasks: next });
     }
 
     /** 미팅(calendar entry) 처리 결과 사이클 — task와 동일한 4단계 (변경은 CalendarEntryEditor) */
@@ -1857,10 +1874,9 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                             const todayOccurrences = calEntries.flatMap(e =>
                                 expandOccurrences(e, date, date).map(o => ({ ...o }))
                             );
-                            // 하루 종일: 공휴일·절기 (기념일은 별도 컬럼에서 표시 → 제외)
-                            const allDayEntries = todayOccurrences.filter(o =>
-                                o.entry.kind === "public_holiday" || o.entry.kind === "solar_term"
-                            );
+                            // 하루 종일: 공휴일·절기는 헤더에 이미 표시되므로 일정&업무에서는 제외
+                            // (개인 기념일·미팅의 하루 종일만 여기서 노출)
+                            const allDayEntries: typeof todayOccurrences = [];
                             // 시간 있는 미팅
                             const timedMeetings = todayOccurrences
                                 .filter(o => o.entry.kind === "meeting" && o.entry.start_time)
@@ -1869,14 +1885,23 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                             const untimedMeetings = todayOccurrences
                                 .filter(o => o.entry.kind === "meeting" && !o.entry.start_time)
                                 .map(o => ({ entry: o.entry }));
-                            // 시간 있는 태스크
+                            // 메인/서브 분리 — 리스트에는 메인만 노출, 서브는 메인 아래 렌더
+                            const subtasksByParent = new Map<string, PlannerTask[]>();
+                            for (const t of tasks) {
+                                if (t.parent_id) {
+                                    const arr = subtasksByParent.get(t.parent_id) ?? [];
+                                    arr.push(t);
+                                    subtasksByParent.set(t.parent_id, arr);
+                                }
+                            }
+                            // 시간 있는 메인 태스크
                             const timedTasks = tasks
-                                .filter(t => t.time)
+                                .filter(t => t.time && !t.parent_id)
                                 .map(t => ({ type: "task" as const, time: t.time!, task: t }));
-                            // 시간 없는 태스크 (원래 순서 유지, 드래그용 index 포함)
+                            // 시간 없는 메인 태스크 (원래 순서 유지, 드래그용 index 포함)
                             const untimedTasks = tasks
                                 .map((t, idx) => ({ task: t, idx }))
-                                .filter(({ task }) => !task.time);
+                                .filter(({ task }) => !task.time && !task.parent_id);
 
                             // 시간 기반 항목 정렬
                             const timedItems = [...timedMeetings, ...timedTasks]
@@ -1891,6 +1916,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                     <div className="flex items-center justify-between mb-4">
                                         <h2 className="text-xs uppercase tracking-widest text-neutral-400">일정 & 업무</h2>
                                         <div className="flex items-center gap-2">
+                                            <TaskViewToggle value={taskView} onChange={toggleTaskView} />
                                             {pendingInfo && pendingInfo.count > 0 && (
                                                 <button
                                                     onClick={openPendingModal}
@@ -1906,7 +1932,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                             )}
                                             <button
                                                 onClick={() => { setCalEditing(null); setCalEditorOpen(true); }}
-                                                title="일정 추가"
+                                                title="일정·업무 추가 (상세 모달)"
                                                 className="p-1.5 rounded text-neutral-300 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors"
                                             >
                                                 <Plus className="h-3.5 w-3.5" />
@@ -1914,6 +1940,23 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         </div>
                                     </div>
 
+                                    {taskView === 'kanban' && (
+                                        <DailyKanban
+                                            tasks={tasks}
+                                            meetings={todayOccurrences.filter(o => o.entry.kind === "meeting").map(o => o.entry)}
+                                            projects={activeProjects}
+                                            onChangeStatus={(taskId, next) => {
+                                                const updated = tasks.map(t => t.id === taskId ? { ...t, status: next } : t);
+                                                setTasks(updated);
+                                                save({ tasks: updated });
+                                            }}
+                                            onRemoveTask={removeTask}
+                                            onOpenMeeting={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
+                                            onAddTask={() => { setCalEditing(null); setCalEditorOpen(true); }}
+                                        />
+                                    )}
+
+                                    {taskView === 'list' && (<>
                                     {/* 1. 하루 종일 항목 */}
                                     {(allDayEntries.length > 0 || untimedMeetings.length > 0) && (
                                         <div className="mb-3 pb-3 border-b border-neutral-100 space-y-1">
@@ -2052,8 +2095,10 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 const h = parseInt(timeStr.split(":")[0], 10);
                                                 const ampm = h < 12 ? "오전" : "오후";
                                                 const strike = t.status === "done" || t.status === "cancelled" || t.status === "moved";
+                                                const subs = subtasksByParent.get(t.id) ?? [];
                                                 return (
-                                                    <div key={`t-${t.id}`} className="flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 group">
+                                                    <div key={`t-${t.id}`}>
+                                                    <div className="flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 group">
                                                         <button
                                                             onClick={() => cycleStatus(t.id)}
                                                             title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
@@ -2071,14 +2116,6 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                         <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
                                                             {ampm} {timeStr}
                                                         </span>
-                                                        {t.priority && PRIORITY_META[t.priority as TaskPriority] && (
-                                                            <PriorityBadge
-                                                                priority={t.priority as TaskPriority}
-                                                                onClick={() => updateTaskPriority(t.id,
-                                                                    QUADRANT_CYCLE[t.priority as TaskPriority]
-                                                                )}
-                                                            />
-                                                        )}
                                                         <span className={`flex-1 text-xs ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                                             {t.text}
                                                             {t.status === "moved" && t.moved_to && (
@@ -2102,6 +2139,12 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                             <Trash2 className="h-3 w-3" />
                                                         </button>
                                                     </div>
+                                                    {subs.length > 0 && (
+                                                        <div className="ml-7 mt-0.5 mb-1 pl-3 border-l-2 border-neutral-100 space-y-0.5">
+                                                            {subs.map(s => <SubtaskRow key={s.id} task={s} onCycle={() => cycleStatus(s.id)} onRemove={() => removeTask(s.id)} />)}
+                                                        </div>
+                                                    )}
+                                                    </div>
                                                 );
                                             }
                                         })}
@@ -2111,17 +2154,18 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                             <div className="border-t border-dashed border-neutral-100 my-2" />
                                         )}
 
-                                        {/* 3. 시간 없는 태스크 (드래그 가능) */}
-                                        {untimedTasks.map(({ task: t, idx }) => (
+                                        {/* 3. 시간 없는 메인 태스크 (드래그 가능) — 서브태스크는 들여쓰기 */}
+                                        {untimedTasks.map(({ task: t, idx }) => {
+                                            const subs = subtasksByParent.get(t.id) ?? [];
+                                            return (
+                                            <div key={t.id}>
                                             <TaskRow
-                                                key={t.id}
                                                 task={t}
                                                 index={idx}
                                                 isDragOver={dragOverIndex === idx}
                                                 onCycle={() => cycleStatus(t.id)}
                                                 onRemove={() => removeTask(t.id)}
                                                 onTimeChange={(time) => updateTaskTime(t.id, time)}
-                                                onPriorityChange={(p) => updateTaskPriority(t.id, p)}
                                                 onProjectChange={(pid) => updateTaskProject(t.id, pid)}
                                                 onMove={() => { setMoveTaskId(t.id); setMoveDate(date); setMoveTime(t.time?.slice(0,5) || ""); }}
                                                 projects={activeProjects}
@@ -2130,10 +2174,17 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 onDrop={() => onDrop(idx)}
                                                 onDragEnd={onDragEnd}
                                             />
-                                        ))}
+                                            {subs.length > 0 && (
+                                                <div className="ml-7 mt-0.5 mb-1 pl-3 border-l-2 border-neutral-100 space-y-0.5">
+                                                    {subs.map(s => <SubtaskRow key={s.id} task={s} onCycle={() => cycleStatus(s.id)} onRemove={() => removeTask(s.id)} />)}
+                                                </div>
+                                            )}
+                                            </div>
+                                            );
+                                        })}
                                     </div>
+                                    </>)}
 
-                                    {/* 업무 추가는 + 버튼(CalendarEntryEditor 모달)으로 통합 */}
                                 </section>
                             );
                         })()}
@@ -2924,15 +2975,18 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 </div>
                             ) : (
                                 <div className="divide-y divide-neutral-100">
-                                    {/* 전체 선택/해제 */}
+                                    {/* 전체 선택/해제 — 메인 태스크 기준 (서브는 메인을 선택하면 함께 따라옴) */}
+                                    {(() => {
+                                        const mains = pendingGroups.flatMap(g => g.tasks).filter(t => !t.parent_id);
+                                        return (
                                     <div className="px-5 py-3 bg-neutral-50 flex items-center gap-2">
                                         <input
                                             type="checkbox"
                                             id="pending-select-all"
-                                            checked={selectedPendingIds.size === pendingGroups.flatMap(g => g.tasks).length}
+                                            checked={mains.length > 0 && selectedPendingIds.size === mains.length}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    setSelectedPendingIds(new Set(pendingGroups.flatMap(g => g.tasks).map(t => t.id)));
+                                                    setSelectedPendingIds(new Set(mains.map(t => t.id)));
                                                 } else {
                                                     setSelectedPendingIds(new Set());
                                                 }
@@ -2940,12 +2994,14 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                             className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500"
                                         />
                                         <label htmlFor="pending-select-all" className="text-xs text-neutral-600 cursor-pointer select-none">
-                                            전체 선택 ({pendingGroups.flatMap(g => g.tasks).length}건)
+                                            전체 선택 ({mains.length}건 · 서브 동반)
                                         </label>
-                                        {selectedPendingIds.size > 0 && selectedPendingIds.size < pendingGroups.flatMap(g => g.tasks).length && (
+                                        {selectedPendingIds.size > 0 && selectedPendingIds.size < mains.length && (
                                             <span className="text-xs text-amber-600 ml-auto">{selectedPendingIds.size}건 선택</span>
                                         )}
                                     </div>
+                                        );
+                                    })()}
 
                                     {/* 날짜별 그룹 */}
                                     {pendingGroups.map((group) => {
@@ -2965,11 +3021,13 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 <ul className="divide-y divide-neutral-50">
                                                     {group.tasks.map((task) => {
                                                         const checked = selectedPendingIds.has(task.id);
-                                                        const pMeta = task.priority ? PRIORITY_META[task.priority as TaskPriority] : null;
+                                                        const isSub = !!task.parent_id;
+                                                        const subDone = isSub && (task.status === "done" || task.status === "cancelled");
+                                                        // 서브태스크는 체크박스 비활성, 메인을 선택하면 함께 따라옴
                                                         return (
                                                             <li
                                                                 key={task.id}
-                                                                onClick={() => {
+                                                                onClick={isSub ? undefined : () => {
                                                                     setSelectedPendingIds(prev => {
                                                                         const next = new Set(prev);
                                                                         if (next.has(task.id)) next.delete(task.id);
@@ -2977,32 +3035,50 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                                         return next;
                                                                     });
                                                                 }}
-                                                                className={`flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-neutral-50 transition-colors ${checked ? '' : 'opacity-50'}`}
+                                                                className={`flex items-center gap-3 px-5 py-2 transition-colors ${
+                                                                    isSub
+                                                                        ? "bg-neutral-50/60 pl-12 cursor-default"
+                                                                        : `py-3 cursor-pointer hover:bg-neutral-50 ${checked ? '' : 'opacity-50'}`
+                                                                }`}
                                                             >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={checked}
-                                                                    onChange={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setSelectedPendingIds(prev => {
-                                                                            const next = new Set(prev);
-                                                                            if (next.has(task.id)) next.delete(task.id);
-                                                                            else next.add(task.id);
-                                                                            return next;
-                                                                        });
-                                                                    }}
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500 shrink-0"
-                                                                />
-                                                                <span className="flex-1 text-sm text-neutral-800 leading-snug">{task.text}</span>
+                                                                {isSub ? (
+                                                                    <span className={`shrink-0 w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] font-bold ${
+                                                                        task.status === "done" ? "bg-[#6366F1] border-[#6366F1] text-white"
+                                                                        : task.status === "doing" ? "bg-amber-400 border-amber-400 text-white"
+                                                                        : task.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
+                                                                        : "border-neutral-300"
+                                                                    }`}>
+                                                                        {task.status === "done" ? "✓" : task.status === "doing" ? "·" : task.status === "cancelled" ? "✕" : ""}
+                                                                    </span>
+                                                                ) : (
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={checked}
+                                                                        onChange={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedPendingIds(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (next.has(task.id)) next.delete(task.id);
+                                                                                else next.add(task.id);
+                                                                                return next;
+                                                                            });
+                                                                        }}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500 shrink-0"
+                                                                    />
+                                                                )}
+                                                                <span className={`flex-1 leading-snug ${
+                                                                    isSub
+                                                                        ? `text-xs ${subDone ? "text-neutral-400 line-through" : "text-neutral-600"}`
+                                                                        : "text-sm text-neutral-800"
+                                                                }`}>
+                                                                    {task.text}
+                                                                </span>
                                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                                     {task.time && (
                                                                         <span className="text-[10px] text-neutral-400 flex items-center gap-0.5">
                                                                             <Clock className="h-2.5 w-2.5" />{task.time}
                                                                         </span>
-                                                                    )}
-                                                                    {pMeta && (
-                                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded border ${pMeta.cls}`}>{pMeta.label}</span>
                                                                     )}
                                                                 </div>
                                                             </li>
@@ -3187,8 +3263,41 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
     );
 }
 
-// TaskRowProps, QUADRANT_CYCLE, PriorityBadge, PriorityPicker, TaskRow
-// → DailyTaskRow.tsx (imported above)
+// TaskRowProps, TaskRow → DailyTaskRow.tsx (imported above)
+
+/** 서브 태스크 한 줄 — 메인 태스크 아래 들여쓰기 렌더 */
+function SubtaskRow({ task, onCycle, onRemove }: { task: PlannerTask; onCycle: () => void; onRemove: () => void }) {
+    const strike = task.status === "done" || task.status === "cancelled" || task.status === "moved";
+    return (
+        <div className="group flex items-center gap-2 py-0.5">
+            <button
+                onClick={onCycle}
+                title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
+                className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center text-[9px] font-bold transition-colors shrink-0 ${
+                    task.status === "done"     ? "bg-[#6366F1] border-[#6366F1] text-white"
+                    : task.status === "doing"  ? "bg-amber-400 border-amber-400 text-white"
+                    : task.status === "hold"   ? "bg-amber-200 border-amber-300 text-amber-800"
+                    : task.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
+                    : "border-neutral-300 hover:border-[#6366F1]"
+                }`}
+            >
+                {task.status === "done" ? "✓" : task.status === "doing" ? "·" : task.status === "hold" ? "⏸" : task.status === "cancelled" ? "✕" : ""}
+            </button>
+            {task.time && (
+                <span className="shrink-0 text-[10px] font-mono text-neutral-400">{task.time.slice(0, 5)}</span>
+            )}
+            <span className={`flex-1 text-[11px] leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-600"}`}>
+                {task.text}
+            </span>
+            <button
+                onClick={onRemove}
+                className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-rose-500 transition-opacity shrink-0"
+            >
+                <Trash2 className="h-2.5 w-2.5" />
+            </button>
+        </div>
+    );
+}
 
 // ExerciseBlock, HealthBlock, TrackingRowWithNote, TrackingRow → DailyTrackingBlocks.tsx (imported above)
 // UpcomingSchedule → UpcomingSchedule.tsx (imported above)

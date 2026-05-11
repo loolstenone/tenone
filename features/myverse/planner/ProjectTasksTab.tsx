@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus } from "lucide-react";
+import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3 } from "lucide-react";
 import { localDateStr } from "@/lib/myverse/types";
 
 interface TaskItem {
@@ -41,6 +41,8 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "todo" | "done" | "carried">("all");
+    const [viewMode, setViewMode] = useState<"list" | "kanban" | "gantt">("list");
+    const [milestones, setMilestones] = useState<Array<{ id: string; title: string; due_date: string | null; done_at: string | null }>>([]);
 
     // 새 업무 입력
     const today = useMemo(() => localDateStr(new Date()), []);
@@ -51,11 +53,28 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
     async function load() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/myverse/projects/${projectId}/tasks`);
-            if (res.ok) {
-                const d = await res.json();
-                setItems(d.items ?? []);
-                setStats(d.stats ?? null);
+            const [tRes, mRes] = await Promise.all([
+                fetch(`/api/myverse/projects/${projectId}/tasks`),
+                fetch(`/api/myverse/projects/${projectId}/milestones`),
+            ]);
+            if (tRes.ok) {
+                const d = await tRes.json();
+                // 마일스톤 sync 마커(ms_ 접두사)는 마일스톤 탭/간트에서 별도 표시되므로 업무에서 제외
+                const filtered = (d.items ?? []).filter((it: TaskItem) => !it.task.id?.startsWith("ms_"));
+                setItems(filtered);
+                // stats도 마일스톤 마커 제외해서 재계산
+                const recompute = (s: string) => filtered.filter((i: TaskItem) => i.task.status === s).length;
+                setStats({
+                    total: filtered.length,
+                    todo: recompute("todo"),
+                    done: recompute("done"),
+                    carried: recompute("carried"),
+                    cancelled: recompute("cancelled"),
+                });
+            }
+            if (mRes.ok) {
+                const d = await mRes.json();
+                setMilestones(d.milestones ?? []);
             }
         } finally {
             setLoading(false);
@@ -157,7 +176,30 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                         </section>
                     )}
 
-                    {/* 상태 탭 — IdentitySubNav 일관 패턴 */}
+                    {/* 뷰 토글 — 리스트 / 칸반 / 간트 */}
+                    <div className="flex items-center gap-1.5 bg-neutral-100 rounded-lg p-0.5 self-start inline-flex w-fit">
+                        {([
+                            { k: "list" as const,   label: "리스트", Icon: List },
+                            { k: "kanban" as const, label: "칸반",   Icon: LayoutGrid },
+                            { k: "gantt" as const,  label: "간트",   Icon: BarChart3 },
+                        ]).map(({ k, label, Icon }) => (
+                            <button
+                                key={k}
+                                onClick={() => setViewMode(k)}
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                                    viewMode === k
+                                        ? "bg-white text-neutral-900 shadow-sm"
+                                        : "text-neutral-500 hover:text-neutral-900"
+                                }`}
+                            >
+                                <Icon className="h-3.5 w-3.5" />
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* 상태 탭 — IdentitySubNav 일관 패턴 (리스트 뷰에서만) */}
+                    {viewMode === "list" && (
                     <nav className="flex items-center gap-1 border-b border-neutral-200">
                         {([
                             { k: "all" as const,     label: "전체" },
@@ -182,9 +224,11 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                             );
                         })}
                     </nav>
+                    )}
 
-                    {/* 업무 리스트 (날짜 그룹) */}
-                    {filtered.length === 0 ? (
+                    {/* 리스트 뷰 */}
+                    {viewMode === "list" && (
+                    filtered.length === 0 ? (
                         <div className="py-8 text-center bg-white border border-neutral-200 rounded-xl">
                             <p className="text-sm text-neutral-400">해당 상태의 업무가 없습니다.</p>
                         </div>
@@ -232,7 +276,14 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                         ));
                     })()}
                 </section>
+                    )
                     )}
+
+                    {/* 칸반 뷰 */}
+                    {viewMode === "kanban" && <ProjectKanbanView items={items} />}
+
+                    {/* 간트 뷰 */}
+                    {viewMode === "gantt" && <ProjectGanttView items={items} milestones={milestones} projectColor={projectColor} onReload={load} />}
                 </>
             )}
         </div>
@@ -246,4 +297,393 @@ function Cell({ label, value, accent = "text-neutral-900" }: { label: string; va
             <p className={`text-lg font-semibold ${accent}`}>{value}</p>
         </div>
     );
+}
+
+/** 칸반 뷰 — 계획 / 진행 / 완료 (status 기반) */
+function ProjectKanbanView({ items }: { items: TaskItem[] }) {
+    function col(s: string): "planned" | "doing" | "done" {
+        if (s === "done" || s === "cancelled") return "done";
+        if (s === "doing") return "doing";
+        return "planned";
+    }
+    const cols = [
+        { k: "planned" as const, label: "계획", dot: "bg-neutral-400" },
+        { k: "doing"   as const, label: "진행", dot: "bg-amber-400" },
+        { k: "done"    as const, label: "완료", dot: "bg-[#6366F1]" },
+    ];
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {cols.map(c => {
+                const colItems = items.filter(i => col(i.task.status) === c.k);
+                return (
+                    <div key={c.k} className="rounded-lg border border-neutral-200 bg-neutral-50/60 min-h-[200px]">
+                        <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200 bg-white rounded-t-lg">
+                            <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                            <span className="text-xs font-semibold text-neutral-700">{c.label}</span>
+                            <span className="text-[10px] text-neutral-500">{colItems.length}</span>
+                        </div>
+                        <div className="p-2 space-y-1.5">
+                            {colItems.length === 0 ? (
+                                <div className="text-center text-[10px] text-neutral-300 py-6">비어 있음</div>
+                            ) : colItems.map(({ task, date }) => {
+                                const strike = task.status === "done" || task.status === "cancelled";
+                                const isMilestone = task.source === "milestone";
+                                return (
+                                    <div key={task.id} className="rounded-md border border-neutral-200 bg-white px-2 py-1.5">
+                                        <div className={`text-xs leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
+                                            {task.text}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <span className="text-[10px] text-neutral-400 font-mono">
+                                                {date}{task.time ? ` · ${task.time.slice(0,5)}` : ""}
+                                            </span>
+                                            {isMilestone && (
+                                                <span className="text-[9px] uppercase tracking-wider px-1 py-0 rounded bg-[#6366F1]/10 text-[#6366F1]">M</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+/** 간트 뷰 — 날짜 기반 가로 타임라인 + 드래그 늘리기/이동 + 자율 헤더 + 마일스톤 ◆ */
+function ProjectGanttView({
+    items: initialItems,
+    milestones,
+    projectColor,
+    onReload,
+}: {
+    items: TaskItem[];
+    milestones: Array<{ id: string; title: string; due_date: string | null; done_at: string | null }>;
+    projectColor: string;
+    onReload?: () => void;
+}) {
+    const [items, setItems] = useState(initialItems);
+    useEffect(() => { setItems(initialItems); }, [initialItems]);
+
+    const [editingTask, setEditingTask] = useState<{ id: string; date: string } | null>(null);
+    const [zoomMode, setZoomMode] = useState<"auto" | "day" | "week" | "month">("auto");
+
+    const dated = milestones.filter(m => m.due_date) as Array<{ id: string; title: string; due_date: string; done_at: string | null }>;
+
+    if (items.length === 0 && dated.length === 0) {
+        return <div className="py-12 text-center text-sm text-neutral-400 bg-white border border-neutral-200 rounded-xl">표시할 업무·마일스톤이 없습니다.</div>;
+    }
+    const sorted = [...items].sort((a, b) => a.date.localeCompare(b.date));
+
+    // 범위: 모든 task/milestone 시작/종료 포함
+    const candidates: string[] = [
+        ...sorted.map(i => i.date),
+        ...sorted.map(i => addDays(i.date, Math.max(1, i.task.duration_days ?? 1) - 1)),
+        ...dated.map(m => m.due_date),
+    ];
+    const minDate = candidates.reduce((a, b) => (a < b ? a : b));
+    const maxEndRaw = candidates.reduce((a, b) => (a > b ? a : b));
+    const today = new Date().toISOString().slice(0, 10);
+    const maxDate = addDays(maxEndRaw > today ? maxEndRaw : today, 3);
+    const totalDays = Math.max(7, dayDiff(minDate, maxDate) + 1);
+
+    // 자율 헤더 — 줌 단계 (자동 또는 수동)
+    let zoom: "day" | "3day" | "week" | "month";
+    let colWidth: number;
+    if (zoomMode === "day") { zoom = "day"; colWidth = 28; }
+    else if (zoomMode === "week") { zoom = "week"; colWidth = 12; }
+    else if (zoomMode === "month") { zoom = "month"; colWidth = 10; }
+    else {
+        if (totalDays <= 30) { zoom = "day"; colWidth = 28; }
+        else if (totalDays <= 90) { zoom = "3day"; colWidth = 14; }
+        else if (totalDays <= 365) { zoom = "week"; colWidth = 12; }
+        else { zoom = "month"; colWidth = 10; }
+    }
+    const chartWidth = totalDays * colWidth;
+    const todayOffset = dayDiff(minDate, today);
+
+    const ticks: Array<{ label: string; offset: number; major?: boolean }> = [];
+    if (zoom === "day") {
+        for (let d = 0; d < totalDays; d++) {
+            const dt = addDate(minDate, d);
+            ticks.push({ label: `${dt.getMonth() + 1}/${dt.getDate()}`, offset: d, major: dt.getDate() === 1 });
+        }
+    } else if (zoom === "3day") {
+        for (let d = 0; d < totalDays; d += 3) {
+            const dt = addDate(minDate, d);
+            ticks.push({ label: `${dt.getMonth() + 1}/${dt.getDate()}`, offset: d, major: dt.getDate() <= 3 });
+        }
+    } else if (zoom === "week") {
+        for (let d = 0; d < totalDays; d += 7) {
+            const dt = addDate(minDate, d);
+            ticks.push({ label: `${dt.getMonth() + 1}/${dt.getDate()}`, offset: d, major: dt.getDate() <= 7 });
+        }
+    } else {
+        for (let d = 0; d < totalDays; d += 30) {
+            const dt = addDate(minDate, d);
+            ticks.push({ label: `${dt.getFullYear()}.${dt.getMonth() + 1}`, offset: d, major: true });
+        }
+    }
+
+    function barColor(s: string): string {
+        if (s === "done") return projectColor || "#6366F1";
+        if (s === "doing") return "#F59E0B";
+        if (s === "cancelled") return "#9CA3AF";
+        return "#A5B4FC";
+    }
+
+    async function patch(taskId: string, taskDate: string, body: Record<string, unknown>) {
+        await fetch(`/api/myverse/daily/${taskDate}/task/${taskId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        }).catch(() => {});
+        onReload?.();
+    }
+
+    function startDrag(e: React.MouseEvent, taskId: string, taskDate: string, mode: "move" | "resize") {
+        e.preventDefault();
+        e.stopPropagation();
+        const startX = e.clientX;
+        const item = items.find(i => i.task.id === taskId);
+        if (!item) return;
+        const startOffset = Math.max(0, dayDiff(minDate, taskDate));
+        const startDuration = Math.max(1, item.task.duration_days ?? 1);
+
+        function onMove(ev: MouseEvent) {
+            const dx = ev.clientX - startX;
+            const deltaDays = Math.round(dx / colWidth);
+            if (mode === "resize") {
+                const nextDur = Math.max(1, startDuration + deltaDays);
+                setItems(prev => prev.map(i => i.task.id === taskId ? { ...i, task: { ...i.task, duration_days: nextDur } } : i));
+            } else {
+                const nextOffset = Math.max(0, startOffset + deltaDays);
+                const nextDate = addDays(minDate, nextOffset);
+                setItems(prev => prev.map(i => i.task.id === taskId ? { ...i, date: nextDate } : i));
+            }
+        }
+        function onUp() {
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+            const after = items.find(i => i.task.id === taskId);
+            // setItems는 비동기라 latest 직접 계산
+            const dx = (window as { __ganttLastX?: number }).__ganttLastX != null ? 0 : 0;
+            void dx; void after;
+            // 다시 한 번 stateful 값 동기화 — 캡처된 latest 사용
+            setItems(prev => {
+                const cur = prev.find(i => i.task.id === taskId);
+                if (cur) {
+                    if (mode === "resize") {
+                        patch(taskId, cur.date, { duration_days: cur.task.duration_days ?? 1 });
+                    } else {
+                        // 날짜 이동: 새 date에 task 옮기기
+                        patch(taskId, taskDate, { date: cur.date });
+                    }
+                }
+                return prev;
+            });
+        }
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+    }
+
+    return (
+        <>
+        {/* 줌 컨트롤 */}
+        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <div className="flex items-center gap-3 text-[10px] text-neutral-500">
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#A5B4FC" }} />계획</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-400" />진행</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: projectColor || "#6366F1" }} />완료</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#6366F1]">◆</span>마일스톤</span>
+                <span className="inline-flex items-center gap-1"><span className="w-px h-3 bg-rose-500" />오늘</span>
+            </div>
+            <div className="inline-flex bg-neutral-100 rounded-md p-0.5">
+                {([
+                    { k: "auto" as const, label: "자동" },
+                    { k: "day" as const, label: "일" },
+                    { k: "week" as const, label: "주" },
+                    { k: "month" as const, label: "월" },
+                ]).map(z => (
+                    <button
+                        key={z.k}
+                        onClick={() => setZoomMode(z.k)}
+                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
+                            zoomMode === z.k ? "bg-white shadow-sm text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                        }`}
+                    >
+                        {z.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-xl overflow-x-auto select-none">
+            <div style={{ minWidth: chartWidth + 240 }}>
+                <div className="flex sticky top-0 bg-neutral-50 border-b border-neutral-200 z-10">
+                    <div className="w-60 shrink-0 px-3 py-2 text-[10px] uppercase tracking-widest text-neutral-500">
+                        업무·마일스톤
+                    </div>
+                    <div className="relative" style={{ width: chartWidth, height: 28 }}>
+                        {ticks.map(t => (
+                            <div
+                                key={t.offset}
+                                className={`absolute top-0 bottom-0 border-l text-[9px] px-1 py-2 font-mono ${
+                                    t.major ? "border-neutral-300 text-neutral-600 font-semibold" : "border-neutral-100 text-neutral-400"
+                                }`}
+                                style={{ left: t.offset * colWidth, width: colWidth }}
+                            >
+                                {t.label}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="divide-y divide-neutral-100 relative">
+                    {/* 오늘 표시줄 (전체 행 overlay) */}
+                    {todayOffset >= 0 && todayOffset < totalDays && (
+                        <div
+                            className="absolute top-0 bottom-0 pointer-events-none z-20"
+                            style={{ left: 240 + todayOffset * colWidth + colWidth / 2 }}
+                        >
+                            <div className="w-px h-full bg-rose-500" />
+                            <div className="absolute -top-2 -left-3 w-6 text-center text-[8px] font-bold text-rose-500 bg-white px-0.5">오늘</div>
+                        </div>
+                    )}
+
+                    {/* 마일스톤 행 */}
+                    {dated.map(m => {
+                        const offset = Math.max(0, dayDiff(minDate, m.due_date));
+                        const isDone = !!m.done_at;
+                        return (
+                            <div key={m.id} className="flex items-center min-h-[28px] bg-[#6366F1]/[0.03]">
+                                <div className="w-60 shrink-0 px-3 py-1 text-xs text-neutral-700 truncate flex items-center gap-1">
+                                    <span className={`text-[10px] ${isDone ? "text-neutral-400" : "text-[#6366F1]"}`}>◆</span>
+                                    <span className={isDone ? "text-neutral-400 line-through" : ""}>{m.title}</span>
+                                </div>
+                                <div className="relative h-6 my-1" style={{ width: chartWidth }}>
+                                    <div
+                                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                                        style={{ left: offset * colWidth + colWidth / 2 }}
+                                        title={`${m.title} · ${m.due_date}${isDone ? " · 완료" : ""}`}
+                                    >
+                                        <span className={`block w-3 h-3 rotate-45 ${isDone ? "bg-neutral-300" : "bg-[#6366F1]"}`} />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {sorted.map(({ task, date }) => {
+                        const offset = Math.max(0, dayDiff(minDate, date));
+                        const duration = Math.max(1, task.duration_days ?? 1);
+                        const barWidth = duration * colWidth;
+                        const isMilestone = task.source === "milestone";
+                        return (
+                            <div key={task.id} className="flex items-center min-h-[36px]">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingTask({ id: task.id, date })}
+                                    className="w-60 shrink-0 px-3 py-1.5 text-xs text-neutral-800 truncate flex items-center gap-1 hover:bg-neutral-50 text-left"
+                                    title="클릭: 날짜·기간 편집"
+                                >
+                                    {isMilestone && <span className="text-[9px] text-[#6366F1]">◆</span>}
+                                    {task.text}
+                                </button>
+                                <div className="relative h-7 my-1" style={{ width: chartWidth }}>
+                                    <div
+                                        className="absolute top-0 bottom-0 rounded flex items-center px-1.5 text-[10px] font-medium text-white whitespace-nowrap cursor-move group"
+                                        style={{
+                                            left: offset * colWidth + 2,
+                                            width: Math.max(barWidth - 4, 24),
+                                            backgroundColor: barColor(task.status),
+                                            opacity: task.status === "cancelled" ? 0.4 : 1,
+                                        }}
+                                        onMouseDown={(e) => startDrag(e, task.id, date, "move")}
+                                        title={`${task.text} · ${date} · ${duration}일`}
+                                    >
+                                        <span className="truncate flex-1">
+                                            {task.status === "done" ? "완료" : task.status === "doing" ? "진행" : task.status === "carried" ? "이월" : task.status === "cancelled" ? "취소" : "계획"}
+                                            <span className="ml-1 opacity-80">{duration}d</span>
+                                        </span>
+                                        {/* 우측 리사이즈 핸들 */}
+                                        <span
+                                            onMouseDown={(e) => startDrag(e, task.id, date, "resize")}
+                                            className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize bg-black/0 hover:bg-black/20 rounded-r"
+                                            title="드래그: 기간 늘리기"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+
+        {/* 날짜·기간 편집 팝오버 */}
+        {editingTask && (() => {
+            const item = items.find(i => i.task.id === editingTask.id);
+            if (!item) return null;
+            const initDate = item.date;
+            const initDur = item.task.duration_days ?? 1;
+            return (
+                <div className="fixed inset-0 z-[9300] flex items-center justify-center bg-black/40 px-4" onClick={() => setEditingTask(null)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-xs p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-sm font-semibold text-neutral-900 truncate">{item.task.text}</h3>
+                        <div>
+                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">시작일</label>
+                            <input
+                                type="date"
+                                defaultValue={initDate}
+                                onChange={(e) => {
+                                    const newDate = e.target.value;
+                                    if (!newDate) return;
+                                    setItems(prev => prev.map(i => i.task.id === editingTask.id ? { ...i, date: newDate } : i));
+                                    patch(editingTask.id, initDate, { date: newDate });
+                                }}
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">기간 (일)</label>
+                            <input
+                                type="number"
+                                min={1}
+                                defaultValue={initDur}
+                                onChange={(e) => {
+                                    const n = Math.max(1, parseInt(e.target.value || "1", 10));
+                                    setItems(prev => prev.map(i => i.task.id === editingTask.id ? { ...i, task: { ...i.task, duration_days: n } } : i));
+                                    patch(editingTask.id, item.date, { duration_days: n });
+                                }}
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div className="flex justify-end pt-1">
+                            <button
+                                onClick={() => setEditingTask(null)}
+                                className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5]"
+                            >
+                                완료
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        })()}
+        </>
+    );
+}
+
+// 유틸
+function dayDiff(a: string, b: string): number {
+    return Math.floor((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
+}
+function addDate(base: string, days: number): Date {
+    const d = new Date(base);
+    d.setDate(d.getDate() + days);
+    return d;
+}
+function addDays(base: string, days: number): string {
+    return addDate(base, days).toISOString().slice(0, 10);
 }

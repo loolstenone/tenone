@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
-    ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2,
+    ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2, ArrowUpFromLine,
 } from "lucide-react";
 import type { PlannerRole } from "@/lib/myverse/types";
 import { PLANNER_ROLE_META } from "@/lib/myverse/types";
@@ -371,6 +371,7 @@ export function TemplatesView() {
     const [selected, setSelected] = useState<Template | null>(null);
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [copied, setCopied] = useState(false);
+    const [promoted, setPromoted] = useState(false);
     const [tplData, setTplData] = useState<FrameworkData>({});
     const [userRole, setUserRole] = useState<PlannerRole | null>(null);
 
@@ -430,6 +431,21 @@ export function TemplatesView() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch { /* noop */ }
+    }
+
+    async function promoteToTask() {
+        if (!selected) return;
+        const text = isSpecialTemplate(selected)
+            ? exportFwText(selected, tplData)
+            : selected.body_md;
+        if (!text.trim()) return;
+        await fetch("/api/myverse/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text.slice(0, 500).trim(), source: "note" }),
+        });
+        setPromoted(true);
+        setTimeout(() => setPromoted(false), 2000);
     }
 
     const isRoleMatch = useCallback((t: Template) =>
@@ -746,13 +762,22 @@ export function TemplatesView() {
                                     : 'Daily · 프로젝트 노트에서 "템플릿 삽입"으로 사용하세요.'
                                 }
                             </span>
-                            <button
-                                onClick={copyToClipboard}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
-                            >
-                                {copied ? <Check className="h-3 w-3 text-[#6366F1]" /> : <Copy className="h-3 w-3" />}
-                                {copied ? "복사됨" : hasData ? "내용 복사" : "마크다운 복사"}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={promoteToTask}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
+                                >
+                                    {promoted ? <Check className="h-3 w-3 text-[#6366F1]" /> : <ArrowUpFromLine className="h-3 w-3" />}
+                                    {promoted ? "승격됨" : "태스크로 승격"}
+                                </button>
+                                <button
+                                    onClick={copyToClipboard}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
+                                >
+                                    {copied ? <Check className="h-3 w-3 text-[#6366F1]" /> : <Copy className="h-3 w-3" />}
+                                    {copied ? "복사됨" : hasData ? "내용 복사" : "마크다운 복사"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

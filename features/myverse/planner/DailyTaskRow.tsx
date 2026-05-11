@@ -1,27 +1,19 @@
 "use client";
 
 // 일간 할 일 행 컴포넌트 — DailyView에서 분리.
-// PriorityBadge, PriorityPicker, TaskRow + 관련 타입·상수
+// TaskRow + 관련 타입·상수 (경중완급 우선순위는 폐기)
 
 import { useState } from "react";
-import { GripVertical, Clock, Trash2, CalendarDays } from "lucide-react";
-import type { PlannerTask } from "@/lib/myverse/types";
+import { GripVertical, Clock, Trash2, CalendarDays, Flag, DollarSign, Users, Settings } from "lucide-react";
+import type { PlannerTask, TaskType } from "@/lib/myverse/types";
 
-export type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
-export type TaskPriority = '급중' | '급경' | '완중' | '완경';
+export type TaskStatus = 'todo' | 'doing' | 'done' | 'carried' | 'cancelled' | 'hold' | 'moved';
 
-export const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: string }> = {
-    '급중': { label: "급중", cls: "text-rose-600   bg-rose-50   border-rose-200",     dotCls: "bg-rose-500"    },
-    '급경': { label: "급경", cls: "text-amber-600  bg-amber-50  border-amber-200",    dotCls: "bg-amber-500"   },
-    '완중': { label: "완중", cls: "text-sky-600    bg-sky-50    border-sky-200",       dotCls: "bg-sky-500"     },
-    '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
-};
-
-export const QUADRANT_CYCLE: Record<TaskPriority, TaskPriority | null> = {
-    '급중': '급경',
-    '급경': '완중',
-    '완중': '완경',
-    '완경': null,
+export const TASK_TYPE_META: Record<Exclude<TaskType, 'normal'>, { label: string; icon: React.ReactNode; cls: string }> = {
+    milestone: { label: "마일스톤", icon: <Flag className="h-2.5 w-2.5" />, cls: "text-violet-600 bg-violet-50 border-violet-200" },
+    finance:   { label: "비용",     icon: <DollarSign className="h-2.5 w-2.5" />, cls: "text-emerald-600 bg-emerald-50 border-emerald-200" },
+    people:    { label: "인력",     icon: <Users className="h-2.5 w-2.5" />, cls: "text-sky-600 bg-sky-50 border-sky-200" },
+    admin:     { label: "관리",     icon: <Settings className="h-2.5 w-2.5" />, cls: "text-neutral-500 bg-neutral-100 border-neutral-200" },
 };
 
 export interface TaskRowProps {
@@ -31,7 +23,6 @@ export interface TaskRowProps {
     onCycle: () => void;
     onRemove: () => void;
     onTimeChange: (time: string) => void;
-    onPriorityChange?: (p: PlannerTask["priority"]) => void;
     onProjectChange?: (projectId: string | null) => void;
     onMove?: () => void;
     projects?: Array<{ id: string; title: string; color: string | null }>;
@@ -41,60 +32,7 @@ export interface TaskRowProps {
     onDragEnd: () => void;
 }
 
-/** 우선순위 뱃지 — 클릭 시 사분면 순환 */
-export function PriorityBadge({ priority, onClick }: { priority: TaskPriority | null; onClick: () => void }) {
-    if (!priority) return null;
-    const m = PRIORITY_META[priority];
-    return (
-        <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${m.cls}`}
-            title="클릭: 사분면 순환"
-        >
-            {m.label}
-        </button>
-    );
-}
-
-/** 우선순위 선택기 — 2×2 사분면 미니 피커 */
-export function PriorityPicker({ value, onChange }: { value: PlannerTask["priority"]; onChange: (p: PlannerTask["priority"]) => void }) {
-    const quads: Array<{ q: TaskPriority; activeCls: string; borderCls: string }> = [
-        { q: "급경", activeCls: "bg-amber-400 text-white",   borderCls: "border-b border-r border-neutral-200" },
-        { q: "급중", activeCls: "bg-rose-500 text-white",    borderCls: "border-b border-neutral-200" },
-        { q: "완경", activeCls: "bg-neutral-400 text-white", borderCls: "border-r border-neutral-200" },
-        { q: "완중", activeCls: "bg-sky-500 text-white",     borderCls: "" },
-    ];
-    return (
-        <div className="flex flex-col items-start gap-0.5 bg-white border border-neutral-200 rounded-lg shadow-lg p-2 w-[100px]">
-            <div className="grid grid-cols-2 w-full rounded overflow-hidden border border-neutral-200">
-                {quads.map(({ q, activeCls, borderCls }) => (
-                    <button
-                        key={q}
-                        type="button"
-                        onClick={() => onChange(value === q ? null : q)}
-                        className={`py-1.5 text-center text-[10px] font-bold transition-colors ${borderCls} ${
-                            value === q ? activeCls : "bg-white hover:bg-neutral-50 text-neutral-500"
-                        }`}
-                    >
-                        {q}
-                    </button>
-                ))}
-            </div>
-            {value && (
-                <button
-                    type="button"
-                    onClick={() => onChange(null)}
-                    className="w-full text-[9px] text-neutral-400 hover:text-neutral-600 text-center pt-1"
-                >
-                    없음
-                </button>
-            )}
-        </div>
-    );
-}
-
-export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriorityChange, onProjectChange, onMove, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
+export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onProjectChange, onMove, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
     const [editingTime, setEditingTime] = useState(false);
     const strike = task.status === 'done' || task.status === 'cancelled' || task.status === 'moved';
 
@@ -182,26 +120,15 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                 </button>
             )}
 
-            {/* 우선순위 뱃지 (있을 때만) */}
-            {task.priority && PRIORITY_META[task.priority as TaskPriority] && (
-                <PriorityBadge
-                    priority={task.priority as TaskPriority}
-                    onClick={() => onPriorityChange?.(
-                        QUADRANT_CYCLE[task.priority as TaskPriority]
-                    )}
-                />
-            )}
-            {/* 우선순위 없을 때 — hover 시 빠른 설정 버튼 */}
-            {!task.priority && onPriorityChange && (
-                <button
-                    type="button"
-                    onClick={() => onPriorityChange("급중")}
-                    className="shrink-0 text-xs text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
-                    title="우선순위 설정"
-                >
-                    급중
-                </button>
-            )}
+            {/* Task type badge */}
+            {task.type && task.type !== 'normal' && TASK_TYPE_META[task.type as Exclude<TaskType, 'normal'>] && (() => {
+                const m = TASK_TYPE_META[task.type as Exclude<TaskType, 'normal'>];
+                return (
+                    <span className={`shrink-0 inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border ${m.cls}`}>
+                        {m.icon}{m.label}
+                    </span>
+                );
+            })()}
 
             {/* 모바일 스페이서 — project+delete를 우측으로 밀기 */}
             <span className="flex-1 sm:hidden" />
