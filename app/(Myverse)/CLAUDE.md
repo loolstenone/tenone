@@ -145,6 +145,16 @@
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
 
+### 마인드맵 import·회사 관리·간트 의존성 위반·프레임워크 4종 (세션 130)
+| 파일 | 역할 |
+|------|------|
+| `features/myverse/planner/MindmapEditor.tsx` | **텍스트 import** (`parseTextToMindmap`/`buildTreeFromItems` — 마크다운/들여쓰기 자동 감지) + **Apply 모달** (1단계 자식 → 마일스톤, 손자 → description 평탄화). 툴바: FileInput / Target 버튼 |
+| `features/myverse/planner/CompaniesView.tsx` | **신규** — 회사 엔티티 CRUD + 검색 + 펼침으로 소속 인원 미리보기 + 컬러/로고 편집 + 삭제 확인 |
+| `app/(Myverse)/myverse/app/contacts/companies/page.tsx` | **신규 라우트** — `/myverse/app/contacts/companies` |
+| `features/myverse/planner/ContactsView.tsx` | 헤더에 "회사 (N)" 링크 배지 추가 |
+| `features/myverse/planner/ProjectTasksTab.tsx` | **간트 의존성 위반 감지** (dashed rose marker + ⚠ AlertTriangle + 상단 배너 + 자동 일정 조정 5-pass 위상정렬). **PNG/SVG export** (`chartRef` + html-to-image의 toPng/toSvg) |
+| `sql/myverse-templates-frameworks-v2.sql` | **신규** — RACI / Pre-mortem / OKR Roll-up / SAFe PI Planning 4종 시드 (Prod 적용) |
+
 ### 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처 (세션 129)
 | 파일 | 역할 |
 |------|------|
@@ -269,7 +279,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 129 (2026-05-12)** — 간트 의존성 화살표(SVG 직각 경로)·좌측 시작일 핸들·마일스톤 ◆ 드래그·ProjectKanban DnD + 마인드맵 신규(SVG 방사형 + 노드 드래그 + 컬러 picker + 1.5s 자동 저장) + 템플릿 변수 치환({{today}}/{{user}}/{{quarter}}/{{week}} 등)·마일스톤 자동 변환 + Company Stage 2 (myverse_companies + contacts.company_id + ContactsView datalist autocomplete + find-or-create) + DigitalCard PNG 캡처 외부이미지 dataURL prefetch + 시드 템플릿 변수 주입 |
+| **Phase** | **세션 130 (2026-05-12)** — 마인드맵 텍스트 import(마크다운/들여쓰기 자동 감지) + 회사 관리 페이지(`/contacts/companies` CRUD + 인원 펼침) + 간트 의존성 위반 감지(dashed rose + ⚠ + 5-pass 자동 일정 조정) + 마인드맵→프로젝트(1단계 자식→마일스톤) + 간트 PNG/SVG export + 신규 프레임워크 4종(RACI·Pre-mortem·OKR Roll-up·SAFe PI Planning) |
+| **세션 129 (2026-05-12)** | 간트 의존성 화살표(SVG 직각 경로)·좌측 시작일 핸들·마일스톤 ◆ 드래그·ProjectKanban DnD + 마인드맵 신규(SVG 방사형 + 노드 드래그 + 컬러 picker + 1.5s 자동 저장) + 템플릿 변수 치환·마일스톤 자동 변환 + Company Stage 2 + DigitalCard PNG 캡처 외부이미지 dataURL prefetch + 시드 템플릿 변수 주입 |
 | **세션 128 (2026-05-13)** | 일정&업무 칸반/리스트 토글 + 메인/서브 위계 트리 + 경중완급 폐기 + 프로젝트 모달화·간트 4단계 고도화(드래그/리사이즈/팝오버/자율헤더+오늘선+마일스톤◆) + 미완 호출 시 메인+서브 동반 + 사이드바 토글 우측 상단 absolute + Hydration suppressHydrationWarning + TimeBlock UI 폐기 |
 | **세션 127 (2026-05-11)** | Personal OS 통합 — 사이드바 접힘 + 브랜드 자산 SSOT + 메일/캘린더 양방향 + 무끼 LLM 확장 + 마케팅 페이지 통합(story+philosophy+about) + DailyView 3,158줄 분할 |
 | **세션 124 (2026-05-11)** | IA 재구성(INSIDE/OUTSIDE) + 핸들 URL 정비(`/v` 폐기 → `/[handle]`) + 디지털 명함 SSOT(DigitalCard) + 노트 4종 미리보기 통일(h-48) + 캔버스 저장 버그 수정(unmount flush) + 모달 템플릿 입력 버그 수정(TemplateGridEditor) + 템플릿 그리드 Instagram 비례 + ViewToggle 4 페이지 공통 + PP→CanvasEditor 리네이밍 |
@@ -284,6 +295,7 @@
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **세션 130 결정** | ① 마인드맵 텍스트 import는 자동 감지(`#`로 시작 → 마크다운 / 들여쓰기 있음 → outline). 스택 기반 트리 구성. 모드 선택 강제하지 않음 · ② 회사 관리는 ContactsView와 별도 페이지로 분리 — 자동완성으로 부족할 때만 manual. `<datalist>` SSOT는 그대로 유지 · ③ 의존성 위반 감지는 클라이언트 측 계산(별도 API 불필요). dashed rose + ⚠ 시각 신호 + 옵션형 auto-fix · ④ Auto-fix는 5-pass 위상정렬로 단순화 — 사이클 발생 시 더 깊은 검증 없이 종료(상위에서 합리적 의존 관계 가정) · ⑤ 마인드맵 → 프로젝트는 1단계 자식만 마일스톤, 손자 트리는 description으로 평탄화. 너무 깊은 자동 변환은 의미 손실 — 사용자가 1단계 구성을 의도적으로 정리하도록 유도 · ⑥ 간트 export는 차트 컨테이너만 ref로 캡처(범례·배너 제외). pixelRatio: PNG=2, SVG=1 · ⑦ 신규 프레임워크 시드는 변수 패턴 적극 활용 — OKR Roll-up에 `{{quarter}}/{{year}}/{{user}}`, RACI/Pre-mortem에 `{{today}}` |
 | **세션 129 결정** | ① 간트 의존성은 PlannerTask JSONB에 `depends_on: string[]` 추가로 마이그레이션 없이 즉시 구현. SVG 직각 경로 + arrow marker · ② 좌측 시작일 핸들은 끝점 고정(duration 자동 보정), 우측 핸들은 끝점 이동(duration만), 본문은 전체 이동(date만). 3가지 모드 명확히 분리 · ③ 마인드맵은 캔버스 엔진 재사용하지 않고 별도 SVG 컴포넌트 `MindmapEditor.tsx`로 구현. 캔버스 data 컬럼 안에 `data.mindmap` vs `data.ppcanvas` 키로 분기 — DB 마이그레이션 0 · ④ 노드 수동 드래그 좌표는 `(dx/zoom)`로 줌 보정 필수 — 줌 in/out 상태에서도 정확 이동 · ⑤ 템플릿 변수는 `{{var\|fallback}}` 패턴. 자동 컨텍스트는 `buildDefaultVarContext()` SSOT로 모든 호출지점 통일 · ⑥ 마일스톤 추출은 `## 헤딩` 우선, `- [ ]` 보조. `(YYYY-MM-DD)` 패턴은 자동 due_date 인식 · ⑦ Stage 2 Company는 `company_name`(자유 텍스트) legacy fallback 유지 + `company_id` FK 신규. 점진 마이그레이션. ContactsView는 `<datalist>` SSOT로 모든 폼에서 자동완성 · ⑧ DigitalCard PNG 캡처는 외부 이미지 CORS로 누락되던 문제 — `fetch→blob→FileReader.readAsDataURL`로 prefetch + onload 대기(1.5s 타임아웃) + 캡처 후 src 복원 |
 | **세션 125 결정** | ① 무끼(AI 묻기/일기/코치)는 사이드바에서 빼고 우측 하단 그라디언트 FAB로 통합 — 대화는 저장 X, 의도(일정·연락처 등)만 마이버스 서비스에 자동 반영 · ② "오늘의 한 장면"이 SNS 포스팅 (자유 글/사진/영상). DB `myverse_daily_moments`에 `media_type='text'` + `body` 컬럼 + `media_url` nullable. 피드 공개 토글 + Web Share API · ③ DailyView 3 카드 독립: TodaySceneCard / DailyPlacesCard / DailyRoutinesCard. 한 컴포저에서 입력해도 places·routines 미러 저장 · ④ 흔적 통합: `/api/myverse/traces` (moments + places + routines UNION). UnifiedTrace 정규화 형태 + happened_at 정렬 · ⑤ 레이아웃 전부 fixed: TopNav `fixed top-0 z-40` / SideNav `fixed top-12 left-0 bottom-0 z-30` / MonthBar `fixed top-12 right-0 bottom-0 z-30`. main에 `pt-12 md:ml-52 md:mr-10` 보정 · ⑥ "Verse" 용어 폐기 — "내 페이지" / "피드에 공개하기"로 통일. `/myverse/v/{handle}` 옛 링크는 `/myverse/{handle}`로 · ⑦ 코넬 노트 제목에서 Enter → 첫 단서 자동 포커스 · ⑧ 사이드바 footer `mt-auto` 부동 수정 |
 | **세션 124 결정** | ① IA INSIDE(ENGINE/PERSONAL/BLACKBOX/MUKKI) + OUTSIDE(피드/프로필/명함) — 5 Lane 폐기 · ② `/today` → `/daily` 메인 통합. 메뉴 라벨은 "오늘", 라우트는 `/daily`. 시간 줌 4 페이지 ViewToggle 공통 노출 · ③ `/myverse/v/[handle]` 폐기 → `/myverse/[handle]` (`HandleSubNav` [공개 흔적][프로필][명함]) · ④ DigitalCard SSOT (myverse·wio 양쪽). publicUrl 컨벤션: `myverse.kr/{handle}/card` · ⑤ 노트 4종 `h-48 + Maximize2 hover overlay` 통일. 캔버스 미리보기 = 콘텐츠 only(CanvasPreview) · ⑥ 캔버스 저장 unmount flush (PpCanvas/CanvasEditor) · ⑦ 모달 템플릿 입력은 `TemplateGridEditor` 컴포넌트로 격리, useState로 즉시 재렌더 · ⑧ 템플릿 그리드 `aspect-square` 제거, `grid-cols-1 sm:grid-cols-2` Instagram 패턴 · ⑨ PP 잔재: `PpCanvas`→`CanvasEditor`, `PpCanvasToolbar`→`CanvasEditorToolbar` (DB `data.ppcanvas` 키만 호환 유지) |

@@ -8,7 +8,7 @@
 // 자동 저장: 1.5초 디바운스 (CanvasEditor와 동일 패턴)
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2, FileInput, X, Target, Check, Loader2 } from "lucide-react";
 
 export interface MindmapNode {
     id: string;
@@ -36,6 +36,74 @@ function emptyDoc(): MindmapDoc {
         root: { id: genId(), text: "중심 주제", children: [] },
         layout: "radial",
     };
+}
+
+// ── 텍스트 → MindmapNode 파서 ────────────────────────────────────────
+// 자동 감지: 첫 비공백 줄이 `#`로 시작하면 마크다운, 아니면 들여쓰기 outline.
+// 마크다운: `# 헤더` = depth 0(root), `## 헤더` = depth 1...
+// 들여쓰기: 첫 줄 = root, 들여쓴 만큼 depth 추가 (탭=1, 스페이스=실제 개수 그대로)
+export function parseTextToMindmap(text: string): MindmapNode | null {
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length === 0) return null;
+
+    // 빈 줄을 제외한 첫 줄에서 모드 판정
+    const firstTrim = lines[0].trim();
+    const isMarkdown = /^#+\s+\S/.test(firstTrim);
+
+    if (isMarkdown) {
+        // 마크다운 모드
+        const items: Array<{ depth: number; text: string }> = [];
+        for (const raw of lines) {
+            const m = raw.match(/^(#+)\s+(.+?)\s*#*$/);
+            if (!m) continue;
+            const depth = Math.min(m[1].length - 1, 5);
+            items.push({ depth, text: m[2].trim() });
+        }
+        if (items.length === 0) return null;
+        // 최상위 depth 정규화 (모두 ## 부터 시작했다면 depth 1을 0으로)
+        const minDepth = Math.min(...items.map(i => i.depth));
+        return buildTreeFromItems(items.map(i => ({ depth: i.depth - minDepth, text: i.text })));
+    } else {
+        // 들여쓰기 outline 모드 — 첫 비공백 위치를 기준 depth 0
+        const items: Array<{ depth: number; text: string }> = lines.map(raw => {
+            const indent = raw.match(/^[\s\t]*/)?.[0] ?? "";
+            // 탭 1개 = depth 1, 스페이스 2개 = depth 1
+            const tabCount = (indent.match(/\t/g) ?? []).length;
+            const spaceCount = indent.length - tabCount;
+            const depth = tabCount + Math.floor(spaceCount / 2);
+            return { depth, text: raw.trim().replace(/^[-*•]\s+/, "") };
+        });
+        const minDepth = Math.min(...items.map(i => i.depth));
+        return buildTreeFromItems(items.map(i => ({ depth: i.depth - minDepth, text: i.text })));
+    }
+}
+
+function buildTreeFromItems(items: Array<{ depth: number; text: string }>): MindmapNode | null {
+    if (items.length === 0) return null;
+
+    // 첫 depth=0 항목이 root. 만약 첫 항목이 depth>0이면 가상 root 생성.
+    let rootText = "중심 주제";
+    let startIdx = 0;
+    if (items[0].depth === 0) {
+        rootText = items[0].text;
+        startIdx = 1;
+    }
+    const root: MindmapNode = { id: genId(), text: rootText, children: [] };
+
+    // 스택 기반 트리 구성: stack[i] = depth i+1의 현재 부모
+    const stack: MindmapNode[] = [root];
+    for (let i = startIdx; i < items.length; i++) {
+        const { depth, text } = items[i];
+        const node: MindmapNode = { id: genId(), text, children: [] };
+        // 부모는 stack[depth-1] (depth=1이면 root, depth=2면 그 자식의 자식)
+        // 만약 depth > stack.length라면 가장 최근 노드 안에 강제로 넣음
+        const parentDepth = Math.min(depth, stack.length);
+        const parent = stack[parentDepth - 1] ?? stack[stack.length - 1] ?? root;
+        parent.children.push(node);
+        stack.length = parentDepth; // 깊은 스택 자르기
+        stack.push(node);
+    }
+    return root;
 }
 
 // ── 자동 레이아웃 ──────────────────────────────────────────────────────
@@ -148,6 +216,23 @@ export function MindmapEditor({
     const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
     const [pan, setPan] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
+    const [importModal, setImportModal] = useState<{ open: boolean; text: string; mode: "replace" | "append"; error?: string } | null>(null);
+    const [applyModal, setApplyModal] = useState<{ open: boolean; projectId: string; loading: boolean; result?: { count: number } } | null>(null);
+    const [projects, setProjects] = useState<Array<{ id: string; title: string; color?: string }>>([]);
+
+    // 프로젝트 목록 (apply 모달용) — 처음 모달 열 때 1회 fetch
+    useEffect(() => {
+        if (!applyModal?.open || projects.length > 0) return;
+        (async () => {
+            try {
+                const r = await fetch("/api/myverse/projects");
+                if (r.ok) {
+                    const d = await r.json();
+                    setProjects((d.projects ?? []).map((p: { id: string; title: string; color?: string }) => ({ id: p.id, title: p.title, color: p.color })));
+                }
+            } catch { /* noop */ }
+        })();
+    }, [applyModal?.open, projects.length]);
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -325,6 +410,55 @@ export function MindmapEditor({
         setZoom(1);
     }
 
+    // root의 1단계 자식들을 마일스톤으로 변환, 손자는 description으로 평탄화
+    async function applyToProject() {
+        if (!applyModal || !applyModal.projectId) return;
+        setApplyModal({ ...applyModal, loading: true });
+        const milestones = doc.root.children;
+        let count = 0;
+        for (let i = 0; i < milestones.length; i++) {
+            const m = milestones[i];
+            // 손자 + 증손자(있다면)를 description으로 합치기
+            const subItems: string[] = [];
+            function collect(n: MindmapNode, indent: number) {
+                if (indent > 0) subItems.push(`${"  ".repeat(indent - 1)}- ${n.text}`);
+                if (!n.collapsed) for (const c of n.children) collect(c, indent + 1);
+            }
+            for (const c of m.children) collect(c, 1);
+            const description = subItems.length > 0 ? subItems.join("\n") : null;
+            try {
+                const r = await fetch(`/api/myverse/projects/${applyModal.projectId}/milestones`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title: m.text, description, order_index: i }),
+                });
+                if (r.ok) count++;
+            } catch { /* noop */ }
+        }
+        setApplyModal({ ...applyModal, loading: false, result: { count } });
+    }
+
+    function doImport() {
+        if (!importModal) return;
+        const parsed = parseTextToMindmap(importModal.text);
+        if (!parsed) {
+            setImportModal({ ...importModal, error: "파싱할 텍스트가 없습니다. 마크다운 헤딩(#) 또는 들여쓰기 outline을 사용하세요." });
+            return;
+        }
+        if (importModal.mode === "replace") {
+            setDoc({ ...doc, root: parsed });
+            setSelectedId(parsed.id);
+        } else {
+            // 현재 root 아래에 parsed의 모든 자식을 append. parsed 자체는 라벨로 사용 X
+            const newChildren = parsed.children.length > 0 ? parsed.children : [parsed];
+            setDoc(prev => ({
+                ...prev,
+                root: { ...prev.root, children: [...prev.root.children, ...newChildren], collapsed: false },
+            }));
+        }
+        setImportModal(null);
+    }
+
     return (
         <div ref={containerRef} className={`relative w-full h-full overflow-hidden bg-neutral-50 ${className}`}>
             {/* 툴바 */}
@@ -344,6 +478,24 @@ export function MindmapEditor({
                     title="형제 추가 (Enter)"
                 >
                     <Plus className="h-3 w-3" /> 형제
+                </button>
+                <div className="w-px h-4 bg-neutral-200 mx-1" />
+                <button
+                    type="button"
+                    onClick={() => setImportModal({ open: true, text: "", mode: "append" })}
+                    className="flex items-center gap-1 px-2 py-1 rounded hover:bg-neutral-100 text-neutral-700"
+                    title="텍스트(마크다운/들여쓰기)에서 import"
+                >
+                    <FileInput className="h-3 w-3" /> Import
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setApplyModal({ open: true, projectId: "", loading: false })}
+                    disabled={doc.root.children.length === 0}
+                    className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[#6366F1]/10 text-[#6366F1] disabled:opacity-40"
+                    title="1단계 자식 노드를 선택한 프로젝트의 마일스톤으로 일괄 변환"
+                >
+                    <Target className="h-3 w-3" /> 프로젝트로
                 </button>
                 <div className="w-px h-4 bg-neutral-200 mx-1" />
                 <button type="button" onClick={() => setZoom(z => Math.min(3, z + 0.2))} className="p-1 rounded hover:bg-neutral-100" title="확대"><ZoomIn className="h-3 w-3" /></button>
@@ -397,6 +549,165 @@ export function MindmapEditor({
                 <Sparkles className="h-2.5 w-2.5 inline mr-1" />
                 Tab=자식 · Enter=형제 · Space=접기 · F2=편집 · Delete=삭제 · 노드 드래그=위치 · 휠=확대 · 배경 드래그=이동
             </div>
+
+            {/* Apply 모달 — 프로젝트의 마일스톤으로 변환 */}
+            {applyModal?.open && (() => {
+                const milestones = doc.root.children;
+                return (
+                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => !applyModal.loading && setApplyModal(null)}>
+                        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                                    <Target className="h-4 w-4 text-[#6366F1]" />
+                                    프로젝트로 적용
+                                </h3>
+                                <button type="button" onClick={() => setApplyModal(null)} className="text-neutral-400 hover:text-neutral-700">
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                            <p className="text-[11px] text-neutral-500 leading-relaxed">
+                                {doc.root.text}의 1단계 자식 <strong>{milestones.length}개</strong>를 선택한 프로젝트의 마일스톤으로 변환합니다.
+                                손자 노드는 마일스톤 description으로 들어갑니다.
+                            </p>
+
+                            {applyModal.result ? (
+                                <div className="text-center py-3">
+                                    <Check className="h-7 w-7 text-[#6366F1] mx-auto mb-1" />
+                                    <p className="text-sm text-neutral-700">
+                                        {applyModal.result.count > 0 ? `마일스톤 ${applyModal.result.count}개 추가됨` : "변환 실패"}
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">대상 프로젝트</label>
+                                        <select
+                                            value={applyModal.projectId}
+                                            onChange={(e) => setApplyModal({ ...applyModal, projectId: e.target.value })}
+                                            disabled={applyModal.loading}
+                                            className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                        >
+                                            <option value="">— 프로젝트 선택 —</option>
+                                            {projects.map(p => (
+                                                <option key={p.id} value={p.id}>{p.title}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="max-h-44 overflow-y-auto bg-neutral-50 rounded-md p-2 space-y-1">
+                                        {milestones.length === 0 ? (
+                                            <p className="text-[11px] text-neutral-400 italic">자식 노드가 없습니다.</p>
+                                        ) : milestones.map((m, i) => (
+                                            <div key={m.id} className="text-xs">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[#6366F1] shrink-0">◆</span>
+                                                    <span className="font-medium text-neutral-700">{i + 1}. {m.text}</span>
+                                                </div>
+                                                {m.children.length > 0 && (
+                                                    <ul className="pl-4 mt-0.5 text-[10px] text-neutral-500">
+                                                        {m.children.slice(0, 3).map(c => (
+                                                            <li key={c.id} className="truncate">- {c.text}</li>
+                                                        ))}
+                                                        {m.children.length > 3 && <li className="text-neutral-400 italic">... 외 {m.children.length - 3}개</li>}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="flex justify-end gap-2 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setApplyModal(null)}
+                                    disabled={applyModal.loading}
+                                    className="text-xs px-3 py-1.5 border border-neutral-200 rounded-md text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
+                                >
+                                    {applyModal.result ? "닫기" : "취소"}
+                                </button>
+                                {!applyModal.result && (
+                                    <button
+                                        type="button"
+                                        onClick={applyToProject}
+                                        disabled={applyModal.loading || !applyModal.projectId || milestones.length === 0}
+                                        className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50 flex items-center gap-1.5"
+                                    >
+                                        {applyModal.loading && <Loader2 className="h-3 w-3 animate-spin" />}
+                                        적용
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
+
+            {/* Import 모달 */}
+            {importModal?.open && (
+                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => setImportModal(null)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                                <FileInput className="h-4 w-4 text-[#6366F1]" />
+                                텍스트에서 마인드맵 import
+                            </h3>
+                            <button type="button" onClick={() => setImportModal(null)} className="text-neutral-400 hover:text-neutral-700">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <p className="text-[11px] text-neutral-500 leading-relaxed">
+                            마크다운 헤딩(<code className="font-mono bg-neutral-100 px-1 rounded">#·##·###</code>) 또는 들여쓰기 outline(탭/스페이스 2칸). 자동 감지.
+                        </p>
+                        <textarea
+                            value={importModal.text}
+                            onChange={(e) => setImportModal({ ...importModal, text: e.target.value, error: undefined })}
+                            placeholder={`예: 마크다운\n# 마이버스 OS\n## 채집\n### 사진\n### GPS\n## 분류\n\n또는 들여쓰기\n마이버스 OS\n  채집\n    사진\n    GPS\n  분류`}
+                            className="w-full h-44 text-xs font-mono border border-neutral-200 rounded-md px-2 py-2 focus:outline-none focus:border-[#6366F1] resize-none"
+                        />
+                        {importModal.error && (
+                            <p className="text-[11px] text-rose-600">{importModal.error}</p>
+                        )}
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                            <label className="text-[11px] text-neutral-600 flex items-center gap-1.5">
+                                <input
+                                    type="radio"
+                                    name="import-mode"
+                                    checked={importModal.mode === "append"}
+                                    onChange={() => setImportModal({ ...importModal, mode: "append" })}
+                                    className="accent-[#6366F1]"
+                                />
+                                현재 root에 추가
+                            </label>
+                            <label className="text-[11px] text-neutral-600 flex items-center gap-1.5">
+                                <input
+                                    type="radio"
+                                    name="import-mode"
+                                    checked={importModal.mode === "replace"}
+                                    onChange={() => setImportModal({ ...importModal, mode: "replace" })}
+                                    className="accent-[#6366F1]"
+                                />
+                                전체 교체
+                            </label>
+                            <div className="flex-1" />
+                            <button
+                                type="button"
+                                onClick={() => setImportModal(null)}
+                                className="text-xs px-3 py-1.5 border border-neutral-200 rounded-md text-neutral-600 hover:bg-neutral-50"
+                            >
+                                취소
+                            </button>
+                            <button
+                                type="button"
+                                onClick={doImport}
+                                disabled={!importModal.text.trim()}
+                                className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50"
+                            >
+                                import
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <svg
                 ref={svgRef}

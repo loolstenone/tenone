@@ -4,9 +4,10 @@
 // 데이터 소스: myverse_daily.tasks (단일 SSOT)
 // "업무" = task — 유니버스 전반에서 통일된 표기
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3, Link2, Unlink } from "lucide-react";
+import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3, Link2, Unlink, AlertTriangle, Wand2, Image as ImageIcon, FileImage } from "lucide-react";
+import { toPng, toSvg } from "html-to-image";
 import { localDateStr } from "@/lib/myverse/types";
 
 interface TaskItem {
@@ -428,6 +429,31 @@ function ProjectGanttView({
 
     const [editingTask, setEditingTask] = useState<{ id: string; date: string } | null>(null);
     const [zoomMode, setZoomMode] = useState<"auto" | "day" | "week" | "month">("auto");
+    const [exporting, setExporting] = useState(false);
+    const chartRef = useRef<HTMLDivElement>(null);
+
+    async function exportChart(format: "png" | "svg") {
+        if (!chartRef.current || exporting) return;
+        setExporting(true);
+        try {
+            const opts = {
+                backgroundColor: "#FFFFFF",
+                pixelRatio: format === "png" ? 2 : 1,
+                cacheBust: false,
+            };
+            const dataUrl = format === "png"
+                ? await toPng(chartRef.current, opts)
+                : await toSvg(chartRef.current, opts);
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `gantt-${new Date().toISOString().slice(0, 10)}.${format}`;
+            a.click();
+        } catch (e) {
+            console.warn("gantt export failed", e);
+        } finally {
+            setExporting(false);
+        }
+    }
 
     const dated = msState.filter(m => m.due_date) as Array<{ id: string; title: string; due_date: string; done_at: string | null }>;
 
@@ -594,6 +620,66 @@ function ProjectGanttView({
         window.addEventListener("mouseup", onUp);
     }
 
+    // 의존성 위반 자동 일정 조정 — 각 위반 task의 시작일을 dep 종료일 + 1일로 push
+    async function autoFixDependencies() {
+        // 위반 정보 수집 + 적용 순서 결정 (위상정렬 비슷하게: 의존받는 게 먼저 fix되어야)
+        const updates: Array<{ id: string; oldDate: string; newDate: string }> = [];
+        const taskById = new Map<string, TaskItem>();
+        for (const it of sorted) taskById.set(it.task.id, it);
+        // 의존 깊이 우선순위: 의존이 없는 노드부터 처리, 처리할 때마다 캐시 갱신
+        const currentDates = new Map<string, string>();
+        const currentDurations = new Map<string, number>();
+        for (const it of sorted) {
+            currentDates.set(it.task.id, it.date);
+            currentDurations.set(it.task.id, Math.max(1, it.task.duration_days ?? 1));
+        }
+        // 단순 반복: 모든 task에 대해 deps 검사, 위반이면 push. 위상정렬 없이 N회 반복 (사이클 무시)
+        for (let pass = 0; pass < 5; pass++) {
+            let any = false;
+            for (const it of sorted) {
+                const deps = Array.isArray(it.task.depends_on) ? it.task.depends_on : [];
+                if (deps.length === 0) continue;
+                let latestEnd = "";
+                for (const dId of deps) {
+                    const dDate = currentDates.get(dId);
+                    const dDur = currentDurations.get(dId);
+                    if (!dDate || !dDur) continue;
+                    const dEndDate = addDays(dDate, dDur - 1);
+                    if (!latestEnd || dEndDate > latestEnd) latestEnd = dEndDate;
+                }
+                if (!latestEnd) continue;
+                const minStart = addDays(latestEnd, 1);
+                const curStart = currentDates.get(it.task.id);
+                if (curStart && curStart < minStart) {
+                    currentDates.set(it.task.id, minStart);
+                    any = true;
+                }
+            }
+            if (!any) break;
+        }
+        for (const it of sorted) {
+            const newDate = currentDates.get(it.task.id);
+            if (newDate && newDate !== it.date) {
+                updates.push({ id: it.task.id, oldDate: it.date, newDate });
+            }
+        }
+        if (updates.length === 0) return;
+        // 낙관적 업데이트 후 일괄 patch
+        setItems(prev => prev.map(i => {
+            const u = updates.find(x => x.id === i.task.id);
+            return u ? { ...i, date: u.newDate } : i;
+        }));
+        // PATCH 호출 (daily 행 간 이관)
+        for (const u of updates) {
+            await fetch(`/api/myverse/daily/${u.oldDate}/task/${u.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: u.newDate }),
+            }).catch(() => {});
+        }
+        onReload?.();
+    }
+
     // 의존성 추가/제거
     async function toggleDependency(targetId: string, depId: string) {
         const target = items.find(i => i.task.id === targetId);
@@ -625,16 +711,23 @@ function ProjectGanttView({
     const taskIndexById = new Map<string, number>();
     sorted.forEach((it, i) => taskIndexById.set(it.task.id, i));
 
-    const arrows: Array<{ from: Coord; to: Coord; key: string }> = [];
+    const arrows: Array<{ from: Coord; to: Coord; key: string; violated: boolean }> = [];
+    const violatingTaskIds = new Set<string>();
     sorted.forEach((it, i) => {
         const deps = Array.isArray(it.task.depends_on) ? it.task.depends_on : [];
         deps.forEach(depId => {
             const depIdx = taskIndexById.get(depId);
             if (depIdx == null) return;
             const dep = sorted[depIdx];
-            const from = barEnd(depIdx, dep.date, Math.max(1, dep.task.duration_days ?? 1));
+            const depDuration = Math.max(1, dep.task.duration_days ?? 1);
+            const from = barEnd(depIdx, dep.date, depDuration);
             const to = barStart(i, it.date);
-            arrows.push({ from, to, key: `${depId}->${it.task.id}` });
+            // 의존성 위반: dep의 종료일 >= it의 시작일 (Finish-to-Start 깨짐)
+            // 또는 dep이 done이 아니고 it의 시작일이 dep 종료보다 이르거나 같음
+            const gap = dayDiff(dep.date, it.date) - depDuration; // 종료일~시작일 사이 일 수
+            const violated = gap < 0;
+            if (violated) violatingTaskIds.add(it.task.id);
+            arrows.push({ from, to, key: `${depId}->${it.task.id}`, violated });
         });
     });
 
@@ -642,35 +735,90 @@ function ProjectGanttView({
 
     return (
         <>
+        {/* 의존성 위반 알림 + auto-fix */}
+        {violatingTaskIds.size > 0 && (
+            <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg text-xs">
+                <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                <span className="text-rose-700">
+                    의존성 위반 <strong>{violatingTaskIds.size}개</strong> — 선행 업무 종료 전에 시작됨
+                </span>
+                <button
+                    type="button"
+                    onClick={autoFixDependencies}
+                    className="ml-auto inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-white bg-rose-500 hover:bg-rose-600 rounded transition-colors"
+                    title="위반된 업무의 시작일을 선행 종료 다음날로 자동 조정"
+                >
+                    <Wand2 className="h-3 w-3" />
+                    자동 일정 조정
+                </button>
+            </div>
+        )}
+
         {/* 줌 컨트롤 */}
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <div className="flex items-center gap-3 text-[10px] text-neutral-500">
+            <div className="flex items-center gap-3 text-[10px] text-neutral-500 flex-wrap">
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#A5B4FC" }} />계획</span>
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-400" />진행</span>
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: projectColor || "#6366F1" }} />완료</span>
                 <span className="inline-flex items-center gap-1"><span className="text-[#6366F1]">◆</span>마일스톤</span>
                 <span className="inline-flex items-center gap-1"><span className="w-px h-3 bg-rose-500" />오늘</span>
+                {arrows.length > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                        <svg width="14" height="6"><path d="M 0 3 L 14 3" stroke="#6366F1" strokeWidth="1.5" /></svg>
+                        의존성
+                    </span>
+                )}
+                {violatingTaskIds.size > 0 && (
+                    <span className="inline-flex items-center gap-1 text-rose-600">
+                        <svg width="14" height="6"><path d="M 0 3 L 14 3" stroke="#EF4444" strokeWidth="2" strokeDasharray="4 3" /></svg>
+                        위반
+                    </span>
+                )}
             </div>
-            <div className="inline-flex bg-neutral-100 rounded-md p-0.5">
-                {([
-                    { k: "auto" as const, label: "자동" },
-                    { k: "day" as const, label: "일" },
-                    { k: "week" as const, label: "주" },
-                    { k: "month" as const, label: "월" },
-                ]).map(z => (
+            <div className="inline-flex items-center gap-2">
+                <div className="inline-flex bg-neutral-100 rounded-md p-0.5">
+                    {([
+                        { k: "auto" as const, label: "자동" },
+                        { k: "day" as const, label: "일" },
+                        { k: "week" as const, label: "주" },
+                        { k: "month" as const, label: "월" },
+                    ]).map(z => (
+                        <button
+                            key={z.k}
+                            onClick={() => setZoomMode(z.k)}
+                            className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
+                                zoomMode === z.k ? "bg-white shadow-sm text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                            }`}
+                        >
+                            {z.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="inline-flex items-center gap-0.5 border border-neutral-200 rounded-md overflow-hidden">
                     <button
-                        key={z.k}
-                        onClick={() => setZoomMode(z.k)}
-                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
-                            zoomMode === z.k ? "bg-white shadow-sm text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
-                        }`}
+                        type="button"
+                        onClick={() => exportChart("png")}
+                        disabled={exporting}
+                        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
+                        title="간트 차트를 PNG로 내보내기"
                     >
-                        {z.label}
+                        {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
+                        PNG
                     </button>
-                ))}
+                    <button
+                        type="button"
+                        onClick={() => exportChart("svg")}
+                        disabled={exporting}
+                        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 text-neutral-600 hover:bg-neutral-50 border-l border-neutral-200 disabled:opacity-50"
+                        title="간트 차트를 SVG로 내보내기"
+                    >
+                        {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileImage className="h-3 w-3" />}
+                        SVG
+                    </button>
+                </div>
             </div>
         </div>
-        <div className="bg-white border border-neutral-200 rounded-xl overflow-x-auto select-none">
+        <div ref={chartRef} className="bg-white border border-neutral-200 rounded-xl overflow-x-auto select-none">
             <div style={{ minWidth: chartWidth + 240 }}>
                 <div className="flex sticky top-0 bg-neutral-50 border-b border-neutral-200 z-10">
                     <div className="w-60 shrink-0 px-3 py-2 text-[10px] uppercase tracking-widest text-neutral-500">
@@ -702,8 +850,11 @@ function ProjectGanttView({
                                 <marker id="dep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                                     <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366F1" />
                                 </marker>
+                                <marker id="dep-arrow-violated" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444" />
+                                </marker>
                             </defs>
-                            {arrows.map(({ from, to, key }) => {
+                            {arrows.map(({ from, to, key, violated }) => {
                                 // 직각 경로: 출발 → 오른쪽으로 살짝 → 위/아래 → 도착 좌측
                                 const gap = 8;
                                 const mid = from.x + gap;
@@ -714,10 +865,11 @@ function ProjectGanttView({
                                         key={key}
                                         d={d}
                                         fill="none"
-                                        stroke="#6366F1"
-                                        strokeWidth={1.5}
-                                        strokeOpacity={0.7}
-                                        markerEnd="url(#dep-arrow)"
+                                        stroke={violated ? "#EF4444" : "#6366F1"}
+                                        strokeWidth={violated ? 2 : 1.5}
+                                        strokeOpacity={violated ? 0.9 : 0.7}
+                                        strokeDasharray={violated ? "4 3" : undefined}
+                                        markerEnd={violated ? "url(#dep-arrow-violated)" : "url(#dep-arrow)"}
                                     />
                                 );
                             })}
@@ -770,9 +922,10 @@ function ProjectGanttView({
                                     type="button"
                                     onClick={() => setEditingTask({ id: task.id, date })}
                                     className="w-60 shrink-0 px-3 py-1.5 text-xs text-neutral-800 truncate flex items-center gap-1 hover:bg-neutral-50 text-left"
-                                    title="클릭: 날짜·기간 편집"
+                                    title={violatingTaskIds.has(task.id) ? "의존성 위반 — 선행 업무가 끝나기 전에 시작" : "클릭: 날짜·기간 편집"}
                                 >
                                     {isMilestone && <span className="text-[9px] text-[#6366F1]">◆</span>}
+                                    {violatingTaskIds.has(task.id) && <AlertTriangle className="h-3 w-3 text-rose-500 shrink-0" />}
                                     {task.text}
                                 </button>
                                 <div className="relative h-7 my-1" style={{ width: chartWidth }}>

@@ -4,6 +4,59 @@
 
 ---
 
+## 2026-05-12 (세션 130) — 마인드맵 import·회사 관리·간트 의존성 위반·신규 프레임워크 4종
+
+### Myverse — 마인드맵 텍스트 import
+- `features/myverse/planner/MindmapEditor.tsx` — `parseTextToMindmap()` + `buildTreeFromItems()` 신규
+- 자동 감지: 첫 비공백 줄이 `#`로 시작 → 마크다운, 들여쓰기 있음 → outline 모드
+- 모달 UI: textarea + 추가/교체 라디오 + 에러 메시지 + 예시 placeholder
+- 스택 기반 트리 구성 — depth가 stack 깊이 벗어나도 최근 노드에 fallback
+
+### Myverse — 회사 관리 페이지
+- 신규 `app/(Myverse)/myverse/app/contacts/companies/page.tsx`
+- 신규 `features/myverse/planner/CompaniesView.tsx` — 회사 CRUD, 검색, 회사별 소속 인원 펼침, 컬러/로고 편집, 삭제 확인
+- ContactsView 헤더에 "회사 (N)" 링크 배지 추가
+- 회사 삭제 시 contact.company_id는 ON DELETE SET NULL — 연락처 보존
+
+### Myverse — 간트 의존성 위반 + auto-fix
+- `features/myverse/planner/ProjectTasksTab.tsx` (ProjectGanttView)
+- 위반 감지: `dayDiff(dep.date, task.date) - dep.duration < 0` (Finish-to-Start)
+- 시각화: dashed rose 화살표 + 별도 marker + ⚠ AlertTriangle 아이콘 + 상단 배너
+- `autoFixDependencies()` — 5-pass 위상정렬로 task 시작일을 dep의 latest end+1일로 push, daily 행 간 자동 이관
+- 범례에 "의존성 / 위반" 항목 추가
+
+### Myverse — 마인드맵 → 프로젝트로 적용
+- MindmapEditor에 Target 버튼 + Apply 모달
+- root의 1단계 자식 = 마일스톤, 손자 트리 = description으로 평탄화(들여쓰기 보존)
+- 프로젝트 fetch on demand (모달 열 때 1회)
+- 미리보기: 최상위 3개 손자만 노출, 나머지는 "외 N개"
+- `myverse_project_milestones` 일괄 POST
+
+### Myverse — 간트 PNG/SVG export
+- ProjectGanttView에 `chartRef` + html-to-image의 `toPng`/`toSvg`
+- 줌 토글 옆 [PNG | SVG] 버튼 그룹
+- 파일명: `gantt-{ISO date}.{png|svg}`
+
+### Myverse — 신규 프레임워크 4종 (Prod 적용)
+- `sql/myverse-templates-frameworks-v2.sql`:
+  - **RACI** — Responsible/Accountable/Consulted/Informed 매트릭스 + 검증 체크리스트
+  - **Pre-mortem** — 6개월 후 실패 시나리오 역추론 + 4분면(외부 통제 가/불가 × 내부 통제 가/불가) + 트리거 신호
+  - **OKR Roll-up** — 조직 → 팀 → 개인 OKR 정렬, `{{quarter}}/{{year}}/{{user}}` 변수 활용
+  - **SAFe PI Planning** — Business Context, PI Objectives, ART Risks (ROAM 분류), 의존성 보드, Confidence Vote
+
+### 신규 파일
+
+| 경로 | 역할 |
+|---|---|
+| `app/(Myverse)/myverse/app/contacts/companies/page.tsx` | 회사 관리 라우트 |
+| `features/myverse/planner/CompaniesView.tsx` | 회사 엔티티 CRUD UI |
+| `sql/myverse-templates-frameworks-v2.sql` | RACI / Pre-mortem / OKR Roll-up / SAFe PI Planning 시드 (Prod 적용) |
+
+### DB 마이그레이션 (Prod 실행 완료)
+1. `myverse-templates-frameworks-v2.sql`
+
+---
+
 ## 2026-05-12 (세션 129) — 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처
 
 ### Myverse — 간트 차트 추가 고도화
