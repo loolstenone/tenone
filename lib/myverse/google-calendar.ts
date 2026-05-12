@@ -11,6 +11,8 @@ const SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/calendar.events",
     "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.send",      // 답장·새 메일 작성
+    "https://www.googleapis.com/auth/gmail.modify",    // archive·읽음 동기화 (UNREAD/INBOX 라벨 제거)
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ];

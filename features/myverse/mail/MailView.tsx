@@ -8,10 +8,12 @@ import {
     Mail, Inbox, Receipt, Calendar as CalIcon, Newspaper, Archive,
     Search, RefreshCw, Loader2, Star, ExternalLink, AlertCircle,
     Users as UsersIcon, Filter, X as XIcon, NotebookPen, Check,
+    Reply, Send, PenSquare,
 } from "lucide-react";
 
 interface EmailItem {
     id: string;
+    external_id?: string;  // Gmail message id — modify/send API 호출용
     sender_name: string | null;
     sender_email: string | null;
     subject: string | null;
@@ -111,10 +113,10 @@ export function MailView() {
         }
     }
 
-    async function openEmail(e: EmailItem) {
+    async function openEmail(e: EmailItem & { external_id?: string }) {
         setSelected({ ...e });
         setDetailLoading(true);
-        // 읽음 마킹 (낙관)
+        // 읽음 마킹 (낙관) — 로컬 DB + Gmail 라벨 동기화
         if (!e.is_read) {
             setEmails(prev => prev.map(x => x.id === e.id ? { ...x, is_read: true } : x));
             void fetch(`/api/myverse/email-imports/${e.id}`, {
@@ -122,6 +124,13 @@ export function MailView() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ is_read: true }),
             });
+            if (e.external_id) {
+                void fetch("/api/myverse/integrations/gmail/modify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ external_id: e.external_id, action: "mark_read" }),
+                }).catch(() => null);
+            }
         }
         try {
             const res = await fetch(`/api/myverse/email-imports/${e.id}`, { cache: "no-store" });
@@ -134,15 +143,92 @@ export function MailView() {
         }
     }
 
-    async function toggleStar(e: EmailItem) {
+    async function toggleStar(e: EmailItem & { external_id?: string }) {
         const next = !e.is_starred;
         setEmails(prev => prev.map(x => x.id === e.id ? { ...x, is_starred: next } : x));
         if (selected?.id === e.id) setSelected({ ...selected, is_starred: next });
-        await fetch(`/api/myverse/email-imports/${e.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ is_starred: next }),
+        await Promise.all([
+            fetch(`/api/myverse/email-imports/${e.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ is_starred: next }),
+            }),
+            // Gmail 라벨 동기화 (best-effort, 실패해도 로컬 상태 유지)
+            e.external_id && fetch("/api/myverse/integrations/gmail/modify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ external_id: e.external_id, action: next ? "star" : "unstar" }),
+            }).catch(() => null),
+        ]);
+    }
+
+    // 답장·작성 composer 상태
+    const [composer, setComposer] = useState<{
+        open: boolean;
+        mode: "reply" | "compose";
+        to: string;
+        subject: string;
+        body: string;
+        inReplyTo?: string;   // Gmail message id (External-Id) 헤더용
+        threadId?: string;
+    } | null>(null);
+    const [sending, setSending] = useState(false);
+    const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+    function openReply(e: EmailDetail) {
+        const replyTo = e.sender_email ?? "";
+        const subj = e.subject?.startsWith("Re:") ? e.subject : `Re: ${e.subject ?? ""}`;
+        const quote = e.body_text
+            ? `\n\n\n---\nOn ${new Date(e.received_at).toLocaleString("ko-KR")}, ${e.sender_name || e.sender_email} wrote:\n${(e.body_text ?? "").split("\n").map(l => `> ${l}`).join("\n").slice(0, 5000)}`
+            : "";
+        setComposer({
+            open: true,
+            mode: "reply",
+            to: replyTo,
+            subject: subj,
+            body: quote,
+            inReplyTo: e.external_id,
+            threadId: undefined,  // 향후 thread_id 컬럼 활용
         });
+    }
+    function openCompose() {
+        setComposer({ open: true, mode: "compose", to: "", subject: "", body: "" });
+    }
+    async function sendEmail() {
+        if (!composer || sending) return;
+        if (!composer.to.trim() || !composer.body.trim()) {
+            setSendResult({ ok: false, msg: "받는 사람과 본문을 입력하세요" });
+            return;
+        }
+        setSending(true);
+        setSendResult(null);
+        try {
+            const res = await fetch("/api/myverse/integrations/gmail/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    to: composer.to.trim(),
+                    subject: composer.subject.trim(),
+                    body: composer.body,
+                    inReplyTo: composer.inReplyTo,
+                    threadId: composer.threadId,
+                }),
+            });
+            if (res.ok) {
+                setSendResult({ ok: true, msg: "전송 완료" });
+                setTimeout(() => {
+                    setComposer(null);
+                    setSendResult(null);
+                }, 1200);
+            } else {
+                const d = await res.json().catch(() => ({}));
+                setSendResult({ ok: false, msg: d.error === "insufficient_scope" ? "Gmail 전송 권한 누락 — 재연결 필요" : `전송 실패: ${d.error}` });
+            }
+        } catch {
+            setSendResult({ ok: false, msg: "네트워크 오류" });
+        } finally {
+            setSending(false);
+        }
     }
 
     const [embedding, setEmbedding] = useState(false);
@@ -193,14 +279,21 @@ export function MailView() {
         }
     }
 
-    async function archive(e: EmailItem) {
+    async function archive(e: EmailItem & { external_id?: string }) {
         setEmails(prev => prev.filter(x => x.id !== e.id));
         if (selected?.id === e.id) setSelected(null);
-        await fetch(`/api/myverse/email-imports/${e.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ triage_state: "archive" }),
-        });
+        await Promise.all([
+            fetch(`/api/myverse/email-imports/${e.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ triage_state: "archive" }),
+            }),
+            e.external_id && fetch("/api/myverse/integrations/gmail/modify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ external_id: e.external_id, action: "archive" }),
+            }).catch(() => null),
+        ]);
     }
 
     // 카테고리 카운트
@@ -258,7 +351,15 @@ export function MailView() {
             <aside className="w-52 shrink-0 border-r border-neutral-200 myverse-dark:border-white/8 flex flex-col">
                 <div className="px-3 py-3 border-b border-neutral-200 myverse-dark:border-white/8 flex items-center gap-2">
                     <Mail className="h-4 w-4 text-[#6366F1]" />
-                    <h1 className="text-sm font-semibold text-neutral-900 myverse-dark:text-neutral-100">메일</h1>
+                    <h1 className="text-sm font-semibold text-neutral-900 myverse-dark:text-neutral-100 flex-1">메일</h1>
+                    <button
+                        type="button"
+                        onClick={openCompose}
+                        className="p-1 rounded hover:bg-[#6366F1]/10 text-[#6366F1]"
+                        title="새 메일 작성"
+                    >
+                        <PenSquare className="h-3.5 w-3.5" />
+                    </button>
                 </div>
                 <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
                     {CATEGORIES.map(cat => {
@@ -516,6 +617,14 @@ export function MailView() {
                                 </h2>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
+                                        onClick={() => openReply(selected)}
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] bg-[#6366F1] text-white hover:bg-[#4F46E5] transition-colors"
+                                        title="답장"
+                                    >
+                                        <Reply className="h-3 w-3" />
+                                        답장
+                                    </button>
+                                    <button
                                         onClick={() => embedToDaily(selected)}
                                         disabled={embedding}
                                         className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 disabled:opacity-50 transition-colors"
@@ -593,6 +702,91 @@ export function MailView() {
                     </>
                 )}
             </div>
+
+            {/* Composer 모달 — 새 메일 작성 또는 답장 */}
+            {composer?.open && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={() => !sending && setComposer(null)}>
+                    <div className="bg-white myverse-dark:bg-[#0D0D15] rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[88vh]" onClick={(ev) => ev.stopPropagation()}>
+                        <div className="px-4 py-3 border-b border-neutral-200 myverse-dark:border-white/8 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-neutral-900 myverse-dark:text-neutral-100 flex items-center gap-2">
+                                {composer.mode === "reply" ? <Reply className="h-4 w-4 text-[#6366F1]" /> : <PenSquare className="h-4 w-4 text-[#6366F1]" />}
+                                {composer.mode === "reply" ? "답장" : "새 메일 작성"}
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => !sending && setComposer(null)}
+                                className="text-neutral-400 hover:text-neutral-700 myverse-dark:hover:text-neutral-100"
+                            >
+                                <XIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">받는 사람</label>
+                                <input
+                                    type="email"
+                                    value={composer.to}
+                                    onChange={(e) => setComposer({ ...composer, to: e.target.value })}
+                                    placeholder="recipient@example.com"
+                                    disabled={sending}
+                                    className="w-full text-sm border border-neutral-200 myverse-dark:border-white/10 rounded-md px-2 py-1.5 bg-white myverse-dark:bg-white/5 focus:outline-none focus:border-[#6366F1]"
+                                    autoFocus={composer.mode === "compose"}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">제목</label>
+                                <input
+                                    type="text"
+                                    value={composer.subject}
+                                    onChange={(e) => setComposer({ ...composer, subject: e.target.value })}
+                                    placeholder="(제목 없음)"
+                                    disabled={sending}
+                                    className="w-full text-sm border border-neutral-200 myverse-dark:border-white/10 rounded-md px-2 py-1.5 bg-white myverse-dark:bg-white/5 focus:outline-none focus:border-[#6366F1]"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">본문</label>
+                                <textarea
+                                    value={composer.body}
+                                    onChange={(e) => setComposer({ ...composer, body: e.target.value })}
+                                    rows={composer.mode === "reply" ? 12 : 10}
+                                    placeholder="메시지를 입력하세요…"
+                                    disabled={sending}
+                                    className="w-full text-sm border border-neutral-200 myverse-dark:border-white/10 rounded-md px-2 py-2 bg-white myverse-dark:bg-white/5 focus:outline-none focus:border-[#6366F1] resize-none font-mono leading-relaxed"
+                                    autoFocus={composer.mode === "reply"}
+                                />
+                            </div>
+                            {sendResult && (
+                                <p className={`text-xs ${sendResult.ok ? "text-[#6366F1]" : "text-rose-500"}`}>
+                                    {sendResult.ok && <Check className="inline h-3 w-3 mr-1" />}
+                                    {sendResult.msg}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="px-4 py-3 border-t border-neutral-200 myverse-dark:border-white/8 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => !sending && setComposer(null)}
+                                disabled={sending}
+                                className="text-xs px-3 py-1.5 border border-neutral-200 myverse-dark:border-white/10 rounded text-neutral-500 hover:bg-neutral-50 myverse-dark:hover:bg-white/5 disabled:opacity-50"
+                            >
+                                취소
+                            </button>
+                            <button
+                                type="button"
+                                onClick={sendEmail}
+                                disabled={sending || !composer.to.trim() || !composer.body.trim()}
+                                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50"
+                            >
+                                {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                                {sending ? "전송 중…" : "보내기"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
