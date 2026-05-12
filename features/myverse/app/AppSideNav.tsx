@@ -23,6 +23,7 @@ const NAV: NavSection[] = [
                     { key: "canvas",    label: "캔버스",   icon: "draw",           href: `${BASE}/canvas` },
                     { key: "templates", label: "템플릿",   icon: "frame_source",   href: `${BASE}/templates` },
                     { key: "contacts",  label: "연락처",   icon: "contacts",       href: `${BASE}/contacts` },
+                    { key: "mail",      label: "메일",     icon: "mail",           href: `${BASE}/mail` },
                 ],
             },
             {

@@ -420,6 +420,23 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
         } finally { setSyncing(null); }
     }
 
+    // ── Gmail (Google OAuth 토큰 공유) ─────────────────────────────────────────
+
+    async function syncGmail() {
+        setSyncing("gmail");
+        try {
+            const res = await fetch("/api/myverse/integrations/gmail/sync", { method: "POST" });
+            if (res.ok) {
+                const d = await res.json();
+                showToast(`${d.imported ?? 0}건 메일 가져옴`);
+                await reloadIntegrations();
+            } else {
+                const d = await res.json();
+                showToast(`메일 동기화 실패: ${d.error}`, false);
+            }
+        } finally { setSyncing(null); }
+    }
+
     // ── Todoist ───────────────────────────────────────────────────────────────
 
     async function syncTodoist() {
@@ -602,6 +619,25 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         <Loader2 className="inline-block ml-2 h-3.5 w-3.5 animate-spin text-neutral-400" />
                     )}
                 </h2>
+
+                {/* Connected emails — Notion Mail 스타일 그룹 분리 */}
+                <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">Connected emails</p>
+                <div className="space-y-3 mb-5">
+                    <IntegrationRow
+                        name="Gmail"
+                        desc="Gmail 받은편지함을 메일 페이지에서 검색·읽기·임베드"
+                        integration={integrations.find(i => i.provider === "google_calendar" && i.status === "active")}
+                        connectHref="/api/myverse/integrations/google/connect"
+                        onSync={syncGmail}
+                        onDisconnect={() => disconnectIntegration("google_calendar")}
+                        syncing={syncing === "gmail"}
+                        pendingConfirm={pendingDisconnect === "gmail-confirm"}
+                        onConfirm={() => confirmDisconnect("google_calendar")}
+                        onCancel={() => setPendingDisconnect(null)}
+                    />
+                </div>
+
+                <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">Connected calendars</p>
                 <div className="space-y-3">
                     <IntegrationRow
                         name="Google Calendar"
