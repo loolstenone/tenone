@@ -175,8 +175,8 @@ export default async function MyverseAppLayout({ children }: { children: React.R
                 href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
                 rel="stylesheet"
             />
-            {/* 다크모드 flash 방지 — React hydration 전에 동기적으로 실행 */}
-            <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('myverse_theme_mode')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('myverse-dark');}catch(e){}})()` }} />
+            {/* 다크모드 + 사이드바 접힘 flash 방지 — React hydration 전에 동기적으로 실행 */}
+            <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('myverse_theme_mode')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('myverse-dark');var c=localStorage.getItem('myverse_sidebar_collapsed')==='true';if(c)document.documentElement.classList.add('myverse-sidebar-collapsed');}catch(e){}})()` }} />
             <MyverseThemeProvider />
             <PwaRegister />
             <Suspense><WelcomeTracker /></Suspense>
