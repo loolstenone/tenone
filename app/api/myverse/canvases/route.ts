@@ -35,9 +35,10 @@ export async function GET() {
     const admin = createAdminClient();
 
     // ── 캔버스 목록 ──────────────────────────────────────────────────────
+    // data.mindmap 존재 여부로 kind 판별 (페이로드 부담 줄이려 data 자체는 클라이언트로 보내지 않음)
     const { data: canvases, error } = await admin
         .from("myverse_canvases")
-        .select("id, title, thumbnail_url, is_archived, created_at, updated_at")
+        .select("id, title, thumbnail_url, is_archived, created_at, updated_at, data")
         .eq("member_id", user.id)
         .order("updated_at", { ascending: false })
         .limit(200);
@@ -100,10 +101,15 @@ export async function GET() {
     } catch { /* origin 실패해도 목록은 반환 */ }
 
     // ── 결합 ──────────────────────────────────────────────────────────────
-    const result = (canvases ?? []).map((c: { id: string; title: string; thumbnail_url: string | null; is_archived: boolean; created_at: string; updated_at: string }) => ({
-        ...c,
-        origin: originMap[c.id] ?? { type: "standalone" } as CanvasOrigin,
-    }));
+    const result = (canvases ?? []).map((c: { id: string; title: string; thumbnail_url: string | null; is_archived: boolean; created_at: string; updated_at: string; data?: { mindmap?: unknown; ppcanvas?: unknown } | null }) => {
+        const { data: _data, ...rest } = c;
+        const kind: "mindmap" | "canvas" = _data && typeof _data === "object" && _data.mindmap ? "mindmap" : "canvas";
+        return {
+            ...rest,
+            kind,
+            origin: originMap[c.id] ?? { type: "standalone" } as CanvasOrigin,
+        };
+    });
 
     return NextResponse.json({ canvases: result });
 }
@@ -114,11 +120,12 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const title: string = (body?.title ?? "").trim() || "제목 없음";
+    const initData = body?.data && typeof body.data === "object" ? body.data : {};
 
     const admin = createAdminClient();
     const { data, error } = await admin
         .from("myverse_canvases")
-        .insert({ member_id: user.id, title, data: {} })
+        .insert({ member_id: user.id, title, data: initData })
         .select("id, title, created_at, updated_at")
         .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

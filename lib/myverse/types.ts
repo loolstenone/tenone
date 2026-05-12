@@ -192,6 +192,8 @@ export interface PlannerTask {
     created_at?: string | null;
     /** 간트 차트용 — 지속 일수 (기본 1, 시작=date, 종료=date+duration_days-1) */
     duration_days?: number | null;
+    /** 간트 의존성 — 이 task가 시작되려면 먼저 완료되어야 할 task id 목록 (Finish-to-Start) */
+    depends_on?: string[] | null;
 }
 
 export interface PlannerDaily {

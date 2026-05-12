@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3 } from "lucide-react";
+import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3, Link2, Unlink } from "lucide-react";
 import { localDateStr } from "@/lib/myverse/types";
 
 interface TaskItem {
@@ -18,6 +18,8 @@ interface TaskItem {
         time?: string | null;
         project_id?: string | null;
         source?: string;
+        duration_days?: number | null;
+        depends_on?: string[] | null;
     };
 }
 
@@ -82,6 +84,24 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
     }
 
     useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [projectId]);
+
+    async function changeTaskStatus(taskId: string, nextStatus: string) {
+        const item = items.find(i => i.task.id === taskId);
+        if (!item) return;
+        // 낙관적 업데이트
+        setItems(prev => prev.map(i => i.task.id === taskId ? { ...i, task: { ...i.task, status: nextStatus } } : i));
+        try {
+            const res = await fetch(`/api/myverse/daily/${item.date}/task/${taskId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: nextStatus }),
+            });
+            if (!res.ok) await load();
+            else await load(); // stats 재계산용
+        } catch {
+            await load();
+        }
+    }
 
     async function addTask() {
         const text = newText.trim();
@@ -280,10 +300,10 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                     )}
 
                     {/* 칸반 뷰 */}
-                    {viewMode === "kanban" && <ProjectKanbanView items={items} />}
+                    {viewMode === "kanban" && <ProjectKanbanView items={items} onChangeStatus={changeTaskStatus} />}
 
                     {/* 간트 뷰 */}
-                    {viewMode === "gantt" && <ProjectGanttView items={items} milestones={milestones} projectColor={projectColor} onReload={load} />}
+                    {viewMode === "gantt" && <ProjectGanttView items={items} milestones={milestones} projectColor={projectColor} projectId={projectId} onReload={load} />}
                 </>
             )}
         </div>
@@ -299,12 +319,20 @@ function Cell({ label, value, accent = "text-neutral-900" }: { label: string; va
     );
 }
 
-/** 칸반 뷰 — 계획 / 진행 / 완료 (status 기반) */
-function ProjectKanbanView({ items }: { items: TaskItem[] }) {
+/** 칸반 뷰 — 계획 / 진행 / 완료 (status 기반) + 드래그&드롭으로 status 변경 */
+function ProjectKanbanView({ items, onChangeStatus }: { items: TaskItem[]; onChangeStatus: (taskId: string, nextStatus: string) => void }) {
+    const [dragId, setDragId] = useState<string | null>(null);
+    const [dragOverCol, setDragOverCol] = useState<"planned" | "doing" | "done" | null>(null);
+
     function col(s: string): "planned" | "doing" | "done" {
         if (s === "done" || s === "cancelled") return "done";
         if (s === "doing") return "doing";
         return "planned";
+    }
+    function colToStatus(c: "planned" | "doing" | "done"): string {
+        if (c === "done") return "done";
+        if (c === "doing") return "doing";
+        return "todo";
     }
     const cols = [
         { k: "planned" as const, label: "계획", dot: "bg-neutral-400" },
@@ -315,8 +343,26 @@ function ProjectKanbanView({ items }: { items: TaskItem[] }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {cols.map(c => {
                 const colItems = items.filter(i => col(i.task.status) === c.k);
+                const isDragOver = dragOverCol === c.k;
                 return (
-                    <div key={c.k} className="rounded-lg border border-neutral-200 bg-neutral-50/60 min-h-[200px]">
+                    <div
+                        key={c.k}
+                        onDragOver={(e) => { e.preventDefault(); setDragOverCol(c.k); }}
+                        onDragLeave={() => setDragOverCol(null)}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            if (!dragId) return;
+                            const current = items.find(i => i.task.id === dragId);
+                            if (current && col(current.task.status) !== c.k) {
+                                onChangeStatus(dragId, colToStatus(c.k));
+                            }
+                            setDragId(null);
+                            setDragOverCol(null);
+                        }}
+                        className={`rounded-lg border bg-neutral-50/60 min-h-[200px] transition-colors ${
+                            isDragOver ? "border-[#6366F1] bg-[#6366F1]/5" : "border-neutral-200"
+                        }`}
+                    >
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200 bg-white rounded-t-lg">
                             <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
                             <span className="text-xs font-semibold text-neutral-700">{c.label}</span>
@@ -324,12 +370,20 @@ function ProjectKanbanView({ items }: { items: TaskItem[] }) {
                         </div>
                         <div className="p-2 space-y-1.5">
                             {colItems.length === 0 ? (
-                                <div className="text-center text-[10px] text-neutral-300 py-6">비어 있음</div>
+                                <div className="text-center text-[10px] text-neutral-300 py-6">{c.k === "planned" ? "비어 있음" : "드래그해서 옮기세요"}</div>
                             ) : colItems.map(({ task, date }) => {
                                 const strike = task.status === "done" || task.status === "cancelled";
                                 const isMilestone = task.source === "milestone";
                                 return (
-                                    <div key={task.id} className="rounded-md border border-neutral-200 bg-white px-2 py-1.5">
+                                    <div
+                                        key={task.id}
+                                        draggable
+                                        onDragStart={(e) => { setDragId(task.id); e.dataTransfer.effectAllowed = "move"; }}
+                                        onDragEnd={() => { setDragId(null); setDragOverCol(null); }}
+                                        className={`rounded-md border border-neutral-200 bg-white px-2 py-1.5 cursor-grab active:cursor-grabbing transition-opacity ${
+                                            dragId === task.id ? "opacity-40" : ""
+                                        }`}
+                                    >
                                         <div className={`text-xs leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                             {task.text}
                                         </div>
@@ -352,25 +406,30 @@ function ProjectKanbanView({ items }: { items: TaskItem[] }) {
     );
 }
 
-/** 간트 뷰 — 날짜 기반 가로 타임라인 + 드래그 늘리기/이동 + 자율 헤더 + 마일스톤 ◆ */
+/** 간트 뷰 — 날짜 기반 가로 타임라인 + 드래그(이동/늘리기/시작일) + 마일스톤 ◆ 드래그 + 의존성 화살표 + 자율 헤더 */
 function ProjectGanttView({
     items: initialItems,
     milestones,
     projectColor,
+    projectId,
     onReload,
 }: {
     items: TaskItem[];
     milestones: Array<{ id: string; title: string; due_date: string | null; done_at: string | null }>;
     projectColor: string;
+    projectId: string;
     onReload?: () => void;
 }) {
     const [items, setItems] = useState(initialItems);
     useEffect(() => { setItems(initialItems); }, [initialItems]);
 
+    const [msState, setMsState] = useState(milestones);
+    useEffect(() => { setMsState(milestones); }, [milestones]);
+
     const [editingTask, setEditingTask] = useState<{ id: string; date: string } | null>(null);
     const [zoomMode, setZoomMode] = useState<"auto" | "day" | "week" | "month">("auto");
 
-    const dated = milestones.filter(m => m.due_date) as Array<{ id: string; title: string; due_date: string; done_at: string | null }>;
+    const dated = msState.filter(m => m.due_date) as Array<{ id: string; title: string; due_date: string; done_at: string | null }>;
 
     if (items.length === 0 && dated.length === 0) {
         return <div className="py-12 text-center text-sm text-neutral-400 bg-white border border-neutral-200 rounded-xl">표시할 업무·마일스톤이 없습니다.</div>;
@@ -443,7 +502,16 @@ function ProjectGanttView({
         onReload?.();
     }
 
-    function startDrag(e: React.MouseEvent, taskId: string, taskDate: string, mode: "move" | "resize") {
+    async function patchMilestone(id: string, body: Record<string, unknown>) {
+        await fetch(`/api/myverse/projects/${projectId}/milestones`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, ...body }),
+        }).catch(() => {});
+        onReload?.();
+    }
+
+    function startDrag(e: React.MouseEvent, taskId: string, taskDate: string, mode: "move" | "resize-right" | "resize-left") {
         e.preventDefault();
         e.stopPropagation();
         const startX = e.clientX;
@@ -455,9 +523,17 @@ function ProjectGanttView({
         function onMove(ev: MouseEvent) {
             const dx = ev.clientX - startX;
             const deltaDays = Math.round(dx / colWidth);
-            if (mode === "resize") {
+            if (mode === "resize-right") {
                 const nextDur = Math.max(1, startDuration + deltaDays);
                 setItems(prev => prev.map(i => i.task.id === taskId ? { ...i, task: { ...i.task, duration_days: nextDur } } : i));
+            } else if (mode === "resize-left") {
+                // 좌측 핸들 — 시작일 이동 + duration 반대로 보정 (끝점 고정)
+                const capDelta = Math.min(deltaDays, startDuration - 1); // 최소 1일 보존
+                const nextOffset = Math.max(0, startOffset + capDelta);
+                const actualDelta = nextOffset - startOffset;
+                const nextDate = addDays(minDate, nextOffset);
+                const nextDur = Math.max(1, startDuration - actualDelta);
+                setItems(prev => prev.map(i => i.task.id === taskId ? { ...i, date: nextDate, task: { ...i.task, duration_days: nextDur } } : i));
             } else {
                 const nextOffset = Math.max(0, startOffset + deltaDays);
                 const nextDate = addDays(minDate, nextOffset);
@@ -467,18 +543,19 @@ function ProjectGanttView({
         function onUp() {
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("mouseup", onUp);
-            const after = items.find(i => i.task.id === taskId);
-            // setItems는 비동기라 latest 직접 계산
-            const dx = (window as { __ganttLastX?: number }).__ganttLastX != null ? 0 : 0;
-            void dx; void after;
-            // 다시 한 번 stateful 값 동기화 — 캡처된 latest 사용
             setItems(prev => {
                 const cur = prev.find(i => i.task.id === taskId);
                 if (cur) {
-                    if (mode === "resize") {
+                    if (mode === "resize-right") {
                         patch(taskId, cur.date, { duration_days: cur.task.duration_days ?? 1 });
+                    } else if (mode === "resize-left") {
+                        // 날짜 + duration 동시 패치 (date 이동은 PATCH 핸들러가 행 간 이관)
+                        if (cur.date !== taskDate) {
+                            patch(taskId, taskDate, { date: cur.date, duration_days: cur.task.duration_days ?? 1 });
+                        } else {
+                            patch(taskId, taskDate, { duration_days: cur.task.duration_days ?? 1 });
+                        }
                     } else {
-                        // 날짜 이동: 새 date에 task 옮기기
                         patch(taskId, taskDate, { date: cur.date });
                     }
                 }
@@ -488,6 +565,80 @@ function ProjectGanttView({
         window.addEventListener("mousemove", onMove);
         window.addEventListener("mouseup", onUp);
     }
+
+    function startMilestoneDrag(e: React.MouseEvent, m: { id: string; due_date: string }) {
+        e.preventDefault();
+        e.stopPropagation();
+        const startX = e.clientX;
+        const startOffset = Math.max(0, dayDiff(minDate, m.due_date));
+
+        function onMove(ev: MouseEvent) {
+            const dx = ev.clientX - startX;
+            const deltaDays = Math.round(dx / colWidth);
+            const nextOffset = Math.max(0, startOffset + deltaDays);
+            const nextDate = addDays(minDate, nextOffset);
+            setMsState(prev => prev.map(x => x.id === m.id ? { ...x, due_date: nextDate } : x));
+        }
+        function onUp() {
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+            setMsState(prev => {
+                const cur = prev.find(x => x.id === m.id);
+                if (cur && cur.due_date && cur.due_date !== m.due_date) {
+                    patchMilestone(m.id, { due_date: cur.due_date });
+                }
+                return prev;
+            });
+        }
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+    }
+
+    // 의존성 추가/제거
+    async function toggleDependency(targetId: string, depId: string) {
+        const target = items.find(i => i.task.id === targetId);
+        if (!target) return;
+        const current = Array.isArray(target.task.depends_on) ? [...target.task.depends_on] : [];
+        const idx = current.indexOf(depId);
+        if (idx >= 0) current.splice(idx, 1);
+        else current.push(depId);
+        setItems(prev => prev.map(i => i.task.id === targetId ? { ...i, task: { ...i.task, depends_on: current } } : i));
+        await patch(targetId, target.date, { depends_on: current });
+    }
+
+    // 의존성 화살표용 좌표 계산
+    const taskRowH = 36;
+    const msRowH = 28;
+    const headerH = 28;
+    const labelW = 240;
+
+    type Coord = { x: number; y: number };
+    function barStart(i: number, date: string): Coord {
+        const offset = Math.max(0, dayDiff(minDate, date));
+        return { x: labelW + offset * colWidth + 2, y: headerH + dated.length * msRowH + i * taskRowH + taskRowH / 2 };
+    }
+    function barEnd(i: number, date: string, duration: number): Coord {
+        const offset = Math.max(0, dayDiff(minDate, date));
+        return { x: labelW + (offset + duration) * colWidth - 2, y: headerH + dated.length * msRowH + i * taskRowH + taskRowH / 2 };
+    }
+
+    const taskIndexById = new Map<string, number>();
+    sorted.forEach((it, i) => taskIndexById.set(it.task.id, i));
+
+    const arrows: Array<{ from: Coord; to: Coord; key: string }> = [];
+    sorted.forEach((it, i) => {
+        const deps = Array.isArray(it.task.depends_on) ? it.task.depends_on : [];
+        deps.forEach(depId => {
+            const depIdx = taskIndexById.get(depId);
+            if (depIdx == null) return;
+            const dep = sorted[depIdx];
+            const from = barEnd(depIdx, dep.date, Math.max(1, dep.task.duration_days ?? 1));
+            const to = barStart(i, it.date);
+            arrows.push({ from, to, key: `${depId}->${it.task.id}` });
+        });
+    });
+
+    const svgHeight = headerH + dated.length * msRowH + sorted.length * taskRowH;
 
     return (
         <>
@@ -540,6 +691,39 @@ function ProjectGanttView({
                     </div>
                 </div>
                 <div className="divide-y divide-neutral-100 relative">
+                    {/* 의존성 화살표 SVG 오버레이 */}
+                    {arrows.length > 0 && (
+                        <svg
+                            className="absolute pointer-events-none z-10"
+                            style={{ left: 0, top: 0, width: chartWidth + labelW, height: svgHeight - headerH }}
+                            viewBox={`0 ${headerH} ${chartWidth + labelW} ${svgHeight - headerH}`}
+                        >
+                            <defs>
+                                <marker id="dep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366F1" />
+                                </marker>
+                            </defs>
+                            {arrows.map(({ from, to, key }) => {
+                                // 직각 경로: 출발 → 오른쪽으로 살짝 → 위/아래 → 도착 좌측
+                                const gap = 8;
+                                const mid = from.x + gap;
+                                const targetMid = to.x - gap;
+                                const d = `M ${from.x} ${from.y} L ${mid} ${from.y} L ${mid} ${to.y} L ${targetMid} ${to.y} L ${to.x} ${to.y}`;
+                                return (
+                                    <path
+                                        key={key}
+                                        d={d}
+                                        fill="none"
+                                        stroke="#6366F1"
+                                        strokeWidth={1.5}
+                                        strokeOpacity={0.7}
+                                        markerEnd="url(#dep-arrow)"
+                                    />
+                                );
+                            })}
+                        </svg>
+                    )}
+
                     {/* 오늘 표시줄 (전체 행 overlay) */}
                     {todayOffset >= 0 && todayOffset < totalDays && (
                         <div
@@ -551,7 +735,7 @@ function ProjectGanttView({
                         </div>
                     )}
 
-                    {/* 마일스톤 행 */}
+                    {/* 마일스톤 행 — ◆ 드래그로 due_date 이동 */}
                     {dated.map(m => {
                         const offset = Math.max(0, dayDiff(minDate, m.due_date));
                         const isDone = !!m.done_at;
@@ -563,11 +747,12 @@ function ProjectGanttView({
                                 </div>
                                 <div className="relative h-6 my-1" style={{ width: chartWidth }}>
                                     <div
-                                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing"
                                         style={{ left: offset * colWidth + colWidth / 2 }}
-                                        title={`${m.title} · ${m.due_date}${isDone ? " · 완료" : ""}`}
+                                        onMouseDown={(e) => startMilestoneDrag(e, { id: m.id, due_date: m.due_date })}
+                                        title={`${m.title} · ${m.due_date}${isDone ? " · 완료" : ""} · 드래그로 일정 이동`}
                                     >
-                                        <span className={`block w-3 h-3 rotate-45 ${isDone ? "bg-neutral-300" : "bg-[#6366F1]"}`} />
+                                        <span className={`block w-3 h-3 rotate-45 transition-transform hover:scale-125 ${isDone ? "bg-neutral-300" : "bg-[#6366F1]"}`} />
                                     </div>
                                 </div>
                             </div>
@@ -602,13 +787,19 @@ function ProjectGanttView({
                                         onMouseDown={(e) => startDrag(e, task.id, date, "move")}
                                         title={`${task.text} · ${date} · ${duration}일`}
                                     >
-                                        <span className="truncate flex-1">
+                                        {/* 좌측 리사이즈 핸들 — 시작일 이동(끝점 고정) */}
+                                        <span
+                                            onMouseDown={(e) => startDrag(e, task.id, date, "resize-left")}
+                                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize bg-black/0 hover:bg-black/20 rounded-l"
+                                            title="드래그: 시작일 이동 (끝점 고정)"
+                                        />
+                                        <span className="truncate flex-1 pl-1">
                                             {task.status === "done" ? "완료" : task.status === "doing" ? "진행" : task.status === "carried" ? "이월" : task.status === "cancelled" ? "취소" : "계획"}
                                             <span className="ml-1 opacity-80">{duration}d</span>
                                         </span>
-                                        {/* 우측 리사이즈 핸들 */}
+                                        {/* 우측 리사이즈 핸들 — 기간 늘리기/줄이기 */}
                                         <span
-                                            onMouseDown={(e) => startDrag(e, task.id, date, "resize")}
+                                            onMouseDown={(e) => startDrag(e, task.id, date, "resize-right")}
                                             className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize bg-black/0 hover:bg-black/20 rounded-r"
                                             title="드래그: 기간 늘리기"
                                         />
@@ -621,15 +812,18 @@ function ProjectGanttView({
             </div>
         </div>
 
-        {/* 날짜·기간 편집 팝오버 */}
+        {/* 날짜·기간·의존성 편집 팝오버 */}
         {editingTask && (() => {
             const item = items.find(i => i.task.id === editingTask.id);
             if (!item) return null;
             const initDate = item.date;
             const initDur = item.task.duration_days ?? 1;
+            const currentDeps = Array.isArray(item.task.depends_on) ? item.task.depends_on : [];
+            // 의존 후보 = 자기 자신 제외한 다른 모든 task
+            const depCandidates = items.filter(i => i.task.id !== editingTask.id);
             return (
                 <div className="fixed inset-0 z-[9300] flex items-center justify-center bg-black/40 px-4" onClick={() => setEditingTask(null)}>
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-xs p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 space-y-3 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-sm font-semibold text-neutral-900 truncate">{item.task.text}</h3>
                         <div>
                             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">시작일</label>
@@ -658,6 +852,53 @@ function ProjectGanttView({
                                 }}
                                 className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
                             />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1 flex items-center gap-1">
+                                <Link2 className="h-2.5 w-2.5" /> 의존 업무 (먼저 끝나야 함)
+                            </label>
+                            {currentDeps.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-1.5">
+                                    {currentDeps.map(depId => {
+                                        const dep = items.find(i => i.task.id === depId);
+                                        if (!dep) return null;
+                                        return (
+                                            <span key={depId} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#6366F1]/10 text-[#6366F1] rounded text-[11px]">
+                                                <span className="truncate max-w-[140px]">{dep.task.text}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleDependency(editingTask.id, depId)}
+                                                    className="hover:text-rose-500"
+                                                    title="의존성 제거"
+                                                >
+                                                    <Unlink className="h-2.5 w-2.5" />
+                                                </button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            {depCandidates.length === 0 ? (
+                                <p className="text-[11px] text-neutral-400 italic">다른 업무가 없어 의존성을 만들 수 없습니다.</p>
+                            ) : (
+                                <select
+                                    value=""
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        if (v) toggleDependency(editingTask.id, v);
+                                    }}
+                                    className="w-full text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                >
+                                    <option value="">+ 의존성 추가…</option>
+                                    {depCandidates
+                                        .filter(c => !currentDeps.includes(c.task.id))
+                                        .map(c => (
+                                            <option key={c.task.id} value={c.task.id}>
+                                                {c.task.text} ({c.date})
+                                            </option>
+                                        ))}
+                                </select>
+                            )}
                         </div>
                         <div className="flex justify-end pt-1">
                             <button

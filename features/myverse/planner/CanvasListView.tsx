@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2, Pencil, Trash2, ImageIcon, CalendarDays, FolderOpen, Layers } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, ImageIcon, CalendarDays, FolderOpen, Layers, GitBranch } from "lucide-react";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { ConfirmSheet } from "./ConfirmSheet";
 
@@ -20,6 +20,7 @@ interface CanvasRow {
     created_at: string;
     updated_at: string;
     origin: CanvasOrigin;
+    kind?: "canvas" | "mindmap";
 }
 
 function OriginBadge({ origin }: { origin: CanvasOrigin }) {
@@ -67,13 +68,25 @@ export function CanvasListView() {
     }
     useEffect(() => { load(); }, []);
 
-    async function createNew() {
+    async function createNew(kind: "canvas" | "mindmap" = "canvas") {
         setCreating(true);
         try {
+            const isMindmap = kind === "mindmap";
+            const body: { title: string; data?: { mindmap: { root: { id: string; text: string; children: never[] }; layout: string } } } = {
+                title: isMindmap ? "새 마인드맵" : "새 캔버스",
+            };
+            if (isMindmap) {
+                body.data = {
+                    mindmap: {
+                        root: { id: `mn_${Date.now().toString(36)}`, text: "중심 주제", children: [] },
+                        layout: "radial",
+                    },
+                };
+            }
             const res = await fetch("/api/myverse/canvases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: "새 캔버스" }),
+                body: JSON.stringify(body),
             });
             if (res.ok) {
                 const d = await res.json();
@@ -103,15 +116,23 @@ export function CanvasListView() {
                 펜·도형·텍스트·화살표를 자유롭게. Apple Pencil · S Pen · 마우스 모두 지원합니다.
             </p>
 
-            {/* 새 캔버스 — Projects와 동일 패턴 (상단 우측 teal pill) */}
-            <div className="flex justify-end mb-4">
+            {/* 새 캔버스 / 마인드맵 — Projects와 동일 패턴 (상단 우측 pill) */}
+            <div className="flex justify-end gap-2 mb-4">
                 <button
-                    onClick={createNew}
+                    onClick={() => createNew("mindmap")}
+                    disabled={creating}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-white border border-[#6366F1]/30 text-[#6366F1] rounded-lg hover:bg-[#6366F1]/5 transition-colors disabled:opacity-50"
+                >
+                    {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <GitBranch className="h-3.5 w-3.5" />}
+                    새 마인드맵
+                </button>
+                <button
+                    onClick={() => createNew("canvas")}
                     disabled={creating}
                     className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
                 >
                     {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                    {creating ? "캔버스 생성 중…" : "새 캔버스"}
+                    {creating ? "생성 중…" : "새 캔버스"}
                 </button>
             </div>
 
@@ -136,6 +157,13 @@ export function CanvasListView() {
                         >
                             {/* Thumbnail */}
                             <div className="aspect-[4/3] bg-neutral-50 border-b border-neutral-100 relative overflow-hidden">
+                                {/* 카드 종류 배지 (썸네일 좌상단) */}
+                                {row.kind === "mindmap" && (
+                                    <span className="absolute top-2 left-2 z-20 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#6366F1] text-white shadow-sm">
+                                        <GitBranch className="h-2.5 w-2.5" />
+                                        마인드맵
+                                    </span>
+                                )}
                                 {row.thumbnail_url ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={row.thumbnail_url} alt={row.title} className="w-full h-full object-cover" />
@@ -150,7 +178,11 @@ export function CanvasListView() {
                                             </defs>
                                             <rect width="100%" height="100%" fill={`url(#grid-${row.id})`} />
                                         </svg>
-                                        <Pencil className="h-7 w-7 text-neutral-200 group-hover:text-[#6366F1]/30 transition-colors relative z-10" />
+                                        {row.kind === "mindmap" ? (
+                                            <GitBranch className="h-7 w-7 text-[#6366F1]/40 group-hover:text-[#6366F1]/60 transition-colors relative z-10" />
+                                        ) : (
+                                            <Pencil className="h-7 w-7 text-neutral-200 group-hover:text-[#6366F1]/30 transition-colors relative z-10" />
+                                        )}
                                         <span className="text-[10px] text-neutral-300 group-hover:text-[#6366F1]/40 transition-colors relative z-10">미리보기 없음</span>
                                     </div>
                                 )}
