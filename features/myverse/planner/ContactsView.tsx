@@ -509,6 +509,7 @@ function emptyForm(): Omit<Contact, "id"> {
 
 export function ContactsView() {
     const [contacts, setContacts] = useState<Contact[]>([]);
+    const [companies, setCompanies] = useState<Array<{ id: string; name: string; contact_count: number }>>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     // view: "all" | "favorites" | "unclassified" | "label:xxx" | "group:xxx"
@@ -548,10 +549,17 @@ export function ContactsView() {
 
     async function load() {
         setLoading(true);
-        const res = await fetch("/api/myverse/contacts", { cache: "no-store" });
-        if (res.ok) {
-            const d = await res.json();
+        const [contactsRes, companiesRes] = await Promise.all([
+            fetch("/api/myverse/contacts", { cache: "no-store" }),
+            fetch("/api/myverse/companies", { cache: "no-store" }).catch(() => null),
+        ]);
+        if (contactsRes.ok) {
+            const d = await contactsRes.json();
             setContacts(d.contacts ?? []);
+        }
+        if (companiesRes?.ok) {
+            const d = await companiesRes.json();
+            setCompanies(d.companies ?? []);
         }
         setLoading(false);
     }
@@ -693,6 +701,29 @@ export function ContactsView() {
         setSaving(true);
         // 전화번호 입력 그대로 두지 않고 자동 포맷 적용
         const formattedPhone = form.phone ? formatPhoneKR(form.phone) : "";
+
+        // Company find-or-create — 회사명 입력이 있으면 myverse_companies에 row 보장 후 company_id 연결
+        let companyId: string | null = null;
+        const orgName = (form.organization ?? "").trim();
+        if (orgName) {
+            const match = companies.find(c => c.name === orgName);
+            if (match) {
+                companyId = match.id;
+            } else {
+                try {
+                    const r = await fetch("/api/myverse/companies", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: orgName }),
+                    });
+                    if (r.ok) {
+                        const d = await r.json();
+                        if (d.company?.id) companyId = d.company.id;
+                    }
+                } catch { /* 실패해도 텍스트 fallback으로 저장 진행 */ }
+            }
+        }
+
         const payload = {
             name: form.name.trim(),
             phone: formattedPhone || null,
@@ -701,7 +732,9 @@ export function ContactsView() {
             relationship: form.relationship || null,
             note: form.note || null,
             birthday: form.birthday || null,
-            organization: form.organization || null,
+            organization: orgName || null,        // legacy fallback (자유 텍스트)
+            company_name: orgName || null,        // Stage 2 정규화: contacts.company_name 동시 유지
+            company_id: companyId,                // Stage 2 정규화: company 엔티티 FK
             title: form.title || null,
             address: form.address || null,
             is_favorite: !!form.is_favorite,
@@ -1193,6 +1226,12 @@ export function ContactsView() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+            {/* Companies datalist — 회사명 입력 자동완성 SSOT (모달 폼에서 list="myverse-companies-datalist") */}
+            <datalist id="myverse-companies-datalist">
+                {companies.map(c => (
+                    <option key={c.id} value={c.name}>{c.contact_count > 0 ? `${c.contact_count}명` : ""}</option>
+                ))}
+            </datalist>
             {/* Toast */}
             {toast && (
                 <div
@@ -1915,7 +1954,13 @@ function BulkEditModal({
                 </div>
                 <div className="px-6 py-2 overflow-y-auto flex-1">
                     <FieldRow k="organization" label="회사">
-                        <input value={organization} onChange={e => setOrganization(e.target.value)} placeholder="(빈 값으로 두면 회사 비움)" className={INPUT} />
+                        <input
+                            list="myverse-companies-datalist"
+                            value={organization}
+                            onChange={e => setOrganization(e.target.value)}
+                            placeholder="(빈 값으로 두면 회사 비움)"
+                            className={INPUT}
+                        />
                     </FieldRow>
                     <FieldRow k="title" label="직책">
                         <input value={title} onChange={e => setTitle(e.target.value)} className={INPUT} />
@@ -2570,7 +2615,14 @@ function ContactModal({ form, setForm, editing, saving, onSave, onClose }: {
                     </Field>
                     <div className="grid grid-cols-2 gap-3">
                         <Field label="회사">
-                            <input type="text" value={form.organization || ""} onChange={field("organization")} placeholder="Ten:One" className={INPUT} />
+                            <input
+                                type="text"
+                                list="myverse-companies-datalist"
+                                value={form.organization || ""}
+                                onChange={field("organization")}
+                                placeholder="Ten:One"
+                                className={INPUT}
+                            />
                         </Field>
                         <Field label="직책">
                             <input type="text" value={form.title || ""} onChange={field("title")} placeholder="대표" className={INPUT} />

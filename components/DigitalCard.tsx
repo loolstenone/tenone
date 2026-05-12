@@ -94,20 +94,64 @@ export function DigitalCard({
         a.click();
     }
 
-    // 명함 카드 전체를 PNG로 캡처해 다운로드
+    // 외부 이미지 URL → dataURL (CORS·캐시 우회) — PNG 캡처에 brand 로고·아바타·QR이 누락되는 문제 해결
+    async function imageUrlToDataUrl(url: string): Promise<string | null> {
+        if (!url || url.startsWith("data:")) return url;
+        try {
+            const res = await fetch(url, { mode: "cors", credentials: "omit", cache: "no-cache" });
+            if (!res.ok) return null;
+            const blob = await res.blob();
+            return await new Promise<string | null>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(typeof reader.result === "string" ? reader.result : null);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(blob);
+            });
+        } catch {
+            return null;
+        }
+    }
+
+    // 명함 카드 전체를 PNG로 캡처해 다운로드 — 외부 이미지(아바타·로고)를 dataURL로 prefetch 후 캡처
     async function downloadCardImage() {
         if (!cardRef.current || savingImage) return;
         setSavingImage(true);
         try {
+            // 1) 카드 안 모든 <img>의 src를 dataURL로 교체 (캡처용)
+            const imgs = Array.from(cardRef.current.querySelectorAll("img"));
+            const originals = new Map<HTMLImageElement, string>();
+            await Promise.all(imgs.map(async (img) => {
+                const src = img.getAttribute("src") ?? "";
+                if (!src || src.startsWith("data:")) return;
+                const dataUrl = await imageUrlToDataUrl(src);
+                if (dataUrl) {
+                    originals.set(img, src);
+                    img.setAttribute("src", dataUrl);
+                    // 강제 다시 로드 (decode 대기)
+                    if (img.complete && img.naturalWidth > 0) return;
+                    await new Promise<void>((resolve) => {
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve();
+                        setTimeout(resolve, 1500);
+                    });
+                }
+            }));
+
+            // 2) 캡처 (브랜드 자산 + 로고 + 아바타 + QR 모두 포함)
             const dataUrl = await toPng(cardRef.current, {
-                cacheBust: true,
+                cacheBust: false,
                 pixelRatio: 2,
                 backgroundColor: "#FFFFFF",
             });
+
+            // 3) 다운로드
             const a = document.createElement("a");
             a.href = dataUrl;
             a.download = `card-${handle ?? name ?? "image"}.png`;
             a.click();
+
+            // 4) 원래 src 복원 (React가 rehydrate 안 했을 경우 대비)
+            originals.forEach((origSrc, img) => img.setAttribute("src", origSrc));
         } catch (e) {
             console.warn("card image capture failed", e);
         } finally {

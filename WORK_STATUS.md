@@ -1,6 +1,47 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-13 (세션 128 — 프로젝트·간트·칸반·미완 트리·UX 대청소)
+> 마지막 업데이트: 2026-05-12 (세션 129 — 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처)
+
+---
+
+## 세션 129 핵심 성과 (2026-05-12)
+
+### 1. 간트 차트 추가 고도화
+- **의존성 화살표** — `PlannerTask.depends_on: string[]` 신규 필드, SVG 직각 경로(`M→L→L→L→L`) + arrow marker
+- **편집 팝오버 의존성 picker** — 자기 자신 제외 후보 select + 현재 의존 chip + Unlink 토글
+- **좌측 시작일 핸들** — `resize-left` 모드 (끝점 고정 + 시작일 이동, duration 자동 조정, daily 행 간 자동 이관)
+- **마일스톤 ◆ 드래그** — diamond 마커 mousedown→drag→`milestones` PATCH로 due_date 변경
+- **ProjectKanbanView DnD** — 컬럼 간 status 변경 (DailyKanban 패턴 일관화)
+
+### 2. 템플릿 — 변수 치환 + 마일스톤 자동 변환
+- `lib/myverse/templates.ts`: `buildDefaultVarContext` / `expandVariables` / `extractVariables` / `extractMilestones` 4개 신규 함수
+- 변수 치환: `{{today|fallback}}` 패턴. `today/date/year/month/day/quarter/week/weekday/user/role` 자동 채움
+- 모달 본문 상단에 치환된 변수 미리보기 (인디고 안내 박스)
+- 마일스톤 추출: `## 헤딩` + `- [ ]` 체크박스 + `(YYYY-MM-DD)` due_date 자동 인식
+- 모달 푸터에 "프로젝트로 적용" 버튼 → 프로젝트 선택 모달 → `myverse_project_milestones` 일괄 INSERT
+- 시드 마이그레이션: `myverse-templates-variables.sql` (Prod 적용) — daily_log/weekly_review/project_kickoff 본문에 변수 주입, 신규 `quarterly_kickoff` 추가
+
+### 3. 마인드맵 — 캔버스 위 신규 모드
+- 신규 `features/myverse/planner/MindmapEditor.tsx` — SVG 방사형 + 자동 레이아웃
+- 키보드: Tab=자식 / Enter=형제 / Space=접기 / F2·더블클릭=편집 / Delete=삭제 / Esc=편집취소
+- 휠 줌(0.3~3x), 배경 드래그 pan, 1.5초 디바운스 자동 저장
+- **노드 수동 드래그** — `MindmapNode.position` 오버라이드, 자동 레이아웃 위에 덮어쓰기
+- **색상 커스터마이즈** — 선택 노드 우상단 8색 PALETTE picker + "자동" 복귀 + "위치 리셋"
+- CanvasStudio가 `data.mindmap` 감지해 MindmapEditor로 분기 (`data.ppcanvas`와 양립)
+- CanvasListView에 "새 마인드맵" 버튼 + 카드 좌상단 인디고 배지 + 빈 썸네일 GitBranch 아이콘
+- 캔버스 list API에 `kind: "canvas"|"mindmap"` 필드 추가 (data는 응답에서 제외 — 페이로드 부담 0)
+
+### 4. Person/Company 정규화 Stage 2
+- DB: `sql/myverse-companies.sql` (Prod 적용 완료) — `myverse_companies` 테이블 + `contacts.company_id` FK + 기존 `company_name` 자동 백필
+- API: `app/api/myverse/companies/route.ts` (CRUD + 회사별 contact 카운트, find-or-create)
+- contacts insert에 company_id/person_type/role/tags/avatar_url 받게 확장
+- **ContactsView 자동완성** — `<datalist id="myverse-companies-datalist">`로 회사 input autocomplete (메인 폼 + bulk edit 폼 모두)
+- save 시 organization 입력값이 새 회사면 `/api/myverse/companies` find-or-create 호출 → `company_id` 자동 연결
+
+### 5. DigitalCard PNG 캡처 — 브랜드 자산 반영
+- 외부 이미지(아바타·brand 로고·QR) CORS로 누락되던 문제 해결
+- 캡처 전 모든 `<img src>`를 `fetch → blob → dataURL`로 prefetch, 로드 완료까지 대기 (1.5s 타임아웃)
+- 캡처 후 원래 src 복원 (React rehydrate 안전성)
 
 ---
 
@@ -141,21 +182,17 @@
 
 ## 다음 세션 시작 시 할 일
 
-### 사용자 명시 — 다음 작업 방향
-> **"프로젝트, 템플릿 고도화, 마인드 맵 등 툴을 고도화"**
-
 ### 운영 사용자 직접 조치 필요
-1. GCP 콘솔에서 Gmail API 활성화
+1. GCP 콘솔에서 Gmail API 활성화 (세션 127 잔여)
 2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
 
-### 기능 확장 (세션 128 잔여)
-1. **프로젝트 도구 고도화** — 칸반/간트에서 드래그&드롭으로 status 변경, 의존성 화살표, 마일스톤 ◆ 드래그로 due_date 이동
-2. **템플릿 고도화** — 더 많은 프레임워크, 변수 치환, 템플릿 → 마일스톤 자동 변환
-3. **마인드맵** — 캔버스 엔진 위에 마인드맵 모드 (방사형 노드 + 자동 레이아웃)
-4. **Person Company 정규화** — Stage 2: companyName(텍스트) → Company 엔티티 분리
-5. **브랜드 자산 → DigitalCard PNG 캡처에 포함** — 현재 UI 렌더만, 이미지 저장 시 자산 미반영
-6. **간트 좌측 시작일 핸들** — 현재는 본문 드래그가 이동, 좌측 핸들로 시작일만 조정 가능하게
-7. **간트 마일스톤 ◆ 드래그** — 현재 마커는 정적, 클릭/드래그로 due_date 편집
+### 기능 확장 (세션 129 잔여)
+1. **마인드맵 텍스트 → 마인드맵 자동 변환** — 들여쓰기 outline·마크다운 헤딩 트리를 MindmapDoc으로 import
+2. **ContactsView 회사 관리 페이지** — `/myverse/app/contacts/companies` 신규 (자동완성 만으로 부족할 때 manual 관리). 회사 logo/domain/notes 편집 + 회사 클릭 시 소속 인원 필터
+3. **간트 의존성 자동 일정 조정** — A→B 의존이고 A의 end_date가 B의 start_date보다 늦으면 시각적 경고 (붉은 화살표) 또는 자동 push 옵션
+4. **마인드맵 → 프로젝트로 적용** — 마인드맵 노드를 마일스톤/태스크로 일괄 변환 (템플릿의 "프로젝트로 적용" 패턴 재사용)
+5. **간트 의존성 PNG/SVG export** — 회의 자료용
+6. **템플릿 신규 프레임워크** — RACI · SAFe · OKR Roll-up · Pre-mortem (요청 시)
 
 ---
 

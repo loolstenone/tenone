@@ -160,7 +160,8 @@ export async function POST(req: Request) {
 
     // ─── 단일 insert ───
     const { name, phone, email, group_name, relationship, note, birthday,
-            organization, title, address, is_favorite, last_contacted_at, labels } = body;
+            organization, title, address, is_favorite, last_contacted_at, labels,
+            person_type, company_name, company_id, role, tags, avatar_url } = body;
     if (!name?.trim()) return NextResponse.json({ error: "name_required" }, { status: 400 });
 
     const { data, error } = await admin
@@ -172,6 +173,12 @@ export async function POST(req: Request) {
             is_favorite: !!is_favorite,
             last_contacted_at,
             labels: Array.isArray(labels) ? labels : [],
+            ...(person_type !== undefined && { person_type }),
+            ...(company_name !== undefined && { company_name }),
+            ...(company_id !== undefined && { company_id }),
+            ...(role !== undefined && { role }),
+            ...(tags !== undefined && Array.isArray(tags) && { tags }),
+            ...(avatar_url !== undefined && { avatar_url }),
         })
         .select()
         .single();

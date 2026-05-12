@@ -4,6 +4,115 @@
 
 ---
 
+## 2026-05-12 (세션 129) — 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처
+
+### Myverse — 간트 차트 추가 고도화
+
+**의존성 화살표 (Finish-to-Start)**
+- `lib/myverse/types.ts` (PlannerTask) — `depends_on?: string[] | null` 신규 필드
+- `features/myverse/planner/ProjectTasksTab.tsx` — SVG 직각 경로 + arrow marker 오버레이
+- 편집 팝오버에 의존성 picker(자기 자신 제외 후보 select + 현재 의존 chip + Unlink 토글)
+- 좌표 계산: `barEnd(dep) → barStart(target)`, row_y = headerH + dated.length·msRowH + i·taskRowH + h/2
+
+**좌측 시작일 핸들**
+- `startDrag(mode: "resize-left")` — deltaDays 만큼 date 이동, duration_days를 반대로 보정 (끝점 고정 + duration 최소 1 보존)
+- 좌측 1.5px 핸들 (`cursor-ew-resize`) — 우측 핸들과 별도 영역
+
+**마일스톤 ◆ 드래그**
+- `startMilestoneDrag()` — diamond 마커 mousedown→drag→PATCH `/api/myverse/projects/{id}/milestones`로 due_date 변경
+- 호버 시 1.25x scale 미세 인디케이터
+
+**ProjectKanbanView 드래그&드롭**
+- 카드 draggable + 컬럼 dragover/drop → status 변경 (DailyKanban 패턴 일관화)
+
+### Myverse — 템플릿 변수 + 마일스톤 자동 변환
+
+**변수 치환 시스템**
+- `lib/myverse/templates.ts` — `buildDefaultVarContext` / `expandVariables` / `extractVariables` 3개 신규 함수
+- `{{var|fallback}}` 패턴 파서, 미정의 변수는 빈 문자열 또는 fallback
+- 자동 변수: `today/date/year/month/day/quarter/week/weekday/user/role`
+- `TemplatesView.tsx` — body_md를 `expandVariables(body, varCtx)`로 렌더, 모달 상단에 치환된 변수 인디고 안내 박스 노출
+
+**마일스톤 자동 변환**
+- `extractMilestones()` 신규 — `## 헤딩` + `- [ ] 체크박스` 추출, `(YYYY-MM-DD)` 패턴은 due_date로 인식
+- 모달 푸터 "프로젝트로 적용" 버튼 → 프로젝트 선택 모달 → `myverse_project_milestones` 일괄 INSERT
+- 적용 결과 카운트 표시
+
+**시드 마이그레이션**
+- `sql/myverse-templates-variables.sql` (Prod 적용) — daily_log/weekly_review/project_kickoff 본문에 `{{today}}/{{weekday}}/{{user}}/{{year}}/{{week}}` 자연스럽게 주입
+- 신규 `quarterly_kickoff` 템플릿 추가 (변수 풀 활용 예시)
+
+### Myverse — 마인드맵 (캔버스 위 신규 모드)
+
+**MindmapEditor 신규**
+- `features/myverse/planner/MindmapEditor.tsx` 신규 — SVG 방사형 + 자동 레이아웃
+- `MindmapNode { id, text, children, collapsed?, color?, position? }` 타입
+- 자동 레이아웃: root(0,0) 중앙, 1단계 360° 균등 분할, 깊은 단계는 부모 각도 ±75° sector 내 균등 분포
+- 키보드 단축키: Tab=자식 / Enter=형제 / Space=접기 / F2·더블클릭=편집 / Delete=삭제 / Esc=편집취소
+- 휠 줌(0.3~3x), 배경 드래그 pan, 1.5초 디바운스 자동 저장
+- **노드 수동 드래그** — `MindmapNode.position` 오버라이드, 자동 레이아웃 위에 덮어쓰기. 좌표는 `(e.clientX - start) / zoom`로 줌 보정
+- **색상 커스터마이즈** — 선택 노드 우상단 floating 컬러 picker(8색 + "자동" 복귀 + "위치 리셋" 버튼)
+- 엣지: 부드러운 베지에 곡선(`M Q T`), 색상은 부모 색 상속
+
+**CanvasStudio 분기**
+- `canvas.data.mindmap` 존재 시 MindmapEditor 렌더, `canvas.data.ppcanvas` 존재 시 기존 CanvasEditor (양립)
+- `handleMindmapSave` 신규 — `data.mindmap` 키로 PATCH
+
+**CanvasListView 생성·표시**
+- "새 마인드맵" 버튼 추가 (기존 "새 캔버스" 옆) — POST 시 `data.mindmap.root` 초기 시드
+- 카드 좌상단 인디고 배지 + 빈 썸네일 GitBranch 아이콘 (kind 기반)
+
+**캔버스 list API**
+- `app/api/myverse/canvases/route.ts` GET — `kind: "canvas"|"mindmap"` 필드 응답에 추가, data 자체는 응답에서 제외 (페이로드 부담 0)
+- POST — `body.data` 인자 받게 확장 (마인드맵 초기 시드용)
+
+### Myverse — Person/Company 정규화 Stage 2
+
+**DB 마이그레이션** — `sql/myverse-companies.sql` (Prod 적용 완료)
+- `myverse_companies` 신규 테이블 (member_id/name/domain/industry/logo_url/notes/color)
+- `myverse_contacts.company_id UUID REFERENCES myverse_companies ON DELETE SET NULL` FK 추가
+- 기존 `contacts.company_name`(자유 텍스트) 자동 백필 → company 엔티티 생성 + company_id 연결
+- legacy fallback: `company_name` 컬럼 그대로 유지
+
+**API 신규**
+- `app/api/myverse/companies/route.ts` — GET(검색·아카이브)/POST(find-or-create)/PATCH/DELETE + 회사별 contact 카운트
+
+**Contacts API 확장**
+- 단일 insert에 `person_type/company_name/company_id/role/tags/avatar_url` 받게
+
+**ContactsView UI 통합**
+- `<datalist id="myverse-companies-datalist">` SSOT — 회사 input autocomplete (메인 폼 + bulk edit 폼)
+- save 시 입력값이 새 회사면 `/api/myverse/companies` find-or-create 호출 → `company_id` 자동 연결
+- load 시 contacts + companies 병렬 fetch
+
+### DigitalCard PNG 캡처 — 브랜드 자산 반영
+
+- `components/DigitalCard.tsx` — `downloadCardImage()` 강화
+- 외부 이미지(아바타·brand 로고·QR) CORS로 누락되던 문제 해결
+- 캡처 전: 모든 `<img src>` → `fetch(mode:'cors') → blob → FileReader.readAsDataURL` 변환, `onload` 대기(1.5s 타임아웃)
+- `toPng` 호출 후 원래 src 복원 (React rehydrate 안전성)
+
+### 신규 파일
+
+| 경로 | 역할 |
+|---|---|
+| `features/myverse/planner/MindmapEditor.tsx` | SVG 방사형 마인드맵 에디터 (드래그·색상·키보드) |
+| `app/api/myverse/companies/route.ts` | Company 엔티티 CRUD + find-or-create |
+| `sql/myverse-companies.sql` | Companies 테이블 + 백필 (Prod 적용) |
+| `sql/myverse-templates-variables.sql` | 시드 템플릿 변수 주입 + quarterly_kickoff (Prod 적용) |
+
+### 신규 / 확장된 함수·필드
+
+- `PlannerTask.depends_on?: string[] | null`
+- `MindmapNode.position?: {x,y} | null` · `color?: string | null`
+- `lib/myverse/templates.ts`: `buildDefaultVarContext` · `expandVariables` · `extractVariables` · `extractMilestones`
+
+### DB 마이그레이션 (Prod 실행 완료)
+1. `myverse-companies.sql`
+2. `myverse-templates-variables.sql`
+
+---
+
 ## 2026-05-13 (세션 128) — 프로젝트·간트·칸반·미완 트리·UX 대청소
 
 ### Myverse — 일정 & 업무 카드

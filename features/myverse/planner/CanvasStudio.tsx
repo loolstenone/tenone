@@ -12,6 +12,7 @@ import {
 import type { CanvasDocument } from "@/lib/canvas-engine";
 import { ConfirmSheet } from "./ConfirmSheet";
 import CanvasEditor from "./CanvasEditor";
+import { MindmapEditor, type MindmapDoc } from "./MindmapEditor";
 
 // ─── 로딩 / 에러 UI ─────────────────────────────────────────────────────────
 
@@ -32,6 +33,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     const [savedAt, setSavedAt]       = useState<Date | null>(null);
     const [notFound, setNotFound]     = useState(false);
     const [initialDoc, setInitialDoc] = useState<CanvasDocument | null>(null);
+    const [initialMindmap, setInitialMindmap] = useState<MindmapDoc | null>(null);
+    const [mode, setMode]             = useState<"canvas" | "mindmap">("canvas");
     const [titleDirty, setTitleDirty] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -47,8 +50,12 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             const canvas = json.canvas;
             if (!canvas) { setNotFound(true); setLoading(false); return; }
             setTitle(canvas.title ?? "새 캔버스");
-            if (canvas.data?.ppcanvas) {
+            if (canvas.data?.mindmap) {
+                setInitialMindmap(canvas.data.mindmap as MindmapDoc);
+                setMode("mindmap");
+            } else if (canvas.data?.ppcanvas) {
                 setInitialDoc(canvas.data.ppcanvas as CanvasDocument);
+                setMode("canvas");
             }
             setLoading(false);
         })();
@@ -63,6 +70,21 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ data: { ppcanvas: doc } }),
+            });
+            setSavedAt(new Date());
+        } finally {
+            setSaving(false);
+        }
+    }, [canvasId]);
+
+    // ─── 마인드맵 저장 ─────────────────────────────────────────────────────
+    const handleMindmapSave = useCallback(async (doc: MindmapDoc) => {
+        setSaving(true);
+        try {
+            await fetch(`/api/myverse/canvases/${canvasId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ data: { mindmap: doc } }),
             });
             setSavedAt(new Date());
         } finally {
@@ -183,12 +205,20 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
 
             {/* 캔버스 영역 */}
             <div className="flex-1 min-h-0 relative">
-                <CanvasEditor
-                    initialDoc={initialDoc ?? undefined}
-                    onSave={handleCanvasSave}
-                    onPromoteText={handlePromoteText}
-                    className="absolute inset-0"
-                />
+                {mode === "mindmap" ? (
+                    <MindmapEditor
+                        initialDoc={initialMindmap ?? undefined}
+                        onSave={handleMindmapSave}
+                        className="absolute inset-0"
+                    />
+                ) : (
+                    <CanvasEditor
+                        initialDoc={initialDoc ?? undefined}
+                        onSave={handleCanvasSave}
+                        onPromoteText={handlePromoteText}
+                        className="absolute inset-0"
+                    />
+                )}
             </div>
 
             <ConfirmSheet

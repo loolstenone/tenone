@@ -574,6 +574,101 @@ export function exportFrameworkText(tpl: TemplateMeta, data: FrameworkData): str
     return out;
 }
 
+/** 템플릿 변수 치환 컨텍스트 — 본문 내 {{var}} 패턴을 자동 치환 */
+export interface TemplateVarContext {
+    user?: string | null;          // 사용자 이름
+    email?: string | null;         // 사용자 이메일
+    role?: string | null;          // 사용자 역할 라벨 (한글)
+    project?: string | null;       // 프로젝트명
+    today?: string;                // YYYY-MM-DD
+    date?: string;                 // alias of today
+    year?: string;                 // YYYY
+    month?: string;                // 1~12
+    day?: string;                  // 1~31
+    quarter?: string;              // Q1~Q4
+    week?: string;                 // ISO week number
+    weekday?: string;              // 월~일
+    [key: string]: string | null | undefined;
+}
+
+/** 표준 변수 컨텍스트 빌드 — 일자·연도·분기·주차를 자동 채움 */
+export function buildDefaultVarContext(extra: Partial<TemplateVarContext> = {}): TemplateVarContext {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = d.getMonth() + 1;
+    const dd = d.getDate();
+    const today = `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+    const quarter = `Q${Math.floor((mm - 1) / 3) + 1}`;
+    // ISO week
+    const tmp = new Date(Date.UTC(yyyy, mm - 1, dd));
+    const dayNum = tmp.getUTCDay() || 7;
+    tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+    const week = Math.ceil(((tmp.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+    const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    return {
+        today, date: today,
+        year: String(yyyy),
+        month: String(mm),
+        day: String(dd),
+        quarter,
+        week: String(week),
+        weekday: weekdayNames[d.getDay()],
+        ...extra,
+    };
+}
+
+/** 본문 안의 `{{var}}` / `{{var|fallback}}` 패턴을 치환. 미정의 변수는 빈 문자열. */
+export function expandVariables(body: string, ctx: TemplateVarContext): string {
+    return body.replace(/\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\|\s*([^}]*?)\s*)?\}\}/g, (_m, key: string, fallback?: string) => {
+        const v = ctx[key];
+        if (v != null && String(v).trim()) return String(v);
+        return (fallback ?? "").trim();
+    });
+}
+
+/** 본문에서 사용된 변수 이름 목록 (UI 미리보기·도움말용) */
+export function extractVariables(body: string): string[] {
+    const set = new Set<string>();
+    const re = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\|[^}]*?)?\}\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(body)) !== null) set.add(m[1]);
+    return [...set];
+}
+
+/** 마일스톤 후보 추출 — `## 헤딩` 또는 `- [ ] 항목`. 텍스트 안 `(YYYY-MM-DD)` 패턴은 due_date로 사용. */
+export interface MilestoneCandidate {
+    title: string;
+    due_date: string | null;
+}
+
+export function extractMilestones(body: string): MilestoneCandidate[] {
+    const lines = body.split("\n");
+    const out: MilestoneCandidate[] = [];
+    const dateRe = /\((\d{4}-\d{2}-\d{2})\)/;
+    for (const raw of lines) {
+        const line = raw.trim();
+        // 헤딩 (h2/h3)
+        const h = line.match(/^#{2,3}\s+(.+)$/);
+        if (h) {
+            const matched = h[1].match(dateRe);
+            const due = matched ? matched[1] : null;
+            const title = h[1].replace(dateRe, "").trim();
+            if (title && !/^[\d.]+$/.test(title)) out.push({ title, due_date: due });
+            continue;
+        }
+        // 체크박스
+        const c = line.match(/^[-*]\s+\[[ x]\]\s+(.+)$/i);
+        if (c) {
+            const matched = c[1].match(dateRe);
+            const due = matched ? matched[1] : null;
+            const title = c[1].replace(dateRe, "").trim();
+            if (title) out.push({ title, due_date: due });
+        }
+    }
+    return out;
+}
+
 export const tplDataKey = (id: string) => `myverse_tpl_data_${id}`;
 
 /** Returns the best content for insertion: localStorage grid data if filled, else body_md */

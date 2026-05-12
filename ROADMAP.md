@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-05-03 (세션 105 — PP Canvas Engine 골격 + Toolbar 고도화)
+> 마지막 업데이트: 2026-05-12 (세션 129 — Myverse 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처)
 
 ---
 
