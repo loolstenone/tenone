@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users, CalendarDays, Target, NotebookPen, Heart } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudDrizzle, CloudLightning, Thermometer, Sunrise, Sunset, Globe, MapPin, Users, CalendarDays, Target, NotebookPen, Heart, Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/myverse/types";
@@ -105,11 +105,21 @@ import { UpcomingSchedule } from "./UpcomingSchedule";
 export type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = {
     id: string;
-    type?: 'cornell' | 'template' | 'handwriting' | 'canvas';
+    type?: 'cornell' | 'template' | 'handwriting' | 'canvas' | 'email';
     handMode?: boolean;
     templateKey?: string;
     templateLabel?: string;
     canvas_id?: string;
+    /** type === 'email' 일 때 — myverse_email_imports.id 참조 + 캐시된 메타 */
+    email_id?: string;
+    email_meta?: {
+        sender_name?: string | null;
+        sender_email?: string | null;
+        subject?: string | null;
+        snippet?: string | null;
+        received_at?: string;
+        external_id?: string;  // Gmail message id (외부 링크용)
+    };
     title: string; cue: string; content: string; summary: string; rows: CornellRow[];
     handwriting?: HandNoteData;
     _cornellPages?: { rows: CornellRow[]; summary: string }[];
@@ -522,10 +532,11 @@ function DailyNoteCard({
     const isLast = idx === notesList.length - 1;
 
     // 자동 제목인지 — "기본 노트 1", "손글씨 2" 같은 기본값
-    const isAutoTitle = /^(기본 노트|노트|손글씨|캔버스) \d+$/.test(note.title);
+    const isAutoTitle = /^(기본 노트|노트|손글씨|캔버스|메일) \d+$/.test(note.title);
     const placeholder =
         note.type === 'handwriting' ? "예: 회의 메모 · 손글씨 정리"
         : note.type === 'canvas' ? "예: 동선 스케치"
+        : note.type === 'email' ? "메일 임베드"
         : "예: AI 마케팅 특강 — 강의 구성안";
 
     return (
@@ -552,6 +563,7 @@ function DailyNoteCard({
                 </div>
                 {note.type === 'handwriting' && <PenLine className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />}
                 {note.type === 'canvas' && <ImageIcon className="h-3.5 w-3.5 text-sky-500 shrink-0" />}
+                {note.type === 'email' && <Mail className="h-3.5 w-3.5 text-rose-500 shrink-0" />}
                 <input
                     type="text"
                     value={note.title}
@@ -626,6 +638,44 @@ function DailyNoteCard({
                             <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
                         </span>
                     </div>
+                </div>
+            ) : note.type === 'email' ? (
+                /* 이메일 임베드 — Gmail에서 가져온 메일 카드 (Notion Mail 스타일) */
+                <div className="relative h-48 overflow-hidden p-4 bg-gradient-to-br from-rose-50/50 to-white">
+                    <div className="flex items-start gap-2 mb-2">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-rose-600 text-white shrink-0">
+                            <span className="text-xs font-semibold">@</span>
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-neutral-900 truncate">
+                                {note.email_meta?.sender_name || note.email_meta?.sender_email || "(보낸이 없음)"}
+                            </p>
+                            <p className="text-[10px] text-neutral-400 font-mono truncate">
+                                {note.email_meta?.sender_email ?? ""}
+                                {note.email_meta?.received_at && (
+                                    <span className="ml-1">· {new Date(note.email_meta.received_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                                )}
+                            </p>
+                        </div>
+                        {note.email_meta?.external_id && (
+                            <a
+                                href={`https://mail.google.com/mail/u/0/#inbox/${note.email_meta.external_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-neutral-400 hover:text-[#6366F1] shrink-0"
+                                title="Gmail에서 열기"
+                            >
+                                <Maximize2 className="h-3.5 w-3.5" />
+                            </a>
+                        )}
+                    </div>
+                    <p className="text-sm font-medium text-neutral-900 line-clamp-1 mb-1">
+                        {note.email_meta?.subject ?? "(제목 없음)"}
+                    </p>
+                    <p className="text-xs text-neutral-500 line-clamp-4 leading-snug">
+                        {note.email_meta?.snippet ?? ""}
+                    </p>
                 </div>
             ) : (
                 /* cornell — 미리보기 (편집은 모달) — 손글씨·캔버스와 동일 h-48 */

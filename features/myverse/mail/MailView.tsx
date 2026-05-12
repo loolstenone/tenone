@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Mail, Inbox, Receipt, Calendar as CalIcon, Newspaper, Archive,
     Search, RefreshCw, Loader2, Star, ExternalLink, AlertCircle,
-    Users as UsersIcon, Filter, X as XIcon,
+    Users as UsersIcon, Filter, X as XIcon, NotebookPen, Check,
 } from "lucide-react";
 
 interface EmailItem {
@@ -143,6 +143,54 @@ export function MailView() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ is_starred: next }),
         });
+    }
+
+    const [embedding, setEmbedding] = useState(false);
+    const [embedded, setEmbedded] = useState(false);
+    async function embedToDaily(e: EmailDetail) {
+        if (embedding) return;
+        setEmbedding(true);
+        try {
+            // 1) 오늘 daily 가져오기
+            const today = new Date();
+            const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+            const r = await fetch(`/api/myverse/daily?date=${date}`, { cache: "no-store" });
+            const d = r.ok ? await r.json() : null;
+            const currentNotes = Array.isArray(d?.daily?.notes) ? d.daily.notes : [];
+            // 2) email 노트 추가
+            const noteId = `n_email_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+            const newNote = {
+                id: noteId,
+                type: "email" as const,
+                email_id: e.id,
+                email_meta: {
+                    sender_name: e.sender_name ?? null,
+                    sender_email: e.sender_email ?? null,
+                    subject: e.subject ?? null,
+                    snippet: e.snippet ?? null,
+                    received_at: e.received_at,
+                    external_id: e.external_id,
+                },
+                title: e.subject?.slice(0, 60) || `메일 ${currentNotes.length + 1}`,
+                cue: "", content: "", summary: "", rows: [],
+            };
+            // 3) POST upsert
+            await fetch("/api/myverse/daily", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date, notes: [...currentNotes, newNote] }),
+            });
+            // 4) email triage_state='note' 마킹 (이미 임베드한 메일 식별용)
+            await fetch(`/api/myverse/email-imports/${e.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ triage_state: "note" }),
+            });
+            setEmbedded(true);
+            setTimeout(() => setEmbedded(false), 2500);
+        } finally {
+            setEmbedding(false);
+        }
     }
 
     async function archive(e: EmailItem) {
@@ -467,6 +515,15 @@ export function MailView() {
                                     {selected.subject ?? "(제목 없음)"}
                                 </h2>
                                 <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => embedToDaily(selected)}
+                                        disabled={embedding}
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 disabled:opacity-50 transition-colors"
+                                        title="오늘 Daily 노트로 임베드"
+                                    >
+                                        {embedded ? <Check className="h-3 w-3" /> : embedding ? <Loader2 className="h-3 w-3 animate-spin" /> : <NotebookPen className="h-3 w-3" />}
+                                        {embedded ? "임베드됨" : "Daily 임베드"}
+                                    </button>
                                     <button
                                         onClick={() => toggleStar(selected)}
                                         className="p-1.5 rounded hover:bg-neutral-100 myverse-dark:hover:bg-white/5"
