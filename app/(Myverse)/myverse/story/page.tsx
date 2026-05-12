@@ -149,7 +149,7 @@ export default function StoryPage() {
                         Myverse는 당신의 Personal Black Box입니다.
                     </p>
                     <Link
-                        href="/Myverse"
+                        href="/myverse"
                         className="inline-flex items-center gap-2 mt-10 px-6 py-3 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium hover:opacity-90 transition-colors"
                     >
                         시작하기 <ArrowRight className="h-4 w-4" />
