@@ -1254,6 +1254,13 @@ export function ContactsView() {
                             {favoritesCount > 0 && <span className="ml-2 text-amber-600">⭐ {favoritesCount.toLocaleString("ko-KR")}</span>}
                         </span>
                     )}
+                    <a
+                        href="/myverse/app/contacts/companies"
+                        className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] text-neutral-600 hover:text-[#6366F1] border border-neutral-200 rounded-md hover:border-[#6366F1]/40 transition-colors"
+                        title="회사 엔티티 관리"
+                    >
+                        <Building2 className="h-3 w-3" /> 회사 {companies.length > 0 && <span className="text-neutral-400">({companies.length})</span>}
+                    </a>
                 </div>
                 {/* 모바일 전용 (사이드바 숨김 화면)에만 액션 폴백 */}
                 <div className="lg:hidden flex items-center gap-2">

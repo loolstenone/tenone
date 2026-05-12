@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-05-12 (세션 129 — Myverse 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처)
+> 마지막 업데이트: 2026-05-12 (세션 130 — Myverse 마인드맵 import·회사 관리·간트 의존성 위반·신규 프레임워크 4종)
 
 ---
 

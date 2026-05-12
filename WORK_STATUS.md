@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-12 (세션 129 — 간트 의존성·마인드맵·템플릿 변수·Company Stage 2·DigitalCard 캡처)
+> 마지막 업데이트: 2026-05-12 (세션 130 — 마인드맵 import·회사 관리·간트 의존성 위반·신규 프레임워크 4종)
+
+---
+
+## 세션 130 핵심 성과 (2026-05-12)
+
+### 1. 마인드맵 텍스트 import
+- `parseTextToMindmap()` — 마크다운 헤딩(`#·##·###`) + 들여쓰기 outline 자동 감지
+- 첫 줄이 `#`로 시작 → 마크다운 모드, 들여쓰기 있음 → outline 모드 (탭=1, 스페이스 2개=1)
+- 모달 UI: `<textarea>` + "현재 root에 추가" / "전체 교체" 라디오 + 예시 placeholder
+- 외부 학습 자료·메모를 그대로 붙여넣어 즉시 마인드맵 생성
+
+### 2. 회사 관리 페이지 (`/myverse/app/contacts/companies`)
+- 신규 라우트 + `CompaniesView` 컴포넌트
+- 회사 목록 (검색·CRUD·삭제 확인)
+- 회사별 소속 인원 펼침(클릭) — name/title/email
+- 컬러 / 로고 URL / 도메인 / 산업군 / 메모 편집
+- 삭제 시 contact 자동 분리(ON DELETE SET NULL)
+- ContactsView 헤더에 "회사 (N)" 링크 배지
+
+### 3. 간트 의존성 위반 감지 + auto-fix
+- 위반 조건: `dayDiff(dep.date, task.date) - dep.duration < 0` (Finish-to-Start 깨짐)
+- 위반 화살표: dashed rose + 굵은 stroke + 별도 marker
+- 위반 task 라벨에 ⚠ AlertTriangle + 빨간 색 tooltip
+- 상단 배너: "의존성 위반 N개" + "자동 일정 조정" 버튼
+- `autoFixDependencies()` — 위상정렬 5pass, 위반 task의 시작일을 모든 dep의 max(end_date)+1일로 push, daily 행 간 자동 이관
+- 범례에 "의존성 / 위반" 항목 추가
+
+### 4. 마인드맵 → 프로젝트로 적용
+- MindmapEditor 툴바에 Target 버튼 + Apply 모달
+- root의 1단계 자식 = 마일스톤, 손자 트리 = description으로 들여쓰기 평탄화
+- 프로젝트 선택 + 미리보기 (최상위 3개 손자만 표시, 나머지는 "외 N개")
+- `myverse_project_milestones` 일괄 POST
+
+### 5. 간트 PNG/SVG export
+- 차트 컨테이너에 `chartRef`
+- 줌 토글 옆 [PNG | SVG] 버튼 (Image / FileImage 아이콘)
+- `html-to-image` 활용 — PNG는 pixelRatio 2, SVG는 1
+- 파일명: `gantt-YYYY-MM-DD.{png,svg}`
+
+### 6. 신규 프레임워크 4종 (Prod 적용)
+- `sql/myverse-templates-frameworks-v2.sql`
+- **RACI Matrix** — 역할 분담 명확화 (R/A/C/I + 검증 체크리스트)
+- **Pre-mortem** — 6개월 후 실패 시나리오 역추론 + 4분면 분류 + 트리거 신호
+- **OKR Roll-up** — 조직 → 팀 → 개인 OKR 정렬 (`{{quarter}}/{{year}}/{{user}}` 변수 사용)
+- **SAFe PI Planning** — Business Context / PI Objectives / ART Risks (ROAM) / 의존성 보드 / Confidence Vote
 
 ---
 
@@ -186,13 +231,13 @@
 1. GCP 콘솔에서 Gmail API 활성화 (세션 127 잔여)
 2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
 
-### 기능 확장 (세션 129 잔여)
-1. **마인드맵 텍스트 → 마인드맵 자동 변환** — 들여쓰기 outline·마크다운 헤딩 트리를 MindmapDoc으로 import
-2. **ContactsView 회사 관리 페이지** — `/myverse/app/contacts/companies` 신규 (자동완성 만으로 부족할 때 manual 관리). 회사 logo/domain/notes 편집 + 회사 클릭 시 소속 인원 필터
-3. **간트 의존성 자동 일정 조정** — A→B 의존이고 A의 end_date가 B의 start_date보다 늦으면 시각적 경고 (붉은 화살표) 또는 자동 push 옵션
-4. **마인드맵 → 프로젝트로 적용** — 마인드맵 노드를 마일스톤/태스크로 일괄 변환 (템플릿의 "프로젝트로 적용" 패턴 재사용)
-5. **간트 의존성 PNG/SVG export** — 회의 자료용
-6. **템플릿 신규 프레임워크** — RACI · SAFe · OKR Roll-up · Pre-mortem (요청 시)
+### 기능 확장 (세션 130 잔여 — 다음 세션 후보)
+1. **마인드맵 PNG/SVG export** — 간트와 같은 패턴으로 캡처 (회의 공유용)
+2. **마인드맵 노드 → Daily Task 변환** — 단일 노드 우클릭 → "Task로 변환" (이미 캔버스에는 ＋태스크 있지만 마인드맵엔 없음)
+3. **간트 의존성 SVG export에 화살표 포함 확인** — html-to-image의 SVG 변환이 SVG `<path>` 잘 포착하는지 검증 필요
+4. **OKR Roll-up 시각화** — 조직 → 팀 → 개인 흐름을 시각적 트리로 렌더 (마인드맵 자동 import?)
+5. **회사 페이지 — 회사 클릭 시 ContactsView에 필터 자동 적용** — `/contacts?company=xxx` 라우팅
+6. **Pre-mortem 위험 → 프로젝트 리스크 등록** — 자동화 옵션 (요청 시)
 
 ---
 
