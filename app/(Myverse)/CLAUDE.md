@@ -145,6 +145,15 @@
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
 
+### 마인드맵 export·노드→Task·OKR 시각화·회사 필터·노트 적용 (세션 131)
+| 파일 | 역할 |
+|------|------|
+| `features/myverse/planner/MindmapEditor.tsx` | **PNG/SVG export** (`exportMindmap` + 툴바 PNG/SVG 버튼). `data-mindmap-ui` 속성 가진 UI 요소(툴바·도움말·color picker·모달) 캡처 제외. 선택 노드 우상단에 **+Task** 버튼 (`onPromoteText` prop) |
+| `features/myverse/planner/CanvasStudio.tsx` | `handlePromoteText`를 MindmapEditor에도 전달 (CanvasEditor와 동일 콜백) |
+| `features/myverse/planner/TemplatesView.tsx` | **마인드맵으로** 버튼 (본문 → `parseTextToMindmap` → POST canvases + `data.mindmap` 시드 → router.push). **applyMode** 라디오 추가 — 마일스톤(기존)/프로젝트 노트 이중 모드. 노트 모드는 본문 통째로 `/projects/{id}/notes` POST |
+| `features/myverse/planner/ContactsView.tsx` | `useSearchParams`로 `?company=ID` 필터. Contact 타입에 `company_id` 추가. 헤더에 활성 필터 칩(회사명 + X) |
+| `features/myverse/planner/CompaniesView.tsx` | 회사 행에 ExternalLink 버튼 (contact_count > 0 시) → `/contacts?company={id}` 이동 |
+
 ### 마인드맵 import·회사 관리·간트 의존성 위반·프레임워크 4종 (세션 130)
 | 파일 | 역할 |
 |------|------|
@@ -279,7 +288,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 130 (2026-05-12)** — 마인드맵 텍스트 import(마크다운/들여쓰기 자동 감지) + 회사 관리 페이지(`/contacts/companies` CRUD + 인원 펼침) + 간트 의존성 위반 감지(dashed rose + ⚠ + 5-pass 자동 일정 조정) + 마인드맵→프로젝트(1단계 자식→마일스톤) + 간트 PNG/SVG export + 신규 프레임워크 4종(RACI·Pre-mortem·OKR Roll-up·SAFe PI Planning) |
+| **Phase** | **세션 131 (2026-05-12)** — 마인드맵 PNG/SVG export + 선택 노드 → +Task 버튼 + 템플릿 본문 → 마인드맵 시각화(parseTextToMindmap 재사용) + 회사 클릭 → ContactsView 필터(`?company=ID` + 활성 칩) + 템플릿 적용 모달에 "마일스톤/프로젝트 노트" 이중 모드 (Pre-mortem·RACI·SAFe 본문 보존) |
+| **세션 130 (2026-05-12)** | 마인드맵 텍스트 import(마크다운/들여쓰기 자동 감지) + 회사 관리 페이지(`/contacts/companies` CRUD + 인원 펼침) + 간트 의존성 위반 감지(dashed rose + ⚠ + 5-pass 자동 일정 조정) + 마인드맵→프로젝트(1단계 자식→마일스톤) + 간트 PNG/SVG export + 신규 프레임워크 4종(RACI·Pre-mortem·OKR Roll-up·SAFe PI Planning) |
 | **세션 129 (2026-05-12)** | 간트 의존성 화살표(SVG 직각 경로)·좌측 시작일 핸들·마일스톤 ◆ 드래그·ProjectKanban DnD + 마인드맵 신규(SVG 방사형 + 노드 드래그 + 컬러 picker + 1.5s 자동 저장) + 템플릿 변수 치환·마일스톤 자동 변환 + Company Stage 2 + DigitalCard PNG 캡처 외부이미지 dataURL prefetch + 시드 템플릿 변수 주입 |
 | **세션 128 (2026-05-13)** | 일정&업무 칸반/리스트 토글 + 메인/서브 위계 트리 + 경중완급 폐기 + 프로젝트 모달화·간트 4단계 고도화(드래그/리사이즈/팝오버/자율헤더+오늘선+마일스톤◆) + 미완 호출 시 메인+서브 동반 + 사이드바 토글 우측 상단 absolute + Hydration suppressHydrationWarning + TimeBlock UI 폐기 |
 | **세션 127 (2026-05-11)** | Personal OS 통합 — 사이드바 접힘 + 브랜드 자산 SSOT + 메일/캘린더 양방향 + 무끼 LLM 확장 + 마케팅 페이지 통합(story+philosophy+about) + DailyView 3,158줄 분할 |
@@ -295,6 +305,7 @@
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **세션 131 결정** | ① 마인드맵 export 캡처 제외는 `data-mindmap-ui` 속성으로 마킹 + `filter` 옵션 — UI 요소(툴바·도움말·picker·모달)를 깔끔히 빼서 회의 자료용 결과물 생성 · ② 노드 → Task는 CanvasEditor와 동일한 `onPromoteText` prop 패턴 재사용 — 일관성 유지, 별도 API 불필요 · ③ 템플릿 → 마인드맵은 새 캔버스 생성 후 router.push (모달 내 미리보기 X) — 마인드맵은 큰 화면이 필요한 도구라 새 페이지가 자연 · ④ 회사 필터는 URL query(`?company=ID`)로 stateless — 북마크·공유 가능. 활성 필터 칩으로 명확한 시그널 · ⑤ Pre-mortem/RACI/SAFe 같은 구조 보존 템플릿은 "노트 모드"로 통째로 저장 — 마일스톤 분해는 의미 손실. 사용자가 모드 선택. 헤딩 없어도 본문 있으면 노트 모드로 적용 가능 · ⑥ apply 모달이 milestones·note 양쪽을 같은 함수에서 처리 — 분기는 applyMode state로 단순화 |
 | **세션 130 결정** | ① 마인드맵 텍스트 import는 자동 감지(`#`로 시작 → 마크다운 / 들여쓰기 있음 → outline). 스택 기반 트리 구성. 모드 선택 강제하지 않음 · ② 회사 관리는 ContactsView와 별도 페이지로 분리 — 자동완성으로 부족할 때만 manual. `<datalist>` SSOT는 그대로 유지 · ③ 의존성 위반 감지는 클라이언트 측 계산(별도 API 불필요). dashed rose + ⚠ 시각 신호 + 옵션형 auto-fix · ④ Auto-fix는 5-pass 위상정렬로 단순화 — 사이클 발생 시 더 깊은 검증 없이 종료(상위에서 합리적 의존 관계 가정) · ⑤ 마인드맵 → 프로젝트는 1단계 자식만 마일스톤, 손자 트리는 description으로 평탄화. 너무 깊은 자동 변환은 의미 손실 — 사용자가 1단계 구성을 의도적으로 정리하도록 유도 · ⑥ 간트 export는 차트 컨테이너만 ref로 캡처(범례·배너 제외). pixelRatio: PNG=2, SVG=1 · ⑦ 신규 프레임워크 시드는 변수 패턴 적극 활용 — OKR Roll-up에 `{{quarter}}/{{year}}/{{user}}`, RACI/Pre-mortem에 `{{today}}` |
 | **세션 129 결정** | ① 간트 의존성은 PlannerTask JSONB에 `depends_on: string[]` 추가로 마이그레이션 없이 즉시 구현. SVG 직각 경로 + arrow marker · ② 좌측 시작일 핸들은 끝점 고정(duration 자동 보정), 우측 핸들은 끝점 이동(duration만), 본문은 전체 이동(date만). 3가지 모드 명확히 분리 · ③ 마인드맵은 캔버스 엔진 재사용하지 않고 별도 SVG 컴포넌트 `MindmapEditor.tsx`로 구현. 캔버스 data 컬럼 안에 `data.mindmap` vs `data.ppcanvas` 키로 분기 — DB 마이그레이션 0 · ④ 노드 수동 드래그 좌표는 `(dx/zoom)`로 줌 보정 필수 — 줌 in/out 상태에서도 정확 이동 · ⑤ 템플릿 변수는 `{{var\|fallback}}` 패턴. 자동 컨텍스트는 `buildDefaultVarContext()` SSOT로 모든 호출지점 통일 · ⑥ 마일스톤 추출은 `## 헤딩` 우선, `- [ ]` 보조. `(YYYY-MM-DD)` 패턴은 자동 due_date 인식 · ⑦ Stage 2 Company는 `company_name`(자유 텍스트) legacy fallback 유지 + `company_id` FK 신규. 점진 마이그레이션. ContactsView는 `<datalist>` SSOT로 모든 폼에서 자동완성 · ⑧ DigitalCard PNG 캡처는 외부 이미지 CORS로 누락되던 문제 — `fetch→blob→FileReader.readAsDataURL`로 prefetch + onload 대기(1.5s 타임아웃) + 캡처 후 src 복원 |
 | **세션 125 결정** | ① 무끼(AI 묻기/일기/코치)는 사이드바에서 빼고 우측 하단 그라디언트 FAB로 통합 — 대화는 저장 X, 의도(일정·연락처 등)만 마이버스 서비스에 자동 반영 · ② "오늘의 한 장면"이 SNS 포스팅 (자유 글/사진/영상). DB `myverse_daily_moments`에 `media_type='text'` + `body` 컬럼 + `media_url` nullable. 피드 공개 토글 + Web Share API · ③ DailyView 3 카드 독립: TodaySceneCard / DailyPlacesCard / DailyRoutinesCard. 한 컴포저에서 입력해도 places·routines 미러 저장 · ④ 흔적 통합: `/api/myverse/traces` (moments + places + routines UNION). UnifiedTrace 정규화 형태 + happened_at 정렬 · ⑤ 레이아웃 전부 fixed: TopNav `fixed top-0 z-40` / SideNav `fixed top-12 left-0 bottom-0 z-30` / MonthBar `fixed top-12 right-0 bottom-0 z-30`. main에 `pt-12 md:ml-52 md:mr-10` 보정 · ⑥ "Verse" 용어 폐기 — "내 페이지" / "피드에 공개하기"로 통일. `/myverse/v/{handle}` 옛 링크는 `/myverse/{handle}`로 · ⑦ 코넬 노트 제목에서 Enter → 첫 단서 자동 포커스 · ⑧ 사이드바 footer `mt-auto` 부동 수정 |

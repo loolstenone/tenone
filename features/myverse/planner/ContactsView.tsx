@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { localDateStr } from "@/lib/myverse/types";
 import {
     Users, Plus, Search, Phone, Mail, Tag, X, ChevronDown,
@@ -484,6 +485,7 @@ interface Contact {
     is_favorite?: boolean;
     last_contacted_at?: string;
     labels?: string[];
+    company_id?: string | null;
 }
 
 const RELATIONSHIPS = ["가족", "연인", "친구", "직장", "기타"] as const;
@@ -508,6 +510,9 @@ function emptyForm(): Omit<Contact, "id"> {
 }
 
 export function ContactsView() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const companyFilter = searchParams.get("company") ?? null;
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [companies, setCompanies] = useState<Array<{ id: string; name: string; contact_count: number }>>([]);
     const [loading, setLoading] = useState(true);
@@ -622,8 +627,14 @@ export function ContactsView() {
         else if (view === "recent") matchView = !!c.last_contacted_at;
         else if (view.startsWith("label:")) matchView = (c.labels || []).includes(view.slice(6));
         else if (view.startsWith("group:")) matchView = c.group_name === view.slice(6);
-        return matchSearch && matchView;
+        // 회사 필터 (?company=ID) — companies에서 비롯
+        const matchCompany = !companyFilter || c.company_id === companyFilter;
+        return matchSearch && matchView && matchCompany;
     });
+
+    const filterCompanyName = companyFilter
+        ? companies.find(co => co.id === companyFilter)?.name ?? null
+        : null;
 
     // 정렬: recent 뷰면 last_contacted_at 내림차순, 그 외엔 즐겨찾기 → 가나다
     const sortedRows = view === "recent"
@@ -1261,6 +1272,20 @@ export function ContactsView() {
                     >
                         <Building2 className="h-3 w-3" /> 회사 {companies.length > 0 && <span className="text-neutral-400">({companies.length})</span>}
                     </a>
+                    {companyFilter && filterCompanyName && (
+                        <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/30 rounded-md">
+                            <Building2 className="h-3 w-3" />
+                            {filterCompanyName}
+                            <button
+                                type="button"
+                                onClick={() => router.push("/myverse/app/contacts")}
+                                className="ml-0.5 hover:text-rose-500"
+                                title="필터 해제"
+                            >
+                                <X className="h-3 w-3" />
+                            </button>
+                        </span>
+                    )}
                 </div>
                 {/* 모바일 전용 (사이드바 숨김 화면)에만 액션 폴백 */}
                 <div className="lg:hidden flex items-center gap-2">

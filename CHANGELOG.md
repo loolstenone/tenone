@@ -4,6 +4,54 @@
 
 ---
 
+## 2026-05-12 (세션 131) — 마인드맵 export·노드→Task·OKR 시각화·회사 필터·프로젝트 노트 통합
+
+### Myverse — 마인드맵 export
+- `features/myverse/planner/MindmapEditor.tsx` — `exportMindmap(format)` 함수
+- 툴바에 PNG / SVG 버튼 (Image / FileImage 아이콘) — html-to-image의 toPng/toSvg
+- 캡처 영역: containerRef 전체
+- 캡처 제외: `data-mindmap-ui` 속성 (툴바·도움말·color picker·import 모달·apply 모달)
+- 파일명: `mindmap-{root.text 첫 20자}-{ISO date}.{png|svg}`
+
+### Myverse — 마인드맵 선택 노드 → Daily Task
+- MindmapEditor에 `onPromoteText?: (text: string) => void | Promise<void>` prop 신규
+- 선택 노드 우상단 color picker 패널에 "+Task" 버튼 (emerald 색상, root 제외, onPromoteText 있을 때만)
+- CanvasStudio가 mindmap·canvas 양쪽에 동일한 `handlePromoteText`(`/api/myverse/tasks` POST + source_note_id=canvasId) 전달
+
+### Myverse — 템플릿 → 마인드맵 시각화
+- TemplatesView 모달 푸터에 "마인드맵으로" 버튼 (GitBranch, indigo 보더)
+- `visualizeAsMindmap()` 신규 — 본문/framework data → `parseTextToMindmap` → POST `/api/myverse/canvases` + `data.mindmap` 시드 → `router.push`
+- OKR Roll-up / RACI / SAFe PI 등 `##` 헤딩 구조면 즉시 시각화
+
+### Myverse — 회사 → ContactsView 필터
+- `features/myverse/planner/CompaniesView.tsx` — 회사 행에 ExternalLink 아이콘 버튼 (contact_count > 0 일 때만)
+- `<Link href="/myverse/app/contacts?company={id}">` — 클릭 시 ContactsView로 이동
+- `features/myverse/planner/ContactsView.tsx`:
+  - `useSearchParams`/`useRouter` 추가 (next/navigation)
+  - Contact 인터페이스에 `company_id?: string | null` 추가
+  - filtered 함수에 `matchCompany` 조건 (companyFilter && c.company_id === companyFilter)
+  - 헤더에 활성 필터 칩 (회사명 + X 해제 버튼, `/myverse/app/contacts`로 push)
+
+### Myverse — 템플릿 → 프로젝트 마일스톤/노트 이중 모드
+- "프로젝트로 적용" 모달에 라디오 추가 — `applyMode: "milestones" | "note"`
+- 마일스톤 모드: 기존 동작 유지 (extractMilestones → milestones POST)
+- **노트 모드**: 본문 통째로 `/api/myverse/projects/{id}/notes` POST — Pre-mortem 위험·RACI·SAFe 구조 보존
+- 미리보기도 모드별 분기 (마일스톤 ◆ 리스트 / 노트 본문 잘림 미리보기 400자)
+- "프로젝트로 적용" 버튼 노출 조건 변경 — 헤딩 없어도 본문 있으면 노출 (자동으로 note 모드 기본 선택)
+
+### 신규 파일
+
+(없음 — 모두 기존 파일 확장)
+
+### 확장된 prop / 함수
+
+- `MindmapEditor.onPromoteText` (옵션)
+- `TemplatesView.visualizeAsMindmap()` (신규 함수)
+- `TemplatesView.applyMode` state ("milestones" | "note")
+- ContactsView Contact 타입에 `company_id`
+
+---
+
 ## 2026-05-12 (세션 130) — 마인드맵 import·회사 관리·간트 의존성 위반·신규 프레임워크 4종
 
 ### Myverse — 마인드맵 텍스트 import

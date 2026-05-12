@@ -1,6 +1,38 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-12 (세션 130 — 마인드맵 import·회사 관리·간트 의존성 위반·신규 프레임워크 4종)
+> 마지막 업데이트: 2026-05-12 (세션 131 — 마인드맵 export·노드→Task·OKR 시각화·회사 필터·프로젝트 노트 통합)
+
+---
+
+## 세션 131 핵심 성과 (2026-05-12)
+
+### 1. 마인드맵 PNG/SVG export
+- MindmapEditor 툴바에 PNG/SVG 버튼 (html-to-image의 toPng/toSvg)
+- 캡처 영역: containerRef 전체 — `data-mindmap-ui` 속성 가진 노드(툴바·도움말·색상 picker·모달)는 filter로 제외
+- 파일명: `mindmap-{root.text}-{ISO date}.{png|svg}`
+
+### 2. 마인드맵 선택 노드 → Daily Task 변환
+- MindmapEditor에 `onPromoteText` prop 추가 (CanvasEditor와 동일 패턴)
+- 선택 노드 우상단 color picker 옆에 "+Task" 버튼 (root 제외, 다른 노드 선택 시만 표시)
+- CanvasStudio가 `handlePromoteText`를 mindmap·canvas 양쪽에 동일 콜백으로 전달
+
+### 3. 템플릿 → 마인드맵 시각화 (OKR Roll-up 등)
+- TemplatesView 모달 푸터에 "마인드맵으로" 버튼 (GitBranch 아이콘)
+- 클릭 → 본문(또는 framework 데이터)을 `parseTextToMindmap`으로 트리 변환 → POST `/api/myverse/canvases` with `{ data: { mindmap: { root } } }` → 새 캔버스로 navigate
+- OKR Roll-up / RACI / SAFe PI 등 `##` 헤딩 구조 템플릿이 즉시 시각화됨
+
+### 4. 회사 → ContactsView 필터
+- CompaniesView 회사 행에 ExternalLink 버튼 (소속 인원 0개면 미노출)
+- 클릭 → `/myverse/app/contacts?company={id}` 이동
+- ContactsView가 `useSearchParams`로 `company` 읽어 `c.company_id === filter` 필터
+- 헤더에 활성 필터 칩(회사명 + X 해제 버튼)
+
+### 5. 템플릿 → 프로젝트로 적용 — 마일스톤/노트 이중 모드
+- 기존 "프로젝트로 적용" 모달에 라디오 추가 — "마일스톤으로" / "프로젝트 노트로"
+- 마일스톤 모드: `extractMilestones` 추출 → milestones POST (기존 동작)
+- 노트 모드: 본문 통째로 → `/api/myverse/projects/{id}/notes` POST (Pre-mortem 위험·RACI 매트릭스 등 구조 보존)
+- 헤딩 0개여도 노트 모드는 항상 가능 → 본문 있으면 "프로젝트로 적용" 버튼 노출 (이전엔 헤딩 없으면 숨김)
+- 미리보기도 모드별 분기 (마일스톤 ◆ 리스트 / 노트 본문 잘림 미리보기)
 
 ---
 
@@ -231,13 +263,14 @@
 1. GCP 콘솔에서 Gmail API 활성화 (세션 127 잔여)
 2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
 
-### 기능 확장 (세션 130 잔여 — 다음 세션 후보)
-1. **마인드맵 PNG/SVG export** — 간트와 같은 패턴으로 캡처 (회의 공유용)
-2. **마인드맵 노드 → Daily Task 변환** — 단일 노드 우클릭 → "Task로 변환" (이미 캔버스에는 ＋태스크 있지만 마인드맵엔 없음)
-3. **간트 의존성 SVG export에 화살표 포함 확인** — html-to-image의 SVG 변환이 SVG `<path>` 잘 포착하는지 검증 필요
-4. **OKR Roll-up 시각화** — 조직 → 팀 → 개인 흐름을 시각적 트리로 렌더 (마인드맵 자동 import?)
-5. **회사 페이지 — 회사 클릭 시 ContactsView에 필터 자동 적용** — `/contacts?company=xxx` 라우팅
-6. **Pre-mortem 위험 → 프로젝트 리스크 등록** — 자동화 옵션 (요청 시)
+### 기능 확장 (세션 131 잔여 — 다음 세션 후보)
+1. **마인드맵 협업 모드** — 여러 사람이 동시 편집 (Yjs/CRDT) 또는 read-only 공유 링크
+2. **간트 critical path** — 의존성 그래프에서 최장 경로 자동 강조 (프로젝트 마감 추정)
+3. **회사 페이지에 contacts CSV 일괄 import** — 회사별로 명함 한꺼번에 가져오기
+4. **프로젝트 노트 검색** — 노트 본문 전체 풀텍스트 검색 (`tsvector` 인덱스)
+5. **마인드맵 노드 일괄 → Task** — 선택된 서브트리 전체를 한 번에 Task로 변환
+6. **시드 템플릿 — Decision Log·SBI Feedback·Pre-mortem 시각화 예시** 추가
+7. **운영 조치 (사용자 직접)**: GCP Gmail API 활성화 + 기존 Google 사용자 재연결 안내
 
 ---
 

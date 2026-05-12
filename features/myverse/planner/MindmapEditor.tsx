@@ -8,7 +8,8 @@
 // 자동 저장: 1.5초 디바운스 (CanvasEditor와 동일 패턴)
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2, FileInput, X, Target, Check, Loader2 } from "lucide-react";
+import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2, FileInput, X, Target, Check, Loader2, Image as ImageIcon, FileImage } from "lucide-react";
+import { toPng, toSvg } from "html-to-image";
 
 export interface MindmapNode {
     id: string;
@@ -205,10 +206,12 @@ function updateNode(root: MindmapNode, id: string, patch: Partial<MindmapNode>):
 export function MindmapEditor({
     initialDoc,
     onSave,
+    onPromoteText,
     className = "",
 }: {
     initialDoc?: MindmapDoc;
     onSave?: (doc: MindmapDoc) => void;
+    onPromoteText?: (text: string) => void | Promise<void>;
     className?: string;
 }) {
     const [doc, setDoc] = useState<MindmapDoc>(initialDoc ?? emptyDoc());
@@ -410,6 +413,35 @@ export function MindmapEditor({
         setZoom(1);
     }
 
+    const [exporting, setExporting] = useState(false);
+    async function exportMindmap(format: "png" | "svg") {
+        if (!containerRef.current || exporting) return;
+        setExporting(true);
+        try {
+            const opts = {
+                backgroundColor: "#FAFAFA",
+                pixelRatio: format === "png" ? 2 : 1,
+                cacheBust: false,
+                // 도움말·툴바 등 절대 위치 UI는 캡처에서 제외 (filter 옵션)
+                filter: (node: HTMLElement) => {
+                    if (!(node instanceof HTMLElement)) return true;
+                    return !node.dataset?.mindmapUi;
+                },
+            };
+            const dataUrl = format === "png"
+                ? await toPng(containerRef.current, opts)
+                : await toSvg(containerRef.current, opts);
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `mindmap-${doc.root.text.slice(0, 20).replace(/[^\w\sㄱ-힣]/g, "_")}-${new Date().toISOString().slice(0, 10)}.${format}`;
+            a.click();
+        } catch (e) {
+            console.warn("mindmap export failed", e);
+        } finally {
+            setExporting(false);
+        }
+    }
+
     // root의 1단계 자식들을 마일스톤으로 변환, 손자는 description으로 평탄화
     async function applyToProject() {
         if (!applyModal || !applyModal.projectId) return;
@@ -462,7 +494,7 @@ export function MindmapEditor({
     return (
         <div ref={containerRef} className={`relative w-full h-full overflow-hidden bg-neutral-50 ${className}`}>
             {/* 툴바 */}
-            <div className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white border border-neutral-200 rounded-lg shadow-sm px-1.5 py-1 text-xs">
+            <div data-mindmap-ui className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white border border-neutral-200 rounded-lg shadow-sm px-1.5 py-1 text-xs">
                 <button
                     type="button"
                     onClick={handleAddChild}
@@ -501,6 +533,27 @@ export function MindmapEditor({
                 <button type="button" onClick={() => setZoom(z => Math.min(3, z + 0.2))} className="p-1 rounded hover:bg-neutral-100" title="확대"><ZoomIn className="h-3 w-3" /></button>
                 <button type="button" onClick={() => setZoom(z => Math.max(0.3, z - 0.2))} className="p-1 rounded hover:bg-neutral-100" title="축소"><ZoomOut className="h-3 w-3" /></button>
                 <button type="button" onClick={resetView} className="p-1 rounded hover:bg-neutral-100" title="중앙 정렬"><Maximize2 className="h-3 w-3" /></button>
+                <div className="w-px h-4 bg-neutral-200 mx-1" />
+                <button
+                    type="button"
+                    onClick={() => exportMindmap("png")}
+                    disabled={exporting}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-neutral-100 text-neutral-700 disabled:opacity-50"
+                    title="현재 마인드맵을 PNG로 내보내기"
+                >
+                    {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
+                    PNG
+                </button>
+                <button
+                    type="button"
+                    onClick={() => exportMindmap("svg")}
+                    disabled={exporting}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-neutral-100 text-neutral-700 disabled:opacity-50"
+                    title="현재 마인드맵을 SVG로 내보내기"
+                >
+                    {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileImage className="h-3 w-3" />}
+                    SVG
+                </button>
             </div>
 
             {/* 색상 picker — 선택된 노드 있을 때 우상단 */}
@@ -510,7 +563,7 @@ export function MindmapEditor({
                 const selLayout = layout.get(selectedId);
                 const isCustom = !!selNode.position;
                 return (
-                    <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg shadow-sm px-2 py-1.5 text-xs">
+                    <div data-mindmap-ui className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg shadow-sm px-2 py-1.5 text-xs">
                         <span className="text-[10px] uppercase tracking-widest text-neutral-400 mr-1">색상</span>
                         {PALETTE.map(c => (
                             <button
@@ -540,12 +593,28 @@ export function MindmapEditor({
                                 위치 리셋
                             </button>
                         )}
+                        {onPromoteText && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const n = findNode(doc.root, selectedId);
+                                    if (n && n.text.trim()) {
+                                        await onPromoteText(n.text.trim());
+                                        // 시각적 피드백을 위해 잠시 색상 변경 등은 생략 — Daily에서 확인
+                                    }
+                                }}
+                                className="text-[10px] text-emerald-700 hover:bg-emerald-50 ml-1 px-1.5 py-0.5 rounded border border-emerald-300"
+                                title="이 노드를 Daily Task로 보냄"
+                            >
+                                ＋Task
+                            </button>
+                        )}
                     </div>
                 );
             })()}
 
             {/* 도움말 */}
-            <div className="absolute bottom-3 left-3 z-20 text-[10px] text-neutral-400 bg-white/80 backdrop-blur px-2 py-1 rounded">
+            <div data-mindmap-ui className="absolute bottom-3 left-3 z-20 text-[10px] text-neutral-400 bg-white/80 backdrop-blur px-2 py-1 rounded">
                 <Sparkles className="h-2.5 w-2.5 inline mr-1" />
                 Tab=자식 · Enter=형제 · Space=접기 · F2=편집 · Delete=삭제 · 노드 드래그=위치 · 휠=확대 · 배경 드래그=이동
             </div>
@@ -554,7 +623,7 @@ export function MindmapEditor({
             {applyModal?.open && (() => {
                 const milestones = doc.root.children;
                 return (
-                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => !applyModal.loading && setApplyModal(null)}>
+                    <div data-mindmap-ui className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => !applyModal.loading && setApplyModal(null)}>
                         <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
@@ -644,7 +713,7 @@ export function MindmapEditor({
 
             {/* Import 모달 */}
             {importModal?.open && (
-                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => setImportModal(null)}>
+                <div data-mindmap-ui className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => setImportModal(null)}>
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
