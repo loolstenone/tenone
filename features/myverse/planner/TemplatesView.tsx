@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
-    ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2, ArrowUpFromLine, Target,
+    ChevronRight, Heart, Copy, Check, TrendingUp, UserCircle2, ArrowUpFromLine, Target, GitBranch,
 } from "lucide-react";
 import type { PlannerRole } from "@/lib/myverse/types";
 import { PLANNER_ROLE_META } from "@/lib/myverse/types";
 import { isSpecialTemplate as isSpecial, exportFrameworkText as exportFwText, tplDataKey, buildDefaultVarContext, expandVariables, extractVariables, extractMilestones } from "@/lib/myverse/templates";
+import { parseTextToMindmap } from "./MindmapEditor";
 import {
     type FrameworkData as SharedFrameworkData,
 } from "./template-grids/_shared";
@@ -358,6 +360,7 @@ const VALID_CATS = ["all", "my_role", "framework", "schedule", "note", "recommen
 type CatType = typeof VALID_CATS[number];
 
 export function TemplatesView() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const initialCat = (() => {
         const c = searchParams.get("category");
@@ -380,6 +383,7 @@ export function TemplatesView() {
     const [applyTargetId, setApplyTargetId] = useState<string>("");
     const [applying, setApplying] = useState(false);
     const [applyResult, setApplyResult] = useState<{ count: number } | null>(null);
+    const [applyMode, setApplyMode] = useState<"milestones" | "note">("milestones");
 
     useEffect(() => {
         try {
@@ -438,13 +442,28 @@ export function TemplatesView() {
 
     async function applyAsMilestones() {
         if (!selected || !applyTargetId) return;
-        const candidates = extractMilestones(expandedBodyMd);
-        if (candidates.length === 0) {
-            setApplyResult({ count: 0 });
-            return;
-        }
         setApplying(true);
         try {
+            if (applyMode === "note") {
+                // 프로젝트 노트로 저장 — 본문 통째로 (Pre-mortem 위험·RACI 매트릭스 등 전체 보존)
+                const content = isSpecialTemplate(selected) ? exportFwText(selected, tplData) : expandedBodyMd;
+                const res = await fetch(`/api/myverse/projects/${applyTargetId}/notes`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        title: selected.label,
+                        content,
+                    }),
+                });
+                setApplyResult({ count: res.ok ? 1 : 0 });
+                return;
+            }
+            // milestones 모드
+            const candidates = extractMilestones(expandedBodyMd);
+            if (candidates.length === 0) {
+                setApplyResult({ count: 0 });
+                return;
+            }
             let success = 0;
             for (let idx = 0; idx < candidates.length; idx++) {
                 const c = candidates[idx];
@@ -491,6 +510,34 @@ export function TemplatesView() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch { /* noop */ }
+    }
+
+    const [visualizing, setVisualizing] = useState(false);
+    async function visualizeAsMindmap() {
+        if (!selected || visualizing) return;
+        const text = isSpecialTemplate(selected)
+            ? exportFwText(selected, tplData)
+            : expandedBodyMd;
+        if (!text.trim()) return;
+        const root = parseTextToMindmap(text);
+        if (!root) return;
+        setVisualizing(true);
+        try {
+            const res = await fetch("/api/myverse/canvases", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: `${selected.label} (마인드맵)`,
+                    data: { mindmap: { root, layout: "radial" } },
+                }),
+            });
+            if (res.ok) {
+                const d = await res.json();
+                router.push(`/myverse/app/canvas/${d.canvas.id}`);
+            }
+        } finally {
+            setVisualizing(false);
+        }
     }
 
     async function promoteToTask() {
@@ -743,16 +790,47 @@ export function TemplatesView() {
                                     프로젝트로 적용
                                 </h3>
                                 <p className="text-xs text-neutral-500 mt-1">
-                                    {selected.label}의 항목 {candidates.length}개를 선택한 프로젝트의 마일스톤으로 추가합니다.
+                                    {selected.label}을 선택한 프로젝트에 적용합니다.
                                 </p>
                             </div>
+
+                            {!applyResult && (
+                                <div className="flex items-center gap-3 p-2 bg-neutral-50 rounded-md">
+                                    <label className="text-xs text-neutral-700 flex items-center gap-1.5 cursor-pointer flex-1">
+                                        <input
+                                            type="radio"
+                                            name="apply-mode"
+                                            checked={applyMode === "milestones"}
+                                            onChange={() => setApplyMode("milestones")}
+                                            className="accent-[#6366F1]"
+                                        />
+                                        <span>
+                                            <strong className="block">마일스톤으로</strong>
+                                            <span className="text-[10px] text-neutral-500">## 헤딩 / - [ ] 추출 ({candidates.length}개)</span>
+                                        </span>
+                                    </label>
+                                    <label className="text-xs text-neutral-700 flex items-center gap-1.5 cursor-pointer flex-1">
+                                        <input
+                                            type="radio"
+                                            name="apply-mode"
+                                            checked={applyMode === "note"}
+                                            onChange={() => setApplyMode("note")}
+                                            className="accent-[#6366F1]"
+                                        />
+                                        <span>
+                                            <strong className="block">프로젝트 노트로</strong>
+                                            <span className="text-[10px] text-neutral-500">본문 그대로 보존 (Pre-mortem·RACI)</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
 
                             {applyResult ? (
                                 <div className="text-center py-4">
                                     <Check className="h-8 w-8 text-[#6366F1] mx-auto mb-2" />
                                     <p className="text-sm text-neutral-700">
                                         {applyResult.count > 0
-                                            ? `마일스톤 ${applyResult.count}개 추가됨`
+                                            ? (applyMode === "note" ? "프로젝트 노트로 저장됨" : `마일스톤 ${applyResult.count}개 추가됨`)
                                             : "추출 가능한 항목이 없습니다 (## 헤딩 또는 - [ ] 체크박스 필요)"}
                                     </p>
                                 </div>
@@ -772,18 +850,30 @@ export function TemplatesView() {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">추가될 마일스톤 미리보기</p>
-                                        <ul className="space-y-1 max-h-44 overflow-y-auto bg-neutral-50 rounded-md p-2">
-                                            {candidates.map((c, i) => (
-                                                <li key={i} className="flex items-center gap-2 text-xs text-neutral-700">
-                                                    <span className="text-[#6366F1] shrink-0">◆</span>
-                                                    <span className="flex-1 truncate">{c.title}</span>
-                                                    {c.due_date && <span className="text-[10px] text-neutral-500 font-mono shrink-0">{c.due_date}</span>}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    {applyMode === "milestones" ? (
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">추가될 마일스톤 미리보기</p>
+                                            <ul className="space-y-1 max-h-44 overflow-y-auto bg-neutral-50 rounded-md p-2">
+                                                {candidates.length === 0 ? (
+                                                    <li className="text-[11px] text-neutral-400 italic">## 헤딩 또는 - [ ] 체크박스가 없습니다. "프로젝트 노트로" 모드를 사용하세요.</li>
+                                                ) : candidates.map((c, i) => (
+                                                    <li key={i} className="flex items-center gap-2 text-xs text-neutral-700">
+                                                        <span className="text-[#6366F1] shrink-0">◆</span>
+                                                        <span className="flex-1 truncate">{c.title}</span>
+                                                        {c.due_date && <span className="text-[10px] text-neutral-500 font-mono shrink-0">{c.due_date}</span>}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">저장될 노트 미리보기</p>
+                                            <div className="max-h-44 overflow-y-auto bg-neutral-50 rounded-md p-2 text-[11px] text-neutral-600 font-mono whitespace-pre-wrap leading-snug">
+                                                {(isSpecialTemplate(selected!) ? exportFwText(selected!, tplData) : expandedBodyMd).slice(0, 400)}
+                                                {(isSpecialTemplate(selected!) ? exportFwText(selected!, tplData) : expandedBodyMd).length > 400 && "\n…"}
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             )}
 
@@ -798,7 +888,7 @@ export function TemplatesView() {
                                 {!applyResult && (
                                     <button
                                         onClick={applyAsMilestones}
-                                        disabled={applying || !applyTargetId}
+                                        disabled={applying || !applyTargetId || (applyMode === "milestones" && candidates.length === 0)}
                                         className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50 flex items-center gap-1.5"
                                     >
                                         {applying && <Loader2 className="h-3 w-3 animate-spin" />}
@@ -918,16 +1008,31 @@ export function TemplatesView() {
                                 }
                             </span>
                             <div className="flex items-center gap-2">
-                                {projects.length > 0 && extractMilestones(expandedBodyMd).length > 0 && (
+                                {projects.length > 0 && expandedBodyMd.trim() && (
                                     <button
-                                        onClick={() => { setApplyResult(null); setApplyTargetId(""); setShowApplyModal(true); }}
+                                        onClick={() => {
+                                            setApplyResult(null);
+                                            setApplyTargetId("");
+                                            // 마일스톤 후보가 0이면 노트 모드를 기본값으로
+                                            setApplyMode(extractMilestones(expandedBodyMd).length > 0 ? "milestones" : "note");
+                                            setShowApplyModal(true);
+                                        }}
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors"
-                                        title={`${extractMilestones(expandedBodyMd).length}개 항목을 마일스톤으로 변환`}
+                                        title="프로젝트에 마일스톤 또는 노트로 적용"
                                     >
                                         <Target className="h-3 w-3" />
                                         프로젝트로 적용
                                     </button>
                                 )}
+                                <button
+                                    onClick={visualizeAsMindmap}
+                                    disabled={visualizing}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors disabled:opacity-50"
+                                    title="템플릿 본문을 마인드맵 캔버스로 자동 변환 후 이동"
+                                >
+                                    {visualizing ? <Loader2 className="h-3 w-3 animate-spin" /> : <GitBranch className="h-3 w-3" />}
+                                    마인드맵으로
+                                </button>
                                 <button
                                     onClick={promoteToTask}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"

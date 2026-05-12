@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2, Plus, Search, Loader2, Pencil, Trash2, ArrowLeft, Globe, Users as UsersIcon, X } from "lucide-react";
+import { Building2, Plus, Search, Loader2, Pencil, Trash2, ArrowLeft, Globe, Users as UsersIcon, X, ExternalLink } from "lucide-react";
 
 interface Company {
     id: string;
@@ -212,6 +212,15 @@ export function CompaniesView() {
                                         </span>
                                     </div>
                                 </button>
+                                {c.contact_count > 0 && (
+                                    <Link
+                                        href={`/myverse/app/contacts?company=${c.id}`}
+                                        className="p-1.5 text-neutral-400 hover:text-[#6366F1] rounded inline-flex items-center"
+                                        title={`소속 연락처 ${c.contact_count}명 보기`}
+                                    >
+                                        <ExternalLink className="h-3.5 w-3.5" />
+                                    </Link>
+                                )}
                                 <button
                                     onClick={() => setEditing(c)}
                                     className="p-1.5 text-neutral-400 hover:text-[#6366F1] rounded"

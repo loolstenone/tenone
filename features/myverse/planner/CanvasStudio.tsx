@@ -209,6 +209,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                     <MindmapEditor
                         initialDoc={initialMindmap ?? undefined}
                         onSave={handleMindmapSave}
+                        onPromoteText={handlePromoteText}
                         className="absolute inset-0"
                     />
                 ) : (
