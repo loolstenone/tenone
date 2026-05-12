@@ -5,8 +5,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    Mail, Inbox, Tag, Receipt, Calendar as CalIcon, Newspaper, Archive,
-    Search, RefreshCw, Loader2, Star, ExternalLink, AlertCircle, Trash2, Check,
+    Mail, Inbox, Receipt, Calendar as CalIcon, Newspaper, Archive,
+    Search, RefreshCw, Loader2, Star, ExternalLink, AlertCircle,
+    Users as UsersIcon, Filter, X as XIcon,
 } from "lucide-react";
 
 interface EmailItem {
@@ -72,6 +73,10 @@ export function MailView() {
     const [selected, setSelected] = useState<EmailDetail | null>(null);
     const [detailLoading, setDetailLoading] = useState(false);
     const [notConnected, setNotConnected] = useState(false);
+    const [unreadOnly, setUnreadOnly] = useState(false);
+    const [dateRange, setDateRange] = useState<"all" | "today" | "week" | "month">("all");
+    const [senderFilter, setSenderFilter] = useState<string | null>(null);  // sender_email 또는 도메인
+    const [showFilters, setShowFilters] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -159,9 +164,32 @@ export function MailView() {
         return out;
     }, [emails]);
 
+    // 발신인 빈도 (top 8)
+    const topSenders = useMemo(() => {
+        const counts = new Map<string, { name: string | null; count: number }>();
+        for (const e of emails) {
+            if (!e.sender_email) continue;
+            const key = e.sender_email.toLowerCase();
+            const cur = counts.get(key);
+            if (cur) cur.count++;
+            else counts.set(key, { name: e.sender_name, count: 1 });
+        }
+        return [...counts.entries()]
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 8)
+            .map(([email, { name, count }]) => ({ email, name, count }));
+    }, [emails]);
+
     const filtered = useMemo(() => {
         const cat = CATEGORIES.find(c => c.key === activeCategory);
         let list = emails.filter(cat?.filter ?? (() => true));
+        if (unreadOnly) list = list.filter(e => !e.is_read);
+        if (senderFilter) list = list.filter(e => (e.sender_email ?? "").toLowerCase() === senderFilter);
+        if (dateRange !== "all") {
+            const now = Date.now();
+            const range = dateRange === "today" ? 86400_000 : dateRange === "week" ? 7 * 86400_000 : 30 * 86400_000;
+            list = list.filter(e => now - new Date(e.received_at).getTime() < range);
+        }
         if (search.trim()) {
             const q = search.toLowerCase();
             list = list.filter(e =>
@@ -172,7 +200,9 @@ export function MailView() {
             );
         }
         return list.sort((a, b) => b.received_at.localeCompare(a.received_at));
-    }, [emails, activeCategory, search]);
+    }, [emails, activeCategory, search, unreadOnly, senderFilter, dateRange]);
+
+    const activeFiltersCount = (unreadOnly ? 1 : 0) + (senderFilter ? 1 : 0) + (dateRange !== "all" ? 1 : 0);
 
     return (
         <div className="flex h-[calc(100vh-3rem)] overflow-hidden bg-white myverse-dark:bg-[#0A0A12]">
@@ -222,17 +252,122 @@ export function MailView() {
 
             {/* 중앙 메일 목록 */}
             <div className="w-96 shrink-0 border-r border-neutral-200 myverse-dark:border-white/8 flex flex-col">
-                <div className="px-3 py-2 border-b border-neutral-200 myverse-dark:border-white/8">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="이름·제목·내용 검색"
-                            className="w-full text-xs pl-7 pr-2 py-1.5 bg-neutral-50 myverse-dark:bg-white/5 border border-neutral-200 myverse-dark:border-white/10 rounded focus:outline-none focus:border-[#6366F1]"
-                        />
+                <div className="px-3 py-2 border-b border-neutral-200 myverse-dark:border-white/8 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="이름·제목·내용 검색"
+                                className="w-full text-xs pl-7 pr-2 py-1.5 bg-neutral-50 myverse-dark:bg-white/5 border border-neutral-200 myverse-dark:border-white/10 rounded focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowFilters(s => !s)}
+                            className={`relative px-2 py-1.5 text-[10px] rounded border transition-colors ${
+                                showFilters || activeFiltersCount > 0
+                                    ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
+                                    : "bg-neutral-50 myverse-dark:bg-white/5 text-neutral-500 border-neutral-200 myverse-dark:border-white/10 hover:text-neutral-700"
+                            }`}
+                            title="필터"
+                        >
+                            <Filter className="h-3 w-3" />
+                            {activeFiltersCount > 0 && (
+                                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#6366F1] text-white text-[8px] flex items-center justify-center font-semibold">
+                                    {activeFiltersCount}
+                                </span>
+                            )}
+                        </button>
                     </div>
+
+                    {showFilters && (
+                        <div className="space-y-1.5 pt-1.5 border-t border-neutral-100 myverse-dark:border-white/5">
+                            {/* 읽지 않음 토글 + 날짜 범위 */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                                <button
+                                    type="button"
+                                    onClick={() => setUnreadOnly(v => !v)}
+                                    className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                                        unreadOnly
+                                            ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
+                                            : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >
+                                    읽지 않음만
+                                </button>
+                                {(["all", "today", "week", "month"] as const).map(r => (
+                                    <button
+                                        key={r}
+                                        type="button"
+                                        onClick={() => setDateRange(r)}
+                                        className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                                            dateRange === r
+                                                ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
+                                                : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                        }`}
+                                    >
+                                        {r === "all" ? "전체기간" : r === "today" ? "오늘" : r === "week" ? "이번주" : "이번달"}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* 발신인 — top 8 */}
+                            {topSenders.length > 0 && (
+                                <div>
+                                    <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-1 flex items-center gap-1">
+                                        <UsersIcon className="h-2.5 w-2.5" /> 발신인
+                                    </p>
+                                    <div className="flex flex-wrap gap-1">
+                                        {topSenders.map(s => {
+                                            const isActive = senderFilter === s.email;
+                                            return (
+                                                <button
+                                                    key={s.email}
+                                                    type="button"
+                                                    onClick={() => setSenderFilter(isActive ? null : s.email)}
+                                                    className={`text-[10px] px-1.5 py-0.5 rounded border max-w-[140px] truncate ${
+                                                        isActive
+                                                            ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
+                                                            : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                                    }`}
+                                                    title={`${s.email} (${s.count}건)`}
+                                                >
+                                                    {s.name || s.email.split("@")[0]} <span className="text-neutral-400">·{s.count}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* 활성 필터 칩 (필터 패널 닫혀 있을 때만 요약 표시) */}
+                    {!showFilters && activeFiltersCount > 0 && (
+                        <div className="flex items-center gap-1 flex-wrap">
+                            {unreadOnly && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1]">
+                                    읽지 않음
+                                    <button onClick={() => setUnreadOnly(false)} className="hover:text-rose-500"><XIcon className="h-2 w-2" /></button>
+                                </span>
+                            )}
+                            {dateRange !== "all" && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1]">
+                                    {dateRange === "today" ? "오늘" : dateRange === "week" ? "이번주" : "이번달"}
+                                    <button onClick={() => setDateRange("all")} className="hover:text-rose-500"><XIcon className="h-2 w-2" /></button>
+                                </span>
+                            )}
+                            {senderFilter && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1] max-w-[160px]">
+                                    <span className="truncate">{senderFilter}</span>
+                                    <button onClick={() => setSenderFilter(null)} className="hover:text-rose-500 shrink-0"><XIcon className="h-2 w-2" /></button>
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {loading ? (
