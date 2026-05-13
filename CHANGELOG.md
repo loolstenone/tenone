@@ -4,6 +4,102 @@
 
 ---
 
+## 2026-05-13 (세션 134) — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴
+
+### 캡쳐 Phase 2 (5건)
+
+**#1 프로젝트 선택 모달**
+- `features/myverse/capture/CaptureView.tsx` — placeholder toast → 실제 모달
+- 모달 구성: 프로젝트 dropdown · 노트/마일스톤 2모드 토글 · 자동 제목 input · 마감일(마일스톤 모드만) · 미리보기
+- `suggestProjectTitle()` / `buildProjectContent()` 헬퍼 — trace의 caption·body·media_url·nutrition·exercise·tags·source 메타 자동 조립
+
+**#2 GPS 자동 체크인** (PWA 한계로 foreground only)
+- `lib/myverse/auto-checkin.ts` 신규 — `useAutoCheckin` hook
+- 10분 폴링 · 300m 이동 dedup · 30분 슬롯 dedup · Visibility API 일시정지 · localStorage 영속화
+- haversine 거리 계산 + slot key `YYYY-MM-DDTHH:MM` 30분 단위 floor
+- CaptureView 도크 위에 토글 + 상태 배지(최근 기록 시각 / 폴링 시각 / 권한 오류 메시지)
+
+**#3 운동·식사 전용 폼**
+- DB: `sql/myverse-routines-structured-fields.sql` (Prod 적용)
+  - `myverse_daily_routines` ADD `kcal INT` + `heart_rate INT` + `composition TEXT`
+- API: `app/api/myverse/routines/route.ts` POST/PATCH 모두 3 필드 수용 + 정수 정규화
+- traces: `app/api/myverse/traces/route.ts` — routine row의 category별 nutrition(meal)/exercise(exercise) JSON으로 surface
+  - exercise summary = `강도 N/5 · 평균 BPM · 메뉴구성` 자동 조립
+- 보너스: moment의 nutrition/exercise JSON 컬럼도 traces select에 추가 → AI 분석 후 카드에 즉시 표시
+- CaptureView composer:
+  - 식사: 시작/종료/메뉴 구성/섭취 칼로리
+  - 운동: 거기에 강도 1~5 세그먼트 + 평균 심박수 + 소모 칼로리
+  - 메모/체크인은 simple composer 유지 (`isStructuredComposer` 분기)
+
+**#4 DailyView dead code 5파일 삭제** — 외부 import 0 확인
+- 삭제: `DailyMoments.tsx` · `DailyPlacesCard.tsx` · `DailyRoutinesCard.tsx` · `DailyHealthStats.tsx` · `SnsPostComposer.tsx`
+
+**#5 좌하단 사이드바 footer 통째 삭제** (사용자 결정)
+- `features/myverse/app/AppSideNav.tsx` — footer 블록(설정·도움말·앱 설치) + `InstallButton` import 제거
+- ⚠ 후속 필요: 설정/도움말/앱 설치 진입점 부재 → UtilityBar 아바타 드롭다운으로 이전 권장 (차기 세션)
+
+### 모바일 하단 네비 — capture 가운데 강조
+
+- `features/myverse/app/MobileBottomNav.tsx`
+  - `ALL_NAV_OPTIONS`에 `capture`(`bolt` 아이콘) + `mail` 추가
+  - `MOBILE_NAV_DEFAULT` → `["projects", "today", "capture", "feed", "card"]`
+  - 5슬롯 모드 가운데(idx=2) 항목 강조 — 위로 솟은 원형 + accent fill + 흰 ring 4 + shadow-lg (Material BottomAppBar FAB 패턴)
+- `app/(Myverse)/myverse/app/settings/tech/page.tsx` — import를 `planner/MobileBottomNav` → `app/MobileBottomNav` 라이브 버전으로 교체
+- 옛 orphan 삭제: `features/myverse/planner/MobileBottomNav.tsx`
+
+### 녹음 + 퀵 메뉴 (CaptureView)
+
+**녹음 (audio media_type 신설)**
+- DB: `sql/myverse-moments-audio.sql` (Prod 적용)
+  - `myverse_daily_moments` media_type CHECK 교체 → `IN ('image','video','text','audio')`
+  - media_url_required CHECK 교체 → audio도 media_url 필수
+- `app/api/myverse/moments/route.ts` POST validation에 audio 허용
+- `app/api/myverse/traces/route.ts` UnifiedTrace.media_type 타입에 audio 추가
+- `lib/myverse/use-recorder.ts` 신규 — `useRecorder` hook
+  - MIME 자동 선택(webm/opus 우선) + getUserMedia 권한 + 거부/미지원/마이크 부재 에러 분기 + 언마운트 안전 정리
+  - 반환: state(idle/requesting/recording/stopping) + start/stop/cancel + elapsedSec + error
+- CaptureView 도크 그리드 `4 cols mobile / 7 cols md` — 사진·영상 옆에 `RecordBtn`
+  - 녹음 중: rose 테두리·아이콘 + 깜빡이는 dot + `mm:ss` 타이머
+  - 정지 → moments/upload → POST `media_type='audio'` + `duration_sec`
+- TraceCard audio: 인디고 박스 + Mic 아이콘 + 네이티브 `<audio controls>`
+- `suggestActions` audio 분기: Task로 + 프로젝트로
+
+**도크 밑 퀵 메뉴 (QuickLink 5개)**
+- 캔버스·연락처·메일·퍼스널·인사이트 — 둥근 칩 + 아이콘 + 텍스트
+- 사이드바 좁아진 모바일에서 빠른 진입점
+
+### 신규 파일
+
+| 경로 | 역할 |
+|---|---|
+| `lib/myverse/auto-checkin.ts` | GPS 자동 체크인 hook (foreground only, 슬롯+이동 dedup, localStorage 영속화) |
+| `lib/myverse/use-recorder.ts` | MediaRecorder hook (MIME 자동, 에러 분기, 언마운트 정리) |
+| `sql/myverse-routines-structured-fields.sql` | routines에 kcal/heart_rate/composition 컬럼 추가 |
+| `sql/myverse-moments-audio.sql` | moments media_type CHECK에 audio 추가 |
+
+### 삭제 파일
+
+- `features/myverse/planner/DailyMoments.tsx`
+- `features/myverse/planner/DailyPlacesCard.tsx`
+- `features/myverse/planner/DailyRoutinesCard.tsx`
+- `features/myverse/planner/DailyHealthStats.tsx`
+- `features/myverse/planner/SnsPostComposer.tsx`
+- `features/myverse/planner/MobileBottomNav.tsx` (orphan, app 버전이 SSOT)
+
+### 결정 사항
+
+1. **프로젝트 선택 모달은 노트/마일스톤 2모드 토글** — 캡쳐의 짧은 텍스트도 의미 손실 없이 보존(노트). 일정 추적 필요 시 마일스톤 모드.
+2. **GPS 자동 체크인은 foreground only** — PWA 한계로 진짜 백그라운드는 불가. UI에 "(앱 열려있을 때만)" 명시. 백그라운드는 Phase 3에서 Android Chrome PeriodicSync로 시도.
+3. **routines kcal/heart_rate/composition은 plain 컬럼** — JSON으로 묶지 않고 정규화. 차후 통계 쿼리 용이.
+4. **traces가 routine을 nutrition/exercise JSON으로 surface** — UnifiedTrace 인터페이스 안 깨고 카드 렌더 통일. moment AI 분석(nutrition/exercise JSONB)과도 형태 호환.
+5. **좌하단 footer 통째 삭제** — 사용자 결정. 차기 세션에서 UtilityBar 아바타 드롭다운으로 이전 (UniverseUtilityBar SSOT 7요소 보강 필요).
+6. **모바일 하단 네비 가운데 슬롯 강조** — Material BottomAppBar FAB 패턴(위로 솟은 원형). 5슬롯 모드(`navItems.length === 5 && idx === 2`)일 때만 적용 — 다른 개수에서는 균등 렌더.
+7. **녹음 audio는 moments 테이블에 통합** — 별도 audio 테이블 만들지 않고 media_type='audio'로 확장. UnifiedTrace 일관성 유지.
+8. **MobileBottomNav SSOT는 `features/myverse/app/MobileBottomNav.tsx`** — `planner/` 버전은 옛 잔재로 삭제. settings/tech import 경로도 일관 정리.
+9. **퀵 메뉴 5개는 좁은 모바일 진입 보강** — 사이드바 footer 삭제 후 캔버스·연락처·메일·퍼스널·인사이트로 가는 빠른 경로 제공.
+
+---
+
 ## 2026-05-13 (세션 133) — 이월 정리 + Myverse 캡쳐 페이지 신규
 
 ### 이월 처리

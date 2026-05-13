@@ -1,6 +1,88 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-13 (세션 133 — 이월 정리 + Myverse 캡쳐 페이지 신규)
+> 마지막 업데이트: 2026-05-13 (세션 134 — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴)
+
+---
+
+## 세션 134 핵심 성과 (2026-05-13)
+
+### 1. 캡쳐 Phase 2 — 5건 일괄 처리
+
+**#1 프로젝트 선택 모달** — `runAction("project")`의 placeholder toast 제거. CaptureView에 모달 추가
+- 프로젝트 dropdown(`GET /api/myverse/projects`) + 노트/마일스톤 2모드 토글
+- 자동 제목 추출 + `buildProjectContent()` (body·caption·media_url·nutrition/exercise·tags·source 메타 포함)
+- 마일스톤 모드일 때만 마감일 input
+- POST `/api/myverse/projects/{id}/notes` 또는 `/milestones`
+
+**#2 GPS 자동 체크인** — `lib/myverse/auto-checkin.ts` 신규 hook
+- 10분 폴링 + 300m 이동 dedup + 30분 슬롯 dedup + Visibility API 일시정지 + localStorage 영속화
+- CaptureView 상단 토글 + 상태 배지 (최근 기록 시각 / 폴링 시각 / 에러 메시지)
+- ⚠ 진짜 백그라운드는 PWA 한계로 불가 — UI에 "(앱 열려있을 때만)" 명시
+- places API에 `place_name="자동 기록"` + `address="lat,lng"` + `note="자동 체크인 (GPS)"`로 row 생성
+
+**#3 운동·식사 전용 폼** (DB 스키마 확장)
+- SQL: `myverse_daily_routines` ADD `kcal INT` + `heart_rate INT` + `composition TEXT` (Prod 적용)
+- routines API: POST/PATCH 모두 3 필드 수용 + 정수 정규화
+- traces API: routine row의 category별로 `nutrition`(meal) / `exercise`(exercise) JSON으로 surface
+  - exercise summary = `강도 N/5 · 평균 BPM · 메뉴구성` 자동 조립
+- 보너스: moment 의 `nutrition`/`exercise` JSON 컬럼도 traces select에 추가 → AI 분석 직후 카드에 즉시 표시
+- CaptureView composer:
+  - 식사: 시작/종료/메뉴 구성/섭취 칼로리
+  - 운동: 거기에 강도 1~5 세그먼트 버튼 + 평균 심박수 + 소모 칼로리
+  - 메모/체크인은 기존 simple composer 유지 (`isStructuredComposer` 분기)
+
+**#4 DailyView dead code 5개 파일 삭제** — 외부 import 0 확인 후 일괄 삭제
+- DailyMoments.tsx · DailyPlacesCard.tsx · DailyRoutinesCard.tsx · DailyHealthStats.tsx · SnsPostComposer.tsx
+
+**#5 좌하단 footer 통째 삭제** — 사용자 결정 (설정·도움말·앱설치 제거)
+- `app/(Myverse)/myverse/app/AppSideNav.tsx`에서 footer 블록 + `InstallButton` import 제거
+- ⚠ 진입점 부재: 설정·도움말·앱 설치로 가는 사이드바 진입점 없어짐 — 차기에 UtilityBar 아바타 드롭다운으로 이전 권장
+
+### 2. 모바일 하단 네비 — capture 가운데 강조
+
+`features/myverse/app/MobileBottomNav.tsx`:
+- `ALL_NAV_OPTIONS`에 `capture` (`bolt` 아이콘) + `mail` 추가
+- `MOBILE_NAV_DEFAULT` → `["projects", "today", "capture", "feed", "card"]`
+- 5슬롯 모드일 때 가운데(idx=2) 항목을 **위로 솟은 원형** 강조 — accent fill + 흰 아이콘 + 흰 ring 4 + shadow-lg (Material BottomAppBar FAB 패턴)
+- `app/(Myverse)/myverse/app/settings/tech/page.tsx` — import 경로를 라이브 버전(`features/myverse/app/MobileBottomNav`)으로 교체
+- 옛 orphan `features/myverse/planner/MobileBottomNav.tsx` 삭제 (외부 import 0)
+
+### 3. 캡쳐 페이지 — 녹음 + 퀵 메뉴
+
+**녹음 (audio media_type 신설)**
+- SQL: `myverse_daily_moments` media_type CHECK + url_required CHECK 둘 다 교체 (image/video/text/audio) (Prod 적용)
+- `app/api/myverse/moments/route.ts` POST validation 확장
+- `app/api/myverse/traces/route.ts` UnifiedTrace.media_type 타입 확장
+- `lib/myverse/use-recorder.ts` 신규 hook — MediaRecorder
+  - MIME 자동 선택 (webm/opus 우선 → webm → ogg → mp4)
+  - getUserMedia 권한 + 거부/미지원/마이크 부재 에러 분기
+  - 언마운트 시 stream/timer 안전 정리
+- CaptureView 도크 그리드 `4 cols mobile / 7 cols md`로 변경 — 사진·영상 옆에 `RecordBtn`
+- 녹음 중: rose 테두리·아이콘 + 깜빡이는 dot + `mm:ss` 타이머
+- 정지 → moments/upload → POST `media_type="audio"` + `duration_sec`
+- TraceCard audio 카드: 인디고 박스 + Mic 아이콘 + 네이티브 `<audio controls>`
+- `suggestActions` audio 분기: Task로 + 프로젝트로
+
+**도크 밑 퀵 메뉴 (QuickLink 5개)**
+- 캔버스·연락처·메일·퍼스널·인사이트 — 둥근 칩 + 아이콘 + 텍스트
+- 사이드바 접근이 좁아진 모바일 사용자 진입점 보강
+
+### 다음 할 일
+
+#### 🟡 사용자 직접 처리 (변동 없음)
+- Supabase Dashboard에서 `planners-moments` 옛 버킷 수동 삭제 (세션 133 마이그레이션 후 4객체 잔존)
+- Toss 가맹점 승인 + Vercel 환경변수
+- Gmail 재연결 공지 (세션 132 OAuth scope 확장 — 구독자는 Settings > 외부 연결에서 Google 재연결 1회 필요)
+
+#### 🟢 캡쳐 Phase 3 (다음 세션)
+1. **녹음 → 자동 transcribe** — Claude Haiku/Whisper로 음성→텍스트 자동 변환 + body에 저장 + Task로 칩에서 사용
+2. **GPS 백그라운드** — 진짜 PWA 백그라운드(Service Worker + PeriodicSync) — Android Chrome 한정. iOS는 포기.
+3. **운동·식사 카드에 구조화 표시** — 카드에서 강도/심박수/칼로리 시각화 (지금은 텍스트 summary만)
+4. **운동/식사 카드 → 분석 액션 자동 사용 가능** — 현재는 사진 있는 moment만 분석 가능. routine은 안내 toast만. transcribe·표 입력으로 가능하도록.
+5. **설정·도움말·앱 설치 진입점** — UtilityBar 아바타 드롭다운에 통합
+
+#### ⚪️ 보안 권고 (낮은 우선순위)
+- Rate Limiting (인증 API 분당 제한, Upstash Redis 등)
 
 ---
 

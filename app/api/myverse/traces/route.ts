@@ -13,7 +13,7 @@ interface UnifiedTrace {
     source: "moment" | "place" | "routine";
     date: string;
     happened_at: string | null;
-    media_type: "image" | "video" | "text" | null;
+    media_type: "image" | "video" | "text" | "audio" | null;
     media_url: string | null;
     thumbnail_url: string | null;
     caption: string | null;
@@ -25,6 +25,8 @@ interface UnifiedTrace {
     duration_min: number | null;
     visibility: "private" | "public" | "friends" | null;
     domain: string | null;
+    nutrition?: { calories?: number; summary?: string } | null;
+    exercise?: { kcal?: number; level?: number; heart_rate?: number; summary?: string } | null;
 }
 
 export async function GET(req: Request) {
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
 
     if (sources.includes("moment")) {
         let q = admin.from("myverse_daily_moments")
-            .select("id, date, happened_at, media_type, media_url, thumbnail_url, caption, body, location, with_whom, activity, visibility, domain")
+            .select("id, date, happened_at, media_type, media_url, thumbnail_url, caption, body, location, with_whom, activity, visibility, domain, nutrition, exercise")
             .eq("member_id", memberId);
         if (date) q = q.eq("date", date);
         else if (from && to) q = q.gte("date", from).lte("date", to);
@@ -54,6 +56,8 @@ export async function GET(req: Request) {
             location: r.location, with_whom: r.with_whom, activity: r.activity,
             category: null, duration_min: null,
             visibility: r.visibility, domain: r.domain,
+            nutrition: r.nutrition ?? null,
+            exercise: r.exercise ?? null,
         }))));
     }
 
@@ -76,7 +80,7 @@ export async function GET(req: Request) {
 
     if (sources.includes("routine")) {
         let q = admin.from("myverse_daily_routines")
-            .select("id, date, start_time, end_time, activity, category, note, level")
+            .select("id, date, start_time, end_time, activity, category, note, level, kcal, heart_rate, composition")
             .eq("member_id", memberId);
         if (date) q = q.eq("date", date);
         else if (from && to) q = q.gte("date", from).lte("date", to);
@@ -85,6 +89,30 @@ export async function GET(req: Request) {
             const duration_min = (r.start_time && r.end_time)
                 ? Math.max(0, Math.round((new Date(`${r.date}T${r.end_time}`).getTime() - new Date(`${r.date}T${r.start_time}`).getTime()) / 60000))
                 : null;
+
+            // category별 구조화 필드 → nutrition / exercise로 surface
+            let nutrition: UnifiedTrace["nutrition"] = null;
+            let exercise: UnifiedTrace["exercise"] = null;
+            if (r.category === "meal" && (r.kcal != null || r.composition)) {
+                const parts: string[] = [];
+                if (r.composition) parts.push(r.composition);
+                nutrition = {
+                    calories: r.kcal ?? undefined,
+                    summary: parts.join(" · ") || undefined,
+                };
+            } else if (r.category === "exercise" && (r.kcal != null || r.heart_rate != null || r.level != null || r.composition)) {
+                const parts: string[] = [];
+                if (r.level) parts.push(`강도 ${r.level}/5`);
+                if (r.heart_rate) parts.push(`평균 ${r.heart_rate}BPM`);
+                if (r.composition) parts.push(r.composition);
+                exercise = {
+                    kcal: r.kcal ?? undefined,
+                    level: r.level ?? undefined,
+                    heart_rate: r.heart_rate ?? undefined,
+                    summary: parts.join(" · ") || undefined,
+                };
+            }
+
             return {
                 id: `r_${r.id}`, source: "routine" as const,
                 date: r.date, happened_at,
@@ -93,6 +121,7 @@ export async function GET(req: Request) {
                 location: null, with_whom: null, activity: r.activity,
                 category: r.category, duration_min,
                 visibility: null, domain: null,
+                nutrition, exercise,
             };
         })));
     }

@@ -38,12 +38,14 @@ export async function POST(req: Request) {
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
     const body = await req.json();
-    const { date, activity, start_time, end_time, category, note, level } = body;
+    const { date, activity, start_time, end_time, category, note, level, kcal, heart_rate, composition } = body;
 
     if (!date || !activity) return NextResponse.json({ error: "date, activity required" }, { status: 400 });
 
     const cat = VALID_CATEGORIES.includes(category) ? category : "general";
     const lvl = Number.isInteger(level) && level >= 1 && level <= 5 ? level : null;
+    const kc = Number.isFinite(Number(kcal)) && Number(kcal) >= 0 ? Math.round(Number(kcal)) : null;
+    const hr = Number.isFinite(Number(heart_rate)) && Number(heart_rate) >= 0 ? Math.round(Number(heart_rate)) : null;
 
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -57,6 +59,9 @@ export async function POST(req: Request) {
             category: cat,
             note: note?.trim() || null,
             level: lvl,
+            kcal: kc,
+            heart_rate: hr,
+            composition: typeof composition === "string" && composition.trim() ? composition.trim() : null,
             capture_mode: "manual",
         })
         .select()
@@ -127,13 +132,20 @@ export async function PATCH(req: Request) {
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
     const body = await req.json();
-    const allowed = ["activity", "start_time", "end_time", "category", "note", "level"];
+    const allowed = ["activity", "start_time", "end_time", "category", "note", "level", "kcal", "heart_rate", "composition"];
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const key of allowed) {
         if (key in body) patch[key] = body[key];
     }
     if (patch.category && !VALID_CATEGORIES.includes(patch.category as string)) {
         patch.category = "general";
+    }
+    // 정수 필드 정규화
+    for (const k of ["level", "kcal", "heart_rate"] as const) {
+        if (k in patch) {
+            const v = patch[k];
+            patch[k] = v == null || v === "" ? null : (Number.isFinite(Number(v)) ? Math.round(Number(v)) : null);
+        }
     }
 
     const admin = createAdminClient();

@@ -145,6 +145,22 @@
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
 
+### 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음 (세션 134) — 캡쳐 페이지 완성도 + 모바일 IA 강화
+| 파일 | 역할 |
+|------|------|
+| `lib/myverse/auto-checkin.ts` | **신규** — GPS 자동 체크인 hook. 10분 폴링 + 300m 이동 dedup + 30분 슬롯 dedup + Visibility API 일시정지 + localStorage 영속화. PWA 한계로 foreground only |
+| `lib/myverse/use-recorder.ts` | **신규** — MediaRecorder hook. MIME 자동 선택(webm/opus 우선) + getUserMedia 권한 + 거부/미지원/마이크 부재 에러 분기 + 언마운트 안전 정리 |
+| `sql/myverse-routines-structured-fields.sql` | **신규** — `myverse_daily_routines` ADD kcal(INT) + heart_rate(INT) + composition(TEXT). 운동·식사 구조화 입력용 (Prod 적용) |
+| `sql/myverse-moments-audio.sql` | **신규** — moments media_type CHECK 교체 → `IN ('image','video','text','audio')`. url_required CHECK도 audio 포함 (Prod 적용) |
+| `features/myverse/capture/CaptureView.tsx` | **대폭 확장** — (1) 프로젝트 선택 모달(노트/마일스톤 2모드, 자동 제목/본문) · (2) 자동 체크인 토글 + 상태 배지 · (3) 식사/운동 전용 구조화 폼(시작/종료/구성/칼로리, 운동은 강도 1~5 + 심박수) · (4) 녹음 도크 버튼(rose 인디케이터+타이머) · (5) 도크 밑 퀵 메뉴 칩 5개(캔버스·연락처·메일·퍼스널·인사이트) · (6) TraceCard audio 렌더(`<audio controls>`) |
+| `features/myverse/app/MobileBottomNav.tsx` | `ALL_NAV_OPTIONS`에 capture/mail 추가. `MOBILE_NAV_DEFAULT` → `["projects","today","capture","feed","card"]`. 5슬롯 모드 가운데 슬롯 강조(Material BottomAppBar FAB — 위로 솟은 원형 + accent fill + 흰 ring) |
+| `features/myverse/app/AppSideNav.tsx` | 좌하단 footer 통째 삭제(설정·도움말·앱 설치). `InstallButton` import 제거. ⚠ 진입점 부재 — UtilityBar 아바타 드롭다운으로 이전 예정 |
+| `app/api/myverse/routines/route.ts` | POST/PATCH가 kcal/heart_rate/composition 수용 + 정수 정규화 |
+| `app/api/myverse/moments/route.ts` | POST validation에 'audio' 허용 (`media_type` + `media_url` 필수 검사 확장) |
+| `app/api/myverse/traces/route.ts` | UnifiedTrace.media_type에 'audio' 추가. routine select에 kcal/heart_rate/composition 추가 + category별 nutrition(meal)/exercise(exercise) JSON으로 surface. 보너스: moment select에 nutrition/exercise JSON 컬럼 추가(AI 분석 후 카드 즉시 표시) |
+| `app/(Myverse)/myverse/app/settings/tech/page.tsx` | import 경로를 `planner/MobileBottomNav` → `app/MobileBottomNav` 라이브 버전으로 교체 |
+| **삭제** | `features/myverse/planner/{DailyMoments,DailyPlacesCard,DailyRoutinesCard,DailyHealthStats,SnsPostComposer,MobileBottomNav}.tsx` — 6개 파일 외부 import 0 확인 후 일괄 삭제 |
+
 ### 캡쳐 통합 페이지 + 구독 만료 SSOT (세션 133) — 5 채집을 한 곳에서, 만료 검증 6곳 일관 처리
 | 파일 | 역할 |
 |------|------|
@@ -325,7 +341,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 133 (2026-05-13)** — 이월 정리(Storage `planners-moments`→`myverse-moments` 4객체 이전, 구독 만료 SSOT 6곳 일관 처리) + 캡쳐 페이지 신규(`/myverse/app/capture` — 빠른 도크 6버튼 + traces 통합 카드 + AI 액션 칩) + DailyView 3카드 제거(캡쳐로 이관) |
+| **Phase** | **세션 134 (2026-05-13)** — 캡쳐 Phase 2 일괄 처리(#1 프로젝트 선택 모달 · #2 GPS 자동 체크인 hook(foreground only) · #3 운동·식사 전용 폼(DB kcal/heart_rate/composition 추가) · #4 DailyView dead code 5파일 삭제 · #5 좌하단 footer 통째 삭제) + 모바일 하단 네비(`MOBILE_NAV_DEFAULT` → projects/today/**capture**/feed/card, 가운데 슬롯 강조 FAB 스타일) + 캡쳐 녹음(audio media_type 신설, MediaRecorder hook) + 도크 밑 퀵 메뉴 5개(캔버스·연락처·메일·퍼스널·인사이트) |
+| **세션 133 (2026-05-13)** | 이월 정리(Storage `planners-moments`→`myverse-moments` 4객체 이전, 구독 만료 SSOT 6곳 일관 처리) + 캡쳐 페이지 신규(`/myverse/app/capture` — 빠른 도크 6버튼 + traces 통합 카드 + AI 액션 칩) + DailyView 3카드 제거(캡쳐로 이관) |
 | **세션 132 (2026-05-12)** | Notion Mail 통합 1~4단계: Gmail 인박스(3패널: 카테고리+목록+본문) + 본문 on-demand fetch+캐시 + 필터(읽지않음/날짜/발신인) + Daily 임베드(NoteItem 'email') + 답장/작성 composer(RFC 822+base64url) + Gmail 라벨 동기화(archive/read/star) + OAuth scope 확장(send+modify). Hotfix: 대문자 /Myverse 404 + 사이드바 접힘 FOUC |
 | **세션 131 (2026-05-12)** | 마인드맵 PNG/SVG export + 선택 노드 → +Task 버튼 + 템플릿 본문 → 마인드맵 시각화(parseTextToMindmap 재사용) + 회사 클릭 → ContactsView 필터(`?company=ID` + 활성 칩) + 템플릿 적용 모달에 "마일스톤/프로젝트 노트" 이중 모드 (Pre-mortem·RACI·SAFe 본문 보존) |
 | **세션 130 (2026-05-12)** | 마인드맵 텍스트 import(마크다운/들여쓰기 자동 감지) + 회사 관리 페이지(`/contacts/companies` CRUD + 인원 펼침) + 간트 의존성 위반 감지(dashed rose + ⚠ + 5-pass 자동 일정 조정) + 마인드맵→프로젝트(1단계 자식→마일스톤) + 간트 PNG/SVG export + 신규 프레임워크 4종(RACI·Pre-mortem·OKR Roll-up·SAFe PI Planning) |
@@ -339,11 +356,12 @@
 | **이전 Phase** | 세션 119 — IA 재구성 (4-Pillar mess → 5-Lane), LaneSubNav, traces ?domain= 딥링크 |
 | **Phase 118** | **세션 118 (2026-05-08)** — 올가미 선택·리사이즈 실시간·PP흔적·보안점검 |
 | **이전 Phase** | 세션 117 — Canvas Engine Phase 2 (image, export, 레이어, 텍스트 서식) / 세션 116 — Planners → Myverse 인프라 마이그레이션 Phase 4 |
-| **다음 Phase** | 캡쳐 Phase 2 — (1) 프로젝트 선택 모달(현재 placeholder toast) · (2) GPS 백그라운드 자동 트래킹 · (3) 운동/식사 전용 폼(level·심박수·칼로리 직접 입력) · (4) DailyMoments·DailyPlacesCard·DailyRoutinesCard 파일 dead code 정리 · (5) Toss 가맹점 승인 + Vercel 환경변수 · (6) Supabase Dashboard에서 `planners-moments` 옛 버킷 수동 삭제 |
+| **다음 Phase** | 캡쳐 Phase 3 — (1) 녹음 → 자동 transcribe(Whisper/Haiku) · (2) GPS 진짜 백그라운드(Service Worker + PeriodicSync, Android Chrome 한정) · (3) 운동·식사 카드에 구조화 표시(강도/심박수/칼로리 시각화) · (4) routine 카드에서도 분석 액션 자동 사용(transcribe·표 입력으로) · (5) 설정·도움말·앱 설치 진입점 부재 — UtilityBar 아바타 드롭다운에 통합 · (6) Toss 가맹점 승인 + Vercel 환경변수 · (7) Supabase Dashboard에서 `planners-moments` 옛 버킷 수동 삭제 · (8) Gmail 재연결 공지 (세션 132 OAuth scope 확장) |
 | **세션 118 결정** | ① 올가미 선택(lasso): ray casting `pointInPolygon()`, SVG polyline 시각화 · ② resize 실시간: SVG DOM translate/scale/translate 직접 적용 · ③ PP 흔적 제거: CommunityView 텍스트, globals.css 죽은 블록, CanvasStudio div 클래스 · ④ 전체화면 노트 뷰: DailyView/ProjectNotesTab z-[9100] + 타입 배지 pill + 취소/저장 버튼 |
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **세션 134 결정** | ① 프로젝트 선택 모달은 노트/마일스톤 2모드 — 캡쳐의 짧은 텍스트도 의미 손실 없이 보존(노트). 일정 추적 필요 시 마일스톤 · ② GPS 자동 체크인은 foreground only — PWA 한계로 진짜 백그라운드 불가, UI에 "(앱 열려있을 때만)" 명시. 10분 폴링 + 300m 이동 dedup + 30분 슬롯 dedup + Visibility 일시정지 · ③ routines 구조화 필드는 plain 컬럼(kcal/heart_rate/composition) — JSON 묶지 않음. 차후 통계 쿼리 용이 · ④ traces가 routine을 nutrition/exercise JSON으로 surface — UnifiedTrace 인터페이스 안 깨고 카드 렌더 통일. moment AI 분석(nutrition/exercise JSONB)과도 형태 호환 · ⑤ 좌하단 footer 통째 삭제(사용자 결정) — 차기 세션에서 UtilityBar 아바타 드롭다운으로 이전 · ⑥ 모바일 하단 네비 가운데 슬롯 강조는 Material BottomAppBar FAB 패턴(위로 솟은 원형). `navItems.length === 5 && idx === 2`일 때만 적용 — 사용자가 4개로 줄이면 균등 렌더 · ⑦ 녹음 audio는 moments 테이블 media_type 확장으로 통합 — 별도 audio 테이블 만들지 않음. UnifiedTrace 일관성 · ⑧ MobileBottomNav SSOT는 `features/myverse/app/MobileBottomNav.tsx` — planner 버전은 옛 잔재로 삭제. settings/tech 경로도 일관 정리 · ⑨ 퀵 메뉴 5개(캔버스·연락처·메일·퍼스널·인사이트)는 좁은 모바일 진입 보강 — 사이드바 footer 삭제 후 후속책 |
 | **세션 133 결정** | ① 구독 만료 검증은 SSOT 헬퍼 1개로 통일 — 6곳 인라인 분기 대신 `lib/myverse/subscription.ts`. `subscription_status='active'` + `subscription_expires_at > now`를 함께 본다 · ② layout.tsx에서 만료 감지 시 DB best-effort UPDATE — Promise.then 비동기 fire-and-forget으로 응답 지연 없이 다음 호출에서 정확 · ③ cron API는 PostgREST `.or()` 두 번 chain의 모호성 회피 — 시간 필터만 SQL, 만료 검증은 코드측 filter. ④ 캡쳐 페이지 데이터 소스는 traces API(moments+places+routines UNION) — 한 페이지에서 통합 표시. 자동 미러링은 기존 places/routines API 그대로. ⑤ 캡쳐 도크 매핑: 메모/사진/영상→moments · 식사/운동→routines(category='meal'/'exercise') · 체크인→places(GPS 자동). ⑥ AI 액션 분기 — 도메인 + sub_tags/caption/body/activity blob에서 FOOD/EXERCISE/CELEBRATION hints 매칭. 첫 매치만 primary 액션. ⑦ DailyView 3카드 제거(캡쳐로 이관). 컴포넌트 파일 자체는 보존 — 다른 페이지 import 가능성 때문에 다음 세션 dead code 정리. ⑧ 캡쳐 사이드바 아이콘은 `bolt`(번개) — Quick Capture의 즉시성. `photo_camera`(카메라)는 사진만 의미해 좁음 |
 | **세션 132 결정** | ① Notion Mail UX = 3패널(카테고리·목록·본문). 메일은 별도 페이지(`/myverse/app/mail`)로 — Daily에서 호출 X · ② 본문은 on-demand fetch + DB 캐시. snippet만 caching하면 메일 미리보기에서 끝, 본문은 클릭한 메일만 fetch. 캡: text 100KB / html 500KB (XSS 안전성 위해 iframe sandbox 렌더) · ③ Gmail OAuth scope 확장은 1회 재연결 필요 — 사용자 안내 + API에 403 insufficient_scope 응답 표시 · ④ 답장은 In-Reply-To/References 헤더로 thread 묶음. RFC 2047 한글 제목 base64 인코딩 필수 · ⑤ Gmail 라벨 동기화는 best-effort (Promise.all + catch) — 로컬 DB 상태가 진실, Gmail 동기화 실패해도 로컬 보존 · ⑥ Daily 임베드 = 본문 복제 X. email_id 참조 + email_meta 캐시(sender/subject/snippet/external_id)만 보관 → 이메일 원본은 Gmail 또는 myverse_email_imports에 그대로 · ⑦ 필터는 client-side만(메일 50개 limit). 서버 q= 검색은 다음 세션 · ⑧ "Connected emails / Connected calendars" 그룹 분리 — Gmail/Calendar 같은 OAuth 공유지만 UI는 독립 표시 (Notion Mail 패턴) · ⑨ FOUC 방지는 다크모드 패턴 재사용 — 인라인 스크립트로 HTML 클래스 부착 + useState 초기값 함수가 클래스 검사. SSR/client 첫 페인트 동일 |
 | **세션 131 결정** | ① 마인드맵 export 캡처 제외는 `data-mindmap-ui` 속성으로 마킹 + `filter` 옵션 — UI 요소(툴바·도움말·picker·모달)를 깔끔히 빼서 회의 자료용 결과물 생성 · ② 노드 → Task는 CanvasEditor와 동일한 `onPromoteText` prop 패턴 재사용 — 일관성 유지, 별도 API 불필요 · ③ 템플릿 → 마인드맵은 새 캔버스 생성 후 router.push (모달 내 미리보기 X) — 마인드맵은 큰 화면이 필요한 도구라 새 페이지가 자연 · ④ 회사 필터는 URL query(`?company=ID`)로 stateless — 북마크·공유 가능. 활성 필터 칩으로 명확한 시그널 · ⑤ Pre-mortem/RACI/SAFe 같은 구조 보존 템플릿은 "노트 모드"로 통째로 저장 — 마일스톤 분해는 의미 손실. 사용자가 모드 선택. 헤딩 없어도 본문 있으면 노트 모드로 적용 가능 · ⑥ apply 모달이 milestones·note 양쪽을 같은 함수에서 처리 — 분기는 applyMode state로 단순화 |

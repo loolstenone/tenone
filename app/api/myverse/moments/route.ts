@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     } = body as Record<string, unknown>;
 
     if (!date || typeof date !== "string") return NextResponse.json({ error: "missing_date" }, { status: 400 });
-    if (media_type !== "image" && media_type !== "video" && media_type !== "text") return NextResponse.json({ error: "invalid_media_type" }, { status: 400 });
-    if (media_type === "image" || media_type === "video") {
+    if (media_type !== "image" && media_type !== "video" && media_type !== "text" && media_type !== "audio") return NextResponse.json({ error: "invalid_media_type" }, { status: 400 });
+    if (media_type === "image" || media_type === "video" || media_type === "audio") {
         if (!media_url || typeof media_url !== "string") return NextResponse.json({ error: "missing_media_url" }, { status: 400 });
     }
     if (media_type === "text") {

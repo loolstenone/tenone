@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { InstallButton } from "@/features/myverse/planner/InstallButton";
 import { useSidebarCollapse } from "./SidebarCollapseContext";
 
 const BASE = "/myverse/app";
@@ -161,28 +160,6 @@ export function AppSideNav() {
                 ))}
             </nav>
 
-            {/* Footer utility — mt-auto로 항상 하단 고정 */}
-            <div className="mt-auto px-2 pb-3 pt-2 border-t border-neutral-100 myverse-dark:border-white/8 space-y-0.5">
-                <SideNavLink
-                    href="/myverse/app/settings"
-                    label="설정"
-                    icon="tune"
-                    active={pathname.startsWith("/myverse/app/settings")}
-                    collapsed={collapsed}
-                />
-                <SideNavLink
-                    href="/myverse/app/help"
-                    label="도움말"
-                    icon="help"
-                    active={pathname.startsWith("/myverse/app/help")}
-                    collapsed={collapsed}
-                />
-                <InstallButton className={`relative group flex items-center ${collapsed ? "justify-center" : "gap-2.5"} px-2.5 py-1.5 rounded-lg text-xs text-neutral-500 myverse-dark:text-neutral-500 hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors w-full text-left`}>
-                    <span className="material-symbols-outlined text-[16px] leading-none shrink-0">download</span>
-                    {!collapsed && <span>앱 설치</span>}
-                </InstallButton>
-
-            </div>
         </aside>
     );
 }

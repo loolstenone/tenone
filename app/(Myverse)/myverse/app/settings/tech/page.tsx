@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import type { ActivityBase } from "@/lib/myverse/types";
-import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/myverse/planner/MobileBottomNav";
+import { ALL_NAV_OPTIONS, MOBILE_NAV_STORAGE_KEY, MOBILE_NAV_DEFAULT } from "@/features/myverse/app/MobileBottomNav";
 import { SettingsLayout } from "@/features/myverse/planner/SettingsLayout";
 import { SettingsIntegrations } from "@/features/myverse/planner/settings/SettingsIntegrations";
 import { SettingsBases } from "@/features/myverse/planner/settings/SettingsBases";
