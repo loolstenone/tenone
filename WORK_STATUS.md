@@ -1,6 +1,44 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-12 (세션 131 — 마인드맵 export·노드→Task·OKR 시각화·회사 필터·프로젝트 노트 통합)
+> 마지막 업데이트: 2026-05-12 (세션 132 — Notion Mail 통합 1~4단계 + 두 건 hotfix)
+
+---
+
+## 세션 132 핵심 성과 (2026-05-12)
+
+### 핫픽스 (개별 push 완료)
+1. **대문자 /Myverse 경로 하드코딩** — `app/(Myverse)/myverse/page.tsx`에 `router.replace("/Myverse/app/daily")` (대문자 M) 하드코딩 → 인증 사용자가 `/myverse` 접근 시 404. Next.js URL case-sensitive. page.tsx 2곳 + story 페이지 1곳 모두 소문자 정정. (commit `214b26cc`)
+2. **사이드바 접힘 FOUC** — `SidebarCollapseProvider` `useState(false)`로 시작 → SSR/첫 페인트는 펼침(라벨 큰 글씨 보임) → useEffect로 localStorage 읽어 접힘. 다크모드 패턴 재사용 — 인라인 스크립트로 `<html>`에 `myverse-sidebar-collapsed` 클래스 부착 + useState 초기값을 함수로(HTML 클래스 검사) + toggle 시 localStorage + HTML 클래스 동시 동기화. (commit `63b4e6e7`)
+
+### Notion Mail 통합 (4단계, 각 단계별 push)
+
+**1단계 — 인박스 페이지 + 본문 캐시** (`bb3d6341`)
+- SQL: `myverse_email_imports`에 `body_text`/`body_html`/`body_fetched_at`/`is_read`/`is_starred` (Prod 적용)
+- API: `GET/PATCH /api/myverse/email-imports/[id]` — 본문 on-demand fetch + Gmail API + DB 캐시 + 읽음·즐겨찾기·triage PATCH
+- 페이지: `/myverse/app/mail` 신규 + `MailView.tsx` (3패널 — 카테고리/검색/목록/본문)
+- 카테고리 필터 7종 — 전체·수신함·영수증·초대·뉴스레터·즐겨찾기·보관함
+- 사이드바에 "메일" 메뉴 추가
+- Settings 외부연동 페이지에 "Connected emails" / "Connected calendars" 그룹 분리 + Gmail row
+
+**2단계 — 필터 패널** (`4ffe11c8`)
+- Filter 토글 버튼 + 활성 필터 카운트 배지
+- 읽지 않음 / 날짜 범위(전체/오늘/이번주/이번달) / 발신인 chip (top 8 빈도순)
+- 활성 필터 칩 (패널 닫힘 시 요약 + X 해제)
+
+**3단계 — 메일 → Daily 임베드** (`a575c3e8`)
+- `NoteItem` 타입에 `'email'` + `email_id` + `email_meta` 추가
+- `DailyView` email 카드 렌더링 — rose 그라디언트, 보낸이 아바타, 제목+snippet 4줄, Gmail 원본 링크
+- `MailView` "Daily 임베드" 버튼 — 오늘 daily.notes에 push + triage_state='note' 마킹
+- 헤더 아이콘에 Mail 아이콘 + auto-title "메일 N" 패턴
+
+**4단계 — 답장·작성·Gmail 동기화** (`925ef605`)
+- OAuth scope 확장: `gmail.send` + `gmail.modify` (기존 사용자 재연결 필요)
+- API: `POST /api/myverse/integrations/gmail/send` (RFC 822 + base64url + In-Reply-To/References + threadId)
+- API: `POST /api/myverse/integrations/gmail/modify` (archive/mark_read/mark_unread/star/unstar)
+- composer 모달 — 답장(자동 인용 + Re:) / 새 작성 — To/Subject/Body
+- 헤더 답장 버튼 + 사이드바 새 메일 작성 버튼 (PenSquare)
+- archive/star/read 시 로컬 DB + Gmail 라벨 동시 동기화 (best-effort)
+- 403 insufficient_scope 응답 + 재연결 안내
 
 ---
 
@@ -263,14 +301,16 @@
 1. GCP 콘솔에서 Gmail API 활성화 (세션 127 잔여)
 2. 기존 Google 사용자 재연결 안내 (scope에 `gmail.readonly` 추가됨)
 
-### 기능 확장 (세션 131 잔여 — 다음 세션 후보)
-1. **마인드맵 협업 모드** — 여러 사람이 동시 편집 (Yjs/CRDT) 또는 read-only 공유 링크
-2. **간트 critical path** — 의존성 그래프에서 최장 경로 자동 강조 (프로젝트 마감 추정)
-3. **회사 페이지에 contacts CSV 일괄 import** — 회사별로 명함 한꺼번에 가져오기
-4. **프로젝트 노트 검색** — 노트 본문 전체 풀텍스트 검색 (`tsvector` 인덱스)
-5. **마인드맵 노드 일괄 → Task** — 선택된 서브트리 전체를 한 번에 Task로 변환
-6. **시드 템플릿 — Decision Log·SBI Feedback·Pre-mortem 시각화 예시** 추가
-7. **운영 조치 (사용자 직접)**: GCP Gmail API 활성화 + 기존 Google 사용자 재연결 안내
+### 기능 확장 (세션 132 잔여 — 다음 세션 후보)
+1. **메일 사용자 정의 라벨 동기화** — Gmail 사용자 라벨 이름 fetch + Myverse 사이드바에 라벨 그룹 추가
+2. **메일 첨부파일** — 본문 fetch 시 attachments 메타도 가져와 표시·다운로드
+3. **메일 server-side 검색** — 현재는 client-side 필터. Gmail q= 파라미터로 원격 검색
+4. **메일 thread view** — 같은 thread_id 메시지 그룹화 (현재는 메시지 단위)
+5. **Outlook/IMAP 메일 통합** — 다른 ESP 추가 (별도 OAuth + provider 분리)
+6. **마인드맵 협업 모드** — Yjs/CRDT 또는 read-only 공유 링크
+7. **간트 critical path** — 의존성 그래프 최장 경로 강조
+8. **시드 템플릿 — Decision Log·SBI Feedback** 추가
+9. **운영 조치 (사용자 직접)**: GCP Gmail API 활성화 + 기존 Google 사용자 재연결 (gmail.send/modify scope 추가)
 
 ---
 
