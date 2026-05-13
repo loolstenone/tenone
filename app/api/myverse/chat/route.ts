@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
+import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 import {
     fetchDomainStats,
     fetchTopPeople,
@@ -54,14 +55,14 @@ export async function POST(req: Request) {
 
     const admin = createAdminClient();
 
-    // 구독 상태 + 일일 한도 체크
+    // 구독 상태 + 일일 한도 체크 (만료일도 함께 검증 — lib/myverse/subscription.ts SSOT)
     const { data: planner } = await admin
         .from("myverse_users")
-        .select("subscription_status")
+        .select("subscription_status, subscription_expires_at")
         .eq("member_id", memberId)
         .maybeSingle();
 
-    const isSubscriber = planner?.subscription_status === "active";
+    const isSubscriber = isMyverseSubscriberActive(planner);
 
     if (!isSubscriber) {
         // 오늘 사용량 카운트

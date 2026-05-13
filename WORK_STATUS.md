@@ -1,6 +1,68 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-12 (세션 132 — Notion Mail 통합 1~4단계 + 두 건 hotfix)
+> 마지막 업데이트: 2026-05-13 (세션 133 — 이월 정리 + Myverse 캡쳐 페이지 신규)
+
+---
+
+## 세션 133 핵심 성과 (2026-05-13)
+
+### 1. 이월 작업 정리
+
+- 🔴 **Storage `planners-moments` → `myverse-moments` 마이그레이션 완료** — 4개 객체 이전 (`scripts/migrate-moments-bucket.js`). `myverse_daily_moments` URL은 이미 새 버킷 참조라 0행 업데이트. 옛 버킷 4개 객체 잔존 → 사용자가 Supabase Dashboard에서 수동 삭제.
+- 🟡 **Myverse 구독 만료 체크 SSOT 정리** — `subscription_status='active'` 만 검증하던 5곳에서 `subscription_expires_at` 누락 → 만료된 active 사용자가 chat 무제한 사용·매일 브리핑 수신·인트라에서 "active" 표시 등 잠재 버그. 6개 파일 일관 적용:
+  - `lib/myverse/subscription.ts` 신규 — `isMyverseSubscriberActive()` + `effectiveSubscriptionStatus()` SSOT
+  - `app/(Myverse)/myverse/app/layout.tsx` — 헬퍼 호출 + 만료 감지 시 DB best-effort UPDATE
+  - `app/api/myverse/chat/route.ts` — `subscription_expires_at` 함께 조회 + 헬퍼 판정
+  - `app/api/myverse/cron/briefings/route.ts` — 시간 필터 SQL + 만료 검증 헬퍼 (PostgREST `.or()` 두 번 chain 모호성 회피)
+  - `features/myverse/planner/PurchaseView.tsx` — "활성 구독" 박스/재결제 버튼이 진짜 활성만 노출
+  - `app/intra/planners/page.tsx` — active 카운트·배지가 만료자를 자동 expired로 처리
+
+### 2. Myverse 캡쳐 페이지 신규 — 5 채집 → 9 영역 통합 진입점
+
+**메뉴 추가** (`features/myverse/app/AppSideNav.tsx`)
+- INSIDE > ENGINE 그룹 "오늘" 위에 "캡쳐" 메뉴 (`bolt` 아이콘 — Quick Capture 메타포)
+
+**라우트 + 페이지** (`app/(Myverse)/myverse/app/capture/page.tsx`)
+- 서버 컴포넌트, force-dynamic. CaptureView 클라이언트 컴포넌트 호출.
+
+**CaptureView** (`features/myverse/capture/CaptureView.tsx`)
+- 상단 빠른 도크 6 버튼:
+  - 메모 (textarea)·사진 (file)·영상 (file) → **moments** (image/video/text)
+  - 식사·운동 (activity + 시간 입력) → **routines** (category='meal'/'exercise')
+  - 체크인 (place_name + GPS 자동 채움) → **places**
+- 카드 리스트: `GET /api/myverse/traces?date=today` — moments/places/routines 통합 + 시간 역순
+- source별 배지·색상:
+  - 한 장면(인디고) · 장소(emerald) · 일과(amber)
+- AI 액션 칩 (suggestActions):
+  - 텍스트 메모 → Task로 · 프로젝트로 · 검색해 볼까요? (Google 새 탭)
+  - 음식 사진 (`body` + 음식 키워드 또는 activity='식사') → 식단·열량 분석 (`/api/myverse/moments/{id}/analyze-food`)
+  - 운동 사진 → 운동 분석 (`/api/myverse/moments/{id}/analyze-exercise`)
+  - 업무·학습 → 프로젝트로 / Task로
+  - 축하·관계 → 소셜 공유 (Web Share API)
+  - routine 카드(meal/exercise) → 분석 칩 안내 (사진 없으면 toast 안내)
+  - 모든 카드: 공유 (navigator.share or 클립보드 fallback) · 삭제
+
+**DailyView 3 카드 제거** (`features/myverse/planner/DailyView.tsx`)
+- TodaySceneCard 정의 + 사용처 + 관련 import 6개(`DailyMomentsAuto`, `SnsPostComposer`, `DailyHealthStats`, `CameraIconForCard`, `DailyPlacesCard`, `DailyRoutinesCard`) 모두 제거
+- 컴포넌트 파일(`DailyMoments.tsx`, `DailyPlacesCard.tsx`, `DailyRoutinesCard.tsx`)은 보존 — 다른 페이지(TracesTimelineView 등)에서 import할 가능성 있음. dead code 정리는 다음 세션.
+- 약 70줄 감소
+
+### 다음 할 일
+
+#### 🟡 사용자 직접 처리
+- **Supabase Dashboard에서 `planners-moments` 버킷 수동 삭제** (오늘 마이그레이션 후 옛 위치 4개 객체 잔존)
+- **Toss 가맹점 승인 + Vercel 환경변수** (대표자 신분증·사업자등록증 → 승인 후 client/secret Vercel 등록)
+- **Gmail 재연결 공지** — 세션 132 OAuth scope 확장(`gmail.send` + `gmail.modify`)으로 구독자는 Settings > 외부 연결에서 Google 재연결 1회 필요
+
+#### 🟢 캡쳐 Phase 2 (다음 세션)
+1. **프로젝트 선택 모달** — 지금은 "다음 단계에서 추가됩니다" toast로 placeholder. 모달에서 프로젝트 선택 → POST `/api/myverse/projects/{id}/notes` 또는 milestones로 발전.
+2. **GPS 백그라운드 트래킹** — 현재는 체크인 클릭 시 1회 위치 채움. PWA 백그라운드 위치 권한 + 시간 슬롯별 자동 places row.
+3. **운동·식사 전용 폼** — 현재는 메모+activity 메타로 임시. 운동 강도(level 1~5)·시간·심박수 / 식사 칼로리·구성 직접 입력 필드.
+4. **DailyView 카드 dead code 정리** — `DailyMoments.tsx`/`DailyPlacesCard.tsx`/`DailyRoutinesCard.tsx`가 다른 페이지에서 정말 안 쓰이면 파일 자체 삭제.
+5. **사이드바 하단 vs 우상단 메뉴 겹침** — A/B/C 답변 대기 중. 설정·도움말·앱설치를 우상단 아바타 드롭다운으로 옮길지 결정 필요 (UniverseUtilityBar SSOT 7요소 보강).
+
+#### ⚪️ 보안 권고 (낮은 우선순위)
+- Rate Limiting (인증 API 분당 제한, Upstash Redis 등) — 외부 인프라 선택 결정 필요
 
 ---
 

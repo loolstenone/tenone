@@ -18,6 +18,7 @@ const NAV: NavSection[] = [
             {
                 label: "ENGINE",
                 items: [
+                    { key: "capture",   label: "캡쳐",    icon: "bolt",           href: `${BASE}/capture` },
                     { key: "today",     label: "오늘",    icon: "wb_twilight",    href: `${BASE}/daily` },
                     { key: "projects",  label: "프로젝트", icon: "folder_managed", href: `${BASE}/projects` },
                     { key: "canvas",    label: "캔버스",   icon: "draw",           href: `${BASE}/canvas` },

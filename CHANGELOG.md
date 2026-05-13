@@ -4,6 +4,79 @@
 
 ---
 
+## 2026-05-13 (세션 133) — 이월 정리 + Myverse 캡쳐 페이지 신규
+
+### 이월 처리
+
+**Storage 마이그레이션 — `planners-moments` → `myverse-moments`**
+- `scripts/migrate-moments-bucket.js` 실행. 4개 객체 복사 성공.
+- `myverse_daily_moments.media_url`은 이미 새 버킷 참조라 URL UPDATE는 0행.
+- 옛 버킷 4개 객체 잔존 — 사용자가 Supabase Dashboard에서 수동 삭제 필요.
+
+**Myverse 구독 만료 SSOT 정리 (잠재 버그 6곳 → 1 헬퍼)**
+- 검증 결과: `subscription_status='active'` 만 보고 `subscription_expires_at` 무시하던 5곳 발견. 만료된 active 사용자가 chat 무제한 사용·매일 브리핑 수신·인트라 active 배지 등 잠재 버그.
+- 신규: `lib/myverse/subscription.ts` — `isMyverseSubscriberActive()` + `effectiveSubscriptionStatus()` SSOT
+- 적용 5곳:
+  - `app/(Myverse)/myverse/app/layout.tsx` — 헬퍼 호출 + DB best-effort UPDATE (다음 호출부터 정확)
+  - `app/api/myverse/chat/route.ts` — `subscription_expires_at` 함께 조회
+  - `app/api/myverse/cron/briefings/route.ts` — 시간 필터는 SQL, 만료 검증은 헬퍼 (PostgREST `.or()` 두 번 chain 모호성 회피 위해 코드측 filter)
+  - `features/myverse/planner/PurchaseView.tsx` — "활성 구독" 박스/재결제 버튼 분기에 헬퍼 사용
+  - `app/intra/planners/page.tsx` — active 카운트·배지가 만료자를 자동 expired로 처리
+
+### Myverse — 캡쳐 페이지 신규 (5 채집 통합 진입점)
+
+**메뉴 추가**
+- `features/myverse/app/AppSideNav.tsx` — INSIDE > ENGINE 그룹 "오늘" 위에 "캡쳐" 메뉴 추가. 아이콘 `bolt` (Quick Capture 메타포).
+
+**페이지 신규**
+- `app/(Myverse)/myverse/app/capture/page.tsx` — 신규 라우트
+- `features/myverse/capture/CaptureView.tsx` — 빠른 도크 6 버튼 + 통합 카드 리스트 + AI 액션 칩
+
+**데이터 통합**
+- 카드 리스트: `GET /api/myverse/traces?date=today` 사용 (moments + places + routines UNION, 시간 역순)
+- 도크 분기:
+  - 메모/사진/영상 → POST `/api/myverse/moments` (text/image/video)
+  - 식사/운동 → POST `/api/myverse/routines` (category='meal'/'exercise')
+  - 체크인 → POST `/api/myverse/places` (place_name + GPS 자동 채움)
+- 자동 미러링 (places ↔ routines)은 기존 API 동작 그대로
+
+**카드 표시 — source별 분기**
+- 한 장면(인디고 인디케이터) · 장소(emerald) · 일과(amber)
+- 메타: 시간 · duration · visibility · domain · category · 태그
+- AI 분석 결과 표시: `nutrition.summary` (kcal) · `exercise.summary`
+
+**AI 액션 칩 (suggestActions)**
+- 텍스트 메모 → Task로 · 프로젝트로 · 검색해 볼까요? (Google 새 탭)
+- 음식 사진 (`body` + 음식 키워드 또는 activity='식사') → 식단·열량 분석
+- 운동 사진 → 운동 분석
+- 업무·학습 → 프로젝트로 / Task로
+- 축하·관계 → 소셜 공유 (navigator.share)
+- routine(meal/exercise) → 분석 칩 (사진 없으면 toast 안내)
+- 모든 카드: 공유 · 삭제 (source별 다른 endpoint)
+
+**DailyView 3 카드 제거 (캡쳐로 이관)**
+- `features/myverse/planner/DailyView.tsx` — TodaySceneCard 정의 + 사용처 + 관련 import 6개 정리
+- 약 70줄 감소
+- 컴포넌트 파일(`DailyMoments.tsx`, `DailyPlacesCard.tsx`, `DailyRoutinesCard.tsx`)은 보존 (다른 페이지 참조 가능성 — 다음 세션 dead code 정리)
+
+### 신규 파일
+
+| 경로 | 역할 |
+|---|---|
+| `lib/myverse/subscription.ts` | 구독 만료 검증 SSOT 헬퍼 |
+| `app/(Myverse)/myverse/app/capture/page.tsx` | 캡쳐 라우트 (서버 컴포넌트) |
+| `features/myverse/capture/CaptureView.tsx` | 캡쳐 통합 UI — 도크 6버튼 · 카드 리스트 · AI 액션 칩 |
+
+### 결정 사항
+
+1. **만료 검증 SSOT 헬퍼 패턴 채택** — 6곳 인라인 분기 대신 1 헬퍼. PostgREST `.or()` 두 번 chain은 모호성 위험 → cron API는 시간 필터만 SQL, 만료 검증은 코드측 filter.
+2. **layout.tsx에서 만료 감지 시 DB best-effort UPDATE** — 다음 호출(chat/cron)에서 정확한 상태 보장. Promise.then 비동기 fire-and-forget.
+3. **캡쳐 도크 매핑 — 식사/운동→routines, 체크인→places** — 도메인 의미상 자연스러운 매핑. 자동 미러링으로 양쪽 테이블에 row 생성.
+4. **AI 액션 분기 — 도메인+키워드 hint 기반** — sub_tags + caption/body/activity blob에서 FOOD_HINTS/EXERCISE_HINTS/CELEBRATION_HINTS 매칭. 첫 매치만 primary 액션, 나머지는 default.
+5. **DailyView 3 카드 제거 — 캡쳐로 통합. 컴포넌트 파일 자체는 보존** — 다른 곳 import 가능성. 다음 세션 dead code 정리.
+
+---
+
 ## 2026-05-12 (세션 132) — Notion Mail 통합 1~4단계 + Hotfix 2건
 
 ### Hotfix

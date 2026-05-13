@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { Search, Check, Loader2, Crown, FileText, Sparkles, BarChart2 } from "lucide-react";
+import { isMyverseSubscriberActive, effectiveSubscriptionStatus } from "@/lib/myverse/subscription";
 
 interface Subscriber {
     member_id: string;
@@ -122,7 +123,7 @@ export default function IntraPlannersPage() {
 
     const stats = {
         total: subs.length,
-        active: subs.filter((s) => s.subscription_status === "active").length,
+        active: subs.filter((s) => isMyverseSubscriberActive(s)).length,
         pdf: subs.filter((s) => s.is_pdf_buyer).length,
         revenue: pays.filter((p) => p.status === "paid").reduce((sum, p) => sum + p.amount, 0),
     };
@@ -211,13 +212,18 @@ export default function IntraPlannersPage() {
                                     <td className="px-4 py-3 text-neutral-300">{s.name || "—"}</td>
                                     <td className="px-4 py-3 text-neutral-400 text-xs">{s.mode === "weekly" ? "Weekly" : "All in One"}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`text-xs px-2 py-0.5 rounded ${
-                                            s.subscription_status === "active" ? "bg-[#0F766E]/20 text-[#0F766E]" :
-                                            s.subscription_status === "expired" ? "bg-red-500/20 text-red-400" :
-                                            "bg-neutral-700 text-neutral-400"
-                                        }`}>
-                                            {s.subscription_status}
-                                        </span>
+                                        {(() => {
+                                            const eff = effectiveSubscriptionStatus(s);
+                                            return (
+                                                <span className={`text-xs px-2 py-0.5 rounded ${
+                                                    eff === "active" ? "bg-[#0F766E]/20 text-[#0F766E]" :
+                                                    eff === "expired" ? "bg-red-500/20 text-red-400" :
+                                                    "bg-neutral-700 text-neutral-400"
+                                                }`}>
+                                                    {eff}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-4 py-3 text-neutral-400 text-xs">
                                         {s.subscription_expires_at ? new Date(s.subscription_expires_at).toLocaleDateString('ko-KR') : "—"}

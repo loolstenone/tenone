@@ -21,6 +21,7 @@ import { MukkiFab } from "@/features/myverse/app/MukkiFab";
 import { MobileBottomNav } from "@/features/myverse/app/MobileBottomNav";
 import { MyverseThemeProvider } from "@/features/myverse/app/MyverseThemeProvider";
 import type { MyverseMode, CustomMenuKey, MyverseUser } from "@/lib/myverse/types";
+import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -150,12 +151,14 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         if (!myverseUser || !myverseUser.onboarding_completed) {
             return <ClientRedirect to="/myverse/app/onboarding" />;
         }
-        if (
-            myverseUser.subscription_status === "active" &&
-            myverseUser.subscription_expires_at &&
-            new Date(myverseUser.subscription_expires_at) < new Date()
-        ) {
+        // 만료 검증 (SSOT 헬퍼)
+        if (myverseUser.subscription_status === "active" && !isMyverseSubscriberActive(myverseUser)) {
             myverseUser.subscription_status = "expired";
+            // DB best-effort 동기화 — 다음번 chat/cron이 정확한 상태를 보도록
+            const syncAdmin = createAdminClient();
+            syncAdmin.from("myverse_users").update({ subscription_status: "expired" }).eq("member_id", member.id).then(({ error }: { error: { message: string } | null }) => {
+                if (error) console.error("[myverse/app/layout] expire sync failed:", error.message);
+            });
         }
         if (myverseUser.subscription_status === "expired") {
             return <ClientRedirect to="/myverse/purchase?expired=1" />;

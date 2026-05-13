@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateBriefing } from "@/lib/myverse/briefing";
+import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 
 export const maxDuration = 300;
 
@@ -28,19 +29,21 @@ export async function GET(req: Request) {
     const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const today = kstNow.toISOString().slice(0, 10);
 
-    // 모닝 트리거 대상
-    const { data: morningUsers } = await admin
+    // 모닝 트리거 대상 — 시간 필터는 SQL, 만료 검증은 SSOT 헬퍼 (PostgREST .or() 두 번 chain 모호성 회피)
+    const { data: morningUsersRaw } = await admin
         .from("myverse_users")
-        .select("member_id, ai_morning_time, mode")
+        .select("member_id, ai_morning_time, mode, subscription_status, subscription_expires_at")
         .eq("subscription_status", "active")
         .or(`ai_morning_time.eq.${kstHHMM},ai_morning_time.eq.${currentHHMM}`);
+    const morningUsers = (morningUsersRaw ?? []).filter((u) => isMyverseSubscriberActive(u, now));
 
     // 이브닝 트리거 대상
-    const { data: eveningUsers } = await admin
+    const { data: eveningUsersRaw } = await admin
         .from("myverse_users")
-        .select("member_id, ai_evening_time, mode")
+        .select("member_id, ai_evening_time, mode, subscription_status, subscription_expires_at")
         .eq("subscription_status", "active")
         .or(`ai_evening_time.eq.${kstHHMM},ai_evening_time.eq.${currentHHMM}`);
+    const eveningUsers = (eveningUsersRaw ?? []).filter((u) => isMyverseSubscriberActive(u, now));
 
     const results = { morning: 0, evening: 0, errors: 0 };
 

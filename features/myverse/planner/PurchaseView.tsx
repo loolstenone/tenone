@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 
 declare global {
     interface Window {
@@ -95,8 +96,8 @@ export function PurchaseView() {
                         </p>
                     </div>
 
-                    {/* 현재 상태 */}
-                    {status && status.subscription_status === "active" && (
+                    {/* 현재 상태 — 만료일 검증까지 통과한 진짜 활성 구독자만 노출 */}
+                    {status && isMyverseSubscriberActive({ subscription_status: status.subscription_status, subscription_expires_at: status.expires }) && (
                         <div className="bg-[#6366F1]/10 border border-[#6366F1]/30 rounded-xl p-5 mb-6">
                             <div className="flex items-center gap-2 mb-1">
                                 <Check className="h-4 w-4 text-[#6366F1]" />
@@ -145,7 +146,7 @@ export function PurchaseView() {
                             ))}
                         </ul>
 
-                        {status?.subscription_status !== "active" && (
+                        {!isMyverseSubscriberActive({ subscription_status: status?.subscription_status, subscription_expires_at: status?.expires ?? null }) && (
                             <button
                                 onClick={handlePay}
                                 disabled={loading}
