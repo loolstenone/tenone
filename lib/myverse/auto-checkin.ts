@@ -1,24 +1,44 @@
 // Myverse — 자동 체크인 훅
-// 앱이 foreground일 때 일정 간격으로 위치를 폴링해 places row를 자동 생성.
-// 진짜 백그라운드(앱 종료/탭 hidden)는 Service Worker만으로는 위치 접근이 안 되므로 제외 — Visibility API로 hidden 시 일시정지.
+// 포그라운드: Visibility API로 앱이 열려있을 때 geolocation 폴링 → onCheckin 호출.
+// 백그라운드: Background Periodic Sync API (Android Chrome 80+) — SW에 좌표 전달,
+//            앱 종료 후에도 periodicsync 이벤트로 /api/myverse/places 호출.
 //
 // 동작 요약
-// 1) enabled=true 일 때 POLL_INTERVAL_MS 마다 navigator.geolocation 폴링
-// 2) 마지막 좌표 대비 MOVE_THRESHOLD_M 이상 이동했을 때만 onCheckin 호출
-// 3) 시간 슬롯(SLOT_MINUTES)당 최대 1회만 — 같은 슬롯에 들어가면 스킵
-// 4) localStorage에 enabled / lastSlot / lastCoord 영속화 — 페이지 reload 후에도 즉시 이어감
-// 5) document.visibilityState === "hidden" 동안에는 폴링 정지, visible 복귀 시 즉시 1회 폴링
+// 1) enabled=true 시 SW(/sw.js) 등록 + PeriodicSync 태그 등록
+// 2) POLL_INTERVAL_MS 마다 navigator.geolocation 폴링 (foreground)
+// 3) 폴링 성공 시 좌표를 SW로 postMessage → SW가 IndexedDB에 저장
+// 4) 마지막 좌표 대비 MOVE_THRESHOLD_M 이상 이동했을 때만 onCheckin 호출
+// 5) 시간 슬롯(SLOT_MINUTES)당 최대 1회만 — 같은 슬롯에 들어가면 스킵
+// 6) localStorage에 enabled / lastSlot / lastCoord 영속화 — 페이지 reload 후 이어감
+// 7) document.visibilityState === "hidden" 동안 폴링 정지, visible 복귀 시 즉시 1회 폴링
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const POLL_INTERVAL_MS = 10 * 60 * 1000;   // 10 min
 const MOVE_THRESHOLD_M = 300;              // 300 m
 const SLOT_MINUTES = 30;                   // 30 min 슬롯
+const PERIODIC_TAG = "myverse-auto-checkin";
 
 const LS_ENABLED   = "myverse_auto_checkin_enabled";
 const LS_LAST_SLOT = "myverse_auto_checkin_last_slot";
 const LS_LAST_LAT  = "myverse_auto_checkin_last_lat";
 const LS_LAST_LNG  = "myverse_auto_checkin_last_lng";
+
+// PeriodicSyncManager는 표준 lib에 없으므로 직접 선언
+interface PeriodicSyncManager {
+    register(tag: string, options?: { minInterval: number }): Promise<void>;
+    unregister(tag: string): Promise<void>;
+    getTags(): Promise<string[]>;
+}
+
+declare global {
+    interface ServiceWorkerRegistration {
+        periodicSync?: PeriodicSyncManager;
+    }
+}
+
+/** Background Periodic Sync 지원 여부 및 등록 상태 */
+export type BgSyncState = "unsupported" | "idle" | "active" | "error";
 
 export interface AutoCheckinPayload {
     latitude: number;
@@ -40,6 +60,8 @@ interface AutoCheckinState {
     lastCoord: { lat: number; lng: number } | null;
     /** 권한 거부 등 오류 — UI 안내용 */
     error: string | null;
+    /** Background Periodic Sync 상태 (Android Chrome 전용) */
+    bgSyncState: BgSyncState;
 }
 
 function haversineMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
@@ -87,18 +109,30 @@ export function useAutoCheckin(onCheckin: (p: AutoCheckinPayload) => Promise<voi
     const [lastPollAt, setLastPollAt] = useState<Date | null>(null);
     const [lastCoord, setLastCoord] = useState<{ lat: number; lng: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [bgSyncState, setBgSyncState] = useState<BgSyncState>("unsupported");
 
     // 콜백을 ref에 보관 — useEffect deps에 묶지 않아 interval 재설치 방지
     const onCheckinRef = useRef(onCheckin);
     useEffect(() => { onCheckinRef.current = onCheckin; }, [onCheckin]);
 
-    // 마운트 시 영속 상태 복원
+    // 마운트 시 SW 등록 + 영속 상태 복원
     useEffect(() => {
         try {
             const persisted = localStorage.getItem(LS_ENABLED);
             if (persisted === "1") setEnabled(true);
             setLastCoord(readLastCoord());
         } catch { /* ignore */ }
+
+        if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+        navigator.serviceWorker.register("/sw.js").then(reg => {
+            const ps = reg.periodicSync;
+            if (!ps) return; // PeriodicSync 미지원 브라우저
+            // 현재 등록 상태 복원 (reload 후에도 active 표시)
+            ps.getTags().then(tags => {
+                setBgSyncState(tags.includes(PERIODIC_TAG) ? "active" : "idle");
+            }).catch(() => setBgSyncState("idle"));
+        }).catch(() => { /* SW 등록 실패 — silent */ });
     }, []);
 
     const toggle = useCallback(() => {
@@ -106,6 +140,24 @@ export function useAutoCheckin(onCheckin: (p: AutoCheckinPayload) => Promise<voi
             const next = !prev;
             try { localStorage.setItem(LS_ENABLED, next ? "1" : "0"); } catch { /* ignore */ }
             if (!next) setError(null);
+
+            // PeriodicSync register / unregister
+            if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+                navigator.serviceWorker.ready.then(reg => {
+                    const ps = reg.periodicSync;
+                    if (!ps) return;
+                    if (next) {
+                        ps.register(PERIODIC_TAG, { minInterval: 30 * 60 * 1000 })
+                            .then(() => setBgSyncState("active"))
+                            .catch(() => setBgSyncState("error"));
+                    } else {
+                        ps.unregister(PERIODIC_TAG)
+                            .then(() => setBgSyncState("idle"))
+                            .catch(() => { /* ignore */ });
+                    }
+                }).catch(() => { /* SW not ready */ });
+            }
+
             return next;
         });
     }, []);
@@ -125,6 +177,14 @@ export function useAutoCheckin(onCheckin: (p: AutoCheckinPayload) => Promise<voi
                     localStorage.setItem(LS_LAST_LAT, String(coord.lat));
                     localStorage.setItem(LS_LAST_LNG, String(coord.lng));
                 } catch { /* ignore */ }
+
+                // SW에 좌표 전달 — background periodicsync 때 사용
+                if (typeof navigator !== "undefined" && navigator.serviceWorker?.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: "MYVERSE_COORDS_UPDATE",
+                        coords: coord,
+                    });
+                }
 
                 // 슬롯 dedup
                 const slot = currentSlotKey();
@@ -191,5 +251,5 @@ export function useAutoCheckin(onCheckin: (p: AutoCheckinPayload) => Promise<voi
         };
     }, [enabled, poll]);
 
-    return { enabled, toggle, lastCheckinAt, lastPollAt, lastCoord, error };
+    return { enabled, toggle, lastCheckinAt, lastPollAt, lastCoord, error, bgSyncState };
 }

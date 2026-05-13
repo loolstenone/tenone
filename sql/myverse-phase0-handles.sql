@@ -81,3 +81,12 @@ FROM members m
 WHERE m.handle IS NOT NULL;
 
 GRANT SELECT ON myverse_public_handles TO anon, authenticated;
+
+-- 예약어 테이블 RLS — 누구나 읽기 가능, 쓰기는 service_role만
+ALTER TABLE myverse_reserved_handles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS reserved_handles_select_public ON myverse_reserved_handles;
+CREATE POLICY reserved_handles_select_public
+    ON myverse_reserved_handles
+    FOR SELECT
+    USING (true);

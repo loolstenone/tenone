@@ -146,7 +146,7 @@ export default function MyVersePage() {
     // 로그인 상태면 서비스 페이지로 자동 이동 — 마케팅 랜딩은 비로그인 진입 전용
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.replace("/myverse/app/daily");
+            router.replace("/myverse/app/capture");
         }
     }, [isLoading, isAuthenticated, router]);
 
@@ -195,7 +195,7 @@ export default function MyVersePage() {
                     {/* CTA */}
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                         {!isLoading && isAuthenticated ? (
-                            <button onClick={() => router.push('/myverse/app/daily')}
+                            <button onClick={() => router.push('/myverse/app/capture')}
                                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-xl shadow-indigo-500/30 text-base">
                                 앱으로 이동 <ArrowRight className="h-4 w-4" />
                             </button>

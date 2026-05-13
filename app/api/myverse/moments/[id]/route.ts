@@ -12,6 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const body = await req.json();
     const patch: Record<string, unknown> = {};
     if (typeof body.caption === "string")     patch.caption = body.caption.slice(0, 500);
+    if (typeof body.body === "string")        patch.body = body.body.slice(0, 5000);
     if (typeof body.happened_at === "string") patch.happened_at = body.happened_at;
     else if (body.happened_at === null)       patch.happened_at = null;
     if (typeof body.with_whom === "string")   patch.with_whom = body.with_whom.slice(0, 200);

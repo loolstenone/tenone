@@ -4,6 +4,40 @@
 
 ---
 
+## 2026-05-14 (세션 135) — 인앱 카메라 + 캡쳐 구도 연구
+
+### 인앱 카메라 — OS 파일 피커 탈피
+- 사용자 결정: 사진/영상 캡쳐는 OS picker가 아닌 **앱 안 viewfinder**로 작동해야 함
+- `lib/myverse/use-camera.ts` 신규 — `getUserMedia` + Canvas + MediaRecorder hook (use-recorder.ts와 동일 state machine: idle→requesting→previewing→recording→stopping)
+  - 전·후면 토글, MIME 자동 선택(webm/vp9 → vp8 → mp4), 친화 에러 메시지, 언마운트 안전 정리
+- `features/myverse/capture/CameraSheet.tsx` 신규 — 풀스크린 카메라 오버레이(z-9500)
+  - 라이브 viewfinder, 셔터/녹화 버튼, 카메라 뒤집기, mm:ss 녹화 타이머, 권한 거부 안내
+  - 전면 카메라 `scaleX(-1)` 거울 미리보기 (저장본은 미러링 X)
+- `features/myverse/capture/CaptureView.tsx` 수정
+  - `CameraSheet` 마운트 + `cameraSheet: CameraMode | null` state + `isCameraSupported` 체크
+  - `openComposer("photo"|"video")` 분기: 지원 시 `setCameraSheet`, 미지원 시 기존 `<input type="file">` fallback
+  - 캡처 결과는 기존 `uploadMedia(file)`로 — 업로드/AI 파이프라인 변경 X
+
+### 캡쳐 기능 구도·역할 연구 (구현 X, 전략 정리)
+- **5층 파이프라인 진단** — L1 입력 ✅, L2 추출/L3 분류/L5 회수 ◐
+- **PWA 한계 솔직 정리** — Apple Health·iOS 위젯·iOS Shortcuts·상시 음성 명령·백그라운드 GPS(iOS)·상시 녹음 = 네이티브 앱 필요
+- **캡쳐·흔적·타임캡슐 관계 정리** — 시간축 t=지금/t<지금/t>지금. 3테이블 SSOT, 캡슐은 trace_refs JSONB + unlock_at 잠금 메타 한 층
+- 차기 Phase 3 우선순위: EXIF · X년 전 오늘 · AI 회상 칩 · 9영역 LLM 분류 · PWA shortcuts·share_target
+
+### 결정사항
+- 캡쳐 페이지에 흔적·캡슐 끌어들이지 않음 (입구+오늘 유지) — 예외 2개: AI 회상 카드, 캡슐 unlock 배너
+- 인앱 카메라 미지원 환경(데스크톱 일부·구형 브라우저)은 기존 `<input type="file">` fallback 보존
+- Whisper STT는 OpenAI/Deepgram API key 결제 결정 전 보류 — Anthropic API에 STT 없음
+- 타임캡슐 MVP는 차기 별도 Phase로 분리
+
+### 파일
+- `lib/myverse/use-camera.ts` (신규, 169줄)
+- `features/myverse/capture/CameraSheet.tsx` (신규, 124줄)
+- `features/myverse/capture/CaptureView.tsx` (인앱 카메라 wiring)
+- `WORK_STATUS.md` · `CHANGELOG.md` · `app/(Myverse)/CLAUDE.md` 갱신
+
+---
+
 ## 2026-05-13 (세션 134) — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴
 
 ### 캡쳐 Phase 2 (5건)

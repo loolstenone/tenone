@@ -14,10 +14,12 @@ import {
     Sparkles, Loader2, Share2, ListPlus, FolderPlus, Search,
     Trash2, Globe, Lock, Plus, Image as ImageIcon, Clock,
     Target, FileText, Flag, Satellite, AlertCircle, Mic, Square,
-    Brush, Contact, Mail, Castle, Lightbulb,
+    Brush, Contact, Mail, Castle, Lightbulb, Heart, Flame,
 } from "lucide-react";
 import { useAutoCheckin, type AutoCheckinPayload } from "@/lib/myverse/auto-checkin";
 import { useRecorder } from "@/lib/myverse/use-recorder";
+import { CameraSheet } from "@/features/myverse/capture/CameraSheet";
+import type { CameraMode } from "@/lib/myverse/use-camera";
 
 type Source = "moment" | "place" | "routine";
 type MediaType = "image" | "video" | "text" | "audio" | null;
@@ -41,7 +43,7 @@ interface UnifiedTrace {
     domain: string | null;
     // 클라이언트 보강 — 카드별 AI 분석 결과 (moment만)
     nutrition?: { calories?: number; summary?: string } | null;
-    exercise?: { kcal?: number; summary?: string } | null;
+    exercise?: { kcal?: number; level?: number; heart_rate?: number; summary?: string } | null;
     sub_tags?: string[] | null;
 }
 
@@ -113,6 +115,7 @@ function suggestActions(t: UnifiedTrace): Action[] {
         } else if (t.media_type === "audio") {
             acts.push({ id: "task", label: "Task로", icon: ListPlus, tone: "primary" });
             acts.push({ id: "project", label: "프로젝트로", icon: FolderPlus });
+            if (t.body) acts.push({ id: "search", label: "검색해 볼까요?", icon: Search });
         } else if (isMedia) {
             if (hasHint(t, FOOD_HINTS) || t.activity === "식사") {
                 if (!t.nutrition) acts.push({ id: "analyze-food", label: "식단·열량 분석", icon: Utensils, tone: "primary" });
@@ -171,6 +174,12 @@ export function CaptureView() {
     const imgRef = useRef<HTMLInputElement | null>(null);
     const vidRef = useRef<HTMLInputElement | null>(null);
 
+    // 인앱 카메라 — getUserMedia 기반 (사파리 14+/안드로이드 크롬). 미지원/거부 시 OS picker로 fallback
+    const [cameraSheet, setCameraSheet] = useState<CameraMode | null>(null);
+    const isCameraSupported = typeof navigator !== "undefined"
+        && !!navigator.mediaDevices
+        && typeof navigator.mediaDevices.getUserMedia === "function";
+
     // 자동 체크인 — 앱이 foreground일 때 30분 슬롯 단위 자동 위치 기록
     const handleAutoCheckin = useCallback(async (p: AutoCheckinPayload) => {
         const res = await fetch("/api/myverse/places", {
@@ -226,8 +235,17 @@ export function CaptureView() {
                     }),
                 });
                 if (!post.ok) { showToast("저장 실패"); return; }
+                const postData = await post.json();
+                // transcript가 있으면 body에 저장
+                if (result.transcript && postData.id) {
+                    await fetch(`/api/myverse/moments/${postData.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ body: result.transcript }),
+                    });
+                }
                 await load();
-                showToast("녹음 저장됨");
+                showToast(result.transcript ? "녹음 저장됨 · 텍스트 변환 완료" : "녹음 저장됨");
             } finally {
                 recordingUploadingRef.current = false;
             }
@@ -264,8 +282,16 @@ export function CaptureView() {
     // ── 빠른 도크 ────────────────────────────
 
     function openComposer(kind: ComposerKind) {
-        if (kind === "photo") { imgRef.current?.click(); return; }
-        if (kind === "video") { vidRef.current?.click(); return; }
+        if (kind === "photo") {
+            if (isCameraSupported) setCameraSheet("photo");
+            else imgRef.current?.click();
+            return;
+        }
+        if (kind === "video") {
+            if (isCameraSupported) setCameraSheet("video");
+            else vidRef.current?.click();
+            return;
+        }
         setComposer(kind);
         setText("");
         setExtraField("");
@@ -458,9 +484,18 @@ export function CaptureView() {
                 if (!res.ok) { showToast("분석 실패"); return; }
                 showToast("운동 분석 완료");
                 await load();
-            } else if (action === "analyze-food" || action === "analyze-exercise") {
-                // routine 카드에서 분석 호출 — moment과 1:1 미러가 있을 수도 있지만, MVP에서는 안내만
-                showToast("이 기록은 사진이 없어서 분석할 수 없어요");
+            } else if (action === "analyze-food" && t.source === "routine") {
+                const endpoint = `/api/myverse/routines/${id}/analyze-food`;
+                const res = await fetch(endpoint, { method: "POST" });
+                if (!res.ok) { showToast("분석 실패"); return; }
+                showToast("식단 분석 완료");
+                await load();
+            } else if (action === "analyze-exercise" && t.source === "routine") {
+                const endpoint = `/api/myverse/routines/${id}/analyze-exercise`;
+                const res = await fetch(endpoint, { method: "POST" });
+                if (!res.ok) { showToast("분석 실패"); return; }
+                showToast("운동 분석 완료");
+                await load();
             } else if (action === "task") {
                 const title = (t.body || t.caption || t.activity || t.location || "").slice(0, 120);
                 if (!title.trim()) { showToast("내용이 없어요"); return; }
@@ -548,15 +583,26 @@ export function CaptureView() {
                                 <span className="truncate">{autoCheckin.error}</span>
                             </div>
                         ) : autoCheckin.enabled ? (
-                            <div className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 truncate">
-                                {autoCheckin.lastCheckinAt
-                                    ? `최근 기록 ${autoCheckin.lastCheckinAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-                                    : autoCheckin.lastPollAt
-                                        ? `폴링 ${autoCheckin.lastPollAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} · 30분마다`
-                                        : "위치 권한을 허용해 주세요"}
+                            <div className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 truncate flex items-center gap-1.5">
+                                <span>
+                                    {autoCheckin.lastCheckinAt
+                                        ? `최근 기록 ${autoCheckin.lastCheckinAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+                                        : autoCheckin.lastPollAt
+                                            ? `폴링 ${autoCheckin.lastPollAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} · 30분마다`
+                                            : "위치 권한을 허용해 주세요"}
+                                </span>
+                                {autoCheckin.bgSyncState === "active" && (
+                                    <span className="flex-shrink-0 rounded px-1 py-0 bg-emerald-100 text-emerald-700 myverse-dark:bg-emerald-500/20 myverse-dark:text-emerald-300 text-[9px] font-medium leading-4">BG</span>
+                                )}
                             </div>
                         ) : (
-                            <div className="text-[10px] text-neutral-400">30분마다 자동 위치 기록 (앱 열려있을 때만)</div>
+                            <div className="text-[10px] text-neutral-400">
+                                {autoCheckin.bgSyncState === "active"
+                                    ? "30분마다 자동 기록 (백그라운드 포함)"
+                                    : autoCheckin.bgSyncState === "idle"
+                                        ? "30분마다 자동 위치 기록 (앱 열려있을 때만)"
+                                        : "30분마다 자동 위치 기록 (앱 열려있을 때만)"}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -602,6 +648,15 @@ export function CaptureView() {
 
             <input ref={imgRef} type="file" accept="image/*" hidden onChange={e => e.target.files?.[0] && uploadMedia(e.target.files[0])} />
             <input ref={vidRef} type="file" accept="video/*" hidden onChange={e => e.target.files?.[0] && uploadMedia(e.target.files[0])} />
+
+            {/* 인앱 카메라 — getUserMedia + Canvas + MediaRecorder */}
+            {cameraSheet && (
+                <CameraSheet
+                    mode={cameraSheet}
+                    onCapture={file => uploadMedia(file)}
+                    onClose={() => setCameraSheet(null)}
+                />
+            )}
 
             {/* Composer */}
             {composer && composerCfg && (
@@ -1010,9 +1065,50 @@ function TraceCard({ trace: t, busy, onAction }: { trace: UnifiedTrace; busy: bo
                     </div>
                 )}
                 {t.source === "routine" && (
-                    <div>
+                    <div className="space-y-2">
                         <p className="text-sm font-medium text-neutral-800 myverse-dark:text-neutral-200">{t.activity}</p>
-                        {t.body && <p className="text-xs text-neutral-600 myverse-dark:text-neutral-400 mt-1 whitespace-pre-wrap">{t.body}</p>}
+                        {t.category === "exercise" && t.exercise && (t.exercise.level != null || t.exercise.heart_rate != null || t.exercise.kcal != null) && (
+                            <div className="flex flex-wrap items-center gap-2.5 py-1.5 px-2 rounded-lg bg-rose-50 myverse-dark:bg-rose-500/10">
+                                {t.exercise.level != null && (
+                                    <div className="flex items-center gap-1">
+                                        {[1,2,3,4,5].map(i => (
+                                            <span key={i} className={`h-2 w-2 rounded-full ${
+                                                i <= (t.exercise?.level ?? 0)
+                                                    ? (t.exercise?.level ?? 0) >= 4 ? "bg-rose-500" : (t.exercise?.level ?? 0) >= 3 ? "bg-amber-500" : "bg-emerald-500"
+                                                    : "bg-neutral-200 myverse-dark:bg-white/20"
+                                            }`} />
+                                        ))}
+                                        <span className="text-[10px] text-neutral-400 ml-0.5">강도 {t.exercise.level}/5</span>
+                                    </div>
+                                )}
+                                {t.exercise.heart_rate != null && (
+                                    <span className="flex items-center gap-0.5 text-[11px] text-rose-600 myverse-dark:text-rose-400">
+                                        <Heart className="h-3 w-3 fill-rose-500 myverse-dark:fill-rose-400" />
+                                        {t.exercise.heart_rate} BPM
+                                    </span>
+                                )}
+                                {t.exercise.kcal != null && (
+                                    <span className="flex items-center gap-0.5 text-[11px] text-orange-600 myverse-dark:text-orange-400">
+                                        <Flame className="h-3 w-3" />
+                                        {t.exercise.kcal} kcal
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {t.category === "meal" && t.nutrition && (t.nutrition.calories != null || t.nutrition.summary) && (
+                            <div className="flex flex-wrap items-center gap-2 py-1.5 px-2 rounded-lg bg-amber-50 myverse-dark:bg-amber-500/10">
+                                {t.nutrition.calories != null && (
+                                    <span className="flex items-center gap-0.5 text-[11px] text-amber-700 myverse-dark:text-amber-400">
+                                        <Flame className="h-3 w-3" />
+                                        {t.nutrition.calories} kcal
+                                    </span>
+                                )}
+                                {t.nutrition.summary && (
+                                    <span className="text-[11px] text-neutral-500 myverse-dark:text-neutral-400">{t.nutrition.summary}</span>
+                                )}
+                            </div>
+                        )}
+                        {t.body && <p className="text-xs text-neutral-600 myverse-dark:text-neutral-400 whitespace-pre-wrap">{t.body}</p>}
                     </div>
                 )}
                 {t.source === "moment" && (
@@ -1022,13 +1118,13 @@ function TraceCard({ trace: t, busy, onAction }: { trace: UnifiedTrace; busy: bo
                     </>
                 )}
 
-                {/* AI 분석 결과 */}
-                {t.nutrition?.summary && (
+                {/* AI 분석 결과 (moment만 — routine 카드는 위에서 직접 시각화) */}
+                {t.source !== "routine" && t.nutrition?.summary && (
                     <div className="text-xs text-emerald-700 myverse-dark:text-emerald-400 bg-emerald-50 myverse-dark:bg-emerald-500/10 px-2 py-1 rounded">
                         🍽 {t.nutrition.summary}{t.nutrition.calories ? ` · ${t.nutrition.calories} kcal` : ""}
                     </div>
                 )}
-                {t.exercise?.summary && (
+                {t.source !== "routine" && t.exercise?.summary && (
                     <div className="text-xs text-rose-700 myverse-dark:text-rose-400 bg-rose-50 myverse-dark:bg-rose-500/10 px-2 py-1 rounded">
                         🏃 {t.exercise.summary}{t.exercise.kcal ? ` · ${t.exercise.kcal} kcal` : ""}
                     </div>

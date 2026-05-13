@@ -1,6 +1,97 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-13 (세션 134 — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴)
+> 마지막 업데이트: 2026-05-14 (세션 135 — 인앱 카메라 + 캡쳐 구도 연구)
+
+---
+
+## 세션 135 핵심 성과 (2026-05-14)
+
+### 1. 인앱 카메라 — `<input type="file">` OS picker 탈피
+
+사용자 결정: *"마이버스는 스마트폰의 카메라 기능을 이용하여 사용할 수 있어야 한다."* — 사진/영상 캡쳐가 OS 파일 피커가 아니라 **앱 안의 카메라 viewfinder**로 작동해야 함.
+
+**신규 파일**
+- `lib/myverse/use-camera.ts` — `getUserMedia` + Canvas(사진) + MediaRecorder(영상) hook. `use-recorder.ts`와 동일한 state machine 패턴 (`idle` → `requesting` → `previewing` → `recording` → `stopping`). 전·후면 토글(`facingMode: environment ↔ user`), MIME 자동 선택(webm/vp9 → vp8 → mp4), 친화 에러 메시지(`NotAllowedError`/`NotFoundError`/`NotReadableError`/`OverconstrainedError`), 언마운트 시 stream/recorder 안전 정리.
+- `features/myverse/capture/CameraSheet.tsx` — 풀스크린 카메라 오버레이(`fixed inset-0 z-[9500] bg-black`). 라이브 `<video autoPlay playsInline muted>` viewfinder + 셔터/녹화 버튼 + 카메라 뒤집기 + 녹화 타이머(`mm:ss`) + 권한 거부 시 안내 UI. 전면 카메라는 `transform: scaleX(-1)` 거울 미리보기(저장본은 미러링 X).
+
+**수정**
+- `features/myverse/capture/CaptureView.tsx`:
+  - `useCamera` import + `CameraSheet` 컴포넌트 마운트
+  - `cameraSheet: CameraMode | null` state + `isCameraSupported` 체크 (`navigator.mediaDevices?.getUserMedia` 존재 여부)
+  - `openComposer("photo"|"video")` 분기: 지원 환경이면 `setCameraSheet(mode)`, 미지원이면 기존 `imgRef.current?.click()` fallback
+  - 캡처 결과는 기존 `uploadMedia(file)`로 그대로 흘러감 — moments 테이블·AI 분석 파이프라인 변경 X
+
+**핵심 설계 결정**
+- 캡처 후 기존 `uploadMedia()` 재사용 → 업로드/저장/AI 분석 파이프라인 무변경 (인터페이스 안정)
+- `cancel()`이 `getTracks().forEach(t => t.stop())` 호출 → 카메라 indicator light 즉시 꺼짐
+- MediaRecorder MIME 자동 선택으로 iOS Safari 호환 확보
+- 데스크톱·구형 브라우저 fallback은 기존 hidden `<input type="file">` 그대로 보존
+
+### 2. 캡쳐 기능 구도·역할 연구 (구현 X, 전략 정리만)
+
+사용자 요청으로 다음 큰 결정 전 솔직한 분석을 정리:
+
+**(A) 캡쳐 = Personal OS의 감각기관(I/O)** — 단순 입력기 아닌, 5채집을 받아 9영역·7시스템 전체로 흘려보내는 **라우터**. 누적 가치는 L5(회수)를 캡쳐 안으로 끌어와야 발현.
+
+**(B) 5층 파이프라인 진단**:
+- L1 입력 ✅ (도크 + 인앱 카메라 + 녹음 + 자동 체크인)
+- L2 추출 ◐ (time/geo만, OCR·STT·EXIF·얼굴 인식·캘린더 매칭 미구현)
+- L3 분류 ◐ (키워드 fallback, LLM 분류·confidence·재학습 부재)
+- L4 적재 ✅ (3테이블 SSOT)
+- L5 회수 ◐ (traces 분산, 캡쳐 페이지에서 직접 회상 불가)
+
+**(C) PWA 한계 솔직 정리** — 다음 결정 전 알아야 할 것:
+- **100% 가능**: EXIF 파싱·X년 전 오늘·Claude Haiku 분류·AI 회상 카드·OCR(Tesseract)·Strava·share_target(Android)·PWA shortcuts
+- **부분 가능**: Whisper STT(별도 API 결제), 백그라운드 GPS(Android만 짧게/iOS 불가), 푸시 알림(iOS 16.4+ 홈 추가 필수)
+- **PWA로 불가능**: Apple Health, iOS 홈 위젯, iOS Shortcuts 통합, 상시 음성 명령("Hey Myverse"), 항상 켜진 위치, 상시 녹음
+- 위 불가능 항목은 **React Native or Swift 네이티브 앱**이 다음 큰 결정
+
+**(D) 캡쳐 · 흔적 · 타임캡슐 관계 정리** (사용자가 계속 고민하려는 주제):
+
+| 메뉴 | 시간축 | 의도 | 한 줄 |
+|---|---|---|---|
+| 캡쳐 | t = 지금 | 채집 | 5채집 입구 |
+| 흔적 | t < 지금 | 회상 | 자동 누적 궤적 |
+| 타임캡슐 | t > 지금 | 약속 | 미래로 봉인된 큐레이션 |
+
+- 데이터 흐름: moments/places/routines 3테이블 SSOT. 캡쳐=INSERT, 흔적=SELECT, 캡슐=참조+잠금 메타 한 층 추가
+- UX 분담: 캡쳐는 입구+오늘만, 흔적은 시간축 회상, 캡슐은 unlock_at 도달 시 노출
+- 캡쳐 페이지에 캡슐 끌어오기는 2가지만 허용: ① AI 회상 카드(상단 1~3장) ② 오늘 unlock된 캡슐 배너 1줄
+
+**타임캡슐 제안 스키마**:
+```sql
+myverse_capsules
+├── id, member_id, title
+├── message_to_future TEXT
+├── trace_refs JSONB        -- [{table:'moments', id:'...'}, ...]
+├── unlock_at TIMESTAMPTZ
+├── unlock_trigger JSONB    -- 마일스톤 ID·이벤트 키 (대안 트리거)
+├── locked BOOLEAN          -- unlock_at 미만이면 본문 차단
+├── visibility, 5축 메타, domain
+```
+
+> 🔁 이 주제는 다음 세션에서 계속 — Phase 우선순위는 **(1) AI 회상 카드 → (2) X년 전 오늘 → (3) 타임캡슐 MVP → (4) unlock 푸시·배너** 제안.
+
+### 다음 할 일
+
+#### 🟢 캡쳐 Phase 3 (다음 세션) — 100% 가능한 것부터
+1. **EXIF 자동 파싱** — `exifr` 패키지. 사진 업로드 시 촬영시간·GPS 자동 추출 → `time_axis`·`geo_axis` 채움. 비용 0.
+2. **X년 전 오늘 카드** — Supabase SQL `EXTRACT(MONTH,DAY)` 매칭. 캡쳐 페이지 상단 1~3장. 비용 0.
+3. **AI 회상 칩** (구독 게이트) — Claude Haiku로 "이번 주 패턴" / "어제 못 끝낸 것" 능동 카드. 캡쳐 상단.
+4. **9영역 LLM 자동 분류** (구독 게이트) — moment 저장 직후 Claude Haiku로 domain + sub_tags + nutrition/exercise JSON 추출.
+5. **PWA shortcuts 4개 + share_target** — manifest.json. Android Chrome 한정.
+
+#### 🟢 캡쳐 Phase 4 — 타임캡슐 MVP
+- 위 (D)의 스키마 + CRUD API + 캡슐 페이지 UI + unlock 푸시·캡쳐 배너
+
+#### 🔴 별도 결정 필요
+- **Whisper STT** — OpenAI/Deepgram API key 결제 의사결정. 결정 후 1세션이면 녹음→자동 transcribe 가능.
+- **네이티브 앱** — Apple Health·iOS 위젯·백그라운드 GPS 진짜 하려면 React Native 갈지 결정.
+
+#### 🟡 사용자 직접 처리 (이월)
+- Supabase Dashboard에서 `planners-moments` 옛 버킷 수동 삭제 (4객체)
+- Toss 가맹점 승인 + Vercel 환경변수
+- Gmail 재연결 공지 (세션 132 OAuth scope 확장)
 
 ---
 

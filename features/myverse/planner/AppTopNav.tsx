@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     Search, Settings, HelpCircle, Sparkles, Download,
-    Menu, Maximize, Minimize, MessageSquarePlus,
+    Menu, Maximize, Minimize, MessageSquarePlus, LogOut, Bell,
 } from "lucide-react";
+import { createBrowserClient } from "@supabase/ssr";
 import type { SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -72,9 +73,12 @@ export function AppTopNav({
     customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [avatarOpen, setAvatarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [unread, setUnread] = useState(0);
+    const avatarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         function onChange() { setIsFullscreen(!!document.fullscreenElement); }
@@ -98,7 +102,19 @@ export function AppTopNav({
         return () => { cancelled = true; clearInterval(t); };
     }, [pathname]);
 
-    useEffect(() => { setMenuOpen(false); }, [pathname]);
+    useEffect(() => { setMenuOpen(false); setAvatarOpen(false); }, [pathname]);
+
+    // 아바타 드롭다운 외부 클릭 닫기
+    useEffect(() => {
+        if (!avatarOpen) return;
+        const handler = (e: MouseEvent) => {
+            if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+                setAvatarOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [avatarOpen]);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -106,6 +122,15 @@ export function AppTopNav({
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [menuOpen]);
+
+    async function handleLogout() {
+        const supabase = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        );
+        await supabase.auth.signOut();
+        router.push("/myverse");
+    }
 
     // 캔버스 편집 화면에서는 네비 숨김
     if (/^\/myverse\/app\/canvas\/.+/.test(pathname)) return null;
@@ -162,20 +187,8 @@ export function AppTopNav({
                     </Link>
                 )}
 
-                <InstallButton className="p-1.5 rounded text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors inline-flex" title="앱 설치">
-                    <Download className="h-4 w-4" />
-                </InstallButton>
-
                 <Link href="/myverse/app/search" className={iconCls(pathname === "/myverse/app/search")} title="검색">
                     <Search className="h-4 w-4" />
-                </Link>
-
-                <Link href="/myverse/app/help" className={iconCls(pathname.startsWith("/myverse/app/help"))} title="도움말">
-                    <HelpCircle className="h-4 w-4" />
-                </Link>
-
-                <Link href="/myverse/app/settings" className={iconCls(pathname.startsWith("/myverse/app/settings"))} title="설정">
-                    <Settings className="h-4 w-4" />
                 </Link>
 
                 <button
@@ -187,26 +200,83 @@ export function AppTopNav({
                     {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </button>
 
+                {/* 아바타 — 드롭다운 메뉴 트리거 */}
                 {userName && (
-                    <Link
-                        href="/myverse/app/notifications"
-                        className="ml-1 relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
-                        title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
-                    >
-                        {avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
-                        ) : (
-                            <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
-                                {userName[0]}
-                            </span>
+                    <div ref={avatarRef} className="relative ml-1">
+                        <button
+                            type="button"
+                            onClick={() => setAvatarOpen(o => !o)}
+                            className="relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6366F1]/40"
+                            title="메뉴"
+                        >
+                            {avatarUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
+                                    {userName[0]}
+                                </span>
+                            )}
+                            {unread > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                    {unread > 99 ? "99+" : unread}
+                                </span>
+                            )}
+                        </button>
+
+                        {avatarOpen && (
+                            <div className="absolute right-0 top-9 w-48 bg-white border border-neutral-200 rounded-xl shadow-lg py-1 z-50">
+                                {/* 사용자명 */}
+                                <div className="px-3 py-2 border-b border-neutral-100">
+                                    <p className="text-[11px] font-semibold text-neutral-800 truncate">{userName}</p>
+                                </div>
+
+                                <div className="py-1">
+                                    <Link
+                                        href="/myverse/app/notifications"
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                                    >
+                                        <Bell className="h-4 w-4 text-neutral-400 shrink-0" />
+                                        <span className="flex-1">알림</span>
+                                        {unread > 0 && (
+                                            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                                                {unread > 99 ? "99+" : unread}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <Link
+                                        href="/myverse/app/settings"
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                                    >
+                                        <Settings className="h-4 w-4 text-neutral-400 shrink-0" />
+                                        <span>설정</span>
+                                    </Link>
+                                    <Link
+                                        href="/myverse/app/help"
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                                    >
+                                        <HelpCircle className="h-4 w-4 text-neutral-400 shrink-0" />
+                                        <span>도움말</span>
+                                    </Link>
+                                    <InstallButton className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors w-full text-left">
+                                        <Download className="h-4 w-4 text-neutral-400 shrink-0" />
+                                        <span>앱 설치</span>
+                                    </InstallButton>
+                                </div>
+
+                                <div className="h-px bg-neutral-100 mx-2 my-1" />
+
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-500 hover:text-rose-600 hover:bg-rose-50 transition-colors w-full"
+                                >
+                                    <LogOut className="h-4 w-4 shrink-0" />
+                                    <span>로그아웃</span>
+                                </button>
+                            </div>
                         )}
-                        {unread > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                                {unread > 99 ? "99+" : unread}
-                            </span>
-                        )}
-                    </Link>
+                    </div>
                 )}
             </div>
 

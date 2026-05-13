@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 const ALLOWED_TYPES = new Set([
     "image/jpeg", "image/png", "image/webp", "image/gif", "image/heic",
     "video/mp4", "video/webm", "video/quicktime",
+    "audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav",
 ]);
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
 
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     if (!ALLOWED_TYPES.has(file.type)) return NextResponse.json({ error: "invalid_type", type: file.type }, { status: 400 });
     if (file.size > MAX_BYTES) return NextResponse.json({ error: "too_large", size: file.size }, { status: 400 });
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || (file.type.startsWith("video/") ? "mp4" : "jpg");
+    const ext = file.name.split(".").pop()?.toLowerCase() || (file.type.startsWith("video/") ? "mp4" : file.type.startsWith("audio/") ? "webm" : "jpg");
     const path = `${memberId}/${date}/${Date.now()}.${ext}`;
 
     const admin = createAdminClient();
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
         url: pub.publicUrl,
-        media_type: file.type.startsWith("video/") ? "video" : "image",
+        media_type: file.type.startsWith("video/") ? "video" : file.type.startsWith("audio/") ? "audio" : "image",
         file_size: file.size,
         path,
         exif: exif ? {

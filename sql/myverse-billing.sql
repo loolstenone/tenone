@@ -38,3 +38,6 @@ CREATE TABLE IF NOT EXISTS myverse_stripe_events (
     processed       boolean NOT NULL DEFAULT false,
     payload         jsonb
 );
+
+-- RLS — service_role만 접근 (웹훅 처리 전용, anon/authenticated 차단)
+ALTER TABLE myverse_stripe_events ENABLE ROW LEVEL SECURITY;
