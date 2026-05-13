@@ -4,6 +4,92 @@
 
 ---
 
+## 2026-05-12 (세션 132) — Notion Mail 통합 1~4단계 + Hotfix 2건
+
+### Hotfix
+
+**대문자 /Myverse 경로 하드코딩 → /myverse**
+- `app/(Myverse)/myverse/page.tsx` line 149, 198 — `router.replace("/Myverse/app/daily")` / `router.push('/Myverse/app')` → 소문자
+- `app/(Myverse)/myverse/story/page.tsx` line 152 — `href="/Myverse"` → 소문자
+- 원인: Next.js URL case-sensitive — 인증 사용자가 `/myverse` 접근 시 자동 redirect → 404
+
+**사이드바 접힘 FOUC**
+- `app/(Myverse)/myverse/app/layout.tsx` 인라인 스크립트에 `myverse-sidebar-collapsed` 클래스 부착 추가 (다크모드 패턴 재사용)
+- `features/myverse/app/SidebarCollapseContext.tsx` useState 초기값을 함수로 — HTML 클래스 검사로 SSR/client 일치. toggle 시 localStorage + HTML 클래스 동시 동기화
+- 원인: useState(false)로 시작 → 펼침 첫 페인트(라벨 큰 글씨) → useEffect로 접힘 → 라벨 사라짐(FOUC)
+
+### Myverse — Notion Mail 통합 1단계: 인박스 페이지 + 본문 캐시
+
+**DB 마이그레이션 (Prod 적용)**
+- `sql/myverse-email-imports-body.sql` — `body_text`/`body_html`/`body_fetched_at`/`is_read`/`is_starred` 컬럼 + 인덱스
+
+**API 신규**
+- `GET /api/myverse/email-imports/[id]` — 본문 캐시 있으면 그대로, 없으면 Gmail API `format=full`로 fetch + payload 트리 재귀 파싱 + base64url 디코딩 + DB 캐시 (text 100KB / html 500KB)
+- `PATCH /api/myverse/email-imports/[id]` — is_read/is_starred/triage_state 토글
+
+**페이지 신규**
+- `app/(Myverse)/myverse/app/mail/page.tsx` + `features/myverse/mail/MailView.tsx` — Notion Mail 3패널 (카테고리 사이드바 + 메일 목록 + 본문)
+- 카테고리 필터 7종 — 전체·수신함·영수증·초대·뉴스레터·즐겨찾기·보관함
+- 메일 카드 — 안 읽음 인디케이터, 즐겨찾기 토글, auto_category 배지, 금액(영수증)
+- 본문 영역 — HTML iframe(sandbox) 또는 text, Gmail 원본 열기·보관·즐겨찾기 액션
+
+**사이드바·Settings**
+- AppSideNav에 "메일" 메뉴 (Mail 아이콘)
+- SettingsIntegrations — "Connected emails" / "Connected calendars" 그룹 분리, Gmail row 추가 (Google OAuth 공유)
+
+### Myverse — Notion Mail 2단계: 필터 패널
+
+**`MailView.tsx`**
+- Filter 토글 버튼 + 활성 필터 카운트 배지
+- 읽지 않음만 토글
+- 날짜 범위 — 전체기간/오늘/이번주/이번달 (4-way 토글)
+- 발신인 chip — top 8 빈도순 (이름·횟수 표시)
+- 활성 필터 칩 (패널 닫혀 있어도 어떤 필터 켜졌는지 요약 + X 해제)
+
+### Myverse — Notion Mail 3단계: Daily 임베드
+
+**`features/myverse/planner/DailyView.tsx`**
+- `NoteItem.type`에 `'email'` 추가 + `email_id` + `email_meta` (sender_name/email/subject/snippet/received_at/external_id)
+- type==='email' 카드 — rose 그라디언트 배경, 보낸이 아바타(@), 제목 1줄 + snippet 4줄, Gmail 원본 링크
+- 헤더 아이콘에 `Mail` 아이콘 + auto-title "메일 N" 패턴 + placeholder
+
+**`MailView.tsx`**
+- 디테일 헤더에 "Daily 임베드" 버튼 — 오늘 daily.notes에 email 노트 push + triage_state='note' 마킹 (중복 임베드 추적)
+- API 흐름: GET daily?date → notes 배열에 push → POST upsert daily → PATCH email triage
+
+### Myverse — Notion Mail 4단계: 답장·작성·Gmail 동기화
+
+**OAuth scope 확장 (기존 사용자 재연결 필요)**
+- `lib/myverse/google-calendar.ts` SCOPES에 `gmail.send` + `gmail.modify` 추가
+
+**API 신규**
+- `POST /api/myverse/integrations/gmail/send` — RFC 822 + base64url 인코딩, In-Reply-To/References 헤더, threadId, RFC 2047 한글 제목 인코딩
+- `POST /api/myverse/integrations/gmail/modify` — `action`: archive/mark_read/mark_unread/star/unstar → Gmail 라벨 add/remove (INBOX/UNREAD/STARRED)
+- 403 insufficient_scope 응답 시 재연결 안내 hint
+
+**`MailView.tsx`**
+- 헤더 답장 버튼 (Reply 인디고 fill) + 사이드바 새 메일 작성 버튼 (PenSquare)
+- composer 모달 — To/Subject/Body, 답장 시 자동 인용 + Re: prefix + inReplyTo
+- 보내기 결과 toast (전송 완료 / 권한 부족 안내)
+- archive/star/read 시 로컬 DB + Gmail 라벨 동시 동기화 (best-effort, 실패해도 로컬 유지)
+- EmailItem 인터페이스에 `external_id` 추가
+
+### 신규 파일
+
+| 경로 | 역할 |
+|---|---|
+| `sql/myverse-email-imports-body.sql` | email_imports 본문 캐시 + read/starred 컬럼 (Prod 적용) |
+| `app/api/myverse/email-imports/[id]/route.ts` | 단일 메일 GET (on-demand fetch+캐시) + PATCH |
+| `app/(Myverse)/myverse/app/mail/page.tsx` | 메일 라우트 |
+| `features/myverse/mail/MailView.tsx` | Notion Mail 3패널 인박스 + composer |
+| `app/api/myverse/integrations/gmail/send/route.ts` | Gmail 발송 (답장·작성) |
+| `app/api/myverse/integrations/gmail/modify/route.ts` | Gmail 라벨 수정 (archive/read/star) |
+
+### DB 마이그레이션 (Prod 실행 완료)
+1. `myverse-email-imports-body.sql`
+
+---
+
 ## 2026-05-12 (세션 131) — 마인드맵 export·노드→Task·OKR 시각화·회사 필터·프로젝트 노트 통합
 
 ### Myverse — 마인드맵 export

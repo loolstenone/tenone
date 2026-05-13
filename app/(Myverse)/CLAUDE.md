@@ -145,6 +145,28 @@
 - ask = "내가 묻는 즉시 답하는 1:1 대화"
 - coach = "묻지 않아도 먼저 보내는 일일 브리핑·주간 리포트"
 
+### Notion Mail 통합 (세션 132) — Gmail 인박스/본문/필터/Daily 임베드/답장·작성·라벨 동기화
+| 파일 | 역할 |
+|------|------|
+| `sql/myverse-email-imports-body.sql` | **신규** — body_text/html, body_fetched_at, is_read, is_starred 컬럼 (Prod 적용) |
+| `app/api/myverse/email-imports/[id]/route.ts` | **신규** — GET (본문 on-demand fetch + Gmail full payload 재귀 파싱 + base64url 디코딩 + DB 캐시), PATCH (read/star/triage) |
+| `app/(Myverse)/myverse/app/mail/page.tsx` | **신규 라우트** — /myverse/app/mail |
+| `features/myverse/mail/MailView.tsx` | **신규** — 3패널(카테고리 사이드바 + 메일 목록 + 본문) + 필터 패널(읽지않음/날짜/발신인) + 답장·새 메일 composer + Daily 임베드 + Gmail 라벨 동기화 |
+| `app/api/myverse/integrations/gmail/send/route.ts` | **신규** — RFC 822 + base64url + In-Reply-To/References + threadId + RFC 2047 한글 인코딩 |
+| `app/api/myverse/integrations/gmail/modify/route.ts` | **신규** — archive/mark_read/mark_unread/star/unstar → INBOX/UNREAD/STARRED 라벨 add/remove |
+| `lib/myverse/google-calendar.ts` | OAuth SCOPES에 `gmail.send` + `gmail.modify` 추가 (기존 사용자 재연결 필요) |
+| `features/myverse/app/AppSideNav.tsx` | "메일" 메뉴 추가 (Mail 아이콘) |
+| `features/myverse/planner/settings/SettingsIntegrations.tsx` | "Connected emails" / "Connected calendars" 그룹 분리 + Gmail row (Google OAuth 공유) |
+| `features/myverse/planner/DailyView.tsx` | NoteItem 'email' 타입 + email_id + email_meta. type==='email' 카드 렌더(rose 그라디언트, sender 아바타, snippet 4줄, Gmail 원본 링크) |
+
+### Hotfix (세션 132)
+| 파일 | 변경 |
+|------|------|
+| `app/(Myverse)/myverse/page.tsx` | `/Myverse/app/daily` (대문자 M) 하드코딩 → `/myverse/app/daily` 정정 (Next.js URL case-sensitive 404 fix) |
+| `app/(Myverse)/myverse/story/page.tsx` | `href="/Myverse"` → `/myverse` |
+| `app/(Myverse)/myverse/app/layout.tsx` | 인라인 스크립트에 `myverse-sidebar-collapsed` 클래스 부착 추가 (FOUC 방지) |
+| `features/myverse/app/SidebarCollapseContext.tsx` | useState 초기값을 함수로 (HTML 클래스 검사) + toggle 시 localStorage + HTML 클래스 동시 동기화 |
+
 ### 마인드맵 export·노드→Task·OKR 시각화·회사 필터·노트 적용 (세션 131)
 | 파일 | 역할 |
 |------|------|
@@ -288,7 +310,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 131 (2026-05-12)** — 마인드맵 PNG/SVG export + 선택 노드 → +Task 버튼 + 템플릿 본문 → 마인드맵 시각화(parseTextToMindmap 재사용) + 회사 클릭 → ContactsView 필터(`?company=ID` + 활성 칩) + 템플릿 적용 모달에 "마일스톤/프로젝트 노트" 이중 모드 (Pre-mortem·RACI·SAFe 본문 보존) |
+| **Phase** | **세션 132 (2026-05-12)** — Notion Mail 통합 1~4단계: Gmail 인박스(3패널: 카테고리+목록+본문) + 본문 on-demand fetch+캐시 + 필터(읽지않음/날짜/발신인) + Daily 임베드(NoteItem 'email') + 답장/작성 composer(RFC 822+base64url) + Gmail 라벨 동기화(archive/read/star) + OAuth scope 확장(send+modify). Hotfix: 대문자 /Myverse 404 + 사이드바 접힘 FOUC |
+| **세션 131 (2026-05-12)** | 마인드맵 PNG/SVG export + 선택 노드 → +Task 버튼 + 템플릿 본문 → 마인드맵 시각화(parseTextToMindmap 재사용) + 회사 클릭 → ContactsView 필터(`?company=ID` + 활성 칩) + 템플릿 적용 모달에 "마일스톤/프로젝트 노트" 이중 모드 (Pre-mortem·RACI·SAFe 본문 보존) |
 | **세션 130 (2026-05-12)** | 마인드맵 텍스트 import(마크다운/들여쓰기 자동 감지) + 회사 관리 페이지(`/contacts/companies` CRUD + 인원 펼침) + 간트 의존성 위반 감지(dashed rose + ⚠ + 5-pass 자동 일정 조정) + 마인드맵→프로젝트(1단계 자식→마일스톤) + 간트 PNG/SVG export + 신규 프레임워크 4종(RACI·Pre-mortem·OKR Roll-up·SAFe PI Planning) |
 | **세션 129 (2026-05-12)** | 간트 의존성 화살표(SVG 직각 경로)·좌측 시작일 핸들·마일스톤 ◆ 드래그·ProjectKanban DnD + 마인드맵 신규(SVG 방사형 + 노드 드래그 + 컬러 picker + 1.5s 자동 저장) + 템플릿 변수 치환·마일스톤 자동 변환 + Company Stage 2 + DigitalCard PNG 캡처 외부이미지 dataURL prefetch + 시드 템플릿 변수 주입 |
 | **세션 128 (2026-05-13)** | 일정&업무 칸반/리스트 토글 + 메인/서브 위계 트리 + 경중완급 폐기 + 프로젝트 모달화·간트 4단계 고도화(드래그/리사이즈/팝오버/자율헤더+오늘선+마일스톤◆) + 미완 호출 시 메인+서브 동반 + 사이드바 토글 우측 상단 absolute + Hydration suppressHydrationWarning + TimeBlock UI 폐기 |
@@ -305,6 +328,7 @@
 | **세션 117 결정** | ① Canvas Engine image 지원: 파일 피커 + Ctrl+V · ② PNG/SVG 내보내기: `lib/canvas-engine/export.ts` · ③ 레이어 정렬 4종(bringToFront/Forward/Backward/Back) + 단축키 · ④ TextElement bold/italic + 플로팅 서식 바 + Ctrl+B/I |
 | **세션 116 결정** | ① Planner's 브랜드 유지 확정 — Myverse 코드 내부 흔적만 제거 · ② DB 마커(handwriting/tpl/canvas) 즉시 실행 완료 (PAT만으로 가능) · ③ Storage 실 파일 이전은 service role key 필요 → 스크립트로 이월 · ④ myverse-sw.js v3 — planners-sw(v1/v2) + myverse(v2) 캐시 모두 삭제 |
 | **위험 관리** | 모든 ALTER `IF NOT EXISTS` · 백필 별도 트랜잭션 · 기본 visibility=private · `/api/planners/*` 외부 호환 rewrite 유지 · server `redirect()` 금지 (Next.js 16 dev router prefetch 무한 큐 트리거) — 인증 게이트는 `<ClientRedirect>` 사용 |
+| **세션 132 결정** | ① Notion Mail UX = 3패널(카테고리·목록·본문). 메일은 별도 페이지(`/myverse/app/mail`)로 — Daily에서 호출 X · ② 본문은 on-demand fetch + DB 캐시. snippet만 caching하면 메일 미리보기에서 끝, 본문은 클릭한 메일만 fetch. 캡: text 100KB / html 500KB (XSS 안전성 위해 iframe sandbox 렌더) · ③ Gmail OAuth scope 확장은 1회 재연결 필요 — 사용자 안내 + API에 403 insufficient_scope 응답 표시 · ④ 답장은 In-Reply-To/References 헤더로 thread 묶음. RFC 2047 한글 제목 base64 인코딩 필수 · ⑤ Gmail 라벨 동기화는 best-effort (Promise.all + catch) — 로컬 DB 상태가 진실, Gmail 동기화 실패해도 로컬 보존 · ⑥ Daily 임베드 = 본문 복제 X. email_id 참조 + email_meta 캐시(sender/subject/snippet/external_id)만 보관 → 이메일 원본은 Gmail 또는 myverse_email_imports에 그대로 · ⑦ 필터는 client-side만(메일 50개 limit). 서버 q= 검색은 다음 세션 · ⑧ "Connected emails / Connected calendars" 그룹 분리 — Gmail/Calendar 같은 OAuth 공유지만 UI는 독립 표시 (Notion Mail 패턴) · ⑨ FOUC 방지는 다크모드 패턴 재사용 — 인라인 스크립트로 HTML 클래스 부착 + useState 초기값 함수가 클래스 검사. SSR/client 첫 페인트 동일 |
 | **세션 131 결정** | ① 마인드맵 export 캡처 제외는 `data-mindmap-ui` 속성으로 마킹 + `filter` 옵션 — UI 요소(툴바·도움말·picker·모달)를 깔끔히 빼서 회의 자료용 결과물 생성 · ② 노드 → Task는 CanvasEditor와 동일한 `onPromoteText` prop 패턴 재사용 — 일관성 유지, 별도 API 불필요 · ③ 템플릿 → 마인드맵은 새 캔버스 생성 후 router.push (모달 내 미리보기 X) — 마인드맵은 큰 화면이 필요한 도구라 새 페이지가 자연 · ④ 회사 필터는 URL query(`?company=ID`)로 stateless — 북마크·공유 가능. 활성 필터 칩으로 명확한 시그널 · ⑤ Pre-mortem/RACI/SAFe 같은 구조 보존 템플릿은 "노트 모드"로 통째로 저장 — 마일스톤 분해는 의미 손실. 사용자가 모드 선택. 헤딩 없어도 본문 있으면 노트 모드로 적용 가능 · ⑥ apply 모달이 milestones·note 양쪽을 같은 함수에서 처리 — 분기는 applyMode state로 단순화 |
 | **세션 130 결정** | ① 마인드맵 텍스트 import는 자동 감지(`#`로 시작 → 마크다운 / 들여쓰기 있음 → outline). 스택 기반 트리 구성. 모드 선택 강제하지 않음 · ② 회사 관리는 ContactsView와 별도 페이지로 분리 — 자동완성으로 부족할 때만 manual. `<datalist>` SSOT는 그대로 유지 · ③ 의존성 위반 감지는 클라이언트 측 계산(별도 API 불필요). dashed rose + ⚠ 시각 신호 + 옵션형 auto-fix · ④ Auto-fix는 5-pass 위상정렬로 단순화 — 사이클 발생 시 더 깊은 검증 없이 종료(상위에서 합리적 의존 관계 가정) · ⑤ 마인드맵 → 프로젝트는 1단계 자식만 마일스톤, 손자 트리는 description으로 평탄화. 너무 깊은 자동 변환은 의미 손실 — 사용자가 1단계 구성을 의도적으로 정리하도록 유도 · ⑥ 간트 export는 차트 컨테이너만 ref로 캡처(범례·배너 제외). pixelRatio: PNG=2, SVG=1 · ⑦ 신규 프레임워크 시드는 변수 패턴 적극 활용 — OKR Roll-up에 `{{quarter}}/{{year}}/{{user}}`, RACI/Pre-mortem에 `{{today}}` |
 | **세션 129 결정** | ① 간트 의존성은 PlannerTask JSONB에 `depends_on: string[]` 추가로 마이그레이션 없이 즉시 구현. SVG 직각 경로 + arrow marker · ② 좌측 시작일 핸들은 끝점 고정(duration 자동 보정), 우측 핸들은 끝점 이동(duration만), 본문은 전체 이동(date만). 3가지 모드 명확히 분리 · ③ 마인드맵은 캔버스 엔진 재사용하지 않고 별도 SVG 컴포넌트 `MindmapEditor.tsx`로 구현. 캔버스 data 컬럼 안에 `data.mindmap` vs `data.ppcanvas` 키로 분기 — DB 마이그레이션 0 · ④ 노드 수동 드래그 좌표는 `(dx/zoom)`로 줌 보정 필수 — 줌 in/out 상태에서도 정확 이동 · ⑤ 템플릿 변수는 `{{var\|fallback}}` 패턴. 자동 컨텍스트는 `buildDefaultVarContext()` SSOT로 모든 호출지점 통일 · ⑥ 마일스톤 추출은 `## 헤딩` 우선, `- [ ]` 보조. `(YYYY-MM-DD)` 패턴은 자동 due_date 인식 · ⑦ Stage 2 Company는 `company_name`(자유 텍스트) legacy fallback 유지 + `company_id` FK 신규. 점진 마이그레이션. ContactsView는 `<datalist>` SSOT로 모든 폼에서 자동완성 · ⑧ DigitalCard PNG 캡처는 외부 이미지 CORS로 누락되던 문제 — `fetch→blob→FileReader.readAsDataURL`로 prefetch + onload 대기(1.5s 타임아웃) + 캡처 후 src 복원 |
