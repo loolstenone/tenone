@@ -4,6 +4,107 @@
 
 ---
 
+## 2026-05-14 (세션 135) — Myverse 진입점 + SmarComm Index Phase 1~3 고도화
+
+### Myverse (3 영역)
+
+**AppTopNav 아바타 드롭다운** ([features/myverse/planner/AppTopNav.tsx](features/myverse/planner/AppTopNav.tsx))
+- Install·Help·Settings 분리 아이콘 → 아바타 드롭다운 통합
+- Bell 알림 분리 (이전엔 아바타가 알림 진입점)
+- 드롭다운: 이름·구독상태 헤더 → 프로필 / 설정 / 도움말 / 앱 설치 / 로그아웃
+
+**운동·식사 카드 시각화** ([features/myverse/capture/CaptureView.tsx](features/myverse/capture/CaptureView.tsx))
+- StatChip · IntensityDots (5단계) · MealStats · ExerciseStats
+- UnifiedTrace.exercise에 level/heart_rate 추가
+- 부수: capture_mode 잠재 버그 fix ([app/api/myverse/routines/route.ts:65](app/api/myverse/routines/route.ts) "manual" → "active", 세션 108부터 잠재)
+
+**첫 랜딩 페이지 → 캡쳐** (6곳: marketing redirect / Hero CTA / `/myverse/app` / onboarding 완료·재진입 / 브랜드 로고)
+
+### SmarComm CLAUDE.md 전면 재작성
+
+[app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) 130줄 → 376줄
+- § 2 WIO ↔ SmarComm 동등 OS SSOT (종속 폐기)
+- § 3 Marketing OS 7대 영역
+- § 3-A 보고서 5 SSOT (가중치/AI 플랫폼/Question Bank/역할/뷰 모드)
+- § 5 팩 시스템 SSOT
+- § 10 핵심 파일 60+개
+- § 13 절대 하지 말 것 9건
+
+### SmarComm Index Phase 1 — DB 영구 저장 + 공유 URL
+
+- [lib/smarcomm/index-calculator.ts](lib/smarcomm/index-calculator.ts) — `computeIndex()` 30/30/40 + Grade S/A/B/C/D
+- [sql/smarcomm-scans.sql](sql/smarcomm-scans.sql) — `smarcomm_scans` + `smarcomm_scan_pages` (Prod 적용)
+- scan API + report API + short_id 발급 + Hero UI + 신뢰 푸터
+
+### SmarComm Index Phase 1.5 — 권위 표준 정렬
+
+- [lib/smarcomm/grading/thresholds.ts](lib/smarcomm/grading/thresholds.ts) — Google CWV/QRG/Schema.org/WCAG/Mozilla/llms.txt 출처
+- [lib/smarcomm/analyzers/schema-validator.ts](lib/smarcomm/analyzers/schema-validator.ts) — JSON-LD 자체 검증 (14 schema)
+- [lib/smarcomm/analyzers/mozilla-observatory.ts](lib/smarcomm/analyzers/mozilla-observatory.ts) — 보안 헤더 등급
+- 카드 분리: 인덱싱 → 인덱싱+Canonical / 내부 링크 → 사이트 링크 분류
+- AI 봇 Access (5봇 robots.txt) + llms.txt + INP 측정
+- 권위도 T4 처리 (휴리스틱 폐기, N/A)
+- 모든 description 재작성 — 판단(✓⚠⛔📋) + 근거 + 출처
+- Trust E-E-A-T 4 sub-score 재배치 (Experience·Expertise·Authoritativeness(N/A)·Trustworthiness)
+
+### SmarComm Index Phase 2 — 5 AI Probe + Visibility Map
+
+- [lib/smarcomm/question-bank.ts](lib/smarcomm/question-bank.ts) — 7카테고리 × 13질문 (업종별)
+- [lib/smarcomm/ai-probes/](lib/smarcomm/ai-probes/) — types/claude/chatgpt/perplexity/google-aio/naver-cue/index 7 파일
+- [sql/smarcomm-ai-probes.sql](sql/smarcomm-ai-probes.sql) — Prod 적용
+- AI Visibility Map UI — 7카테고리 노출률 + 플랫폼별 펼침 + 실제 응답 캡처
+- **발견**: smarcomm.biz Claude 13질문 = 0/13 언급. Index 71 → 61 정직한 조정
+
+### SmarComm Index Phase 2.5 — 답변 일관성
+
+- [lib/smarcomm/analyzers/fact-extractor.ts](lib/smarcomm/analyzers/fact-extractor.ts) — 자사·AI 사실 추출 + 자카드 비교
+- 5 probe 시그니처 통일 (siteTruth 인자)
+- UI: 답변 일관성 요약 카드 + Probe별 정확도 배지 (✓△✗—) + 사실 비교 표
+- 산식: consistency = (exact ×1.0 + partial ×0.5 + wrong ×−0.5) / mentioned × 100
+
+### SmarComm Index Phase 3 — Schema 자동·Action·Trend·Exec Summary
+
+- [lib/smarcomm/schema-generator.ts](lib/smarcomm/schema-generator.ts) — Organization/WebSite/FAQPage/Service/BreadcrumbList 자동 생성
+- [lib/smarcomm/exec-summary.ts](lib/smarcomm/exec-summary.ts) — Claude Haiku 3줄 요약 + Action Plan Impact×Effort 18 룰
+- [app/api/smarcomm/report/[id]/trend/route.ts](app/api/smarcomm/report/[id]/trend/route.ts) — 도메인 시계열 API
+- UI 4 신규: Executive Summary 30초 요약 / ActionMatrix 2×2 / SchemaGenerator (복사 버튼) / TrendChart SVG
+
+### 신규 파일 (총 19개)
+
+**SQL 2** · **API 2** · **lib 15** (smarcomm 14개 + capture 1개 미존재)
+
+| 파일 |
+|---|
+| `lib/smarcomm/index-calculator.ts` · `grading/thresholds.ts` |
+| `lib/smarcomm/analyzers/schema-validator.ts` · `mozilla-observatory.ts` · `fact-extractor.ts` |
+| `lib/smarcomm/question-bank.ts` |
+| `lib/smarcomm/ai-probes/types.ts` · `claude.ts` · `chatgpt.ts` · `perplexity.ts` · `google-aio.ts` · `naver-cue.ts` · `index.ts` |
+| `lib/smarcomm/schema-generator.ts` · `exec-summary.ts` |
+| `app/api/smarcomm/report/[id]/route.ts` · `[id]/trend/route.ts` |
+| `sql/smarcomm-scans.sql` · `smarcomm-ai-probes.sql` |
+
+### 핵심 결정 10개
+
+1. **WIO ↔ SmarComm 동등 OS** — 종속 표현 폐기
+2. **Marketing OS 7대 영역 SSOT**
+3. **Index 가중치 30/30/40** — Citability 강조 (균등/40-40-20 거부)
+4. **5 AI 플랫폼 SSOT** — 6번째 임의 추가 금지
+5. **4-Tier 측정 모델** — T0/T1/T2만 점수 산입, T3/T4 별도 N/A
+6. **권위도 측정 폐기** — `.com/.kr` 휴리스틱은 정직하지 못함. Phase 4 외부 도구 대기
+7. **DB 가격 SSOT** — `wio_subscription_plans`, Markdown 정확 수치 금지
+8. **AI 정확도 wrong = -0.5 음수 가중** — 오답이 미언급보다 위험
+9. **마케터 4 질문 구조** — 찾을 수 있나·신뢰할 만한가·AI 추천하는가·경쟁사 대비 어떤가
+10. **마케터 모드 기본** — 이후 dev/exec 뷰 추가
+
+### 환경
+
+- 작업 위치: 워크트리 `brave-margulis-2c2f3e`
+- 사무실/집: TBD
+- ANTHROPIC_API_KEY: 401 에러 (재갱신 필요)
+- DB 적용 완료: smarcomm_scans · smarcomm_scan_pages · smarcomm_ai_probes
+
+---
+
 ## 2026-05-13 (세션 134) — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴
 
 ### 캡쳐 Phase 2 (5건)

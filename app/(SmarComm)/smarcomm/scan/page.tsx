@@ -37,7 +37,7 @@ function ScanContent() {
     }, 100);
 
     // 실제 API 호출
-    fetch('/api/scan', {
+    fetch('/api/smarcomm/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
@@ -51,16 +51,19 @@ function ScanContent() {
         return res.json();
       })
       .then((result) => {
-        // 결과를 sessionStorage에 저장 + 스캔 URL 기록
-        const scanId = Date.now().toString(36);
-        sessionStorage.setItem(`scan_${scanId}`, JSON.stringify(result));
+        // Phase 1: API가 short_id 발급 + DB 저장. 받은 short_id로 라우팅.
+        // Fallback: short_id 없으면 (DB 실패 등) 옛 방식 sessionStorage
+        const scanId = result.shortId || Date.now().toString(36);
+        if (!result.shortId) {
+          sessionStorage.setItem(`scan_${scanId}`, JSON.stringify(result));
+        }
         saveScanUrl(result.url, result.totalScore);
 
         // 프로그레스 100%로 올리고 리포트 이동
         setProgress(100);
         setStep(4);
         setTimeout(() => {
-          router.push(`/report/${scanId}`);
+          router.push(`/smarcomm/report/${scanId}`);
         }, 500);
       })
       .catch((err) => {

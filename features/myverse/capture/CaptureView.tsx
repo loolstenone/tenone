@@ -14,7 +14,7 @@ import {
     Sparkles, Loader2, Share2, ListPlus, FolderPlus, Search,
     Trash2, Globe, Lock, Plus, Image as ImageIcon, Clock,
     Target, FileText, Flag, Satellite, AlertCircle, Mic, Square,
-    Brush, Contact, Mail, Castle, Lightbulb,
+    Brush, Contact, Mail, Castle, Lightbulb, Heart, Flame,
 } from "lucide-react";
 import { useAutoCheckin, type AutoCheckinPayload } from "@/lib/myverse/auto-checkin";
 import { useRecorder } from "@/lib/myverse/use-recorder";
@@ -39,9 +39,9 @@ interface UnifiedTrace {
     duration_min: number | null;
     visibility: "private" | "public" | "friends" | null;
     domain: string | null;
-    // 클라이언트 보강 — 카드별 AI 분석 결과 (moment만)
+    // 카드 구조화 데이터 — moment: AI 분석 결과 / routine: 직접 입력값
     nutrition?: { calories?: number; summary?: string } | null;
-    exercise?: { kcal?: number; summary?: string } | null;
+    exercise?: { kcal?: number; level?: number; heart_rate?: number; summary?: string } | null;
     sub_tags?: string[] | null;
 }
 
@@ -1022,16 +1022,18 @@ function TraceCard({ trace: t, busy, onAction }: { trace: UnifiedTrace; busy: bo
                     </>
                 )}
 
-                {/* AI 분석 결과 */}
-                {t.nutrition?.summary && (
-                    <div className="text-xs text-emerald-700 myverse-dark:text-emerald-400 bg-emerald-50 myverse-dark:bg-emerald-500/10 px-2 py-1 rounded">
-                        🍽 {t.nutrition.summary}{t.nutrition.calories ? ` · ${t.nutrition.calories} kcal` : ""}
-                    </div>
+                {/* 식사 카드 — 구조화 시각화 */}
+                {t.nutrition && (t.nutrition.calories != null || t.nutrition.summary) && (
+                    <MealStats nutrition={t.nutrition} />
                 )}
-                {t.exercise?.summary && (
-                    <div className="text-xs text-rose-700 myverse-dark:text-rose-400 bg-rose-50 myverse-dark:bg-rose-500/10 px-2 py-1 rounded">
-                        🏃 {t.exercise.summary}{t.exercise.kcal ? ` · ${t.exercise.kcal} kcal` : ""}
-                    </div>
+                {/* 운동 카드 — 구조화 시각화 (강도·BPM·kcal·구성) */}
+                {t.exercise && (
+                    t.exercise.kcal != null ||
+                    t.exercise.level != null ||
+                    t.exercise.heart_rate != null ||
+                    t.exercise.summary
+                ) && (
+                    <ExerciseStats exercise={t.exercise} />
                 )}
 
                 {/* 액션 칩 */}
@@ -1062,6 +1064,106 @@ function TraceCard({ trace: t, busy, onAction }: { trace: UnifiedTrace; busy: bo
                     )}
                 </div>
             </div>
+        </div>
+    );
+}
+
+// ───────────────────────── 구조화 시각화 ─────────────────────────
+
+function StatChip({
+    icon: Icon, value, label, tone,
+}: {
+    icon: typeof Heart;
+    value: string;
+    label?: string;
+    tone: "emerald" | "rose" | "amber" | "neutral";
+}) {
+    const toneCls = {
+        emerald: "text-emerald-700 myverse-dark:text-emerald-400 bg-emerald-50 myverse-dark:bg-emerald-500/10 border-emerald-200 myverse-dark:border-emerald-500/20",
+        rose: "text-rose-700 myverse-dark:text-rose-400 bg-rose-50 myverse-dark:bg-rose-500/10 border-rose-200 myverse-dark:border-rose-500/20",
+        amber: "text-amber-700 myverse-dark:text-amber-400 bg-amber-50 myverse-dark:bg-amber-500/10 border-amber-200 myverse-dark:border-amber-500/20",
+        neutral: "text-neutral-700 myverse-dark:text-neutral-300 bg-neutral-50 myverse-dark:bg-white/5 border-neutral-200 myverse-dark:border-white/10",
+    }[tone];
+    return (
+        <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded border ${toneCls}`} title={label}>
+            <Icon className="h-3 w-3" />
+            <span className="text-[11px] font-semibold tabular-nums">{value}</span>
+            {label && <span className="text-[10px] opacity-75">{label}</span>}
+        </div>
+    );
+}
+
+function IntensityDots({ level }: { level: number }) {
+    const lv = Math.max(0, Math.min(5, level));
+    return (
+        <div className="flex items-center gap-1" title={`강도 ${lv}/5`}>
+            <span className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 font-medium">강도</span>
+            <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map(i => (
+                    <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-colors ${
+                            i <= lv ? "bg-rose-500 myverse-dark:bg-rose-400 w-3" : "bg-neutral-200 myverse-dark:bg-white/10 w-2"
+                        }`}
+                    />
+                ))}
+            </div>
+            <span className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 tabular-nums">{lv}/5</span>
+        </div>
+    );
+}
+
+function MealStats({ nutrition }: { nutrition: NonNullable<UnifiedTrace["nutrition"]> }) {
+    const hasCal = nutrition.calories != null;
+    const summary = nutrition.summary?.trim();
+    if (!hasCal && !summary) return null;
+    return (
+        <div className="rounded-lg border border-emerald-200 myverse-dark:border-emerald-500/20 bg-emerald-50/60 myverse-dark:bg-emerald-500/5 px-2.5 py-2 space-y-1.5">
+            <div className="flex items-center flex-wrap gap-1.5">
+                <Utensils className="h-3 w-3 text-emerald-600 myverse-dark:text-emerald-400" />
+                <span className="text-[10px] font-bold tracking-wider text-emerald-700 myverse-dark:text-emerald-400 uppercase">식단</span>
+                {hasCal && (
+                    <StatChip icon={Flame} value={`${nutrition.calories}`} label="kcal" tone="emerald" />
+                )}
+            </div>
+            {summary && (
+                <p className="text-xs text-emerald-800 myverse-dark:text-emerald-300 leading-relaxed">
+                    {summary}
+                </p>
+            )}
+        </div>
+    );
+}
+
+function ExerciseStats({ exercise }: { exercise: NonNullable<UnifiedTrace["exercise"]> }) {
+    const hasLevel = exercise.level != null && exercise.level > 0;
+    const hasBpm = exercise.heart_rate != null;
+    const hasKcal = exercise.kcal != null;
+    const summary = exercise.summary?.trim();
+    // 구성(composition) summary에서 강도/BPM 부분 빼고 남은 텍스트만 별도 표시
+    const compositionOnly = summary
+        ? summary
+              .split(" · ")
+              .filter(s => !s.startsWith("강도 ") && !s.includes("BPM"))
+              .join(" · ")
+        : "";
+
+    return (
+        <div className="rounded-lg border border-rose-200 myverse-dark:border-rose-500/20 bg-rose-50/60 myverse-dark:bg-rose-500/5 px-2.5 py-2 space-y-1.5">
+            <div className="flex items-center flex-wrap gap-2">
+                <div className="flex items-center gap-1">
+                    <Activity className="h-3 w-3 text-rose-600 myverse-dark:text-rose-400" />
+                    <span className="text-[10px] font-bold tracking-wider text-rose-700 myverse-dark:text-rose-400 uppercase">운동</span>
+                </div>
+                {hasLevel && <IntensityDots level={exercise.level!} />}
+                {hasBpm && <StatChip icon={Heart} value={`${exercise.heart_rate}`} label="BPM" tone="rose" />}
+                {hasKcal && <StatChip icon={Flame} value={`${exercise.kcal}`} label="kcal" tone="amber" />}
+            </div>
+            {compositionOnly && (
+                <p className="text-xs text-rose-800 myverse-dark:text-rose-300 leading-relaxed">
+                    {compositionOnly}
+                </p>
+            )}
         </div>
     );
 }

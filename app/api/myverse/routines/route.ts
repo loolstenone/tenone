@@ -62,7 +62,7 @@ export async function POST(req: Request) {
             kcal: kc,
             heart_rate: hr,
             composition: typeof composition === "string" && composition.trim() ? composition.trim() : null,
-            capture_mode: "manual",
+            capture_mode: "active",
         })
         .select()
         .single();

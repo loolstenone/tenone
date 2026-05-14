@@ -1,5 +1,7 @@
 // 실제 HTML을 분석하여 SEO 점수를 산출하는 엔진
 import Anthropic from '@anthropic-ai/sdk';
+import { analyzeSchema, scoreSchema } from './analyzers/schema-validator';
+import { fetchObservatoryGrade, scoreObservatory } from './analyzers/mozilla-observatory';
 
 export interface AnalysisItem {
   name: string;
@@ -55,9 +57,11 @@ export interface PerformanceData {
   score: number;               // 0~100
   lcp: number;                 // ms (Largest Contentful Paint)
   cls: number;                 // 점수 (Cumulative Layout Shift)
-  tbt: number;                 // ms (Total Blocking Time)
+  tbt: number;                 // ms (Total Blocking Time, lab)
   fcp: number;                 // ms (First Contentful Paint)
   si: number;                  // ms (Speed Index)
+  inp?: number | null;         // ms (Interaction to Next Paint) — Core Web Vitals 2024, CrUX field data
+  inpSource?: 'field' | 'lab' | null;  // 측정 방식
 }
 
 export interface SubPageResult {
@@ -206,6 +210,19 @@ async function fetchPageSpeed(url: string, apiKey: string): Promise<PerformanceD
     const categories = data.lighthouseResult?.categories;
     if (!audits || !categories) return null;
 
+    // INP — CrUX field data (실제 사용자 측정값) 우선, fallback lab
+    // 출처: Google CWV 2024 — INP가 FID 대체 (2024.03)
+    let inp: number | null = null;
+    let inpSource: 'field' | 'lab' | null = null;
+    const fieldInp = data.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS?.percentile;
+    const originInp = data.originLoadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS?.percentile;
+    if (typeof fieldInp === 'number') { inp = fieldInp; inpSource = 'field'; }
+    else if (typeof originInp === 'number') { inp = originInp; inpSource = 'field'; }
+    else {
+      const labInp = audits['interaction-to-next-paint']?.numericValue;
+      if (typeof labInp === 'number' && labInp > 0) { inp = Math.round(labInp); inpSource = 'lab'; }
+    }
+
     return {
       score: Math.round((categories.performance?.score || 0) * 100),
       lcp: Math.round(audits['largest-contentful-paint']?.numericValue || 0),
@@ -213,6 +230,8 @@ async function fetchPageSpeed(url: string, apiKey: string): Promise<PerformanceD
       tbt: Math.round(audits['total-blocking-time']?.numericValue || 0),
       fcp: Math.round(audits['first-contentful-paint']?.numericValue || 0),
       si: Math.round(audits['speed-index']?.numericValue || 0),
+      inp,
+      inpSource,
     };
   } catch {
     return null;
@@ -359,34 +378,54 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
   // === 외부 API 병렬 호출 (PageSpeed + GEO 멘션 테스트) ===
   const domain = (() => { try { return new URL(normalizedUrl).hostname; } catch { return ''; } })();
 
-  const [pageSpeedData, geoTestResults] = await Promise.all([
+  const [pageSpeedData, geoTestResults, observatoryResult] = await Promise.all([
     options?.pageSpeedApiKey ? fetchPageSpeed(normalizedUrl, options.pageSpeedApiKey) : Promise.resolve(null),
     options?.anthropicApiKey ? testGeoMention(normalizedUrl, domain, options.anthropicApiKey) : Promise.resolve([]),
+    fetchObservatoryGrade(domain),    // Phase 1.5.6 — best-effort, 실패 시 null
   ]);
 
   // === 기술 SEO 분석 ===
   const techSeo: AnalysisItem[] = [];
 
-  // 1. 페이지 로딩 속도 (PageSpeed API 또는 fetch 시간 기반)
+  // 1. 페이지 로딩 속도 — Core Web Vitals (LCP·CLS·INP) 명시
+  // 출처: Google Core Web Vitals 2024 (web.dev/vitals), INP는 2024.03 FID 대체
   {
     let score = 15;
     let desc = '';
     if (pageSpeedData) {
-      // 실제 PageSpeed 점수 사용
       const psScore = pageSpeedData.score;
-      if (psScore >= 90) { score = 15; desc = `PageSpeed 점수 ${psScore}/100 — 우수 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
-      else if (psScore >= 50) { score = Math.round(psScore / 100 * 15); desc = `PageSpeed 점수 ${psScore}/100 — 개선 필요 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
-      else { score = Math.round(psScore / 100 * 15); desc = `PageSpeed 점수 ${psScore}/100 — 느림 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
+      const lcpSec = (pageSpeedData.lcp / 1000).toFixed(1);
+      const cls = pageSpeedData.cls.toFixed(3);
+      const inpText = pageSpeedData.inp != null
+        ? ` · INP ${pageSpeedData.inp}ms${pageSpeedData.inpSource === 'field' ? '(실측)' : '(lab)'}`
+        : '';
+      const cwvText = `LCP ${lcpSec}s · CLS ${cls}${inpText}`;
+      const cwvJudge =
+        pageSpeedData.lcp <= 2500 && pageSpeedData.cls <= 0.1 && (pageSpeedData.inp == null || pageSpeedData.inp <= 200)
+          ? '✓ Core Web Vitals 전 통과'
+          : pageSpeedData.lcp <= 4000 && pageSpeedData.cls <= 0.25
+            ? '△ Core Web Vitals 부분 통과'
+            : '⛔ Core Web Vitals 미흡';
+
+      if (psScore >= 90) { score = 15; desc = `${cwvJudge} · PageSpeed ${psScore}/100 (${cwvText}) (출처: Google CWV 2024)`; }
+      else if (psScore >= 50) { score = Math.round(psScore / 100 * 15); desc = `${cwvJudge} · PageSpeed ${psScore}/100 (${cwvText}) (출처: Google CWV 2024)`; }
+      else { score = Math.round(psScore / 100 * 15); desc = `${cwvJudge} · PageSpeed ${psScore}/100 (${cwvText}) (출처: Google CWV 2024)`; }
     } else {
-      // fallback: fetch 시간 기반
-      if (fetchTime < 1000) { score = 15; desc = `응답 시간 ${fetchTime}ms — 매우 빠름`; }
-      else if (fetchTime < 2000) { score = 12; desc = `응답 시간 ${fetchTime}ms — 양호`; }
-      else if (fetchTime < 3000) { score = 8; desc = `응답 시간 ${fetchTime}ms — 개선 권장`; }
-      else if (fetchTime < 5000) { score = 5; desc = `응답 시간 ${fetchTime}ms — 느림`; }
-      else { score = 2; desc = `응답 시간 ${fetchTime}ms — 매우 느림`; }
+      // fallback: fetch 시간 기반 (PageSpeed API 키 없음)
+      if (fetchTime < 1000) { score = 15; desc = `응답 시간 ${fetchTime}ms — 매우 빠름 (PageSpeed 미사용)`; }
+      else if (fetchTime < 2000) { score = 12; desc = `응답 시간 ${fetchTime}ms — 양호 (PageSpeed 미사용)`; }
+      else if (fetchTime < 3000) { score = 8; desc = `응답 시간 ${fetchTime}ms — 개선 권장 (PageSpeed 미사용)`; }
+      else if (fetchTime < 5000) { score = 5; desc = `응답 시간 ${fetchTime}ms — 느림 (PageSpeed 미사용)`; }
+      else { score = 2; desc = `응답 시간 ${fetchTime}ms — 매우 느림 (PageSpeed 미사용)`; }
     }
     if (fetchError) { score = 0; desc = `사이트 접속 실패: ${fetchError}`; }
-    techSeo.push({ name: '페이지 로딩 속도', score, maxScore: 15, status: getStatus(score, 15), description: desc, action: '이미지 최적화, 코드 분할, CDN 적용으로 LCP 2.5초 이하 달성' });
+    techSeo.push({
+      name: '페이지 로딩 속도',
+      score, maxScore: 15,
+      status: getStatus(score, 15),
+      description: desc,
+      action: 'LCP ≤ 2.5s · CLS ≤ 0.1 · INP ≤ 200ms 목표 (이미지 최적화·코드 분할·CDN)',
+    });
   }
 
   // 2. 모바일 최적화 (viewport 메타태그 확인)
@@ -403,53 +442,198 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
     techSeo.push({ name: 'HTTPS 적용', score, maxScore: 5, status: getStatus(score, 5), description: isHttps ? 'HTTPS 적용됨' : 'HTTP 사용 중 — 보안 경고 표시될 수 있음', action: 'SSL 인증서 적용 및 HTTPS 리다이렉트 설정' });
   }
 
-  // 4. 크롤링 접근성 (robots.txt, sitemap 체크)
+  // 4. 크롤링 접근성 + AI 봇 access matrix + llms.txt (3 카드로 분리)
+  let robotsText = '';
+  let robotsExists = false;
+  let sitemapExists = false;
+  let llmsTxtExists = false;
+  try {
+    const origin = new URL(normalizedUrl).origin;
+    const [robotsRes, sitemapRes, llmsRes] = await Promise.all([
+      fetch(`${origin}/robots.txt`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+      fetch(`${origin}/sitemap.xml`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+      fetch(`${origin}/llms.txt`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+    ]);
+    robotsExists = !!robotsRes && robotsRes.ok;
+    if (robotsExists && robotsRes) robotsText = await robotsRes.text().catch(() => '');
+    sitemapExists = !!sitemapRes && sitemapRes.ok;
+    llmsTxtExists = !!llmsRes && llmsRes.ok;
+  } catch { /* silent */ }
+
+  // 4a. 크롤링 접근성 — robots.txt + sitemap.xml
   {
     let score = 0;
     const details: string[] = [];
+    if (robotsExists) { score += 2; details.push('✓ robots.txt'); } else { details.push('⚠ robots.txt 없음'); }
+    if (sitemapExists) { score += 3; details.push('✓ sitemap.xml'); } else { details.push('⛔ sitemap.xml 없음'); }
+    const hasSitemapDirective = /(?:^|\n)\s*sitemap\s*:/i.test(robotsText);
+    if (hasSitemapDirective) details.push('✓ robots.txt → Sitemap 디렉티브 포함');
 
-    try {
-      const origin = new URL(normalizedUrl).origin;
-      const robotsRes = await fetch(`${origin}/robots.txt`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
-      if (robotsRes && robotsRes.ok) { score += 2; details.push('robots.txt 존재'); }
-      else { details.push('robots.txt 없음'); }
-
-      const sitemapRes = await fetch(`${origin}/sitemap.xml`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
-      if (sitemapRes && sitemapRes.ok) { score += 3; details.push('sitemap.xml 존재'); }
-      else { score += 0; details.push('sitemap.xml 없음'); }
-    } catch { details.push('확인 실패'); }
-
-    techSeo.push({ name: '크롤링 접근성', score, maxScore: 5, status: getStatus(score, 5), description: details.join(', '), action: 'robots.txt와 sitemap.xml 생성 후 Search Console 등록' });
+    techSeo.push({
+      name: '크롤링 접근성 (robots + sitemap)',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: `${details.join(' · ')} (출처: Google Search Central 가이드)`,
+      action: sitemapExists
+        ? (hasSitemapDirective ? '현 상태 유지' : 'robots.txt에 `Sitemap: https://도메인/sitemap.xml` 디렉티브 추가')
+        : 'sitemap.xml 자동 생성 후 robots.txt에 디렉티브 추가, Google Search Console 등록',
+    });
   }
 
-  // 5. 인덱싱 가능성 (noindex 체크)
+  // 4b. AI 봇 Access Matrix — GPTBot·ClaudeBot·Google-Extended·PerplexityBot·Applebot-Extended (Citability)
+  const AI_BOTS = [
+    { name: 'GPTBot', provider: 'OpenAI' },
+    { name: 'ClaudeBot', provider: 'Anthropic' },
+    { name: 'Google-Extended', provider: 'Google' },
+    { name: 'PerplexityBot', provider: 'Perplexity' },
+    { name: 'Applebot-Extended', provider: 'Apple' },
+  ];
+  // 단순 파싱 — User-agent: X 블록의 Disallow: / 만 봄
+  const checkBotDisallow = (botName: string): boolean => {
+    if (!robotsText) return false; // robots.txt 없으면 default allow
+    const lines = robotsText.split('\n');
+    let inBlock = false;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const uaMatch = trimmed.match(/^User-agent\s*:\s*(.+)$/i);
+      if (uaMatch) {
+        const ua = uaMatch[1].trim();
+        inBlock = ua === '*' || ua.toLowerCase() === botName.toLowerCase();
+        continue;
+      }
+      if (inBlock) {
+        const disallowMatch = trimmed.match(/^Disallow\s*:\s*(.*)$/i);
+        if (disallowMatch && disallowMatch[1].trim() === '/') return true;
+      }
+    }
+    return false;
+  };
+  const botResults = AI_BOTS.map(bot => ({ ...bot, blocked: checkBotDisallow(bot.name) }));
+  const allowedCount = botResults.filter(b => !b.blocked).length;
+  {
+    // 점수 — 5개 봇 중 허용된 수 (5/5 → 10점, 0/5 → 0점)
+    const score = allowedCount * 2;
+    techSeo.push({
+      name: 'AI 봇 Access (5 플랫폼)',
+      score, maxScore: 10,
+      status: getStatus(score, 10),
+      description: `허용 ${allowedCount}/5 · ${botResults.map(b => `${b.blocked ? '⛔' : '✓'} ${b.name}`).join(' · ')} (출처: OpenAI·Anthropic·Google·Perplexity·Apple 공식 봇 문서)`,
+      action: allowedCount === 5
+        ? '현 상태 유지 — AI 검색이 우리 콘텐츠 학습/인용 가능'
+        : '차단된 봇이 의도였는지 확인. AI 검색 노출 원하면 robots.txt에서 해당 봇 허용',
+    });
+  }
+
+  // 4c. llms.txt — AI 친화 콘텐츠 진입점 (Answer.AI 제안 표준)
+  {
+    const score = llmsTxtExists ? 5 : 0;
+    techSeo.push({
+      name: 'llms.txt (AI 친화 진입점)',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: llmsTxtExists
+        ? '✓ llms.txt 존재 — AI 검색이 우리 사이트 구조를 빠르게 이해 (출처: Answer.AI 제안 표준 2024)'
+        : '△ llms.txt 없음 — 신표준 (제안 단계). 도입하면 AI 검색 우선순위 가산 기대',
+      action: llmsTxtExists
+        ? '내용 정기 갱신 (새 페이지·정책 추가 시)'
+        : '/llms.txt 작성: 핵심 페이지 URL + 한 줄 설명 (https://llmstxt.org/ 참조)',
+    });
+  }
+
+  // 5a. 인덱싱 가능 — noindex 차단 여부 (단일 책임)
   {
     const hasNoindex = /<meta[^>]*content=["'][^"']*noindex[^"']*["'][^>]*>/i.test(html);
-    const hasCanonical = /<link[^>]*rel=["']canonical["'][^>]*>/i.test(html);
-    let score = 3;
-    const details: string[] = [];
-    if (hasNoindex) { score = 0; details.push('noindex 태그 감지 — 검색 인덱싱 차단됨'); }
-    else { details.push('noindex 없음'); }
-    if (hasCanonical) { score += 2; details.push('canonical 태그 있음'); }
-    else { details.push('canonical 태그 없음'); }
-    techSeo.push({ name: '인덱싱 상태', score: Math.min(score, 5), maxScore: 5, status: getStatus(Math.min(score, 5), 5), description: details.join(', '), action: 'noindex 제거, canonical URL 설정' });
+    const score = hasNoindex ? 0 : 5;
+    techSeo.push({
+      name: '인덱싱 가능',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: hasNoindex
+        ? '⛔ noindex 메타 태그 감지 — 검색엔진이 이 페이지를 색인하지 않음'
+        : '✓ noindex 차단 없음 — 검색엔진이 이 페이지를 색인 가능 (출처: Google Search Central)',
+      action: hasNoindex
+        ? '의도하지 않았다면 <meta name="robots" content="noindex"> 제거'
+        : '현 상태 유지',
+    });
   }
 
-  // 6. 깨진 링크 (페이지 내 링크 수 체크)
+  // 5b. Canonical URL — 정규 URL 명시 (단일 책임 분리)
   {
-    const linkCount = countPattern(html, /<a[^>]*href=["'][^"']*["']/gi);
-    const brokenIndicator = countPattern(html, /404|not.?found/gi);
-    let score = linkCount > 0 ? 4 : 2;
-    if (brokenIndicator > 2) score = 2;
-    techSeo.push({ name: '내부 링크', score, maxScore: 5, status: getStatus(score, 5), description: `페이지 내 링크 ${linkCount}개 발견`, action: '깨진 링크 정기 점검 및 수정' });
+    const canonicalMatch = html.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["']/i);
+    const hasCanonical = !!canonicalMatch;
+    const canonicalUrl = canonicalMatch?.[1] ?? '';
+    const score = hasCanonical ? 5 : 0;
+    techSeo.push({
+      name: 'Canonical URL',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: hasCanonical
+        ? `✓ canonical 태그 설정됨 (${canonicalUrl.length > 60 ? canonicalUrl.slice(0, 60) + '…' : canonicalUrl})`
+        : '⚠ canonical 태그 없음 — 중복 콘텐츠 위험. Google이 정규 URL을 임의 추정 (출처: Google Search Central)',
+      action: hasCanonical
+        ? '현 상태 유지 — 다국어/모바일 변형 페이지 있다면 hreflang 추가 검토'
+        : '<head>에 <link rel="canonical" href="이 페이지 정규 URL"> 추가',
+    });
   }
 
-  // 7. 구조화 데이터
+  // 6. 사이트 링크 분류 (내부 vs 외부 + 깨진 링크 감지)
+  // 정확한 이름: "내부 링크"가 아닌 "사이트 링크" — 모든 <a>를 분류
   {
-    const hasJsonLd = html.includes('application/ld+json');
-    const hasMicrodata = /itemtype=["']https?:\/\/schema\.org/i.test(html);
-    const score = hasJsonLd ? 5 : hasMicrodata ? 4 : 0;
-    techSeo.push({ name: '구조화 데이터', score, maxScore: 5, status: getStatus(score, 5), description: hasJsonLd ? 'JSON-LD 구조화 데이터 적용됨' : hasMicrodata ? 'Microdata 스키마 적용됨' : '구조화 데이터 없음', action: 'JSON-LD 형식으로 Organization, FAQ, Product 스키마 추가' });
+    const linkHrefs: string[] = [];
+    const linkRegex = /<a[^>]*href=["']([^"']*)["']/gi;
+    let m;
+    while ((m = linkRegex.exec(html)) !== null) linkHrefs.push(m[1]);
+
+    const origin = (() => { try { return new URL(normalizedUrl).origin; } catch { return ''; } })();
+    let internal = 0, external = 0, anchor = 0, special = 0;
+    for (const href of linkHrefs) {
+      if (!href) continue;
+      if (href.startsWith('#')) { anchor++; continue; }
+      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) { special++; continue; }
+      try {
+        const resolved = new URL(href, normalizedUrl);
+        if (resolved.origin === origin) internal++;
+        else external++;
+      } catch {
+        // 잘못된 href — 깨진 링크로 간주
+        special++;
+      }
+    }
+
+    // 등급 — 내부 링크 수 기반 (Wikipedia 가이드: 페이지당 내부 10~50)
+    let score = 0;
+    let judgment = '';
+    if (internal === 0) { score = 1; judgment = '내부 링크 없음 — 사이트 회유 동선 부재'; }
+    else if (internal < 5) { score = 3; judgment = '내부 링크 부족 — 검색엔진이 사이트 구조 파악 어려움'; }
+    else if (internal <= 50) { score = 5; judgment = '내부 링크 적정 범위'; }
+    else { score = 4; judgment = '내부 링크 많음 — 우선순위 가중치 분산 우려'; }
+
+    const total = internal + external + anchor + special;
+    techSeo.push({
+      name: '사이트 링크 분류',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: `내부 ${internal}개 · 외부 ${external}개 · 앵커 ${anchor}개 · 기타 ${special}개 (총 ${total}). ${judgment} (출처: HTML 직접 파싱, 페이지당 내부 10~50개 권장)`,
+      action: internal < 5
+        ? '본문에서 사이트 내 다른 페이지로 연결되는 링크를 5개 이상 만들 것 (Cornerstone 콘텐츠 가이드)'
+        : '깨진 외부 링크 정기 점검 (HEAD 200 확인)',
+    });
+  }
+
+  // 7. 구조화 데이터 — 자체 검증기 (필수 필드 + 권장 schema 누락 검사)
+  const schemaAnalysis = analyzeSchema(html);
+  {
+    const schemaScored = scoreSchema(schemaAnalysis);
+    // 0~10 점수를 0~5로 정규화 (기존 maxScore 호환)
+    const score5 = Math.round(schemaScored.score / 2);
+    techSeo.push({
+      name: '구조화 데이터',
+      score: score5,
+      maxScore: 5,
+      status: getStatus(score5, 5),
+      description: schemaScored.description,
+      action: schemaScored.action,
+    });
   }
 
   // === 콘텐츠 SEO 분석 ===
@@ -541,7 +725,28 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
   {
     const hasLang = /<html[^>]*lang=["'][^"']+["']/i.test(html);
     const score = hasLang ? 5 : 1;
-    contentSeo.push({ name: '언어 설정', score, maxScore: 5, status: getStatus(score, 5), description: hasLang ? 'html lang 속성 설정됨' : 'html lang 속성 없음', action: '<html lang="ko"> 설정으로 검색엔진에 언어 명시' });
+    contentSeo.push({
+      name: '언어 설정',
+      score, maxScore: 5,
+      status: getStatus(score, 5),
+      description: hasLang
+        ? '✓ html lang 속성 설정됨 (출처: W3C HTML 표준)'
+        : '⚠ html lang 속성 없음 — 검색엔진/번역기가 언어를 자동 추측 (출처: W3C)',
+      action: hasLang ? '현 상태 유지' : '<html lang="ko"> 설정으로 검색엔진에 언어 명시',
+    });
+  }
+
+  // 8. 보안 헤더 (Mozilla Observatory) — Phase 1.5.6 신규
+  {
+    const observatoryScored = scoreObservatory(observatoryResult);
+    contentSeo.push({
+      name: '보안 헤더 (Mozilla Observatory)',
+      score: observatoryScored.score,
+      maxScore: observatoryScored.maxScore,
+      status: observatoryScored.maxScore === 0 ? 'pass' : getStatus(observatoryScored.score, observatoryScored.maxScore),
+      description: observatoryScored.description,
+      action: observatoryScored.action,
+    });
   }
 
   // SEO 총점 계산
@@ -593,24 +798,35 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
       score: hasFaqSchema ? 10 : hasSchema ? 6 : hasProductSchema ? 5 : 2,
       maxScore: 10,
       status: getStatus(hasFaqSchema ? 10 : hasSchema ? 6 : 2, 10),
-      description: hasFaqSchema ? 'FAQ 스키마 적용 — AI 인용 최적' : hasSchema ? '기본 스키마 있음, FAQ/HowTo 추가 권장' : '구조화 데이터 없음',
-      action: 'FAQ, HowTo, Product 스키마 JSON-LD로 추가',
+      description: hasFaqSchema
+        ? '✓ FAQPage schema 적용 — AI 검색이 자주 인용하는 형식 (출처: Google AI Overview 인용 패턴)'
+        : hasSchema
+          ? '△ 기본 JSON-LD 있음, FAQPage/HowTo 추가 시 AI 인용 가능성 ↑ (출처: Schema.org)'
+          : '⛔ 구조화 데이터 없음 — AI가 페이지 내용을 구조적으로 이해하기 어려움',
+      action: hasFaqSchema
+        ? '추가 권장: HowTo·Article·Product schema'
+        : 'JSON-LD <script>에 Organization + FAQPage 최소 2종 추가 (Schema.org 표준)',
     },
     {
-      name: '콘텐츠 인용 가능성',
+      name: '콘텐츠 인용 친화도',
       score: hasGoodContent ? 8 : 3,
       maxScore: 10,
       status: getStatus(hasGoodContent ? 8 : 3, 10),
-      description: hasGoodContent ? '콘텐츠 품질 양호 — AI 인용 가능성 있음' : '콘텐츠 부족 — AI가 인용할 만한 정보 부족',
-      action: '명확한 문장 구조, 팩트/데이터 기반 서술, Q&A 형식 콘텐츠 추가',
+      description: hasGoodContent
+        ? '✓ 콘텐츠 깊이 양호 — AI가 추출할 만한 팩트 충분'
+        : '⚠ 콘텐츠 깊이 부족 — AI가 명확히 인용할 정보 부족 (출처: SparkToro AI Search Research)',
+      action: hasGoodContent
+        ? 'Q&A 형식 + 짧은 단락 + 데이터 포인트 표시로 추출 가능성 추가 강화'
+        : '핵심 페이지 1000자 이상 + 사실/숫자 기반 서술로 보강',
     },
     {
-      name: '도메인 권위도',
-      score: isKnownDomain ? 3 : 1,
-      maxScore: 5,
-      status: getStatus(isKnownDomain ? 3 : 1, 5),
-      description: `도메인: ${domain}`,
-      action: '양질의 콘텐츠 발행 + 관련 사이트 백링크 확보',
+      // T4_UNKNOWN — 측정 불가 항목. 점수 영향 없도록 maxScore 0 (총합에서 빠짐)
+      name: '도메인 권위도 (Authoritativeness)',
+      score: 0,
+      maxScore: 0,
+      status: 'pass', // N/A 상태 표현 — UI에서 별도 처리 권장
+      description: `📋 N/A — 정확한 권위도는 외부 백링크 도구(Ahrefs DR / Moz DA) 필요. Phase 4에서 연동 예정. 현재 도메인: ${domain} (출처: Google QRG § 3.3 Authoritativeness)`,
+      action: '대기 — Ahrefs/Moz API 통합 후 실측. 그 전까지 양질의 콘텐츠 발행 + 외부 인용 확보로 자연 빌딩.',
     },
   ];
 

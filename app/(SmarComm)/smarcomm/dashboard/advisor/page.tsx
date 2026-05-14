@@ -133,7 +133,7 @@ export default function AdvisorPage() {
     if (!execution) return;
     setRescanning(true);
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/smarcomm/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: execution.scan_url }),

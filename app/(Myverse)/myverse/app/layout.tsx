@@ -112,7 +112,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
         if (s.kind === "ok") {
             const mu = (s.member as { myverse_users?: MyverseUser[] }).myverse_users?.[0];
             if (isPrivileged(s.member as { member_roles?: RoleRow[] }) || mu?.onboarding_completed) {
-                return <ClientRedirect to="/myverse/app/daily" />;
+                return <ClientRedirect to="/myverse/app/capture" />;
             }
         }
         return <>{children}</>;

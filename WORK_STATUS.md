@@ -1,6 +1,146 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-13 (세션 134 — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴)
+> 마지막 업데이트: 2026-05-14 (세션 135 — Myverse 진입점 정비 + SmarComm Index Phase 1~3 고도화)
+
+---
+
+## 세션 135 핵심 성과 (2026-05-14)
+
+### 1. Myverse — 진입점·시각화 정비
+
+**AppTopNav 아바타 드롭다운 통합** ([features/myverse/planner/AppTopNav.tsx](features/myverse/planner/AppTopNav.tsx))
+- 데스크톱 우측에서 Install·Help·Settings 분리 아이콘 3개 제거 → 아바타 드롭다운으로 통합
+- Bell 알림 분리 (이전엔 아바타가 알림 진입점) — 미확인 배지 유지
+- 드롭다운: 헤더(이름·구독상태) → 프로필 / 설정 / 도움말 / 앱 설치 / 로그아웃
+- Esc·외부 클릭·경로 변경 시 자동 닫힘, 다크모드 지원
+
+**운동·식사 카드 시각화** ([features/myverse/capture/CaptureView.tsx](features/myverse/capture/CaptureView.tsx))
+- `StatChip` (4톤 + 다크모드) · `IntensityDots` (5단계 강도 시각화) · `MealStats` · `ExerciseStats` 4개 신규
+- 운동 카드: 강도 도트 ●●●○○ N/5 + ❤ BPM + 🔥 kcal + 구성 텍스트
+- 식사 카드: 🔥 kcal + 메뉴 구성
+- summary에서 강도/BPM 부분 자동 추출 후 구성만 별도 표시
+
+**잠재 버그 1건 수정**: [app/api/myverse/routines/route.ts:65](app/api/myverse/routines/route.ts)
+- `capture_mode: "manual"` → `"active"` (DB CHECK 제약 `'active'|'auto'|'imported'`와 불일치, 세션 108부터 잠재. routines POST 500 항상 실패)
+
+**Myverse 첫 랜딩 페이지를 캡쳐로 변경** (6곳)
+- 마케팅 페이지 자동 리다이렉트 / Hero CTA / `/myverse/app` 루트 / 온보딩 완료 / 온보딩 재진입 / AppTopNav 브랜드 로고
+
+### 2. SmarComm CLAUDE.md 전면 재작성 — WIO↔SmarComm 동등 OS
+
+**130줄 → 376줄** (Myverse 394줄과 비슷한 깊이)
+- **§ 2 WIO ↔ SmarComm 관계 SSOT 신설** — "종속 관계 아님" 명시. 동등 OS 관계 다이어그램 + 5 모듈 사용 규칙 + 정체성 차이 표. "SmarComm = WIO MKT-* 위의 어플리케이션" 표현 폐기
+- **§ 3 Marketing OS 7대 영역 SSOT** — 진단·전략·제작·집행·관계·분석·운영 사이클. 35개 대시보드 페이지 분류
+- **§ 3-A SmarComm Index 보고서 SSOT (5 SSOT)** — Index 가중치(30/30/40) · AI 플랫폼 5종 · Question Bank · 역할 매핑 · 뷰 모드 3개
+- § 5 팩 시스템 SSOT (PACK_TIER)
+- § 10 핵심 파일 60+개 정비 (이전 8개)
+- § 13 절대 하지 말 것 9항목 신설
+- § 15 현재 상태 정정: "Phase: Launch 완료" → "Beta — UI 완성·백엔드 통합 중"
+
+### 3. SmarComm Index Phase 1 — Index SSOT + DB + 공유 URL
+
+| # | 산출 |
+|---|---|
+| 1.1-1.2 | [lib/smarcomm/index-calculator.ts](lib/smarcomm/index-calculator.ts) — `computeIndex()` 30/30/40 SSOT + Grade S/A/B/C/D |
+| 1.3 | [sql/smarcomm-scans.sql](sql/smarcomm-scans.sql) — `smarcomm_scans` + `smarcomm_scan_pages` (Prod 적용) |
+| 1.4 | [app/api/smarcomm/scan/route.ts](app/api/smarcomm/scan/route.ts) — DB 저장 + short_id 발급 + Index breakdown |
+| 1.5 | [app/api/smarcomm/report/[id]/route.ts](app/api/smarcomm/report/[id]/route.ts) — 신규 보고서 조회 API |
+| 1.6 | report page — SmarComm Index Hero + 3 질문 카드 + 신뢰 푸터 |
+| — | scan page → `/api/smarcomm/scan` SSOT 통일 |
+
+### 4. SmarComm Index Phase 1.5 — 권위 표준 정렬
+
+| # | 산출 |
+|---|---|
+| 1.5.1 | [lib/smarcomm/grading/thresholds.ts](lib/smarcomm/grading/thresholds.ts) — 모든 임계값 SSOT + 출처 (Google CWV/QRG/Schema.org/WCAG/Mozilla/Answer.AI llms.txt) |
+| 1.5.2 | 사이트 링크 분류 (내부/외부/앵커/기타) — `<a>` 정규식 + same-origin 판정 |
+| 1.5.3 | 카드 분리 — "인덱싱 상태" → "인덱싱 가능" + "Canonical URL" 2개 |
+| 1.5.5 | [lib/smarcomm/analyzers/schema-validator.ts](lib/smarcomm/analyzers/schema-validator.ts) — JSON-LD 자체 검증 (필수 필드 + 권장 누락 검사, 14 schema type 지원) |
+| 1.5.6 | [lib/smarcomm/analyzers/mozilla-observatory.ts](lib/smarcomm/analyzers/mozilla-observatory.ts) — 보안 헤더 등급 (HSTS·CSP·X-Frame). Trustworthiness sub-score 연동 |
+| 1.5.4 | INP 측정 — PageSpeed CrUX field data 우선·lab fallback |
+| 1.5.7 | AI 봇 robots.txt 파서 — GPTBot·ClaudeBot·Google-Extended·PerplexityBot·Applebot-Extended access matrix |
+| 1.5.8 | llms.txt 존재 검증 (Answer.AI 제안 표준) |
+| 1.5.9 | 권위도 T4 처리 (`isKnownDomain` 휴리스틱 폐기, maxScore 0으로 점수 영향 제거, N/A 표시) |
+| 1.5.10 | 모든 description 재작성 — "raw 숫자" → "판단(✓⚠⛔📋) + 근거 + 출처" |
+| 1.5.11 | UI 출처 칩 — `🔬 출처: ___` pill, hover tooltip |
+| — | **Trust E-E-A-T 4 sub-score 재배치** — Experience·Expertise·Authoritativeness(N/A)·Trustworthiness. EEATCell UI 컴포넌트 |
+
+### 5. SmarComm Index Phase 2 — 5 AI Probe 인프라 + AI Visibility Map
+
+| # | 산출 |
+|---|---|
+| 2.1 | [lib/smarcomm/question-bank.ts](lib/smarcomm/question-bank.ts) — 7카테고리 × 13질문 (업종별 템플릿: marketing-saas / ecommerce / education) |
+| 2.2 | [lib/smarcomm/ai-probes/types.ts](lib/smarcomm/ai-probes/types.ts) — 5 플랫폼 공통 인터페이스 + detectMention 헬퍼 |
+| 2.3 | [lib/smarcomm/ai-probes/claude.ts](lib/smarcomm/ai-probes/claude.ts) — Claude Haiku 4.5 실측 |
+| 2.4 | [chatgpt.ts](lib/smarcomm/ai-probes/chatgpt.ts) · [perplexity.ts](lib/smarcomm/ai-probes/perplexity.ts) · [google-aio.ts](lib/smarcomm/ai-probes/google-aio.ts) · [naver-cue.ts](lib/smarcomm/ai-probes/naver-cue.ts) — 4 플랫폼 스텁 (키 추가 시 즉시 활성) |
+| 2.4 | [lib/smarcomm/ai-probes/index.ts](lib/smarcomm/ai-probes/index.ts) — 오케스트레이터 + Citability 점수 |
+| 2.5 | [sql/smarcomm-ai-probes.sql](sql/smarcomm-ai-probes.sql) — DB 테이블 (Prod 적용) |
+| 2.6 | scan API에 5 플랫폼 병렬 실행 + DB 저장 + geoChecks 실측 교체 |
+| 2.7 | report API + AIVisibilityMap UI — 7카테고리 노출률 바 + 플랫폼별 펼침 + 실제 응답 캡처 |
+
+**핵심 발견**: smarcomm.biz Claude 13질문 실측 = 0/13 언급. 이전 "추정 mentioned"가 거짓이었음. Index 71 → 61로 정직한 점수 조정.
+
+### 6. SmarComm Index Phase 2.5 — 답변 일관성
+
+| # | 산출 |
+|---|---|
+| 2.5.1 | [lib/smarcomm/analyzers/fact-extractor.ts](lib/smarcomm/analyzers/fact-extractor.ts) — Schema/meta/본문에서 가격·강점·기능 추출 + AI 응답에서 같은 사실 추출 + 자카드 유사도 비교 |
+| 2.5.2 | Probe 표준에 extractedFacts + factComparison 필드 추가 |
+| 2.5.3 | Claude probe + 4 스텁 시그니처 통일 (siteTruth 인자 추가) |
+| 2.5.4 | scan API 자사 사실 추출 → AI 응답 비교 → DB 저장 (`extracted_facts` JSONB) |
+| 2.5.5 | UI — 답변 일관성 요약 카드(정확/부분/오답/미언급 4분류) + probe별 정확도 배지(✓△✗—) + 사실 비교 표 (우리 vs AI) |
+
+산식: `consistencyScore = (exact × 1.0 + partial × 0.5 + wrong × -0.5) / mentioned × 100` (오답 음수 가중)
+
+### 7. SmarComm Index Phase 3 — Schema 자동 생성·Action·Trend·Exec Summary
+
+| # | 산출 |
+|---|---|
+| 3.1 | [lib/smarcomm/schema-generator.ts](lib/smarcomm/schema-generator.ts) — Organization·WebSite·FAQPage·Service·BreadcrumbList 5종 자동 생성 + placeholder 표시 |
+| 3.2 | [app/api/smarcomm/report/[id]/trend/route.ts](app/api/smarcomm/report/[id]/trend/route.ts) — 도메인별 최근 20회 시계열 + UI SVG 차트 |
+| 3.3 | [lib/smarcomm/exec-summary.ts](lib/smarcomm/exec-summary.ts) `buildActionPlan` — fail/warn 항목을 Impact·Effort·역할·예상점수로 자동 매핑 (18 룰) |
+| 3.4 | [lib/smarcomm/exec-summary.ts](lib/smarcomm/exec-summary.ts) `generateExecSummary` — Claude Haiku로 3줄 요약 (잘된것·문제·다음행동) |
+| UI | 4 신규 컴포넌트 — ActionMatrix (Impact×Effort 2×2) · SchemaGenerator (복사 버튼 + 펼침) · TrendChart (SVG) · Exec Summary 30초 요약 |
+
+### 보고서 섹션 — 14개 완성
+
+```
+Hero (SmarComm Index + Grade + 3 질문) → E-E-A-T 4축 → 30초 요약
+→ Action Plan (Impact×Effort 4분면 + 역할 + 예상점수)
+→ Schema 자동 생성기 (5종 복사) → Trend 시계열
+→ 상위 이슈 → 서브페이지 분석 → 종합 레이더 → 분석 요약 → 브랜드 성격 제안
+→ 기술 SEO (10 카드) → 콘텐츠 SEO (8 카드 + 보안 헤더 신규)
+→ AI 검색 노출 (실측) → AI Visibility Map (5 플랫폼 × 7카테고리)
+→ AI 최적화 준비도 (3 카드 + Authoritativeness N/A)
+→ 심화 분석 + 신뢰 푸터
+```
+
+### 다음 할 일
+
+#### 🚩 즉시 필요 (사용자 작업)
+- **ANTHROPIC_API_KEY 갱신** — 현재 401 에러. Claude probe 13질문 + Executive Summary 자동 생성 잠금 해제
+- **OPENAI_API_KEY 발급** — ChatGPT 실측 즉시 활성
+- **PERPLEXITY_API_KEY 발급** — Perplexity 실측 + 인용 출처 활성
+- **SERPAPI_API_KEY 발급** — Google AI Overview 실측 활성
+- **GOOGLE_PAGESPEED_API_KEY 발급** — Core Web Vitals(LCP·INP·CLS) 실측
+
+#### 🟢 SmarComm Phase 4 (다음 세션)
+1. **Ahrefs / Moz API 통합** — Authoritativeness sub-score N/A 해소 (E-E-A-T A축 정상화)
+2. **업종 백분위** — `smarcomm_industry_benchmarks` 집계 뷰 + 보고서 표시
+3. **정기 자동 재진단** — Vercel Cron (주간) + 점수 변화 알림 이메일
+4. **PDF 리포트 다운로드** — html-to-image 또는 React-PDF
+5. **Wikidata SPARQL** — Knowledge Graph entry 검출
+6. **3 뷰 모드 활성** — `?view=marketer|exec|dev` 분기 UI
+
+#### 🟢 SmarComm 기타 (Phase 1.5에서 식별)
+- [dashboard/layout.tsx:28](app/(SmarComm)/smarcomm/dashboard/layout.tsx) `router.push('/login')` → LoginModal 또는 `loginHref` (CLAUDE.md § 1.2.1 위반)
+- [lib/smarcomm/auth.ts](lib/smarcomm/auth.ts) Mock 인증 제거 (평문 비밀번호 + sessionStorage, 사용처 1곳뿐)
+- `wio_subscription_plans` 실제 게이트 연동 (TierGate 활성)
+- localStorage `smarcomm_company` · `smarcomm_favorites` → DB 마이그레이션
+
+#### 🟢 Myverse (이월)
+- [features/myverse/capture/CaptureView.tsx](features/myverse/capture/CaptureView.tsx) "Invalid Date" 미러 places 이슈 — routines mirror INSERT에서 visited_at에 `HH:MM`만 저장 → traces API에서 NaN. spawn_task 등록됨
+- 캡쳐 Phase 3 — 녹음 자동 transcribe · GPS 백그라운드 · routine 카드 분석 액션 활성
 
 ---
 

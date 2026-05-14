@@ -7,7 +7,7 @@ import {
   ArrowLeft, AlertTriangle, CheckCircle2, XCircle,
   ExternalLink, Clock, Target, ChevronRight, Lock,
   Download, Share2, Printer, Gauge, Zap, Timer,
-  Lightbulb, Loader2
+  Lightbulb, Loader2, Bot, ShieldCheck, Search
 } from 'lucide-react';
 import Header from '@/features/smarcomm/Header';
 import Footer from '@/features/smarcomm/Footer';
@@ -15,6 +15,7 @@ import GaugeChart from '@/features/smarcomm/GaugeChart';
 import RadarChart from '@/features/smarcomm/RadarChart';
 import { useAuth } from '@/lib/auth-context';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
+import { GRADE_META, type IndexBreakdown, type Grade } from '@/lib/smarcomm/index-calculator';
 
 const GRADE_MAP = {
   excellent: { color: '#059669', label: 'Excellent', message: 'AI 시대 검색 준비 완료' },
@@ -81,7 +82,55 @@ interface ScanData {
       imgCount: number; imgWithAlt: number; linkCount: number; textLength: number;
     };
   };
+  // SmarComm Index breakdown (Phase 1 신규)
+  breakdown?: IndexBreakdown;
+  // 메타데이터 (DB 기반)
+  createdAt?: string;
+  domain?: string;
+  shortId?: string;
+  // AI Probe 실측 결과 (Phase 2)
+  aiProbes?: AIProbeRow[];
 }
+
+interface AIProbeRow {
+  platform: 'claude' | 'chatgpt' | 'perplexity' | 'naver-cue' | 'google-aio';
+  category: string;
+  query: string;
+  raw_response: string;
+  citations: Array<{ url: string; title?: string }> | null;
+  mentioned: boolean;
+  position: number | null;
+  accuracy: 'exact' | 'partial' | 'wrong' | 'absent';
+  measured_at: string;
+  // Phase 2.5 — fact comparison
+  extracted_facts?: Record<string, unknown>;
+  fact_comparison?: Array<{ field: string; match: 'exact' | 'partial' | 'wrong' | 'missing'; siteValue?: string; aiValue?: string }>;
+}
+
+const ACCURACY_META: Record<AIProbeRow['accuracy'], { label: string; color: string; emoji: string }> = {
+  exact:   { label: '정확',  color: '#22C55E', emoji: '✓' },
+  partial: { label: '부분',  color: '#F59E0B', emoji: '△' },
+  wrong:   { label: '오답',  color: '#DC2626', emoji: '✗' },
+  absent:  { label: '미언급', color: '#9CA3AF', emoji: '—' },
+};
+
+const AI_PLATFORM_LABELS: Record<AIProbeRow['platform'], { label: string; provider: string }> = {
+  'claude':      { label: 'Claude',              provider: 'Anthropic' },
+  'chatgpt':     { label: 'ChatGPT',             provider: 'OpenAI' },
+  'perplexity':  { label: 'Perplexity',          provider: 'Perplexity' },
+  'naver-cue':   { label: '네이버 Cue',          provider: 'Naver' },
+  'google-aio':  { label: 'Google AI Overview',  provider: 'Google' },
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'brand_direct': '브랜드 직접',
+  'product_generic': '제품군',
+  'use_case': '사용 사례',
+  'competitor': '경쟁사 비교',
+  'pricing': '가격·플랜',
+  'howto': '방법·가이드',
+  'local': '지역·시장',
+};
 
 function getScoreComment(score: number, maxScore: number): string {
   const pct = score / maxScore;
@@ -91,21 +140,564 @@ function getScoreComment(score: number, maxScore: number): string {
   return '미흡 — 우선 개선이 필요합니다';
 }
 
+function QuestionCard({
+  icon, color, question, score, sub, borderLeft,
+}: {
+  icon: React.ReactNode;
+  color: string;
+  question: string;
+  score: number;
+  sub: string;
+  borderLeft?: boolean;
+}) {
+  // 점수에 따라 신호등 색상
+  const indicator = score >= 80 ? '🟢' : score >= 60 ? '🟡' : '🔴';
+  return (
+    <div className={`flex flex-col gap-2 px-5 py-4 ${borderLeft ? 'md:border-l md:border-border' : ''}`}>
+      <div className="flex items-center gap-2">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: `${color}15`, color }}>
+          {icon}
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">{sub}</p>
+        </div>
+      </div>
+      <p className="text-sm font-medium text-text leading-snug">{question}</p>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-extrabold tabular-nums" style={{ color }}>{score}</span>
+        <span className="text-xs text-text-muted">/ 100</span>
+        <span className="ml-auto text-base">{indicator}</span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
+        <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, background: color }} />
+      </div>
+    </div>
+  );
+}
+
+// Phase 3 — UI 타입
+interface SchemaSuggestionUI {
+  type: string;
+  label: string;
+  description: string;
+  alreadyApplied: boolean;
+  priority: 'critical' | 'high' | 'recommended';
+  snippet: string;
+  placeholders: string[];
+}
+
+interface ActionItemUI {
+  title: string;
+  category: string;
+  impact: 'high' | 'medium' | 'low';
+  effort: 'low' | 'medium' | 'high';
+  quadrant: 'quick-win' | 'major' | 'fill-in' | 'avoid';
+  role: 'marketer' | 'dev' | 'writer' | 'designer';
+  estimatedPoints: number;
+  action: string;
+  description: string;
+}
+
+const ROLE_META: Record<ActionItemUI['role'], { label: string; emoji: string; color: string }> = {
+  marketer: { label: '마케팅', emoji: '🎯', color: '#3B82F6' },
+  dev:      { label: '개발팀', emoji: '💻', color: '#A855F7' },
+  writer:   { label: '콘텐츠', emoji: '✍️', color: '#10B981' },
+  designer: { label: '디자이너', emoji: '🎨', color: '#F59E0B' },
+};
+
+const QUADRANT_META: Record<ActionItemUI['quadrant'], { label: string; color: string; description: string }> = {
+  'quick-win': { label: '퀵윈', color: '#22C55E', description: '높은 임팩트 · 낮은 노력 — 즉시 실행' },
+  'major':     { label: '핵심 투자', color: '#3B82F6', description: '높은 임팩트 · 노력 큼 — 중장기' },
+  'fill-in':   { label: '채우기', color: '#F59E0B', description: '낮은 임팩트 · 낮은 노력 — 여유 시' },
+  'avoid':     { label: '후순위', color: '#9CA3AF', description: '낮은 임팩트 · 노력 큼 — 보류' },
+};
+
+/** Action Plan Impact×Effort 2×2 매트릭스 — Phase 3.3 */
+function ActionMatrix({ actions }: { actions: ActionItemUI[] }) {
+  const byQuadrant: Record<ActionItemUI['quadrant'], ActionItemUI[]> = {
+    'quick-win': [], 'major': [], 'fill-in': [], 'avoid': [],
+  };
+  for (const a of actions) byQuadrant[a.quadrant].push(a);
+
+  const totalPotential = actions.reduce((s, a) => s + a.estimatedPoints, 0);
+
+  return (
+    <div className="mb-10">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-[15px] font-bold text-text">Action Plan</h2>
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">Impact × Effort</span>
+        <span className="ml-auto text-[10px] text-text-muted">모두 적용 시 예상 +{totalPotential}점</span>
+      </div>
+      <p className="mb-4 text-xs text-text-muted">
+        진단에서 발견된 개선 항목을 임팩트와 노력으로 분류 + 누구에게 부탁할지 + 예상 점수 변화 (출처: 자체 SSOT)
+      </p>
+
+      <div className="grid grid-cols-2 gap-3">
+        {(['quick-win', 'major', 'fill-in', 'avoid'] as ActionItemUI['quadrant'][]).map(q => {
+          const items = byQuadrant[q];
+          const meta = QUADRANT_META[q];
+          return (
+            <div key={q} className="rounded-xl border-2 bg-white p-3" style={{ borderColor: `${meta.color}30` }}>
+              <div className="mb-2 flex items-center gap-2">
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: meta.color }}>
+                  {meta.label}
+                </span>
+                <span className="text-[10px] text-text-muted">{meta.description}</span>
+                <span className="ml-auto text-[10px] tabular-nums text-text-sub">{items.length}건</span>
+              </div>
+              {items.length === 0 ? (
+                <p className="text-xs text-text-muted py-2">해당 없음 — 모두 통과</p>
+              ) : (
+                <div className="space-y-2">
+                  {items.slice(0, 5).map((a, i) => {
+                    const role = ROLE_META[a.role];
+                    return (
+                      <div key={i} className="rounded-lg bg-surface/30 p-2 text-xs">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="font-medium text-text truncate flex-1">{a.title}</span>
+                          <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: `${role.color}15`, color: role.color }}>
+                            {role.emoji} {role.label}
+                          </span>
+                          <span className="text-[9px] font-bold text-success tabular-nums">+{a.estimatedPoints}</span>
+                        </div>
+                        <p className="text-[10px] text-text-muted line-clamp-2">{a.action}</p>
+                      </div>
+                    );
+                  })}
+                  {items.length > 5 && <p className="text-[10px] text-text-muted">+{items.length - 5}건 더</p>}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Schema 자동 생성기 — Phase 3.1 */
+function SchemaGenerator({ suggestions }: { suggestions: SchemaSuggestionUI[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const handleCopy = async (snippet: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
+    } catch { /* silent */ }
+  };
+
+  const missing = suggestions.filter(s => !s.alreadyApplied);
+  const applied = suggestions.filter(s => s.alreadyApplied);
+
+  return (
+    <div className="mb-10">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-[15px] font-bold text-text">Schema 자동 생성기</h2>
+        <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">바로 복사</span>
+        <span className="ml-auto text-[10px] text-text-muted">{applied.length}/{suggestions.length} 적용 · {missing.length} 신규 추천</span>
+      </div>
+      <p className="mb-4 text-xs text-text-muted">
+        분석 결과 기반으로 권장 JSON-LD를 자동 생성. <b>__필드명__</b> placeholder만 실제 값으로 교체 후 &lt;head&gt;에 삽입 (출처: Schema.org + Google Rich Results 요건)
+      </p>
+
+      <div className="space-y-2">
+        {suggestions.map(s => {
+          const isExpanded = expanded === s.type;
+          const isCopied = copied === s.type;
+          const priorityColor = s.priority === 'critical' ? '#DC2626' : s.priority === 'high' ? '#F59E0B' : '#9CA3AF';
+          return (
+            <div key={s.type} className="rounded-xl border border-border bg-white p-3">
+              <div className="flex items-center gap-2">
+                {s.alreadyApplied ? <CheckCircle2 size={14} className="text-success" /> : <AlertTriangle size={14} style={{ color: priorityColor }} />}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-text">{s.label}</span>
+                    {!s.alreadyApplied && (
+                      <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase" style={{ background: `${priorityColor}15`, color: priorityColor }}>
+                        {s.priority === 'critical' ? '필수' : s.priority === 'high' ? '권장' : '추천'}
+                      </span>
+                    )}
+                    {s.alreadyApplied && <span className="rounded-full bg-success/10 px-1.5 py-0.5 text-[9px] font-bold text-success uppercase">적용됨</span>}
+                  </div>
+                  <p className="text-xs text-text-muted mt-0.5">{s.description}</p>
+                </div>
+                <button
+                  onClick={() => handleCopy(s.snippet, s.type)}
+                  className="px-2 py-1 rounded-md border border-border text-[10px] font-medium hover:bg-surface text-text-sub"
+                >
+                  {isCopied ? '✓ 복사됨' : '📋 복사'}
+                </button>
+                <button
+                  onClick={() => setExpanded(isExpanded ? null : s.type)}
+                  className="text-[10px] text-text-muted hover:text-text"
+                >
+                  {isExpanded ? '▾' : '▸'}
+                </button>
+              </div>
+              {isExpanded && (
+                <div className="mt-2 space-y-2">
+                  {s.placeholders.length > 0 && (
+                    <div className="rounded bg-warning/5 border border-warning/20 p-2 text-[10px]">
+                      <span className="font-bold text-warning">교체 필요: </span>
+                      <span className="text-text-sub">{s.placeholders.join(' · ')}</span>
+                    </div>
+                  )}
+                  <pre className="rounded bg-surface p-2 text-[10px] overflow-x-auto">
+                    <code className="text-text">{s.snippet}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Trend 차트 — Phase 3.2 (도메인 시계열) */
+function TrendChart({ shortId }: { shortId: string }) {
+  const [scans, setScans] = useState<Array<{ short_id: string; smarcomm_index: number; findability_score: number; trust_score: number; citability_score: number; grade: string; created_at: string }> | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/smarcomm/report/${shortId}/trend`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setScans(d?.scans ?? []))
+      .catch(() => setScans([]));
+  }, [shortId]);
+
+  if (!scans || scans.length < 2) return null;  // 1회만 진단한 도메인은 차트 표시 안 함
+
+  const max = 100;
+  const W = 600, H = 160;
+  const points = scans.map((s, i) => ({
+    x: (i / Math.max(1, scans.length - 1)) * W,
+    y: H - (s.smarcomm_index / max) * H,
+    s,
+  }));
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const current = scans[scans.length - 1];
+  const previous = scans[scans.length - 2];
+  const delta = current.smarcomm_index - previous.smarcomm_index;
+
+  return (
+    <div className="mb-10">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-[15px] font-bold text-text">Trend (시계열 추이)</h2>
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">{scans.length}회 진단</span>
+        {delta !== 0 && (
+          <span className={`text-xs font-bold tabular-nums ${delta > 0 ? 'text-success' : 'text-danger'}`}>
+            {delta > 0 ? '↑' : '↓'} {Math.abs(delta)} 점
+          </span>
+        )}
+      </div>
+      <div className="rounded-xl border border-border bg-white p-4">
+        <svg viewBox={`0 0 ${W + 40} ${H + 40}`} className="w-full h-40">
+          {[0, 25, 50, 75, 100].map(v => (
+            <g key={v}>
+              <line x1={20} x2={W + 20} y1={H - (v / max) * H + 10} y2={H - (v / max) * H + 10} stroke="#E5E7EB" strokeDasharray="2 2" />
+              <text x={0} y={H - (v / max) * H + 13} fontSize="9" fill="#9CA3AF">{v}</text>
+            </g>
+          ))}
+          <path d={pathD} transform="translate(20 10)" stroke="#3B82F6" strokeWidth="2" fill="none" />
+          {points.map((p, i) => (
+            <g key={i} transform={`translate(${20 + p.x} ${10 + p.y})`}>
+              <circle r="4" fill="#3B82F6" />
+              <text x={0} y={-8} fontSize="9" fill="#374151" textAnchor="middle">{p.s.smarcomm_index}</text>
+            </g>
+          ))}
+          <g>
+            {points.map((p, i) => (
+              <text key={i} x={20 + p.x} y={H + 25} fontSize="9" fill="#9CA3AF" textAnchor="middle">
+                {new Date(p.s.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+              </text>
+            ))}
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/** AI Visibility Map — Phase 2 핵심 차별점.
+ *  5 AI 플랫폼 × 카테고리별 노출 매트릭스 + 실제 응답 expandable */
+function AIVisibilityMap({ aiProbes }: { aiProbes: AIProbeRow[] }) {
+  // 1) 플랫폼별 그룹핑
+  const byPlatform: Record<string, AIProbeRow[]> = {};
+  for (const a of aiProbes) {
+    (byPlatform[a.platform] ||= []).push(a);
+  }
+  const platforms = Object.keys(byPlatform) as AIProbeRow['platform'][];
+
+  // 2) 카테고리 셋
+  const categories = Array.from(new Set(aiProbes.map(a => a.category)));
+
+  // 3) 카테고리별 노출률 (across all platforms)
+  const categoryStats = categories.map(cat => {
+    const inCat = aiProbes.filter(a => a.category === cat);
+    const mentioned = inCat.filter(a => a.mentioned);
+    const platformsHere = Array.from(new Set(mentioned.map(a => a.platform)));
+    return {
+      category: cat,
+      total: inCat.length,
+      mentioned: mentioned.length,
+      rate: inCat.length > 0 ? mentioned.length / inCat.length : 0,
+      platforms: platformsHere,
+    };
+  }).sort((a, b) => b.rate - a.rate);
+
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  return (
+    <div className="mb-10">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-[15px] font-bold text-text">AI Visibility Map</h2>
+        <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">실측</span>
+        <span className="ml-auto text-[10px] text-text-muted">총 {aiProbes.length}개 질문 · {platforms.length} 플랫폼</span>
+      </div>
+      <p className="mb-4 text-xs text-text-muted">
+        5 AI 플랫폼에 실제 카테고리별 질문을 던져 우리 브랜드 언급 여부를 측정 — 추정 0%, 실측 100% (출처: 각 AI Provider API)
+      </p>
+
+      {/* 답변 일관성 요약 — Phase 2.5 */}
+      {(() => {
+        const mentionedProbes = aiProbes.filter(p => p.mentioned);
+        if (mentionedProbes.length === 0) return null;
+        const accCounts = { exact: 0, partial: 0, wrong: 0, absent: 0 };
+        for (const p of mentionedProbes) accCounts[p.accuracy] = (accCounts[p.accuracy] || 0) + 1;
+        const consistencyScore = mentionedProbes.length > 0
+          ? Math.round(((accCounts.exact * 1.0 + accCounts.partial * 0.5 + accCounts.wrong * -0.5) / mentionedProbes.length) * 100)
+          : 0;
+        const cColor = consistencyScore >= 70 ? '#22C55E' : consistencyScore >= 40 ? '#F59E0B' : '#DC2626';
+        return (
+          <div className="mb-5 rounded-xl border-2 bg-white p-4" style={{ borderColor: `${cColor}40` }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">답변 일관성</span>
+              <span className="text-[10px] text-text-muted opacity-70">AI가 우리 사실을 정확히 말하는가</span>
+              <span
+                className="ml-auto inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted"
+                title="자사 사이트의 가격·강점 사실을 AI가 정확히 인용하는지 측정"
+              >
+                🔬 출처: 자사 schema/meta vs AI 응답 NLP 추출
+              </span>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl font-extrabold tabular-nums" style={{ color: cColor }}>{consistencyScore}</span>
+              <span className="text-xs text-text-muted">/ 100</span>
+            </div>
+            <div className="mt-2 grid grid-cols-4 gap-2 text-[10px]">
+              <div className="rounded bg-success/10 px-2 py-1">
+                <span className="font-bold text-success">{accCounts.exact}</span>
+                <span className="ml-1 text-text-muted">정확</span>
+              </div>
+              <div className="rounded bg-warning/10 px-2 py-1">
+                <span className="font-bold text-warning">{accCounts.partial}</span>
+                <span className="ml-1 text-text-muted">부분</span>
+              </div>
+              <div className="rounded bg-danger/10 px-2 py-1">
+                <span className="font-bold text-danger">{accCounts.wrong}</span>
+                <span className="ml-1 text-text-muted">오답</span>
+              </div>
+              <div className="rounded bg-surface px-2 py-1">
+                <span className="font-bold text-text-muted">{accCounts.absent}</span>
+                <span className="ml-1 text-text-muted">미언급</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 카테고리별 노출률 바 차트 */}
+      <div className="mb-5 rounded-xl border border-border bg-white p-5">
+        <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-text-muted">
+          카테고리별 노출 비율
+        </div>
+        <div className="space-y-2">
+          {categoryStats.map(s => {
+            const color = s.rate >= 0.6 ? '#22C55E' : s.rate >= 0.3 ? '#F59E0B' : '#DC2626';
+            return (
+              <div key={s.category} className="flex items-center gap-3">
+                <div className="w-24 text-xs font-medium text-text">{CATEGORY_LABELS[s.category] || s.category}</div>
+                <div className="flex-1 h-3 overflow-hidden rounded-full bg-surface">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(s.rate * 100, 4)}%`, background: color }} />
+                </div>
+                <div className="text-xs tabular-nums text-text-sub w-16 text-right">{s.mentioned}/{s.total}</div>
+                <div className="text-xs text-text-muted w-12 text-right">{Math.round(s.rate * 100)}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 플랫폼별 카드 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {platforms.map(pf => {
+          const probes = byPlatform[pf];
+          const meta = AI_PLATFORM_LABELS[pf];
+          const mentioned = probes.filter(p => p.mentioned).length;
+          const rate = probes.length > 0 ? mentioned / probes.length : 0;
+          const isExpanded = expanded === pf;
+          return (
+            <div key={pf} className="rounded-xl border border-border bg-white p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-text">{meta.label}</span>
+                <span className="text-[10px] text-text-muted">{meta.provider}</span>
+                <span className="ml-auto text-xs tabular-nums text-text-sub">
+                  {mentioned}/{probes.length} 언급 · {Math.round(rate * 100)}%
+                </span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${Math.max(rate * 100, 4)}%`,
+                    background: rate >= 0.6 ? '#22C55E' : rate >= 0.3 ? '#F59E0B' : '#DC2626',
+                  }}
+                />
+              </div>
+              <button
+                onClick={() => setExpanded(isExpanded ? null : pf)}
+                className="mt-3 text-[11px] text-text-sub hover:text-text"
+              >
+                {isExpanded ? '▾ 응답 숨기기' : `▸ ${probes.length}개 응답 펼치기`}
+              </button>
+              {isExpanded && (
+                <div className="mt-3 space-y-2 max-h-96 overflow-y-auto">
+                  {probes.map((p, i) => {
+                    const acc = ACCURACY_META[p.accuracy];
+                    const ef = p.extracted_facts as { facts?: unknown; comparison?: Array<{ field: string; match: string; siteValue?: string; aiValue?: string }> } | null;
+                    return (
+                    <div key={i} className="rounded-lg border border-border bg-surface/30 p-2">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-[9px] uppercase font-bold tracking-wider text-text-muted">
+                          {CATEGORY_LABELS[p.category] || p.category}
+                        </span>
+                        {p.mentioned ? (
+                          <span className="text-[9px] text-success">✓ 언급{p.position ? ` (순위 ${p.position})` : ''}</span>
+                        ) : (
+                          <span className="text-[9px] text-text-muted">⛔ 미언급</span>
+                        )}
+                        {p.mentioned && (
+                          <span
+                            className="ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+                            style={{ background: `${acc.color}15`, color: acc.color }}
+                            title={`사실 정확도: ${acc.label}`}
+                          >
+                            <span>{acc.emoji}</span>
+                            <span>{acc.label}</span>
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-medium text-text mb-1">"{p.query}"</p>
+                      <p className="text-[10px] text-text-muted leading-relaxed line-clamp-5">{p.raw_response}</p>
+                      {ef?.comparison && ef.comparison.length > 0 && (
+                        <div className="mt-1.5 rounded border border-border bg-white p-1.5 space-y-0.5">
+                          <div className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-0.5">사실 비교</div>
+                          {ef.comparison.map((c, j) => {
+                            const mColor = c.match === 'exact' ? '#22C55E' : c.match === 'partial' ? '#F59E0B' : c.match === 'wrong' ? '#DC2626' : '#9CA3AF';
+                            const mLabel = c.match === 'exact' ? '✓' : c.match === 'partial' ? '△' : c.match === 'wrong' ? '✗' : '○';
+                            return (
+                              <div key={j} className="flex items-center gap-1.5 text-[9px]">
+                                <span style={{ color: mColor }} className="font-bold">{mLabel}</span>
+                                <span className="text-text-muted">{c.field}:</span>
+                                {c.siteValue && <span className="text-text">우리 "{c.siteValue}"</span>}
+                                {c.aiValue && <span className="text-text-muted">vs AI "{c.aiValue}"</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {p.citations && p.citations.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {p.citations.slice(0, 3).map((c, j) => (
+                            <a key={j} href={c.url} target="_blank" rel="noopener" className="text-[9px] text-accent underline truncate max-w-[200px]">
+                              🔗 {c.title || new URL(c.url).hostname}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EEATCell({ label, sub, value }: { label: string; sub: string; value: number | null }) {
+  const isNA = value == null;
+  const color = isNA ? '#9CA3AF' : value >= 80 ? '#22C55E' : value >= 60 ? '#3B82F6' : value >= 40 ? '#F59E0B' : '#DC2626';
+  return (
+    <div className="rounded-lg border border-border bg-surface/30 px-3 py-2">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">{label}</div>
+      <div className="text-[9px] text-text-muted opacity-70">{sub}</div>
+      <div className="mt-1 flex items-baseline gap-1">
+        <span className="text-base font-bold tabular-nums" style={{ color }}>{isNA ? 'N/A' : value}</span>
+        {!isNA && <span className="text-[10px] text-text-muted">/100</span>}
+      </div>
+      {!isNA && (
+        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-surface">
+          <div className="h-full rounded-full transition-all" style={{ width: `${value}%`, background: color }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** description에서 "(출처: ___)" 패턴을 추출 — 본문과 분리 표시 */
+function splitSource(description: string): { body: string; source: string | null } {
+  const match = description.match(/\s*\(출처:\s*([^)]+)\)\s*$/);
+  if (!match) return { body: description, source: null };
+  return { body: description.slice(0, match.index).trim(), source: match[1].trim() };
+}
+
 function SeoItemRow({ item }: { item: { name: string; score: number; maxScore: number; status: Status; description: string; action: string } }) {
+  // T4_UNKNOWN — maxScore 0 → N/A 표시
+  const isNA = item.maxScore === 0;
+  const { body, source } = splitSource(item.description);
   return (
     <div className="rounded-xl border border-border bg-white px-5 py-4">
       <div className="flex items-center gap-3">
-        <StatusIcon status={item.status} />
+        {isNA
+          ? <span className="text-text-muted text-xs font-bold" title="측정 불가">N/A</span>
+          : <StatusIcon status={item.status} />
+        }
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-text">{item.name}</div>
-          <div className="text-xs text-text-muted">{item.description}</div>
+          <div className="text-xs text-text-muted">{body}</div>
+          {source && (
+            <div
+              className="mt-1 inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium text-text-muted"
+              title={`이 측정의 권위 출처: ${source}`}
+            >
+              <span className="opacity-60">🔬</span>
+              <span>출처: {source}</span>
+            </div>
+          )}
         </div>
-        <div className="text-sm font-semibold text-text-sub whitespace-nowrap">{item.score}/{item.maxScore}</div>
+        <div className="text-sm font-semibold text-text-sub whitespace-nowrap">
+          {isNA ? '측정 불가' : `${item.score}/${item.maxScore}`}
+        </div>
       </div>
-      <div className="mt-2 ml-8 text-xs text-text-muted">
-        {getScoreComment(item.score, item.maxScore)}
-        {item.status !== 'pass' && <span className="text-text-sub"> → {item.action}</span>}
-      </div>
+      {!isNA && (
+        <div className="mt-2 ml-8 text-xs text-text-muted">
+          {getScoreComment(item.score, item.maxScore)}
+          {item.status !== 'pass' && <span className="text-text-sub"> → {item.action}</span>}
+        </div>
+      )}
+      {isNA && (
+        <div className="mt-2 ml-8 text-xs text-text-muted">
+          {item.action}
+        </div>
+      )}
     </div>
   );
 }
@@ -141,9 +733,37 @@ function ReportContent({ scanId }: { scanId: string }) {
   };
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(`scan_${scanId}`);
-    if (stored) setScan(JSON.parse(stored));
-    setLoading(false);
+    // 1) DB에서 short_id로 조회 (영구 저장된 보고서)
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/smarcomm/report/${scanId}`, { cache: 'no-store' });
+        if (aborted) return;
+        if (res.ok) {
+          const { scan: dbScan, aiProbes } = await res.json();
+          if (dbScan?.analysis) {
+            // analysis JSONB = AnalysisResult 전체 + breakdown 별도
+            setScan({
+              ...dbScan.analysis,
+              breakdown: dbScan.breakdown,
+              createdAt: dbScan.created_at,
+              domain: dbScan.domain,
+              shortId: dbScan.short_id,
+              aiProbes: aiProbes ?? [],
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        /* fall through to sessionStorage */
+      }
+      // 2) Fallback — 옛 세션 스토리지 기반 (구버전 호환)
+      const stored = sessionStorage.getItem(`scan_${scanId}`);
+      if (!aborted && stored) setScan(JSON.parse(stored));
+      if (!aborted) setLoading(false);
+    })();
+    return () => { aborted = true; };
   }, [scanId]);
 
   useEffect(() => {
@@ -233,32 +853,152 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
-          {/* Score */}
-          <div className="mb-8 rounded-2xl border border-border bg-white p-6">
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              <GaugeChart score={scan.seoScore} label="SEO" color="#6B7280" size={100} />
-              <GaugeChart score={scan.geoScore} label="GEO" color="#6B7280" size={100} />
-              {scan.performanceScore !== undefined && (
-                <GaugeChart score={scan.performanceScore} label="Performance" color={scan.performanceScore >= 90 ? '#059669' : scan.performanceScore >= 50 ? '#D97706' : '#DC2626'} size={100} />
+          {/* SmarComm Index Hero — Phase 1 (CLAUDE.md § 3-A SSOT) */}
+          {scan.breakdown ? (
+            <>
+            <div className="mb-8 overflow-hidden rounded-2xl border border-border bg-white">
+              {/* 점수 + 등급 */}
+              <div className="flex flex-col items-center bg-gradient-to-b from-surface/40 to-white px-6 py-8">
+                <div className="relative">
+                  <GaugeChart
+                    score={scan.breakdown.index}
+                    label="SmarComm Index"
+                    color={GRADE_META[scan.breakdown.grade as Grade].color}
+                    size={180}
+                  />
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold text-white"
+                    style={{ background: GRADE_META[scan.breakdown.grade as Grade].color }}
+                  >
+                    {scan.breakdown.grade}
+                  </span>
+                  <span className="text-sm font-medium text-text">{GRADE_META[scan.breakdown.grade as Grade].description}</span>
+                </div>
+              </div>
+
+              {/* 마케터 4 질문 */}
+              <div className="border-t border-border bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-3">
+                  <QuestionCard
+                    icon={<Search size={16} />}
+                    color="#3B82F6"
+                    question="고객이 우리를 찾을 수 있나?"
+                    score={scan.breakdown.findability}
+                    sub="Findability"
+                  />
+                  <QuestionCard
+                    icon={<ShieldCheck size={16} />}
+                    color="#A855F7"
+                    question="고객이 신뢰할 만한가?"
+                    score={scan.breakdown.trust}
+                    sub="Trust"
+                    borderLeft
+                  />
+                  <QuestionCard
+                    icon={<Bot size={16} />}
+                    color="#10B981"
+                    question="AI가 우리를 추천하는가?"
+                    score={scan.breakdown.citability}
+                    sub="Citability · 가중치 40%"
+                    borderLeft
+                  />
+                </div>
+              </div>
+
+              {/* E-E-A-T 4 sub-score — Google QRG § 3 SSOT */}
+              {scan.breakdown.eeat && (
+                <div className="border-t border-border bg-white px-6 py-4">
+                  <div className="mb-2 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">E-E-A-T 분해</span>
+                    <span className="text-[10px] text-text-muted opacity-60">(Trust 내부 4축)</span>
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted ml-auto"
+                      title="Google Search Quality Rater Guidelines § 3.1~3.4 (2024) — Experience·Expertise·Authoritativeness·Trustworthiness"
+                    >
+                      🔬 출처: Google QRG 2024
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <EEATCell label="Experience" sub="직접 경험" value={scan.breakdown.eeat.experience} />
+                    <EEATCell label="Expertise" sub="전문성" value={scan.breakdown.eeat.expertise} />
+                    <EEATCell label="Authoritativeness" sub="권위 (Phase 4)" value={scan.breakdown.eeat.authoritativeness} />
+                    <EEATCell label="Trustworthiness" sub="신뢰" value={scan.breakdown.eeat.trustworthiness} />
+                  </div>
+                </div>
               )}
-              <GaugeChart score={scan.totalScore} label="종합" color={grade.color} size={130} />
+
+              {/* 산출 근거 */}
+              <div className="border-t border-border bg-surface/30 px-6 py-3 text-center">
+                <p className="text-[11px] text-text-muted">
+                  Index = Findability × 30% + Trust × 30% + Citability × 40%
+                  {scan.performanceScore !== undefined && ` · PageSpeed ${scan.performanceScore}점 (참고)`}
+                </p>
+              </div>
             </div>
-            <div className="mt-4 text-center">
-              <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold" style={{ background: `${grade.color}12`, color: grade.color, border: `1px solid ${grade.color}30` }}>
-                {grade.label}
-              </span>
-              <p className="mt-2 text-sm text-text-sub">{grade.message}</p>
+
+            {/* Phase 3.4 — Executive Summary (30초 요약) */}
+            {scan.breakdown.execSummary && (
+              <div className="mb-6 rounded-2xl border border-border bg-white p-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">30초 요약</span>
+                  <span
+                    className="ml-auto inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted"
+                    title="Claude Haiku 4.5로 진단 결과 자동 요약"
+                  >
+                    🔬 AI 자동 요약 (Claude Haiku)
+                  </span>
+                </div>
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex gap-2">
+                    <span className="text-success text-base shrink-0">✅</span>
+                    <span className="text-text"><b className="text-success">잘된 것:</b> {scan.breakdown.execSummary.winning}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-danger text-base shrink-0">⚠</span>
+                    <span className="text-text"><b className="text-danger">문제:</b> {scan.breakdown.execSummary.problem}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-accent text-base shrink-0">🎯</span>
+                    <span className="text-text"><b className="text-accent">다음 행동:</b> {scan.breakdown.execSummary.nextAction}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            </>
+          ) : (
+            // Fallback — 옛 보고서 (breakdown 없음)
+            <div className="mb-8 rounded-2xl border border-border bg-white p-6">
+              <div className="flex flex-wrap items-center justify-center gap-8">
+                <GaugeChart score={scan.seoScore} label="SEO" color="#6B7280" size={100} />
+                <GaugeChart score={scan.geoScore} label="GEO" color="#6B7280" size={100} />
+                {scan.performanceScore !== undefined && (
+                  <GaugeChart score={scan.performanceScore} label="Performance" color={scan.performanceScore >= 90 ? '#059669' : scan.performanceScore >= 50 ? '#D97706' : '#DC2626'} size={100} />
+                )}
+                <GaugeChart score={scan.totalScore} label="종합" color={grade.color} size={130} />
+              </div>
+              <div className="mt-4 text-center">
+                <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold" style={{ background: `${grade.color}12`, color: grade.color, border: `1px solid ${grade.color}30` }}>
+                  {grade.label}
+                </span>
+                <p className="mt-2 text-sm text-text-sub">{grade.message}</p>
+              </div>
             </div>
-            {/* 점수 산출 근거 */}
-            <div className="mt-4 border-t border-border pt-3">
-              <p className="text-[11px] text-text-muted text-center">
-                종합 = {scan.performanceScore !== undefined ? 'SEO 40% + GEO 40% + Performance 20%' : 'SEO 50% + GEO 50%'}
-                {scan.performanceScore !== undefined
-                  ? ` (Performance: ${scan.pageSpeedData ? 'Google PageSpeed Insights' : '서버 응답시간 기반'})`
-                  : ''}
-              </p>
-            </div>
-          </div>
+          )}
+
+          {/* Phase 3.3 — Action Plan (Impact × Effort) */}
+          {scan.breakdown?.actionPlan && scan.breakdown.actionPlan.length > 0 && (
+            <ActionMatrix actions={scan.breakdown.actionPlan} />
+          )}
+
+          {/* Phase 3.1 — Schema 자동 생성기 */}
+          {scan.breakdown && Array.isArray(scan.breakdown.schemaSuggestions) && scan.breakdown.schemaSuggestions.length > 0 && (
+            <SchemaGenerator suggestions={scan.breakdown.schemaSuggestions as SchemaSuggestionUI[]} />
+          )}
+
+          {/* Phase 3.2 — Trend (도메인 시계열) */}
+          {scan.shortId && <TrendChart shortId={scan.shortId} />}
 
           {/* Top Issues */}
           <div className="mb-8">
@@ -447,7 +1187,7 @@ function ReportContent({ scanId }: { scanId: string }) {
 
           {/* GEO */}
           <div className="mb-10">
-            <h2 className="mb-4 text-[15px] font-bold text-text">AI 검색 노출 추정</h2>
+            <h2 className="mb-4 text-[15px] font-bold text-text">AI 검색 노출 (실측)</h2>
             <div className="space-y-3">
               {scan.geoChecks.map((check, i) => (
                 <div key={i} className="rounded-xl border border-border bg-white px-5 py-4">
@@ -465,6 +1205,11 @@ function ReportContent({ scanId }: { scanId: string }) {
               ))}
             </div>
           </div>
+
+          {/* AI Visibility Map — Phase 2 신규 (실제 AI 응답 캡처) */}
+          {scan.aiProbes && scan.aiProbes.length > 0 && (
+            <AIVisibilityMap aiProbes={scan.aiProbes} />
+          )}
 
           {/* GEO Readiness */}
           <div className="mb-10">
@@ -674,6 +1419,44 @@ function ReportContent({ scanId }: { scanId: string }) {
               </Link>
             </div>
           )}
+
+          {/* 신뢰 푸터 — Phase 1.6 (분석 소스 명시) */}
+          <div className="mt-10 rounded-xl border border-border bg-white px-6 py-5">
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-text-muted">
+              이 보고서가 사용한 데이터 소스
+            </div>
+            <ul className="space-y-1.5 text-xs text-text-sub">
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-sub" />
+                <span><b>실제 HTML 파싱</b> — 페이지 메타·구조·이미지·링크 직접 추출 ({scan.fetchTime}ms)</span>
+              </li>
+              {scan.pageSpeedData && (
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-sub" />
+                  <span><b>Google PageSpeed Insights API</b> — 실측 LCP·CLS·TBT·FCP·SI</span>
+                </li>
+              )}
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-sub" />
+                <span><b>Claude Sonnet 4.6</b> — AI 검색 노출 실측 테스트</span>
+              </li>
+              {scan.pagesAnalyzed && scan.pagesAnalyzed > 1 && (
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-sub" />
+                  <span><b>자체 크롤러</b> — 메인 + 서브페이지 {(scan.pagesAnalyzed - 1)}개 동시 분석 (총 {scan.pagesAnalyzed}페이지)</span>
+                </li>
+              )}
+            </ul>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-[11px] text-text-muted">
+              <div>
+                {scan.createdAt && <span>진단 일시: {new Date(scan.createdAt).toLocaleString('ko-KR')}</span>}
+                {scan.shortId && <span className="ml-3">ID: {scan.shortId}</span>}
+              </div>
+              <div>
+                Phase 1 보고서 · Phase 2(ChatGPT·Perplexity 실측) 곧 추가
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
