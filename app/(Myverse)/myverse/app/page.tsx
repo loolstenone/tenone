@@ -1,6 +1,6 @@
-// /myverse/app — 진입 시 오늘 페이지로 자동 이동
+// /myverse/app — 첫 랜딩 = 캡쳐 (5채집 시작점)
 import { ClientRedirect } from "@/components/ClientRedirect";
 
 export default function Page() {
-    return <ClientRedirect to="/myverse/app/daily" />;
+    return <ClientRedirect to="/myverse/app/capture" />;
 }

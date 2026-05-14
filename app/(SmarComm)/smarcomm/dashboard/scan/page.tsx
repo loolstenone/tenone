@@ -126,7 +126,7 @@ export default function ScanPage() {
     setScanning(true);
     setError('');
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/smarcomm/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),
@@ -161,7 +161,7 @@ export default function ScanPage() {
     const normalized = compareUrl.startsWith('http') ? compareUrl : 'https://' + compareUrl;
     setScanning(true);
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/smarcomm/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),

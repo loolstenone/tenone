@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
     Search, Settings, HelpCircle, Sparkles, Download,
     Menu, Maximize, Minimize, MessageSquarePlus,
+    Bell, ChevronDown, LogOut, User as UserIcon,
 } from "lucide-react";
 import type { SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
+import { useAuth } from "@/lib/auth-context";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
@@ -72,9 +74,12 @@ export function AppTopNav({
     customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
+    const { logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [unread, setUnread] = useState(0);
+    const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+    const avatarMenuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         function onChange() { setIsFullscreen(!!document.fullscreenElement); }
@@ -107,6 +112,25 @@ export function AppTopNav({
         return () => window.removeEventListener("keydown", onKey);
     }, [menuOpen]);
 
+    // 아바타 드롭다운 — 경로 변경/Esc/외부 클릭 시 닫기
+    useEffect(() => { setAvatarMenuOpen(false); }, [pathname]);
+    useEffect(() => {
+        if (!avatarMenuOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setAvatarMenuOpen(false); };
+        const onClick = (e: MouseEvent) => {
+            if (avatarMenuRef.current && !avatarMenuRef.current.contains(e.target as Node)) {
+                setAvatarMenuOpen(false);
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        const t = setTimeout(() => window.addEventListener("click", onClick), 0);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            clearTimeout(t);
+            window.removeEventListener("click", onClick);
+        };
+    }, [avatarMenuOpen]);
+
     // 캔버스 편집 화면에서는 네비 숨김
     if (/^\/myverse\/app\/canvas\/.+/.test(pathname)) return null;
 
@@ -133,7 +157,7 @@ export function AppTopNav({
     return (
         <header className="fixed top-0 left-0 right-0 z-40 bg-white myverse-dark:bg-[#0D0D15] border-b border-neutral-200 myverse-dark:border-white/8 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand */}
-            <Link href="/myverse/app/daily" className="flex items-center gap-1.5 mr-1 shrink-0">
+            <Link href="/myverse/app/capture" className="flex items-center gap-1.5 mr-1 shrink-0">
                 <Image src="/Myverse_logo_black.png" alt="Myverse" width={24} height={24} className="shrink-0" />
                 <span className="hidden sm:inline font-sans font-semibold text-sm text-neutral-900 myverse-dark:text-neutral-100 tracking-tight whitespace-nowrap">
                     Myverse
@@ -162,20 +186,8 @@ export function AppTopNav({
                     </Link>
                 )}
 
-                <InstallButton className="p-1.5 rounded text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors inline-flex" title="앱 설치">
-                    <Download className="h-4 w-4" />
-                </InstallButton>
-
                 <Link href="/myverse/app/search" className={iconCls(pathname === "/myverse/app/search")} title="검색">
                     <Search className="h-4 w-4" />
-                </Link>
-
-                <Link href="/myverse/app/help" className={iconCls(pathname.startsWith("/myverse/app/help"))} title="도움말">
-                    <HelpCircle className="h-4 w-4" />
-                </Link>
-
-                <Link href="/myverse/app/settings" className={iconCls(pathname.startsWith("/myverse/app/settings"))} title="설정">
-                    <Settings className="h-4 w-4" />
                 </Link>
 
                 <button
@@ -187,26 +199,101 @@ export function AppTopNav({
                     {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </button>
 
+                {/* 알림 (Bell) — 아바타에서 분리 */}
+                <Link
+                    href="/myverse/app/notifications"
+                    className={`relative ${iconCls(pathname.startsWith("/myverse/app/notifications"))}`}
+                    title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
+                >
+                    <Bell className="h-4 w-4" />
+                    {unread > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white myverse-dark:ring-[#0D0D15]">
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    )}
+                </Link>
+
+                {/* 아바타 드롭다운 — 프로필·설정·도움말·앱 설치·로그아웃 통합 */}
                 {userName && (
-                    <Link
-                        href="/myverse/app/notifications"
-                        className="ml-1 relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
-                        title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
-                    >
-                        {avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
-                        ) : (
-                            <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
-                                {userName[0]}
+                    <div ref={avatarMenuRef} className="relative ml-1">
+                        <button
+                            type="button"
+                            onClick={() => setAvatarMenuOpen(o => !o)}
+                            aria-haspopup="menu"
+                            aria-expanded={avatarMenuOpen}
+                            title={userName}
+                            className="flex items-center gap-0.5 rounded-full hover:opacity-80 transition-opacity"
+                        >
+                            <span className="relative h-7 w-7 rounded-full shrink-0 overflow-hidden block">
+                                {avatarUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+                                ) : (
+                                    <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
+                                        {userName[0]}
+                                    </span>
+                                )}
                             </span>
+                            <ChevronDown className={`h-3 w-3 text-neutral-400 transition-transform ${avatarMenuOpen ? "rotate-180" : ""}`} />
+                        </button>
+
+                        {avatarMenuOpen && (
+                            <div
+                                role="menu"
+                                className="absolute right-0 top-full mt-2 w-56 bg-white myverse-dark:bg-[#15151F] text-neutral-900 myverse-dark:text-neutral-100 rounded-lg shadow-xl border border-neutral-200 myverse-dark:border-white/10 overflow-hidden z-50"
+                            >
+                                <div className="px-3 py-2.5 border-b border-neutral-100 myverse-dark:border-white/8">
+                                    <div className="text-sm font-medium truncate">{userName}</div>
+                                    <div className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 mt-0.5">
+                                        {subscriptionStatus === "active" ? "구독 중" : "무료"}
+                                    </div>
+                                </div>
+                                <div className="py-1">
+                                    <Link
+                                        href="/myverse/app/profile"
+                                        onClick={() => setAvatarMenuOpen(false)}
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors"
+                                    >
+                                        <UserIcon className="h-4 w-4 text-neutral-400" />
+                                        <span>프로필</span>
+                                    </Link>
+                                    <Link
+                                        href="/myverse/app/settings"
+                                        onClick={() => setAvatarMenuOpen(false)}
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors"
+                                    >
+                                        <Settings className="h-4 w-4 text-neutral-400" />
+                                        <span>설정</span>
+                                    </Link>
+                                    <Link
+                                        href="/myverse/app/help"
+                                        onClick={() => setAvatarMenuOpen(false)}
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors"
+                                    >
+                                        <HelpCircle className="h-4 w-4 text-neutral-400" />
+                                        <span>도움말</span>
+                                    </Link>
+                                    <InstallButton
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors w-full text-left"
+                                        onInstalled={() => setAvatarMenuOpen(false)}
+                                    >
+                                        <Download className="h-4 w-4 text-[#6366F1]" />
+                                        <span>앱 설치</span>
+                                    </InstallButton>
+                                </div>
+                                <div className="border-t border-neutral-100 myverse-dark:border-white/8 py-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setAvatarMenuOpen(false); logout(); }}
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors w-full text-left text-neutral-700 myverse-dark:text-neutral-200"
+                                    >
+                                        <LogOut className="h-4 w-4 text-neutral-400" />
+                                        <span>로그아웃</span>
+                                    </button>
+                                </div>
+                            </div>
                         )}
-                        {unread > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                                {unread > 99 ? "99+" : unread}
-                            </span>
-                        )}
-                    </Link>
+                    </div>
                 )}
             </div>
 

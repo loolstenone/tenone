@@ -53,7 +53,7 @@ export default function OnboardingPage() {
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (d?.user?.onboarding_completed) {
-                    window.location.replace("/myverse/app/daily");
+                    window.location.replace("/myverse/app/capture");
                 }
             })
             .catch(() => {});
@@ -113,7 +113,7 @@ export default function OnboardingPage() {
                 return;
             }
             trackMyverse("myverse_onboarding_complete", { mode, ai_tone: tone });
-            window.location.assign("/myverse/app/daily");
+            window.location.assign("/myverse/app/capture");
         } catch (e) {
             console.error("onboarding fetch error", e);
             alert(`네트워크 오류: ${(e as Error).message}\n다시 시도해 주세요.`);
