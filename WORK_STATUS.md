@@ -1,6 +1,70 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-13 (세션 134 — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴)
+> 마지막 업데이트: 2026-05-15 (세션 135 — SmarComm Phase 4 ①~⑥ + 이월 정리)
+
+---
+
+## 세션 135 핵심 성과 (2026-05-15)
+
+### SmarComm Phase 4 ①~⑥ 완성
+
+**① Moz/Ahrefs 백링크 → E-E-A-T Authoritativeness** (이전 세션 완료, 본 세션 통합 확인)
+- `lib/smarcomm/analyzers/backlink-authority.ts` — Moz API v2 primary + Ahrefs fallback
+- Index Calculator의 EEAT Authoritativeness 점수원
+
+**② 업종 백분위** (이전 세션 완료)
+- `lib/smarcomm/analyzers/industry-benchmark.ts` + scan API 통합
+
+**③ Vercel Cron 정기 재진단 + 점수 알림** (이전 세션 완료)
+- `/api/smarcomm/cron/*` + 알림 트리거
+
+**④ PDF 리포트 다운로드 (Frontend)** — 본 세션 신규
+- `features/smarcomm/PageActions.tsx` 전면 재작성 — `window.print()` placeholder 제거. POST `/api/smarcomm/scan/save` → id 획득 → GET `/api/smarcomm/report/pdf?id=...` → Blob 다운로드. `Loader2` 로딩 상태 + alert 에러 처리 + `Content-Disposition` filename 추출.
+- `app/(SmarComm)/smarcomm/dashboard/index/page.tsx` 신규 (~280줄) — URL 입력 + 업종 select + 진단 트리거 + 등급 배지 + 3축 ScoreCard + 경영진 요약 + 액션플랜 아코디언(퀵윈 우선) + 진단 이력 테이블 + 재진단 버튼.
+- `features/smarcomm/DashboardSidebar.tsx` — "진단" 섹션 최상단에 `SmarComm Index` 항목 추가 (`BarChart3` 아이콘, `pack:'core'`).
+- `app/api/smarcomm/scan/history/route.ts` 신규 — 사용자 스캔 이력 최신 20건 반환.
+
+**⑤ Wikidata SPARQL Knowledge Graph 분석기** — 본 세션 신규
+- `lib/smarcomm/analyzers/wikidata-knowledge-graph.ts` 신규 — 무료 SPARQL endpoint(https://query.wikidata.org/sparql), 도메인이 entity의 P856(official website)로 등록됐는지 검사. `kgScore` 0~100 (등록 시 60, 설명 +20, 한국어 라벨 +20).
+- `lib/smarcomm/index-calculator.ts` — Citability에 최대 +10점 Wikidata 보너스, EEAT Authoritativeness가 backlink null일 때 `kgScore` fallback, `IndexBreakdown.knowledgeGraph` 메타 추가.
+- `app/api/smarcomm/scan/route.ts` — `Promise.all`로 backlink·Wikidata 병렬 fetch.
+
+**⑥ 3 View Mode (`?view=marketer|exec|dev`)** — 본 세션 신규
+- `app/(SmarComm)/smarcomm/dashboard/index/page.tsx` 확장 — `useSearchParams` + `Suspense` boundary, 상단 탭 UI(Sparkles/Briefcase/Code2 아이콘).
+- 마케터(default): 등급 + 3축 + 경영진 요약 + 퀵윈 + 상위 5개 액션 + "+N개 더 보기 (개발자 view)" 링크
+- 경영진: 등급 + 3축 + 경영진 요약 (액션플랜 숨김)
+- 개발자: 전체 액션 + E-E-A-T 4축 카드 + Wikidata Knowledge Graph 카드 + Findability/Trust raw 진단 항목 progress bar
+
+### SmarComm 이월 작업 정리 (3건)
+
+**① `dashboard/layout.tsx` loginHref 리팩토링**
+- `router.push('/login?redirect=...')` 하드코딩 → `loginHref(pathname)` 헬퍼로 교체. `usePathname()` 추가.
+
+**② Mock Auth 제거**
+- `lib/smarcomm/auth.ts` (sessionStorage 기반 MASTER_ACCOUNT + Mock User) 완전 삭제.
+- `app/(SmarComm)/smarcomm/dashboard/scan/page.tsx` — 동적 import로 호출하던 `saveScanUrl` 제거, 대신 `/api/smarcomm/scan/save` API 호출(실 Supabase SSOT)로 교체.
+
+**③ wio_subscription_plans 실제 Preview Gate 연동**
+- `app/api/smarcomm/plan-check/route.ts` 신규 — Free(0) → Starter(1) → Pro(2) → Business(3) 4단계 PLAN_RANK 비교. `wio_subscriptions` 활성 구독 조회 + 만료 검증 + `wio_feature_flags` 보조 검사.
+- `features/smarcomm/SmarCommPlanGate.tsx` 신규 — 클라이언트 컴포넌트. requiredPlan/feature props. 미인증·플랜부족 시 업그레이드 모달(/smarcomm#pricing 링크). 기존 "Coming Soon" 게이트(`SmarCommPreviewGate.tsx`)와 별개 — 신규 게이트는 실제 구독 검증용.
+
+### 환경/인프라
+
+- 워크트리에 `.env.local` 복사 (메인 `C:\Projects\TenOne\.env.local`에서) — Supabase 키 공급
+- `next.config.ts`에 `turbopack.root = path.resolve(__dirname)` 추가 — 다중 lockfile 경고 제거
+
+### 다음 할 일
+
+#### 🟡 사용자 직접 처리
+- ANTHROPIC_API_KEY 갱신 (401 에러 — Phase 4 ③ 알림 발송 차단됨)
+- MOZ_ACCESS_ID + MOZ_SECRET_KEY 발급 (E-E-A-T Authoritativeness 실값 채우려면 필요)
+- AHREFS_API_KEY 발급 (Moz fallback)
+- 워크트리 Turbopack 컴파일 hang — `rm -rf node_modules && npm install` 또는 메인 폴더에서 실행
+
+#### 🟢 SmarComm 차기
+1. `SmarCommPlanGate` 실제 적용 — `/dashboard/creative`, `/dashboard/analytics` 등 유료 페이지 상단에 `<SmarCommPlanGate requiredPlan="pro">`로 감싸기 (구독 결제 플로우 완성 후)
+2. PDF 리포트 view mode별 분기 — 마케터/경영진/개발자 view에 따라 PDF 섹션 구성 차별화
+3. Wikidata fallback 안내 카드에 "Wikidata에 등록하기" 가이드 링크 추가
 
 ---
 

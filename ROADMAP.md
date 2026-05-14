@@ -177,6 +177,16 @@ WIO / SmarComm
 - [x] Coming Soon 해제 → 접근 가능
 - [x] `/intra/marketing` ↔ SmarComm WS 데이터 연결
 
+### 1-B-1. SmarComm Index Phase 4 ✅ 완료 (세션 135 — 2026-05-15)
+- [x] ① Moz/Ahrefs 백링크 → E-E-A-T Authoritativeness
+- [x] ② 업종 백분위
+- [x] ③ Vercel Cron 정기 재진단 + 점수 알림
+- [x] ④ PDF 리포트 다운로드 (backend + frontend + history API)
+- [x] ⑤ Wikidata SPARQL Knowledge Graph 분석기
+- [x] ⑥ 3 view mode (`?view=marketer|exec|dev`)
+- [x] Mock auth 제거 + `wio_subscription_plans` 실 Plan Gate
+- [ ] **차기**: `SmarCommPlanGate` 실제 적용 (유료 페이지 wrap), PDF view별 분기, Wikidata 등록 가이드 카드
+
 ### 1-C. WIO 테넌트 관리 ✅ 완료 (세션 69)
 - [x] `/intra/ums/wio/tenants` 실구현 (wio_tenants + wio_members 집계)
 - [x] WIO Demo/SaaS/Master 모드 확인

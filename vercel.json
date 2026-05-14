@@ -57,6 +57,10 @@
     {
       "path": "/api/planners/cron/holidays",
       "schedule": "0 0 1 1 *"
+    },
+    {
+      "path": "/api/smarcomm/cron/rescan",
+      "schedule": "0 19 * * 0"
     }
   ]
 }

@@ -1,18 +1,20 @@
 'use client';
 
 import { useEffect, useState, createContext } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
+import { loginHref } from '@/lib/login-href';
 
 export const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [ready, setReady] = useState(false);
   const [companyName, setCompanyName] = useState('');
@@ -25,11 +27,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      router.push(loginHref(pathname));
       return;
     }
     initDashboard();
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname]);
 
   const initDashboard = () => {
     const savedCompany = localStorage.getItem('smarcomm_company');

@@ -49,6 +49,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: '진단',
     items: [
+      { href: '/dashboard/index', label: 'SmarComm Index', icon: BarChart3, pack: 'core' },
       { href: '/dashboard/scan', label: 'GEO & SEO 진단', icon: Crosshair, pack: 'core' },
       { href: '/dashboard/advisor', label: 'AI 어드바이저', icon: Lightbulb, pack: 'action' },
     ],

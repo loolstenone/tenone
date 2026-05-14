@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeUrl } from '@/lib/smarcomm/seo-analyzer';
+import { computeIndex } from '@/lib/smarcomm/index-calculator';
+import { fetchBacklinkData } from '@/lib/smarcomm/analyzers/backlink-authority';
+import { fetchIndustryBenchmark } from '@/lib/smarcomm/analyzers/industry-benchmark';
+import { fetchWikidataEntity } from '@/lib/smarcomm/analyzers/wikidata-knowledge-graph';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { url } = body;
+    const { url, industry } = body;
 
     if (!url || typeof url !== 'string') {
       return NextResponse.json({ error: 'URL이 필요합니다' }, { status: 400 });
@@ -35,7 +39,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(result);
+    const domain = new URL(normalizedUrl).hostname.replace(/^www\./, '');
+    const [backlinkData, wikidata] = await Promise.all([
+        fetchBacklinkData(domain).catch(() => undefined),
+        fetchWikidataEntity(domain).catch(() => null),
+    ]);
+    const breakdown = computeIndex(result, backlinkData, wikidata ?? undefined);
+
+    const benchmark = await fetchIndustryBenchmark(
+        industry || 'general',
+        { findability: breakdown.findability, trust: breakdown.trust, citability: breakdown.citability, index: breakdown.index }
+    ).catch(() => null);
+
+    return NextResponse.json({ ...result, breakdown, benchmark, wikidata });
   } catch (error) {
     console.error('Scan error:', error);
     return NextResponse.json(

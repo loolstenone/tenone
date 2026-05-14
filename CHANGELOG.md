@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-05-15 (세션 135) — SmarComm Phase 4 ④~⑥ + 이월 3건 정리
+
+### Phase 4 ④ PDF 리포트 Frontend
+- `features/smarcomm/PageActions.tsx` — `window.print()` placeholder를 실제 다운로드 플로우로 교체. POST `/api/smarcomm/scan/save` → id → GET `/api/smarcomm/report/pdf?id=...` → Blob → `<a>.click()`. `Loader2` 로딩 상태 + `Content-Disposition` 헤더에서 filename 추출.
+- `app/(SmarComm)/smarcomm/dashboard/index/page.tsx` 신규 — SmarComm Index 진단 페이지 (~280줄). URL/업종 입력 + 등급/3축/요약/액션플랜/이력 통합 UI.
+- `app/api/smarcomm/scan/history/route.ts` 신규 — GET 사용자 이력 20건.
+- `features/smarcomm/DashboardSidebar.tsx` — "진단" 섹션 최상단에 SmarComm Index 항목 추가.
+
+### Phase 4 ⑤ Wikidata SPARQL Knowledge Graph
+- `lib/smarcomm/analyzers/wikidata-knowledge-graph.ts` 신규 — query.wikidata.org SPARQL endpoint, 도메인 P856 매칭. `kgScore` 0~100 (등록 60 + 설명 20 + 한국어 라벨 20). 무료, 인증 불필요, 5s 타임아웃.
+- `lib/smarcomm/index-calculator.ts` — `computeIndex(result, backlink, wikidata)`. Citability +10점 보너스, EEAT Authoritativeness가 backlink null일 때 kgScore fallback. `IndexBreakdown.knowledgeGraph` 메타 추가.
+- `app/api/smarcomm/scan/route.ts` — `Promise.all`로 backlink·Wikidata 병렬 fetch, 응답에 `wikidata` 포함.
+
+### Phase 4 ⑥ 3 View Mode (`?view=marketer|exec|dev`)
+- `app/(SmarComm)/smarcomm/dashboard/index/page.tsx` — `useSearchParams` + `Suspense` boundary, 상단 탭(Sparkles/Briefcase/Code2). View별 분기: 마케터(default, 퀵윈+상위5), 경영진(액션플랜 숨김), 개발자(전체 액션 + E-E-A-T 4축 카드 + Wikidata KG 카드 + raw 진단 항목 progress).
+
+### SmarComm 이월 정리 (3건)
+- `app/(SmarComm)/smarcomm/dashboard/layout.tsx` — `router.push('/login?redirect=...')` 하드코딩 → `loginHref(pathname)` 헬퍼. `usePathname()` 추가.
+- `lib/smarcomm/auth.ts` 삭제 — sessionStorage Mock 인증 시스템(MASTER_ACCOUNT + 가짜 signup/login). `app/(SmarComm)/smarcomm/dashboard/scan/page.tsx`의 동적 import `saveScanUrl` 호출은 `/api/smarcomm/scan/save` 실제 Supabase API로 교체.
+- `app/api/smarcomm/plan-check/route.ts` 신규 — `wio_subscriptions` + `wio_feature_flags` 기반 4단계 PLAN_RANK(free 0 → business 3) 검증. 만료 expires_at 체크.
+- `features/smarcomm/SmarCommPlanGate.tsx` 신규 — `requiredPlan`+`feature` props. 미인증·플랜부족 시 업그레이드 안내(/smarcomm#pricing). 기존 `SmarCommPreviewGate.tsx`(Coming Soon 게이트)와 별개로 공존.
+
+### 인프라
+- `next.config.ts` — `turbopack.root = path.resolve(__dirname)` 추가, 다중 lockfile 경고 제거.
+- 워크트리에 `.env.local` 복사 — Supabase 키 공급.
+
+### 다음 할 일 (사용자 액션)
+- ANTHROPIC_API_KEY 갱신 (401), MOZ/AHREFS API 키 발급
+- `SmarCommPlanGate` 실제 적용 (Pro 페이지 상단 wrap)
+- 워크트리 Turbopack 컴파일 hang 해결 (node_modules 재설치 또는 메인 폴더 사용)
+
+---
+
 ## 2026-05-13 (세션 134) — 캡쳐 Phase 2 + 모바일 하단 네비 + 녹음·퀵메뉴
 
 ### 캡쳐 Phase 2 (5건)

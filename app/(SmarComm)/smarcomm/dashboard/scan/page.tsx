@@ -136,8 +136,14 @@ export default function ScanPage() {
       setResult(data);
       setView('result');
 
-      const { saveScanUrl } = await import('@/lib/smarcomm/auth');
-      saveScanUrl(data.url, data.totalScore, data.seoScore, data.geoScore);
+      // 스캔 결과 DB 저장 (Supabase SSOT) — index 페이지와 동일한 API 사용
+      if (data.breakdown) {
+        fetch('/api/smarcomm/scan/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: data.url, industry: 'general', breakdown: data.breakdown, benchmark: data.benchmark ?? null }),
+        }).catch(() => {});
+      }
 
       // 경쟁사 URL이면 경쟁사 이력에도 저장
       const scanDomain = data.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
