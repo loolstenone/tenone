@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-05-16 (세션 137) — Smart-Data Hub 홈 위젯 통합 + 정직성 ZERO 홈 적용
+
+### dashboard/page.tsx 전면 재작성
+
+**파일**: [app/(SmarComm)/smarcomm/dashboard/page.tsx](app/(SmarComm)/smarcomm/dashboard/page.tsx)
+
+**문제**: `/dashboard` 홈이 Mock 매출·광고 KPI를 경고 없이 노출 — 정직성 절대 원칙 ZERO 위반
+
+**변경**:
+- **Smart-Data Hub 실측 위젯 신설** (개요 탭 최상단)
+  - SmarComm Index (`scanLog[0].score` → 로컬/DB)
+  - AIRM 오픈 플래그 (`/api/smarcomm/airm/flags?status=open` — >0 빨강, =0 초록)
+  - Brand Assets 수 (`/api/smarcomm/assets`)
+  - `Promise.all` 병렬 fetch + `animate-pulse` 스켈레톤 + 에러 시 `—` fallback
+- **Mock 섹션 인라인 라벨**: `🧪 Demo 데이터` 앰버 배지 + Phase 5 예정 안내
+  - 광고·매출 KPI 3카드, 차트 3개 헤더, campaigns/sales 탭 배너
+- **실측 섹션 초록 라벨**: `실측 데이터` 배지 — Smart-Data Hub 헤더 + 최근 사이트 진단 테이블
+- 추가 import: `ShieldAlert, Archive, Crosshair, Zap` (lucide-react), `useEffect` (react)
+
+**설계**: 홈은 실·Mock 혼재 → `MOCK_PATH_PREFIXES` 추가 부적절 → 섹션별 인라인 라벨로 정직성 달성
+
+---
+
 ## 2026-05-15 (세션 136) — SmarComm V2.0 워크플로우 전면 구현
 
 ### SmarComm CLAUDE.md V2.0 SSOT (+262 / -24)

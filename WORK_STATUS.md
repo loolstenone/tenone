@@ -1,6 +1,35 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-15 (세션 136 — V2.0 + Quick win + V2.1 + 정직성 6차 + 절대 원칙 ZERO + 다크모드)
+> 마지막 업데이트: 2026-05-16 (세션 137 — Smart-Data Hub 홈 위젯 통합 + 정직성 ZERO 홈 적용)
+
+---
+
+## 세션 137 핵심 성과 (2026-05-16)
+
+### Smart-Data Hub 홈 위젯 통합 + 정직성 원칙 ZERO 홈 적용
+
+[app/(SmarComm)/smarcomm/dashboard/page.tsx](app/(SmarComm)/smarcomm/dashboard/page.tsx) 전면 재작성.
+
+**문제**: `/dashboard` 홈이 이번 달 매출·광고 집행액·전환 수 등 Mock KPI를 아무 경고 없이 실제 데이터인 것처럼 노출. 정직성 절대 원칙 ZERO 위반.
+
+**해결**:
+
+1. **Smart-Data Hub 실측 위젯 신설** — 3개 카드 (실 API 연동)
+   - SmarComm Index — `scanLog[0].score` (로컬 + DB)
+   - AIRM 오픈 플래그 — `/api/smarcomm/airm/flags?status=open` (0이면 초록, >0이면 빨강)
+   - Brand Assets 수 — `/api/smarcomm/assets`
+   - 로딩 시 `animate-pulse` 스켈레톤 + 에러 시 `—` fallback
+
+2. **Demo 데이터 인라인 라벨** — 모든 Mock 섹션에 `🧪 Demo 데이터` 앰버 배지 + "Phase 5에서 GA4·광고 매체 실 API 연동 예정" 안내
+   - 광고·매출 KPI 3카드 (이번 달 매출·광고 집행액·전환 수)
+   - 차트 (트렌드·GA4·캠페인 성과 레이더) 헤더
+   - campaigns·sales 탭 상단 배너
+
+3. **실측 데이터 초록 라벨** — 최근 사이트 진단 테이블 + Smart-Data Hub 섹션 헤더에 `실측 데이터` 초록 배지
+
+**설계 근거**: `/dashboard` 홈은 실·Mock 혼재 → `MOCK_PATH_PREFIXES`에 추가 불가 (전체 페이지 배너는 부적절). 대신 섹션별 인라인 라벨로 정직성 달성.
+
+---
 
 ---
 
@@ -301,7 +330,7 @@ V2.1 구현 우선순위 매트릭스 16종 정의 (Phase 4·5·6 단계별).
 4. Ahrefs/Moz API 통합 → Authoritativeness sub-score N/A 해소
 5. AIRM Critical 플래그 (`severity='critical'`)는 Action Hub priority=critical로 별도 등록 (현재 high)
 6. Person·Product·HowTo·Article Entity 자동 생성(현 Organization·Service·FAQ·WebSite만)
-7. Smart-Data Hub `/dashboard` 홈 위젯 통합 (4 소스 KPI)
+7. ~~Smart-Data Hub `/dashboard` 홈 위젯 통합 (4 소스 KPI)~~ ✅ 세션 137 완료
 8. 3 뷰 모드(`?view=marketer|exec|dev`) 활성 — boundary 분기
 
 #### 🟢 SmarComm 기타 (V1→V2 마이그레이션)
