@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-05-16 (세션 137) — Phase 5 Item 1: 정기 자동 재진단 Vercel Cron
+
+### Phase 5 Item 1 완료 — Smart-Data Hub 시계열 풍부화 + AIRM 자동 발견
+
+**DB**: `smarcomm_rescan_schedules` 테이블 Prod 적용
+- cadence (weekly/biweekly/monthly) · next_run_at · RLS no_public_access
+
+**공유 스캔 파이프라인 추출**: [lib/smarcomm/run-scan.ts](lib/smarcomm/run-scan.ts)
+- `runFullScan()` 함수 — scan route + cron 공용
+- scan/route.ts 280줄 → 50줄 slim wrapper
+
+**Cron 엔드포인트**: [app/api/cron/smarcomm-weekly-rescan/route.ts](app/api/cron/smarcomm-weekly-rescan/route.ts)
+- GET, `Authorization: Bearer CRON_SECRET` 인증
+- active=true + next_run_at≤now 기준 limit 10/회 순차 처리
+- 처리 후 next_run_at 갱신 (weekly +7d, biweekly +14d, monthly +1mo)
+
+**vercel.json**: schedule `0 3 * * 1` (매주 월 03:00 UTC) + maxDuration 300 양쪽
+
+---
+
 ## 2026-05-15 (세션 136) — SmarComm V2.0 워크플로우 전면 구현
 
 ### SmarComm CLAUDE.md V2.0 SSOT (+262 / -24)
