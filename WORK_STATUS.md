@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-16 (세션 137 — Phase 5 Item 1: 정기 자동 재진단 Vercel Cron + run-scan.ts 공유 모듈)
+> 마지막 업데이트: 2026-05-16 (세션 138 — Phase 5 Items 2+3: 캠페인 자산화 트리거 + AIRM 플래그 출처 추적)
 
 ---
 
@@ -300,8 +300,8 @@ V2.1 구현 우선순위 매트릭스 16종 정의 (Phase 4·5·6 단계별).
    - `lib/smarcomm/run-scan.ts` 공유 스캔 파이프라인 추출 (scan route + cron 공용)
    - `app/api/cron/smarcomm-weekly-rescan/route.ts` (GET, CRON_SECRET 인증, limit 10/회)
    - `vercel.json`: schedule `0 3 * * 1` + maxDuration 300 양쪽
-2. Entity 자동 등록 트리거 — 캠페인 종료(`wio_campaigns.status='ended'`) 훅으로 `smarcomm_brand_assets` 자동 INSERT
-3. AIRM 플래그 출처 추적(`smarcomm_ai_flag_sources`) — 외부 검색 API로 학습 추정 페이지 Top N
+2. ✅ Entity 자동 등록 트리거 — 캠페인 종료(`wio_campaigns.status='ended'`) 훅으로 `smarcomm_brand_assets` 자동 INSERT
+3. ✅ AIRM 플래그 출처 추적(`smarcomm_ai_flag_sources`) — 외부 검색 API로 학습 추정 페이지 Top N
 4. Ahrefs/Moz API 통합 → Authoritativeness sub-score N/A 해소
 5. AIRM Critical 플래그 (`severity='critical'`)는 Action Hub priority=critical로 별도 등록 (현재 high)
 6. Person·Product·HowTo·Article Entity 자동 생성(현 Organization·Service·FAQ·WebSite만)

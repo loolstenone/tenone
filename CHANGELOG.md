@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-05-16 (세션 138) — Phase 5 Items 2+3: 캠페인 자산화 트리거 + AIRM 플래그 출처 추적
+
+### Phase 5 Item 2 완료 — 캠페인 완료 시 Entity 자동 등록 SQL 트리거
+
+**SQL 트리거**: [sql/smarcomm-campaign-assetize-trigger.sql](sql/smarcomm-campaign-assetize-trigger.sql)
+- `smarcomm_auto_assetize_on_campaign_complete()` 함수 + `smarcomm_campaign_complete_assetize` 트리거
+- `AFTER UPDATE OF status ON marketing_campaigns` — `'Completed'` 전환 시만 실행
+- 슬러그 자동 생성 (정규화·소문자화·공백→하이픈) + 충돌 회피 (counter ≤ 99)
+- `smarcomm_brand_assets`에 Service Entity INSERT + schema.org JSON-LD 자동 생성
+- 중복 방지: 동일 `source_campaign_id` + `entity_type='Service'` + `valid_until IS NULL` 존재 시 skip
+
+### Phase 5 Item 3 완료 — AIRM 플래그 출처 추적 (Serper API 연동)
+
+**DB**: [sql/smarcomm-airm-flag-sources.sql](sql/smarcomm-airm-flag-sources.sql)
+- `smarcomm_ai_flag_sources` 테이블: flag_id(FK→CASCADE)·tenant_id·url·title·snippet·source_type·relevance_score·fetched_at
+- RLS: tenant isolation + service_role bypass
+
+**API 라우트**: [app/api/smarcomm/airm/flags/[id]/sources/route.ts](app/api/smarcomm/airm/flags/[id]/sources/route.ts)
+- GET: 저장된 출처 목록 조회 (relevance_score 내림차순)
+- POST: `SERPER_API_KEY` 확인 → 없으면 `{ status: 'api_key_missing' }` (정직 원칙)
+  → flag.claim으로 검색 쿼리 빌드 → Serper `google.serper.dev/search` Top 10
+  → URL 유형 자동 분류 (`detectSourceType`: wiki/official/news/forum/blog/other)
+  → rank-based 감쇠 relevance_score (`1 - i * 0.09`) → 기존 결과 삭제 후 fresh INSERT
+
+**UI**: [app/(SmarComm)/smarcomm/dashboard/airm/flags/page.tsx](app/(SmarComm)/smarcomm/dashboard/airm/flags/page.tsx)
+- `Source` 인터페이스 + `SOURCE_TYPE_LABEL` 상수 추가
+- 각 FlagRow에 4상태 Sources 섹션:
+  - `api_key_missing` → "🔌 외부 검색 API 미연결 — SERPER_API_KEY 설정 필요" 안내
+  - `search_error` → "⚠ 검색 중 오류" 재시도 안내
+  - `ok` + 결과 있음 → type 뱃지·제목·스니펫·관련도% 클릭 가능 링크 목록
+  - `ok` + 결과 없음 → "검색 결과가 없습니다" 안내
+- "출처 조회" 버튼 → 첫 조회 후 "출처 새로고침"으로 텍스트 전환
+
+---
+
 ## 2026-05-16 (세션 137) — Phase 5 Item 1: 정기 자동 재진단 Vercel Cron
 
 ### Phase 5 Item 1 완료 — Smart-Data Hub 시계열 풍부화 + AIRM 자동 발견

@@ -29,6 +29,16 @@ interface FlagRow {
   action_count: number;
 }
 
+interface Source {
+  id: string;
+  url: string;
+  title: string | null;
+  snippet: string | null;
+  source_type: string | null;
+  relevance_score: number | null;
+  fetched_at: string;
+}
+
 export default function FlagsListPage() {
   const [flags, setFlags] = useState<FlagRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +81,7 @@ export default function FlagsListPage() {
             🔬 출처: AI Probe 자동 (LLM 분류)
           </span>
         </div>
-        <p className="mt-1 text-xs text-text-muted">scan 실행 시 자동 감지 · 사용자 입력 불필요. 출처 추적(ai_flag_sources)은 Phase 5 외부 검색 API 연동 예정.</p>
+        <p className="mt-1 text-xs text-text-muted">scan 실행 시 자동 감지 · 사용자 입력 불필요. 출처 추적 — "출처 조회" 버튼으로 외부 검색 API 조회 (SERPER_API_KEY 설정 필요).</p>
       </div>
 
       {/* 필터 */}
@@ -124,11 +134,27 @@ function FilterChip({ selected, onClick, label, color }: { selected: boolean; on
   );
 }
 
+const SOURCE_TYPE_LABEL: Record<string, string> = {
+  wiki: '위키', official: '공식', news: '뉴스', forum: '포럼', blog: '블로그', other: '기타',
+};
+
 function FlagRow({ flag, onUpdate }: { flag: FlagRow; onUpdate: (id: string, status: FlagStatus) => void }) {
   const meta = FLAG_TYPE_META[flag.flag_type];
   const sMeta = SEVERITY_META[flag.severity];
   const stMeta = FLAG_STATUS_META[flag.status];
   const [expanded, setExpanded] = useState(false);
+  const [sources, setSources] = useState<Source[] | null>(null);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
+  const [sourcesStatus, setSourcesStatus] = useState<string | null>(null);
+
+  const fetchSources = async () => {
+    setSourcesLoading(true);
+    const res = await fetch(`/api/smarcomm/airm/flags/${flag.id}/sources`, { method: 'POST' });
+    const data = await res.json();
+    setSourcesStatus(data.status ?? 'ok');
+    setSources(data.sources ?? []);
+    setSourcesLoading(false);
+  };
 
   return (
     <div className="px-5 py-4">
@@ -146,10 +172,64 @@ function FlagRow({ flag, onUpdate }: { flag: FlagRow; onUpdate: (id: string, sta
           {expanded && (
             <p className="mt-2 rounded-lg bg-surface/50 p-2 text-[11px] text-text-sub line-clamp-6 whitespace-pre-wrap">{flag.response_excerpt}</p>
           )}
+
+          {/* 출처 섹션 */}
+          {sourcesStatus === 'api_key_missing' && (
+            <div className="mt-2 rounded-lg border border-border bg-surface/30 px-3 py-2 text-[11px] text-text-muted">
+              🔌 외부 검색 API 미연결 — <code className="text-[10px]">SERPER_API_KEY</code> 설정 필요
+            </div>
+          )}
+          {sourcesStatus === 'search_error' && (
+            <div className="mt-2 rounded-lg border border-border bg-surface/30 px-3 py-2 text-[11px] text-text-muted">
+              ⚠ 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+            </div>
+          )}
+          {sources && sources.length > 0 && (
+            <div className="mt-2 rounded-lg border border-border bg-surface/30 divide-y divide-border overflow-hidden">
+              <div className="px-3 py-1.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide">
+                🔍 AI 학습 추정 출처 ({sources.length}건)
+              </div>
+              {sources.map(s => (
+                <a
+                  key={s.id}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-3 py-2 hover:bg-surface/60 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="mt-0.5 rounded px-1 py-0.5 text-[9px] font-medium bg-surface text-text-muted shrink-0">
+                      {SOURCE_TYPE_LABEL[s.source_type ?? ''] ?? '기타'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium text-text truncate">{s.title ?? s.url}</p>
+                      {s.snippet && <p className="mt-0.5 text-[10px] text-text-sub line-clamp-2">{s.snippet}</p>}
+                    </div>
+                    {s.relevance_score != null && (
+                      <span className="shrink-0 text-[9px] text-text-muted">{Math.round(s.relevance_score * 100)}%</span>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+          {sources && sources.length === 0 && sourcesStatus === 'ok' && (
+            <div className="mt-2 rounded-lg border border-border bg-surface/30 px-3 py-2 text-[11px] text-text-muted">
+              검색 결과가 없습니다.
+            </div>
+          )}
+
           <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
             <button onClick={() => setExpanded(!expanded)} className="text-text-sub hover:text-text inline-flex items-center gap-0.5">
               <ChevronDown size={11} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
               {expanded ? '응답 숨기기' : '응답 보기'}
+            </button>
+            <button
+              onClick={fetchSources}
+              disabled={sourcesLoading}
+              className="text-text-sub hover:text-text inline-flex items-center gap-0.5 disabled:opacity-50"
+            >
+              {sourcesLoading ? '조회 중…' : sources !== null ? '출처 새로고침' : '출처 조회'}
             </button>
             {flag.action_count > 0 && (
               <Link href={`/smarcomm/dashboard/airm/actions?flag_id=${flag.id}`} className="text-accent hover:underline">
