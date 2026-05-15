@@ -1,8 +1,28 @@
 # SmarComm 브랜드 가이드
 
-> **SmarComm = Marketing OS** — 마케팅의 모든 작업 흐름(진단·전략·제작·집행·관계·분석·운영)을 하나의 운영체제로 묶는다.
+> ## 🔴 절대 원칙 ZERO — 정직성(Honesty)이 무엇보다 중요하다
+>
+> **SmarComm의 모든 요소는 정직해야 한다.** 점수·지표·라벨·차트·텍스트·UI 모두 예외 없음. 다른 모든 원칙·기능·UX 결정에 앞선다.
+>
+> 정직성 위반 = **SmarComm 핵심 가치 위반**. 다음 중 하나라도 발견되면 **즉시 수정 의무**:
+> - 임의 휴리스틱으로 점수·라벨 생성 (키워드 사전·정규식·임계값 분기로 의미 분석)
+> - 진짜 측정 없이 "AI 분석"으로 표시
+> - LLM 미가용 시 가짜 fallback 응답
+> - 차트·메트릭에 출처·산식 명시 없음
+> - 데이터가 어디서 오는지(자동·사용자 입력·Phase X 예정) 명시 없음
+> - To-Be 목표값을 "정답"으로 노출 (기본값임을 명시 안 함)
+> - DB 테이블만 있고 데이터 입력 경로 부재
+> - Mock 데이터를 실측인 듯 노출
+>
+> 정직성 회복은 우선순위 1. UX·디자인·성능·일관성보다 먼저. 정직하지 못한 기능은 차라리 **N/A 표시** 또는 **삭제**가 정답.
+>
+> 참고: 정직성 1~6차 회복 이력은 [CHANGELOG.md](../../CHANGELOG.md) 참조.
+
+> **SmarComm = Marketing OS** — 마케팅의 모든 작업 흐름(진단·분석·전략·제작·집행·모니터링·자산화)을 하나의 운영체제로 묶는다. **V2.0부터 데이터 플라이휠(Smart-Loop) 중심.**
 >
 > **WIO ↔ SmarComm은 동등한 OS다.** 종속 관계가 아니라 **공유 인프라 위의 동등한 OS 두 개**. WIO가 일반 업무 OS라면, SmarComm은 마케팅 전용 OS다.
+>
+> **V2.0 잠금 (2026-05-15)**: 이전 V1 어휘 "진단·전략·제작·집행·관계·분석·운영"은 폐기. V2.0 7단계로 통일. § 3 본문 참조.
 
 ---
 
@@ -65,31 +85,75 @@
 
 ---
 
-## 3. Marketing OS 7대 영역 (SSOT)
+## 3. Marketing OS 7단계 (V2.0 SSOT — Smart-Loop)
 
-마케팅 업무 흐름을 7단계 사이클로 모델링한다. 모든 SmarComm 페이지는 이 7개 중 하나에 속한다.
+> **V2.0 SSOT (2026-05-15 확정).** 이전 V1 "진단·전략·제작·집행·관계·분석·운영"은 폐기.
+> V2.0은 **데이터 플라이휠(Smart-Loop)** 중심 — 모든 캠페인은 "자산화"로 끝나 다음 사이클의 진단 인풋이 된다.
+> 모든 SmarComm 페이지는 이 7단계 중 하나에 속한다.
 
-| # | 영역 | 핵심 질문 | 대표 페이지 |
-|---|---|---|---|
-| ① | **진단** | "지금 우리는 어디에 있나" | `/dashboard/scan` · `/dashboard/geo`·`/dashboard/geo/competitors`·`/dashboard/geo/brand`·`/dashboard/geo/tracking`·`/dashboard/geo/prompts` |
-| ② | **전략** | "어디로 가야 하나" | `/dashboard/advisor` (AI 어드바이저) |
-| ③ | **제작** | "무엇을 만들 것인가" | `/dashboard/creative`·`/dashboard/content`·`/dashboard/archive` |
-| ④ | **집행** | "어디에 어떻게 뿌릴 것인가" | `/dashboard/campaigns`·`/dashboard/calendar`·`/dashboard/workflow/automation` |
-| ⑤ | **관계** | "누구와 계속 이어갈 것인가" | `/dashboard/crm`·`/dashboard/crm/email`·`/dashboard/crm/kakao`·`/dashboard/crm/push` |
-| ⑥ | **분석** | "결과는 어땠나" | `/dashboard/funnel`·`/dashboard/traffic`·`/dashboard/analytics`·`/dashboard/cohort`·`/dashboard/abtest`·`/dashboard/journey`·`/dashboard/events`·`/dashboard/reports`·`/dashboard/data-reports` |
-| ⑦ | **운영** | "어떻게 한 흐름으로 굴릴 것인가" | `/dashboard/workflow`·`/dashboard/workflow/projects`·`/dashboard/workflow/kanban`·`/dashboard/workflow/pipeline` |
+### V2.0 7단계 SSOT
 
-> 새 페이지를 만들 때 **반드시 7개 영역 중 하나로 분류**. 어디에도 안 맞으면 7대 영역 자체를 갱신할지 검토.
+| # | 단계 | 서비스명 | 핵심 질문 | 핵심 활동 (2026 Add-on) |
+|---|---|---|---|---|
+| ① | **진단** | **Smart-Audit** | "지금 우리는 어디에 있나" | 네이버·구글·쿠팡·AI 4대 플랫폼 통합 진단 (SEO·GEO·AICI·E-E-A-T) |
+| ② | **분석** | **Data Intelligence** | "데이터가 무엇을 말하나" | 검색 트렌드 + AI 인용지수(AICI) + 경쟁사·업종 백분위 분석 |
+| ③ | **전략** | **Omni-Strategy** | "어디로 가야 하나" | Entity 브랜딩 방향 + 플랫폼별 믹스 + 메시지·페르소나 |
+| ④ | **제작** | **Smart-Studio** | "무엇을 만들 것인가" | 사람용 UX + AI용 구조화 콘텐츠(Schema·FAQ·llms.txt) 동시 제작 |
+| ⑤ | **집행** | **Performance Plus** | "어디에 어떻게 뿌릴 것인가" | 유료 광고 + **AI 학습 유도(공신력 매체 배포·인용 유발)** |
+| ⑥ | **모니터링** | **Real-time Tracker** | "지금 무슨 일이 일어나나" | 클릭·전환 + **AI 답변 변화 실시간 추적** + 평판 sentiment |
+| ⑦ | **자산화** | **Brand Assetizing** | "이 캠페인이 영구 자산으로 남는가" | 캠페인 산출물을 검색·AI가 평생 참조할 Entity로 영속화 |
 
-### 사이클의 흐름
+### Smart-Loop — 데이터 플라이휠 시각화
 
 ```
-진단 → 전략 → 제작 → 집행 → 관계 → 분석 → 운영
- ↑                                          │
- └──────────── 다음 사이클 ──────────────────┘
+                ① 진단 (Smart-Audit)
+              ↗                    ↘
+     ⑦ 자산화                       ② 분석
+     (Brand Assetizing)              (Data Intelligence)
+              ↑                       ↓
+     ⑥ 모니터링                       ③ 전략
+     (Real-time Tracker)              (Omni-Strategy)
+              ↖                    ↙
+                ⑤ 집행 ← ④ 제작
+                (Performance Plus)  (Smart-Studio)
 ```
 
-분석 결과가 다음 진단의 기준이 되고, 운영은 전 영역을 묶는 위계.
+**핵심 원칙 — Data Flywheel**: "지난 캠페인의 모니터링 데이터가 다음 캠페인의 진단 데이터로 완벽하게 치환될 때" SmarComm은 가장 강력해진다. **⑥→⑦→①의 매끄러운 연결**이 SmarComm의 해자(moat). 이 연결이 끊긴 채로 페이지·기능을 만들면 V1으로 회귀.
+
+### V2.0 보완 3대 축 (서비스 차별점)
+
+| # | 축 | 핵심 질문 | 결합 단계 | 모듈 SSOT |
+|---|---|---|---|---|
+| ① | **디지털 자산화** (Entity Branding) | "캠페인이 끝나도 AI는 우리 브랜드를 추천할 데이터를 가졌나?" | ⑦ 자산화 | § 3-D |
+| ② | **AI 평판 방어 (AIRM)** | "AI가 우리에 대해 거짓말할 때, 즉시 대응할 시스템이 있나?" | ⑥ + ⑦ | § 3-C |
+| ③ | **CRO & CRM** | "트래픽은 늘었는데 매출이 안 오는 이유는?" | ⑤ + ⑥ | (Phase 5 예정) |
+
+### V1 → V2.0 흡수 매핑
+
+V1의 5개 영역(관계·분석·운영 등)은 V2.0 단계에 흡수된다.
+
+| V1 영역 | V2.0 흡수 | 사유 |
+|---|---|---|
+| 관계 (CRM·이메일·카카오·푸시) | ⑤ 집행의 채널 | CRM은 마케팅 채널의 하위 — 별도 단계가 아님 |
+| 분석 (funnel·cohort·abtest 등) | ⑥ 모니터링의 측정 도구 | 측정은 모니터링의 일부 |
+| 분석 일부 (data-reports·reports) | ② 분석 | 회고가 아닌 forward-looking 인사이트 |
+| 운영 (workflow·kanban·pipeline) | 7단계를 묶는 운영 위계 (별도 단계 아님) | Smart-Loop 자체가 운영 |
+
+### 페이지 매핑 (V1 → V2.0 전환 진행 중)
+
+| V2.0 단계 | 현 페이지 | 신설 예정 |
+|---|---|---|
+| ① 진단 | `/dashboard/scan` · `/dashboard/geo` · `/dashboard/geo/{competitors,brand,tracking,prompts}` | — |
+| ② 분석 | `/dashboard/data-reports` · `/dashboard/reports` | `/dashboard/insights` (AICI·트렌드 통합) |
+| ③ 전략 | `/dashboard/advisor` | — |
+| ④ 제작 | `/dashboard/creative` · `/dashboard/content` · `/dashboard/archive` | — |
+| ⑤ 집행 | `/dashboard/campaigns` · `/dashboard/calendar` · `/dashboard/crm/*` · `/dashboard/workflow/automation` | — |
+| ⑥ 모니터링 | `/dashboard/funnel` · `/dashboard/traffic` · `/dashboard/analytics` · `/dashboard/cohort` · `/dashboard/abtest` · `/dashboard/journey` · `/dashboard/events` | `/dashboard/ai-tracker` (AI 답변 변화 실시간) |
+| ⑦ 자산화 | — | `/dashboard/assets` (Entity 자산 등록·외부 배포 추적) |
+| 운영 위계 | `/dashboard/workflow` · `/dashboard/workflow/{projects,kanban,pipeline,automation}` | — |
+
+> 새 페이지를 만들 때 **반드시 V2.0 7단계 중 하나로 분류**. 어디에도 안 맞으면 7단계 자체를 갱신할지 검토.
+> 사이드바 메뉴 `MENU_SECTIONS` (DashboardSidebar.tsx) 그룹 라벨도 V2.0 어휘로 점진 교체 예정.
 
 ---
 
@@ -172,6 +236,50 @@ SSOT 구현 위치: 액션 객체에 `role: 'marketer'|'dev'|'writer'|'designer'
 
 같은 데이터, 다른 노출. 데이터 모델·계산은 단일.
 
+### SSOT-6. AI 브랜드 가시성 4지표 + 6 측정 차원 (V2.0 → V2.1 정직성 회복)
+
+> Citability 40%는 단일 점수가 아니라 **4지표 × 6차원**으로 분해된다. 점수의 의미를 클라이언트에게 입체적으로 설명하기 위함.
+> SSOT 구현 위치: `lib/smarcomm/ai-probes/` + `lib/smarcomm/index-calculator.ts`의 `citability` 계산 블록.
+>
+> **V2.1 정직성 회복 (2026-05-15)**: Sentiment·Reasoning·Attribute는 **Claude Haiku 4.5 LLM 분류기**(`lib/smarcomm/sentiment-llm.ts`)로 실측. 휴리스틱(`lib/smarcomm/sentiment.ts`) **폐기 + 파일 삭제**. ANTHROPIC_API_KEY 미설정 시 N/A로 표시 (점수 산입 제외) — § 1.10 정직 원칙 + 권위도(Authoritativeness)와 동일 정책.
+
+#### 4지표 (AI 브랜드 성적표)
+
+| 지표 | 영문 | 측정 | 산식 |
+|---|---|---|---|
+| **인지 (Awareness)** | Mention Frequency | 100회 질문 중 브랜드가 N회 언급되는가 | 언급된 질문 수 / 전체 질문 수 |
+| **이해 (Depth)** | Attribute Accuracy | AI가 우리 브랜드의 핵심 속성을 정확히 묘사하는가 | (자사 사실 ∩ AI 사실) / 자사 사실 — fact-extractor 자카드 |
+| **추천 (Trust)** | Recommendation Rank | 카테고리 추천 시 N위에 등장하는가 (TOP 3 / TOP 5 / OUT) | 평균 추천 순위 (낮을수록 좋음) |
+| **평판 (Sentiment)** | Positive Ratio | 긍정 답변 비율 (긍정·중립·부정) | 긍정 답변 수 / 전체 답변 수 |
+
+#### 6 측정 차원 (probe별 메트릭)
+
+5 AI 플랫폼 × 7카테고리 × 13질문에서 추출되는 6 차원.
+
+| # | 차원 | 영문 | 설명 | 산출 |
+|---|---|---|---|---|
+| 1 | **개체 인지도** | Entity Presence | "X는 무엇인가?" 정의 가능 여부 | Brand Direct 카테고리 응답에서 엔티티 명확성 ✓⚠⛔ |
+| 2 | **속성 결합도** | Attribute Association | 브랜드 검색 시 동반 형용사 (혁신·가성비·신뢰 등) | AI 응답에서 형용사 추출 → 의도 키워드 매칭 % |
+| 3 | **지식 최신성** | Knowledge Recency | 최근 행보(신제품·수상 등)를 검색 없이 알고 있는가 | "지난 6개월 이내 사실" 인식률 |
+| 4 | **추천 순위** | Recommendation Ranking | 카테고리 추천 시 위치 | "X사 N위" 파싱 — 평균/중앙값 |
+| 5 | **추천 근거** | Reasoning | 추천 시 든 이유 (리뷰·기술력·가격 등) | AI 응답에서 reason 추출 → 카테고리 분류 |
+| 6 | **비교 우위** | Comparative Analysis | 경쟁사 비교 시 강점/약점 | Competitor Comparison 카테고리 응답 sentiment + reason |
+
+#### As-Is / To-Be 성적표 (보고서 신규 섹션)
+
+진단 결과를 다음 형식으로 노출 — 클라이언트가 "지금 어디 있고 어디로 가야 하는지" 30초에 파악.
+
+| 구분 | 측정 지표 | 현 상태 (As-Is) | 목표 (To-Be) | 권장 액션 |
+|---|---|---|---|---|
+| 인지 (Awareness) | AI 언급 빈도 | 100회 중 N회 | 100회 중 30회 | § 3-D 자산화·§ 3-C AIRM |
+| 이해 (Depth) | 핵심 키워드 일치율 | 60% / 40% | 90% | § 3-D Entity Branding (Schema·FAQ) |
+| 추천 (Trust) | 추천 리스트 포함 | 5위권 밖 | TOP 3 이내 | § 3-D 고권위 소스 주입 |
+| 평판 (Sentiment) | 긍정 답변 비율 | 45% | 85% | § 3-C AIRM (오정보 교정) |
+
+> 보고서 UI 구현 위치: `app/(SmarComm)/smarcomm/report/[id]/page.tsx` — "AI Brand Journey" 신규 섹션. § 3-A SSOT-5의 마케터 뷰 기본 노출.
+
+---
+
 ### SmarComm Index 보고서 페이지 SSOT
 
 | 페이지 | 역할 |
@@ -194,6 +302,305 @@ SSOT 구현 위치: 액션 객체에 `role: 'marketer'|'dev'|'writer'|'designer'
 | `smarcomm_scan_pages` | 서브페이지 분석 결과 | Phase 1 |
 | `smarcomm_ai_probes` | AI 플랫폼별 실측 응답 캡처 | Phase 2 |
 | `smarcomm_industry_benchmarks` | 업종 평균 (백분위 계산) | Phase 4 |
+
+---
+
+### SSOT-7. V2.1 진단 5 Sub-Engine + 퍼널 (2026-05-15 확장)
+
+> **결정**: V2.0 상위 가중치 30/30/40(Findability·Trust·Citability)은 그대로 유지하되, ① 진단 단계 내부를 **5 sub-engine**으로 세분화한다. 각 sub-engine은 V2.0 상위 축에 매핑된다.
+>
+> 새 가중치 모델(Awareness/Search/UX/Security 20/20/30/30)을 도입하면 기존 진단 점수와 비교 불가 → **V2.0 상위 모델 유지** 결정 (2026-05-15).
+
+#### 5 Sub-Engine 정의
+
+| # | Sub-Engine | 별칭 | 측정 목표 | V2.0 상위 매핑 |
+|---|---|---|---|---|
+| ① | **Discovery Engine** | GEO & SEO | 사용자/AI가 우리를 어떻게 발견하는가 | Findability(주) + Citability(GEO) |
+| ② | **Conversion Engine** | UI & UX | 발견된 사용자가 매끄럽게 목표 달성 | Findability + Trust |
+| ③ | **Trust Engine** | Security | 보이지 않는 신뢰 기반 | Trust (E-E-A-T Trustworthiness) |
+| ④ | **Reputation Engine** | SNS·커뮤니티 | 시장의 목소리 | Trust(외부 신호) + Citability(인용) |
+| ⑤ | **Shopping Engine** | 커머스 접점 | 실제 구매 접점 디테일 | Citability(상거래 검색) |
+| ⑥ | **Funnel** | 통합 재구성 | 인지→탐색→결정→전환→충성 단계별 분석 | 1~5 데이터를 단계별 재구성 |
+
+#### Sub-Engine ① Discovery (GEO & SEO)
+
+| 측정 | V2.0 측정 여부 | V2.1 신규 추가 |
+|---|---|---|
+| AI SOV (Share of Voice) — 모델별 카테고리 쿼리 언급 빈도 | △ (5 플랫폼 mentioned 단순 비율) | ✅ 카테고리×모델 매트릭스, SOV % 산출 |
+| 인용 출처 맵핑 (Source Mapping) | ❌ | ✅ AI 응답에서 "출처" 단편 추출 → 신뢰 소스 분류 (뉴스/위키/공식 블로그) |
+| 할루시네이션 진단 | △ (factComparison wrong) | ✅ 가격·위치·스펙 등 사실 카테고리별 분리 + AIRM § 3-C 연동 |
+| 기술 SEO (Crawl Budget·CWV·HTTPS) | ✅ 14 카드 | — |
+| 검색 의도 정렬 (Intent Matching) | ❌ | ✅ 페이지 콘텐츠 vs 사용자 의도(정보/구매/비교) 분류 |
+| 지식 그래프 등록 (JSON-LD) | ✅ Schema 검증기 | + 구글/네이버 Knowledge Panel 매칭 확인 |
+
+#### Sub-Engine ② Conversion (UI & UX)
+
+| 측정 | 분리 |
+|---|---|
+| **3초 테스트 (3-Second Rule)** | 비로그인 — 페이지 진입 후 3초 내 USP 이해도 |
+| **전환 마찰 분석** | 비로그인 — CTA까지 스크롤 깊이·방해 요소 |
+| **모바일 가독성** | 텍스트 크기·버튼 간격·이미지 최적화 |
+| **온보딩 효율성 (TSR)** | 로그인 — 첫 기능 성공률 (Task Success Rate) |
+| **기능 복잡도** | 로그인 — 대시보드 정보 밀도 (인지 과부하) |
+| **개인화 대시보드** | 로그인 — 사용자 활동 기반 맞춤 시각화 |
+
+> 비로그인(Public·인지·설득) vs 로그인(Private·리텐션·효용) **두 모드 분리 측정**이 V2.1 핵심.
+
+#### Sub-Engine ③ Trust (Security)
+
+| 측정 | V2.0 | V2.1 신규 |
+|---|---|---|
+| 인증/인가 보안 (소셜 토큰·세션 탈취·비밀번호 정책) | ❌ | ✅ 표면 검사 (HTTPS·헤더는 V2.0 있음) |
+| 데이터 거버넌스 (GDPR/PIPA 동의 절차) | ❌ | ✅ 동의 화면·정책 페이지 검출 |
+| 취약점 스캔 (SQLi/XSS) | ❌ | ✅ Phase 5 (OWASP ZAP 또는 snyk 연동) |
+| 보안 헤더 (Mozilla Observatory) | ✅ | — |
+
+#### Sub-Engine ④ Reputation (SNS·커뮤니티)
+
+| 측정 |
+|---|
+| 감성 점수 (Sentiment Score) — 브랜드 언급 데이터 긍정/부정/중립 + 경쟁사 대비 |
+| 연관 키워드 클라우드 — 동반 언급 단어가 의도한 브랜드 전략과 일치하는가 |
+| 인플루언서 점유율 — 카테고리 내 오피니언 리더의 우리 언급 비중 |
+
+> 데이터 소스: Phase 5 외부 크롤러 (Twitter/X·인스타·블로그·커뮤니티 API). 현재 V2.0의 sentiment 휴리스틱은 AI 응답 내부에서만 작동 → 외부 채널은 미커버.
+
+#### Sub-Engine ⑤ Shopping (커머스 접점)
+
+| 측정 |
+|---|
+| 에셋 일관성 — 네이버 스마트스토어·쿠팡·자사몰 상세페이지 이미지·메시지 통일성 |
+| 키워드 점유율 — 쇼핑 탭 검색의 광고 외 유기적(Organic) 상단 노출 비중 |
+| 리뷰 시맨틱 — 페인 포인트(Pain Point) 추출 + 구매 동기 분석 |
+
+> 데이터 소스: 네이버 쇼핑·쿠팡 API + 리뷰 NLP. Phase 5.
+
+#### Sub-Engine ⑥ Funnel (인지·탐색·결정·전환·충성)
+
+V2.0의 모든 측정값을 5단계로 재구성:
+
+```
+인지 (Awareness)   → Discovery ① AI SOV + 인지 키워드 점유율
+   ↓
+탐색 (Exploration) → Conversion ② 3초 테스트 + 정보형 검색 매칭
+   ↓
+결정 (Decision)    → Reputation ④ 감성 + Shopping ⑤ 리뷰 신호
+   ↓
+전환 (Action)      → Conversion ② 전환 마찰 + 온보딩 TSR
+   ↓
+충성 (Loyalty)     → Reputation ④ 인플루언서 + 재구매 시그널 (CRM 데이터)
+```
+
+#### Smar-Index(SI) — V2.1 연구 과제용 보조 지표
+
+> 사용자 비전에서 제시된 공식. **SmarComm Index와 별도**로 운영. 보고서에는 둘 다 노출(SmarComm Index가 주, Smar-Index가 보조).
+
+```
+Smar-Index(SI) = (Awareness × 0.2 + Search × 0.2 + UX × 0.3 + Security × 0.3) / Industry_Avg
+```
+
+| 변수 | 산출 |
+|---|---|
+| Awareness | Sub-Engine ① Discovery의 GEO 부분 (AI SOV) |
+| Search | Sub-Engine ① Discovery의 SEO 부분 (기술+의도+그래프) |
+| UX | Sub-Engine ② Conversion 종합 |
+| Security | Sub-Engine ③ Trust 종합 |
+| Industry_Avg | `smarcomm_industry_benchmarks` (Phase 4 도입) |
+
+> Smar-Index는 **상대적 위치**(Industry 평균 대비)를 보여주는 보조 지표. SmarComm Index(절대 점수)와 함께 표시.
+
+#### V2.1 신규 측정 차원 매핑 (구현 우선순위)
+
+| 차원 | Sub-Engine | 데이터 소스 | 우선순위 | Phase |
+|---|---|---|---|---|
+| AI SOV 매트릭스 | ① | 기존 AI Probe 재집계 | 🔴 High | Phase 4 |
+| 인용 출처 맵핑 | ① | probe rawResponse NLP | 🔴 High | Phase 4 |
+| 할루시네이션 분리 | ① | 기존 factComparison 확장 | 🔴 High | Phase 4 |
+| 검색 의도 정렬 | ① | LLM 페이지 분류 | 🟡 Med | Phase 5 |
+| 3초 테스트 | ② | LLM 페이지 분석 (Hero 위주) | 🟡 Med | Phase 5 |
+| 전환 마찰 | ② | UI 자동 분석 (Above-fold·CTA 위치) | 🟡 Med | Phase 5 |
+| 모바일 가독성 | ② | Lighthouse a11y/font-size | 🟢 Low | Phase 4 |
+| 인증/인가 표면 검사 | ③ | HTTPS·CSP·세션 쿠키 | 🟡 Med | Phase 5 |
+| 데이터 거버넌스 | ③ | 동의 페이지 키워드 검출 | 🟢 Low | Phase 5 |
+| 취약점 스캔 | ③ | 외부 도구(ZAP/snyk) | 🟡 Med | Phase 6 |
+| 감성 점수 (외부) | ④ | SNS 크롤러 API | 🔴 High | Phase 5 |
+| 키워드 클라우드 | ④ | NLP from SNS | 🟡 Med | Phase 5 |
+| 인플루언서 점유율 | ④ | 인플루언서 DB API | 🟢 Low | Phase 6 |
+| 에셋 일관성 | ⑤ | 네이버/쿠팡 크롤 | 🔴 High | Phase 5 |
+| 쇼핑 키워드 점유율 | ⑤ | 네이버 쇼핑 API | 🟡 Med | Phase 5 |
+| 리뷰 시맨틱 | ⑤ | 리뷰 NLP | 🟡 Med | Phase 5 |
+
+#### 차별화 연구 과제 (V2.1+)
+
+1. **AI 리터러시 진단** — "AI가 우리 브랜드를 추천하지 않는 이유가 데이터 부족(Awareness) 때문인가, 정보의 부정확성(Depth) 때문인가?" 판별 알고리즘
+   - 입력: 모든 probe 응답 + Discovery·Reputation·Shopping 데이터
+   - 출력: 결핍 분류 (volume·accuracy·sentiment·authority) + 권장 액션
+2. **쇼핑 모멘텀 시차 분석** — 리뷰 긍정 수치 → 매출 상승 시차(Time-lag) 모델
+   - 입력: 시계열 리뷰 sentiment + 매출 데이터
+   - 출력: 평균 lag(주) + 회귀 계수
+
+#### 구축 방법론 (SmarComm Framework — V2.1)
+
+```
+1. Data Ingestion
+   - API: Search Console · GA4 · SNS · AI 엔진
+   - 로그: 사이트 내부 사용자 행동 (Hotjar 등)
+
+2. Scoring Engine
+   - 각 sub-engine 가중치 → 정량 점수
+   - smarcomm_industry_benchmarks와 비교 → 상대적 위치
+
+3. Visual Reporting
+   - 브랜드 건강도 지도 (5 sub-engine 레이더 + 퍼널 깔때기)
+   - "왜 이 점수가 나왔는가?" AI 기반 원인 분석 자동 생성
+```
+
+> V2.1 진단 sub-engine 도입 시 **신규 DB 테이블 도입 최소화** — `smarcomm_scans.breakdown` JSONB에 sub-engine별 score·detail 누적. 큰 데이터(Reputation 시계열·Shopping 크롤)만 별도 테이블.
+
+---
+
+## 3-B. Smart-Data Hub SSOT (데이터 플라이휠 인프라)
+
+> **원칙**: SmarComm의 해자는 "지난 캠페인의 모니터링 데이터가 다음 캠페인의 진단 데이터로 완벽하게 치환되는 것". 이 치환을 가능하게 만드는 **단일 데이터 허브**가 Smart-Data Hub.
+> 광고 성과 · AI 답변 변화 · 유입 로그 · 진단 결과 — 4 소스를 하나의 통합 대시보드에 모은다. 이게 없으면 클라이언트는 SmarComm을 떠난다.
+
+### 데이터 4 소스 통합 모델
+
+| 소스 | DB 위치 | 수집 빈도 | 사용 단계 |
+|---|---|---|---|
+| **진단 결과** | `smarcomm_scans` · `smarcomm_scan_pages` · `smarcomm_ai_probes` | 사용자 트리거 + 정기 재진단 (주간 Cron) | ① 진단 → ② 분석 |
+| **광고 성과** | `wio_campaigns` + 외부 API (네이버·구글·메타·카카오) | 일간 sync | ⑤ 집행 → ⑥ 모니터링 |
+| **AI 답변 변화** | `smarcomm_ai_probes` 시계열 | 정기 재진단 (주간) | ⑥ 모니터링 → ⑦ 자산화 |
+| **유입 로그** | GA4 · 자체 이벤트 (`wio_events`) | 실시간 | ⑥ 모니터링 |
+
+### Smart-Data Hub 페이지 SSOT (신설 예정)
+
+| 페이지 | 역할 | Phase |
+|---|---|---|
+| `/dashboard` (홈 — 기존) | 4 소스 핵심 KPI 통합 위젯 (재정의 필요) | Phase 4 |
+| `/dashboard/insights` (신설) | ② 분석 단계의 데이터 인사이트 ("AICI 트렌드" "키워드 변화" "경쟁사 갭") | Phase 4 |
+| `/dashboard/ai-tracker` (신설) | ⑥ 모니터링의 AI 답변 변화 실시간 — 4지표 추이 차트 | Phase 4 |
+| `/dashboard/assets` (신설) | ⑦ 자산화의 Entity 자산 목록 + 외부 배포 추적 | Phase 5 |
+
+### Smart-Loop 데이터 흐름 (구현 의무)
+
+```
+① 진단  → smarcomm_scans (저장)
+② 분석  → smarcomm_scans + wio_campaigns + wio_events 조인 → 인사이트 추출
+③ 전략  → advisor 입력으로 ②의 인사이트 자동 주입
+④ 제작  → ③의 전략 prompt → creative 자동 생성
+⑤ 집행  → wio_campaigns 생성 + 외부 광고 매체 push
+⑥ 모니터링 → 외부 광고 매체 pull + ai-tracker 정기 재진단
+⑦ 자산화 → 캠페인 종료 시 ⑥ 데이터 + 산출물을 smarcomm_brand_assets로 영속화
+   ↓
+다음 ①의 baseline = ⑦에 저장된 brand_assets + 직전 ⑥의 ai_probes 시계열
+```
+
+> **구현 규약**: 새 페이지·API는 4 소스 중 **최소 2개를 조인**해야 한다. 단일 소스만 보면 dashboard-data.ts mock 같은 회고적 보고서로 끝남.
+
+### 신설 예정 DB 테이블
+
+| 테이블 | 역할 | Phase |
+|---|---|---|
+| `smarcomm_data_hub_widgets` | 사용자별 대시보드 위젯 배치 | Phase 4 |
+| `smarcomm_brand_assets` | ⑦ 자산화 결과 영속 저장 (§ 3-D 참조) | Phase 5 |
+| `smarcomm_ai_tracking_jobs` | 정기 재진단 스케줄 | Phase 4 |
+| `smarcomm_ai_diff_events` | AI 답변 변화 이벤트 (점수·답변 텍스트·sentiment 변화) | Phase 4 |
+
+---
+
+## 3-C. AIRM SSOT (AI Reputation Management)
+
+> **원칙**: AI가 우리 브랜드에 대해 거짓말·부정·경쟁사 혼동 답변을 할 때, **발견 → 분석 → 교정 → 검증** 4단계 워크플로우로 즉시 대응한다.
+> SmarComm의 **유료 핵심 모듈** — Pro/Enterprise 플랜 차별점.
+
+### AIRM 4단계 워크플로우
+
+```
+① 발견 (Detection)        ② 분석 (Diagnosis)       ③ 교정 (Cleansing)        ④ 검증 (Verification)
+정기 재진단에서          오정보 출처 추적         고권위 소스에            재진단으로 답변
+부정/오답/혼동 자동      (어떤 학습 데이터에서?)  올바른 정보 확산         변경 확인
+플래그
+```
+
+### 4단계별 메트릭·테이블·자동화
+
+| # | 단계 | 메트릭 | 테이블 | 자동화 |
+|---|---|---|---|---|
+| ① 발견 | sentiment·factual·confusion 3축 자동 분류 | `smarcomm_ai_flags` | 정기 재진단 시 음수 sentiment / wrong fact / competitor mention 자동 INSERT |
+| ② 분석 | 오정보 원본 추적 (검색 결과·인용 사이트 분석) | `smarcomm_ai_flag_sources` | 외부 검색 API로 "AI가 학습했을 가능성이 높은 페이지" Top N |
+| ③ 교정 | 액션 큐 (위키피디아·보도자료·매체 인터뷰·구조화 데이터) | `smarcomm_airm_actions` | role별 자동 할당 (writer·marketer·dev) |
+| ④ 검증 | 30일 후 자동 재진단 → diff 비교 | `smarcomm_ai_diff_events` | 답변 변화 자동 알림 |
+
+### 신규 페이지 SSOT (Phase 5)
+
+| 페이지 | 역할 |
+|---|---|
+| `/dashboard/airm` | AIRM 허브 — 발견된 플래그 + 진행 중 액션 + 검증 대기 |
+| `/dashboard/airm/flags` | 발견된 부정·오답·혼동 답변 목록 |
+| `/dashboard/airm/actions` | 교정 액션 큐 (role별 할당) |
+| `/dashboard/airm/timeline` | 답변 변화 타임라인 (As-Is → To-Be 시각화) |
+
+### 유료 모델
+
+- **AIRM 기본**: Pro 플랜 포함 — 자동 플래그 + 액션 큐 (사용자가 직접 교정)
+- **AIRM 프리미엄**: Enterprise 플랜 — 교정 액션 SmarComm 팀이 대행 (위키피디아·매체 인터뷰 등)
+- **AIRM 단건**: 컨설팅 — `smarcomm_consulting_inquiries` 경유
+
+> **금지 패턴**: AIRM 발견(①) 단계에서 끝나면 의미 없음. 반드시 ③ 교정 액션이 큐에 들어가야 모듈 완성. 발견만 보여주는 "AIRM Lite"는 만들지 않는다.
+
+---
+
+## 3-D. 자산화 SSOT (Brand Assetizing — Entity Branding)
+
+> **원칙**: 모든 캠페인은 일회성이 아니라 **영구 자산**으로 끝난다. 캠페인 종료 후에도 AI·검색이 평생 참조할 디지털 흔적을 남긴다.
+> SmarComm의 **장기 가치** — 클라이언트가 1년 후에도 "그때 그 캠페인"의 효과를 느낀다.
+
+### 자산화 3대 노력 (V2.0)
+
+| # | 노력 | 핵심 활동 | 산출 |
+|---|---|---|---|
+| ① | **디지털 흔적 정화** (Data Cleaning) | 오래된 보도자료·잘못된 정보·부정 게시글 관리 | `smarcomm_airm_actions` — AIRM과 연동 |
+| ② | **고권위 소스 주입** (High-Authority Feeding) | 위키피디아·권위 뉴스·학술 백서·정부 자료 등재 | `smarcomm_brand_assets` (type='external_authority') |
+| ③ | **엔티티 브랜딩** (Entity Branding) | 구조화 데이터(JSON-LD) — Organization·Service·Person·Product 영속화 | `smarcomm_brand_assets` (type='entity_schema') |
+
+### Entity 자산 5종 (Schema.org)
+
+| Entity Type | 의미 | SmarComm 자동 생성 |
+|---|---|---|
+| **Organization** | 회사 본질 (이름·소속·연락처·SameAs) | ✅ Phase 3 (schema-generator.ts) |
+| **Service** | 서비스 카탈로그 | ✅ Phase 3 |
+| **Person** | 핵심 인물·전문가 프로필 | Phase 5 |
+| **Product** | 개별 제품 | Phase 5 |
+| **FAQPage / HowTo** | 질문·튜토리얼 | ✅ Phase 3 |
+
+### 자산화 페이지 SSOT (신설 — Phase 5)
+
+| 페이지 | 역할 |
+|---|---|
+| `/dashboard/assets` | Entity 자산 카탈로그 (회사 · 서비스 · 인물 · 제품) — 영구 URL 부여 |
+| `/dashboard/assets/[id]` | 개별 Entity 상세 (JSON-LD 미리보기 + 외부 배포 상태) |
+| `/dashboard/assets/distribution` | 외부 배포 추적 (위키피디아·뉴스·매체별 등재 현황) |
+| `/dashboard/assets/score` | 디지털 흔적 점수 (Entity 영구성 지표) |
+
+### 신설 예정 DB 테이블
+
+| 테이블 | 역할 |
+|---|---|
+| `smarcomm_brand_assets` | Entity별 영구 자산 (type, schema_jsonld, valid_from, distribution_status) |
+| `smarcomm_asset_distributions` | 외부 매체별 배포 이력 (위키피디아 · 뉴스 매체 · 학술) |
+| `smarcomm_asset_citations` | AI가 우리 Entity를 인용한 이력 (어디서·언제·정확도) |
+
+### 캠페인 ↔ 자산화 연결 의무
+
+⑤ 집행 단계 종료 시 다음을 자동 실행:
+
+1. 캠페인 산출물(콘텐츠·소재)을 → `smarcomm_brand_assets` row INSERT
+2. JSON-LD 자동 생성 → 사이트 상단 `<head>` 삽입 권장 (역할: dev)
+3. 외부 배포 액션 큐 → `smarcomm_asset_distributions` (위키피디아·매체 등재 시도)
+4. 30·90·365일 후 AI 답변에서 우리 Entity 인용률 추적 → `smarcomm_asset_citations`
+
+> **구현 규약**: ⑤ 집행 페이지에서 캠페인 종료 버튼 클릭 시 자산화 자동 트리거. "캠페인 종료 = 끝"이 아니라 "캠페인 종료 = 자산화 시작"이 V2.0의 핵심 행동 변화.
 
 ---
 
@@ -276,11 +683,19 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 
 ## 9. Action Hub Entries
 
-> CLAUDE.md § 1.9.1 SSOT. 현재 SmarComm은 **승인/심사 흐름이 없어** Action Hub 등록 항목 0개.
+> CLAUDE.md § 1.9.1 SSOT — `lib/action-hub-registry.ts` 등록 항목.
+
+| key | 라벨 | 테이블 · 필터 | href | category | priority |
+|---|---|---|---|---|---|
+| `smarcomm_airm_open_flags` | SmarComm AIRM 신규 플래그 | `smarcomm_ai_flags` · `status='open'` | `/intra/ums/smarcomm` | moderation | high |
+| `smarcomm_airm_todo_actions` | SmarComm AIRM 교정 액션 대기 | `smarcomm_airm_actions` · `status='todo'` | `/intra/ums/smarcomm` | moderation | normal |
+
+> AIRM 자동 발견된 부정/오답/혼동 답변과 교정 액션 큐를 Dashboard Action Hub에서 추적. § 3-C 워크플로우와 연동.
 
 향후 등록 후보:
 - 무료 진단 의뢰 (비회원 → CS 응대) — table `smarcomm_scan_inquiries` (예정)
 - AI 어드바이저 컨설팅 신청 (Enterprise 문의) — table `smarcomm_consulting_inquiries` (예정)
+- AIRM critical 플래그 (`severity='critical'`) — `/intra/ums/smarcomm/airm` 페이지 신설 후 priority=critical로 등록
 
 ---
 
@@ -390,7 +805,7 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 | [glossary-data.ts](lib/smarcomm/glossary-data.ts) | 용어집 |
 | [chart-palette.ts](lib/smarcomm/chart-palette.ts) | 차트 색상 팔레트 |
 | [notify.ts](lib/smarcomm/notify.ts) | 알림 |
-| ⚠ [auth.ts](lib/smarcomm/auth.ts) | **Mock 인증 — 제거 예정** (CLAUDE.md 1.2 위반) |
+| ~~auth.ts~~ | **삭제 완료** (2026-05-15 세션 136) — Mock 인증 제거, `useAuth()` SSOT로 통일 |
 
 ### API 라우트
 
@@ -449,7 +864,37 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 - ❌ **자체 구독 테이블 생성** — `wio_subscription_plans WHERE service='smarcomm'` SSOT 필수. 별도 `smarcomm_plans` 테이블 만들지 말 것
 - ❌ **WIO Marketing 모듈과 중복 구현** — 캠페인·메시지·오디언스는 `wio_campaigns`/`wio_messages` 등 WIO 테이블을 직접 사용. 별도 `smarcomm_campaigns` 만들지 말 것 (단, SmarComm 고유 도메인인 GEO 진단·소재 생성 메타데이터는 자체 테이블 OK)
 - ❌ **localStorage에 영구 데이터 저장** — `smarcomm_company` · `smarcomm_favorites` 등은 마이그레이션 대상. 멀티디바이스 동기 깨짐
-- ❌ **7대 영역 외 메뉴 추가** — 새 메뉴는 반드시 7개 영역 중 하나로 분류
+- ❌ **V1 어휘 사용** — "관계·분석·운영"을 영역명으로 신규 사용 금지. V2.0 7단계(진단·분석·전략·제작·집행·모니터링·자산화) 어휘만 사용. 기존 코드는 점진 교체.
+- ❌ **V2.0 7단계 외 메뉴 추가** — 새 메뉴는 반드시 7단계 중 하나로 분류. 어디에도 안 맞으면 § 3 SSOT를 갱신할지 검토 (개별 메뉴를 분류 외부로 두지 말 것).
+- ❌ **자산화 빠진 캠페인 종료** — § 3-D 규약 위반. ⑤ 집행 종료 시 `smarcomm_brand_assets` INSERT + JSON-LD 생성 + 배포 큐 자동 트리거 필수.
+- ❌ **AIRM 발견만 구현하고 교정 액션 큐 누락** — § 3-C 금지. ① 발견 → ③ 교정까지 한 흐름으로 만들어야 모듈 완성.
+- ❌ **Smart-Data Hub 4 소스 단일 의존** — 새 분석 페이지는 4 소스(진단·광고성과·AI답변·유입로그) 중 최소 2개 조인 필수. 단일 소스만 보면 mock 회고 보고서로 끝남.
+- ❌ **V2.0 상위 가중치 30/30/40 변경** — Findability·Trust·Citability 가중치는 잠금. V2.1 sub-engine은 상위 축에 매핑되는 sub-axis로만 추가 가능. Smar-Index(20/20/30/30)는 보조 지표로 별도 운영 (§ 3-A SSOT-7).
+- ❌ **V2.1 sub-engine 외 추가** — 새 진단 영역은 반드시 5 sub-engine(Discovery/Conversion/Trust/Reputation/Shopping) 중 하나 + Funnel 통합. 어디에도 안 맞으면 § 3-A SSOT-7 자체를 갱신할지 검토.
+- ❌ **Sub-engine별 별도 DB 테이블 남발** — `smarcomm_scans.breakdown` JSONB에 sub-engine score·detail 누적. 큰 시계열 데이터(Reputation·Shopping)만 별도 테이블.
+- ❌ **휴리스틱 sentiment·reasoning·attribute·factComparison·source 분류** — § 1.10 정직 원칙 위반. 한국어 키워드 사전·정규식 매칭·자카드로 의미 판정 금지. **반드시 LLM 분류기 사용**:
+  - sentiment/reasoning/attributes/factComparisons → [lib/smarcomm/sentiment-llm.ts](lib/smarcomm/sentiment-llm.ts) `classifySentimentLLM`
+  - cited source 카테고리/신뢰도 → [lib/smarcomm/source-classifier-llm.ts](lib/smarcomm/source-classifier-llm.ts) `classifySourcesLLM`
+  - API 키 없으면 **N/A**로 표시 (권위도와 동일 처리)
+- ❌ **점수 산입에 LLM 미실측 N/A 항목 포함** — Sentiment·Attribute·Reasoning이 LLM 미실측이면 종합 점수 평균에서 제외. 0점으로 포함시키면 종합 점수가 거짓으로 낮아짐.
+- ❌ **`extractFromAIResponse` / `compareFacts` 신규 호출** — `lib/smarcomm/analyzers/fact-extractor.ts`의 두 함수는 V2.1 정직성 회복으로 **deprecated**. AI 응답 의미 분석은 LLM만 사용. 사이트 측 사실 추출(`extractFromSite`)은 Schema/HTML 표준이라 유지.
+- ❌ **`buildActionPlan` / `suggestActions` (휴리스틱) 신규 호출** — V2.1 § 1.10 정직 원칙으로 deprecated. 신규 코드는 `buildActionPlanLLM` (lib/smarcomm/exec-summary.ts) + `suggestActionsLLM` (lib/smarcomm/airm.ts) 사용. API 키 없으면 null 반환 → UI에서 "LLM 미가용" 안내.
+- ❌ **Citability 분모에 skipped 플랫폼 포함** — 5 AI 플랫폼 중 stub인 것은 `GeoCheckResult.skipped=true` 명시 + `lib/smarcomm/index-calculator.ts`의 `activeChecks` 필터로 분모에서 제외. 5/5 분모로 두면 4개 stub이 부당하게 점수 깎음.
+- ❌ **콘텐츠 볼륨에 LLM 깊이 평가 없이 점수만 노출** — Phase 5까지 "표면 측정" 라벨 의무. 길이만으로는 의미 깊이 보장 못함.
+- ❌ **persistence_score 채널 가중치 임의 변경** — wikipedia=25·news=15 등은 휴리스틱. UI에 "휴리스틱 가중치" 라벨 의무. Phase 5 Ahrefs DR 연동 시 정규화 전까지 정직 표기.
+- ❌ **schemaSuggestions placeholder 그대로 안내 없이 노출** — `__필드명__` placeholder 포함된 스니펫은 "그대로 붙여넣기 금지" 경고 박스 의무. 사용자가 교체 없이 head 삽입하면 검색·AI가 placeholder 학습.
+- ❌ **`analyzeBrandPersonality` (36 유형 임의 매핑) 신규 호출** — `lib/smarcomm/brand-personality.ts`는 점수 임계값 분기로 "디지털 제왕" 같은 라벨 매핑. 동일 점수면 항상 동일 라벨 → 정직하지 못함. 신규 코드는 [brand-personality-llm.ts](lib/smarcomm/brand-personality-llm.ts) `analyzeBrandPersonalityLLM` (Claude Haiku 동적 분석) 사용. API 키 없으면 N/A 안내.
+- ❌ **advisor/campaign-plan + creative/generate API 휴리스틱 fallback** — Claude API 실패/키 없을 때 `generateFallbackPlan`/`generateFallback` 같은 규칙 기반 가짜 응답 반환 금지. **503 반환 + UI 안내**가 표준. § 1.10 정직 원칙: 진짜 LLM 분석이 아니면 응답 안 함.
+- ❌ **Insights 자동 인사이트 텍스트만으로 보고** — `computeInsights`의 임계값 분기 텍스트는 보조. 주 신호는 `analyzeInsightsLLM`(`lib/smarcomm/insights-llm.ts`) Claude Haiku 동적 분석. LLM 미가용 시 "⚠ LLM 미가용" 라벨 의무.
+- ❌ **Mock dashboard 페이지에 배너 없이 노출** — 30+ mock 페이지(funnel·traffic·analytics·cohort·abtest·journey·events·reports·data-reports·crm·campaigns·calendar·workflow)는 `dashboard/layout.tsx`의 `MOCK_PATH_PREFIXES` 자동 배너 표시. 새 mock 페이지 추가 시 prefix 등록 필수.
+- ❌ **AI SOV 매트릭스에서 활성 플랫폼 1~2개를 5플랫폼 평균인 듯 노출** — 활성 플랫폼 수 < 3이면 "활성 N/5 플랫폼만 측정" 신뢰도 라벨 의무.
+- ❌ **Grade S/A/B/C/D 임계값 출처 미명시** — `getGrade` 95/80/60/40은 자체 SSOT. `GRADE_SOURCE` 상수에 출처 명시되어 있음 (Lighthouse 차용 + Phase 5 업종 백분위 정규화 예정).
+- ❌ **차트·메트릭에 출처 칩(🔬) + 산식 부재** — 모든 차트(Trend·종합 레이더·SOV 등)는 헤더에 "🔬 출처: {DB·계산·LLM·사용자입력}" 칩 + 산식/Y축/X축 설명 의무. 사용자가 "이 데이터 어디서?" 질문 못 하게 명시.
+- ❌ **To-Be 목표값을 "최종 정답"인 듯 노출** — 30회·90%·TOP3·85%는 SmarComm 자체 SSOT **기본값**. UI에 "기본값 · Phase 5 업종 백분위 + 워크스페이스 커스터마이즈 예정" 출처 의무. `TARGETS_SOURCE` 상수 참조.
+- ❌ **DB 테이블만 있고 데이터 입력 UI 부재** — `smarcomm_asset_distributions`·`smarcomm_asset_citations`·`smarcomm_ai_flag_sources` 처럼 사용자가 데이터를 채울 경로 없으면 점수 영원히 0. **수동 입력 모달** 또는 **자동 동기화 명시**(Phase 5 라벨) 의무.
+  - distributions: `/api/smarcomm/assets/[id]/distributions` POST + 자산 상세 페이지 "+ 배포 이력 추가" 모달 (V2.1 신규)
+  - citations: AI Probe 자동 동기화 (Phase 5 예정 라벨)
+  - ai_flag_sources: 외부 검색 API 연동 (Phase 5 예정 라벨)
 - ❌ **팩 분류 없이 메뉴 추가** — `DashboardSidebar.MENU_SECTIONS` 의 `pack` 필드 누락 시 잠금 동작 깨짐
 - ❌ **자체 헤더로 UniverseUtilityBar 우회** — 마케팅 페이지는 [SmarCommHeader.tsx](features/smarcomm/SmarCommHeader.tsx) 유지, 대시보드는 자체 헤더지만 향후 UniverseUtilityBar 통합 검토
 
@@ -471,9 +916,11 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 
 | 항목 | 내용 |
 |---|---|
-| **Phase** | **Beta + SmarComm Index 보고서 Phase 3 완료** (2026-05-14, 세션 135 갱신) |
-| **개발 수준** | 진단 영역 = 산업 표준급 보고서 완성 (Phase 1~3). 나머지 35+ 페이지는 mock. API 라우트 5개 (scan + report/[id] + report/[id]/trend + creative + advisor) |
-| **이월 작업 (우선순위 순)** | ① **ANTHROPIC_API_KEY 갱신** (현재 401, Claude probe + exec summary 잠금) · ② OpenAI/Perplexity/SerpAPI/PageSpeed 키 발급으로 5 AI 플랫폼 + CWV 전체 활성 · ③ [lib/smarcomm/auth.ts](lib/smarcomm/auth.ts) Mock 인증 제거 · ④ [dashboard/layout.tsx:28](smarcomm/dashboard/layout.tsx) `router.push('/login')` → LoginModal · ⑤ Mock 대시보드 → 실 API · ⑥ Feature Flags `wio_feature_flags` 연동 · ⑦ localStorage → DB 마이그레이션 |
-| **주요 결정 (세션 135)** | ① **WIO ↔ SmarComm 동등 OS 관계 SSOT 확정** — 종속 관계 표현 폐기 · ② Marketing OS 7대 영역(진단·전략·제작·집행·관계·분석·운영) 명문화 · ③ **SmarComm Index 가중치 30/30/40 확정** — Citability(40%) 가중 = 차별점 · ④ 권위도 측정 폐기 (휴리스틱 정직하지 못함, Phase 4 외부 도구 대기) · ⑤ **AI 정확도 wrong = -0.5 음수 가중** (오답이 미언급보다 위험) · ⑥ Index 보고서 4-Tier 측정 모델 (T0~T2만 점수, T3/T4 별도 N/A) |
-| **SmarComm Index 보고서 산출 (세션 135)** | **DB 3 테이블 · lib 15 모듈 · UI 9 컴포넌트 · 권위 anchor 12개**. 보고서 14 섹션 — Hero(Index+Grade+3질문) → E-E-A-T 4축 → 30초 요약 → Action Plan(2×2) → Schema 자동 생성기 → Trend 차트 → 상위 이슈 → 서브페이지 → 종합 레이더 → 분석 요약 → 브랜드 성격 → 기술 SEO(10 카드) → 콘텐츠 SEO(8 카드, 보안 헤더 신규) → AI 검색(5 플랫폼 실측) → AI Visibility Map → AI 최적화 준비도 → 심화 분석 + 신뢰 푸터 |
+| **Phase** | **V2.0 SSOT 잠금 (2026-05-15, 세션 136)** — 워크플로우 V1→V2.0 어휘·구조 전면 재정의. 코드 변경 0줄. |
+| **개발 수준** | 진단 영역 = 산업 표준급 보고서 완성 (Phase 1~3). 나머지 35+ 페이지는 mock. API 라우트 5개 (scan + report/[id] + report/[id]/trend + creative + advisor). **V2.0 페이지 신설 0건** — Smart-Data Hub · AIRM · 자산화 모듈 미구현 (SSOT만 잠금). |
+| **이월 작업 (우선순위 순, V2.0 반영)** | ① **ANTHROPIC_API_KEY 갱신** (현재 401, Claude probe + exec summary 잠금) · ② OpenAI/Perplexity/SerpAPI/PageSpeed 키 발급으로 5 AI 플랫폼 + CWV 전체 활성 · ③ **§ 3-A SSOT-6 4지표 측정 구현** — 인지·이해·추천·평판 분리 산출 + As-Is/To-Be 성적표 UI · ④ § 3-B Smart-Data Hub `/dashboard/insights` · `/dashboard/ai-tracker` 신설 · ⑤ § 3-D 자산화 `/dashboard/assets` + `smarcomm_brand_assets` 테이블 · ⑥ § 3-C AIRM 발견→교정 4단계 워크플로우 · ⑦ [lib/smarcomm/auth.ts](lib/smarcomm/auth.ts) Mock 인증 제거 · ⑧ [dashboard/layout.tsx:28](smarcomm/dashboard/layout.tsx) `router.push('/login')` → LoginModal · ⑨ Mock 대시보드 → 실 API · ⑩ Feature Flags `wio_feature_flags` 연동 · ⑪ localStorage → DB 마이그레이션 |
+| **주요 결정 (세션 136 — V2.0 SSOT)** | ① **워크플로우 V1→V2.0** — 진단·분석·전략·제작·집행·모니터링·자산화 7단계. V1의 관계·분석·운영은 5·6·운영위계로 흡수 · ② **Smart-Loop 데이터 플라이휠 SSOT** — ⑥→⑦→① 매끄러운 연결이 SmarComm 해자 · ③ **AI 브랜드 가시성 4지표 SSOT** — 인지·이해·추천·평판 (As-Is/To-Be 성적표) + 6 측정 차원 (개체·속성·최신성·랭킹·근거·비교우위) · ④ **§ 3-B Smart-Data Hub** — 4 소스(진단·광고·AI·유입) 통합 인프라 신설 · ⑤ **§ 3-C AIRM 신설** — Pro/Enterprise 유료 핵심 모듈 (발견→분석→교정→검증 4단계) · ⑥ **§ 3-D 자산화 신설** — Entity Branding 영속화 (3대 노력: 정화·고권위 주입·Schema) · ⑦ **캠페인 종료 = 자산화 시작** — ⑤ 집행 종료 시 brand_assets 자동 INSERT 의무 |
+| **주요 결정 (세션 136 — V2.1 진단 sub-engine SSOT)** | ⑧ **V2.0 상위 30/30/40 잠금 + V2.1 5 sub-engine sub-axis** — Discovery(GEO·SEO) / Conversion(UI·UX) / Trust(Security) / Reputation(SNS) / Shopping(커머스) + 퍼널 통합 · ⑨ **Smar-Index(SI) 보조 지표** — Awareness/Search/UX/Security 20/20/30/30 / Industry_Avg 로 별도 산출, 상대적 위치 가시화 · ⑩ **V2.1 신규 측정 16종** — AI SOV·인용 출처·할루시네이션 분리·검색 의도·3초 테스트·전환 마찰·모바일 가독성·인증/인가·거버넌스·취약점·감성·키워드 클라우드·인플루언서·에셋 일관성·쇼핑 키워드·리뷰 시맨틱 · ⑪ **신규 DB 테이블 최소화** — `smarcomm_scans.breakdown` JSONB에 sub-engine 누적, 큰 시계열만 별도 · ⑫ **차별화 연구 과제** — AI 리터러시 진단 알고리즘 + 쇼핑 모멘텀 시차 분석 |
+| **주요 결정 (세션 135 — 유지)** | ① WIO ↔ SmarComm 동등 OS 관계 · ② Index 가중치 30/30/40 (Citability 40%) · ③ 권위도 측정 폐기 · ④ AI 정확도 wrong = -0.5 음수 가중 · ⑤ 4-Tier 측정 모델 (T0~T2 점수, T3/T4 별도 N/A) |
+| **SmarComm Index 보고서 산출 (세션 135)** | **DB 3 테이블 · lib 15 모듈 · UI 9 컴포넌트 · 권위 anchor 12개**. 보고서 14 섹션 (V2.0 신설 "AI Brand Journey" 4지표 섹션 추가 예정) |
 | **블로커** | Toss 가맹점 승인 + Vercel 환경변수 (실 결제 흐름 작동 안 됨) · ANTHROPIC_API_KEY 갱신 필요 |

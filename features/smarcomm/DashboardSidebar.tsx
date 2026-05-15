@@ -11,7 +11,7 @@ import {
   MessageSquare, Gauge, Crosshair, Brush,
   Rocket, PieChart, Wrench, ListChecks, Shield, Lightbulb,
   Workflow, KanbanSquare, FolderKanban, Zap,
-  Eye, Search, Target, Radar, Globe, BookOpen, Lock
+  Eye, Search, Target, Radar, Globe, BookOpen, Lock, ShieldAlert
 } from 'lucide-react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -58,6 +58,30 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: '제작',
     items: [
       { href: '/dashboard/creative', label: 'AI 소재 제작', icon: Brush, pack: 'action' },
+    ],
+  },
+  // ── 자산화 (V2.0 § 3-D 신설 — Smart-Loop ⑦) ──
+  {
+    title: '자산화',
+    items: [
+      { href: '/dashboard/assets', label: 'Brand Assets', icon: Archive, pack: 'core' },
+    ],
+  },
+  // ── 분석 — Data Intelligence (V2.0 § 3-B Smart-Data Hub) ──
+  {
+    title: '분석',
+    items: [
+      { href: '/dashboard/insights', label: 'Insights', icon: BarChart3, pack: 'core' },
+    ],
+  },
+  // ── 모니터링 — AI Tracker + AIRM (V2.0 § 3-B + § 3-C) ──
+  {
+    title: '모니터링',
+    items: [
+      { href: '/dashboard/ai-tracker', label: 'AI Tracker', icon: Radar, pack: 'core' },
+      { href: '/dashboard/airm', label: 'AIRM 허브', icon: ShieldAlert, pack: 'experiment' },
+      { href: '/dashboard/airm/flags', label: '플래그', icon: Activity, pack: 'experiment' },
+      { href: '/dashboard/airm/actions', label: '교정 액션', icon: ListChecks, pack: 'experiment' },
     ],
   },
   // ── 설정 ──

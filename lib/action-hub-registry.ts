@@ -25,8 +25,10 @@ export interface ActionEntry {
     label: string;
     /** Supabase 테이블명 */
     table: string;
-    /** 필터 조건: column → value */
+    /** 필터 조건: column → value (1차 필터) */
     filter: { column: string; value: string };
+    /** 추가 AND 조건 (선택) — 예: severity='critical' 같이 second-axis 필터링 시 사용 */
+    extraFilters?: Array<{ column: string; value: string }>;
     /** 클릭 시 이동할 관리 페이지 */
     href: string;
     /** 소속 브랜드 (공통이면 global) */
@@ -207,6 +209,39 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         brand_id: "myverse",
         category: "moderation",
         priority: "high",
+    },
+
+    // ── SmarComm AIRM (V2.0 § 3-C — Pro/Enterprise 핵심 모듈)
+    {
+        key: "smarcomm_airm_critical_flags",
+        label: "SmarComm AIRM Critical 플래그",
+        table: "smarcomm_ai_flags",
+        filter: { column: "status", value: "open" },
+        extraFilters: [{ column: "severity", value: "critical" }],
+        href: "/intra/ums/smarcomm",
+        brand_id: "smarcomm",
+        category: "moderation",
+        priority: "critical",
+    },
+    {
+        key: "smarcomm_airm_open_flags",
+        label: "SmarComm AIRM 신규 플래그",
+        table: "smarcomm_ai_flags",
+        filter: { column: "status", value: "open" },
+        href: "/intra/ums/smarcomm",
+        brand_id: "smarcomm",
+        category: "moderation",
+        priority: "high",
+    },
+    {
+        key: "smarcomm_airm_todo_actions",
+        label: "SmarComm AIRM 교정 액션 대기",
+        table: "smarcomm_airm_actions",
+        filter: { column: "status", value: "todo" },
+        href: "/intra/ums/smarcomm",
+        brand_id: "smarcomm",
+        category: "moderation",
+        priority: "normal",
     },
 ];
 

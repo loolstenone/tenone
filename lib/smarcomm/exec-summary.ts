@@ -129,6 +129,10 @@ function determineQuadrant(impact: ActionItem['impact'], effort: ActionItem['eff
     return 'avoid';
 }
 
+/**
+ * @deprecated V2.1 § 1.10 정직 원칙 — 18 ACTION_RULES 휴리스틱 매핑은 정직하지 못함.
+ * 신규 코드는 `buildActionPlanLLM` 사용 (Claude Haiku로 fail 카드 + 사이트 정보 기반 추천).
+ */
 export function buildActionPlan(result: AnalysisResult): ActionItem[] {
     const allItems = [...result.techSeo, ...result.contentSeo, ...result.geoReadiness];
     const fails = allItems.filter(i => i.maxScore > 0 && (i.status === 'fail' || i.status === 'warning'));
@@ -171,4 +175,147 @@ export function buildActionPlan(result: AnalysisResult): ActionItem[] {
     });
 
     return actions;
+}
+
+// ─────────────────────────────────────────────────────────────
+// V2.1 § 1.10 정직 원칙 — LLM 기반 Action Plan
+//
+// 휴리스틱 18 ACTION_RULES 폐기. Claude Haiku에게 fail 카드 + 사이트 컨텍스트를 주고
+// impact·effort·role·estimatedPoints·action 추천 요청.
+//
+// 비용: ~$0.005/scan (단일 호출, ~1200 input + ~600 output tokens)
+// API 키 없으면 null — UI에서 "Phase 5 권장 / LLM 미가용" 안내
+// ─────────────────────────────────────────────────────────────
+
+const ACTION_PLAN_SYSTEM_PROMPT = `당신은 마케팅 컨설턴트입니다. SEO/AI 검색 진단의 fail/warning 카드를 보고
+각 카드에 대한 Impact·Effort·담당 역할·예상 점수 변화·구체적 액션을 추천합니다.
+
+반드시 다음 JSON 형식으로만 응답 (코드 펜스 불필요):
+{
+  "actions": [
+    {
+      "title": "카드 이름 그대로",
+      "category": "기술 SEO" | "콘텐츠 SEO" | "GEO" | "Trust" | "구조화",
+      "impact": "high" | "medium" | "low",
+      "effort": "low" | "medium" | "high",
+      "role": "marketer" | "dev" | "writer" | "designer",
+      "estimatedPoints": 1~15,
+      "action": "구체적 한 줄 액션",
+      "description": "왜 이게 중요한지 한 줄",
+      "reason": "Impact·Effort 판단 근거 한 줄"
+    }
+  ]
+}
+
+지침:
+- impact: 검색·AI 노출에 미치는 영향 (high = 점수 +5점 이상 잠재)
+- effort: 마케터·개발자가 적용하는 부담 (low = 1시간 내, high = 며칠)
+- role: 카드 성격에 맞는 담당 (코드 변경 = dev, 문구 = writer, 시각 = designer, 전략 = marketer)
+- estimatedPoints: SmarComm Index 점수 변화 추정 (보수적으로)
+- 우선순위는 quick-win(high impact + low effort) → major → fill-in → avoid 순으로`;
+
+interface LlmActionResponse {
+    actions?: unknown[];
+}
+
+export async function buildActionPlanLLM(
+    result: AnalysisResult,
+    breakdown: IndexBreakdown,
+    apiKey?: string,
+): Promise<(ActionItem & { reason: string; source: 'llm' })[] | null> {
+    const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
+    if (!key) return null;
+
+    const allItems = [...result.techSeo, ...result.contentSeo, ...result.geoReadiness];
+    const fails = allItems.filter(i => i.maxScore > 0 && (i.status === 'fail' || i.status === 'warning'));
+    if (fails.length === 0) return [];
+
+    const client = new Anthropic({ apiKey: key });
+    const cardsList = fails.map((f, i) => {
+        const ratio = f.maxScore > 0 ? Math.round((f.score / f.maxScore) * 100) : 0;
+        return `${i + 1}. [${f.name}] ${f.status.toUpperCase()} (${f.score}/${f.maxScore}점, ${ratio}%)
+   - 진단: ${f.description}
+   - 권장: ${f.action}`;
+    }).join('\n\n');
+
+    try {
+        const response = await client.messages.create({
+            model: MODEL,
+            max_tokens: 2000,
+            system: ACTION_PLAN_SYSTEM_PROMPT,
+            messages: [{
+                role: 'user',
+                content: `SmarComm Index: ${breakdown.index} (Grade ${breakdown.grade})
+Findability ${breakdown.findability} · Trust ${breakdown.trust} · Citability ${breakdown.citability}
+
+다음 ${fails.length}개 fail/warning 카드에 대해 Action Plan을 JSON으로 답하세요.
+
+${cardsList}`,
+            }],
+        });
+
+        const text = response.content
+            .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+            .map(b => b.text).join('');
+        const parsed = parseJsonRobust<LlmActionResponse>(text);
+        if (!parsed || !Array.isArray(parsed.actions)) return null;
+
+        const validImpact: ActionItem['impact'][] = ['high', 'medium', 'low'];
+        const validEffort: ActionItem['effort'][] = ['low', 'medium', 'high'];
+        const validRole: ActionItem['role'][] = ['marketer', 'dev', 'writer', 'designer'];
+
+        const actions = parsed.actions
+            .map(a => {
+                if (typeof a !== 'object' || a === null) return null;
+                const o = a as Record<string, unknown>;
+                const impact = (typeof o.impact === 'string' && validImpact.includes(o.impact as ActionItem['impact'])
+                    ? o.impact : 'medium') as ActionItem['impact'];
+                const effort = (typeof o.effort === 'string' && validEffort.includes(o.effort as ActionItem['effort'])
+                    ? o.effort : 'medium') as ActionItem['effort'];
+                const role = (typeof o.role === 'string' && validRole.includes(o.role as ActionItem['role'])
+                    ? o.role : 'marketer') as ActionItem['role'];
+                const title = typeof o.title === 'string' ? o.title : '';
+                if (!title) return null;
+                return {
+                    title,
+                    category: typeof o.category === 'string' ? o.category : '기타',
+                    impact,
+                    effort,
+                    quadrant: determineQuadrant(impact, effort),
+                    role,
+                    estimatedPoints: typeof o.estimatedPoints === 'number' ? Math.max(0, Math.min(15, Math.round(o.estimatedPoints))) : 3,
+                    action: typeof o.action === 'string' ? o.action.slice(0, 200) : '',
+                    description: typeof o.description === 'string' ? o.description.slice(0, 200) : '',
+                    reason: typeof o.reason === 'string' ? o.reason.slice(0, 200) : '',
+                    source: 'llm' as const,
+                };
+            })
+            .filter((a): a is NonNullable<typeof a> => a !== null);
+
+        // 정렬
+        const QUADRANT_ORDER: Record<ActionItem['quadrant'], number> = { 'quick-win': 0, 'major': 1, 'fill-in': 2, 'avoid': 3 };
+        actions.sort((a, b) => {
+            const qd = QUADRANT_ORDER[a.quadrant] - QUADRANT_ORDER[b.quadrant];
+            if (qd !== 0) return qd;
+            return b.estimatedPoints - a.estimatedPoints;
+        });
+
+        return actions;
+    } catch (err) {
+        console.error('[buildActionPlanLLM] failed:', (err as Error).message);
+        return null;
+    }
+}
+
+function parseJsonRobust<T>(text: string): T | null {
+    try { return JSON.parse(text) as T; } catch { /* continue */ }
+    const fence = text.match(/```(?:json)?\s*([\s\S]+?)```/);
+    if (fence) {
+        try { return JSON.parse(fence[1].trim()) as T; } catch { /* continue */ }
+    }
+    const block = text.match(/\{[\s\S]+\}/);
+    if (block) {
+        try { return JSON.parse(block[0]) as T; } catch { /* fall through */ }
+    }
+    return null;
 }

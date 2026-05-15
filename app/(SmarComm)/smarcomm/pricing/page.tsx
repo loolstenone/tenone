@@ -42,7 +42,7 @@ export default async function PricingPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen px-5 pb-20 pt-24">
+      <main className="min-h-screen bg-surface px-5 pb-20 pt-24 text-text">
         <div className="mx-auto max-w-5xl">
           <div className="mb-10 text-center">
             <h1 className="mb-3 text-3xl font-extrabold text-text">요금제</h1>

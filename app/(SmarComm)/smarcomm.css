@@ -17,6 +17,12 @@
   --color-text: #111827;
   --color-text-sub: #6B7280;
   --color-text-muted: #9CA3AF;
+
+  /* 글로벌 light 배경 강제 — body의 다크 배경이 SmarComm 페이지로 새어나오지 않게.
+     페이지별 main 태그에 bg 누락돼도 안전. 다크 의도(my/page.tsx 등)는 자체 bg-neutral-900으로 override. */
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  min-height: 100vh;
 }
 
 /* Scrollbar for SmarComm */

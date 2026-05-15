@@ -11,7 +11,8 @@ import {
     summarizeAnswers,
     skippedPlatform,
 } from './types';
-import { type BrandFacts, extractFromAIResponse, compareFacts } from '../analyzers/fact-extractor';
+import { type BrandFacts } from '../analyzers/fact-extractor';
+import { classifySentimentLLM } from '../sentiment-llm';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o-mini';
@@ -66,15 +67,39 @@ async function askChatGPT(apiKey: string, q: Question, brand: string, siteTruth:
         const rawResponse: string = data.choices?.[0]?.message?.content ?? '';
         const { mentioned, position } = detectMention(rawResponse, brand);
 
+        // V2.1 § 1.10 정직 — LLM 의미 분석 (Claude probe와 동일 패턴)
         let accuracy: 'exact' | 'partial' | 'wrong' | 'absent' = mentioned ? 'partial' : 'absent';
-        let extractedFacts: BrandFacts | undefined;
         let factComparison: ProbeAnswer['detection']['factComparison'];
+        let sentiment: 'positive' | 'neutral' | 'negative' | undefined;
+        let sentimentConfidence: number | undefined;
+        let reasoning: string[] | undefined;
+        let attributes: string[] | undefined;
+        let analysisSource: 'llm' | undefined;
+
         if (mentioned) {
-            extractedFacts = extractFromAIResponse(rawResponse, brand);
-            if (siteTruth) {
-                const cmp = compareFacts(siteTruth, extractedFacts);
-                accuracy = cmp.verdict;
-                factComparison = cmp.details;
+            const llm = await classifySentimentLLM(rawResponse, brand, siteTruth);
+            if (llm) {
+                sentiment = llm.sentiment;
+                sentimentConfidence = llm.confidence;
+                if (llm.reasoning.length > 0) reasoning = llm.reasoning;
+                if (llm.attributes.length > 0) attributes = llm.attributes;
+                analysisSource = 'llm';
+                if (llm.factComparisons.length > 0) {
+                    factComparison = llm.factComparisons.map(c => ({
+                        field: c.field, match: c.match, siteValue: c.siteValue, aiValue: c.aiValue, reason: c.reason,
+                    }));
+                    const matches = llm.factComparisons.map(c => c.match);
+                    const total = matches.length;
+                    if (total > 0) {
+                        const exact = matches.filter(m => m === 'exact').length;
+                        const wrong = matches.filter(m => m === 'wrong').length;
+                        const missing = matches.filter(m => m === 'missing').length;
+                        if (exact === total) accuracy = 'exact';
+                        else if (wrong > 0) accuracy = 'wrong';
+                        else if (missing === total) accuracy = 'absent';
+                        else accuracy = 'partial';
+                    }
+                }
             }
         }
 
@@ -83,7 +108,7 @@ async function askChatGPT(apiKey: string, q: Question, brand: string, siteTruth:
             category: q.category,
             query: q.text,
             rawResponse,
-            detection: { mentioned, position, accuracy, extractedFacts, factComparison },
+            detection: { mentioned, position, accuracy, factComparison, sentiment, sentimentConfidence, reasoning, attributes, analysisSource },
             measuredAt,
         };
     } catch (err) {

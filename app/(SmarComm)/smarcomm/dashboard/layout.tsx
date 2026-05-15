@@ -1,18 +1,44 @@
 'use client';
 
 import { useEffect, useState, createContext } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star, AlertTriangle } from 'lucide-react';
 import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
+import { LoginModal } from '@/components/LoginModal';
+
+// V2.1 § 1.10 정직 — Mock 데이터로만 작동하는 경로
+// 실제 API 연결된 페이지는 제외 (scan·geo·advisor·creative·insights·ai-tracker·airm·assets·content·archive·admin·profile·members·guide·glossary)
+const MOCK_PATH_PREFIXES = [
+  '/smarcomm/dashboard/funnel',
+  '/smarcomm/dashboard/traffic',
+  '/smarcomm/dashboard/analytics',
+  '/smarcomm/dashboard/cohort',
+  '/smarcomm/dashboard/abtest',
+  '/smarcomm/dashboard/journey',
+  '/smarcomm/dashboard/events',
+  '/smarcomm/dashboard/reports',
+  '/smarcomm/dashboard/data-reports',
+  '/smarcomm/dashboard/crm',
+  '/smarcomm/dashboard/campaigns',
+  '/smarcomm/dashboard/calendar',
+  '/smarcomm/dashboard/workflow',
+];
+
+function isMockPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return MOCK_PATH_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'));
+}
 
 export const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const showMockBanner = isMockPath(pathname);
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [ready, setReady] = useState(false);
   const [companyName, setCompanyName] = useState('');
@@ -25,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      // CLAUDE.md § 1.2.1 — 브랜드 보호 페이지는 LoginModal 팝업, /login 이동 금지
       return;
     }
     initDashboard();
@@ -63,7 +89,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setReady(true);
   };
 
-  if (!ready || isLoading) return (
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="text-center">
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs text-neutral-400">Workspace 로딩 중...</p>
+      </div>
+    </div>
+  );
+
+  // CLAUDE.md § 1.2.1 — 비로그인 시 LoginModal 팝업 (현재 페이지 위에 표시, 이탈 방지)
+  if (!isAuthenticated) return (
+    <div className="min-h-screen bg-surface">
+      <LoginModal isOpen={true} onClose={() => {}} accentColor="#0F172A" />
+    </div>
+  );
+
+  if (!ready) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
         <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
@@ -142,6 +184,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* 메인 콘텐츠 */}
       <main className="min-h-screen bg-surface pt-12 transition-all duration-200" style={{ marginLeft: `${sidebarWidth}px`, marginRight: contextOpen ? '288px' : '0' }}>
+        {showMockBanner && (
+          <div className="bg-amber-100 border-b-2 border-amber-300 px-6 py-2.5 flex items-center gap-2 text-amber-900">
+            <AlertTriangle size={14} className="shrink-0" />
+            <span className="text-xs">
+              <strong>🧪 Mock 데이터 페이지</strong> — 이 화면은 실측 데이터가 아닌 데모 데이터로 작동합니다. § 1.10 정직 원칙. Phase 5에서 실 API(GA4·Search Console·광고 매체 등) 연동 예정.
+            </span>
+          </div>
+        )}
         <div className="p-6">
           {children}
         </div>

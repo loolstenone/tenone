@@ -17,6 +17,7 @@ export const AI_PLATFORM_META: Record<AIPlatform, { label: string; provider: str
 };
 
 export type ProbeAccuracy = 'exact' | 'partial' | 'wrong' | 'absent';
+export type Sentiment = 'positive' | 'neutral' | 'negative';
 
 export interface ProbeAnswer {
     /** 단일 질문 1회 실행 결과 */
@@ -36,13 +37,25 @@ export interface ProbeAnswer {
         accuracy: ProbeAccuracy;
         /** AI가 말한 핵심 사실 (가격·기능·강점 등) — structured */
         extractedFacts?: BrandFacts;
-        /** 자사 사이트 사실 vs AI 답변 비교 결과 (Phase 2.5) */
+        /** 자사 사이트 사실 vs AI 답변 비교 결과 (V2.1 — LLM 의미 분류) */
         factComparison?: {
             field: string;
             match: 'exact' | 'partial' | 'wrong' | 'missing';
             siteValue?: string;
             aiValue?: string;
+            /** V2.1 — LLM 판정 근거 (한국어) */
+            reason?: string;
         }[];
+        /** V2.1 § 3-A SSOT-7 — Sentiment (LLM 분류, API 키 없으면 undefined) */
+        sentiment?: Sentiment;
+        /** sentiment 신뢰도 (0~1) — LLM이 보고한 confidence */
+        sentimentConfidence?: number;
+        /** V2.1 § 3-A SSOT-7 — 추천 근거 (LLM 추출) */
+        reasoning?: string[];
+        /** V2.1 § 3-A SSOT-7 — 브랜드 동반 형용사 (LLM 추출) */
+        attributes?: string[];
+        /** 분류 출처 — § 1.10 정직 원칙. 'llm' = Claude Haiku 실측, undefined = API 키 없어 측정 불가 */
+        analysisSource?: 'llm';
     };
     measuredAt: string;     // ISO
     /** API 호출 비용 추적 (선택) */

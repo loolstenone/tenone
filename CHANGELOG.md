@@ -4,6 +4,310 @@
 
 ---
 
+## 2026-05-15 (세션 136) — SmarComm V2.0 워크플로우 전면 구현
+
+### SmarComm CLAUDE.md V2.0 SSOT (+262 / -24)
+
+[app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) 전면 재작성:
+- V1 어휘(진단·전략·제작·집행·관계·분석·운영) 폐기 → V2.0 7단계 **Smart-Loop** (진단·분석·전략·제작·집행·모니터링·자산화)
+- **§ 3-A SSOT-6** 신설 — AI 브랜드 4지표(인지·이해·추천·평판) + 6 측정 차원
+- **§ 3-B Smart-Data Hub** 신설 — 4 소스(진단·광고·AI답변·유입) 통합 인프라
+- **§ 3-C AIRM** 신설 — 4단계 워크플로우 (Pro/Enterprise 유료)
+- **§ 3-D 자산화** 신설 — Entity Branding 영속화
+- **§ 13** V2.0 금지사항 5건 / **§ 15** SSOT 잠금 상태
+
+### 4지표 측정 — AI Brand Journey
+
+**lib (3)**: [sentiment.ts](lib/smarcomm/sentiment.ts) · [brand-journey.ts](lib/smarcomm/brand-journey.ts) · [ai-probes/claude.ts](lib/smarcomm/ai-probes/claude.ts) 확장
+**UI**: [BrandJourneyCard.tsx](features/smarcomm/BrandJourneyCard.tsx) — As-Is/To-Be 성적표 4축 + 6 차원 펼침
+**연결**: scan API 통합 + report 페이지 신규 섹션
+
+### 자산화 (Brand Assetizing) — § 3-D
+
+**DB 3 테이블** Prod 적용: `smarcomm_brand_assets`·`smarcomm_asset_distributions`·`smarcomm_asset_citations`
+**lib**: [assets.ts](lib/smarcomm/assets.ts) — Entity 10종 메타 + JSON-LD 빌더
+**API**: [/api/smarcomm/assets](app/api/smarcomm/assets/route.ts) + [[id]](app/api/smarcomm/assets/[id]/route.ts)
+**페이지 2**: [카탈로그](app/(SmarComm)/smarcomm/dashboard/assets/page.tsx) + [상세](app/(SmarComm)/smarcomm/dashboard/assets/[id]/page.tsx)
+
+### AIRM — § 3-C
+
+**DB 4 테이블** Prod 적용: `smarcomm_ai_flags`·`smarcomm_ai_flag_sources`·`smarcomm_airm_actions`·`smarcomm_ai_diff_events`
+**lib**: [airm.ts](lib/smarcomm/airm.ts) — 5 flag 유형 자동 분류 + 9 액션 유형 권장
+**자동화**: scan API에 flag + 액션 자동 INSERT 통합
+**API**: [/flags](app/api/smarcomm/airm/flags/route.ts) + [/actions](app/api/smarcomm/airm/actions/route.ts)
+**페이지 3**: [허브](app/(SmarComm)/smarcomm/dashboard/airm/page.tsx) + [플래그](app/(SmarComm)/smarcomm/dashboard/airm/flags/page.tsx) + [액션](app/(SmarComm)/smarcomm/dashboard/airm/actions/page.tsx) (칸반)
+
+### Smart-Data Hub — § 3-B
+
+**lib**: [insights.ts](lib/smarcomm/insights.ts) — 시계열 집계 + Before/After diff
+**API**: [/insights](app/api/smarcomm/insights/route.ts) + [/ai-tracker](app/api/smarcomm/ai-tracker/route.ts)
+**페이지 2**: [Insights](app/(SmarComm)/smarcomm/dashboard/insights/page.tsx) (3축 + 4지표 추이 SVG) + [AI Tracker](app/(SmarComm)/smarcomm/dashboard/ai-tracker/page.tsx) (8 변화 유형)
+
+### 사이드바 V2.0 + Action Hub Registry
+
+[DashboardSidebar.tsx](features/smarcomm/DashboardSidebar.tsx) — V2.0 섹션 신설 (진단·제작·자산화·분석·모니터링)
+[action-hub-registry.ts](lib/action-hub-registry.ts) — `smarcomm_airm_open_flags`·`smarcomm_airm_todo_actions` 2 entry 추가
+
+### 명명 교정 (Smat → Smart, 7 파일)
+
+사용자 비전 "Smat-" 표현을 정식 **Smart-Loop / Smart-Audit / Smart-Studio / Smart-Data Hub**로 통일.
+
+### 정직성 최우선 원칙 SSOT 잠금 + 다크 모드 가독성 버그 수정 (사용자 지적)
+
+사용자가 두 가지 핵심 메시지를 던짐:
+1. **"모든 요소의 정직성이 무엇보다 중요하다"**
+2. **"다크 모드에서 타이틀 안 보이고 있어"**
+
+**P1. 정직성 = 절대 원칙 ZERO**
+- [app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) 머리말 최상단에 "🔴 절대 원칙 ZERO — 정직성(Honesty)이 무엇보다 중요하다" 추가
+- 정직성 위반 8 유형 명시 (휴리스틱 점수·가짜 LLM·fallback·출처 부재·데이터 입력 경로 부재 등)
+- "정직성 회복은 우선순위 1. UX·디자인·성능·일관성보다 먼저. 정직하지 못한 기능은 차라리 N/A 표시 또는 삭제가 정답."
+
+**P2. 다크 모드 가독성 — 4 페이지 + 근본 해결**
+- 근본 원인: body 배경이 `rgb(10, 10, 10)` (거의 검정)인데 SmarComm `.smarcomm-theme` 컨테이너에 background-color 미지정 → 검정 위 검정 텍스트
+- **근본 해결**: [app/(SmarComm)/smarcomm.css](app/(SmarComm)/smarcomm.css) `.smarcomm-theme`에 `background-color: var(--color-surface); color: var(--color-text); min-height: 100vh` 추가
+- 페이지별 보강 (이중 안전): report·pricing·workspace·scan 4 페이지 main에 `bg-surface text-text` 명시
+- 다크 의도된 페이지(`my/page.tsx`의 `bg-neutral-900`)는 자체 override라 영향 없음
+
+**검증**: smarcomm.css 적용 후 모든 SmarComm 페이지 `.smarcomm-theme` 배경 = `rgb(248, 249, 251)`, h1·h2 색 = `rgb(17, 24, 39)`. 대비 정상. report·pricing 페이지 스크린샷 가독성 회복 확인.
+
+### V2.1 정직성 6차 — 출처·라벨·데이터 입력 경로 (사용자 직접 지적)
+
+사용자가 Trend 차트를 보고 "이건 뭐에 대한 추이? 출처는? 근거 없는 데이터 억지 만든 거 없나?" 라는 핵심 정직성 질문을 던짐. 전체 차트·메트릭 재점검 후 6 항목 회복:
+
+**6-A. Trend 차트 — "SmarComm Index 시계열 추이"로 라벨 명시화**
+- "Trend (시계열 추이)" → "SmarComm Index 시계열 추이" 헤더 보강
+- 🔬 출처: smarcomm_scans (자동 누적) 칩 추가
+- 부제: "URL 진단 시 1 row 자동 INSERT. Y축은 SmarComm Index 점수(0~100)"
+- 차트 하단: Y축·X축·파란 선 범례
+
+**6-B. 종합 분석 레이더 산식 명시**
+- 6 축 계산 산식 노출 ("기술 SEO·콘텐츠 SEO는 카드 점수 합/만점, AI 검색 노출은 5플랫폼 mentioned 비율, AI 최적화는 geoReadiness 카드 합, 키워드/콘텐츠 갭은 deep 분석에서 산출 (0~100 정규화)")
+- 🔬 출처: scan 자동 산출 칩
+
+**6-C. AI Brand Journey To-Be 목표값 "기본값" 명시**
+- [brand-journey.ts](lib/smarcomm/brand-journey.ts) `TARGETS_SOURCE` 상수 추가 — "SmarComm 자체 SSOT 기본값 · Phase 5 업종 백분위 동적 산출 예정"
+- BrandJourneyCard 푸터에 "🎯 To-Be 목표값(30회·90%·TOP3·85%)은 SmarComm 자체 SSOT 기본값 — Phase 5 동적 산출 + 커스터마이즈 예정" 라벨
+
+**6-D1. 자산화 distributions UI 신설 (사용자 직접 입력)**
+- 신규 [API: /api/smarcomm/assets/[id]/distributions](app/api/smarcomm/assets/[id]/distributions/route.ts) — POST(create) + DELETE(remove)
+- 자산 상세 페이지에 "+ 배포 이력 추가" 버튼 + AddDistributionModal 컴포넌트
+- 입력: channel(8종)·medium_name·external_url·status(5종)
+- 헤더: "🔬 출처: 사용자 입력 (수동)" 명시
+
+**6-D2. citations 데이터 출처 라벨**
+- "🔬 출처: AI Probe 자동 (Phase 5)" 라벨 + 부제 "Phase 5에서 진단 시 자동 동기화 예정 — 현재는 수동 INSERT 불가"
+
+**6-D3. AIRM ai_flag_sources Phase 5 라벨**
+- flags 페이지 헤더에 "🔬 출처: AI Probe 자동 (LLM 분류)" 칩 + 부제 "출처 추적(ai_flag_sources)은 Phase 5 외부 검색 API 연동 예정"
+
+**SmarComm CLAUDE.md § 13**: V2.1 6차 금지사항 4건 추가
+- 차트·메트릭 헤더에 🔬 출처 칩 + 산식 의무
+- To-Be 목표값을 "최종 정답"인 듯 노출 금지
+- DB 테이블만 있고 입력 UI 부재 금지
+
+**검증**: /smarcomm/dashboard/assets/{slug} → "🔬 출처: 사용자 입력 (수동)" + "+ 배포 이력 추가" 버튼 정상. /smarcomm/report/{id} → "SmarComm Index 시계열 추이" + 종합 레이더 산식 + AI Brand Journey "기본값" 출처 푸터 정상.
+
+### V2.1 정직성 5차 — 잔여 5건 (Insights LLM + deprecated 완전 제거 + Mock 배너 + 라벨)
+
+**R-A. Insights 자동 인사이트 LLM 교체**
+- 신규 [insights-llm.ts](lib/smarcomm/insights-llm.ts) `analyzeInsightsLLM` — Claude Haiku에 최근 시계열(최대 10건) → headline·explanation·nextAction 동적 분석. 비용 ~$0.002/scan
+- [insights API](app/api/smarcomm/insights/route.ts) → 호출 후 `llmInsight` 응답 첨부
+- [Insights 페이지](app/(SmarComm)/smarcomm/dashboard/insights/page.tsx) — 신규 "🤖 LLM 동적 인사이트" 카드 (헤드라인 + 설명 + 다음 행동). 기존 임계값 분기는 보조 카드로 격하 + LLM 미가용 시 "⚠ LLM 미가용" 라벨
+
+**R-B. deprecated 파일/함수 완전 제거**
+- `lib/smarcomm/brand-personality.ts` 파일 삭제 (36 유형 임의 매핑 휴리스틱)
+- `lib/smarcomm/analyzers/fact-extractor.ts` — `extractFromAIResponse`·`compareFacts` 함수 제거 (LLM으로 일원화)
+- `lib/smarcomm/campaign-plan.ts` — `generateFallbackPlan` 함수 제거 (advisor route는 503 반환)
+- [ai-probes/chatgpt.ts](lib/smarcomm/ai-probes/chatgpt.ts) probe도 LLM 교체 (Claude probe와 동일 패턴) — 휴리스틱 호출 일관성 정리
+
+**R-C. Mock dashboard 페이지 자동 배너**
+- [dashboard/layout.tsx](app/(SmarComm)/smarcomm/dashboard/layout.tsx) — `MOCK_PATH_PREFIXES` 배열 + `isMockPath()` 검사
+- 13 path prefix(funnel·traffic·analytics·cohort·abtest·journey·events·reports·data-reports·crm·campaigns·calendar·workflow)에 진입 시 main 상단 노란 배너 자동 노출
+- 메시지: "🧪 Mock 데이터 페이지 — 실측 데이터가 아닌 데모 데이터로 작동합니다. § 1.10 정직 원칙. Phase 5에서 실 API 연동 예정"
+
+**R-D. Grade 임계값 출처 + AI SOV 신뢰도 라벨**
+- [index-calculator.ts](lib/smarcomm/index-calculator.ts) — `GRADE_SOURCE` 상수 추가 ("Lighthouse 90+/50-89/<50 차용. Phase 5 업종 백분위 정규화 예정")
+- [DiscoveryDetailCard.tsx](features/smarcomm/DiscoveryDetailCard.tsx) `SovMatrix` — 활성 플랫폼 < 3이면 "⚠ 활성 N/5 플랫폼만 측정" 라벨 + 평균값 표기를 "제한적 평균"으로
+
+**SSOT 보강**: SmarComm CLAUDE.md § 13에 V2.1 5차 금지사항 5건 추가
+
+**검증**:
+- TypeScript 클린
+- preview: /dashboard/funnel → Mock 배너 정상 노출
+- /dashboard/insights → "🤖 LLM 동적 인사이트" 카드 + 기존 보조 카드에 "⚠ LLM 미가용" 라벨
+- /smarcomm/report/[id] → AI SOV 카드에 "⚠ 활성 1/5 플랫폼만 측정" 라벨 정상
+
+### V2.1 정직성 4차 — 다른 단계 잔여 3건 (브랜드 페르소나 + 어드바이저 + 소재 생성)
+
+진단 외 단계 휴리스틱 fallback 제거:
+
+**F1. 브랜드 페르소나 — 36 유형 임의 매핑 → LLM 동적 분석**
+- 기존 [brand-personality.ts](lib/smarcomm/brand-personality.ts) `analyzeBrandPersonality` — 점수 임계값(V1/V2/V3·TC/TP·AO/AA·E1/E2/E3) 분기로 36 유형 매핑. 동일 점수면 항상 동일 라벨("디지털 제왕"·"숨겨진 보석" 등). 진짜 분석 아님 → § 1.10 위반
+- 신규 [brand-personality-llm.ts](lib/smarcomm/brand-personality-llm.ts) `analyzeBrandPersonalityLLM` — Claude Haiku에 점수 + Top 5 passing/failing 카드 → 동적 페르소나 분석 (name·emoji·subtitle·description·strengths·weaknesses·recommendation). 비용 ~$0.001/scan
+- scan API에서 호출 후 `breakdown.brandPersonality` 저장. IndexBreakdown.brandPersonality 필드 신설
+- report 페이지에서 client-side `analyzeBrandPersonality` 호출 제거. server-side LLM 결과 사용. API 키 없으면 "⚠ 브랜드 페르소나 LLM 미가용" 노란 박스
+- 기존 brand-personality.ts deprecated 표기
+
+**F2. AI 어드바이저 (campaign-plan) — 휴리스틱 fallback 제거**
+- 기존 [advisor/campaign-plan/route.ts](app/api/smarcomm/advisor/campaign-plan/route.ts) — Claude API 실패 시 `generateFallbackPlan` (규칙 기반) 호출. 가짜 plan 반환
+- V2.1: API 키 없으면 **503**, Claude 실패 시 **502** 반환. fallback 제거. 클라이언트가 안내 메시지 표시 책임
+
+**F3. AI 소재 생성 (creative/generate) — 휴리스틱 fallback 제거**
+- 기존 [creative/generate/route.ts](app/api/smarcomm/creative/generate/route.ts) — `generateFallback`이 `prompt.slice(0, 20)`로 키워드 슬라이싱한 가짜 카피 3개 반환. 정직 위반
+- V2.1: API 키 없으면 503. Claude 실패 시 502. `generateFallback` 제거
+
+**SSOT 보강** — SmarComm CLAUDE.md § 13에 V2.1 4차 금지사항 3건 추가
+
+**검증**: API 키 401 상태 — 브랜드 페르소나 카드 위치에 "⚠ LLM 미가용" 박스 정상. 기존 "디지털 제왕" 같은 가짜 라벨 사라짐.
+
+### V2.1 정직성 3차 회복 — 잔여 6 항목 (E 옵션, A+B+C+D 통합)
+
+전체 진단 시스템 36 항목 점검 후 6 항목 정직화:
+
+**E1. AI 플랫폼 stub Citability 정규화** ([seo-analyzer.ts](lib/smarcomm/seo-analyzer.ts) + [index-calculator.ts](lib/smarcomm/index-calculator.ts))
+- `GeoCheckResult.skipped?: boolean` 필드 추가
+- scan API에서 stub 플랫폼에 `skipped: true` 표시
+- Citability 분모를 `activeChecks` (skipped 제외)로 정규화 → 4/5 stub이 점수 부당하게 깎는 문제 해소
+
+**E2. Action Plan LLM 추천 교체** ([exec-summary.ts](lib/smarcomm/exec-summary.ts))
+- `buildActionPlan` (18 ACTION_RULES 휴리스틱) → `buildActionPlanLLM`
+- Claude Haiku에 fail/warning 카드 + breakdown 정보 → impact·effort·role·estimatedPoints·action·reason 추천
+- API 키 없으면 null. UI에 "Action Plan LLM 미가용" 노란 박스 + § 1.10 안내
+- IndexBreakdown.actionPlan에 `reason?: string` + `source?: 'llm'` 필드 추가
+- 비용 ~$0.005/scan
+
+**E3. AIRM suggestActions LLM 교체** ([airm.ts](lib/smarcomm/airm.ts))
+- `suggestActions` (5 flag_type × 2~3 액션 임의 매핑) → `suggestActionsLLM`
+- 각 flag별 1~3 액션 LLM 추천 (Claude Haiku, ~$0.001/flag)
+- scan API에서 병렬 호출 후 description에 "🤖 LLM 판정: {reason}" 첨부
+- API 키 없으면 액션 INSERT 0건 (정직)
+
+**E4. 콘텐츠 볼륨 라벨** ([seo-analyzer.ts](lib/smarcomm/seo-analyzer.ts))
+- description에 "⚠ 표면 측정 (길이만, 의미 깊이 보장 없음 — Phase 5 LLM 깊이 평가 추가 예정)" 명시
+
+**E5. persistence_score 가중치 라벨** ([assets.ts](lib/smarcomm/assets.ts) + [assets/[id]/page.tsx](app/(SmarComm)/smarcomm/dashboard/assets/[id]/page.tsx))
+- 함수 doc-comment에 "휴리스틱 추정, Phase 5 Ahrefs DR 정규화" 명시
+- 상세 페이지 흔적 점수 옆에 "⚠ 휴리스틳 가중치" 라벨 노출
+
+**E6. schemaSuggestions placeholder 강조** ([report/[id]/page.tsx](app/(SmarComm)/smarcomm/report/[id]/page.tsx) SchemaGenerator)
+- 헤더 상단에 두드러진 노란 박스: "⚠ 그대로 붙여넣기 금지 — 모든 스니펫은 `__필드명__` placeholder를 포함합니다. 실제 값으로 반드시 교체 후 `<head>`에 삽입하세요. 교체 없이 노출하면 검색·AI가 placeholder 그대로 학습할 수 있습니다."
+
+**SSOT 보강**: SmarComm CLAUDE.md § 13에 V2.1 정직 금지사항 6건 추가 (buildActionPlan·suggestActions·Citability 분모·콘텐츠 볼륨 라벨·persistence_score 라벨·schemaSuggestions 경고)
+
+**비용 영향**: scan당 추가 ~$0.006 (actionPlan LLM + AIRM suggestActions × n flags). 누적 sentiment-llm + source-classifier-llm + actionPlan-llm + airm-suggest-llm = ~$0.05/scan
+
+**검증**: smarcomm.biz scan (API 키 401) — Action Plan "LLM 미가용" 박스 정상, Schema placeholder 강조 박스 정상, 콘텐츠 볼륨 "표면 측정" 라벨, Citability=34 (1/5 활성 분모로 정규화)
+
+### V2.1 추가 정직성 회복 — factComparison + Source 분류 + Hallucination LLM 통합
+
+§ 1.10 정직 원칙 추가 적용. 휴리스틱 의존 잔여 항목 일괄 LLM 교체:
+
+**factComparison (사이트 사실 vs AI 응답 비교)**
+- [sentiment-llm.ts](lib/smarcomm/sentiment-llm.ts) 시스템 프롬프트 확장 — 한 LLM 호출로 sentiment + reasoning + attributes + factComparisons 동시 추출
+- LLM에 siteTruth 전달 → 의미적 비교 (예: 49,000원 ↔ "약 5만원" → exact)
+- 각 factComparison에 LLM 판정 reason 한 줄 첨부
+- 휴리스틱 `compareFacts` 폐기 (deprecated 표기)
+- [ai-probes/claude.ts](lib/smarcomm/ai-probes/claude.ts) — `extractFromAIResponse`/`compareFacts` 호출 제거, LLM 결과 사용
+- accuracy verdict는 LLM factComparisons에서 자동 산출
+
+**Source 분류 (cited source 카테고리)**
+- 신규 [source-classifier-llm.ts](lib/smarcomm/source-classifier-llm.ts) — batch URL 분류 LLM. scan당 1회 호출 (~$0.0005)
+- 10 카테고리(news·wiki·official·blog·social·forum·review·academic·directory·unknown) + 3 trust level(high/medium/low) + 판정 reason
+- [diagnostics-v21.ts](lib/smarcomm/diagnostics-v21.ts) `extractCitedSources` async로 변환, 휴리스틱 정규식 폐기
+- API 키 없으면 모든 source category='unknown', trust='low' + classifierSource='na' 명시
+
+**Hallucination 자동 정직화**
+- factComparison이 LLM이라 hallucination 분리도 자동으로 정직해짐
+- HallucinationFinding에 `reason` 필드 추가 (LLM 판정 근거)
+- UI에 "🤖 LLM 의미 분류" 배지 + reason 한 줄 노출
+
+**비용**: scan당 sentiment-llm × 5플랫폼 × 13질문 (~$0.04) + source-classifier-llm × 1회 (~$0.0005) = **~$0.04/scan**
+
+**검증**: API 키 401 상태 — Source 카드에 "🤖 LLM" 배지 정상, 분류 출처 명시. 키 갱신 시 진짜 의미 분류 작동.
+
+### V2.1 정직성 회복 — Sentiment·Reasoning·Attribute LLM 실측 교체 (§ 1.10 정직 원칙)
+
+진단 항목 정직성 평가 후 휴리스틱 폐기 결정:
+
+**제거**: [lib/smarcomm/sentiment.ts](lib/smarcomm/sentiment.ts) 파일 삭제 (한국어 키워드 사전·정규식 매칭 휴리스틱)
+**신규**: [lib/smarcomm/sentiment-llm.ts](lib/smarcomm/sentiment-llm.ts) — Claude Haiku 4.5 LLM 분류기. structured JSON output. brand 미언급 시 즉시 skip (비용 절약). 응답당 ~$0.0003, 5플랫폼 × 13질문 ~$0.02/scan
+
+**연결**:
+- [ai-probes/claude.ts](lib/smarcomm/ai-probes/claude.ts) — `analyzeSentiment/extractReasoning/extractAttributes` 휴리스틱 호출 제거 → `classifySentimentLLM` 단일 호출. `analysisSource: 'llm'` 필드 추가
+- [ai-probes/types.ts](lib/smarcomm/ai-probes/types.ts) — `analysisSource?: 'llm'` 필드 (undefined = N/A)
+- [brand-journey.ts](lib/smarcomm/brand-journey.ts) — LLM 미실측 시 Sentiment Axis N/A, 종합 점수 평균에서 제외. Attribute Association·Reasoning 차원도 isNA=true 처리
+- [airm.ts](lib/smarcomm/airm.ts) — `detectFlagsFromProbes` negative_sentiment flag는 LLM 실측만 생성
+- [BrandJourneyCard.tsx](features/smarcomm/BrandJourneyCard.tsx) — 헤더에 "🤖 LLM 실측 N건" 또는 "⚠ Sentiment LLM 미가용" 배지. Sentiment Axis N/A 박스 + "🔬 LLM 키 필요" 칩
+
+**SSOT 갱신**:
+- SmarComm CLAUDE.md § 3-A SSOT-6 머리말에 V2.1 정직성 회복 명시
+- § 13 V2.1 금지사항 추가 (휴리스틱 sentiment 금지, N/A 점수 산입 금지)
+
+**효과**: ANTHROPIC_API_KEY 401 상태 진단 시:
+- 이전: sentiment 50점 가짜 평균, attributes/reasoning 0점 → 종합 점수 왜곡
+- 이후: 모두 N/A 명시, 종합 점수는 측정 가능한 3축(인지·이해·추천)만 평균
+
+### V2.1 Discovery sub-engine High 3건 구현
+
+기존 AI Probe 응답에서 외부 API 없이 추출 가능한 3 측정 차원 신설:
+
+**lib**: [diagnostics-v21.ts](lib/smarcomm/diagnostics-v21.ts)
+- `computeAiSov()` — 카테고리 × 플랫폼 매트릭스 + byCategory / byPlatform 평균 + 전체 SOV
+- `extractCitedSources()` — citations + rawResponse URL 추출 + 9 카테고리 분류 (news/wiki/official/blog/social/forum/review/academic/other) — 휴리스틱 정규식 도메인 매칭
+- `extractHallucinations()` — factComparison wrong을 8 카테고리(price·location·spec·founded·features·strengths·category·other) + 3 severity로 분리
+- `computeDiscoveryDetail()` — 통합 산출
+
+**UI**: [DiscoveryDetailCard.tsx](features/smarcomm/DiscoveryDetailCard.tsx)
+- SOV 매트릭스 — 색 히트맵 (≥70 녹·40~70 파·20~40 노·<20 주)
+- 인용 출처 — 도메인 카드 + 카테고리 칩 + 펼침
+- 할루시네이션 — Critical/High/Medium 분리 + 사이트 vs AI 비교
+
+**연결**: scan API → `breakdown.discoveryDetail` JSONB 저장, report 페이지 신규 섹션 (BrandJourneyCard 다음, Action Plan 앞)
+**검증**: smarcomm.biz scan → 7 SOV 셀 정상 매트릭스, 빈 상태(no URL/no wrong) 모두 핸들
+
+### V2.1 진단 sub-engine SSOT 잠금 (코드 0줄)
+
+[app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) § 3-A SSOT-7 신설 — V2.0 상위 30/30/40 유지하면서 ① 진단 내부를 5 sub-engine + 퍼널 통합으로 세분화:
+
+- **Discovery / Conversion / Trust / Reputation / Shopping** 5 sub-engine + Funnel
+- **AI SOV·인용 출처·할루시네이션 분리·검색 의도·3초 테스트·전환 마찰·모바일 가독성·인증/인가·거버넌스·취약점·감성·키워드 클라우드·인플루언서·에셋 일관성·쇼핑 키워드·리뷰 시맨틱** 16 측정 차원 정의
+- **Smar-Index(SI)** — 20/20/30/30 보조 지표로 별도 산출 (SmarComm Index 30/30/40과 함께 표시)
+- **차별화 연구 2건** — AI 리터러시 진단 / 쇼핑 모멘텀 시차
+- § 13 V2.1 관련 금지사항 4건 추가
+- 신규 DB 테이블 최소화 원칙 (JSONB 누적 우선)
+
+### Quick win 후속 5건
+
+- **AIRM Critical priority 분리** — `ActionEntry.extraFilters` 신설 (multi-AND 필터), `smarcomm_airm_critical_flags` entry 추가
+- **dashboard `/login` → LoginModal** — `router.push('/login?redirect=…')` 제거, § 1.2.1 위반 해소
+- **Mock 인증 제거** — `lib/smarcomm/auth.ts` 삭제, dashboard/scan dynamic import 정리, scan-data.ts SSOT 통일
+- **Entity 자동 등록 트리거** — `lib/smarcomm/auto-assetize.ts` 신설 + `/api/smarcomm/campaigns/finalize` API. § 3-D "캠페인 종료 = 자산화 시작" 규약 코드화. UUID 검증 + 멱등성 확인
+- **빌드·preview E2E 검증** — Spring Launch 2026 캠페인 종료 → Service + FAQPage 자동 INSERT, /dashboard/assets 3 카드 노출 확인
+
+### 핵심 결정 7건
+
+1. **V1 어휘 폐기 → V2.0 7단계 SSOT** — Smart-Loop 데이터 플라이휠 중심
+2. **AI 브랜드 4지표 + 6 측정 차원** — Citability 단일축 → 입체화
+3. **AIRM = Pro/Enterprise 유료 핵심 모듈** — 발견·분석·교정·검증 4단계
+4. **자산화 = 캠페인 종료 시작점** — 캠페인 끝나면 brand_assets INSERT 의무
+5. **Smart-Data Hub 4 소스 의무 조인** — 새 분석 페이지는 단일 소스 금지
+6. **Entity 5종 Schema.org SSOT** — Organization·Service·Person·Product·FAQPage
+7. **명명: Smart-** (SmarComm 브랜드 + Smart 워크플로우)
+
+### 산출 파일 (총 25개 변경)
+
+| 분류 | 파일 |
+|---|---|
+| SQL | smarcomm-brand-assets.sql · smarcomm-airm.sql (Prod 적용) |
+| lib (5 신규) | sentiment.ts · brand-journey.ts · assets.ts · airm.ts · insights.ts |
+| API (8 신규) | assets · assets/[id] · airm/flags · airm/actions · insights · ai-tracker · scan(수정) · report/[id](영향 X) |
+| 페이지 (7 신규) | dashboard/assets · assets/[id] · airm · airm/flags · airm/actions · insights · ai-tracker |
+| UI (1 신규) | BrandJourneyCard.tsx |
+| 수정 | CLAUDE.md(SmarComm) · DashboardSidebar.tsx · action-hub-registry.ts · ai-probes/types.ts · ai-probes/claude.ts · index-calculator.ts · scan/route.ts · report/[id]/page.tsx |
+
+---
+
 ## 2026-05-14 (세션 135) — Myverse 진입점 + SmarComm Index Phase 1~3 고도화
 
 ### Myverse (3 영역)

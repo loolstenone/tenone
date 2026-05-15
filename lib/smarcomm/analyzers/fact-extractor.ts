@@ -93,82 +93,12 @@ export function extractFromSite(
     return facts;
 }
 
-// ── AI 응답에서 같은 사실 추출 ──
-export function extractFromAIResponse(rawResponse: string, brand: string): BrandFacts {
-    const facts: BrandFacts = {};
-    const text = rawResponse;
+// V2.1 § 1.10 정직 원칙 — `extractFromAIResponse` / `compareFacts` 함수 완전 제거 (2026-05-15).
+// AI 응답 의미 분석은 LLM(`lib/smarcomm/sentiment-llm.ts`)으로 일원화.
+// `BrandFacts` 타입과 `extractFromSite` (사이트 측 표준 추출)은 유지.
 
-    // 가격 추출
-    const price = extractPriceFromText(text);
-    if (price) facts.price = price;
-
-    // 강점 + 기능 키워드 — 응답에서 브랜드 근처 텍스트 추출
-    const brandLower = brand.toLowerCase();
-    const textLower = text.toLowerCase();
-    const idx = textLower.indexOf(brandLower);
-    if (idx !== -1) {
-        // 브랜드 언급 ± 100자 윈도우
-        const window = text.slice(Math.max(0, idx - 100), Math.min(text.length, idx + 200));
-        facts.strengths = extractKeywordsFromText(window).slice(0, 5);
-    }
-
-    return facts;
-}
-
-// ── 일치도 판정 ──
+// AccuracyVerdict 타입은 다른 곳에서 참조될 수 있어 유지
 export type AccuracyVerdict = 'exact' | 'partial' | 'wrong' | 'absent';
-
-export function compareFacts(siteTruth: BrandFacts, aiSaid: BrandFacts): {
-    verdict: AccuracyVerdict;
-    details: { field: string; match: 'exact' | 'partial' | 'wrong' | 'missing'; siteValue?: string; aiValue?: string }[];
-} {
-    const details: { field: string; match: 'exact' | 'partial' | 'wrong' | 'missing'; siteValue?: string; aiValue?: string }[] = [];
-
-    // 가격 비교
-    if (siteTruth.price) {
-        if (!aiSaid.price) {
-            details.push({ field: 'price', match: 'missing', siteValue: formatPrice(siteTruth.price) });
-        } else if (
-            aiSaid.price.value === siteTruth.price.value &&
-            aiSaid.price.currency === siteTruth.price.currency &&
-            aiSaid.price.period === siteTruth.price.period
-        ) {
-            details.push({ field: 'price', match: 'exact', siteValue: formatPrice(siteTruth.price), aiValue: formatPrice(aiSaid.price) });
-        } else if (Math.abs(aiSaid.price.value - siteTruth.price.value) / siteTruth.price.value < 0.2) {
-            details.push({ field: 'price', match: 'partial', siteValue: formatPrice(siteTruth.price), aiValue: formatPrice(aiSaid.price) });
-        } else {
-            details.push({ field: 'price', match: 'wrong', siteValue: formatPrice(siteTruth.price), aiValue: formatPrice(aiSaid.price) });
-        }
-    }
-
-    // 강점 키워드 비교 — 자카드 유사도
-    if (siteTruth.strengths && siteTruth.strengths.length > 0) {
-        if (!aiSaid.strengths || aiSaid.strengths.length === 0) {
-            details.push({ field: 'strengths', match: 'missing', siteValue: siteTruth.strengths.slice(0, 3).join(', ') });
-        } else {
-            const overlap = aiSaid.strengths.filter(s => siteTruth.strengths!.some(t => normalizeKw(t) === normalizeKw(s) || normalizeKw(t).includes(normalizeKw(s)) || normalizeKw(s).includes(normalizeKw(t))));
-            const sim = overlap.length / siteTruth.strengths.length;
-            if (sim >= 0.5) details.push({ field: 'strengths', match: 'exact', siteValue: siteTruth.strengths.slice(0, 3).join(', '), aiValue: aiSaid.strengths.slice(0, 3).join(', ') });
-            else if (sim >= 0.2) details.push({ field: 'strengths', match: 'partial', siteValue: siteTruth.strengths.slice(0, 3).join(', '), aiValue: aiSaid.strengths.slice(0, 3).join(', ') });
-            else details.push({ field: 'strengths', match: 'wrong', siteValue: siteTruth.strengths.slice(0, 3).join(', '), aiValue: aiSaid.strengths.slice(0, 3).join(', ') });
-        }
-    }
-
-    // 종합 판정
-    const exactCount = details.filter(d => d.match === 'exact').length;
-    const wrongCount = details.filter(d => d.match === 'wrong').length;
-    const missingCount = details.filter(d => d.match === 'missing').length;
-    const totalFields = details.length;
-
-    let verdict: AccuracyVerdict = 'absent';
-    if (totalFields === 0) verdict = 'absent';
-    else if (exactCount === totalFields) verdict = 'exact';
-    else if (wrongCount > 0) verdict = 'wrong';
-    else if (missingCount === totalFields) verdict = 'absent';
-    else verdict = 'partial';
-
-    return { verdict, details };
-}
 
 // ── 헬퍼 ──
 function extractPriceFromOffer(offer: Record<string, unknown>): BrandFacts['price'] | null {

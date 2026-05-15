@@ -84,7 +84,7 @@ function ScanContent() {
     return (
       <>
         <Header />
-        <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
+        <main className="flex min-h-screen flex-col items-center justify-center bg-surface px-5 pt-14 text-text">
           <div className="w-full max-w-md text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10">
               <AlertCircle size={32} className="text-danger" />

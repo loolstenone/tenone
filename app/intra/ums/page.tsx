@@ -511,10 +511,15 @@ export default function UniverseDashboard() {
                  */
                 const registryCounts = await Promise.all(
                     ACTION_HUB_REGISTRY.map(async (entry) => {
-                        const { count, error } = await supabase
+                        let query = supabase
                             .from(entry.table)
                             .select("*", { count: "exact", head: true })
                             .eq(entry.filter.column, entry.filter.value);
+                        // extraFilters AND 조건 적용
+                        for (const ef of entry.extraFilters ?? []) {
+                            query = query.eq(ef.column, ef.value);
+                        }
+                        const { count, error } = await query;
                         return {
                             label: entry.label,
                             count: error ? 0 : (count ?? 0),

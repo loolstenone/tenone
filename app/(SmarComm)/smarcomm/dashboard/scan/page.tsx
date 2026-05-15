@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle, X, Gauge, Zap, Timer, Lightbulb, Loader2 } from 'lucide-react';
-import { getScanLog, loadScanLogFromDB, saveCompetitorList, loadCompetitorListFromDB, saveCompareLog, loadCompareLogFromDB, getCompareLog, type CompareEntry } from '@/lib/smarcomm/scan-data';
+import { getScanLog, loadScanLogFromDB, saveCompetitorList, loadCompetitorListFromDB, saveCompareLog, loadCompareLogFromDB, getCompareLog, saveScanUrl, type CompareEntry } from '@/lib/smarcomm/scan-data';
 import GaugeChart from '@/features/smarcomm/GaugeChart';
 import NextStepCTA from '@/features/smarcomm/NextStepCTA';
 import RadarChart from '@/features/smarcomm/RadarChart';
@@ -136,7 +136,6 @@ export default function ScanPage() {
       setResult(data);
       setView('result');
 
-      const { saveScanUrl } = await import('@/lib/smarcomm/auth');
       saveScanUrl(data.url, data.totalScore, data.seoScore, data.geoScore);
 
       // 경쟁사 URL이면 경쟁사 이력에도 저장

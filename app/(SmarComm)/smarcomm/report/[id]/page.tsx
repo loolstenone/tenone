@@ -14,8 +14,9 @@ import Footer from '@/features/smarcomm/Footer';
 import GaugeChart from '@/features/smarcomm/GaugeChart';
 import RadarChart from '@/features/smarcomm/RadarChart';
 import { useAuth } from '@/lib/auth-context';
-import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 import { GRADE_META, type IndexBreakdown, type Grade } from '@/lib/smarcomm/index-calculator';
+import BrandJourneyCard from '@/features/smarcomm/BrandJourneyCard';
+import DiscoveryDetailCard from '@/features/smarcomm/DiscoveryDetailCard';
 
 const GRADE_MAP = {
   excellent: { color: '#059669', label: 'Excellent', message: 'AI 시대 검색 준비 완료' },
@@ -196,6 +197,8 @@ interface ActionItemUI {
   estimatedPoints: number;
   action: string;
   description: string;
+  reason?: string;
+  source?: 'llm';
 }
 
 const ROLE_META: Record<ActionItemUI['role'], { label: string; emoji: string; color: string }> = {
@@ -223,13 +226,18 @@ function ActionMatrix({ actions }: { actions: ActionItemUI[] }) {
 
   return (
     <div className="mb-10">
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex items-center gap-2 flex-wrap">
         <h2 className="text-[15px] font-bold text-text">Action Plan</h2>
         <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">Impact × Effort</span>
+        {actions.some(a => a.source === 'llm') ? (
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700" title="Claude Haiku LLM이 fail 카드 기반으로 추천">🤖 LLM 추천</span>
+        ) : (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700" title="ANTHROPIC_API_KEY 미설정 또는 LLM 응답 실패">⚠ 휴리스틱/미가용</span>
+        )}
         <span className="ml-auto text-[10px] text-text-muted">모두 적용 시 예상 +{totalPotential}점</span>
       </div>
       <p className="mb-4 text-xs text-text-muted">
-        진단에서 발견된 개선 항목을 임팩트와 노력으로 분류 + 누구에게 부탁할지 + 예상 점수 변화 (출처: 자체 SSOT)
+        진단에서 발견된 개선 항목을 임팩트와 노력으로 분류 + 누구에게 부탁할지 + 예상 점수 변화 (V2.1 § 1.10 — Claude Haiku LLM 추천)
       </p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -298,8 +306,11 @@ function SchemaGenerator({ suggestions }: { suggestions: SchemaSuggestionUI[] })
         <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">바로 복사</span>
         <span className="ml-auto text-[10px] text-text-muted">{applied.length}/{suggestions.length} 적용 · {missing.length} 신규 추천</span>
       </div>
+      <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-2.5 text-[11px] text-amber-900">
+        <strong>⚠ 그대로 붙여넣기 금지</strong> — 모든 스니펫은 <b className="font-mono bg-amber-100 px-1">__필드명__</b> placeholder를 포함합니다. <b>실제 값으로 반드시 교체</b> 후 <code className="font-mono bg-amber-100 px-1">&lt;head&gt;</code>에 삽입하세요. 교체 없이 노출하면 검색·AI가 placeholder 그대로 학습할 수 있습니다.
+      </div>
       <p className="mb-4 text-xs text-text-muted">
-        분석 결과 기반으로 권장 JSON-LD를 자동 생성. <b>__필드명__</b> placeholder만 실제 값으로 교체 후 &lt;head&gt;에 삽입 (출처: Schema.org + Google Rich Results 요건)
+        분석 결과 기반 권장 JSON-LD 자동 생성 (출처: Schema.org + Google Rich Results 요건)
       </p>
 
       <div className="space-y-2">
@@ -385,15 +396,21 @@ function TrendChart({ shortId }: { shortId: string }) {
 
   return (
     <div className="mb-10">
-      <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-[15px] font-bold text-text">Trend (시계열 추이)</h2>
+      <div className="mb-1 flex items-center gap-2 flex-wrap">
+        <h2 className="text-[15px] font-bold text-text">SmarComm Index 시계열 추이</h2>
         <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">{scans.length}회 진단</span>
         {delta !== 0 && (
           <span className={`text-xs font-bold tabular-nums ${delta > 0 ? 'text-success' : 'text-danger'}`}>
             {delta > 0 ? '↑' : '↓'} {Math.abs(delta)} 점
           </span>
         )}
+        <span className="ml-auto rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="진단 누적 데이터 — 같은 도메인을 여러 번 진단할수록 그래프가 풍부해집니다">
+          🔬 출처: smarcomm_scans (자동 누적)
+        </span>
       </div>
+      <p className="mb-3 text-[11px] text-text-muted">
+        같은 도메인을 진단할 때마다 자동으로 누적됩니다. 데이터 입력 불필요 — URL 진단 시 1 row 자동 INSERT. Y축은 SmarComm Index 점수(0~100).
+      </p>
       <div className="rounded-xl border border-border bg-white p-4">
         <svg viewBox={`0 0 ${W + 40} ${H + 40}`} className="w-full h-40">
           {[0, 25, 50, 75, 100].map(v => (
@@ -417,6 +434,9 @@ function TrendChart({ shortId }: { shortId: string }) {
             ))}
           </g>
         </svg>
+        <p className="mt-2 text-[10px] text-text-muted text-center">
+          ⓘ Y축: SmarComm Index (0~100) · X축: 진단 시각 · 파란 선: 같은 도메인 점수 변화
+        </p>
       </div>
     </div>
   );
@@ -800,7 +820,7 @@ function ReportContent({ scanId }: { scanId: string }) {
   return (
     <>
       <Header />
-      <main className="min-h-screen px-5 pb-24 pt-20">
+      <main className="min-h-screen bg-surface px-5 pb-24 pt-20 text-text">
         <div className="mx-auto max-w-3xl">
           {/* Top Nav */}
           <div className="mb-5 flex items-center justify-between">
@@ -987,10 +1007,24 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* Phase 3.3 — Action Plan (Impact × Effort) */}
-          {scan.breakdown?.actionPlan && scan.breakdown.actionPlan.length > 0 && (
-            <ActionMatrix actions={scan.breakdown.actionPlan} />
+          {/* V2.0 § 3-A SSOT-6 — AI Brand Journey (4지표 + 6 차원) */}
+          {scan.breakdown?.brandJourney && (
+            <BrandJourneyCard journey={scan.breakdown.brandJourney} />
           )}
+
+          {/* V2.1 § 3-A SSOT-7 — Discovery sub-engine (AI SOV + 인용 출처 + 할루시네이션) */}
+          {scan.breakdown?.discoveryDetail && (
+            <DiscoveryDetailCard detail={scan.breakdown.discoveryDetail} />
+          )}
+
+          {/* Phase 3.3 — Action Plan (Impact × Effort) — V2.1 LLM 추천 */}
+          {scan.breakdown?.actionPlan === null ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-900">
+              <strong>⚠ Action Plan LLM 미가용</strong> — ANTHROPIC_API_KEY 미설정으로 Claude Haiku 추천 작동 안 함. § 1.10 정직 원칙에 따라 휴리스틱 fallback 폐기.
+            </div>
+          ) : scan.breakdown?.actionPlan && scan.breakdown.actionPlan.length > 0 ? (
+            <ActionMatrix actions={scan.breakdown.actionPlan} />
+          ) : null}
 
           {/* Phase 3.1 — Schema 자동 생성기 */}
           {scan.breakdown && Array.isArray(scan.breakdown.schemaSuggestions) && scan.breakdown.schemaSuggestions.length > 0 && (
@@ -1066,7 +1100,8 @@ function ReportContent({ scanId }: { scanId: string }) {
             const radarLabels = ['기술 SEO', '콘텐츠 SEO', 'AI 검색 노출', 'AI 최적화', '키워드', '콘텐츠 갭'];
             const radarValues = [techPct, contentPct, geoExposurePct, geoReadinessPct, keywordPct, contentGapPct];
 
-            const personality = analyzeBrandPersonality({ techSeo: techPct, contentSeo: contentPct, geoExposure: geoExposurePct, geoReadiness: geoReadinessPct, keywords: keywordPct, contentGap: contentGapPct });
+            // V2.1 § 1.10 — 휴리스틱 36 유형 매핑 제거. server-side LLM 분석 사용.
+            const personality = scan.breakdown?.brandPersonality ?? null;
 
             const avgScore = Math.round(radarValues.reduce((s, v) => s + v, 0) / radarValues.length);
             const strongAreas = radarLabels.filter((_, i) => radarValues[i] >= 70);
@@ -1077,7 +1112,15 @@ function ReportContent({ scanId }: { scanId: string }) {
                 {/* 레이더 + 분석 요약 나란히 */}
                 <div className="mb-10 grid gap-5 lg:grid-cols-2">
                   <div className="rounded-2xl border border-border bg-white p-6">
-                    <h2 className="mb-2 text-[15px] font-bold text-text">종합 분석 레이더</h2>
+                    <div className="mb-2 flex items-center justify-between gap-2 flex-wrap">
+                      <h2 className="text-[15px] font-bold text-text">종합 분석 레이더</h2>
+                      <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="6 축 모두 진단 카드 점수에서 자동 산출 — 사용자 입력 불필요">
+                        🔬 출처: scan 자동 산출
+                      </span>
+                    </div>
+                    <div className="mb-3 text-[10px] text-text-muted leading-relaxed">
+                      산식: 기술 SEO·콘텐츠 SEO는 카드 점수 합/만점, AI 검색 노출은 5플랫폼 mentioned 비율, AI 최적화는 geoReadiness 카드 합, 키워드/콘텐츠 갭은 deep 분석에서 산출 (0~100 정규화)
+                    </div>
                     <RadarChart labels={radarLabels} values={radarValues} size={360} />
                   </div>
 
@@ -1112,18 +1155,21 @@ function ReportContent({ scanId }: { scanId: string }) {
                   </div>
                 </div>
 
-                {/* 브랜드 커뮤니케이션 성격 제안 — 좌우 분리 */}
+                {/* 브랜드 커뮤니케이션 성격 제안 — V2.1 LLM 동적 분석 */}
+                {personality ? (
                 <div className="mb-10 rounded-2xl border border-border bg-white p-6">
-                  <h2 className="mb-1 text-[15px] font-bold text-text">브랜드 커뮤니케이션 성격 제안</h2>
-                  <p className="mb-5 text-xs text-text-muted">SEO/GEO 분석을 기반으로 브랜드의 디지털 성격을 진단합니다</p>
+                  <div className="mb-1 flex items-center gap-2 flex-wrap">
+                    <h2 className="text-[15px] font-bold text-text">브랜드 커뮤니케이션 성격 제안</h2>
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700" title="Claude Haiku LLM 동적 분석 (36 유형 임의 매핑 폐기)">🤖 LLM 동적 분석</span>
+                  </div>
+                  <p className="mb-5 text-xs text-text-muted">진단 점수와 카드를 LLM이 보고 동적으로 분석한 디지털 페르소나 (V2.1 § 1.10)</p>
 
                   <div className="grid gap-6 lg:grid-cols-5">
                     {/* 왼쪽: 타이틀 */}
                     <div className="lg:col-span-2">
                       <div className="text-5xl mb-3">{personality.emoji}</div>
                       <div className="text-2xl font-bold text-text mb-1">{personality.name}</div>
-                      {'subtitle' in personality && <div className="text-sm text-text-sub mb-2">{(personality as any).subtitle}</div>}
-                      <div className="text-[10px] font-mono text-text-muted tracking-widest mb-3">{personality.type}</div>
+                      {personality.subtitle && <div className="text-sm text-text-sub mb-2">{personality.subtitle}</div>}
                       <p className="text-sm leading-relaxed text-text-sub">{personality.description}</p>
                     </div>
 
@@ -1158,6 +1204,11 @@ function ReportContent({ scanId }: { scanId: string }) {
                     </div>
                   </div>
                 </div>
+                ) : (
+                <div className="mb-10 rounded-2xl border border-amber-200 bg-amber-50/40 p-5 text-xs text-amber-900">
+                  <strong>⚠ 브랜드 페르소나 LLM 미가용</strong> — ANTHROPIC_API_KEY 미설정으로 Claude Haiku 동적 분석 작동 안 함. § 1.10 정직 원칙에 따라 36 유형 임의 매핑 휴리스틱 폐기.
+                </div>
+                )}
               </>
             );
           })()}

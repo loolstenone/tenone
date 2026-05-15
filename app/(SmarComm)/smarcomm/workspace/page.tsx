@@ -42,7 +42,7 @@ export default function WorkspacePage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
+      <main className="min-h-screen bg-surface text-text">
         {/* Hero */}
         <section className="bg-[#0A0E1A] px-5 pb-16 pt-28 md:pt-36">
           <div className="mx-auto max-w-3xl text-center">

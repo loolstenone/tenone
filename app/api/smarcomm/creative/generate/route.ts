@@ -97,28 +97,8 @@ ${req.prompt}
 한국어로 작성. 변형 2개.`;
 }
 
-// Claude API 실패 시 규칙 기반 생성
-function generateFallback(req: GenerateRequest): { title: string; body: string; cta?: string; hashtags?: string[] }[] {
-  const keyword = req.prompt.slice(0, 20);
-  return [
-    {
-      title: `${keyword} — 지금 시작하세요`,
-      body: `${req.prompt}\n\n전문가가 추천하는 솔루션으로 효과를 직접 확인해보세요.`,
-      cta: '무료 상담 신청',
-      hashtags: ['마케팅', 'AI', '디지털마케팅'],
-    },
-    {
-      title: `왜 ${keyword}이 중요한가요?`,
-      body: `많은 기업이 이미 시작했습니다. 늦기 전에 지금 확인하세요.`,
-      cta: '자세히 보기',
-    },
-    {
-      title: `${keyword} 성공 사례`,
-      body: `실제 데이터로 증명된 효과. 다음은 당신의 차례입니다.`,
-      cta: '사례 확인',
-    },
-  ];
-}
+// @deprecated V2.1 § 1.10 정직 원칙 — 키워드 슬라이싱 휴리스틱은 정직하지 못함.
+// API 키 없으면 503 반환 + 사용자에게 안내. 가짜 카피 생성 금지.
 
 export async function POST(request: NextRequest) {
   const { error: authErr } = await requireAuth();
@@ -133,36 +113,42 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    if (apiKey) {
-      try {
-        const client = new Anthropic({ apiKey });
-        const prompt = buildCreativePrompt(body);
-
-        const response = await client.messages.create({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 3000,
-          messages: [{ role: 'user', content: prompt }],
-        });
-
-        const responseText = response.content
-          .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-          .map(block => block.text)
-          .join('');
-
-        let jsonStr = responseText.trim();
-        const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) jsonStr = jsonMatch[1].trim();
-
-        const parsed = JSON.parse(jsonStr);
-        return NextResponse.json({ creatives: parsed.creatives, generated_by: 'ai' });
-      } catch (aiError) {
-        console.error('Claude API error, falling back:', aiError);
-      }
+    // V2.1 § 1.10 정직 원칙 — 휴리스틱 fallback 폐기. API 키 없으면 503.
+    if (!apiKey) {
+      return NextResponse.json({
+        error: 'ANTHROPIC_API_KEY 미설정 — AI 소재 생성 사용 불가',
+        hint: '§ 1.10 정직 원칙에 따라 키워드 슬라이싱 fallback 폐기. 환경변수 ANTHROPIC_API_KEY 설정 후 재시도하세요.',
+      }, { status: 503 });
     }
 
-    // Fallback
-    const fallback = generateFallback(body);
-    return NextResponse.json({ creatives: fallback, generated_by: 'rule' });
+    try {
+      const client = new Anthropic({ apiKey });
+      const prompt = buildCreativePrompt(body);
+
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const responseText = response.content
+        .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+        .map(block => block.text)
+        .join('');
+
+      let jsonStr = responseText.trim();
+      const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) jsonStr = jsonMatch[1].trim();
+
+      const parsed = JSON.parse(jsonStr);
+      return NextResponse.json({ creatives: parsed.creatives, generated_by: 'ai' });
+    } catch (aiError) {
+      console.error('Claude API error:', aiError);
+      return NextResponse.json({
+        error: 'AI 소재 생성 호출 실패',
+        hint: 'API 키 만료/한도 초과 가능. § 1.10 정직 원칙에 따라 휴리스틱 fallback 폐기.',
+      }, { status: 502 });
+    }
   } catch (error) {
     console.error('Creative generation error:', error);
     return NextResponse.json({ error: '소재 생성 중 오류가 발생했습니다' }, { status: 500 });

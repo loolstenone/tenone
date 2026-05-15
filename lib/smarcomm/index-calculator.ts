@@ -12,6 +12,9 @@
 //   - Citability(40%)  = AI 노출 실측 + 인용 가능성 (geoChecks·geoReadiness)
 
 import type { AnalysisResult, AnalysisItem, GeoCheckResult } from './seo-analyzer';
+import type { BrandJourney } from './brand-journey';
+import type { DiscoveryDetail } from './diagnostics-v21';
+import type { BrandPersonalityLlm } from './brand-personality-llm';
 
 export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
 
@@ -49,8 +52,18 @@ export interface IndexBreakdown extends IndexScores {
         estimatedPoints: number;
         action: string;
         description: string;
-    }>;
+        /** V2.1 § 1.10 — LLM 판정 근거 */
+        reason?: string;
+        /** V2.1 § 1.10 — 'llm' = Claude Haiku 실측 */
+        source?: 'llm';
+    }> | null;
     execSummary?: { winning: string; problem: string; nextAction: string; generatedAt: string } | null;
+    /** V2.0 § 3-A SSOT-6 — AI Brand Journey (4지표 + 6 차원) */
+    brandJourney?: BrandJourney | null;
+    /** V2.1 § 3-A SSOT-7 — Discovery sub-engine detail (AI SOV·인용 출처·할루시네이션) */
+    discoveryDetail?: DiscoveryDetail | null;
+    /** V2.1 § 1.10 — LLM 동적 브랜드 페르소나 분석 (36 유형 임의 매핑 폐기) */
+    brandPersonality?: BrandPersonalityLlm | null;
 }
 
 // 0~100 정규화 헬퍼
@@ -118,8 +131,10 @@ export function computeIndex(result: AnalysisResult): IndexBreakdown {
 
     // ── Citability 점수 ──
     // 1. AI 플랫폼 노출 (geoChecks) — 50점 만점
-    const platformCount = result.geoChecks.length || 1;
-    const mentionedCount = result.geoChecks.filter(c => c.mentioned).length;
+    // V2.1 § 1.10 정직 — skipped 플랫폼은 분모에서 제외 (측정 불가 항목 0점 처리 시 점수 부당하게 낮아짐)
+    const activeChecks = result.geoChecks.filter(c => !c.skipped);
+    const platformCount = activeChecks.length || 1;
+    const mentionedCount = activeChecks.filter(c => c.mentioned).length;
     const platformScore = Math.round((mentionedCount / platformCount) * 50);
 
     // 2. AI 준비도 (geoReadiness) — 30점 만점 (도메인 권위도 T4는 maxScore 0이라 합산에서 자동 제외)
@@ -182,6 +197,9 @@ export function computeIndex(result: AnalysisResult): IndexBreakdown {
     };
 }
 
+// V2.1 § 1.10 정직 — Grade 임계값 출처 명시
+// 95/80/60/40 임계값은 SmarComm 자체 SSOT. Google Lighthouse Performance(90+/50-89/<50) 패턴 차용 +
+// 한국 학점 체계(A/B/C/D) 결합. Phase 5 업종 백분위(`smarcomm_industry_benchmarks`)와 결합해 동적 임계값으로 진화 예정.
 export function getGrade(index: number): Grade {
     if (index >= 95) return 'S';
     if (index >= 80) return 'A';
@@ -198,6 +216,9 @@ export const GRADE_META: Record<Grade, { label: string; color: string; descripti
     C: { label: 'C', color: '#F59E0B', description: '개선 필요 — 핵심 항목 누락 다수' },
     D: { label: 'D', color: '#DC2626', description: '심각 — 검색·AI 검색에서 거의 보이지 않음' },
 };
+
+/** Grade 임계값 출처 — UI 출처 칩에 표기 */
+export const GRADE_SOURCE = 'SmarComm 자체 SSOT — Lighthouse 90+/50-89/<50 패턴 차용. Phase 5 업종 백분위 정규화 예정';
 
 // 마케터에게 보여줄 4가지 질문 매핑 SSOT
 export interface MarketerQuestion {

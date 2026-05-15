@@ -16,6 +16,8 @@ export interface GeoCheckResult {
   platform: string;
   mentioned: boolean;
   details: string;
+  /** V2.1 정직성 — true면 측정 불가(API 키 없음 등). Citability 분모 산입에서 제외 */
+  skipped?: boolean;
 }
 
 export interface KeywordInsight {
@@ -718,7 +720,7 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
     else if (wordCount > 1000) { score = 3; }
     else if (wordCount > 300) { score = 2; }
     else { score = 1; }
-    contentSeo.push({ name: '콘텐츠 볼륨', score, maxScore: 5, status: getStatus(score, 5), description: `텍스트 약 ${wordCount}자 — ${wordCount < 500 ? 'thin content 우려' : wordCount > 3000 ? '충분한 콘텐츠' : '보통'}`, action: '핵심 페이지에 1,000자 이상 유용한 콘텐츠 작성' });
+    contentSeo.push({ name: '콘텐츠 볼륨', score, maxScore: 5, status: getStatus(score, 5), description: `텍스트 약 ${wordCount}자 — ${wordCount < 500 ? 'thin content 우려' : wordCount > 3000 ? '충분한 콘텐츠' : '보통'} · ⚠ 표면 측정 (길이만, 의미 깊이 보장 없음 — Phase 5 LLM 깊이 평가 추가 예정)`, action: '핵심 페이지에 1,000자 이상 유용한 콘텐츠 작성' });
   }
 
   // 7. 언어 설정

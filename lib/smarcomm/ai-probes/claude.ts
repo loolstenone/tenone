@@ -12,7 +12,8 @@ import {
     summarizeAnswers,
     skippedPlatform,
 } from './types';
-import { type BrandFacts, extractFromAIResponse, compareFacts } from '../analyzers/fact-extractor';
+import { type BrandFacts } from '../analyzers/fact-extractor';
+import { classifySentimentLLM } from '../sentiment-llm';
 
 // 비용 절감 — Haiku 사용 (Citability는 빠른 사실 추출만 필요)
 const MODEL = 'claude-haiku-4-5-20251001';
@@ -70,17 +71,52 @@ async function askClaude(
 
         const { mentioned, position } = detectMention(rawResponse, brand);
 
-        // Phase 2.5 — 사실 추출 + 비교
+        // V2.1 § 3-A SSOT-7 — sentiment·reasoning·attributes·factComparison 일괄 LLM 실측
+        // § 1.10 정직 원칙: API 키 없으면 모두 N/A. 휴리스틱 fact-extractor 폐기.
         let accuracy: 'exact' | 'partial' | 'wrong' | 'absent' = mentioned ? 'partial' : 'absent';
-        let extractedFacts: BrandFacts | undefined;
-        let factComparison: { field: string; match: 'exact' | 'partial' | 'wrong' | 'missing'; siteValue?: string; aiValue?: string }[] | undefined;
+        const extractedFacts: BrandFacts | undefined = undefined;  // 휴리스틱 폐기 — siteTruth는 LLM 입력으로만 사용
+        let factComparison: { field: string; match: 'exact' | 'partial' | 'wrong' | 'missing'; siteValue?: string; aiValue?: string; reason?: string }[] | undefined;
+        let sentiment: 'positive' | 'neutral' | 'negative' | undefined;
+        let sentimentConfidence: number | undefined;
+        let reasoning: string[] | undefined;
+        let attributes: string[] | undefined;
+        let analysisSource: 'llm' | undefined;
+
         if (mentioned) {
-            extractedFacts = extractFromAIResponse(rawResponse, brand);
-            if (siteTruth) {
-                const cmp = compareFacts(siteTruth, extractedFacts);
-                accuracy = cmp.verdict;
-                factComparison = cmp.details;
+            const llm = await classifySentimentLLM(rawResponse, brand, siteTruth);
+            if (llm) {
+                sentiment = llm.sentiment;
+                sentimentConfidence = llm.confidence;
+                if (llm.reasoning.length > 0) reasoning = llm.reasoning;
+                if (llm.attributes.length > 0) attributes = llm.attributes;
+                analysisSource = 'llm';
+
+                // factComparison — LLM 출력 사용 (휴리스틱 compareFacts 폐기)
+                if (llm.factComparisons.length > 0) {
+                    factComparison = llm.factComparisons.map(c => ({
+                        field: c.field,
+                        match: c.match,
+                        siteValue: c.siteValue,
+                        aiValue: c.aiValue,
+                        reason: c.reason,
+                    }));
+                    // accuracy verdict 산출 (LLM factComparisons로부터)
+                    const matches = llm.factComparisons.map(c => c.match);
+                    const total = matches.length;
+                    if (total === 0) {
+                        accuracy = mentioned ? 'partial' : 'absent';
+                    } else {
+                        const exact = matches.filter(m => m === 'exact').length;
+                        const wrong = matches.filter(m => m === 'wrong').length;
+                        const missing = matches.filter(m => m === 'missing').length;
+                        if (exact === total) accuracy = 'exact';
+                        else if (wrong > 0) accuracy = 'wrong';
+                        else if (missing === total) accuracy = 'absent';
+                        else accuracy = 'partial';
+                    }
+                }
             }
+            // llm === null이면 모든 의미 분석 필드 undefined 유지 → UI에서 N/A
         }
 
         return {
@@ -94,6 +130,11 @@ async function askClaude(
                 accuracy,
                 extractedFacts,
                 factComparison,
+                sentiment,
+                sentimentConfidence,
+                reasoning,
+                attributes,
+                analysisSource,
             },
             measuredAt,
         };
