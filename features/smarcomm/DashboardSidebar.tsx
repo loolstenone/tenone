@@ -73,7 +73,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: '③ 제작',
     items: [
       { href: '/dashboard/creative', label: 'AI 소재 제작', icon: Brush, pack: 'action' },
-      { href: '/dashboard/content', label: '콘텐츠', icon: BookOpen, pack: 'action', dev: true },
+      { href: '/dashboard/content', label: '콘텐츠', icon: BookOpen, pack: 'action' },
       { href: '/dashboard/archive', label: '소재 아카이브', icon: Archive, pack: 'action' },
     ],
   },
@@ -98,7 +98,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
       { href: '/dashboard/airm/actions', label: '교정 액션', icon: ListChecks, pack: 'experiment' },
       { href: '/dashboard/journey', label: '사용자 여정', icon: Route, pack: 'experiment' },
       { href: '/dashboard/events', label: 'AI 답변 변화', icon: Activity, pack: 'experiment' },
-      { href: '/dashboard/abtest', label: 'A/B 테스트', icon: Gauge, pack: 'experiment', dev: true },
+      { href: '/dashboard/abtest', label: 'A/B 테스트', icon: Gauge, pack: 'experiment' },
     ],
   },
   // ⑥ 자산화 — Brand Assetizing

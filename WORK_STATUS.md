@@ -62,6 +62,12 @@
 - **신규 API**: [calendar](app/api/smarcomm/calendar/route.ts) — 월 단위 events + comm_events 통합 조회
 - 페이지 재작성: 월 그리드 + 일 셀별 최대 2 이벤트 미리보기 + 사이드 상세 패널 · DEV 제거 (현재 5월 0행 → 빈 상태)
 
+#### ⑩ Phase B 3페이지 활성화 (CRUD UI 신규 — 기존 빈 테이블 활용)
+- **A/B 테스트** (`/dashboard/abtest`): API [experiments](app/api/smarcomm/experiments/route.ts) — `mkt_experiments` CRUD, 가설/변형/기간 입력 모달 + 카드 + 빈 상태
+- **콘텐츠 라이브러리** (`/dashboard/content`): API [content](app/api/smarcomm/content/route.ts) — `marketing_content` CRUD, 발행물 메타(제목·유형·상태·채널) + 상태 필터, AI 소재 제작 페이지로 분리 링크
+- **광고 캠페인** (`/dashboard/campaigns`): API [campaigns](app/api/smarcomm/campaigns/route.ts) — `marketing_campaigns` CRUD, 채널(네이버 SA/DA·구글·메타·카카오·유튜브·이메일) + 예산 진척 바 + 매체 자동 갱신 안내
+- 3 페이지 모두 DEV 제거 · MOCK 배너 prefix 정리
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.

@@ -18,11 +18,9 @@ const MOCK_PATH_PREFIXES = [
   '/smarcomm/dashboard/geo/tracking',
   '/smarcomm/dashboard/content',
   '/smarcomm/dashboard/analytics',
-  '/smarcomm/dashboard/abtest',
   '/smarcomm/dashboard/data-reports',
   '/smarcomm/dashboard/crm/kakao',
   '/smarcomm/dashboard/crm/push',
-  '/smarcomm/dashboard/campaigns',
 ];
 
 function isMockPath(pathname: string | null): boolean {

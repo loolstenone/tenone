@@ -36,6 +36,14 @@
 - 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
 - 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
 
+### Phase B — A/B + 콘텐츠 + 캠페인 CRUD (3 DEV 페이지)
+- API [experiments](app/api/smarcomm/experiments/route.ts) — `mkt_experiments` GET/POST/PATCH/DELETE + 가설·변형·기간·승자
+- API [content](app/api/smarcomm/content/route.ts) — `marketing_content` GET/POST/PATCH/DELETE + 상태/유형 필터
+- API [campaigns](app/api/smarcomm/campaigns/route.ts) — `marketing_campaigns` GET/POST/PATCH/DELETE + 채널·예산·집행률 집계
+- abtest/content/campaigns 페이지 재작성: 모달 입력 폼 + 카드 리스트 + 빈 상태 + 출처 표기
+- 사이드바 DEV 일괄 제거 (abtest, content, campaigns 모두) + MOCK_PATH_PREFIXES 정리
+- 남은 DEV는 카카오·푸시(외부 API 인프라 필요) 2개
+
 ### Phase A — 5 DEV 페이지 실 DB 활성화
 - 분석 3 (`wio_analytics_events` 803행 기반)
   - 트래픽 (`/dashboard/traffic`) + API [analytics/traffic](app/api/smarcomm/analytics/traffic/route.ts) — 일자/페이지/브랜드 집계 + 체류·이탈
