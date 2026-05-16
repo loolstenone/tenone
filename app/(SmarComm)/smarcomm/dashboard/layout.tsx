@@ -26,8 +26,6 @@ const MOCK_PATH_PREFIXES = [
   '/smarcomm/dashboard/crm',
   '/smarcomm/dashboard/campaigns',
   '/smarcomm/dashboard/calendar',
-  '/smarcomm/dashboard/workflow/projects',
-  '/smarcomm/dashboard/workflow/pipeline',
 ];
 
 function isMockPath(pathname: string | null): boolean {

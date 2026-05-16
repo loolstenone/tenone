@@ -23,6 +23,13 @@
 - Provider 미스매치 버그 수정: `dashboard/layout` + `content/page` `lib/smarcomm/workflow-context` → `lib/workflow-context` 통일
 - 6행 실 DB 태스크 5컬럼에 분포 · DEV + MOCK 배너 prefix 제거
 
+### 프로젝트 + 파이프라인 + 워크플로우 허브
+- 신규 API [app/api/smarcomm/workflow/projects/route.ts](app/api/smarcomm/workflow/projects/route.ts) — `projects` 테이블 8행 + status/phase 정규화
+- 신규 API [app/api/smarcomm/workflow/pipeline/route.ts](app/api/smarcomm/workflow/pipeline/route.ts) — `content_pipeline` 6행 + stage/type 정규화
+- 컨텍스트 projects/pipelineItems 슬라이스도 DB 동기 (mount fetch + optimistic CRUD)
+- 파이프라인 redirect 경로 버그 수정: `/dashboard/content` (404) → `/smarcomm/dashboard/content`
+- 워크플로우 허브 4 KPI(태스크/파이프라인/프로젝트/자동화) 모두 실 집계 · DEV 일괄 제거
+
 ### 자동화 (`/dashboard/workflow/automation`)
 - 신규 API [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` CRUD
 - 컨텍스트 toggle/add/update/delete DB 동기 (toggle setState 내부 PATCH 호출로 race 방지)

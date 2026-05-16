@@ -5,6 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const router = useRouter();
-  useEffect(() => { router.replace('/dashboard/content'); }, [router]);
+  useEffect(() => { router.replace('/smarcomm/dashboard/content'); }, [router]);
   return null;
 }

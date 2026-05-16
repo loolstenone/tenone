@@ -28,6 +28,13 @@
 - **버그 수정**: dashboard/layout이 `lib/smarcomm/workflow-context` Provider로 감쌌으나 kanban/projects/automation은 `lib/workflow-context`의 useWorkflow를 사용 → Provider 미스매치로 Application error. layout과 content 페이지를 통일해 정리
 - 사이드바 DEV 배지 + MOCK 배너 prefix 제거. 6행 실 데이터(LUKI 싱글 / WIO 가이드 / MADLeague S3 등) 5컬럼에 분포
 
+#### ⑤ 프로젝트 (`/dashboard/workflow/projects`) + 파이프라인 (`/dashboard/workflow/pipeline`) + 워크플로우 허브 (`/dashboard/workflow`)
+- **신규 API 2**: [app/api/smarcomm/workflow/projects/route.ts](app/api/smarcomm/workflow/projects/route.ts) — `projects` 테이블 (in-progress/draft/completed → Active/On Hold/Completed) · [app/api/smarcomm/workflow/pipeline/route.ts](app/api/smarcomm/workflow/pipeline/route.ts) — `content_pipeline` (writing→Scripting, filming/editing→Production, published→Published)
+- 컨텍스트의 projects·pipelineItems 슬라이스도 DB 동기 (mount fetch + optimistic CRUD)
+- 파이프라인 redirect 버그 수정: `/dashboard/content` (404) → `/smarcomm/dashboard/content`
+- 프로젝트 8행, 파이프라인 6행 실 데이터 → 워크플로우 허브 KPI 4종(태스크·파이프라인·프로젝트·자동화) 모두 실 집계
+- DEV 일괄 제거: 워크플로우 / 프로젝트 / 파이프라인 prefix · 워크플로우 그룹 4개 완전 활성화
+
 #### ④ 자동화 (`/dashboard/workflow/automation`)
 - **신규 API**: [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` GET/POST/PATCH/DELETE
 - 컨텍스트 자동화 액션도 DB 동기 (toggle 시 setState 내부에서 PATCH 호출 → race condition 방지)

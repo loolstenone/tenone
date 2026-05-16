@@ -112,8 +112,8 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: '⑦ 운영',
     items: [
-      { href: '/dashboard/workflow', label: '워크플로우', icon: ListChecks, pack: 'ops', dev: true },
-      { href: '/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban, pack: 'ops', dev: true },
+      { href: '/dashboard/workflow', label: '워크플로우', icon: ListChecks, pack: 'ops' },
+      { href: '/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban, pack: 'ops' },
       { href: '/dashboard/workflow/kanban', label: '칸반 보드', icon: KanbanSquare, pack: 'ops' },
       { href: '/dashboard/workflow/automation', label: '자동화', icon: Zap, pack: 'ops' },
     ],
