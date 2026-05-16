@@ -51,7 +51,8 @@ export default function AirmHubPage() {
   useEffect(() => {
     (async () => {
       try {
-        const tenantId = localStorage.getItem('smarcomm_company') || 'tenone-demo';
+        // tenant_id는 SSOT — localStorage 회사 정보 객체가 아니라 실제 tenant 식별자
+        const tenantId = 'tenone';
         const [fRes, aRes] = await Promise.all([
           fetch(`/api/smarcomm/airm/flags?tenant_id=${tenantId}&limit=100`),
           fetch(`/api/smarcomm/airm/actions?tenant_id=${tenantId}&limit=100`),
@@ -95,12 +96,16 @@ export default function AirmHubPage() {
         </p>
       </div>
 
-      {/* 4단계 워크플로우 가이드 */}
+      {/* 4단계 워크플로우 가이드 — 각 단계 클릭 시 해당 페이지 이동 */}
       <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StageCard step="①" label="발견" count={openFlags} subLabel="신규 + 검토" color="#DC2626" />
-        <StageCard step="②" label="분석" count={inActionFlags} subLabel="교정 중" color="#F59E0B" />
-        <StageCard step="③" label="교정" count={todoActions + inProgressActions} subLabel="액션 큐" color="#3B82F6" />
-        <StageCard step="④" label="검증" count={fixedFlags} subLabel="완료" color="#10B981" />
+        <StageCard step="①" label="발견" count={openFlags} subLabel="신규 + 검토" color="#DC2626"
+          href="/smarcomm/dashboard/airm/flags" />
+        <StageCard step="②" label="분석" count={inActionFlags} subLabel="교정 중" color="#F59E0B"
+          href="/smarcomm/dashboard/airm/flags?status=in_action" />
+        <StageCard step="③" label="교정" count={todoActions + inProgressActions} subLabel="액션 큐" color="#3B82F6"
+          href="/smarcomm/dashboard/airm/actions" />
+        <StageCard step="④" label="검증" count={fixedFlags} subLabel="답변 변화" color="#10B981"
+          href="/smarcomm/dashboard/events" />
       </div>
 
       {loading ? (
@@ -166,16 +171,17 @@ export default function AirmHubPage() {
   );
 }
 
-function StageCard({ step, label, count, subLabel, color }: { step: string; label: string; count: number; subLabel: string; color: string }) {
+function StageCard({ step, label, count, subLabel, color, href }: { step: string; label: string; count: number; subLabel: string; color: string; href: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-white p-4">
+    <Link href={href} className="rounded-2xl border border-border bg-white p-4 hover:bg-surface transition-colors block">
       <div className="flex items-baseline gap-1.5 mb-1">
         <span className="text-base font-bold" style={{ color }}>{step}</span>
         <span className="text-xs font-semibold text-text">{label}</span>
+        <ArrowRight size={10} className="ml-auto text-text-muted" />
       </div>
       <div className="text-2xl font-bold text-text">{count}</div>
       <div className="text-[10px] text-text-muted">{subLabel}</div>
-    </div>
+    </Link>
   );
 }
 
