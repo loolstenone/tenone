@@ -250,10 +250,10 @@ export default function FunnelPage() {
         <h2 className="mb-4 text-sm font-semibold text-text">SmarComm. AI 인사이트</h2>
         <div className="space-y-2.5">
           {[
-            { severity: 'danger', icon: '🔴', text: 'Consideration 단계가 업종 평균보다 13점 낮습니다. 랜딩 페이지 이탈률(58%)을 줄이기 위해 CTA 위치와 메시지를 개선하세요.', action: 'A/B 테스트 시작', href: '/dashboard/abtest' },
-            { severity: 'warning', icon: '🟡', text: 'Retention 단계의 재방문율이 지속 하락 중입니다(-2%). 7일 미방문 사용자에게 자동 리마인더를 설정하세요.', action: '자동화 설정', href: '/dashboard/workflow/automation' },
+            { severity: 'danger', icon: '🔴', text: 'Consideration 단계가 업종 평균보다 13점 낮습니다. 랜딩 페이지 이탈률(58%)을 줄이기 위해 CTA 위치와 메시지를 개선하세요.', action: 'A/B 테스트 시작', href: '/smarcomm/dashboard/abtest' },
+            { severity: 'warning', icon: '🟡', text: 'Retention 단계의 재방문율이 지속 하락 중입니다(-2%). 7일 미방문 사용자에게 자동 리마인더를 설정하세요.', action: '자동화 설정', href: '/smarcomm/dashboard/workflow/automation' },
             { severity: 'success', icon: '🟢', text: 'Purchase 전환율이 전월 대비 +0.3% 상승하여 업종 평균을 초과했습니다. 현재 소재와 랜딩을 유지하세요.', action: '', href: '' },
-            { severity: 'info', icon: '💡', text: 'Advocacy 단계의 NPS가 36으로 상승 중입니다. 리뷰 작성 인센티브를 도입하면 추천 전환이 더 늘어날 것으로 예상됩니다.', action: '푸시 발송', href: '/dashboard/crm/push' },
+            { severity: 'info', icon: '💡', text: 'Advocacy 단계의 NPS가 36으로 상승 중입니다. 리뷰 작성 인센티브를 도입하면 추천 전환이 더 늘어날 것으로 예상됩니다.', action: '푸시 발송', href: '/smarcomm/dashboard/crm/push' },
           ].map((insight, i) => (
             <div key={i} className="flex items-start justify-between gap-3 rounded-xl border border-border px-4 py-3">
               <div className="flex items-start gap-3 min-w-0">
@@ -270,7 +270,7 @@ export default function FunnelPage() {
         </div>
       </div>
 
-      <NextStepCTA stage="진단 → 기획" title="병목 구간 기반으로 개선 프로젝트 시작" description="퍼널 분석 결과를 프로젝트와 태스크로 전환하여 체계적으로 개선하세요" actionLabel="프로젝트 생성" href="/dashboard/workflow/projects" />
+      <NextStepCTA stage="진단 → 기획" title="병목 구간 기반으로 개선 프로젝트 시작" description="퍼널 분석 결과를 프로젝트와 태스크로 전환하여 체계적으로 개선하세요" actionLabel="프로젝트 생성" href="/smarcomm/dashboard/workflow/projects" />
     </div>
   );
 }

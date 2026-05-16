@@ -15,91 +15,91 @@ import Link from 'next/link';
 // ── 메뉴별 키워드 매핑 (블로그/가이드 자동 매칭용) ──
 const MENU_KEYWORDS: Record<string, string[]> = {
   // Core
-  '/dashboard': ['KPI', '대시보드', 'ROAS', '마케팅', '트렌드', '프로세스', '퍼널 분석'],
-  '/dashboard/funnel': ['퍼널', '퍼널 분석', '전환', '이탈', '전환율', 'Awareness', 'Interest', 'Consideration', 'Purchase', 'Retention', 'Advocacy', '병목', '건강도'],
-  '/dashboard/scan': ['GEO', 'SEO', '진단', '검색', 'AI', '스키마', '크롤링', '점수', 'Index'],
-  '/dashboard/traffic': ['트래픽', '유입', '채널', 'GA4', '세션', '사용자', 'AI 추천', '오디언스', '디바이스', '페이지'],
-  '/dashboard/analytics': ['매출', '분석', 'ROAS', 'ROI', '수익', '광고비', '추이'],
-  '/dashboard/reports': ['보고서', '리포트', '성과', '채널', '캠페인', 'KPI', 'CPA'],
-  '/dashboard/data-reports': ['데이터', '리포트', '통합', '분석', '커스텀', '템플릿', '업종', '프리셋'],
+  '/smarcomm/dashboard': ['KPI', '대시보드', 'ROAS', '마케팅', '트렌드', '프로세스', '퍼널 분석'],
+  '/smarcomm/dashboard/funnel': ['퍼널', '퍼널 분석', '전환', '이탈', '전환율', 'Awareness', 'Interest', 'Consideration', 'Purchase', 'Retention', 'Advocacy', '병목', '건강도'],
+  '/smarcomm/dashboard/scan': ['GEO', 'SEO', '진단', '검색', 'AI', '스키마', '크롤링', '점수', 'Index'],
+  '/smarcomm/dashboard/traffic': ['트래픽', '유입', '채널', 'GA4', '세션', '사용자', 'AI 추천', '오디언스', '디바이스', '페이지'],
+  '/smarcomm/dashboard/analytics': ['매출', '분석', 'ROAS', 'ROI', '수익', '광고비', '추이'],
+  '/smarcomm/dashboard/reports': ['보고서', '리포트', '성과', '채널', '캠페인', 'KPI', 'CPA'],
+  '/smarcomm/dashboard/data-reports': ['데이터', '리포트', '통합', '분석', '커스텀', '템플릿', '업종', '프리셋'],
   // AI 가시성
-  '/dashboard/geo': ['AI 가시성', 'GEO', '멘션', 'ChatGPT', 'Perplexity', 'Gemini', 'Claude', '브랜드', '프롬프트'],
-  '/dashboard/geo/competitors': ['경쟁사', 'AI 가시성', '리서치', '비교', '점수'],
-  '/dashboard/geo/prompts': ['프롬프트', '리서치', '검색', '멘션', '포지션', 'AI'],
-  '/dashboard/geo/brand': ['브랜드', '인식', '감성', '내러티브', '실적', 'NPS'],
-  '/dashboard/geo/tracking': ['프롬프트', '추적', '모니터링', '포지션', '변화'],
+  '/smarcomm/dashboard/geo': ['AI 가시성', 'GEO', '멘션', 'ChatGPT', 'Perplexity', 'Gemini', 'Claude', '브랜드', '프롬프트'],
+  '/smarcomm/dashboard/geo/competitors': ['경쟁사', 'AI 가시성', '리서치', '비교', '점수'],
+  '/smarcomm/dashboard/geo/prompts': ['프롬프트', '리서치', '검색', '멘션', '포지션', 'AI'],
+  '/smarcomm/dashboard/geo/brand': ['브랜드', '인식', '감성', '내러티브', '실적', 'NPS'],
+  '/smarcomm/dashboard/geo/tracking': ['프롬프트', '추적', '모니터링', '포지션', '변화'],
   // 액션팩
-  '/dashboard/creative': ['소재', '카피', '배너', '크리에이티브', 'A/B', 'CTR', '제작', 'AI'],
-  '/dashboard/content': ['콘텐츠', '주제', 'SEO 최적화', '재활용', '블로그', '채널', '퍼널'],
-  '/dashboard/advisor': ['AI 어드바이저', '인사이트', '추천', '액션', '예산', 'Before', 'After', '병목'],
+  '/smarcomm/dashboard/creative': ['소재', '카피', '배너', '크리에이티브', 'A/B', 'CTR', '제작', 'AI'],
+  '/smarcomm/dashboard/content': ['콘텐츠', '주제', 'SEO 최적화', '재활용', '블로그', '채널', '퍼널'],
+  '/smarcomm/dashboard/advisor': ['AI 어드바이저', '인사이트', '추천', '액션', '예산', 'Before', 'After', '병목'],
   // CRM팩
-  '/dashboard/crm': ['CRM', '고객', '리드', '관리', '파이프라인', '세그먼트'],
-  '/dashboard/crm/kakao': ['카카오', '알림톡', '친구톡', '비즈메시지', '발송', 'CRM'],
-  '/dashboard/crm/email': ['이메일', '자동화', '드립', '뉴스레터', '발송', '오픈율'],
-  '/dashboard/crm/push': ['푸시', '알림', '메시지', '발송', '세그먼트', '클릭'],
+  '/smarcomm/dashboard/crm': ['CRM', '고객', '리드', '관리', '파이프라인', '세그먼트'],
+  '/smarcomm/dashboard/crm/kakao': ['카카오', '알림톡', '친구톡', '비즈메시지', '발송', 'CRM'],
+  '/smarcomm/dashboard/crm/email': ['이메일', '자동화', '드립', '뉴스레터', '발송', '오픈율'],
+  '/smarcomm/dashboard/crm/push': ['푸시', '알림', '메시지', '발송', '세그먼트', '클릭'],
   // 실험팩
-  '/dashboard/abtest': ['A/B', '테스트', '실험', '전환율', 'CTR', '소재', '유의성', '통계'],
-  '/dashboard/journey': ['여정', '고객', '접점', '퍼널', '전환', '타임라인', '이탈'],
-  '/dashboard/cohort': ['코호트', '리텐션', '세그먼트', '이탈', '그룹', '히트맵'],
-  '/dashboard/events': ['이벤트', '추적', '트래킹', '전환', '데이터', '연동', '매핑'],
+  '/smarcomm/dashboard/abtest': ['A/B', '테스트', '실험', '전환율', 'CTR', '소재', '유의성', '통계'],
+  '/smarcomm/dashboard/journey': ['여정', '고객', '접점', '퍼널', '전환', '타임라인', '이탈'],
+  '/smarcomm/dashboard/cohort': ['코호트', '리텐션', '세그먼트', '이탈', '그룹', '히트맵'],
+  '/smarcomm/dashboard/events': ['이벤트', '추적', '트래킹', '전환', '데이터', '연동', '매핑'],
   // 운영팩
-  '/dashboard/workflow/projects': ['프로젝트', '캠페인', '기획', '관리', 'Phase', '진행률'],
-  '/dashboard/workflow/kanban': ['칸반', '태스크', '보드', '관리', '드래그', '우선순위'],
-  '/dashboard/calendar': ['캘린더', '일정', '시즌', '스케줄', '기획', '이벤트'],
-  '/dashboard/workflow/pipeline': ['파이프라인', '콘텐츠', '제작', '아이디어', '발행'],
-  '/dashboard/archive': ['아카이브', '소재', '보관', '라이브러리', '캠페인'],
+  '/smarcomm/dashboard/workflow/projects': ['프로젝트', '캠페인', '기획', '관리', 'Phase', '진행률'],
+  '/smarcomm/dashboard/workflow/kanban': ['칸반', '태스크', '보드', '관리', '드래그', '우선순위'],
+  '/smarcomm/dashboard/calendar': ['캘린더', '일정', '시즌', '스케줄', '기획', '이벤트'],
+  '/smarcomm/dashboard/workflow/pipeline': ['파이프라인', '콘텐츠', '제작', '아이디어', '발행'],
+  '/smarcomm/dashboard/archive': ['아카이브', '소재', '보관', '라이브러리', '캠페인'],
   // 집행팩
-  '/dashboard/campaigns': ['캠페인', '광고', '집행', '네이버', '메타', '구글', 'ROAS', 'CPA', '전환'],
-  '/dashboard/workflow/automation': ['자동화', '트리거', '규칙', '워크플로우', '액션', '조건'],
+  '/smarcomm/dashboard/campaigns': ['캠페인', '광고', '집행', '네이버', '메타', '구글', 'ROAS', 'CPA', '전환'],
+  '/smarcomm/dashboard/workflow/automation': ['자동화', '트리거', '규칙', '워크플로우', '액션', '조건'],
   // 설정
-  '/dashboard/admin': ['관리', '블로그', 'SEO', '사이트', '설정', 'CMS', '회원', '페이지'],
-  '/dashboard/workflow': ['워크플로우', '현황', '태스크', '파이프라인', '프로젝트', '자동화'],
-  '/dashboard/profile': ['설정', '워크스페이스', '멤버', '연동', '팔레트', 'OAuth', 'API'],
-  '/dashboard/members': ['멤버', '권한', '역할', '초대', '관리자'],
-  '/dashboard/glossary': ['용어', '사전', '마케팅', '검색', '카테고리'],
-  '/dashboard/guide': ['가이드', '사용법', '시작', '도움말'],
+  '/smarcomm/dashboard/admin': ['관리', '블로그', 'SEO', '사이트', '설정', 'CMS', '회원', '페이지'],
+  '/smarcomm/dashboard/workflow': ['워크플로우', '현황', '태스크', '파이프라인', '프로젝트', '자동화'],
+  '/smarcomm/dashboard/profile': ['설정', '워크스페이스', '멤버', '연동', '팔레트', 'OAuth', 'API'],
+  '/smarcomm/dashboard/members': ['멤버', '권한', '역할', '초대', '관리자'],
+  '/smarcomm/dashboard/glossary': ['용어', '사전', '마케팅', '검색', '카테고리'],
+  '/smarcomm/dashboard/guide': ['가이드', '사용법', '시작', '도움말'],
 };
 
 // ── 메뉴 → 가이드 1:1 직접 매핑 ──
 const MENU_GUIDE_MAP: Record<string, string> = {
-  '/dashboard': 'process-overview',
-  '/dashboard/funnel': 'breaking-funnel-guide',
-  '/dashboard/scan': 'site-scan',
-  '/dashboard/traffic': 'traffic-guide',
-  '/dashboard/analytics': 'analytics-guide',
-  '/dashboard/reports': 'campaign-report-guide',
-  '/dashboard/data-reports': 'data-report-guide',
-  '/dashboard/geo': 'geo-overview-guide',
-  '/dashboard/geo/competitors': 'geo-competitors-guide',
-  '/dashboard/geo/prompts': 'geo-prompts-guide',
-  '/dashboard/geo/brand': 'geo-brand-guide',
-  '/dashboard/geo/tracking': 'geo-tracking-guide',
-  '/dashboard/creative': 'creative',
-  '/dashboard/content': 'content-guide',
-  '/dashboard/advisor': 'advisor-guide',
-  '/dashboard/crm': 'crm-guide',
-  '/dashboard/crm/kakao': 'kakao-guide',
-  '/dashboard/crm/email': 'email-automation',
-  '/dashboard/crm/push': 'push-setup',
-  '/dashboard/abtest': 'abtest-guide',
-  '/dashboard/journey': 'journey-guide',
-  '/dashboard/cohort': 'cohort',
-  '/dashboard/events': 'events-guide',
-  '/dashboard/workflow/projects': 'project-guide',
-  '/dashboard/workflow/kanban': 'kanban-guide',
-  '/dashboard/calendar': 'calendar-guide',
-  '/dashboard/workflow/pipeline': 'pipeline-guide',
-  '/dashboard/archive': 'archive-guide',
-  '/dashboard/campaigns': 'campaigns-guide',
-  '/dashboard/workflow/automation': 'automation-guide',
-  '/dashboard/admin': 'admin-guide',
-  '/dashboard/workflow': 'kanban-guide',
-  '/dashboard/profile': 'workspace-guide',
+  '/smarcomm/dashboard': 'process-overview',
+  '/smarcomm/dashboard/funnel': 'breaking-funnel-guide',
+  '/smarcomm/dashboard/scan': 'site-scan',
+  '/smarcomm/dashboard/traffic': 'traffic-guide',
+  '/smarcomm/dashboard/analytics': 'analytics-guide',
+  '/smarcomm/dashboard/reports': 'campaign-report-guide',
+  '/smarcomm/dashboard/data-reports': 'data-report-guide',
+  '/smarcomm/dashboard/geo': 'geo-overview-guide',
+  '/smarcomm/dashboard/geo/competitors': 'geo-competitors-guide',
+  '/smarcomm/dashboard/geo/prompts': 'geo-prompts-guide',
+  '/smarcomm/dashboard/geo/brand': 'geo-brand-guide',
+  '/smarcomm/dashboard/geo/tracking': 'geo-tracking-guide',
+  '/smarcomm/dashboard/creative': 'creative',
+  '/smarcomm/dashboard/content': 'content-guide',
+  '/smarcomm/dashboard/advisor': 'advisor-guide',
+  '/smarcomm/dashboard/crm': 'crm-guide',
+  '/smarcomm/dashboard/crm/kakao': 'kakao-guide',
+  '/smarcomm/dashboard/crm/email': 'email-automation',
+  '/smarcomm/dashboard/crm/push': 'push-setup',
+  '/smarcomm/dashboard/abtest': 'abtest-guide',
+  '/smarcomm/dashboard/journey': 'journey-guide',
+  '/smarcomm/dashboard/cohort': 'cohort',
+  '/smarcomm/dashboard/events': 'events-guide',
+  '/smarcomm/dashboard/workflow/projects': 'project-guide',
+  '/smarcomm/dashboard/workflow/kanban': 'kanban-guide',
+  '/smarcomm/dashboard/calendar': 'calendar-guide',
+  '/smarcomm/dashboard/workflow/pipeline': 'pipeline-guide',
+  '/smarcomm/dashboard/archive': 'archive-guide',
+  '/smarcomm/dashboard/campaigns': 'campaigns-guide',
+  '/smarcomm/dashboard/workflow/automation': 'automation-guide',
+  '/smarcomm/dashboard/admin': 'admin-guide',
+  '/smarcomm/dashboard/workflow': 'kanban-guide',
+  '/smarcomm/dashboard/profile': 'workspace-guide',
 };
 
 // 키워드 기반으로 블로그 글 매칭
 function getMatchedBlogs(pathname: string): BlogPost[] {
-  const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/dashboard'] || [];
+  const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/smarcomm/dashboard'] || [];
   const posts = getPublishedPosts();
   const scored = posts.map(post => {
     let score = 0;
@@ -118,7 +118,7 @@ function getPrimaryGuide(pathname: string): Guide | null {
 }
 
 function getRelatedGuides(pathname: string, excludeId?: string): Guide[] {
-  const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/dashboard'] || [];
+  const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/smarcomm/dashboard'] || [];
   const scored = GUIDES
     .filter(g => g.id !== excludeId)
     .map(guide => {
@@ -461,7 +461,7 @@ export default function ContextPanel({ isOpen, onClose }: ContextPanelProps) {
 
             {/* ── 사전 탭 ── */}
             {panelTab === 'glossary' && (() => {
-              const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/dashboard'] || [];
+              const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/smarcomm/dashboard'] || [];
               const matched = GLOSSARY.filter(term => {
                 const text = `${term.en} ${term.ko} ${term.category} ${term.definition}`.toLowerCase();
                 return keywords.some(kw => text.includes(kw.toLowerCase()));

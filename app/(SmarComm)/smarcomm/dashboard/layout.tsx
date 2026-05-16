@@ -151,7 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }}>
                 <div className="flex gap-1.5 py-1">
                   {favorites.map(fav => (
-                    <Link key={fav.path} href={fav.path}
+                    <Link key={fav.path} href={`/smarcomm${fav.path}`}
                       className="shrink-0 flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs text-text-sub hover:bg-surface hover:text-text transition-colors">
                       <Star size={10} className="text-warning fill-warning" />
                       {fav.label}
@@ -173,7 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {profileOpen && (
             <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border bg-white py-1.5 shadow-lg z-50">
-              <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
+              <Link href="/smarcomm/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
               <Link href="/" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>SmarComm 홈</Link>
               <div className="my-1 border-t border-border" />
               <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text-muted hover:bg-surface hover:text-text">

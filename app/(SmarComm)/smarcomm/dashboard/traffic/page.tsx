@@ -79,7 +79,7 @@ export default function TrafficPage() {
             <div className="text-[10px] text-text-muted">현재는 샘플 데이터가 표시됩니다</div>
           </div>
         </div>
-        <a href="/dashboard/profile" className="rounded-lg bg-point px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-point/80">GA4 연동 →</a>
+        <a href="/smarcomm/dashboard/profile" className="rounded-lg bg-point px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-point/80">GA4 연동 →</a>
       </div>
 
       {/* KPI */}
@@ -222,7 +222,7 @@ export default function TrafficPage() {
         </div>
       </div>
 
-      <NextStepCTA stage="진단 → 기획" title="트래픽 분석을 기반으로 마케팅 전략 수립" description="유입 채널별 성과를 분석하고 예산을 최적화하세요" actionLabel="AI 어드바이저" href="/dashboard/advisor" />
+      <NextStepCTA stage="진단 → 기획" title="트래픽 분석을 기반으로 마케팅 전략 수립" description="유입 채널별 성과를 분석하고 예산을 최적화하세요" actionLabel="AI 어드바이저" href="/smarcomm/dashboard/advisor" />
     </div>
   );
 }

@@ -192,7 +192,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 {companyName.charAt(0).toUpperCase()}
               </div>
             ) : (
-              <Link href="/dashboard/profile" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-text-muted/40 text-text-muted hover:border-text hover:text-text" title="로고 설정">
+              <Link href="/smarcomm/dashboard/profile" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-text-muted/40 text-text-muted hover:border-text hover:text-text" title="로고 설정">
                 <span className="text-sm">+</span>
               </Link>
             )}
@@ -201,9 +201,9 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 {companyName ? (
                   <div className="text-[10px] text-text-muted truncate">{companyName}</div>
                 ) : (
-                  <Link href="/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
+                  <Link href="/smarcomm/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
                 )}
-                <Link href="/dashboard" className="text-base font-extrabold text-text tracking-tight leading-tight hover:opacity-70 transition-opacity">Workspace</Link>
+                <Link href="/smarcomm/dashboard" className="text-base font-extrabold text-text tracking-tight leading-tight hover:opacity-70 transition-opacity">Workspace</Link>
               </div>
             )}
           </div>
@@ -231,7 +231,8 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
               )}
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
+                const fullHref = `/smarcomm${item.href}`;
+                const isActive = pathname === fullHref;
                 const itemPack = item.pack || 'core';
                 const requiredTier = PACK_TIER[itemPack] || 'starter';
                 const requiredTierIndex = TIER_ORDER.indexOf(requiredTier);
@@ -240,7 +241,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={fullHref}
                     title={collapsed ? `${item.label}${isDev ? ' (개발 중)' : ''}` : undefined}
                     className={`flex items-center rounded-lg py-1.5 text-sm transition-colors mb-px ${
                       collapsed ? 'justify-center px-0' : 'gap-2.5 px-3'
