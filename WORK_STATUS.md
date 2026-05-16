@@ -83,6 +83,15 @@
 - `smarcomm/login/page.tsx` redirect 경로 수정: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
 - `dashboard/layout.tsx` localStorage 직접 접근 → `getSetting('smarcomm','company','smarcomm_company')` (DB-first + localStorage fallback) 패턴으로 전환 (이미 profile 페이지에서 사용 중인 `user_settings` 통합)
 
+#### ⑬ Phase E+ 즐겨찾기 user_settings 통합 + 경로 정규화 버그 수정
+- **버그 발견**: PageTopBar가 `pathname` (예: `/smarcomm/dashboard/X`)을 그대로 저장했으나 layout nameMap은 `/dashboard/X` 키 기대 → 라벨 매칭 실패 + 렌더 시 `/smarcomm` 이중 prefix 가능성
+- **수정**: PageTopBar `normalize()` 함수로 `/smarcomm` prefix 제거 후 저장 + `getSetting/setSetting` 사용 (user_settings DB-first)
+- **layout**: 즐겨찾기 로드도 `getSetting('smarcomm','favorites','smarcomm_favorites')` 사용. localStorage 직접 접근 제거 (멀티디바이스 동기 가능)
+- nameMap 라벨 일부 정정 (이벤트 관리 → AI 답변 변화, 광고 집행 → 광고 캠페인, 아카이브 → 소재 아카이브)
+
+#### ⑭ CLAUDE.md 이월 작업 SSOT 갱신
+- 완료 항목 12건 별도 표기, 진짜 블로커(외부 키 6종) + 내부 작업(`wio_feature_flags`·AIRM 검증·자동화)으로 재정렬
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.

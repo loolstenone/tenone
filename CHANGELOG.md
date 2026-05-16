@@ -36,6 +36,15 @@
 - 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
 - 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
 
+### Phase E+ — 즐겨찾기 user_settings 통합 + 경로 정규화 버그 수정
+- PageTopBar: `pathname` (`/smarcomm/...`) 그대로 저장 버그 → `normalize()`로 `/smarcomm` 제거 후 저장 (nameMap 매칭 + 렌더 prefix 일관성)
+- PageTopBar 즐겨찾기 읽기/쓰기 `getSetting/setSetting` 사용 (user_settings DB-first + localStorage fallback)
+- dashboard/layout 즐겨찾기 로드도 동일 패턴 적용 → 멀티디바이스 동기 가능
+- nameMap 라벨 정정 3건 (이벤트 관리/광고 집행/아카이브)
+
+### CLAUDE.md 이월 작업 SSOT 갱신
+- 세션 138~139 완료 12건 표기 · 외부 키 블로커 6종 + 내부 작업 4종으로 재구성
+
 ### Phase E — 운영 정합성 정리
 - `smarcomm/login/page.tsx` redirect 경로: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
 - `dashboard/layout.tsx` localStorage 직접 접근 제거 → `getSetting('smarcomm','company',...)` (`user_settings` DB-first + localStorage fallback)
