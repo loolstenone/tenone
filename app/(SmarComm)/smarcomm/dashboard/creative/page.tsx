@@ -29,6 +29,7 @@ function CreativePageInner() {
   const [generated, setGenerated] = useState<GeneratedCreative[]>([]);
   const [generatedBy, setGeneratedBy] = useState<'ai' | 'rule'>('rule');
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [genError, setGenError] = useState<string | null>(null);
 
   // 기획서에서 넘어온 컨텍스트 자동 적용
   useEffect(() => {
@@ -58,7 +59,7 @@ function CreativePageInner() {
         }
       } catch { /* ignore */ }
 
-      const res = await fetch('/api/creative/generate', {
+      const res = await fetch('/api/smarcomm/creative/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,9 +74,18 @@ function CreativePageInner() {
         const data = await res.json();
         setGenerated(data.creatives || []);
         setGeneratedBy(data.generated_by || 'rule');
+        setGenError(null);
+      } else if (res.status === 503) {
+        const data = await res.json().catch(() => ({}));
+        setGenError(data.error || 'AI 소재 생성기가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.');
+      } else if (res.status === 401) {
+        setGenError('세션이 만료되었습니다. 다시 로그인해주세요.');
+      } else {
+        setGenError(`소재 생성 실패 (${res.status}). 잠시 후 다시 시도해주세요.`);
       }
     } catch (e) {
       console.error('Creative generation failed:', e);
+      setGenError('네트워크 오류로 소재 생성에 실패했습니다.');
     }
     setGenerating(false);
   };
@@ -135,6 +145,12 @@ function CreativePageInner() {
         </div>
       </div>
 
+      {genError && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          ⚠ {genError}
+        </div>
+      )}
+
       {/* 생성 결과 */}
       {generated.length > 0 && (
         <div className="mb-6 rounded-2xl border border-border bg-white p-5">
@@ -180,7 +196,7 @@ function CreativePageInner() {
       <div className="rounded-2xl border border-border bg-white">
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <h2 className="text-sm font-semibold text-text">최근 소재</h2>
-          <button onClick={() => window.location.href = '/dashboard/archive'} className="text-xs text-text-muted hover:text-text">전체 아카이브 →</button>
+          <button onClick={() => window.location.href = '/smarcomm/dashboard/archive'} className="text-xs text-text-muted hover:text-text">전체 아카이브 →</button>
         </div>
         <table className="w-full text-sm">
           <thead><tr className="border-b border-border text-xs text-text-muted">
@@ -207,7 +223,7 @@ function CreativePageInner() {
         </table>
       </div>
 
-      <NextStepCTA stage="제작 → 실행" title="완성된 소재를 광고 채널에 집행" description="제작된 카피와 배너를 네이버, 메타, 구글 등에서 바로 집행하세요" actionLabel="캠페인 집행" href="/dashboard/campaigns" />
+      <NextStepCTA stage="제작 → 실행" title="완성된 소재를 광고 채널에 집행" description="제작된 카피와 배너를 네이버, 메타, 구글 등에서 바로 집행하세요" actionLabel="캠페인 집행" href="/smarcomm/dashboard/campaigns" />
     </div>
   );
 }

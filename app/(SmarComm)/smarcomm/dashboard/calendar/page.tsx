@@ -1,103 +1,174 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { MOCK_CALENDAR } from '@/lib/smarcomm/dashboard-data';
-import { getChartColors } from '@/lib/smarcomm/chart-palette';
+// 마케팅 캘린더 — events + comm_events 통합 (월 단위)
+import { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
+interface CalEvent {
+    id: string;
+    title: string;
+    description: string;
+    start_at: string;
+    end_at: string | null;
+    all_day: boolean;
+    location: string;
+    color: string;
+    source: 'events' | 'comm_events';
+    kind: string;
+}
+
+interface CalResp { month: string; total: number; events: CalEvent[] }
+
+function ymKey(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // 2026년 3월
-  const [events, setEvents] = useState(MOCK_CALENDAR);
-  const [newTitle, setNewTitle] = useState('');
-  const [newDate, setNewDate] = useState('');
-  const [newType, setNewType] = useState<'campaign' | 'video' | 'season' | 'content'>('campaign');
+    const [cursor, setCursor] = useState<Date>(() => new Date());
+    const [data, setData] = useState<CalResp | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+    useEffect(() => {
+        setLoading(true);
+        fetch(`/api/smarcomm/calendar?month=${ymKey(cursor)}`)
+            .then(r => r.json())
+            .then(setData)
+            .finally(() => setLoading(false));
+    }, [cursor]);
 
-  const days = Array.from({ length: 42 }, (_, i) => {
-    const day = i - firstDay + 1;
-    if (day < 1 || day > daysInMonth) return null;
-    return day;
-  });
+    const grid = useMemo(() => {
+        const y = cursor.getFullYear();
+        const m = cursor.getMonth();
+        const firstDay = new Date(y, m, 1).getDay();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const cells: { day: number | null; events: CalEvent[] }[] = [];
+        for (let i = 0; i < firstDay; i++) cells.push({ day: null, events: [] });
+        for (let d = 1; d <= daysInMonth; d++) {
+            const events = (data?.events ?? []).filter(e => {
+                const dt = new Date(e.start_at);
+                return dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d;
+            });
+            cells.push({ day: d, events });
+        }
+        return cells;
+    }, [cursor, data]);
 
-  const pc = getChartColors(7);
-  const typeColors = { campaign: pc[0], video: pc[1], season: pc[2], content: pc[3] };
-  const typeLabels = { campaign: '캠페인', video: '영상', season: '시즌', content: '콘텐츠' };
+    const selectedEvents = selectedDay
+        ? (data?.events ?? []).filter(e => {
+            const dt = new Date(e.start_at);
+            return dt.getFullYear() === cursor.getFullYear() && dt.getMonth() === cursor.getMonth() && dt.getDate() === selectedDay;
+        })
+        : (data?.events ?? []).slice(0, 5);
 
-  const getEventsForDay = (day: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return events.filter(e => e.date === dateStr);
-  };
+    return (
+        <div className="max-w-6xl">
+            <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
 
-  const handleAdd = () => {
-    if (!newTitle || !newDate) return;
-    setEvents([...events, { id: `e${Date.now()}`, title: newTitle, date: newDate, type: newType, color: typeColors[newType] }]);
-    setNewTitle(''); setNewDate('');
-  };
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-bold text-text">마케팅 캘린더</h1>
+                        <GuideHelpButton />
+                    </div>
+                    <p className="mt-1 text-xs text-text-muted">이벤트·캠페인·발송 일정을 통합 관리합니다</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+                        className="rounded-lg border border-border bg-white p-1.5 hover:bg-surface">
+                        <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-sm font-semibold text-text min-w-[100px] text-center">
+                        {cursor.getFullYear()}.{String(cursor.getMonth() + 1).padStart(2, '0')}
+                    </span>
+                    <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+                        className="rounded-lg border border-border bg-white p-1.5 hover:bg-surface">
+                        <ChevronRight size={14} />
+                    </button>
+                    <button onClick={() => { setCursor(new Date()); setSelectedDay(null); }}
+                        className="rounded-lg border border-border bg-white px-3 py-1.5 text-xs hover:bg-surface">오늘</button>
+                </div>
+            </div>
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <Kpi label="이번 달 일정" value={data?.total ?? 0} loading={loading} accent="#0F172A" />
+                <Kpi label="일반 이벤트" value={(data?.events ?? []).filter(e => e.source === 'events').length} loading={loading} accent="#3b82f6" />
+                <Kpi label="커뮤니케이션" value={(data?.events ?? []).filter(e => e.source === 'comm_events').length} loading={loading} accent="#8b5cf6" />
+            </div>
 
-  return (
-    <div className="max-w-4xl">
-      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
-      <div className="flex items-center gap-2 mb-6"><h1 className="text-xl font-bold text-text">마케팅 캘린더</h1><GuideHelpButton /></div>
+            <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+                <div className="rounded-2xl border border-border bg-white p-4">
+                    <div className="grid grid-cols-7 gap-1 mb-2 text-xs text-text-muted text-center">
+                        {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d}>{d}</div>)}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                        {grid.map((cell, i) => {
+                            const isSelected = cell.day === selectedDay;
+                            return (
+                                <button key={i}
+                                    onClick={() => cell.day && setSelectedDay(cell.day)}
+                                    disabled={!cell.day}
+                                    className={`aspect-square rounded-lg border p-1.5 text-left text-xs transition-colors ${cell.day ? (isSelected ? 'border-text bg-surface' : 'border-border hover:bg-surface') : 'border-transparent'}`}>
+                                    {cell.day && (
+                                        <>
+                                            <div className="font-medium text-text-sub">{cell.day}</div>
+                                            <div className="mt-1 space-y-0.5">
+                                                {cell.events.slice(0, 2).map(e => (
+                                                    <div key={e.id} className="truncate rounded px-1 py-px text-[9px] text-white"
+                                                        style={{ background: e.color }}>{e.title}</div>
+                                                ))}
+                                                {cell.events.length > 2 && (
+                                                    <div className="text-[9px] text-text-muted">+{cell.events.length - 2}</div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
 
-      {/* Month Navigation */}
-      <div className="mb-4 flex items-center justify-between">
-        <button onClick={prevMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronLeft size={16} /></button>
-        <span className="text-base font-semibold text-text">{year}년 {month + 1}월</span>
-        <button onClick={nextMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronRight size={16} /></button>
-      </div>
+                <div className="rounded-2xl border border-border bg-white p-5">
+                    <h2 className="mb-3 text-sm font-semibold text-text">
+                        {selectedDay ? `${cursor.getMonth() + 1}/${selectedDay} 일정` : '곧 다가오는 일정'}
+                    </h2>
+                    {selectedEvents.length === 0 && <div className="text-xs text-text-muted">예정된 일정이 없습니다</div>}
+                    <div className="space-y-3">
+                        {selectedEvents.map(e => (
+                            <div key={e.id} className="border-l-2 pl-3" style={{ borderColor: e.color }}>
+                                <div className="text-xs font-semibold text-text">{e.title}</div>
+                                <div className="mt-0.5 text-[10px] text-text-muted">
+                                    {new Date(e.start_at).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                {e.location && (
+                                    <div className="mt-0.5 flex items-center gap-1 text-[10px] text-text-muted">
+                                        <MapPin size={9} /> {e.location}
+                                    </div>
+                                )}
+                                {e.kind && e.kind !== 'general' && (
+                                    <span className="mt-1 inline-block rounded-full bg-surface px-1.5 py-0.5 text-[9px] text-text-sub">{e.kind}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-      {/* Calendar Grid */}
-      <div className="mb-6 rounded-2xl border border-border bg-white overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-border bg-surface">
-          {['일', '월', '화', '수', '목', '금', '토'].map(d => (
-            <div key={d} className="py-2 text-center text-xs font-medium text-text-muted">{d}</div>
-          ))}
+            <div className="mt-6 rounded-xl border border-border bg-surface p-4 text-xs text-text-muted leading-relaxed">
+                <strong className="text-text-sub">🔬 출처</strong> · DB <code className="font-mono text-[10px]">events</code> + <code className="font-mono text-[10px]">comm_events</code> · 일반 일정과 커뮤니케이션 이벤트(공지/캠페인 마감 등) 통합. WIO 일정 모듈과 동일 테이블 공유.
+            </div>
         </div>
-        <div className="grid grid-cols-7">
-          {days.map((day, i) => {
-            const dayEvents = day ? getEventsForDay(day) : [];
-            const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
-            return (
-              <div key={i} className={`min-h-[80px] border-b border-r border-border p-1 ${day ? '' : 'bg-surface/50'}`}>
-                {day && (
-                  <>
-                    <div className={`mb-0.5 text-xs ${isToday ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-text text-white' : 'text-text-sub'}`}>{day}</div>
-                    {dayEvents.map(e => (
-                      <div key={e.id} className="mb-0.5 truncate rounded px-1 py-0.5 text-[10px] font-medium text-white" style={{ background: e.color }}>
-                        {e.title}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+    );
+}
 
-      {/* Add Event */}
-      <div className="rounded-2xl border border-border bg-white p-5">
-        <h2 className="mb-3 text-sm font-semibold text-text">일정 추가</h2>
-        <div className="grid gap-3 sm:grid-cols-4">
-          <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="일정 제목" className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none" />
-          <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text focus:border-text focus:outline-none" />
-          <select value={newType} onChange={e => setNewType(e.target.value as typeof newType)} className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text focus:border-text focus:outline-none">
-            {Object.entries(typeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <button onClick={handleAdd} className="flex items-center justify-center gap-1 rounded-xl bg-text px-4 py-2 text-sm font-semibold text-white hover:bg-accent-sub">
-            <Plus size={15} /> 추가
-          </button>
+function Kpi({ label, value, accent, loading }: { label: string; value: number; accent: string; loading: boolean }) {
+    return (
+        <div className="rounded-2xl border border-border bg-white p-4">
+            <div className="text-xs text-text-muted">{label}</div>
+            <div className="mt-1 text-2xl font-bold" style={{ color: accent }}>{loading ? '—' : value.toLocaleString()}</div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

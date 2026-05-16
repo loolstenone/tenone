@@ -1,33 +1,129 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-16 (세션 137 — Smart-Data Hub 홈 위젯 통합 + 정직성 ZERO 홈 적용)
+> 마지막 업데이트: 2026-05-17 (세션 139→통합 — 멀티 워크트리 프로토콜 + USER_SCENARIO + 137~139 일괄 머지)
 
 ---
 
-## 세션 137 핵심 성과 (2026-05-16)
+## 🌳 현재 활성 워크트리 (집/사무실 동기화 SSOT)
 
-### Smart-Data Hub 홈 위젯 통합 + 정직성 원칙 ZERO 홈 적용
+> **SSOT 규칙**: CLAUDE.md § 3.4 + [docs/Worktree_Protocol.md](docs/Worktree_Protocol.md)
+> 모든 워크트리 작업 시작 시 이 표에 추가, 종료 시 행 제거 또는 "완료" 표시.
+> "다음 첫 액션"은 **파일·라인·구체 행동** 단위로 작성 (막연한 표현 금지).
 
-[app/(SmarComm)/smarcomm/dashboard/page.tsx](app/(SmarComm)/smarcomm/dashboard/page.tsx) 전면 재작성.
+| 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
+|---|---|---|---|---|
+| _(현재 활성 워크트리 없음 — 이 표는 작업 시작 시 채움)_ | | | | |
 
-**문제**: `/dashboard` 홈이 이번 달 매출·광고 집행액·전환 수 등 Mock KPI를 아무 경고 없이 실제 데이터인 것처럼 노출. 정직성 절대 원칙 ZERO 위반.
+### 활성 backup 브랜치 (origin)
 
-**해결**:
+| 브랜치 | 내용 | 다음 처리 |
+|---|---|---|
+| `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
+| `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
+| `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
 
-1. **Smart-Data Hub 실측 위젯 신설** — 3개 카드 (실 API 연동)
-   - SmarComm Index — `scanLog[0].score` (로컬 + DB)
-   - AIRM 오픈 플래그 — `/api/smarcomm/airm/flags?status=open` (0이면 초록, >0이면 빨강)
-   - Brand Assets 수 — `/api/smarcomm/assets`
-   - 로딩 시 `animate-pulse` 스켈레톤 + 에러 시 `—` fallback
+---
 
-2. **Demo 데이터 인라인 라벨** — 모든 Mock 섹션에 `🧪 Demo 데이터` 앰버 배지 + "Phase 5에서 GA4·광고 매체 실 API 연동 예정" 안내
-   - 광고·매출 KPI 3카드 (이번 달 매출·광고 집행액·전환 수)
-   - 차트 (트렌드·GA4·캠페인 성과 레이더) 헤더
-   - campaigns·sales 탭 상단 배너
+## 세션 139 핵심 성과 (2026-05-16)
 
-3. **실측 데이터 초록 라벨** — 최근 사이트 진단 테이블 + Smart-Data Hub 섹션 헤더에 `실측 데이터` 초록 배지
+### DEV 표기 페이지 → 실 DB 기반 고도화 (순서대로 진행)
 
-**설계 근거**: `/dashboard` 홈은 실·Mock 혼재 → `MOCK_PATH_PREFIXES`에 추가 불가 (전체 페이지 배너는 부적절). 대신 섹션별 인라인 라벨로 정직성 달성.
+이전 세션에서 reports/AI 가시성/journey/archive 4개를 실 DB로 전환한 흐름을 이어, 이번 세션은 프롬프트 관리·이벤트 관리 2개 추가 고도화.
+
+#### ① 프롬프트 관리 (`/dashboard/geo/prompts`)
+- **신규 API**: [app/api/smarcomm/prompts/route.ts](app/api/smarcomm/prompts/route.ts) — `smarcomm_ai_probes`의 query를 그룹화 → mentioned/accuracy/platforms[] 집계, sort(rate-desc/asc/recent/total) + category/domain 필터
+- **신규 UI**: [app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx](app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx) — KPI 4개(고유·평균 노출률·강한≥60%·약한 0%) + 확장 카드 + 플랫폼 칩(언급/정확도 컬러)
+- 사이드바 DEV 배지 + MOCK_PATH_PREFIXES 제거
+
+#### ② 이벤트 관리 → AI 답변 변화 (`/dashboard/events`)
+- 기존: GA-스타일 generic 이벤트 택소노미 mock (SmarComm V2.0 방향과 불일치)
+- 전환: V2.0 § 3-C AIRM ④ 검증 단계 + § 3-B Smart-Data Hub 모니터링 소스인 `smarcomm_ai_diff_events` 활용
+- **신규 API**: [app/api/smarcomm/ai-events/route.ts](app/api/smarcomm/ai-events/route.ts) — diff_type 6종(improved/degraded/unchanged/sentiment_flip/fact_corrected/fact_introduced) + platform 집계 + 일자별 timeline
+- **신규 UI**: [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — KPI 4개 + 이전/이후 텍스트 diff 시각화 + 정직한 빈 상태 안내
+- 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" 재정의 + DEV 제거
+
+#### ③ 칸반 보드 (`/dashboard/workflow/kanban`)
+- **신규 API**: [app/api/smarcomm/workflow/tasks/route.ts](app/api/smarcomm/workflow/tasks/route.ts) — `workflow_tasks` GET/POST/PATCH/DELETE + status/priority 대소문자 정규화
+- **컨텍스트 DB 연동**: [lib/workflow-context.tsx](lib/workflow-context.tsx) — `tasks` mount fetch + add/update/move/delete 시 API 동기 호출 (optimistic)
+- **버그 수정**: dashboard/layout이 `lib/smarcomm/workflow-context` Provider로 감쌌으나 kanban/projects/automation은 `lib/workflow-context`의 useWorkflow를 사용 → Provider 미스매치로 Application error. layout과 content 페이지를 통일해 정리
+- 사이드바 DEV 배지 + MOCK 배너 prefix 제거. 6행 실 데이터(LUKI 싱글 / WIO 가이드 / MADLeague S3 등) 5컬럼에 분포
+
+#### ⑤ 프로젝트 (`/dashboard/workflow/projects`) + 파이프라인 (`/dashboard/workflow/pipeline`) + 워크플로우 허브 (`/dashboard/workflow`)
+- **신규 API 2**: [app/api/smarcomm/workflow/projects/route.ts](app/api/smarcomm/workflow/projects/route.ts) — `projects` 테이블 (in-progress/draft/completed → Active/On Hold/Completed) · [app/api/smarcomm/workflow/pipeline/route.ts](app/api/smarcomm/workflow/pipeline/route.ts) — `content_pipeline` (writing→Scripting, filming/editing→Production, published→Published)
+- 컨텍스트의 projects·pipelineItems 슬라이스도 DB 동기 (mount fetch + optimistic CRUD)
+- 파이프라인 redirect 버그 수정: `/dashboard/content` (404) → `/smarcomm/dashboard/content`
+- 프로젝트 8행, 파이프라인 6행 실 데이터 → 워크플로우 허브 KPI 4종(태스크·파이프라인·프로젝트·자동화) 모두 실 집계
+- DEV 일괄 제거: 워크플로우 / 프로젝트 / 파이프라인 prefix · 워크플로우 그룹 4개 완전 활성화
+
+#### ④ 자동화 (`/dashboard/workflow/automation`)
+- **신규 API**: [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` GET/POST/PATCH/DELETE
+- 컨텍스트 자동화 액션도 DB 동기 (toggle 시 setState 내부에서 PATCH 호출 → race condition 방지)
+- 3개 실 규칙 표시(50만원 이하 자동승인 / 마감일 3일 전 이메일 / Slack 알림) + KPI(활성 2 / 전체 3 / 비활성 1) · DEV 제거
+
+#### ⑥ 고객 관리 (`/dashboard/crm`)
+- **신규 API 2**: [app/api/smarcomm/crm/people/route.ts](app/api/smarcomm/crm/people/route.ts) — `crm_people` + lifecycle/status/source 집계 · [app/api/smarcomm/crm/segments/route.ts](app/api/smarcomm/crm/segments/route.ts) — `crm_segments`
+- 페이지 전면 재작성: MOCK_LEADS 폐기 → KPI 4(총·발송 가능·세그먼트·활성) + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
+- 라이프사이클 8단계 컬러 매핑 (subscriber/lead/MQL/SQL/opportunity/customer/evangelist/churned)
+- 실 5고객(전천일/김사라/김준호/박기혁/Cheonil Jeon) + 4세그먼트(전체 고객/신규 리드/유니버스 회원/발송 가능) 표시
+- DEV 제거 · MOCK 배너 prefix 조정 (CRM 본체는 제거, 카카오/이메일/푸시 sub-route만 유지)
+
+#### ⑦ Phase A 분석 그룹 (`wio_analytics_events` 803행 기반)
+- **신규 API 3**: [analytics/traffic](app/api/smarcomm/analytics/traffic/route.ts) · [analytics/funnel](app/api/smarcomm/analytics/funnel/route.ts) · [analytics/cohort](app/api/smarcomm/analytics/cohort/route.ts)
+- **트래픽 분석** (`/dashboard/traffic`): 일자별 PV/세션/사용자 + 상위 페이지 15 + 브랜드 분포 + 평균 체류·이탈률 (350 PV 실측)
+- **퍼널 분석** (`/dashboard/funnel`): session_id 단위 4단계(랜딩→탐색→참여→전환) drop-off, 단계별 전환율 (76 세션 실측)
+- **코호트** (`/dashboard/cohort`): user_id 첫 활동 주차 × 5주 잔존율 히트맵 (현재 user_id 0행 → 정직한 빈 상태)
+- 3개 페이지 모두 DEV 제거 + MOCK 배너 prefix 제거
+
+#### ⑧ Phase A 이메일 채널 (`email_sends 64` + `email_senders 4` + `newsletter_subscribers 68`)
+- **신규 API**: [crm/email](app/api/smarcomm/crm/email/route.ts) — 발송/전달/오픈/클릭/반송 KPI + 구독자 4 KPI + 발신자 카드 + 최근 30 발송
+- 페이지 재작성: 64건 실 발송 이력 + 68명 구독자 표시 · DEV 제거
+
+#### ⑨ Phase A 마케팅 캘린더 (`events` + `comm_events`)
+- **신규 API**: [calendar](app/api/smarcomm/calendar/route.ts) — 월 단위 events + comm_events 통합 조회
+- 페이지 재작성: 월 그리드 + 일 셀별 최대 2 이벤트 미리보기 + 사이드 상세 패널 · DEV 제거 (현재 5월 0행 → 빈 상태)
+
+#### ⑩ Phase B 3페이지 활성화 (CRUD UI 신규 — 기존 빈 테이블 활용)
+- **A/B 테스트** (`/dashboard/abtest`): API [experiments](app/api/smarcomm/experiments/route.ts) — `mkt_experiments` CRUD, 가설/변형/기간 입력 모달 + 카드 + 빈 상태
+- **콘텐츠 라이브러리** (`/dashboard/content`): API [content](app/api/smarcomm/content/route.ts) — `marketing_content` CRUD, 발행물 메타(제목·유형·상태·채널) + 상태 필터, AI 소재 제작 페이지로 분리 링크
+- **광고 캠페인** (`/dashboard/campaigns`): API [campaigns](app/api/smarcomm/campaigns/route.ts) — `marketing_campaigns` CRUD, 채널(네이버 SA/DA·구글·메타·카카오·유튜브·이메일) + 예산 진척 바 + 매체 자동 갱신 안내
+- 3 페이지 모두 DEV 제거 · MOCK 배너 prefix 정리
+
+#### ⑪ Phase B+ 카카오 + 푸시 통합 브로드캐스트
+- **MCP 마이그레이션**: `smarcomm_broadcasts` 신규 (카카오·푸시·SMS 통합) — channel CHECK 제약(`kakao_alimtalk`/`kakao_friendtalk`/`kakao_bizmsg`/`push`/`sms`/`app_inbox`) + status CHECK + 4 인덱스 + RLS
+- **신규 API**: [broadcasts](app/api/smarcomm/broadcasts/route.ts) — CRUD + status/kpi(sent·delivered·opened·clicked) 집계 + channelPrefix 필터
+- **공통 컴포넌트**: [BroadcastPage](features/smarcomm/BroadcastPage.tsx) — 카카오·푸시 공유 UI
+- **카카오** (`/dashboard/crm/kakao`): 알림톡·친구톡·비즈메시지 3종
+- **푸시** (`/dashboard/crm/push`): 모바일 푸시·앱 인박스 2종
+- 2 페이지 모두 DEV 제거 · MOCK prefix 제거
+
+**🎉 SmarComm 전체 사이드바 DEV 배지 0개** (28+ 메뉴 모두 실 DB 또는 신규 CRUD 인프라 보유)
+
+#### ⑫ Phase E 운영 정합성 정리
+- `lib/smarcomm/auth.ts` Mock 인증 — 이미 제거 확인 (코드 참조 0건, MD만 잔존)
+- `smarcomm/login/page.tsx` redirect 경로 수정: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
+- `dashboard/layout.tsx` localStorage 직접 접근 → `getSetting('smarcomm','company','smarcomm_company')` (DB-first + localStorage fallback) 패턴으로 전환 (이미 profile 페이지에서 사용 중인 `user_settings` 통합)
+
+#### ⑬ Phase E+ 즐겨찾기 user_settings 통합 + 경로 정규화 버그 수정
+- **버그 발견**: PageTopBar가 `pathname` (예: `/smarcomm/dashboard/X`)을 그대로 저장했으나 layout nameMap은 `/dashboard/X` 키 기대 → 라벨 매칭 실패 + 렌더 시 `/smarcomm` 이중 prefix 가능성
+- **수정**: PageTopBar `normalize()` 함수로 `/smarcomm` prefix 제거 후 저장 + `getSetting/setSetting` 사용 (user_settings DB-first)
+- **layout**: 즐겨찾기 로드도 `getSetting('smarcomm','favorites','smarcomm_favorites')` 사용. localStorage 직접 접근 제거 (멀티디바이스 동기 가능)
+- nameMap 라벨 일부 정정 (이벤트 관리 → AI 답변 변화, 광고 집행 → 광고 캠페인, 아카이브 → 소재 아카이브)
+
+#### ⑭ CLAUDE.md 이월 작업 SSOT 갱신
+- 완료 항목 12건 별도 표기, 진짜 블로커(외부 키 6종) + 내부 작업(`wio_feature_flags`·AIRM 검증·자동화)으로 재정렬
+
+### 이월 — 대형 인프라 필요 페이지
+
+콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.
+
+---
+
+## 세션 137 핵심 성과 (2026-05-16) — Smart-Data Hub 홈 위젯 + 정직성 ZERO
+
+[app/(SmarComm)/smarcomm/dashboard/page.tsx](app/(SmarComm)/smarcomm/dashboard/page.tsx):
+- Smart-Data Hub 실측 위젯 3개 (SmarComm Index·AIRM 오픈 플래그·Brand Assets)
+- Mock 섹션 인라인 `🧪 Demo 데이터` 앰버 배지 + Phase 5 예정 안내
+- 실측 섹션 초록 라벨 (실측 데이터)
 
 ---
 
@@ -324,9 +420,13 @@ V2.1 구현 우선순위 매트릭스 16종 정의 (Phase 4·5·6 단계별).
 - OpenAI/Perplexity/SerpAPI/PageSpeed 키 발급으로 5 AI 플랫폼 + CWV 전체 활성
 
 #### 🟢 V2.0 후속 모듈 (Phase 5)
-1. 정기 자동 재진단 (Vercel Cron 주간) → AIRM 자동 발견 + Smart-Data Hub 시계열 풍부화
-2. Entity 자동 등록 트리거 — 캠페인 종료(`wio_campaigns.status='ended'`) 훅으로 `smarcomm_brand_assets` 자동 INSERT
-3. AIRM 플래그 출처 추적(`smarcomm_ai_flag_sources`) — 외부 검색 API로 학습 추정 페이지 Top N
+1. ✅ 정기 자동 재진단 (Vercel Cron 주간) → AIRM 자동 발견 + Smart-Data Hub 시계열 풍부화
+   - `smarcomm_rescan_schedules` 테이블 + RLS Prod 적용
+   - `lib/smarcomm/run-scan.ts` 공유 스캔 파이프라인 추출 (scan route + cron 공용)
+   - `app/api/cron/smarcomm-weekly-rescan/route.ts` (GET, CRON_SECRET 인증, limit 10/회)
+   - `vercel.json`: schedule `0 3 * * 1` + maxDuration 300 양쪽
+2. ✅ Entity 자동 등록 트리거 — 캠페인 종료(`wio_campaigns.status='ended'`) 훅으로 `smarcomm_brand_assets` 자동 INSERT
+3. ✅ AIRM 플래그 출처 추적(`smarcomm_ai_flag_sources`) — 외부 검색 API로 학습 추정 페이지 Top N
 4. Ahrefs/Moz API 통합 → Authoritativeness sub-score N/A 해소
 5. AIRM Critical 플래그 (`severity='critical'`)는 Action Hub priority=critical로 별도 등록 (현재 high)
 6. Person·Product·HowTo·Article Entity 자동 생성(현 Organization·Service·FAQ·WebSite만)

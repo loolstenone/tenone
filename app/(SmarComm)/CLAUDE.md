@@ -1,5 +1,10 @@
 # SmarComm 브랜드 가이드
 
+> ## 🟢 실 사용자 시나리오 SSOT — [USER_SCENARIO.md](USER_SCENARIO.md)
+>
+> 모든 기능 기획·UX 결정·페이지 분류는 **"김지원(D2C 마케터) 4주 사용 흐름"**을 기준으로 판단한다.
+> 신규 기능 PR 시 "김지원의 어느 단계에서 쓰이는가" 매핑 필수. 시나리오와 현실의 갭은 USER_SCENARIO.md § 5에 누적·관리.
+
 > ## 🔴 절대 원칙 ZERO — 정직성(Honesty)이 무엇보다 중요하다
 >
 > **SmarComm의 모든 요소는 정직해야 한다.** 점수·지표·라벨·차트·텍스트·UI 모두 예외 없음. 다른 모든 원칙·기능·UX 결정에 앞선다.
@@ -900,6 +905,13 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 
 ---
 
+## 13.5 실 사용자 시나리오
+
+> 모든 기능·UX 결정의 SSOT: **[USER_SCENARIO.md](USER_SCENARIO.md)**
+>
+> 주 페르소나: 김지원(35·D2C 스킨케어 마케팅 매니저·3년차). 4주 흐름 ① 진단 → ⑦ 자산화까지 매핑.
+> 시나리오 vs 현실 갭은 Critical 6건·High 6건·Medium 5건으로 § 5에 정리. 갭 해소 시 row 삭제 + CHANGELOG 기록.
+
 ## 14. 참고 문서
 
 - 서비스 접근 모델: [CLAUDE.md § 1.4](../../CLAUDE.md#14-서비스-접근-모델-6종)
@@ -916,9 +928,9 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 
 | 항목 | 내용 |
 |---|---|
-| **Phase** | **V2.0 구현 진행 중 (2026-05-16, 세션 137)** — SSOT 잠금(세션 136) 이후 모듈 순차 구현 중. |
-| **개발 수준** | 진단 영역 = 산업 표준급 보고서 완성 (Phase 1~3). 나머지 35+ 페이지는 mock. **V2.0 구현 완료**: Smart-Data Hub (insights·ai-tracker) · AIRM (4단계 허브·flags·actions) · 자산화 (assets 카탈로그·단건 상세). **홈 `/dashboard`**: Smart-Data Hub 실측 위젯 3개 (SmarComm Index·AIRM 오픈 플래그·Brand Assets) + Mock 섹션 인라인 `🧪 Demo 데이터` 라벨 (정직성 ZERO 적용). |
-| **이월 작업 (우선순위 순, V2.0 반영)** | ① **ANTHROPIC_API_KEY 갱신** (현재 401, Claude probe + exec summary 잠금) · ② OpenAI/Perplexity/SerpAPI/PageSpeed 키 발급으로 5 AI 플랫폼 + CWV 전체 활성 · ③ **§ 3-A SSOT-6 4지표 측정 구현** — 인지·이해·추천·평판 분리 산출 + As-Is/To-Be 성적표 UI · ④ § 3-B Smart-Data Hub `/dashboard/insights` · `/dashboard/ai-tracker` 신설 · ⑤ § 3-D 자산화 `/dashboard/assets` + `smarcomm_brand_assets` 테이블 · ⑥ § 3-C AIRM 발견→교정 4단계 워크플로우 · ⑦ [lib/smarcomm/auth.ts](lib/smarcomm/auth.ts) Mock 인증 제거 · ⑧ [dashboard/layout.tsx:28](smarcomm/dashboard/layout.tsx) `router.push('/login')` → LoginModal · ⑨ Mock 대시보드 → 실 API · ⑩ Feature Flags `wio_feature_flags` 연동 · ⑪ localStorage → DB 마이그레이션 |
+| **Phase** | **Phase 5+ (2026-05-17, 세션 139)** — V2.0 SSOT 잠금 + 사이드바 DEV 배지 **0개 달성** (28+ 메뉴 전부 실 DB 또는 CRUD 인프라). Phase A(분석 3+이메일+캘린더) + Phase B(A/B+콘텐츠+캠페인) + Phase B+(카카오·푸시 통합 브로드캐스트) + Phase E(운영 정합성) 완료. |
+| **개발 수준** | 진단 영역 = 산업 표준급 보고서 완성 (Phase 1~3). API 라우트 15개 + cron 2종(smarcomm-weekly-rescan, smarcomm-airm-verify). **Phase 5 Items 1·2·3 완료**. **홈 `/dashboard`**: Smart-Data Hub 실측 위젯 3개 (SmarComm Index·AIRM 오픈 플래그·Brand Assets) + Mock 섹션 `🧪 Demo 데이터` 라벨 (정직성 ZERO 적용). |
+| **이월 작업 (2026-05-17 갱신)** | **외부 키 발급 선행 필요 (블로커):** ① ANTHROPIC_API_KEY 갱신 (401, Claude probe·exec summary 잠금) · ② OpenAI/Perplexity/SerpAPI/PageSpeed 키 → 5 AI 플랫폼 + CWV 전체 활성 · ③ Ahrefs/Moz API → `persistence_score` N/A 해소 · ④ Google Ads/Meta/Naver Ads/Kakao Biz API → 캠페인 spent·CTR 자동 갱신 (Phase C) · ⑤ FCM/Kakao Bizmessage → 실 발송 활성 · ⑥ Resend webhook → email_events 자동 캡처. **내부 작업:** ⑦ `wio_feature_flags` 연동 · ⑧ localStorage `smarcomm_favorites` → `user_settings` 통합 · ⑨ Phase 5 운영 자동화 강화 · ⑩ AIRM 4단계 검증(④) UI 보강. **USER_SCENARIO.md § 5 갭** 17건 별도 추적. |
 | **주요 결정 (세션 136 — V2.0 SSOT)** | ① **워크플로우 V1→V2.0** — 진단·분석·전략·제작·집행·모니터링·자산화 7단계. V1의 관계·분석·운영은 5·6·운영위계로 흡수 · ② **Smart-Loop 데이터 플라이휠 SSOT** — ⑥→⑦→① 매끄러운 연결이 SmarComm 해자 · ③ **AI 브랜드 가시성 4지표 SSOT** — 인지·이해·추천·평판 (As-Is/To-Be 성적표) + 6 측정 차원 (개체·속성·최신성·랭킹·근거·비교우위) · ④ **§ 3-B Smart-Data Hub** — 4 소스(진단·광고·AI·유입) 통합 인프라 신설 · ⑤ **§ 3-C AIRM 신설** — Pro/Enterprise 유료 핵심 모듈 (발견→분석→교정→검증 4단계) · ⑥ **§ 3-D 자산화 신설** — Entity Branding 영속화 (3대 노력: 정화·고권위 주입·Schema) · ⑦ **캠페인 종료 = 자산화 시작** — ⑤ 집행 종료 시 brand_assets 자동 INSERT 의무 |
 | **주요 결정 (세션 136 — V2.1 진단 sub-engine SSOT)** | ⑧ **V2.0 상위 30/30/40 잠금 + V2.1 5 sub-engine sub-axis** — Discovery(GEO·SEO) / Conversion(UI·UX) / Trust(Security) / Reputation(SNS) / Shopping(커머스) + 퍼널 통합 · ⑨ **Smar-Index(SI) 보조 지표** — Awareness/Search/UX/Security 20/20/30/30 / Industry_Avg 로 별도 산출, 상대적 위치 가시화 · ⑩ **V2.1 신규 측정 16종** — AI SOV·인용 출처·할루시네이션 분리·검색 의도·3초 테스트·전환 마찰·모바일 가독성·인증/인가·거버넌스·취약점·감성·키워드 클라우드·인플루언서·에셋 일관성·쇼핑 키워드·리뷰 시맨틱 · ⑪ **신규 DB 테이블 최소화** — `smarcomm_scans.breakdown` JSONB에 sub-engine 누적, 큰 시계열만 별도 · ⑫ **차별화 연구 과제** — AI 리터러시 진단 알고리즘 + 쇼핑 모멘텀 시차 분석 |
 | **주요 결정 (세션 135 — 유지)** | ① WIO ↔ SmarComm 동등 OS 관계 · ② Index 가중치 30/30/40 (Citability 40%) · ③ 권위도 측정 폐기 · ④ AI 정확도 wrong = -0.5 음수 가중 · ⑤ 4-Tier 측정 모델 (T0~T2 점수, T3/T4 별도 N/A) |

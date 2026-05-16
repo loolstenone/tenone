@@ -17,7 +17,7 @@ export default function SmarcommCsPage() {
             .eq("brand_id", "smarcomm")
             .order("created_at", { ascending: false })
             .limit(200)
-            .then(res => { setInquiries((res.data ?? []) as Inquiry[]); setLoading(false); });
+            .then((res: { data: Inquiry[] | null }) => { setInquiries(res.data ?? []); setLoading(false); });
     }, []);
 
     const filtered = inquiries.filter(i => !search || i.name?.includes(search) || i.email?.includes(search) || i.subject?.includes(search));

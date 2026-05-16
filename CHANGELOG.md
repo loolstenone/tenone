@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-05-17 (세션 139→통합) — 멀티 워크트리 프로토콜 + USER_SCENARIO + Phase 통합
+
+### 멀티 워크트리 SSOT 프로토콜 신설
+- [docs/Worktree_Protocol.md](docs/Worktree_Protocol.md) — 4 규칙·6 유형·DB 스키마 특별 규칙·정리·backup 패턴·체크리스트
+- CLAUDE.md § 3.4 신설, § 4.1·4.2 워커/오케스트레이터 책임 분리
+- WORK_STATUS.md "현재 활성 워크트리" + "활성 backup 브랜치" 표 양식
+
+### SmarComm 실 사용자 시나리오 SSOT
+- [app/(SmarComm)/USER_SCENARIO.md](app/(SmarComm)/USER_SCENARIO.md) — 페르소나 김지원 4주 흐름 + 갭 17건(Critical 6/High 6/Medium 5)
+
+### 이번 세션 코드 변경
+- 신규 API [/api/smarcomm/me/plan](app/api/smarcomm/me/plan/route.ts) — wio_subscriptions 기반 plan_key 조회
+- DashboardSidebar PACK_TIER → DB plan_key(free/starter/pro/business) 매핑
+- [lib/smarcomm/abtest-chi-square.ts](lib/smarcomm/abtest-chi-square.ts) — 카이제곱 SSOT (erfc p-value + 표본 크기)
+- abtest 페이지 관측값 입력 + 자동 winner·confidence 갱신
+- 신규 Cron [/api/cron/smarcomm-airm-verify](app/api/cron/smarcomm-airm-verify/route.ts) — 30일 경과 in_action 플래그 자동 재진단
+
+### 워크트리 정리 — 5개 → 2개
+- 4개 즉시 정리, 위험 3개는 `backup/myverse-canvas-share` · `backup/smarcomm-phase4` · `backup/myverse-camera` 브랜치로 origin 보존
+
+---
+
 ## 2026-05-16 (세션 137) — Smart-Data Hub 홈 위젯 통합 + 정직성 ZERO 홈 적용
 
 ### dashboard/page.tsx 전면 재작성
@@ -19,11 +41,142 @@
   - Brand Assets 수 (`/api/smarcomm/assets`)
   - `Promise.all` 병렬 fetch + `animate-pulse` 스켈레톤 + 에러 시 `—` fallback
 - **Mock 섹션 인라인 라벨**: `🧪 Demo 데이터` 앰버 배지 + Phase 5 예정 안내
-  - 광고·매출 KPI 3카드, 차트 3개 헤더, campaigns/sales 탭 배너
-- **실측 섹션 초록 라벨**: `실측 데이터` 배지 — Smart-Data Hub 헤더 + 최근 사이트 진단 테이블
-- 추가 import: `ShieldAlert, Archive, Crosshair, Zap` (lucide-react), `useEffect` (react)
+- **실측 섹션 초록 라벨**: `실측 데이터` 배지
 
-**설계**: 홈은 실·Mock 혼재 → `MOCK_PATH_PREFIXES` 추가 부적절 → 섹션별 인라인 라벨로 정직성 달성
+---
+
+## 2026-05-16 (세션 139) — DEV 페이지 실 DB 고도화: 프롬프트 관리·AI 답변 변화
+
+### 프롬프트 관리 (`/dashboard/geo/prompts`)
+- 신규 API [app/api/smarcomm/prompts/route.ts](app/api/smarcomm/prompts/route.ts) — `smarcomm_ai_probes` query 그룹화, mentionRate·platforms[]·accuracy bucket·lastSeen 산출
+- 신규 UI [app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx](app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx) — KPI 4 + 확장 카드 + 정렬·필터
+- DashboardSidebar `dev: true` 제거 · dashboard/layout MOCK_PATH_PREFIXES 제거
+
+### 이벤트 관리 → AI 답변 변화 (`/dashboard/events`)
+- 기존 GA 택소노미 mock 폐기 → V2.0 § 3-C AIRM 검증 데이터(`smarcomm_ai_diff_events`)로 재정의
+- 신규 API [app/api/smarcomm/ai-events/route.ts](app/api/smarcomm/ai-events/route.ts) — diff_type 6종 집계 + 일자별 timeline
+- 신규 UI [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — 이전/이후 텍스트 diff + 빈 상태 정직 안내
+- 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" + DEV 제거 · MOCK 배너 prefix 제거
+
+### 칸반 보드 (`/dashboard/workflow/kanban`)
+- 신규 API [app/api/smarcomm/workflow/tasks/route.ts](app/api/smarcomm/workflow/tasks/route.ts) — `workflow_tasks` CRUD + 대소문자 정규화
+- [lib/workflow-context.tsx](lib/workflow-context.tsx) DB 동기화 (mount fetch + optimistic add/update/move/delete)
+- Provider 미스매치 버그 수정: `dashboard/layout` + `content/page` `lib/smarcomm/workflow-context` → `lib/workflow-context` 통일
+- 6행 실 DB 태스크 5컬럼에 분포 · DEV + MOCK 배너 prefix 제거
+
+### 프로젝트 + 파이프라인 + 워크플로우 허브
+- 신규 API [app/api/smarcomm/workflow/projects/route.ts](app/api/smarcomm/workflow/projects/route.ts) — `projects` 테이블 8행 + status/phase 정규화
+- 신규 API [app/api/smarcomm/workflow/pipeline/route.ts](app/api/smarcomm/workflow/pipeline/route.ts) — `content_pipeline` 6행 + stage/type 정규화
+- 컨텍스트 projects/pipelineItems 슬라이스도 DB 동기 (mount fetch + optimistic CRUD)
+- 파이프라인 redirect 경로 버그 수정: `/dashboard/content` (404) → `/smarcomm/dashboard/content`
+- 워크플로우 허브 4 KPI(태스크/파이프라인/프로젝트/자동화) 모두 실 집계 · DEV 일괄 제거
+
+### 고객 관리 (`/dashboard/crm`)
+- 신규 API [app/api/smarcomm/crm/people/route.ts](app/api/smarcomm/crm/people/route.ts) — `crm_people` + 단계/상태/출처 집계 + 이메일 발송 가능 수
+- 신규 API [app/api/smarcomm/crm/segments/route.ts](app/api/smarcomm/crm/segments/route.ts) — `crm_segments`
+- 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
+- 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
+
+### Phase E+ — 즐겨찾기 user_settings 통합 + 경로 정규화 버그 수정
+- PageTopBar: `pathname` (`/smarcomm/...`) 그대로 저장 버그 → `normalize()`로 `/smarcomm` 제거 후 저장 (nameMap 매칭 + 렌더 prefix 일관성)
+- PageTopBar 즐겨찾기 읽기/쓰기 `getSetting/setSetting` 사용 (user_settings DB-first + localStorage fallback)
+- dashboard/layout 즐겨찾기 로드도 동일 패턴 적용 → 멀티디바이스 동기 가능
+- nameMap 라벨 정정 3건 (이벤트 관리/광고 집행/아카이브)
+
+### CLAUDE.md 이월 작업 SSOT 갱신
+- 세션 138~139 완료 12건 표기 · 외부 키 블로커 6종 + 내부 작업 4종으로 재구성
+
+### Phase E — 운영 정합성 정리
+- `smarcomm/login/page.tsx` redirect 경로: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
+- `dashboard/layout.tsx` localStorage 직접 접근 제거 → `getSetting('smarcomm','company',...)` (`user_settings` DB-first + localStorage fallback)
+- `lib/smarcomm/auth.ts` Mock 인증은 이미 제거 확인 (코드 참조 0건)
+
+### Phase B+ — 카카오 + 푸시 통합 브로드캐스트 (마지막 2 DEV 페이지)
+- MCP 마이그레이션 `smarcomm_broadcasts` — 카카오·푸시·SMS 통합 (channel/status CHECK + 4 인덱스 + RLS)
+- API [broadcasts](app/api/smarcomm/broadcasts/route.ts) — CRUD + 채널 prefix 필터 + KPI 집계
+- 공통 컴포넌트 [BroadcastPage](features/smarcomm/BroadcastPage.tsx) — 채널 카드/모달/빈 상태 공유
+- crm/kakao: 알림톡/친구톡/비즈메시지 · crm/push: 모바일 푸시/앱 인박스
+- 사이드바 DEV 배지 0개 달성 (마지막 2개 제거)
+
+### Phase B — A/B + 콘텐츠 + 캠페인 CRUD (3 DEV 페이지)
+- API [experiments](app/api/smarcomm/experiments/route.ts) — `mkt_experiments` GET/POST/PATCH/DELETE + 가설·변형·기간·승자
+- API [content](app/api/smarcomm/content/route.ts) — `marketing_content` GET/POST/PATCH/DELETE + 상태/유형 필터
+- API [campaigns](app/api/smarcomm/campaigns/route.ts) — `marketing_campaigns` GET/POST/PATCH/DELETE + 채널·예산·집행률 집계
+- abtest/content/campaigns 페이지 재작성: 모달 입력 폼 + 카드 리스트 + 빈 상태 + 출처 표기
+- 사이드바 DEV 일괄 제거 (abtest, content, campaigns 모두) + MOCK_PATH_PREFIXES 정리
+- 남은 DEV는 카카오·푸시(외부 API 인프라 필요) 2개
+
+### Phase A — 5 DEV 페이지 실 DB 활성화
+- 분석 3 (`wio_analytics_events` 803행 기반)
+  - 트래픽 (`/dashboard/traffic`) + API [analytics/traffic](app/api/smarcomm/analytics/traffic/route.ts) — 일자/페이지/브랜드 집계 + 체류·이탈
+  - 퍼널 (`/dashboard/funnel`) + API [analytics/funnel](app/api/smarcomm/analytics/funnel/route.ts) — 4단계 세션 단위 drop-off
+  - 코호트 (`/dashboard/cohort`) + API [analytics/cohort](app/api/smarcomm/analytics/cohort/route.ts) — user 첫 주차 × 5주 잔존 히트맵
+- 이메일 채널 (`/dashboard/crm/email`) + API [crm/email](app/api/smarcomm/crm/email/route.ts) — 64건 발송 + 68명 구독자 + 4 발신자
+- 마케팅 캘린더 (`/dashboard/calendar`) + API [calendar](app/api/smarcomm/calendar/route.ts) — events + comm_events 월 그리드
+- 사이드바 DEV 일괄 제거 + MOCK_PATH_PREFIXES 5개 항목 제거
+
+### 자동화 (`/dashboard/workflow/automation`)
+- 신규 API [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` CRUD
+- 컨텍스트 toggle/add/update/delete DB 동기 (toggle setState 내부 PATCH 호출로 race 방지)
+- 3행 실 규칙 + KPI(2 활성 / 1 비활성) · DEV 제거
+
+### 결정
+- 콘텐츠·캘린더·CRM·A/B·트래픽·퍼널·코호트 등 외부 인프라/신규 테이블 세트 필요 페이지는 세션 139 범위 외 — 차기 세션 우선순위 결정 후 진행
+
+---
+
+## 2026-05-16 (세션 138) — Phase 5 Items 2+3: 캠페인 자산화 트리거 + AIRM 플래그 출처 추적
+
+### Phase 5 Item 2 완료 — 캠페인 완료 시 Entity 자동 등록 SQL 트리거
+
+**SQL 트리거**: [sql/smarcomm-campaign-assetize-trigger.sql](sql/smarcomm-campaign-assetize-trigger.sql)
+- `smarcomm_auto_assetize_on_campaign_complete()` 함수 + `smarcomm_campaign_complete_assetize` 트리거
+- `AFTER UPDATE OF status ON marketing_campaigns` — `'Completed'` 전환 시만 실행
+- 슬러그 자동 생성 (정규화·소문자화·공백→하이픈) + 충돌 회피 (counter ≤ 99)
+- `smarcomm_brand_assets`에 Service Entity INSERT + schema.org JSON-LD 자동 생성
+- 중복 방지: 동일 `source_campaign_id` + `entity_type='Service'` + `valid_until IS NULL` 존재 시 skip
+
+### Phase 5 Item 3 완료 — AIRM 플래그 출처 추적 (Serper API 연동)
+
+**DB**: [sql/smarcomm-airm-flag-sources.sql](sql/smarcomm-airm-flag-sources.sql)
+- `smarcomm_ai_flag_sources` 테이블: flag_id(FK→CASCADE)·tenant_id·url·title·snippet·source_type·relevance_score·fetched_at
+- RLS: tenant isolation + service_role bypass
+
+**API 라우트**: [app/api/smarcomm/airm/flags/[id]/sources/route.ts](app/api/smarcomm/airm/flags/[id]/sources/route.ts)
+- GET: 저장된 출처 목록 조회 (relevance_score 내림차순)
+- POST: `SERPER_API_KEY` 확인 → 없으면 `{ status: 'api_key_missing' }` (정직 원칙)
+  → flag.claim으로 검색 쿼리 빌드 → Serper `google.serper.dev/search` Top 10
+  → URL 유형 자동 분류 (`detectSourceType`: wiki/official/news/forum/blog/other)
+  → rank-based 감쇠 relevance_score (`1 - i * 0.09`) → 기존 결과 삭제 후 fresh INSERT
+
+**UI**: [app/(SmarComm)/smarcomm/dashboard/airm/flags/page.tsx](app/(SmarComm)/smarcomm/dashboard/airm/flags/page.tsx)
+- `Source` 인터페이스 + `SOURCE_TYPE_LABEL` 상수 추가
+- 각 FlagRow에 4상태 Sources 섹션:
+  - `api_key_missing` → "🔌 외부 검색 API 미연결 — SERPER_API_KEY 설정 필요" 안내
+  - `search_error` → "⚠ 검색 중 오류" 재시도 안내
+  - `ok` + 결과 있음 → type 뱃지·제목·스니펫·관련도% 클릭 가능 링크 목록
+  - `ok` + 결과 없음 → "검색 결과가 없습니다" 안내
+- "출처 조회" 버튼 → 첫 조회 후 "출처 새로고침"으로 텍스트 전환
+
+---
+
+## 2026-05-16 (세션 137) — Phase 5 Item 1: 정기 자동 재진단 Vercel Cron
+
+### Phase 5 Item 1 완료 — Smart-Data Hub 시계열 풍부화 + AIRM 자동 발견
+
+**DB**: `smarcomm_rescan_schedules` 테이블 Prod 적용
+- cadence (weekly/biweekly/monthly) · next_run_at · RLS no_public_access
+
+**공유 스캔 파이프라인 추출**: [lib/smarcomm/run-scan.ts](lib/smarcomm/run-scan.ts)
+- `runFullScan()` 함수 — scan route + cron 공용
+- scan/route.ts 280줄 → 50줄 slim wrapper
+
+**Cron 엔드포인트**: [app/api/cron/smarcomm-weekly-rescan/route.ts](app/api/cron/smarcomm-weekly-rescan/route.ts)
+- GET, `Authorization: Bearer CRON_SECRET` 인증
+- active=true + next_run_at≤now 기준 limit 10/회 순차 처리
+- 처리 후 next_run_at 갱신 (weekly +7d, biweekly +14d, monthly +1mo)
+
+**vercel.json**: schedule `0 3 * * 1` (매주 월 03:00 UTC) + maxDuration 300 양쪽
 
 ---
 

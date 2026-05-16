@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { requireAuth } from '@/lib/supabase/api-utils';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 interface GenerateRequest {
   type: 'text' | 'banner' | 'video';
@@ -101,7 +102,7 @@ ${req.prompt}
 // API 키 없으면 503 반환 + 사용자에게 안내. 가짜 카피 생성 금지.
 
 export async function POST(request: NextRequest) {
-  const { error: authErr } = await requireAuth();
+  const { error: authErr, user } = await requireAuth();
   if (authErr) return authErr;
 
   try {
@@ -141,6 +142,34 @@ export async function POST(request: NextRequest) {
       if (jsonMatch) jsonStr = jsonMatch[1].trim();
 
       const parsed = JSON.parse(jsonStr);
+
+      // 생성 결과를 smarcomm_creatives에 영속 저장 (실패해도 응답은 정상 반환)
+      try {
+        const admin = createAdminClient();
+        const memberId = user && 'id' in user ? (user as { id: string }).id : null;
+        const rows = (parsed.creatives ?? []).map((c: { title?: string; body?: string; cta?: string; hashtags?: string[]; image_prompt?: string; duration?: string }) => ({
+          tenant_id: 'tenone-demo',
+          member_id: memberId,
+          type: body.type,
+          channel: body.channel ?? null,
+          status: 'draft',
+          title: c.title ?? '(제목 없음)',
+          body: c.body ?? null,
+          cta: c.cta ?? null,
+          hashtags: c.hashtags ?? null,
+          image_prompt: c.image_prompt ?? null,
+          duration: c.duration ?? null,
+          source_prompt: body.prompt,
+          source_context: body.context ?? null,
+          generated_by: 'ai',
+        }));
+        if (rows.length > 0) {
+          await admin.from('smarcomm_creatives').insert(rows);
+        }
+      } catch (persistErr) {
+        console.error('[creative] persist failed:', persistErr);
+      }
+
       return NextResponse.json({ creatives: parsed.creatives, generated_by: 'ai' });
     } catch (aiError) {
       console.error('Claude API error:', aiError);

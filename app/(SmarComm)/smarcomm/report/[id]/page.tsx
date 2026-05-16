@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, AlertTriangle, CheckCircle2, XCircle,
   ExternalLink, Clock, Target, ChevronRight, Lock,
@@ -237,7 +237,7 @@ function ActionMatrix({ actions }: { actions: ActionItemUI[] }) {
         <span className="ml-auto text-[10px] text-text-muted">모두 적용 시 예상 +{totalPotential}점</span>
       </div>
       <p className="mb-4 text-xs text-text-muted">
-        진단에서 발견된 개선 항목을 임팩트와 노력으로 분류 + 누구에게 부탁할지 + 예상 점수 변화 (V2.1 § 1.10 — Claude Haiku LLM 추천)
+        진단에서 발견된 개선 항목을 임팩트와 노력으로 분류 + 누구에게 부탁할지 + 예상 점수 변화 (Claude Haiku LLM 추천)
       </p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -722,32 +722,113 @@ function SeoItemRow({ item }: { item: { name: string; score: number; maxScore: n
   );
 }
 
+function ChapterDivider({ num, title, subtitle }: { num: string; title: string; subtitle?: string }) {
+  return (
+    <div className="mt-12 mb-6">
+      <div className="flex items-center gap-3">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-text text-[11px] font-bold text-white tabular-nums">{num}</span>
+        <div className="flex-1">
+          <h2 className="text-[18px] font-bold text-text leading-tight">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-xs text-text-muted">{subtitle}</p>}
+        </div>
+        <div className="h-px flex-1 bg-border max-w-[120px]" />
+      </div>
+    </div>
+  );
+}
+
+type ViewMode = 'marketer' | 'exec' | 'dev';
+
+const VIEW_META: Record<ViewMode, { label: string; emoji: string; hint: string }> = {
+  marketer: { label: '마케터',   emoji: '🎯', hint: '전체 보고서 (기본)' },
+  exec:     { label: '경영진',   emoji: '📊', hint: '30초 핵심 요약' },
+  dev:      { label: '개발자',   emoji: '💻', hint: '기술 체크 + Schema' },
+};
+
+function ViewSwitcher({ current, scanId }: { current: ViewMode; scanId: string }) {
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2">
+      <span className="text-[11px] font-medium text-text-muted mr-1">보고서 뷰</span>
+      {(Object.keys(VIEW_META) as ViewMode[]).map((m) => {
+        const meta = VIEW_META[m];
+        const active = m === current;
+        const href = m === 'marketer' ? `/smarcomm/report/${scanId}` : `/smarcomm/report/${scanId}?view=${m}`;
+        return (
+          <Link
+            key={m}
+            href={href}
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              active ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'
+            }`}
+            title={meta.hint}
+          >
+            <span>{meta.emoji}</span> {meta.label}
+          </Link>
+        );
+      })}
+      <span className="ml-auto text-[10px] text-text-muted">{VIEW_META[current].hint}</span>
+    </div>
+  );
+}
+
 function ReportContent({ scanId }: { scanId: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get('view');
+  const view: ViewMode = viewParam === 'exec' || viewParam === 'dev' ? viewParam : 'marketer';
+  const isMarketer = view === 'marketer';
+  const isExec = view === 'exec';
+  const isDev = view === 'dev';
   const [scan, setScan] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
   const { isAuthenticated: isLoggedIn } = useAuth();
   const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
 
   const handleGenerateCampaignPlan = async () => {
-    const stored = sessionStorage.getItem(`scan_${scanId}`);
-    if (!stored) return;
+    if (!isLoggedIn) {
+      router.push(`/smarcomm/login?redirect=${encodeURIComponent(`/smarcomm/report/${scanId}`)}`);
+      return;
+    }
     setGeneratingPlan(true);
+    setPlanError(null);
     try {
-      const res = await fetch('/api/advisor/campaign-plan', {
+      // 진단 데이터 확보 — 같은 세션 sessionStorage 우선, 없으면 DB에서 fetch
+      let scanResult: unknown = null;
+      const stored = sessionStorage.getItem(`scan_${scanId}`);
+      if (stored) {
+        scanResult = JSON.parse(stored);
+      } else if (scan?.url) {
+        // DB에서 받은 scan 객체 자체를 사용 (AnalysisResult 호환 필드들)
+        scanResult = scan;
+      }
+      if (!scanResult) {
+        setPlanError('진단 데이터를 불러올 수 없습니다. 페이지를 새로고침 후 다시 시도해주세요.');
+        setGeneratingPlan(false);
+        return;
+      }
+      const res = await fetch('/api/smarcomm/advisor/campaign-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scanResult: JSON.parse(stored) }),
+        body: JSON.stringify({ scanResult }),
       });
       if (res.ok) {
         const plan = await res.json();
         sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
-        router.push('/dashboard/advisor');
+        router.push('/smarcomm/dashboard/advisor');
+      } else if (res.status === 503) {
+        const data = await res.json().catch(() => ({}));
+        setPlanError(data.error || 'AI 어드바이저가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.');
+      } else if (res.status === 401) {
+        setPlanError('세션이 만료되었습니다. 다시 로그인해주세요.');
+      } else {
+        setPlanError(`기획서 생성 실패 (${res.status}). 잠시 후 다시 시도해주세요.`);
       }
     } catch (e) {
       console.error('Campaign plan generation failed:', e);
+      setPlanError('네트워크 오류로 기획서 생성에 실패했습니다.');
     }
     setGeneratingPlan(false);
   };
@@ -833,6 +914,9 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
+          {/* SSOT-5 — 보고서 뷰 모드 (마케터·경영진·개발자) */}
+          <ViewSwitcher current={view} scanId={scanId} />
+
           {/* Report Header — 로고 왼쪽 + 타이틀 + 액션 */}
           <div className="mb-6 flex items-center gap-5 rounded-2xl border border-border bg-white px-6 py-5">
             {/* 왼쪽: 로고 + 도메인 */}
@@ -873,7 +957,12 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
-          {/* SmarComm Index Hero — Phase 1 (CLAUDE.md § 3-A SSOT) */}
+          {/* ── Chapter 1: 진단 결과 — 모든 뷰 ── */}
+          {!isDev && (
+            <ChapterDivider num="1" title="진단 결과" subtitle="지금 우리의 점수와 등급, 그리고 30초 요약" />
+          )}
+
+          {/* SmarComm Index Hero */}
           {scan.breakdown ? (
             <>
             <div className="mb-8 overflow-hidden rounded-2xl border border-border bg-white">
@@ -943,7 +1032,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <EEATCell label="Experience" sub="직접 경험" value={scan.breakdown.eeat.experience} />
                     <EEATCell label="Expertise" sub="전문성" value={scan.breakdown.eeat.expertise} />
-                    <EEATCell label="Authoritativeness" sub="권위 (Phase 4)" value={scan.breakdown.eeat.authoritativeness} />
+                    <EEATCell label="Authoritativeness" sub="권위 (별도 측정)" value={scan.breakdown.eeat.authoritativeness} />
                     <EEATCell label="Trustworthiness" sub="신뢰" value={scan.breakdown.eeat.trustworthiness} />
                   </div>
                 </div>
@@ -958,8 +1047,8 @@ function ReportContent({ scanId }: { scanId: string }) {
               </div>
             </div>
 
-            {/* Phase 3.4 — Executive Summary (30초 요약) */}
-            {scan.breakdown.execSummary && (
+            {/* Phase 3.4 — Executive Summary (30초 요약) — 마케터·경영진 */}
+            {!isDev && scan.breakdown.execSummary && (
               <div className="mb-6 rounded-2xl border border-border bg-white p-5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">30초 요약</span>
@@ -1007,54 +1096,79 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* V2.0 § 3-A SSOT-6 — AI Brand Journey (4지표 + 6 차원) */}
-          {scan.breakdown?.brandJourney && (
+          {/* ── Chapter 2: AI는 우리를 어떻게 보고 있나 — 마케터·경영진 ── */}
+          {!isDev && (scan.breakdown?.brandJourney || (scan.aiProbes && scan.aiProbes.length > 0) || scan.breakdown?.discoveryDetail) && (
+            <ChapterDivider num="2" title="AI는 우리를 어떻게 보고 있나" subtitle="실제 AI 플랫폼 응답을 캡처해 4가지 관점에서 분석했습니다" />
+          )}
+
+          {/* AI Brand Journey (4지표) */}
+          {!isDev && scan.breakdown?.brandJourney && (
             <BrandJourneyCard journey={scan.breakdown.brandJourney} />
           )}
 
-          {/* V2.1 § 3-A SSOT-7 — Discovery sub-engine (AI SOV + 인용 출처 + 할루시네이션) */}
-          {scan.breakdown?.discoveryDetail && (
+          {/* AI Visibility Map (5 플랫폼 실측 응답) — 마케터·경영진은 Chapter 2 안에서 노출 */}
+          {!isExec && !isDev && scan.aiProbes && scan.aiProbes.length > 0 && (
+            <AIVisibilityMap aiProbes={scan.aiProbes} />
+          )}
+
+          {/* Discovery sub-engine — 마케터·개발자 */}
+          {!isExec && scan.breakdown?.discoveryDetail && (
             <DiscoveryDetailCard detail={scan.breakdown.discoveryDetail} />
           )}
 
-          {/* Phase 3.3 — Action Plan (Impact × Effort) — V2.1 LLM 추천 */}
-          {scan.breakdown?.actionPlan === null ? (
-            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-900">
-              <strong>⚠ Action Plan LLM 미가용</strong> — ANTHROPIC_API_KEY 미설정으로 Claude Haiku 추천 작동 안 함. § 1.10 정직 원칙에 따라 휴리스틱 fallback 폐기.
-            </div>
-          ) : scan.breakdown?.actionPlan && scan.breakdown.actionPlan.length > 0 ? (
-            <ActionMatrix actions={scan.breakdown.actionPlan} />
-          ) : null}
+          {/* ── Chapter 3: 개선 로드맵 — 마케터·경영진 ── */}
+          {!isDev && (scan.topIssues?.length > 0 || scan.breakdown?.actionPlan || scan.shortId) && (
+            <ChapterDivider num="3" title="개선 로드맵" subtitle="무엇을, 어떻게, 누구와 함께 할 것인가" />
+          )}
 
-          {/* Phase 3.1 — Schema 자동 생성기 */}
-          {scan.breakdown && Array.isArray(scan.breakdown.schemaSuggestions) && scan.breakdown.schemaSuggestions.length > 0 && (
+          {/* Schema 자동 생성기 — 개발자 전용 */}
+          {isDev && scan.breakdown && Array.isArray(scan.breakdown.schemaSuggestions) && scan.breakdown.schemaSuggestions.length > 0 && (
             <SchemaGenerator suggestions={scan.breakdown.schemaSuggestions as SchemaSuggestionUI[]} />
           )}
 
-          {/* Phase 3.2 — Trend (도메인 시계열) */}
-          {scan.shortId && <TrendChart shortId={scan.shortId} />}
-
-          {/* Top Issues */}
-          <div className="mb-8">
-            <h2 className="mb-3 text-[15px] font-bold text-text">상위 이슈</h2>
-            <div className="space-y-2">
+          {/* Top Issues — 마케터·경영진 */}
+          {!isDev && (
+          <div className="mb-10">
+            <div className="mb-5">
+              <h2 className="text-[17px] font-bold text-text">먼저 챙겨볼 것</h2>
+              <p className="mt-1 text-xs text-text-muted">개선하면 가장 큰 변화가 있는 항목부터 정리했습니다</p>
+            </div>
+            <div className="space-y-3">
               {scan.topIssues.map((issue, i) => {
-                const sc = issue.severity === 'high' ? '#DC2626' : issue.severity === 'medium' ? '#EA580C' : '#D97706';
+                const sev = issue.severity === 'high'
+                  ? { dot: '#DC2626', label: '긴급 개선', tone: 'text-rose-700' }
+                  : issue.severity === 'medium'
+                  ? { dot: '#EA580C', label: '권장 개선', tone: 'text-amber-700' }
+                  : { dot: '#94A3B8', label: '참고', tone: 'text-slate-600' };
                 return (
-                  <div key={i} className="rounded-xl border border-border bg-white p-4" style={{ borderLeftWidth: 3, borderLeftColor: sc }}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-text">{issue.title}</span>
-                      <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase" style={{ color: sc }}>{issue.severity}</span>
+                  <div key={i} className="rounded-2xl border border-border bg-white px-6 py-5 transition-shadow hover:shadow-sm">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="inline-flex h-2 w-2 shrink-0 rounded-full" style={{ background: sev.dot }} />
+                      <span className={`text-[11px] font-medium ${sev.tone}`}>{sev.label}</span>
                     </div>
-                    <p className="text-xs text-text-sub">{issue.description}</p>
+                    <h3 className="text-[15px] font-semibold text-text leading-snug">{issue.title}</h3>
+                    <p className="mt-2 text-sm text-text-sub leading-relaxed">{issue.description}</p>
                   </div>
                 );
               })}
             </div>
           </div>
+          )}
 
-          {/* 서브페이지 분석 결과 */}
-          {scan.subPages && scan.subPages.length > 0 && (
+          {/* Action Plan (Impact × Effort) — 마케터 전용 — Top Issues 다음에 위치 */}
+          {isMarketer && (scan.breakdown?.actionPlan === null ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-900">
+              <strong>⚠ Action Plan LLM 미가용</strong> — Anthropic API 키 미설정으로 Claude Haiku 추천이 작동하지 않습니다. 정직 원칙에 따라 휴리스틱 추정 응답은 제공하지 않습니다.
+            </div>
+          ) : scan.breakdown?.actionPlan && scan.breakdown.actionPlan.length > 0 ? (
+            <ActionMatrix actions={scan.breakdown.actionPlan} />
+          ) : null)}
+
+          {/* Trend (도메인 시계열) — 마케터·경영진 */}
+          {!isDev && scan.shortId && <TrendChart shortId={scan.shortId} />}
+
+          {/* 서브페이지 분석 결과 — 개발자 전용 */}
+          {isDev && scan.subPages && scan.subPages.length > 0 && (
             <div className="mb-8">
               <h2 className="mb-1 text-[15px] font-bold text-text">사이트 전체 페이지 분석</h2>
               <p className="mb-3 text-xs text-text-muted">홈페이지 포함 총 {scan.pagesAnalyzed || 1}개 페이지 분석</p>
@@ -1088,8 +1202,13 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* Radar + 분석 요약 (나란히) + 브랜드 성격 */}
-          {scan.deep && (() => {
+          {/* ── Chapter 4: 우리 브랜드의 디지털 페르소나 — 마케터 전용 ── */}
+          {isMarketer && scan.deep && (
+            <ChapterDivider num="4" title="우리 브랜드의 디지털 페르소나" subtitle="진단 점수를 종합해 본 우리 브랜드의 캐릭터" />
+          )}
+
+          {/* Radar + 분석 요약 (나란히) + 브랜드 성격 — 마케터 전용 */}
+          {isMarketer && scan.deep && (() => {
             const techPct = Math.round(techSeoTotal / techSeoMax * 100);
             const contentPct = Math.round(contentSeoTotal / contentSeoMax * 100);
             const geoExposurePct = Math.round(scan.geoChecks.filter(c => c.mentioned).length / scan.geoChecks.length * 100);
@@ -1162,7 +1281,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                     <h2 className="text-[15px] font-bold text-text">브랜드 커뮤니케이션 성격 제안</h2>
                     <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700" title="Claude Haiku LLM 동적 분석 (36 유형 임의 매핑 폐기)">🤖 LLM 동적 분석</span>
                   </div>
-                  <p className="mb-5 text-xs text-text-muted">진단 점수와 카드를 LLM이 보고 동적으로 분석한 디지털 페르소나 (V2.1 § 1.10)</p>
+                  <p className="mb-5 text-xs text-text-muted">진단 점수와 카드를 LLM이 보고 동적으로 분석한 디지털 페르소나</p>
 
                   <div className="grid gap-6 lg:grid-cols-5">
                     {/* 왼쪽: 타이틀 */}
@@ -1206,37 +1325,44 @@ function ReportContent({ scanId }: { scanId: string }) {
                 </div>
                 ) : (
                 <div className="mb-10 rounded-2xl border border-amber-200 bg-amber-50/40 p-5 text-xs text-amber-900">
-                  <strong>⚠ 브랜드 페르소나 LLM 미가용</strong> — ANTHROPIC_API_KEY 미설정으로 Claude Haiku 동적 분석 작동 안 함. § 1.10 정직 원칙에 따라 36 유형 임의 매핑 휴리스틱 폐기.
+                  <strong>⚠ 브랜드 페르소나 LLM 미가용</strong> — Anthropic API 키 미설정으로 Claude Haiku 동적 분석이 작동하지 않습니다. 정직 원칙에 따라 점수 임계값만으로 페르소나를 임의 매핑하지 않습니다.
                 </div>
                 )}
               </>
             );
           })()}
 
-          {/* === 구분선: 써머리 ↔ 상세 === */}
+          {/* === 구분선: 써머리 ↔ 상세 === — 개발자 전용 */}
+          {isDev && (
           <div className="mb-10 flex items-center gap-4">
             <div className="flex-1 border-t border-border" />
             <span className="text-xs font-medium text-text-muted tracking-wider">상세 분석 결과</span>
             <div className="flex-1 border-t border-border" />
           </div>
+          )}
 
-          {/* Tech SEO */}
+          {/* Tech SEO — 개발자 전용 */}
+          {isDev && (
           <div className="mb-10">
             <h2 className="mb-4 text-[15px] font-bold text-text">기술 SEO <span className="font-normal text-text-muted text-sm">{techSeoTotal}/{techSeoMax}</span></h2>
             <div className="space-y-3">
               {scan.techSeo.map((item, i) => <SeoItemRow key={i} item={item} />)}
             </div>
           </div>
+          )}
 
-          {/* Content SEO */}
+          {/* Content SEO — 개발자 전용 */}
+          {isDev && (
           <div className="mb-10">
             <h2 className="mb-4 text-[15px] font-bold text-text">콘텐츠 SEO <span className="font-normal text-text-muted text-sm">{contentSeoTotal}/{contentSeoMax}</span></h2>
             <div className="space-y-3">
               {scan.contentSeo.map((item, i) => <SeoItemRow key={i} item={item} />)}
             </div>
           </div>
+          )}
 
-          {/* GEO */}
+          {/* GEO — 개발자 전용 */}
+          {isDev && (
           <div className="mb-10">
             <h2 className="mb-4 text-[15px] font-bold text-text">AI 검색 노출 (실측)</h2>
             <div className="space-y-3">
@@ -1256,22 +1382,25 @@ function ReportContent({ scanId }: { scanId: string }) {
               ))}
             </div>
           </div>
+          )}
 
-          {/* AI Visibility Map — Phase 2 신규 (실제 AI 응답 캡처) */}
-          {scan.aiProbes && scan.aiProbes.length > 0 && (
+          {/* AI Visibility Map — 개발자 전용 (마케터는 Chapter 2에서 이미 노출) */}
+          {isDev && scan.aiProbes && scan.aiProbes.length > 0 && (
             <AIVisibilityMap aiProbes={scan.aiProbes} />
           )}
 
-          {/* GEO Readiness */}
+          {/* GEO Readiness — 개발자 전용 */}
+          {isDev && (
           <div className="mb-10">
             <h2 className="mb-4 text-[15px] font-bold text-text">AI 최적화 준비도</h2>
             <div className="space-y-3">
               {scan.geoReadiness.map((item, i) => <SeoItemRow key={i} item={item} />)}
             </div>
           </div>
+          )}
 
-          {/* 성능 (Core Web Vitals) */}
-          {scan.performance && (
+          {/* 성능 (Core Web Vitals) — 개발자 전용 */}
+          {isDev && scan.performance && (
             <div className="mb-10">
               <h2 className="mb-4 text-[15px] font-bold text-text flex items-center gap-1.5"><Gauge size={15} /> 성능 (Core Web Vitals)</h2>
               <div className="grid gap-3 sm:grid-cols-3">
@@ -1307,8 +1436,8 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* Deep Analysis */}
-          {scan.deep && (
+          {/* Deep Analysis — 개발자 전용 */}
+          {isDev && scan.deep && (
             <div className="mb-8">
               <h2 className="mb-4 text-[15px] font-bold text-text">심화 분석</h2>
 
@@ -1444,7 +1573,13 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* AI 캠페인 기획서 생성 */}
+          {/* ── Chapter 5: 다음 단계 — 마케터 전용 ── */}
+          {isMarketer && (
+            <ChapterDivider num="5" title="다음 단계" subtitle="진단을 행동으로 옮기는 가장 빠른 길" />
+          )}
+
+          {/* AI 캠페인 기획서 생성 — 마케터 전용 */}
+          {isMarketer && (
           <div className="mb-6 text-center">
             <button
               onClick={handleGenerateCampaignPlan}
@@ -1457,17 +1592,38 @@ function ReportContent({ scanId }: { scanId: string }) {
                 <><Lightbulb size={16} /> AI 캠페인 기획서 생성</>
               )}
             </button>
+            {!isLoggedIn && (
+              <p className="mt-2 text-[11px] text-text-muted">로그인 후 이용 가능합니다. 클릭 시 로그인 페이지로 이동합니다.</p>
+            )}
+            {planError && (
+              <div className="mt-3 mx-auto max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+                ⚠ {planError}
+              </div>
+            )}
           </div>
+          )}
 
           {/* Bottom CTA — 비로그인만 */}
           {!isLoggedIn && (
             <div className="rounded-2xl border border-border bg-surface p-8 text-center">
               <h3 className="mb-2 text-lg font-bold text-text">심화 분석과 개선 가이드가 필요하신가요?</h3>
-              <p className="mb-5 text-sm text-text-sub">무료 회원가입으로 정식 보고서와 맞춤 액션 플랜을 확인하세요</p>
-              <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-sub">
-                정식 보고서 확인
+              <p className="mb-5 text-sm text-text-sub">정식 보고서와 맞춤 액션 플랜을 확인하세요</p>
+              <Link
+                href={`/smarcomm/signup?redirect=${encodeURIComponent(`/smarcomm/report/${scanId}`)}`}
+                className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-sub"
+              >
+                무료로 시작
                 <ChevronRight size={15} />
               </Link>
+              <p className="mt-3 text-[11px] text-text-muted">
+                이미 계정이 있으신가요?{' '}
+                <Link
+                  href={`/smarcomm/login?redirect=${encodeURIComponent(`/smarcomm/report/${scanId}`)}`}
+                  className="font-medium text-text underline-offset-2 hover:underline"
+                >
+                  로그인
+                </Link>
+              </p>
             </div>
           )}
 
@@ -1504,7 +1660,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                 {scan.shortId && <span className="ml-3">ID: {scan.shortId}</span>}
               </div>
               <div>
-                Phase 1 보고서 · Phase 2(ChatGPT·Perplexity 실측) 곧 추가
+                Claude(Anthropic) 기준 측정 · 추가 AI 플랫폼은 단계적으로 활성
               </div>
             </div>
           </div>
@@ -1512,9 +1668,18 @@ function ReportContent({ scanId }: { scanId: string }) {
       </main>
 
       {/* 우하단 플로팅 — 비로그인만 */}
-      <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${showFloating && !isLoggedIn ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'}`}>
-        <Link href="/signup" className="flex items-center gap-2 rounded-full bg-text px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-accent-sub hover:shadow-xl">
-          정식 보고서 확인
+      <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 transition-all duration-500 ${showFloating && !isLoggedIn ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'}`}>
+        <Link
+          href={`/smarcomm/login?redirect=${encodeURIComponent(`/smarcomm/report/${scanId}`)}`}
+          className="rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-text shadow-sm transition-all hover:shadow-md"
+        >
+          로그인
+        </Link>
+        <Link
+          href={`/smarcomm/signup?redirect=${encodeURIComponent(`/smarcomm/report/${scanId}`)}`}
+          className="flex items-center gap-2 rounded-full bg-text px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-accent-sub hover:shadow-xl"
+        >
+          무료로 시작
           <ChevronRight size={15} />
         </Link>
       </div>

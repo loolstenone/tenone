@@ -118,7 +118,7 @@ export async function autoAssetizeCampaign(
             name: input.campaign_name,
             description: input.description,
             provider: input.org_name,
-            offers: input.service_price,
+            offers: input.service_price ? { price: input.service_price.value, priceCurrency: input.service_price.currency } : undefined,
         });
         const { data: srvRow, error: srvErr } = await admin
             .from('smarcomm_brand_assets')

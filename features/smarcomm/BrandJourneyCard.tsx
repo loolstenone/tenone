@@ -22,7 +22,6 @@ export default function BrandJourneyCard({ journey }: Props) {
           <div>
             <div className="mb-1 flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">AI Brand Journey</span>
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-medium text-emerald-700">V2.1</span>
               {journey.sentimentSource === 'llm' ? (
                 <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-medium text-blue-700" title="Sentiment·Reasoning·Attribute는 Claude Haiku 4.5로 실측 분류">
                   🤖 LLM 실측 {journey.analyzedByLlm}건
@@ -79,10 +78,10 @@ export default function BrandJourneyCard({ journey }: Props) {
       {/* 출처 푸터 */}
       <div className="border-t border-border bg-surface/40 px-5 py-2.5 text-center space-y-0.5">
         <p className="text-[10px] text-text-muted">
-          🔬 출처: SmarComm § 3-A SSOT-7 (V2.1) · 산식 = 인지·이해·추천·평판 평균 · Sentiment/Reasoning/Attribute는 Claude Haiku 4.5 LLM 실측 (휴리스틱 폐기, § 1.10 정직 원칙)
+          🔬 출처: AI 응답 실측 · 산식 = 인지·이해·추천·평판 평균 · Sentiment·Reasoning·Attribute는 LLM 분류기로 측정
         </p>
         <p className="text-[10px] text-text-muted">
-          🎯 To-Be 목표값(30회·90%·TOP3·85%)은 <strong>SmarComm 자체 SSOT 기본값</strong> — Phase 5 업종 백분위(`smarcomm_industry_benchmarks`) 동적 산출 + 워크스페이스 커스터마이즈 예정
+          🎯 To-Be 목표값(30회·90%·TOP3·85%)은 <strong>SmarComm 표준 기본값</strong> — 업종 백분위 기반 동적 산출 및 워크스페이스 맞춤화는 단계적으로 적용
         </p>
       </div>
     </div>
@@ -104,7 +103,7 @@ function AxisCard({ axis, isNA = false }: { axis: BrandJourney['axes'][number]; 
         </div>
         <div className="text-2xl font-bold text-text-muted">N/A</div>
         <p className="text-[10px] text-text-muted leading-snug">
-          ANTHROPIC_API_KEY 미설정 — Claude Haiku LLM 분류기 작동 불가. § 1.10 정직 원칙에 따라 휴리스틱 점수 산입 안 함.
+          Anthropic API 키 미설정 — Claude Haiku LLM 분류기가 작동하지 않습니다. 정직 원칙에 따라 휴리스틱 추정 점수는 산입하지 않습니다.
         </p>
         <div className="inline-block rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-700">
           🔬 LLM 키 필요
@@ -144,9 +143,9 @@ function AxisCard({ axis, isNA = false }: { axis: BrandJourney['axes'][number]; 
       </div>
       {!onTrack && (
         <div className="inline-block rounded-full bg-surface px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
-          {axis.recommendedModule === 'airm' ? '§ 3-C AIRM' :
-           axis.recommendedModule === 'assets' ? '§ 3-D 자산화' :
-           axis.recommendedModule === 'strategy' ? '③ 전략' : '④ 제작'} 으로 +{gap}점
+          {axis.recommendedModule === 'airm' ? 'AIRM' :
+           axis.recommendedModule === 'assets' ? '자산화' :
+           axis.recommendedModule === 'strategy' ? '전략' : '제작'} 으로 +{gap}점
         </div>
       )}
     </div>

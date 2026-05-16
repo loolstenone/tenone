@@ -5,6 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const router = useRouter();
-  useEffect(() => { router.replace('/dashboard/geo'); }, [router]);
+  useEffect(() => { router.replace('/smarcomm/dashboard/geo'); }, [router]);
   return null;
 }

@@ -43,7 +43,7 @@ export default function InsightsPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-text">② 분석 — Data Intelligence</h1>
           <GuideHelpButton />
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">V2.0 · Smart-Data Hub</span>
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">Smart-Data Hub</span>
         </div>
         <p className="mt-1 text-xs text-text-muted">진단 시계열에서 자동 인사이트 도출 — Smart-Loop ②→③ 인풋</p>
       </div>
@@ -111,7 +111,7 @@ export default function InsightsPage() {
             <ul className="space-y-1.5 text-xs text-text leading-relaxed">
               {summary.insights.map((ins, i) => <li key={i}>{ins}</li>)}
             </ul>
-            <p className="mt-2 text-[10px] text-text-muted">📋 위 메시지는 임계값 분기 산출 (보조). LLM 동적 인사이트가 주 신호 — § 1.10 정직 원칙.</p>
+            <p className="mt-2 text-[10px] text-text-muted">📋 위 메시지는 임계값 분기 산출(보조 신호)입니다. LLM 동적 인사이트가 주 신호입니다.</p>
           </div>
 
           {/* Index 3축 시계열 */}

@@ -7,25 +7,19 @@ import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star, AlertTriangle } f
 import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
-import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
+import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
+import { getSetting } from '@/lib/supabase/settings';
 
-// V2.1 § 1.10 정직 — Mock 데이터로만 작동하는 경로
-// 실제 API 연결된 페이지는 제외 (scan·geo·advisor·creative·insights·ai-tracker·airm·assets·content·archive·admin·profile·members·guide·glossary)
+// Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
+// 실제 API 연결된 페이지는 제외 (scan·advisor·creative·insights·ai-tracker·airm·assets·admin·profile·members·guide·glossary)
 const MOCK_PATH_PREFIXES = [
-  '/smarcomm/dashboard/funnel',
-  '/smarcomm/dashboard/traffic',
+  '/smarcomm/dashboard/geo/competitors',
+  '/smarcomm/dashboard/geo/brand',
+  '/smarcomm/dashboard/geo/tracking',
+  '/smarcomm/dashboard/content',
   '/smarcomm/dashboard/analytics',
-  '/smarcomm/dashboard/cohort',
-  '/smarcomm/dashboard/abtest',
-  '/smarcomm/dashboard/journey',
-  '/smarcomm/dashboard/events',
-  '/smarcomm/dashboard/reports',
   '/smarcomm/dashboard/data-reports',
-  '/smarcomm/dashboard/crm',
-  '/smarcomm/dashboard/campaigns',
-  '/smarcomm/dashboard/calendar',
-  '/smarcomm/dashboard/workflow',
 ];
 
 function isMockPath(pathname: string | null): boolean {
@@ -58,31 +52,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [isLoading, isAuthenticated, router]);
 
   const initDashboard = () => {
-    const savedCompany = localStorage.getItem('smarcomm_company');
-    if (savedCompany) {
-      const parsed = JSON.parse(savedCompany);
-      setCompanyName(parsed.name || '');
-      setCompanyLogo(parsed.logo || '');
-    }
+    // DB-first (user_settings 테이블) → localStorage fallback
+    getSetting<{ name?: string; logo?: string }>('smarcomm', 'company', 'smarcomm_company').then(data => {
+      if (data) {
+        setCompanyName(data.name || '');
+        setCompanyLogo(data.logo || '');
+      }
+    });
 
-    const loadFavs = () => {
-      try {
-        const favPaths: string[] = JSON.parse(localStorage.getItem('smarcomm_favorites') || '[]');
-        const nameMap: Record<string, string> = {
-          '/dashboard': '대시보드', '/dashboard/funnel': '퍼널 분석', '/dashboard/scan': 'GEO & SEO 진단',
-          '/dashboard/traffic': '트래픽 분석', '/dashboard/analytics': '매출 분석', '/dashboard/reports': '캠페인 보고서',
-          '/dashboard/data-reports': '데이터 리포트', '/dashboard/geo': '가시성 개요', '/dashboard/geo/competitors': '경쟁사 리서치',
-          '/dashboard/geo/prompts': '프롬프트 리서치', '/dashboard/geo/brand': '브랜드 실적', '/dashboard/geo/tracking': '프롬프트 추적',
-          '/dashboard/creative': 'AI 소재 제작', '/dashboard/content': '콘텐츠', '/dashboard/advisor': 'AI 어드바이저',
-          '/dashboard/crm': '고객 관리', '/dashboard/crm/kakao': '카카오', '/dashboard/crm/email': '이메일',
-          '/dashboard/crm/push': '푸시', '/dashboard/abtest': 'A/B 테스트', '/dashboard/journey': '사용자 여정',
-          '/dashboard/cohort': '코호트', '/dashboard/events': '이벤트 관리', '/dashboard/workflow/projects': '프로젝트',
-          '/dashboard/workflow/kanban': '칸반 보드', '/dashboard/calendar': '캘린더', '/dashboard/workflow/pipeline': '파이프라인',
-          '/dashboard/archive': '아카이브', '/dashboard/campaigns': '광고 집행', '/dashboard/workflow/automation': '자동화',
-          '/dashboard/admin': '사이트 관리', '/dashboard/profile': '워크스페이스',
-        };
-        setFavorites(favPaths.slice(0, 10).map(p => ({ path: p, label: nameMap[p] || p.split('/').pop() || '' })));
-      } catch {}
+    const nameMap: Record<string, string> = {
+      '/dashboard': '대시보드', '/dashboard/funnel': '퍼널 분석', '/dashboard/scan': 'GEO & SEO 진단',
+      '/dashboard/traffic': '트래픽 분석', '/dashboard/analytics': '매출 분석', '/dashboard/reports': '캠페인 보고서',
+      '/dashboard/data-reports': '데이터 리포트', '/dashboard/geo': '가시성 개요', '/dashboard/geo/competitors': '경쟁사 리서치',
+      '/dashboard/geo/prompts': '프롬프트 리서치', '/dashboard/geo/brand': '브랜드 실적', '/dashboard/geo/tracking': '프롬프트 추적',
+      '/dashboard/creative': 'AI 소재 제작', '/dashboard/content': '콘텐츠', '/dashboard/advisor': 'AI 어드바이저',
+      '/dashboard/crm': '고객 관리', '/dashboard/crm/kakao': '카카오', '/dashboard/crm/email': '이메일',
+      '/dashboard/crm/push': '푸시', '/dashboard/abtest': 'A/B 테스트', '/dashboard/journey': '사용자 여정',
+      '/dashboard/cohort': '코호트', '/dashboard/events': 'AI 답변 변화', '/dashboard/workflow/projects': '프로젝트',
+      '/dashboard/workflow/kanban': '칸반 보드', '/dashboard/calendar': '캘린더', '/dashboard/workflow/pipeline': '파이프라인',
+      '/dashboard/archive': '소재 아카이브', '/dashboard/campaigns': '광고 캠페인', '/dashboard/workflow/automation': '자동화',
+      '/dashboard/admin': '사이트 관리', '/dashboard/profile': '워크스페이스',
+    };
+    const loadFavs = async () => {
+      // DB-first (user_settings) → localStorage fallback
+      const favPaths = await getSetting<string[]>('smarcomm', 'favorites', 'smarcomm_favorites') ?? [];
+      setFavorites(favPaths.slice(0, 10).map(p => ({ path: p, label: nameMap[p] || p.split('/').pop() || '' })));
     };
     window.addEventListener('favorites-changed', loadFavs);
     loadFavs();
@@ -149,7 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }}>
                 <div className="flex gap-1.5 py-1">
                   {favorites.map(fav => (
-                    <Link key={fav.path} href={fav.path}
+                    <Link key={fav.path} href={`/smarcomm${fav.path}`}
                       className="shrink-0 flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs text-text-sub hover:bg-surface hover:text-text transition-colors">
                       <Star size={10} className="text-warning fill-warning" />
                       {fav.label}
@@ -171,7 +165,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {profileOpen && (
             <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border bg-white py-1.5 shadow-lg z-50">
-              <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
+              <Link href="/smarcomm/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
               <Link href="/" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>SmarComm 홈</Link>
               <div className="my-1 border-t border-border" />
               <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text-muted hover:bg-surface hover:text-text">
@@ -188,7 +182,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="bg-amber-100 border-b-2 border-amber-300 px-6 py-2.5 flex items-center gap-2 text-amber-900">
             <AlertTriangle size={14} className="shrink-0" />
             <span className="text-xs">
-              <strong>🧪 Mock 데이터 페이지</strong> — 이 화면은 실측 데이터가 아닌 데모 데이터로 작동합니다. § 1.10 정직 원칙. Phase 5에서 실 API(GA4·Search Console·광고 매체 등) 연동 예정.
+              <strong>🧪 데모 데이터 화면</strong> — 이 화면은 데모 데이터로 작동합니다. 실 API(GA4·Search Console·광고 매체 등) 연동은 단계적으로 활성됩니다.
             </span>
           </div>
         )}

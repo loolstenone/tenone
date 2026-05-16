@@ -62,7 +62,7 @@ export default function AssetsPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-text">⑦ 자산화 — Brand Assetizing</h1>
             <GuideHelpButton />
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">V2.0</span>
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">Brand Assetizing</span>
           </div>
           <p className="mt-1 text-xs text-text-muted">
             캠페인 산출물을 검색·AI가 평생 참조할 Entity 자산으로 영속화합니다. Schema.org 표준 JSON-LD로 저장됩니다.
@@ -132,7 +132,7 @@ export default function AssetsPage() {
           캠페인이 끝나도 AI·검색이 평생 참조할 디지털 흔적을 남기는 단계. SmarComm의 장기 가치는 "한 번 만든 자산이 365일 후에도 AI 추천에 인용되는 것"입니다.
         </p>
         <ul className="space-y-1 text-xs text-text-sub">
-          <li>① <strong>디지털 흔적 정화</strong> — 오래된 보도자료·잘못된 정보 정리 (§ 3-C AIRM과 연동)</li>
+          <li>① <strong>디지털 흔적 정화</strong> — 오래된 보도자료·잘못된 정보 정리 (AIRM과 연동)</li>
           <li>② <strong>고권위 소스 주입</strong> — 위키피디아·권위 매체·학술 백서 등재</li>
           <li>③ <strong>엔티티 브랜딩</strong> — JSON-LD로 AI가 읽기 쉬운 구조화 데이터 제공</li>
         </ul>

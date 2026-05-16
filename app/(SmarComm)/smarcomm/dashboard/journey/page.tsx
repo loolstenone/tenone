@@ -1,134 +1,202 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Globe, FileText, Palette, Megaphone, LineChart, Clock, ChevronRight } from 'lucide-react';
-import { getChartColors } from '@/lib/smarcomm/chart-palette';
+// 사용자 여정 — Smart-Loop 7단계 데이터 흐름 시각화
+// 진단 → AI 응답 → 플래그 → 액션 → 자산화 → 배포 → 인용 추적
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Calendar, ArrowDown, Sparkles, Activity } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
-// SmarComm 고객 여정 타임라인
-interface JourneyEvent {
-  id: string;
-  type: 'scan' | 'signup' | 'report' | 'creative' | 'campaign' | 'meeting';
-  title: string;
-  detail: string;
-  date: string;
-  icon: typeof Search;
-  color: string;
-}
+interface Stage { key: string; label: string; emoji: string; table: string; count: number; status: 'ok' | 'empty' | 'error' }
+interface Conversion { from: string; to: string; rate: number }
+interface Recent { stage: string; emoji: string; label: string; detail: string; created_at: string }
+interface JourneyData { stages: Stage[]; conversions: Conversion[]; recent: Recent[]; generated_at: string }
 
-const _jc = getChartColors(7);
-const TYPE_COLOR: Record<string, string> = { scan: _jc[0], signup: _jc[1], report: _jc[2], creative: _jc[3], campaign: _jc[4], meeting: _jc[5] };
+const RANGE_OPTIONS = [
+  { label: '전체', value: 0 },
+  { label: '7일', value: 7 },
+  { label: '30일', value: 30 },
+  { label: '90일', value: 90 },
+];
 
-const MOCK_JOURNEYS: Record<string, JourneyEvent[]> = {
-  '굿프레시 F&B': [
-    { id: '1', type: 'scan', title: '사이트 진단 완료', detail: 'goodfresh.co.kr — 종합 62점 (Good)', date: '2026-03-01', icon: Globe, color: TYPE_COLOR.scan },
-    { id: '2', type: 'signup', title: '회원가입', detail: 'kim@goodfresh.co.kr', date: '2026-03-01', icon: Search, color: TYPE_COLOR.signup },
-    { id: '3', type: 'report', title: '심화 리포트 열람', detail: '키워드 분석, 콘텐츠 갭 확인', date: '2026-03-03', icon: FileText, color: TYPE_COLOR.report },
-    { id: '4', type: 'scan', title: '리테스트 (2회차)', detail: '종합 68점 (+6점 향상)', date: '2026-03-08', icon: Globe, color: TYPE_COLOR.scan },
-    { id: '5', type: 'meeting', title: '전문가 미팅', detail: 'SEO 개선 + 소재 제작 상담', date: '2026-03-10', icon: Search, color: TYPE_COLOR.meeting },
-    { id: '6', type: 'creative', title: '소재 제작 시작', detail: '네이버 SA 카피 + 인스타 배너', date: '2026-03-12', icon: Palette, color: TYPE_COLOR.creative },
-    { id: '7', type: 'campaign', title: 'Lite 플랜 가입', detail: '월 39만원 — 1채널 집행', date: '2026-03-15', icon: Megaphone, color: TYPE_COLOR.campaign },
-    { id: '8', type: 'campaign', title: '네이버 SA 캠페인 시작', detail: '월 300만원 예산', date: '2026-03-18', icon: LineChart, color: TYPE_COLOR.campaign },
-  ],
-  '스타일온 패션': [
-    { id: '1', type: 'scan', title: '사이트 진단', detail: 'styleon.kr — 종합 45점 (Needs Work)', date: '2026-03-05', icon: Globe, color: TYPE_COLOR.scan },
-    { id: '2', type: 'signup', title: '회원가입', detail: 'lee@styleon.kr', date: '2026-03-05', icon: Search, color: TYPE_COLOR.signup },
-    { id: '3', type: 'report', title: '심화 리포트 열람', detail: 'GEO 점수 22점 — AI 노출 부족', date: '2026-03-06', icon: FileText, color: TYPE_COLOR.report },
-    { id: '4', type: 'creative', title: '소재 체험', detail: '5건 무료 소재 생성', date: '2026-03-08', icon: Palette, color: TYPE_COLOR.creative },
-  ],
-  '테크하우스': [
-    { id: '1', type: 'scan', title: '사이트 진단', detail: 'techhouse.io — 종합 78점 (Good)', date: '2026-03-19', icon: Globe, color: TYPE_COLOR.scan },
-    { id: '2', type: 'meeting', title: '미팅 예약', detail: '3/25 14:00 예정', date: '2026-03-19', icon: Search, color: TYPE_COLOR.meeting },
-  ],
+const STAGE_LINKS: Record<string, string> = {
+  scan: '/smarcomm/dashboard/reports',
+  probe: '/smarcomm/dashboard/geo',
+  flag: '/smarcomm/dashboard/airm/flags',
+  action: '/smarcomm/dashboard/airm/actions',
+  asset: '/smarcomm/dashboard/assets',
+  distribution: '/smarcomm/dashboard/assets',
+  citation: '/smarcomm/dashboard/assets',
+};
+
+const STAGE_HELP: Record<string, string> = {
+  scan: '도메인 진단을 실행해 SEO·GEO 점수를 산출합니다',
+  probe: '5 AI 플랫폼에 질문해 우리 브랜드 응답을 캡처합니다',
+  flag: 'AI 응답에서 부정/오답/혼동 답변을 자동 감지합니다',
+  action: '발견된 플래그를 교정할 role별 액션 큐를 만듭니다',
+  asset: 'Schema.org Entity를 영구 자산으로 등록합니다',
+  distribution: 'Entity를 위키·뉴스·매체에 배포해 권위를 쌓습니다',
+  citation: 'AI 응답에서 우리 Entity가 인용되는 빈도를 추적합니다',
 };
 
 export default function JourneyPage() {
-  const [selectedCustomer, setSelectedCustomer] = useState('굿프레시 F&B');
-  const journey = MOCK_JOURNEYS[selectedCustomer] || [];
+  const [data, setData] = useState<JourneyData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [days, setDays] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (days > 0) params.set('days', String(days));
+        const res = await fetch(`/api/smarcomm/journey?${params.toString()}`);
+        const d = await res.json();
+        if (!cancelled) setData(res.ok ? d : null);
+      } catch {
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [days]);
+
+  const maxCount = Math.max(...(data?.stages.map(s => s.count) ?? [0]), 1);
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
-      <div className="mb-6">
-        <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">사용자 여정</h1><GuideHelpButton /></div>
-        <p className="mt-1 text-xs text-text-muted">고객이 SmarComm과 함께한 여정을 타임라인으로 확인하세요</p>
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">사용자 여정</h1><GuideHelpButton /></div>
+          <p className="mt-1 text-xs text-text-muted">Smart-Loop 7단계 데이터 흐름 — 진단부터 AI 인용 추적까지</p>
+        </div>
+        <Link href="/smarcomm/dashboard/scan" className="inline-flex items-center gap-1.5 rounded-full bg-text px-4 py-2 text-xs font-semibold text-white hover:bg-accent-sub">
+          <Sparkles size={13} /> 새 진단 시작
+        </Link>
       </div>
 
-      {/* 고객 선택 */}
-      <div className="mb-6 flex gap-2">
-        {Object.keys(MOCK_JOURNEYS).map(name => (
-          <button
-            key={name}
-            onClick={() => setSelectedCustomer(name)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              selectedCustomer === name ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'
-            }`}
-          >
-            {name}
-          </button>
-        ))}
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1 rounded-full border border-border bg-white px-1 py-1">
+          <Calendar size={11} className="ml-2 text-text-muted" />
+          {RANGE_OPTIONS.map(opt => (
+            <button key={opt.value} onClick={() => setDays(opt.value)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${days === opt.value ? 'bg-text text-white' : 'text-text-sub hover:text-text'}`}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {data?.generated_at && (
+          <span className="ml-auto text-[10px] text-text-muted">
+            {new Date(data.generated_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })} 갱신
+          </span>
+        )}
       </div>
 
-      {/* 여정 요약 */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-border bg-white p-4 text-center">
-          <div className="text-2xl font-bold text-text">{journey.length}</div>
-          <div className="text-xs text-text-muted">총 활동</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-4 text-center">
-          <div className="text-2xl font-bold text-text">{journey.filter(e => e.type === 'scan').length}</div>
-          <div className="text-xs text-text-muted">진단 횟수</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-4 text-center">
-          <div className="text-2xl font-bold text-text">{journey.filter(e => e.type === 'creative').length}</div>
-          <div className="text-xs text-text-muted">소재 제작</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-4 text-center">
-          <div className="text-2xl font-bold text-text">
-            {journey.some(e => e.type === 'campaign' && e.title.includes('플랜')) ? '유료' : '무료'}
-          </div>
-          <div className="text-xs text-text-muted">현재 상태</div>
-        </div>
-      </div>
-
-      {/* 타임라인 */}
-      <div className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-5 text-sm font-semibold text-text">활동 타임라인</h2>
-        <div className="relative">
-          {/* 세로 라인 */}
-          <div className="absolute left-5 top-0 h-full w-px bg-border" />
-
-          <div className="space-y-6">
-            {journey.map((event, i) => {
-              const Icon = event.icon;
-              return (
-                <div key={event.id} className="relative flex items-start gap-5 pl-2">
-                  {/* 도트 */}
-                  <div
-                    className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: event.color }}
-                  >
-                    <Icon size={14} className="text-white" />
-                  </div>
-
-                  {/* 콘텐츠 */}
-                  <div className="flex-1 pb-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-text">{event.title}</h3>
-                      <div className="flex items-center gap-1 text-xs text-text-muted">
-                        <Clock size={10} />
-                        {event.date}
+      {loading ? (
+        <div className="rounded-2xl border border-border bg-white p-12 text-center text-sm text-text-muted">불러오는 중…</div>
+      ) : !data ? (
+        <div className="rounded-2xl border border-border bg-white p-12 text-center text-sm text-text-muted">데이터를 불러올 수 없습니다.</div>
+      ) : (
+        <>
+          {/* Funnel 시각화 */}
+          <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white">
+            <div className="border-b border-border bg-surface/40 px-5 py-3">
+              <h2 className="text-sm font-bold text-text">데이터 플라이휠 — 단계별 전환</h2>
+              <p className="mt-0.5 text-[11px] text-text-muted">각 단계의 데이터가 다음 단계의 인풋이 됩니다. 막대 길이는 누적 카운트, 화살표는 단계 간 전환율.</p>
+            </div>
+            <div className="p-5 space-y-3">
+              {data.stages.map((s, i) => {
+                const width = (s.count / maxCount) * 100;
+                const conv = i > 0 ? data.conversions[i - 1] : null;
+                const isEmpty = s.count === 0;
+                return (
+                  <div key={s.key}>
+                    {conv && (
+                      <div className="mb-1.5 flex items-center justify-center text-[10px] text-text-muted gap-1">
+                        <ArrowDown size={11} className="opacity-50" />
+                        <span>전환율 {conv.rate}%</span>
                       </div>
-                    </div>
-                    <p className="mt-0.5 text-sm text-text-sub">{event.detail}</p>
+                    )}
+                    <Link href={STAGE_LINKS[s.key] ?? '#'} className="block group">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl shrink-0">{s.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className={`text-sm font-semibold ${isEmpty ? 'text-text-muted' : 'text-text'}`}>{s.label}</span>
+                            <span className={`text-base font-bold tabular-nums ${isEmpty ? 'text-text-muted' : 'text-text'}`}>
+                              {isEmpty ? '—' : s.count.toLocaleString()}
+                              <span className="ml-1 text-[10px] font-normal text-text-muted">건</span>
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full bg-surface overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{
+                              width: `${Math.max(width, isEmpty ? 0 : 4)}%`,
+                              background: isEmpty ? '#E2E8F0' : stageColor(i),
+                            }}/>
+                          </div>
+                          <p className="mt-1 text-[10px] text-text-muted">{STAGE_HELP[s.key]}</p>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <div className="border-t border-border bg-surface/20 px-5 py-2.5 text-[10px] text-text-muted">
+              ⓘ Smart-Loop 자산화 → AI 인용 → 다음 진단의 baseline. 마지막 두 단계(배포·인용)는 외부 매체 등재 후 누적이 시작됩니다.
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* 최근 활동 피드 */}
+          <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white">
+            <div className="border-b border-border bg-surface/40 px-5 py-3 flex items-center gap-2">
+              <Activity size={13} className="text-text-muted" />
+              <h2 className="text-sm font-bold text-text">최근 활동</h2>
+              <span className="text-[10px] text-text-muted">전 단계 통합 ({data.recent.length}건)</span>
+            </div>
+            {data.recent.length === 0 ? (
+              <div className="p-12 text-center text-sm text-text-muted">최근 활동이 없습니다.</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {data.recent.map((r, i) => (
+                  <Link key={i} href={STAGE_LINKS[r.stage] ?? '#'} className="flex items-start gap-3 px-5 py-3 hover:bg-surface/30">
+                    <span className="text-base shrink-0 mt-0.5">{r.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold text-text">{r.label}</span>
+                        <span className="text-[10px] text-text-muted">{relativeTime(r.created_at)}</span>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-text-sub truncate">{r.detail}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
+}
+
+function stageColor(i: number): string {
+  const palette = ['#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
+  return palette[i % palette.length];
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '방금 전';
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const d = Math.floor(hr / 24);
+  if (d < 30) return `${d}일 전`;
+  return `${Math.floor(d / 30)}달 전`;
 }

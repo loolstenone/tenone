@@ -17,7 +17,7 @@ export default function SmarcommMembersPage() {
             .contains("affiliations", ["smarcomm"])
             .order("created_at", { ascending: false })
             .limit(200)
-            .then(res => { setMembers((res.data ?? []) as Member[]); setLoading(false); });
+            .then((res: { data: Member[] | null }) => { setMembers(res.data ?? []); setLoading(false); });
     }, []);
 
     const filtered = members.filter(m => !search || m.name?.includes(search) || m.email?.includes(search) || m.company?.includes(search));
