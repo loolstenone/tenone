@@ -83,9 +83,9 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     items: [
       { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops' },
       { href: '/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm' },
-      { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm', dev: true },
+      { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm' },
       { href: '/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm' },
-      { href: '/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm', dev: true },
+      { href: '/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm' },
     ],
   },
   // ⑤ 모니터링 — Real-time Tracker + AIRM

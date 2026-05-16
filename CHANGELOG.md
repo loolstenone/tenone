@@ -36,6 +36,13 @@
 - 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
 - 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
 
+### Phase B+ — 카카오 + 푸시 통합 브로드캐스트 (마지막 2 DEV 페이지)
+- MCP 마이그레이션 `smarcomm_broadcasts` — 카카오·푸시·SMS 통합 (channel/status CHECK + 4 인덱스 + RLS)
+- API [broadcasts](app/api/smarcomm/broadcasts/route.ts) — CRUD + 채널 prefix 필터 + KPI 집계
+- 공통 컴포넌트 [BroadcastPage](features/smarcomm/BroadcastPage.tsx) — 채널 카드/모달/빈 상태 공유
+- crm/kakao: 알림톡/친구톡/비즈메시지 · crm/push: 모바일 푸시/앱 인박스
+- 사이드바 DEV 배지 0개 달성 (마지막 2개 제거)
+
 ### Phase B — A/B + 콘텐츠 + 캠페인 CRUD (3 DEV 페이지)
 - API [experiments](app/api/smarcomm/experiments/route.ts) — `mkt_experiments` GET/POST/PATCH/DELETE + 가설·변형·기간·승자
 - API [content](app/api/smarcomm/content/route.ts) — `marketing_content` GET/POST/PATCH/DELETE + 상태/유형 필터

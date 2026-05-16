@@ -68,6 +68,16 @@
 - **광고 캠페인** (`/dashboard/campaigns`): API [campaigns](app/api/smarcomm/campaigns/route.ts) — `marketing_campaigns` CRUD, 채널(네이버 SA/DA·구글·메타·카카오·유튜브·이메일) + 예산 진척 바 + 매체 자동 갱신 안내
 - 3 페이지 모두 DEV 제거 · MOCK 배너 prefix 정리
 
+#### ⑪ Phase B+ 카카오 + 푸시 통합 브로드캐스트
+- **MCP 마이그레이션**: `smarcomm_broadcasts` 신규 (카카오·푸시·SMS 통합) — channel CHECK 제약(`kakao_alimtalk`/`kakao_friendtalk`/`kakao_bizmsg`/`push`/`sms`/`app_inbox`) + status CHECK + 4 인덱스 + RLS
+- **신규 API**: [broadcasts](app/api/smarcomm/broadcasts/route.ts) — CRUD + status/kpi(sent·delivered·opened·clicked) 집계 + channelPrefix 필터
+- **공통 컴포넌트**: [BroadcastPage](features/smarcomm/BroadcastPage.tsx) — 카카오·푸시 공유 UI
+- **카카오** (`/dashboard/crm/kakao`): 알림톡·친구톡·비즈메시지 3종
+- **푸시** (`/dashboard/crm/push`): 모바일 푸시·앱 인박스 2종
+- 2 페이지 모두 DEV 제거 · MOCK prefix 제거
+
+**🎉 SmarComm 전체 사이드바 DEV 배지 0개** (28+ 메뉴 모두 실 DB 또는 신규 CRUD 인프라 보유)
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.
