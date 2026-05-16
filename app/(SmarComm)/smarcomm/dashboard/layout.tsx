@@ -7,7 +7,7 @@ import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star, AlertTriangle } f
 import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
-import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
+import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
 
 // Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
@@ -26,7 +26,8 @@ const MOCK_PATH_PREFIXES = [
   '/smarcomm/dashboard/crm',
   '/smarcomm/dashboard/campaigns',
   '/smarcomm/dashboard/calendar',
-  '/smarcomm/dashboard/workflow',
+  '/smarcomm/dashboard/workflow/projects',
+  '/smarcomm/dashboard/workflow/pipeline',
 ];
 
 function isMockPath(pathname: string | null): boolean {

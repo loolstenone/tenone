@@ -17,8 +17,19 @@
 - 신규 UI [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — 이전/이후 텍스트 diff + 빈 상태 정직 안내
 - 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" + DEV 제거 · MOCK 배너 prefix 제거
 
+### 칸반 보드 (`/dashboard/workflow/kanban`)
+- 신규 API [app/api/smarcomm/workflow/tasks/route.ts](app/api/smarcomm/workflow/tasks/route.ts) — `workflow_tasks` CRUD + 대소문자 정규화
+- [lib/workflow-context.tsx](lib/workflow-context.tsx) DB 동기화 (mount fetch + optimistic add/update/move/delete)
+- Provider 미스매치 버그 수정: `dashboard/layout` + `content/page` `lib/smarcomm/workflow-context` → `lib/workflow-context` 통일
+- 6행 실 DB 태스크 5컬럼에 분포 · DEV + MOCK 배너 prefix 제거
+
+### 자동화 (`/dashboard/workflow/automation`)
+- 신규 API [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` CRUD
+- 컨텍스트 toggle/add/update/delete DB 동기 (toggle setState 내부 PATCH 호출로 race 방지)
+- 3행 실 규칙 + KPI(2 활성 / 1 비활성) · DEV 제거
+
 ### 결정
-- 콘텐츠·캘린더·CRM·A/B·워크플로우 등 외부 인프라/신규 테이블 세트 필요 페이지는 세션 139 범위 외 — 차기 세션 우선순위 결정 후 진행
+- 콘텐츠·캘린더·CRM·A/B·트래픽·퍼널·코호트 등 외부 인프라/신규 테이블 세트 필요 페이지는 세션 139 범위 외 — 차기 세션 우선순위 결정 후 진행
 
 ---
 

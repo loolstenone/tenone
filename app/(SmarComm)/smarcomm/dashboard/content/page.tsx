@@ -10,7 +10,7 @@ import {
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 import BarChart from '@/features/smarcomm/charts/BarChart';
 import NextStepCTA from '@/features/smarcomm/NextStepCTA';
-import { useWorkflow } from '@/lib/smarcomm/workflow-context';
+import { useWorkflow } from '@/lib/workflow-context';
 import { PipelineStage } from '@/types/workflow';
 import { workflowChannels } from '@/lib/smarcomm/workflow-data';
 

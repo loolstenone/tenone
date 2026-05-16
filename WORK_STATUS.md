@@ -22,9 +22,20 @@
 - **신규 UI**: [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — KPI 4개 + 이전/이후 텍스트 diff 시각화 + 정직한 빈 상태 안내
 - 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" 재정의 + DEV 제거
 
+#### ③ 칸반 보드 (`/dashboard/workflow/kanban`)
+- **신규 API**: [app/api/smarcomm/workflow/tasks/route.ts](app/api/smarcomm/workflow/tasks/route.ts) — `workflow_tasks` GET/POST/PATCH/DELETE + status/priority 대소문자 정규화
+- **컨텍스트 DB 연동**: [lib/workflow-context.tsx](lib/workflow-context.tsx) — `tasks` mount fetch + add/update/move/delete 시 API 동기 호출 (optimistic)
+- **버그 수정**: dashboard/layout이 `lib/smarcomm/workflow-context` Provider로 감쌌으나 kanban/projects/automation은 `lib/workflow-context`의 useWorkflow를 사용 → Provider 미스매치로 Application error. layout과 content 페이지를 통일해 정리
+- 사이드바 DEV 배지 + MOCK 배너 prefix 제거. 6행 실 데이터(LUKI 싱글 / WIO 가이드 / MADLeague S3 등) 5컬럼에 분포
+
+#### ④ 자동화 (`/dashboard/workflow/automation`)
+- **신규 API**: [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` GET/POST/PATCH/DELETE
+- 컨텍스트 자동화 액션도 DB 동기 (toggle 시 setState 내부에서 PATCH 호출 → race condition 방지)
+- 3개 실 규칙 표시(50만원 이하 자동승인 / 마감일 3일 전 이메일 / Slack 알림) + KPI(활성 2 / 전체 3 / 비활성 1) · DEV 제거
+
 ### 이월 — 대형 인프라 필요 페이지
 
-콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·워크플로우 4종 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.
+콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.
 
 ---
 
