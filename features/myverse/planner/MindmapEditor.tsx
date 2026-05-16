@@ -8,7 +8,7 @@
 // 자동 저장: 1.5초 디바운스 (CanvasEditor와 동일 패턴)
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2, FileInput, X, Target, Check, Loader2, Image as ImageIcon, FileImage } from "lucide-react";
+import { Plus, Sparkles, ZoomIn, ZoomOut, Maximize2, FileInput, X, Target, Check, Loader2, Image as ImageIcon, FileImage, Link2, Copy, CheckCheck } from "lucide-react";
 import { toPng, toSvg } from "html-to-image";
 
 export interface MindmapNode {
@@ -207,11 +207,15 @@ export function MindmapEditor({
     initialDoc,
     onSave,
     onPromoteText,
+    canvasId,
+    initialShareToken,
     className = "",
 }: {
     initialDoc?: MindmapDoc;
     onSave?: (doc: MindmapDoc) => void;
     onPromoteText?: (text: string) => void | Promise<void>;
+    canvasId?: string;
+    initialShareToken?: string | null;
     className?: string;
 }) {
     const [doc, setDoc] = useState<MindmapDoc>(initialDoc ?? emptyDoc());
@@ -221,6 +225,10 @@ export function MindmapEditor({
     const [zoom, setZoom] = useState(1);
     const [importModal, setImportModal] = useState<{ open: boolean; text: string; mode: "replace" | "append"; error?: string } | null>(null);
     const [applyModal, setApplyModal] = useState<{ open: boolean; projectId: string; loading: boolean; result?: { count: number } } | null>(null);
+    const [shareModal, setShareModal] = useState(false);
+    const [shareToken, setShareToken] = useState<string | null | undefined>(initialShareToken);
+    const [shareLoading, setShareLoading] = useState(false);
+    const [copied, setCopied] = useState(false);
     const [projects, setProjects] = useState<Array<{ id: string; title: string; color?: string }>>([]);
 
     // 프로젝트 목록 (apply 모달용) — 처음 모달 열 때 1회 fetch
@@ -249,6 +257,41 @@ export function MindmapEditor({
     }, [doc, onSave]);
 
     const layout = useMemo(() => radialLayout(doc.root), [doc.root]);
+
+    // 공유 링크 생성/해제
+    async function enableShare() {
+        if (!canvasId) return;
+        setShareLoading(true);
+        try {
+            const r = await fetch(`/api/myverse/canvases/${canvasId}/share`, { method: "POST" });
+            if (r.ok) {
+                const d = await r.json();
+                setShareToken(d.share_token);
+            }
+        } catch { /* noop */ } finally {
+            setShareLoading(false);
+        }
+    }
+
+    async function revokeShare() {
+        if (!canvasId) return;
+        setShareLoading(true);
+        try {
+            const r = await fetch(`/api/myverse/canvases/${canvasId}/share`, { method: "DELETE" });
+            if (r.ok) setShareToken(null);
+        } catch { /* noop */ } finally {
+            setShareLoading(false);
+        }
+    }
+
+    function copyShareLink() {
+        if (!shareToken) return;
+        const url = `${window.location.origin}/myverse/shared/${shareToken}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }
 
     // 가시 노드 (collapsed 무시한 평탄화)
     const visibleNodes = useMemo(() => {
@@ -554,6 +597,19 @@ export function MindmapEditor({
                     {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileImage className="h-3 w-3" />}
                     SVG
                 </button>
+                {canvasId && (
+                    <>
+                        <div className="w-px h-4 bg-neutral-200 mx-1" />
+                        <button
+                            type="button"
+                            onClick={() => setShareModal(true)}
+                            className="flex items-center gap-1 px-2 py-1 rounded hover:bg-neutral-100 text-neutral-700"
+                            title="공유 링크"
+                        >
+                            <Link2 className="h-3 w-3" /> 공유
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* 색상 picker — 선택된 노드 있을 때 우상단 */}
@@ -618,6 +674,65 @@ export function MindmapEditor({
                 <Sparkles className="h-2.5 w-2.5 inline mr-1" />
                 Tab=자식 · Enter=형제 · Space=접기 · F2=편집 · Delete=삭제 · 노드 드래그=위치 · 휠=확대 · 배경 드래그=이동
             </div>
+
+            {/* 공유 링크 모달 */}
+            {shareModal && (
+                <div data-mindmap-ui className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-4" onClick={() => setShareModal(false)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                                <Link2 className="h-4 w-4 text-[#6366F1]" />
+                                공유 링크
+                            </h3>
+                            <button type="button" onClick={() => setShareModal(false)} className="text-neutral-400 hover:text-neutral-700">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        {shareToken ? (
+                            <>
+                                <p className="text-[11px] text-neutral-500">링크를 가진 누구나 읽기 전용으로 볼 수 있습니다.</p>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        readOnly
+                                        value={`${typeof window !== "undefined" ? window.location.origin : ""}/myverse/shared/${shareToken}`}
+                                        className="flex-1 text-[11px] bg-neutral-50 border border-neutral-200 rounded px-2 py-1.5 text-neutral-700 truncate"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={copyShareLink}
+                                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded bg-[#6366F1] text-white text-[11px] hover:bg-[#4F46E5]"
+                                    >
+                                        {copied ? <CheckCheck className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                        {copied ? "복사됨" : "복사"}
+                                    </button>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={revokeShare}
+                                    disabled={shareLoading}
+                                    className="text-[11px] text-red-500 hover:text-red-700 disabled:opacity-50"
+                                >
+                                    {shareLoading ? "처리 중..." : "공유 해제"}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-[11px] text-neutral-500">링크를 생성하면 누구나 이 마인드맵을 읽기 전용으로 볼 수 있습니다.</p>
+                                <button
+                                    type="button"
+                                    onClick={enableShare}
+                                    disabled={shareLoading}
+                                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-[#6366F1] text-white text-sm hover:bg-[#4F46E5] disabled:opacity-50"
+                                >
+                                    {shareLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                                    공유 링크 생성
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Apply 모달 — 프로젝트의 마일스톤으로 변환 */}
             {applyModal?.open && (() => {

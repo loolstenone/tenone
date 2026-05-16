@@ -461,14 +461,14 @@ function ProjectGanttView({
         return <div className="py-12 text-center text-sm text-neutral-400 bg-white border border-neutral-200 rounded-xl">표시할 업무·마일스톤이 없습니다.</div>;
     }
     const sorted = [...items].sort((a, b) => a.date.localeCompare(b.date));
-
-    // 범위: 모든 task/milestone 시작/종료 포함
     const candidates: string[] = [
         ...sorted.map(i => i.date),
         ...sorted.map(i => addDays(i.date, Math.max(1, i.task.duration_days ?? 1) - 1)),
         ...dated.map(m => m.due_date),
     ];
     const minDate = candidates.reduce((a, b) => (a < b ? a : b));
+    const { criticalIds, projectEndDays } = computeCriticalPath(sorted, minDate);
+    const estimatedEnd = projectEndDays > 0 ? addDays(minDate, projectEndDays) : null;
     const maxEndRaw = candidates.reduce((a, b) => (a > b ? a : b));
     const today = new Date().toISOString().slice(0, 10);
     const maxDate = addDays(maxEndRaw > today ? maxEndRaw : today, 3);
@@ -711,7 +711,7 @@ function ProjectGanttView({
     const taskIndexById = new Map<string, number>();
     sorted.forEach((it, i) => taskIndexById.set(it.task.id, i));
 
-    const arrows: Array<{ from: Coord; to: Coord; key: string; violated: boolean }> = [];
+    const arrows: Array<{ from: Coord; to: Coord; key: string; violated: boolean; critical?: boolean }> = [];
     const violatingTaskIds = new Set<string>();
     sorted.forEach((it, i) => {
         const deps = Array.isArray(it.task.depends_on) ? it.task.depends_on : [];
@@ -727,7 +727,8 @@ function ProjectGanttView({
             const gap = dayDiff(dep.date, it.date) - depDuration; // 종료일~시작일 사이 일 수
             const violated = gap < 0;
             if (violated) violatingTaskIds.add(it.task.id);
-            arrows.push({ from, to, key: `${depId}->${it.task.id}`, violated });
+            const critical = criticalIds.has(depId) && criticalIds.has(it.task.id);
+            arrows.push({ from, to, key: `${depId}->${it.task.id}`, violated, critical });
         });
     });
 
@@ -772,6 +773,17 @@ function ProjectGanttView({
                     <span className="inline-flex items-center gap-1 text-rose-600">
                         <svg width="14" height="6"><path d="M 0 3 L 14 3" stroke="#EF4444" strokeWidth="2" strokeDasharray="4 3" /></svg>
                         위반
+                    </span>
+                )}
+                {criticalIds.size > 0 && (
+                    <span className="inline-flex items-center gap-1 text-orange-500">
+                        <svg width="14" height="6"><path d="M 0 3 L 14 3" stroke="#F97316" strokeWidth="2" /></svg>
+                        임계경로
+                    </span>
+                )}
+                {estimatedEnd && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 font-medium">
+                        마감 추정: {estimatedEnd}
                     </span>
                 )}
             </div>
@@ -853,8 +865,11 @@ function ProjectGanttView({
                                 <marker id="dep-arrow-violated" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                                     <path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444" />
                                 </marker>
+                                <marker id="dep-arrow-critical" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#F97316" />
+                                </marker>
                             </defs>
-                            {arrows.map(({ from, to, key, violated }) => {
+                            {arrows.map(({ from, to, key, violated, critical }) => {
                                 // 직각 경로: 출발 → 오른쪽으로 살짝 → 위/아래 → 도착 좌측
                                 const gap = 8;
                                 const mid = from.x + gap;
@@ -865,11 +880,11 @@ function ProjectGanttView({
                                         key={key}
                                         d={d}
                                         fill="none"
-                                        stroke={violated ? "#EF4444" : "#6366F1"}
-                                        strokeWidth={violated ? 2 : 1.5}
-                                        strokeOpacity={violated ? 0.9 : 0.7}
+                                        stroke={violated ? "#EF4444" : critical ? "#F97316" : "#6366F1"}
+                                        strokeWidth={violated ? 2 : critical ? 2 : 1.5}
+                                        strokeOpacity={violated ? 0.9 : critical ? 0.9 : 0.7}
                                         strokeDasharray={violated ? "4 3" : undefined}
-                                        markerEnd={violated ? "url(#dep-arrow-violated)" : "url(#dep-arrow)"}
+                                        markerEnd={violated ? "url(#dep-arrow-violated)" : critical ? "url(#dep-arrow-critical)" : "url(#dep-arrow)"}
                                     />
                                 );
                             })}
@@ -936,6 +951,7 @@ function ProjectGanttView({
                                             width: Math.max(barWidth - 4, 24),
                                             backgroundColor: barColor(task.status),
                                             opacity: task.status === "cancelled" ? 0.4 : 1,
+                                            boxShadow: criticalIds.has(task.id) ? "0 0 0 2px #F97316" : undefined,
                                         }}
                                         onMouseDown={(e) => startDrag(e, task.id, date, "move")}
                                         title={`${task.text} · ${date} · ${duration}일`}
@@ -1080,4 +1096,78 @@ function addDate(base: string, days: number): Date {
 }
 function addDays(base: string, days: number): string {
     return addDate(base, days).toISOString().slice(0, 10);
+}
+
+// CPM — 임계 경로 계산 (Critical Path Method)
+// sorted: TaskItem[] (date = 시작일 문자열, task.duration_days, task.depends_on)
+// 반환: criticalIds (float=0인 task id 집합), projectEndDays (최장 경로 길이, minDate 기준 일 수)
+function computeCriticalPath(
+    sorted: Array<{ task: { id: string; duration_days?: number | null; depends_on?: string[] | null }; date: string }>,
+    minDate: string,
+): { criticalIds: Set<string>; projectEndDays: number } {
+    if (sorted.length === 0) return { criticalIds: new Set(), projectEndDays: 0 };
+
+    const ids = sorted.map(it => it.task.id);
+    const dur = new Map<string, number>();
+    const es = new Map<string, number>(); // earliest start (days from minDate)
+    const ef = new Map<string, number>(); // earliest finish
+    const ls = new Map<string, number>(); // latest start
+    const lf = new Map<string, number>(); // latest finish
+
+    const predsMap = new Map<string, string[]>(); // id → predecessor ids
+    const succsMap = new Map<string, string[]>(); // id → successor ids
+
+    for (const it of sorted) {
+        const id = it.task.id;
+        dur.set(id, Math.max(1, it.task.duration_days ?? 1));
+        predsMap.set(id, Array.isArray(it.task.depends_on) ? [...it.task.depends_on].filter(p => predsMap.has(p) || ids.includes(p)) : []);
+        succsMap.set(id, []);
+    }
+    for (const id of ids) {
+        for (const pred of predsMap.get(id) ?? []) {
+            succsMap.get(pred)?.push(id);
+        }
+    }
+
+    // Kahn 위상 정렬 (사이클 감지)
+    const inDeg = new Map<string, number>();
+    for (const id of ids) inDeg.set(id, (predsMap.get(id) ?? []).length);
+    const queue = ids.filter(id => inDeg.get(id) === 0);
+    const topo: string[] = [];
+    while (queue.length) {
+        const id = queue.shift()!;
+        topo.push(id);
+        for (const succ of succsMap.get(id) ?? []) {
+            inDeg.set(succ, (inDeg.get(succ) ?? 0) - 1);
+            if (inDeg.get(succ) === 0) queue.push(succ);
+        }
+    }
+    if (topo.length < ids.length) return { criticalIds: new Set(), projectEndDays: 0 }; // 사이클
+
+    // Forward pass
+    for (const id of topo) {
+        const d = dur.get(id)!;
+        const startDay = dayDiff(minDate, sorted.find(it => it.task.id === id)!.date);
+        let maxPredEf = startDay; // 의존성 없으면 실제 시작일 사용
+        for (const pred of predsMap.get(id) ?? []) {
+            if (ef.has(pred)) maxPredEf = Math.max(maxPredEf, ef.get(pred)!);
+        }
+        es.set(id, maxPredEf);
+        ef.set(id, maxPredEf + d);
+    }
+
+    const projectEnd = Math.max(...ids.map(id => ef.get(id) ?? 0));
+
+    // Backward pass
+    for (const id of ids) lf.set(id, projectEnd);
+    for (const id of [...topo].reverse()) {
+        const succs = succsMap.get(id) ?? [];
+        if (succs.length > 0) {
+            lf.set(id, Math.min(...succs.map(s => ls.get(s) ?? projectEnd)));
+        }
+        ls.set(id, lf.get(id)! - dur.get(id)!);
+    }
+
+    const criticalIds = new Set<string>(ids.filter(id => (ls.get(id) ?? 0) - (es.get(id) ?? 0) === 0));
+    return { criticalIds, projectEndDays: projectEnd };
 }

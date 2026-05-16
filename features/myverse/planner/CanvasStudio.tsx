@@ -35,6 +35,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     const [initialDoc, setInitialDoc] = useState<CanvasDocument | null>(null);
     const [initialMindmap, setInitialMindmap] = useState<MindmapDoc | null>(null);
     const [mode, setMode]             = useState<"canvas" | "mindmap">("canvas");
+    const [shareToken, setShareToken] = useState<string | null>(null);
     const [titleDirty, setTitleDirty] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -50,6 +51,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             const canvas = json.canvas;
             if (!canvas) { setNotFound(true); setLoading(false); return; }
             setTitle(canvas.title ?? "새 캔버스");
+            setShareToken(canvas.share_token ?? null);
             if (canvas.data?.mindmap) {
                 setInitialMindmap(canvas.data.mindmap as MindmapDoc);
                 setMode("mindmap");
@@ -210,6 +212,8 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                         initialDoc={initialMindmap ?? undefined}
                         onSave={handleMindmapSave}
                         onPromoteText={handlePromoteText}
+                        canvasId={canvasId}
+                        initialShareToken={shareToken}
                         className="absolute inset-0"
                     />
                 ) : (
