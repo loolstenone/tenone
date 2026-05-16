@@ -4,6 +4,26 @@
 
 ---
 
+## 🌳 현재 활성 워크트리 (집/사무실 동기화 SSOT)
+
+> **SSOT 규칙**: CLAUDE.md § 3.4 + [docs/Worktree_Protocol.md](docs/Worktree_Protocol.md)
+> 모든 워크트리 작업 시작 시 이 표에 추가, 종료 시 행 제거 또는 "완료" 표시.
+> "다음 첫 액션"은 **파일·라인·구체 행동** 단위로 작성 (막연한 표현 금지).
+
+| 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
+|---|---|---|---|---|
+| _(현재 활성 워크트리 없음 — 이 표는 작업 시작 시 채움)_ | | | | |
+
+### 활성 backup 브랜치 (origin)
+
+| 브랜치 | 내용 | 다음 처리 |
+|---|---|---|
+| `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
+| `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
+| `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
+
+---
+
 ## 세션 139 핵심 성과 (2026-05-16)
 
 ### DEV 표기 페이지 → 실 DB 기반 고도화 (순서대로 진행)

@@ -1283,10 +1283,53 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 
 ## 3.3 관리 파일 읽는 순서 (작업 시작 시)
 
-1. `WORK_STATUS.md` — 어제 멈춘 지점 파악
+1. `WORK_STATUS.md` — 어제 멈춘 지점 파악 + **현재 활성 워크트리 표** 확인
 2. `CHANGELOG.md` — 최근 변경 맥락
 3. `ROADMAP.md` — 전체 방향성
 4. (해당 브랜드 작업이면) `app/(BrandName)/CLAUDE.md` — 브랜드 컨텍스트
+
+## 3.4 멀티 워크트리 SSOT — 집/사무실 끊김 없는 동기화
+
+> **상세 프로토콜**: [docs/Worktree_Protocol.md](docs/Worktree_Protocol.md)
+>
+> 텐원은 26+ 브랜드를 단일 Next.js·단일 Supabase에서 1인 개발자가 집·사무실 양쪽에서 멀티 워크트리로 동시에 굴린다. 워크트리 폴더는 로컬·브랜치는 글로벌이라는 분리를 전제로 다음 4 규칙을 지킨다.
+
+### 4 규칙
+
+| # | 규칙 | 위반 시 |
+|---|---|---|
+| 1 | **브랜치 이름은 의미 있게** (`brand/badak-my-fix` 등 6 유형, 워크트리 폴더명은 신경 X) | 다른 PC에서 어떤 브랜치인지 파악 불가 |
+| 2 | **퇴근 전 모든 워크트리에서 origin push** (미완성이면 `WIP: 어디까지` commit) | 집/사무실 전환 시 미커밋 변경 잃음 |
+| 3 | **WORK_STATUS.md 최상단에 "현재 활성 워크트리" 표 의무** — 브랜치·작업·진행률·**다음 첫 액션** (파일·라인·구체 행동 단위) | 다음 장소에서 어디부터 이어갈지 모름 |
+| 4 | **회사에서 작업 시작 = 4 명령**: `git checkout master && git pull` → `git fetch origin` → `git worktree add <folder> <branch>` → `claude` | 끊김 없는 재개 |
+
+### 6 워크트리 유형
+
+| 유형 | 명명 | 동시 가능 | 머지 정책 |
+|---|---|---|---|
+| 🟢 brand/{siteId}-{task} | 단일 브랜드 | 3~4개 | 자유 |
+| 🟡 shared/{component} | 공용 컴포넌트 | 1개 | 회귀 테스트 후 |
+| 🔴 infra/{topic} | 인증·도메인 | 1개 | 직렬화 |
+| 🔴 schema/{date}-{topic} | DB 스키마 | 1개 | **같은 날 머지 의무** |
+| 🟢 hotfix/{issue} | 긴급 버그 | 1개 선순위 | 즉시 |
+| 🔬 exp/{name} | 실험·POC | 무제한 | 머지 X |
+
+**1인 개발자 동시 활성 상한: 4개** (오케스트레이터 1 + 워커 3).
+
+### 오케스트레이터 + 워커 모델
+
+- **오케스트레이터 세션** (master, Recents 상단 고정) — WORK_STATUS·CHANGELOG·문서·push 직렬화. 코드 직접 안 건드림.
+- **워커 세션 N** (워크트리별) — 자기 브랜치만, commit·push 자기 책임.
+
+### 동시 편집 금지 파일 (1 워크트리만)
+
+```
+CLAUDE.md · WORK_STATUS.md · CHANGELOG.md · ROADMAP.md
+lib/site-config.ts · lib/domain-registry.ts · package.json
+features/smarcomm/DashboardSidebar.tsx · lib/action-hub-registry.ts
+components/UniverseUtilityBar.tsx · UniverseFooter.tsx · UniverseMobileMenu.tsx
+sql/*.sql (같은 파일 동시 편집 X)
+```
 
 ---
 
@@ -1301,10 +1344,12 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 ```
 1. git checkout master          ← 항상 master로 (어떤 브랜치에 있든)
 2. git pull origin master       ← ⛔ 절대 생략 금지. 생략하면 충돌·중복 작업
-3. 상황 파악                     ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md 순서
-4. 개발 서버 실행 (필요 시)      ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
-5. 브리핑 보고                   ← 아래 양식으로 사용자에게 보고
-6. 사용자 확인 후 작업 시작
+3. git fetch origin             ← 다른 PC에서 push한 브랜치·backup/* 받아오기
+4. 상황 파악                     ← WORK_STATUS.md (활성 워크트리 표 포함) → CHANGELOG.md → ROADMAP.md
+5. 워크트리 결정                  ← § 3.4의 결정 트리·유형 사용. 이어가는 브랜치면 `git worktree add <folder> <branch>`
+6. 개발 서버 실행 (필요 시)      ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
+7. 브리핑 보고                   ← 아래 양식으로 사용자에게 보고
+8. 사용자 확인 후 작업 시작
 ```
 
 **브리핑 양식:**
@@ -1322,20 +1367,36 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 ## 4.2 "작업 종료" 프로토콜
 
 > **⛔ 사용자가 "작업 종료"라고 말했을 때만 실행. Claude가 임의로 실행 금지.**
+> 멀티 워크트리 운영 시 § 3.4의 워커·오케스트레이터 책임 분리에 따라 단계 분담.
+
+### A. 각 워커 세션 (워크트리별, 본인이 닫기 전)
 
 ```
-1. 변경 브랜드 식별
-   git diff --name-only origin/master...HEAD | grep -oP 'app/\(\K[^)]+' | sort -u
-2. 작업 기록 (아래 4개 파일 세트)
-   - WORK_STATUS.md (오늘 한 것 + 다음 할 것)
+1. git status --short          ← 미커밋 0 확인
+2. 미완성이면 git commit -m "WIP: <어디까지>"   ← 잃지 않도록 commit
+3. git push origin HEAD:<branch-name>          ← 자기 브랜치 origin 보존
+4. (선택) git worktree remove <folder>          ← 작업 끝났으면 즉시 정리
+```
+
+### B. 오케스트레이터 세션 (master, 모든 워커 push 끝난 후)
+
+```
+1. git fetch origin && git pull origin master   ← 다른 워커 push 받기
+2. 변경 브랜드 식별
+   git diff --name-only origin/master~10..origin/master | grep -oP 'app/\(\K[^)]+' | sort -u
+3. 작업 기록 (아래 4개 파일 세트)
+   - WORK_STATUS.md (오늘 한 것 + ★ "현재 활성 워크트리" 표 + 다음 첫 액션)
    - CHANGELOG.md (날짜/장소/파일/결정사항)
    - ROADMAP.md (완료 체크 + 새 항목)
-   - ⭐ 1단계에서 식별된 각 브랜드의 `app/(BrandName)/CLAUDE.md` 갱신
+   - ⭐ 2단계에서 식별된 각 브랜드의 `app/(BrandName)/CLAUDE.md` 갱신
         → 현재 상태(Phase/이월), 핵심 파일, 주의사항 반영
         → 상세: [2.3 브랜드 CLAUDE.md 자동 갱신 규칙](#23-브랜드-claudemd-자동-갱신-규칙)
-3. git add + commit ← 코드 + 관리 파일 + 브랜드 CLAUDE.md 모두
-4. git push origin master ← ⛔ 이 순간에만 push. 세션 중 유일한 1회.
+4. git add + commit ← 관리 파일 + 브랜드 CLAUDE.md
+5. git push origin master ← ⛔ 이 순간에만 push. 세션 중 유일한 1회.
+6. 끝난 워크트리 정리: git worktree prune + git worktree remove <folder>
 ```
+
+> 단일 워크트리만 운영 중이면 A·B를 같은 세션에서 한 번에 실행해도 됨.
 
 ### "다음 할 일" 작성 원칙
 
