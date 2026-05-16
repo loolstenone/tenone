@@ -30,11 +30,11 @@ interface Kpi {
 async function safeCount(
     admin: ReturnType<typeof createAdminClient>,
     table: string,
-    filters: (q: ReturnType<ReturnType<typeof createAdminClient>['from']>) => unknown,
+    filters: (q: unknown) => unknown,
 ): Promise<{ count: number | null; status: KpiStatus; note?: string }> {
     try {
-        let query = admin.from(table).select('*', { count: 'exact', head: true });
-        query = filters(query) as typeof query;
+        const base = admin.from(table).select('*', { count: 'exact', head: true });
+        const query = filters(base) as typeof base;
         const { count, error } = await query;
         if (error) {
             const msg = error.message || '';

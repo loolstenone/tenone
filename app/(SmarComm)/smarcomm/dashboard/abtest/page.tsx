@@ -2,14 +2,16 @@
 
 // A/B 테스트 — mkt_experiments 실 DB
 import { useEffect, useState } from 'react';
-import { Plus, FlaskConical, X, Trophy } from 'lucide-react';
+import { Plus, FlaskConical, X, Trophy, Calculator } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
+import { computeChiSquare, requiredSampleSize } from '@/lib/smarcomm/abtest-chi-square';
 
+interface Variant { name: string; traffic: number; visitors?: number; conversions?: number; }
 interface Experiment {
     id: string; name: string; brand_id: string; status: string; type: string;
     hypothesis: string; start_date: string | null; end_date: string | null;
-    sample_size: number; confidence: number; variants: { name: string; traffic: number }[];
+    sample_size: number; confidence: number; variants: Variant[];
     winner: string | null; notes: string; created_at: string;
 }
 interface ExpResp { experiments: Experiment[]; total: number; byStatus: Record<string, number> }
@@ -47,6 +49,22 @@ export default function AbtestPage() {
     const del = async (id: string) => {
         if (!confirm('삭제하시겠습니까?')) return;
         await fetch(`/api/smarcomm/experiments?id=${id}`, { method: 'DELETE' });
+        reload();
+    };
+
+    const saveObs = async (e: Experiment, idx: number, field: 'visitors' | 'conversions', value: number) => {
+        const next = e.variants.map((v, i) => i === idx ? { ...v, [field]: Math.max(0, value | 0) } : v);
+        // 조기 종료 결정 — 유의 시 winner + confidence 자동 갱신
+        const r = computeChiSquare(next.map(v => ({ name: v.name, visitors: v.visitors ?? 0, conversions: v.conversions ?? 0 })));
+        const patch: Record<string, unknown> = { id: e.id, variants: next };
+        if (r && r.winnerIdx !== null) {
+            patch.winner = next[r.winnerIdx].name;
+            patch.confidence = r.significance === '99' ? 99 : r.significance === '95' ? 95 : r.significance === '90' ? 90 : 0;
+        }
+        await fetch('/api/smarcomm/experiments', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patch),
+        });
         reload();
     };
 
@@ -98,14 +116,7 @@ export default function AbtestPage() {
                                     <h3 className="text-sm font-semibold text-text">{e.name}</h3>
                                     {e.hypothesis && <p className="mt-1 text-xs text-text-sub line-clamp-2">{e.hypothesis}</p>}
                                     {e.variants && Array.isArray(e.variants) && e.variants.length > 0 && (
-                                        <div className="mt-3 flex gap-2">
-                                            {e.variants.map((v, i) => (
-                                                <div key={i} className="flex-1 rounded-lg border border-border px-3 py-2">
-                                                    <div className="text-[10px] text-text-muted">{v.name}</div>
-                                                    <div className="text-sm font-bold text-text">{v.traffic}%</div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        <ExperimentStats experiment={e} onObsChange={saveObs} />
                                     )}
                                     <div className="mt-2 flex items-center gap-4 text-[10px] text-text-muted">
                                         {e.start_date && <span>시작 {e.start_date}</span>}
@@ -172,6 +183,100 @@ function Kpi({ label, value, accent, loading }: { label: string; value: number; 
         <div className="rounded-2xl border border-border bg-white p-4">
             <div className="text-xs text-text-muted">{label}</div>
             <div className="mt-1 text-2xl font-bold" style={{ color: accent }}>{loading ? '—' : value.toLocaleString()}</div>
+        </div>
+    );
+}
+
+function ExperimentStats({ experiment, onObsChange }: {
+    experiment: Experiment;
+    onObsChange: (e: Experiment, idx: number, field: 'visitors' | 'conversions', value: number) => void;
+}) {
+    const variants = experiment.variants;
+    const result = computeChiSquare(variants.map(v => ({ name: v.name, visitors: v.visitors ?? 0, conversions: v.conversions ?? 0 })));
+
+    const sigColor = result?.significance === '99' ? '#10b981'
+        : result?.significance === '95' ? '#3b82f6'
+        : result?.significance === '90' ? '#f59e0b'
+        : '#94a3b8';
+
+    return (
+        <div className="mt-3">
+            <div className="grid grid-cols-2 gap-2">
+                {variants.map((v, i) => {
+                    const rate = v.visitors && v.visitors > 0 ? ((v.conversions ?? 0) / v.visitors * 100) : null;
+                    return (
+                        <div key={i} className="rounded-lg border border-border p-3">
+                            <div className="flex items-center justify-between">
+                                <div className="text-xs font-semibold text-text">{v.name}</div>
+                                <div className="text-[10px] text-text-muted">트래픽 {v.traffic}%</div>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-1.5">
+                                <label className="block">
+                                    <span className="text-[9px] text-text-muted">방문자</span>
+                                    <input
+                                        type="number" min={0}
+                                        value={v.visitors ?? ''}
+                                        onChange={ev => onObsChange(experiment, i, 'visitors', Number(ev.target.value))}
+                                        className="mt-0.5 w-full rounded border border-border px-2 py-1 text-xs"
+                                        placeholder="0"
+                                    />
+                                </label>
+                                <label className="block">
+                                    <span className="text-[9px] text-text-muted">전환</span>
+                                    <input
+                                        type="number" min={0}
+                                        value={v.conversions ?? ''}
+                                        onChange={ev => onObsChange(experiment, i, 'conversions', Number(ev.target.value))}
+                                        className="mt-0.5 w-full rounded border border-border px-2 py-1 text-xs"
+                                        placeholder="0"
+                                    />
+                                </label>
+                            </div>
+                            <div className="mt-1.5 text-[10px] text-text-sub">
+                                전환율 <span className="font-bold text-text">{rate === null ? '—' : rate.toFixed(2) + '%'}</span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {result && (variants.some(v => (v.visitors ?? 0) > 0)) && (
+                <div className="mt-2 rounded-lg border px-3 py-2" style={{ borderColor: sigColor + '40', background: sigColor + '08' }}>
+                    <div className="flex items-center gap-2 text-[11px]">
+                        <Calculator size={11} style={{ color: sigColor }} />
+                        <span className="font-semibold" style={{ color: sigColor }}>
+                            {result.significance === 'none' ? '유의차 없음' : `${result.significance}% 신뢰수준`}
+                        </span>
+                        <span className="text-text-muted">·</span>
+                        <span className="text-text-sub">χ² = {result.chiSquare.toFixed(3)}</span>
+                        <span className="text-text-muted">·</span>
+                        <span className="text-text-sub">p = {result.pValue < 0.001 ? '< 0.001' : result.pValue.toFixed(4)}</span>
+                        {result.liftPct !== null && (
+                            <>
+                                <span className="text-text-muted">·</span>
+                                <span className="text-text-sub">리프트 {result.liftPct > 0 ? '+' : ''}{result.liftPct.toFixed(1)}%</span>
+                            </>
+                        )}
+                    </div>
+                    <div className="mt-1 text-[10px] text-text-muted">{result.note}</div>
+                    {!result.sampleAdequate && variants[0].visitors !== undefined && (
+                        <SampleSizeHint variants={variants} />
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function SampleSizeHint({ variants }: { variants: Variant[] }) {
+    const a = variants[0];
+    const baselineRate = a.visitors && a.visitors > 0 ? (a.conversions ?? 0) / a.visitors : 0;
+    if (baselineRate <= 0) return null;
+    const need10 = requiredSampleSize(baselineRate, 10);
+    const need20 = requiredSampleSize(baselineRate, 20);
+    return (
+        <div className="mt-1 text-[10px] text-text-muted">
+            🔬 출처: 정규근사 (α=0.05·power=0.80) · 10% 리프트 검출 표본 {Number.isFinite(need10) ? need10.toLocaleString() : '∞'}/변형 · 20% 리프트 {Number.isFinite(need20) ? need20.toLocaleString() : '∞'}/변형
         </div>
     );
 }

@@ -132,50 +132,46 @@ interface Props {
   companyLogo?: string;
 }
 
-// 사용자 티어 확인 (가격 정책 기반)
-type UserTier = 'starter' | 'growth' | 'pro' | 'enterprise';
-
-function getUserTier(): UserTier {
-  if (typeof window === 'undefined') return 'enterprise';
-  try {
-    const user = localStorage.getItem('smarcomm_user');
-    if (user) {
-      const parsed = JSON.parse(user);
-      if (parsed.email === 'admin@smarcomm.com') return 'enterprise';
-    }
-    const tier = localStorage.getItem('smarcomm_tier');
-    if (tier) return tier as UserTier;
-  } catch {}
-  return 'starter';
-}
+// 사용자 티어 — DB plan_key (wio_subscriptions) 기준
+// free → starter → pro → business
+type UserTier = 'free' | 'starter' | 'pro' | 'business';
 
 // 팩별 필요 티어
-// Starter: Core + AI 가시성
-// Growth: + 액션팩 + CRM팩
-// Pro: + 실험팩 + 운영팩
-// Enterprise: + 집행팩
+// Free   : Core (홈/스캔/AI 가시성/리포트/Insights/퍼널/트래픽/Assets/AI Tracker)
+// Starter: + 액션팩 (Advisor·Creative·Content·Archive) + CRM팩 (Kakao·Email·Push)
+// Pro    : + 실험팩 (Cohort·A/B·AIRM·Journey·Events) + 운영팩 (Calendar·Workflow)
+// Business: + 집행팩 (Launch)
 const PACK_TIER: Record<string, UserTier> = {
-  core: 'starter',
-  action: 'growth',
-  crm: 'growth',
+  core: 'free',
+  action: 'starter',
+  crm: 'starter',
   experiment: 'pro',
   ops: 'pro',
-  launch: 'enterprise',
-  setting: 'starter',
+  launch: 'business',
+  setting: 'free',
 };
-
-function isMasterUser(): boolean {
-  return getUserTier() === 'enterprise';
-}
 
 export default function DashboardSidebar({ companyName, companyLogo }: Props) {
   const pathname = usePathname();
   const { collapsed, setCollapsed } = useContext(SidebarContext);
-  // Auth 기반 티어 결정 (staff/admin→enterprise, 일반→starter)
   const { user } = useAuth();
-  const userTier: UserTier = (user?.accountType === 'staff' || user?.role === 'Admin' || ['admin@smarcomm.com', 'cheonil@tenone.biz', 'tenone@tenone.biz'].includes(user?.email || '')) ? 'enterprise' : 'starter';
 
-  const TIER_ORDER: UserTier[] = ['starter', 'growth', 'pro', 'enterprise'];
+  // wio_subscriptions 기반 플랜 조회 — master_email/staff_role 자동 business
+  const [userTier, setUserTier] = useState<UserTier>('free');
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/smarcomm/me/plan', { cache: 'no-store' })
+      .then(r => r.json())
+      .then((d: { plan_key?: string }) => {
+        if (!alive) return;
+        const k = (d?.plan_key ?? 'free') as UserTier;
+        if (['free', 'starter', 'pro', 'business'].includes(k)) setUserTier(k);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [user?.email]);
+
+  const TIER_ORDER: UserTier[] = ['free', 'starter', 'pro', 'business'];
   const userTierIndex = TIER_ORDER.indexOf(userTier);
 
   return (

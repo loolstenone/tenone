@@ -342,7 +342,7 @@ ${flag.notes ? `- notes: ${flag.notes}` : ''}
         });
 
         const text = response.content
-            .filter((b): b is { type: 'text'; text: string } & Record<string, unknown> => b.type === 'text')
+            .filter((b): b is Extract<typeof response.content[number], { type: 'text' }> => b.type === 'text')
             .map(b => b.text).join('');
 
         const parsed = parseJsonRobustAirm<LlmAirmResponse>(text);

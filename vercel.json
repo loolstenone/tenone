@@ -11,6 +11,9 @@
     "app/api/cron/smarcomm-weekly-rescan/route.ts": {
       "maxDuration": 300
     },
+    "app/api/cron/smarcomm-airm-verify/route.ts": {
+      "maxDuration": 300
+    },
     "app/api/smarcomm/scan/route.ts": {
       "maxDuration": 300
     }
@@ -67,6 +70,10 @@
     {
       "path": "/api/cron/smarcomm-weekly-rescan",
       "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/smarcomm-airm-verify",
+      "schedule": "0 4 * * *"
     }
   ]
 }
