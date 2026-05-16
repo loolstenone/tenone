@@ -9,8 +9,8 @@ import {
   Download, Share2, Printer, Gauge, Zap, Timer,
   Lightbulb, Loader2, Bot, ShieldCheck, Search
 } from 'lucide-react';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 import GaugeChart from '@/features/smarcomm/GaugeChart';
 import RadarChart from '@/features/smarcomm/RadarChart';
 import { useAuth } from '@/lib/auth-context';
@@ -881,7 +881,7 @@ function ReportContent({ scanId }: { scanId: string }) {
   if (!scan) {
     return (
       <>
-        <Header />
+        <SmarCommHeader />
         <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
           <h1 className="mb-2 text-xl font-bold text-text">리포트를 찾을 수 없습니다</h1>
           <p className="mb-6 text-sm text-text-sub">스캔 결과가 만료되었거나 존재하지 않습니다.</p>
@@ -900,7 +900,7 @@ function ReportContent({ scanId }: { scanId: string }) {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="min-h-screen bg-surface px-5 pb-24 pt-20 text-text">
         <div className="mx-auto max-w-3xl">
           {/* Top Nav */}
@@ -1684,7 +1684,7 @@ function ReportContent({ scanId }: { scanId: string }) {
         </Link>
       </div>
 
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

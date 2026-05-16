@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, Brain, Search, Target, Database, Radar, PenTool, BarChart3, ChevronRight } from "lucide-react";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
-import BrandGravityHeader from '@/features/brandgravity/BrandGravityHeader';
 import '../gravity-hero.css';
 
 // 최종 위치 근처에서 둥둥 떠다니는 두 위치 (작은 offset)
@@ -38,7 +37,6 @@ const processSteps = [
 export default function BrandGravityPage() {
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white">
-            <BrandGravityHeader />
 
             {/* ── 풀스크린 히어로 ── */}
             <section style={{
@@ -377,9 +375,6 @@ export default function BrandGravityPage() {
                 </section>
             </div>
 
-            <footer className="border-t border-neutral-800 py-8 text-center text-xs text-neutral-600">
-                &copy; Brand Gravity. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
-            </footer>
         </div>
     );
 }

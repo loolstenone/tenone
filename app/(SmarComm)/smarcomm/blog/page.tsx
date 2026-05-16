@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { getPublishedPosts, BLOG_CATEGORIES } from '@/lib/smarcomm/blog-data';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 
 export default function BlogPage() {
   const [category, setCategory] = useState('전체');
@@ -30,7 +30,7 @@ export default function BlogPage() {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="min-h-screen bg-white pt-20">
         <div className="mx-auto max-w-4xl px-6 py-12">
           <div className="mb-8">
@@ -109,7 +109,7 @@ export default function BlogPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

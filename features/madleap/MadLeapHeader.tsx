@@ -73,7 +73,7 @@ export function MadLeapHeader() {
                     <UniverseUtilityBar
                         aboutPath="/madleap/about"
                         profilePath="/madleap/my"
-                        accentColor="#D32F2F"
+                        accentColor="#00B8FF"
                         signupPath="/signup"
                         siteId="madleap"
                         siteName="MADLeap"

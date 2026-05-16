@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 
 interface Plan {
   plan_key: string;
@@ -41,7 +41,7 @@ export default async function PricingPage() {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="min-h-screen bg-surface px-5 pb-20 pt-24 text-text">
         <div className="mx-auto max-w-5xl">
           <div className="mb-10 text-center">
@@ -109,7 +109,7 @@ export default async function PricingPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

@@ -6,8 +6,8 @@ import {
   GitBranch, Activity, FileBarChart, BookOpen, Route,
   ChevronRight, BarChart3, Sparkles, Shield
 } from 'lucide-react';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 
 const FEATURES = [
   {
@@ -41,7 +41,7 @@ const FEATURES = [
 export default function WorkspacePage() {
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="min-h-screen bg-surface text-text">
         {/* Hero */}
         <section className="bg-[#0A0E1A] px-5 pb-16 pt-28 md:pt-36">
@@ -126,7 +126,7 @@ export default function WorkspacePage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

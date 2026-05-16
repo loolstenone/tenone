@@ -20,7 +20,6 @@ export default function SmarCommFooter() {
         {
           title: 'Account',
           links: [
-            { label: '로그인', href: '/login' },
             { label: '회원가입', href: '/signup' },
           ],
         },

@@ -7,7 +7,7 @@ export function MadLeapFooter() {
         <UniverseFooter
             brandName="MADLeap"
             tagline="실전 프로젝트 대학생 연합동아리"
-            accentColor="#D32F2F"
+            accentColor="#00B8FF"
             dark={true}
             linkColumns={[
                 {

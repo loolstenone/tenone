@@ -11,8 +11,8 @@ import {
   FileBarChart, Target, ArrowRight, Shield, Zap,
   CheckCircle2, Eye, PenTool, Sparkles
 } from 'lucide-react';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const HEADLINES = [
@@ -129,7 +129,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="flex-1">
         {/* Hero — Black */}
         <section className="bg-[#0A0E1A] px-5 pb-20 pt-28 md:pt-36">
@@ -466,7 +466,7 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

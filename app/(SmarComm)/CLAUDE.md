@@ -936,3 +936,4 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 | **주요 결정 (세션 135 — 유지)** | ① WIO ↔ SmarComm 동등 OS 관계 · ② Index 가중치 30/30/40 (Citability 40%) · ③ 권위도 측정 폐기 · ④ AI 정확도 wrong = -0.5 음수 가중 · ⑤ 4-Tier 측정 모델 (T0~T2 점수, T3/T4 별도 N/A) |
 | **SmarComm Index 보고서 산출 (세션 135)** | **DB 3 테이블 · lib 15 모듈 · UI 9 컴포넌트 · 권위 anchor 12개**. 보고서 14 섹션 (V2.0 신설 "AI Brand Journey" 4지표 섹션 추가 예정) |
 | **블로커** | Toss 가맹점 승인 + Vercel 환경변수 (실 결제 흐름 작동 안 됨) · ANTHROPIC_API_KEY 갱신 필요 |
+| **QA 완료 (2026-05-17)** | Universe 컴포넌트 정합 확인 — `generateMetadata()` ✅ · `UniverseUtilityBar` ✅ · `UniverseMobileMenu` ✅ · `UniverseFooter` ✅ · `LoginModal` ✅ · `loginHref()` ✅. 구 `Header`/`Footer` → `SmarCommHeader`/`SmarCommFooter` 마이그레이션 완료 (7개 마케팅 페이지). `SmarCommFooter` `/login` 하드코딩 제거. |

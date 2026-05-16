@@ -233,9 +233,6 @@ export default function LifeMarkPage() {
                 </div>
             </section>
 
-            <footer className="border-t border-neutral-800 py-8 text-center text-xs text-neutral-600">
-                &copy; Brand Gravity. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
-            </footer>
         </div>
     );
 }

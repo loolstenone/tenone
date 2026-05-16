@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-17 (세션 139→통합 — 멀티 워크트리 프로토콜 + USER_SCENARIO + 137~139 일괄 머지)
+> 마지막 업데이트: 2026-05-17 (세션 140 — 8개 브랜드 전체 QA + SmarComm 구 Header/Footer 마이그레이션)
 
 ---
 
@@ -21,6 +21,21 @@
 | `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
+
+---
+
+## 세션 140 핵심 성과 (2026-05-17)
+
+### 8개 브랜드 전체 QA + SmarComm Header/Footer 마이그레이션
+
+**QA 대상**: Badak · MADLeague · MADLeap · BrandGravity · WIO · HeRo · Myverse · SmarComm
+**QA 기준 6개**: `generateMetadata()` · `UniverseUtilityBar` · `UniverseMobileMenu` · `UniverseFooter` · `LoginModal` · `loginHref()`
+**결과**: 전 브랜드 6/6 통과 ✅
+
+#### SmarComm 구 Header/Footer → 신규 컴포넌트 마이그레이션
+- 7개 마케팅 페이지(홈·blog·blog/[slug]·pricing·workspace·scan·report/[id])에서 구 `Header`/`Footer` → `SmarCommHeader`/`SmarCommFooter` 교체 완료
+- `SmarCommFooter` linkColumns에서 `/login` 하드코딩 제거 (UniverseUtilityBar가 loginHref() 처리)
+- 구 `Header.tsx`/`Footer.tsx` import 0건 확인 (Grep 검증)
 
 ---
 

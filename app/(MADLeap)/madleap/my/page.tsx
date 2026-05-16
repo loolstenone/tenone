@@ -24,8 +24,8 @@ export default function MADLeapMyPage() {
         fetch(`/api/board/posts?site=madleap&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#7C3AED] rounded-full animate-spin" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#7C3AED" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#00B8FF] rounded-full animate-spin" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#00B8FF" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },

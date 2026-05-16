@@ -61,8 +61,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta — 브랜딩 컨설팅 포트폴리오 전시 중 |
+| **Phase** | Beta (2026-05-17 업데이트) — 브랜딩 컨설팅 포트폴리오 전시 중 |
 | **이월 작업** | 상담 신청 시스템 |
+| **QA 완료 (2026-05-17)** | Universe 컴포넌트 정합 확인 — `generateMetadata()` ✅ · `UniverseUtilityBar` ✅ · `UniverseMobileMenu` ✅ · `UniverseFooter` ✅ · `LoginModal` ✅ · `loginHref()` ✅ |
 
 ---
 

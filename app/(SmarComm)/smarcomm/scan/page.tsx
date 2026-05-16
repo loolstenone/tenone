@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Globe, Settings, FileText, Bot, Calculator, CheckCircle2, AlertCircle } from 'lucide-react';
-import Header from '@/features/smarcomm/Header';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { saveScanUrl } from '@/lib/smarcomm/scan-data';
 
 const STEPS = [
@@ -83,7 +83,7 @@ function ScanContent() {
   if (error) {
     return (
       <>
-        <Header />
+        <SmarCommHeader />
         <main className="flex min-h-screen flex-col items-center justify-center bg-surface px-5 pt-14 text-text">
           <div className="w-full max-w-md text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10">
@@ -105,7 +105,7 @@ function ScanContent() {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
         <div className="w-full max-w-md text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface">

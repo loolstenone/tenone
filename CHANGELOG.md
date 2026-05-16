@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-05-17 (세션 140) — 8개 브랜드 전체 QA + SmarComm Header/Footer 마이그레이션
+
+### QA — 8개 브랜드 Universe 컴포넌트 정합 전수 확인
+
+| 브랜드 | generateMetadata | UtilityBar | MobileMenu | Footer | LoginModal | loginHref |
+|---|---|---|---|---|---|---|
+| Badak | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MADLeague | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MADLeap | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| BrandGravity | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| WIO | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| HeRo | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Myverse | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| SmarComm | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### SmarComm — 구 Header/Footer 완전 제거
+
+- 7개 마케팅 페이지(홈·blog·blog/[slug]·pricing·workspace·scan·report/[id]) 구 `Header`/`Footer` → `SmarCommHeader`/`SmarCommFooter` 교체
+- `features/smarcomm/SmarCommFooter.tsx` — Account linkColumns에서 `/login` 하드코딩 제거
+- `features/brandgravity/BrandGravityFooter.tsx` · `features/wio/WIOFooter.tsx` 신규 생성 확인
+
+### 브랜드 CLAUDE.md 갱신
+- `app/(BrandGravity)/CLAUDE.md` — QA 완료 기록
+- `app/(MADLeap)/CLAUDE.md` — QA 완료 기록, Phase 날짜 갱신
+- `app/(SmarComm)/CLAUDE.md` — QA 완료 + 마이그레이션 완료 기록
+
+---
+
 ## 2026-05-17 (세션 139→통합) — 멀티 워크트리 프로토콜 + USER_SCENARIO + Phase 통합
 
 ### 멀티 워크트리 SSOT 프로토콜 신설

@@ -61,8 +61,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta (2026-04-22 업데이트) — 포트폴리오 페이지 완성 |
+| **Phase** | Beta (2026-05-17 업데이트) — 포트폴리오 페이지 완성 |
 | **이월 작업** | 포트폴리오 DB 연동 (현재 mock 데이터, 추후 portfolios 테이블 연결) |
+| **QA 완료 (2026-05-17)** | Universe 컴포넌트 정합 확인 — `generateMetadata()` ✅ · `UniverseUtilityBar` ✅ · `UniverseMobileMenu` ✅ · `UniverseFooter` ✅ · `LoginModal` ✅ · `loginHref()` ✅ |
 
 ---
 

@@ -4,8 +4,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Tag } from 'lucide-react';
 import { getPostBySlug, getPublishedPosts } from '@/lib/smarcomm/blog-data';
-import Header from '@/features/smarcomm/Header';
-import Footer from '@/features/smarcomm/Footer';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
+import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -28,14 +28,14 @@ export default function BlogPostPage() {
   if (!post) {
     return (
       <>
-        <Header />
+        <SmarCommHeader />
         <main className="min-h-screen bg-white pt-20">
           <div className="mx-auto max-w-3xl px-6 py-20 text-center">
             <h1 className="text-2xl font-bold text-text">글을 찾을 수 없습니다</h1>
             <Link href="/blog" className="mt-4 inline-block text-sm text-text-muted hover:text-text">← 블로그로 돌아가기</Link>
           </div>
         </main>
-        <Footer />
+        <SmarCommFooter />
       </>
     );
   }
@@ -67,7 +67,7 @@ export default function BlogPostPage() {
 
   return (
     <>
-      <Header />
+      <SmarCommHeader />
       <main className="min-h-screen bg-white pt-20">
         <article className="mx-auto max-w-3xl px-6 py-12">
           {/* 뒤로가기 */}
@@ -157,7 +157,7 @@ export default function BlogPostPage() {
           )}
         </article>
       </main>
-      <Footer />
+      <SmarCommFooter />
     </>
   );
 }

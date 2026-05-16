@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
 import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
+import { loginHref } from '@/lib/login-href';
 
 const navItems = [
   { name: '서비스', href: '/brandgravity/services' },
@@ -83,7 +84,7 @@ export default function BrandGravityHeader() {
       textTone="light"
       footer={
         <Link
-          href={isAuthenticated ? '/brandgravity/my' : '/login'}
+          href={isAuthenticated ? '/brandgravity/my' : loginHref(pathname)}
           onClick={() => setMenuOpen(false)}
           className="block text-center px-4 py-2.5 bg-amber-500 text-black text-sm rounded-lg font-bold"
         >
