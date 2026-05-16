@@ -1,5 +1,10 @@
 # SmarComm 브랜드 가이드
 
+> ## 🟢 실 사용자 시나리오 SSOT — [USER_SCENARIO.md](USER_SCENARIO.md)
+>
+> 모든 기능 기획·UX 결정·페이지 분류는 **"김지원(D2C 마케터) 4주 사용 흐름"**을 기준으로 판단한다.
+> 신규 기능 PR 시 "김지원의 어느 단계에서 쓰이는가" 매핑 필수. 시나리오와 현실의 갭은 USER_SCENARIO.md § 5에 누적·관리.
+
 > ## 🔴 절대 원칙 ZERO — 정직성(Honesty)이 무엇보다 중요하다
 >
 > **SmarComm의 모든 요소는 정직해야 한다.** 점수·지표·라벨·차트·텍스트·UI 모두 예외 없음. 다른 모든 원칙·기능·UX 결정에 앞선다.
@@ -899,6 +904,13 @@ SSOT 위치: [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/Dashboar
 - ❌ **자체 헤더로 UniverseUtilityBar 우회** — 마케팅 페이지는 [SmarCommHeader.tsx](features/smarcomm/SmarCommHeader.tsx) 유지, 대시보드는 자체 헤더지만 향후 UniverseUtilityBar 통합 검토
 
 ---
+
+## 13.5 실 사용자 시나리오
+
+> 모든 기능·UX 결정의 SSOT: **[USER_SCENARIO.md](USER_SCENARIO.md)**
+>
+> 주 페르소나: 김지원(35·D2C 스킨케어 마케팅 매니저·3년차). 4주 흐름 ① 진단 → ⑦ 자산화까지 매핑.
+> 시나리오 vs 현실 갭은 Critical 6건·High 6건·Medium 5건으로 § 5에 정리. 갭 해소 시 row 삭제 + CHANGELOG 기록.
 
 ## 14. 참고 문서
 
