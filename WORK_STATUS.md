@@ -78,6 +78,11 @@
 
 **🎉 SmarComm 전체 사이드바 DEV 배지 0개** (28+ 메뉴 모두 실 DB 또는 신규 CRUD 인프라 보유)
 
+#### ⑫ Phase E 운영 정합성 정리
+- `lib/smarcomm/auth.ts` Mock 인증 — 이미 제거 확인 (코드 참조 0건, MD만 잔존)
+- `smarcomm/login/page.tsx` redirect 경로 수정: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
+- `dashboard/layout.tsx` localStorage 직접 접근 → `getSetting('smarcomm','company','smarcomm_company')` (DB-first + localStorage fallback) 패턴으로 전환 (이미 profile 페이지에서 사용 중인 `user_settings` 통합)
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.

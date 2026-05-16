@@ -9,6 +9,7 @@ import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
+import { getSetting } from '@/lib/supabase/settings';
 
 // Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
 // 실제 API 연결된 페이지는 제외 (scan·advisor·creative·insights·ai-tracker·airm·assets·admin·profile·members·guide·glossary)
@@ -51,12 +52,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [isLoading, isAuthenticated, router]);
 
   const initDashboard = () => {
-    const savedCompany = localStorage.getItem('smarcomm_company');
-    if (savedCompany) {
-      const parsed = JSON.parse(savedCompany);
-      setCompanyName(parsed.name || '');
-      setCompanyLogo(parsed.logo || '');
-    }
+    // DB-first (user_settings 테이블) → localStorage fallback
+    getSetting<{ name?: string; logo?: string }>('smarcomm', 'company', 'smarcomm_company').then(data => {
+      if (data) {
+        setCompanyName(data.name || '');
+        setCompanyLogo(data.logo || '');
+      }
+    });
 
     const loadFavs = () => {
       try {

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function SmarCommLoginRedirect() {
     const router = useRouter();
     useEffect(() => {
-        router.replace('/login?redirect=/dashboard');
+        router.replace('/login?redirect=/smarcomm/dashboard');
     }, [router]);
     return (
         <div className="min-h-screen flex items-center justify-center bg-white">

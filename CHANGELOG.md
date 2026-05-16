@@ -36,6 +36,11 @@
 - 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
 - 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
 
+### Phase E — 운영 정합성 정리
+- `smarcomm/login/page.tsx` redirect 경로: `/login?redirect=/dashboard` → `/login?redirect=/smarcomm/dashboard` (브랜드 prefix 누락 수정)
+- `dashboard/layout.tsx` localStorage 직접 접근 제거 → `getSetting('smarcomm','company',...)` (`user_settings` DB-first + localStorage fallback)
+- `lib/smarcomm/auth.ts` Mock 인증은 이미 제거 확인 (코드 참조 0건)
+
 ### Phase B+ — 카카오 + 푸시 통합 브로드캐스트 (마지막 2 DEV 페이지)
 - MCP 마이그레이션 `smarcomm_broadcasts` — 카카오·푸시·SMS 통합 (channel/status CHECK + 4 인덱스 + RLS)
 - API [broadcasts](app/api/smarcomm/broadcasts/route.ts) — CRUD + 채널 prefix 필터 + KPI 집계
