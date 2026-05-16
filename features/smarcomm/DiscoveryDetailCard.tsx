@@ -71,9 +71,7 @@ export default function DiscoveryDetailCard({ detail }: Props) {
   return (
     <div className="mb-6 space-y-4">
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Discovery Sub-Engine</span>
-        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-medium text-blue-700">V2.1</span>
-        <span className="text-[10px] text-text-muted">§ 3-A SSOT-7</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Discovery — GEO & SEO 진단</span>
       </div>
 
       <SovMatrix sov={detail.sov} />
@@ -379,7 +377,7 @@ function HallucinationFindings({ hallucinations }: { hallucinations: DiscoveryDe
 
       <div className="border-t border-border bg-rose-50/20 px-5 py-2.5">
         <p className="text-[10px] text-rose-700">
-          💡 모든 wrong 발견은 § 3-C AIRM 워크플로우에 자동 등록되어 교정 액션 큐로 들어갑니다.
+          💡 모든 wrong 발견은 AIRM 워크플로우에 자동 등록되어 교정 액션 큐로 들어갑니다.
         </p>
       </div>
     </div>

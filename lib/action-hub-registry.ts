@@ -29,6 +29,8 @@ export interface ActionEntry {
     filter: { column: string; value: string };
     /** 추가 AND 조건 (선택) — 예: severity='critical' 같이 second-axis 필터링 시 사용 */
     extraFilters?: Array<{ column: string; value: string }>;
+    /** AND NOT 조건 (선택) — 예: 같은 테이블을 priority별로 분할할 때 critical을 일반에서 제외 */
+    notFilters?: Array<{ column: string; value: string }>;
     /** 클릭 시 이동할 관리 페이지 */
     href: string;
     /** 소속 브랜드 (공통이면 global) */
@@ -225,9 +227,10 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
     },
     {
         key: "smarcomm_airm_open_flags",
-        label: "SmarComm AIRM 신규 플래그",
+        label: "SmarComm AIRM 신규 플래그 (critical 외)",
         table: "smarcomm_ai_flags",
         filter: { column: "status", value: "open" },
+        notFilters: [{ column: "severity", value: "critical" }],
         href: "/intra/ums/smarcomm",
         brand_id: "smarcomm",
         category: "moderation",

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       return NextResponse.json({
         error: 'ANTHROPIC_API_KEY 미설정 — AI 어드바이저 사용 불가',
-        hint: '§ 1.10 정직 원칙에 따라 규칙 기반 fallback 폐기. 환경변수 ANTHROPIC_API_KEY 설정 후 재시도하세요.',
+        hint: '정직 원칙에 따라 휴리스틱 대체 응답은 제공하지 않습니다. 환경변수 ANTHROPIC_API_KEY 설정 후 재시도하세요.',
       }, { status: 503 });
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       console.error('Claude API error:', aiError);
       return NextResponse.json({
         error: 'AI 어드바이저 호출 실패',
-        hint: 'API 키 만료/한도 초과 가능. § 1.10 정직 원칙에 따라 규칙 기반 fallback 폐기.',
+        hint: 'API 키 만료/한도 초과일 수 있습니다. 정직 원칙에 따라 휴리스틱 대체 응답은 제공하지 않습니다.',
       }, { status: 502 });
     }
   } catch (error) {

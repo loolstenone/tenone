@@ -298,7 +298,7 @@ export default function AdvisorPage() {
                           channel: action.channel,
                           desc: action.description,
                         });
-                        router.push(`/dashboard/creative?${params.toString()}`);
+                        router.push(`/smarcomm/dashboard/creative?${params.toString()}`);
                       }}
                       className="mt-2 flex items-center gap-1 rounded-lg bg-text px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-accent-sub"
                     >

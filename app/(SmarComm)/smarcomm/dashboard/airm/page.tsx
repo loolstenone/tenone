@@ -88,7 +88,7 @@ export default function AirmHubPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-text">⑥+⑦ AIRM — AI Reputation Management</h1>
           <GuideHelpButton />
-          <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-medium text-rose-700">V2.0 · Pro+</span>
+          <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-medium text-rose-700">Pro+</span>
         </div>
         <p className="mt-1 text-xs text-text-muted">
           AI가 우리 브랜드에 거짓말·부정·혼동 답변을 할 때, 발견→분석→교정→검증으로 즉시 대응합니다.

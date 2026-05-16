@@ -1,6 +1,30 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-16 (세션 138 — Phase 5 Items 2+3: 캠페인 자산화 트리거 + AIRM 플래그 출처 추적)
+> 마지막 업데이트: 2026-05-16 (세션 139 — DEV 페이지 실 DB 고도화: 프롬프트 관리·AI 답변 변화)
+
+---
+
+## 세션 139 핵심 성과 (2026-05-16)
+
+### DEV 표기 페이지 → 실 DB 기반 고도화 (순서대로 진행)
+
+이전 세션에서 reports/AI 가시성/journey/archive 4개를 실 DB로 전환한 흐름을 이어, 이번 세션은 프롬프트 관리·이벤트 관리 2개 추가 고도화.
+
+#### ① 프롬프트 관리 (`/dashboard/geo/prompts`)
+- **신규 API**: [app/api/smarcomm/prompts/route.ts](app/api/smarcomm/prompts/route.ts) — `smarcomm_ai_probes`의 query를 그룹화 → mentioned/accuracy/platforms[] 집계, sort(rate-desc/asc/recent/total) + category/domain 필터
+- **신규 UI**: [app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx](app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx) — KPI 4개(고유·평균 노출률·강한≥60%·약한 0%) + 확장 카드 + 플랫폼 칩(언급/정확도 컬러)
+- 사이드바 DEV 배지 + MOCK_PATH_PREFIXES 제거
+
+#### ② 이벤트 관리 → AI 답변 변화 (`/dashboard/events`)
+- 기존: GA-스타일 generic 이벤트 택소노미 mock (SmarComm V2.0 방향과 불일치)
+- 전환: V2.0 § 3-C AIRM ④ 검증 단계 + § 3-B Smart-Data Hub 모니터링 소스인 `smarcomm_ai_diff_events` 활용
+- **신규 API**: [app/api/smarcomm/ai-events/route.ts](app/api/smarcomm/ai-events/route.ts) — diff_type 6종(improved/degraded/unchanged/sentiment_flip/fact_corrected/fact_introduced) + platform 집계 + 일자별 timeline
+- **신규 UI**: [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — KPI 4개 + 이전/이후 텍스트 diff 시각화 + 정직한 빈 상태 안내
+- 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" 재정의 + DEV 제거
+
+### 이월 — 대형 인프라 필요 페이지
+
+콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·워크플로우 4종 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.
 
 ---
 

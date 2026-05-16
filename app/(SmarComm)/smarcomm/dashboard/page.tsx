@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
+import SmartDataHubWidget from '@/features/smarcomm/SmartDataHubWidget';
 import {
   Search, TrendingUp, TrendingDown, ArrowRight, ExternalLink,
   BarChart3, Megaphone, Palette, DollarSign, Globe,
@@ -23,7 +24,13 @@ export default function DashboardOverview() {
   const [tab, setTab] = useState<Tab>('overview');
   const [url, setUrl] = useState('');
   const [showQuickStart, setShowQuickStart] = useState(false);
+  const [tenantId, setTenantId] = useState<string>('tenone-demo');
   const scanLog = getScanLog().reverse();
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('smarcomm_company') : null;
+    if (stored) setTenantId(stored);
+  }, []);
 
   const handleScan = () => {
     const trimmed = url.trim();
@@ -51,6 +58,10 @@ export default function DashboardOverview() {
   return (
     <div className="max-w-6xl">
       <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
+
+      {/* V2.0 § 3-B — Smart-Data Hub 4 소스 KPI (Phase 5 Item 7) */}
+      <SmartDataHubWidget tenantId={tenantId} />
+
       {/* 추천 카드 */}
       <div className="mb-6">
         <div className="mb-2 text-xs font-semibold text-point">추천</div>

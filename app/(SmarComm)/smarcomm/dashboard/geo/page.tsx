@@ -1,433 +1,313 @@
 'use client';
 
-import { useState } from 'react';
+// AI 가시성 — smarcomm_ai_probes 실측 데이터 기반
+// 5 플랫폼 × 7 카테고리 노출률, accuracy 분포, 최근 응답
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Eye, TrendingUp, TrendingDown, MessageSquare, Search, Users, Target, Plus, Globe, HelpCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
-import DonutChart from '@/features/smarcomm/charts/DonutChart';
-import LineChart from '@/features/smarcomm/charts/LineChart';
-import BarChart from '@/features/smarcomm/charts/BarChart';
-import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import { Bot, Sparkles, Calendar, Globe, ShieldCheck } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
-type GeoTab = 'overview' | 'competitors' | 'brand';
-
-// ── Mock: AI 플랫폼별 가시성 데이터 ──
-const PLATFORMS = [
-  { name: 'ChatGPT', mentioned: true, sentiment: 'positive', mentions: 8, totalPrompts: 15, score: 73 },
-  { name: 'Perplexity', mentioned: true, sentiment: 'positive', mentions: 6, totalPrompts: 12, score: 67 },
-  { name: 'Gemini', mentioned: false, sentiment: 'neutral', mentions: 2, totalPrompts: 10, score: 32 },
-  { name: 'Claude', mentioned: true, sentiment: 'positive', mentions: 5, totalPrompts: 10, score: 65 },
-  { name: 'Naver Cue', mentioned: false, sentiment: 'neutral', mentions: 1, totalPrompts: 8, score: 18 },
-];
-
-const WEEKLY_VISIBILITY = [
-  { label: 'W1', value: 42 }, { label: 'W2', value: 48 }, { label: 'W3', value: 45 },
-  { label: 'W4', value: 52 }, { label: 'W5', value: 58 }, { label: 'W6', value: 55 }, { label: 'W7', value: 61 },
-];
-
-const OVERVIEW_COMPETITORS = [
-  { name: '우리 브랜드', score: 61, mentions: 22, sentiment: 82 },
-  { name: 'competitor-a.com', score: 74, mentions: 31, sentiment: 78 },
-  { name: 'competitor-b.com', score: 55, mentions: 18, sentiment: 85 },
-  { name: 'competitor-c.com', score: 43, mentions: 12, sentiment: 70 },
-];
-
-const TOP_PROMPTS = [
-  { prompt: '한국에서 좋은 마케팅 자동화 도구 추천해줘', mentioned: true, platform: 'ChatGPT', sentiment: 'positive' },
-  { prompt: 'SEO 진단 도구 비교해줘', mentioned: true, platform: 'Perplexity', sentiment: 'positive' },
-  { prompt: '소상공인 마케팅 플랫폼 추천', mentioned: false, platform: 'Gemini', sentiment: 'neutral' },
-  { prompt: 'GEO 최적화 방법 알려줘', mentioned: true, platform: 'Claude', sentiment: 'positive' },
-  { prompt: '광고 성과 분석 도구 뭐가 좋아?', mentioned: false, platform: 'ChatGPT', sentiment: 'neutral' },
-];
-
-// ── Mock: 경쟁사 상세 ──
-interface Competitor {
-  domain: string;
-  overallScore: number;
-  platforms: { name: string; score: number; mentions: number; sentiment: string }[];
-  topKeywords: string[];
-  trend: 'up' | 'down' | 'stable';
-}
-
-const COMPETITORS: Competitor[] = [
-  { domain: '우리 브랜드 (smarcomm.com)', overallScore: 61, trend: 'up',
-    platforms: [{ name: 'ChatGPT', score: 73, mentions: 8, sentiment: 'positive' }, { name: 'Perplexity', score: 67, mentions: 6, sentiment: 'positive' }, { name: 'Gemini', score: 32, mentions: 2, sentiment: 'neutral' }, { name: 'Claude', score: 65, mentions: 5, sentiment: 'positive' }],
-    topKeywords: ['마케팅 자동화', 'SEO 진단', 'GEO 최적화'] },
-  { domain: 'competitor-a.com', overallScore: 74, trend: 'up',
-    platforms: [{ name: 'ChatGPT', score: 82, mentions: 12, sentiment: 'positive' }, { name: 'Perplexity', score: 78, mentions: 9, sentiment: 'positive' }, { name: 'Gemini', score: 65, mentions: 5, sentiment: 'positive' }, { name: 'Claude', score: 71, mentions: 5, sentiment: 'positive' }],
-    topKeywords: ['디지털 마케팅', '광고 최적화', 'ROI 분석'] },
-  { domain: 'competitor-b.com', overallScore: 55, trend: 'down',
-    platforms: [{ name: 'ChatGPT', score: 62, mentions: 6, sentiment: 'neutral' }, { name: 'Perplexity', score: 52, mentions: 4, sentiment: 'neutral' }, { name: 'Gemini', score: 48, mentions: 3, sentiment: 'neutral' }, { name: 'Claude', score: 58, mentions: 5, sentiment: 'positive' }],
-    topKeywords: ['SNS 마케팅', '콘텐츠 마케팅', '인플루언서'] },
-  { domain: 'competitor-c.com', overallScore: 43, trend: 'stable',
-    platforms: [{ name: 'ChatGPT', score: 45, mentions: 4, sentiment: 'neutral' }, { name: 'Perplexity', score: 38, mentions: 2, sentiment: 'neutral' }, { name: 'Gemini', score: 42, mentions: 3, sentiment: 'neutral' }, { name: 'Claude', score: 47, mentions: 3, sentiment: 'neutral' }],
-    topKeywords: ['이메일 마케팅', '뉴스레터', 'CRM'] },
-];
-
-// ── Mock: 브랜드 실적 ──
-const BRAND_METRICS = {
-  overallPerception: 72,
-  sentimentBreakdown: { positive: 68, neutral: 24, negative: 8 },
-  weeklyTrend: [
-    { label: 'W1', value: 58 }, { label: 'W2', value: 62 }, { label: 'W3', value: 65 },
-    { label: 'W4', value: 68 }, { label: 'W5', value: 71 }, { label: 'W6', value: 70 }, { label: 'W7', value: 72 },
-  ],
+const PLATFORMS = ['claude', 'chatgpt', 'perplexity', 'naver-cue', 'google-aio'] as const;
+const PLATFORM_LABEL: Record<typeof PLATFORMS[number], string> = {
+  claude: 'Claude',
+  chatgpt: 'ChatGPT',
+  perplexity: 'Perplexity',
+  'naver-cue': '네이버 Cue',
+  'google-aio': 'Google AIO',
+};
+const PLATFORM_TONE: Record<typeof PLATFORMS[number], string> = {
+  claude: '#D97757',
+  chatgpt: '#10A37F',
+  perplexity: '#1FB8CD',
+  'naver-cue': '#03C75A',
+  'google-aio': '#4285F4',
 };
 
-const NARRATIVES = [
-  { factor: 'GEO/SEO 진단 전문성', score: 85, impact: 'high', description: 'AI가 SmarComm을 SEO 진단 도구로 자주 언급합니다' },
-  { factor: '마케팅 자동화', score: 62, impact: 'medium', description: '자동화 기능은 언급되지만 HubSpot, Mailchimp 대비 인지도 낮음' },
-  { factor: '소상공인 타겟', score: 78, impact: 'high', description: '"소상공인 마케팅"과 관련하여 자주 추천됩니다' },
-  { factor: '가격 경쟁력', score: 70, impact: 'medium', description: '가격 대비 기능 면에서 긍정적으로 언급됨' },
-  { factor: '한국 매체 지원', score: 88, impact: 'high', description: '네이버/카카오 지원이 차별화 요소로 인식됨' },
-  { factor: '데이터 분석 깊이', score: 45, impact: 'low', description: 'Amplitude, Mixpanel 대비 분석 깊이가 부족하다고 인식됨' },
+const CATEGORIES = ['brand_direct', 'product_generic', 'use_case', 'competitor', 'pricing', 'howto', 'local'] as const;
+const CATEGORY_LABEL: Record<typeof CATEGORIES[number], string> = {
+  brand_direct: '브랜드 직접',
+  product_generic: '제품군 일반',
+  use_case: '사용 사례',
+  competitor: '경쟁사 비교',
+  pricing: '가격 플랜',
+  howto: '방법 가이드',
+  local: '지역·시장',
+};
+
+const ACCURACY_LABEL: Record<string, { label: string; color: string }> = {
+  exact:   { label: '정확',   color: '#16A34A' },
+  partial: { label: '부분',   color: '#D97706' },
+  wrong:   { label: '오답',   color: '#DC2626' },
+  absent:  { label: '미언급', color: '#94A3B8' },
+};
+
+interface Bucket { total: number; mentioned: number; rate: number }
+interface PlatformBucket extends Bucket { platform: string; skipped: boolean }
+interface CategoryBucket extends Bucket { category: string }
+interface MatrixCell extends Bucket { platform: string; category: string }
+interface RecentProbe {
+  id: string; scan_id: string; platform: string; category: string; query: string;
+  mentioned: boolean; position: number | null; accuracy: string; created_at: string;
+}
+interface VisibilityData {
+  total: number;
+  mentionRate: number;
+  platformBreakdown: PlatformBucket[];
+  categoryBreakdown: CategoryBucket[];
+  accuracyDist: Record<string, number>;
+  matrix: MatrixCell[];
+  recent: RecentProbe[];
+}
+
+const RANGE_OPTIONS = [
+  { label: '전체', value: 0 },
+  { label: '7일', value: 7 },
+  { label: '30일', value: 30 },
+  { label: '90일', value: 90 },
 ];
 
-const TOP_QUESTIONS = [
-  { question: 'SmarComm이 뭐하는 서비스야?', frequency: 120, answered: true },
-  { question: 'SmarComm 가격은 얼마야?', frequency: 85, answered: true },
-  { question: 'SmarComm vs Semrush 차이가 뭐야?', frequency: 62, answered: true },
-  { question: 'SmarComm 무료 플랜으로 뭘 할 수 있어?', frequency: 48, answered: true },
-  { question: 'SmarComm GEO 점수가 뭐야?', frequency: 35, answered: false },
-  { question: 'SmarComm으로 네이버 광고 관리할 수 있어?', frequency: 28, answered: true },
-];
+export default function GeoVisibilityPage() {
+  const [data, setData] = useState<VisibilityData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [domain, setDomain] = useState<string>('');
+  const [domains, setDomains] = useState<string[]>([]);
+  const [days, setDays] = useState(0);
 
-const sentimentColor = (s: string) => s === 'positive' ? 'text-success' : s === 'negative' ? 'text-danger' : 'text-text-muted';
-const sentimentLabel = (s: string) => s === 'positive' ? '긍정' : s === 'negative' ? '부정' : '중립';
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/smarcomm/scans?limit=200');
+        const d = await res.json();
+        const list = Array.from(new Set((d.scans ?? []).map((s: { domain: string }) => s.domain))) as string[];
+        setDomains(list);
+      } catch { /* ignore */ }
+    })();
+  }, []);
 
-export default function GeoPage() {
-  const [tab, setTab] = useState<GeoTab>('overview');
-  const pc = getChartColors(7);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ limit: '500' });
+        if (domain) params.set('domain', domain);
+        if (days > 0) params.set('days', String(days));
+        const res = await fetch(`/api/smarcomm/ai-visibility?${params.toString()}`);
+        const d = await res.json();
+        if (cancelled) return;
+        if (!res.ok) { setError(d.error || '데이터를 불러올 수 없습니다.'); setData(null); }
+        else { setError(null); setData(d); }
+      } catch {
+        if (!cancelled) { setError('네트워크 오류'); setData(null); }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [domain, days]);
+
+  const matrixCell = (pf: string, cat: string) =>
+    data?.matrix.find(m => m.platform === pf && m.category === cat) ?? { total: 0, mentioned: 0, rate: 0 };
 
   return (
     <div className="max-w-5xl">
       <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={20} className="text-point" />
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div>
           <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">AI 가시성</h1><GuideHelpButton /></div>
+          <p className="mt-1 text-xs text-text-muted">5 AI 플랫폼에서 우리 브랜드가 언급되는 비율을 카테고리별로 추적합니다</p>
         </div>
-        <p className="text-xs text-text-muted">AI 검색에서 브랜드 가시성, 경쟁사, 브랜드 실적을 통합 관리합니다</p>
+        <Link href="/smarcomm/dashboard/scan" className="inline-flex items-center gap-1.5 rounded-full bg-text px-4 py-2 text-xs font-semibold text-white hover:bg-accent-sub">
+          <Sparkles size={13} /> 새 진단 시작
+        </Link>
       </div>
 
-      {/* 메인 탭 */}
-      <div className="mb-6 flex gap-1">
-        {([
-          { id: 'overview' as GeoTab, label: '가시성 개요' },
-          { id: 'competitors' as GeoTab, label: '경쟁사 리서치' },
-          { id: 'brand' as GeoTab, label: '브랜드 실적' },
-        ]).map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${tab === t.id ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'}`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'overview' && <OverviewTab pc={pc} />}
-      {tab === 'competitors' && <CompetitorsTab pc={pc} />}
-      {tab === 'brand' && <BrandTab pc={pc} />}
-
-      <NextStepCTA stage="진단 → 기획" title="AI 가시성 개선 프로젝트 시작" description="AI 검색에서 브랜드 노출을 높이기 위한 GEO 최적화 프로젝트를 생성하세요" actionLabel="프로젝트 생성" href="/dashboard/workflow/projects" />
-    </div>
-  );
-}
-
-/* ── 가시성 개요 탭 ── */
-function OverviewTab({ pc }: { pc: string[] }) {
-  const avgScore = Math.round(PLATFORMS.reduce((s, p) => s + p.score, 0) / PLATFORMS.length);
-  const totalMentions = PLATFORMS.reduce((s, p) => s + p.mentions, 0);
-  const mentionRate = Math.round(PLATFORMS.filter(p => p.mentioned).length / PLATFORMS.length * 100);
-
-  return (
-    <div>
-      {/* KPI */}
-      <div className="mb-6 grid grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">AI 가시성 점수</div>
-          <div className="mt-1 text-2xl font-bold text-text">{avgScore}<span className="text-sm text-text-muted">/100</span></div>
-          <div className="mt-1 flex items-center gap-1 text-xs text-success"><TrendingUp size={11} /> +7점 (전주 대비)</div>
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="relative">
+          <Globe size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <select value={domain} onChange={(e) => setDomain(e.target.value)} className="rounded-full border border-border bg-white pl-8 pr-7 py-1.5 text-xs text-text focus:outline-none focus:border-text appearance-none">
+            <option value="">전체 도메인</option>
+            {domains.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
         </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">총 멘션 수</div>
-          <div className="mt-1 text-2xl font-bold text-text">{totalMentions}회</div>
-          <div className="mt-1 text-xs text-text-muted">최근 7일</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">멘션 비율</div>
-          <div className="mt-1 text-2xl font-bold text-text">{mentionRate}%</div>
-          <div className="mt-1 text-xs text-text-muted">{PLATFORMS.filter(p => p.mentioned).length}/{PLATFORMS.length} 플랫폼</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">감성 분석</div>
-          <div className="mt-1 text-2xl font-bold text-success">긍정</div>
-          <div className="mt-1 text-xs text-text-muted">전체 멘션의 73%</div>
-        </div>
-      </div>
-
-      {/* 차트 */}
-      <div className="mb-6 grid gap-4 lg:grid-cols-5">
-        <div className="lg:col-span-3 rounded-2xl border border-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-text">주간 가시성 추이</h2>
-          <LineChart data={WEEKLY_VISIBILITY} height={200} color={pc[0]} />
-        </div>
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-text">플랫폼별 멘션 비중</h2>
-          <DonutChart
-            data={PLATFORMS.map((p, i) => ({ label: p.name, value: p.mentions, color: pc[i] }))}
-            size={160} centerLabel="총 멘션" centerValue={String(totalMentions)}
-          />
-        </div>
-      </div>
-
-      {/* 플랫폼별 상세 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white">
-        <div className="border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold text-text">플랫폼별 가시성</h2>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs text-text-muted">
-              <th className="px-5 py-2.5 text-left font-medium">플랫폼</th>
-              <th className="px-5 py-2.5 text-center font-medium">노출 여부</th>
-              <th className="px-5 py-2.5 text-center font-medium">멘션 수</th>
-              <th className="px-5 py-2.5 text-center font-medium">감성</th>
-              <th className="px-5 py-2.5 text-right font-medium">가시성 점수</th>
-            </tr>
-          </thead>
-          <tbody>
-            {PLATFORMS.map(p => (
-              <tr key={p.name} className="border-b border-border last:border-0 hover:bg-surface">
-                <td className="px-5 py-3 font-medium text-text">{p.name}</td>
-                <td className="px-5 py-3 text-center">
-                  {p.mentioned ? <span className="text-success text-xs font-semibold">노출</span> : <span className="text-danger text-xs">미노출</span>}
-                </td>
-                <td className="px-5 py-3 text-center text-text-sub">{p.mentions}/{p.totalPrompts}</td>
-                <td className="px-5 py-3 text-center"><span className={`text-xs font-semibold ${sentimentColor(p.sentiment)}`}>{sentimentLabel(p.sentiment)}</span></td>
-                <td className="px-5 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 h-1.5 rounded-full bg-surface overflow-hidden">
-                      <div className="h-full rounded-full bg-point transition-all" style={{ width: `${p.score}%` }} />
-                    </div>
-                    <span className="text-xs font-bold text-text w-8 text-right">{p.score}</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 경쟁사 비교 + 인기 프롬프트 */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-text">경쟁사 AI 가시성 비교</h2>
-          <div className="space-y-2.5">
-            {OVERVIEW_COMPETITORS.map((c, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className={`w-28 truncate text-xs ${i === 0 ? 'font-bold text-text' : 'text-text-sub'}`}>{c.name}</span>
-                <div className="flex-1 h-2 rounded-full bg-surface overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${c.score}%`, background: pc[i] }} />
-                </div>
-                <span className="text-xs font-bold text-text w-8 text-right">{c.score}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-text">주요 프롬프트</h2>
-            <Link href="/dashboard/geo/prompts" className="text-[10px] text-text-muted hover:text-text">전체 →</Link>
-          </div>
-          <div className="space-y-2">
-            {TOP_PROMPTS.map((tp, i) => (
-              <div key={i} className="flex items-start gap-2 rounded-lg bg-surface px-3 py-2">
-                <MessageSquare size={12} className="mt-0.5 shrink-0 text-text-muted" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-text truncate">&quot;{tp.prompt}&quot;</p>
-                  <div className="mt-0.5 flex items-center gap-2 text-[9px] text-text-muted">
-                    <span>{tp.platform}</span>
-                    <span className={sentimentColor(tp.sentiment)}>{tp.mentioned ? '멘션됨' : '미멘션'}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 경쟁사 리서치 탭 ── */
-function CompetitorsTab({ pc }: { pc: string[] }) {
-  const [newDomain, setNewDomain] = useState('');
-
-  return (
-    <div>
-      {/* 경쟁사 추가 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white p-4">
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input type="text" value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="경쟁사 도메인 추가 (예: competitor.com)"
-              className="w-full rounded-xl border border-border bg-surface py-2.5 pl-9 pr-4 text-sm placeholder:text-text-muted focus:border-text focus:outline-none" />
-          </div>
-          <button className="flex items-center gap-1.5 rounded-xl bg-text px-5 py-2.5 text-xs font-semibold text-white hover:bg-accent-sub">
-            <Plus size={13} /> 추가
-          </button>
-        </div>
-      </div>
-
-      {/* 점수 비교 차트 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white p-5">
-        <h2 className="mb-3 text-sm font-semibold text-text">AI 가시성 점수 비교</h2>
-        <BarChart data={COMPETITORS.map((c, i) => ({ label: c.domain.split(' ')[0].replace('(', ''), value: c.overallScore, color: pc[i] }))} height={200} />
-      </div>
-
-      {/* 상세 비교 테이블 */}
-      <div className="rounded-2xl border border-border bg-white">
-        <div className="border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold text-text">플랫폼별 상세 비교</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs text-text-muted">
-                <th className="px-5 py-2.5 text-left font-medium">도메인</th>
-                <th className="px-5 py-2.5 text-center font-medium">종합</th>
-                <th className="px-5 py-2.5 text-center font-medium">ChatGPT</th>
-                <th className="px-5 py-2.5 text-center font-medium">Perplexity</th>
-                <th className="px-5 py-2.5 text-center font-medium">Gemini</th>
-                <th className="px-5 py-2.5 text-center font-medium">Claude</th>
-                <th className="px-5 py-2.5 text-center font-medium">추세</th>
-                <th className="px-5 py-2.5 text-left font-medium">주요 키워드</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPETITORS.map((c, i) => (
-                <tr key={i} className={`border-b border-border last:border-0 hover:bg-surface ${i === 0 ? 'bg-surface/50' : ''}`}>
-                  <td className="px-5 py-3"><span className={`text-xs ${i === 0 ? 'font-bold text-text' : 'text-text-sub'}`}>{c.domain}</span></td>
-                  <td className="px-5 py-3 text-center"><span className="text-sm font-bold text-text">{c.overallScore}</span></td>
-                  {c.platforms.map(p => (
-                    <td key={p.name} className="px-5 py-3 text-center text-xs text-text-sub">{p.score}</td>
-                  ))}
-                  <td className="px-5 py-3 text-center">
-                    {c.trend === 'up' ? <TrendingUp size={14} className="mx-auto text-success" /> : c.trend === 'down' ? <TrendingDown size={14} className="mx-auto text-danger" /> : <span className="text-text-muted">—</span>}
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex gap-1">
-                      {c.topKeywords.slice(0, 2).map(kw => <span key={kw} className="rounded bg-surface px-1.5 py-0.5 text-[9px] text-text-muted">{kw}</span>)}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 브랜드 실적 탭 ── */
-function BrandTab({ pc }: { pc: string[] }) {
-  return (
-    <div>
-      {/* KPI */}
-      <div className="mb-6 grid grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">브랜드 인식 점수</div>
-          <div className="mt-1 text-2xl font-bold text-text">{BRAND_METRICS.overallPerception}</div>
-          <div className="mt-1 flex items-center gap-1 text-xs text-success"><TrendingUp size={11} /> +4점</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">긍정 비율</div>
-          <div className="mt-1 text-2xl font-bold text-success">{BRAND_METRICS.sentimentBreakdown.positive}%</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">중립</div>
-          <div className="mt-1 text-2xl font-bold text-text-sub">{BRAND_METRICS.sentimentBreakdown.neutral}%</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs text-text-muted">부정</div>
-          <div className="mt-1 text-2xl font-bold text-danger">{BRAND_METRICS.sentimentBreakdown.negative}%</div>
-        </div>
-      </div>
-
-      {/* 차트 */}
-      <div className="mb-6 grid gap-4 lg:grid-cols-5">
-        <div className="lg:col-span-3 rounded-2xl border border-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-text">주간 인식 점수 추이</h2>
-          <LineChart data={BRAND_METRICS.weeklyTrend} height={200} color={pc[0]} />
-        </div>
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-text">감성 분포</h2>
-          <DonutChart
-            data={[
-              { label: '긍정', value: BRAND_METRICS.sentimentBreakdown.positive, color: '#059669' },
-              { label: '중립', value: BRAND_METRICS.sentimentBreakdown.neutral, color: '#9CA3AF' },
-              { label: '부정', value: BRAND_METRICS.sentimentBreakdown.negative, color: '#DC2626' },
-            ]}
-            size={160} centerLabel="인식 점수" centerValue={String(BRAND_METRICS.overallPerception)}
-          />
-        </div>
-      </div>
-
-      {/* 내러티브 요인 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white p-5">
-        <h2 className="mb-4 text-sm font-semibold text-text">내러티브 요인 분석</h2>
-        <p className="mb-3 text-xs text-text-muted">AI가 브랜드를 설명할 때 어떤 요인을 강조하는지 분석합니다</p>
-        <div className="space-y-3">
-          {NARRATIVES.map((n, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <span className="w-36 shrink-0 text-xs font-medium text-text">{n.factor}</span>
-              <div className="flex-1 h-3 rounded-full bg-surface overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{ width: `${n.score}%`, background: n.score >= 70 ? '#059669' : n.score >= 50 ? '#D97706' : '#DC2626' }} />
-              </div>
-              <span className="w-8 text-right text-xs font-bold text-text">{n.score}</span>
-              <span className={`w-10 text-right text-[9px] font-semibold ${n.impact === 'high' ? 'text-success' : n.impact === 'medium' ? 'text-warning' : 'text-text-muted'}`}>
-                {n.impact === 'high' ? '높음' : n.impact === 'medium' ? '보통' : '낮음'}
-              </span>
-            </div>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-white px-1 py-1">
+          <Calendar size={11} className="ml-2 text-text-muted" />
+          {RANGE_OPTIONS.map(opt => (
+            <button key={opt.value} onClick={() => setDays(opt.value)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${days === opt.value ? 'bg-text text-white' : 'text-text-sub hover:text-text'}`}>
+              {opt.label}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* 사용자 질문 */}
-      <div className="rounded-2xl border border-border bg-white">
-        <div className="border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold text-text">브랜드 관련 질문</h2>
-          <p className="text-[10px] text-text-muted mt-0.5">사용자들이 AI에게 브랜드에 대해 묻는 질문</p>
+      {error && <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">⚠ {error}</div>}
+
+      {loading ? (
+        <div className="rounded-2xl border border-border bg-white p-12 text-center text-sm text-text-muted">불러오는 중…</div>
+      ) : !data || data.total === 0 ? (
+        <div className="rounded-2xl border border-border bg-white p-12 text-center text-sm text-text-muted">
+          AI 응답 데이터가 없습니다. 먼저 진단을 실행해주세요.
+          <div className="mt-3"><Link href="/smarcomm/dashboard/scan" className="inline-flex items-center gap-1 text-xs text-text underline-offset-2 hover:underline"><Sparkles size={11}/> 진단 시작</Link></div>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs text-text-muted">
-              <th className="px-5 py-2.5 text-left font-medium">질문</th>
-              <th className="px-5 py-2.5 text-center font-medium">빈도</th>
-              <th className="px-5 py-2.5 text-center font-medium">정확한 응답</th>
-            </tr>
-          </thead>
-          <tbody>
-            {TOP_QUESTIONS.map((q, i) => (
-              <tr key={i} className="border-b border-border last:border-0 hover:bg-surface">
-                <td className="px-5 py-3">
-                  <div className="flex items-start gap-2">
-                    <HelpCircle size={12} className="mt-0.5 shrink-0 text-text-muted" />
-                    <span className="text-xs text-text">&quot;{q.question}&quot;</span>
+      ) : (
+        <>
+          <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <KpiCard icon={<Bot size={14}/>} label="총 응답 수집" value={`${data.total}건`} sub={domain ? domain : '전체 도메인'} color="#0EA5E9" />
+            <KpiCard icon={<ShieldCheck size={14}/>} label="평균 언급률" value={`${data.mentionRate}%`} sub={`${data.total}건 중 ${Math.round(data.mentionRate * data.total / 100)}건 언급`} color="#16A34A" />
+            <KpiCard icon={<span className="text-base">✓</span>} label="정확 응답" value={`${data.accuracyDist.exact || 0}`} sub={`${pct(data.accuracyDist.exact, data.total)}% — 우리 정보 정확`} color="#16A34A" />
+            <KpiCard icon={<span className="text-base">⚠</span>} label="오답·미언급" value={`${(data.accuracyDist.wrong || 0) + (data.accuracyDist.absent || 0)}`} sub="교정 필요" color="#DC2626" />
+          </div>
+
+          <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white">
+            <div className="border-b border-border bg-surface/40 px-5 py-3">
+              <h2 className="text-sm font-bold text-text">플랫폼 × 카테고리 노출 매트릭스</h2>
+              <p className="mt-0.5 text-[11px] text-text-muted">셀 색상이 진할수록 언급률이 높습니다. 0%는 빈 셀(회색)로 표시.</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase text-text-muted">카테고리 / 플랫폼</th>
+                    {PLATFORMS.map(pf => (
+                      <th key={pf} className="px-3 py-2 text-center font-semibold text-text" style={{ minWidth: 90 }}>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: PLATFORM_TONE[pf] }}/>
+                          {PLATFORM_LABEL[pf]}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {CATEGORIES.map(cat => (
+                    <tr key={cat} className="border-b border-border last:border-0">
+                      <td className="px-3 py-2 font-medium text-text-sub">{CATEGORY_LABEL[cat]}</td>
+                      {PLATFORMS.map(pf => {
+                        const cell = matrixCell(pf, cat);
+                        const isEmpty = cell.total === 0;
+                        const tone = PLATFORM_TONE[pf];
+                        const alpha = isEmpty ? 0.04 : 0.10 + (cell.rate / 100) * 0.50;
+                        const textColor = !isEmpty && cell.rate >= 60 ? tone : '#475569';
+                        return (
+                          <td key={pf} className="px-2 py-2 text-center">
+                            <div className="rounded-md px-2 py-1.5 tabular-nums" style={{ background: hexA(tone, alpha) }}>
+                              <div className="text-[13px] font-semibold" style={{ color: isEmpty ? '#94A3B8' : textColor }}>
+                                {isEmpty ? '—' : `${cell.rate}%`}
+                              </div>
+                              {!isEmpty && <div className="text-[9px] text-text-muted">{cell.mentioned}/{cell.total}</div>}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <BreakdownCard title="플랫폼별 노출률" items={data.platformBreakdown.map(p => ({ label: PLATFORM_LABEL[p.platform as keyof typeof PLATFORM_LABEL], total: p.total, mentioned: p.mentioned, rate: p.rate, skipped: p.skipped, color: PLATFORM_TONE[p.platform as keyof typeof PLATFORM_TONE] }))} />
+            <BreakdownCard title="카테고리별 노출률" items={data.categoryBreakdown.map(c => ({ label: CATEGORY_LABEL[c.category as keyof typeof CATEGORY_LABEL], total: c.total, mentioned: c.mentioned, rate: c.rate, color: '#3B82F6' }))} />
+          </div>
+
+          <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white">
+            <div className="border-b border-border bg-surface/40 px-5 py-3">
+              <h2 className="text-sm font-bold text-text">최근 AI 응답 ({data.recent.length}건)</h2>
+              <p className="mt-0.5 text-[11px] text-text-muted">진단 시 캡처된 5 AI 플랫폼의 실제 응답을 시간순으로 표시</p>
+            </div>
+            <div className="divide-y divide-border">
+              {data.recent.map(p => {
+                const acc = ACCURACY_LABEL[p.accuracy] ?? ACCURACY_LABEL.absent;
+                const tone = PLATFORM_TONE[p.platform as keyof typeof PLATFORM_TONE] || '#94A3B8';
+                return (
+                  <div key={p.id} className="px-5 py-3">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ background: tone }}/>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-semibold text-text">{PLATFORM_LABEL[p.platform as keyof typeof PLATFORM_LABEL] || p.platform}</span>
+                          <span className="text-[10px] text-text-muted">{CATEGORY_LABEL[p.category as keyof typeof CATEGORY_LABEL] || p.category}</span>
+                          <span className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold" style={{ background: `${acc.color}15`, color: acc.color }}>{acc.label}</span>
+                          {p.position && <span className="text-[10px] text-text-muted">{p.position}위</span>}
+                        </div>
+                        <p className="mt-1 text-xs text-text-sub italic line-clamp-1">&quot;{p.query}&quot;</p>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-text-muted">{relativeTime(p.created_at)}</span>
+                    </div>
                   </div>
-                </td>
-                <td className="px-5 py-3 text-center text-xs text-text-sub">월 {q.frequency}회</td>
-                <td className="px-5 py-3 text-center">
-                  {q.answered ? <ThumbsUp size={13} className="mx-auto text-success" /> : <ThumbsDown size={13} className="mx-auto text-danger" />}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function KpiCard({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub: string; color: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-white p-4">
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="flex h-6 w-6 items-center justify-center rounded-lg" style={{ background: `${color}15`, color }}>{icon}</span>
+        <span className="text-[11px] font-semibold text-text-sub">{label}</span>
+      </div>
+      <div className="text-2xl font-bold text-text tabular-nums">{value}</div>
+      <div className="mt-1 text-[10px] text-text-muted">{sub}</div>
+    </div>
+  );
+}
+
+function BreakdownCard({ title, items }: { title: string; items: Array<{ label: string; total: number; mentioned: number; rate: number; skipped?: boolean; color: string }> }) {
+  return (
+    <div className="rounded-2xl border border-border bg-white">
+      <div className="border-b border-border bg-surface/40 px-5 py-3">
+        <h3 className="text-sm font-bold text-text">{title}</h3>
+      </div>
+      <div className="p-4 space-y-2.5">
+        {items.map((it, i) => (
+          <div key={i}>
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className={`font-medium ${it.skipped ? 'text-text-muted/60' : 'text-text-sub'}`}>{it.label}</span>
+              <span className={`tabular-nums ${it.skipped ? 'text-text-muted/60' : 'text-text-muted'}`}>
+                {it.skipped ? '데이터 없음' : `${it.mentioned}/${it.total} · ${it.rate}%`}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{ width: `${it.rate}%`, background: it.color, opacity: it.skipped ? 0.2 : 0.85 }}/>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
+}
+
+function pct(n: number | undefined, total: number): number {
+  if (!n || total === 0) return 0;
+  return Math.round((n / total) * 100);
+}
+
+function hexA(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '방금 전';
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const d = Math.floor(hr / 24);
+  if (d < 30) return `${d}일 전`;
+  return `${Math.floor(d / 30)}달 전`;
 }

@@ -95,7 +95,7 @@ export default function AiTrackerPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-text">⑥ 모니터링 — AI Tracker</h1>
           <GuideHelpButton />
-          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700">V2.0 · Real-time</span>
+          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700">Real-time</span>
         </div>
         <p className="mt-1 text-xs text-text-muted">최근 두 진단 간 AI 답변 변화 추적 — 정기 재진단(주간) 시 자동 diff 산출</p>
       </div>

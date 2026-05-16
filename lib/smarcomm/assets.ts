@@ -180,12 +180,14 @@ export function slugify(input: string): string {
 // ── 디지털 흔적 점수 (persistence_score) 산출 ──
 // 외부 배포 live + 인용 정확도 누적 평가
 //
-// ⚠ V2.1 § 1.10 정직성 — 채널 가중치(wikipedia=25, news=15 등)는 휴리스틱 추정.
-// Phase 5에서 외부 도메인 권위도 데이터(Ahrefs DR 등) 연동 시 정규화 예정.
+// V2.1 § 1.10 정직성 (Phase 5 Item 4 — 2026-05-16) — 채널 가중치는 max cap이며,
+// distribution.domain_authority 가 있으면 DA-scaled (DA × maxWeight / 100)로 정규화한다.
+// domain_authority IS NULL인 경우만 채널 가중치 fallback (휴리스틱).
+// DA 자동 채움: POST /api/smarcomm/assets/[id]/distributions/enrich-da (Moz·Ahrefs)
 export function computePersistenceScore(distributions: AssetDistribution[], citations: AssetCitation[]): number {
     if (distributions.length === 0 && citations.length === 0) return 0;
 
-    // 배포 채널별 가중치
+    // 배포 채널별 가중치 (DA 미연동 시 fallback / DA 연동 시 max cap)
     const channelWeight: Record<AssetDistribution['channel'], number> = {
         wikipedia: 25,
         news_press: 15,
@@ -199,7 +201,12 @@ export function computePersistenceScore(distributions: AssetDistribution[], cita
 
     let distScore = 0;
     for (const d of distributions) {
-        if (d.status === 'live') distScore += channelWeight[d.channel];
+        if (d.status !== 'live') continue;
+        const maxWeight = channelWeight[d.channel];
+        const score = d.domain_authority != null
+            ? Math.round(d.domain_authority * maxWeight / 100)
+            : maxWeight;
+        distScore += score;
     }
     distScore = Math.min(60, distScore); // 배포 최대 60점
 

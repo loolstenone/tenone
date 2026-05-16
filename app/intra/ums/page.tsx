@@ -519,6 +519,10 @@ export default function UniverseDashboard() {
                         for (const ef of entry.extraFilters ?? []) {
                             query = query.eq(ef.column, ef.value);
                         }
+                        // notFilters AND NOT 조건 적용 (critical 제외 등)
+                        for (const nf of entry.notFilters ?? []) {
+                            query = query.neq(nf.column, nf.value);
+                        }
                         const { count, error } = await query;
                         return {
                             label: entry.label,

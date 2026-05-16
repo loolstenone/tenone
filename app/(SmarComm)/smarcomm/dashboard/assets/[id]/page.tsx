@@ -46,11 +46,45 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showDistModal, setShowDistModal] = useState(false);
+  const [daLoading, setDaLoading] = useState<Set<string>>(new Set());
+  const [daBatchLoading, setDaBatchLoading] = useState(false);
+  const [daKeyMissing, setDaKeyMissing] = useState(false);
 
   const reloadDetail = async () => {
     if (!detail) return;
     const res = await fetch(`/api/smarcomm/assets/${detail.asset.id}`);
     if (res.ok) setDetail(await res.json());
+  };
+
+  const enrichDA = async (distributionId?: string) => {
+    if (!detail) return;
+    if (distributionId) {
+      setDaLoading(prev => new Set(prev).add(distributionId));
+    } else {
+      setDaBatchLoading(true);
+    }
+    try {
+      const res = await fetch(`/api/smarcomm/assets/${detail.asset.id}/distributions/enrich-da`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: distributionId ? JSON.stringify({ distribution_id: distributionId }) : undefined,
+      });
+      const data = await res.json();
+      if (data.status === 'api_key_missing') {
+        setDaKeyMissing(true);
+      } else {
+        setDaKeyMissing(false);
+        await reloadDetail();
+      }
+    } catch {
+      // ignore
+    } finally {
+      if (distributionId) {
+        setDaLoading(prev => { const n = new Set(prev); n.delete(distributionId); return n; });
+      } else {
+        setDaBatchLoading(false);
+      }
+    }
   };
 
   useEffect(() => {
@@ -150,8 +184,8 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
           <div className="text-right shrink-0">
             <div className="text-3xl font-bold" style={{ color: scoreColor }}>{asset.persistence_score}</div>
             <div className="text-[10px] text-text-muted">디지털 흔적 점수</div>
-            <div className="mt-0.5 text-[9px] text-text-muted italic" title="채널 가중치(wikipedia=25, news=15 등) 휴리스틱. Phase 5 Ahrefs DR 연동 시 정규화 예정.">
-              ⚠ 휴리스틱 가중치
+            <div className="mt-0.5 text-[9px] text-text-muted italic" title="distribution.domain_authority 있으면 DA × 채널 max cap / 100 으로 정규화. 없으면 채널 가중치(휴리스틱) fallback. DA 자동 채움: Moz/Ahrefs API.">
+              🔬 DA-scaled (fallback: 휴리스틱)
             </div>
           </div>
         </div>
@@ -194,16 +228,33 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
           <div>
             <h2 className="text-sm font-bold text-text inline-flex items-center gap-1.5">
               외부 매체 배포 이력
-              <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="사용자가 수동 입력. Phase 5에서 외부 매체 자동 감지 도구 연동 예정.">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="사용자가 수동 입력. 외부 매체 자동 감지 연동은 단계적으로 활성.">
                 🔬 출처: 사용자 입력 (수동)
               </span>
             </h2>
             <p className="mt-0.5 text-[11px] text-text-muted">권위 매체에 Entity가 노출될수록 AI 학습·인용 가능성이 높아집니다. 직접 등재한 이력을 추가해 흔적 점수를 관리하세요.</p>
           </div>
-          <button onClick={() => setShowDistModal(true)} className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border bg-white px-2.5 py-1.5 text-[11px] font-medium text-text hover:bg-surface">
-            <Plus size={12} /> 배포 이력 추가
-          </button>
+          <div className="shrink-0 flex items-center gap-1.5">
+            {distributions.some(d => d.external_url) && (
+              <button
+                onClick={() => enrichDA()}
+                disabled={daBatchLoading}
+                className="inline-flex items-center gap-1 rounded-lg border border-border bg-white px-2.5 py-1.5 text-[11px] font-medium text-text hover:bg-surface disabled:opacity-50"
+                title="외부 URL이 있는 모든 배포 이력의 도메인 권위도(DA)를 Moz/Ahrefs API로 조회"
+              >
+                {daBatchLoading ? '조회 중…' : '🔍 DA 일괄 조회'}
+              </button>
+            )}
+            <button onClick={() => setShowDistModal(true)} className="inline-flex items-center gap-1 rounded-lg border border-border bg-white px-2.5 py-1.5 text-[11px] font-medium text-text hover:bg-surface">
+              <Plus size={12} /> 배포 이력 추가
+            </button>
+          </div>
         </div>
+        {daKeyMissing && (
+          <div className="border-b border-border bg-amber-50 px-5 py-2 text-[11px] text-amber-800">
+            🔌 외부 도메인 권위도 API 미연결 — <code className="text-[10px]">MOZSCAPE_ACCESS_ID + MOZSCAPE_SECRET_KEY</code> (Moz, 권장) 또는 <code className="text-[10px]">AHREFS_API_KEY</code> 설정 필요. 현재는 채널 휴리스틱 가중치로 fallback.
+          </div>
+        )}
         {distributions.length === 0 ? (
           <div className="p-6 text-center text-xs text-text-muted">
             등록된 배포 이력이 없습니다. 위키피디아·뉴스·매체에 Entity가 등재되면 + 버튼으로 직접 추가하세요.
@@ -229,7 +280,31 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
                       )}
                     </div>
                   </div>
-                  <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: `${sMeta.color}15`, color: sMeta.color }}>{sMeta.label}</span>
+                  <div className="shrink-0 flex items-center gap-1.5">
+                    <span
+                      className="rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
+                      style={{
+                        background: d.domain_authority != null ? '#0F766E15' : '#94A3B815',
+                        color: d.domain_authority != null ? '#0F766E' : '#94A3B8',
+                      }}
+                      title={d.domain_authority != null
+                        ? `Domain Authority ${d.domain_authority}/100 (Moz DA 또는 Ahrefs DR)`
+                        : '도메인 권위도 미조회 — DA 조회 버튼으로 Moz/Ahrefs API 호출'}
+                    >
+                      DA {d.domain_authority != null ? d.domain_authority : '—'}
+                    </span>
+                    {d.external_url && (
+                      <button
+                        onClick={() => enrichDA(d.id)}
+                        disabled={daLoading.has(d.id)}
+                        className="rounded-full border border-border bg-white px-1.5 py-0.5 text-[10px] font-medium text-text-sub hover:text-text hover:bg-surface disabled:opacity-50"
+                        title="이 도메인의 권위도(DA)를 Moz/Ahrefs API로 조회"
+                      >
+                        {daLoading.has(d.id) ? '…' : '🔍 DA 조회'}
+                      </button>
+                    )}
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: `${sMeta.color}15`, color: sMeta.color }}>{sMeta.label}</span>
+                  </div>
                 </div>
               );
             })}
@@ -242,11 +317,11 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
         <div className="border-b border-border bg-surface/40 px-5 py-3">
           <h2 className="text-sm font-bold text-text inline-flex items-center gap-1.5">
             AI 인용 이력
-            <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="진단 시 AI Probe가 응답에서 Entity 언급을 감지하면 자동 INSERT (Phase 5 예정). 현재는 수동 데이터 없음.">
-              🔬 출처: AI Probe 자동 (Phase 5)
+            <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-muted" title="진단 시 AI 응답에서 Entity 언급을 감지하면 자동 기록. 현재 자동 동기화 준비 중.">
+              🔬 출처: AI 응답 자동 (준비 중)
             </span>
           </h2>
-          <p className="mt-0.5 text-[11px] text-text-muted">5 AI 플랫폼에서 이 Entity가 어떻게 인용되는지 추적합니다. Phase 5에서 진단 시 자동 동기화 예정 — 현재는 수동 INSERT 불가.</p>
+          <p className="mt-0.5 text-[11px] text-text-muted">5 AI 플랫폼에서 이 Entity가 어떻게 인용되는지 추적합니다. 진단 시 자동 동기화는 준비 중 — 현재는 수동 기록 불가.</p>
         </div>
         {citations.length === 0 ? (
           <div className="p-6 text-center text-xs text-text-muted">아직 AI 인용이 감지되지 않았습니다.</div>

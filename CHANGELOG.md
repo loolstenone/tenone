@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-05-16 (세션 139) — DEV 페이지 실 DB 고도화: 프롬프트 관리·AI 답변 변화
+
+### 프롬프트 관리 (`/dashboard/geo/prompts`)
+- 신규 API [app/api/smarcomm/prompts/route.ts](app/api/smarcomm/prompts/route.ts) — `smarcomm_ai_probes` query 그룹화, mentionRate·platforms[]·accuracy bucket·lastSeen 산출
+- 신규 UI [app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx](app/(SmarComm)/smarcomm/dashboard/geo/prompts/page.tsx) — KPI 4 + 확장 카드 + 정렬·필터
+- DashboardSidebar `dev: true` 제거 · dashboard/layout MOCK_PATH_PREFIXES 제거
+
+### 이벤트 관리 → AI 답변 변화 (`/dashboard/events`)
+- 기존 GA 택소노미 mock 폐기 → V2.0 § 3-C AIRM 검증 데이터(`smarcomm_ai_diff_events`)로 재정의
+- 신규 API [app/api/smarcomm/ai-events/route.ts](app/api/smarcomm/ai-events/route.ts) — diff_type 6종 집계 + 일자별 timeline
+- 신규 UI [app/(SmarComm)/smarcomm/dashboard/events/page.tsx](app/(SmarComm)/smarcomm/dashboard/events/page.tsx) — 이전/이후 텍스트 diff + 빈 상태 정직 안내
+- 사이드바 라벨 "이벤트 관리" → "AI 답변 변화" + DEV 제거 · MOCK 배너 prefix 제거
+
+### 결정
+- 콘텐츠·캘린더·CRM·A/B·워크플로우 등 외부 인프라/신규 테이블 세트 필요 페이지는 세션 139 범위 외 — 차기 세션 우선순위 결정 후 진행
+
+---
+
 ## 2026-05-16 (세션 138) — Phase 5 Items 2+3: 캠페인 자산화 트리거 + AIRM 플래그 출처 추적
 
 ### Phase 5 Item 2 완료 — 캠페인 완료 시 Entity 자동 등록 SQL 트리거

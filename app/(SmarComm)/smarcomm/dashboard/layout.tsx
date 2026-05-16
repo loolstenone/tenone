@@ -10,17 +10,18 @@ import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
 
-// V2.1 § 1.10 정직 — Mock 데이터로만 작동하는 경로
-// 실제 API 연결된 페이지는 제외 (scan·geo·advisor·creative·insights·ai-tracker·airm·assets·content·archive·admin·profile·members·guide·glossary)
+// Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
+// 실제 API 연결된 페이지는 제외 (scan·advisor·creative·insights·ai-tracker·airm·assets·admin·profile·members·guide·glossary)
 const MOCK_PATH_PREFIXES = [
+  '/smarcomm/dashboard/geo/competitors',
+  '/smarcomm/dashboard/geo/brand',
+  '/smarcomm/dashboard/geo/tracking',
+  '/smarcomm/dashboard/content',
   '/smarcomm/dashboard/funnel',
   '/smarcomm/dashboard/traffic',
   '/smarcomm/dashboard/analytics',
   '/smarcomm/dashboard/cohort',
   '/smarcomm/dashboard/abtest',
-  '/smarcomm/dashboard/journey',
-  '/smarcomm/dashboard/events',
-  '/smarcomm/dashboard/reports',
   '/smarcomm/dashboard/data-reports',
   '/smarcomm/dashboard/crm',
   '/smarcomm/dashboard/campaigns',
@@ -188,7 +189,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="bg-amber-100 border-b-2 border-amber-300 px-6 py-2.5 flex items-center gap-2 text-amber-900">
             <AlertTriangle size={14} className="shrink-0" />
             <span className="text-xs">
-              <strong>🧪 Mock 데이터 페이지</strong> — 이 화면은 실측 데이터가 아닌 데모 데이터로 작동합니다. § 1.10 정직 원칙. Phase 5에서 실 API(GA4·Search Console·광고 매체 등) 연동 예정.
+              <strong>🧪 데모 데이터 화면</strong> — 이 화면은 데모 데이터로 작동합니다. 실 API(GA4·Search Console·광고 매체 등) 연동은 단계적으로 활성됩니다.
             </span>
           </div>
         )}
