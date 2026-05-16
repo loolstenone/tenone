@@ -40,6 +40,13 @@
 - 컨텍스트 자동화 액션도 DB 동기 (toggle 시 setState 내부에서 PATCH 호출 → race condition 방지)
 - 3개 실 규칙 표시(50만원 이하 자동승인 / 마감일 3일 전 이메일 / Slack 알림) + KPI(활성 2 / 전체 3 / 비활성 1) · DEV 제거
 
+#### ⑥ 고객 관리 (`/dashboard/crm`)
+- **신규 API 2**: [app/api/smarcomm/crm/people/route.ts](app/api/smarcomm/crm/people/route.ts) — `crm_people` + lifecycle/status/source 집계 · [app/api/smarcomm/crm/segments/route.ts](app/api/smarcomm/crm/segments/route.ts) — `crm_segments`
+- 페이지 전면 재작성: MOCK_LEADS 폐기 → KPI 4(총·발송 가능·세그먼트·활성) + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
+- 라이프사이클 8단계 컬러 매핑 (subscriber/lead/MQL/SQL/opportunity/customer/evangelist/churned)
+- 실 5고객(전천일/김사라/김준호/박기혁/Cheonil Jeon) + 4세그먼트(전체 고객/신규 리드/유니버스 회원/발송 가능) 표시
+- DEV 제거 · MOCK 배너 prefix 조정 (CRM 본체는 제거, 카카오/이메일/푸시 sub-route만 유지)
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.

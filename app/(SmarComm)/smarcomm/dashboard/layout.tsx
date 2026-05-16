@@ -23,7 +23,9 @@ const MOCK_PATH_PREFIXES = [
   '/smarcomm/dashboard/cohort',
   '/smarcomm/dashboard/abtest',
   '/smarcomm/dashboard/data-reports',
-  '/smarcomm/dashboard/crm',
+  '/smarcomm/dashboard/crm/kakao',
+  '/smarcomm/dashboard/crm/email',
+  '/smarcomm/dashboard/crm/push',
   '/smarcomm/dashboard/campaigns',
   '/smarcomm/dashboard/calendar',
 ];

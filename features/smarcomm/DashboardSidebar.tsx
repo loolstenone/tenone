@@ -82,7 +82,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: '④ 집행',
     items: [
       { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops', dev: true },
-      { href: '/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm', dev: true },
+      { href: '/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm' },
       { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm', dev: true },
       { href: '/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm', dev: true },
       { href: '/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm', dev: true },
