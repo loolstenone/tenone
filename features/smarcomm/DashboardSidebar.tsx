@@ -62,9 +62,9 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: '② 분석',
     items: [
       { href: '/dashboard/insights', label: 'Insights', icon: BarChart3, pack: 'core' },
-      { href: '/dashboard/funnel', label: '퍼널 분석', icon: GitBranch, pack: 'core', dev: true },
-      { href: '/dashboard/traffic', label: '트래픽 분석', icon: Globe, pack: 'core', dev: true },
-      { href: '/dashboard/cohort', label: '코호트', icon: PieChart, pack: 'experiment', dev: true },
+      { href: '/dashboard/funnel', label: '퍼널 분석', icon: GitBranch, pack: 'core' },
+      { href: '/dashboard/traffic', label: '트래픽 분석', icon: Globe, pack: 'core' },
+      { href: '/dashboard/cohort', label: '코호트', icon: PieChart, pack: 'experiment' },
       { href: '/dashboard/reports', label: '리포트', icon: FileBarChart, pack: 'core' },
     ],
   },
@@ -81,10 +81,10 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: '④ 집행',
     items: [
-      { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops', dev: true },
+      { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops' },
       { href: '/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm' },
       { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm', dev: true },
-      { href: '/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm', dev: true },
+      { href: '/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm' },
       { href: '/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm', dev: true },
     ],
   },

@@ -47,6 +47,21 @@
 - 실 5고객(전천일/김사라/김준호/박기혁/Cheonil Jeon) + 4세그먼트(전체 고객/신규 리드/유니버스 회원/발송 가능) 표시
 - DEV 제거 · MOCK 배너 prefix 조정 (CRM 본체는 제거, 카카오/이메일/푸시 sub-route만 유지)
 
+#### ⑦ Phase A 분석 그룹 (`wio_analytics_events` 803행 기반)
+- **신규 API 3**: [analytics/traffic](app/api/smarcomm/analytics/traffic/route.ts) · [analytics/funnel](app/api/smarcomm/analytics/funnel/route.ts) · [analytics/cohort](app/api/smarcomm/analytics/cohort/route.ts)
+- **트래픽 분석** (`/dashboard/traffic`): 일자별 PV/세션/사용자 + 상위 페이지 15 + 브랜드 분포 + 평균 체류·이탈률 (350 PV 실측)
+- **퍼널 분석** (`/dashboard/funnel`): session_id 단위 4단계(랜딩→탐색→참여→전환) drop-off, 단계별 전환율 (76 세션 실측)
+- **코호트** (`/dashboard/cohort`): user_id 첫 활동 주차 × 5주 잔존율 히트맵 (현재 user_id 0행 → 정직한 빈 상태)
+- 3개 페이지 모두 DEV 제거 + MOCK 배너 prefix 제거
+
+#### ⑧ Phase A 이메일 채널 (`email_sends 64` + `email_senders 4` + `newsletter_subscribers 68`)
+- **신규 API**: [crm/email](app/api/smarcomm/crm/email/route.ts) — 발송/전달/오픈/클릭/반송 KPI + 구독자 4 KPI + 발신자 카드 + 최근 30 발송
+- 페이지 재작성: 64건 실 발송 이력 + 68명 구독자 표시 · DEV 제거
+
+#### ⑨ Phase A 마케팅 캘린더 (`events` + `comm_events`)
+- **신규 API**: [calendar](app/api/smarcomm/calendar/route.ts) — 월 단위 events + comm_events 통합 조회
+- 페이지 재작성: 월 그리드 + 일 셀별 최대 2 이벤트 미리보기 + 사이드 상세 패널 · DEV 제거 (현재 5월 0행 → 빈 상태)
+
 ### 이월 — 대형 인프라 필요 페이지
 
 콘텐츠·캘린더·CRM(카카오·이메일·푸시)·A/B 테스트·트래픽·퍼널·코호트 등은 각각 별도 외부 인프라 또는 신규 테이블 세트가 필요 → 본 세션 범위 외. 차기 세션에서 우선순위 결정 후 진행.

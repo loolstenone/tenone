@@ -36,6 +36,15 @@
 - 페이지 재작성: MOCK_LEADS 폐기 → KPI 4 + 세그먼트 그리드 + 라이프사이클 필터 + 검색 + 고객 테이블 + 출처 표기
 - 실 5고객 + 4세그먼트 표시 · DEV 제거 · MOCK 배너 prefix를 CRM sub-route(카카오/이메일/푸시)로만 한정
 
+### Phase A — 5 DEV 페이지 실 DB 활성화
+- 분석 3 (`wio_analytics_events` 803행 기반)
+  - 트래픽 (`/dashboard/traffic`) + API [analytics/traffic](app/api/smarcomm/analytics/traffic/route.ts) — 일자/페이지/브랜드 집계 + 체류·이탈
+  - 퍼널 (`/dashboard/funnel`) + API [analytics/funnel](app/api/smarcomm/analytics/funnel/route.ts) — 4단계 세션 단위 drop-off
+  - 코호트 (`/dashboard/cohort`) + API [analytics/cohort](app/api/smarcomm/analytics/cohort/route.ts) — user 첫 주차 × 5주 잔존 히트맵
+- 이메일 채널 (`/dashboard/crm/email`) + API [crm/email](app/api/smarcomm/crm/email/route.ts) — 64건 발송 + 68명 구독자 + 4 발신자
+- 마케팅 캘린더 (`/dashboard/calendar`) + API [calendar](app/api/smarcomm/calendar/route.ts) — events + comm_events 월 그리드
+- 사이드바 DEV 일괄 제거 + MOCK_PATH_PREFIXES 5개 항목 제거
+
 ### 자동화 (`/dashboard/workflow/automation`)
 - 신규 API [app/api/smarcomm/workflow/automations/route.ts](app/api/smarcomm/workflow/automations/route.ts) — `workflow_automations` CRUD
 - 컨텍스트 toggle/add/update/delete DB 동기 (toggle setState 내부 PATCH 호출로 race 방지)
