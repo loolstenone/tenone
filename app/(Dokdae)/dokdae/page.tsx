@@ -6,7 +6,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2, Eye, EyeOff, Plus, Mic, Image as ImageIcon, Menu, X } from 'lucide-react';
+import { Send, Loader2, Eye, EyeOff, Plus, Mic, Image as ImageIcon, Menu, X, Search } from 'lucide-react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
@@ -24,10 +24,16 @@ interface AgentStatus {
 }
 
 interface SelectedAgent {
-  name: string;
+  name: string;          // '_group' 이면 단체방 모드
   displayName: string;
   role: string;
 }
+
+const GROUP_AGENT: SelectedAgent = {
+  name: '_group',
+  displayName: 'Universe 단체방',
+  role: '텐원 AI 팀 전체',
+};
 
 interface TrendItem {
   title: string;
@@ -43,13 +49,17 @@ interface InlineCard {
 
 interface Message {
   id: string;
-  role: 'user' | 'ai';
+  role: 'user' | 'ai' | 'router';
   text: string;
   time: string;
   cards?: InlineCard[];
   error?: boolean;
   retryText?: string;
   retryAction?: string;
+  // 단체방 모드에서 발신 에이전트 식별
+  agentName?: string;
+  agentDisplayName?: string;
+  agentLayer?: number;
 }
 
 // ── 상수 ─────────────────────────────────────────────────────────
@@ -189,27 +199,65 @@ function renderMarkdown(text: string) {
 }
 
 function formatInline(text: string): React.ReactNode {
-  // **bold** 처리
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
+  // **bold** · `code` · @멘션 — 한 번에 토큰화
+  const tokens = text.split(/(\*\*[^*]+\*\*|`[^`]+`|@\w+)/g);
+  return tokens.map((tk, i) => {
+    if (tk.startsWith('**') && tk.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-white">{tk.slice(2, -2)}</strong>;
     }
-    // `code` 인라인
-    const codeParts = part.split(/(`[^`]+`)/g);
-    return codeParts.map((cp, ci) => {
-      if (cp.startsWith('`') && cp.endsWith('`')) {
-        return <code key={`${i}-${ci}`} className="text-[13px] bg-white/10 px-1 py-0.5 rounded text-emerald-300 font-mono">{cp.slice(1, -1)}</code>;
-      }
-      return cp;
-    });
+    if (tk.startsWith('`') && tk.endsWith('`')) {
+      return <code key={i} className="text-[13px] bg-white/10 px-1 py-0.5 rounded text-emerald-300 font-mono">{tk.slice(1, -1)}</code>;
+    }
+    if (/^@\w+$/.test(tk)) {
+      return <span key={i} className="text-[#FEE500] font-medium bg-[#FEE500]/10 rounded px-1">{tk}</span>;
+    }
+    return tk;
   });
 }
 
 // ── 채팅 버블 ──────────────────────────────────────────────────────
 
+// 에이전트별 색상 (단체방에서 발신자 구분용)
+function agentAccent(layer?: number) {
+  switch (layer) {
+    case 0: return { dot: 'bg-[#FEE500]', text: 'text-[#FEE500]', bg: 'bg-[#FEE500]', ring: 'ring-[#FEE500]/40' };
+    case 1: return { dot: 'bg-emerald-400', text: 'text-emerald-300', bg: 'bg-emerald-500', ring: 'ring-emerald-400/30' };
+    case 2: return { dot: 'bg-indigo-400', text: 'text-indigo-300', bg: 'bg-indigo-500', ring: 'ring-indigo-400/30' };
+    case 3: return { dot: 'bg-purple-400', text: 'text-purple-300', bg: 'bg-purple-500', ring: 'ring-purple-400/30' };
+    default: return { dot: 'bg-slate-400', text: 'text-slate-300', bg: 'bg-slate-600', ring: 'ring-slate-400/30' };
+  }
+}
+
+// 에이전트 이니셜 (한글 1자, 영문 알파벳은 첫 글자 대문자)
+function agentInitial(name?: string, displayName?: string): string {
+  if (!displayName && !name) return '?';
+  const src = displayName ?? name ?? '';
+  // 한글이면 첫 글자 1자
+  if (/[ㄱ-힝]/.test(src[0] ?? '')) return src[0];
+  // 영문/숫자면 대문자 1~2자
+  const upper = src.match(/[A-Za-z0-9]+/)?.[0] ?? src;
+  return upper.slice(0, 2).toUpperCase();
+}
+
+// 에이전트 아바타 — 이니셜 + layer 컬러
+function AgentAvatar({ name, displayName, layer, size = 36 }: {
+  name?: string; displayName?: string; layer?: number; size?: number;
+}) {
+  const accent = agentAccent(layer);
+  return (
+    <div
+      className={`rounded-full flex items-center justify-center text-white font-bold ${accent.bg} ring-1 ${accent.ring}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
+      title={displayName ?? name}
+    >
+      <span className={layer === 0 ? 'text-neutral-900' : ''}>{agentInitial(name, displayName)}</span>
+    </div>
+  );
+}
+
 function Bubble({ msg, showAvatar, onRetry }: { msg: Message; showAvatar: boolean; onRetry?: (text: string, action?: string) => void }) {
   const isUser = msg.role === 'user';
+  const isRouter = msg.role === 'router';
 
   if (isUser) {
     return (
@@ -222,16 +270,45 @@ function Bubble({ msg, showAvatar, onRetry }: { msg: Message; showAvatar: boolea
     );
   }
 
+  // 라우터 메모 — 중앙 정렬 슬림 박스 (1001이 누구를 호출하는지)
+  if (isRouter) {
+    return (
+      <div className="flex justify-center py-1">
+        <div className="rounded-full bg-white/[0.04] border border-white/[0.08] px-3 py-1">
+          <p className="text-[12px] text-slate-400">
+            <span className="text-[#FEE500]">1001</span> · {msg.text}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const accent = agentAccent(msg.agentLayer);
+  const hasAgentInfo = !!msg.agentName || !!msg.agentDisplayName;
+
   return (
     <div className="flex items-start gap-2.5 py-0.5">
-      {/* 아바타 */}
-      <div className={`mt-0.5 h-9 w-9 rounded-full flex-shrink-0 overflow-hidden ${
-        showAvatar ? 'bg-black border border-white/10' : 'invisible'
-      }`}>
-        {showAvatar && <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>}
+      {/* 아바타 — 에이전트 정보 있으면 이니셜 아바타, 없으면 텐원 로고 (legacy 1001) */}
+      <div className={`mt-0.5 flex-shrink-0 ${showAvatar ? '' : 'invisible'}`}>
+        {showAvatar && (
+          hasAgentInfo
+            ? <AgentAvatar name={msg.agentName} displayName={msg.agentDisplayName} layer={msg.agentLayer} size={36} />
+            : (
+              <div className="h-9 w-9 rounded-full overflow-hidden bg-black border border-white/10">
+                <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>
+              </div>
+            )
+        )}
       </div>
       {/* 버블 + 인라인 카드 + 타임스탬프 */}
       <div className="flex-1 min-w-0">
+        {/* 단체방: 발신 에이전트 라벨 (showAvatar일 때만, 연속 발화는 생략) */}
+        {msg.agentDisplayName && showAvatar && (
+          <div className="flex items-center gap-1.5 mb-1 ml-1">
+            <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+            <span className={`text-[12px] font-medium ${accent.text}`}>{msg.agentDisplayName}</span>
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <div className={`max-w-[78%] rounded-2xl rounded-tl-sm px-4 py-3 ${msg.error ? 'bg-red-900/30 border border-red-500/20' : 'bg-[#222336]'}`}>
             <div className="text-[16px] leading-relaxed text-white">{renderMarkdown(msg.text)}</div>
@@ -458,13 +535,39 @@ function SideMenu({
             </div>
           </div>
 
-          {/* 에이전트 선택 */}
+          {/* 단체방 진입 */}
+          <div className="px-4 pt-4 pb-2">
+            <p className="text-[12px] text-slate-500 uppercase tracking-widest mb-3">채널</p>
+            <button
+              onClick={() => { onSelectAgent(GROUP_AGENT); onClose(); }}
+              className={`w-full flex items-center justify-between rounded-xl px-4 py-3.5 border transition-all active:scale-[0.98] text-left ${
+                selectedAgent.name === '_group'
+                  ? 'border-[#FEE500]/40 bg-[#FEE500]/[0.08]'
+                  : 'border-indigo-400/30 bg-indigo-400/[0.06] hover:border-indigo-400/50 hover:bg-indigo-400/10'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-[20px]">🌌</span>
+                <div>
+                  <p className={`text-[15px] font-semibold ${selectedAgent.name === '_group' ? 'text-[#FEE500]' : 'text-white'}`}>
+                    Universe 단체방
+                  </p>
+                  <p className="text-[12px] text-slate-400 mt-0.5">텐원 AI 팀 28명 · 1001이 자동 라우팅</p>
+                </div>
+              </div>
+              {selectedAgent.name === '_group' && (
+                <span className="text-[12px] font-semibold text-[#FEE500]">대화 중</span>
+              )}
+            </button>
+          </div>
+
+          {/* 에이전트 선택 (1:1) */}
           <div className="px-4 pt-4 pb-3">
             <button
               onClick={() => setAgentOpen(o => !o)}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <p className="text-[12px] text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">에이전트 선택</p>
+              <p className="text-[12px] text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">1:1 독대</p>
               <span className={`text-[11px] text-slate-500 transition-transform ${agentOpen ? 'rotate-180' : ''}`}>▾</span>
             </button>
             {agentOpen && (
@@ -528,11 +631,156 @@ function SideMenu({
   );
 }
 
+// ── 참여자 시트 ─────────────────────────────────────────────────
+// 단체방에서 28명 에이전트 전체를 보여주고, 클릭 시 @멘션 prepend 또는 1:1 전환
+
+function ParticipantSheet({
+  agents, selectedAgent, routerStats, onClose, onSelectAgent, onMention,
+}: {
+  agents: AgentStatus[];
+  selectedAgent: SelectedAgent;
+  routerStats: Array<{ name: string; count: number }>;
+  onClose: () => void;
+  onSelectAgent: (a: SelectedAgent) => void;
+  onMention: (name: string) => void;
+}) {
+  const layerLabel: Record<number, string> = {
+    0: 'L0 ORCHESTRATOR',
+    1: 'L1 수집·인프라',
+    2: 'L2 운영 에이전트',
+    3: 'L3 Badak 챗봇',
+  };
+  const layerRole: Record<number, string> = {
+    0: '오케스트레이터',
+    1: '수집·인프라',
+    2: '운영 에이전트',
+    3: 'Badak 챗봇',
+  };
+
+  const handle1on1 = (a: AgentStatus) => {
+    onSelectAgent({
+      name: a.name,
+      displayName: a.displayName,
+      role: layerRole[a.layer] ?? '에이전트',
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative w-96 max-w-[92vw] h-full bg-[#12132a] border-l border-white/10 flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+        style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
+          <div>
+            <p className="text-[16px] font-semibold text-white">🌌 Universe 단체방</p>
+            <p className="text-[13px] text-slate-400 mt-0.5">참여 에이전트 {agents.length}명</p>
+          </div>
+          <button onClick={onClose} className="h-9 w-9 flex items-center justify-center text-slate-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {/* 라우터 통계 — 최근 단체방 호출 Top 5 */}
+          {routerStats.length > 0 && (
+            <div className="px-4 pt-4 pb-2">
+              <p className="text-[12px] text-slate-500 uppercase tracking-widest mb-2">
+                최근 라우터가 자주 호출 (Top 5)
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {routerStats.map(({ name, count }) => {
+                  const agent = agents.find(a => a.name === name);
+                  const accent = agentAccent(agent?.layer);
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => { onMention(name); onClose(); }}
+                      className={`inline-flex items-center gap-1.5 text-[12px] rounded-full px-2.5 py-1 border ${accent.ring} bg-white/[0.04] hover:bg-white/10 transition-colors`}
+                      title={`@${name} 로 멘션`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+                      <span className="text-white">{agent?.displayName ?? name}</span>
+                      <span className="text-slate-500">×{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* layer별 에이전트 그리드 */}
+          <div className="px-4 pt-4 pb-4 space-y-5">
+            {[0, 1, 2, 3].map(layer => {
+              const group = agents.filter(a => a.layer === layer);
+              if (!group.length) return null;
+              return (
+                <div key={layer}>
+                  <p className="text-[12px] text-slate-500 mb-2 pl-0.5">{layerLabel[layer]} · {group.length}명</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {group.map(a => {
+                      const accent = agentAccent(a.layer);
+                      const isSelf = selectedAgent.name === a.name;
+                      return (
+                        <div key={a.name} className={`rounded-xl border bg-white/[0.03] p-2.5 ${isSelf ? 'border-[#FEE500]/40' : 'border-white/[0.07]'}`}>
+                          <div className="flex items-center gap-2">
+                            <AgentAvatar name={a.name} displayName={a.displayName} layer={a.layer} size={28} />
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-[13px] font-medium truncate ${a.isActive ? 'text-white' : 'text-slate-500'}`}>
+                                {a.displayName}
+                              </p>
+                              <p className={`text-[11px] truncate ${accent.text}`}>@{a.name}</p>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex gap-1.5">
+                            <button
+                              onClick={() => { onMention(a.name); onClose(); }}
+                              className="flex-1 text-[11px] rounded-md bg-[#FEE500]/10 text-[#FEE500] border border-[#FEE500]/20 hover:bg-[#FEE500]/15 py-1 active:scale-95 transition-all"
+                              title={`@${a.name} 멘션 추가`}
+                            >
+                              @멘션
+                            </button>
+                            <button
+                              onClick={() => handle1on1(a)}
+                              className="flex-1 text-[11px] rounded-md bg-white/[0.05] text-slate-300 border border-white/10 hover:bg-white/10 py-1 active:scale-95 transition-all"
+                              title="1:1 독대"
+                            >
+                              1:1
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex-shrink-0 px-4 py-3 border-t border-white/10 bg-black/20">
+          <p className="text-[11px] text-slate-500 text-center">
+            @멘션은 라우터를 우회하고 해당 에이전트만 답합니다. 1:1은 사이드메뉴 &gt; 1:1 독대와 동일.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ChatScreen() {
   const [messages, setMessages]   = useState<Message[]>([]);
   const [input, setInput]         = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [participantSheetOpen, setParticipantSheetOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [agents, setAgents] = useState<AgentStatus[]>([]);
+  const [routerStats, setRouterStats] = useState<Array<{ name: string; count: number }>>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -569,33 +817,128 @@ function ChatScreen() {
     };
   }, []);
 
-  // 이전 대화 로드
+  // 28명 에이전트 fetch (1회) — 참여자 시트·자동완성·라우터 통계에서 공유
   useEffect(() => {
+    createClient()
+      .from('agent_profiles')
+      .select('name, display_name, is_active, layer, risk_level')
+      .order('layer', { ascending: true })
+      .then(({ data }: { data: Array<{ name: string; display_name: string; is_active: boolean; layer: number; risk_level: string }> | null }) => {
+        setAgents((data ?? []).map(a => ({
+          name: a.name,
+          displayName: a.display_name,
+          layer: a.layer,
+          isActive: a.is_active,
+          riskLevel: a.risk_level,
+        })));
+      });
+  }, []);
+
+  // 라우터 통계 — 단체방 모드 진입 시 최근 100개 dokdae_routing 메시지 집계
+  useEffect(() => {
+    if (selectedAgent.name !== '_group') {
+      setRouterStats([]);
+      return;
+    }
     const sb = createClient();
     sb.auth.getUser().then(async ({ data }: { data: { user: import('@supabase/supabase-js').User | null } }) => {
       if (!data.user) return;
       const { data: rows } = await sb
         .from('agent_messages')
-        .select('from_agent, payload, created_at')
-        .eq('message_type', 'dokdae_chat')
+        .select('payload')
+        .eq('message_type', 'dokdae_routing')
         .eq('user_id', data.user.id)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (!rows?.length) { setRouterStats([]); return; }
+      const counter: Record<string, number> = {};
+      for (const r of rows as Array<{ payload: { agents?: string[] } }>) {
+        for (const name of r.payload?.agents ?? []) counter[name] = (counter[name] ?? 0) + 1;
+      }
+      const top = Object.entries(counter).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      setRouterStats(top.map(([name, count]) => ({ name, count })));
+    });
+  }, [selectedAgent.name]);
+
+  // 이전 대화 로드 — selectedAgent 변경 시 재실행 (1:1 ↔ 단체방 분리)
+  useEffect(() => {
+    setHistoryLoaded(false);
+    setMessages([]);
+    const sb = createClient();
+    const isGroup = selectedAgent.name === '_group';
+
+    sb.auth.getUser().then(async ({ data }: { data: { user: import('@supabase/supabase-js').User | null } }) => {
+      if (!data.user) { setHistoryLoaded(true); return; }
+
+      // 단체방: to_agent='group' 메시지 (라우팅+응답+사용자)
+      // 1:1: from='user'↔to=agent 또는 from=agent↔to='user' (mode가 'agent'인 것)
+      let query = sb
+        .from('agent_messages')
+        .select('from_agent, to_agent, payload, created_at, message_type')
+        .eq('user_id', data.user.id)
+        .in('message_type', ['dokdae_chat', 'dokdae_routing'])
         .order('created_at', { ascending: true })
-        .limit(60);
+        .limit(80);
+
+      if (isGroup) {
+        query = query.eq('to_agent', 'group');
+      } else {
+        query = query.or(
+          `and(from_agent.eq.user,to_agent.eq.${selectedAgent.name}),` +
+          `and(from_agent.eq.${selectedAgent.name},to_agent.eq.user)`
+        );
+      }
+
+      const { data: rows } = await query;
 
       if (rows?.length) {
-        const loaded: Message[] = rows.map((row: { from_agent: string; payload: Record<string, unknown>; created_at: string }) => ({
-          id: uid(),
-          role: row.from_agent === 'user' ? 'user' : 'ai',
-          text: (row.payload as { text?: string }).text ?? '',
-          time: new Date(row.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-          cards: row.from_agent !== 'user' ? extractCards(row.payload as Record<string, unknown>) : undefined,
-        }));
+        const loaded: Message[] = rows.map((row: {
+          from_agent: string;
+          to_agent: string;
+          payload: Record<string, unknown>;
+          created_at: string;
+          message_type: string;
+        }) => {
+          const time = new Date(row.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+          // 라우터 결정 메시지
+          if (row.message_type === 'dokdae_routing') {
+            const agents = (row.payload as { agents?: string[]; reason?: string }).agents ?? [];
+            const reason = (row.payload as { reason?: string }).reason ?? '';
+            return {
+              id: uid(),
+              role: 'router' as const,
+              text: `${reason} → ${agents.join(', ')}`,
+              time,
+            };
+          }
+          // 사용자 메시지
+          if (row.from_agent === 'user') {
+            return {
+              id: uid(),
+              role: 'user' as const,
+              text: (row.payload as { text?: string }).text ?? '',
+              time,
+            };
+          }
+          // 에이전트 응답
+          const payload = row.payload as { text?: string; displayName?: string; layer?: number };
+          return {
+            id: uid(),
+            role: 'ai' as const,
+            text: payload.text ?? '',
+            time,
+            cards: extractCards(row.payload),
+            agentName: row.from_agent,
+            agentDisplayName: payload.displayName,
+            agentLayer: payload.layer,
+          };
+        });
         setMessages(loaded);
-        setHasMore(rows.length >= 60);
+        setHasMore(rows.length >= 80);
       }
       setHistoryLoaded(true);
     });
-  }, []);
+  }, [selectedAgent.name]);
 
   useEffect(() => { if (historyLoaded) scrollDown(false); }, [historyLoaded]);
   useEffect(() => { if (!isLoading) scrollDown(); }, [messages.length, isLoading]);
@@ -609,6 +952,15 @@ function ChatScreen() {
   const send = useCallback(async (text: string, quickAction?: string) => {
     if (!text.trim() || isLoading) return;
 
+    const isGroup = selectedAgent.name === '_group';
+
+    // @멘션 파싱: @{name} 패턴이 있고 isGroup일 때만 라우터 우회
+    let mention: string | undefined;
+    if (isGroup) {
+      const m = text.match(/@(\w+)/);
+      if (m) mention = m[1].toLowerCase();
+    }
+
     setMessages(prev => [...prev, { id: uid(), role: 'user', text: text.trim(), time: timeStr() }]);
     setInput('');
     if (inputRef.current) inputRef.current.style.height = 'auto';
@@ -620,20 +972,53 @@ function ChatScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text.trim(),
-          agentName: selectedAgent.name,
+          mode: isGroup ? 'group' : 'agent',
+          ...(isGroup ? {} : { agentName: selectedAgent.name }),
+          ...(mention ? { mention } : {}),
           ...(quickAction ? { quickAction } : {}),
         }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || '서버 오류');
       const data  = json.data ?? json;
-      const cards = extractCards(data);
-      setMessages(prev => [...prev, {
-        id: uid(), role: 'ai',
-        text: data.response || '응답 없음',
-        time: timeStr(),
-        cards,
-      }]);
+
+      if (isGroup && data.mode === 'group') {
+        // 단체방: 라우터 메모 + N개 에이전트 응답을 순서대로 추가
+        const groupMsgs: Message[] = [];
+        if (data.routerNote) {
+          groupMsgs.push({
+            id: uid(),
+            role: 'router',
+            text: `${data.routerNote} → ${(data.replies ?? []).map((r: { displayName: string }) => r.displayName).join(', ')}`,
+            time: timeStr(),
+          });
+        }
+        const cards = extractCards(data);
+        (data.replies ?? []).forEach((r: { agentName: string; displayName: string; layer: number; response: string }, idx: number) => {
+          groupMsgs.push({
+            id: uid(),
+            role: 'ai',
+            text: r.response || '응답 없음',
+            time: timeStr(),
+            agentName: r.agentName,
+            agentDisplayName: r.displayName,
+            agentLayer: r.layer,
+            cards: idx === (data.replies as unknown[]).length - 1 ? cards : undefined,
+          });
+        });
+        setMessages(prev => [...prev, ...groupMsgs]);
+      } else {
+        // 1:1
+        const cards = extractCards(data);
+        setMessages(prev => [...prev, {
+          id: uid(), role: 'ai',
+          text: data.response || '응답 없음',
+          time: timeStr(),
+          cards,
+          agentName: selectedAgent.name,
+          agentDisplayName: selectedAgent.displayName,
+        }]);
+      }
     } catch (e) {
       setMessages(prev => [...prev, {
         id: uid(), role: 'ai',
@@ -676,6 +1061,21 @@ function ChatScreen() {
         />
       )}
 
+      {participantSheetOpen && (
+        <ParticipantSheet
+          agents={agents}
+          selectedAgent={selectedAgent}
+          routerStats={routerStats}
+          onClose={() => setParticipantSheetOpen(false)}
+          onSelectAgent={(agent) => { setSelectedAgent(agent); }}
+          onMention={(name) => {
+            const cur = input.trimEnd();
+            setInput(cur ? `${cur} @${name} ` : `@${name} `);
+            setTimeout(() => inputRef.current?.focus(), 50);
+          }}
+        />
+      )}
+
       {/* 헤더 */}
       <div className="flex-shrink-0 bg-[#0d0e1a] border-b border-white/10"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
@@ -690,11 +1090,53 @@ function ChatScreen() {
               <p className="text-[13px] text-slate-400 leading-none">{selectedAgent.role}</p>
             </div>
           </div>
+          {/* 단체방 전용 참여자 버튼 */}
+          {selectedAgent.name === '_group' && (
+            <button
+              onClick={() => setParticipantSheetOpen(true)}
+              className="h-9 px-2.5 flex items-center gap-1.5 rounded-full bg-indigo-400/10 border border-indigo-400/20 text-indigo-200 hover:bg-indigo-400/15 active:scale-95 transition-all"
+              title="참여자 보기"
+            >
+              <span className="text-[14px]">👥</span>
+              <span className="text-[13px] font-medium">{agents.length || '...'}</span>
+            </button>
+          )}
+          {/* 검색 버튼 */}
+          <button onClick={() => setSearchOpen(s => !s)}
+            className={`h-10 w-10 flex items-center justify-center active:scale-90 transition-all ${searchOpen ? 'text-[#FEE500]' : 'text-slate-400 hover:text-white'}`}
+            title="메시지 검색"
+          >
+            <Search size={20}/>
+          </button>
           <button onClick={() => setDrawerOpen(true)}
             className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
             <Menu size={22}/>
           </button>
         </div>
+        {/* 검색 입력 (열렸을 때만) */}
+        {searchOpen && (
+          <div className="max-w-2xl mx-auto px-4 pb-3">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="메시지 검색"
+                autoFocus
+                className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-9 pr-9 py-2 text-[14px] text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FEE500]/40"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                >
+                  <X size={14}/>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 메시지 영역 */}
@@ -753,29 +1195,60 @@ function ChatScreen() {
 
           {messages.length > 0 && <DateDivider/>}
 
-          {messages.map((msg, i) => {
-            const prev = messages[i - 1];
-            const showAvatar = msg.role === 'ai' && (!prev || prev.role === 'user');
-            return <Bubble key={msg.id} msg={msg} showAvatar={showAvatar} onRetry={(text, action) => send(text, action)}/>;
-          })}
+          {(() => {
+            const filtered = searchQuery.trim()
+              ? messages.filter(m => m.text.toLowerCase().includes(searchQuery.toLowerCase().trim()))
+              : messages;
+            if (searchQuery.trim() && filtered.length === 0) {
+              return (
+                <div className="py-8 text-center">
+                  <p className="text-[14px] text-slate-500">&ldquo;{searchQuery}&rdquo;에 해당하는 메시지가 없습니다</p>
+                </div>
+              );
+            }
+            return filtered.map((msg, i) => {
+              const prev = filtered[i - 1];
+              // 연속 같은 에이전트면 아바타 생략 (단체방), 단 role 바뀌면 표시
+              const sameAgentAsPrev = prev && prev.role === 'ai' && msg.role === 'ai' && prev.agentName === msg.agentName;
+              const showAvatar = msg.role === 'ai' && (!prev || prev.role === 'user' || prev.role === 'router' || !sameAgentAsPrev);
+              return <Bubble key={msg.id} msg={msg} showAvatar={showAvatar} onRetry={(text, action) => send(text, action)}/>;
+            });
+          })()}
 
           {isLoading && (
-            <div className="flex items-end gap-2.5 py-1">
-              <div className="h-9 w-9 rounded-full overflow-hidden bg-black border border-white/10 flex-shrink-0">
-                <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>
-              </div>
-              <div className="rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1 items-center">
-                    {[0, 150, 300].map((d, i) => (
-                      <span key={i} className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-bounce"
-                        style={{ animationDelay: `${d}ms` }}/>
-                    ))}
+            selectedAgent.name === '_group' ? (
+              <div className="flex justify-center py-2">
+                <div className="rounded-full bg-indigo-500/10 border border-indigo-400/20 px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1 items-center">
+                      {[0, 150, 300].map((d, i) => (
+                        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#FEE500] animate-bounce" style={{ animationDelay: `${d}ms` }}/>
+                      ))}
+                    </div>
+                    <span className="text-[13px] text-indigo-200">
+                      🌌 Universe 단체방 — <span className="text-[#FEE500]">1001</span>이 라우팅 후 에이전트 응답 작성 중...
+                    </span>
                   </div>
-                  <span className="text-[13px] text-slate-400">{selectedAgent.displayName}이 분석 중...</span>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-end gap-2.5 py-1">
+                <div className="h-9 w-9 rounded-full overflow-hidden bg-black border border-white/10 flex-shrink-0">
+                  <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>
+                </div>
+                <div className="rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1 items-center">
+                      {[0, 150, 300].map((d, i) => (
+                        <span key={i} className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-bounce"
+                          style={{ animationDelay: `${d}ms` }}/>
+                      ))}
+                    </div>
+                    <span className="text-[13px] text-slate-400">{selectedAgent.displayName}이 분석 중...</span>
+                  </div>
+                </div>
+              </div>
+            )
           )}
 
           <div ref={bottomRef}/>
@@ -794,6 +1267,48 @@ function ChatScreen() {
         </div>
       </div>
 
+      {/* @멘션 자동완성 — 단체방 모드 + 입력 끝에 @{query} 패턴 매칭 시 */}
+      {(() => {
+        if (selectedAgent.name !== '_group') return null;
+        const m = input.match(/@(\w*)$/);
+        if (!m) return null;
+        const query = m[1].toLowerCase();
+        const matches = agents
+          .filter(a =>
+            a.layer !== 0 && // 1001 제외
+            (a.name.toLowerCase().startsWith(query) || a.displayName.toLowerCase().includes(query))
+          )
+          .slice(0, 6);
+        if (matches.length === 0) return null;
+        return (
+          <div className="flex-shrink-0 bg-[#0d0e1a] border-t border-white/10">
+            <div className="max-w-2xl mx-auto px-3 py-2">
+              <p className="text-[11px] text-slate-500 px-1 mb-1.5">@{query || '...'} 매칭 {matches.length}명</p>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                {matches.map(a => {
+                  const accent = agentAccent(a.layer);
+                  return (
+                    <button
+                      key={a.name}
+                      onClick={() => {
+                        const replaced = input.replace(/@\w*$/, `@${a.name} `);
+                        setInput(replaced);
+                        setTimeout(() => inputRef.current?.focus(), 30);
+                      }}
+                      className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 px-2.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all"
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+                      <span className="text-[13px] text-white">{a.displayName}</span>
+                      <span className={`text-[11px] ${accent.text}`}>@{a.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 입력 바 */}
       <div
         className="flex-shrink-0 bg-[#0d0e1a] border-t border-white/10"
@@ -809,7 +1324,7 @@ function ChatScreen() {
             onChange={onInputChange}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            placeholder="메시지 입력"
+            placeholder={selectedAgent.name === '_group' ? '메시지 입력 (특정 에이전트 호출: @mindle)' : '메시지 입력'}
             rows={1}
             className="flex-1 resize-none bg-[#1c1e30] border border-white/10 rounded-2xl px-4 py-2.5 text-[16px] text-white placeholder:text-slate-500 focus:outline-none focus:border-white/20 disabled:opacity-40 leading-relaxed"
             style={{ maxHeight: '100px' }}

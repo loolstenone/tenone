@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-17 (세션 140 — 8개 브랜드 전체 QA + SmarComm 구 Header/Footer 마이그레이션)
+> 마지막 업데이트: 2026-05-17 (세션 141 — Phase 2-A 구독 인프라 시드 보강 + commerce/subscriptions 정직성 회복)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| _(현재 활성 워크트리 없음 — 이 표는 작업 시작 시 채움)_ | | | | |
+| `claude/friendly-heisenberg-94bd10` | 🔴 schema | Phase 2-A 구독 시드 보강 + UI 정직 — 완료 후 머지·정리 대기 | 100% | 오케스트레이터에서 master pull → cherry-pick 또는 fast-forward 머지 → 워크트리 remove |
 
 ### 활성 backup 브랜치 (origin)
 
@@ -21,6 +21,126 @@
 | `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
+
+---
+
+## 세션 141 핵심 성과 (2026-05-17)
+
+### 단체방 채팅 환경 고도화 2차 + API 401 친절화
+
+채팅 환경 1차(아바타·@멘션·인디케이터)에 이어 카카오톡 수준 4축 추가:
+
+1. **참여자 시트** — 헤더 "👥 N" 버튼 → 오른쪽 슬라이드 시트. 28명 layer 4그룹(L0/L1/L2/L3) 그리드, 각 항목 "@멘션 / 1:1" 2버튼. 상단에 라우터 통계 Top 5 칩 (지난 100개 `dokdae_routing` 메시지 집계)
+2. **@멘션 자동완성** — 입력 끝에 `@\w*` 패턴이면 매칭 에이전트 6명 dropdown(입력바 위 가로 스크롤). 1001은 후보 제외
+3. **메시지 검색** — 헤더 돋보기 아이콘 토글 → 검색 입력. `text.toLowerCase().includes(q)` 필터. 결과 없으면 안내
+4. **연속 발화 아바타 생략** — 같은 에이전트가 연속이면 아바타 생략 (카카오톡 패턴)
+5. **API 401 친절화** — [lib/agent/claude.ts](lib/agent/claude.ts) Anthropic 401일 때 raw JSON 대신 "키 만료 + 갱신 4단계" 안내. 429/529도 명확 메시지
+
+> **알려진 차단**: `.env.local`의 `ANTHROPIC_API_KEY` 만료 → 1:1·단체방 실 LLM 호출 401. 사용자 직접 키 갱신 필요(Supabase Edge Function 키는 별개, trend-crawl 정상 가동).
+
+### 독대 → Universe 단체방 채팅 환경 고도화
+
+MVP에 이어 채팅 환경 4축 고도화:
+
+1. **히스토리 로드 분리** — `selectedAgent.name` 변경 시 useEffect 재실행. 단체방 모드는 `to_agent='group'` 필터로 라우팅+사용자+에이전트 메시지 80건 로드. 1:1 모드는 기존 `from/to user↔agent`. 모드 전환 시 화면 적절히 비움
+2. **에이전트 아바타** — `AgentAvatar` 컴포넌트 신설. layer 4단계 컬러(L0 노랑·L1 에메랄드·L2 인디고·L3 퍼플) + 이니셜(한글 1자/영문 대문자 1~2자). 텐원 로고는 1001/legacy에만 사용
+3. **@멘션** — 입력에 `@{name}` 패턴 감지 시 라우터 우회. 매칭은 `name` 일치 또는 `display_name` 부분 일치. 1001은 항상 제외. 실패 시 일반 라우터로 폴백. 본문에서 `@\w+`는 노랑 강조 렌더
+4. **타이핑 인디케이터** — 단체방 모드에 별도 "🌌 Universe 단체방 — 1001 라우팅 + 에이전트 응답 작성 중" 배지. 1:1은 기존 텐원 로고 + 분석 중 패턴
+5. **입력 placeholder 힌트** — 단체방일 때 "@mindle" 가이드 표시
+
+### 독대 → Universe 단체방 승격 MVP
+
+DokDae CLAUDE.md 이월 작업 "다중 Agent 지원" 해소. 텐원이 1:1로만 가능했던 독대를 텐원 AI 팀 28명 단체 채널로 확장.
+
+**구현 (코드 변경)**:
+- [app/api/agent/dokdae/route.ts](app/api/agent/dokdae/route.ts) — `mode` 파라미터 추가. `mode='group'`이면 `decideRoutingHaiku()` (Haiku 라우터로 1~3명 선택) → `Promise.all`로 병렬 `invokeAgent()` → 응답 배열 반환. 1001은 라우터 역할만 (응답자에서 제외, 비용 절감)
+- [app/(Dokdae)/dokdae/page.tsx](app/(Dokdae)/dokdae/page.tsx):
+  - `GROUP_AGENT` 상수 신설 (`name:'_group'`)
+  - `Message.role`에 `'router'` 추가 (1001 결정 메모 슬림 박스)
+  - `Bubble`에 발신 에이전트 라벨·layer 컬러 도트
+  - `send()`에서 group 모드 응답 배열 처리 (라우터 메모 + N개 에이전트 메시지 시퀀스 추가)
+  - SideMenu 최상단에 "🌌 Universe 단체방" 옵션 (인디고 강조)
+- [app/(Dokdae)/CLAUDE.md](app/(Dokdae)/CLAUDE.md) — 운영 모드 2종 + 단체방 메시지 패턴 + 비용 명세
+
+**메시지 패턴** (`agent_messages` 활용, 스키마 변경 0):
+- 텐원 입력: `from='user', to='group', payload.mode='group'`
+- 라우터 결정: `from='1001', to='group', type='dokdae_routing', payload.agents=[...]`
+- 각 응답: `from='{agent}', to='group', type='dokdae_chat', payload.agentName/layer`
+
+**검증**:
+- TypeScript 0 에러
+- `/dokdae` 페이지 200 (`SiteClosedOverlay` 가림막 정상 작동, LoginScreen 빌드 정상)
+- 실 LLM E2E는 staff 로그인 필요 → 사용자 테스트 단계
+
+### Lane A — trend-crawl 27일 정지 복구
+
+[supabase/functions/trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) `source_type` NOT NULL 누락 패치 + 재배포 (v7→v8). 직후 5분 만에 collected_data 237 신규행 + mindle_trends 3 카드 생성 검증.
+
+### Lane B — 에이전트 SSOT 갱신
+
+- [docs/TenOne_Agent_State.md](docs/TenOne_Agent_State.md) 신규 — 실측 v2.5 (28 에이전트·11 Edge Function·pg_cron 4 job·미해소 6건)
+- [CLAUDE.md](CLAUDE.md) §0 OpenClaw 가동 상태 정정 + SSOT 참조
+
+### Phase 2-A 구독 인프라 시드 보강 + commerce/subscriptions 정직성 회복
+
+ROADMAP Phase 2-A "구독 테이블 구축"의 stale 표기를 실측 기반으로 정정하고, 누락 시드 4건 + UI Mock fallback 제거.
+
+#### ① Prod DB 실측 진단 (점검 결과)
+
+| 객체 | 상태 |
+|---|---|
+| `wio_subscription_plans` | ✅ 테이블 + RLS + 11행 (WIO 5 / SmarComm 4 / Mindle 2) |
+| `wio_subscriptions` | ✅ 테이블 + RLS + 활성 3건 (wio·youinone·evschool) |
+| `wio_tenants` · `auth_is_staff()` | ✅ |
+
+#### ② 무결성 위반 발견 (미해결 — 차기 세션 이월)
+
+`wio_subscriptions` 활성 구독 2건이 `plan_id IS NULL`:
+- `youinone/premium` (id 8fac448b-...)
+- `evschool/course` (id c1ae6b5c-...)
+
+원인: 해당 service의 'premium'·'course' plan이 미시드된 채 구독 row만 선행 INSERT됨. 해결 순서 — 유료 티어 가격 결정 → plan 시드 → plan_id 백필 UPDATE. 임시로 'free' plan 가리키게 만들면 결제·기능 게이트 왜곡되므로 금지.
+
+#### ③ Free 플랜 시드 4건 INSERT (Prod 적용 + SQL 파일 갱신)
+
+[sql/wio-subscription-plans.sql](sql/wio-subscription-plans.sql) 끝에 추가 + Prod에 직접 INSERT:
+
+```
+badak/free · hero/free · evschool/free · youinone/free
+price_monthly=0, max_members=1, features='[]'::jsonb
+ON CONFLICT DO NOTHING
+```
+
+`features` 빈 배열은 의도적 — 유료 티어 설계 시 함께 채움 (§ 1.10 정직 원칙: 임의 추정 금지).
+
+#### ④ commerce/subscriptions UI 정직성 회복 (§ 1.10)
+
+[app/intra/ums/commerce/subscriptions/page.tsx](app/intra/ums/commerce/subscriptions/page.tsx):
+- 제거: `mockServiceStats` (가짜 6 서비스) · `mockChurnData` (6개월 가짜 추이) · `mockCrossSell` (4 가짜 기회) · `mockSubs` (10명 가짜 구독자) · `ChurnItem`·`CrossSellItem` 타입 · 미사용 import (`AlertTriangle`·`ArrowUpRight`·`CreditCard`)
+- 변경: useState 초기값 모두 `[]`. 라이브 데이터 0건이면 가짜로 채우지 않음
+- 추가: 빈 상태 안내 3 세션 — Service Stats(활성 구독 0 안내) · 이탈률/LTV(누적 후 활성화) · 크로스셀(2 서비스 이상 누적 시 활성화) + 테이블 빈 상태
+- 추가: `serviceLabels` 매핑 (lowercase service id → 표시명) — DB 키와 UI 라벨 분리
+
+#### ⑤ ROADMAP Phase 2-A 정정
+
+기존 `[ ]` 3건 → `[x]` 5건 + 남은 `[ ]` 2건:
+- 신규 `[ ]` Badak·HeRo·EvSchool·YouInOne 유료 티어 가격·기능 정책 결정
+- 신규 `[ ]` 무결성 위반 백필 (youinone/premium·evschool/course plan_id NULL)
+
+경로 정정: `/intra/universe/subscriptions` (stale) → `/intra/ums/commerce/subscriptions` (실제)
+
+#### ⑥ 검증
+
+- TypeScript: `npx tsc --noEmit` 0 에러 (commerce/subscriptions 관련)
+- Dead reference: `Grep churnData|crossSell|ChurnItem|CrossSellItem` → 0건
+- 페이지 200 응답 + staff 게이트 정상 작동 (비로그인 시 인트라 로그인 화면 노출 확인)
+- 시각 검증은 staff 자격증명 부재로 한계 — 다음 staff 로그인 세션에서 확인 권장
+
+#### 다음 첫 액션 (차기 세션)
+
+1. youinone·evschool **유료 티어 가격 정책** 사용자 결정 → plan 시드 + plan_id 백필 (무결성 회복)
+2. Badak 유료 티어(Pro/Business) 설계 — 기능 게이트 후보 식별 (DM·고급 필터·구인 공고 등)
+3. Phase 2-B 결제 PG 선택 (토스 vs 포트원)
 
 ---
 

@@ -97,20 +97,32 @@ async function crawl(): Promise<{ sources: number; collected: number; errors: st
       const items = parseRssItems(xml);
 
       for (const item of items.slice(0, 10)) {
+        // pubDate 파싱 — 빈 값/잘못된 형식이면 null (RSS feed들 형식 제각각)
+        let publishedAt: string | null = null;
+        if (item.pubDate) {
+          const parsed = new Date(item.pubDate);
+          if (!isNaN(parsed.getTime())) publishedAt = parsed.toISOString();
+        }
+
         const { error: upsertErr } = await supabase.from('collected_data').upsert(
           {
             url: item.link,
             title: item.title,
-            content: item.description,
+            content: item.description || item.title, // NOT NULL — description 없으면 title로 폴백
             source_name: src.name,
+            source_type: src.source_type, // NOT NULL — 'rss'·'web' 등
             category: src.category,
-            published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
+            published_at: publishedAt,
             status: 'raw',
             tenant_id: 'tenone',
           },
           { onConflict: 'url' },
         );
-        if (!upsertErr) totalCollected++;
+        if (upsertErr) {
+          errors.push(`${src.name} upsert: ${upsertErr.message}`);
+        } else {
+          totalCollected++;
+        }
       }
 
       await supabase.from('mindle_sources').update({

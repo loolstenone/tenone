@@ -136,10 +136,16 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta (2026-04-20) — 커뮤니티·그룹 기능 추가, UC 보상 확대 진행 중 |
-| **개발 수준** | 대부분 완성. 기본 모임·검색·후기 기능 안정화. |
-| **이월 작업** | 없음 — 세션 58에서 모든 태스크 검증 완료 |
-| **최근 결정** | 모임 후기에 사진 첨부 지원 추가 예정, UC 브랜드별 정책 확정 |
+| **Phase** | Beta (2026-05-17 갱신) — 실DB 연동 완료, 프리미엄 멤버십 티어 설계 대기 |
+| **개발 수준** | API 44개 모두 Supabase 연결 ✅. 니즈 클라우드(`lib/badak-cloud-data.ts`)만 DB 폴백용 Mock 잔재. |
+| **이월 작업** | 1️⃣ **유료 티어 가격·기능 정책 결정** (현재 `wio_subscription_plans.badak/free` 시드만 존재, features=`[]`). 2️⃣ Pro/Business 티어 기능 게이트 후보 식별 — 후보: DM 무제한·고급 필터·구인 공고 게시·프리미엄 배지·응시자 통계. |
+| **최근 결정** | (2026-05-17 세션 141) `wio_subscription_plans`에 `badak/free` 시드 INSERT. 유료 티어는 §1.10 정직 원칙에 따라 가격·기능 정책 결정 시점까지 보류. |
+
+## 구독 인프라
+
+- 플랜 SSOT: `wio_subscription_plans` (service='badak') · 현재 free 1개만 시드, `features='[]'::jsonb`
+- 구독 행: `wio_subscriptions` (service='badak') · 현재 0건
+- 관리 UI: `/intra/ums/commerce/subscriptions` (전 브랜드 공통)
 
 ---
 

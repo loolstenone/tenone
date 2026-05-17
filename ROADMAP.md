@@ -195,9 +195,12 @@ WIO / SmarComm
 > **목표: 결제가 실제로 이루어지는 상태 (MRR 시작)**
 
 ### 2-A. 구독 테이블 구축
-- [ ] `wio_subscription_plans` 테이블 생성 + 시드 (Mindle·SmarComm·WIO·Badak 플랜)
-- [ ] `wio_subscriptions` 테이블 생성 + RLS
-- [ ] `/intra/universe/subscriptions` 관리 UI → DB 완전 연결
+- [x] `wio_subscription_plans` 테이블 생성 + RLS (Prod 적용 완료)
+- [x] `wio_subscriptions` 테이블 생성 + RLS (Prod 적용 완료)
+- [x] 시드 (WIO 5 / SmarComm 4 / Mindle 2 / Badak·HeRo·EvSchool·YouInOne free 1씩)
+- [x] `/intra/ums/commerce/subscriptions` 관리 UI ↔ wio_subscriptions 연결 (Mock fallback 제거, 빈 상태 안내)
+- [ ] Badak·HeRo·EvSchool·YouInOne **유료 티어** 가격·기능 정책 결정 → 시드 보강
+- [ ] 무결성 위반 백필: youinone/premium·evschool/course 구독의 plan_id NULL → 유료 티어 시드 후 UPDATE
 
 ### 2-B. 결제 PG 연동
 - [ ] 토스페이먼츠 또는 포트원 선택·설정

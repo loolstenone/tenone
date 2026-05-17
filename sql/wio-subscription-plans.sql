@@ -111,3 +111,22 @@ ON CONFLICT (service, plan_key) DO UPDATE SET
   price_monthly = EXCLUDED.price_monthly,
   features      = EXCLUDED.features,
   updated_at    = now();
+
+-- Badak / HeRo / EvSchool / YouInOne — Free 골격만 (유료 티어는 차기 세션에서 결정)
+-- features=[] 의도적 빈 배열. 유료 티어 설계 시 함께 채운다 (§ 1.10 정직 원칙)
+-- DO NOTHING — 기존 행 보존, 임의 덮어쓰기 금지
+INSERT INTO wio_subscription_plans (service, plan_key, display_name, price_monthly, price_yearly, max_members, is_popular, sort_order, features) VALUES
+  ('badak',    'free', 'Free', 0, 0, 1, false, 1, '[]'::jsonb),
+  ('hero',     'free', 'Free', 0, 0, 1, false, 1, '[]'::jsonb),
+  ('evschool', 'free', 'Free', 0, 0, 1, false, 1, '[]'::jsonb),
+  ('youinone', 'free', 'Free', 0, 0, 1, false, 1, '[]'::jsonb)
+ON CONFLICT (service, plan_key) DO NOTHING;
+
+-- ⚠️ 미해결 무결성 이슈 (2026-05-17 점검 시 발견)
+-- wio_subscriptions의 활성 구독 2건이 plan_id IS NULL 상태:
+--   · youinone/premium (id 8fac448b-ef7f-44d6-93a4-a68e1f55cb5d)
+--   · evschool/course  (id c1ae6b5c-ab67-4f60-aa37-ad3b4c8cb7c8)
+-- 원인: 해당 service의 'premium'·'course' plan이 미시드된 채 구독 row만 선행 INSERT됨.
+-- 해결 순서: ① 사용자가 YouInOne·EvSchool 유료 티어 결정 →
+--           ② 'premium'·'course' plan 시드 → ③ plan_id 백필 UPDATE.
+-- 임시로 'free' plan을 가리키게 만들면 결제·기능 게이트가 왜곡되므로 금지.

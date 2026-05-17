@@ -52,12 +52,15 @@ INTEL 레이어에 속하며, 외부 정보를 유니버스에 들여오는 "눈
 | 축 | 도구 | 역할 | 상시 가동 |
 |---|------|------|----------|
 | 기획 | 열시일분 (Claude Chat) | 전략, 오케스트레이션 | ❌ |
-| 실행 | **OpenClaw** (PC 상주) | 에이전트 런타임, 자율 실행, 메시징, 소셜 게시 | ✅ |
+| 실행 | **OpenClaw** (PC 상주) | 에이전트 런타임, 자율 실행, 메시징, 소셜 게시 | ⚠️ 등록만 (local_endpoint 미점검) |
 | 개발 | **Claude Code** | 코드/빌드/배포, OpenClaw 커스텀 스킬 개발 | ❌ |
 
 > **OpenClaw** = Peter Steinberger 개발 오픈소스 AI 에이전트 프레임워크 (MIT). 텐원 PC에 상주.
 > **Lobster**(YAML 워크플로우) + **ClawHub** 스킬 마켓 + 로컬 영구 메모리(`~/.openclaw/`)
 > Claude Code 산출물: `C:\Users\텐원\TenOne\skills\` (커스텀 스킬), `~/.openclaw/workflows/` (Lobster YAML)
+
+> **실측 상태 SSOT**: [docs/TenOne_Agent_State.md](docs/TenOne_Agent_State.md) (v2.5, 2026-05-17)
+> 28개 에이전트 · 11 Edge Function · pg_cron 4 job · 미해소 6건. 마스터 v2.4(`tenone-agent` 스킬)는 stale.
 
 ### 기술 스택
 

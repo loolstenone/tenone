@@ -4,6 +4,86 @@
 
 ---
 
+## 2026-05-17 (세션 141) — 독대 단체방 승격 + 트렌드 크롤러 복구 + 에이전트 SSOT
+
+### 단체방 채팅 환경 고도화 2차 + API 401 친절화
+
+- [app/(Dokdae)/dokdae/page.tsx](app/(Dokdae)/dokdae/page.tsx):
+  - `ParticipantSheet` 컴포넌트 신설 — 28명 layer 4그룹 그리드 + 라우터 Top 5 칩 + 각 에이전트 "@멘션 / 1:1" 2버튼
+  - 헤더에 "👥 N" 참여자 카운트 버튼 (단체방 모드 전용)
+  - @멘션 자동완성 dropdown — `@\w*` 매칭 시 입력바 위 가로 스크롤 칩. 1001 제외
+  - 메시지 검색 — 헤더 돋보기 아이콘 + 검색 입력 + 필터 + 결과 없음 안내
+  - 연속 발화 아바타 생략 (카카오톡 패턴)
+  - `agents` state + 라우터 통계 `routerStats` state (단체방 진입 시 100개 `dokdae_routing` 메시지 집계)
+- [lib/agent/claude.ts](lib/agent/claude.ts):
+  - Anthropic 401 → raw JSON 노출 대신 키 갱신 4단계 안내 박스
+  - 429(rate limit) / 529(overload) 명확 메시지
+- [app/(Dokdae)/CLAUDE.md](app/(Dokdae)/CLAUDE.md) — 채팅 UX 매트릭스 갱신 (참여자 시트·자동완성·검색·연속 발화·API 친절화 5건 추가)
+
+> **알려진 차단**: `.env.local` ANTHROPIC_API_KEY 401. 사용자 직접 키 갱신 필요 (Supabase Edge Function 키는 별개, trend-crawl 정상).
+
+---
+
+### 독대 → Universe 단체방 MVP + 채팅 환경 고도화
+
+- [app/api/agent/dokdae/route.ts](app/api/agent/dokdae/route.ts) — `mode='group'` 지원. Haiku 라우터(1~3명 결정) + 병렬 `invokeAgent()` 호출. 응답 배열 반환. **@멘션** 시 라우터 우회 (matching: name 또는 display_name 부분 일치, 1001 제외, 실패 시 폴백)
+- [app/(Dokdae)/dokdae/page.tsx](app/(Dokdae)/dokdae/page.tsx):
+  - `GROUP_AGENT` 상수 + 사이드메뉴 "🌌 Universe 단체방" 인디고 강조 옵션
+  - `Message.role`에 `'router'` 추가 (1001 결정 메모 슬림 박스 — 중앙 정렬)
+  - `AgentAvatar` 컴포넌트 신설 — layer 4단계 컬러(노랑/에메랄드/인디고/퍼플) + 이니셜
+  - `Bubble`이 에이전트 정보 있으면 이니셜 아바타, 없으면 텐원 로고 (legacy 1001 1:1)
+  - `send()` group 모드 응답 배열 처리 — 라우터 메모 + N개 에이전트 메시지 시퀀스
+  - 히스토리 로드 useEffect — selectedAgent 변경 시 재실행, 단체방(`to_agent='group'`)/1:1 분기, 80건
+  - 입력 텍스트에 `@\w+` 감지 → API에 `mention` 전달
+  - `formatInline`에 `@멘션` 노랑 강조 렌더 추가
+  - 타이핑 인디케이터 — 단체방 전용 배지 "🌌 Universe 단체방 — 1001 라우팅 후 응답 작성 중"
+  - 입력 placeholder — 단체방일 때 "@mindle" 가이드
+- [app/(Dokdae)/CLAUDE.md](app/(Dokdae)/CLAUDE.md) — Phase Beta · 운영 모드 2종 · @멘션 규약 · 채팅 UX 매트릭스
+
+### trend-crawl 27일 정지 복구
+
+- [supabase/functions/trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) — `source_type` NOT NULL 누락 + `content`/`publishedAt` 안전 처리. Edge Function v7→v8 재배포
+- 검증: collected_data max_id 41,538→213,014 / 5분 신규 237행 / mindle_trends 3개 신규
+
+### 에이전트 SSOT 갱신
+
+- [docs/TenOne_Agent_State.md](docs/TenOne_Agent_State.md) — **신규**. 실측 v2.5 (28 에이전트·11 Edge Function·pg_cron 4·미해소 6건)
+- [CLAUDE.md](CLAUDE.md) §0 — OpenClaw 가동 상태 "✅ 상시"→"⚠️ 등록만" 정정 + 새 SSOT 참조
+
+---
+
+## 2026-05-17 (세션 141) — Phase 2-A 구독 인프라 시드 보강 + 정직성 회복
+
+### Prod DB 시드 INSERT 4건
+
+`wio_subscription_plans` (ziotlxkdctlhiwkgmmsh):
+- `badak/free`, `hero/free`, `evschool/free`, `youinone/free` — price 0, features=`[]`, ON CONFLICT DO NOTHING
+- 유료 티어는 차기 세션에서 가격 정책 결정 후 추가 (§ 1.10 정직 원칙)
+
+### 파일 변경
+
+- [sql/wio-subscription-plans.sql](sql/wio-subscription-plans.sql) — Badak·HeRo·EvSchool·YouInOne free 시드 + 무결성 미해결 이슈 주석 추가
+- [app/intra/ums/commerce/subscriptions/page.tsx](app/intra/ums/commerce/subscriptions/page.tsx) — Mock fallback 4종(mockServiceStats·mockChurnData·mockCrossSell·mockSubs) 전부 제거, 빈 상태 안내 3 섹션 추가, `serviceLabels` 도입(lowercase id → 표시명 분리)
+- [ROADMAP.md](ROADMAP.md) — Phase 2-A: 완료 항목 5건 `[x]` 체크 + 남은 작업 2건(유료 티어 결정, 무결성 백필) 명시. stale 경로 `/intra/universe/subscriptions` → `/intra/ums/commerce/subscriptions` 정정
+- [WORK_STATUS.md](WORK_STATUS.md) — 활성 워크트리 표 채움 + 세션 141 핵심 성과 + 다음 첫 액션 3건
+
+### 발견 — 미해결 무결성 위반 (차기 세션 이월)
+
+`wio_subscriptions` 활성 구독 2건 `plan_id IS NULL`:
+- `youinone/premium` (8fac448b-ef7f-44d6-93a4-a68e1f55cb5d)
+- `evschool/course` (c1ae6b5c-ab67-4f60-aa37-ad3b4c8cb7c8)
+
+해결 순서: ① 유료 티어 결정 → ② 'premium'·'course' plan 시드 → ③ plan_id 백필 UPDATE.
+**임시로 free에 연결 금지** (결제·기능 게이트 왜곡).
+
+### 검증
+
+- `npx tsc --noEmit` 0 에러
+- `Grep churnData|crossSell|ChurnItem|CrossSellItem` → 0건
+- 페이지 200 응답 + staff 게이트 정상
+
+---
+
 ## 2026-05-17 (세션 140) — 8개 브랜드 전체 QA + SmarComm Header/Footer 마이그레이션
 
 ### QA — 8개 브랜드 Universe 컴포넌트 정합 전수 확인
