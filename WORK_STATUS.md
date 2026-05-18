@@ -12,7 +12,7 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| `claude/friendly-heisenberg-94bd10` | 🔴 schema | Phase 2-A 구독 시드 보강 + UI 정직 — 완료 후 머지·정리 대기 | 100% | 오케스트레이터에서 master pull → cherry-pick 또는 fast-forward 머지 → 워크트리 remove |
+| _(현재 활성 워크트리 없음 — 세션 141 종료 시 정리)_ | | | | |
 
 ### 활성 backup 브랜치 (origin)
 
@@ -25,6 +25,30 @@
 ---
 
 ## 세션 141 핵심 성과 (2026-05-17)
+
+### 🎯 다음 세션 첫 액션
+
+**사용자 직접 (시크릿 관련)**:
+1. **ANTHROPIC_API_KEY 갱신** — `.env.local` + Vercel env 만료 (401). `dokdae.tenone.biz` 단체방 실 LLM 응답 위해 필수. https://console.anthropic.com/settings/keys → 양쪽 갱신 → 빈 commit + push 재배포. Supabase Edge Function 키는 별개로 유효 (trend-crawl 정상).
+
+**코드 작업 (다음 세션 Claude 진행 가능)**:
+2. **Jakka 실결제 PG 연동** (Phase 2-B): 토스/포트원 결정 → `/api/jakka/checkout` + 콜백·웹훅. 1~2 세션.
+3. **MoNTZ 헤더 `/upload` 직접 진입점**: 현재 my 경유. `MoNTZHeader`에 모델·배우 권한 사용자만 보이는 "업로드" 버튼.
+4. **워크트리 정리**: 현재 8개 (CLAUDE.md §3.4 상한 4개 초과).
+5. **MoNTZ 인트라 관리 패널**: `/intra/ums/montz/contacts` · `/intra/ums/montz/applications` — 캐스팅 컨택·오디션 응시 모니터링.
+
+---
+
+### MoNTZ + Jakka 소비자 동선 UX 5축 고도화 (commit `42472ae0`)
+
+수요자 관점 마찰점 진단 후 즉시 강화:
+- **MoNTZ 홈**: hero 안내 + 3 CTA + 양방향 진입 카드 (FOR CASTING / FOR CREATOR)
+- **MoNTZ [handle]**: placeholder 팔로우·DM → "캐스팅 제안"(메인) + "공유"(navigator.share + 클립보드 폴백, 2초 피드백) 교체
+- **MoNTZ explore**: 빈 상태 컨텍스트 안내 + "전체 보기" 1클릭 리셋
+- **Jakka explore**: 빈 상태 + 모바일 전용 추천 카테고리 6개 (데스크톱 추천 패널 갭 해소)
+- **Jakka market 상세**: 가격 아래 신뢰 신호 3분할(조회·찜·수수료) + "구매 절차 3단계 + 작가 직접 발송" 정직 안내
+
+---
 
 ### MoNTZ 양방향 활성화 — 작품 업로드 + 캐스팅 컨택 + 오디션 응시
 
