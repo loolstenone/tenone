@@ -112,7 +112,11 @@ export default function MontzHome() {
                     <h1 className="text-[28px] font-black tracking-tight leading-none text-white mb-3">
                         모델 · 배우<br />포트폴리오
                     </h1>
-                    <div className="flex gap-2">
+                    <p className="text-[13px] text-white/85 leading-relaxed mb-3 max-w-md">
+                        캐스팅 디렉터·에이전시는 조건 필터로 모델을 찾고, <br className="hidden sm:block" />
+                        프로필 페이지에서 직접 캐스팅을 제안할 수 있습니다.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
                         <Link
                             href="/montz/explore"
                             className="text-[12px] font-bold text-neutral-900 bg-white px-4 py-2 hover:bg-neutral-100 transition-colors"
@@ -121,11 +125,39 @@ export default function MontzHome() {
                         </Link>
                         <Link
                             href="/montz/audition"
+                            className="text-[12px] font-bold text-neutral-900 bg-[#c8a97e] px-4 py-2 hover:bg-[#d4b88c] transition-colors"
+                        >
+                            오디션 공고
+                        </Link>
+                        <Link
+                            href="/montz/upload"
                             className="text-[12px] font-bold text-white border border-white/60 px-4 py-2 hover:bg-white/10 transition-colors"
                         >
-                            오디션 보기
+                            내 작품 올리기
                         </Link>
                     </div>
+                </div>
+            </section>
+
+            {/* 양방향 진입 안내 — 캐스팅 측 vs 크리에이터 측 */}
+            <section className="px-5 pt-6">
+                <div className="grid grid-cols-2 gap-2.5">
+                    <Link
+                        href="/montz/explore"
+                        className="group block bg-neutral-900 text-white p-4 hover:bg-neutral-800 transition-colors"
+                    >
+                        <p className="text-[10px] font-mono text-[#c8a97e] tracking-[0.2em] uppercase mb-1.5">FOR CASTING</p>
+                        <p className="text-[15px] font-black leading-snug mb-1">캐스팅 디렉터</p>
+                        <p className="text-[12px] text-white/70 leading-snug">조건으로 모델 찾기 →</p>
+                    </Link>
+                    <Link
+                        href="/montz/profile"
+                        className="group block bg-white border border-neutral-200 text-neutral-900 p-4 hover:border-neutral-900 transition-colors"
+                    >
+                        <p className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] uppercase mb-1.5">FOR CREATOR</p>
+                        <p className="text-[15px] font-black leading-snug mb-1">모델 · 배우</p>
+                        <p className="text-[12px] text-neutral-700 leading-snug">프로필 등록 후 작품 업로드 →</p>
+                    </Link>
                 </div>
             </section>
 

@@ -389,14 +389,38 @@ export default function MarketProductDetailPage() {
 
                         {/* 재고 */}
                         {product.stock !== null && !isSoldOut && (
-                            <p className="text-[12px] text-neutral-700 mb-5">
+                            <p className="text-[12px] text-neutral-700 mb-3">
                                 잔여 수량 {product.stock}개
                                 {product.is_limited && <span className="ml-1.5 text-neutral-500">(한정판)</span>}
                             </p>
                         )}
                         {product.is_limited && product.stock === null && !isSoldOut && (
-                            <p className="text-[12px] text-neutral-700 mb-5">한정판</p>
+                            <p className="text-[12px] text-neutral-700 mb-3">한정판</p>
                         )}
+
+                        {/* 신뢰 신호 박스 — 조회수·찜·안전거래 */}
+                        <div className="flex items-stretch gap-px bg-neutral-200 border-y border-neutral-200 my-4">
+                            <div className="flex-1 bg-white px-3 py-2.5 text-center">
+                                <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">조회</p>
+                                <p className="text-[14px] font-black text-neutral-900">{viewCount.toLocaleString("ko-KR")}</p>
+                            </div>
+                            <div className="flex-1 bg-white px-3 py-2.5 text-center">
+                                <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">찜</p>
+                                <p className="text-[14px] font-black text-neutral-900">{likesCount.toLocaleString("ko-KR")}</p>
+                            </div>
+                            <div className="flex-1 bg-white px-3 py-2.5 text-center">
+                                <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">수수료</p>
+                                <p className="text-[14px] font-black text-neutral-900">15<span className="text-[11px] font-bold">%</span></p>
+                            </div>
+                        </div>
+
+                        {/* 거래 안내 — 비로그인 + 첫 방문자가 봐야 하는 정직한 안내 */}
+                        <div className="bg-neutral-50 border border-neutral-200 px-3.5 py-3 mb-5 text-[11px] text-neutral-700 leading-relaxed">
+                            <p className="font-bold text-neutral-900 mb-1">구매 절차</p>
+                            ① 구매 문의 접수 → ② 작가와 1:1 협의 (배송·일정) → ③ 결제 안내
+                            <br />
+                            플랫폼 수수료 15%는 판매가에 포함. 작가가 직접 발송합니다.
+                        </div>
 
                         {/* 구매 / 입고 알림 */}
                         {isSoldOut ? (

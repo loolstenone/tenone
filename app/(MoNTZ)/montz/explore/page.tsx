@@ -208,8 +208,33 @@ export default function MontzExplorePage() {
                         <div className="w-5 h-5 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
                     </div>
                 ) : filtered.length === 0 ? (
-                    <div className="py-16 text-center text-[13px] text-neutral-500">
-                        조건에 맞는 크리에이터가 없습니다.
+                    <div className="py-16 text-center">
+                        <p className="text-[14px] text-neutral-900 font-bold mb-2">
+                            {search.trim()
+                                ? `“${search}”에 맞는 크리에이터가 없습니다`
+                                : activeFilterCount > 0
+                                    ? "조건에 맞는 크리에이터가 없습니다"
+                                    : "아직 등록된 크리에이터가 없습니다"}
+                        </p>
+                        <p className="text-[12px] text-neutral-500 mb-5 leading-relaxed">
+                            {search.trim() || activeFilterCount > 0
+                                ? "필터를 줄이거나 검색어를 다시 확인해 주세요."
+                                : "MoNTZ에 모델·배우가 등록되면 이곳에 표시됩니다."}
+                        </p>
+                        {(search.trim() || activeFilterCount > 0) && (
+                            <button
+                                onClick={() => {
+                                    setSearch("");
+                                    setTypeFilter("all");
+                                    setGenderFilter("all");
+                                    setAgeFilter("all");
+                                    setSpecialtyFilter("all");
+                                }}
+                                className="text-[12px] font-bold text-neutral-900 border border-neutral-900 px-5 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                            >
+                                전체 보기
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, ExternalLink, Send } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ExternalLink, Send, Share2, Check } from "lucide-react";
 import { getCreatorByHandle, getCreatorWorks, type MontzCreator, type MontzWork, type MontzAvailability } from "@/lib/supabase/montz";
 import { useAuth } from "@/lib/auth-context";
 import { ContactModal } from "@/features/montz/ContactModal";
@@ -33,6 +33,29 @@ export default function MontzProfilePage() {
     const [works, setWorks] = useState<MontzWork[]>([]);
     const [loading, setLoading] = useState(true);
     const [contactOpen, setContactOpen] = useState(false);
+    const [shareState, setShareState] = useState<"idle" | "copied">("idle");
+
+    const handleShare = async () => {
+        if (!creator) return;
+        const url = typeof window !== "undefined" ? window.location.href : "";
+        const shareData = {
+            title: `MoNTZ — ${creator.display_name}`,
+            text: `${creator.display_name} (@${creator.handle}) · MoNTZ 포트폴리오`,
+            url,
+        };
+        // navigator.share 가능하면 우선 사용 (모바일)
+        if (typeof navigator !== "undefined" && navigator.share) {
+            try { await navigator.share(shareData); return; } catch { /* 취소 등은 무시 */ }
+        }
+        // 폴백: 클립보드 복사
+        try {
+            await navigator.clipboard.writeText(url);
+            setShareState("copied");
+            setTimeout(() => setShareState("idle"), 2000);
+        } catch {
+            // 클립보드 실패 — 그냥 무시 (브라우저 제약)
+        }
+    };
 
     useEffect(() => {
         getCreatorByHandle(handle).then(async (c) => {
@@ -212,17 +235,25 @@ export default function MontzProfilePage() {
                     </div>
                 )}
 
-                {/* Action */}
+                {/* Action — 캐스팅 제안 (메인) + 공유 (보조) */}
                 <div className="flex gap-2 mb-5">
-                    <button className="flex-1 py-2.5 text-[13px] font-bold text-white bg-neutral-900 hover:bg-neutral-700 transition-colors">
-                        팔로우
-                    </button>
                     <button
                         onClick={() => setContactOpen(true)}
-                        className="flex-1 py-2.5 text-[13px] font-bold text-neutral-900 border border-[#c8a97e] bg-[#c8a97e]/10 hover:bg-[#c8a97e] hover:text-neutral-900 transition-colors flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 text-[13px] font-bold text-neutral-900 bg-[#c8a97e] hover:bg-[#d4b88c] transition-colors flex items-center justify-center gap-1.5"
                     >
                         <Send size={13} />
-                        캐스팅 제안
+                        캐스팅 제안 보내기
+                    </button>
+                    <button
+                        onClick={handleShare}
+                        className="px-4 py-2.5 text-[13px] font-bold text-neutral-900 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors flex items-center justify-center gap-1.5 min-w-[88px]"
+                        aria-label="프로필 공유"
+                    >
+                        {shareState === "copied" ? (
+                            <><Check size={13} /> 복사됨</>
+                        ) : (
+                            <><Share2 size={13} /> 공유</>
+                        )}
                     </button>
                 </div>
             </div>

@@ -421,8 +421,38 @@ export default function JakkaExplorePage() {
                                 )}
                             </section>
                         ) : (
-                            <div className="py-20 text-center">
-                                <p className="text-[13px] text-neutral-600">검색 결과가 없습니다</p>
+                            <div className="py-20 text-center px-5">
+                                <p className="text-[15px] font-bold text-neutral-900 mb-2">
+                                    {query.trim()
+                                        ? `“${query}”에 맞는 결과가 없습니다`
+                                        : activeCategory !== "전체"
+                                            ? `${activeCategory} 카테고리에 등록된 작가가 없습니다`
+                                            : "검색 결과가 없습니다"}
+                                </p>
+                                <p className="text-[12px] text-neutral-700 mb-5 leading-relaxed">
+                                    다른 카테고리를 둘러보거나 검색어를 다시 확인해 주세요.
+                                </p>
+                                <button
+                                    onClick={() => { setQuery(""); setActiveCategory("전체"); }}
+                                    className="text-[12px] font-bold text-neutral-900 border border-neutral-900 px-5 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                                >
+                                    전체 작가 보기
+                                </button>
+                                {/* 모바일 전용 — 데스크톱 추천 패널이 안 보이므로 추천 카테고리 노출 */}
+                                <div className="md:hidden mt-8">
+                                    <p className="text-[11px] font-mono text-neutral-500 uppercase tracking-wider mb-3">추천 카테고리</p>
+                                    <div className="flex flex-wrap gap-2 justify-center">
+                                        {categories.slice(1, 7).map((cat) => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setActiveCategory(cat.id)}
+                                                className="text-[12px] font-semibold text-neutral-700 border border-neutral-300 px-3 py-1.5 hover:border-neutral-900 hover:text-neutral-900 transition-colors"
+                                            >
+                                                {cat.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </>

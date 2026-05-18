@@ -6,6 +6,19 @@
 
 ## 2026-05-17 (세션 141) — 독대 단체방 승격 + 트렌드 크롤러 복구 + 에이전트 SSOT
 
+### MoNTZ + Jakka 소비자 동선 UX 고도화 (5축)
+
+수요자(캐스팅 디렉터·작품 구매자) 관점 마찰점 진단 후 5축 즉시 강화:
+
+**MoNTZ**:
+- [app/(MoNTZ)/montz/page.tsx](app/(MoNTZ)/montz/page.tsx) — 홈 hero에 캐스팅 디렉터용 안내 문구 + 3 CTA(탐색·오디션·작품 올리기). hero 직후 양방향 진입 카드(FOR CASTING vs FOR CREATOR)
+- [app/(MoNTZ)/montz/[handle]/page.tsx](app/(MoNTZ)/montz/[handle]/page.tsx) — placeholder "팔로우"·"DM" → "캐스팅 제안"(메인) + "공유"(navigator.share + 클립보드 폴백, 2초 "복사됨" 피드백). 비로그인도 모달 작동
+- [app/(MoNTZ)/montz/explore/page.tsx](app/(MoNTZ)/montz/explore/page.tsx) — 빈 상태에 검색·필터 컨텍스트별 안내(검색어 vs 필터) + "전체 보기" 1클릭 리셋
+
+**Jakka**:
+- [app/(Jakka)/jakka/explore/page.tsx](app/(Jakka)/jakka/explore/page.tsx) — 빈 상태 컨텍스트 안내 + "전체 작가 보기" 리셋 + 모바일 전용 추천 카테고리 6개 (데스크톱은 우측 추천 패널, 모바일은 못 봐서 추가)
+- [app/(Jakka)/jakka/market/[id]/page.tsx](app/(Jakka)/jakka/market/[id]/page.tsx) — 가격 아래 신뢰 신호 3분할 박스(조회수·찜·수수료 15%) + "구매 절차 3단계 + 작가 직접 발송" 정직 안내. 첫 방문자가 결제 전에 알아야 할 것 명확화
+
 ### MoNTZ 양방향 활성화 패키지 — 작품 업로드 + 캐스팅 컨택 + 오디션 응시
 
 **인프라 (Prod 적용)**:
