@@ -1,8 +1,21 @@
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
-import { ChevronLeft, MessageCircle, Heart } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Heart, FileText, Download, Play } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { CommentSection } from './CommentSection';
+
+interface MediaItem {
+  url: string;
+  type: 'image' | 'video' | 'file';
+  name: string;
+  size: number;
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
 
 export const revalidate = 0;
 
@@ -40,9 +53,15 @@ export default async function PostDetailPage({ params }: PageProps) {
     id: string; title: string; content: string; category: string;
     author_id: string; likes_count: number; comments_count: number;
     is_pinned: boolean; created_at: string;
+    media: MediaItem[] | null;
     mad_members: { name: string; avatar_url: string | null } | null;
     mad_clubs: { slug: string; name: string; color: string | null } | null;
   };
+
+  const media: MediaItem[] = Array.isArray(typed.media) ? typed.media : [];
+  const images = media.filter(m => m.type === 'image');
+  const videos = media.filter(m => m.type === 'video');
+  const files = media.filter(m => m.type === 'file');
 
   const currentMemberId = (member as { id: string }).id;
   const isOwner = typed.author_id === currentMemberId;
@@ -78,6 +97,53 @@ export default async function PostDetailPage({ params }: PageProps) {
         <div className="mt-8 whitespace-pre-wrap text-neutral-200 leading-relaxed">
           {typed.content}
         </div>
+
+        {/* Media gallery */}
+        {images.length > 0 && (
+          <div className={`mt-6 grid gap-2 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {images.map((img, i) => (
+              <a key={i} href={img.url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden bg-neutral-950 border border-neutral-900">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt={img.name} className="w-full object-cover max-h-[480px]" />
+              </a>
+            ))}
+          </div>
+        )}
+
+        {videos.length > 0 && (
+          <div className="mt-6 space-y-3">
+            {videos.map((vid, i) => (
+              <div key={i} className="bg-neutral-950 border border-neutral-900 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-900 text-xs text-neutral-500">
+                  <Play className="h-3 w-3 text-[#EC1D25]" />
+                  <span className="truncate">{vid.name}</span>
+                  <span className="ml-auto shrink-0">{formatBytes(vid.size)}</span>
+                </div>
+                <video src={vid.url} controls className="w-full max-h-[400px] bg-black" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {files.length > 0 && (
+          <div className="mt-6 space-y-2">
+            {files.map((f, i) => (
+              <a
+                key={i}
+                href={f.url}
+                download={f.name}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-neutral-950 border border-neutral-900 px-4 py-3 hover:border-neutral-700 transition group"
+              >
+                <FileText className="h-4 w-4 text-neutral-500 group-hover:text-white shrink-0" />
+                <span className="flex-1 text-sm text-neutral-300 truncate group-hover:text-white">{f.name}</span>
+                <span className="text-xs text-neutral-600">{formatBytes(f.size)}</span>
+                <Download className="h-4 w-4 text-neutral-600 group-hover:text-white shrink-0" />
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="mt-10 flex items-center gap-4 text-sm text-neutral-500 border-t border-neutral-900 pt-6">
           <span className="inline-flex items-center gap-1"><Heart className="h-4 w-4" /> {typed.likes_count}</span>

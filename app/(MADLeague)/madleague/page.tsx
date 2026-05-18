@@ -43,6 +43,12 @@ export default async function Page() {
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link
+              href="/madleague/apply"
+              className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-8 py-4 transition"
+            >
+              지원하기 <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
               href="/madleague/about"
               className="inline-flex items-center gap-2 border border-neutral-600 hover:border-white text-white font-bold px-8 py-4 transition"
             >
@@ -105,13 +111,14 @@ export default async function Page() {
 
       {/* ─── 프로그램 ──────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 py-32">
-        <SectionHeader eyebrow="PROGRAMS" title="6가지 실전 무대" />
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SectionHeader eyebrow="PROGRAMS" title="7가지 실전 무대" />
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProgramCard href="/madleague/programs/competition" title="경쟁 PT" desc="실제 기업 과제에 동아리가 경쟁 — MAD Crown을 향해" featured />
           <ProgramCard href="/madleague/programs/project" title="PJT" desc="기업의 실전 프로젝트를 통해 현장에서 배우는 인턴 프로그램" />
           <ProgramCard href="/madleague/programs/markethon" title="마케톤" desc="72시간의 열정 — Marketing + Hacking + Marathon" />
           <ProgramCard href="/madleague/programs/insight-touring" title="인사이트 투어링" desc="지역 사회 투어를 통한 혁신 제안" />
           <ProgramCard href="/madleague/programs/im" title="아이디어 무브먼트" desc="나의 아이디어로 문제를 해결한다." />
+          <ProgramCard href="/madleague/programs/hero" title="히어로 프로그램" desc="HeRo와 연계한 커리어 솔루션 — 취업·인턴 연결" />
           <ProgramCard href="/madleague/programs/dam" title="DAM 파티" desc="Digital Advertising Meeting — 기업-학생 네트워킹 허브." />
         </div>
       </section>

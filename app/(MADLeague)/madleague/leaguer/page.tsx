@@ -65,80 +65,74 @@ export default function LeaguerPage() {
     const filtered = leaguers.filter((l) => l.cohort === activeCohort);
 
     return (
-        <div>
+        <div className="bg-[var(--mad-black,#000)] text-white">
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
-                <div className="max-w-4xl mx-auto text-center">
-                    <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
-                        MADLeaguer
-                    </span>
-                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">매드리거</h1>
-                    <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
+            <section className="relative overflow-hidden border-b border-neutral-900">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.12),transparent_60%)]" aria-hidden />
+                <div className="relative mx-auto max-w-5xl px-6 py-24 sm:py-32">
+                    <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MAD LEAGUER</div>
+                    <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">매드리거</h1>
+                    <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
                         MADLeague와 함께 성장한 매드리거들을 소개합니다.
                     </p>
                 </div>
             </section>
 
             {/* Cohort Tabs + Members */}
-            <section className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    {/* Cohort Tabs */}
-                    <div className="flex items-center justify-center gap-2 mb-12 flex-wrap">
-                        {cohorts.map((cohort) => (
-                            <button
-                                key={cohort}
-                                onClick={() => setActiveCohort(cohort)}
-                                className={clsx(
-                                    "px-5 py-2 rounded-full text-sm font-medium transition-colors",
-                                    activeCohort === cohort
-                                        ? "bg-[#D32F2F] text-white"
-                                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                                )}
-                            >
-                                {cohort}기
-                            </button>
-                        ))}
-                    </div>
+            <section className="mx-auto max-w-7xl px-6 py-20">
+                {/* Cohort Tabs */}
+                <div className="flex items-center gap-2 mb-12 flex-wrap">
+                    {cohorts.map((cohort) => (
+                        <button
+                            key={cohort}
+                            onClick={() => setActiveCohort(cohort)}
+                            className={clsx(
+                                "px-6 py-2 text-sm font-bold tracking-wide transition",
+                                activeCohort === cohort
+                                    ? "bg-[#EC1D25] text-white"
+                                    : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                            )}
+                        >
+                            {cohort}기
+                        </button>
+                    ))}
+                </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center justify-center gap-6 mb-10 text-sm text-neutral-500">
-                        <span className="flex items-center gap-1.5">
-                            <Users className="h-4 w-4" />
-                            {filtered.length}명
-                        </span>
-                        {filtered[0]?.activityYear && (
-                            <span className="text-neutral-400">{filtered[0].activityYear}년 활동</span>
-                        )}
-                    </div>
-
-                    {/* Member Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {filtered.map((leaguer) => (
-                            <div
-                                key={`${leaguer.cohort}-${leaguer.name}`}
-                                className="p-5 bg-white border border-neutral-200 rounded-xl text-center hover:shadow-md transition-shadow"
-                            >
-                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
-                                    <span className="text-xl font-bold text-neutral-400">
-                                        {leaguer.name.charAt(0)}
-                                    </span>
-                                </div>
-                                <h3 className="font-bold text-neutral-900 mb-1">{leaguer.name}</h3>
-                                <div className="flex items-center justify-center gap-1 text-xs text-neutral-500 mb-3">
-                                    <GraduationCap className="h-3.5 w-3.5" />
-                                    <span>{leaguer.school}</span>
-                                </div>
-                                <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-[#D32F2F]/10 text-[#D32F2F]">
-                                    {leaguer.cohort}기 매드리거
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-
-                    {filtered.length === 0 && (
-                        <p className="text-center text-neutral-400 py-10">해당 기수의 매드리거 정보가 없습니다.</p>
+                {/* Stats */}
+                <div className="flex items-center gap-6 mb-10 text-sm text-neutral-500">
+                    <span className="flex items-center gap-1.5">
+                        <Users className="h-4 w-4" />
+                        {filtered.length}명
+                    </span>
+                    {filtered[0]?.activityYear && (
+                        <span>{filtered[0].activityYear}년 활동</span>
                     )}
                 </div>
+
+                {/* Member Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {filtered.map((leaguer) => (
+                        <div
+                            key={`${leaguer.cohort}-${leaguer.name}`}
+                            className="bg-neutral-950 border border-neutral-900 p-6 text-center"
+                        >
+                            <div className="w-12 h-12 mx-auto mb-4 bg-neutral-800 flex items-center justify-center">
+                                <span className="text-lg font-black text-[#EC1D25]">
+                                    {leaguer.name.charAt(0)}
+                                </span>
+                            </div>
+                            <div className="font-black text-white text-sm mb-1">{leaguer.name}</div>
+                            <div className="flex items-center justify-center gap-1 text-xs text-neutral-500">
+                                <GraduationCap className="h-3 w-3" />
+                                <span>{leaguer.school}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {filtered.length === 0 && (
+                    <p className="text-center text-neutral-600 py-16">해당 기수의 매드리거 정보가 없습니다.</p>
+                )}
             </section>
         </div>
     );

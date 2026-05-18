@@ -1,4 +1,5 @@
-import { Clock, Zap, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Clock, Zap, Users, ArrowRight } from 'lucide-react';
 
 export const metadata = { title: '마케톤', description: 'Marketing + Hacking + Marathon — 72시간의 열정' };
 
@@ -33,6 +34,19 @@ export default function MarkethonPage() {
               <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{c.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="bg-[#FFC000]">
+        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <div className="text-sm font-bold tracking-widest text-black/60 mb-3">APPLY</div>
+            <div className="text-3xl sm:text-4xl font-black text-black">72시간, 함께 버텨보자</div>
+            <p className="mt-3 text-black/70">매드리거만 참가할 수 있는 시그니처 프로그램.</p>
+          </div>
+          <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
+            지원하기 <ArrowRight className="h-5 w-5" />
+          </Link>
         </div>
       </section>
     </div>

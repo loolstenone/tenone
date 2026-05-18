@@ -42,7 +42,8 @@ export async function POST(req: Request) {
   const { data: member } = await sb.from('mad_members').select('id, club_id').eq('user_id', user.id).maybeSingle();
   if (!member) return NextResponse.json({ error: 'NOT_A_MEMBER' }, { status: 403 });
 
-  let body: { category?: string; title?: string; content?: string; clubId?: string; clubSlug?: string };
+  interface MediaItem { url: string; type: 'image' | 'video' | 'file'; name: string; size: number; }
+  let body: { category?: string; title?: string; content?: string; clubId?: string; clubSlug?: string; media?: MediaItem[] };
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }); }
   if (!body.title || !body.content) return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
   if (body.category && !['free', 'question', 'share', 'insight', 'pinboard'].includes(body.category)) {
@@ -55,6 +56,8 @@ export async function POST(req: Request) {
     clubId = c?.id ?? null;
   }
 
+  const media = Array.isArray(body.media) ? body.media.slice(0, 5) : [];
+
   const { data, error } = await sb
     .from('mad_posts')
     .insert({
@@ -63,6 +66,7 @@ export async function POST(req: Request) {
       category: body.category ?? 'free',
       title: body.title.trim().slice(0, 200),
       content: body.content.trim().slice(0, 10000),
+      media,
     })
     .select()
     .single();

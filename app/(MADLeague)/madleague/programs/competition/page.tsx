@@ -81,7 +81,7 @@ export default async function CompetitionPage() {
           {STEPS.map((s, i) => (
             <div key={s.title} className="bg-neutral-950 border border-neutral-900 p-10">
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-10 w-10 rounded-full bg-[#EC1D25] flex items-center justify-center text-sm font-black shrink-0">
+                <div className="h-10 w-10 bg-[#EC1D25] flex items-center justify-center text-sm font-black shrink-0">
                   {i + 1}
                 </div>
                 <s.icon className="h-6 w-6 text-neutral-500" />
@@ -116,7 +116,7 @@ export default async function CompetitionPage() {
                         alt={item.client}
                         width={200}
                         height={80}
-                        className="object-contain object-left max-h-16 w-auto rounded-xl"
+                        className="object-contain object-left max-h-16 w-auto"
                       />
                     </div>
                     <p className="mt-6 text-lg text-neutral-400 leading-relaxed">

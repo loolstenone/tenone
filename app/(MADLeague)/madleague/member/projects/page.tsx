@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
   const s = map[status] ?? { label: status, color: 'rgba(255,255,255,0.08)' };
   return (
     <span
-      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+      className="text-[10px] font-bold px-2 py-0.5"
       style={{ background: s.color, color: status === 'ongoing' ? '#EC1D25' : 'rgba(255,255,255,0.5)' }}
     >
       {s.label}
@@ -207,7 +207,7 @@ export default function ProjectsPage() {
                         <div className="flex items-center gap-2 mb-2">
                           {comp && <StatusBadge status={comp.status} />}
                           {team.myRole === 'leader' && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EC1D25]/15 text-[#EC1D25]">
+                            <span className="text-[10px] font-bold px-2 py-0.5 bg-[#EC1D25]/15 text-[#EC1D25]">
                               팀장
                             </span>
                           )}
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
                         <div className="flex items-center gap-2 text-sm">
                           <FileText className="h-4 w-4 text-neutral-500" />
                           <span className="font-medium">{sub.title}</span>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          <span className={`text-[10px] px-1.5 py-0.5 ${
                             sub.status === 'submitted' ? 'bg-green-950/40 text-green-400' : 'bg-neutral-900 text-neutral-500'
                           }`}>
                             {sub.status === 'submitted' ? '제출완료' : '초안'}

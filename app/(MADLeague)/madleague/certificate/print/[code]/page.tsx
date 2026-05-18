@@ -69,7 +69,7 @@ export default async function PrintCertPage({ params }: PageProps) {
           {/* Header */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <span className="inline-block h-4 w-4 rounded-full bg-[#EC1D25]" />
+              <span className="inline-block h-4 w-4 bg-[#EC1D25]" />
               <span className="text-2xl font-extrabold tracking-tight">MAD League</span>
             </div>
             <div className="text-xs font-bold tracking-[0.4em] text-neutral-500">

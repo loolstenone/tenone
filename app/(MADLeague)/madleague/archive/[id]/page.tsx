@@ -36,7 +36,7 @@ export default async function ArchiveDetailPage({ params }: PageProps) {
   const comp = compRes.data as { slug: string; title: string; client_name: string | null; year: number } | null;
 
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
+    <div className="bg-[var(--mad-black,#000)] text-white min-h-screen">
       <div className="mx-auto max-w-5xl px-6 pt-8">
         <Link href="/madleague/archive" className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition">
           <ChevronLeft className="h-4 w-4" /> 아카이브

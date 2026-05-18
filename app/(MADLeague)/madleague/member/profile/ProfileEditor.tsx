@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { CheckCircle2, X, Plus } from 'lucide-react';
 
+const inputCls = 'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
+
 interface Initial {
   id: string; name: string; email: string | null; phone: string | null;
   university: string | null; major: string | null; year_in_school: number | null;
@@ -74,15 +76,15 @@ export function ProfileEditor({ initial }: { initial: Initial }) {
       </div>
 
       <Field label="프로필 사진 URL">
-        <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} type="url" placeholder="https://" className="input" />
+        <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} type="url" placeholder="https://" className={inputCls} />
       </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="연락처">
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className="input" />
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className={inputCls} />
         </Field>
         <Field label="학년">
-          <select value={yearInSchool ?? ''} onChange={(e) => setYearInSchool(e.target.value ? Number(e.target.value) : null)} className="input">
+          <select value={yearInSchool ?? ''} onChange={(e) => setYearInSchool(e.target.value ? Number(e.target.value) : null)} className={inputCls}>
             <option value="">선택 안 함</option>
             {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}학년{n === 5 ? ' 이상' : ''}</option>)}
           </select>
@@ -91,15 +93,15 @@ export function ProfileEditor({ initial }: { initial: Initial }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="학교">
-          <input value={university} onChange={(e) => setUniversity(e.target.value)} className="input" />
+          <input value={university} onChange={(e) => setUniversity(e.target.value)} className={inputCls} />
         </Field>
         <Field label="전공">
-          <input value={major} onChange={(e) => setMajor(e.target.value)} className="input" />
+          <input value={major} onChange={(e) => setMajor(e.target.value)} className={inputCls} />
         </Field>
       </div>
 
       <Field label="한 줄 소개 / 바이오">
-        <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={500} placeholder="본인을 한 줄로 소개해주세요" className="input resize-none" />
+        <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={500} placeholder="본인을 한 줄로 소개해주세요" className={`${inputCls} resize-none`} />
         <div className="mt-1 text-xs text-neutral-500 text-right">{bio.length} / 500</div>
       </Field>
 
@@ -121,7 +123,7 @@ export function ProfileEditor({ initial }: { initial: Initial }) {
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
             placeholder="예: 브랜딩, 크리에이티브, 퍼포먼스 마케팅"
             maxLength={30}
-            className="input flex-1"
+            className={`${inputCls} flex-1`}
           />
           <button type="button" onClick={addSkill} className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-white px-4 inline-flex items-center">
             <Plus className="h-4 w-4" />
@@ -155,18 +157,7 @@ export function ProfileEditor({ initial }: { initial: Initial }) {
         {submitting ? '저장 중...' : '저장'}
       </button>
 
-      <style>{`
-        .input {
-          width: 100%;
-          background: #000;
-          border: 1px solid #262626;
-          padding: 10px 14px;
-          color: #fff;
-          outline: none;
-          transition: border-color 0.15s;
-        }
-        .input:focus { border-color: #EC1D25; }
-      `}</style>
+
     </form>
   );
 }

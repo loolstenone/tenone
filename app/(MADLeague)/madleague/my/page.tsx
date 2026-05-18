@@ -119,25 +119,25 @@ export default function MadLeagueMyPage() {
                     {madStatus === 'active' && madInfo && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
                             {madInfo.club_name && (
-                                <div className="bg-neutral-800/50 rounded-lg px-3 py-2">
+                                <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">소속 동아리</p>
                                     <p className="text-sm font-semibold">{madInfo.club_name}</p>
                                 </div>
                             )}
                             {madInfo.cohort && (
-                                <div className="bg-neutral-800/50 rounded-lg px-3 py-2">
+                                <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">기수</p>
                                     <p className="text-sm font-semibold">{madInfo.cohort}기</p>
                                 </div>
                             )}
                             {madInfo.university && (
-                                <div className="bg-neutral-800/50 rounded-lg px-3 py-2">
+                                <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">대학교</p>
                                     <p className="text-sm font-semibold">{madInfo.university}</p>
                                 </div>
                             )}
                             {madInfo.activity_years && madInfo.activity_years.length > 0 && (
-                                <div className="bg-neutral-800/50 rounded-lg px-3 py-2">
+                                <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">활동연도</p>
                                     <p className="text-sm font-semibold">{madInfo.activity_years.join(', ')}</p>
                                 </div>

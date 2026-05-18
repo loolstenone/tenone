@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
 const INTEREST_OPTIONS = ['마케팅', '광고 기획', '크리에이티브', '브랜딩', '디지털·퍼포먼스', '데이터·그로스', 'PR·커뮤니케이션', '기타'];
+const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#FFC000]';
 
 export function HeroForm() {
   const [submitting, setSubmitting] = useState(false);
@@ -63,14 +64,14 @@ export function HeroForm() {
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="이름" required>
-          <input name="name" required className="input" />
+          <input name="name" required className={inputCls} />
         </Field>
         <Field label="이메일" required>
-          <input name="email" type="email" required className="input" />
+          <input name="email" type="email" required className={inputCls} />
         </Field>
       </div>
       <Field label="연락처">
-        <input name="phone" placeholder="010-0000-0000" className="input" />
+        <input name="phone" placeholder="010-0000-0000" className={inputCls} />
       </Field>
 
       <Field label="관심 분야 (복수 선택)">
@@ -93,13 +94,13 @@ export function HeroForm() {
       </Field>
 
       <Field label="이력서 URL">
-        <input name="resumeUrl" type="url" placeholder="https://" className="input" />
+        <input name="resumeUrl" type="url" placeholder="https://" className={inputCls} />
       </Field>
       <Field label="포트폴리오 URL">
-        <input name="portfolioUrl" type="url" placeholder="https://" className="input" />
+        <input name="portfolioUrl" type="url" placeholder="https://" className={inputCls} />
       </Field>
       <Field label="하고 싶은 말">
-        <textarea name="message" rows={4} className="input resize-none" placeholder="커리어 고민, 희망 업계, 특이사항 등." />
+        <textarea name="message" rows={4} className={`${inputCls} resize-none`} placeholder="커리어 고민, 희망 업계, 특이사항 등." />
       </Field>
 
       {error && (
@@ -116,18 +117,6 @@ export function HeroForm() {
         {submitting ? '제출 중...' : 'HeRo 신청하기'}
       </button>
 
-      <style>{`
-        .input {
-          width: 100%;
-          background: #000;
-          border: 1px solid #262626;
-          padding: 12px 16px;
-          color: #fff;
-          outline: none;
-          transition: border-color 0.15s;
-        }
-        .input:focus { border-color: #FFC000; }
-      `}</style>
     </form>
   );
 }

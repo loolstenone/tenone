@@ -54,7 +54,7 @@ function CompStatusBadge({ status }: { status: Competition['status'] }) {
     cancelled: { label: '취소', cls: 'bg-white/5 text-white/30' },
   };
   const s = map[status];
-  return <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${s.cls}`}>{s.label}</span>;
+  return <span className={`text-[11px] font-bold px-2.5 py-1 ${s.cls}`}>{s.label}</span>;
 }
 
 function SubmissionStatusIcon({ status }: { status: 'draft' | 'submitted' | 'withdrawn' }) {
@@ -95,7 +95,7 @@ function TeamPanel({ team }: { team: Team }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EC1D25]/15 text-[#EC1D25]">
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-[#EC1D25]/15 text-[#EC1D25]">
               {team.myRole === 'leader' ? '내 팀 · 팀장' : '내 팀 · 팀원'}
             </span>
           </div>
