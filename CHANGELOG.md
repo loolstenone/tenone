@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-05-19 (세션 142) — MADLeague 전체 디자인 QA
+
+### MADLeague rounded 제거 + inputCls 통일 (26개 파일)
+
+- `rounded-*` 위반 전량 제거: `my/page.tsx`, `projects/page.tsx`(StatusBadge+TeamCard), `pt/page.tsx`(CompStatusBadge+TeamPanel), `certificate/print/[code]/page.tsx` 등
+- `<style>` 블록 → `inputCls` 상수로 교체: `apply/ApplyForm.tsx`, `hero/HeroForm.tsx`, `madzine/write/ArticleEditor.tsx`, `member/profile/ProfileEditor.tsx`, `clubs/[slug]/manage/ManagePanel.tsx` 등
+- 신규 추가: `programs/hero/page.tsx`, `api/madleague/upload/route.ts`
+- 허용 예외 확정: `h-3` 이하 컬러 도트 `rounded-full` / print CSS `<style dangerouslySetInnerHTML>`
+- HeRo 프로그램: `focus:border-[#FFC000]` (금색 브랜딩, 의도적)
+
+---
+
 ## 2026-05-17 (세션 141) — 독대 단체방 승격 + 트렌드 크롤러 복구 + 에이전트 SSOT
 
 ### MoNTZ + Jakka 소비자 동선 UX 고도화 (5축)

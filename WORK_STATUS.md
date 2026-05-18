@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-17 (세션 141 — Phase 2-A 구독 인프라 시드 보강 + commerce/subscriptions 정직성 회복)
+> 마지막 업데이트: 2026-05-19 (세션 142 — MADLeague 전체 디자인 QA 완료)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| _(현재 활성 워크트리 없음 — 세션 141 종료 시 정리)_ | | | | |
+| _(현재 활성 워크트리 없음)_ | | | | |
 
 ### 활성 backup 브랜치 (origin)
 
@@ -24,7 +24,16 @@
 
 ---
 
-## 세션 141 핵심 성과 (2026-05-17)
+## 세션 142 핵심 성과 (2026-05-19)
+
+### ✅ MADLeague 전체 디자인 QA 완료
+
+`app/(MADLeague)/**/*.tsx` 전수 검토:
+- `rounded-*` 위반 전량 제거 (my, projects, pt, certificate/print 등)
+- `<style>` 블록 → `inputCls` Tailwind 상수 교체 (apply, hero, madzine/write 등)
+- `programs/hero/page.tsx` 신규 추가
+- `api/madleague/upload/route.ts` 신규 추가
+- 예외 허용: `h-3` 이하 컬러 도트 `rounded-full` / print CSS `<style dangerouslySetInnerHTML>`
 
 ### 🎯 다음 세션 첫 액션
 
