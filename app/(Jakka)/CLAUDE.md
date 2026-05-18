@@ -310,10 +310,25 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta (2026-04-21) — 마켓 디테일 8기능 + 입점 승인제 + 판매자 센터 완성 |
-| **개발 수준** | 포트폴리오·탐색·업로드 + 마켓 전체 플로우(목록→상세→신청→승인→등록→판매→정산) 완성 |
-| **이월 작업** | 입점 승인/반려 시 이메일 알림, 정산 리포트 자동 생성, 구매 실결제 통합 |
-| **최근 결정** | NFT 카테고리 완전 제거 (실체 없이 메타데이터만 있는 상태라 제거) / 플랫폼 수수료 15% 기본 / 주문 MVP = 구매 문의 접수 (실결제 후속) / 품절 시 입고 알림 신청 |
+| **Phase** | Beta (2026-05-17 갱신) — 마켓 디테일 8기능 + 입점 승인제 + 판매자 센터 + **자동 이메일 + 정산 리포트** 완성. 활성 데이터 0건 (실 거래 시작 전) |
+| **개발 수준** | 포트폴리오·탐색·업로드 + 마켓 전체 플로우(목록→상세→신청→승인→등록→판매→정산) **코드 완성**. 잔여 = 실결제 PG 연동 |
+| **이월 작업** | (1) **구매 실결제 PG 연동** (토스/포트원) — 진짜 유일 미완. 기타 이메일·정산은 코드 완성 |
+| **최근 결정** | NFT 카테고리 완전 제거 / 플랫폼 수수료 15% 기본 / 주문 MVP = 구매 문의 접수 (실결제 후속) / 품절 시 입고 알림 신청 / 정산 status 전환 시 작가 이메일 알림 (2026-05-17 추가) |
+
+### 자동 이메일 (Resend, 2026-05-17 확인·보강)
+
+| 트리거 | 발신 | 구현 |
+|---|---|---|
+| 입점 승인 / 반려 | `Jakka <noreply@tenone.biz>` | [app/api/intra/jakka/sellers/route.ts:139-156](app/api/intra/jakka/sellers/route.ts) — `POST` action에서 자동 발송 |
+| 정산 확정 / 지급 완료 | `Jakka <noreply@tenone.biz>` | [app/api/intra/jakka/settlements/route.ts](app/api/intra/jakka/settlements/route.ts) `PATCH` — status 'confirmed'·'paid' 전환 시 자동 발송 (2026-05-17 추가) |
+
+### 정산 자동 생성 (확인됨)
+
+- `/api/intra/jakka/settlements` `POST { month }` — 해당 월 `completed` 주문 일괄 집계
+- 작가별 group + 수수료(`seller_commission_rate` 기본 15%) 자동 계산
+- `jakka_seller_applications` 계좌 정보 자동 병합
+- 멱등 — `ON CONFLICT (creator_id, month)`
+- 인트라 UI [/intra/ums/jakka/settlements](app/intra/ums/jakka/settlements/page.tsx) 에서 월별 일괄 생성 + status 전환
 
 ### Phase A 마켓 디테일 (2026-04-20~21)
 

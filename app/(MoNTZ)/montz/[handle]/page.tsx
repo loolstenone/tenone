@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, ExternalLink } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ExternalLink, Send } from "lucide-react";
 import { getCreatorByHandle, getCreatorWorks, type MontzCreator, type MontzWork, type MontzAvailability } from "@/lib/supabase/montz";
 import { useAuth } from "@/lib/auth-context";
+import { ContactModal } from "@/features/montz/ContactModal";
 
 const AVAIL_LABEL: Record<MontzAvailability, string> = {
     active: "활동중",
@@ -31,6 +32,7 @@ export default function MontzProfilePage() {
     const [creator, setCreator] = useState<MontzCreator | null>(null);
     const [works, setWorks] = useState<MontzWork[]>([]);
     const [loading, setLoading] = useState(true);
+    const [contactOpen, setContactOpen] = useState(false);
 
     useEffect(() => {
         getCreatorByHandle(handle).then(async (c) => {
@@ -215,11 +217,23 @@ export default function MontzProfilePage() {
                     <button className="flex-1 py-2.5 text-[13px] font-bold text-white bg-neutral-900 hover:bg-neutral-700 transition-colors">
                         팔로우
                     </button>
-                    <button className="flex-1 py-2.5 text-[13px] font-bold text-neutral-900 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors">
-                        DM 보내기
+                    <button
+                        onClick={() => setContactOpen(true)}
+                        className="flex-1 py-2.5 text-[13px] font-bold text-neutral-900 border border-[#c8a97e] bg-[#c8a97e]/10 hover:bg-[#c8a97e] hover:text-neutral-900 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                        <Send size={13} />
+                        캐스팅 제안
                     </button>
                 </div>
             </div>
+
+            {/* 캐스팅 컨택 모달 */}
+            <ContactModal
+                isOpen={contactOpen}
+                onClose={() => setContactOpen(false)}
+                targetCreatorId={creator.id}
+                targetDisplayName={creator.display_name}
+            />
 
             {/* Portfolio Grid */}
             <div className="border-t border-neutral-200">

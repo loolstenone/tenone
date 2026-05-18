@@ -157,9 +157,48 @@ montz_auditions  -- 오디션 공고 (company, role, type, deadline, pay)
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Alpha (2026-04-20) — 핵심 5페이지 완성, DB 미연결 (목 데이터) |
-| **완료** | layout 교체, 홈·탐색·프로필·오디션·업로드 페이지 구조 |
-| **이월 작업** | DB 테이블 생성 + 실 데이터 연결, `/montz/upload` 페이지, 팔로우/연락 기능 |
+| **Phase** | **Beta** (2026-05-17 양방향 완성) — 모델·배우 작품 업로드 + 캐스팅 디렉터 컨택 + 오디션 응시 흐름 모두 가동 |
+| **완료** | 페이지 8개(홈·탐색·프로필·오디션·my·about·[handle]·**upload**) + 6 DB 테이블 + 3 신규 흐름 |
+| **이월 작업** | (1) 팔로우 기능 (현재 placeholder), (2) 헤더 네비에 upload 직접 진입점, (3) 인트라 응시·컨택 관리 패널 |
+
+### 신규 흐름 3건 (2026-05-17 양방향 활성화)
+
+#### 1. 모델·배우 작품 업로드
+- 페이지: [app/(MoNTZ)/montz/upload/page.tsx](app/(MoNTZ)/montz/upload/page.tsx) — 폼(제목·카테고리·설명·태그·이미지 5장) + Storage 병렬 업로드 + montz_works INSERT
+- Storage 버킷 `montz-works` (public, 10MB, jpeg/png/webp) — 사용자 폴더 분리 (`{userId}/...`)
+- RLS: 본인 폴더만 INSERT/UPDATE/DELETE, public read
+- 라이브러리: `uploadWorkImage` · `createMyWork` · `getMyWorks` · `deleteMyWork` ([lib/supabase/montz.ts](../../lib/supabase/montz.ts))
+
+#### 2. 캐스팅 디렉터 → 모델·배우 컨택
+- DB: `montz_contact_requests` (target_creator_id, sender_name/email/company/role_title, message, status 4단계)
+- API: [app/api/montz/contact/route.ts](app/api/montz/contact/route.ts) — RLS 우회 INSERT + Resend 이메일 발송 (모델 user_id → auth.users.email)
+- UI: [features/montz/ContactModal.tsx](../../features/montz/ContactModal.tsx) — 비로그인도 사용 가능 (이메일 필수). 로그인 사용자는 sender_user_id 자동 첨부
+- 진입점: [app/(MoNTZ)/montz/[handle]/page.tsx](app/(MoNTZ)/montz/[handle]/page.tsx) "DM 보내기" → "캐스팅 제안" 버튼 (#c8a97e 강조)
+
+#### 3. 모델·배우 → 오디션 응시
+- DB: `montz_audition_applications` (audition_id × creator_id UNIQUE, message, applicant_email, status 5단계)
+- API: [app/api/montz/applications/route.ts](app/api/montz/applications/route.ts) — Bearer 인증 + INSERT + 캐스팅 디렉터(`audition.contact_email`)에게 Resend 이메일 발송
+- UI: [features/montz/AuditionApplyModal.tsx](../../features/montz/AuditionApplyModal.tsx) — 비로그인은 안내 후 차단, 메시지+이메일 입력
+- 진입점: [app/(MoNTZ)/montz/audition/page.tsx](app/(MoNTZ)/montz/audition/page.tsx) DetailView 액션 영역 최상단 "이 공고에 응시하기" (#c8a97e)
+
+### `/montz/my` 마이페이지 — 3 신규 탭
+
+| 탭 | 소스 | 동작 |
+|---|---|---|
+| **내 작품** | `getMyWorks` | 그리드 + 호버 시 삭제. "새 작품 업로드" CTA |
+| **받은 제안** | `getMyReceivedContacts` | 카드 + 수락/거절/확인만 + 답장 mailto. 신규(pending) 카운트 배지 강조 |
+| **신청 오디션** | `getMyApplications` | 카드 + 상태 5단계(pending/seen/shortlisted/rejected/cast) |
+
+### 실 데이터 현황 (Prod, 2026-05-17 실측)
+
+| 테이블 | 행 수 | 컬럼 수 |
+|---|---|---|
+| `montz_creators` | 8 | 32 |
+| `montz_works` | 6 | 11 |
+| `montz_auditions` | 6 | 14 |
+| `montz_verification_requests` | 0 | 13 |
+| `montz_contact_requests` | 0 | 11 (신규) |
+| `montz_audition_applications` | 0 | 9 (신규) |
 
 ---
 

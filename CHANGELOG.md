@@ -6,6 +6,49 @@
 
 ## 2026-05-17 (세션 141) — 독대 단체방 승격 + 트렌드 크롤러 복구 + 에이전트 SSOT
 
+### MoNTZ 양방향 활성화 패키지 — 작품 업로드 + 캐스팅 컨택 + 오디션 응시
+
+**인프라 (Prod 적용)**:
+- Storage 버킷 `montz-works` (public, 10MB, jpeg/png/webp) + RLS (사용자 폴더 분리)
+- `montz_contact_requests` 테이블 + 3 인덱스 + RLS 3 정책
+- `montz_audition_applications` 테이블 + 3 인덱스 + UNIQUE(audition_id, creator_id) + RLS 2 정책
+
+**라이브러리** ([lib/supabase/montz.ts](lib/supabase/montz.ts)):
+- 작품: `uploadWorkImage`·`createMyWork`·`getMyWorks`·`deleteMyWork`
+- 컨택: `sendContactRequest`·`getMyReceivedContacts`·`updateContactStatus`
+- 응시: `applyAudition`·`getMyApplications`
+- 타입: `MontzContactRequest`·`MontzApplication`·`CreateWorkInput`·`SendContactInput`·`ApplyAuditionInput`
+
+**API 신규**:
+- [app/api/montz/contact/route.ts](app/api/montz/contact/route.ts) — RLS 우회 INSERT + 모델 이메일 자동 조회 + Resend 발송
+- [app/api/montz/applications/route.ts](app/api/montz/applications/route.ts) — Bearer 인증 + UNIQUE 중복 처리 + 캐스팅 디렉터 이메일
+
+**페이지 신규**:
+- [app/(MoNTZ)/montz/upload/page.tsx](app/(MoNTZ)/montz/upload/page.tsx) — 작품 업로드 폼
+
+**컴포넌트 신규**:
+- [features/montz/ContactModal.tsx](features/montz/ContactModal.tsx) — 캐스팅 제안 모달 (비로그인 가능)
+- [features/montz/AuditionApplyModal.tsx](features/montz/AuditionApplyModal.tsx) — 오디션 응시 모달
+
+**기존 페이지 확장**:
+- [app/(MoNTZ)/montz/[handle]/page.tsx](app/(MoNTZ)/montz/[handle]/page.tsx) — "DM 보내기" → "캐스팅 제안" 버튼 교체
+- [app/(MoNTZ)/montz/audition/page.tsx](app/(MoNTZ)/montz/audition/page.tsx) — DetailView 최상단 "응시" 버튼
+- [app/(MoNTZ)/montz/my/page.tsx](app/(MoNTZ)/montz/my/page.tsx) — 3 신규 탭(works/offers/applied) + lazy fetch + pending 카운트 배지
+
+**문서**: [app/(MoNTZ)/CLAUDE.md](app/(MoNTZ)/CLAUDE.md) Alpha → Beta, 신규 흐름 3건 명세, DB 6 테이블 표 (+ 2 신규)
+
+### Jakka 정산 PATCH 이메일 알림 추가 (보너스)
+
+- [app/api/intra/jakka/settlements/route.ts](app/api/intra/jakka/settlements/route.ts) — status 'confirmed'·'paid' 전환 시 작가에게 자동 이메일 (Resend, `replyTo: lools@tenone.biz`)
+- [app/(Jakka)/CLAUDE.md](app/(Jakka)/CLAUDE.md) 이월 작업 3건 → 1건(실결제만)으로 정정. stale 표기 해소
+
+### MoNTZ CLAUDE.md stale 정정
+
+- 이전 표기 "DB 미연결·mock·페이지 6개 미연결"이 모두 stale였음을 확인 (실제 DB 4 테이블 존재, 5 페이지 DB 연결됨, lib 17 함수 추상화)
+- 정직성 회복
+
+---
+
 ### 단체방 채팅 환경 고도화 2차 + API 401 친절화
 
 - [app/(Dokdae)/dokdae/page.tsx](app/(Dokdae)/dokdae/page.tsx):

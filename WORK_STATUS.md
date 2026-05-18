@@ -26,6 +26,34 @@
 
 ## 세션 141 핵심 성과 (2026-05-17)
 
+### MoNTZ 양방향 활성화 — 작품 업로드 + 캐스팅 컨택 + 오디션 응시
+
+**타겟 매트릭스 분석 → "모델·배우 ↔ 캐스팅 디렉터" 양방향 끊김 해소** 패키지. 1세션 안에 인프라부터 UI까지 끝.
+
+**Phase 1 인프라 (DB · Storage)**: Storage 버킷 `montz-works` (10MB, jpeg/png/webp) + 사용자 폴더 분리 RLS · `montz_contact_requests` 테이블 + 인덱스 + RLS · `montz_audition_applications` 테이블 + `(audition_id, creator_id)` UNIQUE + RLS
+
+**Phase 2 라이브러리 함수 11개** ([lib/supabase/montz.ts](lib/supabase/montz.ts)): `uploadWorkImage`·`createMyWork`·`getMyWorks`·`deleteMyWork` · `sendContactRequest`·`getMyReceivedContacts`·`updateContactStatus` · `applyAudition`·`getMyApplications`
+
+**Phase 3 작품 업로드 페이지** ([app/(MoNTZ)/montz/upload/page.tsx](app/(MoNTZ)/montz/upload/page.tsx)): 인증·크리에이터 게이트 + 폼(제목·카테고리·설명·태그·이미지 5장) + Storage 병렬 업로드 + 본인 포트폴리오 리다이렉트
+
+**Phase 4 캐스팅 컨택**:
+- [app/api/montz/contact/route.ts](app/api/montz/contact/route.ts) — Admin 클라이언트로 RLS 우회 INSERT + 모델 `user_id` → `auth.users.email` 조회 + Resend 이메일 발송
+- [features/montz/ContactModal.tsx](features/montz/ContactModal.tsx) — 비로그인 가능, 로그인 시 sender_user_id 자동 첨부
+- [app/(MoNTZ)/montz/[handle]/page.tsx](app/(MoNTZ)/montz/[handle]/page.tsx) — "DM 보내기" → "캐스팅 제안" 버튼 (#c8a97e Send 아이콘)
+
+**Phase 5 오디션 응시**:
+- [app/api/montz/applications/route.ts](app/api/montz/applications/route.ts) — Bearer 인증 + 중복 체크(`23505` 처리) + 캐스팅 디렉터(`audition.contact_email`)에게 Resend 이메일
+- [features/montz/AuditionApplyModal.tsx](features/montz/AuditionApplyModal.tsx) — 비로그인 안내·차단, message + applicantEmail
+- [app/(MoNTZ)/montz/audition/page.tsx](app/(MoNTZ)/montz/audition/page.tsx) — DetailView 최상단 "이 공고에 응시하기" 버튼
+
+**Phase 6 /montz/my 3 신규 탭**:
+- 내 작품: 그리드 + 호버 삭제 + "새 작품 업로드" CTA
+- 받은 제안: 카드 + 수락/거절/확인만 액션 + pending 카운트 배지 강조 + mailto 답장
+- 신청 오디션: 카드 + 상태 5단계 + 마감일 표시
+- Lazy fetch — 활성 탭만 호출
+
+**Phase 7 검증·문서**: [app/(MoNTZ)/CLAUDE.md](app/(MoNTZ)/CLAUDE.md) Phase Alpha → **Beta** 갱신, 신규 흐름 3건 명세, DB 6 테이블 표
+
 ### 단체방 채팅 환경 고도화 2차 + API 401 친절화
 
 채팅 환경 1차(아바타·@멘션·인디케이터)에 이어 카카오톡 수준 4축 추가:

@@ -422,3 +422,230 @@ export async function deleteMontzAudition(id: string): Promise<void> {
     const supabase = createClient();
     await supabase.from("montz_auditions").delete().eq("id", id);
 }
+
+// ── 작품 업로드 (공급자: 모델·배우) ─────────────────────────────────
+
+/** 클라이언트에서 이미지를 montz-works 버킷에 업로드하고 public URL 반환 */
+export async function uploadWorkImage(userId: string, file: File): Promise<string> {
+    const supabase = createClient();
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("montz-works").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+    });
+    if (error) throw new Error(`업로드 실패: ${error.message}`);
+    const { data } = supabase.storage.from("montz-works").getPublicUrl(path);
+    return data.publicUrl;
+}
+
+export interface CreateWorkInput {
+    title: string;
+    description?: string;
+    category: string;
+    images: string[];      // 업로드된 이미지 URL 배열
+    tags?: string[];
+}
+
+/** 본인 montz_creators 레코드를 찾아 작품 INSERT. 크리에이터 없으면 에러. */
+export async function createMyWork(userId: string, input: CreateWorkInput): Promise<MontzWork> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) throw new Error("크리에이터 프로필이 없습니다. 먼저 프로필을 등록해주세요.");
+
+    const { data, error } = await supabase
+        .from("montz_works")
+        .insert({
+            creator_id: creator.id,
+            title: input.title,
+            description: input.description ?? null,
+            category: input.category,
+            images: input.images,
+            tags: input.tags ?? [],
+        })
+        .select()
+        .single();
+
+    if (error || !data) throw new Error(`작품 등록 실패: ${error?.message ?? "unknown"}`);
+    return data as MontzWork;
+}
+
+/** 본인 작품 목록 (최신순) */
+export async function getMyWorks(userId: string): Promise<MontzWork[]> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) return [];
+    const { data, error } = await supabase
+        .from("montz_works")
+        .select("*")
+        .eq("creator_id", creator.id)
+        .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data ?? []) as MontzWork[];
+}
+
+/** 본인 작품 삭제 (creator_id 일치 검증) */
+export async function deleteMyWork(userId: string, workId: string): Promise<void> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) throw new Error("크리에이터 프로필이 없습니다.");
+    const { error } = await supabase
+        .from("montz_works")
+        .delete()
+        .eq("id", workId)
+        .eq("creator_id", creator.id);
+    if (error) throw new Error(`삭제 실패: ${error.message}`);
+}
+
+// ── 캐스팅 컨택 (수요자: 캐스팅 디렉터 → 모델·배우) ────────────────
+
+export interface MontzContactRequest {
+    id: string;
+    target_creator_id: string;
+    sender_user_id: string | null;
+    sender_name: string;
+    sender_email: string;
+    sender_company: string | null;
+    role_title: string | null;
+    message: string;
+    status: "pending" | "seen" | "accepted" | "declined";
+    created_at: string;
+    responded_at: string | null;
+    // 조인용
+    target?: Pick<MontzCreator, "handle" | "display_name">;
+}
+
+export interface SendContactInput {
+    targetCreatorId: string;
+    senderName: string;
+    senderEmail: string;
+    senderCompany?: string;
+    roleTitle?: string;
+    message: string;
+}
+
+/** 캐스팅 제안 발송 — 비로그인 캐스팅 디렉터도 가능. 본인이면 user_id 자동 첨부. */
+export async function sendContactRequest(input: SendContactInput): Promise<MontzContactRequest> {
+    const supabase = createClient();
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id ?? null;
+
+    const { data, error } = await supabase
+        .from("montz_contact_requests")
+        .insert({
+            target_creator_id: input.targetCreatorId,
+            sender_user_id: userId,
+            sender_name: input.senderName,
+            sender_email: input.senderEmail,
+            sender_company: input.senderCompany ?? null,
+            role_title: input.roleTitle ?? null,
+            message: input.message,
+            status: "pending",
+        })
+        .select()
+        .single();
+
+    if (error || !data) throw new Error(`전송 실패: ${error?.message ?? "unknown"}`);
+    return data as MontzContactRequest;
+}
+
+/** 본인이 받은 캐스팅 제안 목록 (모델·배우 본인 my 페이지용) */
+export async function getMyReceivedContacts(userId: string): Promise<MontzContactRequest[]> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) return [];
+    const { data, error } = await supabase
+        .from("montz_contact_requests")
+        .select("*")
+        .eq("target_creator_id", creator.id)
+        .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data ?? []) as MontzContactRequest[];
+}
+
+/** 받은 컨택 상태 변경 (seen / accepted / declined) */
+export async function updateContactStatus(
+    userId: string,
+    contactId: string,
+    status: "seen" | "accepted" | "declined",
+): Promise<void> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) throw new Error("권한 없음");
+    const patch: Record<string, unknown> = { status };
+    if (status !== "seen") patch.responded_at = new Date().toISOString();
+    const { error } = await supabase
+        .from("montz_contact_requests")
+        .update(patch)
+        .eq("id", contactId)
+        .eq("target_creator_id", creator.id);
+    if (error) throw new Error(`상태 변경 실패: ${error.message}`);
+}
+
+// ── 오디션 신청 (공급자: 모델·배우 → 오디션 공고) ───────────────────
+
+export interface MontzApplication {
+    id: string;
+    audition_id: string;
+    creator_id: string;
+    message: string | null;
+    status: "pending" | "seen" | "shortlisted" | "rejected" | "cast";
+    applicant_email: string | null;
+    created_at: string;
+    reviewed_at: string | null;
+    // 조인용
+    audition?: Pick<MontzAudition, "company" | "role" | "type" | "deadline">;
+}
+
+export interface ApplyAuditionInput {
+    auditionId: string;
+    message?: string;
+    applicantEmail?: string;     // 캐스팅 디렉터 컨택용 (선택, auth 이메일 fallback)
+}
+
+/** 본인이 오디션에 신청 (UNIQUE audition_id+creator_id로 중복 방지) */
+export async function applyAudition(userId: string, input: ApplyAuditionInput): Promise<MontzApplication> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) throw new Error("크리에이터 프로필이 필요합니다.");
+
+    // auth.user.email 폴백
+    let email = input.applicantEmail;
+    if (!email) {
+        const { data: userData } = await supabase.auth.getUser();
+        email = userData.user?.email ?? undefined;
+    }
+
+    const { data, error } = await supabase
+        .from("montz_audition_applications")
+        .insert({
+            audition_id: input.auditionId,
+            creator_id: creator.id,
+            message: input.message ?? null,
+            applicant_email: email ?? null,
+            status: "pending",
+        })
+        .select()
+        .single();
+
+    if (error || !data) {
+        if (error?.code === "23505") throw new Error("이미 신청하신 오디션입니다.");
+        throw new Error(`신청 실패: ${error?.message ?? "unknown"}`);
+    }
+    return data as MontzApplication;
+}
+
+/** 본인이 신청한 오디션 목록 */
+export async function getMyApplications(userId: string): Promise<MontzApplication[]> {
+    const supabase = createClient();
+    const creator = await getCreatorByUserId(userId);
+    if (!creator) return [];
+    const { data, error } = await supabase
+        .from("montz_audition_applications")
+        .select(`*, audition:montz_auditions(company, role, type, deadline)`)
+        .eq("creator_id", creator.id)
+        .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data ?? []) as MontzApplication[];
+}

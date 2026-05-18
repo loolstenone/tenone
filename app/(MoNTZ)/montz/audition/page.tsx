@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ExternalLink, Megaphone, ChevronDown, ChevronLeft, Loader2, Mail } from "lucide-react";
+import { ExternalLink, Megaphone, ChevronDown, ChevronLeft, Loader2, Mail, Send } from "lucide-react";
 import { getActiveAuditions, type MontzAudition, type MontzAuditionType } from "@/lib/supabase/montz";
 import { createClient } from "@/lib/supabase/client";
+import { AuditionApplyModal } from "@/features/montz/AuditionApplyModal";
 
 const ALL_TYPES: MontzAuditionType[] = ["드라마", "영화", "뮤지컬", "모델", "광고", "CF", "기타"];
 const TYPE_OPTIONS: MontzAuditionType[] = ALL_TYPES;
@@ -140,6 +141,7 @@ function ListView({
 
 function DetailView({ audition, onBack }: { audition: MontzAudition; onBack: () => void }) {
     const s = TYPE_STYLE[audition.type] ?? TYPE_STYLE["기타"];
+    const [applyOpen, setApplyOpen] = useState(false);
     return (
         <div>
             {/* 상단 네비 */}
@@ -150,6 +152,14 @@ function DetailView({ audition, onBack }: { audition: MontzAudition; onBack: () 
                 </button>
                 <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">Audition</span>
             </div>
+
+            {/* 응시 모달 */}
+            <AuditionApplyModal
+                isOpen={applyOpen}
+                onClose={() => setApplyOpen(false)}
+                auditionId={audition.id}
+                auditionTitle={`${audition.company} · ${audition.role}`}
+            />
 
             {/* 제목 영역 */}
             <div className="px-4 py-5 border-b border-neutral-200">
@@ -188,6 +198,14 @@ function DetailView({ audition, onBack }: { audition: MontzAudition; onBack: () 
 
             {/* 액션 버튼 */}
             <div className="px-4 py-5 space-y-2">
+                {/* 응시하기 — 가장 강조 */}
+                <button
+                    onClick={() => setApplyOpen(true)}
+                    className="flex items-center justify-center gap-2 w-full py-3 text-[14px] font-black bg-[#c8a97e] text-neutral-900 hover:bg-[#d4b88c] transition-colors"
+                >
+                    <Send className="h-4 w-4" />
+                    이 공고에 응시하기
+                </button>
                 {audition.href && (
                     <a href={audition.href} target="_blank" rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3 text-[14px] font-black bg-neutral-900 text-white hover:opacity-80 transition-opacity">
