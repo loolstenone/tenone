@@ -11,6 +11,19 @@ import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
 import { getSetting } from '@/lib/supabase/settings';
 
+// SmarComm CLAUDE.md § 1A 라우트 노출 정책 (2026-05-19):
+// Marvis 런칭 시점에 /smarcomm/dashboard/* (Pro 자산)은 비공개.
+// staff·super_admin·아래 BETA_EMAILS만 접근. 그 외는 Marvis로 redirect.
+const BETA_EMAILS = ['lools@tenone.biz', 'cheonil@tenone.biz', 'tenone@tenone.biz', 'admin@smarcomm.com'];
+
+function isProAccessAllowed(user: { email?: string; accountType?: string; role?: string } | null): boolean {
+  if (!user) return false;
+  if (user.accountType === 'staff') return true;
+  if (user.role === 'Admin' || user.role === 'super_admin') return true;
+  if (user.email && BETA_EMAILS.includes(user.email)) return true;
+  return false;
+}
+
 // Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
 // 실제 API 연결된 페이지는 제외 (scan·advisor·creative·insights·ai-tracker·airm·assets·admin·profile·members·guide·glossary)
 const MOCK_PATH_PREFIXES = [
@@ -48,8 +61,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       // CLAUDE.md § 1.2.1 — 브랜드 보호 페이지는 LoginModal 팝업, /login 이동 금지
       return;
     }
+    // Marvis 런칭 정책 — Pro 자산은 staff·beta만 접근, 그 외는 Marvis로 이동
+    if (!isProAccessAllowed(user)) {
+      router.replace('/smarcomm/marvis?reason=beta_only');
+      return;
+    }
     initDashboard();
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   const initDashboard = () => {
     // DB-first (user_settings 테이블) → localStorage fallback

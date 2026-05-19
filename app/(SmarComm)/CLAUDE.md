@@ -1,5 +1,18 @@
 # SmarComm 브랜드 가이드
 
+> ## 🚀 런칭 라인업 SSOT (2026-05-19 결정) — § 1A 본문 참조
+>
+> SmarComm은 **3 티어**로 운영한다.
+> | 티어 | 대상 | 런칭 노출 |
+> |---|---|---|
+> | **Marvis** (Marketing Jarvis) | 1인·소규모 자사몰 | ✅ 공개 — **런칭 1차 단독 노출** |
+> | **Pro** | 중소 (10~100인) | ⏳ 비공개 (베타·staff만) |
+> | **Platinum** | 대규모·에이전시 | ⏳ 비공개 (협의·문의 폼) |
+>
+> 현 개발물(Index·AI Visibility·Schema·Trust·Trend·Exec Summary·AIRM·CRM 채널·Workflow 등)은 **버리지 않고 Pro/Platinum 자산으로 보존**. 런칭 시점 외부 노출은 Marvis 라우트만, Pro·Platinum 라우트는 `role:beta`·`staff` 게이트로 비공개.
+>
+> 런칭 후 Marvis 검증이 끝나면 Pro 베타 공개 → Platinum 영업 채널 개통 순서.
+
 > ## 🟢 실 사용자 시나리오 SSOT — [USER_SCENARIO.md](USER_SCENARIO.md)
 >
 > 모든 기능 기획·UX 결정·페이지 분류는 **"김지원(D2C 마케터) 4주 사용 흐름"**을 기준으로 판단한다.
@@ -39,6 +52,85 @@
 - **주 컬러**: 네이비 + 하늘색 (신뢰·기술)
 - **디자인 방향**: 데이터 가시화 · 워크스페이스 · 팩(Pack) 기반 확장
 - **주 도메인**: `smarcomm.biz` (서브: `smarcomm.tenone.biz`)
+
+---
+
+## 1A. Marvis 라인업 SSOT (2026-05-19 확정)
+
+> **결정 배경**: 대기업용 마케팅 OS는 1인 사장님에게 과잉이다. SmarComm V2.0 7단계의 무게를 그대로 1인 사장님에게 보여주면 진입 자체가 안 된다. 그래서 **런칭 시점은 "관리에서 승인으로"의 1탭 마케팅 비서 = Marvis 단독**으로 가고, 현 개발 자산(Index·AI Visibility·Schema·Trust·Trend·Exec Summary·AIRM·CRM·Workflow 등)은 **Pro/Platinum 티어로 보존**한다.
+
+### Marvis = Marketing Jarvis 축약 (음운: SmarComm의 'M' 연결)
+
+> **컨셉**: 사장님이 데이터를 입력하거나 대시보드를 직접 보지 않는다. 매일 아침 AI가 분석·콘텐츠 초안까지 만들어 **카톡·이메일로 알려주고, 사장님은 [승인] 버튼 한 번**만 누른다.
+> "관리(Management) → 승인(Approval)" 패러다임 전환이 코어. 콘텐츠 자동화는 사이드, **자동 트리거 워크플로우 자체가 해자**.
+
+### 3 티어 정의
+
+| 티어 | 대상 | 단가 (잠정) | 포지셔닝 |
+|---|---|---|---|
+| **Marvis** | 1인·5인 이하 자사몰 사장님 | 월 9,900원 / 29,900원 2단계 | 매일 아침 To-Do 3개 + 1탭 발송 |
+| **Pro** | 중소 (10~100인) | 월 99,000~199,000원대 | 풀 진단 + AI Visibility + AIRM + 콘텐츠 자동화 |
+| **Platinum** | 대규모·에이전시 | 협의 (월 500만원~) | 다중 사이트 + Custom Probe + 화이트라벨 + API |
+
+> 'Enterprise'가 아닌 **Platinum**으로 확정. 마케팅 SaaS 시장에서 더 친근하고 럭셔리한 톤.
+
+### Marvis 4대 기능
+
+| # | 기능 | 라이트 범위 | 자산 |
+|---|---|---|---|
+| 1 | **마케팅 대시보드** | 카페24/아임웹 연동 1개 + 핵심 지표 4개(방문·주문·매출·재구매 후보 수) + "오늘의 To-Do 3개" | 신규 |
+| 2 | **진단 — SEO / GEO / 퍼널** | Index 종합 점수 1개 + 등급(S/A/B/C/D) + 핵심 권고 3개 | 기존 SmarComm Index 라이트화 재활용. **GEO = Generative Engine Optimization** (AI 검색 노출), 풀 AI Visibility Map은 Pro |
+| 3 | **간단 분석** | "오늘 돈이 되는 행동 3개" — 재구매 후보·이탈 후보·신상품 후보 리스트 | RFM 백엔드 신규 (사용자에게는 RFM 용어 노출 금지) |
+| 4 | **이메일·CRM 도구** | 카페24 webhook → AI 초안 → 사장님 카톡/이메일 1탭 승인 → Resend 발송 | 신규. **알림톡은 Phase 2** (발신자 자격·심사 부담) |
+
+### Marvis vs Pro 차등 (가입 동기 보존)
+
+| 기능 | Marvis | Pro |
+|---|---|---|
+| 진단 점수 | 종합 점수 + 등급 1개 + 권고 3개 | 30+ 세부 점수 + Findability/Trust/Citability 4축 분해 |
+| AI 검색 (GEO) | "Pro에서 풀 진단" 안내 | Claude·ChatGPT·Perplexity·Google AIO·Naver Cue 5 프로브 |
+| Schema | 자동 점수만 | Schema Generator + JSON-LD 14종 자동 작성 |
+| 이메일 시나리오 | **재구매 1 시나리오만** | 장바구니 이탈·재구매·VVIP 감사·리뷰 유도 등 5+ 시나리오 |
+| Trend | 없음 | TrendChart + 도메인 시계열 |
+| Exec Summary | 없음 | Claude Haiku 3줄 요약 + Action Plan 18 룰 |
+| AIRM (평판 방어) | 없음 | 전체 |
+| Workflow | 없음 | 칸반·자동화·파이프라인 |
+
+**핵심 원칙**: Marvis는 "점수 + 행동"만, Pro는 "분석 + 출처 + 자동화"까지.
+
+### 라우트 노출 정책 (런칭 시점)
+
+| 라우트 | 노출 | 접근 |
+|---|---|---|
+| `/smarcomm` (랜딩) | ✅ | 누구나 — Marvis 단일 CTA |
+| `/smarcomm/marvis` · `/smarcomm/marvis/*` | ✅ | 가입 후 누구나 (또는 데모용 일부 공개) |
+| `/smarcomm/dashboard` · `/smarcomm/dashboard/*` | 비공개 | `role:beta`·`staff`·`super_admin`만 |
+| `/smarcomm/scan` · `/smarcomm/report/[id]` | 비공개 | 동상 |
+| `/smarcomm/pricing` | ✅ (간소화) | Marvis 단가만 노출, Pro/Platinum은 "베타 신청" 폼 |
+
+> **현 50+ Pro 라우트는 삭제 X**. Layout 레벨 또는 `SmarCommPreviewGate` 강화로 비공개 게이트만 적용. Marvis 검증 완료 후 단계적으로 Pro 베타 → Pro 정식 공개.
+
+### MVP 시나리오 (4주 안 검증)
+
+| 주차 | 작업 |
+|---|---|
+| 1주차 | 카페24 dev sandbox 등록 + webhook 실측 (cart는 미루고 **order·review** 안정성만 확인) |
+| 2주차 | `/smarcomm/marvis` 대시보드 4 카드 + RFM 백엔드 (주문 데이터 기반) + 재구매 후보 자동 추출 |
+| 3주차 | 재구매 1 시나리오: AI 초안(Claude) → 사장님에게 이메일 알림 → 1탭 승인 → Resend 발송 |
+| 4주차 | 실 사장님 1~3명 베타 테스트, "1탭 승인" UX의 wow factor 검증 |
+
+여기서 검증 안 되면 알림톡·카톡·9,900원 단가로 가도 작동 안 한다는 게 운영 가설.
+
+### USER_SCENARIO 매핑
+
+기존 "김지원(D2C 마케터) 4주 흐름"은 **Pro 사용자 시나리오**. Marvis는 **다른 사용자 시나리오 필요** — "박정수(1인 사장님) 4주 흐름". 별도 USER_SCENARIO 또는 USER_SCENARIO.md § 6 신설 예정.
+
+### 금지 패턴
+
+- ❌ Marvis 페이지에서 RFM·코호트·세그먼트·funnel 같은 마케팅 전문 용어 노출 (사장님 인지부하)
+- ❌ 자동 발송 (Auto-Pilot) — 반드시 사장님 승인 필수 (Phase 2 후 옵트인)
+- ❌ Pro 자산 일부를 Marvis에 노출 (티어 게이트 무력화)
+- ❌ Marvis 라우트에서 V2.0 7단계 어휘 노출 (Marvis는 "오늘의 To-Do"·"보낼까요?" 어휘만)
 
 ---
 

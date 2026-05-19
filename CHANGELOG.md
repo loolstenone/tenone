@@ -4,6 +4,82 @@
 
 ---
 
+## 2026-05-19 (세션 143) — 워크트리 정리 8→1 + MoNTZ 이월 #3·#5 완료 + SmarComm Marvis 라인업 SSOT 확정
+
+### 워크트리 정리 (8 → 1)
+
+작업 시작 시점 활성 워크트리 8개 (CLAUDE.md §3.4 상한 4개 초과). 분석 결과 **7개 모두 master에 흡수 확인**:
+- `affectionate-mahavira-d5fa78`·`cool-bohr-30331f`·`friendly-heisenberg-94bd10`·`great-heyrovsky-f4415e`·`inspiring-rubin-7863ea`·`wizardly-satoshi-3a795f` — 6개 모두 `rev-list --left-right` 결과 HEAD에 unique 0건 → 안전 삭제
+- `brave-margulis-2c2f3e` — HEAD에 unique 1 commit이 있으나 `git diff master..b9b7aa1c` 결과 master가 178 files 더 진보 (세션 138-139 통합에서 흡수됨 검증) → 로컬 워크트리만 삭제, origin 보존
+- `inspiring-rubin`의 `.claude/launch.json` `autoPort:true` 변경은 별도 commit 가치 있어 사용자 판단에 보류
+- 로컬 브랜치도 함께 정리 (`git branch -d` × 6, `-D brave-margulis` 1)
+- 결과: `cranky-murdock-a0c05b` 1개만 활성. origin에 `claude/brave-margulis-2c2f3e` backup 유지.
+
+### MoNTZ — 이월 작업 #3 (헤더 업로드 진입점) + #5 (인트라 관리 패널) 완료
+
+**#3 권한 기반 업로드 진입점** — [features/montz/MontzInstaLayout.tsx](features/montz/MontzInstaLayout.tsx):
+- `useEffect`로 `getCreatorByUserId(user.id)` 호출 → `isCreator` state로 sidebar·bottom nav에 동적으로 `PlusSquare` "업로드" 항목 삽입
+- 데스크톱 sidebar: 오디션과 내 프로필 사이
+- 모바일 bottom nav: 동일 위치, 비활성 시 골드 `#c8a97e` 강조
+- 비크리에이터/비로그인은 기존 4개 메뉴 그대로 (검증 완료)
+
+**#5 인트라 관리 패널 신규 2종**:
+- [app/intra/ums/montz/contacts/page.tsx](app/intra/ums/montz/contacts/page.tsx) — 캐스팅 컨택 모니터링. 5탭(전체/대기/확인/수락/거절) + 검색(이름·이메일·회사·핸들·메시지) + 모델 핸들 클릭 시 새창. JOIN: `target:montz_creators!target_creator_id`
+- [app/intra/ums/montz/applications/page.tsx](app/intra/ums/montz/applications/page.tsx) — 오디션 응시 모니터링. 6탭(전체/대기/확인/숏리스트/캐스트/거절) + 검색(오디션·신청자·이메일·메시지) + 양쪽 조인(audition + creator) 표시
+- [app/intra/ums/montz/page.tsx](app/intra/ums/montz/page.tsx) — 통계에 `pendingContacts`·`pendingApplications` 추가 + 빠른 이동 카드 2건 추가 (대기 카운트 표시)
+- [lib/intra-nav.ts](lib/intra-nav.ts) — MoNTZ 서브메뉴에 "캐스팅 컨택"·"오디션 응시" 추가
+- **Action Hub Registry 비추가** — 캐스팅 컨택·오디션 응시는 staff 처리가 아닌 모니터링 용도 (실제 처리는 모델·캐스팅 디렉터 사이드 채널). CLAUDE.md §1.9.1 원칙대로 처리 대기 액션만 등록.
+
+### SmarComm — Marvis 라인업 SSOT 확정 + 런칭 1차 페이지 구축
+
+**전략 결정 (사용자 확정)**:
+- SmarComm은 **3 티어**로 운영: `Marvis (1인·소규모) / Pro (중소) / Platinum (대규모)`
+- 'Enterprise' 대신 **Platinum** 채택 (마케팅 SaaS 톤에 더 부합)
+- 런칭 시점은 **Marvis 단독 노출**, Pro/Platinum은 비공개 (staff·beta·super_admin만)
+- GEO = **Generative Engine Optimization** (AI 검색 노출) 확정
+- 현 개발 자산(Index·AI Visibility·Schema·Trust·Trend·Exec Summary·AIRM·CRM·Workflow)은 **버리지 않고 Pro/Platinum으로 보존**
+
+**[app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) 갱신**:
+- 최상단 🚀 런칭 라인업 SSOT 박스 추가
+- § 1A Marvis 라인업 SSOT 신설 (3티어 정의·4기능·Marvis vs Pro 차등 표·라우트 노출 정책·4주 MVP 시나리오·금지 패턴)
+
+**Marvis 라우트 신설**:
+- [app/(SmarComm)/smarcomm/marvis/page.tsx](app/(SmarComm)/smarcomm/marvis/page.tsx) — Marvis 대시보드. 사장님 인사 / 연동 안 됨 배너 (정직성) / 빈 To-Do (가짜 Mock 금지) / 4기능 카드 (3개 Phase 1, 1개 라이트 활성) / "왜 지금은 비어 있나요?" 정직 안내
+- [app/(SmarComm)/smarcomm/marvis/scan/page.tsx](app/(SmarComm)/smarcomm/marvis/scan/page.tsx) — 라이트 진단 stub. URL 입력 폼 (진단 시작 disabled, "Phase 1에서 활성화") + Marvis 6개 vs Pro 4개 차등 표
+
+**Marvis 정직성 원칙 100% 준수**: 카페24·아임웹 미연동 상태에서 가짜 To-Do·가짜 점수 0건 노출. 모든 미구현 영역에 "Phase 1" 라벨 + 빈 상태 정직 표시.
+
+**[app/(SmarComm)/smarcomm/page.tsx](app/(SmarComm)/smarcomm/page.tsx) Hero 교체**:
+- 헤드라인 "사장님 마케팅 비서, 매일 아침 1탭으로 끝납니다."
+- "MARVIS · MARKETING JARVIS" 뱃지
+- URL 입력 → `/smarcomm/marvis/scan?url=...` 라우팅 (기존 `/scan` 폐기)
+- "Marvis 대시보드 미리보기 →" 보조 링크
+- **정직성 회복**: 검증 안 된 Social Proof 수치(`500+`·`93%`·`30초`·`₩0`) 제거 → Marvis 4가치(`1탭`·`카페24`·`매일`·`Phase 1`)로 교체
+
+**Pro 비공개 게이트** — [app/(SmarComm)/smarcomm/dashboard/layout.tsx](app/(SmarComm)/smarcomm/dashboard/layout.tsx):
+- `isProAccessAllowed(user)` 헬퍼 추가: `accountType==='staff'` OR `role==='Admin'/'super_admin'` OR `BETA_EMAILS` 포함 시만 통과
+- 그 외 인증 사용자는 `router.replace('/smarcomm/marvis?reason=beta_only')` 처리
+- 단일 layout 게이트로 `/smarcomm/dashboard/*` 50+ 라우트 일괄 비공개 효과
+- BETA_EMAILS: `lools@tenone.biz · cheonil@tenone.biz · tenone@tenone.biz · admin@smarcomm.com`
+
+### 검증
+
+- TypeScript: `npx tsc --noEmit` exit 0 (전 변경 파일 통과)
+- 페이지 200 응답: `/smarcomm` · `/smarcomm/marvis` · `/smarcomm/marvis/scan` · `/montz` 모두 정상 렌더 확인
+- 서버 에러 0건 (preview_logs)
+- 시각 검증: Marvis Hero "사장님 마케팅 비서" 메시지 + Marvis 4가치 정직 노출 + Marvis 대시보드 빈 상태 정상 표시
+- Pro 게이트는 staff 자격증명 부재로 시각 검증 보류 — 다음 staff 로그인 세션에서 확인 권장
+
+### 다음 첫 액션 (차기 세션)
+
+1. **랜딩 페이지 나머지 섹션 정리** — `/smarcomm`의 "GEO + SEO 통합 점검"·"Getting Started"·"Our Tools" 등을 Marvis 컨텍스트로 재편 또는 숨김
+2. **TierGate 3티어 통일** — `starter|growth|pro|enterprise` (TierGate.tsx) + `free|starter|pro|business` (DashboardSidebar.tsx) 두 불일치 시스템을 `marvis|pro|platinum` 단일화
+3. **카페24 dev sandbox 등록 + webhook 실측** (사용자 작업) — Marvis Phase 1 MVP의 데이터 파이프 전제조건. cart는 미루고 order·review 안정성만 확인.
+4. **Marvis Phase 1 — 재구매 1 시나리오 구현**: `marvis_orders`·`marvis_customers` 테이블 + RFM 계산 + Claude 초안 + 1탭 승인 → Resend 발송 (4주 일정)
+5. **Marvis 사용자 시나리오(USER_SCENARIO)** — 기존 "김지원(D2C 마케터)"은 Pro 시나리오. Marvis용 "박정수(1인 사장님) 4주 흐름" 신설.
+
+---
+
 ## 2026-05-19 (세션 142) — MADLeague 전체 디자인 QA
 
 ### MADLeague rounded 제거 + inputCls 통일 (26개 파일)

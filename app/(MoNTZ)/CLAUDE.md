@@ -157,9 +157,24 @@ montz_auditions  -- 오디션 공고 (company, role, type, deadline, pay)
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **Beta** (2026-05-17 양방향 완성) — 모델·배우 작품 업로드 + 캐스팅 디렉터 컨택 + 오디션 응시 흐름 모두 가동 |
-| **완료** | 페이지 8개(홈·탐색·프로필·오디션·my·about·[handle]·**upload**) + 6 DB 테이블 + 3 신규 흐름 |
-| **이월 작업** | (1) 팔로우 기능 (현재 placeholder), (2) 헤더 네비에 upload 직접 진입점, (3) 인트라 응시·컨택 관리 패널 |
+| **Phase** | **Beta** (2026-05-19 인트라 관리 + 헤더 업로드 진입점 완료) |
+| **완료** | 페이지 8개(홈·탐색·프로필·오디션·my·about·[handle]·**upload**) + 6 DB 테이블 + 3 신규 흐름 + **인트라 관리 패널 (contacts·applications) + MontzInstaLayout 권한 기반 업로드 진입점** |
+| **이월 작업** | ~~(2) 헤더 네비 upload 직접 진입점~~ ✅ 세션 143 완료 · ~~(3) 인트라 응시·컨택 관리 패널~~ ✅ 세션 143 완료 · **남음: (1) 팔로우 기능 (현재 placeholder)** |
+
+### 세션 143 추가 (2026-05-19)
+
+**MontzInstaLayout 권한 기반 업로드 진입점** — [features/montz/MontzInstaLayout.tsx](../../features/montz/MontzInstaLayout.tsx):
+- `useEffect`로 `getCreatorByUserId(user.id)` 호출 → `isCreator` state로 sidebar·bottom nav에 동적으로 `PlusSquare` "업로드" 항목 삽입
+- 데스크톱 sidebar: 오디션과 내 프로필 사이
+- 모바일 bottom nav: 동일 위치, 비활성 시 골드 `#c8a97e` 강조
+- 비크리에이터/비로그인은 기존 4개 메뉴 그대로
+
+**인트라 관리 패널 신규 2종**:
+- [app/intra/ums/montz/contacts/page.tsx](../../app/intra/ums/montz/contacts/page.tsx) — 캐스팅 컨택 모니터링. 5탭(전체/대기/확인/수락/거절) + 검색(이름·이메일·회사·핸들·메시지) + 모델 핸들 클릭 시 새창
+- [app/intra/ums/montz/applications/page.tsx](../../app/intra/ums/montz/applications/page.tsx) — 오디션 응시 모니터링. 6탭(전체/대기/확인/숏리스트/캐스트/거절) + 검색(오디션·신청자·이메일·메시지) + 양쪽 조인(audition + creator) 표시
+- [app/intra/ums/montz/page.tsx](../../app/intra/ums/montz/page.tsx) — 통계에 `pendingContacts`·`pendingApplications` 추가 + 빠른 이동 카드 2건 추가 (대기 카운트 표시)
+- [lib/intra-nav.ts](../../lib/intra-nav.ts) — MoNTZ 서브메뉴에 "캐스팅 컨택"·"오디션 응시" 추가
+- Action Hub Registry **비추가** — 캐스팅 컨택·오디션 응시는 staff 처리가 아닌 모니터링 용도 (실제 처리는 모델·캐스팅 디렉터 사이드 채널). CLAUDE.md §1.9.1 원칙대로 처리 대기 액션만 등록.
 
 ### 신규 흐름 3건 (2026-05-17 양방향 활성화)
 

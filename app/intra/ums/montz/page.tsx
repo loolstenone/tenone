@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function MontzDashboard() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ creators: 0, verified: 0, works: 0, activeAuditions: 0 });
+    const [stats, setStats] = useState({ creators: 0, verified: 0, works: 0, activeAuditions: 0, pendingContacts: 0, pendingApplications: 0 });
     const [recentCreators, setRecentCreators] = useState<{ id: string; display_name: string; handle: string; type: string; created_at: string }[]>([]);
 
     useEffect(() => {
@@ -19,12 +19,16 @@ export default function MontzDashboard() {
             sb.from("montz_works").select("*", { count: "exact", head: true }),
             sb.from("montz_auditions").select("*", { count: "exact", head: true }).eq("is_active", true),
             sb.from("montz_creators").select("id, display_name, handle, type, created_at").order("created_at", { ascending: false }).limit(5),
-        ]).then(([creators, verified, works, auditions, recent]) => {
+            sb.from("montz_contact_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+            sb.from("montz_audition_applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        ]).then(([creators, verified, works, auditions, recent, contacts, apps]) => {
             setStats({
                 creators: creators.count ?? 0,
                 verified: verified.count ?? 0,
                 works: works.count ?? 0,
                 activeAuditions: auditions.count ?? 0,
+                pendingContacts: contacts.count ?? 0,
+                pendingApplications: apps.count ?? 0,
             });
             setRecentCreators((recent.data ?? []) as { id: string; display_name: string; handle: string; type: string; created_at: string }[]);
             setLoading(false);
@@ -80,6 +84,16 @@ export default function MontzDashboard() {
                                 {[
                                     { label: `창작자 관리 ${stats.creators}명`, sub: "모델·배우 프로필 관리", href: "/intra/ums/montz/members" },
                                     { label: `오디션 관리 ${stats.activeAuditions}건`, sub: "오디션 공고 등록·수정·삭제", href: "/intra/ums/montz/auditions" },
+                                    {
+                                        label: `캐스팅 컨택${stats.pendingContacts > 0 ? ` · 대기 ${stats.pendingContacts}건` : ""}`,
+                                        sub: "캐스팅 디렉터 → 모델·배우 제안 모니터링",
+                                        href: "/intra/ums/montz/contacts",
+                                    },
+                                    {
+                                        label: `오디션 응시${stats.pendingApplications > 0 ? ` · 대기 ${stats.pendingApplications}건` : ""}`,
+                                        sub: "모델·배우 → 오디션 공고 응시 모니터링",
+                                        href: "/intra/ums/montz/applications",
+                                    },
                                 ].map(({ label, sub, href }) => (
                                     <Link key={href} href={href}
                                         className="block px-4 py-3 border border-neutral-200 hover:border-neutral-900 transition rounded">

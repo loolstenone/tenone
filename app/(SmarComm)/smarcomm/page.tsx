@@ -112,7 +112,11 @@ export default function LandingPage() {
 
   const handleScan = () => {
     const trimmed = url.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      // URL 없어도 Marvis 진단 페이지로 진입 가능
+      router.push('/smarcomm/marvis/scan');
+      return;
+    }
     const normalized = trimmed.startsWith('http') ? trimmed : 'https://' + trimmed;
     try {
       const parsed = new URL(normalized);
@@ -124,31 +128,31 @@ export default function LandingPage() {
       alert('올바른 URL을 입력해주세요.\n예: https://yoursite.com');
       return;
     }
-    window.location.href = `/scan?url=${encodeURIComponent(normalized)}`;
+    window.location.href = `/smarcomm/marvis/scan?url=${encodeURIComponent(normalized)}`;
   };
 
   return (
     <>
       <SmarCommHeader />
       <main className="flex-1">
-        {/* Hero — Black */}
+        {/* Hero — Marvis 중심 */}
         <section className="bg-[#0A0E1A] px-5 pb-20 pt-28 md:pt-36">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 text-[13px] font-medium tracking-widest text-white/40 uppercase">
-              Smart Marketing Communication
+            <p className="mb-5 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-white/60 uppercase border border-white/15 rounded-full px-3 py-1">
+              <Sparkles size={11} /> Marvis · Marketing Jarvis
             </p>
 
             <h1 className="mb-5 text-3xl font-bold leading-tight tracking-tight text-white md:text-[44px] md:leading-[1.2]">
-              {headline.main}<br />
-              <span className="text-white/80">{headline.accent}</span>
+              사장님 마케팅 비서,<br />
+              <span className="text-white/80">매일 아침 1탭으로 끝납니다.</span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-lg text-[15px] leading-relaxed text-white/50">
-              GEO · SEO 진단부터 기획, 소재 제작, 채널 집행, 분석까지<br className="hidden md:block" />
-              마케팅 전체를 AI가 자동화합니다
+            <p className="mx-auto mb-10 max-w-xl text-[15px] leading-relaxed text-white/50">
+              관리에서 승인으로 — Marvis가 쇼핑몰 데이터를 분석해 매일 아침 To-Do 3개를 준비합니다.<br className="hidden md:block" />
+              사장님은 카톡으로 받은 [승인] 버튼만 누르세요. 1인·소규모 사장님 전용.
             </p>
 
-            {/* URL Input */}
+            {/* URL Input → Marvis 라이트 진단 */}
             <div className="mx-auto max-w-lg">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative flex-1">
@@ -158,7 +162,7 @@ export default function LandingPage() {
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleScan()}
-                    placeholder="https://yoursite.com"
+                    placeholder="쇼핑몰 URL — https://yourshop.com"
                     className="w-full rounded-full border border-white/15 bg-white/10 py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/30 transition-colors focus:border-white/40 focus:outline-none"
                   />
                 </div>
@@ -166,25 +170,33 @@ export default function LandingPage() {
                   onClick={handleScan}
                   className="flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0A0E1A] transition-all hover:bg-white/90"
                 >
-                  무료 진단 시작
+                  라이트 진단 받기
                 </button>
               </div>
               <p className="mt-3 text-xs text-white/30">
-                회원가입 없이 · 30초 소요 · 완전 무료
+                Marvis 라이트 진단 · 회원가입 없이 · 종합 점수 + 핵심 권고 3개
               </p>
+              <div className="mt-6">
+                <Link
+                  href="/smarcomm/marvis"
+                  className="inline-flex items-center gap-1 text-[12px] font-bold text-white/70 hover:text-white"
+                >
+                  Marvis 대시보드 미리보기 <ArrowRight size={12} />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Social Proof — 핵심 수치 */}
+        {/* Marvis 4 가치 — 정직성 원칙: 검증 안 된 수치 노출 금지 */}
         <section className="border-t border-white/[0.06] bg-[#0A0E1A] px-5 py-12">
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {[
-                { value: '500+', label: '진단 완료', desc: '기업 사이트' },
-                { value: '93%', label: '개선 확인', desc: '3개월 내 점수 상승' },
-                { value: '30초', label: '진단 소요', desc: '회원가입 불필요' },
-                { value: '₩0', label: '무료 진단', desc: '부담 제로' },
+                { value: '1탭', label: '승인 발송', desc: '관리 → 승인 전환' },
+                { value: '카페24', label: '·아임웹', desc: '자사몰 1회 연동' },
+                { value: '매일', label: '자동 분석', desc: 'To-Do 3개' },
+                { value: 'Phase 1', label: '준비 중', desc: 'Marvis 베타' },
               ].map((s, i) => (
                 <div key={i} className="py-4 text-center">
                   <div className="text-2xl font-bold text-white md:text-3xl">{s.value}</div>

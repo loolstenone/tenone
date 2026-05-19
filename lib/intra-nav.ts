@@ -394,8 +394,10 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "대시보드", href: "/intra/ums/montz" },
                             { name: "창작자 관리", href: "/intra/ums/montz/members" },
-                            { name: "포트폴리오", href: "/intra/ums/montz/portfolio", badge: "soon" },
+                            { name: "캐스팅 컨택", href: "/intra/ums/montz/contacts" },
                             { name: "오디션 관리", href: "/intra/ums/montz/auditions" },
+                            { name: "오디션 응시", href: "/intra/ums/montz/applications" },
+                            { name: "포트폴리오", href: "/intra/ums/montz/portfolio", badge: "soon" },
                             { name: "고객 문의", href: "/intra/ums/montz/cs", badge: "soon" },
                         ],
                     },

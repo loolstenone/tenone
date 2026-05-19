@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-19 (세션 142 — MADLeague 전체 디자인 QA 완료)
+> 마지막 업데이트: 2026-05-19 (세션 143 — 워크트리 정리 8→1)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| _(현재 활성 워크트리 없음)_ | | | | |
+| _(현재 활성 워크트리 없음 — 세션 143 종료)_ | | | | |
 
 ### 활성 backup 브랜치 (origin)
 
@@ -21,6 +21,7 @@
 | `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
+| `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
 
 ---
 
@@ -35,16 +36,18 @@
 - `api/madleague/upload/route.ts` 신규 추가
 - 예외 허용: `h-3` 이하 컬러 도트 `rounded-full` / print CSS `<style dangerouslySetInnerHTML>`
 
-### 🎯 다음 세션 첫 액션
+### 🎯 다음 세션 첫 액션 (세션 143 종료 시점 갱신)
 
-**사용자 직접 (시크릿 관련)**:
+**사용자 직접 (시크릿·외부 등록)**:
 1. **ANTHROPIC_API_KEY 갱신** — `.env.local` + Vercel env 만료 (401). `dokdae.tenone.biz` 단체방 실 LLM 응답 위해 필수. https://console.anthropic.com/settings/keys → 양쪽 갱신 → 빈 commit + push 재배포. Supabase Edge Function 키는 별개로 유효 (trend-crawl 정상).
+2. **카페24 dev sandbox 등록 + webhook 실측** — Marvis Phase 1 MVP의 데이터 파이프 전제조건. cart는 미루고 order·review 안정성만 확인. https://developers.cafe24.com 가입 → 앱 등록 → 테스트 스토어 webhook 실측.
 
 **코드 작업 (다음 세션 Claude 진행 가능)**:
-2. **Jakka 실결제 PG 연동** (Phase 2-B): 토스/포트원 결정 → `/api/jakka/checkout` + 콜백·웹훅. 1~2 세션.
-3. **MoNTZ 헤더 `/upload` 직접 진입점**: 현재 my 경유. `MoNTZHeader`에 모델·배우 권한 사용자만 보이는 "업로드" 버튼.
-4. **워크트리 정리**: 현재 8개 (CLAUDE.md §3.4 상한 4개 초과).
-5. **MoNTZ 인트라 관리 패널**: `/intra/ums/montz/contacts` · `/intra/ums/montz/applications` — 캐스팅 컨택·오디션 응시 모니터링.
+3. **Marvis Phase 1 — 재구매 1 시나리오 구현** (4주 일정): `marvis_orders`·`marvis_customers`·`marvis_drafts` 테이블 + RFM 계산 + Claude 초안 + `/api/marvis/approve` → Resend 발송. CLAUDE.md § 1A "MVP 시나리오" 표 기준.
+4. **SmarComm 랜딩 페이지 나머지 섹션 정리** — `/smarcomm`의 "GEO + SEO 통합 점검"·"Getting Started"·"Our Tools" 등을 Marvis 컨텍스트로 재편 또는 숨김. Hero·Marvis 4가치는 세션 143 완료.
+5. **TierGate 3티어 통일** — `starter|growth|pro|enterprise` (TierGate.tsx) + `free|starter|pro|business` (DashboardSidebar.tsx) 두 불일치 시스템을 `marvis|pro|platinum` 단일화 + PACK_TIER 매핑 재조정.
+6. **Marvis 사용자 시나리오(USER_SCENARIO)** — 기존 "김지원(D2C 마케터)"은 Pro 시나리오. Marvis용 "박정수(1인 사장님) 4주 흐름" 신설.
+7. **Jakka 실결제 PG 연동** (Phase 2-B): 토스/포트원 결정 → `/api/jakka/checkout` + 콜백·웹훅. 1~2 세션. (Marvis MVP와 별도 트랙)
 
 ---
 

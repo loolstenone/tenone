@@ -3,25 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings, Mail, PlusSquare } from "lucide-react";
 import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
+import { getCreatorByUserId } from "@/lib/supabase/montz";
 
-const sidebarItems = [
+type NavItem = { icon: typeof Home; label: string; href: string };
+
+const baseSidebarItems: NavItem[] = [
     { icon: Home, label: "홈", href: "/montz" },
     { icon: Search, label: "탐색", href: "/montz/explore" },
     { icon: Megaphone, label: "오디션", href: "/montz/audition" },
     { icon: User, label: "내 프로필", href: "/montz/profile" },
 ];
 
-const bottomNavItems = [
-    { icon: Home, href: "/montz" },
-    { icon: Search, href: "/montz/explore" },
-    { icon: Megaphone, href: "/montz/audition" },
-    { icon: User, href: "/montz/profile" },
-];
+const UPLOAD_ITEM: NavItem = { icon: PlusSquare, label: "업로드", href: "/montz/upload" };
 
 const GOLD = "#c8a97e";
 
@@ -181,7 +179,26 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const { user, isAuthenticated } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isCreator, setIsCreator] = useState(false);
+
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) {
+            setIsCreator(false);
+            return;
+        }
+        let cancelled = false;
+        getCreatorByUserId(user.id).then((c) => {
+            if (!cancelled) setIsCreator(!!c);
+        });
+        return () => { cancelled = true; };
+    }, [isAuthenticated, user?.id]);
+
+    // 크리에이터일 때 "오디션"과 "내 프로필" 사이에 업로드 진입점 삽입
+    const sidebarItems: NavItem[] = isCreator
+        ? [...baseSidebarItems.slice(0, 3), UPLOAD_ITEM, ...baseSidebarItems.slice(3)]
+        : baseSidebarItems;
 
     return (
         <div className="min-h-screen bg-white">
@@ -263,12 +280,19 @@ export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
             {/* Mobile Bottom Nav */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 md:hidden">
                 <div className="flex items-center justify-around h-[49px]">
-                    {bottomNavItems.map((item, i) => {
+                    {sidebarItems.map((item) => {
                         const isActive = pathname === item.href;
+                        const isUpload = item.href === "/montz/upload";
                         return (
-                            <Link key={i} href={item.href} className="relative flex flex-col items-center justify-center gap-1 p-2">
+                            <Link key={item.href} href={item.href} aria-label={item.label} className="relative flex flex-col items-center justify-center gap-1 p-2">
                                 <item.icon
-                                    className={`h-[24px] w-[24px] transition-all ${isActive ? "stroke-[2.2] text-neutral-900" : "stroke-[1.5] text-neutral-500"}`}
+                                    className={`h-[24px] w-[24px] transition-all ${
+                                        isUpload
+                                            ? `stroke-[2] ${isActive ? "text-neutral-900" : "text-[#c8a97e]"}`
+                                            : isActive
+                                                ? "stroke-[2.2] text-neutral-900"
+                                                : "stroke-[1.5] text-neutral-500"
+                                    }`}
                                 />
                                 <span className={`h-[3px] w-[3px] rounded-full transition-colors ${isActive ? "bg-neutral-900" : "bg-transparent"}`} />
                             </Link>
