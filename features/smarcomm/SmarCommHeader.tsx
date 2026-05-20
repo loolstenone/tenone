@@ -18,7 +18,7 @@ export default function SmarCommHeader() {
     <>
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className="flex items-center text-xl tracking-[-0.03em]">
+        <Link href={currentPath.startsWith('/smarcomm') ? '/smarcomm' : '/'} className="flex items-center text-xl tracking-[-0.03em]">
           <span className="font-light text-text">Smar</span>
           <span className="font-semibold text-text">Comm</span>
           <span className="font-semibold text-text">.</span>

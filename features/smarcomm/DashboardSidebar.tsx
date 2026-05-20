@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { PACK_TIER, TIER_ORDER, type UserTier } from '@/lib/smarcomm/tier-policy';
 const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 // 팩 타입: core=항상 보임, action/crm/experiment/ops/launch=확장팩
@@ -132,24 +133,7 @@ interface Props {
   companyLogo?: string;
 }
 
-// 사용자 티어 — DB plan_key (wio_subscriptions) 기준
-// free → starter → pro → business
-type UserTier = 'free' | 'starter' | 'pro' | 'business';
-
-// 팩별 필요 티어
-// Free   : Core (홈/스캔/AI 가시성/리포트/Insights/퍼널/트래픽/Assets/AI Tracker)
-// Starter: + 액션팩 (Advisor·Creative·Content·Archive) + CRM팩 (Kakao·Email·Push)
-// Pro    : + 실험팩 (Cohort·A/B·AIRM·Journey·Events) + 운영팩 (Calendar·Workflow)
-// Business: + 집행팩 (Launch)
-const PACK_TIER: Record<string, UserTier> = {
-  core: 'free',
-  action: 'starter',
-  crm: 'starter',
-  experiment: 'pro',
-  ops: 'pro',
-  launch: 'business',
-  setting: 'free',
-};
+// 사용자 티어 SSOT: lib/smarcomm/tier-policy.ts
 
 export default function DashboardSidebar({ companyName, companyLogo }: Props) {
   const pathname = usePathname();
@@ -171,7 +155,6 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
     return () => { alive = false; };
   }, [user?.email]);
 
-  const TIER_ORDER: UserTier[] = ['free', 'starter', 'pro', 'business'];
   const userTierIndex = TIER_ORDER.indexOf(userTier);
 
   return (

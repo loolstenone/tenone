@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-20 (세션 144 — ANTHROPIC 만료 오해 정정 + Marvis 진단 활성화)
+> 마지막 업데이트: 2026-05-21 (세션 145 — SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계서)
 
 ---
 
@@ -12,7 +12,8 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| _(현재 활성 워크트리 없음 — 세션 144 종료. trusting-visvesvaraya-1024ad master 머지 후 정리)_ | | | | |
+| `claude/vibrant-sammet-3259e9` | brand/smarcomm | SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계 | 세션 145 종료 | Phase 3.1 진입 시 §9 옵션 A/B/C 결정 후 `lib/email/send-broadcast.ts` 헬퍼 추출 (intra send route 71~228줄 추출, 회귀 테스트 포함) |
+| _(세션 144 활성 워크트리 trusting-visvesvaraya-1024ad는 master 머지 후 정리됨)_ | | | | |
 
 ### ⚠️ Dangling 워크트리 (정리 필요)
 
@@ -26,6 +27,63 @@
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
 | `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+
+---
+
+## 세션 145 핵심 성과 (2026-05-21)
+
+### ① SmarComm Workspace 32개 페이지 감사 + orphan 정리
+
+**감사 결과**: 사이드바 32개 메뉴 모두 페이지 파일 존재(404 0건). 사이드바 외 orphan stub 6개(`analytics`, `data-reports`, `geo/{brand,competitors,tracking}`, `workflow/pipeline`) 발견 → 삭제. `lib/smarcomm/workflow-context.tsx`(mock-only 사본)는 어디서도 import 안 됨 → 삭제. 사이드바 사용 중인 `lib/workflow-context.tsx`(루트)는 이미 `/api/smarcomm/workflow/*` API 동기화 완료 — 추가 작업 불필요.
+
+`app/(SmarComm)/smarcomm/dashboard/layout.tsx`의 `MOCK_PATH_PREFIXES`에서 지운 5개 + `nameMap`에서 잔재 6개 항목 청소.
+
+### ② TierGate SSOT 신설 + 페이지 자동 보호
+
+**문제**: 기존 `features/smarcomm/TierGate.tsx`가 **stale** — tier 명칭(`starter/growth/pro/enterprise`)이 sidebar(`free/starter/pro/business`)와 불일치, `useAuth()` 직접 판정해 `/api/smarcomm/me/plan` 미사용, 어디서도 import 안 됨.
+
+**해결**:
+- [lib/smarcomm/tier-policy.ts](lib/smarcomm/tier-policy.ts) **신설 SSOT** — `UserTier`, `TIER_ORDER`, `TIER_LABELS`, `PACK_TIER`, `PATH_TO_PACK`, `getRequiredTier(pathname)`, `hasAccess()`
+- [features/smarcomm/TierGate.tsx](features/smarcomm/TierGate.tsx) **리팩** — 4-tier 통일, `/api/smarcomm/me/plan` API 사용, `/smarcomm/pricing` 링크
+- [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/DashboardSidebar.tsx) — `PACK_TIER`·`UserTier`·`TIER_ORDER` 모두 SSOT에서 import
+- [app/(SmarComm)/smarcomm/dashboard/layout.tsx](app/(SmarComm)/smarcomm/dashboard/layout.tsx) — `<TierGate requiredTier={getRequiredTier(pathname)}>` 으로 children 자동 wrap → **페이지 20개 손 안 대고 티어 게이트 적용**
+
+**검증**: master_email 자동 business → 모든 페이지 200 ✓. `/smarcomm/pricing`이 DB `wio_subscription_plans`에서 Free/Starter/Pro/Business 4-tier 동적 렌더 → TierGate 명칭과 정합 ✓.
+
+### ③ SmarComm Phase 3 설계서 작성
+
+[docs/SmarComm_Phase3_Plan.md](docs/SmarComm_Phase3_Plan.md) 10 섹션. 사용자 의사결정 7개(D1~D7) + 구현 옵션 3개(§9 A/B/C) 정리.
+
+**핵심 발견 (이 세션)**: 인트라에 이미 작동하는 풀스택 이메일 발송 인프라 존재 — `/api/intra/crm/broadcast/send/route.ts` 229줄에 Resend 배치·세그먼트·예약·변수치환·List-Unsubscribe·email_sends 로그 구현 완료. SmarComm Phase 3.1은 새로 만드는 게 아니라 **재사용 vs 재구축** 결정 문제. 권장: **옵션 A (공용 헬퍼 추출 + SmarComm 라우트 신설)** — 1.5 세션.
+
+**모순 발견**: `smarcomm_broadcasts`(BroadcastPage용, 발송 X) vs `crm_campaigns`(인트라용, 발송 O) 2개 시스템 분리 — CLAUDE.md §1.10 위반 소지. 옵션 C(통합)로 가는 길의 1단계로 옵션 A 자연스러움.
+
+### ④ 워크트리 의존성 + dev 서버 정상화
+
+- `npm install` (워크트리에 의존성 부재)
+- `npm install lightningcss-win32-x64-msvc` (Tailwind v4 Windows native binding 누락)
+- `.next` 캐시 정리 + dev 서버 재기동
+- 모든 페이지 200 회귀 없음 확인
+
+### ⑤ 라이트 진단 제거 + WORK 드롭다운 Myverse 제거 (세션 시작 시점)
+
+- `app/(SmarComm)/smarcomm/marvis/scan/page.tsx` + `marvis/report/[id]/page.tsx` 삭제
+- `marvis/page.tsx` FeatureCard href `/smarcomm/marvis/scan` → `/smarcomm`
+- `scan/page.tsx` `from=marvis` 분기 제거 (항상 `/smarcomm/report/[id]`로)
+- `components/UniverseUtilityBar.tsx` `WORKSPACE_REGISTRY`에서 Myverse 제거 (Myverse는 개별 서비스, 워크스페이스 아님)
+
+### 🎯 다음 세션 첫 액션 (세션 145 종료 시점 갱신)
+
+**사용자 결정 필요** (Phase 3.1 진입 전):
+1. **§9 옵션 A/B/C 중 선택** — [docs/SmarComm_Phase3_Plan.md §9](docs/SmarComm_Phase3_Plan.md) 비교 후. 권장: **A (공용 헬퍼 추출 + SmarComm 라우트)** — 1.5 세션.
+2. **D1~D7 결정** — 카카오 공급사·푸시 범위·자동화 인프라 (§7 표).
+
+**옵션 A 선택 시 Claude 첫 5 액션** (§9-G):
+1. `lib/email/send-broadcast.ts` 신설 — `/api/intra/crm/broadcast/send/route.ts:71-228` 추출
+2. 인트라 라우트가 헬퍼 호출하도록 변경 + 회귀 테스트
+3. `crm_campaigns`에 `tenant_owner`/`created_by_service` 컬럼 추가 (smarcomm 격리)
+4. `/api/smarcomm/email/send/route.ts` 신설 — SmarComm 권한 검증 + 헬퍼 호출
+5. SmarComm `/dashboard/crm/email/page.tsx`에 "내 캠페인" 섹션 + 발송 버튼 (UI 모달은 Phase 3.1.2)
 
 ---
 

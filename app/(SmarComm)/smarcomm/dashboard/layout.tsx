@@ -10,6 +10,8 @@ import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
 import { getSetting } from '@/lib/supabase/settings';
+import TierGate from '@/features/smarcomm/TierGate';
+import { getRequiredTier } from '@/lib/smarcomm/tier-policy';
 
 // SmarComm CLAUDE.md § 1A 라우트 노출 정책 (2026-05-19):
 // Marvis 런칭 시점에 /smarcomm/dashboard/* (Pro 자산)은 비공개.
@@ -25,14 +27,9 @@ function isProAccessAllowed(user: { email?: string; accountType?: string; role?:
 }
 
 // Mock 데이터로만 작동하는 경로 — 사이드바 DEV 배지와 정합
-// 실제 API 연결된 페이지는 제외 (scan·advisor·creative·insights·ai-tracker·airm·assets·admin·profile·members·guide·glossary)
+// 실제 API 연결된 페이지는 제외
 const MOCK_PATH_PREFIXES = [
-  '/smarcomm/dashboard/geo/competitors',
-  '/smarcomm/dashboard/geo/brand',
-  '/smarcomm/dashboard/geo/tracking',
   '/smarcomm/dashboard/content',
-  '/smarcomm/dashboard/analytics',
-  '/smarcomm/dashboard/data-reports',
 ];
 
 function isMockPath(pathname: string | null): boolean {
@@ -80,16 +77,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const nameMap: Record<string, string> = {
       '/dashboard': '대시보드', '/dashboard/funnel': '퍼널 분석', '/dashboard/scan': 'GEO & SEO 진단',
-      '/dashboard/traffic': '트래픽 분석', '/dashboard/analytics': '매출 분석', '/dashboard/reports': '캠페인 보고서',
-      '/dashboard/data-reports': '데이터 리포트', '/dashboard/geo': '가시성 개요', '/dashboard/geo/competitors': '경쟁사 리서치',
-      '/dashboard/geo/prompts': '프롬프트 리서치', '/dashboard/geo/brand': '브랜드 실적', '/dashboard/geo/tracking': '프롬프트 추적',
+      '/dashboard/traffic': '트래픽 분석', '/dashboard/reports': '캠페인 보고서',
+      '/dashboard/geo': 'AI 가시성', '/dashboard/geo/prompts': '프롬프트 관리',
       '/dashboard/creative': 'AI 소재 제작', '/dashboard/content': '콘텐츠', '/dashboard/advisor': 'AI 어드바이저',
       '/dashboard/crm': '고객 관리', '/dashboard/crm/kakao': '카카오', '/dashboard/crm/email': '이메일',
       '/dashboard/crm/push': '푸시', '/dashboard/abtest': 'A/B 테스트', '/dashboard/journey': '사용자 여정',
       '/dashboard/cohort': '코호트', '/dashboard/events': 'AI 답변 변화', '/dashboard/workflow/projects': '프로젝트',
-      '/dashboard/workflow/kanban': '칸반 보드', '/dashboard/calendar': '캘린더', '/dashboard/workflow/pipeline': '파이프라인',
-      '/dashboard/archive': '소재 아카이브', '/dashboard/campaigns': '광고 캠페인', '/dashboard/workflow/automation': '자동화',
-      '/dashboard/admin': '사이트 관리', '/dashboard/profile': '워크스페이스',
+      '/dashboard/workflow/kanban': '칸반 보드', '/dashboard/calendar': '캘린더',
+      '/dashboard/archive': '소재 아카이브', '/dashboard/workflow/automation': '자동화',
+      '/dashboard/profile': '워크스페이스',
     };
     const loadFavs = async () => {
       // DB-first (user_settings) → localStorage fallback
@@ -205,7 +201,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         )}
         <div className="p-6">
-          {children}
+          <TierGate
+            requiredTier={getRequiredTier(pathname)}
+            featureName="이 기능은 상위 플랜에서 사용 가능합니다"
+            featureDesc="플랜을 업그레이드하면 SmarComm의 모든 기능을 활용할 수 있습니다."
+          >
+            {children}
+          </TierGate>
         </div>
       </main>
 

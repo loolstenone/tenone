@@ -71,8 +71,8 @@ export default function MarvisDashboard() {
                             title="진단 — SEO·GEO·퍼널"
                             desc="종합 점수 1개 + 등급 + 핵심 권고 3개"
                             status="lite_available"
-                            statusLabel="Pro에 풀 진단"
-                            href="/smarcomm/marvis/scan"
+                            statusLabel="진단 시작"
+                            href="/smarcomm"
                         />
                         <FeatureCard
                             icon={Sparkles}

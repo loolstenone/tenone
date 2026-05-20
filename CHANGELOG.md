@@ -4,6 +4,66 @@
 
 ---
 
+## 2026-05-21 (세션 145) — SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계서
+
+### 워크트리 / 장소
+
+- 워크트리: `claude/vibrant-sammet-3259e9` (단일)
+- 장소: 미상
+- Base: master `08f55aee`
+
+### ① SmarComm Workspace 32개 페이지 감사
+
+사이드바 32개 메뉴 vs 파일 시스템 교차 점검 — 404 0건. orphan stub 6개 발견·삭제. `lib/smarcomm/workflow-context.tsx`(mock-only 사본, dead code) 삭제. 루트 `lib/workflow-context.tsx`는 이미 `/api/smarcomm/workflow/*` API 동기화 완료 확인.
+
+**삭제**:
+- `app/(SmarComm)/smarcomm/dashboard/{analytics,data-reports,workflow/pipeline}/page.tsx`
+- `app/(SmarComm)/smarcomm/dashboard/geo/{brand,competitors,tracking}/page.tsx`
+- `lib/smarcomm/workflow-context.tsx`
+
+**청소**: [app/(SmarComm)/smarcomm/dashboard/layout.tsx](app/(SmarComm)/smarcomm/dashboard/layout.tsx) `MOCK_PATH_PREFIXES` 5개 + `nameMap` 6개 잔재.
+
+### ② TierGate 시스템 SSOT 신설
+
+기존 [features/smarcomm/TierGate.tsx](features/smarcomm/TierGate.tsx)가 stale (tier 명칭 불일치 `starter/growth/pro/enterprise`, `useAuth()` 직접 판정, 미사용). 4-tier 통일·SSOT 도입.
+
+- **신설** [lib/smarcomm/tier-policy.ts](lib/smarcomm/tier-policy.ts) — `UserTier`, `TIER_ORDER`, `TIER_LABELS`, `PACK_TIER`, `PATH_TO_PACK`, `getRequiredTier(pathname)`, `hasAccess()`
+- **리팩** [features/smarcomm/TierGate.tsx](features/smarcomm/TierGate.tsx) — `/api/smarcomm/me/plan` API 사용, 4-tier(free/starter/pro/business), `/smarcomm/pricing` 링크
+- **마이그** [features/smarcomm/DashboardSidebar.tsx](features/smarcomm/DashboardSidebar.tsx) — PACK_TIER·UserTier·TIER_ORDER SSOT 임포트
+- **자동 wrap** [app/(SmarComm)/smarcomm/dashboard/layout.tsx](app/(SmarComm)/smarcomm/dashboard/layout.tsx) — `<TierGate requiredTier={getRequiredTier(pathname)}>` 으로 children 자동 보호. 페이지 20개 손 안 대고 적용.
+
+**검증**: master_email 자동 business → 모든 페이지 200. `/smarcomm/pricing` DB 동적 렌더 Free/Starter/Pro/Business 4-tier — TierGate 명칭 정합.
+
+### ③ SmarComm Phase 3 설계서
+
+**신설** [docs/SmarComm_Phase3_Plan.md](docs/SmarComm_Phase3_Plan.md) (10 섹션):
+- §1~6: 카카오·푸시·이메일·자동화 인프라 옵션 + DB 스키마
+- §7: 사용자 결정 7개(D1~D7) 권장 정리
+- §8: 단계별 첫 액션
+- **§9 (이번 세션 발견 후 추가)**: 인트라 발송 인프라(`/api/intra/crm/broadcast/send/route.ts` 229줄) 재발견 → 옵션 A/B/C 비교, 권장 A (공용 헬퍼 추출 + SmarComm 라우트, 1.5 세션)
+
+**모순 식별**: `smarcomm_broadcasts` vs `crm_campaigns` 2개 시스템 분리 — CLAUDE.md §1.10 위반 소지.
+
+### ④ 워크트리 환경 정상화
+
+- `npm install` (워크트리 의존성 누락)
+- `lightningcss-win32-x64-msvc` 별도 설치 (Tailwind v4 Windows native binding)
+- `.next` 캐시 정리 + dev 서버 재기동
+- 모든 페이지 200 회귀 없음 확인
+
+### ⑤ 세션 시작 직후 정리 작업
+
+- [components/UniverseUtilityBar.tsx](components/UniverseUtilityBar.tsx) WORKSPACE_REGISTRY에서 **Myverse 제거** (Myverse는 개별 B2C 서비스, 워크스페이스 아님)
+- Marvis 라이트 진단 제거: `marvis/scan/page.tsx` + `marvis/report/[id]/page.tsx` 삭제, `marvis/page.tsx`의 FeatureCard href를 풀 진단(`/smarcomm`)으로
+- `scan/page.tsx`의 `from=marvis` 분기 제거 (라이트 페이지 사라졌으므로)
+
+### 의사결정 보류 (다음 세션 사용자 결정 필요)
+
+- §9 옵션 A/B/C 선택
+- D1~D7 (카카오 공급사·푸시 범위·자동화 인프라)
+
+---
+
 ## 2026-05-20 (세션 144) — ANTHROPIC "만료" 오해 정정 + Marvis 진단(#2) 즉시 활성화
 
 ### 워크트리 / 장소

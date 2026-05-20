@@ -12,7 +12,6 @@ import { LoginModal } from "@/components/LoginModal";
 // 새 브랜드 추가 시 여기 한 줄만 추가하면 전 사이트에서 자동 반영.
 interface WorkspaceEntry { brandId: string; label: string; path: string; description?: string; }
 const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
-    { brandId: "myverse",      label: "Myverse",              path: "/myverse/app",     description: "9 영역 자동 정리 + 능동 AI 플래너 + @handle 공개" },
     { brandId: "badak",        label: "Badak",                path: "/badak/my",        description: "기획자 네트워크" },
     { brandId: "madleague",    label: "MAD League",           path: "/madleague/my",    description: "현역·OB" },
     { brandId: "madleap",      label: "MADLeap",              path: "/madleap/my",      description: "교육 프로그램" },
