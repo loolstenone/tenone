@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-19 (세션 143 — 워크트리 정리 8→1)
+> 마지막 업데이트: 2026-05-20 (세션 144 — ANTHROPIC 만료 오해 정정 + Marvis 진단 활성화)
 
 ---
 
@@ -12,7 +12,11 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| _(현재 활성 워크트리 없음 — 세션 143 종료)_ | | | | |
+| _(현재 활성 워크트리 없음 — 세션 144 종료. trusting-visvesvaraya-1024ad master 머지 후 정리)_ | | | | |
+
+### ⚠️ Dangling 워크트리 (정리 필요)
+
+`C:\Projects\tenone\.claude\worktrees\cranky-murdock-a0c05b` — `git worktree list`에는 안 잡히는데 디렉토리는 잔존. dev 서버가 그 안에서 가동 중(`build-manifest.json` ENOENT 에러 상태). 로컬 브랜치 `claude/cranky-murdock-a0c05b` + origin 동명 브랜치 존재. 세션 143 종료 시 "결과: cranky-murdock-a0c05b 1개만 활성"로 표기됐던 워크트리. 다음 세션에서 ① 서버 stop → ② 디렉토리 검증(미커밋 없는지) → ③ `git worktree remove --force` 또는 디렉토리 직접 삭제 → ④ origin 백업 결정.
 
 ### 활성 backup 브랜치 (origin)
 
@@ -22,6 +26,50 @@
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
 | `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+
+---
+
+## 세션 144 핵심 성과 (2026-05-20)
+
+### ① ANTHROPIC_API_KEY "만료" 오해 표현 전수 정정
+
+**문제**: WORK_STATUS·CHANGELOG·코드 6곳에 "ANTHROPIC_API_KEY 만료/갱신 필요"로 적혀 있어, 매번 시간 만료되는 것처럼 미래 세션이 오해. 실제 Anthropic 키는 revoke·rotate되지 않는 한 영구 유효 — 매 세션 갱신할 일 아님. 401은 (a) env 불일치, (b) 회수/회전, (c) 결제·크레딧, (d) workspace 변경 중 하나의 원인.
+
+**정정 위치 7곳**:
+- [lib/agent/claude.ts:347-356](lib/agent/claude.ts:347) — 사용자 노출 401 메시지: "자동 만료 아님 + 4가지 원인 진단 + 1회 셋업 복구" 박스로 재작성
+- [WORK_STATUS.md:42](WORK_STATUS.md:42) — 다음 첫 액션 #1 진단 순서 ①②③ + "매번 갱신할 일 아님" 명시
+- [WORK_STATUS.md:101](WORK_STATUS.md:101) — 세션 142 성과 #5 문구
+- [WORK_STATUS.md:103](WORK_STATUS.md:103) — 알려진 차단 박스: "자동 만료가 아니므로 매번 갱신할 일 아님" 강조
+- [app/(Dokdae)/CLAUDE.md:91](app/(Dokdae)/CLAUDE.md:91) — Dokdae 가이드 동일 정정
+- [app/api/smarcomm/creative/generate/route.ts:178](app/api/smarcomm/creative/generate/route.ts:178) — API hint
+- [app/api/smarcomm/advisor/campaign-plan/route.ts:70](app/api/smarcomm/advisor/campaign-plan/route.ts:70) — API hint
+- [app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) §15 — 이월 작업 + 블로커 표현 정정
+
+### ② Marvis 진단 (#2) 즉시 활성화
+
+**문제**: `/smarcomm/marvis/scan`의 "진단 시작" 버튼이 [marvis/scan/page.tsx:55-60](app/(SmarComm)/smarcomm/marvis/scan/page.tsx:55)에서 `disabled` 하드코딩 + "Phase 1에서 활성화" 안내. 사용자가 "분석 자체가 안 됨" 보고.
+
+**해결**: `disabled` 해제 + `handleSubmit` 추가. URL 검증(`new URL`·hostname dot check) 통과 시 `/smarcomm/scan?url={encoded}&from=marvis`로 라우팅. 기존 작동 중인 SmarComm Index 엔진(`/api/smarcomm/scan` → `runFullScan` → `/smarcomm/report/[id]`)을 그대로 위임 — 라이트화는 차후 세션에서 결과 페이지 variant로.
+
+**정직성 보존**: ANTHROPIC_API_KEY 401 상태에서도 기술 SEO·Schema·CWV 측정은 작동, Citability는 N/A. 가짜 Mock 데이터 노출 0.
+
+**검증**: tsc 0 에러. 화면 검증은 dev 서버가 dangling 워크트리(`cranky-murdock-a0c05b`)에서 가동 중이라 보류 — 다음 세션에서 서버 정리 후 재검증.
+
+### 🎯 다음 세션 첫 액션 (세션 144 종료 시점 갱신)
+
+**사용자 직접**:
+1. **ANTHROPIC_API_KEY 401 진단** — 위 ① 참조. console.anthropic.com → `.env.local` 3곳 ↔ Vercel Env 동기화 확인 → 1회 셋업으로 종결.
+2. **카페24 dev sandbox 등록 + webhook 실측** — Marvis #1·#3·#4 모든 데이터 소스의 전제. cart 제외 order·review만. https://developers.cafe24.com
+
+**코드 작업**:
+3. **Dangling 워크트리 정리** — `cranky-murdock-a0c05b` 디렉토리 + dev 서버 stop → 미커밋 검증 → 디렉토리 삭제 → origin 백업 판단.
+4. **Marvis #2 진단 결과 라이트화** — `/smarcomm/report/[id]?from=marvis` 또는 `/smarcomm/marvis/report/[id]` 신규 — 종합 점수 + 등급 S/A/B/C/D + 핵심 권고 3개만 노출. 풀 진단(5 AI 플랫폼·Schema Generator·Trend)은 Pro 게이트.
+5. **Marvis #1 대시보드 — 카페24 연동 자리** — `/smarcomm/marvis/page.tsx`의 `connection="not_connected"` 하드코딩 해제. `lib/marvis/connection.ts` 신규: `getConnectionState(userId)` 함수가 `marvis_connections` 테이블 조회. 테이블 없을 땐 정직하게 "not_connected" 반환. 다음 단계 카페24 OAuth 연결 화면 자리만 준비.
+6. **Marvis #3 RFM 백엔드 골격** — `lib/marvis/rfm.ts` + SQL: `marvis_orders`(주문 sync), `marvis_customers`(RFM 점수), `marvis_drafts`(AI 초안). webhook 도착 즉시 작동하도록 함수만 미리. 데이터 없으면 빈 결과.
+7. **Marvis #4 이메일 1탭 승인** — `/api/marvis/approve` POST 라우트 + Resend 발송 함수 + 사장님 승인 UI. 실 데이터는 webhook 후.
+8. **TierGate 3티어 통일** — `marvis|pro|platinum` 단일화 + PACK_TIER 재조정.
+9. **Marvis USER_SCENARIO** — "박정수(1인 사장님) 4주 흐름" 신설.
+10. **Jakka 실결제 PG 연동** (Phase 2-B): 별도 트랙.
 
 ---
 
@@ -39,7 +87,7 @@
 ### 🎯 다음 세션 첫 액션 (세션 143 종료 시점 갱신)
 
 **사용자 직접 (시크릿·외부 등록)**:
-1. **ANTHROPIC_API_KEY 갱신** — `.env.local` + Vercel env 만료 (401). `dokdae.tenone.biz` 단체방 실 LLM 응답 위해 필수. https://console.anthropic.com/settings/keys → 양쪽 갱신 → 빈 commit + push 재배포. Supabase Edge Function 키는 별개로 유효 (trend-crawl 정상).
+1. **ANTHROPIC_API_KEY 401 진단** — Anthropic 키는 시간 만료되지 않음(revoke·rotate 외 영구 유효). 매번 갱신할 일 아님. 진단 순서: ① console.anthropic.com/settings/keys에서 active/revoked 확인 ② `.env.local`(집·사무실) ↔ Vercel Env 3곳 키 prefix 일치 확인 ③ console > Billing 카드·잔액 점검. 원인 확정되면 새 키 1개 발급 → 3곳 동일 셋업(반복 갱신 아님). `dokdae.tenone.biz` 단체방 실 LLM 응답 차단 중. Supabase Edge Function 키는 별개로 유효(trend-crawl 정상).
 2. **카페24 dev sandbox 등록 + webhook 실측** — Marvis Phase 1 MVP의 데이터 파이프 전제조건. cart는 미루고 order·review 안정성만 확인. https://developers.cafe24.com 가입 → 앱 등록 → 테스트 스토어 webhook 실측.
 
 **코드 작업 (다음 세션 Claude 진행 가능)**:
@@ -98,9 +146,9 @@
 2. **@멘션 자동완성** — 입력 끝에 `@\w*` 패턴이면 매칭 에이전트 6명 dropdown(입력바 위 가로 스크롤). 1001은 후보 제외
 3. **메시지 검색** — 헤더 돋보기 아이콘 토글 → 검색 입력. `text.toLowerCase().includes(q)` 필터. 결과 없으면 안내
 4. **연속 발화 아바타 생략** — 같은 에이전트가 연속이면 아바타 생략 (카카오톡 패턴)
-5. **API 401 친절화** — [lib/agent/claude.ts](lib/agent/claude.ts) Anthropic 401일 때 raw JSON 대신 "키 만료 + 갱신 4단계" 안내. 429/529도 명확 메시지
+5. **API 401 친절화** — [lib/agent/claude.ts](lib/agent/claude.ts) Anthropic 401일 때 raw JSON 대신 "자동 만료 아님 + 4가지 원인 진단(키 불일치/회수/결제/workspace) + 1회 셋업 복구" 안내. 429/529도 명확 메시지
 
-> **알려진 차단**: `.env.local`의 `ANTHROPIC_API_KEY` 만료 → 1:1·단체방 실 LLM 호출 401. 사용자 직접 키 갱신 필요(Supabase Edge Function 키는 별개, trend-crawl 정상 가동).
+> **알려진 차단**: `ANTHROPIC_API_KEY` 401 → 1:1·단체방 실 LLM 호출 차단. **자동 만료가 아니므로 매번 갱신할 일 아님** — `.env.local`(집·사무실) ↔ Vercel Env 3곳 키 불일치, 회수/회전, 결제 상태 중 하나로 진단 후 1회 셋업으로 종결. Supabase Edge Function 키는 별개, trend-crawl 정상 가동.
 
 ### 독대 → Universe 단체방 채팅 환경 고도화
 

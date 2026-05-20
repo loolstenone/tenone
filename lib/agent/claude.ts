@@ -344,13 +344,16 @@ export async function invokeAgent(params: {
       const status = (error as { status?: number })?.status;
       if (status === 401) {
         responseText =
-          '🔑 **ANTHROPIC_API_KEY가 만료되었거나 유효하지 않습니다.**\n\n' +
-          '코드는 정상이고 키 문제입니다. 텐원 직접 조치 필요:\n\n' +
-          '1. https://console.anthropic.com/settings/keys 에서 새 키 발급\n' +
-          '2. `.env.local`의 `ANTHROPIC_API_KEY` 갱신\n' +
-          '3. Vercel Dashboard > Environment Variables도 갱신 (프로덕션용)\n' +
-          '4. 로컬 dev 서버 재시작 (`preview_start` 재호출), Vercel은 재배포 자동\n\n' +
-          '📌 참고: Supabase Edge Function 환경변수는 별개입니다. trend-crawl은 정상 가동 중(15:15 KST 257건 수집).';
+          '🔑 **ANTHROPIC_API_KEY 인증 실패 (401).**\n\n' +
+          '⚠️ Anthropic 키는 시간으로 자동 만료되지 않습니다. revoke·rotate되지 않는 한 영구 유효합니다.\n' +
+          '아래 중 어떤 원인인지 먼저 진단하세요:\n\n' +
+          '1. **키 불일치** — `.env.local`(집·사무실) ↔ Vercel Env 3곳이 같은 키인지 확인 (한 군데만 바꿨을 때 가장 흔함)\n' +
+          '2. **키 회수/회전** — https://console.anthropic.com/settings/keys 에서 active/revoked 상태 확인\n' +
+          '3. **결제·크레딧** — console > Settings > Billing — 카드 만료/잔액 부족 시 workspace 비활성, 키가 살아 있어도 401 응답\n' +
+          '4. **Workspace 변경** — 키가 의도한 workspace/org 소속인지 확인\n\n' +
+          '복구 (반복 갱신이 아니라 1회 셋업):\n' +
+          '• 진단으로 원인 특정 → 필요 시 새 키 1개 발급 → `.env.local`(집·사무실) + Vercel Env 3곳에 동일 셋업 → dev 재시작\n\n' +
+          '📌 Supabase Edge Function 환경변수는 별개 (trend-crawl 정상 가동 중).';
       } else if (status === 429) {
         responseText = '⏱ Anthropic API 사용량 제한(429). 잠시 후 다시 시도하거나 결제 상태를 확인하세요.';
       } else if (status === 529) {

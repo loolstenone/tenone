@@ -88,7 +88,7 @@
 | **@멘션 자동완성** | 입력 끝에 `@\w*` 패턴이면 매칭 에이전트 6명 dropdown (입력바 위 가로 스크롤). 1001은 후보 제외 |
 | **메시지 검색** | 헤더 돋보기 아이콘 → 검색 입력. messages를 `text.toLowerCase().includes(q)`로 필터. 결과 없으면 "&ldquo;...&rdquo; 해당 메시지 없음" 안내 |
 | **연속 발화 아바타 생략** | 같은 에이전트가 연속으로 말하면 아바타 생략 (카카오톡 패턴) |
-| **API 401 친절화** | [lib/agent/claude.ts](../../lib/agent/claude.ts) — Anthropic 401일 때 raw JSON 대신 "키 만료 + 갱신 절차 4단계" 안내 박스. 429/529도 명확 메시지 |
+| **API 401 친절화** | [lib/agent/claude.ts](../../lib/agent/claude.ts) — Anthropic 401일 때 raw JSON 대신 "자동 만료 아님 + 4가지 원인 진단(키 불일치 / 회수 / 결제 / workspace) + 1회 셋업 복구" 안내 박스. 429/529도 명확 메시지 |
 
 ### 단체방 메시지 패턴 (agent_messages 테이블)
 

@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
       console.error('Claude API error:', aiError);
       return NextResponse.json({
         error: 'AI 소재 생성 호출 실패',
-        hint: 'API 키 만료/한도 초과 가능. § 1.10 정직 원칙에 따라 휴리스틱 fallback 폐기.',
+        hint: 'ANTHROPIC_API_KEY 401 또는 429 의심. Anthropic 키는 자동 만료되지 않음 — env 불일치/회수/결제 중 진단 필요. § 1.10 정직 원칙에 따라 휴리스틱 fallback 폐기.',
       }, { status: 502 });
     }
   } catch (error) {

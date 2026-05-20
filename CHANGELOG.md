@@ -4,6 +4,69 @@
 
 ---
 
+## 2026-05-20 (세션 144) — ANTHROPIC "만료" 오해 정정 + Marvis 진단(#2) 즉시 활성화
+
+### 워크트리 / 장소
+
+- 워크트리: `claude/trusting-visvesvaraya-1024ad` (단일)
+- 장소: 미상
+- Base: master `72ccd6cf` (origin과 ahead·behind 0)
+
+### ① ANTHROPIC_API_KEY "만료" 오해 표현 전수 정정 (7곳)
+
+**배경**: 사용자가 "ANTHROPIC_API_KEY 갱신은 매번 해야 하는거야?" 질문. 코드·문서 6곳에서 401을 "만료"로 안내하고 있어, 매 세션 시간 만료되는 것처럼 미래 세션이 오해. 실제로는 revoke·rotate되지 않는 한 영구 유효. 401의 진짜 원인은 4가지:
+1. `.env.local`(집·사무실) ↔ Vercel Env 3곳 키 불일치 (가장 흔함)
+2. console에서 키 회수/회전
+3. 결제·크레딧 (카드 만료 시 workspace 비활성)
+4. Workspace 변경 (키가 의도와 다른 org 소속)
+
+**정정 파일**:
+- [lib/agent/claude.ts:347-356](lib/agent/claude.ts:347) — 사용자 노출 401 메시지를 "자동 만료 아님 + 4가지 원인 진단 + 1회 셋업 복구" 박스로 재작성. 단체방·1:1 채팅에서 401 발생 시 이 박스가 노출됨.
+- [WORK_STATUS.md:42](WORK_STATUS.md:42) — 다음 첫 액션 #1: 진단 순서 ①②③ + "매번 갱신할 일 아님" 명시
+- [WORK_STATUS.md:101, 103](WORK_STATUS.md:101) — 세션 142 성과 + 알려진 차단 박스 표현 정정
+- [app/(Dokdae)/CLAUDE.md:91](app/(Dokdae)/CLAUDE.md:91) — Dokdae 가이드 동일 정정
+- [app/api/smarcomm/creative/generate/route.ts:178](app/api/smarcomm/creative/generate/route.ts:178) + [app/api/smarcomm/advisor/campaign-plan/route.ts:70](app/api/smarcomm/advisor/campaign-plan/route.ts:70) — 두 API의 502 hint 정정
+- [app/(SmarComm)/CLAUDE.md](app/(SmarComm)/CLAUDE.md) §15 — 이월 작업 + 블로커 라인 정정
+
+### ② Marvis 진단 (#2) 즉시 활성화 — `/smarcomm/marvis/scan` disabled 해제
+
+**배경**: 사용자가 "SmarComm Marvis 작동이 안 된다 / 분석 자체가" 보고. 진단 결과, 페이지 [marvis/scan/page.tsx:55-60](app/(SmarComm)/smarcomm/marvis/scan/page.tsx:55)의 "진단 시작" 버튼이 `disabled` 하드코딩 + `title="Phase 1에서 활성화"`. 정직성 원칙(SmarComm CLAUDE.md § ZERO)에 따라 가짜 Mock 노출 금지로 의도적 잠금.
+
+**해결**:
+- `disabled` 해제 + `useRouter`·`useState` 추가
+- `normalizeUrl()` 함수: `http://`/`https://` 자동 prefix + `new URL()` 검증 + hostname dot 체크 (잘못된 URL 즉시 에러)
+- `handleSubmit()`: 검증 통과 시 `router.push('/smarcomm/scan?url={encoded}&from=marvis')`로 기존 SmarComm Index 엔진에 위임
+- UI: 인라인 에러 박스(빨강 alert) + 입력 시 자동 클리어 + autoFocus
+- 안내 문구: "Phase 1에서 활성화" → "SmarComm Index 엔진을 재사용한 라이트 진단입니다. 풀 진단(Pro)에서는 5 AI 플랫폼·Schema Generator·Trend가 추가됩니다."
+
+**위임 흐름**:
+```
+/smarcomm/marvis/scan (URL 입력)
+   → router.push('/smarcomm/scan?url=...&from=marvis')
+   → /smarcomm/scan 클라이언트 useEffect (기존)
+   → POST /api/smarcomm/scan
+   → runFullScan() (lib/smarcomm/run-scan.ts)
+   → DB 저장 + shortId 발급
+   → router.push('/smarcomm/report/${shortId}')
+```
+
+ANTHROPIC_API_KEY 401 상태에서도 기술 SEO·Schema·CWV는 측정. Citability만 N/A.
+
+**검증**:
+- `npx tsc --noEmit` exit 0 (타입 정합)
+- 화면 검증 보류: dev 서버가 dangling 워크트리(`cranky-murdock-a0c05b`)에서 `build-manifest.json` ENOENT 에러로 돌고 있어 HMR 미반영. 다음 세션에서 서버 정리 후 재검증.
+
+**다음 세션 작업** (Marvis 나머지 3 기능):
+- #1 대시보드: `connection="not_connected"` 하드코딩 해제 + `lib/marvis/connection.ts` 신규
+- #3 RFM: `marvis_orders`·`marvis_customers`·`marvis_drafts` 테이블 + `lib/marvis/rfm.ts`
+- #4 이메일: `/api/marvis/approve` + Resend + 1탭 승인 UI
+
+### 발견된 이슈 (다음 세션 처리)
+
+- **Dangling 워크트리**: `C:\Projects\tenone\.claude\worktrees\cranky-murdock-a0c05b`가 `git worktree list`에 안 잡히지만 디렉토리 + 로컬 브랜치 + origin 브랜치 모두 잔존. dev 서버(port 3000)가 그 안에서 `build-manifest.json` ENOENT 상태로 가동 중. 세션 143 종료 시 "결과: cranky-murdock-a0c05b 1개만 활성"으로 표기됐던 그 워크트리. WORK_STATUS § 활성 워크트리 표에 ⚠️ 섹션으로 기록.
+
+---
+
 ## 2026-05-19 (세션 143) — 워크트리 정리 8→1 + MoNTZ 이월 #3·#5 완료 + SmarComm Marvis 라인업 SSOT 확정
 
 ### 워크트리 정리 (8 → 1)
