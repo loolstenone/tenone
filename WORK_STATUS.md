@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-21 (세션 146 — 워크트리 일괄 정리 + 다음 첫 액션 명확화)
+> 마지막 업데이트: 2026-05-21 (세션 147 — SmarComm Phase 3.1 옵션 A 완료)
 
 ---
 
@@ -14,7 +14,9 @@
 |---|---|---|---|---|
 | _(없음 — master 단독)_ | | | | |
 
-**세션 146 정리 결과 (2026-05-21)**: 세션 144 워크트리 `trusting-visvesvaraya-1024ad` + dangling 폴더 2개(`cranky-murdock-a0c05b`, `friendly-heisenberg-94bd10`) + 로컬 브랜치 2개(`claude/trusting-visvesvaraya-1024ad`, `claude/cranky-murdock-a0c05b`) 모두 정리. 세션 145 작업은 origin/master `86c794ba`에 머지·확인 완료. 다음 워크트리는 Phase 3.1 진입 시 새로 생성.
+**세션 147 진행 결과 (2026-05-21)**: master 단독에서 Phase 3.1 옵션 A (이메일 발송 헬퍼 분리 + SmarComm 라우트 신설) 완료. 새 워크트리는 생성하지 않음. 다음 첫 액션은 Phase 3.1.2 (캠페인 작성 모달 UI) 또는 Phase 3.2 (웹 푸시 VAPID·서비스 워커·`smarcomm_push_subscriptions`).
+
+**세션 146 정리 결과 (2026-05-21)**: 세션 144 워크트리 `trusting-visvesvaraya-1024ad` + dangling 폴더 2개(`cranky-murdock-a0c05b`, `friendly-heisenberg-94bd10`) + 로컬 브랜치 2개(`claude/trusting-visvesvaraya-1024ad`, `claude/cranky-murdock-a0c05b`) 모두 정리.
 
 ### 활성 backup 브랜치 (origin)
 
@@ -24,6 +26,65 @@
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
 | `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+
+---
+
+## 세션 147 핵심 성과 (2026-05-21)
+
+### ① SmarComm Phase 3.1 옵션 A 완료 — 이메일 발송 헬퍼 분리
+
+[docs/SmarComm_Phase3_Plan.md §9-C](docs/SmarComm_Phase3_Plan.md) 옵션 A 5 액션 모두 완료.
+
+**A1. 헬퍼 신설** — [lib/email/send-broadcast.ts](lib/email/send-broadcast.ts)
+- 인트라 `route.ts` 71~228줄 발신자 검증·대상자 조회·배치 발송·`email_sends` 로깅·status 갱신 로직을 `sendCampaignBroadcast({campaignId, testEmails?, scheduledAt?, supabase, adminSupabase})`로 추출
+- 에러 클래스 `BroadcastError(message, status)` — caller가 NextResponse status로 매핑
+- 내부 헬퍼 `resolveTargets()` 분리
+
+**A2. 인트라 리팩** — [app/api/intra/crm/broadcast/send/route.ts](app/api/intra/crm/broadcast/send/route.ts)
+- 229줄 → 43줄. 인증·`RESEND_API_KEY` 체크는 헬퍼가 담당, caller는 인증 + try/catch만
+- 응답 형식 동일 유지 (기존 호출 측 회귀 0)
+
+**A3. 스키마 확장** — [sql/crm-campaigns-owner-columns.sql](sql/crm-campaigns-owner-columns.sql)
+- `crm_campaigns.created_by_service TEXT NOT NULL DEFAULT 'intra' CHECK IN ('intra','smarcomm')`
+- `crm_campaigns.owner_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL`
+- 부분 인덱스: `idx_crm_campaigns_service_owner WHERE created_by_service='smarcomm'`
+- RLS 정책 추가: `"crm_campaigns smarcomm owner"` — SmarComm 사용자 본인 캠페인만 ALL
+- Prod 적용 완료 (HTTP 201)
+
+**A4. SmarComm send 라우트** — [app/api/smarcomm/email/send/route.ts](app/api/smarcomm/email/send/route.ts)
+- 1차 RLS + 2차 코드 검증 (`created_by_service='smarcomm'` AND `owner_user_id=user.id`)
+- 통과 시 공용 헬퍼 호출
+- TODO Phase 3.1.2: `wio_subscriptions` 한도 검증
+
+**A5. UI** — [crm/email/page.tsx](app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx) + [campaigns route](app/api/smarcomm/email/campaigns/route.ts)
+- GET/POST `/api/smarcomm/email/campaigns` (본인 SmarComm 캠페인 list·create)
+- "내 캠페인" 테이블 섹션: name·subject·status 칩·recipient·생성일·액션
+- "지금 발송" 버튼 (status=draft/scheduled만 활성, sending 중 disabled + Loader2)
+- 캠페인 작성 모달 UI는 Phase 3.1.2 (현재는 API POST 또는 인트라에서 생성)
+
+**검증**: dev 서버 200, LoginModal 게이트 정상, `/api/smarcomm/email/{campaigns,send}` 비인증 401, 서버·콘솔 에러 0. 인증 후 end-to-end 발송은 Phase 3.1.2 모달 완성 시점에 진행.
+
+### ② 작업 종료 시점 갱신
+
+- master 단독에서 진행, 새 워크트리 없음
+- 세션 146 워크트리 정리 commit `8bbedac8` + 세션 147 commit이 origin/master에 push 예정
+
+### 🎯 다음 세션 첫 액션 (세션 147 종료 시점 갱신)
+
+**옵션 1: Phase 3.1.2 (캠페인 작성 모달 UI)** — 1 세션
+1. `features/smarcomm/EmailCampaignModal.tsx` 신설 — name·subject·body_text·body_html·sender_id·segment_id·person_ids 입력
+2. 본문 에디터: Markdown or 간단 textarea + HTML preview
+3. 세그먼트 선택: `/api/intra/crm/segments` 재사용 또는 SmarComm 전용 list
+4. 테스트 발송 버튼 (testEmails 1개 + Send Test)
+5. 모달 → POST `/api/smarcomm/email/campaigns` → list refresh
+
+**옵션 2: Phase 3.2 (웹 푸시)** — 1 세션
+1. VAPID 키 생성 (`web-push` lib) + `.env.local`·Vercel Env 등록
+2. `sql/smarcomm-push-subscriptions.sql` 신설 + 적용
+3. 서비스 워커 + Subscribe 버튼
+4. `/api/smarcomm/push/send` 라우트
+
+**옵션 3: D1~D7 결정 후 Phase 3.3 (카카오 알림톡)** — Solapi 계정·승인 템플릿 필요
 
 ---
 

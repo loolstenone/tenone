@@ -2,8 +2,8 @@
 
 // 이메일 채널 — email_sends + email_senders + newsletter_subscribers 실 DB
 
-import { useEffect, useState } from 'react';
-import { Mail, Send, Eye, MousePointerClick, AlertCircle, Users, CheckCircle2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Mail, Send, Eye, MousePointerClick, AlertCircle, Users, CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
@@ -18,10 +18,23 @@ interface EmailResp {
     recentSends: SendRow[];
 }
 
+interface MyCampaign {
+    id: string;
+    name: string;
+    subject: string;
+    status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+    scheduled_at: string | null;
+    sent_at: string | null;
+    recipient_count: number | null;
+    created_at: string;
+}
+
 export default function EmailPage() {
     const [data, setData] = useState<EmailResp | null>(null);
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState(30);
+    const [campaigns, setCampaigns] = useState<MyCampaign[] | null>(null);
+    const [sendingId, setSendingId] = useState<string | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -30,6 +43,40 @@ export default function EmailPage() {
             .then(setData)
             .finally(() => setLoading(false));
     }, [days]);
+
+    const loadCampaigns = useCallback(async () => {
+        const r = await fetch('/api/smarcomm/email/campaigns');
+        if (!r.ok) { setCampaigns([]); return; }
+        const j = await r.json();
+        setCampaigns(j.campaigns ?? []);
+    }, []);
+
+    useEffect(() => { loadCampaigns(); }, [loadCampaigns]);
+
+    async function handleSend(c: MyCampaign) {
+        if (!confirm(`'${c.name}'을(를) 지금 발송할까요? 발송 후 취소할 수 없습니다.`)) return;
+        setSendingId(c.id);
+        try {
+            const r = await fetch('/api/smarcomm/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ campaignId: c.id }),
+            });
+            const j = await r.json();
+            if (!r.ok) {
+                alert(`발송 실패: ${j.error ?? r.status}`);
+            } else if (j.scheduled) {
+                alert(`예약 완료: ${j.scheduledAt}`);
+            } else {
+                alert(`발송 완료: ${j.sent}/${j.total}${j.errors ? `\n에러: ${j.errors.join('; ')}` : ''}`);
+            }
+            await loadCampaigns();
+        } catch (e) {
+            alert(`발송 오류: ${e instanceof Error ? e.message : 'unknown'}`);
+        } finally {
+            setSendingId(null);
+        }
+    }
 
     return (
         <div className="max-w-6xl">
@@ -68,6 +115,72 @@ export default function EmailPage() {
                 <Kpi icon={Users} label="활성" value={data?.subscribers.active ?? 0} accent="#10b981" loading={loading} />
                 <Kpi icon={CheckCircle2} label="이메일 인증" value={data?.subscribers.confirmed ?? 0} accent="#3b82f6" loading={loading} />
                 <Kpi icon={AlertCircle} label="구독 해지" value={data?.subscribers.unsubscribed ?? 0} accent="#f59e0b" loading={loading} />
+            </div>
+
+            {/* 내 캠페인 (SmarComm 사용자 본인 캠페인) */}
+            <div className="mb-6 rounded-2xl border border-border bg-white overflow-hidden">
+                <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+                    <h2 className="text-sm font-semibold text-text">내 캠페인 {campaigns ? `(${campaigns.length})` : ''}</h2>
+                    <span className="text-[10px] text-text-muted">발송 = 인트라와 공통 인프라. 캠페인 작성 UI는 Phase 3.1.2 예정.</span>
+                </div>
+                {campaigns === null ? (
+                    <div className="px-5 py-8 text-center text-xs text-text-muted">불러오는 중…</div>
+                ) : campaigns.length === 0 ? (
+                    <div className="px-5 py-8 text-center text-xs text-text-muted">
+                        <Mail size={24} className="mx-auto mb-2 text-text-muted" />
+                        본인 SmarComm 캠페인이 없습니다. POST <code className="font-mono text-[10px]">/api/smarcomm/email/campaigns</code>로 생성 가능합니다.
+                    </div>
+                ) : (
+                    <table className="w-full text-sm">
+                        <thead><tr className="border-b border-border text-xs text-text-muted">
+                            <th className="px-5 py-2.5 text-left font-medium">캠페인</th>
+                            <th className="px-5 py-2.5 text-center font-medium">상태</th>
+                            <th className="px-5 py-2.5 text-right font-medium">발송 수</th>
+                            <th className="px-5 py-2.5 text-right font-medium">생성</th>
+                            <th className="px-5 py-2.5 text-right font-medium">액션</th>
+                        </tr></thead>
+                        <tbody>
+                            {campaigns.map(c => (
+                                <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface">
+                                    <td className="px-5 py-2.5">
+                                        <div className="text-xs font-semibold text-text truncate max-w-[240px]">{c.name}</div>
+                                        <div className="text-[10px] text-text-muted truncate max-w-[240px]">{c.subject}</div>
+                                    </td>
+                                    <td className="px-5 py-2.5 text-center">
+                                        <StatusChip status={c.status} />
+                                    </td>
+                                    <td className="px-5 py-2.5 text-right text-xs text-text-sub">
+                                        {c.recipient_count ?? '-'}
+                                    </td>
+                                    <td className="px-5 py-2.5 text-right text-[10px] text-text-muted">
+                                        {c.created_at.slice(0, 10)}
+                                    </td>
+                                    <td className="px-5 py-2.5 text-right">
+                                        {(c.status === 'draft' || c.status === 'scheduled') ? (
+                                            <button
+                                                onClick={() => handleSend(c)}
+                                                disabled={sendingId === c.id}
+                                                className="inline-flex items-center gap-1 rounded-lg bg-text px-2.5 py-1 text-[10px] font-medium text-white hover:opacity-90 disabled:opacity-50"
+                                            >
+                                                {sendingId === c.id ? (
+                                                    <><Loader2 size={11} className="animate-spin" /> 발송 중</>
+                                                ) : (
+                                                    <><Send size={11} /> 지금 발송</>
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-[10px] text-text-muted">
+                                                {c.status === 'sent' && c.sent_at ? <><CheckCircle2 size={10} /> {c.sent_at.slice(0, 10)}</> : null}
+                                                {c.status === 'failed' ? <span className="text-danger">실패</span> : null}
+                                                {c.status === 'sending' ? <><Clock size={10} /> 진행 중</> : null}
+                                            </span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             {/* 발신자 */}
@@ -140,6 +253,18 @@ export default function EmailPage() {
             </div>
         </div>
     );
+}
+
+function StatusChip({ status }: { status: MyCampaign['status'] }) {
+    const map: Record<MyCampaign['status'], { label: string; cls: string }> = {
+        draft:     { label: '초안',    cls: 'bg-surface text-text-muted' },
+        scheduled: { label: '예약',    cls: 'bg-info/10 text-info' },
+        sending:   { label: '발송 중', cls: 'bg-warning/10 text-warning' },
+        sent:      { label: '완료',    cls: 'bg-success/10 text-success' },
+        failed:    { label: '실패',    cls: 'bg-danger/10 text-danger' },
+    };
+    const { label, cls } = map[status];
+    return <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${cls}`}>{label}</span>;
 }
 
 function Kpi({ icon: Icon, label, value, accent, loading, suffix }: {

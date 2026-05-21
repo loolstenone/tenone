@@ -4,6 +4,84 @@
 
 ---
 
+## 2026-05-21 (세션 147) — SmarComm Phase 3.1 옵션 A 완료 (이메일 발송 헬퍼 분리 + SmarComm 라우트)
+
+### 워크트리 / 장소
+
+- 워크트리: master 단독 (별도 워크트리 생성 안 함)
+- Base: 세션 146 commit `8bbedac8` (origin/master 0 behind)
+
+### ① 옵션 A — `lib/email/send-broadcast.ts` 공용 헬퍼 추출
+
+[docs/SmarComm_Phase3_Plan.md §9-C](docs/SmarComm_Phase3_Plan.md) 권장안 진행. 인트라의 검증된 발송 인프라(229줄)를 헬퍼로 분리해 SmarComm에서도 재사용.
+
+**신설**: [lib/email/send-broadcast.ts](lib/email/send-broadcast.ts)
+- `sendCampaignBroadcast({campaignId, testEmails?, scheduledAt?, supabase, adminSupabase})` Promise<SendBroadcastResult>
+- `BroadcastError(message: string, status: number)` — caller가 NextResponse status로 매핑
+- 내부 `resolveTargets()` 헬퍼 (segment + person_ids 합집합 + do_not_email/do_not_contact 필터)
+- 인증·`RESEND_API_KEY` 체크는 헬퍼가 처리, caller는 권한·tenant 검증만 책임
+
+### ② 인트라 send route 리팩
+
+[app/api/intra/crm/broadcast/send/route.ts](app/api/intra/crm/broadcast/send/route.ts) 229줄 → 43줄.
+- 인증 + campaignId 파싱 + `getAdminClient()` + 공용 헬퍼 호출 + `BroadcastError` catch만 남김
+- 응답 형식·status 코드 완전 동일 유지 (기존 호출 측 회귀 0)
+- tsc 회귀 0건 (내 변경 분), `.next/dev/types` stale 캐시 6건은 세션 145 삭제 페이지 잔재로 무관
+
+### ③ crm_campaigns 스키마 확장
+
+[sql/crm-campaigns-owner-columns.sql](sql/crm-campaigns-owner-columns.sql) 신설, prod 적용 완료 (HTTP 201).
+
+```sql
+ALTER TABLE crm_campaigns
+  ADD COLUMN IF NOT EXISTS created_by_service TEXT NOT NULL DEFAULT 'intra'
+    CHECK (created_by_service IN ('intra','smarcomm')),
+  ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+```
+
++ 부분 인덱스 `idx_crm_campaigns_service_owner WHERE created_by_service='smarcomm'`
++ RLS 정책 `"crm_campaigns smarcomm owner"` — `created_by_service='smarcomm' AND owner_user_id=auth.uid()` 한정 ALL
+
+기존 row는 모두 `'intra'` 기본값으로 보존, 인트라 라우트 회귀 0.
+
+### ④ SmarComm send 라우트
+
+[app/api/smarcomm/email/send/route.ts](app/api/smarcomm/email/send/route.ts) 신설.
+- 1차 RLS (smarcomm owner 정책) + 2차 코드 검증 (`created_by_service='smarcomm' AND owner_user_id=user.id`)
+- 통과 시 공용 헬퍼 호출
+- TODO Phase 3.1.2: `wio_subscriptions` 한도 검증 (Free·Starter 월 N건 제한)
+
+### ⑤ SmarComm 캠페인 list·create 라우트 + UI
+
+**라우트**: [app/api/smarcomm/email/campaigns/route.ts](app/api/smarcomm/email/campaigns/route.ts)
+- GET — 본인 SmarComm 캠페인 list (50개, created_at DESC)
+- POST — name·subject·body_text 필수 + sender·preheader·button·brand·segment·person_ids 선택, INSERT 시 `created_by_service='smarcomm'`·`owner_user_id=user.id`·`brand_id='smarcomm'` 자동 세팅
+
+**UI**: [app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx](app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx)
+- "내 캠페인" 테이블 섹션 (구독자 KPI ↔ 발신자 사이)
+- status 칩 (draft/scheduled/sending/sent/failed) — `StatusChip` 컴포넌트
+- "지금 발송" 버튼 — `draft`·`scheduled`만 활성, 클릭 시 confirm → POST `/api/smarcomm/email/send`
+- 발송 중 Loader2 spinner + disabled
+
+### 검증
+
+- dev 서버 가동 (preview_start "dev" port 3000), Next 16.1.6 Turbopack
+- `/smarcomm/dashboard/crm/email` HTTP 200, LoginModal 게이트 정상
+- `/api/smarcomm/email/campaigns` GET → 401 Unauthorized (정상)
+- `/api/smarcomm/email/send` POST → 401 Unauthorized (정상)
+- 서버 logs / 콘솔 logs 에러 0건
+- end-to-end 발송 검증은 Phase 3.1.2 모달 완성 시점
+
+### 모순 식별 후속
+
+세션 145에서 식별된 `smarcomm_broadcasts` vs `crm_campaigns` 2개 시스템 분리는 옵션 A 진행으로 1단계 통합 완료. `crm_campaigns`가 인트라·SmarComm 공통 SSOT로 격상. 추후 옵션 C 진행 시 `smarcomm_broadcasts` 마이그레이션만 남음.
+
+### 다음 세션 첫 액션 (Phase 3.1.2 또는 3.2)
+
+WORK_STATUS.md "다음 세션 첫 액션" 참조.
+
+---
+
 ## 2026-05-21 (세션 146) — 워크트리 일괄 정리 + WORK_STATUS 활성 표 갱신
 
 ### 작업 시작 프로토콜에서 발견
