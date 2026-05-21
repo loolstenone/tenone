@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-05-21 (세션 146) — 워크트리 일괄 정리 + WORK_STATUS 활성 표 갱신
+
+### 작업 시작 프로토콜에서 발견
+
+`git pull origin master`로 세션 145 commit(`86c794ba`) fast-forward 후 상황 점검 — WORK_STATUS의 활성 워크트리 표가 stale:
+- `claude/vibrant-sammet-3259e9` (세션 145 작업) → master에 머지 후 정리됨, 표에만 남아있음
+- `.claude/worktrees/` 폴더에 3개 잔존: `trusting-visvesvaraya-1024ad`(git worktree list 잡힘), `cranky-murdock-a0c05b`(dangling), `friendly-heisenberg-94bd10`(신규 dangling)
+
+### 정리 절차
+
+1. `git worktree remove .claude/worktrees/trusting-visvesvaraya-1024ad` — 권한 에러 반환했으나 실제로는 git 메타·디렉토리 모두 정리됨
+2. `.claude/worktrees/` 잔존 폴더 검증 — PowerShell cwd 오해로 잠시 "없음"으로 보였으나 실제론 3개 폴더 모두 남아있음을 `Set-Location` 후 재확인
+3. 빈 폴더 2개(`trusting-visvesvaraya-1024ad`, `friendly-heisenberg-94bd10`) `Remove-Item -Recurse -Force` 즉시 삭제
+4. `cranky-murdock-a0c05b` 폴더(327MB, 워크트리 콘텐츠+`.next`+`node_modules`) — origin 브랜치 0 behind master 확인, **사용자 승인** 후 `Remove-Item -Recurse -Force` 삭제
+5. 로컬 브랜치 정리:
+   - `claude/trusting-visvesvaraya-1024ad` (was 08f55aee, origin/master에 포함됨) → `git branch -d`로 안전 삭제
+   - `claude/cranky-murdock-a0c05b` (was 72ccd6cf, origin/master에 포함됨) → `git branch -d`로 안전 삭제
+
+### 결과
+
+- `git worktree list`: master 단독 `86c794ba`
+- 로컬 브랜치: master만
+- 미커밋 변경: 없음
+- origin backup 브랜치 4개(`backup/myverse-canvas-share`, `backup/smarcomm-phase4`, `backup/myverse-camera`, `claude/brave-margulis-2c2f3e`)는 그대로 보존 (사용자 결정 영역)
+
+### 다음 세션 진입 조건
+
+워크트리 SSOT 깨끗. Phase 3.1 진입 시 §9 옵션 A/B/C 사용자 결정 후 새 워크트리 생성 (`brand/smarcomm-phase31-email`).
+
+---
+
 ## 2026-05-21 (세션 145) — SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계서
 
 ### 워크트리 / 장소

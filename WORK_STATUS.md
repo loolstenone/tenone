@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-21 (세션 145 — SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계서)
+> 마지막 업데이트: 2026-05-21 (세션 146 — 워크트리 일괄 정리 + 다음 첫 액션 명확화)
 
 ---
 
@@ -12,12 +12,9 @@
 
 | 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
 |---|---|---|---|---|
-| `claude/vibrant-sammet-3259e9` | brand/smarcomm | SmarComm Workspace 감사·TierGate SSOT·Phase 3 설계 | 세션 145 종료 | Phase 3.1 진입 시 §9 옵션 A/B/C 결정 후 `lib/email/send-broadcast.ts` 헬퍼 추출 (intra send route 71~228줄 추출, 회귀 테스트 포함) |
-| _(세션 144 활성 워크트리 trusting-visvesvaraya-1024ad는 master 머지 후 정리됨)_ | | | | |
+| _(없음 — master 단독)_ | | | | |
 
-### ⚠️ Dangling 워크트리 (정리 필요)
-
-`C:\Projects\tenone\.claude\worktrees\cranky-murdock-a0c05b` — `git worktree list`에는 안 잡히는데 디렉토리는 잔존. dev 서버가 그 안에서 가동 중(`build-manifest.json` ENOENT 에러 상태). 로컬 브랜치 `claude/cranky-murdock-a0c05b` + origin 동명 브랜치 존재. 세션 143 종료 시 "결과: cranky-murdock-a0c05b 1개만 활성"로 표기됐던 워크트리. 다음 세션에서 ① 서버 stop → ② 디렉토리 검증(미커밋 없는지) → ③ `git worktree remove --force` 또는 디렉토리 직접 삭제 → ④ origin 백업 결정.
+**세션 146 정리 결과 (2026-05-21)**: 세션 144 워크트리 `trusting-visvesvaraya-1024ad` + dangling 폴더 2개(`cranky-murdock-a0c05b`, `friendly-heisenberg-94bd10`) + 로컬 브랜치 2개(`claude/trusting-visvesvaraya-1024ad`, `claude/cranky-murdock-a0c05b`) 모두 정리. 세션 145 작업은 origin/master `86c794ba`에 머지·확인 완료. 다음 워크트리는 Phase 3.1 진입 시 새로 생성.
 
 ### 활성 backup 브랜치 (origin)
 
