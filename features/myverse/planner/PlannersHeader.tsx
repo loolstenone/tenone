@@ -82,7 +82,7 @@ export function PlannersHeader() {
                         aboutPath="/myverse/story"
                         profilePath="/myverse/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/planners/signup"
                         siteId="planners"
                         siteName="Planner's"
                         workspacePath="/myverse/app"
@@ -115,7 +115,7 @@ export function PlannersHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={`/myverse/login?redirect=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
+                        <Link href="/planners/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
                     </div>
                 )
             }

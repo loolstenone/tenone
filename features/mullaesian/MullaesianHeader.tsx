@@ -10,9 +10,9 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
-    { name: "뚜르 드 문래", href: "/#tour" },
-    { name: "갤러리 문래", href: "/#gallery" },
-    { name: "문래 꼬뮨", href: "/#commune" },
+    { name: "뚜르 드 문래", href: "/mullaesian#tour" },
+    { name: "갤러리 문래", href: "/mullaesian#gallery" },
+    { name: "문래 꼬뮨", href: "/mullaesian#commune" },
 ];
 
 export function MullaesianHeader() {
@@ -48,10 +48,11 @@ export function MullaesianHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex ml-auto">
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/mullaesian/about"
                         profilePath="/mullaesian/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/mullaesian/signup"
                         siteId="mullaesian"
                         siteName="Mullaesian"
                     />
@@ -80,7 +81,7 @@ export function MullaesianHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
+                        <Link href="/mullaesian/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
                     </div>
                 )
             }

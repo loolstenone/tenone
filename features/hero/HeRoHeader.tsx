@@ -95,7 +95,7 @@ export function HeRoHeader() {
                         workspacePath="/hero/journey"
                         workspaceLabel="Journey"
                         accentColor="#E53935"
-                        signupPath="/signup"
+                        signupPath="/hero/signup"
                         siteId="hero"
                         siteName="HeRo"
                     />

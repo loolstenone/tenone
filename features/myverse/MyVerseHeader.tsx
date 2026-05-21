@@ -69,7 +69,7 @@ export function MyVerseHeader() {
                         <UniverseUtilityBar
                             aboutPath="/myverse/story"
                             profilePath="/myverse/my"
-                            signupPath="/signup"
+                            signupPath="/myverse/signup"
                             accentColor="#6366f1"
                             searchPlaceholder="Myverse 검색"
                             siteId="myverse"
@@ -115,7 +115,7 @@ export function MyVerseHeader() {
                             로그인
                         </Link>
                         <Link
-                            href="/signup"
+                            href="/myverse/signup"
                             onClick={() => setMobileOpen(false)}
                             className="text-sm text-neutral-500 hover:text-neutral-900"
                         >

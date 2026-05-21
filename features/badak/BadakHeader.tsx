@@ -77,7 +77,7 @@ export function BadakHeader() {
                         aboutPath="/badak/about"
                         profilePath="/badak/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/badak/signup"
                         siteId="badak"
                         siteName="바닥"
                     />

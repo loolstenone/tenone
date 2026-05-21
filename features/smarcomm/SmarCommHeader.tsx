@@ -25,15 +25,16 @@ export default function SmarCommHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">서비스</Link>
-          <Link href="/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
-          <Link href="/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
+          <Link href="/smarcomm#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">서비스</Link>
+          <Link href="/smarcomm/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
+          <Link href="/smarcomm/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
           <UniverseUtilityBar
-            aboutPath="/about"
+            hideAbout
+            aboutPath="/smarcomm/about"
             profilePath="/smarcomm/dashboard/profile"
             workspacePath="/smarcomm/dashboard"
             workspaceLabel="워크스페이스"
-            signupPath="/signup"
+            signupPath="/smarcomm/signup"
             accentColor="#171717"
             siteId="smarcomm"
             siteName="SmarComm"
@@ -59,14 +60,14 @@ export default function SmarCommHeader() {
         ) : (
           <div className="flex flex-col gap-2">
             <Link href={loginHref(currentPath)} onClick={() => setMenuOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-            <Link href="/signup" onClick={() => setMenuOpen(false)} className="rounded-full bg-neutral-900 px-4 py-2.5 text-center text-sm font-semibold text-white">무료 가입</Link>
+            <Link href="/smarcomm/signup" onClick={() => setMenuOpen(false)} className="rounded-full bg-neutral-900 px-4 py-2.5 text-center text-sm font-semibold text-white">무료 가입</Link>
           </div>
         )
       }
     >
-      <Link href="/#process" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">서비스</Link>
-      <Link href="/blog" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">블로그</Link>
-      <Link href="/pricing" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">요금제</Link>
+      <Link href="/smarcomm#process" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">서비스</Link>
+      <Link href="/smarcomm/blog" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">블로그</Link>
+      <Link href="/smarcomm/pricing" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">요금제</Link>
       <Link href={isAuthenticated ? '/smarcomm/dashboard' : '/'} onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">워크스페이스</Link>
     </UniverseMobileMenu>
     </>

@@ -105,7 +105,7 @@ export function WIOMarketingHeader() {
                             profilePath="/wio/app"
                             workspacePath={null}
                             workspaceLabel="APP"
-                            signupPath="/signup"
+                            signupPath="/wio/signup"
                             accentColor="#6366f1"
                             loginPath="/wio/login"
                             siteId="wio"

@@ -76,7 +76,7 @@ export function MadLeagueHeader() {
                         aboutPath="/madleague/about"
                         profilePath="/madleague/my"
                         accentColor="#EC1D25"
-                        signupPath="/signup"
+                        signupPath="/madleague/signup"
                         siteId="madleague"
                         siteName="MAD League"
                     />
@@ -108,7 +108,7 @@ export function MadLeagueHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
+                        <Link href="/madleague/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
                     </div>
                 )
             }

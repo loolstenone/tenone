@@ -50,7 +50,7 @@ export function FWNHeader() {
                                 aboutPath="/fwn/about"
                                 profilePath="/fwn/my"
                                 accentColor="#000000"
-                                signupPath="/signup"
+                                signupPath="/fwn/signup"
                                 siteId="fwn"
                                 siteName="FWN"
                             />
@@ -99,7 +99,7 @@ export function FWNHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
+                        <Link href="/fwn/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
                     </div>
                 )
             }

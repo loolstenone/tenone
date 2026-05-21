@@ -52,10 +52,11 @@ export function MoNTZHeader() {
                         </Link>
                     ))}
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/montz/about"
                         profilePath="/montz/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/montz/signup"
                         siteId="montz"
                         siteName="MoNTZ"
                     />
@@ -84,7 +85,7 @@ export function MoNTZHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
+                        <Link href="/montz/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
                     </div>
                 )
             }

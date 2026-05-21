@@ -57,10 +57,11 @@ export default function BrandGravityHeader() {
           </Link>
           <div className="hidden md:block">
             <UniverseUtilityBar
+              hideAbout
               aboutPath="/brandgravity/about"
               profilePath="/brandgravity/my"
               workspacePath={null}
-              signupPath="/signup"
+              signupPath="/brandgravity/signup"
               accentColor="#f59e0b"
               siteId="brandgravity"
               siteName="Brand Gravity"

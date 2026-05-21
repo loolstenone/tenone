@@ -68,10 +68,10 @@ export function OgamjaHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex ml-auto">
                     <UniverseUtilityBar
-                        aboutPath="/ogamja/about"
-                        profilePath="/ogamja/my"
+                        aboutPath="/0gamja/about"
+                        profilePath="/0gamja/my"
                         accentColor="#6B21A8"
-                        signupPath="/signup"
+                        signupPath="/0gamja/signup"
                         siteId="ogamja"
                         siteName="0gamja"
                     />
@@ -96,11 +96,11 @@ export function OgamjaHeader() {
             textTone="dark"
             footer={
                 isAuthenticated ? (
-                    <Link href="/ogamja/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
+                    <Link href="/0gamja/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
+                        <Link href="/0gamja/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
                     </div>
                 )
             }

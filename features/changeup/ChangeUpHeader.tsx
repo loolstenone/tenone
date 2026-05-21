@@ -61,7 +61,7 @@ export function ChangeUpHeader() {
                         aboutPath="/changeup/about"
                         profilePath="/changeup/my"
                         accentColor="#2563EB"
-                        signupPath="/signup"
+                        signupPath="/changeup/signup"
                         siteId="changeup"
                         siteName="ChangeUp"
                     />
@@ -90,7 +90,7 @@ export function ChangeUpHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full">시작하기</Link>
+                        <Link href="/changeup/signup" onClick={() => setMobileOpen(false)} className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full">시작하기</Link>
                     </div>
                 )
             }

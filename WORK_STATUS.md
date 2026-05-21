@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-21 (세션 147 — SmarComm Phase 3.1 옵션 A 완료)
+> 마지막 업데이트: 2026-05-21 (세션 148 — 전 브랜드 헤더 링크 일관성 일괄 정렬)
 
 ---
 
@@ -26,6 +26,39 @@
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
 | `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+
+---
+
+## 세션 148 핵심 성과 (2026-05-21)
+
+### ① 전 브랜드 헤더 nav·UtilityBar 링크 일관성 일괄 정렬
+
+**계기**: SmarComm preview 오픈 중 우측 유틸리티 바 5건 깨짐 발견 (`/blog`, `/pricing`, `/#process`, `/about`, `/signup` 모두 tenone 루트 가리킴) — CLAUDE.md §1.2.1·§1.9.2 위반.
+
+**점검**: Explore agent로 features 전 헤더 28개 컴포넌트 전수 스캔. 17~20건 동일 패턴 깨짐 식별 + 도메인 path 오류(ogamja `/ogamja/...` vs 실제 `/0gamja/...`) 추가 발견.
+
+**일괄 수정 — 23개 파일, 60+ Edit**:
+
+| 카테고리 | 수정 건수 | 브랜드 |
+|---|---|---|
+| `signupPath="/signup"` → `/{brand}/signup` (UtilityBar prop) | 18건 | badak·changeup·domo·fwn·hero·jakka·madleague·madleap·mindle·montz·mullaesian·myverse·myverse/app·myverse/planner·naturebox·rook·seoul360·smarcomm·townity·wio·youinone·brandgravity |
+| 모바일 메뉴 `<Link href="/signup">` → `/{brand}/signup` | 14건 | changeup·domo·fwn·jakka·madleague·madleap·montz·mullaesian·myverse·myverse/app·myverse/planner·naturebox·rook·seoul360·smarcomm·townity·youinone |
+| navItems 앵커 `/#xxx` → `/{brand}#xxx` | 11 링크 (3 브랜드) | mullaesian·naturebox·townity |
+| `hideAbout` 추가 (about 페이지 미존재) | 8 브랜드 | brandgravity·montz·mullaesian·naturebox·seoul360·smarcomm·townity·youinone |
+| ogamja 도메인 path 정렬 (`/ogamja/...` → `/0gamja/...`) | 3건 | ogamja |
+
+**검증**: SmarComm preview 회귀 0, 우측 바 7요소 표준 부합 (`서비스/블로그/요금제/로그인/가입/공유/검색` 모두 `/smarcomm/...` 또는 button). 컴파일 에러 0.
+
+### ② 잔여 (다음 세션 또는 별도 결정)
+
+- `features/smarcomm/Header.tsx` (사용처 0 dead code, 2건 잔여 깨짐) — 삭제 결정 필요
+- 로고 `<Link href="/">` 패턴 (mullaesian·townity·naturebox·ogamja 등) — SmarCommHeader처럼 `currentPath.startsWith('/{brand}') ? '/{brand}' : '/'` 분기 도입 검토
+- 일부 브랜드 `/{brand}/signup` 페이지 미존재 — 클릭 시 404 가능 (다만 SmarComm 등 주요 브랜드는 페이지 존재)
+
+### 🎯 다음 세션 첫 액션
+
+옵션 1·2·3 (세션 147 종료 시점) 그대로 + 추가:
+- **옵션 4**: 잔여 dead code 정리 (features/smarcomm/Header.tsx 삭제) + 로고 분기 일관화
 
 ---
 

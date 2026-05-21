@@ -63,7 +63,7 @@ export function DomoHeader() {
                         aboutPath="/domo/about"
                         profilePath="/domo/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/domo/signup"
                         siteId="domo"
                         siteName="Domo"
                     />
@@ -92,7 +92,7 @@ export function DomoHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">멤버 가입</Link>
+                        <Link href="/domo/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">멤버 가입</Link>
                     </div>
                 )
             }

@@ -10,10 +10,10 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
-    { name: "자연함 이야기", href: "/#about" },
-    { name: "우리 먹거리", href: "/#products" },
-    { name: "정선 이야기", href: "/#jeongseon" },
-    { name: "오시는 길", href: "/#visit" },
+    { name: "자연함 이야기", href: "/naturebox#about" },
+    { name: "우리 먹거리", href: "/naturebox#products" },
+    { name: "정선 이야기", href: "/naturebox#jeongseon" },
+    { name: "오시는 길", href: "/naturebox#visit" },
 ];
 
 export function NatureBoxHeader() {
@@ -47,10 +47,11 @@ export function NatureBoxHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex ml-auto">
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/naturebox/about"
                         profilePath="/naturebox/my"
                         accentColor="#166534"
-                        signupPath="/signup"
+                        signupPath="/naturebox/signup"
                         siteId="naturebox"
                         siteName="NatureBox"
                     />
@@ -78,7 +79,7 @@ export function NatureBoxHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
+                        <Link href="/naturebox/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
                     </div>
                 )
             }

@@ -65,10 +65,11 @@ export function YouInOneHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex ml-auto items-center gap-3">
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/youinone/about"
                         profilePath="/youinone/my"
                         accentColor="#1AAD64"
-                        signupPath="/signup"
+                        signupPath="/youinone/signup"
                         siteId="youinone"
                         siteName="YouInOne"
                     />
@@ -104,7 +105,7 @@ export function YouInOneHeader() {
                     ) : (
                         <div className="flex items-center gap-4">
                             <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">로그인</Link>
-                            <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">가입</Link>
+                            <Link href="/youinone/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">가입</Link>
                         </div>
                     )}
                     <Link

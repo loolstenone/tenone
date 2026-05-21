@@ -4,6 +4,59 @@
 
 ---
 
+## 2026-05-21 (세션 148) — 전 브랜드 헤더 링크 일관성 일괄 정렬 (signupPath·navItems·hideAbout)
+
+### 워크트리 / 장소
+
+- 워크트리: master 단독
+- Base: 세션 147 commit `5f817fd6` (origin/master 0 behind)
+
+### 계기
+
+SmarComm preview 오픈 중 우측 유틸리티 바 5건 깨짐 발견:
+- `<Link href="/blog">` → tenone에 없음 (404)
+- `<Link href="/pricing">` → 동일
+- `<Link href="/#process">` → tenone 홈으로 이탈
+- `aboutPath="/about"` → tenone 사이트로 이탈
+- `signupPath="/signup"` (UniverseUtilityBar prop) → tenone 회원가입으로 이탈
+
+CLAUDE.md §1.2.1(브랜드 사이트 로그인/가입 복귀 원칙) + §1.9.2(UniverseUtilityBar SSOT) 위반. 텐원 유니버스 원칙 "각 서비스는 독립적, 일부 세계관 특징만 연결" 적용 → 전 브랜드 헤더 일괄 점검 결정.
+
+### Explore agent로 features 28개 헤더 전수 스캔
+
+발견:
+1. **signupPath="/signup" UniverseUtilityBar prop** — 18개 브랜드 (badak·brandgravity·changeup·domo·fwn·hero·jakka·madleague·madleap·mindle·montz·mullaesian·myverse·myverse/app·myverse/planner·naturebox·rook·seoul360·townity·wio·youinone)
+2. **모바일 메뉴 `<Link href="/signup">`** — 14개 브랜드
+3. **navItems 앵커 `/#xxx`** — mullaesian·naturebox·townity (11 링크)
+4. **about 페이지 미존재 브랜드** — 8건 (`hideAbout` 권장)
+5. **ogamja 도메인 path 오류** — siteId=`ogamja`인데 실제 path는 `/0gamja` (헤더는 `/ogamja/...` 가리킴)
+
+### 23개 파일 60+ Edit
+
+`features/{brand}/{Brand}Header.tsx` 23개:
+- badak, brandgravity, changeup, domo, fwn, hero, jakka, madleague, madleap, mindle, montz, mullaesian, myverse, myverse/app, myverse/planner, naturebox, ogamja, rook, seoul360, smarcomm, townity, wio, youinone
+
+수정 패턴:
+- 모든 `signupPath="/signup"` → `signupPath="/{brand}/signup"`
+- 모든 모바일 `<Link href="/signup">` → `<Link href="/{brand}/signup">`
+- `mullaesian`·`naturebox`·`townity`의 navItems 앵커 `/#xxx` → `/{brand}#xxx`
+- about 페이지 없는 8 브랜드 UniverseUtilityBar에 `hideAbout` prop 추가
+- ogamja의 5건 (`aboutPath`, `profilePath`, `signupPath`, 모바일 my, 모바일 signup) `/ogamja/...` → `/0gamja/...` 정렬
+
+### 검증
+
+- SmarComm preview HMR 후 우측 바 회귀 0
+- 컴파일 에러 0, 콘솔 에러 0
+- 우측 헤더 7요소 표준 부합 (서비스·블로그·요금제·로그인·가입·공유·검색)
+
+### 잔여
+
+- `features/smarcomm/Header.tsx` (사용처 0 dead code, 2건 잔여) — 삭제 결정 필요
+- 로고 `<Link href="/">` 패턴 (다수 브랜드) — `currentPath.startsWith('/{brand}') ? '/{brand}' : '/'` 분기 일관화 필요
+- 일부 브랜드 `/{brand}/signup` 페이지 미존재 — 클릭 시 404 가능 (개별 브랜드별 signup 페이지 신설은 별도 결정)
+
+---
+
 ## 2026-05-21 (세션 147) — SmarComm Phase 3.1 옵션 A 완료 (이메일 발송 헬퍼 분리 + SmarComm 라우트)
 
 ### 워크트리 / 장소

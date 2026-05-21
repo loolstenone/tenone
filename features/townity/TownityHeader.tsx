@@ -10,10 +10,10 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
-    { name: "타우니티란", href: "/#about" },
-    { name: "우리 동네", href: "/#town" },
-    { name: "함께 해요", href: "/#together" },
-    { name: "이야기", href: "/#stories" },
+    { name: "타우니티란", href: "/townity#about" },
+    { name: "우리 동네", href: "/townity#town" },
+    { name: "함께 해요", href: "/townity#together" },
+    { name: "이야기", href: "/townity#stories" },
 ];
 
 export function TownityHeader() {
@@ -47,10 +47,11 @@ export function TownityHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex ml-auto">
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/townity/about"
                         profilePath="/townity/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/townity/signup"
                         siteId="townity"
                         siteName="Townity"
                     />
@@ -78,7 +79,7 @@ export function TownityHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
+                        <Link href="/townity/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
                     </div>
                 )
             }

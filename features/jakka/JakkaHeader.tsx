@@ -59,7 +59,7 @@ export function JakkaHeader() {
                             aboutPath="/jakka/about"
                             profilePath="/jakka/my"
                             accentColor="#1a1a2e"
-                            signupPath="/signup"
+                            signupPath="/jakka/signup"
                             siteId="jakka"
                             siteName="Jakka"
                         />
@@ -89,7 +89,7 @@ export function JakkaHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
+                        <Link href="/jakka/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
                     </div>
                 )
             }

@@ -63,10 +63,11 @@ export function Seoul360Header() {
                 {/* Right side */}
                 <div className="hidden lg:flex ml-auto">
                     <UniverseUtilityBar
+                        hideAbout
                         aboutPath="/seoul360/about"
                         profilePath="/seoul360/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/seoul360/signup"
                         siteId="seoul360"
                         siteName="Seoul360"
                     />
@@ -95,7 +96,7 @@ export function Seoul360Header() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
+                        <Link href="/seoul360/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
                     </div>
                 )
             }

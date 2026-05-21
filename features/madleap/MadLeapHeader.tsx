@@ -74,7 +74,7 @@ export function MadLeapHeader() {
                         aboutPath="/madleap/about"
                         profilePath="/madleap/my"
                         accentColor="#00B8FF"
-                        signupPath="/signup"
+                        signupPath="/madleap/signup"
                         siteId="madleap"
                         siteName="MADLeap"
                     />
@@ -103,7 +103,7 @@ export function MadLeapHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">Login</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">Register</Link>
+                        <Link href="/madleap/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">Register</Link>
                     </div>
                 )
             }

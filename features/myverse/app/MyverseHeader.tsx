@@ -82,7 +82,7 @@ export function MyverseHeader() {
                         aboutPath="/myverse/story"
                         profilePath="/myverse/my"
                         accentColor="#1a1a2e"
-                        signupPath="/signup"
+                        signupPath="/myverse/signup"
                         siteId="myverse"
                         siteName="Myverse"
                         workspacePath="/myverse/app"
@@ -115,7 +115,7 @@ export function MyverseHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={`/myverse/login?redirect=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
+                        <Link href="/myverse/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
                     </div>
                 )
             }

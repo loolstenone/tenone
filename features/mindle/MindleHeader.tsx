@@ -49,7 +49,7 @@ export function MindleHeader() {
                         adminPath="/mindle/admin"
                         adminEmails={["cheonil@tenone.biz", "tenone@tenone.biz", "admin@tenone.biz"]}
                         accentColor="#F5C518"
-                        signupPath="/signup"
+                        signupPath="/mindle/signup"
                         searchPlaceholder="Search trends, reports, keywords..."
                         siteId="mindle"
                         siteName="Mindle"
