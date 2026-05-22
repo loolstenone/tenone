@@ -112,11 +112,7 @@ export default function LandingPage() {
 
   const handleScan = () => {
     const trimmed = url.trim();
-    if (!trimmed) {
-      // URL 없어도 Marvis 진단 페이지로 진입 가능
-      router.push('/smarcomm/marvis/scan');
-      return;
-    }
+    if (!trimmed) return;
     const normalized = trimmed.startsWith('http') ? trimmed : 'https://' + trimmed;
     try {
       const parsed = new URL(normalized);
@@ -128,31 +124,31 @@ export default function LandingPage() {
       alert('올바른 URL을 입력해주세요.\n예: https://yoursite.com');
       return;
     }
-    window.location.href = `/smarcomm/marvis/scan?url=${encodeURIComponent(normalized)}`;
+    window.location.href = `/smarcomm/scan?url=${encodeURIComponent(normalized)}`;
   };
 
   return (
     <>
       <SmarCommHeader />
       <main className="flex-1">
-        {/* Hero — Marvis 중심 */}
+        {/* Hero — Black */}
         <section className="bg-[#0A0E1A] px-5 pb-20 pt-28 md:pt-36">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-white/60 uppercase border border-white/15 rounded-full px-3 py-1">
-              <Sparkles size={11} /> Marvis · Marketing Jarvis
+            <p className="mb-5 text-[13px] font-medium tracking-widest text-white/40 uppercase">
+              Smart Marketing Communication
             </p>
 
             <h1 className="mb-5 text-3xl font-bold leading-tight tracking-tight text-white md:text-[44px] md:leading-[1.2]">
-              사장님 마케팅 비서,<br />
-              <span className="text-white/80">매일 아침 1탭으로 끝납니다.</span>
+              {headline.main}<br />
+              <span className="text-white/80">{headline.accent}</span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-xl text-[15px] leading-relaxed text-white/50">
-              관리에서 승인으로 — Marvis가 쇼핑몰 데이터를 분석해 매일 아침 To-Do 3개를 준비합니다.<br className="hidden md:block" />
-              사장님은 카톡으로 받은 [승인] 버튼만 누르세요. 1인·소규모 사장님 전용.
+            <p className="mx-auto mb-10 max-w-lg text-[15px] leading-relaxed text-white/50">
+              GEO · SEO 진단부터 기획, 소재 제작, 채널 집행, 분석까지<br className="hidden md:block" />
+              마케팅 전체를 AI가 자동화합니다
             </p>
 
-            {/* URL Input → Marvis 라이트 진단 */}
+            {/* URL Input */}
             <div className="mx-auto max-w-lg">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative flex-1">
@@ -162,7 +158,7 @@ export default function LandingPage() {
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleScan()}
-                    placeholder="쇼핑몰 URL — https://yourshop.com"
+                    placeholder="https://yoursite.com"
                     className="w-full rounded-full border border-white/15 bg-white/10 py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/30 transition-colors focus:border-white/40 focus:outline-none"
                   />
                 </div>
@@ -170,20 +166,12 @@ export default function LandingPage() {
                   onClick={handleScan}
                   className="flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0A0E1A] transition-all hover:bg-white/90"
                 >
-                  라이트 진단 받기
+                  무료 진단 시작
                 </button>
               </div>
               <p className="mt-3 text-xs text-white/30">
-                Marvis 라이트 진단 · 회원가입 없이 · 종합 점수 + 핵심 권고 3개
+                회원가입 없이 · 30초 소요 · 완전 무료
               </p>
-              <div className="mt-6">
-                <Link
-                  href="/smarcomm/marvis"
-                  className="inline-flex items-center gap-1 text-[12px] font-bold text-white/70 hover:text-white"
-                >
-                  Marvis 대시보드 미리보기 <ArrowRight size={12} />
-                </Link>
-              </div>
             </div>
           </div>
         </section>
