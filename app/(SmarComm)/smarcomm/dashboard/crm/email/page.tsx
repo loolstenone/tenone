@@ -2,10 +2,11 @@
 
 // 이메일 채널 — email_sends + email_senders + newsletter_subscribers 실 DB
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Mail, Send, Eye, MousePointerClick, AlertCircle, Users, CheckCircle2, Clock, Loader2, Plus, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Mail, Send, Eye, MousePointerClick, AlertCircle, Users, CheckCircle2, Clock, Loader2, Plus } from 'lucide-react';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
+import EmailCampaignModal from '@/features/smarcomm/EmailCampaignModal';
 
 interface Sender { id: string; from_addr: string; from_name: string; purpose: string; brand_id: string; is_active: boolean; daily_limit: number | null }
 interface SendRow { id: string; to: string; subject: string; status: string; kind: string; opened: boolean; clicked: boolean; bounced: boolean; created_at: string }
@@ -35,12 +36,7 @@ export default function EmailPage() {
     const [days, setDays] = useState(30);
     const [campaigns, setCampaigns] = useState<MyCampaign[] | null>(null);
     const [sendingId, setSendingId] = useState<string | null>(null);
-    const EMPTY_FORM = { name: '', subject: '', bodyText: '', preheader: '', buttonLabel: '', buttonUrl: '', senderId: '' };
     const [modalOpen, setModalOpen] = useState(false);
-    const [form, setForm] = useState(EMPTY_FORM);
-    const [saving, setSaving] = useState(false);
-    const [saveError, setSaveError] = useState<string | null>(null);
-    const nameRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -84,47 +80,6 @@ export default function EmailPage() {
         }
     }
 
-    function openModal() {
-        setForm(EMPTY_FORM);
-        setSaveError(null);
-        setModalOpen(true);
-        setTimeout(() => nameRef.current?.focus(), 50);
-    }
-
-    async function handleCreate(e: React.FormEvent) {
-        e.preventDefault();
-        if (!form.name.trim() || !form.subject.trim() || !form.bodyText.trim()) {
-            setSaveError('캠페인 이름·제목·본문은 필수입니다.');
-            return;
-        }
-        setSaving(true);
-        setSaveError(null);
-        try {
-            const body: Record<string, string> = {
-                name: form.name.trim(),
-                subject: form.subject.trim(),
-                body_text: form.bodyText.trim(),
-            };
-            if (form.preheader.trim()) body.preheader = form.preheader.trim();
-            if (form.buttonLabel.trim()) body.button_label = form.buttonLabel.trim();
-            if (form.buttonUrl.trim()) body.button_url = form.buttonUrl.trim();
-            if (form.senderId.trim()) body.sender_id = form.senderId.trim();
-            const r = await fetch('/api/smarcomm/email/campaigns', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const j = await r.json();
-            if (!r.ok) { setSaveError(j.error ?? `오류 ${r.status}`); return; }
-            setModalOpen(false);
-            await loadCampaigns();
-        } catch (e) {
-            setSaveError(e instanceof Error ? e.message : '알 수 없는 오류');
-        } finally {
-            setSaving(false);
-        }
-    }
-
     return (
         <div className="max-w-6xl">
             <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
@@ -137,18 +92,13 @@ export default function EmailPage() {
                     </div>
                     <p className="mt-1 text-xs text-text-muted">발송 이력·오픈·클릭·구독자를 통합 관리합니다</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={openModal} className="inline-flex items-center gap-1.5 rounded-lg bg-text px-3 py-1.5 text-xs font-medium text-white hover:opacity-90">
-                        <Plus size={13} /> 새 캠페인
-                    </button>
-                    <div className="flex gap-1">
-                        {[7, 30, 90].map(d => (
-                            <button key={d} onClick={() => setDays(d)}
-                                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${days === d ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'}`}>
-                                {d}일
-                            </button>
-                        ))}
-                    </div>
+                <div className="flex gap-1">
+                    {[7, 30, 90].map(d => (
+                        <button key={d} onClick={() => setDays(d)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-medium ${days === d ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'}`}>
+                            {d}일
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -173,8 +123,8 @@ export default function EmailPage() {
             <div className="mb-6 rounded-2xl border border-border bg-white overflow-hidden">
                 <div className="px-5 py-3 border-b border-border flex items-center justify-between">
                     <h2 className="text-sm font-semibold text-text">내 캠페인 {campaigns ? `(${campaigns.length})` : ''}</h2>
-                    <button onClick={openModal} className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-[10px] text-text-sub hover:bg-surface">
-                        <Plus size={11} /> 새 캠페인
+                    <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-text px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-opacity">
+                        <Plus size={13} /> 새 캠페인
                     </button>
                 </div>
                 {campaigns === null ? (
@@ -182,10 +132,10 @@ export default function EmailPage() {
                 ) : campaigns.length === 0 ? (
                     <div className="px-5 py-10 text-center">
                         <Mail size={28} className="mx-auto mb-3 text-text-muted" />
-                        <p className="mb-3 text-sm font-medium text-text">아직 캠페인이 없습니다</p>
-                        <p className="mb-4 text-xs text-text-muted">첫 이메일 캠페인을 작성하고 구독자에게 발송해 보세요.</p>
-                        <button onClick={openModal} className="inline-flex items-center gap-1.5 rounded-lg bg-text px-4 py-2 text-xs font-medium text-white hover:opacity-90">
-                            <Plus size={13} /> 첫 캠페인 만들기
+                        <p className="text-sm font-medium text-text mb-1">아직 캠페인이 없습니다</p>
+                        <p className="text-xs text-text-muted mb-4">첫 이메일 캠페인을 만들어 수신자에게 발송하세요.</p>
+                        <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-text px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity">
+                            <Plus size={13} /> 새 캠페인 만들기
                         </button>
                     </div>
                 ) : (
@@ -310,78 +260,12 @@ export default function EmailPage() {
                 <strong className="text-text-sub">🔬 출처</strong> · DB <code className="font-mono text-[10px]">email_sends</code> + <code className="font-mono text-[10px]">email_senders</code> + <code className="font-mono text-[10px]">newsletter_subscribers</code> · Resend 발송 + webhook 캡처. 오픈/클릭은 Resend webhook 수신 시 갱신.
             </div>
 
-            {modalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-                     onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
-                    <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-                        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                            <h2 className="text-base font-semibold text-text">새 캠페인 만들기</h2>
-                            <button onClick={() => setModalOpen(false)} className="rounded-lg p-1 hover:bg-surface">
-                                <X size={18} className="text-text-sub" />
-                            </button>
-                        </div>
-                        <form onSubmit={handleCreate} className="px-6 py-5 space-y-4">
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-text">캠페인 이름 <span className="text-danger">*</span></label>
-                                <input ref={nameRef} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none" placeholder="예: 5월 뉴스레터" required />
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-text">이메일 제목 <span className="text-danger">*</span></label>
-                                <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none" placeholder="예: 이번 달 특별 혜택을 놓치지 마세요!" required />
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-text">본문 (텍스트) <span className="text-danger">*</span></label>
-                                <textarea value={form.bodyText} onChange={e => setForm(f => ({ ...f, bodyText: e.target.value }))}
-                                    rows={6} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none resize-none" placeholder="이메일 본문을 입력하세요." required />
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-text">프리헤더 <span className="text-[10px] text-text-muted">(선택)</span></label>
-                                <input value={form.preheader} onChange={e => setForm(f => ({ ...f, preheader: e.target.value }))}
-                                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none" placeholder="받은편지함 미리보기 텍스트" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-text">버튼 라벨 <span className="text-[10px] text-text-muted">(선택)</span></label>
-                                    <input value={form.buttonLabel} onChange={e => setForm(f => ({ ...f, buttonLabel: e.target.value }))}
-                                        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none" placeholder="예: 지금 확인하기" />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-text">버튼 URL <span className="text-[10px] text-text-muted">(선택)</span></label>
-                                    <input value={form.buttonUrl} onChange={e => setForm(f => ({ ...f, buttonUrl: e.target.value }))}
-                                        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none" placeholder="https://..." />
-                                </div>
-                            </div>
-                            {data?.senders && data.senders.length > 0 && (
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-text">발신자 <span className="text-[10px] text-text-muted">(선택)</span></label>
-                                    <select value={form.senderId} onChange={e => setForm(f => ({ ...f, senderId: e.target.value }))}
-                                        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-text focus:outline-none bg-white">
-                                        <option value="">기본 발신자</option>
-                                        {data.senders.map(s => (
-                                            <option key={s.id} value={s.id}>{s.from_name} &lt;{s.from_addr}&gt;</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                            {saveError && (
-                                <p className="rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">{saveError}</p>
-                            )}
-                            <div className="flex justify-end gap-2 pt-1">
-                                <button type="button" onClick={() => setModalOpen(false)}
-                                    className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-sub hover:bg-surface">
-                                    취소
-                                </button>
-                                <button type="submit" disabled={saving}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-text px-4 py-2 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50">
-                                    {saving ? <><Loader2 size={13} className="animate-spin" /> 저장 중</> : '초안으로 저장'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <EmailCampaignModal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onCreated={loadCampaigns}
+                senders={data?.senders?.map(s => ({ id: s.id, name: s.from_name || s.from_addr, email: s.from_addr })) ?? []}
+            />
         </div>
     );
 }
