@@ -8,6 +8,7 @@ import {
   Zap, Bell, ArrowUpRight
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── Evaluation Cycle ── */
 const EVAL_CYCLE = [
@@ -399,6 +400,5 @@ export default function EvaluationPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

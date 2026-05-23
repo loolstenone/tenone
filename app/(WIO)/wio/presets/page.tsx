@@ -7,6 +7,7 @@ import {
   Check, ArrowRight, Layers, Workflow, Star, Plug
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 프리셋 데이터 ── */
 type Preset = {
@@ -269,6 +270,5 @@ export default function PresetsPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

@@ -8,6 +8,7 @@ import {
   CheckCircle2, FileCheck, Users, HardDrive, ChevronRight
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 3가지 전환 방식 ── */
 const MIGRATION_TYPES = [
@@ -281,6 +282,5 @@ export default function MigrationPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

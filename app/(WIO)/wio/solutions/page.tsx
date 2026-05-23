@@ -7,6 +7,7 @@ import {
   MessageSquare, Settings, Users, Clock, DollarSign, ChevronDown, X
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── Resource 배지 ── */
 const RESOURCE_BADGE: Record<string, { label: string; color: string }> = {
@@ -384,6 +385,5 @@ export default function SolutionsPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

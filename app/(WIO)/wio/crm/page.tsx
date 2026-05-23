@@ -8,6 +8,7 @@ import {
   Star, Award, Crown, Gem, UserCheck, Lock, Eye, FileCheck
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 3-Layer CRM ── */
 const CRM_LAYERS = [
@@ -353,6 +354,5 @@ export default function CRMPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

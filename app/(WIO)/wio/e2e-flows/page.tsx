@@ -8,6 +8,7 @@ import {
   UserPlus, GraduationCap, Target
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 노드 타입 ── */
 type FlowNode = {
@@ -284,6 +285,5 @@ export default function E2EFlowsPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

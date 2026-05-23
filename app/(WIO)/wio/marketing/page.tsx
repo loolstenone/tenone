@@ -9,6 +9,7 @@ import {
   BarChart3, ArrowRight, Database, Layers, Zap, Target
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 매체 분류 ── */
 const MEDIA_CATEGORIES = [
@@ -313,6 +314,5 @@ export default function MarketingPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}
