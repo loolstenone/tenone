@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Target, Swords, TrendingUp, Trophy, Users, Building2, GraduationCap } from 'lucide-react';
 
 export const metadata = {
@@ -153,8 +154,13 @@ export default function AboutPage() {
               <span className="text-white"> "담비라 세상아!"</span>
             </p>
           </div>
-          <div className="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center">
-            <div className="text-8xl">🦡</div>
+          <div className="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center relative overflow-hidden">
+            <Image
+              src="/logos/madleague/dambe.png"
+              alt="DAMbe 캐릭터"
+              fill
+              className="object-contain p-8"
+            />
           </div>
         </div>
       </section>

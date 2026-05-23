@@ -84,7 +84,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+              <span className={`ml-2 text-xs px-1.5 py-0.5 ${
                 tab.key === 'pending' ? 'bg-amber-600 text-white' : 'bg-neutral-700 text-neutral-300'
               }`}>{tab.count}</span>
             )}

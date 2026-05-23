@@ -34,7 +34,7 @@ function StatusBadge({ status }: { status: string }) {
     cancelled: { label: '취소', cls: 'bg-white/5 text-white/30' },
   };
   const s = map[status] ?? { label: status, cls: 'bg-white/5 text-white/30' };
-  return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.cls}`}>{s.label}</span>;
+  return <span className={`text-[10px] font-bold px-2 py-0.5 ${s.cls}`}>{s.label}</span>;
 }
 
 function ResultBadge({ result }: { result: NonNullable<Team['result']> }) {
@@ -61,7 +61,7 @@ function TeamCard({ team, showMyBadge }: { team: Team; showMyBadge?: boolean }) 
         <div className="flex items-center gap-2 flex-wrap">
           {team.competition && <StatusBadge status={team.competition.status} />}
           {showMyBadge && team.isMyTeam && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EC1D25]/15 text-[#EC1D25]">
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-[#EC1D25]/15 text-[#EC1D25]">
               {team.myRole === 'leader' ? '내 팀 · 팀장' : '내 팀'}
             </span>
           )}

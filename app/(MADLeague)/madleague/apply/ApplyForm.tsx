@@ -12,6 +12,8 @@ interface Props {
   jobFunctions?: string[];
 }
 
+const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
+
 /** 전화번호 자동 포맷: 010-1234-5678 */
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -128,22 +130,22 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="회사명" required>
-              <input name="companyName" required className="input" placeholder="(주)텐원" />
+              <input name="companyName" required className={inputCls} placeholder="(주)텐원" />
             </Field>
             <Field label="담당자명" required>
-              <input name="name" required className="input" />
+              <input name="name" required className={inputCls} />
             </Field>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="이메일" required>
-              <input name="email" type="email" required className="input" />
+              <input name="email" type="email" required className={inputCls} />
             </Field>
             <Field label="연락처">
-              <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className="input" />
+              <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className={inputCls} />
             </Field>
           </div>
           <Field label="참여 목적">
-            <select name="industry" className="input" defaultValue="">
+            <select name="industry" className={inputCls} defaultValue="">
               <option value="">선택</option>
               <option value="경쟁PT 과제기업">경쟁PT 과제기업</option>
               <option value="채용 파트너">채용 파트너</option>
@@ -168,10 +170,10 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="기수" required>
-              <input name="cohort" type="number" min={1} max={99} required placeholder="예: 3" className="input" />
+              <input name="cohort" type="number" min={1} max={99} required placeholder="예: 3" className={inputCls} />
             </Field>
             <Field label="매드리그 활동 연도" required>
-              <select name="activityYear" required className="input" defaultValue="">
+              <select name="activityYear" required className={inputCls} defaultValue="">
                 <option value="" disabled>선택</option>
                 {activityYears.map(y => (
                   <option key={y} value={y}>{y}년</option>
@@ -182,31 +184,31 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field label="이름" required>
-              <input name="name" required className="input" />
+              <input name="name" required className={inputCls} />
             </Field>
             <Field label="이메일" required>
-              <input name="email" type="email" required className="input" />
+              <input name="email" type="email" required className={inputCls} />
             </Field>
             <Field label="연락처">
-              <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className="input" />
+              <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className={inputCls} />
             </Field>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field label="소속 대학" required>
-              <input name="university" required className="input" />
+              <input name="university" required className={inputCls} />
             </Field>
             <Field label="전공">
-              <input name="major" className="input" />
+              <input name="major" className={inputCls} />
             </Field>
             <Field label="부전공">
-              <input name="minor" className="input" />
+              <input name="minor" className={inputCls} />
             </Field>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="관심 산업군">
-              <select name="industry" className="input" defaultValue="">
+              <select name="industry" className={inputCls} defaultValue="">
                 <option value="">선택</option>
                 {industries.map(ind => (
                   <option key={ind} value={ind}>{ind}</option>
@@ -214,7 +216,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
               </select>
             </Field>
             <Field label="관심 직무군">
-              <select name="jobFunction" className="input" defaultValue="">
+              <select name="jobFunction" className={inputCls} defaultValue="">
                 <option value="">선택</option>
                 {jobFunctions.map(jf => (
                   <option key={jf} value={jf}>{jf}</option>
@@ -239,19 +241,6 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         {submitting ? '등록 중...' : '등록'}
       </button>
 
-      <style>{`
-        .input {
-          width: 100%;
-          background: #000;
-          border: 1px solid #262626;
-          padding: 12px 16px;
-          color: #fff;
-          outline: none;
-          transition: border-color 0.15s;
-        }
-        .input:focus { border-color: #EC1D25; }
-        select { color-scheme: dark; }
-      `}</style>
     </form>
   );
 }

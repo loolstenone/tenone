@@ -12,13 +12,14 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const programItems = [
-    { name: "아이디어 무브먼트", href: "/madleague/idea-movement" },
-    { name: "PT 경쟁 프로그램", href: "/madleague/pt" },
-    { name: "전체 프로그램", href: "/madleague/program" },
+    { name: "경쟁 PT", href: "/madleague/programs/competition" },
+    { name: "아이디어 무브먼트", href: "/madleague/programs/im" },
+    { name: "전체 프로그램", href: "/madleague/programs" },
 ];
 
 const navItems = [
     { name: "프로그램",  href: "/madleague/programs" },
+    { name: "동아리",    href: "/madleague/clubs" },
     { name: "아레나",    href: "/madleague/arena" },
     { name: "MADzine",  href: "/madleague/madzine" },
 ];
@@ -79,6 +80,7 @@ export function MadLeagueHeader() {
                         signupPath="/madleague/signup"
                         siteId="madleague"
                         siteName="MAD League"
+                        hideWorkspaces={true}
                     />
                 </div>
 

@@ -130,14 +130,21 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta (2026-04-22 업데이트) — 아레나 3섹션 + 워크스페이스 2페이지 완성. |
-| **개발 수준** | 클럽 시스템·대회 기능·지원서·아레나 완성. 프로젝트/PT 워크스페이스 신설. |
+| **Phase** | Beta (2026-05-19 업데이트) — 전체 QA 완료. rounded 제거 + inputCls 통일. |
+| **개발 수준** | 클럽 시스템·대회 기능·지원서·아레나·워크스페이스 완성. 디자인 QA 완료. |
 | **이월 작업** | 동아리 로고 7종 (M1-G) / MADzine 실제 콘텐츠 이관 (ML-E) |
 | **최근 결정** | `/madleague/pt` = 매드리거 전용 워크스페이스 (Hall of Fame 공개 페이지와 분리) / 구 301 리디렉트 제거 |
 
 ### 핵심 파일 추가
 - `app/(MADLeague)/madleague/projects/page.tsx` — 프로젝트 워크스페이스
 - `app/(MADLeague)/madleague/pt/page.tsx` — 경쟁PT 워크스페이스
+- `app/(MADLeague)/madleague/programs/hero/page.tsx` — HeRo 프로그램 페이지
+
+### 디자인 QA 규칙 (2026-05-19 확정)
+- `rounded-*` 완전 제거 (예외: `h-3` 이하 컬러 도트 `rounded-full`)
+- `<style>` 블록 금지 → `inputCls` Tailwind 상수로 대체
+- `inputCls`: `'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]'`
+- HeRo 프로그램만 `focus:border-[#FFC000]` (금색 브랜딩)
 
 ---
 

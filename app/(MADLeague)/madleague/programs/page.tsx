@@ -34,6 +34,11 @@ const programs = [
     desc: '연말 전국 대학생 아이디어 쇼케이스. 내 아이디어로 세상을 바꾼다.',
   },
   {
+    href: '/madleague/programs/hero',
+    title: '히어로 프로그램',
+    desc: 'HeRo와 연계한 커리어 솔루션 — 취업·인턴 연결.',
+  },
+  {
     href: '/madleague/programs/dam',
     title: 'DAM 파티',
     desc: 'Digital Advertising Meeting — 기업-학생 네트워킹 허브.',
@@ -47,10 +52,10 @@ export default function ProgramsPage() {
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">PROGRAMS</div>
           <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
-            6가지 실전 무대
+            7가지 실전 무대
           </h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
-            MADLeague는 학생이 실전을 경험할 수 있는 6가지 프로그램을 운영한다.
+            MADLeague는 학생이 실전을 경험할 수 있는 7가지 프로그램을 운영한다.
             각 프로그램마다 방식은 다르지만, 결국 하나를 남긴다 — <span className="text-white">진짜 경험</span>.
           </p>
         </div>

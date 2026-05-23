@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Save, Send, X, Plus, Loader2 } from 'lucide-react';
 
+const inputCls = 'w-full bg-[#0a0a0a] border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25]';
+
 const CATEGORIES = [
   { slug: 'interview', label: '인터뷰' },
   { slug: 'case',      label: '케이스' },
@@ -71,27 +73,27 @@ export function ArticleEditor({ initial }: Props) {
   return (
     <div className="space-y-6">
       <Field label="카테고리">
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
           {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.label}</option>)}
         </select>
       </Field>
 
       <Field label="제목 *">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="독자의 시선을 끄는 제목" className="input text-xl font-bold" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="독자의 시선을 끄는 제목" className={`${inputCls} text-xl font-bold`} />
         <div className="text-xs text-neutral-500 text-right mt-1">{title.length} / 200</div>
       </Field>
 
       <Field label="부제 (선택)">
-        <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} maxLength={300} placeholder="한 문장으로 요약" className="input" />
+        <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} maxLength={300} placeholder="한 문장으로 요약" className={inputCls} />
       </Field>
 
       <Field label="썸네일 이미지 URL (선택)">
-        <input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} type="url" placeholder="https://..." className="input" />
+        <input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} type="url" placeholder="https://..." className={inputCls} />
       </Field>
 
       <Field label="본문 *">
         <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20} maxLength={50000}
-          placeholder="마크다운 또는 일반 텍스트. 엔터는 줄바꿈으로 렌더됩니다." className="input resize-y leading-relaxed font-mono text-sm" />
+          placeholder="마크다운 또는 일반 텍스트. 엔터는 줄바꿈으로 렌더됩니다." className={`${inputCls} resize-y leading-relaxed font-mono text-sm`} />
         <div className="text-xs text-neutral-500 text-right mt-1">{content.length.toLocaleString()} / 50,000</div>
       </Field>
 
@@ -109,7 +111,7 @@ export function ArticleEditor({ initial }: Props) {
         <div className="flex gap-2">
           <input value={newTag} onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-            placeholder="예: 경쟁PT, 수상, MADLeap" maxLength={30} className="input flex-1" />
+            placeholder="예: 경쟁PT, 수상, MADLeap" maxLength={30} className={`${inputCls} flex-1`} />
           <button type="button" onClick={addTag} className="bg-neutral-900 border border-neutral-800 text-white px-4 inline-flex items-center">
             <Plus className="h-4 w-4" />
           </button>
@@ -131,18 +133,6 @@ export function ArticleEditor({ initial }: Props) {
         </button>
       </div>
 
-      <style>{`
-        .input {
-          width: 100%;
-          background: #0a0a0a;
-          border: 1px solid #262626;
-          padding: 12px 16px;
-          color: #fff;
-          outline: none;
-          transition: border-color 0.15s;
-        }
-        .input:focus { border-color: #EC1D25; }
-      `}</style>
     </div>
   );
 }
