@@ -4,6 +4,71 @@
 
 ---
 
+## 2026-05-23 (세션 149) — SmarComm 캠페인 모달 + 랜딩 hero 복구 + 워크트리 전면 정리 + 단일 master 운영 복귀
+
+### 장소·운영
+
+- 시작: lucid-poincare 워크트리 (이전 세션부터 운영 중)
+- 종료: master 단독으로 복귀 (워크트리 6개 → 0개)
+- Base: 세션 148 commit `255691f6`
+
+### 변경 요약
+
+**SmarComm — Phase 3.1.2 캠페인 모달 UI 2단계 발전**
+- 1단계: [app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx](app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx)에 "+ 새 캠페인" 버튼 + 인라인 모달 (7필드, POST `/api/smarcomm/email/campaigns`)
+- 2단계: 인라인 → [features/smarcomm/EmailCampaignModal.tsx](features/smarcomm/EmailCampaignModal.tsx) 352라인 분리 컴포넌트 (세그먼트 선택·작성/미리보기 탭·테스트 발송·person_ids 직접 입력)
+- 이월 작업 해소: `body_html` 에디터 + 세그먼트 + 테스트 발송 셋 모두 단일 컴포넌트로 통합
+
+**SmarComm — 랜딩 hero 회전 카피·분석 경로 복구**
+- [app/(SmarComm)/smarcomm/page.tsx](app/(SmarComm)/smarcomm/page.tsx): Marvis 단독 정적 카피 → 20개 회전 헤드라인 + referrer/UTM 매칭 복원
+- 분석 진입 `/smarcomm/marvis/scan` → `/smarcomm/scan?url=...` 풀 SmarComm Index 복귀
+- 버튼·플레이스홀더·안내 카피 모두 복원
+
+**WIO — 15페이지 푸터 공통 컴포넌트화**
+- [features/wio/WIOFooter.tsx](features/wio/WIOFooter.tsx) (기존) 적용: wio/about·ai-matrix·contact·crm·data·e2e-flows·evaluation·framework·marketing·migration·page·presets·pricing·setup·solutions
+- 인라인 푸터 중복 -52라인 / 컴포넌트 호출 +44라인 (-8라인 단순화)
+
+**MADLeague — 세션 142 QA 머지**
+- stoic-archimedes 워크트리의 미머지 2 commits 흡수: `rounded` 제거 + `inputCls` 통일
+- `app/(MADLeague)/madleague/programs/hero/page.tsx` 신규
+- `app/api/madleague/upload/route.ts` 신규
+
+**워크트리 6개 → 0개 일괄 정리**
+
+| 워크트리 | 작업 | 결과 |
+|---|---|---|
+| vibrant-sammet | 이미 머지된 잔재 | 즉시 제거 |
+| stoic-archimedes | MADLeague QA | master 머지 후 제거 |
+| lucid-poincare | SmarComm 모달 1단계 + 랜딩 복구 | master 머지 후 제거 |
+| nostalgic-bohr | EmailCampaignModal 분리 (2단계) | master 머지 후 제거 |
+| charming-nash | WIO 푸터 공통화 | master 머지 후 제거 |
+
+push 총 5회 중 master push 2회 (Vercel 빌드 2회). 묶음 머지로 6회+ 빌드 절약.
+
+**운영 방식 변경 — 워크트리 폐기 + CLAUDE.md 단순화**
+- CLAUDE.md § 3.4 멀티 워크트리 SSOT 전체 제거 → "단일 master 운영 원칙"으로 대체
+- § 4.1 작업 시작 프로토콜 6단계 → 5단계 (워크트리 결정 단계 제거)
+- § 4.2 작업 종료 프로토콜 A/B 분리 (워커/오케스트레이터) 제거 → 단일 흐름
+- WORK_STATUS의 "현재 활성 워크트리" 표 폐지 → "운영 방식" 안내 + backup 브랜치 표만 유지
+
+### 결정사항
+
+- 1인 개발자 + 한 시점 한 작업 = master 단독이 가장 단순. 멀티 워크트리는 진짜 평행 필요 시 단발성 사용
+- master push만 Vercel 빌드 트리거 → 묶음 머지가 비용 절감
+- nostalgic-bohr의 충돌 해결은 "더 발전된 버전 채택" 원칙으로 stash 강제 적용 (lucid 인라인을 EmailCampaignModal로 덮어씀)
+
+### 워크트리에서 발견된 모순·이슈
+
+- master에 lucid와 같은 의도의 미커밋 작업 잔재 — 사용자 결정으로 폐기 후 lucid 머지로 일원화
+- 워크트리에 `node_modules` 누락으로 `@anthropic-ai/sdk` 미설치 → 분석 API 500 발생. `npm install` 914 패키지 설치 + `.next` 캐시 클리어 후 정상 (서버 로그 `POST /api/smarcomm/scan 200` 확인)
+- `nostalgic-bohr`와 `lucid-poincare`가 같은 파일에 다른 방식으로 평행 작업한 사례 — 분리 컴포넌트 버전이 우수해 후자 채택. **이런 평행 작업은 단일 master 운영으로 원천 차단됨**
+
+### 이월
+
+세션 148과 동일 + Phase 3.2 웹 푸시 + EmailCampaignModal 회귀 검증.
+
+---
+
 ## 2026-05-21 (세션 148) — 전 브랜드 헤더 링크 일관성 일괄 정렬 (signupPath·navItems·hideAbout)
 
 ### 워크트리 / 장소

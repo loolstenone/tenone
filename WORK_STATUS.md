@@ -1,31 +1,74 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-21 (세션 148 — 전 브랜드 헤더 링크 일관성 일괄 정렬)
+> 마지막 업데이트: 2026-05-23 (세션 149 — SmarComm 캠페인 모달 + 랜딩 hero 복구 + 워크트리 전면 정리 + 단일 master 운영 복귀)
 
 ---
 
-## 🌳 현재 활성 워크트리 (집/사무실 동기화 SSOT)
+## 운영 방식 (2026-05-23 변경)
 
-> **SSOT 규칙**: CLAUDE.md § 3.4 + [docs/Worktree_Protocol.md](docs/Worktree_Protocol.md)
-> 모든 워크트리 작업 시작 시 이 표에 추가, 종료 시 행 제거 또는 "완료" 표시.
-> "다음 첫 액션"은 **파일·라인·구체 행동** 단위로 작성 (막연한 표현 금지).
+**단일 master 운영.** 멀티 워크트리·feature 브랜치 운영 폐기. CLAUDE.md § 3.4·4.1·4.2 단순화 완료. 평행 작업이 진짜 필요한 hotfix·장기 실험만 임시 워크트리 1개로 처리.
 
-| 브랜치 | 유형 | 작업 | 진행률 | 다음 첫 액션 |
-|---|---|---|---|---|
-| _(없음 — master 단독)_ | | | | |
-
-**세션 147 진행 결과 (2026-05-21)**: master 단독에서 Phase 3.1 옵션 A (이메일 발송 헬퍼 분리 + SmarComm 라우트 신설) 완료. 새 워크트리는 생성하지 않음. 다음 첫 액션은 Phase 3.1.2 (캠페인 작성 모달 UI) 또는 Phase 3.2 (웹 푸시 VAPID·서비스 워커·`smarcomm_push_subscriptions`).
-
-**세션 146 정리 결과 (2026-05-21)**: 세션 144 워크트리 `trusting-visvesvaraya-1024ad` + dangling 폴더 2개(`cranky-murdock-a0c05b`, `friendly-heisenberg-94bd10`) + 로컬 브랜치 2개(`claude/trusting-visvesvaraya-1024ad`, `claude/cranky-murdock-a0c05b`) 모두 정리.
-
-### 활성 backup 브랜치 (origin)
+### 활성 backup 브랜치 (origin, 미머지 자산)
 
 | 브랜치 | 내용 | 다음 처리 |
 |---|---|---|
 | `backup/myverse-canvas-share` | Myverse 캔버스 공유 (DB·API·UI·SQL 10 파일) | 충돌 해결 후 master 머지 (cherry-pick 권장) |
 | `backup/smarcomm-phase4` | SmarComm Phase 4 (PDF·Wikidata KG·3 view mode) | V2.1과 중복 검토 후 부분 cherry-pick |
 | `backup/myverse-camera` | Myverse 인앱 카메라 (세션 135) | 세션 134 캡쳐 Phase 2와 비교 후 통합 결정 |
-| `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 세션 143에서 master에 흡수 확인 후 로컬 삭제. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+| `claude/brave-margulis-2c2f3e` | 세션 135 SmarComm Index Phase 1~3 + Myverse — 이미 master에 흡수. origin 보존. | 다음 마스터 점검 시 origin 삭제 가능 |
+
+---
+
+## 세션 149 핵심 성과 (2026-05-23)
+
+### ① SmarComm Phase 3.1.2 — 캠페인 작성 모달 UI (인라인 → 분리 컴포넌트 발전)
+
+1단계 (lucid-poincare 워크트리): [app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx](app/(SmarComm)/smarcomm/dashboard/crm/email/page.tsx)에 "+ 새 캠페인" 버튼 + 인라인 모달(이름·제목·본문·프리헤더·버튼 라벨·URL·발신자 7필드 + POST `/api/smarcomm/email/campaigns`).
+
+2단계 (nostalgic-bohr 워크트리, 머지): 인라인을 [features/smarcomm/EmailCampaignModal.tsx](features/smarcomm/EmailCampaignModal.tsx) 352라인 분리 컴포넌트로 발전 — 세그먼트 선택(`/api/smarcomm/crm/segments` 연동), 본문 작성/미리보기 탭, 테스트 발송 UI, person_ids 직접 입력. `page.tsx`는 import + 호출만.
+
+**Phase 3.1.2 이월 작업 해소**: `body_html` 에디터(미리보기 탭) + 세그먼트 선택 + 테스트 발송 — 셋 다 단일 컴포넌트로 통합 구현.
+
+### ② SmarComm 랜딩 hero 회전 카피·분석 경로 복구
+
+[app/(SmarComm)/smarcomm/page.tsx](app/(SmarComm)/smarcomm/page.tsx):
+- Marvis 단독 정적 카피("사장님 마케팅 비서…") → **20개 회전 헤드라인**(`HEADLINES` + `useEffect` referrer/UTM 매칭) 복원
+- "라이트 진단 받기" → "무료 진단 시작" 복원, 안내 "회원가입 없이 · 30초 소요 · 완전 무료"
+- 분석 진입 경로 `/smarcomm/marvis/scan` → `/smarcomm/scan?url=...` 복귀 (Marvis 라이트는 별도 진단 페이지로 운영, 메인 랜딩은 풀 SmarComm Index 진입)
+
+### ③ WIO 15페이지 푸터 공통 컴포넌트화
+
+[features/wio/WIOFooter.tsx](features/wio/WIOFooter.tsx) (이미 존재)를 wio/about·ai-matrix·contact·crm·data·e2e-flows·evaluation·framework·marketing·migration·page·presets·pricing·setup·solutions 15페이지에 일괄 적용 (-52/+44, 인라인 중복 제거).
+
+### ④ MADLeague 전체 QA 머지 (세션 142 작업)
+
+stoic-archimedes 워크트리의 미머지 commit 2개 (MADLeague QA — `rounded` 제거 + `inputCls` 통일 + 세션 142 docs) master 흡수. `app/(MADLeague)/madleague/...` 다수 페이지 + `programs/hero/page.tsx` 신규 + `app/api/madleague/upload/route.ts` 신규.
+
+### ⑤ 워크트리 6개 → master 단독 정리
+
+| 워크트리 | 처리 |
+|---|---|
+| vibrant-sammet-3259e9 | 이미 머지된 잔재 — 즉시 제거 |
+| stoic-archimedes-af8400 | MADLeague QA → master 머지 → 제거 |
+| lucid-poincare-0bda68 | SmarComm 모달 + 랜딩 → master 머지 → 제거 |
+| nostalgic-bohr-9db6e3 | EmailCampaignModal 분리 → master 머지 → 제거 |
+| charming-nash-cbdeed | WIO 푸터 공통화 → master 머지 → 제거 |
+
+push 총 5회 중 master push 2회 (Vercel 빌드 2회). 분리 push 시 발생했을 6회+ 빌드를 묶음 머지로 절약.
+
+### ⑥ 워크트리 운영 폐기 + CLAUDE.md 프로토콜 단순화
+
+CLAUDE.md § 3.4 멀티 워크트리 SSOT 전체 제거 → "단일 master 운영 원칙"으로 대체. § 4.1 작업 시작 6단계 → 5단계. § 4.2 작업 종료 A/B 분리 제거 → 단일 흐름. WORK_STATUS의 활성 워크트리 표 폐지.
+
+### 🎯 다음 세션 첫 액션
+
+1. **외부 키 발급** (SmarComm 블로커 — 세션 144 이후 그대로):
+   - ANTHROPIC_API_KEY 401 진단 (`.env.local` ↔ Vercel Env 3곳 키 불일치 / revoke·rotate / 결제·크레딧 진단)
+   - OpenAI/Perplexity/SerpAPI/PageSpeed → 5 AI 플랫폼 전체 활성
+2. **SmarComm Phase 3.2 웹 푸시**: VAPID 발급 + 서비스 워커 + `smarcomm_push_subscriptions` 테이블 (Phase 3 설계서 § 4)
+3. **SmarComm EmailCampaignModal 회귀 검증**: 실제 segments API 응답 확인 + 테스트 발송 흐름 e2e
+4. **MADLeague upload API 검토**: 세션 142의 `app/api/madleague/upload/route.ts` 인증·용량·MIME 정책 점검
+5. **Marvis #1·#3·#4 (카페24 dev sandbox 등록 후)** — 사용자 직접 작업 대기
 
 ---
 
