@@ -63,6 +63,11 @@ push 총 5회 중 master push 2회 (Vercel 빌드 2회). 묶음 머지로 6회+ 
 - 워크트리에 `node_modules` 누락으로 `@anthropic-ai/sdk` 미설치 → 분석 API 500 발생. `npm install` 914 패키지 설치 + `.next` 캐시 클리어 후 정상 (서버 로그 `POST /api/smarcomm/scan 200` 확인)
 - `nostalgic-bohr`와 `lucid-poincare`가 같은 파일에 다른 방식으로 평행 작업한 사례 — 분리 컴포넌트 버전이 우수해 후자 채택. **이런 평행 작업은 단일 master 운영으로 원천 차단됨**
 
+### 추가 정리 (세션 149 끝물)
+
+- **랜딩 Marvis 4카드 섹션 삭제** (commit `ce4c99ff`) — hero 아래 "1탭·카페24·매일·Phase 1" 검증 안 된 카드 4종 + wrapper section 제거 (-20라인). hero → 바로 "GEO + SEO 통합 점검"으로 연결. 정직성 원칙(§ 1.10 ZERO) 동일하게 "Phase 1"·"Marvis 베타" 같은 미완료 라벨을 메인 랜딩에서 노출 안 함.
+- **운영 교훈 — 워크트리 삭제 시 dev server도 같이 stop 의무**: 워크트리 폴더(`lucid-poincare-0bda68`)는 Remove-Item으로 지웠지만 Node dev 프로세스가 그 경로의 `.next` 빌드를 메모리에 잡고 계속 서빙 → master에 push해도 `localhost:3000/smarcomm`에 옛 코드만 보임. 해결: `preview_stop` 후 master 경로에서 새 세션·새 dev server 시작. **향후 워크트리 제거 절차에 dev server stop 단계 명시 필요** (현재 운영 방식은 master 단독이라 재발 가능성 낮음).
+
 ### 이월
 
 세션 148과 동일 + Phase 3.2 웹 푸시 + EmailCampaignModal 회귀 검증.
