@@ -176,26 +176,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Marvis 4 가치 — 정직성 원칙: 검증 안 된 수치 노출 금지 */}
-        <section className="border-t border-white/[0.06] bg-[#0A0E1A] px-5 py-12">
-          <div className="mx-auto max-w-4xl">
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {[
-                { value: '1탭', label: '승인 발송', desc: '관리 → 승인 전환' },
-                { value: '카페24', label: '·아임웹', desc: '자사몰 1회 연동' },
-                { value: '매일', label: '자동 분석', desc: 'To-Do 3개' },
-                { value: 'Phase 1', label: '준비 중', desc: 'Marvis 베타' },
-              ].map((s, i) => (
-                <div key={i} className="py-4 text-center">
-                  <div className="text-2xl font-bold text-white md:text-3xl">{s.value}</div>
-                  <div className="mt-1 text-xs font-medium text-white/60">{s.label}</div>
-                  <div className="text-[10px] text-white/25">{s.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* What We Check */}
         <section className="border-t border-border bg-surface px-5 py-16">
           <div className="mx-auto max-w-4xl">
