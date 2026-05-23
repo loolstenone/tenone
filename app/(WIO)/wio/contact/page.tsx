@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Send, Check, Building2, Users, Briefcase, GraduationCap } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 const interests = [
     { id: 'solution', label: '솔루션 구축', icon: Building2 },
@@ -124,6 +125,5 @@ export default function ContactPage() {
                     )}
                 </div>
             </main>
-        </>
-    );
-}
+      <WIOFooter />
+    </>

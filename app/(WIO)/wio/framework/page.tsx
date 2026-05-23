@@ -10,6 +10,7 @@ import {
   Accessibility, Zap, Target, BarChart3, Rocket, Calendar, CheckCircle2
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 3대 자원 상세 ── */
 const RESOURCE_DETAILS = [
@@ -634,6 +635,5 @@ export default function FrameworkPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

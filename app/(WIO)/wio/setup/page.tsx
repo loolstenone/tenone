@@ -7,6 +7,7 @@ import {
   LayoutGrid, Users, Shield, Settings, Workflow, Rocket
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 const STEPS = [
   {
@@ -267,6 +268,5 @@ export default function SetupPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

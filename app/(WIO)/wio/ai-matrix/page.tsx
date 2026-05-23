@@ -7,6 +7,7 @@ import {
   ShieldCheck, MessageCircle, Filter, Info
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── AI 유형 정의 ── */
 const AI_TYPES = [
@@ -284,6 +285,5 @@ export default function AIMatrixPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

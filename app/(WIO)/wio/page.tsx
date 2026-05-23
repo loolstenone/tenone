@@ -8,6 +8,7 @@ import {
   ChevronRight, Sparkles, Target, BarChart3, BookOpen
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── 3대 자원 ── */
@@ -350,16 +351,7 @@ export default function WIOHome() {
         </div>
       </section>
 
-      {/* ═══════ Footer ═══════ */}
-      <footer className="border-t border-white/5 py-8 px-6">
-        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-center sm:text-left">
-            <div className="text-sm font-bold"><span className="text-[#9B8FE8]">W</span>IO <span className="text-slate-600">Enterprise Unified System</span></div>
-            <div className="text-xs text-slate-600 mt-1">Powered by <a href="https://tenone.biz" className="hover:text-slate-400">Ten:One&trade;</a></div>
-          </div>
-          <div className="text-xs text-slate-600">&copy; {new Date().getFullYear()} Ten:One&trade; Universe</div>
-        </div>
-      </footer>
+      <WIOFooter />
     </>
   );
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 export default function AboutPage() {
   return (
@@ -85,6 +86,5 @@ export default function AboutPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

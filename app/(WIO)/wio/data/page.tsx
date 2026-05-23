@@ -8,6 +8,7 @@ import {
   Layers, ArrowRight, ChevronRight, Cpu, LineChart
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 4-Level Analytics ── */
 const ANALYTICS_LEVELS = [
@@ -309,6 +310,5 @@ export default function DataPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}

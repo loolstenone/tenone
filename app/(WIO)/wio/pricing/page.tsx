@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Check, ArrowRight, Sparkles, Building2, Zap, Crown, Settings, Gift, Server, Mail, HardDrive } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import { WIOFooter } from '@/features/wio/WIOFooter';
 
 /* ── 확정 플랜 (팀 단위 플랫 과금) ── */
 const PLANS = [
@@ -259,6 +260,5 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+      <WIOFooter />
     </>
-  );
-}
