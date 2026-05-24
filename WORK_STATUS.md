@@ -6,6 +6,17 @@
 
 ## 세션 150 핵심 성과 (2026-05-25)
 
+### ⑤ Phase 3.2 — Web Push (VAPID + 서비스 워커) 완료
+
+이전 세션 잔재 점검 → VAPID 키 발급 + 권한 게이트 + 클라이언트 구독 컴포넌트 추가로 마무리.
+
+- **VAPID 키 발급**: `npx web-push generate-vapid-keys` → `.env.local`에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`·`VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT` 추가. **Vercel Env 동기화 필요** (Production+Preview+Development).
+- **권한 게이트**: [app/api/smarcomm/push/send/route.ts](app/api/smarcomm/push/send/route.ts) — staff/manager/super_admin만 발송 가능 (member_roles 체크).
+- **클라이언트 구독 컴포넌트**: [features/smarcomm/PushSubscribeButton.tsx](features/smarcomm/PushSubscribeButton.tsx) — 서비스 워커 등록 + Notification 권한 + PushManager.subscribe + API 호출. unsupported/denied/subscribed/unsubscribed 4상태.
+- **오프라인 폴백**: [app/(SmarComm)/smarcomm/offline/page.tsx](app/(SmarComm)/smarcomm/offline/page.tsx) — `smarcomm-sw.js`의 `OFFLINE_URL` 대응.
+- **검증**: `/smarcomm-sw.js` 200, `/smarcomm/offline` 200, push 페이지 컴파일 에러 0.
+- **남은 사용자 액션**: Vercel Env에 VAPID 4개 등록, 푸시 알림 e2e 검증(실제 브라우저에서 구독→발송→수신).
+
 ### ④ Phase 3.4 — 환각 감지 (Hallucination Detection) 🥇 D.SaiO 핵심 차별점 대응
 
 기존 `classifySentimentLLM`이 이미 factComparisons 생성하던 것을 활용 — 신규 LLM 모듈 불필요. 영속화 테이블 + UI만 추가.
@@ -39,11 +50,12 @@ choco 비관리자 권한 실패 → GitHub Release 직접 다운로드 → `C:\
 
 ### 🎯 다음 세션 첫 액션
 
-1. **Phase 3.2 웹 푸시** — 이전 세션 잔재(미커밋: `lib/smarcomm/push.ts`·`smarcomm-sw.js`·`smarcomm-push-subscriptions.sql`·`app/api/smarcomm/push/`·`app/(SmarComm)/smarcomm/dashboard/crm/push/page.tsx` 등)를 점검 후 마무리·커밋
-2. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 4 플랫폼 (ANTHROPIC은 해결됨). 키 받으면 다음 신규 scan은 자동으로 새 환각 감지 파이프라인 통과
-3. **환각 감지 회귀 검증** — 새 키 발급 후 실제 scan 1건 돌려서 Phase 3.4 end-to-end 흐름 확인 (백필이 아닌 실시간 capture)
-4. **EmailCampaignModal 회귀 검증** — segments API e2e
-5. **MADLeague upload API 검토** — 세션 142의 `app/api/madleague/upload/route.ts`
+1. **VAPID 4개를 Vercel Env에 등록** — `.env.local` 동일 키값을 Production/Preview/Development 모두에. Vercel Dashboard > Settings > Environment Variables
+2. **Web Push e2e 검증** — 실제 브라우저에서 PushSubscribeButton 클릭 → 구독 → /api/smarcomm/push/send 호출 → 수신 확인
+3. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 4 플랫폼 (ANTHROPIC은 해결됨). 키 받으면 다음 신규 scan은 자동으로 환각 감지 파이프라인 통과
+4. **환각 감지 회귀 검증** — 새 키 발급 후 실제 scan 1건 돌려서 Phase 3.4 end-to-end 흐름 확인 (백필이 아닌 실시간 capture)
+5. **EmailCampaignModal 회귀 검증** — segments API e2e
+6. **MADLeague upload API 검토** — 세션 142의 `app/api/madleague/upload/route.ts`
 
 ---
 
