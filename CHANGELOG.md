@@ -4,6 +4,63 @@
 
 ---
 
+## 2026-05-25 (세션 150) — D.Frame 벤치마킹 + SmarComm Phase 3.5·3.4·3.2 일괄 완료
+
+### 장소·운영
+
+- 시작: 워크트리 nifty-villani-3f0bea (이전 세션부터 운영 중, 단발성)
+- 종료: master 단독 commit 4회·push 3회 (Vercel 빌드 3회)
+- Base: 세션 149 commit `8f19b526`
+
+### 변경 요약
+
+**① D.Frame (DMC Media) 벤치마킹** — PDF 22p + 사이트 8 URL 분석
+- D.SaiO(GEO/AEO 자동 최적화 + 환각 감지)가 SmarComm Scan 직접 경쟁자 식별
+- 차별점 4가지 도출: 환각 감지 / 정량 사례 표기 / L0/L1/L2 데이터레이크 / 5종 기여모델
+- 보완 관계: theCAP/theDAP/Growth/MMM은 가격대·고객 규모로 분리
+
+**② Phase 3.5 — 랜딩 정량 콘텐츠 (How We Score)** — commit `93016ce2`
+- D.Frame 식 정량 표기 감각을 SmarComm 정직성 원칙으로 변형
+- 신규 API [/api/smarcomm/benchmark-stats](app/api/smarcomm/benchmark-stats/route.ts) — 누적 통계 ISR 10분
+- 신규 컴포넌트 [HowWeScoreSection.tsx](features/smarcomm/HowWeScoreSection.tsx) — 산식·실측·정직성 3카드
+- 가짜 사례 0건, 누적 19건 실측 평균 노출 (Index 62 / F84·T57·C48)
+
+**③ Phase 3.4 — 환각 감지 (Hallucination Detection)** 🥇 — commit `37d780e0`
+- D.SaiO 핵심 차별점 대응. 기존 `classifySentimentLLM`의 factComparisons 활용 — 신규 LLM 모듈 0
+- 신규 테이블 [smarcomm_brand_facts·smarcomm_hallucinations](sql/smarcomm-hallucinations.sql) + RLS
+- 신규 모듈 [hallucination-persist.ts](lib/smarcomm/hallucination-persist.ts) — siteTruth→facts, comparison(wrong/partial/missing)→hallucinations
+- run-scan 통합: ai_probes insert에 `.select()` 추가 후 persist 호출
+- 신규 UI [HallucinationCard.tsx](features/smarcomm/HallucinationCard.tsx) — Report에 정직성 카드 (3단계 분류 + Ground truth 칩 + LLM explanation)
+- 백필 검증: hsad.co.kr scan에서 "AI 1974년 vs 사이트 1984년" 사실 오류 자동 검출
+
+**④ Phase 3.2 — Web Push (VAPID + 서비스 워커)** — commit `1f2eb655`
+- 이전 세션 미커밋 잔재(push.ts·sw·subscribe·send API·DB) 점검 후 마무리
+- VAPID 키 발급: `npx web-push generate-vapid-keys` → `.env.local` (Vercel Env 등록은 사용자 액션)
+- 권한 게이트 추가: send API에 staff/manager/super_admin 체크 (member_roles)
+- 신규 [PushSubscribeButton.tsx](features/smarcomm/PushSubscribeButton.tsx) — 서비스 워커 등록 + 권한 + subscribe + 4상태 UI
+- 신규 [smarcomm/offline/page.tsx](app/(SmarComm)/smarcomm/offline/page.tsx) — 서비스 워커 OFFLINE_URL 대응
+
+**⑤ poppler-windows 설치** — PDF 페이지별 읽기
+- choco 비관리자 실패 → GitHub Release 직접 다운로드 → `C:\Users\cheon\poppler\` 사용자 PATH
+- Claude Code 재시작 후 Read 도구의 `pages` 파라미터 사용 가능
+
+### 결정사항
+
+- **Phase 4 (Marvis Phase 1) 보류**: OAuth(카페24/Imweb) 연동 없이는 RFM·매출 데이터가 없어 정직성 원칙 위반 위험. 사용자 OAuth 등록 액션 대기.
+- **풀스택 셀프서브 패턴 확립**: D.SaiO를 비롯한 모든 SmarComm Scan 차별 기능은 추가 LLM 모듈 없이 기존 `classifySentimentLLM` 출력을 영속화하는 방향이 더 효율.
+- **워크트리 ↔ master 양방 카피 흐름**: 단일-master 운영 원칙이지만 harness가 워크트리에 머무르는 동안에는 `.env.local` + 신규 파일을 cp로 sync 필요.
+
+### 이월
+
+- Vercel Env에 VAPID 4개 등록 (사용자)
+- 외부 키 발급 (OpenAI/Perplexity/SerpAPI/PageSpeed)
+- Marvis Phase 1 본격 (OAuth 등록 선행)
+- Marvis Phase 4.5 (정직 활성화) 검토
+- EmailCampaignModal 회귀 검증
+- MADLeague upload API 검토
+
+---
+
 ## 2026-05-23 (세션 149) — SmarComm 캠페인 모달 + 랜딩 hero 복구 + 워크트리 전면 정리 + 단일 master 운영 복귀
 
 ### 장소·운영
