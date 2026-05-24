@@ -312,3 +312,5 @@ export default function DataPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

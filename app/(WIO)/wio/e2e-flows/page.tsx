@@ -287,3 +287,5 @@ export default function E2EFlowsPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

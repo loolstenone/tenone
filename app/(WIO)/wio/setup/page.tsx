@@ -270,3 +270,5 @@ export default function SetupPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

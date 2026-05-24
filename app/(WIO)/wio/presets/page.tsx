@@ -272,3 +272,5 @@ export default function PresetsPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

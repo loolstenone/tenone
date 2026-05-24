@@ -637,3 +637,5 @@ export default function FrameworkPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

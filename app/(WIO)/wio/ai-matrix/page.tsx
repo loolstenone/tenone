@@ -287,3 +287,5 @@ export default function AIMatrixPage() {
       </div>
       <WIOFooter />
     </>
+  );
+}

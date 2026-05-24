@@ -127,3 +127,5 @@ export default function ContactPage() {
             </main>
       <WIOFooter />
     </>
+  );
+}
