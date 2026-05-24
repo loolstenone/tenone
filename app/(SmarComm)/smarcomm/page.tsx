@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import SmarCommFooter from '@/features/smarcomm/SmarCommFooter';
+import HowWeScoreSection from '@/features/smarcomm/HowWeScoreSection';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const HEADLINES = [
@@ -209,6 +210,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* How We Score — 측정 산식 + 실측 벤치마크 + 정직성 */}
+        <HowWeScoreSection />
 
         {/* Getting Started — 고객/SmarComm 역할 구분 */}
         <section id="process" className="bg-[#0A0E1A] px-5 py-20">

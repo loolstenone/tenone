@@ -1,6 +1,39 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-23 (세션 149 — SmarComm 캠페인 모달 + 랜딩 hero 복구 + 워크트리 전면 정리 + 단일 master 운영 복귀)
+> 마지막 업데이트: 2026-05-25 (세션 150 — D.Frame 벤치마킹 + SmarComm Phase 3.5 정량 콘텐츠 랜딩 섹션)
+
+---
+
+## 세션 150 핵심 성과 (2026-05-25)
+
+### ① D.Frame (DMC Media) 벤치마킹 분석
+
+PDF 22p + 사이트 8 URL 크롤 → 종합 정리. D.SaiO(GEO/AEO 자동 최적화 + 환각 감지)가 SmarComm Scan의 직접 경쟁자. 나머지(theCAP/theDAP/Growth/MMM)는 가격대·고객 규모 분리로 보완 관계. 벤치마크 4가지 도출: 환각 감지 / 정량 사례 표기 / L0/L1/L2 데이터레이크 / 5종 기여모델.
+
+### ② Phase 3.5 — 랜딩 정량 콘텐츠 섹션 (How We Score)
+
+D.Frame의 정량 표기 감각을 가져오되 SmarComm 정직성 원칙으로 변형. 가짜 "ROAS 200%→500%" 안 쓰고 실측 데이터만 노출.
+
+- **신규**: [app/api/smarcomm/benchmark-stats/route.ts](app/api/smarcomm/benchmark-stats/route.ts) — 누적 분석 통계 API (ISR 10분)
+- **신규**: [features/smarcomm/HowWeScoreSection.tsx](features/smarcomm/HowWeScoreSection.tsx) — 3카드 섹션 (산식 투명 공개 / 실측 누적 벤치마크 / 정직성 원칙)
+- **수정**: [app/(SmarComm)/smarcomm/page.tsx](app/(SmarComm)/smarcomm/page.tsx) — Getting Started 앞에 배치
+- **실측 데이터** (커밋 시점): 누적 19건 / Index 62 / F 84·T 57·C 48 / 등급 B15·C4
+
+### ③ poppler-windows 설치 (PDF 페이지별 읽기)
+
+choco 비관리자 권한 실패 → GitHub Release 직접 다운로드 → `C:\Users\cheon\poppler\poppler-26.02.0\Library\bin` 사용자 PATH 추가. Claude Code 재시작 후 Read 도구의 `pages` 파라미터 사용 가능.
+
+### 🎯 다음 세션 첫 액션
+
+1. **Phase 3.4 환각 감지 구현** — D.SaiO 직접 대응. 4단계 체크포인트:
+   - DB 스키마 (`smarcomm_brand_facts`, `smarcomm_hallucinations`)
+   - claim-extractor + hallucination-detector 모듈
+   - run-scan 파이프라인 통합
+   - Report UI 노출
+2. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 4 플랫폼 (ANTHROPIC은 해결됨)
+3. **Phase 3.2 웹 푸시** — 이전 세션 잔재(미커밋: `lib/smarcomm/push.ts`·`smarcomm-sw.js`·`smarcomm-push-subscriptions.sql` 등)를 마무리
+4. **EmailCampaignModal 회귀 검증** — segments API e2e
+5. **MADLeague upload API 검토** — 세션 142의 `app/api/madleague/upload/route.ts`
 
 ---
 
@@ -67,9 +100,7 @@ CLAUDE.md § 3.4 멀티 워크트리 SSOT 전체 제거 → "단일 master 운�
 
 ### 🎯 다음 세션 첫 액션
 
-1. **외부 키 발급** (SmarComm 블로커 — 세션 144 이후 그대로):
-   - ANTHROPIC_API_KEY 401 진단 (`.env.local` ↔ Vercel Env 3곳 키 불일치 / revoke·rotate / 결제·크레딧 진단)
-   - OpenAI/Perplexity/SerpAPI/PageSpeed → 5 AI 플랫폼 전체 활성
+1. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 5 AI 플랫폼 전체 활성 여부 (ANTHROPIC_API_KEY는 `8f19b526` 재동기화로 해결 완료)
 2. **SmarComm Phase 3.2 웹 푸시**: VAPID 발급 + 서비스 워커 + `smarcomm_push_subscriptions` 테이블 (Phase 3 설계서 § 4)
 3. **SmarComm EmailCampaignModal 회귀 검증**: 실제 segments API 응답 확인 + 테스트 발송 흐름 e2e
 4. **MADLeague upload API 검토**: 세션 142의 `app/api/madleague/upload/route.ts` 인증·용량·MIME 정책 점검
