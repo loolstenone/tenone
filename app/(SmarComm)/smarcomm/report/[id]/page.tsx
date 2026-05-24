@@ -17,6 +17,7 @@ import { useAuth } from '@/lib/auth-context';
 import { GRADE_META, type IndexBreakdown, type Grade } from '@/lib/smarcomm/index-calculator';
 import BrandJourneyCard from '@/features/smarcomm/BrandJourneyCard';
 import DiscoveryDetailCard from '@/features/smarcomm/DiscoveryDetailCard';
+import HallucinationCard, { type Hallucination, type BrandFact } from '@/features/smarcomm/HallucinationCard';
 
 const GRADE_MAP = {
   excellent: { color: '#059669', label: 'Excellent', message: 'AI 시대 검색 준비 완료' },
@@ -91,6 +92,9 @@ interface ScanData {
   shortId?: string;
   // AI Probe 실측 결과 (Phase 2)
   aiProbes?: AIProbeRow[];
+  // Phase 3.4 — 환각 감지
+  hallucinations?: Hallucination[];
+  brandFacts?: BrandFact[];
 }
 
 interface AIProbeRow {
@@ -841,7 +845,7 @@ function ReportContent({ scanId }: { scanId: string }) {
         const res = await fetch(`/api/smarcomm/report/${scanId}`, { cache: 'no-store' });
         if (aborted) return;
         if (res.ok) {
-          const { scan: dbScan, aiProbes } = await res.json();
+          const { scan: dbScan, aiProbes, brandFacts, hallucinations } = await res.json();
           if (dbScan?.analysis) {
             // analysis JSONB = AnalysisResult 전체 + breakdown 별도
             setScan({
@@ -851,6 +855,8 @@ function ReportContent({ scanId }: { scanId: string }) {
               domain: dbScan.domain,
               shortId: dbScan.short_id,
               aiProbes: aiProbes ?? [],
+              brandFacts: brandFacts ?? [],
+              hallucinations: hallucinations ?? [],
             });
             setLoading(false);
             return;
@@ -1109,6 +1115,11 @@ function ReportContent({ scanId }: { scanId: string }) {
           {/* AI Visibility Map (5 플랫폼 실측 응답) — 마케터·경영진은 Chapter 2 안에서 노출 */}
           {!isExec && !isDev && scan.aiProbes && scan.aiProbes.length > 0 && (
             <AIVisibilityMap aiProbes={scan.aiProbes} />
+          )}
+
+          {/* Phase 3.4 — 환각 감지 (AI 응답 vs 사이트 사실 대조) */}
+          {!isDev && ((scan.hallucinations && scan.hallucinations.length > 0) || (scan.brandFacts && scan.brandFacts.length > 0)) && (
+            <HallucinationCard hallucinations={scan.hallucinations ?? []} brandFacts={scan.brandFacts ?? []} />
           )}
 
           {/* Discovery sub-engine — 마케터·개발자 */}

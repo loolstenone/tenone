@@ -31,8 +31,8 @@ export async function GET(
     return NextResponse.json({ error: 'report expired', expired: true }, { status: 410 });
   }
 
-  // 서브페이지 + AI Probe 실측 (Phase 2)
-  const [{ data: subPages }, { data: aiProbes }] = await Promise.all([
+  // 서브페이지 + AI Probe 실측 + Phase 3.4 환각 감지
+  const [{ data: subPages }, { data: aiProbes }, { data: brandFacts }, { data: hallucinations }] = await Promise.all([
     admin
       .from('smarcomm_scan_pages')
       .select('url, title, has_meta_description, has_h1, text_length, img_count, img_with_alt, status_code, issues')
@@ -42,7 +42,22 @@ export async function GET(
       .select('platform, category, query, raw_response, citations, mentioned, position, accuracy, extracted_facts, measured_at')
       .eq('scan_id', scan.id)
       .order('measured_at', { ascending: true }),
+    admin
+      .from('smarcomm_brand_facts')
+      .select('fact_type, fact_value, source, raw_excerpt, confidence')
+      .eq('scan_id', scan.id),
+    admin
+      .from('smarcomm_hallucinations')
+      .select('platform, claim_text, claim_type, ground_truth, severity, explanation, confidence, detected_at')
+      .eq('scan_id', scan.id)
+      .order('severity', { ascending: true }),
   ]);
 
-  return NextResponse.json({ scan, subPages: subPages ?? [], aiProbes: aiProbes ?? [] });
+  return NextResponse.json({
+    scan,
+    subPages: subPages ?? [],
+    aiProbes: aiProbes ?? [],
+    brandFacts: brandFacts ?? [],
+    hallucinations: hallucinations ?? [],
+  });
 }

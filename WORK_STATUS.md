@@ -1,12 +1,26 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-25 (세션 150 — D.Frame 벤치마킹 + SmarComm Phase 3.5 정량 콘텐츠 랜딩 섹션)
+> 마지막 업데이트: 2026-05-25 (세션 150 — D.Frame 벤치마킹 + SmarComm Phase 3.5 + Phase 3.4 환각 감지)
 
 ---
 
 ## 세션 150 핵심 성과 (2026-05-25)
 
-### ① D.Frame (DMC Media) 벤치마킹 분석
+### ④ Phase 3.4 — 환각 감지 (Hallucination Detection) 🥇 D.SaiO 핵심 차별점 대응
+
+기존 `classifySentimentLLM`이 이미 factComparisons 생성하던 것을 활용 — 신규 LLM 모듈 불필요. 영속화 테이블 + UI만 추가.
+
+- **신규 테이블**: `smarcomm_brand_facts` (ground truth) + `smarcomm_hallucinations` (감지 결과). 둘 다 RLS public-read, service_role 쓰기.
+- **신규 모듈**: [lib/smarcomm/hallucination-persist.ts](lib/smarcomm/hallucination-persist.ts) — siteTruth → brand_facts, factComparison(wrong/partial/missing) → hallucinations
+- **run-scan 통합**: smarcomm_ai_probes insert에 `.select('id,platform,query')` 추가하고 직후 persist 호출
+- **API 확장**: [app/api/smarcomm/report/[id]/route.ts](app/api/smarcomm/report/[id]/route.ts) — brandFacts + hallucinations 동시 반환
+- **신규 UI**: [features/smarcomm/HallucinationCard.tsx](features/smarcomm/HallucinationCard.tsx) — 정직성 원칙 반영
+  - factual_error / partial_match / unverifiable 3단계 분류
+  - Ground truth 없을 때 "검증 불가" 명시
+  - AI 주장 vs 실제 사이트 값 병기, LLM explanation 노출
+- **백필 검증**: hsad.co.kr scan에 기존 ai_probes.comparison 데이터를 새 테이블로 백필 (4 facts, 8 halls). UI 정상 렌더 확인 — AI가 "1974년" 잘못 주장 vs 실제 "1984년" 등.
+
+### ③ Phase 3.5 — 랜딩 정량 콘텐츠 섹션 (How We Score)
 
 PDF 22p + 사이트 8 URL 크롤 → 종합 정리. D.SaiO(GEO/AEO 자동 최적화 + 환각 감지)가 SmarComm Scan의 직접 경쟁자. 나머지(theCAP/theDAP/Growth/MMM)는 가격대·고객 규모 분리로 보완 관계. 벤치마크 4가지 도출: 환각 감지 / 정량 사례 표기 / L0/L1/L2 데이터레이크 / 5종 기여모델.
 
@@ -25,13 +39,9 @@ choco 비관리자 권한 실패 → GitHub Release 직접 다운로드 → `C:\
 
 ### 🎯 다음 세션 첫 액션
 
-1. **Phase 3.4 환각 감지 구현** — D.SaiO 직접 대응. 4단계 체크포인트:
-   - DB 스키마 (`smarcomm_brand_facts`, `smarcomm_hallucinations`)
-   - claim-extractor + hallucination-detector 모듈
-   - run-scan 파이프라인 통합
-   - Report UI 노출
-2. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 4 플랫폼 (ANTHROPIC은 해결됨)
-3. **Phase 3.2 웹 푸시** — 이전 세션 잔재(미커밋: `lib/smarcomm/push.ts`·`smarcomm-sw.js`·`smarcomm-push-subscriptions.sql` 등)를 마무리
+1. **Phase 3.2 웹 푸시** — 이전 세션 잔재(미커밋: `lib/smarcomm/push.ts`·`smarcomm-sw.js`·`smarcomm-push-subscriptions.sql`·`app/api/smarcomm/push/`·`app/(SmarComm)/smarcomm/dashboard/crm/push/page.tsx` 등)를 점검 후 마무리·커밋
+2. **외부 키 활성 확인** — OpenAI/Perplexity/SerpAPI/PageSpeed 4 플랫폼 (ANTHROPIC은 해결됨). 키 받으면 다음 신규 scan은 자동으로 새 환각 감지 파이프라인 통과
+3. **환각 감지 회귀 검증** — 새 키 발급 후 실제 scan 1건 돌려서 Phase 3.4 end-to-end 흐름 확인 (백필이 아닌 실시간 capture)
 4. **EmailCampaignModal 회귀 검증** — segments API e2e
 5. **MADLeague upload API 검토** — 세션 142의 `app/api/madleague/upload/route.ts`
 

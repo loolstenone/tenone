@@ -12,6 +12,7 @@ import { computeBrandJourney } from '@/lib/smarcomm/brand-journey';
 import { detectFlagsFromProbes, suggestActionsLLM } from '@/lib/smarcomm/airm';
 import { computeDiscoveryDetail } from '@/lib/smarcomm/diagnostics-v21';
 import { analyzeBrandPersonalityLLM } from '@/lib/smarcomm/brand-personality-llm';
+import { persistBrandFacts, persistHallucinations } from '@/lib/smarcomm/hallucination-persist';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 function generateShortId(length = 12): string {
@@ -257,7 +258,7 @@ export async function runFullScan(opts: RunScanOptions): Promise<RunScanResult> 
           }
 
           if (allAnswers.length > 0) {
-            await admin.from('smarcomm_ai_probes').insert(
+            const { data: probeRows } = await admin.from('smarcomm_ai_probes').insert(
               allAnswers.map(a => ({
                 scan_id: scanRow.id,
                 platform: a.platform,
@@ -281,7 +282,24 @@ export async function runFullScan(opts: RunScanOptions): Promise<RunScanResult> 
                 measured_at: a.measuredAt,
                 cost_usd: a.costUsd || null,
               }))
-            );
+            ).select('id, platform, query');
+
+            // Phase 3.4 — Hallucination 영속화
+            try {
+              await persistBrandFacts(admin, scanRow.id, domain, siteTruth);
+
+              if (probeRows && probeRows.length > 0) {
+                const probesWithComparison = probeRows.map((row, i) => ({
+                  id: row.id as string,
+                  platform: row.platform as string,
+                  query: row.query as string,
+                  factComparison: allAnswers[i]?.detection.factComparison,
+                }));
+                await persistHallucinations(admin, scanRow.id, probesWithComparison);
+              }
+            } catch (hErr) {
+              console.error('[runFullScan] Hallucination persist failed:', hErr);
+            }
           }
         }
       }
