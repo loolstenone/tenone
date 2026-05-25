@@ -1,6 +1,53 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-25 (세션 150 — D.Frame 벤치마킹 + SmarComm Phase 3.5 + Phase 3.4 환각 감지)
+> 마지막 업데이트: 2026-05-25 (세션 151 — MADLeap madleap.co.kr 콘텐츠 마이그레이션 + 정직성 회복)
+
+---
+
+## 세션 151 핵심 성과 (2026-05-25)
+
+### ① MADLeap 헤더 nav 경로 표준화 (commit `805fed7f`)
+
+기존 `MadLeapHeader` navItems가 `/community`·`/study-room`·`/about`·`/portfolio` 같은 root path로 작성. middleware 도메인 rewrite가 적용된 `madleap.co.kr` / `madleap.tenone.biz`에서는 작동했으나 `tenone.biz/madleap` path 접근 시 404 위험. 전 항목 `/madleap/` 접두사로 표준화 (`UniverseUtilityBar` 패턴과 동일). `lib/site-config.ts` madleap.nav도 `/mlp/` → `/madleap/` 정정.
+
+### ② Portfolio DB 연동 (commit `cb21776e`)
+
+CLAUDE.md (MADLeap) 이월 작업 해소. mock 12개 → DB fetch.
+- 신규 [smarcomm_portfolios](sql/madleap-portfolios.sql) 테이블 (title·team·gen·gen_num·category·client·description·tags[]·award·gradient·is_published·sort_order, RLS public read + service_role write)
+- 신규 [PortfolioGrid.tsx](features/madleap/PortfolioGrid.tsx) — useState 필터 + grid (client)
+- portfolio page를 Server Component로 재작성, `createAdminClient`로 fetch, ISR 5분
+
+### ③ 시드 정직성 회복 (commit `16cb5a11`)
+
+madleap.co.kr 실 사이트와 mock 데이터가 완전히 다른 가짜 데이터 발견 → 시드 전면 교체.
+- 제거: 4기 지평주조(실제 3기), 3기 스타벅스(실제 4기), 무신사/당근/토스/배민/쿠팡/합정카페/에듀테크 7건 (madleap.co.kr 미존재)
+- 도입: 4기 6 (아이디어 무브먼트 3·리제로스·MADVENTURE·대성학원·STARBUCKS·UNIQLO 매듭), 3기 8 (아이디어 무브먼트 2·지평주조·ECOHI·LG U+ 유플투쁠·ASKTobi·ESteem·Belkin·매듭 신규), 2기 3 (학폭예방·아이디어 무브먼트 1·SBA)
+- [seed SQL](sql/madleap-portfolios-seed.sql) 보관해 재실행 대비
+
+### ④ home·about 페이지 정직성 회복 (commit `ce799f58`)
+
+운영진 실명 10명·동문 quote 3건·통계 4종·highlights 4건·instagram feed 6건·5기 30명 모두 검증 안 된 mock — 정직성 위반. 전면 제거.
+
+**도입 (madleap.co.kr 원문):**
+- 학생 목소리 3가지 ("선배님, 저 정말 광고 기획 제대로 배워 보고 싶어요" 등)
+- 핵심 철학: "진짜 실력은 대외활동과 트로피의 갯수가 아니라, 실제로 성과를 만들어본 경험"
+- 5대 가치 원문 순서: 확장·연결·발로 뛰다·세상을 기획하는 기획자·결과로 말하다
+- 인재상 3: 전문가 성장·열망과 열정·소통과 협력
+- 모집 안내: "매년 2~3월, 2년 활동 기준"
+- 공지 채널: SNS·공식 홈페이지·에브리타임·링커리어
+- 채널 3: 인스타 @madleap.official·blog.naver.com/madleap·official@madleap.co.kr
+
+**페이지 구조:**
+- about: Hero · Origin Story · MAD 의미 · 5대 가치 · 인재상 · 문의 (6 섹션)
+- home: Hero · About Preview · Activities · 5대 가치 · Recruiting · Partners · Channels · CTA (8 섹션)
+
+### 🎯 다음 세션 첫 액션
+
+1. **MADLeap is_open 토글 결정** — 현재 `ums_sites.madleap.is_open=false` (외부 차단). 5기 모집·콘텐츠 정직성 회복 완료됐으니 공개 검토.
+2. **MADLeap study_programs DB 연동** — `/madleap/study-room` 6개 프로그램 mock. madleap.co.kr 서브메뉴(공통·기획분과·제작분과)와 매핑 필요. 운영진이 실제 프로그램 콘텐츠 제공해야 함.
+3. **MADLeap sub-pages 7종 검토** — madleap.co.kr "매드립 소개" 서브메뉴 (소개·연혁·프로그램·조직·세계관·멤버십·BI). 동적 페이지라 자동 fetch 불가, 운영진 콘텐츠 제공 후 작업.
+4. **MADLeap 포트폴리오 카테고리·award·gradient·team 정확화** — 현재 17건 시드의 일부 메타데이터는 추정값. Intra UMS에서 운영진이 보강 가능한 페이지 필요할 수 있음.
+5. **SmarComm 이월 (세션 150)** — VAPID Vercel Env 등록, 외부 키 발급, Web Push e2e 검증, 환각 감지 회귀 검증
 
 ---
 

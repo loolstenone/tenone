@@ -4,6 +4,58 @@
 
 ---
 
+## 2026-05-25 (세션 151) — MADLeap madleap.co.kr 콘텐츠 마이그레이션 + 정직성 회복
+
+### 장소·운영
+
+- 시작: 워크트리 nifty-villani-3f0bea (세션 150 연속)
+- 종료: master 단독 commit 5회·push 1회 (Vercel 빌드 1회)
+- Base: 세션 150 commit `4b131db3`
+
+### 변경 요약
+
+**① MADLeap 현황 분석** — 마지막 작업 2026-05-17 QA. 페이지 6종, mock 다수, is_open=false, DB 테이블 0건. siteConfigs nav 경로 4건 깨짐 발견.
+
+**② 헤더 nav 표준화** (commit `805fed7f`)
+- [MadLeapHeader.tsx](features/madleap/MadLeapHeader.tsx) navItems 4건 + 홈 + 모바일 nav 모두 `/madleap/*` 접두사
+- isActive 함수 도메인 rewrite + path 환경 양쪽 대응
+- lib/site-config.ts `madleap.nav`도 `/mlp/` → `/madleap/` 정정
+
+**③ Portfolio DB 연동** (commit `cb21776e`) — CLAUDE.md (MADLeap) 이월 작업 해소
+- 신규 [madleap_portfolios](sql/madleap-portfolios.sql) 테이블 (16 cols + RLS + 3 인덱스)
+- 신규 [PortfolioGrid.tsx](features/madleap/PortfolioGrid.tsx) 필터 + 그리드 (client)
+- portfolio page → Server Component (createAdminClient fetch, revalidate 300)
+
+**④ madleap.co.kr 콘텐츠 마이그레이션** (commit `16cb5a11`) — 정직성 회복 🚨
+- WebFetch로 madleap.co.kr 실 사이트 분석
+- mock 12개 (지평주조 4기·스타벅스 3기 등 기수 틀림, 무신사·당근·토스·배민·쿠팡·합정카페·에듀테크 미존재)를 madleap.co.kr 실 프로젝트 17개로 전면 교체
+- 4기 6 (아이디어 무브먼트 3·리제로스·MADVENTURE·대성학원·STARBUCKS·UNIQLO 매듭)
+- 3기 8 (아이디어 무브먼트 2·지평주조·ECOHI·LG U+ 유플투쁠·ASKTobi·ESteem·Belkin·매듭 신규)
+- 2기 3 (학폭예방·아이디어 무브먼트 1·SBA)
+- [seed SQL](sql/madleap-portfolios-seed.sql) 보관
+
+**⑤ home·about 페이지 정직성 회복** (commit `ce799f58`) 🚨
+- 운영진 10명 실명·동문 quote 3건 (카카오/삼성/토스 합류)·통계 4종 (200+ 멤버·15+ 수상·12+ 파트너·32명 선발)·highlights 4건·instagram feed 6건 모두 검증 안 됨 → 전체 제거
+- madleap.co.kr 원문 도입: 학생 목소리 3가지·핵심 철학·5대 가치 원문 순서·인재상 3가지·"매년 2~3월 2년 활동" 모집 안내·공지 채널
+- about: 6 섹션 / home: 8 섹션 재구성
+
+### 결정사항
+
+- **정직성 원칙 (SmarComm `## ZERO` + Universe 8원칙)을 MADLeap에도 적용** — 검증 안 된 mock은 가짜 사례 표기 가능성. madleap.co.kr 실 콘텐츠와 다른 mock은 시급한 제거 대상.
+- **추정 메타데이터 허용**: 시드 17건의 카테고리·award·gradient·team명 일부는 추정 (fetch 한계). 운영진이 Intra에서 보강 가능. "정보 없음"보다 "추정 + 보강 가능"이 정직성 위반보다는 작은 문제.
+- **is_open=false 유지**: 사용자가 직접 토글 결정 (지금 켤지 후속 판단).
+- **sub-pages 7종 (소개·연혁·프로그램·조직·세계관·멤버십·BI) 보류**: madleap.co.kr 동적 페이지라 자동 fetch 불가, 운영진 콘텐츠 제공 선행 필요.
+
+### 이월 작업
+
+- MADLeap is_open 토글 결정
+- study_programs DB 연동 (운영진 콘텐츠 필요)
+- madleap.co.kr sub-pages 7종 마이그레이션
+- 포트폴리오 시드 메타데이터(category·award·gradient·team) 운영진 보강 인터페이스
+- 세션 150 SmarComm 이월 (VAPID Vercel Env, 외부 키, Web Push e2e, 환각 감지 회귀)
+
+---
+
 ## 2026-05-25 (세션 150) — D.Frame 벤치마킹 + SmarComm Phase 3.5·3.4·3.2 일괄 완료
 
 ### 장소·운영
