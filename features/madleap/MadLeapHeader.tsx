@@ -11,10 +11,10 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
-    { name: "커뮤니티", href: "/community" },
-    { name: "스터디 룸", href: "/study-room" },
-    { name: "매드립 소개", href: "/about" },
-    { name: "포트폴리오", href: "/portfolio" },
+    { name: "커뮤니티", href: "/madleap/community" },
+    { name: "스터디 룸", href: "/madleap/study-room" },
+    { name: "매드립 소개", href: "/madleap/about" },
+    { name: "포트폴리오", href: "/madleap/portfolio" },
 ];
 
 export function MadLeapHeader() {
@@ -23,7 +23,7 @@ export function MadLeapHeader() {
     const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/") return pathname === "/";
+        if (href === "/madleap") return pathname === "/madleap" || pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -34,10 +34,10 @@ export function MadLeapHeader() {
                 {/* Left Nav */}
                 <div className="hidden md:flex items-center gap-6">
                     <Link
-                        href="/"
+                        href="/madleap"
                         className={clsx(
                             "text-sm font-medium transition-colors",
-                            pathname === "/"
+                            isActive("/madleap")
                                 ? "text-neutral-900 underline underline-offset-4"
                                 : "text-neutral-500 hover:text-neutral-900"
                         )}
@@ -61,7 +61,7 @@ export function MadLeapHeader() {
                 </div>
 
                 {/* Center Logo */}
-                <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center">
+                <Link href="/madleap" className="absolute left-1/2 -translate-x-1/2 flex items-center">
                     <span className="text-2xl font-black tracking-tight">
                         M<span className="relative">A</span>D
                     </span>
@@ -109,11 +109,11 @@ export function MadLeapHeader() {
             }
         >
             <Link
-                href="/"
+                href="/madleap"
                 onClick={() => setMobileOpen(false)}
                 className={clsx(
                     "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
-                    pathname === "/" ? "bg-neutral-100 text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    isActive("/madleap") ? "bg-neutral-100 text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                 )}
             >
                 홈
