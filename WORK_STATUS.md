@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-26 (세션 153 — Mindle Phase 1-E 뉴스레터 자동화)
+> 마지막 업데이트: 2026-05-27 (세션 154 — Mindle 정직성 A+B 오버홀)
 
 ---
 
@@ -69,14 +69,34 @@ API 권한 4단 게이트 정직성 확인 (auth 401 / member 404 / role 403 / s
   - 발송 이력 섹션
 - [app/intra/ums/mindle/page.tsx](app/intra/ums/mindle/page.tsx) — 콘텐츠 관리 → 뉴스레터 관리 카드로 교체 (`/intra/ums/mindle/newsletter` 링크)
 
+### ⑪ Mindle 정직성 A+B 오버홀 완료 (세션 154)
+
+**A안 — 정직한 리라벨링 (레이블 정직성 회복)**
+- `relevance_score` (0~10, Claude Haiku 편집 판단)를 "관련성 X%"로 표시하던 곳 전면 교체
+- 변경: `AI 편집점수 X.X/10` (소수점 1자리, 원점수 그대로)
+
+**B안 — 실 시그널 도입 (크로스소스 커버리지)**
+- `signal_score` = COUNT(DISTINCT source_name) from `collected_data` WHERE 같은 카테고리 ±7일
+- 배지: `N출처` (1출처=파란색, 3출처=주황색, 5출처+=빨간색, 미집계=회색)
+- 기존 "급상승/상승/신호/하락" 카테고리 배지 완전 교체
+
+**수정 파일 4건:**
+- [app/intra/agent/trends/page.tsx](app/intra/agent/trends/page.tsx) — `TrendArticle` 인터페이스 + `signalBadge()` + `mapDbToTrend()` + featured/list/grid 뷰 + 쿼리 정렬 (`signal_score` 기준)
+- [features/mindle/QueueRow.tsx](features/mindle/QueueRow.tsx) — `관련성 XX%` → `AI 편집점수 X.X/10`
+- [features/mindle/TrustLabel.tsx](features/mindle/TrustLabel.tsx) — `relevancePct` → `relevanceStr`, compact·full 모드 모두 교체
+- [supabase/functions/mindle-metrics-compute/index.ts](supabase/functions/mindle-metrics-compute/index.ts) — `computeSignalScore()` + `computeMentionGrowth()` + `updatePercentileRanks()` 추가
+
+**TypeScript 검증**: `tsc --noEmit` 통과 (exit code 0)
+
 ### 🎯 다음 세션 첫 액션 (갱신)
 
 1. **Edge Function 2개 deploy** (사용자 직접):
-   - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh` (Step 2 자동 분기)
-   - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh` (Phase 2 메트릭)
-2. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건 (API e2e 검증)
-3. **Phase 1-E 뉴스레터 e2e 검증** — `/intra/ums/mindle/newsletter` 브라우저에서 AI 초안 생성 1건 테스트
-4. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키·Web Push e2e·환각 감지 회귀)
+   - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
+   - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh`
+2. **signal_score 실 데이터 확인** — deploy 후 메트릭 cron이 돌면 mindle_trends에 signal_score 갱신, `/intra/agent/trends` 배지 확인
+3. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건 (API e2e 검증)
+4. **Phase 1-E 뉴스레터 e2e 검증** — `/intra/ums/mindle/newsletter` 브라우저에서 AI 초안 생성 1건 테스트
+5. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키·Web Push e2e·환각 감지 회귀)
 
 ---
 

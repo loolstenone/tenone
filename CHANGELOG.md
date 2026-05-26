@@ -4,6 +4,48 @@
 
 ---
 
+## 2026-05-27 (세션 154) — Mindle 정직성 A+B 오버홀
+
+### 장소·운영
+
+- 시작: master worktree (festive-vaughan-92a53c)
+- 세션 153 이어받아 Mindle 정직성 A+B 완료
+
+### 변경 요약
+
+**⑪ Mindle 정직성 A+B 오버홀**
+
+**근본 문제**: `relevance_score`(Claude Haiku 편집 판단, 0~10)를 트렌드 강도 지표처럼 "관련성 X%"로 표시 → 과학적 근거 없는 오해 유발
+
+**A안 — 정직한 리라벨링**
+- 수정 [features/mindle/TrustLabel.tsx](features/mindle/TrustLabel.tsx)
+  - `relevancePct` (0~100 변환) → `relevanceStr` (원점수 소수점 1자리)
+  - compact·full 모드: `관련성 XX%` → `AI 편집점수 X.X/10`
+- 수정 [features/mindle/QueueRow.tsx](features/mindle/QueueRow.tsx)
+  - `const relevancePct = Math.round(relevance * 10)` 제거
+  - `관련성 {relevancePct}%` → `AI 편집점수 {relevance.toFixed(1)}/10`
+
+**B안 — 실 시그널 도입**
+- 수정 [app/intra/agent/trends/page.tsx](app/intra/agent/trends/page.tsx)
+  - `TrendArticle` 인터페이스: `signalScore` (크로스소스 수) + `relevanceScore` (AI 편집점수) 분리
+  - `signalBadge(score)`: "N출처" 배지 (≥5=빨강, ≥3=주황, ≥1=파랑, 0=미집계)
+  - `mapDbToTrend()`: `signal_score` → `signalScore`, `relevance_score` → `relevanceScore`
+  - 쿼리 정렬: `signal_score` DESC (실 크로스소스 커버리지 기준)
+  - featured/list/grid 뷰 전체: 배지를 `badge(t)` (TrendArticle 기반) → `signalBadge(signalScore)` 호출
+- 수정 [supabase/functions/mindle-metrics-compute/index.ts](supabase/functions/mindle-metrics-compute/index.ts)
+  - `computeSignalScore()`: `collected_data` WHERE category ±7일 → COUNT(DISTINCT source_name)
+  - `computeMentionGrowth()`: 금주/전주 비교 → `mention_growth_pct` (%)
+  - `updatePercentileRanks()`: 전체 published `signal_score` 기준 백분위 일괄 갱신
+  - 메인 핸들러: 메트릭 upsert 후 `mindle_trends` signal_score·mention_growth_pct 직접 업데이트
+
+### 결정사항
+
+- `collected_data.category`(RSS 설정 기반)와 `mindle_trends.category`(Haiku 분류)가 불일치할 수 있어 signal_score=0 → "미집계" 표시 (정직 처리)
+- `relevance_score`는 AI 편집 품질 지표로만 사용, 트렌드 강도 지표는 `signal_score` 전담
+- TypeScript `tsc --noEmit` 통과 확인 (exit code 0)
+
+---
+
 ## 2026-05-26 (세션 153) — Mindle Phase 1-E 뉴스레터 자동화
 
 ### 장소·운영

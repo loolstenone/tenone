@@ -71,7 +71,6 @@ export default function QueueRow({
         );
     }
 
-    const relevancePct = Math.round(relevance * 10);
     const date = createdAt.slice(0, 10);
 
     return (
@@ -83,7 +82,7 @@ export default function QueueRow({
                             {categoryLabel}
                         </span>
                         <span className="text-[10px] font-semibold text-text-sub">
-                            관련성 {relevancePct}%
+                            AI 편집점수 {relevance.toFixed(1)}/10
                         </span>
                         <span className="text-[10px] text-text-muted">{date}</span>
                         <span className="text-[10px] text-text-muted">· {agentName}</span>

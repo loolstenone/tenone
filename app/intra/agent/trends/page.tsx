@@ -10,12 +10,14 @@ interface TrendArticle {
     title: string;
     excerpt: string;
     category: string;
-    status: "trending" | "rising" | "signal" | "fading";
+    status: "hot" | "rising" | "tracking" | "neutral";
     date: string;
     readTime: string;
     views: number;
     author?: string;
     content?: string;
+    signalScore: number;    // COUNT(DISTINCT source_name) — 실제 크로스소스 커버리지
+    relevanceScore: number; // Claude Haiku AI 편집 점수 (0-10)
 }
 
 const categories = [
@@ -24,8 +26,11 @@ const categories = [
 ];
 
 function mapDbToTrend(r: Record<string, unknown>): TrendArticle {
-    const score = (r.relevance_score as number) || 5;
-    const status = score >= 9 ? "trending" : score >= 7.5 ? "rising" : score >= 6 ? "signal" : "fading";
+    const signal = (r.signal_score as number) ?? 0;
+    // signal_score = COUNT(DISTINCT source_name) in same category ±7 days
+    // 시장 커버리지 기반 분류 — AI 편집 점수(relevance_score)와 무관
+    const status: TrendArticle["status"] =
+        signal >= 5 ? "hot" : signal >= 3 ? "rising" : signal >= 1 ? "tracking" : "neutral";
     return {
         id: (r.id as string) || "",
         title: (r.title as string) || "",
@@ -37,15 +42,18 @@ function mapDbToTrend(r: Record<string, unknown>): TrendArticle {
         views: (r.view_count as number) || 0,
         author: (r.agent_name as string) || "Mindle AI",
         content: (r.full_content as string) || "",
+        signalScore: signal,
+        relevanceScore: (r.relevance_score as number) ?? 0,
     };
 }
 
-const intraBadge: Record<string, { label: string; bg: string; text: string }> = {
-    trending: { label: "급상승", bg: "bg-red-50", text: "text-red-600" },
-    rising: { label: "상승", bg: "bg-amber-50", text: "text-amber-600" },
-    signal: { label: "신호", bg: "bg-blue-50", text: "text-blue-600" },
-    fading: { label: "하락", bg: "bg-neutral-100", text: "text-neutral-500" },
-};
+// 출처 수 기반 배지 — 실제 크로스소스 커버리지 표시
+function signalBadge(score: number): { label: string; bg: string; text: string } {
+    if (score >= 5) return { label: `${score}출처`, bg: "bg-red-50", text: "text-red-600" };
+    if (score >= 3) return { label: `${score}출처`, bg: "bg-amber-50", text: "text-amber-600" };
+    if (score >= 1) return { label: `${score}출처`, bg: "bg-blue-50", text: "text-blue-600" };
+    return { label: "미집계", bg: "bg-neutral-100", text: "text-neutral-400" };
+}
 
 export default function MindleTrendsPage() {
     const [selectedCat, setSelectedCat] = useState("전체");
@@ -62,7 +70,7 @@ export default function MindleTrendsPage() {
             .from("mindle_trends")
             .select("*")
             .eq("status", "published")
-            .order("relevance_score", { ascending: false })
+            .order("signal_score", { ascending: false, nullsFirst: false })
             .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     const mapped = data.map((r: Record<string, unknown>) => mapDbToTrend(r));
@@ -82,7 +90,7 @@ export default function MindleTrendsPage() {
         return matchCat && matchSearch;
     });
 
-    const badge = (status: string) => intraBadge[status] || intraBadge.fading;
+    const badge = (t: TrendArticle) => signalBadge(t.signalScore);
 
     if (loading) {
         return (
@@ -151,10 +159,11 @@ export default function MindleTrendsPage() {
                         </div>
                         <div className="lg:col-span-2 flex flex-col justify-center">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 ${badge(featured.status).bg} ${badge(featured.status).text}`}>
-                                    {badge(featured.status).label}
+                                <span className={`text-[10px] font-bold px-2 py-0.5 ${badge(featured).bg} ${badge(featured).text}`}>
+                                    {badge(featured).label}
                                 </span>
                                 <span className="text-[10px] text-neutral-400">{featured.category}</span>
+                                <span className="text-[10px] text-neutral-300">AI편집 {featured.relevanceScore.toFixed(1)}/10</span>
                             </div>
                             <h3 className="text-sm font-semibold text-neutral-900 leading-snug mb-2">
                                 {featured.title}
@@ -209,8 +218,8 @@ export default function MindleTrendsPage() {
                         <article key={t.id} className="group py-3 flex gap-3 hover:bg-neutral-50 transition-colors px-1">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 ${badge(t.status).bg} ${badge(t.status).text}`}>
-                                        {badge(t.status).label}
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 ${badge(t).bg} ${badge(t).text}`}>
+                                        {badge(t).label}
                                     </span>
                                     <span className="text-[10px] text-neutral-400 font-medium">{t.category}</span>
                                     <span className="text-[10px] text-neutral-300">{t.date}</span>
@@ -222,6 +231,7 @@ export default function MindleTrendsPage() {
                                 <div className="flex items-center gap-2.5 text-[10px] text-neutral-300">
                                     <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{t.readTime}</span>
                                     <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{t.views.toLocaleString()}</span>
+                                    <span className="text-neutral-300">AI편집 {t.relevanceScore.toFixed(1)}</span>
                                 </div>
                             </div>
                             <div className="hidden sm:block w-24 h-16 shrink-0 bg-neutral-50 border border-neutral-100" />
@@ -237,8 +247,8 @@ export default function MindleTrendsPage() {
                             </div>
                             <div className="p-3">
                                 <div className="flex items-center gap-2 mb-1.5">
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 ${badge(t.status).bg} ${badge(t.status).text}`}>
-                                        {badge(t.status).label}
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 ${badge(t).bg} ${badge(t).text}`}>
+                                        {badge(t).label}
                                     </span>
                                     <span className="text-[10px] text-neutral-400">{t.category}</span>
                                 </div>

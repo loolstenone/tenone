@@ -18,7 +18,7 @@ interface TrustLabelProps {
     sources: string[];
     sourceUrls?: string[];
     analyzedAt: string;             // ISO timestamp
-    relevance?: number | null;      // 0~1
+    relevance?: number | null;      // 0~10 (Claude Haiku 편집 점수)
     agentName?: string | null;      // 'mindle' | 'claude-4.7' 등
     compact?: boolean;              // 카드 피드용 (한 줄)
     accentClass?: string;           // 텍스트 색 커스터마이즈 (기본 indigo)
@@ -34,7 +34,7 @@ export default function TrustLabel({
     accentClass = "text-indigo-400/60",
 }: TrustLabelProps) {
     const date = analyzedAt ? new Date(analyzedAt).toISOString().slice(0, 10) : "";
-    const relevancePct = typeof relevance === "number" ? Math.round(relevance * 100) : null;
+    const relevanceStr = typeof relevance === "number" ? relevance.toFixed(1) : null;
     const hasSources = sources && sources.length > 0;
 
     if (compact) {
@@ -44,7 +44,7 @@ export default function TrustLabel({
                 <span>
                     {hasSources ? `출처 ${sources.length}` : "출처 없음"}
                     {date && ` · ${date}`}
-                    {relevancePct !== null && ` · 관련성 ${relevancePct}%`}
+                    {relevanceStr !== null && ` · AI 편집점수 ${relevanceStr}/10`}
                 </span>
             </div>
         );
@@ -76,7 +76,7 @@ export default function TrustLabel({
                 <span className="opacity-60">미상</span>
             )}
             {date && <span>· 분석 {date}</span>}
-            {relevancePct !== null && <span>· 관련성 {relevancePct}%</span>}
+            {relevanceStr !== null && <span>· AI 편집점수 {relevanceStr}/10</span>}
             {agentName && <span>· {agentName}</span>}
         </div>
     );
