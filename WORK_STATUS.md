@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-26 (세션 152 — MADLeap study_programs · Mindle Phase 0 · Whole See 리바이브)
+> 마지막 업데이트: 2026-05-26 (세션 153 — Mindle Phase 1-E 뉴스레터 자동화)
 
 ---
 
@@ -57,13 +57,25 @@ API 권한 4단 게이트 정직성 확인 (auth 401 / member 404 / role 403 / s
 - [supabase/functions/mindle-metrics-compute](supabase/functions/mindle-metrics-compute/index.ts) Edge Function — 시간당 5건 batch + upsert 멱등 + agent_messages 보고
 - pg_cron `mindle-metrics-compute-hourly` 매시 25분 (trend-crawl 00·trend-to-draft 30과 충돌 없음)
 
+### ⑩ Mindle Phase 1-E 뉴스레터 자동화 완료 (세션 153)
+
+- [app/api/intra/mindle/newsletter/generate/route.ts](app/api/intra/mindle/newsletter/generate/route.ts) — POST API
+  - 4단 권한 게이트 (auth/member/role/proceed)
+  - `mindle_trends(status=published)` → Claude Haiku → JSON `{title, content}` → `newsletter_issues` draft INSERT
+  - 파라미터: `{ days: 7, maxItems: 7 }` (기본값)
+- [app/intra/ums/mindle/newsletter/page.tsx](app/intra/ums/mindle/newsletter/page.tsx) — Mindle 전용 뉴스레터 관리 UI
+  - 최근 N일 선택 + "초안 생성" 버튼
+  - draft 목록 + 편집·발송 버튼
+  - 발송 이력 섹션
+- [app/intra/ums/mindle/page.tsx](app/intra/ums/mindle/page.tsx) — 콘텐츠 관리 → 뉴스레터 관리 카드로 교체 (`/intra/ums/mindle/newsletter` 링크)
+
 ### 🎯 다음 세션 첫 액션 (갱신)
 
 1. **Edge Function 2개 deploy** (사용자 직접):
    - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh` (Step 2 자동 분기)
    - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh` (Phase 2 메트릭)
 2. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건 (API e2e 검증)
-3. **Phase 1-E 뉴스레터 자동화** — Whole See → AI 초안 → Mindle 자체 source 구독 모집 인프라
+3. **Phase 1-E 뉴스레터 e2e 검증** — `/intra/ums/mindle/newsletter` 브라우저에서 AI 초안 생성 1건 테스트
 4. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키·Web Push e2e·환각 감지 회귀)
 
 ---

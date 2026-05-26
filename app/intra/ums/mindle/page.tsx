@@ -12,8 +12,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-    TrendingUp, Mail, Users, Globe, Layers,
-    Loader2, ArrowRight, Sparkles, Send, FileText,
+    TrendingUp, Mail, Users, Globe,
+    Loader2, ArrowRight, Sparkles, Send,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
@@ -160,14 +160,14 @@ export default function MindleUMSDashboard() {
                     </div>
                 </Link>
 
-                {/* 콘텐츠 관리 */}
-                <Link href="/intra/ums/mindle/content"
+                {/* 뉴스레터 관리 */}
+                <Link href="/intra/ums/mindle/newsletter"
                     className="bg-white border border-neutral-200 rounded-lg p-5 hover:border-cyan-300 hover:bg-cyan-50/30 transition-colors">
                     <div className="flex items-center gap-2 mb-3">
-                        <FileText className="h-5 w-5 text-amber-600" />
-                        <h2 className="text-sm font-semibold text-neutral-900">콘텐츠 관리</h2>
+                        <Mail className="h-5 w-5 text-amber-600" />
+                        <h2 className="text-sm font-semibold text-neutral-900">뉴스레터 관리</h2>
                     </div>
-                    <p className="text-[11px] text-neutral-500 mb-4">Whole See 트렌드 큐레이션 · 뉴스레터 발행 · 아카이브</p>
+                    <p className="text-[11px] text-neutral-500 mb-4">AI 초안 자동 생성 · 트렌드 큐레이션 · 발송 관리</p>
                     <div className="space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
                             <span className="text-neutral-500">발송 이슈</span>
@@ -179,7 +179,7 @@ export default function MindleUMSDashboard() {
                         </div>
                     </div>
                     <div className="mt-3 flex items-center gap-1 text-[11px] text-cyan-700 font-semibold">
-                        콘텐츠 관리로 <ArrowRight className="h-3 w-3" />
+                        뉴스레터 관리로 <ArrowRight className="h-3 w-3" />
                     </div>
                 </Link>
             </div>

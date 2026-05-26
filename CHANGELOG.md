@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-05-26 (세션 153) — Mindle Phase 1-E 뉴스레터 자동화
+
+### 장소·운영
+
+- 시작: master worktree (festive-vaughan-92a53c)
+- 세션 152 이어받아 Phase 1-E 완료
+
+### 변경 요약
+
+**⑩ Mindle Phase 1-E 뉴스레터 자동화**
+- 신규 [app/api/intra/mindle/newsletter/generate/route.ts](app/api/intra/mindle/newsletter/generate/route.ts)
+  - POST /api/intra/mindle/newsletter/generate
+  - staff/manager/super_admin 권한 게이트
+  - mindle_trends(published) → Claude Haiku(claude-haiku-4-5-20251001) → newsletter_issues draft
+  - 파라미터: days(3/7/14일), maxItems(최대 N건)
+- 신규 [app/intra/ums/mindle/newsletter/page.tsx](app/intra/ums/mindle/newsletter/page.tsx)
+  - Mindle 전용 뉴스레터 관리 UI (AI 초안 생성 패널 + draft 목록 + 발송 이력)
+  - 발송: /api/newsletter/send {tags:['mindle']} 호출
+- 수정 [app/intra/ums/mindle/page.tsx](app/intra/ums/mindle/page.tsx)
+  - 콘텐츠 관리 카드 → 뉴스레터 관리 카드로 교체 (/intra/ums/mindle/newsletter 링크)
+
+### 결정사항
+
+- newsletter_issues에 brand_id 컬럼 없으므로 `from_name='Mindle'` + `target_tags @> '{mindle}'` 이중 필터로 Mindle 이슈 식별
+- AI 모델: claude-haiku-4-5-20251001 (기존 /api/mindle/newsletter/route.ts와 동일 패턴)
+
+---
+
 ## 2026-05-26 (세션 152) — MADLeap study_programs · Mindle Phase 0~2 · Whole See 리바이브
 
 ### 장소·운영
