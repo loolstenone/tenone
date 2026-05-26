@@ -29,10 +29,13 @@ async function fetchSentIssues(): Promise<SentIssue[]> {
 }
 
 async function fetchSubscriberCount(): Promise<number> {
+    // Mindle 자체 구독자만 — source='mindle' + is_active=true
     const admin = createAdminClient();
     const { count } = await admin
         .from("newsletter_subscribers")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .eq("source", "mindle")
+        .eq("is_active", true);
     return count ?? 0;
 }
 

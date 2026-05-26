@@ -11,7 +11,9 @@ import {
     categoryLabel,
     getTrendStatus,
 } from "@/lib/mindle/trend-data";
+import { fetchTrendMetrics } from "@/lib/mindle/metrics";
 import TrustLabel from "@/features/mindle/TrustLabel";
+import TrendMetrics from "@/features/mindle/TrendMetrics";
 
 export const revalidate = 60;
 
@@ -53,6 +55,9 @@ export default async function TrendDetailPage({ params }: PageProps) {
     // 관련 트렌드 — 같은 카테고리 최근 3건 (자기 자신 제외)
     const relatedPool = await fetchPublishedTrends({ category: article.category, limit: 4 });
     const related = relatedPool.filter(r => r.id !== article.id).slice(0, 3);
+
+    // 5대 분석 메트릭 (Phase 1-D — 없으면 컴포넌트 내부에서 "Phase 2 도입 예정" 표시)
+    const metrics = await fetchTrendMetrics(article.id);
 
     const date = (article.published_at ?? article.created_at).slice(0, 10);
     const fullContent = article.full_content ?? article.summary;
@@ -172,6 +177,9 @@ export default async function TrendDetailPage({ params }: PageProps) {
                         );
                     })}
                 </article>
+
+                {/* 5대 분석 모듈 (Sometrend 패턴) */}
+                <TrendMetrics metrics={metrics} />
 
                 {/* 출처 원문 링크 (상세에서는 명시적으로 한 번 더) */}
                 {article.source_urls.length > 0 && (

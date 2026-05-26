@@ -6,18 +6,21 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
-import { Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp } from "lucide-react";
-import { trends, statusBadge } from "@/lib/mindle/trend-data";
+import { Bookmark, Bell, Settings, Eye, Plus, X, TrendingUp } from "lucide-react";
+
+// 정직성 회복 (세션 152): mock trends/savedIds/alerts/interests 제거.
+// Phase 2에서 mindle_user_saves · mindle_user_alerts · mindle_user_interests DB 테이블 + API 도입 예정.
 
 const INTEREST_OPTIONS = ["AI / Tech", "Marketing", "Consumer", "Business", "Content", "Lifestyle", "Startup", "Design", "Finance"];
 
 export default function MindleMyPage() {
     const { isAuthenticated, user } = useAuth();
     const [activeTab, setActiveTab] = useState<"saved" | "alerts" | "interests">("saved");
-    const [savedIds] = useState<string[]>(["t2", "t5", "t7"]);
-    const [alerts, setAlerts] = useState<string[]>(["Agent AI", "마이크로 SaaS", "크리에이터 이코노미"]);
+    // Phase 2 DB 연동 전까지 빈 상태로 시작 (mock 데이터 노출 금지)
+    const [alerts, setAlerts] = useState<string[]>([]);
     const [newAlert, setNewAlert] = useState("");
-    const [interests, setInterests] = useState<string[]>(["AI / Tech", "Marketing", "Business"]);
+    const [interests, setInterests] = useState<string[]>([]);
+    const savedArticles: never[] = []; // Phase 2 DB 연동 예정
 
     if (!isAuthenticated) {
         return (
@@ -36,8 +39,6 @@ export default function MindleMyPage() {
             </div>
         );
     }
-
-    const savedArticles = trends.filter(t => savedIds.includes(t.id));
 
     const tabs = [
         { id: "saved" as const, label: "저장한 트렌드", icon: Bookmark, count: savedArticles.length },
@@ -60,10 +61,10 @@ export default function MindleMyPage() {
                 {/* Activity Stats */}
                 <div className="grid grid-cols-4 gap-3 mb-8">
                     {[
-                        { icon: Eye, value: "127", label: "조회한 트렌드", color: "text-neutral-300" },
-                        { icon: Bookmark, value: String(savedIds.length), label: "저장됨", color: "text-[#F5C518]" },
+                        { icon: Eye, value: "—", label: "조회한 트렌드 (Phase 2)", color: "text-neutral-500" },
+                        { icon: Bookmark, value: String(savedArticles.length), label: "저장됨 (Phase 2)", color: "text-neutral-500" },
                         { icon: Bell, value: String(alerts.length), label: "키워드 알림", color: "text-blue-400" },
-                        { icon: TrendingUp, value: "14", label: "이번 주 읽음", color: "text-emerald-400" },
+                        { icon: TrendingUp, value: "—", label: "이번 주 읽음 (Phase 2)", color: "text-neutral-500" },
                     ].map(stat => (
                         <div key={stat.label} className="p-4 bg-neutral-900/50 border border-neutral-800/50 rounded-xl text-center">
                             <stat.icon className={`w-4 h-4 mx-auto mb-2 ${stat.color}`} />
@@ -91,40 +92,17 @@ export default function MindleMyPage() {
                     ))}
                 </div>
 
-                {/* Saved Trends */}
+                {/* Saved Trends — Phase 2 DB 연동 예정 */}
                 {activeTab === "saved" && (
-                    <div>
-                        {savedArticles.length === 0 ? (
-                            <div className="text-center py-16">
-                                <Bookmark className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
-                                <p className="text-neutral-400 text-sm mb-2">저장한 트렌드가 없습니다</p>
-                                <Link href="/mindle/trends" className="text-[#F5C518] text-sm hover:underline">트렌드 둘러보기</Link>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-neutral-800/40">
-                                {savedArticles.map(t => (
-                                    <div key={t.id} className="group flex items-center gap-4 py-4">
-                                        <Link href={`/mindle/trends/${t.id}`} className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${statusBadge[t.status].color}`}>
-                                                    {statusBadge[t.status].label}
-                                                </span>
-                                                <span className="text-[10px] text-neutral-600">{t.category}</span>
-                                                <span className="text-[10px] text-neutral-700">{t.date}</span>
-                                            </div>
-                                            <h3 className="text-white text-sm font-medium group-hover:text-[#F5C518] transition-colors truncate">{t.title}</h3>
-                                            <div className="flex items-center gap-3 text-[10px] text-neutral-600 mt-1">
-                                                <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{t.readTime}</span>
-                                                <span className="flex items-center gap-1"><Eye className="w-2.5 h-2.5" />{t.views.toLocaleString()}</span>
-                                            </div>
-                                        </Link>
-                                        <button className="p-2 text-neutral-700 hover:text-red-400 transition-colors" title="삭제">
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                    <div className="text-center py-16">
+                        <Bookmark className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
+                        <p className="text-neutral-400 text-sm mb-2">저장한 트렌드가 없습니다</p>
+                        <p className="text-[11px] text-neutral-600 mb-4">
+                            🚧 저장 기능은 Phase 2에서 도입 예정 (mindle_user_saves 테이블 + 카드 저장 버튼)
+                        </p>
+                        <Link href="/mindle/trends" className="text-[#F5C518] text-sm hover:underline">
+                            트렌드 둘러보기
+                        </Link>
                     </div>
                 )}
 

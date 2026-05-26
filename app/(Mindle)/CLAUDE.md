@@ -186,8 +186,8 @@ Phase 3: 수익화 + B2B            [3~4주]
 |------|------|---------|
 | `mindle_trends` | 트렌드 카드 SSOT | **1,410건** (published **532건**) |
 | `mindle_sources` | RSS·웹·API 크롤링 소스 | 55건 (active 49) |
-| `newsletter_subscribers` | 구독자 | **79명** |
-| `newsletter_issues` | 뉴스레터 발행 단위 | 9건 (모두 draft, 발송 0건) |
+| `newsletter_subscribers` | 구독자 (전 브랜드 공용 테이블) | 전체 79명 / **Mindle source = 0명** (실제 구독자 모집 전) |
+| `newsletter_issues` | 뉴스레터 발행 단위 | 9건 (모두 draft, status='sent' = 0건) |
 | `crawler_status` | 크롤 실행 로그 | 4회 |
 
 ### Phase 1+ 신규 테이블 (예정)
@@ -240,6 +240,7 @@ Phase 3: 수익화 + B2B            [3~4주]
 - ❌ **하드코딩 mock 트렌드 카드** — mindle_trends DB에 1,410건 있음. 코드에서 직접 mock 생성 금지.
 - ❌ **TrustLabel 누락된 카드** — 모든 트렌드 카드(메인/검색/상세)에 출처·날짜·agent 명시 의무.
 - ❌ **가짜 통계** ("3,420 조회" 등 임의 숫자) — 실 DB count 또는 노출 금지.
+- ❌ **전체 newsletter_subscribers count를 "Mindle 구독자"로 노출** — 반드시 `source='mindle' AND is_active=true` 필터. 세션 152에서 적발된 위반.
 - ❌ **발송 안 한 뉴스레터를 "발송됨"으로 표기** — sent_at IS NULL이면 reports 페이지에서 숨김.
 - ❌ **"매주 X요일 오전 N시 발송" 약속** — 실제 cron이 구축되기 전까지 "발행 예정" 라벨 의무.
 - ❌ **mindle_trends row UPDATE로 status 강제 변경** — published 전 검토 절차 우회 금지.

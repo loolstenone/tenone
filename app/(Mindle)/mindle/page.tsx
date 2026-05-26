@@ -21,14 +21,18 @@ import {
 } from "lucide-react";
 import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
 import TrustLabel from "@/features/mindle/TrustLabel";
+import WeakSignalCorner from "@/features/mindle/WeakSignalCorner";
+import PersonaPicker from "@/features/mindle/PersonaPicker";
 import {
     fetchPublishedTrends,
     countPublishedTrends,
     getCategoryCounts,
+    fetchWeakSignals,
     categoryLabel,
     getTrendStatus,
     type MindleTrend,
 } from "@/lib/mindle/trend-data";
+import { fetchPersonas, fetchPersona, isValidPersonaKey } from "@/lib/mindle/personas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const revalidate = 300;
@@ -63,35 +67,48 @@ const categoryColor: Record<string, string> = {
 };
 
 async function fetchSubscriberCount(): Promise<number> {
+    // Mindle 자체 구독자만 카운트 — source='mindle' 필터
+    // (전체 newsletter_subscribers는 tenone·hero 등 타 브랜드 포함 — 그 수를 노출하면 정직성 위반)
     const admin = createAdminClient();
     const { count } = await admin
         .from("newsletter_subscribers")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .eq("source", "mindle")
+        .eq("is_active", true);
     return count ?? 0;
 }
 
 async function fetchLatestIssueCount(): Promise<number> {
+    // 실제 발송된 호수만 카운트 — draft·scheduled 제외
     const admin = createAdminClient();
     const { count } = await admin
         .from("newsletter_issues")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .eq("status", "sent");
     return count ?? 0;
 }
 
 export default async function MindleHomePage({
     searchParams,
 }: {
-    searchParams: Promise<{ cat?: string }>;
+    searchParams: Promise<{ cat?: string; persona?: string }>;
 }) {
-    const { cat } = await searchParams;
-    const activeCat = cat ?? "all";
+    const { cat, persona: personaParam } = await searchParams;
+    const personaKey = isValidPersonaKey(personaParam) ? personaParam : null;
 
-    const [trends, totalPublished, categoryCounts, subscribers, issueCount] = await Promise.all([
+    // 페르소나 활성 시 첫 default_category로 자동 필터 (cat 명시되면 cat 우선)
+    const persona = personaKey ? await fetchPersona(personaKey) : null;
+    const activeCat = cat ?? (persona?.default_categories[0] ?? "all");
+
+    const [trends, totalPublished, categoryCounts, subscribers, issueCount, weakSignals, personas] = await Promise.all([
         fetchPublishedTrends({ category: activeCat, limit: 12 }),
         countPublishedTrends(),
         getCategoryCounts(),
         fetchSubscriberCount(),
         fetchLatestIssueCount(),
+        // 약신호 코너 — 페르소나·카테고리 필터 없을 때만 노출
+        (activeCat === "all" && !personaKey) ? fetchWeakSignals({ limit: 6 }) : Promise.resolve([]),
+        fetchPersonas(),
     ]);
 
     const featuredTrends = await fetchPublishedTrends({ featuredOnly: true, limit: 1 });
@@ -128,10 +145,33 @@ export default async function MindleHomePage({
                         <Stat icon={BarChart3} label="카테고리" value={String(categoryCounts.length)} />
                     </div>
                     <p className="mt-4 text-[10px] text-indigo-400/40">
-                        🔬 출처: mindle_trends·newsletter_subscribers DB 실측 (5분 캐시)
+                        🔬 출처: mindle_trends(published) · newsletter_subscribers(source=mindle, is_active=true) · newsletter_issues(status=sent) DB 실측 (5분 캐시)
                     </p>
                 </div>
             </section>
+
+            {/* ── 페르소나 4종 진입 ── */}
+            <PersonaPicker personas={personas} activePersona={personaKey} />
+
+            {/* ── 페르소나 활성 시 가이드 메시지 ── */}
+            {persona && (
+                <section className="px-6 pb-6">
+                    <div className="mx-auto max-w-5xl">
+                        <div
+                            className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-xs text-indigo-200/70 flex items-center gap-2"
+                            style={{ borderColor: `${persona.accent_color ?? "#6366f1"}30` }}
+                        >
+                            <span className="font-semibold" style={{ color: persona.accent_color ?? "#6366f1" }}>
+                                {persona.name_ko}
+                            </span>
+                            <span>시각에서 본 트렌드 — 기본 카테고리: {persona.default_categories.map(c => categoryLabel(c)).join(" · ")}</span>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ── 약신호 코너 (전체·페르소나 없을 때만) ── */}
+            {weakSignals.length > 0 && <WeakSignalCorner items={weakSignals} />}
 
             {/* ── 피처드 트렌드 ── */}
             {featured && (

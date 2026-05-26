@@ -22,6 +22,10 @@ export interface MindleTrend {
     published_at: string | null;
     created_at: string;
     updated_at: string;
+    // Phase 1-B 약신호 코너용 (NULL 가능)
+    signal_score: number | null;
+    mention_growth_pct: number | null;
+    percentile_rank: number | null;
 }
 
 /** UI 카테고리 SSOT — DB 카테고리(영문 snake_case) ↔ 화면 라벨 매핑 */
@@ -60,7 +64,7 @@ export async function fetchPublishedTrends(opts?: {
     const admin = createAdminClient();
     let q = admin
         .from("mindle_trends")
-        .select("id, title, summary, full_content, category, tags, source_urls, source_names, relevance_score, agent_name, status, is_featured, view_count, published_at, created_at, updated_at")
+        .select("id, title, summary, full_content, category, tags, source_urls, source_names, relevance_score, agent_name, status, is_featured, view_count, published_at, created_at, updated_at, signal_score, mention_growth_pct, percentile_rank")
         .eq("status", "published")
         .order("created_at", { ascending: false });
 
@@ -138,7 +142,7 @@ export async function fetchTrendById(id: string): Promise<MindleTrend | null> {
     const admin = createAdminClient();
     const { data, error } = await admin
         .from("mindle_trends")
-        .select("id, title, summary, full_content, category, tags, source_urls, source_names, relevance_score, agent_name, status, is_featured, view_count, published_at, created_at, updated_at")
+        .select("id, title, summary, full_content, category, tags, source_urls, source_names, relevance_score, agent_name, status, is_featured, view_count, published_at, created_at, updated_at, signal_score, mention_growth_pct, percentile_rank")
         .eq("id", id)
         .eq("status", "published")
         .maybeSingle();
@@ -161,6 +165,24 @@ export function getTrendStatus(score: number): "trending" | "rising" | "signal" 
     if (score >= 0.85) return "trending";
     if (score >= 0.7) return "rising";
     return "signal";
+}
+
+/** 약신호 코너 fetch — signal_score 상위 N건 */
+export async function fetchWeakSignals(opts?: { limit?: number; minScore?: number }): Promise<MindleTrend[]> {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+        .from("mindle_trends")
+        .select("id, title, summary, full_content, category, tags, source_urls, source_names, relevance_score, agent_name, status, is_featured, view_count, published_at, created_at, updated_at, signal_score, mention_growth_pct, percentile_rank")
+        .eq("status", "published")
+        .gte("signal_score", opts?.minScore ?? 0.85)
+        .order("signal_score", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(opts?.limit ?? 6);
+    if (error) {
+        console.error("[mindle] fetchWeakSignals failed:", error.message);
+        return [];
+    }
+    return (data ?? []) as MindleTrend[];
 }
 
 // ─── 레거시 mock (trends/[id] fallback·작업 중 안전망) ─────────────────────
