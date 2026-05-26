@@ -215,7 +215,16 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
         continue;
       }
 
-      // mindle_trends 저장
+      // mindle_trends 저장 — 점수별 자동 분기
+      //   9+   → published (자동 노출, Claude 매우 확신)
+      //   7~8.x → collected (검수 큐 — /intra/marketing/mindle/queue)
+      //   6~6.x → draft (편집팀 작업 후보)
+      // < 6 은 위 filter 단계에서 rejected 처리되어 여기 도달 불가
+      const initialStatus =
+        filter.relevance_score >= 9 ? 'published' :
+        filter.relevance_score >= 7 ? 'collected' :
+                                      'draft';
+
       const { error: insertErr } = await supabase.from('mindle_trends').insert({
         title: card.title || item.title,
         summary: filter.summary,
@@ -225,7 +234,7 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
         source_urls: item.url ? [item.url] : [],
         source_names: item.source_name ? [item.source_name] : [],
         agent_name: 'Whole See',
-        status: 'collected',
+        status: initialStatus,
         published_at: new Date().toISOString(),
         tenant_id: 'tenone',
         is_featured: false,

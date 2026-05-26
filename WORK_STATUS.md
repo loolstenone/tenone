@@ -1,6 +1,68 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-25 (세션 151 — MADLeap madleap.co.kr 콘텐츠 마이그레이션 + 정직성 회복)
+> 마지막 업데이트: 2026-05-26 (세션 152 — MADLeap study_programs · Mindle Phase 0 · Whole See 리바이브)
+
+---
+
+## 세션 152 핵심 성과 (2026-05-26)
+
+### ① MADLeap study_programs DB 연동 + is_open=true 토글
+
+세션 151 이월 작업 해소. mock 6개(가짜 리더 박지호·정민재·한소율 등 + 가짜 학교 성균관대·한양대 등) 정직성 위반 → 전면 제거.
+
+- 신규 [madleap_study_programs](sql/madleap-study-programs.sql) 테이블 (18 cols + RLS public read·service_role write + sort/status/published 인덱스 3개 + updated_at 트리거)
+- 신규 [StudyRoomList.tsx](features/madleap/StudyRoomList.tsx) 클라이언트 (확장/접힘 + status 영문→한글 매핑 + icon string→컴포넌트 매핑)
+- study-room page → Server Component, 빈 DB일 때 "운영 중 스터디 없음" 안내
+- ums_sites.madleap.is_open=**true** 토글 (외부 공개)
+
+### ② Mindle 벤치마킹 + 고도화 개발 계획
+
+Newen AI + Sometrend(바이브컴퍼니) 4 URL + 2 추가 WebSearch → 차별 포지셔닝 도출:
+- Newen·Sometrend = 분석 도구 / Mindle = 콘텐츠 미디어 (보완 관계)
+- Mindle만의 5가지: 정직성 라벨·편집팀 큐레이션·뉴스레터 First·페르소나 분리·Universe 연계
+- Phase 0~3 로드맵 + DB 스키마 + 가격 정책(PRO ₩9,900 = Sometrend BASIC 1/3) + B2B 단가 시나리오(₩500k~₩15M/년) + 페르소나 4종(founder/planner/reporter/marketer) 정의
+
+### ③ Mindle Phase 0 — 정직성 회복 + 공개
+
+mindle_trends 1,410건 (published 532) 자산 보유 확인 후 mock 페이지를 DB 연동으로 전면 교체.
+
+- [lib/mindle/trend-data.ts](lib/mindle/trend-data.ts) DB fetch 헬퍼 SSOT 신설 (fetchPublishedTrends·countPublishedTrends·getCategoryCounts·fetchTrendById·CATEGORY_LABEL·getTrendStatus)
+- [features/mindle/TrustLabel.tsx](features/mindle/TrustLabel.tsx) 신규 — 정직성 SSOT (출처·분석일·관련성·agent 명시, compact 모드 지원)
+- mindle/page.tsx Server Component 리팩 — mock 제거 + DB fetch + 카테고리 필터(query param)
+- mindle/trends/page.tsx Server Component 리팩 — 검색·필터·뷰모드·페이지네이션 (모두 query param)
+- mindle/trends/[id]/page.tsx Server Component 리팩 — generateMetadata + view_count 증가 + 관련 트렌드 + 출처 원문 링크
+- mindle/reports/page.tsx 전면 교체 — mock "13주차 리포트" 5건 제거 + newsletter_issues DB 연동 + 발송 0건이면 "준비 중" 안내
+- mindle/data + references 정직성 배너 추가
+- ums_sites.mindle.is_open=**true** 토글
+- [app/(Mindle)/CLAUDE.md](app/(Mindle)/CLAUDE.md) 전면 갱신 (Phase 0~3 로드맵·차별 포지셔닝·11종 ZERO 금지 패턴)
+
+### ④ Whole See 리바이브 — 진단 + 백필 + Step 2·3
+
+오해 정정: Whole See는 **죽지 않았다**. 매시간 정상 가동(280건 수집 / 5건 자동 카드 / mindle→1001 정상 보고). 진짜 문제는 검수 단계 부재.
+
+**진단 결과**:
+- cron 4 jobs 정상 (`trend-crawl-hourly`·`trend-to-draft-hourly`·`daily-vrief-morning`·`daily-briefing-1001`)
+- mindle_sources 49개 모두 last_crawled_at 2026-05-26 06:00 정상
+- collected_data 3,098건 (raw 2,189 / processed 746 / rejected 123)
+- mindle_trends 신규 843건 status=**collected**로 쌓이고 있었음 (4/9 이후 published 전환 멈춤)
+
+**Step 1 백필**: collected 843건 중 점수 9+ **228건 즉시 published 전환** → 외부 노출 **532 → 760건 (+43%)**
+
+**Step 2 코드**: trend-crawl/index.ts 228줄 자동 분기 (9+: published / 7~8.x: collected / 6~6.x: draft). 사용자 deploy 필요.
+
+**Step 3 검수 큐 UI**:
+- `/intra/ums/mindle/queue` 신설 (Server Component) — 점수 분포 ScoreCard + 카테고리 필터 + 50건 리스트
+- [features/mindle/QueueRow.tsx](features/mindle/QueueRow.tsx) Client — 1-click 발행/초안/기각
+- [/api/intra/mindle/queue/[id]](app/api/intra/mindle/queue/[id]/route.ts) PATCH 라우트 — staff/manager/super_admin 권한 + published 시 published_at 갱신 + 409 이중 클릭 방지
+- intra-nav.ts "검수 큐" 메뉴 추가
+- action-hub-registry.ts `mindle_pending_cards` 등록 (category=moderation, priority=normal)
+
+### 🎯 다음 세션 첫 액션
+
+1. **Edge Function 배포** (사용자 직접): `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh` → 다음 정각부터 점수 9+ 자동 published
+2. **검수 큐 첫 운영** — collected 8+ 289건 중 일부를 1-click 처리 (스모크 테스트)
+3. **Mindle Phase 1 1-A 또는 1-B 착수** — 5대 분석 모듈 vs 약신호 코너 (vs 페르소나 분리) 우선순위 결정
+4. **세션 150 이월 (SmarComm)**: VAPID Vercel Env 등록, 외부 키 4개 발급, Web Push e2e, 환각 감지 회귀
 
 ---
 

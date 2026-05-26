@@ -51,12 +51,14 @@
 | `app/(MADLeap)/layout.tsx` | generateMetadata |
 | `app/(MADLeap)/madleap/page.tsx` | 메인 페이지 |
 | `app/(MADLeap)/madleap/community/page.tsx` | 커뮤니티 |
-| `app/(MADLeap)/madleap/study-room/page.tsx` | 스터디 룸 |
+| `app/(MADLeap)/madleap/study-room/page.tsx` | 스터디 룸 (Server Component · DB 연동, 빈 DB일 때 안내) |
 | `app/(MADLeap)/madleap/portfolio/page.tsx` | 포트폴리오 (Server Component · DB 연동) |
 | `app/(MADLeap)/madleap/my/page.tsx` | 마이페이지 |
+| `features/madleap/StudyRoomList.tsx` | 스터디 확장/접힘 UI (Client Component) |
 | `features/madleap/PortfolioGrid.tsx` | 포트폴리오 필터 + 그리드 (Client Component) |
 | `features/madleap/MadLeapHeader.tsx` | 헤더 (nav `/madleap/*` 표준) |
-| `sql/madleap-portfolios.sql` · `sql/madleap-portfolios-seed.sql` | 테이블·시드 SSOT |
+| `sql/madleap-portfolios.sql` · `sql/madleap-portfolios-seed.sql` | 포트폴리오 테이블·시드 SSOT |
+| `sql/madleap-study-programs.sql` | 스터디 프로그램 테이블 SSOT (18 cols + RLS + 3 인덱스 + updated_at 트리거) |
 
 ---
 
@@ -64,8 +66,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta+ (2026-05-25 업데이트) — 정직성 회복 + 포트폴리오 DB 연동 완료 |
-| **이월 작업** | study_programs DB 연동 (운영진이 콘텐츠 제공 필요) · madleap.co.kr sub-pages 7종(소개·연혁·프로그램·조직·세계관·멤버십·BI) 마이그레이션 검토 · is_open 토글 결정 (현재 false) |
+| **Phase** | Public (2026-05-26 업데이트) — 정직성 회복 + DB 연동 + is_open=true |
+| **is_open** | **true** (외부 공개) |
+| **이월 작업** | madleap.co.kr sub-pages 7종(소개·연혁·프로그램·조직·세계관·멤버십·BI) 마이그레이션 검토 · 포트폴리오 메타데이터(category·award·gradient·team) 운영진 보강 인터페이스 · study_programs 운영진 콘텐츠 입력 인터페이스 (Intra UMS) |
+| **세션 152 (2026-05-26)** | **study_programs DB 연동 + is_open=true 토글** ① `madleap_study_programs` 테이블 신설 (18 cols + RLS public read·service_role write + sort/status/published 인덱스 3개 + updated_at 트리거) ② `features/madleap/StudyRoomList.tsx` 신규 (Client Component — 확장/접힘 + 영문 status → 한글 매핑 + icon string → 컴포넌트 매핑) ③ `app/(MADLeap)/madleap/study-room/page.tsx` Server Component 리팩 — mock 6개 제거(가짜 리더 6명·학교 6개) + DB fetch + 빈 DB "운영 중 스터디 없음" 안내 ④ ums_sites.madleap.is_open=true 토글 |
 | **세션 151 (2026-05-25)** | **madleap.co.kr 실 콘텐츠 마이그레이션 + 정직성 회복** ① 헤더 nav 경로 `/madleap/*` 표준화 (commit `805fed7f`) ② 포트폴리오 DB 연동 — `madleap_portfolios` 테이블 + `PortfolioGrid` client + page server component (commit `cb21776e`) ③ 시드 정직성 회복 — mock 12개(가짜) → madleap.co.kr 실 프로젝트 17개 (commit `16cb5a11`, [seed](../../sql/madleap-portfolios-seed.sql)) ④ home·about 페이지 정직성 회복 — 운영진 실명·동문 quote·통계 mock 모두 제거, madleap.co.kr 원문 학생 목소리 3가지·"진짜 실력은 트로피 갯수가 아니라" 핵심 철학·5대 가치 원문 순서·"매년 2~3월 2년 활동" 모집 안내 도입 (commit `ce799f58`) |
 | **검증된 콘텐츠 (madleap.co.kr 출처)** | 학생 목소리 3 · 핵심 철학 · 5대 가치 순서 (확장·연결·발로 뛰다·세상을 기획하는 기획자·결과로 말하다) · 인재상 3 (전문가·열망·소통) · 모집 안내 · 채널 4 (이메일·인스타·블로그·유튜브) · 포트폴리오 17건 (4기 6·3기 8·2기 3) |
 | **미검증 (제거 완료)** | 운영진 10명 실명 · 동문 quote 3 (카카오·삼성·토스) · 통계 4 (200+ 멤버·15+ 수상·12+ 파트너·32명 선발) · highlights 4 (대상·DAM Party 150명 등) · instagram feed 6 · 5기 30명·전형 4단계·기간 03.17~04.06 |

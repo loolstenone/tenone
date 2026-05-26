@@ -384,6 +384,7 @@ export const modules: NavModule[] = [
                             { name: "회원 관리", href: "/intra/ums/mindle/members" },
                             { name: "손익 관리", href: "/intra/ums/mindle/revenue" },
                             // ── 브랜드 특화 ──
+                            { name: "검수 큐", href: "/intra/ums/mindle/queue" },
                             { name: "콘텐츠 관리", href: "/intra/ums/mindle/content" },
                             // ── 공통 탭 (마지막) ──
                             { name: "고객 문의", href: "/intra/ums/mindle/cs" },

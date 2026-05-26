@@ -213,6 +213,18 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "high",
     },
 
+    // ── Mindle 검수 큐 (Whole See 자동 생성 트렌드 카드 검수)
+    {
+        key: "mindle_pending_cards",
+        label: "Mindle 검수 큐",
+        table: "mindle_trends",
+        filter: { column: "status", value: "collected" },
+        href: "/intra/ums/mindle/queue",
+        brand_id: "mindle",
+        category: "moderation",
+        priority: "normal",
+    },
+
     // ── SmarComm AIRM (V2.0 § 3-C — Pro/Enterprise 핵심 모듈)
     {
         key: "smarcomm_airm_critical_flags",

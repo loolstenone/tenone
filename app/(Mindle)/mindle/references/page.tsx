@@ -49,6 +49,9 @@ export default function MindleReferencesPage() {
                 <section className="py-8 border-b border-neutral-800/50">
                     <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">레퍼런스</h1>
                     <p className="text-neutral-500 text-sm">트렌드 인텔리전스를 위해 추적하고 추천하는 엄선된 소스.</p>
+                    <p className="mt-2 text-[11px] inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                        📚 Mindle 편집팀이 직접 검증한 외부 리소스 큐레이션 (자동 분석 결과 아님)
+                    </p>
                 </section>
 
                 {/* Featured */}

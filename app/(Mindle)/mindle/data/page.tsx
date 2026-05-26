@@ -58,6 +58,9 @@ export default function MindleDataPage() {
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">데이터</h1>
                             <p className="text-neutral-500 text-sm">멀티 플랫폼 실시간 키워드 트래킹.</p>
+                            <p className="mt-2 text-[11px] inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                                🚧 키워드 트래킹·시계열 분석은 Phase 1 도입 예정. 아래는 UI 샘플입니다.
+                            </p>
                         </div>
                         <div className="flex border border-neutral-800 rounded-lg overflow-hidden">
                             {periods.map(p => (

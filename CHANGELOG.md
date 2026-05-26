@@ -4,6 +4,61 @@
 
 ---
 
+## 2026-05-26 (세션 152) — MADLeap study_programs · Mindle Phase 0 · Whole See 리바이브
+
+### 장소·운영
+
+- 시작: 사무실 (Plan Mode 우회 없이 git pull → 충돌 발생 → reset --hard 후 cce8e671 동기화)
+- 종료: master 단독, 1 commit/push 예정 (Vercel 빌드 1회)
+- Base: 세션 151 commit `cce8e671`
+
+### 변경 요약
+
+**① MADLeap study_programs DB 연동 + is_open=true 토글**
+- 세션 151 이월 작업 해소
+- 신규 [madleap_study_programs](sql/madleap-study-programs.sql) (18 cols + RLS + 인덱스 3개 + updated_at 트리거)
+- mock 6개(가짜 리더 박지호·정민재·한소율·최은서·이도현·김도윤 + 가짜 학교 6개) 정직성 위반 → 전면 제거
+- [StudyRoomList.tsx](features/madleap/StudyRoomList.tsx) Client + study-room page Server Component 리팩
+- `ums_sites.madleap.is_open=true` 토글
+
+**② Mindle 벤치마킹 분석 (Newen + Sometrend)**
+- WebFetch 4 URL + WebSearch 2건 → 차별 포지셔닝 도출
+- Newen·Sometrend = 분석 도구 / Mindle = 콘텐츠 미디어 (보완 관계)
+- 가격 정책(PRO ₩9,900) · 페르소나 4종 · B2B 단가(₩500k~₩15M/년) 설계
+
+**③ Mindle Phase 0 — 정직성 회복 + 공개**
+- mindle_trends 1,410건 DB 자산 노출 시작 (published 532 → 760건)
+- [trend-data.ts](lib/mindle/trend-data.ts) DB fetch 헬퍼 SSOT 신설 + [TrustLabel.tsx](features/mindle/TrustLabel.tsx) 정직성 SSOT
+- 4 페이지 Server Component 리팩 (메인·검색·상세·reports)
+- 2 페이지 정직성 배너 추가 (data·references)
+- [app/(Mindle)/CLAUDE.md](app/(Mindle)/CLAUDE.md) 전면 갱신
+- `ums_sites.mindle.is_open=true` 토글
+
+**④ Whole See 리바이브 — 진단 + 백필 + Step 2·3**
+- 진단 결과: Whole See 정상 가동 중. 검수 단계만 4/23부터 끊김
+- Step 1 백필: collected 843건 중 점수 9+ **228건 published 전환** (532 → 760건, +43%)
+- Step 2 코드: [trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) 자동 분기 (9+/7~/6~)
+- Step 3 UI: `/intra/ums/mindle/queue` Server + [QueueRow.tsx](features/mindle/QueueRow.tsx) Client + [/api/intra/mindle/queue/[id]](app/api/intra/mindle/queue/[id]/route.ts) PATCH + nav + action-hub-registry
+
+### 결정사항
+
+- **검수 단계 부재가 진짜 갭** — Whole See 인프라는 죽지 않았다. 운영자 검수 UI가 없어서 collected → published 전환이 안 됐던 것.
+- **점수별 자동 분기 도입** (Step 2) — 9+ 자동 발행, 7~ 검수 큐, 6~ 편집 후보. 운영자 부담 점진 0 수렴.
+- **MADLeap 외부 공개** — 정직성 회복(home·about·portfolio·study-room) 완료로 is_open=true.
+- **Mindle 외부 공개** — 1,410건 자산 + 79 구독자 보유. 정직성 라벨 SSOT 박고 공개.
+- **B2B 시나리오 확정** — Lite ₩500k · Standard ₩1.5M · Premium ₩3M · 연간 ₩15M (Phase 3 도입).
+
+### 이월 작업
+
+- Edge Function 배포 (Step 2 코드 효력 발생) — 사용자 직접: `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
+- 검수 큐 첫 운영 (collected 615건 중 8+ 289건 우선)
+- Mindle Phase 1 (5대 분석 모듈·약신호 코너·페르소나 분리·뉴스레터 자동화)
+- 세션 150 SmarComm 이월 (VAPID Vercel Env·외부 키·Web Push e2e·환각 감지 회귀) 계속 미해소
+- MADLeap sub-pages 7종 마이그레이션 (운영진 콘텐츠 필요)
+- Mindle data 페이지 키워드 트래킹 (Phase 1)
+
+---
+
 ## 2026-05-25 (세션 151) — MADLeap madleap.co.kr 콘텐츠 마이그레이션 + 정직성 회복
 
 ### 장소·운영

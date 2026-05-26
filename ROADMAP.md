@@ -64,7 +64,7 @@
 | site_configs (L1) | ⚠️ 테이블 생성됨 | Intra handleSave + layout.tsx 연동 필요 |
 | 구독 인프라 (L4) | ❌ 없음 | wio_subscription_plans/subscriptions 미생성 |
 | Agent Hub | ⚠️ 코드 완성 | Prod DB 실행 필요 |
-| Mindle 크롤러 (Whole See) | ❌ 미가동 | 6월 목표 |
+| Mindle 크롤러 (Whole See) | ✅ 정상 가동 중 (세션 152 진단 — 매시간 280건 수집·5건 자동 카드, 검수 큐 UI 추가로 published 전환 가능) | — |
 | 결제 PG | ❌ 없음 | Phase 2 |
 
 ---
@@ -218,9 +218,11 @@ WIO / SmarComm
 
 > **목표: 에이전트가 Universe를 자동 운영하는 첫 사이클**
 
-### 3-A. Whole See 크롤러 가동
-- [ ] GCP Scheduler → RSS 크롤 → `mindle_sources` 저장
-- [ ] Claude Haiku 노이즈 제거 → Sonnet 트렌드 카드 생성 → `mindle_trends`
+### 3-A. Whole See 크롤러 가동 ✅ 정상 (세션 152 진단)
+- [x] pg_cron `trend-crawl-hourly` 매시간 정각 → RSS 49개 fetch → `collected_data` upsert
+- [x] Claude Haiku 필터 → Sonnet 카드 생성 → `mindle_trends` insert (매시간 5건)
+- [x] 점수별 자동 분기 (세션 152) — 9+: published / 7~: collected (검수 큐) / 6~: draft. **사용자 deploy 필요**: `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
+- [x] Mindle 검수 큐 UI 신설 — `/intra/ums/mindle/queue` (세션 152)
 - [ ] 트렌드 카드 100개 축적 목표
 
 ### 3-B. 바당쇠 실전 투입

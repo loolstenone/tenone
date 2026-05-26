@@ -1,424 +1,364 @@
-"use client";
+// Mindle 메인 (Server Component) — Phase 0 정직성 회복
+// DB 1,410건 (published 532건)에서 직접 fetch. mock 0건.
+// 카테고리 필터는 ?cat= query param (Link 기반).
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
-  TrendingUp,
-  Clock,
-  Eye,
-  Flame,
-  ChevronRight,
-  Search,
-  BookOpen,
-  BarChart3,
-  Zap,
-  Globe,
-  Brain,
-  ShoppingCart,
-  Palette,
-  Cpu,
-  Sparkles,
-  Mail,
+    ArrowRight,
+    Clock,
+    ChevronRight,
+    Search,
+    BarChart3,
+    Globe,
+    Brain,
+    ShoppingCart,
+    Palette,
+    Cpu,
+    Sparkles,
+    TrendingUp,
+    BookOpen,
+    Users,
 } from "lucide-react";
 import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
+import TrustLabel from "@/features/mindle/TrustLabel";
+import {
+    fetchPublishedTrends,
+    countPublishedTrends,
+    getCategoryCounts,
+    categoryLabel,
+    getTrendStatus,
+    type MindleTrend,
+} from "@/lib/mindle/trend-data";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-/* ── 인사이트 카피 (로테이션) ── */
-const insightCopies = [
-  "신호에서 인사이트를 피워냅니다.",
-  "트렌드는 데이터에서 시작됩니다.",
-  "변화의 신호를 가장 먼저 포착합니다.",
-  "숫자 뒤에 숨은 이야기를 찾습니다.",
-  "보이지 않는 흐름을 읽는 눈.",
-  "AI가 찾고, 사람이 의미를 부여합니다.",
-  "트렌드는 예측하는 것이 아니라 발견하는 것.",
-  "신호와 소음을 분리합니다.",
-  "한 발 앞서 보는 것이 전략입니다.",
+export const revalidate = 300;
+
+const CATEGORY_NAV: Array<{ id: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+    { id: "all", label: "전체", icon: Search },
+    { id: "tech", label: "테크", icon: Cpu },
+    { id: "marketing_branding", label: "마케팅", icon: BarChart3 },
+    { id: "business_corporate", label: "비즈니스", icon: ShoppingCart },
+    { id: "trend_market", label: "트렌드", icon: TrendingUp },
+    { id: "creator_trend", label: "크리에이터", icon: Palette },
+    { id: "talent_career", label: "커리어", icon: Brain },
 ];
 
-/* ── 카테고리 ── */
-const categories = [
-  { id: "all", label: "전체", icon: Search },
-  { id: "marketing", label: "마케팅", icon: BarChart3 },
-  { id: "tech", label: "테크", icon: Cpu },
-  { id: "consumer", label: "소비자", icon: ShoppingCart },
-  { id: "culture", label: "문화", icon: Palette },
-  { id: "ai", label: "AI", icon: Brain },
-];
-
-/* ── 트렌드 카드 데이터 ── */
-const trendCards = [
-  {
-    id: "t1",
-    title: "에이전트 AI가 업무 방식을 바꾸고 있다 — 2026 생산성의 새로운 공식",
-    category: "ai",
-    date: "2026.03.26",
-    relevance: 97,
-    status: "trending" as const,
-    readTime: "8분",
-    views: 3420,
-  },
-  {
-    id: "t2",
-    title: "숏폼 피로감과 '슬로우 콘텐츠'의 부상",
-    category: "culture",
-    date: "2026.03.25",
-    relevance: 91,
-    status: "rising" as const,
-    readTime: "6분",
-    views: 2180,
-  },
-  {
-    id: "t3",
-    title: "하이퍼로컬 비즈니스가 글로벌로 확장하는 플레이북",
-    category: "marketing",
-    date: "2026.03.24",
-    relevance: 88,
-    status: "trending" as const,
-    readTime: "7분",
-    views: 1950,
-  },
-  {
-    id: "t4",
-    title: "Z세대 가치 소비 — 브랜드는 어떻게 적응하고 있나",
-    category: "consumer",
-    date: "2026.03.23",
-    relevance: 85,
-    status: "rising" as const,
-    readTime: "5분",
-    views: 1720,
-  },
-  {
-    id: "t5",
-    title: "공간 컴퓨팅: 대중화까지 남은 거리는?",
-    category: "tech",
-    date: "2026.03.22",
-    relevance: 82,
-    status: "signal" as const,
-    readTime: "9분",
-    views: 1340,
-  },
-];
-
-/* ── 주간 인사이트 (샘플 — 서비스 출시 후 실데이터로 교체) ── */
-const weeklyInsight = {
-  weekLabel: "샘플 인사이트",
-  title: "AI 에이전트, '도구'에서 '동료'로 진화 중",
-  summary:
-    "Mindle이 출시되면 매주 AI가 분석한 트렌드 인사이트를 제공합니다. 아래는 서비스 출시 후 어떤 형태의 인사이트가 제공되는지 보여주는 샘플입니다.",
-  keyPoints: [
-    "주요 키워드 변화 및 검색량 트렌드 분석",
-    "업계별 콘텐츠 소비 패턴 인사이트",
-    "마케터에게 필요한 액션 포인트 요약",
-  ],
-  generatedBy: "Mindle AI (샘플)",
-};
-
-/* ── 핫 키워드 (샘플 — 서비스 출시 후 실데이터로 교체) ── */
-const hotKeywords = [
-  { rank: 1, keyword: "에이전트 AI", change: "추적 예정" },
-  { rank: 2, keyword: "슬로우 콘텐츠", change: "추적 예정" },
-  { rank: 3, keyword: "하이퍼로컬", change: "추적 예정" },
-  { rank: 4, keyword: "디지털 디톡스", change: "추적 예정" },
-  { rank: 5, keyword: "마이크로 SaaS", change: "추적 예정" },
-];
-
-/* ── 통계 (데모 수치 — 서비스 출시 후 실데이터로 교체 예정) ── */
-const stats = [
-  { label: "추적 트렌드", value: "준비 중", icon: TrendingUp },
-  { label: "주간 리포트", value: "출시 예정", icon: BookOpen },
-  { label: "구독자", value: "사전 신청 중", icon: Mail },
-  { label: "카테고리", value: "5개", icon: BarChart3 },
-];
-
-/* ── 상태 뱃지 ── */
 const statusBadge: Record<string, { label: string; color: string }> = {
-  trending: { label: "급상승", color: "bg-indigo-400/20 text-indigo-300" },
-  rising: { label: "상승", color: "bg-amber-500/20 text-amber-400" },
-  signal: { label: "시그널", color: "bg-cyan-500/20 text-cyan-400" },
+    trending: { label: "급상승", color: "bg-indigo-400/20 text-indigo-300" },
+    rising: { label: "상승", color: "bg-amber-500/20 text-amber-400" },
+    signal: { label: "시그널", color: "bg-cyan-500/20 text-cyan-400" },
 };
 
-/* ── 카테고리 컬러 ── */
 const categoryColor: Record<string, string> = {
-  marketing: "text-pink-400",
-  tech: "text-blue-400",
-  consumer: "text-green-400",
-  culture: "text-amber-400",
-  ai: "text-violet-400",
+    tech: "text-blue-400",
+    marketing_branding: "text-pink-400",
+    business_corporate: "text-green-400",
+    trend_market: "text-amber-400",
+    creator_trend: "text-violet-400",
+    talent_career: "text-cyan-400",
+    industry_vertical: "text-orange-400",
+    creative_reference: "text-rose-400",
+    community_signal: "text-fuchsia-400",
+    empathy_emotion: "text-pink-300",
 };
 
-export default function MindleHomePage() {
-  const [copy, setCopy] = useState(insightCopies[0]);
-  const [activeCategory, setActiveCategory] = useState("all");
-  useEffect(() => {
-    setCopy(insightCopies[Math.floor(Math.random() * insightCopies.length)]);
-    const interval = setInterval(() => {
-      setCopy(insightCopies[Math.floor(Math.random() * insightCopies.length)]);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+async function fetchSubscriberCount(): Promise<number> {
+    const admin = createAdminClient();
+    const { count } = await admin
+        .from("newsletter_subscribers")
+        .select("id", { count: "exact", head: true });
+    return count ?? 0;
+}
 
-  const filteredTrends =
-    activeCategory === "all"
-      ? trendCards
-      : trendCards.filter((t) => t.category === activeCategory);
+async function fetchLatestIssueCount(): Promise<number> {
+    const admin = createAdminClient();
+    const { count } = await admin
+        .from("newsletter_issues")
+        .select("id", { count: "exact", head: true });
+    return count ?? 0;
+}
 
-  return (
-    <div className="bg-[#0C0A1D] min-h-screen">
-      {/* ── HERO ── */}
-      <section className="relative pt-20 pb-16 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/50 via-transparent to-transparent" />
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px]" />
-        <div className="relative mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-6">
-            <Sparkles className="w-3 h-3" />
-            AI 트렌드 인텔리전스
-          </div>
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-4">
-            <span className="text-indigo-400">보이기 전에,</span>
-            <br />
-            <span className="text-white">먼저 본다</span>
-          </h1>
-          <p className="text-indigo-300/70 text-lg sm:text-xl mb-3 font-medium">
-            한국에서 시작해 세계로
-          </p>
-          <p className="text-indigo-400/50 text-sm transition-opacity duration-1000 max-w-lg mx-auto">
-            {copy}
-          </p>
+export default async function MindleHomePage({
+    searchParams,
+}: {
+    searchParams: Promise<{ cat?: string }>;
+}) {
+    const { cat } = await searchParams;
+    const activeCat = cat ?? "all";
 
-          {/* 통계 */}
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className="bg-white/5 border border-white/5 rounded-xl p-4 text-center"
-              >
-                <s.icon className="w-5 h-5 text-indigo-400 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-xs text-indigo-300/50 mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    const [trends, totalPublished, categoryCounts, subscribers, issueCount] = await Promise.all([
+        fetchPublishedTrends({ category: activeCat, limit: 12 }),
+        countPublishedTrends(),
+        getCategoryCounts(),
+        fetchSubscriberCount(),
+        fetchLatestIssueCount(),
+    ]);
 
-      {/* ── HOT KEYWORDS ── */}
-      <section className="px-6 py-3 border-y border-indigo-500/10 bg-indigo-950/30">
-        <div className="mx-auto max-w-5xl flex items-center gap-4 overflow-x-auto scrollbar-hide">
-          <Flame className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          {hotKeywords.map((kw) => (
-            <Link
-              key={kw.rank}
-              href="/mindle/data"
-              className="shrink-0 flex items-center gap-1.5 text-sm hover:text-indigo-300 transition-colors"
-            >
-              <span
-                className={`font-bold ${
-                  kw.rank <= 3 ? "text-indigo-400" : "text-indigo-600"
-                }`}
-              >
-                {kw.rank}
-              </span>
-              <span className="text-white">{kw.keyword}</span>
-              <span className="text-[10px] text-green-400 font-mono">
-                {kw.change}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
+    const featuredTrends = await fetchPublishedTrends({ featuredOnly: true, limit: 1 });
+    const featured = featuredTrends[0] ?? null;
 
-      {/* ── 트렌드 카드 피드 ── */}
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-bold text-white">
-                최근 트렌드
-              </h2>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 uppercase tracking-wide">
-                샘플
-              </span>
-            </div>
-            <Link
-              href="/mindle/trends"
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
-            >
-              전체 보기 <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* 카테고리 필터 */}
-          <div className="flex gap-2 mb-8 overflow-x-auto scrollbar-hide pb-1">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  activeCategory === cat.id
-                    ? "bg-indigo-500 text-white"
-                    : "bg-white/5 text-indigo-300/60 hover:bg-white/10 hover:text-indigo-300"
-                }`}
-              >
-                <cat.icon className="w-3 h-3" />
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* 트렌드 카드 */}
-          <div className="space-y-4">
-            {filteredTrends.map((trend) => (
-              <article
-                key={trend.id}
-                className="group bg-white/[0.03] border border-white/5 rounded-xl p-5 hover:border-indigo-500/30 hover:bg-white/[0.05] transition-all cursor-pointer"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          statusBadge[trend.status].color
-                        }`}
-                      >
-                        {statusBadge[trend.status].label}
-                      </span>
-                      <span
-                        className={`text-[10px] font-medium ${
-                          categoryColor[trend.category] || "text-neutral-400"
-                        }`}
-                      >
-                        {categories.find((c) => c.id === trend.category)?.label}
-                      </span>
-                      <span className="text-[10px] text-indigo-500/50">
-                        {trend.date}
-                      </span>
+    return (
+        <div className="bg-[#0C0A1D] min-h-screen">
+            {/* ── HERO ── */}
+            <section className="relative pt-20 pb-16 px-6 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/50 via-transparent to-transparent" />
+                <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px]" />
+                <div className="relative mx-auto max-w-4xl text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-6">
+                        <Sparkles className="w-3 h-3" />
+                        AI 트렌드 인텔리전스
                     </div>
-                    <h3 className="text-white font-semibold leading-snug group-hover:text-indigo-300 transition-colors">
-                      {trend.title}
-                    </h3>
-                    <div className="flex items-center gap-3 mt-2 text-[11px] text-indigo-400/40">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {trend.readTime}
-                      </span>
+                    <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-4">
+                        <span className="text-indigo-400">보이기 전에,</span>
+                        <br />
+                        <span className="text-white">먼저 본다</span>
+                    </h1>
+                    <p className="text-indigo-300/70 text-lg sm:text-xl mb-3 font-medium">
+                        한국에서 시작해 세계로
+                    </p>
+                    <p className="text-indigo-400/60 text-sm max-w-lg mx-auto">
+                        AI가 찾고, 사람이 의미를 부여합니다.
+                    </p>
+
+                    {/* 실측 통계 — 정직성 SSOT */}
+                    <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                        <Stat icon={TrendingUp} label="발행된 트렌드" value={totalPublished.toLocaleString()} />
+                        <Stat icon={BookOpen} label="뉴스레터 발행" value={issueCount.toLocaleString()} />
+                        <Stat icon={Users} label="구독자" value={subscribers.toLocaleString()} />
+                        <Stat icon={BarChart3} label="카테고리" value={String(categoryCounts.length)} />
                     </div>
-                  </div>
-                  {/* 관련성 점수 */}
-                  <div className="shrink-0 flex items-center gap-2 sm:flex-col sm:items-end">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                      <span className="text-lg font-bold text-indigo-400">
-                        {trend.relevance}
-                      </span>
-                    </div>
-                    <span className="text-[9px] text-indigo-400/40 uppercase tracking-wider">
-                      관련성
-                    </span>
-                  </div>
+                    <p className="mt-4 text-[10px] text-indigo-400/40">
+                        🔬 출처: mindle_trends·newsletter_subscribers DB 실측 (5분 캐시)
+                    </p>
                 </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+            </section>
 
-      {/* ── 주간 인사이트 ── */}
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="bg-gradient-to-br from-indigo-950/80 to-indigo-900/30 border border-indigo-500/20 rounded-2xl p-6 sm:p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-                주간 인사이트
-              </span>
-              <span className="text-xs text-indigo-500/50 ml-auto">
-                {weeklyInsight.weekLabel}
-              </span>
+            {/* ── 피처드 트렌드 ── */}
+            {featured && (
+                <section className="px-6 pb-8">
+                    <div className="mx-auto max-w-5xl">
+                        <FeaturedCard trend={featured} />
+                    </div>
+                </section>
+            )}
+
+            {/* ── 트렌드 카드 피드 ── */}
+            <section className="px-6 py-12">
+                <div className="mx-auto max-w-5xl">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-lg font-bold text-white">
+                                {activeCat === "all" ? "최근 트렌드" : `${categoryLabel(activeCat)} 트렌드`}
+                            </h2>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 uppercase tracking-wide">
+                                실측 DB
+                            </span>
+                        </div>
+                        <Link
+                            href="/mindle/trends"
+                            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                        >
+                            전체 보기 <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
+
+                    {/* 카테고리 필터 (query param 기반) */}
+                    <div className="flex gap-2 mb-8 overflow-x-auto scrollbar-hide pb-1">
+                        {CATEGORY_NAV.map((cat) => {
+                            const isActive = activeCat === cat.id;
+                            const count = cat.id === "all"
+                                ? totalPublished
+                                : categoryCounts.find(c => c.category === cat.id)?.count ?? 0;
+                            return (
+                                <Link
+                                    key={cat.id}
+                                    href={cat.id === "all" ? "/mindle" : `/mindle?cat=${cat.id}`}
+                                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                        isActive
+                                            ? "bg-indigo-500 text-white"
+                                            : "bg-white/5 text-indigo-300/60 hover:bg-white/10 hover:text-indigo-300"
+                                    }`}
+                                >
+                                    <cat.icon className="w-3 h-3" />
+                                    {cat.label}
+                                    <span className={`text-[10px] ${isActive ? "text-white/70" : "text-indigo-300/40"}`}>
+                                        {count}
+                                    </span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                    {/* 카드 리스트 */}
+                    {trends.length === 0 ? (
+                        <div className="text-center py-16 text-indigo-400/40 text-sm">
+                            해당 카테고리에 발행된 트렌드가 없습니다.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {trends.map((trend) => (
+                                <TrendCard key={trend.id} trend={trend} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 CTA ── */}
+            <section className="px-6 py-16 border-t border-indigo-500/10">
+                <NewsletterSubscribeForm source="mindle" brandName="Mindle" dark accentColor="#6366f1" />
+            </section>
+
+            {/* ── Ten:One Universe 연결 ── */}
+            <section className="px-6 py-12 border-t border-indigo-500/10">
+                <div className="mx-auto max-w-5xl">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Globe className="w-4 h-4 text-indigo-500/50" />
+                        <span className="text-xs font-semibold text-indigo-500/50 uppercase tracking-wider">
+                            Ten:One Universe
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {[
+                            { name: "SmarComm", desc: "Mindle 트렌드를 마케팅 캠페인에 활용", href: "/smarcomm", color: "from-rose-500/10 to-transparent" },
+                            { name: "MAD League", desc: "대학생 트렌드 리서처 네트워크", href: "/madleague", color: "from-amber-500/10 to-transparent" },
+                            { name: "RooK", desc: "AI 크리에이터의 콘텐츠 인사이트", href: "/rook", color: "from-violet-500/10 to-transparent" },
+                        ].map((brand) => (
+                            <Link
+                                key={brand.name}
+                                href={brand.href}
+                                className={`group p-5 rounded-xl bg-gradient-to-br ${brand.color} border border-white/5 hover:border-indigo-500/20 transition-all`}
+                            >
+                                <h4 className="font-bold text-white text-sm group-hover:text-indigo-300 transition-colors">
+                                    {brand.name}
+                                </h4>
+                                <p className="text-xs text-indigo-400/40 mt-1">{brand.desc}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+}
+
+function Stat({
+    icon: Icon,
+    label,
+    value,
+}: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    value: string;
+}) {
+    return (
+        <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
+            <Icon className="w-5 h-5 text-indigo-400 mx-auto mb-2" />
+            <p className="text-2xl font-bold text-white">{value}</p>
+            <p className="text-xs text-indigo-300/50 mt-1">{label}</p>
+        </div>
+    );
+}
+
+function FeaturedCard({ trend }: { trend: MindleTrend }) {
+    const status = getTrendStatus(trend.relevance_score);
+    const sb = statusBadge[status];
+    return (
+        <Link
+            href={`/mindle/trends/${trend.id}`}
+            className="group block bg-gradient-to-br from-indigo-950/80 to-indigo-900/30 border border-indigo-500/20 rounded-2xl p-6 sm:p-8 hover:border-indigo-400/40 transition-all"
+        >
+            <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
+                    Featured
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${sb.color}`}>
+                    {sb.label}
+                </span>
+                <span className={`text-[10px] font-medium ${categoryColor[trend.category] ?? "text-neutral-400"}`}>
+                    {categoryLabel(trend.category)}
+                </span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
-              {weeklyInsight.title}
+            <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-indigo-200 transition-colors mb-3 leading-snug">
+                {trend.title}
             </h3>
             <p className="text-sm text-indigo-200/60 leading-relaxed mb-5">
-              {weeklyInsight.summary}
+                {trend.summary}
             </p>
-            <div className="space-y-2 mb-5">
-              {weeklyInsight.keyPoints.map((point, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-2 text-sm text-indigo-200/80"
-                >
-                  <span className="text-indigo-400 mt-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                  </span>
-                  {point}
-                </div>
-              ))}
+            <TrustLabel
+                sources={trend.source_names}
+                sourceUrls={trend.source_urls}
+                analyzedAt={trend.created_at}
+                relevance={trend.relevance_score}
+                agentName={trend.agent_name}
+            />
+            <div className="flex items-center gap-1 mt-4 text-sm text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                전체 분석 보기 <ArrowRight className="w-3.5 h-3.5" />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-indigo-500/40 flex items-center gap-1">
-                <Brain className="w-3 h-3" />
-                {weeklyInsight.generatedBy} 생성
-              </span>
-              <Link
-                href="/mindle/weekly"
-                className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
-              >
-                전체 리포트 <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 뉴스레터 구독 CTA ── */}
-      <section className="px-6 py-16 border-t border-indigo-500/10">
-        <NewsletterSubscribeForm source="mindle" brandName="Mindle" dark accentColor="#6366f1" />
-      </section>
-
-      {/* ── Ten:One Universe 연결 ── */}
-      <section className="px-6 py-12 border-t border-indigo-500/10">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center gap-2 mb-6">
-            <Globe className="w-4 h-4 text-indigo-500/50" />
-            <span className="text-xs font-semibold text-indigo-500/50 uppercase tracking-wider">
-              Ten:One Universe
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                name: "SmarComm",
-                desc: "Mindle 트렌드를 마케팅 캠페인에 활용",
-                href: "/smarcomm",
-                color: "from-rose-500/10 to-transparent",
-              },
-              {
-                name: "MAD League",
-                desc: "대학생 트렌드 리서처 네트워크",
-                href: "/madleague",
-                color: "from-amber-500/10 to-transparent",
-              },
-              {
-                name: "RooK",
-                desc: "AI 크리에이터의 콘텐츠 인사이트",
-                href: "/rook",
-                color: "from-violet-500/10 to-transparent",
-              },
-            ].map((brand) => (
-              <Link
-                key={brand.name}
-                href={brand.href}
-                className={`group p-5 rounded-xl bg-gradient-to-br ${brand.color} border border-white/5 hover:border-indigo-500/20 transition-all`}
-              >
-                <h4 className="font-bold text-white text-sm group-hover:text-indigo-300 transition-colors">
-                  {brand.name}
-                </h4>
-                <p className="text-xs text-indigo-400/40 mt-1">{brand.desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
+        </Link>
+    );
 }
+
+function TrendCard({ trend }: { trend: MindleTrend }) {
+    const status = getTrendStatus(trend.relevance_score);
+    const sb = statusBadge[status];
+    const date = trend.created_at.slice(0, 10);
+    const relevancePct = Math.round(trend.relevance_score * 100);
+
+    return (
+        <Link
+            href={`/mindle/trends/${trend.id}`}
+            className="group block bg-white/[0.03] border border-white/5 rounded-xl p-5 hover:border-indigo-500/30 hover:bg-white/[0.05] transition-all"
+        >
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${sb.color}`}>
+                            {sb.label}
+                        </span>
+                        <span className={`text-[10px] font-medium ${categoryColor[trend.category] ?? "text-neutral-400"}`}>
+                            {categoryLabel(trend.category)}
+                        </span>
+                        <span className="text-[10px] text-indigo-500/50">{date}</span>
+                    </div>
+                    <h3 className="text-white font-semibold leading-snug group-hover:text-indigo-300 transition-colors">
+                        {trend.title}
+                    </h3>
+                    <p className="text-xs text-indigo-300/40 mt-1.5 line-clamp-2 leading-relaxed">
+                        {trend.summary}
+                    </p>
+                    <div className="flex items-center gap-3 mt-3 text-[11px] text-indigo-400/40">
+                        {trend.view_count > 0 && (
+                            <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                조회 {trend.view_count.toLocaleString()}
+                            </span>
+                        )}
+                    </div>
+                    <div className="mt-3">
+                        <TrustLabel
+                            sources={trend.source_names}
+                            sourceUrls={trend.source_urls}
+                            analyzedAt={trend.created_at}
+                            relevance={trend.relevance_score}
+                            agentName={trend.agent_name}
+                            compact
+                        />
+                    </div>
+                </div>
+                <div className="shrink-0 flex items-center gap-2 sm:flex-col sm:items-end">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                        <span className="text-lg font-bold text-indigo-400">
+                            {relevancePct}
+                        </span>
+                    </div>
+                    <span className="text-[9px] text-indigo-400/40 uppercase tracking-wider">
+                        관련성
+                    </span>
+                </div>
+            </div>
+        </Link>
+    );
+}
+
