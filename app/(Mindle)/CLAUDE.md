@@ -44,8 +44,8 @@
 
 ```
 Phase 0: 정직성 회복 + 공개      [✅ 2026-05-26 완료]
-Phase 1: 핵심 가치 완성          [2주]
-Phase 2: AI 자동화               [2~3주]
+Phase 1: 핵심 가치 완성          [✅ B/C/D 2026-05-26 완료, E(뉴스레터) 미완]
+Phase 2: AI 자동화               [🏃 메트릭 컴퓨터 신설 — 2026-05-26]
 Phase 3: 수익화 + B2B            [3~4주]
 ```
 
@@ -71,14 +71,15 @@ Phase 3: 수익화 + B2B            [3~4주]
 | 1-C. 페르소나 4종 분리 | `mindle_personas` 테이블 (founder/planner/reporter/marketer) + 페르소나 진입 카드 + newsletter_subscribers.persona_key |
 | 1-D. 뉴스레터 발행 자동화 1주차 | Whole See → AI 초안 → 편집팀 검수 → Resend 발송 e2e |
 
-### Phase 2 — AI 자동화 (이후 2~3주)
+### Phase 2 — AI 자동화 (진행 중)
 
-| 작업 | 산출물 |
-|---|---|
-| 2-A. Mindle AI Agent | `lib/mindle/agent.ts` + `mindle_raw_items` 테이블 + Edge Function 시간당 크롤 + Claude 자동 카드 생성 |
-| 2-B. 페르소나 4종 뉴스레터 cron | `mindle-newsletter-weekly` 매주 월 09:00 자동 초안 4종 생성 |
-| 2-C. Action Hub Registry | `mindle_pending_cards` · `mindle_newsletter_drafts` 등록 |
-| 2-D. UC + 학생 할인 | `uc_rules` 시드 + 이메일 도메인 자동 추출 |
+| 작업 | 산출물 | 상태 |
+|---|---|---|
+| 2-A. Mindle AI Agent — **메트릭 컴퓨터** | [lib/mindle/agent.ts](../../lib/mindle/agent.ts) (5종 함수 SSOT) + [supabase/functions/mindle-metrics-compute](../../supabase/functions/mindle-metrics-compute/index.ts) (시간당 5건) + pg_cron `mindle-metrics-compute-hourly` 25분 | ✅ 2026-05-26 |
+| 2-B. 5대 분석 메트릭 자동 채움 | mindle_trend_metrics rows 신규 published 카드별 mention_trend·related_keywords·sentiment 자동 (comparison·community는 외부 데이터 필요 → 보류) | 🏃 cron 가동 시작 |
+| 2-C. 페르소나 4종 뉴스레터 cron | `mindle-newsletter-weekly` 매주 월 09:00 자동 초안 4종 생성 | 미진행 |
+| 2-D. Action Hub Registry | `mindle_pending_cards` 등록 완료 (Phase 0 검수 큐 후속) | ✅ 등록됨 |
+| 2-E. UC + 학생 할인 | `uc_rules` 시드 + 이메일 도메인 자동 추출 | 미진행 |
 
 ### Phase 3 — 수익화 + B2B (이후 3~4주)
 

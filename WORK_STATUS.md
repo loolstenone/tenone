@@ -6,6 +6,68 @@
 
 ## 세션 152 핵심 성과 (2026-05-26)
 
+### ⑤ Vercel 빌드 에러 수정 (124ed56d → 3dabe73d → 9f...)
+
+세션 152 첫 push(124ed56d)가 Vercel 빌드 ERROR. 진단: 로컬 dev는 lazy compile로 통과했으나 Next 16 production prerender에서 `mindle/my/page.tsx`가 제거된 `trends/statusBadge` export 참조 검출.
+
+- mindle/my/page.tsx mock 의존 전면 제거 (savedIds/alerts/interests 모두 mock이었음)
+- Phase 2 도입 예정 정직 라벨로 교체
+- 로컬 `npm run build` 성공 후 3dabe73d push → Vercel READY
+
+### ⑥ Mindle Phase 1 B/C/D 일괄 완료
+
+**1-B 약신호 코너 (Newen K-Market Lens)**
+- mindle_trends 컬럼 3개 + 인덱스 2개 + `mindle_recompute_signals()` SQL 함수 + pg_cron `mindle-weak-signal-daily` KST 02:15
+- 백필 결과: strong 148 · rising 80 · weak 532
+- [features/mindle/WeakSignalCorner.tsx](features/mindle/WeakSignalCorner.tsx) — 시그널 게이지 + 카테고리 활성도 (`+137%` 등)
+- 정직 라벨: 산식 명시 + "단순 산식, Phase 2 시계열 분석 예정"
+
+**1-C 페르소나 4종 (Sometrend 페르소나 진화)**
+- `mindle_personas` 테이블 + 4 시드 (founder/planner/reporter/marketer + tagline·default_categories·accent_color)
+- `newsletter_subscribers.persona_key` 컬럼 + 인덱스
+- [lib/mindle/personas.ts](lib/mindle/personas.ts) SSOT + [features/mindle/PersonaPicker.tsx](features/mindle/PersonaPicker.tsx)
+- `/mindle?persona=founder` 등 query param → default_categories[0] 자동 필터
+
+**1-D 5대 분석 모듈 (Sometrend 패턴)**
+- `mindle_trend_metrics` 테이블 (CHECK + UNIQUE 복합키 + RLS)
+- [lib/mindle/metrics.ts](lib/mindle/metrics.ts) SSOT (5 payload 인터페이스)
+- [features/mindle/TrendMetrics.tsx](features/mindle/TrendMetrics.tsx) — MentionTrend SVG·RelatedKeywords 클라우드·Sentiment 바·Comparison·CommunitySnippet
+- 정직성: 데이터 없으면 "🚧 Phase 2 도입 예정" 명시, mock 차트 0건
+
+### ⑦ newsletter_subscribers 79명 정직성 회복
+
+사용자 지적("79명도 다 가짜잖아") — 검증 결과 **Mindle source = 0명**. 79명은 tenone-newsletter 63·hero 7·myverse 3·기타 6 합계였음.
+
+- mindle/page.tsx + reports/page.tsx fetchSubscriberCount에 `source='mindle' AND is_active=true` 필터
+- fetchLatestIssueCount에 `status='sent'` 필터
+- CLAUDE.md DB 테이블 정정 + ZERO 금지 패턴 추가
+
+### ⑧ 검수 큐 운영 시뮬레이션 (옵션 3)
+
+API 권한 4단 게이트 정직성 확인 (auth 401 / member 404 / role 403 / status 409). 4 시나리오 SQL 시뮬레이션:
+- collected 620 → 602 (-18)
+- published 760 → 770 (+10 점수 8+ 카드)
+- draft 40 → 45 (+5 점수 7 카드)
+- archived 0 → 3 (+3 점수 6 카드)
+- signal_score 770건 재계산
+
+### ⑨ Mindle Phase 2 골격 — 메트릭 자동 생성 (옵션 4)
+
+- [lib/mindle/agent.ts](lib/mindle/agent.ts) SSOT — 5종 함수 (mention_trend SQL · related_keywords/sentiment Haiku · comparison/community 외부 데이터 부재로 null 반환 정직 처리)
+- [supabase/functions/mindle-metrics-compute](supabase/functions/mindle-metrics-compute/index.ts) Edge Function — 시간당 5건 batch + upsert 멱등 + agent_messages 보고
+- pg_cron `mindle-metrics-compute-hourly` 매시 25분 (trend-crawl 00·trend-to-draft 30과 충돌 없음)
+
+### 🎯 다음 세션 첫 액션 (갱신)
+
+1. **Edge Function 2개 deploy** (사용자 직접):
+   - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh` (Step 2 자동 분기)
+   - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh` (Phase 2 메트릭)
+2. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건 (API e2e 검증)
+3. **Phase 1-E 뉴스레터 자동화** — Whole See → AI 초안 → Mindle 자체 source 구독 모집 인프라
+4. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키·Web Push e2e·환각 감지 회귀)
+
+---
+
 ### ① MADLeap study_programs DB 연동 + is_open=true 토글
 
 세션 151 이월 작업 해소. mock 6개(가짜 리더 박지호·정민재·한소율 등 + 가짜 학교 성균관대·한양대 등) 정직성 위반 → 전면 제거.

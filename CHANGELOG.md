@@ -4,13 +4,14 @@
 
 ---
 
-## 2026-05-26 (세션 152) — MADLeap study_programs · Mindle Phase 0 · Whole See 리바이브
+## 2026-05-26 (세션 152) — MADLeap study_programs · Mindle Phase 0~2 · Whole See 리바이브
 
 ### 장소·운영
 
 - 시작: 사무실 (Plan Mode 우회 없이 git pull → 충돌 발생 → reset --hard 후 cce8e671 동기화)
-- 종료: master 단독, 1 commit/push 예정 (Vercel 빌드 1회)
+- 종료: master 단독, **3 commit/push** (Vercel 빌드 3회 — 1차 ERROR 후 fix·2차·3차)
 - Base: 세션 151 commit `cce8e671`
+- Commits: 124ed56d (ERROR) → 3dabe73d (fix + Phase 1 B/C/D + 정직성 회복) → 본 종료 commit
 
 ### 변경 요약
 
@@ -40,6 +41,27 @@
 - Step 2 코드: [trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) 자동 분기 (9+/7~/6~)
 - Step 3 UI: `/intra/ums/mindle/queue` Server + [QueueRow.tsx](features/mindle/QueueRow.tsx) Client + [/api/intra/mindle/queue/[id]](app/api/intra/mindle/queue/[id]/route.ts) PATCH + nav + action-hub-registry
 
+**⑤ 빌드 에러 수정 (124ed56d ERROR → 3dabe73d)**
+- mindle/my/page.tsx가 제거된 mock export 참조 → Phase 2 정직 라벨로 교체
+
+**⑥ Mindle Phase 1 B/C/D 완료**
+- 1-B 약신호 코너: signal_score 컬럼 + mindle_recompute_signals() 함수 + pg_cron `mindle-weak-signal-daily` KST 02:15 + WeakSignalCorner 컴포넌트
+- 1-C 페르소나 4종: mindle_personas + newsletter_subscribers.persona_key + PersonaPicker + ?persona= 가중치 필터
+- 1-D 5대 분석 모듈: mindle_trend_metrics + TrendMetrics 5블록 + 정직 라벨
+
+**⑦ newsletter_subscribers 정직성 회복**
+- "79명"이 전체 newsletter_subscribers였고 Mindle source는 0명. mindle 페이지·reports에 source='mindle' 필터 적용
+- CLAUDE.md ZERO 금지 패턴 추가
+
+**⑧ 검수 큐 운영 시뮬레이션**
+- collected 620 → 602 (publish 10·draft 5·reject 3)
+- API 4단 권한 게이트 정직성 확인
+
+**⑨ Mindle Phase 2 골격 — 메트릭 자동 생성**
+- [lib/mindle/agent.ts](lib/mindle/agent.ts) SSOT (mention_trend SQL · related_keywords/sentiment Haiku · comparison/community 외부 데이터 부재로 정직 null)
+- [supabase/functions/mindle-metrics-compute](supabase/functions/mindle-metrics-compute/index.ts) 시간당 5건 batch
+- pg_cron `mindle-metrics-compute-hourly` 매시 25분
+
 ### 결정사항
 
 - **검수 단계 부재가 진짜 갭** — Whole See 인프라는 죽지 않았다. 운영자 검수 UI가 없어서 collected → published 전환이 안 됐던 것.
@@ -50,12 +72,15 @@
 
 ### 이월 작업
 
-- Edge Function 배포 (Step 2 코드 효력 발생) — 사용자 직접: `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
-- 검수 큐 첫 운영 (collected 615건 중 8+ 289건 우선)
-- Mindle Phase 1 (5대 분석 모듈·약신호 코너·페르소나 분리·뉴스레터 자동화)
+- **Edge Function 2개 배포** (사용자 직접):
+  - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh` (Step 2 자동 분기)
+  - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh` (Phase 2 메트릭)
+- 검수 큐 첫 실 운영 — /intra/ums/mindle/queue 1-click 브라우저 e2e
+- Mindle Phase 1-E 뉴스레터 자동화 (Mindle source 구독자 모집 + Whole See AI 초안 + Resend 발송)
+- Mindle Phase 2-C·E (페르소나별 뉴스레터 cron · UC 학생 할인)
+- Mindle Phase 3 (PRO 결제·심층 리포트·대화형 검색·B2B)
 - 세션 150 SmarComm 이월 (VAPID Vercel Env·외부 키·Web Push e2e·환각 감지 회귀) 계속 미해소
 - MADLeap sub-pages 7종 마이그레이션 (운영진 콘텐츠 필요)
-- Mindle data 페이지 키워드 트래킹 (Phase 1)
 
 ---
 
