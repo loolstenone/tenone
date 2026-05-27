@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-27 (세션 153 — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 cron + Phase 2-E UC 학생 할인)
+> 마지막 업데이트: 2026-05-28 (세션 154 — Supabase GRANT 정책 대응 + trend-crawl 비용 최적화)
+
+---
+
+## 세션 154 핵심 성과 (2026-05-28)
+
+### ① Supabase GRANT 정책 대응 (2026-10-30 데드라인)
+
+Supabase 발표: 2026-10-30부터 기존 프로젝트도 public 스키마 테이블에 명시적 GRANT 없으면 Data API 접근 불가.
+
+**[sql/grant-public-tables-migration.sql](sql/grant-public-tables-migration.sql) — 신규**
+- 기존 public 테이블 전체 일괄 GRANT (authenticated DML / anon SELECT / service_role ALL)
+- 시퀀스 GRANT 별도 블록 (INSERT시 nextval 권한)
+- 1회성 실행 — Supabase Dashboard SQL Editor에서 직접 실행
+
+**[CLAUDE.md](CLAUDE.md) 부록 D 갱신**
+- 새 테이블 워크플로우에 GRANT 블록 필수 패턴 + 역할 설명 추가
+- "새 테이블 생성 전 체크리스트"에 GRANT 항목 추가
+
+### ② Claude API 비용 분석 + trend-crawl 최적화
+
+- `tenone-prod` ($10.09) = Claude Code 개발 세션
+- `tenone-prod 2` ($0.32) = 프로덕션 Edge Function (`ANTHROPIC_API_KEY`)
+- 최대 비용 원인: `trend-crawl` (매시간 × Sonnet 4.6 카드 생성)
+
+**[supabase/functions/trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) — 수정**
+- Sonnet 4.6 → Haiku (`claude-haiku-4-5-20251001`) 교체 (카드 생성 단계)
+- 예상 절감: Edge Function 비용 ~70% ↓ ($0.32 → ~$0.08/월)
+- deploy 필요 (PAT 갱신 후)
+
+### 🎯 다음 세션 첫 액션 (갱신)
+
+1. **PAT 갱신** — [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens)에서 PAT 재발급 → `.env.local`의 `SUPABASE_ACCESS_TOKEN` 교체
+2. **Edge Function 3개 deploy** (PAT 갱신 후):
+   ```
+   npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh
+   npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh
+   npx supabase functions deploy mindle-newsletter-draft --project-ref ziotlxkdctlhiwkgmmsh
+   ```
+3. **SQL 3건 실행**:
+   - `sql/grant-public-tables-migration.sql` (Supabase Dashboard SQL Editor, 1회성)
+   - `sql/mindle-newsletter-draft-cron.sql` (pg_cron 5건)
+   - `sql/mindle-student-uc.sql` (UC 정책·is_student_email)
+4. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건
+5. **Mindle Phase 3 착수** — PRO 결제 · 심층 리포트 · 대화형 검색 · B2B
+6. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키 4개·Web Push e2e)
 
 ---
 

@@ -5,7 +5,7 @@
  *
  * 흐름:
  *   1. mindle_sources → RSS 수집 → collected_data upsert
- *   2. collected_data(raw) → Haiku 필터링(≥6) → Sonnet 카드 → mindle_trends insert
+ *   2. collected_data(raw) → Haiku 필터링(≥6) → Haiku 카드 → mindle_trends insert
  *   3. 결과 agent_messages에 기록
  *
  * ※ 이전 버전은 tenone.biz/api/crawler HTTP 호출 → HTML 응답 오류.
@@ -191,9 +191,9 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
         continue;
       }
 
-      // Sonnet — 트렌드 카드
+      // Haiku — 트렌드 카드
       const cardRes = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 600,
         messages: [{
           role: 'user',

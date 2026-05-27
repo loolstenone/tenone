@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-05-28 (세션 154) — Supabase GRANT 정책 대응 + trend-crawl 비용 최적화
+
+### 장소·운영
+
+- 시작: master `git pull` base = 세션 153 commit `422e8079`
+- 종료: master 단독 commit 1회, push 1회 (Vercel 빌드 1회)
+- 변경 파일: `sql/grant-public-tables-migration.sql` (신규) · `CLAUDE.md` (GRANT 컨벤션 추가) · `supabase/functions/trend-crawl/index.ts` (Sonnet→Haiku)
+
+### 변경 요약
+
+**① Supabase GRANT 정책 대응**
+- 신규 [sql/grant-public-tables-migration.sql](sql/grant-public-tables-migration.sql) — 기존 public 테이블 전체 일괄 GRANT (1회성, 2026-10-30 데드라인)
+- [CLAUDE.md](CLAUDE.md) 부록 D에 GRANT 필수 패턴 추가 — 신규 테이블 생성 시 GRANT 블록 체크리스트 포함
+
+**② trend-crawl 비용 최적화**
+- [supabase/functions/trend-crawl/index.ts](supabase/functions/trend-crawl/index.ts) 카드 생성 단계 `claude-sonnet-4-6` → `claude-haiku-4-5-20251001`
+- Edge Function 월 비용 ~70% 절감 예상 ($0.32 → ~$0.08)
+
+**③ Claude API 비용 분석 결과**
+- `tenone-prod` ($10.09) = Claude Code 개발 세션 (코드 설정에 등록된 키)
+- `tenone-prod 2` ($0.32) = 프로덕션 Edge Function (`.env.local` `ANTHROPIC_API_KEY`)
+- 최대 비용 원인 확인: trend-crawl 매시간 Sonnet 4.6 → 이번 세션에서 Haiku 교체로 해소
+
+---
+
 ## 2026-05-27 (세션 153) — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 + Phase 2-E UC 학생 할인
 
 ### 장소·운영
