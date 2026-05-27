@@ -4,6 +4,62 @@
 
 ---
 
+## 2026-05-27 (세션 153) — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 + Phase 2-E UC 학생 할인
+
+### 장소·운영
+
+- 시작: master `git pull` Already up to date, base = 세션 152 commit `a8447f04`
+- 종료: master 단독 commit 1회, push 1회 (Vercel 빌드 1회)
+- 변경 파일 3개 (모두 신규, 코드 변경 없는 Mindle 인프라 확장)
+- **블록 상태**: `.env.local`의 `SUPABASE_ACCESS_TOKEN` 401 Unauthorized → Edge Function deploy + pg_cron register + SQL 시드 실행 모두 PAT 갱신 후 진행
+
+### 변경 요약
+
+**① Mindle Phase 1-E 뉴스레터 초안 자동 생성 Edge Function**
+- 신규 [supabase/functions/mindle-newsletter-draft/index.ts](supabase/functions/mindle-newsletter-draft/index.ts) — 425줄
+- 이번 주 published 카드 fetch → Hero (점수 9+) + Signals (점수 8+ 3건) + Weak (signal_score weak/rising 3건) + LLM 편집팀 인트로 + UniverseFeed 블록 자동 조립
+- newsletter_issues 멱등 UPSERT (status='draft' 갱신, scheduled/sent 보존)
+- agent_messages mindle→1001 보고
+- 정직성 SSOT: published 카드만, source_urls 그대로, LLM은 인트로만, 발송 자동 X
+
+**② Mindle Phase 2-C 페르소나 4종 뉴스레터 분기**
+- mindle-newsletter-draft에 `?persona=KEY` 분기 추가 (founder/planner/reporter/marketer)
+- mindle_personas.default_categories 필터링 + LLM 인트로 페르소나 컨텍스트 + title `[Mindle · {페르소나명}]` + target_tags `['mindle','persona:KEY']`
+- 신규 [sql/mindle-newsletter-draft-cron.sql](sql/mindle-newsletter-draft-cron.sql) — pg_cron 5건 (메인 KST 월·페르소나 4종 KST 화~금 09:00)
+
+**③ Mindle Phase 2-E UC 학생 할인 정책 시드**
+- 신규 [sql/mindle-student-uc.sql](sql/mindle-student-uc.sql)
+- uc_redeem_policies mindle default 10% + student 50% row
+- `is_student_email(TEXT)` SQL 함수 — `.ac.kr` · `.edu` · `.edu.XX` 정규식 판별 (IMMUTABLE)
+- members.is_student GENERATED 컬럼 + 부분 인덱스
+- Phase 3 PRO 결제 도입 시 자동 작동
+
+**④ 검수 큐 부분 e2e 검증 (Task #2 — 코드 경로만)**
+- `/intra/ums/mindle/queue` 렌더 200 (compile 258ms, render 1015ms)
+- PATCH `/api/intra/mindle/queue/[id]` 미인증 401 '인증 필요' 정상 — auth gate 작동
+- 실 운영 브라우저 1-click 1건은 사용자 직접 (lools@tenone.biz 로그인 필요)
+
+### 결정사항
+
+- **Phase 1-E·2-C·2-E 코드 일괄 작성** — 세 작업이 같은 Edge Function 자산을 공유하고 cron 등록이 묶이기 때문에 함께 진행. push 1회로 빌드 최소화.
+- **자동 발송 X — 검수 후 운영자 발송 패턴 유지** — Whole See 검수 큐 패턴과 일치. 정직성 + 운영자 통제 양립.
+- **send route persona AND 매칭 보강은 별도 작업으로 분리** — send route 변경은 다른 브랜드 발송에도 영향. 신중한 별도 검토 필요.
+- **Mindle 자체 source 구독자 = 현재 0명** — 구독자 모집은 마케팅 과제. 인프라(폼·확인·발송)는 완비.
+
+### 이월 작업
+
+- **사용자 액션 필요 (블록 항목)**:
+  - PAT 갱신: [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) → `.env.local` SUPABASE_ACCESS_TOKEN 교체
+  - Edge Function 3개 deploy: `trend-crawl`(세션 152 이월) + `mindle-metrics-compute`(세션 152 이월) + `mindle-newsletter-draft`(세션 153)
+  - SQL 2건 실행: `sql/mindle-newsletter-draft-cron.sql` + `sql/mindle-student-uc.sql`
+  - 검수 큐 첫 실 운영 — 브라우저 1-click 1건
+- **다음 세션 이월**:
+  - send route persona AND 매칭 보강 (Phase 2-C 후속)
+  - Mindle Phase 3 (PRO 결제·심층 리포트·대화형 검색·B2B) — 단계 분리 필요
+  - 세션 150 SmarComm 이월 (VAPID Vercel·외부 키 4개·Web Push e2e·환각 감지 회귀)
+
+---
+
 ## 2026-05-26 (세션 152) — MADLeap study_programs · Mindle Phase 0~2 · Whole See 리바이브
 
 ### 장소·운영

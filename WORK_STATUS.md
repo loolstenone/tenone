@@ -1,6 +1,95 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-26 (세션 152 — MADLeap study_programs · Mindle Phase 0 · Whole See 리바이브)
+> 마지막 업데이트: 2026-05-27 (세션 153 — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 cron + Phase 2-E UC 학생 할인)
+
+---
+
+## 세션 153 핵심 성과 (2026-05-27)
+
+### 장소·운영
+
+- 시작: 집/사무실 (`git pull origin master` 정상, Already up to date, base = 세션 152 commit `a8447f04`)
+- 종료: master 단독, push 1회 예정 (작업 종료 시점)
+- 변경 파일 3개 (모두 신규, Mindle 관련)
+- **블록 상태**: `.env.local`의 `SUPABASE_ACCESS_TOKEN` 401 — Edge Function 배포·pg_cron 등록·SQL 시드 실행 모두 사용자 PAT 갱신 후 진행
+
+### ① Mindle Phase 1-E 뉴스레터 자동화 (코드 완료, 배포 블록)
+
+세션 152 이월 1순위. Whole See published 카드 기반 매거진 블록 자동 생성 Edge Function 신설.
+
+**[supabase/functions/mindle-newsletter-draft/index.ts](supabase/functions/mindle-newsletter-draft/index.ts) — 신규 425줄**
+
+- 정직성 SSOT 유지: published 카드만 사용, source_urls 그대로 카드에 노출, LLM은 인트로 한 마디만 생성, 발송 자동 X (status='draft')
+- 매거진 블록 구성: HeroBlock(점수 9+ 최상위) + intro TextBlock(LLM Haiku) + "이번 주 신호" CardRowBlock(점수 8+ 3건) + "약신호 — 부상 중" CardRowBlock(signal_score weak/rising 3건) + UniverseFeedBlock(Mindle·Badak·SmarComm 자연 CTA)
+- newsletter_issues 멱등 UPSERT (status='draft' 갱신, status='scheduled'/'sent' 보존)
+- agent_messages mindle→1001 risk_level green/yellow/red 보고
+- weekStartKST() KST 월요일 기준 산출
+
+**기존 자산 활용 (추가 작업 없음):**
+- `/api/newsletter` source='mindle' 모집 정상
+- `/api/newsletter/send` Resend 배치 발송 + 예약·테스트·tags 필터
+- `/api/newsletter/confirm` 더블옵트인
+- `/api/newsletter/unsubscribe` 수신거부 + List-Unsubscribe 헤더
+- `/intra/ums/newsletter/issues` 인트라 검수·블록 편집·예약 발송 UI 완비
+
+### ② Mindle Phase 2-C 페르소나 4종 뉴스레터 (코드 완료, cron 등록 블록)
+
+mindle-newsletter-draft에 `?persona=KEY` 분기 추가 — 한 Edge Function이 메인 호 + 페르소나 4종 모두 처리.
+
+**Edge Function 확장:**
+- VALID_PERSONA_KEYS = ['founder','planner','reporter','marketer']
+- fetchPersona(key) — mindle_personas 단건 fetch
+- 페르소나 지정 시: default_categories 필터링 (trendQuery.in('category', persona.default_categories))
+- LLM 인트로에 페르소나 컨텍스트 주입 (`대상 독자: {이름} ({tagline})`)
+- title prefix: `[Mindle · {페르소나명}]` vs `[Mindle 주간]`
+- target_tags: `['mindle','persona:KEY']` vs `['mindle']`
+- category: `mindle-weekly-{key}` vs `mindle-weekly`
+- from_name: `Mindle · {페르소나명}` vs `Mindle`
+- 멱등성 매칭에 target_tags 포함
+
+**[sql/mindle-newsletter-draft-cron.sql](sql/mindle-newsletter-draft-cron.sql) — 신규**
+
+- 메인: KST 월 09:00 (UTC 월 00:00)
+- founder: KST 화 09:00
+- planner: KST 수 09:00
+- reporter: KST 목 09:00
+- marketer: KST 금 09:00
+- pg_cron + net.http_post + vault decrypted_secrets 패턴 (기존 mindle-metrics-compute-hourly와 동일)
+- 재실행 안전: cron.unschedule 5건 일괄 → 재등록
+
+### ③ Mindle Phase 2-E UC 학생 할인 (코드 완료, SQL 실행 블록)
+
+**[sql/mindle-student-uc.sql](sql/mindle-student-uc.sql) — 신규**
+
+- uc_redeem_policies row 2건:
+  - `mindle` default 10% (CLAUDE.md § 1.5 UC 정책 + 기존 brand_id 패턴)
+  - `mindle` student 50% (Phase 3 PRO 결제 도입 시 자동 작동)
+- `is_student_email(TEXT)` SQL 함수 (IMMUTABLE) — `.ac.kr` · `.edu` · `.edu.XX` 정규식 판별
+- members.is_student GENERATED ALWAYS AS (is_student_email(email)) STORED 컬럼 + 부분 인덱스
+- 검증 쿼리 4종 포함 (hongik.ac.kr·mit.edu·gmail.com·oxford.ac.uk)
+
+### ④ 검수 큐 e2e 부분 검증 (Task #2)
+
+- `/intra/ums/mindle/queue` Server Component 렌더 200 (compile 258ms, render 1015ms)
+- PATCH `/api/intra/mindle/queue/[id]` 미인증 401 '인증 필요' 정상 (auth gate)
+- 빌드/런타임 에러 0
+- 미완: 사용자가 lools@tenone.biz 로그인 후 브라우저 1-click 1건 실 e2e
+
+### 🎯 다음 세션 첫 액션 (갱신)
+
+1. **PAT 갱신** — [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens)에서 PAT 재발급 → `.env.local`의 `SUPABASE_ACCESS_TOKEN` 교체
+2. **Edge Function 3개 deploy** (PAT 갱신 후 자동 가능):
+   ```
+   npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh
+   npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh
+   npx supabase functions deploy mindle-newsletter-draft --project-ref ziotlxkdctlhiwkgmmsh
+   ```
+3. **SQL 2건 실행** — `sql/mindle-newsletter-draft-cron.sql` (pg_cron 5건) + `sql/mindle-student-uc.sql` (UC 정책·is_student_email)
+4. **검수 큐 첫 실 운영** — `/intra/ums/mindle/queue` 브라우저 1-click 1건
+5. **Mindle 뉴스레터 첫 발행** — 다음 KST 월 09:00 cron 가동 → 운영자 `/intra/ums/newsletter/issues` 검수 → 발송 (Mindle source 구독자 = 현재 0명. 구독자 모집은 별도 마케팅 과제)
+6. **send route persona AND 매칭 보강** — Phase 2-C 후속. target_tags 길이 2+ 시 모든 tag 보유 구독자만 추출
+7. **Mindle Phase 3 착수** — PRO 결제 (Toss + wio_subscription_plans SSOT) · 심층 리포트 · 대화형 검색 · B2B (한 세션 무리, 단계 분리 필요)
+8. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키 4개·Web Push e2e·환각 감지 회귀)
 
 ---
 

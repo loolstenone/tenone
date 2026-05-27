@@ -44,8 +44,8 @@
 
 ```
 Phase 0: 정직성 회복 + 공개      [✅ 2026-05-26 완료]
-Phase 1: 핵심 가치 완성          [✅ B/C/D 2026-05-26 완료, E(뉴스레터) 미완]
-Phase 2: AI 자동화               [🏃 메트릭 컴퓨터 신설 — 2026-05-26]
+Phase 1: 핵심 가치 완성          [✅ B/C/D 2026-05-26, ✅ E(뉴스레터 자동 초안) 2026-05-27]
+Phase 2: AI 자동화               [✅ A(메트릭) 2026-05-26, ✅ C(페르소나 cron) 2026-05-27, ✅ E(UC 학생 할인) 2026-05-27]
 Phase 3: 수익화 + B2B            [3~4주]
 ```
 
@@ -62,24 +62,25 @@ Phase 3: 수익화 + B2B            [3~4주]
 | data/references 페이지 정직성 배너 | "🚧 Phase 1 도입 예정" / "📚 편집팀 큐레이션" 명시 |
 | `ums_sites.mindle.is_open=true` | 외부 공개 시작 |
 
-### Phase 1 — 핵심 가치 완성 (다음 2주 목표)
-
-| 작업 | 산출물 |
-|---|---|
-| 1-A. Sometrend 5대 분석 모듈 | `mindle_trend_metrics` 테이블 + MentionTrendChart·RelatedKeywordsCloud·SentimentBar·CompareChart·CommunitySnippet 5 컴포넌트 |
-| 1-B. 약신호(Weak Signal) 코너 | mindle_trends에 signal_score·mention_growth_pct·percentile_rank 추가 + 일 1회 cron 갱신 + WeakSignalCorner 컴포넌트 |
-| 1-C. 페르소나 4종 분리 | `mindle_personas` 테이블 (founder/planner/reporter/marketer) + 페르소나 진입 카드 + newsletter_subscribers.persona_key |
-| 1-D. 뉴스레터 발행 자동화 1주차 | Whole See → AI 초안 → 편집팀 검수 → Resend 발송 e2e |
-
-### Phase 2 — AI 자동화 (진행 중)
+### Phase 1 — 핵심 가치 완성 ✅ 완료
 
 | 작업 | 산출물 | 상태 |
 |---|---|---|
-| 2-A. Mindle AI Agent — **메트릭 컴퓨터** | [lib/mindle/agent.ts](../../lib/mindle/agent.ts) (5종 함수 SSOT) + [supabase/functions/mindle-metrics-compute](../../supabase/functions/mindle-metrics-compute/index.ts) (시간당 5건) + pg_cron `mindle-metrics-compute-hourly` 25분 | ✅ 2026-05-26 |
+| 1-A. Sometrend 5대 분석 모듈 | `mindle_trend_metrics` 테이블 + MentionTrendChart·RelatedKeywordsCloud·SentimentBar·CompareChart·CommunitySnippet 5 컴포넌트 | ✅ 2026-05-26 |
+| 1-B. 약신호(Weak Signal) 코너 | mindle_trends에 signal_score·mention_growth_pct·percentile_rank 추가 + 일 1회 cron 갱신 + WeakSignalCorner 컴포넌트 | ✅ 2026-05-26 |
+| 1-C. 페르소나 4종 분리 | `mindle_personas` 테이블 (founder/planner/reporter/marketer) + 페르소나 진입 카드 + newsletter_subscribers.persona_key | ✅ 2026-05-26 |
+| 1-D. 뉴스레터 발행 자동화 1주차 | Whole See → AI 초안 → 편집팀 검수 → Resend 발송 e2e | ✅ 2026-05-27 (E로 통합) |
+| **1-E. 주간 뉴스레터 초안 자동 생성** | [supabase/functions/mindle-newsletter-draft/index.ts](../../supabase/functions/mindle-newsletter-draft/index.ts) — Hero(점수 9+) + Signals(점수 8+ 3건) + Weak(signal_score weak/rising 3건) + LLM 편집팀 인트로 + UniverseFeed 블록 자동 조립 + newsletter_issues 멱등 UPSERT + agent_messages 보고. status='draft' (자동 발송 X). [pg_cron sql](../../sql/mindle-newsletter-draft-cron.sql) 메인 호 KST 월 09:00 | ✅ 2026-05-27 (코드, deploy 블록) |
+
+### Phase 2 — AI 자동화 ✅ 코드 완료
+
+| 작업 | 산출물 | 상태 |
+|---|---|---|
+| 2-A. Mindle AI Agent — **메트릭 컴퓨터** | [lib/mindle/agent.ts](../../lib/mindle/agent.ts) (5종 함수 SSOT) + [supabase/functions/mindle-metrics-compute](../../supabase/functions/mindle-metrics-compute/index.ts) (시간당 5건) + pg_cron `mindle-metrics-compute-hourly` 25분 | ✅ 2026-05-26 (deploy 블록) |
 | 2-B. 5대 분석 메트릭 자동 채움 | mindle_trend_metrics rows 신규 published 카드별 mention_trend·related_keywords·sentiment 자동 (comparison·community는 외부 데이터 필요 → 보류) | 🏃 cron 가동 시작 |
-| 2-C. 페르소나 4종 뉴스레터 cron | `mindle-newsletter-weekly` 매주 월 09:00 자동 초안 4종 생성 | 미진행 |
+| **2-C. 페르소나 4종 뉴스레터 cron** | mindle-newsletter-draft `?persona=KEY` 분기 + mindle_personas.default_categories 카테고리 필터 + 페르소나 컨텍스트 인트로 + title prefix `[Mindle · {페르소나명}]` + target_tags `['mindle','persona:KEY']`. pg_cron 4건 (KST 화·수·목·금 09:00) | ✅ 2026-05-27 (코드, cron 등록 블록) |
 | 2-D. Action Hub Registry | `mindle_pending_cards` 등록 완료 (Phase 0 검수 큐 후속) | ✅ 등록됨 |
-| 2-E. UC + 학생 할인 | `uc_rules` 시드 + 이메일 도메인 자동 추출 | 미진행 |
+| **2-E. UC + 학생 할인** | [sql/mindle-student-uc.sql](../../sql/mindle-student-uc.sql) — uc_redeem_policies mindle default 10% + student 50% + `is_student_email()` SQL 함수 (`.ac.kr`·`.edu`·`.edu.XX`) + members.is_student GENERATED 컬럼. Phase 3 PRO 결제 시 자동 작동 | ✅ 2026-05-27 (코드, SQL 실행 블록) |
 
 ### Phase 3 — 수익화 + B2B (이후 3~4주)
 
@@ -171,13 +172,25 @@ Phase 3: 수익화 + B2B            [3~4주]
 | 파일 | 역할 |
 |---|---|
 | [lib/mindle/trend-data.ts](../../lib/mindle/trend-data.ts) | DB fetch 헬퍼 SSOT — fetchPublishedTrends·countPublishedTrends·getCategoryCounts·fetchTrendById·getTrendStatus·CATEGORY_LABEL |
+| [lib/mindle/agent.ts](../../lib/mindle/agent.ts) | Phase 2 AI Agent SSOT — 메트릭 컴퓨터 5종 함수 (mention_trend·related_keywords·sentiment + comparison/community null) |
+| [lib/mindle/personas.ts](../../lib/mindle/personas.ts) | 페르소나 4종 SSOT — fetchPersonas·fetchPersona·PERSONA_KEYS·isValidPersonaKey |
+| [lib/mindle/metrics.ts](../../lib/mindle/metrics.ts) | 5대 메트릭 타입 정의 SSOT |
 | [lib/mindle/notify.ts](../../lib/mindle/notify.ts) | 알림 헬퍼 |
+
+### Edge Functions
+
+| 파일 | 역할 | cron |
+|---|---|---|
+| [supabase/functions/mindle-metrics-compute/index.ts](../../supabase/functions/mindle-metrics-compute/index.ts) | Phase 2-A·B — published 카드별 mention_trend·related_keywords·sentiment 메트릭 자동 채움 (시간당 5건) | `mindle-metrics-compute-hourly` 매시 25분 |
+| [supabase/functions/mindle-newsletter-draft/index.ts](../../supabase/functions/mindle-newsletter-draft/index.ts) | Phase 1-E·2-C — 주간 뉴스레터 초안 자동 생성. `?persona=KEY` 분기 (메인 + founder/planner/reporter/marketer). 멱등 UPSERT | `mindle-newsletter-draft-*` KST 월~금 09:00 |
 
 ### API
 
 | 파일 | 역할 |
 |---|---|
-| [app/api/mindle/newsletter/route.ts](../../app/api/mindle/newsletter/route.ts) | 뉴스레터 구독 |
+| [app/api/mindle/newsletter/route.ts](../../app/api/mindle/newsletter/route.ts) | 외부 뉴스레터 수집 (Gmail → AI 트렌드 추출) — 구독 인입 API와 별개 |
+
+> 뉴스레터 구독·확인·발송·수신거부는 유니버스 공용 `/api/newsletter*` 라우트 5종 사용 (Mindle은 `source='mindle'` 파라미터로 인입)
 
 ---
 
@@ -256,13 +269,14 @@ Phase 3: 수익화 + B2B            [3~4주]
 
 | 항목 | 내용 |
 |---|---|
-| **Phase** | **Phase 0 완료 (2026-05-26)** — 정직성 회복 + 공개 |
-| **is_open** | true (외부 공개 시작) |
-| **DB 데이터** | mindle_trends 1,410건 (published 532) · 79 구독자 · 49 active sources |
-| **차기 작업** | Phase 1 1-A (5대 분석 모듈) 또는 1-B (약신호) — 우선순위 결정 필요 |
-| **블로커** | 없음. Phase 1·2·3는 독립 진행 가능. |
-| **추가 분석 미완** | 가격 검증 (PRO ₩9,900 실측 검증) · 페르소나 4종 구체화 · B2B 단가 시나리오 (Phase 3 준비) · Whole See ↔ Mindle 통합 그림 |
-| **2026-05-26 작업** | Phase 0 완료 (코드 + DB + 토글) · 본 CLAUDE.md 전면 갱신 |
+| **Phase** | **Phase 1 + Phase 2 코드 완료 (2026-05-27)** — Phase 3 PRO 결제 진입 대기 |
+| **is_open** | true (외부 공개 진행 중) |
+| **DB 데이터** | mindle_trends 1,410건+ (published 760+ 백필 후) · 49 active sources · Mindle source 구독자 0명 (모집 별도 과제) |
+| **차기 작업** | (1) PAT 갱신·Edge Function deploy·SQL 실행 → cron 가동 (2) Phase 3 PRO 결제 (Toss + wio_subscription_plans SSOT) |
+| **블로커** | `.env.local`의 `SUPABASE_ACCESS_TOKEN` 401 — PAT 갱신 시 mindle-metrics-compute·trend-crawl·mindle-newsletter-draft 3개 deploy + cron 5개 등록 + UC 시드 일괄 처리 가능 |
+| **추가 분석 미완** | 가격 검증 (PRO ₩9,900 실측 검증) · B2B 단가 시나리오 (Phase 3 준비) · Whole See ↔ Mindle 통합 그림 |
+| **2026-05-27 작업 (세션 153)** | Phase 1-E·2-C·2-E 코드 일괄 작성 — 뉴스레터 자동 초안 (메인 + 페르소나 4) + UC 학생 할인 시드. push 1회로 통합. |
+| **2026-05-26 작업 (세션 152)** | Phase 0 완료 · 1-B·C·D 완료 · 2-A 메트릭 컴퓨터 골격 |
 
 ---
 

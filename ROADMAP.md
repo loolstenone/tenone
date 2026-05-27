@@ -225,6 +225,16 @@ WIO / SmarComm
 - [x] Mindle 검수 큐 UI 신설 — `/intra/ums/mindle/queue` (세션 152)
 - [ ] 트렌드 카드 100개 축적 목표
 
+### 3-D. Mindle 뉴스레터 자동화 ✅ 코드 완료 (세션 153)
+- [x] Phase 1-E: 주간 뉴스레터 초안 자동 생성 — Edge Function `mindle-newsletter-draft` 신설. Hero/Signals/Weak/Universe 블록 + LLM 편집팀 인트로 + newsletter_issues 멱등 UPSERT
+- [x] Phase 2-C: 페르소나 4종 분기 — `?persona=founder|planner|reporter|marketer` query param. mindle_personas.default_categories 카테고리 필터 + 페르소나 컨텍스트 인트로 + target_tags=['mindle','persona:KEY']
+- [x] pg_cron 5건 SQL 작성 — 메인 KST 월 09:00 + 페르소나 KST 화·수·목·금 09:00 ([sql/mindle-newsletter-draft-cron.sql](sql/mindle-newsletter-draft-cron.sql))
+- [x] Phase 2-E: UC 학생 할인 정책 시드 ([sql/mindle-student-uc.sql](sql/mindle-student-uc.sql)) — `is_student_email()` 함수 + uc_redeem_policies mindle default 10% + student 50%
+- [ ] **사용자 deploy 필요**: `npx supabase functions deploy mindle-newsletter-draft --project-ref ziotlxkdctlhiwkgmmsh` + SQL 2건 실행
+- [ ] send route persona AND 매칭 보강 (Phase 2-C 후속, 별도 작업)
+- [ ] Mindle source 구독자 모집 (현재 0명 — 마케팅 과제)
+- [ ] Mindle 뉴스레터 1호 첫 검수·발송 — 다음 KST 월 09:00 cron 트리거 후
+
 ### 3-B. 바당쇠 실전 투입
 - [ ] Badak 14개 방 리스닝 모드 (수집만, 응답은 수동)
 - [ ] 시그널 → `mindle_trends` 연결 (바당쇠 → Mindle 데이터 공급)
