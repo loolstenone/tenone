@@ -4,6 +4,73 @@
 
 ---
 
+## 2026-05-28 (세션 154) — TenOne.biz 본사이트 정직성·정합성 회복 1차
+
+### 장소·운영
+
+- 시작: master `git pull` Already up to date, base = 세션 153 commit `422e8079`
+- 종료: master 단독 commit 1회, push 1회 (Vercel 빌드 1회)
+- 변경 파일 9개 (TenOne 그룹 8 modified + `lib/universe-map.ts` 신규)
+- 사용자 의사결정: 본사이트 고도화 방향 4종 중 "정직성 + 데이터 정합성 회복" 선택
+
+### 변경 내역
+
+#### Universe 페이지 stale 제거
+- `app/(TenOne)/universe/page.tsx` Coming Soon 8건 섹션 삭제 (`domo`·`FWN`·`MoNTZ`·`Myverse`·`Townity`·`Seoul360`·`Mullaesian`·`Trend Hunter` — 7건은 이미 운영 중, 1건은 정의 미확정)
+- stats 하드코딩 "23 브랜드 / 14 WIO 모듈" → `siteConfigs.length`(28) + UNIVERSE_ROLE_GROUPS.length(8) 동적
+
+#### Brands 페이지 정합화
+- `lib/data.ts` staticBrands 22 → 26개 (jakka·townity·mullaesian·naturebox 추가; internal dokdae·wiki는 외부 갤러리 정책상 제외)
+- 본사이트 brands page `/brands` 26개 카드 정합 노출
+
+#### Landing Crew CTA 활성화
+- `app/page.tsx` "Crew 지원하기" `cursor-default` 비활성 → `/contact?from=crew` Link 활성화
+- `app/(TenOne)/contact/page.tsx` partner 탭 카피 동적 변형 (`Join the Crew`/`크루로 합류하세요`/`크루 지원하기`)
+
+#### History SSOT 일원화
+- `types/brand.ts` `HistoryEvent.link?: string` 추가
+- `lib/data.ts historyEvents` 20 → 27건 보강:
+  - 추가 5건: Chat with ChatGPT(2023.02), Creazy Challenge(2023.11), 0gamja(2024.01), ChangeUp(2024.05), DAM Be(2025.03)
+  - link 보강 6건: Badak·MADLeague·YouInOne·FWN·RooK·LUKI 공식 URL
+  - 2026 마일스톤 2건: Mindle 트렌드 인텔리전스 정식 오픈(2026.05), MADLeap 외부 공개(2026.05)
+- `app/(TenOne)/about/page.tsx` HISTORY_DATA 21건 dead code 제거 → historyEvents import
+- `/history` 별도 페이지도 동일 SSOT (코드 변경 0)
+
+#### Universe Map SSOT 추출
+- `lib/universe-map.ts` 신설 — `UNIVERSE_ROLE_GROUPS` 8 그룹·29 브랜드 SSOT
+- `app/page.tsx` 인라인 → SSOT import (코드 70줄 절감)
+- `app/(TenOne)/about/page.tsx`:
+  - `BRAND_DIRECTORY` 56줄 dead code (어디서도 미사용) 완전 제거
+  - "Brand Ecosystem" 섹션 9 카테고리(19개 브랜드 누락) → 8 그룹·29 브랜드 전체 노출로 교체
+
+#### CLAUDE.md 정정
+- `app/(TenOne)/CLAUDE.md` stale 경로 `app/(public)/page.tsx` 등 → 실제 `app/page.tsx`·`app/(TenOne)/*`로 일괄 정정
+- 핵심 파일 표 확장 (history·works·newsroom·newsletter·contact·tenone features 추가)
+- Phase 정보·최근 결정·이월 작업 갱신
+
+#### PublicHeader About 중복 해소
+- `features/tenone/PublicHeader.tsx` `<UniverseUtilityBar hideAbout={true}>` 추가
+- nav 메뉴 "About" + UtilityBar "ABOUT" 동시 노출 시각 중복 제거
+
+### 검증
+
+- 10개 페이지 200 OK (랜딩, about 4탭, brands, universe, contact 2종, history)
+- console error 0
+- 랜딩·about: 동일 UNIVERSE_ROLE_GROUPS 8 그룹 동기 렌더
+- brands page: 26개 카드 (jakka·townity·mullaesian·naturebox 추가 확인)
+- about?tab=history: 27건, 2026.05 Mindle/MADLeap 마일스톤 최상단
+- contact?from=crew: "Join the Crew" 카피 변형 확인
+- /about 헤더 About 1회만 노출 (시각 검증 완료)
+
+### 의식적 결정
+
+- universe page businesses 12개는 그대로 (대표 사례 의도 선별 — 후속 검토 사항)
+- DB `brands` 테이블 비어 fallback이 SSOT — 추후 DB 시드 시 자동 우선
+- TenOne 카운트 `siteConfigs` 28 vs `UNIVERSE_ROLE_GROUPS` 29 차이 (메타항목 Protocols/Intra/AI Agent/Scribble/Korea360 포함) — about에서 "29개 브랜드" 표시. 메타-실서비스 구분 라벨링은 후속 작업
+- TenOne.biz 허브 가이드 문서 별도 작성 — 사용자 dismiss로 보류, 위치·형식 결정 대기
+
+---
+
 ## 2026-05-27 (세션 153) — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 + Phase 2-E UC 학생 할인
 
 ### 장소·운영

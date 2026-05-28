@@ -22,4 +22,5 @@ export interface HistoryEvent {
     title: string;
     description: string;
     brandId?: string;
+    link?: string;
 }

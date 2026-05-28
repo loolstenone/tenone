@@ -1,6 +1,30 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-05-13 (세션 134 — 캡쳐 Phase 2 5건 + 모바일 하단 네비 + 녹음·퀵메뉴)
+> 마지막 업데이트: 2026-05-28 (세션 154 — TenOne.biz 본사이트 정직성·정합성 회복 1차)
+
+---
+
+## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
+
+> 28개 브랜드의 허브 사이트. 정직성 SSOT + 데이터 일원화 진행 중.
+
+- [x] **1차 — 정직성·정합성 회복** (세션 154):
+  - Universe Coming Soon stale 8건 섹션 삭제
+  - Universe stats 동적화 (28 브랜드 + 8 역할 그룹)
+  - brands page 26개 정합 (4건 추가, 내부 2건 제외)
+  - history SSOT `lib/data.ts historyEvents` 일원화 (20→27건)
+  - `lib/universe-map.ts` SSOT 추출 — 랜딩·about 동기화
+  - about page BRAND_DIRECTORY dead code 56줄 제거
+  - 랜딩 Crew CTA 활성화 + Contact partner 탭 카피 변형
+  - PublicHeader About 중복 해소
+  - CLAUDE.md stale 경로 정정
+- [ ] **2차 — DB 시드 + 페이지 후속 정합**:
+  - DB `brands` 테이블 시드 (26 row) — fallback에서 DB SSOT로 승격
+  - DB `history_events` 테이블 시드 또는 폐기 결정
+  - universe page businesses 12개 선별 의도 라벨링
+  - about founder 섹션 정보 갱신 검토
+  - "29개 브랜드" 메타-실서비스 구분 라벨
+- [ ] **3차 — 허브 가이드 문서**: tenone.biz 허브 정체성·콘텐츠·UX 가이드 (위치·형식 결정 대기)
 
 ---
 

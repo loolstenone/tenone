@@ -1,6 +1,86 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-27 (세션 153 — Mindle Phase 1-E 뉴스레터 자동화 + Phase 2-C 페르소나 4종 cron + Phase 2-E UC 학생 할인)
+> 마지막 업데이트: 2026-05-28 (세션 154 — TenOne.biz 본사이트 정직성·정합성 회복 1차)
+
+---
+
+## 세션 154 핵심 성과 (2026-05-28)
+
+### 장소·운영
+
+- 시작: 집/사무실 (`git pull origin master` 정상, Already up to date, base = 세션 153 commit `422e8079`)
+- 종료: master 단독, push 1회 예정
+- 변경 파일 9개 (TenOne 그룹 8 modified + lib/universe-map.ts 신규)
+- **블록**: 세션 153 PAT 401 미해소 — Mindle Phase 1-E Edge Function 배포 대기 중
+
+### ① 사용자 의사결정: "정직성 + 데이터 정합성 회복"
+
+본사이트 고도화 방향 4종 옵션 중 "정직성 + 데이터 정합성 회복" 선택. 다른 작업의 전제이므로 권장 옵션이 채택됨.
+
+### ② Universe page "Coming Soon" stale 8건 제거
+
+`universe/page.tsx` 277-291 Coming Soon 섹션에 `domo`·`FWN`·`MoNTZ`·`Myverse`·`Townity`·`Seoul360`·`Mullaesian`·`Trend Hunter` 8건 — 이 중 7건은 이미 `siteConfigs`에 등록되어 운영 중. 정직성 위반. 섹션 통째 삭제 (Trend Hunter 1건도 정의 미확정이라 함께).
+
+### ③ Universe page stats 동적화
+
+stats 하드코딩 "23 브랜드 / 14 WIO 모듈" → `siteConfigs.length` 기반 `28` + `8 역할 그룹` (UNIVERSE_ROLE_GROUPS) 동적 계산. WIO 모듈 수는 부정확하므로 제거 후 더 신뢰 가능한 fact로 대체.
+
+### ④ brands page mock fallback 26개 정합
+
+DB `brands` 테이블이 비어 fallback `staticBrands`(22개)만 노출되던 상태. site-config 28개 중 4개 누락 발견 (jakka·townity·mullaesian·naturebox). 4건 추가. 내부용 2건(dokdae·wiki)은 외부 갤러리 정책상 의도적 제외 → 26개가 SSOT.
+
+### ⑤ 랜딩 "Crew 지원하기" 버튼 활성화
+
+`cursor-default`로 비활성 상태였던 CTA → `/contact?from=crew` Link로 교체. Contact 페이지 partner 탭 카피를 `fromCrew` 시 "Join the Crew"·"크루로 합류하세요"로 동적 변형. 진입자 맥락 보존.
+
+### ⑥ history SSOT를 `lib/data.ts historyEvents` 일원화
+
+3곳 분산 데이터 통합:
+- about page `HISTORY_DATA` 21건 → dead code 제거 후 `historyEvents` import
+- `lib/data.ts historyEvents` 20건 → 27건으로 보강:
+  - 5건 추가: Chat with ChatGPT(2023.02), Creazy Challenge(2023.11), 0gamja(2024.01), ChangeUp(2024.05), DAM Be(2025.03)
+  - 6건에 link 보강 (Badak·MADLeague·YouInOne·FWN·RooK·LUKI 공식 URL)
+  - 2026 마일스톤 2건 추가: Mindle 트렌드 인텔리전스 정식 오픈(2026.05) + MADLeap 외부 공개(2026.05)
+- `types/brand.ts` `HistoryEvent.link?: string` 추가
+- `/history` 별도 페이지도 동일 SSOT (코드 변경 0)
+
+### ⑦ `lib/universe-map.ts` SSOT 신설 — Brand Directory/Ecosystem 통합
+
+- 랜딩 `app/page.tsx`에 인라인이던 `UNIVERSE_ROLE_GROUPS`(8 그룹) → `lib/universe-map.ts`로 추출
+- about page에 인라인이던 `BRAND_DIRECTORY`(56줄, 어디서도 미사용 dead code) 제거
+- about page "Brand Ecosystem" 섹션 (9 카테고리만 노출, 19개 누락) → UNIVERSE_ROLE_GROUPS 기반 8 그룹·29 브랜드 모두 노출로 교체
+- 랜딩 + about: 동일 SSOT 사용으로 정합
+
+### ⑧ CLAUDE.md `app/(public)/` stale 경로 정정
+
+`app/(TenOne)/CLAUDE.md`가 `app/(public)/page.tsx` 등 존재하지 않는 경로 참조. 실제 `app/page.tsx`·`app/(TenOne)/*`로 일괄 정정 + Phase 정보·핵심 파일 표 갱신.
+
+### ⑨ PublicHeader "About" 중복 해소
+
+`/about` 페이지에서 nav 메뉴 "About" + UtilityBar "ABOUT" 텍스트 동시 노출 (시각적 중복). UtilityBar에 `hideAbout={true}` 추가 — nav의 About만 단독 노출.
+
+### 검증 (모두 200 OK, console error 0)
+
+- 10개 페이지: `/`, `/about` × 4탭, `/brands`, `/universe`, `/contact` × 2, `/history`
+- 랜딩·about: 동일 SSOT 8 그룹 동기화
+- universe stats 28+8 동적 렌더
+- brands 26개 카드
+- history 27건 (2026 사건 2건 최상단)
+- Crew 버튼 → contact "Join the Crew" 카피 변형
+- PublicHeader About 중복 해소 (시각 검증 완료)
+
+### 🎯 다음 세션 첫 액션
+
+1. **세션 153 PAT 갱신 + Edge Function 3개 deploy** (지속 미해소) — `trend-crawl`·`mindle-metrics-compute`·`mindle-newsletter-draft`
+2. **세션 153 SQL 2건 실행** — `mindle-newsletter-draft-cron.sql` (pg_cron 5건) + `mindle-student-uc.sql`
+3. **DB `brands` 테이블 시드** — 본사이트 brands page를 lib/data.ts fallback에서 DB SSOT로 승격하려면 26 브랜드 row INSERT 필요. 현재는 fallback이 SSOT.
+4. **본사이트 후속 정합화 (선택)**:
+   - DB `history_events` 테이블 시드 (또는 폐기 결정)
+   - universe page businesses 12개 대표 사례 — 선별 의도 명시 라벨 추가 검토
+   - about page 운영진/founder 섹션 정보 갱신 검토 (CJ 이니셜 외 추가 정보?)
+   - "29개 브랜드" 메타 표시 — 메타항목(Protocols/Intra/AI Agent/Scribble/Korea360) vs 실서비스 구분 라벨 검토
+5. **TenOne.biz 허브 가이드 문서** — 사용자 dismiss로 보류. 위치·형식 결정되면 작성.
+6. **세션 150 SmarComm 이월** 계속 미해소 (VAPID Vercel·외부 키 4개·Web Push e2e·환각 감지 회귀)
 
 ---
 

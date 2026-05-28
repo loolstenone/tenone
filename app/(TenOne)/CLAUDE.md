@@ -81,11 +81,19 @@
 
 | 파일 | 역할 |
 |------|------|
-| `app/(public)/page.tsx` | 랜딩 (로그인 유도, 브랜드 쇼케이스) |
-| `app/(public)/profile/page.tsx` | 유니버스 프로필 (모든 서비스 현황) |
-| `app/(public)/universe/page.tsx` | 유니버스 맵 (브랜드 관계도, 가입 현황) |
-| `app/(public)/brands/page.tsx` | 브랜드 갤러리 (전체 26개 소개) |
-| `app/(public)/about/page.tsx` | TenOne 소개 |
+| `app/page.tsx` | 랜딩 (Hero · Crew CTA · Works · Universe 8 그룹 · Core Values · News · Newsletter) |
+| `app/(TenOne)/profile/page.tsx` | 유니버스 프로필 (모든 서비스 현황) |
+| `app/(TenOne)/universe/page.tsx` | 유니버스 맵 (3대 자원·WIO/YIO·사업 포트폴리오·시너지 체인) |
+| `app/(TenOne)/brands/page.tsx` | 브랜드 갤러리 (전체 브랜드 카테고리 필터) |
+| `app/(TenOne)/about/page.tsx` | TenOne 소개 (Philosophy/Universe/Brands/History 4탭) |
+| `app/(TenOne)/history/page.tsx` | 별도 History 페이지 (lib/data.ts historyEvents) |
+| `app/(TenOne)/works/page.tsx` | Works 보드 (BoardPage 위임) |
+| `app/(TenOne)/newsroom/page.tsx` | Newsroom 피드 (NewsTicker + NewsroomFeed) |
+| `app/(TenOne)/newsletter/page.tsx` | 뉴스레터 아카이브 |
+| `app/(TenOne)/contact/page.tsx` | 파트너십/비즈니스 문의 |
+| `features/tenone/PublicHeader.tsx` | 공통 헤더 (TenOne 테마) |
+| `features/tenone/PublicFooter.tsx` | 공통 푸터 |
+| `features/tenone/TenOneThemeWrapper.tsx` | 테마 변수 wrapper (--tn-bg/text/accent 등) |
 | `app/intra/layout.tsx` | Intra 마스터 레이아웃 |
 | `app/intra/erp/*` | ERP (HR·결재·재무·GPR) |
 | `app/intra/marketing/*` | 마케팅 관리 |
@@ -156,10 +164,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Mature (2026-04-20) — 포탈·프로필·Intra 모두 프로덕션. 26개 브랜드 통제 중. |
-| **개발 수준** | 완성. 중앙 인프라 안정화. |
-| **이월 작업** | 없음 — 기본 기능 완성 |
-| **최근 결정** | Intra UMS 9개 패널, Intra Studio 에이전트 관리 통합 |
+| **Phase** | Mature (2026-05-28) — 포탈·프로필·Intra 모두 프로덕션. 28+ 브랜드 통제 중. 본사이트 정직성·정합성 회복 1차 완료 (세션 154). |
+| **개발 수준** | 완성. SSOT 일원화 단계. |
+| **이월 작업** | DB `brands` 테이블 시드 부재 — brands page는 lib/data.ts staticBrands fallback에만 의존 (DB 채우면 자동 우선). Mindle Phase 3 PRO 결제 등 별 트랙 |
+| **최근 결정** | (2026-05-28) **본사이트 정직성·정합성 회복**: ① `app/(public)/` 경로 표기를 실제 `app/(TenOne)/`·`app/page.tsx`로 정정 ② Universe "Coming Soon" 8건(7건 실제 운영 중) 섹션 통째 삭제 ③ Universe stats "23 브랜드/14 WIO 모듈" → `siteConfigs.length` 동적 28 + 8 역할 그룹 ④ brands page fallback 22→26개 (jakka·townity·mullaesian·naturebox 추가, internal dokdae·wiki 제외) ⑤ history SSOT를 `lib/data.ts historyEvents`로 일원화 (about HISTORY_DATA dead code 제거 + 27건으로 보강 — 0gamja·ChangeUp·Chat with ChatGPT·Creazy Challenge·DAM Be·Mindle 2026·MADLeap 2026 포함) ⑥ Crew CTA `cursor-default` → `/contact?from=crew` Link + Contact partner 탭 카피 변형 ⑦ `lib/universe-map.ts` 신설 — `UNIVERSE_ROLE_GROUPS` SSOT 추출. 랜딩 + about Brand Ecosystem 모두 import (about BRAND_DIRECTORY 56줄 dead code 제거) |
 
 ---
 

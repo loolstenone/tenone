@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight, CheckCircle } from "lucide-react";
 import clsx from "clsx";
@@ -73,6 +73,12 @@ export default function ContactPage() {
     const { isAuthenticated } = useAuth();
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [fromCrew, setFromCrew] = useState(false);
+
+    useEffect(() => {
+        const p = new URLSearchParams(window.location.search);
+        setFromCrew(p.get('from') === 'crew');
+    }, []);
 
     const handleSubmit = async (formType: string, form: HTMLFormElement) => {
         setSubmitting(true);
@@ -165,10 +171,14 @@ export default function ContactPage() {
 
                     {/* 파트너 신청 */}
                     {!submitted && activeTab === 'partner' && (
-                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('partner', e.currentTarget); }}>
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(fromCrew ? 'crew' : 'partner', e.currentTarget); }}>
                             <div className="mb-6">
-                                <h3 className="text-xl font-bold">Partner with Us</h3>
-                                <p className="text-sm tn-text-sub mt-1">Ten:One™의 파트너가 되어 함께 문제를 해결해요.</p>
+                                <h3 className="text-xl font-bold">{fromCrew ? 'Join the Crew' : 'Partner with Us'}</h3>
+                                <p className="text-sm tn-text-sub mt-1">
+                                    {fromCrew
+                                        ? 'Ten:One™ Universe 크루로 합류하세요. 실전 프로젝트에 참여하고 함께 성장합니다.'
+                                        : 'Ten:One™의 파트너가 되어 함께 문제를 해결해요.'}
+                                </p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-5">
                                 <div><label className={labelClass}>이름</label><input name="name" type="text" required className={inputClass} placeholder="홍길동" /></div>
@@ -188,7 +198,7 @@ export default function ContactPage() {
                             <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="url" className={inputClass} placeholder="https://..." /></div>
                             <div><label className={labelClass}>자기소개 및 지원동기</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : '파트너 신청하기'}
+                                <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : (fromCrew ? '크루 지원하기' : '파트너 신청하기')}
                             </button>
                         </form>
                     )}

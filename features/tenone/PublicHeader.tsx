@@ -77,6 +77,7 @@ export function PublicHeader() {
                     <ThemeToggle />
                     <UniverseUtilityBar
                         aboutPath="/about"
+                        hideAbout={true}
                         hideAuth={true}
                         accentColor={isDark ? '#fff' : '#000'}
                         siteId="tenone"

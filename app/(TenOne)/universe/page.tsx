@@ -3,6 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink, Zap, Globe, Layers, Sparkles, Building2, Briefcase } from "lucide-react";
+import { siteConfigs } from "@/lib/site-config";
+
+const BRAND_COUNT = Object.keys(siteConfigs).length;
+const ROLE_GROUP_COUNT = 8;
 
 const businesses = [
     { id: "madleague", name: "MADLeague", role: "전국 대학생 동아리 연합", category: "Community", tags: ["wio", "yio"],
@@ -84,8 +88,8 @@ const synergyChains = [
 ];
 
 const stats = [
-    { value: "23", label: "브랜드", desc: "독립적으로 운영되는 사업" },
-    { value: "14", label: "WIO 모듈", desc: "공유 IT 인프라" },
+    { value: String(BRAND_COUNT), label: "브랜드", desc: "독립적으로 운영되는 사업" },
+    { value: String(ROLE_GROUP_COUNT), label: "역할 그룹", desc: "기능별 분류" },
     { value: "3", label: "핵심 자원", desc: "사람 · 돈 · 시간" },
     { value: "∞", label: "시너지", desc: "브랜드 간 연결 가치" },
 ];
@@ -263,30 +267,6 @@ export default function UniversePage() {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Upcoming brands */}
-                <section className="mb-16">
-                    <p className="text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: "var(--tn-text-sub)" }}>
-                        Coming Soon &mdash; 준비 중인 브랜드
-                    </p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
-                        {[
-                            { name: "domo", desc: "시니어 네트워킹" },
-                            { name: "FWN", desc: "패션 네트워크" },
-                            { name: "MoNTZ", desc: "포토그래피" },
-                            { name: "Myverse", desc: "AI 에이전트" },
-                            { name: "Townity", desc: "로컬 커뮤니티" },
-                            { name: "Seoul360", desc: "서울 관광 가이드" },
-                            { name: "Mullaesian", desc: "동남아 로컬" },
-                            { name: "Trend Hunter", desc: "트렌드 헌팅" },
-                        ].map(b => (
-                            <div key={b.name} className="p-3 text-center opacity-40" style={{ backgroundColor: "var(--tn-bg)" }}>
-                                <div className="text-[11px] font-light">{b.name}</div>
-                                <div className="text-[9px] mt-0.5">{b.desc}</div>
                             </div>
                         ))}
                     </div>
