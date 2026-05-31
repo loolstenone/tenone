@@ -1,6 +1,56 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-05-28 (세션 154 — TenOne.biz 본사이트 정직성·정합성 회복 1차)
+> 마지막 업데이트: 2026-06-01 (세션 155 — OpenClaw 코드 제거 + 유니버스 현황 진단)
+
+---
+
+## 세션 155 핵심 성과 (2026-05-31~06-01)
+
+### 장소·운영
+
+- 시작: 워크트리 `interesting-chaum-afed61` (master 동기화 base = 세션 154 `6bf97943`)
+- 종료: master ff-merge, push 1회 예정
+- 코드 변경 = OpenClaw 제거(16파일) + agent-tab 폴링 정리. 브랜드 route group 무변경 → 브랜드 CLAUDE.md 갱신 불필요
+
+### ① OpenClaw 연결 코드 전체 제거 (`3e0eed05`)
+
+사용자 지시 "오픈클로 연결된거 다 삭제 최소". OpenClaw 게이트웨이·KakaoTalk 봇 연동만 제거, Ollama 직접 호출(`lib/agent/claude.ts` local_endpoint 경로)은 범용 인프라로 보존.
+
+- 삭제: `local-agent-bridge/` 전체(Supabase Realtime↔로컬AI 브릿지 데몬) · `app/api/agent/deutbot/`(KakaoTalk webhook+listen) · `app/api/messenger/local-status/`(로컬 에이전트 상태 체크)
+- 15 files, 1646 deletions
+
+### ② agent-tab 죽은 로컬상태 폴링 제거 (`986c454d`)
+
+①의 후속. `app/intra/myverse/messenger/agent-tab.tsx`가 삭제된 `/api/messenger/local-status`를 30초마다 폴링 → 죽은 코드. 폴링 기계(state·useEffect·fetch·RefreshCw) 제거, 로컬 AI(Ollama) 표시 섹션 자체는 보존 (isOnline=false 기본). 1 file, -40 lines.
+
+> `deutbot` 잔재(invoke/route.ts L40·L93)는 **정상** — 에이전트 프로필 기반 라우팅(invokeAgent 경유)이라 삭제한 webhook route와 무관.
+
+### ③ 유니버스 현황 진단 (코드 변경 없음)
+
+전수 지표 수집 + SSOT 정착도 + 블로커 분석. 결과:
+
+- **건강**: SSOT 정착 ~92% (UtilityBar 31헤더·MobileMenu 26·Footer 24브랜드·MyProfileCard 22/24), `UniverseMembership` 잔존 0, 정적 metadata 위반 0
+- **P0 블로커**: PAT 401 (Edge Function 3개 + SQL 2건 + Mindle 뉴스레터 자동화 전부 정체)
+- **P1 데이터**: brands 테이블 시드 미실행 (staticBrands fallback 의존)
+- **P2 코드건강**: `tsc --noEmit` 힙 OOM 크래시(타입 게이트 미작동, `NODE_OPTIONS=--max-old-space-size=8192` 필요) · console.* 481(273파일) · any 172(104파일) · "준비 중" 직접텍스트 59곳(전수 triage 필요)
+- **P3 문서드리프트**: CLAUDE.md §1.9.4 UniverseFooter "차기 세션 점진 적용"은 이미 24개 완료 → stale
+
+### ④ PAT 401 재진단 (미해소 — 사용자 토큰 발급 대기)
+
+`.env.local` SUPABASE_ACCESS_TOKEN: 44자 `sbp_` 접두사(형식 정상)인데 `/v1/projects` HTTP 401 → revoke/rotate된 죽은 토큰. **사용자가 새 PAT 발급 시 즉시: .env.local 교체 → 재검증 → Edge Function 3개 deploy + SQL 2건 실행.**
+
+---
+
+## 🎯 다음 세션 첫 액션
+
+1. **PAT 새 토큰 받기** (https://supabase.com/dashboard/account/tokens → Generate) → `.env.local` SUPABASE_ACCESS_TOKEN 교체 → `curl -H "Authorization: Bearer $TOKEN" https://api.supabase.com/v1/projects`로 200 확인
+2. PAT 풀리면 즉시:
+   - `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
+   - `npx supabase functions deploy mindle-metrics-compute --project-ref ziotlxkdctlhiwkgmmsh`
+   - `npx supabase functions deploy mindle-newsletter-draft --project-ref ziotlxkdctlhiwkgmmsh`
+   - `sql/mindle-newsletter-draft-cron.sql` + `sql/mindle-student-uc.sql` 실행
+3. (토큰 없이 가능) 타입 게이트 복구 — tsc OOM → `NODE_OPTIONS` 메모리 상향 후 1회 완주, 실제 타입 에러 노출
+4. CLAUDE.md §1.9.4 stale 메모 정정 (Footer 마이그레이션 완료 반영)
 
 ---
 

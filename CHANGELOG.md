@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-06-01 (세션 155) — OpenClaw 코드 제거 + 유니버스 현황 진단
+
+### 장소·운영
+
+- 시작: 워크트리 `interesting-chaum-afed61` (master base = 세션 154 `6bf97943`)
+- 종료: master ff-merge, push 1회
+- 코드 2 commit (`3e0eed05`, `986c454d`) + 관리파일/문서 commit + 이전 세션 GRANT 정책 보존 commit
+
+### 변경 내역
+
+#### OpenClaw 연결 코드 전체 제거 (`3e0eed05`)
+- 삭제: `local-agent-bridge/` 전체 · `app/api/agent/deutbot/`(webhook+listen) · `app/api/messenger/local-status/`
+- 15 files, 1646 deletions. Ollama 직접 호출 경로(`lib/agent/claude.ts`)는 범용 인프라로 보존
+- 사용자 지시 "오픈클로 연결된거 다 삭제 최소" — OpenClaw 특화 코드만 정밀 제거
+
+#### agent-tab 죽은 폴링 정리 (`986c454d`)
+- `app/intra/myverse/messenger/agent-tab.tsx` — 삭제된 local-status 엔드포인트 30초 폴링 제거 (-40 lines), 로컬 AI 표시 보존
+
+#### 유니버스 현황 진단 (분석, 코드 무변경)
+- SSOT 정착 ~92% 확인 · PAT 401이 최대 단일 블로커로 식별 · tsc 힙 OOM으로 타입 게이트 미작동 발견 · UniverseFooter 마이그레이션 사실상 완료(문서 stale)
+
+#### PAT 401 재진단 (미해소)
+- SUPABASE_ACCESS_TOKEN revoke 확인 → 사용자 새 토큰 발급 대기. Mindle 자동화 전체가 이 토큰에 묶여 정체
+
+#### (이전 세션) Supabase GRANT 정책 보존
+- `CLAUDE.md` 부록 D — 2026-10-30 public 스키마 Data API GRANT 필수 정책 문서화
+- `sql/grant-public-tables-migration.sql` — 기존 테이블 GRANT 일괄 마이그레이션 (2026-10-30 이전 1회 실행 필요)
+- ⚠️ 세션 155 시작 시점에 미커밋 상태로 발견 → 유실 방지 위해 별도 commit으로 보존
+
+---
+
 ## 2026-05-28 (세션 154) — TenOne.biz 본사이트 정직성·정합성 회복 1차
 
 ### 장소·운영
