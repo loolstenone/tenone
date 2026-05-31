@@ -1,19 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { Bot, Cloud, Monitor, ChevronRight, RefreshCw } from "lucide-react";
+import { Bot, Cloud, Monitor, ChevronRight } from "lucide-react";
 import type { AgentProfileExtended } from "@/types/messenger";
 
 interface AgentTabProps {
     agents: AgentProfileExtended[];
     selectedAgentDM: string | null;
     onSelectAgent: (agent: AgentProfileExtended) => void;
-}
-
-interface LocalStatus {
-    name: string;
-    is_online: boolean;
 }
 
 const layerLabels: Record<number, string> = {
@@ -33,34 +27,6 @@ const layerColors: Record<number, string> = {
 export default function AgentTab({ agents, selectedAgentDM, onSelectAgent }: AgentTabProps) {
     const cloudAgents = agents.filter(a => a.runtime !== 'local');
     const localAgents = agents.filter(a => a.runtime === 'local');
-
-    // 로컬 AI 상태 폴링
-    const [localStatuses, setLocalStatuses] = useState<Map<string, boolean>>(new Map());
-    const [checking, setChecking] = useState(false);
-
-    const checkLocalStatus = async () => {
-        setChecking(true);
-        try {
-            const res = await fetch('/api/messenger/local-status');
-            if (res.ok) {
-                const data = await res.json();
-                const statusMap = new Map<string, boolean>();
-                for (const agent of (data.agents || []) as LocalStatus[]) {
-                    statusMap.set(agent.name, agent.is_online);
-                }
-                setLocalStatuses(statusMap);
-            }
-        } catch { /* ignore */ }
-        setChecking(false);
-    };
-
-    useEffect(() => {
-        if (localAgents.length > 0) {
-            checkLocalStatus();
-            const interval = setInterval(checkLocalStatus, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [localAgents.length]);
 
     return (
         <div className="py-1">
@@ -85,10 +51,6 @@ export default function AgentTab({ agents, selectedAgentDM, onSelectAgent }: Age
                     <div className="px-3 py-2 mt-1 text-[10px] text-neutral-400 uppercase tracking-wider flex items-center gap-1 border-t border-neutral-100">
                         <Monitor className="h-3 w-3" />
                         로컬 AI (PC)
-                        <button onClick={checkLocalStatus} disabled={checking}
-                            className="ml-auto p-0.5 hover:bg-neutral-100 rounded transition-colors">
-                            <RefreshCw className={clsx("h-2.5 w-2.5 text-neutral-400", checking && "animate-spin")} />
-                        </button>
                     </div>
                     {localAgents.map(agent => (
                         <AgentRow
@@ -96,7 +58,7 @@ export default function AgentTab({ agents, selectedAgentDM, onSelectAgent }: Age
                             agent={agent}
                             isSelected={selectedAgentDM === agent.name}
                             onSelect={() => onSelectAgent(agent)}
-                            isOnline={localStatuses.get(agent.name) ?? false}
+                            isOnline={false}
                         />
                     ))}
                 </>
