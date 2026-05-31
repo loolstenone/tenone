@@ -1110,6 +1110,7 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 - [ ] RLS 정책이 `brand_id`/`tenant_id` 기반인가?
 - [ ] 외부 기업이 써도 작동하는가?
 - [ ] 맞춤 서비스에서 나온 기능이라면, 규격 서비스로 환류 가능한가?
+- [ ] SQL 파일 끝에 **GRANT 블록** 포함? (부록 D 참조 — 2026-10-30 정책 변경)
 
 ---
 
@@ -1513,9 +1514,29 @@ grep -rn 'TODO\|FIXME' src | wc -l
   - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
 
 **새 테이블 워크플로우:**
-1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + 시드)
+1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + **GRANT** + 시드)
 2. `scripts/run-sql.js`에 추가 또는 직접 실행
 3. Dashboard 접속 요청 불필요
+
+### ⚠️ GRANT 필수 — Supabase 2026-10-30 정책 변경
+
+> 2026-10-30부터 public 스키마 테이블이 PostgREST/supabase-js에 **자동 노출되지 않음**.
+> 모든 신규 테이블 SQL 파일 끝에 아래 GRANT 블록을 반드시 포함해야 한다.
+
+```sql
+-- ✅ 모든 신규 테이블 SQL 필수 — GRANT 블록 (테이블명 교체)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.table_name TO authenticated;
+GRANT SELECT ON public.table_name TO anon;
+GRANT ALL ON public.table_name TO service_role;
+```
+
+| 역할 | 부여 권한 | 이유 |
+|------|----------|------|
+| `authenticated` | SELECT·INSERT·UPDATE·DELETE | 로그인 사용자 DML (RLS가 행 단위 통제) |
+| `anon` | SELECT | 비로그인 공개 읽기 (RLS가 실제 노출 여부 결정) |
+| `service_role` | ALL | Edge Function / 서버 백엔드 전체 권한 |
+
+**기존 테이블 일괄 마이그레이션**: `sql/grant-public-tables-migration.sql` → 2026-10-30 이전 1회 실행 필요.
 
 ---
 
