@@ -7,6 +7,7 @@
 
 ```
 CLAUDE.md                          # [지금 이 파일] 유니버스 공통 가이드
+docs/Universe_Triage_2026-06.md    # ⭐ 포트폴리오 Tier 분류 + 북극성 지표 SSOT
 app/(BrandName)/CLAUDE.md          # 브랜드별 가이드 (26+ 개, 자동 로드)
 ROADMAP.md                         # 전체 로드맵
 WORK_STATUS.md                     # 현재 진행 상황
@@ -106,6 +107,34 @@ public/            # 정적 파일
 sql/               # SQL 마이그레이션 파일
 docs/              # 설계 문서
 ```
+
+---
+
+# 0.5 포트폴리오 Tier 정책 (2026-06-10 재구조화 — 최우선 규칙)
+
+> **배경**: 실측 진단 결과 — 코드 35.6만 줄·공개 페이지 510개·API 492개 대비 **최근 30일 실사용자 1명**.
+> 수요 검증 없는 공급 과잉이 확인되어 포트폴리오를 3-Tier로 공식 동결했다.
+> 상세 진단·분류 근거: [docs/Universe_Triage_2026-06.md](docs/Universe_Triage_2026-06.md) ← **SSOT**
+
+## Tier 분류
+
+| Tier | 브랜드 | 정책 |
+|---|---|---|
+| **T1 운영** | TenOne · MADLeap · MADLeague · Badak · HeRo · Myverse | 개발 허용 — 단, 북극성 지표 기여 작업만 |
+| **T2 유지** | SmarComm · BrandGravity · Jakka · MoNTZ | 버그 수정만, 신규 기능 동결 |
+| **T3 동결** | 0gamja · ChangeUp · Domo · EvoSchool · FWN · LUKI · Mullaesian · NamingFactory · NatureBox · Planner's · RooK · Seoul360 · Townity · YouInOne · TrendHunter | 개발 전면 중단 (빌드 수리 제외), 코드 보존 |
+| **특수** | Mindle (T3-auto: 크론만 자동 가동) · WIO (인트라 백본만, 외부판매 보류) · Wiki/Dokdae/Intra (내부 인프라) | 현상 유지 |
+
+## 개발 게이트 5원칙
+
+1. **새 페이지·기능은 T1 북극성 지표에 직접 기여할 때만** 만든다. "있으면 좋은 것"은 만들지 않는다.
+2. **새 브랜드 추가 전면 금지** (2026년 내). 새 아이디어는 코드가 아니라 노트에 적는다.
+3. **T3 코드 수정 금지** (빌드 수리 제외). T2는 버그 수정만.
+4. **인프라 일반화 작업 동결** — UC 고도화·capability 확장·테넌트 격리 강화 등은 실사용자 100명 도달까지 보류.
+5. **세션 브리핑에 "이 작업이 어느 Tier·어느 지표에 기여하는가" 명시.** 답할 수 없으면 작업하지 않는다.
+
+> 핵심 문장: **"실사용자 행동이 측정되기 전에는 새 페이지를 만들지 않는다."**
+> § 2.4 새 브랜드 추가 체크리스트는 게이트 2에 의해 2026년 내 사용 금지.
 
 ---
 
@@ -1084,9 +1113,9 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 - ❌ 정책 링크 누락
 - ❌ 푸터에서 GTM/script 직접 삽입 (`Analytics.tsx`가 전담)
 
-### 마이그레이션 (기존 21개 푸터 → UniverseFooter)
+### 마이그레이션 상태
 
-차기 세션에서 brand 별로 점진 적용. 기존 푸터의 콘텐츠를 `linkColumns`와 `children`(상단 슬롯)으로 매핑하면 끝.
+✅ 완료 (2026-06-01 세션 155 진단 — 24개 브랜드 적용 확인). 신규 푸터는 처음부터 `UniverseFooter` 사용.
 
 ---
 
@@ -1233,6 +1262,8 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 ---
 
 ## 2.4 새 브랜드 추가 체크리스트
+
+> ⛔ **§ 0.5 게이트 2에 의해 2026년 내 신규 브랜드 추가 금지.** 이 체크리스트는 동결 해제 후 참고용으로만 보존.
 
 - [ ] `lib/site-config.ts` → `siteConfigs`에 추가 + `SiteIdentifier` 타입에 추가
 - [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가 (독립 도메인일 경우)

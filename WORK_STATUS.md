@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-06-01 (세션 155 — OpenClaw 코드 제거 + 유니버스 현황 진단)
+> 마지막 업데이트: 2026-06-10 (세션 156 — 유니버스 전면 재구조화: 3-Tier 동결)
+
+---
+
+## 세션 156 핵심 성과 (2026-06-10)
+
+### 장소·운영
+
+- 시작: master `git pull` Already up to date (base = 세션 155 `c18898e5`)
+- 코드 변경 0 — 문서·정책 재구조화 세션
+
+### ① Supabase MCP 검증 — PAT 401 블로커 우회 확보
+
+- `.env.local` PAT는 따옴표 제거 후에도 401 (토큰 자체 revoke 확정)
+- **Supabase MCP 연결 정상** (`get_project` ACTIVE_HEALTHY) — SQL 실행·Edge Function 배포 모두 MCP로 가능. 세션 153부터의 P0 블로커 사실상 해소
+
+### ② 유니버스 전면 진단 (실측)
+
+- 공급: 코드 356,476줄 · API 492개 · 인트라 319p · 공개 ~510p (29 브랜드)
+- 수요: **최근 30일 로그인 1명(운영자)** · badak_profiles 0 · career_profiles 0 · mad_applications 1 · 30일 게시글 0 · UC 거래 1
+- 코드량과 실사용 완전 역상관 (WIO 143p/테넌트 0, HeRo 54p/프로필 0)
+- 살아있는 자산 3: Whole See→Mindle 파이프라인(자동) · MADLeap/MADLeague(실조직) · Myverse(본인 도구)
+- 상세: [docs/Universe_Triage_2026-06.md](docs/Universe_Triage_2026-06.md)
+
+### ③ 사용자 의사결정: 포트폴리오 3-Tier 동결
+
+- T1 운영(6): TenOne·MADLeap·MADLeague·Badak·HeRo·Myverse — 북극성 지표 기여 작업만
+- T2 유지(4): SmarComm·BrandGravity·Jakka·MoNTZ — 버그 수정만
+- T3 동결(15+): 나머지 — 개발 전면 중단, 코드 보존
+- 특수: Mindle T3-auto(크론만) · WIO 인트라 백본만 · Wiki/Dokdae 내부
+- 개발 게이트 5원칙 도입 — "실사용자 행동이 측정되기 전에는 새 페이지를 만들지 않는다"
+
+### ④ 문서 재구조화
+
+- 신규: `docs/Universe_Triage_2026-06.md` (Tier·북극성 지표 SSOT)
+- `CLAUDE.md` § 0.5 Tier 정책 신설 + § 2.4 신규 브랜드 금지 게이트 + § 1.9.4 Footer stale 정정
+- `ROADMAP.md` 전면 재작성 — T1 북극성 로드맵 + 동결 항목 표(재개 조건 명시)
+- 기존 이월 작업 중 Mindle 뉴스레터 배포·SmarComm Phase 4·Planner's P3+ 등은 **동결 항목**으로 이동 (재개 조건 충족 시 부활)
+
+## 🎯 다음 세션 첫 액션 (세션 156 기준)
+
+1. **MADLeap 가입 동선 e2e 점검** — T1 최우선. madleap 가입 → mad_applications 기록까지 실흐름 1회 완주, 깨진 곳 수리
+2. **MADLeague·Badak is_open 오픈 준비** — 콘텐츠 정직성 최종 점검 후 토글 (T1인데 외부 차단 상태 해소)
+3. **tsc OOM 타입 게이트 복구** — `NODE_OPTIONS=--max-old-space-size=8192`로 1회 완주, 실타입 에러 노출 (기술 부채)
+4. **HeRo 퍼널 결정** — 54페이지 중 단일 핵심 행동(상담 신청 권장) 사용자 확정 필요
+5. 30일 후(2026-07-10) Tier 재평가 — 북극성 지표 실측 판정
 
 ---
 
