@@ -1,4 +1,5 @@
 -- Supabase 2026-10-30 정책 대응: public 스키마 Data API GRANT 일괄 적용
+-- ✅ 운영 DB 적용 완료: 2026-10-04 (세션 156)
 -- 배경: 2026-05-30부터 신규 프로젝트, 2026-10-30부터 기존 프로젝트도
 --       public 스키마 테이블이 PostgREST/supabase-js에 자동 노출되지 않음.
 --       명시적 GRANT 없으면 Data API에서 테이블 접근 불가.
