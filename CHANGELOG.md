@@ -42,6 +42,10 @@
 - 연결: LoginModal · /login · /signup · /reset-password · intra layout · Dokdae · WIO login · UniverseProfile 비밀번호 변경
 - `.env.example` NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
+#### 배포 후 핫픽스
+- `components/IntraHeader.tsx` 로그아웃: `logout()` 미대기 상태로 `window.location` 이동 → signOut·쿠키삭제 전에 페이지 이탈해 세션 유지되던 버그 → `await logout()`
+- `features/tenone/PublicHeader.tsx` `hideAuth={true}` 제거 — TenOne 본사이트 우측 상단에 로그인·아바타·알림·로그아웃 미노출 (§1.9.2 표준 위반, 04-26 e54c100d부터)
+
 #### 외부 설정 (사용자 수행)
 - Cloudflare 계정·Turnstile 위젯 hostname 5개 정리 / Vercel 2FA 설정 / Vercel env 사이트키 등록 · Needs Attention 비밀값 Secret 전환
 

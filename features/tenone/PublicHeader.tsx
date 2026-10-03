@@ -78,7 +78,6 @@ export function PublicHeader() {
                     <UniverseUtilityBar
                         aboutPath="/about"
                         hideAbout={true}
-                        hideAuth={true}
                         accentColor={isDark ? '#fff' : '#000'}
                         siteId="tenone"
                         siteName="Ten:One"
