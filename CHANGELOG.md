@@ -4,6 +4,52 @@
 
 ---
 
+## 2026-10-04 (세션 156) — 보안 긴급 점검·조치
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61` (base `c18898e5`) → master ff push 1회
+- 코드 3 commit (`7df80807` API 게이트 · `960edf60` CAPTCHA · `79d179b4` DB SQL 기록) + 관리파일 commit
+- 운영 DB 직접 적용 3건 (Supabase MCP): GRANT 마이그레이션 · members 권한 보호 트리거 · fn_auto_member_brand_join DEFINER
+- 사용자 결정: 집중 사이트 5개 (MADLeague·TenOne·HeRo·SmarComm·Badak)
+
+### 진단 (실측)
+
+- 페이지 845 · API 492 · 코드 38.6만 줄 · 브랜드 27 / service_role API 329 / middleware `/api` skip
+- npm audit: critical 1 · high 22 · moderate 14 (미조치)
+- Supabase advisor: security_definer_view 9 · anon 실행 DEFINER 함수 49 · search_path 미고정 91 · 유출 비번 차단 OFF
+- auth.users 226 = 실가입자 0 (본인·내부 4·더미 20·봇 201 — 무작위 이름, 실존 타인 이메일로 인증메일 발송 = 메일 폭탄 악용)
+
+### 변경 내역
+
+#### API 인증 게이트
+- 신규 `lib/api-guard.ts`, `lib/api-access-policy.ts` / `middleware.ts` 0-API 게이트 (70 경로 직원 전용)
+- HeRo 15 route 본인·소유 row 검증, `talent-agent/apply` member_id 세션 기반
+- `app/api/madleague/admin/_auth.ts` requireIntraAdmin → requireStaff
+- `lib/myverse/intra-auth.ts` member_roles 잘못된 컬럼(user_id→member_id), members.email/roles 신뢰 제거
+- gravity scan/brand-value · cron/analytics-sync 내부 fetch에 `internalAuthHeaders()`
+- `app/(SmarComm)/smarcomm/dashboard/layout.tsx` BETA_EMAILS → `SMARCOMM_BETA_EMAILS` 공유
+
+#### 권한 상승 차단 (DB)
+- `sql/protect-member-privileged-columns.sql` — BEFORE INSERT/UPDATE 트리거, anon 쓰기 권한 회수
+
+#### 회원 생성 복구 (DB)
+- `sql/fix-member-brand-join-definer.sql` — 3월 이후 모든 일반 가입자 members INSERT가 RLS로 롤백되던 원인
+
+#### CAPTCHA
+- 신규 `components/CaptchaWidget.tsx` (Turnstile, interaction-only, 1회용 토큰 재발급)
+- `lib/auth-context.tsx` login/register/resetPassword captchaToken 인자
+- 연결: LoginModal · /login · /signup · /reset-password · intra layout · Dokdae · WIO login · UniverseProfile 비밀번호 변경
+- `.env.example` NEXT_PUBLIC_TURNSTILE_SITE_KEY
+
+#### 외부 설정 (사용자 수행)
+- Cloudflare 계정·Turnstile 위젯 hostname 5개 정리 / Vercel 2FA 설정 / Vercel env 사이트키 등록 · Needs Attention 비밀값 Secret 전환
+
+#### 문서
+- CLAUDE.md 부록 A에 API 인증·권한 판단 금지 규칙 / 브랜드 CLAUDE.md (SmarComm·Dokdae·WIO) / 메모리 `project_focus_sites`
+
+---
+
 ## 2026-06-01 (세션 155) — OpenClaw 코드 제거 + 유니버스 현황 진단
 
 ### 장소·운영

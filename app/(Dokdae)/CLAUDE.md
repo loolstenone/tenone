@@ -57,6 +57,7 @@
 | 항목 | 내용 |
 |------|------|
 | **Phase** | Beta — Universe 단체방 MVP 가동 (2026-05-17) |
+| **최근 (세션 156)** | LoginScreen 비밀번호 로그인에 Turnstile CAPTCHA 연결 (`components/CaptchaWidget.tsx`). Supabase Bot Protection ON 이후엔 captchaToken 없으면 로그인 불가 — 새 로그인 폼 만들 때 반드시 `useCaptcha()` 사용. |
 | **이월 작업** | (1) staff 권한 사용자 실 LLM 호출 E2E 검증, (2) 단체방 메시지 ↔ chat_threads/chat_messages 마이그레이션, (3) 라우터 결정 이력 분석 패널 |
 
 ## 운영 모드 (2개)

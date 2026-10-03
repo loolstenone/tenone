@@ -1468,6 +1468,12 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ RLS disabled 테이블 생성
 - ❌ `tenant_id` / `brand_id` 없는 신규 테이블
 - ❌ 프론트엔드에 `service_role` 키 노출
+- ❌ `createAdminClient()`(service_role) 쓰는 API에 인증 없이 쓰기 허용 — 반드시 `lib/api-guard.ts`의 `requireUser/requireMember/requireStaff` 사용. 관리·운영·AI실행 API는 `/api/intra/*` 또는 `/api/{x}/admin/*`에 두거나 `lib/api-access-policy.ts`에 등록 (middleware가 직원 전용 강제)
+- ❌ 요청 body/query의 `memberId`를 그대로 신뢰 — `assertSelf()`/`assertOwnsRow()`로 세션 소유권 검증
+- ❌ 권한 판단에 `members.roles`·`account_type`·`email` 사용 — 본인이 수정 가능한 컬럼. `member_roles`(staff만 쓰기) 또는 인증된 auth 이메일만
+- ❌ 서버 → 자기 API 내부 fetch에 인증 헤더 누락 — `internalAuthHeaders()` (ADMIN_API_KEY)
+- ❌ 비밀번호 인증 폼(signUp·signInWithPassword·resetPasswordForEmail)에 CAPTCHA 누락 — `useCaptcha()` + `captchaToken` (Supabase Bot Protection ON 시 토큰 없으면 실패)
+- ❌ 트리거 함수가 RLS 걸린 다른 테이블에 쓰는데 SECURITY INVOKER — 사용자 INSERT 전체가 롤백됨 (세션 156 members 생성 장애 원인)
 
 ### 프로필·메타
 - ❌ `UniverseMembership` 사용 (레거시)

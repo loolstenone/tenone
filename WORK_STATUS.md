@@ -1,6 +1,55 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-06-01 (세션 155 — OpenClaw 코드 제거 + 유니버스 현황 진단)
+> 마지막 업데이트: 2026-10-04 (세션 156 — 보안 긴급 점검·조치: API 게이트·권한상승 차단·회원생성 수정·CAPTCHA)
+
+---
+
+## 세션 156 핵심 성과 (2026-10-04) — 보안 긴급 점검·조치
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61` (base = 세션 155 `c18898e5`), master ff push 1회
+- 사용자 결정: **집중 사이트 5개 = MADLeague · TenOne · HeRo · SmarComm · Badak** (나머지 후순위)
+- 사실 확인: **실가입자 0명** — auth.users 226 = 본인 1 · 내부 구글 4 · jakka 더미 20 · 봇 201
+
+### ① API 인증 게이트 (`7df80807`)
+
+- 진단: API 492개 중 329개가 service_role(RLS 우회), middleware는 `/api` 전체 skip → 무인증 쓰기 API ~62개
+- `lib/api-guard.ts` 신설 (쿠키·Bearer·내부키 ADMIN_API_KEY/CRON_SECRET) — requireUser/Member/Staff, assertSelf, assertOwnsRow
+- `lib/api-access-policy.ts` + middleware: 70개 경로 직원 전용 (/api/intra·admin·*/admin·gravity(apply 제외)·smarcomm 대시보드·ums·external·analytics sync·hero/matching 큐레이션)
+- HeRo 15 route memberId 위조 차단 · madleague requireIntraAdmin(회원이면 통과하던 버그) · gravity·analytics 내부 체인에 ADMIN_API_KEY 헤더
+- 검증: 비로그인·위조토큰 14건 401, 내부키 200, 공개 경로 정상
+
+### ② 권한 상승 구멍 차단 (DB 적용 완료)
+
+- 진단: members RLS가 본인 row 컬럼 제한 없이 UPDATE/INSERT 허용 → `account_type='staff'` 자가 설정 시 `is_tenone_staff()` true (전 회원 조회·수정·삭제)
+- `sql/protect-member-privileged-columns.sql` 트리거 적용 — 비직원은 권한 컬럼 원복/기본값 강제. 롤백 트랜잭션으로 공격 차단·직원 정상 검증
+- 코드도 `members.roles/account_type/email` 신뢰 제거 (member_roles + 인증된 auth 이메일만)
+
+### ③ 회원 생성 고장 원인 수정 (DB 적용 완료)
+
+- `fn_auto_member_brand_join` INVOKER → member_brand_joins RLS에 막혀 **일반 사용자 members INSERT 전부 롤백** (3월 이후 225명 무 row)
+- SECURITY DEFINER 전환 (`sql/fix-member-brand-join-definer.sql`), 가입 시뮬레이션 성공
+
+### ④ CAPTCHA (`960edf60`) — 봇 가입 201건 대응
+
+- Cloudflare Turnstile 위젯 `Ten:One™` (site key `0x4AAAAAABYayJHKZn1Q1DxQ`, hostnames: tenone.biz·madleague.net·hero.ne.kr·smarcomm.biz·badak.biz)
+- `components/CaptchaWidget.tsx` + 비밀번호 인증 8곳 전부 captchaToken 전달. 사이트키 없으면 기존 동작 (무중단 전환)
+- Vercel env `NEXT_PUBLIC_TURNSTILE_SITE_KEY` 등록 완료. ADMIN_API_KEY·CRON_SECRET 등 Needs Attention 변수 Secret 전환 (사용자)
+
+### ⑤ GRANT 마이그레이션 (DB 적용 완료) — 10-30 마감 대응, 483 테이블 전부 RLS ON 확인 후 실행
+
+---
+
+## 🎯 다음 세션 첫 액션
+
+1. **배포 확인**: tenone.biz/login에서 Turnstile 위젯 로드·토큰 발급 확인 (실 사이트키는 localhost 미등록이라 로컬 검증 불가) + **직원 로그인 상태로 인트라 HeRo 매칭·Gravity·SmarComm 대시보드 동작 확인** (게이트 후 미검증)
+2. **Supabase CAPTCHA ON (사용자)**: Authentication → Attack Protection → Turnstile + Secret Key. ⚠️ 1번 확인 후에. ON 이후 위젯 미등록 도메인(myverse.kr·0gamja·youinone·fwn·changeup)은 로그인 불가 — 집중 대상 아님으로 수용
+3. **봇 계정 201건 정리**: 삭제 ID 목록 생성 → 사용자가 Dashboard에서 삭제 (auth.users는 Claude 삭제 금지). jakka 더미 20개 존치 여부 결정 대기
+4. `npm audit` critical 1·high 22 정리
+5. 2단계 규모 축소: 집중 5개 외 브랜드 API 비활성/보관 범위 결정
+6. 후속 보안: `/api/auth/handle-login`(핸들→이메일 노출) · 크론 27곳 `if (CRON_SECRET && …)` fail-open · `hero/tih` email upsert 덮어쓰기 · messenger action-callback 상대URL 버그 · DB security_definer 뷰 9 · anon 실행 가능 DEFINER 함수 49 · 유출 비밀번호 차단 OFF
+7. ESLint 설정 없음 (`eslint.config.js` 부재) → lint 미작동. tsc는 `NODE_OPTIONS=--max-old-space-size=8192`로 완주 (기존 에러 158줄, 대부분 로컬 `@anthropic-ai/sdk` 미설치)
 
 ---
 

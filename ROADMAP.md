@@ -1,8 +1,24 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-05-28 (세션 154 — TenOne.biz 본사이트 정직성·정합성 회복 1차)
+> 마지막 업데이트: 2026-10-04 (세션 156 — 보안 긴급 점검·조치)
 
 ---
+
+## 🔒 보안·안정화 (세션 156 시작 — 집중 5개 사이트: MADLeague·TenOne·HeRo·SmarComm·Badak)
+
+- [x] API 인증 게이트 — middleware + `lib/api-guard.ts` (무인증 service_role 쓰기 API ~62 차단)
+- [x] HeRo memberId 위조 차단 (15 route)
+- [x] members 권한 컬럼 자가 상승 차단 트리거 (DB)
+- [x] 회원 생성 실패 원인 수정 (fn_auto_member_brand_join DEFINER)
+- [x] GRANT 마이그레이션 (2026-10-30 마감 대응)
+- [x] Turnstile CAPTCHA 코드 연결 (8곳) + Vercel 사이트키
+- [ ] 배포 후 실사이트 위젯 확인 + 직원 로그인 인트라 회귀 확인
+- [ ] Supabase Bot Protection ON (사용자, 배포 확인 후)
+- [ ] 봇 계정 201 정리 (사용자 Dashboard) · jakka 더미 20 결정
+- [ ] npm audit critical 1 · high 22
+- [ ] 규모 축소: 집중 5개 외 브랜드 API 비활성/보관
+- [ ] handle-login 이메일 노출 · 크론 CRON_SECRET fail-open 27곳 · security_definer 뷰 9 · anon DEFINER 함수 49 · 유출 비번 차단
+- [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
 ## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
 
