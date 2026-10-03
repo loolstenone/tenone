@@ -12,6 +12,7 @@ import { TenOneThemeWrapper } from '@/features/tenone/TenOneThemeWrapper';
 import { MadLeagueHeader } from '@/features/madleague/MadLeagueHeader';
 import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { signupHref } from '@/lib/login-href';
 
 // Open Redirect 방어 — 반드시 상대 경로(/)로 시작해야 함
@@ -27,6 +28,7 @@ function safeRedirect(raw: string | null, fallback = '/'): string {
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
     const { login, isAuthenticated, isLoading } = useAuth();
+    const captcha = useCaptcha();
     const searchParams = useSearchParams();
     const router = useRouter();
     const [email, setEmail] = useState('');
@@ -71,8 +73,10 @@ function SmarCommLoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         try {
-            await login(email, password);
+            await login(email, password, captcha.token);
+            captcha.reset();
             router.push(redirectTo);
         } catch { setError('이메일 또는 비밀번호가 올바르지 않습니다'); }
     };
@@ -101,6 +105,7 @@ function SmarCommLoginForm() {
                                 </button>
                             </div>
                         </div>
+                        <CaptchaWidget {...captcha.widgetProps} />
                         <button type="submit" className="w-full bg-neutral-900 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">로그인</button>
                     </form>
                     <div className="mt-6">
@@ -136,6 +141,7 @@ function LoginForm() {
     const searchParams = useSearchParams();
     const redirectTo = safeRedirect(searchParams.get('redirect'));
     const { login, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading, user } = useAuth();
+    const captcha = useCaptcha();
     const { site, siteId, isMadLeague } = useSite();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -172,9 +178,11 @@ function LoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            const result = await login(email, password);
+            const result = await login(email, password, captcha.token);
+            captcha.reset();
             if (result.success) {
                 if (isSubdomain) {
                     router.push(redirectTo !== '/' ? redirectTo : '/');
@@ -233,6 +241,7 @@ function LoginForm() {
                                 <div className="border border-red-500/30 bg-red-500/10 rounded px-4 py-3 text-sm text-red-400">{error}</div>
                             )}
 
+                            <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={isSubmitting}
                                 className="w-full flex items-center justify-center gap-2 bg-[#D32F2F] px-4 py-3 text-sm font-medium text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                 {isSubmitting ? (
@@ -326,6 +335,7 @@ function LoginForm() {
                             <div className="border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">{error}</div>
                         )}
 
+                        <CaptchaWidget {...captcha.widgetProps} />
                         <button type="submit" disabled={isSubmitting}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                             style={{ backgroundColor: buttonBg, color: buttonText }}>

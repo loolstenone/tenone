@@ -16,13 +16,13 @@ interface AuthContextType {
     canAccessIntra: boolean;
     hasAccess: (system: SystemAccess) => boolean;
     hasModuleAccess: (module: IntraModule) => boolean;
-    login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
-    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    login: (email: string, password: string, captchaToken?: string) => Promise<{ success: boolean; error?: string; user?: User }>;
+    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean, captchaToken?: string) => Promise<{ success: boolean; error?: string; memberId?: string }>;
     loginWithGoogle: () => Promise<void>;
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
     logout: () => Promise<void>;
-    resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+    resetPassword: (email: string, captchaToken?: string) => Promise<{ success: boolean; error?: string }>;
     updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -348,11 +348,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // 로그인: Supabase Auth → fallback Mock
-    const login = useCallback(async (email: string, password: string) => {
+    const login = useCallback(async (email: string, password: string, captchaToken?: string) => {
         try {
             // 20초 타임아웃 (cold start 대응)
             const authResult = await Promise.race([
-                supabase.auth.signInWithPassword({ email, password }),
+                supabase.auth.signInWithPassword({ email, password, options: { captchaToken } }),
                 new Promise<{ data: null; error: { message: string } }>((resolve) =>
                     setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 20000)
                 ),
@@ -388,13 +388,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, syncUserFromSession]);
 
     // 회원가입: Supabase Auth + members 테이블
-    const register = useCallback(async (name: string, email: string, password: string, newsletterSubscribed?: boolean) => {
+    const register = useCallback(async (name: string, email: string, password: string, newsletterSubscribed?: boolean, captchaToken?: string) => {
         try {
             // 1. Supabase Auth 가입
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { name } }
+                options: { data: { name }, captchaToken }
             });
 
             if (!error && data.user) {
@@ -525,10 +525,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 비밀번호 재설정 이메일 발송
     // redirectTo를 /auth/callback으로 보내야 서버가 PKCE code를 쿠키와 함께 교환 → /reset-password 리다이렉트
     // (/reset-password로 직접 보내면 클라이언트가 verifier 쿠키에 접근해야 하는데 브라우저/탭 따라 실패 가능)
-    const resetPassword = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
+    const resetPassword = useCallback(async (email: string, captchaToken?: string): Promise<{ success: boolean; error?: string }> => {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/auth/callback?type=recovery&next=/reset-password`,
+                captchaToken,
             });
             if (error) return { success: false, error: error.message };
             return { success: true };

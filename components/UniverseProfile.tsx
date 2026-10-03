@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { siteConfigs, type SiteIdentifier } from '@/lib/site-config';
 import { getAllServiceProfiles, type ServiceProfileData, getBadakActivity, type BadakActivityData, checkHandleAvailable } from '@/lib/supabase/universe-profile';
 import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supabase/capabilities';
@@ -372,6 +373,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     /* ── 비밀번호 변경 ── */
     const [pwdOpen, setPwdOpen] = useState(false);
     const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+    const captcha = useCaptcha();
     const [pwdError, setPwdError] = useState('');
     const [pwdSuccess, setPwdSuccess] = useState('');
     const [pwdLoading, setPwdLoading] = useState(false);
@@ -609,10 +611,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         if (!pwdForm.current) { setPwdError('현재 비밀번호를 입력하세요.'); return; }
         if (pwdForm.next.length < 6) { setPwdError('새 비밀번호는 6자 이상이어야 합니다.'); return; }
         if (pwdForm.next !== pwdForm.confirm) { setPwdError('새 비밀번호가 일치하지 않습니다.'); return; }
+        if (!captcha.ready) { setPwdError(CAPTCHA_PENDING_MESSAGE); return; }
         setPwdLoading(true);
         try {
             const sb = createClient();
-            const { error: signInErr } = await sb.auth.signInWithPassword({ email: user?.email || '', password: pwdForm.current });
+            const { error: signInErr } = await sb.auth.signInWithPassword({ email: user?.email || '', password: pwdForm.current, options: { captchaToken: captcha.token } });
+            captcha.reset();
             if (signInErr) { setPwdError('현재 비밀번호가 올바르지 않습니다.'); return; }
             const { error: updateErr } = await sb.auth.updateUser({ password: pwdForm.next });
             if (updateErr) { setPwdError(`변경 실패: ${updateErr.message}`); return; }
@@ -1007,6 +1011,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                         onChange={v => setPwdForm(f => ({ ...f, next: v }))} />
                                     <PasswordField label="새 비밀번호 확인" value={pwdForm.confirm}
                                         onChange={v => setPwdForm(f => ({ ...f, confirm: v }))} />
+                                    <CaptchaWidget {...captcha.widgetProps} />
                                     {pwdError && <p className="text-xs text-red-500">{pwdError}</p>}
                                     {pwdSuccess && <p className="text-xs text-emerald-600">{pwdSuccess}</p>}
                                     <button onClick={handlePasswordChange} disabled={pwdLoading}

@@ -9,6 +9,7 @@ import { IntraSubTabs } from "@/components/intra/IntraSubTabs";
 import { AIContextProvider } from "@/components/intra/AIContextPanel";
 import { Lock, Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 const INTRA_VERIFIED_KEY = "tenone_intra_verified";
 
@@ -27,6 +28,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const captcha = useCaptcha();
     const [showPw, setShowPw] = useState(false);
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -135,6 +137,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         async (e: React.FormEvent) => {
             e.preventDefault();
             setError("");
+            if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
             setSubmitting(true);
 
             try {
@@ -142,12 +145,13 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
                 // 20초 타임아웃 (cold start 시 10~15초 걸릴 수 있음)
                 const signInResult = await Promise.race([
-                    sb.auth.signInWithPassword({ email, password }),
+                    sb.auth.signInWithPassword({ email, password, options: { captchaToken: captcha.token } }),
                     new Promise<{ error: { message: string } }>((resolve) =>
                         setTimeout(() => resolve({ error: { message: 'timeout' } }), 20000)
                     ),
                 ]);
 
+                captcha.reset();
                 const authError = signInResult && 'error' in signInResult ? signInResult.error : null;
 
                 if (authError) {
@@ -168,7 +172,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 setSubmitting(false);
             }
         },
-        [email, password],
+        [email, password, captcha],
     );
 
     // auth 이벤트 감지: SIGNED_OUT → 로그인 폼, TOKEN_REFRESHED/SIGNED_IN → JWT fast-path 재시도
@@ -258,6 +262,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                                 {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
+                        <CaptchaWidget {...captcha.widgetProps} />
                         {error && <p className="text-xs text-red-400">{error}</p>}
                         <button
                             type="submit"

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import type { WIOTenant } from '@/types/wio';
 
 export default function WIOLoginPage() {
@@ -16,6 +17,7 @@ export default function WIOLoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   // Multi-tenant selection
   const [showTenantSelector, setShowTenantSelector] = useState(false);
@@ -23,10 +25,12 @@ export default function WIOLoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setError(''); setLoading(true);
     const sb = createClient();
     // signOut 하지 않음 — 다른 사이트 세션 유지
-    const { data: authData, error: err } = await sb.auth.signInWithPassword({ email, password });
+    const { data: authData, error: err } = await sb.auth.signInWithPassword({ email, password, options: { captchaToken: captcha.token } });
+    captcha.reset();
     if (err) { setError('이메일 또는 비밀번호가 올바르지 않습니다.'); setLoading(false); return; }
 
     // Check how many tenants this user belongs to
@@ -65,13 +69,15 @@ export default function WIOLoginPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setError(''); setLoading(true);
     if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다.'); setLoading(false); return; }
     const sb = createClient();
     const { error: err } = await sb.auth.signUp({
       email, password,
-      options: { data: { display_name: name || email.split('@')[0] } },
+      options: { data: { display_name: name || email.split('@')[0] }, captchaToken: captcha.token },
     });
+    captcha.reset();
     if (err) { setError(err.message); setLoading(false); return; }
     setSuccess('가입 완료! 이메일을 확인해주세요.');
     setLoading(false);
@@ -159,6 +165,7 @@ export default function WIOLoginPage() {
             <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="비밀번호" required
               className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none" />
 
+            <CaptchaWidget {...captcha.widgetProps} />
             {error && <p className="text-red-400 text-xs">{error}</p>}
 
             <button type="submit" disabled={loading}
