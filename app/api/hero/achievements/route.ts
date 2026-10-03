@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -12,6 +13,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") ?? "20"), 50);
     const offset = parseInt(searchParams.get("offset") ?? "0");
 
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
+    const denied = assertSelf(auth, memberId);
+    if (denied) return denied;
     if (!memberId) return NextResponse.json({ error: "memberId 필수" }, { status: 400 });
 
     const sb = createAdminClient();
@@ -37,6 +42,10 @@ export async function POST(req: NextRequest) {
 
     const { memberId, content, tags, achieved_at } = body;
 
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
+    const denied = assertSelf(auth, memberId);
+    if (denied) return denied;
     if (!memberId || !content?.trim()) {
         return NextResponse.json({ error: "memberId, content 필수" }, { status: 400 });
     }
@@ -68,6 +77,10 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get("id");
     const memberId = searchParams.get("memberId");
 
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
+    const denied = assertSelf(auth, memberId);
+    if (denied) return denied;
     if (!id || !memberId) return NextResponse.json({ error: "id, memberId 필수" }, { status: 400 });
 
     const sb = createAdminClient();

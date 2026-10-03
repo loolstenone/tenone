@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf, assertOwnsRow } from "@/lib/api-guard";
 import { earnUC } from "@/lib/supabase/uc";
 
 interface VriefProgress { code: string; level: number }
@@ -50,6 +51,10 @@ function computeProgress(vriefTargets: VriefTarget[], gprTargets: GprTarget[], v
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
     try {
         const { id: goalId } = await ctx.params;
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const notOwner = await assertOwnsRow(auth, "hero_goals", goalId);
+        if (notOwner) return notOwner;
         const body = (await req.json()) as {
             memberId: string;
             vriefProgress?: VriefProgress[];
@@ -58,6 +63,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
             weekStartDate?: string;
         };
 
+        { const denied = assertSelf(auth, body.memberId); if (denied) return denied; }
         if (!body.memberId) {
             return NextResponse.json({ error: "memberId required" }, { status: 400 });
         }
@@ -107,9 +113,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     }
 }
 
-export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
     try {
         const { id: goalId } = await ctx.params;
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const notOwner = await assertOwnsRow(auth, "hero_goals", goalId);
+        if (notOwner) return notOwner;
         const sb = createAdminClient();
         const { data, error } = await sb.from("hero_goal_checkins")
             .select("*")

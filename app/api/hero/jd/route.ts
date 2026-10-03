@@ -8,6 +8,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 async function assertMemberInCompany(sb: ReturnType<typeof createAdminClient>, memberId: string, companyId: string) {
     const { data } = await sb
@@ -26,6 +27,10 @@ export async function GET(req: NextRequest) {
         const companyId = req.nextUrl.searchParams.get("companyId");
         const memberId = req.nextUrl.searchParams.get("memberId");
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!memberId) return NextResponse.json({ error: "memberId required" }, { status: 400 });
         if (!id && !companyId) return NextResponse.json({ error: "id or companyId required" }, { status: 400 });
 
@@ -82,6 +87,10 @@ export async function POST(req: NextRequest) {
             status?: "draft" | "published" | "archived";
         };
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!memberId || !companyId || !positionTitle) {
             return NextResponse.json({ error: "memberId, companyId, positionTitle required" }, { status: 400 });
         }

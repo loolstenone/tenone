@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
+import { getApiAccessRule } from '@/lib/api-access-policy';
+import { requireStaff } from '@/lib/api-guard';
 
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증·프로필은 전 도메인 공유)
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
@@ -34,6 +36,16 @@ export async function middleware(request: NextRequest) {
         || request.nextUrl.searchParams.has('_rsc');
     if (isPrefetch && (pathname.startsWith('/myverse/app') || pathname === '/planners' || pathname.startsWith('/planners/'))) {
         return new NextResponse(null, { status: 204 });
+    }
+
+    // 0-API. 관리·운영 API 접근 게이트 (lib/api-access-policy.ts SSOT)
+    //        라우트 핸들러가 service_role로 RLS를 우회하므로 여기서 먼저 차단한다.
+    if (pathname.startsWith('/api/') && request.method !== 'OPTIONS') {
+        const rule = getApiAccessRule(pathname);
+        if (rule) {
+            const auth = await requireStaff(request, { allowEmails: rule.allowEmails });
+            if (auth instanceof NextResponse) return auth;
+        }
     }
 
     // 0a. /api/planners/* → /api/myverse/* 내부 rewrite (외부 호출자 호환: Toss, Google OAuth, Cron)

@@ -9,6 +9,7 @@ import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/workflow-context';
 import { LoginModal } from '@/components/LoginModal';
+import { SMARCOMM_BETA_EMAILS } from '@/lib/api-access-policy';
 import { getSetting } from '@/lib/supabase/settings';
 import TierGate from '@/features/smarcomm/TierGate';
 import { getRequiredTier } from '@/lib/smarcomm/tier-policy';
@@ -16,7 +17,7 @@ import { getRequiredTier } from '@/lib/smarcomm/tier-policy';
 // SmarComm CLAUDE.md § 1A 라우트 노출 정책 (2026-05-19):
 // Marvis 런칭 시점에 /smarcomm/dashboard/* (Pro 자산)은 비공개.
 // staff·super_admin·아래 BETA_EMAILS만 접근. 그 외는 Marvis로 redirect.
-const BETA_EMAILS = ['lools@tenone.biz', 'cheonil@tenone.biz', 'tenone@tenone.biz', 'admin@smarcomm.com'];
+const BETA_EMAILS: readonly string[] = SMARCOMM_BETA_EMAILS; // API 게이트와 공유 (lib/api-access-policy.ts)
 
 function isProAccessAllowed(user: { email?: string; accountType?: string; role?: string } | null): boolean {
   if (!user) return false;

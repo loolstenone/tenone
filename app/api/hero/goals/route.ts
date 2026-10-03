@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function GET(req: NextRequest) {
     try {
@@ -12,6 +13,10 @@ export async function GET(req: NextRequest) {
         const memberId = searchParams.get("memberId");
         const status = searchParams.get("status");
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!memberId) return NextResponse.json({ error: "memberId required" }, { status: 400 });
 
         const sb = createAdminClient();
@@ -42,6 +47,10 @@ export async function POST(req: NextRequest) {
             deadline?: string;
         };
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, body.memberId);
+        if (denied) return denied;
         if (!body.memberId || !body.title) {
             return NextResponse.json({ error: "memberId & title required" }, { status: 400 });
         }

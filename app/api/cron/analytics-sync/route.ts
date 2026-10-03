@@ -8,6 +8,7 @@
  * 내부 동작: /api/analytics/sync (POST) 호출 — days=2 (어제 + 그제 재확인)
  */
 import { NextRequest, NextResponse } from "next/server";
+import { internalAuthHeaders } from "@/lib/api-guard";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     try {
         const res = await fetch(`${origin}/api/analytics/sync?days=2`, {
             method: "POST",
-            headers: { "x-cron-source": "vercel-cron" },
+            headers: { "x-cron-source": "vercel-cron", ...internalAuthHeaders() },
         });
         const json = await res.json();
         if (!res.ok) {

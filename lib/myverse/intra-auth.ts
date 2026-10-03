@@ -18,26 +18,22 @@ export async function requireIntraStaff(): Promise<{ ok: true; memberId: string 
         const admin = createAdminClient();
         const { data: member } = await admin
             .from("members")
-            .select("id, email, roles")
+            .select("id")
             .eq("auth_id", user.id)
             .maybeSingle();
 
         if (!member) return { ok: false, status: 403 };
 
-        // 1) tenone.biz 이메일
-        if (typeof member.email === "string" && member.email.endsWith("@tenone.biz")) {
+        // ⚠️ members.email·roles·account_type 은 본인이 UPDATE 가능 → 권한 판단 금지
+        // 1) 인증 완료된 auth 이메일이 tenone.biz
+        if (user.email?.endsWith("@tenone.biz") && user.email_confirmed_at) {
             return { ok: true, memberId: member.id as string };
         }
-        // 2) 레거시 members.roles 배열
-        const legacyRoles = (member.roles ?? []) as string[];
-        if (legacyRoles.some(r => STAFF_ROLES.has(r))) {
-            return { ok: true, memberId: member.id as string };
-        }
-        // 3) member_roles 테이블 (SSOT) — 별도 쿼리
+        // 2) member_roles 테이블 (SSOT — staff만 쓰기 가능)
         const { data: rolesRows } = await admin
             .from("member_roles")
             .select("role, is_active")
-            .eq("user_id", user.id)
+            .eq("member_id", member.id)
             .eq("is_active", true);
         if ((rolesRows ?? []).some(r => STAFF_ROLES.has(r.role as string))) {
             return { ok: true, memberId: member.id as string };

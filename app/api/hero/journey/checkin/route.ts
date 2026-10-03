@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 import { earnUC } from "@/lib/supabase/uc";
 
 export async function POST(req: NextRequest) {
@@ -17,6 +18,10 @@ export async function POST(req: NextRequest) {
             note?: string;
         };
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, body.memberId);
+        if (denied) return denied;
         if (!body.memberId) {
             return NextResponse.json({ error: "memberId required" }, { status: 400 });
         }

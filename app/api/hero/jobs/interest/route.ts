@@ -4,10 +4,15 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function POST(req: NextRequest) {
     try {
         const { memberId, jdId } = await req.json() as { memberId?: string; jdId?: string };
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!memberId || !jdId) {
             return NextResponse.json({ error: "memberId, jdId 필수" }, { status: 400 });
         }

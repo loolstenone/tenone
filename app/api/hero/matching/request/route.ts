@@ -11,6 +11,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function POST(req: NextRequest) {
     try {
@@ -21,6 +22,10 @@ export async function POST(req: NextRequest) {
             companyId?: string;
         };
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!side || !memberId) {
             return NextResponse.json({ error: "side와 memberId가 필요합니다" }, { status: 400 });
         }
