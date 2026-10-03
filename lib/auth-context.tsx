@@ -299,12 +299,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         validateSession();
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+        // ⚠️ 콜백 안에서 supabase 호출을 await 하면 auth 잠금 교착 → 이후 signOut·signIn이 영구 대기.
+        //    (supabase-js 공식 권고) 콜백은 즉시 반환하고 실제 작업은 setTimeout으로 잠금 밖에서 실행.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
             // 초기화 중 SIGNED_IN은 validateSession이 이미 처리 → 스킵 (race condition 방어)
             if (!isInitializedRef.current && event === 'SIGNED_IN') return;
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                if (session?.user) {
+                if (session?.user) setTimeout(async () => {
                     const u = await syncUserFromSession(session.user);
                     // 이메일 인증 후 HIT 결과 자동 연결
                     if (event === 'SIGNED_IN' && u?.id) {
@@ -317,7 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             }).then(() => localStorage.removeItem('pending_hit_result_id')).catch(() => {});
                         }
                     }
-                }
+                }, 0);
             } else if (event === 'SIGNED_OUT') {
                 setUser(null);
                 localStorage.removeItem(STORAGE_KEY);
@@ -557,7 +559,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         try {
-            await supabase.auth.signOut({ scope: 'global' });
+            // signOut이 잠금 대기로 멈춰도 로그아웃은 완료되도록 3초 상한 (쿠키는 아래에서 강제 삭제)
+            await Promise.race([
+                supabase.auth.signOut({ scope: 'global' }),
+                new Promise(resolve => setTimeout(resolve, 3000)),
+            ]);
         } catch { /* ignore */ }
         // Supabase SSR 쿠키 + tenone-auth 쿠키 강제 제거
         document.cookie.split(';').forEach(c => {

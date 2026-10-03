@@ -46,6 +46,8 @@
 - `components/IntraHeader.tsx` 로그아웃: `logout()` 미대기 상태로 `window.location` 이동 → signOut·쿠키삭제 전에 페이지 이탈해 세션 유지되던 버그 → `await logout()`
 - `features/tenone/PublicHeader.tsx` `hideAuth={true}` 제거 — TenOne 본사이트 우측 상단에 로그인·아바타·알림·로그아웃 미노출 (§1.9.2 표준 위반, 04-26 e54c100d부터)
 
+- `lib/auth-context.tsx` onAuthStateChange 콜백이 supabase 조회를 await → auth 잠금 교착 → signOut·signIn·getSession 영구 대기 (인트라 로그아웃 무반응·구글 로그인 후 인트라 미인식·재로그인 무반응의 공통 원인). setTimeout으로 잠금 밖 실행 + signOut 3초 상한
+
 #### 외부 설정 (사용자 수행)
 - Cloudflare 계정·Turnstile 위젯 hostname 5개 정리 / Vercel 2FA 설정 / Vercel env 사이트키 등록 · Needs Attention 비밀값 Secret 전환
 
