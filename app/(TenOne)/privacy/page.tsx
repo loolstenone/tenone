@@ -47,7 +47,7 @@ export default function PrivacyPage() {
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
                     <p>
-                        Ten:One&trade;(이하 &quot;회사&quot;)는 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak 등
+                        열시일분(Ten:One&trade;, 사업자등록번호 222-22-01839, 이하 &quot;회사&quot;)은 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak 등
                         회사가 운영하는 각 브랜드 서비스와 그 도메인, 이하 &quot;서비스&quot;)에 이 개인정보처리방침을 공통으로 적용합니다.
                         회사는 「개인정보 보호법」 등 관련 법령을 준수하며, 하나의 Ten:One 계정으로 여러 서비스를 이용하더라도
                         각 서비스는 그 서비스의 목적 범위 안에서만 개인정보를 처리합니다.
@@ -165,6 +165,7 @@ export default function PrivacyPage() {
 
                     <Section title="11. 개인정보 보호책임자">
                         <p>성명: 전천일 · 직책: 대표 · 이메일: lools@tenone.biz</p>
+                        <p className="mt-1">사업자: 열시일분 (Ten:One&trade;) · 사업자등록번호 222-22-01839</p>
                         <p className="mt-2">개인정보 침해에 대한 신고·상담은 아래 기관에 문의할 수 있습니다.</p>
                         <ul className="list-disc pl-5 mt-1 space-y-0.5">
                             <li>개인정보분쟁조정위원회: 1833-6972 (www.kopico.go.kr)</li>
