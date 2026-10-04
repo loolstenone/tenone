@@ -15,7 +15,7 @@ type Article = { title: string; body: (string | string[])[] };
 
 const ARTICLES: Article[] = [
     { title: "제1조 (목적)", body: [
-        `이 약관은 ${COMPANY_INFO.legalName}(${COMPANY_INFO.brandName}, 이하 "회사")가 운영하는 모든 서비스를 하나의 Ten:One 계정으로 이용하는 데 필요한 회사와 회원의 권리·의무 및 책임사항, 이용 조건과 절차를 정함을 목적으로 합니다.`,
+        `이 약관은 ${COMPANY_INFO.legalName}(${COMPANY_INFO.brandName}, 이하 "회사")이 운영하는 모든 서비스를 하나의 Ten:One 계정으로 이용하는 데 필요한 회사와 회원의 권리·의무 및 책임사항, 이용 조건과 절차를 정함을 목적으로 합니다.`,
     ]},
     { title: "제2조 (정의)", body: [[
         `"서비스": 회사가 운영하는 모든 온라인 서비스를 말하며, tenone.biz와 회사가 운영하는 각 브랜드 서비스(HeRo, MADLeague, MADLeap, Badak 등) 및 그 도메인을 포함합니다. 운영 중인 서비스 목록은 회사 홈페이지(tenone.biz)에서 확인할 수 있습니다.`,
