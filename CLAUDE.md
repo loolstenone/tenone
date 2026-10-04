@@ -169,6 +169,8 @@ docs/              # 설계 문서
 
 > 회원 0인 브랜드는 ①·④를 생략할 수 있으나 ⑤~⑦은 동일하게 수행한다.
 
+> **실행 장치**: 서비스 상태 = `ums_sites.tier/lifecycle/hosting/sunset_at` · 브랜드 가입·동의 = `member_brand_joins`(brand_id는 `ums_sites.slug` FK, `resolve_site_slug()`) · 탈퇴 = `member_brand_withdrawals.scope` · 브랜드별 탈퇴 처리 표 = [docs/Data_Lifecycle.md](docs/Data_Lifecycle.md)
+
 **브랜드 간 API 원칙** (Google+ API 결함 교훈): 브랜드·외부에 열리는 API는 필요한 필드만, 인증 필수, 본인 데이터만. 관리용 API는 `lib/api-access-policy.ts`로 직원 전용.
 
 ---
