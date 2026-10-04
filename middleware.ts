@@ -38,6 +38,16 @@ export async function middleware(request: NextRequest) {
         return new NextResponse(null, { status: 204 });
     }
 
+    // 0-INTRA. 인트라 정식 주소는 intra.tenone.biz 하나 — www.tenone.biz/intra/* → 308
+    //         (세션은 .tenone.biz 쿠키로 공유되므로 재로그인 없음. 로컬·프리뷰 도메인은 제외)
+    {
+        const host = (request.headers.get('host') || '').split(':')[0];
+        if ((host === 'www.tenone.biz' || host === 'tenone.biz') && (pathname === '/intra' || pathname.startsWith('/intra/'))) {
+            if (isPrefetch) return new NextResponse(null, { status: 204 });
+            return NextResponse.redirect(`https://intra.tenone.biz${pathname}${request.nextUrl.search}`, 308);
+        }
+    }
+
     // 0-API. 관리·운영 API 접근 게이트 (lib/api-access-policy.ts SSOT)
     //        라우트 핸들러가 service_role로 RLS를 우회하므로 여기서 먼저 차단한다.
     if (pathname.startsWith('/api/') && request.method !== 'OPTIONS') {
