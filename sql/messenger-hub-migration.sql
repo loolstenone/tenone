@@ -66,14 +66,8 @@ INSERT INTO messenger_service_hooks (service_name, display_name, icon, color, ev
 ('madleague', 'MADLeague',  'Users',      '#ef4444', ARRAY['member_joined', 'event_created', 'club_update'])
 ON CONFLICT (service_name) DO NOTHING;
 
--- 로컬 에이전트 시드
+-- 로컬 에이전트 시드 (openclaw는 2026-10-05 폐기·삭제)
 INSERT INTO agent_profiles (name, display_name, layer, agent_type, brand_id, runtime, local_endpoint, fallback_agent, model_id, system_prompt, can_invoke) VALUES
-(
-    'openclaw', 'OpenClaw', 1, 'infra', 'tenone', 'local',
-    'http://localhost:8080/v1/chat', '1001', 'openclaw-local',
-    '당신은 OpenClaw. Ten:One PC에 상주하는 AI 에이전트 런타임. 워크플로우 실행, 로컬 파일 처리, 자동화 태스크 전담.',
-    ARRAY['1001']
-),
 (
     'gemma', 'Gemma', 1, 'infra', 'tenone', 'local',
     'http://localhost:11434/api/chat', '1001', 'gemma3-27b',

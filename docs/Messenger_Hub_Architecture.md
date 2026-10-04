@@ -1,4 +1,5 @@
 # Intra Messenger Hub Architecture
+> ⚠️ 2026-10-05: OpenClaw 폐기·삭제. 아래 OpenClaw 관련 내용은 기록용.
 
 > **Ten:One Universe 통합 커맨드 센터**
 > 사람 + 클라우드 AI + 로컬 AI + 서비스 = 하나의 메신저

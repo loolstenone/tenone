@@ -10,12 +10,17 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
 import { canAccess } from '@/lib/hit/membership';
+import { getApiUser } from '@/lib/api-guard';
 
 const FREE_CHAT_LIMIT = 3;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, resultId, mode, history, sessionId, alertLevel, memberId } = await request.json();
+    const { message, resultId, mode, history, sessionId, alertLevel } = await request.json();
+
+    // 회원 식별은 로그인 세션으로만 — body의 memberId는 신뢰하지 않음 (타 회원 ID로 등급·횟수 제한 우회 방지)
+    const apiUser = await getApiUser(request);
+    const memberId = apiUser?.memberId ?? null;
 
     if (!message || !resultId || !mode) {
       return new Response(JSON.stringify({ error: 'message, resultId, mode 필수' }), { status: 400 });

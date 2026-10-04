@@ -18,7 +18,7 @@ interface UniverseChatbotProps {
 export function UniverseChatbot({ siteId, siteName = "Ten:One", accentColor = "#1a1a2e" }: UniverseChatbotProps) {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { id: "0", role: "assistant", text: `안녕하세요! ${siteName} 챗봇입니다. 무엇이 궁금하신가요?` },
+        { id: "0", role: "assistant", text: `안녕하세요! ${siteName} AI 챗봇입니다. 무엇이 궁금하신가요?` },
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -73,7 +73,7 @@ export function UniverseChatbot({ siteId, siteName = "Ten:One", accentColor = "#
                     {/* 헤더 */}
                     <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8">
                         <Bot className="h-4 w-4 text-amber-400" />
-                        <span className="text-sm font-semibold text-white">{siteName} 챗봇</span>
+                        <span className="text-sm font-semibold text-white">{siteName} AI 챗봇</span>
                         <button onClick={() => setOpen(false)} className="ml-auto text-white/30 hover:text-white">
                             <X className="h-4 w-4" />
                         </button>
@@ -104,6 +104,9 @@ export function UniverseChatbot({ siteId, siteName = "Ten:One", accentColor = "#
                         <div ref={bottomRef} />
                     </div>
 
+                    {/* AI 고지 (인공지능 기본법) */}
+                    <p className="px-4 pb-1 text-[10px] text-white/35">AI가 생성한 답변으로 부정확할 수 있습니다.</p>
+
                     {/* 입력 */}
                     <div className="flex items-center gap-2 border-t border-white/8 px-3 py-2.5">
                         <input
@@ -111,6 +114,7 @@ export function UniverseChatbot({ siteId, siteName = "Ten:One", accentColor = "#
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
                             placeholder="메시지를 입력하세요..."
+                            maxLength={1000}
                             className="flex-1 bg-transparent text-sm text-white placeholder-white/25 focus:outline-none"
                         />
                         <button onClick={send} disabled={!input.trim() || loading}
