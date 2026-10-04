@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight, CheckCircle } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 type TabType = 'partner' | 'business';
 
@@ -74,6 +75,7 @@ export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [fromCrew, setFromCrew] = useState(false);
+    const captcha = useCaptcha();
 
     useEffect(() => {
         const p = new URLSearchParams(window.location.search);
@@ -81,12 +83,14 @@ export default function ContactPage() {
     }, []);
 
     const handleSubmit = async (formType: string, form: HTMLFormElement) => {
+        if (!captcha.ready) { alert(CAPTCHA_PENDING_MESSAGE); return; }
         setSubmitting(true);
         const fd = new FormData(form);
-        const body: Record<string, string> = { formType };
+        const body: Record<string, string> = { formType, captchaToken: captcha.token ?? '' };
         fd.forEach((v, k) => { body[k] = v as string; });
         try {
             const res = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            captcha.reset();
             if (res.ok) setSubmitted(true);
             else alert('제출에 실패했습니다. 다시 시도해주세요.');
         } catch { alert('네트워크 오류가 발생했습니다.'); }
@@ -197,6 +201,7 @@ export default function ContactPage() {
                             </div>
                             <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="url" className={inputClass} placeholder="https://..." /></div>
                             <div><label className={labelClass}>자기소개 및 지원동기</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
+                            <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : (fromCrew ? '크루 지원하기' : '파트너 신청하기')}
                             </button>
@@ -229,6 +234,7 @@ export default function ContactPage() {
                                 </select>
                             </div>
                             <div><label className={labelClass}>프로젝트 내용</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
+                            <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Briefcase className="h-4 w-4" /> {submitting ? '제출 중...' : '의뢰하기'}
                             </button>

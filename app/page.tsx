@@ -8,6 +8,7 @@ import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
 import { UNIVERSE_ROLE_GROUPS } from "@/lib/universe-map";
+import { CaptchaWidget, useCaptcha } from "@/components/CaptchaWidget";
 
 interface SimplePost {
     id: string;
@@ -26,6 +27,7 @@ export default function HomePage() {
     const [nlAgree, setNlAgree] = useState(false);
     const [nlLoading, setNlLoading] = useState(false);
     const [nlError, setNlError] = useState(false);
+    const nlCaptcha = useCaptcha();
     const [latestWorks, setLatestWorks] = useState<SimplePost[]>([]);
     const [latestNews, setLatestNews] = useState<SimplePost[]>([]);
 
@@ -390,11 +392,12 @@ export default function HomePage() {
                         <>
                             <form onSubmit={async e => {
                                     e.preventDefault();
-                                    if (!nlEmail.trim() || !nlAgree || nlLoading) return;
+                                    if (!nlEmail.trim() || !nlAgree || nlLoading || !nlCaptcha.ready) return;
                                     setNlLoading(true);
                                     setNlError(false);
                                     try {
-                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim(), source: 'tenone-main' }) });
+                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim(), source: 'tenone-main', captchaToken: nlCaptcha.token }) });
+                                        nlCaptcha.reset();
                                         if (res.ok) setNlSubscribed(true);
                                         else setNlError(true);
                                     } catch { setNlError(true); }
@@ -405,12 +408,13 @@ export default function HomePage() {
                                     placeholder="이메일 주소를 입력하세요"
                                     required
                                     className="flex-1 w-full px-4 py-3 text-sm border tn-border focus:outline-none focus:border-neutral-400 placeholder:tn-text-muted" />
-                                <button type="submit" disabled={!nlEmail.trim() || !nlAgree || nlLoading}
+                                <button type="submit" disabled={!nlEmail.trim() || !nlAgree || nlLoading || !nlCaptcha.ready}
                                     className="w-full sm:w-auto px-8 py-3 text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-30 shrink-0"
                                     style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                     {nlLoading ? '처리 중...' : '구독하기'}
                                 </button>
                             </form>
+                            <div className="flex justify-center mt-3"><CaptchaWidget {...nlCaptcha.widgetProps} /></div>
                             {nlError && <p className="text-xs text-red-500 mt-2">구독 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>}
                             <div className="flex items-center justify-center gap-2 mt-3">
                                 <button type="button" onClick={() => setNlAgree(!nlAgree)}

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { getCreators, type JakkaCreator } from "@/lib/supabase/jakka";
 import { PageHeader } from "@/features/jakka/PageHeader";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 const categories = [
     { id: "전체",          label: "전체",          icon: Layers },
@@ -142,18 +143,21 @@ function AdInquiryBanner() {
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const captcha = useCaptcha();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!form.name || !form.email) return;
+        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setSubmitting(true);
         setError(null);
         try {
             const res = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ formType: "jakka_ad", extra: form.category, ...form }),
+                body: JSON.stringify({ formType: "jakka_ad", extra: form.category, ...form, captchaToken: captcha.token }),
             });
+            captcha.reset();
             if (!res.ok) throw new Error();
             setDone(true);
         } catch {
@@ -266,6 +270,7 @@ function AdInquiryBanner() {
                                         className="w-full border border-neutral-300 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors resize-none"
                                     />
                                 </div>
+                                <CaptchaWidget {...captcha.widgetProps} />
                                 {error && <p className="text-[12px] text-red-500">{error}</p>}
                                 <button
                                     type="submit"

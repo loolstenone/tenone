@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // 발송 중단 스위치 (2026-10-05): 구독자 정리 전까지 정지. 재개 = Vercel env NEWSLETTER_DISPATCH_ENABLED=true
+    if (process.env.NEWSLETTER_DISPATCH_ENABLED !== 'true') {
+        return NextResponse.json({ ok: true, dispatched: 0, paused: true });
+    }
+
     const supabase = getAdminClient();
     const nowIso = new Date().toISOString();
 
