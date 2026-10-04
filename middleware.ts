@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
+import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS } from '@/lib/domain-registry';
 import { getApiAccessRule } from '@/lib/api-access-policy';
 import { requireStaff } from '@/lib/api-guard';
 
@@ -38,13 +38,43 @@ export async function middleware(request: NextRequest) {
         return new NextResponse(null, { status: 204 });
     }
 
-    // 0-INTRA. 인트라 정식 주소는 intra.tenone.biz 하나 — www.tenone.biz/intra/* → 308
-    //         (세션은 .tenone.biz 쿠키로 공유되므로 재로그인 없음. 로컬·프리뷰 도메인은 제외)
+    // 0-CANONICAL. 공식 주소 단일화 (lib/domain-registry.ts CANONICAL_HOSTS, CLAUDE.md §0.1)
+    //   - www.tenone.biz/intra/*        → intra.tenone.biz (308, 세션은 .tenone.biz 쿠키 공유)
+    //   - www.tenone.biz/{brand}/*      → 브랜드 공식 주소
+    //   - {brand}.tenone.biz (vercel)   → 브랜드 공식 주소
+    //   로컬·프리뷰 도메인은 제외 (경로 분기로 개발)
+    const reqHost = (request.headers.get('host') || '').split(':')[0];
     {
-        const host = (request.headers.get('host') || '').split(':')[0];
-        if ((host === 'www.tenone.biz' || host === 'tenone.biz') && (pathname === '/intra' || pathname.startsWith('/intra/'))) {
+        const isTenoneMain = reqHost === 'www.tenone.biz' || reqHost === 'tenone.biz';
+        const firstSeg = pathname.split('/')[1] || '';
+        let target: string | null = null;
+        let status = 308;
+
+        if (isTenoneMain && firstSeg === 'intra') {
+            target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;
+        } else {
+            const subBrand = reqHost.endsWith('.tenone.biz') ? reqHost.slice(0, -'.tenone.biz'.length) : null;
+            const brand = isTenoneMain ? firstSeg : subBrand;
+            const canonical = brand ? CANONICAL_HOSTS[brand] : undefined;
+            // API·인증 콜백·정적 파일은 넘기지 않는다 (진행 중인 로그인·자산 요청 보호)
+            const passThrough = /^\/(api|auth|_next)\//.test(pathname) || pathname.includes('.');
+            if (canonical && !passThrough) {
+                if (canonical.hosting === 'vercel') {
+                    // 경로 그대로: 공식 도메인과 {brand}.tenone.biz는 같은 prefix 라우팅,
+                    // www의 /{brand}/* 경로도 공식 도메인에서 그대로 동작
+                    target = `https://${canonical.host}${pathname}${request.nextUrl.search}`;
+                } else if (isTenoneMain) {
+                    // 외부 서버는 경로 체계가 달라 홈으로. 이전 후 vercel로 바꾸면 308 경로 유지
+                    target = `https://${canonical.host}/`;
+                    status = 302;
+                }
+                // external 브랜드의 {brand}.tenone.biz 는 스테이징 — 넘기지 않음 (noindex는 next.config.ts headers)
+            }
+        }
+
+        if (target) {
             if (isPrefetch) return new NextResponse(null, { status: 204 });
-            return NextResponse.redirect(`https://intra.tenone.biz${pathname}${request.nextUrl.search}`, 308);
+            return NextResponse.redirect(target, status);
         }
     }
 

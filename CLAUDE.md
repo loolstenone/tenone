@@ -171,6 +171,10 @@ docs/              # 설계 문서
 
 > ⚠️ 서브도메인은 `siteConfigs`에 키가 있으면 자동 감지. `domainMap`에 따로 추가 불필요.
 
+> **공식 주소(canonical)**: `lib/domain-registry.ts`의 `CANONICAL_HOSTS`에 등록된 브랜드는 middleware가 다른 진입로를 공식 주소로 넘긴다 (§0.1 원칙 4·6).
+> vercel 운영 = 경로 유지 308 · external(외부 서버) = www 경로는 홈으로 302, `{brand}.tenone.biz`는 스테이징(noindex, `next.config.ts`).
+> 외부 브랜드 이전 완료 시 `hosting: 'vercel'`로 바꾸고 noindex 목록에서 제거.
+
 ### 현재 운영 도메인/경로 (29개)
 
 | 브랜드 | 독립 도메인 | 서브도메인 | 경로 | siteId |
@@ -1073,6 +1077,7 @@ import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/Univers
 ├─────────────────────────────────────────────────────┤
 │  [브랜드명]            [컬럼1]  [컬럼2]  [Universe] │  ← 4컬럼
 │  태그라인              링크들    링크들   자동추가   │
+│  Ten:One™ Universe (링크)                          │
 ├─────────────────────────────────────────────────────┤
 │  © Year · Ten:One™ Universe   이용약관  개인정보   │  ← 카피라이트
 └─────────────────────────────────────────────────────┘

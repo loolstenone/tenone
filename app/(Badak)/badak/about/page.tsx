@@ -252,8 +252,7 @@ export default function AboutPage() {
       {/* ── Footer ── */}
       <section className="border-t border-white/6 px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-1 text-[10px] text-white/15">A Part of</p>
-          <p className="mb-4 text-xs font-medium text-white/30">Ten:One Universe</p>
+          <p className="mb-4 text-xs font-medium text-white/30">Ten:One™ Universe</p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             {[
               { name: 'MAD League', href: 'https://madleague.net' },
