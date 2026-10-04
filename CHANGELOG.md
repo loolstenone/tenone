@@ -48,6 +48,8 @@
 
 - `lib/auth-context.tsx` onAuthStateChange 콜백이 supabase 조회를 await → auth 잠금 교착 → signOut·signIn·getSession 영구 대기 (인트라 로그아웃 무반응·구글 로그인 후 인트라 미인식·재로그인 무반응의 공통 원인). setTimeout으로 잠금 밖 실행 + signOut 3초 상한
 
+- refresh 토큰 무한 재시도 사고: www에서 global 로그아웃 직후 열려 있던 intra.tenone.biz 탭이 4분간 4,170회 /token 호출 → 429로 같은 IP의 정상 로그인까지 차단. 원인 가설 = 같은 이름의 host-only 세션 쿠키 중복 (실도메인에서 공존 가능 확인). `lib/supabase/client.ts` *.tenone.biz 로드 시 host-only 사본만 만료 (domain 쿠키 보존 실측 확인) + `app/api/sso/exchange` tenone 계열 호스트면 .tenone.biz domain 지정
+
 #### 외부 설정 (사용자 수행)
 - Cloudflare 계정·Turnstile 위젯 hostname 5개 정리 / Vercel 2FA 설정 / Vercel env 사이트키 등록 · Needs Attention 비밀값 Secret 전환
 

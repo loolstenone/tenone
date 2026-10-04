@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getCookieDomain } from '@/lib/domain-registry';
 
 /**
  * SSO Exchange — 타 도메인(smarcomm.biz 등)에서 호출
@@ -61,7 +62,8 @@ const adminClient = createAdminClient();
                     cookiesToSet.forEach(({ name, value, options }) => {
                         response.cookies.set(name, value, {
                             ...options,
-                            // ���재 도메인 전용 쿠키 (domain 미지정 = 현재 호스트)
+                            // *.tenone.biz에서 호출되면 공용 도메인으로 (host-only 중복 세션 쿠키 → refresh 무한루프 방지). 외부 도메인은 undefined = 현재 호스트
+                            ...(getCookieDomain(request.headers.get('host') || '') && { domain: getCookieDomain(request.headers.get('host') || '') }),
                         });
                     });
                 },

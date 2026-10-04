@@ -18,6 +18,18 @@ export function createClient() {
         ? '.tenone.biz'
         : undefined;
 
+    // *.tenone.biz: 같은 이름의 host-only 세션 쿠키(과거 코드·SSO가 domain 없이 심은 것)가 남아 있으면
+    // supabase가 실패한 세션을 .tenone.biz 쪽만 지우고 host-only 사본을 다시 읽어 refresh를 무한 재시도한다
+    // (2026-10-04 intra.tenone.biz에서 4분간 4,170회 → 429 차단). domain 없이 만료시키면 host-only 사본만 삭제된다.
+    if (cookieDomain && typeof document !== 'undefined') {
+        document.cookie.split(';').forEach(c => {
+            const name = c.split('=')[0].trim();
+            if (name.startsWith('tenone-auth')) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+        });
+    }
+
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
