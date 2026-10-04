@@ -167,6 +167,7 @@
 | **Phase** | Mature (2026-05-28) — 포탈·프로필·Intra 모두 프로덕션. 28+ 브랜드 통제 중. 본사이트 정직성·정합성 회복 1차 완료 (세션 154). |
 | **개발 수준** | 완성. SSOT 일원화 단계. |
 | **이월 작업** | DB `brands` 테이블 시드 부재 — brands page는 lib/data.ts staticBrands fallback에만 의존 (DB 채우면 자동 우선). Mindle Phase 3 PRO 결제 등 별 트랙 |
+| **법무 문서 (2026-10-05)** | `app/(TenOne)/privacy/page.tsx`(유니버스 공통 개인정보처리방침) · `app/(TenOne)/terms/page.tsx`(Ten:One 통합 이용약관) — 전 브랜드 도메인에서 /privacy·/terms로 서빙(middleware skipPaths). 버전·사업자 정보 SSOT = `lib/company-info.ts`. 문서 개정 시 LEGAL_DOCUMENTS.version 올리고 변경 고지 |
 | **최근 결정** | (2026-05-28) **본사이트 정직성·정합성 회복**: ① `app/(public)/` 경로 표기를 실제 `app/(TenOne)/`·`app/page.tsx`로 정정 ② Universe "Coming Soon" 8건(7건 실제 운영 중) 섹션 통째 삭제 ③ Universe stats "23 브랜드/14 WIO 모듈" → `siteConfigs.length` 동적 28 + 8 역할 그룹 ④ brands page fallback 22→26개 (jakka·townity·mullaesian·naturebox 추가, internal dokdae·wiki 제외) ⑤ history SSOT를 `lib/data.ts historyEvents`로 일원화 (about HISTORY_DATA dead code 제거 + 27건으로 보강 — 0gamja·ChangeUp·Chat with ChatGPT·Creazy Challenge·DAM Be·Mindle 2026·MADLeap 2026 포함) ⑥ Crew CTA `cursor-default` → `/contact?from=crew` Link + Contact partner 탭 카피 변형 ⑦ `lib/universe-map.ts` 신설 — `UNIVERSE_ROLE_GROUPS` SSOT 추출. 랜딩 + about Brand Ecosystem 모두 import (about BRAND_DIRECTORY 56줄 dead code 제거) |
 
 ---

@@ -1,6 +1,28 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-04 (세션 156 — 보안 긴급 점검·조치: API 게이트·권한상승 차단·회원생성 수정·CAPTCHA)
+> 마지막 업데이트: 2026-10-05 (세션 157 — 플랫폼 헌법·데이터 계약·약관/방침·가입 동의)
+
+---
+
+## 세션 157 핵심 성과 (2026-10-05) — 플랫폼 헌법 · 데이터 계약 · 약관/방침 · 가입 동의
+
+- 헌법 §0.1 확정 (지주사 모델, 집중 5: TenOne·MADLeague·HeRo·Badak·MADLeap) + 데이터 계약 5조 + 종료 7단계 + 법적 검토 기본
+- 공식 주소 단일화·스테이징 noindex·인트라 로그아웃 수정 — 실서버 검증 완료
+- DB 생애주기(ums_sites tier/lifecycle/hosting) + member_brand_joins 정규화·FK — 운영 적용
+- 개인정보처리방침·통합 이용약관 전면 개정, 전 브랜드 도메인 /privacy·/terms 정상화, 푸터 사업자 정보
+- 가입 동의 표준 + ConsentGate (members.consent 기록 실확인) + LoginModal CAPTCHA 누락 버그 수정
+
+### 다음 첫 액션
+
+1. **브랜드 모달 가입 실검증**: hero.ne.kr → 우상단 로그인 → 가입 탭 → 테스트 이메일 가입 → 인증 메일 링크 → `select consent from members where email='…'`로 consent(channel 'email') 채워졌는지 MCP 확인. 비어 있으면 `lib/auth-context.tsx` syncUserFromSession의 `metaConsent`(user_metadata.consent) 경로 점검
+2. **백업 결정** 사용자에게 1줄 질문: Supabase Pro($25/월, 일일 백업·PITR 옵션) vs 주 1회 수동 덤프. 개발 DB "TenOne Dev."(일시정지) 삭제 여부 함께
+3. **보안 잔여** (ROADMAP 🔒): 크론 CRON_SECRET fail-open 27곳 → `lib/api-guard.ts` 방식으로 fail-closed, anon 실행 DEFINER 함수 49 `REVOKE EXECUTE ... FROM anon` 목록 작성 후 승인받아 적용
+4. DMARC `_dmarc.tenone.biz` p=none → p=quarantine (DNS, 사용자)
+
+### 사용자 할 일
+
+- Supabase Dashboard: 만료 PAT 2개 삭제 (Account > Access Tokens)
+- 봇 계정 201 정리 (Dashboard)
 
 ---
 

@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-10-05 (세션 157) — 플랫폼 헌법 · 데이터 계약 · 약관/방침 · 가입 동의
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61` → master push (사용자 수동 push 2회 + 작업 종료 push)
+- 운영 DB 적용 (MCP `apply_migration`): `service_lifecycle_and_brand_joins`
+- Supabase PAT 2개 만료 확인 → `.env.local`에서 제거, SQL은 MCP 일원화
+
+### 결정 (사용자)
+
+- 지주사–계열사 모델. 집중 브랜드: TenOne·MADLeague·HeRo·Badak·MADLeap. 외부 3개 2027 이전
+- 유니버스는 강조하지 않음 — 푸터 표기는 `Ten:One™ Universe` (Part of 금지)
+- 탈퇴: 커뮤니티 글 익명화, 이력·결제·수료 등은 당분간 전부 보존 + 요청 시 수동 처리. 외부 회원 이전 전 자동화
+- Badak 9천명: 통째 이전 X, 원하는 사람만. Planner's 사용자 분리 고지. 소식은 별도 동의자만
+- 문의 보관 1년 · 만 14세 미만 가입 불가 · 사업자 열시일분 222-22-01839 (통신판매업·직업소개 미신고)
+- 법적 검토는 모든 기능의 기본 단계
+
+### 변경 내역
+
+- 도메인: `lib/domain-registry.ts` CANONICAL_HOSTS, middleware 0-CANONICAL (308/302/prefetch 204), `next.config.ts` 스테이징 noindex, skipPaths에 /privacy·/terms
+- 인트라: IntraHeader·IntraSidebar 로그아웃 → `/intra`
+- 푸터: `components/UniverseFooter.tsx` Part of 제거·사업자 정보 줄·TenOne 저작권 중복 제거, `lib/site-config.ts` universeLabel 통일, Badak about 문구
+- 신규 `lib/company-info.ts` (COMPANY_INFO·LEGAL_DOCUMENTS 버전 레지스트리)
+- `app/(TenOne)/privacy/page.tsx` 전면 개정 · `app/(TenOne)/terms/page.tsx` 통합 이용약관
+- DB `sql/service-lifecycle.sql`: ums_sites 생애주기 컬럼, resolve_site_slug, member_brand_joins 정규화+FK·terms_version, member_brand_withdrawals.scope
+- 신규 `docs/Data_Lifecycle.md`
+- 가입 동의: 신규 `components/SignupConsent.tsx`·`components/ConsentGate.tsx`, `lib/auth-context.tsx` register(consent)·recordConsent, `types/auth.ts` MemberConsent, `/signup`·LoginModal 적용, 루트 layout에 ConsentGate
+- 버그: LoginModal 가입 captchaToken 누락(브랜드 사이트 모달 가입 전부 실패) · 광고 수신 기본값 true 하드코딩(정보통신망법 제50조) 제거
+- 문서: CLAUDE.md §0.1(헌법·데이터 계약·종료 절차·법적 검토·약관 2층) · §1.2.0 가입 동의 표준 · 부록 D MCP 일원화, HeRo·Badak CLAUDE.md
+
+### 검증
+
+- 실서버: tenone.biz·hero.ne.kr·smarcomm.tenone.biz /terms·/privacy 200 + 사업자번호, /signup·hero 로그인 창 동의 4항목, hero 푸터 사업자 정보
+- ConsentGate 실사용: lools@tenone.biz `members.consent` 기록 확인 (terms 2026-10-05, channel existing)
+
+---
+
 ## 2026-10-04 (세션 156) — 보안 긴급 점검·조치
 
 ### 장소·운영

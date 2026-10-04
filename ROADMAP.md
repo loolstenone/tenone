@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-04 (세션 156 — 보안 긴급 점검·조치)
+> 마지막 업데이트: 2026-10-05 (세션 157 — 플랫폼 헌법·데이터 계약·약관/방침·가입 동의)
 
 ---
 
@@ -12,13 +12,29 @@
 - [x] 회원 생성 실패 원인 수정 (fn_auto_member_brand_join DEFINER)
 - [x] GRANT 마이그레이션 (2026-10-30 마감 대응)
 - [x] Turnstile CAPTCHA 코드 연결 (8곳) + Vercel 사이트키
-- [ ] 배포 후 실사이트 위젯 확인 + 직원 로그인 인트라 회귀 확인
-- [ ] Supabase Bot Protection ON (사용자, 배포 확인 후)
+- [x] 배포 후 실사이트 위젯 확인 + 직원 로그인 인트라 회귀 확인 (세션 157)
+- [x] Supabase Bot Protection ON — 직접 API 호출 captcha_failed 확인 (세션 157)
 - [ ] 봇 계정 201 정리 (사용자 Dashboard) · jakka 더미 20 결정
 - [ ] npm audit critical 1 · high 22
 - [ ] 규모 축소: 집중 5개 외 브랜드 API 비활성/보관
 - [ ] handle-login 이메일 노출 · 크론 CRON_SECRET fail-open 27곳 · security_definer 뷰 9 · anon DEFINER 함수 49 · 유출 비번 차단
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
+
+## 🏛 플랫폼 헌법·데이터·법무 (세션 157 — 2026-10-05)
+
+- [x] 공식 주소 단일화 (CANONICAL_HOSTS 308/302, 외부 브랜드 스테이징 noindex) · 인트라 로그아웃 → /intra
+- [x] 헌법 §0.1 (지주사 모델·7원칙·Tier·외부 이전 원칙) + 데이터 계약 5조 + 서비스 종료 7단계 + 법적 검토 기본
+- [x] DB: ums_sites tier/lifecycle/hosting/sunset_at · member_brand_joins 정규화+FK · resolve_site_slug()
+- [x] 개인정보처리방침 유니버스 공통 개정 (처리위탁·국외이전·사업자) · 통합 이용약관 16조 · 2층 약관 체계
+- [x] 전 브랜드 도메인 /privacy·/terms 404 수정 · 푸터 사업자 정보 · TenOne 저작권 중복 제거
+- [x] 가입 동의 표준 (만14세·약관 버전·광고 수신) + ConsentGate + LoginModal CAPTCHA 토큰 누락 수정
+- [ ] 동의 기록 자동 검증: hero.ne.kr 로그인 창 테스트 가입 1건 (이메일 인증 후 members.consent 채워지는지)
+- [ ] 백업 결정 (Supabase Free = 백업 없음 → Pro 또는 주기적 수동 덤프) · 개발 DB(TenOne Dev. 일시정지) 정리
+- [ ] DMARC p=none → quarantine
+- [ ] 보관 브랜드 페이지·API 차단 (§0.1 원칙 5) · 끊긴 테이블 참조 ~40건
+- [ ] 외부 회원 이전 전: 탈퇴 처리 자동화 (process_brand_withdrawal) · MADLeague mad_members email/user_id 키 → members.id
+- [ ] 통신판매업 신고 전 결제 출시 금지 · 직업소개사업 등록 전 HeRo 기업 매칭 금지 · AI 기본법 검토
+- [ ] 브랜드 추가 약관(/terms/{brand}) — 해당 기능 출시 시
 
 ## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
 
