@@ -1583,15 +1583,14 @@ grep -rn 'TODO\|FIXME' src | wc -l
 
 > **Claude가 SQL을 직접 실행한다. 사용자가 Dashboard에서 수동으로 실행할 필요 없다.**
 
-- **PAT**: `.env.local`의 `SUPABASE_ACCESS_TOKEN`
-- **실행 스크립트**: `scripts/run-sql.js` — `queries` 배열에 SQL 추가 후 `node scripts/run-sql.js`
-- **API**: `POST https://api.supabase.com/v1/projects/ziotlxkdctlhiwkgmmsh/database/query`
-  - DDL 성공 응답: HTTP 201, body `[]`
-  - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
+- **실행 수단: Supabase MCP** (`execute_sql` 조회·데이터 수정 / `apply_migration` DDL — 마이그레이션 이력이 남음)
+- ⛔ **PAT(`SUPABASE_ACCESS_TOKEN`)를 `.env.local`에 두지 않는다** — DB 전체 권한 키를 평문 파일로 보관하지 않음 (2026-10-05 만료 PAT 2개 삭제·제거).
+  `scripts/run-sql.js`·`run-sql-files.js`·`seed-*.js` 등 PAT 기반 스크립트는 사용 중단. 꼭 필요하면 단기 만료 PAT를 그 세션에만 쓰고 바로 삭제.
+- 운영 DB 변경 전 사용자 승인 필수 (데이터 삭제·권한 변경·대량 수정)
 
 **새 테이블 워크플로우:**
-1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + **GRANT** + 시드)
-2. `scripts/run-sql.js`에 추가 또는 직접 실행
+1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + **GRANT** + 시드) — 재실행 가능하게(IF NOT EXISTS)
+2. 같은 내용을 MCP `apply_migration`으로 적용, 파일 상단에 적용일 기록
 3. Dashboard 접속 요청 불필요
 
 ### ⚠️ GRANT 필수 — Supabase 2026-10-30 정책 변경
@@ -1761,7 +1760,7 @@ pathname 변경
 | 항목 | 내용 |
 |------|------|
 | 프로젝트 ID | `ziotlxkdctlhiwkgmmsh` |
-| PAT | `.env.local`의 `SUPABASE_ACCESS_TOKEN` |
+| SQL 실행 | Supabase MCP (PAT 미보관 — 부록 D) |
 | Auth SMTP | Resend 연결 완료 (`noreply@tenone.biz`) |
 | Storage 버킷 | `avatars` (프로필), `site-branding` (브랜드 이미지) |
 
