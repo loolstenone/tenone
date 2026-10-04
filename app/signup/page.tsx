@@ -13,6 +13,7 @@ import { TenOneThemeWrapper } from '@/features/tenone/TenOneThemeWrapper';
 import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
+import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from '@/components/SignupConsent';
 import { loginHref } from '@/lib/login-href';
 
 // --- SmarComm 전용 회원가입 컴포넌트 ---
@@ -23,6 +24,7 @@ function SmarCommSignupForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [lastScan, setLastScan] = useState<{ url: string; score: number } | null>(null);
@@ -56,10 +58,11 @@ function SmarCommSignupForm() {
         if (!email || !password) { setError('이메일과 비밀번호를 입력해주세요'); return; }
         if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return; }
         if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
+        if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
         if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            const result = await register(email.split('@')[0], email, password, false, captcha.token);
+            const result = await register(email.split('@')[0], email, password, buildMemberConsent(consent, 'email'), captcha.token);
             captcha.reset();
             if (result.success) {
                 router.push('/dashboard');
@@ -124,6 +127,7 @@ function SmarCommSignupForm() {
                             {passwordConfirm && password !== passwordConfirm && <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
                             {passwordConfirm && password === passwordConfirm && <p className="mt-1 text-xs text-green-600">비밀번호가 일치합니다</p>}
                         </div>
+                        <SignupConsent value={consent} onChange={setConsent} />
                         <CaptchaWidget {...captcha.widgetProps} />
                         <button type="submit" disabled={isSubmitting}
                             className="w-full bg-neutral-900 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50">
@@ -219,6 +223,7 @@ function TenOneSignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -253,6 +258,7 @@ function TenOneSignupPage() {
         if (!email || !password) { setError('이메일과 비밀번호를 입력해주세요'); return; }
         if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return; }
         if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
+        if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
         if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
@@ -261,7 +267,7 @@ function TenOneSignupPage() {
             // 이메일 인증 대기 흐름을 위해 resultId를 localStorage에 미리 저장
             if (hitResultId) localStorage.setItem('pending_hit_result_id', hitResultId);
 
-            const result = await register(name, email, password, true, captcha.token);
+            const result = await register(name, email, password, buildMemberConsent(consent, 'email'), captcha.token);
             captcha.reset();
             if (result.success) {
                 // 세션 즉시 생성된 경우 바로 연결
@@ -326,6 +332,7 @@ function TenOneSignupPage() {
                                 className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : passwordConfirm && password === passwordConfirm ? 'border-green-400' : ''}`} />
                             {passwordConfirm && password !== passwordConfirm && <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
                         </div>
+                        <SignupConsent value={consent} onChange={setConsent} />
                         <CaptchaWidget {...captcha.widgetProps} />
                         <button type="submit" disabled={isSubmitting}
                             className="w-full bg-neutral-900 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50">

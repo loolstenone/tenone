@@ -5,6 +5,7 @@ import { IdentityProvider } from "@/lib/identity-context";
 
 import { SiteProvider } from "@/lib/site-context";
 import { SiteClosedOverlay } from "@/components/SiteClosedOverlay";
+import { ConsentGate } from "@/components/ConsentGate";
 import { AuthRecoveryHandler } from "@/components/AuthRecoveryHandler";
 import { Analytics } from "@/components/Analytics";
 import "./globals.css";
@@ -90,6 +91,7 @@ export default function RootLayout({
             <IdentityProvider>
               <SiteClosedOverlay />
               <AuthRecoveryHandler />
+              <ConsentGate />
               {children}
             </IdentityProvider>
           </AuthProvider>

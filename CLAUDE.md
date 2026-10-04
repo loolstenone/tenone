@@ -327,6 +327,14 @@ export async function generateMetadata(): Promise<Metadata> {
 - 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
 - **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접
 
+### 1.2.0 가입 동의 표준 (2026-10-05)
+
+- 모든 가입 경로(/signup · LoginModal · 소셜 첫 로그인)는 `components/SignupConsent.tsx` 사용: [필수] 만 14세 이상 · [필수] 이용약관 · [선택] 광고성 정보 수신. 개인정보처리방침은 고지 링크
+- 기록: `members.consent` (jsonb — terms_version·privacy_version·marketing·agreed_at·channel·origin_site). 이메일 가입은 signUp `user_metadata.consent` → 인증 후 members 생성 시 이관
+- 동의 기록 없는 로그인 회원(소셜·기존)은 `components/ConsentGate.tsx`(루트 레이아웃)가 1회 동의 받음
+- ❌ `newsletter_subscribed: true` 기본값·하드코딩 금지 (정보통신망법 제50조 — 사전 동의 필수)
+- ❌ 가입 폼에 `captchaToken` 누락 금지
+
 ### 1.2.1 로그인/가입 복귀 원칙 (이탈 방지)
 
 > **대원칙**: 브랜드 사이트에서 로그인/가입을 시작하면, 완료 후 **해당 브랜드 사이트의 원래 페이지**로 복귀한다.

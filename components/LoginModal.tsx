@@ -6,6 +6,7 @@ import { X, Eye, EyeOff, AtSign, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
+import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -28,6 +29,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [error, setError] = useState("");
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
     useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);
@@ -96,10 +98,12 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         if (!name.trim()) { setError("닉네임을 입력해주세요"); return; }
         if (password.length < 6) { setError("비밀번호는 6자 이상이어야 합니다"); return; }
         if (password !== passwordConfirm) { setError("비밀번호가 일치하지 않습니다"); return; }
+        if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
         if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            const result = await register(name, email, password, true);
+            const result = await register(name, email, password, buildMemberConsent(consent, "email"), captcha.token);
+            captcha.reset();
             if (!result.success) {
                 if (result.error?.includes('이미 가입된')) {
                     setIsDuplicate(true);
@@ -243,6 +247,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                 <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)}
                                     className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : ''}`} required />
                                 {passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
+                                <SignupConsent value={consent} onChange={setConsent} accentColor={accentColor} />
                                 <CaptchaWidget {...captcha.widgetProps} />
                                 {error && <p className="text-sm text-red-500">{error}</p>}
                                 <button type="submit" disabled={isSubmitting}

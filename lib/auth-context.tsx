@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { User, SystemAccess, IntraModule } from '@/types/auth';
+import { User, SystemAccess, IntraModule, MemberConsent } from '@/types/auth';
 import { createClient } from '@/lib/supabase/client';
 import { permissionsFromJWT } from '@/lib/supabase/identity';
 import type { JWTAppMetadata } from '@/types/identity';
@@ -17,7 +17,8 @@ interface AuthContextType {
     hasAccess: (system: SystemAccess) => boolean;
     hasModuleAccess: (module: IntraModule) => boolean;
     login: (email: string, password: string, captchaToken?: string) => Promise<{ success: boolean; error?: string; user?: User }>;
-    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean, captchaToken?: string) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    register: (name: string, email: string, password: string, consent: MemberConsent, captchaToken?: string) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    recordConsent: (consent: MemberConsent) => Promise<{ success: boolean; error?: string }>;
     loginWithGoogle: () => Promise<void>;
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
@@ -129,6 +130,7 @@ function memberToUser(member: Record<string, unknown>): User {
         company: member.company as string | undefined,
         createdAt: member.created_at as string,
         newsletterSubscribed: member.newsletter_subscribed as boolean | undefined,
+        consent: (member.consent as Partial<MemberConsent> | null) ?? {},
 
         // 온보딩
         onboardingCompleted: (member.onboarding_completed as boolean) ?? true,
@@ -177,6 +179,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const { defaultModuleAccess } = await import('@/types/auth');
                 const initialType = 'member' as const;
 
+                // 이메일 가입자는 signUp 때 받은 동의를 user_metadata로 넘겨받는다. 소셜 첫 가입은 비어 있음 → ConsentGate
+                const metaConsent = sessionUser.user_metadata?.consent as MemberConsent | undefined;
                 const oauthHandle = await generateUniqueHandle(sessionUser.email || userName, supabase);
                 const { data: newMember } = await supabase
                     .from('members')
@@ -196,6 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         module_access: defaultModuleAccess[initialType] || [],
                         affiliations: [],
                         onboarding_completed: false,
+                        consent: metaConsent?.terms_version ? metaConsent : {},
+                        newsletter_subscribed: metaConsent?.marketing === true,
                     })
                     .select()
                     .single();
@@ -390,13 +396,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, syncUserFromSession]);
 
     // 회원가입: Supabase Auth + members 테이블
-    const register = useCallback(async (name: string, email: string, password: string, newsletterSubscribed?: boolean, captchaToken?: string) => {
+    const register = useCallback(async (name: string, email: string, password: string, consent: MemberConsent, captchaToken?: string) => {
         try {
             // 1. Supabase Auth 가입
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { name }, captchaToken }
+                options: { data: { name, consent }, captchaToken } // consent는 이메일 인증 후 members 생성 시 옮겨 담음
             });
 
             if (!error && data.user) {
@@ -431,7 +437,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         intra_access: false,
                         module_access: initialModules,
                         affiliations: [],
-                        newsletter_subscribed: newsletterSubscribed || false,
+                        newsletter_subscribed: consent.marketing,
+                        consent,
                         role: 'Viewer',
                     })
                     .select()
@@ -484,6 +491,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return updated;
         });
     }, [supabase]);
+
+    // 동의 기록 (소셜 첫 가입·기존 회원) — ConsentGate에서 호출
+    const recordConsent = useCallback(async (consent: MemberConsent) => {
+        if (!user) return { success: false, error: '로그인이 필요합니다.' };
+        const { error } = await supabase.from('members')
+            .update({ consent, newsletter_subscribed: consent.marketing, updated_at: new Date().toISOString() })
+            .eq('id', user.id);
+        if (error) return { success: false, error: '동의 저장에 실패했습니다. 다시 시도해주세요.' };
+        const updated = { ...user, consent, newsletterSubscribed: consent.marketing };
+        setUser(updated);
+        saveUserToStorage(updated);
+        return { success: true };
+    }, [supabase, user]);
 
     // Google 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithGoogle = useCallback(async () => {
@@ -606,7 +626,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user, isAuthenticated: !!user, isLoading,
             isStaff, isInternal, canAccessIntra,
             hasAccess, hasModuleAccess,
-            login, register, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
+            login, register, recordConsent, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
         }}>
             {children}
         </AuthContext.Provider>
