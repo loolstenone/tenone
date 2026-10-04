@@ -157,7 +157,7 @@ export function UniverseFooter({
             <div className={clsx("border-t", borderColor)}>
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className={clsx("text-xs text-center sm:text-left space-y-1", textTertiary)}>
-                        <p>© {year} {brandName} · Ten:One™ Universe. All rights reserved.</p>
+                        <p>© {year} {brandName.startsWith("Ten:One") ? "" : `${brandName} · `}Ten:One™ Universe. All rights reserved.</p>
                         <p>
                             {COMPANY_INFO.legalName} · 대표 {COMPANY_INFO.representative} · 사업자등록번호 {COMPANY_INFO.businessNumber}
                             {COMPANY_INFO.mailOrderNumber && <> · 통신판매업 {COMPANY_INFO.mailOrderNumber}</>}
