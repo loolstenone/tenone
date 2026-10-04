@@ -111,9 +111,6 @@ export function UniverseFooter({
                         {tagline && (
                             <p className={clsx("mt-2 text-sm", textSecondary)}>{tagline}</p>
                         )}
-                        <div className={clsx("mt-4 text-xs", textTertiary)}>
-                            Part of <Link href="https://tenone.biz" className={clsx(linkHover, "underline-offset-2 hover:underline")} style={{ color: accentColor }}>Ten:One™ Universe</Link>
-                        </div>
                     </div>
 
                     {/* 링크 컬럼들 */}
