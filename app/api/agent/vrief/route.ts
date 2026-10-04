@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { invokeAgent } from '@/lib/agent/claude';
+import { requireStaff } from '@/lib/api-guard';
 import { createClient } from '@/lib/supabase/server';
 import { postAgentMessage } from '@/lib/supabase/chat';
 
@@ -57,12 +58,9 @@ const PM_PROMPT = `당신은 열시일분(10:01) 에이전트입니다. 저녁 �
 간결하게, 핵심만 보고하세요.`;
 
 export async function POST(request: NextRequest) {
-    // 인증: ADMIN_API_KEY 또는 내부 cron 호출
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = request.headers.get('x-cron-secret');
-    if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}` && cronSecret !== process.env.CRON_SECRET) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // 인증: 직원 세션 또는 내부 호출(ADMIN_API_KEY·CRON_SECRET) — 키 미설정 시 통과하던 fail-open 제거
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         const body = await request.json().catch(() => ({}));

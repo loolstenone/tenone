@@ -152,6 +152,29 @@ export async function middleware(request: NextRequest) {
     // 보안 검증이 필요한 경우는 API Route에서 getUser() 직접 호출
     await supabase.auth.getSession();
 
+    // 1b. 인트라 서버 게이트 — 직원이 아니면 페이지·RSC 내용을 아예 내려주지 않는다.
+    //     (클라이언트 layout 확인만으로는 번들·RSC가 노출되고 sessionStorage 조작으로 화면이 열림)
+    //     비직원은 /intra/login(빈 페이지)으로 rewrite → layout이 로그인/권한없음 UI 표시.
+    {
+        const onIntraHost = reqDomain === 'intra.tenone.biz';
+        const isIntraPath = pathname === '/intra' || pathname.startsWith('/intra/');
+        const isIntraHostPage = onIntraHost && !isIntraPath
+            && !skipPaths.some(p => pathname.startsWith(p)) && !pathname.includes('.');
+        const effectivePath = isIntraPath ? pathname : isIntraHostPage ? `/intra${pathname === '/' ? '' : pathname}` : null;
+        if (effectivePath && effectivePath !== '/intra/login') {
+            const staff = await requireStaff(request);
+            if (staff instanceof NextResponse) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/intra/login';
+                url.search = '';
+                const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+                response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+                rw.headers.set('Cache-Control', 'private, no-store');
+                return rw;
+            }
+        }
+    }
+
     // 2a. /@handle → 호스트별 분기
     //     myverse.kr → /myverse/{handle} (Myverse 공개 페이지)
     //     그 외      → /profile/{handle} (유니버스 프로필)

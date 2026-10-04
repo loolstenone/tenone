@@ -2,6 +2,7 @@
 
 import { Cloud, Github, Database, Mail, Clock, ExternalLink, AlertCircle, Globe, Server } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { useExternalStatus, formatKst } from "@/lib/intra/use-external-status";
 
 const INFRA = [
     {
@@ -12,7 +13,6 @@ const INFRA = [
         project: "tenone (production)",
         url: "https://vercel.com/dashboard",
         details: [
-            { k: "포함 크레딧", v: "$1.90 / $20.00 사용 (기준 2026-04-14)" },
             { k: "On-Demand 상한", v: "$100" },
             { k: "프리뷰 배포", v: "차단됨 (dev/feature-* 비활성화)" },
             { k: "배포 트리거", v: "git push origin master (유일)" },
@@ -22,7 +22,7 @@ const INFRA = [
         name: "Supabase",
         icon: Database,
         color: "text-emerald-600",
-        plan: "단일 프로젝트",
+        plan: "Free · 단일 프로젝트 (자동 백업 없음)",
         project: "ziotlxkdctlhiwkgmmsh",
         url: "https://supabase.com/dashboard/project/ziotlxkdctlhiwkgmmsh",
         details: [
@@ -30,7 +30,7 @@ const INFRA = [
             { k: "Auth", v: "Email+OTP · Google OAuth" },
             { k: "Storage", v: "avatars · site-branding 버킷" },
             { k: "Edge Functions", v: "Supabase MCP로 배포" },
-            { k: "Access Token", v: "SUPABASE_ACCESS_TOKEN (.env.local · PAT)" },
+            { k: "SQL 실행", v: "Supabase MCP (PAT 평문 보관 금지)" },
         ],
     },
     {
@@ -78,19 +78,6 @@ const INFRA = [
         ],
     },
     {
-        name: "Vercel Cron",
-        icon: Clock,
-        color: "text-violet-600",
-        plan: "vercel.json 스케줄",
-        project: "자동 실행 작업",
-        url: "https://vercel.com/loolstenone/tenone/cron-jobs",
-        details: [
-            { k: "뉴스레터 발송", v: "/api/newsletter/cron/dispatch (10분 간격)" },
-            { k: "통합 크롤", v: "AM 9:00 KST daily" },
-            { k: "통합 처리+브리핑", v: "AM 9:30 KST daily" },
-        ],
-    },
-    {
         name: "Domain Registrar · DNS",
         icon: Globe,
         color: "text-teal-600",
@@ -107,24 +94,12 @@ const INFRA = [
     },
 ];
 
-const ENV_VARS = [
-    { key: "NEXT_PUBLIC_SUPABASE_URL", purpose: "Supabase API 엔드포인트", scope: "public" },
-    { key: "NEXT_PUBLIC_SUPABASE_ANON_KEY", purpose: "Supabase anonymous key (RLS 적용)", scope: "public" },
-    { key: "SUPABASE_SERVICE_ROLE_KEY", purpose: "Supabase service role (RLS bypass)", scope: "server-only" },
-    { key: "SUPABASE_ACCESS_TOKEN", purpose: "Supabase Management API PAT", scope: "server-only" },
-    { key: "RESEND_API_KEY", purpose: "이메일 발송", scope: "server-only" },
-    { key: "RESEND_WEBHOOK_SECRET", purpose: "Svix Webhook 서명 검증", scope: "server-only" },
-    { key: "ANTHROPIC_API_KEY", purpose: "Claude API (에이전트)", scope: "server-only" },
-    { key: "GMAIL_OAUTH_CLIENT_ID / SECRET", purpose: "GCP OAuth 2.0 Client (Gmail API)", scope: "server-only" },
-    { key: "NEXT_PUBLIC_GA_MEASUREMENT_ID", purpose: "Google Analytics 4 (GCP 연결)", scope: "public" },
-    { key: "NEXT_PUBLIC_GTM_ID", purpose: "Google Tag Manager", scope: "public" },
-    { key: "NEXT_PUBLIC_CLARITY_ID", purpose: "Microsoft Clarity (히트맵)", scope: "public" },
-];
 
 export default function DevEnvPage() {
+    const { data, error } = useExternalStatus();
     return (
         <div className="space-y-6">
-            <PageHeader title="개발 환경" description="Vercel · Supabase · GitHub · Resend · GCP · Cron · Domain — 유니버스 실행 인프라 7종" />
+            <PageHeader title="개발 환경" description="Vercel · Supabase · GitHub · Resend · GCP · Domain + Cron·환경변수 실시간 현황" />
 
             {/* Infra Cards */}
             <div className="space-y-4">
@@ -158,9 +133,34 @@ export default function DevEnvPage() {
                 ))}
             </div>
 
-            {/* Env Vars */}
+            {/* Cron — vercel.json에서 자동 */}
             <div>
-                <h2 className="text-sm font-semibold text-neutral-900 mb-3">Vercel 환경 변수</h2>
+                <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-violet-600" /> Vercel Cron <span className="text-[10px] font-normal text-neutral-500">vercel.json 자동 반영</span>
+                </h2>
+                <div className="bg-white border border-neutral-200 rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                    {(data?.crons ?? []).map(c => (
+                        <div key={c.path} className="flex items-center justify-between text-[11px] bg-neutral-50 rounded px-2 py-1">
+                            <span className="font-mono text-neutral-800 truncate">{c.path}</span>
+                            <span className="text-neutral-500 shrink-0 ml-2">{c.label}</span>
+                        </div>
+                    ))}
+                    {!data && <p className="text-[11px] text-neutral-500">{error ?? "불러오는 중..."}</p>}
+                </div>
+            </div>
+
+            {/* Env Vars — 실제 배포 환경의 설정 여부 (값은 절대 표시하지 않음) */}
+            <div>
+                <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+                    환경 변수 <span className="text-[10px] font-normal text-neutral-500">
+                        {data ? `${data.deployment.env} · ${data.deployment.commit ?? "—"} · ${formatKst(data.generatedAt)} 확인` : ""}
+                    </span>
+                </h2>
+                {data && data.envForbiddenSet.length > 0 && (
+                    <div className="mb-2 bg-rose-50 border border-rose-200 rounded p-2 text-[11px] text-rose-900">
+                        {data.envForbiddenSet.map(f => <p key={f.key}>⚠ 금지 변수 설정됨: <span className="font-mono">{f.key}</span> — {f.reason}. Vercel에서 삭제하세요.</p>)}
+                    </div>
+                )}
                 <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
                     <table className="w-full text-xs">
                         <thead className="bg-neutral-50 border-b border-neutral-200">
@@ -168,10 +168,11 @@ export default function DevEnvPage() {
                                 <th className="text-left px-3 py-2 font-semibold text-neutral-600">키</th>
                                 <th className="text-left px-3 py-2 font-semibold text-neutral-600">용도</th>
                                 <th className="text-left px-3 py-2 font-semibold text-neutral-600">범위</th>
+                                <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {ENV_VARS.map((e) => (
+                            {(data?.env ?? []).map((e) => (
                                 <tr key={e.key} className="border-b border-neutral-100 last:border-0">
                                     <td className="px-3 py-1.5 font-mono text-[10px] text-neutral-900">{e.key}</td>
                                     <td className="px-3 py-1.5 text-neutral-600">{e.purpose}</td>
@@ -180,10 +181,16 @@ export default function DevEnvPage() {
                                             e.scope === "public" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
                                         }`}>{e.scope}</span>
                                     </td>
+                                    <td className="px-3 py-1.5 text-[10px]">
+                                        {e.set ? <span className="text-emerald-700">● 설정됨</span>
+                                            : e.required ? <span className="text-rose-700 font-semibold">● 필수 미설정</span>
+                                            : <span className="text-neutral-400">○ 미설정</span>}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    {!data && <p className="px-3 py-2 text-[11px] text-neutral-500">{error ?? "불러오는 중..."}</p>}
                 </div>
             </div>
 

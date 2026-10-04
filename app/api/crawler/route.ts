@@ -9,6 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { requireStaff } from '@/lib/api-guard';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { postAgentMessage } from '@/lib/supabase/chat';
 import { MINDLE_CATEGORY_LIST_FOR_PROMPT } from '@/constants/mindle-categories';
@@ -88,12 +89,9 @@ function parseRssItems(xml: string, sourceName: string, category: string): RssIt
 }
 
 export async function POST(request: NextRequest) {
-    // 인증
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = request.headers.get('x-cron-secret');
-    if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}` && cronSecret !== process.env.CRON_SECRET) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // 인증: 직원 세션 또는 내부 호출(ADMIN_API_KEY·CRON_SECRET) — 키 미설정 시 통과하던 fail-open 제거
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
     const body = await request.json().catch(() => ({}));
     const action = (body as { action?: string }).action || 'crawl';

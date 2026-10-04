@@ -5,6 +5,7 @@ import {
     Share2, Cloud, Key, Radio, ArrowRight,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { ExternalStatusSummary } from "@/components/intra/ExternalStatusSummary";
 
 const CATEGORIES = [
     { key: "dev-env", title: "개발 환경", icon: Cloud, color: "text-blue-600", bg: "bg-blue-50",
@@ -13,7 +14,7 @@ const CATEGORIES = [
       href: "/intra/ums/external/dev-env" },
     { key: "apis", title: "외부 API", icon: Key, color: "text-purple-600", bg: "bg-purple-50",
       desc: "Anthropic Claude · OpenAI · Google OAuth · 소셜 미디어 API",
-      items: ["Anthropic", "Google OAuth (Gmail)", "Resend API", "Supabase API"],
+      items: ["Anthropic", "Google OAuth (Gmail)", "Resend API", "Cloudflare Turnstile"],
       href: "/intra/ums/external/apis" },
     { key: "sources", title: "크롤링 · RSS · 뉴스레터", icon: Radio, color: "text-amber-600", bg: "bg-amber-50",
       desc: "Whole See가 유니버스로 들여오는 외부 정보 소스",
@@ -28,6 +29,9 @@ export default function ExternalResourcesHub() {
                 title="외부 리소스"
                 description="유니버스 경계 밖에 연결된 모든 시스템·API·데이터 원천 카탈로그"
             />
+
+            {/* 자동 점검 — /api/intra/external/status (변동 자동 반영) */}
+            <ExternalStatusSummary />
 
             {/* Philosophy */}
             <div className="bg-gradient-to-r from-neutral-900 to-slate-700 text-white rounded-lg p-5">
@@ -75,7 +79,7 @@ export default function ExternalResourcesHub() {
             {/* Notes */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[11px] text-amber-900 leading-relaxed">
                 <strong>보안 원칙:</strong> API 키·토큰은 모두 Vercel 환경변수에 저장. 코드나 DB에 평문 보관 금지.
-                토큰 만료·바운스·에러율은 각 카테고리 페이지에서 모니터링.
+                상단 자동 점검은 실제 배포 환경 값(설정 여부만)을 읽어 표시하며, 금지 변수(브라우저 노출 관리자 키·PAT)가 설정되면 경고한다.
             </div>
         </div>
     );
