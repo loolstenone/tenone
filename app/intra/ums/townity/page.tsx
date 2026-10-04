@@ -2,24 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ExternalLink, Users, MapPin, MessageCircle, Loader2 } from "lucide-react";
+import { ExternalLink, Users, MessageCircle, Loader2 } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 export default function TownityDashboard() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ members: 0, meetups: 0, pendingInquiries: 0 });
+    const [stats, setStats] = useState({ members: 0, pendingInquiries: 0 });
 
     useEffect(() => {
         const sb = createClient();
         Promise.all([
             sb.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["townity"]),
-            sb.from("meetups").select("*", { count: "exact", head: true }).eq("brand_id", "townity"),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "townity").eq("status", "pending"),
-        ]).then(([members, meetups, inquiries]) => {
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "townity\\_%").in("status", ["new", "pending"]),
+        ]).then(([members, inquiries]) => {
             setStats({
                 members: members.count ?? 0,
-                meetups: meetups.count ?? 0,
                 pendingInquiries: inquiries.count ?? 0,
             });
             setLoading(false);
@@ -39,9 +37,8 @@ export default function TownityDashboard() {
                 <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>
             ) : (
                 <>
-                    <div className="grid grid-cols-3 gap-4 mb-8">
+                    <div className="grid grid-cols-2 gap-4 mb-8">
                         <StatCard label="전체 회원" value={`${stats.members}명`} icon={<Users className="h-4 w-4" />} />
-                        <StatCard label="모임" value={`${stats.meetups}개`} icon={<MapPin className="h-4 w-4" />} />
                         <StatCard label="미답변 문의" value={`${stats.pendingInquiries}건`}
                             sub="응답 필요" icon={<MessageCircle className="h-4 w-4" />} />
                     </div>
@@ -52,7 +49,6 @@ export default function TownityDashboard() {
                             <div className="space-y-2">
                                 {[
                                     { label: "회원 관리", sub: "Townity 가입 회원 관리", href: "/intra/ums/townity/members" },
-                                    { label: `모임 관리 ${stats.meetups}개`, sub: "로컬 모임 · 이벤트 관리", href: "/intra/ums/townity/meetups" },
                                     { label: "커뮤니티", sub: "게시글 · 커뮤니티 관리", href: "/intra/ums/townity/community" },
                                     { label: `미답변 문의 ${stats.pendingInquiries}건`, sub: "고객 문의 응대", href: "/intra/ums/townity/cs" },
                                 ].map(({ label, sub, href }) => (

@@ -13,7 +13,6 @@ const sections = [
             { name: "Onboarding", desc: "Day 1 → Week 1 → Month 1 체크리스트", href: "/intra/wiki/onboarding", icon: Compass, updated: "2026-03-20" },
             { name: "Evolution School", desc: "VRIEF 프레임워크, GPR 목표관리 교육", href: "/intra/wiki/education", icon: GraduationCap, updated: "2026-03-20" },
             { name: "Handbook", desc: "근무, 휴가, 경비, 보안 정책", href: "/intra/wiki/handbook", icon: FileText, updated: "2026-03-20" },
-            { name: "FAQ", desc: "자주 묻는 질문 모음", href: "/intra/wiki/faq", icon: HelpCircle, updated: "2026-03-20" },
         ],
     },
     {

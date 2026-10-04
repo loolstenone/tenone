@@ -14,7 +14,7 @@ export default function RookDashboard() {
         const sb = createClient();
         Promise.all([
             sb.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["rook"]),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "rook").eq("status", "pending"),
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "rook\\_%").in("status", ["new", "pending"]),
             sb.from("posts").select("*", { count: "exact", head: true }).eq("brand_id", "rook"),
         ]).then(([members, inquiries, posts]) => {
             setStats({

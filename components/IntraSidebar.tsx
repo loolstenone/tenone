@@ -22,6 +22,7 @@ export function IntraSidebar() {
     const getPostsByBoard = (_id: string): never[] => [];
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
     // BUMS 사이트 진입 감지
     const siteMatch = pathname.match(/^\/intra\/bums\/sites\/([^/]+)/);
@@ -154,14 +155,33 @@ export function IntraSidebar() {
                             {/* Expanded sub-menu */}
                             {isExpanded && hasSections && (
                                 <div className="ml-3 pl-3 border-l border-neutral-800 mt-1 space-y-1">
-                                    {mod.sections.map((section, sIdx) => (
+                                    {mod.sections.map((section, sIdx) => {
+                                        const sectionKey = `${mod.name}:${sIdx}`;
+                                        const sectionOpen = !section.collapsed
+                                            || openSections.has(sectionKey)
+                                            || section.items.some((item) => isActive(item.href, item.exact));
+                                        return (
                                         <div key={sIdx}>
-                                            {section.label && (
+                                            {section.label && (section.collapsed ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setOpenSections((prev) => {
+                                                        const next = new Set(prev);
+                                                        if (next.has(sectionKey)) next.delete(sectionKey); else next.add(sectionKey);
+                                                        return next;
+                                                    })}
+                                                    className="w-full flex items-center gap-1 text-[9px] tracking-widest text-neutral-600 hover:text-neutral-400 uppercase px-3 pt-3 pb-1"
+                                                >
+                                                    {sectionOpen ? <ChevronDown className="h-2.5 w-2.5" /> : <ChevronRight className="h-2.5 w-2.5" />}
+                                                    {section.label}
+                                                    <span className="normal-case tracking-normal">({section.items.length})</span>
+                                                </button>
+                                            ) : (
                                                 <p className="text-[9px] tracking-widest text-neutral-600 uppercase px-3 pt-3 pb-1">
                                                     {section.label}
                                                 </p>
-                                            )}
-                                            {section.items
+                                            ))}
+                                            {sectionOpen && section.items
                                                 .filter((item) => !item.staffOnly || isStaff)
                                                 .filter((item) => canSeeByRole(item.roles, userRoles))
                                                 .map((item) => (
@@ -189,7 +209,8 @@ export function IntraSidebar() {
                                                     </Link>
                                                 ))}
                                         </div>
-                                    ))}
+                                        );
+                                    })}
 
                                     {/* 동적 사이트 관리 메뉴 (BUMS 사이트 진입 시) */}
                                     {mod.dynamic && activeSite && activeSiteId && (

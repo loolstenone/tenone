@@ -2,26 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ExternalLink, Users, ClipboardList, MapPin, Loader2 } from "lucide-react";
+import { ExternalLink, Users, ClipboardList, Loader2 } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 export default function DomoDashboard() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ members: 0, pendingApplications: 0, meetups: 0, pendingInquiries: 0 });
+    const [stats, setStats] = useState({ members: 0, pendingInquiries: 0 });
 
     useEffect(() => {
         const sb = createClient();
         Promise.all([
             sb.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["domo"]),
-            sb.from("domo_applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
-            sb.from("meetups").select("*", { count: "exact", head: true }).eq("brand_id", "domo"),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "domo").eq("status", "pending"),
-        ]).then(([members, apps, meetups, inquiries]) => {
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "domo\\_%").in("status", ["new", "pending"]),
+        ]).then(([members, inquiries]) => {
             setStats({
                 members: members.count ?? 0,
-                pendingApplications: apps.count ?? 0,
-                meetups: meetups.count ?? 0,
                 pendingInquiries: inquiries.count ?? 0,
             });
             setLoading(false);
@@ -41,11 +37,8 @@ export default function DomoDashboard() {
                 <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>
             ) : (
                 <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
                         <StatCard label="승인 회원" value={`${stats.members}명`} icon={<Users className="h-4 w-4" />} />
-                        <StatCard label="심사 대기" value={`${stats.pendingApplications}건`}
-                            sub="승인 필요" icon={<ClipboardList className="h-4 w-4" />} />
-                        <StatCard label="모임" value={`${stats.meetups}개`} icon={<MapPin className="h-4 w-4" />} />
                         <StatCard label="미답변 문의" value={`${stats.pendingInquiries}건`} icon={<ClipboardList className="h-4 w-4" />} />
                     </div>
 
@@ -54,9 +47,7 @@ export default function DomoDashboard() {
                             <SectionTitle title="빠른 이동" />
                             <div className="space-y-2">
                                 {[
-                                    { label: `심사 대기 ${stats.pendingApplications}건`, sub: "가입 신청 심사 · 승인", href: "/intra/ums/domo/applications" },
                                     { label: "승인 회원 관리", sub: "Domo 승인 멤버 관리", href: "/intra/ums/domo/members" },
-                                    { label: `모임 관리 ${stats.meetups}개`, sub: "비즈니스 모임 · 네트워킹 이벤트", href: "/intra/ums/domo/meetups" },
                                     { label: `미답변 문의 ${stats.pendingInquiries}건`, sub: "고객 문의 응대", href: "/intra/ums/domo/cs" },
                                 ].map(({ label, sub, href }) => (
                                     <Link key={href} href={href}

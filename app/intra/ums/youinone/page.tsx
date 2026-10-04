@@ -16,7 +16,7 @@ export default function YouInOneDashboard() {
             sb.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["youinone"]),
             sb.from("member_capability_roles").select("*", { count: "exact", head: true }).eq("brand_id", "youinone").eq("capability_key", "membership").eq("role", "applicant").is("valid_until", null),
             sb.from("wio_projects").select("*", { count: "exact", head: true }).eq("tenant_id", "youinone").eq("status", "active"),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "youinone").eq("status", "pending"),
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "youinone\\_%").in("status", ["new", "pending"]),
         ]).then(([members, pending, projects, inquiries]) => {
             setStats({
                 members: members.count ?? 0,
