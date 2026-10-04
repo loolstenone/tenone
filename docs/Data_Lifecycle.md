@@ -59,10 +59,10 @@
 | hero_profiles · career_profiles · resumes | 삭제 | 개인 프로필 |
 | hero_goals · hero_goal_checkins · hero_daily_checkins · hero_reflections · hero_achievements | 삭제 | 개인 기록 |
 | hit_*_results · hit_sessions · hit_chat_messages · hit_admin_flags | 삭제 | 진단 결과 (민감) |
-| hero_talent_applications · hero_matching_requests · hero_jh_responses · hero_tih_responses | 삭제 ❓ | **결정 필요**: 매칭 이력 보존 기간 |
+| hero_talent_applications · hero_matching_requests · hero_jh_responses · hero_tih_responses | 익명화 후 영구 보관 | 직무·산업·결과 등 통계는 남기고 이름·연락처·member 연결 제거 (2026-10-05 결정). 직업소개사업 등록 시 법정 장부 보존기간만 원본 보관 |
 | hero_matches | 익명화 | 상대방(기업) 기록 보존 |
 | hero_company_members | 삭제 (기업은 유지) | 기업 계정은 다른 담당자에게 승계 |
-| hero_coaching_sessions | 익명화 ❓ | 결제·정산 연관 시 법정 보관 (전자상거래법 5년) |
+| hero_coaching_sessions | 결제 연관분 5년 원본 보관 후 익명화 | 전자상거래법 계약·결제 기록 5년 |
 | coaching_waitlist · hero_search_light_waitlist · hero_business_inquiries | 삭제 | 이메일 기반 대기·문의 |
 | hit_questions · hit_report_modules · hit_* 마스터 | 유지 | 콘텐츠 (개인 연결 없음) |
 
@@ -72,8 +72,9 @@
 |--------|-----------|------|
 | mad_members | 삭제 | ⚠️ `email`·`user_id` 키 → `member_id`로 전환 필요 (계약 1조) |
 | mad_applications · mad_hero_applications | 삭제 | 지원서. 비회원 지원 가능하면 email 유지 허용 |
-| mad_team_members · mad_certificates | 익명화 ❓ | **결정 필요**: 수료·대회 이력을 기록으로 남길지 |
-| mad_articles · mad_posts · mad_comments · mad_article_comments | 익명화 ❓ | **결정 필요**: 커뮤니티 글 처리 원칙 (아래 4번) |
+| mad_team_members | 익명화 후 영구 보관 | 대회·기수 활동 이력 (2026-10-05 결정) |
+| mad_certificates | 최소 항목 보관 (이름·발급일·인증코드) | 진위 확인용. 개인정보처리방침에 '탈퇴 후 보관 항목'으로 명시 + 발급 시 동의 |
+| mad_articles · mad_posts · mad_comments · mad_article_comments | 익명화 ("탈퇴한 회원") | 본인 요청 시 삭제 (2026-10-05 결정) |
 | mad_article_likes | 삭제 | |
 | mad_clubs.president_member_id | 연결 해제 | 동아리는 유지 |
 | mad_clubs · mad_cohorts · mad_competitions · mad_competition_results · mad_archive | 유지 | 활동 콘텐츠 |
@@ -87,10 +88,15 @@
 
 ---
 
-## 4. 결정이 필요한 정책 (텐원님)
+## 4. 전 브랜드 공통 정책 (2026-10-05 결정)
 
-1. **커뮤니티 글·댓글**: 탈퇴 시 삭제 vs 익명화("탈퇴한 회원")? — 일반적 관행은 익명화 + 본인 요청 시 삭제
-2. **HeRo 매칭·지원 이력**: 탈퇴 즉시 삭제 vs 일정 기간 보존?
-3. **MADLeague 수료·대회 이력**: 탈퇴해도 기록으로 남길지 (익명화)?
+| 데이터 | 탈퇴 시 처리 | 법적 근거 |
+|--------|-------------|----------|
+| 커뮤니티 글·댓글 | 익명화("탈퇴한 회원"), 본인 요청 시 삭제 | — |
+| 매칭·지원·활동·대회 이력 | **익명화 후 영구 보관** (식별 정보 제거) | 개인정보보호법 제21조(파기) · 제58조의2(익명정보 적용 제외) |
+| 수료증 | 이름·발급일·인증코드만 보관 (진위 확인) | 방침 명시 + 발급 시 동의 |
+| 결제·계약 기록 | 5년 원본 보관 후 익명화 | 전자상거래법 |
 
-결정 후 이 문서의 ❓ 표시를 확정하고, 탈퇴 처리 함수(`process_brand_withdrawal(member_id, brand_id)`)로 구현한다.
+> ⛔ **식별 가능한 상태로 영구 보관 금지** — 탈퇴 = 이용 목적 달성 → 지체 없이 파기가 원칙 (제21조).
+
+다음: 탈퇴 처리 함수 `process_brand_withdrawal(member_id, brand_id)` 구현 (HeRo·MADLeague부터).
