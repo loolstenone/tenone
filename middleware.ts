@@ -5,7 +5,7 @@ import { getApiAccessRule } from '@/lib/api-access-policy';
 import { requireStaff } from '@/lib/api-guard';
 
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증·프로필은 전 도메인 공유)
-const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
+const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile', '/privacy', '/terms'];
 
 // Myverse 앱 라우트 SSOT — myverse.kr 도메인에서 prefix 없이 노출되는 앱 첫 세그먼트 목록
 // 예: myverse.kr/today → 내부 /myverse/app/today
