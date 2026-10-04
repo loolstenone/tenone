@@ -1,86 +1,130 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { COMPANY_INFO, LEGAL_DOCUMENTS } from "@/lib/company-info";
+
+export const metadata: Metadata = { title: "이용약관" };
+
+// ① Ten:One 통합 이용약관 (계정 약관) — 2층 약관 체계의 1층 (CLAUDE.md §0.1 데이터 계약 4조)
+// 전 브랜드 도메인의 /terms 에서 동일하게 노출 (middleware skipPaths).
+// ② 서비스별 추가 약관은 해당 기능 출시 시 lib/company-info.ts LEGAL_DOCUMENTS에 등록하고 /terms/{brand} 로 추가.
+// 변경 시: LEGAL_DOCUMENTS.terms 버전·시행일 갱신 + 시행 7일 전 공지 (불리한 변경 30일 전) + 부칙 이력 추가
+
+const doc = LEGAL_DOCUMENTS.terms;
+
+type Article = { title: string; body: (string | string[])[] };
+
+const ARTICLES: Article[] = [
+    { title: "제1조 (목적)", body: [
+        `이 약관은 ${COMPANY_INFO.legalName}(${COMPANY_INFO.brandName}, 이하 "회사")가 운영하는 모든 서비스를 하나의 Ten:One 계정으로 이용하는 데 필요한 회사와 회원의 권리·의무 및 책임사항, 이용 조건과 절차를 정함을 목적으로 합니다.`,
+    ]},
+    { title: "제2조 (정의)", body: [[
+        `"서비스": 회사가 운영하는 모든 온라인 서비스를 말하며, tenone.biz와 회사가 운영하는 각 브랜드 서비스(HeRo, MADLeague, MADLeap, Badak 등) 및 그 도메인을 포함합니다. 운영 중인 서비스 목록은 회사 홈페이지(tenone.biz)에서 확인할 수 있습니다.`,
+        `"Ten:One 계정"(이하 "계정"): 회원이 여러 서비스를 하나의 아이디로 이용하기 위해 회사에 등록한 계정을 말합니다.`,
+        `"회원": 이 약관에 동의하고 계정을 만든 자를 말합니다.`,
+        `"서비스별 추가 약관": 특정 서비스의 고유한 이용 조건(유료 이용, 멤버십 승인, 매칭 등)을 정한 약관을 말합니다.`,
+        `"게시물": 회원이 서비스에 올린 글·사진·파일·댓글 등 일체의 정보를 말합니다.`,
+    ]]},
+    { title: "제3조 (약관의 게시와 변경)", body: [[
+        "회사는 이 약관을 모든 서비스 화면 하단에 게시합니다.",
+        "회사는 관련 법령을 위반하지 않는 범위에서 약관을 변경할 수 있으며, 변경 시 시행일과 변경 사유를 명시하여 시행 7일 전부터(회원에게 불리한 변경은 30일 전부터) 서비스 화면에 공지하고, 불리한 변경은 이메일 등으로 개별 통지합니다.",
+        "회원이 변경된 약관에 동의하지 않는 경우 이용 계약을 해지(탈퇴)할 수 있습니다. 공지·통지 시 시행일까지 거부 의사를 표시하지 않으면 동의한 것으로 본다는 뜻을 함께 알렸음에도 회원이 거부 의사를 표시하지 않은 경우 변경 약관에 동의한 것으로 봅니다.",
+    ]]},
+    { title: "제4조 (서비스별 추가 약관)", body: [[
+        "특정 서비스에 고유한 이용 조건이 있는 경우 회사는 서비스별 추가 약관을 정할 수 있으며, 회원은 해당 서비스를 처음 이용할 때 이에 동의합니다.",
+        "서비스별 추가 약관과 이 약관이 다르게 정하는 경우 해당 서비스에 관하여는 서비스별 추가 약관이 우선합니다.",
+        "마케팅 정보 수신, 서비스 간 정보 활용, 제3자 제공 등은 약관과 별도로 각각 동의를 받으며, 동의하지 않아도 계정과 기본 서비스는 이용할 수 있습니다.",
+    ]]},
+    { title: "제5조 (계정 만들기)", body: [[
+        "계정은 이용자가 이 약관과 개인정보처리방침의 내용을 확인하고 동의한 후 가입을 신청하고, 회사가 이를 승낙함으로써 만들어집니다. 소셜 로그인(Google, Kakao 등)으로도 가입할 수 있습니다.",
+        "만 14세 미만은 가입할 수 없습니다.",
+        "회사는 타인 명의 도용, 허위 정보 기재, 자동화된 수단을 이용한 가입, 과거 이용 제한 이력이 있는 경우 등에는 승낙하지 않거나 사후에 이용 계약을 해지할 수 있습니다.",
+        "하나의 계정으로 여러 서비스를 이용할 수 있습니다. 승인이 필요한 서비스(멤버십 등)는 해당 서비스의 절차에 따라 별도로 이용이 승인됩니다.",
+    ]]},
+    { title: "제6조 (계정 관리)", body: [[
+        "회원은 계정 정보와 비밀번호를 스스로 관리해야 하며, 이를 제3자가 이용하게 해서는 안 됩니다.",
+        "계정이 도용되거나 제3자가 사용하고 있음을 알게 된 경우 즉시 회사에 알려야 합니다.",
+        "회원은 가입 시 등록한 정보가 변경된 경우 프로필에서 수정해야 하며, 수정하지 않아 생긴 불이익은 회원이 부담합니다.",
+    ]]},
+    { title: "제7조 (서비스의 제공, 변경 및 종료)", body: [[
+        "회사는 각 서비스의 기능을 연중무휴 제공하는 것을 원칙으로 하되, 점검·장애·불가항력 등으로 일시 중단할 수 있습니다.",
+        "회사는 운영상·기술상 필요에 따라 서비스의 전부 또는 일부를 변경하거나, 개별 서비스를 통합·분리·종료할 수 있습니다.",
+        "개별 서비스를 종료하는 경우 회사는 종료일 30일 전까지 해당 서비스 화면과 이메일로 알리고, 회원이 자신의 데이터를 내려받거나 후속 서비스로 이전할 수 있는 방법을 함께 안내합니다(회원의 동의가 있는 경우에만 이전합니다). 유료 서비스의 잔여 이용분은 관련 법령과 서비스별 추가 약관에 따라 환불합니다.",
+    ]]},
+    { title: "제8조 (유료 서비스)", body: [
+        "회사가 유료 서비스를 제공하는 경우 그 내용·가격·결제·청약철회 및 환불은 해당 서비스별 추가 약관과 「전자상거래 등에서의 소비자보호에 관한 법률」에 따르며, 회원이 결제 전에 확인할 수 있도록 표시합니다.",
+    ]},
+    { title: "제9조 (유니버스 코인)", body: [[
+        "회사는 서비스 이용·기여에 따라 회원에게 유니버스 코인(UC)을 지급할 수 있으며, 지급 기준과 사용처는 회사가 정하여 서비스 화면에 공지합니다.",
+        "UC는 회사가 정한 서비스 내 결제 금액의 일부 차감 등에만 사용할 수 있으며, 현금으로 환급되거나 다른 회원에게 양도·매매할 수 없습니다.",
+        "부정한 방법으로 얻은 UC는 회수할 수 있으며, 계정 탈퇴 시 남은 UC는 소멸합니다.",
+    ]]},
+    { title: "제10조 (게시물)", body: [[
+        "게시물에 대한 권리는 그 게시물을 작성한 회원에게 있습니다. 회원은 회사가 서비스 운영·노출·홍보를 위해 필요한 범위에서 게시물을 사용(복제·전시·편집 등)하는 것을 허락하며, 이 허락은 게시물이 삭제되면 종료됩니다.",
+        "회원은 언제든지 자신의 게시물을 삭제할 수 있습니다. 탈퇴 시 삭제하지 않은 게시물은 작성자를 \"탈퇴한 회원\"으로 익명 처리하여 유지되며, 탈퇴 전 삭제를 요청할 수 있습니다.",
+        "타인의 권리를 침해하거나 법령·이 약관에 위반되는 게시물은 사전 통지 없이 게시가 중단되거나 삭제될 수 있습니다.",
+    ]]},
+    { title: "제11조 (회원의 의무)", body: ["회원은 다음 행위를 해서는 안 됩니다.", [
+        "타인의 정보를 도용하거나 허위 정보를 등록하는 행위",
+        "회사 또는 제3자의 지식재산권·명예·사생활 등 권리를 침해하는 행위",
+        "서비스를 통해 얻은 다른 회원의 개인정보를 무단으로 수집·이용·제공하는 행위",
+        "자동화된 수단으로 서비스에 접속하거나 정보를 수집하는 행위, 서비스 운영을 방해하는 행위",
+        "회사의 사전 동의 없이 서비스를 영리 목적으로 이용하는 행위",
+        "그 밖에 법령이나 공서양속에 반하는 행위",
+    ]]},
+    { title: "제12조 (이용 제한)", body: [
+        "회원이 제11조를 위반한 경우 회사는 위반의 정도에 따라 경고, 일부 서비스 이용 정지, 계정 이용 정지, 이용 계약 해지의 순서로 이용을 제한할 수 있습니다. 다만 법령 위반 등 중대한 경우 즉시 해지할 수 있으며, 제한 시 그 사유를 회원에게 알리고 이의를 제기할 수 있도록 합니다.",
+    ]},
+    { title: "제13조 (회사의 의무)", body: [
+        "회사는 관련 법령과 이 약관을 지키고, 안정적으로 서비스를 제공하기 위해 노력하며, 개인정보처리방침에 따라 회원의 개인정보를 보호합니다. 회원의 의견과 불만은 신속하게 처리하고 그 결과를 알립니다.",
+    ]},
+    { title: "제14조 (탈퇴)", body: [[
+        "회원은 언제든지 특정 서비스만 탈퇴하거나, 계정 전체를 탈퇴할 수 있습니다.",
+        "특정 서비스만 탈퇴하면 해당 서비스의 이용 정보가 처리되고 계정과 다른 서비스는 유지됩니다. 계정 전체를 탈퇴하면 모든 서비스의 이용이 종료됩니다.",
+        "탈퇴 시 개인정보는 개인정보처리방침에 따라 파기하거나 익명 처리합니다.",
+    ]]},
+    { title: "제15조 (책임의 제한)", body: [[
+        "회사는 천재지변, 회원의 귀책사유, 제3자가 제공하는 서비스의 장애 등 회사의 고의 또는 과실이 없는 사유로 발생한 손해에 대해 책임을 지지 않습니다.",
+        "회사는 회원이 게시하거나 회원 간에 주고받은 정보의 신뢰도·정확성에 대해 보증하지 않으며, 회원 간 거래나 분쟁에 개입할 의무가 없습니다. 다만 회사의 고의 또는 중대한 과실이 있는 경우에는 그러하지 않습니다.",
+    ]]},
+    { title: "제16조 (준거법 및 분쟁 해결)", body: [
+        "이 약관과 서비스 이용에 관한 분쟁은 대한민국 법률에 따르며, 소송이 제기되는 경우 「민사소송법」에 따른 관할 법원에서 해결합니다.",
+    ]},
+];
 
 export default function TermsPage() {
     return (
         <div className="min-h-screen pt-24 pb-20" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
             <div className="max-w-3xl mx-auto px-6">
                 <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Terms of Service</p>
-                <h1 className="text-3xl font-light tracking-tight mb-10">이용약관</h1>
+                <h1 className="text-3xl font-light tracking-tight mb-4">Ten:One 이용약관</h1>
+                <p className="text-xs mb-10" style={{ color: "var(--tn-text-sub)" }}>시행일: {doc.effectiveDate}</p>
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제1조 (목적)</h2>
-                        <p>이 약관은 Ten:One&trade;(이하 &quot;회사&quot;)가 운영하는 웹사이트 및 관련 서비스(이하 &quot;서비스&quot;)의 이용 조건과 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
-                    </section>
+                    {ARTICLES.map(a => (
+                        <section key={a.title}>
+                            <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>{a.title}</h2>
+                            {a.body.map((b, i) => Array.isArray(b) ? (
+                                <ol key={i} className="list-decimal pl-5 space-y-1">
+                                    {b.map(li => <li key={li}>{li}</li>)}
+                                </ol>
+                            ) : (
+                                <p key={i} className={i > 0 ? "mt-2" : "mb-2"}>{b}</p>
+                            ))}
+                        </section>
+                    ))}
 
                     <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제2조 (정의)</h2>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>&quot;서비스&quot;: 회사가 제공하는 모든 온라인 서비스 (tenone.biz 및 하위 도메인)</li>
-                            <li>&quot;이용자&quot;: 본 약관에 따라 서비스를 이용하는 자</li>
-                            <li>&quot;회원&quot;: 가입 절차를 통해 서비스 이용 계약을 체결한 자</li>
-                            <li>&quot;Universe&quot;: Ten:One&trade;가 운영하는 브랜드 생태계 전체</li>
+                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>부칙</h2>
+                        <ul className="list-disc pl-5 space-y-0.5">
+                            <li>이 약관은 {doc.effectiveDate}부터 시행합니다.</li>
+                            <li>2026년 10월 5일: Ten:One 통합 이용약관으로 전면 개정 (전 서비스·도메인 공통 적용, 서비스별 추가 약관·서비스 종료·유니버스 코인·게시물·서비스별 탈퇴 조항 신설)</li>
+                            <li>2026년 3월 26일: 최초 시행</li>
                         </ul>
                     </section>
 
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제3조 (약관의 효력)</h2>
-                        <p>본 약관은 서비스 화면에 게시하거나 기타의 방법으로 이용자에게 공지함으로써 효력을 발생합니다. 회사는 관련 법령에 위배되지 않는 범위에서 약관을 개정할 수 있습니다.</p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제4조 (회원가입)</h2>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>이용자가 약관에 동의하고 가입 양식을 작성하여 회원가입을 신청합니다.</li>
-                            <li>회사는 신청에 대해 승낙함으로써 이용 계약이 성립됩니다.</li>
-                            <li>허위 정보 기재 시 서비스 이용이 제한될 수 있습니다.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제5조 (서비스의 제공)</h2>
-                        <p>회사는 다음의 서비스를 제공합니다:</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>브랜드 포털 및 콘텐츠 서비스</li>
-                            <li>커뮤니티 및 네트워킹 서비스</li>
-                            <li>프로젝트 관리 및 협업 도구 (WIO)</li>
-                            <li>마케팅·컨설팅 솔루션 (SmarComm)</li>
-                            <li>인재 매칭 및 교육 (HeRo, Evolution School)</li>
-                            <li>트렌드 분석 (Mindle)</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제6조 (이용자의 의무)</h2>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>타인의 개인정보를 도용하지 않습니다.</li>
-                            <li>서비스를 이용하여 법령 또는 공서양속에 반하는 행위를 하지 않습니다.</li>
-                            <li>서비스의 안정적 운영을 방해하는 행위를 하지 않습니다.</li>
-                            <li>회사의 사전 동의 없이 서비스를 이용하여 영업 활동을 하지 않습니다.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제7조 (지적재산권)</h2>
-                        <p>서비스에 포함된 콘텐츠(텍스트, 이미지, 로고, 소프트웨어 등)에 대한 지적재산권은 회사에 귀속됩니다. 이용자는 회사의 사전 승낙 없이 이를 복제, 배포, 방송, 기타 방법으로 이용할 수 없습니다.</p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제8조 (면책조항)</h2>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>천재지변 등 불가항력으로 인한 서비스 제공 불능 시 책임이 면제됩니다.</li>
-                            <li>이용자의 귀책사유로 인한 서비스 이용 장애에 대해 책임지지 않습니다.</li>
-                            <li>무료로 제공되는 서비스에 대해서는 별도의 손해배상 책임을 부담하지 않습니다.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>제9조 (분쟁 해결)</h2>
-                        <p>서비스 이용과 관련한 분쟁은 대한민국 법률에 따르며, 관할 법원은 회사 소재지를 관할하는 법원으로 합니다.</p>
-                    </section>
-
-                    <p className="text-xs pt-4 border-t" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
-                        본 약관은 2026년 3월 26일부터 시행됩니다.
+                    <p className="text-xs pt-4 border-t" style={{ borderColor: "var(--tn-border)" }}>
+                        {COMPANY_INFO.legalName} ({COMPANY_INFO.brandName}) · 대표 {COMPANY_INFO.representative} · 사업자등록번호 {COMPANY_INFO.businessNumber} ·
+                        문의 {COMPANY_INFO.privacyOfficerEmail} · <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link>
                     </p>
                 </div>
             </div>

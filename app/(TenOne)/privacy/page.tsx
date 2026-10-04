@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { COMPANY_INFO, LEGAL_DOCUMENTS } from "@/lib/company-info";
 
 export const metadata: Metadata = { title: "개인정보처리방침" };
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = { title: "개인정보처리방침" };
 // 전 브랜드 도메인의 /privacy 에서 동일하게 노출된다 (middleware skipPaths).
 // 변경 시: 시행일·변경 이력 갱신 + 시행 7일 전 공지 (중요 변경 30일 전)
 
-const EFFECTIVE_DATE = "2026년 10월 5일";
+const EFFECTIVE_DATE = LEGAL_DOCUMENTS.privacy.effectiveDate;
 
 const PROCESSORS = [
     { name: "Supabase, Inc.", country: "미국 (데이터 저장 위치: 대한민국 서울 리전)", task: "회원 데이터베이스·로그인 인증·파일 저장", items: "회원 정보 및 서비스 이용 중 생성되는 정보 전반" },
@@ -47,7 +48,7 @@ export default function PrivacyPage() {
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
                     <p>
-                        열시일분(Ten:One&trade;, 사업자등록번호 222-22-01839, 이하 &quot;회사&quot;)은 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak 등
+                        {COMPANY_INFO.legalName}({COMPANY_INFO.brandName}, 사업자등록번호 {COMPANY_INFO.businessNumber}, 이하 &quot;회사&quot;)은 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak 등
                         회사가 운영하는 각 브랜드 서비스와 그 도메인, 이하 &quot;서비스&quot;)에 이 개인정보처리방침을 공통으로 적용합니다.
                         회사는 「개인정보 보호법」 등 관련 법령을 준수하며, 하나의 Ten:One 계정으로 여러 서비스를 이용하더라도
                         각 서비스는 그 서비스의 목적 범위 안에서만 개인정보를 처리합니다.
@@ -164,8 +165,8 @@ export default function PrivacyPage() {
                     </Section>
 
                     <Section title="11. 개인정보 보호책임자">
-                        <p>성명: 전천일 · 직책: 대표 · 이메일: lools@tenone.biz</p>
-                        <p className="mt-1">사업자: 열시일분 (Ten:One&trade;) · 사업자등록번호 222-22-01839</p>
+                        <p>성명: {COMPANY_INFO.representative} · 직책: 대표 · 이메일: {COMPANY_INFO.privacyOfficerEmail}</p>
+                        <p className="mt-1">사업자: {COMPANY_INFO.legalName} ({COMPANY_INFO.brandName}) · 사업자등록번호 {COMPANY_INFO.businessNumber}</p>
                         <p className="mt-2">개인정보 침해에 대한 신고·상담은 아래 기관에 문의할 수 있습니다.</p>
                         <ul className="list-disc pl-5 mt-1 space-y-0.5">
                             <li>개인정보분쟁조정위원회: 1833-6972 (www.kopico.go.kr)</li>
