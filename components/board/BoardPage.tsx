@@ -8,6 +8,8 @@ import PostDetail from "./PostDetail";
 import PostEditor from "./PostEditor";
 import PostAccordion from "./PostAccordion";
 import type { Post, BoardConfig, SiteCode, CreatePostInput, UpdatePostInput } from "@/types/board";
+import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 interface BoardPageProps {
     site: SiteCode;
@@ -49,6 +51,8 @@ function BoardPageInner({
     const [mode, setMode] = useState<Mode>("list");
     const [loading, setLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [showLogin, setShowLogin] = useState(false);
+    const { isAuthenticated } = useAuth();
 
     // URL에서 postId 읽어서 자동 로드
     useEffect(() => {
@@ -142,7 +146,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("저장 실패");
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "저장 실패");
         setMode("list");
         setRefreshKey(k => k + 1);
     }, []);
@@ -155,7 +159,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("수정 실패");
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "수정 실패");
         setMode("list");
         setSelectedPost(null);
         setRefreshKey(k => k + 1);
@@ -233,7 +237,7 @@ function BoardPageInner({
                 {showWriteButton && (
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                         <button
-                            onClick={() => setMode("write")}
+                            onClick={() => (isAuthenticated ? setMode("write") : setShowLogin(true))}
                             className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: accentColor }}
                         >
@@ -243,6 +247,7 @@ function BoardPageInner({
                     </div>
                 )}
             </div>
+            <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} accentColor={accentColor} />
             <BoardList
                 key={refreshKey}
                 site={site}

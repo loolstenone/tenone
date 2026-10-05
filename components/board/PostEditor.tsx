@@ -275,6 +275,9 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 await onSubmit(data);
             }
             setSaveStatus("saved");
+        } catch (err) {
+            setSaveStatus("editing");
+            alert(err instanceof Error ? err.message : "저장에 실패했습니다.");
         } finally {
             setSubmitting(false);
         }

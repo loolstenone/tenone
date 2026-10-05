@@ -2,7 +2,8 @@
  * 뉴스룸 헬퍼 — newsroom_items 자동 등록
  * 게시글 발행 시 호출: registerToNewsroom(post)
  */
-import { createClient } from '@/lib/supabase/server';
+// 서버 전용 — 호출 측(API)에서 권한 확인 후 서비스 롤로 기록
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 
 export interface NewsroomSourcePost {
   id: string;

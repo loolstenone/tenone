@@ -5,15 +5,14 @@
  * - 최대 1280px로 리사이즈
  * - WebP 변환 (80% 용량 절감)
  * - 원본 5MB 제한
+ * - 로그인 회원만 (비로그인 업로드로 저장소 남용 방지)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireMember } from '@/lib/api-guard';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createAdminClient();
 
 const BUCKET = 'board-assets';
 const MAX_WIDTH = 1280;
@@ -21,6 +20,9 @@ const WEBP_QUALITY = 80;
 
 export async function POST(request: NextRequest) {
     try {
+        const auth = await requireMember(request);
+        if (auth instanceof NextResponse) return auth;
+
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
         }
 
-        const site = formData.get('site') as string || 'general';
+        const site = String(formData.get('site') || 'general').replace(/[^a-z0-9_-]/gi, '').slice(0, 40) || 'general';
         const buffer = Buffer.from(await file.arrayBuffer());
 
         // sharp로 리사이즈 + WebP 변환
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
             .from(BUCKET)
             .upload(filePath, optimized, {
                 contentType: ext === 'webp' ? 'image/webp' : `image/${ext}`,
-                upsert: true,
+                upsert: false,
             });
 
         if (error) throw error;
