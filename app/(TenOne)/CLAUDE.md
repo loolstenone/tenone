@@ -46,12 +46,8 @@
 
 ## 권한 체계
 
-- **role 종류**:
-  - `member` — 기본 회원 (context: 없음 또는 각 브랜드별)
-  - `staff` — 직원 (context: tenone)
-  - `manager` — 팀 리더 (context: tenone)
-  - `super_admin` — 마스터 (context: tenone, 전체 시스템 권한)
-- **context**: `tenone` (TenOne 전용) 또는 각 브랜드별
+- **role × context (v3, CLAUDE.md §1.6)**: `super_admin`·`staff`·`manager`·`member` @ `universe` · 인트라 메뉴 `intra_access` @ `system` · 모듈 `{erp·hero…}` @ `module` · 브랜드 관리 `tenone` @ `brand`
+- 서버 직원 판단은 `lib/api-guard.ts` `requireStaff`, RLS는 `auth_is_staff()` (JWT is_staff = staff@universe)
 - **인트라 관리 권한**: `/intra/*` (Intra 전체 = TenOne이 운영하는 중앙 관리 콘솔)
 
 ---
@@ -81,16 +77,21 @@
 
 | 파일 | 역할 |
 |------|------|
-| `app/page.tsx` | 랜딩 (Hero · Crew CTA · Works · Universe 8 그룹 · Core Values · News · Newsletter) |
+| `app/page.tsx` | 랜딩 (Hero · Works · Core Values · CTA · Newsletter) — 2026-10-05 Crew CTA·세계관(Universe 8 그룹)·새로운 소식 섹션 삭제 |
 | `app/(TenOne)/profile/page.tsx` | 유니버스 프로필 (모든 서비스 현황) |
 | `app/(TenOne)/universe/page.tsx` | 유니버스 맵 (3대 자원·WIO/YIO·사업 포트폴리오·시너지 체인) |
 | `app/(TenOne)/brands/page.tsx` | 브랜드 갤러리 (전체 브랜드 카테고리 필터) |
-| `app/(TenOne)/about/page.tsx` | TenOne 소개 (Philosophy/Universe/Brands/History 4탭) |
+| `app/(TenOne)/about/page.tsx` | TenOne 소개 (Philosophy/Universe/Brands/History 4탭, `?tab=` 동기화, 탭 전환 시 탭 바 위치로 스크롤) |
 | `app/(TenOne)/history/page.tsx` | 별도 History 페이지 (lib/data.ts historyEvents) |
-| `app/(TenOne)/works/page.tsx` | Works 보드 (BoardPage 위임) |
-| `app/(TenOne)/newsroom/page.tsx` | Newsroom 피드 (NewsTicker + NewsroomFeed) |
+| `lib/data.ts` `historyEvents` | 연혁 SSOT — **Works에 글이 있는 사건만** (32건, 2026-10-05 재작성) |
+| `app/(TenOne)/works/page.tsx` | Works 보드 (BoardPage 위임, `showWriteButton/showStats/showReactions=false`) — 글은 인트라 TenOne > Works에서 |
 | `app/(TenOne)/newsletter/page.tsx` | 뉴스레터 아카이브 |
-| `app/(TenOne)/contact/page.tsx` | 파트너십/비즈니스 문의 |
+| `app/(TenOne)/contact/page.tsx` | 파트너·크루·프로젝트 의뢰 문의 (form_type `tenone_partner/crew/business`, Turnstile, 개인정보 동의, 첨부 10MB×3) |
+| `lib/contact-attachments.ts` · `lib/contact-inquiry.ts` | 첨부 규칙·링크 보정 / 문의 상태·응대 기록 규칙 |
+| `app/api/contact/route.ts` | 문의 저장 + 첨부 서명 업로드 URL 발급 (비공개 버킷 `contact-attachments`) |
+| `app/api/intra/contact-submissions/[id]` · `app/api/intra/contact-attachment` | 문의 상세·응대 기록 / 첨부 다운로드 (직원 전용) |
+| `components/intra/BrandInquiryInbox.tsx` | 브랜드 고객 문의 인박스 (행 클릭 → 상세·응대 기록) |
+| `app/intra/ums/tenone/*` | 인트라 TenOne: 대시보드 · Works(목록·작성·수정·삭제) · 고객 문의 |
 | `features/tenone/PublicHeader.tsx` | 공통 헤더 (TenOne 테마) |
 | `features/tenone/PublicFooter.tsx` | 공통 푸터 |
 | `features/tenone/TenOneThemeWrapper.tsx` | 테마 변수 wrapper (--tn-bg/text/accent 등) |
@@ -121,6 +122,7 @@
 | `/intra/studio/wio` | WIO 전체 관리 |
 | `/intra/studio/agents` | 에이전트 운영 |
 | `/intra/ums/sites` | 사이트 오픈/닫기 |
+| `/intra/ums/tenone` | **TenOne 집중 브랜드 패널** — 대시보드 · `/works`(BoardContentList·BoardPostEditor) · `/cs`(고객 문의) |
 | `/intra/ums/[brand]/*` | 각 브랜드별 UMS (9개 패널) |
 | `/intra/wiki/*` | 위키 관리 |
 
@@ -166,9 +168,11 @@
 |------|------|
 | **Phase** | Mature (2026-05-28) — 포탈·프로필·Intra 모두 프로덕션. 28+ 브랜드 통제 중. 본사이트 정직성·정합성 회복 1차 완료 (세션 154). |
 | **개발 수준** | 완성. SSOT 일원화 단계. |
-| **이월 작업** | DB `brands` 테이블 시드 부재 — brands page는 lib/data.ts staticBrands fallback에만 의존 (DB 채우면 자동 우선). Mindle Phase 3 PRO 결제 등 별 트랙 |
+| **이월 작업** | ① `sql/contact-submissions-rls-lockdown.sql` **승인 대기·미적용** (로그인 회원 누구나 전 브랜드 문의 조회 + anon 직접 INSERT로 캡차 우회 가능) ② 인트라 문의 상세·응대 기록 직원 로그인 실사용 확인 ③ Contact 실제 제출 1건(첨부 포함) E2E ④ Works 15건 이미지 없음 ⑤ 홈 하단 'Join the Universe' 버튼 존치 여부 ⑥ DB `brands` 테이블 시드 부재 — brands page는 lib/data.ts staticBrands fallback에만 의존 (DB 채우면 자동 우선). Mindle Phase 3 PRO 결제 등 별 트랙 |
 | **법무 문서 (2026-10-05)** | `app/(TenOne)/privacy/page.tsx`(유니버스 공통 개인정보처리방침) · `app/(TenOne)/terms/page.tsx`(Ten:One 통합 이용약관) — 전 브랜드 도메인에서 /privacy·/terms로 서빙(middleware skipPaths). 버전·사업자 정보 SSOT = `lib/company-info.ts`. 문서 개정 시 LEGAL_DOCUMENTS.version 올리고 변경 고지 |
-| **최근 결정** | (2026-05-28) **본사이트 정직성·정합성 회복**: ① `app/(public)/` 경로 표기를 실제 `app/(TenOne)/`·`app/page.tsx`로 정정 ② Universe "Coming Soon" 8건(7건 실제 운영 중) 섹션 통째 삭제 ③ Universe stats "23 브랜드/14 WIO 모듈" → `siteConfigs.length` 동적 28 + 8 역할 그룹 ④ brands page fallback 22→26개 (jakka·townity·mullaesian·naturebox 추가, internal dokdae·wiki 제외) ⑤ history SSOT를 `lib/data.ts historyEvents`로 일원화 (about HISTORY_DATA dead code 제거 + 27건으로 보강 — 0gamja·ChangeUp·Chat with ChatGPT·Creazy Challenge·DAM Be·Mindle 2026·MADLeap 2026 포함) ⑥ Crew CTA `cursor-default` → `/contact?from=crew` Link + Contact partner 탭 카피 변형 ⑦ `lib/universe-map.ts` 신설 — `UNIVERSE_ROLE_GROUPS` SSOT 추출. 랜딩 + about Brand Ecosystem 모두 import (about BRAND_DIRECTORY 56줄 dead code 제거) |
+| **최근 변경 (2026-10-05 세션 158)** | ① 인트라에서 TenOne = 집중 브랜드 (Universe > 집중 브랜드 > TenOne) ② 뉴스룸 폐지 (`/newsroom` → `/` 308, newsroom_items DROP) ③ Works: 관리자 작성 전용, 대표 이미지 미지정 시 본문 첫 이미지, 날짜 연도 표시, 수정 시 발행일 유지, 이미지 브라우저 압축(`lib/board-image-upload.ts`), 조회수·좋아요·북마크 숨김, 상단 메뉴 재클릭 시 목록 복귀 ③ About 연혁 Works 기준 재작성 · Founder 이미지 삭제·연락처 이메일 ④ 홈 Crew CTA·세계관 섹션 삭제, 홈에서 로고 클릭 시 맨 위로 ⑤ Contact: 링크 https 자동 보정·첨부파일, 인트라 문의 상세·응대 기록(handling_log) |
+| **문의 운영 규칙** | 답변/미답변 근거 = `contact_submissions.handling_log` (응대 방법·상태·메모·처리자 members.id). 이메일·전화 등 인트라 밖 응대도 기록. 상태 `pending/in_progress/resolved/closed`, 답변 완료는 메모 필수. 첨부는 비공개 버킷 + 직원 5분 서명 URL. 보관: 처리 완료 후 1년 파기(동의 문구) |
+| **최근 결정 (2026-05-28)** | 본사이트 정직성·정합성 회복 1차 (경로 표기 정정, Coming Soon 삭제, stats 동적화, brands fallback 26개, history SSOT, universe-map SSOT) — 세부는 CHANGELOG 세션 154 |
 
 ---
 

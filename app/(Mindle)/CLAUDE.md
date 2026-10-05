@@ -273,8 +273,9 @@ Phase 3: 수익화 + B2B            [3~4주]
 | **is_open** | true (외부 공개 진행 중) |
 | **DB 데이터** | mindle_trends 1,410건+ (published 760+ 백필 후) · 49 active sources · Mindle source 구독자 0명 (모집 별도 과제) |
 | **차기 작업** | (1) PAT 갱신·Edge Function deploy·SQL 실행 → cron 가동 (2) Phase 3 PRO 결제 (Toss + wio_subscription_plans SSOT) |
-| **블로커** | `.env.local`의 `SUPABASE_ACCESS_TOKEN` 401 — PAT 갱신 시 mindle-metrics-compute·trend-crawl·mindle-newsletter-draft 3개 deploy + cron 5개 등록 + UC 시드 일괄 처리 가능 |
+| **블로커** | ~~PAT 401~~ → 2026-10-05 PAT 보관 폐지, SQL·Edge Function은 Supabase MCP(`execute_sql`·`apply_migration`·`deploy_edge_function`)로. mindle-metrics-compute·trend-crawl·mindle-newsletter-draft deploy + cron 5개 + UC 시드는 MCP로 진행 가능 |
 | **추가 분석 미완** | 가격 검증 (PRO ₩9,900 실측 검증) · B2B 단가 시나리오 (Phase 3 준비) · Whole See ↔ Mindle 통합 그림 |
+| **2026-10-05 (세션 158)** | 트렌드 상세 500 수정(DOMPurify 서버 렌더 제거, `lib/sanitize-html.ts`) · 뉴스레터 구독 폼 Turnstile + 서버 검증(fail-closed) · 뉴스레터 발송 크론은 `NEWSLETTER_DISPATCH_ENABLED=true`일 때만 · About 연혁의 'Mindle 정식 오픈' 항목은 Works 근거 없어 삭제 |
 | **2026-05-27 작업 (세션 153)** | Phase 1-E·2-C·2-E 코드 일괄 작성 — 뉴스레터 자동 초안 (메인 + 페르소나 4) + UC 학생 할인 시드. push 1회로 통합. |
 | **2026-05-26 작업 (세션 152)** | Phase 0 완료 · 1-B·C·D 완료 · 2-A 메트릭 컴퓨터 골격 |
 

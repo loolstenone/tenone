@@ -136,6 +136,7 @@
 
 | 항목 | 내용 |
 |------|------|
+| **최근 변경 (2026-10-05 세션 158)** | 모임·스타 상세 500 수정(DOMPurify 서버 렌더 제거, `lib/sanitize-html.ts`) · 커뮤니티 관리자 숨김·삭제 API 직원 확인 추가(누구나 삭제 가능했음) · `badak_community_*`·`badak_leader_applications`·`badak_meeting_requests` 전체 개방 정책 제거(`sql/security-brand-writes.sql`) · `badak/jobs` 게시판 운영진 작성 전용(직업안정법) · 문의는 `contact_submissions`(badak_inquiry) → 인트라 BrandInquiryInbox에서 상세·응대 기록 |
 | **Phase** | Beta (2026-05-17 갱신) — 실DB 연동 완료, 프리미엄 멤버십 티어 설계 대기 |
 | **개발 수준** | API 44개 모두 Supabase 연결 ✅. 니즈 클라우드(`lib/badak-cloud-data.ts`)만 DB 폴백용 Mock 잔재. |
 | **이월 작업** | 1️⃣ **유료 티어 가격·기능 정책 결정** (현재 `wio_subscription_plans.badak/free` 시드만 존재, features=`[]`). 2️⃣ Pro/Business 티어 기능 게이트 후보 식별 — 후보: DM 무제한·고급 필터·구인 공고 게시·프리미엄 배지·응시자 통계. |

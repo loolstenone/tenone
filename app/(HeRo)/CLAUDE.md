@@ -69,6 +69,7 @@
 
 | state | 조건 | 테이블 표현 |
 |-------|------|-----------|
+| **최근 변경 (2026-10-05 세션 158)** | HIT 검사 서버 전용 처리 — `app/api/hit/*`·`lib/supabase/hit.ts` 서비스 롤, 회원 식별은 세션만(body memberId 불신), 결과 공유 메타 서버 조회 · `sql/security-hit-lockdown.sql` 운영 적용(뷰 security_invoker, 본인+직원만) · `resumes`·`career_profiles` 회원 전체 조회 → 본인+직원 · `hero_matching_requests` 전체 개방 정책 제거 · `/api/hit/chat/stream` memberId 세션 식별 |
 | **게스트 검사자** | 이메일만 · `member_id=NULL` | `hit_sessions.member_id IS NULL` |
 | **회원** | `members` row + `affiliations @> ['hero']` | capability role: `member` |
 | **유료 구매자** | 결제 완료 | capability role: `purchaser` (context `brand:hero`) |

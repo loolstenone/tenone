@@ -1,6 +1,38 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-05 (세션 157 — 플랫폼 헌법·데이터 계약·약관/방침·가입 동의)
+> 마지막 업데이트: 2026-10-05 (세션 158 — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영)
+
+---
+
+## 세션 158 핵심 성과 (2026-10-05, 집) — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영
+
+> 작업 위치: 워크트리 `C:/Projects/TenOne/.claude/worktrees/interesting-chaum-afed61` (브랜치 `claude/work-start-887cd3`) → `git push origin HEAD:master`로 반영.
+> 사무실에서는 평소대로 `git checkout master && git pull origin master` 후 이어가면 된다 (워크트리 불필요).
+
+- **보안 (운영 DB 적용·검증)**: 내부 테이블 'service용' 전체 개방 정책 제거(phase1) · 인트라 서버 게이트(middleware 1b, 비직원 → /intra/login) · 챗봇 로그인 필수 · 뉴스레터 발송 스위치(`NEWSLETTER_DISPATCH_ENABLED`) · 공개 폼 Turnstile fail-closed · wio_members 재귀·셀프 권한 상승 차단 · ERP·HIT·게시판·브랜드 쓰기 잠금 · 서버 리전 icn1
+- **인트라 정리**: 시드·봇 스팸 archive 스키마 이동 · 깨진 메뉴 34·준비중 9 제거 · Action Hub 첫 화면 · 최소 ERP(가짜 데이터 제거) · TenOne = 집중 브랜드(대시보드·Works·고객 문의) · Standard 섹션 운영 기준 정비(헌법·데이터 계약 페이지 신설)
+- **게시판/Works**: 관리자/회원 작성 구분 + 직원 전용 비공개 · 뉴스룸 폐지 · 더미 26건·예시 뉴스레터 9건 삭제 · 대표 이미지 자동 · 연도 표시 · 수정 시 발행일 유지 · 삭제 버튼 · 이미지 압축(저장 실패 해결) · 메뉴 재클릭 복귀 · Works 조회수·좋아요 숨김 · 수정 버튼 작성자·직원만 · Works 글 다수 추가(사용자 요청)
+- **TenOne 본사이트**: About 연혁 Works 기준 32건 재작성 · Founder 이미지 삭제·연락처 이메일 · 홈 Crew CTA·세계관 섹션 삭제 · 홈 로고 클릭 시 맨 위 · About 탭 전환 시 스크롤 · Contact 이메일 표시
+- **문의 운영**: Contact 링크 https 자동 보정 + 첨부(PDF·PPT·Word·한글·ZIP·이미지, 10MB×3, 비공개 버킷 `contact-attachments`) · 인트라 문의 상세(전체 내용·첨부 다운로드·메일/전화) · **응대 기록 `handling_log` = 답변/미답변 근거** · 상태 통일 `pending/in_progress/resolved/closed` · 미답변 집계 'new'→'pending' 버그 수정
+
+### 다음 첫 액션 (사무실)
+
+1. **문의 테이블 RLS 잠금 — 사용자 승인 받고 적용**: `sql/contact-submissions-rls-lockdown.sql`
+   - 문제: `contact_read_auth`(authenticated USING true) = 로그인 회원 누구나 전 브랜드 문의 조회 / `contact_insert`(public WITH CHECK true) = anon 직접 INSERT로 캡차 우회
+   - 적용 전 트랜잭션 롤백 시뮬레이션: anon SELECT·INSERT 거부, 일반 회원 0건, 직원 전체 조회 → 통과 시 MCP `apply_migration`(name `contact_submissions_rls_lockdown`)
+   - 적용 후 `/api/contact` 제출(서비스 롤)·인트라 인박스 조회 정상 확인
+2. **인트라 문의 실사용 확인** (직원 로그인, 사용자가 로그인): intra.tenone.biz/intra/ums/tenone/cs → 행 클릭 → 상세 패널 → "응대 기록 남기기"(답변 완료는 메모 필수) → MCP로 `select status, handling_log from contact_submissions order by created_at desc limit 1` 확인
+3. **Contact 실제 제출 E2E** (사용자, 캡차 필요): tenone.biz/contact 크루 지원 + PDF 1개 첨부 → 인박스 상세에서 첨부 다운로드 열림 확인. 실패 시 브라우저 콘솔 + `storage.objects where bucket_id='contact-attachments'` 확인
+4. 남은 결정 질문 (1줄씩): ① Tier 미지정 24개 사이트 실험/보관 지정 ② 홈 하단 'Join the Universe' 버튼 유지? ③ Works 이미지 없는 15건 처리 ④ 커머스 > 고객문의 메뉴 제거(현재 CS 통합과 같은 인박스)
+5. 기술 부채: MADLeague `member_roles(context='brand:madleague', role=member|mentor|club_leader)` → `member_capability_roles` 이관 · `requireStaff`(인증된 @tenone.biz 이메일 허용) vs RLS `auth_is_staff()`(JWT staff@universe) 판단 불일치 정리
+6. 세션 157 이월: hero.ne.kr 모달 가입 consent 실검증 · 백업 결정(Pro vs 수동 덤프) · 크론 CRON_SECRET fail-open 27곳 · anon DEFINER 함수 49 · DMARC
+
+### 주의 (이번 세션 교훈)
+
+- "고쳤다" 보고 전 **실데이터·실화면 확인** (더미가 남아 있는데 완료라고 보고한 일 있음). 사용자에게 묻기 전에 DB 상태 먼저 확인
+- 큰 요청 본문은 Vercel 4.5MB 한도에서 함수 실행 전 413 → 런타임 로그 없음. 파일은 Storage 직접 업로드(서명 URL)
+- 로컬에서 새로 컴파일되는 일부 라우트는 `@anthropic-ai/sdk` 미설치로 500 — 운영과 무관, PostgREST 직접 조회로 검증
+- 브라우저 페인이 숨김 상태면 smooth scroll 애니메이션이 안 돌아 테스트가 거짓 실패 — 핸들러 호출 여부로 검증
 
 ---
 

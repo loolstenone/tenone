@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-05 (세션 157 — 플랫폼 헌법·데이터 계약·약관/방침·가입 동의)
+> 마지막 업데이트: 2026-10-06 (세션 158 — 보안 잠금·인트라 정리·게시판/Works·TenOne 본사이트·문의 운영)
 
 ---
 
@@ -35,6 +35,22 @@
 - [ ] 외부 회원 이전 전: 탈퇴 처리 자동화 (process_brand_withdrawal) · MADLeague mad_members email/user_id 키 → members.id
 - [ ] 통신판매업 신고 전 결제 출시 금지 · 직업소개사업 등록 전 HeRo 기업 매칭 금지 · AI 기본법 검토
 - [ ] 브랜드 추가 약관(/terms/{brand}) — 해당 기능 출시 시
+
+## 🧭 인트라·게시판·문의 운영 (세션 158 — 2026-10-05~06)
+
+- [x] 내부 테이블 직원 전용화 · 인트라 서버 게이트 · ERP/HIT/게시판/브랜드 쓰기 잠금 (운영 DB)
+- [x] 인트라 메뉴 정리 · Action Hub 첫 화면 · 최소 ERP 실데이터 · TenOne 집중 브랜드 패널
+- [x] 게시판 관리자/회원 작성 구분 · 직원 전용 비공개 · 뉴스룸 폐지 · 더미 정리
+- [x] Works UX (대표 이미지 자동·연도·발행일 유지·삭제·이미지 압축·메뉴 재클릭·통계 숨김)
+- [x] TenOne 본사이트: 연혁 Works 기준 · 홈 섹션 정리 · About 탭 스크롤 · Founder 정리
+- [x] Contact 첨부(비공개 버킷) · 링크 보정 · 인트라 문의 상세 · 응대 기록(handling_log)
+- [ ] **contact_submissions RLS 잠금 적용** (`sql/contact-submissions-rls-lockdown.sql`, 승인 대기)
+- [ ] 인트라 문의 상세 직원 실사용 확인 · Contact 첨부 제출 E2E (운영)
+- [ ] 문의 회신 이메일을 인트라에서 바로 발송 (Resend, 발송 기록 자동으로 handling_log) — 필요 시
+- [ ] 문의 1년 보관 후 자동 파기 (행 + 첨부 Storage) — 크론
+- [ ] Tier 미지정 24개 사이트 실험/보관 지정 · 커머스 > 고객문의 메뉴 정리
+- [ ] MADLeague brand 역할 → member_capability_roles 이관 · requireStaff vs auth_is_staff 일원화
+- [ ] Works 이미지 없는 15건 정리
 
 ## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
 

@@ -4,6 +4,49 @@
 
 ---
 
+## 2026-10-05~06 (세션 158, 집) — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61`(브랜치 `claude/work-start-887cd3`) → `git push origin HEAD:master` (사용자 수동 push 여러 회 + 작업 종료 push)
+- 운영 DB 적용 (MCP `apply_migration`): `security_lockdown_phase1` · `archive_seed_and_spam` · `security_erp_lockdown` · `security_wio_members_fix` · `security_board_lockdown` · `security_brand_writes` · `security_hit_lockdown` · `board_classification` · `remove_dummy_posts_and_newsroom` · `remove_dummy_newsletter_issues` · `contact_attachments` · `contact_handling_log`
+- 데이터 수정(MCP `execute_sql`): Works 작성자 표기 정리(`sql/fix-works-author-name.sql`), Works 글 추가·날짜 수정·복원(사용자 요청), 발행일 리셋된 2건 복구
+- **미적용(승인 대기)**: `sql/contact-submissions-rls-lockdown.sql`
+
+### 결정 (사용자)
+
+- 인트라 5대 영역: My(직원) · Universe(통합관리 = 유니버스 전체 / 집중·보관 브랜드 = 서비스별) · Marketing · ERP · Intelligence. TenOne도 집중 브랜드 섹션에서 관리
+- Works는 관리자 작성 영역 (회원 글쓰기 X, 조회수·좋아요·북마크 비노출)
+- 뉴스룸 폐지 (현재 운영 안 함) · 더미 게시글 26건 삭제
+- About 연혁은 Works에 있는 사건만 · 홈 Crew CTA·세계관 섹션 삭제 · Founder 이미지 삭제, 연락처는 이메일(lools@tenone.biz)
+- Contact 첨부파일 허용 (용량 안내 포함), 링크는 https:// 없이 입력 가능
+
+### 변경 내역
+
+- 보안: 내부 전용 테이블 직원 전용화 · middleware 1b 인트라 서버 게이트 + intra layout 세션 확인 · NEXT_PUBLIC 관리자 키 제거 · `/api/intra/external/status` · 챗봇/HIT memberId 세션 식별 · 뉴스레터 발송 스위치 · `/api/newsletter`·`/api/contact` Turnstile fail-closed · Badak 커뮤니티 관리자 API 직원 확인 · 회원 목록 API 500(signup_source) 수정 · `vercel.json` 리전 icn1
+- AI: OpenClaw·Gemma agent_profiles 삭제, 챗봇 AI 고지
+- 인트라: 메뉴 정리(깨진 링크 34·준비중 9 제거, 집중/보관 브랜드 섹션) · ActionHubPanel · 최소 ERP(mock fallback 제거, 지급·입금 처리) · 중복 페이지 리다이렉트 · TenOne 패널(`app/intra/ums/tenone/*`) · `components/intra/BoardContentList.tsx`·`BoardPostEditor.tsx`·`lib/intra-board.ts` · Standard(access-model·uc·newsletter·privacy·sites·dev-rules·members·roles 정비, constitution·data-contract 신설) · CLAUDE.md §1.6 role×context v3
+- 게시판: `lib/supabase/board.ts` 서버 전용·ums_posts 쓰기 · 게시판 visibility/write_permission · `lib/board-image-upload.ts`(WebP 압축 2000→1024px, 3MB 목표) · BoardPage `showStats`/`showReactions` · URL(`?postId`)↔화면 동기화 · 날짜 연도 · PostDetail 수정 버튼 작성자·직원만 · `lib/sanitize-html.ts`(isomorphic-dompurify 서버 500 해결)
+- 뉴스룸 삭제: `app/(TenOne)/newsroom`·`app/api/newsroom`·`components/newsroom`·`lib/supabase/newsroom.ts`·인트라 메뉴, `/newsroom` → `/` 308
+- TenOne 사이트: `lib/data.ts historyEvents` 32건 재작성 · `app/page.tsx` 세계관·Crew CTA 섹션 삭제 · `features/tenone/PublicHeader.tsx` 홈 로고 클릭 시 맨 위 · `app/(TenOne)/about/page.tsx` `?tab` 동기화·탭 전환 스크롤·Founder 정리 · `app/(TenOne)/contact/page.tsx` `?from` 동기화·이메일 표시·첨부
+- 문의: `lib/contact-attachments.ts`·`lib/contact-inquiry.ts` · `app/api/contact/route.ts`(첨부 메타 검증 + 서명 업로드 URL, portfolio_url http(s)만) · `app/api/intra/contact-submissions/[id]`(GET 상세 / PATCH 응대 기록) · `app/api/intra/contact-attachment`(직원 5분 서명 다운로드) · `components/intra/BrandInquiryInbox.tsx` 상세 패널 · 커머스 > 고객문의도 같은 인박스 · Action Hub·CS 통합 미답변 집계 'new'→'pending'
+- DB: `contact_submissions.attachments`·`handling_log` 컬럼, 비공개 버킷 `contact-attachments`(10MB, 문서·이미지 MIME)
+
+### 검증
+
+- 운영: 배포 READY 확인(`dpl_DeJKSVn5…` = 9d42237d) · tenone.biz 홈 세계관·크루 섹션 없음 · About 연혁 32건(조작 항목 없음)
+- 로컬: Works 메뉴 재클릭·뒤로가기 · About/Contact 탭 리셋 · Works 통계 숨김 · Contact 첨부 선택·형식/용량 차단 · `/api/contact` 캡차 없으면 400 · 인트라 문의 API 비로그인 401
+- Storage 실테스트: 서명 업로드 성공 → anon 다운로드 차단 → 서명 다운로드 성공 → 테스트 파일 삭제
+- 미검증: 인트라 문의 상세 화면(직원 로그인 필요), 실제 Contact 제출(캡차)
+
+### 발견 (미해결)
+
+- `contact_submissions` RLS: 로그인 회원 전체 조회 + anon 직접 INSERT (lockdown SQL 승인 대기)
+- 커머스 > 고객문의 상태 변경은 UPDATE 정책 부재로 원래 저장 안 되던 상태였음 (인박스 교체로 해소)
+- Tier 미지정 24개 사이트 · MADLeague brand 역할 capability 이관 · requireStaff vs auth_is_staff 판단 불일치 · Works 15건 이미지 없음
+
+---
+
 ## 2026-10-05 (세션 157) — 플랫폼 헌법 · 데이터 계약 · 약관/방침 · 가입 동의
 
 ### 장소·운영
