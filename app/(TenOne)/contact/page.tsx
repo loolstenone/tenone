@@ -69,6 +69,20 @@ function OffOniceToggle() {
 const inputClass = "w-full border tn-border px-4 py-3 text-sm tn-text focus:border-neutral-900 focus:outline-none placeholder:tn-text-sub tn-surface";
 const labelClass = "text-sm font-medium text-neutral-700 block mb-1.5";
 
+/** 개인정보 수집·이용 고지 + 필수 동의 (개인정보보호법 제15조) — 보관기간은 개인정보처리방침 기준 */
+function PrivacyConsent({ items }: { items: string }) {
+    return (
+        <label className="flex items-start gap-2 text-xs tn-text-sub leading-relaxed">
+            <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0" />
+            <span>
+                [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: {items} · 목적: 문의 확인 및 회신 ·
+                보관: 처리 완료 후 1년 뒤 파기. 동의하지 않으면 접수할 수 없습니다.{" "}
+                <Link href="/privacy" className="underline">개인정보처리방침</Link>
+            </span>
+        </label>
+    );
+}
+
 export default function ContactPage() {
     const [activeTab, setActiveTab] = useState<TabType>('partner');
     const { isAuthenticated } = useAuth();
@@ -201,6 +215,7 @@ export default function ContactPage() {
                             </div>
                             <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="url" className={inputClass} placeholder="https://..." /></div>
                             <div><label className={labelClass}>자기소개 및 지원동기</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
+                            <PrivacyConsent items="이름, 이메일, 지원 분야, 포트폴리오 링크, 자기소개" />
                             <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : (fromCrew ? '크루 지원하기' : '파트너 신청하기')}
@@ -234,6 +249,7 @@ export default function ContactPage() {
                                 </select>
                             </div>
                             <div><label className={labelClass}>프로젝트 내용</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
+                            <PrivacyConsent items="담당자명, 회사명, 이메일, 연락처, 문의 내용" />
                             <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Briefcase className="h-4 w-4" /> {submitting ? '제출 중...' : '의뢰하기'}
