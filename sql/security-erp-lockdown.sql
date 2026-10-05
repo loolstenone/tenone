@@ -1,6 +1,6 @@
 -- ============================================================
 -- ERP·프로젝트 테이블 접근 정리 (인트라 5단계 — 실데이터 운영 전 필수)
--- 적용: 미적용 (사용자 승인 후 MCP apply_migration: security_erp_lockdown)
+-- 적용: 2026-10-05 (MCP apply_migration: security_erp_lockdown) — 롤백 트랜잭션으로 anon·회원·직원 검증 완료
 --
 -- 발견 (2026-10-05):
 --   projects          projects_read (roles=public, USING true) → 비로그인 포함 누구나 매출·이익 조회
