@@ -131,7 +131,7 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         key: "contact_submissions",
         label: "연락/문의 미답변",
         table: "contact_submissions",
-        filter: { column: "status", value: "new" },
+        filter: { column: "status", value: "pending" },
         href: "/intra/ums/cs/contact",
         brand_id: "global",
         category: "cs",

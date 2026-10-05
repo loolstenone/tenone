@@ -29,7 +29,7 @@ interface InboxStat {
 
 const CS_SOURCES = [
     { key: "contact", label: "연락/문의", icon: Mail, color: "text-blue-600",
-      table: "contact_submissions", openFilter: { col: "status", val: "new" }, href: "/intra/ums/cs/contact" },
+      table: "contact_submissions", openFilter: { col: "status", val: "pending" }, href: "/intra/ums/cs/contact" },
     { key: "jakka_qna", label: "Jakka 작품 Q&A", icon: HelpCircle, color: "text-amber-600",
       table: "jakka_product_qna", openFilter: { col: "answered_at", val: null }, href: "/intra/ums/jakka/market" },
     { key: "badak_feedback", label: "Badak 피드백", icon: Heart, color: "text-rose-600",
