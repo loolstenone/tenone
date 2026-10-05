@@ -5,8 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useSite } from "@/lib/site-context";
 
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
+// 환경변수 끝 공백·줄바꿈 제거 + 형식 검증 — Vercel 값에 줄바꿈이 섞여 GTM 스크립트가 문법 오류로 실행되지 않은 사고 (2026-10-05)
+function cleanId(v: string | undefined, pattern: RegExp): string | undefined {
+  const id = v?.trim();
+  return id && pattern.test(id) ? id : undefined;
+}
+const GTM_ID = cleanId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/);
+const CLARITY_ID = cleanId(process.env.NEXT_PUBLIC_CLARITY_ID, /^[a-z0-9]+$/i);
 
 declare global {
   interface Window {
@@ -37,6 +42,7 @@ export function Analytics() {
   return (
     <>
       {/* Google Tag Manager */}
+      {GTM_ID && (<>
       <Script id="gtm-init" strategy="afterInteractive">
         {`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -57,6 +63,7 @@ export function Analytics() {
           style={{ display: "none", visibility: "hidden" }}
         />
       </noscript>
+      </>)}
 
       {/* Microsoft Clarity */}
       {CLARITY_ID && (
