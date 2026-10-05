@@ -211,13 +211,8 @@ function AboutContent() {
 
                     {/* Founder */}
                     <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-                            <div className="aspect-square tn-bg-alt flex items-center justify-center max-w-md overflow-hidden">
-                                <div className="w-32 h-32 rounded-full bg-neutral-900 flex items-center justify-center">
-                                    <span className="text-3xl font-bold text-white">CJ</span>
-                                </div>
-                            </div>
-                            <div>
+                        <div className="max-w-7xl mx-auto">
+                            <div className="max-w-2xl">
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
                                 <h2 className="text-xl md:text-3xl font-bold">전천일</h2>
                                 <p className="text-sm tn-text-sub mt-1">Cheonil Jeon · Value Connector</p>
@@ -226,7 +221,7 @@ function AboutContent() {
                                     트렌드, 브랜딩, IT에 관심을 가지고 가치를 연결하는 일을 하고 있습니다.
                                 </p>
                                 <div className="mt-6 space-y-2 text-sm tn-text-sub">
-                                    <p><a href="https://tenone.biz/contact" className="hover:tn-text transition-colors">tenone.biz/contact</a></p>
+                                    <p><a href="mailto:lools@tenone.biz" className="hover:tn-text transition-colors">lools@tenone.biz</a></p>
                                     <p><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:tn-text transition-colors">Kakao Open Chat</a></p>
                                 </div>
                             </div>
