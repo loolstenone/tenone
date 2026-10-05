@@ -634,24 +634,19 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 > **모든 권한은 `member_roles(user_id, role, context, is_active)`에서 파생된다.**
 > `members` 테이블의 권한 컬럼은 제거됨 (0-B Phase 완료).
 
-### role 분류
+### role × context 규약 (실제 운영 v3 — 2026-10-05 정리)
 
-| role | 부여 조건 | 접근 범위 |
-|------|----------|----------|
-| `member` | 기본 회원 | 본인 데이터 |
-| `subscriber` | 구독 결제 완료 | 구독 기능 활성 |
-| `purchaser` | 건별 결제 완료 | 구매 항목 접근 |
-| `approved_member` | 멤버십 심사 승인 | 해당 커뮤니티 참여 |
-| `leader` | 그룹/모임 리더 | 해당 그룹 관리 (context 종속) |
-| `staff` | TenOne 직원 | Intra 접근 |
-| `manager` | 매니저급 직원 | 담당 브랜드 관리 |
-| `super_admin` | 마스터 (lools@tenone.biz) | 전체 시스템 |
+| context | role | 의미 |
+|---------|------|------|
+| `universe` | `super_admin` · `staff` · `manager` · `crew` · `member` | 유니버스 등급. `staff@universe`가 JWT `is_staff` → RLS `auth_is_staff()` |
+| `system` | `intra_access` | 인트라 메뉴 표시 플래그 (권한 판단은 staff) |
+| `module` | `{모듈명}` (erp·hero·wiki·smarcomm·project …) | 인트라 모듈 접근 |
+| `brand` | `{브랜드 slug}` (badak·madleague·tenone …) | 해당 브랜드 인트라 관리 |
 
-### context 규약
-
-- `brand:[siteId]` — 특정 브랜드 한정 (예: `brand:badak`, `brand:madleague`)
-- `global` — 유니버스 전체
-- `staff` — 직원 영역
+- 서버 API 직원 판단: `lib/api-guard.ts` `requireStaff` (staff·manager·super_admin 또는 인증된 @tenone.biz)
+- 마스터: `super_admin@universe` (lools@tenone.biz)
+- ❌ 회원 활동 역할(멘토·현역·바닥장·구독자 등)을 member_roles에 넣지 않는다 → `member_capability_roles` (§1.3.1)
+  - 이관 대상: MADLeague `role=member|mentor|club_leader, context='brand:madleague'` (approve API·arena·clubs·community 페이지)
 
 ### 인증 흐름
 
@@ -904,7 +899,7 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 ### 권한 게이트
 
 - Intra 접근: `role IN ('staff','manager','super_admin')`
-- 브랜드별 관리 패널: `role='manager'` + `context='brand:{siteId}'` 또는 `super_admin`
+- 브랜드별 관리 패널: `role='{brand slug}'` + `context='brand'` 또는 `super_admin`
 - 마스터 전용: `super_admin` (lools@tenone.biz)
 
 ### 인트라 ↔ 사이트 반영 흐름
@@ -1248,7 +1243,7 @@ Claude Code는 해당 브랜드 파일을 편집할 때 **자동으로 함께 �
 
 ## 권한 체계
 - role 종류: [member, leader, admin, ...]
-- context: `brand:[siteId]`
+- 인트라 관리 권한: `member_roles(role='{slug}', context='brand')` (§1.6) · 회원 활동 역할은 `member_capability_roles`
 - 인트라 관리 권한: `/intra/ums/[brand]/*`
 
 ## UC 정책 특이사항
