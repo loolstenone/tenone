@@ -281,15 +281,18 @@ export async function createPost(
     author: { memberId: string | null; displayName?: string },
 ): Promise<Post> {
     const status = toDbStatus(input.status) ?? 'published';
+    const body = await externalizeInlineImages(input.content);
+    const representImage = input.representImage ? await externalizeImageSrc(input.representImage) : '';
     const row: Record<string, unknown> = {
         board_id: rule.id,
         site_id: rule.siteId,
         title: input.title,
-        body: input.content,
-        summary: input.excerpt || extractExcerpt(input.content),
+        body,
+        summary: input.excerpt || extractExcerpt(body),
         category_id: input.category || null,
         tags: input.tags || [],
-        image: input.representImage || extractFirstImage(input.content) || null,
+        // 대표 이미지 미지정 → 본문 첫 이미지
+        image: representImage || extractFirstImage(body) || null,
         status,
         is_pinned: input.isPinned || false,
         is_secret: input.isSecret || false,
@@ -310,13 +313,25 @@ export async function createPost(
 export async function updatePost(id: string, input: UpdatePostInput): Promise<Post> {
     const row: Record<string, unknown> = {};
     if (input.title !== undefined) row.title = input.title;
-    if (input.content !== undefined) {
-        row.body = input.content;
-        row.summary = input.excerpt || extractExcerpt(input.content);
+    const body = input.content !== undefined ? await externalizeInlineImages(input.content) : undefined;
+    if (body !== undefined) {
+        row.body = body;
+        row.summary = input.excerpt || extractExcerpt(body);
     }
     if (input.category !== undefined) row.category_id = input.category || null;
     if (input.tags !== undefined) row.tags = input.tags;
-    if (input.representImage !== undefined) row.image = input.representImage || null;
+    // 대표 이미지 미지정 → 본문 첫 이미지
+    if (input.representImage) {
+        row.image = await externalizeImageSrc(input.representImage);
+    } else if (input.representImage !== undefined || body !== undefined) {
+        const firstImage = body !== undefined ? extractFirstImage(body) : '';
+        if (input.representImage !== undefined) {
+            row.image = firstImage || null;
+        } else if (firstImage) {
+            const { data: current } = await supabase.from('ums_posts').select('image').eq('id', id).single();
+            if (!current?.image) row.image = firstImage;
+        }
+    }
     if (input.status !== undefined) {
         row.status = toDbStatus(input.status);
         if (input.status === 'published') row.published_at = new Date().toISOString();
@@ -615,17 +630,38 @@ export async function uploadImage(file: File, path?: string): Promise<string> {
     return data.publicUrl;
 }
 
+/** 본문 안 base64 이미지를 Storage로 올리고 URL로 교체 (대표 이미지 추출·페이지 무게) */
+async function externalizeInlineImages(html: string): Promise<string> {
+    if (!html || !html.includes('data:image/')) return html;
+    const srcs = Array.from(new Set(Array.from(html.matchAll(/src=["'](data:image\/[a-z+]+;base64,[^"']+)["']/gi), m => m[1])));
+    let out = html;
+    for (const src of srcs.slice(0, 30)) {
+        try {
+            const url = await uploadBase64Image(src);
+            out = out.split(src).join(url);
+        } catch (e) {
+            console.error('externalizeInlineImages:', e);
+        }
+    }
+    return out;
+}
+
+async function externalizeImageSrc(src: string): Promise<string> {
+    if (!src.startsWith('data:image/')) return src;
+    try { return await uploadBase64Image(src); } catch { return ''; }
+}
+
 export async function uploadBase64Image(base64: string, filename?: string): Promise<string> {
-    const match = base64.match(/^data:image\/(\w+);base64,(.+)$/);
+    const match = base64.match(/^data:image\/([a-z+]+);base64,(.+)$/i);
     if (!match) throw new Error('Invalid base64 image');
 
-    const ext = match[1];
+    const ext = match[1].toLowerCase() === 'svg+xml' ? 'svg' : match[1].toLowerCase();
     const data = match[2];
     const buffer = Buffer.from(data, 'base64');
     const filePath = filename || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error } = await supabase.storage.from(BUCKET).upload(filePath, buffer, {
-        contentType: `image/${ext}`,
+        contentType: `image/${match[1].toLowerCase()}`,
         cacheControl: '3600',
         upsert: false,
     });

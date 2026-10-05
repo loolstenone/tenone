@@ -524,6 +524,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 <div className="flex items-center gap-2 mb-2">
                     <ImageIcon size={14} className="tn-text-muted" />
                     <span className="text-sm tn-text-muted">대표 이미지</span>
+                    {!representImage && <span className="text-xs tn-text-muted opacity-70">· 지정하지 않으면 본문 첫 이미지</span>}
                 </div>
                 {representImage ? (
                     <div className="relative inline-block">
