@@ -36,7 +36,15 @@ function toPost(row: Record<string, unknown>): Post {
     p.likeCount = p.likeCount ?? 0;
     p.bookmarkCount = p.bookmarkCount ?? 0;
     p.tags = p.tags ?? [];
+    p.status = fromDbStatus(row.status as string);
     return p;
+}
+
+function fromDbStatus(s: string): PostStatus {
+    if (s === 'private') return 'hidden';
+    if (s === 'archived') return 'deleted';
+    if (s === 'scheduled') return 'draft';
+    return s as PostStatus;
 }
 
 /** DB 상태 enum(bums_post_status) ↔ 화면 상태 */
@@ -66,13 +74,15 @@ export interface BoardRule {
     writePermission: string;
     commentPermission: string;
     allowComments: boolean;
+    /** public = 누구나 / 그 외(intra·staff) = 직원 전용 게시판 */
+    visibility: string;
 }
 
 /** 게시판 쓰기 규칙 (site slug + board slug) */
 export async function fetchBoardRule(site: string, board: string): Promise<BoardRule | null> {
     const { data } = await supabase
         .from('ums_boards')
-        .select('id, site_id, write_permission, comment_permission, allow_comments, ums_sites!inner(slug)')
+        .select('id, site_id, write_permission, comment_permission, allow_comments, visibility, ums_sites!inner(slug)')
         .eq('slug', board)
         .eq('ums_sites.slug', site)
         .maybeSingle();
@@ -83,7 +93,22 @@ export async function fetchBoardRule(site: string, board: string): Promise<Board
         writePermission: data.write_permission,
         commentPermission: data.comment_permission,
         allowComments: data.allow_comments !== false,
+        visibility: data.visibility,
     };
+}
+
+/** 직원 전용(비공개) 게시판 slug 목록 — 비직원 목록 조회에서 제외 */
+export async function fetchPrivateBoardSlugs(site: string): Promise<string[]> {
+    const { data } = await supabase
+        .from('ums_boards')
+        .select('slug, ums_sites!inner(slug)')
+        .eq('ums_sites.slug', site)
+        .neq('visibility', 'public');
+    return (data ?? []).map((b: { slug: string }) => b.slug);
+}
+
+export function isPublicBoard(rule: Pick<BoardRule, 'visibility'>): boolean {
+    return rule.visibility === 'public';
 }
 
 /** 회원 쓰기 가능 등급 — 그 외(intra·staff·admin)는 직원만 */
@@ -91,13 +116,39 @@ export function memberCanWrite(permission: string): boolean {
     return permission === 'all' || permission === 'member';
 }
 
+/** DB 권한 등급 → 화면 표기 (관리자 작성 / 회원 작성) */
+function toPermission(p: string): 'all' | 'member' | 'admin' {
+    return p === 'all' ? 'all' : p === 'member' ? 'member' : 'admin';
+}
+
 export async function fetchBoardConfigs(site?: SiteCode, slug?: string): Promise<BoardConfig[]> {
-    let query = supabase.from('board_configs').select('*').order('sort_order');
-    if (site) query = query.eq('site', site);
+    let query = supabase
+        .from('ums_boards')
+        .select('id, slug, name, description, categories, sort_order, created_at, updated_at, board_type, visibility, read_permission, write_permission, comment_permission, ums_sites!inner(slug)')
+        .order('sort_order');
+    if (site) query = query.eq('ums_sites.slug', site);
     if (slug) query = query.eq('slug', slug);
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r) as unknown as BoardConfig);
+    return (data || []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        site: (r.ums_sites as { slug: string }).slug as SiteCode,
+        slug: r.slug as string,
+        name: r.name as string,
+        description: (r.description as string) ?? '',
+        categories: Array.isArray(r.categories) ? (r.categories as string[]) : [],
+        settings: null as unknown as BoardConfig['settings'],
+        permissions: {
+            read: toPermission(r.read_permission as string),
+            write: toPermission(r.write_permission as string),
+            comment: toPermission(r.comment_permission as string),
+        },
+        visibility: r.visibility as string,
+        boardType: r.board_type as string,
+        sortOrder: r.sort_order as number,
+        createdAt: r.created_at as string,
+        updatedAt: r.updated_at as string,
+    }));
 }
 
 export async function fetchBoardConfig(site: SiteCode, slug: string): Promise<BoardConfig | null> {
@@ -117,7 +168,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
     const {
         site, board, category, tag, status,
         search, sort = 'latest', period = 'all',
-        page = 1, limit = 12, author_id,
+        page = 1, limit = 12, author_id, excludeBoards,
     } = params;
 
     let query = supabase
@@ -128,7 +179,9 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
     if (board) query = query.eq('board', board);
     if (category) query = query.eq('category', category);
     if (author_id) query = query.eq('author_id', author_id);
-    query = query.eq('status', toDbStatus(status) ?? 'published');
+    // 'all' = 전체 상태 (직원 관리 화면 — 권한 확인은 API 라우트)
+    if (status !== 'all') query = query.eq('status', toDbStatus(status) ?? 'published');
+    if (excludeBoards && excludeBoards.length > 0) query = query.not('board', 'in', `(${excludeBoards.join(',')})`);
     if (tag) query = query.contains('tags', [tag]);
 
     // 검색 (제목 + 본문)

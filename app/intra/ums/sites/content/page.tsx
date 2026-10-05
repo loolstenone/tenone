@@ -11,20 +11,7 @@ import {
 import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
-/* ── API 응답용 인터페이스 ── */
-interface PostRow {
-    id: string; site: string; board: string; title: string; content: string;
-    excerpt: string; category: string; status: string; author_type: string;
-    author_id: string | null; guest_nickname: string | null;
-    represent_image: string; tags: string[];
-    view_count: number; like_count: number; comment_count: number;
-    is_pinned: boolean; created_at: string;
-}
-
-interface ConfigRow {
-    id: string; site: string; slug: string; name: string;
-    description: string; categories: string[];
-}
+import { loadIntraBoardData, writerLabel, isMemberBoard, editorHref, type IntraPostRow as PostRow, type IntraBoardConfig as ConfigRow } from "@/lib/intra-board";
 
 type ViewMode = "list" | "card";
 
@@ -68,33 +55,9 @@ export default function ContentManagementPage() {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            // configs
-            const configUrl = selectedSiteId === "all"
-                ? "/api/board/configs"
-                : `/api/board/configs?site=${selectedSiteId}`;
-            const configRes = await fetch(configUrl);
-            const configData = configRes.ok ? await configRes.json() : { configs: [] };
-            setConfigs(configData.configs || []);
-
-            // posts: 사이트별 fetch
-            if (selectedSiteId === "all") {
-                const sites = [...new Set((configData.configs || []).map((c: ConfigRow) => c.site))];
-                const allPosts: PostRow[] = [];
-                await Promise.all(
-                    sites.map(async (site: unknown) => {
-                        const res = await fetch(`/api/board/posts?site=${site as string}&limit=500`);
-                        if (res.ok) {
-                            const d = await res.json();
-                            allPosts.push(...(d.posts || []));
-                        }
-                    })
-                );
-                setPosts(allPosts);
-            } else {
-                const postRes = await fetch(`/api/board/posts?site=${selectedSiteId}&limit=500`);
-                const postData = postRes.ok ? await postRes.json() : { posts: [] };
-                setPosts(postData.posts || []);
-            }
+            const { configs, posts } = await loadIntraBoardData(selectedSiteId);
+            setConfigs(configs);
+            setPosts(posts);
         } catch { /* ignore */ }
         setLoading(false);
     }, [selectedSiteId]);
@@ -112,13 +75,13 @@ export default function ContentManagementPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("삭제하시겠습니까?")) return;
         await fetch(`/api/board/posts/${id}`, { method: "DELETE" });
-        setPosts(prev => prev.filter(p => p.id !== id));
+        setPosts(prev => prev.map(p => p.id === id ? { ...p, status: "deleted" } : p));
     };
 
     /* ── 필터링 ── */
     const filtered = posts.filter(p => {
         if (boardFilter !== "전체" && p.board !== boardFilter) return false;
-        if (statusFilter !== "전체" && p.status !== statusFilter) return false;
+        if (statusFilter === "전체" ? p.status === "deleted" : p.status !== statusFilter) return false;
         if (search) {
             const q = search.toLowerCase();
             if (!p.title.toLowerCase().includes(q) && !p.excerpt?.toLowerCase().includes(q)) return false;
@@ -131,7 +94,7 @@ export default function ContentManagementPage() {
 
     /* ── 통계 ── */
     const stats = {
-        total: posts.length,
+        total: posts.filter(p => p.status !== "deleted").length,
         published: posts.filter(p => p.status === "published").length,
         draft: posts.filter(p => p.status === "draft").length,
         hidden: posts.filter(p => p.status === "hidden").length,
@@ -151,7 +114,7 @@ export default function ContentManagementPage() {
                 description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시글 통합 관리`}
             >
                 <SiteFilterDropdown />
-                <PrimaryButton onClick={() => router.push("/intra/bums/content?new=true")}>
+                <PrimaryButton onClick={() => router.push(editorHref({ site: selectedSiteId, board: boardFilter !== "전체" ? boardFilter : undefined }))}>
                     <Plus className="h-3.5 w-3.5" /> 새 글 작성
                 </PrimaryButton>
             </PageHeader>
@@ -182,7 +145,7 @@ export default function ContentManagementPage() {
                 <select value={boardFilter} onChange={e => { setBoardFilter(e.target.value); setCurrentPage(1); }}
                     className="rounded-lg border border-neutral-200 shadow-sm px-3.5 py-2.5 text-sm bg-white">
                     <option value="전체">전체 게시판</option>
-                    {boardOptions.map(b => <option key={b.id} value={b.slug}>{b.name}</option>)}
+                    {boardOptions.map(b => <option key={b.id} value={b.slug}>{selectedSiteId === "all" ? `${siteName(b.site)} · ` : ""}{b.name} ({writerLabel(b)})</option>)}
                 </select>
                 <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
                     className="rounded-lg border border-neutral-200 shadow-sm px-3.5 py-2.5 text-sm bg-white">
@@ -190,6 +153,7 @@ export default function ContentManagementPage() {
                     <option value="published">발행</option>
                     <option value="draft">임시</option>
                     <option value="hidden">숨김</option>
+                    <option value="deleted">삭제</option>
                 </select>
                 <div className="flex gap-1 ml-auto bg-neutral-100 rounded-lg p-0.5">
                     <button onClick={() => setViewMode("list")}
@@ -233,7 +197,10 @@ export default function ContentManagementPage() {
                                         </div>
                                     </td>
                                     <td className="px-5 py-3.5 text-neutral-500 text-xs">{siteName(post.site)}</td>
-                                    <td className="px-5 py-3.5 text-neutral-500 text-xs">{boardName(post.site, post.board)}</td>
+                                    <td className="px-5 py-3.5 text-neutral-500 text-xs">
+                                        {boardName(post.site, post.board)}
+                                        <BoardKind cfg={configs.find(c => c.site === post.site && c.slug === post.board)} />
+                                    </td>
                                     <td className="px-5 py-3.5">
                                         <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-medium", statusBadge[post.status])}>
                                             {statusLabel[post.status] || post.status}
@@ -243,7 +210,7 @@ export default function ContentManagementPage() {
                                     <td className="px-5 py-3.5 text-neutral-400 text-right">{post.view_count.toLocaleString()}</td>
                                     <td className="px-5 py-3.5 text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            <button onClick={() => router.push(`/intra/bums/content?edit=${post.id}`)}
+                                            <button onClick={() => router.push(editorHref({ id: post.id }))}
                                                 className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-all" title="수정">
                                                 <Pencil className="h-3.5 w-3.5" />
                                             </button>
@@ -279,7 +246,7 @@ export default function ContentManagementPage() {
                                     </div>
                                 )}
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                    <button onClick={() => router.push(`/intra/bums/content?edit=${post.id}`)}
+                                    <button onClick={() => router.push(editorHref({ id: post.id }))}
                                         className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-neutral-500 hover:text-neutral-900 shadow-sm" title="수정">
                                         <Pencil className="h-3.5 w-3.5" />
                                     </button>
@@ -339,5 +306,15 @@ export default function ContentManagementPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+function BoardKind({ cfg }: { cfg?: ConfigRow }) {
+    if (!cfg) return null;
+    return (
+        <span className={clsx("ml-1.5 text-[10px] px-1.5 py-0.5 rounded",
+            isMemberBoard(cfg) ? "bg-sky-50 text-sky-600" : "bg-violet-50 text-violet-600")}>
+            {isMemberBoard(cfg) ? "회원" : "관리자"}
+        </span>
     );
 }

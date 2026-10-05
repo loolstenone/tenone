@@ -18,6 +18,14 @@ export async function GET(request: NextRequest) {
     }
     try {
         const apiUser = await getApiUser(request);
+        // 직원 전용 게시판 글의 댓글은 직원만
+        if (!apiUser?.isStaff) {
+            const post = await boardDb.fetchPostById(postId);
+            const rule = post ? await boardDb.fetchBoardRule(post.site, post.board) : null;
+            if (!post || post.status !== 'published' || (rule && !boardDb.isPublicBoard(rule))) {
+                return NextResponse.json({ comments: [] });
+            }
+        }
         const comments = await boardDb.fetchComments(postId, apiUser?.memberId ?? undefined);
         return NextResponse.json({ comments });
     } catch (error) {
@@ -45,6 +53,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '글을 찾을 수 없습니다.' }, { status: 404 });
         }
         const rule = await boardDb.fetchBoardRule(post.site, post.board);
+        if (rule && !boardDb.isPublicBoard(rule) && !auth.isStaff) {
+            return NextResponse.json({ error: '글을 찾을 수 없습니다.' }, { status: 404 });
+        }
         if (!rule?.allowComments) {
             return NextResponse.json({ error: '댓글을 쓸 수 없는 게시판입니다.' }, { status: 403 });
         }

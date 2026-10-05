@@ -1,6 +1,6 @@
 /**
  * 게시글 상세 API
- * GET    /api/board/posts/:id   발행글은 누구나, 그 외는 작성자 본인·직원
+ * GET    /api/board/posts/:id   발행글은 누구나(직원 전용 게시판 제외), 그 외는 작성자 본인·직원
  * PUT    /api/board/posts/:id   작성자 본인·직원
  * PATCH  /api/board/posts/:id   (PUT과 동일)
  * DELETE /api/board/posts/:id   작성자 본인·직원 (보관 처리). ?hard=true 영구 삭제는 직원·Admin Key
@@ -20,13 +20,20 @@ export async function GET(request: NextRequest, { params }: Ctx) {
         const post = await boardDb.fetchPostWithDetails(id, apiUser?.memberId ?? undefined);
         if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
 
-        const canSeeUnpublished = isAdminRequest(request) || !!apiUser?.isStaff
-            || (!!apiUser?.memberId && post.authorId === apiUser.memberId);
+        const isStaff = isAdminRequest(request) || !!apiUser?.isStaff;
+        const canSeeUnpublished = isStaff || (!!apiUser?.memberId && post.authorId === apiUser.memberId);
         if (post.status !== 'published' && !canSeeUnpublished) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
+        // 직원 전용 게시판 글은 직원만
+        if (!isStaff) {
+            const rule = await boardDb.fetchBoardRule(post.site, post.board);
+            if (rule && !boardDb.isPublicBoard(rule)) {
+                return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+            }
+        }
 
-        if (post.status === 'published') await boardDb.incrementViewCount(id);
+        if (post.status === 'published' && !isStaff) await boardDb.incrementViewCount(id);
         return NextResponse.json(post);
     } catch (error) {
         console.error('fetchPost error:', error);

@@ -1,7 +1,8 @@
 /**
  * 게시글 API
  * GET  /api/board/posts?site=tenone&board=news&page=1&limit=12
- *      발행글은 누구나. 그 외 상태(draft 등)는 직원 또는 본인 글(author_id=본인)만
+ *      발행글은 누구나. 그 외 상태(draft 등, status=all)는 직원 또는 본인 글(author_id=본인)만
+ *      직원 전용 게시판(visibility≠public)은 직원만
  * POST /api/board/posts  (글 작성)
  *      로그인 회원 + 게시판 쓰기 권한 (운영 게시판은 직원만). 비회원 작성 없음
  *      Admin API Key = 에이전트 작성 (작성자 표기 'Ten:One')
@@ -31,12 +32,25 @@ export async function GET(request: NextRequest) {
         author_id: searchParams.get('author_id') || undefined,
     };
 
+    const isAdmin = isAdminRequest(request);
+    const apiUser = isAdmin ? null : await getApiUser(request);
+    const isStaff = isAdmin || !!apiUser?.isStaff;
+
     // 발행 외 상태 조회 = 직원 또는 본인 글
-    if (params.status && params.status !== 'published' && !isAdminRequest(request)) {
-        const apiUser = await getApiUser(request);
+    if (params.status && params.status !== 'published' && !isStaff) {
         const isSelf = !!apiUser?.memberId && params.author_id === apiUser.memberId;
-        if (!apiUser?.isStaff && !isSelf) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        if (!isSelf) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // 직원 전용 게시판은 비직원에게 보이지 않음
+    if (!isStaff) {
+        if (params.board) {
+            const rule = await boardDb.fetchBoardRule(params.site, params.board);
+            if (rule && !boardDb.isPublicBoard(rule)) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        } else {
+            params.excludeBoards = await boardDb.fetchPrivateBoardSlugs(params.site);
         }
     }
 

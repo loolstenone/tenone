@@ -42,7 +42,9 @@ export interface BoardConfig {
     description: string;
     categories: string[];
     settings: BoardSettings;
-    permissions: BoardPermissions;
+    permissions: BoardPermissions;   // write: 'admin' = 관리자 작성 게시판 / 'member'·'all' = 회원 작성
+    visibility?: string;             // 'public' = 누구나 / 그 외 = 직원 전용
+    boardType?: string;
     sortOrder: number;
     createdAt: string;
     updatedAt: string;
@@ -194,13 +196,14 @@ export interface PostListParams {
     board?: string;
     category?: string;
     tag?: string;
-    status?: PostStatus;
+    status?: PostStatus | 'all';     // 'all' = 전체 상태 (직원 전용)
     search?: string;
     sort?: 'latest' | 'popular' | 'comments' | 'views';
     period?: 'all' | 'today' | 'week' | 'month' | 'year';
     page?: number;
     limit?: number;
     author_id?: string;
+    excludeBoards?: string[];        // 비직원 조회 시 제외할 직원 전용 게시판
 }
 
 export interface PostListResponse {

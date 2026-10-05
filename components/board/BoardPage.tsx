@@ -52,7 +52,9 @@ function BoardPageInner({
     const [loading, setLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
     const [showLogin, setShowLogin] = useState(false);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isStaff } = useAuth();
+    // 관리자 작성 게시판(운영 콘텐츠)은 직원에게만 글쓰기 노출
+    const canWrite = !boardConfig || boardConfig.permissions?.write !== 'admin' || isStaff;
 
     // URL에서 postId 읽어서 자동 로드
     useEffect(() => {
@@ -234,7 +236,7 @@ function BoardPageInner({
                     <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
                     {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
                 </div>
-                {showWriteButton && (
+                {showWriteButton && canWrite && (
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                         <button
                             onClick={() => (isAuthenticated ? setMode("write") : setShowLogin(true))}
