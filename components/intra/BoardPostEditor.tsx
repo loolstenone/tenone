@@ -80,8 +80,10 @@ function ContentEditor({ listPath: LIST_PATH, fixedSite, fixedBoard }: Props) {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
             });
         if (!res.ok) {
+            if (res.status === 413) throw new Error("글 용량이 너무 큽니다. 본문 이미지 수나 크기를 줄여 주세요.");
+            if (res.status === 401 || res.status === 403) throw new Error("권한이 없거나 로그인이 만료됐습니다. 다시 로그인해 주세요.");
             const body = await res.json().catch(() => ({}));
-            throw new Error(body.error || "저장에 실패했습니다.");
+            throw new Error(body.error || `저장에 실패했습니다. (${res.status})`);
         }
         router.push(LIST_PATH);
     };

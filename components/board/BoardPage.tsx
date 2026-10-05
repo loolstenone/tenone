@@ -148,7 +148,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "저장 실패");
+        if (!res.ok) throw new Error(res.status === 413 ? "글 용량이 너무 큽니다. 이미지 수나 크기를 줄여 주세요." : (await res.json().catch(() => ({}))).error || "저장 실패");
         setMode("list");
         setRefreshKey(k => k + 1);
     }, []);
@@ -161,7 +161,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "수정 실패");
+        if (!res.ok) throw new Error(res.status === 413 ? "글 용량이 너무 큽니다. 이미지 수나 크기를 줄여 주세요." : (await res.json().catch(() => ({}))).error || "수정 실패");
         setMode("list");
         setSelectedPost(null);
         setRefreshKey(k => k + 1);
