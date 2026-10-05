@@ -184,14 +184,6 @@ export const modules: NavModule[] = [
                     },
                     { name: "CS 통합", href: "/intra/ums/cs", icon: MessageCircle },
                     {
-                        name: "Agent 관리", href: "/intra/ums/agents", icon: Bot,
-                        children: [
-                            { name: "에이전트 프로파일", href: "/intra/ums/agents" },
-                            { name: "시스템 프롬프트", href: "/intra/ums/agents/prompts" },
-                            { name: "도구·지식 참조", href: "/intra/ums/agents/tools" },
-                        ],
-                    },
-                    {
                         name: "외부 리소스", href: "/intra/ums/external", icon: Share2,
                         children: [
                             { name: "개요", href: "/intra/ums/external" },
@@ -654,6 +646,9 @@ export const modules: NavModule[] = [
                             { name: "에이전트 현황 (대시보드)", href: "/intra/agent" },
                             { name: "에이전트 지시", href: "/intra/agent/comm" },
                             { name: "에이전트 로그", href: "/intra/agent/logs" },
+                            { name: "에이전트 프로파일", href: "/intra/ums/agents" },
+                            { name: "시스템 프롬프트", href: "/intra/ums/agents/prompts" },
+                            { name: "도구·지식 참조", href: "/intra/ums/agents/tools" },
                         ],
                     },
                 ],

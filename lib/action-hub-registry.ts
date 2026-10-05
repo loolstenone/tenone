@@ -25,8 +25,8 @@ export interface ActionEntry {
     label: string;
     /** Supabase 테이블명 */
     table: string;
-    /** 필터 조건: column → value (1차 필터) */
-    filter: { column: string; value: string };
+    /** 필터 조건: column → value (1차 필터). value가 null이면 IS NULL (예: 미답변 = answered_at IS NULL) */
+    filter: { column: string; value: string | null };
     /** 추가 AND 조건 (선택) — 예: severity='critical' 같이 second-axis 필터링 시 사용 */
     extraFilters?: Array<{ column: string; value: string }>;
     /** AND NOT 조건 (선택) — 예: 같은 테이블을 priority별로 분할할 때 critical을 일반에서 제외 */
@@ -132,7 +132,7 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         label: "연락/문의 미답변",
         table: "contact_submissions",
         filter: { column: "status", value: "new" },
-        href: "/intra/marketing/crm/people",
+        href: "/intra/ums/cs/contact",
         brand_id: "global",
         category: "cs",
         priority: "high",
@@ -141,7 +141,7 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         key: "jakka_qna",
         label: "Jakka 작품 Q&A 미답변",
         table: "jakka_product_qna",
-        filter: { column: "status", value: "open" },
+        filter: { column: "answered_at", value: null },
         href: "/intra/ums/jakka",
         brand_id: "jakka",
         category: "cs",

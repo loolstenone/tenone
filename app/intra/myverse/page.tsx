@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import clsx from "clsx";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { ActionHubPanel } from "@/components/intra/ActionHubPanel";
 import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -197,6 +198,13 @@ export default function MyversePage() {
         <div>
             {/* 인사말 + 격언 */}
             <PageHeader title={`안녕하세요, ${user.name}님`} description={todayQuote} />
+
+            {/* 오늘 처리할 일 — 전 브랜드 Action Hub (직원만) */}
+            {isStaff && (
+                <div className="mb-6">
+                    <ActionHubPanel />
+                </div>
+            )}
 
             {/* 10:01 Vrief 브리핑 위젯 (마스터·직원만) */}
             {isStaff && (

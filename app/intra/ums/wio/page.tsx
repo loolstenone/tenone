@@ -1,2 +1,6 @@
 import { redirect } from "next/navigation";
-export default function WioUMSPage() { redirect("/intra/ums/commerce/subscriptions"); }
+
+/** WIO → 테넌트 (2026-10-05 인트라 3단계 통합) */
+export default function Redirect() {
+    redirect("/intra/ums/wio/tenants");
+}
