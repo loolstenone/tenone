@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -38,6 +38,17 @@ function AboutContent() {
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState('philosophy');
     const [yearFilter, setYearFilter] = useState('전체');
+    const tabsAnchorRef = useRef<HTMLDivElement>(null);
+
+    // 탭 전환 시 새 탭 내용을 처음부터 보이게 — 탭 바 아래로 내려가 있었다면 탭 바 위치로 (헤더 64px)
+    const selectTab = (id: string) => {
+        setActiveTab(id);
+        router.replace(id === 'philosophy' ? '/about' : `/about?tab=${id}`, { scroll: false });
+        const anchor = tabsAnchorRef.current;
+        if (!anchor) return;
+        const top = anchor.getBoundingClientRect().top + window.scrollY - 64;
+        if (window.scrollY > top) window.scrollTo({ top });
+    };
 
     useEffect(() => {
         // URL ↔ 탭 동기화 — 상단 About 메뉴(/about)로 재진입 시 첫 탭으로
@@ -72,11 +83,12 @@ function AboutContent() {
             </section>
 
             {/* Tab Navigation */}
+            <div ref={tabsAnchorRef} />
             <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0 overflow-x-auto">
                         {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => { setActiveTab(tab.id); router.replace(tab.id === 'philosophy' ? '/about' : `/about?tab=${tab.id}`, { scroll: false }); }}
+                            <button key={tab.id} onClick={() => selectTab(tab.id)}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
                                         ? 'border-neutral-900 tn-text font-medium'
