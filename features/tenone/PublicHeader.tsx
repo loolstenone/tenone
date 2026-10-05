@@ -17,7 +17,6 @@ type NavItem = { name: string; href: string; sub?: { name: string; href: string 
 const publicNav: NavItem[] = [
     { name: "Works", href: "/works" },
     { name: "Contact", href: "/contact" },
-    { name: "Newsroom", href: "/newsroom" },
     { name: "About", href: "/about" },
 ];
 

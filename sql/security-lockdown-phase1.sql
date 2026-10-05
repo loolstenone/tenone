@@ -15,7 +15,7 @@
 DO $$
 DECLARE
     a_tables text[];
-    b_tables text[] := ARRAY['newsroom_items','jakka_notices','hit_hero_types','hit_report_modules'];
+    b_tables text[] := ARRAY['jakka_notices','hit_hero_types','hit_report_modules'];
     t text;
     p record;
 BEGIN

@@ -150,7 +150,6 @@ export const modules: NavModule[] = [
                             { name: "사이트 목록", href: "/intra/ums/sites/list" },
                             { name: "게시판", href: "/intra/ums/sites/boards" },
                             { name: "콘텐츠", href: "/intra/ums/sites/content" },
-                            { name: "뉴스룸", href: "/intra/ums/sites/newsroom" },
                         ],
                     },
                     {

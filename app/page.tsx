@@ -29,23 +29,12 @@ export default function HomePage() {
     const [nlError, setNlError] = useState(false);
     const nlCaptcha = useCaptcha();
     const [latestWorks, setLatestWorks] = useState<SimplePost[]>([]);
-    const [latestNews, setLatestNews] = useState<SimplePost[]>([]);
 
     useEffect(() => {
         fetch('/api/board/posts?site=tenone&board=works&limit=8&status=published')
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(d => setLatestWorks(d.posts || []))
             .catch(() => console.warn('[Home] Works fetch failed — using empty state'));
-        fetch('/api/newsroom/feed?sort=latest&limit=4')
-            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-            .then(d => setLatestNews((d.posts || []).map((p: any) => ({
-                id: p.id, title: p.title, excerpt: p.summary || p.excerpt || '',
-                category: p.category || p.source_brand || '',
-                representImage: p.thumbnail_url || p.represent_image || '',
-                created_at: p.published_at || p.created_at, view_count: p.view_count || 0,
-                url: p.url || `/newsroom/${p.id}`,
-            }))))
-            .catch(() => console.warn('[Home] Newsroom feed fetch failed — using empty state'));
     }, []);
 
     return (
@@ -291,47 +280,6 @@ export default function HomePage() {
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* ── Latest News ── */}
-            <section className="py-20 md:py-32 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Latest</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                새로운 <span className="font-bold">소식</span>
-                            </h2>
-                        </div>
-                        <Link href="/newsroom" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            View All <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-
-                    {latestNews.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {latestNews.map((news) => {
-                                const rawDate = (news.created_at || '').substring(0, 10);
-                                return (
-                                    <Link key={news.id} href={news.url || `/newsroom/${news.id}`} className="group block">
-                                        <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
-                                            {news.representImage ? (
-                                                <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <p className="text-xs tn-text-sub text-center px-4">{news.category || '뉴스'}</p>
-                                            )}
-                                        </div>
-                                        <p className="text-xs tn-text-sub">{rawDate}</p>
-                                        <h3 className="font-semibold tn-text mt-1 group-hover:underline leading-snug">{news.title}</h3>
-                                        <p className="text-sm tn-text-sub mt-1 line-clamp-2">{news.excerpt}</p>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <p className="text-sm tn-text-sub text-center py-12">준비 중입니다.</p>
-                    )}
                 </div>
             </section>
 

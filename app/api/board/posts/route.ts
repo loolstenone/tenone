@@ -98,21 +98,6 @@ export async function POST(request: NextRequest) {
             post = await boardDb.createPost(input, rule, { memberId: auth.memberId });
         }
 
-        // 운영 게시판(직원 작성) 발행글만 뉴스룸 자동 등록 — 회원 커뮤니티 글을 다른 곳에 노출하지 않음 (데이터 계약 4조)
-        if (post.status === 'published' && !boardDb.memberCanWrite(rule.writePermission)) {
-            const { registerToNewsroom } = await import('@/lib/supabase/newsroom');
-            await registerToNewsroom({
-                id: post.id,
-                site: post.site,
-                title: post.title,
-                excerpt: post.excerpt,
-                represent_image: post.representImage,
-                category: post.category,
-                tags: post.tags,
-                created_at: post.createdAt,
-            });
-        }
-
         return NextResponse.json(post, { status: 201 });
     } catch (error) {
         console.error('createPost error:', error);
