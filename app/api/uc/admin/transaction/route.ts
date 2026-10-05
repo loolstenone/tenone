@@ -2,18 +2,9 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireStaff } from '@/lib/api-guard';
 
 const supabase = createAdminClient();
-
-async function getStaffCaller(token: string) {
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  const { data: caller } = await supabase.from('members').select('id, roles').eq('auth_id', user.id).single();
-  if (!caller) return null;
-  const roles: string[] = caller.roles ?? [];
-  if (!roles.includes('staff') && !roles.includes('admin')) return null;
-  return caller;
-}
 
 /**
  * PATCH /api/uc/admin/transaction
@@ -21,9 +12,9 @@ async function getStaffCaller(token: string) {
  * Body: { transaction_id, amount?, note? }
  */
 export async function PATCH(request: NextRequest) {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!await getStaffCaller(token)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // 직원 확인 — member_roles 기반 공통 함수
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
 
   const { transaction_id, amount, note } = await request.json();
   if (!transaction_id) return NextResponse.json({ error: 'transaction_id required' }, { status: 400 });
@@ -87,9 +78,9 @@ export async function PATCH(request: NextRequest) {
  * Body: { transaction_id }
  */
 export async function DELETE(request: NextRequest) {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!await getStaffCaller(token)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // 직원 확인 — member_roles 기반 공통 함수
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
 
   const { transaction_id } = await request.json();
   if (!transaction_id) return NextResponse.json({ error: 'transaction_id required' }, { status: 400 });
