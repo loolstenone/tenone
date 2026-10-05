@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight, CheckCircle } from "lucide-react";
 import clsx from "clsx";
@@ -84,6 +85,14 @@ function PrivacyConsent({ items }: { items: string }) {
 }
 
 export default function ContactPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen tn-surface" />}>
+            <ContactContent />
+        </Suspense>
+    );
+}
+
+function ContactContent() {
     const [activeTab, setActiveTab] = useState<TabType>('partner');
     const { isAuthenticated } = useAuth();
     const [submitted, setSubmitted] = useState(false);
@@ -91,10 +100,12 @@ export default function ContactPage() {
     const [fromCrew, setFromCrew] = useState(false);
     const captcha = useCaptcha();
 
+    // URL ↔ 화면 동기화 — 상단 Contact 메뉴(/contact)로 재진입 시 기본 폼으로
+    const fromParam = useSearchParams().get('from');
     useEffect(() => {
-        const p = new URLSearchParams(window.location.search);
-        setFromCrew(p.get('from') === 'crew');
-    }, []);
+        setFromCrew(fromParam === 'crew');
+        setSubmitted(false);
+    }, [fromParam]);
 
     const handleSubmit = async (formType: string, form: HTMLFormElement) => {
         if (!captcha.ready) { alert(CAPTCHA_PENDING_MESSAGE); return; }

@@ -56,13 +56,18 @@ function BoardPageInner({
     // 관리자 작성 게시판(운영 콘텐츠)은 직원에게만 글쓰기 노출
     const canWrite = !boardConfig || boardConfig.permissions?.write !== 'admin' || isStaff;
 
-    // URL에서 postId 읽어서 자동 로드
+    // URL ↔ 화면 동기화 — ?postId 있으면 상세, 없으면 목록
+    // (상단 메뉴로 같은 경로 재진입 · 뒤로가기 시 상세에 머무는 문제 방지)
+    const urlPostId = searchParams.get('postId');
     useEffect(() => {
-        const postId = searchParams.get('postId');
-        if (postId && mode === 'list') {
-            loadPost(postId);
+        if (urlPostId) {
+            if (selectedPost?.id !== urlPostId) loadPost(urlPostId);
+        } else if (mode === 'detail') {
+            setMode('list');
+            setSelectedPost(null);
         }
-    }, [searchParams]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [urlPostId]);
 
     // 게시판 설정 로드 (캐시 활용)
     useEffect(() => {
@@ -91,8 +96,10 @@ function BoardPageInner({
                 const data = await res.json();
                 setSelectedPost(data.post || data);
                 setMode("detail");
-                // URL 업데이트 (고유 URL)
-                window.history.pushState(null, '', `${pathname}?postId=${postId}`);
+                // URL 업데이트 (고유 URL) — 이미 같은 주소면 기록 추가 안 함
+                if (new URLSearchParams(window.location.search).get('postId') !== postId) {
+                    window.history.pushState(null, '', `${pathname}?postId=${postId}`);
+                }
             }
         } catch (err) {
             console.error("게시글 로딩 실패:", err);

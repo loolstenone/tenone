@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { historyEvents } from "@/lib/data";
@@ -34,14 +34,14 @@ const flywheel = [
 
 function AboutContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState('philosophy');
     const [yearFilter, setYearFilter] = useState('전체');
 
     useEffect(() => {
-        if (tabParam && ['philosophy', 'universe', 'brands', 'history'].includes(tabParam)) {
-            setActiveTab(tabParam);
-        }
+        // URL ↔ 탭 동기화 — 상단 About 메뉴(/about)로 재진입 시 첫 탭으로
+        setActiveTab(tabParam && ['philosophy', 'universe', 'brands', 'history'].includes(tabParam) ? tabParam : 'philosophy');
     }, [tabParam]);
 
     const filteredHistory = yearFilter === '전체' ? HISTORY_DATA : HISTORY_DATA.filter(h => h.year === yearFilter);
@@ -76,7 +76,7 @@ function AboutContent() {
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0 overflow-x-auto">
                         {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            <button key={tab.id} onClick={() => { setActiveTab(tab.id); router.replace(tab.id === 'philosophy' ? '/about' : `/about?tab=${tab.id}`, { scroll: false }); }}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
                                         ? 'border-neutral-900 tn-text font-medium'
