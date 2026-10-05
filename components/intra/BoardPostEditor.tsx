@@ -7,7 +7,7 @@
  */
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import PostEditor from "@/components/board/PostEditor";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { siteConfigs } from "@/lib/site-config";
@@ -86,6 +86,13 @@ function ContentEditor({ listPath: LIST_PATH, fixedSite, fixedBoard }: Props) {
         router.push(LIST_PATH);
     };
 
+    const handleDelete = async () => {
+        if (!postId || !confirm("이 글을 삭제하시겠습니까? 사이트에서 바로 내려갑니다.")) return;
+        const res = await fetch(`/api/board/posts/${postId}`, { method: "DELETE" });
+        if (!res.ok) { alert("삭제에 실패했습니다."); return; }
+        router.push(LIST_PATH);
+    };
+
     if (loading) return <Spinner />;
 
     return (
@@ -95,6 +102,12 @@ function ContentEditor({ listPath: LIST_PATH, fixedSite, fixedBoard }: Props) {
                     className="flex items-center gap-1.5 px-3 py-2 text-sm text-neutral-500 hover:text-neutral-900">
                     <ArrowLeft className="h-4 w-4" /> 목록
                 </button>
+                {postId && post && (
+                    <button onClick={handleDelete}
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg">
+                        <Trash2 className="h-4 w-4" /> 삭제
+                    </button>
+                )}
             </PageHeader>
 
             {error && <div className="rounded-lg bg-red-50 text-red-600 text-sm px-4 py-3">{error}</div>}
