@@ -6,7 +6,7 @@ import { PublicHeader } from "@/features/tenone/PublicHeader";
 import { PublicFooter } from "@/features/tenone/PublicFooter";
 import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
-import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
+import { ArrowRight, Diamond, Zap, CheckSquare, CheckCircle2, Globe } from "lucide-react";
 import { CaptchaWidget, useCaptcha } from "@/components/CaptchaWidget";
 
 interface SimplePost {
@@ -88,54 +88,6 @@ export default function HomePage() {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── Crew CTA ── */}
-            <section className="py-24 px-6 tn-bg-alt">
-                <div className="max-w-5xl mx-auto text-center">
-                    <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-4">Join the Universe</p>
-                    <h2 className="text-xl md:text-3xl font-bold tracking-tight mb-3">
-                        프로젝트 <span className="tn-text-sub">크루</span>를 모집합니다.
-                    </h2>
-                    <p className="text-base tn-text-sub mb-12 max-w-2xl mx-auto leading-relaxed">
-                        기획자, 마케터, 디자이너, 개발자 — 당신의 재능이 필요합니다.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <FolderKanban className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">실전 프로젝트 참여</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                기업과 지자체 등 실전 프로젝트에 직접 참여합니다.
-                                포트폴리오가 아닌 실전 경험을 쌓습니다.
-                            </p>
-                        </div>
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <Target className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">HeRo 역량 진단 & 성장</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                HIT 통합검사로 나의 강점과 적성을 발견하고,
-                                맞춤 성장 로드맵과 멘토 매칭을 통해 커리어를 설계합니다.
-                            </p>
-                        </div>
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <Users className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">업계 네트워크 연결</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                현업자 네트워크, 기업 파트너와 연결됩니다.
-                                약한 연결이 만들어내는 강력한 기회를 경험하세요.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <Link href="/contact?from=crew"
-                            className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors"
-                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                            Crew 지원하기
-                        </Link>
                     </div>
                 </div>
             </section>
