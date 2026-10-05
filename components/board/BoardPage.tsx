@@ -21,6 +21,10 @@ interface BoardPageProps {
     isGuest?: boolean;
     /** 레이아웃: 'default' | 'accordion' (FAQ/QnA용) */
     layout?: 'default' | 'accordion';
+    /** 조회수·좋아요 표시 + 인기/조회/댓글순 정렬 (운영 콘텐츠 게시판은 false) */
+    showStats?: boolean;
+    /** 상세 하단 좋아요·북마크 버튼 */
+    showReactions?: boolean;
 }
 
 type Mode = "list" | "detail" | "write" | "edit";
@@ -42,6 +46,8 @@ function BoardPageInner({
     showWriteButton = true,
     isGuest = false,
     layout = 'default',
+    showStats = true,
+    showReactions = true,
 }: BoardPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -229,6 +235,8 @@ function BoardPageInner({
                         onLike={handleLike}
                         onBookmark={handleBookmark}
                         onEdit={() => setMode("edit")}
+                        showStats={showStats}
+                        showReactions={showReactions}
                     />
                 )}
             </div>
@@ -264,6 +272,7 @@ function BoardPageInner({
                 boardConfig={boardConfig || undefined}
                 accentColor={accentColor}
                 layout={layout}
+                showStats={showStats}
                 onPostClick={(post) => layout === 'accordion' ? undefined : loadPost(post.id)}
             />
         </div>

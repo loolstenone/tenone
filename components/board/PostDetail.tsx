@@ -17,6 +17,8 @@ interface PostDetailProps {
     onLike?: () => void;
     onBookmark?: () => void;
     onEdit?: () => void;
+    showStats?: boolean;
+    showReactions?: boolean;
 }
 
 function formatFullDate(dateStr: string): string {
@@ -69,8 +71,12 @@ export default function PostDetail({
     onLike,
     onBookmark,
     onEdit,
+    showStats = true,
+    showReactions = true,
 }: PostDetailProps) {
-    const { user } = useAuth();
+    const { user, isStaff } = useAuth();
+    // 수정 버튼: 작성자 본인 또는 직원만 (서버도 동일 검증)
+    const canEdit = !!user && (isStaff || (!!post.authorId && post.authorId === user.id));
     const [liked, setLiked] = useState(post.isLiked || false);
     const [likeCount, setLikeCount] = useState(post.likeCount);
     const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
@@ -205,6 +211,7 @@ export default function PostDetail({
                             <span title={formatFullDate(post.createdAt)}>{formatRelativeDate(post.createdAt)}</span>
                         </span>
                     </div>
+                    {showStats && (
                     <div className="flex items-center gap-3 tn-text-muted">
                         <span className="flex items-center gap-1">
                             <Eye className="h-3.5 w-3.5" /> {post.viewCount}
@@ -213,6 +220,7 @@ export default function PostDetail({
                             <ThumbsUp className="h-3.5 w-3.5" /> {likeCount}
                         </span>
                     </div>
+                    )}
                 </div>
             </header>
 
@@ -290,6 +298,7 @@ export default function PostDetail({
 
             {/* 액션 버튼 */}
             <div className="flex items-center justify-center gap-3 py-6 border-t border-b mb-8" style={{ borderColor: "var(--tn-border)" }}>
+{showReactions && (<>
                 <button
                     onClick={handleLike}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all duration-200 ${
@@ -320,6 +329,7 @@ export default function PostDetail({
                     <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                     <span className="text-sm">북마크</span>
                 </button>
+</>)}
                 <button
                     onClick={handleShare}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-full border tn-text-sub transition-all duration-200 hover:scale-105"
@@ -328,7 +338,7 @@ export default function PostDetail({
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">공유</span>
                 </button>
-                {onEdit && user && (
+                {onEdit && canEdit && (
                     <button
                         onClick={onEdit}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-full border tn-text-sub transition-all duration-200 hover:scale-105"

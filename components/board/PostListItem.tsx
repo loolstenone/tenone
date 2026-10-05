@@ -6,6 +6,7 @@ import type { Post } from "@/types/board";
 interface PostListItemProps {
     post: Post;
     accentColor?: string;
+    showStats?: boolean;
     onClick?: (post: Post) => void;
 }
 
@@ -34,7 +35,7 @@ function getAuthorInitial(post: Post): string {
     return name.charAt(0).toUpperCase();
 }
 
-export default function PostListItem({ post, accentColor = "#171717", onClick }: PostListItemProps) {
+export default function PostListItem({ post, accentColor = "#171717", showStats = true, onClick }: PostListItemProps) {
     const isNew = Date.now() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000;
 
     return (
@@ -103,6 +104,7 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
             </div>
 
             {/* 통계 */}
+{showStats && (
             <div className="hidden lg:flex items-center gap-3 w-28 shrink-0 text-xs tn-text-sub justify-end">
                 <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" /> {post.viewCount}
@@ -111,6 +113,7 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
                     <ThumbsUp className="h-3 w-3" /> {post.likeCount}
                 </span>
             </div>
+)}
         </article>
     );
 }
