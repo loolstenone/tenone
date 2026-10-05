@@ -46,7 +46,7 @@ function formatRelativeDate(dateStr: string): string {
     if (hours < 24) return `${hours}시간 전`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}일 전`;
-    return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
 export default function BoardList({ site, board, boardConfig, accentColor = "#171717", layout = 'default', onPostClick }: BoardListProps) {

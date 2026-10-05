@@ -22,7 +22,7 @@ function formatRelativeDate(dateStr: string): string {
     if (days === 1) return "어제";
     if (days < 7) return `${days}일 전`;
     if (days < 30) return `${Math.floor(days / 7)}주 전`;
-    return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
 function getAuthorName(post: Post): string {
