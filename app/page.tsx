@@ -7,7 +7,6 @@ import { PublicFooter } from "@/features/tenone/PublicFooter";
 import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
-import { UNIVERSE_ROLE_GROUPS } from "@/lib/universe-map";
 import { CaptchaWidget, useCaptcha } from "@/components/CaptchaWidget";
 
 interface SimplePost {
@@ -189,71 +188,6 @@ export default function HomePage() {
                 </section>
             )}
 
-            {/* ── Universe — 전체 브랜드 맵 (8 역할 그룹) ── */}
-            <section className="py-20 md:py-32 px-6 tn-bg-alt">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                지금까지 펼쳐진 <span className="font-bold">세계관</span>
-                            </h2>
-                        </div>
-                        <Link href="/about?tab=universe" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            전체 보기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-
-                    <div className="space-y-3">
-                        {UNIVERSE_ROLE_GROUPS.map((group) => (
-                            <div key={group.num} className="border tn-border overflow-hidden" style={{ backgroundColor: "var(--tn-surface)" }}>
-                                {/* 그룹 헤더 */}
-                                <div className="flex items-center gap-3 px-5 py-3 border-b tn-border" style={{ borderLeftWidth: 3, borderLeftColor: group.color }}>
-                                    <span className="text-[11px] font-mono" style={{ color: group.color }}>{group.num}</span>
-                                    <span className="text-xs font-medium tn-text-sub">{group.role}</span>
-                                </div>
-                                {/* 브랜드 카드 */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
-                                    {group.brands.map((brand) => {
-                                        const inner = (
-                                            <div style={{ backgroundColor: "var(--tn-surface)" }} className="h-full p-4 hover:opacity-80 transition-opacity">
-                                                <div className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: group.color }} />
-                                                    <div>
-                                                        <p className="text-sm font-bold tn-text leading-tight">{brand.name}</p>
-                                                        {'kr' in brand && <p className="text-[10px] tn-text-muted">{(brand as any).kr}</p>}
-                                                        <p className="text-[11px] tn-text-sub mt-1 leading-snug">{brand.desc}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                        return 'href' in brand ? (
-                                            <Link key={brand.name} href={(brand as any).href}>{inner}</Link>
-                                        ) : (
-                                            <div key={brand.name}>{inner}</div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Universe 순환 플로우 */}
-                    <div className="mt-8 px-5 py-4 border tn-border text-[11px] tn-text-sub leading-relaxed font-mono" style={{ backgroundColor: "var(--tn-surface)" }}>
-                        <span style={{ color: "#5B8FB9" }}>Mindle</span> 트렌드 발견 →{" "}
-                        <span style={{ color: "#BA7517" }}>SmarComm</span> 전략 수립 →{" "}
-                        <span style={{ color: "#BA7517" }}>RooK</span> 크리에이티브 실행 → 성과 환류 → 다음 트렌드 ↻
-                        <span className="mx-4 opacity-30">|</span>
-                        <span style={{ color: "#E8845C" }}>MADLeague</span> 모은다 →{" "}
-                        <span style={{ color: "#D85A30" }}>HeRo</span> 키운다 →{" "}
-                        <span style={{ color: "#E8845C" }}>Badak</span> 연결한다 → 멘토로 돌아온다 ↻
-                    </div>
-
-                    <Link href="/about?tab=brands" className="md:hidden flex items-center justify-center gap-2 mt-6 text-sm tn-text-sub hover:tn-text">
-                        전체 브랜드 보기 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
-            </section>
 
             {/* ── Core Values ── */}
             <section className="tn-card py-20 md:py-32 px-6">
