@@ -134,16 +134,19 @@ docs/              # 설계 문서
 |------|--------|----------|------|
 | 핵심 | TenOne · 인트라 · Ten:One ID | www.tenone.biz · intra.tenone.biz · auth.tenone.biz | |
 | 집중 | HeRo | www.hero.ne.kr | Vercel 운영 중 |
-| 집중 | MADLeague | www.madleague.net | 외부 nginx · 회원 0 · 2027 이전 |
-| 집중 | MADLeap | www.madleap.co.kr | 외부 nginx · 학생 회원 ~200 · 2027 이전 |
-| 집중 | Badak | www.badak.biz | 외부 nginx · **회원 ~9,000** · 2027 이전 |
+| 집중 | MADLeague | www.madleague.net | 외부 nginx · 회원 0 · Vercel 새로 제작 (이전 없음) |
+| 집중 | MADLeap | www.madleap.co.kr | 외부 nginx · 학생 회원 ~200 · Vercel 새로 제작 (이전 없음) |
+| 집중 | Badak | www.badak.biz | 외부 nginx · **회원 ~9,000** · Vercel 새로 제작 (이전 없음) |
 | 실험/보관 | 그 외 전 브랜드 (SmarComm 포함) | {brand}.tenone.biz 또는 없음 | 개별 결정 전까지 신규 투자 없음 |
 
-### 외부 서버 이전 원칙
+### 외부 서버 브랜드 — 새로 제작, 이전 없음 (2026-10-05 확정)
 
-- 이전 = 회원 데이터 이관 + Ten:One ID 통합 + DNS 전환. **회원 공지·동의 절차 필수** (개인정보 처리방침 변경 고지, 첫 로그인 시 Ten:One ID 약관 동의).
-- 순서는 위험이 작은 것부터: 회원 0인 브랜드로 절차를 검증한 뒤 회원이 많은 브랜드로.
-- 동의 기반 단계적 이전 + 마감 기한 (구글의 Nest 계정 → Google 계정 통합 방식). 일괄 강제 전환 금지.
+> Badak·MADLeap·MADLeague는 외부 서버 사이트를 옮기지 않는다. **Vercel에서 새 사이트로 제작**하고, 오픈일에 DNS만 새 사이트로 돌린다. 기존 DB·회원 데이터 이관 없음.
+
+- 새 사이트 회원 = Ten:One ID로 **새로 가입** (§1.2.0 가입 동의). 기존 외부 회원 데이터를 복사해 오지 않는다 (별도 동의 없는 다른 시스템으로의 이전 금지 — 개인정보보호법 제17·18조).
+- 오픈 전까지 Vercel 버전은 비공개 스테이징 (원칙 6 — noindex, 직원 전용).
+- **DNS 전환 = 기존 외부 사이트 종료**: §0.1 서비스 종료 표준 절차 적용 — 회원 있으면 최소 30일 전 공지(새 사이트 재가입 안내), 종료 후 기존 서버 회원 데이터 파기(제21조, 법정 보관분만 기간 동안 보관). 회원 0인 MADLeague부터.
+- 개인정보처리방침에 새 사이트 수집 항목 반영 (출시 체크리스트 §2.4).
 
 ### 데이터 계약 5조 (2026-10-05 확정)
 
@@ -228,7 +231,7 @@ docs/              # 설계 문서
 
 > **공식 주소(canonical)**: `lib/domain-registry.ts`의 `CANONICAL_HOSTS`에 등록된 브랜드는 middleware가 다른 진입로를 공식 주소로 넘긴다 (§0.1 원칙 4·6).
 > vercel 운영 = 경로 유지 308 · external(외부 서버) = www 경로는 홈으로 302, `{brand}.tenone.biz`는 스테이징(noindex, `next.config.ts`).
-> 외부 브랜드 이전 완료 시 `hosting: 'vercel'`로 바꾸고 noindex 목록에서 제거.
+> 외부 브랜드 새 사이트 오픈(DNS 전환) 시 `hosting: 'vercel'`로 바꾸고 noindex 목록에서 제거.
 
 ### 현재 운영 도메인/경로 (29개)
 
