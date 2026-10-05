@@ -104,7 +104,6 @@ export const modules: NavModule[] = [
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
                     { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },
                     { name: "타임시트", href: "/intra/workspace/timesheet", icon: Clock },
-                    { name: "받은 문서", href: "/intra/workspace/approval", icon: Inbox, staffOnly: true },
                     { name: "포인트", href: "/intra/workspace/points", icon: Award },
                     { name: "Library", href: "/intra/workspace/library", icon: FolderOpen },
                 ],
@@ -528,17 +527,6 @@ export const modules: NavModule[] = [
                 items: [
                     { name: "BI Dashboard", href: "/intra/erp/bi", icon: BarChart3, exact: true },
                     {
-                        name: "전자결재", href: "/intra/erp/approval", icon: Stamp,
-                        children: [
-                            { name: "결재 대기", href: "/intra/erp/approval" },
-                            { name: "결재 진행", href: "/intra/erp/approval/progress" },
-                            { name: "결재 완료", href: "/intra/erp/approval/completed" },
-                            { name: "기안", href: "/intra/erp/approval/draft" },
-                            { name: "품의", href: "/intra/erp/approval/draft/expenditure" },
-                            { name: "보고", href: "/intra/erp/approval/draft/report" },
-                        ],
-                    },
-                    {
                         name: "GPR", href: "/intra/erp/gpr", icon: Target,
                         children: [
                             { name: "전사 현황", href: "/intra/erp/gpr" },
@@ -571,20 +559,28 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
-                        name: "Finance", href: "/intra/erp/finance/expenses", icon: CircleDollarSign,
+                        name: "매출 · 청구", href: "/intra/erp/finance/billing", icon: CircleDollarSign,
                         children: [
-                            { name: "경비처리", href: "/intra/erp/finance/expenses" },
-                            { name: "경비품의서", href: "/intra/erp/finance/expenses/request" },
-                            { name: "법인카드", href: "/intra/erp/finance/card" },
-                            { name: "경리리포트", href: "/intra/erp/finance/reports" },
                             { name: "청구관리", href: "/intra/erp/finance/billing" },
                             { name: "지급관리", href: "/intra/erp/finance/billing/payment" },
                         ],
                     },
                     {
-                        name: "운영설정", href: "/intra/erp/settings/approval-line", icon: Settings,
+                        name: "경영관리", href: "/intra/erp/biz/plan", icon: Target,
                         children: [
-                            { name: "결재라인 설정", href: "/intra/erp/settings/approval-line" },
+                            { name: "연간 경영계획", href: "/intra/erp/biz/plan" },
+                            { name: "부문별 계획", href: "/intra/erp/biz/plan/division" },
+                            { name: "월별 추정", href: "/intra/erp/biz/manage" },
+                            { name: "실적 확정", href: "/intra/erp/biz/manage/actual" },
+                            { name: "Gap 분석", href: "/intra/erp/biz/manage/gap" },
+                            { name: "손익 현황", href: "/intra/erp/biz/analysis" },
+                            { name: "부문별 이익률", href: "/intra/erp/biz/analysis/division" },
+                            { name: "프로젝트 수익성", href: "/intra/erp/biz/analysis/project" },
+                        ],
+                    },
+                    {
+                        name: "운영설정", href: "/intra/erp/settings/permissions", icon: Settings,
+                        children: [
                             { name: "권한 설정", href: "/intra/erp/settings/permissions" },
                             { name: "HR · 직급/직책 관리", href: "/intra/erp/settings/hr" },
                             { name: "HR · 부서 관리", href: "/intra/erp/settings/hr/departments" },

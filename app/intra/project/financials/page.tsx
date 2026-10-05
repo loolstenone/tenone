@@ -38,117 +38,7 @@ interface ProjectPL {
 }
 
 // ── Mock 데이터 ──
-const projects: ProjectPL[] = [
-  {
-    code: "PRJ-2026-001",
-    name: "LUKI 2nd Single",
-    type: "클라이언트",
-    financials: {
-      billing: 200000000,
-      exCost: 130000000,
-      revenue: 70000000,
-      inCost: 35000000,
-      profit: 35000000,
-    },
-    billingDetail: [
-      { label: "클라이언트 청구액", amount: 160000000 },
-      { label: "스폰서 수입", amount: 30000000 },
-      { label: "기타 수입", amount: 10000000 },
-    ],
-    exCostDetail: [
-      { label: "제작 외주 (MV/촬영)", amount: 80000000 },
-      { label: "매체 비용 (SNS/PR)", amount: 35000000 },
-      { label: "기타 외부비", amount: 15000000 },
-    ],
-    inCostDetail: [
-      { label: "내부 인건비 (타임시트)", amount: 22000000 },
-      { label: "공통비용 배분", amount: 8000000 },
-      { label: "제경비", amount: 5000000 },
-    ],
-    staffCosts: [
-      { name: "Cheonil Jeon", hours: 120, rate: 65000, amount: 7800000 },
-      { name: "Sarah Kim", hours: 95, rate: 50000, amount: 4750000 },
-      { name: "김콘텐", hours: 80, rate: 45000, amount: 3600000 },
-      { name: "이준서", hours: 70, rate: 45000, amount: 3150000 },
-      { name: "박하늘", hours: 54, rate: 50000, amount: 2700000 },
-    ],
-  },
-  {
-    code: "PRJ-2026-003",
-    name: "리제로스 시즌2",
-    type: "커뮤니티",
-    financials: {
-      billing: 100000000,
-      exCost: 65000000,
-      revenue: 35000000,
-      inCost: 18000000,
-      profit: 17000000,
-    },
-    billingDetail: [
-      { label: "스폰서 수입", amount: 60000000 },
-      { label: "IP 라이선스", amount: 25000000 },
-      { label: "굿즈 판매", amount: 15000000 },
-    ],
-    exCostDetail: [
-      { label: "제작 외주", amount: 35000000 },
-      { label: "매체 비용", amount: 20000000 },
-      { label: "이벤트 운영", amount: 10000000 },
-    ],
-    inCostDetail: [
-      { label: "내부 인건비 (타임시트)", amount: 10000000 },
-      { label: "공통비용 배분", amount: 5000000 },
-      { label: "제경비", amount: 3000000 },
-    ],
-    staffCosts: [
-      { name: "Cheonil Jeon", hours: 60, rate: 65000, amount: 3900000 },
-      { name: "이준서", hours: 80, rate: 45000, amount: 3600000 },
-      { name: "박하늘", hours: 50, rate: 50000, amount: 2500000 },
-    ],
-  },
-  {
-    code: "PRJ-2026-002",
-    name: "MADLeap 5기",
-    type: "내부",
-    financials: {
-      billing: 50000000,
-      exCost: 30000000,
-      revenue: 20000000,
-      inCost: 10000000,
-      profit: 10000000,
-    },
-    billingDetail: [
-      { label: "참가비 수입", amount: 20000000 },
-      { label: "스폰서 수입", amount: 25000000 },
-      { label: "기타", amount: 5000000 },
-    ],
-    exCostDetail: [
-      { label: "공간 임대", amount: 12000000 },
-      { label: "강사 비용", amount: 10000000 },
-      { label: "기타 운영비", amount: 8000000 },
-    ],
-    inCostDetail: [
-      { label: "내부 인건비 (타임시트)", amount: 6000000 },
-      { label: "공통비용 배분", amount: 2500000 },
-      { label: "제경비", amount: 1500000 },
-    ],
-    staffCosts: [
-      { name: "Sarah Kim", hours: 80, rate: 50000, amount: 4000000 },
-      { name: "김준호", hours: 40, rate: 50000, amount: 2000000 },
-    ],
-  },
-];
 
-// ── 합계 ──
-const totals = projects.reduce(
-  (acc, p) => ({
-    billing: acc.billing + p.financials.billing,
-    exCost: acc.exCost + p.financials.exCost,
-    revenue: acc.revenue + p.financials.revenue,
-    inCost: acc.inCost + p.financials.inCost,
-    profit: acc.profit + p.financials.profit,
-  }),
-  { billing: 0, exCost: 0, revenue: 0, inCost: 0, profit: 0 }
-);
 
 const typeBadge: Record<string, string> = {
   "클라이언트": "bg-blue-50 text-blue-600",
@@ -159,31 +49,39 @@ const typeBadge: Record<string, string> = {
 export default function FinancialsPage() {
   const { isStaff } = useAuth();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [projectList, setProjectList] = useState<ProjectPL[]>(projects);
+  const [projectList, setProjectList] = useState<ProjectPL[]>([]);
+  const totals = projectList.reduce(
+    (acc, p) => ({
+      billing: acc.billing + p.financials.billing,
+      exCost: acc.exCost + p.financials.exCost,
+      revenue: acc.revenue + p.financials.revenue,
+      inCost: acc.inCost + p.financials.inCost,
+      profit: acc.profit + p.financials.profit,
+    }),
+    { billing: 0, exCost: 0, revenue: 0, inCost: 0, profit: 0 }
+  );
 
-  // DB에서 프로젝트 재무 로드 (기본 수치만, 상세 내역은 mock 유지)
+  // DB에서 프로젝트 재무 로드 (상세 내역은 미구현 — 빈 배열)
   useEffect(() => {
     projectsDb.fetchProjects({ limit: 50 })
       .then(({ projects: dbProjects }) => {
         if (dbProjects.length > 0) {
           setProjectList(dbProjects.map((p: any) => {
-            // mock에서 동일 code의 상세 데이터 찾기
-            const mockMatch = projects.find(m => m.code === p.code);
             return {
               code: p.code || p.id,
               name: p.name,
               type: (p.type === 'client' ? '클라이언트' : p.type === 'community' ? '커뮤니티' : '내부') as ProjectPL['type'],
               financials: {
-                billing: p.billing || mockMatch?.financials.billing || 0,
-                exCost: p.ex_cost || mockMatch?.financials.exCost || 0,
-                revenue: p.revenue || mockMatch?.financials.revenue || 0,
-                inCost: p.in_cost || mockMatch?.financials.inCost || 0,
-                profit: p.profit || mockMatch?.financials.profit || 0,
+                billing: p.billing || 0,
+                exCost: p.ex_cost || 0,
+                revenue: p.revenue || 0,
+                inCost: p.in_cost || 0,
+                profit: p.profit || 0,
               },
-              billingDetail: mockMatch?.billingDetail || [],
-              exCostDetail: mockMatch?.exCostDetail || [],
-              inCostDetail: mockMatch?.inCostDetail || [],
-              staffCosts: mockMatch?.staffCosts || [],
+              billingDetail: [],
+              exCostDetail: [],
+              inCostDetail: [],
+              staffCosts: [],
             };
           }));
         }

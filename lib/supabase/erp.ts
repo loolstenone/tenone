@@ -431,7 +431,7 @@ export async function createInvoice(input: Record<string, unknown>) {
 export async function updateInvoiceStatus(id: string, status: string) {
     const { data, error } = await supabase
         .from('invoices')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status, paid_at: status === 'paid' ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
@@ -461,10 +461,16 @@ export async function fetchPayments(params?: { status?: string; limit?: number }
     return data || [];
 }
 
+export async function createPayment(input: Record<string, unknown>) {
+    const { data, error } = await supabase.from('payments').insert(input).select().single();
+    if (error) throw error;
+    return data;
+}
+
 export async function updatePaymentStatus(id: string, status: string) {
     const { data, error } = await supabase
         .from('payments')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status, paid_at: status === 'paid' ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();

@@ -21,20 +21,12 @@ interface ProjectPL {
   profitRate: number;
 }
 
-const projects: ProjectPL[] = [
-  { rank: 1, code: "PRJ-2026-0005", name: "Badak 네트워크", type: "플랫폼", billing: 50_000_000, grossProfit: 18_000_000, operatingProfit: 10_000_000, profitRate: 20.0 },
-  { rank: 2, code: "PRJ-2026-0001", name: "LUKI AI 그룹", type: "AI/콘텐츠", billing: 80_000_000, grossProfit: 25_000_000, operatingProfit: 14_000_000, profitRate: 17.5 },
-  { rank: 3, code: "PRJ-2026-0003", name: "리제로스 IP", type: "IP/라이선스", billing: 30_000_000, grossProfit: 9_000_000, operatingProfit: 5_100_000, profitRate: 17.0 },
-  { rank: 4, code: "PRJ-2026-0002", name: "RooK 크리에이터", type: "AI/콘텐츠", billing: 60_000_000, grossProfit: 18_000_000, operatingProfit: 9_600_000, profitRate: 16.0 },
-  { rank: 5, code: "PRJ-2026-0004", name: "MADLeap 프로그램", type: "교육/커뮤니티", billing: 40_000_000, grossProfit: 11_000_000, operatingProfit: 6_000_000, profitRate: 15.0 },
-];
 
-const mockProjects = projects;
 
 export default function ProjectProfitPage() {
   const { user } = useAuth();
   const [sortBy, setSortBy] = useState<"profitRate" | "billing" | "operatingProfit">("profitRate");
-  const [projectData, setProjectData] = useState<ProjectPL[]>(mockProjects);
+  const [projectData, setProjectData] = useState<ProjectPL[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -21,14 +21,6 @@ const gradeToRate: Record<string, number> = {
     "C+": 80, "C": 60, "D+": 30, "D": 0,
 };
 
-const mockIncentives: IncentiveRecord[] = [
-    { name: "Cheonil Jeon", department: "경영기획", position: "대표", gprGrade: "-", baseSalary: 5000000, incentiveRate: 0, incentiveAmount: 0, status: "미평가" },
-    { name: "Sarah Kim", department: "브랜드관리", position: "매니저", gprGrade: "C+", baseSalary: 3500000, incentiveRate: 80, incentiveAmount: 2800000, status: "확정" },
-    { name: "김준호", department: "커뮤니티운영", position: "주임", gprGrade: "-", baseSalary: 2800000, incentiveRate: 0, incentiveAmount: 0, status: "미평가" },
-    { name: "박영상", department: "콘텐츠제작", position: "선임", gprGrade: "B", baseSalary: 3200000, incentiveRate: 100, incentiveAmount: 3200000, status: "확정" },
-    { name: "이수진", department: "디자인", position: "사원", gprGrade: "-", baseSalary: 2600000, incentiveRate: 0, incentiveAmount: 0, status: "산정중" },
-    { name: "최민호", department: "AI크리에이티브", position: "선임", gprGrade: "-", baseSalary: 3400000, incentiveRate: 0, incentiveAmount: 0, status: "미평가" },
-];
 
 function formatKRW(n: number) { return n === 0 ? "-" : new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
@@ -81,10 +73,10 @@ export default function GPRIncentivePage() {
             try {
                 const rows = await fetchStaffGprData();
                 if (!cancelled) {
-                    setIncentives(rows.length > 0 ? rows.map(r => dbRowToIncentive(r)) : mockIncentives);
+                    setIncentives(rows.length > 0 ? rows.map(r => dbRowToIncentive(r)) : []);
                 }
             } catch {
-                if (!cancelled) setIncentives(mockIncentives);
+                if (!cancelled) setIncentives([]);
             } finally {
                 if (!cancelled) setLoading(false);
             }

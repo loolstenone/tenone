@@ -29,16 +29,11 @@ const CERT_TYPES: Certificate[] = [
     { id: "6", type: "4대보험 가입확인서", description: "국민연금, 건강보험, 고용보험, 산재보험 가입 확인", issueCount: 0 },
 ];
 
-const mockHistory: HistoryItem[] = [
-    { type: "재직증명서", date: "2026-01-15", purpose: "은행 제출용" },
-    { type: "경력증명서", date: "2025-12-20", purpose: "외부 제출" },
-    { type: "원천징수영수증", date: "2026-02-01", purpose: "연말정산" },
-];
 
 export default function CertificatesPage() {
     const { user } = useAuth();
     const [certificates, setCertificates] = useState<Certificate[]>(CERT_TYPES);
-    const [recentHistory, setRecentHistory] = useState<HistoryItem[]>(mockHistory);
+    const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

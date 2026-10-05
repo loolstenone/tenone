@@ -15,14 +15,6 @@ interface EvalRecord {
     status: "자기평가완료" | "매니저평가중" | "확정" | "미제출";
 }
 
-const mockEvals: EvalRecord[] = [
-    { name: "Cheonil Jeon", department: "경영기획", position: "대표", selfRate: "75%", managerRate: null, finalGrade: null, status: "자기평가완료" },
-    { name: "Sarah Kim", department: "브랜드관리", position: "매니저", selfRate: "60%", managerRate: "55%", finalGrade: "C+", status: "확정" },
-    { name: "김준호", department: "커뮤니티운영", position: "주임", selfRate: "-", managerRate: null, finalGrade: null, status: "미제출" },
-    { name: "박영상", department: "콘텐츠제작", position: "선임", selfRate: "70%", managerRate: "65%", finalGrade: "B", status: "확정" },
-    { name: "이수진", department: "디자인", position: "사원", selfRate: "50%", managerRate: null, finalGrade: null, status: "매니저평가중" },
-    { name: "최민호", department: "AI크리에이티브", position: "선임", selfRate: "-", managerRate: null, finalGrade: null, status: "미제출" },
-];
 
 const statusColor: Record<string, string> = {
     "자기평가완료": "bg-blue-50 text-blue-600",
@@ -67,10 +59,10 @@ export default function GPREvaluationPage() {
             try {
                 const rows = await fetchStaffGprData();
                 if (!cancelled) {
-                    setEvals(rows.length > 0 ? rows.map(r => dbRowToEval(r)) : mockEvals);
+                    setEvals(rows.length > 0 ? rows.map(r => dbRowToEval(r)) : []);
                 }
             } catch {
-                if (!cancelled) setEvals(mockEvals);
+                if (!cancelled) setEvals([]);
             } finally {
                 if (!cancelled) setLoading(false);
             }

@@ -18,12 +18,6 @@ interface QuarterRow {
   operatingProfit: number;
 }
 
-const mockData: QuarterRow[] = [
-  { quarter: "Q1", billing: 120_000_000, exCost: 78_000_000, grossProfit: 42_000_000, inCost: 22_000_000, operatingProfit: 20_000_000 },
-  { quarter: "Q2", billing: 130_000_000, exCost: 84_000_000, grossProfit: 46_000_000, inCost: 24_000_000, operatingProfit: 22_000_000 },
-  { quarter: "Q3", billing: 125_000_000, exCost: 81_000_000, grossProfit: 44_000_000, inCost: 23_000_000, operatingProfit: 21_000_000 },
-  { quarter: "Q4", billing: 125_000_000, exCost: 82_000_000, grossProfit: 43_000_000, inCost: 22_000_000, operatingProfit: 21_000_000 },
-];
 
 function dbRowsToQuarters(rows: Record<string, unknown>[]): QuarterRow[] {
   const map: Record<string, QuarterRow> = {};
@@ -40,7 +34,7 @@ function dbRowsToQuarters(rows: Record<string, unknown>[]): QuarterRow[] {
 }
 
 export default function AnnualPlanPage() {
-  const [quarterData, setQuarterData] = useState<QuarterRow[]>(mockData);
+  const [quarterData, setQuarterData] = useState<QuarterRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"확정" | "수립중">("확정");
 

@@ -16,13 +16,6 @@ interface Invoice {
     status: "발행" | "입금완료" | "미발행" | "연체";
 }
 
-const mockInvoices: Invoice[] = [
-    { id: "1", invoiceNo: "INV-2026-032", client: "ABC엔터", project: "LUKI 2nd Single MV", amount: 15000000, issueDate: "2026-03-15", dueDate: "2026-04-15", status: "발행" },
-    { id: "2", invoiceNo: "INV-2026-028", client: "XYZ미디어", project: "브랜드 영상 제작", amount: 8000000, issueDate: "2026-03-01", dueDate: "2026-03-31", status: "발행" },
-    { id: "3", invoiceNo: "INV-2026-025", client: "DEF기획", project: "MADLeap 5기 협찬", amount: 5000000, issueDate: "2026-02-20", dueDate: "2026-03-20", status: "입금완료" },
-    { id: "4", invoiceNo: "INV-2026-020", client: "GHI스튜디오", project: "콘텐츠 제작 용역", amount: 12000000, issueDate: "2026-02-10", dueDate: "2026-03-10", status: "연체" },
-    { id: "5", invoiceNo: "-", client: "JKL커뮤니케이션", project: "Badak 네트워크 컨설팅", amount: 3000000, issueDate: "-", dueDate: "-", status: "미발행" },
-];
 
 const statusColor: Record<string, string> = {
     "발행": "bg-blue-50 text-blue-600",
@@ -41,9 +34,10 @@ const statusMap: Record<string, Invoice["status"]> = {
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
 function generateInvoiceNo(): string {
-    const year = new Date().getFullYear();
-    const seq = String(Math.floor(Math.random() * 900) + 100);
-    return `INV-${year}-${seq}`;
+    // INV-YYMMDD-HHMMSS (발행 시각 기준 — 랜덤 3자리는 중복 위험)
+    const d = new Date();
+    const p2 = (n: number) => String(n).padStart(2, "0");
+    return `INV-${String(d.getFullYear()).slice(2)}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;
 }
 
 function dbRowToInvoice(r: Record<string, unknown>): Invoice {
@@ -219,6 +213,20 @@ export default function BillingPage() {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [markingId, setMarkingId] = useState<string | null>(null);
+
+    const markPaid = async (id: string) => {
+        if (!confirm("입금 완료로 처리할까요?")) return;
+        setMarkingId(id);
+        try {
+            const row = await erpDb.updateInvoiceStatus(id, "paid");
+            setInvoices(prev => prev.map(i => (i.id === id ? dbRowToInvoice(row as Record<string, unknown>) : i)));
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "처리 실패");
+        } finally {
+            setMarkingId(null);
+        }
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -226,10 +234,10 @@ export default function BillingPage() {
             try {
                 const rows = await erpDb.fetchInvoices({ limit: 50 });
                 if (!cancelled) {
-                    setInvoices(rows.length > 0 ? rows.map((r: any) => dbRowToInvoice(r as Record<string, unknown>)) : mockInvoices);
+                    setInvoices(rows.map((r: Record<string, unknown>) => dbRowToInvoice(r)));
                 }
             } catch {
-                if (!cancelled) setInvoices(mockInvoices);
+                if (!cancelled) setInvoices([]);
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -267,7 +275,7 @@ export default function BillingPage() {
                     { label: "미수금 합계", value: formatKRW(totalOutstanding) },
                     { label: "발행 건", value: `${invoices.filter(i => i.status === "발행").length}건` },
                     { label: "연체 건", value: `${invoices.filter(i => i.status === "연체").length}건` },
-                    { label: "입금 완료", value: formatKRW(thisMonthPaid) },
+                    { label: "입금 완료 (누적)", value: formatKRW(thisMonthPaid) },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
@@ -294,7 +302,7 @@ export default function BillingPage() {
                         </thead>
                         <tbody>
                             {invoices.map(inv => (
-                                <tr key={inv.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
+                                <tr key={inv.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                     <td className="p-3 font-mono text-xs">{inv.invoiceNo}</td>
                                     <td className="p-3 font-medium">{inv.client}</td>
                                     <td className="p-3 text-neutral-500">{inv.project}</td>
@@ -303,6 +311,12 @@ export default function BillingPage() {
                                     <td className="p-3 text-neutral-500 text-xs">{inv.dueDate}</td>
                                     <td className="p-3 text-center">
                                         <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[inv.status]}`}>{inv.status}</span>
+                                        {(inv.status === "발행" || inv.status === "연체") && (
+                                            <button onClick={() => markPaid(inv.id)} disabled={markingId === inv.id}
+                                                className="ml-2 text-[11px] text-neutral-500 hover:text-neutral-900 underline disabled:opacity-40">
+                                                입금 확인
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

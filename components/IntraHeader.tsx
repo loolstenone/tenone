@@ -32,13 +32,10 @@ const availableBookmarks = [
     { id: 'messenger', label: '메신저', href: '/intra/workspace/messenger', icon: 'MessageSquareText', staffOnly: false },
     { id: 'todo', label: 'Todo', href: '/intra/workspace/todo', icon: 'ListTodo', staffOnly: false },
     { id: 'gpr', label: 'GPR', href: '/intra/workspace/gpr', icon: 'Target', staffOnly: true },
-    { id: 'approval', label: '결재', href: '/intra/workspace/approval', icon: 'Stamp', staffOnly: true },
     { id: 'project', label: '프로젝트', href: '/intra/project/management', icon: 'FolderKanban', staffOnly: true },
     { id: 'attendance', label: '근태', href: '/intra/workspace/attendance', icon: 'CalendarCheck', staffOnly: true },
     { id: 'payroll', label: '급여', href: '/intra/workspace/payroll', icon: 'Wallet', staffOnly: true },
-    { id: 'expenses', label: '경비', href: '/intra/workspace/expenses', icon: 'CreditCard', staffOnly: true },
     { id: 'hero', label: 'HeRo', href: '/intra/hero/hit', icon: 'Target', staffOnly: false },
-    { id: 'education', label: 'Evolution School', href: '/intra/evolution-school', icon: 'User', staffOnly: false },
 ];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -214,10 +211,6 @@ export function IntraHeader() {
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <Target className="h-3.5 w-3.5" /> GPR
                                     </Link>
-                                    <Link href="/intra/workspace/approval" onClick={() => setProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <Stamp className="h-3.5 w-3.5" /> 전자결재
-                                    </Link>
                                     <Link href="/intra/workspace/attendance" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <CalendarCheck className="h-3.5 w-3.5" /> 근태
@@ -225,10 +218,6 @@ export function IntraHeader() {
                                     <Link href="/intra/workspace/payroll" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <Wallet className="h-3.5 w-3.5" /> 급여
-                                    </Link>
-                                    <Link href="/intra/workspace/expenses" onClick={() => setProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <CreditCard className="h-3.5 w-3.5" /> 경비
                                     </Link>
                                     </>)}
                                 </div>

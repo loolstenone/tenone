@@ -32,54 +32,6 @@ interface Project {
 
 /* ─── Mock Data ─── */
 
-const mockProjects: Project[] = [
-    {
-        code: "PRJ-2026-0001", name: "LUKI 2nd Single", type: "클라이언트", subType: "캠페인", status: "진행",
-        pm: "Sarah Kim", startDate: "2026-02-01", endDate: "2026-05-31",
-        memberCount: 5, jobCount: 5, estimatedHours: 115, billing: 20000, grossProfit: 7000,
-    },
-    {
-        code: "PRJ-2026-0002", name: "MADLeap 5기 운영", type: "커뮤니티", subType: "동아리 운영", status: "진행",
-        pm: "김준호", startDate: "2026-03-01", endDate: "2026-06-30",
-        memberCount: 3, jobCount: 3, estimatedHours: 60, billing: 5000, grossProfit: 2000,
-    },
-    {
-        code: "PRJ-2026-0003", name: "리제로스 시즌2", type: "커뮤니티", subType: "경쟁 PT", status: "기획",
-        pm: "마리그", startDate: "2026-04-01", endDate: "2026-09-30",
-        memberCount: 4, jobCount: 2, estimatedHours: 80, billing: 10000, grossProfit: 3500,
-    },
-    {
-        code: "PRJ-2026-0004", name: "Brand Gravity 컨설팅", type: "클라이언트", subType: "브랜딩", status: "진행",
-        pm: "조브랜", startDate: "2026-03-15", endDate: "2026-06-15",
-        memberCount: 3, jobCount: 4, estimatedHours: 90, billing: 8000, grossProfit: 3000,
-    },
-    {
-        code: "PRJ-2026-0005", name: "Badak 네트워크 확장", type: "내부", subType: "네트워킹", status: "기획",
-        pm: "이수진", startDate: "2026-05-01", endDate: "2026-10-31",
-        memberCount: 2, jobCount: 1, estimatedHours: 30, billing: 3000, grossProfit: 1500,
-    },
-    // 완료 프로젝트 (히스토리)
-    {
-        code: "PRJ-2025-0001", name: "LUKI 1st Single 데뷔", type: "클라이언트" as ProjectType, subType: "캠페인" as ProjectSubType, status: "완료" as ProjectStatus,
-        pm: "Sarah Kim", startDate: "2025-06-01", endDate: "2025-12-31",
-        memberCount: 4, jobCount: 6, estimatedHours: 200, billing: 15000, grossProfit: 5500,
-    },
-    {
-        code: "PRJ-2025-0002", name: "리제로스 시즌1", type: "커뮤니티" as ProjectType, subType: "경쟁 PT" as ProjectSubType, status: "완료" as ProjectStatus,
-        pm: "마리그", startDate: "2025-03-01", endDate: "2025-09-30",
-        memberCount: 6, jobCount: 4, estimatedHours: 150, billing: 8000, grossProfit: 3000,
-    },
-    {
-        code: "PRJ-2025-0003", name: "Badak 밋업 런칭", type: "내부" as ProjectType, subType: "네트워킹" as ProjectSubType, status: "완료" as ProjectStatus,
-        pm: "이수진", startDate: "2025-01-01", endDate: "2025-06-30",
-        memberCount: 2, jobCount: 3, estimatedHours: 80, billing: 2000, grossProfit: 1000,
-    },
-    {
-        code: "PRJ-2025-0004", name: "MADLeap 4기 운영", type: "커뮤니티" as ProjectType, subType: "동아리 운영" as ProjectSubType, status: "완료" as ProjectStatus,
-        pm: "김준호", startDate: "2025-03-01", endDate: "2025-08-31",
-        memberCount: 3, jobCount: 3, estimatedHours: 60, billing: 4000, grossProfit: 1500,
-    },
-];
 
 /* ─── Helpers ─── */
 
@@ -125,7 +77,7 @@ type SortKey = "code" | "name" | "pm" | "status" | "startDate" | "grossProfit";
 
 export default function ProjectListPage() {
     const { isStaff } = useAuth();
-    const [projects, setProjects] = useState<Project[]>(mockProjects);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState<"전체" | ProjectType>("전체");

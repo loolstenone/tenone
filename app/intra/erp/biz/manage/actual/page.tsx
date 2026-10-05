@@ -24,13 +24,6 @@ interface ActualRow {
   gapFcPct: string;
 }
 
-const mockActualData: ActualRow[] = [
-  { item: "매출", plan: 40_000_000, forecast: 38_000_000, actual: 35_000_000, gapPlan: -5_000_000, gapPlanPct: "-12.5%", gapFc: -3_000_000, gapFcPct: "-7.9%" },
-  { item: "외부비", plan: 26_000_000, forecast: 25_000_000, actual: 23_000_000, gapPlan: -3_000_000, gapPlanPct: "-11.5%", gapFc: -2_000_000, gapFcPct: "-8.0%" },
-  { item: "매총", plan: 14_000_000, forecast: 13_000_000, actual: 12_000_000, gapPlan: -2_000_000, gapPlanPct: "-14.3%", gapFc: -1_000_000, gapFcPct: "-7.7%" },
-  { item: "내부비", plan: 7_500_000, forecast: 7_200_000, actual: 7_000_000, gapPlan: -500_000, gapPlanPct: "-6.7%", gapFc: -200_000, gapFcPct: "-2.8%" },
-  { item: "영업이익", plan: 6_500_000, forecast: 5_800_000, actual: 5_000_000, gapPlan: -1_500_000, gapPlanPct: "-23.1%", gapFc: -800_000, gapFcPct: "-13.8%" },
-];
 
 function pct(a: number, b: number) {
   if (!b) return "-";
@@ -43,7 +36,7 @@ export default function ActualConfirmPage() {
   const now = new Date();
   const [monthIdx, setMonthIdx] = useState(Math.max(0, now.getMonth() - 1));
   const [status, setStatus] = useState<Status>("미확정");
-  const [actualData, setActualData] = useState<ActualRow[]>(mockActualData);
+  const [actualData, setActualData] = useState<ActualRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

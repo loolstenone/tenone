@@ -34,15 +34,6 @@ interface Partner {
 const skillOptions = ['디자인', '영상', '개발', '사진', '인쇄', '카피라이팅', '번역', '3D', 'AI', '마케팅', '기획', '일러스트', '음악', '모션그래픽'];
 const rateLabels: Record<RateType, string> = { hourly: '시급', project: '건당', monthly: '월정액' };
 
-const mockPartners: Partner[] = [
-    { id: 'p1', type: 'freelancer', name: '김디자인', contactName: '김디자인', email: 'kim@design.kr', phone: '010-1234-5678', skills: ['디자인', '일러스트', 'UI/UX'], speciality: '브랜드 아이덴티티 디자인', portfolioUrl: 'https://behance.net/kimdesign', rating: 4.8, totalProjects: 12, rateType: 'project', rateAmount: 3000000, isActive: true, createdAt: '2025-06-01' },
-    { id: 'p2', type: 'company', name: '비주얼웍스', contactName: '박대표', email: 'info@visualworks.co.kr', phone: '02-1234-5678', skills: ['영상', '모션그래픽', '3D'], speciality: 'MV/광고 영상 제작', rating: 4.5, totalProjects: 8, rateType: 'project', rateAmount: 15000000, isActive: true, createdAt: '2025-03-15' },
-    { id: 'p3', type: 'freelancer', name: '이개발', email: 'lee@dev.com', skills: ['개발', 'AI'], speciality: 'Next.js + AI 서비스 개발', rating: 4.9, totalProjects: 5, rateType: 'hourly', rateAmount: 80000, isActive: true, createdAt: '2025-09-01' },
-    { id: 'p4', type: 'company', name: '포토스튜디오A', contactName: '최실장', email: 'studio@photo-a.com', skills: ['사진'], speciality: '제품/인물 사진 촬영', rating: 4.2, totalProjects: 15, rateType: 'project', rateAmount: 2000000, isActive: true, createdAt: '2024-11-01' },
-    { id: 'p5', type: 'freelancer', name: '박카피', email: 'park@copy.kr', skills: ['카피라이팅', '마케팅', '기획'], speciality: '광고 카피 + SNS 콘텐츠', rating: 4.6, totalProjects: 20, rateType: 'monthly', rateAmount: 4000000, isActive: true, createdAt: '2025-01-10' },
-    { id: 'p6', type: 'company', name: '프린트원', contactName: '강팀장', email: 'print@printone.kr', phone: '02-9876-5432', skills: ['인쇄'], speciality: '대형 인쇄물, 패키지, 명함', rating: 4.0, totalProjects: 30, rateType: 'project', isActive: true, createdAt: '2024-05-01' },
-    { id: 'p7', type: 'freelancer', name: '정번역', email: 'jung@translator.com', skills: ['번역'], speciality: '영/일/중 마케팅 번역', rating: 4.7, totalProjects: 10, rateType: 'hourly', rateAmount: 50000, isActive: false, notes: '2026년 상반기 휴직', createdAt: '2025-04-01' },
-];
 
 function StarRating({ rating }: { rating: number }) {
     return (
@@ -77,7 +68,7 @@ function rowToPartner(r: Record<string, unknown>): Partner {
 }
 
 export default function PartnerPoolPage() {
-    const [partners, setPartners] = useState<Partner[]>(mockPartners);
+    const [partners, setPartners] = useState<Partner[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<'all' | PartnerType>('all');

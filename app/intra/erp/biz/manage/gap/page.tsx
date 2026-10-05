@@ -17,11 +17,6 @@ interface MonthlyTrend {
   gap: number;
 }
 
-const mockMonthlyTrends: MonthlyTrend[] = [
-  { month: "1월", plan: 42_000_000, forecast: 40_000_000, actual: 35_000_000, gap: -7_000_000 },
-  { month: "2월", plan: 40_000_000, forecast: 38_000_000, actual: 35_000_000, gap: -5_000_000 },
-  { month: "3월", plan: 42_000_000, forecast: 40_000_000, actual: 35_000_000, gap: -7_000_000 },
-];
 
 interface ComparisonSummary {
   planVsActualRevenue: number;
@@ -35,17 +30,16 @@ interface ComparisonSummary {
   accOp: number;
 }
 
-const mockSummary: ComparisonSummary = {
-  planVsActualRevenue: -8_000_000, planVsActualGp: -3_000_000, planVsActualOp: -2_000_000,
-  fcVsActualRevenue: -3_000_000, fcVsActualGp: -1_000_000, fcVsActualOp: -800_000,
-  accRevenue: 92.1, accGp: 92.3, accOp: 86.2,
-};
 
 export default function GapAnalysisPage() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [monthlyTrends, setMonthlyTrends] = useState<MonthlyTrend[]>(mockMonthlyTrends);
-  const [summary, setSummary] = useState<ComparisonSummary>(mockSummary);
+  const [monthlyTrends, setMonthlyTrends] = useState<MonthlyTrend[]>([]);
+  const [summary, setSummary] = useState<ComparisonSummary>({
+    planVsActualRevenue: 0, planVsActualGp: 0, planVsActualOp: 0,
+    fcVsActualRevenue: 0, fcVsActualGp: 0, fcVsActualOp: 0,
+    accRevenue: 0, accGp: 0, accOp: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

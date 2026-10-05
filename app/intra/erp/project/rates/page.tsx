@@ -32,25 +32,13 @@ const initialStandardRates: StandardRate[] = [
     { position: '인턴', hourlyRate: 30000 },
 ];
 
-const mockActualRates: ActualRate[] = [
-    { id: 'a1', name: 'Cheonil Jeon', position: '대표', department: '경영기획', monthlySalary: 10000000, workHoursPerMonth: 176, hourlyRate: 56818 },
-    { id: 'a2', name: 'Sarah Kim', position: '이사', department: '사업총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
-    { id: 'a3', name: '김인사', position: '이사', department: '인사총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
-    { id: 'a4', name: '이재무', position: '이사', department: '재무총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
-    { id: 'a5', name: '박기획', position: '팀장', department: '경영기획', monthlySalary: 5500000, workHoursPerMonth: 176, hourlyRate: 31250 },
-    { id: 'a6', name: '김콘텐', position: '팀장', department: '콘텐츠제작', monthlySalary: 5500000, workHoursPerMonth: 176, hourlyRate: 31250 },
-    { id: 'a7', name: '한마케', position: '팀장', department: '영업', monthlySalary: 5500000, workHoursPerMonth: 176, hourlyRate: 31250 },
-    { id: 'a8', name: '조에이', position: '팀장', department: 'AI크리에이티브', monthlySalary: 6000000, workHoursPerMonth: 176, hourlyRate: 34091 },
-    { id: 'a9', name: '이영상', position: '매니저', department: '콘텐츠제작', monthlySalary: 4500000, workHoursPerMonth: 176, hourlyRate: 25568 },
-    { id: 'a10', name: '유광고', position: '매니저', department: '영업', monthlySalary: 4200000, workHoursPerMonth: 176, hourlyRate: 23864 },
-];
 
 function formatKRW(n: number) { return new Intl.NumberFormat('ko-KR').format(n); }
 
 export default function RatesPage() {
     const [tab, setTab] = useState<'standard' | 'actual'>('standard');
     const [standardRates, setStandardRates] = useState(initialStandardRates);
-    const [actualRates, setActualRates] = useState<ActualRate[]>(mockActualRates);
+    const [actualRates, setActualRates] = useState<ActualRate[]>([]);
     const [editingIdx, setEditingIdx] = useState<number | null>(null);
     const [editValue, setEditValue] = useState('');
     const [loading, setLoading] = useState(true);
