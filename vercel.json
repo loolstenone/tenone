@@ -4,6 +4,7 @@
       "master": true
     }
   },
+  "regions": ["icn1"],
   "functions": {
     "app/api/agent/deutbot/route.ts": {
       "maxDuration": 60
