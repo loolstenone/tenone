@@ -334,7 +334,11 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<Po
     }
     if (input.status !== undefined) {
         row.status = toDbStatus(input.status);
-        if (input.status === 'published') row.published_at = new Date().toISOString();
+        // 처음 발행할 때만 발행일 기록 — 이미 발행된 글 수정 시 발행일 유지
+        if (input.status === 'published') {
+            const { data: current } = await supabase.from('ums_posts').select('published_at').eq('id', id).single();
+            if (!current?.published_at) row.published_at = new Date().toISOString();
+        }
     }
     if (input.isPinned !== undefined) row.is_pinned = input.isPinned;
     if (input.isSecret !== undefined) row.is_secret = input.isSecret;
