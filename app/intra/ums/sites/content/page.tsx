@@ -110,13 +110,10 @@ export default function ContentManagementPage() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="콘텐츠 관리"
-                description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시글 통합 관리`}
+                title="콘텐츠 점검"
+                description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시글 점검 · 글 작성은 각 브랜드 메뉴에서`}
             >
                 <SiteFilterDropdown />
-                <PrimaryButton onClick={() => router.push(editorHref({ site: selectedSiteId, board: boardFilter !== "전체" ? boardFilter : undefined }))}>
-                    <Plus className="h-3.5 w-3.5" /> 새 글 작성
-                </PrimaryButton>
             </PageHeader>
 
             {/* Stats */}

@@ -29,16 +29,10 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: typeof Cl
 const TYPE_MAP: Record<string, { label: string; color: string }> = {
   partner: { label: '파트너 신청', color: 'text-violet-600 bg-violet-50' },
   business: { label: '프로젝트 의뢰', color: 'text-indigo-600 bg-indigo-50' },
+  tenone_partner: { label: '파트너 신청', color: 'text-violet-600 bg-violet-50' },
+  tenone_crew: { label: '크루 신청', color: 'text-violet-600 bg-violet-50' },
+  tenone_business: { label: '프로젝트 의뢰', color: 'text-indigo-600 bg-indigo-50' },
 };
-
-// Mock 데이터
-const MOCK_SUBMISSIONS: Submission[] = [
-  { id: 's1', form_type: 'partner', name: '김마케팅', email: 'mkt@agency.com', company: '크리에이티브랩', phone: '010-1234-5678', message: '마케팅 에이전시입니다. 파트너 제휴 문의드립니다.', category: null, portfolio_url: 'https://creative.co.kr', status: 'pending', created_at: '2026-03-29T14:30:00Z' },
-  { id: 's2', form_type: 'business', name: '박기획', email: 'plan@startup.io', company: '넥스트스텝', phone: '010-2345-6789', message: '신규 브랜딩 프로젝트 의뢰 관련 미팅 요청드립니다. 4월 중 론칭 예정인 서비스입니다.', category: '브랜딩', portfolio_url: null, status: 'reviewing', created_at: '2026-03-28T10:15:00Z' },
-  { id: 's3', form_type: 'business', name: '이개발', email: 'dev@tech.kr', company: '테크솔루션', phone: null, message: 'WIO 도입 검토 중입니다. 데모 미팅 가능할까요?', category: 'IT/개발', portfolio_url: null, status: 'responded', created_at: '2026-03-27T09:00:00Z' },
-  { id: 's4', form_type: 'partner', name: '정디자인', email: 'design@studio.com', company: '디자인스튜디오', phone: '010-3456-7890', message: 'UI/UX 디자인 파트너 등록 희망합니다. 포트폴리오 첨부합니다.', category: null, portfolio_url: 'https://design-studio.co.kr/portfolio', status: 'pending', created_at: '2026-03-26T16:45:00Z' },
-  { id: 's5', form_type: 'business', name: '최교수', email: 'prof@univ.ac.kr', company: '서울대학교', phone: '010-4567-8901', message: 'MADLeague 산학협력 프로그램 관련 문의입니다.', category: '교육', portfolio_url: null, status: 'pending', created_at: '2026-03-25T11:20:00Z' },
-];
 
 export default function InquiryPage() {
   const { selectedSiteId } = useBumsFilter();
@@ -57,24 +51,20 @@ export default function InquiryPage() {
           .from('contact_submissions')
           .select('*')
           .order('created_at', { ascending: false });
-        if (data && data.length > 0) {
+        if (data) {
           setSubmissions(data.map((r: any) => ({
             id: r.id, form_type: r.form_type || 'business', name: r.name, email: r.email,
             company: r.company, phone: r.phone, message: r.message, category: r.category,
             portfolio_url: r.portfolio_url, status: r.status || 'pending', created_at: r.created_at,
           })));
-        } else {
-          setSubmissions(MOCK_SUBMISSIONS);
         }
-      } catch {
-        setSubmissions(MOCK_SUBMISSIONS);
-      }
+      } catch { /* 빈 목록 */ }
       setLoading(false);
     })();
   }, []);
 
   const filtered = submissions
-    .filter(s => filter === 'all' || s.form_type === filter)
+    .filter(s => filter === 'all' || s.form_type === filter || s.form_type.endsWith(`_${filter}`))
     .filter(s => statusFilter === 'all' || s.status === statusFilter)
     .filter(s => !search || s.name.includes(search) || s.email.includes(search) || (s.company || '').includes(search));
 

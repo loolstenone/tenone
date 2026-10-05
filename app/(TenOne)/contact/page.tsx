@@ -189,7 +189,7 @@ export default function ContactPage() {
 
                     {/* 파트너 신청 */}
                     {!submitted && activeTab === 'partner' && (
-                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(fromCrew ? 'crew' : 'partner', e.currentTarget); }}>
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(fromCrew ? 'tenone_crew' : 'tenone_partner', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">{fromCrew ? 'Join the Crew' : 'Partner with Us'}</h3>
                                 <p className="text-sm tn-text-sub mt-1">
@@ -225,7 +225,7 @@ export default function ContactPage() {
 
                     {/* 프로젝트 의뢰 */}
                     {!submitted && activeTab === 'business' && (
-                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('business', e.currentTarget); }}>
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('tenone_business', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">Business Inquiry</h3>
                                 <p className="text-sm tn-text-sub mt-1">프로젝트 의뢰 및 파트너십 제안을 보내주세요.</p>

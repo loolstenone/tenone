@@ -209,10 +209,7 @@ export default function BoardsManagementPage() {
                                 <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-900">선택 해제</button>
                             </div>
                         ) : <div />}
-                        <button onClick={() => router.push(editorHref({ site: selectedSiteId, board: boardFilter !== "전체" ? boardFilter : undefined }))}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 shadow-sm">
-                            <Plus className="h-4 w-4" /> 새 글 작성
-                        </button>
+                        <span className="text-xs text-neutral-400">글 작성은 각 브랜드 메뉴에서</span>
                     </div>
 
                     <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">

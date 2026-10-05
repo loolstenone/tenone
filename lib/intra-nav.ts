@@ -149,7 +149,7 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "사이트 목록", href: "/intra/ums/sites/list" },
                             { name: "게시판", href: "/intra/ums/sites/boards" },
-                            { name: "콘텐츠", href: "/intra/ums/sites/content" },
+                            { name: "콘텐츠 점검", href: "/intra/ums/sites/content" },
                         ],
                     },
                     {
@@ -214,6 +214,14 @@ export const modules: NavModule[] = [
             {
                 label: "집중 브랜드",
                 items: [
+                    {
+                        name: "TenOne", href: "/intra/ums/tenone", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/tenone" },
+                            { name: "Works", href: "/intra/ums/tenone/works" },
+                            { name: "고객 문의", href: "/intra/ums/tenone/cs" },
+                        ],
+                    },
                     {
                         name: "Badak", href: "/intra/ums/badak", icon: Globe,
                         children: [
