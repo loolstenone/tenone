@@ -1,9 +1,10 @@
 /**
- * HIT 검사 Supabase CRUD
+ * HIT 검사 Supabase CRUD — 서버 전용 (app/api/hit/* 에서만 사용)
+ * 검사 테이블은 본인·직원만 읽을 수 있으므로(RLS) 비회원 검사 흐름은 서버가 서비스 롤로 처리한다.
  */
-import { createClient } from './client';
+import { createAdminClient } from './admin';
 
-const supabase = createClient();
+const supabase = createAdminClient();
 
 // ── 세션 ──
 

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // HIT A 결과 가져오기
     let hitAData = null;
     if (hitAResultId) {
-      const { createClient } = await import('@/lib/supabase/client');
+      const { createAdminClient: createClient } = await import('@/lib/supabase/admin');
       const supabase = createClient();
       const { data } = await supabase
         .from('hit_a_results')
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // alert_code 지정 문항 조회 (DB 기반 주의 신호 채점용)
     let alertQuestions: { question_id: string; alert_code: string }[] = [];
     try {
-      const { createClient } = await import('@/lib/supabase/client');
+      const { createAdminClient: createClient } = await import('@/lib/supabase/admin');
       const sb = createClient();
       const { data: aqData } = await sb
         .from('hit_questions')
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       const darkScore = af.NR + af.MK;  // 나르시시즘 + 마키아벨리즘
       if (darkScore >= 50) {
         try {
-          const { createClient } = await import('@/lib/supabase/server');
+          const { createAdminClient: createClient } = await import('@/lib/supabase/admin');
           const supabase = await createClient();
           await supabase.from('hit_admin_flags').insert({
             member_id: session.member_id || null,

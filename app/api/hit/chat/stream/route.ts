@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server';
 import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
 import { canAccess } from '@/lib/hit/membership';
 import { getApiUser } from '@/lib/api-guard';

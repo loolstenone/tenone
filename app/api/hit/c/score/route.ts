@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitCResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitC } from '@/lib/hit/scoring-c';
-import { createClient } from '@/lib/supabase/client';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       const darkScore = af.NR + af.MK;
       if (darkScore >= 50) {
         try {
-          const { createClient: serverClient } = await import('@/lib/supabase/server');
+          const { createAdminClient: serverClient } = await import('@/lib/supabase/admin');
           const supabaseAdmin = await serverClient();
           await supabaseAdmin.from('hit_admin_flags').insert({
             member_id: session.member_id || null,

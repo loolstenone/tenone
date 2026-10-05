@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, getHitAResult } from '@/lib/supabase/hit';
 import { scoreCH, scoreCHDeep, scoreAPDeep } from '@/lib/hit/scoring';
-import { createClient } from '@/lib/supabase/client';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 
 const supabase = createClient();
 
