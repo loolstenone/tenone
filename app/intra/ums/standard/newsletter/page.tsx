@@ -39,7 +39,7 @@ export default function NewsletterStandardPage() {
         async function load() {
             const sb = createClient();
             const [sendersRes, subsActive, subsTotal, issuesTotal, issuesSent, sends24h] = await Promise.all([
-                sb.from("email_senders").select("id, email, name, purpose, is_active"),
+                sb.from("email_senders").select("id, email:from_addr, name:from_name, purpose, is_active"),
                 sb.from("newsletter_subscribers").select("*", { count: "exact", head: true }).eq("is_active", true),
                 sb.from("newsletter_subscribers").select("*", { count: "exact", head: true }),
                 sb.from("newsletter_issues").select("*", { count: "exact", head: true }),

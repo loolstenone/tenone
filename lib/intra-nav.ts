@@ -194,6 +194,8 @@ export const modules: NavModule[] = [
                         name: "Standard 관리", href: "/intra/ums/standard", icon: Shield,
                         children: [
                             { name: "개요", href: "/intra/ums/standard" },
+                            { name: "플랫폼 헌법", href: "/intra/ums/standard/constitution" },
+                            { name: "데이터 계약", href: "/intra/ums/standard/data-contract" },
                             { name: "회원", href: "/intra/ums/standard/members" },
                             { name: "Universe Coin", href: "/intra/ums/standard/uc" },
                             { name: "산업군/직무군", href: "/intra/ums/standard/taxonomies" },
