@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { earnUC } from '@/lib/supabase/uc';
+import { requireStaff } from '@/lib/api-guard';
 
 const supabase = createAdminClient();
 
@@ -23,8 +24,10 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ posts: posts || [] });
 }
 
-// PATCH: 관리자 숨김/표시 토글
+// PATCH: 관리자 숨김/표시 토글 (직원 전용)
 export async function PATCH(request: NextRequest) {
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
   const body = await request.json();
   const { id, is_hidden } = body;
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
@@ -36,8 +39,10 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ updated: true });
 }
 
-// DELETE: 관리자 글 삭제
+// DELETE: 관리자 글 삭제 (직원 전용)
 export async function DELETE(request: NextRequest) {
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
