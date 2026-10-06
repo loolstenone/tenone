@@ -43,7 +43,7 @@ export default async function ClubsPage() {
                   <Image src={club.logo_url} alt={club.name} width={56} height={56} className="object-contain" />
                 </div>
               ) : (
-                <div className="h-14 w-14 rounded-full mb-6" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+                <div className="h-14 w-14 mb-6" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
               )}
               <div className="text-4xl font-black text-white">{club.name}</div>
               <div className="mt-3 flex items-center gap-1.5 text-base text-neutral-400">

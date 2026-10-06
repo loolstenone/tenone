@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ArticleEditor } from '../ArticleEditor';
+import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
 export const metadata = { title: '아티클 편집' };
 
@@ -14,7 +15,7 @@ export default async function EditPage({ params }: PageProps) {
   const { id } = await params;
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect('/login?redirect=/madleague/madzine/write/' + id);
+  if (!user) return <MadLoginGate />;
 
   const { data: member } = await sb.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
   if (!member) redirect('/madleague/member');

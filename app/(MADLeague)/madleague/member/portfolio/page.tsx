@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { ArrowLeft, ExternalLink, Eye, EyeOff, Trophy, Award, Tag } from 'lucide-react';
+import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
 export const metadata = { title: '내 포트폴리오', description: '매드리거 포트폴리오 관리' };
 
@@ -15,7 +16,7 @@ const CERT_LABEL: Record<string, string> = {
 export default async function PortfolioPage() {
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect('/login?redirect=/madleague/member/portfolio');
+  if (!user) return <MadLoginGate />;
 
   const { data: member } = await sb
     .from('mad_members')

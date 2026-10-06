@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getMadAccess } from '@/lib/madleague-roles';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 import {
   Trophy, Users, Crown, Medal, FileText, ExternalLink,
   Calendar, ChevronRight, ArrowRight, Clock, CheckCircle2,
@@ -207,7 +208,7 @@ export default async function PTWorkspacePage() {
         <div className="mx-auto max-w-3xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · PT</div>
           <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 입장 가능합니다</h1>
-          <Link href="/login?redirect=/madleague/pt" className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</Link>
+          <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
       </div>
     );

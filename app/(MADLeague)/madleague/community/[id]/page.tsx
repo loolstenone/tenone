@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { ChevronLeft, MessageCircle, Heart, FileText, Download, Play } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { CommentSection } from './CommentSection';
+import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
 interface MediaItem {
   url: string;
@@ -31,7 +32,7 @@ export default async function PostDetailPage({ params }: PageProps) {
   const { id } = await params;
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect('/login?redirect=/madleague/community/' + id);
+  if (!user) return <MadLoginGate />;
 
   const { data: member } = await sb.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
   if (!member) redirect('/madleague/member');

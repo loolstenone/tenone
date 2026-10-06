@@ -185,7 +185,7 @@ export default function MadLeagueMyPage() {
                             <Shield className="h-5 w-5 text-[#EC1D25]" />
                             <h3 className="font-black text-base">{madInfo.club_name} · 신청서 대기</h3>
                             {pendingApps.length > 0 && (
-                                <span className="ml-auto bg-[#EC1D25] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                <span className="ml-auto bg-[#EC1D25] text-white text-xs font-bold px-2 py-0.5">
                                     {pendingApps.length}
                                 </span>
                             )}

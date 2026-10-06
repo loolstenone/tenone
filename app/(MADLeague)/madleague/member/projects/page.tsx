@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Trophy, Users, Calendar, FileText, ExternalLink, Crown, Medal, Loader2 } from 'lucide-react';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 interface Competition {
   id: string;
@@ -163,9 +164,9 @@ export default function ProjectsPage() {
           <div className="bg-red-950/30 border border-red-900/40 text-red-400 p-6 text-sm">
             {error}
             {error === '로그인이 필요합니다.' && (
-              <Link href="/login?redirect=/madleague/member/projects" className="ml-3 underline">
+              <MadLoginButton className="ml-3 underline">
                 로그인
-              </Link>
+              </MadLoginButton>
             )}
           </div>
         ) : teams.length === 0 ? (

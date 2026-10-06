@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { ArrowRight, Calendar, GraduationCap, MapPin, Sparkles, FolderOpen, LayoutDashboard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { MemberLinkButton } from './MemberLinkButton';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 export const metadata = {
   title: '매드리거',
@@ -24,9 +25,9 @@ export default async function MemberPage() {
             아직 매드리그 멤버가 아니라면 지원서를 제출해주세요.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Link href="/login?redirect=/madleague/member" className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-8 py-4 transition">
+            <MadLoginButton className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-8 py-4 transition">
               로그인 <ArrowRight className="h-4 w-4" />
-            </Link>
+            </MadLoginButton>
             <Link href="/madleague/apply" className="inline-flex items-center gap-2 border border-neutral-600 hover:border-white text-white font-bold px-8 py-4 transition">
               지원하기
             </Link>

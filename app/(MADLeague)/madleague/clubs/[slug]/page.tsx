@@ -90,7 +90,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
               <Image src={club.logo_url} alt={club.name} width={80} height={80} className="object-contain" />
             </div>
           ) : (
-            <div className="h-20 w-20 rounded-full mb-8" style={{ backgroundColor: accent }} />
+            <div className="h-20 w-20 mb-8" style={{ backgroundColor: accent }} />
           )}
           <h1 className="text-5xl sm:text-7xl font-black tracking-tight">{club.name}</h1>
           <div className="mt-4 flex items-center gap-2 text-neutral-400">

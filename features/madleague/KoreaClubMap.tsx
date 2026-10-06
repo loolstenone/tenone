@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export function KoreaClubMap() {
   return (
-    <div className="mx-auto overflow-hidden rounded-2xl" style={{ maxWidth: 520 }}>
+    <div className="mx-auto overflow-hidden" style={{ maxWidth: 520 }}>
       <Image
         src="/logos/madleague/korea-map.png"
         alt="전국 7개 권역 지도"

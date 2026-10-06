@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Send, Loader2 } from 'lucide-react';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 interface Comment {
   id: string;
@@ -66,7 +67,7 @@ export function ArticleComments({ articleId, canComment }: { articleId: string; 
       ) : (
         <div className="mb-8 bg-neutral-50 border border-neutral-200 p-4 text-sm text-neutral-500 text-center">
           댓글은 매드리거만 작성할 수 있습니다.
-          <a href="/login?redirect=/madleague/madzine" className="ml-2 text-[#EC1D25] font-bold hover:underline">로그인</a>
+          <MadLoginButton className="ml-2 text-[#EC1D25] font-bold hover:underline">로그인</MadLoginButton>
         </div>
       )}
 

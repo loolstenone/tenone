@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ProfileEditor } from './ProfileEditor';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 export const metadata = { title: '프로필 편집' };
 
@@ -13,7 +14,7 @@ export default async function ProfileEditPage() {
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
           <h1 className="text-4xl font-black">로그인이 필요합니다</h1>
-          <Link href="/login?redirect=/madleague/member/profile" className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</Link>
+          <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
       </div>
     );

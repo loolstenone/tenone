@@ -121,7 +121,7 @@ export function MadLeagueHeader() {
                     key={p.href}
                     href={p.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg px-4 py-2 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition pl-6"
+                    className="block px-4 py-2 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition pl-6"
                 >
                     {p.name}
                 </Link>
@@ -133,7 +133,7 @@ export function MadLeagueHeader() {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={clsx(
-                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        "block px-4 py-2.5 text-base font-medium transition-colors",
                         isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
                     )}
                 >

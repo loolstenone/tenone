@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getMadAccess } from '@/lib/madleague-roles';
 import { MessageSquare, FolderKanban, Trophy, ArrowRight } from 'lucide-react';
+import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 export const metadata = { title: '아레나', description: '매드 아레나 — 게시판·라이브러리·교육·프로젝트·취업정보' };
 
@@ -17,7 +18,7 @@ export default async function ArenaPage() {
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA</div>
                     <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 입장 가능합니다</h1>
                     <p className="mt-6 text-neutral-400">로그인 후 매드리거 연동을 완료하면 아레나에 입장할 수 있습니다.</p>
-                    <Link href="/login?redirect=/madleague/arena" className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</Link>
+                    <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
                 </div>
             </div>
         );
