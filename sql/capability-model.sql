@@ -54,7 +54,7 @@ CREATE POLICY mcr_self_read ON member_capability_roles FOR SELECT
 INSERT INTO capabilities(key, name_ko, description, built_in_roles) VALUES
 ('community',    '커뮤니티',   '게시글·댓글·반응·문의', ARRAY['member']),
 ('meetup',       '모임',       '모임 개설/참여, 개설자는 관리권 보유', ARRAY['owner','participant']),
-('club',         '동아리',     '연차 기반 조직·임원·OB 체계', ARRAY['현역','임원','OB']),
+('club',         '동아리',     '연차 기반 조직·임원·OB 체계', ARRAY['현역','임원','OB','멘토']),
 ('portfolio',    '포트폴리오', '작품·작업물·경력 쇼케이스', ARRAY['creator']),
 ('membership',   '승인 멤버십', '심사제 소속 (결제 없이 승인)', ARRAY['applicant','approved']),
 ('course',       '강의',       '강사 진행·수강 등록', ARRAY['instructor','taker']),

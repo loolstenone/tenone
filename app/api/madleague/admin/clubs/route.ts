@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { listActiveMadleaguers } from '@/lib/madleague-roles';
 
 export const runtime = 'nodejs';
 
@@ -15,6 +16,7 @@ async function verifyStaff(token: string) {
     .eq('member_id', (await admin.from('members').select('id').eq('auth_id', user.id).maybeSingle()).data?.id ?? '')
     .in('role', ['staff', 'manager', 'super_admin'])
     .eq('is_active', true)
+    .limit(1)
     .maybeSingle();
   return roleRow ? user : null;
 }
@@ -37,18 +39,12 @@ export async function GET(req: NextRequest) {
     .eq('member_id', memberRow.id)
     .in('role', ['staff', 'manager', 'super_admin'])
     .eq('is_active', true)
+    .limit(1)
     .maybeSingle();
   if (!roleRow) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  // All approved MADLeague members
-  const { data: approvedRoles } = await admin
-    .from('member_roles')
-    .select('member_id')
-    .eq('role', 'approved_member')
-    .eq('context', 'brand:madleague')
-    .eq('is_active', true);
-
-  const memberIds = (approvedRoles ?? []).map((r: { member_id: string }) => r.member_id);
+  // 진행 중인 매드리거 (club 현역·임원) — member_capability_roles SSOT
+  const memberIds = await listActiveMadleaguers();
 
   if (memberIds.length === 0) return NextResponse.json({ members: [] });
 
@@ -79,6 +75,7 @@ export async function PATCH(req: NextRequest) {
     .eq('member_id', memberRow.id)
     .in('role', ['staff', 'manager', 'super_admin'])
     .eq('is_active', true)
+    .limit(1)
     .maybeSingle();
   if (!roleRow) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 

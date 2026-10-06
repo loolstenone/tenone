@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getMadAccess } from '@/lib/madleague-roles';
 import { MessageSquare, FolderKanban, Trophy, ArrowRight } from 'lucide-react';
 
 export const metadata = { title: '아레나', description: '매드 아레나 — 게시판·라이브러리·교육·프로젝트·취업정보' };
@@ -25,24 +26,9 @@ export default async function ArenaPage() {
     const { data: memberRow } = await sb.from('members').select('id').eq('auth_id', user.id).maybeSingle();
     if (!memberRow) redirect('/madleague/apply');
 
-    const { data: roleRow } = await sb
-        .from('member_roles')
-        .select('id')
-        .eq('member_id', memberRow.id)
-        .in('role', ['approved_member', 'leader', 'mentor', 'corporate', 'staff', 'manager', 'super_admin'])
-        .eq('context', 'brand:madleague')
-        .eq('is_active', true)
-        .maybeSingle();
-
-    const { data: globalAdmin } = roleRow ? { data: null } : await sb
-        .from('member_roles')
-        .select('id')
-        .eq('member_id', memberRow.id)
-        .eq('role', 'super_admin')
-        .eq('is_active', true)
-        .maybeSingle();
-
-    if (!roleRow && !globalAdmin) redirect('/madleague/apply');
+    // 매드리거(club·showcase 활동 역할) 또는 직원만 — member_capability_roles SSOT
+    const access = await getMadAccess(memberRow.id);
+    if (!access.canEnter) redirect('/madleague/apply');
 
     const SECTIONS = [
         {

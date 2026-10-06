@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getMadAccess } from '@/lib/madleague-roles';
 import { ManagePanel } from './ManagePanel';
 
 interface PageProps {
@@ -29,23 +30,11 @@ export default async function ClubManagePage({ params }: PageProps) {
   if (!club) notFound();
 
   // 권한 확인: 회장 본인 / staff(super_admin 포함) / mentor
-  const [staffRes, mentorRes] = await Promise.all([
-    admin.from('member_roles').select('role')
-      .eq('member_id', memberRow.id)
-      .in('role', ['staff', 'manager', 'super_admin'])
-      .eq('is_active', true)
-      .maybeSingle(),
-    admin.from('member_roles').select('role')
-      .eq('member_id', memberRow.id)
-      .eq('role', 'mentor')
-      .eq('context', 'brand:madleague')
-      .eq('is_active', true)
-      .maybeSingle(),
-  ]);
+  const access = await getMadAccess(memberRow.id);
 
   const isPresident = club.president_member_id === memberRow.id;
-  const isStaff = !!staffRes.data;
-  const isMentor = !!mentorRes.data;
+  const isStaff = access.isStaff;
+  const isMentor = access.isMentor;
 
   if (!isPresident && !isStaff && !isMentor) {
     redirect(`/madleague/clubs/${slug}`);

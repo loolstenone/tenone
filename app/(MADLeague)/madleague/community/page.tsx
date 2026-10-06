@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getMadAccess } from '@/lib/madleague-roles';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
 import { CommunityFeed } from './CommunityFeed';
 
@@ -38,29 +39,13 @@ export default async function CommunityPage({ searchParams }: PageProps) {
     );
   }
 
-  // members 테이블에서 member_id 조회 → member_roles 승인 체크
+  // members 테이블에서 member_id 조회 → 활동 역할 확인
   const { data: memberRow } = await sb.from('members').select('id').eq('auth_id', user.id).maybeSingle();
   if (!memberRow) redirect('/madleague/apply');
 
-  const { data: roleRow } = await sb
-    .from('member_roles')
-    .select('id')
-    .eq('member_id', memberRow.id)
-    .in('role', ['approved_member', 'leader', 'mentor', 'corporate', 'staff', 'manager', 'super_admin'])
-    .eq('context', 'brand:madleague')
-    .eq('is_active', true)
-    .maybeSingle();
-
-  // super_admin(마스터)은 context 무관하게 통과
-  const { data: globalAdmin } = roleRow ? { data: null } : await sb
-    .from('member_roles')
-    .select('id')
-    .eq('member_id', memberRow.id)
-    .eq('role', 'super_admin')
-    .eq('is_active', true)
-    .maybeSingle();
-
-  if (!roleRow && !globalAdmin) redirect('/madleague/apply');
+  // 매드리거(club·showcase 활동 역할) 또는 직원만 — member_capability_roles SSOT
+  const access = await getMadAccess(memberRow.id);
+  if (!access.canEnter) redirect('/madleague/apply');
 
   const clubs = await fetchMadClubs();
 

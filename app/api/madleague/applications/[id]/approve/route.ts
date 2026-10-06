@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { capabilityRoleForApplicant, getMadAccess, grantMadCapabilityRole, type MadApplicantRole } from '@/lib/madleague-roles';
 
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   // 지원서 조회
   const { data: app } = await admin
     .from('mad_applications')
-    .select('id, member_id, club_id, email, status, name, university, phone, major, activity_year, cohort, applicant_role')
+    .select('id, member_id, club_id, email, status, name, university, phone, major, activity_year, cohort, applicant_role, company_name')
     .eq('id', id)
     .maybeSingle();
   if (!app) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
@@ -38,16 +39,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     .eq('id', app.club_id)
     .maybeSingle();
 
-  const { data: roleRow } = await sb
-    .from('member_roles')
-    .select('role')
-    .eq('member_id', memberRow.id)
-    .in('role', ['staff', 'manager', 'super_admin'])
-    .eq('is_active', true)
-    .maybeSingle();
-
   const isPresident = club?.president_member_id === memberRow.id;
-  const isStaff = !!roleRow;
+  const isStaff = (await getMadAccess(memberRow.id)).isStaff;
 
   // 동아리 회장·멘토·기업 신청은 staff만 승인 가능, 일반 신청은 회장 또는 staff
   if ((isClubLeaderApp || isMentorApp || isCorporateApp) && !isStaff) {
@@ -71,7 +64,6 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
   if (applicantMember) {
     const madRole = isClubLeaderApp ? 'club_leader' : isMentorApp ? 'mentor' : isCorporateApp ? 'corporate' : 'member';
-    const memberRoleValue = isClubLeaderApp ? 'leader' : isMentorApp ? 'mentor' : isCorporateApp ? 'corporate' : 'approved_member';
 
     // mad_members INSERT
     const { data: existingMadMember } = await admin
@@ -95,24 +87,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
       });
     }
 
-    // member_roles INSERT
-    const { data: existingRole } = await admin
-      .from('member_roles')
-      .select('id')
-      .eq('member_id', applicantMember.id)
-      .eq('role', memberRoleValue)
-      .eq('context', 'brand:madleague')
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (!existingRole) {
-      await admin.from('member_roles').insert({
-        member_id: applicantMember.id,
-        role: memberRoleValue,
-        context: 'brand:madleague',
-        is_active: true,
-      });
-    }
+    // 활동 역할 = member_capability_roles (§1.3.1). member_roles는 권한 전용이라 넣지 않는다
+    await grantMadCapabilityRole(
+      applicantMember.id,
+      capabilityRoleForApplicant(madRole as MadApplicantRole, {
+        clubId: app.club_id, activityYear: app.activity_year, companyName: app.company_name,
+      }),
+    );
 
     // 동아리 회장 신청이면 mad_clubs.president_member_id 설정
     if (isClubLeaderApp) {

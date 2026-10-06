@@ -5,6 +5,7 @@ import { MapPin, Calendar, Users, ArrowRight, ChevronLeft, Settings } from 'luci
 import { fetchMadClubBySlug } from '@/lib/supabase/madleague';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getMadAccess } from '@/lib/madleague-roles';
 
 export const revalidate = 300;
 
@@ -50,13 +51,8 @@ export default async function ClubDetailPage({ params }: PageProps) {
       const { data: memberRow } = await adminClient.from('members').select('id').eq('auth_id', user.id).maybeSingle();
       if (memberRow) {
         const isPresident = club.president_member_id === memberRow.id;
-        const [staffRole, mentorRole] = await Promise.all([
-          adminClient.from('member_roles').select('role')
-            .eq('member_id', memberRow.id).in('role', ['staff', 'manager', 'super_admin']).eq('is_active', true).maybeSingle(),
-          adminClient.from('member_roles').select('role')
-            .eq('member_id', memberRow.id).eq('role', 'mentor').eq('context', 'brand:madleague').eq('is_active', true).maybeSingle(),
-        ]);
-        canManage = isPresident || !!staffRole.data || !!mentorRole.data;
+        const access = await getMadAccess(memberRow.id);
+        canManage = isPresident || access.isStaff || access.isMentor;
       }
     }
   } catch { /* 비로그인 시 무시 */ }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getMadAccess } from '@/lib/madleague-roles';
 
 export const runtime = 'nodejs';
 
@@ -33,16 +34,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     .eq('id', app.club_id)
     .maybeSingle();
 
-  const { data: roleRow } = await sb
-    .from('member_roles')
-    .select('role')
-    .eq('member_id', memberRow.id)
-    .in('role', ['staff', 'manager', 'super_admin'])
-    .eq('is_active', true)
-    .maybeSingle();
-
   const isPresident = club?.president_member_id === memberRow.id;
-  const isStaff = !!roleRow;
+  const isStaff = (await getMadAccess(memberRow.id)).isStaff;
   if (!isPresident && !isStaff) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }

@@ -507,7 +507,7 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 |-----|---------|-----------|------------|
 | `community` | 커뮤니티 | member | **전 브랜드 기본 탑재** (게시글·문의·반응) |
 | `meetup` | 모임 | owner, participant | Badak, Rook, Townity, Domo |
-| `club` | 동아리 | 현역, 임원, OB | MADLeague, MADLeap |
+| `club` | 동아리 | 현역, 임원, OB, 멘토 | MADLeague, MADLeap |
 | `portfolio` | 포트폴리오 | creator | MoNTZ, Jakka, HeRo |
 | `membership` | 승인 멤버십 | applicant, approved | YouInOne, Domo |
 | `course` | 강의 | instructor, taker | MADLeap, HeRo, Badak, EvoSchool 등 |
@@ -646,7 +646,7 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 - 서버 API 직원 판단: `lib/api-guard.ts` `requireStaff` (staff·manager·super_admin 또는 인증된 @tenone.biz)
 - 마스터: `super_admin@universe` (lools@tenone.biz)
 - ❌ 회원 활동 역할(멘토·현역·바닥장·구독자 등)을 member_roles에 넣지 않는다 → `member_capability_roles` (§1.3.1)
-  - 이관 대상: MADLeague `role=member|mentor|club_leader, context='brand:madleague'` (approve API·arena·clubs·community 페이지)
+  - MADLeague 이관 완료 (2026-10-06): 현역·임원(회장)·멘토 = `club`, 기업(과제기업·채용 파트너) = `showcase/host {type:corporate}` · 헬퍼 `lib/madleague-roles.ts`
 
 ### 인증 흐름
 

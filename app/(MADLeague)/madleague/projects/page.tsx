@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getMadAccess } from '@/lib/madleague-roles';
 import {
   FolderKanban, Users, Crown, Medal, ArrowRight, Calendar,
   BookOpen, ChevronRight, Trophy
@@ -122,24 +123,9 @@ export default async function ProjectsWorkspacePage() {
   const { data: memberRow } = await sb.from('members').select('id').eq('auth_id', user.id).maybeSingle();
   if (!memberRow) redirect('/madleague/apply');
 
-  const { data: roleRow } = await sb
-    .from('member_roles')
-    .select('id')
-    .eq('member_id', memberRow.id)
-    .in('role', ['approved_member', 'leader', 'mentor', 'corporate', 'staff', 'manager', 'super_admin'])
-    .eq('context', 'brand:madleague')
-    .eq('is_active', true)
-    .maybeSingle();
-
-  const { data: globalAdmin } = roleRow ? { data: null } : await sb
-    .from('member_roles')
-    .select('id')
-    .eq('member_id', memberRow.id)
-    .eq('role', 'super_admin')
-    .eq('is_active', true)
-    .maybeSingle();
-
-  if (!roleRow && !globalAdmin) redirect('/madleague/apply');
+  // 매드리거(club·showcase 활동 역할) 또는 직원만 — member_capability_roles SSOT
+  const access = await getMadAccess(memberRow.id);
+  if (!access.canEnter) redirect('/madleague/apply');
 
   /* ── 데이터 로드 ── */
   // mad_members.id (팀 소속 확인용)
