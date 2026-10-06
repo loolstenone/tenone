@@ -86,6 +86,7 @@
 
 ## 개발 주의사항
 
+- 원본 사이트 대조가 기준 — 임의 레이아웃·문구·"More" 섹션 추가 금지 (세션 160 사용자 지적). 바꿀 땐 원본 실측(폭·글자 크기·순서) 후
 - 링크는 `/rook/...` prefix로 (rook.tenone.biz·rook.co.kr에서도 동작, localhost 경로 분기 대응)
 - 본문 HTML은 서버에서 정화 불가(`lib/sanitize-html.ts`) → `RooKPostBody`가 마운트 후 표시. 상세 페이지 서버 HTML에 본문 없음 (SEO는 summary·og로)
 - 홈 배경 영상: `_xly_E2iphk`(비열한 저잣거리) · AI 모델 섹션 `NXdOyBWZkvw` (원본과 동일)
@@ -98,5 +99,5 @@
 | 항목 | 내용 |
 |------|------|
 | **Phase** | 새 사이트 제작 — 비공개 스테이징 (2026-10-07 세션 160) |
-| **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) ·  집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
-| **이월 작업** | ① 인트라 RooK 관리(작품·아티스트 작성 화면, 문의 인박스 확인) ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |
+| **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) · 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
+| **이월 작업** | ⓪ 배포 화면을 www.rook.co.kr과 나란히 비교 · 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 자유게시판 공지 작성자 "매니악 취향"(rk-167517018·rk-167515976)이 운영자인지 사용자 확인 ① 인트라 RooK 관리(작품·아티스트 작성 화면, 문의 인박스 확인) ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |

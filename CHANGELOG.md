@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-10-07 (세션 160, 집) — MADLeague 이월 수리 · RooK 집중 승격·원본 이전
+
+### 장소·운영
+
+- 워크트리 `agitated-brahmagupta-60c3e4` (브랜치 `claude/work-start-0795aa`) → 작업 종료 시 `git push origin HEAD:master` 1회
+- 커밋: `99ed2dae` · `50b60809` (MADLeague) · `4bdaab2d` · `33f781a1` (RooK) + 문서 커밋
+- 운영 DB (MCP `apply_migration`): `madleague_members_drop_prep` · `rook_focus_boards` · `rook_board_categories_original`
+- 데이터: RooK Works 20·Artist 30·자유게시판 공지 3 → `ums_posts` + Storage `board-assets/rook/` (`Scripts/rook-import.mjs`, service_role) · `extra_fields.sort` 53건 (MCP `execute_sql`)
+- **미적용**: `sql/madleague-members-drop-copied-columns.sql` B단계 (컬럼 DROP — 승인 완료, 배포 후 실행)
+
+### 결정 (사용자)
+
+- `mad_members` 복사 컬럼 삭제 전부 승인 (계정 미연결 옛 행 1건 삭제 포함)
+- RooK 집중 Tier 승격, www.rook.co.kr 콘텐츠 이전 — 메뉴·레이아웃·이미지까지 원본 그대로
+- RooK 자유게시판은 원본 '공지' 글만 이전 (회원 글·회원 데이터 이전 없음, §0.1)
+
+### 변경 내역
+
+- MADLeague: `mad_link_member_to_user` 삭제, `mad_eligible_certificates` members 기준·service_role 전용 · `member/link` API·`MemberLinkButton` 삭제 · `acceptMadApplication()` 공통 승인(회장·인트라) · 상태 'accepted' 통일(`ManagePanel`) · `/api/madleague/applications/president` 신설 + 마이페이지 · `getMadLeagueProfile(memberId)` · `getAllServiceProfiles(email, memberId)` · MADLeap 인트라 3페이지 admin API · 마이페이지 `madInfo` null 타입 오류
+- RooK DB: `ums_sites` tier focus·lifecycle active·hosting external · 게시판 works(admin)·artist(admin)·freeboard(member) + 원본 카테고리
+- RooK 코드: `lib/supabase/rook.ts`(원본 순서 정렬·작성자) · `features/rook/RooKUI.tsx`(매스너리·카테고리 탭·카드·색) · `RooKHeader`(모집 배너·원본 메뉴, UtilityBar About 숨김) · 홈·works·artist·상세(`RooKPostDetail`)·about·rookie·freeboard 재작성 · `RooKContactForm` → `RooKContactModalButton`(Contact/RooKie 지원, 첨부 서명 업로드) · 옛 경로 `board`·`home` 리다이렉트 · 마이페이지 내 글 필터
+- 공통: `lib/sanitize-html.ts` `sanitizeRichHtml`(YouTube iframe) · `lib/domain-registry.ts` CANONICAL rook · `next.config.ts` noindex rook · `app/sitemap.ts` RooK 제외 · CLAUDE.md Tier 표 RooK
+- 문서: `app/(RooK)/CLAUDE.md` 전면 작성 · `app/(MADLeague)/CLAUDE.md` 현재 상태
+
+### 검증
+
+- 로컬 미리보기(가림막 스크립트 제거 후): Works 목록 탭·문구·매스너리, 상세 영상·이미지, About·RooKie 팝업 필드, 자유게시판 카테고리·공지 3편
+- tsc: RooK·MADLeague 변경 파일 오류 0 (기존 무관 오류는 메인 node_modules 미설치 패키지 때문)
+- 미검증: 배포 화면, 폼 실제 제출, 로그인 플로우
+
+---
+
 ## 2026-10-06 (세션 159, 사무실) — MADLeague 가이드 정합화 · MADzine 이전·리디자인 · 문의 RLS
 
 ### 장소·운영

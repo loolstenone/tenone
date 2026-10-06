@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-06 (세션 159 — MADLeague 가이드 정합화·MADzine 이전·리디자인·문의 RLS)
+> 마지막 업데이트: 2026-10-07 (세션 160 — MADLeague 이월 수리 · RooK 집중 승격·원본 이전)
 
 ---
 
@@ -52,6 +52,15 @@
 - [ ] MADLeague brand 역할 → member_capability_roles 이관 · requireStaff vs auth_is_staff 일원화
 - [ ] Works 이미지 없는 15건 정리
 
+## 🤖 RooK 새 사이트 (집중 — 세션 160 · 2026-10-07 승격, 비공개 스테이징)
+
+- [x] 집중 Tier 승격 (ums_sites·CANONICAL_HOSTS external·noindex·사이트맵 제외)
+- [x] 게시판 works·artist·freeboard + 원본 카테고리 · Works 20·Artist 30·자유게시판 공지 3 이전 · 원본 순서
+- [x] 원본 www.rook.co.kr 대조 재작성 (메뉴·배너·홈·목록·상세·About·RooKie·팝업 폼)
+- [ ] 배포 화면 원본 비교 · 팝업 폼 실제 제출(첨부) · "매니악 취향" 공지 2편 확인
+- [ ] 인트라 RooK 관리 (작품·아티스트 작성 화면) · RooKie 승인 회원 체계(capability)
+- [ ] AD 시안 상표 검토 · 본문 서버 렌더(SEO) · DNS 전환 계획(아임웹 회원 수 → 30일 공지 · 옛 URL 308)
+
 ## 🎓 MADLeague 새 사이트 (집중 — 세션 159 · 2026-10-06, 비공개 스테이징)
 
 - [x] RLS: mad_members·mad_applications anon 차단 · 본인 수정 컬럼 제한 · 공개 포트폴리오 service_role
@@ -62,7 +71,10 @@
 - [x] 로그인 표준 (MadLoginButton·MadLoginGate) · 목업 삭제 · rounded 정리
 - [x] 계정 정보 members SSOT 1단계 (member_id·작성자 표시·프로필 편집·승격 트리거)
 - [x] MADzine 이전 (madleague.net 21건·이미지 85장·카테고리 8종) + 검정 에디토리얼 리디자인 · 배포
-- [ ] `mad_members` 복사 컬럼 4개 삭제 (`sql/madleague-members-drop-copied-columns.sql`, 승인 대기)
+- [x] `mad_members` 복사 컬럼 삭제 A단계 (옛 행 정리·link 함수 삭제·수료증 함수 members 기준) — 세션 160
+- [ ] `mad_members` 복사 컬럼 4개 DROP B단계 (승인 완료, 배포 후 실행)
+- [x] 승인 로직 통일(회장·인트라 → capability) · 회장 대기 지원서 API · getMadLeagueProfile · MADLeap 인트라 조회 — 세션 160
+- [ ] 동아리 지원서 전제 결정 (A 소속 인증 / B 모집 / C 폐지) + 멘토 전 동아리 지원자 열람 범위 수리
 - [ ] 로그인 실검증: 지원 → 마이페이지 심사 중 → 인트라 승인 → capability 행 · 멘토 아레나 입장
 - [ ] 회장 마이페이지 대기 지원서 (정책 없음) · `getMadLeagueProfile` 고장 · MADLeap 인트라 brand_id 필터
 - [ ] 기수 14건(archive) 근거 확인 · 동아리 로고 7종·소개 문구

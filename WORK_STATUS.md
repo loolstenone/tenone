@@ -1,6 +1,44 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-06 (세션 159 — MADLeague 가이드 정합화 · MADzine 이전·리디자인 · 문의 RLS)
+> 마지막 업데이트: 2026-10-07 (세션 160 — MADLeague 이월 버그 수리 · RooK 집중 승격 + www.rook.co.kr 원본 그대로 이전)
+
+---
+
+## 세션 160 핵심 성과 (2026-10-07, 집) — MADLeague 이월 수리 · RooK 집중 승격·원본 이전
+
+> 작업 위치: 워크트리 `C:/Projects/TenOne/.claude/worktrees/agitated-brahmagupta-60c3e4` (브랜치 `claude/work-start-0795aa`) → 작업 종료 시 `git push origin HEAD:master`로 반영.
+> **사무실에서는 평소대로 `git checkout master && git pull origin master`** 후 이어가면 된다 (워크트리 불필요).
+> 로컬 환경 메모: 이 워크트리는 `node_modules`를 메인 저장소로 junction. 메인 `node_modules/jsdom`이 비어 있어 이전 스크립트는 스크래치 jsdom@26 + `NODE_PATH`로 실행했음 — 사무실에서 스크립트 재실행 시 `npm i` 먼저.
+
+- **MADLeague (커밋 99ed2dae·50b60809)**
+  - `mad_members` 복사 컬럼 삭제 **A단계 운영 적용**(`madleague_members_drop_prep`): 계정 미연결 옛 행 1건 삭제 · `mad_link_member_to_user` 함수 삭제 · `mad_eligible_certificates` members 기준 재작성 + anon/authenticated 실행 권한 회수(보안: anon이 수료증 함수 실행 가능했음)
+  - 이메일 매칭 계정 연결 기능 폐기 (`member/link` API·`MemberLinkButton` 삭제)
+  - 승인 로직 통일 `acceptMadApplication()` (`lib/madleague-roles.ts`) — 회장 승인·인트라 승인 모두 capability 부여. 상태 어휘 'approved'→'accepted' 통일
+  - 회장 대기 지원서 API 신설 `/api/madleague/applications/president` + 마이페이지 연결
+  - `getMadLeagueProfile(memberId)` 실제 컬럼으로 수리, MADLeap 인트라 3페이지 admin API(club=madleap)로 수리
+- **RooK (커밋 4bdaab2d·33f781a1) — 집중 Tier 승격 + 원본 사이트 그대로 이전** (사용자 요청)
+  - 운영 DB: `ums_sites` rook tier=focus·hosting=external · 게시판 works(직원)·artist(직원)·freeboard(회원), 원본 카테고리·순서 (`sql/rook-focus-boards.sql`, 마이그레이션 `rook_focus_boards`·`rook_board_categories_original`)
+  - 콘텐츠: Works 20 · Artist 30 · 자유게시판 원본 '공지' 3편 → `ums_posts`(slug `rk-{아임웹 idx}`), 이미지 → Storage `board-assets/rook/`, 원본 목록 순서 `extra_fields.sort`
+  - CANONICAL_HOSTS `www.rook.co.kr`(external) · noindex · 사이트맵 제외 · CLAUDE.md Tier 표
+  - 사이트 재작성(원본 대조): 흰 모집 배너+검정 메뉴(HOME·WORKS·ARTIST·FREE BOARD *·ROOKIE·ABOUT) · 홈(배경 영상·Works 12·Free board 3·AI Artist 15·AI Model·RooKie) · 목록 매스너리 3열(원본 비율, 카테고리 색) · 상세(카테고리+제목→본문) · About/RooKie 2단 + 팝업 폼(Contact / RooKie 지원 — 이력서·포트폴리오 첨부)
+  - **"콘텐츠가 자유게시판으로 갔다" 원인**: 배포된 옛 코드의 `/rook/board`가 works 게시판을 보여줌 + 로컬·배포가 같은 운영 DB. 새 코드 배포 시 해소
+
+### 다음 첫 액션 (사무실)
+
+1. **배포 확인**: 이번 push 빌드 성공 후 `rook.tenone.biz/rook` (마스터 로그인 상태 — 가림막 bypass)에서 홈·Works·Artist·Free board·About·RooKie 화면을 www.rook.co.kr과 나란히 비교. 특히 `/rook/freeboard`에 공지 3편만, Works는 `/rook/works`에 있는지
+2. **사용자 확인 필요**: 자유게시판 공지 3편 중 2편 작성자 "매니악 취향" — 운영자 본인 계정인지. 아니면 `rk-167517018`·`rk-167515976` 삭제 (MCP `execute_sql` → ums_posts status 변경 또는 삭제)
+3. **RooK 팝업 폼 실제 제출 1건씩** (Contact·RooKie 지원 + 첨부 1개) → 인트라 문의 인박스(`contact_submissions` form_type `rook_inquiry`·`rook_rookie`)에서 내용·첨부 다운로드 확인 → 테스트 건 closed 처리
+4. **`mad_members` 복사 컬럼 삭제 B단계** (사용자 승인 완료, 배포 후 실행): `sql/madleague-members-drop-copied-columns.sql` 93줄 이후 — 실행 전 MCP로 `select proname from pg_proc where prosrc ilike '%mad_members%' and (prosrc ilike '%.name%' or prosrc ilike '%email%')` + 뷰 의존성 확인 → `apply_migration`. 이후 MADLeague 커뮤니티·MADzine 댓글 작성자 표시 확인
+5. **로그인 실검증** (사용자 로그인 필요): MADLeague 지원 → `/madleague/my` "심사 중" → 회장 마이페이지 대기 목록 → 인트라 승인 → `member_capability_roles` 행 생성
+6. **MADLeague 결정 대기**: 동아리 지원서 기능의 전제 (A 소속 인증 / B 모집 / C 폐지) + **멘토가 `/madleague/clubs/[slug]/manage`에서 전 동아리 지원자 개인정보를 보는 문제**(동아리 범위 제한 없음 — 결정과 함께 수리)
+7. 세션 158 이월 그대로: 인트라 문의 상세 직원 실사용 · Tier 미지정 24개 · 커머스>고객문의 메뉴 · `requireStaff` vs `auth_is_staff()` 일원화 · 사이트맵 정리
+
+### 주의 (이번 세션 교훈)
+
+- **원본 사이트를 옮길 때는 "내용만" 아니라 메뉴·레이아웃·문구·카테고리 순서까지 실측 대조**한다 (임의 레이아웃·문구를 만들어 사용자 지적받음). 브라우저로 원본 폭·글자 크기·순서를 재고 그대로
+- 데이터 이전은 배포된 옛 코드에 즉시 보인다 (세션 159와 같은 교훈 재발) — 이전과 코드 배포를 묶거나, 옛 코드에서 어떻게 보일지 먼저 확인
+- 아임웹 og:image는 본문 이미지가 없으면 사이트 기본 배너 — 대표 이미지는 원본 목록 썸네일 사용
+- tsc는 메모리 부족 → `NODE_OPTIONS=--max-old-space-size=8192`. 메인 node_modules에 `@anthropic-ai/sdk`·`sharp` 미설치로 기존 오류 다수(이번 변경과 무관)
 
 ---
 

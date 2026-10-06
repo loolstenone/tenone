@@ -155,7 +155,8 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | 새 사이트 제작 중 — 비공개 스테이징 (2026-10-06 세션 159 업데이트) |
+| **Phase** | 새 사이트 제작 중 — 비공개 스테이징 (2026-10-07 세션 160 업데이트) |
 | **세션 159 완료** | RLS 잠금 · 지원서 로그인/캡차/동의/member_id · 활동 역할 capability 이관 · 동아리 7개 복원 · 로그인 모달 표준화 · 계정 정보 members SSOT 전환(1단계) · MADzine 21건 이전 + 에디토리얼 레이아웃 · 배포 완료 |
-| **이월 작업** | ① `mad_members` 복사 컬럼 4개 삭제 (`sql/madleague-members-drop-copied-columns.sql`, 승인 대기 — 계정 미연결 옛 행 1건 처리 방침 포함) ② 로그인 실검증: 지원→마이페이지 "심사 중" · 인트라 승인→capability 행 · 멘토 아레나 입장 ③ 회장 마이페이지 대기 지원서 목록 — 정책 없음(항상 빈 목록) ④ `universe-profile.ts getMadLeagueProfile` 고장 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name`도 복사값(바이라인 스냅샷) — 투고 기사 표시 방식 결정 |
+| **세션 160 완료** | 복사 컬럼 삭제 A단계(옛 미연결 행 삭제 · `mad_link_member_to_user` 삭제 · `mad_eligible_certificates` members 기준·service_role 전용) · 이메일 매칭 계정 연결(`member/link`·`MemberLinkButton`) 폐기 · `acceptMadApplication()` 공통 승인(회장·인트라 모두 capability 부여, 상태 'accepted' 통일) · 회장 대기 지원서 API `/api/madleague/applications/president` · `getMadLeagueProfile(memberId)` 수리 · MADLeap 인트라 3페이지 admin API로 수리 |
+| **이월 작업** | ① `mad_members` 복사 컬럼 DROP B단계 (`sql/madleague-members-drop-copied-columns.sql` 93줄~, 승인 완료 — 배포 후, DB 함수·뷰 의존성 확인 뒤 실행) ② 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 ③ **동아리 지원서 전제 결정**(A 소속 인증 / B 모집 / C 폐지) ④ **멘토가 `/madleague/clubs/[slug]/manage`에서 전 동아리 지원자 개인정보 열람 가능** — 동아리 범위 제한 필요 (③과 함께) ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
 | **최근 결정** | 멘토 = club/멘토 · 기업 = showcase/host · MADzine 카테고리 원본 8종 · 이미지 자체 Storage 복사 · 작성자 이름·사진 공개 · 동아리 7개만 복원(소개 비움) |
