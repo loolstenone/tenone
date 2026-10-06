@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { ArrowRight, Calendar, GraduationCap, MapPin, Sparkles, FolderOpen, LayoutDashboard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getMemberCoreByAuthId } from '@/lib/madleague-people';
-import { MemberLinkButton } from './MemberLinkButton';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 export const metadata = {
@@ -47,7 +46,7 @@ export default async function MemberPage() {
   const core = await getMemberCoreByAuthId(user.id);
 
   if (!member) {
-    // 계정은 있는데 매드리거 레코드 미연동 → 연결 시도
+    // 계정은 있는데 매드리거 기록 없음 (지원서 승인 시 계정 기준으로 자동 생성)
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
@@ -61,12 +60,10 @@ export default async function MemberPage() {
             <div className="text-sm font-bold mb-2">이런 경우를 확인해보세요</div>
             <ul className="text-sm text-neutral-400 space-y-1 list-disc list-inside">
               <li>지원서가 아직 승인되지 않았습니다.</li>
-              <li>지원서 이메일과 가입 이메일이 다릅니다. (같게 맞춰주세요)</li>
               <li>아직 지원서를 제출하지 않았습니다.</li>
             </ul>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <MemberLinkButton />
             <Link href="/madleague/apply" className="inline-flex items-center gap-2 border border-neutral-600 hover:border-white text-white font-bold px-8 py-4 transition">
               지원서 작성
             </Link>
