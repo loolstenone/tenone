@@ -103,6 +103,7 @@ export const CANONICAL_HOSTS: Record<string, { host: string; hosting: 'vercel' |
     madleague: { host: 'www.madleague.net', hosting: 'external' },
     madleap:   { host: 'www.madleap.co.kr', hosting: 'external' },
     badak:     { host: 'www.badak.biz',     hosting: 'external' },
+    rook:      { host: 'www.rook.co.kr',    hosting: 'external' },
 };
 
 // ── 파생 맵 (자동 생성) ──

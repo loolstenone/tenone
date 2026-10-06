@@ -137,11 +137,12 @@ docs/              # 설계 문서
 | 집중 | MADLeague | www.madleague.net | 외부 nginx · 회원 0 · Vercel 새로 제작 (이전 없음) |
 | 집중 | MADLeap | www.madleap.co.kr | 외부 nginx · 학생 회원 ~200 · Vercel 새로 제작 (이전 없음) |
 | 집중 | Badak | www.badak.biz | 외부 nginx · **회원 ~9,000** · Vercel 새로 제작 (이전 없음) |
+| 집중 | RooK | www.rook.co.kr | 외부 아임웹 · 2026-10-07 승격 · Vercel 새로 제작 (운영사 콘텐츠 Works·Artist만 이전, 회원·자유게시판 이전 없음) |
 | 실험/보관 | 그 외 전 브랜드 (SmarComm 포함) | {brand}.tenone.biz 또는 없음 | 개별 결정 전까지 신규 투자 없음 |
 
 ### 외부 서버 브랜드 — 새로 제작, 이전 없음 (2026-10-05 확정)
 
-> Badak·MADLeap·MADLeague는 외부 서버 사이트를 옮기지 않는다. **Vercel에서 새 사이트로 제작**하고, 오픈일에 DNS만 새 사이트로 돌린다. 기존 DB·회원 데이터 이관 없음.
+> Badak·MADLeap·MADLeague·RooK은 외부 서버 사이트를 옮기지 않는다. **Vercel에서 새 사이트로 제작**하고, 오픈일에 DNS만 새 사이트로 돌린다. 기존 DB·회원 데이터 이관 없음.
 
 - 새 사이트 회원 = Ten:One ID로 **새로 가입** (§1.2.0 가입 동의). 기존 외부 회원 데이터를 복사해 오지 않는다 (별도 동의 없는 다른 시스템으로의 이전 금지 — 개인정보보호법 제17·18조).
 - 오픈 전까지 Vercel 버전은 비공개 스테이징 (원칙 6 — noindex, 직원 전용).

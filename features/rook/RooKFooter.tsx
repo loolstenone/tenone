@@ -15,7 +15,7 @@ export function RooKFooter() {
                     links: [
                         { label: "Works", href: "/rook/works" },
                         { label: "Artist", href: "/rook/artist" },
-                        { label: "Free board", href: "/rook/board" },
+                        { label: "Free board", href: "/rook/freeboard" },
                         { label: "RooKie", href: "/rook/rookie" },
                         { label: "About", href: "/rook/about" },
                     ],
@@ -23,7 +23,9 @@ export function RooKFooter() {
                 {
                     title: "Contact",
                     links: [
-                        { label: "tenone.biz/contact", href: "https://tenone.biz/contact", external: true },
+                        { label: "상담 / 문의", href: "/rook/about#contact" },
+                        { label: "RooKie 지원", href: "/rook/rookie#apply" },
+                        { label: "YouTube", href: "https://www.youtube.com/@RooK_AI_Creator", external: true },
                     ],
                 },
             ]}

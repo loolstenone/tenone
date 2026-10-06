@@ -1,50 +1,60 @@
 # RooK 브랜드 가이드
 
 > **RooK** — AI Creator. "밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다"
+> Tier **집중** (2026-10-07 승격) · 공식 주소 `www.rook.co.kr` (외부 아임웹 운영 중 → Vercel 버전은 비공개 스테이징 `rook.tenone.biz`, is_open=false, noindex) · §0.1 "새로 제작, 이전 없음"
 
 ---
 
 ## 정체성
 
-- **한 줄 소개**: AI 기반 창작 플랫폼 (영상·이미지·음악 생성 및 공유)
-- **톤앤매너**: 자유로움·창의적·도전적. 아티스트 중심.
-- **주 컬러**: 초록색 (#00d255)
-- **디자인 방향**: 갤러리 + 크리에이션 도구. 사용자가 만드는 콘텐츠 중심.
+- **한 줄 소개**: AI 크리에이터 — AI로 음악·영상·밈·광고·아트워크를 만들고, AI 모델(아티스트)을 브랜드에 제공
+- **톤앤매너**: 자유로움·창의적·도전적 ("Just Do It!")
+- **주 컬러**: 초록 `#00d255` (포인트) + 검정 헤더 / 흰 본문 (원본 사이트 톤)
+- **디자인 방향**: 작품 갤러리(16:9) + AI 아티스트 프로필(3:4). 사각 모서리(rounded 없음)
+- **채널**: YouTube `@RooK_AI_Creator`
 
 ---
 
 ## 접근 모델
 
-- **유형**: 오픈 (누구나 가입 후 창작 가능)
-- **가입 경로**:
-  1. 회원가입 (이메일)
-  2. 즉시 창작 도구 접근 가능
-  3. `members` 레코드 생성
-- **멤버 권한**:
-  - `member` — 기본 크리에이터
-  - `creator` — 인증 크리에이터
-  - `admin` — 운영진
+- **유형**: 오픈 — 보기는 누구나, 자유게시판 글쓰기는 Ten:One ID 회원
+- **RooKie**: 창작 커뮤니티 지원 = 문의 폼(`form_type='rook_rookie'`) → 내부 심사. 승인 회원 관리 체계는 아직 없음 (이월)
+- **문의**: About `#contact` (`form_type='rook_inquiry'`) — `/api/contact` (Turnstile·개인정보 동의)
+
+---
+
+## 콘텐츠 (2026-10-07 www.rook.co.kr에서 이전)
+
+| 게시판 (`ums_boards`, site rook) | 쓰기 | 카테고리 | 내용 |
+|---|---|---|---|
+| `works` (Works) | 직원(admin) | Music · Meme · Contents · AD · Art work | 운영사 작품 20편 (slug `rk-{아임웹 idx}`) |
+| `artist` (AI Artist) | 직원(admin) | Woman · Man · High teen · Kids · Baby · Senior · Animal · Character · Musician | AI 모델 30명 |
+| `freeboard` (Free board) | 회원 | — | 자랑게시판 (원본 글은 이전하지 않음 — 회원 글·스팸) |
+| `challenge` · `feedback` | 회원 | — | 이전부터 있던 빈 게시판 (미사용) |
+
+- 글 = `ums_posts` (`category_id`=카테고리명, `image`=대표 이미지, `extra_fields.youtube_id`·`source`=원본 URL, `author_name`='RooK')
+- 이미지 = Storage `board-assets/rook/{works|artist}/{idx}/` · 사이트 이미지 `board-assets/rook/site/`
+- 이전 스크립트 `Scripts/rook-import.mjs` (멱등, slug 기준 갱신)
+- ⚠️ AD 카테고리(비타500·벤츠·서울우유·LG Gram)는 실제 브랜드명을 쓴 AI 시안 — 공식 오픈 전 상표·광고 표기 검토
 
 ---
 
 ## 프로필 특화
 
-- **특화 테이블**: 없음 (공통 members 테이블)
-- **고유 필드**: 창작 이력 (followers, works_count, verified_status)
-
----
+- 특화 테이블 없음 (공통 `members`). 마이페이지 = MyProfileCard + CapabilitySection + 내 자유게시판 글
 
 ## 권한 체계
 
-- **role 종류**: member, creator, admin
-- **context**: `brand:rook`
-
----
+- 브랜드 자체 권한 없음 (데이터 계약 2조). 직원 = `member_roles` staff 계열, 인트라 관리 = `member_roles(role='rook', context='brand')`
+- capability: `community`, `meetup` (brand_capabilities). RooKie 체계가 생기면 `club`(루키·슈퍼 루키) 검토
 
 ## UC 정책 특이사항
 
-- **브랜드 전용 액션**: create_work (월 10회, 무료)
-- **brand_id 지정**: `brand_id = 'rook'`
+- 브랜드 전용 액션 없음 (`brand_id='rook'`)
+
+## Action Hub Entries
+
+- 없음 (문의는 `contact_submissions` form_type `rook_*` — 인트라 CS 인박스)
 
 ---
 
@@ -52,11 +62,32 @@
 
 | 파일 | 역할 |
 |------|------|
-| `app/(RooK)/layout.tsx` | generateMetadata |
-| `app/(RooK)/rook/page.tsx` | 갤러리 (추천 작품) |
-| `app/(RooK)/rook/create/page.tsx` | 창작 도구 |
-| `app/(RooK)/rook/explore/page.tsx` | 작품 탐색 |
+| `app/(RooK)/layout.tsx` | generateMetadata + 헤더·푸터 |
+| `app/(RooK)/rook/page.tsx` | 홈 (배경 영상·Works·Free board·AI Artist·AI Model·RooKie) |
+| `app/(RooK)/rook/works/` · `works/[slug]/` | 작품 목록(카테고리 필터)·상세 |
+| `app/(RooK)/rook/artist/` · `artist/[slug]/` | AI 아티스트 목록·상세 |
+| `app/(RooK)/rook/freeboard/` | 자유게시판 (BoardPage). `[id]` → `?postId=` |
+| `app/(RooK)/rook/rookie/` · `about/` | 원본 문구 + 지원·문의 폼 |
+| `app/(RooK)/rook/board/` · `home/` | 옛 경로 → freeboard·홈 리다이렉트 |
 | `app/(RooK)/rook/my/page.tsx` | 마이페이지 |
+| `lib/supabase/rook.ts` | 공개 콘텐츠 조회 (anon + RLS, ISR 10분) |
+| `features/rook/RooKUI.tsx` | 사이트 이미지·영상 상수, 카드, 카테고리 탭, 배경 영상 |
+| `features/rook/RooKPostBody.tsx` | 본문 HTML (클라이언트 정화, YouTube embed만 허용) |
+| `features/rook/RooKContactForm.tsx` | 문의·RooKie 지원 폼 |
+| `features/rook/RooKHeader.tsx` · `RooKFooter.tsx` | 헤더(UtilityBar·MobileMenu)·푸터(UniverseFooter) |
+
+## 인트라 관리 경로
+
+- 작품·아티스트 글 작성·수정: 게시판 관리(직원) — 전용 화면 없음 (이월)
+
+---
+
+## 개발 주의사항
+
+- 링크는 `/rook/...` prefix로 (rook.tenone.biz·rook.co.kr에서도 동작, localhost 경로 분기 대응)
+- 본문 HTML은 서버에서 정화 불가(`lib/sanitize-html.ts`) → `RooKPostBody`가 마운트 후 표시. 상세 페이지 서버 HTML에 본문 없음 (SEO는 summary·og로)
+- 홈 배경 영상: `_xly_E2iphk`(비열한 저잣거리) · AI 모델 섹션 `NXdOyBWZkvw` (원본과 동일)
+- DNS 전환 시: `ums_sites.hosting='vercel'`, CANONICAL_HOSTS `hosting:'vercel'`, next.config noindex 목록에서 제거, 옛 URL `/works/?idx={n}&bmode=view` → `/rook/works/rk-{n}` (artist 동일) 308 매핑 필요, 기존 아임웹 회원 30일 전 공지·재가입 안내
 
 ---
 
@@ -64,12 +95,6 @@
 
 | 항목 | 내용 |
 |------|------|
-| **최근 변경 (2026-10-05 세션 158)** | 게시판 slug `works`로 정리 (`app/(RooK)/rook/board/page.tsx`) — 관리자 작성 게시판은 직원에게만 글쓰기 버튼 |
-| **Phase** | Beta — 창작 도구 구축 중 |
-| **이월 작업** | AI 생성 모델 연동 |
-
----
-
-## 참고
-
-- 서비스 접근 모델: [CLAUDE.md § 1.4](../../CLAUDE.md#14-서비스-접근-모델-6종)
+| **Phase** | 새 사이트 제작 — 비공개 스테이징 (2026-10-07 세션 160) |
+| **세션 160 완료** | 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
+| **이월 작업** | ① 인트라 RooK 관리(작품·아티스트 작성 화면, 문의 인박스 확인) ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |

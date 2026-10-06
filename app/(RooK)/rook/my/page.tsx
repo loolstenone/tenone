@@ -21,11 +21,11 @@ export default function RooKMyPage() {
 
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=rook&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=rook&board=freeboard&author_id=${encodeURIComponent(user.id)}&limit=20`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#1E88E5] rounded-full animate-spin" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#1E88E5" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#00d255] rounded-full animate-spin" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#00d255" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
@@ -41,13 +41,13 @@ export default function RooKMyPage() {
                     <HitProfileBadge memberId={user?.id} respectOptIn />
                 </div>
 
-                <MyProfileCard accentColor="#1E88E5" />
-                {user?.id && <CapabilitySection memberId={user.id} brandId="rook" accentColor="#1E88E5" className="mb-6" />}
+                <MyProfileCard accentColor="#00d255" />
+                {user?.id && <CapabilitySection memberId={user.id} brandId="rook" accentColor="#00d255" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#1E88E5] text-[#1E88E5]" : "border-transparent text-neutral-500"}`}>
+                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#00d255] text-[#00d255]" : "border-transparent text-neutral-500"}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
                             {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-500">{tab.count}</span>}
                         </button>

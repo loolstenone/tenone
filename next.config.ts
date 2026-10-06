@@ -60,7 +60,7 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       // 외부 서버 운영 브랜드의 이전 준비용 스테이징 — 검색 노출 차단 (CLAUDE.md §0.1 원칙 6)
-      ...['badak', 'madleague', 'madleap'].map(brand => ({
+      ...['badak', 'madleague', 'madleap', 'rook'].map(brand => ({
         source: '/:path*',
         has: [{ type: 'host' as const, value: `${brand}.tenone.biz` }],
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],

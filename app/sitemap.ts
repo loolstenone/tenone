@@ -57,11 +57,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${baseUrl}/hero/mentor`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
         { url: `${baseUrl}/hero/hit`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
 
-        // ── RooK ──
-        { url: `${baseUrl}/rook`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-        { url: `${baseUrl}/rook/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-        { url: `${baseUrl}/rook/works`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
-        { url: `${baseUrl}/rook/artist`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
 
         // ── Planner's ──
         { url: `${baseUrl}/planners`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },

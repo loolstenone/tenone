@@ -9,13 +9,15 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
+import { ROOK_ASSETS } from "@/features/rook/RooKUI";
 
+// 메뉴 = 원본 www.rook.co.kr과 동일 (Home · Works · Artist · Free board · RooKie · About)
 const navItems = [
-    { name: "WORKS", href: "/works" },
-    { name: "ARTIST", href: "/artist" },
-    { name: "FREE BOARD", href: "/board" },
-    { name: "ROOKIE", href: "/rookie" },
-    { name: "ABOUT", href: "/about" },
+    { name: "Works", href: "/rook/works" },
+    { name: "Artist", href: "/rook/artist" },
+    { name: "Free board", href: "/rook/freeboard" },
+    { name: "RooKie", href: "/rook/rookie" },
+    { name: "About", href: "/rook/about" },
 ];
 
 export function RooKHeader() {
@@ -24,23 +26,23 @@ export function RooKHeader() {
     const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/") return pathname === "/";
-        return pathname.startsWith(href);
+        // rook.co.kr·rook.tenone.biz는 prefix 없이 접속 → /works 와 /rook/works 모두 활성 처리
+        const path = pathname.startsWith("/rook") ? pathname : `/rook${pathname}`;
+        return path.startsWith(href);
     };
 
     return (
         <>
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#282828]">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-black">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="shrink-0">
-                    <span className="text-white font-bold text-2xl tracking-tight" style={{ fontFamily: 'sans-serif' }}>
-                        Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span>
-                    </span>
+                <Link href="/rook" className="shrink-0" aria-label="RooK 홈">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ROOK_ASSETS.logo} alt="RooK" className="h-6 w-auto" />
                 </Link>
 
                 {/* Desktop Nav */}
-                <div className="hidden lg:flex items-center gap-6">
+                <div className="hidden lg:flex items-center gap-8 ml-10">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
@@ -84,7 +86,7 @@ export function RooKHeader() {
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="RooK"
-            bgClass="bg-[#282828]"
+            bgClass="bg-black"
             textTone="light"
             footer={
                 isAuthenticated ? (
@@ -92,7 +94,7 @@ export function RooKHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/rook/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347] rounded">가입</Link>
+                        <Link href="/rook/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347]">가입</Link>
                     </div>
                 )
             }

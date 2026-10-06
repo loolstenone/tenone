@@ -1,26 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DOMPurify from "dompurify";
-
-const YOUTUBE_EMBED = /^https:\/\/(www\.)?(youtube\.com|youtube-nocookie\.com)\/embed\//i;
-
-/** 기사 HTML 정화 — 기본 DOMPurify + YouTube embed iframe만 허용 (그 외 iframe·script·style 속성 제거) */
-function sanitizeArticleHtml(html: string): string {
-    DOMPurify.addHook("uponSanitizeElement", (node, data) => {
-        if (data.tagName === "iframe") {
-            const src = (node as Element).getAttribute("src") ?? "";
-            if (!YOUTUBE_EMBED.test(src)) node.parentNode?.removeChild(node);
-        }
-    });
-    const clean = DOMPurify.sanitize(html, {
-        ADD_TAGS: ["iframe"],
-        ADD_ATTR: ["allowfullscreen", "frameborder"],
-        FORBID_ATTR: ["style"],
-    });
-    DOMPurify.removeHook("uponSanitizeElement");
-    return clean;
-}
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 
 /** 검정 바탕 에디토리얼 본문 — MadzineUI의 세리프 변수(--font-mz-serif) 사용 */
 const RICH =
@@ -45,7 +26,7 @@ export function MadzineArticleBody({ content }: { content: string }) {
     const [html, setHtml] = useState<string | null>(null);
 
     useEffect(() => {
-        if (isHtml) setHtml(sanitizeArticleHtml(content));
+        if (isHtml) setHtml(sanitizeRichHtml(content));
     }, [content, isHtml]);
 
     if (!isHtml) {
