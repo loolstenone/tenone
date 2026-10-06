@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { ClipboardList } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 interface Application { id: string; name: string; email: string; university: string | null; major: string | null; cohort: string | null; status: string; created_at: string; }
 
@@ -18,17 +17,23 @@ export default function MadleapApplicationsPage() {
     const [apps, setApps] = useState<Application[]>([]);
     const [filter, setFilter] = useState("pending");
 
+    // MADLeap = mad_clubs slug 'madleap'. 조회·처리는 직원 API — 승인은 공통 로직(활동 역할 부여)을 거친다
     useEffect(() => {
-        createClient().from("mad_applications")
-            .select("id, name, email, university, major, cohort, status, created_at")
-            .eq("brand_id", "madleap")
-            .order("created_at", { ascending: false })
-            .limit(300)
-            .then(res => { setApps((res.data ?? []) as Application[]); setLoading(false); });
+        fetch("/api/madleague/admin/applications?status=all&club=madleap")
+            .then(r => (r.ok ? r.json() : { applications: [] }))
+            .then((data: { applications?: Application[] }) => setApps(data.applications ?? []))
+            .catch(() => setApps([]))
+            .finally(() => setLoading(false));
     }, []);
 
+    const ACTION: Record<string, string> = { accepted: "accept", rejected: "reject", reviewing: "reviewing" };
     const handleAction = async (id: string, newStatus: string) => {
-        await createClient().from("mad_applications").update({ status: newStatus }).eq("id", id);
+        const res = await fetch("/api/madleague/admin/applications", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, action: ACTION[newStatus] }),
+        });
+        if (!res.ok) { alert("처리에 실패했습니다."); return; }
         setApps(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
     };
 

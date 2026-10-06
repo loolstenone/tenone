@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireIntraAdmin, getAdminClient } from '../_auth';
+import { acceptMadApplication } from '@/lib/madleague-roles';
 
 export const runtime = 'nodejs';
 
@@ -41,6 +42,13 @@ export async function PATCH(req: NextRequest) {
   const map: Record<string, string> = { accept: 'accepted', reject: 'rejected', reviewing: 'reviewing' };
   const newStatus = map[body.action];
   if (!newStatus) return NextResponse.json({ error: 'INVALID_ACTION' }, { status: 400 });
+
+  // 승인은 공통 로직 (mad_members·활동 역할·회장 지정까지) — 상태만 바꾸면 매드리거 공간 입장 불가
+  if (newStatus === 'accepted') {
+    const result = await acceptMadApplication(body.id, body.note ?? null);
+    if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json({ ok: true, status: newStatus });
+  }
 
   const sb = getAdminClient();
   const { error } = await sb

@@ -30,6 +30,7 @@ export default function MadLeagueMyPage() {
     const [madStatus, setMadStatus] = useState<'loading' | 'none' | 'pending' | 'active'>('loading');
     const [pendingApps, setPendingApps] = useState<{ id: string; name: string; university: string; created_at: string }[]>([]);
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [isPresident, setIsPresident] = useState(false);
 
     useEffect(() => {
         if (!user?.id || !user?.authId) return;
@@ -64,17 +65,17 @@ export default function MadLeagueMyPage() {
             });
     }, [user?.id, user?.authId]);
 
+    // 회장 판단(mad_clubs.president_member_id)·지원서 조회는 서버에서 — 지원서는 RLS로 클라이언트 조회 불가
     useEffect(() => {
-        if (!madInfo?.club_id || madInfo.role !== 'club_leader') return;
-        const sb = createClient();
-        sb.from('mad_applications')
-            .select('id, name, university, created_at')
-            .eq('club_id', madInfo.club_id)
-            .eq('status', 'pending')
-            .eq('applicant_role', 'member')
-            .order('created_at', { ascending: false })
-            .then(({ data }: { data: any[] | null }) => setPendingApps(data ?? []));
-    }, [madInfo?.club_id, madInfo?.role]);
+        if (madStatus !== 'active') return;
+        fetch('/api/madleague/applications/president')
+            .then(res => (res.ok ? res.json() : {}))
+            .then((data: { isPresident?: boolean; applications?: { id: string; name: string; university: string; created_at: string }[] }) => {
+                setIsPresident(!!data.isPresident);
+                setPendingApps(data.applications ?? []);
+            })
+            .catch(() => setPendingApps([]));
+    }, [madStatus]);
 
     async function handleApprove(appId: string) {
         setProcessingId(appId);
@@ -178,7 +179,7 @@ export default function MadLeagueMyPage() {
             <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
 
                 {/* 동아리 회장 패널 */}
-                {madStatus === 'active' && madInfo?.role === 'club_leader' && madInfo.club_id && (
+                {madStatus === 'active' && isPresident && (
                     <div className="bg-neutral-950 border border-neutral-800 p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Shield className="h-5 w-5 text-[#EC1D25]" />

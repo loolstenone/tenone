@@ -68,31 +68,34 @@ export interface ServiceProfileData {
     fields: Record<string, string | number | null>;
 }
 
-/** MADLeague 서비스 프로필 조회 */
-async function getMadLeagueProfile(email: string): Promise<ServiceProfileData | null> {
+/** MADLeague 서비스 프로필 조회 — 지원서는 members.id로 연결 (데이터 계약 1, 이메일 매칭 금지). RLS = 본인 지원서만 */
+async function getMadLeagueProfile(memberId: string): Promise<ServiceProfileData | null> {
     const { data } = await supabase
         .from('mad_applications')
-        .select('club_slug, cohort, activity_year, university, major, minor, industry, job_function, created_at, updated_at')
-        .eq('email', email)
+        .select('status, cohort, activity_year, university, major, minor, interested_industry, interested_job, created_at, reviewed_at, mad_clubs(name)')
+        .eq('member_id', memberId)
+        .neq('status', 'rejected')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
     if (!data) return null;
+    const club = data.mad_clubs as { name: string } | { name: string }[] | null;
+    const clubName = Array.isArray(club) ? club[0]?.name : club?.name;
     return {
         siteId: 'madleague',
         siteName: 'MAD League',
-        isActive: true,
+        isActive: data.status === 'accepted',
         joinedAt: data.created_at,
-        lastActivity: data.updated_at,
+        lastActivity: data.reviewed_at ?? data.created_at,
         fields: {
-            '소속 동아리': data.club_slug,
+            '소속 동아리': clubName ?? null,
             '기수': data.cohort ? `${data.cohort}기` : null,
             '활동 연도': data.activity_year ? `${data.activity_year}년` : null,
             '소속 대학': data.university,
             '전공': data.major,
             '부전공': data.minor,
-            '관심 산업군': data.industry,
-            '관심 직무군': data.job_function,
+            '관심 산업군': data.interested_industry,
+            '관심 직무군': data.interested_job,
         },
     };
 }
@@ -144,9 +147,9 @@ async function getHeroProfile(email: string): Promise<ServiceProfileData | null>
 }
 
 /** 전체 서비스 프로필 한번에 조회 */
-export async function getAllServiceProfiles(email: string): Promise<ServiceProfileData[]> {
+export async function getAllServiceProfiles(email: string, memberId?: string): Promise<ServiceProfileData[]> {
     const results = await Promise.allSettled([
-        getMadLeagueProfile(email),
+        memberId ? getMadLeagueProfile(memberId) : Promise.resolve(null),
         getBadakProfile(email),
         getHeroProfile(email),
     ]);

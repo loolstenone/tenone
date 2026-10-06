@@ -102,3 +102,71 @@ export async function listActiveMadleaguers(): Promise<string[]> {
         .is("valid_until", null);
     return [...new Set((data ?? []).map((r: { member_id: string }) => r.member_id))];
 }
+
+export type AcceptMadResult =
+    | { ok: true }
+    | { ok: false; error: "NOT_FOUND" | "ALREADY_PROCESSED" | "UPDATE_FAILED"; status: number };
+
+/**
+ * 지원서 승인 — 회장 승인(/api/madleague/applications/[id]/approve)·인트라 승인(admin/applications) 공통.
+ * 권한 확인은 호출자 책임. status = 'accepted' (DB 트리거 mad_promote_application_to_member 기준값)
+ * 지원자 = 지원서의 member_id (데이터 계약 1). 계정 연결 없는 옛 지원서는 상태만 승인
+ */
+export async function acceptMadApplication(appId: string, reviewerNote?: string | null): Promise<AcceptMadResult> {
+    const admin = createAdminClient();
+    const { data: app } = await admin
+        .from("mad_applications")
+        .select("id, member_id, club_id, status, university, major, activity_year, applicant_role, company_name")
+        .eq("id", appId)
+        .maybeSingle();
+    if (!app) return { ok: false, error: "NOT_FOUND", status: 404 };
+    if (app.status !== "pending" && app.status !== "reviewing") return { ok: false, error: "ALREADY_PROCESSED", status: 400 };
+
+    // 상태 변경 → 트리거가 mad_members 1행 생성 (member_id 있을 때)
+    const { error: updateErr } = await admin
+        .from("mad_applications")
+        .update({ status: "accepted", reviewed_at: new Date().toISOString(), ...(reviewerNote !== undefined && { reviewer_note: reviewerNote }) })
+        .eq("id", appId);
+    if (updateErr) return { ok: false, error: "UPDATE_FAILED", status: 500 };
+
+    if (!app.member_id) return { ok: true };
+    const { data: applicant } = await admin.from("members").select("id, auth_id").eq("id", app.member_id).maybeSingle();
+    if (!applicant) return { ok: true };
+
+    const applicantRole = (app.applicant_role ?? "member") as MadApplicantRole;
+    const madRole = applicantRole; // mad_members.role 값 = 지원 유형 (member·club_leader·mentor·corporate)
+
+    // 트리거가 만든 행(또는 기존 행)에 역할 반영, 없으면 생성. 이름·이메일·전화·사진은 복사하지 않는다 (members SSOT)
+    const { data: existing } = await admin
+        .from("mad_members")
+        .select("id")
+        .or(`member_id.eq.${applicant.id}${applicant.auth_id ? `,user_id.eq.${applicant.auth_id}` : ""}`)
+        .limit(1);
+    if (existing && existing.length > 0) {
+        await admin.from("mad_members").update({ role: madRole, member_id: applicant.id }).eq("id", existing[0].id);
+    } else {
+        await admin.from("mad_members").insert({
+            member_id: applicant.id,
+            user_id: applicant.auth_id,
+            club_id: app.club_id,
+            university: app.university ?? null,
+            major: app.major ?? null,
+            role: madRole,
+            activity_years: app.activity_year ? [app.activity_year] : [],
+            source_application_id: app.id,
+        });
+    }
+
+    // 활동 역할 = member_capability_roles (§1.3.1)
+    await grantMadCapabilityRole(
+        applicant.id,
+        capabilityRoleForApplicant(applicantRole, {
+            clubId: app.club_id, activityYear: app.activity_year, companyName: app.company_name,
+        }),
+    );
+
+    if (applicantRole === "club_leader" && app.club_id) {
+        await admin.from("mad_clubs").update({ president_member_id: applicant.id }).eq("id", app.club_id);
+    }
+    return { ok: true };
+}

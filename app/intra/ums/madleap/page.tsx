@@ -12,19 +12,21 @@ export default function MadleapDashboard() {
     const [recentApps, setRecentApps] = useState<{ id: string; name: string; university: string | null; major: string | null; created_at: string; status: string }[]>([]);
 
     useEffect(() => {
+        // MADLeap = mad_clubs slug 'madleap' (mad_applications에 brand_id 컬럼 없음). 지원서는 RLS로 직원 API 경유
         const sb = createClient();
         Promise.all([
-            sb.from("mad_applications").select("*", { count: "exact", head: true }).eq("brand_id", "madleap").eq("status", "accepted"),
-            sb.from("mad_applications").select("*", { count: "exact", head: true }).eq("brand_id", "madleap").eq("status", "pending"),
+            fetch("/api/madleague/admin/applications?status=all&club=madleap")
+                .then(r => (r.ok ? r.json() : { applications: [] }))
+                .catch(() => ({ applications: [] })),
             sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "madleap\\_%").in("status", ["new", "pending"]),
-            sb.from("mad_applications").select("id, name, university, major, created_at, status").eq("brand_id", "madleap").order("created_at", { ascending: false }).limit(5),
-        ]).then(([members, pending, inquiries, recent]) => {
+        ]).then(([appsRes, inquiries]) => {
+            const apps = (appsRes.applications ?? []) as { id: string; name: string; university: string | null; major: string | null; created_at: string; status: string }[];
             setStats({
-                members: members.count ?? 0,
-                pending: pending.count ?? 0,
+                members: apps.filter(a => a.status === "accepted").length,
+                pending: apps.filter(a => a.status === "pending").length,
                 pendingInquiries: inquiries.count ?? 0,
             });
-            setRecentApps((recent.data ?? []) as { id: string; name: string; university: string | null; major: string | null; created_at: string; status: string }[]);
+            setRecentApps(apps.slice(0, 5));
             setLoading(false);
         });
     }, []);

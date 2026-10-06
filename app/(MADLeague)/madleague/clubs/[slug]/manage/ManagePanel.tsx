@@ -17,7 +17,7 @@ interface Application {
   interested_job: string | null;
   motivation: string | null;
   portfolio_url: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
 }
 
@@ -32,7 +32,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
   const [apps, setApps] = useState(initial);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'accepted' | 'rejected'>('pending');
 
   const filtered = apps.filter(a => a.status === activeTab);
   const pendingCount = apps.filter(a => a.status === 'pending').length;
@@ -43,7 +43,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
       const res = await fetch(`/api/madleague/applications/${appId}/${action}`, { method: 'POST' });
       if (!res.ok) throw new Error('failed');
       setApps(prev => prev.map(a => a.id === appId
-        ? { ...a, status: action === 'approve' ? 'approved' : 'rejected' }
+        ? { ...a, status: action === 'approve' ? 'accepted' : 'rejected' }
         : a
       ));
       setExpanded(null);
@@ -56,7 +56,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
 
   const tabs: { key: typeof activeTab; label: string; count: number }[] = [
     { key: 'pending', label: '대기 중', count: apps.filter(a => a.status === 'pending').length },
-    { key: 'approved', label: '승인됨', count: apps.filter(a => a.status === 'approved').length },
+    { key: 'accepted', label: '승인됨', count: apps.filter(a => a.status === 'accepted').length },
     { key: 'rejected', label: '거절됨', count: apps.filter(a => a.status === 'rejected').length },
   ];
 
@@ -96,7 +96,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
       {filtered.length === 0 ? (
         <div className="py-16 text-center text-neutral-500 text-sm">
           {activeTab === 'pending' ? '대기 중인 지원서가 없습니다.' :
-           activeTab === 'approved' ? '승인된 매드리거가 없습니다.' : '거절된 지원서가 없습니다.'}
+           activeTab === 'accepted' ? '승인된 매드리거가 없습니다.' : '거절된 지원서가 없습니다.'}
         </div>
       ) : (
         <div className="space-y-2">
@@ -177,7 +177,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
                     </div>
                   )}
 
-                  {app.status === 'approved' && (
+                  {app.status === 'accepted' && (
                     <div className="flex items-center gap-2 text-sm text-green-400">
                       <CheckCircle2 className="h-4 w-4" /> 승인 완료 — 매드리거 커뮤니티 접근 가능
                     </div>

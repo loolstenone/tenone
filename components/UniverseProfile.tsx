@@ -396,8 +396,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     useEffect(() => {
         const email = profile?.email;
         if (!email) return;
-        getAllServiceProfiles(email).then(setServiceProfiles).catch(() => {});
-    }, [profile?.email]);
+        getAllServiceProfiles(email, profile?.id).then(setServiceProfiles).catch(() => {});
+    }, [profile?.email, profile?.id]);
 
     /* ── 사이트 오픈 상태 ── */
     useEffect(() => {

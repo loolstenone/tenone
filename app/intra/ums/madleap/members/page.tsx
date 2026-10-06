@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Search, Users } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 interface MadleapMember { id: string; name: string; email: string; university: string | null; major: string | null; cohort: string | null; activity_year: number | null; created_at: string; }
 
@@ -11,14 +10,13 @@ export default function MadleapMembersPage() {
     const [members, setMembers] = useState<MadleapMember[]>([]);
     const [search, setSearch] = useState("");
 
+    // MADLeap = mad_clubs slug 'madleap'. 승인된 지원서 기준 (지원서는 RLS로 직원 API 경유)
     useEffect(() => {
-        createClient().from("mad_applications")
-            .select("id, name, email, university, major, cohort, activity_year, created_at")
-            .eq("brand_id", "madleap")
-            .eq("status", "accepted")
-            .order("created_at", { ascending: false })
-            .limit(300)
-            .then(res => { setMembers((res.data ?? []) as MadleapMember[]); setLoading(false); });
+        fetch("/api/madleague/admin/applications?status=accepted&club=madleap")
+            .then(r => (r.ok ? r.json() : { applications: [] }))
+            .then((data: { applications?: MadleapMember[] }) => setMembers(data.applications ?? []))
+            .catch(() => setMembers([]))
+            .finally(() => setLoading(false));
     }, []);
 
     const filtered = members.filter(m =>
