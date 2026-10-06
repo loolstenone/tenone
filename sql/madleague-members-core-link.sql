@@ -1,4 +1,4 @@
--- MADLeague mad_members → 공통 프로필(members.id) 연결 — 1단계 (적용 대기: 사용자 승인 후)
+-- MADLeague mad_members → 공통 프로필(members.id) 연결 — 1단계 — 운영 적용 2026-10-06 (migration madleague_members_core_link, 백필 1건)
 -- 데이터 계약 1: 이름·이메일·전화·사진은 members가 SSOT. mad_members는 MADLeague 고유 데이터만.
 -- 1단계(지금): member_id 추가·백필, name NOT NULL 해제, 승격 트리거가 계정 정보 복사 중단
 -- 2단계(새 코드 배포 후 별도): mad_members.name·email·phone·avatar_url 컬럼 삭제 (sql/madleague-members-drop-copied-columns.sql)
