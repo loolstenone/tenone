@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { withMadAuthors } from '@/lib/madleague-people';
 
 export const runtime = 'nodejs';
 
@@ -19,16 +20,17 @@ export async function GET(_req: Request, { params }: RouteProps) {
 
   const [postRes, commentsRes] = await Promise.all([
     sb.from('mad_posts')
-      .select('*, mad_members!author_id(name, avatar_url), mad_clubs(slug, name, color)')
+      .select('*, mad_clubs(slug, name, color)')
       .eq('id', id)
       .maybeSingle(),
     sb.from('mad_comments')
-      .select('*, mad_members!author_id(name, avatar_url)')
+      .select('*')
       .eq('post_id', id)
       .order('created_at', { ascending: true }),
   ]);
   if (!postRes.data) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
-  return NextResponse.json({ post: postRes.data, comments: commentsRes.data ?? [] });
+  const [post] = await withMadAuthors([postRes.data]);
+  return NextResponse.json({ post, comments: await withMadAuthors(commentsRes.data ?? []) });
 }
 
 // POST { content } — 댓글 작성

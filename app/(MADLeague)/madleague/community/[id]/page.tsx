@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { ChevronLeft, MessageCircle, Heart, FileText, Download, Play } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { withMadAuthors } from '@/lib/madleague-people';
 import { CommentSection } from './CommentSection';
 import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
@@ -37,18 +38,22 @@ export default async function PostDetailPage({ params }: PageProps) {
   const { data: member } = await sb.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
   if (!member) redirect('/madleague/member');
 
-  const { data: post } = await sb
+  const { data: postRow } = await sb
     .from('mad_posts')
-    .select('*, mad_members!author_id(name, avatar_url), mad_clubs(slug, name, color)')
+    .select('*, mad_clubs(slug, name, color)')
     .eq('id', id)
     .maybeSingle();
-  if (!post) notFound();
+  if (!postRow) notFound();
 
-  const { data: comments } = await sb
+  const { data: commentRows } = await sb
     .from('mad_comments')
-    .select('*, mad_members!author_id(name, avatar_url)')
+    .select('*')
     .eq('post_id', id)
     .order('created_at', { ascending: true });
+
+  // 작성자 이름·사진 = 공통 프로필(members)
+  const [post] = await withMadAuthors([postRow]);
+  const comments = await withMadAuthors(commentRows ?? []);
 
   const typed = post as {
     id: string; title: string; content: string; category: string;

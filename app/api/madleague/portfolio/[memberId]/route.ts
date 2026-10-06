@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getMadPeople } from '@/lib/madleague-people';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,7 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const { data: member, error } = await createAdminClient()
     .from('mad_members')
     .select(`
-      id, name, bio, skill_tags, activity_years, avatar_url,
+      id, bio, skill_tags, activity_years,
       university, major, year_in_school, joined_at, status,
       mad_clubs(slug, name, region, color),
       mad_cohorts(year, status)
@@ -30,6 +31,9 @@ export async function GET(_req: Request, { params }: RouteProps) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!member) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
+  // 이름·사진 = 공통 프로필(members)
+  const person = (await getMadPeople([memberId])).get(memberId);
+  Object.assign(member, { name: person?.name ?? '', avatar_url: person?.avatar_url ?? null });
 
   // 팀 참여 이력 (경쟁PT 결과 포함)
   const { data: teamLinks } = await sb

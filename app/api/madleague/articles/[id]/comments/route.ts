@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { withMadAuthors } from '@/lib/madleague-people';
 
 export const runtime = 'nodejs';
 
@@ -12,10 +13,10 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const { id } = await params;
   const sb = await createClient();
   const { data } = await sb.from('mad_article_comments')
-    .select('id, content, created_at, author_id, mad_members!author_id(name, avatar_url)')
+    .select('id, content, created_at, author_id')
     .eq('article_id', id)
     .order('created_at', { ascending: true });
-  return NextResponse.json({ comments: data ?? [] });
+  return NextResponse.json({ comments: await withMadAuthors(data ?? []) });
 }
 
 // POST { content } — 댓글 작성

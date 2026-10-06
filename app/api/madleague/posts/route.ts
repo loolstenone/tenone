@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { withMadAuthors } from '@/lib/madleague-people';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
 
   let q = sb
     .from('mad_posts')
-    .select('*, mad_members!author_id(name, avatar_url), mad_clubs(slug, name, color)')
+    .select('*, mad_clubs(slug, name, color)')
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
   }
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ posts: data ?? [] });
+  return NextResponse.json({ posts: await withMadAuthors(data ?? []) });
 }
 
 // POST { category, title, content, clubId? }

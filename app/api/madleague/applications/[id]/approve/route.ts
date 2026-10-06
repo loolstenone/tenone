@@ -73,12 +73,11 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
       .maybeSingle();
 
     if (!existingMadMember) {
+      // 이름·이메일·전화·사진은 복사하지 않는다 — 공통 프로필(members) SSOT (데이터 계약 1)
       await admin.from('mad_members').insert({
+        member_id: applicantMember.id,
         user_id: applicantMember.auth_id,
         club_id: app.club_id,
-        name: app.name,
-        email: app.email,
-        phone: app.phone ?? null,
         university: app.university ?? null,
         major: app.major ?? null,
         role: madRole,

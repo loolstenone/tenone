@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { isMadzineCategory } from '@/lib/madzine-categories';
 
 export const runtime = 'nodejs';
 
@@ -33,7 +34,7 @@ export async function PATCH(req: Request, { params }: RouteProps) {
   if (body.title) update.title = body.title.trim().slice(0, 200);
   if (body.subtitle !== undefined) update.subtitle = body.subtitle.trim().slice(0, 300) || null;
   if (body.content) update.content = body.content.trim().slice(0, 50000);
-  if (body.category && ['interview', 'case', 'report', 'cover', 'news'].includes(body.category)) update.category = body.category;
+  if (isMadzineCategory(body.category)) update.category = body.category;
   if (body.tags !== undefined) update.tags = Array.isArray(body.tags) ? body.tags.slice(0, 10).map(t => String(t).trim().slice(0, 30)).filter(Boolean) : null;
   if (body.thumbnail_url !== undefined) update.thumbnail_url = body.thumbnail_url?.trim() || null;
   if (body.action === 'submit') update.status = 'pending_review';

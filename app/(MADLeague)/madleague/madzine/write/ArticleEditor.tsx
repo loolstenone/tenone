@@ -1,17 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { MADZINE_CATEGORIES } from '@/lib/madzine-categories';
 import { Save, Send, X, Plus, Loader2 } from 'lucide-react';
 
 const inputCls = 'w-full bg-[#0a0a0a] border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25]';
 
-const CATEGORIES = [
-  { slug: 'interview', label: '인터뷰' },
-  { slug: 'case',      label: '케이스' },
-  { slug: 'report',    label: '리포트' },
-  { slug: 'cover',     label: '커버' },
-  { slug: 'news',      label: '동아리 소식' },
-];
+const CATEGORIES = MADZINE_CATEGORIES;
 
 interface Props {
   initial?: {

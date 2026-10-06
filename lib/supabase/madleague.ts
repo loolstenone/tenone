@@ -1,3 +1,4 @@
+import type { MadzineCategory } from '@/lib/madzine-categories';
 // MADLeague 브랜드 DB 접근 헬퍼 (Phase 1)
 import { createClient as createServerClient } from './server';
 
@@ -40,7 +41,7 @@ export interface MadArticle {
   slug: string;
   title: string;
   subtitle: string | null;
-  category: 'interview' | 'case' | 'report' | 'cover' | 'news';
+  category: MadzineCategory;
   club_id: string | null;
   author_name: string | null;
   author_avatar_url: string | null;

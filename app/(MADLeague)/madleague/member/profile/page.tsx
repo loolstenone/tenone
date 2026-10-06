@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 import { ProfileEditor } from './ProfileEditor';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
@@ -22,7 +23,7 @@ export default async function ProfileEditPage() {
 
   const { data: member } = await sb
     .from('mad_members')
-    .select('id, name, email, phone, university, major, year_in_school, bio, skill_tags, portfolio_public, avatar_url')
+    .select('id, university, major, year_in_school, bio, skill_tags, portfolio_public')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -37,12 +38,13 @@ export default async function ProfileEditPage() {
     );
   }
 
-  const m = member as {
-    id: string; name: string; email: string | null; phone: string | null;
-    university: string | null; major: string | null; year_in_school: number | null;
+  const mad = member as {
+    id: string; university: string | null; major: string | null; year_in_school: number | null;
     bio: string | null; skill_tags: string[] | null; portfolio_public: boolean;
-    avatar_url: string | null;
   };
+  // 이름·이메일·전화·사진 = 공통 프로필(members) SSOT
+  const core = await getMemberCoreByAuthId(user.id);
+  const m = { ...mad, name: core?.name ?? '', email: core?.email ?? null, phone: core?.phone ?? null, avatar_url: core?.avatar_url ?? null };
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">

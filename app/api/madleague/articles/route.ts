@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { isMadzineCategory } from '@/lib/madzine-categories';
+import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 
 export const runtime = 'nodejs';
 
@@ -9,7 +11,7 @@ export async function POST(req: Request) {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
 
-  const { data: member } = await sb.from('mad_members').select('id, club_id, name').eq('user_id', user.id).maybeSingle();
+  const { data: member } = await sb.from('mad_members').select('id, club_id').eq('user_id', user.id).maybeSingle();
   if (!member) return NextResponse.json({ error: 'NOT_A_MEMBER' }, { status: 403 });
 
   let body: {
@@ -22,11 +24,11 @@ export async function POST(req: Request) {
   if (!body.title || !body.content || !body.category) {
     return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
   }
-  if (!['interview', 'case', 'report', 'cover', 'news'].includes(body.category)) {
+  if (!isMadzineCategory(body.category)) {
     return NextResponse.json({ error: 'INVALID_CATEGORY' }, { status: 400 });
   }
 
-  const m = member as { id: string; club_id: string | null; name: string };
+  const m = member as { id: string; club_id: string | null };
   const slugBase = body.title.trim().toLowerCase().replace(/[^가-힣a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
   const slug = `${slugBase}-${Date.now().toString(36).slice(-5)}`;
 
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
     category: body.category,
     club_id: m.club_id,
     author_id: m.id,
-    author_name: m.name,
+    author_name: (await getMemberCoreByAuthId(user.id))?.name ?? null,
     thumbnail_url: body.thumbnail_url?.trim() || null,
     tags: Array.isArray(body.tags) ? body.tags.slice(0, 10).map(t => String(t).trim().slice(0, 30)).filter(Boolean) : null,
     status,

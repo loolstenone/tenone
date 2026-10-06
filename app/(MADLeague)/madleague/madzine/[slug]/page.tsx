@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server';
 import { ArticleActions } from './ArticleActions';
 import { ArticleComments } from './ArticleComments';
 import { ArticleViewPing } from './ArticleViewPing';
+import { MadzineArticleBody } from '@/features/madleague/MadzineArticleBody';
+import { madzineCategoryLabel } from '@/lib/madzine-categories';
 
 export const revalidate = 0;
 
@@ -90,7 +92,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
       <header className="mx-auto max-w-3xl px-6 py-12">
         <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
-          <span className="text-[#EC1D25]">{article.category}</span>
+          <span className="text-[#EC1D25]">{madzineCategoryLabel(article.category)}</span>
           {club && (<><span className="text-neutral-300">·</span><Link href={`/madleague/madzine?club=${club.slug}`} className="text-neutral-500 hover:text-black">{club.name}</Link></>)}
           {article.year && (<><span className="text-neutral-300">·</span><span className="text-neutral-500">{article.year}</span></>)}
         </div>
@@ -113,9 +115,7 @@ export default async function ArticlePage({ params }: PageProps) {
       )}
 
       <div className="mx-auto max-w-3xl px-6 py-12">
-        <div className="prose prose-neutral max-w-none whitespace-pre-wrap leading-relaxed text-neutral-800 text-base">
-          {article.content}
-        </div>
+        <MadzineArticleBody content={article.content} />
 
         {article.tags && article.tags.length > 0 && (
           <div className="mt-12 pt-8 border-t border-neutral-200 flex flex-wrap gap-2">
@@ -156,11 +156,11 @@ export default async function ArticlePage({ params }: PageProps) {
                       <img src={r.thumbnail_url} alt={r.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-neutral-400 text-xs tracking-[0.3em] font-bold">
-                        {r.category.toUpperCase()}
+                        {madzineCategoryLabel(r.category)}
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 text-xs font-bold tracking-wider uppercase text-[#EC1D25]">{r.category}</div>
+                  <div className="mt-3 text-xs font-bold tracking-wider uppercase text-[#EC1D25]">{madzineCategoryLabel(r.category)}</div>
                   <div className="mt-1 font-bold group-hover:text-[#EC1D25] transition">{r.title}</div>
                 </Link>
               ))}

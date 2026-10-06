@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 import { CertificateManager } from './CertificateManager';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
@@ -26,9 +27,11 @@ export default async function CertificatePage() {
 
   const { data: member } = await sb
     .from('mad_members')
-    .select('id, name')
+    .select('id')
     .eq('user_id', user.id)
     .maybeSingle();
+  // 수료증 이름 = 공통 프로필 이름 (mad_members.name은 연결 전 옛 행 대체값)
+  const core = await getMemberCoreByAuthId(user.id);
 
   if (!member) {
     return (
@@ -61,7 +64,7 @@ export default async function CertificatePage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 pb-20">
-        <CertificateManager memberName={member.name} />
+        <CertificateManager memberName={core?.name ?? ''} />
       </section>
     </div>
   );

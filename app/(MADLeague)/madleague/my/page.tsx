@@ -18,7 +18,6 @@ interface MadMemberInfo {
     role: string;
     club_id: string | null;
     club_name?: string;
-    name?: string;
     activity_years?: number[];
     cohort?: number;
     university?: string;
@@ -38,7 +37,7 @@ export default function MadLeagueMyPage() {
 
         // mad_members.user_id = auth uid (members.id 아님). cohort 컬럼은 없음(cohort_id) — 조회하면 쿼리 전체가 실패
         sb.from('mad_members')
-            .select('role, club_id, name, activity_years, university')
+            .select('role, club_id, activity_years, university')
             .eq('user_id', user.authId)
             .maybeSingle()
             .then(async ({ data: member }: { data: any }) => {

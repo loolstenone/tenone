@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
+import { MADZINE_CATEGORIES, madzineCategoryLabel } from '@/lib/madzine-categories';
 
 export const revalidate = 300;
 
@@ -9,14 +10,7 @@ export const metadata = {
   description: 'MADLeague의 인터뷰·케이스·리포트·매거진',
 };
 
-const CATEGORIES = [
-  { slug: 'all',       label: '전체' },
-  { slug: 'interview', label: '인터뷰' },
-  { slug: 'case',      label: '케이스' },
-  { slug: 'report',    label: '리포트' },
-  { slug: 'cover',     label: '커버' },
-  { slug: 'news',      label: '동아리 소식' },
-] as const;
+const CATEGORIES = [{ slug: 'all', label: '전체' }, ...MADZINE_CATEGORIES] as const;
 
 interface PageProps {
   searchParams: Promise<{ category?: string; club?: string; year?: string; tag?: string }>;
@@ -124,12 +118,12 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                         className="h-full w-full object-cover group-hover:scale-105 transition duration-500" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-neutral-700 text-sm tracking-widest font-bold">
-                        {featured.category.toUpperCase()}
+                        {madzineCategoryLabel(featured.category)}
                       </div>
                     )}
                   </div>
                   <div className="mt-5">
-                    <span className="text-xs font-bold tracking-widest text-[#EC1D25] uppercase">{featured.category}</span>
+                    <span className="text-xs font-bold tracking-widest text-[#EC1D25] uppercase">{madzineCategoryLabel(featured.category)}</span>
                     <h2 className="mt-2 text-2xl sm:text-3xl font-black leading-tight group-hover:text-[#EC1D25] transition">
                       {featured.title}
                     </h2>
@@ -156,7 +150,7 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{a.category}</span>
+                        <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{madzineCategoryLabel(a.category)}</span>
                         <h3 className="mt-1 text-sm font-black leading-snug group-hover:text-[#EC1D25] transition line-clamp-3">
                           {a.title}
                         </h3>
@@ -182,7 +176,7 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                     )}
                   </div>
                   <div>
-                    <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{subFeatured[2].category}</span>
+                    <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{madzineCategoryLabel(subFeatured[2].category)}</span>
                     <h3 className="mt-1 text-xl font-black group-hover:text-[#EC1D25] transition">{subFeatured[2].title}</h3>
                     {subFeatured[2].subtitle && (
                       <p className="mt-2 text-sm text-neutral-400 line-clamp-1">{subFeatured[2].subtitle}</p>
@@ -213,7 +207,7 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                         <tr key={a.id} className="border-b border-neutral-900 group hover:bg-neutral-950 transition">
                           <td className="py-4 hidden sm:table-cell">
                             <span className="text-xs font-bold text-[#EC1D25] tracking-wider uppercase">
-                              {a.category}
+                              {madzineCategoryLabel(a.category)}
                             </span>
                           </td>
                           <td className="py-4 pr-4">

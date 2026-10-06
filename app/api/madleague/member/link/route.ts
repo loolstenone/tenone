@@ -31,6 +31,8 @@ export async function POST() {
     return NextResponse.json({ ok: true, memberId: existing.id, linked: true });
   }
 
+  const { data: memberRow } = await admin.from('members').select('id').eq('auth_id', user.id).maybeSingle();
+
   // 이메일로 미연결 멤버 찾기
   const { data: match } = await admin
     .from('mad_members')
@@ -45,7 +47,7 @@ export async function POST() {
 
   const { error } = await admin
     .from('mad_members')
-    .update({ user_id: user.id })
+    .update({ user_id: user.id, member_id: memberRow?.id ?? null })
     .eq('id', match.id);
 
   if (error) {

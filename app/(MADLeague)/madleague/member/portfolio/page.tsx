@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 import { ArrowLeft, ExternalLink, Eye, EyeOff, Trophy, Award, Tag } from 'lucide-react';
 import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
@@ -21,7 +22,7 @@ export default async function PortfolioPage() {
   const { data: member } = await sb
     .from('mad_members')
     .select(`
-      id, name, bio, skill_tags, activity_years, avatar_url,
+      id, bio, skill_tags, activity_years,
       university, major, portfolio_public, joined_at,
       mad_clubs(slug, name, region, color),
       mad_cohorts(year, status)
@@ -30,6 +31,7 @@ export default async function PortfolioPage() {
     .maybeSingle();
 
   if (!member) redirect('/madleague/member');
+  const core = await getMemberCoreByAuthId(user.id);
 
   const m = member as unknown as {
     id: string;
@@ -176,7 +178,7 @@ export default async function PortfolioPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <div className="text-xs text-neutral-600 mb-1">이름</div>
-              <div className="font-bold">{m.name}</div>
+              <div className="font-bold">{core?.name}</div>
             </div>
             {m.mad_clubs && (
               <div>

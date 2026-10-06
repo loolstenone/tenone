@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight, Calendar, GraduationCap, MapPin, Sparkles, FolderOpen, LayoutDashboard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 import { MemberLinkButton } from './MemberLinkButton';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
@@ -43,6 +44,7 @@ export default async function MemberPage() {
     .select('*, mad_clubs(slug, name, region, color), mad_cohorts(year, status)')
     .eq('user_id', user.id)
     .maybeSingle();
+  const core = await getMemberCoreByAuthId(user.id);
 
   if (!member) {
     // 계정은 있는데 매드리거 레코드 미연동 → 연결 시도
@@ -87,7 +89,7 @@ export default async function MemberPage() {
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#EC1D25] mb-4">
             MEMBER · {member.role === 'club_leader' ? '동아리장' : member.role === 'staff' ? '운영진' : '매드리거'}
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight">{member.name}</h1>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight">{core?.name}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-neutral-400">
             {club && (
               <span className="inline-flex items-center gap-2">

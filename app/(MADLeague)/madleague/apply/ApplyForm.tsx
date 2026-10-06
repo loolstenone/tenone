@@ -17,7 +17,7 @@ interface Props {
 }
 
 /** 지원서 수집·이용 동의 문구 버전 — 문구를 바꾸면 API(CONSENT_VERSION)와 함께 올린다 */
-const MAD_APPLY_CONSENT_VERSION = '2026-10-06';
+const MAD_APPLY_CONSENT_VERSION = '2026-10-06.2';
 
 const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
 
@@ -256,7 +256,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0 accent-[#EC1D25]" />
         <span>
           [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: 이름·연락처·소속(대학·전공·동아리·기수 또는 회사명)·관심 분야 ·
-          목적: 매드리거 등록 심사 및 활동 안내 · 보관: MADLeague 또는 계정 탈퇴 시까지 (탈퇴 시 파기).
+          목적: 매드리거 등록 심사 및 활동 안내 · 보관: MADLeague 또는 계정 탈퇴 시까지 (탈퇴 시 파기). 등록 후 MADLeague에 작성한 글·댓글·포트폴리오에는 이름과 프로필 사진이 다른 이용자에게 표시됩니다.
           동의하지 않으면 신청할 수 없습니다.{' '}
           <Link href="/privacy" className="underline">개인정보처리방침</Link>
         </span>
