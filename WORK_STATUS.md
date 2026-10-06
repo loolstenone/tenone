@@ -17,7 +17,7 @@
 
 ### 다음 첫 액션 (사무실)
 
-1. **문의 테이블 RLS 잠금 — 사용자 승인 받고 적용**: `sql/contact-submissions-rls-lockdown.sql`
+1. ~~**문의 테이블 RLS 잠금**~~ ✅ 2026-10-06 운영 적용 완료 (시뮬레이션: anon/회원 0건·쓰기 거부, 직원 전체, service_role 쓰기 OK / 운영 REST: anon 조회 [] · INSERT 401). 직원 추가 시 `app_metadata.is_staff` 필요 — 없으면 인박스가 빈 화면: `sql/contact-submissions-rls-lockdown.sql`
    - 문제: `contact_read_auth`(authenticated USING true) = 로그인 회원 누구나 전 브랜드 문의 조회 / `contact_insert`(public WITH CHECK true) = anon 직접 INSERT로 캡차 우회
    - 적용 전 트랜잭션 롤백 시뮬레이션: anon SELECT·INSERT 거부, 일반 회원 0건, 직원 전체 조회 → 통과 시 MCP `apply_migration`(name `contact_submissions_rls_lockdown`)
    - 적용 후 `/api/contact` 제출(서비스 롤)·인트라 인박스 조회 정상 확인

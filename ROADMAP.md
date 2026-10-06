@@ -44,7 +44,7 @@
 - [x] Works UX (대표 이미지 자동·연도·발행일 유지·삭제·이미지 압축·메뉴 재클릭·통계 숨김)
 - [x] TenOne 본사이트: 연혁 Works 기준 · 홈 섹션 정리 · About 탭 스크롤 · Founder 정리
 - [x] Contact 첨부(비공개 버킷) · 링크 보정 · 인트라 문의 상세 · 응대 기록(handling_log)
-- [ ] **contact_submissions RLS 잠금 적용** (`sql/contact-submissions-rls-lockdown.sql`, 승인 대기)
+- [x] **contact_submissions RLS 잠금 적용** (`sql/contact-submissions-rls-lockdown.sql`, 2026-10-06 운영 적용 — anon 조회 0·INSERT 401 확인)
 - [ ] 인트라 문의 상세 직원 실사용 확인 · Contact 첨부 제출 E2E (운영)
 - [ ] 문의 회신 이메일을 인트라에서 바로 발송 (Resend, 발송 기록 자동으로 handling_log) — 필요 시
 - [ ] 문의 1년 보관 후 자동 파기 (행 + 첨부 Storage) — 크론
