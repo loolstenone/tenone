@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import clsx from "clsx";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { ActionHubPanel } from "@/components/intra/ActionHubPanel";
 import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -198,6 +199,13 @@ export default function MyversePage() {
             {/* 인사말 + 격언 */}
             <PageHeader title={`안녕하세요, ${user.name}님`} description={todayQuote} />
 
+            {/* 오늘 처리할 일 — 전 브랜드 Action Hub (직원만) */}
+            {isStaff && (
+                <div className="mb-6">
+                    <ActionHubPanel />
+                </div>
+            )}
+
             {/* 10:01 Vrief 브리핑 위젯 (마스터·직원만) */}
             {isStaff && (
                 <div className="border border-neutral-200 bg-white p-4 mb-4">
@@ -223,7 +231,6 @@ export default function MyversePage() {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ADMIN_API_KEY ?? ''}`,
                                         },
                                         body: JSON.stringify({ type }),
                                     });

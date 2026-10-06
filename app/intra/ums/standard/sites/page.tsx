@@ -20,7 +20,14 @@ interface SiteRow {
     meta_description: string | null;
     og_image_url: string | null;
     favicon_url: string | null;
+    tier: string | null;
+    lifecycle: string | null;
+    hosting: string | null;
+    sunset_at: string | null;
 }
+
+const TIER_LABEL: Record<string, string> = { core: "핵심", focus: "집중", experiment: "실험", archive: "보관" };
+const LIFECYCLE_LABEL: Record<string, string> = { active: "운영", frozen: "동결", sunsetting: "종료 진행", archived: "종료(보관)" };
 
 const META_STANDARDS = [
     { field: "meta_title", rule: "브랜드명 없이 고유 슬로건 · 60자 이내 · Ten:One™ Universe 템플릿 접미사 자동 추가" },
@@ -54,7 +61,7 @@ export default function SitesStandardPage() {
         <div className="space-y-6">
             <PageHeader
                 title="사이트 · 도메인 표준"
-                description="29 도메인 · SEO 기본값 · 오픈그래프 · favicon 정책 SSOT"
+                description="사이트 상태(Tier·생애주기·호스팅) + SEO 기본값 · 체계 SSOT = ums_sites + lib/domain-registry.ts CANONICAL_HOSTS"
             />
 
             {/* Completion Stats */}
@@ -116,7 +123,9 @@ export default function SitesStandardPage() {
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">이름</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">slug</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">메인 도메인</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">타입</th>
+                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">Tier</th>
+                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">생애주기</th>
+                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">호스팅</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">접근 모델</th>
                                     <th className="text-center px-3 py-2 font-semibold text-neutral-600">오픈</th>
                                     <th className="text-center px-3 py-2 font-semibold text-neutral-600">메타</th>
@@ -125,7 +134,7 @@ export default function SitesStandardPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sites.map(s => (
+                                {[...sites].sort((a, b) => tierRank(a.tier) - tierRank(b.tier)).map(s => (
                                     <tr key={s.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
                                         <td className="px-3 py-1.5 font-medium text-neutral-900">{s.name}</td>
                                         <td className="px-3 py-1.5 font-mono text-neutral-600">{s.slug}</td>
@@ -136,7 +145,12 @@ export default function SitesStandardPage() {
                                                 </a>
                                             ) : "-"}
                                         </td>
-                                        <td className="px-3 py-1.5 text-neutral-500">{s.site_type || "-"}</td>
+                                        <td className="px-3 py-1.5 text-neutral-700">{s.tier ? TIER_LABEL[s.tier] ?? s.tier : "미지정"}</td>
+                                        <td className="px-3 py-1.5 text-neutral-500">
+                                            {s.lifecycle ? LIFECYCLE_LABEL[s.lifecycle] ?? s.lifecycle : "-"}
+                                            {s.sunset_at && <span className="ml-1 text-rose-500">~{s.sunset_at.substring(0, 10)}</span>}
+                                        </td>
+                                        <td className="px-3 py-1.5 text-neutral-500">{s.hosting === "external" ? "외부 서버" : s.hosting === "vercel" ? "Vercel" : s.hosting ?? "-"}</td>
                                         <td className="px-3 py-1.5">
                                             {s.access_model && (
                                                 <span className="text-[10px] bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded">{s.access_model}</span>
@@ -178,4 +192,8 @@ export default function SitesStandardPage() {
             </div>
         </div>
     );
+}
+
+function tierRank(t: string | null): number {
+    return t === "core" ? 0 : t === "focus" ? 1 : 2;
 }

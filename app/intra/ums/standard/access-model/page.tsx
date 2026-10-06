@@ -12,12 +12,12 @@ interface SiteRow {
 }
 
 const MODELS = [
-    { key: "오픈", label: "오픈", desc: "이메일만 있으면 즉시 이용", role: "member", color: "bg-emerald-100 text-emerald-800" },
-    { key: "구독", label: "구독", desc: "플랜 선택 + 결제", role: "subscriber", color: "bg-blue-100 text-blue-800" },
-    { key: "구매", label: "구매", desc: "건별 결제 (상담·교육·제품·모임비)", role: "purchaser", color: "bg-teal-100 text-teal-800" },
-    { key: "승인 멤버십", label: "승인 멤버십", desc: "신청서 → 운영진 심사/승인", role: "approved_member / leader", color: "bg-violet-100 text-violet-800" },
-    { key: "직원", label: "직원", desc: "입사 → tenone_staff_profiles 등록", role: "staff / manager / super_admin", color: "bg-neutral-900 text-white" },
-    { key: "내부", label: "내부", desc: "외부 노출 없음 (기록 전용)", role: "internal", color: "bg-amber-100 text-amber-800" },
+    { key: "open", label: "오픈", desc: "이메일만 있으면 즉시 이용", role: "member", color: "bg-emerald-100 text-emerald-800" },
+    { key: "subscription", label: "구독", desc: "플랜 선택 + 결제", role: "subscriber", color: "bg-blue-100 text-blue-800" },
+    { key: "purchase", label: "구매", desc: "건별 결제 (상담·교육·제품·모임비)", role: "purchaser", color: "bg-teal-100 text-teal-800" },
+    { key: "approval", label: "승인 멤버십", desc: "신청서 → 운영진 심사/승인", role: "approved_member / leader", color: "bg-violet-100 text-violet-800" },
+    { key: "staff", label: "직원", desc: "입사 → tenone_staff_profiles 등록", role: "staff / manager / super_admin", color: "bg-neutral-900 text-white" },
+    { key: "internal", label: "내부", desc: "외부 노출 없음 (기록 전용)", role: "internal", color: "bg-amber-100 text-amber-800" },
 ];
 
 export default function AccessModelStandardPage() {
@@ -47,7 +47,7 @@ export default function AccessModelStandardPage() {
         <div className="space-y-6">
             <PageHeader
                 title="서비스 접근 모델 (6종)"
-                description="CLAUDE.md §1.4 · 모든 브랜드는 6가지 중 하나 · 가입 경로·권한·UC 지급이 여기서 파생"
+                description="CLAUDE.md §1.4 · 모든 브랜드는 6가지 중 하나 · ums_sites.access_model (open·subscription·purchase·approval·staff·internal)"
             />
 
             {/* 6 Models */}

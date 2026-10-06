@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const DISC_COLORS: Record<string, string> = {
   D: '#E53935',
@@ -19,7 +19,8 @@ export async function generateMetadata({
   const { id } = await params;
 
   try {
-    const supabase = await createClient();
+    // 공유 링크 미리보기 — 유형 정보만 조회 (원본 테이블은 본인·직원 전용)
+    const supabase = createAdminClient();
     const { data } = await supabase
       .from('hit_a_results')
       .select('type_code, type_name_ko, type_nickname, disc_primary')

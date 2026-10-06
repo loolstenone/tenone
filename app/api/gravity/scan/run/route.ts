@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { internalAuthHeaders } from "@/lib/api-guard";
 import { notifyPipelineStep, notifyAnalysisComplete } from "@/lib/gravity/notify";
 
 /**
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const base = req.nextUrl.origin;
-    const headers = { "Content-Type": "application/json" };
+    const headers = { "Content-Type": "application/json", ...internalAuthHeaders() };
 
     // ── 인코딩 안전: DB에서 실제 브랜드명 조회 ─────────────────────
     // HTTP body로 전달된 brand_name은 인코딩 이슈가 생길 수 있으므로

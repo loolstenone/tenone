@@ -1,4 +1,7 @@
 /**
+ * ⛔ 사용 중단 (2026-10-05) — PAT를 .env.local에 보관하지 않는다. Supabase MCP로 실행 (CLAUDE.md 부록 D)
+ */
+/**
  * Ten:One Prod SQL 실행 스크립트
  * 사용법: node scripts/run-sql.js [파일명]
  *   예: node scripts/run-sql.js agent-tables.sql

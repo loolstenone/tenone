@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireStaff } from '@/lib/api-guard';
 
 const supabase = createAdminClient();
 
@@ -13,25 +14,9 @@ const supabase = createAdminClient();
  * - Bypasses earn rules and monthly caps entirely
  */
 export async function POST(request: NextRequest) {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  // Staff check
-  const { data: caller } = await supabase
-    .from('members')
-    .select('id, roles')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!caller) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
-
-  const roles: string[] = caller.roles ?? [];
-  if (!roles.includes('staff') && !roles.includes('admin')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  // 직원 확인 — member_roles 기반 공통 함수
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
 
   const body = await request.json();
   const { member_id, action_key, amount, brand_id = null, note = null } = body;

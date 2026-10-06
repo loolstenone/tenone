@@ -9,6 +9,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, Eye, EyeOff, Plus, Mic, Image as ImageIcon, Menu, X, Search } from 'lucide-react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 
 // ── 타입 ─────────────────────────────────────────────────────────
 
@@ -395,11 +396,15 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   const [showPw, setShowPw]   = useState(false);
   const [err, setErr]         = useState('');
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(''); setLoading(true);
-    const { error } = await createClient().auth.signInWithPassword({ email, password: pw });
+    setErr('');
+    if (!captcha.ready) { setErr(CAPTCHA_PENDING_MESSAGE); return; }
+    setLoading(true);
+    const { error } = await createClient().auth.signInWithPassword({ email, password: pw, options: { captchaToken: captcha.token } });
+    captcha.reset();
     if (error) { setErr('이메일 또는 비밀번호를 확인하세요.'); setLoading(false); }
     else onSuccess();
   };
@@ -426,6 +431,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
           </button>
         </div>
+        <CaptchaWidget {...captcha.widgetProps} />
         {err && <p className="text-[13px] text-red-400 px-1">{err}</p>}
         <button type="submit" disabled={loading || !email || !pw}
           className="w-full rounded-xl bg-[#FEE500] py-4 text-[16px] font-bold text-neutral-900 hover:bg-yellow-300 active:scale-[0.98] disabled:opacity-30 transition-all">

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, Bookmark, Share2, ChevronRight, Tag, ThumbsUp, MessageCircle, ExternalLink } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
+import { textWithBold } from "@/lib/sanitize-html";
 import {
     fetchTrendById,
     fetchPublishedTrends,
@@ -155,9 +155,7 @@ export default async function TrendDetailPage({ params }: PageProps) {
                                             key={j}
                                             className="text-neutral-300 text-sm leading-relaxed mb-1.5"
                                             dangerouslySetInnerHTML={{
-                                                __html: DOMPurify.sanitize(
-                                                    line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                                                ),
+                                                __html: textWithBold(line, "text-white"),
                                             }}
                                         />
                                     ))}
@@ -169,9 +167,7 @@ export default async function TrendDetailPage({ params }: PageProps) {
                                 key={i}
                                 className="text-neutral-300 text-sm leading-relaxed mb-4"
                                 dangerouslySetInnerHTML={{
-                                    __html: DOMPurify.sanitize(
-                                        para.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                                    ),
+                                    __html: textWithBold(para, "text-white"),
                                 }}
                             />
                         );

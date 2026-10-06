@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight, CheckCircle, Paperclip, X } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
+import { createClient } from "@/lib/supabase/client";
+import {
+    CONTACT_ATTACHMENT_ACCEPT, CONTACT_ATTACHMENT_BUCKET, CONTACT_ATTACHMENT_GUIDE, CONTACT_ATTACHMENT_MAX_FILES, validateAttachments,
+} from "@/lib/contact-attachments";
 
 type TabType = 'partner' | 'business';
 
@@ -68,27 +74,111 @@ function OffOniceToggle() {
 const inputClass = "w-full border tn-border px-4 py-3 text-sm tn-text focus:border-neutral-900 focus:outline-none placeholder:tn-text-sub tn-surface";
 const labelClass = "text-sm font-medium text-neutral-700 block mb-1.5";
 
+/** 개인정보 수집·이용 고지 + 필수 동의 (개인정보보호법 제15조) — 보관기간은 개인정보처리방침 기준 */
+function PrivacyConsent({ items }: { items: string }) {
+    return (
+        <label className="flex items-start gap-2 text-xs tn-text-sub leading-relaxed">
+            <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0" />
+            <span>
+                [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: {items} · 목적: 문의 확인 및 회신 ·
+                보관: 처리 완료 후 1년 뒤 파기. 동의하지 않으면 접수할 수 없습니다.{" "}
+                <Link href="/privacy" className="underline">개인정보처리방침</Link>
+            </span>
+        </label>
+    );
+}
+
+function formatSize(bytes: number) {
+    return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(bytes / 1024))}KB`;
+}
+
+/** 첨부파일 선택 — 선택 목록·삭제·용량 안내. 실제 업로드는 제출 시 */
+function AttachmentField({ label, files, onChange }: { label: string; files: File[]; onChange: (files: File[]) => void }) {
+    const [error, setError] = useState("");
+    const add = (picked: FileList | null) => {
+        if (!picked?.length) return;
+        const next = [...files, ...Array.from(picked)];
+        const msg = validateAttachments(next);
+        setError(msg ?? "");
+        if (!msg) onChange(next);
+    };
+    return (
+        <div>
+            <label className={labelClass}>{label}</label>
+            <label className={clsx(inputClass, "flex items-center gap-2 cursor-pointer", files.length >= CONTACT_ATTACHMENT_MAX_FILES && "opacity-50 pointer-events-none")}>
+                <Paperclip className="h-4 w-4 tn-text-sub" />
+                <span className="tn-text-sub">파일 선택</span>
+                <input type="file" multiple accept={CONTACT_ATTACHMENT_ACCEPT} className="hidden"
+                    onChange={e => { add(e.target.files); e.target.value = ""; }} />
+            </label>
+            <p className="text-xs tn-text-sub mt-1.5">{CONTACT_ATTACHMENT_GUIDE} · 더 큰 파일은 위 링크로 보내 주세요.</p>
+            {error && <p className="text-xs text-rose-500 mt-1">{error}</p>}
+            {files.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                    {files.map((f, i) => (
+                        <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-2 text-sm border tn-border px-3 py-2">
+                            <span className="truncate">{f.name} <span className="tn-text-sub text-xs">· {formatSize(f.size)}</span></span>
+                            <button type="button" onClick={() => { setError(""); onChange(files.filter((_, j) => j !== i)); }}
+                                className="tn-text-sub hover:tn-text shrink-0" aria-label={`${f.name} 삭제`}>
+                                <X className="h-4 w-4" />
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+
 export default function ContactPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen tn-surface" />}>
+            <ContactContent />
+        </Suspense>
+    );
+}
+
+function ContactContent() {
     const [activeTab, setActiveTab] = useState<TabType>('partner');
     const { isAuthenticated } = useAuth();
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [fromCrew, setFromCrew] = useState(false);
+    const [files, setFiles] = useState<File[]>([]);
+    const captcha = useCaptcha();
 
+    // URL ↔ 화면 동기화 — 상단 Contact 메뉴(/contact)로 재진입 시 기본 폼으로
+    const fromParam = useSearchParams().get('from');
     useEffect(() => {
-        const p = new URLSearchParams(window.location.search);
-        setFromCrew(p.get('from') === 'crew');
-    }, []);
+        setFromCrew(fromParam === 'crew');
+        setSubmitted(false);
+        setFiles([]);
+    }, [fromParam]);
 
     const handleSubmit = async (formType: string, form: HTMLFormElement) => {
+        if (!captcha.ready) { alert(CAPTCHA_PENDING_MESSAGE); return; }
         setSubmitting(true);
         const fd = new FormData(form);
-        const body: Record<string, string> = { formType };
-        fd.forEach((v, k) => { body[k] = v as string; });
+        const body: Record<string, unknown> = {
+            formType, captchaToken: captcha.token ?? '',
+            attachments: files.map(f => ({ name: f.name, size: f.size, type: f.type })),
+        };
+        fd.forEach((v, k) => { if (typeof v === 'string') body[k] = v; });
         try {
             const res = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            if (res.ok) setSubmitted(true);
-            else alert('제출에 실패했습니다. 다시 시도해주세요.');
+            captcha.reset();
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) { alert(data.error || '제출에 실패했습니다. 다시 시도해주세요.'); setSubmitting(false); return; }
+
+            // 접수 후 첨부 업로드 (서명 URL로 Storage 직접) — 실패해도 문의 자체는 접수됨
+            const uploads: { path: string; token: string }[] = data.uploads ?? [];
+            const storage = createClient().storage.from(CONTACT_ATTACHMENT_BUCKET);
+            const results = await Promise.all(uploads.map((u, i) =>
+                storage.uploadToSignedUrl(u.path, u.token, files[i], { contentType: files[i].type || 'application/octet-stream' })));
+            const failed = results.filter(r => r.error).length;
+            if (failed) alert(`문의는 접수됐지만 첨부파일 ${failed}개를 올리지 못했습니다. 링크로 보내 주시거나 lools@tenone.biz로 보내 주세요.`);
+            setFiles([]);
+            setSubmitted(true);
         } catch { alert('네트워크 오류가 발생했습니다.'); }
         setSubmitting(false);
     };
@@ -119,11 +209,11 @@ export default function ContactPage() {
                         <p className="text-sm tn-text-sub mt-4">Planning, Business, Marketing, Advertising, Communication, HR</p>
 
                         <div className="mt-6 space-y-3">
-                            <a href="https://tenone.biz/contact" className="flex items-center gap-3 text-sm text-neutral-600 hover:tn-text transition-colors">
-                                <Mail className="h-4 w-4 tn-text-sub" /> tenone.biz/contact
+                            <a href="mailto:lools@tenone.biz" className="flex items-center gap-3 text-sm tn-text-sub hover:tn-text transition-colors">
+                                <Mail className="h-4 w-4 tn-text-sub" /> lools@tenone.biz
                             </a>
                             <a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-3 text-sm text-neutral-600 hover:tn-text transition-colors">
+                                className="flex items-center gap-3 text-sm tn-text-sub hover:tn-text transition-colors">
                                 <MessageCircle className="h-4 w-4 tn-text-sub" /> Kakao Open Chat
                             </a>
                         </div>
@@ -144,14 +234,14 @@ export default function ContactPage() {
                 <div className="lg:col-span-8">
                     {/* Tabs */}
                     <div className="flex border-b tn-border mb-8">
-                        <button onClick={() => setActiveTab('partner')}
+                        <button onClick={() => { setActiveTab('partner'); setFiles([]); }}
                             className={clsx(
                                 "flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-colors border-b-2",
                                 activeTab === 'partner' ? "border-neutral-900 tn-text font-medium" : "border-transparent tn-text-sub hover:text-neutral-700"
                             )}>
                             <Handshake className="h-4 w-4" /> 파트너 신청
                         </button>
-                        <button onClick={() => setActiveTab('business')}
+                        <button onClick={() => { setActiveTab('business'); setFiles([]); }}
                             className={clsx(
                                 "flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-colors border-b-2",
                                 activeTab === 'business' ? "border-neutral-900 tn-text font-medium" : "border-transparent tn-text-sub hover:text-neutral-700"
@@ -171,7 +261,7 @@ export default function ContactPage() {
 
                     {/* 파트너 신청 */}
                     {!submitted && activeTab === 'partner' && (
-                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(fromCrew ? 'crew' : 'partner', e.currentTarget); }}>
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(fromCrew ? 'tenone_crew' : 'tenone_partner', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">{fromCrew ? 'Join the Crew' : 'Partner with Us'}</h3>
                                 <p className="text-sm tn-text-sub mt-1">
@@ -195,8 +285,11 @@ export default function ContactPage() {
                                     <option>기타 (Other)</option>
                                 </select>
                             </div>
-                            <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="url" className={inputClass} placeholder="https://..." /></div>
+                            <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="text" inputMode="url" className={inputClass} placeholder="notion.so/... · 구글 드라이브 · 비핸스 등 (https:// 없이 입력 가능)" /></div>
+                            <AttachmentField label="포트폴리오/이력서 파일" files={files} onChange={setFiles} />
                             <div><label className={labelClass}>자기소개 및 지원동기</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
+                            <PrivacyConsent items="이름, 이메일, 지원 분야, 포트폴리오 링크·첨부파일, 자기소개" />
+                            <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : (fromCrew ? '크루 지원하기' : '파트너 신청하기')}
                             </button>
@@ -205,7 +298,7 @@ export default function ContactPage() {
 
                     {/* 프로젝트 의뢰 */}
                     {!submitted && activeTab === 'business' && (
-                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('business', e.currentTarget); }}>
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('tenone_business', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">Business Inquiry</h3>
                                 <p className="text-sm tn-text-sub mt-1">프로젝트 의뢰 및 파트너십 제안을 보내주세요.</p>
@@ -229,6 +322,9 @@ export default function ContactPage() {
                                 </select>
                             </div>
                             <div><label className={labelClass}>프로젝트 내용</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
+                            <AttachmentField label="제안요청서·참고자료 (선택)" files={files} onChange={setFiles} />
+                            <PrivacyConsent items="담당자명, 회사명, 이메일, 연락처, 문의 내용, 첨부파일" />
+                            <CaptchaWidget {...captcha.widgetProps} />
                             <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Briefcase className="h-4 w-4" /> {submitting ? '제출 중...' : '의뢰하기'}
                             </button>

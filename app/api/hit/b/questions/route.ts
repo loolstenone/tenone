@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createClient } from '@/lib/supabase/client';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 
 type RawQuestion = { id: string; question_text: string; sub_domain: string; reverse_scored: boolean; track_id: string | null };
 

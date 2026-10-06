@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession } from '@/lib/supabase/hit';
 
@@ -41,7 +42,9 @@ export async function POST(request: NextRequest) {
       return successResponse({ sessionId: 'fake', sessionToken: 'fake' }, 201);
     }
 
-    const session = await createHitSession('A', body.memberId);
+    // 회원 식별은 로그인 세션으로만 — body의 memberId는 신뢰하지 않음
+    const memberId = (await getApiUser(request))?.memberId ?? undefined;
+    const session = await createHitSession('A', memberId);
 
     return successResponse({
       sessionId: session.id,

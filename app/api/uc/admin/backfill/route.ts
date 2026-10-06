@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { requireStaff } from '@/lib/api-guard';
 
 const admin = createAdminClient();
 
@@ -11,25 +11,10 @@ const admin = createAdminClient();
  * 가입 완료 UC 미지급 회원에게 signup_complete UC를 일괄 지급
  * staff 인증 필수
  */
-export async function POST() {
-    const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: me } = await admin
-        .from('members')
-        .select('roles, email')
-        .eq('auth_id', user.id)
-        .single();
-
-    const isStaff = me?.email?.endsWith('@tenone.biz') ||
-        (me?.roles ?? []).some((r: string) => ['staff', 'admin', 'superadmin'].includes(r));
-
-    if (!isStaff) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+export async function POST(request: NextRequest) {
+    // 직원 확인 — member_roles 기반 공통 함수
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
     // signup_complete 룰 조회
     const { data: rule } = await admin

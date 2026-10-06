@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { internalAuthHeaders } from "@/lib/api-guard";
 
 /**
  * POST /api/gravity/brand-value/run
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
     try {
         const socialRes = await fetch(`${baseUrl}/api/gravity/social/run`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...internalAuthHeaders() },
             body: JSON.stringify({ product_id, brand_name, competitors }),
         });
         socialData = await socialRes.json();

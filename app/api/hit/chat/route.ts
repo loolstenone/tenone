@@ -4,12 +4,13 @@
  * Body: { message, resultId, mode: 'A_ONLY'|'B_ONLY'|'AB_FULL', history: [{role,content}] }
  */
 import { NextRequest } from 'next/server';
+import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
 import { canAccess } from '@/lib/hit/membership';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
 
 /** 무료 회원 AI 채팅 최대 횟수 */
@@ -17,7 +18,9 @@ const FREE_CHAT_LIMIT = 3;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, resultId, mode, history, memberId } = await request.json();
+    const { message, resultId, mode, history } = await request.json();
+    // 회원 식별은 로그인 세션으로만 — body의 memberId는 신뢰하지 않음
+    const memberId = (await getApiUser(request))?.memberId ?? null;
 
     if (!message || !resultId || !mode) {
       return errorResponse('message, resultId, mode는 필수입니다.', 400);

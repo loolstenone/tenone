@@ -6,11 +6,11 @@ import {
     Users, CreditCard, TrendingUp, DollarSign,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
     Globe, ShoppingCart, FileText, LayoutList, Bell, CheckCircle2,
-    Bot, Layers, Inbox, Sparkles,
+    Bot, Layers, Sparkles,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
-import { ACTION_HUB_REGISTRY, CATEGORY_LABEL, PRIORITY_COLOR, type ActionCategory } from "@/lib/action-hub-registry";
+import { ActionHubPanel } from "@/components/intra/ActionHubPanel";
 
 /* ═══════════════════════════════════════════════════════════════
    타입
@@ -33,13 +33,6 @@ interface MatrixCell {
     active_count: number;
 }
 
-interface PendingAction {
-    label: string;
-    count: number;
-    href: string;
-    category: ActionCategory;
-    priority: "critical" | "high" | "normal";
-}
 
 interface BrandItem { name: string; letter: string; color: string; members: number; subs: number; revenue: number; trend: number; }
 interface ActivityItem { text: string; time: string; type: string; }
@@ -369,69 +362,6 @@ function _UnusedCapabilityMatrix({ matrix }: { matrix: MatrixCell[] }) {
 /* ═══════════════════════════════════════════════════════════════
    컴포넌트 — L5 Action Hub (minimal)
 ═══════════════════════════════════════════════════════════════ */
-function ActionHub({ pending }: { pending: PendingAction[] }) {
-    const active = pending.filter(p => p.count > 0);
-    const total = active.reduce((s, p) => s + p.count, 0);
-
-    // category별 그룹핑
-    const byCategory = new Map<ActionCategory, PendingAction[]>();
-    active.forEach(p => {
-        if (!byCategory.has(p.category)) byCategory.set(p.category, []);
-        byCategory.get(p.category)!.push(p);
-    });
-    // priority 기준 정렬 (critical > high > normal)
-    const prioRank = { critical: 0, high: 1, normal: 2 };
-    byCategory.forEach(list => list.sort((a, b) => prioRank[a.priority] - prioRank[b.priority]));
-
-    return (
-        <div>
-            <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
-                    <Inbox className="h-4 w-4 text-rose-500" />
-                    Action Hub
-                    {total > 0 && (
-                        <span className="px-1.5 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded">{total}</span>
-                    )}
-                </h2>
-                <span className="text-[10px] text-neutral-400">
-                    레지스트리 {ACTION_HUB_REGISTRY.length}건 · 활성 {active.length}
-                </span>
-            </div>
-            {total === 0 ? (
-                <div className="bg-neutral-50 border border-dashed border-neutral-200 rounded-lg p-4 text-center text-[11px] text-neutral-400">
-                    처리할 승인·요청이 없습니다. <span className="text-neutral-300">({ACTION_HUB_REGISTRY.length}개 소스 모니터링 중)</span>
-                </div>
-            ) : (
-                <div className="space-y-3">
-                    {Array.from(byCategory.entries()).map(([cat, list]) => (
-                        <div key={cat}>
-                            <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold mb-1.5">
-                                {CATEGORY_LABEL[cat]} <span className="text-neutral-300">({list.length})</span>
-                            </p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {list.map(p => (
-                                    <Link key={p.label} href={p.href}
-                                        className="bg-white border border-neutral-200 rounded-lg p-3 hover:border-rose-300 hover:bg-rose-50/30 transition-colors">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <p className="text-[11px] text-neutral-500 truncate">{p.label}</p>
-                                            {p.priority !== "normal" && (
-                                                <span className={`text-[9px] px-1 rounded font-semibold ${PRIORITY_COLOR[p.priority]}`}>
-                                                    {p.priority === "critical" ? "!" : "↑"}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-xl font-bold text-neutral-900">{p.count}<span className="text-[11px] text-neutral-500 font-normal ml-1">건</span></p>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
 /* ═══════════════════════════════════════════════════════════════
    메인 컴포넌트
 ═══════════════════════════════════════════════════════════════ */
@@ -442,7 +372,6 @@ export default function UniverseDashboard() {
     // Part A — L1/L2/L5
     const [health, setHealth] = useState<UniverseHealth | null>(null);
     const [matrix, setMatrix] = useState<MatrixCell[]>([]);
-    const [pending, setPending] = useState<PendingAction[]>([]);
 
     // 참고 지표
     const [brands, setBrands] = useState<BrandItem[]>([]);
@@ -505,35 +434,6 @@ export default function UniverseDashboard() {
                 }));
                 setMatrix(mx);
 
-                /* ── Part A: Action Hub (Registry 기반) ──
-                 * 각 브랜드의 처리 대기 액션은 lib/action-hub-registry.ts에 등록.
-                 * 새 브랜드 추가 시 레지스트리 한 줄 추가로 자동 반영. CLAUDE.md §1.11 참조.
-                 */
-                const registryCounts = await Promise.all(
-                    ACTION_HUB_REGISTRY.map(async (entry) => {
-                        let query = supabase
-                            .from(entry.table)
-                            .select("*", { count: "exact", head: true })
-                            .eq(entry.filter.column, entry.filter.value);
-                        // extraFilters AND 조건 적용
-                        for (const ef of entry.extraFilters ?? []) {
-                            query = query.eq(ef.column, ef.value);
-                        }
-                        // notFilters AND NOT 조건 적용 (critical 제외 등)
-                        for (const nf of entry.notFilters ?? []) {
-                            query = query.neq(nf.column, nf.value);
-                        }
-                        const { count, error } = await query;
-                        return {
-                            label: entry.label,
-                            count: error ? 0 : (count ?? 0),
-                            href: entry.href,
-                            category: entry.category,
-                            priority: entry.priority ?? "normal",
-                        };
-                    })
-                );
-                setPending(registryCounts);
 
                 /* ── 참고 지표: 브랜드별 현황 ── */
                 const brandMap: Record<string, { members: number; revenue: number; subs: number }> = {};
@@ -641,7 +541,7 @@ export default function UniverseDashboard() {
             <HeroStrip health={health} />
 
             {/* L5 Action Hub */}
-            <ActionHub pending={pending} />
+            <ActionHubPanel />
 
             {/* ── 참고 지표 구분선 ── */}
             <div className="border-t border-neutral-200 pt-6">

@@ -310,6 +310,7 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 
 | 항목 | 내용 |
 |------|------|
+| **최근 변경 (2026-10-05 세션 158)** | explore 페이지 공개 폼 Turnstile(CaptchaWidget + captchaToken) — `/api/newsletter`·`/api/contact` 서버 검증 fail-closed |
 | **Phase** | Beta (2026-05-17 갱신) — 마켓 디테일 8기능 + 입점 승인제 + 판매자 센터 + **자동 이메일 + 정산 리포트** 완성. 활성 데이터 0건 (실 거래 시작 전) |
 | **개발 수준** | 포트폴리오·탐색·업로드 + 마켓 전체 플로우(목록→상세→신청→승인→등록→판매→정산) **코드 완성**. 잔여 = 실결제 PG 연동 |
 | **이월 작업** | (1) **구매 실결제 PG 연동** (토스/포트원) — 진짜 유일 미완. 기타 이메일·정산은 코드 완성 |

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Send, ArrowRight, Zap, TrendingUp, BarChart3, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 const benefits = [
     {
@@ -51,6 +52,7 @@ function SubscribeForm({
     const [agree, setAgree] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
+    const captcha = useCaptcha();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,15 +62,18 @@ function SubscribeForm({
         if (!email.trim() || !isValidEmail(email)) { setEmailError("유효한 이메일 주소를 입력해주세요."); valid = false; }
         else setEmailError("");
         if (!agree || !valid) return;
+        if (!captcha.ready) { setEmailError(CAPTCHA_PENDING_MESSAGE); return; }
 
         setLoading(true);
         try {
             const res = await fetch('/api/newsletter', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim(), nickname: nickname.trim(), source: 'mindle' }),
+                body: JSON.stringify({ email: email.trim(), nickname: nickname.trim(), source: 'mindle', captchaToken: captcha.token }),
             });
+            captcha.reset();
             if (res.ok) setSent(true);
+            else setEmailError('구독에 실패했습니다. 다시 시도해주세요.');
         } catch { /* 무시 */ }
         setLoading(false);
     };
@@ -122,6 +127,7 @@ function SubscribeForm({
                     </span>
                 </label>
                 <p className="text-[10px] text-neutral-600 mt-2">{brandDesc}</p>
+                <div className="mt-2"><CaptchaWidget {...captcha.widgetProps} /></div>
             </form>
         );
     }
@@ -156,6 +162,7 @@ function SubscribeForm({
                         뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다. 언제든 수신거부 가능합니다.
                     </span>
                 </label>
+                <CaptchaWidget {...captcha.widgetProps} />
                 <button
                     type="submit"
                     disabled={loading || !agree}

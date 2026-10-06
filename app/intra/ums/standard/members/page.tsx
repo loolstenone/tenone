@@ -59,6 +59,8 @@ export default function MembersStandardPage() {
                     <li>특화 필드는 <strong>해당 서비스 테이블만</strong> 수정</li>
                     <li>유니버스 프로필(/profile)은 특화 필드를 <strong>읽기만</strong> 함</li>
                     <li>`members.affiliations[]`로 이용 중인 서비스 목록 관리</li>
+                    <li><strong>데이터 계약 1조</strong>: 회원 연결 키는 `members.id`만 — 이메일·이름으로 연결하지 않고, 계정 정보(이름·이메일·사진)를 브랜드 테이블에 복사하지 않음. 비회원(구독자·문의자)만 email로 식별</li>
+                    <li>브랜드 활동(역할)은 `member_capability_roles`에 누적 — 변화는 UPDATE가 아니라 새 행 INSERT</li>
                 </ul>
             </div>
 

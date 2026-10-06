@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { X, Eye, EyeOff, AtSign, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
+import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -15,6 +17,7 @@ interface LoginModalProps {
 
 export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTab = "login" }: LoginModalProps) {
     const { login, register, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading } = useAuth();
+    const captcha = useCaptcha();
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -26,6 +29,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [error, setError] = useState("");
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
     useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);
@@ -48,6 +52,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
             let loginEmail = email;
@@ -73,13 +78,15 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                     return;
                 }
                 // auth-context login() 재사용 → 모달 자동 닫힘 포함
-                const result = await login(loginEmail, password);
+                const result = await login(loginEmail, password, captcha.token);
+                captcha.reset();
                 if (!result.success) setError("핸들 또는 비밀번호가 올바르지 않습니다.");
                 setIsSubmitting(false);
                 return;
             }
 
-            const result = await login(loginEmail, password);
+            const result = await login(loginEmail, password, captcha.token);
+                captcha.reset();
             if (!result.success) setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다.");
         } catch { setError("로그인 중 오류가 발생했습니다."); }
         setIsSubmitting(false);
@@ -91,9 +98,12 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         if (!name.trim()) { setError("닉네임을 입력해주세요"); return; }
         if (password.length < 6) { setError("비밀번호는 6자 이상이어야 합니다"); return; }
         if (password !== passwordConfirm) { setError("비밀번호가 일치하지 않습니다"); return; }
+        if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
+        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            const result = await register(name, email, password, true);
+            const result = await register(name, email, password, buildMemberConsent(consent, "email"), captcha.token);
+            captcha.reset();
             if (!result.success) {
                 if (result.error?.includes('이미 가입된')) {
                     setIsDuplicate(true);
@@ -193,6 +203,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
+                            <CaptchaWidget {...captcha.widgetProps} />
                             {error && <p className="text-sm text-red-500">{error}</p>}
                             <button type="submit" disabled={isSubmitting}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
@@ -236,6 +247,8 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                 <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)}
                                     className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : ''}`} required />
                                 {passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
+                                <SignupConsent value={consent} onChange={setConsent} accentColor={accentColor} />
+                                <CaptchaWidget {...captcha.widgetProps} />
                                 {error && <p className="text-sm text-red-500">{error}</p>}
                                 <button type="submit" disabled={isSubmitting}
                                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"

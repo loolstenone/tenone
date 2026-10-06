@@ -1,20 +1,17 @@
 /**
  * AI 채팅 사용 횟수 조회
- * GET /api/hit/chat/usage?memberId=xxx
+ * GET /api/hit/chat/usage — 로그인 회원 본인 사용량 (비로그인 0)
  * Response: { data: number } — 총 사용 횟수 (role='user' 메시지 수)
  */
 import { NextRequest } from 'next/server';
+import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const memberId = searchParams.get('memberId');
-
-    if (!memberId) {
-      return errorResponse('memberId는 필수입니다.', 400);
-    }
+    const memberId = (await getApiUser(request))?.memberId;
+    if (!memberId) return successResponse(0);
 
     const supabase = await createClient();
     const { count, error } = await supabase

@@ -6,8 +6,8 @@ import { PublicHeader } from "@/features/tenone/PublicHeader";
 import { PublicFooter } from "@/features/tenone/PublicFooter";
 import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
-import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
-import { UNIVERSE_ROLE_GROUPS } from "@/lib/universe-map";
+import { ArrowRight, Diamond, Zap, CheckSquare, CheckCircle2, Globe } from "lucide-react";
+import { CaptchaWidget, useCaptcha } from "@/components/CaptchaWidget";
 
 interface SimplePost {
     id: string;
@@ -26,24 +26,14 @@ export default function HomePage() {
     const [nlAgree, setNlAgree] = useState(false);
     const [nlLoading, setNlLoading] = useState(false);
     const [nlError, setNlError] = useState(false);
+    const nlCaptcha = useCaptcha();
     const [latestWorks, setLatestWorks] = useState<SimplePost[]>([]);
-    const [latestNews, setLatestNews] = useState<SimplePost[]>([]);
 
     useEffect(() => {
         fetch('/api/board/posts?site=tenone&board=works&limit=8&status=published')
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(d => setLatestWorks(d.posts || []))
             .catch(() => console.warn('[Home] Works fetch failed — using empty state'));
-        fetch('/api/newsroom/feed?sort=latest&limit=4')
-            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-            .then(d => setLatestNews((d.posts || []).map((p: any) => ({
-                id: p.id, title: p.title, excerpt: p.summary || p.excerpt || '',
-                category: p.category || p.source_brand || '',
-                representImage: p.thumbnail_url || p.represent_image || '',
-                created_at: p.published_at || p.created_at, view_count: p.view_count || 0,
-                url: p.url || `/newsroom/${p.id}`,
-            }))))
-            .catch(() => console.warn('[Home] Newsroom feed fetch failed — using empty state'));
     }, []);
 
     return (
@@ -102,54 +92,6 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── Crew CTA ── */}
-            <section className="py-24 px-6 tn-bg-alt">
-                <div className="max-w-5xl mx-auto text-center">
-                    <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-4">Join the Universe</p>
-                    <h2 className="text-xl md:text-3xl font-bold tracking-tight mb-3">
-                        프로젝트 <span className="tn-text-sub">크루</span>를 모집합니다.
-                    </h2>
-                    <p className="text-base tn-text-sub mb-12 max-w-2xl mx-auto leading-relaxed">
-                        기획자, 마케터, 디자이너, 개발자 — 당신의 재능이 필요합니다.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <FolderKanban className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">실전 프로젝트 참여</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                기업과 지자체 등 실전 프로젝트에 직접 참여합니다.
-                                포트폴리오가 아닌 실전 경험을 쌓습니다.
-                            </p>
-                        </div>
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <Target className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">HeRo 역량 진단 & 성장</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                HIT 통합검사로 나의 강점과 적성을 발견하고,
-                                맞춤 성장 로드맵과 멘토 매칭을 통해 커리어를 설계합니다.
-                            </p>
-                        </div>
-                        <div className="tn-surface border tn-border p-6 text-left">
-                            <Users className="h-5 w-5 tn-text-sub mb-3" />
-                            <h3 className="text-sm font-bold mb-2">업계 네트워크 연결</h3>
-                            <p className="text-xs tn-text-sub leading-relaxed">
-                                현업자 네트워크, 기업 파트너와 연결됩니다.
-                                약한 연결이 만들어내는 강력한 기회를 경험하세요.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <Link href="/contact?from=crew"
-                            className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors"
-                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                            Crew 지원하기
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
             {/* ── Works ── */}
             {latestWorks.length > 0 && (
                 <section className="py-20 md:py-32 px-6">
@@ -198,71 +140,6 @@ export default function HomePage() {
                 </section>
             )}
 
-            {/* ── Universe — 전체 브랜드 맵 (8 역할 그룹) ── */}
-            <section className="py-20 md:py-32 px-6 tn-bg-alt">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                지금까지 펼쳐진 <span className="font-bold">세계관</span>
-                            </h2>
-                        </div>
-                        <Link href="/about?tab=universe" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            전체 보기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-
-                    <div className="space-y-3">
-                        {UNIVERSE_ROLE_GROUPS.map((group) => (
-                            <div key={group.num} className="border tn-border overflow-hidden" style={{ backgroundColor: "var(--tn-surface)" }}>
-                                {/* 그룹 헤더 */}
-                                <div className="flex items-center gap-3 px-5 py-3 border-b tn-border" style={{ borderLeftWidth: 3, borderLeftColor: group.color }}>
-                                    <span className="text-[11px] font-mono" style={{ color: group.color }}>{group.num}</span>
-                                    <span className="text-xs font-medium tn-text-sub">{group.role}</span>
-                                </div>
-                                {/* 브랜드 카드 */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
-                                    {group.brands.map((brand) => {
-                                        const inner = (
-                                            <div style={{ backgroundColor: "var(--tn-surface)" }} className="h-full p-4 hover:opacity-80 transition-opacity">
-                                                <div className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: group.color }} />
-                                                    <div>
-                                                        <p className="text-sm font-bold tn-text leading-tight">{brand.name}</p>
-                                                        {'kr' in brand && <p className="text-[10px] tn-text-muted">{(brand as any).kr}</p>}
-                                                        <p className="text-[11px] tn-text-sub mt-1 leading-snug">{brand.desc}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                        return 'href' in brand ? (
-                                            <Link key={brand.name} href={(brand as any).href}>{inner}</Link>
-                                        ) : (
-                                            <div key={brand.name}>{inner}</div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Universe 순환 플로우 */}
-                    <div className="mt-8 px-5 py-4 border tn-border text-[11px] tn-text-sub leading-relaxed font-mono" style={{ backgroundColor: "var(--tn-surface)" }}>
-                        <span style={{ color: "#5B8FB9" }}>Mindle</span> 트렌드 발견 →{" "}
-                        <span style={{ color: "#BA7517" }}>SmarComm</span> 전략 수립 →{" "}
-                        <span style={{ color: "#BA7517" }}>RooK</span> 크리에이티브 실행 → 성과 환류 → 다음 트렌드 ↻
-                        <span className="mx-4 opacity-30">|</span>
-                        <span style={{ color: "#E8845C" }}>MADLeague</span> 모은다 →{" "}
-                        <span style={{ color: "#D85A30" }}>HeRo</span> 키운다 →{" "}
-                        <span style={{ color: "#E8845C" }}>Badak</span> 연결한다 → 멘토로 돌아온다 ↻
-                    </div>
-
-                    <Link href="/about?tab=brands" className="md:hidden flex items-center justify-center gap-2 mt-6 text-sm tn-text-sub hover:tn-text">
-                        전체 브랜드 보기 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
-            </section>
 
             {/* ── Core Values ── */}
             <section className="tn-card py-20 md:py-32 px-6">
@@ -289,47 +166,6 @@ export default function HomePage() {
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* ── Latest News ── */}
-            <section className="py-20 md:py-32 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Latest</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                새로운 <span className="font-bold">소식</span>
-                            </h2>
-                        </div>
-                        <Link href="/newsroom" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            View All <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-
-                    {latestNews.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {latestNews.map((news) => {
-                                const rawDate = (news.created_at || '').substring(0, 10);
-                                return (
-                                    <Link key={news.id} href={news.url || `/newsroom/${news.id}`} className="group block">
-                                        <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
-                                            {news.representImage ? (
-                                                <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <p className="text-xs tn-text-sub text-center px-4">{news.category || '뉴스'}</p>
-                                            )}
-                                        </div>
-                                        <p className="text-xs tn-text-sub">{rawDate}</p>
-                                        <h3 className="font-semibold tn-text mt-1 group-hover:underline leading-snug">{news.title}</h3>
-                                        <p className="text-sm tn-text-sub mt-1 line-clamp-2">{news.excerpt}</p>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <p className="text-sm tn-text-sub text-center py-12">준비 중입니다.</p>
-                    )}
                 </div>
             </section>
 
@@ -390,11 +226,12 @@ export default function HomePage() {
                         <>
                             <form onSubmit={async e => {
                                     e.preventDefault();
-                                    if (!nlEmail.trim() || !nlAgree || nlLoading) return;
+                                    if (!nlEmail.trim() || !nlAgree || nlLoading || !nlCaptcha.ready) return;
                                     setNlLoading(true);
                                     setNlError(false);
                                     try {
-                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim(), source: 'tenone-main' }) });
+                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim(), source: 'tenone-main', captchaToken: nlCaptcha.token }) });
+                                        nlCaptcha.reset();
                                         if (res.ok) setNlSubscribed(true);
                                         else setNlError(true);
                                     } catch { setNlError(true); }
@@ -405,12 +242,13 @@ export default function HomePage() {
                                     placeholder="이메일 주소를 입력하세요"
                                     required
                                     className="flex-1 w-full px-4 py-3 text-sm border tn-border focus:outline-none focus:border-neutral-400 placeholder:tn-text-muted" />
-                                <button type="submit" disabled={!nlEmail.trim() || !nlAgree || nlLoading}
+                                <button type="submit" disabled={!nlEmail.trim() || !nlAgree || nlLoading || !nlCaptcha.ready}
                                     className="w-full sm:w-auto px-8 py-3 text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-30 shrink-0"
                                     style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                     {nlLoading ? '처리 중...' : '구독하기'}
                                 </button>
                             </form>
+                            <div className="flex justify-center mt-3"><CaptchaWidget {...nlCaptcha.widgetProps} /></div>
                             {nlError && <p className="text-xs text-red-500 mt-2">구독 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>}
                             <div className="flex items-center justify-center gap-2 mt-3">
                                 <button type="button" onClick={() => setNlAgree(!nlAgree)}

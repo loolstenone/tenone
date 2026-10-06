@@ -17,7 +17,6 @@ type NavItem = { name: string; href: string; sub?: { name: string; href: string 
 const publicNav: NavItem[] = [
     { name: "Works", href: "/works" },
     { name: "Contact", href: "/contact" },
-    { name: "Newsroom", href: "/newsroom" },
     { name: "About", href: "/about" },
 ];
 
@@ -35,7 +34,13 @@ export function PublicHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
             style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
-                <Link href="/" className="flex items-center">
+                <Link href="/" className="flex items-center"
+                    onClick={(e) => {
+                        // 이미 홈이면 Link가 아무 일도 안 함 → 맨 위로
+                        if (pathname !== "/") return;
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}>
                     <Logo variant="horizontal" size="sm" asLink={false} />
                 </Link>
 
@@ -78,7 +83,6 @@ export function PublicHeader() {
                     <UniverseUtilityBar
                         aboutPath="/about"
                         hideAbout={true}
-                        hideAuth={true}
                         accentColor={isDark ? '#fff' : '#000'}
                         siteId="tenone"
                         siteName="Ten:One"

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitDResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitD } from '@/lib/hit/scoring-d';
-import { createClient } from '@/lib/supabase/client';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       const darkScore = af.NR + af.MK;
       if (darkScore >= 50) {
         try {
-          const { createClient: serverClient } = await import('@/lib/supabase/server');
+          const { createAdminClient: serverClient } = await import('@/lib/supabase/admin');
           const supabaseAdmin = await serverClient();
           await supabaseAdmin.from('hit_admin_flags').insert({
             member_id: session.member_id || null,
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     // 미끼 통과(조작 의심) 시 어드민 플래그 등록
     if (scored.faking_flag) {
       try {
-        const { createClient: createServerClient } = await import('@/lib/supabase/server');
+        const { createAdminClient: createServerClient } = await import('@/lib/supabase/admin');
         const serverSupabase = await createServerClient();
         await serverSupabase.from('hit_admin_flags').insert({
           member_id: session.member_id || null,

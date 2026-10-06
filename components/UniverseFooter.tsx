@@ -28,6 +28,7 @@
  */
 
 import Link from "next/link";
+import { COMPANY_INFO } from "@/lib/company-info";
 import { ReactNode } from "react";
 import clsx from "clsx";
 
@@ -112,7 +113,7 @@ export function UniverseFooter({
                             <p className={clsx("mt-2 text-sm", textSecondary)}>{tagline}</p>
                         )}
                         <div className={clsx("mt-4 text-xs", textTertiary)}>
-                            Part of <Link href="https://tenone.biz" className={clsx(linkHover, "underline-offset-2 hover:underline")} style={{ color: accentColor }}>Ten:One™ Universe</Link>
+                            <Link href="https://tenone.biz" className={clsx(linkHover, "underline-offset-2 hover:underline")} style={{ color: accentColor }}>Ten:One™ Universe</Link>
                         </div>
                     </div>
 
@@ -155,9 +156,13 @@ export function UniverseFooter({
             {/* 하단 — 카피라이트 + 정책 */}
             <div className={clsx("border-t", borderColor)}>
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <p className={clsx("text-xs", textTertiary)}>
-                        © {year} {brandName} · Ten:One™ Universe. All rights reserved.
-                    </p>
+                    <div className={clsx("text-xs text-center sm:text-left space-y-1", textTertiary)}>
+                        <p>© {year} {brandName.startsWith("Ten:One") ? "" : `${brandName} · `}Ten:One™ Universe. All rights reserved.</p>
+                        <p>
+                            {COMPANY_INFO.legalName} · 대표 {COMPANY_INFO.representative} · 사업자등록번호 {COMPANY_INFO.businessNumber}
+                            {COMPANY_INFO.mailOrderNumber && <> · 통신판매업 {COMPANY_INFO.mailOrderNumber}</>}
+                        </p>
+                    </div>
                     <div className="flex items-center gap-4">
                         {DEFAULT_POLICY_LINKS.map(link => (
                             <Link

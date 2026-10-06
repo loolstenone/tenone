@@ -50,7 +50,7 @@ export default function AgentCommPage() {
         try {
             const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ADMIN_KEY || ''}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action }),
             });
             if (res.status === 401) {

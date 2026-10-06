@@ -7,7 +7,6 @@
 
 ```
 CLAUDE.md                          # [지금 이 파일] 유니버스 공통 가이드
-docs/Universe_Triage_2026-06.md    # ⭐ 포트폴리오 Tier 분류 + 북극성 지표 SSOT
 app/(BrandName)/CLAUDE.md          # 브랜드별 가이드 (26+ 개, 자동 로드)
 ROADMAP.md                         # 전체 로드맵
 WORK_STATUS.md                     # 현재 진행 상황
@@ -48,17 +47,15 @@ INTEL 레이어에 속하며, 외부 정보를 유니버스에 들여오는 "눈
 
 > **원칙**: 크롤링·분석은 Whole See(INTEL) 공동 인프라, 각 브랜드는 UMS에서 자기 콘텐츠·회원·사이트만 관리.
 
-### AI Agent Team — 3축 체계
+### AI Agent Team
 
 | 축 | 도구 | 역할 | 상시 가동 |
 |---|------|------|----------|
 | 기획 | 열시일분 (Claude Chat) | 전략, 오케스트레이션 | ❌ |
-| 실행 | **OpenClaw** (PC 상주) | 에이전트 런타임, 자율 실행, 메시징, 소셜 게시 | ⚠️ 등록만 (local_endpoint 미점검) |
-| 개발 | **Claude Code** | 코드/빌드/배포, OpenClaw 커스텀 스킬 개발 | ❌ |
+| 실행 | Edge Function + pg_cron (Mindle 트렌드 → 열시일분 브리핑) | 자동 수집·브리핑 | ✅ |
+| 개발 | **Claude Code** | 코드/빌드/배포 | ❌ |
 
-> **OpenClaw** = Peter Steinberger 개발 오픈소스 AI 에이전트 프레임워크 (MIT). 텐원 PC에 상주.
-> **Lobster**(YAML 워크플로우) + **ClawHub** 스킬 마켓 + 로컬 영구 메모리(`~/.openclaw/`)
-> Claude Code 산출물: `C:\Users\텐원\TenOne\skills\` (커스텀 스킬), `~/.openclaw/workflows/` (Lobster YAML)
+> OpenClaw(PC 상주 런타임)는 미가동으로 2026-10-05 폐기 — agent_profiles row 삭제. 재도입 결정 전까지 문서·코드에 추가하지 않는다.
 
 > **실측 상태 SSOT**: [docs/TenOne_Agent_State.md](docs/TenOne_Agent_State.md) (v2.5, 2026-05-17)
 > 28개 에이전트 · 11 Edge Function · pg_cron 4 job · 미해소 6건. 마스터 v2.4(`tenone-agent` 스킬)는 stale.
@@ -110,31 +107,97 @@ docs/              # 설계 문서
 
 ---
 
-# 0.5 포트폴리오 Tier 정책 (2026-06-10 재구조화 — 최우선 규칙)
+## 0.1 플랫폼 헌법 (2026-10-04 확정 — 모든 설계 판단의 최상위 기준)
 
-> **배경**: 실측 진단 결과 — 코드 35.6만 줄·공개 페이지 510개·API 492개 대비 **최근 30일 실사용자 1명**.
-> 수요 검증 없는 공급 과잉이 확인되어 포트폴리오를 3-Tier로 공식 동결했다.
-> 상세 진단·분류 근거: [docs/Universe_Triage_2026-06.md](docs/Universe_Triage_2026-06.md) ← **SSOT**
+> **지주사–계열사 모델.** 각 브랜드는 독립 사업이고, TenOne은 운영사(사업자)로만 드러난다.
+> 브랜드끼리는 세계관 속에서 순환하며 시너지를 낸다 (예: MADLeague → MADLeap → HeRo → Badak).
+> tenone.biz에서만 TenOne이 대표로 나선다.
 
-## Tier 분류
+### 7원칙
 
-| Tier | 브랜드 | 정책 |
-|---|---|---|
-| **T1 운영** | TenOne · MADLeap · MADLeague · Badak · HeRo · Myverse | 개발 허용 — 단, 북극성 지표 기여 작업만 |
-| **T2 유지** | SmarComm · BrandGravity · Jakka · MoNTZ | 버그 수정만, 신규 기능 동결 |
-| **T3 동결** | 0gamja · ChangeUp · Domo · EvoSchool · FWN · LUKI · Mullaesian · NamingFactory · NatureBox · Planner's · RooK · Seoul360 · Townity · YouInOne · TrendHunter | 개발 전면 중단 (빌드 수리 제외), 코드 보존 |
-| **특수** | Mindle (T3-auto: 크론만 자동 가동) · WIO (인트라 백본만, 외부판매 보류) · Wiki/Dokdae/Intra (내부 인프라) | 현상 유지 |
+1. **계정은 하나, 서비스는 독립** — Ten:One ID 하나로 전 브랜드를 쓰지만, 각 브랜드는 단독으로 완결된 서비스다. 브랜드 첫 진입 시 해당 브랜드 약관·개인정보 동의를 받는다 (`member_brand_joins`). 탈퇴는 "이 서비스만" / "계정 전체"를 구분한다.
+2. **코어는 작고 단단하게** — 코어 = Ten:One ID · 공통 프로필 · 권한(member_roles) · 여정(capability) · UC · 인트라. 보안 투자는 코어에 집중한다.
+3. **서비스는 코어(ID·API)를 통해서만 연결** — 다른 브랜드 테이블 직접 조회 금지.
+4. **브랜드당 공식 주소(canonical) 1개** — 나머지는 공식 주소로 308. `tenone.biz/{brand}` 경로는 외부에 노출하지 않는다 (로컬 개발 전용).
+5. **Tier별로 투자** — 핵심 / 집중 / 실험 / 보관. 보관 브랜드는 페이지·API를 끈다 (공격 표면 축소).
+6. **같은 브랜드를 두 곳에서 동시에 공개 운영하지 않는다** — 외부 서버에서 운영 중인 브랜드의 Vercel 버전은 이전일까지 비공개(noindex, 직원 전용 스테이징). 이전일에 DNS 전환으로 한 번에 넘어간다.
+7. **유니버스는 강조하지 않는다** — 사용자에게는 푸터(§1.9.4 UniverseFooter 표준)의 관련 사이트 링크 정도만. 쓰다 보면 자연스럽게 알게 된다. 단, **프로필과 여정은 전 브랜드에서 일관되게** 적용한다 (MyProfileCard · capability 모델). 다른 브랜드 활동의 교차 노출은 본인 허락 시에만.
 
-## 개발 게이트 5원칙
+### 브랜드 Tier (2026-10-04 스냅샷)
 
-1. **새 페이지·기능은 T1 북극성 지표에 직접 기여할 때만** 만든다. "있으면 좋은 것"은 만들지 않는다.
-2. **새 브랜드 추가 전면 금지** (2026년 내). 새 아이디어는 코드가 아니라 노트에 적는다.
-3. **T3 코드 수정 금지** (빌드 수리 제외). T2는 버그 수정만.
-4. **인프라 일반화 작업 동결** — UC 고도화·capability 확장·테넌트 격리 강화 등은 실사용자 100명 도달까지 보류.
-5. **세션 브리핑에 "이 작업이 어느 Tier·어느 지표에 기여하는가" 명시.** 답할 수 없으면 작업하지 않는다.
+> ⚠️ **서비스 체계(브랜드 구성·Tier·통합/분리)는 계속 바뀐다.** 원칙·데이터 계약은 특정 브랜드에 묶이지 않게 쓰고,
+> 현재 상태의 SSOT는 **DB `ums_sites`(tier·lifecycle·hosting)** + **`lib/domain-registry.ts` CANONICAL_HOSTS** 두 곳이다. 아래 표는 참고용 스냅샷.
+> 체계가 바뀌면: ① `ums_sites` 갱신 → ② CANONICAL_HOSTS 갱신 → ③ 이 표 갱신. 서비스 통합·분리·이름 변경도 §0.1 종료 절차·이전 원칙을 그대로 적용한다
+> (예: Planner's → MyVerse 흡수처럼 서비스가 합쳐질 때 = 기존 서비스 종료 절차 + 새 서비스 동의 기반 이전).
 
-> 핵심 문장: **"실사용자 행동이 측정되기 전에는 새 페이지를 만들지 않는다."**
-> § 2.4 새 브랜드 추가 체크리스트는 게이트 2에 의해 2026년 내 사용 금지.
+| Tier | 브랜드 | 공식 주소 | 비고 |
+|------|--------|----------|------|
+| 핵심 | TenOne · 인트라 · Ten:One ID | www.tenone.biz · intra.tenone.biz · auth.tenone.biz | |
+| 집중 | HeRo | www.hero.ne.kr | Vercel 운영 중 |
+| 집중 | MADLeague | www.madleague.net | 외부 nginx · 회원 0 · Vercel 새로 제작 (이전 없음) |
+| 집중 | MADLeap | www.madleap.co.kr | 외부 nginx · 학생 회원 ~200 · Vercel 새로 제작 (이전 없음) |
+| 집중 | Badak | www.badak.biz | 외부 nginx · **회원 ~9,000** · Vercel 새로 제작 (이전 없음) |
+| 실험/보관 | 그 외 전 브랜드 (SmarComm 포함) | {brand}.tenone.biz 또는 없음 | 개별 결정 전까지 신규 투자 없음 |
+
+### 외부 서버 브랜드 — 새로 제작, 이전 없음 (2026-10-05 확정)
+
+> Badak·MADLeap·MADLeague는 외부 서버 사이트를 옮기지 않는다. **Vercel에서 새 사이트로 제작**하고, 오픈일에 DNS만 새 사이트로 돌린다. 기존 DB·회원 데이터 이관 없음.
+
+- 새 사이트 회원 = Ten:One ID로 **새로 가입** (§1.2.0 가입 동의). 기존 외부 회원 데이터를 복사해 오지 않는다 (별도 동의 없는 다른 시스템으로의 이전 금지 — 개인정보보호법 제17·18조).
+- 오픈 전까지 Vercel 버전은 비공개 스테이징 (원칙 6 — noindex, 직원 전용).
+- **DNS 전환 = 기존 외부 사이트 종료**: §0.1 서비스 종료 표준 절차 적용 — 회원 있으면 최소 30일 전 공지(새 사이트 재가입 안내), 종료 후 기존 서버 회원 데이터 파기(제21조, 법정 보관분만 기간 동안 보관). 회원 0인 MADLeague부터.
+- 개인정보처리방침에 새 사이트 수집 항목 반영 (출시 체크리스트 §2.4).
+
+### 데이터 계약 5조 (2026-10-05 확정)
+
+> 구글이 수백 개 서비스를 만들고 없애도 데이터 사고가 드문 이유는 **각 서비스 내부는 자유, 공통 계약은 강제**이기 때문이다.
+> 텐원도 브랜드 내부 설계는 서비스 성격대로 자유롭게 하되, 아래 5조는 모든 브랜드가 예외 없이 지킨다.
+
+| # | 계약 | 규칙 | 위반 시 사고 |
+|---|------|------|-------------|
+| 1 | **바뀌지 않는 ID** | 회원 데이터의 유일한 열쇠는 `members.id`(UUID). 이메일·이름은 속성일 뿐 연결 키로 쓰지 않는다. 계정 정보(이름·이메일·사진)를 브랜드 테이블에 복사해 두지 않는다. **회원이 아닌 사람**(구독자·문의자·지원자·CRM 연락처)만 `email`로 식별한다 | 이메일 변경 시 데이터 단절, 이메일로 남의 데이터 덮어쓰기 |
+| 2 | **권한은 한 곳에서** | 권한 판단은 `member_roles` + 공통 함수(`lib/api-guard.ts`, `auth_is_staff()`)로만. 브랜드가 자체 권한 컬럼을 만들지 않는다. 본인이 수정 가능한 컬럼으로 권한을 판단하지 않는다 | 브랜드마다 다른 권한 판단 → 권한 상승 (세션 156 실제 발견) |
+| 3 | **데이터는 서비스가 소유** | 저장소(Supabase)는 공유하지만 테이블의 주인은 한 브랜드. 다른 브랜드 테이블을 직접 읽거나 쓰지 않고 공통 API·뷰로만 접근한다. 공통 기능은 **집중 브랜드 2곳 이상이 실제로 필요할 때** 코어로 끌어올린다 | 한 서비스 종료·변경이 다른 서비스를 깨뜨림 |
+| 4 | **동의는 서비스별** | 개인정보처리방침은 하나(운영사 TenOne). 브랜드 첫 진입 시 해당 브랜드 약관 동의를 `member_brand_joins`에 버전과 함께 기록. **한 브랜드의 데이터를 다른 브랜드에서 쓰거나 노출하려면 별도 동의** (예: Badak 활동을 HeRo 프로필에 표시) | 구글 Buzz(2010) — Gmail 연락처를 동의 없이 새 서비스에 노출 → FTC 20년 감사 |
+| 5 | **생애주기 절차** | 출시: §2.4 체크리스트 + 개인정보·보안 점검. 탈퇴: "이 브랜드만" / "계정 전체"를 구분하고, 각 브랜드는 탈퇴 시 자기 데이터 처리 방법을 미리 정의. 종료: 아래 절차 | 서비스 종료 시 데이터 방치·무단 삭제, 탈퇴 후 데이터 잔존 |
+
+**서비스 종료 표준 절차** (Google Reader·Google+·Stadia 패턴):
+
+```
+① 종료 결정·공지 (회원 있으면 최소 30일 전, 이메일 + 사이트 배너)
+② 신규 가입·결제 중단
+③ 읽기 전용 전환
+④ 데이터 내보내기 또는 후속 브랜드로 이전 안내 (동의 받은 경우만 이전)
+⑤ 종료일 접속 차단 (ums_sites 상태 변경, CANONICAL/라우팅 정리, API 차단)
+⑥ 보관 기간 경과 후 삭제 (백업 포함)
+⑦ 개인정보처리방침·CLAUDE.md Tier 표 갱신
+```
+
+> 회원 0인 브랜드는 ①·④를 생략할 수 있으나 ⑤~⑦은 동일하게 수행한다.
+
+> **실행 장치**: 서비스 상태 = `ums_sites.tier/lifecycle/hosting/sunset_at` · 브랜드 가입·동의 = `member_brand_joins`(brand_id는 `ums_sites.slug` FK, `resolve_site_slug()`) · 탈퇴 = `member_brand_withdrawals.scope` · 브랜드별 탈퇴 처리 표 = [docs/Data_Lifecycle.md](docs/Data_Lifecycle.md)
+
+**브랜드 간 API 원칙** (Google+ API 결함 교훈): 브랜드·외부에 열리는 API는 필요한 필드만, 인증 필수, 본인 데이터만. 관리용 API는 `lib/api-access-policy.ts`로 직원 전용.
+
+### 법적 검토는 기본 (2026-10-05 확정)
+
+> **모든 기능 기획·개발·데이터 설계는 법적 검토를 기본 단계로 포함한다.** Claude는 요청이 없어도 관련 법적 이슈를 먼저 짚고, 결론과 근거 조항을 제시한다.
+> Claude의 판단은 일반 원칙 수준 — 개인정보처리방침·약관 문안, 신규 사업 등록 요건은 출시 전 법률 검토를 권고한다.
+
+| 상황 | 확인할 법 | 핵심 |
+|------|----------|------|
+| 개인정보 수집·이용 | 개인정보보호법 제15·16조 | 목적·항목·보관기간 고지 + 동의, 최소 수집 |
+| **수집 목적과 다른 용도로 사용** (브랜드 간 데이터 활용 포함) | 개인정보보호법 제18조 | 별도 동의 없이는 금지 — 같은 운영사(TenOne)라도 브랜드 간 목적이 다르면 해당 |
+| 다른 사람·기업에게 제공 (예: 인재 정보를 기업에 공개) | 개인정보보호법 제17조 | 제공받는 자·목적·항목·기간을 밝힌 **별도 동의** |
+| 탈퇴·목적 달성 후 보관 | 개인정보보호법 제21조 · 제58조의2 | 원칙은 지체 없이 파기. 영구 보관은 **익명화한 정보만** 가능. 법정 보관 기록은 그 기간만 원본 보관 |
+| 만 14세 미만 | 개인정보보호법 제22조의2 | 법정대리인 동의 (학생 대상 서비스 주의) |
+| 광고성 메일·알림 | 정보통신망법 제50조 | 수신 동의 별도, 야간(21~08시) 별도 동의, 수신거부 수단 |
+| 결제·환불 | 전자상거래법 | 계약·결제 기록 5년, 소비자 불만 3년 보관, 청약철회 |
+| 구인·구직 연결, 인재 매칭 | 직업안정법 · 채용절차법 | 직업소개사업 등록·신고 여부, 장부 보존, 응시자 서류 반환·파기 |
+| 약관 | 약관규제법 | 불공정 조항 무효, 중요 내용 설명 |
+| 위치 정보 | 위치정보법 | 별도 동의·사업 신고 |
+
+**적용 시점**: 기능 기획(브리핑) → 테이블 설계(데이터 계약) → 출시 체크리스트(§2.4) → 종료 절차(⑦ 방침 갱신).
 
 ---
 
@@ -165,6 +228,10 @@ docs/              # 설계 문서
 **③ 경로 분기** (pathSiteMap, localhost 개발용): `www.tenone.biz/madleague`
 
 > ⚠️ 서브도메인은 `siteConfigs`에 키가 있으면 자동 감지. `domainMap`에 따로 추가 불필요.
+
+> **공식 주소(canonical)**: `lib/domain-registry.ts`의 `CANONICAL_HOSTS`에 등록된 브랜드는 middleware가 다른 진입로를 공식 주소로 넘긴다 (§0.1 원칙 4·6).
+> vercel 운영 = 경로 유지 308 · external(외부 서버) = www 경로는 홈으로 302, `{brand}.tenone.biz`는 스테이징(noindex, `next.config.ts`).
+> 외부 브랜드 새 사이트 오픈(DNS 전환) 시 `hosting: 'vercel'`로 바꾸고 noindex 목록에서 제거.
 
 ### 현재 운영 도메인/경로 (29개)
 
@@ -260,6 +327,14 @@ export async function generateMetadata(): Promise<Metadata> {
 - 이메일 발송: Resend SMTP (`Ten:One™ Universe <noreply@tenone.biz>`)
 - 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
 - **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접
+
+### 1.2.0 가입 동의 표준 (2026-10-05)
+
+- 모든 가입 경로(/signup · LoginModal · 소셜 첫 로그인)는 `components/SignupConsent.tsx` 사용: [필수] 만 14세 이상 · [필수] 이용약관 · [선택] 광고성 정보 수신. 개인정보처리방침은 고지 링크
+- 기록: `members.consent` (jsonb — terms_version·privacy_version·marketing·agreed_at·channel·origin_site). 이메일 가입은 signUp `user_metadata.consent` → 인증 후 members 생성 시 이관
+- 동의 기록 없는 로그인 회원(소셜·기존)은 `components/ConsentGate.tsx`(루트 레이아웃)가 1회 동의 받음
+- ❌ `newsletter_subscribed: true` 기본값·하드코딩 금지 (정보통신망법 제50조 — 사전 동의 필수)
+- ❌ 가입 폼에 `captchaToken` 누락 금지
 
 ### 1.2.1 로그인/가입 복귀 원칙 (이탈 방지)
 
@@ -559,24 +634,19 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 > **모든 권한은 `member_roles(user_id, role, context, is_active)`에서 파생된다.**
 > `members` 테이블의 권한 컬럼은 제거됨 (0-B Phase 완료).
 
-### role 분류
+### role × context 규약 (실제 운영 v3 — 2026-10-05 정리)
 
-| role | 부여 조건 | 접근 범위 |
-|------|----------|----------|
-| `member` | 기본 회원 | 본인 데이터 |
-| `subscriber` | 구독 결제 완료 | 구독 기능 활성 |
-| `purchaser` | 건별 결제 완료 | 구매 항목 접근 |
-| `approved_member` | 멤버십 심사 승인 | 해당 커뮤니티 참여 |
-| `leader` | 그룹/모임 리더 | 해당 그룹 관리 (context 종속) |
-| `staff` | TenOne 직원 | Intra 접근 |
-| `manager` | 매니저급 직원 | 담당 브랜드 관리 |
-| `super_admin` | 마스터 (lools@tenone.biz) | 전체 시스템 |
+| context | role | 의미 |
+|---------|------|------|
+| `universe` | `super_admin` · `staff` · `manager` · `crew` · `member` | 유니버스 등급. `staff@universe`가 JWT `is_staff` → RLS `auth_is_staff()` |
+| `system` | `intra_access` | 인트라 메뉴 표시 플래그 (권한 판단은 staff) |
+| `module` | `{모듈명}` (erp·hero·wiki·smarcomm·project …) | 인트라 모듈 접근 |
+| `brand` | `{브랜드 slug}` (badak·madleague·tenone …) | 해당 브랜드 인트라 관리 |
 
-### context 규약
-
-- `brand:[siteId]` — 특정 브랜드 한정 (예: `brand:badak`, `brand:madleague`)
-- `global` — 유니버스 전체
-- `staff` — 직원 영역
+- 서버 API 직원 판단: `lib/api-guard.ts` `requireStaff` (staff·manager·super_admin 또는 인증된 @tenone.biz)
+- 마스터: `super_admin@universe` (lools@tenone.biz)
+- ❌ 회원 활동 역할(멘토·현역·바닥장·구독자 등)을 member_roles에 넣지 않는다 → `member_capability_roles` (§1.3.1)
+  - 이관 대상: MADLeague `role=member|mentor|club_leader, context='brand:madleague'` (approve API·arena·clubs·community 페이지)
 
 ### 인증 흐름
 
@@ -829,7 +899,7 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 ### 권한 게이트
 
 - Intra 접근: `role IN ('staff','manager','super_admin')`
-- 브랜드별 관리 패널: `role='manager'` + `context='brand:{siteId}'` 또는 `super_admin`
+- 브랜드별 관리 패널: `role='{brand slug}'` + `context='brand'` 또는 `super_admin`
 - 마스터 전용: `super_admin` (lools@tenone.biz)
 
 ### 인트라 ↔ 사이트 반영 흐름
@@ -1068,7 +1138,7 @@ import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/Univers
 ├─────────────────────────────────────────────────────┤
 │  [브랜드명]            [컬럼1]  [컬럼2]  [Universe] │  ← 4컬럼
 │  태그라인              링크들    링크들   자동추가   │
-│  Part of Ten:One™                                  │
+│  Ten:One™ Universe (링크)                          │
 ├─────────────────────────────────────────────────────┤
 │  © Year · Ten:One™ Universe   이용약관  개인정보   │  ← 카피라이트
 └─────────────────────────────────────────────────────┘
@@ -1113,9 +1183,9 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 - ❌ 정책 링크 누락
 - ❌ 푸터에서 GTM/script 직접 삽입 (`Analytics.tsx`가 전담)
 
-### 마이그레이션 상태
+### 마이그레이션 (기존 21개 푸터 → UniverseFooter)
 
-✅ 완료 (2026-06-01 세션 155 진단 — 24개 브랜드 적용 확인). 신규 푸터는 처음부터 `UniverseFooter` 사용.
+차기 세션에서 brand 별로 점진 적용. 기존 푸터의 콘텐츠를 `linkColumns`와 `children`(상단 슬롯)으로 매핑하면 끝.
 
 ---
 
@@ -1173,7 +1243,7 @@ Claude Code는 해당 브랜드 파일을 편집할 때 **자동으로 함께 �
 
 ## 권한 체계
 - role 종류: [member, leader, admin, ...]
-- context: `brand:[siteId]`
+- 인트라 관리 권한: `member_roles(role='{slug}', context='brand')` (§1.6) · 회원 활동 역할은 `member_capability_roles`
 - 인트라 관리 권한: `/intra/ums/[brand]/*`
 
 ## UC 정책 특이사항
@@ -1263,8 +1333,6 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 
 ## 2.4 새 브랜드 추가 체크리스트
 
-> ⛔ **§ 0.5 게이트 2에 의해 2026년 내 신규 브랜드 추가 금지.** 이 체크리스트는 동결 해제 후 참고용으로만 보존.
-
 - [ ] `lib/site-config.ts` → `siteConfigs`에 추가 + `SiteIdentifier` 타입에 추가
 - [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가 (독립 도메인일 경우)
 - [ ] `lib/site-context.tsx` → `pathSiteMap`에 경로 매핑 추가
@@ -1283,6 +1351,8 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 - [ ] `UniverseProfile.tsx` → `SERVICE_META`에 아이콘·설명·접근모델 등록
 - [ ] **Action Hub**: 관리자 처리 필요 테이블이 있으면 `lib/action-hub-registry.ts`에 entry 추가 (승인·CS·개인정보·결제 유형별)
 - [ ] 브랜드 CLAUDE.md에 `## Action Hub Entries` 섹션으로 등록 내역 기록
+- [ ] **법적 검토** (§0.1 법적 검토 표): 수집 항목·목적·보관기간, 브랜드 간 데이터 활용·제3자 제공 동의, 만 14세 미만, 광고성 정보, 결제, 업종별 등록·신고 요건
+- [ ] **탈퇴 처리 정의**: `docs/Data_Lifecycle.md`에 브랜드 테이블별 삭제·익명화·유지 기준 추가
 
 ---
 
@@ -1499,6 +1569,15 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ RLS disabled 테이블 생성
 - ❌ `tenant_id` / `brand_id` 없는 신규 테이블
 - ❌ 프론트엔드에 `service_role` 키 노출
+- ❌ `createAdminClient()`(service_role) 쓰는 API에 인증 없이 쓰기 허용 — 반드시 `lib/api-guard.ts`의 `requireUser/requireMember/requireStaff` 사용. 관리·운영·AI실행 API는 `/api/intra/*` 또는 `/api/{x}/admin/*`에 두거나 `lib/api-access-policy.ts`에 등록 (middleware가 직원 전용 강제)
+- ❌ 요청 body/query의 `memberId`를 그대로 신뢰 — `assertSelf()`/`assertOwnsRow()`로 세션 소유권 검증
+- ❌ 권한 판단에 `members.roles`·`account_type`·`email` 사용 — 본인이 수정 가능한 컬럼. `member_roles`(staff만 쓰기) 또는 인증된 auth 이메일만
+- ❌ 서버 → 자기 API 내부 fetch에 인증 헤더 누락 — `internalAuthHeaders()` (ADMIN_API_KEY)
+- ❌ 비밀번호 인증 폼(signUp·signInWithPassword·resetPasswordForEmail)에 CAPTCHA 누락 — `useCaptcha()` + `captchaToken` (Supabase Bot Protection ON 시 토큰 없으면 실패)
+- ❌ 인트라 접근을 클라이언트 확인에만 의존 — middleware 1b가 `/intra/*`·intra.tenone.biz 전 페이지를 `requireStaff`로 서버에서 막는다 (비직원 → `/intra/login` rewrite). 새 게이트 우회 경로 만들지 말 것
+- ❌ `NEXT_PUBLIC_*`에 관리자 키 — 브라우저 번들에 그대로 박힌다. 인트라 → 자기 API는 세션 쿠키로 인증(`requireStaff`)
+- ❌ RLS 정책을 `roles=public` + `USING (true)`로 "service role용"이라 만들기 — service_role은 RLS를 우회하므로 불필요하고, 실제로는 anon에게 전부 열린다 (2026-10-05 사고: 듣봇 대화·발송 메일 공개)
+- ❌ 트리거 함수가 RLS 걸린 다른 테이블에 쓰는데 SECURITY INVOKER — 사용자 INSERT 전체가 롤백됨 (세션 156 members 생성 장애 원인)
 
 ### 프로필·메타
 - ❌ `UniverseMembership` 사용 (레거시)
@@ -1538,15 +1617,14 @@ grep -rn 'TODO\|FIXME' src | wc -l
 
 > **Claude가 SQL을 직접 실행한다. 사용자가 Dashboard에서 수동으로 실행할 필요 없다.**
 
-- **PAT**: `.env.local`의 `SUPABASE_ACCESS_TOKEN`
-- **실행 스크립트**: `scripts/run-sql.js` — `queries` 배열에 SQL 추가 후 `node scripts/run-sql.js`
-- **API**: `POST https://api.supabase.com/v1/projects/ziotlxkdctlhiwkgmmsh/database/query`
-  - DDL 성공 응답: HTTP 201, body `[]`
-  - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
+- **실행 수단: Supabase MCP** (`execute_sql` 조회·데이터 수정 / `apply_migration` DDL — 마이그레이션 이력이 남음)
+- ⛔ **PAT(`SUPABASE_ACCESS_TOKEN`)를 `.env.local`에 두지 않는다** — DB 전체 권한 키를 평문 파일로 보관하지 않음 (2026-10-05 만료 PAT 2개 삭제·제거).
+  `scripts/run-sql.js`·`run-sql-files.js`·`seed-*.js` 등 PAT 기반 스크립트는 사용 중단. 꼭 필요하면 단기 만료 PAT를 그 세션에만 쓰고 바로 삭제.
+- 운영 DB 변경 전 사용자 승인 필수 (데이터 삭제·권한 변경·대량 수정)
 
 **새 테이블 워크플로우:**
-1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + **GRANT** + 시드)
-2. `scripts/run-sql.js`에 추가 또는 직접 실행
+1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + **GRANT** + 시드) — 재실행 가능하게(IF NOT EXISTS)
+2. 같은 내용을 MCP `apply_migration`으로 적용, 파일 상단에 적용일 기록
 3. Dashboard 접속 요청 불필요
 
 ### ⚠️ GRANT 필수 — Supabase 2026-10-30 정책 변경
@@ -1716,7 +1794,7 @@ pathname 변경
 | 항목 | 내용 |
 |------|------|
 | 프로젝트 ID | `ziotlxkdctlhiwkgmmsh` |
-| PAT | `.env.local`의 `SUPABASE_ACCESS_TOKEN` |
+| SQL 실행 | Supabase MCP (PAT 미보관 — 부록 D) |
 | Auth SMTP | Resend 연결 완료 (`noreply@tenone.biz`) |
 | Storage 버킷 | `avatars` (프로필), `site-branding` (브랜드 이미지) |
 

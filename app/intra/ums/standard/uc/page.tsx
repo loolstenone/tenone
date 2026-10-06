@@ -7,13 +7,13 @@ import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 interface UcRule {
+    id: string;
     action_key: string;
-    action_label: string | null;
+    label: string | null;
     amount: number;
     monthly_cap: number | null;
     is_active: boolean;
     brand_id: string | null;
-    category: string | null;
 }
 
 const PRINCIPLES = [
@@ -31,7 +31,7 @@ export default function UcStandardPage() {
     useEffect(() => {
         async function load() {
             const sb = createClient();
-            const { data } = await sb.from("uc_earn_rules").select("action_key, action_label, amount, monthly_cap, is_active, brand_id, category").order("category").order("amount", { ascending: false });
+            const { data } = await sb.from("uc_earn_rules").select("id, action_key, label, amount, monthly_cap, is_active, brand_id").order("brand_id", { nullsFirst: true }).order("amount", { ascending: false });
             setRules(data ?? []);
             setLoading(false);
         }
@@ -64,7 +64,6 @@ export default function UcStandardPage() {
                         <table className="w-full text-xs">
                             <thead className="bg-neutral-50 border-b border-neutral-200">
                                 <tr>
-                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">카테고리</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">action_key</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">설명</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">브랜드</th>
@@ -75,11 +74,10 @@ export default function UcStandardPage() {
                             </thead>
                             <tbody>
                                 {rules.map((r) => (
-                                    <tr key={r.action_key} className="border-b border-neutral-100 last:border-0">
-                                        <td className="px-3 py-2 text-neutral-700">{r.category || "-"}</td>
+                                    <tr key={r.id} className="border-b border-neutral-100 last:border-0">
                                         <td className="px-3 py-2 font-mono text-[10px] text-neutral-900">{r.action_key}</td>
-                                        <td className="px-3 py-2 text-neutral-600 truncate max-w-[240px]">{r.action_label || "-"}</td>
-                                        <td className="px-3 py-2 text-neutral-500">{r.brand_id || "GLOBAL"}</td>
+                                        <td className="px-3 py-2 text-neutral-600 truncate max-w-[240px]">{r.label || "-"}</td>
+                                        <td className="px-3 py-2 text-neutral-500">{r.brand_id || "공통"}</td>
                                         <td className="px-3 py-2 text-right font-semibold text-neutral-900">+{r.amount.toLocaleString()}</td>
                                         <td className="px-3 py-2 text-right text-neutral-500">{r.monthly_cap ? r.monthly_cap.toLocaleString() : "-"}</td>
                                         <td className="px-3 py-2">

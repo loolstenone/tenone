@@ -1,35 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { requireStaff } from '@/lib/api-guard';
 
 const admin = createAdminClient();
 
 /**
  * GET /api/intra/members
  * 인트라 전용 — 전체 회원 목록 조회 (service role)
- * staff 인증 필수
+ * staff 인증 필수 (requireStaff)
  */
 export async function GET(request: NextRequest) {
-    // 인증 확인
-    const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // staff 확인 (roles 배열에 staff/admin 포함 또는 tenone 도메인)
-    const { data: member } = await admin
-        .from('members')
-        .select('roles, email')
-        .eq('auth_id', user.id)
-        .single();
-
-    const isStaff = member?.email?.endsWith('@tenone.biz') ||
-        (member?.roles ?? []).some((r: string) => ['staff', 'admin', 'superadmin'].includes(r));
-
-    if (!isStaff) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // 직원 확인 — member_roles 기반 공통 함수 (본인이 수정 가능한 members.roles·email로 판단하지 않음)
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
     const url = new URL(request.url);
     const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '500'), 1000);
@@ -37,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const { data: members, count: totalCount, error } = await admin
         .from('members')
-        .select('id, name, email, handle, phone, bio, company, position, affiliations, roles, last_login_at, created_at, signup_source, onboarding_completed, deleted_at', { count: 'exact' })
+        .select('id, name, email, handle, phone, bio, company, position, affiliations, roles, last_login_at, created_at, onboarding_completed, deleted_at', { count: 'exact' })
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);

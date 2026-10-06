@@ -176,7 +176,6 @@ export default function AgentHubPage() {
         try {
             await fetch("/api/agent/briefing", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_API_KEY ?? ""}` },
             });
             setTimeout(() => fetchBriefings(), 3000);
         } catch {}

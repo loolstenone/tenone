@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { historyEvents } from "@/lib/data";
@@ -34,14 +34,25 @@ const flywheel = [
 
 function AboutContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState('philosophy');
     const [yearFilter, setYearFilter] = useState('전체');
+    const tabsAnchorRef = useRef<HTMLDivElement>(null);
+
+    // 탭 전환 시 새 탭 내용을 처음부터 보이게 — 탭 바 아래로 내려가 있었다면 탭 바 위치로 (헤더 64px)
+    const selectTab = (id: string) => {
+        setActiveTab(id);
+        router.replace(id === 'philosophy' ? '/about' : `/about?tab=${id}`, { scroll: false });
+        const anchor = tabsAnchorRef.current;
+        if (!anchor) return;
+        const top = anchor.getBoundingClientRect().top + window.scrollY - 64;
+        if (window.scrollY > top) window.scrollTo({ top });
+    };
 
     useEffect(() => {
-        if (tabParam && ['philosophy', 'universe', 'brands', 'history'].includes(tabParam)) {
-            setActiveTab(tabParam);
-        }
+        // URL ↔ 탭 동기화 — 상단 About 메뉴(/about)로 재진입 시 첫 탭으로
+        setActiveTab(tabParam && ['philosophy', 'universe', 'brands', 'history'].includes(tabParam) ? tabParam : 'philosophy');
     }, [tabParam]);
 
     const filteredHistory = yearFilter === '전체' ? HISTORY_DATA : HISTORY_DATA.filter(h => h.year === yearFilter);
@@ -72,11 +83,12 @@ function AboutContent() {
             </section>
 
             {/* Tab Navigation */}
+            <div ref={tabsAnchorRef} />
             <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0 overflow-x-auto">
                         {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            <button key={tab.id} onClick={() => selectTab(tab.id)}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
                                         ? 'border-neutral-900 tn-text font-medium'
@@ -211,13 +223,8 @@ function AboutContent() {
 
                     {/* Founder */}
                     <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-                            <div className="aspect-square tn-bg-alt flex items-center justify-center max-w-md overflow-hidden">
-                                <div className="w-32 h-32 rounded-full bg-neutral-900 flex items-center justify-center">
-                                    <span className="text-3xl font-bold text-white">CJ</span>
-                                </div>
-                            </div>
-                            <div>
+                        <div className="max-w-7xl mx-auto">
+                            <div className="max-w-2xl">
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
                                 <h2 className="text-xl md:text-3xl font-bold">전천일</h2>
                                 <p className="text-sm tn-text-sub mt-1">Cheonil Jeon · Value Connector</p>
@@ -226,7 +233,7 @@ function AboutContent() {
                                     트렌드, 브랜딩, IT에 관심을 가지고 가치를 연결하는 일을 하고 있습니다.
                                 </p>
                                 <div className="mt-6 space-y-2 text-sm tn-text-sub">
-                                    <p><a href="https://tenone.biz/contact" className="hover:tn-text transition-colors">tenone.biz/contact</a></p>
+                                    <p><a href="mailto:lools@tenone.biz" className="hover:tn-text transition-colors">lools@tenone.biz</a></p>
                                     <p><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:tn-text transition-colors">Kakao Open Chat</a></p>
                                 </div>
                             </div>

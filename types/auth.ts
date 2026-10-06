@@ -89,6 +89,7 @@ export interface User {
     employmentType?: string;
     createdAt?: string;
     newsletterSubscribed?: boolean;
+    consent?: Partial<MemberConsent>;   // 가입 동의 기록 (members.consent) — terms_version 없으면 ConsentGate가 동의 요청
 
     // BUMS 권한
     bumsRole?: BumsRole;
@@ -132,4 +133,18 @@ export interface SocialLinks {
     github?: string;
     website?: string;
     [key: string]: string | undefined;
+}
+
+/**
+ * 가입 동의 기록 — members.consent (jsonb)에 저장.
+ * 이용약관 동의 버전·만 14세 확인·광고성 정보 수신(정보통신망법 제50조) 여부와 시점을 남긴다.
+ */
+export interface MemberConsent {
+    terms_version: string;          // LEGAL_DOCUMENTS.terms.version
+    privacy_version: string;        // 고지한 개인정보처리방침 버전
+    age_14_plus: true;
+    marketing: boolean;             // [선택] 소식·혜택 수신
+    agreed_at: string;              // ISO
+    channel: 'email' | 'social' | 'existing';
+    origin_site: string;            // 동의한 도메인
 }

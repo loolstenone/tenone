@@ -1,16 +1,20 @@
 /**
- * Ten:One™ 통합 게시판 Supabase CRUD
- * posts, comments, attachments, likes, bookmarks, board_configs
+ * Ten:One™ 통합 게시판 — 서버 전용 (app/api/board/* 에서만 사용)
+ *
+ * 저장소: ums_posts · ums_comments · ums_boards (+ likes · bookmarks · attachments)
+ * 읽기는 posts / board_configs 뷰, 쓰기는 실제 테이블.
+ * 권한 확인(로그인·게시판 쓰기 권한·작성자 본인)은 API 라우트 책임 — 여기서는 서비스 롤로 기록만 한다.
+ * 작성자 표시는 members에서 조인 (이름·사진을 게시판 테이블에 복사하지 않음 — 데이터 계약 1조)
  */
-import { createClient } from './client';
+import { createAdminClient } from './admin';
 import type {
     Post, Comment, Attachment, BoardConfig,
     PostListParams, PostListResponse,
     CreatePostInput, UpdatePostInput, CreateCommentInput,
-    SiteCode,
+    SiteCode, PostStatus,
 } from '@/types/board';
 
-const supabase = createClient();
+const supabase = createAdminClient();
 
 // ── 유틸 ──
 
@@ -23,39 +27,128 @@ function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
     return result;
 }
 
-function camelToSnake(obj: Record<string, unknown>): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
-        if (value === undefined) continue;
-        const snakeKey = key.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
-        result[snakeKey] = value;
-    }
-    return result;
-}
-
 function toPost(row: Record<string, unknown>): Post {
-    return snakeToCamel(row) as unknown as Post;
+    const p = snakeToCamel(row) as unknown as Post;
+    // 뷰의 guest_nickname = ums_posts.author_name (회원 아닌 작성자 표기용 — 에이전트·이전 데이터)
+    p.authorType = p.authorId ? 'member' : 'admin';
+    if (!p.authorId && p.guestNickname) p.authorName = p.guestNickname;
+    p.guestNickname = null;
+    p.likeCount = p.likeCount ?? 0;
+    p.bookmarkCount = p.bookmarkCount ?? 0;
+    p.tags = p.tags ?? [];
+    p.status = fromDbStatus(row.status as string);
+    return p;
 }
 
-function toComment(row: Record<string, unknown>): Comment {
-    const c = snakeToCamel(row) as unknown as Comment;
-    // guestPassword는 응답에서 제거
-    delete (c as unknown as Record<string, unknown>).guestPassword;
-    return c;
+function fromDbStatus(s: string): PostStatus {
+    if (s === 'private') return 'hidden';
+    if (s === 'archived') return 'deleted';
+    if (s === 'scheduled') return 'draft';
+    return s as PostStatus;
+}
+
+/** DB 상태 enum(bums_post_status) ↔ 화면 상태 */
+function toDbStatus(s?: PostStatus): string | undefined {
+    if (!s) return undefined;
+    if (s === 'hidden') return 'private';
+    if (s === 'deleted') return 'archived';
+    return s;
+}
+
+async function attachAuthors<T extends { authorId: string | null; authorName?: string; authorAvatar?: string }>(items: T[]): Promise<T[]> {
+    const ids = Array.from(new Set(items.map(i => i.authorId).filter((v): v is string => !!v)));
+    if (ids.length === 0) return items;
+    const { data } = await supabase.from('members').select('id, name, avatar_url').in('id', ids);
+    const byId = new Map((data ?? []).map((m: { id: string; name: string; avatar_url: string | null }) => [m.id, m]));
+    return items.map(i => {
+        const m = i.authorId ? byId.get(i.authorId) : undefined;
+        return m ? { ...i, authorName: m.name, authorAvatar: m.avatar_url ?? undefined } : i;
+    });
 }
 
 // ── Board Configs ──
 
+export interface BoardRule {
+    id: string;
+    siteId: string;
+    writePermission: string;
+    commentPermission: string;
+    allowComments: boolean;
+    /** public = 누구나 / 그 외(intra·staff) = 직원 전용 게시판 */
+    visibility: string;
+}
+
+/** 게시판 쓰기 규칙 (site slug + board slug) */
+export async function fetchBoardRule(site: string, board: string): Promise<BoardRule | null> {
+    const { data } = await supabase
+        .from('ums_boards')
+        .select('id, site_id, write_permission, comment_permission, allow_comments, visibility, ums_sites!inner(slug)')
+        .eq('slug', board)
+        .eq('ums_sites.slug', site)
+        .maybeSingle();
+    if (!data) return null;
+    return {
+        id: data.id,
+        siteId: data.site_id,
+        writePermission: data.write_permission,
+        commentPermission: data.comment_permission,
+        allowComments: data.allow_comments !== false,
+        visibility: data.visibility,
+    };
+}
+
+/** 직원 전용(비공개) 게시판 slug 목록 — 비직원 목록 조회에서 제외 */
+export async function fetchPrivateBoardSlugs(site: string): Promise<string[]> {
+    const { data } = await supabase
+        .from('ums_boards')
+        .select('slug, ums_sites!inner(slug)')
+        .eq('ums_sites.slug', site)
+        .neq('visibility', 'public');
+    return (data ?? []).map((b: { slug: string }) => b.slug);
+}
+
+export function isPublicBoard(rule: Pick<BoardRule, 'visibility'>): boolean {
+    return rule.visibility === 'public';
+}
+
+/** 회원 쓰기 가능 등급 — 그 외(intra·staff·admin)는 직원만 */
+export function memberCanWrite(permission: string): boolean {
+    return permission === 'all' || permission === 'member';
+}
+
+/** DB 권한 등급 → 화면 표기 (관리자 작성 / 회원 작성) */
+function toPermission(p: string): 'all' | 'member' | 'admin' {
+    return p === 'all' ? 'all' : p === 'member' ? 'member' : 'admin';
+}
+
 export async function fetchBoardConfigs(site?: SiteCode, slug?: string): Promise<BoardConfig[]> {
-    let query = supabase.from('board_configs').select('*').order('sort_order');
-    if (site) query = query.eq('site', site);
+    let query = supabase
+        .from('ums_boards')
+        .select('id, slug, name, description, categories, sort_order, created_at, updated_at, board_type, visibility, read_permission, write_permission, comment_permission, ums_sites!inner(slug)')
+        .order('sort_order');
+    if (site) query = query.eq('ums_sites.slug', site);
     if (slug) query = query.eq('slug', slug);
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map((r: Record<string, unknown>) => {
-        const c = snakeToCamel(r) as unknown as BoardConfig;
-        return c;
-    });
+    return (data || []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        site: (r.ums_sites as { slug: string }).slug as SiteCode,
+        slug: r.slug as string,
+        name: r.name as string,
+        description: (r.description as string) ?? '',
+        categories: Array.isArray(r.categories) ? (r.categories as string[]) : [],
+        settings: null as unknown as BoardConfig['settings'],
+        permissions: {
+            read: toPermission(r.read_permission as string),
+            write: toPermission(r.write_permission as string),
+            comment: toPermission(r.comment_permission as string),
+        },
+        visibility: r.visibility as string,
+        boardType: r.board_type as string,
+        sortOrder: r.sort_order as number,
+        createdAt: r.created_at as string,
+        updatedAt: r.updated_at as string,
+    }));
 }
 
 export async function fetchBoardConfig(site: SiteCode, slug: string): Promise<BoardConfig | null> {
@@ -69,42 +162,26 @@ export async function fetchBoardConfig(site: SiteCode, slug: string): Promise<Bo
     return snakeToCamel(data) as unknown as BoardConfig;
 }
 
-export async function upsertBoardConfig(config: Partial<BoardConfig> & { site: SiteCode; slug: string }) {
-    const row = camelToSnake(config as unknown as Record<string, unknown>);
-    row.updated_at = new Date().toISOString();
-    const { data, error } = await supabase
-        .from('board_configs')
-        .upsert(row, { onConflict: 'site,slug' })
-        .select()
-        .single();
-    if (error) throw error;
-    return snakeToCamel(data) as unknown as BoardConfig;
-}
-
-export async function deleteBoardConfig(id: string) {
-    const { error } = await supabase.from('board_configs').delete().eq('id', id);
-    if (error) throw error;
-}
-
 // ── Posts ──
 
 export async function fetchPosts(params: PostListParams): Promise<PostListResponse> {
     const {
         site, board, category, tag, status,
         search, sort = 'latest', period = 'all',
-        page = 1, limit = 12, author_id,
+        page = 1, limit = 12, author_id, excludeBoards,
     } = params;
 
     let query = supabase
         .from('posts')
-        .select('id, site, board, title, excerpt, category, status, author_type, represent_image, tags, is_pinned, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
+        .select('id, site, board, title, excerpt, category, status, author_id, guest_nickname, represent_image, tags, is_pinned, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
         .eq('site', site);
 
     if (board) query = query.eq('board', board);
     if (category) query = query.eq('category', category);
     if (author_id) query = query.eq('author_id', author_id);
-    if (status) query = query.eq('status', status);
-    else query = query.eq('status', 'published');
+    // 'all' = 전체 상태 (직원 관리 화면 — 권한 확인은 API 라우트)
+    if (status !== 'all') query = query.eq('status', toDbStatus(status) ?? 'published');
+    if (excludeBoards && excludeBoards.length > 0) query = query.not('board', 'in', `(${excludeBoards.join(',')})`);
     if (tag) query = query.contains('tags', [tag]);
 
     // 검색 (제목 + 본문)
@@ -127,16 +204,15 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
         query = query.gte('created_at', from.toISOString());
     }
 
-    // 정렬 (공지 우선)
+    // 정렬 (공지 우선) — 좋아요 수는 목록에 집계하지 않으므로 인기순 = 조회수
     query = query.order('is_pinned', { ascending: false });
     switch (sort) {
         case 'latest': query = query.order('created_at', { ascending: false }); break;
-        case 'popular': query = query.order('like_count', { ascending: false }); break;
+        case 'popular': query = query.order('view_count', { ascending: false }); break;
         case 'comments': query = query.order('comment_count', { ascending: false }); break;
         case 'views': query = query.order('view_count', { ascending: false }); break;
     }
 
-    // 페이지네이션
     const offset = (page - 1) * limit;
     query = query.range(offset, offset + limit - 1);
 
@@ -145,7 +221,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
 
     const total = count || 0;
     return {
-        posts: (data || []).map(toPost),
+        posts: await attachAuthors((data || []).map(toPost)),
         total,
         page,
         limit,
@@ -158,12 +234,13 @@ export async function fetchPostById(id: string): Promise<Post | null> {
         .from('posts')
         .select('*')
         .eq('id', id)
-        .single();
-    if (error) return null;
-    return toPost(data);
+        .maybeSingle();
+    if (error || !data) return null;
+    const [post] = await attachAuthors([toPost(data)]);
+    return post;
 }
 
-export async function fetchPostWithDetails(id: string, userId?: string): Promise<Post | null> {
+export async function fetchPostWithDetails(id: string, memberId?: string): Promise<Post | null> {
     const post = await fetchPostById(id);
     if (!post) return null;
 
@@ -172,146 +249,178 @@ export async function fetchPostWithDetails(id: string, userId?: string): Promise
         const extracted = extractFirstImage(post.content);
         if (extracted) {
             post.representImage = extracted;
-            // DB에도 저장 (다음 리스트 조회 시 바로 사용)
-            supabase.from('posts').update({ represent_image: extracted }).eq('id', id).then(() => {});
+            supabase.from('ums_posts').update({ image: extracted }).eq('id', id).then(() => {});
         }
     }
 
-    // 첨부파일 조인
-    const { data: attachments } = await supabase
-        .from('attachments')
-        .select('*')
-        .eq('post_id', id);
+    const [{ data: attachments }, { count: likeCount }, { count: bookmarkCount }] = await Promise.all([
+        supabase.from('attachments').select('*').eq('post_id', id),
+        supabase.from('likes').select('id', { count: 'exact', head: true }).eq('target_type', 'post').eq('target_id', id),
+        supabase.from('bookmarks').select('id', { count: 'exact', head: true }).eq('post_id', id),
+    ]);
     post.attachments = (attachments || []).map((a: Record<string, unknown>) => snakeToCamel(a) as unknown as Attachment);
+    post.likeCount = likeCount ?? 0;
+    post.bookmarkCount = bookmarkCount ?? 0;
 
-    // 좋아요/북마크 상태 (로그인 유저)
-    if (userId) {
-        const { data: like } = await supabase
-            .from('likes')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('target_type', 'post')
-            .eq('target_id', id)
-            .maybeSingle();
+    if (memberId) {
+        const [{ data: like }, { data: bookmark }] = await Promise.all([
+            supabase.from('likes').select('id').eq('user_id', memberId).eq('target_type', 'post').eq('target_id', id).maybeSingle(),
+            supabase.from('bookmarks').select('id').eq('user_id', memberId).eq('post_id', id).maybeSingle(),
+        ]);
         post.isLiked = !!like;
-
-        const { data: bookmark } = await supabase
-            .from('bookmarks')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('post_id', id)
-            .maybeSingle();
         post.isBookmarked = !!bookmark;
     }
 
     return post;
 }
 
-export async function createPost(input: CreatePostInput, authorId?: string): Promise<Post> {
+/** 게시글 작성 — 호출 전에 게시판 쓰기 권한 확인 필수 (API 라우트) */
+export async function createPost(
+    input: CreatePostInput,
+    rule: BoardRule,
+    author: { memberId: string | null; displayName?: string },
+): Promise<Post> {
+    const status = toDbStatus(input.status) ?? 'published';
+    const body = await externalizeInlineImages(input.content);
+    const representImage = input.representImage ? await externalizeImageSrc(input.representImage) : '';
     const row: Record<string, unknown> = {
-        site: input.site,
-        board: input.board,
+        board_id: rule.id,
+        site_id: rule.siteId,
         title: input.title,
-        content: input.content,
-        excerpt: input.excerpt || extractExcerpt(input.content),
-        category: input.category || '',
+        body,
+        summary: input.excerpt || extractExcerpt(body),
+        category_id: input.category || null,
         tags: input.tags || [],
-        represent_image: input.representImage || extractFirstImage(input.content) || '',
-        status: input.status || 'published',
+        // 대표 이미지 미지정 → 본문 첫 이미지
+        image: representImage || extractFirstImage(body) || null,
+        status,
         is_pinned: input.isPinned || false,
+        is_secret: input.isSecret || false,
+        author_id: author.memberId,
+        // 회원 글은 이름을 복사하지 않는다 (members 조인). 비회원 작성자(에이전트 등)만 표기명 저장
+        author_name: author.memberId ? null : (author.displayName ?? null),
+        published_at: status === 'published' ? new Date().toISOString() : null,
     };
 
-    if (authorId) {
-        row.author_type = 'member';
-        row.author_id = authorId;
-    } else if (input.guestNickname) {
-        row.author_type = 'guest';
-        row.guest_nickname = input.guestNickname;
-        row.guest_password = input.guestPassword; // API route에서 해시 처리
-        row.guest_email = input.guestEmail || null;
-    }
-
-    const { data, error } = await supabase
-        .from('posts')
-        .insert(row)
-        .select()
-        .single();
+    const { data, error } = await supabase.from('ums_posts').insert(row).select('id').single();
     if (error) throw error;
-    return toPost(data);
+    const post = await fetchPostById(data.id);
+    if (!post) throw new Error('작성한 글을 찾을 수 없습니다.');
+    return post;
 }
 
+/** 게시글 수정 — 호출 전에 작성자 본인·직원 확인 필수 */
 export async function updatePost(id: string, input: UpdatePostInput): Promise<Post> {
     const row: Record<string, unknown> = {};
     if (input.title !== undefined) row.title = input.title;
-    if (input.content !== undefined) {
-        row.content = input.content;
-        row.excerpt = input.excerpt || extractExcerpt(input.content);
+    const body = input.content !== undefined ? await externalizeInlineImages(input.content) : undefined;
+    if (body !== undefined) {
+        row.body = body;
+        row.summary = input.excerpt || extractExcerpt(body);
     }
-    if (input.category !== undefined) row.category = input.category;
+    if (input.category !== undefined) row.category_id = input.category || null;
     if (input.tags !== undefined) row.tags = input.tags;
-    if (input.representImage !== undefined) row.represent_image = input.representImage;
-    if (input.status !== undefined) row.status = input.status;
+    // 대표 이미지 미지정 → 본문 첫 이미지
+    if (input.representImage) {
+        row.image = await externalizeImageSrc(input.representImage);
+    } else if (input.representImage !== undefined || body !== undefined) {
+        const firstImage = body !== undefined ? extractFirstImage(body) : '';
+        if (input.representImage !== undefined) {
+            row.image = firstImage || null;
+        } else if (firstImage) {
+            const { data: current } = await supabase.from('ums_posts').select('image').eq('id', id).single();
+            if (!current?.image) row.image = firstImage;
+        }
+    }
+    if (input.status !== undefined) {
+        row.status = toDbStatus(input.status);
+        // 처음 발행할 때만 발행일 기록 — 이미 발행된 글 수정 시 발행일 유지
+        if (input.status === 'published') {
+            const { data: current } = await supabase.from('ums_posts').select('published_at').eq('id', id).single();
+            if (!current?.published_at) row.published_at = new Date().toISOString();
+        }
+    }
     if (input.isPinned !== undefined) row.is_pinned = input.isPinned;
+    if (input.isSecret !== undefined) row.is_secret = input.isSecret;
     row.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
-        .from('posts')
-        .update(row)
-        .eq('id', id)
-        .select()
-        .single();
+    const { error } = await supabase.from('ums_posts').update(row).eq('id', id);
     if (error) throw error;
-    return toPost(data);
+    const post = await fetchPostById(id);
+    if (!post) throw new Error('글을 찾을 수 없습니다.');
+    return post;
 }
 
+/** 삭제 — 기본은 보관(archived) 처리, hard=true면 영구 삭제 (직원만) */
 export async function deletePost(id: string, hard = false) {
     if (hard) {
-        const { error } = await supabase.from('posts').delete().eq('id', id);
+        const { error } = await supabase.from('ums_posts').delete().eq('id', id);
         if (error) throw error;
-    } else {
-        // 소프트 삭제
-        const { error } = await supabase
-            .from('posts')
-            .update({ status: 'deleted', deleted_at: new Date().toISOString() })
-            .eq('id', id);
-        if (error) throw error;
+        return;
     }
+    const { error } = await supabase
+        .from('ums_posts')
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw error;
 }
 
 export async function incrementViewCount(id: string) {
     await supabase.rpc('increment_post_view', { p_id: id });
 }
 
-// ── Comments ──
+// ── Comments (ums_comments) ──
 
-export async function fetchComments(postId: string, userId?: string): Promise<Comment[]> {
+function toComment(row: Record<string, unknown>, likeCount = 0): Comment {
+    return {
+        id: row.id as string,
+        postId: row.post_id as string,
+        parentId: (row.parent_id as string | null) ?? null,
+        content: row.body as string,
+        authorType: 'member',
+        authorId: (row.author_id as string | null) ?? null,
+        guestNickname: null,
+        likeCount,
+        status: row.status === 'published' ? 'active' : (row.status as Comment['status']),
+        createdAt: row.created_at as string,
+        updatedAt: row.updated_at as string,
+    };
+}
+
+export async function fetchComments(postId: string, memberId?: string): Promise<Comment[]> {
     const { data, error } = await supabase
-        .from('comments')
-        .select('*')
+        .from('ums_comments')
+        .select('id, post_id, parent_id, author_id, body, status, created_at, updated_at')
         .eq('post_id', postId)
-        .eq('status', 'active')
+        .eq('status', 'published')
         .order('created_at', { ascending: true });
     if (error) throw error;
 
-    const comments: Comment[] = (data || []).map((r: Record<string, unknown>) => toComment(r));
-
-    // 좋아요 상태
-    if (userId && comments.length > 0) {
-        const commentIds = comments.map((c) => c.id);
+    const rows = data || [];
+    const ids = rows.map((r: { id: string }) => r.id);
+    const likeCounts = new Map<string, number>();
+    const likedIds = new Set<string>();
+    if (ids.length > 0) {
         const { data: likes } = await supabase
             .from('likes')
-            .select('target_id')
-            .eq('user_id', userId)
+            .select('target_id, user_id')
             .eq('target_type', 'comment')
-            .in('target_id', commentIds);
-        const likedIds = new Set((likes || []).map((l: Record<string, unknown>) => l.target_id));
-        comments.forEach((c) => { c.isLiked = likedIds.has(c.id); });
+            .in('target_id', ids);
+        for (const l of likes || []) {
+            likeCounts.set(l.target_id, (likeCounts.get(l.target_id) || 0) + 1);
+            if (memberId && l.user_id === memberId) likedIds.add(l.target_id);
+        }
     }
+
+    const comments = await attachAuthors(rows.map((r: Record<string, unknown>) => {
+        const c = toComment(r, likeCounts.get(r.id as string) || 0);
+        c.isLiked = likedIds.has(c.id);
+        return c;
+    }));
 
     // 대댓글 트리 구성
     const rootComments: Comment[] = [];
     const childMap = new Map<string, Comment[]>();
-
     for (const c of comments) {
         if (c.parentId) {
             if (!childMap.has(c.parentId)) childMap.set(c.parentId, []);
@@ -320,141 +429,107 @@ export async function fetchComments(postId: string, userId?: string): Promise<Co
             rootComments.push(c);
         }
     }
-    for (const root of rootComments) {
-        root.replies = childMap.get(root.id) || [];
-    }
-
-    return rootComments;
+    return rootComments.map(root => ({ ...root, replies: childMap.get(root.id) || [] }));
 }
 
-export async function createComment(input: CreateCommentInput, authorId?: string): Promise<Comment> {
-    const row: Record<string, unknown> = {
-        post_id: input.postId,
-        parent_id: input.parentId || null,
-        content: input.content,
-    };
-
-    if (authorId) {
-        row.author_type = 'member';
-        row.author_id = authorId;
-    } else {
-        row.author_type = 'guest';
-        row.guest_nickname = input.guestNickname;
-        row.guest_password = input.guestPassword;
-    }
-
+/** 댓글 작성 — 호출 전에 로그인·댓글 권한 확인 필수 */
+export async function createComment(input: CreateCommentInput, memberId: string): Promise<Comment> {
     const { data, error } = await supabase
-        .from('comments')
-        .insert(row)
-        .select()
+        .from('ums_comments')
+        .insert({
+            post_id: input.postId,
+            parent_id: input.parentId || null,
+            body: input.content,
+            author_id: memberId,
+        })
+        .select('id, post_id, parent_id, author_id, body, status, created_at, updated_at')
         .single();
     if (error) throw error;
-    return toComment(data);
+    const [c] = await attachAuthors([toComment(data)]);
+    return c;
+}
+
+export async function fetchCommentAuthor(id: string): Promise<string | null | undefined> {
+    const { data } = await supabase.from('ums_comments').select('author_id').eq('id', id).maybeSingle();
+    return data ? (data.author_id as string | null) : undefined;
 }
 
 export async function deleteComment(id: string) {
     const { error } = await supabase
-        .from('comments')
-        .update({ status: 'deleted' })
+        .from('ums_comments')
+        .update({ status: 'deleted', updated_at: new Date().toISOString() })
         .eq('id', id);
     if (error) throw error;
 }
 
-// ── Likes ──
+// ── Likes (user_id = members.id) ──
 
-export async function toggleLike(userId: string, targetType: 'post' | 'comment', targetId: string): Promise<boolean> {
-    // 이미 좋아요 했는지 확인
+export async function toggleLike(memberId: string, targetType: 'post' | 'comment', targetId: string): Promise<{ liked: boolean; count: number }> {
     const { data: existing } = await supabase
         .from('likes')
         .select('id')
-        .eq('user_id', userId)
+        .eq('user_id', memberId)
         .eq('target_type', targetType)
         .eq('target_id', targetId)
         .maybeSingle();
 
     if (existing) {
-        // 좋아요 취소
         await supabase.from('likes').delete().eq('id', existing.id);
-        return false;
     } else {
-        // 좋아요 추가
-        await supabase.from('likes').insert({
-            user_id: userId,
-            target_type: targetType,
-            target_id: targetId,
-        });
-        return true;
+        await supabase.from('likes').insert({ user_id: memberId, target_type: targetType, target_id: targetId });
     }
+    const { count } = await supabase
+        .from('likes')
+        .select('id', { count: 'exact', head: true })
+        .eq('target_type', targetType)
+        .eq('target_id', targetId);
+    return { liked: !existing, count: count ?? 0 };
 }
 
-// ── Bookmarks ──
+// ── Bookmarks (user_id = members.id) ──
 
-export async function toggleBookmark(userId: string, postId: string): Promise<boolean> {
+export async function toggleBookmark(memberId: string, postId: string): Promise<{ bookmarked: boolean; count: number }> {
     const { data: existing } = await supabase
         .from('bookmarks')
         .select('id')
-        .eq('user_id', userId)
+        .eq('user_id', memberId)
         .eq('post_id', postId)
         .maybeSingle();
 
     if (existing) {
         await supabase.from('bookmarks').delete().eq('id', existing.id);
-        return false;
     } else {
-        await supabase.from('bookmarks').insert({ user_id: userId, post_id: postId });
-        return true;
+        await supabase.from('bookmarks').insert({ user_id: memberId, post_id: postId });
     }
+    const { count } = await supabase
+        .from('bookmarks')
+        .select('id', { count: 'exact', head: true })
+        .eq('post_id', postId);
+    return { bookmarked: !existing, count: count ?? 0 };
 }
 
-export async function fetchBookmarks(userId: string, page = 1, limit = 12): Promise<PostListResponse> {
+export async function fetchBookmarks(memberId: string, page = 1, limit = 12): Promise<PostListResponse> {
     const offset = (page - 1) * limit;
     const { data, error, count } = await supabase
         .from('bookmarks')
-        .select('post_id, posts(*)', { count: 'exact' })
-        .eq('user_id', userId)
+        .select('post_id', { count: 'exact' })
+        .eq('user_id', memberId)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
-
     if (error) throw error;
 
     const total = count || 0;
-    const posts = (data || [])
-        .map((row: Record<string, unknown>) => row.posts)
-        .filter(Boolean)
-        .map((p: unknown) => toPost(p as Record<string, unknown>));
-
+    const ids = (data || []).map((r: { post_id: string }) => r.post_id);
+    let posts: Post[] = [];
+    if (ids.length > 0) {
+        const { data: rows } = await supabase.from('posts').select('*').in('id', ids).eq('status', 'published');
+        const byId = new Map((rows || []).map((r: Record<string, unknown>) => [r.id as string, toPost(r)]));
+        posts = await attachAuthors(ids.map((id: string) => byId.get(id)).filter((p: Post | undefined): p is Post => !!p));
+    }
     return { posts, total, page, limit, totalPages: Math.ceil(total / limit) };
 }
 
 // ── Attachments ──
-
-export async function uploadAttachment(postId: string, file: File): Promise<Attachment> {
-    const now = new Date();
-    const path = `board/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${Date.now()}_${file.name}`;
-
-    const { data: uploaded, error: uploadError } = await supabase.storage
-        .from('board-assets')
-        .upload(path, file, { cacheControl: '3600', upsert: false });
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-        .from('board-assets')
-        .getPublicUrl(uploaded.path);
-
-    const { data, error } = await supabase
-        .from('attachments')
-        .insert({
-            post_id: postId,
-            filename: file.name,
-            filepath: publicUrl,
-            filesize: file.size,
-            mimetype: file.type,
-        })
-        .select()
-        .single();
-    if (error) throw error;
-    return snakeToCamel(data) as unknown as Attachment;
-}
 
 export async function incrementDownloadCount(id: string) {
     const { data } = await supabase.from('attachments').select('download_count').eq('id', id).single();
@@ -501,7 +576,7 @@ export async function fetchRelatedPosts(
 ): Promise<Post[]> {
     let query = supabase
         .from('posts')
-        .select('id, site, board, title, excerpt, category, represent_image, author_type, guest_nickname, tags, view_count, like_count, comment_count, created_at')
+        .select('id, site, board, title, excerpt, category, represent_image, author_id, guest_nickname, tags, view_count, like_count, comment_count, created_at')
         .eq('site', site)
         .eq('board', board)
         .eq('status', 'published')
@@ -516,7 +591,7 @@ export async function fetchRelatedPosts(
 
     const { data, error } = await query;
     if (error) return [];
-    return (data || []).map(toPost);
+    return attachAuthors((data || []).map(toPost));
 }
 
 // ── 유틸 ──
@@ -559,17 +634,38 @@ export async function uploadImage(file: File, path?: string): Promise<string> {
     return data.publicUrl;
 }
 
+/** 본문 안 base64 이미지를 Storage로 올리고 URL로 교체 (대표 이미지 추출·페이지 무게) */
+async function externalizeInlineImages(html: string): Promise<string> {
+    if (!html || !html.includes('data:image/')) return html;
+    const srcs = Array.from(new Set(Array.from(html.matchAll(/src=["'](data:image\/[a-z+]+;base64,[^"']+)["']/gi), m => m[1])));
+    let out = html;
+    for (const src of srcs.slice(0, 30)) {
+        try {
+            const url = await uploadBase64Image(src);
+            out = out.split(src).join(url);
+        } catch (e) {
+            console.error('externalizeInlineImages:', e);
+        }
+    }
+    return out;
+}
+
+async function externalizeImageSrc(src: string): Promise<string> {
+    if (!src.startsWith('data:image/')) return src;
+    try { return await uploadBase64Image(src); } catch { return ''; }
+}
+
 export async function uploadBase64Image(base64: string, filename?: string): Promise<string> {
-    const match = base64.match(/^data:image\/(\w+);base64,(.+)$/);
+    const match = base64.match(/^data:image\/([a-z+]+);base64,(.+)$/i);
     if (!match) throw new Error('Invalid base64 image');
 
-    const ext = match[1];
+    const ext = match[1].toLowerCase() === 'svg+xml' ? 'svg' : match[1].toLowerCase();
     const data = match[2];
     const buffer = Buffer.from(data, 'base64');
     const filePath = filename || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error } = await supabase.storage.from(BUCKET).upload(filePath, buffer, {
-        contentType: `image/${ext}`,
+        contentType: `image/${match[1].toLowerCase()}`,
         cacheControl: '3600',
         upsert: false,
     });

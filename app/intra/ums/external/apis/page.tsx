@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Key, ExternalLink, CheckCircle2, XCircle, Clock, Loader2, Shield } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
-import { createClient } from "@/lib/supabase/client";
+import { useExternalStatus, formatKst } from "@/lib/intra/use-external-status";
 
 interface GmailToken {
     email: string;
@@ -29,7 +28,7 @@ const APIS: {
         category: "AI · LLM",
         providers: [
             { name: "Anthropic Claude", purpose: "Agent Hub · 트렌드 분석 · 콘텐츠 생성 · Deutbot", env: "ANTHROPIC_API_KEY",
-              url: "https://console.anthropic.com", docs: "claude-sonnet-4-6 / opus-4-6 / haiku-4-5", status: "active" },
+              url: "https://console.anthropic.com", docs: "사용 모델은 아래 실시간 에이전트 목록 참조", status: "active" },
             { name: "OpenAI", purpose: "(미채택) GPT 대안", env: "OPENAI_API_KEY", url: "https://platform.openai.com", docs: "전면 Anthropic 선택", status: "unused" },
             { name: "Google Gemini", purpose: "(미채택) Multi-modal 대안", env: "GEMINI_API_KEY", url: "https://aistudio.google.com", docs: "-", status: "unused" },
             { name: "Perplexity", purpose: "(미채택) 검색 증강", env: "PERPLEXITY_API_KEY", url: "https://perplexity.ai", docs: "-", status: "unused" },
@@ -177,18 +176,12 @@ const STATUS_META: Record<Status, { label: string; color: string }> = {
 };
 
 export default function ApisPage() {
-    const [loading, setLoading] = useState(true);
-    const [gmail, setGmail] = useState<GmailToken[]>([]);
-
-    useEffect(() => {
-        async function load() {
-            const sb = createClient();
-            const { data } = await sb.from("gmail_oauth_tokens").select("email, is_active, expiry_date, updated_at");
-            setGmail(data ?? []);
-            setLoading(false);
-        }
-        load();
-    }, []);
+    // 실시간 현황 (직원 전용 API) — Gmail 토큰·에이전트·모델
+    const { data: live, loading } = useExternalStatus();
+    const gmail: GmailToken[] = (live?.gmail ?? []).map(g => ({
+        email: g.email, is_active: g.is_active,
+        expiry_date: g.expiresAt ? new Date(g.expiresAt).getTime() : null, updated_at: g.updated_at,
+    }));
 
     // 전체 통계
     const allProviders = APIS.flatMap(c => c.providers);
@@ -203,6 +196,26 @@ export default function ApisPage() {
     return (
         <div className="space-y-6">
             <PageHeader title="외부 API" description={`유니버스가 호출하거나 호출할 외부 서비스 전체 카탈로그 · ${counts.total}건`} />
+
+            {/* AI 에이전트 실시간 — agent_profiles + 최근 30일 활동 */}
+            <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-sm font-semibold text-neutral-900">AI 에이전트 · 모델 (실시간)</h2>
+                    <span className="text-[10px] text-neutral-500">사용 모델: {live?.models.join(" · ") || "—"}</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+                    {(live?.agents ?? []).map(a => (
+                        <div key={a.name} className="flex items-center justify-between text-[11px] bg-neutral-50 rounded px-2 py-1">
+                            <span className="truncate">
+                                <span className={a.count30 > 0 ? "text-emerald-600" : "text-neutral-300"}>●</span>{" "}
+                                {a.display_name} <span className="text-neutral-400 font-mono">{a.model_id}</span>
+                            </span>
+                            <span className="text-neutral-500 shrink-0 ml-2">{a.count30 > 0 ? `30일 ${a.count30}건` : "30일 미가동"}</span>
+                        </div>
+                    ))}
+                    {loading && <p className="text-[11px] text-neutral-500">불러오는 중...</p>}
+                </div>
+            </div>
 
             {/* 상태 요약 */}
             <div className="grid grid-cols-4 gap-3">

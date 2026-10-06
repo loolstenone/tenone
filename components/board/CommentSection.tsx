@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { ThumbsUp, CornerDownRight, Trash2, MoreHorizontal } from "lucide-react";
 import type { Comment } from "@/types/board";
+import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 interface CommentSectionProps {
     postId: string;
@@ -16,6 +18,8 @@ interface CommentItemProps {
     onReply?: (commentId: string) => void;
     onDelete?: (commentId: string) => void;
     onLike?: (commentId: string) => void;
+    /** 삭제 메뉴 노출 여부 (작성자 본인·직원) */
+    canDelete?: (comment: Comment) => boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -29,7 +33,7 @@ function formatDate(dateStr: string): string {
     if (hours < 24) return `${hours}시간 전`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}일 전`;
-    return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
 function getAuthorName(comment: Comment): string {
@@ -37,8 +41,9 @@ function getAuthorName(comment: Comment): string {
     return comment.authorName || "회원";
 }
 
-function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike }: CommentItemProps) {
+function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike, canDelete }: CommentItemProps) {
     const [showMenu, setShowMenu] = useState(false);
+    const deletable = !!onDelete && !!canDelete?.(comment);
 
     return (
         <div className={`${isReply ? "ml-8 md:ml-12" : ""}`}>
@@ -53,7 +58,7 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                             {formatDate(comment.createdAt)}
                         </span>
                     </div>
-                    <div className="relative">
+                    {deletable && <div className="relative">
                         <button
                             onClick={() => setShowMenu(!showMenu)}
                             className="p-1 tn-text-muted"
@@ -72,7 +77,7 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                                 </button>
                             </div>
                         )}
-                    </div>
+                    </div>}
                 </div>
 
                 <p className="text-sm tn-text-sub whitespace-pre-wrap">{comment.content}</p>
@@ -109,6 +114,7 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                             isReply
                             onDelete={onDelete}
                             onLike={onLike}
+                            canDelete={canDelete}
                         />
                     ))}
                 </div>
@@ -122,12 +128,13 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
     const [loading, setLoading] = useState(true);
     const [content, setContent] = useState("");
     const [replyTo, setReplyTo] = useState<string | null>(null);
-    const [guestNickname, setGuestNickname] = useState("");
-    const [guestPassword, setGuestPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState("");
+    const [showLogin, setShowLogin] = useState(false);
 
-    // TODO: 실제 인증 상태 체크
-    const isLoggedIn = false;
+    // 댓글은 로그인 회원만 (비회원 댓글 없음)
+    const { user, isAuthenticated: isLoggedIn, isStaff } = useAuth();
+    const canDelete = useCallback((c: Comment) => isStaff || (!!user?.id && c.authorId === user.id), [isStaff, user?.id]);
 
     const fetchComments = useCallback(async () => {
         try {
@@ -150,19 +157,16 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!content.trim()) return;
-        if (!isLoggedIn && (!guestNickname.trim() || !guestPassword.trim())) return;
+        if (!isLoggedIn) { setShowLogin(true); return; }
 
         setSubmitting(true);
+        setError("");
         try {
             const body: Record<string, string> = {
                 postId,
                 content: content.trim(),
             };
             if (replyTo) body.parentId = replyTo;
-            if (!isLoggedIn) {
-                body.guestNickname = guestNickname.trim();
-                body.guestPassword = guestPassword.trim();
-            }
 
             const res = await fetch("/api/board/comments", {
                 method: "POST",
@@ -174,6 +178,9 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                 setContent("");
                 setReplyTo(null);
                 fetchComments();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || "댓글 저장에 실패했습니다.");
             }
         } catch (err) {
             console.error("댓글 작성 실패:", err);
@@ -188,7 +195,15 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
         document.getElementById("comment-input")?.focus();
     };
 
+    const handleDelete = async (commentId: string) => {
+        if (!confirm("댓글을 삭제할까요?")) return;
+        const res = await fetch(`/api/board/comments?id=${commentId}`, { method: "DELETE" });
+        if (res.ok) fetchComments();
+        else alert("삭제에 실패했습니다.");
+    };
+
     const handleLike = async (commentId: string) => {
+        if (!isLoggedIn) { setShowLogin(true); return; }
         try {
             await fetch("/api/board/like", {
                 method: "POST",
@@ -225,36 +240,13 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                     </div>
                 )}
 
-                {/* 비회원 정보 입력 */}
-                {!isLoggedIn && (
-                    <div className="flex gap-2 mb-2">
-                        <input
-                            type="text"
-                            value={guestNickname}
-                            onChange={(e) => setGuestNickname(e.target.value)}
-                            placeholder="닉네임"
-                            className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg focus:outline-none bg-transparent tn-text"
-                            style={{ borderColor: "var(--tn-border)" }}
-                            maxLength={20}
-                        />
-                        <input
-                            type="password"
-                            value={guestPassword}
-                            onChange={(e) => setGuestPassword(e.target.value)}
-                            placeholder="비밀번호"
-                            className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg focus:outline-none bg-transparent tn-text"
-                            style={{ borderColor: "var(--tn-border)" }}
-                            maxLength={20}
-                        />
-                    </div>
-                )}
-
                 <div className="flex gap-2">
                     <textarea
                         id="comment-input"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="댓글을 작성하세요..."
+                        placeholder={isLoggedIn ? "댓글을 작성하세요..." : "로그인 후 댓글을 작성할 수 있습니다"}
+                        onFocus={() => { if (!isLoggedIn) setShowLogin(true); }}
                         rows={3}
                         className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg resize-none focus:outline-none bg-transparent tn-text"
                         style={{ borderColor: "var(--tn-border)" }}
@@ -268,7 +260,9 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                         {submitting ? "..." : "등록"}
                     </button>
                 </div>
+                {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
             </form>
+            <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} accentColor={accentColor} />
 
             {/* 댓글 목록 */}
             {loading ? (
@@ -287,7 +281,8 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                             comment={comment}
                             accentColor={accentColor}
                             onReply={handleReply}
-                            onDelete={() => {/* TODO: 삭제 모달 */}}
+                            onDelete={handleDelete}
+                            canDelete={canDelete}
                             onLike={handleLike}
                         />
                     ))}

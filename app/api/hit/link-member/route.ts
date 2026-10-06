@@ -1,19 +1,23 @@
 /**
  * HIT 결과를 회원에 연결
  * POST /api/hit/link-member
- * Body: { resultId, memberId }
+ * Body: { resultId } — 회원은 로그인 세션에서 식별
  *
  * 회원가입 직후 호출 — 비회원 검사 데이터를 새 회원에 연결
  */
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireMember } from '@/lib/api-guard';
 
 export async function POST(request: NextRequest) {
   try {
-    const { resultId, memberId } = await request.json();
-    if (!resultId || !memberId) {
-      return errorResponse('resultId와 memberId는 필수입니다.', 400);
+    const auth = await requireMember(request);
+    if (auth instanceof Response) return auth;
+    const memberId = auth.memberId;
+    const { resultId } = await request.json();
+    if (!resultId) {
+      return errorResponse('resultId는 필수입니다.', 400);
     }
 
     const supabase = createAdminClient();

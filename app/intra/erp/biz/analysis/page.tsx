@@ -22,33 +22,15 @@ interface MonthlyPL {
   isActual: boolean;
 }
 
-const mockMonthlyData: MonthlyPL[] = [
-  { month: "1월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: true },
-  { month: "2월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: true },
-  { month: "3월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: false },
-  { month: "4월", billing: 42_000_000, exCost: 27_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.7, isActual: false },
-  { month: "5월", billing: 42_000_000, exCost: 27_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.7, isActual: false },
-  { month: "6월", billing: 45_000_000, exCost: 29_000_000, grossProfit: 16_000_000, inCost: 8_000_000, operatingProfit: 8_000_000, profitRate: 17.8, isActual: false },
-  { month: "7월", billing: 42_000_000, exCost: 27_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.7, isActual: false },
-  { month: "8월", billing: 40_000_000, exCost: 26_000_000, grossProfit: 14_000_000, inCost: 7_500_000, operatingProfit: 6_500_000, profitRate: 16.3, isActual: false },
-  { month: "9월", billing: 43_000_000, exCost: 28_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.3, isActual: false },
-  { month: "10월", billing: 42_000_000, exCost: 27_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.7, isActual: false },
-  { month: "11월", billing: 42_000_000, exCost: 27_000_000, grossProfit: 15_000_000, inCost: 8_000_000, operatingProfit: 7_000_000, profitRate: 16.7, isActual: false },
-  { month: "12월", billing: 40_000_000, exCost: 26_000_000, grossProfit: 14_000_000, inCost: 7_500_000, operatingProfit: 6_500_000, profitRate: 16.3, isActual: false },
-];
 
 interface YtdSummary { billing: number; grossProfit: number; operatingProfit: number; }
 
-const mockYtd: YtdSummary = (() => {
-  const actual = mockMonthlyData.filter(m => m.isActual);
-  return { billing: actual.reduce((s, m) => s + m.billing, 0), grossProfit: actual.reduce((s, m) => s + m.grossProfit, 0), operatingProfit: actual.reduce((s, m) => s + m.operatingProfit, 0) };
-})();
 
 export default function PLDashboardPage() {
   const { user } = useAuth();
   const [showYoY, setShowYoY] = useState(false);
-  const [ytd, setYtd] = useState<YtdSummary>(mockYtd);
-  const [monthlyData] = useState<MonthlyPL[]>(mockMonthlyData);
+  const [ytd, setYtd] = useState<YtdSummary>({ billing: 0, grossProfit: 0, operatingProfit: 0 });
+  const [monthlyData] = useState<MonthlyPL[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

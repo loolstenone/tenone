@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession } from '@/lib/supabase/hit';
 import { gateApi } from '@/lib/hit/membership-server';
@@ -6,7 +7,9 @@ import { gateApi } from '@/lib/hit/membership-server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { hitAResultId, memberId } = body;
+    const { hitAResultId } = body;
+    // 회원 식별은 로그인 세션으로만 — body의 memberId는 신뢰하지 않음
+    const memberId = (await getApiUser(request))?.memberId ?? undefined;
 
     if (!hitAResultId) {
       return errorResponse('hitAResultId는 필수입니다.', 400);

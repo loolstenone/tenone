@@ -4,6 +4,140 @@
 
 ---
 
+## 2026-10-05~06 (세션 158, 집) — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61`(브랜치 `claude/work-start-887cd3`) → `git push origin HEAD:master` (사용자 수동 push 여러 회 + 작업 종료 push)
+- 운영 DB 적용 (MCP `apply_migration`): `security_lockdown_phase1` · `archive_seed_and_spam` · `security_erp_lockdown` · `security_wio_members_fix` · `security_board_lockdown` · `security_brand_writes` · `security_hit_lockdown` · `board_classification` · `remove_dummy_posts_and_newsroom` · `remove_dummy_newsletter_issues` · `contact_attachments` · `contact_handling_log`
+- 데이터 수정(MCP `execute_sql`): Works 작성자 표기 정리(`sql/fix-works-author-name.sql`), Works 글 추가·날짜 수정·복원(사용자 요청), 발행일 리셋된 2건 복구
+- **미적용(승인 대기)**: `sql/contact-submissions-rls-lockdown.sql`
+
+### 결정 (사용자)
+
+- 인트라 5대 영역: My(직원) · Universe(통합관리 = 유니버스 전체 / 집중·보관 브랜드 = 서비스별) · Marketing · ERP · Intelligence. TenOne도 집중 브랜드 섹션에서 관리
+- Works는 관리자 작성 영역 (회원 글쓰기 X, 조회수·좋아요·북마크 비노출)
+- 뉴스룸 폐지 (현재 운영 안 함) · 더미 게시글 26건 삭제
+- About 연혁은 Works에 있는 사건만 · 홈 Crew CTA·세계관 섹션 삭제 · Founder 이미지 삭제, 연락처는 이메일(lools@tenone.biz)
+- Contact 첨부파일 허용 (용량 안내 포함), 링크는 https:// 없이 입력 가능
+
+### 변경 내역
+
+- 보안: 내부 전용 테이블 직원 전용화 · middleware 1b 인트라 서버 게이트 + intra layout 세션 확인 · NEXT_PUBLIC 관리자 키 제거 · `/api/intra/external/status` · 챗봇/HIT memberId 세션 식별 · 뉴스레터 발송 스위치 · `/api/newsletter`·`/api/contact` Turnstile fail-closed · Badak 커뮤니티 관리자 API 직원 확인 · 회원 목록 API 500(signup_source) 수정 · `vercel.json` 리전 icn1
+- AI: OpenClaw·Gemma agent_profiles 삭제, 챗봇 AI 고지
+- 인트라: 메뉴 정리(깨진 링크 34·준비중 9 제거, 집중/보관 브랜드 섹션) · ActionHubPanel · 최소 ERP(mock fallback 제거, 지급·입금 처리) · 중복 페이지 리다이렉트 · TenOne 패널(`app/intra/ums/tenone/*`) · `components/intra/BoardContentList.tsx`·`BoardPostEditor.tsx`·`lib/intra-board.ts` · Standard(access-model·uc·newsletter·privacy·sites·dev-rules·members·roles 정비, constitution·data-contract 신설) · CLAUDE.md §1.6 role×context v3
+- 게시판: `lib/supabase/board.ts` 서버 전용·ums_posts 쓰기 · 게시판 visibility/write_permission · `lib/board-image-upload.ts`(WebP 압축 2000→1024px, 3MB 목표) · BoardPage `showStats`/`showReactions` · URL(`?postId`)↔화면 동기화 · 날짜 연도 · PostDetail 수정 버튼 작성자·직원만 · `lib/sanitize-html.ts`(isomorphic-dompurify 서버 500 해결)
+- 뉴스룸 삭제: `app/(TenOne)/newsroom`·`app/api/newsroom`·`components/newsroom`·`lib/supabase/newsroom.ts`·인트라 메뉴, `/newsroom` → `/` 308
+- TenOne 사이트: `lib/data.ts historyEvents` 32건 재작성 · `app/page.tsx` 세계관·Crew CTA 섹션 삭제 · `features/tenone/PublicHeader.tsx` 홈 로고 클릭 시 맨 위 · `app/(TenOne)/about/page.tsx` `?tab` 동기화·탭 전환 스크롤·Founder 정리 · `app/(TenOne)/contact/page.tsx` `?from` 동기화·이메일 표시·첨부
+- 문의: `lib/contact-attachments.ts`·`lib/contact-inquiry.ts` · `app/api/contact/route.ts`(첨부 메타 검증 + 서명 업로드 URL, portfolio_url http(s)만) · `app/api/intra/contact-submissions/[id]`(GET 상세 / PATCH 응대 기록) · `app/api/intra/contact-attachment`(직원 5분 서명 다운로드) · `components/intra/BrandInquiryInbox.tsx` 상세 패널 · 커머스 > 고객문의도 같은 인박스 · Action Hub·CS 통합 미답변 집계 'new'→'pending'
+- DB: `contact_submissions.attachments`·`handling_log` 컬럼, 비공개 버킷 `contact-attachments`(10MB, 문서·이미지 MIME)
+
+### 검증
+
+- 운영: 배포 READY 확인(`dpl_DeJKSVn5…` = 9d42237d) · tenone.biz 홈 세계관·크루 섹션 없음 · About 연혁 32건(조작 항목 없음)
+- 로컬: Works 메뉴 재클릭·뒤로가기 · About/Contact 탭 리셋 · Works 통계 숨김 · Contact 첨부 선택·형식/용량 차단 · `/api/contact` 캡차 없으면 400 · 인트라 문의 API 비로그인 401
+- Storage 실테스트: 서명 업로드 성공 → anon 다운로드 차단 → 서명 다운로드 성공 → 테스트 파일 삭제
+- 미검증: 인트라 문의 상세 화면(직원 로그인 필요), 실제 Contact 제출(캡차)
+
+### 발견 (미해결)
+
+- `contact_submissions` RLS: 로그인 회원 전체 조회 + anon 직접 INSERT (lockdown SQL 승인 대기)
+- 커머스 > 고객문의 상태 변경은 UPDATE 정책 부재로 원래 저장 안 되던 상태였음 (인박스 교체로 해소)
+- Tier 미지정 24개 사이트 · MADLeague brand 역할 capability 이관 · requireStaff vs auth_is_staff 판단 불일치 · Works 15건 이미지 없음
+
+---
+
+## 2026-10-05 (세션 157) — 플랫폼 헌법 · 데이터 계약 · 약관/방침 · 가입 동의
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61` → master push (사용자 수동 push 2회 + 작업 종료 push)
+- 운영 DB 적용 (MCP `apply_migration`): `service_lifecycle_and_brand_joins`
+- Supabase PAT 2개 만료 확인 → `.env.local`에서 제거, SQL은 MCP 일원화
+
+### 결정 (사용자)
+
+- 지주사–계열사 모델. 집중 브랜드: TenOne·MADLeague·HeRo·Badak·MADLeap. 외부 3개 2027 이전
+- 유니버스는 강조하지 않음 — 푸터 표기는 `Ten:One™ Universe` (Part of 금지)
+- 탈퇴: 커뮤니티 글 익명화, 이력·결제·수료 등은 당분간 전부 보존 + 요청 시 수동 처리. 외부 회원 이전 전 자동화
+- Badak 9천명: 통째 이전 X, 원하는 사람만. Planner's 사용자 분리 고지. 소식은 별도 동의자만
+- 문의 보관 1년 · 만 14세 미만 가입 불가 · 사업자 열시일분 222-22-01839 (통신판매업·직업소개 미신고)
+- 법적 검토는 모든 기능의 기본 단계
+
+### 변경 내역
+
+- 도메인: `lib/domain-registry.ts` CANONICAL_HOSTS, middleware 0-CANONICAL (308/302/prefetch 204), `next.config.ts` 스테이징 noindex, skipPaths에 /privacy·/terms
+- 인트라: IntraHeader·IntraSidebar 로그아웃 → `/intra`
+- 푸터: `components/UniverseFooter.tsx` Part of 제거·사업자 정보 줄·TenOne 저작권 중복 제거, `lib/site-config.ts` universeLabel 통일, Badak about 문구
+- 신규 `lib/company-info.ts` (COMPANY_INFO·LEGAL_DOCUMENTS 버전 레지스트리)
+- `app/(TenOne)/privacy/page.tsx` 전면 개정 · `app/(TenOne)/terms/page.tsx` 통합 이용약관
+- DB `sql/service-lifecycle.sql`: ums_sites 생애주기 컬럼, resolve_site_slug, member_brand_joins 정규화+FK·terms_version, member_brand_withdrawals.scope
+- 신규 `docs/Data_Lifecycle.md`
+- 가입 동의: 신규 `components/SignupConsent.tsx`·`components/ConsentGate.tsx`, `lib/auth-context.tsx` register(consent)·recordConsent, `types/auth.ts` MemberConsent, `/signup`·LoginModal 적용, 루트 layout에 ConsentGate
+- 버그: LoginModal 가입 captchaToken 누락(브랜드 사이트 모달 가입 전부 실패) · 광고 수신 기본값 true 하드코딩(정보통신망법 제50조) 제거
+- 문서: CLAUDE.md §0.1(헌법·데이터 계약·종료 절차·법적 검토·약관 2층) · §1.2.0 가입 동의 표준 · 부록 D MCP 일원화, HeRo·Badak CLAUDE.md
+
+### 검증
+
+- 실서버: tenone.biz·hero.ne.kr·smarcomm.tenone.biz /terms·/privacy 200 + 사업자번호, /signup·hero 로그인 창 동의 4항목, hero 푸터 사업자 정보
+- ConsentGate 실사용: lools@tenone.biz `members.consent` 기록 확인 (terms 2026-10-05, channel existing)
+
+---
+
+## 2026-10-04 (세션 156) — 보안 긴급 점검·조치
+
+### 장소·운영
+
+- 워크트리 `interesting-chaum-afed61` (base `c18898e5`) → master ff push 1회
+- 코드 3 commit (`7df80807` API 게이트 · `960edf60` CAPTCHA · `79d179b4` DB SQL 기록) + 관리파일 commit
+- 운영 DB 직접 적용 3건 (Supabase MCP): GRANT 마이그레이션 · members 권한 보호 트리거 · fn_auto_member_brand_join DEFINER
+- 사용자 결정: 집중 사이트 5개 (MADLeague·TenOne·HeRo·SmarComm·Badak)
+
+### 진단 (실측)
+
+- 페이지 845 · API 492 · 코드 38.6만 줄 · 브랜드 27 / service_role API 329 / middleware `/api` skip
+- npm audit: critical 1 · high 22 · moderate 14 (미조치)
+- Supabase advisor: security_definer_view 9 · anon 실행 DEFINER 함수 49 · search_path 미고정 91 · 유출 비번 차단 OFF
+- auth.users 226 = 실가입자 0 (본인·내부 4·더미 20·봇 201 — 무작위 이름, 실존 타인 이메일로 인증메일 발송 = 메일 폭탄 악용)
+
+### 변경 내역
+
+#### API 인증 게이트
+- 신규 `lib/api-guard.ts`, `lib/api-access-policy.ts` / `middleware.ts` 0-API 게이트 (70 경로 직원 전용)
+- HeRo 15 route 본인·소유 row 검증, `talent-agent/apply` member_id 세션 기반
+- `app/api/madleague/admin/_auth.ts` requireIntraAdmin → requireStaff
+- `lib/myverse/intra-auth.ts` member_roles 잘못된 컬럼(user_id→member_id), members.email/roles 신뢰 제거
+- gravity scan/brand-value · cron/analytics-sync 내부 fetch에 `internalAuthHeaders()`
+- `app/(SmarComm)/smarcomm/dashboard/layout.tsx` BETA_EMAILS → `SMARCOMM_BETA_EMAILS` 공유
+
+#### 권한 상승 차단 (DB)
+- `sql/protect-member-privileged-columns.sql` — BEFORE INSERT/UPDATE 트리거, anon 쓰기 권한 회수
+
+#### 회원 생성 복구 (DB)
+- `sql/fix-member-brand-join-definer.sql` — 3월 이후 모든 일반 가입자 members INSERT가 RLS로 롤백되던 원인
+
+#### CAPTCHA
+- 신규 `components/CaptchaWidget.tsx` (Turnstile, interaction-only, 1회용 토큰 재발급)
+- `lib/auth-context.tsx` login/register/resetPassword captchaToken 인자
+- 연결: LoginModal · /login · /signup · /reset-password · intra layout · Dokdae · WIO login · UniverseProfile 비밀번호 변경
+- `.env.example` NEXT_PUBLIC_TURNSTILE_SITE_KEY
+
+#### 배포 후 핫픽스
+- `components/IntraHeader.tsx` 로그아웃: `logout()` 미대기 상태로 `window.location` 이동 → signOut·쿠키삭제 전에 페이지 이탈해 세션 유지되던 버그 → `await logout()`
+- `features/tenone/PublicHeader.tsx` `hideAuth={true}` 제거 — TenOne 본사이트 우측 상단에 로그인·아바타·알림·로그아웃 미노출 (§1.9.2 표준 위반, 04-26 e54c100d부터)
+
+- `lib/auth-context.tsx` onAuthStateChange 콜백이 supabase 조회를 await → auth 잠금 교착 → signOut·signIn·getSession 영구 대기 (인트라 로그아웃 무반응·구글 로그인 후 인트라 미인식·재로그인 무반응의 공통 원인). setTimeout으로 잠금 밖 실행 + signOut 3초 상한
+
+- refresh 토큰 무한 재시도 사고: www에서 global 로그아웃 직후 열려 있던 intra.tenone.biz 탭이 4분간 4,170회 /token 호출 → 429로 같은 IP의 정상 로그인까지 차단. 원인 가설 = 같은 이름의 host-only 세션 쿠키 중복 (실도메인에서 공존 가능 확인). `lib/supabase/client.ts` *.tenone.biz 로드 시 host-only 사본만 만료 (domain 쿠키 보존 실측 확인) + `app/api/sso/exchange` tenone 계열 호스트면 .tenone.biz domain 지정
+
+#### 외부 설정 (사용자 수행)
+- Cloudflare 계정·Turnstile 위젯 hostname 5개 정리 / Vercel 2FA 설정 / Vercel env 사이트키 등록 · Needs Attention 비밀값 Secret 전환
+
+#### 문서
+- CLAUDE.md 부록 A에 API 인증·권한 판단 금지 규칙 / 브랜드 CLAUDE.md (SmarComm·Dokdae·WIO) / 메모리 `project_focus_sites`
+
+---
+
 ## 2026-06-01 (세션 155) — OpenClaw 코드 제거 + 유니버스 현황 진단
 
 ### 장소·운영

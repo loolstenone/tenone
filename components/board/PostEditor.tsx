@@ -18,6 +18,7 @@ import {
     Undo, Redo, X, Upload, Tag, Eye, Save, Send, Lock,
     Paperclip, FileText, Trash2, Table as TableIcon,
 } from "lucide-react";
+import { uploadBoardImage, uploadInlineImages } from "@/lib/board-image-upload";
 import type { CreatePostInput, UpdatePostInput, Post, BoardConfig, Attachment } from "@/types/board";
 
 interface PostEditorProps {
@@ -108,25 +109,13 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                         event.preventDefault();
                         const file = item.getAsFile();
                         if (!file) return false;
-                        const fd = new FormData();
-                        fd.append('file', file);
-                        fd.append('site', config.site);
-                        fetch('/api/board/upload', { method: 'POST', body: fd })
-                            .then(r => r.ok ? r.json() : Promise.reject())
-                            .then(({ url }) => {
+                        uploadBoardImage(file, config.site)
+                            .then(url => {
                                 view.dispatch(view.state.tr.replaceSelectionWith(
                                     view.state.schema.nodes.image.create({ src: url })
                                 ));
                             })
-                            .catch(() => {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    view.dispatch(view.state.tr.replaceSelectionWith(
-                                        view.state.schema.nodes.image.create({ src: e.target?.result as string })
-                                    ));
-                                };
-                                reader.readAsDataURL(file);
-                            });
+                            .catch((e: Error) => alert(e.message));
                         return true;
                     }
                 }
@@ -138,24 +127,13 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 const file = files[0];
                 if (!file.type.startsWith("image/")) return false;
                 event.preventDefault();
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('site', config.site);
                 const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos || 0;
-                fetch('/api/board/upload', { method: 'POST', body: fd })
-                    .then(r => r.ok ? r.json() : Promise.reject())
-                    .then(({ url }) => {
+                uploadBoardImage(file, config.site)
+                    .then(url => {
                         const { tr } = view.state;
                         view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({ src: url })));
                     })
-                    .catch(() => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const { tr } = view.state;
-                            view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({ src: e.target?.result as string })));
-                        };
-                        reader.readAsDataURL(file);
-                    });
+                    .catch((e: Error) => alert(e.message));
                 return true;
             },
         },
@@ -196,22 +174,11 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
         input.onchange = async () => {
             const file = input.files?.[0];
             if (!file || !editor) return;
-            const fd = new FormData();
-            fd.append("file", file);
-            fd.append("site", config.site);
             try {
-                const res = await fetch("/api/board/upload", { method: "POST", body: fd });
-                if (res.ok) {
-                    const { url } = await res.json();
-                    editor.chain().focus().setImage({ src: url }).run();
-                }
-            } catch {
-                // fallback base64
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    editor.chain().focus().setImage({ src: e.target?.result as string }).run();
-                };
-                reader.readAsDataURL(file);
+                const url = await uploadBoardImage(file, config.site);
+                editor.chain().focus().setImage({ src: url }).run();
+            } catch (e) {
+                alert(e instanceof Error ? e.message : "이미지 업로드에 실패했습니다.");
             }
         };
         input.click();
@@ -255,7 +222,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
         setSubmitting(true);
         setSaveStatus("saving");
         try {
-            const content = editor?.getHTML() || "";
+            const content = await uploadInlineImages(editor?.getHTML() || "", config.site);
             const excerpt = editor?.getText().substring(0, 200) || "";
 
             if (isEdit) {
@@ -275,6 +242,9 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 await onSubmit(data);
             }
             setSaveStatus("saved");
+        } catch (err) {
+            setSaveStatus("editing");
+            alert(err instanceof Error ? err.message : "저장에 실패했습니다.");
         } finally {
             setSubmitting(false);
         }
@@ -521,6 +491,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 <div className="flex items-center gap-2 mb-2">
                     <ImageIcon size={14} className="tn-text-muted" />
                     <span className="text-sm tn-text-muted">대표 이미지</span>
+                    {!representImage && <span className="text-xs tn-text-muted opacity-70">· 지정하지 않으면 본문 첫 이미지</span>}
                 </div>
                 {representImage ? (
                     <div className="relative inline-block">
@@ -539,22 +510,9 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                             const file = e.target.files?.[0];
                             if (!file) return;
                             try {
-                                const fd = new FormData();
-                                fd.append('file', file);
-                                fd.append('site', config.site);
-                                const res = await fetch('/api/board/upload', { method: 'POST', body: fd });
-                                if (res.ok) {
-                                    const { url } = await res.json();
-                                    setRepresentImage(url);
-                                } else {
-                                    const reader = new FileReader();
-                                    reader.onload = ev => setRepresentImage(ev.target?.result as string);
-                                    reader.readAsDataURL(file);
-                                }
-                            } catch {
-                                const reader = new FileReader();
-                                reader.onload = ev => setRepresentImage(ev.target?.result as string);
-                                reader.readAsDataURL(file);
+                                setRepresentImage(await uploadBoardImage(file, config.site));
+                            } catch (err) {
+                                alert(err instanceof Error ? err.message : "이미지 업로드에 실패했습니다.");
                             }
                         }} />
                     </label>

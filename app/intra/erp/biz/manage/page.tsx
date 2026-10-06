@@ -22,13 +22,6 @@ interface ForecastRow {
   gap: number;
 }
 
-const mockForecast: ForecastRow[] = [
-  { item: "매출 (Billing)", plan: 42_000_000, fc1: 38_000_000, fc2: 40_000_000, prevActual: 35_000_000, gap: -2_000_000 },
-  { item: "외부비 (Ex-Cost)", plan: 27_000_000, fc1: 25_000_000, fc2: 26_000_000, prevActual: 23_000_000, gap: -1_000_000 },
-  { item: "매출총이익", plan: 15_000_000, fc1: 13_000_000, fc2: 14_000_000, prevActual: 12_000_000, gap: -1_000_000 },
-  { item: "내부비", plan: 8_000_000, fc1: 7_500_000, fc2: 7_800_000, prevActual: 7_000_000, gap: -200_000 },
-  { item: "영업이익", plan: 7_000_000, fc1: 5_500_000, fc2: 6_200_000, prevActual: 5_000_000, gap: -800_000 },
-];
 
 type Status = "작성중" | "검토요청" | "승인완료";
 
@@ -41,7 +34,7 @@ export default function MonthlyForecastPage() {
   const [monthIdx, setMonthIdx] = useState(now.getMonth());
   const [round, setRound] = useState(2);
   const [status, setStatus] = useState<Status>("작성중");
-  const [forecastData, setForecastData] = useState<ForecastRow[]>(mockForecast);
+  const [forecastData, setForecastData] = useState<ForecastRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

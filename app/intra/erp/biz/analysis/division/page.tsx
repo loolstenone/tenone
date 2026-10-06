@@ -21,12 +21,6 @@ interface DivisionData {
   perCapita: number;
 }
 
-const mockDivisions: DivisionData[] = [
-  { name: "관리부문", billing: 20_000_000, grossProfit: 6_000_000, operatingProfit: 2_500_000, profitRate: 12.5, prevProfitRate: 11.8, headcount: 5, perCapita: 4_000_000 },
-  { name: "사업부문", billing: 58_000_000, grossProfit: 17_000_000, operatingProfit: 8_000_000, profitRate: 13.8, prevProfitRate: 14.2, headcount: 16, perCapita: 3_625_000 },
-  { name: "제작부문", billing: 17_000_000, grossProfit: 6_000_000, operatingProfit: 2_500_000, profitRate: 14.7, prevProfitRate: 14.7, headcount: 14, perCapita: 1_214_286 },
-  { name: "지원부문", billing: 10_000_000, grossProfit: 3_000_000, operatingProfit: 2_000_000, profitRate: 20.0, prevProfitRate: 18.5, headcount: 10, perCapita: 1_000_000 },
-];
 
 function buildDivisionData(rows: Record<string, unknown>[]): DivisionData[] {
   // Group by division, accumulate two most-recent quarters for prev/current comparison
@@ -78,7 +72,7 @@ function TrendLabel({ current, prev }: { current: number; prev: number }) {
 export default function DivisionProfitPage() {
   const { user } = useAuth();
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
-  const [divisions, setDivisions] = useState<DivisionData[]>(mockDivisions);
+  const [divisions, setDivisions] = useState<DivisionData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

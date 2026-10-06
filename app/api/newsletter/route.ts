@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { renderConfirmHtml, renderConfirmText } from '@/lib/email/newsletter-template';
+import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server';
+import { getApiUser } from '@/lib/api-guard';
 
 function getAdminClient() {
     return createClient(
@@ -42,8 +44,18 @@ function makeToken(id: string): string {
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, nickname, name, memberId, source } = await request.json();
+        const { email, nickname, name, source, captchaToken } = await request.json();
         if (!email) return NextResponse.json({ error: '이메일은 필수입니다.' }, { status: 400 });
+
+        // 봇 차단 — 봇 구독 신청마다 타인 주소로 인증 메일이 나가던 문제 (2026-10-05: 구독자 458 중 457 봇)
+        // 시크릿 미설정 시 fail-closed → 구독·인증 메일 발송 중단
+        // 로그인 회원이 본인 이메일로 구독하면 세션으로 확인 (가입 때 이미 로봇 확인 통과)
+        const apiUser = await getApiUser(request);
+        const isSelf = !!apiUser?.email && apiUser.email.toLowerCase() === String(email).trim().toLowerCase();
+        if (!isSelf && !(await verifyTurnstile(captchaToken, request))) {
+            return NextResponse.json({ error: CAPTCHA_REQUIRED_ERROR }, { status: 400 });
+        }
+        const memberId = isSelf ? apiUser?.memberId ?? null : null;
 
         // nickname 우선, 없으면 name 폴백 (로그인 회원)
         const displayName = nickname || name || null;

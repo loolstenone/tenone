@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
 
     if (hasAdminFlag) {
       try {
-        const { createClient } = await import('@/lib/supabase/server');
+        const { createAdminClient: createClient } = await import('@/lib/supabase/admin');
         const supabase = await createClient();
 
         // 다크 트라이어드 사전 탐지

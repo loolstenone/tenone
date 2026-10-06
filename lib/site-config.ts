@@ -135,7 +135,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#D32F2F', primaryDark: '#B71C1C', secondary: '#FF5252', headerBg: '#171717', headerText: '#ffffff', footerBg: '#212121', footerText: '#a3a3a3', accent: '#D32F2F' },
         meta: { title: 'MAD League — 경쟁을 통한 성장 플랫폼', description: 'Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.', keywords: ['MAD League', '대학생', '마케팅', '경쟁', 'PT'] },
         homePath: '/madleague', signupPath: '/signup', domain: 'madleague.net',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     madleap: {
@@ -151,7 +151,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
             { name: '매드립 소개', href: '/madleap/about' },
             { name: '포트폴리오', href: '/madleap/portfolio' },
         ],
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     youinone: {
@@ -161,7 +161,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#1AAD64', primaryDark: '#148B4A', secondary: '#525252', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#1AAD64' },
         meta: { title: 'YouInOne — 프로젝트 그룹', description: '기업과 사회의 문제를 해결하는 프로젝트 그룹. Idea + Strategy. 소규모 기업 연합 얼라이언스.', keywords: ['YouInOne', '프로젝트그룹', '얼라이언스', '문제해결'] },
         homePath: '/youinone', signupPath: '/signup', domain: 'youinone.com',
-        universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     luki: {
@@ -171,7 +171,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#7C3AED', primaryDark: '#5B21B6', secondary: '#A78BFA', headerBg: '#1a1a2e', headerText: '#ffffff', footerBg: '#1a1a2e', footerText: '#a3a3a3', accent: '#7C3AED' },
         meta: { title: 'LUKI — AI Idol Group', description: 'LUKI - AI 기반 아이돌 그룹. Ten:One Universe의 AI 엔터테인먼트 브랜드.', keywords: ['LUKI', 'AI Idol', 'AI 아이돌', 'Ten:One'] },
         homePath: '/', signupPath: '/signup', domain: 'luki.ai',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     rook: {
@@ -181,7 +181,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#00d255', primaryDark: '#00b347', secondary: '#00ff66', headerBg: '#282828', headerText: '#ffffff', footerBg: '#1a1a1a', footerText: '#a3a3a3', accent: '#00d255' },
         meta: { title: 'RooK — AI Creator', description: 'AI Creator RooK. 밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다. 하고 싶은 것이라면 무엇이든 도전합니다.', keywords: ['RooK', 'AI Creator', 'AI 크리에이터', 'AI 아티스트', 'Ten:One'] },
         homePath: '/rook', signupPath: '/signup', domain: 'rook.co.kr',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     badak: {
@@ -197,7 +197,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
             { name: '커뮤니티', href: '/badak/community' },
             { name: '바닥이란', href: '/badak/about' },
         ],
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     smarcomm: {
@@ -207,7 +207,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#3B82F6', primaryDark: '#2563EB', secondary: '#60A5FA', headerBg: '#ffffff', headerText: '#171717', footerBg: '#0A0E1A', footerText: '#a3a3a3', accent: '#3B82F6' },
         meta: { title: 'SmarComm. — AI 마케팅 커뮤니케이션', description: 'SmarComm. - AI 기반 올인원 마케팅 커뮤니케이션 플랫폼.', keywords: ['SmarComm', 'AI 마케팅', '커뮤니케이션', 'Ten:One'] },
         homePath: '/smarcomm', signupPath: '/signup', domain: 'smarcomm.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: false, kakao: false },
     },
     ogamja: {
@@ -216,7 +216,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#F5C518', primaryDark: '#D4A017', secondary: '#FFD54F', headerBg: '#ffffff', headerText: '#171717', footerBg: '#2D2D2D', footerText: '#a3a3a3', accent: '#F5C518' },
         meta: { title: '공감자 — 하찮고 귀여운 감자들의 공감 이야기', description: '하찮고 귀여운 감자들의 공감 이야기. 감자처럼 소소하지만 따뜻한 일상의 공감 블로그.', keywords: ['공감자', 'Ogamja', '블로그', '공감', '감자', 'Ten:One'] },
         homePath: '/0gamja', signupPath: '/signup', domain: '0gamja.com',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '필찐감자', href: '/0gamja/writers' },
@@ -237,7 +237,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#F5C518', primaryDark: '#D4A017', secondary: '#FFD54F', headerBg: '#3D3D3D', headerText: '#ffffff', footerBg: '#3D3D3D', footerText: '#a3a3a3', accent: '#F5C518' },
         meta: { title: 'Seoul/360° — Explore Seoul by Subway', description: 'Your complete guide to exploring Seoul using only the subway. Challenge Only Subway Seoul Tour!', keywords: ['Seoul', 'subway', 'travel', 'Korea', 'tour', 'metro'] },
         homePath: '/seoul360', signupPath: '/signup', domain: 'seoul360.net',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: 'Seoul/360°', href: '/seoul360' },
@@ -261,7 +261,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#007BBF', primaryDark: '#005F8A', secondary: '#4FC3F7', headerBg: '#ffffff', headerText: '#171717', footerBg: '#1a1a2e', footerText: '#a3a3a3', accent: '#007BBF' },
         meta: { title: '문래지앙 — 작은 철공소, 골목 그리고 가난한 예술가들', description: '문래동 18년 거주자의 로컬 프로젝트. 철공소, 골목, 예술가들의 이야기를 기록합니다.', keywords: ['문래지앙', 'Mullaesian', '문래동', '문래창작촌', '철공소', 'Ten:One'] },
         homePath: '/mullaesian', signupPath: '/signup', domain: 'mullaesian.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: '뚜르 드 문래', href: '/mls#tour' },
@@ -282,7 +282,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#00C853', primaryDark: '#00A844', secondary: '#69F0AE', headerBg: '#1a1a1a', headerText: '#ffffff', footerBg: '#1a1a1a', footerText: '#a3a3a3', accent: '#00C853' },
         meta: { title: 'FWN — 패션 위크 네트워크', description: 'Fashion Week Network. 전 세계 패션 위크를 네트워크로 연결합니다. The World is on the Runway.', keywords: ['FWN', 'Fashion Week', '패션위크', '패션위크네트워크', '서울패션위크', 'Ten:One'] },
         homePath: '/fwn', signupPath: '/signup', domain: 'fwn.co.kr',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: '서울', href: '/fwn/category/seoul' },
@@ -312,7 +312,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#1a1a1a', primaryDark: '#111111', secondary: '#333333', headerBg: '#1a1a1a', headerText: '#ffffff', footerBg: '#1a1a1a', footerText: '#a3a3a3', accent: '#c8a97e' },
         meta: { title: 'MoNTZ — U.G.L.Y Photography', description: 'MoNTZ 포토그래피. 자신을 사랑하며, 개인적·상업적으로 다양한 사진 촬영 작업을 하고 있습니다.', keywords: ['MoNTZ', 'photography', '포토그래피', '사진', 'UGLY', 'Ten:One'] },
         homePath: '/montz', signupPath: '/signup', domain: 'montz.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: 'MoNTZ', href: '/montz' },
@@ -332,7 +332,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#F59E0B', primaryDark: '#D97706', secondary: '#FBBF24', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#F59E0B' },
         meta: { title: 'HeRo — Talent Agency', description: 'Human enhancement & Recruit Optimization. HeRo는 인재의 성장을 설계하고 최적의 무대를 연결하는 인재 기획사입니다.', keywords: ['HeRo', 'Talent Agency', '인재기획사', '커리어', '매칭', 'HIT', 'Ten:One'] },
         homePath: '/hero', signupPath: '/signup', domain: 'hero.ne.kr',
-        universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
     mindle: {
@@ -341,7 +341,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#F5C518', primaryDark: '#E5B616', secondary: '#FFD54F', headerBg: '#0A0A0A', headerText: '#ffffff', footerBg: '#0A0A0A', footerText: '#a3a3a3', accent: '#F5C518' },
         meta: { title: 'Mindle — 트렌드의 홀씨를 찾아, 인사이트로 피워냅니다', description: 'AI 기반 트렌드 분석 플랫폼. 데이터 크롤링부터 인사이트 큐레이션까지.', keywords: ['Mindle', '민들레', '트렌드', 'AI 분석', '트렌드 리포트', 'Ten:One'] },
         homePath: '/mindle', signupPath: '/signup', domain: 'mindle.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '트렌드', href: '/mindle/trends' },
@@ -363,7 +363,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#10B981', primaryDark: '#059669', secondary: '#34D399', headerBg: '#ffffff', headerText: '#171717', footerBg: '#1a2e1a', footerText: '#a3a3a3', accent: '#10B981' },
         meta: { title: '타우니티 — 지역이 살아야 우리가 산다', description: 'Town Community 타우니티. 인공지능 시대, 지역 소멸과 고령화에 맞서는 지역 기반 커뮤니티.', keywords: ['타우니티', 'Townity', '지역 커뮤니티', '지역 소멸', '고령화', '로컬', 'Ten:One'] },
         homePath: '/townity', signupPath: '/signup', domain: 'townity.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: '타우니티란', href: '/tw#about' },
@@ -386,7 +386,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#6B8E23', primaryDark: '#556B2F', secondary: '#8FBC8F', headerBg: '#ffffff', headerText: '#171717', footerBg: '#2D3319', footerText: '#a3a3a3', accent: '#6B8E23' },
         meta: { title: '자연함 — 정선의 자연을 담다', description: '강원도 정선 기반 자연식품 브랜드. 자연이 키운 건강한 먹거리를 전합니다.', keywords: ['자연함', 'NatureBox', '정선', '자연식품', '강원도', '건강식품', 'Ten:One'] },
         homePath: '/naturebox', signupPath: '/signup', domain: 'naturebox.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: '자연함 이야기', href: '/nb#about' },
@@ -409,7 +409,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#6366F1', primaryDark: '#4F46E5', secondary: '#818CF8', headerBg: '#0B0D17', headerText: '#ffffff', footerBg: '#0B0D17', footerText: '#a3a3a3', accent: '#6366F1' },
         meta: { title: 'Myverse — 나를 운영하는 OS', description: '기록·분류·분석·실행을 하나로. 사진·메모·일정·관계가 자동 정리되는 Personal OS.', keywords: ['Myverse', 'Personal OS', 'AI 에이전트', '개인화', '데이터 주권', 'Ten:One'] },
         homePath: '/myverse', signupPath: '/signup', domain: 'myverse.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '철학', href: '/mv/philosophy' },
@@ -435,7 +435,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#7F1146', primaryDark: '#5C0C33', secondary: '#A3194F', headerBg: '#2D1B2E', headerText: '#ffffff', footerBg: '#1E1220', footerText: '#a3a3a3', accent: '#7F1146' },
         meta: { title: 'Domo — 인생 2회차, 도모하다', description: '정년·은퇴 후 새로운 도전을 시작하는 시니어 비즈니스맨을 위한 네트워킹·준비서·기획·투자자문 플랫폼.', keywords: ['도모', 'Domo', '시니어', '네트워킹', '은퇴', '비즈니스', '투자자문', '기획'] },
         homePath: '/domo', signupPath: '/signup', domain: 'domo.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '서비스', href: '/dm/services' },
@@ -458,7 +458,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#111111', primaryDark: '#000000', secondary: '#555555', headerBg: '#ffffff', headerText: '#111111', footerBg: '#1a1a1a', footerText: '#a3a3a3', accent: '#111111' },
         meta: { title: 'JAKKA — 포트폴리오', description: '사진작가 JAKKA의 포트폴리오. 인물, 스튜디오, 스포츠, 항공, 콘서트 사진.', keywords: ['JAKKA', '포트폴리오', '사진작가', 'Photography', 'Ten:One'] },
         homePath: '/jakka', signupPath: '/signup', domain: 'jakka.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: '포트폴리오', href: '/jakka' },
@@ -477,7 +477,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#1AAD64', primaryDark: '#148F52', secondary: '#256EFF', headerBg: '#ffffff', headerText: '#171717', footerBg: '#0F1F2E', footerText: '#a3a3a3', accent: '#1AAD64' },
         meta: { title: 'ChangeUp — 미래를 만드는 일, 창업', description: 'AI 시대 고등학생·대학생 창업 교육 플랫폼. 부모·학교·지역사회가 함께 투자하는 청소년 창업 생태계.', keywords: ['ChangeUp', '창업교육', '청소년창업', 'AI창업', '투자', 'Ten:One'] },
         homePath: '/changeup', signupPath: '/signup', domain: 'changeup.company',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '프로그램', href: '/cu/programs' },
@@ -500,7 +500,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#0F766E', primaryDark: '#134E4A', secondary: '#14B8A6', headerBg: '#134E4A', headerText: '#ffffff', footerBg: '#042F2E', footerText: '#99F6E4', accent: '#14B8A6' },
         meta: { title: "Planner's — 우리는 모두 기획자다", description: '기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.', keywords: ['Planner', '기획자', '기획', 'Planning', 'Ten:One'] },
         homePath: '/planners', signupPath: '/signup', domain: 'planners.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: false, google: false, kakao: false },
         nav: [
             { name: "Planner's", href: '/planners' },
@@ -522,7 +522,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#6366F1', primaryDark: '#4F46E5', secondary: '#818CF8', headerBg: '#0F0F23', headerText: '#ffffff', footerBg: '#0F0F23', footerText: '#94A3B8', accent: '#6366F1' },
         meta: { title: 'WIO — Work In One', description: '프로젝트 중심으로 사람·일·돈·지식이 하나의 시스템에서 돌아가는 통합 운영 플랫폼. 솔루션 구축과 컨설팅.', keywords: ['WIO', 'Work In One', '프로젝트 관리', 'ERP', 'GPR', 'Vrief', 'Ten:One'] },
         homePath: '/wio', signupPath: '/signup', domain: 'wio.work',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '솔루션', href: '/wio/solutions' },
@@ -538,7 +538,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#1E3A5F', primaryDark: '#162D4A', secondary: '#3D5A80', headerBg: '#0D1B2A', headerText: '#ffffff', footerBg: '#0D1B2A', footerText: '#94A3B8', accent: '#E0A458' },
         meta: { title: 'Brand Gravity™ — 브랜딩 컨설팅', description: '브랜드의 중력을 만드는 전략 컨설팅. Brand Gravity™는 Ten:One™ Universe의 브랜딩 전문 서비스입니다.', keywords: ['Brand Gravity', '브랜딩', '컨설팅', '브랜드 전략', 'Ten:One'] },
         homePath: '/brandgravity', signupPath: '/signup', domain: 'brandgravity.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '서비스', href: '/brandgravity/services' },
@@ -553,7 +553,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#10B981', primaryDark: '#059669', secondary: '#34D399', headerBg: '#064E3B', headerText: '#ffffff', footerBg: '#064E3B', footerText: '#94A3B8', accent: '#10B981' },
         meta: { title: 'Universe Wiki — 지식 허브', description: 'Ten:One™ Universe의 공개 지식 허브. 브랜드, 프로젝트, 운영 노하우를 공유합니다.', keywords: ['Wiki', '지식', 'Ten:One', 'Universe', '위키'] },
         homePath: '/wiki', signupPath: '/signup', domain: 'wiki.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: '문서', href: '/wiki/docs' },
@@ -567,7 +567,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#60A5FA', primaryDark: '#3B82F6', secondary: '#93C5FD', headerBg: '#0F172A', headerText: '#ffffff', footerBg: '#0F172A', footerText: '#94A3B8', accent: '#60A5FA' },
         meta: { title: '독대 — AI Agent 메시징 채널', description: 'AI Agent(열시일분 등)와 메시지를 주고받는 채널. Ten:One™ Universe.', keywords: ['독대', 'AI Agent', '메시징', '열시일분', 'Ten:One'] },
         homePath: '/dokdae', signupPath: '/signup', domain: 'dokdae.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [],
     },
@@ -578,7 +578,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#F87171', primaryDark: '#EF4444', secondary: '#FCA5A5', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#F87171' },
         meta: { title: 'Evolution School — 실무 교육 플랫폼', description: '실전 중심 교육으로 진짜 실력을 키우는 곳. Evolution School은 Ten:One™ Universe의 교육 브랜드입니다.', keywords: ['Evolution School', '교육', '실무', 'Ten:One'] },
         homePath: '/evschool', signupPath: '/signup', domain: 'evschool.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [],
     },
@@ -589,7 +589,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#FCD34D', primaryDark: '#FBBF24', secondary: '#FDE68A', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#FCD34D' },
         meta: { title: 'Naming Factory — 네이밍 서비스', description: '브랜드, 제품, 서비스의 이름을 짓는 전문 네이밍 서비스. Ten:One™ Universe.', keywords: ['Naming Factory', '네이밍', '브랜드명', 'Ten:One'] },
         homePath: '/namingfactory', signupPath: '/signup', domain: 'namingfactory.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [],
     },

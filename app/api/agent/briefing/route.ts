@@ -8,6 +8,7 @@
  * Auth: Bearer ADMIN_API_KEY
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { requireStaff } from '@/lib/api-guard';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { invokeAgent } from '@/lib/agent/claude';
 
@@ -125,11 +126,9 @@ async function publishToChannel(content: string): Promise<boolean> {
 // ── 핸들러 ─────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-    // 인증 (ADMIN_API_KEY)
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // 인증: 직원 세션 또는 내부 호출(ADMIN_API_KEY) — 인트라 수동 브리핑 버튼은 세션 쿠키로 통과
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         const korTime = new Intl.DateTimeFormat('ko-KR', {

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { User, SystemAccess, IntraModule } from '@/types/auth';
+import { User, SystemAccess, IntraModule, MemberConsent } from '@/types/auth';
 import { createClient } from '@/lib/supabase/client';
 import { permissionsFromJWT } from '@/lib/supabase/identity';
 import type { JWTAppMetadata } from '@/types/identity';
@@ -16,13 +16,14 @@ interface AuthContextType {
     canAccessIntra: boolean;
     hasAccess: (system: SystemAccess) => boolean;
     hasModuleAccess: (module: IntraModule) => boolean;
-    login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
-    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    login: (email: string, password: string, captchaToken?: string) => Promise<{ success: boolean; error?: string; user?: User }>;
+    register: (name: string, email: string, password: string, consent: MemberConsent, captchaToken?: string) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    recordConsent: (consent: MemberConsent) => Promise<{ success: boolean; error?: string }>;
     loginWithGoogle: () => Promise<void>;
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
     logout: () => Promise<void>;
-    resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+    resetPassword: (email: string, captchaToken?: string) => Promise<{ success: boolean; error?: string }>;
     updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -129,6 +130,7 @@ function memberToUser(member: Record<string, unknown>): User {
         company: member.company as string | undefined,
         createdAt: member.created_at as string,
         newsletterSubscribed: member.newsletter_subscribed as boolean | undefined,
+        consent: (member.consent as Partial<MemberConsent> | null) ?? {},
 
         // 온보딩
         onboardingCompleted: (member.onboarding_completed as boolean) ?? true,
@@ -177,6 +179,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const { defaultModuleAccess } = await import('@/types/auth');
                 const initialType = 'member' as const;
 
+                // 이메일 가입자는 signUp 때 받은 동의를 user_metadata로 넘겨받는다. 소셜 첫 가입은 비어 있음 → ConsentGate
+                const metaConsent = sessionUser.user_metadata?.consent as MemberConsent | undefined;
                 const oauthHandle = await generateUniqueHandle(sessionUser.email || userName, supabase);
                 const { data: newMember } = await supabase
                     .from('members')
@@ -196,6 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         module_access: defaultModuleAccess[initialType] || [],
                         affiliations: [],
                         onboarding_completed: false,
+                        consent: metaConsent?.terms_version ? metaConsent : {},
+                        newsletter_subscribed: metaConsent?.marketing === true,
                     })
                     .select()
                     .single();
@@ -299,12 +305,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         validateSession();
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+        // ⚠️ 콜백 안에서 supabase 호출을 await 하면 auth 잠금 교착 → 이후 signOut·signIn이 영구 대기.
+        //    (supabase-js 공식 권고) 콜백은 즉시 반환하고 실제 작업은 setTimeout으로 잠금 밖에서 실행.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
             // 초기화 중 SIGNED_IN은 validateSession이 이미 처리 → 스킵 (race condition 방어)
             if (!isInitializedRef.current && event === 'SIGNED_IN') return;
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                if (session?.user) {
+                if (session?.user) setTimeout(async () => {
                     const u = await syncUserFromSession(session.user);
                     // 이메일 인증 후 HIT 결과 자동 연결
                     if (event === 'SIGNED_IN' && u?.id) {
@@ -317,7 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             }).then(() => localStorage.removeItem('pending_hit_result_id')).catch(() => {});
                         }
                     }
-                }
+                }, 0);
             } else if (event === 'SIGNED_OUT') {
                 setUser(null);
                 localStorage.removeItem(STORAGE_KEY);
@@ -348,11 +356,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // 로그인: Supabase Auth → fallback Mock
-    const login = useCallback(async (email: string, password: string) => {
+    const login = useCallback(async (email: string, password: string, captchaToken?: string) => {
         try {
             // 20초 타임아웃 (cold start 대응)
             const authResult = await Promise.race([
-                supabase.auth.signInWithPassword({ email, password }),
+                supabase.auth.signInWithPassword({ email, password, options: { captchaToken } }),
                 new Promise<{ data: null; error: { message: string } }>((resolve) =>
                     setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 20000)
                 ),
@@ -388,13 +396,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, syncUserFromSession]);
 
     // 회원가입: Supabase Auth + members 테이블
-    const register = useCallback(async (name: string, email: string, password: string, newsletterSubscribed?: boolean) => {
+    const register = useCallback(async (name: string, email: string, password: string, consent: MemberConsent, captchaToken?: string) => {
         try {
             // 1. Supabase Auth 가입
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { name } }
+                options: { data: { name, consent }, captchaToken } // consent는 이메일 인증 후 members 생성 시 옮겨 담음
             });
 
             if (!error && data.user) {
@@ -429,7 +437,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         intra_access: false,
                         module_access: initialModules,
                         affiliations: [],
-                        newsletter_subscribed: newsletterSubscribed || false,
+                        newsletter_subscribed: consent.marketing,
+                        consent,
                         role: 'Viewer',
                     })
                     .select()
@@ -483,6 +492,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, [supabase]);
 
+    // 동의 기록 (소셜 첫 가입·기존 회원) — ConsentGate에서 호출
+    const recordConsent = useCallback(async (consent: MemberConsent) => {
+        if (!user) return { success: false, error: '로그인이 필요합니다.' };
+        const { error } = await supabase.from('members')
+            .update({ consent, newsletter_subscribed: consent.marketing, updated_at: new Date().toISOString() })
+            .eq('id', user.id);
+        if (error) return { success: false, error: '동의 저장에 실패했습니다. 다시 시도해주세요.' };
+        const updated = { ...user, consent, newsletterSubscribed: consent.marketing };
+        setUser(updated);
+        saveUserToStorage(updated);
+        return { success: true };
+    }, [supabase, user]);
+
     // Google 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithGoogle = useCallback(async () => {
         const pathname = window.location.pathname;
@@ -525,10 +547,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 비밀번호 재설정 이메일 발송
     // redirectTo를 /auth/callback으로 보내야 서버가 PKCE code를 쿠키와 함께 교환 → /reset-password 리다이렉트
     // (/reset-password로 직접 보내면 클라이언트가 verifier 쿠키에 접근해야 하는데 브라우저/탭 따라 실패 가능)
-    const resetPassword = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
+    const resetPassword = useCallback(async (email: string, captchaToken?: string): Promise<{ success: boolean; error?: string }> => {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/auth/callback?type=recovery&next=/reset-password`,
+                captchaToken,
             });
             if (error) return { success: false, error: error.message };
             return { success: true };
@@ -556,7 +579,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         try {
-            await supabase.auth.signOut({ scope: 'global' });
+            // signOut이 잠금 대기로 멈춰도 로그아웃은 완료되도록 3초 상한 (쿠키는 아래에서 강제 삭제)
+            await Promise.race([
+                supabase.auth.signOut({ scope: 'global' }),
+                new Promise(resolve => setTimeout(resolve, 3000)),
+            ]);
         } catch { /* ignore */ }
         // Supabase SSR 쿠키 + tenone-auth 쿠키 강제 제거
         document.cookie.split(';').forEach(c => {
@@ -599,7 +626,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user, isAuthenticated: !!user, isLoading,
             isStaff, isInternal, canAccessIntra,
             hasAccess, hasModuleAccess,
-            login, register, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
+            login, register, recordConsent, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
         }}>
             {children}
         </AuthContext.Provider>

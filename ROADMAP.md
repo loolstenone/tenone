@@ -1,98 +1,403 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-06-10 (세션 156 — 전면 재구조화)
-> **포트폴리오 Tier 분류·북극성 지표 SSOT**: [docs/Universe_Triage_2026-06.md](docs/Universe_Triage_2026-06.md)
-> **이 로드맵은 T1 6개 브랜드의 북극성 지표 달성만 다룬다.** T2는 버그 수정만, T3는 동결.
+> 마지막 업데이트: 2026-10-06 (세션 158 — 보안 잠금·인트라 정리·게시판/Works·TenOne 본사이트·문의 운영)
 
 ---
 
-## 🧭 재구조화 배경 (2026-06-10)
+## 🔒 보안·안정화 (세션 156 시작 — 집중 5개 사이트: MADLeague·TenOne·HeRo·SmarComm·Badak)
 
-실측: 코드 356,476줄 · 공개 페이지 ~510개 · API 492개 ↔ **최근 30일 실사용자 1명(운영자)**.
-수요 검증 없는 공급 과잉 확인 → 29개 브랜드를 T1(6)/T2(4)/T3(15+)로 동결.
-**개발 단위는 '브랜드'가 아니라 '검증할 가설'. 새 페이지는 북극성 지표에 기여할 때만.**
+- [x] API 인증 게이트 — middleware + `lib/api-guard.ts` (무인증 service_role 쓰기 API ~62 차단)
+- [x] HeRo memberId 위조 차단 (15 route)
+- [x] members 권한 컬럼 자가 상승 차단 트리거 (DB)
+- [x] 회원 생성 실패 원인 수정 (fn_auto_member_brand_join DEFINER)
+- [x] GRANT 마이그레이션 (2026-10-30 마감 대응)
+- [x] Turnstile CAPTCHA 코드 연결 (8곳) + Vercel 사이트키
+- [x] 배포 후 실사이트 위젯 확인 + 직원 로그인 인트라 회귀 확인 (세션 157)
+- [x] Supabase Bot Protection ON — 직접 API 호출 captcha_failed 확인 (세션 157)
+- [ ] 봇 계정 201 정리 (사용자 Dashboard) · jakka 더미 20 결정
+- [ ] npm audit critical 1 · high 22
+- [ ] 규모 축소: 집중 5개 외 브랜드 API 비활성/보관
+- [ ] handle-login 이메일 노출 · 크론 CRON_SECRET fail-open 27곳 · security_definer 뷰 9 · anon DEFINER 함수 49 · 유출 비번 차단
+- [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
----
+## 🏛 플랫폼 헌법·데이터·법무 (세션 157 — 2026-10-05)
 
-## 🎯 T1 북극성 로드맵 (30일 — 2026-07-10 재평가)
+- [x] 공식 주소 단일화 (CANONICAL_HOSTS 308/302, 외부 브랜드 스테이징 noindex) · 인트라 로그아웃 → /intra
+- [x] 헌법 §0.1 (지주사 모델·7원칙·Tier·외부 이전 원칙) + 데이터 계약 5조 + 서비스 종료 7단계 + 법적 검토 기본
+- [x] DB: ums_sites tier/lifecycle/hosting/sunset_at · member_brand_joins 정규화+FK · resolve_site_slug()
+- [x] 개인정보처리방침 유니버스 공통 개정 (처리위탁·국외이전·사업자) · 통합 이용약관 16조 · 2층 약관 체계
+- [x] 전 브랜드 도메인 /privacy·/terms 404 수정 · 푸터 사업자 정보 · TenOne 저작권 중복 제거
+- [x] 가입 동의 표준 (만14세·약관 버전·광고 수신) + ConsentGate + LoginModal CAPTCHA 토큰 누락 수정
+- [ ] 동의 기록 자동 검증: hero.ne.kr 로그인 창 테스트 가입 1건 (이메일 인증 후 members.consent 채워지는지)
+- [ ] 백업 결정 (Supabase Free = 백업 없음 → Pro 또는 주기적 수동 덤프) · 개발 DB(TenOne Dev. 일시정지) 정리
+- [ ] DMARC p=none → quarantine
+- [ ] 보관 브랜드 페이지·API 차단 (§0.1 원칙 5) · 끊긴 테이블 참조 ~40건
+- [ ] 외부 회원 이전 전: 탈퇴 처리 자동화 (process_brand_withdrawal) · MADLeague mad_members email/user_id 키 → members.id
+- [ ] 통신판매업 신고 전 결제 출시 금지 · 직업소개사업 등록 전 HeRo 기업 매칭 금지 · AI 기본법 검토
+- [ ] 브랜드 추가 약관(/terms/{brand}) — 해당 기능 출시 시
 
-### 1. MADLeap — 5기 부원 10명 실가입 ⭐ 최우선
+## 🧭 인트라·게시판·문의 운영 (세션 158 — 2026-10-05~06)
 
-> 유니버스에서 유일하게 실존 조직·실제 사람이 있는 자산. is_open=true 상태.
+- [x] 내부 테이블 직원 전용화 · 인트라 서버 게이트 · ERP/HIT/게시판/브랜드 쓰기 잠금 (운영 DB)
+- [x] 인트라 메뉴 정리 · Action Hub 첫 화면 · 최소 ERP 실데이터 · TenOne 집중 브랜드 패널
+- [x] 게시판 관리자/회원 작성 구분 · 직원 전용 비공개 · 뉴스룸 폐지 · 더미 정리
+- [x] Works UX (대표 이미지 자동·연도·발행일 유지·삭제·이미지 압축·메뉴 재클릭·통계 숨김)
+- [x] TenOne 본사이트: 연혁 Works 기준 · 홈 섹션 정리 · About 탭 스크롤 · Founder 정리
+- [x] Contact 첨부(비공개 버킷) · 링크 보정 · 인트라 문의 상세 · 응대 기록(handling_log)
+- [ ] **contact_submissions RLS 잠금 적용** (`sql/contact-submissions-rls-lockdown.sql`, 승인 대기)
+- [ ] 인트라 문의 상세 직원 실사용 확인 · Contact 첨부 제출 E2E (운영)
+- [ ] 문의 회신 이메일을 인트라에서 바로 발송 (Resend, 발송 기록 자동으로 handling_log) — 필요 시
+- [ ] 문의 1년 보관 후 자동 파기 (행 + 첨부 Storage) — 크론
+- [ ] Tier 미지정 24개 사이트 실험/보관 지정 · 커머스 > 고객문의 메뉴 정리
+- [ ] MADLeague brand 역할 → member_capability_roles 이관 · requireStaff vs auth_is_staff 일원화
+- [ ] Works 이미지 없는 15건 정리
 
-- [ ] 가입 동선 e2e 점검 — madleap.tenone.biz 접속 → 가입 → mad_applications 기록까지 실제 흐름 1회 완주
-- [ ] 5기 모집 페이지 현행화 (모집 시기·지원 방법 — 운영진 확인 필요)
-- [ ] 실부원 첫 가입 유도 (오프라인 모임에서 직접 안내 — 마케팅 과제)
-- [ ] 가입자 발생 시: 온보딩 경험 개선 (실사용 피드백 기반)
+## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
 
-### 2. MADLeague — 오픈 + 동아리 1개 실등록
+> 28개 브랜드의 허브 사이트. 정직성 SSOT + 데이터 일원화 진행 중.
 
-- [ ] is_open=true 토글 전 콘텐츠 정직성 최종 점검 (39페이지 중 mock 잔존 여부)
-- [ ] ums_sites.madleague.is_open=true 토글
-- [ ] 연맹 소속 동아리 1개(MADA 등) 실등록 — mad_clubs·mad_applications 실데이터
-- [ ] 미달 시 T2 강등
-
-### 3. Badak — 기획자 10명 실프로필
-
-- [ ] is_open=true 토글 전 점검 (20페이지)
-- [ ] 운영자 인맥 기획자 10명 직접 초대 → badak_profiles ≥ 10
-- [ ] 첫 모임 1건 개설 (capability: meetup owner 첫 실인스턴스)
-- [ ] 미달 시 T2 강등
-
-### 4. HeRo — 54페이지 → 핵심 퍼널 1개 축소
-
-- [ ] 퍼널 결정: 어떤 단일 행동? (커리어 상담 신청 권장)
-- [ ] 핵심 동선 외 페이지 비노출 처리 (삭제 아님 — nav에서 제거)
-- [ ] 상담 신청 3건 실접수
-- [ ] 미달 시 T2 강등
-
-### 5. Myverse — "개인 도구" 공식 재분류
-
-- [x] 외부화 보류 결정 (2026-06-10)
-- [ ] 본인 실사용 유지 (calendar·daily·projects) — 도그푸딩 지속
-- [ ] 외부 공개 관련 작업 전면 보류
-
-### 6. TenOne — 허브 유지
-
-- [ ] 신규 개발 없음. brands 테이블 시드(26 row)만 잔여 (fallback → DB SSOT 승격, 선택)
-
----
-
-## 🔧 기술 부채 (게이트 무관 허용 작업)
-
-- [ ] tsc OOM 해소 — 타입 게이트 복구 (`NODE_OPTIONS=--max-old-space-size=8192`)
-- [ ] `.env.local` SUPABASE_ACCESS_TOKEN 갱신 (revoke됨 — 당분간 Supabase MCP로 대체)
-- [ ] OpenClaw 잔재 DB 정리 (deutbot_logs 2,047행 등 죽은 테이블 triage)
-- [ ] console.* 481건 · `: any` 172건 점진 감축
-- [ ] `sql/grant-public-tables-migration.sql` 실행 (2026-10-30 이전 1회 필수)
-
----
-
-## 🧊 동결 항목 (재개 조건 명시)
-
-| 항목 | 동결 사유 | 재개 조건 |
-|---|---|---|
-| Mindle 뉴스레터 자동화 배포 (Edge Function 3종 + cron 5건 — 코드 완성 상태) | 구독자 0명 | Mindle source 실구독자 10명 |
-| Mindle Phase 3 (PRO 결제·B2B) | 동일 | 동일 |
-| SmarComm Phase 4+ (Web Push e2e·외부 키 4종 등 세션 150 이월 포함) | 실고객 0 | 실스캔 고객 3명 |
-| WIO 외부 판매 (2-Tier·가격제) | 외부 테넌트 0 | 외부 도입 문의 1건 |
-| PP Canvas Engine Phase 1.9~6 | Planner's T3 동결 | Planner's 부활 시 |
-| Planner's Planner AI P3~P5 | T3 동결 | 유료 구매자 발생 시 |
-| UC 정책 고도화 · capability 확장 | 거래 1건 | 실사용자 100명 |
-| 에이전트 확장 (바당쇠 실전·10:01 자동 브리핑·브랜드 에이전트) | 운영할 커뮤니티에 사용자 0 | T1 북극성 지표 달성 후 |
-| T3 브랜드 15개 전체 | 사용자 0 | 분기 재평가 (2026-07-10) |
-
-> 동결 ≠ 폐기. 코드·테이블·문서 전부 보존. Whole See 크롤러·Mindle 파이프라인 등 **이미 자동화된 것은 그대로 가동** (사람 시간 투입만 중단).
+- [x] **1차 — 정직성·정합성 회복** (세션 154):
+  - Universe Coming Soon stale 8건 섹션 삭제
+  - Universe stats 동적화 (28 브랜드 + 8 역할 그룹)
+  - brands page 26개 정합 (4건 추가, 내부 2건 제외)
+  - history SSOT `lib/data.ts historyEvents` 일원화 (20→27건)
+  - `lib/universe-map.ts` SSOT 추출 — 랜딩·about 동기화
+  - about page BRAND_DIRECTORY dead code 56줄 제거
+  - 랜딩 Crew CTA 활성화 + Contact partner 탭 카피 변형
+  - PublicHeader About 중복 해소
+  - CLAUDE.md stale 경로 정정
+- [ ] **2차 — DB 시드 + 페이지 후속 정합**:
+  - DB `brands` 테이블 시드 (26 row) — fallback에서 DB SSOT로 승격
+  - DB `history_events` 테이블 시드 또는 폐기 결정
+  - universe page businesses 12개 선별 의도 라벨링
+  - about founder 섹션 정보 갱신 검토
+  - "29개 브랜드" 메타-실서비스 구분 라벨
+- [ ] **3차 — 허브 가이드 문서**: tenone.biz 허브 정체성·콘텐츠·UX 가이드 (위치·형식 결정 대기)
 
 ---
 
-## 수익 마일스톤 (재설정)
+## 🎨 PP Canvas Engine (세션 105 시작 — 6단계 ~10주)
 
-| 시점 | 목표 | 전제 |
+> HandNote(필기·SVG)와 CanvasStudio(자유 캔버스·Excalidraw)를 통합하는 자체 엔진. 외부 라이선스 의존 점진 제거.
+
+- [x] **Phase 1 — Core 골격** (세션 105): types · engine · history · render(Canvas 2D 라이브) · strokes(perfect-freehand 6펜) · background · palm-rejection · pan-zoom · serialize · adapters(handnote + handnote-storage)
+- [ ] **Phase 1.9 — HandNote 본체 재작성** (다음 세션 메인): CanvasEngine 기반 전면 교체. 어댑터 이미 준비됨
+- [ ] **Phase 2 — Shapes**: rect/ellipse/diamond/arrow/line 도형 layer
+- [ ] **Phase 3 — Selection**: 단일/멀티 선택 + 변형 핸들 + 회전
+- [ ] **Phase 4 — Text**: 텍스트 엘리먼트 + 인라인 편집
+- [ ] **Phase 5 — Polish**: 키보드 단축키 · 컨텍스트 메뉴 · 그리드 스냅 · 가이드
+- [ ] **Phase 6 — Migration**: Excalidraw 제거 + 기존 데이터 마이그레이션
+
+상세: `docs/PP_Canvas_Engine_Plan.md`
+
+---
+
+## 🗓 Planner's Planner AI (세션 84 완결)
+
+- [x] **W1 — 앱 쉘**: DB 스키마 · 인증 게이트 · 온보딩 4단계 · 모드 선택(Weekly/AllInOne) · 사이드바
+- [x] **W2 — 메인 뷰**: Today · Weekly (Light Vrief + GPR) · Monthly · Yearly · Identity · Projects + AI 브리핑 인프라
+- [x] **W3 — 확장**: Project Notes CRUD · Templates 20종 시드 · 자동 집계 함수 (weekly/monthly/yearly)
+- [x] **W4 — AI + UX**: Copy-to-AI (Claude/ChatGPT/Gemini) · 풀텍스트 검색 · Vercel Cron (매시간 브리핑)
+- [x] **P0 — 결제·보안**: Toss Payments 19,000원/년 · PDF 구매자 무료 활성화 · 구독 게이트 · Supabase 보안 감사 완료
+- [x] **P1 — MVP 완성도**: PWA · Web Push · 이메일 백업 · 공휴일/절기 · Daily 자동 이월 · 마케팅 "Now Live"
+- [x] **P2 — 콘텐츠·연동**: Templates 59종 · Cover 15종 · Anniversary 2p · Google Calendar OAuth · Todoist
+- [ ] **P3 — 고급 기능**: 필기입력(Fabric.js) · FrameWork 위젯 · 기업 플랜 · AI 고급 설정 · Copy-to-AI 편집
+- [ ] **P4 — 운영·분석**: GTM 트래킹 · 사용자 매뉴얼 · 베타 피드백 · Intra 확장
+- [ ] **P5 — 추가 연동**: Notion · Slack · Apple/Outlook (CalDAV)
+- [ ] **배포 대기**: PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · domain planners.tenone.biz 연결
+
+---
+
+## 📧 이메일/CRM 인프라 (세션 65 완결)
+
+- [x] **Phase 1 — 발송 기반**: `email_sends`/`email_events`/`email_senders`, Resend Webhook, 바운스 자동 비활성
+- [x] **Phase 2 — 뉴스레터 발송**: 테스트·예약 발송, Vercel Cron, 분석 페이지
+- [x] **Phase 3 — CRM People**: lifecycle_stage, touchpoints, 자동 흡수 트리거, 상세 타임라인
+- [x] **Phase 4 — 세그먼트**: 규칙 엔진(14필드·10연산자), 빌더 UI + 실시간 미리보기
+- [x] **Phase 5 — 브로드캐스트**: `crm_campaigns`, 변수 치환, 3-Step 발송 마법사
+- [x] **Phase 6 — 운영**: 통합 수신거부, 발송 한도 대시보드, 발신자 관리
+- [x] 인트라 네비에 신규 경로 4개 링크 추가 (`segments`/`broadcast`/`email/usage`/`email/senders`)
+- [ ] Resend Pro 업그레이드 (본격 사업 시작 시)
+
+---
+> 기준 문서: TenOne_Universe_Architecture_v1.md / TenOne_4Products.md
+> **핵심 원칙: 4대 제품(Mindle·SmarComm·WIO·AI Agent)을 Intra에서 통제·운영·관리**
+
+---
+
+## 현재 상태 요약
+
+| 영역 | 상태 | 비고 |
 |------|------|------|
-| 2026-07 | T1 북극성 지표 1차 판정 | 30일 검증 |
-| 2026-Q3 | 실사용자 누적 30명 (T1 합산) | MADLeap·Badak 실가입 |
-| 2026-Q4 | 첫 유료 전환 1건 (브랜드 무관) | 실사용자 행동 데이터 확보 후 가격 결정 |
+| 퍼블릭 사이트 (26개 브랜드) | ⚠️ 프론트만 | Google Sites 잔재 /about·/universe·/history |
+| Intra 143페이지 | ✅ UI + DB 대부분 | 4대 제품 통제 레이어 미연결 |
+| WIO Orbi (141p) | ✅ UI + 일부 DB | 외부 테넌트 미연동 |
+| SmarComm (46p) | ⚠️ 숨김 | Coming Soon 상태, 인트라 연결 필요 |
+| site_configs (L1) | ⚠️ 테이블 생성됨 | Intra handleSave + layout.tsx 연동 필요 |
+| 구독 인프라 (L4) | ❌ 없음 | wio_subscription_plans/subscriptions 미생성 |
+| Agent Hub | ⚠️ 코드 완성 | Prod DB 실행 필요 |
+| Mindle 크롤러 (Whole See) | ✅ 정상 가동 중 (세션 152 진단 — 매시간 280건 수집·5건 자동 카드, 검수 큐 UI 추가로 published 전환 가능) | — |
+| 결제 PG | ❌ 없음 | Phase 2 |
 
-> 이전 로드맵의 "Mindle MRR 2026.05" 등은 사용자 0 상태의 희망 수치였으므로 폐기.
-> 과거 완료 이력은 [CHANGELOG.md](CHANGELOG.md) 참조.
+---
+
+## 아키텍처 원칙 (개발 시 반드시 준수)
+
+### 4대 제품 구조
+```
+Mindle(연료) ──트렌드 데이터──→ SmarComm(마케팅 자동화)
+                                       ↑
+WIO(공장) ──────── MKT-* 인프라 ────────┘
+    │
+    └── COM-AI = Agent Hub
+                    │
+            AI Agent(운영 엔진) → 3개 제품 자동 운영
+```
+
+### 모순 방지 8원칙 (위반 금지)
+| # | 규칙 |
+|---|------|
+| 1 | 구독 테이블은 `wio_subscription_plans` 하나만 쓴다 |
+| 2 | Intra 전용 운영 테이블을 새로 만들지 않는다 (WIO 테이블 사용) |
+| 3 | 브랜드 사이트는 Supabase만 바라본다 (Intra API 직접 호출 금지) |
+| 4 | SmarComm WS = WIO MKT-* 위의 어플리케이션 (이중 구현 금지) |
+| 5 | 에이전트는 사람과 같은 API를 쓴다 |
+| 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 |
+| 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 |
+| 8 | 맞춤 서비스 개발 기술은 WIO 코어에 환류한다 (Tech Flywheel) |
+
+### WIO 서비스 2-Tier 모델 (2026-04-03 확정)
+```
+WIO / SmarComm
+├── 규격 서비스 (Subscription) — 등급별 기능 제한, 동일 코드, 셀프서비스
+└── 맞춤 서비스 (Custom Installation) — 클라이언트 최적화 용역, 직접 설치
+    └── TenOne.biz (첫 번째 고객=자사), XXXX, VVVV, AAAA...
+```
+**Tech Flywheel**: 맞춤 개발 → 기술 진보 → WIO 코어 흡수 → 규격 서비스 업그레이드 → 반복
+
+---
+
+## 🚨 즉시 (이번 주 — 리스크 제거)
+
+### ① HeRo Mock 데이터 제거 [법적 리스크] ✅ 완료
+- [x] HeRo 파트너 기업 로고 (카카오·네이버·쿠팡·토스 등) 제거
+- [x] Mock 수치 (매칭 100+건, 파트너 50+개) 제거
+- [x] `/hero` 파트너 섹션 → "파트너 모집 중" UI로 교체
+
+### ② Prod SQL 6개 실행 [기능 미작동] ✅ 완료
+- [x] `sql/erp-finance-tables.sql` (invoices, payments, card_usage, incentives)
+- [x] `sql/monthly-forecasts-table.sql`
+- [x] `sql/standard-rates-table.sql`
+- [x] `sql/agent-tables.sql` (agent_profiles, agent_messages)
+- [x] `sql/workflow-tables.sql`
+- [x] `sql/badaksoe-rooms-table.sql`
+
+### ③ site_configs 완전 연동 [L1 설정 레이어] ✅ 완료
+- [x] `/intra/bums/sites` handleSave → DB upsert (이전 세션 완료)
+- [x] 22개 브랜드 `layout.tsx` → `generateMetadata()` + `getSiteConfigServer(siteId)`
+- [x] 26개 사이트 시드 데이터 확인 (이전 세션 생성)
+
+### ④ Google Sites 잔재 제거 [신뢰·SEO] ✅ 완료
+- [x] `/about`, `/universe`, `/history` — 이미 Next.js 내부 페이지, Google Sites 링크 없음 확인
+
+---
+
+## Phase 0: 테넌트 격리 기반 구축 (4월 1~2주)
+
+> **목표: 외부 고객이 들어와도 데이터가 섞이지 않는 격리 구조 확보**
+> **원칙: 지금 동작하는 코드는 건드리지 않는다. 격리 구조만 씌운다.**
+
+### 0-A. tenant_id 일괄 추가 ✅ 완료 (세션 73 확인)
+- [x] 위반 테이블 목록 확정 — DB 조회 결과 누락 테이블 2개 (`capabilities`, `wio_tenants`) 모두 tenant 불필요 (전역 레지스트리 / 테넌트 테이블 자체)
+- [x] 기존 Phase 0-C/D 작업으로 이미 대부분 정비 완료 — 63개 추정치는 과대 산정이었음
+- [x] `capabilities` / `wio_tenants` — 구조상 tenant_id 불필요 (intentional)
+
+### 0-B. 고객 아이덴티티 계층 확정 ✅ 완료 (세션 73 확인)
+- [x] TIER 1: `auth.users` → `members` (auth_id FK, 메인 프로필 테이블)
+- [x] TIER 2: `member_brand_joins` (Universe SSO — 다중 브랜드 가입, tenant_id 포함) ✅ 존재
+- [x] TIER 3: `wio_members` (WIO 서비스 멤버 — tenant_id 기반) ✅ 존재
+- [x] TIER 4: 각 테이블 tenant_id/brand_id 격리 — Phase 0-A에서 확인 완료
+- [x] 아이덴티티 흐름 문서화 (`docs/Identity_Architecture.md`) ✅ 존재 (3계층 다중 페르소나 설계)
+
+### 0-C. 중복 테이블 정리 ✅ 완료 (세션 71)
+- [x] `expenses` → `wio_expenses` 코드 참조 전환 (erp.ts)
+- [x] `approvals` → `wio_approvals` 코드 참조 전환 (erp.ts, myverse.ts, 인증서 페이지, API 3개)
+- [x] `timesheets` → `wio_timesheets` 코드 참조 전환 (projects.ts, myverse.ts, timesheets API)
+- [x] `chat_threads/messages` → `wio_chat_threads/wio_chat_messages` 전환 (chat.ts, messenger API 2개, briefing, local-agent-bridge)
+- 구 테이블 삭제는 Phase 1 이후
+
+### 0-D. WIO 서비스 인프라 ✅ 완료 (세션 72)
+- [x] `wio_tenant_configs` 테이블 생성 (맞춤 서비스 설정 저장) — 8 rows, RLS on
+- [x] `wio_subscription_plans`에 service_type 컬럼 추가 ('standard' | 'custom') — 11 rows
+- [x] `wio_feature_flags` 테이블 생성 (규격 서비스 등급별 기능 제한) — 76 rows, RLS on
+- [x] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가 (기본값 'tenone', 코드 호환)
+
+---
+
+## Phase 1: 4대 제품 Intra 통제 레이어 (4월 3~4주)
+
+> **목표: Intra 하나에서 Mindle·SmarComm·WIO·AI Agent를 통제할 수 있는 상태**
+
+### 1-A. Mindle 관리 (연료 공급 시스템) ✅ 완료 (세션 73 확인)
+- [x] 뉴스레터 구독 DB 연동 — `newsletter_subscribers` (source='mindle' 필터), UMS 대시보드 DB 연결 완료
+- [x] `/intra/ums/newsletter` CRUD 완성 (구독자/이슈 관리 통합)
+- [x] 트렌드 카드 관리: `mindle_trends` 테이블 + Pipeline UI (수집→검토→승인→발행 4단계)
+- [x] `/mindle/trends` 퍼블릭 페이지 → mindle_trends DB 연결 완료
+- [x] Whole See 크롤러 설정: `/intra/ums/external/sources` RSS/웹/뉴스레터 3탭 관리 UI
+
+### 1-B. SmarComm 활성화 ✅ 완료 (세션 이전)
+- [x] Coming Soon 해제 → 접근 가능
+- [x] `/intra/marketing` ↔ SmarComm WS 데이터 연결
+
+### 1-C. WIO 테넌트 관리 ✅ 완료 (세션 69)
+- [x] `/intra/ums/wio/tenants` 실구현 (wio_tenants + wio_members 집계)
+- [x] WIO Demo/SaaS/Master 모드 확인
+- [ ] WIO SaaS 모드: 테넌트 생성 → OrbiConfig 저장 플로우 완성 (잔여)
+
+### 1-D. Agent Hub 활성화 (운영 엔진) ✅ 완료
+- [x] `sql/agent-tables.sql` 실행 후 `/intra/agent` 테스트
+- [x] 열시일분(compass) 에이전트 프로필 등록 확인
+- [x] 바당쇠 에이전트: `/api/agent/badaksoe` 엔드포인트 구현
+- [x] 10:01 프로토콜 기초: AM/PM 에이전트 Vrief 제출 → Intra Dashboard 위젯
+
+---
+
+## Phase 2: 구독 인프라 + 수익화 (5월)
+
+> **목표: 결제가 실제로 이루어지는 상태 (MRR 시작)**
+
+### 2-A. 구독 테이블 구축
+- [x] `wio_subscription_plans` 테이블 생성 + RLS (Prod 적용 완료)
+- [x] `wio_subscriptions` 테이블 생성 + RLS (Prod 적용 완료)
+- [x] 시드 (WIO 5 / SmarComm 4 / Mindle 2 / Badak·HeRo·EvSchool·YouInOne free 1씩)
+- [x] `/intra/ums/commerce/subscriptions` 관리 UI ↔ wio_subscriptions 연결 (Mock fallback 제거, 빈 상태 안내)
+- [ ] Badak·HeRo·EvSchool·YouInOne **유료 티어** 가격·기능 정책 결정 → 시드 보강
+- [ ] 무결성 위반 백필: youinone/premium·evschool/course 구독의 plan_id NULL → 유료 티어 시드 후 UPDATE
+
+### 2-B. 결제 PG 연동
+- [ ] 토스페이먼츠 또는 포트원 선택·설정
+- [ ] Mindle 구독 결제 흐름 구현 (`/mindle/pricing` → 결제 → wio_subscriptions)
+- [ ] 구독 체크 미들웨어 (`hasAccess()` 함수 → 유료 콘텐츠 보호)
+
+### 2-C. 브랜드 연동
+- [ ] Badak 사이트 실DB 연동 + 프리미엄 멤버십 티어
+- [ ] MADLeague 사이트 실DB 연동
+- [ ] Myverse 웹 → DB 완전 전환
+
+---
+
+## Phase 3: 에이전트 자동화 가동 (6월)
+
+> **목표: 에이전트가 Universe를 자동 운영하는 첫 사이클**
+
+### 3-A. Whole See 크롤러 가동 ✅ 정상 (세션 152 진단)
+- [x] pg_cron `trend-crawl-hourly` 매시간 정각 → RSS 49개 fetch → `collected_data` upsert
+- [x] Claude Haiku 필터 → Sonnet 카드 생성 → `mindle_trends` insert (매시간 5건)
+- [x] 점수별 자동 분기 (세션 152) — 9+: published / 7~: collected (검수 큐) / 6~: draft. **사용자 deploy 필요**: `npx supabase functions deploy trend-crawl --project-ref ziotlxkdctlhiwkgmmsh`
+- [x] Mindle 검수 큐 UI 신설 — `/intra/ums/mindle/queue` (세션 152)
+- [ ] 트렌드 카드 100개 축적 목표
+
+### 3-D. Mindle 뉴스레터 자동화 ✅ 코드 완료 (세션 153)
+- [x] Phase 1-E: 주간 뉴스레터 초안 자동 생성 — Edge Function `mindle-newsletter-draft` 신설. Hero/Signals/Weak/Universe 블록 + LLM 편집팀 인트로 + newsletter_issues 멱등 UPSERT
+- [x] Phase 2-C: 페르소나 4종 분기 — `?persona=founder|planner|reporter|marketer` query param. mindle_personas.default_categories 카테고리 필터 + 페르소나 컨텍스트 인트로 + target_tags=['mindle','persona:KEY']
+- [x] pg_cron 5건 SQL 작성 — 메인 KST 월 09:00 + 페르소나 KST 화·수·목·금 09:00 ([sql/mindle-newsletter-draft-cron.sql](sql/mindle-newsletter-draft-cron.sql))
+- [x] Phase 2-E: UC 학생 할인 정책 시드 ([sql/mindle-student-uc.sql](sql/mindle-student-uc.sql)) — `is_student_email()` 함수 + uc_redeem_policies mindle default 10% + student 50%
+- [ ] **사용자 deploy 필요**: `npx supabase functions deploy mindle-newsletter-draft --project-ref ziotlxkdctlhiwkgmmsh` + SQL 2건 실행
+- [ ] send route persona AND 매칭 보강 (Phase 2-C 후속, 별도 작업)
+- [ ] Mindle source 구독자 모집 (현재 0명 — 마케팅 과제)
+- [ ] Mindle 뉴스레터 1호 첫 검수·발송 — 다음 KST 월 09:00 cron 트리거 후
+
+### 3-B. 바당쇠 실전 투입
+- [ ] Badak 14개 방 리스닝 모드 (수집만, 응답은 수동)
+- [ ] 시그널 → `mindle_trends` 연결 (바당쇠 → Mindle 데이터 공급)
+
+### 3-C. 10:01 자동 브리핑
+- [ ] AM 10:01: 각 에이전트 Vrief 제출 → 열시일분 취합 → 텐원에게 방향
+- [ ] PM 10:01: GPR Result → 열시일분 취합 → 텐원에게 성과
+- [ ] GCP Scheduler → 자동 실행 → 카카오톡 전송 (Phase 3 완성)
+
+---
+
+## Phase 4: 콘텐츠 확장 + 대중화 (하반기)
+
+### 7월
+- [ ] Mindle 뉴스레터 1호 발송
+- [ ] Planner's 아티클 시작
+- [ ] Badak 사이트 공개
+- [ ] Badak Stars v1: 북마크·연결·니즈 관심 수 집계 → 상위 멤버 자동 노출 (데이터 최소 3개월 누적 후)
+
+### 8월
+- [ ] MADLeague 사이트 공개
+- [ ] HeRo 사이트 공개 (실 데이터 기반)
+
+### 9월~12월
+- [ ] GPR·Finance 실DB 완성
+- [ ] Rule Engine 구현
+- [ ] MADLeap 5기 WIO 내부 테스트
+- [ ] tenone.biz 포탈 공개
+- [ ] WIO 80%+ 실DB
+- [ ] Myverse Sprint 1~2 (React Native)
+- [ ] 뉴스레터 500명+
+- [ ] Badak 탐색 시스템 v1: 관심 이력·북마크·경력·니즈·원츠 종합 → 서로를 발견하는 추천 피드 (explore 페이지 People/Needs/Wants 탭 고도화)
+
+---
+
+## Phase 5: 2027 실전
+
+### 1~3월
+- [ ] MADLeague 신기수 WIO 적용 (30~50명)
+- [ ] Badak 500명+ CRM 적용
+- [ ] Vrief 워크숍 1건 (Phase 1 첫 외부 수익)
+
+### 4~6월
+- [ ] 7거점 확대
+- [ ] HeRo 매칭 파일럿
+- [ ] Evolution School 1기
+
+---
+
+## 에이전트 가동 일정
+
+| 에이전트 | 브랜드 | 가동 목표 |
+|---------|--------|----------|
+| 열시일분 | Ten:One | 2026.04 (Agent Hub 활성화) |
+| 바당쇠 | Badak | 2026.06 |
+| Whole See | Mindle | 2026.06 |
+| 매드레드 | MADLeague | 2026.08 |
+| 스마커 | SmarComm | 2027.Q2 |
+| 히어로 | HeRo | 2027.Q2 |
+
+---
+
+## Badak Stars + 탐색 시스템 (장기 고도화)
+
+> **왜 지금 안 하나:** Stars는 "가장 많은 관심을 받은 사람" 자동 랭킹이다. 북마크 수·수락된 연결 수·니즈 관심 수를 집계해야 의미 있는 랭킹이 나온다. 데이터 없이 시스템을 먼저 만들면 빈 페이지가 된다. Badak이 공개되고 사용자가 쌓인 후 설계해야 한다.
+
+### Stars — 집계 소스 (확정)
+| 소스 | 테이블 | 가중치 |
+|------|--------|--------|
+| 프로필 북마크 수 | `badak_bookmarks` (item_type='member') | 높음 |
+| 수락된 연결 신청 수 | `badak_connections` (accepted) | 높음 |
+| 내 니즈의 관심 수 합산 | `badak_needs.count` | 중간 |
+| 게시물 좋아요·댓글 | (미구현, 나중에 추가) | 낮음 |
+
+### 탐색 시스템 — 방향
+- 현재 explore 페이지의 People/Needs/Wants 탭이 MVP 쉘
+- 관심 이력·북마크·경력·소개·니즈·원츠를 종합해 "서로를 발견"하는 시스템으로 고도화
+- Stars 피처링 = 탐색 시스템 고도화의 가시적 출력물
+
+### 개발 조건
+- Badak 공개 후 최소 3개월 데이터 누적 시점에 설계 시작
+- Stars 관리 인트라 페이지는 탐색 시스템 설계와 함께 구현 (별도 선행 불필요)
+
+---
+
+## 수익 마일스톤
+
+| 시점 | 목표 | 핵심 조건 |
+|------|------|----------|
+| 2026.05 | Mindle MRR 시작 | 구독 결제 + 뉴스레터 1호 |
+| 2026.06 | 에이전트 ROI 12.5배 실현 | Whole See 가동 + Naming Factory |
+| 2026.07 | SmarComm 대행 1건 | Intra 통제 + Mindle 데이터 |
+| 2027.03 | Vrief 워크숍 수익 | Phase 1 첫 외부 판매 |
+| 2027.Q2 | WIO SaaS 외부 구독 | 도그푸딩 완성 후 |

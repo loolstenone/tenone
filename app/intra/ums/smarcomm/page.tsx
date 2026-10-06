@@ -17,7 +17,7 @@ export default function SmarcommDashboard() {
         const sb = createClient();
         Promise.all([
             sb.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["smarcomm"]),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "smarcomm").eq("status", "pending"),
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "smarcomm\\_%").in("status", ["new", "pending"]),
             sb.from("wio_subscription_plans").select("id, name, price_monthly, service_type").eq("service_type", "smarcomm").order("price_monthly"),
         ]).then(([members, inquiries, plansRes]) => {
             setStats({

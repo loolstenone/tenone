@@ -8,6 +8,8 @@ import PostDetail from "./PostDetail";
 import PostEditor from "./PostEditor";
 import PostAccordion from "./PostAccordion";
 import type { Post, BoardConfig, SiteCode, CreatePostInput, UpdatePostInput } from "@/types/board";
+import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 interface BoardPageProps {
     site: SiteCode;
@@ -19,6 +21,10 @@ interface BoardPageProps {
     isGuest?: boolean;
     /** 레이아웃: 'default' | 'accordion' (FAQ/QnA용) */
     layout?: 'default' | 'accordion';
+    /** 조회수·좋아요 표시 + 인기/조회/댓글순 정렬 (운영 콘텐츠 게시판은 false) */
+    showStats?: boolean;
+    /** 상세 하단 좋아요·북마크 버튼 */
+    showReactions?: boolean;
 }
 
 type Mode = "list" | "detail" | "write" | "edit";
@@ -40,6 +46,8 @@ function BoardPageInner({
     showWriteButton = true,
     isGuest = false,
     layout = 'default',
+    showStats = true,
+    showReactions = true,
 }: BoardPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -49,14 +57,23 @@ function BoardPageInner({
     const [mode, setMode] = useState<Mode>("list");
     const [loading, setLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [showLogin, setShowLogin] = useState(false);
+    const { isAuthenticated, isStaff } = useAuth();
+    // 관리자 작성 게시판(운영 콘텐츠)은 직원에게만 글쓰기 노출
+    const canWrite = !boardConfig || boardConfig.permissions?.write !== 'admin' || isStaff;
 
-    // URL에서 postId 읽어서 자동 로드
+    // URL ↔ 화면 동기화 — ?postId 있으면 상세, 없으면 목록
+    // (상단 메뉴로 같은 경로 재진입 · 뒤로가기 시 상세에 머무는 문제 방지)
+    const urlPostId = searchParams.get('postId');
     useEffect(() => {
-        const postId = searchParams.get('postId');
-        if (postId && mode === 'list') {
-            loadPost(postId);
+        if (urlPostId) {
+            if (selectedPost?.id !== urlPostId) loadPost(urlPostId);
+        } else if (mode === 'detail') {
+            setMode('list');
+            setSelectedPost(null);
         }
-    }, [searchParams]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [urlPostId]);
 
     // 게시판 설정 로드 (캐시 활용)
     useEffect(() => {
@@ -85,8 +102,10 @@ function BoardPageInner({
                 const data = await res.json();
                 setSelectedPost(data.post || data);
                 setMode("detail");
-                // URL 업데이트 (고유 URL)
-                window.history.pushState(null, '', `${pathname}?postId=${postId}`);
+                // URL 업데이트 (고유 URL) — 이미 같은 주소면 기록 추가 안 함
+                if (new URLSearchParams(window.location.search).get('postId') !== postId) {
+                    window.history.pushState(null, '', `${pathname}?postId=${postId}`);
+                }
             }
         } catch (err) {
             console.error("게시글 로딩 실패:", err);
@@ -142,7 +161,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("저장 실패");
+        if (!res.ok) throw new Error(res.status === 413 ? "글 용량이 너무 큽니다. 이미지 수나 크기를 줄여 주세요." : (await res.json().catch(() => ({}))).error || "저장 실패");
         setMode("list");
         setRefreshKey(k => k + 1);
     }, []);
@@ -155,7 +174,7 @@ function BoardPageInner({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("수정 실패");
+        if (!res.ok) throw new Error(res.status === 413 ? "글 용량이 너무 큽니다. 이미지 수나 크기를 줄여 주세요." : (await res.json().catch(() => ({}))).error || "수정 실패");
         setMode("list");
         setSelectedPost(null);
         setRefreshKey(k => k + 1);
@@ -216,6 +235,8 @@ function BoardPageInner({
                         onLike={handleLike}
                         onBookmark={handleBookmark}
                         onEdit={() => setMode("edit")}
+                        showStats={showStats}
+                        showReactions={showReactions}
                     />
                 )}
             </div>
@@ -230,10 +251,10 @@ function BoardPageInner({
                     <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
                     {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
                 </div>
-                {showWriteButton && (
+                {showWriteButton && canWrite && (
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                         <button
-                            onClick={() => setMode("write")}
+                            onClick={() => (isAuthenticated ? setMode("write") : setShowLogin(true))}
                             className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: accentColor }}
                         >
@@ -243,6 +264,7 @@ function BoardPageInner({
                     </div>
                 )}
             </div>
+            <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} accentColor={accentColor} />
             <BoardList
                 key={refreshKey}
                 site={site}
@@ -250,6 +272,7 @@ function BoardPageInner({
                 boardConfig={boardConfig || undefined}
                 accentColor={accentColor}
                 layout={layout}
+                showStats={showStats}
                 onPostClick={(post) => layout === 'accordion' ? undefined : loadPost(post.id)}
             />
         </div>

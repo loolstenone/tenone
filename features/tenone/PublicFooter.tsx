@@ -26,7 +26,6 @@ export function PublicFooter() {
                     links: [
                         { label: "Works", href: "/works" },
                         { label: "About", href: "/about" },
-                        { label: "Newsroom", href: "/newsroom" },
                         { label: "Contact", href: "/contact" },
                     ],
                 },

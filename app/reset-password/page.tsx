@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { Eye, EyeOff, Check, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const { isAuthenticated, updatePassword, resetPassword } = useAuth();
+  const captcha = useCaptcha();
 
   // 두 가지 모드: 이메일 입력(요청) / 새 비밀번호 입력(재설정)
   const [mode, setMode] = useState<'request' | 'reset'>('request');
@@ -51,8 +53,10 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError(''); setSuccess('');
     if (!email.trim()) { setError('이메일을 입력해주세요'); return; }
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setIsSubmitting(true);
-    const result = await resetPassword(email.trim());
+    const result = await resetPassword(email.trim(), captcha.token);
+    captcha.reset();
     setIsSubmitting(false);
     if (result.success) {
       setSuccess('비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요.');
@@ -109,6 +113,7 @@ export default function ResetPasswordPage() {
               autoComplete="email"
               className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-white/30 focus:outline-none"
             />
+            <CaptchaWidget {...captcha.widgetProps} />
             <button
               type="submit"
               disabled={isSubmitting}

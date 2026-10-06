@@ -5,10 +5,15 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertOwnsRow } from "@/lib/api-guard";
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await ctx.params;
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const notOwner = await assertOwnsRow(auth, "hero_goals", id);
+        if (notOwner) return notOwner;
         const body = await req.json();
 
         const updates: Record<string, unknown> = {};
@@ -30,9 +35,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
 }
 
-export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await ctx.params;
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const notOwner = await assertOwnsRow(auth, "hero_goals", id);
+        if (notOwner) return notOwner;
         const sb = createAdminClient();
         const { error } = await sb.from("hero_goals").delete().eq("id", id);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });

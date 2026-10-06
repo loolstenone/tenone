@@ -29,11 +29,11 @@ interface InboxStat {
 
 const CS_SOURCES = [
     { key: "contact", label: "연락/문의", icon: Mail, color: "text-blue-600",
-      table: "contact_submissions", openFilter: { col: "status", val: "new" }, href: "/intra/ums/cs/contact" },
+      table: "contact_submissions", openFilter: { col: "status", val: "pending" }, href: "/intra/ums/cs/contact" },
     { key: "jakka_qna", label: "Jakka 작품 Q&A", icon: HelpCircle, color: "text-amber-600",
-      table: "jakka_product_qna", openFilter: { col: "status", val: "open" }, href: "/intra/ums/cs/jakka-qna" },
+      table: "jakka_product_qna", openFilter: { col: "answered_at", val: null }, href: "/intra/ums/jakka/market" },
     { key: "badak_feedback", label: "Badak 피드백", icon: Heart, color: "text-rose-600",
-      table: "badak_feedbacks", openFilter: null, href: "/intra/ums/cs/badak" },
+      table: "badak_feedbacks", openFilter: null, href: "/intra/ums/badak/cs" },
     { key: "jakka_orders_cs", label: "Jakka 주문 문의", icon: ShoppingCart, color: "text-emerald-600",
       table: "jakka_orders", openFilter: { col: "status", val: "pending" }, href: "/intra/ums/jakka/market" },
 ];
@@ -48,7 +48,7 @@ export default function CSHubPage() {
             const results = await Promise.all(CS_SOURCES.map(async (s) => {
                 const totalQ = sb.from(s.table).select("*", { count: "exact", head: true });
                 let openQ = sb.from(s.table).select("*", { count: "exact", head: true });
-                if (s.openFilter) openQ = openQ.eq(s.openFilter.col, s.openFilter.val);
+                if (s.openFilter) openQ = s.openFilter.val === null ? openQ.is(s.openFilter.col, null) : openQ.eq(s.openFilter.col, s.openFilter.val);
                 const [tRes, oRes] = await Promise.all([totalQ, openQ]);
                 return {
                     key: s.key, label: s.label, icon: s.icon, color: s.color,

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { fetchStarBySlug } from '@/lib/supabase/badak';
 import ProfileCard from '@/features/badak/ProfileCard';
 import type { BadakStar } from '@/types/badak';
@@ -50,7 +50,7 @@ export default function StarDetailPage() {
           <p className="mt-2 text-sm text-neutral-400">{new Date(star.publishedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         )}
 
-        <div className="mt-8 prose prose-neutral max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(star.content) }} />
+        <div className="mt-8 prose prose-neutral max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(star.content) }} />
 
         {star.featuredProfile && (
           <div className="mt-10 border-t border-neutral-200 pt-8">

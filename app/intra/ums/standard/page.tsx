@@ -8,13 +8,17 @@
 import Link from "next/link";
 import {
     Shield, Users, Coins, Briefcase, Mail, Layers, KeyRound, FileLock2, ArrowRight,
-    Globe, ShieldCheck, Package, Building2, BookOpen, FileCode,
+    Globe, ShieldCheck, Package, Building2, BookOpen, FileCode, Landmark, FileSignature,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 
 const STANDARDS = [
+    { key: "constitution", title: "플랫폼 헌법", icon: Landmark, color: "text-neutral-900", bg: "bg-neutral-100",
+      desc: "지주사–계열사 모델 7원칙 · 브랜드 Tier (최상위 기준)", source: "CLAUDE.md §0.1 · ums_sites.tier", href: "/intra/ums/standard/constitution" },
+    { key: "data-contract", title: "데이터 계약 · 생애주기", icon: FileSignature, color: "text-rose-600", bg: "bg-rose-50",
+      desc: "데이터 계약 5조 · 서비스 종료 7단계 · 법적 검토 기준", source: "CLAUDE.md §0.1 · docs/Data_Lifecycle.md", href: "/intra/ums/standard/data-contract" },
     { key: "members", title: "회원", icon: Users, color: "text-violet-600", bg: "bg-violet-50",
-      desc: "3계층 프로필 체계 (auth.users / members / 서비스별)", source: "members 테이블", href: "/intra/ums/standard/members" },
+      desc: "3계층 프로필 · 바뀌지 않는 ID(members.id) · 계정 정보 복사 금지", source: "members 테이블", href: "/intra/ums/standard/members" },
     { key: "uc", title: "Universe Coin", icon: Coins, color: "text-amber-600", bg: "bg-amber-50",
       desc: "1 UC = 1 KRW · 기여 기반 지급 · 월별 상한", source: "uc_earn_rules", href: "/intra/ums/standard/uc" },
     { key: "taxonomies", title: "산업군 / 직무군", icon: Briefcase, color: "text-emerald-600", bg: "bg-emerald-50",
@@ -26,13 +30,13 @@ const STANDARDS = [
     { key: "roles", title: "권한 체계", icon: KeyRound, color: "text-purple-600", bg: "bg-purple-50",
       desc: "role × context 기반 — 전 시스템 권한 SSOT", source: "member_roles", href: "/intra/ums/standard/roles" },
     { key: "privacy", title: "약관 · 개인정보", icon: FileLock2, color: "text-rose-600", bg: "bg-rose-50",
-      desc: "탈퇴 처리 · 동의 · 개인정보 정책", source: "privacy_deletion_requests · consent", href: "/intra/ums/standard/privacy" },
+      desc: "브랜드별 동의 · 탈퇴 범위(이 서비스만/계정 전체) · 파기", source: "members.consent · member_brand_joins · member_brand_withdrawals", href: "/intra/ums/standard/privacy" },
     { key: "sites", title: "사이트 · 도메인", icon: Globe, color: "text-blue-600", bg: "bg-blue-50",
-      desc: "29 도메인 매핑 · SEO 기본값 · OG 이미지 · favicon 정책", source: "ums_sites · site-config.ts", href: "/intra/ums/standard/sites" },
+      desc: "Tier · 생애주기 · 호스팅 · SEO 기본값 · OG · favicon", source: "ums_sites · site-config.ts", href: "/intra/ums/standard/sites" },
     { key: "access-model", title: "접근 모델 (6종)", icon: ShieldCheck, color: "text-indigo-600", bg: "bg-indigo-50",
       desc: "오픈·구독·구매·멤버십·직원·내부 — 가입 경로 SSOT", source: "CLAUDE.md §1.4 + ums_sites.access_model", href: "/intra/ums/standard/access-model" },
     { key: "wio-plans", title: "WIO 요금제 · 기능", icon: Package, color: "text-slate-600", bg: "bg-slate-50",
-      desc: "11 플랜 × 76 기능 플래그 매트릭스", source: "wio_subscription_plans · wio_feature_flags", href: "/intra/ums/standard/wio-plans" },
+      desc: "서비스별 요금제 × 기능 플래그 매트릭스", source: "wio_subscription_plans · wio_feature_flags", href: "/intra/ums/standard/wio-plans" },
     { key: "tenants", title: "테넌트 레지스트리", icon: Building2, color: "text-stone-600", bg: "bg-stone-50",
       desc: "tenant_id 격리 · 내부(tenone) + 외부 고객", source: "wio_tenants · wio_tenant_configs", href: "/intra/ums/standard/tenants" },
     { key: "dev-rules", title: "개발 규칙 8원칙", icon: BookOpen, color: "text-neutral-900", bg: "bg-neutral-100",
@@ -46,7 +50,7 @@ export default function StandardManagementHub() {
         <div className="space-y-6">
             <PageHeader
                 title="Standard 관리"
-                description="26+ 브랜드가 공유하는 유니버스 공통 표준 · 스키마 · 정책"
+                description="유니버스 관리 체계 — 전 브랜드가 따르는 공통 표준 · 스키마 · 정책"
             />
 
             {/* Philosophy */}
@@ -65,7 +69,7 @@ export default function StandardManagementHub() {
                 </div>
             </div>
 
-            {/* 7 Standard Cards */}
+            {/* Standard Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {STANDARDS.map((s) => (
                     <Link key={s.key} href={s.href}

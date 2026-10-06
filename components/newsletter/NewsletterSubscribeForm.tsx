@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 
 interface NewsletterSubscribeFormProps {
   /** 신청 출처 (DB 저장 + 태그). 예: 'jakka', 'badak', 'madleague' */
@@ -38,6 +39,7 @@ export default function NewsletterSubscribeForm({
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const captcha = useCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +49,7 @@ export default function NewsletterSubscribeForm({
     if (!email.trim() || !isValidEmail(email)) { setEmailError('유효한 이메일 주소를 입력해주세요.'); valid = false; }
     else setEmailError('');
     if (!agree || !valid) return;
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
 
     setLoading(true);
     setError('');
@@ -54,8 +57,9 @@ export default function NewsletterSubscribeForm({
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), nickname: nickname.trim(), source }),
+        body: JSON.stringify({ email: email.trim(), nickname: nickname.trim(), source, captchaToken: captcha.token }),
       });
+      captcha.reset();
       if (res.ok) {
         setSent(true);
       } else {
@@ -124,6 +128,7 @@ export default function NewsletterSubscribeForm({
             <b>뉴스레터 수신 동의</b> · 발송을 위한 이메일 수집·이용에 동의합니다.
           </span>
         </label>
+        <CaptchaWidget {...captcha.widgetProps} />
         {error && <p className="text-[10px] text-red-400">{error}</p>}
         <button
           type="submit"

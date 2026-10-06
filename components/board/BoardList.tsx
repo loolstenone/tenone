@@ -13,6 +13,7 @@ interface BoardListProps {
     boardConfig?: BoardConfig;
     accentColor?: string;
     layout?: 'default' | 'accordion';
+    showStats?: boolean;
     onPostClick?: (post: Post) => void;
 }
 
@@ -46,10 +47,10 @@ function formatRelativeDate(dateStr: string): string {
     if (hours < 24) return `${hours}시간 전`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}일 전`;
-    return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export default function BoardList({ site, board, boardConfig, accentColor = "#171717", layout = 'default', onPostClick }: BoardListProps) {
+export default function BoardList({ site, board, boardConfig, accentColor = "#171717", layout = 'default', showStats = true, onPostClick }: BoardListProps) {
     const defaultView = boardConfig?.settings?.defaultView || "card";
     const defaultLimit = boardConfig?.settings?.postsPerPage || 12;
 
@@ -170,8 +171,8 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                 </form>
 
                 <div className="flex items-center gap-2">
-                    {/* 정렬 드롭다운 (항상 표시) */}
-                    <select
+                    {/* 정렬 드롭다운 — 통계 숨김 게시판은 최신순 고정 */}
+                    {showStats && <select
                         value={sort}
                         onChange={(e) => { setSort(e.target.value as SortOption); setPage(1); }}
                         className="text-sm border rounded-lg px-2.5 py-2 bg-transparent tn-text min-w-[80px]"
@@ -180,7 +181,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         {Object.entries(sortLabels).map(([key, label]) => (
                             <option key={key} value={key}>{label}</option>
                         ))}
-                    </select>
+                    </select>}
 
                     {/* 필터 토글 */}
                     <button
@@ -262,13 +263,14 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <div className="flex-1">제목</div>
                         <div className="hidden sm:block w-24 text-center">작성자</div>
                         <div className="w-20 text-center">날짜</div>
-                        <div className="hidden lg:block w-28 text-right">조회/좋아요</div>
+                        {showStats && <div className="hidden lg:block w-28 text-right">조회/좋아요</div>}
                     </div>
                     {posts.map((post) => (
                         <PostListItem
                             key={post.id}
                             post={post}
                             accentColor={accentColor}
+                            showStats={showStats}
                             onClick={onPostClick}
                         />
                     ))}
@@ -283,6 +285,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                             key={post.id}
                             post={post}
                             accentColor={accentColor}
+                            showStats={showStats}
                             onClick={onPostClick}
                         />
                     ))}
@@ -317,9 +320,9 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                                 <h3 className="text-sm font-medium tn-text line-clamp-2">{post.title}</h3>
                                 <div className="flex items-center justify-between mt-2 text-xs tn-text-muted">
                                     <span>{formatRelativeDate(post.createdAt)}</span>
-                                    <span className="flex items-center gap-1">
+                                    {showStats && <span className="flex items-center gap-1">
                                         &#9825; {post.likeCount}
-                                    </span>
+                                    </span>}
                                 </div>
                             </div>
                         </article>
@@ -411,8 +414,8 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                                         <h3 className="text-sm font-medium tn-text line-clamp-2 mt-0.5">{post.title}</h3>
                                         <div className="flex items-center gap-2 mt-2 text-xs tn-text-muted">
                                             <span>{formatRelativeDate(post.createdAt)}</span>
-                                            <span>&middot;</span>
-                                            <span>&#9825; {post.likeCount}</span>
+                                            {showStats && <><span>&middot;</span>
+                                            <span>&#9825; {post.likeCount}</span></>}
                                         </div>
                                     </div>
                                 </article>

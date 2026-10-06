@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
       // 삭제된 페이지 — 301 리다이렉트
       { source: '/goods', destination: '/', permanent: true },
       { source: '/goods/:path*', destination: '/', permanent: true },
+      // 뉴스룸 폐지 (2026-10-05)
+      { source: '/newsroom', destination: '/', permanent: true },
+      { source: '/newsroom/:path*', destination: '/', permanent: true },
       // URL 컨벤션 통일 (PascalCase → kebab-case)
       { source: '/CrewInvite', destination: '/crew-invite', permanent: true },
       // MADLeague: 구 라우트 → 신 사이트맵 (2026-04-16 v2)
@@ -56,6 +59,12 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: securityHeaders,
       },
+      // 외부 서버 운영 브랜드의 이전 준비용 스테이징 — 검색 노출 차단 (CLAUDE.md §0.1 원칙 6)
+      ...['badak', 'madleague', 'madleap'].map(brand => ({
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: `${brand}.tenone.biz` }],
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      })),
       // 마케팅/랜딩 페이지 — 1시간 캐시 (ISR 대체)
       {
         source: '/(about|brands|history|universe|works)',

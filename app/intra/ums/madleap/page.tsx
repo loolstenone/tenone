@@ -16,7 +16,7 @@ export default function MadleapDashboard() {
         Promise.all([
             sb.from("mad_applications").select("*", { count: "exact", head: true }).eq("brand_id", "madleap").eq("status", "accepted"),
             sb.from("mad_applications").select("*", { count: "exact", head: true }).eq("brand_id", "madleap").eq("status", "pending"),
-            sb.from("inquiries").select("*", { count: "exact", head: true }).eq("brand_id", "madleap").eq("status", "pending"),
+            sb.from("contact_submissions").select("*", { count: "exact", head: true }).like("form_type", "madleap\\_%").in("status", ["new", "pending"]),
             sb.from("mad_applications").select("id, name, university, major, created_at, status").eq("brand_id", "madleap").order("created_at", { ascending: false }).limit(5),
         ]).then(([members, pending, inquiries, recent]) => {
             setStats({

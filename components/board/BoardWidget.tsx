@@ -50,7 +50,7 @@ function formatDate(dateStr: string): string {
     if (d === 0) return "오늘";
     if (d === 1) return "어제";
     if (d < 7) return `${d}일 전`;
-    return new Date(dateStr).toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return new Date(dateStr).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
 // 리스트형 아이템

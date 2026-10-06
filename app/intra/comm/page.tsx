@@ -33,7 +33,6 @@ const wikiLinks = [
     { name: "Onboarding", desc: "신규 입사자 가이드", href: "/intra/wiki/onboarding" },
     { name: "Education", desc: "교육 프로그램", href: "/intra/wiki/education" },
     { name: "Handbook", desc: "업무 매뉴얼", href: "/intra/wiki/handbook" },
-    { name: "FAQ", desc: "자주 묻는 질문", href: "/intra/wiki/faq" },
 ];
 
 function fmtDate(s: string) {

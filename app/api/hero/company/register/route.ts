@@ -22,6 +22,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function POST(req: NextRequest) {
     try {
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
             contactPhone,
         } = body;
 
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
         if (!memberId || !companyName) {
             return NextResponse.json(
                 { error: "memberId와 companyName은 필수입니다." },

@@ -36,6 +36,10 @@ const BRAND_CHECKLIST = [
     "`app/(BrandName)/brandname/my/page.tsx` → `<MyProfileCard>` 적용",
     "Vercel 프로젝트에 도메인 연결 + env 동일하게 설정",
     "Supabase Auth > Allowed Redirect URLs에 `https://새도메인/**` 추가",
+    "DB: `ums_sites` tier·lifecycle·hosting 지정 + `lib/domain-registry.ts` CANONICAL_HOSTS (공식 주소 1개)",
+    "Action Hub: 관리자 처리 필요 테이블은 `lib/action-hub-registry.ts`에 등록",
+    "법적 검토: 수집 항목·목적·보관기간, 브랜드 간 활용·제3자 제공 동의, 만 14세 미만, 광고성 정보, 결제, 업종별 등록·신고",
+    "탈퇴 처리 정의: `docs/Data_Lifecycle.md`에 브랜드 테이블별 삭제·익명화·유지 기준 추가",
 ];
 
 export default function DevRulesStandardPage() {

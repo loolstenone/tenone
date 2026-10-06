@@ -6,6 +6,7 @@ import type { Post } from "@/types/board";
 interface PostCardProps {
     post: Post;
     accentColor?: string;
+    showStats?: boolean;
     onClick?: (post: Post) => void;
 }
 
@@ -22,7 +23,7 @@ function formatRelativeDate(dateStr: string): string {
     if (days === 1) return "어제";
     if (days < 7) return `${days}일 전`;
     if (days < 30) return `${Math.floor(days / 7)}주 전`;
-    return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
 function getAuthorName(post: Post): string {
@@ -35,7 +36,7 @@ function getAuthorInitial(post: Post): string {
     return name.charAt(0).toUpperCase();
 }
 
-export default function PostCard({ post, accentColor = "#171717", onClick }: PostCardProps) {
+export default function PostCard({ post, accentColor = "#171717", showStats = true, onClick }: PostCardProps) {
     const isNew = Date.now() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000;
 
     return (
@@ -115,6 +116,7 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                         <span className="tn-text-muted">&middot;</span>
                         <span className="tn-text-muted">{formatRelativeDate(post.createdAt)}</span>
                     </div>
+{showStats && (
                     <div className="flex items-center gap-3 tn-text-muted">
                         <span className="flex items-center gap-1">
                             <Eye className="h-3 w-3" /> {post.viewCount}
@@ -123,6 +125,7 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                             <ThumbsUp className="h-3 w-3" /> {post.likeCount}
                         </span>
                     </div>
+)}
                 </div>
             </div>
 

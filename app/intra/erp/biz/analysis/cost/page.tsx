@@ -30,30 +30,9 @@ interface AllocationRow {
   headcount: number;
 }
 
-const mockExternalCosts: CostItem[] = [
-  { name: "제작외주", amount: 10_350_000, ratio: 45 },
-  { name: "매체비", amount: 8_050_000, ratio: 35 },
-  { name: "기타", amount: 4_600_000, ratio: 20 },
-];
 
-const mockInternalCosts: CostItem[] = [
-  { name: "인건비", amount: 4_200_000, ratio: 60 },
-  { name: "공통비", amount: 1_750_000, ratio: 25 },
-  { name: "제경비", amount: 1_050_000, ratio: 15 },
-];
 
-const mockMonthlyCosts: MonthlyCostRow[] = [
-  { month: "1월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
-  { month: "2월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
-  { month: "3월", exCost: 26_000_000, inCost: 7_800_000, total: 33_800_000 },
-];
 
-const mockAllocations: AllocationRow[] = [
-  { division: "사업부문", commonCost: 875_000, ratio: 40, headcount: 16 },
-  { division: "제작부문", commonCost: 656_000, ratio: 30, headcount: 14 },
-  { division: "지원부문", commonCost: 438_000, ratio: 20, headcount: 10 },
-  { division: "관리부문", commonCost: 219_000, ratio: 10, headcount: 5 },
-];
 
 // Map expense category → external or internal bucket
 const EXTERNAL_TYPES = ["외주비", "제작외주", "매체비", "광고비", "행사비"];
@@ -117,9 +96,9 @@ const barColors = ["bg-neutral-700", "bg-neutral-400", "bg-neutral-200"];
 export default function CostAnalysisPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"external" | "internal">("external");
-  const [externalCosts, setExternalCosts] = useState<CostItem[]>(mockExternalCosts);
-  const [internalCosts, setInternalCosts] = useState<CostItem[]>(mockInternalCosts);
-  const [monthlyCosts, setMonthlyCosts] = useState<MonthlyCostRow[]>(mockMonthlyCosts);
+  const [externalCosts, setExternalCosts] = useState<CostItem[]>([]);
+  const [internalCosts, setInternalCosts] = useState<CostItem[]>([]);
+  const [monthlyCosts, setMonthlyCosts] = useState<MonthlyCostRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -135,7 +114,7 @@ export default function CostAnalysisPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const allocations: AllocationRow[] = mockAllocations;
+  const allocations: AllocationRow[] = []; // 배부 기준 데이터 미구현 — 실데이터 연결 전까지 비움
   const activeCosts = tab === "external" ? externalCosts : internalCosts;
   const totalCost = activeCosts.reduce((s, c) => s + c.amount, 0);
 

@@ -92,6 +92,19 @@ const registry: Record<string, DomainEntry> = {
     'intra.tenone.biz':         { prefix: '/intra',      siteId: 'tenone' },
 };
 
+// ── 공식 주소 (canonical) — CLAUDE.md §0.1 원칙 4·6 ──
+//
+// 브랜드당 공식 주소 1개. 같은 브랜드의 다른 진입로는 middleware가 공식 주소로 넘긴다.
+//   - vercel   : 이 서버에서 운영 중. 경로 유지 308 (예: www.tenone.biz/hero/jobs → www.hero.ne.kr/hero/jobs)
+//   - external : 외부 서버(nginx)에서 운영 중. 경로 체계가 달라 홈으로 302 (이전 후 vercel로 전환)
+//                {brand}.tenone.biz 는 이전 준비용 스테이징 — noindex + ums_sites.is_open=false
+export const CANONICAL_HOSTS: Record<string, { host: string; hosting: 'vercel' | 'external' }> = {
+    hero:      { host: 'www.hero.ne.kr',    hosting: 'vercel' },
+    madleague: { host: 'www.madleague.net', hosting: 'external' },
+    madleap:   { host: 'www.madleap.co.kr', hosting: 'external' },
+    badak:     { host: 'www.badak.biz',     hosting: 'external' },
+};
+
 // ── 파생 맵 (자동 생성) ──
 
 /** 미들웨어용: domain → prefix */

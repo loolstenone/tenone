@@ -166,6 +166,7 @@
 | **Phase** | Mature (2026-05-11 갱신) — 모든 모듈 프로덕션. 규격·맞춤 서비스 동시 운영. 직원 디지털 명함 신설. |
 | **개발 수준** | 코어 안정화 완료. 각 모듈 고도화 진행 중. |
 | **이월 작업** | 없음 — 기본 기능 완성 |
+| **최근 결정 (세션 156)** | `/wio/login` 로그인·가입에 Turnstile CAPTCHA 연결 (`useCaptcha()` → `options.captchaToken`). ⚠️ 현재 Turnstile 위젯 hostname에 WIO 전용 도메인 없음 — tenone.biz 경로(`/wio/login`)에서만 동작. Supabase Bot Protection ON 이후 비등록 도메인에선 로그인 불가. |
 | **최근 결정 (세션 149)** | 15페이지 인라인 푸터 → [features/wio/WIOFooter.tsx](features/wio/WIOFooter.tsx) 공통 컴포넌트 일괄 교체 (wio/about·ai-matrix·contact·crm·data·e2e-flows·evaluation·framework·marketing·migration·page·presets·pricing·setup·solutions). 인라인 중복 -52라인 / 컴포넌트 호출 +44라인. 향후 푸터 변경은 한 곳에서. |
 | **최근 결정 (세션 124)** | `/wio/app/my/card` — `components/DigitalCard.tsx` SSOT 사용 (WIO 블루 `#2563EB`). QR target = `myverse.kr/{handle}/card` (받는 사람 시점). WIO는 자체 핸들 두지 않고 마이버스 핸들에 위임. MY_TABS에 "명함" 추가. |
 | **최근 결정** | 테넌트 동적 구성, 맞춤 서비스 3개(TenOne, XXXX, VVVV) |

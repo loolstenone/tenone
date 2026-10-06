@@ -20,7 +20,7 @@ const BRAND_META: Record<string, BrandMeta> = {
     bgColor: 'bg-neutral-800',
     dotColor: 'bg-neutral-400',
     url: '',
-    boardPath: '/newsroom',
+    boardPath: '/works',
   },
   madleague: {
     name: 'MADLeague',

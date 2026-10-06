@@ -4,12 +4,17 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const memberId = searchParams.get("memberId");
     const limit = Math.min(Number(searchParams.get("limit") ?? "20"), 50);
 
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
+    const denied = assertSelf(auth, memberId);
+    if (denied) return denied;
     if (!memberId) return NextResponse.json({ error: "memberId 필수" }, { status: 400 });
 
     const sb = createAdminClient();
@@ -36,6 +41,10 @@ export async function POST(req: NextRequest) {
             sessionType?: string;
         };
 
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
+    const denied = assertSelf(auth, memberId);
+    if (denied) return denied;
     if (!memberId || !topic?.trim()) {
         return NextResponse.json({ error: "memberId, topic 필수" }, { status: 400 });
     }

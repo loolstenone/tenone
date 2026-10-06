@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
+import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS } from '@/lib/domain-registry';
+import { getApiAccessRule } from '@/lib/api-access-policy';
+import { requireStaff } from '@/lib/api-guard';
 
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증·프로필은 전 도메인 공유)
-const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
+const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile', '/privacy', '/terms'];
 
 // Myverse 앱 라우트 SSOT — myverse.kr 도메인에서 prefix 없이 노출되는 앱 첫 세그먼트 목록
 // 예: myverse.kr/today → 내부 /myverse/app/today
@@ -34,6 +36,56 @@ export async function middleware(request: NextRequest) {
         || request.nextUrl.searchParams.has('_rsc');
     if (isPrefetch && (pathname.startsWith('/myverse/app') || pathname === '/planners' || pathname.startsWith('/planners/'))) {
         return new NextResponse(null, { status: 204 });
+    }
+
+    // 0-CANONICAL. 공식 주소 단일화 (lib/domain-registry.ts CANONICAL_HOSTS, CLAUDE.md §0.1)
+    //   - www.tenone.biz/intra/*        → intra.tenone.biz (308, 세션은 .tenone.biz 쿠키 공유)
+    //   - www.tenone.biz/{brand}/*      → 브랜드 공식 주소
+    //   - {brand}.tenone.biz (vercel)   → 브랜드 공식 주소
+    //   로컬·프리뷰 도메인은 제외 (경로 분기로 개발)
+    const reqHost = (request.headers.get('host') || '').split(':')[0];
+    {
+        const isTenoneMain = reqHost === 'www.tenone.biz' || reqHost === 'tenone.biz';
+        const firstSeg = pathname.split('/')[1] || '';
+        let target: string | null = null;
+        let status = 308;
+
+        if (isTenoneMain && firstSeg === 'intra') {
+            target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;
+        } else {
+            const subBrand = reqHost.endsWith('.tenone.biz') ? reqHost.slice(0, -'.tenone.biz'.length) : null;
+            const brand = isTenoneMain ? firstSeg : subBrand;
+            const canonical = brand ? CANONICAL_HOSTS[brand] : undefined;
+            // API·인증 콜백·정적 파일은 넘기지 않는다 (진행 중인 로그인·자산 요청 보호)
+            const passThrough = /^\/(api|auth|_next)\//.test(pathname) || pathname.includes('.');
+            if (canonical && !passThrough) {
+                if (canonical.hosting === 'vercel') {
+                    // 경로 그대로: 공식 도메인과 {brand}.tenone.biz는 같은 prefix 라우팅,
+                    // www의 /{brand}/* 경로도 공식 도메인에서 그대로 동작
+                    target = `https://${canonical.host}${pathname}${request.nextUrl.search}`;
+                } else if (isTenoneMain) {
+                    // 외부 서버는 경로 체계가 달라 홈으로. 이전 후 vercel로 바꾸면 308 경로 유지
+                    target = `https://${canonical.host}/`;
+                    status = 302;
+                }
+                // external 브랜드의 {brand}.tenone.biz 는 스테이징 — 넘기지 않음 (noindex는 next.config.ts headers)
+            }
+        }
+
+        if (target) {
+            if (isPrefetch) return new NextResponse(null, { status: 204 });
+            return NextResponse.redirect(target, status);
+        }
+    }
+
+    // 0-API. 관리·운영 API 접근 게이트 (lib/api-access-policy.ts SSOT)
+    //        라우트 핸들러가 service_role로 RLS를 우회하므로 여기서 먼저 차단한다.
+    if (pathname.startsWith('/api/') && request.method !== 'OPTIONS') {
+        const rule = getApiAccessRule(pathname);
+        if (rule) {
+            const auth = await requireStaff(request, { allowEmails: rule.allowEmails });
+            if (auth instanceof NextResponse) return auth;
+        }
     }
 
     // 0a. /api/planners/* → /api/myverse/* 내부 rewrite (외부 호출자 호환: Toss, Google OAuth, Cron)
@@ -99,6 +151,29 @@ export async function middleware(request: NextRequest) {
     // getSession()으로 쿠키 갱신 (getUser()는 매 요청마다 Supabase 서버 호출 → cold start 블로킹)
     // 보안 검증이 필요한 경우는 API Route에서 getUser() 직접 호출
     await supabase.auth.getSession();
+
+    // 1b. 인트라 서버 게이트 — 직원이 아니면 페이지·RSC 내용을 아예 내려주지 않는다.
+    //     (클라이언트 layout 확인만으로는 번들·RSC가 노출되고 sessionStorage 조작으로 화면이 열림)
+    //     비직원은 /intra/login(빈 페이지)으로 rewrite → layout이 로그인/권한없음 UI 표시.
+    {
+        const onIntraHost = reqDomain === 'intra.tenone.biz';
+        const isIntraPath = pathname === '/intra' || pathname.startsWith('/intra/');
+        const isIntraHostPage = onIntraHost && !isIntraPath
+            && !skipPaths.some(p => pathname.startsWith(p)) && !pathname.includes('.');
+        const effectivePath = isIntraPath ? pathname : isIntraHostPage ? `/intra${pathname === '/' ? '' : pathname}` : null;
+        if (effectivePath && effectivePath !== '/intra/login') {
+            const staff = await requireStaff(request);
+            if (staff instanceof NextResponse) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/intra/login';
+                url.search = '';
+                const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+                response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+                rw.headers.set('Cache-Control', 'private, no-store');
+                return rw;
+            }
+        }
+    }
 
     // 2a. /@handle → 호스트별 분기
     //     myverse.kr → /myverse/{handle} (Myverse 공개 페이지)
