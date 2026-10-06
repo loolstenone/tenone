@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
@@ -9,12 +10,13 @@ interface RouteProps {
 
 // GET — 퍼블릭 포트폴리오
 // portfolio_public=true인 멤버만 조회 가능 (anon도 접근 가능)
+// mad_members는 RLS로 본인 행만 열려 있으므로 service_role로 읽되, 공개 컬럼만 고른다 (email·phone 제외)
 export async function GET(_req: Request, { params }: RouteProps) {
   const { memberId } = await params;
   const sb = await createClient();
 
   // 멤버 기본 정보 (portfolio_public=true만)
-  const { data: member, error } = await sb
+  const { data: member, error } = await createAdminClient()
     .from('mad_members')
     .select(`
       id, name, bio, skill_tags, activity_years, avatar_url,
