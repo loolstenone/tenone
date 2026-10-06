@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
 import { MADZINE_CATEGORIES, madzineCategoryLabel } from '@/lib/madzine-categories';
+import { MadzineCard, MZ_DISPLAY, MZ_KICKER, MZ_RULE, MZ_SERIF, formatMzDate } from '@/features/madleague/MadzineUI';
 
 export const revalidate = 300;
 
@@ -39,204 +40,152 @@ export default async function MadzinePage({ searchParams }: PageProps) {
   const articles = (data ?? []) as Array<{
     id: string; slug: string; title: string; subtitle: string | null; category: string;
     club_id: string | null; thumbnail_url: string | null; author_name: string | null;
-    year: number | null; published_at: string; is_featured: boolean; views_count?: number;
+    year: number | null; published_at: string; is_featured: boolean; views_count?: number; excerpt: string | null;
   }>;
   const clubById = new Map(clubs.map((c) => [c.id, c]));
 
   const { data: allYears } = await sb.from('mad_articles').select('year').eq('is_published', true);
   const yearOptions = Array.from(new Set((allYears ?? []).map((r: { year: number | null }) => r.year).filter(Boolean) as number[])).sort((a, b) => b - a);
 
-  const featured = articles[0] ?? null;
-  const subFeatured = articles.slice(1, 4);
-  const boardArticles = articles.slice(4);
+  const cover = articles[0] ?? null;
+  const picks = articles.slice(1, 7);
+  const archive = articles.slice(7);
+  const issueYear = yearOptions[0] ?? new Date().getFullYear();
 
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* ─── Header ─────────────────────────────── */}
-      <section className="border-b border-neutral-900">
-        <div className="mx-auto max-w-7xl px-6 py-20 flex items-end justify-between flex-wrap gap-6">
-          <div>
-            <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADZINE</div>
-            <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">진짜들이 쓰는 기록</h1>
-            {tag && <p className="mt-4 text-neutral-400">태그 <span className="text-[#EC1D25] font-bold">#{tag}</span></p>}
+    <div>
+      {/* ─── Masthead ─────────────────────────────── */}
+      <header className={`border-b ${MZ_RULE}`}>
+        <div className="mx-auto max-w-7xl px-6">
+          <div className={`flex items-center justify-between border-b ${MZ_RULE} py-4 ${MZ_KICKER} text-neutral-500`}>
+            <span>MAD League Magazine</span>
+            <span className="hidden sm:inline">Vol. {issueYear} · {articles.length} Stories</span>
           </div>
-          {isMember && (
-            <Link href="/madleague/madzine/write" className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-6 py-3 transition">
-              + 투고
-            </Link>
-          )}
+          <div className="py-14 sm:py-20 text-center">
+            <h1 className={`text-7xl sm:text-9xl italic font-black tracking-tight text-white ${MZ_DISPLAY}`}>
+              MAD<span className="text-[#EC1D25]">zine</span>
+            </h1>
+            <p className={`mt-6 text-lg sm:text-xl text-neutral-300 ${MZ_SERIF}`}>진짜들이 쓰는 기록</p>
+            {tag && <p className={`mt-4 ${MZ_KICKER} text-neutral-400`}>Tag · <span className="text-[#EC1D25]">#{tag}</span></p>}
+            {isMember && (
+              <Link href="/madleague/madzine/write"
+                className={`mt-8 inline-block border border-white/30 px-6 py-3 ${MZ_KICKER} text-white hover:border-[#EC1D25] hover:text-[#EC1D25] transition`}>
+                + 투고하기
+              </Link>
+            )}
+          </div>
         </div>
-      </section>
 
-      {/* ─── 카테고리 필터 ─────────────────────── */}
-      <section className="border-b border-neutral-900 bg-neutral-950">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-wrap gap-2 items-center">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={buildQS({ category: cat.slug === 'all' ? undefined : cat.slug, club, year })}
-              className={`text-xs font-bold px-4 py-2 border transition ${
-                category === cat.slug
-                  ? 'bg-[#EC1D25] border-[#EC1D25] text-white'
-                  : 'border-neutral-700 text-neutral-400 hover:border-white hover:text-white'
-              }`}
-            >
-              {cat.label}
-            </Link>
-          ))}
-          {yearOptions.length > 0 && <div className="w-px h-4 bg-neutral-700 mx-2" />}
-          {yearOptions.map((y) => (
-            <Link
-              key={y}
-              href={buildQS({ category: category === 'all' ? undefined : category, club, year: String(y) })}
-              className={`text-xs font-bold px-3 py-2 border transition ${
-                year === String(y)
-                  ? 'bg-neutral-700 border-neutral-700 text-white'
-                  : 'border-neutral-700 text-neutral-500 hover:border-white hover:text-white'
-              }`}
-            >
-              {y}
-            </Link>
-          ))}
-        </div>
-      </section>
+        {/* 카테고리 · 연도 */}
+        <nav className={`border-t ${MZ_RULE}`}>
+          <div className="mx-auto max-w-7xl px-6 py-5 flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
+            {CATEGORIES.map((cat) => {
+              const active = category === cat.slug;
+              return (
+                <Link
+                  key={cat.slug}
+                  href={buildQS({ category: cat.slug === 'all' ? undefined : cat.slug, club, year })}
+                  className={`${MZ_KICKER} pb-1 border-b transition ${active ? 'text-white border-[#EC1D25]' : 'text-neutral-500 border-transparent hover:text-white'}`}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
+            {yearOptions.length > 0 && <span className="h-3 w-px bg-white/20" />}
+            {yearOptions.map((y) => (
+              <Link
+                key={y}
+                href={buildQS({ category: category === 'all' ? undefined : category, club, year: year === String(y) ? undefined : String(y) })}
+                className={`text-sm italic transition ${MZ_DISPLAY} ${year === String(y) ? 'text-[#EC1D25]' : 'text-neutral-500 hover:text-white'}`}
+              >
+                {y}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </header>
 
       {articles.length === 0 ? (
-        <div className="text-center py-40 text-neutral-600">조건에 맞는 콘텐츠가 없습니다.</div>
+        <div className="py-40 text-center">
+          <p className={`text-3xl italic text-neutral-600 ${MZ_DISPLAY}`}>Next issue</p>
+          <p className="mt-3 text-sm text-neutral-500">조건에 맞는 글이 아직 없습니다.</p>
+        </div>
       ) : (
         <>
-          {/* ─── 매거진 피처 ───────────────────── */}
-          {featured && (
-            <section className="mx-auto max-w-7xl px-6 py-16">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* 메인 피처 */}
-                <Link href={`/madleague/madzine/${featured.slug}`} className="group lg:col-span-2 block">
-                  <div className="aspect-[16/9] bg-neutral-900 overflow-hidden">
-                    {featured.thumbnail_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={featured.thumbnail_url} alt={featured.title}
-                        className="h-full w-full object-cover group-hover:scale-105 transition duration-500" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-neutral-700 text-sm tracking-widest font-bold">
-                        {madzineCategoryLabel(featured.category)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-5">
-                    <span className="text-xs font-bold tracking-widest text-[#EC1D25] uppercase">{madzineCategoryLabel(featured.category)}</span>
-                    <h2 className="mt-2 text-2xl sm:text-3xl font-black leading-tight group-hover:text-[#EC1D25] transition">
-                      {featured.title}
-                    </h2>
-                    {featured.subtitle && (
-                      <p className="mt-3 text-base text-neutral-400 leading-relaxed line-clamp-2">{featured.subtitle}</p>
-                    )}
-                    <div className="mt-4 text-xs text-neutral-600">
-                      {featured.author_name && <span>{featured.author_name} · </span>}
-                      {new Date(featured.published_at).toLocaleDateString('ko-KR')}
-                    </div>
-                  </div>
-                </Link>
-
-                {/* 사이드 피처 2개 */}
-                <div className="flex flex-col gap-8">
-                  {subFeatured.slice(0, 2).map((a) => (
-                    <Link key={a.id} href={`/madleague/madzine/${a.slug}`} className="group flex gap-4">
-                      <div className="w-28 h-20 bg-neutral-900 overflow-hidden shrink-0">
-                        {a.thumbnail_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
-                        ) : (
-                          <div className="h-full w-full bg-neutral-800" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{madzineCategoryLabel(a.category)}</span>
-                        <h3 className="mt-1 text-sm font-black leading-snug group-hover:text-[#EC1D25] transition line-clamp-3">
-                          {a.title}
-                        </h3>
-                        <div className="mt-2 text-xs text-neutral-600">
-                          {new Date(a.published_at).toLocaleDateString('ko-KR')}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+          {/* ─── Cover Story ─────────────────────── */}
+          {cover && (
+            <section className="mx-auto max-w-7xl px-6 pt-12">
+              <Link href={`/madleague/madzine/${cover.slug}`} className="group relative block overflow-hidden bg-neutral-900">
+                <div className="aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]">
+                  {cover.thumbnail_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={cover.thumbnail_url} alt={cover.title}
+                      className="h-full w-full object-cover group-hover:scale-[1.02] transition duration-1000" />
+                  )}
                 </div>
-              </div>
-
-              {/* 3번째 서브피처 */}
-              {subFeatured[2] && (
-                <Link href={`/madleague/madzine/${subFeatured[2].slug}`}
-                  className="group mt-8 flex gap-6 border-t border-neutral-900 pt-8 items-center">
-                  <div className="w-40 h-28 bg-neutral-900 overflow-hidden shrink-0">
-                    {subFeatured[2].thumbnail_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={subFeatured[2].thumbnail_url} alt={subFeatured[2].title} className="h-full w-full object-cover group-hover:scale-105 transition" />
-                    ) : (
-                      <div className="h-full w-full bg-neutral-800" />
-                    )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-12 max-w-3xl">
+                  <div className={`${MZ_KICKER} text-[#EC1D25]`}>Cover Story · {madzineCategoryLabel(cover.category)}</div>
+                  <h2 className={`mt-4 text-3xl sm:text-5xl font-black leading-tight text-white ${MZ_SERIF}`}>{cover.title}</h2>
+                  {(cover.subtitle ?? cover.excerpt) && (
+                    <p className="mt-4 text-sm sm:text-base leading-relaxed text-neutral-300 line-clamp-2">{cover.subtitle ?? cover.excerpt}</p>
+                  )}
+                  <div className="mt-5 text-[11px] tracking-[0.2em] text-neutral-400">
+                    {cover.author_name && <span>{cover.author_name} · </span>}{formatMzDate(cover.published_at)}
                   </div>
-                  <div>
-                    <span className="text-xs font-bold tracking-wider text-[#EC1D25] uppercase">{madzineCategoryLabel(subFeatured[2].category)}</span>
-                    <h3 className="mt-1 text-xl font-black group-hover:text-[#EC1D25] transition">{subFeatured[2].title}</h3>
-                    {subFeatured[2].subtitle && (
-                      <p className="mt-2 text-sm text-neutral-400 line-clamp-1">{subFeatured[2].subtitle}</p>
-                    )}
-                  </div>
-                </Link>
-              )}
+                </div>
+              </Link>
             </section>
           )}
 
-          {/* ─── 게시판 ────────────────────────── */}
-          {boardArticles.length > 0 && (
-            <section className="border-t border-neutral-900">
-              <div className="mx-auto max-w-7xl px-6 py-12">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-800 text-xs font-bold tracking-widest text-neutral-600 text-left">
-                      <th className="pb-4 w-20 hidden sm:table-cell">카테고리</th>
-                      <th className="pb-4">제목</th>
-                      <th className="pb-4 hidden md:table-cell w-24">동아리</th>
-                      <th className="pb-4 w-24 text-right">날짜</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {boardArticles.map((a) => {
-                      const articleClub = a.club_id ? clubById.get(a.club_id) : null;
-                      return (
-                        <tr key={a.id} className="border-b border-neutral-900 group hover:bg-neutral-950 transition">
-                          <td className="py-4 hidden sm:table-cell">
-                            <span className="text-xs font-bold text-[#EC1D25] tracking-wider uppercase">
-                              {madzineCategoryLabel(a.category)}
-                            </span>
-                          </td>
-                          <td className="py-4 pr-4">
-                            <Link href={`/madleague/madzine/${a.slug}`}
-                              className="font-bold group-hover:text-[#EC1D25] transition leading-snug line-clamp-1">
-                              {a.title}
-                            </Link>
-                            {a.subtitle && (
-                              <div className="mt-0.5 text-xs text-neutral-600 line-clamp-1 hidden sm:block">
-                                {a.subtitle}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 hidden md:table-cell text-neutral-500 text-xs">
-                            {articleClub?.name ?? '—'}
-                          </td>
-                          <td className="py-4 text-right text-neutral-600 text-xs whitespace-nowrap">
-                            {new Date(a.published_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          {/* ─── In This Issue ───────────────────── */}
+          {picks.length > 0 && (
+            <section className="mx-auto max-w-7xl px-6 pt-20">
+              <SectionTitle eyebrow="In This Issue" title="이번 호의 이야기" />
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+                {picks.map((a, i) => <MadzineCard key={a.id} article={a} index={i + 1} />)}
               </div>
             </section>
           )}
+
+          {/* ─── Archive Index ───────────────────── */}
+          {archive.length > 0 && (
+            <section className="mx-auto max-w-7xl px-6 pt-24">
+              <SectionTitle eyebrow="Archive" title="지난 이야기" />
+              <ol className={`mt-10 border-t ${MZ_RULE}`}>
+                {archive.map((a, i) => {
+                  const articleClub = a.club_id ? clubById.get(a.club_id) : null;
+                  return (
+                    <li key={a.id} className={`border-b ${MZ_RULE}`}>
+                      <Link href={`/madleague/madzine/${a.slug}`} className="group grid grid-cols-12 items-baseline gap-4 py-6">
+                        <span className={`col-span-2 sm:col-span-1 text-2xl italic text-neutral-600 group-hover:text-[#EC1D25] transition ${MZ_DISPLAY}`}>
+                          {String(picks.length + i + 1).padStart(2, '0')}
+                        </span>
+                        <span className={`hidden sm:block col-span-2 ${MZ_KICKER} text-[#EC1D25]`}>{madzineCategoryLabel(a.category)}</span>
+                        <span className={`col-span-10 sm:col-span-6 text-lg leading-snug text-white group-hover:text-[#EC1D25] transition ${MZ_SERIF}`}>
+                          {a.title}
+                        </span>
+                        <span className="hidden sm:block col-span-1 text-xs text-neutral-500">{articleClub?.name ?? ''}</span>
+                        <span className="hidden sm:block col-span-2 text-right text-[11px] tracking-[0.2em] text-neutral-500">{formatMzDate(a.published_at)}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
+          <div className="pb-24" />
         </>
       )}
+    </div>
+  );
+}
+
+function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className={`flex items-end justify-between gap-6 border-b ${MZ_RULE} pb-4`}>
+      <h2 className={`text-3xl sm:text-4xl text-white ${MZ_SERIF}`}>{title}</h2>
+      <span className={`text-lg italic text-neutral-500 ${MZ_DISPLAY}`}>{eyebrow}</span>
     </div>
   );
 }

@@ -78,13 +78,16 @@ for (const a of articles) {
   const content = sanitize(body.innerHTML).trim();
   const thumb = a.listThumb ? await copyImage(a.listThumb, a.idx) : null;
   const leftover = (content.match(/cdn\.imweb\.me/g) ?? []).length;
+  // 요약 = 본문 텍스트 앞 160자 (원본 description은 &nbsp;·문단 붙음 문제가 있어 쓰지 않음)
+  const text = new JSDOM(`<body>${content.replace(/<\/(p|li|div|h\d)>/g, ' </$1>')}</body>`).window.document.body.textContent.replace(/\s+/g, ' ').trim();
+  const excerpt = text.length > 160 ? `${text.slice(0, 160)}…` : text;
 
   const row = {
     slug: `mz-${a.idx}`,
     title: a.title,
     content,
     category: a.category,
-    excerpt: a.description,
+    excerpt,
     author_name: 'MAD League',
     thumbnail_url: thumb,
     year: a.publishedAt ? Number(a.publishedAt.slice(0, 4)) : null,

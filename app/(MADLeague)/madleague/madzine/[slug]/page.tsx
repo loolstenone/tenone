@@ -7,6 +7,7 @@ import { ArticleComments } from './ArticleComments';
 import { ArticleViewPing } from './ArticleViewPing';
 import { MadzineArticleBody } from '@/features/madleague/MadzineArticleBody';
 import { madzineCategoryLabel } from '@/lib/madzine-categories';
+import { MadzineCard, MZ_DISPLAY, MZ_KICKER, MZ_RULE, MZ_SERIF, formatMzDate } from '@/features/madleague/MadzineUI';
 
 export const revalidate = 0;
 
@@ -46,7 +47,7 @@ export default async function ArticlePage({ params }: PageProps) {
   const article = data as {
     id: string; slug: string; title: string; subtitle: string | null; content: string;
     category: string; club_id: string | null; author_id: string | null; author_name: string | null;
-    thumbnail_url: string | null; tags: string[] | null; year: number | null;
+    thumbnail_url: string | null; tags: string[] | null; year: number | null; excerpt: string | null;
     likes_count: number; views_count: number; comments_count: number;
     published_at: string; is_featured: boolean;
   };
@@ -54,7 +55,7 @@ export default async function ArticlePage({ params }: PageProps) {
   const [clubRes, relatedRes, likeRes, { data: { user } }] = await Promise.all([
     article.club_id ? sb.from('mad_clubs').select('slug, name, color').eq('id', article.club_id).maybeSingle() : Promise.resolve({ data: null }),
     sb.from('mad_articles')
-      .select('id, slug, title, subtitle, category, thumbnail_url, published_at')
+      .select('id, slug, title, subtitle, excerpt, category, thumbnail_url, published_at')
       .eq('is_published', true)
       .eq('category', article.category)
       .neq('id', article.id)
@@ -65,7 +66,7 @@ export default async function ArticlePage({ params }: PageProps) {
   ]);
 
   const club = clubRes.data as { slug: string; name: string; color: string | null } | null;
-  const related = (relatedRes.data ?? []) as Array<{ id: string; slug: string; title: string; subtitle: string | null; category: string; thumbnail_url: string | null; published_at: string }>;
+  const related = (relatedRes.data ?? []) as Array<{ id: string; slug: string; title: string; subtitle: string | null; excerpt: string | null; category: string; thumbnail_url: string | null; published_at: string }>;
 
   // 본인 좋아요 여부 조회
   let userLiked = false;
@@ -81,54 +82,60 @@ export default async function ArticlePage({ params }: PageProps) {
   }
 
   return (
-    <article className="bg-white text-neutral-900">
+    <article>
       <ArticleViewPing articleId={article.id} />
 
-      <div className="mx-auto max-w-3xl px-6 pt-12">
-        <Link href="/madleague/madzine" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-black transition">
-          <ChevronLeft className="h-4 w-4" /> MADzine
-        </Link>
+      {/* 상단 러닝 헤드 */}
+      <div className={`border-b ${MZ_RULE}`}>
+        <div className={`mx-auto max-w-7xl px-6 py-4 flex items-center justify-between ${MZ_KICKER} text-neutral-500`}>
+          <Link href="/madleague/madzine" className="inline-flex items-center gap-1 hover:text-white transition">
+            <ChevronLeft className="h-3.5 w-3.5" /> <span className={`normal-case tracking-normal text-base italic ${MZ_DISPLAY}`}>MADzine</span>
+          </Link>
+          <span>{madzineCategoryLabel(article.category)}</span>
+        </div>
       </div>
 
-      <header className="mx-auto max-w-3xl px-6 py-12">
-        <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
+      {/* 헤드라인 */}
+      <header className="mx-auto max-w-4xl px-6 pt-16 sm:pt-24 pb-12 text-center">
+        <div className={`flex items-center justify-center gap-3 ${MZ_KICKER}`}>
           <span className="text-[#EC1D25]">{madzineCategoryLabel(article.category)}</span>
-          {club && (<><span className="text-neutral-300">·</span><Link href={`/madleague/madzine?club=${club.slug}`} className="text-neutral-500 hover:text-black">{club.name}</Link></>)}
-          {article.year && (<><span className="text-neutral-300">·</span><span className="text-neutral-500">{article.year}</span></>)}
+          {club && (<><span className="text-neutral-700">/</span><Link href={`/madleague/madzine?club=${club.slug}`} className="text-neutral-400 hover:text-white">{club.name}</Link></>)}
+          {article.year && (<><span className="text-neutral-700">/</span><span className="text-neutral-400">{article.year}</span></>)}
         </div>
-        <h1 className="mt-4 text-3xl sm:text-5xl font-black tracking-tight leading-tight">{article.title}</h1>
-        {article.subtitle && <p className="mt-4 text-lg text-neutral-600 leading-relaxed">{article.subtitle}</p>}
-        <div className="mt-6 flex items-center gap-4 text-sm text-neutral-500">
-          {article.author_name && <span>{article.author_name}</span>}
-          <span>·</span>
-          <span>{new Date(article.published_at).toLocaleDateString('ko-KR')}</span>
-          <span>·</span>
+        <h1 className={`mt-8 text-4xl sm:text-6xl font-black leading-[1.15] tracking-tight text-white ${MZ_SERIF}`}>{article.title}</h1>
+        {(article.subtitle ?? article.excerpt) && (
+          <p className={`mt-8 mx-auto max-w-2xl text-lg sm:text-xl italic leading-relaxed text-neutral-400 ${MZ_SERIF}`}>
+            {article.subtitle ?? article.excerpt}
+          </p>
+        )}
+        <div className={`mt-10 mx-auto max-w-xl flex items-center justify-center gap-4 border-y ${MZ_RULE} py-4 text-[11px] tracking-[0.2em] text-neutral-500`}>
+          {article.author_name && <span className="uppercase text-neutral-300">By {article.author_name}</span>}
+          <span>{formatMzDate(article.published_at)}</span>
           <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {article.views_count.toLocaleString()}</span>
         </div>
       </header>
 
       {article.thumbnail_url && (
-        <div className="mx-auto max-w-5xl">
+        <figure className="mx-auto max-w-6xl px-0 sm:px-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={article.thumbnail_url} alt={article.title} className="w-full h-auto" />
-        </div>
+        </figure>
       )}
 
-      <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
         <MadzineArticleBody content={article.content} />
 
         {article.tags && article.tags.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-neutral-200 flex flex-wrap gap-2">
+          <div className={`mt-16 pt-8 border-t ${MZ_RULE} flex flex-wrap gap-x-5 gap-y-2`}>
             {article.tags.map(tag => (
-              <Link key={tag} href={`/madleague/madzine?tag=${encodeURIComponent(tag)}`} className="text-xs font-bold text-neutral-500 bg-neutral-100 hover:bg-neutral-200 px-3 py-1">
+              <Link key={tag} href={`/madleague/madzine?tag=${encodeURIComponent(tag)}`} className={`${MZ_KICKER} text-neutral-500 hover:text-[#EC1D25] transition`}>
                 #{tag}
               </Link>
             ))}
           </div>
         )}
 
-        {/* Actions: likes + share */}
-        <div className="mt-10">
+        <div className={`mt-12 pt-8 border-t ${MZ_RULE}`}>
           <ArticleActions
             articleId={article.id}
             slug={article.slug}
@@ -141,42 +148,33 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Related */}
+      {/* Comments */}
+      <section id="comments" className={`border-t ${MZ_RULE}`}>
+        <div className="mx-auto max-w-2xl px-6 py-16">
+          <div className="flex items-baseline justify-between mb-8">
+            <h2 className={`text-2xl text-white ${MZ_SERIF}`}>댓글</h2>
+            <span className={`text-lg italic text-neutral-500 ${MZ_DISPLAY}`}>
+              <MessageCircle className="inline h-4 w-4 mr-1 -mt-1" />{article.comments_count}
+            </span>
+          </div>
+          <ArticleComments articleId={article.id} canComment={!!memberId} />
+        </div>
+      </section>
+
+      {/* More Stories */}
       {related.length > 0 && (
-        <section className="bg-neutral-50 border-y border-neutral-200">
-          <div className="mx-auto max-w-5xl px-6 py-16">
-            <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">RELATED</div>
-            <h2 className="text-2xl font-black mb-8">이 카테고리의 다른 글</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {related.map(r => (
-                <Link key={r.id} href={`/madleague/madzine/${r.slug}`} className="group block">
-                  <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
-                    {r.thumbnail_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.thumbnail_url} alt={r.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-neutral-400 text-xs tracking-[0.3em] font-bold">
-                        {madzineCategoryLabel(r.category)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-3 text-xs font-bold tracking-wider uppercase text-[#EC1D25]">{madzineCategoryLabel(r.category)}</div>
-                  <div className="mt-1 font-bold group-hover:text-[#EC1D25] transition">{r.title}</div>
-                </Link>
-              ))}
+        <section className={`border-t ${MZ_RULE}`}>
+          <div className="mx-auto max-w-7xl px-6 py-20">
+            <div className={`flex items-end justify-between gap-6 border-b ${MZ_RULE} pb-4`}>
+              <h2 className={`text-3xl sm:text-4xl text-white ${MZ_SERIF}`}>{madzineCategoryLabel(article.category)}의 다른 이야기</h2>
+              <span className={`text-lg italic text-neutral-500 ${MZ_DISPLAY}`}>More Stories</span>
+            </div>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+              {related.map(r => <MadzineCard key={r.id} article={r} />)}
             </div>
           </div>
         </section>
       )}
-
-      {/* Comments */}
-      <section className="mx-auto max-w-3xl px-6 py-16">
-        <div className="flex items-center gap-2 mb-6">
-          <MessageCircle className="h-5 w-5 text-neutral-500" />
-          <h2 className="text-xl font-black">댓글 <span className="text-neutral-500 font-normal">{article.comments_count}</span></h2>
-        </div>
-        <ArticleComments articleId={article.id} canComment={!!memberId} />
-      </section>
     </article>
   );
 }

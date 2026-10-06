@@ -63,17 +63,17 @@ export function ArticleActions({ articleId, slug, title, initialLikesCount, init
     <div className="flex items-center gap-3 flex-wrap">
       <button
         onClick={toggleLike}
-        className={`inline-flex items-center gap-2 px-5 py-2.5 border-2 transition font-bold ${
+        className={`inline-flex items-center gap-2 px-5 py-2.5 border transition font-bold ${
           liked
             ? 'bg-[#EC1D25] border-[#EC1D25] text-white'
-            : 'bg-white border-neutral-300 text-neutral-700 hover:border-[#EC1D25] hover:text-[#EC1D25]'
+            : 'bg-transparent border-white/20 text-neutral-300 hover:border-[#EC1D25] hover:text-[#EC1D25]'
         }`}
       >
         <Heart className="h-4 w-4" fill={liked ? 'currentColor' : 'none'} />
         <span>{count.toLocaleString()}</span>
       </button>
 
-      <a href="#comments" className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-neutral-300 text-neutral-700 hover:border-black hover:text-black transition font-bold">
+      <a href="#comments" className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/20 text-neutral-300 hover:border-white hover:text-white transition font-bold">
         <MessageCircle className="h-4 w-4" />
         <span>{commentsCount.toLocaleString()}</span>
       </a>
@@ -81,7 +81,7 @@ export function ArticleActions({ articleId, slug, title, initialLikesCount, init
       <div className="ml-auto flex items-center gap-2">
         <button
           onClick={share}
-          className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-neutral-300 text-neutral-700 hover:border-black hover:text-black transition font-bold text-sm"
+          className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/20 text-neutral-300 hover:border-white hover:text-white transition font-bold text-sm"
         >
           {copied ? <><Check className="h-4 w-4" /> 복사됨</> : <><Share2 className="h-4 w-4" /> 공유</>}
         </button>
@@ -91,7 +91,7 @@ export function ArticleActions({ articleId, slug, title, initialLikesCount, init
             try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1800); }
             catch { prompt('URL 복사', url); }
           }}
-          className="inline-flex items-center justify-center h-10 w-10 border-2 border-neutral-300 text-neutral-700 hover:border-black hover:text-black transition"
+          className="inline-flex items-center justify-center h-10 w-10 border border-white/20 text-neutral-300 hover:border-white hover:text-white transition"
           title="URL 복사"
         >
           <Link2 className="h-4 w-4" />
