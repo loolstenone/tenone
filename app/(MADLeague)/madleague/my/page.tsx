@@ -33,12 +33,13 @@ export default function MadLeagueMyPage() {
     const [processingId, setProcessingId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!user?.id || !user?.email) return;
+        if (!user?.id || !user?.authId) return;
         const sb = createClient();
 
+        // mad_members.user_id = auth uid (members.id 아님). cohort 컬럼은 없음(cohort_id) — 조회하면 쿼리 전체가 실패
         sb.from('mad_members')
-            .select('role, club_id, name, activity_years, cohort, university')
-            .eq('user_id', user.id)
+            .select('role, club_id, name, activity_years, university')
+            .eq('user_id', user.authId)
             .maybeSingle()
             .then(async ({ data: member }: { data: any }) => {
                 if (member) {
@@ -50,17 +51,19 @@ export default function MadLeagueMyPage() {
                     setMadInfo(info);
                     setMadStatus('active');
                 } else {
+                    // 지원서는 members.id로 연결 (데이터 계약 1 — 이메일 매칭 금지)
                     const { data: app } = await sb
                         .from('mad_applications')
                         .select('id, status')
-                        .eq('email', user.email!)
+                        .eq('member_id', user.id)
+                        .eq('status', 'pending')
                         .order('created_at', { ascending: false })
                         .limit(1)
                         .maybeSingle();
                     setMadStatus(app ? 'pending' : 'none');
                 }
             });
-    }, [user?.id, user?.email]);
+    }, [user?.id, user?.authId]);
 
     useEffect(() => {
         if (!madInfo?.club_id || madInfo.role !== 'club_leader') return;

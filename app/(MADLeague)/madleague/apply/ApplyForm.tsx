@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import type { MadClub } from '@/lib/supabase/madleague';
+import { useAuth } from '@/lib/auth-context';
+import { LoginModal } from '@/components/LoginModal';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { INDUSTRIES as INDUSTRIES_FALLBACK, JOB_FUNCTIONS as JOB_FUNCTIONS_FALLBACK } from '@/lib/badak-constants';
 
 interface Props {
@@ -11,6 +15,9 @@ interface Props {
   industries?: string[];
   jobFunctions?: string[];
 }
+
+/** 지원서 수집·이용 동의 문구 버전 — 문구를 바꾸면 API(CONSENT_VERSION)와 함께 올린다 */
+const MAD_APPLY_CONSENT_VERSION = '2026-10-06';
 
 const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
 
@@ -23,6 +30,8 @@ function formatPhone(value: string): string {
 }
 
 export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_FALLBACK], jobFunctions = [...JOB_FUNCTIONS_FALLBACK] }: Props) {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const captcha = useCaptcha();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +48,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setSubmitting(true);
     const fd = new FormData(e.currentTarget);
     const body = {
@@ -49,7 +59,6 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
       cohort: Number(fd.get('cohort') ?? 0) || undefined,
       activityYear: Number(fd.get('activityYear') ?? 0) || undefined,
       name: String(fd.get('name') ?? ''),
-      email: String(fd.get('email') ?? ''),
       phone: String(fd.get('phone') ?? ''),
       university: String(fd.get('university') ?? ''),
       major: String(fd.get('major') ?? ''),
@@ -58,6 +67,9 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
       jobFunction: String(fd.get('jobFunction') ?? ''),
       motivation: String(fd.get('motivation') ?? ''),
       portfolioUrl: String(fd.get('portfolioUrl') ?? ''),
+      privacyConsent: fd.get('privacyConsent') === 'on',
+      consentVersion: MAD_APPLY_CONSENT_VERSION,
+      captchaToken: captcha.token ?? '',
     };
 
     try {
@@ -73,6 +85,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : '등록 실패');
+      captcha.reset();
     } finally {
       setSubmitting(false);
     }
@@ -84,8 +97,22 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         <CheckCircle2 className="h-12 w-12 text-[#EC1D25] mx-auto" />
         <h2 className="mt-6 text-2xl font-black">등록이 완료되었습니다</h2>
         <p className="mt-3 text-sm text-neutral-400">
-          소속 동아리 운영진이 확인 후 입력하신 이메일로 연락드립니다.
+          운영진이 확인 후 계정 이메일로 연락드립니다. 진행 상태는 마이페이지에서 볼 수 있습니다.
         </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div className="py-24 text-center text-sm text-neutral-500">확인 중...</div>;
+  }
+
+  // 지원은 Ten:One ID 로그인 후 — 지원서는 계정(members.id)에 연결된다
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="border border-neutral-800 bg-neutral-950 p-12 text-center">
+        <p className="text-sm text-neutral-400">로그인 후 등록 신청할 수 있습니다.</p>
+        <LoginModal isOpen={true} onClose={() => {}} accentColor="#EC1D25" />
       </div>
     );
   }
@@ -133,12 +160,12 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
               <input name="companyName" required className={inputCls} placeholder="(주)텐원" />
             </Field>
             <Field label="담당자명" required>
-              <input name="name" required className={inputCls} />
+              <input name="name" required defaultValue={user.name ?? ''} className={inputCls} />
             </Field>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="이메일" required>
-              <input name="email" type="email" required className={inputCls} />
+            <Field label="이메일 (계정)">
+              <input value={user.email ?? ''} readOnly className={`${inputCls} text-neutral-500`} />
             </Field>
             <Field label="연락처">
               <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className={inputCls} />
@@ -153,9 +180,6 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
               <option value="기타">기타</option>
             </select>
           </Field>
-          {/* 기업은 동아리·기수 불필요 — hidden으로 기본값 전달 */}
-          <input type="hidden" name="university" value="" />
-          <input type="hidden" name="clubSlug" value={sortedClubs[0]?.slug ?? ''} />
         </>
       ) : (
         <>
@@ -184,10 +208,10 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field label="이름" required>
-              <input name="name" required className={inputCls} />
+              <input name="name" required defaultValue={user.name ?? ''} className={inputCls} />
             </Field>
-            <Field label="이메일" required>
-              <input name="email" type="email" required className={inputCls} />
+            <Field label="이메일 (계정)">
+              <input value={user.email ?? ''} readOnly className={`${inputCls} text-neutral-500`} />
             </Field>
             <Field label="연락처">
               <input name="phone" type="tel" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className={inputCls} />
@@ -226,6 +250,19 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
           </div>
         </>
       )}
+
+      {/* 개인정보 수집·이용 고지 + 필수 동의 (개인정보보호법 제15조) */}
+      <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed">
+        <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0 accent-[#EC1D25]" />
+        <span>
+          [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: 이름·연락처·소속(대학·전공·동아리·기수 또는 회사명)·관심 분야 ·
+          목적: 매드리거 등록 심사 및 활동 안내 · 보관: MADLeague 또는 계정 탈퇴 시까지 (탈퇴 시 파기).
+          동의하지 않으면 신청할 수 없습니다.{' '}
+          <Link href="/privacy" className="underline">개인정보처리방침</Link>
+        </span>
+      </label>
+
+      <CaptchaWidget {...captcha.widgetProps} />
 
       {error && (
         <div className="bg-red-950 border border-red-900 text-red-200 text-sm px-4 py-3">

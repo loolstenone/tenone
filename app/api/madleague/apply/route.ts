@@ -1,28 +1,41 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireMember } from '@/lib/api-guard';
+import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server';
 
 export const runtime = 'nodejs';
+
+/** 지원서 수집·이용 동의 문구 버전 — ApplyForm의 MAD_APPLY_CONSENT_VERSION과 같아야 한다 */
+const CONSENT_VERSION = '2026-10-06';
 
 interface Body {
   applicantRole?: string;
   activityRegion?: string;
   companyName?: string;
-  clubSlug: string;
+  clubSlug?: string;
   cohort?: number;
   activityYear?: number;
   name: string;
-  email: string;
   phone?: string;
-  university: string;
+  university?: string;
   major?: string;
   minor?: string;
   industry?: string;
   jobFunction?: string;
   motivation?: string;
   portfolioUrl?: string;
+  privacyConsent?: boolean;
+  consentVersion?: string;
+  captchaToken?: string;
 }
 
-export async function POST(req: Request) {
+const clip = (v: string | undefined, max: number) => v?.trim().slice(0, max) || null;
+
+// POST — 매드리거 등록 신청. 로그인(Ten:One ID) 필수, 지원자 식별은 members.id (데이터 계약 1)
+export async function POST(req: NextRequest) {
+  const auth = await requireMember(req);
+  if (auth instanceof NextResponse) return auth;
+
   let body: Body;
   try {
     body = await req.json();
@@ -30,49 +43,68 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 });
   }
 
-  const isCorporate = body.applicantRole === 'corporate';
-
-  if (!body.name || !body.email) {
-    return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
+  if (!(await verifyTurnstile(body.captchaToken, req))) {
+    return NextResponse.json({ error: CAPTCHA_REQUIRED_ERROR }, { status: 400 });
   }
-  if (!isCorporate && (!body.clubSlug || !body.university)) {
-    return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
+  if (body.privacyConsent !== true || body.consentVersion !== CONSENT_VERSION) {
+    return NextResponse.json({ error: '개인정보 수집·이용에 동의해야 신청할 수 있습니다.' }, { status: 400 });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
-    return NextResponse.json({ error: 'INVALID_EMAIL' }, { status: 400 });
-  }
-
-  const sb = await createClient();
-
-  let clubId: string | null = null;
-  if (!isCorporate && body.clubSlug) {
-    const { data: club } = await sb.from('mad_clubs').select('id').eq('slug', body.clubSlug).maybeSingle();
-    if (!club) return NextResponse.json({ error: 'CLUB_NOT_FOUND' }, { status: 404 });
-    clubId = club.id;
+  if (!auth.email) {
+    return NextResponse.json({ error: '계정 이메일을 확인할 수 없습니다.' }, { status: 400 });
   }
 
   const applicantRole = body.applicantRole === 'club_leader' ? 'club_leader'
     : body.applicantRole === 'mentor' ? 'mentor'
     : body.applicantRole === 'corporate' ? 'corporate'
     : 'member';
+  const isCorporate = applicantRole === 'corporate';
+
+  if (!body.name?.trim()) {
+    return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
+  }
+  if (isCorporate ? !body.companyName?.trim() : (!body.clubSlug || !body.university?.trim())) {
+    return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
+  }
+
+  const sb = createAdminClient();
+
+  let clubId: string | null = null;
+  if (!isCorporate) {
+    const { data: club } = await sb.from('mad_clubs').select('id').eq('slug', body.clubSlug!).maybeSingle();
+    if (!club) return NextResponse.json({ error: 'CLUB_NOT_FOUND' }, { status: 404 });
+    clubId = club.id;
+  }
+
+  // 같은 동아리(기업은 기업 신청)에 심사 대기 중인 신청이 있으면 중복 접수하지 않는다
+  let dup = sb.from('mad_applications').select('id').eq('member_id', auth.memberId).eq('status', 'pending').eq('applicant_role', applicantRole);
+  dup = clubId ? dup.eq('club_id', clubId) : dup.is('club_id', null);
+  const { data: existing } = await dup.limit(1).maybeSingle();
+  if (existing) return NextResponse.json({ error: '이미 심사 대기 중인 신청이 있습니다.' }, { status: 409 });
+
+  const currentYear = new Date().getFullYear();
+  const activityYear = body.activityYear && body.activityYear >= 2021 && body.activityYear <= currentYear + 1 ? body.activityYear : null;
+  const portfolioUrl = clip(body.portfolioUrl, 500);
 
   const { error } = await sb.from('mad_applications').insert({
+    member_id: auth.memberId,
     club_id: clubId,
     applicant_role: applicantRole,
-    activity_region: body.activityRegion?.trim() || null,
-    company_name: body.companyName?.trim() || null,
-    cohort: body.cohort ?? null,
-    activity_year: body.activityYear ?? null,
-    name: body.name.trim(),
-    email: body.email.trim(),
-    phone: body.phone?.trim() || null,
-    university: body.university?.trim() || null,
-    major: body.major?.trim() || null,
-    minor: body.minor?.trim() || null,
-    interested_industry: body.industry?.trim() || null,
-    interested_job: body.jobFunction?.trim() || null,
-    motivation: body.motivation?.trim() || null,
-    portfolio_url: body.portfolioUrl?.trim() || null,
+    activity_region: clip(body.activityRegion, 50),
+    company_name: clip(body.companyName, 100),
+    cohort: body.cohort && body.cohort > 0 && body.cohort < 100 ? body.cohort : null,
+    activity_year: activityYear,
+    year: activityYear ?? currentYear,
+    name: body.name.trim().slice(0, 50),
+    email: auth.email,
+    phone: clip(body.phone, 30),
+    university: isCorporate ? null : clip(body.university, 100),
+    major: clip(body.major, 100),
+    minor: clip(body.minor, 100),
+    interested_industry: clip(body.industry, 100),
+    interested_job: clip(body.jobFunction, 100),
+    motivation: clip(body.motivation, 2000),
+    portfolio_url: portfolioUrl && /^https?:\/\//i.test(portfolioUrl) ? portfolioUrl : null,
+    consent: { privacy: true, version: CONSENT_VERSION, agreed_at: new Date().toISOString() },
     status: 'pending',
   });
 

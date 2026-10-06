@@ -21,7 +21,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   // 지원서 조회
   const { data: app } = await admin
     .from('mad_applications')
-    .select('id, club_id, email, status, name, university, phone, major, activity_year, cohort, applicant_role')
+    .select('id, member_id, club_id, email, status, name, university, phone, major, activity_year, cohort, applicant_role')
     .eq('id', id)
     .maybeSingle();
   if (!app) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
@@ -57,12 +57,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  // 지원자의 member_id 조회 (이메일로)
-  const { data: applicantMember } = await admin
-    .from('members')
-    .select('id, auth_id')
-    .eq('email', app.email)
-    .maybeSingle();
+  // 지원자 = 지원서의 member_id (데이터 계약 1 — 이메일 매칭 금지). 계정 연결 없는 옛 지원서는 상태만 승인
+  const { data: applicantMember } = app.member_id
+    ? await admin.from('members').select('id, auth_id').eq('id', app.member_id).maybeSingle()
+    : { data: null };
 
   // 상태 변경
   const { error: updateErr } = await admin

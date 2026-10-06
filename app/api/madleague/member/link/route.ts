@@ -14,6 +14,10 @@ export async function POST() {
   if (!user?.email) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
+  // 이메일 매칭은 계정 연결 이전에 승인된 옛 행 전용 (신규 지원은 members.id로 연결). 인증된 이메일만 허용
+  if (!user.email_confirmed_at) {
+    return NextResponse.json({ error: 'EMAIL_NOT_CONFIRMED' }, { status: 403 });
+  }
 
   const admin = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
