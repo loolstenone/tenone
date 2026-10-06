@@ -29,7 +29,7 @@ export default function RooKLayout({
     return (
         <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
             <RooKHeader />
-            <main className="flex-1 pt-16">
+            <main className="flex-1">
                 {children}
             </main>
             <RooKFooter />

@@ -11,11 +11,12 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 import { ROOK_ASSETS } from "@/features/rook/RooKUI";
 
-// 메뉴 = 원본 www.rook.co.kr과 동일 (Home · Works · Artist · Free board · RooKie · About)
+// 메뉴 = 원본 www.rook.co.kr과 동일 (Home · Works · Artist · Free board * · RooKie · About, 대문자 표시)
 const navItems = [
+    { name: "Home", href: "/rook" },
     { name: "Works", href: "/rook/works" },
     { name: "Artist", href: "/rook/artist" },
-    { name: "Free board", href: "/rook/freeboard" },
+    { name: "Free board *", href: "/rook/freeboard" },
     { name: "RooKie", href: "/rook/rookie" },
     { name: "About", href: "/rook/about" },
 ];
@@ -27,31 +28,36 @@ export function RooKHeader() {
 
     const isActive = (href: string) => {
         // rook.co.kr·rook.tenone.biz는 prefix 없이 접속 → /works 와 /rook/works 모두 활성 처리
-        const path = pathname.startsWith("/rook") ? pathname : `/rook${pathname}`;
+        const path = pathname.startsWith("/rook") ? pathname : `/rook${pathname === "/" ? "" : pathname}`;
+        if (href === "/rook") return path === "/rook" || path === "/rook/home";
         return path.startsWith(href);
     };
 
     return (
         <>
-        <header className="fixed top-0 left-0 right-0 z-50 bg-black">
-            <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+        <header className="sticky top-0 z-50">
+            {/* 상단 띠 배너 (원본과 동일) */}
+            <Link href="/rook/rookie" className="flex h-[38px] items-center justify-center bg-white text-[14px] md:text-[16px] text-[#222] hover:underline">
+                함께 연구하고 작업할 루키 모집 중
+            </Link>
+            <nav className="relative flex h-[60px] md:h-[78px] items-center justify-between bg-black px-4 md:px-[35px]">
                 {/* Logo */}
                 <Link href="/rook" className="shrink-0" aria-label="RooK 홈">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ROOK_ASSETS.logo} alt="RooK" className="h-6 w-auto" />
+                    <img src={ROOK_ASSETS.logo} alt="RooK" className="h-[26px] md:h-[34px] w-auto" />
                 </Link>
 
-                {/* Desktop Nav */}
-                <div className="hidden lg:flex items-center gap-8 ml-10">
+                {/* Desktop Nav — 가운데 */}
+                <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-[30px]">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={clsx(
-                                "text-sm font-medium transition-colors whitespace-nowrap",
+                                "text-[14px] uppercase transition-colors whitespace-nowrap",
                                 isActive(item.href)
                                     ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
+                                    : "text-white/50 hover:text-white"
                             )}
                         >
                             {item.name}
@@ -62,7 +68,7 @@ export function RooKHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex ml-auto">
                     <UniverseUtilityBar
-                        aboutPath="/rook/about"
+                        hideAbout // 메뉴에 About이 이미 있음 (원본과 동일)
                         profilePath="/rook/my"
                         accentColor="#00d255"
                         signupPath="/rook/signup"

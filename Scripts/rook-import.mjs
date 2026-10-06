@@ -1,8 +1,8 @@
-// RooK 콘텐츠 이전 — www.rook.co.kr(아임웹) Works·Artist → ums_posts + Storage (2026-10-07)
-// 입력: 추출 JSON { works: [...], artist: [...] } (idx·category·title·date·bodyHtml·images·youtube·listThumb)
+// RooK 콘텐츠 이전 — www.rook.co.kr(아임웹) Works·Artist·자유게시판 공지 → ums_posts + Storage (2026-10-07)
+// 입력: 추출 JSON { works?, artist?, freeboard? } (idx·category·title·date·bodyHtml·images·youtube·listThumb·writer)
 // 사용: node Scripts/rook-import.mjs <extract.json> [--dry]
 // 멱등: 이미지는 같은 경로 upsert, 글은 (board, slug 'rk-{idx}') 기준 update/insert
-// ⚠️ 운영사 콘텐츠만. 자유게시판(회원 글)·회원 데이터는 이전하지 않는다 (§0.1 새로 제작·이전 없음)
+// ⚠️ 운영사 콘텐츠만. 자유게시판은 원본에서 '공지'로 고정한 운영 글만 (스팸·일반 회원 글·회원 데이터는 이전하지 않음, §0.1)
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -76,12 +76,12 @@ function cleanBody(html) {
 
 // 사이트·게시판 id
 const { data: site } = await sb.from('ums_sites').select('id').eq('slug', 'rook').single();
-const { data: boards } = await sb.from('ums_boards').select('id, slug').eq('site_id', site.id).in('slug', ['works', 'artist']);
+const { data: boards } = await sb.from('ums_boards').select('id, slug').eq('site_id', site.id).in('slug', ['works', 'artist', 'freeboard']);
 const boardId = Object.fromEntries(boards.map(b => [b.slug, b.id]));
 
 const data = JSON.parse(fs.readFileSync(input, 'utf8'));
 let ok = 0;
-for (const board of ['works', 'artist']) {
+for (const board of ['works', 'artist', 'freeboard']) {
   for (const a of data[board] ?? []) {
     const body = cleanBody(a.bodyHtml);
     for (const img of body.querySelectorAll('img')) {
@@ -114,7 +114,9 @@ for (const board of ['works', 'artist']) {
       status: 'published',
       category_id: a.category,
       author_id: null,
-      author_name: 'RooK',
+      // 아임웹 작성자 칸에 "Free Board 수정지우기"가 붙어 나옴 → 첫 줄(닉네임)만
+      author_name: a.writer ? a.writer.split(/\s*\n\s*/)[0].trim() : 'RooK',
+      is_pinned: true, // 원본에서 전부 '공지' 고정
       image,
       og_image: image,
       extra_fields: { source: `https://www.rook.co.kr/${board}/?idx=${a.idx}&bmode=view`, youtube_id: ytId ?? null },

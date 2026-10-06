@@ -1,45 +1,68 @@
 import Link from "next/link";
 import clsx from "clsx";
-import { Play } from "lucide-react";
-import type { RookPost } from "@/lib/supabase/rook";
+import type { RookBoard, RookPost } from "@/lib/supabase/rook";
 
-/** RooK 공통 — 검정 헤더·흰 본문·초록 포인트 (www.rook.co.kr 원본 톤 유지) */
+/**
+ * RooK 공통 UI — 원본 www.rook.co.kr(아임웹) 레이아웃을 그대로 옮김 (2026-10-07 원본 대조)
+ * 본문 폭 950px · 매스너리 3열(카드 여백 15px) · 섹션 제목 36px · 본문 16px · 흰 바탕 검정 글씨
+ */
 export const ROOK_GREEN = "#00d255";
+
+/** 카테고리 색 (원본과 동일) */
+export const ROOK_CATEGORY_COLOR: Record<RookBoard | "freeboard", string> = {
+    works: "#FF635D",
+    artist: "#F9A746",
+    freeboard: "#FF635D",
+};
+const FREEBOARD_CATEGORY_COLOR: Record<string, string> = { "망했어요 ㅋ": "#00B8FF" };
+export function rookCategoryColor(board: RookBoard | "freeboard", category: string | null): string {
+    if (board === "freeboard" && category && FREEBOARD_CATEGORY_COLOR[category]) return FREEBOARD_CATEGORY_COLOR[category];
+    return ROOK_CATEGORY_COLOR[board];
+}
 
 const ASSET_BASE = "https://ziotlxkdctlhiwkgmmsh.supabase.co/storage/v1/object/public/board-assets/rook/site";
 /** 사이트 이미지 (2026-10-07 www.rook.co.kr에서 Storage로 이전) */
 export const ROOK_ASSETS = {
-    logo: `${ASSET_BASE}/logo.png`,
-    aboutHero: `${ASSET_BASE}/about_hero.png`,
+    logo: `${ASSET_BASE}/logo2.png`,
+    aboutTitle: `${ASSET_BASE}/about_hero.png`,
     aboutRook: `${ASSET_BASE}/about_rook.png`,
-    rookieHero: `${ASSET_BASE}/rookie_hero.png`,
+    rookieTitle: `${ASSET_BASE}/rookie_hero.png`,
     rookieRecruit: `${ASSET_BASE}/rookie_recruit.png`,
-    modelBg: `${ASSET_BASE}/model_bg.jpg`,
     homeRookie: `${ASSET_BASE}/home_rookie1.png`,
+    homeRookieLogo: `${ASSET_BASE}/home_rookie2.png`,
 };
 
-/** 홈 상단·AI 모델 섹션 배경 영상 (원본 사이트와 동일) */
+/** 홈 상단·AI 모델 섹션 배경 영상 (원본과 동일) */
 export const ROOK_HERO_VIDEO = "_xly_E2iphk";
 export const ROOK_MODEL_VIDEO = "NXdOyBWZkvw";
-export const ROOK_YOUTUBE_CHANNEL = "https://www.youtube.com/@RooK_AI_Creator";
 
+/** 원본 본문 폭 950px */
+export function RooKContainer({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <div className={clsx("mx-auto w-full max-w-[980px] px-4 md:px-[15px]", className)}>{children}</div>;
+}
+
+/** 섹션 제목 — "Works" 36px 굵게 + 옆에 14px 설명, 아래 14px 한 줄 */
 export function RooKSectionTitle({ title, desc, sub }: { title: string; desc?: string; sub?: string }) {
     return (
-        <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+        <div className="mb-6 px-0 md:px-[15px]">
+            <h2 className="text-[28px] md:text-[36px] font-bold leading-tight text-black">
                 {title}
-                {desc && <span className="mt-1 block text-sm font-normal text-neutral-500 md:ml-3 md:mt-0 md:inline md:align-middle md:text-base">{desc}</span>}
+                {desc && <span className="ml-2 align-baseline text-[14px] font-normal">{desc}</span>}
             </h2>
-            {sub && <p className="mt-2 text-sm md:text-base text-neutral-600 break-keep">{sub}</p>}
+            {sub && <p className="mt-1 text-[14px] text-black break-keep">{sub}</p>}
         </div>
     );
 }
 
-/** 카테고리 탭 — ?category= 링크 (서버 페이지에서 필터) */
+/** 테두리 버튼 (원본 "▶ 스토리 보기"·"상담 / 문의"·"RooKie 지원하기" 등) */
+export const ROOK_OUTLINE_BUTTON =
+    "inline-flex items-center justify-center gap-2 border border-black bg-white px-6 py-2.5 text-[12px] text-black transition-colors hover:bg-black hover:text-white";
+
+/** 카테고리 탭 — 원본: 13px, 선택된 탭만 검정 테두리 */
 export function RooKCategoryTabs({ basePath, categories, active }: { basePath: string; categories: string[]; active?: string }) {
     const items = [{ label: "전체", value: undefined as string | undefined }, ...categories.map(c => ({ label: c, value: c }))];
     return (
-        <div className="mb-8 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+        <nav className="mb-8 flex flex-wrap justify-center gap-1">
             {items.map(it => {
                 const on = (it.value ?? "") === (active ?? "");
                 return (
@@ -47,56 +70,62 @@ export function RooKCategoryTabs({ basePath, categories, active }: { basePath: s
                         key={it.label}
                         href={it.value ? `${basePath}?category=${encodeURIComponent(it.value)}` : basePath}
                         className={clsx(
-                            "shrink-0 px-4 py-1.5 text-sm border transition-colors",
-                            on ? "bg-black text-white border-black" : "border-neutral-300 text-neutral-600 hover:border-black hover:text-black",
+                            "px-[15px] py-1 text-[13px] border transition-colors",
+                            on ? "border-black text-black" : "border-transparent text-black/70 hover:text-black",
                         )}
                     >
                         {it.label}
                     </Link>
                 );
             })}
-        </div>
+        </nav>
     );
 }
 
-/** Works 카드 — 16:9 썸네일 (영상 작품은 재생 표시) */
-export function RooKWorkCard({ post }: { post: RookPost }) {
+/** 매스너리 — 원본처럼 왼쪽→오른쪽 순서로 열에 나눠 담는다 (모바일 2열 · 데스크톱 3열) */
+export function RooKMasonry<T>({ items, render, keyOf }: { items: T[]; render: (item: T) => React.ReactNode; keyOf: (item: T) => string }) {
+    const split = (n: number) => Array.from({ length: n }, (_, c) => items.filter((_, i) => i % n === c));
     return (
-        <Link href={`/rook/works/${post.slug}`} className="group block">
-            <div className="relative aspect-video overflow-hidden bg-black">
-                {post.image && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={post.image} alt={post.title} loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                )}
-                {post.youtubeId && (
-                    <span className="absolute bottom-3 left-3 flex h-9 w-9 items-center justify-center bg-black/70 text-white">
-                        <Play className="h-4 w-4 fill-current" />
-                    </span>
-                )}
+        <>
+            <div className="grid grid-cols-2 md:hidden">
+                {split(2).map((col, c) => <div key={c}>{col.map(it => <div key={keyOf(it)} className="p-[6px]">{render(it)}</div>)}</div>)}
             </div>
-            <div className="mt-3">
-                {post.category && <p className="text-xs font-semibold tracking-wide" style={{ color: ROOK_GREEN }}>{post.category}</p>}
-                <p className="mt-1 font-semibold leading-snug break-keep group-hover:underline">{post.title}</p>
+            <div className="hidden md:grid md:grid-cols-3">
+                {split(3).map((col, c) => <div key={c}>{col.map(it => <div key={keyOf(it)} className="p-[15px]">{render(it)}</div>)}</div>)}
             </div>
+        </>
+    );
+}
+
+/** 홈 카드 — 원본 비율 이미지, 마우스를 올리면 제목이 이미지 위에 (원본 overlay 스타일) */
+export function RooKOverlayCard({ href, image, title }: { href: string; image: string | null; title: string }) {
+    return (
+        <Link href={href} className="group relative block overflow-hidden bg-neutral-100">
+            {image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={image} alt={title} loading="lazy" className="block h-auto w-full" />
+            )}
+            <span className="absolute inset-0 flex items-end bg-black/0 p-4 text-[14px] text-white opacity-0 transition-all duration-300 group-hover:bg-black/50 group-hover:opacity-100">
+                {title}
+            </span>
         </Link>
     );
 }
 
-/** AI Artist 카드 — 3:4 세로 */
-export function RooKArtistCard({ post }: { post: RookPost }) {
+/** 목록 카드 — 원본 비율 이미지 + 아래 카테고리(색)·제목 */
+export function RooKListCard({ board, post }: { board: RookBoard; post: RookPost }) {
     return (
-        <Link href={`/rook/artist/${post.slug}`} className="group block">
-            <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
+        <Link href={`/rook/${board}/${post.slug}`} className="group block">
+            <div className="overflow-hidden bg-neutral-100">
                 {post.image && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={post.image} alt={post.title} loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        className="block h-auto w-full transition-opacity group-hover:opacity-80" />
                 )}
             </div>
-            <div className="mt-2">
-                {post.category && <p className="text-[11px] font-semibold tracking-wide text-neutral-500">{post.category}</p>}
-                <p className="text-sm font-semibold leading-snug break-keep">{post.title}</p>
+            <div className="pt-3 pb-2 text-[14px] leading-snug">
+                {post.category && <span className="mr-2" style={{ color: rookCategoryColor(board, post.category) }}>{post.category}</span>}
+                <span className="text-black break-keep">{post.title}</span>
             </div>
         </Link>
     );
@@ -115,10 +144,4 @@ export function RooKBackgroundVideo({ videoId, className }: { videoId: string; c
             />
         </div>
     );
-}
-
-export function formatRookDate(iso: string | null): string {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }

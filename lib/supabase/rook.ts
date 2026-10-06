@@ -1,8 +1,8 @@
-// RooK 공개 콘텐츠 조회 (서버 전용) — Works·AI Artist = ums_posts (site 'rook', 게시판 works·artist)
+// RooK 공개 콘텐츠 조회 (서버 전용) — Works·AI Artist·Free board = ums_posts (site 'rook', 게시판 works·artist·freeboard)
 // anon 키 + RLS(공개 게시판의 published 글만) → 쿠키 없이 조회해 ISR 캐시 가능
 import { createClient } from '@supabase/supabase-js';
 
-export type RookBoard = 'works' | 'artist';
+export type RookBoard = 'works' | 'artist' | 'freeboard';
 
 export interface RookPost {
     id: string;
@@ -13,13 +13,15 @@ export interface RookPost {
     category: string | null;
     image: string | null;
     youtubeId: string | null;
+    authorName: string | null;
     publishedAt: string | null;
 }
 
-/** 게시판 카테고리 순서 (ums_boards.categories와 동일) */
+/** 게시판 카테고리 = 원본 rook.co.kr 메뉴 순서 (ums_boards.categories와 동일) */
 export const ROOK_CATEGORIES: Record<RookBoard, string[]> = {
-    works: ['Music', 'Meme', 'Contents', 'AD', 'Art work'],
+    works: ['Meme', 'AD', 'Music', 'Contents', 'RooK BooK', 'Art work'],
     artist: ['Woman', 'Man', 'High teen', 'Kids', 'Baby', 'Senior', 'Animal', 'Character', 'Musician'],
+    freeboard: ['Imge', 'Video', 'Music', 'Text', 'Big Contents', '망했어요 ㅋ'],
 };
 
 function anon() {
@@ -36,7 +38,8 @@ interface PostRow {
     body: string | null;
     category_id: string | null;
     image: string | null;
-    extra_fields: { youtube_id?: string | null } | null;
+    extra_fields: { youtube_id?: string | null; sort?: number } | null;
+    author_name: string | null;
     published_at: string | null;
 }
 
@@ -50,6 +53,7 @@ function toPost(r: PostRow): RookPost {
         category: r.category_id,
         image: r.image,
         youtubeId: r.extra_fields?.youtube_id ?? null,
+        authorName: r.author_name,
         publishedAt: r.published_at,
     };
 }
@@ -64,7 +68,7 @@ async function boardId(board: RookBoard): Promise<string | null> {
     return (data as { id: string } | null)?.id ?? null;
 }
 
-const COLUMNS = 'id, slug, title, summary, body, category_id, image, extra_fields, published_at';
+const COLUMNS = 'id, slug, title, summary, body, category_id, image, extra_fields, author_name, published_at';
 
 export async function getRookPosts(board: RookBoard, opts: { category?: string; limit?: number } = {}): Promise<RookPost[]> {
     const id = await boardId(board);
@@ -76,13 +80,20 @@ export async function getRookPosts(board: RookBoard, opts: { category?: string; 
         .eq('status', 'published')
         .order('published_at', { ascending: false });
     if (opts.category) q = q.eq('category_id', opts.category);
-    if (opts.limit) q = q.limit(opts.limit);
     const { data, error } = await q;
     if (error) {
         console.error('[rook] posts', board, error.message);
         return [];
     }
-    return ((data ?? []) as PostRow[]).map(toPost);
+    // 순서: 새로 올린 글(최신순) → 이전 글은 원본 rook.co.kr 목록 순서(extra_fields.sort)
+    const rows = [...((data ?? []) as PostRow[])].sort((a, b) => {
+        const sa = a.extra_fields?.sort, sb = b.extra_fields?.sort;
+        if (sa === undefined && sb === undefined) return 0;
+        if (sa === undefined) return -1;
+        if (sb === undefined) return 1;
+        return sa - sb;
+    });
+    return (opts.limit ? rows.slice(0, opts.limit) : rows).map(toPost);
 }
 
 export async function getRookPost(board: RookBoard, slug: string): Promise<RookPost | null> {

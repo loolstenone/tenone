@@ -32,3 +32,14 @@ SELECT s.id, 'tenone', v.name, v.slug, 'general'::bums_board_type, 'public'::bum
        ) AS v(name, slug, description, write_permission, categories, sort_order)
  WHERE s.slug = 'rook'
 ON CONFLICT (site_id, slug) DO NOTHING;
+
+-- 3) 카테고리 = 원본 rook.co.kr 메뉴 순서 그대로 (2026-10-07 원본 대조)
+UPDATE public.ums_boards b
+   SET categories = v.categories::jsonb, description = v.description, updated_at = now()
+  FROM public.ums_sites s,
+       (VALUES
+         ('works', '["Meme","AD","Music","Contents","RooK BooK","Art work"]', '밈에서부터 광고, 영화까지 루크의 작업에는 경계가 없습니다.'),
+         ('artist', '["Woman","Man","High teen","Kids","Baby","Senior","Animal","Character","Musician"]', '브랜드와 콘텐츠에 최적화되어 있는 인공지능 모델'),
+         ('freeboard', '["Imge","Video","Music","Text","Big Contents","망했어요 ㅋ"]', '자신의 작품을 자유롭게 자랑해 보세요, 게시판 취지에 맞지 않는 내용은 임의로 삭제할 수 있습니다.')
+       ) AS v(slug, categories, description)
+ WHERE s.id = b.site_id AND s.slug = 'rook' AND b.slug = v.slug;

@@ -1,34 +1,29 @@
 import type { Metadata } from "next";
 import { getRookPosts, ROOK_CATEGORIES } from "@/lib/supabase/rook";
-import { RooKArtistCard, RooKCategoryTabs, RooKSectionTitle } from "@/features/rook/RooKUI";
+import { RooKCategoryTabs, RooKContainer, RooKListCard, RooKMasonry } from "@/features/rook/RooKUI";
 
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-    title: "AI Artist",
-    description: "루크 소속 인공지능 모델 — 브랜드와 콘텐츠에 최적화된 AI 아티스트",
+    title: "Artist",
+    description: "브랜드와 콘텐츠에 최적화되어 있는 인공지능 모델 — 루크 소속 AI 아티스트",
 };
 
+/** 원본 rook.co.kr/artist: 카테고리 탭 → 가운데 문구 → 매스너리(이미지 + 카테고리·이름) */
 export default async function RooKArtistPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
     const { category } = await searchParams;
     const active = category && ROOK_CATEGORIES.artist.includes(category) ? category : undefined;
     const artists = await getRookPosts("artist", { category: active });
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 md:py-16">
-            <RooKSectionTitle
-                title="AI Artist"
-                desc="루크 소속 인공지능 모델들입니다."
-                sub="브랜드와 콘텐츠에 최적화되어 있는 인공지능 모델. 당신의 브랜드와 콘텐츠를 위해서라면 최선을 다합니다."
-            />
+        <RooKContainer className="pt-4 pb-20">
             <RooKCategoryTabs basePath="/rook/artist" categories={ROOK_CATEGORIES.artist} active={active} />
+            <p className="mb-10 text-center text-[20px] md:text-[24px] break-keep">브랜드와 콘텐츠에 최적화되어 있는 인공지능 모델</p>
             {artists.length === 0 ? (
-                <p className="py-24 text-center text-neutral-500">등록된 아티스트가 없습니다.</p>
+                <p className="py-24 text-center text-[14px] text-black/60">게시물이 없습니다.</p>
             ) : (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
-                    {artists.map(a => <RooKArtistCard key={a.id} post={a} />)}
-                </div>
+                <RooKMasonry items={artists} keyOf={a => a.id} render={a => <RooKListCard board="artist" post={a} />} />
             )}
-        </div>
+        </RooKContainer>
     );
 }
