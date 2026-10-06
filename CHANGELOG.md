@@ -4,6 +4,51 @@
 
 ---
 
+## 2026-10-06 (세션 159, 사무실) — MADLeague 가이드 정합화 · MADzine 이전·리디자인 · 문의 RLS
+
+### 장소·운영
+
+- `C:\Projects\tenone` master 직접. 시작 pull 충돌 → 미push 로컬 `ce677760`(2026-06 3-Tier 동결) 폐기, 원격(헌법 §0.1) 채택 = 병합 `23811262` (사용자 결정)
+- push 2회 (사용자 "배포해"): `db1b2e5c..6f33cdb2`, `6f33cdb2..d4cb33d7` — 배포 사이트 madleague.tenone.biz 반영 확인
+- 운영 DB 적용 (MCP `apply_migration`, 각각 롤백 시뮬레이션 후 사용자 승인): `contact_submissions_rls_lockdown` · `madleague_rls_lockdown` · `madleague_apply_member_link` · `madleague_capability_roles` · `madleague_restore_clubs` · `madzine_categories` · `madleague_policy_member_fn` · `madleague_members_core_link`
+- 데이터 (service_role 스크립트·MCP `execute_sql`): MADzine 21건 upsert + Storage 이미지 85장, 이전 글 요약 21건 재생성
+- **미적용**: `sql/madleague-members-drop-copied-columns.sql` (복사 컬럼 삭제 — 승인 대기)
+
+### 결정 (사용자)
+
+- CLAUDE.md 충돌: 원격 채택 (§0.5 3-Tier 동결 폐기, §0.1 헌법 유지)
+- MADLeague 활동 역할 매핑: 멘토 = `club/멘토`(capabilities.club에 추가) · 기업 회원 = `showcase/host {type:corporate}`
+- 동아리: archive 7개만 복원, 소개 문구 비움, 기수 14건은 근거 확인 전 미복원
+- 커뮤니티 작성자 공개 범위: 이름·프로필 사진 모두 공개 (지원서 동의 문구에 명시)
+- MADzine 이전: 원본 카테고리 8종 그대로, 이미지는 자체 Storage 복사
+- MADzine 디자인: 목록·기사 검정 에디토리얼 매거진으로 통일
+
+### 변경 내역
+
+- 문의: `contact_submissions` 정책 `contact_insert`·`contact_read_auth` 제거 → `contact_read_staff`(auth_is_staff), anon·authenticated 쓰기 REVOKE
+- MADLeague 보안: `mad_members`·`mad_applications` anon REVOKE, `mad_members_read_public` 제거, 본인 UPDATE 컬럼 GRANT 제한, `mad_apps_staff_all`·`mad_apps_read_own`, `mad_current_member_id()` + 정책 13개 교체, 공개 포트폴리오 API service_role
+- 지원서: `app/api/madleague/apply/route.ts` 재작성(requireMember·Turnstile·동의 버전·member_id·중복 409·year/university 수정), `ApplyForm.tsx` 로그인 게이트·동의·캡차, `mad_applications.member_id·consent`, university NULL 허용
+- 역할: `lib/madleague-roles.ts` 신설, arena·community·pt·projects 게이트, clubs 상세·관리, approve·reject, admin/clubs → capability, 기존 mentor 1건 이관(원 행 비활성)
+- 계정 정보: `lib/madleague-people.ts` 신설(작성자 = members), 프로필 편집 전화·사진 → members, 승인·연결 시 복사 중단, `mad_members.member_id`·name NULL 허용, 승격 트리거 1인 1행·복사 제거, 마이페이지 auth uid/없는 cohort 컬럼 버그
+- 로그인: `features/madleague/MadLoginButton.tsx`(MadLoginButton·MadLoginGate), 하드코딩 /login 13곳 교체
+- 정리: `leaguer/page.tsx`(목업, 도달 불가) 삭제, 비도트 rounded 제거, `member/link` 인증 이메일만
+- MADzine: `Scripts/madzine-import.mjs`, `lib/madzine-categories.ts`, `features/madleague/MadzineArticleBody.tsx`(DOMPurify+YouTube), `features/madleague/MadzineUI.tsx`, `madzine/layout.tsx`(Playfair Display·Noto Serif KR), 목록·기사·ArticleActions·ArticleComments 리디자인
+- 문서: CLAUDE.md capability 표(club 멘토)·§1.6 이관 완료, `sql/capability-model.sql` 시드, 브랜드 가이드 MADLeague 전면 갱신·TenOne 이월 갱신, `docs/Universe_Triage_2026-06.md` 기록용 표시
+
+### 검증
+
+- 운영 REST(anon): contact 조회 `[]`·INSERT 401 / mad_members·mad_applications 조회·INSERT 401 / MADzine 조회 복구
+- 롤백 시뮬레이션: 각 마이그레이션별 anon·본인·타인·직원·service_role 권한 표 확인
+- 로컬: 지원서 비로그인 LoginModal·API 401, 매드리거 페이지 12개 200, MADzine 기사 HTML 렌더·YouTube·목록 21건, 모바일 375px 가로 넘침 없음, tsc MADLeague 0 에러
+- 배포 사이트: 기사 배경 검정·세리프 헤드라인·태그 노출 0·More Stories (비로그인이라 가림막 아래 DOM으로 확인)
+- 미검증: 로그인 상태 지원→승인→capability 흐름, 멘토 아레나 입장, 인트라 문의 인박스 (모두 로그인 필요)
+
+### 사고
+
+- 1단계 RLS 잠금이 다른 테이블 정책의 `mad_members` 서브쿼리를 깨뜨려 anon MADzine·수료증 조회 실패 (비공개 스테이징이라 외부 영향 없음) → 같은 날 함수 기반 정책으로 복구
+
+---
+
 ## 2026-10-05~06 (세션 158, 집) — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영
 
 ### 장소·운영

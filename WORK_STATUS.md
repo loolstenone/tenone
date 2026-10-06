@@ -1,6 +1,45 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-05 (세션 158 — 보안 잠금 · 인트라 정리 · 게시판/Works · TenOne 본사이트 · 문의 운영)
+> 마지막 업데이트: 2026-10-06 (세션 159 — MADLeague 가이드 정합화 · MADzine 이전·리디자인 · 문의 RLS)
+
+---
+
+## 세션 159 핵심 성과 (2026-10-06, 사무실) — MADLeague 가이드 정합화 · MADzine 이전·리디자인 · 문의 RLS
+
+> 작업 위치: `C:\Projects\tenone` master 직접 (워크트리 없음). 배포 push 2회 (`6f33cdb2`, `d4cb33d7`) — 사용자 "배포해" 요청.
+> 시작 시 pull 충돌: 미push 로컬 커밋 `ce677760`(6월 3-Tier 동결)이 원격 세션 156~158과 충돌 → **사용자 결정: 원격 채택** (헌법 §0.1이 SSOT, `docs/Universe_Triage_2026-06.md`는 기록용 표시만 남김)
+
+- **문의 RLS 잠금** (운영 DB): `contact_submissions` 직원만 조회, anon·회원 쓰기 차단. anon REST 조회 `[]`·INSERT 401 확인
+- **MADLeague 가이드 위반 정리** (운영 DB 7건 + 코드, 전부 배포됨)
+  - RLS: `mad_members`·`mad_applications` anon 차단, 본인 수정 컬럼 제한(role 사칭 차단), 공개 포트폴리오 service_role+화이트리스트
+  - 지원서: 로그인 필수 + Turnstile + 개인정보 동의(버전 기록) + `member_id` 연결. **기존 버그: year NOT NULL 누락으로 지원 전부 실패하던 것 수정**
+  - 활동 역할 → `member_capability_roles` (멘토=club/멘토, 기업=showcase/host — 사용자 결정), `lib/madleague-roles.ts`. `.maybeSingle()` 다중 직원 역할 오판 6곳 수정
+  - 동아리 7개 archive→public 복원(소개 비움, 기수 미복원 — 사용자 결정)
+  - 로그인: `/login` 링크 9곳·리다이렉트 4곳 → `MadLoginButton`/`MadLoginGate`. 목업 `leaguer/page.tsx` 삭제, rounded 정리
+  - 계정 정보 members SSOT 1단계: `mad_members.member_id` + 작성자 이름·사진 공통 프로필에서(공개 범위 = 이름·사진, 사용자 결정). 승인 시 복사 중단
+  - **회귀 사고·복구**: anon `mad_members` 권한 회수 → 서브쿼리 정책 13개 때문에 anon MADzine·수료증 조회 실패 → `mad_current_member_id()` SECURITY DEFINER로 교체
+- **MADzine 이전**: madleague.net/59(아임웹) 21건 → `mad_articles`(slug `mz-{idx}`), 이미지 85장 → Storage `mad-community/madzine/`, 카테고리 원본 8종, YouTube 4건 유지, 본문 HTML 렌더(DOMPurify)
+- **MADzine 리디자인**: 목록·기사 흰/검정 불일치 → 검정 에디토리얼 매거진 통일 (세리프 서체, 마스트헤드, 커버스토리, 4:5 카드, 번호 아카이브, More Stories) — 배포 사이트 확인
+
+### 다음 첫 액션
+
+1. **배포 사이트 로그인 실검증** (마스터 계정, 사용자 로그인 필요 — Claude는 비밀번호 입력 불가)
+   - `madleague.tenone.biz/madleague/madzine` 목록·기사 화면 눈으로 확인 (가림막 bypass 상태)
+   - `/madleague/apply` 일반 매드리거 신청 1건 → `/madleague/my`에 "심사 중" → MCP `select member_id, consent, status from mad_applications order by created_at desc limit 1`
+   - 인트라 `/intra/ums/madleague`에서 승인 → `select capability_key, role, context from member_capability_roles where brand_id='madleague' order by created_at desc limit 2` 행 생성 + `mad_members.member_id` 채워짐 확인
+2. **`mad_members` 복사 컬럼 삭제 — 사용자 승인 후**: `sql/madleague-members-drop-copied-columns.sql` (배포 완료로 전제 충족). 실행 전 `select id from mad_members where member_id is null` (계정 미연결 옛 행 1건) 처리 방침 확인 → 롤백 시뮬레이션 → MCP `apply_migration`
+3. **MADLeague 이월 버그** (각 1줄 결정·수리)
+   - 회장 마이페이지 대기 지원서: `app/(MADLeague)/madleague/my/page.tsx` 70줄 클라이언트 조회가 정책 없어 항상 빈 목록 → 회장 전용 API(service_role + president 확인)로
+   - `lib/supabase/universe-profile.ts` 72줄 `getMadLeagueProfile`: 없는 컬럼(club_slug·industry·job_function) + email 조회 → member_id 기준으로
+   - MADLeap 인트라 `app/intra/ums/madleap/{page,applications,members}.tsx`: 없는 `mad_applications.brand_id`로 필터 → club 기준으로
+4. 세션 158 이월 그대로: 인트라 문의 상세 직원 실사용 · Contact 첨부 E2E · Tier 미지정 24개 · 커머스>고객문의 메뉴 · `requireStaff` vs `auth_is_staff()` 일원화
+
+### 주의 (이번 세션 교훈)
+
+- **RLS로 테이블 권한을 회수할 때, 그 테이블을 서브쿼리로 읽는 다른 테이블 정책도 같이 점검**한다 (`pg_policies`에서 `qual ilike '%테이블명%'`). 시뮬레이션은 해당 테이블뿐 아니라 참조하는 테이블의 anon 조회까지
+- 배포 사이트와 로컬이 **같은 운영 DB**를 쓴다 — 데이터 이전·변환은 배포된(옛) 코드에 즉시 보인다. 렌더 방식이 바뀌는 데이터는 코드 배포와 묶어서
+- `.maybeSingle()`은 여러 행이면 에러 → 직원 역할 판단에 쓰지 말 것
+- 미push 로컬 커밋이 오래 남아 있었다 (9/18 커밋). 작업 종료 시 push 누락 여부 확인
 
 ---
 

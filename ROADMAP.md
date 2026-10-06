@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-06 (세션 158 — 보안 잠금·인트라 정리·게시판/Works·TenOne 본사이트·문의 운영)
+> 마지막 업데이트: 2026-10-06 (세션 159 — MADLeague 가이드 정합화·MADzine 이전·리디자인·문의 RLS)
 
 ---
 
@@ -51,6 +51,23 @@
 - [ ] Tier 미지정 24개 사이트 실험/보관 지정 · 커머스 > 고객문의 메뉴 정리
 - [ ] MADLeague brand 역할 → member_capability_roles 이관 · requireStaff vs auth_is_staff 일원화
 - [ ] Works 이미지 없는 15건 정리
+
+## 🎓 MADLeague 새 사이트 (집중 — 세션 159 · 2026-10-06, 비공개 스테이징)
+
+- [x] RLS: mad_members·mad_applications anon 차단 · 본인 수정 컬럼 제한 · 공개 포트폴리오 service_role
+- [x] 정책 서브쿼리 → `mad_current_member_id()` (anon MADzine·수료증 조회 회귀 복구)
+- [x] 지원서: 로그인 필수 · Turnstile · 개인정보 동의(버전) · members.id 연결 · year 누락 버그
+- [x] 활동 역할 → member_capability_roles (현역·임원·멘토 = club / 기업 = showcase host) · `lib/madleague-roles.ts`
+- [x] 동아리 7개 복원 (소개 비움)
+- [x] 로그인 표준 (MadLoginButton·MadLoginGate) · 목업 삭제 · rounded 정리
+- [x] 계정 정보 members SSOT 1단계 (member_id·작성자 표시·프로필 편집·승격 트리거)
+- [x] MADzine 이전 (madleague.net 21건·이미지 85장·카테고리 8종) + 검정 에디토리얼 리디자인 · 배포
+- [ ] `mad_members` 복사 컬럼 4개 삭제 (`sql/madleague-members-drop-copied-columns.sql`, 승인 대기)
+- [ ] 로그인 실검증: 지원 → 마이페이지 심사 중 → 인트라 승인 → capability 행 · 멘토 아레나 입장
+- [ ] 회장 마이페이지 대기 지원서 (정책 없음) · `getMadLeagueProfile` 고장 · MADLeap 인트라 brand_id 필터
+- [ ] 기수 14건(archive) 근거 확인 · 동아리 로고 7종·소개 문구
+- [ ] MADzine 서버 렌더(SEO) · 구 아임웹 URL 308 · 투고 기사 author_name 방식 — DNS 전환 전
+- [ ] 오픈 체크리스트: 개인정보처리방침 새 수집 항목 · 외부 사이트 종료 절차(회원 0 — §0.1 ⑤~⑦) · DNS 전환 · noindex 해제 · `hosting: 'vercel'`
 
 ## 🏢 TenOne.biz 본사이트 (세션 154 — 정직성·정합성 1차 완료)
 
