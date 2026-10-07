@@ -304,7 +304,7 @@ export default async function PTWorkspacePage() {
                     {comp.brief_title && (
                       <p className="mt-3 text-sm text-neutral-400 max-w-xl">{comp.brief_title}</p>
                     )}
-                    {(myTeam || access.isStaff) && (
+                    {(myTeam || access.isStaff || access.roles.some(r => r.capability_key === 'showcase' && r.context?.competition_id === comp.id)) && (
                       <Link href={`/madleague/pt/${comp.id}`}
                         className="mt-4 inline-flex items-center gap-2 bg-[#EC1D25] px-5 py-2.5 text-sm font-bold text-white">
                         공지 · Q&amp;A · 제출 <ArrowRight className="h-4 w-4" />

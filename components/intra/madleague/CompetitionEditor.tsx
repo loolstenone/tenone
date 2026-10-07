@@ -24,6 +24,7 @@ interface Detail {
     teams: Team[];
     applicants: (Person & { response_id: string; response_status: string })[];
     madleaguers: Person[];
+    clients: Person[];
 }
 
 const INFO_FIELDS: { key: string; label: string; type?: string; wide?: boolean }[] = [
@@ -45,6 +46,7 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
     const [busy, setBusy] = useState(false);
     const [saved, setSaved] = useState(false);
     const [newTeam, setNewTeam] = useState({ name: "", club_id: "" });
+    const [clientEmail, setClientEmail] = useState("");
 
     const load = useCallback(async () => {
         const res = await fetch(`/api/intra/madleague/competitions/${id}`);
@@ -130,6 +132,26 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
                         <div className="mb-1 text-xs text-neutral-500">브리프 내용 (팀원에게 보이는 과제 설명)</div>
                         <textarea rows={4} value={info.brief_content ?? ""} onChange={e => setInfo({ ...info, brief_content: e.target.value })} className={inputCls} />
                     </label>
+                </div>
+            </section>
+
+            {/* 클라이언트 — 회차 방에서 공지·Q&A·제출물 확인, 답변·코멘트 (팀원 이름은 보이지 않음) */}
+            <section className="rounded-lg border border-neutral-200 bg-white p-5">
+                <h2 className="font-semibold text-neutral-800">클라이언트</h2>
+                <p className="mt-1 text-xs text-neutral-500">담당자의 Ten:One ID 이메일로 연결합니다. 회차 방(/madleague/pt/…)에서 공지·Q&A·최종 제출물을 보고 답변·코멘트할 수 있습니다. 팀 이름과 제출물만 보이고 팀원 이름은 보이지 않습니다.</p>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                    {d.clients.length === 0 && <li className="text-xs text-neutral-400">연결된 클라이언트가 없습니다.</li>}
+                    {d.clients.map(c => (
+                        <li key={c.member_id} className="inline-flex items-center gap-1.5 rounded border border-neutral-200 px-2 py-1 text-sm">
+                            {c.name}{c.email && <span className="text-xs text-neutral-400">{c.email}</span>}
+                            <button disabled={busy} onClick={() => { if (confirm(`${c.name} 님의 클라이언트 연결을 끝낼까요?`)) act({ action: "remove_client", member_id: c.member_id }); }} className="text-neutral-400 hover:text-red-600" title="연결 해제"><X className="h-3.5 w-3.5" /></button>
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-3 flex gap-2">
+                    <input value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="담당자 이메일" className="flex-1 rounded border border-neutral-300 px-3 py-2 text-sm" />
+                    <button disabled={busy || !clientEmail.trim()} onClick={async () => { if (await act({ action: "add_client", email: clientEmail })) setClientEmail(""); }}
+                        className="rounded bg-neutral-900 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-300">연결</button>
                 </div>
             </section>
 

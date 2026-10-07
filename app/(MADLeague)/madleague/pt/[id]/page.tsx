@@ -86,7 +86,7 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
       </section>
       <div className="mx-auto max-w-4xl px-4 pb-16 sm:px-6">
         <Suspense fallback={<p className="pt-6 text-sm text-neutral-500">불러오는 중…</p>}>
-          <RoundTabs compId={id} teamId={access.teamId} isFinalist={!!team?.is_finalist} kind={comp.kind} finalDeadline={day(comp.final_deadline)} />
+          <RoundTabs compId={id} role={access.role} teamId={access.teamId} isFinalist={!!team?.is_finalist} kind={comp.kind} finalDeadline={day(comp.final_deadline)} />
         </Suspense>
       </div>
     </div>

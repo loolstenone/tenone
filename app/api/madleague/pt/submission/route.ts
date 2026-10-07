@@ -1,5 +1,5 @@
 /**
- * 경쟁 PT·프로젝트 팀 제출물 — 팀원(팀장·팀원) 또는 직원
+ * 경쟁 PT·프로젝트 팀 제출물 — 팀원(팀장·팀원) 또는 직원 · 클라이언트는 최종 제출물 내려받기만
  *   GET  /api/madleague/pt/submission?team_id=&stage=   내 팀 제출물 + 파일 내려받기 서명 URL(5분)
  *   POST /api/madleague/pt/submission                   { action, team_id, stage }
  *        prepare  { file:{name,size,type} }  → 서명 업로드 URL (브라우저가 Storage에 직접 올림)
@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isStaffMember } from "@/lib/api-guard";
 import { notify, brandManagerIds } from "@/lib/notify";
+import { roundClientIds } from "@/lib/madleague-round-access";
 
 export const runtime = "nodejs";
 
@@ -46,15 +47,16 @@ async function authorize(teamId: unknown, stageRaw: unknown) {
         isStaffMember(admin, me.id),
         admin.from("mad_team_members").select("role").eq("team_id", teamId).eq("member_id", me.id).maybeSingle(),
     ]);
-    if (!isStaff && !link) return { error: NextResponse.json({ error: "이 팀 팀원만 이용할 수 있습니다." }, { status: 403 }) };
+    const isClient = !isStaff && !link && (await roundClientIds(team.competition_id)).includes(me.id);
+    if (!isStaff && !link && !isClient) return { error: NextResponse.json({ error: "이 팀 팀원만 이용할 수 있습니다." }, { status: 403 }) };
 
     const comp = (team as unknown as { mad_competitions: { title: string; status: string; end_date: string | null; final_deadline: string | null } | null }).mad_competitions;
     // 본선 제출은 진출 팀만 (직원은 확인용으로 열람 가능)
-    if (stage === "final" && !team.is_finalist && !isStaff) return { error: NextResponse.json({ error: "본선 진출 팀만 제출할 수 있습니다." }, { status: 403 }) };
+    if (stage === "final" && !team.is_finalist && !isStaff && !isClient) return { error: NextResponse.json({ error: "본선 진출 팀만 제출할 수 있습니다." }, { status: 403 }) };
     const day = stage === "final" ? comp?.final_deadline : comp?.end_date;
     const deadline = day ? new Date(`${day}T23:59:59+09:00`) : null;
     const open = comp?.status === "ongoing" && (!deadline || Date.now() <= deadline.getTime()) && (stage === "prelim" || team.is_finalist);
-    return { admin, me, team, stage, compTitle: comp?.title ?? "", isStaff, canEdit: isStaff || open, deadline };
+    return { admin, me, team, stage, compTitle: comp?.title ?? "", isStaff, isClient, canEdit: !isClient && (isStaff || open), deadline };
 }
 
 async function currentSubmission(admin: Admin, teamId: string, stage: Stage) {
@@ -67,7 +69,9 @@ async function currentSubmission(admin: Admin, teamId: string, stage: Stage) {
 export async function GET(req: NextRequest) {
     const a = await authorize(req.nextUrl.searchParams.get("team_id"), req.nextUrl.searchParams.get("stage"));
     if ("error" in a) return a.error;
-    const sub = await currentSubmission(a.admin, a.team.id, a.stage);
+    const found = await currentSubmission(a.admin, a.team.id, a.stage);
+    // 클라이언트는 최종 제출한 것만 (임시 저장 비공개)
+    const sub = a.isClient && found?.status !== "submitted" ? null : found;
     let download_url: string | null = null;
     if (sub?.file_url) {
         const { data } = await a.admin.storage.from(BUCKET).createSignedUrl(sub.file_url, 300, { download: sub.file_name ?? true });
@@ -86,6 +90,7 @@ export async function POST(req: NextRequest) {
     const a = await authorize(body.team_id, body.stage);
     if ("error" in a) return a.error;
     const { admin, me, team, stage } = a;
+    if (a.isClient) return NextResponse.json({ error: "클라이언트는 열람만 할 수 있습니다." }, { status: 403 });
     if (!a.canEdit) return NextResponse.json({ error: "마감되었거나 진행 중인 회차가 아닙니다." }, { status: 403 });
 
     switch (body.action) {
@@ -157,7 +162,9 @@ export async function POST(req: NextRequest) {
             if (submit) {
                 const label = `${a.compTitle} · ${team.name} ${STAGE_LABEL[stage]} 최종 제출`;
                 const { data: mates } = await admin.from("mad_team_members").select("member_id").eq("team_id", team.id);
+                const clients = await roundClientIds(team.competition_id);
                 await Promise.all([
+                    notify(clients, { brandId: "madleague", type: "mad_submission", title: label, message: title, link: `/madleague/pt/${team.competition_id}?tab=works` }),
                     notify(await brandManagerIds("madleague"), { brandId: "madleague", type: "mad_submission", title: label, message: title, link: `/intra/ums/madleague/competitions/${team.competition_id}` }),
                     notify((mates ?? []).map(m => m.member_id).filter(id => id !== me.id), { brandId: "madleague", type: "mad_submission", title: label, message: title, link: "/madleague/pt" }),
                 ]);

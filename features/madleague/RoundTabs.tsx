@@ -1,15 +1,18 @@
 'use client';
 
 /**
- * 회차(경쟁 PT·프로젝트) 방 — 공지 · Q&A · 우리 팀 제출
+ * 회차(경쟁 PT·프로젝트) 방 — 공지 · Q&A · 우리 팀 제출(팀원) · 제출물(직원·클라이언트, 코멘트)
  * 팀원·직원·클라이언트가 같은 화면을 쓴다 (모바일 우선 — 이동 중 공지 작성·답변)
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, MessageCircle, Megaphone, Pin, Trash2, Upload } from 'lucide-react';
+import { Download, EyeOff, FolderOpen, Lock, MessageCircle, Megaphone, Pin, Trash2, Upload } from 'lucide-react';
 import { PtSubmissionPanel } from './PtSubmissionPanel';
 
-type Tab = 'notice' | 'qna' | 'submit';
+type Tab = 'notice' | 'qna' | 'submit' | 'works';
+interface Comment { id: string; author_role: 'staff' | 'client'; body: string; visible_to_team: boolean; created_at: string }
+interface Work { id: string; stage: 'prelim' | 'final'; title: string; description: string | null; presentation_url: string | null; file_name: string | null; status: string; submitted_at: string | null; comments: Comment[] }
+interface WorkTeam { id: string; name: string; is_finalist: boolean; submissions: Work[] }
 interface Notice { id: string; title: string; body: string | null; pinned: boolean; created_at: string }
 interface Question {
   id: string; title: string; body: string | null; is_private: boolean; status: string; created_at: string;
@@ -21,18 +24,21 @@ const inputCls = 'w-full bg-black border border-neutral-800 px-3 py-2.5 text-sm 
 const fmt = (s: string) => new Date(s).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 const ROLE_LABEL = { staff: '운영진', client: '클라이언트' } as const;
 
-export function RoundTabs({ compId, teamId, isFinalist, kind, finalDeadline }: {
-  compId: string; teamId: string | null; isFinalist: boolean; kind: string; finalDeadline: string | null;
+export function RoundTabs({ compId, role, teamId, isFinalist, kind, finalDeadline }: {
+  compId: string; role: 'staff' | 'client' | 'team'; teamId: string | null; isFinalist: boolean; kind: string; finalDeadline: string | null;
 }) {
+  const reviewer = role === 'staff' || role === 'client';
   const router = useRouter();
   const params = useSearchParams();
   const initial = (params.get('tab') as Tab) || 'notice';
-  const [tab, setTab] = useState<Tab>(initial === 'submit' && !teamId ? 'notice' : initial);
+  const allowed = (t: Tab) => t === 'notice' || t === 'qna' || (t === 'submit' && !!teamId) || (t === 'works' && reviewer);
+  const [tab, setTab] = useState<Tab>(allowed(initial) ? initial : 'notice');
   const go = (t: Tab) => { setTab(t); router.replace(`?tab=${t}`, { scroll: false }); };
 
   const tabs: { key: Tab; label: string; icon: typeof Megaphone }[] = [
     { key: 'notice', label: '공지', icon: Megaphone },
     { key: 'qna', label: 'Q&A', icon: MessageCircle },
+    ...(reviewer ? [{ key: 'works' as Tab, label: '제출물', icon: FolderOpen }] : []),
     ...(teamId ? [{ key: 'submit' as Tab, label: '우리 팀 제출', icon: Upload }] : []),
   ];
 
@@ -49,6 +55,7 @@ export function RoundTabs({ compId, teamId, isFinalist, kind, finalDeadline }: {
       <div className="pt-6">
         {tab === 'notice' && <Notices compId={compId} />}
         {tab === 'qna' && <Qna compId={compId} />}
+        {tab === 'works' && reviewer && <Works compId={compId} />}
         {tab === 'submit' && teamId && (
           <div className="space-y-8">
             {isFinalist && (
@@ -62,6 +69,7 @@ export function RoundTabs({ compId, teamId, isFinalist, kind, finalDeadline }: {
               <div className="mb-3 text-xs font-bold tracking-widest text-neutral-600">{kind === 'project' ? '제출' : '예선 제출'}</div>
               <PtSubmissionPanel teamId={teamId} stage="prelim" />
             </div>
+            <TeamFeedback compId={compId} />
           </div>
         )}
       </div>
@@ -202,6 +210,112 @@ function Qna({ compId }: { compId: string }) {
             </div>
           )}
         </article>
+      ))}
+    </div>
+  );
+}
+
+/* ─── 제출물 (직원·클라이언트) — 팀 이름 × 최종 제출물, 내려받기, 코멘트 ─── */
+function Works({ compId }: { compId: string }) {
+  const [teams, setTeams] = useState<WorkTeam[] | null>(null);
+  const [draft, setDraft] = useState<Record<string, { body: string; visible: boolean }>>({});
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const url = `/api/madleague/rounds/${compId}/works`;
+
+  const load = useCallback(async () => {
+    const res = await fetch(url); const j = await res.json();
+    if (!res.ok) { setErr(j.error ?? '불러오지 못했습니다.'); setTeams([]); return; }
+    setTeams(j.teams);
+  }, [url]);
+  useEffect(() => { load(); }, [load]);
+
+  const download = async (teamId: string, stage: string) => {
+    const res = await fetch(`/api/madleague/pt/submission?team_id=${teamId}&stage=${stage}`); const j = await res.json();
+    if (j.download_url) window.location.href = j.download_url; else setErr(j.error ?? '파일이 없습니다.');
+  };
+  const comment = async (subId: string) => {
+    const d = draft[subId]; if (!d?.body.trim()) return;
+    setBusy(true); setErr('');
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ submission_id: subId, body: d.body, visible_to_team: d.visible }) });
+    const j = await res.json(); setBusy(false);
+    if (!res.ok) { setErr(j.error ?? '처리하지 못했습니다.'); return; }
+    setDraft({ ...draft, [subId]: { body: '', visible: true } }); await load();
+  };
+
+  if (!teams) return <p className="text-sm text-neutral-500">불러오는 중…</p>;
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-neutral-500">최종 제출된 자료만 보입니다. 팀원 개인 정보는 표시하지 않습니다.</p>
+      {err && <p className="text-sm text-red-400">{err}</p>}
+      {teams.length === 0 && <p className="py-10 text-center text-sm text-neutral-600">팀이 없습니다.</p>}
+      {teams.map(t => (
+        <section key={t.id} className="border border-neutral-900 bg-neutral-950 p-4">
+          <div className="flex items-center gap-2">
+            <h3 className="font-black">{t.name}</h3>
+            {t.is_finalist && <span className="bg-[#FFC000]/15 px-2 py-0.5 text-[10px] font-bold text-[#FFC000]">본선 진출</span>}
+          </div>
+          {t.submissions.length === 0 ? <p className="mt-2 text-sm text-neutral-600">아직 최종 제출이 없습니다.</p> : t.submissions.map(s => (
+            <div key={s.id} className="mt-3 border-t border-neutral-900 pt-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className={`px-2 py-0.5 font-bold ${s.stage === 'final' ? 'bg-[#FFC000]/15 text-[#FFC000]' : 'bg-white/5 text-neutral-300'}`}>{s.stage === 'final' ? '본선' : '예선'}</span>
+                {s.submitted_at && <span className="text-neutral-500">{fmt(s.submitted_at)} 제출</span>}
+              </div>
+              <div className="mt-1 font-bold">{s.title}</div>
+              {s.description && <p className="mt-1 whitespace-pre-line text-sm text-neutral-400">{s.description}</p>}
+              <div className="mt-2 flex flex-wrap gap-4 text-xs">
+                {s.file_name && <button onClick={() => download(t.id, s.stage)} className="inline-flex items-center gap-1 text-neutral-300 hover:text-white"><Download className="h-3.5 w-3.5" /> {s.file_name}</button>}
+                {s.presentation_url && <a href={s.presentation_url} target="_blank" rel="noopener noreferrer" className="text-neutral-300 underline hover:text-white">발표자료 링크</a>}
+              </div>
+              {s.comments.map(c => <CommentRow key={c.id} c={c} />)}
+              <div className="mt-3 space-y-2">
+                <textarea rows={2} value={draft[s.id]?.body ?? ''} onChange={e => setDraft({ ...draft, [s.id]: { body: e.target.value, visible: draft[s.id]?.visible ?? true } })} placeholder="코멘트" className={inputCls} />
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs text-neutral-400">
+                    <input type="checkbox" checked={draft[s.id]?.visible ?? true} onChange={e => setDraft({ ...draft, [s.id]: { body: draft[s.id]?.body ?? '', visible: e.target.checked } })} className="accent-[#EC1D25]" />
+                    팀에게 공개 (끄면 운영진·클라이언트만 보는 심사 메모)
+                  </label>
+                  <button disabled={busy || !(draft[s.id]?.body ?? '').trim()} onClick={() => comment(s.id)} className="ml-auto bg-white px-4 py-2 text-sm font-bold text-black disabled:opacity-40">등록</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function CommentRow({ c }: { c: Comment }) {
+  return (
+    <div className="mt-2 border-l-2 border-[#EC1D25]/50 bg-black/40 py-2 pl-3 pr-2">
+      <div className="flex items-center gap-2 text-xs font-bold text-[#EC1D25]">
+        {ROLE_LABEL[c.author_role]}
+        {!c.visible_to_team && <span className="inline-flex items-center gap-1 font-normal text-neutral-500"><EyeOff className="h-3 w-3" /> 심사 메모</span>}
+        <span className="font-normal text-neutral-600">· {fmt(c.created_at)}</span>
+      </div>
+      <p className="mt-1 whitespace-pre-line text-sm text-neutral-200">{c.body}</p>
+    </div>
+  );
+}
+
+/* ─── 우리 팀이 받은 피드백 (팀에게 공개된 코멘트) ─── */
+function TeamFeedback({ compId }: { compId: string }) {
+  const [subs, setSubs] = useState<Work[] | null>(null);
+  useEffect(() => {
+    fetch(`/api/madleague/rounds/${compId}/works`).then(r => r.json())
+      .then(j => setSubs((j.teams?.[0]?.submissions ?? []) as Work[])).catch(() => setSubs([]));
+  }, [compId]);
+  const withComments = (subs ?? []).filter(s => s.comments.length > 0);
+  if (!withComments.length) return null;
+  return (
+    <div>
+      <div className="mb-3 text-xs font-bold tracking-widest text-neutral-600">받은 피드백</div>
+      {withComments.map(s => (
+        <div key={s.id} className="mb-3 border border-neutral-900 bg-neutral-950 p-4">
+          <div className="text-xs text-neutral-500">{s.stage === 'final' ? '본선' : '예선'} · {s.title}</div>
+          {s.comments.map(c => <CommentRow key={c.id} c={c} />)}
+        </div>
       ))}
     </div>
   );

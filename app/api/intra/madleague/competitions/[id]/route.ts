@@ -2,7 +2,8 @@
  * 인트라 경쟁 PT·프로젝트 회차 상세 — 직원 전용
  *   GET   /api/intra/madleague/competitions/{id}   회차 · 팀(팀원 이름) · 결과 · 연결 폼 응답(배정 후보) · 매드리거 후보
  *   PATCH /api/intra/madleague/competitions/{id}   회차 정보 수정
- *   POST  /api/intra/madleague/competitions/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_finalist · set_result
+ *   POST  /api/intra/madleague/competitions/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_finalist · set_result · add_client · remove_client
+ * 클라이언트 = member_capability_roles (showcase, madleague, host, {type:'corporate', competition_id, company}) — Ten:One ID 이메일로 연결
  *
  * 팀원 키 = members.id (데이터 계약 1조). 이름·이메일은 members에서 읽어 보여줄 뿐 복사하지 않는다.
  */
@@ -10,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notify } from "@/lib/notify";
+import { roundClientIds } from "@/lib/madleague-round-access";
 
 type Params = { params: Promise<{ id: string }> };
 const TENANT = "tenone";
@@ -49,7 +51,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { data: capRows } = await admin.from("member_capability_roles").select("member_id, role, context")
         .eq("brand_id", "madleague").eq("capability_key", "club").in("role", ["현역", "임원"]).is("valid_until", null);
 
+    const clientIds = await roundClientIds(id);
     const memberIds = [...new Set([
+        ...clientIds,
         ...(links ?? []).map(l => l.member_id),
         ...(responses ?? []).map(r => r.member_id as string),
         ...(capRows ?? []).map(r => r.member_id as string),
@@ -74,6 +78,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         })),
         applicants: (responses ?? []).map(r => ({ ...label(r.member_id as string), response_id: r.id, response_status: r.status })),
         madleaguers: [...new Set((capRows ?? []).map(r => r.member_id as string))].map(label),
+        clients: clientIds.map(label),
     });
 }
 
@@ -172,6 +177,29 @@ export async function POST(req: NextRequest, { params }: Params) {
                     link: "/madleague/pt",
                 });
             }
+            break;
+        }
+        case "add_client": {
+            const email = String(body.email ?? "").trim().toLowerCase();
+            if (!email) return NextResponse.json({ error: "클라이언트 담당자 이메일을 적어 주세요." }, { status: 400 });
+            const { data: m } = await admin.from("members").select("id").ilike("email", email).limit(1).maybeSingle();
+            if (!m) return NextResponse.json({ error: "이 이메일로 가입한 Ten:One ID가 없습니다. 담당자가 먼저 가입해야 합니다." }, { status: 404 });
+            if ((await roundClientIds(id)).includes(m.id)) return NextResponse.json({ error: "이미 연결된 클라이언트입니다." }, { status: 409 });
+            const { data: comp } = await admin.from("mad_competitions").select("title, client_name").eq("id", id).maybeSingle();
+            const { error } = await admin.from("member_capability_roles").insert({
+                member_id: m.id, brand_id: "madleague", capability_key: "showcase", role: "host",
+                context: { type: "corporate", competition_id: id, company: comp?.client_name ?? null },
+            });
+            if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            await notify([m.id], { brandId: "madleague", type: "mad_round_client", title: `${comp?.title ?? "MADLeague"} 클라이언트로 초대되었습니다`, message: "공지·Q&A·제출물을 확인하고 의견을 남길 수 있습니다.", link: `/madleague/pt/${id}` });
+            break;
+        }
+        case "remove_client": {
+            // 이력 보존 — UPDATE로 역할을 지우지 않고 종료일만 (§1.6.1)
+            const { error } = await admin.from("member_capability_roles").update({ valid_until: new Date().toISOString() })
+                .eq("member_id", String(body.member_id ?? "")).eq("brand_id", "madleague").eq("capability_key", "showcase").eq("role", "host")
+                .eq("context->>competition_id", id).is("valid_until", null);
+            if (error) return NextResponse.json({ error: error.message }, { status: 500 });
             break;
         }
         case "set_result": {
