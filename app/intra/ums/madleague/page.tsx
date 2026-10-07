@@ -282,21 +282,8 @@ export default function MADLeagueIntraPage() {
                     </div>
                     <div className="flex items-center gap-2 pb-2.5 pl-6">
                       <span className="text-xs text-neutral-400">회장:</span>
-                      <select
-                        disabled={isAssigning}
-                        value={c.president_member_id ?? ''}
-                        onChange={e => assignPresident(c.id, e.target.value || null)}
-                        className="text-xs border border-neutral-200 bg-white px-2 py-0.5 text-neutral-700 disabled:opacity-50 max-w-[160px]"
-                      >
-                        <option value="">미지정</option>
-                        {presidentMembers.map(m => (
-                          <option key={m.id} value={m.id}>{m.name} ({m.email})</option>
-                        ))}
-                      </select>
-                      {isAssigning && <Loader2 className="h-3 w-3 animate-spin text-neutral-400" />}
-                      {president && !isAssigning && (
-                        <span className="text-xs text-emerald-600 font-medium">{president.name}</span>
-                      )}
+                      <span className="text-xs text-neutral-700">{president ? president.name : '미지정'}</span>
+                      <Link href={`/intra/ums/madleague/officers#${c.slug}`} className="text-xs text-neutral-400 underline hover:text-neutral-700">운영진 지정</Link>
                     </div>
                   </div>
                 );

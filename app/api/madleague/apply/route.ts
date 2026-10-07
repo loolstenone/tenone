@@ -6,7 +6,7 @@ import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server'
 export const runtime = 'nodejs';
 
 /** 지원서 수집·이용 동의 문구 버전 — ApplyForm의 MAD_APPLY_CONSENT_VERSION과 같아야 한다 */
-const CONSENT_VERSION = '2026-10-06.2';
+const CONSENT_VERSION = '2026-10-08.1';
 
 interface Body {
   applicantRole?: string;

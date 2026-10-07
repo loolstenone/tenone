@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getMadAccess } from '@/lib/madleague-roles';
+import { getMadAccess, officerClubIds } from '@/lib/madleague-roles';
 
 export const runtime = 'nodejs';
 
@@ -27,17 +27,19 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (!app) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
   if (app.status !== 'pending') return NextResponse.json({ error: 'ALREADY_PROCESSED' }, { status: 400 });
 
-  // 승인과 같은 기준: 일반 신청은 회장 또는 staff, 회장·멘토·기업 신청은 staff만
+  // 승인과 같은 기준: 일반 신청은 운영진 또는 staff, 회장·멘토·기업 신청은 staff만
   const { data: club } = await admin
     .from('mad_clubs')
     .select('president_member_id')
     .eq('id', app.club_id)
     .maybeSingle();
 
-  const isPresident = club?.president_member_id === memberRow.id;
-  const isStaff = (await getMadAccess(memberRow.id)).isStaff;
+  // 일반 신청 승인·반려 = 이 동아리 운영진 전원 (2026-10-08 사용자 결정) + (옛) 회장
+  const access = await getMadAccess(memberRow.id);
+  const isClubOfficer = officerClubIds(access).includes(app.club_id) || club?.president_member_id === memberRow.id;
+  const isStaff = access.isStaff;
   const isGeneralApp = (app.applicant_role ?? 'member') === 'member';
-  if (!isStaff && !(isGeneralApp && isPresident)) {
+  if (!isStaff && !(isGeneralApp && isClubOfficer)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

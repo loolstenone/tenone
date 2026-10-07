@@ -85,7 +85,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                     { label: "전체 프로그램", path: "/madleague/programs" },
                 ],
             },
-            { placement: "header", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, unit: "개" },
+            { placement: "header", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
             { placement: "header", label: "매드리거", path: "/madleague/madleaguer", source: { kind: "table", table: "mad_posts" }, unit: "글" },
             { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
             { placement: "feature", location: "홈", label: "지원하기", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },

@@ -70,13 +70,124 @@ export interface MadAccess {
     mentorClubIds: string[];
 }
 
-/** 동아리 지원서(소속 인증) 열람 가능 여부: 직원 · 해당 동아리 회장 · 해당 동아리 담당 멘토 */
+/** 동아리 지원서(소속 인증) 열람 가능 여부: 직원 · 해당 동아리 운영진 · (옛) 회장 · 담당 멘토 */
 export function canViewClubApplications(
     access: MadAccess,
     memberId: string,
     club: { id: string; president_member_id: string | null },
 ): boolean {
-    return access.isStaff || club.president_member_id === memberId || access.mentorClubIds.includes(club.id);
+    return access.isStaff || officerClubIds(access).includes(club.id) || club.president_member_id === memberId || access.mentorClubIds.includes(club.id);
+}
+
+/* ─── 동아리 운영진 (2026-10-08) ───────────────────────────────────────────
+ * 운영진 = (club, 임원, {club_id, position, term}) 활동 역할. 동아리당 최대 5명, 회장 1명 필수.
+ * 지정·교체 = 직원 또는 해당 동아리 회장·부회장 / 지원서 승인 = 해당 동아리 운영진 전원 (사용자 결정)
+ * 새 명단 저장 = 이전 임기 운영진 자동 종료 (인수인계 공백 없음)
+ */
+export const OFFICER_POSITIONS = ["회장", "부회장", "총무"] as const;
+const OFFICER_MANAGER_POSITIONS = ["회장", "부회장"];
+export const MAX_OFFICERS = 5;
+
+export type TermUnit = "year" | "semester";
+
+/** 임기 표기 — 연간 2026 · 학기 2026-1(3~8월)·2026-2(9~2월, 1·2월은 전년도 2학기) */
+export function termLabel(unit: TermUnit, d = new Date()): string {
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    if (unit === "year") return String(y);
+    if (m >= 3 && m <= 8) return `${y}-1`;
+    return m >= 9 ? `${y}-2` : `${y - 1}-2`;
+}
+
+/** 다음 임기 표기 */
+export function nextTermLabel(unit: TermUnit, d = new Date()): string {
+    const cur = termLabel(unit, d);
+    if (unit === "year") return String(Number(cur) + 1);
+    const [y, s] = cur.split("-").map(Number);
+    return s === 1 ? `${y}-2` : `${y + 1}-1`;
+}
+
+/** 내가 운영진인 동아리 id */
+export function officerClubIds(access: MadAccess): string[] {
+    return access.roles
+        .filter(r => r.capability_key === "club" && r.role === "임원")
+        .map(r => r.context?.club_id)
+        .filter((id): id is string => typeof id === "string");
+}
+
+/** 운영진을 지정할 수 있는가: 직원 또는 해당 동아리 회장·부회장 */
+export function canManageClubOfficers(access: MadAccess, clubId: string): boolean {
+    if (access.isStaff) return true;
+    return access.roles.some(r =>
+        r.capability_key === "club" && r.role === "임원"
+        && r.context?.club_id === clubId
+        && OFFICER_MANAGER_POSITIONS.includes(String(r.context?.position ?? "")));
+}
+
+export interface ClubOfficer { id: string; member_id: string; position: string; term: string | null; valid_from: string; valid_until: string | null }
+
+/** 동아리 운영진 — 진행 중(valid_until null) + 최근 종료 이력 */
+export async function getClubOfficers(clubId: string, opts: { history?: boolean } = {}): Promise<ClubOfficer[]> {
+    let q = createAdminClient()
+        .from("member_capability_roles")
+        .select("id, member_id, context, valid_from, valid_until")
+        .eq("brand_id", BRAND_ID).eq("capability_key", "club").eq("role", "임원")
+        .eq("context->>club_id", clubId)
+        .order("valid_from", { ascending: false });
+    q = opts.history ? q.not("valid_until", "is", null).limit(30) : q.is("valid_until", null);
+    const { data } = await q;
+    return (data ?? []).map((r: { id: string; member_id: string; context: Record<string, unknown> | null; valid_from: string; valid_until: string | null }) => ({
+        id: r.id,
+        member_id: r.member_id,
+        position: String(r.context?.position ?? "운영진"),
+        term: typeof r.context?.term === "string" ? r.context.term : (r.context?.year != null ? String(r.context.year) : null),
+        valid_from: r.valid_from,
+        valid_until: r.valid_until,
+    }));
+}
+
+/**
+ * 운영진 명단 저장 — 이전 운영진 종료(valid_until) + 새 명단 INSERT + mad_clubs.president_member_id 동기화
+ * 검증(1~5명·회장 1명·중복 없음)은 여기서 한다. 호출 전 권한 확인은 API 책임.
+ */
+export async function saveClubOfficers(
+    clubId: string,
+    term: string,
+    officers: { member_id: string; position: string }[],
+    actorMemberId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+    const list = officers
+        .map(o => ({ member_id: String(o.member_id), position: String(o.position ?? "").trim().slice(0, 20) }))
+        .filter(o => o.member_id && o.position);
+    if (list.length === 0 || list.length > MAX_OFFICERS) return { ok: false, error: `운영진은 1~${MAX_OFFICERS}명입니다.` };
+    if (new Set(list.map(o => o.member_id)).size !== list.length) return { ok: false, error: "같은 사람이 두 번 들어 있습니다." };
+    if (list.filter(o => o.position === "회장").length !== 1) return { ok: false, error: "회장은 1명이어야 합니다." };
+    if (!/^\d{4}(-[12])?$/.test(term)) return { ok: false, error: "임기 표기가 올바르지 않습니다." };
+
+    const admin = createAdminClient();
+    const now = new Date().toISOString();
+    // 새 명단 먼저 넣고 → 그 외 진행 중 운영진 종료 (INSERT 실패 시 기존 운영진 유지)
+    const { data: inserted, error: insErr } = await admin.from("member_capability_roles").insert(list.map(o => ({
+        member_id: o.member_id,
+        brand_id: BRAND_ID,
+        capability_key: "club",
+        role: "임원",
+        context: { club_id: clubId, position: o.position, term, appointed_by: actorMemberId },
+        valid_from: now,
+    }))).select("id");
+    if (insErr) return { ok: false, error: insErr.message };
+
+    const newIds = (inserted ?? []).map((r: { id: string }) => r.id);
+    const { error: endErr } = await admin.from("member_capability_roles")
+        .update({ valid_until: now })
+        .eq("brand_id", BRAND_ID).eq("capability_key", "club").eq("role", "임원")
+        .eq("context->>club_id", clubId).is("valid_until", null)
+        .not("id", "in", `(${newIds.join(",")})`);
+    if (endErr) return { ok: false, error: endErr.message };
+
+    const president = list.find(o => o.position === "회장")!;
+    await admin.from("mad_clubs").update({ president_member_id: president.member_id }).eq("id", clubId);
+    return { ok: true };
 }
 
 /** members.id 기준 MADLeague 접근 정보 (서버 전용) */
