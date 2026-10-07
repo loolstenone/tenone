@@ -1827,6 +1827,7 @@ pathname 변경
    - 가비아 CNAME 값은 끝에 점(.) 필요
    - SSL은 DNS 확인 후 자동 발급 (apex·www 따로, 수 분). 그 사이 `ERR_CERT_COMMON_NAME_INVALID`는 정상
 4. Supabase Auth > Redirect URLs에 `https://새도메인/**` 추가
+5. **Cloudflare Turnstile** > 위젯 > Hostname Management에 새 도메인 추가 (apex 하나면 www 포함) — 빠지면 로그인·가입·문의 폼이 "보안 확인 중"으로 막힌다 (콘솔 `Turnstile Error: 110200`, 2026-10-07 rook.co.kr 전환 때 발생)
 
 ---
 
