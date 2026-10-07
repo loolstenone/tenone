@@ -1821,8 +1821,12 @@ pathname 변경
 #### 새 도메인 추가 3단계
 
 1. `lib/domain-registry.ts` 에 도메인 등록
-2. Vercel Dashboard > Domains에 도메인 추가
-3. Supabase Auth > Redirect URLs에 `https://새도메인/**` 추가
+2. Vercel Dashboard > Domains > **Add Existing**으로 도메인 추가 (`www.` = Production, apex = www로 308 Redirect)
+3. 각 도메인 **View DNS configuration**에 나온 **권장값**으로 등록업체 DNS 설정 — 값을 기억으로 쓰지 않는다 (`76.76.21.21`·`cname.vercel-dns.com`은 레거시, "DNS Change Recommended" 경고. 2026-10 권장 예: A `216.150.1.1`, CNAME `{해시}.vercel-dns-017.com.`)
+   - 먼저 네임서버가 그 등록업체 것인지 조회 (`nslookup -type=ns 도메인`, .kr은 `b.dns.kr`) — 외부 빌더(아임웹 등) 네임서버면 레코드를 고쳐도 반영 안 됨 → 등록업체 기본 네임서버로 변경
+   - 가비아 CNAME 값은 끝에 점(.) 필요
+   - SSL은 DNS 확인 후 자동 발급 (apex·www 따로, 수 분). 그 사이 `ERR_CERT_COMMON_NAME_INVALID`는 정상
+4. Supabase Auth > Redirect URLs에 `https://새도메인/**` 추가
 
 ---
 
