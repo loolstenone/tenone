@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-10-08 (세션 164, 사무실) — 유니버스 6축 점검(Fable) · 보안 긴급 수정
+
+### 장소·운영
+
+- 점검: Fable 읽기 전용 에이전트 6개 (데이터 계약 · SSOT · 권한·보안 · 문서↔실제 · 죽은 것 · 브랜드 간 연결) → `docs/audit/2026-10/` (README 종합)
+- 운영 DB (MCP): `security_board_assets_lockdown` (board-assets anon 쓰기 정책 3개 삭제) · `security_hero_talent_applications_rls` (본인/직원 읽기·직원 수정·anon REVOKE)
+- 배포: 긴급 수정 push 1회(사용자 "긴급한 것들은 진행해") + 보고서 push
+
+### 결정 (사용자)
+
+- 점검은 Fable, 수정은 Opus · 축 1부터 순서대로 · 긴급 보안 건은 즉시 수정·배포
+
+### 변경 내역
+
+- `lib/api-access-policy.ts` SmarComm 대시보드 API 범위 확대(crm·scans·analytics·insights·journey·calendar·data-hub·prompts·ai-*·creative) + `/api/newsletter/send` 직원 전용
+- `app/api/smarcomm/crm/{people,email,segments}` requireStaff · `app/api/newsletter/send` requireStaff · `app/api/badak/needs/review` requireStaff(badak_members.role 판단 제거)
+- `middleware.ts` matcher `/api/:path*` 추가
+- 삭제: `app/api/debug-env`
+- SQL: `sql/security-board-assets-lockdown.sql` · `sql/security-hero-talent-applications-rls.sql`
+- 문서: `docs/audit/2026-10/{README,axis-1~6}.md`
+
+---
+
 ## 2026-10-08 (세션 163, 집) — 경쟁 PT 운영 완성 → 코어 프로그램 모듈(program_*) · 팀 구성 · 인증서 · RooK·HeRo 연결
 
 ### 장소·운영

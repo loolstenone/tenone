@@ -1,6 +1,30 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-08 (세션 163 — MADLeague 경쟁 PT 운영 → 코어 프로그램 모듈(program_*) · 팀 구성·초대 · 인증서 · RooK·HeRo 연결)
+> 마지막 업데이트: 2026-10-08 (세션 164 — 유니버스 6축 점검 · 보안 긴급 수정)
+
+---
+
+## 세션 164 (2026-10-08, 사무실) — 유니버스 6축 점검(Fable) · 보안 긴급 수정
+
+> 워크트리 `festive-vaughan-92a53c` → master push 2회 (긴급 보안 수정 336e4a03 · 점검 보고서). **사무실/집 시작**: `git checkout master && git pull origin master` → [docs/audit/2026-10/README.md](docs/audit/2026-10/README.md)
+
+### 완료
+
+- 배포 확인 (세션 163분): `site:check rook --live` ✅17 · rook.co.kr/rook/projects·certificate·verify · hero.ne.kr/hero/programs · madleague 스테이징 게이트 정상
+- **유니버스 6축 점검** (Fable 읽기 전용 에이전트, 축별 순차) → `docs/audit/2026-10/` 보고서 6개 + 종합 README — 총 139건 (C7·H35·M61·L36). 진단: 코어는 견고, 문제는 "코어 이전에 만든 것"이 정리 안 된 채 공존
+- **긴급 보안 수정·배포·운영 확인**: SmarComm CRM API 비인증 개인정보 노출 차단(직원 전용) · 뉴스레터 발송 requireStaff · board-assets anon 쓰기 정책 삭제(DB) · middleware `.png` 경로 API 게이트 우회 차단 · Badak role 권한 상승 → requireStaff · hero_talent_applications RLS 본인/직원(DB) · `/api/debug-env` 삭제. 사용자가 인트라 뉴스레터·SmarComm CRM 직원 화면 정상 확인
+
+### 다음 첫 액션
+
+1. **README "결정이 필요한 것" D-1~D-7 사용자 결정** (SSO 유지/폐기 · 보관 브랜드 API 차단 · 빈 테이블 91개 DROP · MADLeap/HeRo 순환 구조 · CLAUDE.md 정리 · 탈퇴 정책 · crm_absorb_member 트리거)
+2. **1단계 남은 보안 1번부터**: 축1 C-3 `is_tenone_staff()` → `auth_is_staff()` — 먼저 `select pg_get_functiondef('public.is_tenone_staff()'::regprocedure)` + 사용 정책 65개 목록 확인 → 직원 계정이 둘 다 true인지 대조 → 함수 본문만 교체하는 마이그레이션(승인) → 인트라 화면 확인
+3. 이어서 README 권장 순서 2~7 (USING(true) 7개 테이블 · HeRo 매칭 RLS · 자기 승인 컬럼 · open redirect · tih upsert · Scripts 정리)
+4. 세션 163 이월 그대로: 옛 mad_* DROP(→ D-3과 함께) · 10-14 처리방침 · HeRo is_open·진입점 · 법적 검토
+
+### 주의
+
+- 점검 보고서는 정적 분석 — 각 항목 **재확인 후** 수정 (예: 축2 "posts 없음"은 VIEW로 존재해 보정함)
+- 서브에이전트 Haiku 규칙(§4.3)은 이번 점검에 한해 사용자 지정 Fable 예외
 
 ---
 
