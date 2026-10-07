@@ -15,7 +15,7 @@ const STEPS = [
   { icon: Users,        title: '동아리별 팀 구성',       desc: '동아리 내 4~6인으로 팀을 꾸린다.' },
   { icon: Lightbulb,    title: '클라이언트 OT',         desc: '기업 담당자가 직접 과제 배경과 목표를 설명한다.' },
   { icon: Trophy,       title: '지역 예선 → 본선 진출',  desc: '지역 예선을 통과한 팀만 본선 무대에 오른다.' },
-  { icon: Presentation, title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표한다. 최고의 전략이 MAD Crown을 받는다.' },
+  { icon: Presentation, title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표하고 순위를 가린다.' },
 ];
 
 const ARCHIVE = [
@@ -23,11 +23,11 @@ const ARCHIVE = [
     year: 2026,
     round: '1차',
     client: '춤추는 고래',
-    desc: '',
+    desc: '여성용품(생리대, 팬티라이너) 브랜드 마케팅 전략 수립',
     logo: '/logos/madleague/dancingwhale-logo.png',
     gallery: [] as string[],
     awards: [
-      { img: '/logos/madleague/26-1gold.png',   label: 'MAD Crown' },
+      { img: '/logos/madleague/26-1gold.png',   label: '1위' },
       { img: '/logos/madleague/26-1silver.png', label: '2위' },
       { img: '/logos/madleague/26-1bronze.png', label: '3위' },
     ],
@@ -41,7 +41,7 @@ const ARCHIVE = [
     // 원본 madleague.net/pt 명예의 전당 발표 장면
     gallery: ['3cc380de1afb6', '9e51de11b9c1b', '77efc772b91b6', 'ebf5d1bd22680'],
     awards: [
-      { img: '/logos/madleague/25-1gold.png',   label: 'MAD Crown' },
+      { img: '/logos/madleague/25-1gold.png',   label: '1위' },
       { img: '/logos/madleague/25-1silver.png',  label: '2위' },
       { img: '/logos/madleague/25-1bronze.png',  label: '3위' },
     ],
@@ -54,7 +54,7 @@ const ARCHIVE = [
     logo: '/logos/madleague/daesunglogo.png',
     gallery: ['01ed880a45dad', '014e066281217', '0040db378fa38', 'e69acb812da8d', '8f50929fa55c5'],
     awards: [
-      { img: '/logos/madleague/25gold.png',    label: 'MAD Crown' },
+      { img: '/logos/madleague/25gold.png',    label: '1위' },
       { img: '/logos/madleague/25silver.png',  label: '2위' },
       { img: '/logos/madleague/25silver2.png', label: '3위' },
       { img: '/logos/madleague/25silver3.png', label: '4위' },
@@ -68,7 +68,7 @@ const ARCHIVE = [
     logo: '/logos/madleague/지평로고.png',
     gallery: ['1c6fe5c16769a', 'ba2b35413d8f7', 'a1d00227bff56', '9786f6ef75c79'],
     awards: [
-      { img: '/logos/madleague/24gold.png',   label: 'MAD Crown' },
+      { img: '/logos/madleague/24gold.png',   label: '1위' },
       { img: '/logos/madleague/24silver.png', label: '2위' },
       { img: '/logos/madleague/24bronze.png', label: '3위' },
     ],
@@ -88,7 +88,6 @@ export default async function CompetitionPage() {
           <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">경쟁 PT</h1>
           <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
             실제 기업의 고민을 전국의 동아리가 같이 경쟁한다.
-            최고의 전략은 <span className="text-[#FFC000] font-bold">MAD Crown</span>을 받는다.
           </p>
           <p className="mt-4 text-sm text-neutral-500">실전프로젝트를 통한 성장 — MAD League의 경쟁 PT</p>
         </div>

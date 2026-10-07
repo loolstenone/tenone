@@ -113,7 +113,7 @@ export default async function Page() {
       <section className="mx-auto max-w-7xl px-6 py-32">
         <SectionHeader eyebrow="PROGRAMS" title="7가지 실전 무대" />
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <ProgramCard href="/madleague/programs/competition" title="경쟁 PT" desc="실제 기업 과제에 동아리가 경쟁 — MAD Crown을 향해" featured />
+          <ProgramCard href="/madleague/programs/competition" title="경쟁 PT" desc="실제 기업 과제에 동아리가 경쟁" featured />
           <ProgramCard href="/madleague/programs/project" title="PJT" desc="기업의 실전 프로젝트를 통해 현장에서 배우는 인턴 프로그램" />
           <ProgramCard href="/madleague/programs/markethon" title="마케톤" desc="72시간의 열정 — Marketing + Hacking + Marathon" />
           <ProgramCard href="/madleague/programs/insight-touring" title="인사이트 투어링" desc="지역 사회 투어를 통한 혁신 제안" />
