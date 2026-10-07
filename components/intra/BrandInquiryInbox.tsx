@@ -57,7 +57,7 @@ function extraText(extra: unknown): string | null {
     return null;
 }
 
-export function BrandInquiryInbox({ brandId, brandName, formType }: { brandId?: string; brandName: string; formType?: string }) {
+export function BrandInquiryInbox({ brandId, brandName, formType, title }: { brandId?: string; brandName: string; formType?: string; title?: string }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -94,7 +94,7 @@ export function BrandInquiryInbox({ brandId, brandName, formType }: { brandId?: 
         <div>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">고객 문의</h1>
+                    <h1 className="text-lg font-bold">{title ?? "고객 문의"}</h1>
                     <p className="text-sm text-neutral-400 mt-0.5">{brandName} 문의 · 공개 폼 접수분 · 행을 누르면 내용과 응대 기록을 볼 수 있습니다</p>
                 </div>
                 <div className="relative">

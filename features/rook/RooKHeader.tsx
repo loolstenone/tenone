@@ -10,16 +10,11 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 import { ROOK_ASSETS } from "@/features/rook/RooKUI";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
 
 // 메뉴 = 원본 www.rook.co.kr과 동일 (Home · Works · Artist · Free board * · RooKie · About, 대문자 표시)
-const navItems = [
-    { name: "Home", href: "/rook" },
-    { name: "Works", href: "/rook/works" },
-    { name: "Artist", href: "/rook/artist" },
-    { name: "Free board *", href: "/rook/freeboard" },
-    { name: "RooKie", href: "/rook/rookie" },
-    { name: "About", href: "/rook/about" },
-];
+// 이름·순서 SSOT = lib/brand-site-menus.ts — 인트라 RooK 메뉴도 같은 정의를 쓴다 (CLAUDE.md §1.9.5)
+const navItems = siteHeaderNav("rook");
 
 export function RooKHeader() {
     const pathname = usePathname();

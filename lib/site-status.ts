@@ -2,7 +2,7 @@
 // Tier·상태 = ums_sites, 메뉴별 콘텐츠 = lib/brand-site-menus.ts
 // 개수는 DB count(head)로 센다 — 행을 불러와 세면 API 1000행 제한에 잘린다 (Badak 회원 ~9,000)
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { BRAND_SITE_MENUS, type SiteMenu } from "@/lib/brand-site-menus";
+import { BRAND_SITE_MENUS, siteMenuTitle, type SiteMenu } from "@/lib/brand-site-menus";
 import { OPEN_INQUIRY_STATUSES } from "@/lib/contact-inquiry";
 import type { MenuStatus, SiteStatus } from "@/types/site-status";
 
@@ -36,7 +36,7 @@ function inquiryCount(admin: SupabaseClient, match: { formType: string } | { pre
 
 async function menuStatus(admin: SupabaseClient, boardId: (slug: string) => string | undefined, m: SiteMenu): Promise<MenuStatus> {
     const src = m.source;
-    const base = { label: m.label, path: m.path, adminHref: m.adminHref ?? null, unit: m.unit ?? "", kind: src.kind };
+    const base = { label: siteMenuTitle(m), path: m.path, adminHref: m.adminHref ?? null, unit: m.unit ?? "", kind: src.kind, placement: m.placement };
     switch (src.kind) {
         case "board": {
             const id = boardId(src.board);
@@ -65,17 +65,20 @@ async function menuStatus(admin: SupabaseClient, boardId: (slug: string) => stri
 export async function computeSitesStatus(admin: SupabaseClient, only?: string | null): Promise<SiteStatus[]> {
     const [sitesRes, boardsRes] = await Promise.all([
         admin.from("ums_sites").select("id, slug, name, tier, lifecycle, hosting, is_open").order("slug"),
-        admin.from("ums_boards").select("id, slug, site_id"),
+        admin.from("ums_boards").select("id, slug, name, site_id"),
     ]);
     if (sitesRes.error) throw sitesRes.error;
     if (boardsRes.error) throw boardsRes.error;
     type SiteRow = { id: string; slug: string; name: string | null; tier: string | null; lifecycle: string | null; hosting: string | null; is_open: boolean };
     const sites = ((sitesRes.data ?? []) as SiteRow[]).filter(s => !only || s.slug === only);
-    const boards = (boardsRes.data ?? []) as { id: string; slug: string; site_id: string }[];
+    const boards = (boardsRes.data ?? []) as { id: string; slug: string; name: string | null; site_id: string }[];
 
     return Promise.all(sites.map(async (s): Promise<SiteStatus> => {
         const reg = BRAND_SITE_MENUS.find(b => b.siteId === s.slug);
         const boardId = (slug: string) => boards.find(b => b.site_id === s.id && b.slug === slug)?.id;
+        // DB 게시판 중 사이트 메뉴(레지스트리)에 연결 안 된 것 — 사이트에서 게시판을 늘리고 메뉴를 안 붙이면 여기 드러난다
+        const mappedBoards = new Set((reg?.menus ?? []).flatMap(m => (m.source.kind === "board" ? [m.source.board] : [])));
+        const unmappedBoards = reg ? boards.filter(b => b.site_id === s.id && !mappedBoards.has(b.slug)).map(b => b.name ?? b.slug) : [];
         const [members, posts, inquiries, openInquiries, menus] = await Promise.all([
             headCount(admin, "member_brand_joins", q => q.eq("brand_id", s.slug).is("withdrawn_at", null)),
             headCount(admin, "ums_posts", q => q.eq("site_id", s.id)),
@@ -86,7 +89,7 @@ export async function computeSitesStatus(admin: SupabaseClient, only?: string | 
         return {
             slug: s.slug, name: s.name, tier: s.tier, lifecycle: s.lifecycle, hosting: s.hosting, isOpen: !!s.is_open,
             members: members ?? 0, posts: posts ?? 0, inquiries: inquiries ?? 0, openInquiries: openInquiries ?? 0,
-            menus,
+            menus, unmappedBoards,
         };
     }));
 }

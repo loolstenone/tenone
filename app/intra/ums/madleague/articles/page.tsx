@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ExternalLink, Eye, EyeOff, Star, Loader2 } from "lucide-react";
 import { Card, SectionTitle } from "@/components/intra/IntraUI";
+import { adminTitle } from "@/lib/brand-site-menus";
 
 interface Article {
     id: string; slug: string; title: string; category: string;
@@ -80,7 +81,7 @@ export default function MADLeagueArticlesPage() {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">콘텐츠 관리</h1>
+                    <h1 className="text-lg font-bold">{adminTitle("/intra/ums/madleague/articles", "MADzine")}</h1>
                     <p className="text-sm text-neutral-400 mt-0.5">MADzine 아티클 발행 · 투고 검토</p>
                 </div>
             </div>

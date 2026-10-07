@@ -16,16 +16,18 @@ const GUIDE_LAYERS = [
 
 const PRINCIPLES = [
     { title: "하나의 사실은 한 곳에만", desc: "같은 정보를 두 곳에 손으로 적지 않는다. 다른 곳은 원천을 읽어서 만든다 (예: 사이드바 집중 브랜드 = ums_sites.tier에서 계산)" },
-    { title: "인트라 메뉴 = 사이트 메뉴 1:1", desc: "브랜드 인트라 메뉴는 사이트 메뉴 레지스트리에서 생성. 사이트 메뉴를 바꾸면 레지스트리 한 곳만 고친다" },
+    { title: "이름은 사이트 표기 그대로", desc: "인트라 브랜드 메뉴·화면 제목 = 사이트 헤더 메뉴명, 페이지 안 기능은 '위치 › 버튼 문구' (예: About › 상담 / 문의). 사이트 헤더도 같은 레지스트리로 렌더하므로 이름을 고칠 곳은 한 곳뿐" },
+    { title: "사이트 변경은 자동 반영", desc: "콘텐츠 수는 실시간 집계, Tier는 ums_sites, 메뉴는 레지스트리. 레지스트리에 연결 안 된 DB 게시판은 사이트 현황에 경고로 드러난다" },
     { title: "숫자는 한 함수로 센다", desc: "통합 관리·브랜드 대시보드·에이전트가 같은 집계 함수(lib/site-status.ts)를 쓴다 → 화면마다 숫자가 달라지지 않는다" },
     { title: "빠진 것은 숨기지 않고 드러낸다", desc: "Tier 미지정·메뉴 미매핑·조회 실패를 '점검 필요'로 표시. 조용히 0으로 보이게 하지 않는다" },
+    { title: "가이드와 어긋나는 지시는 먼저 묻는다", desc: "공통·사이트별 가이드와 다른 지시는 어느 조항과 어긋나는지 짚고 가이드 변경·예외·지시 조정 중 결정을 받은 뒤 진행" },
     { title: "권한·데이터 계약은 공통, 화면·콘텐츠는 브랜드 자유", desc: "데이터 계약 5조·권한(member_roles)·동의는 예외 없음. 디자인·메뉴·콘텐츠 구조는 브랜드 가이드에서 정한다" },
 ];
 
 const SSOT_CHAIN = [
     { source: "DB ums_sites (tier · lifecycle · hosting · is_open)", feeds: ["사이드바 집중 / 실험·보관 자동 분류 (lib/intra-nav.ts regroupBrandSections)", "통합 관리 > 사이트 현황 그룹", "SiteClosedOverlay 공개 여부", "플랫폼 헌법 Tier 표"] },
     { source: "lib/domain-registry.ts (도메인 · CANONICAL_HOSTS)", feeds: ["middleware 공식 주소 이동", "brandSiteUrl() — 인트라 → 사이트 링크 (vercel=공식 주소, external=스테이징)"] },
-    { source: "lib/brand-site-menus.ts (사이트 메뉴 ↔ 콘텐츠 원천 ↔ 인트라 화면)", feeds: ["인트라 브랜드 메뉴 (brandAdminChildren)", "사이트 현황·브랜드 대시보드의 메뉴별 콘텐츠 수"] },
+    { source: "lib/brand-site-menus.ts (사이트 헤더 메뉴·페이지 기능 ↔ 콘텐츠 원천 ↔ 인트라 화면)", feeds: ["사이트 헤더 메뉴 (siteHeaderNav)", "인트라 브랜드 메뉴 (brandAdminChildren) · 화면 제목 (adminTitle)", "사이트 현황·브랜드 대시보드의 메뉴별 콘텐츠 수 · 미연결 DB 게시판 경고"] },
     { source: "lib/action-hub-registry.ts (처리 대기 액션)", feeds: ["인트라 대시보드 Action Hub"] },
     { source: "member_roles → isStaffMember / auth_is_staff()", feeds: ["인트라·관리 API·RLS 직원 판단 (한 정의)"] },
 ];

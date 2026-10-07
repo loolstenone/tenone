@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { MessageCircle, Search, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { brandSiteUrl } from "@/lib/domain-registry";
+import { adminTitle } from "@/lib/brand-site-menus";
 
 // RooK 글 = 통합 게시판 ums_posts (site = rook). 게시판: works·artist(직원 작성) · freeboard(회원)
 interface Post {
@@ -22,9 +23,9 @@ function postPath(p: Post): string | null {
 }
 
 const BOARD_TITLES: Record<string, { title: string; desc: string }> = {
-    works: { title: "Works", desc: "사이트 /rook/works — 직원 작성 (사이트 목록·상세의 직원 글쓰기·수정 버튼)" },
-    artist: { title: "Artist", desc: "사이트 /rook/artist — 직원 작성 (사이트 목록·상세의 직원 글쓰기·수정 버튼)" },
-    freeboard: { title: "Free board", desc: "사이트 /rook/freeboard — 회원 작성" },
+    works: { title: adminTitle("/intra/ums/rook/works", "Works"), desc: "사이트 /rook/works — 직원 작성 (사이트 목록·상세의 직원 글쓰기·수정 버튼)" },
+    artist: { title: adminTitle("/intra/ums/rook/artist", "Artist"), desc: "사이트 /rook/artist — 직원 작성 (사이트 목록·상세의 직원 글쓰기·수정 버튼)" },
+    freeboard: { title: adminTitle("/intra/ums/rook/freeboard", "Free board"), desc: "사이트 /rook/freeboard — 회원 작성" },
 };
 
 /** fixedBoard 지정 시 해당 게시판만 (인트라 메뉴 = 사이트 메뉴 1:1, lib/brand-site-menus.ts) */

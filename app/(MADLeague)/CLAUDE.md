@@ -105,9 +105,12 @@
 | 경로 | 역할 |
 |------|------|
 | `/intra/ums/madleague` | 지원서·멤버·동아리·대회·HeRo 신청 관리 |
+| (공통) | **사이트 헤더 메뉴·인트라 메뉴·화면 제목 = `lib/brand-site-menus.ts`(madleague)** — `MadLeagueHeader`가 `siteHeaderNav`로 렌더, 인트라 이름은 사이트 표기 그대로 (CLAUDE.md §1.9.5) |
 | `/intra/ums/madleague/articles` | MADzine 기사 검토·발행 |
+| `/intra/ums/madleague/applications` | 홈 › 지원하기 (mad_applications) — `ApplicationsAdmin` |
+| `/intra/ums/madleague/hero-applications` | HeRo › HeRo 신청하기 (mad_hero_applications) |
 | `/intra/ums/madleague/members` | 회원 = 활동 역할 보유자 (`/api/madleague/admin/members` — member_capability_roles는 본인 조회 RLS뿐이라 service_role API) · 역할 필터·종료 역할 보기 |
-| `/intra/ums/madleague/cs` | 문의 인박스 (form_type `madleague_*`) |
+| `/intra/ums/madleague/cs` | 푸터 Contact › 문의하기 (form_type `madleague_inquiry`) |
 
 ---
 

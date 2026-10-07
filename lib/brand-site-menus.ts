@@ -1,15 +1,15 @@
 /**
- * 브랜드 사이트 메뉴 레지스트리 — 사이트 메뉴 ↔ 콘텐츠 원천 ↔ 인트라 관리 화면 SSOT
+ * 브랜드 사이트 메뉴 레지스트리 — 사이트 헤더 메뉴 · 페이지 안 기능 ↔ 콘텐츠 원천 ↔ 인트라 관리 화면 SSOT
  *
  * 원칙 (CLAUDE.md §1.9.5):
- *   - 인트라 브랜드 메뉴는 사이트 메뉴와 1:1. 사이트 메뉴를 바꾸면 이 파일을 같이 바꾼다
- *   - 통합 관리 > 사이트 현황(/intra/ums/sites/status)과 브랜드별 화면은 이 정의로 숫자를 계산한다 → 사이트·인트라 불일치 방지
- *   - 아직 매핑 안 된 브랜드는 숨기지 않고 "메뉴 매핑 없음"으로 드러낸다
- *   - Tier(집중/보관)는 여기서 정하지 않는다 → DB ums_sites.tier (헌법 §0.1 SSOT)
+ *   - 사이트 헤더는 이 파일의 header 메뉴를 그대로 렌더한다 (siteHeaderNav) → 메뉴 이름을 고칠 곳은 여기 한 곳
+ *   - 인트라 브랜드 메뉴는 사이트에 보이는 이름 그대로 (헤더 메뉴명 / "메뉴 › 버튼명") — 다른 이름을 지어 붙이지 않는다
+ *   - 통합 관리 > 사이트 현황과 브랜드 대시보드는 이 정의로 숫자를 센다 (lib/site-status.ts)
+ *   - Tier(집중/보관)는 여기서 정하지 않는다 → DB ums_sites.tier
  */
 
 export type ContentSource =
-    /** 통합 게시판 ums_posts (사이트 slug + 게시판 slug) */
+    /** 통합 게시판 ums_posts (사이트 + 게시판 slug) */
     | { kind: "board"; board: string }
     /** 브랜드 전용 테이블 (count) */
     | { kind: "table"; table: string; eq?: Record<string, string | boolean>; pendingEq?: Record<string, string> }
@@ -18,19 +18,33 @@ export type ContentSource =
     /** 고정 페이지 — 관리할 콘텐츠 없음 */
     | { kind: "static" };
 
-export interface SiteMenu {
-    /** 사이트 헤더에 보이는 이름 */
+interface MenuBase {
+    /** 사이트에 보이는 이름 그대로 (헤더 메뉴명 또는 버튼·링크 문구) */
     label: string;
     /** 사이트 경로 (브랜드 prefix 포함) */
     path: string;
     source: ContentSource;
-    /** 인트라에서 이 메뉴 콘텐츠를 관리하는 화면 */
+    /** 인트라에서 이 콘텐츠를 관리하는 화면 (없으면 대시보드 표에만 보임) */
     adminHref?: string;
-    /** 인트라 메뉴 이름 (없으면 label) */
-    adminLabel?: string;
     /** 콘텐츠 단위 (글·건·개) */
     unit?: string;
 }
+
+/** 사이트 헤더 메뉴 — 사이트 헤더가 이 순서·이 이름으로 렌더 */
+export interface HeaderMenu extends MenuBase {
+    placement: "header";
+    /** 헤더 드롭다운 하위 링크 */
+    dropdown?: { label: string; path: string }[];
+}
+
+/** 페이지 안 기능 (버튼·폼·푸터 링크) — 인트라 이름 = "위치 › 문구" */
+export interface FeatureMenu extends MenuBase {
+    placement: "feature";
+    /** 기능이 있는 위치 — 헤더 메뉴명 또는 "홈"·"푸터 Contact" 등 사이트에 보이는 이름 */
+    location: string;
+}
+
+export type SiteMenu = HeaderMenu | FeatureMenu;
 
 export interface BrandSiteMenus {
     siteId: string;
@@ -41,28 +55,38 @@ export interface BrandSiteMenus {
 
 export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
     {
+        // 원본 www.rook.co.kr 메뉴 그대로 (Free board * 표기 포함)
         siteId: "rook",
         adminBase: "/intra/ums/rook",
         menus: [
-            { label: "Home", path: "/rook", source: { kind: "static" } },
-            { label: "Works", path: "/rook/works", source: { kind: "board", board: "works" }, adminHref: "/intra/ums/rook/works", unit: "글" },
-            { label: "Artist", path: "/rook/artist", source: { kind: "board", board: "artist" }, adminHref: "/intra/ums/rook/artist", unit: "글" },
-            { label: "Free board", path: "/rook/freeboard", source: { kind: "board", board: "freeboard" }, adminHref: "/intra/ums/rook/freeboard", unit: "글" },
-            { label: "RooKie 지원", path: "/rook/rookie", source: { kind: "inquiry", formType: "rook_rookie" }, adminHref: "/intra/ums/rook/rookie", unit: "건" },
-            { label: "Contact (About)", path: "/rook/about", source: { kind: "inquiry", formType: "rook_inquiry" }, adminHref: "/intra/ums/rook/cs", adminLabel: "Contact 문의", unit: "건" },
+            { placement: "header", label: "Home", path: "/rook", source: { kind: "static" } },
+            { placement: "header", label: "Works", path: "/rook/works", source: { kind: "board", board: "works" }, adminHref: "/intra/ums/rook/works", unit: "글" },
+            { placement: "header", label: "Artist", path: "/rook/artist", source: { kind: "board", board: "artist" }, adminHref: "/intra/ums/rook/artist", unit: "글" },
+            { placement: "header", label: "Free board *", path: "/rook/freeboard", source: { kind: "board", board: "freeboard" }, adminHref: "/intra/ums/rook/freeboard", unit: "글" },
+            { placement: "header", label: "RooKie", path: "/rook/rookie", source: { kind: "static" } },
+            { placement: "header", label: "About", path: "/rook/about", source: { kind: "static" } },
+            { placement: "feature", location: "RooKie", label: "RooKie 지원하기", path: "/rook/rookie", source: { kind: "inquiry", formType: "rook_rookie" }, adminHref: "/intra/ums/rook/rookie", unit: "건" },
+            { placement: "feature", location: "About", label: "상담 / 문의", path: "/rook/about", source: { kind: "inquiry", formType: "rook_inquiry" }, adminHref: "/intra/ums/rook/cs", unit: "건" },
         ],
     },
     {
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [
-            { label: "프로그램", path: "/madleague/programs", source: { kind: "table", table: "mad_competitions" }, unit: "개" },
-            { label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, unit: "개" },
-            { label: "아레나 (커뮤니티)", path: "/madleague/arena", source: { kind: "table", table: "mad_posts" }, unit: "글" },
-            { label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", adminLabel: "MADzine 검토", unit: "글" },
-            { label: "지원하기", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", adminLabel: "지원·HeRo 심사", unit: "건" },
-            { label: "HeRo 신청", path: "/madleague/hero", source: { kind: "table", table: "mad_hero_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },
-            { label: "문의하기", path: "/madleague/contact", source: { kind: "inquiry", formType: "madleague_inquiry" }, adminHref: "/intra/ums/madleague/cs", adminLabel: "고객 문의", unit: "건" },
+            {
+                placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "table", table: "mad_competitions" }, unit: "개",
+                dropdown: [
+                    { label: "경쟁 PT", path: "/madleague/programs/competition" },
+                    { label: "아이디어 무브먼트", path: "/madleague/programs/im" },
+                    { label: "전체 프로그램", path: "/madleague/programs" },
+                ],
+            },
+            { placement: "header", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, unit: "개" },
+            { placement: "header", label: "아레나", path: "/madleague/arena", source: { kind: "table", table: "mad_posts" }, unit: "글" },
+            { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
+            { placement: "feature", location: "홈", label: "지원하기", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },
+            { placement: "feature", location: "HeRo", label: "HeRo 신청하기", path: "/madleague/hero", source: { kind: "table", table: "mad_hero_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/hero-applications", unit: "건" },
+            { placement: "feature", location: "푸터 Contact", label: "문의하기", path: "/madleague/contact", source: { kind: "inquiry", formType: "madleague_inquiry" }, adminHref: "/intra/ums/madleague/cs", unit: "건" },
         ],
     },
 ];
@@ -71,10 +95,26 @@ export function getBrandSiteMenus(siteId: string): BrandSiteMenus | undefined {
     return BRAND_SITE_MENUS.find(b => b.siteId === siteId);
 }
 
+/** 인트라·현황표에 쓰는 이름 — 사이트에 보이는 그대로 (기능은 "위치 › 문구") */
+export function siteMenuTitle(m: SiteMenu): string {
+    return m.placement === "feature" ? `${m.location} › ${m.label}` : m.label;
+}
+
+/** 사이트 헤더 메뉴 — 브랜드 헤더 컴포넌트가 이걸로 렌더 (이름·순서 SSOT) */
+export function siteHeaderNav(siteId: string): { name: string; href: string; dropdown?: { name: string; href: string }[] }[] {
+    return (getBrandSiteMenus(siteId)?.menus ?? [])
+        .filter((m): m is HeaderMenu => m.placement === "header")
+        .map(m => ({
+            name: m.label,
+            href: m.path,
+            ...(m.dropdown && { dropdown: m.dropdown.map(d => ({ name: d.label, href: d.path })) }),
+        }));
+}
+
 export interface AdminNavChild { name: string; href: string }
 
 /**
- * 인트라 브랜드 메뉴(children) = 대시보드 + 사이트 메뉴별 관리 화면(중복 href 제외) + 공통 탭
+ * 인트라 브랜드 메뉴(children) = 대시보드 + 관리 화면이 있는 사이트 메뉴·기능(사이트 이름 그대로) + 공통 탭
  * lib/intra-nav.ts가 사용 — 사이트 메뉴를 바꾸면 인트라 메뉴가 같이 바뀐다
  */
 export function brandAdminChildren(siteId: string, extra: AdminNavChild[] = []): AdminNavChild[] {
@@ -82,8 +122,17 @@ export function brandAdminChildren(siteId: string, extra: AdminNavChild[] = []):
     if (!reg) return extra;
     const out: AdminNavChild[] = [{ name: "대시보드", href: reg.adminBase }];
     for (const m of reg.menus) {
-        if (m.adminHref && !out.some(c => c.href === m.adminHref)) out.push({ name: m.adminLabel ?? m.label, href: m.adminHref });
+        if (m.adminHref && !out.some(c => c.href === m.adminHref)) out.push({ name: siteMenuTitle(m), href: m.adminHref });
     }
     for (const e of extra) if (!out.some(c => c.href === e.href)) out.push(e);
     return out;
+}
+
+/** 인트라 관리 화면 제목 — 그 화면이 담당하는 사이트 메뉴·기능 이름 그대로 (화면에 이름을 따로 적지 않는다) */
+export function adminTitle(adminHref: string, fallback: string): string {
+    for (const b of BRAND_SITE_MENUS) {
+        const m = b.menus.find(x => x.adminHref === adminHref);
+        if (m) return siteMenuTitle(m);
+    }
+    return fallback;
 }

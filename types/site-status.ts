@@ -11,6 +11,8 @@ export interface MenuStatus {
     /** 처리 대기 (미답변 문의·심사 대기 등) */
     pending: number | null;
     kind: ContentSource["kind"];
+    /** header = 사이트 헤더 메뉴, feature = 페이지 안 버튼·폼 */
+    placement: "header" | "feature";
 }
 
 export interface SiteStatus {
@@ -29,4 +31,6 @@ export interface SiteStatus {
     openInquiries: number;
     /** 메뉴 레지스트리 미등록 사이트는 null */
     menus: MenuStatus[] | null;
+    /** DB 게시판 중 사이트 메뉴에 연결 안 된 것 (레지스트리 등록 사이트만) */
+    unmappedBoards: string[];
 }

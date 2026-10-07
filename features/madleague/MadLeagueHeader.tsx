@@ -10,19 +10,11 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
 
-const programItems = [
-    { name: "경쟁 PT", href: "/madleague/programs/competition" },
-    { name: "아이디어 무브먼트", href: "/madleague/programs/im" },
-    { name: "전체 프로그램", href: "/madleague/programs" },
-];
-
-const navItems = [
-    { name: "프로그램",  href: "/madleague/programs" },
-    { name: "동아리",    href: "/madleague/clubs" },
-    { name: "아레나",    href: "/madleague/arena" },
-    { name: "MADzine",  href: "/madleague/madzine" },
-];
+// 헤더 메뉴 이름·순서 SSOT = lib/brand-site-menus.ts — 인트라 MAD League 메뉴도 같은 정의를 쓴다 (CLAUDE.md §1.9.5)
+const navItems = siteHeaderNav("madleague");
+const programItems = navItems.find(i => i.href === "/madleague/programs")?.dropdown ?? [];
 
 export function MadLeagueHeader() {
     const pathname = usePathname();

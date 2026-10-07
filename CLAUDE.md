@@ -1202,7 +1202,7 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 |---|---|
 | DB `ums_sites.tier`·`lifecycle`·`hosting`·`is_open` | 사이드바 **집중 / 실험·보관** 섹션 (`lib/intra-nav.ts` `regroupBrandSections` + `lib/use-site-tiers.ts`) · 통합 관리 › 사이트 현황 · 가림막 · 헌법 Tier 표 |
 | `lib/domain-registry.ts` | middleware 공식 주소 · `brandSiteUrl()` (인트라 → 사이트 링크: vercel=공식 주소, external=스테이징) |
-| **`lib/brand-site-menus.ts`** (사이트 메뉴 ↔ 콘텐츠 원천 ↔ 인트라 화면) | 인트라 브랜드 메뉴 (`brandAdminChildren`) · 사이트 현황·브랜드 대시보드의 **메뉴별 콘텐츠 수** |
+| **`lib/brand-site-menus.ts`** (사이트 헤더 메뉴·페이지 기능 ↔ 콘텐츠 원천 ↔ 인트라 화면) | **사이트 헤더 메뉴** (`siteHeaderNav` — 브랜드 헤더가 이걸로 렌더) · 인트라 브랜드 메뉴 (`brandAdminChildren`) · 인트라 화면 제목 (`adminTitle`) · 사이트 현황·브랜드 대시보드의 **메뉴별 콘텐츠 수** |
 | `lib/site-status.ts` `computeSitesStatus()` | `/api/intra/sites/status` → 통합 관리·브랜드 대시보드·에이전트가 **같은 숫자** |
 | `lib/action-hub-registry.ts` | 인트라 대시보드 Action Hub |
 
@@ -1214,7 +1214,9 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 
 ### 규칙
 
-- 인트라 브랜드 메뉴 = 사이트 메뉴 1:1. 사이트 헤더 메뉴를 추가·변경하면 **같은 커밋에서** `lib/brand-site-menus.ts`도 고친다 (관리 화면이 없으면 만든다)
+- **이름은 사이트 표기 그대로** — 인트라 브랜드 메뉴·화면 제목은 사이트 헤더 메뉴명, 페이지 안 기능은 "위치 › 버튼 문구" (예: `About › 상담 / 문의`, `홈 › 지원하기`). 인트라용 이름을 따로 짓지 않는다 (오해 방지)
+- 사이트 헤더 메뉴는 레지스트리에서 렌더(`siteHeaderNav`) → 메뉴를 바꾸는 곳은 `lib/brand-site-menus.ts` 한 곳. 인트라 메뉴·제목·현황이 같이 바뀐다. 관리할 콘텐츠가 생기는 메뉴·기능이면 관리 화면(adminHref)을 만든다
+- 사이트 DB 변경은 자동 반영: 콘텐츠 수는 실시간 집계, Tier는 ums_sites, **레지스트리에 연결 안 된 DB 게시판은 사이트 현황에 경고로 표시** (사이트에 노출하려면 메뉴 등록, 아니면 정리)
 - 집중 브랜드는 반드시 `lib/brand-site-menus.ts`에 등록한다. 미등록은 사이트 현황에 "메뉴 매핑 없음"으로 드러난다
 - 집계 숫자는 `computeSitesStatus()`만 쓴다. 브랜드 대시보드에서 같은 숫자를 따로 쿼리하지 않는다
 - 개수는 DB count(head)로 센다 — 행을 불러와 세면 API 1000행 제한에 잘린다
@@ -1622,6 +1624,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ 페이지에 "준비 중" / "Coming Soon" 텍스트 직접 표시
 
 ### 커뮤니케이션
+- ❌ 사용자 지시가 유니버스 공통 가이드(CLAUDE.md)·사이트별 가이드(app/(Brand)/CLAUDE.md)와 어긋나는데 그대로 실행 — **어느 조항과 어떻게 어긋나는지 짚고 의견을 먼저 묻는다** (가이드를 바꿀지, 예외로 할지, 지시를 조정할지)
 - ❌ 실제 안 한 작업을 완료로 기록
 - ❌ "다음 할 일"을 막연하게 작성
 - ❌ "작업 종료할까요?" 등 자발적 묻기 — 사용자가 말할 때까지 계속 진행
