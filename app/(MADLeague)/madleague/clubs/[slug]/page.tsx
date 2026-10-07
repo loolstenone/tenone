@@ -32,11 +32,12 @@ export default async function ClubDetailPage({ params }: PageProps) {
   const [cohortsRes, archiveRes, resultsRes] = await Promise.all([
     sb.from('mad_cohorts').select('year, member_count, status').eq('club_id', club.id).order('year', { ascending: false }),
     sb.from('mad_archive').select('id, title, year, thumbnail_url, type, award').eq('club_id', club.id).order('year', { ascending: false }).limit(6),
-    sb.from('mad_competition_results').select('id, team_name, rank, is_crown, award_name, competition_id').eq('club_id', club.id).order('rank', { ascending: true }),
+    // 코어 프로그램 결과 — 발표된 회차만 RLS로 읽힘, 동아리 = context.club_id
+    sb.from('program_results').select('id, team_name, rank, award_name, round_id').eq('context->>club_id', club.id).order('rank', { ascending: true }),
   ]);
   const cohorts = (cohortsRes.data ?? []) as Array<{ year: number; member_count: number; status: string }>;
   const archive = (archiveRes.data ?? []) as Array<{ id: string; title: string; year: number; thumbnail_url: string | null; type: string; award: string | null }>;
-  const results = (resultsRes.data ?? []) as Array<{ id: string; team_name: string; rank: number | null; is_crown: boolean; award_name: string | null }>;
+  const results = ((resultsRes.data ?? []) as Array<{ id: string; team_name: string; rank: number | null; award_name: string | null }>).map(r => ({ ...r, is_crown: false }));
 
   const activeYears = cohorts.map((c) => c.year);
   const totalMembers = cohorts.reduce((sum, c) => sum + (c.member_count ?? 0), 0);

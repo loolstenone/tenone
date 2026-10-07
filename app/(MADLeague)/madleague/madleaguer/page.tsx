@@ -57,20 +57,21 @@ export default async function MadleaguerPage() {
     // 내 프로그램 = 내가 속한 팀 (진행·예정 회차 우선) — 팀원 키 = members.id
     let programs: MyProgram[] = [];
     {
+        // 코어 프로그램 모듈 — 내 참가 (MADLeague 창구에 노출된 회차)
         const { data: links } = await admin
-            .from('mad_team_members')
-            .select('role, mad_competition_teams(id, name, mad_competitions(title, status, presentation_date))')
+            .from('program_participants')
+            .select('role, team:program_teams(id, name), round:program_rounds(id, title, status, presentation_date, channels)')
             .eq('member_id', memberRow.id);
-        type Link = { role: string; mad_competition_teams: { id: string; name: string; mad_competitions: { title: string; status: string; presentation_date: string | null } | null } | null };
+        type Link = { role: string; team: { id: string; name: string } | null; round: { id: string; title: string; status: string; presentation_date: string | null; channels: string[] } | null };
         programs = ((links ?? []) as unknown as Link[])
-            .filter(l => l.mad_competition_teams?.mad_competitions)
+            .filter(l => l.round && (l.round.channels ?? []).includes('madleague'))
             .map(l => ({
-                teamId: l.mad_competition_teams!.id,
-                teamName: l.mad_competition_teams!.name,
+                teamId: l.team?.id ?? l.round!.id,
+                teamName: l.team?.name ?? '개인 참가',
                 role: l.role,
-                compTitle: l.mad_competition_teams!.mad_competitions!.title,
-                status: l.mad_competition_teams!.mad_competitions!.status,
-                presentationDate: l.mad_competition_teams!.mad_competitions!.presentation_date,
+                compTitle: l.round!.title,
+                status: l.round!.status,
+                presentationDate: l.round!.presentation_date,
             }))
             .sort((a, b) => Number(a.status === 'completed') - Number(b.status === 'completed'));
     }

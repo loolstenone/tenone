@@ -62,7 +62,8 @@ export default function MADLeagueIntraPage() {
       const sb = createClient();
       const [clubRes, crownRes, pubRes] = await Promise.all([
         sb.from('mad_clubs').select('id, slug, name, region, color, president_member_id').eq('status', 'active').order('sort_order'),
-        sb.from('mad_competition_results').select('*', { count: 'exact', head: true }).eq('is_crown', true),
+        // MAD Crown 표기 결정 대기 — 코어 결과에는 Crown 없음
+        Promise.resolve({ count: 0 }),
         sb.from('mad_articles').select('*', { count: 'exact', head: true }).eq('is_published', true),
       ]);
       const [appsRes, heroRes, reviewRes] = await Promise.all([

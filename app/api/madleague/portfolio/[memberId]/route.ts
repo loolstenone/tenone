@@ -38,7 +38,7 @@ export async function GET(_req: Request, { params }: RouteProps) {
   // 팀 참여 이력 (경쟁PT 결과 포함) — 팀원 키 = members.id, 팀원 행은 비공개라 service_role로 이 회원 것만
   const coreId = (member as { member_id?: string | null }).member_id;
   const { data: teamLinks } = coreId
-    ? await createAdminClient().from('mad_team_members').select('team_id, role').eq('member_id', coreId)
+    ? await createAdminClient().from('program_participants').select('team_id, role').eq('member_id', coreId).not('team_id', 'is', null)
     : { data: [] };
   delete (member as { member_id?: unknown }).member_id;
 
@@ -47,24 +47,25 @@ export async function GET(_req: Request, { params }: RouteProps) {
   let teams: unknown[] = [];
   if (teamIds.length > 0) {
     const { data } = await sb
-      .from('mad_competition_teams')
+      .from('program_teams')
       .select(`
         id, name,
-        mad_competitions(title, year, status, presentation_date)
+        mad_competitions:program_rounds(title, year, status, presentation_date)
       `)
       .in('id', teamIds)
       .order('created_at', { ascending: false });
     teams = data ?? [];
 
     // 결과 (수상)
+    // 결과 — 발표된 회차만 (RLS)
     const { data: results } = await sb
-      .from('mad_competition_results')
-      .select('team_id, rank, award_name, is_crown')
+      .from('program_results')
+      .select('team_id, rank, award_name')
       .in('team_id', teamIds);
 
     const resultMap: Record<string, unknown> = {};
-    (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null; is_crown: boolean }) => {
-      if (r.team_id) resultMap[r.team_id] = r;
+    (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null }) => {
+      if (r.team_id) resultMap[r.team_id] = { ...r, is_crown: false };
     });
 
     const roleMap: Record<string, string> = {};

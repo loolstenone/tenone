@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getMadAccess } from '@/lib/madleague-roles';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
-import { PtSubmissionPanel } from '@/features/madleague/PtSubmissionPanel';
+import { SubmissionPanel } from '@/features/programs/SubmissionPanel';
+import { PROGRAM_KIND_LABEL } from '@/lib/programs/paths';
 import { Trophy, Users, Medal, Calendar, ChevronRight, ArrowRight } from 'lucide-react';
 
 export const metadata = {
@@ -20,7 +21,7 @@ interface Competition {
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
   brief_title: string | null;
   brief_content: string | null;
-  kind: 'competition' | 'project';
+  kind: string;
   final_deadline: string | null;
   results_published_at: string | null;
   client_name: string | null;
@@ -100,14 +101,14 @@ function TeamPanel({ team, comp }: { team: Team; comp: Competition }) {
         <div className="border border-[#FFC000]/30 p-5">
           <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-1">본선 제출 · FINAL</div>
           <p className="text-xs text-neutral-500 mb-4">현장 PT 전까지 디벨롭한 제안서를 올려 주세요.{comp.final_deadline ? ` 마감 ${fmtDay(comp.final_deadline)}` : ''}</p>
-          <PtSubmissionPanel teamId={team.id} stage="final" />
+          <SubmissionPanel teamId={team.id} stage="final" />
         </div>
       )}
 
       {/* 예선 제출 — 팀원 누구나 올리고 최종 제출 (마감 전) */}
       <div>
-        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">{comp.kind === 'project' ? '제출 · SUBMISSION' : '예선 제출 · SUBMISSION'}</div>
-        <PtSubmissionPanel teamId={team.id} stage="prelim" />
+        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">{comp.kind === 'competition' ? '예선 제출 · SUBMISSION' : '제출 · SUBMISSION'}</div>
+        <SubmissionPanel teamId={team.id} stage="prelim" />
       </div>
     </div>
   );
@@ -160,18 +161,20 @@ export default async function PTWorkspacePage() {
   /* ── 데이터 로드 ── 입장 확인 후 서버에서만 (팀원·제출물 행은 RLS 비공개) */
   const db = createAdminClient();
 
-  // 진행 중·예정 대회
+  // 진행 중·예정 회차 — 코어 프로그램 모듈 중 MADLeague 창구(channels)에 노출된 것 (HeRo·RooK 회차 포함 가능)
   const { data: competitions } = await db
-    .from('mad_competitions')
+    .from('program_rounds')
     .select('*')
+    .contains('channels', ['madleague'])
     .in('status', ['ongoing', 'upcoming'])
     .order('year', { ascending: false })
     .order('presentation_date', { ascending: true });
 
   // 최근 완료 대회도 1개 추가 (결과 확인용)
   const { data: recentCompleted } = await db
-    .from('mad_competitions')
+    .from('program_rounds')
     .select('*')
+    .contains('channels', ['madleague'])
     .eq('status', 'completed')
     .order('presentation_date', { ascending: false })
     .limit(1);
@@ -182,9 +185,9 @@ export default async function PTWorkspacePage() {
   // 전체 팀 (해당 대회들)
   const { data: rawTeams } = compIds.length > 0
     ? await db
-        .from('mad_competition_teams')
-        .select('id, name, description, competition_id, is_finalist')
-        .in('competition_id', compIds)
+        .from('program_teams')
+        .select('id, name, description, competition_id:round_id, is_finalist')
+        .in('round_id', compIds)
     : { data: [] };
 
   const teamIds = (rawTeams ?? []).map((t: { id: string }) => t.id);
@@ -195,7 +198,7 @@ export default async function PTWorkspacePage() {
 
   if (teamIds.length > 0) {
     const { data: myLinks } = await db
-      .from('mad_team_members')
+      .from('program_participants')
       .select('team_id, role')
       .eq('member_id', memberRow.id)
       .in('team_id', teamIds);
@@ -207,7 +210,7 @@ export default async function PTWorkspacePage() {
 
   // 팀 멤버 수
   const { data: memberCountRows } = teamIds.length > 0
-    ? await db.from('mad_team_members').select('team_id').in('team_id', teamIds)
+    ? await db.from('program_participants').select('team_id').in('team_id', teamIds)
     : { data: [] };
   const countByTeam: Record<string, number> = {};
   (memberCountRows ?? []).forEach((r: { team_id: string }) => {
@@ -216,14 +219,14 @@ export default async function PTWorkspacePage() {
 
   // 수상 결과
   const { data: results } = teamIds.length > 0
-    ? await db.from('mad_competition_results').select('team_id, rank, award_name, is_crown').in('team_id', teamIds)
+    ? await db.from('program_results').select('team_id, rank, award_name').in('team_id', teamIds)
     : { data: [] };
   const resultByTeam: Record<string, Team['result']> = {};
   // 결과 발표 전에는 숨김 (results_published_at — 인트라 '결과 발표')
   const publishedComp = new Set(allComps.filter(c => c.results_published_at).map(c => c.id));
   const compOfTeam = new Map((rawTeams ?? []).map((t: { id: string; competition_id: string }) => [t.id, t.competition_id]));
-  (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null; is_crown: boolean }) => {
-    if (r.team_id && publishedComp.has(compOfTeam.get(r.team_id) ?? '')) resultByTeam[r.team_id] = r;
+  (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null }) => {
+    if (r.team_id && publishedComp.has(compOfTeam.get(r.team_id) ?? '')) resultByTeam[r.team_id] = { ...r, is_crown: false };
   });
 
   // 팀 조합
@@ -298,7 +301,7 @@ export default async function PTWorkspacePage() {
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <CompStatusBadge status={comp.status} />
-                      <span className="text-[11px] font-bold px-2.5 py-1 bg-white/5 text-white/60">{comp.kind === 'project' ? '프로젝트' : '경쟁 PT'}</span>
+                      <span className="text-[11px] font-bold px-2.5 py-1 bg-white/5 text-white/60">{PROGRAM_KIND_LABEL[comp.kind] ?? comp.kind}</span>
                       <span className="text-xs text-neutral-600">{comp.year}년</span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black">{comp.title}</h2>
@@ -308,7 +311,7 @@ export default async function PTWorkspacePage() {
                     {comp.brief_title && (
                       <p className="mt-3 text-sm text-neutral-400 max-w-xl">{comp.brief_title}</p>
                     )}
-                    {(myTeam || access.isStaff || access.roles.some(r => r.capability_key === 'showcase' && r.context?.competition_id === comp.id)) && (
+                    {(myTeam || access.isStaff || access.roles.some(r => r.capability_key === 'showcase' && r.context?.round_id === comp.id)) && (
                       <Link href={`/madleague/pt/${comp.id}`}
                         className="mt-4 inline-flex items-center gap-2 bg-[#EC1D25] px-5 py-2.5 text-sm font-bold text-white">
                         공지 · Q&amp;A · 제출 <ArrowRight className="h-4 w-4" />

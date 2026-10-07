@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * 회차(경쟁 PT·프로젝트) 방 — 공지 · Q&A · 우리 팀 제출(팀원) · 제출물(직원·클라이언트, 코멘트)
+ * 프로그램 회차 방 (코어) — 공지 · Q&A · 우리 팀 제출(팀원) · 제출물(직원·클라이언트, 코멘트)
  * 팀원·직원·클라이언트가 같은 화면을 쓴다 (모바일 우선 — 이동 중 공지 작성·답변)
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, EyeOff, FolderOpen, Lock, MessageCircle, Megaphone, Pin, Trash2, Upload } from 'lucide-react';
-import { PtSubmissionPanel } from './PtSubmissionPanel';
+import { SubmissionPanel } from './SubmissionPanel';
 
 type Tab = 'notice' | 'qna' | 'submit' | 'works';
 interface Comment { id: string; author_role: 'staff' | 'client'; body: string; visible_to_team: boolean; created_at: string }
@@ -62,12 +62,12 @@ export function RoundTabs({ compId, role, teamId, isFinalist, kind, finalDeadlin
               <div className="border border-[#FFC000]/30 p-4 sm:p-5">
                 <div className="mb-1 text-xs font-bold tracking-widest text-[#FFC000]">본선 제출 · FINAL</div>
                 <p className="mb-4 text-xs text-neutral-500">현장 PT 전까지 디벨롭한 제안서를 올려 주세요.{finalDeadline ? ` 마감 ${finalDeadline}` : ''}</p>
-                <PtSubmissionPanel teamId={teamId} stage="final" />
+                <SubmissionPanel teamId={teamId} stage="final" />
               </div>
             )}
             <div>
               <div className="mb-3 text-xs font-bold tracking-widest text-neutral-600">{kind === 'project' ? '제출' : '예선 제출'}</div>
-              <PtSubmissionPanel teamId={teamId} stage="prelim" />
+              <SubmissionPanel teamId={teamId} stage="prelim" />
             </div>
             <TeamFeedback compId={compId} />
           </div>
@@ -85,7 +85,7 @@ function Notices({ compId }: { compId: string }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const url = `/api/madleague/rounds/${compId}/notices`;
+  const url = `/api/programs/rounds/${compId}/notices`;
 
   const load = useCallback(async () => {
     const res = await fetch(url); const d = await res.json();
@@ -149,7 +149,7 @@ function Qna({ compId }: { compId: string }) {
   const [reply, setReply] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const url = `/api/madleague/rounds/${compId}/qna`;
+  const url = `/api/programs/rounds/${compId}/qna`;
 
   const load = useCallback(async () => {
     const res = await fetch(url); const j = await res.json();
@@ -221,7 +221,7 @@ function Works({ compId }: { compId: string }) {
   const [draft, setDraft] = useState<Record<string, { body: string; visible: boolean }>>({});
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const url = `/api/madleague/rounds/${compId}/works`;
+  const url = `/api/programs/rounds/${compId}/works`;
 
   const load = useCallback(async () => {
     const res = await fetch(url); const j = await res.json();
@@ -231,7 +231,7 @@ function Works({ compId }: { compId: string }) {
   useEffect(() => { load(); }, [load]);
 
   const download = async (teamId: string, stage: string) => {
-    const res = await fetch(`/api/madleague/pt/submission?team_id=${teamId}&stage=${stage}`); const j = await res.json();
+    const res = await fetch(`/api/programs/submission?team_id=${teamId}&stage=${stage}`); const j = await res.json();
     if (j.download_url) window.location.href = j.download_url; else setErr(j.error ?? '파일이 없습니다.');
   };
   const comment = async (subId: string) => {
@@ -303,7 +303,7 @@ function CommentRow({ c }: { c: Comment }) {
 function TeamFeedback({ compId }: { compId: string }) {
   const [subs, setSubs] = useState<Work[] | null>(null);
   useEffect(() => {
-    fetch(`/api/madleague/rounds/${compId}/works`).then(r => r.json())
+    fetch(`/api/programs/rounds/${compId}/works`).then(r => r.json())
       .then(j => setSubs((j.teams?.[0]?.submissions ?? []) as Work[])).catch(() => setSubs([]));
   }, [compId]);
   const withComments = (subs ?? []).filter(s => s.comments.length > 0);

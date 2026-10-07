@@ -2,9 +2,10 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getRoundAccess } from '@/lib/madleague-round-access';
+import { getRoundAccess } from '@/lib/programs/access';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
-import { RoundTabs } from '@/features/madleague/RoundTabs';
+import { RoundTabs } from '@/features/programs/RoundTabs';
+import { PROGRAM_KIND_LABEL } from '@/lib/programs/paths';
 import { ChevronRight, Calendar } from 'lucide-react';
 
 export const metadata = { title: '회차 공지 · Q&A' };
@@ -13,7 +14,7 @@ const STATUS = { upcoming: '모집 예정', ongoing: '진행 중', completed: '�
 const ROLE = { staff: '운영진', client: '클라이언트', team: '참여 팀' } as const;
 const day = (d: string | null) => d ? new Date(`${d}T00:00:00+09:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) : null;
 
-/** 회차 방 — 그 회차 팀원 · 직원 · 클라이언트만 (lib/madleague-round-access) */
+/** 회차 방 — 그 회차 참가자 · 직원 · 클라이언트만 (코어 lib/programs/access) — MADLeague 창구 */
 export default async function RoundPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sb = await createClient();
@@ -44,8 +45,8 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
 
   const db = createAdminClient();
   const [{ data: comp }, { data: team }] = await Promise.all([
-    db.from('mad_competitions').select('title, kind, status, year, client_name, brief_title, brief_content, end_date, final_deadline, presentation_date').eq('id', id).single(),
-    access.teamId ? db.from('mad_competition_teams').select('name, is_finalist').eq('id', access.teamId).single() : Promise.resolve({ data: null }),
+    db.from('program_rounds').select('title, kind, status, year, client_name, brief_title, brief_content, end_date, final_deadline, presentation_date').eq('id', id).single(),
+    access.teamId ? db.from('program_teams').select('name, is_finalist').eq('id', access.teamId).single() : Promise.resolve({ data: null }),
   ]);
   if (!comp) return null;
   const dates = [
@@ -61,7 +62,7 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
           <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-500">
             <Link href="/madleague/pt" className="transition hover:text-white">PT WORKSPACE</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-[#EC1D25]">{comp.kind === 'project' ? '프로젝트' : '경쟁 PT'}</span>
+            <span className="text-[#EC1D25]">{PROGRAM_KIND_LABEL[comp.kind] ?? comp.kind}</span>
           </div>
           <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-bold">
             <span className="bg-[#EC1D25]/20 px-2.5 py-1 text-[#EC1D25]">{STATUS[comp.status] ?? comp.status}</span>

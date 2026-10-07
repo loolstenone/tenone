@@ -26,7 +26,7 @@ import {
     BookOpen, Compass, HelpCircle,
     ShoppingCart, CalendarClock, LayoutGrid, MessageCircle, Flame,
     Bot, Users, Home, Menu, X, Radio, Mail, Brain, LineChart, Map, RefreshCw,
-    Zap, Layers, PenTool, Eye, Coins,
+    Zap, Layers, PenTool, Eye, Coins, Trophy,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -156,6 +156,8 @@ export const modules: NavModule[] = [
                             { name: "콘텐츠 점검", href: "/intra/ums/sites/content" },
                         ],
                     },
+                    // 코어 프로그램 모듈 — 전 브랜드 회차 (경쟁 PT·실전 프로젝트·교육 과정) · docs/Program_Module.md
+                    { name: "프로그램", href: "/intra/ums/programs", icon: Trophy },
                     {
                         name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
                         children: [

@@ -1,15 +1,16 @@
 /**
- * 회차 제출물 · 코멘트
- *   GET  /api/madleague/rounds/{id}/works
- *        직원·클라이언트: 팀(이름·본선 진출) × 최종 제출물(예선·본선) + 코멘트 전체 — 팀원 이름 비노출
- *        팀원: 우리 팀 제출물에 달린 '팀에게 공개' 코멘트만
- *   POST /api/madleague/rounds/{id}/works  { submission_id, body, visible_to_team }  — 직원·클라이언트
+ * 프로그램 회차 제출물 · 코멘트 (코어)
+ *   GET  /api/programs/rounds/{id}/works
+ *        직원·클라이언트: 팀(이름·본선 진출) × 최종 제출물(예선·본선) + 코멘트 전체 — 참가자 이름 비노출
+ *        참가자: 우리 팀 제출물에 달린 '팀에게 공개' 코멘트만
+ *   POST /api/programs/rounds/{id}/works  { submission_id, body, visible_to_team }  — 직원·클라이언트
  *        팀에게 공개 → 팀원 알림 · 클라이언트가 쓰면 운영 담당 알림
- * 파일 내려받기는 /api/madleague/pt/submission (서명 URL 5분)
+ * 파일 내려받기는 /api/programs/submission (서명 URL 5분)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getRoundAccess, roundTeamMemberIds } from "@/lib/madleague-round-access";
+import { getRoundAccess, roundParticipantIds } from "@/lib/programs/access";
+import { programRoomPath } from "@/lib/programs/paths";
 import { notify, brandManagerIds } from "@/lib/notify";
 
 type Params = { params: Promise<{ id: string }> };
@@ -25,17 +26,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const admin = createAdminClient();
     const reviewer = a.role === "staff" || a.role === "client";
 
-    const { data: teams } = await admin.from("mad_competition_teams").select("id, name, is_finalist")
-        .eq("competition_id", id).order("created_at");
+    const { data: teams } = await admin.from("program_teams").select("id, name, is_finalist")
+        .eq("round_id", id).order("created_at");
     const visibleTeams = reviewer ? (teams ?? []) : (teams ?? []).filter(t => t.id === a.teamId);
     const teamIds = visibleTeams.map(t => t.id);
     if (!teamIds.length) return NextResponse.json({ reviewer, teams: [] });
 
-    let sq = admin.from("mad_submissions").select("id, team_id, stage, title, description, presentation_url, file_name, status, submitted_at").in("team_id", teamIds);
+    let sq = admin.from("program_submissions").select("id, team_id, stage, title, description, presentation_url, file_name, status, submitted_at").in("team_id", teamIds);
     if (reviewer) sq = sq.eq("status", "submitted"); // 직원·클라이언트 = 최종 제출한 것만
     const { data: subs } = await sq;
     const subIds = (subs ?? []).map(s => s.id);
-    let cq = admin.from("mad_submission_comments").select("id, submission_id, author_role, body, visible_to_team, created_at").order("created_at");
+    let cq = admin.from("program_submission_comments").select("id, submission_id, author_role, body, visible_to_team, created_at").order("created_at");
     if (!reviewer) cq = cq.eq("visible_to_team", true);
     const { data: comments } = subIds.length ? await cq.in("submission_id", subIds) : { data: [] as Cmt[] };
 
@@ -60,27 +61,27 @@ export async function POST(req: NextRequest, { params }: Params) {
     const text = String(body.body ?? "").trim().slice(0, 5000);
     if (!text) return NextResponse.json({ error: "코멘트를 적어 주세요." }, { status: 400 });
 
-    const { data: sub } = await admin.from("mad_submissions").select("id, team_id, stage, title, status")
-        .eq("id", String(body.submission_id ?? "")).eq("competition_id", id).maybeSingle();
+    const { data: sub } = await admin.from("program_submissions").select("id, team_id, stage, title, status")
+        .eq("id", String(body.submission_id ?? "")).eq("round_id", id).maybeSingle();
     if (!sub || (a.role === "client" && sub.status !== "submitted")) return NextResponse.json({ error: "제출물을 찾을 수 없습니다." }, { status: 404 });
 
     const visible = body.visible_to_team !== false;
-    const { error } = await admin.from("mad_submission_comments").insert({
-        submission_id: sub.id, author_member_id: a.memberId, author_role: a.role, body: text, visible_to_team: visible,
+    const { error } = await admin.from("program_submission_comments").insert({
+        brand_id: a.round.brand_id, submission_id: sub.id, author_member_id: a.memberId, author_role: a.role, body: text, visible_to_team: visible,
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const stage = sub.stage === "final" ? "본선" : "예선";
     await Promise.all([
-        visible ? notify(await roundTeamMemberIds(id, sub.team_id), {
-            brandId: "madleague", type: "mad_submission_comment",
-            title: `[${a.role === "client" ? "클라이언트" : "운영진"} 코멘트] ${a.comp.title} · ${stage} 제출물`, message: text.slice(0, 120),
-            link: `/madleague/pt/${id}?tab=submit`,
+        visible ? notify(await roundParticipantIds(id, sub.team_id), {
+            brandId: a.round.brand_id, type: "program_submission_comment",
+            title: `[${a.role === "client" ? "클라이언트" : "운영진"} 코멘트] ${a.round.title} · ${stage} 제출물`, message: text.slice(0, 120),
+            link: programRoomPath(a.round, "submit"),
         }) : Promise.resolve(),
-        a.role === "client" ? notify((await brandManagerIds("madleague")).filter(m => m !== a.memberId), {
-            brandId: "madleague", type: "mad_submission_comment",
-            title: `[클라이언트 코멘트] ${a.comp.title} · ${sub.title}`, message: text.slice(0, 120),
-            link: `/madleague/pt/${id}?tab=works`,
+        a.role === "client" ? notify((await brandManagerIds(a.round.brand_id)).filter(m => m !== a.memberId), {
+            brandId: a.round.brand_id, type: "program_submission_comment",
+            title: `[클라이언트 코멘트] ${a.round.title} · ${sub.title}`, message: text.slice(0, 120),
+            link: programRoomPath(a.round, "works"),
         }) : Promise.resolve(),
     ]);
     return NextResponse.json({ ok: true });

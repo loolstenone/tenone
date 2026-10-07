@@ -30,7 +30,7 @@ export default async function ArchiveDetailPage({ params }: PageProps) {
   };
   const [clubRes, compRes] = await Promise.all([
     item.club_id ? sb.from('mad_clubs').select('slug, name, color').eq('id', item.club_id).maybeSingle() : Promise.resolve({ data: null }),
-    item.competition_id ? sb.from('mad_competitions').select('slug, title, client_name, year').eq('id', item.competition_id).maybeSingle() : Promise.resolve({ data: null }),
+    item.competition_id ? sb.from('program_rounds').select('slug, title, client_name, year').eq('id', item.competition_id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   const club = clubRes.data as { slug: string; name: string; color: string | null } | null;
   const comp = compRes.data as { slug: string; title: string; client_name: string | null; year: number } | null;

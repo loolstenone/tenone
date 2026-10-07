@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getMemberCoreByAuthId } from '@/lib/madleague-people';
 import { ArrowLeft, ExternalLink, Eye, EyeOff, Trophy, Award, Tag } from 'lucide-react';
 import { MadLoginGate } from '@/features/madleague/MadLoginButton';
@@ -48,9 +49,9 @@ export default async function PortfolioPage() {
     mad_cohorts: { year: number; status: string } | null;
   };
 
-  // 팀 이력 — 팀원 키 = members.id (데이터 계약 1조)
+  // 팀 이력 — 코어 프로그램 참가자(program_participants, 비공개)에서 본인 것만 서버로. 팀원 키 = members.id (데이터 계약 1조)
   const { data: teamLinks } = core
-    ? await sb.from('mad_team_members').select('team_id, role').eq('member_id', core.id)
+    ? await createAdminClient().from('program_participants').select('team_id, role').eq('member_id', core.id).not('team_id', 'is', null)
     : { data: [] };
 
   const teamIds = (teamLinks ?? []).map((t: { team_id: string }) => t.team_id);
@@ -58,19 +59,20 @@ export default async function PortfolioPage() {
   let teams: { id: string; name: string; myRole: string; mad_competitions: { title: string; year: number } | null; result: { rank: number | null; award_name: string | null; is_crown: boolean } | null }[] = [];
   if (teamIds.length > 0) {
     const { data: teamsData } = await sb
-      .from('mad_competition_teams')
-      .select('id, name, mad_competitions(title, year)')
+      .from('program_teams')
+      .select('id, name, mad_competitions:program_rounds(title, year)')
       .in('id', teamIds)
       .order('created_at', { ascending: false });
 
+    // 결과 — 발표된 회차만 (RLS)
     const { data: results } = await sb
-      .from('mad_competition_results')
-      .select('team_id, rank, award_name, is_crown')
+      .from('program_results')
+      .select('team_id, rank, award_name')
       .in('team_id', teamIds);
 
     const resultMap: Record<string, { rank: number | null; award_name: string | null; is_crown: boolean }> = {};
-    (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null; is_crown: boolean }) => {
-      if (r.team_id) resultMap[r.team_id] = r;
+    (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null }) => {
+      if (r.team_id) resultMap[r.team_id] = { ...r, is_crown: false };
     });
 
     const roleMap: Record<string, string> = {};
