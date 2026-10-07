@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getMadAccess } from '@/lib/madleague-roles';
+import { canViewClubApplications, getMadAccess } from '@/lib/madleague-roles';
 import { ManagePanel } from './ManagePanel';
 
 interface PageProps {
@@ -29,14 +29,9 @@ export default async function ClubManagePage({ params }: PageProps) {
     .maybeSingle();
   if (!club) notFound();
 
-  // 권한 확인: 회장 본인 / staff(super_admin 포함) / mentor
+  // 권한 확인: 직원 / 이 동아리 회장 / 이 동아리 담당 멘토 (지원서 = 소속 인증, 개인정보라 동아리 범위로 제한)
   const access = await getMadAccess(memberRow.id);
-
-  const isPresident = club.president_member_id === memberRow.id;
-  const isStaff = access.isStaff;
-  const isMentor = access.isMentor;
-
-  if (!isPresident && !isStaff && !isMentor) {
+  if (!canViewClubApplications(access, memberRow.id, club)) {
     redirect(`/madleague/clubs/${slug}`);
   }
 
@@ -53,7 +48,7 @@ export default async function ClubManagePage({ params }: PageProps) {
         <div className="mb-8">
           <p className="text-xs font-bold tracking-widest text-[#EC1D25]">CLUB MANAGE</p>
           <h1 className="mt-2 text-3xl font-black">{club.name} 지원서 관리</h1>
-          <p className="mt-1 text-sm text-neutral-400">회장만 접근 가능. 지원서를 승인하면 매드리거 커뮤니티 이용 권한이 부여됩니다.</p>
+          <p className="mt-1 text-sm text-neutral-400">이 동아리 회장·담당 멘토·운영진만 볼 수 있습니다. 승인(회장·운영진)하면 소속이 인증되고 매드리거 공간 이용 권한이 부여됩니다.</p>
         </div>
 
         <ManagePanel

@@ -5,7 +5,7 @@ import { MapPin, Calendar, Users, ArrowRight, ChevronLeft, Settings } from 'luci
 import { fetchMadClubBySlug } from '@/lib/supabase/madleague';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getMadAccess } from '@/lib/madleague-roles';
+import { canViewClubApplications, getMadAccess } from '@/lib/madleague-roles';
 
 export const revalidate = 300;
 
@@ -42,7 +42,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
   const totalMembers = cohorts.reduce((sum, c) => sum + (c.member_count ?? 0), 0);
   const accent = club.color ?? '#EC1D25';
 
-  // 회장 여부 확인 (관리 링크 노출용)
+  // 지원서 관리 링크 노출: 직원 · 이 동아리 회장 · 이 동아리 담당 멘토
   let canManage = false;
   try {
     const { data: { user } } = await sb.auth.getUser();
@@ -50,9 +50,8 @@ export default async function ClubDetailPage({ params }: PageProps) {
       const adminClient = createAdminClient();
       const { data: memberRow } = await adminClient.from('members').select('id').eq('auth_id', user.id).maybeSingle();
       if (memberRow) {
-        const isPresident = club.president_member_id === memberRow.id;
         const access = await getMadAccess(memberRow.id);
-        canManage = isPresident || access.isStaff || access.isMentor;
+        canManage = canViewClubApplications(access, memberRow.id, club);
       }
     }
   } catch { /* 비로그인 시 무시 */ }

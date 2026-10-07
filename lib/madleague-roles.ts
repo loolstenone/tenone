@@ -66,6 +66,17 @@ export interface MadAccess {
     /** 매드리거 전용 공간(아레나·커뮤니티·PT·프로젝트) 입장 가능 */
     canEnter: boolean;
     isMentor: boolean;
+    /** 멘토로 담당하는 동아리 id (context.club_id) — 지원서 열람은 담당 동아리만 */
+    mentorClubIds: string[];
+}
+
+/** 동아리 지원서(소속 인증) 열람 가능 여부: 직원 · 해당 동아리 회장 · 해당 동아리 담당 멘토 */
+export function canViewClubApplications(
+    access: MadAccess,
+    memberId: string,
+    club: { id: string; president_member_id: string | null },
+): boolean {
+    return access.isStaff || club.president_member_id === memberId || access.mentorClubIds.includes(club.id);
 }
 
 /** members.id 기준 MADLeague 접근 정보 (서버 전용) */
@@ -83,11 +94,15 @@ export async function getMadAccess(memberId: string): Promise<MadAccess> {
     ]);
     const isStaff = (staffRes.data ?? []).length > 0;
     const roles = (capRes.data ?? []) as MadAccess["roles"];
+    const mentorRoles = roles.filter(r => r.capability_key === "club" && r.role === "멘토");
     return {
         isStaff,
         roles,
         canEnter: isStaff || roles.length > 0,
-        isMentor: roles.some(r => r.capability_key === "club" && r.role === "멘토"),
+        isMentor: mentorRoles.length > 0,
+        mentorClubIds: mentorRoles
+            .map(r => r.context?.club_id)
+            .filter((id): id is string => typeof id === "string"),
     };
 }
 

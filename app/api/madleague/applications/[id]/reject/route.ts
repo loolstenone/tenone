@@ -21,13 +21,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   // 지원서 조회
   const { data: app } = await admin
     .from('mad_applications')
-    .select('id, club_id, status')
+    .select('id, club_id, status, applicant_role')
     .eq('id', id)
     .maybeSingle();
   if (!app) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
   if (app.status !== 'pending') return NextResponse.json({ error: 'ALREADY_PROCESSED' }, { status: 400 });
 
-  // 회장 또는 staff 확인
+  // 승인과 같은 기준: 일반 신청은 회장 또는 staff, 회장·멘토·기업 신청은 staff만
   const { data: club } = await admin
     .from('mad_clubs')
     .select('president_member_id')
@@ -36,7 +36,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
   const isPresident = club?.president_member_id === memberRow.id;
   const isStaff = (await getMadAccess(memberRow.id)).isStaff;
-  if (!isPresident && !isStaff) {
+  const isGeneralApp = (app.applicant_role ?? 'member') === 'member';
+  if (!isStaff && !(isGeneralApp && isPresident)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
