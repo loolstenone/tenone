@@ -2,14 +2,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getMadAccess } from '@/lib/madleague-roles';
-import { fetchMadClubs } from '@/lib/supabase/madleague';
 import { CommunityFeed } from './CommunityFeed';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
-export const metadata = { title: '커뮤니티', description: '매드리거 커뮤니티' };
+export const metadata = { title: '자유 게시판', description: '매드리거 자유 게시판 — 동아리 구분 없이 전체 매드리거가 소통하는 공간' };
 
 interface PageProps {
-  searchParams: Promise<{ category?: string; club?: string }>;
+  searchParams: Promise<{ category?: string }>;
 }
 
 const CATEGORIES = [
@@ -23,7 +22,7 @@ const CATEGORIES = [
 ];
 
 export default async function CommunityPage({ searchParams }: PageProps) {
-  const { category = 'all', club } = await searchParams;
+  const { category = 'all' } = await searchParams;
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
 
@@ -31,7 +30,7 @@ export default async function CommunityPage({ searchParams }: PageProps) {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · 게시판</div>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · 게시판</div>
           <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 접근 가능합니다</h1>
           <p className="mt-6 text-neutral-400">로그인 후 매드리거 연동을 완료하면 커뮤니티에 참여할 수 있습니다.</p>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
@@ -48,15 +47,13 @@ export default async function CommunityPage({ searchParams }: PageProps) {
   const access = await getMadAccess(memberRow.id);
   if (!access.canEnter) redirect('/madleague/apply');
 
-  const clubs = await fetchMadClubs();
-
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · 게시판</div>
-          <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">매드 아레나</h1>
-          <p className="mt-4 text-sm text-neutral-400">매드리거 간 자유 소통 공간. 글은 승인된 매드리거만 볼 수 있습니다.</p>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · 게시판</div>
+          <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">자유 게시판</h1>
+          <p className="mt-4 text-sm text-neutral-400">동아리 구분 없이 전체 매드리거가 소통하는 공간. 글은 승인된 매드리거만 볼 수 있습니다.</p>
         </div>
       </section>
 
@@ -65,7 +62,7 @@ export default async function CommunityPage({ searchParams }: PageProps) {
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
-              href={buildQS({ category: cat.slug === 'all' ? undefined : cat.slug, club })}
+              href={buildQS({ category: cat.slug === 'all' ? undefined : cat.slug })}
               className={`text-xs font-bold px-3 py-2 border transition ${
                 category === cat.slug
                   ? 'bg-[#EC1D25] border-[#EC1D25] text-white'
@@ -76,41 +73,18 @@ export default async function CommunityPage({ searchParams }: PageProps) {
             </Link>
           ))}
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Link
-            href={buildQS({ category: category === 'all' ? undefined : category })}
-            className={`text-xs font-bold px-3 py-2 border transition ${
-              !club ? 'bg-white border-white text-black' : 'bg-black border-neutral-800 text-neutral-400 hover:border-white'
-            }`}
-          >
-            전 동아리
-          </Link>
-          {clubs.map((c) => (
-            <Link
-              key={c.slug}
-              href={buildQS({ category: category === 'all' ? undefined : category, club: c.slug })}
-              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 border transition ${
-                club === c.slug ? 'bg-white border-white text-black' : 'bg-black border-neutral-800 text-neutral-400 hover:border-white'
-              }`}
-            >
-              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: c.color ?? '#EC1D25' }} />
-              {c.name}
-            </Link>
-          ))}
-        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-8">
-        <CommunityFeed initialCategory={category} initialClub={club} clubs={clubs} />
+        <CommunityFeed initialCategory={category} />
       </section>
     </div>
   );
 }
 
-function buildQS(p: { category?: string; club?: string }) {
+function buildQS(p: { category?: string }) {
   const qs = new URLSearchParams();
   if (p.category) qs.set('category', p.category);
-  if (p.club) qs.set('club', p.club);
   const s = qs.toString();
   return s ? `/madleague/community?${s}` : '/madleague/community';
 }

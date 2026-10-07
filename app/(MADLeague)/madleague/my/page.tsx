@@ -217,13 +217,13 @@ export default function MadLeagueMyPage() {
                     </div>
                 )}
 
-                {/* 아레나 바로가기 */}
+                {/* 매드리거(아레나) 바로가기 */}
                 {madStatus === 'active' && (
-                    <Link href="/madleague/arena" className="group flex items-center justify-between bg-neutral-950 border border-neutral-800 hover:border-[#EC1D25] px-6 py-5 transition">
+                    <Link href="/madleague/madleaguer" className="group flex items-center justify-between bg-neutral-950 border border-neutral-800 hover:border-[#EC1D25] px-6 py-5 transition">
                         <div className="flex items-center gap-3">
                             <Users className="h-5 w-5 text-[#EC1D25]" />
                             <div>
-                                <p className="font-bold text-sm">매드 아레나</p>
+                                <p className="font-bold text-sm">매드리거</p>
                                 <p className="text-xs text-neutral-500 mt-0.5">게시판·프로젝트·경쟁PT 워크스페이스</p>
                             </div>
                         </div>

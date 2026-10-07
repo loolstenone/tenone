@@ -4,14 +4,14 @@ import { createClient } from '@/lib/supabase/server';
 import { getMadAccess } from '@/lib/madleague-roles';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 import {
-  Trophy, Users, Crown, Medal, FileText, ExternalLink,
+  Trophy, Users, Medal, FileText, ExternalLink,
   Calendar, ChevronRight, ArrowRight, Clock, CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 
 export const metadata = {
   title: '경쟁PT 워크스페이스',
-  description: '아이디어 무브먼트·PT 경쟁 프로그램 참여 팀의 작업 공간.',
+  description: '경쟁 PT 참여 팀의 작업 공간 — 브리프·팀·제출·결과.',
 };
 
 /* ─── 타입 ─── */
@@ -71,11 +71,7 @@ function SubmissionStatusLabel({ status }: { status: 'draft' | 'submitted' | 'wi
 }
 
 function ResultBadge({ result }: { result: NonNullable<Team['result']> }) {
-  if (result.is_crown) return (
-    <div className="inline-flex items-center gap-1.5 text-sm font-bold text-[#FFC000]">
-      <Crown className="h-4 w-4" /> MAD Crown
-    </div>
-  );
+  // 경쟁 PT에는 MAD Crown 표기를 쓰지 않는다 — 순위만 (사용자 결정 2026-10-07)
   if (result.rank) return (
     <div className="inline-flex items-center gap-1.5 text-sm font-bold text-white/60">
       <Medal className="h-4 w-4" /> {result.rank}위{result.award_name ? ` · ${result.award_name}` : ''}
@@ -206,7 +202,7 @@ export default async function PTWorkspacePage() {
     return (
       <div className="bg-black text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · PT</div>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · PT</div>
           <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 입장 가능합니다</h1>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
@@ -333,7 +329,7 @@ export default async function PTWorkspacePage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_60%,rgba(236,29,37,0.15),transparent_55%)]" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-6 py-16">
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-500 mb-4">
-            <Link href="/madleague/arena" className="hover:text-white transition">ARENA</Link>
+            <Link href="/madleague/madleaguer" className="hover:text-white transition">MADLEAGUER</Link>
             <ChevronRight className="h-3 w-3" />
             <span className="text-[#EC1D25]">PT WORKSPACE</span>
           </div>
@@ -342,7 +338,7 @@ export default async function PTWorkspacePage() {
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight">경쟁PT 워크스페이스</h1>
           </div>
           <p className="text-sm text-neutral-400 max-w-lg">
-            아이디어 무브먼트·PT 경쟁 프로그램 참여 팀의 작업 공간.
+            경쟁 PT 참여 팀의 작업 공간.
             팀 현황 확인, 제출물 관리, 발표 준비를 여기서 합니다.
           </p>
         </div>
@@ -411,10 +407,10 @@ export default async function PTWorkspacePage() {
                   <div className="mb-8 bg-neutral-950 border border-dashed border-neutral-800 p-8 text-center">
                     <Users className="h-8 w-8 text-neutral-700 mx-auto mb-3" />
                     <p className="text-sm text-neutral-500 mb-4">아직 참여 팀이 없습니다. 운영진에게 팀 배정을 요청하세요.</p>
-                    <a href="mailto:lools@tenone.biz"
+                    <Link href="/madleague/contact"
                       className="inline-flex items-center gap-2 text-sm font-bold text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 px-5 py-2.5 transition">
                       운영진 문의
-                    </a>
+                    </Link>
                   </div>
                 ) : null}
 
@@ -442,22 +438,11 @@ export default async function PTWorkspacePage() {
             href="/madleague/programs/competition"
             className="group bg-neutral-950 border border-neutral-900 hover:border-[#FFC000]/40 p-6 transition-all"
           >
-            <Crown className="h-5 w-5 text-[#FFC000] mb-3" />
-            <div className="font-black mb-1">Hall of Fame</div>
+            <Medal className="h-5 w-5 text-[#FFC000] mb-3" />
+            <div className="font-black mb-1">명예의 전당</div>
             <p className="text-sm text-neutral-500 mb-4">역대 경쟁PT 수상작 아카이브</p>
             <div className="flex items-center gap-1.5 text-sm font-bold text-neutral-400 group-hover:text-[#FFC000] group-hover:gap-3 transition-all">
               아카이브 보기 <ArrowRight className="h-4 w-4" />
-            </div>
-          </Link>
-          <Link
-            href="/madleague/projects"
-            className="group bg-neutral-950 border border-neutral-900 hover:border-neutral-600 p-6 transition-all"
-          >
-            <Trophy className="h-5 w-5 text-neutral-500 mb-3" />
-            <div className="font-black mb-1">프로젝트 전체</div>
-            <p className="text-sm text-neutral-500 mb-4">경쟁PT 포함 모든 MADLeague 팀 프로젝트</p>
-            <div className="flex items-center gap-1.5 text-sm font-bold text-neutral-400 group-hover:text-white group-hover:gap-3 transition-all">
-              보기 <ArrowRight className="h-4 w-4" />
             </div>
           </Link>
         </section>

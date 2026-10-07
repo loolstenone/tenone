@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { MessageCircle, Heart, Pin, Loader2, Plus, X, Paperclip, ImageIcon, Film, FileText, AlertCircle } from 'lucide-react';
-import type { MadClub } from '@/lib/supabase/madleague';
 
 export interface MediaItem {
   url: string;
@@ -31,8 +30,6 @@ type LikeState = Record<string, { count: number; liked: boolean; processing: boo
 
 interface Props {
   initialCategory: string;
-  initialClub?: string;
-  clubs: MadClub[];
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -47,7 +44,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
 }
 
-export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
+export function CommunityFeed({ initialCategory }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [writing, setWriting] = useState(false);
@@ -58,7 +55,6 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
     try {
       const qs = new URLSearchParams();
       if (initialCategory && initialCategory !== 'all') qs.set('category', initialCategory);
-      if (initialClub) qs.set('club', initialClub);
       const res = await fetch(`/api/madleague/posts?${qs.toString()}`);
       const data = await res.json();
       const fetched: Post[] = data.posts ?? [];
@@ -73,7 +69,7 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [initialCategory, initialClub]);
+  }, [initialCategory]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -187,7 +183,6 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
 
       {writing && (
         <WriteModal
-          clubs={clubs}
           onClose={() => setWriting(false)}
           onCreated={() => { setWriting(false); load(); }}
         />
@@ -210,7 +205,7 @@ function FileTypeIcon({ type }: { type: 'image' | 'video' | 'file' }) {
   return <FileText className="h-4 w-4" />;
 }
 
-function WriteModal({ clubs, onClose, onCreated }: { clubs: MadClub[]; onClose: () => void; onCreated: () => void }) {
+function WriteModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadQueue, setUploadQueue] = useState<UploadingFile[]>([]);
@@ -271,7 +266,6 @@ function WriteModal({ clubs, onClose, onCreated }: { clubs: MadClub[]; onClose: 
       category: String(fd.get('category') ?? 'free'),
       title: String(fd.get('title') ?? ''),
       content: String(fd.get('content') ?? ''),
-      clubSlug: String(fd.get('clubSlug') ?? '') || undefined,
       media: completedMedia,
     };
     try {
@@ -300,7 +294,7 @@ function WriteModal({ clubs, onClose, onCreated }: { clubs: MadClub[]; onClose: 
           <button onClick={onClose} className="text-neutral-500 hover:text-white"><X className="h-5 w-5" /></button>
         </div>
         <form onSubmit={submit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div>
             <label className="block">
               <div className="text-xs font-bold text-neutral-400 mb-1">카테고리</div>
               <select name="category" defaultValue="free" className="w-full bg-black border border-neutral-800 px-3 py-2 text-white text-sm focus:border-[#EC1D25] focus:outline-none">
@@ -309,13 +303,6 @@ function WriteModal({ clubs, onClose, onCreated }: { clubs: MadClub[]; onClose: 
                 <option value="share">공유</option>
                 <option value="insight">인사이트</option>
                 <option value="pinboard">핀보드 (공모전/프로젝트)</option>
-              </select>
-            </label>
-            <label className="block">
-              <div className="text-xs font-bold text-neutral-400 mb-1">동아리 (선택)</div>
-              <select name="clubSlug" defaultValue="" className="w-full bg-black border border-neutral-800 px-3 py-2 text-white text-sm focus:border-[#EC1D25] focus:outline-none">
-                <option value="">전체 공개</option>
-                {clubs.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
               </select>
             </label>
           </div>
