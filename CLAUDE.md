@@ -1391,6 +1391,49 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 - [ ] 브랜드 CLAUDE.md에 `## Action Hub Entries` 섹션으로 등록 내역 기록
 - [ ] **법적 검토** (§0.1 법적 검토 표): 수집 항목·목적·보관기간, 브랜드 간 데이터 활용·제3자 제공 동의, 만 14세 미만, 광고성 정보, 결제, 업종별 등록·신고 요건
 - [ ] **탈퇴 처리 정의**: `docs/Data_Lifecycle.md`에 브랜드 테이블별 삭제·익명화·유지 기준 추가
+- [ ] **마지막에 §2.5 원스톱 체크리스트** — `npm run site:check -- {siteId}` 전부 ✅ + 외부 작업 한 번에 안내
+
+---
+
+## 2.5 사이트 출시·수정·도메인 전환 원스톱 체크리스트 (2026-10-07)
+
+> **원칙**: 브랜드 사이트를 새로 만들거나, 고치거나, 도메인을 옮길 때 유니버스 공통 항목은 **한 번에** 적용·점검한다.
+> 사용자가 파비콘·로그인 버튼·보안 확인 같은 걸 하나씩 발견해 지적하게 만들지 않는다 (rook.co.kr 전환 때 5건이 차례로 발견된 사고).
+> 새 공통 규칙이 생기면 **`scripts/site-check.mjs`와 이 표에 같이** 추가한다 — 기억이 아니라 점검기로 지킨다.
+
+### ① 자동 점검 — 브랜드 파일을 고쳤으면 배포 전 매번
+
+```bash
+npm run site:check -- {siteId}          # 코드·DB
+npm run site:check -- {siteId} --live   # + 공식 도메인 실접속 (https·apex→www·파비콘·noindex)
+npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
+```
+
+| 점검 항목 | 근거 |
+|---|---|
+| siteConfigs·브랜드 그룹·ums_sites row·브랜드 CLAUDE.md | §2.4 |
+| layout generateMetadata + getSiteConfigServer, 정적 metadata 금지, og 이미지 | §1.1 |
+| **파비콘 파일 실제 존재** (`public/...` 404 금지) | §1.1 |
+| UniverseUtilityBar·MobileMenu·Footer 사용, **어두운 헤더면 유틸리티 바에 밝은 글자색** | §1.9.2~1.9.4 |
+| 마이페이지 MyProfileCard, `/login` 하드코딩 금지(loginHref), "준비 중" 직접 표시 | §1.3·§1.2.1·§1.1 |
+| page의 useSearchParams는 Suspense 필수 (없으면 빌드 실패) | Next.js |
+| 집중 브랜드 → brand-site-menus 등록 | §1.9.5 |
+| CANONICAL_HOSTS ↔ ums_sites.hosting ↔ noindex 목록 ↔ is_open 일치 | §0.1 원칙 4·6 |
+| 개인정보처리방침에 브랜드 수집 항목 | §0.1 법적 검토 |
+
+❌가 있으면 배포하지 않는다. ⚠️는 확인 후 보고. 결과 요약을 작업 보고에 포함한다.
+
+### ② 사람이 하는 외부 작업 — 런칭·도메인 전환 때 **한 메시지에 전부** 안내 (점검기 👤 항목)
+
+| 순서 | 어디서 | 할 일 |
+|---|---|---|
+| 1 | Vercel › Domains › Add Existing | `www.도메인`(Production) + `도메인`(→ www 308) |
+| 2 | 등록업체 | 네임서버가 그 업체 것인지 먼저 조회 → Vercel **View DNS configuration 권장값**으로 A·CNAME (부록 G.2) |
+| 3 | Cloudflare › Turnstile › 위젯 › Hostname | `도메인` 추가 — 빠지면 로그인·가입·폼 전부 막힘 (콘솔 110200) |
+| 4 | Supabase › Auth › URL Configuration | Redirect URLs `https://www.도메인/**`·`https://도메인/**` |
+| 5 | DB (Claude) | `ums_sites` hosting=vercel·is_open=true, CANONICAL_HOSTS·noindex 정리 → 배포 |
+| 6 | 확인 (Claude) | `npm run site:check -- {siteId} --live` 전부 ✅ + 브라우저로 로그인 모달·폼 보안 확인 통과 |
+| 7 | 옛 서버 | 종료 절차 §0.1 ①~⑦ (회원 있으면 30일 전 공지, 데이터 파기) |
 
 ---
 
@@ -1625,6 +1668,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 
 ### 커뮤니케이션
 - ❌ 사용자 지시가 유니버스 공통 가이드(CLAUDE.md)·사이트별 가이드(app/(Brand)/CLAUDE.md)와 어긋나는데 그대로 실행 — **어느 조항과 어떻게 어긋나는지 짚고 의견을 먼저 묻는다** (가이드를 바꿀지, 예외로 할지, 지시를 조정할지)
+- ❌ 브랜드 사이트를 만들거나 고친 뒤 `npm run site:check` 없이 배포, 외부 작업(Vercel·DNS·Turnstile·Supabase)을 하나씩 나눠 안내 — §2.5 원스톱 체크리스트로 한 번에
 - ❌ 실제 안 한 작업을 완료로 기록
 - ❌ "다음 할 일"을 막연하게 작성
 - ❌ "작업 종료할까요?" 등 자발적 묻기 — 사용자가 말할 때까지 계속 진행
