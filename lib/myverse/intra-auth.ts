@@ -1,13 +1,8 @@
-// 인트라 staff 권한 체크 — member_roles SSOT + tenone.biz 도메인 fallback
-//
-// CLAUDE.md 1.6: member_roles(role, is_active)가 SSOT.
-// 단, 마스터 계정(lools@tenone.biz)이나 직원이 member_roles row 없이 운영되는 경우를 위해
-// @tenone.biz 도메인 이메일도 staff로 인정.
+// 인트라 staff 권한 체크 — 직원 판단은 lib/api-guard.ts isStaffMember (member_roles SSOT, 데이터 계약 2조)
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-
-const STAFF_ROLES = new Set(["staff", "manager", "admin", "super_admin", "superadmin"]);
+import { isStaffMember } from "@/lib/api-guard";
 
 export async function requireIntraStaff(): Promise<{ ok: true; memberId: string } | { ok: false; status: number }> {
     try {
@@ -23,19 +18,7 @@ export async function requireIntraStaff(): Promise<{ ok: true; memberId: string 
             .maybeSingle();
 
         if (!member) return { ok: false, status: 403 };
-
-        // ⚠️ members.email·roles·account_type 은 본인이 UPDATE 가능 → 권한 판단 금지
-        // 1) 인증 완료된 auth 이메일이 tenone.biz
-        if (user.email?.endsWith("@tenone.biz") && user.email_confirmed_at) {
-            return { ok: true, memberId: member.id as string };
-        }
-        // 2) member_roles 테이블 (SSOT — staff만 쓰기 가능)
-        const { data: rolesRows } = await admin
-            .from("member_roles")
-            .select("role, is_active")
-            .eq("member_id", member.id)
-            .eq("is_active", true);
-        if ((rolesRows ?? []).some(r => STAFF_ROLES.has(r.role as string))) {
+        if (await isStaffMember(admin, member.id as string)) {
             return { ok: true, memberId: member.id as string };
         }
         return { ok: false, status: 403 };

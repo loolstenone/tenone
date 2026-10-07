@@ -20,8 +20,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 
-const STAFF_ROLES = new Set(["staff", "manager", "admin", "super_admin", "superadmin"]);
-const STAFF_EMAIL_DOMAIN = "@tenone.biz";
+// 직원 정의 (DB 트리거 sync_roles_to_jwt → auth_is_staff()와 동일 — sql/staff-definition-unify.sql)
+const STAFF_ROLES = ["staff", "manager", "super_admin"];
 
 export interface ApiUser {
     kind: "user";
@@ -95,18 +95,19 @@ async function resolveMember(admin: SupabaseClient, user: User): Promise<{ id: s
     return byEmail ?? null;
 }
 
-async function resolveStaff(admin: SupabaseClient, user: User, member: { id: string } | null): Promise<boolean> {
-    // 1) 인증 완료된 @tenone.biz 이메일 (members row 없는 직원 계정 대비)
-    if (user.email?.endsWith(STAFF_EMAIL_DOMAIN) && user.email_confirmed_at) return true;
-    if (!member) return false;
-    // ⚠️ members.roles / account_type 은 본인이 UPDATE 가능한 컬럼 → 권한 판단에 절대 사용 금지
-    // 2) member_roles (SSOT — staff만 INSERT/UPDATE 가능)
+/** 직원 여부 (members.id 기준, 서버 전용) — 유니버스 전체 직원 판단은 이 함수 하나로 */
+export async function isStaffMember(admin: SupabaseClient, memberId: string): Promise<boolean> {
+    // 권한 = member_roles만 (데이터 계약 2조). 이메일 도메인·members.roles·account_type으로 판단하지 않는다
     const { data: rows } = await admin
         .from("member_roles")
         .select("role")
-        .eq("member_id", member.id)
-        .eq("is_active", true);
-    return (rows ?? []).some(r => STAFF_ROLES.has(r.role as string));
+        .eq("member_id", memberId)
+        .eq("context", "universe")
+        .in("role", STAFF_ROLES)
+        .eq("is_active", true)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .limit(1);
+    return (rows ?? []).length > 0;
 }
 
 /** 호출자 식별 (실패 시 null) */
@@ -115,7 +116,7 @@ export async function getApiUser(req: NextRequest): Promise<ApiUser | null> {
     const user = await resolveUser(req, admin);
     if (!user) return null;
     const member = await resolveMember(admin, user);
-    const isStaff = await resolveStaff(admin, user, member);
+    const isStaff = member ? await isStaffMember(admin, member.id) : false;
     return { kind: "user", user, email: user.email ?? null, memberId: member?.id ?? null, isStaff };
 }
 

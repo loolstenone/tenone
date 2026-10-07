@@ -644,7 +644,7 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 | `module` | `{모듈명}` (erp·hero·wiki·smarcomm·project …) | 인트라 모듈 접근 |
 | `brand` | `{브랜드 slug}` (badak·madleague·tenone …) | 해당 브랜드 인트라 관리 |
 
-- 서버 API 직원 판단: `lib/api-guard.ts` `requireStaff` (staff·manager·super_admin 또는 인증된 @tenone.biz)
+- 직원 판단 SSOT: `lib/api-guard.ts` `isStaffMember` = `member_roles` staff·manager·super_admin @universe (활성·미만료). `requireStaff`·`getMadAccess`·MyVerse 인트라가 사용, DB는 같은 정의로 JWT `is_staff` 동기화(`sync_roles_to_jwt`) → RLS `auth_is_staff()`. ❌ 이메일 도메인으로 직원 판단 금지 (2026-10-07 폐지)
 - 마스터: `super_admin@universe` (lools@tenone.biz)
 - ❌ 회원 활동 역할(멘토·현역·바닥장·구독자 등)을 member_roles에 넣지 않는다 → `member_capability_roles` (§1.3.1)
   - MADLeague 이관 완료 (2026-10-06): 현역·임원(회장)·멘토 = `club`, 기업(과제기업·채용 파트너) = `showcase/host {type:corporate}` · 헬퍼 `lib/madleague-roles.ts`

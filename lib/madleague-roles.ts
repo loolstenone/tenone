@@ -1,5 +1,6 @@
 // 서버 전용 (service_role 사용) — 클라이언트 컴포넌트에서 import 금지
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isStaffMember } from "@/lib/api-guard";
 
 /**
  * MADLeague 회원 활동 역할 — member_capability_roles(brand_id='madleague') SSOT (§1.3.1)
@@ -8,7 +9,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
  */
 
 const BRAND_ID = "madleague";
-const STAFF_ROLES = ["staff", "manager", "super_admin"];
 
 export type MadApplicantRole = "member" | "club_leader" | "mentor" | "corporate";
 
@@ -82,8 +82,8 @@ export function canViewClubApplications(
 /** members.id 기준 MADLeague 접근 정보 (서버 전용) */
 export async function getMadAccess(memberId: string): Promise<MadAccess> {
     const admin = createAdminClient();
-    const [staffRes, capRes] = await Promise.all([
-        admin.from("member_roles").select("role").eq("member_id", memberId).in("role", STAFF_ROLES).eq("is_active", true).limit(1),
+    const [isStaff, capRes] = await Promise.all([
+        isStaffMember(admin, memberId),
         admin
             .from("member_capability_roles")
             .select("capability_key, role, context")
@@ -92,7 +92,6 @@ export async function getMadAccess(memberId: string): Promise<MadAccess> {
             .in("capability_key", ["club", "showcase"])
             .is("valid_until", null),
     ]);
-    const isStaff = (staffRes.data ?? []).length > 0;
     const roles = (capRes.data ?? []) as MadAccess["roles"];
     const mentorRoles = roles.filter(r => r.capability_key === "club" && r.role === "멘토");
     return {
