@@ -137,7 +137,7 @@ docs/              # 설계 문서
 | 집중 | MADLeague | www.madleague.net | 외부 nginx · 회원 0 · Vercel 새로 제작 (이전 없음) |
 | 집중 | MADLeap | www.madleap.co.kr | 외부 nginx · 학생 회원 ~200 · Vercel 새로 제작 (이전 없음) |
 | 집중 | Badak | www.badak.biz | 외부 nginx · **회원 ~9,000** · Vercel 새로 제작 (이전 없음) |
-| 집중 | RooK | www.rook.co.kr | 외부 아임웹 · 2026-10-07 승격 · Vercel 새로 제작 (운영사 콘텐츠 Works·Artist만 이전, 회원·자유게시판 이전 없음) |
+| 집중 | RooK | www.rook.co.kr | 2026-10-07 승격 · **Vercel 운영 (2026-10-07 DNS 전환)** — 아임웹 종료(회원 = 운영자뿐, 이전 없음). 운영사 콘텐츠 Works·Artist만 이전 |
 | 실험/보관 | 그 외 전 브랜드 (SmarComm 포함) | {brand}.tenone.biz 또는 없음 | 개별 결정 전까지 신규 투자 없음 |
 
 ### 외부 서버 브랜드 — 새로 제작, 이전 없음 (2026-10-05 확정)

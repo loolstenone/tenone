@@ -1,7 +1,7 @@
 # RooK 브랜드 가이드
 
 > **RooK** — AI Creator. "밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다"
-> Tier **집중** (2026-10-07 승격) · 공식 주소 `www.rook.co.kr` (외부 아임웹 운영 중 → Vercel 버전은 비공개 스테이징 `rook.tenone.biz`, is_open=false, noindex) · §0.1 "새로 제작, 이전 없음"
+> Tier **집중** (2026-10-07 승격) · 공식 주소 `www.rook.co.kr` — **Vercel 운영 (2026-10-07 DNS 전환, hosting=vercel)**. 아임웹 종료 · 회원 이전 없음 (§0.1 "새로 제작, 이전 없음")
 
 ---
 
@@ -35,7 +35,7 @@
 - 정렬: `sort` 없는 새 글(최신순) → 이전 글은 원본 순서 (`getRookPosts`)
 - 이미지 = Storage `board-assets/rook/{works|artist}/{idx}/` · 사이트 이미지 `board-assets/rook/site/`
 - 이전 스크립트 `Scripts/rook-import.mjs` (멱등, slug 기준 갱신)
-- ⚠️ AD 카테고리(비타500·벤츠·서울우유·LG Gram)는 실제 브랜드명을 쓴 AI 시안 — 공식 오픈 전 상표·광고 표기 검토
+- AD 카테고리(비타500·벤츠·서울우유·LG Gram)는 실제 브랜드명을 쓴 AI 시안 → 목록 카드·상세에 `ROOK_AD_DISCLAIMER`("RooK의 AI 창작 시안이며, 해당 브랜드와 무관합니다.") 자동 표기 (`isRookAdSample`, RooKUI). AD 글을 새로 올려도 자동 적용
 
 ---
 
@@ -95,7 +95,7 @@
 - 링크는 `/rook/...` prefix로 (rook.tenone.biz·rook.co.kr에서도 동작, localhost 경로 분기 대응)
 - 본문 HTML은 서버에서 정화 불가(`lib/sanitize-html.ts`) → `RooKPostBody`가 마운트 후 표시. 상세 페이지 서버 HTML에 본문 없음 (SEO는 summary·og로)
 - 홈 배경 영상: `_xly_E2iphk`(비열한 저잣거리) · AI 모델 섹션 `NXdOyBWZkvw` (원본과 동일)
-- DNS 전환 시: `ums_sites.hosting='vercel'`, CANONICAL_HOSTS `hosting:'vercel'`, next.config noindex 목록에서 제거, 옛 URL `/works/?idx={n}&bmode=view` → `/rook/works/rk-{n}` (artist 동일) 308 매핑 필요, 기존 아임웹 회원 30일 전 공지·재가입 안내
+- DNS 전환 (2026-10-07): CANONICAL_HOSTS `hosting:'vercel'` · noindex 해제 · 옛 아임웹 URL `/{works|artist}/?idx={n}&bmode=view` → `/rook/{board}/rk-{n}` 308 (freeboard는 클라이언트 replace → `[id]` 308) · 아임웹 회원 = 운영자뿐이라 공지 생략(§0.1 ①④) · 개인정보처리방침 RooK 항목 추가(2026-10-14 시행, 10-07 공지). 남은 것: ums_sites hosting·is_open 전환, 아임웹 해지·데이터 파기(⑥)
 
 ---
 
@@ -103,7 +103,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | 새 사이트 제작 — 비공개 스테이징 (2026-10-07 세션 161 — ums_sites.is_open=false로 다시 닫음) |
+| **Phase** | **공개 운영 전환** — www.rook.co.kr DNS → Vercel (2026-10-07 세션 161) |
 | **세션 161 완료** | 배포 확인(Works 20·Artist 30·자유게시판 공지 3) · "매니악 취향" = 운영자 본인 확인(유지) · 인트라 RooK 실데이터 연결(옛 posts → ums_posts, affiliations → member_brand_joins) · 직원 글쓰기·수정 버튼 · **새 글 상세 404 수정**(slug 없는 글은 id로 조회 — getRookPost) · 미사용 게시판 challenge·feedback 삭제 · RooKHeader aboutPath 타입 오류 |
 | **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) · 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
-| **이월 작업** | ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |
+| **이월 작업** | ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ ~~AD 시안 표기~~ (완료) ④ DNS 전환 후: 아임웹 해지·데이터 파기, 2026-10-14 처리방침 시행 시 변경 예정 공지 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신 ⑤ 본문 서버 렌더(SEO) |

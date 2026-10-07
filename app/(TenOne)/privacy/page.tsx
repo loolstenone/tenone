@@ -23,6 +23,7 @@ const BRAND_ITEMS = [
     { brand: "MADLeague · MADLeap", items: "소속 학교·전공, 동아리·기수, 활동·대회 이력, 포트폴리오" },
     { brand: "Badak", items: "직무·산업·경력 수준, 모임·커뮤니티 활동 기록" },
     { brand: "뉴스레터", items: "이메일 (회원 가입 없이 구독 가능)" },
+    { brand: "RooK (2026년 10월 14일 시행)", items: "RooKie 지원: 이름·이메일·연락처, 이력서·포트폴리오 파일, 참고 URL · 상담 / 문의: 이름·이메일·연락처·회사, 문의 내용" },
     { brand: "문의·제안", items: "이름, 이메일, 연락처, 소속, 문의 내용" },
 ];
 
@@ -44,7 +45,11 @@ export default function PrivacyPage() {
             <div className="max-w-3xl mx-auto px-6">
                 <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Privacy Policy</p>
                 <h1 className="text-3xl font-light tracking-tight mb-4">개인정보처리방침</h1>
-                <p className="text-xs mb-10" style={{ color: "var(--tn-text-sub)" }}>시행일: {EFFECTIVE_DATE}</p>
+                <p className="text-xs mb-3" style={{ color: "var(--tn-text-sub)" }}>시행일: {EFFECTIVE_DATE}</p>
+                {/* 변경 예정 공지 — 시행 7일 전부터 (12조). 시행일이 지나면 공지를 지우고 LEGAL_DOCUMENTS.privacy 버전·시행일 갱신 */}
+                <p className="text-xs mb-10 px-3 py-2 border" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
+                    변경 예정 공지 (2026년 10월 7일): 2026년 10월 14일부터 RooK 서비스의 수집 항목(RooKie 지원 서류 등)이 추가됩니다. 자세한 내용은 2조·3조·12조를 확인해 주세요.
+                </p>
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
                     <p>
@@ -101,7 +106,7 @@ export default function PrivacyPage() {
                             <li>게시글·댓글: 탈퇴 시 작성자를 &quot;탈퇴한 회원&quot;으로 익명 처리하여 유지하며, 탈퇴 전 본인이 삭제하거나 삭제를 요청할 수 있습니다</li>
                             <li>활동·대회·매칭 이력: 개인을 알아볼 수 없도록 익명 처리한 통계 형태로만 보관합니다</li>
                             <li>수료증: 진위 확인을 위해 이름·발급일·인증번호를 보관합니다 (발급 시 별도 고지·동의)</li>
-                            <li>뉴스레터: 구독 해지 시 파기 · 문의: 처리 완료 후 1년 보관 후 파기</li>
+                            <li>뉴스레터: 구독 해지 시 파기 · 문의(지원 서류·첨부 포함): 처리 완료 후 1년 보관 후 파기</li>
                         </ul>
                     </Section>
 
@@ -178,6 +183,7 @@ export default function PrivacyPage() {
                     <Section title="12. 개인정보처리방침의 변경">
                         <p>이 방침을 변경하는 경우 시행 7일 전(이용자 권리에 중요한 변경은 30일 전)부터 서비스 화면에 공지합니다.</p>
                         <ul className="list-disc pl-5 mt-2 space-y-0.5">
+                            <li>2026년 10월 14일 (10월 7일 공지): RooK 서비스 수집 항목 추가 (RooKie 지원 이력서·포트폴리오 파일·참고 URL, 상담 / 문의)</li>
                             <li>2026년 10월 5일: 유니버스 전 서비스 공통 적용, 처리 위탁·국외 이전, 서비스별 수집 항목, 보유 기간 세분화, 만 14세 미만, 안전성 확보 조치, 쿠키 항목 추가</li>
                             <li>2026년 3월 26일: 최초 시행</li>
                         </ul>

@@ -113,6 +113,14 @@ export function RooKOverlayCard({ href, image, title }: { href: string; image: s
 }
 
 /** 목록 카드 — 원본 비율 이미지 + 아래 카테고리(색)·제목 */
+/**
+ * Works AD = 실제 브랜드명을 쓴 AI 광고 시안 — 협찬·공식 광고 오인 방지 표기 (2026-10-07 공개 전환 시 결정, RooK 가이드)
+ */
+export const ROOK_AD_DISCLAIMER = "RooK의 AI 창작 시안이며, 해당 브랜드와 무관합니다.";
+export function isRookAdSample(board: RookBoard, category: string | null): boolean {
+    return board === "works" && category === "AD";
+}
+
 export function RooKListCard({ board, post }: { board: RookBoard; post: RookPost }) {
     return (
         <Link href={`/rook/${board}/${post.slug}`} className="group block">
@@ -126,6 +134,7 @@ export function RooKListCard({ board, post }: { board: RookBoard; post: RookPost
             <div className="pt-3 pb-2 text-[14px] leading-snug">
                 {post.category && <span className="mr-2" style={{ color: rookCategoryColor(board, post.category) }}>{post.category}</span>}
                 <span className="text-black break-keep">{post.title}</span>
+                {isRookAdSample(board, post.category) && <span className="mt-1 block text-[11px] text-black/45">{ROOK_AD_DISCLAIMER}</span>}
             </div>
         </Link>
     );
