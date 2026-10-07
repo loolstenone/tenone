@@ -154,18 +154,18 @@ export async function middleware(request: NextRequest) {
 
     // 1b. 인트라 서버 게이트 — 직원이 아니면 페이지·RSC 내용을 아예 내려주지 않는다.
     //     (클라이언트 layout 확인만으로는 번들·RSC가 노출되고 sessionStorage 조작으로 화면이 열림)
-    //     비직원은 /intra/login(빈 페이지)으로 rewrite → layout이 로그인/권한없음 UI 표시.
+    //     비직원은 /intra-gate(로그인 화면만, app/intra 밖)로 rewrite → 인트라 메뉴·목차의 HTML·JS가 내려가지 않는다.
     {
         const onIntraHost = reqDomain === 'intra.tenone.biz';
         const isIntraPath = pathname === '/intra' || pathname.startsWith('/intra/');
         const isIntraHostPage = onIntraHost && !isIntraPath
             && !skipPaths.some(p => pathname.startsWith(p)) && !pathname.includes('.');
         const effectivePath = isIntraPath ? pathname : isIntraHostPage ? `/intra${pathname === '/' ? '' : pathname}` : null;
-        if (effectivePath && effectivePath !== '/intra/login') {
+        if (effectivePath) {
             const staff = await requireStaff(request);
             if (staff instanceof NextResponse) {
                 const url = request.nextUrl.clone();
-                url.pathname = '/intra/login';
+                url.pathname = '/intra-gate';
                 url.search = '';
                 const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
                 response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
