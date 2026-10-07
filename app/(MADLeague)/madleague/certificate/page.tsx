@@ -3,18 +3,19 @@ import { FileCheck, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-r
 
 export const metadata = { title: '활동인증서', description: 'MADLeague 활동 인증서 발급 안내' };
 
+// 발급 기준·절차 = 코어 program_certificates 실제 동작 (2026-10-08) — 로그인 후 본인이 직접 발급
 const criteria = [
-    { label: '기수 활동 완료', desc: '해당 기수 전체 활동 기간을 완료한 멤버' },
-    { label: '경쟁 PT 참가', desc: '1회 이상 경쟁 PT에 팀원으로 참가한 경험' },
-    { label: '출석률 80% 이상', desc: '정기 모임 및 프로그램 출석률 80% 이상' },
-    { label: '팀 활동 기여', desc: '팀 프로젝트에 실질적으로 기여한 것을 확인' },
+    { label: '활동 인증서', desc: '동아리 현역으로 활동한 연도가 끝나면 그 연도의 활동 인증서' },
+    { label: '참가 확인서', desc: '경쟁 PT·프로젝트에 팀원으로 참가하고 결과가 발표된 회차' },
+    { label: '수상 확인서', desc: '참가한 회차에서 순위·상을 받은 경우 (참가 확인서 대신)' },
+    { label: '진위 확인', desc: '인증서마다 고유 코드 — 누구나 진위 확인 페이지에서 확인' },
 ];
 
 const steps = [
-    { step: 1, title: '신청', desc: '활동인증서 발급 신청서를 온라인으로 제출합니다.' },
-    { step: 2, title: '검토', desc: '활동 기록을 바탕으로 발급 자격을 검토합니다.' },
-    { step: 3, title: '발급', desc: '검토 완료 후 디지털 인증서를 발급합니다.' },
-    { step: 4, title: '수령', desc: '이메일 또는 마이페이지에서 인증서를 다운로드합니다.' },
+    { step: 1, title: '로그인', desc: '활동할 때 쓴 Ten:One ID로 로그인합니다. 활동이 끝난 뒤에도 언제든 가능합니다.' },
+    { step: 2, title: '확인', desc: '매드리거 › 인증서에서 발급할 수 있는 인증서를 확인합니다.' },
+    { step: 3, title: '발급', desc: '처음 한 번만 생년월일·출신 대학·전공을 입력하고 바로 발급합니다.' },
+    { step: 4, title: '저장', desc: '인증서 화면에서 인쇄 또는 PDF로 저장합니다. 다시 받아도 같은 코드입니다.' },
 ];
 
 export default function CertificatePage() {
@@ -58,8 +59,8 @@ export default function CertificatePage() {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-black tracking-tight">활동인증서란?</h2>
                         <p className="text-neutral-400 leading-relaxed">
-                            MADLeague 활동인증서는 기수별 활동을 공식적으로 인증하는 문서입니다.
-                            경쟁 PT 참가, 프로그램 수료, 팀 활동 등 MADLeague에서의 경험을
+                            MADLeague 인증서는 동아리 활동·경쟁 PT 참가·수상을 공식적으로 확인하는 문서입니다.
+                            MADLeague에서의 경험을
                             취업이나 대외활동 증빙에 활용할 수 있습니다.
                         </p>
                         <div className="flex items-start gap-3 p-4 bg-neutral-950 border border-neutral-800">
@@ -117,7 +118,7 @@ export default function CertificatePage() {
                     </div>
                     <div className="mt-8 flex items-center gap-2 text-sm text-neutral-600">
                         <Clock className="h-4 w-4" />
-                        <span>신청 후 약 5~7일 이내 발급 완료</span>
+                        <span>검토 없이 바로 발급 — 결과 발표·활동 연도 종료 후 자동으로 목록에 나타납니다</span>
                     </div>
                 </div>
             </section>
@@ -128,11 +129,16 @@ export default function CertificatePage() {
                     <div>
                         <div className="text-sm font-bold tracking-widest text-white/70 mb-3">APPLY</div>
                         <div className="text-3xl sm:text-4xl font-black text-white">활동 기록을 공식 인증서로</div>
-                        <p className="mt-3 text-white/80">매드리거로 지원하고 활동 인증서를 발급받으세요.</p>
+                        <p className="mt-3 text-white/80">매드리거라면 지금 바로 발급받을 수 있습니다.</p>
                     </div>
+                    <div className="flex flex-wrap gap-3">
+                    <Link href="/madleague/member/certificate" className="inline-flex items-center gap-2 border border-white text-white font-bold px-8 py-5 text-lg transition hover:bg-white hover:text-[#EC1D25]">
+                        내 인증서
+                    </Link>
                     <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
                         지원하기 <ArrowRight className="h-5 w-5" />
                     </Link>
+                    </div>
                 </div>
             </section>
         </div>

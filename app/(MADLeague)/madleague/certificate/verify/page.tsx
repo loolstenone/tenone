@@ -16,7 +16,7 @@ export default function VerifyIndexPage() {
         <h1 className="text-4xl sm:text-5xl font-black tracking-tight">인증서 검증</h1>
         <p className="mt-6 text-neutral-400 leading-relaxed">
           MADLeague가 발급한 인증서의 진위를 확인합니다.
-          인증서 하단의 10자리 고유 코드를 입력해주세요.
+          인증서 하단의 고유 코드를 입력해 주세요.
         </p>
 
         <form
@@ -29,7 +29,7 @@ export default function VerifyIndexPage() {
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="예: AB3CD6EF9Z"
+            placeholder="예: MAD26-AB3CD6"
             maxLength={16}
             className="flex-1 bg-black border border-neutral-800 px-4 py-4 text-white text-lg font-mono tracking-widest focus:border-[#FFC000] focus:outline-none"
           />

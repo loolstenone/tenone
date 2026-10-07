@@ -1,122 +1,93 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { isStaffMember } from '@/lib/api-guard';
+import { sessionMemberId } from '@/lib/programs/access';
+import { getCertificateByCode } from '@/lib/programs/certificates';
+import { CERT_TYPE_EN } from '@/lib/programs/certificate-labels';
+import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
 export const revalidate = 0;
+export const metadata = { title: '인증서', robots: { index: false, follow: false } };
 
-interface PageProps {
-  params: Promise<{ code: string }>;
-}
+interface PageProps { params: Promise<{ code: string }> }
 
-export async function generateMetadata({ params }: PageProps) {
-  const { code } = await params;
-  return { title: `인증서 · ${code}` };
-}
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' });
+const fmtBirth = (d: string | null) => d ? new Date(`${d}T00:00:00+09:00`).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }) : null;
 
+/** 인증서 인쇄 — 본인·직원만 (생년월일 등 표기). 다른 사람은 진위 확인 페이지로 */
 export default async function PrintCertPage({ params }: PageProps) {
   const { code } = await params;
-  const sb = await createClient();
-  const { data } = await sb
-    .from('mad_certificates')
-    .select('*')
-    .eq('verification_code', code.toUpperCase())
-    .maybeSingle();
-  if (!data) notFound();
-  const cert = data as { id: string; type: string; title: string; details: Record<string, unknown>; verification_code: string; issued_at: string };
+  const memberId = await sessionMemberId();
+  if (!memberId) return <MadLoginGate message="인증서는 발급받은 본인만 열 수 있습니다. 로그인해 주세요." />;
+  const cert = await getCertificateByCode(code);
+  if (!cert) notFound();
+  if (cert.member_id !== memberId && !(await isStaffMember(createAdminClient(), memberId))) notFound();
 
-  const memberName = String(cert.details.member_name ?? '—');
-  const clubName = cert.details.club_name ? String(cert.details.club_name) : null;
-  const year = cert.details.year ? String(cert.details.year) : null;
-  const teamName = cert.details.team_name ? String(cert.details.team_name) : null;
-  const client = cert.details.client ? String(cert.details.client) : null;
-  const award = cert.details.award_name ? String(cert.details.award_name) : null;
-  const university = cert.details.university ? String(cert.details.university) : null;
-
-  const typeLabel: Record<string, string> = {
-    activity: 'CERTIFICATE OF ACTIVITY',
-    competition: 'CERTIFICATE OF PARTICIPATION',
-    award: 'CERTIFICATE OF AWARD',
-    crown: 'MAD CROWN CERTIFICATE',
-  };
-
-  const issuedDate = new Date(cert.issued_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const s = cert.snapshot;
+  const rows: [string, string | null][] = [
+    ['성명', s.name],
+    ['생년월일', fmtBirth(s.birthdate)],
+    ['출신 대학', [s.university, s.major].filter(Boolean).join(' · ') || null],
+    [s.group_label ?? '소속', [s.group_name, s.cohort].filter(Boolean).join(' ') || null],
+    ['프로그램', s.round_title],
+    ['출전 팀', s.team_name],
+    ['클라이언트', s.client_name],
+    ['결과', cert.result],
+  ];
+  const sentence = cert.type === 'activity'
+    ? `위 사람은 ${s.year ?? ''}년 ${s.brand_name}${s.group_name ? ` ${s.group_name}` : ''}에서 활동하였음을 확인합니다.`
+    : cert.type === 'award'
+      ? `위 사람은 ${s.brand_name} ${s.round_title ?? ''}에서 위와 같이 수상하였음을 확인합니다.`
+      : cert.type === 'completion'
+        ? `위 사람은 ${s.brand_name} ${s.round_title ?? ''} 과정을 수료하였음을 확인합니다.`
+        : `위 사람은 ${s.brand_name} ${s.round_title ?? ''}에 참가하였음을 확인합니다.`;
 
   return (
-    <div className="bg-white text-neutral-900 min-h-screen print:min-h-0">
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @page { size: A4 landscape; margin: 12mm; }
-          @media print {
-            body { background: white !important; }
-            .no-print { display: none !important; }
-          }
-        `
-      }} />
-
-      {/* Print actions */}
-      <div className="no-print bg-neutral-900 text-white px-6 py-3 flex items-center justify-center text-xs font-bold tracking-widest">
-        인쇄 미리보기 — Ctrl+P (또는 Cmd+P)로 PDF 저장
+    <div className="min-h-screen bg-white text-neutral-900 print:min-h-0">
+      <style dangerouslySetInnerHTML={{ __html: '@page { size: A4 portrait; margin: 14mm; } @media print { body { background: white !important; } .no-print { display: none !important; } header, footer, nav { display: none !important; } }' }} />
+      <div className="no-print flex items-center justify-center bg-neutral-900 px-6 py-3 text-xs font-bold tracking-widest text-white">
+        인쇄 미리보기 — Ctrl+P (Mac은 Cmd+P) → &quot;PDF로 저장&quot;
       </div>
 
-      <div className="mx-auto max-w-5xl p-12 print:p-0">
-        {/* Certificate frame */}
-        <div className="border-8 border-[#EC1D25] p-16 relative">
-          {/* Gold corners */}
-          <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-[#FFC000]" />
-          <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-[#FFC000]" />
-          <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-[#FFC000]" />
-          <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-[#FFC000]" />
+      <div className="mx-auto max-w-3xl p-8 print:p-0">
+        <div className="relative border-8 border-[#EC1D25] px-12 py-14">
+          <div className="absolute left-0 top-0 h-14 w-14 border-l-4 border-t-4 border-[#FFC000]" />
+          <div className="absolute right-0 top-0 h-14 w-14 border-r-4 border-t-4 border-[#FFC000]" />
+          <div className="absolute bottom-0 left-0 h-14 w-14 border-b-4 border-l-4 border-[#FFC000]" />
+          <div className="absolute bottom-0 right-0 h-14 w-14 border-b-4 border-r-4 border-[#FFC000]" />
 
-          {/* Header */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="mb-2 flex items-center justify-center gap-3">
               <span className="inline-block h-4 w-4 bg-[#EC1D25]" />
-              <span className="text-2xl font-extrabold tracking-tight">MAD League</span>
+              <span className="text-2xl font-extrabold tracking-tight">{s.brand_name}</span>
             </div>
-            <div className="text-xs font-bold tracking-[0.4em] text-neutral-500">
-              {typeLabel[cert.type] ?? typeLabel.activity}
-            </div>
+            <div className="text-[11px] font-bold tracking-[0.4em] text-neutral-500">{CERT_TYPE_EN[cert.type] ?? ''}</div>
+            <h1 className="mt-10 text-5xl font-black tracking-[0.3em]">{s.label}</h1>
+            <div className="mt-3 text-sm text-neutral-500">제 {cert.code} 호</div>
           </div>
 
-          {/* Title */}
-          <div className="mt-16 text-center">
-            <h1 className="text-5xl font-black tracking-tight">{cert.title}</h1>
+          <table className="mx-auto mt-12 w-full max-w-md text-[15px]">
+            <tbody>
+              {rows.filter(([, v]) => v).map(([k, v]) => (
+                <tr key={k} className="border-b border-neutral-200">
+                  <th className="w-28 py-2.5 text-left font-medium text-neutral-500">{k}</th>
+                  <td className="py-2.5 font-bold">{v}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="mx-auto mt-12 max-w-md text-center text-lg leading-relaxed">{sentence}</p>
+
+          <div className="mt-14 text-center">
+            <div className="text-base">{fmtDate(cert.issued_at)}</div>
+            <div className="mt-6 text-2xl font-black">{s.brand_name}</div>
+            <div className="mt-1 text-xs tracking-widest text-neutral-500">운영 · Ten:One™ Universe</div>
           </div>
 
-          {/* Content */}
-          <div className="mt-16 text-center space-y-2 text-lg">
-            <div className="text-sm text-neutral-500">본 증서는 다음의 사실을 인증합니다.</div>
-            <div className="mt-6">
-              <span className="text-2xl font-black">{memberName}</span>
-              {university && <span className="text-neutral-500 ml-2">({university})</span>}
-            </div>
-            {clubName && (
-              <div>
-                MADLeague <strong className="font-bold">{clubName}</strong>
-                {year && <span className="ml-2 text-neutral-600">{year}년</span>}
-              </div>
-            )}
-            {teamName && (
-              <div>
-                팀 <strong className="font-bold">{teamName}</strong>
-                {client && <span className="text-neutral-600"> · 과제기업 {client}</span>}
-              </div>
-            )}
-            {award && (
-              <div className="mt-4 text-3xl font-black text-[#EC1D25]">{award}</div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="mt-20 pt-8 border-t-2 border-neutral-300 flex items-end justify-between">
-            <div className="text-sm text-neutral-500">
-              <div>발급일: <strong className="text-neutral-900">{issuedDate}</strong></div>
-              <div className="mt-1">검증 코드: <strong className="font-mono text-neutral-900">{cert.verification_code}</strong></div>
-              <div className="mt-1">검증 URL: <strong className="text-neutral-900">madleague.net/certificate/verify/{cert.verification_code}</strong></div>
-            </div>
-            <div className="text-right">
-              <div className="text-xl font-black">MAD League</div>
-              <div className="text-xs text-neutral-500 tracking-widest mt-1">Match · Act · Develop</div>
-            </div>
+          <div className="mt-12 border-t border-neutral-300 pt-4 text-center text-xs text-neutral-500">
+            진위 확인: madleague.net/certificate/verify/{cert.code}
+            {cert.revoked_at && <div className="mt-2 font-bold text-red-600">취소된 인증서입니다{cert.revoked_reason ? ` — ${cert.revoked_reason}` : ''}</div>}
           </div>
         </div>
       </div>

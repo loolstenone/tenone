@@ -158,6 +158,7 @@ export const modules: NavModule[] = [
                     },
                     // 코어 프로그램 모듈 — 전 브랜드 회차 (경쟁 PT·실전 프로젝트·교육 과정) · docs/Program_Module.md
                     { name: "프로그램", href: "/intra/ums/programs", icon: Trophy },
+                    { name: "인증서", href: "/intra/ums/programs/certificates", icon: Award },
                     {
                         name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
                         children: [

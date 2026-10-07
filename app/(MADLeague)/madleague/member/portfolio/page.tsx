@@ -8,11 +8,12 @@ import { MadLoginGate } from '@/features/madleague/MadLoginButton';
 
 export const metadata = { title: '내 포트폴리오', description: '매드리거 포트폴리오 관리' };
 
+// 인증서 = 코어 program_certificates (구분 표기는 발급 시점 snapshot.label)
 const CERT_LABEL: Record<string, string> = {
-  activity: '활동인증서',
-  competition: '경쟁PT 참가증',
-  award: '수상확인서',
-  crown: 'MAD Crown',
+  activity: '활동 인증서',
+  participation: '참가 확인서',
+  award: '수상 확인서',
+  completion: '수료증',
 };
 
 export default async function PortfolioPage() {
@@ -86,13 +87,13 @@ export default async function PortfolioPage() {
     }));
   }
 
-  // 인증서
-  const { data: certs } = await sb
-    .from('mad_certificates')
-    .select('id, type, issued_at, cert_code')
-    .eq('member_id', m.id)
-    .eq('status', 'active')
-    .order('issued_at', { ascending: false });
+  // 인증서 — 코어 program_certificates (서버 전용 테이블, 본인 것만)
+  const { data: certRows } = core
+    ? await createAdminClient().from('program_certificates').select('id, type, issued_at, code, snapshot')
+        .eq('member_id', core.id).eq('brand_id', 'madleague').is('revoked_at', null).order('issued_at', { ascending: false })
+    : { data: [] };
+  const certs = (certRows ?? []).map((c: { id: string; type: string; issued_at: string; code: string; snapshot: { label?: string; title?: string } | null }) =>
+    ({ id: c.id, type: c.type, issued_at: c.issued_at, cert_code: c.code, label: c.snapshot?.label ? `${c.snapshot.label} · ${c.snapshot.title ?? ''}` : null }));
 
   const publicUrl = `/madleague/portfolio/${m.id}`;
 
@@ -277,14 +278,14 @@ export default async function PortfolioPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {(certs ?? []).map((cert: { id: string; type: string; issued_at: string; cert_code: string }) => (
+              {(certs ?? []).map((cert: { id: string; type: string; issued_at: string; cert_code: string; label: string | null }) => (
                 <Link
                   key={cert.id}
                   href={`/madleague/certificate/verify/${cert.cert_code}`}
                   className="bg-neutral-950 border border-neutral-900 hover:border-neutral-700 p-5 flex items-center justify-between transition"
                 >
                   <div>
-                    <div className="font-bold text-sm">{CERT_LABEL[cert.type] ?? cert.type}</div>
+                    <div className="font-bold text-sm">{cert.label ?? CERT_LABEL[cert.type] ?? cert.type}</div>
                     <div className="text-xs text-neutral-600 mt-0.5">
                       {new Date(cert.issued_at).toLocaleDateString('ko-KR')} · #{cert.cert_code}
                     </div>

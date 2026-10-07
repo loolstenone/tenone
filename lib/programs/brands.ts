@@ -59,3 +59,46 @@ export async function groupCandidates(brand: string, groupIds: string[], year: n
     }
     return [...seen.values()];
 }
+
+/* ─── 3단계: 인증서 (2026-10-08) ─────────────────────────────────────────
+ * 브랜드 활동 인증 (회차와 무관) — MADLeague = 동아리 현역 활동 연도 (끝난 연도 또는 종료된 현역 기록)
+ * 인증서 표기용 브랜드 값 — MADLeague = 소속 동아리·기수 (+ 지원서의 대학·전공은 첫 발급 입력 기본값)
+ */
+export interface ActivityCert { key: string; year: number; group_id: string | null }
+
+export async function brandActivityCerts(brand: string, memberId: string): Promise<ActivityCert[]> {
+    if (brand !== "madleague") return [];
+    const { data } = await createAdminClient().from("member_capability_roles").select("context, valid_until")
+        .eq("member_id", memberId).eq("brand_id", "madleague").eq("capability_key", "club").in("role", ["현역", "임원"]);
+    const thisYear = new Date().getFullYear();
+    const byYear = new Map<number, ActivityCert>();
+    for (const r of (data ?? []) as { context: { club_id?: string; year?: number | string; term?: string } | null; valid_until: string | null }[]) {
+        const y = Number(r.context?.year ?? (r.context?.term ? String(r.context.term).slice(0, 4) : NaN));
+        if (!Number.isFinite(y) || !(y < thisYear || r.valid_until)) continue;
+        if (!byYear.has(y)) byYear.set(y, { key: `activity:${y}`, year: y, group_id: r.context?.club_id ?? null });
+    }
+    return [...byYear.values()].sort((a, b) => b.year - a.year);
+}
+
+export interface BrandCertExtras { group_label: string | null; group_name: string | null; cohort: string | null; university: string | null; major: string | null }
+
+export async function brandCertExtras(brand: string, memberId: string, groupId: string | null, year: number | null): Promise<BrandCertExtras> {
+    const empty: BrandCertExtras = { group_label: GROUP_LABEL[brand] ?? null, group_name: null, cohort: null, university: null, major: null };
+    if (brand !== "madleague") return empty;
+    const admin = createAdminClient();
+    const [{ data: club }, { data: apps }] = await Promise.all([
+        groupId ? admin.from("mad_clubs").select("name").eq("id", groupId).maybeSingle() : Promise.resolve({ data: null }),
+        admin.from("mad_applications").select("club_id, activity_year, cohort, university, major, created_at")
+            .eq("member_id", memberId).order("created_at", { ascending: false }).limit(20),
+    ]);
+    type App = { club_id: string | null; activity_year: number | null; cohort: number | null; university: string | null; major: string | null };
+    const list = (apps ?? []) as App[];
+    const app = list.find(a => (!groupId || a.club_id === groupId) && (!year || a.activity_year === year)) ?? list[0] ?? null;
+    return {
+        ...empty,
+        group_name: (club as { name: string } | null)?.name ?? null,
+        cohort: app?.cohort != null ? `${app.cohort}기` : null,
+        university: app?.university ?? null,
+        major: app?.major ?? null,
+    };
+}

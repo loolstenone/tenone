@@ -36,10 +36,11 @@
 | `brand_id` | **`ums_sites.slug`만** (FK). 호스트명·표시명은 `resolve_site_slug()`로 변환 |
 | `terms_version` · `terms_agreed_at` | 브랜드 첫 진입 시 동의한 약관 버전·시각 (데이터 계약 4조) |
 | `status` · `withdrawn_at` | active / withdrawn. 브랜드만 탈퇴하면 row는 남기고 status 변경 (재가입 이력) |
-| `origin` | signup · sso_auto · admin |
+| `origin` | signup · sso_auto · admin · **program** (프로그램 참가 동의, 2026-10-08) |
 
 - 가입 시 자동 기록: `fn_auto_member_brand_join` 트리거가 `members.origin_site` → slug 변환 후 INSERT
 - ⏳ **미구현**: 브랜드 첫 진입 시 약관 동의 화면 + `terms_version` 기록 (브랜드별 약관 버전 체계가 먼저 필요)
+- ✅ **프로그램 참가 동의** (2026-10-08): 회차 방 첫 입장·초대 링크 합류 시 주인 브랜드에 `terms_version='program-2026-10-08'` 기록 (`lib/programs/consent.ts`)
 
 ---
 
@@ -79,8 +80,7 @@
 |--------|-----------|------|
 | mad_members | 삭제 | ⚠️ `email`·`user_id` 키 → `member_id`로 전환 필요 (계약 1조) |
 | mad_applications · mad_hero_applications | 삭제 | 지원서. 비회원 지원 가능하면 email 유지 허용 |
-| mad_team_members | 익명화 후 영구 보관 | 대회·기수 활동 이력 (2026-10-05 결정) |
-| mad_certificates | 최소 항목 보관 (이름·발급일·인증코드) | 진위 확인용. 개인정보처리방침에 '탈퇴 후 보관 항목'으로 명시 + 발급 시 동의 |
+| (옛) mad_team_members · mad_certificates | → 코어 프로그램 모듈로 이전 (아래 3.2.2) | 옛 테이블은 배포 후 삭제 |
 | mad_articles · mad_posts · mad_comments · mad_article_comments | 익명화 ("탈퇴한 회원") | 본인 요청 시 삭제 (2026-10-05 결정) |
 | mad_article_likes | 삭제 | |
 | mad_clubs.president_member_id | 연결 해제 | 동아리는 유지 |
@@ -93,6 +93,17 @@
 | form_responses (member_id 있음) | 삭제 + 첨부파일(`contact-attachments/forms/...`) 삭제 | 해당 brand_id 응답만 |
 | form_responses (비회원, respondent_email) | 폼별 보관 기간(`consent.retention`) 경과 후 삭제 | 기간 만료 정리 = 수동 (자동화 이월) |
 | forms | 유지 | 신청서 정의 (개인정보 없음) |
+
+### 3.2.2 코어 프로그램 모듈 (`program_*`, 2026-10-08 — MADLeague·RooK·HeRo 공용, brand_id별)
+
+| 테이블 | 브랜드 탈퇴 (해당 brand_id 행) | 비고 |
+|--------|-----------|------|
+| program_participants | 익명화 후 영구 보관 (member 연결 제거) | 팀 구성·활동 이력 통계 (2026-10-05 결정 승계) |
+| program_submissions · 제출 파일(`program-submissions` 버킷) | 팀 제출물 유지 (submitted_by 연결 제거) · 개인 참가 제출물 삭제 | 팀 공동 저작물 |
+| program_questions · program_answers · program_submission_comments | 익명화 ("탈퇴한 회원") | |
+| program_results | 유지 | 팀 이름·순위 스냅샷 (개인 없음) |
+| **program_certificates** | **익명화**: member_id NULL · snapshot에서 birthdate·university·major 삭제 · name은 마스킹 값으로 교체 | 코드·구분·결과·발급일만 진위 확인용으로 보관. 발급 화면 동의 문구에 고지 (2026-10-08) |
+| program_rounds · program_teams · program_notices | 유지 | 운영 콘텐츠 |
 
 ### 3.3 MADLeap · Badak — 이전 시 확정
 - 외부 서버의 실제 데이터 구조를 보고 이전 설계와 함께 정한다 (§0.1 외부 서버 이전 원칙).

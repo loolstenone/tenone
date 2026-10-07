@@ -12,7 +12,7 @@ interface Team {
   mad_competitions: Competition | null;
   result: { rank: number | null; award_name: string | null; is_crown: boolean } | null;
 }
-interface Certificate { id: string; type: string; issued_at: string; cert_code: string }
+interface Certificate { id: string; type: string; issued_at: string; cert_code: string; label: string | null }
 interface Member {
   id: string;
   name: string;
@@ -27,11 +27,12 @@ interface Member {
   mad_cohorts: { year: number; status: string } | null;
 }
 
+// 인증서 = 코어 program_certificates (구분 표기는 발급 시점 snapshot.label)
 const CERT_LABEL: Record<string, string> = {
-  activity: '활동인증서',
-  competition: '경쟁PT 참가증',
-  award: '수상확인서',
-  crown: 'MAD Crown',
+  activity: '활동 인증서',
+  participation: '참가 확인서',
+  award: '수상 확인서',
+  completion: '수료증',
 };
 
 export default function PublicPortfolioPage({ params }: { params: Promise<{ memberId: string }> }) {
@@ -242,7 +243,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
                   className="bg-neutral-950 border border-neutral-900 hover:border-neutral-700 p-5 flex items-center justify-between transition"
                 >
                   <div>
-                    <div className="font-bold text-sm">{CERT_LABEL[cert.type] ?? cert.type}</div>
+                    <div className="font-bold text-sm">{cert.label ?? CERT_LABEL[cert.type] ?? cert.type}</div>
                     <div className="text-xs text-neutral-600 mt-0.5">
                       {new Date(cert.issued_at).toLocaleDateString('ko-KR')} · #{cert.cert_code}
                     </div>

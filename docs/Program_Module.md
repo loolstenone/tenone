@@ -1,6 +1,6 @@
 # 프로그램 모듈 (코어) — 설계안 v0.1
 
-> 2026-10-08 · 상태: **1·2단계 적용** (3단계 인증서 · 4단계 RooK·HeRo 예정)
+> 2026-10-08 · 상태: **1·2·3단계 적용** (4단계 RooK·HeRo 예정)
 > 원칙: **기능은 하나(코어), 주인은 브랜드(`brand_id`), 창구는 여러 곳(`channels`)**
 > 근거: 데이터 계약 3조 — MADLeague(경쟁 PT)·RooK(실전 프로젝트) 두 집중 브랜드가 같은 기능을 필요로 함 → 코어로 끌어올림
 
@@ -64,7 +64,7 @@
 3. 코드 전환 — API `/api/programs/rounds/{id}/…` · 인트라 `/api/intra/programs/…` · 접근 함수 코어로. MADLeague 화면(워크스페이스·회차 방·명예의 전당·포트폴리오·동아리·홈)은 겉모습 그대로
 4. 검증 — 지금까지 한 시나리오 전부 다시 (제출·본선·공지·Q&A·클라이언트·결과 발표·익명 차단)
 5. **옛 `mad_*` 경쟁 PT 테이블 삭제는 배포 후** — 배포된 옛 코드가 읽고 있으므로 (승인 후 별도 실행)
-   대상: mad_competitions · mad_competition_teams · mad_team_members · mad_submissions · mad_competition_results · mad_round_* · mad_submission_comments · 버킷 mad-submissions · (`mad_archive` 0건 — competition_id FK 정리)
+   대상: mad_competitions · mad_competition_teams · mad_team_members · mad_submissions · mad_competition_results · mad_round_* · mad_submission_comments · 버킷 mad-submissions · (`mad_archive` 0건 — competition_id FK 정리) · mad_certificates · 함수 mad_eligible_certificates·mad_gen_cert_code
 
 ## 6. 법적 체크 (§0.1)
 
@@ -91,3 +91,17 @@
 - 한 회차 한 팀: DB UNIQUE → 다른 팀 소속이면 409 (이동은 운영진)
 - 브리프 내용은 회차 방에서 동의 후에만 (워크스페이스 목록에서 제거)
 - API: `/api/programs/rounds/{id}/teams` (GET 보드 · POST create_team·rename·assign·set_leader·invite·delete_team) · `/api/programs/invite` (GET 미리보기 · POST 합류) · `/api/programs/consent`
+
+---
+
+## 8. 3단계 — 인증서 (2026-10-08 적용)
+
+- 테이블 `program_certificates` (`sql/program-certificates.sql`): brand_id · round_id(NULL = 브랜드 활동 인증) · member_id · cert_key(중복 방지 `round:{id}`·`activity:{year}`) · **type(구분)** · **code(코드)** · **issued_at(발급일)** · **note(비고)** · **result(결과)** · snapshot(발급 시점 값) · revoked_at/reason. anon·authenticated 권한 없음 (서버 API만)
+- 발급 가능: 팀으로 참가 + 결과 발표(또는 종료) 회차 → 수상 있으면 **수상 확인서**, 없으면 **참가 확인서**(경쟁 PT)·**참여 확인서**(프로젝트·프로그램)·**수료증**(교육 과정) / 브랜드 활동 인증 → MADLeague **활동 인증서**(현역 연도 종료 후)
+- 본인 발급: 로그인 → 매드리거 › 인증서 발급 → 첫 발급 때만 생년월일·출신 대학·전공 + 수집 동의 → 즉시 발급·인쇄/PDF. 다시 받으면 같은 코드. 전화번호는 받지 않는다
+- snapshot: 이름·생년월일·대학·전공·소속(동아리)·기수·출전팀·프로그램·연도·클라이언트·브랜드 — 이후 프로필이 바뀌어도 인증서 내용 고정
+- 화면: `/madleague/member/certificate`(발급) · `/madleague/certificate/print/{code}`(본인·직원만) · `/madleague/certificate/verify/{code}`(누구나 — 이름 마스킹, 생년월일·대학·전공은 조회 자체를 안 함)
+- 인트라: 통합 관리 › 인증서(`/intra/ums/programs/certificates`) · MADLeague › 인증서 발급 — 구분·코드·발급일·이름·프로그램·결과·비고·상태, 비고·결과 수정, 취소(사유)/복원, CSV(내부용)
+- 코드 형식 `MAD26-XXXXXX` (브랜드 접두 + 연도 2자리)
+- 옛 `mad_certificates`(0건)·`mad_eligible_certificates()`·`mad_gen_cert_code()`·`/api/madleague/certificates` → 대체. 옛 테이블·함수는 배포 후 삭제 목록에 포함
+- 탈퇴: 익명화 (docs/Data_Lifecycle.md 3.2.2)

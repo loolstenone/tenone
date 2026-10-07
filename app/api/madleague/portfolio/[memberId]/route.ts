@@ -78,13 +78,13 @@ export async function GET(_req: Request, { params }: RouteProps) {
     }));
   }
 
-  // 발급된 인증서 (public)
-  const { data: certs } = await sb
-    .from('mad_certificates')
-    .select('id, type, issued_at, cert_code, competition_id, award_name')
-    .eq('member_id', memberId)
-    .eq('status', 'active')
-    .order('issued_at', { ascending: false });
+  // 발급된 인증서 — 공개 포트폴리오(본인 공개 설정)에만. 구분·제목·코드만 (생년월일 등 snapshot 개인정보 제외)
+  const { data: certRows } = coreId
+    ? await createAdminClient().from('program_certificates').select('id, type, issued_at, code, snapshot')
+        .eq('member_id', coreId).eq('brand_id', 'madleague').is('revoked_at', null).order('issued_at', { ascending: false })
+    : { data: [] };
+  const certs = (certRows ?? []).map((c: { id: string; type: string; issued_at: string; code: string; snapshot: { label?: string; title?: string } | null }) =>
+    ({ id: c.id, type: c.type, issued_at: c.issued_at, cert_code: c.code, label: c.snapshot?.label ? `${c.snapshot.label} · ${c.snapshot.title ?? ''}` : null }));
 
   return NextResponse.json({
     member,
