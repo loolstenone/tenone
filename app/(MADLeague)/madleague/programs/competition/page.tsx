@@ -1,12 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Trophy, Users, Search, Lightbulb, Presentation, ArrowRight } from 'lucide-react';
+import { MAD_PROGRAM_IMAGES, madProgramAsset } from '@/lib/madleague-program-assets';
 
 export const revalidate = 300;
 
 export const metadata = {
-  title: '경쟁 PT — Hall of Fame',
-  description: '실제 기업 과제에 동아리가 경쟁. MADLeague 경쟁PT 수상작 아카이브.',
+  title: '경쟁 PT — 명예의 전당',
+  description: '실제 기업 과제에 동아리가 경쟁. MADLeague 경쟁PT 명예의 전당.',
 };
 
 const STEPS = [
@@ -19,11 +20,26 @@ const STEPS = [
 
 const ARCHIVE = [
   {
+    year: 2026,
+    round: '1차',
+    client: '춤추는 고래',
+    desc: '',
+    logo: '/logos/madleague/dancingwhale-logo.png',
+    gallery: [] as string[],
+    awards: [
+      { img: '/logos/madleague/26-1gold.png',   label: 'MAD Crown' },
+      { img: '/logos/madleague/26-1silver.png', label: '2위' },
+      { img: '/logos/madleague/26-1bronze.png', label: '3위' },
+    ],
+  },
+  {
     year: 2025,
     round: '2차',
     client: '리제로스',
     desc: '자연친화 스타트업 리제로스에서 개발한 배달, 포장 음식 냉매제에 대한 시장 진출 전략',
     logo: '/logos/madleague/rezerouslogo.png',
+    // 원본 madleague.net/pt 명예의 전당 발표 장면
+    gallery: ['3cc380de1afb6', '9e51de11b9c1b', '77efc772b91b6', 'ebf5d1bd22680'],
     awards: [
       { img: '/logos/madleague/25-1gold.png',   label: 'MAD Crown' },
       { img: '/logos/madleague/25-1silver.png',  label: '2위' },
@@ -36,6 +52,7 @@ const ARCHIVE = [
     client: '대성학원',
     desc: '대성학원 연간 소셜 캠페인 제안',
     logo: '/logos/madleague/daesunglogo.png',
+    gallery: ['01ed880a45dad', '014e066281217', '0040db378fa38', 'e69acb812da8d', '8f50929fa55c5'],
     awards: [
       { img: '/logos/madleague/25gold.png',    label: 'MAD Crown' },
       { img: '/logos/madleague/25silver.png',  label: '2위' },
@@ -49,6 +66,7 @@ const ARCHIVE = [
     client: '지평주조',
     desc: '지평 막걸리 100주년을 기점으로 지역을 벗어나 전국 막걸리가 되기 위한 전략 제안',
     logo: '/logos/madleague/지평로고.png',
+    gallery: ['1c6fe5c16769a', 'ba2b35413d8f7', 'a1d00227bff56', '9786f6ef75c79'],
     awards: [
       { img: '/logos/madleague/24gold.png',   label: 'MAD Crown' },
       { img: '/logos/madleague/24silver.png', label: '2위' },
@@ -62,7 +80,9 @@ export default async function CompetitionPage() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(236,29,37,0.2),transparent_60%)]" aria-hidden />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={MAD_PROGRAM_IMAGES.ptHero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-6 py-32 sm:py-40">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">COMPETITION</div>
           <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">경쟁 PT</h1>
@@ -70,6 +90,7 @@ export default async function CompetitionPage() {
             실제 기업의 고민을 전국의 동아리가 같이 경쟁한다.
             최고의 전략은 <span className="text-[#FFC000] font-bold">MAD Crown</span>을 받는다.
           </p>
+          <p className="mt-4 text-sm text-neutral-500">실전프로젝트를 통한 성장 — MAD League의 경쟁 PT</p>
         </div>
       </section>
 
@@ -97,7 +118,7 @@ export default async function CompetitionPage() {
       <section className="border-t border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-32">
           <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-4">HALL OF FAME</div>
-          <h2 className="text-4xl sm:text-6xl font-black mb-24">수상작 아카이브</h2>
+          <h2 className="text-4xl sm:text-6xl font-black mb-24">명예의 전당</h2>
 
           <div className="space-y-32">
             {ARCHIVE.map((item) => (
@@ -119,9 +140,11 @@ export default async function CompetitionPage() {
                         className="object-contain object-left max-h-16 w-auto"
                       />
                     </div>
-                    <p className="mt-6 text-lg text-neutral-400 leading-relaxed">
-                      {item.desc}
-                    </p>
+                    {item.desc && (
+                      <p className="mt-6 text-lg text-neutral-400 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    )}
                   </div>
 
                   {/* 수상 배지 */}
@@ -139,6 +162,14 @@ export default async function CompetitionPage() {
                     ))}
                   </div>
                 </div>
+
+                {/* 발표 장면 */}
+                {item.gallery.length > 0 && <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-2">
+                  {item.gallery.map((id) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={id} src={madProgramAsset('pt', id)} alt={`${item.client} 경쟁 PT`} loading="lazy" className="aspect-[4/3] w-full object-cover bg-neutral-950" />
+                  ))}
+                </div>}
 
                 <div className="mt-16 h-px bg-neutral-900" />
               </div>
