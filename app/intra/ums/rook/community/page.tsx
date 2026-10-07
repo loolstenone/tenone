@@ -1,38 +1,70 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageCircle, Search } from "lucide-react";
+import { MessageCircle, Search, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { brandSiteUrl } from "@/lib/domain-registry";
 
-interface Post { id: string; title: string; author_name: string | null; created_at: string; likes_count: number | null; comments_count: number | null; }
+// RooK 글 = 통합 게시판 ums_posts (site = rook). 게시판: works·artist(직원 작성) · freeboard(회원)
+interface Post {
+    id: string; slug: string | null; title: string; author_name: string | null; status: string;
+    category_id: string | null; view_count: number | null; comment_count: number | null;
+    published_at: string | null; created_at: string;
+    ums_boards: { slug: string; name: string } | null;
+}
+
+/** 사이트 글 주소 — works·artist는 slug, freeboard는 id (app/(RooK)/rook/{board}/[slug|id]) */
+function postPath(p: Post): string | null {
+    const board = p.ums_boards?.slug;
+    if (board === "freeboard") return `/rook/freeboard/${p.id}`;
+    if ((board === "works" || board === "artist") && p.slug) return `/rook/${board}/${p.slug}`;
+    return null;
+}
 
 export default function RookCommunityPage() {
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState<Post[]>([]);
     const [search, setSearch] = useState("");
+    const [board, setBoard] = useState("all");
 
     useEffect(() => {
-        createClient().from("posts")
-            .select("id, title, author_name, created_at, likes_count, comments_count")
-            .eq("brand_id", "rook")
-            .order("created_at", { ascending: false })
-            .limit(100)
-            .then(res => { setPosts((res.data ?? []) as Post[]); setLoading(false); });
+        const sb = createClient();
+        (async () => {
+            const { data: site } = await sb.from("ums_sites").select("id").eq("slug", "rook").single();
+            if (!site) { setLoading(false); return; }
+            const { data } = await sb.from("ums_posts")
+                .select("id, slug, title, author_name, status, category_id, view_count, comment_count, published_at, created_at, ums_boards(slug, name)")
+                .eq("site_id", site.id)
+                .order("created_at", { ascending: false })
+                .limit(300);
+            setPosts((data ?? []) as unknown as Post[]);
+            setLoading(false);
+        })();
     }, []);
 
-    const filtered = posts.filter(p => !search || p.title?.includes(search) || p.author_name?.includes(search));
+    const boardNames = Array.from(new Map(posts.filter(p => p.ums_boards).map(p => [p.ums_boards!.slug, p.ums_boards!.name])).entries());
+    const filtered = posts
+        .filter(p => board === "all" || p.ums_boards?.slug === board)
+        .filter(p => !search || p.title?.includes(search) || p.author_name?.includes(search));
 
     return (
         <div>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">커뮤니티 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">RooK 게시글 · 커뮤니티 현황</p>
+                    <h1 className="text-lg font-bold">게시글 관리</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">RooK Works · Artist · Free board (수정·삭제는 인트라 &gt; 게시판)</p>
                 </div>
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="제목, 작성자..."
-                        className="pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-lg w-52 focus:outline-none focus:border-neutral-400" />
+                <div className="flex items-center gap-2">
+                    <select value={board} onChange={e => setBoard(e.target.value)}
+                        className="py-2 px-3 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400">
+                        <option value="all">전체 게시판</option>
+                        {boardNames.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}
+                    </select>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
+                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="제목, 작성자..."
+                            className="pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-lg w-52 focus:outline-none focus:border-neutral-400" />
+                    </div>
                 </div>
             </div>
 
@@ -42,7 +74,7 @@ export default function RookCommunityPage() {
                     <p className="text-2xl font-bold">{posts.length}</p>
                 </div>
                 <div className="border border-neutral-200 rounded-lg p-4">
-                    <p className="text-xs text-neutral-400 mb-1">검색 결과</p>
+                    <p className="text-xs text-neutral-400 mb-1">표시 중</p>
                     <p className="text-2xl font-bold">{filtered.length}</p>
                 </div>
             </div>
@@ -57,17 +89,29 @@ export default function RookCommunityPage() {
             ) : (
                 <div className="border border-neutral-200 rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                        <thead><tr className="bg-neutral-50 text-left">{["제목","작성자","좋아요","댓글","작성일"].map(h => <th key={h} className="px-4 py-3 font-semibold text-neutral-500">{h}</th>)}</tr></thead>
+                        <thead><tr className="bg-neutral-50 text-left">{["게시판", "카테고리", "제목", "작성자", "상태", "조회", "댓글", "발행일"].map(h => <th key={h} className="px-4 py-3 font-semibold text-neutral-500">{h}</th>)}</tr></thead>
                         <tbody>
-                            {filtered.map(p => (
-                                <tr key={p.id} className="border-t border-neutral-100 hover:bg-neutral-50">
-                                    <td className="px-4 py-3 font-medium max-w-xs truncate">{p.title || "(제목 없음)"}</td>
-                                    <td className="px-4 py-3 text-neutral-500">{p.author_name || "-"}</td>
-                                    <td className="px-4 py-3 text-neutral-500">{p.likes_count ?? 0}</td>
-                                    <td className="px-4 py-3 text-neutral-500">{p.comments_count ?? 0}</td>
-                                    <td className="px-4 py-3 text-xs text-neutral-400">{new Date(p.created_at).toLocaleDateString("ko-KR")}</td>
-                                </tr>
-                            ))}
+                            {filtered.map(p => {
+                                const path = postPath(p);
+                                return (
+                                    <tr key={p.id} className="border-t border-neutral-100 hover:bg-neutral-50">
+                                        <td className="px-4 py-3 text-xs text-neutral-500">{p.ums_boards?.name ?? "-"}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-500">{p.category_id ?? "-"}</td>
+                                        <td className="px-4 py-3 font-medium max-w-xs truncate">
+                                            {path ? (
+                                                <a href={brandSiteUrl("rook", path)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline">
+                                                    {p.title || "(제목 없음)"} <ExternalLink className="h-3 w-3 text-neutral-300" />
+                                                </a>
+                                            ) : (p.title || "(제목 없음)")}
+                                        </td>
+                                        <td className="px-4 py-3 text-neutral-500">{p.author_name || "-"}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-500">{p.status}</td>
+                                        <td className="px-4 py-3 text-neutral-500">{p.view_count ?? 0}</td>
+                                        <td className="px-4 py-3 text-neutral-500">{p.comment_count ?? 0}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-400">{new Date(p.published_at ?? p.created_at).toLocaleDateString("ko-KR")}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                     <div className="px-4 py-2 bg-neutral-50 border-t border-neutral-100 text-xs text-neutral-400">총 {filtered.length}건</div>

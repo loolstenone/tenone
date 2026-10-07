@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
+import { brandSiteUrl } from "@/lib/domain-registry";
 
 interface Club { id: string; slug: string; name: string; region: string; color: string | null; president_member_id: string | null; }
 interface PresidentMember { id: string; name: string; email: string; }
@@ -203,7 +204,7 @@ export default function MADLeagueIntraPage() {
     <div>
       <PageHeader title="MAD League 관리" description="대학 동아리 연합 운영 대시보드">
         <Link
-          href="/madleague"
+          href={brandSiteUrl("madleague", "/madleague")}
           target="_blank"
           className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700 transition-colors"
         >
@@ -264,10 +265,10 @@ export default function MADLeagueIntraPage() {
                         <div className="text-xs text-neutral-500">{c.region}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <Link href={`/madleague/clubs/${c.slug}`} target="_blank" className="text-neutral-300 hover:text-neutral-600">
+                        <Link href={brandSiteUrl("madleague", `/madleague/clubs/${c.slug}`)} target="_blank" className="text-neutral-300 hover:text-neutral-600">
                           <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
-                        <Link href={`/madleague/clubs/${c.slug}/manage`} target="_blank" className="text-neutral-300 hover:text-neutral-600">
+                        <Link href={brandSiteUrl("madleague", `/madleague/clubs/${c.slug}/manage`)} target="_blank" className="text-neutral-300 hover:text-neutral-600">
                           <UserCheck className="h-3.5 w-3.5" />
                         </Link>
                       </div>
@@ -471,7 +472,7 @@ export default function MADLeagueIntraPage() {
                   >
                     {a.is_published ? <><Eye className="h-3 w-3" /> 발행</> : <><EyeOff className="h-3 w-3" /> 비공개</>}
                   </button>
-                  <Link href={`/madleague/madzine/${a.slug}`} target="_blank" className="text-xs text-neutral-400 hover:text-neutral-700">
+                  <Link href={brandSiteUrl("madleague", `/madleague/madzine/${a.slug}`)} target="_blank" className="text-xs text-neutral-400 hover:text-neutral-700">
                     <ExternalLink className="h-3.5 w-3.5" />
                   </Link>
                 </div>
@@ -505,7 +506,7 @@ export default function MADLeagueIntraPage() {
                         </span>
                       </div>
                       <div className="font-semibold text-neutral-900">{a.title}</div>
-                      <Link href={`/madleague/madzine/${a.slug}`} target="_blank" className="mt-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                      <Link href={brandSiteUrl("madleague", `/madleague/madzine/${a.slug}`)} target="_blank" className="mt-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline">
                         미리보기 <ExternalLink className="h-3 w-3" />
                       </Link>
                     </div>

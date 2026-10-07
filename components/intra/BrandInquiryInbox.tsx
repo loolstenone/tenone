@@ -39,6 +39,8 @@ const TYPE_LABEL: Record<string, string> = {
     tenone_crew: "크루 지원",
     tenone_business: "프로젝트 의뢰",
     badak_inquiry: "Badak 문의",
+    rook_inquiry: "RooK 문의",
+    rook_rookie: "RooKie 지원",
 };
 
 function dt(s: string) {

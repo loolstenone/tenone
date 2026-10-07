@@ -5,6 +5,7 @@ import { Search, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Member { id: string; name: string | null; email: string; company: string | null; created_at: string; }
+interface JoinRow { joined_at: string; members: Omit<Member, "created_at"> | null }
 
 export default function RookMembersPage() {
     const [loading, setLoading] = useState(true);
@@ -12,12 +13,18 @@ export default function RookMembersPage() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        createClient().from("members")
-            .select("id, name, email, company, created_at")
-            .contains("affiliations", ["rook"])
-            .order("created_at", { ascending: false })
-            .limit(200)
-            .then(res => { setMembers((res.data ?? []) as Member[]); setLoading(false); });
+        // RooK 회원 = member_brand_joins(brand_id='rook') — 브랜드 첫 진입 동의 기록 (헌법 원칙 1). 계정 정보는 members
+        createClient().from("member_brand_joins")
+            .select("joined_at, members!member_brand_joins_member_id_fkey(id, name, email, company)")
+            .eq("brand_id", "rook")
+            .is("withdrawn_at", null)
+            .order("joined_at", { ascending: false })
+            .limit(500)
+            .then((res: { data: unknown }) => {
+                const rows = (res.data ?? []) as unknown as JoinRow[];
+                setMembers(rows.filter(r => r.members).map(r => ({ ...r.members!, created_at: r.joined_at })));
+                setLoading(false);
+            });
     }, []);
 
     const filtered = members.filter(m =>
@@ -61,7 +68,7 @@ export default function RookMembersPage() {
             ) : (
                 <div className="border border-neutral-200 rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                        <thead><tr className="bg-neutral-50 text-left">{["이름","이메일","회사","가입일"].map(h => <th key={h} className="px-4 py-3 font-semibold text-neutral-500">{h}</th>)}</tr></thead>
+                        <thead><tr className="bg-neutral-50 text-left">{["이름","이메일","회사","RooK 가입일"].map(h => <th key={h} className="px-4 py-3 font-semibold text-neutral-500">{h}</th>)}</tr></thead>
                         <tbody>
                             {filtered.map(m => (
                                 <tr key={m.id} className="border-t border-neutral-100 hover:bg-neutral-50">

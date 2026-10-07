@@ -106,6 +106,20 @@ export const CANONICAL_HOSTS: Record<string, { host: string; hosting: 'vercel' |
     rook:      { host: 'www.rook.co.kr',    hosting: 'external' },
 };
 
+/**
+ * 인트라 등 다른 호스트에서 브랜드 사이트로 여는 절대 URL (path는 브랜드 prefix 포함, 예: '/rook/works')
+ *   - vercel 운영   → 공식 주소 (경로 유지)
+ *   - external 운영 → {brand}.tenone.biz 스테이징 (이전 전 직원 확인용)
+ *   - 그 외          → 상대 경로 그대로
+ */
+export function brandSiteUrl(siteId: string, path = ''): string {
+    const canonical = CANONICAL_HOSTS[siteId];
+    if (canonical?.hosting === 'vercel') return `https://${canonical.host}${path}`;
+    const staging = `${siteId}.tenone.biz`;
+    if (registry[staging]) return `https://${staging}${path}`;
+    return path || '/';
+}
+
 // ── 파생 맵 (자동 생성) ──
 
 /** 미들웨어용: domain → prefix */
