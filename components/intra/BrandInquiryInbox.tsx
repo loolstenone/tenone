@@ -2,7 +2,7 @@
 
 /**
  * 브랜드 고객 문의 인박스 — contact_submissions 기반 (공개 폼 → /api/contact 저장분)
- * brandId 지정 시 form_type이 `${brandId}_`로 시작하는 문의만, 미지정 시 전체.
+ * brandId 지정 시 form_type이 `${brandId}_`로 시작하는 문의만, 미지정 시 전체. formType 지정 시 그 유형만(사이트 메뉴별 인박스).
  * 예: Badak 문의 = badak_inquiry, Jakka 광고 문의 = jakka_ad
  *
  * 행 클릭 → 상세(전체 내용·첨부·응대 기록). 답변/미답변 근거 = handling_log
@@ -57,7 +57,7 @@ function extraText(extra: unknown): string | null {
     return null;
 }
 
-export function BrandInquiryInbox({ brandId, brandName }: { brandId?: string; brandName: string }) {
+export function BrandInquiryInbox({ brandId, brandName, formType }: { brandId?: string; brandName: string; formType?: string }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -70,13 +70,14 @@ export function BrandInquiryInbox({ brandId, brandName }: { brandId?: string; br
             .select("id, form_type, name, email, phone, company, message, portfolio_url, extra, attachments, handling_log, status, created_at")
             .order("created_at", { ascending: false })
             .limit(200);
-        if (brandId) q = q.like("form_type", `${brandId}\\_%`);
+        if (formType) q = q.eq("form_type", formType);
+        else if (brandId) q = q.like("form_type", `${brandId}\\_%`);
         q.then((res: { data: unknown[] | null; error: unknown }) => {
             if (res.error) setError("문의 내역을 불러오지 못했습니다.");
             setInquiries((res.data ?? []) as Inquiry[]);
             setLoading(false);
         });
-    }, [brandId]);
+    }, [brandId, formType]);
 
     const term = search.trim();
     const filtered = inquiries

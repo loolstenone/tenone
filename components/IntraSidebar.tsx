@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -10,7 +10,8 @@ import {
     LayoutDashboard, FileText, BarChart3, Settings,
 } from "lucide-react";
 import clsx from "clsx";
-import { modules, canSeeByRole } from "@/lib/intra-nav";
+import { modules as staticModules, canSeeByRole, regroupBrandSections } from "@/lib/intra-nav";
+import { useSiteTiers } from "@/lib/use-site-tiers";
 
 export function IntraSidebar() {
     const pathname = usePathname();
@@ -23,6 +24,9 @@ export function IntraSidebar() {
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [mobileOpen, setMobileOpen] = useState(false);
     const [openSections, setOpenSections] = useState<Set<string>>(new Set());
+    // 브랜드 섹션(집중 / 실험·보관)은 DB ums_sites.tier로 재분류 — tier를 바꾸면 사이드바가 자동으로 따라온다
+    const siteTiers = useSiteTiers();
+    const modules = useMemo(() => (siteTiers ? regroupBrandSections(staticModules, siteTiers) : staticModules), [siteTiers]);
 
     // BUMS 사이트 진입 감지
     const siteMatch = pathname.match(/^\/intra\/bums\/sites\/([^/]+)/);
@@ -54,7 +58,7 @@ export function IntraSidebar() {
             if (isModuleActive) newModules.add(mod.name);
         }
         setExpandedModules(newModules);
-    }, [pathname]);
+    }, [pathname, modules]);
 
     const toggleModule = (name: string) => {
         setExpandedModules((prev) => {

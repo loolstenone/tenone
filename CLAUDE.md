@@ -127,7 +127,7 @@ docs/              # 설계 문서
 
 > ⚠️ **서비스 체계(브랜드 구성·Tier·통합/분리)는 계속 바뀐다.** 원칙·데이터 계약은 특정 브랜드에 묶이지 않게 쓰고,
 > 현재 상태의 SSOT는 **DB `ums_sites`(tier·lifecycle·hosting)** + **`lib/domain-registry.ts` CANONICAL_HOSTS** 두 곳이다. 아래 표는 참고용 스냅샷.
-> 체계가 바뀌면: ① `ums_sites` 갱신 → ② CANONICAL_HOSTS 갱신 → ③ 이 표 갱신. 서비스 통합·분리·이름 변경도 §0.1 종료 절차·이전 원칙을 그대로 적용한다
+> 체계가 바뀌면: ① `ums_sites` 갱신(인트라 사이드바 집중/보관·사이트 현황은 자동 반영, §1.9.5) → ② CANONICAL_HOSTS 갱신 → ③ 이 표 갱신 → ④ 집중으로 올리면 `lib/brand-site-menus.ts` 등록. 서비스 통합·분리·이름 변경도 §0.1 종료 절차·이전 원칙을 그대로 적용한다
 > (예: Planner's → MyVerse 흡수처럼 서비스가 합쳐질 때 = 기존 서비스 종료 절차 + 새 서비스 동의 기반 이전).
 
 | Tier | 브랜드 | 공식 주소 | 비고 |
@@ -1190,6 +1190,40 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 
 ---
 
+## 1.9.5 인트라 브랜드 관리 SSOT — 사이트와 인트라가 어긋나지 않게 (2026-10-07)
+
+> **원칙**: 같은 사실을 두 곳에 손으로 적지 않는다. 인트라는 원천을 **읽어서** 만든다.
+> 브랜드 Tier가 바뀌거나 사이트 메뉴가 바뀌어도, 사람이 인트라를 따로 확인·지시하지 않아도 따라오게 한다.
+> 인트라 문서: Standard › 관리 체계 (`/intra/ums/standard/management`)
+
+### SSOT 사슬
+
+| 원천 (여기만 고친다) | 자동으로 따라오는 곳 |
+|---|---|
+| DB `ums_sites.tier`·`lifecycle`·`hosting`·`is_open` | 사이드바 **집중 / 실험·보관** 섹션 (`lib/intra-nav.ts` `regroupBrandSections` + `lib/use-site-tiers.ts`) · 통합 관리 › 사이트 현황 · 가림막 · 헌법 Tier 표 |
+| `lib/domain-registry.ts` | middleware 공식 주소 · `brandSiteUrl()` (인트라 → 사이트 링크: vercel=공식 주소, external=스테이징) |
+| **`lib/brand-site-menus.ts`** (사이트 메뉴 ↔ 콘텐츠 원천 ↔ 인트라 화면) | 인트라 브랜드 메뉴 (`brandAdminChildren`) · 사이트 현황·브랜드 대시보드의 **메뉴별 콘텐츠 수** |
+| `lib/site-status.ts` `computeSitesStatus()` | `/api/intra/sites/status` → 통합 관리·브랜드 대시보드·에이전트가 **같은 숫자** |
+| `lib/action-hub-registry.ts` | 인트라 대시보드 Action Hub |
+
+### 인트라 › 유니버스 구성
+
+- **통합 관리** — 전 사이트 집계: 사이트 현황(`/intra/ums/sites/status`: Tier·상태·가입 회원·게시글·문의·메뉴 매핑, 펼치면 메뉴별 현황) · 통합 회원 · 게시판 · CS 통합 · UC · 외부 리소스 · Standard
+- **집중 브랜드** (tier = core·focus) — 브랜드 대시보드 = 사이트 메뉴별 현황(`components/intra/BrandSiteStatus.tsx`) + **사이트 메뉴 1:1 관리 화면**
+- **실험·보관 브랜드** (그 외·미지정, 기본 접힘)
+
+### 규칙
+
+- 인트라 브랜드 메뉴 = 사이트 메뉴 1:1. 사이트 헤더 메뉴를 추가·변경하면 **같은 커밋에서** `lib/brand-site-menus.ts`도 고친다 (관리 화면이 없으면 만든다)
+- 집중 브랜드는 반드시 `lib/brand-site-menus.ts`에 등록한다. 미등록은 사이트 현황에 "메뉴 매핑 없음"으로 드러난다
+- 집계 숫자는 `computeSitesStatus()`만 쓴다. 브랜드 대시보드에서 같은 숫자를 따로 쿼리하지 않는다
+- 개수는 DB count(head)로 센다 — 행을 불러와 세면 API 1000행 제한에 잘린다
+- ❌ `lib/intra-nav.ts`에서 브랜드를 집중/보관 섹션 사이로 손으로 옮기기 (tier는 DB에서만)
+- ❌ 인트라 화면이 사이트와 다른 테이블을 보기 (예: RooK 인트라가 옛 `posts`를 봐서 항상 0건이던 사고, 2026-10-07)
+- ❌ 브랜드 회원 수를 `members.affiliations`로 세기 → `member_brand_joins` (헌법 원칙 1)
+
+---
+
 ## 1.10 개발 규칙 — 모순 방지 8원칙
 
 | # | 규칙 | 위반 시 문제 |
@@ -1350,6 +1384,7 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 - [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/**` 추가
 - [ ] 특화 프로필 테이블 필요 시 `universe-profile.ts`에 조회 함수 추가
 - [ ] `UniverseProfile.tsx` → `SERVICE_META`에 아이콘·설명·접근모델 등록
+- [ ] **사이트 메뉴 레지스트리**: `lib/brand-site-menus.ts`에 사이트 메뉴 ↔ 콘텐츠 원천 ↔ 인트라 화면 등록 (§1.9.5 — 인트라 메뉴·현황 자동)
 - [ ] **Action Hub**: 관리자 처리 필요 테이블이 있으면 `lib/action-hub-registry.ts`에 entry 추가 (승인·CS·개인정보·결제 유형별)
 - [ ] 브랜드 CLAUDE.md에 `## Action Hub Entries` 섹션으로 등록 내역 기록
 - [ ] **법적 검토** (§0.1 법적 검토 표): 수집 항목·목적·보관기간, 브랜드 간 데이터 활용·제3자 제공 동의, 만 14세 미만, 광고성 정보, 결제, 업종별 등록·신고 요건

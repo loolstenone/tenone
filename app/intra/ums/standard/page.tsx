@@ -8,7 +8,7 @@
 import Link from "next/link";
 import {
     Shield, Users, Coins, Briefcase, Mail, Layers, KeyRound, FileLock2, ArrowRight,
-    Globe, ShieldCheck, Package, Building2, BookOpen, FileCode, Landmark, FileSignature,
+    Globe, ShieldCheck, Package, Building2, BookOpen, FileCode, Landmark, FileSignature, Workflow, Share2,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 
@@ -17,6 +17,10 @@ const STANDARDS = [
       desc: "지주사–계열사 모델 7원칙 · 브랜드 Tier (최상위 기준)", source: "CLAUDE.md §0.1 · ums_sites.tier", href: "/intra/ums/standard/constitution" },
     { key: "data-contract", title: "데이터 계약 · 생애주기", icon: FileSignature, color: "text-rose-600", bg: "bg-rose-50",
       desc: "데이터 계약 5조 · 서비스 종료 7단계 · 법적 검토 기준", source: "CLAUDE.md §0.1 · docs/Data_Lifecycle.md", href: "/intra/ums/standard/data-contract" },
+    { key: "management", title: "관리 체계", icon: Workflow, color: "text-neutral-900", bg: "bg-neutral-100",
+      desc: "공통·사이트별 가이드 · 오류 방지 대원칙 · SSOT 사슬 · 인트라 연계(통합/집중/보관)", source: "CLAUDE.md §1.9.5 · ums_sites · lib/brand-site-menus.ts", href: "/intra/ums/standard/management" },
+    { key: "external", title: "외부 리소스 운영", icon: Share2, color: "text-sky-600", bg: "bg-sky-50",
+      desc: "비밀 관리 · 외부 호출 인증 · 서비스별 기준 (Vercel·Supabase·Anthropic·Resend 등)", source: "CLAUDE.md 부록 G · Vault · Vercel env", href: "/intra/ums/standard/external" },
     { key: "members", title: "회원", icon: Users, color: "text-violet-600", bg: "bg-violet-50",
       desc: "3계층 프로필 · 바뀌지 않는 ID(members.id) · 계정 정보 복사 금지", source: "members 테이블", href: "/intra/ums/standard/members" },
     { key: "uc", title: "Universe Coin", icon: Coins, color: "text-amber-600", bg: "bg-amber-50",

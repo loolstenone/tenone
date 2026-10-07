@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
+import { brandAdminChildren } from "@/lib/brand-site-menus";
 
 /** 사용자 역할 (OR 조건) — 명시되면 해당 role 중 하나를 가진 사용자만 볼 수 있음 */
 export type VisibleRole = "staff" | "manager" | "super_admin" | "member" | "leader" | "subscriber" | "purchaser" | "approved_member";
@@ -58,6 +59,8 @@ export interface MenuSection {
     label?: string;
     /** 기본 접힘 (실험·보관 브랜드 등). 섹션 안 메뉴가 활성이면 자동으로 펼친다 */
     collapsed?: boolean;
+    /** 브랜드 섹션 — 실제 소속은 DB ums_sites.tier로 실행 시 재분류 (regroupBrandSections) */
+    brandGroup?: "focus" | "rest";
     items: MenuItem[];
 }
 
@@ -147,6 +150,7 @@ export const modules: NavModule[] = [
                     {
                         name: "사이트 관리", href: "/intra/ums/sites", icon: Globe,
                         children: [
+                            { name: "사이트 현황", href: "/intra/ums/sites/status" },
                             { name: "사이트 목록", href: "/intra/ums/sites/list" },
                             { name: "게시판", href: "/intra/ums/sites/boards" },
                             { name: "콘텐츠 점검", href: "/intra/ums/sites/content" },
@@ -196,6 +200,8 @@ export const modules: NavModule[] = [
                             { name: "개요", href: "/intra/ums/standard" },
                             { name: "플랫폼 헌법", href: "/intra/ums/standard/constitution" },
                             { name: "데이터 계약", href: "/intra/ums/standard/data-contract" },
+                            { name: "관리 체계", href: "/intra/ums/standard/management" },
+                            { name: "외부 리소스 운영", href: "/intra/ums/standard/external" },
                             { name: "회원", href: "/intra/ums/standard/members" },
                             { name: "Universe Coin", href: "/intra/ums/standard/uc" },
                             { name: "산업군/직무군", href: "/intra/ums/standard/taxonomies" },
@@ -215,6 +221,7 @@ export const modules: NavModule[] = [
             },
             {
                 label: "집중 브랜드",
+                brandGroup: "focus",
                 items: [
                     {
                         name: "TenOne", href: "/intra/ums/tenone", icon: Globe,
@@ -270,16 +277,8 @@ export const modules: NavModule[] = [
                     },
                     {
                         name: "MAD League", href: "/intra/ums/madleague", icon: Globe,
-                        children: [
-                            // ── 공통 탭 ──
-                            { name: "대시보드", href: "/intra/ums/madleague" },
-                            { name: "회원 관리", href: "/intra/ums/madleague/members" },
-                            // ── 브랜드 특화 ──
-                            { name: "심사 관리", href: "/intra/ums/madleague/applications" },
-                            { name: "콘텐츠 관리", href: "/intra/ums/madleague/articles" },
-                            // ── 공통 탭 (마지막) ──
-                            { name: "고객 문의", href: "/intra/ums/madleague/cs" },
-                        ],
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1
+                        children: brandAdminChildren("madleague", [{ name: "회원 관리", href: "/intra/ums/madleague/members" }]),
                     },
                     {
                         name: "MADLeap", href: "/intra/ums/madleap", icon: Globe,
@@ -295,6 +294,7 @@ export const modules: NavModule[] = [
             {
                 label: "실험 · 보관 브랜드 (알파벳순)",
                 collapsed: true,
+                brandGroup: "rest",
                 items: [
                     // 브랜드명 영문 통일 (canonical + English only)
                     {
@@ -425,12 +425,8 @@ export const modules: NavModule[] = [
                     },
                     {
                         name: "RooK", href: "/intra/ums/rook", icon: Globe,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/rook" },
-                            { name: "회원 관리", href: "/intra/ums/rook/members" },
-                            { name: "커뮤니티", href: "/intra/ums/rook/community" },
-                            { name: "고객 문의", href: "/intra/ums/rook/cs" },
-                        ],
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1
+                        children: brandAdminChildren("rook", [{ name: "회원 관리", href: "/intra/ums/rook/members" }]),
                     },
                     {
                         name: "Seoul/360°", href: "/intra/ums/seoul360", icon: Globe,
@@ -710,4 +706,54 @@ export function getActiveSubHref(pathname: string, children: SubItem[]): string 
     }
 
     return best?.href ?? null;
+}
+
+// ── 브랜드 Tier 재분류 (SSOT = DB ums_sites.tier) ─────────────
+//
+// 브랜드 메뉴 정의는 위 modules에 한 번만 둔다. 어느 섹션(집중 / 실험·보관)에 보일지는
+// DB ums_sites.tier를 읽어 실행 시 정한다 → tier를 바꾸면 사이드바가 자동으로 따라온다 (CLAUDE.md §1.9.5)
+
+/** 인트라 경로 중 사이트 slug와 다른 것 */
+const BRAND_ADMIN_OVERRIDES: Record<string, string> = { hero: "/intra/hero", brandgravity: "/intra/gravity" };
+
+/** 사이트 slug → 인트라 브랜드 관리 루트 */
+export function brandAdminHref(siteSlug: string): string {
+    return BRAND_ADMIN_OVERRIDES[siteSlug] ?? `/intra/ums/${siteSlug}`;
+}
+
+/** 인트라 브랜드 메뉴 href → 사이트 slug */
+export function brandSiteSlugOf(href: string): string | null {
+    for (const [slug, h] of Object.entries(BRAND_ADMIN_OVERRIDES)) if (href === h) return slug;
+    const m = href.match(/^\/intra\/ums\/([^/]+)/); // /intra/ums/wio/tenants → wio
+    return m ? m[1] : null;
+}
+
+const FOCUS_TIERS = new Set(["core", "focus"]);
+
+/** 브랜드 섹션을 tier 기준으로 다시 나눈다. tiers 미지정 사이트·비브랜드 항목은 '실험·보관'에 남는다 */
+export function regroupBrandSections(mods: NavModule[], tiers: Record<string, string | null>): NavModule[] {
+    return mods.map(mod => {
+        const focusSec = mod.sections.find(s => s.brandGroup === "focus");
+        const restSec = mod.sections.find(s => s.brandGroup === "rest");
+        if (!focusSec || !restSec) return mod;
+        const all = [...focusSec.items, ...restSec.items];
+        const isFocus = (item: MenuItem) => {
+            const slug = brandSiteSlugOf(item.href);
+            return !!slug && FOCUS_TIERS.has(tiers[slug] ?? "");
+        };
+        // 핵심(core) 먼저, 그다음 이름순
+        const focus = all.filter(isFocus).sort((a, b) => {
+            const ta = tiers[brandSiteSlugOf(a.href) ?? ""] === "core" ? 0 : 1;
+            const tb = tiers[brandSiteSlugOf(b.href) ?? ""] === "core" ? 0 : 1;
+            return ta - tb || a.name.localeCompare(b.name);
+        });
+        const rest = all.filter(i => !isFocus(i)).sort((a, b) => a.name.localeCompare(b.name));
+        return {
+            ...mod,
+            sections: mod.sections.map(s =>
+                s.brandGroup === "focus" ? { ...s, items: focus }
+                : s.brandGroup === "rest" ? { ...s, items: rest }
+                : s),
+        };
+    });
 }

@@ -80,10 +80,11 @@
 
 ## 인트라 관리 경로
 
-- `/intra/ums/rook` 대시보드 — 가입 회원(member_brand_joins)·게시글(ums_posts site=rook, 게시판별)·미답변 문의 (세션 161)
-- `/intra/ums/rook/community` 게시글 관리 — 게시판 필터·사이트 글 링크 (수정·삭제는 인트라 > 게시판 또는 사이트 직원 버튼)
-- `/intra/ums/rook/members` 회원 — `member_brand_joins(brand_id=rook)` 기준 (members.affiliations 아님)
-- `/intra/ums/rook/cs` 문의 인박스 — form_type `rook_inquiry`(RooK 문의)·`rook_rookie`(RooKie 지원)
+- **인트라 메뉴 = 사이트 메뉴 1:1** — `lib/brand-site-menus.ts`(rook)에서 생성 (CLAUDE.md §1.9.5). 사이트 헤더 메뉴를 바꾸면 같이 고친다
+- `/intra/ums/rook` 대시보드 — 가입 회원·게시글·미답변 문의 + 사이트 메뉴별 현황 (`/api/intra/sites/status?site=rook`, 통합 관리 › 사이트 현황과 같은 숫자)
+- `/intra/ums/rook/works`·`/artist`·`/freeboard` 게시판별 글 (`RookPostsAdmin`) · `/community` 전체 글
+- `/intra/ums/rook/rookie` RooKie 지원(form_type `rook_rookie`) · `/intra/ums/rook/cs` Contact 문의(`rook_inquiry`)
+- `/intra/ums/rook/members` 회원 — `member_brand_joins(brand_id=rook)` 기준
 - 작품·아티스트 글 작성·수정: **사이트 Works·Artist 목록 "글쓰기 (직원)"·상세 "수정 (직원)"** (`features/rook/RooKStaffPostButton.tsx` → 통합 게시판 PostEditor, 서버 권한 write_permission=admin). ISR 10분 — 다른 방문자에게는 최대 10분 뒤 반영
 
 ---

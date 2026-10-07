@@ -8,6 +8,7 @@ import {
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 import { brandSiteUrl } from "@/lib/domain-registry";
+import { BrandSiteStatus } from "@/components/intra/BrandSiteStatus";
 
 interface Club { id: string; slug: string; name: string; region: string; color: string | null; president_member_id: string | null; }
 interface PresidentMember { id: string; name: string; email: string; }
@@ -221,6 +222,12 @@ export default function MADLeagueIntraPage() {
         <StatCard label="발행 아티클" value={`${stats.publishedArticles}개`} sub="MADzine" icon={<Eye className="h-4 w-4" />} />
         <StatCard label="MAD Crown" value={`${stats.totalCrowns}개`} sub="누적" icon={<Trophy className="h-4 w-4" />} />
       </div>
+
+      {/* 사이트 메뉴별 현황 — 통합 관리 > 사이트 현황과 같은 정의 (lib/brand-site-menus.ts) */}
+      <Card className="mb-6">
+        <SectionTitle title="사이트 메뉴별 현황" />
+        <BrandSiteStatus site="madleague" />
+      </Card>
 
       <div className="flex items-center gap-1 border-b border-neutral-200 mb-6">
         {([
