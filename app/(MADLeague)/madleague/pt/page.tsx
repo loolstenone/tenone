@@ -4,11 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getMadAccess } from '@/lib/madleague-roles';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
-import {
-  Trophy, Users, Medal, FileText, ExternalLink,
-  Calendar, ChevronRight, ArrowRight, Clock, CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+import { PtSubmissionPanel } from '@/features/madleague/PtSubmissionPanel';
+import { Trophy, Users, Medal, Calendar, ChevronRight, ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: '경쟁PT 워크스페이스',
@@ -61,17 +58,6 @@ function CompStatusBadge({ status }: { status: Competition['status'] }) {
   return <span className={`text-[11px] font-bold px-2.5 py-1 ${s.cls}`}>{s.label}</span>;
 }
 
-function SubmissionStatusIcon({ status }: { status: 'draft' | 'submitted' | 'withdrawn' }) {
-  if (status === 'submitted') return <CheckCircle2 className="h-4 w-4 text-green-400" />;
-  if (status === 'withdrawn') return <AlertCircle className="h-4 w-4 text-neutral-500" />;
-  return <Clock className="h-4 w-4 text-yellow-500" />;
-}
-
-function SubmissionStatusLabel({ status }: { status: 'draft' | 'submitted' | 'withdrawn' }) {
-  const map = { submitted: '제출 완료', draft: '작성 중', withdrawn: '철회' };
-  return <>{map[status]}</>;
-}
-
 function ResultBadge({ result }: { result: NonNullable<Team['result']> }) {
   // 경쟁 PT에는 MAD Crown 표기를 쓰지 않는다 — 순위만 (사용자 결정 2026-10-07)
   if (result.rank) return (
@@ -88,7 +74,6 @@ function ResultBadge({ result }: { result: NonNullable<Team['result']> }) {
 }
 
 function TeamPanel({ team }: { team: Team }) {
-  const latestSub = team.submissions[0] ?? null;
   return (
     <div className="bg-neutral-950 border border-[#EC1D25]/30 p-6 space-y-5">
       {/* 팀 헤더 */}
@@ -112,65 +97,11 @@ function TeamPanel({ team }: { team: Team }) {
         </span>
       </div>
 
-      {/* 제출물 */}
+      {/* 제출물 — 팀원 누구나 올리고 최종 제출 (마감 전) */}
       <div>
-        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">SUBMISSIONS</div>
-        {team.submissions.length === 0 ? (
-          <div className="bg-black border border-neutral-900 p-5 text-center">
-            <FileText className="h-6 w-6 text-neutral-700 mx-auto mb-2" />
-            <p className="text-sm text-neutral-500">아직 제출한 자료가 없습니다.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {team.submissions.map(sub => (
-              <div key={sub.id} className="bg-black border border-neutral-900 p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <SubmissionStatusIcon status={sub.status} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">{sub.title}</div>
-                    <div className="text-xs text-neutral-500 mt-0.5">
-                      <SubmissionStatusLabel status={sub.status} />
-                      {sub.submitted_at && (
-                        <span className="ml-2">
-                          · {new Date(sub.submitted_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {sub.presentation_url && (
-                    <a href={sub.presentation_url} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition">
-                      발표자료 <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                  {sub.file_url && (
-                    <a href={sub.file_url} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition">
-                      파일 <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">SUBMISSION</div>
+        <PtSubmissionPanel teamId={team.id} />
       </div>
-
-      {/* 제출 상태 안내 */}
-      {latestSub?.status === 'draft' && (
-        <div className="flex items-start gap-3 bg-yellow-950/20 border border-yellow-900/30 p-4 text-sm">
-          <Clock className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-          <p className="text-yellow-200/70">제출물이 아직 초안 상태입니다. 마감 전 최종 제출을 완료하세요.</p>
-        </div>
-      )}
-      {latestSub?.status === 'submitted' && (
-        <div className="flex items-start gap-3 bg-green-950/20 border border-green-900/30 p-4 text-sm">
-          <CheckCircle2 className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
-          <p className="text-green-200/70">제출 완료. 발표일에 뵙겠습니다!</p>
-        </div>
-      )}
     </div>
   );
 }

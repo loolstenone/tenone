@@ -14,6 +14,7 @@ interface Team {
     id: string; name: string; club_id: string | null;
     members: (Person & { role: string })[];
     result: { rank: number | null; award_name: string | null; feedback: string | null } | null;
+    submission: { title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string } | null;
 }
 interface Detail {
     competition: Record<string, string | number | null>;
@@ -189,12 +190,47 @@ function TeamCard({ team, clubs, candidates, applicantIds, busy, act }: {
                 <button disabled={busy || !pick} onClick={async () => { if (await act({ action: "add_member", team_id: team.id, member_id: pick, role: "leader" })) setPick(""); }} className="rounded border border-neutral-300 px-3 py-1.5 text-sm disabled:text-neutral-300">팀장으로</button>
             </div>
 
+            <SubmissionLine team={team} />
+
             <div className="mt-4 grid grid-cols-1 gap-2 border-t border-neutral-100 pt-4 sm:grid-cols-[6rem_1fr_2fr_auto]">
                 <input value={result.rank} onChange={e => setResult({ ...result, rank: e.target.value.replace(/\D/g, "").slice(0, 2) })} placeholder="순위" className="rounded border border-neutral-300 px-3 py-1.5 text-sm" />
                 <input value={result.award_name} onChange={e => setResult({ ...result, award_name: e.target.value })} placeholder="상 이름 (선택)" className="rounded border border-neutral-300 px-3 py-1.5 text-sm" />
                 <input value={result.feedback} onChange={e => setResult({ ...result, feedback: e.target.value })} placeholder="심사 코멘트 (선택)" className="rounded border border-neutral-300 px-3 py-1.5 text-sm" />
                 <button disabled={busy} onClick={() => act({ action: "set_result", team_id: team.id, ...result })} className="rounded bg-neutral-900 px-3 py-1.5 text-sm font-semibold text-white disabled:bg-neutral-300">결과 저장</button>
             </div>
+        </div>
+    );
+}
+
+/** 팀 제출물 — 최종 제출 여부·파일 내려받기(서명 URL 5분)·발표자료 링크 */
+function SubmissionLine({ team }: { team: Team }) {
+    const [loading, setLoading] = useState(false);
+    const s = team.submission;
+    const download = async () => {
+        setLoading(true);
+        const res = await fetch(`/api/madleague/pt/submission?team_id=${team.id}`);
+        const data = await res.json();
+        setLoading(false);
+        if (data.download_url) window.location.href = data.download_url;
+        else alert(data.error ?? "파일이 없습니다.");
+    };
+    return (
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-4 text-sm">
+            <span className="text-xs text-neutral-500">제출물</span>
+            {!s ? <span className="text-neutral-400">없음</span> : (
+                <>
+                    <span className={`rounded px-2 py-0.5 text-xs ${s.status === "submitted" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                        {s.status === "submitted" ? `최종 제출 ${s.submitted_at ? new Date(s.submitted_at).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : ""}` : "임시 저장"}
+                    </span>
+                    <span className="text-neutral-800">{s.title}</span>
+                    {s.file_name && (
+                        <button onClick={download} disabled={loading} className="text-xs text-neutral-500 underline hover:text-neutral-900">
+                            {loading ? "준비 중…" : `파일 ${s.file_name}`}
+                        </button>
+                    )}
+                    {s.presentation_url && <a href={s.presentation_url} target="_blank" rel="noopener noreferrer" className="text-xs text-neutral-500 underline hover:text-neutral-900">발표자료 링크</a>}
+                </>
+            )}
         </div>
     );
 }

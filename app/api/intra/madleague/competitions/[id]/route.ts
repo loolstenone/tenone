@@ -35,6 +35,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { data: links } = teamIds.length
         ? await admin.from("mad_team_members").select("team_id, member_id, role").in("team_id", teamIds)
         : { data: [] as { team_id: string; member_id: string; role: string }[] };
+    // 팀 제출물 (파일은 /api/madleague/pt/submission 서명 URL로 내려받기)
+    const { data: subs } = teamIds.length
+        ? await admin.from("mad_submissions").select("team_id, title, status, file_name, presentation_url, submitted_at, updated_at").in("team_id", teamIds)
+        : { data: [] as { team_id: string; title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string }[] };
 
     // 배정 후보: 연결 폼의 로그인 응답자 + 현역·임원 매드리거
     const { data: responses } = comp.form_id
@@ -64,6 +68,7 @@ export async function GET(req: NextRequest, { params }: Params) {
             ...t,
             members: (links ?? []).filter(l => l.team_id === t.id).map(l => ({ ...label(l.member_id), role: l.role })),
             result: (results ?? []).find(r => r.team_id === t.id) ?? null,
+            submission: (subs ?? []).find(s => s.team_id === t.id) ?? null,
         })),
         applicants: (responses ?? []).map(r => ({ ...label(r.member_id as string), response_id: r.id, response_status: r.status })),
         madleaguers: [...new Set((capRows ?? []).map(r => r.member_id as string))].map(label),
