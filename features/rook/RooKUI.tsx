@@ -140,17 +140,5 @@ export function RooKListCard({ board, post }: { board: RookBoard; post: RookPost
     );
 }
 
-/** 배경 유튜브 (음소거·반복·컨트롤 없음) — 장식용이라 포인터 이벤트 차단 */
-export function RooKBackgroundVideo({ videoId, className }: { videoId: string; className?: string }) {
-    const src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`;
-    return (
-        <div className={clsx("pointer-events-none absolute inset-0 overflow-hidden", className)} aria-hidden>
-            <iframe
-                src={src}
-                title="background video"
-                allow="autoplay; encrypted-media"
-                className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2"
-            />
-        </div>
-    );
-}
+// 배경 유튜브는 자막 제거(플레이어 API)가 필요해 클라이언트 컴포넌트로 분리
+export { RooKBackgroundVideo } from "@/features/rook/RooKBackgroundVideo";

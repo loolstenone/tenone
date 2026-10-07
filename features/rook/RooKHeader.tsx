@@ -61,7 +61,7 @@ export function RooKHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto">
+                <div className="hidden lg:flex ml-auto text-white">{/* 검정 헤더 — 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
                     <UniverseUtilityBar
                         hideAbout // 메뉴에 About이 이미 있음 (원본과 동일)
                         aboutPath="/rook/about"
