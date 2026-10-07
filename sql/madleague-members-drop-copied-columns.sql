@@ -2,6 +2,8 @@
 -- A (1~3) 즉시 적용 가능 / B (4~5)는 member/link API 삭제 코드 배포 후에만
 --   (배포 전 실행 시 운영 중인 옛 /api/madleague/member/link 가 mad_members.email 을 읽다 실패)
 -- 계정 미연결 옛 행: 2026-10-06 기준 테스트 행 1건뿐 (2026-04-15 생성) → 삭제
+-- 적용: A = 2026-10-07 `madleague_members_drop_prep` / B = 2026-10-07 `madleague_members_drop_copied_columns`
+--   (B 사전 점검: 함수·뷰·정책 의존성 0, 코드 참조 0, 롤백 시뮬레이션 통과)
 
 -- ===== A =====
 -- 1) 계정 미연결 테스트 행 정리 (member_id·user_id 모두 없음 = 이름이 사라지면 식별 불가)
