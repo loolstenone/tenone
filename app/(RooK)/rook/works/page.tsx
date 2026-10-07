@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getRookPosts, ROOK_CATEGORIES } from "@/lib/supabase/rook";
 import { RooKCategoryTabs, RooKContainer, RooKListCard, RooKMasonry } from "@/features/rook/RooKUI";
+import { RooKStaffPostButton } from "@/features/rook/RooKStaffPostButton";
 
 export const revalidate = 600;
 
@@ -18,6 +19,7 @@ export default async function RooKWorksPage({ searchParams }: { searchParams: Pr
     return (
         <RooKContainer className="pt-4 pb-20">
             <RooKCategoryTabs basePath="/rook/works" categories={ROOK_CATEGORIES.works} active={active} />
+            <div className="mb-4 flex justify-end empty:hidden"><RooKStaffPostButton board="works" /></div>
             <div className="mb-10 text-center">
                 <p className="text-[14px]">밈에서부터 광고, 영화까지</p>
                 <p className="mt-3 text-[20px] md:text-[24px]">루크의 작업에는 경계가 없습니다.</p>

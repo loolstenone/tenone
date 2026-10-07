@@ -13,11 +13,11 @@ interface Post {
     ums_boards: { slug: string; name: string } | null;
 }
 
-/** 사이트 글 주소 — works·artist는 slug, freeboard는 id (app/(RooK)/rook/{board}/[slug|id]) */
+/** 사이트 글 주소 — works·artist는 slug(없으면 id), freeboard는 id (app/(RooK)/rook/{board}/[slug|id]) */
 function postPath(p: Post): string | null {
     const board = p.ums_boards?.slug;
     if (board === "freeboard") return `/rook/freeboard/${p.id}`;
-    if ((board === "works" || board === "artist") && p.slug) return `/rook/${board}/${p.slug}`;
+    if (board === "works" || board === "artist") return `/rook/${board}/${p.slug ?? p.id}`;
     return null;
 }
 

@@ -69,6 +69,7 @@ export function RooKHeader() {
                 <div className="hidden lg:flex ml-auto">
                     <UniverseUtilityBar
                         hideAbout // 메뉴에 About이 이미 있음 (원본과 동일)
+                        aboutPath="/rook/about"
                         profilePath="/rook/my"
                         accentColor="#00d255"
                         signupPath="/rook/signup"

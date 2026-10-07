@@ -96,6 +96,9 @@ export async function getRookPosts(board: RookBoard, opts: { category?: string; 
     return (opts.limit ? rows.slice(0, opts.limit) : rows).map(toPost);
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** slug 또는 id로 조회 — 이전 글은 slug(rk-…), 게시판에서 새로 쓴 글은 slug가 없어 id로 링크된다 (toPost) */
 export async function getRookPost(board: RookBoard, slug: string): Promise<RookPost | null> {
     const id = await boardId(board);
     if (!id) return null;
@@ -103,7 +106,7 @@ export async function getRookPost(board: RookBoard, slug: string): Promise<RookP
         .from('ums_posts')
         .select(COLUMNS)
         .eq('board_id', id)
-        .eq('slug', slug)
+        .eq(UUID_RE.test(slug) ? 'id' : 'slug', slug)
         .eq('status', 'published')
         .maybeSingle();
     return data ? toPost(data as PostRow) : null;
