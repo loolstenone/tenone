@@ -34,6 +34,16 @@
 - 공통: `lib/domain-registry.ts` `brandSiteUrl()` · `BrandInquiryInbox` 라벨(madleague_inquiry·rook_*)
 - SQL 파일: `staff-definition-unify.sql` · `security-definer-rpc-lockdown.sql` · `security-open-insert-lockdown.sql` · `security-open-insert-lockdown-3.sql` · `cron-cleanup-2026-10-07.sql` · `cleanup-unused-boards-2026-10-07.sql` · `madleague-members-drop-copied-columns.sql` 적용 기록
 
+### 변경 내역 (후반 — 배포 요청 시 추가)
+
+- **(세션 161 후반) Edge Function 인증 · 인트라 관리 SSOT** (커밋 74653249 · ce89b0b3 · 4d083821)
+  - Edge Function 11개 x-edge-secret 잠금 (Vault `edge_function_secret`) → **Anthropic 크레딧 충전 가능**
+  - 인트라 사이드바 집중/실험·보관 = DB `ums_sites.tier` 자동 분류 (RooK 집중 반영)
+  - `lib/brand-site-menus.ts` = 사이트 헤더 메뉴·페이지 기능 ↔ 콘텐츠 ↔ 인트라 화면 SSOT. RooK·MADLeague 헤더가 레지스트리로 렌더, 인트라 메뉴·제목 = 사이트 표기 그대로 ("위치 › 버튼 문구")
+  - 통합 관리 › 사이트 현황 (`/intra/ums/sites/status`, `lib/site-status.ts` DB count) · 브랜드 대시보드 메뉴별 현황 · 미연결 DB 게시판 경고
+  - Standard › 관리 체계 · 외부 리소스 운영 / CLAUDE.md §1.9.5 + 부록 A "가이드와 어긋나는 지시는 먼저 묻기"
+  - 다음: TenOne·Badak·HeRo·MADLeap 레지스트리 등록 · Tier 미지정 23개 결정 · 인트라 화면 직원 로그인 확인
+
 ### 검증
 
 - 운영 anon REST: 잠근 RPC 6종 401 · 공개 INSERT 10개 테이블 401 · 유지 대상(조회수 RPC) 정상
