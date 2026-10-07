@@ -1,6 +1,6 @@
 -- 누구나 INSERT 가능한 정책 정리 3차 — 세션 161, 2026-10-07
 -- 2차(sql/security-open-insert-lockdown.sql)에서 코드 변경이 필요해 남긴 6개
--- 적용: A = 2026-10-07 MCP apply_migration `security_open_insert_lockdown_3a` (시뮬레이션 + 운영 anon REST INSERT 401 확인) / B = 미적용 (배포 후)
+-- 적용: A = 2026-10-07 MCP apply_migration `security_open_insert_lockdown_3a` (시뮬레이션 + 운영 anon REST INSERT 401 확인) / B = 2026-10-07 배포 후 `security_open_insert_lockdown_3b` (anon INSERT 401, 누구나 INSERT 정책 0개)
 
 -- ===== A (지금 — 배포된 코드가 이 정책에 의존하지 않음) =====
 -- MADLeague HeRo 신청 동의 기록 컬럼 (추가만 — 옛 코드 영향 없음)
@@ -16,5 +16,5 @@ DROP POLICY IF EXISTS "누구나 INSERT" ON public.hero_business_inquiries;
 
 -- ===== B (배포 후 — 배포된 옛 API가 사용자 세션 클라이언트로 INSERT 중) =====
 -- 새 코드: /api/hero/coaching-waitlist = requireMember + service_role, /api/madleague/hero = Turnstile + 동의 + service_role
--- DROP POLICY IF EXISTS "본인 INSERT" ON public.coaching_waitlist;
--- DROP POLICY IF EXISTS mad_hero_insert ON public.mad_hero_applications;
+DROP POLICY IF EXISTS "본인 INSERT" ON public.coaching_waitlist;
+DROP POLICY IF EXISTS mad_hero_insert ON public.mad_hero_applications;
