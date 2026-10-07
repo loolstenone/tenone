@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { MAD_PROGRAM_IMAGES } from '@/lib/madleague-program-assets';
 import { Lightbulb, AlertTriangle, Search, Filter, Hammer, ArrowRight, Target, Eye, Zap, Quote } from 'lucide-react';
 
 export const metadata = {
@@ -48,14 +47,10 @@ const termDefinitions = [
 export default function IdeaMovementPage() {
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* 원본 madleague.net/IdeaMovement 키비주얼 — 세상을 바꾸는 아이디어 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={MAD_PROGRAM_IMAGES.imHero} alt="Idea Movement — 세상을 바꾸는 아이디어" className="block w-full max-h-[70vh] object-cover" />
-
-      {/* Hero */}
+      {/* Hero — 다른 프로그램과 같은 텍스트 카피 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
-        <div className="relative mx-auto max-w-5xl px-6 py-20">
+        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">IDEA MOVEMENT</div>
           <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
             아이디어로<br />세상을 바꾼다

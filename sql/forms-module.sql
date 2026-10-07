@@ -1,7 +1,7 @@
 -- ============================================================
 -- 유니버스 공통 신청 폼 모듈 (구글 폼형) — forms · form_responses
 -- 작성: 2026-10-07 (MADLeague 크리에이지·DAM 파티 참가 신청 → 이벤트마다 새 폼)
--- 적용: (미적용 — 승인 후 MCP apply_migration)
+-- 적용: 2026-10-07 MCP apply_migration `forms_module` + `forms_module_grant_tighten`
 --
 -- 왜 공통인가: MADLeague 행사 신청 + RooK RooKie 지원 등 집중 브랜드 2곳 이상이 같은 기능 필요 (데이터 계약 3조)
 -- 데이터 계약:
@@ -84,6 +84,9 @@ DROP TRIGGER IF EXISTS form_responses_touch ON public.form_responses;
 CREATE TRIGGER form_responses_touch BEFORE UPDATE ON public.form_responses FOR EACH ROW EXECUTE FUNCTION public.forms_touch_updated_at();
 
 -- 5) GRANT (부록 D) — 응답은 anon 권한 없음 -------------------
+-- 기본 권한(default privileges)이 anon·authenticated에 ALL을 자동 부여하므로 먼저 회수 (2026-10-07 적용 시 발견)
+REVOKE ALL ON public.forms FROM anon, authenticated;
+REVOKE ALL ON public.form_responses FROM anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.forms TO authenticated;
 GRANT SELECT ON public.forms TO anon;
 GRANT ALL ON public.forms TO service_role;

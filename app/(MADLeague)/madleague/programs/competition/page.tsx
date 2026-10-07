@@ -39,7 +39,7 @@ const ARCHIVE = [
     desc: '자연친화 스타트업 리제로스에서 개발한 배달, 포장 음식 냉매제에 대한 시장 진출 전략',
     logo: '/logos/madleague/rezerouslogo.png',
     // 원본 madleague.net/pt 명예의 전당 발표 장면
-    gallery: ['3cc380de1afb6', '9e51de11b9c1b', '77efc772b91b6', 'ebf5d1bd22680'],
+    gallery: [] as string[],
     awards: [
       { img: '/logos/madleague/25-1gold.png',   label: '1위' },
       { img: '/logos/madleague/25-1silver.png',  label: '2위' },
@@ -52,7 +52,7 @@ const ARCHIVE = [
     client: '대성학원',
     desc: '대성학원 연간 소셜 캠페인 제안',
     logo: '/logos/madleague/daesunglogo.png',
-    gallery: ['01ed880a45dad', '014e066281217', '0040db378fa38', 'e69acb812da8d', '8f50929fa55c5'],
+    gallery: [] as string[],
     awards: [
       { img: '/logos/madleague/25gold.png',    label: '1위' },
       { img: '/logos/madleague/25silver.png',  label: '2위' },
@@ -66,7 +66,7 @@ const ARCHIVE = [
     client: '지평주조',
     desc: '지평 막걸리 100주년을 기점으로 지역을 벗어나 전국 막걸리가 되기 위한 전략 제안',
     logo: '/logos/madleague/지평로고.png',
-    gallery: ['1c6fe5c16769a', 'ba2b35413d8f7', 'a1d00227bff56', '9786f6ef75c79'],
+    gallery: [] as string[],
     awards: [
       { img: '/logos/madleague/24gold.png',   label: '1위' },
       { img: '/logos/madleague/24silver.png', label: '2위' },

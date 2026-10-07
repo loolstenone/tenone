@@ -73,11 +73,11 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [
+            { placement: "header", label: "경쟁 PT", path: "/madleague/programs/competition", source: { kind: "table", table: "mad_competitions" }, unit: "개" },
             {
-                placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "table", table: "mad_competitions" }, unit: "개",
+                placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "static" },
                 dropdown: [
-                    // madleague.net 프로그램 메뉴 이름·순서 그대로 (2026-10-07 이전)
-                    { label: "경쟁 PT", path: "/madleague/programs/competition" },
+                    // madleague.net 프로그램 메뉴 이름·순서 그대로 (2026-10-07 이전) — 경쟁 PT는 헤더 단독 메뉴로 (사용자 결정 2026-10-07)
                     { label: "크리에이지", path: "/madleague/programs/creazy" },
                     { label: "댐 파티", path: "/madleague/programs/dam" },
                     { label: "아이디어 무브먼트", path: "/madleague/programs/im" },

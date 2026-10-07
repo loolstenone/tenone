@@ -14,13 +14,10 @@ export const metadata = {
 export default function DamPage() {
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* Hero — 원본 키비주얼 */}
-      <section className="border-b border-neutral-900">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={MAD_PROGRAM_IMAGES.damHero} alt="DAM Party — 약한 연결고리가 만드는 강력한 기회" className="block w-full" />
-      </section>
-
-      <section className="mx-auto max-w-5xl px-6 py-28">
+      {/* Hero — 다른 프로그램과 같은 텍스트 카피 */}
+      <section className="relative overflow-hidden border-b border-neutral-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
+        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25]">DAM NETWORKING PARTY</div>
         <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-tight">우리와 맞는 좋은 인재,<br />나와 맞는 좋은 기업</h1>
         <p className="mt-6 text-2xl text-neutral-400 font-bold">찾기 힘드셨죠?</p>
@@ -32,6 +29,7 @@ export default function DamPage() {
           새로운 채용과 취업 기회를 창출하고자 합니다. 이력서와 기업 홈페이지로 찾아낼 수 없는 좋은 인재와 좋은 기업의 연결고리 —
           그 약한 연결고리가 만드는 강력한 기회, DAM(Draft Assembly Meeting)을 개최합니다.
         </p>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-28 grid grid-cols-1 md:grid-cols-2 gap-8">

@@ -1,4 +1,3 @@
-import { MAD_PROGRAM_IMAGES } from '@/lib/madleague-program-assets';
 import { ProgramForms } from '@/features/madleague/ProgramForms';
 
 export const revalidate = 300;
@@ -42,13 +41,10 @@ const AWARDS: [string, string, string, string, string][] = [
 export default function CreazyPage() {
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* Hero — 원본 키비주얼 */}
-      <section className="border-b border-neutral-900 bg-[#d9d9d9]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={MAD_PROGRAM_IMAGES.creazyHero} alt="CREAZY — 아이디어를 가둬두지 말고 세상에 꺼내자" className="mx-auto block w-full max-w-6xl" />
-      </section>
-
-      <section className="mx-auto max-w-5xl px-6 py-28">
+      {/* Hero — 다른 프로그램과 같은 텍스트 카피 */}
+      <section className="relative overflow-hidden border-b border-neutral-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
+        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CREATIVE &amp; CRAZY</div>
         <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-tight">매드리그 국제광고제<br />출품 프로젝트</h1>
         <p className="mt-10 text-xl text-neutral-300 leading-relaxed">
@@ -61,6 +57,7 @@ export default function CreazyPage() {
           <span className="text-[#EC1D25]">업계 선배들과 함께 하는 프로젝트입니다.</span>
         </p>
         <p className="mt-4 text-lg text-neutral-400">선배들의 못다 이룬 꿈을 함께 고민하면서 성장하는 것이 꿈입니다. 많은 분들과 함께 성장하고 싶습니다.</p>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-28 grid grid-cols-1 md:grid-cols-2 gap-8">

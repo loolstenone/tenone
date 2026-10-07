@@ -22,10 +22,12 @@ export function MadLeagueHeader() {
     const [logoError, setLogoError] = useState(false);
     const { isAuthenticated } = useAuth();
 
-    const isActive = (href: string) => {
-        if (href === "/") return pathname === "/";
-        return pathname.startsWith(href);
-    };
+    // 가장 길게 일치하는 메뉴 하나만 활성 (경쟁 PT /programs/competition ⊂ 프로그램 /programs)
+    const activeHref = navItems
+        .map(i => i.href)
+        .filter(h => pathname.startsWith(h))
+        .sort((a, b) => b.length - a.length)[0];
+    const isActive = (href: string) => href === activeHref;
 
     return (
         <>
