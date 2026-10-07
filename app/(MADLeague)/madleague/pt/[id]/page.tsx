@@ -5,8 +5,11 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getRoundAccess } from '@/lib/programs/access';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 import { RoundTabs } from '@/features/programs/RoundTabs';
-import { PROGRAM_KIND_LABEL } from '@/lib/programs/paths';
-import { ChevronRight, Calendar } from 'lucide-react';
+import { PROGRAM_KIND_LABEL, programTeamsPath } from '@/lib/programs/paths';
+import { hasProgramConsent } from '@/lib/programs/consent';
+import { officerGroupIds } from '@/lib/programs/brands';
+import { ProgramConsent } from '@/features/programs/ProgramConsent';
+import { ChevronRight, Calendar, Users } from 'lucide-react';
 
 export const metadata = { title: '회차 공지 · Q&A' };
 
@@ -32,18 +35,35 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
 
   const access = await getRoundAccess(id);
   if (!access) {
+    // 운영진(동아리 임원)은 팀 배정 전이어도 팀 구성 화면으로
+    const { data: m } = await createAdminClient().from('members').select('id').eq('auth_id', user.id).maybeSingle();
+    const { data: r } = await createAdminClient().from('program_rounds').select('id, brand_id, channels, title').eq('id', id).maybeSingle();
+    const officer = m && r ? (await officerGroupIds(r.brand_id, m.id)).length > 0 : false;
     return (
       <div className="min-h-[60vh] bg-black text-white">
         <div className="mx-auto max-w-3xl px-4 py-24 sm:px-6">
           <h1 className="text-3xl font-black">이 회차 참여자만 볼 수 있습니다</h1>
-          <p className="mt-3 text-sm text-neutral-500">팀 배정은 운영진이 합니다.</p>
-          <Link href="/madleague/pt" className="mt-8 inline-block border border-neutral-700 px-6 py-3 text-sm font-bold">워크스페이스로</Link>
+          <p className="mt-3 text-sm text-neutral-500">팀 배정은 동아리 운영진이 하거나, 팀장에게 받은 초대 링크로 합류합니다.</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {officer && r && <Link href={programTeamsPath(r)} className="inline-block bg-[#EC1D25] px-6 py-3 text-sm font-bold">팀 구성하기</Link>}
+            <Link href="/madleague/pt" className="inline-block border border-neutral-700 px-6 py-3 text-sm font-bold">워크스페이스로</Link>
+          </div>
         </div>
       </div>
     );
   }
 
   const db = createAdminClient();
+  // 참가자는 주인 브랜드 참가 동의 후 입장 (브리프·공지 포함) — 직원·클라이언트 제외
+  if (access.role === 'team' && !(await hasProgramConsent(access.memberId, access.round.brand_id))) {
+    const { data: site } = await db.from('ums_sites').select('name').eq('slug', access.round.brand_id).maybeSingle();
+    return (
+      <div className="min-h-[70vh] bg-black px-4 py-16 text-white sm:px-6">
+        <p className="mx-auto mb-6 max-w-xl text-sm text-neutral-400">{access.round.title}</p>
+        <ProgramConsent brand={access.round.brand_id} brandName={(site as { name: string } | null)?.name ?? access.round.brand_id} />
+      </div>
+    );
+  }
   const [{ data: comp }, { data: team }] = await Promise.all([
     db.from('program_rounds').select('title, kind, status, year, client_name, brief_title, brief_content, end_date, final_deadline, presentation_date').eq('id', id).single(),
     access.teamId ? db.from('program_teams').select('name, is_finalist').eq('id', access.teamId).single() : Promise.resolve({ data: null }),
@@ -68,6 +88,11 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
             <span className="bg-[#EC1D25]/20 px-2.5 py-1 text-[#EC1D25]">{STATUS[comp.status] ?? comp.status}</span>
             <span className="bg-white/5 px-2.5 py-1 text-white/60">{ROLE[access.role]}{team ? ` · ${team.name}` : ''}</span>
             {team?.is_finalist && <span className="bg-[#FFC000]/15 px-2.5 py-1 text-[#FFC000]">본선 진출</span>}
+            {(access.teamId || access.role === 'staff') && access.round.mode === 'team' && (
+              <Link href={programTeamsPath(access.round)} className="inline-flex items-center gap-1 border border-white/15 px-2.5 py-1 text-white/70 hover:text-white">
+                <Users className="h-3 w-3" /> {access.role === 'staff' ? '팀 구성' : '팀 관리'}
+              </Link>
+            )}
           </div>
           <h1 className="text-2xl font-black sm:text-4xl">{comp.title}</h1>
           {comp.client_name && <p className="mt-1 text-sm text-neutral-500">클라이언트 · {comp.client_name}</p>}

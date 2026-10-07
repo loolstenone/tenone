@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getMadAccess } from '@/lib/madleague-roles';
+import { getMadAccess, officerClubIds } from '@/lib/madleague-roles';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 import { SubmissionPanel } from '@/features/programs/SubmissionPanel';
-import { PROGRAM_KIND_LABEL } from '@/lib/programs/paths';
+import { PROGRAM_KIND_LABEL, programTeamsPath } from '@/lib/programs/paths';
 import { Trophy, Users, Medal, Calendar, ChevronRight, ArrowRight } from 'lucide-react';
 
 export const metadata = {
@@ -20,8 +20,10 @@ interface Competition {
   year: number;
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
   brief_title: string | null;
-  brief_content: string | null;
   kind: string;
+  brand_id: string;
+  channels: string[];
+  mode: string;
   final_deadline: string | null;
   results_published_at: string | null;
   client_name: string | null;
@@ -157,6 +159,7 @@ export default async function PTWorkspacePage() {
   // 매드리거(club·showcase 활동 역할) 또는 직원만 — member_capability_roles SSOT
   const access = await getMadAccess(memberRow.id);
   if (!access.canEnter) redirect('/madleague/apply');
+  const isOfficer = officerClubIds(access).length > 0;
 
   /* ── 데이터 로드 ── 입장 확인 후 서버에서만 (팀원·제출물 행은 RLS 비공개) */
   const db = createAdminClient();
@@ -317,9 +320,12 @@ export default async function PTWorkspacePage() {
                         공지 · Q&amp;A · 제출 <ArrowRight className="h-4 w-4" />
                       </Link>
                     )}
-                    {/* 브리프 내용 — 참여 팀원에게만 (인트라 경쟁 PT에서 입력) */}
-                    {comp.brief_content && myTeamIds.size > 0 && compTeams.some(t => t.myRole !== null) && (
-                      <p className="mt-3 text-sm text-neutral-300 max-w-2xl whitespace-pre-line leading-relaxed">{comp.brief_content}</p>
+                    {/* 팀 구성 — 동아리 운영진·직원 (팀장은 회차 방 › 팀 관리). 브리프 내용은 회차 방에서 참가 동의 후 */}
+                    {comp.mode === 'team' && comp.brand_id === 'madleague' && (comp.status === 'ongoing' || comp.status === 'upcoming') && (isOfficer || access.isStaff) && (
+                      <Link href={programTeamsPath(comp)}
+                        className="mt-4 ml-2 inline-flex items-center gap-2 border border-neutral-700 px-5 py-2.5 text-sm font-bold text-white hover:border-white">
+                        <Users className="h-4 w-4" /> 팀 구성
+                      </Link>
                     )}
                   </div>
                   {comp.presentation_date && (
@@ -344,7 +350,7 @@ export default async function PTWorkspacePage() {
                 ) : comp.status === 'ongoing' ? (
                   <div className="mb-8 bg-neutral-950 border border-dashed border-neutral-800 p-8 text-center">
                     <Users className="h-8 w-8 text-neutral-700 mx-auto mb-3" />
-                    <p className="text-sm text-neutral-500 mb-4">아직 참여 팀이 없습니다. 운영진에게 팀 배정을 요청하세요.</p>
+                    <p className="text-sm text-neutral-500 mb-4">아직 소속 팀이 없습니다. 동아리 운영진에게 배정을 요청하거나, 팀장에게 받은 초대 링크로 합류하세요.</p>
                     <Link href="/madleague/contact"
                       className="inline-flex items-center gap-2 text-sm font-bold text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 px-5 py-2.5 transition">
                       운영진 문의

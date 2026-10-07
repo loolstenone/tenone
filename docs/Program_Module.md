@@ -1,6 +1,6 @@
 # 프로그램 모듈 (코어) — 설계안 v0.1
 
-> 2026-10-08 · 상태: **설계 검토 중** (적용 전)
+> 2026-10-08 · 상태: **1·2단계 적용** (3단계 인증서 · 4단계 RooK·HeRo 예정)
 > 원칙: **기능은 하나(코어), 주인은 브랜드(`brand_id`), 창구는 여러 곳(`channels`)**
 > 근거: 데이터 계약 3조 — MADLeague(경쟁 PT)·RooK(실전 프로젝트) 두 집중 브랜드가 같은 기능을 필요로 함 → 코어로 끌어올림
 
@@ -73,3 +73,21 @@
 - 클라이언트에게 참가자 개인정보 비노출 — 팀 이름·제출물만 (제17조, 2026-10-08 결정)
 - 인증서 스냅샷은 발급 기록 — 탈퇴 시 처리 기준을 `docs/Data_Lifecycle.md`에 추가 (3단계)
 - RooK 실전 프로젝트: "참여 확인서" 명칭 · 무급 참여 근로자성 · 직업소개 연결 금지(미신고) — 4단계 출시 전 법률 검토
+
+---
+
+## 7. 2단계 — 사이트 팀 구성 · 초대 링크 · 참가 동의 (2026-10-08 적용)
+
+| 기능 | 누가 | 어디서 | 구현 |
+|---|---|---|---|
+| 참가 동의 | 참가자 (직원·클라이언트 제외) | 회차 방 첫 입장 · 팀 관리 · 초대 링크 합류 | `member_brand_joins(주인 브랜드)` origin `program` · terms_version `program-2026-10-08` (`lib/programs/consent.ts`, 문구 `consent-text.ts`) |
+| 팀 꾸리기 | 직원 · 동아리 운영진(club 임원 → 자기 동아리 팀만) | `/madleague/pt/{id}/teams` | 그 해 활동 회원(현역·임원, `context.year` = 회차 연도 또는 미기록)을 끌어다 놓기 · 모바일은 이름 → "여기로" · 팀장 지정 · 빈 팀 삭제 |
+| 초대 링크 | 팀장 · 운영진 · 직원 | 팀 카드 | `program_teams.invite_code` (10자, 재발급·끄기) → `/madleague/pt/join/{code}` → 가입·로그인 → 동의 → 합류 (`joined_via='invite'`) |
+| 팀명·소개 | 팀장 · 운영진 · 직원 | 팀 카드 "수정" | `rename` |
+
+- 권한: `lib/programs/teams.ts` (`getTeamScope` · `canRunTeam` · `canEditTeam`) — 운영진 권한은 모집 예정·진행 중 회차만, 직원은 항상
+- 브랜드 훅: `officerGroupIds` · `groupCandidates` (`lib/programs/brands.ts`) — 다른 브랜드는 훅 추가로 같은 화면 사용
+- 운영진은 자기 동아리 그 해 활동 회원만 직접 배정 — 그 외(미가입·타 동아리)는 초대 링크로 본인이 동의하고 합류
+- 한 회차 한 팀: DB UNIQUE → 다른 팀 소속이면 409 (이동은 운영진)
+- 브리프 내용은 회차 방에서 동의 후에만 (워크스페이스 목록에서 제거)
+- API: `/api/programs/rounds/{id}/teams` (GET 보드 · POST create_team·rename·assign·set_leader·invite·delete_team) · `/api/programs/invite` (GET 미리보기 · POST 합류) · `/api/programs/consent`
