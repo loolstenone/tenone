@@ -80,10 +80,10 @@
 
 ## 인트라 관리 경로
 
-- **사이트 헤더 메뉴·인트라 메뉴·화면 제목 = `lib/brand-site-menus.ts`(rook) 한 곳** (CLAUDE.md §1.9.5). `RooKHeader`가 `siteHeaderNav("rook")`로 렌더 — 메뉴 이름·순서는 레지스트리에서만 바꾼다. 인트라 이름은 사이트 표기 그대로 (Free board * · RooKie › RooKie 지원하기 · About › 상담 / 문의)
+- **사이트 헤더 메뉴·인트라 메뉴·화면 제목 = `lib/brand-site-menus.ts`(rook) 한 곳** (CLAUDE.md §1.9.5). `RooKHeader`가 `siteHeaderNav("rook")`로 렌더 — 메뉴 이름·순서는 레지스트리에서만 바꾼다. 인트라 이름은 사이트 표기 그대로 (Free board * · RooKie 지원하기 · 상담 / 문의)
 - `/intra/ums/rook` 대시보드 — 가입 회원·게시글·미답변 문의 + 사이트 메뉴별 현황 (`/api/intra/sites/status?site=rook`, 통합 관리 › 사이트 현황과 같은 숫자)
 - `/intra/ums/rook/works`·`/artist`·`/freeboard` 게시판별 글 (`RookPostsAdmin`) · `/community` 전체 글
-- `/intra/ums/rook/rookie` RooKie › RooKie 지원하기(form_type `rook_rookie`) · `/intra/ums/rook/cs` About › 상담 / 문의(`rook_inquiry`)
+- `/intra/ums/rook/rookie` RooKie 지원하기(RooKie 페이지, form_type `rook_rookie`) · `/intra/ums/rook/cs` 상담 / 문의(About 페이지, `rook_inquiry`)
 - `/intra/ums/rook/members` 회원 — `member_brand_joins(brand_id=rook)` 기준
 - 작품·아티스트 글 작성·수정: **사이트 Works·Artist 목록 "글쓰기 (직원)"·상세 "수정 (직원)"** (`features/rook/RooKStaffPostButton.tsx` → 통합 게시판 PostEditor, 서버 권한 write_permission=admin). ISR 10분 — 다른 방문자에게는 최대 10분 뒤 반영
 

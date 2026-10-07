@@ -3,7 +3,7 @@
  *
  * 원칙 (CLAUDE.md §1.9.5):
  *   - 사이트 헤더는 이 파일의 header 메뉴를 그대로 렌더한다 (siteHeaderNav) → 메뉴 이름을 고칠 곳은 여기 한 곳
- *   - 인트라 브랜드 메뉴는 사이트에 보이는 이름 그대로 (헤더 메뉴명 / "메뉴 › 버튼명") — 다른 이름을 지어 붙이지 않는다
+ *   - 인트라 브랜드 메뉴는 사이트에 보이는 이름 그대로 (헤더 메뉴명 / 버튼 문구) — 위치(상위 메뉴)를 붙이지 않고, 다른 이름을 지어 붙이지 않는다
  *   - 통합 관리 > 사이트 현황과 브랜드 대시보드는 이 정의로 숫자를 센다 (lib/site-status.ts)
  *   - Tier(집중/보관)는 여기서 정하지 않는다 → DB ums_sites.tier
  */
@@ -37,10 +37,10 @@ export interface HeaderMenu extends MenuBase {
     dropdown?: { label: string; path: string }[];
 }
 
-/** 페이지 안 기능 (버튼·폼·푸터 링크) — 인트라 이름 = "위치 › 문구" */
+/** 페이지 안 기능 (버튼·폼·푸터 링크) — 인트라 이름 = 버튼 문구 그대로, 위치는 현황표 보조 정보로만 */
 export interface FeatureMenu extends MenuBase {
     placement: "feature";
-    /** 기능이 있는 위치 — 헤더 메뉴명 또는 "홈"·"푸터 Contact" 등 사이트에 보이는 이름 */
+    /** 기능이 있는 위치 (현황표 보조 표기) — 헤더 메뉴명 또는 "홈"·"푸터 Contact" 등 */
     location: string;
 }
 
@@ -95,9 +95,9 @@ export function getBrandSiteMenus(siteId: string): BrandSiteMenus | undefined {
     return BRAND_SITE_MENUS.find(b => b.siteId === siteId);
 }
 
-/** 인트라·현황표에 쓰는 이름 — 사이트에 보이는 그대로 (기능은 "위치 › 문구") */
+/** 인트라·현황표에 쓰는 이름 — 사이트에 보이는 그대로 (헤더 메뉴명 / 버튼 문구, 위치 표기 없음) */
 export function siteMenuTitle(m: SiteMenu): string {
-    return m.placement === "feature" ? `${m.location} › ${m.label}` : m.label;
+    return m.label;
 }
 
 /** 사이트 헤더 메뉴 — 브랜드 헤더 컴포넌트가 이걸로 렌더 (이름·순서 SSOT) */

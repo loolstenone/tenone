@@ -36,7 +36,7 @@ function inquiryCount(admin: SupabaseClient, match: { formType: string } | { pre
 
 async function menuStatus(admin: SupabaseClient, boardId: (slug: string) => string | undefined, m: SiteMenu): Promise<MenuStatus> {
     const src = m.source;
-    const base = { label: siteMenuTitle(m), path: m.path, adminHref: m.adminHref ?? null, unit: m.unit ?? "", kind: src.kind, placement: m.placement };
+    const base = { label: siteMenuTitle(m), path: m.path, adminHref: m.adminHref ?? null, unit: m.unit ?? "", kind: src.kind, placement: m.placement, location: m.placement === "feature" ? m.location : null };
     switch (src.kind) {
         case "board": {
             const id = boardId(src.board);

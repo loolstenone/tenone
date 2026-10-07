@@ -23,7 +23,7 @@ interface HeroApp {
 
 export type Tab = "applications" | "hero";
 
-// 제목 = 사이트 표기 그대로 (lib/brand-site-menus.ts → 홈 › 지원하기 / HeRo › HeRo 신청하기)
+// 제목 = 사이트 표기 그대로 (lib/brand-site-menus.ts → 지원하기 / HeRo 신청하기)
 const TAB_TITLE: Record<Tab, { title: string; desc: string }> = {
     applications: { title: adminTitle("/intra/ums/madleague/applications", "지원서"), desc: "사이트 /madleague/apply 지원서 (mad_applications)" },
     hero: { title: adminTitle("/intra/ums/madleague/hero-applications", "HeRo 신청"), desc: "사이트 /madleague/hero 커리어 상담 신청 (mad_hero_applications)" },

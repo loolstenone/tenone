@@ -33,7 +33,7 @@ export function SiteMenuTable({ site }: { site: SiteStatus }) {
         <table className="w-full text-sm">
             <thead>
                 <tr className="text-left text-xs text-neutral-400">
-                    <th className="py-2 pr-3 font-medium">사이트 메뉴 · 기능 (사이트 표기 그대로)</th>
+                    <th className="py-2 pr-3 font-medium">사이트 메뉴 · 기능</th>
                     <th className="py-2 pr-3 font-medium text-right">콘텐츠</th>
                     <th className="py-2 pr-3 font-medium text-right">처리 대기</th>
                     <th className="py-2 font-medium">인트라 관리</th>
@@ -46,7 +46,7 @@ export function SiteMenuTable({ site }: { site: SiteStatus }) {
                             <a href={brandSiteUrl(site.slug, m.path)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline">
                                 {m.label} <ExternalLink className="h-3 w-3 text-neutral-300" />
                             </a>
-                            <span className="ml-1.5 text-[10px] text-neutral-400">{m.placement === "header" ? "헤더 메뉴" : "페이지 기능"}</span>
+                            <span className="ml-1.5 text-[10px] text-neutral-400">{m.placement === "header" ? "헤더 메뉴" : `${m.location ?? ""} 페이지 기능`}</span>
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">{m.kind === "static" ? <span className="text-neutral-300">고정 페이지</span> : m.count === null ? <span className="text-red-500">{m.kind === "board" ? "DB 게시판 없음" : "조회 실패"}</span> : `${m.count}${m.unit}`}</td>
                         <td className="py-2 pr-3 text-right tabular-nums">{m.pending ? <span className="font-semibold text-red-600">{m.pending}</span> : <span className="text-neutral-300">-</span>}</td>

@@ -13,6 +13,8 @@ export interface MenuStatus {
     kind: ContentSource["kind"];
     /** header = 사이트 헤더 메뉴, feature = 페이지 안 버튼·폼 */
     placement: "header" | "feature";
+    /** 페이지 기능의 위치 (보조 표기) */
+    location: string | null;
 }
 
 export interface SiteStatus {
