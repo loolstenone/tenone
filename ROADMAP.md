@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-07 (세션 160 — MADLeague 이월 수리 · RooK 집중 승격·원본 이전)
+> 마지막 업데이트: 2026-10-07 (세션 161 — 보안 집중 정리 · MADLeague·RooK 인트라 연결 · 크론 정리)
 
 ---
 
@@ -17,7 +17,14 @@
 - [ ] 봇 계정 201 정리 (사용자 Dashboard) · jakka 더미 20 결정
 - [ ] npm audit critical 1 · high 22
 - [ ] 규모 축소: 집중 5개 외 브랜드 API 비활성/보관
-- [ ] handle-login 이메일 노출 · 크론 CRON_SECRET fail-open 27곳 · security_definer 뷰 9 · anon DEFINER 함수 49 · 유출 비번 차단
+- [x] 크론 fail-open 20개 라우트 → `isInternalRequest` — 세션 161
+- [x] 직원 판단 기준 통일 `isStaffMember` (@tenone.biz 이메일 인정 폐지) + JWT is_staff 같은 정의 — 세션 161
+- [x] anon DEFINER RPC 위험 14개 잠금 (set_brand_role·HeRo 매칭·WIO 가입·카운터) — 세션 161
+- [x] 누구나 INSERT 정책 21/23 제거 (가짜 알림·주문·구독자 등) + MoNTZ 메일 HTML 이스케이프·캡차 — 세션 161
+- [ ] 배포 후: `get_email_by_handle` 회수 · 공개 INSERT 3차 B 2개 · 크론 401 확인
+- [ ] **Edge Function 인증** (verify_jwt=false·본문 인증 없음 → Claude 크레딧 소모 통로) — Vault 비밀 승인 대기, Anthropic 크레딧 충전 전
+- [ ] handle-login 핸들→이메일 공개 API · WIO 테넌트 자가 가입 · `is_tenone_staff()` → `auth_is_staff()` 통일 (~70 정책)
+- [ ] security_definer 뷰 9 · 유출 비번 차단 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
 ## 🏛 플랫폼 헌법·데이터·법무 (세션 157 — 2026-10-05)
@@ -57,8 +64,10 @@
 - [x] 집중 Tier 승격 (ums_sites·CANONICAL_HOSTS external·noindex·사이트맵 제외)
 - [x] 게시판 works·artist·freeboard + 원본 카테고리 · Works 20·Artist 30·자유게시판 공지 3 이전 · 원본 순서
 - [x] 원본 www.rook.co.kr 대조 재작성 (메뉴·배너·홈·목록·상세·About·RooKie·팝업 폼)
-- [ ] 배포 화면 원본 비교 · 팝업 폼 실제 제출(첨부) · "매니악 취향" 공지 2편 확인
-- [ ] 인트라 RooK 관리 (작품·아티스트 작성 화면) · RooKie 승인 회원 체계(capability)
+- [x] 배포 화면 확인 · "매니악 취향" = 운영자 본인(유지) · 스테이징 다시 닫음 — 세션 161
+- [x] 인트라 RooK 실데이터 연결(ums_posts·member_brand_joins) · Works·Artist 직원 글쓰기·수정 · 새 글 상세 404 수정 · 미사용 게시판 삭제 — 세션 161
+- [ ] 팝업 폼 실제 제출(첨부) · 직원 글쓰기 실사용 1건 · 인트라 화면 직원 로그인 확인
+- [ ] RooKie 승인 회원 체계(capability)
 - [ ] AD 시안 상표 검토 · 본문 서버 렌더(SEO) · DNS 전환 계획(아임웹 회원 수 → 30일 공지 · 옛 URL 308)
 
 ## 🎓 MADLeague 새 사이트 (집중 — 세션 159 · 2026-10-06, 비공개 스테이징)
@@ -72,11 +81,12 @@
 - [x] 계정 정보 members SSOT 1단계 (member_id·작성자 표시·프로필 편집·승격 트리거)
 - [x] MADzine 이전 (madleague.net 21건·이미지 85장·카테고리 8종) + 검정 에디토리얼 리디자인 · 배포
 - [x] `mad_members` 복사 컬럼 삭제 A단계 (옛 행 정리·link 함수 삭제·수료증 함수 members 기준) — 세션 160
-- [ ] `mad_members` 복사 컬럼 4개 DROP B단계 (승인 완료, 배포 후 실행)
+- [x] `mad_members` 복사 컬럼 4개 DROP B단계 — 세션 161
 - [x] 승인 로직 통일(회장·인트라 → capability) · 회장 대기 지원서 API · getMadLeagueProfile · MADLeap 인트라 조회 — 세션 160
-- [ ] 동아리 지원서 전제 결정 (A 소속 인증 / B 모집 / C 폐지) + 멘토 전 동아리 지원자 열람 범위 수리
+- [x] 동아리 지원서 = A 소속 인증 · 열람 해당 동아리 회장·담당 멘토·직원 · 반려 권한 통일 — 세션 161
+- [x] 인트라 회원 관리 capability 기준 · 문의하기 페이지 · HeRo 신청 동의·캡차 · 미사용 ums_boards 6개·테스트 지원서 삭제 — 세션 161
+- [ ] 기존 멘토(lools) 담당 동아리 지정 · HeRo 신청 보관기간 확인 · 문의하기 실제 제출
 - [ ] 로그인 실검증: 지원 → 마이페이지 심사 중 → 인트라 승인 → capability 행 · 멘토 아레나 입장
-- [ ] 회장 마이페이지 대기 지원서 (정책 없음) · `getMadLeagueProfile` 고장 · MADLeap 인트라 brand_id 필터
 - [ ] 기수 14건(archive) 근거 확인 · 동아리 로고 7종·소개 문구
 - [ ] MADzine 서버 렌더(SEO) · 구 아임웹 URL 308 · 투고 기사 author_name 방식 — DNS 전환 전
 - [ ] 오픈 체크리스트: 개인정보처리방침 새 수집 항목 · 외부 사이트 종료 절차(회원 0 — §0.1 ⑤~⑦) · DNS 전환 · noindex 해제 · `hosting: 'vercel'`

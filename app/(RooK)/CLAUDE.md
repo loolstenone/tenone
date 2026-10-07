@@ -30,7 +30,6 @@
 | `works` (Works) | 직원(admin) | Meme · AD · Music · Contents · RooK BooK · Art work | 운영사 작품 20편 (slug `rk-{아임웹 idx}`) |
 | `artist` (AI Artist) | 직원(admin) | Woman · Man · High teen · Kids · Baby · Senior · Animal · Character · Musician | AI 모델 30명 |
 | `freeboard` (Free board) | 회원 | Imge · Video · Music · Text · Big Contents · 망했어요 ㅋ | 자랑게시판. 원본 '공지' 3편만 이전 (작성자 관리자·매니악 취향) — 일반 회원 글·스팸은 이전하지 않음 |
-| `challenge` · `feedback` | 회원 | — | 이전부터 있던 빈 게시판 (미사용) |
 
 - 글 = `ums_posts` (`category_id`=카테고리명, `image`=원본 목록 썸네일, `extra_fields.youtube_id`·`source`=원본 URL·`sort`=원본 목록 순서, `author_name`=원본 작성자)
 - 정렬: `sort` 없는 새 글(최신순) → 이전 글은 원본 순서 (`getRookPosts`)
@@ -75,12 +74,17 @@
 | `features/rook/RooKUI.tsx` | 사이트 이미지·영상·카테고리 색 상수, 섹션 제목, 카테고리 탭, 매스너리, 홈 오버레이 카드·목록 카드, 배경 영상 |
 | `features/rook/RooKPostBody.tsx` | 본문 HTML (클라이언트 정화, YouTube embed만 허용) |
 | `features/rook/RooKContactForm.tsx` | `RooKContactModalButton` — Contact·RooKie 지원 팝업 (원본 필드) |
-| `features/rook/RooKPostDetail.tsx` | Works·Artist 상세 (원본: 카테고리+제목 20px → 본문) |
+| `features/rook/RooKPostDetail.tsx` | Works·Artist 상세 (원본: 카테고리+제목 20px → 본문) + 직원 수정 버튼 |
+| `features/rook/RooKStaffPostButton.tsx` | 직원 전용 글쓰기·수정 (PostEditor 모달, /api/board/posts) |
 | `features/rook/RooKHeader.tsx` · `RooKFooter.tsx` | 헤더(UtilityBar·MobileMenu)·푸터(UniverseFooter) |
 
 ## 인트라 관리 경로
 
-- 작품·아티스트 글 작성·수정: 게시판 관리(직원) — 전용 화면 없음 (이월)
+- `/intra/ums/rook` 대시보드 — 가입 회원(member_brand_joins)·게시글(ums_posts site=rook, 게시판별)·미답변 문의 (세션 161)
+- `/intra/ums/rook/community` 게시글 관리 — 게시판 필터·사이트 글 링크 (수정·삭제는 인트라 > 게시판 또는 사이트 직원 버튼)
+- `/intra/ums/rook/members` 회원 — `member_brand_joins(brand_id=rook)` 기준 (members.affiliations 아님)
+- `/intra/ums/rook/cs` 문의 인박스 — form_type `rook_inquiry`(RooK 문의)·`rook_rookie`(RooKie 지원)
+- 작품·아티스트 글 작성·수정: **사이트 Works·Artist 목록 "글쓰기 (직원)"·상세 "수정 (직원)"** (`features/rook/RooKStaffPostButton.tsx` → 통합 게시판 PostEditor, 서버 권한 write_permission=admin). ISR 10분 — 다른 방문자에게는 최대 10분 뒤 반영
 
 ---
 
@@ -98,6 +102,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | 새 사이트 제작 — 비공개 스테이징 (2026-10-07 세션 160) |
+| **Phase** | 새 사이트 제작 — 비공개 스테이징 (2026-10-07 세션 161 — ums_sites.is_open=false로 다시 닫음) |
+| **세션 161 완료** | 배포 확인(Works 20·Artist 30·자유게시판 공지 3) · "매니악 취향" = 운영자 본인 확인(유지) · 인트라 RooK 실데이터 연결(옛 posts → ums_posts, affiliations → member_brand_joins) · 직원 글쓰기·수정 버튼 · **새 글 상세 404 수정**(slug 없는 글은 id로 조회 — getRookPost) · 미사용 게시판 challenge·feedback 삭제 · RooKHeader aboutPath 타입 오류 |
 | **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) · 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
-| **이월 작업** | ⓪ 배포 화면을 www.rook.co.kr과 나란히 비교 · 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 자유게시판 공지 작성자 "매니악 취향"(rk-167517018·rk-167515976)이 운영자인지 사용자 확인 ① 인트라 RooK 관리(작품·아티스트 작성 화면, 문의 인박스 확인) ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |
+| **이월 작업** | ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ AD 시안 상표 검토 ④ DNS 전환 계획(아임웹 회원 수 확인 → 공지) ⑤ 본문 서버 렌더(SEO) |

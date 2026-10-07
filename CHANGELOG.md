@@ -4,6 +4,53 @@
 
 ---
 
+## 2026-10-07 (세션 161) — 보안 집중 정리 · MADLeague·RooK 인트라 연결 · 크론 정리
+
+### 장소·운영
+
+- `C:\Projects\tenone` master 직접. 커밋 14개 + 문서 커밋 → 작업 종료 시 push 1회
+- 운영 DB (MCP, 각 롤백 시뮬레이션 + 운영 anon REST 확인 후): `madleague_members_drop_copied_columns` · `staff_definition_unify` · `security_definer_rpc_lockdown` · `security_open_insert_lockdown` · `security_open_insert_lockdown_3a` · `cleanup_unused_boards_test_application` · `ums_sites` rook·madleague `is_open=false` · pg_cron 2개 unschedule
+- **미적용 (배포 후)**: `get_email_by_handle` 회수(`sql/security-definer-rpc-lockdown.sql` 4) · 공개 INSERT 3차 B(`sql/security-open-insert-lockdown-3.sql`)
+- **차단됨 (자동 모드)**: Edge Function 인증용 Vault 비밀 생성 — 사용자 결정 대기
+
+### 결정 (사용자)
+
+- "매니악 취향" 자유게시판 공지 = 운영자 본인 → 유지
+- rook·madleague 스테이징 다시 닫기 (원칙 6)
+- MADLeague 동아리 지원서 전제 = **A 소속 인증**
+- 직원 기준 통일 · 크론 fail-open 제거 진행 (자동 모드 차단 후 명시 승인)
+- DEFINER RPC 1차 (b) — `get_email_by_handle`만 배포 후
+- MADLeague 문의 폼 추가 · 미사용 게시판 8개·테스트 지원서·HeRo API 2개 삭제
+
+### 변경 내역
+
+- 권한: `lib/api-guard.ts` `isStaffMember()` 신설(@tenone.biz 이메일 인정 폐지, context=universe·만료 반영) → `requireStaff`·`getMadAccess`·MyVerse `requireIntraStaff` · DB `sync_roles_to_jwt` 같은 정의 · CLAUDE.md §1.6 갱신
+- 크론: 20개 라우트 `isInternalRequest` (Bearer undefined·no-secret·CRON_SECRET 미설정 통과 제거) · `newsletter-crawl` 내부 호출 `internalAuthHeaders` · `vercel.json` KST 새벽 이동·badak KST 0시·trend-crawl 제거
+- DEFINER RPC: 서버 전용·미사용 12개 anon/authenticated 회수 · `hero_match_candidates_for_tih` 직원만 · `ensure_wio_membership` 본인만 · `handle-login` admin 클라이언트
+- 공개 INSERT: 2차 17개 정책 제거(badak/jakka 알림·chat_messages·shop_orders·badak_stars·collected_data·newsletter_subscribers·hero 지원·tih 등) · 3차 A 4개(montz·Townity 댓글·hero 대기·기업 문의)
+- 공개 폼: MoNTZ `/api/montz/contact` Turnstile + 메일 escapeHtml + 제목 개행 제거, 브라우저 직접 INSERT 함수 삭제 · `/api/madleague/hero` Turnstile·동의(`2026-10-07.1`, `mad_hero_applications.consent`)·service_role · `/api/hero/coaching-waitlist` requireMember·이름/이메일 복사 중단 · `app/api/hero/{search-light-waitlist,business-inquiry}` 삭제
+- MADLeague: `canViewClubApplications`(멘토 context.club_id) · 반려 권한 = 승인 · `/api/madleague/admin/members` + 인트라 회원 관리 capability 기준 · `/madleague/contact` + `MadContactForm` · 푸터 mailto → 문의하기
+- RooK: 인트라 대시보드·게시글 관리(`ums_posts`)·회원(`member_brand_joins`) · `RooKStaffPostButton`(Works·Artist 글쓰기·수정) · `getRookPost` slug/id 조회(새 글 404 수정) · `RooKHeader` aboutPath
+- 공통: `lib/domain-registry.ts` `brandSiteUrl()` · `BrandInquiryInbox` 라벨(madleague_inquiry·rook_*)
+- SQL 파일: `staff-definition-unify.sql` · `security-definer-rpc-lockdown.sql` · `security-open-insert-lockdown.sql` · `security-open-insert-lockdown-3.sql` · `cron-cleanup-2026-10-07.sql` · `cleanup-unused-boards-2026-10-07.sql` · `madleague-members-drop-copied-columns.sql` 적용 기록
+
+### 검증
+
+- 운영 anon REST: 잠근 RPC 6종 401 · 공개 INSERT 10개 테이블 401 · 유지 대상(조회수 RPC) 정상
+- 로컬: 크론 6개 라우트 인증 없음·Bearer undefined·no-secret 모두 401 · RooK slug/id 상세 200, 없는 id 404, 비로그인 직원 버튼 미노출 · `/madleague/contact` 렌더 · admin members API 비로그인 401
+- 직원 권한 시뮬레이션: RooK 글 53·회원 1 조회 · tsc 변경 파일 0 에러
+- 미검증: 인트라 화면(직원 로그인) · 폼 실제 제출(캡차) · 배포 후 크론 실행
+
+### 발견
+
+- Anthropic API 크레딧 소진 — 10:01 브리핑 3주간 저장 0건
+- Edge Function 대부분 인증 없음(verify_jwt=false) — 크레딧 소모 공격 통로
+- `daily-gpr` Edge 미배포 · `mindle-metrics-compute` 미배포(pg_cron 404, 해제함)
+- `is_tenone_staff()`가 `members.account_type` 기준 (~70 정책) — 현재 노출 없음(보호 트리거·해당 계정 모두 staff 역할), 통일 이월
+- 인트라 HeRo 매칭 함수 타입 불일치(varchar(3) vs text)로 고장
+
+---
+
 ## 2026-10-07 (세션 160, 집) — MADLeague 이월 수리 · RooK 집중 승격·원본 이전
 
 ### 장소·운영

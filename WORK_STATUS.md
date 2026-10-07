@@ -1,6 +1,46 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-07 (세션 160 — MADLeague 이월 버그 수리 · RooK 집중 승격 + www.rook.co.kr 원본 그대로 이전)
+> 마지막 업데이트: 2026-10-07 (세션 161 — 보안 집중 정리(DEFINER RPC·공개 INSERT·크론·직원 기준) · MADLeague·RooK 인트라 연결 · 크론·pg_cron 정리)
+
+---
+
+## 세션 161 핵심 성과 (2026-10-07) — 보안 정리 · 인트라 연결 · 크론
+
+> 작업 위치: `C:\Projects\tenone` master 직접. 작업 종료 시 push 1회.
+
+- **MADLeague**
+  - `mad_members` 복사 컬럼 DROP B단계 운영 적용 (`madleague_members_drop_copied_columns`, 의존성 0·시뮬레이션 후)
+  - 동아리 지원서 = **A 소속 인증** (사용자 결정): 열람 = 직원·이 동아리 회장·이 동아리 담당 멘토 (`canViewClubApplications`), 반려 권한 승인과 통일
+  - 인트라 회원 관리 = 활동 역할(capability) 기준 (`/api/madleague/admin/members`) · 문의하기 페이지 `/madleague/contact` 신설 · HeRo 신청 동의·캡차·서버 저장
+  - 미사용 `ums_boards` 6개 · 테스트 지원서(test@test.com) 삭제
+- **RooK**: 배포 확인 · 인트라 실데이터 연결(옛 `posts` → `ums_posts`, `affiliations` → `member_brand_joins`) · Works·Artist 직원 글쓰기·수정 버튼 · **새 글 상세 404 수정**(id 조회) · challenge·feedback 게시판 삭제
+- **스테이징 공개 차단**: rook·madleague `ums_sites.is_open=false` (로그인 없이 보이던 상태 → 원칙 6)
+- **직원 판단 기준 통일**: `lib/api-guard.ts isStaffMember` = `member_roles` staff·manager·super_admin@universe(활성·미만료). @tenone.biz 이메일 직원 인정 폐지. DB `sync_roles_to_jwt` 같은 정의(`staff_definition_unify`)
+- **보안 (운영 DB, 각 시뮬레이션 + anon REST 401 확인)**
+  - anon 실행 가능 DEFINER RPC 14개 잠금 (`security_definer_rpc_lockdown`): `set_brand_role`(권한 변조)·HeRo 매칭 점수 조회·WIO 임의 테넌트 가입·카운터 조작
+  - 누구나 INSERT 정책 23개 중 21개 제거 (`security_open_insert_lockdown`, `…_3a`): 가짜 알림·주문·구독자·Badak 스타 기사 등
+  - 공개 폼: MoNTZ 캐스팅 제안 캡차 + **메일 HTML 이스케이프**(noreply@tenone.biz 명의 피싱 차단) · 코칭 대기 requireMember·이메일 복사 중단 · 호출처 없는 HeRo API 2개 삭제
+  - 크론 20개 라우트 fail-open 제거 → `isInternalRequest`
+- **크론**: 무거운 크롤 KST 02~06시, badak 만료 KST 0시, Vercel trend-crawl 중복 제거 · pg_cron `daily-briefing-1001`(401·평문 키·중복)·`mindle-metrics-compute-hourly`(404) 해제
+
+### 다음 첫 액션
+
+1. **배포 확인 직후 (순서대로)**
+   - 크론 401 여부: Vercel 로그에서 `/api/cron/*` 401 — 있으면 운영 `CRON_SECRET`이 16자 미만(→ `isInternalRequest` 거부). Vercel env 키 교체
+   - `get_email_by_handle` 실행 회수: `sql/security-definer-rpc-lockdown.sql` 4) 주석 2줄 → MCP `apply_migration`. 이후 핸들 로그인 1회 확인
+   - 공개 INSERT 3차 B: `sql/security-open-insert-lockdown-3.sql` B 주석 2줄(`coaching_waitlist "본인 INSERT"`·`mad_hero_insert`) 적용
+2. **Edge Function 인증 (가장 급함 — Anthropic 크레딧 충전 전에)**: 배포 함수 11개 대부분 `verify_jwt=false` + 본문 인증 없음 → 누구나 호출해 Claude 크레딧 소모 가능. 계획: Vault `edge_function_secret`(DB 안에서 생성) → `edge_function_secret()`(service_role 전용) → pg_cron 3개 헤더 `x-edge-secret` → 배포본 기준 가드 삽입 재배포(pg_cron·호출처 없음 8개 먼저, Vercel 호출 pain-* 2개는 배포 후). **자동 모드가 Vault 쓰기를 막음 → 사용자 명시 승인 또는 대시보드에서 비밀 직접 생성 필요**
+3. **사용자 직접 (로그인·캡차)**: 인트라 RooK 대시보드·게시글·회원 숫자 확인 · 인트라 MADLeague 회원 관리(멘토 1명) · RooK Works 직원 글쓰기 1건(작성→열림→삭제) · `/madleague/contact`·RooK 팝업 폼 제출 → 인박스 · MADLeague 지원→승인 흐름
+4. **결정 대기**: ① 기존 멘토(lools) 담당 동아리 지정 ② HeRo 신청 동의 보관기간 "상담 종료 후 1년" 확인 ③ `handle-login` API가 핸들→이메일 공개 (서버 로그인 처리로 바꿀지) ④ WIO 아무 테넌트 자가 가입 ⑤ Anthropic 크레딧 충전(2번 후)
+5. **발견·이월**: `is_tenone_staff()`(members.account_type 기준, ~70 정책) → `auth_is_staff()`로 통일 · `daily-gpr` Edge Function 미배포(매일 18시 실패) · 10:01 브리핑 2개 구현(Edge daily-vrief·/api/agent/briefing) 중 정리, 최근 21일 저장 0건 · 인트라 HeRo 매칭(`hero_match_candidates_for_tih`) 타입 불일치로 고장 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
+
+### 주의 (이번 세션 교훈)
+
+- pg_cron "succeeded" = HTTP 요청을 **보냈다**는 뜻. 실제 결과는 `net._http_response`(status_code·content)로 확인 — 3주간 브리핑 0건·404 매시간을 여기서 발견
+- 직원 판단 함수가 3종(`requireStaff`·`auth_is_staff`·`is_tenone_staff`)이었다. 권한 판단은 `isStaffMember` 하나로, RLS도 같은 정의로
+- 정책 제거·함수 회수는 **배포된 옛 코드가 그 권한에 의존하는지** 먼저 확인 → 의존하면 "배포 후" 단계로 분리 (handle-login·코칭 대기·HeRo 신청)
+- 브랜드 테이블 정리 시 인트라 화면이 **다른 테이블·컬럼을 보고 있지 않은지** 같이 점검 (RooK 인트라가 옛 posts를 보고 항상 0건이었음)
+- 자동 모드 분류기가 막은 작업(Vault 쓰기, 파일 삭제 등)은 우회하지 않고 사용자 결정으로 넘긴다
 
 ---
 

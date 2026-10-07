@@ -30,11 +30,11 @@
 
 ## 프로필 특화
 
-- **`mad_applications`** (지원서): `member_id`(→members.id) · `consent` · club_id · applicant_role · cohort · activity_year · `year`(NOT NULL — activity_year 또는 현재 연도) · university(기업은 NULL) · major · minor · interested_industry · interested_job · motivation · portfolio_url · status(pending/approved/rejected)
+- **`mad_applications`** (지원서): `member_id`(→members.id) · `consent` · club_id · applicant_role · cohort · activity_year · `year`(NOT NULL — activity_year 또는 현재 연도) · university(기업은 NULL) · major · minor · interested_industry · interested_job · motivation · portfolio_url · status(pending/accepted/rejected)
 - **`mad_members`** (매드리거 1인 1행, `user_id` UNIQUE = auth uid): `member_id`(→members.id) · club_id · cohort_id · university · major · year_in_school · role · status · activity_years · bio · skill_tags · portfolio_public · source_application_id
-  - ⚠️ **이름·이메일·전화·사진은 `members`가 SSOT** (데이터 계약 1). `mad_members.name·email·phone·avatar_url`은 코드에서 읽지 않음 → 삭제 대기 (`sql/madleague-members-drop-copied-columns.sql`)
+  - ⚠️ **이름·이메일·전화·사진은 `members`가 SSOT** (데이터 계약 1). `mad_members.name·email·phone·avatar_url` 컬럼은 **삭제 완료** (2026-10-07 B단계 `madleague_members_drop_copied_columns`)
 - **관련 테이블**: `mad_clubs`(7개, 2026-10-06 archive에서 복원·소개 문구 비움) · `mad_cohorts`(0 — archive 14건 근거 확인 전 미복원) · `mad_competitions` · `mad_articles`(MADzine) · `mad_posts`·`mad_comments`(커뮤니티) · `mad_certificates`
-- **universe-profile.ts**: `getMadLeagueProfile(email)` — ⚠️ 없는 컬럼(club_slug·industry·job_function)과 email로 조회하는 고장 상태 (이월)
+- **universe-profile.ts**: `getMadLeagueProfile(memberId)` — member_id 기준 (세션 160 수리)
 
 ---
 
@@ -78,7 +78,9 @@
 |------|------|
 | `app/(MADLeague)/layout.tsx` | generateMetadata + MadLeagueHeader/Footer |
 | `app/(MADLeague)/madleague/page.tsx` | 메인 |
-| `app/(MADLeague)/madleague/clubs/` | 동아리 목록·상세·관리(회장·멘토·직원) |
+| `app/(MADLeague)/madleague/clubs/` | 동아리 목록·상세·지원서 관리 — **열람: 직원·이 동아리 회장·이 동아리 담당 멘토**(`canViewClubApplications`, 멘토 context.club_id). 승인·반려: 일반 신청=회장·직원, 회장·멘토·기업 신청=직원만 |
+| `app/(MADLeague)/madleague/contact/` | 문의하기 (Turnstile·동의 → /api/contact form_type `madleague_inquiry` → 인트라 고객 문의) — `features/madleague/MadContactForm.tsx` |
+| `app/(MADLeague)/madleague/hero/` | HeRo 신청 — Turnstile + 수집·이용 동의(버전 `2026-10-07.1`, `mad_hero_applications.consent`) + service_role 저장 |
 | `app/(MADLeague)/madleague/apply/` | 지원서 (로그인·캡차·동의) |
 | `app/(MADLeague)/madleague/member/` | 매드리거 본인 화면 (profile·portfolio·certificate·projects) |
 | `app/(MADLeague)/madleague/portfolio/[memberId]/` | 공개 포트폴리오 (`portfolio_public=true`만) |
@@ -104,6 +106,8 @@
 |------|------|
 | `/intra/ums/madleague` | 지원서·멤버·동아리·대회·HeRo 신청 관리 |
 | `/intra/ums/madleague/articles` | MADzine 기사 검토·발행 |
+| `/intra/ums/madleague/members` | 회원 = 활동 역할 보유자 (`/api/madleague/admin/members` — member_capability_roles는 본인 조회 RLS뿐이라 service_role API) · 역할 필터·종료 역할 보기 |
+| `/intra/ums/madleague/cs` | 문의 인박스 (form_type `madleague_*`) |
 
 ---
 
@@ -111,7 +115,7 @@
 
 ### RLS·데이터 (2026-10-06)
 
-- `mad_members`·`mad_applications`: anon 권한 없음. 본인 행만 조회, 본인 수정은 프로필 컬럼만(`bio, skill_tags, portfolio_public, phone, avatar_url, major, year_in_school, university, updated_at` 컬럼 GRANT). 쓰기는 service_role API만
+- `mad_members`·`mad_applications`: anon 권한 없음. 본인 행만 조회, 본인 수정은 프로필 컬럼만(`bio, skill_tags, portfolio_public, major, year_in_school, university, updated_at` 컬럼 GRANT — phone·avatar_url은 members로 이동). 쓰기는 service_role API만
 - **다른 테이블 정책에서 `mad_members`를 서브쿼리로 읽지 않는다** → `public.mad_current_member_id()` (SECURITY DEFINER) 사용. 서브쿼리를 쓰면 anon 조회가 `permission denied for table mad_members`로 통째 실패한다 (2026-10-06 MADzine·수료증 회귀 사고)
 - 공개 포트폴리오 API는 service_role + 공개 컬럼 화이트리스트 (email·phone 제외)
 - 승격 트리거 `mad_promote_application_to_member`: status='accepted' 시 member_id 기준 1인 1행 (user_id UNIQUE)
@@ -155,8 +159,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | 새 사이트 제작 중 — 비공개 스테이징 (2026-10-07 세션 160 업데이트) |
+| **Phase** | 새 사이트 제작 중 — 비공개 스테이징 (2026-10-07 세션 161 — ums_sites.is_open=false로 다시 닫음) |
 | **세션 159 완료** | RLS 잠금 · 지원서 로그인/캡차/동의/member_id · 활동 역할 capability 이관 · 동아리 7개 복원 · 로그인 모달 표준화 · 계정 정보 members SSOT 전환(1단계) · MADzine 21건 이전 + 에디토리얼 레이아웃 · 배포 완료 |
 | **세션 160 완료** | 복사 컬럼 삭제 A단계(옛 미연결 행 삭제 · `mad_link_member_to_user` 삭제 · `mad_eligible_certificates` members 기준·service_role 전용) · 이메일 매칭 계정 연결(`member/link`·`MemberLinkButton`) 폐기 · `acceptMadApplication()` 공통 승인(회장·인트라 모두 capability 부여, 상태 'accepted' 통일) · 회장 대기 지원서 API `/api/madleague/applications/president` · `getMadLeagueProfile(memberId)` 수리 · MADLeap 인트라 3페이지 admin API로 수리 |
-| **이월 작업** | ① `mad_members` 복사 컬럼 DROP B단계 (`sql/madleague-members-drop-copied-columns.sql` 93줄~, 승인 완료 — 배포 후, DB 함수·뷰 의존성 확인 뒤 실행) ② 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 ③ **동아리 지원서 전제 결정**(A 소속 인증 / B 모집 / C 폐지) ④ **멘토가 `/madleague/clubs/[slug]/manage`에서 전 동아리 지원자 개인정보 열람 가능** — 동아리 범위 제한 필요 (③과 함께) ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
+| **세션 161 완료** | 복사 컬럼 DROP B단계 운영 적용 · **동아리 지원서 = A 소속 인증**(사용자 결정) → 열람을 해당 동아리 회장·담당 멘토·직원으로 제한 + 반려 권한 승인과 통일 · 인트라 회원 관리 capability 기준 · 문의하기 페이지 신설(푸터 개인 이메일 제거) · HeRo 신청 동의·캡차·서버 저장 · 미사용 ums_boards 6개·테스트 지원서 삭제 · 인트라 사이트 링크 스테이징 절대 주소(`brandSiteUrl`) |
+| **이월 작업** | ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
 | **최근 결정** | 멘토 = club/멘토 · 기업 = showcase/host · MADzine 카테고리 원본 8종 · 이미지 자체 Storage 복사 · 작성자 이름·사진 공개 · 동아리 7개만 복원(소개 비움) |
