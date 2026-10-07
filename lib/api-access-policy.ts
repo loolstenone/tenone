@@ -22,10 +22,16 @@ const STAFF_ONLY_API: RegExp[] = [
     /^\/api\/analytics\/(sync|env-check)(\/|$)/,
     /^\/api\/external(\/|$)/,
     /^\/api\/ums(\/|$)/,
+    // 뉴스레터 발송 — 핸들러도 requireStaff (이중 방어)
+    /^\/api\/newsletter\/send(\/|$)/,
 ];
 
-/** SmarComm Pro 대시보드 API — 직원 + 베타 이메일 */
-const SMARCOMM_DASHBOARD_API = /^\/api\/smarcomm\/(airm|assets|broadcasts|campaigns|content|creatives|experiments|workflow)(\/|$)/;
+/**
+ * SmarComm Pro 대시보드 API — 직원 + 베타 이메일
+ * 공개로 남는 것: scan·report·advisor·benchmark-stats(무료 진단·리포트 링크) · me·push·email(핸들러 자체 인증)
+ * crm 이하는 2026-10-08 감사 축3 C-1 — 인증 없이 CRM 이름·이메일·전화가 내려가던 경로
+ */
+const SMARCOMM_DASHBOARD_API = /^\/api\/smarcomm\/(airm|assets|broadcasts|campaigns|content|creatives|experiments|workflow|crm|scans|analytics|insights|journey|calendar|data-hub|prompts|ai-events|ai-tracker|ai-visibility|creative)(\/|$)/;
 
 export type ApiAccessRule = { level: 'staff'; allowEmails?: readonly string[] } | null;
 

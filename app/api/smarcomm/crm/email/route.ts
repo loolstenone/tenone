@@ -1,11 +1,16 @@
 // 이메일 채널 API — email_sends + email_senders + newsletter_subscribers
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireStaff } from '@/lib/api-guard';
+import { SMARCOMM_BETA_EMAILS } from '@/lib/api-access-policy';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+    const guard = await requireStaff(request, { allowEmails: SMARCOMM_BETA_EMAILS });
+    if (guard instanceof NextResponse) return guard;
+
     const { searchParams } = new URL(request.url);
     const days = Math.min(parseInt(searchParams.get('days') ?? '30', 10), 365);
 

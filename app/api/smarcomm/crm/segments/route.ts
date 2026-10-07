@@ -1,11 +1,16 @@
 // CRM 세그먼트 API — crm_segments 테이블
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireStaff } from '@/lib/api-guard';
+import { SMARCOMM_BETA_EMAILS } from '@/lib/api-access-policy';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+    const guard = await requireStaff(request, { allowEmails: SMARCOMM_BETA_EMAILS });
+    if (guard instanceof NextResponse) return guard;
+
     const admin = createAdminClient();
     const { data, error } = await admin
         .from('crm_segments')

@@ -1,35 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireStaff } from '@/lib/api-guard';
 
 const supabase = createAdminClient();
 
-async function requireAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const token = authHeader.replace('Bearer ', '');
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  // badak_members.role이 'admin' 또는 'super_admin'인지 확인
-  const { data: member } = await supabase
-    .from('badak_members')
-    .select('role')
-    .eq('user_id', user.id)
-    .single();
-
-  const row = member as { role: string } | null;
-  if (!row || !['admin', 'super_admin'].includes(row.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  return { userId: user.id };
-}
+// 관리자 판단 = 직원(member_roles) — badak_members.role은 본인이 수정 가능한 컬럼이라 권한 판단에 쓰지 않는다
+// (2026-10-08 감사 축1 C-2, 데이터 계약 2조)
 
 // GET /api/badak/needs/review?status=pending_review
 // 관리자용 니즈 승인 큐 조회
 export async function GET(request: NextRequest) {
-  const auth = await requireAdmin(request);
+  const auth = await requireStaff(request);
   if (auth instanceof NextResponse) return auth;
 
   const { searchParams } = new URL(request.url);
@@ -49,7 +30,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/badak/needs/review
 // { needId, action: 'approve' | 'reject' }
 export async function PATCH(request: NextRequest) {
-  const auth = await requireAdmin(request);
+  const auth = await requireStaff(request);
   if (auth instanceof NextResponse) return auth;
 
   try {

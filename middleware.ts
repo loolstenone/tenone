@@ -281,5 +281,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)'],
+    // API는 확장자와 무관하게 항상 통과 — `/api/x/{id}.png`로 직원 게이트를 건너뛰던 구멍 (2026-10-08 감사 축3 H-2)
+    matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)', '/api/:path*'],
 };

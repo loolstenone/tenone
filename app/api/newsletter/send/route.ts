@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
+import { requireStaff } from '@/lib/api-guard';
 import { renderNewsletterHtml, renderNewsletterText } from '@/lib/email/newsletter-template';
 import { renderMagazineHtml, renderMagazineText } from '@/lib/email/newsletter-blocks';
 import type { NewsletterBlock } from '@/lib/email/newsletter-blocks';
@@ -37,15 +38,10 @@ interface SendBody {
 }
 
 export async function POST(request: NextRequest) {
-  // 인증
-  const auth = request.headers.get('authorization');
+  // 인증 — 직원 또는 서버 내부 호출(ADMIN_API_KEY·CRON_SECRET)만. 로그인만으로는 발송 불가 (2026-10-08 감사 축3 C-2)
+  const guard = await requireStaff(request);
+  if (guard instanceof NextResponse) return guard;
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  const isAdmin = auth === `Bearer ${process.env.ADMIN_API_KEY}`;
-  if (!user && !isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   // RESEND_API_KEY 체크
   const resendKey = process.env.RESEND_API_KEY;
