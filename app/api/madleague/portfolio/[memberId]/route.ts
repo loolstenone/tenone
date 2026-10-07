@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const { data: member, error } = await createAdminClient()
     .from('mad_members')
     .select(`
-      id, bio, skill_tags, activity_years,
+      id, member_id, bio, skill_tags, activity_years,
       university, major, year_in_school, joined_at, status,
       mad_clubs(slug, name, region, color),
       mad_cohorts(year, status)
@@ -35,11 +35,12 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const person = (await getMadPeople([memberId])).get(memberId);
   Object.assign(member, { name: person?.name ?? '', avatar_url: person?.avatar_url ?? null });
 
-  // 팀 참여 이력 (경쟁PT 결과 포함)
-  const { data: teamLinks } = await sb
-    .from('mad_team_members')
-    .select('team_id, role')
-    .eq('member_id', memberId);
+  // 팀 참여 이력 (경쟁PT 결과 포함) — 팀원 키 = members.id, 팀원 행은 비공개라 service_role로 이 회원 것만
+  const coreId = (member as { member_id?: string | null }).member_id;
+  const { data: teamLinks } = coreId
+    ? await createAdminClient().from('mad_team_members').select('team_id, role').eq('member_id', coreId)
+    : { data: [] };
+  delete (member as { member_id?: unknown }).member_id;
 
   const teamIds = (teamLinks ?? []).map((t: { team_id: string }) => t.team_id);
 

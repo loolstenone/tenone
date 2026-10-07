@@ -48,11 +48,10 @@ export default async function PortfolioPage() {
     mad_cohorts: { year: number; status: string } | null;
   };
 
-  // 팀 이력
-  const { data: teamLinks } = await sb
-    .from('mad_team_members')
-    .select('team_id, role')
-    .eq('member_id', m.id);
+  // 팀 이력 — 팀원 키 = members.id (데이터 계약 1조)
+  const { data: teamLinks } = core
+    ? await sb.from('mad_team_members').select('team_id, role').eq('member_id', core.id)
+    : { data: [] };
 
   const teamIds = (teamLinks ?? []).map((t: { team_id: string }) => t.team_id);
 

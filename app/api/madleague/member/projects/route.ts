@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
@@ -17,11 +18,13 @@ export async function GET() {
     .maybeSingle();
   if (!member) return NextResponse.json({ error: 'NOT_A_MEMBER' }, { status: 403 });
 
-  // 내가 속한 팀 ID 목록
+  // 내가 속한 팀 ID 목록 — 팀원 키 = members.id (데이터 계약 1조)
+  const { data: core } = await sb.from('members').select('id').eq('auth_id', user.id).maybeSingle();
+  if (!core) return NextResponse.json({ teams: [] });
   const { data: teamLinks, error: tlErr } = await sb
     .from('mad_team_members')
     .select('team_id, role')
-    .eq('member_id', (member as { id: string }).id);
+    .eq('member_id', core.id);
   if (tlErr) return NextResponse.json({ error: tlErr.message }, { status: 500 });
 
   if (!teamLinks || teamLinks.length === 0) {
@@ -65,8 +68,8 @@ export async function GET() {
         .in('team_id', teamIds)
     : { data: [] };
 
-  // 팀 멤버 수
-  const { data: memberCounts } = await sb
+  // 팀 멤버 수 — 팀원 행은 RLS로 본인 것만 보이므로 내 팀 범위에서만 service_role로 센다
+  const { data: memberCounts } = await createAdminClient()
     .from('mad_team_members')
     .select('team_id')
     .in('team_id', teamIds);

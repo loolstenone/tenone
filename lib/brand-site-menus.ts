@@ -73,7 +73,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [
-            { placement: "header", label: "경쟁 PT", path: "/madleague/programs/competition", source: { kind: "table", table: "mad_competitions" }, unit: "개" },
+            { placement: "header", label: "경쟁 PT", path: "/madleague/programs/competition", source: { kind: "table", table: "mad_competitions" }, adminHref: "/intra/ums/madleague/competitions", unit: "개" },
             {
                 placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "static" },
                 dropdown: [

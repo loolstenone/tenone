@@ -54,14 +54,13 @@ export default async function MadleaguerPage() {
         : { data: [] as ClubRow[] };
     const roleByClub = new Map(clubRoles.map(r => [r.context!.club_id as string, r.role]));
 
-    // 내 프로그램 = 내가 속한 팀 (진행·예정 회차 우선)
-    const { data: madMember } = await admin.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
+    // 내 프로그램 = 내가 속한 팀 (진행·예정 회차 우선) — 팀원 키 = members.id
     let programs: MyProgram[] = [];
-    if (madMember) {
+    {
         const { data: links } = await admin
             .from('mad_team_members')
             .select('role, mad_competition_teams(id, name, mad_competitions(title, status, presentation_date))')
-            .eq('member_id', madMember.id);
+            .eq('member_id', memberRow.id);
         type Link = { role: string; mad_competition_teams: { id: string; name: string; mad_competitions: { title: string; status: string; presentation_date: string | null } | null } | null };
         programs = ((links ?? []) as unknown as Link[])
             .filter(l => l.mad_competition_teams?.mad_competitions)
