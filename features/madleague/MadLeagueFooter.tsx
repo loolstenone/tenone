@@ -22,7 +22,7 @@ export function MadLeagueFooter() {
                 {
                     title: "Contact",
                     links: [
-                        { label: "lools@tenone.biz", href: "mailto:lools@tenone.biz", external: true },
+                        { label: "문의하기", href: "/madleague/contact" },
                         { label: "마이페이지", href: "/madleague/my" },
                     ],
                 },
