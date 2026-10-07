@@ -86,6 +86,14 @@
 | mad_clubs.president_member_id | 연결 해제 | 동아리는 유지 |
 | mad_clubs · mad_cohorts · mad_competitions · mad_competition_results · mad_archive | 유지 | 활동 콘텐츠 |
 
+### 3.2.1 공통 신청 폼 (`forms` · `form_responses`, 2026-10-07 — 전 브랜드)
+
+| 테이블 | 브랜드 탈퇴 | 비고 |
+|--------|-----------|------|
+| form_responses (member_id 있음) | 삭제 + 첨부파일(`contact-attachments/forms/...`) 삭제 | 해당 brand_id 응답만 |
+| form_responses (비회원, respondent_email) | 폼별 보관 기간(`consent.retention`) 경과 후 삭제 | 기간 만료 정리 = 수동 (자동화 이월) |
+| forms | 유지 | 신청서 정의 (개인정보 없음) |
+
 ### 3.3 MADLeap · Badak — 이전 시 확정
 - 외부 서버의 실제 데이터 구조를 보고 이전 설계와 함께 정한다 (§0.1 외부 서버 이전 원칙).
 - 참고: Vercel의 `madleap_portfolios`는 회원 키 컬럼이 없음, `badak_*` 29개는 이전 전 추정 설계(동결).

@@ -1,8 +1,15 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-07 (세션 161 — 보안 집중 정리 · MADLeague·RooK 인트라 연결 · 크론 정리)
+> 마지막 업데이트: 2026-10-07 (세션 162 — RooK DNS 전환 · 인트라 메뉴 비공개 · site:check · MADLeague 프로그램 이전·신청 폼)
 
 ---
+
+## 🧰 공통 가이드 점검 (세션 162)
+
+- [x] `npm run site:check` + CLAUDE.md §2.5 원스톱 체크리스트 · 파비콘 404 4개 복원 · HeRo 공개
+- [x] 인트라 메뉴·목차 비직원 비전달 (서버 레이아웃 + intra-gate)
+- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌)
+- [ ] 실험·보관 독립 도메인 Turnstile 등록 여부 · 위젯 10개 초과 대비
 
 ## 🔒 보안·안정화 (세션 156 시작 — 집중 5개 사이트: MADLeague·TenOne·HeRo·SmarComm·Badak)
 
@@ -59,7 +66,7 @@
 - [ ] MADLeague brand 역할 → member_capability_roles 이관 · requireStaff vs auth_is_staff 일원화
 - [ ] Works 이미지 없는 15건 정리
 
-## 🤖 RooK 새 사이트 (집중 — 세션 160 · 2026-10-07 승격, 비공개 스테이징)
+## 🤖 RooK (집중 — 2026-10-07 www.rook.co.kr 공개 운영)
 
 - [x] 집중 Tier 승격 (ums_sites·CANONICAL_HOSTS external·noindex·사이트맵 제외)
 - [x] 게시판 works·artist·freeboard + 원본 카테고리 · Works 20·Artist 30·자유게시판 공지 3 이전 · 원본 순서
@@ -68,7 +75,8 @@
 - [x] 인트라 RooK 실데이터 연결(ums_posts·member_brand_joins) · Works·Artist 직원 글쓰기·수정 · 새 글 상세 404 수정 · 미사용 게시판 삭제 — 세션 161
 - [ ] 팝업 폼 실제 제출(첨부) · 직원 글쓰기 실사용 1건 · 인트라 화면 직원 로그인 확인
 - [ ] RooKie 승인 회원 체계(capability)
-- [ ] AD 시안 상표 검토 · 본문 서버 렌더(SEO) · DNS 전환 계획(아임웹 회원 수 → 30일 공지 · 옛 URL 308)
+- [x] DNS 전환 (Vercel·가비아 네임서버·Turnstile·Supabase) · 옛 URL 308 · AD 시안 표기 · 처리방침 · 파비콘·헤더·자막 · 조회수 시드 — 세션 162
+- [ ] 아임웹 해지·데이터 삭제(사용자) · 10-14 처리방침 시행 처리 · 본문 서버 렌더(SEO)
 
 ## 🎓 MADLeague 새 사이트 (집중 — 세션 159 · 2026-10-06, 비공개 스테이징)
 
@@ -85,6 +93,10 @@
 - [x] 승인 로직 통일(회장·인트라 → capability) · 회장 대기 지원서 API · getMadLeagueProfile · MADLeap 인트라 조회 — 세션 160
 - [x] 동아리 지원서 = A 소속 인증 · 열람 해당 동아리 회장·담당 멘토·직원 · 반려 권한 통일 — 세션 161
 - [x] 인트라 회원 관리 capability 기준 · 문의하기 페이지 · HeRo 신청 동의·캡차 · 미사용 ums_boards 6개·테스트 지원서 삭제 — 세션 161
+- [x] madleague.net 프로그램 이전: 경쟁 PT(명예의 전당·발표 장면·2026 1차 춤추는 고래·MAD Crown 표기 제거) · 크리에이지 · 댐 파티(+히스토리) · 아이디어 무브먼트 · 히어로 — 세션 162
+- [x] 유니버스 공통 신청 폼(구글 폼형) 코드 — 세션 162
+- [ ] **신청 폼 DB 적용 (승인 대기, `sql/forms-module.sql`)** → 실제 신청 검증
+- [ ] MAD Crown 남은 표기 정리 여부 · 춤추는 고래 발표 사진 · mad_competitions 2026 1차 행
 - [ ] 기존 멘토(lools) 담당 동아리 지정 · HeRo 신청 보관기간 확인 · 문의하기 실제 제출
 - [ ] 로그인 실검증: 지원 → 마이페이지 심사 중 → 인트라 승인 → capability 행 · 멘토 아레나 입장
 - [ ] 기수 14건(archive) 근거 확인 · 동아리 로고 7종·소개 문구

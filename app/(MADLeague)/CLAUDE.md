@@ -97,6 +97,10 @@
 | `lib/supabase/madleague.ts` | DB 헬퍼 |
 | `app/api/madleague/*` | apply · applications/[id]/approve·reject · member/* · posts · articles · portfolio · admin/* |
 | `Scripts/madzine-import.mjs` | 기존 madleague.net(아임웹) MADzine 이전 스크립트 (멱등) |
+| `app/(MADLeague)/madleague/programs/` | 프로그램 하위 메뉴 = madleague.net 이름·순서 (경쟁 PT · 크리에이지 · 댐 파티 · 아이디어 무브먼트 · 히어로 → PJT·마케톤·인사이트 투어링). 경쟁 PT 명예의 전당은 페이지 상수 `ARCHIVE` |
+| `lib/madleague-program-assets.ts` · `Scripts/madleague-programs-import.mjs` | madleague.net 프로그램 이미지 44장 → Storage `board-assets/madleague/programs/{group}/{id}.webp` (멱등) |
+| `features/madleague/ProgramForms.tsx` | 프로그램 페이지의 참가 신청 버튼 — `forms.program` 키(creazy·dam)의 공개 폼 자동 노출 |
+| `app/(MADLeague)/madleague/forms/[slug]/` | 행사 참가 신청 (유니버스 공통 폼 `components/forms/FormRenderer.tsx`) |
 
 ---
 
@@ -111,6 +115,7 @@
 | `/intra/ums/madleague/hero-applications` | HeRo 신청하기 (/madleague/hero, mad_hero_applications) |
 | `/intra/ums/madleague/members` | 회원 = 활동 역할 보유자 (`/api/madleague/admin/members` — member_capability_roles는 본인 조회 RLS뿐이라 service_role API) · 역할 필터·종료 역할 보기 |
 | `/intra/ums/madleague/cs` | 문의하기 (푸터 Contact, form_type `madleague_inquiry`) |
+| `/intra/ums/madleague/forms` | 참가 신청 — 이벤트마다 신청서 생성·복제·질문·기간·로그인·수정·1인 1회·정원·개인정보 고지·응답(상태·메모·첨부·CSV). 연결 프로그램 키 = `app/intra/ums/madleague/form-programs.ts` |
 
 ---
 
@@ -134,6 +139,12 @@
 - 본문은 HTML(이전분) 또는 일반 텍스트(투고 에디터). HTML은 클라이언트에서 정화 후 렌더 → 서버 HTML에 본문 없음 (SEO 이월)
 - 이전 글 slug = `mz-{아임웹 idx}`, 이미지 = Storage `mad-community/madzine/{idx}/`, 작성자 표기 "MAD League", 요약 = 본문 앞 160자
 - ⚠️ 운영 DB는 배포 사이트와 로컬이 공유 — 데이터 작업은 배포된(옛) 코드에 즉시 노출된다. 렌더 방식이 바뀌는 데이터는 코드 배포와 함께
+
+### 프로그램·경쟁 PT (2026-10-07)
+
+- 경쟁 PT에는 **MAD Crown 표기를 쓰지 않는다** — 순위는 1·2·3위 (사용자 결정). About·수료증·포트폴리오의 MAD Crown은 별도 확인 대기
+- 원본 이전 시 개인 입금 계좌·개인 전화번호·지난 모집 기간은 옮기지 않는다 — 회차별 안내는 신청서 설명에
+- 신청서는 `forms` 공통 모듈 (데이터 계약: 회원 응답 = member_id, 비회원만 respondent_email). 행사 개인정보는 폼마다 목적·보관기간 고지 + 동의 버전 기록, 열기 전 서버가 확인
 
 ### 동아리 로고
 
@@ -166,5 +177,6 @@
 | **세션 159 완료** | RLS 잠금 · 지원서 로그인/캡차/동의/member_id · 활동 역할 capability 이관 · 동아리 7개 복원 · 로그인 모달 표준화 · 계정 정보 members SSOT 전환(1단계) · MADzine 21건 이전 + 에디토리얼 레이아웃 · 배포 완료 |
 | **세션 160 완료** | 복사 컬럼 삭제 A단계(옛 미연결 행 삭제 · `mad_link_member_to_user` 삭제 · `mad_eligible_certificates` members 기준·service_role 전용) · 이메일 매칭 계정 연결(`member/link`·`MemberLinkButton`) 폐기 · `acceptMadApplication()` 공통 승인(회장·인트라 모두 capability 부여, 상태 'accepted' 통일) · 회장 대기 지원서 API `/api/madleague/applications/president` · `getMadLeagueProfile(memberId)` 수리 · MADLeap 인트라 3페이지 admin API로 수리 |
 | **세션 161 완료** | 복사 컬럼 DROP B단계 운영 적용 · **동아리 지원서 = A 소속 인증**(사용자 결정) → 열람을 해당 동아리 회장·담당 멘토·직원으로 제한 + 반려 권한 승인과 통일 · 인트라 회원 관리 capability 기준 · 문의하기 페이지 신설(푸터 개인 이메일 제거) · HeRo 신청 동의·캡차·서버 저장 · 미사용 ums_boards 6개·테스트 지원서 삭제 · 인트라 사이트 링크 스테이징 절대 주소(`brandSiteUrl`) |
-| **이월 작업** | ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
+| **세션 162 완료** | madleague.net 프로그램 이전(경쟁 PT 명예의 전당·발표 장면·2026 1차 춤추는 고래·MAD Crown 표기 제거 · 크리에이지 신규 · 댐 파티+히스토리 · 아이디어 무브먼트·히어로 키비주얼 · 하위 메뉴 원본 이름) · 유니버스 공통 신청 폼(인트라 참가 신청·사이트 /forms·프로그램 자동 버튼) 코드 · 파비콘 |
+| **이월 작업** | ⓪ **신청 폼 DB 적용(승인 대기 `sql/forms-module.sql`) → DAM 학생 폼 열기·제출·인트라 확인** · MAD Crown 남은 표기 결정 · 춤추는 고래 발표 사진 · ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
 | **최근 결정** | 멘토 = club/멘토 · 기업 = showcase/host · MADzine 카테고리 원본 8종 · 이미지 자체 Storage 복사 · 작성자 이름·사진 공개 · 동아리 7개만 복원(소개 비움) |

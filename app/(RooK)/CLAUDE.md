@@ -107,4 +107,5 @@
 | **Phase** | **공개 운영 전환** — www.rook.co.kr DNS → Vercel (2026-10-07 세션 161) |
 | **세션 161 완료** | 배포 확인(Works 20·Artist 30·자유게시판 공지 3) · "매니악 취향" = 운영자 본인 확인(유지) · 인트라 RooK 실데이터 연결(옛 posts → ums_posts, affiliations → member_brand_joins) · 직원 글쓰기·수정 버튼 · **새 글 상세 404 수정**(slug 없는 글은 id로 조회 — getRookPost) · 미사용 게시판 challenge·feedback 삭제 · RooKHeader aboutPath 타입 오류 |
 | **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) · 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
+| **세션 162 완료** | DNS 전환 완료(가비아 네임서버·Vercel 권장 DNS·Turnstile·Supabase) · ums_sites 공개 · 헤더 유틸리티 바 흰색 · 배경 유튜브 자막 끄기(`RooKBackgroundVideo.tsx`) · 파비콘(원본) · 조회수 시드 |
 | **이월 작업** | ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ ~~AD 시안 표기~~ (완료) ④ DNS 전환 후: 아임웹 해지·데이터 파기, 2026-10-14 처리방침 시행 시 변경 예정 공지 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신 ⑤ 본문 서버 렌더(SEO) |

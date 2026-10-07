@@ -104,6 +104,17 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "normal",
     },
     {
+        key: "madleague_form_responses",
+        label: "MADLeague 참가 신청 (행사 신청서)",
+        table: "form_responses",
+        filter: { column: "status", value: "pending" },
+        extraFilters: [{ column: "brand_id", value: "madleague" }],
+        href: "/intra/ums/madleague/forms",
+        brand_id: "madleague",
+        category: "approval",
+        priority: "normal",
+    },
+    {
         key: "mad_hero_applications",
         label: "MAD Hero 지원서",
         table: "mad_hero_applications",

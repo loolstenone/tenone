@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-07 (세션 161 — 보안 집중 정리(DEFINER RPC·공개 INSERT·크론·직원 기준) · MADLeague·RooK 인트라 연결 · 크론·pg_cron 정리)
+> 마지막 업데이트: 2026-10-07 (세션 162 — RooK DNS 전환 · 인트라 메뉴 비공개 · site:check · MADLeague 프로그램 이전·신청 폼(DB 승인 대기))
+
+---
+
+## 세션 162 (2026-10-07, 사무실) — RooK DNS 전환 · 인트라 보안 · 공통 가이드 점검기 · MADLeague 프로그램 이전·신청 폼
+
+> 작업 위치: `C:\Projects\tenone` master 직접. 이 세션 배포 4회(사용자 "배포" 요청 시) + 작업 종료 push.
+> **집에서 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **RooK = www.rook.co.kr 공개 운영** (아임웹 → Vercel DNS 전환)
+  - 코드: CANONICAL_HOSTS `hosting:'vercel'` · noindex 해제 · 옛 아임웹 URL `/{works|artist}/?idx=N&bmode=view` → `/rook/{board}/rk-N` 308 · freeboard Suspense(빌드 실패 수정)
+  - DB: `ums_sites` rook `hosting=vercel`·`is_open=true`
+  - 외부(사용자): Vercel 도메인 2개(권장 DNS 값 A `216.150.1.1`·CNAME `…vercel-dns-017.com.`) · 가비아 네임서버(호스트코코아 → 가비아) · Supabase Redirect URLs 확인 · **Cloudflare Turnstile 위젯에 rook.co.kr 추가**(로그인 "보안 확인 중" 막힘 원인 110200)
+  - 사이트: AD 시안 "브랜드 무관" 자동 표기 · 헤더 유틸리티 바 흰색(검정 위 검정이라 로그인 안 보임) · 배경 유튜브 자막 끄기 · 파비콘(원본) · 조회수 시드 53편(`extra_fields.views_seeded`, 사용자 지시 — Free board는 화면 노출 고지 후 진행)
+  - 개인정보처리방침: RooK 항목 + 행사 신청서 항목 **2026-10-14 시행(10-07 공지)**
+- **인트라 보안**: 비직원에게 메뉴·목차가 HTML·JS 어디에도 안 내려감 — `app/intra/layout.tsx` 서버 판단(`lib/intra-server-gate.ts` getUser+member_roles) + 비직원은 middleware가 `app/intra-gate`(로그인 화면만)로 rewrite. 클라이언트 캐시·account_type 판단 제거. 사용자 확인 "잘 작동함"
+- **공통 가이드 일괄 점검기** `npm run site:check -- {siteId} [--live] | --all` + CLAUDE.md §2.5 원스톱 체크리스트 (반복 불만 → 기억 대신 점검기). 첫 실행으로 HeRo·Badak·MADLeague·MADLeap 파비콘 404 복원 · HeRo `is_open=true`(사용자 결정)
+- **MADLeague 프로그램 이전** (madleague.net → 새 사이트, 사용자 범위 "프로그램 + 경쟁 PT·히어로")
+  - 프로그램 하위 메뉴 = 원본 이름·순서: 경쟁 PT · 크리에이지(신규) · 댐 파티(시즌3 + 히스토리) · 아이디어 무브먼트 · 히어로 (+ PJT·마케톤·인사이트 투어링 유지)
+  - 이미지 44장 → Storage `board-assets/madleague/programs/` (`Scripts/madleague-programs-import.mjs`, `lib/madleague-program-assets.ts`)
+  - 경쟁 PT: "명예의 전당" · 발표 장면 · **2026 1차 춤추는 고래**(여성용품 브랜드 전략, 1~3위 MADLeap) · **MAD Crown 표기 제거**(사용자: 경쟁 PT엔 해당 안 됨, 순위만)
+  - 원본의 개인 입금 계좌·개인 전화번호·지난 모집 기간은 옮기지 않음
+- **유니버스 공통 신청 폼 모듈 (구글 폼형) — 코드 완료, DB 미적용**
+  - 인트라 › MADLeague › 참가 신청 (`/intra/ums/madleague/forms`): 이벤트마다 생성·복제 · 질문 13유형 · 기간·로그인·제출 후 수정·1인 1회·정원 · 개인정보 목적·보관기간(열기 전 필수) · 응답 상태·메모·첨부·CSV
+  - 사이트 `/madleague/forms/{slug}` (`components/forms/FormRenderer.tsx`) · 프로그램 페이지에 열린 폼 자동 버튼(`features/madleague/ProgramForms.tsx`, forms.program)
+  - API `/api/forms/[brand]/[slug]` (Turnstile·서버 규칙 강제) · `/api/intra/forms/*` · Action Hub·사이트 현황 연결
+  - ⚠️ **테이블이 아직 없음** → 프로그램 페이지는 "일정 공지 예정", 인트라 참가 신청은 오류 표시 (안전 확인함)
+
+### 다음 첫 액션 (집)
+
+1. **신청 폼 DB 적용** — 사용자 승인 받기 → `sql/forms-module.sql`을 MCP `apply_migration`(이름 `forms_module`). 롤백 시뮬레이션은 세션 162에서 통과(정책 4·시드 OK). 적용 후:
+   - anon REST: `form_responses` 401/빈 배열, `forms`는 open만 보이는지 (시드 4개 draft라 0건이 정상)
+   - 로컬 실검증: 인트라 참가 신청 → "DAM 파티 학생 참가 신청" 열기(기간·목적 확인) → `/madleague/programs/dam` 버튼 → 제출(파일 포함) → 인트라 응답·첨부·CSV → Action Hub 대기 1 → 테스트 응답 삭제
+   - `npm run site:check -- madleague` ✅
+2. **2026-10-14**: 개인정보처리방침 "변경 예정 공지" 박스 삭제 + `lib/company-info.ts` `LEGAL_DOCUMENTS.privacy` 버전 `2026-10-14`·시행일 갱신
+3. **사용자 결정 대기**: MAD Crown이 남은 곳(About "번뜩이는 재치 · MAD Crown", 수료증 MAD Crown 인증서, 포트폴리오·프로젝트 수상 표기) 정리 여부 · 춤추는 고래 발표 사진 · 2026 1차를 DB `mad_competitions`에도 넣을지(인트라 "프로그램" 숫자)
+4. **사용자 직접**: 아임웹(rook) 요금제 해지·데이터 삭제 · RooK 로그인·RooKie 폼 실제 제출 1건 (Turnstile 반영 확인)
+5. 이월: 집중 브랜드 레지스트리 미등록(HeRo·Badak·MADLeap — site:check ❌) · 비회원 폼 응답 보관기간 만료 정리 자동화 · Turnstile 위젯 10개 초과 시 위젯 2개 구조(무료 20×10) · 실험·보관 독립 도메인 8개 Turnstile 미등록(로그인 막힘 가능)
+
+### 주의 (이번 세션 교훈)
+
+- 도메인 전환 외부 작업은 **한 메시지에 전부** (§2.5): Vercel 권장 DNS 값은 화면에서 받기(76.76.21.21은 옛 값) · 네임서버가 등록업체 것인지 먼저 조회 · **Turnstile Hostname** · Supabase Redirect
+- 같은 라우트에서 조건부 렌더만 하면 숨긴 컴포넌트의 JS 번들이 그대로 내려간다 → 비공개 UI는 라우트 분리(intra-gate)
+- `useSearchParams`를 page에서 쓰면 Suspense 필수 (로컬 tsc는 통과, 빌드에서만 실패 → 배포 전 `npm run build` 또는 site:check)
 
 ---
 

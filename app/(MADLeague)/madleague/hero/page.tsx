@@ -1,4 +1,5 @@
 import { HeroForm } from './HeroForm';
+import { MAD_PROGRAM_IMAGES } from '@/lib/madleague-program-assets';
 
 export const metadata = {
   title: 'HeRo 프로그램 — 커리어 상담',
@@ -8,6 +9,13 @@ export const metadata = {
 export default function HeroPage() {
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
+      {/* 원본 madleague.net/hero_prgram 키비주얼 — We believe in your talent */}
+      <section className="bg-white">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={MAD_PROGRAM_IMAGES.heroWide} alt="HeRo — We believe in your talent" className="mx-auto hidden w-full max-w-6xl sm:block" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={MAD_PROGRAM_IMAGES.heroTall} alt="HeRo — We believe in your talent" className="mx-auto block w-full sm:hidden" />
+      </section>
       <section className="relative overflow-hidden border-b border-neutral-900">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(255,192,0,0.15),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-20">
@@ -15,6 +23,7 @@ export default function HeroPage() {
           <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
             진로 설계부터<br />취업까지
           </h1>
+          <p className="mt-4 text-lg text-[#FFC000] font-bold">진로에 대한 고민, 커리어 관리에 대한 상담을 제공합니다.</p>
           <p className="mt-8 max-w-2xl text-lg text-neutral-300 leading-relaxed">
             MADLeague의 HeRo 프로그램은 단순한 취업 상담이 아닙니다.
             <br />

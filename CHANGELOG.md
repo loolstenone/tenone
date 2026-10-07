@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-10-07 (세션 162, 사무실) — RooK DNS 전환 · 인트라 메뉴 비공개 · 공통 가이드 점검기 · MADLeague 프로그램 이전·신청 폼
+
+### 장소·운영
+
+- `C:\Projects\tenone` master 직접. 배포(push) 4회 = 사용자 "배포" 요청 + 작업 종료 push
+- 운영 DB (MCP): `ums_sites` rook `hosting=vercel·is_open=true` · hero `is_open=true` · RooK `ums_posts.view_count` 시드 53편(`extra_fields.views_seeded`)
+- **미적용 (승인 대기)**: `sql/forms-module.sql` (forms·form_responses + 시드 4 draft) — 롤백 시뮬레이션 통과
+- Storage: `board-assets/madleague/programs/*` 44장 (madleague.net 이미지 webp)
+
+### 결정 (사용자)
+
+- rook.co.kr 전환: 아임웹 회원 = 운영자뿐 · 바로 공개 · AD 시안 "AI 시안·브랜드 무관" 표기 · 처리방침 추가 후 전환
+- RooK 조회수 시드 (Works·Artist + Free board — 화면 노출·표시광고법 소지 고지 후)
+- 인트라 메뉴·목차 = 기업 보안 → 비직원에게 전달 금지
+- 사이트 런칭·수정 시 공통 가이드 한 번에 (반복 불만) → site:check + §2.5
+- HeRo 공개(is_open=true)
+- MADLeague: 이전 범위 = 프로그램 + 경쟁 PT·히어로 · 신청서 = 이벤트마다 생성하는 폼 빌더(질문 추가·로그인·수정 설정) · "수상작 아카이브" → "명예의 전당" · 2026 1차 춤추는 고래(1~3위 MADLeap) · 경쟁 PT에 MAD Crown 표기 안 함
+
+### 변경 내역
+
+- RooK: `lib/domain-registry.ts` vercel · `next.config.ts` noindex 해제 · works/artist/freeboard 옛 URL 308 · `features/rook/RooKUI.tsx`(AD 표기·배경 영상 분리) · `RooKBackgroundVideo.tsx`(자막 unloadModule) · `RooKHeader.tsx`(text-white) · `public/brands/rook/favicon.png`
+- 인트라: `app/intra/layout.tsx`(서버) · `lib/intra-server-gate.ts` · `components/intra/IntraShell.tsx`·`IntraLoginScreen.tsx` · `app/intra-gate/page.tsx` · middleware 1b rewrite 대상 변경 · `app/intra/login/page.tsx` redirect
+- 점검기: `scripts/site-check.mjs` · `package.json` site:check · 파비콘 `public/brands/{hero,badak,madleague,madleap}/favicon.png`
+- MADLeague: `programs/{creazy(신규),dam,im,competition,layout}` · `hero/page.tsx` · `lib/madleague-program-assets.ts` · `Scripts/madleague-programs-import.mjs` · `public/logos/madleague/{dancingwhale-logo,26-1gold,26-1silver,26-1bronze}.png` · `lib/brand-site-menus.ts`(프로그램 드롭다운·참가 신청 기능) · 홈 경쟁 PT 카드
+- 신청 폼 모듈: `types/forms.ts` · `lib/forms.ts` · `lib/forms-server.ts` · `components/forms/FormRenderer.tsx` · `components/intra/forms/{FormsAdmin,FormEditor}.tsx` · `app/api/forms/[brand]/[slug]` · `app/api/intra/forms/{route,[id],[id]/responses,attachment}` · `app/(MADLeague)/madleague/forms/[slug]` · `app/intra/ums/madleague/forms/*` · `features/madleague/ProgramForms.tsx` · `lib/action-hub-registry.ts`
+- 문서: CLAUDE.md §2.5 원스톱 체크리스트 · 부록 A(인트라 메뉴 보안·site:check) · 부록 G.2 도메인 절차(권장 DNS·네임서버·Turnstile) · 개인정보처리방침(RooK·행사 신청서, 10-14 시행) · `docs/Data_Lifecycle.md` 3.2.1 공통 신청 폼
+- 메모리: feedback_vercel_dns_values · feedback_site_launch_one_pass
+
+---
+
 ## 2026-10-07 (세션 161) — 보안 집중 정리 · MADLeague·RooK 인트라 연결 · 크론 정리
 
 ### 장소·운영

@@ -76,8 +76,12 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             {
                 placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "table", table: "mad_competitions" }, unit: "개",
                 dropdown: [
+                    // madleague.net 프로그램 메뉴 이름·순서 그대로 (2026-10-07 이전)
                     { label: "경쟁 PT", path: "/madleague/programs/competition" },
+                    { label: "크리에이지", path: "/madleague/programs/creazy" },
+                    { label: "댐 파티", path: "/madleague/programs/dam" },
                     { label: "아이디어 무브먼트", path: "/madleague/programs/im" },
+                    { label: "히어로", path: "/madleague/hero" },
                     { label: "전체 프로그램", path: "/madleague/programs" },
                 ],
             },
@@ -86,6 +90,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
             { placement: "feature", location: "홈", label: "지원하기", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },
             { placement: "feature", location: "HeRo", label: "HeRo 신청하기", path: "/madleague/hero", source: { kind: "table", table: "mad_hero_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/hero-applications", unit: "건" },
+            { placement: "feature", location: "크리에이지·댐 파티", label: "참가 신청", path: "/madleague/programs", source: { kind: "table", table: "form_responses", eq: { brand_id: "madleague" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/forms", unit: "건" },
             { placement: "feature", location: "푸터 Contact", label: "문의하기", path: "/madleague/contact", source: { kind: "inquiry", formType: "madleague_inquiry" }, adminHref: "/intra/ums/madleague/cs", unit: "건" },
         ],
     },

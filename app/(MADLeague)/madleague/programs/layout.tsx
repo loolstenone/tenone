@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+// 이름·순서 = madleague.net 프로그램 메뉴 (경쟁 PT · 크리에이지 · 댐 파티 · 아이디어 무브먼트 · 히어로), 그 뒤 새 사이트 프로그램
 const PROGRAMS = [
   { name: '경쟁 PT',         href: '/madleague/programs/competition' },
+  { name: '크리에이지',       href: '/madleague/programs/creazy' },
+  { name: '댐 파티',          href: '/madleague/programs/dam' },
+  { name: '아이디어 무브먼트', href: '/madleague/programs/im' },
+  { name: '히어로',           href: '/madleague/hero' },
   { name: 'PJT',             href: '/madleague/programs/project' },
   { name: '마케톤',           href: '/madleague/programs/markethon' },
   { name: '인사이트 투어링',   href: '/madleague/programs/insight-touring' },
-  { name: '아이디어 무브먼트', href: '/madleague/programs/im' },
-  { name: 'DAM 파티',         href: '/madleague/programs/dam' },
 ];
 
 function ProgramsSubNav() {

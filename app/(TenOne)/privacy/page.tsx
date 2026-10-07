@@ -21,6 +21,7 @@ const PROCESSORS = [
 const BRAND_ITEMS = [
     { brand: "HeRo", items: "진단(HIT) 응답·결과, 이력서·경력 정보, 희망 직무·산업, 목표·기록" },
     { brand: "MADLeague · MADLeap", items: "소속 학교·전공, 동아리·기수, 활동·대회 이력, 포트폴리오" },
+    { brand: "행사·프로그램 참가 신청 (2026년 10월 14일 시행)", items: "신청서마다 고지하는 항목 (예: 이름·연락처·이메일·소속·자기소개·이력서·포트폴리오 파일) — 목적·보관 기간은 신청서 제출 화면에서 고지하고 동의를 받음" },
     { brand: "Badak", items: "직무·산업·경력 수준, 모임·커뮤니티 활동 기록" },
     { brand: "뉴스레터", items: "이메일 (회원 가입 없이 구독 가능)" },
     { brand: "RooK (2026년 10월 14일 시행)", items: "RooKie 지원: 이름·이메일·연락처, 이력서·포트폴리오 파일, 참고 URL · 상담 / 문의: 이름·이메일·연락처·회사, 문의 내용" },
@@ -48,7 +49,7 @@ export default function PrivacyPage() {
                 <p className="text-xs mb-3" style={{ color: "var(--tn-text-sub)" }}>시행일: {EFFECTIVE_DATE}</p>
                 {/* 변경 예정 공지 — 시행 7일 전부터 (12조). 시행일이 지나면 공지를 지우고 LEGAL_DOCUMENTS.privacy 버전·시행일 갱신 */}
                 <p className="text-xs mb-10 px-3 py-2 border" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
-                    변경 예정 공지 (2026년 10월 7일): 2026년 10월 14일부터 RooK 서비스의 수집 항목(RooKie 지원 서류 등)이 추가됩니다. 자세한 내용은 2조·3조·12조를 확인해 주세요.
+                    변경 예정 공지 (2026년 10월 7일): 2026년 10월 14일부터 RooK 서비스의 수집 항목(RooKie 지원 서류 등)과 행사·프로그램 참가 신청서 항목이 추가됩니다. 자세한 내용은 2조·3조·12조를 확인해 주세요.
                 </p>
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
@@ -183,7 +184,7 @@ export default function PrivacyPage() {
                     <Section title="12. 개인정보처리방침의 변경">
                         <p>이 방침을 변경하는 경우 시행 7일 전(이용자 권리에 중요한 변경은 30일 전)부터 서비스 화면에 공지합니다.</p>
                         <ul className="list-disc pl-5 mt-2 space-y-0.5">
-                            <li>2026년 10월 14일 (10월 7일 공지): RooK 서비스 수집 항목 추가 (RooKie 지원 이력서·포트폴리오 파일·참고 URL, 상담 / 문의)</li>
+                            <li>2026년 10월 14일 (10월 7일 공지): RooK 서비스 수집 항목 추가 (RooKie 지원 이력서·포트폴리오 파일·참고 URL, 상담 / 문의) · 행사·프로그램 참가 신청서(신청서별 고지 항목) 추가</li>
                             <li>2026년 10월 5일: 유니버스 전 서비스 공통 적용, 처리 위탁·국외 이전, 서비스별 수집 항목, 보유 기간 세분화, 만 14세 미만, 안전성 확보 조치, 쿠키 항목 추가</li>
                             <li>2026년 3월 26일: 최초 시행</li>
                         </ul>
