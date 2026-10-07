@@ -1,21 +1,22 @@
 "use client";
 
 /**
- * 인트라 경쟁 PT 회차 편집 — 정보 · 참가 신청 폼 연결 · 팀 구성·배정 · 결과
+ * 인트라 경쟁 PT·프로젝트 회차 편집 — 정보 · 참가 신청 폼 연결 · 팀 구성·배정 · 본선 진출 · 제출물 · 결과
  * 팀원 = members.id. 배정 후보 = 연결 폼의 로그인 응답자 + 현역·임원 매드리거
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Plus, Trash2, X } from "lucide-react";
-import { COMP_STATUS_LABEL } from "./CompetitionsAdmin";
+import { COMP_STATUS_LABEL, COMP_KIND_LABEL } from "./CompetitionsAdmin";
 
 interface Person { member_id: string; name: string; email: string | null; club: string | null }
 interface Team {
-    id: string; name: string; club_id: string | null;
+    id: string; name: string; club_id: string | null; is_finalist: boolean;
     members: (Person & { role: string })[];
     result: { rank: number | null; award_name: string | null; feedback: string | null } | null;
-    submission: { title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string } | null;
+    submissions: Submission[];
 }
+interface Submission { stage: "prelim" | "final"; title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string }
 interface Detail {
     competition: Record<string, string | number | null>;
     clubs: { id: string; name: string }[];
@@ -31,7 +32,8 @@ const INFO_FIELDS: { key: string; label: string; type?: string; wide?: boolean }
     { key: "client_name", label: "클라이언트" },
     { key: "brief_title", label: "브리프 요약", wide: true },
     { key: "start_date", label: "시작일", type: "date" },
-    { key: "end_date", label: "마감일", type: "date" },
+    { key: "end_date", label: "예선 제출 마감", type: "date" },
+    { key: "final_deadline", label: "본선 제출 마감", type: "date" },
     { key: "presentation_date", label: "발표일", type: "date" },
 ];
 const inputCls = "w-full rounded border border-neutral-300 px-3 py-2 text-sm";
@@ -50,7 +52,7 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
         if (!res.ok) { setError(data.error ?? "불러오지 못했습니다."); return; }
         setD(data);
         const c = data.competition;
-        setInfo(Object.fromEntries(["title", "year", "client_name", "brief_title", "brief_content", "start_date", "end_date", "presentation_date", "status", "form_id"].map(k => [k, c[k] == null ? "" : String(c[k])])));
+        setInfo(Object.fromEntries(["title", "year", "kind", "client_name", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"].map(k => [k, c[k] == null ? "" : String(c[k])])));
     }, [id]);
     useEffect(() => { load(); }, [load]);
 
@@ -106,12 +108,18 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
                         </label>
                     ))}
                     <label>
+                        <div className="mb-1 text-xs text-neutral-500">유형</div>
+                        <select value={info.kind} onChange={e => setInfo({ ...info, kind: e.target.value })} className={inputCls}>
+                            {Object.entries(COMP_KIND_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                    </label>
+                    <label>
                         <div className="mb-1 text-xs text-neutral-500">상태</div>
                         <select value={info.status} onChange={e => setInfo({ ...info, status: e.target.value })} className={inputCls}>
                             {Object.entries(COMP_STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                         </select>
                     </label>
-                    <label className="sm:col-span-2">
+                    <label className="sm:col-span-3">
                         <div className="mb-1 text-xs text-neutral-500">참가 신청 폼 (응답자를 팀 배정 후보로)</div>
                         <select value={info.form_id} onChange={e => setInfo({ ...info, form_id: e.target.value })} className={inputCls}>
                             <option value="">연결 안 함</option>
@@ -164,6 +172,11 @@ function TeamCard({ team, clubs, candidates, applicantIds, busy, act }: {
             <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-neutral-900">{team.name}</h3>
                 {club && <span className="text-xs text-neutral-400">{club}</span>}
+                <label className="ml-3 inline-flex items-center gap-1 text-xs text-neutral-600">
+                    <input type="checkbox" checked={team.is_finalist} disabled={busy}
+                        onChange={e => act({ action: "set_finalist", team_id: team.id, is_finalist: e.target.checked })} />
+                    본선 진출
+                </label>
                 <button disabled={busy} onClick={() => { if (confirm(`'${team.name}' 팀을 삭제할까요? 팀원 배정·결과도 함께 지워집니다.`)) act({ action: "delete_team", team_id: team.id }); }}
                     className="ml-auto text-neutral-400 hover:text-red-600" title="팀 삭제"><Trash2 className="h-4 w-4" /></button>
             </div>
@@ -190,7 +203,8 @@ function TeamCard({ team, clubs, candidates, applicantIds, busy, act }: {
                 <button disabled={busy || !pick} onClick={async () => { if (await act({ action: "add_member", team_id: team.id, member_id: pick, role: "leader" })) setPick(""); }} className="rounded border border-neutral-300 px-3 py-1.5 text-sm disabled:text-neutral-300">팀장으로</button>
             </div>
 
-            <SubmissionLine team={team} />
+            <SubmissionLine teamId={team.id} stage="prelim" s={team.submissions.find(x => x.stage === "prelim")} />
+            {team.is_finalist && <SubmissionLine teamId={team.id} stage="final" s={team.submissions.find(x => x.stage === "final")} />}
 
             <div className="mt-4 grid grid-cols-1 gap-2 border-t border-neutral-100 pt-4 sm:grid-cols-[6rem_1fr_2fr_auto]">
                 <input value={result.rank} onChange={e => setResult({ ...result, rank: e.target.value.replace(/\D/g, "").slice(0, 2) })} placeholder="순위" className="rounded border border-neutral-300 px-3 py-1.5 text-sm" />
@@ -203,12 +217,11 @@ function TeamCard({ team, clubs, candidates, applicantIds, busy, act }: {
 }
 
 /** 팀 제출물 — 최종 제출 여부·파일 내려받기(서명 URL 5분)·발표자료 링크 */
-function SubmissionLine({ team }: { team: Team }) {
+function SubmissionLine({ teamId, stage, s }: { teamId: string; stage: "prelim" | "final"; s?: Submission }) {
     const [loading, setLoading] = useState(false);
-    const s = team.submission;
     const download = async () => {
         setLoading(true);
-        const res = await fetch(`/api/madleague/pt/submission?team_id=${team.id}`);
+        const res = await fetch(`/api/madleague/pt/submission?team_id=${teamId}&stage=${stage}`);
         const data = await res.json();
         setLoading(false);
         if (data.download_url) window.location.href = data.download_url;
@@ -216,7 +229,7 @@ function SubmissionLine({ team }: { team: Team }) {
     };
     return (
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-4 text-sm">
-            <span className="text-xs text-neutral-500">제출물</span>
+            <span className="text-xs text-neutral-500">{stage === "final" ? "본선 제출" : "예선 제출"}</span>
             {!s ? <span className="text-neutral-400">없음</span> : (
                 <>
                     <span className={`rounded px-2 py-0.5 text-xs ${s.status === "submitted" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>

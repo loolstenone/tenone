@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * 경쟁 PT 워크스페이스 — 내 팀 제출물 (팀원 누구나 · 마감 전)
+ * 경쟁 PT·프로젝트 워크스페이스 — 내 팀 제출물 (팀원 누구나 · 마감 전) · 단계별 예선/본선
  * 파일은 서명 업로드 URL로 브라우저가 Storage(mad-submissions, 비공개)에 직접 올린다 → /api/madleague/pt/submission
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -19,7 +19,7 @@ const ACCEPT = '.pdf,.ppt,.pptx,.key,.zip,.jpg,.jpeg,.png,.webp,.mp4';
 const fmtSize = (n: number) => n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))}KB` : `${(n / 1024 / 1024).toFixed(1)}MB`;
 const fmtDate = (s: string) => new Date(s).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-export function PtSubmissionPanel({ teamId }: { teamId: string }) {
+export function PtSubmissionPanel({ teamId, stage = 'prelim' }: { teamId: string; stage?: 'prelim' | 'final' }) {
   const [sub, setSub] = useState<Submission | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [canEdit, setCanEdit] = useState(false);
@@ -33,7 +33,7 @@ export function PtSubmissionPanel({ teamId }: { teamId: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/madleague/pt/submission?team_id=${teamId}`);
+    const res = await fetch(`/api/madleague/pt/submission?team_id=${teamId}&stage=${stage}`);
     const data = await res.json();
     if (!res.ok) { setMsg({ ok: false, text: data.error ?? '불러오지 못했습니다.' }); setLoaded(true); return; }
     setSub(data.submission);
@@ -46,11 +46,11 @@ export function PtSubmissionPanel({ teamId }: { teamId: string }) {
       presentation_url: data.submission?.presentation_url ?? '',
     });
     setLoaded(true);
-  }, [teamId]);
+  }, [teamId, stage]);
   useEffect(() => { load(); }, [load]);
 
   const post = async (body: Record<string, unknown>) => {
-    const res = await fetch('/api/madleague/pt/submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team_id: teamId, ...body }) });
+    const res = await fetch('/api/madleague/pt/submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team_id: teamId, stage, ...body }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? '처리하지 못했습니다.');
     return data;

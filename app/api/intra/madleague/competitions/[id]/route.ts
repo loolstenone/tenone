@@ -1,19 +1,21 @@
 /**
- * 인트라 경쟁 PT 회차 상세 — 직원 전용
+ * 인트라 경쟁 PT·프로젝트 회차 상세 — 직원 전용
  *   GET   /api/intra/madleague/competitions/{id}   회차 · 팀(팀원 이름) · 결과 · 연결 폼 응답(배정 후보) · 매드리거 후보
  *   PATCH /api/intra/madleague/competitions/{id}   회차 정보 수정
- *   POST  /api/intra/madleague/competitions/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_result
+ *   POST  /api/intra/madleague/competitions/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_finalist · set_result
  *
  * 팀원 키 = members.id (데이터 계약 1조). 이름·이메일은 members에서 읽어 보여줄 뿐 복사하지 않는다.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notify } from "@/lib/notify";
 
 type Params = { params: Promise<{ id: string }> };
 const TENANT = "tenone";
 const STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
-const EDITABLE = ["title", "year", "client_name", "brief_title", "brief_content", "start_date", "end_date", "presentation_date", "status", "form_id"] as const;
+const KINDS = ["competition", "project"];
+const EDITABLE = ["title", "year", "kind", "client_name", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"] as const;
 
 export async function GET(req: NextRequest, { params }: Params) {
     const auth = await requireStaff(req);
@@ -26,7 +28,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     if (!comp) return NextResponse.json({ error: "회차를 찾을 수 없습니다." }, { status: 404 });
 
     const [{ data: teams }, { data: results }, { data: clubs }, { data: forms }] = await Promise.all([
-        admin.from("mad_competition_teams").select("id, name, club_id, description").eq("competition_id", id).order("created_at"),
+        admin.from("mad_competition_teams").select("id, name, club_id, description, is_finalist").eq("competition_id", id).order("created_at"),
         admin.from("mad_competition_results").select("id, team_id, rank, award_name, feedback").eq("competition_id", id),
         admin.from("mad_clubs").select("id, name").order("name"),
         admin.from("forms").select("id, title, status").eq("brand_id", "madleague").order("created_at", { ascending: false }),
@@ -37,8 +39,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         : { data: [] as { team_id: string; member_id: string; role: string }[] };
     // 팀 제출물 (파일은 /api/madleague/pt/submission 서명 URL로 내려받기)
     const { data: subs } = teamIds.length
-        ? await admin.from("mad_submissions").select("team_id, title, status, file_name, presentation_url, submitted_at, updated_at").in("team_id", teamIds)
-        : { data: [] as { team_id: string; title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string }[] };
+        ? await admin.from("mad_submissions").select("team_id, stage, title, status, file_name, presentation_url, submitted_at, updated_at").in("team_id", teamIds)
+        : { data: [] as { team_id: string; stage: string; title: string; status: string; file_name: string | null; presentation_url: string | null; submitted_at: string | null; updated_at: string }[] };
 
     // 배정 후보: 연결 폼의 로그인 응답자 + 현역·임원 매드리거
     const { data: responses } = comp.form_id
@@ -68,7 +70,7 @@ export async function GET(req: NextRequest, { params }: Params) {
             ...t,
             members: (links ?? []).filter(l => l.team_id === t.id).map(l => ({ ...label(l.member_id), role: l.role })),
             result: (results ?? []).find(r => r.team_id === t.id) ?? null,
-            submission: (subs ?? []).find(s => s.team_id === t.id) ?? null,
+            submissions: (subs ?? []).filter(s => s.team_id === t.id),
         })),
         applicants: (responses ?? []).map(r => ({ ...label(r.member_id as string), response_id: r.id, response_status: r.status })),
         madleaguers: [...new Set((capRows ?? []).map(r => r.member_id as string))].map(label),
@@ -88,6 +90,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
     if ("title" in patch && !patch.title) return NextResponse.json({ error: "제목이 필요합니다." }, { status: 400 });
     if ("status" in patch && !STATUSES.includes(String(patch.status))) return NextResponse.json({ error: "상태 값이 올바르지 않습니다." }, { status: 400 });
+    if ("kind" in patch && !KINDS.includes(String(patch.kind))) return NextResponse.json({ error: "유형 값이 올바르지 않습니다." }, { status: 400 });
     if ("year" in patch) patch.year = Number(patch.year);
     patch.updated_at = new Date().toISOString();
 
@@ -149,6 +152,26 @@ export async function POST(req: NextRequest, { params }: Params) {
             if (!(await teamOfComp(body.team_id))) return NextResponse.json({ error: "팀을 찾을 수 없습니다." }, { status: 404 });
             const { error } = await admin.from("mad_team_members").delete().eq("team_id", body.team_id).eq("member_id", body.member_id);
             if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            break;
+        }
+        case "set_finalist": {
+            const team = await teamOfComp(body.team_id);
+            if (!team) return NextResponse.json({ error: "팀을 찾을 수 없습니다." }, { status: 404 });
+            const on = body.is_finalist === true;
+            const { error } = await admin.from("mad_competition_teams").update({ is_finalist: on, updated_at: new Date().toISOString() }).eq("id", team.id);
+            if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            if (on) {
+                const [{ data: comp }, { data: mates }] = await Promise.all([
+                    admin.from("mad_competitions").select("title, final_deadline").eq("id", id).maybeSingle(),
+                    admin.from("mad_team_members").select("member_id").eq("team_id", team.id),
+                ]);
+                await notify((mates ?? []).map(m => m.member_id), {
+                    brandId: "madleague", type: "mad_finalist",
+                    title: `${comp?.title ?? "경쟁 PT"} · ${team.name} 본선 진출`,
+                    message: comp?.final_deadline ? `본선 제안서 제출 마감 ${comp.final_deadline}` : "워크스페이스에서 본선 제안서를 제출하세요.",
+                    link: "/madleague/pt",
+                });
+            }
             break;
         }
         case "set_result": {

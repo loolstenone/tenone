@@ -1,7 +1,7 @@
 /**
- * 인트라 경쟁 PT 회차 — 직원 전용 (매드리거 구조 개편 2단계)
+ * 인트라 경쟁 PT·프로젝트 회차 — 직원 전용
  *   GET  /api/intra/madleague/competitions   회차 목록 + 팀 수
- *   POST /api/intra/madleague/competitions   새 회차 { title, year, client_name? }
+ *   POST /api/intra/madleague/competitions   새 회차 { title, year, kind?, client_name? }
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/api-guard";
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (auth instanceof NextResponse) return auth;
     const admin = createAdminClient();
     const { data, error } = await admin.from("mad_competitions")
-        .select("id, title, year, client_name, status, presentation_date, form_id")
+        .select("id, title, year, kind, client_name, status, presentation_date, form_id")
         .order("year", { ascending: false }).order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
         tenant_id: "tenone",
         title,
         year,
+        kind: body.kind === "project" ? "project" : "competition",
         client_name: String(body.client_name ?? "").trim() || null,
         status: "upcoming",
     }).select("id").single();

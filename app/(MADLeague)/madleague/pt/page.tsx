@@ -20,7 +20,8 @@ interface Competition {
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
   brief_title: string | null;
   brief_content: string | null;
-  brief_content: string | null;
+  kind: 'competition' | 'project';
+  final_deadline: string | null;
   client_name: string | null;
   client_logo_url: string | null;
   start_date: string | null;
@@ -35,14 +36,7 @@ interface Team {
   competition_id: string;
   memberCount: number;
   myRole: 'leader' | 'member' | null;
-  submissions: Array<{
-    id: string;
-    title: string;
-    status: 'draft' | 'submitted' | 'withdrawn';
-    submitted_at: string | null;
-    presentation_url: string | null;
-    file_url: string | null;
-  }>;
+  isFinalist: boolean;
   result: { rank: number | null; award_name: string | null; is_crown: boolean } | null;
 }
 
@@ -73,7 +67,9 @@ function ResultBadge({ result }: { result: NonNullable<Team['result']> }) {
   return null;
 }
 
-function TeamPanel({ team }: { team: Team }) {
+const fmtDay = (d: string) => new Date(`${d}T00:00:00+09:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+
+function TeamPanel({ team, comp }: { team: Team; comp: Competition }) {
   return (
     <div className="bg-neutral-950 border border-[#EC1D25]/30 p-6 space-y-5">
       {/* 팀 헤더 */}
@@ -83,6 +79,7 @@ function TeamPanel({ team }: { team: Team }) {
             <span className="text-[10px] font-bold px-2 py-0.5 bg-[#EC1D25]/15 text-[#EC1D25]">
               {team.myRole === 'leader' ? '내 팀 · 팀장' : '내 팀 · 팀원'}
             </span>
+            {team.isFinalist && <span className="text-[10px] font-bold px-2 py-0.5 bg-[#FFC000]/15 text-[#FFC000]">본선 진출</span>}
           </div>
           <h3 className="text-xl font-black">{team.name}</h3>
           {team.description && <p className="text-sm text-neutral-500 mt-1">{team.description}</p>}
@@ -97,10 +94,19 @@ function TeamPanel({ team }: { team: Team }) {
         </span>
       </div>
 
-      {/* 제출물 — 팀원 누구나 올리고 최종 제출 (마감 전) */}
+      {/* 본선 제출 — 진출 팀만, 현장 PT 전까지 디벨롭한 제안서 */}
+      {team.isFinalist && (
+        <div className="border border-[#FFC000]/30 p-5">
+          <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-1">본선 제출 · FINAL</div>
+          <p className="text-xs text-neutral-500 mb-4">현장 PT 전까지 디벨롭한 제안서를 올려 주세요.{comp.final_deadline ? ` 마감 ${fmtDay(comp.final_deadline)}` : ''}</p>
+          <PtSubmissionPanel teamId={team.id} stage="final" />
+        </div>
+      )}
+
+      {/* 예선 제출 — 팀원 누구나 올리고 최종 제출 (마감 전) */}
       <div>
-        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">SUBMISSION</div>
-        <PtSubmissionPanel teamId={team.id} />
+        <div className="text-xs font-bold tracking-widest text-neutral-600 mb-3">{comp.kind === 'project' ? '제출 · SUBMISSION' : '예선 제출 · SUBMISSION'}</div>
+        <PtSubmissionPanel teamId={team.id} stage="prelim" />
       </div>
     </div>
   );
@@ -176,7 +182,7 @@ export default async function PTWorkspacePage() {
   const { data: rawTeams } = compIds.length > 0
     ? await db
         .from('mad_competition_teams')
-        .select('id, name, description, competition_id')
+        .select('id, name, description, competition_id, is_finalist')
         .in('competition_id', compIds)
     : { data: [] };
 
@@ -207,21 +213,6 @@ export default async function PTWorkspacePage() {
     countByTeam[r.team_id] = (countByTeam[r.team_id] ?? 0) + 1;
   });
 
-  // 제출물 (내 팀들만)
-  const myTeamIdArr = [...myTeamIds];
-  const { data: submissions } = myTeamIdArr.length > 0
-    ? await db
-        .from('mad_submissions')
-        .select('id, team_id, title, status, submitted_at, presentation_url, file_url')
-        .in('team_id', myTeamIdArr)
-        .order('created_at', { ascending: false })
-    : { data: [] };
-  const subsByTeam: Record<string, Team['submissions']> = {};
-  (submissions ?? []).forEach((s: { team_id: string } & Team['submissions'][number]) => {
-    if (!subsByTeam[s.team_id]) subsByTeam[s.team_id] = [];
-    subsByTeam[s.team_id].push(s);
-  });
-
   // 수상 결과
   const { data: results } = teamIds.length > 0
     ? await db.from('mad_competition_results').select('team_id, rank, award_name, is_crown').in('team_id', teamIds)
@@ -232,14 +223,14 @@ export default async function PTWorkspacePage() {
   });
 
   // 팀 조합
-  const teams: Team[] = (rawTeams ?? []).map((t: { id: string; name: string; description: string | null; competition_id: string }) => ({
+  const teams: Team[] = (rawTeams ?? []).map((t: { id: string; name: string; description: string | null; competition_id: string; is_finalist: boolean }) => ({
     id: t.id,
     name: t.name,
     description: t.description,
     competition_id: t.competition_id,
     memberCount: countByTeam[t.id] ?? 0,
     myRole: myTeamIds.has(t.id) ? (myRoleByTeam[t.id] ?? 'member') : null,
-    submissions: subsByTeam[t.id] ?? [],
+    isFinalist: t.is_finalist,
     result: resultByTeam[t.id] ?? null,
     isMyTeam: myTeamIds.has(t.id),
   }));
@@ -303,6 +294,7 @@ export default async function PTWorkspacePage() {
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <CompStatusBadge status={comp.status} />
+                      <span className="text-[11px] font-bold px-2.5 py-1 bg-white/5 text-white/60">{comp.kind === 'project' ? '프로젝트' : '경쟁 PT'}</span>
                       <span className="text-xs text-neutral-600">{comp.year}년</span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black">{comp.title}</h2>
@@ -334,7 +326,7 @@ export default async function PTWorkspacePage() {
                 {myTeam ? (
                   <div className="mb-8">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">MY TEAM</div>
-                    <TeamPanel team={myTeam} />
+                    <TeamPanel team={myTeam} comp={comp} />
                   </div>
                 ) : comp.status === 'ongoing' ? (
                   <div className="mb-8 bg-neutral-950 border border-dashed border-neutral-800 p-8 text-center">

@@ -93,7 +93,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
     const [notiOpen, setNotiOpen] = useState(false);
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [notiLoading, setNotiLoading] = useState(false);
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const isAdmin = user?.role === "Admin" || user?.accountType === "staff"
         || (config.adminEmails || []).includes(user?.email || "");
@@ -174,7 +174,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
         return () => clearTimeout(timer);
     }, [searchQuery, config.siteId]);
 
-    // 알림 fetch (인증 상태에서, drawer 열렸을 때)
+    // 알림 — 로그인 시 1회(배지), 드롭다운 열 때 새로고침 + 읽음 처리 (본인 알림만, /api/notifications)
     async function fetchNotifications() {
         if (!isAuthenticated) return;
         setNotiLoading(true);
@@ -183,14 +183,25 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data.notifications ?? []);
+                setUnreadCount(data.unread ?? 0);
             }
-        } catch { /* silent — endpoint 미구현이면 빈 목록 */
+        } catch { /* silent */
         } finally {
             setNotiLoading(false);
         }
     }
     useEffect(() => {
-        if (notiOpen && notifications.length === 0) fetchNotifications();
+        if (isAuthenticated && !config.hideNotifications) fetchNotifications();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated]);
+    useEffect(() => {
+        if (!notiOpen) return;
+        fetchNotifications().then(() => {
+            // 목록은 그대로 강조해 두고, 배지만 지운다
+            fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+            setUnreadCount(0);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [notiOpen]);
 
     // 외부 클릭 시 드롭다운 닫기
@@ -290,7 +301,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                     <div className="absolute right-0 top-full mt-2 w-80 bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-200 overflow-hidden z-50">
                                         <div className="px-3 py-2 border-b border-neutral-100 flex items-center justify-between">
                                             <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">알림</span>
-                                            {unreadCount > 0 && <span className="text-[10px] text-rose-500 font-semibold">{unreadCount} 새 알림</span>}
+                                            {notifications.some(n => !n.read) && <span className="text-[10px] text-rose-500 font-semibold">{notifications.filter(n => !n.read).length} 새 알림</span>}
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
                                             {notiLoading ? (
