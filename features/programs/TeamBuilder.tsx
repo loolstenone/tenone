@@ -60,7 +60,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
     };
 
     const runnerTeams = useMemo(() => (b?.teams ?? []).filter(t => t.canRun && (!b?.groups.length || !group || t.group_id === group || (!t.group_id && b?.me.isStaff))), [b, group]);
-    const pool = useMemo(() => (b?.unassigned ?? []).filter(u => !group || u.group_id === group), [b, group]);
+    const pool = useMemo(() => (b?.unassigned ?? []).filter(u => !group || !u.group_id || u.group_id === group), [b, group]);
 
     if (error && !b) return <p className="py-10 text-sm text-red-400">{error}</p>;
     if (!b) return <p className="py-10 text-sm text-neutral-500">불러오는 중…</p>;
@@ -78,7 +78,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
             draggable={draggable && !busy}
             onDragStart={e => e.dataTransfer.setData("text/plain", m.member_id)}
             onClick={() => draggable && setPicked(p => (p === m.member_id ? null : m.member_id))}
-            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-sm ${draggable ? "cursor-grab active:cursor-grabbing" : ""} ${picked === m.member_id ? "border-[#EC1D25] bg-[#EC1D25]/15" : "border-neutral-800 bg-neutral-900"}`}>
+            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-sm ${draggable ? "cursor-grab active:cursor-grabbing" : ""} ${picked === m.member_id ? "border-[var(--pa,#EC1D25)] bg-[var(--pa,#EC1D25)]/15" : "border-neutral-800 bg-neutral-900"}`}>
             {m.name}{extra}
         </span>
     );
@@ -91,7 +91,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
             {/* 내 팀 (팀원·팀장) */}
             {myTeam && !myTeam.canRun && (
                 <section>
-                    <div className="mb-3 text-xs font-bold tracking-widest text-[#EC1D25]">MY TEAM</div>
+                    <div className="mb-3 text-xs font-bold tracking-widest text-[var(--pa,#EC1D25)]">MY TEAM</div>
                     <TeamCard team={myTeam} busy={busy} act={act} chip={chip} />
                 </section>
             )}
@@ -101,7 +101,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
                 <section className="space-y-5">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                         <div>
-                            <div className="text-xs font-bold tracking-widest text-[#EC1D25]">TEAM BUILDING</div>
+                            <div className="text-xs font-bold tracking-widest text-[var(--pa,#EC1D25)]">TEAM BUILDING</div>
                             <p className="mt-1 text-sm text-neutral-500">
                                 {b.round.year}년 활동 회원을 팀으로 끌어다 놓으세요. 휴대폰에서는 이름을 누른 뒤 팀의 &quot;여기로&quot;를 누릅니다.
                                 가입하지 않은 인원은 팀 초대 링크로 가입 후 합류합니다.
@@ -115,11 +115,11 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
                     </div>
 
                     <div {...dropProps(POOL)}
-                        className={`border border-dashed p-4 ${over === POOL ? "border-[#EC1D25] bg-[#EC1D25]/5" : "border-neutral-800"}`}>
+                        className={`border border-dashed p-4 ${over === POOL ? "border-[var(--pa,#EC1D25)] bg-[var(--pa,#EC1D25)]/5" : "border-neutral-800"}`}>
                         <div className="mb-3 flex items-center justify-between text-xs font-bold text-neutral-400">
                             <span>미배정 · {b.groups.find(g => g.id === group)?.name ?? ""} {pool.length}명</span>
                             {picked && b.teams.some(t => t.members.some(m => m.member_id === picked)) && (
-                                <button onClick={() => move(picked, POOL)} className="text-[#EC1D25]">여기로 (배정 해제)</button>
+                                <button onClick={() => move(picked, POOL)} className="text-[var(--pa,#EC1D25)]">여기로 (배정 해제)</button>
                             )}
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -129,7 +129,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
 
                     <div className="grid gap-4 md:grid-cols-2">
                         {runnerTeams.map(t => (
-                            <div key={t.id} {...dropProps(t.id)} className={over === t.id ? "outline outline-1 outline-[#EC1D25]" : ""}>
+                            <div key={t.id} {...dropProps(t.id)} className={over === t.id ? "outline outline-1 outline-[var(--pa,#EC1D25)]" : ""}>
                                 <TeamCard team={t} busy={busy} act={act} chip={chip}
                                     onHere={picked && !t.members.some(m => m.member_id === picked) ? () => move(picked, t.id) : undefined} />
                             </div>
@@ -142,7 +142,7 @@ export function TeamBuilder({ roundId, brandName }: { roundId: string; brandName
                                 className="flex-1 border border-neutral-700 bg-black px-3 py-2 text-sm" />
                             <button disabled={busy || !newName.trim()}
                                 onClick={async () => { if (await act({ action: "create_team", name: newName, group_id: group })) setNewName(""); }}
-                                className="inline-flex items-center gap-1 bg-[#EC1D25] px-4 py-2 text-sm font-bold disabled:opacity-40">
+                                className="inline-flex items-center gap-1 bg-[var(--pa,#EC1D25)] px-4 py-2 text-sm font-bold disabled:opacity-40">
                                 <Plus className="h-4 w-4" /> 팀 만들기
                             </button>
                         </div>
@@ -176,7 +176,7 @@ function TeamCard({ team, busy, act, chip, onHere }: {
                         <textarea value={desc} onChange={e => setDesc(e.target.value)} maxLength={300} rows={2} placeholder="팀 소개 (선택)" className="w-full border border-neutral-700 bg-black px-3 py-2 text-sm" />
                         <div className="flex gap-2">
                             <button disabled={busy || !name.trim()} onClick={async () => { if (await act({ action: "rename", team_id: team.id, name, description: desc })) setEditing(false); }}
-                                className="bg-[#EC1D25] px-3 py-1.5 text-xs font-bold disabled:opacity-40">저장</button>
+                                className="bg-[var(--pa,#EC1D25)] px-3 py-1.5 text-xs font-bold disabled:opacity-40">저장</button>
                             <button onClick={() => { setEditing(false); setName(team.name); setDesc(team.description ?? ""); }} className="border border-neutral-700 px-3 py-1.5 text-xs">취소</button>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ function TeamCard({ team, busy, act, chip, onHere }: {
                     </div>
                 )}
                 <div className="flex shrink-0 items-center gap-2">
-                    {onHere && <button onClick={onHere} className="bg-[#EC1D25] px-3 py-1.5 text-xs font-bold">여기로</button>}
+                    {onHere && <button onClick={onHere} className="bg-[var(--pa,#EC1D25)] px-3 py-1.5 text-xs font-bold">여기로</button>}
                     {team.canEdit && !editing && <button onClick={() => setEditing(true)} className="border border-neutral-700 px-3 py-1.5 text-xs">수정</button>}
                     {team.canRun && team.members.length === 0 && (
                         <button disabled={busy} onClick={() => { if (confirm(`${team.name} 팀을 지울까요?`)) act({ action: "delete_team", team_id: team.id }); }} aria-label="팀 삭제" className="text-neutral-600 hover:text-red-400">
@@ -223,7 +223,7 @@ function TeamCard({ team, busy, act, chip, onHere }: {
                     {inviteUrl ? (
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Link2 className="h-3.5 w-3.5 shrink-0 text-[#EC1D25]" />
+                                <Link2 className="h-3.5 w-3.5 shrink-0 text-[var(--pa,#EC1D25)]" />
                                 <code className="min-w-0 flex-1 truncate text-neutral-400">{inviteUrl}</code>
                                 <button onClick={async () => { await navigator.clipboard.writeText(inviteUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
                                     className="border border-neutral-700 px-2.5 py-1">{copied ? "복사됨" : "복사"}</button>

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { ProgramBoard } from '@/features/programs/ProgramBoard';
+import { PROGRAM_THEMES } from '@/features/programs/ProgramTheme';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata = {
@@ -81,6 +83,11 @@ export default function ProgramsPage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* 다른 브랜드 프로그램 — 창구에 MADLeague를 지정한 RooK 실전 프로젝트·HeRo 프로그램 (운영·동의는 주인 브랜드). 회차가 없으면 숨김 */}
+      <section className="mx-auto max-w-7xl px-6 pb-16">
+        <ProgramBoard theme={PROGRAM_THEMES.madleague} brands={['rook', 'hero']} title="함께하는 프로그램" hideWhenEmpty />
       </section>
     </div>
   );

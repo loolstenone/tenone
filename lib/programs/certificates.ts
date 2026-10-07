@@ -76,7 +76,7 @@ export async function eligibleCertificates(brand: string, memberId: string): Pro
         const res = r.results_published_at ? (results ?? []).find(x => x.team_id === p.team_id) : null;
         const award = !!(res && (res.award_name || res.rank));
         const type = programCertType(r.kind, award);
-        const result = res?.award_name ?? (res?.rank ? `${res.rank}위` : p.team!.is_finalist ? "본선 진출" : r.kind === "course" ? "수료" : "참가");
+        const result = res?.award_name ?? (res?.rank ? `${res.rank}위` : p.team!.is_finalist ? "본선 진출" : r.kind === "course" ? "수료" : r.kind === "competition" ? "참가" : "참여");
         const key = `round:${r.id}`;
         return {
             key, type, label: CERT_TYPE_LABEL[type](r.kind), title: r.title, result, year: r.year,

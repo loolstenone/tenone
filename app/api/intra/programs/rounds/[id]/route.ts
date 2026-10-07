@@ -4,6 +4,7 @@
  *   PATCH /api/intra/programs/rounds/{id}   회차 정보 수정
  *   POST  /api/intra/programs/rounds/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_finalist
  *                                           set_result · add_client · remove_client · publish_results{on} · logo_upload{name}
+ *                                           accept_application · decline_application (4단계 — 신청 → 선발)
  * 결과 발표(results_published_at) 전에는 결과가 공개 화면(명예의 전당·포트폴리오 등)에 보이지 않는다 (RLS)
  * 클라이언트 = member_capability_roles (showcase, {주인 brand}, host, {type:'corporate', round_id, company})
  * 참가자 키 = members.id (데이터 계약 1조) · 한 회차 한 사람 한 번 (program_participants UNIQUE)
@@ -20,7 +21,7 @@ import { brandCandidates, brandGroups, GROUP_LABEL } from "@/lib/programs/brands
 type Params = { params: Promise<{ id: string }> };
 const STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
 const KINDS = ["competition", "project", "program", "course"];
-const EDITABLE = ["title", "year", "kind", "mode", "channels", "client_name", "client_logo_url", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"] as const;
+const EDITABLE = ["title", "year", "kind", "mode", "channels", "client_name", "client_logo_url", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id", "applications_open"] as const;
 
 export async function GET(req: NextRequest, { params }: Params) {
     const auth = await requireStaff(req);
@@ -44,6 +45,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         roundClientIds(id),
         admin.from("ums_sites").select("slug, name").order("name"),
     ]);
+    const { data: apps } = await admin.from("program_applications")
+        .select("id, member_id, channel, motivation, portfolio_url, status, created_at").eq("round_id", id).neq("status", "withdrawn").order("created_at");
 
     // 배정 후보: 연결 폼의 로그인 응답자 + 브랜드 후보
     const { data: responses } = round.form_id
@@ -55,6 +58,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         ...(parts ?? []).map(p => p.member_id),
         ...(responses ?? []).map(r => r.member_id as string),
         ...candidates.map(c => c.member_id),
+        ...(apps ?? []).map(a => a.member_id),
     ])];
     const { data: people } = memberIds.length
         ? await admin.from("members").select("id, name, email").in("id", memberIds)
@@ -78,7 +82,13 @@ export async function GET(req: NextRequest, { params }: Params) {
             submissions: (subs ?? []).filter(s => s.team_id === t.id),
         })),
         applicants: (responses ?? []).map(r => ({ ...label(r.member_id as string), response_id: r.id, response_status: r.status })),
-        candidates: candidates.map(c => label(c.member_id)),
+        candidates: [...new Map([
+            // 선발된 신청자(팀 미배정)를 맨 앞에
+            ...(parts ?? []).filter(p => !p.team_id).map(p => [p.member_id, label(p.member_id)] as const),
+            ...candidates.map(c => [c.member_id, label(c.member_id)] as const),
+        ]).values()],
+        unassigned: (parts ?? []).filter(p => !p.team_id).map(p => label(p.member_id)),
+        applications: (apps ?? []).map(a => ({ ...label(a.member_id), id: a.id, channel: a.channel, motivation: a.motivation, portfolio_url: a.portfolio_url, status: a.status, created_at: a.created_at })),
         clients: clientIds.map(label),
     });
 }
@@ -157,16 +167,43 @@ export async function POST(req: NextRequest, { params }: Params) {
             if (typeof body.member_id !== "string") return NextResponse.json({ error: "회원을 선택하세요." }, { status: 400 });
             const role = body.role === "leader" ? "leader" : "member";
             // 한 회차에 한 사람 한 번 — DB UNIQUE(round_id, member_id)
-            const { error } = await admin.from("program_participants").insert({ brand_id: brand, round_id: id, team_id: body.team_id, member_id: body.member_id, role, joined_via: "staff" });
+            // 선발된 신청자(팀 미배정 참가자)는 그 행에 팀만 넣는다
+            const { data: loose } = await admin.from("program_participants").select("id").eq("round_id", id).eq("member_id", body.member_id).is("team_id", null).maybeSingle();
+            const { error } = loose
+                ? await admin.from("program_participants").update({ team_id: body.team_id, role }).eq("id", loose.id)
+                : await admin.from("program_participants").insert({ brand_id: brand, round_id: id, team_id: body.team_id, member_id: body.member_id, role, joined_via: "staff" });
             if (error) {
                 if (error.code === "23505") return NextResponse.json({ error: "이미 이 회차의 다른 팀에 배정된 회원입니다." }, { status: 409 });
                 return NextResponse.json({ error: error.message }, { status: 500 });
             }
             break;
         }
+        case "accept_application":
+        case "decline_application": {
+            const { data: app } = await admin.from("program_applications").select("id, member_id, status").eq("id", String(body.application_id ?? "")).eq("round_id", id).maybeSingle();
+            if (!app) return NextResponse.json({ error: "신청을 찾을 수 없습니다." }, { status: 404 });
+            const accept = body.action === "accept_application";
+            if (accept) {
+                const { error: pErr } = await admin.from("program_participants").insert({ brand_id: brand, round_id: id, team_id: null, member_id: app.member_id, role: "member", joined_via: "apply" });
+                if (pErr && pErr.code !== "23505") return NextResponse.json({ error: pErr.message }, { status: 500 });
+            }
+            const { error } = await admin.from("program_applications").update({
+                status: accept ? "accepted" : "declined", decided_at: new Date().toISOString(), decided_by: ("memberId" in auth ? auth.memberId : null) ?? null, updated_at: new Date().toISOString(),
+            }).eq("id", app.id);
+            if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            await notify([app.member_id], accept
+                ? { brandId: brand, type: "program_application", title: `${round.title} 참가자로 선발되었습니다`, message: "회차 방에서 공지를 확인하세요. 팀 배정은 운영진이 안내합니다.", link: programRoomPath(round) }
+                : { brandId: brand, type: "program_application", title: `${round.title} 신청 결과 안내`, message: "이번 회차에는 함께하지 못하게 되었습니다. 다음 모집에서 만나요.", link: null });
+            break;
+        }
         case "remove_member": {
             if (!(await teamOfRound(body.team_id))) return NextResponse.json({ error: "팀을 찾을 수 없습니다." }, { status: 404 });
-            const { error } = await admin.from("program_participants").delete().eq("round_id", id).eq("team_id", body.team_id).eq("member_id", body.member_id);
+            // 신청으로 선발된 참가자는 참가 자격을 남기고 팀만 뺀다
+            const { data: row } = await admin.from("program_participants").select("id, joined_via").eq("round_id", id).eq("team_id", body.team_id).eq("member_id", body.member_id).maybeSingle();
+            if (!row) break;
+            const { error } = row.joined_via === "apply"
+                ? await admin.from("program_participants").update({ team_id: null, role: "member" }).eq("id", row.id)
+                : await admin.from("program_participants").delete().eq("id", row.id);
             if (error) return NextResponse.json({ error: error.message }, { status: 500 });
             break;
         }

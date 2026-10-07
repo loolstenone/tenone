@@ -20,7 +20,7 @@ interface Question {
   answers: { id: string; role: 'staff' | 'client'; body: string; created_at: string }[];
 }
 
-const inputCls = 'w-full bg-black border border-neutral-800 px-3 py-2.5 text-sm text-white outline-none focus:border-[#EC1D25]';
+const inputCls = 'w-full bg-black border border-neutral-800 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--pa,#EC1D25)]';
 const fmt = (s: string) => new Date(s).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 const ROLE_LABEL = { staff: '운영진', client: '클라이언트' } as const;
 
@@ -47,7 +47,7 @@ export function RoundTabs({ compId, role, teamId, isFinalist, kind, finalDeadlin
       <div className="sticky top-0 z-10 -mx-4 flex border-b border-neutral-900 bg-black px-4 sm:mx-0 sm:px-0">
         {tabs.map(t => (
           <button key={t.key} onClick={() => go(t.key)}
-            className={`flex flex-1 items-center justify-center gap-1.5 py-3.5 text-sm font-bold transition sm:flex-none sm:px-6 ${tab === t.key ? 'border-b-2 border-[#EC1D25] text-white' : 'text-neutral-500 hover:text-white'}`}>
+            className={`flex flex-1 items-center justify-center gap-1.5 py-3.5 text-sm font-bold transition sm:flex-none sm:px-6 ${tab === t.key ? 'border-b-2 border-[var(--pa,#EC1D25)] text-white' : 'text-neutral-500 hover:text-white'}`}>
             <t.icon className="h-4 w-4" /> {t.label}
           </button>
         ))}
@@ -110,11 +110,11 @@ function Notices({ compId }: { compId: string }) {
           <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="공지 제목" className={inputCls} />
           <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={5} placeholder="내용" className={inputCls} />
           <label className="flex items-center gap-2 text-xs text-neutral-400">
-            <input type="checkbox" checked={form.pinned} onChange={e => setForm({ ...form, pinned: e.target.checked })} className="accent-[#EC1D25]" /> 상단 고정
+            <input type="checkbox" checked={form.pinned} onChange={e => setForm({ ...form, pinned: e.target.checked })} className="accent-[var(--pa,#EC1D25)]" /> 상단 고정
           </label>
           <div className="flex gap-2">
             <button disabled={busy || !form.title.trim()} onClick={async () => { if (await send('POST', form)) { setForm({ title: '', body: '', pinned: false }); setOpen(false); } }}
-              className="flex-1 bg-[#EC1D25] py-2.5 text-sm font-bold text-white disabled:opacity-40 sm:flex-none sm:px-6">올리기 · 참여자에게 알림</button>
+              className="flex-1 bg-[var(--pa,#EC1D25)] py-2.5 text-sm font-bold text-white disabled:opacity-40 sm:flex-none sm:px-6">올리기 · 참여자에게 알림</button>
             <button onClick={() => setOpen(false)} className="px-4 text-sm text-neutral-500">취소</button>
           </div>
         </div>
@@ -125,7 +125,7 @@ function Notices({ compId }: { compId: string }) {
       {list.length === 0 ? <p className="py-10 text-center text-sm text-neutral-600">공지가 없습니다.</p> : list.map(n => (
         <article key={n.id} className="border border-neutral-900 bg-neutral-950 p-4">
           <div className="flex items-start gap-2">
-            {n.pinned && <Pin className="mt-0.5 h-4 w-4 shrink-0 text-[#EC1D25]" />}
+            {n.pinned && <Pin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--pa,#EC1D25)]" />}
             <h3 className="flex-1 font-bold">{n.title}</h3>
             {canWrite && (
               <div className="flex shrink-0 gap-2 text-neutral-600">
@@ -175,11 +175,11 @@ function Qna({ compId }: { compId: string }) {
           <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={3} placeholder="자세한 내용 (선택)" className={inputCls} />
           <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2 text-xs text-neutral-400">
-              <input type="checkbox" checked={form.is_private} onChange={e => setForm({ ...form, is_private: e.target.checked })} className="accent-[#EC1D25]" />
+              <input type="checkbox" checked={form.is_private} onChange={e => setForm({ ...form, is_private: e.target.checked })} className="accent-[var(--pa,#EC1D25)]" />
               <Lock className="h-3.5 w-3.5" /> 비밀 질문 (우리 팀·운영진·클라이언트만)
             </label>
             <button disabled={busy || !form.title.trim()} onClick={async () => { if (await post({ action: 'ask', ...form })) setForm({ title: '', body: '', is_private: false }); }}
-              className="ml-auto bg-[#EC1D25] px-5 py-2 text-sm font-bold text-white disabled:opacity-40">질문하기</button>
+              className="ml-auto bg-[var(--pa,#EC1D25)] px-5 py-2 text-sm font-bold text-white disabled:opacity-40">질문하기</button>
           </div>
         </div>
       )}
@@ -197,8 +197,8 @@ function Qna({ compId }: { compId: string }) {
           <h3 className="mt-2 font-bold">{q.title}</h3>
           {q.body && <p className="mt-1 whitespace-pre-line text-sm text-neutral-300">{q.body}</p>}
           {q.answers.map(a => (
-            <div key={a.id} className="mt-3 border-l-2 border-[#EC1D25]/50 bg-black/40 py-2 pl-3 pr-2">
-              <div className="text-xs font-bold text-[#EC1D25]">{ROLE_LABEL[a.role]} <span className="font-normal text-neutral-600">· {fmt(a.created_at)}</span></div>
+            <div key={a.id} className="mt-3 border-l-2 border-[var(--pa,#EC1D25)]/50 bg-black/40 py-2 pl-3 pr-2">
+              <div className="text-xs font-bold text-[var(--pa,#EC1D25)]">{ROLE_LABEL[a.role]} <span className="font-normal text-neutral-600">· {fmt(a.created_at)}</span></div>
               <p className="mt-1 whitespace-pre-line text-sm text-neutral-200">{a.body}</p>
             </div>
           ))}
@@ -272,7 +272,7 @@ function Works({ compId }: { compId: string }) {
                 <textarea rows={2} value={draft[s.id]?.body ?? ''} onChange={e => setDraft({ ...draft, [s.id]: { body: e.target.value, visible: draft[s.id]?.visible ?? true } })} placeholder="코멘트" className={inputCls} />
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-2 text-xs text-neutral-400">
-                    <input type="checkbox" checked={draft[s.id]?.visible ?? true} onChange={e => setDraft({ ...draft, [s.id]: { body: draft[s.id]?.body ?? '', visible: e.target.checked } })} className="accent-[#EC1D25]" />
+                    <input type="checkbox" checked={draft[s.id]?.visible ?? true} onChange={e => setDraft({ ...draft, [s.id]: { body: draft[s.id]?.body ?? '', visible: e.target.checked } })} className="accent-[var(--pa,#EC1D25)]" />
                     팀에게 공개 (끄면 운영진·클라이언트만 보는 심사 메모)
                   </label>
                   <button disabled={busy || !(draft[s.id]?.body ?? '').trim()} onClick={() => comment(s.id)} className="ml-auto bg-white px-4 py-2 text-sm font-bold text-black disabled:opacity-40">등록</button>
@@ -288,8 +288,8 @@ function Works({ compId }: { compId: string }) {
 
 function CommentRow({ c }: { c: Comment }) {
   return (
-    <div className="mt-2 border-l-2 border-[#EC1D25]/50 bg-black/40 py-2 pl-3 pr-2">
-      <div className="flex items-center gap-2 text-xs font-bold text-[#EC1D25]">
+    <div className="mt-2 border-l-2 border-[var(--pa,#EC1D25)]/50 bg-black/40 py-2 pl-3 pr-2">
+      <div className="flex items-center gap-2 text-xs font-bold text-[var(--pa,#EC1D25)]">
         {ROLE_LABEL[c.author_role]}
         {!c.visible_to_team && <span className="inline-flex items-center gap-1 font-normal text-neutral-500"><EyeOff className="h-3 w-3" /> 심사 메모</span>}
         <span className="font-normal text-neutral-600">· {fmt(c.created_at)}</span>

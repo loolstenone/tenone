@@ -253,6 +253,7 @@ export const modules: NavModule[] = [
                             // ── 공통 ──
                             { name: "대시보드", href: "/intra/hero" },
                             { name: "인재 풀", href: "/intra/hero/talent" },
+                            { name: "프로그램", href: "/intra/hero/programs" },
                             // ── 기업 측 (Tetrad) ──
                             { name: "기업 풀", href: "/intra/hero/companies" },
                             { name: "TIH 요청", href: "/intra/hero/search-light" },

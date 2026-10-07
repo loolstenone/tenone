@@ -66,6 +66,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             { placement: "header", label: "RooKie", path: "/rook/rookie", source: { kind: "static" } },
             { placement: "header", label: "About", path: "/rook/about", source: { kind: "static" } },
             { placement: "feature", location: "RooKie", label: "RooKie 지원하기", path: "/rook/rookie", source: { kind: "inquiry", formType: "rook_rookie" }, adminHref: "/intra/ums/rook/rookie", unit: "건" },
+            { placement: "feature", location: "RooKie", label: "참가 신청", path: "/rook/projects", source: { kind: "table", table: "program_applications", eq: { brand_id: "rook" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/rook/programs", unit: "건" },
             { placement: "feature", location: "About", label: "상담 / 문의", path: "/rook/about", source: { kind: "inquiry", formType: "rook_inquiry" }, adminHref: "/intra/ums/rook/cs", unit: "건" },
         ],
     },

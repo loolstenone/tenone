@@ -1,6 +1,6 @@
 # 프로그램 모듈 (코어) — 설계안 v0.1
 
-> 2026-10-08 · 상태: **1·2·3단계 적용** (4단계 RooK·HeRo 예정)
+> 2026-10-08 · 상태: **1~4단계 적용** (출시 전 법률 검토 대기 — §9)
 > 원칙: **기능은 하나(코어), 주인은 브랜드(`brand_id`), 창구는 여러 곳(`channels`)**
 > 근거: 데이터 계약 3조 — MADLeague(경쟁 PT)·RooK(실전 프로젝트) 두 집중 브랜드가 같은 기능을 필요로 함 → 코어로 끌어올림
 
@@ -105,3 +105,17 @@
 - 코드 형식 `MAD26-XXXXXX` (브랜드 접두 + 연도 2자리)
 - 옛 `mad_certificates`(0건)·`mad_eligible_certificates()`·`mad_gen_cert_code()`·`/api/madleague/certificates` → 대체. 옛 테이블·함수는 배포 후 삭제 목록에 포함
 - 탈퇴: 익명화 (docs/Data_Lifecycle.md 3.2.2)
+
+---
+
+## 9. 4단계 — RooK 실전 프로젝트 · HeRo 프로그램 연결 (2026-10-08 적용)
+
+- **참가 신청**: `program_applications` (`sql/program-applications.sql`) — 지원 동기·포트폴리오 링크만 (이름·연락처는 계정). 회차 `applications_open`(인트라 "사이트에서 신청 받기") + 모집 예정·진행 중일 때만. 신청 시 주인 브랜드 참가 동의. 창구(channel) 기록
+- **선발**: 인트라 회차 편집 › 참가 신청 — 선발(→ `program_participants` team_id NULL, joined_via `apply`) / 미선발(안내 알림). 팀 회차면 팀 카드·사이트 팀 구성에서 배정. 팀에서 빼도 선발 자격은 유지
+- **창구 공용 화면** (`features/programs/*`, 테마 `ProgramTheme.ts`): 목록 `ProgramBoard` · 신청 `ApplyButton` · 회차 방 `RoundRoom` · 팀 `RoundTeams` · 초대 `InviteJoin` · 인증서 `CertificateManager`/`CertificatePrint`/`CertificateVerify`/`CertificateVerifyForm` — 색은 CSS 변수 `--pa`
+- **RooK** (`/rook/projects` · `/rook/projects/{id}` · `/teams` · `/join/{code}` · `/rook/certificate` · `/print` · `/verify`) — RooKie 페이지에 "모집 중인 실전 프로젝트"(회차 없으면 숨김). 헤더 메뉴는 원본 그대로 (추가 안 함)
+- **HeRo** (`/hero/programs` …같은 구조) — 헤더 진입점 미정 (사용자 결정 대기)
+- **MADLeague** — 프로그램 페이지 하단 "함께하는 프로그램"(RooK·HeRo 회차 중 창구 MADLeague, 없으면 숨김) · 경쟁 PT 워크스페이스에도 창구 회차 표시. 회차 방은 어느 창구 주소로 열어도 같다
+- **인증서**: 경쟁 PT = 참가 확인서, 프로젝트·프로그램 = 참여 확인서(결과 "참여"). 순위 없는 프로젝트는 회차를 "종료"하면 발급 가능
+- 인트라: `/intra/ums/rook/programs` · `/intra/hero/programs` · Action Hub 브랜드별 신청 카드
+- **출시 전 법률 검토 (필수)**: RooK — 무급 참여의 근로자성(실제 업무·지휘감독·성과물 귀속), RooKie 페이지의 "수익 공유" 문구와 계약 관계, 직업소개 연결 금지(미신고) / HeRo — 유료 프로그램은 통신판매업 신고 전 결제 금지(무료·상담 후 안내만) / 공통 — 개인정보처리방침에 신청 항목 반영

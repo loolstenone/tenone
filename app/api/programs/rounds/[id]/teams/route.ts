@@ -38,7 +38,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { data: parts } = await admin.from("program_participants").select("team_id, member_id, role").eq("round_id", id);
     const inRound = new Map(((parts ?? []) as { team_id: string | null; member_id: string; role: string }[]).map(p => [p.member_id, p]));
     const candidates = runner ? await groupCandidates(s.round.brand_id, groups.map(g => g.id), s.round.year) : [];
-    const unassigned = candidates.filter(c => !inRound.has(c.member_id));
+    // 미배정 = 그 해 활동 회원 중 아직 참가 안 한 사람 + (직원) 선발됐지만 팀이 없는 참가자
+    const loose = s.isStaff ? [...inRound.values()].filter(p => !p.team_id).map(p => ({ member_id: p.member_id, group_id: null as string | null })) : [];
+    const unassigned = [...loose, ...candidates.filter(c => !inRound.has(c.member_id))];
 
     const memberIds = [...new Set([
         ...((parts ?? []) as { team_id: string | null; member_id: string }[]).filter(p => p.team_id && teamIds.includes(p.team_id)).map(p => p.member_id),
@@ -117,14 +119,17 @@ export async function POST(req: NextRequest, { params }: Params) {
             // team_id = null → 배정 해제 / 그 외 → 그 팀으로 (이동 포함)
             if (!isUuid(body.member_id)) return deny("회원을 선택하세요.", 400);
             const memberId = body.member_id;
-            const { data: cur } = await admin.from("program_participants").select("id, team_id, role").eq("round_id", id).eq("member_id", memberId).maybeSingle();
+            const { data: cur } = await admin.from("program_participants").select("id, team_id, role, joined_via").eq("round_id", id).eq("member_id", memberId).maybeSingle();
             const curTeam = cur?.team_id ? await teamOf(cur.team_id) : null;
             if (cur && curTeam && !canRunTeam(s, curTeam)) return deny("다른 팀에 이미 소속된 회원입니다.", 409);
 
             if (body.team_id === null) {
                 if (!cur) return NextResponse.json({ ok: true });
                 if (!curTeam && !s.isStaff) return deny();
-                const { error } = await admin.from("program_participants").delete().eq("id", cur.id);
+                // 신청으로 선발된 참가자는 참가 자격을 남기고 팀만 뺀다
+                const { error } = cur.joined_via === "apply"
+                    ? await admin.from("program_participants").update({ team_id: null, role: "member" }).eq("id", cur.id)
+                    : await admin.from("program_participants").delete().eq("id", cur.id);
                 if (error) return NextResponse.json({ error: error.message }, { status: 500 });
                 return NextResponse.json({ ok: true });
             }

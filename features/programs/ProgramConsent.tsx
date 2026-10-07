@@ -36,17 +36,17 @@ export function ProgramConsent({ brand, brandName, onAgreed }: { brand: string; 
     return (
         <div className="mx-auto max-w-xl space-y-4 border border-neutral-800 bg-neutral-950 p-6 text-white">
             <div>
-                <div className="text-xs font-bold tracking-widest text-[#EC1D25]">참가 동의</div>
+                <div className="text-xs font-bold tracking-widest text-[var(--pa,#EC1D25)]">참가 동의</div>
                 <h2 className="mt-1 text-xl font-black">{brandName} 프로그램 참가</h2>
                 <p className="mt-1 text-sm text-neutral-500">처음 한 번만 받습니다. 운영: {brandName}</p>
             </div>
             <ConsentItems />
             <label className="flex cursor-pointer items-start gap-2 text-sm">
-                <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#EC1D25]" />
+                <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--pa,#EC1D25)]" />
                 <span>[필수] 위 내용으로 개인정보 수집·이용에 동의합니다.</span>
             </label>
             {error && <p className="text-sm text-red-400">{error}</p>}
-            <button onClick={submit} disabled={!agree || busy} className="w-full bg-[#EC1D25] py-3 text-sm font-bold text-white disabled:opacity-40">
+            <button onClick={submit} disabled={!agree || busy} className="w-full bg-[var(--pa,#EC1D25)] py-3 text-sm font-bold text-white disabled:opacity-40">
                 {busy ? "저장 중…" : "동의하고 계속"}
             </button>
         </div>

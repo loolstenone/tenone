@@ -53,6 +53,16 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "approval",
         priority: "normal",
     },
+    // 코어 프로그램 참가 신청 (program_applications, 2026-10-08) — 브랜드별 카드
+    ...([
+        ["madleague", "MAD League 프로그램 신청", "/intra/ums/madleague/competitions"],
+        ["rook", "RooK 실전 프로젝트 신청", "/intra/ums/rook/programs"],
+        ["hero", "HeRo 프로그램 신청", "/intra/hero/programs"],
+    ] as const).map(([brand, label, href]): ActionEntry => ({
+        key: `program_applications_${brand}`, label, table: "program_applications",
+        filter: { column: "status", value: "pending" }, extraFilters: [{ column: "brand_id", value: brand }],
+        href, brand_id: brand, category: "approval", priority: "normal",
+    })),
     {
         key: "jakka_seller_applications",
         label: "Jakka 판매자 심사",

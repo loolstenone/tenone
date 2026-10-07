@@ -14,7 +14,7 @@ interface Submission {
   status: 'draft' | 'submitted' | 'withdrawn'; submitted_at: string | null; updated_at: string;
 }
 
-const inputCls = 'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
+const inputCls = 'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[var(--pa,#EC1D25)] [color-scheme:dark]';
 const ACCEPT = '.pdf,.ppt,.pptx,.key,.zip,.jpg,.jpeg,.png,.webp,.mp4';
 const fmtSize = (n: number) => n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))}KB` : `${(n / 1024 / 1024).toFixed(1)}MB`;
 const fmtDate = (s: string) => new Date(s).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -133,7 +133,7 @@ export function SubmissionPanel({ teamId, stage = 'prelim' }: { teamId: string; 
             <input ref={fileRef} type="file" accept={ACCEPT} className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
           </label>
           <label className="flex items-start gap-2 text-xs text-neutral-400">
-            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 accent-[#EC1D25]" />
+            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 accent-[var(--pa,#EC1D25)]" />
             최종 제출하면 제출물이 심사를 위해 과제 기업과 심사위원에게 전달되는 것에 동의합니다. (최종 제출 시 필수)
           </label>
           {msg && <p className={`text-sm ${msg.ok ? 'text-green-400' : 'text-red-400'}`}>{msg.text}</p>}
@@ -141,7 +141,7 @@ export function SubmissionPanel({ teamId, stage = 'prelim' }: { teamId: string; 
             <button onClick={() => save(false)} disabled={busy || !form.title.trim()} className="border border-neutral-700 px-5 py-2.5 text-sm font-bold text-white hover:border-white disabled:opacity-40">
               임시 저장
             </button>
-            <button onClick={() => save(true)} disabled={busy || !form.title.trim() || !consent} className="inline-flex items-center gap-1.5 bg-[#EC1D25] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">
+            <button onClick={() => save(true)} disabled={busy || !form.title.trim() || !consent} className="inline-flex items-center gap-1.5 bg-[var(--pa,#EC1D25)] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />} 최종 제출
             </button>
             {sub?.status === 'submitted' && (

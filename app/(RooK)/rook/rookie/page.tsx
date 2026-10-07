@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ROOK_ASSETS, RooKContainer } from "@/features/rook/RooKUI";
 import { RooKContactModalButton } from "@/features/rook/RooKContactForm";
+import { ProgramBoard } from "@/features/programs/ProgramBoard";
+import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
 
 export const metadata: Metadata = {
     title: "RooKie",
@@ -82,6 +84,11 @@ export default function RooKRookiePage() {
 
             <div className="my-14 text-center">
                 <RooKContactModalButton kind="rookie" label="RooKie 지원하기" />
+            </div>
+
+            {/* 모집 중인 실전 프로젝트 (코어 프로그램 모듈) — 회차가 없으면 숨김. 원본 화면은 그대로 유지 */}
+            <div className="mb-14 md:px-[15px]">
+                <ProgramBoard theme={PROGRAM_THEMES.rook} brands={["rook"]} dark={false} title="모집 중인 실전 프로젝트" hideWhenEmpty />
             </div>
 
             <div className="md:px-[15px] break-keep">

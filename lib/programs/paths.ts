@@ -4,6 +4,8 @@
  */
 export const PROGRAM_ROOM_BASE: Record<string, string> = {
     madleague: "/madleague/pt",
+    rook: "/rook/projects",
+    hero: "/hero/programs",
 };
 
 /** 회차 방 주소 — 주인 브랜드 창구 기준 (없으면 첫 창구, 그래도 없으면 /{brand}/programs) */

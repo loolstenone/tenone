@@ -99,6 +99,7 @@
 | 테이블 | 브랜드 탈퇴 (해당 brand_id 행) | 비고 |
 |--------|-----------|------|
 | program_participants | 익명화 후 영구 보관 (member 연결 제거) | 팀 구성·활동 이력 통계 (2026-10-05 결정 승계) |
+| program_applications | 삭제 (선발된 건은 participants로 이력 유지) | 지원 동기·포트폴리오 링크 (2026-10-08) |
 | program_submissions · 제출 파일(`program-submissions` 버킷) | 팀 제출물 유지 (submitted_by 연결 제거) · 개인 참가 제출물 삭제 | 팀 공동 저작물 |
 | program_questions · program_answers · program_submission_comments | 익명화 ("탈퇴한 회원") | |
 | program_results | 유지 | 팀 이름·순위 스냅샷 (개인 없음) |

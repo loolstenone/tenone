@@ -30,7 +30,11 @@ interface Detail {
     applicants: (Person & { response_id: string; response_status: string })[];
     candidates: Person[];
     clients: Person[];
+    unassigned: Person[];
+    applications: (Person & { id: string; channel: string | null; motivation: string; portfolio_url: string | null; status: string; created_at: string })[];
 }
+
+const APP_STATUS: Record<string, string> = { pending: "심사 대기", accepted: "선발", declined: "미선발" };
 
 const INFO_FIELDS: { key: string; label: string; type?: string; wide?: boolean }[] = [
     { key: "title", label: "제목", wide: true },
@@ -181,6 +185,50 @@ export function ProgramEditor({ id, basePath }: { id: string; basePath: string }
                         <textarea rows={4} value={info.brief_content ?? ""} onChange={e => setInfo({ ...info, brief_content: e.target.value })} className={inputCls} />
                     </label>
                 </div>
+            </section>
+
+            {/* 참가 신청 (4단계) — 사이트·창구에서 신청 → 선발 → 참가자(팀 회차면 아래에서 팀 배정) */}
+            <section className="rounded-lg border border-neutral-200 bg-white p-5">
+                <div className="flex flex-wrap items-center gap-3">
+                    <h2 className="font-semibold text-neutral-800">참가 신청</h2>
+                    <label className="inline-flex items-center gap-2 text-sm text-neutral-700">
+                        <input type="checkbox" checked={!!r.applications_open} disabled={busy}
+                            onChange={async e => {
+                                await fetch(api, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applications_open: e.target.checked }) });
+                                await load();
+                            }} />
+                        사이트에서 신청 받기 (모집 예정·진행 중일 때)
+                    </label>
+                    <span className="text-xs text-neutral-400">창구로 지정한 사이트 모두에 신청 버튼이 보입니다. 동의는 운영 브랜드 기준.</span>
+                </div>
+                {d.applications.length === 0 ? (
+                    <p className="mt-3 text-xs text-neutral-400">신청이 없습니다.</p>
+                ) : (
+                    <ul className="mt-3 divide-y divide-neutral-100">
+                        {d.applications.map(a => (
+                            <li key={a.id} className="py-3 text-sm">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-neutral-900">{a.name}</span>
+                                    {a.email && <span className="text-xs text-neutral-400">{a.email}</span>}
+                                    {a.channel && a.channel !== brand && <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600">창구 {d.sites.find(s => s.slug === a.channel)?.name ?? a.channel}</span>}
+                                    <span className="text-xs text-neutral-400">{new Date(a.created_at).toLocaleDateString("ko-KR")}</span>
+                                    <span className={`ml-auto rounded px-2 py-0.5 text-xs ${a.status === "accepted" ? "bg-emerald-50 text-emerald-700" : a.status === "declined" ? "bg-neutral-100 text-neutral-500" : "bg-amber-50 text-amber-700"}`}>{APP_STATUS[a.status] ?? a.status}</span>
+                                    {a.status === "pending" && (
+                                        <>
+                                            <button disabled={busy} onClick={() => act({ action: "accept_application", application_id: a.id })} className="rounded bg-neutral-900 px-3 py-1 text-xs text-white">선발</button>
+                                            <button disabled={busy} onClick={() => { if (confirm(`${a.name} 님을 미선발 처리할까요? 본인에게 안내 알림이 갑니다.`)) act({ action: "decline_application", application_id: a.id }); }} className="rounded border border-neutral-300 px-3 py-1 text-xs">미선발</button>
+                                        </>
+                                    )}
+                                </div>
+                                <p className="mt-1 whitespace-pre-line text-neutral-600">{a.motivation}</p>
+                                {a.portfolio_url && <a href={a.portfolio_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-blue-600 underline">포트폴리오</a>}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                {d.unassigned.length > 0 && r.mode === "team" && (
+                    <p className="mt-3 text-xs text-amber-700">팀 미배정 참가자 {d.unassigned.length}명 — {d.unassigned.map(u => u.name).join(", ")} · 아래 팀 카드의 팀원 선택 목록 맨 앞에 있습니다.</p>
+                )}
             </section>
 
             {/* 클라이언트 — 회차 방에서 공지·Q&A·제출물 확인, 답변·코멘트 (팀원 이름은 보이지 않음) */}
