@@ -22,6 +22,7 @@ interface Competition {
   brief_content: string | null;
   kind: 'competition' | 'project';
   final_deadline: string | null;
+  results_published_at: string | null;
   client_name: string | null;
   client_logo_url: string | null;
   start_date: string | null;
@@ -218,8 +219,11 @@ export default async function PTWorkspacePage() {
     ? await db.from('mad_competition_results').select('team_id, rank, award_name, is_crown').in('team_id', teamIds)
     : { data: [] };
   const resultByTeam: Record<string, Team['result']> = {};
+  // 결과 발표 전에는 숨김 (results_published_at — 인트라 '결과 발표')
+  const publishedComp = new Set(allComps.filter(c => c.results_published_at).map(c => c.id));
+  const compOfTeam = new Map((rawTeams ?? []).map((t: { id: string; competition_id: string }) => [t.id, t.competition_id]));
   (results ?? []).forEach((r: { team_id: string | null; rank: number | null; award_name: string | null; is_crown: boolean }) => {
-    if (r.team_id) resultByTeam[r.team_id] = r;
+    if (r.team_id && publishedComp.has(compOfTeam.get(r.team_id) ?? '')) resultByTeam[r.team_id] = r;
   });
 
   // 팀 조합

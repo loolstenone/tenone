@@ -3,21 +3,24 @@
  *   GET   /api/intra/madleague/competitions/{id}   회차 · 팀(팀원 이름) · 결과 · 연결 폼 응답(배정 후보) · 매드리거 후보
  *   PATCH /api/intra/madleague/competitions/{id}   회차 정보 수정
  *   POST  /api/intra/madleague/competitions/{id}   { action } — add_team · update_team · delete_team · add_member · remove_member · set_finalist · set_result · add_client · remove_client
+ *                                                  publish_results{on} · logo_upload{name}
+ * 결과 발표(results_published_at) 전에는 결과가 명예의 전당·포트폴리오·워크스페이스에 보이지 않는다 (RLS)
  * 클라이언트 = member_capability_roles (showcase, madleague, host, {type:'corporate', competition_id, company}) — Ten:One ID 이메일로 연결
  *
  * 팀원 키 = members.id (데이터 계약 1조). 이름·이메일은 members에서 읽어 보여줄 뿐 복사하지 않는다.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireStaff } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notify } from "@/lib/notify";
-import { roundClientIds } from "@/lib/madleague-round-access";
+import { roundClientIds, roundTeamMemberIds } from "@/lib/madleague-round-access";
 
 type Params = { params: Promise<{ id: string }> };
 const TENANT = "tenone";
 const STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
 const KINDS = ["competition", "project"];
-const EDITABLE = ["title", "year", "kind", "client_name", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"] as const;
+const EDITABLE = ["title", "year", "kind", "client_name", "client_logo_url", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"] as const;
 
 export async function GET(req: NextRequest, { params }: Params) {
     const auth = await requireStaff(req);
@@ -201,6 +204,39 @@ export async function POST(req: NextRequest, { params }: Params) {
                 .eq("context->>competition_id", id).is("valid_until", null);
             if (error) return NextResponse.json({ error: error.message }, { status: 500 });
             break;
+        }
+        case "publish_results": {
+            const on = body.on === true;
+            if (on) {
+                const { count } = await admin.from("mad_competition_results").select("id", { count: "exact", head: true }).eq("competition_id", id);
+                if (!count) return NextResponse.json({ error: "발표할 결과가 없습니다. 팀별 순위·상을 먼저 저장하세요." }, { status: 400 });
+            }
+            const { data: comp, error } = await admin.from("mad_competitions")
+                .update({ results_published_at: on ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+                .eq("id", id).select("title, kind").single();
+            if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            revalidatePath("/madleague/programs/competition");
+            revalidatePath("/madleague");
+            if (on) {
+                const [team, clients] = await Promise.all([roundTeamMemberIds(id), roundClientIds(id)]);
+                await notify([...team, ...clients], {
+                    brandId: "madleague", type: "mad_results",
+                    title: `${comp.title} 결과 발표`,
+                    message: comp.kind === "competition" ? "명예의 전당과 내 포트폴리오에 반영되었습니다." : "내 포트폴리오에 반영되었습니다.",
+                    link: comp.kind === "competition" ? "/madleague/programs/competition" : "/madleague/member/portfolio",
+                });
+            }
+            break;
+        }
+        case "logo_upload": {
+            // 클라이언트 로고 — 공개 버킷 board-assets (명예의 전당 노출용). 브라우저가 서명 URL로 직접 올린 뒤 PATCH client_logo_url
+            const ext = String(body.name ?? "").split(".").pop()?.toLowerCase() ?? "";
+            if (!["png", "jpg", "jpeg", "webp", "svg"].includes(ext)) return NextResponse.json({ error: "로고는 png·jpg·webp·svg만 올릴 수 있습니다." }, { status: 400 });
+            const path = `madleague/competitions/${id}/logo-${Date.now()}.${ext}`;
+            const { data, error } = await admin.storage.from("board-assets").createSignedUploadUrl(path);
+            if (error || !data) return NextResponse.json({ error: "업로드 준비에 실패했습니다." }, { status: 500 });
+            const publicUrl = admin.storage.from("board-assets").getPublicUrl(path).data.publicUrl;
+            return NextResponse.json({ path: data.path, token: data.token, bucket: "board-assets", publicUrl });
         }
         case "set_result": {
             const team = await teamOfComp(body.team_id);

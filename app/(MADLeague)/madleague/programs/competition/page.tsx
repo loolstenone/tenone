@@ -1,7 +1,50 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Trophy, Users, Search, Lightbulb, Presentation, ArrowRight } from 'lucide-react';
+import { Trophy, Users, Search, Lightbulb, Presentation, ArrowRight, Medal } from 'lucide-react';
 import { MAD_PROGRAM_IMAGES, madProgramAsset } from '@/lib/madleague-program-assets';
+import { fetchMadHallRounds, type MadHallRound } from '@/lib/supabase/madleague';
+
+/* 순위 색 — 경쟁 PT는 MAD Crown 없이 순위만 (2026-10-07 결정) */
+const RANK_TONE: Record<number, string> = { 1: 'text-[#FFC000] border-[#FFC000]/40', 2: 'text-neutral-200 border-neutral-500', 3: 'text-[#CD7F32] border-[#CD7F32]/40' };
+
+/** 인트라에서 결과 발표한 회차 — 자동 반영 */
+function HallRound({ r }: { r: MadHallRound }) {
+  return (
+    <div>
+      <div className="text-sm text-neutral-500 font-bold tracking-widest mb-6">{r.year}년 · {r.title}</div>
+      <div className="flex flex-col lg:flex-row gap-16 items-start">
+        <div className="lg:w-80 shrink-0">
+          <div className="h-20 flex items-center">
+            {r.client_logo_url
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={r.client_logo_url} alt={r.client_name ?? r.title} className="object-contain object-left max-h-16 w-auto" />
+              : <span className="text-3xl font-black">{r.client_name ?? r.title}</span>}
+          </div>
+          {r.brief_title && <p className="mt-6 text-lg text-neutral-400 leading-relaxed">{r.brief_title}</p>}
+        </div>
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
+          {r.results.map((x, i) => (
+            <div key={i} className={`border bg-neutral-950 p-6 ${x.rank ? RANK_TONE[x.rank] ?? 'border-neutral-800 text-neutral-400' : 'border-neutral-800 text-neutral-400'}`}>
+              <div className="flex items-center gap-2 text-sm font-black">
+                <Medal className="h-5 w-5" />
+                {x.rank ? `${x.rank}위` : ''}{x.award_name ? `${x.rank ? ' · ' : ''}${x.award_name}` : ''}
+              </div>
+              <div className="mt-4 text-xl font-black text-white">{x.team_name}</div>
+              {x.club && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-neutral-500">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {x.club.logo_url && <img src={x.club.logo_url} alt="" className="h-5 w-5 object-contain" />}
+                  {x.club.name}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-16 h-px bg-neutral-900" />
+    </div>
+  );
+}
 
 export const revalidate = 300;
 
@@ -76,6 +119,7 @@ const ARCHIVE = [
 ];
 
 export default async function CompetitionPage() {
+  const hallRounds = await fetchMadHallRounds();
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Hero */}
@@ -120,6 +164,7 @@ export default async function CompetitionPage() {
           <h2 className="text-4xl sm:text-6xl font-black mb-24">명예의 전당</h2>
 
           <div className="space-y-32">
+            {hallRounds.map(r => <HallRound key={r.id} r={r} />)}
             {ARCHIVE.map((item) => (
               <div key={`${item.year}-${item.round}`}>
                 {/* 연도 + 클라이언트 헤더 */}
@@ -186,7 +231,7 @@ export default async function CompetitionPage() {
             <p className="mt-3 text-white/80 text-lg">전국 대학생의 크리에이티브를 기업의 마케팅 과제에 연결합니다.</p>
           </div>
           <Link
-            href="mailto:lools@tenone.biz"
+            href="/madleague/contact"
             className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition shrink-0"
           >
             문의하기 <ArrowRight className="h-5 w-5" />

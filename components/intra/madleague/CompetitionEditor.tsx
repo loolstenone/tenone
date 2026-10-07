@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChevronLeft, Loader2, Plus, Trash2, X } from "lucide-react";
 import { COMP_STATUS_LABEL, COMP_KIND_LABEL } from "./CompetitionsAdmin";
 import { brandSiteUrl } from "@/lib/domain-registry";
+import { createClient } from "@/lib/supabase/client";
 
 interface Person { member_id: string; name: string; email: string | null; club: string | null }
 interface Team {
@@ -55,7 +56,7 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
         if (!res.ok) { setError(data.error ?? "불러오지 못했습니다."); return; }
         setD(data);
         const c = data.competition;
-        setInfo(Object.fromEntries(["title", "year", "kind", "client_name", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"].map(k => [k, c[k] == null ? "" : String(c[k])])));
+        setInfo(Object.fromEntries(["title", "year", "kind", "client_name", "client_logo_url", "brief_title", "brief_content", "start_date", "end_date", "final_deadline", "presentation_date", "status", "form_id"].map(k => [k, c[k] == null ? "" : String(c[k])])));
     }, [id]);
     useEffect(() => { load(); }, [load]);
 
@@ -93,6 +94,13 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
                 <p className="mt-1 text-sm text-neutral-500">{COMP_STATUS_LABEL[String(d.competition.status)]} · 팀 {d.teams.length} · 배정 {assigned.size}명</p>
                 <a href={brandSiteUrl("madleague", `/madleague/pt/${id}`)} target="_blank" rel="noopener noreferrer"
                     className="mt-2 inline-block text-sm font-semibold text-red-600 hover:underline">회차 방 열기 — 공지·Q&A·제출물 ↗</a>
+                <PublishBar published={d.competition.results_published_at ? String(d.competition.results_published_at) : null}
+                    kind={String(d.competition.kind)} busy={busy} onToggle={on => {
+                        const msg = on
+                            ? (d.competition.kind === "competition" ? "결과를 발표할까요? 명예의 전당·포트폴리오에 바로 반영되고 참여 팀·클라이언트에게 알림이 갑니다." : "결과를 발표할까요? 참여 팀 포트폴리오에 반영되고 알림이 갑니다.")
+                            : "발표를 취소할까요? 명예의 전당·포트폴리오에서 결과가 내려갑니다.";
+                        if (confirm(msg)) act({ action: "publish_results", on });
+                    }} />
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -131,6 +139,10 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
                             {d.forms.map(f => <option key={f.id} value={f.id}>{f.title}{f.status === "draft" ? " (준비 중)" : ""}</option>)}
                         </select>
                     </label>
+                    <LogoField url={info.client_logo_url} busy={busy} compId={id} onUploaded={async u => {
+                        setInfo(i => ({ ...i, client_logo_url: u }));
+                        await fetch(`/api/intra/madleague/competitions/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ client_logo_url: u }) });
+                    }} />
                     <label className="sm:col-span-3">
                         <div className="mb-1 text-xs text-neutral-500">브리프 내용 (팀원에게 보이는 과제 설명)</div>
                         <textarea rows={4} value={info.brief_content ?? ""} onChange={e => setInfo({ ...info, brief_content: e.target.value })} className={inputCls} />
@@ -269,6 +281,58 @@ function SubmissionLine({ teamId, stage, s }: { teamId: string; stage: "prelim" 
                     {s.presentation_url && <a href={s.presentation_url} target="_blank" rel="noopener noreferrer" className="text-xs text-neutral-500 underline hover:text-neutral-900">발표자료 링크</a>}
                 </>
             )}
+        </div>
+    );
+}
+
+/** 결과 발표 — 발표 전 결과는 직원만 본다 (명예의 전당·포트폴리오·워크스페이스 비노출) */
+function PublishBar({ published, kind, busy, onToggle }: { published: string | null; kind: string; busy: boolean; onToggle: (on: boolean) => void }) {
+    return (
+        <div className={`mt-3 flex flex-wrap items-center gap-3 rounded border px-4 py-3 text-sm ${published ? "border-emerald-200 bg-emerald-50" : "border-neutral-200 bg-neutral-50"}`}>
+            {published ? (
+                <>
+                    <span className="font-semibold text-emerald-700">결과 발표됨 · {new Date(published).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="text-xs text-emerald-700/70">{kind === "competition" ? "명예의 전당·포트폴리오에 반영 중" : "포트폴리오에 반영 중"}</span>
+                    <button disabled={busy} onClick={() => onToggle(false)} className="ml-auto text-xs text-neutral-500 underline hover:text-red-600">발표 취소</button>
+                </>
+            ) : (
+                <>
+                    <span className="text-neutral-600">결과 미발표 — 순위·상은 직원만 봅니다.</span>
+                    <button disabled={busy} onClick={() => onToggle(true)} className="ml-auto rounded bg-neutral-900 px-4 py-1.5 text-sm font-semibold text-white disabled:bg-neutral-300">결과 발표</button>
+                </>
+            )}
+        </div>
+    );
+}
+
+/** 클라이언트 로고 — 명예의 전당에 표시 (공개 버킷) */
+function LogoField({ url, busy, compId, onUploaded }: { url: string; busy: boolean; compId: string; onUploaded: (u: string) => Promise<void> }) {
+    const [uploading, setUploading] = useState(false);
+    const [err, setErr] = useState("");
+    const upload = async (f: File) => {
+        setUploading(true); setErr("");
+        try {
+            const res = await fetch(`/api/intra/madleague/competitions/${compId}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "logo_upload", name: f.name }) });
+            const prep = await res.json();
+            if (!res.ok) throw new Error(prep.error ?? "업로드 준비 실패");
+            const { error } = await createClient().storage.from(prep.bucket).uploadToSignedUrl(prep.path, prep.token, f, { contentType: f.type });
+            if (error) throw new Error("업로드 실패");
+            await onUploaded(prep.publicUrl);
+        } catch (e) { setErr(e instanceof Error ? e.message : "업로드 실패"); }
+        finally { setUploading(false); }
+    };
+    return (
+        <div className="sm:col-span-3">
+            <div className="mb-1 text-xs text-neutral-500">클라이언트 로고 (명예의 전당 표시, 없으면 클라이언트 이름)</div>
+            <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {url && <img src={url} alt="" className="h-10 max-w-40 rounded border border-neutral-200 bg-neutral-900 object-contain p-1" />}
+                <label className="cursor-pointer rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">
+                    {uploading ? "올리는 중…" : url ? "로고 교체" : "로고 올리기"}
+                    <input type="file" accept=".png,.jpg,.jpeg,.webp,.svg" className="hidden" disabled={busy || uploading} onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); }} />
+                </label>
+                {err && <span className="text-xs text-red-600">{err}</span>}
+            </div>
         </div>
     );
 }

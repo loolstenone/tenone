@@ -118,6 +118,7 @@ export async function fetchMadHallOfFame(limit = 3): Promise<Array<MadCompetitio
     .from('mad_competitions')
     .select('*')
     .eq('status', 'completed')
+    .eq('kind', 'competition')
     .order('presentation_date', { ascending: false })
     .limit(limit);
   if (!comps || comps.length === 0) return [];
@@ -132,6 +133,44 @@ export async function fetchMadHallOfFame(limit = 3): Promise<Array<MadCompetitio
     if (!resultByComp.has(r.competition_id)) resultByComp.set(r.competition_id, r);
   }
   return (comps as MadCompetition[]).map((c) => ({ ...c, result: resultByComp.get(c.id) }));
+}
+
+/**
+ * 명예의 전당 — 결과 발표된 경쟁 PT 회차 (results_published_at, kind='competition')
+ * 결과 읽기는 RLS가 발표된 회차만 허용. 팀 이름·동아리만 (팀원 이름 비노출)
+ */
+export interface MadHallRound {
+  id: string; title: string; year: number; client_name: string | null; client_logo_url: string | null;
+  brief_title: string | null; presentation_date: string | null; results_published_at: string;
+  results: { rank: number | null; award_name: string | null; team_name: string; club: { name: string; logo_url: string | null } | null }[];
+}
+export async function fetchMadHallRounds(): Promise<MadHallRound[]> {
+  const sb = await createServerClient();
+  const { data: comps } = await sb
+    .from('mad_competitions')
+    .select('id, title, year, client_name, client_logo_url, brief_title, presentation_date, results_published_at')
+    .eq('kind', 'competition')
+    .not('results_published_at', 'is', null)
+    .order('year', { ascending: false })
+    .order('results_published_at', { ascending: false });
+  if (!comps?.length) return [];
+  const { data: results } = await sb
+    .from('mad_competition_results')
+    .select('competition_id, rank, award_name, team_name, club_id')
+    .in('competition_id', comps.map(c => c.id));
+  const clubIds = [...new Set((results ?? []).map(r => r.club_id).filter(Boolean))] as string[];
+  const { data: clubs } = clubIds.length
+    ? await sb.from('mad_clubs').select('id, name, logo_url').in('id', clubIds)
+    : { data: [] as { id: string; name: string; logo_url: string | null }[] };
+  const clubById = new Map((clubs ?? []).map(c => [c.id, { name: c.name, logo_url: c.logo_url }]));
+  return comps
+    .map(c => ({
+      ...c,
+      results: (results ?? []).filter(r => r.competition_id === c.id)
+        .sort((x, y) => (x.rank ?? 99) - (y.rank ?? 99))
+        .map(r => ({ rank: r.rank, award_name: r.award_name, team_name: r.team_name, club: r.club_id ? clubById.get(r.club_id) ?? null : null })),
+    }))
+    .filter(c => c.results.length > 0) as MadHallRound[];
 }
 
 // ────────────────────────────────────────────────────────
