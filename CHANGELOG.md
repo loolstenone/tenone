@@ -23,7 +23,8 @@
 - `middleware.ts` matcher `/api/:path*` 추가
 - 삭제: `app/api/debug-env`
 - SQL: `sql/security-board-assets-lockdown.sql` · `sql/security-hero-talent-applications-rls.sql`
-- 문서: `docs/audit/2026-10/{README,axis-1~6}.md`
+- 문서: `docs/audit/2026-10/{README,axis-1~6}.md` · `axis-6-appendix-connection-map.md`(집중 브랜드 연결 지도 + A6-1~6)
+- **미수정·승인 대기**: `get_public_profile` RPC 이메일 반환(anon) — 다음 세션 첫 작업
 
 ---
 

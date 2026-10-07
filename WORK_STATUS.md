@@ -11,11 +11,12 @@
 ### 완료
 
 - 배포 확인 (세션 163분): `site:check rook --live` ✅17 · rook.co.kr/rook/projects·certificate·verify · hero.ne.kr/hero/programs · madleague 스테이징 게이트 정상
-- **유니버스 6축 점검** (Fable 읽기 전용 에이전트, 축별 순차) → `docs/audit/2026-10/` 보고서 6개 + 종합 README — 총 139건 (C7·H35·M61·L36). 진단: 코어는 견고, 문제는 "코어 이전에 만든 것"이 정리 안 된 채 공존
+- **유니버스 6축 점검** (Fable 읽기 전용 에이전트, 축별 순차) → `docs/audit/2026-10/` 보고서 6개 + 부록(연결 지도) + 종합 README — 총 145건. 진단: 코어는 견고, 문제는 "코어 이전에 만든 것"이 정리 안 된 채 공존
 - **긴급 보안 수정·배포·운영 확인**: SmarComm CRM API 비인증 개인정보 노출 차단(직원 전용) · 뉴스레터 발송 requireStaff · board-assets anon 쓰기 정책 삭제(DB) · middleware `.png` 경로 API 게이트 우회 차단 · Badak role 권한 상승 → requireStaff · hero_talent_applications RLS 본인/직원(DB) · `/api/debug-env` 삭제. 사용자가 인트라 뉴스레터·SmarComm CRM 직원 화면 정상 확인
 
 ### 다음 첫 액션
 
+0. **⚠️ 운영 노출 1건 (승인 받고 맨 먼저)**: `get_public_profile` RPC가 비로그인에게 회원 이메일·affiliations 반환 (anon EXECUTE, 5명 전원 해당 — Opus 재확인). 수정안·영향은 [README ⚠️](docs/audit/2026-10/README.md) — `sql/security-get-public-profile.sql` 작성 → 승인 → apply_migration → `www.tenone.biz/profile/@{handle}` 비로그인·로그인 화면 확인. 이어서 A6-2 MADLeague 포트폴리오 타 브랜드 이력 필터(`app/(MADLeague)/madleague/member/portfolio/page.tsx:55-70`, `app/api/madleague/portfolio/[memberId]/route.ts:41-62` — `channels ⊇ ['madleague']` 기준, madleaguer 화면과 동일)
 1. **README "결정이 필요한 것" D-1~D-7 사용자 결정** (SSO 유지/폐기 · 보관 브랜드 API 차단 · 빈 테이블 91개 DROP · MADLeap/HeRo 순환 구조 · CLAUDE.md 정리 · 탈퇴 정책 · crm_absorb_member 트리거)
 2. **1단계 남은 보안 1번부터**: 축1 C-3 `is_tenone_staff()` → `auth_is_staff()` — 먼저 `select pg_get_functiondef('public.is_tenone_staff()'::regprocedure)` + 사용 정책 65개 목록 확인 → 직원 계정이 둘 다 true인지 대조 → 함수 본문만 교체하는 마이그레이션(승인) → 인트라 화면 확인
 3. 이어서 README 권장 순서 2~7 (USING(true) 7개 테이블 · HeRo 매칭 RLS · 자기 승인 컬럼 · open redirect · tih upsert · Scripts 정리)

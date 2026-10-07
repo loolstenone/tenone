@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-08 (세션 163 — 코어 프로그램 모듈 · 팀 구성 · 인증서 · RooK·HeRo 프로그램 연결)
+> 마지막 업데이트: 2026-10-08 (세션 164 — 유니버스 6축 점검 · 보안 긴급 수정)
 
 ---
 
@@ -79,6 +79,15 @@
 - [ ] 아임웹 해지·데이터 삭제(사용자) · 10-14 처리방침 시행 처리 · 본문 서버 렌더(SEO)
 - [x] 실전 프로젝트 `/rook/projects` · 인증서 `/rook/certificate` · 인트라 `/intra/ums/rook/programs` (코어 프로그램 모듈) — 세션 163
 - [ ] 실전 프로젝트 법적 검토(무급 참여·수익 공유·직업소개 아님) → 첫 회차 모집
+
+## 🔍 유니버스 점검 2026-10 (세션 164) — `docs/audit/2026-10/README.md`
+
+- [x] 6축 점검(Fable) · 종합 README · 연결 지도 부록 — 145건
+- [x] 긴급 보안: SmarComm CRM · 뉴스레터 발송 · board-assets · middleware .png · Badak role · HeRo talent RLS · debug-env
+- [ ] ⚠️ `get_public_profile` 이메일 반환 차단 (승인) · MADLeague 포트폴리오 타 브랜드 이력 필터
+- [ ] 1단계 남은 보안: is_tenone_staff → auth_is_staff · USING(true) 7개 · HeRo 매칭 · 자기 승인 컬럼 · open redirect · tih · Scripts 정리
+- [ ] 결정 D-1~D-7 (SSO · 보관 API · 빈 테이블 DROP · MADLeap/HeRo 순환 · CLAUDE.md 정리 · 탈퇴 · CRM 트리거)
+- [ ] 2단계 SSOT 단일화 · 3단계 정리·이상적 구조 · 점검기 확장 → 같은 6축 재점검
 
 ## 🧩 코어 프로그램 모듈 (세션 163 · 2026-10-08) — 설계 `docs/Program_Module.md`
 

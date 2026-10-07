@@ -17,7 +17,8 @@
 | 4 | [문서 ↔ 실제](axis-4-docs-vs-reality.md) | 1 | 7 | 13 | 8 | 핵심 규칙은 맞음, **옛 문장이 새 규칙 옆에 공존** (email 조인 키 지시 등) · UC 4벌 |
 | 5 | [죽은 것](axis-5-dead.md) | 0 | 4 | 8 | 4 | 테이블 499개 중 355개 0행 · 미사용 API ~55 · **보관 브랜드 API ~250개 켜짐** |
 | 6 | [브랜드 간 연결](axis-6-cross-brand.md) | 0 | 5 | 7 | 5 | 코어 장치는 있음, **실제 이어진 여정은 거의 없음** (독립 도메인 로그인 단절·첫 진입 동의 없음) |
-| | **합계** | **7** | **35** | **61** | **36** | 139건 |
+| 6+ | [부록: 연결 지도](axis-6-appendix-connection-map.md) | | 3 | 3 | | 집중 6개 브랜드 링크·테이블·프로필 연결 파일:줄 단위 + 새 항목 A6-1~6 |
+| | **합계** | **7** | **38** | **64** | **36** | 145건 |
 
 ## 공통 진단 (6개 축을 관통하는 한 문장)
 
@@ -41,6 +42,11 @@
 - 축2 H-3 "`posts` 테이블 없음" → **`posts`·`board_configs`는 DB VIEW로 존재** (축5 확인, 2026-10-08 pg_class 재확인). `badak_posts`·`subscriptions`는 실제로 없음 → H-3은 이 두 개로 범위 축소.
 - 축3 H-2는 정적 분석 "확인 필요"였으나 로컬에서 재현 확인 후 수정함.
 
+## ⚠️ 운영 중 노출 확인 — 다음 세션 맨 먼저 (승인 필요)
+
+- **A6-4 `get_public_profile` RPC가 회원 이메일 반환** — SECURITY DEFINER + anon EXECUTE, `members.email·affiliations·privacy_settings·role`을 `row_to_json`으로 그대로 돌려준다. handle 있는 회원 5명 전원 공개 상태(2026-10-08 Opus 재확인). handle만 알면 비로그인으로 이메일 조회 가능.
+- 수정안: 함수의 SELECT에서 `email`·`affiliations`·`privacy_settings`·`role` 제거(공개 필드 name·company·bio·avatar_url·interests·handle·social_links·created_at·profile_visibility만) → `sql/security-get-public-profile.sql` + MCP apply_migration. 영향: `components/UniverseProfile.tsx`가 공개 뷰에서 `publicData.email`로 badak·hero 프로필을 email 매칭 조회(축1 H-2) → 공개 뷰에서 그 섹션이 비게 됨(원래 동의 없는 교차 노출이라 오히려 맞음). `/profile/@handle` 화면 확인 필요.
+
 ## 결정이 필요한 것 (사용자)
 
 | # | 결정 | 관련 | 선택지 |
@@ -56,6 +62,7 @@
 ## 권장 작업 순서 (Opus 세션에서 하나씩 — 각 항목은 보고서 근거를 코드·DB로 재확인 후 수정)
 
 **1단계 — 남은 보안 (회원 받기 전 필수)**
+0. **A6-4 `get_public_profile` 이메일 반환 차단** (위 ⚠️) · **A6-2 MADLeague 포트폴리오 타 브랜드 이력 필터** (공개 포트폴리오 교차 노출)
 1. 축1 C-3 `is_tenone_staff()` → `auth_is_staff()` (함수 1개로 정책 65개 단일화) — DB 승인
 2. 축3 H-3 `USING(true)` 7개 테이블 + anon REVOKE (`collected_data` anon UPDATE 포함) — DB 승인
 3. 축3 H-1 HeRo 매칭 RLS·API 2개 `assertSelf` (HeRo 공개 운영 중)
@@ -68,7 +75,7 @@
 8. 축1 H-1+H-5 · 축6 H-4 — 브랜드 가입·동의 = `member_brand_joins` 단일화 + BrandJoinGate (affiliations 판단 7곳 교체)
 9. 축2 H-1 도메인 맵 3벌 → `domain-registry` 파생 · H-7 `0gamja/ogamja` 통일
 10. 축2 H-2 Badak·HeRo·MADLeap `brand-site-menus` 등록 (site:check ❌ 해소)
-11. 축6 H-2 교차 브랜드 링크 헬퍼 (독립 도메인 404 — HeRo 공개 중)
+11. 축6 H-2 교차 브랜드 링크 헬퍼 (독립 도메인 404 — HeRo 공개 중) — 부록 A6-5(푸터 `/brands`·`/universe`·WORK 드롭다운·HitProfileBadge)·A6-1(모바일 "가입" 404) 같이
 12. 축2 H-5 산업군·직무군 단일화 · H-4 브랜드 이름·컬러 단일화
 13. D-5 CLAUDE.md 정리 (축4 C-1·H-1·H-2 우선)
 
