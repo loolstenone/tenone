@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { X, Loader2, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 interface ContactModalProps {
     isOpen: boolean;
@@ -30,6 +31,7 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const captcha = useCaptcha();
 
     if (!isOpen) return null;
 
@@ -43,6 +45,10 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
             setError("올바른 이메일 형식이 아닙니다.");
+            return;
+        }
+        if (!captcha.ready) {
+            setError(CAPTCHA_PENDING_MESSAGE);
             return;
         }
 
@@ -64,6 +70,7 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
                     senderCompany: company.trim() || undefined,
                     roleTitle: roleTitle.trim() || undefined,
                     message: message.trim(),
+                    captchaToken: captcha.token ?? "",
                 }),
             });
             const json = await res.json();
@@ -71,6 +78,7 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
             setSuccess(true);
         } catch (e) {
             setError(e instanceof Error ? e.message : "전송 중 오류가 발생했습니다.");
+            captcha.reset();
         } finally {
             setSubmitting(false);
         }
@@ -164,6 +172,7 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
                                 className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-900 focus:outline-none focus:border-neutral-900 placeholder:text-neutral-400 resize-none" />
                             <p className="text-[11px] text-neutral-500 mt-1 text-right">{message.length}/1000</p>
                         </div>
+                        <CaptchaWidget {...captcha.widgetProps} />
                         {error && (
                             <div className="bg-red-50 border border-red-300 text-red-700 text-[12px] px-3 py-2">
                                 {error}

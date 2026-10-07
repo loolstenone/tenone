@@ -4,10 +4,13 @@
  *
  * 캐스팅 디렉터(또는 임의 방문자)가 모델·배우에게 컨택 제안을 보낸다.
  * 비로그인도 가능 (sender_email 필수). 서버에서 RLS 우회 + Resend 이메일 발송.
+ * Turnstile 필수 (noreply@tenone.biz 명의 메일 발송 경로 — 스팸 릴레이 차단), 메일 본문은 입력값 이스케이프.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { escapeHtml } from "@/lib/sanitize-html";
+import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from "@/lib/turnstile-server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,6 +21,7 @@ interface ContactBody {
     senderCompany?: string;
     roleTitle?: string;
     message: string;
+    captchaToken?: string;
 }
 
 function buildContactEmailHtml({
@@ -30,6 +34,13 @@ function buildContactEmailHtml({
     roleTitle: string | null;
     message: string;
 }): string {
+    // 외부 입력은 전부 이스케이프 — 그대로 넣으면 우리 도메인 명의로 임의 HTML(피싱 링크) 메일 발송 가능
+    creatorName = escapeHtml(creatorName);
+    senderName = escapeHtml(senderName);
+    senderEmail = escapeHtml(senderEmail);
+    senderCompany = senderCompany ? escapeHtml(senderCompany) : null;
+    roleTitle = roleTitle ? escapeHtml(roleTitle) : null;
+    message = escapeHtml(message);
     const metaBlock = [
         senderCompany ? `<strong>${senderCompany}</strong>` : null,
         roleTitle ? `· ${roleTitle}` : null,
@@ -72,6 +83,10 @@ function buildContactEmailHtml({
 export async function POST(req: NextRequest) {
     let body: ContactBody;
     try { body = await req.json(); } catch { return NextResponse.json({ error: "invalid json" }, { status: 400 }); }
+
+    if (!(await verifyTurnstile(body.captchaToken, req))) {
+        return NextResponse.json({ error: CAPTCHA_REQUIRED_ERROR }, { status: 400 });
+    }
 
     const { targetCreatorId, senderName, senderEmail, senderCompany, roleTitle, message } = body;
     if (!targetCreatorId || !senderName || !senderEmail || !message) {
@@ -128,7 +143,7 @@ export async function POST(req: NextRequest) {
                 from: "MoNTZ <noreply@tenone.biz>",
                 to: creatorEmail,
                 replyTo: senderEmail,
-                subject: `[MoNTZ] ${senderName}님의 캐스팅 제안이 도착했습니다`,
+                subject: `[MoNTZ] ${senderName.replace(/[\r\n]/g, " ").slice(0, 40)}님의 캐스팅 제안이 도착했습니다`,
                 html: buildContactEmailHtml({
                     creatorName: creator.display_name || creator.handle,
                     senderName,

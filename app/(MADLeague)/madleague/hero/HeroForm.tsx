@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
+
+/** 수집·이용 동의 문구 버전 — 문구를 바꾸면 API(CONSENT_VERSION)와 함께 올린다 */
+const HERO_APPLY_CONSENT_VERSION = '2026-10-07.1';
 
 const INTEREST_OPTIONS = ['마케팅', '광고 기획', '크리에이티브', '브랜딩', '디지털·퍼포먼스', '데이터·그로스', 'PR·커뮤니케이션', '기타'];
 const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#FFC000]';
@@ -11,6 +16,7 @@ export function HeroForm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
+  const captcha = useCaptcha();
 
   function toggleInterest(value: string) {
     setInterests((prev) => prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]);
@@ -19,6 +25,7 @@ export function HeroForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setSubmitting(true);
     const fd = new FormData(e.currentTarget);
     const body = {
@@ -29,6 +36,9 @@ export function HeroForm() {
       resumeUrl: String(fd.get('resumeUrl') ?? ''),
       portfolioUrl: String(fd.get('portfolioUrl') ?? ''),
       message: String(fd.get('message') ?? ''),
+      privacyConsent: fd.get('privacyConsent') === 'on',
+      consentVersion: HERO_APPLY_CONSENT_VERSION,
+      captchaToken: captcha.token ?? '',
     };
     try {
       const res = await fetch('/api/madleague/hero', {
@@ -43,6 +53,7 @@ export function HeroForm() {
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : '제출 실패');
+      captcha.reset();
     } finally {
       setSubmitting(false);
     }
@@ -102,6 +113,19 @@ export function HeroForm() {
       <Field label="하고 싶은 말">
         <textarea name="message" rows={4} className={`${inputCls} resize-none`} placeholder="커리어 고민, 희망 업계, 특이사항 등." />
       </Field>
+
+      {/* 개인정보 수집·이용 고지 + 필수 동의 (개인정보보호법 제15조) */}
+      <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed">
+        <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0 accent-[#FFC000]" />
+        <span>
+          [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: 이름·이메일·연락처·관심 분야·이력서/포트폴리오 링크·남긴 메시지 ·
+          목적: HeRo 커리어 코칭 상담 연락 · 보관: 상담 종료 후 1년 (요청 시 즉시 파기).
+          동의하지 않으면 신청할 수 없습니다.{' '}
+          <Link href="/privacy" className="underline">개인정보처리방침</Link>
+        </span>
+      </label>
+
+      <CaptchaWidget {...captcha.widgetProps} />
 
       {error && (
         <div className="bg-red-950 border border-red-900 text-red-200 text-sm px-4 py-3">

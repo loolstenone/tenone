@@ -516,39 +516,7 @@ export interface MontzContactRequest {
     target?: Pick<MontzCreator, "handle" | "display_name">;
 }
 
-export interface SendContactInput {
-    targetCreatorId: string;
-    senderName: string;
-    senderEmail: string;
-    senderCompany?: string;
-    roleTitle?: string;
-    message: string;
-}
-
-/** 캐스팅 제안 발송 — 비로그인 캐스팅 디렉터도 가능. 본인이면 user_id 자동 첨부. */
-export async function sendContactRequest(input: SendContactInput): Promise<MontzContactRequest> {
-    const supabase = createClient();
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id ?? null;
-
-    const { data, error } = await supabase
-        .from("montz_contact_requests")
-        .insert({
-            target_creator_id: input.targetCreatorId,
-            sender_user_id: userId,
-            sender_name: input.senderName,
-            sender_email: input.senderEmail,
-            sender_company: input.senderCompany ?? null,
-            role_title: input.roleTitle ?? null,
-            message: input.message,
-            status: "pending",
-        })
-        .select()
-        .single();
-
-    if (error || !data) throw new Error(`전송 실패: ${error?.message ?? "unknown"}`);
-    return data as MontzContactRequest;
-}
+// 캐스팅 제안 발송은 /api/montz/contact 전용 (Turnstile + 서버 INSERT) — 브라우저 직접 INSERT 경로 제거 (2026-10-07)
 
 /** 본인이 받은 캐스팅 제안 목록 (모델·배우 본인 my 페이지용) */
 export async function getMyReceivedContacts(userId: string): Promise<MontzContactRequest[]> {

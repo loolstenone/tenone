@@ -1,32 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireMember } from "@/lib/api-guard";
+import { createAdminClient } from "@/lib/supabase/admin";
 
+// 로그인 회원 본인만 신청 — 서버(service_role)에서만 INSERT (테이블 공개 INSERT 정책 제거)
+// 이름·이메일은 members가 SSOT (데이터 계약 1조) → 복사하지 않고 member_id만 저장
 export async function POST(req: NextRequest) {
-    const { plan, note } = await req.json();
-    const supabase = await createClient();
+    const auth = await requireMember(req);
+    if (auth instanceof NextResponse) return auth;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { plan, note } = await req.json().catch(() => ({} as { plan?: string; note?: string }));
 
-    const { data: member } = await supabase
-        .from("members")
-        .select("id, email, name")
-        .eq("auth_id", user.id)
-        .single();
-
-    if (!member) return NextResponse.json({ error: "Member not found" }, { status: 404 });
-
-    const { error } = await supabase.from("coaching_waitlist").upsert({
-        member_id: member.id,
-        email: member.email,
-        name: member.name,
-        plan: plan || "standard",
-        note: note || null,
+    const { error } = await createAdminClient().from("coaching_waitlist").upsert({
+        member_id: auth.memberId,
+        plan: typeof plan === "string" && plan ? plan.slice(0, 50) : "standard",
+        note: typeof note === "string" && note ? note.slice(0, 1000) : null,
         status: "waiting",
         created_at: new Date().toISOString(),
     }, { onConflict: "member_id,plan" });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+        console.error("[hero/coaching-waitlist]", error);
+        return NextResponse.json({ error: "신청에 실패했습니다." }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
 }
