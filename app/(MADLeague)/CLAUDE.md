@@ -33,7 +33,8 @@
 - **`mad_applications`** (지원서): `member_id`(→members.id) · `consent` · club_id · applicant_role · cohort · activity_year · `year`(NOT NULL — activity_year 또는 현재 연도) · university(기업은 NULL) · major · minor · interested_industry · interested_job · motivation · portfolio_url · status(pending/accepted/rejected)
 - **`mad_members`** (매드리거 1인 1행, `user_id` UNIQUE = auth uid): `member_id`(→members.id) · club_id · cohort_id · university · major · year_in_school · role · status · activity_years · bio · skill_tags · portfolio_public · source_application_id
   - ⚠️ **이름·이메일·전화·사진은 `members`가 SSOT** (데이터 계약 1). `mad_members.name·email·phone·avatar_url` 컬럼은 **삭제 완료** (2026-10-07 B단계 `madleague_members_drop_copied_columns`)
-- **관련 테이블**: `mad_clubs`(7개, 2026-10-06 archive에서 복원·소개 문구 비움) · `mad_cohorts`(0 — archive 14건 근거 확인 전 미복원) · `mad_competitions` · `mad_articles`(MADzine) · `mad_posts`·`mad_comments`(커뮤니티) · `mad_certificates`
+- **관련 테이블**: `mad_clubs`(7개, 2026-10-06 archive에서 복원·소개 문구 비움) · `mad_cohorts`(0 — archive 14건 근거 확인 전 미복원) · `mad_articles`(MADzine) · `mad_posts`·`mad_comments`(커뮤니티)
+- **경쟁 PT·인증서 = 코어 프로그램 모듈** (세션 163): `program_rounds`(brand_id='madleague', context `{club_id}`) · `program_teams`·`program_participants`·제출·Q&A·`program_applications` · `program_certificates`(코드 `MAD26-`). 옛 `mad_competitions` 계열·`mad_certificates`는 배포 확인 후 DROP 예정 — 새 코드에서 읽지 않는다. 설계 `docs/Program_Module.md`
 - **universe-profile.ts**: `getMadLeagueProfile(memberId)` — member_id 기준 (세션 160 수리)
 
 ---
@@ -69,6 +70,7 @@
 
 - `mad_applications` · status='pending' · `/intra/ums/madleague` · category=approval · priority=normal
 - `mad_hero_applications` · status='pending' · `/intra/ums/madleague` · category=approval · priority=normal
+- `program_applications` (brand madleague) · status='pending' · `/intra/ums/programs` · category=approval · priority=normal
 
 ---
 
@@ -101,6 +103,9 @@
 | `lib/madleague-program-assets.ts` · `Scripts/madleague-programs-import.mjs` | madleague.net 프로그램 이미지 44장 → Storage `board-assets/madleague/programs/{group}/{id}.webp` (멱등) |
 | `features/madleague/ProgramForms.tsx` | 프로그램 페이지의 참가 신청 버튼 — `forms.program` 키(creazy·dam)의 공개 폼 자동 노출 |
 | `app/(MADLeague)/madleague/forms/[slug]/` | 행사 참가 신청 (유니버스 공통 폼 `components/forms/FormRenderer.tsx`) |
+| `app/(MADLeague)/madleague/pt/` | 경쟁 PT 목록 · `[id]` 회차 방 · `[id]/teams` 팀 구성(임원·직원) · `join/[code]` 초대 — 화면은 `features/programs/*` 얇은 래퍼 (테마 `ProgramTheme.ts` madleague) |
+| `app/(MADLeague)/madleague/certificate/` | 인증서 발급·인쇄(`print/[code]`)·진위 확인(`verify/[code]`) — `features/programs/Certificate*` |
+| `lib/programs/*` | 코어 프로그램 모듈 (access·brands(officerGroupIds·groupCandidates·brandActivityCerts)·consent·teams·certificates·paths) |
 
 ---
 
@@ -116,6 +121,8 @@
 | `/intra/ums/madleague/members` | 회원 = 활동 역할 보유자 (`/api/madleague/admin/members` — member_capability_roles는 본인 조회 RLS뿐이라 service_role API) · 역할 필터·종료 역할 보기 |
 | `/intra/ums/madleague/cs` | 문의하기 (푸터 Contact, form_type `madleague_inquiry`) |
 | `/intra/ums/madleague/forms` | 참가 신청 — 이벤트마다 신청서 생성·복제·질문·기간·로그인·수정·1인 1회·정원·개인정보 고지·응답(상태·메모·첨부·CSV). 연결 프로그램 키 = `app/intra/ums/madleague/form-programs.ts` |
+| `/intra/ums/madleague/competitions` · `/intra/ums/programs` | 경쟁 PT 회차·팀·제출·결과·참가 신청 선발 (브랜드별 / 통합) — `components/intra/programs/ProgramEditor` |
+| `/intra/ums/madleague/certificates` · `/intra/ums/programs/certificates` | 인증서 관리 (구분·코드·발급일·비고·결과·폐기/복원·CSV) |
 
 ---
 
@@ -145,6 +152,14 @@
 - 경쟁 PT에는 **MAD Crown 표기를 쓰지 않는다** — 순위는 1·2·3위 (사용자 결정). About·수료증·포트폴리오의 MAD Crown은 별도 확인 대기
 - 원본 이전 시 개인 입금 계좌·개인 전화번호·지난 모집 기간은 옮기지 않는다 — 회차별 안내는 신청서 설명에
 - 신청서는 `forms` 공통 모듈 (데이터 계약: 회원 응답 = member_id, 비회원만 respondent_email). 행사 개인정보는 폼마다 목적·보관기간 고지 + 동의 버전 기록, 열기 전 서버가 확인
+
+### 코어 프로그램 모듈 (2026-10-08 세션 163)
+
+- 경쟁 PT 데이터는 `program_*` (brand_id='madleague'). 동아리는 `context.club_id` — 브랜드 전용 값은 컬럼 추가 대신 context
+- 팀 구성 권한: 직원 · 자기 동아리 임원(club/임원 활성)만, 회차 status upcoming·ongoing일 때. 후보 = 그 해 현역·임원(context.year=회차 연도 또는 연도 없음)
+- 참가자는 회차 방 첫 입장 때 MADLeague 참가 동의(`member_brand_joins` origin 'program', `program-2026-10-08`) — 동의 없이 브리프 안 보임
+- 인증서 발급 가능: 회차 결과 공개(results_published_at) 또는 status=completed · 활동 인증서 = 연도별 현역 기록. 생년월일·대학·전공은 발급 시점 스냅샷 — 진위 확인 화면은 이름 마스킹만, 민감 필드를 select하지 않는다
+- 동의 버전: 지원서 `2026-10-08.1` · 프로그램 참가 `program-2026-10-08`
 
 ### 동아리 로고
 
@@ -178,5 +193,6 @@
 | **세션 160 완료** | 복사 컬럼 삭제 A단계(옛 미연결 행 삭제 · `mad_link_member_to_user` 삭제 · `mad_eligible_certificates` members 기준·service_role 전용) · 이메일 매칭 계정 연결(`member/link`·`MemberLinkButton`) 폐기 · `acceptMadApplication()` 공통 승인(회장·인트라 모두 capability 부여, 상태 'accepted' 통일) · 회장 대기 지원서 API `/api/madleague/applications/president` · `getMadLeagueProfile(memberId)` 수리 · MADLeap 인트라 3페이지 admin API로 수리 |
 | **세션 161 완료** | 복사 컬럼 DROP B단계 운영 적용 · **동아리 지원서 = A 소속 인증**(사용자 결정) → 열람을 해당 동아리 회장·담당 멘토·직원으로 제한 + 반려 권한 승인과 통일 · 인트라 회원 관리 capability 기준 · 문의하기 페이지 신설(푸터 개인 이메일 제거) · HeRo 신청 동의·캡차·서버 저장 · 미사용 ums_boards 6개·테스트 지원서 삭제 · 인트라 사이트 링크 스테이징 절대 주소(`brandSiteUrl`) |
 | **세션 162 완료** | madleague.net 프로그램 이전(경쟁 PT 명예의 전당·발표 장면·2026 1차 춤추는 고래·MAD Crown 표기 제거 · 크리에이지 신규 · 댐 파티+히스토리 · 아이디어 무브먼트·히어로 키비주얼 · 하위 메뉴 원본 이름) · 유니버스 공통 신청 폼(인트라 참가 신청·사이트 /forms·프로그램 자동 버튼) 코드 · 파비콘 |
-| **이월 작업** | ⓪ **신청 폼 DB 적용(승인 대기 `sql/forms-module.sql`) → DAM 학생 폼 열기·제출·인트라 확인** · MAD Crown 남은 표기 결정 · 춤추는 고래 발표 사진 · ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
+| **세션 163 완료** | 신청 폼 DB 적용 · 매드리거 홈·자유 게시판·동아리 운영진(최대 5명·임기·위임) · 경쟁 PT 운영 전체(회차·팀·제출·회차 방·클라이언트·알림·결과→명예의 전당·포트폴리오) · **코어 프로그램 모듈 이전**(program_*) · 사이트 팀 구성·초대 링크·참가 동의 · 인증서 본인 발급·진위 확인·인트라 관리 · "함께하는 프로그램"(RooK·HeRo 회차 노출) |
+| **이월 작업** | ⓪ 배포 확인 → 옛 mad_competitions 계열·mad_certificates DROP(승인) · 처리방침에 신청·인증서 항목(10-14) · 비직원 계정 실검증(임원 팀 구성·초대 수락·참가자 회차 방) · 개인 모드 제출 · 데모 회차 삭제(요청 시) · DAM 폼 실제 제출 1건 · MAD Crown 남은 표기 결정 · 춤추는 고래 발표 사진 · ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
 | **최근 결정** | 멘토 = club/멘토 · 기업 = showcase/host · MADzine 카테고리 원본 8종 · 이미지 자체 Storage 복사 · 작성자 이름·사진 공개 · 동아리 7개만 복원(소개 비움) |

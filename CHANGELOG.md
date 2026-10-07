@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-10-08 (세션 163, 집) — 경쟁 PT 운영 완성 → 코어 프로그램 모듈(program_*) · 팀 구성 · 인증서 · RooK·HeRo 연결
+
+### 장소·운영
+
+- 워크트리 `festive-vaughan-92a53c` → 작업 종료 시 master fast-forward push 1회
+- 운영 DB (MCP apply_migration): `forms_module` · 경쟁 PT 운영 테이블 · `program_module`(mad_* → program_* 이전) · `program_module_step2`(초대 코드·팀장·`member_brand_joins.origin` 'program' 허용) · `program_certificates` · `program_applications`
+- 테스트 데이터 전부 정리 (회차·인증서·신청·program 동의·알림 0건 확인). 데모 회차 "[데모] 2027 봄 시즌 경쟁 PT"는 사용자 요청 시 삭제
+- 옛 `mad_competitions` 계열·`mad_certificates` 테이블은 아직 DROP 안 함 (배포 확인 후 승인)
+
+### 결정 (사용자)
+
+- 경쟁 PT를 MADLeague 전용이 아닌 **코어 프로그램 모듈**로 — 데이터 주인 브랜드(brand_id) + 창구 사이트(channels) 분리. RooK 실전 프로젝트·HeRo 프로그램도 같은 모듈
+- 팀 구성은 동아리 임원이 사이트에서 직접 · 초대 링크 · 팀장이 팀명 수정 · 처음 참가 시 주인 브랜드 참가 동의
+- 인증서 = 로그인 후 본인 발급·다운로드 · 첫 발급 때만 생년월일·대학·전공 (전화번호 없음) · 인트라 관리 컬럼 구분·코드·발급일·비고·결과
+- 브랜드별 따로 관리 + 통합 관리 둘 다
+
+### 변경 내역
+
+- 경쟁 PT 운영: 인트라 회차·팀 배정·결과 · 제출(예선/본선) · 회차 방(공지·Q&A·제출) · 클라이언트 열람·코멘트 · 알림 · 결과 → 명예의 전당·포트폴리오
+- 매드리거: 홈 대시보드 · 자유 게시판 · 동아리 운영진 최대 5명·임기·위임
+- 코어: `lib/programs/{access,brands,consent,consent-text,teams,paths,certificates,certificate-labels}.ts` · `features/programs/*`(RoundRoom·RoundTabs·RoundTeams·TeamBuilder·InviteJoin·ProgramConsent·ApplyButton·ProgramBoard·CertificateManager·CertificatePrint·CertificateVerify·CertificateVerifyForm·ProgramLoginButton·ProgramTheme)
+- API: `/api/programs/{consent,invite,certificates}` · `/api/programs/rounds/[id]/{teams,apply}` · `/api/intra/programs/*`(회차·신청 선발·인증서)
+- 사이트: MADLeague `/madleague/pt/[id]`·`teams`·`join/[code]`·certificate · RooK `/rook/projects/*`·`/rook/certificate/*` · HeRo `/hero/programs/*`·`/hero/certificate/*` · MADLeague 프로그램 "함께하는 프로그램"
+- 인트라: `/intra/ums/programs`(+certificates) · `/intra/ums/madleague/certificates` · `/intra/ums/rook/programs` · `/intra/hero/programs` · `components/intra/programs/*`(ProgramEditor 참가 신청 섹션·CertificatesAdmin)
+- 레지스트리: `lib/intra-nav.ts`(프로그램·인증서) · `lib/brand-site-menus.ts`(인증서 발급·참가 신청) · `lib/action-hub-registry.ts`(program_applications × madleague·rook·hero)
+- 삭제: `lib/madleague-round-access.ts` · `/api/madleague/certificates` · 옛 MADLeague CertificateManager
+- SQL: `sql/program-module.sql` · `program-module-step2.sql` · `program-certificates.sql` · `program-applications.sql`
+- 문서: `docs/Program_Module.md`(설계 §1~9) · `docs/Data_Lifecycle.md` 3.2.2(프로그램·인증서 탈퇴 처리)
+
+---
+
 ## 2026-10-07 (세션 162, 사무실) — RooK DNS 전환 · 인트라 메뉴 비공개 · 공통 가이드 점검기 · MADLeague 프로그램 이전·신청 폼
 
 ### 장소·운영

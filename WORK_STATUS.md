@@ -1,6 +1,47 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-07 (세션 162 — RooK DNS 전환 · 인트라 메뉴 비공개 · site:check · MADLeague 프로그램 이전·신청 폼(DB 승인 대기))
+> 마지막 업데이트: 2026-10-08 (세션 163 — MADLeague 경쟁 PT 운영 → 코어 프로그램 모듈(program_*) · 팀 구성·초대 · 인증서 · RooK·HeRo 연결)
+
+---
+
+## 세션 163 (2026-10-08, 집) — 경쟁 PT 운영 완성 → 코어 프로그램 모듈 · 팀 구성 · 인증서 · RooK 실전 프로젝트 · HeRo 프로그램
+
+> 작업 위치: 워크트리 `festive-vaughan-92a53c` (브랜치 claude/work-start-eb5675) → 작업 종료 시 master로 fast-forward push 1회. 커밋 15개(53cb7e94 … 작업 종료 커밋).
+> **사무실에서 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터. 설계 SSOT = [docs/Program_Module.md](docs/Program_Module.md)
+
+### 완료
+
+- **신청 폼 DB 적용** (`forms_module`, 세션 162 승인 대기분) · 경쟁 PT 헤더 단독 메뉴 · 프로그램 상단 카피 통일
+- **매드리거 구조 개편**: 홈 대시보드 · 자유 게시판 · 동아리 운영진(회장·부회장·총무 등 최대 5명, 임기 연간·학기, 회장단 위임)
+- **경쟁 PT 운영 (MADLeague)**: 인트라 회차·팀 배정·결과 · 예선/본선 제출 · 회차 유형(경쟁 PT·프로젝트) · 사이트 내 알림 · **회차 방**(`/madleague/pt/{id}` — 공지·공개/비밀 Q&A·우리 팀 제출) · 클라이언트 접근(최종 제출물 열람·코멘트) · 결과 발표 → 명예의 전당·포트폴리오 자동 반영
+- **1단계 — 코어 프로그램 모듈**: 경쟁 PT를 브랜드 무관 `program_*` 테이블로 이전 (`brand_id`=데이터 주인, `channels[]`=노출 창구 사이트, `kind`=competition/project/program/course, `mode`=team/individual, `context` jsonb=브랜드별 값 예 `{club_id}`). 공개 읽기는 컬럼 GRANT, 나머지는 서버 API(service_role)만. `sql/program-module.sql`
+- **2단계 — 팀 구성**: 동아리 임원(club/임원)이 자기 동아리 후보(그 해 현역·임원)로 팀 구성(드래그 + 탭 "여기로") · 팀장 팀명 수정 · **팀 초대 링크**(10자 코드 `/…/join/{code}`) · **참가 동의**(주인 브랜드 `member_brand_joins` origin 'program', 버전 `program-2026-10-08`). `sql/program-module-step2.sql`
+- **3단계 — 인증서** `program_certificates`: 로그인 후 본인 발급·다운로드(참가/참여 확인서·수상 확인서·활동 인증서·수료증) · 첫 발급 때만 생년월일·대학·전공 입력(발급 시점 스냅샷, 전화번호 없음) · 코드 `MAD26-XXXXXX`/`ROOK26-`/`HERO26-`/`LEAP26-` · 진위 확인(이름 마스킹, 민감 필드 미조회) · 인트라 인증서 관리(구분·코드·발급일·비고·결과·폐기/복원·CSV) · 날짜 Asia/Seoul 고정. 옛 `/api/madleague/certificates` 삭제. `sql/program-certificates.sql`
+- **4단계 — RooK·HeRo 연결**: 참가 신청 `program_applications`(신청 → 인트라 선발 → 참가자, 팀 미배정 상태로 합류) · 창구 공용 화면 `features/programs/*`(테마 `ProgramTheme.ts`: madleague #EC1D25 `/madleague/pt` · rook #00d255 `/rook/projects` · hero #E53935 `/hero/programs`) · RooK `/rook/projects`·`/rook/certificate` · HeRo `/hero/programs`·`/hero/certificate` · MADLeague `/madleague/programs`에 "함께하는 프로그램"(rook·hero, 없으면 숨김) · 인트라 `/intra/ums/programs`(통합)·`/intra/ums/rook/programs`·`/intra/hero/programs` · Action Hub 신청 대기 3개. `sql/program-applications.sql`
+- 검증: 직원 계정으로 1~4단계 전부 실행 확인 후 테스트 데이터 정리(회차·인증서·신청·동의·알림 0건 확인) · `site:check` madleague ✅14 · rook ✅14 · hero ❌2(이번 세션 이전부터 — 아래 4번)
+
+### 다음 첫 액션 (사무실)
+
+1. **배포 확인** (이번 push로 Vercel 빌드 1회) — 빌드 성공 확인 후:
+   - `npm run site:check -- rook --live` ✅ · `npm run site:check -- madleague`
+   - 브라우저(직원 로그인): `https://www.rook.co.kr/rook/projects`(회차 없으면 빈 안내) · `/rook/certificate` · `/rook/certificate/verify` · MADLeague 스테이징 `madleague.tenone.biz/madleague/pt` · 인트라 `intra.tenone.biz/intra/ums/programs`·`/intra/ums/programs/certificates`
+   - 오류 없으면 인트라에서 테스트 회차 1개(rook, kind=project, 신청 열기) → 사이트 신청 → 인트라 선발 → 회차 방 입장 → 회차 삭제
+2. **옛 mad_* 테이블 정리 (사용자 승인 필요)** — 배포 확인 후, program_*로 옮긴 옛 테이블(`mad_competitions` 계열·`mad_certificates`) 코드 참조 0인지 `grep -rn "mad_competition\|mad_certificates" app lib features components` → `sql/program-module-drop-mad.sql` 작성(백업 후 DROP) → 승인 받고 MCP `apply_migration`
+3. **2026-10-14 (화)**: 개인정보처리방침 — ① "변경 예정 공지" 박스 삭제 ② `lib/company-info.ts` `LEGAL_DOCUMENTS.privacy` 버전 `2026-10-14`·시행일 ③ **이번 세션 새 수집 항목 추가**: 프로그램 참가 신청(지원 동기·포트폴리오 링크), 인증서 발급(생년월일·대학·전공 스냅샷 — 진위 확인용 보관기간 결정 필요). 탈퇴 처리 근거 `docs/Data_Lifecycle.md` 3.2.2
+4. **사용자 결정 대기**:
+   - HeRo `ums_sites.is_open=false` — 10-07 12:51 UTC에 닫힘(세션 162 기록은 "공개"). 의도인지 확인 → 공개면 `is_open=true`
+   - HeRo 프로그램 진입점(헤더에 "프로그램" 메뉴?) + `lib/brand-site-menus.ts` hero 등록 (site:check ❌ 해소)
+   - 법적 검토: RooK 실전 프로젝트(무급 참여·수익 공유 여부·직업소개 아님 명시) · HeRo 유료 프로그램은 통신판매업 신고 전 결제 금지
+   - MAD Crown 남은 표기 · 데모 회차 "[데모] 2027 봄 시즌 경쟁 PT" — 사용자가 "데모 삭제"라고 하면 삭제
+5. 이월: 개인 모드(individual) 제출 화면 · **비직원 계정 실검증**(임원 팀 구성·초대 수락·참가자 회차 방·클라이언트 화면 — 두 번째 계정 필요) · madleap.co.kr Turnstile 추가 · DAM 폼 실제 제출 1건 · 집중 브랜드 레지스트리 미등록(HeRo·Badak·MADLeap)
+
+### 주의 (이번 세션 교훈)
+
+- 서버 컴포넌트가 await한 값은 Next dev 모드에서 React 디버그 정보로 HTML에 실린다 → 공개 화면용 조회는 민감 필드를 **아예 select하지 않는** 전용 함수(`getPublicCertificate`)
+- 날짜는 `timeZone: 'Asia/Seoul'` 고정 (UTC로 하루 밀린 발급일 표시 사고)
+- `member_brand_joins.origin` 체크 제약 — 새 origin 값은 마이그레이션 먼저
+- tsc 전체는 메모리 부족 → `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` 후 수정 파일만 필터
+- 다른 브랜드 회차를 창구 사이트에 보여도 데이터·동의·인증서는 **주인 브랜드**(헌법 데이터 계약 3·4)
 
 ---
 

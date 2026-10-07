@@ -450,6 +450,8 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | `lib/hit/data/*.ts` | 질문 하드코딩 24파일 (Phase 4에서 제거 예정) |
 | `app/api/hit/{a~f}/{session,response,score,result}` | 검사 API |
 | `app/api/hero/tih/route.ts` | TIH 저장 (createAdminClient) |
+| `app/(HeRo)/hero/programs/` | HeRo 프로그램 (코어 프로그램 모듈, brand_id='hero') — 목록·`[id]` 회차 방·`join/[code]`. 화면 = `features/programs/*` (테마 hero #E53935). **헤더 진입점 없음 (결정 대기)** |
+| `app/(HeRo)/hero/certificate/` | 수료증·참여 확인서 발급·인쇄·진위 확인 (코드 `HERO26-`) |
 
 ---
 
@@ -477,6 +479,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | `/intra/hero/ai-prompts` | AI 프롬프트 SSOT 관리 | ✅ |
 | `/intra/hero/funnel` | Funnel 전환율 · 비회원→회원→유료 | ✅ |
 | `/intra/hero/talent-agent/applications` | 탤런트 에이전시 신청 심사 | ✅ |
+| `/intra/hero/programs` | 프로그램 회차·참가 신청 선발 (코어 프로그램 모듈, 통합 `/intra/ums/programs`) | ✅ 세션 163 |
 
 ---
 
@@ -551,6 +554,8 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | **이월** | 64캐릭터 일러스트 양산 · HIT 질문 DB 단일화 (24파일→hit_questions) · HitProfileBadge 21개 브랜드 삽입 · TIH SSOT(산업군/직무군) 교체 |
 | **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 |
 | **색 SSOT 확정 (세션 82)** | Action/Accent/State layer만 HeRo Red · `group-hover:text-[#E53935]` on `font-bold` titles = hover-only affordance = ACCEPTABLE · per-card outline red = ACCEPTABLE · semantic red = 항상 ACCEPTABLE |
+| **세션 163 (2026-10-08)** | 코어 프로그램 모듈 연결 — `/hero/programs`·`/hero/certificate`·`/intra/hero/programs` · Action Hub `program_applications`(hero) · MADLeague 프로그램 화면에 HeRo 회차 노출 |
+| **결정 대기 (세션 163)** | ① `ums_sites.is_open=false`(10-07 12:51 UTC 변경 — 세션 162 기록은 공개) 의도 확인 ② 헤더 "프로그램" 진입점 + `lib/brand-site-menus.ts` hero 등록(site:check ❌) ③ 유료 프로그램은 통신판매업 신고 전 결제 금지 · 처리방침 항목 |
 | **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 (Tetrad) · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 · Journey 리텐션 엔진 · Talent Agency 포지셔닝 |
 
 ---

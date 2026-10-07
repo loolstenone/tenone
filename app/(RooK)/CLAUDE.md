@@ -55,7 +55,8 @@
 
 ## Action Hub Entries
 
-- 없음 (문의는 `contact_submissions` form_type `rook_*` — 인트라 CS 인박스)
+- `program_applications` (brand rook) · status='pending' · `/intra/ums/rook/programs` · category=approval · priority=normal (실전 프로젝트 참가 신청)
+- 문의는 `contact_submissions` form_type `rook_*` — 인트라 CS 인박스
 
 ---
 
@@ -78,6 +79,8 @@
 | `features/rook/RooKPostDetail.tsx` | Works·Artist 상세 (원본: 카테고리+제목 20px → 본문) + 직원 수정 버튼 |
 | `features/rook/RooKStaffPostButton.tsx` | 직원 전용 글쓰기·수정 (PostEditor 모달, /api/board/posts) |
 | `features/rook/RooKHeader.tsx` · `RooKFooter.tsx` | 헤더(UtilityBar·MobileMenu)·푸터(UniverseFooter) |
+| `app/(RooK)/rook/projects/` | 실전 프로젝트 (코어 프로그램 모듈, brand_id='rook') — 목록·`[id]` 회차 방·`[id]/teams`·`join/[code]`. 화면 = `features/programs/*` (테마 rook #00d255) |
+| `app/(RooK)/rook/certificate/` | 참여 확인서 발급·인쇄·진위 확인 (코드 `ROOK26-`) |
 
 ## 인트라 관리 경로
 
@@ -85,6 +88,7 @@
 - `/intra/ums/rook` 대시보드 — 가입 회원·게시글·미답변 문의 + 사이트 메뉴별 현황 (`/api/intra/sites/status?site=rook`, 통합 관리 › 사이트 현황과 같은 숫자)
 - `/intra/ums/rook/works`·`/artist`·`/freeboard` 게시판별 글 (`RookPostsAdmin`) · `/community` 전체 글
 - `/intra/ums/rook/rookie` RooKie 지원하기(RooKie 페이지, form_type `rook_rookie`) · `/intra/ums/rook/cs` 상담 / 문의(About 페이지, `rook_inquiry`)
+- `/intra/ums/rook/programs` 실전 프로젝트 회차·참가 신청 선발 (통합 `/intra/ums/programs`에서도)
 - `/intra/ums/rook/members` 회원 — `member_brand_joins(brand_id=rook)` 기준
 - 작품·아티스트 글 작성·수정: **사이트 Works·Artist 목록 "글쓰기 (직원)"·상세 "수정 (직원)"** (`features/rook/RooKStaffPostButton.tsx` → 통합 게시판 PostEditor, 서버 권한 write_permission=admin). ISR 10분 — 다른 방문자에게는 최대 10분 뒤 반영
 
@@ -108,4 +112,5 @@
 | **세션 161 완료** | 배포 확인(Works 20·Artist 30·자유게시판 공지 3) · "매니악 취향" = 운영자 본인 확인(유지) · 인트라 RooK 실데이터 연결(옛 posts → ums_posts, affiliations → member_brand_joins) · 직원 글쓰기·수정 버튼 · **새 글 상세 404 수정**(slug 없는 글은 id로 조회 — getRookPost) · 미사용 게시판 challenge·feedback 삭제 · RooKHeader aboutPath 타입 오류 |
 | **세션 160 완료** | 원본 대조 재작성(메뉴·배너·카테고리 순서·매스너리·상세·About/RooKie 2단·팝업 폼·자유게시판 공지 3편·원본 정렬) · 집중 Tier 승격(ums_sites·CANONICAL_HOSTS·noindex·사이트맵 제외) · 게시판 works/artist/freeboard 구성 · Works 20·Artist 30·이미지 이전 · 전 페이지 원본 콘텐츠로 재작성 · 문의·RooKie 지원 폼 · 마이페이지 내 글 필터 버그 수정 |
 | **세션 162 완료** | DNS 전환 완료(가비아 네임서버·Vercel 권장 DNS·Turnstile·Supabase) · ums_sites 공개 · 헤더 유틸리티 바 흰색 · 배경 유튜브 자막 끄기(`RooKBackgroundVideo.tsx`) · 파비콘(원본) · 조회수 시드 |
-| **이월 작업** | ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ ~~AD 시안 표기~~ (완료) ④ DNS 전환 후: 아임웹 해지·데이터 파기, 2026-10-14 처리방침 시행 시 변경 예정 공지 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신 ⑤ 본문 서버 렌더(SEO) |
+| **세션 163 완료** | 실전 프로젝트 `/rook/projects`(신청 → 인트라 선발 → 회차 방·팀) · 인증서 `/rook/certificate` · 인트라 `/intra/ums/rook/programs` · RooKie 페이지에 모집 중 회차 자동 노출(없으면 숨김) · Action Hub 신청 대기 |
+| **이월 작업** | ⓪-1 **실전 프로젝트 법적 검토** — 무급 참여 여부·수익 공유·저작권 귀속·직업소개 아님 명시 후 첫 회차 모집 · 처리방침에 신청·인증서 항목(10-14) · 메뉴 진입점(RooKie 외 헤더 노출 여부) ⓪ 팝업 폼 실제 제출(첨부 포함) → 인트라 문의 인박스 확인 · 직원 글쓰기 실사용 1건(작성→상세 열림→삭제) · 인트라 RooK 화면 직원 로그인 확인 ② RooKie 승인 회원 체계(capability) ③ ~~AD 시안 표기~~ (완료) ④ DNS 전환 후: 아임웹 해지·데이터 파기, 2026-10-14 처리방침 시행 시 변경 예정 공지 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신 ⑤ 본문 서버 렌더(SEO) |
