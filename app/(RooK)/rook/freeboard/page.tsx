@@ -1,8 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BoardPage } from "@/components/board";
 
 export default function RooKFreeBoardPage() {
+    const router = useRouter();
+    const idx = useSearchParams().get("idx");
+
+    // 옛 아임웹 주소 www.rook.co.kr/freeboard/?idx=N&bmode=view → 이전 글 rk-N ([id] 라우트가 실제 글로 연결)
+    useEffect(() => {
+        if (idx && /^\d+$/.test(idx)) router.replace(`/rook/freeboard/rk-${idx}`);
+    }, [idx, router]);
+
     return (
         <BoardPage
             site="rook"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import { getRookPosts, ROOK_CATEGORIES } from "@/lib/supabase/rook";
 import { RooKCategoryTabs, RooKContainer, RooKListCard, RooKMasonry } from "@/features/rook/RooKUI";
 import { RooKStaffPostButton } from "@/features/rook/RooKStaffPostButton";
@@ -11,8 +12,10 @@ export const metadata: Metadata = {
 };
 
 /** 원본 rook.co.kr/artist: 카테고리 탭 → 가운데 문구 → 매스너리(이미지 + 카테고리·이름) */
-export default async function RooKArtistPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
-    const { category } = await searchParams;
+export default async function RooKArtistPage({ searchParams }: { searchParams: Promise<{ category?: string; idx?: string }> }) {
+    const { category, idx } = await searchParams;
+    // 옛 아임웹 주소 www.rook.co.kr/artist/?idx=N&bmode=view → 이전 글 slug rk-N (DNS 전환 후 외부 링크·검색 유입 보존)
+    if (idx && /^\d+$/.test(idx)) permanentRedirect(`/rook/artist/rk-${idx}`);
     const active = category && ROOK_CATEGORIES.artist.includes(category) ? category : undefined;
     const artists = await getRookPosts("artist", { category: active });
 
