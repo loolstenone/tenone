@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+// get_email_by_handle은 service_role 전용 (anon 직접 RPC 호출로 이메일 수집 차단 — sql/security-definer-rpc-lockdown.sql)
+const supabase = createAdminClient();
 
 /**
  * POST /api/auth/handle-login
