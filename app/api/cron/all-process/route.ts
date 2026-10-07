@@ -4,10 +4,10 @@
  * Whole See 처리 + 기회 AI 분석 + AM 브리핑 통합
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 
 export async function GET(request: NextRequest) {
-    const auth = request.headers.get('authorization');
-    if (auth !== `Bearer ${process.env.CRON_SECRET}` && auth !== `Bearer ${process.env.ADMIN_API_KEY}`) {
+    if (!isInternalRequest(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';

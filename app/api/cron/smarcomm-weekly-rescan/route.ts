@@ -3,6 +3,7 @@
 // Smart-Data Hub 시계열 풍부화 + AIRM 자동 발견
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { runFullScan } from '@/lib/smarcomm/run-scan';
 
@@ -10,8 +11,7 @@ export const maxDuration = 300; // 5분 — 복수 사이트 순차 처리
 
 // Vercel Cron 인증 헤더 검증
 function isAuthorized(request: NextRequest): boolean {
-  const auth = request.headers.get('authorization');
-  return auth === `Bearer ${process.env.CRON_SECRET}`;
+  return isInternalRequest(request);
 }
 
 export async function GET(request: NextRequest) {

@@ -8,6 +8,7 @@
  * Vercel Cron: 매일 AM 9:30 KST (trend-crawl 이후)
  */
 import { NextRequest } from 'next/server';
+import { internalAuthHeaders, isInternalRequest } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { searchMessages, readMessage, refreshAccessToken } from '@/lib/gmail/client';
@@ -25,15 +26,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    // Cron 인증 (Admin API Key 또는 Vercel Cron Secret)
-    const authHeader = request.headers.get('authorization');
-    const adminKey = process.env.ADMIN_API_KEY;
-    const cronKey = process.env.CRON_SECRET;
-
-    if (
-        authHeader !== `Bearer ${adminKey}` &&
-        authHeader !== `Bearer ${cronKey}`
-    ) {
+    // Cron 인증 (Admin API Key 또는 Vercel Cron Secret — 미설정 키는 매칭하지 않음)
+    if (!isInternalRequest(request)) {
         return errorResponse('Unauthorized', 401);
     }
 
@@ -123,7 +117,7 @@ export async function POST(request: NextRequest) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminKey}`,
+                        ...internalAuthHeaders(),
                     },
                     body: JSON.stringify({ emails }),
                 });

@@ -4,16 +4,13 @@
  * 스케줄: "0 9 * * *" (UTC 09:00 = KST 18:00)
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function GET(request: NextRequest) {
-  const auth = request.headers.get('authorization');
-  if (
-    auth !== `Bearer ${process.env.CRON_SECRET}` &&
-    auth !== `Bearer ${process.env.ADMIN_API_KEY}`
-  ) {
+  if (!isInternalRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -2,17 +2,16 @@
 // vercel.json에 "schedule": "0 * * * *" 설정 + "crons": [...] 추가 필요.
 // 인증: CRON_SECRET 환경변수를 Authorization 헤더로 확인.
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { isInternalRequest } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateBriefing } from "@/lib/myverse/briefing";
 import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 
 export const maxDuration = 300;
 
-export async function GET(req: Request) {
-    const authHeader = req.headers.get("authorization") || "";
-    const expected = process.env.CRON_SECRET;
-    if (!expected || authHeader !== `Bearer ${expected}`) {
+export async function GET(req: NextRequest) {
+    if (!isInternalRequest(req)) {
         return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 

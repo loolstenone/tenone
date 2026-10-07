@@ -3,18 +3,17 @@
 // 입력: ?year=2027 (없으면 다음 해)
 // 결과: myverse_calendar_entries 에 KR 공휴일·절기 upsert (is_system=true)
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { isInternalRequest } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchKoreanHolidays, fetchKoreanSolarTerms } from "@/lib/myverse/public-holidays";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     // 인증 — Vercel cron 또는 수동 호출
-    const auth = req.headers.get("authorization") || "";
-    const expected = `Bearer ${process.env.CRON_SECRET || "no-secret"}`;
-    if (auth !== expected) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    if (!isInternalRequest(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
     const url = new URL(req.url);
     const yearParam = url.searchParams.get("year");

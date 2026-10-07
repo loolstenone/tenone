@@ -6,6 +6,7 @@
  * 인증: Vercel Cron은 Authorization: Bearer <CRON_SECRET> 헤더 전송
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 import { createClient } from '@supabase/supabase-js';
 
 function getAdminClient() {
@@ -18,8 +19,7 @@ function getAdminClient() {
 
 export async function GET(request: NextRequest) {
     // Vercel Cron 인증
-    const auth = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!isInternalRequest(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -4,10 +4,10 @@
  * Hobby 플랜 제약(1일 1회 2개 한도)으로 Whole See + 기회 수집 통합
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 
 export async function GET(request: NextRequest) {
-    const auth = request.headers.get('authorization');
-    if (auth !== `Bearer ${process.env.CRON_SECRET}` && auth !== `Bearer ${process.env.ADMIN_API_KEY}`) {
+    if (!isInternalRequest(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';

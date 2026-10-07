@@ -8,15 +8,14 @@
  * 내부 동작: /api/analytics/sync (POST) 호출 — days=2 (어제 + 그제 재확인)
  */
 import { NextRequest, NextResponse } from "next/server";
-import { internalAuthHeaders } from "@/lib/api-guard";
+import { internalAuthHeaders, isInternalRequest } from "@/lib/api-guard";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
     // Vercel Cron이 자동으로 Authorization 헤더를 붙인다
-    const auth = req.headers.get("authorization");
-    if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!isInternalRequest(req)) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

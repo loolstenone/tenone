@@ -11,14 +11,14 @@
 // 정직성: 비교는 가능한 한 LLM 분류기로 판정. ANTHROPIC_API_KEY 없으면 텍스트 동일성만 비교 → 'unchanged'/'changed' 단순 라벨.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isInternalRequest } from '@/lib/api-guard';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { runFullScan } from '@/lib/smarcomm/run-scan';
 
 export const maxDuration = 300;
 
 function isAuthorized(request: NextRequest): boolean {
-    const auth = request.headers.get('authorization');
-    return auth === `Bearer ${process.env.CRON_SECRET}`;
+    return isInternalRequest(request);
 }
 
 interface FlagRow {
