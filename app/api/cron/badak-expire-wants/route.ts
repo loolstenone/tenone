@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const supabase = createAdminClient();
 
 // GET /api/cron/badak-expire-wants
-// Vercel Cron: 매일 0시 (vercel.json에 schedule 등록 필요)
+// Vercel Cron: 매일 KST 0시 (vercel.json "0 15 * * *" = UTC 15:00)
 export async function GET(request: NextRequest) {
   if (!isInternalRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

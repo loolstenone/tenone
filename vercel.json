@@ -22,19 +22,15 @@
   "crons": [
     {
       "path": "/api/cron/all-crawl",
-      "schedule": "0 0 * * *"
+      "schedule": "0 17 * * *"
     },
     {
       "path": "/api/cron/all-process",
-      "schedule": "30 0 * * *"
+      "schedule": "30 17 * * *"
     },
     {
       "path": "/api/cron/daily-vrief",
       "schedule": "1 1 * * *"
-    },
-    {
-      "path": "/api/cron/trend-crawl",
-      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/daily-gpr",
@@ -42,7 +38,7 @@
     },
     {
       "path": "/api/cron/badak-expire-wants",
-      "schedule": "0 0 * * *"
+      "schedule": "0 15 * * *"
     },
     {
       "path": "/api/newsletter/cron/dispatch",
@@ -54,7 +50,7 @@
     },
     {
       "path": "/api/cron/newsletter-crawl",
-      "schedule": "0 1 * * *"
+      "schedule": "0 20 * * *"
     },
     {
       "path": "/api/cron/hero-weekly-report",
@@ -70,11 +66,11 @@
     },
     {
       "path": "/api/cron/smarcomm-weekly-rescan",
-      "schedule": "0 3 * * 1"
+      "schedule": "0 19 * * 0"
     },
     {
       "path": "/api/cron/smarcomm-airm-verify",
-      "schedule": "0 4 * * *"
+      "schedule": "0 21 * * *"
     }
   ]
 }
