@@ -1,7 +1,7 @@
 -- SECURITY DEFINER RPC 노출 정리 1차 — 세션 161, 2026-10-07
 -- 배경: anon이 실행 가능한 DEFINER 함수 51개 중 RLS 보조(7)·트리거(24)를 뺀 20개 점검
 --   - DEFINER = RLS 우회. anon 키는 브라우저에 공개되어 있으므로 누구나 /rest/v1/rpc/{fn} 직접 호출 가능
--- 적용: 1)~3) 2026-10-07 MCP apply_migration `security_definer_rpc_lockdown` (롤백 시뮬레이션 + 운영 anon REST 401 확인) / 4) 미적용 — 배포 후
+-- 적용: 1)~3) 2026-10-07 MCP apply_migration `security_definer_rpc_lockdown` (롤백 시뮬레이션 + 운영 anon REST 401 확인) / 4) 2026-10-07 배포 후 적용 `security_definer_rpc_lockdown_4_get_email_by_handle` (anon RPC 401, handle-login API 200)
 
 -- 1) 서버(service_role)에서만 쓰거나 호출처가 없는 함수 → anon·authenticated 실행 회수
 --    set_brand_role               : 누구나 임의 회원의 members.brand_roles·brand_access 변조 가능 (호출처 없음)
@@ -67,5 +67,5 @@ GRANT EXECUTE ON FUNCTION public.ensure_wio_membership(uuid,uuid,text) TO authen
 
 -- 4) [배포 후] get_email_by_handle: 핸들 → 이메일 = 회원 이메일 수집 경로
 --    handle-login API가 admin 클라이언트로 바뀐 코드가 배포된 뒤에 실행 (먼저 실행하면 배포 전 핸들 로그인 실패)
--- REVOKE EXECUTE ON FUNCTION public.get_email_by_handle(text) FROM PUBLIC, anon, authenticated;
--- GRANT EXECUTE ON FUNCTION public.get_email_by_handle(text) TO service_role;
+REVOKE EXECUTE ON FUNCTION public.get_email_by_handle(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_email_by_handle(text) TO service_role;
