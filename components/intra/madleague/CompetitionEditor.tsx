@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Plus, Trash2, X } from "lucide-react";
 import { COMP_STATUS_LABEL, COMP_KIND_LABEL } from "./CompetitionsAdmin";
+import { brandSiteUrl } from "@/lib/domain-registry";
 
 interface Person { member_id: string; name: string; email: string | null; club: string | null }
 interface Team {
@@ -90,6 +91,8 @@ export function CompetitionEditor({ id, basePath }: { id: string; basePath: stri
                 <Link href={basePath} className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"><ChevronLeft className="h-4 w-4" /> 회차 목록</Link>
                 <h1 className="mt-2 text-2xl font-bold text-neutral-900">{String(d.competition.title)}</h1>
                 <p className="mt-1 text-sm text-neutral-500">{COMP_STATUS_LABEL[String(d.competition.status)]} · 팀 {d.teams.length} · 배정 {assigned.size}명</p>
+                <a href={brandSiteUrl("madleague", `/madleague/pt/${id}`)} target="_blank" rel="noopener noreferrer"
+                    className="mt-2 inline-block text-sm font-semibold text-red-600 hover:underline">회차 방 열기 — 공지·Q&A·제출물 ↗</a>
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
 
