@@ -12,6 +12,7 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js';
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -34,7 +35,11 @@ function currentQuarter(): string {
   return `${now.getFullYear()}-Q${q}`;
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   try {
     const today = todayKST();
     const quarter = currentQuarter();

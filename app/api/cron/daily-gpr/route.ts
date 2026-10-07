@@ -4,6 +4,7 @@
  * 스케줄: "0 9 * * *" (UTC 09:00 = KST 18:00)
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { edgeAuthHeaders } from '@/lib/edge-functions';
 import { isInternalRequest } from '@/lib/api-guard';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        ...(await edgeAuthHeaders()), // x-edge-secret — Edge Function 호출 인증
       },
     });
 

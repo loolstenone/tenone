@@ -16,6 +16,7 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js';
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -73,6 +74,10 @@ AEO 핵심 원칙:
 - 소셜 증거(리뷰, 케이스 스터디)가 있는 콘텐츠가 더 자주 인용된다`;
 
 Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } });
   }

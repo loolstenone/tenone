@@ -12,6 +12,7 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js';
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -30,7 +31,11 @@ interface DeutbotLog {
   created_at: string;
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   try {
     const since = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
 

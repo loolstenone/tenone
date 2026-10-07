@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { edgeAuthHeaders } from "@/lib/edge-functions";
 
 /**
  * POST /api/gravity/pain/collect
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${serviceRoleKey}`,
+            ...(await edgeAuthHeaders()), // x-edge-secret — Edge Function 호출 인증
         },
         body: JSON.stringify({ product_id, brand_name, category, keywords, competitors, limit }),
     });

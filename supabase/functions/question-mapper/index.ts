@@ -12,6 +12,7 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js';
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -50,6 +51,10 @@ const CLUSTER_PROMPT = `다음은 소비자들이 AI에게 물어볼 법한 상�
 - source_questions는 실제 원본 질문만 포함 (없으면 빈 배열)`;
 
 Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } });
   }

@@ -32,6 +32,7 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js';
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -159,6 +160,10 @@ async function generateIntro(trends: TrendRow[], persona: PersonaRow | null): Pr
 const VALID_PERSONA_KEYS = ['founder', 'planner', 'reporter', 'marketer'] as const;
 
 Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   const startAt = Date.now();
 
   try {

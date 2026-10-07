@@ -9,6 +9,8 @@
  *   3. analytics_snapshots upsert
  */
 
+import { requireEdgeSecret } from '../_shared/edge-auth.ts';
+
 const GA4_PROPERTY_ID = Deno.env.get("GA4_PROPERTY_ID");
 const GA4_SERVICE_ACCOUNT_JSON = Deno.env.get("GA4_SERVICE_ACCOUNT_JSON");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -57,7 +59,11 @@ async function getAccessToken(serviceAccountJson: string): Promise<string> {
   return data.access_token;
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  // 우리 쪽 호출자(pg_cron·Vercel 서버)만 — x-edge-secret (sql/edge-function-auth.sql)
+  const denied = await requireEdgeSecret(req);
+  if (denied) return denied;
+
   if (!GA4_PROPERTY_ID || !GA4_SERVICE_ACCOUNT_JSON) {
     return new Response(
       JSON.stringify({ error: "GA4 환경변수 미설정" }),

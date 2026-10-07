@@ -29,7 +29,7 @@
    - 크론 401 여부: Vercel 로그에서 `/api/cron/*` 401 — 있으면 운영 `CRON_SECRET`이 16자 미만(→ `isInternalRequest` 거부). Vercel env 키 교체
    - `get_email_by_handle` 실행 회수: `sql/security-definer-rpc-lockdown.sql` 4) 주석 2줄 → MCP `apply_migration`. 이후 핸들 로그인 1회 확인
    - 공개 INSERT 3차 B: `sql/security-open-insert-lockdown-3.sql` B 주석 2줄(`coaching_waitlist "본인 INSERT"`·`mad_hero_insert`) 적용
-2. **Edge Function 인증 (가장 급함 — Anthropic 크레딧 충전 전에)**: 배포 함수 11개 대부분 `verify_jwt=false` + 본문 인증 없음 → 누구나 호출해 Claude 크레딧 소모 가능. 계획: Vault `edge_function_secret`(DB 안에서 생성) → `edge_function_secret()`(service_role 전용) → pg_cron 3개 헤더 `x-edge-secret` → 배포본 기준 가드 삽입 재배포(pg_cron·호출처 없음 8개 먼저, Vercel 호출 pain-* 2개는 배포 후). **자동 모드가 Vault 쓰기를 막음 → 사용자 명시 승인 또는 대시보드에서 비밀 직접 생성 필요**
+2. ~~**Edge Function 인증**~~ ✅ 2026-10-07 완료 (사용자 승인): Vault `edge_function_secret`(64자, DB 안에서 생성) · `edge_function_secret()` service_role 전용 · pg_cron 3개 `x-edge-secret` 헤더 · 배포 함수 11개 전부 가드 재배포(헤더 없음·anon 키 모두 401, trend-to-draft 비밀 호출 200 확인) · Vercel 호출 4곳 `edgeAuthHeaders()` (커밋됨, **다음 push 전까지 인트라 Gravity 수집·분류 버튼은 401** — 크레딧 0이라 원래도 실패 중). 이제 **Anthropic 크레딧 충전 가능**
 3. **사용자 직접 (로그인·캡차)**: 인트라 RooK 대시보드·게시글·회원 숫자 확인 · 인트라 MADLeague 회원 관리(멘토 1명) · RooK Works 직원 글쓰기 1건(작성→열림→삭제) · `/madleague/contact`·RooK 팝업 폼 제출 → 인박스 · MADLeague 지원→승인 흐름
 4. **결정 대기**: ① 기존 멘토(lools) 담당 동아리 지정 ② HeRo 신청 동의 보관기간 "상담 종료 후 1년" 확인 ③ `handle-login` API가 핸들→이메일 공개 (서버 로그인 처리로 바꿀지) ④ WIO 아무 테넌트 자가 가입 ⑤ Anthropic 크레딧 충전(2번 후)
 5. **발견·이월**: `is_tenone_staff()`(members.account_type 기준, ~70 정책) → `auth_is_staff()`로 통일 · `daily-gpr` Edge Function 미배포(매일 18시 실패) · 10:01 브리핑 2개 구현(Edge daily-vrief·/api/agent/briefing) 중 정리, 최근 21일 저장 0건 · 인트라 HeRo 매칭(`hero_match_candidates_for_tih`) 타입 불일치로 고장 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
