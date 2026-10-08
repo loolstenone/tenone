@@ -10,6 +10,7 @@
 - **한 줄 소개**: 국내 주요 대학의 마케팅·기획 동아리 네트워크 + 경쟁 플랫폼
 - **톤앤매너**: 대학생 에너지. 밝음·열정·포용. 커뮤니티 중심.
 - **주 컬러**: 검정 + 레드 `#EC1D25` (HeRo 프로그램만 골드 `#FFC000`)
+- **BI** (About): Red `#EC1D25` Passion(열정) · Black `#000000` Patience(끈기) · Gold `#FFC000` Witty(재치 발랄함) — "열정과 끈기 그리고 재치 발랄함 / 이 조합은 강인함을 만들어 낸다." · 마스코트 DAMbe(담비) — 고화질 `public/logos/madleague/dambe-trophy.webp`(트로피, 배경 투명) · `dambe-football.webp`(미식축구). 옛 `dambe.png`는 저화질 — 쓰지 않는다
 - **디자인 방향**: 동아리 정보 + 대회 아카이브 + 멤버 포트폴리오. MADzine은 검정 에디토리얼 매거진 (아래 디자인 규칙)
 
 ---
@@ -81,7 +82,11 @@
 | `app/(MADLeague)/layout.tsx` | generateMetadata + MadLeagueHeader/Footer |
 | `app/(MADLeague)/madleague/page.tsx` | 메인 |
 | `app/(MADLeague)/madleague/clubs/` | 동아리 목록·상세·지원서 관리 — **열람: 직원·이 동아리 회장·이 동아리 담당 멘토**(`canViewClubApplications`, 멘토 context.club_id). 승인·반려: 일반 신청=회장·직원, 회장·멘토·기업 신청=직원만 |
-| `app/(MADLeague)/madleague/contact/` | 문의하기 (Turnstile·동의 → /api/contact form_type `madleague_inquiry` → 인트라 고객 문의) — `features/madleague/MadContactForm.tsx` |
+| `app/(MADLeague)/madleague/contact/` | 문의하기 (Turnstile·동의 → /api/contact form_type `madleague_inquiry` → 인트라 고객 문의) — `features/madleague/MadContactForm.tsx`. **`?type=` 유형 미리 선택**: corporate(기업 협업·과제 제안)·club-apply(공식 동아리 신청)·club·program·etc (`MAD_CONTACT_TOPICS`) — 버튼에서 넘길 때 유형을 붙인다 |
+| `app/(MADLeague)/madleague/clubs/[slug]/room/` | **동아리 방 = 작은 네이버 카페** — 대문·게시판(`lib/madleague-club-cafe.ts` CAFE_BOARDS: 공지(운영진)·자유·질문·자료실·사진첩)·글·댓글·멤버·운영진 고정/삭제. 입장 = 그 동아리 현역·임원·멘토·직원 (`mad_can_access_club`·`mad_is_club_officer`, `sql/madleague-club-cafe.sql`). 동아리 목록 카드에서 입장 |
+| `features/madleague/programs-list.ts` | 프로그램 목록 SSOT (프로그램 페이지·About 공용) |
+| `features/madleague/PracticeProgramPage.tsx` | RooKie(`/programs/rookie`)·Planner's(`/programs/planners`) 실전 훈련 프로그램 공용 화면 |
+| `features/madleague/HeroRotatingTitle.tsx` | 홈 히어로 카피 3종 3초 교체 |
 | `app/(MADLeague)/madleague/hero/` | HeRo 신청 — Turnstile + 수집·이용 동의(버전 `2026-10-07.1`, `mad_hero_applications.consent`) + service_role 저장 |
 | `app/(MADLeague)/madleague/apply/` | 지원서 (로그인·캡차·동의) |
 | `app/(MADLeague)/madleague/member/` | 매드리거 본인 화면 (profile·portfolio·certificate·projects) |
@@ -159,7 +164,15 @@
 - 팀 구성 권한: 직원 · 자기 동아리 임원(club/임원 활성)만, 회차 status upcoming·ongoing일 때. 후보 = 그 해 현역·임원(context.year=회차 연도 또는 연도 없음)
 - 참가자는 회차 방 첫 입장 때 MADLeague 참가 동의(`member_brand_joins` origin 'program', `program-2026-10-08`) — 동의 없이 브리프 안 보임
 - 인증서 발급 가능: 회차 결과 공개(results_published_at) 또는 status=completed · 활동 인증서 = 연도별 현역 기록. 생년월일·대학·전공은 발급 시점 스냅샷 — 진위 확인 화면은 이름 마스킹만, 민감 필드를 select하지 않는다
-- 동의 버전: 지원서 `2026-10-08.1` · 프로그램 참가 `program-2026-10-08`
+- 동의 버전: 지원서(매드리거 등록) `2026-10-08.2`(하고 싶은 말 항목 추가) · 프로그램 참가 `program-2026-10-08`
+- 지원서: '하고 싶은 말'(motivation, 전 유형) · 멘토는 소속 동아리 없음 허용
+
+### 사이트 표기 (2026-10-08 세션 165)
+
+- "지원하기" → **"매드리거 등록"** (사이트·인트라 메뉴명 모두). 헤더 메뉴: 매드리거 ▸ 매드리거 홈·동아리·매드리거 등록 / 프로그램 ▸ … RooKie·Planner's
+- 경쟁 PT 페이지는 프로그램 탭 줄을 숨긴다(헤더 단독 메뉴) · 공개 페이지에 개인 이메일 금지 → 문의하기 페이지로
+- 푸터 4열: 참여(매드리거 등록·공식 동아리 신청·문의하기·마이페이지) · 채널(HeRo·RooK·Planner's — Planner's는 지금 MADLeague 프로그램 페이지로 연결, MyVerse로 보낼지 미결정)
+- BI 세 원은 디자인 규칙(rounded 금지)의 예외 — BI 그림 자체
 
 ### 동아리 로고
 
@@ -194,5 +207,6 @@
 | **세션 161 완료** | 복사 컬럼 DROP B단계 운영 적용 · **동아리 지원서 = A 소속 인증**(사용자 결정) → 열람을 해당 동아리 회장·담당 멘토·직원으로 제한 + 반려 권한 승인과 통일 · 인트라 회원 관리 capability 기준 · 문의하기 페이지 신설(푸터 개인 이메일 제거) · HeRo 신청 동의·캡차·서버 저장 · 미사용 ums_boards 6개·테스트 지원서 삭제 · 인트라 사이트 링크 스테이징 절대 주소(`brandSiteUrl`) |
 | **세션 162 완료** | madleague.net 프로그램 이전(경쟁 PT 명예의 전당·발표 장면·2026 1차 춤추는 고래·MAD Crown 표기 제거 · 크리에이지 신규 · 댐 파티+히스토리 · 아이디어 무브먼트·히어로 키비주얼 · 하위 메뉴 원본 이름) · 유니버스 공통 신청 폼(인트라 참가 신청·사이트 /forms·프로그램 자동 버튼) 코드 · 파비콘 |
 | **세션 163 완료** | 신청 폼 DB 적용 · 매드리거 홈·자유 게시판·동아리 운영진(최대 5명·임기·위임) · 경쟁 PT 운영 전체(회차·팀·제출·회차 방·클라이언트·알림·결과→명예의 전당·포트폴리오) · **코어 프로그램 모듈 이전**(program_*) · 사이트 팀 구성·초대 링크·참가 동의 · 인증서 본인 발급·진위 확인·인트라 관리 · "함께하는 프로그램"(RooK·HeRo 회차 노출) |
-| **이월 작업** | ⓪ 배포 확인 → 옛 mad_competitions 계열·mad_certificates DROP(승인) · 처리방침에 신청·인증서 항목(10-14) · 비직원 계정 실검증(임원 팀 구성·초대 수락·참가자 회차 방) · 개인 모드 제출 · 데모 회차 삭제(요청 시) · DAM 폼 실제 제출 1건 · MAD Crown 남은 표기 결정 · 춤추는 고래 발표 사진 · ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
+| **세션 165 완료** | 보안 1단계(공개 프로필 이메일·포트폴리오 타 브랜드 이력 필터 등) · One ID SSO · 홈 히어로 카피·소개 · 매드리거 등록(이름·하고 싶은 말·멘토 무소속·로그인 모달 닫기) · 관심 산업/직무 선택지 수리 · 헤더 하위 메뉴(매드리거·프로그램) · 동아리 방(카페) · RooKie·Planner's 프로그램 · 홈 정비(공식 동아리·명예의 전당 삭제) · 푸터 4열 · 경쟁 PT 문구 · About 정비(아이콘·네 자리·프로그램·BI·담비) · 문의 유형 미리 선택 · 테스트 데이터: AD Zone 가상 회원 10명(`sql/test-data-madleague-adzone-demo.sql`, 사용자 "삭제" 시 정리 블록 실행) |
+| **이월 작업** | ⓐ 배포 후 확인: 동아리 방 비직원 계정 입장·글쓰기 · 문의 유형 미리 선택 · About 담비 이미지 · ⓑ 테스트 가상 회원 10명 삭제(요청 시) · ⓒ 헬멧 엠블럼·담비 의상 5종 원본 파일 받으면 About에 · ⓓ 푸터 Planner's 연결처 결정 · ⓔ `ums_sites.is_open` 현재 true — 스테이징 비공개 의도면 false로 (site:check에서 확인, 세션 161 기록은 false) ·  ⓪ 배포 확인 → 옛 mad_competitions 계열·mad_certificates DROP(승인) · 처리방침에 신청·인증서 항목(10-14) · 비직원 계정 실검증(임원 팀 구성·초대 수락·참가자 회차 방) · 개인 모드 제출 · 데모 회차 삭제(요청 시) · DAM 폼 실제 제출 1건 · MAD Crown 남은 표기 결정 · 춤추는 고래 발표 사진 · ① 로그인 실검증: 지원→마이페이지 "심사 중"→회장 대기 목록→승인→capability 행 · 인트라 회원 관리(멘토 1명 표시)·문의하기 제출 1건 ② **기존 멘토 1명(lools, context에 club_id 없음) 담당 동아리 지정** — 없으면 어느 동아리 지원서도 못 봄 ③ 배포 후 공개 INSERT 정책 제거(`sql/security-open-insert-lockdown-3.sql` B: `mad_hero_insert`) ④ HeRo 신청 동의 보관기간("상담 종료 후 1년") 사용자 확인 ⑤ 기수 14건(archive) 근거 확인 후 복원 여부 ⑥ MADzine 서버 렌더(SEO) — DNS 전환 전 ⑦ DNS 전환 시 구 URL `/59/?bmode=view&idx=…` → `/madleague/madzine/mz-…` 308 ⑧ 동아리 로고 7종 · 소개 문구 ⑨ `mad_articles.author_name` 바이라인 표시 방식 결정 |
 | **최근 결정** | 멘토 = club/멘토 · 기업 = showcase/host · MADzine 카테고리 원본 8종 · 이미지 자체 Storage 복사 · 작성자 이름·사진 공개 · 동아리 7개만 복원(소개 비움) |

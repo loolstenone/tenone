@@ -106,6 +106,8 @@
 
 ## 현재 상태
 
+- **2026-10-08 (세션 165)**: 푸터 4열 규칙 적용(`RooKFooter` siteId·actions·channels — 메뉴는 헤더 레지스트리 자동, CLAUDE.md §1.9.4) · 마이페이지 LoginRequired
+
 | 항목 | 내용 |
 |------|------|
 | **Phase** | **공개 운영 전환** — www.rook.co.kr DNS → Vercel (2026-10-07 세션 161) |

@@ -541,6 +541,8 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ## 현재 상태
 
+- **2026-10-08 (세션 165)**: 로그인 필요 화면 LoginRequired 표준(기업·JD·JH·마이·이력서 워크스페이스) · TIH 신청 Turnstile 필수 + INSERT만(중복 이메일 409, 덮어쓰기 차단) · talent-agent 브랜드 카드 CrossSiteLink · 매칭 inbox/journey API requireMember+assertSelf · HeRo 매칭 RLS(hero_matches·hero_companies·hero_company_members) 적용
+
 | 항목 | 내용 |
 |------|------|
 | **Phase** | P3 완료 · 잔업 정리 진행 중 (2026-04-24 세션 83) |

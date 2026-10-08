@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-08 (세션 164 — 유니버스 6축 점검 · 보안 긴급 수정)
+> 마지막 업데이트: 2026-10-08 (세션 165 — 보안 1단계 · One ID SSO · MADLeague 사이트 정비)
 
 ---
 
@@ -8,7 +8,8 @@
 
 - [x] `npm run site:check` + CLAUDE.md §2.5 원스톱 체크리스트 · 파비콘 404 4개 복원 · HeRo 공개
 - [x] 인트라 메뉴·목차 비직원 비전달 (서버 레이아웃 + intra-gate)
-- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌)
+- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌) + 푸터 4열 이행
+- [x] 로그인 필요 화면 LoginRequired 표준(닫기 가능) 27곳 · 푸터 4열 규칙(Universe 열 폐지·사업자등록번호 숨김) · 로그인 도움(아이디·비밀번호 찾기) · 교차 브랜드 링크 CrossSiteLink — 세션 165
 - [ ] 실험·보관 독립 도메인 Turnstile 등록 여부 · 위젯 10개 초과 대비
 
 ## 🔒 보안·안정화 (세션 156 시작 — 집중 5개 사이트: MADLeague·TenOne·HeRo·SmarComm·Badak)
@@ -30,7 +31,8 @@
 - [x] 누구나 INSERT 정책 21/23 제거 (가짜 알림·주문·구독자 등) + MoNTZ 메일 HTML 이스케이프·캡차 — 세션 161
 - [ ] 배포 후: `get_email_by_handle` 회수 · 공개 INSERT 3차 B 2개 · 크론 401 확인
 - [ ] **Edge Function 인증** (verify_jwt=false·본문 인증 없음 → Claude 크레딧 소모 통로) — Vault 비밀 승인 대기, Anthropic 크레딧 충전 전
-- [ ] handle-login 핸들→이메일 공개 API · WIO 테넌트 자가 가입 · `is_tenone_staff()` → `auth_is_staff()` 통일 (~70 정책)
+- [x] handle-login 핸들→이메일 공개 API (서버 로그인으로) · `is_tenone_staff()` → `auth_is_staff()` 통일 — 세션 165
+- [ ] WIO 테넌트 자가 가입
 - [ ] security_definer 뷰 9 · 유출 비번 차단 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
@@ -84,9 +86,11 @@
 
 - [x] 6축 점검(Fable) · 종합 README · 연결 지도 부록 — 145건
 - [x] 긴급 보안: SmarComm CRM · 뉴스레터 발송 · board-assets · middleware .png · Badak role · HeRo talent RLS · debug-env
-- [ ] ⚠️ `get_public_profile` 이메일 반환 차단 (승인) · MADLeague 포트폴리오 타 브랜드 이력 필터
-- [ ] 1단계 남은 보안: is_tenone_staff → auth_is_staff · USING(true) 7개 · HeRo 매칭 · 자기 승인 컬럼 · open redirect · tih · Scripts 정리
-- [ ] 결정 D-1~D-7 (SSO · 보관 API · 빈 테이블 DROP · MADLeap/HeRo 순환 · CLAUDE.md 정리 · 탈퇴 · CRM 트리거)
+- [x] ⚠️ `get_public_profile` 이메일 반환 차단 · MADLeague 포트폴리오 타 브랜드 이력 필터 — 세션 165
+- [x] 1단계 남은 보안: is_tenone_staff → auth_is_staff · USING(true) 7개 · HeRo 매칭 · 자기 승인 컬럼 · open redirect · tih · Scripts 정리 — 세션 165
+- [ ] 남은 점검 항목: `has_brand_admin_access()`가 members 컬럼으로 판단 (데이터 계약 2 위반)
+- [x] D-1 SSO → **One ID로 복구** (허브 auth.tenone.biz · 도메인별 독립 세션 · 일회용 해시 토큰 · BrandJoinGate) — 세션 165, 배포 후 독립 도메인 간 실검증
+- [ ] 결정 D-2~D-7 (보관 API · 빈 테이블 DROP · MADLeap/HeRo 순환 · CLAUDE.md 정리 · 탈퇴 · CRM 트리거)
 - [ ] 2단계 SSOT 단일화 · 3단계 정리·이상적 구조 · 점검기 확장 → 같은 6축 재점검
 
 ## 🧩 코어 프로그램 모듈 (세션 163 · 2026-10-08) — 설계 `docs/Program_Module.md`

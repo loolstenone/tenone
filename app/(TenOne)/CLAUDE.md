@@ -164,6 +164,8 @@
 
 ## 현재 상태
 
+- **2026-10-08 (세션 165)**: `/profile/[handle]` 본인 판정을 email → `members.auth_id`로 · 공개 프로필 RPC `get_public_profile` 공개 필드만(이메일은 privacy_settings.email 동의 시) · 서비스 프로필은 본인만 · `/my` LoginRequired
+
 | 항목 | 내용 |
 |------|------|
 | **Phase** | Mature (2026-05-28) — 포탈·프로필·Intra 모두 프로덕션. 28+ 브랜드 통제 중. 본사이트 정직성·정합성 회복 1차 완료 (세션 154). |

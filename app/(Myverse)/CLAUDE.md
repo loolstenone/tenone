@@ -339,6 +339,8 @@
 
 ## 현재 상태
 
+- **2026-10-08 (세션 165)**: 로그인 페이지 복귀 경로 `safeRedirect()`(lib/login-href.ts) — 외부 주소·`//` 리다이렉트 차단(open redirect)
+
 | 항목 | 내용 |
 |------|------|
 | **Phase** | **세션 135 (2026-05-14)** — Myverse 진입점·시각화 정비: ① **AppTopNav 아바타 드롭다운 통합** (Install·Help·Settings 분리 아이콘 제거 → 아바타 클릭 시 드롭다운: 프로필/설정/도움말/앱 설치/로그아웃). Bell 알림 분리 · ② **운동·식사 카드 시각화** (StatChip·IntensityDots 5단계·MealStats·ExerciseStats — 강도 도트 + BPM + kcal + 구성) · ③ **첫 랜딩 페이지를 캡쳐로** (6곳: marketing redirect/Hero CTA/`/myverse/app`/onboarding/브랜드 로고) · ④ **잠재 버그 fix** — `capture_mode: "manual"` → `"active"` (세션 108부터 routines POST 500 실패) |

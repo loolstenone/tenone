@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-10-08 (세션 165, 사무실) — 보안 1단계 · One ID SSO · 로그인 표준 · MADLeague 사이트 정비
+
+### 장소·운영
+
+- 운영 DB (MCP, 각각 롤백 시뮬레이션 → 사용자 승인 → 적용 → anon REST 확인): `security_get_public_profile` · `security_is_tenone_staff_unify` · `security_using_true_lockdown`(collected_data·member_visits·member_brand_withdrawals·chat_threads·wio_orders·evolution_enrollments·newsletter_subscribers) · `security_hero_matching_rls` · `security_protect_review_columns`(bma·jakka_showcases·approvals 자기 승인 차단 트리거) · `sso_one_id`(평문 토큰 5행 삭제·해시 컬럼) · `brand_join_gate`(origin first_visit·application) · `madleague_club_cafe`
+- 테스트 데이터 (execute_sql): MADLeague AD Zone 가상 회원 10명 `madtest-NN@example.invalid` — 정리 SQL `sql/test-data-madleague-adzone-demo.sql` 하단
+- 배포: 작업 종료 push 1회
+
+### 결정 (사용자)
+
+- D-1 SSO = A안 복구, "Ten:One™ Universe One ID" 개념 (독립 도메인 사이도 다시 로그인 없이)
+- 로그인 필요 모달은 닫을 수 있어야 함 → CLAUDE.md §1.2.1 표준 변경 (`LoginRequired`)
+- 푸터 4열 규칙(브랜드·메뉴·참여·채널) · 채널에 유니버스 연관 사이트 포함 · Universe 열 폐지 · 사업자등록번호 전 사이트 숨김(통신판매 시 자동 표시) → CLAUDE.md §1.9.4
+- MADLeague: "지원하기" → "매드리거 등록" · 동아리 방 = 작은 네이버 카페 · RooKie·Planner's 프로그램을 MADLeague 안에 · 명예의 전당 섹션 삭제 · 공개 페이지 개인 이메일 삭제 · BI(Passion·Patience·Witty) · 담비 고화질
+
+### 변경 내역
+
+- 보안: `lib/login-href.ts` `safeRedirect()`(auth confirm·callback·SSO·login·MyVerse) · `/api/auth/handle-login`(서버 로그인, 이메일 비노출) · HeRo TIH 캡차·insert만 · HeRo 매칭 API requireMember+assertSelf · 뉴스레터 수신거부 admin client · 공개 프로필 본인 판정 auth_id · Scripts/ → scripts/ (PAT 스크립트 26개 삭제, deploy:* 제거)
+- One ID: `lib/sso-server.ts`·`lib/sso.ts`·`app/api/sso/{initiate,exchange,return,publish,adopt}` · LoginModal One ID 문구·(?) 안내(`components/HelpPopover.tsx`·`OneIdHelp.tsx`) · `components/BrandJoinGate.tsx`·`/api/brand-join`
+- 로그인: `components/LoginRequired.tsx`(27곳 교체·AuthGate) · `/api/auth/login-help` + `/reset-password` "로그인 도움"(가입 여부 먼저, 소셜 가입 안내) · 소셜 로그인 콜백 1회 실행 보호(StrictMode) · 복귀 경로 쿼리 유지 · 이메일 인증 후 가입 사이트로 복귀
+- 교차 브랜드 링크: `lib/cross-site.ts`·`components/CrossSiteLink.tsx`·`siteOriginForPath()` (유틸리티 바·HeRo talent-agent·푸터 채널)
+- 공통 데이터: `lib/supabase/taxonomies.ts` label 없으면 value (관심 산업군·직무군 빈 선택지)
+- 푸터: `components/UniverseFooter.tsx` 재작성 (siteId·actions·channels) · MADLeague·RooK 4열 · `scripts/site-check.mjs` 규칙 추가(닫히지 않는 모달·푸터 siteId·유틸리티 바 글자색)
+- MADLeague: 히어로 카피 슬라이드 · 소개 3줄 · 매드리거 등록(하고 싶은 말·멘토 무소속·동의 `2026-10-08.2`) · 헤더 하위 메뉴(매드리거·프로그램) · 마이페이지 "내 동아리 관리" · 동아리 방 카페(`clubs/[slug]/room`) · RooKie·Planner's(`PracticeProgramPage`) · 홈 정비 · 경쟁 PT 문구·CTA · About 정비(Match 칼·Act 움직임·네 자리·프로그램 SSOT `programs-list.ts`·BI 세 원·슬로건·담비) · 문의하기 `?type=` 유형 미리 선택 + "공식 동아리 신청" 유형 · 담비 이미지 `dambe-trophy.webp`·`dambe-football.webp`
+- 브랜드 CLAUDE.md: MADLeague·HeRo·RooK·TenOne·Myverse·SmarComm 외 LoginRequired 교체 브랜드 12개 현재 상태에 기록
+
+---
+
 ## 2026-10-08 (세션 164, 사무실) — 유니버스 6축 점검(Fable) · 보안 긴급 수정
 
 ### 장소·운영

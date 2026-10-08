@@ -1,6 +1,36 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-08 (세션 164 — 유니버스 6축 점검 · 보안 긴급 수정)
+> 마지막 업데이트: 2026-10-08 (세션 165 — 보안 1단계 · One ID SSO · MADLeague 사이트 정비)
+
+---
+
+## 세션 165 (2026-10-08, 사무실) — 보안 1단계 · One ID SSO · 로그인 표준 · MADLeague 사이트 정비
+
+> master 직접 작업, 커밋 40개 → 작업 종료 push 1회. **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **보안 1단계 전부** (점검 README 0~7번): 공개 프로필 이메일 차단 · 포트폴리오 타 브랜드 이력 필터 · `is_tenone_staff()`=`auth_is_staff()` · USING(true) 7개 테이블 잠금 · HeRo 매칭 RLS · 자기 승인 컬럼 보호 트리거 · open redirect(`safeRedirect`) · TIH 덮어쓰기 · scripts 정리 · 핸들 로그인 이메일 노출 — 운영 DB 5건 승인 후 적용·anon 확인
+- **D-1 One ID SSO 복구**: 허브 `auth.tenone.biz`가 일회용 해시 토큰(60초)으로 도메인별 독립 세션 발급 · LoginModal One ID 문구·(?) 안내 · 브랜드 첫 진입 동의 `BrandJoinGate`
+- **로그인**: `LoginRequired` 표준(닫기 가능·다시 열기, §1.2.1 변경, 27곳) · 로그인 도움(가입 여부 먼저·소셜 가입 안내·메일로 비밀번호 설정 링크) · 소셜 로그인 후 원래 페이지 복귀 수리 · 복귀 경로 전수 점검 · 교차 브랜드 링크 404 수리(`CrossSiteLink`)
+- **푸터 4열 규칙**(§1.9.4 개정) · Universe 열 폐지 · 사업자등록번호 숨김 · MADLeague·RooK 적용
+- **MADLeague**: 히어로 카피·소개 · 매드리거 등록(이름 변경·하고 싶은 말·멘토 무소속) · 관심 산업/직무 선택지 수리 · 헤더 하위 메뉴 · 동아리 방(카페) · RooKie·Planner's · 홈 정비 · 경쟁 PT 문구 · 개인 이메일 제거 · About 정비(BI·담비) · 문의 유형 미리 선택
+- `site:check` madleague ✅16 · rook ✅ (👤 외부 작업은 DNS 전환 때)
+
+### 다음 첫 액션
+
+1. **배포 확인** (이번 push로 Vercel 빌드 1회): 빌드 성공 → `npm run site:check -- rook --live` → 브라우저 확인
+   - **One ID 실검증**(로컬에선 불가): `www.rook.co.kr`에서 로그인 → `www.hero.ne.kr` 접속 시 "로그인 정보를 확인하고 있습니다" 후 자동 로그인 · 로그아웃 상태면 그냥 비로그인
+   - BrandJoinGate(처음 들어가는 브랜드에서 동의 1회) · 로그인 도움 메일 수신(가입·미가입·소셜 계정 3가지) · 핸들 로그인 · HeRo TIH 캡차 · 이메일 가입 인증 후 가입 사이트로 복귀
+   - MADLeague 스테이징 `madleague.tenone.biz`: 동아리 방(비직원 계정 잠김·현역 입장) · 문의 유형 미리 선택 · About
+2. **사용자 결정 대기**: 테스트 가상 회원 10명 삭제("삭제"라고 하면 `sql/test-data-madleague-adzone-demo.sql` 정리 블록) · 푸터 Planner's 연결처(MADLeague 프로그램 페이지 vs MyVerse) · MADLeague `ums_sites.is_open` 지금 true — 스테이징 비공개면 false · 헬멧 엠블럼·담비 의상 원본 파일 · D-2~D-7
+3. 남은 점검 항목: `has_brand_admin_access()` members 컬럼 판단 → member_roles(brand) 기준으로 (데이터 계약 2)
+4. 세션 163·164 이월 그대로: 옛 mad_* DROP · **10-14 처리방침**(프로그램 신청·인증서 항목 + 이번 세션 매드리거 등록 '하고 싶은 말') · HeRo·Badak·MADLeap 메뉴 레지스트리·푸터 4열
+
+### 주의
+
+- 로컬 tsc에 이전부터 있던 에러(HeRo company·intra hero/montz/townity/wio 등 implicit any) — `ignoreBuildErrors: true`라 빌드는 통과, 이번 세션 변경과 무관
+- One ID 토큰은 60초 일회용 — 허브(`auth.tenone.biz`) Vercel 도메인 연결 유지 필수
 
 ---
 
