@@ -68,38 +68,26 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            let loginEmail = email;
-
-            // 핸들 로그인: API로 이메일 조회 후 동일한 login() 사용
+            // 핸들 로그인: 서버가 핸들→이메일 확인과 로그인을 함께 처리, 이메일은 브라우저로 오지 않는다.
+            // 받은 세션을 setSession → onAuthStateChange(SIGNED_IN)가 회원 동기화 → 모달 자동 닫힘
             if (loginMode === "handle") {
                 const res = await fetch("/api/auth/handle-login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ handle }),
+                    body: JSON.stringify({ handle, password, captchaToken: captcha.token }),
                 });
-                let body: Record<string, string> = {};
-                try { body = await res.json(); } catch { /* non-JSON response */ }
-                if (!res.ok) {
-                    setError(body.error || "존재하지 않는 핸들입니다.");
-                    setIsSubmitting(false);
-                    return;
-                }
-                loginEmail = body.email ?? "";
-                if (!loginEmail) {
-                    setError("이메일을 찾을 수 없습니다.");
-                    setIsSubmitting(false);
-                    return;
-                }
-                // auth-context login() 재사용 → 모달 자동 닫힘 포함
-                const result = await login(loginEmail, password, captcha.token);
                 captcha.reset();
-                if (!result.success) { setError("핸들 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
+                const body = await res.json().catch(() => ({})) as { error?: string; session?: { access_token: string; refresh_token: string } };
+                const { error: sessErr } = res.ok && body.session
+                    ? await createClient().auth.setSession(body.session)
+                    : { error: new Error(body.error || "핸들 또는 비밀번호가 올바르지 않습니다.") };
+                if (sessErr) { setError(body.error || "핸들 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
                 else publishLoginToHub();
                 setIsSubmitting(false);
                 return;
             }
 
-            const result = await login(loginEmail, password, captcha.token);
+            const result = await login(email, password, captcha.token);
             captcha.reset();
             if (!result.success) { setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
             else publishLoginToHub(); // 독립 도메인이면 허브에도 등록 → 다른 유니버스 사이트에서 다시 로그인 불필요
