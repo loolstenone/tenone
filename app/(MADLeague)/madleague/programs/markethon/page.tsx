@@ -1,54 +1,36 @@
-import Link from 'next/link';
-import { Clock, Zap, Users, ArrowRight } from 'lucide-react';
+import { FileText, Users, Zap, Presentation, Clock, FolderOpen, Network } from 'lucide-react';
+import { ProgramDetailPage } from '@/features/madleague/ProgramDetailPage';
+import { getMadProgram } from '@/features/madleague/programs-list';
 
-export const metadata = { title: '마케톤', description: 'Marketing + Hacking + Marathon — 72시간의 열정' };
+const program = getMadProgram('markethon');
+export const metadata = { title: program.title, description: program.desc };
+
+const STEPS = [
+  { icon: FileText,     title: '브리프 공개',    desc: '금요일 저녁, 과제 브리프가 그 자리에서 공개된다.' },
+  { icon: Users,        title: '즉석 팀 구성',   desc: '전국 동아리 매드리거가 섞여 즉석에서 팀을 꾸린다.' },
+  { icon: Zap,          title: '72시간 논스톱',  desc: '실시간 멘토링을 받으며 잠도 잊고, 생각도 멈추지 않는다.' },
+  { icon: Presentation, title: '최종 발표',      desc: '월요일 아침, 결과물을 발표하고 순위를 가린다.' },
+];
+
+const GETS = [
+  { icon: Clock,      title: '72시간의 결과물',     desc: '한계까지 밀어붙여 만든 전략과 크리에이티브.' },
+  { icon: Network,    title: '전국 매드리거 네트워크', desc: '전국 동아리가 한 공간에 모인다. 권역을 넘은 동료가 생긴다.' },
+  { icon: FolderOpen, title: '포트폴리오',          desc: '브리프부터 발표까지 72시간이 통째로 포트폴리오가 된다.' },
+];
 
 export default function MarkethonPage() {
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,192,0,0.18),transparent_60%)]" aria-hidden />
-        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
-          <div className="text-xs font-bold tracking-widest text-[#FFC000]">MARKETHON</div>
-          <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">72시간의<br />열정</h1>
-          <p className="mt-6 text-2xl sm:text-3xl font-black text-[#FFC000]">
-            Marketing + Hacking + Marathon
-          </p>
-          <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            3일 동안 잠도 잊고, 생각도 멈추지 않고.<br />
-            한계까지 밀어붙이는 매드리거의 시그니처 프로그램.
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { icon: Clock,  title: '72시간',    desc: '금요일 저녁부터 월요일 아침까지. 논스톱.' },
-            { icon: Zap,    title: '해커톤 형식', desc: '브리프 공개 → 즉석 팀 구성 → 실시간 멘토링 → 최종 발표.' },
-            { icon: Users,  title: '크로스 권역', desc: '전국 7개 동아리 매드리거가 한 공간에 모입니다.' },
-          ].map((c) => (
-            <div key={c.title} className="bg-neutral-950 border border-neutral-900 p-12">
-              <c.icon className="h-10 w-10 text-[#FFC000]" />
-              <div className="mt-8 text-3xl font-black">{c.title}</div>
-              <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[#FFC000]">
-        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <div className="text-sm font-bold tracking-widest text-black/60 mb-3">APPLY</div>
-            <div className="text-3xl sm:text-4xl font-black text-black">72시간, 함께 버텨보자</div>
-            <p className="mt-3 text-black/70">매드리거만 참가할 수 있는 시그니처 프로그램.</p>
-          </div>
-          <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
-            매드리거 등록 <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
-    </div>
+    <ProgramDetailPage
+      programKey="markethon"
+      heroExtra={
+        <p className="mt-8 text-2xl sm:text-3xl font-black leading-snug text-[#FFC000]">
+          72시간의 열정
+          <span className="block mt-2 text-lg font-bold text-neutral-400">3일 동안 잠도 잊고, 생각도 멈추지 않고. 한계까지 밀어붙이는 매드리거의 시그니처 프로그램.</span>
+        </p>
+      }
+      steps={STEPS}
+      stepsTitle="금요일 저녁부터 월요일 아침까지"
+      gets={GETS}
+    />
   );
 }

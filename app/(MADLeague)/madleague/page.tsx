@@ -7,6 +7,7 @@ import {
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
 import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
+import { MAD_PROGRAMS } from '@/features/madleague/programs-list';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 export const revalidate = 300; // 5분 캐시
@@ -119,16 +120,9 @@ export default async function Page() {
       <section className="mx-auto max-w-7xl px-6 py-32">
         <SectionHeader eyebrow="PROGRAMS" title={<>실전 프로젝트로<br />경력 같은 신입으로</>} />
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <ProgramCard href="/madleague/programs/competition" title="경쟁 PT" desc="실제 기업 과제에 동아리가 경쟁" featured />
-          <ProgramCard href="/madleague/programs/project" title="PJT" desc="기업의 실전 프로젝트를 통해 현장에서 배우는 인턴 프로그램" />
-          <ProgramCard href="/madleague/programs/markethon" title="마케톤" desc="72시간의 열정 — Marketing + Hacking + Marathon" />
-          <ProgramCard href="/madleague/programs/insight-touring" title="인사이트 투어링" desc="지역 사회 투어를 통한 혁신 제안" />
-          <ProgramCard href="/madleague/programs/im" title="아이디어 무브먼트" desc="나의 아이디어로 문제를 해결한다." />
-          <ProgramCard href="/madleague/programs/hero" title="히어로 프로그램" desc="HeRo와 연계한 커리어 솔루션 — 취업·인턴 연결" />
-          <ProgramCard href="/madleague/programs/dam" title="DAM 파티" desc="Digital Advertising Meeting — 기업-학생 네트워킹 허브." />
-          <ProgramCard href="/madleague/programs/creazy" title="크리에이지" desc="매드리그 국제광고제 출품 프로젝트 — 아이디어를 국제 광고제 출품까지." />
-          <ProgramCard href="/madleague/programs/rookie" title="RooKie" desc="실전 크리에이티브를 훈련하고 실전 프로젝트에도 참여할 기회" />
-          <ProgramCard href="/madleague/programs/planners" title="Planner's" desc="실전 전략 기획을 훈련하고 실전 프로젝트에도 참여할 기회" />
+          {MAD_PROGRAMS.map((p) => (
+            <ProgramCard key={p.href} href={p.href} title={p.title} desc={p.desc} featured={p.featured} />
+          ))}
         </div>
       </section>
 

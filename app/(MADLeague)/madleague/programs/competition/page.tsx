@@ -1,8 +1,9 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { Trophy, Users, Search, Lightbulb, Presentation, ArrowRight, Medal } from 'lucide-react';
+import { Trophy, Users, Search, Lightbulb, Presentation, Medal, Award, FolderOpen } from 'lucide-react';
 import { MAD_PROGRAM_IMAGES, madProgramAsset } from '@/lib/madleague-program-assets';
 import { fetchMadHallRounds, type MadHallRound } from '@/lib/supabase/madleague';
+import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
+import { getMadProgram } from '@/features/madleague/programs-list';
 
 /* 순위 색 — 경쟁 PT는 MAD Crown 없이 순위만 (2026-10-07 결정) */
 const RANK_TONE: Record<number, string> = { 1: 'text-[#FFC000] border-[#FFC000]/40', 2: 'text-neutral-200 border-neutral-500', 3: 'text-[#CD7F32] border-[#CD7F32]/40' };
@@ -48,10 +49,8 @@ function HallRound({ r }: { r: MadHallRound }) {
 
 export const revalidate = 300;
 
-export const metadata = {
-  title: '경쟁 PT — 명예의 전당',
-  description: '실제 기업 과제에 동아리가 경쟁. MADLeague 경쟁PT 명예의 전당.',
-};
+const program = getMadProgram('competition');
+export const metadata = { title: `${program.title} — 명예의 전당`, description: program.desc };
 
 const STEPS = [
   { icon: Search,       title: '클라이언트 RFP',       desc: '실제 기업이 마케팅 과제를 RFP 형식으로 제시한다.' },
@@ -61,6 +60,13 @@ const STEPS = [
   { icon: Presentation, title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표하고 순위를 가린다.' },
 ];
 
+const GETS = [
+  { icon: Trophy,     title: '순위 · 명예의 전당', desc: '본선 결과는 명예의 전당에 영구 기록된다. 제안에서 끝나지 않고 실행까지 이어진다.' },
+  { icon: FolderOpen, title: '포트폴리오 자동 반영', desc: '참가·수상 기록이 매드리거 포트폴리오에 자동으로 쌓인다.' },
+  { icon: Award,      title: '참가 · 수상 인증서',  desc: '회차가 끝나면 본인 화면에서 참가 확인서·수상 확인서를 직접 발급한다.' },
+];
+
+// 인트라 결과 발표 이전의 기록 — 옛 사이트 명예의 전당 (madleague.net/pt)
 const ARCHIVE = [
   {
     year: 2026,
@@ -81,7 +87,6 @@ const ARCHIVE = [
     client: '리제로스',
     desc: '자연친화 스타트업 리제로스에서 개발한 배달, 포장 음식 냉매제에 대한 시장 진출 전략',
     logo: '/logos/madleague/rezerouslogo.png',
-    // 원본 madleague.net/pt 명예의 전당 발표 장면
     gallery: [] as string[],
     awards: [
       { img: '/logos/madleague/25-1gold.png',   label: '1위' },
@@ -121,123 +126,46 @@ const ARCHIVE = [
 export default async function CompetitionPage() {
   const hallRounds = await fetchMadHallRounds();
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-neutral-900">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={MAD_PROGRAM_IMAGES.ptHero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-6 py-32 sm:py-40">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">COMPETITION</div>
-          <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">경쟁 PT</h1>
-          <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            기업의 실전 프로젝트로 경쟁한다.
-          </p>
-          <p className="mt-4 text-sm text-neutral-500">제안에서 끝나는 것이 아니라 실행까지.</p>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section className="mx-auto max-w-7xl px-6 py-32">
-        <div className="text-xs font-bold tracking-widest text-neutral-500 mb-4">PROCESS</div>
-        <h2 className="text-4xl sm:text-5xl font-black mb-16">경쟁PT는 이렇게 진행된다</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {STEPS.map((s, i) => (
-            <div key={s.title} className="bg-neutral-950 border border-neutral-900 p-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-10 w-10 bg-[#EC1D25] flex items-center justify-center text-sm font-black shrink-0">
-                  {i + 1}
+    <ProgramDetailPage
+      programKey="competition"
+      heroImage={MAD_PROGRAM_IMAGES.ptHero}
+      heroExtra={<p className="mt-4 text-sm text-neutral-500">제안에서 끝나는 것이 아니라 실행까지.</p>}
+      steps={STEPS}
+      stepsTitle="경쟁 PT는 이렇게 진행된다"
+      gets={GETS}
+    >
+      <ProgramSection eyebrow="HALL OF FAME" title="명예의 전당">
+        <div className="space-y-32">
+          {hallRounds.map(r => <HallRound key={r.id} r={r} />)}
+          {ARCHIVE.map((item) => (
+            <div key={`${item.year}-${item.round}`}>
+              <div className="text-sm text-neutral-500 font-bold tracking-widest mb-6">{item.year}년 {item.round}</div>
+              <div className="flex flex-col lg:flex-row gap-16 items-start">
+                <div className="lg:w-80 shrink-0">
+                  <div className="h-20 flex items-center">
+                    <Image src={item.logo} alt={item.client} width={200} height={80} className="object-contain object-left max-h-16 w-auto" />
+                  </div>
+                  {item.desc && <p className="mt-6 text-lg text-neutral-400 leading-relaxed">{item.desc}</p>}
                 </div>
-                <s.icon className="h-6 w-6 text-neutral-500" />
+                <div className="flex flex-wrap gap-8 items-end flex-1">
+                  {item.awards.map((award) => (
+                    <div key={award.img} className="flex flex-col items-center gap-3">
+                      <Image src={award.img} alt={award.label} width={180} height={220} className="object-contain w-40 sm:w-44 h-auto" />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="text-xl font-black">{s.title}</div>
-              <div className="mt-3 text-base text-neutral-500 leading-relaxed">{s.desc}</div>
+              {item.gallery.length > 0 && <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-2">
+                {item.gallery.map((id) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={id} src={madProgramAsset('pt', id)} alt={`${item.client} 경쟁 PT`} loading="lazy" className="aspect-[4/3] w-full object-cover bg-neutral-950" />
+                ))}
+              </div>}
+              <div className="mt-16 h-px bg-neutral-900" />
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Archive */}
-      <section className="border-t border-neutral-900">
-        <div className="mx-auto max-w-7xl px-6 py-32">
-          <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-4">HALL OF FAME</div>
-          <h2 className="text-4xl sm:text-6xl font-black mb-24">명예의 전당</h2>
-
-          <div className="space-y-32">
-            {hallRounds.map(r => <HallRound key={r.id} r={r} />)}
-            {ARCHIVE.map((item) => (
-              <div key={`${item.year}-${item.round}`}>
-                {/* 연도 + 클라이언트 헤더 */}
-                <div className="text-sm text-neutral-500 font-bold tracking-widest mb-6">
-                  {item.year}년 {item.round}
-                </div>
-
-                <div className="flex flex-col lg:flex-row gap-16 items-start">
-                  {/* 클라이언트 정보 */}
-                  <div className="lg:w-80 shrink-0">
-                    <div className="h-20 flex items-center">
-                      <Image
-                        src={item.logo}
-                        alt={item.client}
-                        width={200}
-                        height={80}
-                        className="object-contain object-left max-h-16 w-auto"
-                      />
-                    </div>
-                    {item.desc && (
-                      <p className="mt-6 text-lg text-neutral-400 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 수상 배지 */}
-                  <div className="flex flex-wrap gap-8 items-end flex-1">
-                    {item.awards.map((award) => (
-                      <div key={award.img} className="flex flex-col items-center gap-3">
-                        <Image
-                          src={award.img}
-                          alt={award.label}
-                          width={180}
-                          height={220}
-                          className="object-contain w-40 sm:w-44 h-auto"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 발표 장면 */}
-                {item.gallery.length > 0 && <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-2">
-                  {item.gallery.map((id) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={id} src={madProgramAsset('pt', id)} alt={`${item.client} 경쟁 PT`} loading="lazy" className="aspect-[4/3] w-full object-cover bg-neutral-950" />
-                  ))}
-                </div>}
-
-                <div className="mt-16 h-px bg-neutral-900" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-[#EC1D25]">
-        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <div className="text-sm font-bold tracking-widest text-white/70 mb-3">FOR CORPORATE</div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">과제 기업으로 참여하시겠습니까?</h2>
-            <p className="mt-3 text-white/80 text-lg">전국 대학생의 크리에이티브를 기업의 마케팅 과제에 연결합니다.</p>
-          </div>
-          <Link
-            href="/madleague/contact?type=corporate"
-            className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition shrink-0"
-          >
-            과제 기업으로 문의하기 <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
-    </div>
+      </ProgramSection>
+    </ProgramDetailPage>
   );
 }

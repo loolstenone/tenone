@@ -1,50 +1,31 @@
-import Link from 'next/link';
-import { Briefcase, Users, Target } from 'lucide-react';
-import { ArrowRight } from 'lucide-react';
+import { Briefcase, Users, Target, PackageCheck, MessageSquare, FolderOpen } from 'lucide-react';
+import { ProgramDetailPage } from '@/features/madleague/ProgramDetailPage';
+import { getMadProgram } from '@/features/madleague/programs-list';
 
-export const metadata = { title: 'PJT', description: 'MADLeague 실전 프로젝트 OJT' };
+const program = getMadProgram('project');
+export const metadata = { title: `${program.title} — Project Job Training`, description: program.desc };
+
+const STEPS = [
+  { icon: Briefcase,   title: '기업 과제 접수',  desc: '기업이 실제로 필요로 하는 마케팅 과제를 가져온다. 기업 참여는 문의하기로.' },
+  { icon: Users,       title: '크로스 팀 구성',  desc: '동아리·권역을 넘어 다양한 배경의 매드리거로 팀을 꾸린다.' },
+  { icon: Target,      title: '현장 수행 — OJT', desc: '기업 담당자와 함께 과제를 수행한다. 현장에서 배우고, 현장에서 성장한다.' },
+  { icon: PackageCheck, title: '결과 납품 · 피드백', desc: '과제를 완수하고 결과를 납품한다. 기업 피드백이 성장 지표.' },
+];
+
+const GETS = [
+  { icon: Briefcase,     title: '실무 경험',   desc: '과제가 아니라 기업이 실제로 쓰는 결과물을 만든 경험.' },
+  { icon: MessageSquare, title: '기업 피드백', desc: '현업 담당자의 피드백이 다음 성장의 기준이 된다.' },
+  { icon: FolderOpen,    title: '포트폴리오',  desc: '납품한 결과물과 기업명이 포트폴리오에 남는다.' },
+];
 
 export default function ProjectPage() {
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
-        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">PJT</div>
-          <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">
-            Project Job<br />Training
-          </h1>
-          <p className="mt-10 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            기업의 실전 프로젝트를 통해<br />
-            현장에서 배우는 인턴 프로그램.
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { icon: Briefcase, title: '실제 과제', desc: '기업이 실제로 필요로 하는 마케팅 과제를 진행합니다.' },
-            { icon: Users,     title: '크로스 팀', desc: '동아리·권역을 넘어 다양한 배경의 크루로 구성됩니다.' },
-            { icon: Target,    title: '결과 책임', desc: '과제를 완수하고 결과를 납품합니다. 기업 피드백이 성장 지표.' },
-          ].map((c) => (
-            <div key={c.title} className="bg-neutral-950 border border-neutral-900 p-12">
-              <c.icon className="h-10 w-10 text-[#EC1D25]" />
-              <div className="mt-8 text-3xl font-black">{c.title}</div>
-              <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[#EC1D25]">
-        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="text-3xl sm:text-4xl font-black text-white">PJT 참여 기업 모집</div>
-          <Link href="/madleague/contact?type=corporate" className="inline-flex items-center gap-2 bg-black text-white font-bold px-10 py-5 text-lg">
-            문의하기 <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
-    </div>
+    <ProgramDetailPage
+      programKey="project"
+      heroExtra={<p className="mt-4 text-sm text-neutral-500">Project Job Training — 현장에서 배우고, 현장에서 성장한다.</p>}
+      steps={STEPS}
+      stepsTitle="과제에서 납품까지"
+      gets={GETS}
+    />
   );
 }

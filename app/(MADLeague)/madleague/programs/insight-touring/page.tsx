@@ -1,53 +1,31 @@
-import Link from 'next/link';
-import { MapPin, Eye, Lightbulb, ArrowRight } from 'lucide-react';
+import { MapPin, Eye, Lightbulb, Presentation, Compass, FileText, FolderOpen } from 'lucide-react';
+import { ProgramDetailPage } from '@/features/madleague/ProgramDetailPage';
+import { getMadProgram } from '@/features/madleague/programs-list';
 
-export const metadata = { title: '인사이트 투어링', description: '지역 사회 투어를 통한 혁신 제안' };
+const program = getMadProgram('insight-touring');
+export const metadata = { title: program.title, description: program.desc };
+
+const STEPS = [
+  { icon: MapPin,       title: '지역 투어',      desc: '지역 산업·문화·거점을 현장에서 직접 탐구한다.' },
+  { icon: Eye,          title: '관찰 · 인터뷰',  desc: '대표·실무자 인터뷰, 소비자 관찰, 경쟁사 답사.' },
+  { icon: Lightbulb,    title: '혁신 제안',      desc: '학생의 시선으로 재해석한 전략 제안서를 쓴다.' },
+  { icon: Presentation, title: '현장 발표',      desc: '지역·기업 앞에서 제안을 발표하고 피드백을 받는다.' },
+];
+
+const GETS = [
+  { icon: Compass,    title: '현장 인사이트',  desc: '책상이 아니라 현장에서 얻은 통찰. 당신의 통찰이 지역을 바꾼다.' },
+  { icon: FileText,   title: '전략 제안서',   desc: '지역·기업에 실제로 전달되는 제안서 한 편.' },
+  { icon: FolderOpen, title: '포트폴리오',    desc: '투어부터 발표까지 한 사이클이 포트폴리오로 남는다.' },
+];
 
 export default function InsightTouringPage() {
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
-        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">INSIGHT TOURING</div>
-          <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">
-            당신의 통찰이<br />지역을 바꾼다
-          </h1>
-          <p className="mt-10 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            지역과 기업을 직접 방문하고 현장의 목소리를 듣습니다.<br />
-            그 후 매드리거만의 시선으로 혁신 전략을 제안하는 프로그램.
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { icon: MapPin,    title: '지역 투어',    desc: '지역 산업·문화·거점을 현장에서 직접 탐구.' },
-            { icon: Eye,       title: '관찰 · 인터뷰', desc: '대표·실무자 인터뷰, 소비자 관찰, 경쟁사 답사.' },
-            { icon: Lightbulb, title: '혁신 제안',    desc: '학생의 시선으로 재해석한 전략 제안서 제출.' },
-          ].map((c) => (
-            <div key={c.title} className="bg-neutral-950 border border-neutral-900 p-12">
-              <c.icon className="h-10 w-10 text-[#EC1D25]" />
-              <div className="mt-8 text-3xl font-black">{c.title}</div>
-              <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[#EC1D25]">
-        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <div className="text-sm font-bold tracking-widest text-white/70 mb-3">APPLY</div>
-            <div className="text-3xl sm:text-4xl font-black text-white">현장에서 배우는 성장</div>
-            <p className="mt-3 text-white/80">매드리거로 지원하고 인사이트 투어링에 참여하세요.</p>
-          </div>
-          <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
-            매드리거 등록 <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
-    </div>
+    <ProgramDetailPage
+      programKey="insight-touring"
+      heroExtra={<p className="mt-4 text-sm text-neutral-500">지역과 기업을 직접 방문하고 현장의 목소리를 듣는다. 그 후 매드리거만의 시선으로 혁신 전략을 제안한다.</p>}
+      steps={STEPS}
+      stepsTitle="투어에서 제안까지"
+      gets={GETS}
+    />
   );
 }

@@ -39,6 +39,9 @@ const nextConfig: NextConfig = {
       { source: '/madleague/idea-movement', destination: '/madleague/programs/im', permanent: true },
       { source: '/madleague/idea-movement/:path*', destination: '/madleague/programs/im/:path*', permanent: true },
       { source: '/madleague/leaguer', destination: '/madleague/member', permanent: true },
+      // 프로그램 주소 체계 통일 (2026-10-08) — 히어로 프로그램은 /programs/ 아래로, IM 에센스는 IM 페이지 섹션으로 흡수
+      { source: '/madleague/hero', destination: '/madleague/programs/hero', permanent: true },
+      { source: '/madleague/programs/im/essence', destination: '/madleague/programs/im#essence', permanent: true },
       // Wiki 강제 이동 — 모든 /intra/wiki/* → wiki.tenone.biz (SSOT)
       { source: '/intra/wiki', destination: 'https://wiki.tenone.biz', permanent: true },
       { source: '/intra/wiki/:path*', destination: 'https://wiki.tenone.biz/:path*', permanent: true },

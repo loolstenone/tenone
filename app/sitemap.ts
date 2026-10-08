@@ -31,7 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${baseUrl}/madleague/program`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
         { url: `${baseUrl}/madleague/idea-movement`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
         { url: `${baseUrl}/madleague/madzine`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
-        { url: `${baseUrl}/madleague/hero`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+        { url: `${baseUrl}/madleague/programs/hero`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
         { url: `${baseUrl}/madleague/certificate`, lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
         { url: `${baseUrl}/madleague/pt`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
 

@@ -1,62 +1,55 @@
-import Link from 'next/link';
-import { Briefcase, UserCheck, ArrowRight } from 'lucide-react';
+import { FileText, MessageCircle, Briefcase, Compass, UserCheck, FolderOpen } from 'lucide-react';
+import { HeroForm } from './HeroForm';
+import { MAD_PROGRAM_IMAGES } from '@/lib/madleague-program-assets';
+import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
+import { getMadProgram } from '@/features/madleague/programs-list';
 
-export const metadata = { title: '히어로 프로그램', description: 'HeRo와 연계한 커리어 솔루션 — 취업·인턴 연결' };
+// 옛 주소 /madleague/hero 는 next.config 리다이렉트 (2026-10-08 사용자 결정 — 프로그램 주소 체계 통일)
+const program = getMadProgram('hero');
+export const metadata = { title: program.title, description: program.desc };
+
+const STEPS = [
+  { icon: FileText,      title: '신청',            desc: '아래 신청서를 작성한다. 매드리거라면 로그인 후 신청 — 활동 이력이 자동 연동되어 이력서·포트폴리오를 따로 준비하지 않아도 된다.' },
+  { icon: MessageCircle, title: '커리어 상담',       desc: '진로에 대한 고민, 커리어 관리에 대한 상담을 받는다. 단순 취업 상담이 아니라 활동 이력을 자산으로 바꾸는 설계.' },
+  { icon: Briefcase,     title: '인턴 · 채용 연결',  desc: 'HeRo 파트너 기업의 인턴십에 우선 지원하고, 경쟁 PT 수상·프로젝트 성과를 가진 매드리거는 기업에 직접 매칭된다.' },
+];
+
+const GETS = [
+  { icon: Compass,    title: '진로 설계',      desc: '어디로 갈지부터 함께 정한다. 현업 네트워크가 기회로 이어지는 커리어 솔루션.' },
+  { icon: UserCheck,  title: '인턴 · 채용 기회', desc: 'HeRo 파트너 기업 인턴십 우선 지원, 성과 보유 매드리거 직접 매칭.' },
+  { icon: FolderOpen, title: '활동 이력이 곧 서류', desc: '매드리그에서 쌓은 활동이 그대로 증명이 된다. 포트폴리오가 곧 서류다.' },
+];
 
 export default function HeroProgramPage() {
   return (
-    <div className="bg-[var(--mad-black,#000)] text-white">
-      <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
-        <div className="relative mx-auto max-w-5xl px-6 py-32 sm:py-40">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">HERO PROGRAM</div>
-          <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">
-            히어로 프로그램
-          </h1>
-          <p className="mt-10 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            MADLeague × HeRo 커리어 연결 프로그램.<br />
-            실전 경험을 쌓은 매드리거가 인재 채용·인턴 연결까지 이어지는 커리어 솔루션.
-          </p>
-        </div>
+    <ProgramDetailPage
+      programKey="hero"
+      heroExtra={<p className="mt-4 text-lg text-[#FFC000] font-bold">진로에 대한 고민, 커리어 관리에 대한 상담을 제공합니다.</p>}
+      steps={STEPS}
+      stepsTitle="신청부터 연결까지"
+      gets={GETS}
+      cta={{ primary: { label: '신청서 작성', href: '#apply' } }}
+    >
+      {/* 원본 madleague.net/hero_prgram 키비주얼 */}
+      <section className="bg-white border-t border-neutral-900">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={MAD_PROGRAM_IMAGES.heroWide} alt="HeRo — We believe in your talent" className="mx-auto hidden w-full max-w-6xl sm:block" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={MAD_PROGRAM_IMAGES.heroTall} alt="HeRo — We believe in your talent" className="mx-auto block w-full sm:hidden" />
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-32">
-        <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">HOW IT WORKS</div>
-        <h2 className="text-4xl sm:text-5xl font-black mb-16">두 가지 연결</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            {
-              icon: Briefcase,
-              title: '인턴 연결',
-              desc: '매드리그 활동을 증명하고 HeRo 파트너 기업의 인턴십에 우선 지원. 포트폴리오가 곧 서류다.',
-            },
-            {
-              icon: UserCheck,
-              title: '채용 연결',
-              desc: '경쟁PT 수상·프로젝트 성과를 보유한 매드리거를 HeRo가 파트너 기업에 직접 매칭한다.',
-            },
-          ].map((c) => (
-            <div key={c.title} className="bg-neutral-950 border border-neutral-900 p-12">
-              <c.icon className="h-10 w-10 text-[#EC1D25]" />
-              <div className="mt-8 text-3xl font-black">{c.title}</div>
-              <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[#EC1D25]">
-        <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <div className="text-sm font-bold tracking-widest text-white/70 mb-3">APPLY</div>
-            <div className="text-3xl sm:text-4xl font-black text-white">지금 매드리거로 시작하자</div>
-            <p className="mt-3 text-white/80">경험이 커리어가 되는 길 — 히어로 프로그램이 연결한다.</p>
+      <ProgramSection id="apply" eyebrow="APPLY" title="HeRo 프로그램 신청" tone="dark">
+        <div className="max-w-3xl">
+          <div className="bg-black border border-neutral-900 p-8 mb-8">
+            <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-2">매드리거 혜택</div>
+            <p className="text-sm text-neutral-300 leading-relaxed">
+              이미 MADLeague 매드리거라면, 로그인 후 신청하시면 활동 이력이 자동 연동됩니다.
+              이력서·포트폴리오를 별도로 준비하지 않아도 됩니다.
+            </p>
           </div>
-          <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
-            매드리거 등록 <ArrowRight className="h-5 w-5" />
-          </Link>
+          <HeroForm />
         </div>
-      </section>
-    </div>
+      </ProgramSection>
+    </ProgramDetailPage>
   );
 }
