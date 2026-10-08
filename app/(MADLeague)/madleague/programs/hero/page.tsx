@@ -53,7 +53,7 @@ export default function HeroProgramPage() {
             <p className="mt-3 text-white/80">경험이 커리어가 되는 길 — 히어로 프로그램이 연결한다.</p>
           </div>
           <Link href="/madleague/apply" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition">
-            지원하기 <ArrowRight className="h-5 w-5" />
+            매드리거 등록 <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
       </section>

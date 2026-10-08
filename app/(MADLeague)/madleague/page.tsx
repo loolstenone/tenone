@@ -43,7 +43,7 @@ export default async function Page() {
               href="/madleague/apply"
               className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-8 py-4 transition"
             >
-              지원하기 <ArrowRight className="h-4 w-4" />
+              매드리거 등록 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/madleague/about"

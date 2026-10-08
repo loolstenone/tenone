@@ -30,6 +30,7 @@ function formatPhone(value: string): string {
 }
 
 export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_FALLBACK], jobFunctions = [...JOB_FUNCTIONS_FALLBACK] }: Props) {
+  const [loginOpen, setLoginOpen] = useState(true);
   const { user, isAuthenticated, isLoading } = useAuth();
   const captcha = useCaptcha();
   const [submitting, setSubmitting] = useState(false);
@@ -111,8 +112,13 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
   if (!isAuthenticated || !user) {
     return (
       <div className="border border-neutral-800 bg-neutral-950 p-12 text-center">
-        <p className="text-sm text-neutral-400">로그인 후 등록 신청할 수 있습니다.</p>
-        <LoginModal isOpen={true} onClose={() => {}} accentColor="#EC1D25" />
+        <p className="text-sm text-neutral-400">로그인 후 매드리거 등록을 신청할 수 있습니다.</p>
+        <button type="button" onClick={() => setLoginOpen(true)}
+          className="mt-6 inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-6 py-3 transition">
+          로그인하고 매드리거 등록
+        </button>
+        {/* X·바깥 클릭으로 닫을 수 있게 — 닫으면 위 버튼으로 다시 연다 */}
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#EC1D25" />
       </div>
     );
   }

@@ -29,7 +29,7 @@ export default async function MemberPage() {
               로그인 <ArrowRight className="h-4 w-4" />
             </MadLoginButton>
             <Link href="/madleague/apply" className="inline-flex items-center gap-2 border border-neutral-600 hover:border-white text-white font-bold px-8 py-4 transition">
-              지원하기
+              매드리거 등록
             </Link>
           </div>
         </div>

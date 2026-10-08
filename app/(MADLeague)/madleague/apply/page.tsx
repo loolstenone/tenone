@@ -5,7 +5,7 @@ import { ApplyForm } from './ApplyForm';
 export const revalidate = 300;
 
 export const metadata = {
-  title: '지원하기',
+  title: '매드리거 등록',
   description: 'MADLeague 공식 동아리 지원',
 };
 

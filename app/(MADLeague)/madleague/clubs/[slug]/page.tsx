@@ -207,14 +207,14 @@ export default async function ClubDetailPage({ params }: PageProps) {
       <section style={{ backgroundColor: accent }}>
         <div className="mx-auto max-w-7xl px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <div className="text-sm font-bold tracking-widest text-white/80">{club.name}에 지원하기</div>
+            <div className="text-sm font-bold tracking-widest text-white/80">{club.name} 매드리거 등록</div>
             <div className="mt-2 text-2xl sm:text-3xl font-black text-white">{club.region} 거점 동아리 합류</div>
           </div>
           <Link
             href={`/madleague/apply?club=${club.slug}`}
             className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 transition"
           >
-            지원하기 <ArrowRight className="h-4 w-4" />
+            매드리거 등록 <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
