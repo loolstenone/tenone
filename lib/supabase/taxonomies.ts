@@ -23,19 +23,24 @@ function getClient() {
   );
 }
 
+/** 표시 이름 = label(별칭)이 있으면 label, 없으면 value. 운영 DB는 이름이 value에만 있고 label은 비어 있다
+ *  (label만 읽어서 매드리거 등록·프로필의 관심 산업군·직무군 선택지가 빈 칸으로 나오던 문제, 2026-10-08) */
+const displayName = (r: { value: string | null; label: string | null }) => (r.label?.trim() || r.value?.trim() || '');
+
 // ── 단일 kind 조회 ─────────────────────────────────────────────────
 
 export async function getTaxonomies(kind: TaxonomyKind): Promise<string[]> {
   const supabase = getClient();
   const { data, error } = await supabase
     .from('taxonomies')
-    .select('label')
+    .select('value, label')
     .eq('kind', kind)
     .eq('is_active', true)
     .order('sort_order');
 
   if (error || !data?.length) return getFallback(kind);
-  return data.map((r) => r.label);
+  const names = data.map(displayName).filter(Boolean);
+  return names.length ? names : getFallback(kind);
 }
 
 // ── 전체 조회 (kind → labels[]) ────────────────────────────────────
@@ -44,7 +49,7 @@ export async function getAllTaxonomies(): Promise<Record<TaxonomyKind, string[]>
   const supabase = getClient();
   const { data, error } = await supabase
     .from('taxonomies')
-    .select('kind, label, sort_order')
+    .select('kind, value, label, sort_order')
     .eq('is_active', true)
     .order('sort_order');
 
@@ -63,8 +68,9 @@ export async function getAllTaxonomies(): Promise<Record<TaxonomyKind, string[]>
   };
 
   for (const row of data) {
-    if (row.kind in result) {
-      result[row.kind as TaxonomyKind].push(row.label);
+    const name = displayName(row);
+    if (name && row.kind in result) {
+      result[row.kind as TaxonomyKind].push(name);
     }
   }
 
