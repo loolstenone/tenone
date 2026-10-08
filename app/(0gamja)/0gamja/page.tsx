@@ -392,7 +392,7 @@ export default function OgamjaHome() {
       <section className="py-16 px-6">
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-10">
-            <h2 className="text-xl font-bold mb-2">Ten:One Universe</h2>
+            <h2 className="text-xl font-bold mb-2">Ten:One™ Universe</h2>
             <p className="text-neutral-500 text-sm">공감자가 연결하는 따뜻한 생태계</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

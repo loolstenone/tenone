@@ -403,7 +403,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             <div className="mx-auto max-w-2xl space-y-8">
                                 <section>
                                     <div className="mb-3 flex items-center gap-2">
-                                        <span className="text-xs font-bold tracking-widest text-white/40 uppercase">{config.siteName ?? "사이트"} 검색결과</span>
+                                        <span className="text-xs font-bold tracking-wider text-white/40">{config.siteName ?? "사이트"} 검색결과</span>
                                         {siteResults.length > 0 && <span className="text-[10px] text-white/25">{siteResults.length}건</span>}
                                     </div>
                                     {siteResults.length === 0 ? (
@@ -428,7 +428,8 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                 </section>
                                 <section>
                                     <div className="mb-3 flex items-center gap-2">
-                                        <span className="text-xs font-bold tracking-widest text-white/40 uppercase">Ten:One Universe</span>
+                                        {/* 브랜드 표기는 그대로 — 대문자 변환·™ 생략 금지 */}
+                                        <span className="text-xs font-bold tracking-wider text-white/40">Ten:One™ Universe</span>
                                         {universeResults.length > 0 && <span className="text-[10px] text-white/25">{universeResults.length}건</span>}
                                     </div>
                                     {universeResults.length === 0 ? (

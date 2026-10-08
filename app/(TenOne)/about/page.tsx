@@ -301,7 +301,7 @@ function AboutContent() {
                     {/* Flywheel */}
                     <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                         <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Ten:One™ Flywheel</p>
+                            <p className="text-xs tracking-[0.3em] tn-text-sub mb-4">Ten:One™ Flywheel</p>
                             <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 실행은 연결을 가속하고, <span className="font-bold">연결은 더 많은 기회를 만든다.</span>
                             </h2>

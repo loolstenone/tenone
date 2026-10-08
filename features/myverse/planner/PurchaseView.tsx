@@ -87,7 +87,7 @@ export function PurchaseView() {
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <p className="text-xs uppercase tracking-widest text-[#6366F1] mb-3">Ten:One™</p>
+                        <p className="text-xs tracking-widest text-[#6366F1] mb-3">Ten:One™</p>
                         <h1 className="font-serif text-4xl md:text-5xl text-neutral-900 leading-tight">
                             Planner&apos;s Planner AI
                         </h1>

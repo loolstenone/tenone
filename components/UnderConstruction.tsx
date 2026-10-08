@@ -22,7 +22,7 @@ export default function UnderConstruction({
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5">
           <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
-          <span className="text-[11px] font-medium tracking-widest text-white/40 uppercase">Ten:One Universe</span>
+          <span className="text-[11px] font-medium tracking-widest text-white/40">Ten:One™ Universe</span>
         </div>
 
         <h1 className="mb-4 text-5xl font-bold tracking-tight text-white sm:text-7xl">

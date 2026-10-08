@@ -96,7 +96,7 @@ export default function CardPage() {
                     <div key={card.last4} className="bg-neutral-900 text-white p-5 rounded-lg">
                         <div className="flex items-center justify-between mb-4">
                             <CreditCard className="h-6 w-6 text-neutral-400" />
-                            <span className="text-xs text-neutral-400">TEN:ONE Corp</span>
+                            <span className="text-xs text-neutral-400">Ten:One™ Corp</span>
                         </div>
                         <p className="text-lg font-mono tracking-wider mb-1">•••• •••• •••• {card.last4}</p>
                         <p className="text-xs text-neutral-400 mb-3">{card.holder}</p>

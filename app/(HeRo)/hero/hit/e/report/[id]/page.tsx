@@ -337,7 +337,7 @@ export default function HitEReportPage() {
           <div className="text-center">
             <Image src="/hero-logo-black-wide.png" alt="HeRo" width={400} height={200} className="w-80 mx-auto opacity-[0.06]" />
             <p className="text-sm text-neutral-300 mt-10 tracking-widest uppercase">HeRo Integrated Test</p>
-            <p className="text-xs text-neutral-300 mt-2">Ten:One Universe</p>
+            <p className="text-xs text-neutral-300 mt-2">Ten:One™ Universe</p>
           </div>
         </div>
       </div>

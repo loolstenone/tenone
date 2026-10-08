@@ -341,7 +341,7 @@ export default function ChangeUpHomePage() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ten:One Universe</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ten:One™ Universe</h2>
             <p className="text-neutral-500">ChangeUp이 연결하는 창업 생태계</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
