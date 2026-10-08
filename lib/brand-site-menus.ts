@@ -83,6 +83,8 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                     { label: "댐 파티", path: "/madleague/programs/dam" },
                     { label: "아이디어 무브먼트", path: "/madleague/programs/im" },
                     { label: "히어로", path: "/madleague/hero" },
+                    { label: "RooKie", path: "/madleague/programs/rookie" },
+                    { label: "Planner's", path: "/madleague/programs/planners" },
                     { label: "전체 프로그램", path: "/madleague/programs" },
                 ],
             },

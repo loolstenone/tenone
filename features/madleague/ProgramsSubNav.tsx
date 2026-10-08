@@ -11,6 +11,8 @@ const PROGRAMS = [
   { name: '댐 파티',          href: '/madleague/programs/dam' },
   { name: '아이디어 무브먼트', href: '/madleague/programs/im' },
   { name: '히어로',           href: '/madleague/hero' },
+  { name: 'RooKie',          href: '/madleague/programs/rookie' },
+  { name: "Planner's",       href: '/madleague/programs/planners' },
   { name: 'PJT',             href: '/madleague/programs/project' },
   { name: '마케톤',           href: '/madleague/programs/markethon' },
   { name: '인사이트 투어링',   href: '/madleague/programs/insight-touring' },

@@ -2,4 +2,6 @@
 export const MAD_FORM_PROGRAMS: Record<string, string> = {
     creazy: "크리에이지 (/madleague/programs/creazy)",
     dam: "댐 파티 (/madleague/programs/dam)",
+    rookie: "RooKie (/madleague/programs/rookie)",
+    planners: "Planner's (/madleague/programs/planners)",
 };

@@ -5,14 +5,14 @@ import { ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: '프로그램',
-  description: 'MADLeague 7가지 실전 무대',
+  description: "MADLeague 실전 무대 — 경쟁 PT부터 RooKie·Planner's까지",
 };
 
 const programs = [
   {
     href: '/madleague/programs/competition',
     title: '경쟁 PT',
-    desc: '실제 기업 과제에 동아리가 경쟁한다. MAD Crown을 향해.',
+    desc: '실제 기업 과제에 동아리가 경쟁한다.',
     featured: true,
   },
   {
@@ -45,6 +45,21 @@ const programs = [
     title: 'DAM 파티',
     desc: 'Digital Advertising Meeting — 기업-학생 네트워킹 허브.',
   },
+  {
+    href: '/madleague/programs/creazy',
+    title: '크리에이지',
+    desc: '매드리그 국제광고제 출품 프로젝트 — 아이디어를 국제 광고제 출품까지.',
+  },
+  {
+    href: '/madleague/programs/rookie',
+    title: 'RooKie',
+    desc: '실전 크리에이티브를 훈련하고 실전 프로젝트에도 참여할 기회.',
+  },
+  {
+    href: '/madleague/programs/planners',
+    title: "Planner's",
+    desc: '실전 전략 기획을 훈련하고 실전 프로젝트에도 참여할 기회.',
+  },
 ];
 
 export default function ProgramsPage() {
@@ -54,10 +69,10 @@ export default function ProgramsPage() {
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">PROGRAMS</div>
           <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
-            7가지 실전 무대
+            {programs.length}가지 실전 무대
           </h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
-            MADLeague는 학생이 실전을 경험할 수 있는 7가지 프로그램을 운영한다.
+            MADLeague는 학생이 실전을 경험할 수 있는 {programs.length}가지 프로그램을 운영한다.
             각 프로그램마다 방식은 다르지만, 결국 하나를 남긴다 — <span className="text-white">진짜 경험</span>.
           </p>
         </div>
