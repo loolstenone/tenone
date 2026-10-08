@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, ArrowRight } from 'lucide-react';
+import { MapPin, ArrowRight, DoorOpen } from 'lucide-react';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
 
 export const revalidate = 300;
@@ -33,9 +33,8 @@ export default async function ClubsPage() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {clubs.map((club) => (
-            <Link
+            <div
               key={club.slug}
-              href={`/madleague/clubs/${club.slug}`}
               className="group relative bg-neutral-950 border border-neutral-900 hover:border-[#EC1D25] transition p-8"
             >
               {club.logo_url ? (
@@ -55,10 +54,18 @@ export default async function ClubsPage() {
                   {club.description}
                 </p>
               )}
-              <div className="mt-10 flex items-center gap-2 text-base font-bold text-neutral-400 group-hover:text-[#EC1D25] transition">
-                동아리 상세 <ArrowRight className="h-4 w-4" />
+              {/* 소개(누구나) · 동아리 방(소속 매드리거·담당 멘토·관리자 — 자격은 방에서 확인) */}
+              <div className="mt-10 flex flex-wrap items-center gap-3">
+                <Link href={`/madleague/clubs/${club.slug}`}
+                  className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white px-4 py-2.5 text-sm font-bold text-neutral-300 hover:text-white transition">
+                  동아리 소개 <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href={`/madleague/clubs/${club.slug}/room`}
+                  className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] px-4 py-2.5 text-sm font-bold text-white transition">
+                  <DoorOpen className="h-4 w-4" /> 동아리 방 입장
+                </Link>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
