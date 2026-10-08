@@ -8,7 +8,8 @@
 
 - [x] `npm run site:check` + CLAUDE.md §2.5 원스톱 체크리스트 · 파비콘 404 4개 복원 · HeRo 공개
 - [x] 인트라 메뉴·목차 비직원 비전달 (서버 레이아웃 + intra-gate)
-- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌) + 푸터 4열 이행
+- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌) + 푸터 4열 이행 + 사이트 검색 자동 연결
+- [x] 유니버스 검색 복구 (메뉴·게시판·브랜드 콘텐츠·유니버스, 회원 검색 제거) · Ten:One™ 표기 규칙 — 세션 165
 - [x] 로그인 필요 화면 LoginRequired 표준(닫기 가능) 27곳 · 푸터 4열 규칙(Universe 열 폐지·사업자등록번호 숨김) · 로그인 도움(아이디·비밀번호 찾기) · 교차 브랜드 링크 CrossSiteLink — 세션 165
 - [ ] 실험·보관 독립 도메인 Turnstile 등록 여부 · 위젯 10개 초과 대비
 

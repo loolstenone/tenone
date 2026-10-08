@@ -29,6 +29,8 @@
 - 푸터: `components/UniverseFooter.tsx` 재작성 (siteId·actions·channels) · MADLeague·RooK 4열 · `scripts/site-check.mjs` 규칙 추가(닫히지 않는 모달·푸터 siteId·유틸리티 바 글자색)
 - MADLeague: 히어로 카피 슬라이드 · 소개 3줄 · 매드리거 등록(하고 싶은 말·멘토 무소속·동의 `2026-10-08.2`) · 헤더 하위 메뉴(매드리거·프로그램) · 마이페이지 "내 동아리 관리" · 동아리 방 카페(`clubs/[slug]/room`) · RooKie·Planner's(`PracticeProgramPage`) · 홈 정비 · 경쟁 PT 문구·CTA · About 정비(Match 칼·Act 움직임·네 자리·프로그램 SSOT `programs-list.ts`·BI 세 원·슬로건·담비) · 문의하기 `?type=` 유형 미리 선택 + "공식 동아리 신청" 유형 · 담비 이미지 `dambe-trophy.webp`·`dambe-football.webp`
 - 브랜드 CLAUDE.md: MADLeague·HeRo·RooK·TenOne·Myverse·SmarComm 외 LoginRequired 교체 브랜드 12개 현재 상태에 기록
+- 검색: `app/api/search/route.ts` 재작성 — 이 사이트(메뉴 레지스트리·board 원천 ums_posts 공개 글·MADLeague MADzine/동아리/프로그램·program_rounds 창구) + 유니버스(ums_sites.slug, is_open) · 회원 검색 제거 · 검색어 sanitize · `UniverseUtilityBar` 결과 제목 uppercase 제거
+- 브랜드 표기 (사용자: "Ten:One™은 브랜드 요소이기 때문에 변질되어서는 안 된다"): ™ 누락·uppercase 10곳 수정 · CLAUDE.md 부록 B 규칙
 
 ---
 

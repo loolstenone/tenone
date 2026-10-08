@@ -16,6 +16,7 @@
 - **푸터 4열 규칙**(§1.9.4 개정) · Universe 열 폐지 · 사업자등록번호 숨김 · MADLeague·RooK 적용
 - **MADLeague**: 히어로 카피·소개 · 매드리거 등록(이름 변경·하고 싶은 말·멘토 무소속) · 관심 산업/직무 선택지 수리 · 헤더 하위 메뉴 · 동아리 방(카페) · RooKie·Planner's · 홈 정비 · 경쟁 PT 문구 · 개인 이메일 제거 · About 정비(BI·담비) · 문의 유형 미리 선택
 - `site:check` madleague ✅16 · rook ✅ (👤 외부 작업은 DNS 전환 때)
+- **검색 복구** (작업 종료 후 추가): `/api/search` — 메뉴·통합 게시판 글(ums_posts)·MADzine·동아리·프로그램·회차 · 유니버스 브랜드 · 회원 검색 제거(개인정보) · `Ten:One™` 표기 변형 금지(uppercase·™ 누락 10곳, CLAUDE.md 부록 B)
 
 ### 다음 첫 액션
 
@@ -24,8 +25,9 @@
    - BrandJoinGate(처음 들어가는 브랜드에서 동의 1회) · 로그인 도움 메일 수신(가입·미가입·소셜 계정 3가지) · 핸들 로그인 · HeRo TIH 캡차 · 이메일 가입 인증 후 가입 사이트로 복귀
    - MADLeague 스테이징 `madleague.tenone.biz`: 동아리 방(비직원 계정 잠김·현역 입장) · 문의 유형 미리 선택 · About
 2. **사용자 결정 대기**: 테스트 가상 회원 10명 삭제("삭제"라고 하면 `sql/test-data-madleague-adzone-demo.sql` 정리 블록) · 푸터 Planner's 연결처(MADLeague 프로그램 페이지 vs MyVerse) · MADLeague `ums_sites.is_open` 지금 true — 스테이징 비공개면 false · 헬멧 엠블럼·담비 의상 원본 파일 · D-2~D-7
-3. 남은 점검 항목: `has_brand_admin_access()` members 컬럼 판단 → member_roles(brand) 기준으로 (데이터 계약 2)
-4. 세션 163·164 이월 그대로: 옛 mad_* DROP · **10-14 처리방침**(프로그램 신청·인증서 항목 + 이번 세션 매드리거 등록 '하고 싶은 말') · HeRo·Badak·MADLeap 메뉴 레지스트리·푸터 4열
+3. 배포 후 검색 확인: rook.co.kr 검색창 "광고" → Works·Artist 글 · MADLeague "경쟁" → 경쟁 PT·MADzine. HeRo·Badak·MADLeap은 메뉴 레지스트리 등록 시 검색 자동 연결
+4. 남은 점검 항목: `has_brand_admin_access()` members 컬럼 판단 → member_roles(brand) 기준으로 (데이터 계약 2)
+5. 세션 163·164 이월 그대로: 옛 mad_* DROP · **10-14 처리방침**(프로그램 신청·인증서 항목 + 이번 세션 매드리거 등록 '하고 싶은 말') · HeRo·Badak·MADLeap 메뉴 레지스트리·푸터 4열
 
 ### 주의
 

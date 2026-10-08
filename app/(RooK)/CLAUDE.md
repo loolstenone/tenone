@@ -106,6 +106,7 @@
 
 ## 현재 상태
 
+- **2026-10-08 (세션 165)**: 검색 복구 — 검색창이 Works·Artist·Free board 공개 글·메뉴·실전 프로젝트 회차를 찾는다 (`/api/search`, 레지스트리 board 원천)
 - **2026-10-08 (세션 165)**: 푸터 4열 규칙 적용(`RooKFooter` siteId·actions·channels — 메뉴는 헤더 레지스트리 자동, CLAUDE.md §1.9.4) · 마이페이지 LoginRequired
 
 | 항목 | 내용 |
