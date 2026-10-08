@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const { isAuthenticated, updatePassword } = useAuth();
+  const { isAuthenticated, updatePassword, loginWithGoogle, loginWithKakao } = useAuth();
   const { siteId } = useSite();
   const captcha = useCaptcha();
 
@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
     } else if (res?.ok) {
       setSuccess(data?.throttled
         ? '방금 안내 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해주세요. 1분 뒤 다시 요청할 수 있어요.'
-        : '가입된 One ID가 있어요. 로그인 방법을 이메일로 보냈습니다. 메일함(스팸함 포함)을 확인해주세요.');
+        : '가입된 이메일입니다. 로그인 방법을 이 메일로 보냈어요. 메일함(스팸함 포함)을 확인해주세요.');
     } else {
       setError(data?.error || '요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
@@ -118,18 +118,29 @@ export default function ResetPasswordPage() {
 
         {mode === 'request' && notFound && (
           <div className="mb-4 rounded-lg border border-neutral-700 bg-neutral-900 p-4 text-sm text-neutral-300 space-y-3">
-            <p className="font-semibold text-white">{email.trim()}(으)로 가입된 One ID가 없습니다</p>
-            <ul className="space-y-1 text-xs text-neutral-400">
-              <li>· 다른 이메일로 가입했을 수 있어요. 자주 쓰는 다른 이메일로 다시 찾아보세요.</li>
-              <li>· Google·카카오로 가입했다면 그 계정의 이메일이 다를 수 있어요. 로그인 화면에서 <b className="text-neutral-200">Google로 로그인</b>·<b className="text-neutral-200">카카오로 로그인</b>을 눌러보세요.</li>
-            </ul>
-            <div className="flex gap-2 pt-1">
+            <div>
+              <p className="font-semibold text-white">가입된 메일 정보가 없습니다</p>
+              <p className="mt-1 text-xs text-neutral-400">{email.trim()}</p>
+            </div>
+            <p className="text-sm text-neutral-200">소셜 계정(Google·카카오)으로 가입하신 건 아닐까요?</p>
+            <div className="space-y-2">
+              <button type="button" onClick={() => loginWithGoogle()}
+                className="w-full rounded-lg bg-white py-2.5 text-xs font-semibold text-neutral-900 hover:bg-neutral-200">
+                Google로 로그인
+              </button>
+              <button type="button" onClick={() => loginWithKakao()}
+                className="w-full rounded-lg bg-[#FEE500] py-2.5 text-xs font-semibold text-neutral-900 hover:opacity-90">
+                카카오로 로그인
+              </button>
+            </div>
+            <p className="text-xs text-neutral-500">다른 이메일로 가입했을 수도 있어요.</p>
+            <div className="flex gap-2">
               <button type="button" onClick={() => { setNotFound(false); setEmail(''); }}
                 className="flex-1 rounded-lg border border-neutral-600 py-2 text-xs font-semibold text-white hover:bg-neutral-800">
                 다른 이메일로 찾기
               </button>
-              <Link href="/signup" className="flex-1 rounded-lg bg-white py-2 text-center text-xs font-semibold text-neutral-900 hover:bg-neutral-200">
-                One ID 만들기
+              <Link href="/signup" className="flex-1 rounded-lg border border-neutral-600 py-2 text-center text-xs font-semibold text-white hover:bg-neutral-800">
+                새로 가입하기
               </Link>
             </div>
           </div>
