@@ -351,7 +351,7 @@ export default async function PTWorkspacePage() {
                   <div className="mb-8 bg-neutral-950 border border-dashed border-neutral-800 p-8 text-center">
                     <Users className="h-8 w-8 text-neutral-700 mx-auto mb-3" />
                     <p className="text-sm text-neutral-500 mb-4">아직 소속 팀이 없습니다. 동아리 운영진에게 배정을 요청하거나, 팀장에게 받은 초대 링크로 합류하세요.</p>
-                    <Link href="/madleague/contact"
+                    <Link href="/madleague/contact?type=program"
                       className="inline-flex items-center gap-2 text-sm font-bold text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 px-5 py-2.5 transition">
                       운영진 문의
                     </Link>

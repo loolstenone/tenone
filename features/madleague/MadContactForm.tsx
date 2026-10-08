@@ -6,7 +6,15 @@ import { CheckCircle2 } from 'lucide-react';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 
 // MADLeague 문의 → /api/contact (Turnstile 서버 검증·service_role 저장) → 인트라 MADLeague 고객 문의 인박스 (form_type madleague_inquiry)
-const TOPICS = ['기업 협업 · 과제 제안', '동아리 가입 · 운영', '대회 · 프로그램', '기타'] as const;
+// key = 다른 페이지 버튼에서 /madleague/contact?type={key}로 넘기면 문의 유형이 미리 선택된다
+export const MAD_CONTACT_TOPICS = [
+  { key: 'corporate', label: '기업 협업 · 과제 제안' },
+  { key: 'club-apply', label: '공식 동아리 신청' },
+  { key: 'club', label: '동아리 가입 · 운영' },
+  { key: 'program', label: '대회 · 프로그램' },
+  { key: 'etc', label: '기타' },
+] as const;
+export type MadContactTopicKey = (typeof MAD_CONTACT_TOPICS)[number]['key'];
 const inputCls = 'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
@@ -20,7 +28,8 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-export function MadContactForm() {
+export function MadContactForm({ initialTopic }: { initialTopic?: string }) {
+  const preset = MAD_CONTACT_TOPICS.find(t => t.key === initialTopic)?.label ?? '';
   const captcha = useCaptcha();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -71,9 +80,9 @@ export function MadContactForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <Field label="문의 유형" required>
-        <select name="topic" required defaultValue="" className={inputCls}>
+        <select name="topic" required defaultValue={preset} className={inputCls}>
           <option value="" disabled>선택해 주세요</option>
-          {TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
+          {MAD_CONTACT_TOPICS.map(t => <option key={t.key} value={t.label}>{t.label}</option>)}
         </select>
       </Field>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

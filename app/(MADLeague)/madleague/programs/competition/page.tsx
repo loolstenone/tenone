@@ -231,7 +231,7 @@ export default async function CompetitionPage() {
             <p className="mt-3 text-white/80 text-lg">전국 대학생의 크리에이티브를 기업의 마케팅 과제에 연결합니다.</p>
           </div>
           <Link
-            href="/madleague/contact"
+            href="/madleague/contact?type=corporate"
             className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition shrink-0"
           >
             과제 기업으로 문의하기 <ArrowRight className="h-5 w-5" />

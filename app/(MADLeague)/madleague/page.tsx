@@ -100,7 +100,7 @@ export default async function Page() {
                 ))}
                 {/* 공식 동아리 신청 — 문의하기로 접수, 내부 심사 후 선정 */}
                 <div className="pt-6">
-                  <Link href="/madleague/contact"
+                  <Link href="/madleague/contact?type=club-apply"
                     className="inline-flex items-center gap-4 bg-[#EC1D25] hover:bg-[#d01820] text-white px-8 py-4 transition">
                     <span className="text-left">
                       <span className="block font-bold">공식 동아리 신청</span>

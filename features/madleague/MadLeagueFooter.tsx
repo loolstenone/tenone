@@ -13,7 +13,7 @@ export function MadLeagueFooter() {
             dark={true}
             actions={[
                 { label: "매드리거 등록", href: "/madleague/apply" },
-                { label: "공식 동아리 신청", href: "/madleague/contact" },
+                { label: "공식 동아리 신청", href: "/madleague/contact?type=club-apply" },
                 { label: "문의하기", href: "/madleague/contact" },
                 { label: "마이페이지", href: "/madleague/my" },
             ]}
