@@ -6,12 +6,22 @@ import { safeRedirect } from '@/lib/login-href';
 import { publishLoginToHub } from '@/lib/sso';
 import { createClient } from '@/lib/supabase/client';
 
+// 콜백 처리는 페이지 로드당 한 번만 — 개발 모드 StrictMode가 useEffect를 두 번 실행하면
+// 두 번째 실행이 이미 쓴 code 교환에 실패하거나 지워진 auth_redirect 쿠키를 못 읽어 홈('/')으로 튕겼다 (2026-10-08)
+let callbackStarted = false;
+
 export default function AuthCallbackPage() {
     const router = useRouter();
 
     useEffect(() => {
+        if (callbackStarted) return;
+        callbackStarted = true;
+
         const handleCallback = async () => {
             const params = new URLSearchParams(window.location.search);
+            // 복귀 경로는 교환 전에 먼저 읽어 둔다
+            const authRedirectMatch = document.cookie.match(/(?:^|; )auth_redirect=([^;]+)/);
+            const pendingRedirect = authRedirectMatch ? safeRedirect(decodeURIComponent(authRedirectMatch[1]), '') || null : null;
             const code = params.get('code');
             const type = params.get('type');
             const next = safeRedirect(params.get('next'));
@@ -22,17 +32,16 @@ export default function AuthCallbackPage() {
             }
 
             const supabase = createClient();
-            const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            // 교환 실패여도 세션이 이미 만들어졌으면(다른 경로가 먼저 교환) 성공으로 진행
+            const hasSession = !error || !!(await supabase.auth.getSession()).data.session;
 
-            if (error) {
+            if (!hasSession && error) {
                 console.error('[auth/callback] exchange error:', error.message);
                 router.replace(`/login?error=auth_callback_error&msg=${encodeURIComponent(error.message)}`);
                 return;
             }
 
-            // auth_redirect 쿠키에서 최초 요청 경로 복원
-            const authRedirectMatch = document.cookie.match(/(?:^|; )auth_redirect=([^;]+)/);
-            const pendingRedirect = authRedirectMatch ? safeRedirect(decodeURIComponent(authRedirectMatch[1]), '') || null : null;
             if (pendingRedirect) {
                 document.cookie = 'auth_redirect=;path=/;max-age=0';
             }
