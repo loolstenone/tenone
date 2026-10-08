@@ -19,6 +19,8 @@ const PROGRAMS = [
 
 export function ProgramsSubNav() {
   const pathname = usePathname();
+  // 경쟁 PT는 헤더 단독 메뉴 — 그 페이지에는 프로그램 탭 줄을 띄우지 않는다
+  if (pathname?.startsWith('/madleague/programs/competition')) return null;
   return (
     <div className="sticky top-16 z-40 bg-neutral-950 border-b border-neutral-800">
       <div className="mx-auto max-w-7xl px-6">

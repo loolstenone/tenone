@@ -131,9 +131,9 @@ export default async function CompetitionPage() {
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">COMPETITION</div>
           <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">경쟁 PT</h1>
           <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
-            실제 기업의 고민을 전국의 동아리가 같이 경쟁한다.
+            기업의 실전 프로젝트로 경쟁한다.
           </p>
-          <p className="mt-4 text-sm text-neutral-500">실전프로젝트를 통한 성장 — MAD League의 경쟁 PT</p>
+          <p className="mt-4 text-sm text-neutral-500">제안에서 끝나는 것이 아니라 실행까지.</p>
         </div>
       </section>
 
@@ -234,7 +234,7 @@ export default async function CompetitionPage() {
             href="/madleague/contact"
             className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-10 py-5 text-lg transition shrink-0"
           >
-            문의하기 <ArrowRight className="h-5 w-5" />
+            과제 기업으로 문의하기 <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
       </section>
