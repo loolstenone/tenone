@@ -71,6 +71,16 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         ],
     },
     {
+        // Planner's — 기획자 훈련 브랜드. 훈련·프로젝트는 코어 프로그램 모듈(program_*, 주인 brand planners)
+        siteId: "planners",
+        adminBase: "/intra/ums/planners",
+        menus: [
+            { placement: "header", label: "프로젝트", path: "/planners/projects", source: { kind: "table", table: "program_rounds", eq: { brand_id: "planners" } }, adminHref: "/intra/ums/planners/programs", unit: "개" },
+            { placement: "header", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },
+            { placement: "feature", location: "프로젝트", label: "참가 신청", path: "/planners/projects", source: { kind: "table", table: "program_applications", eq: { brand_id: "planners" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/planners/programs", unit: "건" },
+        ],
+    },
+    {
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [

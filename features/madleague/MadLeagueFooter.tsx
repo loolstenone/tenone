@@ -21,7 +21,7 @@ export function MadLeagueFooter() {
                 // 유니버스 안의 결이 맞는 사이트 — 커리어(HeRo) · 크리에이티브(RooK) · 전략 기획(Planner's)
                 { label: "HeRo", href: "/hero" },
                 { label: "RooK", href: "/rook" },
-                { label: "Planner's", href: "/madleague/programs/planners" },
+                { label: "Planner's", href: "/planners" },
             ]}
         />
     );

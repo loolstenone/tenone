@@ -29,7 +29,7 @@ export interface CertSnapshot {
     client_name: string | null; brand_name: string; label: string; title: string;
 }
 
-const CODE_PREFIX: Record<string, string> = { madleague: "MAD", hero: "HERO", rook: "ROOK", madleap: "LEAP" };
+const CODE_PREFIX: Record<string, string> = { madleague: "MAD", hero: "HERO", rook: "ROOK", madleap: "LEAP", planners: "PLAN" };
 
 /** 인증서 코드 — {접두}{연도2}-{6자} (혼동 문자 제외) */
 export function newCertCode(brand: string): string {

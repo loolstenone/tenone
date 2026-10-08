@@ -171,6 +171,7 @@ const SITE_SEARCHERS: Record<string, (q: string) => Promise<SearchResult[]>> = {
     },
     rook: (q) => searchProgramRounds('rook', q),
     hero: (q) => searchProgramRounds('hero', q),
+    planners: (q) => searchProgramRounds('planners', q),
     badak: async (q) => {
         const { data } = await supabase.from('badak_groups')
             .select('id, title, description')

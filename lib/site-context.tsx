@@ -31,6 +31,7 @@ const pathSiteMap: Array<{ prefix: string; siteId: SiteIdentifier }> = [
     { prefix: '/mlp',       siteId: 'madleap' },
     { prefix: '/badak',     siteId: 'badak' },
     { prefix: '/rook',      siteId: 'rook' },
+    { prefix: '/planners',  siteId: 'planners' },
     { prefix: '/youinone',  siteId: 'youinone' },
     { prefix: '/hero',      siteId: 'hero' },
     { prefix: '/smarcomm',  siteId: 'smarcomm' },

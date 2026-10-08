@@ -58,6 +58,7 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         ["madleague", "MAD League 프로그램 신청", "/intra/ums/madleague/competitions"],
         ["rook", "RooK 실전 프로젝트 신청", "/intra/ums/rook/programs"],
         ["hero", "HeRo 프로그램 신청", "/intra/hero/programs"],
+        ["planners", "Planner's 프로그램 신청", "/intra/ums/planners/programs"],
     ] as const).map(([brand, label, href]): ActionEntry => ({
         key: `program_applications_${brand}`, label, table: "program_applications",
         filter: { column: "status", value: "pending" }, extraFilters: [{ column: "brand_id", value: brand }],

@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
         || request.headers.get('rsc') === '1'
         || request.headers.get('next-router-state-tree') !== null
         || request.nextUrl.searchParams.has('_rsc');
-    if (isPrefetch && (pathname.startsWith('/myverse/app') || pathname === '/planners' || pathname.startsWith('/planners/'))) {
+    if (isPrefetch && (pathname.startsWith('/myverse/app'))) {
         return new NextResponse(null, { status: 204 });
     }
 
@@ -89,27 +89,13 @@ export async function middleware(request: NextRequest) {
     }
 
     // 0a. /api/planners/* → /api/myverse/* 내부 rewrite (외부 호출자 호환: Toss, Google OAuth, Cron)
+    //     Planner's 사이트(/planners/*)는 2026-10-09 부활했지만 vercel.json 크론·Google OAuth 콘솔이
+    //     아직 /api/planners/*를 호출하므로 API rewrite는 유지한다 (페이지 /planners/*는 더 이상 myverse로 보내지 않음).
     //     URL은 그대로 유지하면서 새 핸들러로 라우팅.
     if (pathname.startsWith('/api/planners/')) {
         const url = request.nextUrl.clone();
         url.pathname = pathname.replace(/^\/api\/planners\//, '/api/myverse/');
         return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-    }
-
-    // 0b. /planners/* → /myverse/* 308 영구 리디렉트 (Planner's Planner를 마이버스로 흡수)
-    //     RSC prefetch는 308을 따라가다 stale 큐 무한 루프를 일으키므로 prefetch에는 redirect 안 함
-    //     주의: /planners-sw.js, /planners-icon-*.png 같은 정적 자산은 startsWith('/planners')에 걸리면
-    //     안 된다 → 옛 PWA 사용자가 SW 업그레이드 못함. 반드시 /planners 또는 /planners/* 만 매칭.
-    if (pathname === '/planners' || pathname.startsWith('/planners/')) {
-        const isPrefetch = request.headers.get('next-router-prefetch') === '1'
-            || request.headers.get('purpose') === 'prefetch'
-            || request.headers.get('rsc') === '1';
-        if (isPrefetch) {
-            return new NextResponse(null, { status: 204 });
-        }
-        const url = request.nextUrl.clone();
-        url.pathname = pathname.replace(/^\/planners/, '/myverse');
-        return NextResponse.redirect(url, 308);
     }
 
     // /auth/* 경로는 세션 갱신/검증 건너뛰기 (pass-through)

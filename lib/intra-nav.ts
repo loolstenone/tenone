@@ -422,6 +422,7 @@ export const modules: NavModule[] = [
                     {
                         name: "Planner's", href: "/intra/ums/planners", icon: Globe,
                         children: [
+                            { name: "프로그램", href: "/intra/ums/planners/programs" },
                             { name: "PP AI 관리", href: "/intra/planners" },
                             { name: "베타 피드백", href: "/intra/planners/feedback" },
                             { name: "Evolution School", href: "/intra/evolution-school" },
