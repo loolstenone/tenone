@@ -22,7 +22,6 @@ export default function ProjectPage() {
   return (
     <ProgramDetailPage
       programKey="project"
-      heroExtra={<p className="mt-4 text-sm text-neutral-500">Project Job Training — 현장에서 배우고, 현장에서 성장한다.</p>}
       steps={STEPS}
       stepsTitle="과제에서 납품까지"
       gets={GETS}

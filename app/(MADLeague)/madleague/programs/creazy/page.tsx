@@ -45,12 +45,6 @@ export default function CreazyPage() {
   return (
     <ProgramDetailPage
       programKey="creazy"
-      heroExtra={
-        <p className="mt-8 text-2xl font-black leading-snug">
-          크리에이지는 강의가 아닙니다.<br />
-          <span className="text-[#EC1D25]">업계 선배들과 함께 하는 프로젝트입니다.</span>
-        </p>
-      }
       steps={STEPS}
       stepsTitle="8개월, 이렇게 진행된다"
       gets={GETS}

@@ -39,7 +39,9 @@ export type MadProgram = {
   desc: string;
   group: MadProgramGroup;
   featured?: boolean;
-  /** 강조색 — 기본 레드. HeRo 골드·RooKie 그린·Planner's 틸은 연계 브랜드 색 */
+  /** 히어로 부제 한 줄 — 모든 프로그램이 같은 자리·같은 스타일로 (2026-10-09 통일) */
+  tagline: string;
+  /** 강조색 — 레드 하나로 통일. 예외는 히어로 프로그램 골드뿐 (브랜드 가이드 "HeRo 프로그램만 골드") */
   accent?: string;
   glance: MadProgramGlance;
   /** 기업도 참여하는 프로그램 — CTA에 "기업으로 참여 문의" 버튼이 붙는다 */
@@ -57,6 +59,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '경쟁 PT',
     eyebrow: 'COMPETITION',
     desc: '실제 기업 과제에 동아리가 경쟁한다.',
+    tagline: '제안에서 끝나지 않는다. 실행까지 간다.',
     group: 'challenge',
     featured: true,
     corporate: true,
@@ -75,6 +78,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '크리에이지',
     eyebrow: 'CREATIVE & CRAZY',
     desc: '국제 광고제 출품 프로젝트 — 아이디어를 세계 무대에 올린다.',
+    tagline: '강의가 아니다. 업계 선배들과 함께 하는 프로젝트다.',
     group: 'challenge',
     glance: {
       who: '마케팅·광고 업계 취업을 희망하는 대학생 — 2개 팀, 팀당 4~5명',
@@ -90,6 +94,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: 'DAM 파티',
     eyebrow: 'DAM NETWORKING PARTY',
     desc: 'Draft Assembly Meeting — 대학생·현업·기업이 직접 만나는 네트워킹 파티.',
+    tagline: '우리와 맞는 인재, 나와 맞는 기업 — 이력서 밖에서 만난다.',
     group: 'connect',
     corporate: true,
     glance: {
@@ -106,6 +111,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '아이디어 무브먼트',
     eyebrow: 'IDEA MOVEMENT',
     desc: '연말 전국 대학생 아이디어 쇼케이스 — 문제를 정의하고, 아이디어를 실행으로 옮긴다.',
+    tagline: '아이디어로 세상을 바꾼다.',
     group: 'challenge',
     glance: {
       who: '전국 대학생 — 매드리거가 아니어도 참가 가능',
@@ -121,6 +127,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '히어로 프로그램',
     eyebrow: 'HERO PROGRAM',
     desc: 'HeRo와 연계한 커리어 솔루션 — 진로 상담부터 인턴·채용 연결까지.',
+    tagline: '진로에 대한 고민, 커리어 관리까지 함께한다.',
     group: 'connect',
     accent: '#FFC000',
     glance: {
@@ -137,8 +144,8 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: 'RooKie',
     eyebrow: 'ROOKIE',
     desc: '실전 크리에이티브를 훈련하고 실전 프로젝트에도 참여할 기회.',
+    tagline: '훈련으로 끝나지 않는다. 실전 프로젝트로 이어진다.',
     group: 'training',
-    accent: '#00d255',
     glance: {
       who: '크리에이티브를 지망하는 매드리거·대학생',
       when: '기수제 — 모집 공지 때 일정 안내',
@@ -153,8 +160,8 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: "Planner's",
     eyebrow: "PLANNER'S",
     desc: '실전 전략 기획을 훈련하고 실전 프로젝트에도 참여할 기회.',
+    tagline: '훈련으로 끝나지 않는다. 실전 프로젝트로 이어진다.',
     group: 'training',
-    accent: '#2DD4BF',
     glance: {
       who: '전략 기획을 지망하는 매드리거·대학생',
       when: '기수제 — 모집 공지 때 일정 안내',
@@ -169,6 +176,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: 'PJT',
     eyebrow: 'PROJECT JOB TRAINING',
     desc: '기업의 실전 프로젝트를 현장에서 수행하는 OJT.',
+    tagline: '현장에서 배우고, 현장에서 성장한다.',
     group: 'practice',
     corporate: true,
     madleaguerOnly: true,
@@ -186,8 +194,8 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '마케톤',
     eyebrow: 'MARKETHON',
     desc: 'Marketing + Hacking + Marathon — 72시간의 열정.',
+    tagline: '3일 동안 잠도 잊고, 한계까지 밀어붙인다.',
     group: 'challenge',
-    accent: '#FFC000',
     madleaguerOnly: true,
     glance: {
       who: '매드리거만 — 전국 동아리가 한 공간에',
@@ -203,6 +211,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     title: '인사이트 투어링',
     eyebrow: 'INSIGHT TOURING',
     desc: '지역·기업을 돌며 혁신 제안. 당신의 통찰이 지역을 바꾼다.',
+    tagline: '현장의 목소리를 듣고, 매드리거의 시선으로 제안한다.',
     group: 'practice',
     corporate: true,
     madleaguerOnly: true,

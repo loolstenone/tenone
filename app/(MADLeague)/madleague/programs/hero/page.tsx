@@ -24,7 +24,6 @@ export default function HeroProgramPage() {
   return (
     <ProgramDetailPage
       programKey="hero"
-      heroExtra={<p className="mt-4 text-lg text-[#FFC000] font-bold">진로에 대한 고민, 커리어 관리에 대한 상담을 제공합니다.</p>}
       steps={STEPS}
       stepsTitle="신청부터 연결까지"
       gets={GETS}

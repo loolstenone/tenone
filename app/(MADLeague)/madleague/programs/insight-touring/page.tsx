@@ -22,7 +22,6 @@ export default function InsightTouringPage() {
   return (
     <ProgramDetailPage
       programKey="insight-touring"
-      heroExtra={<p className="mt-4 text-sm text-neutral-500">지역과 기업을 직접 방문하고 현장의 목소리를 듣는다. 그 후 매드리거만의 시선으로 혁신 전략을 제안한다.</p>}
       steps={STEPS}
       stepsTitle="투어에서 제안까지"
       gets={GETS}

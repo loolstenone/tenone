@@ -27,12 +27,6 @@ export default function DamPage() {
   return (
     <ProgramDetailPage
       programKey="dam"
-      heroExtra={
-        <p className="mt-8 text-2xl sm:text-3xl font-black leading-snug">
-          우리와 맞는 좋은 인재, 나와 맞는 좋은 기업<br />
-          <span className="text-neutral-400">찾기 힘드셨죠?</span>
-        </p>
-      }
       steps={STEPS}
       stepsTitle="파티는 이렇게 진행된다"
       gets={GETS}

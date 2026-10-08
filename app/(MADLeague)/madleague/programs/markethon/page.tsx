@@ -22,12 +22,6 @@ export default function MarkethonPage() {
   return (
     <ProgramDetailPage
       programKey="markethon"
-      heroExtra={
-        <p className="mt-8 text-2xl sm:text-3xl font-black leading-snug text-[#FFC000]">
-          72시간의 열정
-          <span className="block mt-2 text-lg font-bold text-neutral-400">3일 동안 잠도 잊고, 생각도 멈추지 않고. 한계까지 밀어붙이는 매드리거의 시그니처 프로그램.</span>
-        </p>
-      }
       steps={STEPS}
       stepsTitle="금요일 저녁부터 월요일 아침까지"
       gets={GETS}

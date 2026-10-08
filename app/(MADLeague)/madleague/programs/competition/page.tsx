@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Trophy, Users, Search, Lightbulb, Presentation, Medal, Award, FolderOpen } from 'lucide-react';
-import { MAD_PROGRAM_IMAGES, madProgramAsset } from '@/lib/madleague-program-assets';
+import { madProgramAsset } from '@/lib/madleague-program-assets';
 import { fetchMadHallRounds, type MadHallRound } from '@/lib/supabase/madleague';
 import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
 import { getMadProgram } from '@/features/madleague/programs-list';
@@ -128,8 +128,6 @@ export default async function CompetitionPage() {
   return (
     <ProgramDetailPage
       programKey="competition"
-      heroImage={MAD_PROGRAM_IMAGES.ptHero}
-      heroExtra={<p className="mt-4 text-sm text-neutral-500">제안에서 끝나는 것이 아니라 실행까지.</p>}
       steps={STEPS}
       stepsTitle="경쟁 PT는 이렇게 진행된다"
       gets={GETS}

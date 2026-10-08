@@ -6,7 +6,7 @@ import { ProgramCTA } from '@/features/madleague/ProgramCTA';
 /**
  * MADLeague 프로그램 상세 표준 템플릿 — 10개 프로그램이 전부 같은 뼈대로 보인다.
  *
- *   ① 히어로        eyebrow · 제목 · 한 줄 요약 · 대상/시기/방식 칩   (programs-list.ts)
+ *   ① 히어로        eyebrow · 제목 · 한 줄 요약 · tagline · 대상/시기/참가비 칩   (전부 programs-list.ts — 페이지별 히어로 꾸밈 금지)
  *   ② 한눈에 보기    대상 · 시기 · 방식 · 참가비 · 남는 것             (programs-list.ts glance)
  *   ③ 진행 과정      steps (3~5단계)
  *   ④ 얻는 것        gets  (카드 2~3개)
@@ -21,8 +21,6 @@ export type ProgramGet = { title: string; desc: string; icon?: LucideIcon };
 
 export function ProgramDetailPage({
   programKey,
-  heroImage,
-  heroExtra,
   steps,
   stepsTitle,
   gets,
@@ -31,10 +29,6 @@ export function ProgramDetailPage({
   cta,
 }: {
   programKey: string;
-  /** 히어로 배경 이미지 (선택) — 텍스트 카피 위에 흐리게 깔린다 */
-  heroImage?: string;
-  /** 히어로 요약 아래 추가 카피 (선택) */
-  heroExtra?: React.ReactNode;
   steps: ProgramStep[];
   stepsTitle?: string;
   gets: ProgramGet[];
@@ -52,16 +46,7 @@ export function ProgramDetailPage({
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* ① 히어로 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        {heroImage && (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" aria-hidden />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" aria-hidden />
-          </>
-        )}
-        {!heroImage && (
-          <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 50%, ${accent}2e, transparent 60%)` }} aria-hidden />
-        )}
+        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 50%, ${accent}2e, transparent 60%)` }} aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-28 sm:py-36">
           <div className="flex items-center gap-3 text-xs font-bold tracking-widest">
             <span style={{ color: accent }}>{p.eyebrow}</span>
@@ -70,7 +55,7 @@ export function ProgramDetailPage({
           </div>
           <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">{p.title}</h1>
           <p className="mt-8 max-w-2xl text-xl sm:text-2xl text-neutral-300 leading-relaxed">{p.desc}</p>
-          {heroExtra}
+          <p className="mt-6 text-lg sm:text-xl font-bold" style={{ color: accent }}>{p.tagline}</p>
           <dl className="mt-10 flex flex-wrap gap-2">
             {[
               ['대상', p.glance.who],
@@ -116,7 +101,7 @@ export function ProgramDetailPage({
           {steps.map((s, i) => (
             <li key={s.title} className="bg-neutral-950 border border-neutral-900 p-10">
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-10 w-10 flex items-center justify-center text-sm font-black shrink-0 text-black" style={{ backgroundColor: accent }}>{i + 1}</div>
+                <div className="h-10 w-10 flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: accent, color: accent === MAD_ACCENT ? "#fff" : "#000" }}>{i + 1}</div>
                 {s.icon && <s.icon className="h-6 w-6 text-neutral-500" />}
               </div>
               <div className="text-xl font-black">{s.title}</div>

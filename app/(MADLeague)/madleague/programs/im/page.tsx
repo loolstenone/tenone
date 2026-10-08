@@ -43,11 +43,6 @@ export default function IdeaMovementPage() {
   return (
     <ProgramDetailPage
       programKey="im"
-      heroExtra={
-        <p className="mt-8 text-2xl sm:text-3xl font-black leading-snug">
-          아이디어로 <span className="text-[#EC1D25]">세상을 바꾼다</span>
-        </p>
-      }
       steps={STEPS}
       stepsTitle="아이디어 무브먼트는 이렇게 진행된다"
       gets={GETS}
