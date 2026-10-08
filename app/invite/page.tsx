@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Eye, EyeOff, ShieldAlert, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { loginHref } from "@/lib/login-href";
 import Image from "next/image";
 
 // 초대 코드별 설정
@@ -74,7 +75,7 @@ function InviteForm() {
                     <h1 className="text-lg font-bold mb-2">가입이 완료되었습니다</h1>
                     <p className="text-sm text-neutral-500 mb-2">이메일 인증이 확인되었습니다.</p>
                     <p className="text-xs text-neutral-400 mb-6">지금 바로 로그인하여 Intra에 접속할 수 있습니다.</p>
-                    <Link href="/login" className="px-6 py-2.5 bg-neutral-900 text-sm text-white hover:bg-neutral-800 transition-colors inline-block">
+                    <Link href={loginHref("/intra")} className="px-6 py-2.5 bg-neutral-900 text-sm text-white hover:bg-neutral-800 transition-colors inline-block">
                         로그인하기
                     </Link>
                 </div>
@@ -250,7 +251,7 @@ function InviteForm() {
 
                 <div className="text-center mt-6">
                     <p className="text-xs text-neutral-400">이미 계정이 있으신가요?{' '}
-                        <Link href="/login" className="text-neutral-700 hover:underline">로그인</Link>
+                        <Link href={loginHref(`/invite${code ? `?code=${encodeURIComponent(code)}` : ""}`)} className="text-neutral-700 hover:underline">로그인</Link>
                     </p>
                 </div>
             </div>

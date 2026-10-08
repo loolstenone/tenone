@@ -512,7 +512,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             || pathname.endsWith('/login') || pathname.endsWith('/signup');
         // /login?redirect=X 에서 소셜 로그인 시 redirect 파라미터를 쿠키에 보존
         const searchRedirect = isAuthPage ? new URLSearchParams(window.location.search).get('redirect') : null;
-        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' ? pathname : null);
+        // 쿼리(?club=… 등)까지 보존 — 경로만 저장하면 선택 값이 사라진다
+        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' || window.location.search ? pathname + window.location.search : null);
         if (returnPath) {
             document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
         }
@@ -531,7 +532,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const isAuthPage = pathname === '/login' || pathname === '/signup'
             || pathname.endsWith('/login') || pathname.endsWith('/signup');
         const searchRedirect = isAuthPage ? new URLSearchParams(window.location.search).get('redirect') : null;
-        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' ? pathname : null);
+        // 쿼리(?club=… 등)까지 보존 — 경로만 저장하면 선택 값이 사라진다
+        const returnPath = searchRedirect ?? (isAuthPage ? null : pathname !== '/' || window.location.search ? pathname + window.location.search : null);
         if (returnPath) {
             document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
         }

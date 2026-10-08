@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/lib/login-href';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { getCookieDomain } from '@/lib/domain-registry';
+import { getCookieDomain, isTenoneFamily, isExternalDomain } from '@/lib/domain-registry';
 import { earnUC } from '@/lib/supabase/uc';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -70,6 +70,34 @@ export async function GET(request: NextRequest) {
         }
     }
 
+    // 가입 인증: 메일 링크가 Site URL(tenone.biz)로 열려도 가입한 브랜드 사이트로 돌려보낸다 (§1.2.1 이탈 방지)
+    //  - 가입 사이트 = signUp 때 저장한 user_metadata.consent.origin_site (hostname)
+    //  - *.tenone.biz → 쿠키 공유라 그대로 이동 · 독립 도메인 → 허브(auth.tenone.biz) SSO로 로그인까지 넘김 (One ID)
+    if (type === 'signup' && next === '/' && verifyData?.user) {
+        const originSite = (verifyData.user.user_metadata?.consent as { origin_site?: string } | undefined)?.origin_site;
+        const brandUrl = signupSiteReturn(originSite, hostname);
+        if (brandUrl) return NextResponse.redirect(brandUrl);
+    }
+
     // 성공 → next 경로로 리다이렉트 (세션 쿠키 이미 설정됨)
     return NextResponse.redirect(`${origin}${next}`);
+}
+
+/** 가입한 사이트로 돌아갈 주소 — 지금 호스트와 같거나 등록되지 않은 호스트면 null */
+function signupSiteReturn(originSite: string | undefined, currentHost: string): string | null {
+    if (!originSite) return null;
+    const host = originSite.toLowerCase();
+    const current = currentHost.split(':')[0];
+    if (host === current || host === 'localhost' || current === 'localhost') return null;
+    if (isTenoneFamily(host)) {
+        // 같은 .tenone.biz 쿠키 — 바로 이동 (staging·서브도메인)
+        return isTenoneFamily(current) ? `https://${host}/` : null;
+    }
+    if (!isExternalDomain(host)) return null;
+    // 독립 도메인 — 허브가 지금 막 만든 세션(.tenone.biz 쿠키)을 그 도메인으로 넘긴다
+    if (!isTenoneFamily(current)) return null;
+    const sso = new URL('/api/sso/initiate', 'https://auth.tenone.biz');
+    sso.searchParams.set('origin', `https://${host}`);
+    sso.searchParams.set('final', '/');
+    return sso.toString();
 }

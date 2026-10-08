@@ -14,7 +14,7 @@ import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from '@/components/SignupConsent';
-import { loginHref } from '@/lib/login-href';
+import { loginHref, safeRedirect } from '@/lib/login-href';
 
 // --- SmarComm 전용 회원가입 컴포넌트 ---
 function SmarCommSignupForm() {
@@ -76,6 +76,9 @@ function SmarCommSignupForm() {
     // 직접 Supabase OAuth (auth-hub 경유 없이)
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
+        // ?redirect= 를 쿠키로 보존 → /auth/callback이 가입 후 원래 페이지로 (§1.2.1)
+        const back = safeRedirect(new URLSearchParams(window.location.search).get('redirect'), '');
+        if (back && back !== '/') document.cookie = `auth_redirect=${encodeURIComponent(back)};path=/;max-age=300;SameSite=Lax`;
         const redirectTo = `${window.location.origin}/auth/callback`;
         const { data, error: oauthError } = await sb.auth.signInWithOAuth({
             provider,
@@ -242,6 +245,9 @@ function TenOneSignupPage() {
     // Supabase OAuth
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
+        // ?redirect= 를 쿠키로 보존 → /auth/callback이 가입 후 원래 페이지로 (§1.2.1)
+        const back = safeRedirect(new URLSearchParams(window.location.search).get('redirect'), '');
+        if (back && back !== '/') document.cookie = `auth_redirect=${encodeURIComponent(back)};path=/;max-age=300;SameSite=Lax`;
         const redirectTo = `${window.location.origin}/auth/callback`;
         const { data, error: oauthError } = await sb.auth.signInWithOAuth({
             provider,
