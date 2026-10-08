@@ -61,7 +61,7 @@ export default async function PortfolioPage() {
   if (teamIds.length > 0) {
     const { data: teamsData } = await sb
       .from('program_teams')
-      .select('id, name, mad_competitions:program_rounds(title, year)')
+      .select('id, name, mad_competitions:program_rounds(title, year, channels)')
       .in('id', teamIds)
       .order('created_at', { ascending: false });
 
@@ -79,12 +79,16 @@ export default async function PortfolioPage() {
     const roleMap: Record<string, string> = {};
     (teamLinks ?? []).forEach((t: { team_id: string; role: string }) => { roleMap[t.team_id] = t.role; });
 
-    type TeamRow = { id: string; name: string; mad_competitions: { title: string; year: number } | null };
-    teams = ((teamsData ?? []) as unknown as TeamRow[]).map((t) => ({
-      ...t,
-      myRole: roleMap[t.id] ?? 'member',
-      result: resultMap[t.id] ?? null,
-    }));
+    // MADLeague 창구에 노출된 회차만 — 다른 브랜드(RooK·HeRo) 참여 이력은 별도 동의 없이 보이지 않는다 (데이터 계약 4조)
+    type TeamRow = { id: string; name: string; mad_competitions: { title: string; year: number; channels: string[] | null } | null };
+    teams = ((teamsData ?? []) as unknown as TeamRow[])
+      .filter((t) => (t.mad_competitions?.channels ?? []).includes('madleague'))
+      .map(({ mad_competitions, ...t }) => ({
+        ...t,
+        mad_competitions: mad_competitions ? { title: mad_competitions.title, year: mad_competitions.year } : null,
+        myRole: roleMap[t.id] ?? 'member',
+        result: resultMap[t.id] ?? null,
+      }));
   }
 
   // 인증서 — 코어 program_certificates (서버 전용 테이블, 본인 것만)

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ArrowRight, ArrowLeft, CheckCircle, Lightbulb, Pointer } from "lucide-react";
 import { INDUSTRIES, JOB_FUNCTIONS } from "@/lib/badak-constants";
+import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 
 const HERO_RED = "#E53935";
 
@@ -71,6 +72,7 @@ export default function TIHTestPage() {
     const [done, setDone] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const captcha = useCaptcha();
 
     const [hydrated, setHydrated] = useState(false);
 
@@ -111,15 +113,20 @@ export default function TIHTestPage() {
     };
 
     async function handleSubmit() {
+        if (!captcha.ready) { setSubmitError(CAPTCHA_PENDING_MESSAGE); return; }
         setSubmitting(true);
         setSubmitError(null);
         try {
             const res = await fetch("/api/hero/tih", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, captchaToken: captcha.token }),
             });
-            if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
+            captcha.reset(); // 토큰은 1회용
+            if (!res.ok) {
+                const j = await res.json().catch(() => null) as { error?: string } | null;
+                throw new Error(j?.error ?? `서버 오류 (${res.status})`);
+            }
             localStorage.removeItem(LS_KEY);
             setDone(true);
         } catch (e) {
@@ -545,6 +552,13 @@ export default function TIHTestPage() {
                             <p className="font-semibold text-neutral-700 mb-1">개인정보 안내</p>
                             <p>입력하신 정보는 HeRo의 인재 매칭에만 사용되며, 외부에 공개되지 않습니다.</p>
                         </div>
+                    </div>
+                )}
+
+                {/* 보안 확인 (마지막 단계) */}
+                {step === TOTAL_STEPS - 1 && (
+                    <div className="mt-6">
+                        <CaptchaWidget {...captcha.widgetProps} />
                     </div>
                 )}
 

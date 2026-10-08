@@ -54,10 +54,14 @@ export default async function PublicProfilePage({ params }: Props) {
     const { data } = profileResult;
     if (!data) notFound();
 
-    // 로그인한 사용자가 프로필 소유자인지 확인 — email 비교 (RLS 우회)
+    // 로그인한 사용자가 프로필 소유자인지 확인 — 본인 members 행(RLS: auth_id = auth.uid())의 id 비교
     const { data: { user: authUser } } = await supabase.auth.getUser();
     const isLoggedIn = !!authUser;
-    const isOwner = !!authUser && !!data.email && authUser.email === data.email;
+    let isOwner = false;
+    if (authUser && data.id) {
+        const { data: me } = await supabase.from('members').select('id').eq('auth_id', authUser.id).maybeSingle();
+        isOwner = me?.id === data.id;
+    }
 
     // 소유자는 /profile 로 redirect (소유자 전용 편집 뷰)
     if (isOwner) redirect('/profile');
@@ -83,15 +87,13 @@ export default async function PublicProfilePage({ params }: Props) {
         id: data.id,
         name: data.name,
         handle: data.handle || h,
-        email: data.email,
+        email: data.email || undefined,
         company: data.company || undefined,
         bio: data.bio || undefined,
         avatarUrl: data.avatar_url || undefined,
-        affiliations: data.affiliations || [],
         interestsIndustry: data.interests_industry || [],
         interestsJob: data.interests_job || [],
         profileVisibility: (data.profile_visibility as 'public' | 'private') || 'public',
-        role: data.role || 'Member',
         createdAt: data.created_at,
         privacySettings: data.privacy_settings || undefined,
         socialLinks: data.social_links || undefined,

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { safeRedirect } from "@/lib/login-href";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
@@ -11,7 +12,7 @@ function LoginGate() {
     const searchParams = useSearchParams();
     const [modalOpen, setModalOpen] = useState(false);
 
-    const redirectTo = searchParams.get("redirect") || "/myverse/app";
+    const redirectTo = safeRedirect(searchParams.get("redirect"), "/myverse/app");
 
     useEffect(() => {
         if (isLoading) return;

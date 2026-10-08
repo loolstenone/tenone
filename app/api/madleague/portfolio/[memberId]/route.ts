@@ -50,11 +50,19 @@ export async function GET(_req: Request, { params }: RouteProps) {
       .from('program_teams')
       .select(`
         id, name,
-        mad_competitions:program_rounds(title, year, status, presentation_date)
+        mad_competitions:program_rounds(title, year, status, presentation_date, channels)
       `)
       .in('id', teamIds)
       .order('created_at', { ascending: false });
-    teams = data ?? [];
+    // MADLeague 창구에 노출된 회차만 — 다른 브랜드 참여 이력은 공개 포트폴리오에 싣지 않는다 (데이터 계약 4조)
+    type TeamRow = { id: string; name: string; mad_competitions: { channels?: string[] | null } & Record<string, unknown> | null };
+    teams = ((data ?? []) as unknown as TeamRow[])
+      .filter((t) => (t.mad_competitions?.channels ?? []).includes('madleague'))
+      .map((t) => {
+        if (!t.mad_competitions) return t;
+        const { channels: _channels, ...round } = t.mad_competitions;
+        return { ...t, mad_competitions: round };
+      });
 
     // 결과 (수상)
     // 결과 — 발표된 회차만 (RLS)

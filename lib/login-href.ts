@@ -13,6 +13,20 @@
 
 type Tab = "login" | "signup";
 
+/**
+ * 로그인·인증 후 이동 경로 검증 (open redirect 차단) — 같은 사이트 안의 상대 경로만 허용.
+ * `//evil.com` · `/\evil.com` · `https://…` · `.evil.com`·`@evil.com`(`${origin}${next}`에 붙는 호스트 변조 — /로 시작 필수로 차단) · 제어문자 차단.
+ * `?redirect=` · `next` · `final` 등 외부에서 들어온 경로는 반드시 이 함수를 통과시킨다.
+ */
+export function safeRedirect(raw: string | null | undefined, fallback = "/"): string {
+    if (!raw) return fallback;
+    if (!raw.startsWith("/")) return fallback;
+    if (raw.startsWith("//") || raw.startsWith("/\\")) return fallback;
+    // 백슬래시(브라우저가 /로 해석) · 제어문자(탭·개행으로 // 우회)
+    if (/[\\\u0000-\u001f\u007f]/.test(raw)) return fallback;
+    return raw;
+}
+
 export function loginHref(
     pathname: string | null | undefined,
     tab?: Tab,

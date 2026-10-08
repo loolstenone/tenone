@@ -17,3 +17,11 @@ lib/site-packages/
 .claude/settings.local.json
 .claude/worktrees/
 _refs/
+
+# Python venv 산출물 (scripts/에 섞여 들어옴 — 점검 축5 H-1, 2026-10-08)
+*.exe
+__pycache__/
+*.pyc
+scripts/dumppdf.py
+scripts/pdf2txt.py
+scripts/vba_extract.py

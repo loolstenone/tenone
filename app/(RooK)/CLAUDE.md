@@ -34,7 +34,7 @@
 - 글 = `ums_posts` (`category_id`=카테고리명, `image`=원본 목록 썸네일, `extra_fields.youtube_id`·`source`=원본 URL·`sort`=원본 목록 순서, `author_name`=원본 작성자)
 - 정렬: `sort` 없는 새 글(최신순) → 이전 글은 원본 순서 (`getRookPosts`)
 - 이미지 = Storage `board-assets/rook/{works|artist}/{idx}/` · 사이트 이미지 `board-assets/rook/site/`
-- 이전 스크립트 `Scripts/rook-import.mjs` (멱등, slug 기준 갱신)
+- 이전 스크립트 `scripts/rook-import.mjs` (멱등, slug 기준 갱신)
 - 조회수 시드 (2026-10-07, 사용자 지시): Works·Artist 50편 + Free board 3편 `view_count` = 시드값 (Works 120~900·Artist 60~450, slug 해시 고정). `extra_fields.views_seeded`에 시드값 기록 → 실제 조회 = view_count − views_seeded. 되돌리기: `view_count = view_count - (extra_fields->>'views_seeded')::int`. Free board 공지 3편도 사용자 결정으로 시드(40~200 — 이 게시판은 목록·홈 위젯에 조회수가 **보임**, 표시광고법 기만 표시 소지를 안내한 뒤 진행). 새 글에는 시드하지 않는다. 아임웹 공개 화면엔 조회수가 없어 원본 값은 관리자에만 있음
 - AD 카테고리(비타500·벤츠·서울우유·LG Gram)는 실제 브랜드명을 쓴 AI 시안 → 목록 카드·상세에 `ROOK_AD_DISCLAIMER`("RooK의 AI 창작 시안이며, 해당 브랜드와 무관합니다.") 자동 표기 (`isRookAdSample`, RooKUI). AD 글을 새로 올려도 자동 적용
 

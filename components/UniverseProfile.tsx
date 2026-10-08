@@ -103,7 +103,8 @@ export interface PublicProfileData {
     id: string;
     name: string;
     handle?: string;
-    email: string;
+    /** 본인이 이메일 공개를 켠 경우에만 값이 있다 (get_public_profile) */
+    email?: string;
     company?: string;
     bio?: string;
     avatarUrl?: string;
@@ -392,12 +393,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             .catch(() => {});
     }, []);
 
-    /* ── 서비스 프로필 로드 ── */
+    /* ── 서비스 프로필 로드 (소유자만 — 공개 뷰의 브랜드 간 교차 노출은 별도 동의 필요, 헌법 데이터 계약 4조) ── */
     useEffect(() => {
         const email = profile?.email;
-        if (!email) return;
+        if (!isOwner || !email) return;
         getAllServiceProfiles(email, profile?.id).then(setServiceProfiles).catch(() => {});
-    }, [profile?.email, profile?.id]);
+    }, [isOwner, profile?.email, profile?.id]);
 
     /* ── 사이트 오픈 상태 ── */
     useEffect(() => {

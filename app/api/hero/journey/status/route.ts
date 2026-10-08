@@ -10,6 +10,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 import { earnUC } from "@/lib/supabase/uc";
 import { Resend } from "resend";
 import { heroStageUpHtml } from "@/lib/email/hero-stage-up";
@@ -23,6 +24,12 @@ export async function GET(req: NextRequest) {
         if (!memberId) {
             return NextResponse.json({ error: "memberId required" }, { status: 400 });
         }
+
+        // 본인만 (직원 허용) — 승급 시 UC 지급·메일 발송 부수효과가 있어 memberId 쿼리를 믿지 않는다 (점검 축3 H-1)
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
 
         const sb = createAdminClient();
 

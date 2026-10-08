@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { safeRedirect } from '@/lib/login-href';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AuthCallbackPage() {
@@ -12,7 +13,7 @@ export default function AuthCallbackPage() {
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             const type = params.get('type');
-            const next = params.get('next') ?? '/';
+            const next = safeRedirect(params.get('next'));
 
             if (!code) {
                 router.replace('/login?error=auth_callback_error&msg=no_code');
@@ -30,7 +31,7 @@ export default function AuthCallbackPage() {
 
             // auth_redirect 쿠키에서 최초 요청 경로 복원
             const authRedirectMatch = document.cookie.match(/(?:^|; )auth_redirect=([^;]+)/);
-            const pendingRedirect = authRedirectMatch ? decodeURIComponent(authRedirectMatch[1]) : null;
+            const pendingRedirect = authRedirectMatch ? safeRedirect(decodeURIComponent(authRedirectMatch[1]), '') || null : null;
             if (pendingRedirect) {
                 document.cookie = 'auth_redirect=;path=/;max-age=0';
             }
@@ -43,8 +44,7 @@ export default function AuthCallbackPage() {
             if (pendingRedirect) {
                 // /*/app/onboarding 으로 돌아오면 완료된 사용자가 온보딩에 갇히는 루프 발생.
                 // 대신 /*/app 으로 보내면 각 서비스 layout이 신규/기존 여부에 따라 라우팅한다.
-                const safeRedirect = pendingRedirect.replace(/\/app\/onboarding(\/.*)?$/, '/app');
-                router.replace(safeRedirect);
+                router.replace(pendingRedirect.replace(/\/app\/onboarding(\/.*)?$/, '/app'));
             } else {
                 const defaultNext = window.location.hostname.includes('smarcomm') ? '/dashboard' : '/';
                 router.replace(next !== '/' ? next : defaultNext);

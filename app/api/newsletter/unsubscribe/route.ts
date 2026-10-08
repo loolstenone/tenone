@@ -3,7 +3,8 @@
  * POST /api/newsletter/unsubscribe             — One-Click List-Unsubscribe (RFC 8058)
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+// newsletter_subscribers는 직원·service_role만 쓰기 가능 (RLS) — 토큰(구독자 id) 검증 후 서버에서 처리
+import { createAdminClient } from '@/lib/supabase/admin';
 
 function decodeToken(token: string): string | null {
   try {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse('유효하지 않은 토큰입니다.', { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from('newsletter_subscribers')
     .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'invalid token' }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   await supabase
     .from('newsletter_subscribers')
     .update({ is_active: false, unsubscribed_at: new Date().toISOString() })

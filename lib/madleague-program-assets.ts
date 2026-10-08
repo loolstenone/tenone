@@ -1,5 +1,5 @@
 // madleague.net(아임웹)에서 이전한 프로그램 이미지 — Storage board-assets/madleague/programs/{group}/{id}.webp
-// 업로드: Scripts/madleague-programs-import.mjs (같은 group·id 목록)
+// 업로드: scripts/madleague-programs-import.mjs (같은 group·id 목록)
 const BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/board-assets/madleague/programs`;
 
 export const madProgramAsset = (group: string, id: string) => `${BASE}/${group}/${id}.webp`;

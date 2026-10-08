@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { safeRedirect } from '@/lib/login-href';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { getCookieDomain } from '@/lib/domain-registry';
@@ -21,7 +22,8 @@ export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
     const token_hash = searchParams.get('token_hash');
     const type = searchParams.get('type') as EmailOtpType | null;
-    const next = searchParams.get('next') || '/';
+    // next는 같은 사이트 상대 경로만 — `${origin}${next}`에 .evil.com·@evil.com 붙는 변조 차단 (점검 축3 H-5)
+    const next = safeRedirect(searchParams.get('next'));
     const hostname = request.headers.get('host') || '';
     const cookieStore = await cookies();
     const cookieDomain = getCookieDomain(hostname);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { safeRedirect } from '@/lib/login-href';
 import { createServerClient } from '@supabase/ssr';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { randomBytes } from 'crypto';
@@ -20,7 +21,7 @@ import { getAllExternalDomains } from '@/lib/domain-registry';
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const origin = searchParams.get('origin');   // https://smarcomm.biz
-    const final_path = searchParams.get('final') || '/';
+    const final_path = safeRedirect(searchParams.get('final'));
 
     // origin 필수 + 안전한 URL인지 검증
     if (!origin || !origin.startsWith('https://')) {

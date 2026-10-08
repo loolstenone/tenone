@@ -98,9 +98,9 @@
 | `lib/madzine-categories.ts` | MADzine 카테고리 8종 SSOT (DB 제약과 동일) |
 | `lib/supabase/madleague.ts` | DB 헬퍼 |
 | `app/api/madleague/*` | apply · applications/[id]/approve·reject · member/* · posts · articles · portfolio · admin/* |
-| `Scripts/madzine-import.mjs` | 기존 madleague.net(아임웹) MADzine 이전 스크립트 (멱등) |
+| `scripts/madzine-import.mjs` | 기존 madleague.net(아임웹) MADzine 이전 스크립트 (멱등) |
 | `app/(MADLeague)/madleague/programs/` | 프로그램 하위 메뉴 = madleague.net 이름·순서 (경쟁 PT · 크리에이지 · 댐 파티 · 아이디어 무브먼트 · 히어로 → PJT·마케톤·인사이트 투어링). 경쟁 PT 명예의 전당은 페이지 상수 `ARCHIVE` |
-| `lib/madleague-program-assets.ts` · `Scripts/madleague-programs-import.mjs` | madleague.net 프로그램 이미지 44장 → Storage `board-assets/madleague/programs/{group}/{id}.webp` (멱등) |
+| `lib/madleague-program-assets.ts` · `scripts/madleague-programs-import.mjs` | madleague.net 프로그램 이미지 44장 → Storage `board-assets/madleague/programs/{group}/{id}.webp` (멱등) |
 | `features/madleague/ProgramForms.tsx` | 프로그램 페이지의 참가 신청 버튼 — `forms.program` 키(creazy·dam)의 공개 폼 자동 노출 |
 | `app/(MADLeague)/madleague/forms/[slug]/` | 행사 참가 신청 (유니버스 공통 폼 `components/forms/FormRenderer.tsx`) |
 | `app/(MADLeague)/madleague/pt/` | 경쟁 PT 목록 · `[id]` 회차 방 · `[id]/teams` 팀 구성(임원·직원) · `join/[code]` 초대 — 화면은 `features/programs/*` 얇은 래퍼 (테마 `ProgramTheme.ts` madleague) |

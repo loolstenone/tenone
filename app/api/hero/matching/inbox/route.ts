@@ -16,6 +16,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember, assertSelf } from "@/lib/api-guard";
 
 interface AiReport {
     for_company?: string;
@@ -41,6 +42,12 @@ export async function GET(req: NextRequest) {
         if (!side || !memberId) {
             return NextResponse.json({ error: "side and memberId required" }, { status: 400 });
         }
+
+        // 본인 매칭만 (직원 허용) — memberId 쿼리를 그대로 믿지 않는다 (점검 축3 H-1)
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const denied = assertSelf(auth, memberId);
+        if (denied) return denied;
 
         const sb = createAdminClient();
 

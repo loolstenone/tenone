@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { safeRedirect } from '@/lib/login-href';
 import { createServerClient } from '@supabase/ssr';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCookieDomain } from '@/lib/domain-registry';
@@ -18,7 +19,6 @@ import { getCookieDomain } from '@/lib/domain-registry';
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
-    const final_path = searchParams.get('final') || '/';
     const origin = request.nextUrl.origin;
 
     if (!token) {
@@ -50,6 +50,8 @@ const adminClient = createAdminClient();
     await adminClient.from('sso_tokens').update({ used: true }).eq('id', ssoToken.id);
 
     // 현재 도메인에 Supabase 세션 쿠키 설정
+    // 최종 경로는 initiate에서 저장한 값만 쓴다 (쿼리 final 무시) + 상대 경로 검증 (점검 축3 H-5)
+    const final_path = safeRedirect((ssoToken as { final_path?: string | null }).final_path);
     let response = NextResponse.redirect(new URL(final_path, origin));
 
     const supabase = createServerClient(

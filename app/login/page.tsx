@@ -13,17 +13,9 @@ import { MadLeagueHeader } from '@/features/madleague/MadLeagueHeader';
 import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
-import { signupHref } from '@/lib/login-href';
+import { signupHref, safeRedirect } from '@/lib/login-href';
 
 // Open Redirect 방어 — 반드시 상대 경로(/)로 시작해야 함
-function safeRedirect(raw: string | null, fallback = '/'): string {
-    if (!raw) return fallback;
-    // //evil.com, https://evil.com 등 외부 URL 차단
-    if (/^(https?:)?\/\//.test(raw)) return fallback;
-    // 반드시 /로 시작
-    if (!raw.startsWith('/')) return fallback;
-    return raw;
-}
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
