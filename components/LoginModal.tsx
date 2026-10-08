@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 import { shouldTrySso, startSso, publishLoginToHub } from "@/lib/sso";
+import { OneIdHelp } from "@/components/OneIdHelp";
 import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
@@ -172,8 +173,9 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                 </div>
 
                 <div className="px-6 pb-6">
-                    <p className="text-sm text-neutral-700 mb-5">
+                    <p className="text-sm text-neutral-700 mb-5 flex items-center gap-1.5">
                         {tab === "login" ? "One ID로 로그인하세요" : "One ID를 만들고 시작하세요"}
+                        <OneIdHelp />
                     </p>
 
                     {/* 소셜 로그인 */}

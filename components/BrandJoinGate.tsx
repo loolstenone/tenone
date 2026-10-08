@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useSite } from "@/lib/site-context";
 import { createClient } from "@/lib/supabase/client";
 import { LEGAL_DOCUMENTS } from "@/lib/company-info";
+import { OneIdHelp } from "@/components/OneIdHelp";
 
 /**
  * 브랜드 첫 진입 동의 — 헌법 원칙 1 ("계정은 하나, 서비스는 독립") · 데이터 계약 4조
@@ -65,7 +66,7 @@ export function BrandJoinGate() {
     return (
         <div className="fixed inset-0 z-[99997] flex items-center justify-center bg-black/60 px-4">
             <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
-                <p className="text-[11px] font-semibold tracking-wide text-neutral-400">Ten:One™ Universe One ID</p>
+                <p className="flex items-center gap-1 text-[11px] font-semibold tracking-wide text-neutral-400">Ten:One™ Universe One ID <OneIdHelp size={12} /></p>
                 <h2 className="mt-1 text-lg font-bold text-neutral-900">{brandName}을(를) 처음 이용하시네요</h2>
                 <p className="mt-1 text-sm text-neutral-500">
                     가지고 계신 One ID로 {brandName}을(를) 바로 이용할 수 있어요. 시작하기 전에 아래 항목을 확인해주세요.
