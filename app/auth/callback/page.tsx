@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { safeRedirect } from '@/lib/login-href';
+import { publishLoginToHub } from '@/lib/sso';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AuthCallbackPage() {
@@ -44,10 +45,13 @@ export default function AuthCallbackPage() {
             if (pendingRedirect) {
                 // /*/app/onboarding 으로 돌아오면 완료된 사용자가 온보딩에 갇히는 루프 발생.
                 // 대신 /*/app 으로 보내면 각 서비스 layout이 신규/기존 여부에 따라 라우팅한다.
-                router.replace(pendingRedirect.replace(/\/app\/onboarding(\/.*)?$/, '/app'));
+                const target = pendingRedirect.replace(/\/app\/onboarding(\/.*)?$/, '/app');
+                // 독립 도메인이면 허브(auth.tenone.biz)에도 로그인 등록 후 target으로 (One ID — lib/sso-server.ts)
+                if (!publishLoginToHub(target)) router.replace(target);
             } else {
                 const defaultNext = window.location.hostname.includes('smarcomm') ? '/dashboard' : '/';
-                router.replace(next !== '/' ? next : defaultNext);
+                const target = next !== '/' ? next : defaultNext;
+                if (!publishLoginToHub(target)) router.replace(target);
             }
         };
 

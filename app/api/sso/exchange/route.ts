@@ -1,92 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/lib/login-href';
-import { createServerClient } from '@supabase/ssr';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { getCookieDomain } from '@/lib/domain-registry';
+import { consumeSsoToken, establishSession, SSO_NONE_COOKIE, SSO_NONE_MAX_AGE } from '@/lib/sso-server';
 
 /**
- * SSO Exchange — 타 도메인(smarcomm.biz 등)에서 호출
- *
- * 흐름:
- * 1. /api/sso/initiate에서 받은 일회성 토큰으로 세션 복원
- * 2. Supabase setSession() → 현재 도메인 쿠키에 세션 저��
- * 3. 최종 목���지로 리다이렉트
- *
- * Query params:
- *   token: SSO 일회성 토���
- *   final: 최종 리다���렉트 경로 (/dashboard)
+ * SSO Exchange — 사이트(독립 도메인)에서 실행. 허브가 발급한 일회용 토큰으로 이 도메인에 독립 세션을 만든다.
+ * GET ?token=… → 세션 쿠키 설정 → 토큰 발급 때 정한 경로로 이동 (쿼리로 받은 경로는 쓰지 않는다)
  */
 export async function GET(request: NextRequest) {
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
     const origin = request.nextUrl.origin;
+    const host = request.headers.get('host') || '';
+    const row = await consumeSsoToken(request.nextUrl.searchParams.get('token'), 'to_site', host);
 
-    if (!token) {
-        return NextResponse.redirect(new URL(`/login?error=sso_no_token`, origin));
-    }
+    // 실패하면 오류 화면 대신 일반 로그인으로 (잠시 SSO를 다시 묻지 않음)
+    const giveUp = (path: string) => {
+        const res = NextResponse.redirect(new URL(safeRedirect(path), origin));
+        res.cookies.set(SSO_NONE_COOKIE, '1', { path: '/', maxAge: SSO_NONE_MAX_AGE, sameSite: 'lax', secure: true });
+        return res;
+    };
+    if (!row) return giveUp('/');
 
-    // service_role로 토큰 조회 (RLS ��회)
-const adminClient = createAdminClient();
-
-    const { data: ssoToken, error: fetchError } = await adminClient
-        .from('sso_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('used', false)
-        .single();
-
-    if (fetchError || !ssoToken) {
-        return NextResponse.redirect(new URL(`/login?error=sso_invalid_token`, origin));
-    }
-
-    // 만료 확인 (60초)
-    if (new Date(ssoToken.expires_at) < new Date()) {
-        // 만료된 토큰 삭제
-        await adminClient.from('sso_tokens').delete().eq('id', ssoToken.id);
-        return NextResponse.redirect(new URL(`/login?error=sso_token_expired`, origin));
-    }
-
-    // 토큰 사용 처리 (일회성)
-    await adminClient.from('sso_tokens').update({ used: true }).eq('id', ssoToken.id);
-
-    // 현재 도메인에 Supabase 세션 쿠키 설정
-    // 최종 경로는 initiate에서 저장한 값만 쓴다 (쿼리 final 무시) + 상대 경로 검증 (점검 축3 H-5)
-    const final_path = safeRedirect((ssoToken as { final_path?: string | null }).final_path);
-    let response = NextResponse.redirect(new URL(final_path, origin));
-
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return request.cookies.getAll(); },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        response.cookies.set(name, value, {
-                            ...options,
-                            // *.tenone.biz에서 호출되면 공용 도메인으로 (host-only 중복 세션 쿠키 → refresh 무한루프 방지). 외부 도메인은 undefined = 현재 호스트
-                            ...(getCookieDomain(request.headers.get('host') || '') && { domain: getCookieDomain(request.headers.get('host') || '') }),
-                        });
-                    });
-                },
-            },
-            auth: { storageKey: 'tenone-auth' },
-        }
-    );
-
-    // setSession으로 세션 복원 → 쿠키 자동 설정
-    const { error: sessionError } = await supabase.auth.setSession({
-        access_token: ssoToken.access_token,
-        refresh_token: ssoToken.refresh_token,
-    });
-
-    if (sessionError) {
-        console.error('[SSO] setSession error:', sessionError);
-        return NextResponse.redirect(new URL(`/login?error=sso_session_failed`, origin));
-    }
-
-    // 사용된 토큰 삭제 (정리)
-    adminClient.from('sso_tokens').delete().eq('id', ssoToken.id).then(() => {});
-
-    return response;
+    const response = NextResponse.redirect(new URL(safeRedirect(row.final_path), origin));
+    const ok = await establishSession(request, response, row.otp_hash, row.user_id);
+    return ok ? response : giveUp(row.final_path);
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Eye, EyeOff, AtSign, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
+import { shouldTrySso, startSso, publishLoginToHub } from "@/lib/sso";
 import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
@@ -30,6 +31,16 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
+    const [ssoChecking, setSsoChecking] = useState(false);
+    const ssoTried = useRef(false);
+
+    // One ID — 독립 도메인에서는 모달을 열기 전에 허브(auth.tenone.biz)에 로그인 기록이 있는지 먼저 확인.
+    // 있으면 비밀번호 없이 이 사이트에도 로그인, 없으면 돌아와서 이 모달을 그대로 연다 (lib/sso-server.ts)
+    useEffect(() => {
+        if (!isOpen || isLoading || isAuthenticated || ssoTried.current) return;
+        ssoTried.current = true;
+        if (shouldTrySso()) { setSsoChecking(true); startSso(); }
+    }, [isOpen, isLoading, isAuthenticated]);
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
     useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);
@@ -81,13 +92,15 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                 const result = await login(loginEmail, password, captcha.token);
                 captcha.reset();
                 if (!result.success) setError("핸들 또는 비밀번호가 올바르지 않습니다.");
+                else publishLoginToHub();
                 setIsSubmitting(false);
                 return;
             }
 
             const result = await login(loginEmail, password, captcha.token);
-                captcha.reset();
+            captcha.reset();
             if (!result.success) setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다.");
+            else publishLoginToHub(); // 독립 도메인이면 허브에도 등록 → 다른 유니버스 사이트에서 다시 로그인 불필요
         } catch { setError("로그인 중 오류가 발생했습니다."); }
         setIsSubmitting(false);
     };
@@ -122,6 +135,18 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     };
 
     if (!isOpen || typeof window === 'undefined') return null;
+
+    if (ssoChecking) return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <div className="relative rounded-2xl bg-white px-8 py-6 text-center shadow-xl">
+                <div className="mx-auto mb-3 h-6 w-6 rounded-full border-2 border-neutral-200 border-t-neutral-900 animate-spin" />
+                <p className="text-sm font-semibold text-neutral-900">Ten:One™ Universe One ID</p>
+                <p className="mt-1 text-xs text-neutral-500">로그인 정보를 확인하고 있습니다</p>
+            </div>
+        </div>,
+        document.body,
+    );
 
     const inputClass = "w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900";
 

@@ -1,56 +1,42 @@
 /**
- * SSO (Single Sign-On) 유틸리티
- * 타 루트 도메인 간 세션 공유
+ * Ten:One™ Universe One ID — SSO 클라이언트 헬퍼 (독립 도메인 간 로그인 이어주기)
+ * 서버 흐름·보안 원칙: lib/sso-server.ts
  *
- * 도메인 목록은 domain-registry.ts에서 자동 파생 — 수동 관리 불필요
+ * - *.tenone.biz 계열은 `.tenone.biz` 쿠키로 이미 공유 → SSO 불필요
+ * - 독립 도메인(rook.co.kr·madleague.net·hero.ne.kr …) 프로덕션에서만 동작. localhost는 경로 분기라 해당 없음
  */
+import { isExternalDomain as checkExternalDomain } from '@/lib/domain-registry';
 
-import {
-    getAllExternalDomains,
-    isTenoneFamily as checkTenoneFamily,
-    isExternalDomain as checkExternalDomain,
-} from '@/lib/domain-registry';
+const HUB_ORIGIN = 'https://auth.tenone.biz';
+const NONE_COOKIE = 't1_sso_none';
 
-/** 현재 도메인이 SSO가 필요한 외부 도메인인지 확인 */
-export function isExternalDomain(): boolean {
+/** 현재 페이지가 SSO 대상 독립 도메인(https)인지 */
+export function isSsoDomain(): boolean {
     if (typeof window === 'undefined') return false;
-    return checkExternalDomain(window.location.hostname);
+    return window.location.protocol === 'https:' && checkExternalDomain(window.location.hostname);
 }
 
-/** 현재 도메인이 *.tenone.biz 패밀리인지 확인 */
-export function isTenoneFamily(): boolean {
-    if (typeof window === 'undefined') return true;
-    return checkTenoneFamily(window.location.hostname);
+/** 로그인 버튼을 눌렀을 때 허브에 먼저 물어볼지 — 허브에 세션 없음이 최근 확인됐으면 바로 로그인 모달 */
+export function shouldTrySso(): boolean {
+    if (!isSsoDomain()) return false;
+    return !document.cookie.split(';').some(c => c.trim().startsWith(`${NONE_COOKIE}=`));
 }
 
-/**
- * SSO 로그인 시작
- * 현재 도메인이 외부 도메인이면 tenone.biz의 SSO initiate로 리다이렉트
- * @param finalPath 로그인 완료 후 최종 목적지 (기본 /)
- */
-export function startSSOLogin(finalPath: string = '/') {
-    const origin = window.location.origin;
-    const ssoUrl = new URL('https://tenone.biz/api/sso/initiate');
-    ssoUrl.searchParams.set('origin', origin);
-    ssoUrl.searchParams.set('final', finalPath);
-    window.location.href = ssoUrl.toString();
+function currentPath(): string {
+    return window.location.pathname + window.location.search;
 }
 
-/**
- * 페이지 로드 시 SSO 자동 체크
- * 외부 도메인에서 로그인 안 된 상태면 tenone.biz 세션 확인 시도
- * (자동 로그인 — 사용자가 tenone.biz에서 이미 로그인한 경우)
- */
-export function checkSSOSession(finalPath: string = '/') {
-    if (!isExternalDomain()) return;
-
-    // 이미 SSO 시도한 적 있으면 무한 루프 방지
-    const ssoAttempted = sessionStorage.getItem('sso_attempted');
-    if (ssoAttempted) return;
-
-    sessionStorage.setItem('sso_attempted', 'true');
-    startSSOLogin(finalPath);
+/** 허브에 로그인 상태가 있으면 이 도메인에도 로그인 (없으면 돌아와서 로그인 모달) */
+export function startSso(finalPath: string = currentPath()) {
+    const url = new URL('/api/sso/initiate', HUB_ORIGIN);
+    url.searchParams.set('origin', window.location.origin);
+    url.searchParams.set('final', finalPath);
+    window.location.href = url.toString();
 }
 
-/** 외부 도메인 목록 (하위 호환용 export) */
-export { getAllExternalDomains };
+/** 이 도메인에서 로그인 성공 직후 — 허브에도 등록해 다른 유니버스 사이트에서 다시 로그인하지 않게 */
+export function publishLoginToHub(finalPath: string = currentPath()): boolean {
+    if (!isSsoDomain()) return false;
+    window.location.href = `/api/sso/publish?final=${encodeURIComponent(finalPath)}`;
+    return true;
+}

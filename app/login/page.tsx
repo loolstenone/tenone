@@ -14,6 +14,7 @@ import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { signupHref, safeRedirect } from '@/lib/login-href';
+import { shouldTrySso, startSso, publishLoginToHub } from '@/lib/sso';
 
 // Open Redirect 방어 — 반드시 상대 경로(/)로 시작해야 함
 
@@ -69,7 +70,7 @@ function SmarCommLoginForm() {
         try {
             await login(email, password, captcha.token);
             captcha.reset();
-            router.push(redirectTo);
+            if (!publishLoginToHub(redirectTo)) router.push(redirectTo);
         } catch { setError('이메일 또는 비밀번호가 올바르지 않습니다'); }
     };
 
@@ -176,13 +177,11 @@ function LoginForm() {
             const result = await login(email, password, captcha.token);
             captcha.reset();
             if (result.success) {
-                if (isSubdomain) {
-                    router.push(redirectTo !== '/' ? redirectTo : '/');
-                } else {
-                    const defaultDest = isMadLeague ? '/madleague' : '/';
-                    const dest = redirectTo !== '/' ? redirectTo : defaultDest;
-                    router.push(dest);
-                }
+                const dest = isSubdomain
+                    ? (redirectTo !== '/' ? redirectTo : '/')
+                    : (redirectTo !== '/' ? redirectTo : (isMadLeague ? '/madleague' : '/'));
+                // 독립 도메인이면 허브에도 로그인 등록 후 이동 (One ID — lib/sso-server.ts)
+                if (!publishLoginToHub(dest)) router.push(dest);
             } else {
                 setError(result.error || '이메일 또는 비밀번호가 올바르지 않습니다.');
                 setIsSubmitting(false);
@@ -394,22 +393,11 @@ function LoginPageInner() {
         const isExternal = !isTenone && !isTenoneSubdomain;
         setIsExternalDomain(isExternal);
 
-        if (isExternal) {
-            // tenone.biz에 세션이 있으면 자동 로그인 시도 (한 번만)
-            const ssoAttempted = sessionStorage.getItem('sso_attempted');
-            if (!ssoAttempted) {
-                sessionStorage.setItem('sso_attempted', '1');
-                const searchParams = new URLSearchParams(window.location.search);
-                // SSO 에러로 돌아온 경우는 스킵 (무한루프 방지)
-                if (!searchParams.get('error')?.startsWith('sso_')) {
-                    const finalPath = safeRedirect(searchParams.get('redirect'));
-                    const ssoUrl = new URL('https://tenone.biz/api/sso/initiate');
-                    ssoUrl.searchParams.set('origin', window.location.origin);
-                    ssoUrl.searchParams.set('final', finalPath);
-                    window.location.href = ssoUrl.toString();
-                    return;
-                }
-            }
+        // One ID — 독립 도메인이면 허브(auth.tenone.biz)에 로그인 기록이 있는지 먼저 확인 (없으면 돌아와서 로그인 폼)
+        // 돌아올 곳 = 이 /login 그대로: 허브 세션이 있으면 로그인된 채 돌아와 redirect로 자동 이동, 없으면 폼 표시
+        if (shouldTrySso()) {
+            startSso();
+            return;
         }
         setDomainChecked(true);
     }, []);

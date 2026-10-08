@@ -1,86 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/lib/login-href';
-import { createServerClient } from '@supabase/ssr';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { randomBytes } from 'crypto';
-import { getAllExternalDomains } from '@/lib/domain-registry';
+import { isAllowedSiteOrigin, isHubHost, mintSsoToken, ssoSupabase } from '@/lib/sso-server';
 
 /**
- * SSO Initiate — tenone.biz 에서 호출
+ * SSO Initiate — 허브(auth.tenone.biz)에서 실행. 사이트의 로그인 버튼이 여기로 보낸다.
  *
- * 흐름:
- * 1. 타 도메인(smarcomm.biz 등)의 로그인 페이지가 여기로 리다이렉트
- * 2. .tenone.biz 쿠키에서 세션 확인
- * 3. 세션 있으면 → 일회성 토큰 생성 → 타 도메인의 /api/sso/exchange로 리다이렉트
- * 4. 세션 없으면 → tenone.biz 로그인 페이지로 (로그인 후 다시 여기로)
- *
- * Query params:
- *   origin: 타 도메인 origin (https://smarcomm.biz)
- *   final: 최종 리다이렉트 경로 (/dashboard)
+ * GET ?origin=https://www.rook.co.kr&final=/rook/projects
+ *   허브 세션 있음 → 일회용 토큰 → {origin}/api/sso/exchange?token=…
+ *   허브 세션 없음 → {origin}/api/sso/return?final=… (사이트가 로그인 모달을 연다)
+ * 허브는 로그인 화면을 띄우지 않는다 — 로그인은 항상 브랜드 사이트 안에서 (§1.2.1 이탈 방지)
  */
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const origin = searchParams.get('origin');   // https://smarcomm.biz
+    const origin = searchParams.get('origin');
     const final_path = safeRedirect(searchParams.get('final'));
 
-    // origin 필수 + 안전한 URL인지 검증
-    if (!origin || !origin.startsWith('https://')) {
-        return NextResponse.json({ error: 'Missing or invalid origin' }, { status: 400 });
-    }
+    if (!isHubHost(request)) return NextResponse.json({ error: 'SSO hub only' }, { status: 404 });
+    if (!isAllowedSiteOrigin(origin)) return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
 
-    // 허용된 도메인 — domain-registry에서 자동 파생 (수동 관리 불필요)
-    const allowedDomains = getAllExternalDomains();
-    const originHost = new URL(origin).hostname;
-    if (!allowedDomains.includes(originHost)) {
-        return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
-    }
+    const back = new URL('/api/sso/return', origin);
+    back.searchParams.set('final', final_path);
 
-    // .tenone.biz 쿠키에서 Supabase 세션 읽기
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return request.cookies.getAll(); },
-                setAll() { /* read-only */ },
-            },
-            auth: { storageKey: 'tenone-auth' },
-        }
-    );
+    const probe = NextResponse.next();
+    const { data: { user } } = await ssoSupabase(request, probe).auth.getUser();
+    if (!user?.email) return NextResponse.redirect(back);
 
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-        // 세션 없음 → tenone.biz 로그인 페이지로 (로그인 후 다��� 여기로 돌아오도록)
-        const currentUrl = request.url;
-        const loginUrl = new URL('https://tenone.biz/login');
-        loginUrl.searchParams.set('redirect', currentUrl);
-        return NextResponse.redirect(loginUrl);
-    }
-
-    // 세션 있음 → 일회성 SSO 토큰 생성
-    const token = randomBytes(32).toString('hex');
-
-    // service_role 키로 sso_tokens 테이블에 INSERT (RLS 우회)
-const adminClient = createAdminClient();
-
-    const { error } = await adminClient.from('sso_tokens').insert({
-        token,
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        redirect_to: origin,
-        final_path,
+    const token = await mintSsoToken({
+        userId: user.id,
+        email: user.email,
+        direction: 'to_site',
+        exchangeOrigin: origin,
+        returnOrigin: origin,
+        finalPath: final_path,
     });
+    if (!token) return NextResponse.redirect(back);
 
-    if (error) {
-        console.error('[SSO] Token insert error:', error);
-        return NextResponse.json({ error: 'SSO token creation failed' }, { status: 500 });
-    }
-
-    // 타 도메인의 exchange 엔드포인트로 리다���렉트
-    const exchangeUrl = new URL(`${origin}/api/sso/exchange`);
-    exchangeUrl.searchParams.set('token', token);
-    exchangeUrl.searchParams.set('final', final_path);
-
-    return NextResponse.redirect(exchangeUrl);
+    const exchange = new URL('/api/sso/exchange', origin);
+    exchange.searchParams.set('token', token);
+    return NextResponse.redirect(exchange);
 }
