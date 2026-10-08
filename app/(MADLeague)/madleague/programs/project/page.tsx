@@ -40,7 +40,7 @@ export default function ProjectPage() {
       <section className="bg-[#EC1D25]">
         <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="text-3xl sm:text-4xl font-black text-white">PJT 참여 기업 모집</div>
-          <Link href="mailto:lools@tenone.biz" className="inline-flex items-center gap-2 bg-black text-white font-bold px-10 py-5 text-lg">
+          <Link href="/madleague/contact" className="inline-flex items-center gap-2 bg-black text-white font-bold px-10 py-5 text-lg">
             문의하기 <ArrowRight className="h-5 w-5" />
           </Link>
         </div>

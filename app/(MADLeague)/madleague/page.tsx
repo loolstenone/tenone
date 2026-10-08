@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import {
   fetchMadClubs,
   fetchMadArticles,
@@ -185,13 +185,6 @@ export default async function Page() {
           <div className="flex-1">
             <div className="text-sm font-bold tracking-widest text-white/80">DAMbe 들이 기다린다</div>
             <div className="mt-2 text-3xl sm:text-4xl font-black text-white">담비라 세상아!</div>
-            <a
-              href="mailto:lools@tenone.biz"
-              className="mt-6 inline-flex items-center gap-2 text-white/80 hover:text-white transition text-sm font-bold"
-            >
-              <Mail className="h-4 w-4" />
-              lools@tenone.biz
-            </a>
           </div>
 
           {/* 담비 캐릭터 */}
