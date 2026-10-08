@@ -78,7 +78,7 @@ export function MadLeagueHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto">
+                <div className="hidden lg:flex ml-auto text-white">
                     <UniverseUtilityBar
                         aboutPath="/madleague/about"
                         profilePath="/madleague/my"
