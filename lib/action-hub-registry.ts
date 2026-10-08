@@ -124,16 +124,6 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "approval",
         priority: "normal",
     },
-    {
-        key: "mad_hero_applications",
-        label: "MAD Hero 지원서",
-        table: "mad_hero_applications",
-        filter: { column: "status", value: "pending" },
-        href: "/intra/ums/madleague/hero-applications",
-        brand_id: "madleague",
-        category: "approval",
-        priority: "normal",
-    },
 
     // ── 개인정보 (Privacy)
     {

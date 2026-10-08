@@ -6,7 +6,7 @@ import { MAD_ACCENT, MAD_PROGRAM_GROUPS, MAD_PROGRAMS } from '@/features/madleag
 
 export const metadata = {
   title: '프로그램',
-  description: `MADLeague ${MAD_PROGRAMS.length}가지 실전 무대 — 도전 · 실전 · 훈련 · 연결`,
+  description: `MADLeague ${MAD_PROGRAMS.length}가지 실전 무대 — 도전 · 실전 · 연결 · 연계`,
 };
 
 export default function ProgramsPage() {
@@ -20,7 +20,7 @@ export default function ProgramsPage() {
           </h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
             MADLeague는 학생이 실전을 경험할 수 있는 {MAD_PROGRAMS.length}가지 프로그램을 운영한다.
-            방식은 넷으로 나뉜다 — <span className="text-white">도전·실전·훈련·연결</span>. 결국 하나를 남긴다, 진짜 경험.
+            방식은 넷으로 나뉜다 — <span className="text-white">도전·실전·연결·연계</span>. 연계 프로그램은 MADLeague에서 맛보고, 그 브랜드에서 제대로 쓴다.
           </p>
           {/* 그룹 바로가기 */}
           <div className="mt-10 flex flex-wrap gap-2">
@@ -64,8 +64,17 @@ export default function ProgramsPage() {
                       <div className="mt-3 text-3xl font-black text-white">{p.title}</div>
                       <div className={`mt-4 text-sm leading-relaxed ${p.featured ? 'text-white/90' : 'text-neutral-400'}`}>{p.desc}</div>
                       <dl className={`mt-6 space-y-1 text-xs ${p.featured ? 'text-white/80' : 'text-neutral-500'}`}>
-                        <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">대상</dt><dd>{p.glance.who}</dd></div>
-                        <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">시기</dt><dd>{p.glance.when}</dd></div>
+                        {p.glance ? (
+                          <>
+                            <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">대상</dt><dd>{p.glance.who}</dd></div>
+                            <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">시기</dt><dd>{p.glance.when}</dd></div>
+                          </>
+                        ) : p.partner && (
+                          <>
+                            <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">맛보기</dt><dd>MADLeague</dd></div>
+                            <div className="flex gap-2"><dt className="w-10 shrink-0 font-bold">정식</dt><dd>{p.partner.brand}</dd></div>
+                          </>
+                        )}
                       </dl>
                       <ArrowRight className={`mt-8 h-5 w-5 ${p.featured ? 'text-white' : 'text-neutral-600 group-hover:text-[#EC1D25]'} transition`} />
                     </Link>
