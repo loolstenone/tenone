@@ -299,18 +299,6 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                         </div>
                     )}
 
-                    {/* 소셜 로그인 안내 */}
-                    {tab === "login" && (
-                        <p className="text-center text-[11px] text-neutral-600 mt-2">
-                            소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
-                        </p>
-                    )}
-
-                    {/* One ID 안내 — 유니버스를 강조하지 않고, 헷갈릴 때 알 수 있게 작게 (헌법 원칙 7) */}
-                    <p className="text-center text-[11px] text-neutral-400 mt-4">
-                        <span className="font-semibold text-neutral-500">Ten:One™ Universe One ID</span> · 하나의 아이디로 유니버스의 모든 서비스를 이용합니다
-                    </p>
-
                     {/* 탭 전환 링크 */}
                     <p className="text-center text-sm text-neutral-700 mt-4">
                         {tab === "login" ? (
@@ -319,6 +307,13 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                             <>이미 계정이 있으신가요? <button onClick={() => switchTab("login")} className="font-semibold text-neutral-900 hover:underline">로그인</button></>
                         )}
                     </p>
+
+                    {/* 소셜 로그인 안내 — 맨 하단 */}
+                    {tab === "login" && (
+                        <p className="text-center text-[11px] text-neutral-500 mt-3">
+                            소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
+                        </p>
+                    )}
                 </div>
             </div>
         </div>,
