@@ -8,7 +8,7 @@ export function MadLeagueFooter() {
         <UniverseFooter
             siteId="madleague"
             brandName="MAD League"
-            tagline="Match, Act, Develop · 경쟁을 통한 성장 플랫폼"
+            tagline="Match, Act, Develop · 실전 경쟁을 통한 성장"
             accentColor="#EC1D25"
             dark={true}
             actions={[
