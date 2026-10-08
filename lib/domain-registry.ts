@@ -138,6 +138,22 @@ for (const { prefix, siteId } of Object.values(registry)) {
     if (!prefixToSiteId[prefix]) prefixToSiteId[prefix] = siteId;
 }
 
+/**
+ * 경로(브랜드 prefix 포함, 예: '/rook/projects/1')를 소유한 사이트의 origin
+ *   공식 주소(vercel 운영) → {brand}.tenone.biz → www.tenone.biz (브랜드 prefix가 아닌 경로 = TenOne 페이지)
+ * 교차 브랜드 링크용 — 독립 도메인·서브도메인에서 상대 경로는 middleware가 현재 사이트 prefix를 붙여 404가 된다 (점검 축6 H-2)
+ */
+export function siteOriginForPath(path: string): string {
+    const seg = `/${path.split(/[/?#]/)[1] ?? ''}`;
+    const siteId = prefixToSiteId[seg];
+    if (!siteId) return 'https://www.tenone.biz';
+    const key = seg.slice(1);
+    const canonical = CANONICAL_HOSTS[key] ?? CANONICAL_HOSTS[siteId];
+    if (canonical?.hosting === 'vercel') return `https://${canonical.host}`;
+    if (registry[`${key}.tenone.biz`]) return `https://${key}.tenone.biz`;
+    return 'https://www.tenone.biz';
+}
+
 // ── 도메인 유틸리티 (모든 인증 파일의 단일 진실 소스) ──
 
 /** hostname이 *.tenone.biz 패밀리인지 판별 */

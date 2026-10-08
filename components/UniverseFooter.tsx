@@ -28,6 +28,7 @@
  */
 
 import Link from "next/link";
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 import { COMPANY_INFO } from "@/lib/company-info";
 import { ReactNode } from "react";
 import clsx from "clsx";
@@ -53,7 +54,7 @@ export interface UniverseFooterProps {
 }
 
 const DEFAULT_UNIVERSE_LINKS: FooterLink[] = [
-    { label: "Ten:One", href: "https://tenone.biz", external: true },
+    { label: "Ten:One", href: "https://www.tenone.biz", external: true },
     { label: "About", href: "/about" },
     { label: "Brands", href: "/brands" },
     { label: "Universe", href: "/universe" },
@@ -113,7 +114,7 @@ export function UniverseFooter({
                             <p className={clsx("mt-2 text-sm", textSecondary)}>{tagline}</p>
                         )}
                         <div className={clsx("mt-4 text-xs", textTertiary)}>
-                            <Link href="https://tenone.biz" className={clsx(linkHover, "underline-offset-2 hover:underline")} style={{ color: accentColor }}>Ten:One™ Universe</Link>
+                            <a href="https://www.tenone.biz" className={clsx(linkHover, "underline-offset-2 hover:underline")} style={{ color: accentColor }}>Ten:One™ Universe</a>
                         </div>
                     </div>
 
@@ -137,12 +138,13 @@ export function UniverseFooter({
                                                     {link.label}
                                                 </a>
                                             ) : (
-                                                <Link
+                                                // 브랜드 링크는 같은 사이트 경로 그대로, Universe 열(About·Brands·Universe = TenOne 페이지)은 브랜드 도메인에서 www.tenone.biz로
+                                                <CrossSiteLink
                                                     href={link.href}
                                                     className={clsx("text-sm transition-colors", textSecondary, linkHover)}
                                                 >
                                                     {link.label}
-                                                </Link>
+                                                </CrossSiteLink>
                                             )}
                                         </li>
                                     ))}

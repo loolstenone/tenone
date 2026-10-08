@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 import Image from "next/image";
 import { User, LogOut, Share2, Search, Shield, X, ArrowRight, Bell, Briefcase, ChevronDown, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -17,7 +18,7 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
     { brandId: "madleap",      label: "MADLeap",              path: "/madleap/my",      description: "교육 프로그램" },
     { brandId: "hero",         label: "HeRo",                 path: "/hero/journey",    description: "커리어 여정" },
     { brandId: "wio",          label: "WIO",                  path: "/wio/app",         description: "업무 자동화 OS" },
-    { brandId: "smarcomm",     label: "SmarComm",             path: "/dashboard",       description: "마케팅 OS" },
+    { brandId: "smarcomm",     label: "SmarComm",             path: "/smarcomm/dashboard", description: "마케팅 OS" },
     { brandId: "youinone",     label: "YouInOne",             path: "/youinone/my",     description: "크루 정산" },
     { brandId: "mindle",       label: "Mindle",               path: "/mindle/my",       description: "트렌드 콘텐츠" },
     { brandId: "brandgravity", label: "Brand Gravity",        path: "/brandgravity/my", description: "브랜드 진단" },
@@ -244,7 +245,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
                                             {workspaces.map(w => (
-                                                <Link
+                                                <CrossSiteLink
                                                     key={w.brandId}
                                                     href={w.path}
                                                     onClick={() => setWsOpen(false)}
@@ -256,7 +257,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                                         {w.description && <div className="text-[10px] text-neutral-500 truncate">{w.description}</div>}
                                                     </div>
                                                     <ExternalLink className="h-3 w-3 text-neutral-300 group-hover:text-neutral-700 shrink-0" />
-                                                </Link>
+                                                </CrossSiteLink>
                                             ))}
                                             {/* legacy workspacePath fallback (registry에 없으나 호출자가 명시한 경우) */}
                                             {config.workspacePath && !workspaces.some(w => w.path === config.workspacePath) && (
@@ -309,7 +310,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                             ) : notifications.length === 0 ? (
                                                 <div className="px-4 py-10 text-center text-xs text-neutral-400">새 알림이 없습니다</div>
                                             ) : notifications.map(n => (
-                                                <Link
+                                                <CrossSiteLink
                                                     key={n.id}
                                                     href={n.href || "#"}
                                                     onClick={() => setNotiOpen(false)}
@@ -320,7 +321,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                                     <div className="text-sm font-medium text-neutral-900 truncate">{n.title}</div>
                                                     {n.body && <div className="text-xs text-neutral-500 mt-0.5 line-clamp-2">{n.body}</div>}
                                                     <div className="text-[10px] text-neutral-400 mt-1">{new Date(n.created_at).toLocaleString("ko-KR")}</div>
-                                                </Link>
+                                                </CrossSiteLink>
                                             ))}
                                         </div>
                                     </div>
@@ -435,7 +436,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                     ) : (
                                         <div className="space-y-1">
                                             {universeResults.map((r) => (
-                                                <Link key={r.id} href={r.href} onClick={closeSearch}
+                                                <CrossSiteLink key={r.id} href={r.href} onClick={closeSearch}
                                                     className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 hover:bg-white/5 transition-colors group">
                                                     <div className="min-w-0">
                                                         <div className="text-sm font-medium text-white/80 group-hover:text-white truncate">{r.title}</div>
@@ -445,7 +446,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                                         <span className="text-[10px] text-white/25 font-medium">{r.type}</span>
                                                         <ArrowRight className="h-3.5 w-3.5 text-white/20 group-hover:text-white/60 transition-colors" />
                                                     </div>
-                                                </Link>
+                                                </CrossSiteLink>
                                             ))}
                                         </div>
                                     )}

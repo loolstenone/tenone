@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 import { ArrowRight, Megaphone, Sparkles, Users, Compass, ShieldCheck, CheckCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -218,7 +219,7 @@ export default function TalentAgentPage() {
                 dot: "#1E88E5",
               },
             ].map((s) => (
-              <Link
+              <CrossSiteLink
                 key={s.name}
                 href={s.href}
                 className="group flex flex-col p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 transition-colors min-h-full"
@@ -230,7 +231,7 @@ export default function TalentAgentPage() {
                 </div>
                 <p className="text-[11px] text-red-400/70 font-medium mb-2 uppercase tracking-wider">{s.tagline}</p>
                 <p className="text-xs text-neutral-400 leading-relaxed">{s.desc}</p>
-              </Link>
+              </CrossSiteLink>
             ))}
           </div>
 
