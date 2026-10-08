@@ -8,12 +8,12 @@ import { useEffect, useState } from 'react';
  * 서버 렌더는 첫 카피(검색엔진용) · prefers-reduced-motion이면 슬라이드 없이 교체.
  */
 const COPIES: { top: string; accent: string }[] = [
-  { top: '양손잡이 마케터,', accent: '전략과 크리에이티브' },
-  { top: '전략과 크리에이티브,', accent: '우리는 모두 기획자다' },
-  { top: '실전이 우리를', accent: '강하게 하리라' },
+  { top: '전략과 크리에이티브,', accent: '양손잡이 마케터' },
+  { top: '세상을 바꾸는,', accent: '우리는 모두 기획자다' },
+  { top: '실전이 우리를,', accent: '강하게 하리라' },
 ];
 
-const INTERVAL_MS = 4500;
+const INTERVAL_MS = 2000;
 
 export function HeroRotatingTitle() {
   const [index, setIndex] = useState(0);
