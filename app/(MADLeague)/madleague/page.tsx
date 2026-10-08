@@ -32,11 +32,11 @@ export default async function Page() {
           </div>
           <HeroRotatingTitle />
           <p className="mt-8 max-w-xl text-lg text-neutral-300 leading-relaxed">
-            전국 대학생 광고·마케팅 동아리 연합.
+            전국 마케팅 광고 동아리들의 경쟁을 통한 성장
             <br />
-            7개 권역, 200여 명의 매드리거가 같은 클라이언트의 고민을 놓고 경쟁하고,
+            클라이언트의 실제 고민을 해결하고 실행한다.
             <br />
-            실전 프로젝트로 성장한다.
+            경력 같은 신입의 무대 - 매드리그
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link
