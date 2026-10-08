@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 // 프로그램 하위 메뉴 — programs/* 레이아웃과 /madleague/hero가 같이 쓴다
-// 이름·순서 = madleague.net 프로그램 메뉴 (경쟁 PT · 크리에이지 · 댐 파티 · 아이디어 무브먼트 · 히어로), 그 뒤 새 사이트 프로그램
+// 이름·순서 = 헤더 '프로그램' 하위 메뉴와 같게 — 경쟁 PT는 헤더 단독 메뉴라 여기서 뺀다 (2026-10-07 결정, 중복 표시 방지)
 const PROGRAMS = [
-  { name: '경쟁 PT',         href: '/madleague/programs/competition' },
   { name: '크리에이지',       href: '/madleague/programs/creazy' },
   { name: '댐 파티',          href: '/madleague/programs/dam' },
   { name: '아이디어 무브먼트', href: '/madleague/programs/im' },
