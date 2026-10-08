@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useSite } from '@/lib/site-context';
 import { createClient } from '@/lib/supabase/client';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { Eye, EyeOff, Check, KeyRound } from 'lucide-react';
@@ -10,7 +11,8 @@ import Link from 'next/link';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const { isAuthenticated, updatePassword, resetPassword } = useAuth();
+  const { isAuthenticated, updatePassword } = useAuth();
+  const { siteId } = useSite();
   const captcha = useCaptcha();
 
   // 두 가지 모드: 이메일 입력(요청) / 새 비밀번호 입력(재설정)
@@ -55,13 +57,19 @@ export default function ResetPasswordPage() {
     if (!email.trim()) { setError('이메일을 입력해주세요'); return; }
     if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setIsSubmitting(true);
-    const result = await resetPassword(email.trim(), captcha.token);
+    // 로그인 도움 — 소셜 가입이면 가입 방식 안내, 이메일 가입이면 재설정 링크를 그 메일함으로만 (/api/auth/login-help)
+    const res = await fetch('/api/auth/login-help', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), captchaToken: captcha.token, site: siteId }),
+    }).catch(() => null);
     captcha.reset();
     setIsSubmitting(false);
-    if (result.success) {
-      setSuccess('비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요.');
+    const data = await res?.json().catch(() => null) as { error?: string } | null;
+    if (res?.ok) {
+      setSuccess('입력한 이메일로 안내를 보냈습니다. 메일이 오지 않으면 스팸함을 확인하거나, 다른 이메일 또는 Google·카카오 로그인으로 시도해 보세요.');
     } else {
-      setError(result.error || '요청에 실패했습니다');
+      setError(data?.error || '요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
@@ -87,11 +95,11 @@ export default function ResetPasswordPage() {
         <div className="mb-8 text-center">
           <KeyRound className="mx-auto mb-3 h-10 w-10 text-white/60" />
           <h1 className="text-xl font-bold text-white">
-            {mode === 'request' ? '비밀번호 찾기' : '새 비밀번호 설정'}
+            {mode === 'request' ? '로그인 도움' : '새 비밀번호 설정'}
           </h1>
           <p className="mt-1 text-sm text-neutral-400">
             {mode === 'request'
-              ? '가입한 이메일을 입력하면 재설정 링크를 보내드립니다'
+              ? '가입할 때 쓴 이메일을 입력하면, 그 메일함으로 로그인 방법을 안내해 드립니다'
               : '새로운 비밀번호를 입력해주세요'}
           </p>
         </div>
@@ -119,7 +127,7 @@ export default function ResetPasswordPage() {
               disabled={isSubmitting}
               className="w-full rounded-lg bg-white py-3 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? '전송 중...' : '재설정 이메일 보내기'}
+              {isSubmitting ? '전송 중...' : '안내 메일 받기'}
             </button>
           </form>
         )}

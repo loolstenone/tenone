@@ -33,6 +33,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [consent, setConsent] = useState<SignupConsentValue>(EMPTY_CONSENT);
     const [ssoChecking, setSsoChecking] = useState(false);
+    const [failCount, setFailCount] = useState(0);
     const ssoTried = useRef(false);
 
     // One ID — 독립 도메인에서는 모달을 열기 전에 허브(auth.tenone.biz)에 로그인 기록이 있는지 먼저 확인.
@@ -92,7 +93,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                 // auth-context login() 재사용 → 모달 자동 닫힘 포함
                 const result = await login(loginEmail, password, captcha.token);
                 captcha.reset();
-                if (!result.success) setError("핸들 또는 비밀번호가 올바르지 않습니다.");
+                if (!result.success) { setError("핸들 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
                 else publishLoginToHub();
                 setIsSubmitting(false);
                 return;
@@ -100,7 +101,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
             const result = await login(loginEmail, password, captcha.token);
             captcha.reset();
-            if (!result.success) setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다.");
+            if (!result.success) { setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
             else publishLoginToHub(); // 독립 도메인이면 허브에도 등록 → 다른 유니버스 사이트에서 다시 로그인 불필요
         } catch { setError("로그인 중 오류가 발생했습니다."); }
         setIsSubmitting(false);
@@ -235,6 +236,14 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                             </div>
                             <CaptchaWidget {...captcha.widgetProps} />
                             {error && <p className="text-sm text-red-500">{error}</p>}
+                            {/* 2번 이상 실패 — 소셜로 가입했는데 이메일로 시도하는 경우가 많다 */}
+                            {failCount >= 2 && (
+                                <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 space-y-2">
+                                    <p className="font-semibold">로그인이 계속 안 되나요?</p>
+                                    <p>Google·카카오로 가입하셨다면 이메일·비밀번호가 아니라 위의 <b>Google로 로그인</b> 또는 <b>카카오로 로그인</b>을 눌러주세요.</p>
+                                    <a href="/reset-password" className="inline-block font-semibold underline">로그인 도움 — 가입 방법·비밀번호를 메일로 안내받기</a>
+                                </div>
+                            )}
                             <button type="submit" disabled={isSubmitting}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
                                 style={{ backgroundColor: accentColor }}>
@@ -290,11 +299,11 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                         )
                     )}
 
-                    {/* 비밀번호 찾기 (로그인 탭일 때만) */}
+                    {/* 로그인 도움 = 아이디(가입 방법)·비밀번호 찾기 (로그인 탭일 때만) */}
                     {tab === "login" && (
                         <div className="text-center mt-3">
                             <a href="/reset-password" className="text-xs text-neutral-600 hover:text-neutral-900 underline transition-colors">
-                                비밀번호를 잊으셨나요?
+                                로그인이 안 되나요? 아이디·비밀번호 찾기
                             </a>
                         </div>
                     )}
