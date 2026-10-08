@@ -32,9 +32,9 @@ export default async function Page() {
           </div>
           <HeroRotatingTitle />
           <p className="mt-8 max-w-xl text-lg text-neutral-300 leading-relaxed">
-            전국 마케팅 광고 동아리들의 경쟁을 통한 성장
+            전국 마케팅 광고 동아리들의 경쟁을 통한 성장.
             <br />
-            클라이언트의 실제 고민을 해결하고 실행한다.
+            클라이언트의 실제 프로젝트를 제안하고 실행한다.
             <br />
             경력 같은 신입의 무대 - 매드리그
           </p>
