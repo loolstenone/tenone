@@ -8,6 +8,7 @@ import {
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
 import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
 import { MAD_PROGRAMS } from '@/features/madleague/programs-list';
+import { madzineCategoryLabel } from '@/lib/madzine-categories';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 export const revalidate = 300; // 5분 캐시
@@ -149,12 +150,12 @@ export default async function Page() {
                       <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
-                        {a.category.toUpperCase()}
+                        {madzineCategoryLabel(a.category)}
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 text-xs text-[#EC1D25] font-bold tracking-wider uppercase">
-                    {a.category}
+                  <div className="mt-4 text-xs text-[#EC1D25] font-bold tracking-wider">
+                    {madzineCategoryLabel(a.category)}
                   </div>
                   <div className="mt-2 font-bold group-hover:text-[#EC1D25] transition">
                     {a.title}

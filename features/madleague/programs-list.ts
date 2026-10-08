@@ -36,7 +36,7 @@ export type MadProgram = {
   key: string;
   href: string;
   title: string;
-  /** 히어로 영문 eyebrow */
+  /** 히어로 영문 eyebrow — 브랜드명은 공식 표기 그대로 (HeRo·RooK·Planner's 대문자 변환 금지, 부록 B) */
   eyebrow: string;
   /** 한 줄 요약 — 목록 카드·검색·메타 description */
   desc: string;
@@ -199,7 +199,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     key: 'hero',
     href: '/madleague/programs/hero',
     title: '히어로 프로그램',
-    eyebrow: 'HERO PROGRAM',
+    eyebrow: 'WITH HeRo',
     desc: '커리어는 HeRo에서 — 매드리거의 진로 고민을 HeRo로 연결한다.',
     tagline: '매드리그에서 쌓은 경험, 커리어 설계는 HeRo와 함께.',
     group: 'partner',
@@ -208,7 +208,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
       brand: 'HeRo',
       href: '/hero',
       linkLabel: 'HeRo에서 시작하기',
-      taste: ['HIT 진단 간략 결과 — 나의 영웅 유형 미리보기', '매드리거 대상 커리어 특강·상담 회차'],
+      taste: ['HIT 미니 — 20문항·3분, 나의 영웅 유형 미리보기 (이 페이지에서 바로)', '매드리거 대상 커리어 특강·상담 회차'],
       full: ['HIT 풀 리포트·심화 진단', 'AI 커리어 상담', '현업 멘토 커리어 코칭', 'Journey — 목표·데일리 체크인'],
       link: ['경쟁 PT 수상·활동 인증서 → HeRo 커리어 프로필', 'HIT 진단 결과 → 매드리그 팀 구성·포트폴리오'],
     },
@@ -217,7 +217,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     key: 'rookie',
     href: '/madleague/programs/rookie',
     title: 'RooKie',
-    eyebrow: 'ROOKIE',
+    eyebrow: 'WITH RooK',
     desc: '크리에이티브 실전은 RooK에서 — RooK 실전 프로젝트로 연결한다.',
     tagline: '크리에이티브 실전 무대는 RooK이 연다.',
     group: 'partner',
@@ -234,13 +234,14 @@ export const MAD_PROGRAMS: MadProgram[] = [
     key: 'planners',
     href: '/madleague/programs/planners',
     title: "Planner's",
-    eyebrow: "PLANNER'S",
+    eyebrow: "WITH Planner's",
     desc: "전략 기획 훈련은 Planner's에서 — 매드리거를 Planner's로 연결한다.",
     tagline: "기획자의 훈련은 Planner's가 맡는다.",
     group: 'partner',
     partner: {
       brand: "Planner's",
-      // 연결처 미정 (MADLeague 프로그램 페이지 vs MyVerse — 사용자 결정 대기). 정해지면 href 추가
+      href: '/planners/projects',
+      linkLabel: "Planner's 훈련 프로젝트 보기",
       taste: ['매드리거 대상 전략 기획 원데이 클래스', "Planner's 기획 도구 체험"],
       full: ['실전 전략 기획 훈련 과정', '실전 프로젝트 참여'],
       link: ["Planner's 훈련 기록 → 매드리거 포트폴리오", '매드리그 경쟁 PT 기획서 → 훈련 과제로'],

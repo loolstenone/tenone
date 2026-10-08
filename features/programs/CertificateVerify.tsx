@@ -52,7 +52,7 @@ export async function CertificateVerify({ code, theme }: { code: string; theme: 
         )}
 
         <div className="bg-white text-neutral-900 p-8 sm:p-10">
-          <div className="text-xs font-bold tracking-widest" style={{ color: theme.accent }}>{s.brand_name.toUpperCase()}</div>
+          <div className="text-xs font-bold tracking-widest" style={{ color: theme.accent }}>{s.brand_name}</div>
           <h1 className="mt-4 text-2xl font-black tracking-tight">{s.title}</h1>
           <div className="mt-8 space-y-3 text-sm">
             {rows.filter(([, v]) => v).map(([k, v]) => (

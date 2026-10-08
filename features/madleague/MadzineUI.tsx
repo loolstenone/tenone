@@ -8,7 +8,8 @@ import { madzineCategoryLabel } from '@/lib/madzine-categories';
 
 export const MZ_SERIF = 'font-[family-name:var(--font-mz-serif)] break-keep';
 export const MZ_DISPLAY = 'font-[family-name:var(--font-mz-display)]';
-export const MZ_KICKER = 'text-[11px] font-bold tracking-[0.3em] uppercase';
+// uppercase 금지 — 카테고리 'HeRo' 같은 브랜드명이 HERO로 바뀐다 (부록 B)
+export const MZ_KICKER = 'text-[11px] font-bold tracking-[0.3em]';
 export const MZ_RULE = 'border-white/15';
 
 export interface MadzineCardArticle {
