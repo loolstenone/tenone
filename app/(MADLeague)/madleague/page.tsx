@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { ArrowRight, Mail } from 'lucide-react';
 import {
   fetchMadClubs,
-  fetchMadHallOfFame,
   fetchMadArticles,
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
@@ -13,9 +12,8 @@ import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribe
 export const revalidate = 300; // 5분 캐시
 
 export default async function Page() {
-  const [clubs, hallOfFame, articles] = await Promise.all([
+  const [clubs, articles] = await Promise.all([
     fetchMadClubs(),
-    fetchMadHallOfFame(3),
     fetchMadArticles({ limit: 4 }),
   ]);
 
@@ -101,13 +99,16 @@ export default async function Page() {
                   </div>
                 ))}
                 {/* 공식 동아리 신청 — 문의하기로 접수, 내부 심사 후 선정 */}
-                <Link href="/madleague/contact" className="group flex items-center gap-4 px-4 py-3 -mx-4 mt-2 border-t border-neutral-800 pt-5">
-                  <span className="text-xs text-[#EC1D25] font-bold tracking-wider w-24 shrink-0">신청</span>
-                  <span className="text-base text-neutral-300 group-hover:text-white transition">
-                    공식 동아리 신청 <span className="text-sm text-neutral-500">· 내부 심사를 통해 선정</span>
-                    <ArrowRight className="ml-2 inline h-4 w-4 text-neutral-500 group-hover:text-[#EC1D25] transition" />
-                  </span>
-                </Link>
+                <div className="pt-6">
+                  <Link href="/madleague/contact"
+                    className="group inline-flex items-center gap-4 border border-[#EC1D25] hover:bg-[#EC1D25] px-6 py-4 transition">
+                    <span className="text-left">
+                      <span className="block text-base font-black text-white">공식 동아리 신청</span>
+                      <span className="block mt-0.5 text-xs text-neutral-400 group-hover:text-white/85">내부 심사를 통해 선정</span>
+                    </span>
+                    <ArrowRight className="h-5 w-5 text-[#EC1D25] group-hover:text-white transition" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -116,7 +117,7 @@ export default async function Page() {
 
       {/* ─── 프로그램 ──────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 py-32">
-        <SectionHeader eyebrow="PROGRAMS" title="7가지 실전 무대" />
+        <SectionHeader eyebrow="PROGRAMS" title={<>실전 프로젝트로<br />경력 같은 신입으로</>} />
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProgramCard href="/madleague/programs/competition" title="경쟁 PT" desc="실제 기업 과제에 동아리가 경쟁" featured />
           <ProgramCard href="/madleague/programs/project" title="PJT" desc="기업의 실전 프로젝트를 통해 현장에서 배우는 인턴 프로그램" />
@@ -125,46 +126,11 @@ export default async function Page() {
           <ProgramCard href="/madleague/programs/im" title="아이디어 무브먼트" desc="나의 아이디어로 문제를 해결한다." />
           <ProgramCard href="/madleague/programs/hero" title="히어로 프로그램" desc="HeRo와 연계한 커리어 솔루션 — 취업·인턴 연결" />
           <ProgramCard href="/madleague/programs/dam" title="DAM 파티" desc="Digital Advertising Meeting — 기업-학생 네트워킹 허브." />
+          <ProgramCard href="/madleague/programs/creazy" title="크리에이지" desc="매드리그 국제광고제 출품 프로젝트 — 아이디어를 국제 광고제 출품까지." />
+          <ProgramCard href="/madleague/programs/rookie" title="RooKie" desc="실전 크리에이티브를 훈련하고 실전 프로젝트에도 참여할 기회" />
+          <ProgramCard href="/madleague/programs/planners" title="Planner's" desc="실전 전략 기획을 훈련하고 실전 프로젝트에도 참여할 기회" />
         </div>
       </section>
-
-      {/* ─── Hall of Fame ─────────────────────────── */}
-      {hallOfFame.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 py-32">
-          <SectionHeader
-            eyebrow="HALL OF FAME"
-            title="최근 경쟁PT 수상작"
-            action={{ href: '/madleague/programs/competition', label: '전체 보기' }}
-          />
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {hallOfFame.map((hof) => (
-              <div
-                key={hof.id}
-                className="group relative bg-neutral-950 border border-neutral-900 hover:border-[#FFC000] transition p-8"
-              >
-                {hof.result?.is_crown && (
-                  <div className="absolute top-4 right-4 text-[#FFC000] text-xs font-bold tracking-wider">
-                    ♛ MAD CROWN
-                  </div>
-                )}
-                <div className="text-xs text-neutral-500 font-bold tracking-wider">
-                  {hof.year}
-                </div>
-                <div className="mt-3 text-2xl font-black text-white">{hof.client_name ?? hof.title}</div>
-                {hof.result && (
-                  <div className="mt-6 pt-6 border-t border-neutral-900">
-                    <div className="text-sm text-neutral-400">수상팀</div>
-                    <div className="mt-1 font-bold text-white">{hof.result.team_name}</div>
-                    {hof.result.award_name && (
-                      <div className="mt-2 text-sm text-[#EC1D25] font-bold">{hof.result.award_name}</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ─── MADzine 최신 ──────────────────────────── */}
       {articles.length > 0 && (
@@ -258,7 +224,7 @@ function SectionHeader({
   dark = true,
 }: {
   eyebrow: string;
-  title: string;
+  title: React.ReactNode;
   action?: { href: string; label: string };
   dark?: boolean;
 }) {

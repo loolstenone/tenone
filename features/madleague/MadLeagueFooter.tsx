@@ -1,6 +1,16 @@
 "use client";
 
 import { UniverseFooter } from "@/components/UniverseFooter";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
+
+// 푸터 메뉴 = 헤더 메뉴와 같은 원천 (lib/brand-site-menus.ts) — 메뉴를 바꾸면 헤더·푸터·인트라가 함께 바뀐다 (§1.9.5)
+const nav = siteHeaderNav("madleague");
+const menuLinks = nav.flatMap(item => {
+    const children = (item.dropdown ?? []).filter(d => d.href !== item.href && d.href !== "/madleague/apply");
+    // 매드리거 하위의 '동아리'는 푸터에서 따로 보이게 (자주 찾는 메뉴)
+    const club = children.find(d => d.href === "/madleague/clubs");
+    return [{ label: item.name, href: item.href }, ...(club ? [{ label: club.name, href: club.href }] : [])];
+});
 
 export function MadLeagueFooter() {
     return (
@@ -10,18 +20,12 @@ export function MadLeagueFooter() {
             accentColor="#EC1D25"
             dark={true}
             linkColumns={[
+                { title: "메뉴", links: menuLinks },
                 {
-                    title: "프로그램",
+                    title: "참여",
                     links: [
-                        { label: "동아리", href: "/madleague/clubs" },
-                        { label: "프로그램", href: "/madleague/programs" },
-                        { label: "MADzine", href: "/madleague/madzine" },
-                        { label: "아카이브", href: "/madleague/archive" },
-                    ],
-                },
-                {
-                    title: "Contact",
-                    links: [
+                        { label: "매드리거 등록", href: "/madleague/apply" },
+                        { label: "공식 동아리 신청", href: "/madleague/contact" },
                         { label: "문의하기", href: "/madleague/contact" },
                         { label: "마이페이지", href: "/madleague/my" },
                     ],
