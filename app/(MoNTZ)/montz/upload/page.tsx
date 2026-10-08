@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { Upload, X, Loader2, Image as ImageIcon, ArrowLeft } from "lucide-react";
 import {
     uploadWorkImage,
@@ -50,7 +50,7 @@ export default function MontzUploadPage() {
     );
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-neutral-950">
-            <LoginModal isOpen={true} onClose={() => {}} accentColor="#c8a97e" />
+            <LoginRequired accentColor="#c8a97e" />
         </div>
     );
 

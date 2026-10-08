@@ -126,6 +126,8 @@ async function checkSite(siteId) {
     if (myPage) /MyProfileCard/.test(myPage) ? ok("마이페이지 MyProfileCard") : fail("마이페이지에 MyProfileCard 없음 (§1.3)");
     const bareLogin = files.filter(f => /href=["']\/login["']|router\.push\(["']\/login["']\)/.test(src[f]));
     bareLogin.length ? fail(`/login 하드코딩 (loginHref 사용, §1.2.1): ${bareLogin.join(", ")}`) : ok("로그인 링크 loginHref 규칙");
+    const stuckModal = files.filter(f => /<LoginModal[^>]*onClose=\{\(\) => \{\}\}/.test(src[f]));
+    stuckModal.length ? fail(`닫히지 않는 로그인 모달 (LoginRequired 사용, §1.2.1): ${stuckModal.slice(0, 3).join(", ")}`) : ok("로그인 모달 닫기 가능 (LoginRequired 규칙)");
     const comingSoon = files.filter(f => /준비 중|Coming Soon|공사중/.test(src[f]));
     if (comingSoon.length) warn(`"준비 중/Coming Soon" 직접 표시 의심: ${comingSoon.slice(0, 3).join(", ")}`);
     const useSP = files.filter(f => /useSearchParams\(/.test(src[f]) && /^app\//.test(f) && /page\.tsx$/.test(f) && !/Suspense/.test(src[f]));

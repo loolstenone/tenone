@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { JH_QUESTIONS } from "@/lib/hero/jh-questions";
 
 const HERO_RED = "#E53935";
@@ -79,7 +79,7 @@ export default function JHWritePage() {
         return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     }
     if (!isAuthenticated) {
-        return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+        return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
     }
 
     function setResp(key: string, val: string | string[]) {

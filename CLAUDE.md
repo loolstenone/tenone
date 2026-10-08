@@ -344,8 +344,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 **세부 원칙 A: 브랜드 보호 페이지에서 로그인 요구 시 → `/login` 이동 금지, LoginModal 팝업**
 
-> Badak 표준: 비로그인 상태로 브랜드 마이페이지(`/{brand}/my`) 접근 시 **현재 페이지 위에 LoginModal 팝업**을 띄운다.
+> 비로그인 상태로 브랜드 보호 페이지(`/{brand}/my` 등) 접근 시 **현재 페이지 위에 LoginModal 팝업**을 띄운다 — `<LoginRequired>`.
 > `router.push('/login')` 하지 않는다. 로그인 완료 → 모달 닫힘 → 그 자리에 머문다.
+> **모달은 X·바깥 클릭·Esc로 닫을 수 있어야 한다.** 닫으면 "로그인이 필요한 페이지입니다 + [로그인]" 버튼이 남아 다시 연다 (2026-10-08 — 닫히지 않는 모달에 사용자가 갇히던 문제로 표준 변경).
 
 **세부 원칙 B: 외부 `/login` 링크 (네비·푸터·CTA 등)에서 `/login`으로 이동할 때는 `?redirect={현재경로}` 전달**
 
@@ -353,14 +354,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 | 상황 | 규칙 |
 |------|------|
-| 브랜드 마이페이지(`/{brand}/my`) 비인증 접근 | `<LoginModal isOpen={true} onClose={() => {}} accentColor="#..." />` 렌더 (Badak 패턴) |
-| 공용 `<AuthGate>` 래퍼 선택 가능 | `components/AuthGate.tsx` 써서 `<AuthGate accentColor bgClassName>` 으로 감싸도 됨 |
+| 브랜드 보호 페이지 비인증 접근 | `<LoginRequired accentColor="#..." />` 렌더 (`components/LoginRequired.tsx` — 모달 즉시 표시·닫기 가능·다시 열기 버튼). MADLeague는 `square` (rounded 금지) |
+| 공용 `<AuthGate>` 래퍼 선택 가능 | `components/AuthGate.tsx` (내부가 LoginRequired) — `<AuthGate accentColor bgClassName>` 으로 감싸도 됨 |
 | `/login`으로 이동하는 Link·버튼 (헤더, 푸터, CTA) | 반드시 `loginHref(pathname)` 사용 (`?redirect=` 전달) |
 | `router.push('/login')` / `redirect('/login')` | 반드시 `loginHref(pathname)` 또는 `currentLoginHref()` 사용 |
 | 소셜 로그인 클릭 | `auth-context`가 `auth_redirect` 쿠키로 자동 저장 (auto) |
 | InstaLayout 계열(Jakka/MoNTZ) 등 모달 기반 헤더 | 모달이 현재 페이지 위에 열리므로 추가 조치 불필요 (auto) |
 
-**표준 헬퍼** — `lib/login-href.ts` & `components/AuthGate.tsx`
+**표준 헬퍼** — `lib/login-href.ts` & `components/LoginRequired.tsx` & `components/AuthGate.tsx`
 
 ```tsx
 // (1) 외부 /login 링크 — Link·버튼·router.push
@@ -372,13 +373,13 @@ const pathname = usePathname();
 <Link href={loginHref(pathname, "signup")}>회원가입</Link>
 router.push(loginHref(pathname));
 
-// (2) 브랜드 마이페이지 비인증 처리 — LoginModal 팝업 (Badak 표준)
-import { LoginModal } from "@/components/LoginModal";
+// (2) 브랜드 보호 페이지 비인증 처리 — 현재 페이지 위 LoginModal (닫기 가능 + 다시 열기 버튼)
+import { LoginRequired } from "@/components/LoginRequired";
 
 if (isLoading) return <SpinnerScreen />;
 if (!isAuthenticated) return (
     <div className="min-h-screen bg-neutral-950">
-        <LoginModal isOpen={true} onClose={() => {}} accentColor="#BRAND_COLOR" />
+        <LoginRequired accentColor="#BRAND_COLOR" />
     </div>
 );
 // (선택) <AuthGate accentColor bgClassName> 래퍼 사용도 가능
@@ -386,6 +387,7 @@ if (!isAuthenticated) return (
 
 **절대 하지 말 것:**
 - ❌ 브랜드 마이페이지에서 `router.push('/login')` — 사용자가 보던 페이지에서 튕겨 나감. LoginModal 팝업이 표준.
+- ❌ `<LoginModal isOpen onClose={() => {}} />` (닫히지 않는 모달) — X·바깥 클릭이 안 먹어 사용자가 갇힌다. `<LoginRequired>` 사용
 - ❌ `<Link href="/login">` (파라미터 없음) — 로그인 후 브랜드 홈('/')으로만 감, 원래 페이지 상실
 - ❌ `router.push("/login")` 하드코딩 — 동일 사유
 - ❌ 브랜드 헤더에서 `window.location.href = 'https://tenone.biz/login'` — tenone 이탈

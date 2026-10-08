@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
@@ -99,7 +99,7 @@ export default function MadLeagueMyPage() {
 
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-black">
-            <LoginModal isOpen={true} onClose={() => {}} accentColor="#EC1D25" />
+            <LoginRequired accentColor="#EC1D25" square />
         </div>
     );
 

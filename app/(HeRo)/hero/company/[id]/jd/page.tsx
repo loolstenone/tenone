@@ -8,7 +8,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, FileText, Loader2, Plus, Edit, ArrowRight, CheckCircle2, Clock, Archive } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 
 const HERO_RED = "#E53935";
 
@@ -51,7 +51,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
     }, [user?.id, companyId]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     if (forbidden) {
         return (

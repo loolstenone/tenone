@@ -8,7 +8,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import JDEditor, { type JDInitialValues } from "@/features/hero/JDEditor";
 
 const HERO_RED = "#E53935";
@@ -45,7 +45,7 @@ export default function EditJDPage({ params }: { params: Promise<{ id: string; j
     }, [user?.id, jdId]);
 
     if (isLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
     if (error) return <div className="min-h-screen flex items-center justify-center text-sm text-red-500">{error}</div>;
     if (!initial) return null;
 

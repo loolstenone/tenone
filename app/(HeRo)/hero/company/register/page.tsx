@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Building2, Loader2, CheckCircle } from "lucide-react";
 import { INDUSTRIES } from "@/lib/badak-constants";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 
 const HERO_RED = "#E53935";
 
@@ -41,7 +41,7 @@ export default function CompanyRegisterPage() {
     const [result, setResult] = useState<{ companyId: string; status: string; message?: string } | null>(null);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     async function submit() {
         if (!user?.id) return;

@@ -8,7 +8,7 @@ import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/workflow-context';
-import { LoginModal } from '@/components/LoginModal';
+import { LoginRequired } from "@/components/LoginRequired";
 import { SMARCOMM_BETA_EMAILS } from '@/lib/api-access-policy';
 import { getSetting } from '@/lib/supabase/settings';
 import TierGate from '@/features/smarcomm/TierGate';
@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // CLAUDE.md § 1.2.1 — 비로그인 시 LoginModal 팝업 (현재 페이지 위에 표시, 이탈 방지)
   if (!isAuthenticated) return (
     <div className="min-h-screen bg-surface">
-      <LoginModal isOpen={true} onClose={() => {}} accentColor="#0F172A" />
+      <LoginRequired accentColor="#0F172A" />
     </div>
   );
 

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, Edit, Compass, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { JH_QUESTIONS } from "@/lib/hero/jh-questions";
 
 const HERO_RED = "#E53935";
@@ -40,7 +40,7 @@ export default function JHViewPage() {
     }, [user?.id]);
 
     if (isLoading || loading) return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     // 미작성
     if (!jh) {

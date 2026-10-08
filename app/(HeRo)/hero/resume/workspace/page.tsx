@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { createClient } from "@/lib/supabase/client";
 import {
     FileText, Plus, Trash2, Star, StarOff, Edit3,
@@ -127,7 +127,7 @@ export default function ResumeWorkspacePage() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-white">
-                <LoginModal isOpen onClose={() => {}} accentColor="#F59E0B" />
+                <LoginRequired accentColor="#F59E0B" />
             </div>
         );
     }

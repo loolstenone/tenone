@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Building2, Plus, Loader2, ArrowRight, Clock, CheckCircle2, FileText, Compass } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { createClient } from "@/lib/supabase/client";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 
@@ -50,7 +50,7 @@ export default function HeroCompanyHubPage() {
     }, [user?.id]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginModal isOpen={true} onClose={() => {}} accentColor={HERO_RED} /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     const active = myCompanies.filter(c => c.status === "active");
     const pending = myCompanies.filter(c => c.status === "pending");

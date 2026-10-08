@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
@@ -31,7 +31,7 @@ export default function TownityMyPage() {
     );
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-neutral-950">
-            <LoginModal isOpen={true} onClose={() => {}} accentColor="#10B981" />
+            <LoginRequired accentColor="#10B981" />
         </div>
     );
 

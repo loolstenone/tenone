@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 
 interface AuthGateProps {
     children: ReactNode;
@@ -18,7 +18,7 @@ interface AuthGateProps {
  * 브랜드 보호 페이지(마이페이지 등) 로그인 게이트 표준 컴포넌트.
  *
  * 원칙: 비로그인 상태로 접근 시 **`/login` 페이지로 리다이렉트하지 말고**
- * 현재 페이지 위에 `LoginModal`을 팝업한다 (Badak 표준).
+ * 현재 페이지 위에 `LoginModal`을 팝업한다. 모달은 닫을 수 있고, 닫으면 [로그인] 버튼으로 다시 연다 (LoginRequired).
  *
  * 사용 예:
  *   export default function MyPage() {
@@ -36,12 +36,6 @@ export function AuthGate({
     defaultTab = "login",
 }: AuthGateProps) {
     const { isAuthenticated, isLoading } = useAuth();
-    const [showLogin, setShowLogin] = useState(false);
-
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) setShowLogin(true);
-        else if (isAuthenticated) setShowLogin(false);
-    }, [isLoading, isAuthenticated]);
 
     if (isLoading) {
         return (
@@ -57,12 +51,7 @@ export function AuthGate({
     if (!isAuthenticated) {
         return (
             <div className={`min-h-screen ${bgClassName}`}>
-                <LoginModal
-                    isOpen={showLogin}
-                    onClose={() => setShowLogin(false)}
-                    accentColor={accentColor}
-                    defaultTab={defaultTab}
-                />
+                <LoginRequired accentColor={accentColor} defaultTab={defaultTab} />
             </div>
         );
     }

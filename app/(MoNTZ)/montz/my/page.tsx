@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
@@ -108,7 +108,7 @@ export default function MoNTZMyPage() {
     );
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-neutral-950">
-            <LoginModal isOpen={true} onClose={() => {}} accentColor="#c8a97e" />
+            <LoginRequired accentColor="#c8a97e" />
         </div>
     );
 

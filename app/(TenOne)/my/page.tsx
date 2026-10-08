@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { useRouter } from "next/navigation";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
@@ -57,7 +57,7 @@ export default function MyPage() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)" }}>
-                <LoginModal isOpen={true} onClose={() => {}} accentColor="#171717" />
+                <LoginRequired accentColor="#171717" />
             </div>
         );
     }

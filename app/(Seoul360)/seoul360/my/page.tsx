@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
@@ -25,7 +25,7 @@ export default function Seoul360MyPage() {
     }, [user?.id]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#6366F1] rounded-full animate-spin" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#6366F1" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginRequired accentColor="#6366F1" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },

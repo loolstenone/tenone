@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
@@ -31,7 +31,7 @@ export default function MullaesianMyPage() {
     );
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-neutral-950">
-            <LoginModal isOpen={true} onClose={() => {}} accentColor="#29ABE2" />
+            <LoginRequired accentColor="#29ABE2" />
         </div>
     );
 

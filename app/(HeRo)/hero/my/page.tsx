@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { LoginRequired } from "@/components/LoginRequired";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
@@ -32,7 +32,7 @@ export default function HeRoMyPage() {
     }, [user?.id]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#E53935] rounded-full animate-spin" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#E53935" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginRequired accentColor="#E53935" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
