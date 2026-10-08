@@ -101,12 +101,12 @@ export default async function Page() {
                 {/* 공식 동아리 신청 — 문의하기로 접수, 내부 심사 후 선정 */}
                 <div className="pt-6">
                   <Link href="/madleague/contact"
-                    className="group inline-flex items-center gap-4 border border-[#EC1D25] hover:bg-[#EC1D25] px-6 py-4 transition">
+                    className="inline-flex items-center gap-4 bg-[#EC1D25] hover:bg-[#d01820] text-white px-8 py-4 transition">
                     <span className="text-left">
-                      <span className="block text-base font-black text-white">공식 동아리 신청</span>
-                      <span className="block mt-0.5 text-xs text-neutral-400 group-hover:text-white/85">내부 심사를 통해 선정</span>
+                      <span className="block font-bold">공식 동아리 신청</span>
+                      <span className="block mt-0.5 text-xs text-white/80">내부 심사를 통해 선정</span>
                     </span>
-                    <ArrowRight className="h-5 w-5 text-[#EC1D25] group-hover:text-white transition" />
+                    <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
