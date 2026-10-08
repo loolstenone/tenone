@@ -173,7 +173,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
                 <div className="px-6 pb-6">
                     <p className="text-sm text-neutral-700 mb-5">
-                        {tab === "login" ? "계정에 로그인하세요" : "Ten:One™ Universe에 가입하세요"}
+                        {tab === "login" ? "One ID로 로그인하세요" : "One ID를 만들고 시작하세요"}
                     </p>
 
                     {/* 소셜 로그인 */}
@@ -245,9 +245,9 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                             <div className="space-y-4">
                                 <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-5 text-center">
                                     <div className="text-2xl mb-2">🌐</div>
-                                    <p className="text-sm font-semibold text-neutral-900 mb-1">이미 Ten:One™ Universe 회원입니다</p>
+                                    <p className="text-sm font-semibold text-neutral-900 mb-1">이미 One ID가 있습니다</p>
                                     <p className="text-xs text-neutral-500 mb-1">{email}</p>
-                                    <p className="text-xs text-neutral-400">로그인하면 가입된 서비스 현황을 확인할 수 있습니다.</p>
+                                    <p className="text-xs text-neutral-400">Ten:One™ Universe의 다른 서비스에서 만든 계정일 수 있어요.<br />그때 만든 비밀번호(또는 같은 소셜 계정)로 로그인하면 바로 이용할 수 있습니다.</p>
                                 </div>
                                 <button onClick={() => { setIsDuplicate(false); setError(""); setPassword(""); setPasswordConfirm(""); setTab("login"); }}
                                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
@@ -300,6 +300,11 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                             소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
                         </p>
                     )}
+
+                    {/* One ID 안내 — 유니버스를 강조하지 않고, 헷갈릴 때 알 수 있게 작게 (헌법 원칙 7) */}
+                    <p className="text-center text-[11px] text-neutral-400 mt-4">
+                        <span className="font-semibold text-neutral-500">Ten:One™ Universe One ID</span> · 하나의 아이디로 유니버스의 모든 서비스를 이용합니다
+                    </p>
 
                     {/* 탭 전환 링크 */}
                     <p className="text-center text-sm text-neutral-700 mt-4">
