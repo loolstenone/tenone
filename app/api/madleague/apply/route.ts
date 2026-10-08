@@ -6,7 +6,7 @@ import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server'
 export const runtime = 'nodejs';
 
 /** 지원서 수집·이용 동의 문구 버전 — ApplyForm의 MAD_APPLY_CONSENT_VERSION과 같아야 한다 */
-const CONSENT_VERSION = '2026-10-08.1';
+const CONSENT_VERSION = '2026-10-08.2';
 
 interface Body {
   applicantRole?: string;
@@ -62,14 +62,16 @@ export async function POST(req: NextRequest) {
   if (!body.name?.trim()) {
     return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
   }
-  if (isCorporate ? !body.companyName?.trim() : (!body.clubSlug || !body.university?.trim())) {
+  // 멘토는 소속 동아리 없이 신청 가능 (현직자·OB)
+  const isMentor = applicantRole === 'mentor';
+  if (isCorporate ? !body.companyName?.trim() : ((!isMentor && !body.clubSlug) || !body.university?.trim())) {
     return NextResponse.json({ error: 'MISSING_FIELDS' }, { status: 400 });
   }
 
   const sb = createAdminClient();
 
   let clubId: string | null = null;
-  if (!isCorporate) {
+  if (!isCorporate && body.clubSlug) {
     const { data: club } = await sb.from('mad_clubs').select('id').eq('slug', body.clubSlug!).maybeSingle();
     if (!club) return NextResponse.json({ error: 'CLUB_NOT_FOUND' }, { status: 404 });
     clubId = club.id;

@@ -9,6 +9,7 @@ export const runtime = 'nodejs';
  * 동아리 운영진 마이페이지 — 내 동아리 대기 중 일반 지원서
  * 운영진 = (club, 임원, context.club_id) 활동 역할 + (옛) mad_clubs.president_member_id — approve/reject API와 같은 기준.
  * mad_applications는 RLS로 본인·직원만 조회 가능하므로 서버에서 회장 확인 후 필요한 필드만 반환
+ * manageClubs = 마이페이지 "내 동아리 관리" 바로가기 (운영진·(옛) 회장·담당 멘토 → /madleague/clubs/{slug}/manage)
  */
 export async function GET(req: NextRequest) {
   const auth = await requireMember(req);
@@ -21,7 +22,12 @@ export async function GET(req: NextRequest) {
     getMadAccess(auth.memberId),
   ]);
   const clubIds = [...new Set([...(clubs ?? []).map((c: { id: string }) => c.id), ...officerClubIds(access)])];
-  if (clubIds.length === 0) return NextResponse.json({ isPresident: false, applications: [] });
+  const manageIds = [...new Set([...clubIds, ...access.mentorClubIds])];
+  const { data: manageRows } = manageIds.length
+    ? await admin.from('mad_clubs').select('slug, name').in('id', manageIds).order('name')
+    : { data: [] };
+  const manageClubs = (manageRows ?? []) as { slug: string; name: string }[];
+  if (clubIds.length === 0) return NextResponse.json({ isPresident: false, applications: [], manageClubs });
 
   const { data, error } = await admin
     .from('mad_applications')
@@ -34,5 +40,5 @@ export async function GET(req: NextRequest) {
     console.error('[madleague/applications/president]', error.message);
     return NextResponse.json({ error: 'QUERY_FAILED' }, { status: 500 });
   }
-  return NextResponse.json({ isPresident: true, applications: data ?? [] });
+  return NextResponse.json({ isPresident: true, applications: data ?? [], manageClubs });
 }

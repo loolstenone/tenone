@@ -17,7 +17,7 @@ interface Props {
 }
 
 /** 지원서 수집·이용 동의 문구 버전 — 문구를 바꾸면 API(CONSENT_VERSION)와 함께 올린다 */
-const MAD_APPLY_CONSENT_VERSION = '2026-10-08.1';
+const MAD_APPLY_CONSENT_VERSION = '2026-10-08.2'; // .2 = 수집 항목에 '하고 싶은 말' 추가
 
 const inputCls = 'w-full bg-black border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]';
 
@@ -189,9 +189,12 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         </>
       ) : (
         <>
-          <Field label="소속 동아리" required>
-            <select name="clubSlug" defaultValue={preselectedClub ?? ''} required className="w-full bg-black border border-neutral-800 px-4 py-3 text-white focus:border-[#EC1D25] focus:outline-none">
-              <option value="" disabled>선택하세요</option>
+          {/* 멘토는 소속 동아리가 없을 수 있다 (현직자·OB) — 동아리·기수·활동 연도 선택 사항 */}
+          <Field label="소속 동아리" required={applicantRole !== 'mentor'}>
+            <select name="clubSlug" defaultValue={preselectedClub ?? ''} required={applicantRole !== 'mentor'} className="w-full bg-black border border-neutral-800 px-4 py-3 text-white focus:border-[#EC1D25] focus:outline-none">
+              {applicantRole === 'mentor'
+                ? <option value="">소속 동아리 없음</option>
+                : <option value="" disabled>선택하세요</option>}
               {sortedClubs.map((c) => (
                 <option key={c.slug} value={c.slug}>{c.name} — {c.region}</option>
               ))}
@@ -199,11 +202,11 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
           </Field>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="기수" required>
-              <input name="cohort" type="number" min={1} max={99} required placeholder="예: 3" className={inputCls} />
+            <Field label="기수" required={applicantRole !== 'mentor'}>
+              <input name="cohort" type="number" min={1} max={99} required={applicantRole !== 'mentor'} placeholder="예: 3" className={inputCls} />
             </Field>
-            <Field label="매드리그 활동 연도" required>
-              <select name="activityYear" required className={inputCls} defaultValue="">
+            <Field label="매드리그 활동 연도" required={applicantRole !== 'mentor'}>
+              <select name="activityYear" required={applicantRole !== 'mentor'} className={inputCls} defaultValue="">
                 <option value="" disabled>선택</option>
                 {activityYears.map(y => (
                   <option key={y} value={y}>{y}년</option>
@@ -257,11 +260,17 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
         </>
       )}
 
+      {/* 하고 싶은 말 — 모든 신청 유형 공통 (mad_applications.motivation, 최대 2000자) */}
+      <Field label="하고 싶은 말">
+        <textarea name="motivation" rows={5} maxLength={2000} className={`${inputCls} resize-y`}
+          placeholder="지원 동기, 매드리그에서 해보고 싶은 것, 운영진에게 전하고 싶은 말 등을 자유롭게 적어주세요." />
+      </Field>
+
       {/* 개인정보 수집·이용 고지 + 필수 동의 (개인정보보호법 제15조) */}
       <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed">
         <input type="checkbox" name="privacyConsent" required className="mt-0.5 shrink-0 accent-[#EC1D25]" />
         <span>
-          [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: 이름·연락처·소속(대학·전공·동아리·기수 또는 회사명)·관심 분야 ·
+          [필수] 개인정보 수집·이용에 동의합니다. 수집 항목: 이름·연락처·소속(대학·전공·동아리·기수 또는 회사명)·관심 분야·하고 싶은 말(작성한 경우) ·
           목적: 매드리거 등록 심사 및 활동 안내 (심사는 지원한 동아리 운영진과 MADLeague 운영진이 합니다) · 보관: MADLeague 또는 계정 탈퇴 시까지 (탈퇴 시 파기). 등록 후 MADLeague에 작성한 글·댓글·포트폴리오에는 이름과 프로필 사진이 다른 이용자에게 표시됩니다.
           동의하지 않으면 신청할 수 없습니다.{' '}
           <Link href="/privacy" className="underline">개인정보처리방침</Link>

@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import {
     ArrowRight, ClipboardList,
     Clock, Shield, UserCheck, XCircle,
-    LogOut, Users
+    LogOut, Settings, Users
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -31,6 +31,7 @@ export default function MadLeagueMyPage() {
     const [pendingApps, setPendingApps] = useState<{ id: string; name: string; university: string; created_at: string }[]>([]);
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [isPresident, setIsPresident] = useState(false);
+    const [manageClubs, setManageClubs] = useState<{ slug: string; name: string }[]>([]);
 
     useEffect(() => {
         if (!user?.id || !user?.authId) return;
@@ -70,8 +71,9 @@ export default function MadLeagueMyPage() {
         if (madStatus !== 'active') return;
         fetch('/api/madleague/applications/president')
             .then(res => (res.ok ? res.json() : {}))
-            .then((data: { isPresident?: boolean; applications?: { id: string; name: string; university: string; created_at: string }[] }) => {
+            .then((data: { isPresident?: boolean; applications?: { id: string; name: string; university: string; created_at: string }[]; manageClubs?: { slug: string; name: string }[] }) => {
                 setIsPresident(!!data.isPresident);
+                setManageClubs(data.manageClubs ?? []);
                 setPendingApps(data.applications ?? []);
             })
             .catch(() => setPendingApps([]));
@@ -178,7 +180,26 @@ export default function MadLeagueMyPage() {
 
             <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
 
-                {/* 동아리 회장 패널 */}
+                {/* 내 동아리 관리 — 운영진(회장·부회장·총무 등)·담당 멘토. 지원서 승인·반려 + 운영진 지정 */}
+                {madStatus === 'active' && manageClubs.length > 0 && (
+                    <div className="bg-neutral-950 border border-neutral-800 p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Settings className="h-5 w-5 text-[#EC1D25]" />
+                            <h3 className="font-black text-base">내 동아리 관리</h3>
+                        </div>
+                        <p className="text-xs text-neutral-500 mb-4">지원서 승인·반려와 운영진 지정을 할 수 있어요.</p>
+                        <div className="flex flex-wrap gap-2">
+                            {manageClubs.map(c => (
+                                <Link key={c.slug} href={`/madleague/clubs/${c.slug}/manage`}
+                                    className="inline-flex items-center gap-1.5 border border-neutral-700 hover:border-[#EC1D25] px-4 py-2 text-sm font-semibold transition">
+                                    {c.name} 관리 <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 동아리 운영진 패널 — 대기 지원서 바로 처리 */}
                 {madStatus === 'active' && isPresident && (
                     <div className="bg-neutral-950 border border-neutral-800 p-6">
                         <div className="flex items-center gap-2 mb-4">
