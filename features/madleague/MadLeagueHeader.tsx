@@ -13,8 +13,8 @@ import { loginHref } from "@/lib/login-href";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
 
 // 헤더 메뉴 이름·순서 SSOT = lib/brand-site-menus.ts — 인트라 MAD League 메뉴도 같은 정의를 쓴다 (CLAUDE.md §1.9.5)
+// 하위 메뉴(dropdown)도 레지스트리 그대로 — 데스크톱은 hover/포커스로 펼침, 모바일은 상위 메뉴 아래 들여쓰기
 const navItems = siteHeaderNav("madleague");
-const programItems = navItems.find(i => i.href === "/madleague/programs")?.dropdown ?? [];
 
 export function MadLeagueHeader() {
     const pathname = usePathname();
@@ -52,16 +52,27 @@ export function MadLeagueHeader() {
                 {/* Desktop Nav */}
                 <div className="hidden lg:flex items-center gap-6">
                     {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={clsx(
-                                "text-sm font-medium transition-colors whitespace-nowrap",
-                                isActive(item.href) ? "text-white" : "text-neutral-400 hover:text-white"
+                        <div key={item.href} className="relative group">
+                            <Link
+                                href={item.href}
+                                className={clsx(
+                                    "flex h-16 items-center text-sm font-medium transition-colors whitespace-nowrap",
+                                    isActive(item.href) ? "text-white" : "text-neutral-400 hover:text-white"
+                                )}
+                            >
+                                {item.name}
+                            </Link>
+                            {item.dropdown && (
+                                <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition absolute left-0 top-full min-w-44 border border-neutral-800 bg-neutral-900 py-2 shadow-xl">
+                                    {item.dropdown.map(d => (
+                                        <Link key={d.href} href={d.href}
+                                            className="block px-4 py-2 text-sm text-neutral-400 hover:bg-white/5 hover:text-white whitespace-nowrap">
+                                            {d.name}
+                                        </Link>
+                                    ))}
+                                </div>
                             )}
-                        >
-                            {item.name}
-                        </Link>
+                        </div>
                     ))}
                 </div>
 
@@ -104,35 +115,34 @@ export function MadLeagueHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/madleague/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
+                        <Link href="/madleague/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white">가입</Link>
                     </div>
                 )
             }
         >
-            <div className="text-[10px] font-bold tracking-widest text-[#EC1D25] px-4 mb-2">PROGRAMS</div>
-            {programItems.map((p) => (
-                <Link
-                    key={p.href}
-                    href={p.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-2 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition pl-6"
-                >
-                    {p.name}
-                </Link>
-            ))}
-            <div className="my-2 border-t border-white/10" />
             {navItems.map((item) => (
-                <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={clsx(
-                        "block px-4 py-2.5 text-base font-medium transition-colors",
-                        isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
-                    )}
-                >
-                    {item.name}
-                </Link>
+                <div key={item.href}>
+                    <Link
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={clsx(
+                            "block px-4 py-2.5 text-base font-medium transition-colors",
+                            isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                        )}
+                    >
+                        {item.name}
+                    </Link>
+                    {item.dropdown?.filter(d => d.href !== item.href).map(d => (
+                        <Link
+                            key={d.href}
+                            href={d.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="block py-2 pl-8 pr-4 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition"
+                        >
+                            {d.name}
+                        </Link>
+                    ))}
+                </div>
             ))}
         </UniverseMobileMenu>
         </>

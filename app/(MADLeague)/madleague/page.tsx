@@ -231,10 +231,10 @@ export default async function Page() {
           </div>
 
           <Link
-            href="/madleague/my"
+            href="/madleague/apply"
             className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 transition shrink-0"
           >
-            매드리거 신청 <ArrowRight className="h-4 w-4" />
+            매드리거 등록 <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
