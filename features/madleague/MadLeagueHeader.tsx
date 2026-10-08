@@ -23,10 +23,11 @@ export function MadLeagueHeader() {
     const { isAuthenticated } = useAuth();
 
     // 가장 길게 일치하는 메뉴 하나만 활성 (경쟁 PT /programs/competition ⊂ 프로그램 /programs)
+    // 하위 메뉴 주소(예: /madleague/clubs ∈ 매드리거)에 있으면 상위 메뉴를 활성
     const activeHref = navItems
-        .map(i => i.href)
-        .filter(h => pathname.startsWith(h))
-        .sort((a, b) => b.length - a.length)[0];
+        .flatMap(i => [i.href, ...(i.dropdown ?? []).map(d => d.href)].map(h => ({ h, owner: i.href })))
+        .filter(({ h }) => pathname.startsWith(h))
+        .sort((a, b) => b.h.length - a.h.length)[0]?.owner;
     const isActive = (href: string) => href === activeHref;
 
     return (

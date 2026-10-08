@@ -86,15 +86,17 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                     { label: "전체 프로그램", path: "/madleague/programs" },
                 ],
             },
-            { placement: "header", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
             {
                 placement: "header", label: "매드리거", path: "/madleague/madleaguer", source: { kind: "table", table: "mad_posts" }, unit: "글",
                 dropdown: [
                     { label: "매드리거 홈", path: "/madleague/madleaguer" },
+                    { label: "동아리", path: "/madleague/clubs" },
                     { label: "매드리거 등록", path: "/madleague/apply" },
                 ],
             },
             { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
+            // 동아리 = 매드리거 하위 메뉴 (2026-10-08 사용자 결정 — 동아리 목록에서 각 동아리 방으로)
+            { placement: "feature", location: "매드리거", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
             { placement: "feature", location: "홈·매드리거", label: "매드리거 등록", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },
             { placement: "feature", location: "매드리거", label: "인증서 발급", path: "/madleague/member/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "madleague" } }, adminHref: "/intra/ums/madleague/certificates", unit: "건" },
             { placement: "feature", location: "HeRo", label: "HeRo 신청하기", path: "/madleague/hero", source: { kind: "table", table: "mad_hero_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/hero-applications", unit: "건" },

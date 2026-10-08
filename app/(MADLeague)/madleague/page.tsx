@@ -60,7 +60,7 @@ export default async function Page() {
         <div className="mx-auto max-w-7xl px-6 py-32">
           <SectionHeader
             eyebrow="CLUBS"
-            title="경쟁을 통한 성장"
+            title="공식 동아리"
             action={{ href: '/madleague/clubs', label: '동아리 전체 보기' }}
           />
           <div className="mt-16 flex flex-col lg:flex-row gap-16 items-start">
@@ -100,6 +100,14 @@ export default async function Page() {
                     </span>
                   </div>
                 ))}
+                {/* 공식 동아리 신청 — 문의하기로 접수, 내부 심사 후 선정 */}
+                <Link href="/madleague/contact" className="group flex items-center gap-4 px-4 py-3 -mx-4 mt-2 border-t border-neutral-800 pt-5">
+                  <span className="text-xs text-[#EC1D25] font-bold tracking-wider w-24 shrink-0">신청</span>
+                  <span className="text-base text-neutral-300 group-hover:text-white transition">
+                    공식 동아리 신청 <span className="text-sm text-neutral-500">· 내부 심사를 통해 선정</span>
+                    <ArrowRight className="ml-2 inline h-4 w-4 text-neutral-500 group-hover:text-[#EC1D25] transition" />
+                  </span>
+                </Link>
               </div>
             </div>
           </div>

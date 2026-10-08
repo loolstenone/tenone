@@ -106,7 +106,7 @@ export default async function MadleaguerPage() {
                     </div>
                     {(clubs ?? []).length === 0 ? (
                         <div className="text-sm text-neutral-500 leading-relaxed">
-                            {access.isStaff ? '운영진 계정입니다. 소속 동아리가 없습니다.' : '소속 동아리 정보가 없습니다.'}
+                            {access.isStaff ? '관리자 계정입니다. 모든 동아리 방에 들어갈 수 있습니다.' : '소속 동아리 정보가 없습니다.'}
                             <Link href="/madleague/clubs" className="mt-4 flex items-center gap-1.5 font-bold text-neutral-300 hover:text-white">
                                 동아리 둘러보기 <ArrowRight className="h-4 w-4" />
                             </Link>
