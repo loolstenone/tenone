@@ -7,6 +7,7 @@ import {
   fetchMadArticles,
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
+import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 export const revalidate = 300; // 5분 캐시
@@ -29,11 +30,7 @@ export default async function Page() {
             <span className="h-px w-8 bg-[#EC1D25]" />
             MATCH · ACT · DEVELOP
           </div>
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight">
-            실전이 우리를
-            <br />
-            <span className="text-[#EC1D25]">강하게 하리라</span>
-          </h1>
+          <HeroRotatingTitle />
           <p className="mt-8 max-w-xl text-lg text-neutral-300 leading-relaxed">
             전국 대학생 광고·마케팅 동아리 연합.
             <br />
