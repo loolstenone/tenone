@@ -88,7 +88,7 @@
 | `features/madleague/ProgramDetailPage.tsx` | **프로그램 상세 표준 템플릿** (2026-10-08): ① 히어로(대상·시기·참가비 칩) ② 한눈에 보기 ③ 진행 과정(steps) ④ 얻는 것(gets) ⑤ 자유 섹션(`ProgramSection`) ⑥ 참여 CTA ⑦ 이전·다음 프로그램. 각 page.tsx는 steps·gets·자유 섹션만 넘긴다 |
 | `features/madleague/ProgramCTA.tsx` | 상세 하단 참여 CTA 통일 — 공개 신청서(forms.program=key) 있으면 그 버튼, 없으면 매드리거 등록 · 문의하기(`?type=program`) · corporate면 기업 참여 문의(`?type=corporate`) · `primary`로 페이지 안 폼 앵커 덮어쓰기(히어로) |
 | `features/madleague/HeroRotatingTitle.tsx` | 홈 히어로 카피 3종 3초 교체 |
-| `app/(MADLeague)/madleague/programs/hero/` | 히어로 프로그램 (옛 `/madleague/hero` → 308) — 템플릿 + `HeroForm`(Turnstile + 수집·이용 동의 버전 `2026-10-07.1`, `mad_hero_applications.consent`, service_role 저장) |
+| `app/(MADLeague)/madleague/programs/hero·rookie·planners/` | **연계 프로그램** (`PartnerProgramPage`) — 옛 `/madleague/hero` → 308. MADLeague 자체 HeRo 신청 폼·`/api/madleague/hero` 삭제(2026-10-09) |
 | `app/(MADLeague)/madleague/apply/` | 지원서 (로그인·캡차·동의) |
 | `app/(MADLeague)/madleague/member/` | 매드리거 본인 화면 (profile·portfolio·certificate·projects) |
 | `app/(MADLeague)/madleague/portfolio/[memberId]/` | 공개 포트폴리오 (`portfolio_public=true`만) |
@@ -174,10 +174,21 @@
 - 푸터 4열: 참여(매드리거 등록·공식 동아리 신청·문의하기·마이페이지) · 채널(HeRo·RooK·Planner's — Planner's는 지금 MADLeague 프로그램 페이지로 연결, MyVerse로 보낼지 미결정)
 - BI 세 원은 디자인 규칙(rounded 금지)의 예외 — BI 그림 자체
 
+### 연계 프로그램 — 맛보기·정식·연계 (2026-10-09 사용자 결정)
+
+- **텐원은 하나의 회사, 서비스만 다르다.** MADLeague는 HeRo·RooK·Planner's의 서비스를 대신 제공하지 않는다
+  - ① **맛보기** — MADLeague 안에서 가볍게 (`partner.taste`)
+  - ② **정식** — 같은 Ten:One ID로 그 서비스에 신청해 사용, 첫 이용 때 서비스 동의(`member_brand_joins`) (`partner.full`)
+  - ③ **연계** — 서비스 간 경험·데이터는 서비스별 별도 동의로 이어져 풀 서비스·풀 데이터 (`partner.link`, 개인정보보호법 제18조)
+- 연계 프로그램 = `programs-list.ts` `group: 'partner'` + `partner` 필드, 페이지는 `PartnerProgramPage`. 직접 운영 프로그램만 `glance`·`ProgramDetailPage`
+- 맛보기·연계 항목은 **구상 문구** — 실제 구현(HIT 간략 진단 MADLeague 노출, 인증서 → HeRo 프로필 연동 동의 등)은 아직 없음
+- `mad_hero_applications` 테이블(0건)·인트라 `hero-applications` 화면·`/api/madleague/admin/hero`는 남아 있음 → DROP 승인 대기
+- 직업소개 미신고 — "채용 연결·직접 매칭" 문구 금지 (직업안정법)
+
 ### 프로그램 상세 표준 (2026-10-08 세션 166)
 
 - **새 프로그램·프로그램 수정은 `programs-list.ts` 한 곳** — 항목 추가 → 탭 줄·홈·전체 목록·About·검색·이전/다음에 자동 반영. `glance` 5개 키는 비우지 않는다 (사람들이 "누가·언제·얼마"를 못 찾는 게 가장 큰 이해 격차였다)
-- 상세 page.tsx는 `ProgramDetailPage`에 steps·gets·자유 섹션만 넘긴다. 자체 히어로·자체 CTA를 만들지 않는다 (10개 중 6개가 스텁, CTA가 6가지였던 2026-10-08 이전 상태로 돌아가지 않기)
+- 직접 운영 상세 page.tsx는 `ProgramDetailPage`에 steps·gets·자유 섹션만 넘긴다. 자체 히어로·자체 CTA를 만들지 않는다 (10개 중 6개가 스텁, CTA가 6가지였던 2026-10-08 이전 상태로 돌아가지 않기)
 - 표기: 'DAM 파티'(댐 파티 ✗) · '히어로 프로그램'(히어로·HeRo 프로그램 ✗) · 'PJT'. 메뉴 레지스트리 라벨도 같게
 - **히어로(상단)는 전부 programs-list에서** — eyebrow·제목·요약·`tagline`(한 줄, 강조색 굵게)·칩. 페이지별 히어로 카피·배경 사진 금지 (2026-10-09 통일 — 부제 스타일 4종·배경 사진이 섞여 있었다)
 - 강조색: **레드 하나**. 예외는 히어로 프로그램 골드뿐(브랜드 가이드). 마케톤 골드·RooKie 그린·Planner's 틸은 폐지 (2026-10-09)
