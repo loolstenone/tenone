@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 import { shouldTrySso, startSso, publishLoginToHub } from "@/lib/sso";
-import { OneIdHelp } from "@/components/OneIdHelp";
+import { OneIdHelp, HandleIdHelp } from "@/components/OneIdHelp";
 import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
@@ -202,8 +202,9 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                     {/* 로그인 폼 */}
                     {tab === "login" && (
                         <form onSubmit={handleLogin} className="space-y-3">
-                            {/* 이메일 / 핸들 전환 탭 */}
-                            <div className="flex rounded-xl overflow-hidden border border-neutral-200 text-xs font-medium">
+                            {/* 이메일 / 핸들 전환 탭 + 핸들 ID 안내 (토글이 overflow-hidden이라 안내 버튼은 바깥) */}
+                            <div className="flex items-center gap-2">
+                            <div className="flex flex-1 rounded-xl overflow-hidden border border-neutral-200 text-xs font-medium">
                                 <button type="button"
                                     onClick={() => { setLoginMode("email"); setError(""); }}
                                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "email" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
@@ -214,6 +215,8 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "handle" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
                                     <AtSign className="w-3.5 h-3.5" /> 핸들 ID
                                 </button>
+                            </div>
+                            <HandleIdHelp />
                             </div>
 
                             {loginMode === "email" ? (
