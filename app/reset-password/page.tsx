@@ -25,6 +25,7 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExchanging, setIsExchanging] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   // 이메일 링크 클릭 시 ?code=XXX (PKCE)를 세션으로 교환 → reset 모드 전환
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function ResetPasswordPage() {
 
   const handleRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError(''); setSuccess(''); setNotFound(false);
     if (!email.trim()) { setError('이메일을 입력해주세요'); return; }
     if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
     setIsSubmitting(true);
@@ -65,9 +66,13 @@ export default function ResetPasswordPage() {
     }).catch(() => null);
     captcha.reset();
     setIsSubmitting(false);
-    const data = await res?.json().catch(() => null) as { error?: string } | null;
-    if (res?.ok) {
-      setSuccess('입력한 이메일로 안내를 보냈습니다. 메일이 오지 않으면 스팸함을 확인하거나, 다른 이메일 또는 Google·카카오 로그인으로 시도해 보세요.');
+    const data = await res?.json().catch(() => null) as { error?: string; registered?: boolean; throttled?: boolean } | null;
+    if (res?.ok && data?.registered === false) {
+      setNotFound(true);
+    } else if (res?.ok) {
+      setSuccess(data?.throttled
+        ? '방금 안내 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해주세요. 1분 뒤 다시 요청할 수 있어요.'
+        : '가입된 One ID가 있어요. 로그인 방법을 이메일로 보냈습니다. 메일함(스팸함 포함)을 확인해주세요.');
     } else {
       setError(data?.error || '요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
@@ -111,7 +116,26 @@ export default function ResetPasswordPage() {
           </div>
         )}
 
-        {mode === 'request' && !success && (
+        {mode === 'request' && notFound && (
+          <div className="mb-4 rounded-lg border border-neutral-700 bg-neutral-900 p-4 text-sm text-neutral-300 space-y-3">
+            <p className="font-semibold text-white">{email.trim()}(으)로 가입된 One ID가 없습니다</p>
+            <ul className="space-y-1 text-xs text-neutral-400">
+              <li>· 다른 이메일로 가입했을 수 있어요. 자주 쓰는 다른 이메일로 다시 찾아보세요.</li>
+              <li>· Google·카카오로 가입했다면 그 계정의 이메일이 다를 수 있어요. 로그인 화면에서 <b className="text-neutral-200">Google로 로그인</b>·<b className="text-neutral-200">카카오로 로그인</b>을 눌러보세요.</li>
+            </ul>
+            <div className="flex gap-2 pt-1">
+              <button type="button" onClick={() => { setNotFound(false); setEmail(''); }}
+                className="flex-1 rounded-lg border border-neutral-600 py-2 text-xs font-semibold text-white hover:bg-neutral-800">
+                다른 이메일로 찾기
+              </button>
+              <Link href="/signup" className="flex-1 rounded-lg bg-white py-2 text-center text-xs font-semibold text-neutral-900 hover:bg-neutral-200">
+                One ID 만들기
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {mode === 'request' && !success && !notFound && (
           <form onSubmit={handleRequest} className="space-y-4">
             <input
               type="email"

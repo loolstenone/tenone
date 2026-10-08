@@ -2,8 +2,8 @@
  * POST /api/auth/login-help — 로그인 도움 (아이디·비밀번호 찾기 통합)
  * Body: { email, captchaToken, site? }
  *
- * 안내는 그 이메일 주인의 메일함으로만 보낸다 — 화면 응답은 계정 유무·가입 방식과 상관없이 항상 같다
- * (화면에서 "Google로 가입한 계정"을 알려주면 남의 이메일로 가입 여부·방식을 캐낼 수 있다)
+ * 화면 응답 = 가입 여부만 (registered). 가입 여부는 회원가입 화면("이미 One ID가 있습니다")에서도 이미 드러나므로 숨겨도 보호 효과가 없다.
+ * 가입 방식(Google/카카오/이메일)과 재설정 링크는 그 이메일 주인의 메일함으로만 보낸다.
  *   - 소셜(Google/카카오)로만 가입 → "○○로 가입한 One ID입니다" + 소셜 로그인 안내 + (선택) 이메일 비밀번호 만들기 링크
  *   - 이메일로 가입              → 비밀번호 재설정 링크
  *   - 가입하지 않은 이메일        → 보내지 않음
@@ -24,7 +24,7 @@ const lastSent = new Map<string, number>();
 
 const PROVIDER_LABEL: Record<string, string> = { google: "Google", kakao: "카카오" };
 
-const ok = () => NextResponse.json({ ok: true, message: "입력한 이메일로 안내를 보냈습니다." });
+const ok = (registered: boolean) => NextResponse.json({ ok: true, registered });
 
 function esc(s: string): string {
     return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -63,10 +63,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "이메일 주소를 확인해주세요." }, { status: 400 });
     }
 
-    // 같은 이메일 연속 요청은 조용히 무시 (응답은 동일)
+    // 같은 이메일 연속 요청은 메일을 다시 보내지 않음 (방금 보낸 안내를 확인하도록)
     const now = Date.now();
-    if ((lastSent.get(email) ?? 0) > now - RESEND_INTERVAL_MS) return ok();
-    lastSent.set(email, now);
+    if ((lastSent.get(email) ?? 0) > now - RESEND_INTERVAL_MS) {
+        return NextResponse.json({ ok: true, registered: true, throttled: true });
+    }
 
     const siteId = typeof body.site === "string" && body.site in siteConfigs ? (body.site as SiteIdentifier) : "tenone";
     const brand = siteConfigs[siteId].name;
@@ -76,7 +77,8 @@ export async function POST(req: NextRequest) {
     const { data, error } = await createAdminClient().auth.admin.generateLink({ type: "recovery", email });
     const user = data?.user;
     const hashed = data?.properties?.hashed_token;
-    if (error || !user || !hashed) return ok();
+    if (error || !user || !hashed) return ok(false);
+    lastSent.set(email, now);
 
     const resetUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(hashed)}&type=recovery&next=/reset-password`;
     const providers = ((user.app_metadata?.providers as string[] | undefined) ?? [user.app_metadata?.provider as string])
@@ -114,6 +116,9 @@ export async function POST(req: NextRequest) {
         subject: mail.subject,
         html: mail.html,
     });
-    if (sendErr) console.error("[login-help] send failed:", sendErr.message);
-    return ok();
+    if (sendErr) {
+        console.error("[login-help] send failed:", sendErr.message);
+        return NextResponse.json({ error: "안내 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요." }, { status: 502 });
+    }
+    return ok(true);
 }
