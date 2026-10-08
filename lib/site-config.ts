@@ -133,7 +133,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         faviconUrl: '/brands/madleague/favicon.png', appleTouchIcon: '/brands/madleague/favicon.png',
         accentColor: '#D32F2F', bgDark: '#212121',
         colors: { primary: '#D32F2F', primaryDark: '#B71C1C', secondary: '#FF5252', headerBg: '#171717', headerText: '#ffffff', footerBg: '#212121', footerText: '#a3a3a3', accent: '#D32F2F' },
-        meta: { title: 'MAD League — 경쟁을 통한 성장 플랫폼', description: 'Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.', keywords: ['MAD League', '대학생', '마케팅', '경쟁', 'PT'] },
+        meta: { title: 'MAD League — 실전 경쟁을 통한 성장', description: 'Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.', keywords: ['MAD League', '대학생', '마케팅', '경쟁', 'PT'] },
         homePath: '/madleague', signupPath: '/signup', domain: 'madleague.net',
         universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
