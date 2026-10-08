@@ -13,7 +13,7 @@ const COPIES: { top: string; accent: string }[] = [
   { top: '실전이 우리를,', accent: '강하게 하리라' },
 ];
 
-const INTERVAL_MS = 2000;
+const INTERVAL_MS = 3000;
 
 export function HeroRotatingTitle() {
   const [index, setIndex] = useState(0);
