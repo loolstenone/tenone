@@ -69,6 +69,8 @@ export type MadProgramPartner = {
   full: string[];
   /** ③ 연계 — 본인 동의 시 오가는 경험·데이터 (브랜드별 별도 동의, 개인정보보호법 제18조) */
   link: string[];
+  /** ③ 실제 동의 카드 — lib/service-links.ts 키 (ServiceLinkConsent) */
+  linkScopes?: string[];
 };
 
 export const MAD_ACCENT = '#EC1D25';
@@ -211,6 +213,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
       taste: ['HIT 미니 — 20문항·3분, 나의 영웅 유형 미리보기 (이 페이지에서 바로)', '매드리거 대상 커리어 특강·상담 회차'],
       full: ['HIT 풀 리포트·심화 진단', 'AI 커리어 상담', '현업 멘토 커리어 코칭', 'Journey — 목표·데일리 체크인'],
       link: ['경쟁 PT 수상·활동 인증서 → HeRo 커리어 프로필', 'HIT 진단 결과 → 매드리그 팀 구성·포트폴리오'],
+      linkScopes: ['madleague.certificates>hero.profile', 'hero.hit_type>madleague.portfolio'],
     },
   },
   {
@@ -228,6 +231,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
       taste: ['모집 중인 RooK 실전 프로젝트 미리보기 — 이 페이지와 프로그램 목록에 함께 노출', '매드리거 대상 크리에이티브 원데이 과제'],
       full: ['RooK 실전 크리에이티브 프로젝트 참가 신청·선발', '현업 크리에이터와 프로젝트 수행', 'RooK 참가 인증서'],
       link: ['RooK 프로젝트 결과물 → 매드리거 포트폴리오', '매드리그 경쟁 PT 이력 → RooK 선발 참고'],
+      linkScopes: ['rook.program_results>madleague.portfolio'],
     },
   },
   {
@@ -245,6 +249,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
       taste: ['매드리거 대상 전략 기획 원데이 클래스', "Planner's 기획 도구 체험"],
       full: ['실전 전략 기획 훈련 과정', '실전 프로젝트 참여'],
       link: ["Planner's 훈련 기록 → 매드리거 포트폴리오", '매드리그 경쟁 PT 기획서 → 훈련 과제로'],
+      linkScopes: ['planners.program_results>madleague.portfolio'],
     },
   },
 ];

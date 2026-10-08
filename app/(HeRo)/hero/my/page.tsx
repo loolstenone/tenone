@@ -7,6 +7,7 @@ import { LoginRequired } from "@/components/LoginRequired";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { LinkedMadleagueCertificates } from "@/features/hero/LinkedMadleagueCertificates";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Compass, Building2 } from "lucide-react";
@@ -74,6 +75,9 @@ export default function HeRoMyPage() {
                 <MyProfileCard accentColor="#E53935" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="hero" accentColor="#E53935" className="mb-6" />}
+
+                {/* MADLeague 활동 경력 — 서비스 간 연계 동의 시 (lib/service-links.ts) */}
+                <LinkedMadleagueCertificates />
 
                 {/* 매칭 인박스 — 큐레이션 수신 */}
                 {user?.id && (

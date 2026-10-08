@@ -106,6 +106,17 @@
 | **program_certificates** | **익명화**: member_id NULL · snapshot에서 birthdate·university·major 삭제 · name은 마스킹 값으로 교체 | 코드·구분·결과·발급일만 진위 확인용으로 보관. 발급 화면 동의 문구에 고지 (2026-10-08) |
 | program_rounds · program_teams · program_notices | 유지 | 운영 콘텐츠 |
 
+### 3.2.3 서비스 간 연계 동의 (`member_service_links`, 2026-10-09 — 코어)
+
+| 상황 | 처리 | 비고 |
+|------|------|------|
+| 회원이 연결 끊기 | `revoked_at` 설정 (revoke_reason=`member`) — 받는 서비스는 즉시 못 읽음 | 행은 남김 (동의·철회 이력 = 입증 자료) |
+| 서비스 탈퇴 (scope=brand) | 그 서비스가 보내는 쪽·받는 쪽인 연계 자동 철회 (트리거 `trg_revoke_service_links_on_withdrawal`) | `brand_withdrawal` |
+| 계정 전체 탈퇴 | 전부 자동 철회 → members 삭제 시 FK cascade로 행 삭제 | `account_withdrawal` |
+
+- 받는 서비스는 원본을 **복사해 두지 않는다** — 매번 동의 확인 후 원천 테이블을 읽는다 (철회 = 즉시 안 보임). 레지스트리 `lib/service-links.ts`
+- 첫 실제 연계: MADLeague 인증서 → HeRo 마이페이지 (`/api/hero/linked/madleague-certificates` — 구분·프로그램·결과·발급일·코드만, 생년월일·대학·전공 제외)
+
 ### 3.3 MADLeap · Badak — 이전 시 확정
 - 외부 서버의 실제 데이터 구조를 보고 이전 설계와 함께 정한다 (§0.1 외부 서버 이전 원칙).
 - 참고: Vercel의 `madleap_portfolios`는 회원 키 컬럼이 없음, `badak_*` 29개는 이전 전 추정 설계(동결).

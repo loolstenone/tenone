@@ -8,6 +8,7 @@ import { getAllServiceProfiles, type ServiceProfileData, getBadakActivity, type 
 import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supabase/capabilities';
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
+import { ServiceLinksPanel } from '@/components/ServiceLinksPanel';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
 import type { TaxonomyKind } from '@/lib/supabase/taxonomies';
 import Image from 'next/image';
@@ -1293,6 +1294,9 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                         </div>
                     );
                 })()}
+
+                {/* ── 서비스 연계 (서비스 간 데이터 연계 동의·철회) ── */}
+                {isOwner && <ServiceLinksPanel />}
 
                 {/* ── 직원 정보 ── */}
                 {isOwner && isStaff && (

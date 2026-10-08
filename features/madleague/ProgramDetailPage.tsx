@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, MessageSquare, type LucideIcon } from 'lucide-react';
 import { CrossSiteLink } from '@/components/CrossSiteLink';
+import { ServiceLinkConsent } from '@/components/ServiceLinkConsent';
 import { getMadProgram, getMadProgramNeighbors, MAD_ACCENT, MAD_PROGRAM_GROUPS, type MadProgram } from '@/features/madleague/programs-list';
 import { ProgramCTA } from '@/features/madleague/ProgramCTA';
 
@@ -194,6 +195,14 @@ export function PartnerProgramPage({ programKey, children }: { programKey: strin
             </li>
           ))}
         </ol>
+        {partner.linkScopes && partner.linkScopes.length > 0 && (
+          <div className="mt-10">
+            <div className="text-xs font-bold tracking-widest text-neutral-500 mb-4">지금 연결하기</div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {partner.linkScopes.map((s) => <ServiceLinkConsent key={s} scope={s} accentColor={accent} />)}
+            </div>
+          </div>
+        )}
         <p className="mt-8 text-sm text-neutral-500">
           MADLeague와 {partner.brand}는 모두 Ten:One™이 운영하는 서비스입니다. 계정은 하나로 쓰고, {partner.brand}를 처음 이용할 때 이용 동의를 받습니다. 서비스 사이의 기록 연계는 서비스마다 따로 동의한 경우에만 이뤄지고, 언제든 끊을 수 있습니다.
         </p>

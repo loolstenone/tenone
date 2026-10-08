@@ -181,7 +181,7 @@
   - ② **정식** — 같은 Ten:One ID로 그 서비스에 신청해 사용, 첫 이용 때 서비스 동의(`member_brand_joins`) (`partner.full`)
   - ③ **연계** — 서비스 간 경험·데이터는 서비스별 별도 동의로 이어져 풀 서비스·풀 데이터 (`partner.link`, 개인정보보호법 제18조)
 - 연계 프로그램 = `programs-list.ts` `group: 'partner'` + `partner` 필드, 페이지는 `PartnerProgramPage`. 직접 운영 프로그램만 `glance`·`ProgramDetailPage`
-- 맛보기·연계 항목은 **구상 문구** — 실제 구현(HIT 간략 진단 MADLeague 노출, 인증서 → HeRo 프로필 연동 동의 등)은 아직 없음
+- 실제 구현 (2026-10-09): 맛보기 = HIT 미니(`HitTaste`, 저장 없음) · 연계 = **서비스 간 연계 동의 코어**(`member_service_links` · `lib/service-links.ts` 레지스트리 · `ServiceLinkConsent` 카드 · `/api/universe/service-links`). 연계 페이지 "지금 연결하기"에 `partner.linkScopes` 카드 — live는 `madleague.certificates>hero.profile` 하나, 나머지는 "준비 중". 새 연계는 레지스트리에 추가 + 받는 서비스 API에서 `hasServiceLink()` 확인 후 원천 조회 (복사 금지)
 - `mad_hero_applications` 테이블(0건)·인트라 `hero-applications` 화면·`/api/madleague/admin/hero`는 남아 있음 → DROP 승인 대기
 - 직업소개 미신고 — "채용 연결·직접 매칭" 문구 금지 (직업안정법)
 
