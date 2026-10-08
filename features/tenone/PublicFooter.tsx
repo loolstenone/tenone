@@ -7,7 +7,6 @@ export function PublicFooter() {
             tagline="Beyond the Limit, Universe of Possibilities."
             accentColor="#fff"
             dark={true}
-            hideUniverseColumn={true}
             linkColumns={[
                 {
                     title: "Universe",

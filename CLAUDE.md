@@ -1127,25 +1127,25 @@ import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/Univers
 
 ---
 
-## 1.9.4 유니버스 푸터 (UniverseFooter)
+## 1.9.4 유니버스 푸터 (UniverseFooter) — 4열 규칙 (2026-10-08 개정)
 
-> **원칙**: 모든 브랜드 사이트의 푸터는 **동일한 레이아웃**을 가진다.
-> 브랜드별로 다른 건 (a) 컬러, (b) 링크 컨텐츠, (c) 상단 슬롯(뉴스레터 등). 구조는 동일.
-> SSOT 컴포넌트: `components/UniverseFooter.tsx`
+> **원칙**: 모든 브랜드 사이트의 푸터는 **같은 4열 구조**다. 열마다 역할이 하나다.
+> SSOT 컴포넌트: `components/UniverseFooter.tsx` — 자체 푸터를 만들지 않는다.
 
-### 표준 4단 구조
+### 4열 구조
 
-```
-┌─────────────────────────────────────────────────────┐
-│  (선택) 상단 슬롯 — 뉴스레터·CTA·소셜               │  ← children
-├─────────────────────────────────────────────────────┤
-│  [브랜드명]            [컬럼1]  [컬럼2]  [Universe] │  ← 4컬럼
-│  태그라인              링크들    링크들   자동추가   │
-│  Ten:One™ Universe (링크)                          │
-├─────────────────────────────────────────────────────┤
-│  © Year · Ten:One™ Universe   이용약관  개인정보   │  ← 카피라이트
-└─────────────────────────────────────────────────────┘
-```
+| 열 | 제목 | 내용 | 정하는 방식 |
+|---|---|---|---|
+| **1. 브랜드** | (브랜드명) | 브랜드명 · 컨셉 또는 슬로건 · **Ten:One™ Universe** 링크 | 브랜드마다 문구. **유니버스 연결은 여기 한 곳만** (헌법 원칙 7) |
+| **2. 메뉴** | 메뉴 | 메인 메뉴 (헤더 상위 메뉴) | **`siteId`를 주면 `lib/brand-site-menus.ts` `siteHeaderNav`에서 자동** — 손으로 적지 않는다 (헤더와 어긋남 방지) |
+| **3. 참여** | 참여 | 등록·지원·문의·마이페이지 등 사용자의 행동 유발 | `actions` — 가장 중요한 행동을 맨 위에 |
+| **4. 채널** | 채널 | 외부 채널(SNS·유튜브·뉴스레터) + **유니버스 안의 결이 맞는·서로 도움이 되는 사이트** (예: 매드리그 → HeRo·RooK·Planner's) | `channels` — 외부 주소는 새 탭, 유니버스 경로(`/hero` 등)는 그 사이트 공식 주소로 자동 변환(`lib/cross-site.ts`) |
+| 하단 줄 | — | © 연도 · 상호·대표 · 이용약관·개인정보처리방침 | 자동 |
+
+- **비어 있는 열은 숨긴다** (빈 열 금지)
+- 상단 슬롯(`children`) — 뉴스레터·CTA 등 선택
+- **사업자등록번호**: 2026-10-08 사용자 결정으로 하단 줄에서 숨김. ⚠️ **통신판매(온라인 결제·판매)를 시작하면** 전자상거래법상 상호·대표자·사업자등록번호·통신판매업 신고번호를 첫 화면에 표시해야 한다 → `lib/company-info.ts` `mailOrderNumber`를 넣으면 사업자등록번호와 함께 자동 표시된다
+- 이용약관·개인정보처리방침 **본문**의 운영 주체 표기(사업자등록번호 포함)는 그대로 둔다
 
 ### 호출 패턴
 
@@ -1153,44 +1153,35 @@ import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/Univers
 import { UniverseFooter } from "@/components/UniverseFooter";
 
 <UniverseFooter
-  brandName="Badak"
-  tagline="기획자 네트워크"
-  accentColor="#ffd93d"
+  siteId="madleague"                      // 2열 메뉴 자동
+  brandName="MAD League"
+  tagline="경쟁을 통한 성장 플랫폼"
+  accentColor="#EC1D25"
   dark={true}
-  linkColumns={[
-    { title: "서비스", links: [
-      { label: "모임", href: "/badak/groups" },
-      { label: "커뮤니티", href: "/badak/community" },
-    ]},
-    { title: "고객", links: [
-      { label: "문의", href: "/badak/contact" },
-      { label: "공지", href: "/badak/notice" },
-    ]},
+  actions={[
+    { label: "매드리거 등록", href: "/madleague/apply" },
+    { label: "문의하기", href: "/madleague/contact" },
   ]}
->
-  <NewsletterForm />  {/* 선택 슬롯 */}
-</UniverseFooter>
+  channels={[
+    { label: "HeRo", href: "/hero" },                                   // 유니버스 연관 사이트
+    { label: "YouTube", href: "https://youtube.com/@…", external: true }, // 외부 채널
+  ]}
+/>
 ```
 
-### 자동으로 들어가는 것
+### 이행 (24개 푸터)
 
-- **Universe 컬럼**: Ten:One·About·Brands·Universe (`hideUniverseColumn={true}`로 끌 수 있음)
-- **카피라이트**: 자동 연도 + 브랜드명 + Ten:One™ Universe
-- **정책 링크**: 이용약관·개인정보처리방침 (하단 우측)
+- Universe 열(Ten:One·About·Brands·Universe)은 **폐지 — 전 사이트 동시 적용**. 브랜드 사이트의 About이 TenOne 소개로 가는 등 브랜드 메뉴와 어긋났다
+- 4열 구조(`siteId`·`actions`·`channels`) 적용: 메뉴 레지스트리 등록 브랜드부터 — **MADLeague·RooK 완료 (2026-10-08)**. HeRo·Badak·MADLeap은 레지스트리 등록과 함께
+- 나머지(실험·보관)는 기존 `linkColumns`가 그대로 나온다 — 집중 브랜드로 올릴 때 4열로 옮긴다
 
 ### 절대 하지 말 것
 
-- ❌ 자체 푸터 컴포넌트 직접 작성 (`features/{brand}/{Brand}Footer.tsx` 더 이상 만들지 않음)
-- ❌ 카피라이트 연도 하드코딩
-- ❌ Universe 컬럼 누락 (TenOne 본체만 예외)
-- ❌ 정책 링크 누락
+- ❌ 자체 푸터 컴포넌트 직접 작성
+- ❌ 2열 메뉴를 손으로 적기 (레지스트리 등록 브랜드는 `siteId`)
+- ❌ 브랜드 푸터에 TenOne 페이지 링크(About·Brands 등)를 브랜드 메뉴처럼 넣기
+- ❌ 빈 열 · 카피라이트 연도 하드코딩 · 정책 링크 누락
 - ❌ 푸터에서 GTM/script 직접 삽입 (`Analytics.tsx`가 전담)
-
-### 마이그레이션 (기존 21개 푸터 → UniverseFooter)
-
-차기 세션에서 brand 별로 점진 적용. 기존 푸터의 콘텐츠를 `linkColumns`와 `children`(상단 슬롯)으로 매핑하면 끝.
-
----
 
 ## 1.9.5 인트라 브랜드 관리 SSOT — 사이트와 인트라가 어긋나지 않게 (2026-10-07)
 

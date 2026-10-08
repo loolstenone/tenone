@@ -1,35 +1,27 @@
 "use client";
 
 import { UniverseFooter } from "@/components/UniverseFooter";
-import { siteHeaderNav } from "@/lib/brand-site-menus";
 
-// 푸터 메뉴 = 헤더 메뉴와 같은 원천 (lib/brand-site-menus.ts) — 메뉴를 바꾸면 헤더·푸터·인트라가 함께 바뀐다 (§1.9.5)
-const nav = siteHeaderNav("madleague");
-const menuLinks = nav.flatMap(item => {
-    const children = (item.dropdown ?? []).filter(d => d.href !== item.href && d.href !== "/madleague/apply");
-    // 매드리거 하위의 '동아리'는 푸터에서 따로 보이게 (자주 찾는 메뉴)
-    const club = children.find(d => d.href === "/madleague/clubs");
-    return [{ label: item.name, href: item.href }, ...(club ? [{ label: club.name, href: club.href }] : [])];
-});
-
+// 푸터 규칙 CLAUDE.md §1.9.4 — 메뉴는 헤더 레지스트리에서 자동(siteId), 참여·채널만 여기서
 export function MadLeagueFooter() {
     return (
         <UniverseFooter
+            siteId="madleague"
             brandName="MAD League"
             tagline="Match, Act, Develop · 경쟁을 통한 성장 플랫폼"
             accentColor="#EC1D25"
             dark={true}
-            linkColumns={[
-                { title: "메뉴", links: menuLinks },
-                {
-                    title: "참여",
-                    links: [
-                        { label: "매드리거 등록", href: "/madleague/apply" },
-                        { label: "공식 동아리 신청", href: "/madleague/contact" },
-                        { label: "문의하기", href: "/madleague/contact" },
-                        { label: "마이페이지", href: "/madleague/my" },
-                    ],
-                },
+            actions={[
+                { label: "매드리거 등록", href: "/madleague/apply" },
+                { label: "공식 동아리 신청", href: "/madleague/contact" },
+                { label: "문의하기", href: "/madleague/contact" },
+                { label: "마이페이지", href: "/madleague/my" },
+            ]}
+            channels={[
+                // 유니버스 안의 결이 맞는 사이트 — 커리어(HeRo) · 크리에이티브(RooK) · 전략 기획(Planner's)
+                { label: "HeRo", href: "/hero" },
+                { label: "RooK", href: "/rook" },
+                { label: "Planner's", href: "/madleague/programs/planners" },
             ]}
         />
     );

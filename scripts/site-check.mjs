@@ -137,6 +137,12 @@ async function checkSite(siteId) {
     const tier = row?.tier;
     const inMenus = new RegExp(`siteId:\\s*["']${siteId}["']`).test(menusSrc);
     if (tier === "focus" || tier === "core") inMenus ? ok("brand-site-menus 등록 (집중 브랜드)") : fail("집중 브랜드인데 lib/brand-site-menus.ts 미등록");
+    // 푸터 4열 규칙 (§1.9.4, 2026-10-08) — 메뉴 레지스트리 등록 브랜드는 2열 메뉴를 siteId로 자동 생성 (헤더와 어긋남 방지)
+    const footerFile = files.find(f => /Footer\.tsx$/.test(f) && /UniverseFooter/.test(src[f]));
+    if (footerFile) {
+        if (/hideUniverseColumn/.test(src[footerFile])) warn(`${footerFile}: hideUniverseColumn은 폐지된 옵션 (Universe 열 폐지 §1.9.4) — 지워도 됨`);
+        if (inMenus) /siteId=/.test(src[footerFile]) ? ok("푸터 4열 규칙 (메뉴 = 헤더 레지스트리)") : fail(`${footerFile}: 메뉴 레지스트리 등록 브랜드인데 푸터에 siteId 없음 → 2열 메뉴가 헤더와 어긋남 (§1.9.4)`);
+    }
 
     // 5. 공식 주소·검색 노출 (§0.1 원칙 4·6)
     if (canon) {
