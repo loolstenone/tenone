@@ -190,8 +190,9 @@ export default async function Page() {
           {/* 담비 캐릭터 */}
           <div className="relative h-48 w-40 shrink-0 hidden sm:block">
             <Image
-              src="/logos/madleague/dambe.png"
-              alt="DAMbe 캐릭터"
+              src="/logos/madleague/dambe-trophy.webp"
+              alt="트로피를 든 DAMbe 캐릭터"
+              sizes="160px"
               fill
               className="object-contain object-bottom drop-shadow-2xl"
             />

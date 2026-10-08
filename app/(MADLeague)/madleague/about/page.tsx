@@ -161,12 +161,14 @@ export default function AboutPage() {
               <span className="text-white"> "담비라 세상아!"</span>
             </p>
           </div>
-          <div className="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center relative overflow-hidden">
+          {/* 배경 투명 원본 — 페이지 검정 바탕 위에 바로 (상자 없음) */}
+          <div className="relative mx-auto h-[420px] sm:h-[520px] w-full max-w-sm">
             <Image
-              src="/logos/madleague/dambe.png"
-              alt="DAMbe 캐릭터"
+              src="/logos/madleague/dambe-trophy.webp"
+              alt="트로피를 든 DAMbe 캐릭터"
               fill
-              className="object-contain p-8"
+              sizes="(min-width: 768px) 384px, 100vw"
+              className="object-contain"
             />
           </div>
         </div>
