@@ -1,232 +1,121 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { StaffRole, Division, SystemAccess } from "@/types/staff";
-import { divisions, positions, accessOptions, divisionDefaultAccess, brandOptions } from "@/lib/staff-data";
-import { ArrowLeft, UserPlus } from "lucide-react";
+/**
+ * ERP › HR › 구성원 등록 (입사) — 2026-10-10 초대 방식으로 재작성
+ *   계정 초대 메일(비밀번호는 본인이 설정) + 직원 정보 + 권한 묶음 + 담당 브랜드를 한 번에 (lib/staff-lifecycle.ts)
+ *   직무 권한(인사·급여·재무·회계)은 여기서 주지 않는다 — Standard › 권한 체계 (마스터)
+ */
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { createClient } from "@/lib/supabase/client";
+import { EMPLOYMENT_TYPES, STAFF_PRESETS } from "@/lib/staff-presets";
 
-const roles: StaffRole[] = ['Admin', 'Manager', 'Editor', 'Viewer'];
-const inputClass = "w-full border border-neutral-200 bg-white px-4 py-2.5 placeholder-neutral-300 focus:border-neutral-900 focus:outline-none";
-const labelClass = "block text-sm text-neutral-500 mb-1.5";
+const input = "w-full border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none";
+const label = "mb-1 block text-xs text-neutral-500";
 
 export default function StaffRegisterPage() {
-    const router = useRouter();
     const [form, setForm] = useState({
-        name: '', email: '', employeeId: '',
-        division: '' as Division | '',
-        department: '', position: '',
-        role: 'Editor' as StaffRole,
-        accessLevel: [] as SystemAccess[],
-        startDate: new Date().toISOString().split('T')[0],
-        phone: '',
-        brandAssociation: [] as string[],
-        tempPassword: '',
+        name: "", email: "", employeeId: "", department: "", position: "",
+        employmentType: "정규직", hireDate: new Date().toISOString().slice(0, 10), preset: "staff", brands: [] as string[],
     });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
+    const [sites, setSites] = useState<{ slug: string; name: string }[]>([]);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState("");
+    const [done, setDone] = useState<{ existingAccount: boolean } | null>(null);
 
-    const selectedDivision = divisions.find(d => d.id === form.division);
-    const availableDepts = selectedDivision?.departments ?? [];
+    useEffect(() => {
+        createClient().from("ums_sites").select("slug, name").in("tier", ["core", "focus"]).order("slug")
+            .then(({ data }: { data: { slug: string; name: string }[] | null }) => setSites(data ?? []));
+    }, []);
 
-    const handleDivisionChange = (divId: string) => {
-        const div = divId as Division;
-        const defaultAccess = divisionDefaultAccess[div] ?? [];
-        setForm({ ...form, division: div, department: '', accessLevel: defaultAccess as SystemAccess[] });
-    };
+    const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
+    const toggleBrand = (slug: string) =>
+        setForm(f => ({ ...f, brands: f.brands.includes(slug) ? f.brands.filter(b => b !== slug) : [...f.brands, slug] }));
 
-    const toggleAccess = (id: SystemAccess) => {
-        setForm(prev => ({
-            ...prev,
-            accessLevel: prev.accessLevel.includes(id)
-                ? prev.accessLevel.filter(a => a !== id)
-                : [...prev.accessLevel, id]
-        }));
-    };
-
-    const toggleBrand = (id: string) => {
-        setForm(prev => ({
-            ...prev,
-            brandAssociation: prev.brandAssociation.includes(id)
-                ? prev.brandAssociation.filter(b => b !== id)
-                : [...prev.brandAssociation, id]
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        if (!form.name || !form.email || !form.employeeId || !form.division || !form.department || !form.position) {
-            setError('필수 항목을 모두 입력해주세요.'); return;
-        }
-        if (!form.tempPassword || form.tempPassword.length < 6) {
-            setError('임시 비밀번호를 6자 이상 입력해주세요.'); return;
-        }
-        if (form.accessLevel.length === 0) {
-            setError('시스템 접근 권한을 1개 이상 선택해주세요.'); return;
-        }
-
-        // API route (service_role) → Supabase Auth 계정 + members 행 동시 생성
-        try {
-            const res = await fetch('/api/admin/create-staff', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: form.email,
-                    name: form.name,
-                    tempPassword: form.tempPassword,
-                    employeeId: form.employeeId,
-                    division: form.division,
-                    department: form.department,
-                    position: form.position,
-                    role: form.role,
-                    phone: form.phone || null,
-                    startDate: form.startDate || null,
-                    brandAssociation: form.brandAssociation,
-                    systemAccess: form.accessLevel,
-                }),
-            });
-            const json = await res.json();
-            if (!res.ok) {
-                setError(json.error || '직원 등록에 실패했습니다.');
-                return;
-            }
-        } catch (err) {
-            console.error('[Staff] create-staff API error:', err);
-            setError('서버 오류가 발생했습니다.');
-            return;
-        }
-
-        setSuccess(true);
-        setTimeout(() => router.push('/intra/erp/hr/staff'), 1500);
+        setBusy(true); setError("");
+        const res = await fetch("/api/intra/staff", {
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
+        }).catch(() => null);
+        const d = await res?.json().catch(() => null);
+        if (!res?.ok) setError(d?.error ?? "등록하지 못했습니다.");
+        else setDone({ existingAccount: d.existingAccount });
+        setBusy(false);
     };
 
-    if (success) {
+    if (done) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <div className="h-16 w-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
-                        <UserPlus className="h-8 w-8 text-neutral-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold tracking-tight text-neutral-900">직원이 등록되었습니다</h3>
-                    <p className="text-sm text-neutral-500 mt-2">{form.name} ({form.employeeId})</p>
+            <div className="mx-auto max-w-lg space-y-4 py-10 text-center">
+                <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
+                <p className="text-lg font-semibold text-neutral-900">{form.name}님 입사 등록 완료</p>
+                <p className="text-sm text-neutral-600">
+                    {done.existingAccount
+                        ? "이미 Ten:One ID가 있어 그 계정에 직원 권한을 더했습니다. 안내 메일을 보냈습니다."
+                        : `${form.email}로 초대 메일을 보냈습니다. 링크(24시간 유효)에서 본인이 비밀번호를 정합니다.`}
+                    <br />첫 로그인 때 인사 정보 처리 안내 확인과 보안 서약을 마치면 재직 상태가 됩니다.
+                </p>
+                <div className="flex justify-center gap-3 pt-2 text-sm">
+                    <Link href="/intra/erp/hr/staff/lifecycle" className="border border-neutral-200 px-4 py-2 hover:border-neutral-900">입·퇴사 현황</Link>
+                    <button onClick={() => { setDone(null); setForm(f => ({ ...f, name: "", email: "", employeeId: "", brands: [] })); }}
+                        className="bg-neutral-900 px-4 py-2 text-white">한 명 더 등록</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
-                <ArrowLeft className="h-4 w-4" /> Staff List
+        <div className="max-w-2xl space-y-6">
+            <Link href="/intra/erp/hr/staff/lifecycle" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900">
+                <ArrowLeft className="h-3 w-3" /> 입·퇴사 현황
             </Link>
+            <PageHeader title="구성원 등록 (입사)" description="초대 메일로 계정을 열고, 직원 정보와 권한 묶음을 한 번에 부여합니다 — 인사 담당 또는 마스터" />
 
-            <PageHeader title="직원 등록" description="새로운 직원을 시스템에 등록합니다." />
-
-            <form onSubmit={handleSubmit}>
-                {/* 기본 정보 */}
-                <div className="border border-neutral-200 bg-white p-8 mb-6">
-                    <h3 className="text-sm font-semibold mb-5">기본 정보</h3>
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                            <div><label className={labelClass}>사번 *</label><input value={form.employeeId} onChange={e => setForm({...form, employeeId: e.target.value})} placeholder="2026-0001" required className={inputClass} /></div>
-                            <div><label className={labelClass}>이름 *</label><input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="홍길동" required className={inputClass} /></div>
-                            <div><label className={labelClass}>이메일 *</label><input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="name@tenone.biz" required className={inputClass} /></div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div><label className={labelClass}>연락처</label><input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="010-0000-0000" className={inputClass} /></div>
-                            <div><label className={labelClass}>입사일</label><input type="date" value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} className={inputClass} /></div>
-                        </div>
+            <form onSubmit={submit} className="space-y-6">
+                <section className="grid grid-cols-1 gap-4 rounded-lg border border-neutral-200 bg-white p-5 sm:grid-cols-2">
+                    <div><label className={label}>이름 *</label><input required value={form.name} onChange={e => set("name", e.target.value)} className={input} /></div>
+                    <div><label className={label}>이메일 * (로그인 ID)</label><input required type="email" value={form.email} onChange={e => set("email", e.target.value)} className={input} /></div>
+                    <div><label className={label}>사번</label><input value={form.employeeId} onChange={e => set("employeeId", e.target.value)} placeholder="2026-0001" className={input} /></div>
+                    <div><label className={label}>입사일</label><input type="date" value={form.hireDate} onChange={e => set("hireDate", e.target.value)} className={input} /></div>
+                    <div><label className={label}>부서</label><input value={form.department} onChange={e => set("department", e.target.value)} className={input} /></div>
+                    <div><label className={label}>직위</label><input value={form.position} onChange={e => set("position", e.target.value)} className={input} /></div>
+                    <div>
+                        <label className={label}>고용형태</label>
+                        <select value={form.employmentType} onChange={e => set("employmentType", e.target.value)} className={input}>
+                            {EMPLOYMENT_TYPES.map(t => <option key={t}>{t}</option>)}
+                        </select>
                     </div>
-                </div>
+                </section>
 
-                {/* 조직 배치 */}
-                <div className="border border-neutral-200 bg-white p-8 mb-6">
-                    <h3 className="text-sm font-semibold mb-5">조직 배치</h3>
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className={labelClass}>부문 *</label>
-                                <select value={form.division} onChange={e => handleDivisionChange(e.target.value)} required className={inputClass}>
-                                    <option value="">선택</option>
-                                    {divisions.map(d => <option key={d.id} value={d.id}>{d.name} ({d.id})</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className={labelClass}>부서 *</label>
-                                <select value={form.department} onChange={e => setForm({...form, department: e.target.value})} required className={inputClass} disabled={!form.division}>
-                                    <option value="">선택</option>
-                                    {availableDepts.map(d => <option key={d} value={d}>{d}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className={labelClass}>직위 *</label>
-                                <select value={form.position} onChange={e => setForm({...form, position: e.target.value})} required className={inputClass}>
-                                    <option value="">선택</option>
-                                    {positions.map(p => <option key={p} value={p}>{p}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label className={labelClass}>권한 등급</label>
-                            <select value={form.role} onChange={e => setForm({...form, role: e.target.value as StaffRole})} className={inputClass}>
-                                {roles.map(r => <option key={r} value={r}>{r}</option>)}
-                            </select>
-                        </div>
+                <section className="space-y-3 rounded-lg border border-neutral-200 bg-white p-5">
+                    <p className="text-sm font-semibold text-neutral-900">권한 묶음 *</p>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {STAFF_PRESETS.map(p => (
+                            <label key={p.key} className={`cursor-pointer rounded border p-3 ${form.preset === p.key ? "border-neutral-900" : "border-neutral-200"}`}>
+                                <input type="radio" name="preset" className="sr-only" checked={form.preset === p.key} onChange={() => set("preset", p.key)} />
+                                <p className="text-sm font-medium text-neutral-900">{p.label}</p>
+                                <p className="text-[11px] text-neutral-500">{p.desc}</p>
+                            </label>
+                        ))}
                     </div>
-                </div>
-
-                {/* 시스템 접근 권한 (중복 선택) */}
-                <div className="border border-neutral-900 bg-neutral-50 p-8 mb-6">
-                    <h3 className="text-sm font-semibold text-neutral-900 mb-2">시스템 접근 권한 (중복 선택)</h3>
-                    <p className="text-xs text-neutral-400 mb-4">부문 선택 시 기본 권한이 자동 할당됩니다. 필요에 따라 추가/제거하세요.</p>
-                    <div className="grid grid-cols-5 gap-3">
-                        {accessOptions.map(opt => (
-                            <button key={opt.id} type="button" onClick={() => toggleAccess(opt.id as SystemAccess)}
-                                className={`border px-3 py-3 text-center transition-colors ${
-                                    form.accessLevel.includes(opt.id as SystemAccess)
-                                        ? 'border-neutral-900 bg-neutral-100'
-                                        : 'border-neutral-200 hover:border-neutral-400'
-                                }`}>
-                                <p className={`text-xs font-medium ${form.accessLevel.includes(opt.id as SystemAccess) ? 'text-neutral-900' : 'text-neutral-500'}`}>{opt.label}</p>
-                                <p className="text-xs text-neutral-400 mt-0.5">{opt.desc}</p>
+                    <p className="pt-2 text-sm font-semibold text-neutral-900">담당 브랜드 <span className="text-xs font-normal text-neutral-400">(선택 — 인트라 브랜드 관리 메뉴)</span></p>
+                    <div className="flex flex-wrap gap-2">
+                        {sites.map(s => (
+                            <button type="button" key={s.slug} onClick={() => toggleBrand(s.slug)}
+                                className={`rounded border px-3 py-1 text-xs ${form.brands.includes(s.slug) ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 text-neutral-600"}`}>
+                                {s.name}
                             </button>
                         ))}
                     </div>
-                </div>
+                    <p className="text-[11px] text-neutral-400">인사·급여·재무·회계 직무 권한은 마스터가 Standard › 권한 체계에서 따로 부여합니다.</p>
+                </section>
 
-                {/* 소속 브랜드 */}
-                <div className="border border-neutral-200 bg-white p-8 mb-6">
-                    <h3 className="text-sm font-semibold mb-4">소속 브랜드</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {brandOptions.map(b => (
-                            <button key={b.id} type="button" onClick={() => toggleBrand(b.id)}
-                                className={`px-3 py-1.5 text-xs font-medium transition-colors border ${
-                                    form.brandAssociation.includes(b.id)
-                                        ? 'bg-neutral-900 text-white border-neutral-900'
-                                        : 'bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400'
-                                }`}>{b.name}</button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* 임시 비밀번호 */}
-                <div className="border border-neutral-200 bg-white p-8 mb-6">
-                    <label className={labelClass}>임시 비밀번호 *</label>
-                    <input value={form.tempPassword} onChange={e => setForm({...form, tempPassword: e.target.value})} placeholder="직원에게 전달할 임시 비밀번호" required className={inputClass} />
-                    <p className="text-xs text-neutral-300 mt-1">직원이 최초 로그인 시 변경하도록 안내해주세요.</p>
-                </div>
-
-                {error && <div className="bg-neutral-100 border border-neutral-200 px-4 py-3 text-sm text-neutral-500 mb-6">{error}</div>}
-
-                <div className="flex items-center justify-between">
-                    <Link href="/intra/erp/hr/staff" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">취소</Link>
-                    <button type="submit" className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
-                        <UserPlus className="h-4 w-4" /> 직원 등록
-                    </button>
-                </div>
+                {error && <p className="text-sm text-rose-600">{error}</p>}
+                <button disabled={busy} className="flex items-center gap-2 bg-neutral-900 px-5 py-2.5 text-sm text-white disabled:opacity-50">
+                    {busy && <Loader2 className="h-4 w-4 animate-spin" />} 초대 메일 보내고 등록
+                </button>
             </form>
         </div>
     );

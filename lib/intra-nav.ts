@@ -571,6 +571,7 @@ export const modules: NavModule[] = [
                             { name: "전체 구성원", href: "/intra/erp/hr/people" },
                             { name: "직원 관리", href: "/intra/erp/hr/staff" },
                             { name: "조직도", href: "/intra/erp/hr/people/org" },
+                            { name: "입·퇴사", href: "/intra/erp/hr/staff/lifecycle" },
                             { name: "구성원 등록", href: "/intra/erp/hr/staff/register" },
                             { name: "근태관리", href: "/intra/erp/hr/attendance" },
                             { name: "급여관리", href: "/intra/erp/hr/payroll" },

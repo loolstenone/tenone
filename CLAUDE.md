@@ -929,6 +929,7 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 | **My** | 나에 관한 기록 (본인만) — 근태 · 급여명세 · GPR · 포인트 · 경비 | 헤더 아바타 메뉴 `/intra/my` |
 | **ERP** | 회사 전체 관리 — 담당 직무(duty)가 있는 사람만 | 사이드바 ERP |
 
+- **입사·퇴사** (`lib/staff-lifecycle.ts`, 인사 직무 또는 마스터): ERP › HR › 구성원 등록 = 초대 메일(비밀번호는 본인이 설정 — ❌ 임시 비밀번호 전달) + `tenone_staff_profiles` + 권한 묶음(`lib/staff-presets.ts`) + 담당 브랜드 → 상태 `invited` → 첫 로그인 때 인사 정보 처리 안내 + 보안 서약(`StaffWelcome`, 그 전엔 메뉴 안 열림) → `active` → 퇴사 처리 = 일반 회원만 남기고 권한 전부 회수(`offboarded`·`left_at`, 인사 기록은 퇴직 후 3년 보관 후 파기 — 근로기준법 제42조). 직무 권한은 묶음에 넣지 않는다
 - 같은 데이터라도 **내 것은 My, 전원 것은 ERP**. Workspace에는 남의 개인정보를 두지 않는다
 - 전 유니버스 처리 대기 전체는 Universe 대시보드 (`<ActionHubPanel />`), Workspace는 `<ActionHubPanel scope="focus" />`
 

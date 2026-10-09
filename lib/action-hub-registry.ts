@@ -42,6 +42,17 @@ export interface ActionEntry {
 }
 
 export const ACTION_HUB_REGISTRY: ActionEntry[] = [
+    // ── 직원 입사 진행 (2026-10-10, lib/staff-lifecycle.ts) — 초대 수락·첫 로그인 확인이 안 끝난 사람
+    {
+        key: "staff_invited", label: "입사 — 초대 수락 대기", table: "tenone_staff_profiles",
+        filter: { column: "status", value: "invited" },
+        href: "/intra/erp/hr/staff/lifecycle", brand_id: "global", category: "approval", priority: "normal",
+    },
+    {
+        key: "staff_onboarding", label: "입사 — 첫 로그인 확인 대기", table: "tenone_staff_profiles",
+        filter: { column: "status", value: "onboarding" },
+        href: "/intra/erp/hr/staff/lifecycle", brand_id: "global", category: "approval", priority: "normal",
+    },
     // ── 승인 (Approval)
     {
         key: "mad_applications",

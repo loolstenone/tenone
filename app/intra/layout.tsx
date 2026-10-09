@@ -1,4 +1,5 @@
-import { getIntraViewer } from "@/lib/intra-server-gate";
+import { getIntraContext } from "@/lib/intra-server-gate";
+import { StaffWelcome } from "@/components/intra/StaffWelcome";
 import { IntraShell } from "@/components/intra/IntraShell";
 import { IntraLoginScreen } from "@/components/intra/IntraLoginScreen";
 
@@ -12,7 +13,9 @@ import { IntraLoginScreen } from "@/components/intra/IntraLoginScreen";
 export const dynamic = "force-dynamic";
 
 export default async function IntraLayout({ children }: { children: React.ReactNode }) {
-    const viewer = await getIntraViewer();
+    const { viewer, staffStatus } = await getIntraContext();
     if (viewer !== "staff") return <IntraLoginScreen noAccess={viewer === "signed-in"} />;
+    // 입사 후 첫 로그인: 인사 처리 안내 확인 + 보안 서약 전에는 메뉴를 열지 않는다 (lib/staff-lifecycle.ts)
+    if (staffStatus === "invited" || staffStatus === "onboarding") return <StaffWelcome needsPassword={staffStatus === "invited"} />;
     return <IntraShell>{children}</IntraShell>;
 }
