@@ -74,7 +74,7 @@ export default function CertificatePage() {
                                 href="/madleague/certificate/issue"
                                 className="inline-flex items-center gap-2 bg-[#EC1D25] px-6 py-3 text-sm font-bold tracking-wide text-white transition hover:opacity-90"
                             >
-                                경쟁 PT 인증서 받기 (계정 없이) →
+                                경쟁 PT 인증서 받기 →
                             </Link>
                             <Link
                                 href="/madleague/certificate/verify"

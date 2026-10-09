@@ -45,6 +45,10 @@ export default async function CertificatePage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 pb-20">
+        <Link href="/madleague/certificate/issue" className="mb-8 flex items-center justify-between border border-neutral-800 bg-neutral-950 px-6 py-4 hover:border-neutral-600 transition">
+          <span><b>경쟁 PT 참가·수상 확인서</b> <span className="text-sm text-neutral-500">— 2025·2026 경쟁 PT 참가자</span></span>
+          <span className="text-sm font-bold text-[#EC1D25]">받기 →</span>
+        </Link>
         <CertificateManager brand="madleague" printBase="/madleague/certificate/print" verifyBase="/madleague/certificate/verify" />
       </section>
     </div>

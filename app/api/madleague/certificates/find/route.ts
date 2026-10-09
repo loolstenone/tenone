@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireMember } from '@/lib/api-guard';
 import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server';
+import { PT_CERT_CONSENT_VERSION } from '@/features/madleague/pt-certificate-consent';
 
 export const runtime = 'nodejs';
 
+const NOTE = '수료증 관리 대장';
 const NOT_FOUND = '입력한 정보와 일치하는 인증서가 없습니다. 이름·생년월일·대학을 참가 신청 때와 같게 입력했는지 확인해 주세요.';
+const TAKEN = '이 인증서는 이미 다른 계정에 연결되어 있습니다. 본인이 연결한 적이 없다면 문의하기로 알려 주세요.';
 
-/** 대학 표기 차이 흡수 — 공백·'학교' 제거 (고려대학교 세종캠퍼스 ↔ 고려대, 국민대 ↔ 국민대학교) */
+/** 대학 표기 차이 흡수 — 공백·'대학교'/'대' (고려대학교 세종캠퍼스 ↔ 고려대, 국민대 ↔ 국민대학교) */
 const normUniv = (s: string) => s.replace(/\s+/g, '').replace(/대학교/g, '대').toLowerCase();
 const univMatch = (input: string, stored: string | null) => {
   if (!stored) return false;
@@ -14,15 +18,40 @@ const univMatch = (input: string, stored: string | null) => {
   return a.length >= 2 && (a === b || b.startsWith(a) || a.startsWith(b));
 };
 
+type Snap = { name: string; birthdate: string | null; university: string | null; major: string | null; group_name: string | null; cohort: string | null; client_name: string | null; round_title: string | null; year: number | null };
+type Row = { id: string; member_id: string | null; code: string; type: string; result: string | null; issued_at: string; snapshot: Snap };
+
+const toDoc = (c: Row) => ({
+  code: c.code, type: c.type, result: c.result, issued_at: c.issued_at,
+  name: c.snapshot.name, birthdate: c.snapshot.birthdate, university: c.snapshot.university, major: c.snapshot.major,
+  club: c.snapshot.group_name, cohort: c.snapshot.cohort, client: c.snapshot.client_name, title: c.snapshot.round_title ?? '경쟁 PT', year: c.snapshot.year,
+});
+
+const base = () => createAdminClient().from('program_certificates')
+  .select('id, member_id, code, type, result, issued_at, snapshot')
+  .eq('brand_id', 'madleague').eq('note', NOTE).is('revoked_at', null);
+
+/** GET — 내 계정에 연결된 경쟁 PT 인증서 */
+export async function GET(req: NextRequest) {
+  const auth = await requireMember(req);
+  if (auth instanceof NextResponse) return auth;
+  const { data, error } = await base().eq('member_id', auth.memberId).order('issued_at');
+  if (error) return NextResponse.json({ error: '조회하지 못했습니다.' }, { status: 500 });
+  return NextResponse.json({ certificates: ((data ?? []) as Row[]).map(toDoc) });
+}
+
 /**
- * POST { name, birthdate(YYYY-MM-DD), university, captchaToken }
- * MADLeague 경쟁 PT 인증서 본인 조회 — 계정 없이 (수료증 관리 대장 기반, 2026-10-09)
- * 이름·생년월일 정확히 + 대학 일치해야 한다. 어느 항목이 틀렸는지는 알려주지 않는다 (추측 방지)
- * 응답은 본인 인증서 이미지에 들어가는 항목만 — 전화번호 등은 저장하지도 않음
+ * POST { name, birthdate(YYYY-MM-DD), university, agree: true, captchaToken }
+ * 경쟁 PT 인증서 받기 = 로그인 유도 (2026-10-09 사용자 결정). 본인 확인 → 내 계정에 연결(member_id) → 이후 로그인만 하면 바로
+ * 이름·생년월일 정확히 + 대학 일치. 어느 항목이 틀렸는지 알려주지 않는다 (추측 방지)
+ * 연결과 함께 MADLeague 이용 동의를 member_brand_joins에 기록 (데이터 계약 4조)
  */
 export async function POST(req: NextRequest) {
+  const auth = await requireMember(req);
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json().catch(() => ({}));
   if (!(await verifyTurnstile(body.captchaToken, req))) return NextResponse.json({ error: CAPTCHA_REQUIRED_ERROR }, { status: 400 });
+  if (body.agree !== true) return NextResponse.json({ error: '필수 동의가 필요합니다.' }, { status: 400 });
 
   const name = String(body.name ?? '').replace(/\s+/g, '');
   const birthdate = String(body.birthdate ?? '');
@@ -31,27 +60,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '이름·생년월일·대학을 모두 입력해 주세요.' }, { status: 400 });
   }
 
-  const { data, error } = await createAdminClient().from('program_certificates')
-    .select('code, type, result, issued_at, snapshot')
-    .eq('brand_id', 'madleague').in('type', ['participation', 'award']).is('revoked_at', null)
-    .eq('snapshot->>name', name).eq('snapshot->>birthdate', birthdate)
-    .order('issued_at', { ascending: true });
+  const { data, error } = await base().eq('snapshot->>name', name).eq('snapshot->>birthdate', birthdate);
   if (error) {
     console.error('[madleague/certificates/find]', error);
     return NextResponse.json({ error: '조회하지 못했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 500 });
   }
+  const matched = ((data ?? []) as Row[]).filter(c => univMatch(university, c.snapshot.university));
+  if (matched.length === 0) return NextResponse.json({ error: NOT_FOUND }, { status: 404 });
 
-  type Snap = { name: string; birthdate: string | null; university: string | null; major: string | null; group_name: string | null; cohort: string | null; client_name: string | null; round_title: string | null; year: number | null };
-  const certificates = (data ?? [])
-    .filter(c => univMatch(university, (c.snapshot as Snap).university))
-    .map(c => {
-      const s = c.snapshot as Snap;
-      return {
-        code: c.code, type: c.type, result: c.result, issued_at: c.issued_at,
-        name: s.name, birthdate: s.birthdate, university: s.university, major: s.major,
-        club: s.group_name, cohort: s.cohort, client: s.client_name, title: s.round_title ?? '경쟁 PT', year: s.year,
-      };
-    });
-  if (certificates.length === 0) return NextResponse.json({ error: NOT_FOUND }, { status: 404 });
-  return NextResponse.json({ certificates });
+  const free = matched.filter(c => !c.member_id);
+  if (free.length === 0 && !matched.some(c => c.member_id === auth.memberId)) return NextResponse.json({ error: TAKEN }, { status: 409 });
+
+  const admin = createAdminClient();
+  if (free.length > 0) {
+    // MADLeague 이용 동의 — 가입 기록이 없을 때만 새로 (기존 가입 경로·동의는 보존)
+    const { data: join } = await admin.from('member_brand_joins').select('member_id').eq('member_id', auth.memberId).eq('brand_id', 'madleague').maybeSingle();
+    if (!join) {
+      const now = new Date().toISOString();
+      const { error: jErr } = await admin.from('member_brand_joins').insert({
+        member_id: auth.memberId, brand_id: 'madleague', origin: 'certificate', status: 'active', terms_version: PT_CERT_CONSENT_VERSION, terms_agreed_at: now,
+      });
+      if (jErr) console.error('[madleague/certificates/find] join', jErr);
+    }
+    // 동시에 다른 계정이 연결하지 못하게 member_id IS NULL 조건으로만
+    const { error: uErr } = await admin.from('program_certificates').update({ member_id: auth.memberId })
+      .in('id', free.map(c => c.id)).is('member_id', null);
+    if (uErr) return NextResponse.json({ error: '연결하지 못했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 500 });
+  }
+
+  const { data: mine } = await base().eq('member_id', auth.memberId).order('issued_at');
+  return NextResponse.json({ certificates: ((mine ?? []) as Row[]).map(toDoc), linked: free.length });
 }

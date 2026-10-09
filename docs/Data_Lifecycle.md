@@ -106,7 +106,7 @@
 | **program_certificates** | **익명화**: member_id NULL · snapshot에서 birthdate·university·major 삭제 · name은 마스킹 값으로 교체 | 코드·구분·결과·발급일만 진위 확인용으로 보관. 발급 화면 동의 문구에 고지 (2026-10-08) |
 | program_rounds · program_teams · program_notices | 유지 | 운영 콘텐츠 |
 
-- **수료증 관리 대장 인증서** (2026-10-09, `note='수료증 관리 대장'`, `cert_key='ledger:{코드}'`, member_id NULL — 비회원): 2025 대성학원·리제로스·2026 춤추는고래 경쟁 PT 참가·수상 243건. snapshot = 이름·생년월일·대학·전공·동아리·기수·팀. **전화번호는 가져오지 않음**(최소 수집). 본인 조회 `/madleague/certificate/issue`(이름+생년월일+대학, Turnstile) → PNG·PDF는 브라우저에서 생성(서버 보관 없음). ⚠️ 보관 기간 미정 — 처리방침에 항목·기간 고지 필요
+- **수료증 관리 대장 인증서** (2026-10-09, `note='수료증 관리 대장'`, `cert_key='ledger:{코드}'`, member_id NULL — 비회원): 2025 대성학원·리제로스·2026 춤추는고래 경쟁 PT 참가·수상 243건. snapshot = 이름·생년월일·대학·전공·동아리·기수·팀. **전화번호는 가져오지 않음**(최소 수집). 로그인 + 본인 확인(이름+생년월일+대학, Turnstile) + 동의(`pt-cert-2026-10-09`) 시 그 계정에 연결 → 이후 탈퇴 처리는 위 program_certificates 규칙(익명화) 그대로. PNG·PDF는 브라우저에서 생성(서버 보관 없음). ⚠️ **아무도 연결하지 않은 대장 행의 보관 기간 미정** — 처리방침에 항목·기간 고지 필요
 
 ### 3.2.3 서비스 간 연계 동의 (`member_service_links`, 2026-10-09 — 코어)
 
