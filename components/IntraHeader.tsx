@@ -9,7 +9,7 @@ import { getSetting, setSetting } from "@/lib/supabase/settings";
 import {
     Search, Bell, LogOut, ChevronDown, User, Users, Target, CalendarCheck,
     CreditCard, Wallet, Star, Plus, X, MessageSquareText, ListTodo, Stamp,
-    FolderKanban, GripVertical, Home
+    FolderKanban, GripVertical, Home, Award, Receipt
 } from "lucide-react";
 
 const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -29,12 +29,13 @@ const defaultFavorites = [
 const availableBookmarks = [
     { id: 'myverse', label: 'Workspace', href: '/intra/workspace', icon: 'User', staffOnly: false },
     { id: 'org', label: '조직도', href: '/intra/erp/hr/people/org', icon: 'Users', staffOnly: true },
+    { id: 'my', label: 'My', href: '/intra/my', icon: 'User', staffOnly: false },
     { id: 'messenger', label: '메신저', href: '/intra/workspace/messenger', icon: 'MessageSquareText', staffOnly: false },
     { id: 'todo', label: 'Todo', href: '/intra/workspace/todo', icon: 'ListTodo', staffOnly: false },
-    { id: 'gpr', label: 'GPR', href: '/intra/workspace/gpr', icon: 'Target', staffOnly: true },
+    { id: 'gpr', label: 'GPR', href: '/intra/my/gpr', icon: 'Target', staffOnly: true },
     { id: 'project', label: '프로젝트', href: '/intra/project/management', icon: 'FolderKanban', staffOnly: true },
-    { id: 'attendance', label: '근태', href: '/intra/workspace/attendance', icon: 'CalendarCheck', staffOnly: true },
-    { id: 'payroll', label: '급여', href: '/intra/workspace/payroll', icon: 'Wallet', staffOnly: true },
+    { id: 'attendance', label: '근태', href: '/intra/my/attendance', icon: 'CalendarCheck', staffOnly: true },
+    { id: 'payroll', label: '급여명세', href: '/intra/my/payroll', icon: 'Wallet', staffOnly: true },
     { id: 'hero', label: 'HeRo', href: '/intra/hero/hit', icon: 'Target', staffOnly: false },
 ];
 
@@ -194,30 +195,31 @@ export function IntraHeader() {
                                     <p className="text-[10px] text-neutral-400">{user?.role || ''}</p>
                                 </div>
                                 <div className="py-1">
-                                    <Link href="/intra/workspace" onClick={() => setProfileOpen(false)}
+                                    {/* My = 나에 관한 기록 (2026-10-10). 일하는 곳은 사이드바 Workspace */}
+                                    <Link href="/intra/my" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <User className="h-3.5 w-3.5" /> Myverse
-                                    </Link>
-                                    <Link href="/intra/workspace/messenger" onClick={() => setProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <MessageSquareText className="h-3.5 w-3.5" /> 메신저
-                                    </Link>
-                                    <Link href="/intra/workspace/todo" onClick={() => setProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <ListTodo className="h-3.5 w-3.5" /> Todo
+                                        <User className="h-3.5 w-3.5" /> My
                                     </Link>
                                     {isStaff && (<>
-                                    <Link href="/intra/workspace/gpr" onClick={() => setProfileOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <Target className="h-3.5 w-3.5" /> GPR
-                                    </Link>
-                                    <Link href="/intra/workspace/attendance" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/my/attendance" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <CalendarCheck className="h-3.5 w-3.5" /> 근태
                                     </Link>
-                                    <Link href="/intra/workspace/payroll" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/my/payroll" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-                                        <Wallet className="h-3.5 w-3.5" /> 급여
+                                        <Wallet className="h-3.5 w-3.5" /> 급여명세
+                                    </Link>
+                                    <Link href="/intra/my/gpr" onClick={() => setProfileOpen(false)}
+                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
+                                        <Target className="h-3.5 w-3.5" /> GPR
+                                    </Link>
+                                    <Link href="/intra/my/points" onClick={() => setProfileOpen(false)}
+                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
+                                        <Award className="h-3.5 w-3.5" /> 포인트
+                                    </Link>
+                                    <Link href="/intra/my/expenses" onClick={() => setProfileOpen(false)}
+                                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
+                                        <Receipt className="h-3.5 w-3.5" /> 경비
                                     </Link>
                                     </>)}
                                 </div>

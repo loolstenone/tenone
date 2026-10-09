@@ -25,7 +25,7 @@ import {
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
     ShoppingCart, CalendarClock, LayoutGrid, MessageCircle, Flame,
-    Bot, Users, Home, Menu, X, Radio, Mail, Brain, LineChart, Map, RefreshCw,
+    Bot, Users, Home, Menu, X, Network, Radio, Mail, Brain, LineChart, Map, RefreshCw,
     Zap, Layers, PenTool, Eye, Coins, Trophy,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -94,8 +94,9 @@ export const modules: NavModule[] = [
     //  MY — 개인 워크스페이스
     // ══════════════════════════════════════════════════════════
     {
-        name: "My",
-        tagline: "내 일 · 내 일정 · 내 포인트",
+        // Workspace = 회사 일을 하는 곳 (동료와 공유). 나에 관한 기록(근태·급여·GPR·포인트·경비)은 헤더 아바타 › My (/intra/my) — 2026-10-10
+        name: "Workspace",
+        tagline: "오늘 할 일 · 소통 · 협업",
         href: "/intra/workspace",
         icon: Home,
         intraModule: "myverse" as IntraModule,
@@ -106,8 +107,9 @@ export const modules: NavModule[] = [
                     { name: "대시보드", href: "/intra/workspace", icon: LayoutDashboard, exact: true },
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
                     { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },
+                    { name: "내 프로젝트", href: "/intra/workspace/projects", icon: Briefcase },
                     { name: "타임시트", href: "/intra/workspace/timesheet", icon: Clock },
-                    { name: "포인트", href: "/intra/workspace/points", icon: Award },
+                    { name: "결재함", href: "/intra/workspace/approval", icon: FileCheck },
                     { name: "Library", href: "/intra/workspace/library", icon: FolderOpen },
                 ],
             },
@@ -117,6 +119,7 @@ export const modules: NavModule[] = [
                     { name: "공지사항", href: "/intra/comm/notice", icon: ClipboardList },
                     { name: "자유게시판", href: "/intra/comm/free", icon: FileText },
                     { name: "전체 일정", href: "/intra/comm/calendar", icon: Calendar },
+                    { name: "조직도", href: "/intra/erp/hr/people/org", icon: Network },
                     { name: "Wiki ↗", href: "https://wiki.tenone.biz", icon: BookOpen },
                 ],
             },

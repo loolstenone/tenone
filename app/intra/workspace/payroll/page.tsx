@@ -1,2 +1,3 @@
 import { redirect } from "next/navigation";
-export default function Page() { redirect("/intra/erp/hr/payroll"); }
+/** 개인 기록은 My로 (2026-10-10 Workspace/My 체계) */
+export default function Page() { redirect("/intra/my/payroll"); }

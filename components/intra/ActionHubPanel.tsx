@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useSiteTiers } from "@/lib/use-site-tiers";
 import { ACTION_HUB_REGISTRY, CATEGORY_LABEL, PRIORITY_COLOR, type ActionCategory } from "@/lib/action-hub-registry";
 
 interface PendingAction {
@@ -17,6 +18,7 @@ interface PendingAction {
     href: string;
     category: ActionCategory;
     priority: "critical" | "high" | "normal";
+    brand_id: string;
 }
 
 async function loadPending(): Promise<PendingAction[]> {
@@ -37,13 +39,21 @@ async function loadPending(): Promise<PendingAction[]> {
                 href: entry.href,
                 category: entry.category,
                 priority: entry.priority ?? "normal",
+                brand_id: entry.brand_id,
             };
         })
     );
 }
 
-export function ActionHubPanel() {
+const FOCUS_TIERS = ["core", "focus"];
+
+/**
+ * scope="focus" — Workspace(개인 대시보드)용: 공통(global) + 핵심·집중 브랜드만. 나머지는 건수만 알리고 Universe 대시보드로 (2026-10-10)
+ * scope="all"   — Universe 대시보드: 전 유니버스
+ */
+export function ActionHubPanel({ scope = "all" }: { scope?: "focus" | "all" }) {
     const [pending, setPending] = useState<PendingAction[] | null>(null);
+    const tiers = useSiteTiers();
 
     useEffect(() => {
         let cancelled = false;
@@ -51,13 +61,16 @@ export function ActionHubPanel() {
         return () => { cancelled = true; };
     }, []);
 
-    if (!pending) {
+    if (!pending || (scope === "focus" && !tiers)) {
         return <div className="bg-neutral-50 border border-dashed border-neutral-200 rounded-lg p-4 text-center text-[11px] text-neutral-400">Action Hub 불러오는 중...</div>;
     }
-    return <ActionHub pending={pending} />;
+    if (scope === "all") return <ActionHub pending={pending} />;
+    const inFocus = (p: PendingAction) => p.brand_id === "global" || FOCUS_TIERS.includes(tiers?.[p.brand_id] ?? "");
+    const others = pending.filter(p => !inFocus(p)).reduce((n, p) => n + p.count, 0);
+    return <ActionHub pending={pending.filter(inFocus)} others={others} />;
 }
 
-function ActionHub({ pending }: { pending: PendingAction[] }) {
+function ActionHub({ pending, others = 0 }: { pending: PendingAction[]; others?: number }) {
     const active = pending.filter(p => p.count > 0);
     const total = active.reduce((s, p) => s + p.count, 0);
 
@@ -81,9 +94,15 @@ function ActionHub({ pending }: { pending: PendingAction[] }) {
                         <span className="px-1.5 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded">{total}</span>
                     )}
                 </h2>
-                <span className="text-[10px] text-neutral-400">
-                    레지스트리 {ACTION_HUB_REGISTRY.length}건 · 활성 {active.length}
-                </span>
+                {others > 0 ? (
+                    <Link href="/intra/ums" className="text-[10px] text-neutral-400 hover:text-neutral-900">
+                        실험·보관 브랜드 {others.toLocaleString()}건 → Universe 대시보드
+                    </Link>
+                ) : (
+                    <span className="text-[10px] text-neutral-400">
+                        레지스트리 {ACTION_HUB_REGISTRY.length}건 · 활성 {active.length}
+                    </span>
+                )}
             </div>
             {total === 0 ? (
                 <div className="bg-neutral-50 border border-dashed border-neutral-200 rounded-lg p-4 text-center text-[11px] text-neutral-400">

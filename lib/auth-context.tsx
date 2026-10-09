@@ -77,6 +77,24 @@ async function generateUniqueHandle(
     return safeBase + Date.now().toString().slice(-4);
 }
 
+/**
+ * 메뉴 접근(SystemAccess)은 member_roles에서만 — members.system_access(본인 수정 가능 컬럼)는 더 읽지 않는다 (2026-10-10)
+ *   직무(context='duty'): hr·payroll → ERP 인사 / finance·accounting → ERP 재무 · erp-admin = super_admin
+ *   메뉴는 편의일 뿐, 실제 데이터 접근은 DB RLS auth_has_duty()가 막는다 (sql/staff-duty-roles.sql)
+ */
+const ALL_SYSTEM_ACCESS: SystemAccess[] = ['project', 'erp-hr', 'erp-people', 'erp-finance', 'erp-sales', 'erp-admin', 'marketing', 'wiki'];
+function systemAccessFromRoles(isSuperAdmin: boolean, duties: string[], modules: string[]): SystemAccess[] {
+    if (isSuperAdmin) return ALL_SYSTEM_ACCESS;
+    const out = new Set<SystemAccess>();
+    if (duties.includes('hr')) { out.add('erp-hr'); out.add('erp-people'); }
+    if (duties.includes('payroll')) out.add('erp-hr');
+    if (duties.includes('finance') || duties.includes('accounting')) { out.add('erp-finance'); out.add('erp-sales'); }
+    if (modules.includes('project')) out.add('project');
+    if (modules.includes('wiki')) out.add('wiki');
+    if (modules.includes('marketing')) out.add('marketing');
+    return [...out];
+}
+
 // Supabase members → User 변환 (v3: member_roles 기반)
 function memberToUser(member: Record<string, unknown>): User {
     const accountType = (member.account_type as User['accountType']) || 'member';
@@ -89,6 +107,8 @@ function memberToUser(member: Record<string, unknown>): User {
     const universeRoles = activeRoles.filter(r => r.context === 'universe').map(r => r.role);
     const moduleRoles   = activeRoles.filter(r => r.context === 'module').map(r => r.role);
     const brandRoles    = activeRoles.filter(r => r.context === 'brand').map(r => r.role);
+    const dutyRoles     = activeRoles.filter(r => r.context === 'duty').map(r => r.role);
+    const isSuperAdmin  = universeRoles.includes('super_admin');
     const hasIntraRole  = activeRoles.some(r => r.role === 'intra_access' || r.role === 'staff' || r.role === 'super_admin' || r.role === 'crew');
 
     // member_roles 데이터 없으면 members 컬럼 fallback
@@ -102,7 +122,8 @@ function memberToUser(member: Record<string, unknown>): User {
         authId: member.auth_id as string | undefined,
         name: member.name as string,
         email: member.email as string,
-        role: (member.role as User['role']) || 'Viewer',
+        // 'Admin'은 super_admin@universe만 — members.role은 본인이 수정 가능한 컬럼이라 권한 근거로 쓰지 않는다 (데이터 계약 2)
+        role: isSuperAdmin ? 'Admin' : (member.role === 'Admin' ? 'Viewer' : (member.role as User['role']) || 'Viewer'),
         accountType,
         primaryType: (member.primary_type as string) || accountType,
         avatarInitials: (member.avatar_initials as string) || ((member.name as string) || '').substring(0, 2).toUpperCase(),
@@ -116,7 +137,7 @@ function memberToUser(member: Record<string, unknown>): User {
         // 접근 권한 (member_roles 기반)
         intraAccess,
         moduleAccess: moduleAccess as User['moduleAccess'],
-        systemAccess: (member.system_access as SystemAccess[]) || [],
+        systemAccess: systemAccessFromRoles(isSuperAdmin, dutyRoles, moduleRoles),
         brandAccess,
 
         // 프로필 (HR 필드는 tenone_staff_profiles에서)

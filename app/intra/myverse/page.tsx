@@ -202,7 +202,7 @@ export default function MyversePage() {
             {/* 오늘 처리할 일 — 전 브랜드 Action Hub (직원만) */}
             {isStaff && (
                 <div className="mb-6">
-                    <ActionHubPanel />
+                    <ActionHubPanel scope="focus" />
                 </div>
             )}
 

@@ -662,6 +662,11 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 | `system` | `intra_access` | 인트라 메뉴 표시 플래그 (권한 판단은 staff) |
 | `module` | `{모듈명}` (erp·hero·wiki·smarcomm·project …) | 인트라 모듈 접근 |
 | `brand` | `{브랜드 slug}` (badak·madleague·tenone …) | 해당 브랜드 인트라 관리 |
+| `duty` | `hr` · `payroll` · `finance` · `accounting` | 직무 권한 — 전 직원 인사·급여·재무·회계 데이터. JWT `hr:duty` → RLS `auth_has_duty('hr')`. SSOT `lib/staff-duties.ts` (2026-10-10) |
+
+- **부여 권한**: `universe`·`system`·`duty`는 **super_admin만** 부여·회수 (member_roles RLS + `/api/intra/duties`, 화면 = Standard › 권한 체계). `brand`·`module`은 직원 (2026-10-10 — 직원이 자기에게 super_admin을 줄 수 있던 구멍 차단)
+- **인사·재무 데이터 = 본인 + 담당 직무만** (개인정보보호법 제29조): 급여·인센티브 `payroll`(+`accounting` 조회) · 근태·GPR·직원 정보 수정·교육·포인트 `hr` · 경비·카드·청구·지급·사업계획 `finance`(+`accounting` 조회). ❌ 이런 테이블에 `auth_is_staff()`만으로 전원 조회 허용 금지 (`sql/staff-duty-roles.sql`)
+- 인트라 메뉴 접근(`user.systemAccess`)도 `member_roles`(duty·module·super_admin)에서만 도출 — ❌ `members.system_access`·`members.role`(본인 수정 가능 컬럼)으로 메뉴·Admin 판단 금지
 
 - 직원 판단 SSOT: `lib/api-guard.ts` `isStaffMember` = `member_roles` staff·manager·super_admin @universe (활성·미만료). `requireStaff`·`getMadAccess`·MyVerse 인트라가 사용, DB는 같은 정의로 JWT `is_staff` 동기화(`sync_roles_to_jwt`) → RLS `auth_is_staff()`. ❌ 이메일 도메인으로 직원 판단 금지 (2026-10-07 폐지)
 - 마스터: `super_admin@universe` (lools@tenone.biz)
@@ -915,6 +920,17 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 | UMS — UC 거래 | `/intra/ums/uc/transactions` | 모든 UC 거래 원장 |
 | UMS — 브랜드별 | `/intra/ums/{brand}/*` | Badak·Jakka 등 브랜드 전용 관리 |
 | Wiki | `/intra/wiki` | 내부 지식 베이스 |
+
+### Workspace · My · ERP (2026-10-10)
+
+| 영역 | 정의 | 위치 |
+|---|---|---|
+| **Workspace** | 회사 일을 하는 곳 (동료와 공유) — 오늘 처리할 일(Action Hub: 공통 + 핵심·집중 브랜드) · 메신저 · Todo · 내 프로젝트 · 타임시트 · 결재함 · Library · 공지·게시판·일정 · 조직도 · Wiki | 사이드바 첫 모듈 `/intra/workspace` |
+| **My** | 나에 관한 기록 (본인만) — 근태 · 급여명세 · GPR · 포인트 · 경비 | 헤더 아바타 메뉴 `/intra/my` |
+| **ERP** | 회사 전체 관리 — 담당 직무(duty)가 있는 사람만 | 사이드바 ERP |
+
+- 같은 데이터라도 **내 것은 My, 전원 것은 ERP**. Workspace에는 남의 개인정보를 두지 않는다
+- 전 유니버스 처리 대기 전체는 Universe 대시보드 (`<ActionHubPanel />`), Workspace는 `<ActionHubPanel scope="focus" />`
 
 ### 권한 게이트
 

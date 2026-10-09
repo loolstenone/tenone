@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
+import { DutyRolesManager } from "@/components/intra/DutyRolesManager";
 
 interface RoleRow {
     role: string;
@@ -19,6 +20,7 @@ const ROLE_DEFS = [
     { role: "crew", context: "universe", label: "크루", condition: "외부 협업 크루", scope: "인트라 일부 접근", color: "bg-sky-100 text-sky-700" },
     { role: "member", context: "universe", label: "회원", condition: "가입 시 자동 부여", scope: "본인 데이터", color: "bg-neutral-100 text-neutral-700" },
     { role: "intra_access", context: "system", label: "인트라 진입", condition: "직원·크루 계정 생성 시", scope: "인트라 메뉴 표시 (권한 판단은 staff)", color: "bg-neutral-900 text-white" },
+    { role: "hr · payroll · finance · accounting", context: "duty", label: "직무 권한", condition: "마스터가 아래 표에서 부여", scope: "전 직원 인사·급여·재무·회계 데이터 (RLS auth_has_duty) — 없으면 본인 기록만", color: "bg-emerald-100 text-emerald-700" },
     { role: "{모듈명}", context: "module", label: "모듈 접근", condition: "직원별 모듈 배정", scope: "erp · hero · wiki · smarcomm · project 등 인트라 모듈 메뉴", color: "bg-amber-100 text-amber-700" },
     { role: "{브랜드 slug}", context: "brand", label: "브랜드 관리", condition: "브랜드 담당 배정", scope: "해당 브랜드 인트라 관리 메뉴", color: "bg-violet-100 text-violet-700" },
 ];
@@ -28,6 +30,7 @@ const CONTEXT_RULES = [
     { pattern: "system", desc: "시스템 기능 플래그", example: "intra_access" },
     { pattern: "module", desc: "인트라 모듈 접근 — role이 모듈명", example: "erp · hero · wiki" },
     { pattern: "brand", desc: "브랜드 관리 — role이 브랜드 slug", example: "badak · madleague · tenone" },
+    { pattern: "duty", desc: "직무 권한 — role이 직무 (lib/staff-duties.ts)", example: "hr · payroll · finance · accounting" },
 ];
 
 const KNOWN_CONTEXTS = new Set(CONTEXT_RULES.map(c => c.pattern));
@@ -56,8 +59,14 @@ export default function RolesStandardPage() {
         <div className="space-y-6">
             <PageHeader
                 title="권한 체계 (Roles)"
-                description="모든 권한은 member_roles(member_id, role, context, is_active)에서 파생 · 데이터 계약 2조 · 쓰기는 직원만"
+                description="모든 권한은 member_roles(member_id, role, context, is_active)에서 파생 · 데이터 계약 2조 · universe·system·duty 부여는 마스터만, brand·module은 직원"
             />
+
+            <div>
+                <h2 className="text-sm font-semibold text-neutral-900 mb-1">직무 권한 — 인사 · 급여 · 재무 · 회계</h2>
+                <p className="text-[11px] text-neutral-500 mb-3">직원이라고 전원의 인사·재무 데이터를 보지 않습니다. 담당 직무가 있는 사람만 봅니다 (개인정보보호법 제29조 접근권한 최소화).</p>
+                <DutyRolesManager />
+            </div>
 
             {/* 8 Role Definitions */}
             <div>
