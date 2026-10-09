@@ -201,7 +201,9 @@
 - 코드 = 대장 그대로 `{연도}-COA 000001` · `{연도}-MCP 000052` (연도별 일련번호, 가운데 공백 1칸) — `normalizeCertCode()`가 공백·대소문자 차이 흡수. 계정 발급분(`MAD26-XXXXXX`)과 공존
 - 표기 날짜 = 대장 발급일 · 본문 = 대장 비고("리제로스 경쟁 PT") · 주최 = 비고에서 " 경쟁 PT" 뗀 이름 (샘플 이미지는 샘플일 뿐 — 대장이 SSOT)
 - **인증서 받기는 로그인하게 하는 미끼** (2026-10-09 사용자 결정) — 비로그인은 가입·로그인 유도만. 본인 확인 통과 시 대장 인증서를 그 계정에 연결(`member_id` 설정, NULL인 것만 — 먼저 연결한 계정이 주인) + MADLeague 가입 기록(`member_brand_joins` origin `certificate`, 동의 `pt-cert-2026-10-09` — `features/madleague/pt-certificate-consent.ts`). 다음부터는 로그인만 하면 목록. 연결된 인증서는 HeRo 연계(`madleague.certificates>hero.profile`)에도 잡힌다
-- 남이 먼저 연결한 경우 "이미 다른 계정에 연결" 안내 → 문의로 직원이 확인 후 member_id 정정
+- **우선권 = 매드리거 등록 정보** (2026-10-09 사용자 결정): 등록 때 낸 이름+전화번호가 대장과 맞는 계정이 주인 — `lib/programs/ledger-match.ts` `linkLedgerByRegistration` (linked_by `registration`, 직접 확인 연결(manual)도 넘겨받음). 대장 전화번호는 원본 대신 `match_hash`(HMAC, env `CERT_MATCH_SECRET` — 바꾸면 해시 전부 재계산)만. 등록 정보를 인증서 찾기에 쓰는 건 목적 외라 화면에서 [필수] 동의 후 버튼(자동 연결 아님, 제18조)
+- 등록 안 한 사람: 매드리거 등록 유도 + 직접 확인(이름+생년월일+대학, 먼저 연결한 계정, manual). 남이 먼저 연결했으면 안내 → 등록 정보로 찾기 또는 문의
+- 보관: 인증서 발급 기록 영구(진위 확인) · 대학·전공·계정 연결은 탈퇴 시 삭제 · 매드리거 등록 정보는 탈퇴 시 파기 — `docs/Data_Lifecycle.md` 3.2.2
 - 본인 확인: 이름·생년월일 정확히 + 대학 느슨하게(공백·'대학교'/'대' 차이 흡수, 캠퍼스 표기 허용). 전공은 같은 사람도 표기가 달라 열쇠로 쓰지 않는다. 어느 항목이 틀렸는지 알려주지 않는다
 - 새 회차: 대장에 행 추가 → 같은 방식으로 program_certificates INSERT (member_id NULL, cert_key `ledger:{코드}`, note '수료증 관리 대장'). 전화번호 제외
 - 대장 데이터 확인 필요: 양우진·오희수 회차마다 생년월일 다름 (조회 시 그 회차 값과 맞아야 함) · 동아리 표기 혼재(ABC마케팅/ABC, 매드립/MADLeap) — 인증서에 그대로 찍힘

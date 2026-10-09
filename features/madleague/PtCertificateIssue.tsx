@@ -34,6 +34,7 @@ export function PtCertificateIssue() {
     const [login, setLogin] = useState<null | "login" | "signup">(null);
     const [certs, setCerts] = useState<Cert[] | null>(null);
     const [showForm, setShowForm] = useState(false);
+    const [registered, setRegistered] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [working, setWorking] = useState<string | null>(null);
 
@@ -41,6 +42,7 @@ export function PtCertificateIssue() {
         const res = await fetch("/api/madleague/certificates/find").catch(() => null);
         const d = res?.ok ? await res.json() : { certificates: [] };
         const list = d.certificates as PtCertificate[];
+        setRegistered(!!d.registered);
         setShowForm(list.length === 0);
         setCerts(await withPreviews(list));
     }, []);
@@ -124,13 +126,76 @@ export function PtCertificateIssue() {
                     {error && <p className="mt-6 text-sm text-red-500">{error}</p>}
                 </>
             )}
-            {showForm && <ClaimForm onDone={list => { setShowForm(false); setError(null); withPreviews(list).then(setCerts); }} />}
+            {showForm && <ClaimForm registered={registered} onDone={list => { setShowForm(false); setError(null); withPreviews(list).then(setCerts); }} />}
         </div>
     );
 }
 
-/** 본인 확인 + 계정 연결 동의 */
-function ClaimForm({ onDone }: { onDone: (list: PtCertificate[]) => void }) {
+function ConsentBox() {
+    return (
+        <div className="border border-neutral-800 p-4 text-xs text-neutral-400 leading-relaxed space-y-1">
+            <p><b className="text-neutral-300">목적</b> {PT_CERT_CONSENT.purpose}</p>
+            <p><b className="text-neutral-300">항목</b> {PT_CERT_CONSENT.items}</p>
+            <p><b className="text-neutral-300">기간</b> {PT_CERT_CONSENT.retention}</p>
+            <p><b className="text-neutral-300">거부</b> {PT_CERT_CONSENT.refusal}</p>
+        </div>
+    );
+}
+
+/** 찾기 — ① 매드리거 등록 정보로(우선권, 입력 없음) ② 직접 확인 */
+function ClaimForm({ registered, onDone }: { registered: boolean; onDone: (list: PtCertificate[]) => void }) {
+    const [manual, setManual] = useState(!registered);
+    const [agreeReg, setAgreeReg] = useState(false);
+    const [regBusy, setRegBusy] = useState(false);
+    const [regMsg, setRegMsg] = useState<string | null>(null);
+
+    async function byRegistration() {
+        setRegBusy(true); setRegMsg(null);
+        const res = await fetch("/api/madleague/certificates/find", {
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "registration", agree: true }),
+        }).catch(() => null);
+        const d = res ? await res.json().catch(() => ({})) : {};
+        setRegBusy(false);
+        if (!res?.ok) { setRegMsg(d.error ?? "찾지 못했습니다. 잠시 후 다시 시도해 주세요."); return; }
+        if ((d.certificates ?? []).length === 0) { setRegMsg("등록 정보(이름·전화번호)와 맞는 인증서가 없습니다. 참가 신청 때 다른 번호를 썼다면 아래에서 직접 확인해 주세요."); setManual(true); return; }
+        onDone(d.certificates as PtCertificate[]);
+    }
+
+    return (
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="max-w-md">
+                <div className="text-xs font-bold tracking-widest text-neutral-500">매드리거 등록 정보로 찾기</div>
+                {registered ? (
+                    <div className="mt-4 space-y-4">
+                        <p className="text-sm text-neutral-400">매드리거 등록 때 낸 이름·전화번호가 경쟁 PT 참가 기록과 맞으면 바로 연결됩니다. 등록 정보가 맞는 계정이 우선입니다.</p>
+                        <ConsentBox />
+                        <label className="flex items-start gap-3 text-sm text-neutral-300">
+                            <input type="checkbox" checked={agreeReg} onChange={e => setAgreeReg(e.target.checked)} className="mt-1" />
+                            <span>[필수] 위 내용을 확인했고, 등록 정보로 인증서를 찾아 내 계정에 연결하는 데 동의합니다.</span>
+                        </label>
+                        {regMsg && <p className="text-sm text-red-500">{regMsg}</p>}
+                        <button onClick={byRegistration} disabled={!agreeReg || regBusy} className="w-full py-4 font-bold text-white disabled:opacity-40" style={{ backgroundColor: ACCENT }}>
+                            {regBusy ? "찾는 중…" : "동의하고 내 인증서 찾기"}
+                        </button>
+                    </div>
+                ) : (
+                    <div className="mt-4 border border-neutral-800 bg-neutral-950 p-6">
+                        <p className="text-sm text-neutral-300">매드리거로 등록하면 등록 정보로 인증서를 바로 찾을 수 있고, 동아리·프로그램 활동도 함께 쌓입니다.</p>
+                        <a href="/madleague/apply" className="mt-4 inline-block px-6 py-3 font-bold text-white" style={{ backgroundColor: ACCENT }}>매드리거 등록</a>
+                    </div>
+                )}
+            </div>
+            <div>
+                {manual ? <ManualForm onDone={onDone} /> : (
+                    <button onClick={() => setManual(true)} className="text-sm text-neutral-500 underline">등록 정보와 다르면 직접 확인하기</button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+/** 직접 확인 — 이름·생년월일·대학 */
+function ManualForm({ onDone }: { onDone: (list: PtCertificate[]) => void }) {
     const captcha = useCaptcha();
     const [form, setForm] = useState({ name: "", birthdate: "", university: "" });
     const [agree, setAgree] = useState(false);
@@ -154,9 +219,9 @@ function ClaimForm({ onDone }: { onDone: (list: PtCertificate[]) => void }) {
     }
 
     return (
-        <form onSubmit={submit} className="mt-12 max-w-md space-y-4">
+        <form onSubmit={submit} className="max-w-md space-y-4">
             <div>
-                <div className="text-xs font-bold tracking-widest text-neutral-500">본인 확인</div>
+                <div className="text-xs font-bold tracking-widest text-neutral-500">직접 확인</div>
                 <p className="mt-2 text-sm text-neutral-400">경쟁 PT 참가 신청 때 제출한 정보와 같게 입력해 주세요. 한 번 확인하면 내 계정에 연결됩니다.</p>
             </div>
             <label className="block">
@@ -171,12 +236,7 @@ function ClaimForm({ onDone }: { onDone: (list: PtCertificate[]) => void }) {
                 <span className="text-sm font-bold text-neutral-300">대학</span>
                 <input className={`${input} mt-2`} value={form.university} onChange={e => setForm({ ...form, university: e.target.value })} placeholder="예: 조선대학교" required />
             </label>
-            <div className="border border-neutral-800 p-4 text-xs text-neutral-400 leading-relaxed space-y-1">
-                <p><b className="text-neutral-300">목적</b> {PT_CERT_CONSENT.purpose}</p>
-                <p><b className="text-neutral-300">항목</b> {PT_CERT_CONSENT.items}</p>
-                <p><b className="text-neutral-300">기간</b> {PT_CERT_CONSENT.retention}</p>
-                <p><b className="text-neutral-300">거부</b> {PT_CERT_CONSENT.refusal}</p>
-            </div>
+            <ConsentBox />
             <label className="flex items-start gap-3 text-sm text-neutral-300">
                 <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-1" />
                 <span>[필수] 위 내용을 확인했고, 인증서를 내 계정에 연결하는 데 동의합니다.</span>

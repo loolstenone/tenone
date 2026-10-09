@@ -9,3 +9,13 @@
 ALTER TABLE public.member_brand_joins DROP CONSTRAINT IF EXISTS member_brand_joins_origin_check;
 ALTER TABLE public.member_brand_joins ADD CONSTRAINT member_brand_joins_origin_check
   CHECK (origin = ANY (ARRAY['signup','sso_auto','admin','program','first_visit','application','certificate']));
+
+-- 2026-10-09 추가 — MCP apply_migration `program_certificates_ledger_match`
+-- 매드리거 등록 정보 우선권 (사용자 결정): 등록 때 낸 이름+전화번호가 대장과 맞는 계정이 인증서 주인
+--   전화번호 원본은 저장하지 않고 HMAC 해시만 (서버 env CERT_MATCH_SECRET). linked_by = 연결 방식 (registration이 manual보다 우선)
+ALTER TABLE public.program_certificates ADD COLUMN IF NOT EXISTS match_hash text;
+ALTER TABLE public.program_certificates ADD COLUMN IF NOT EXISTS linked_by text;
+ALTER TABLE public.program_certificates DROP CONSTRAINT IF EXISTS program_certificates_linked_by_check;
+ALTER TABLE public.program_certificates ADD CONSTRAINT program_certificates_linked_by_check
+  CHECK (linked_by IS NULL OR linked_by IN ('registration', 'manual', 'admin'));
+CREATE INDEX IF NOT EXISTS program_certificates_match_hash_idx ON public.program_certificates (match_hash) WHERE match_hash IS NOT NULL;
