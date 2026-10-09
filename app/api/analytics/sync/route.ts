@@ -195,7 +195,38 @@ async function fetchGA4Report(
     rows[key].traffic_sources = srcMap[key] ?? [];
   }
 
-  return Object.values(rows);
+  // (not set) = GA4 자동 이벤트(세션 시작·첫 방문·Google 태그 자동 page_view)라 brand_id가 없다 → 같은 방문이 브랜드 행과 겹쳐 합계를 부풀린다. 저장하지 않음
+  return Object.values(rows).filter((r) => r.brand_id !== NOT_SET);
+}
+
+const NOT_SET = "(not set)";
+/** 유니버스 전체 = 브랜드 구분 없이 GA4가 센 값 (중복 없는 세션·사용자). 브랜드별 행을 더하면 한 방문이 여러 번 셀 수 있어 따로 받는다 */
+const ALL_BRANDS_ID = "_all";
+
+async function fetchGA4Totals(token: string, propertyId: string, startDate: string, endDate: string): Promise<GA4Row[]> {
+  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: "date" }],
+      metrics: [{ name: "sessions" }, { name: "totalUsers" }, { name: "newUsers" }, { name: "averageSessionDuration" }, { name: "bounceRate" }],
+      limit: 1000,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`GA4 Data API ${res.status}: ${data?.error?.message ?? "응답 오류"}`);
+  return (data.rows ?? []).map((row: { dimensionValues: { value: string }[]; metricValues: { value: string }[] }) => {
+    const date = row.dimensionValues[0].value;
+    const [sessions, users, newUsers, duration, bounce] = row.metricValues.map((m) => parseFloat(m.value));
+    return {
+      brand_id: ALL_BRANDS_ID,
+      date: `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`,
+      sessions: Math.round(sessions), pageviews: 0, users: Math.round(users), new_users: Math.round(newUsers),
+      avg_session_duration: Math.round(duration), bounce_rate: parseFloat((bounce * 100).toFixed(2)),
+      top_pages: [], traffic_sources: [],
+    };
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -230,7 +261,12 @@ export async function POST(req: NextRequest) {
     const gaRows: GA4Row[] = [];
     for (let from = new Date(startDate); from <= endDate; from.setDate(from.getDate() + 30)) {
       const to = new Date(from); to.setDate(to.getDate() + 29);
-      gaRows.push(...await fetchGA4Report(token, GA4_PROPERTY_ID, fmt(from), fmt(to > endDate ? endDate : to)));
+      const range = [fmt(from), fmt(to > endDate ? endDate : to)] as const;
+      gaRows.push(...await fetchGA4Report(token, GA4_PROPERTY_ID, ...range));
+      // 전체 페이지뷰 = 브랜드 페이지뷰 합 (Google 태그 자동 page_view까지 세면 한 화면이 두 번 잡힌다)
+      const pvByDate: Record<string, number> = {};
+      for (const r of gaRows) pvByDate[r.date] = (pvByDate[r.date] ?? 0) + r.pageviews;
+      for (const t of await fetchGA4Totals(token, GA4_PROPERTY_ID, ...range)) gaRows.push({ ...t, pageviews: pvByDate[t.date] ?? 0 });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -243,6 +279,9 @@ export async function POST(req: NextRequest) {
       if (!byBrand[row.brand_id]) byBrand[row.brand_id] = [];
       byBrand[row.brand_id].push(row);
     }
+
+    // 예전에 저장된 (not set) 행 정리 (GA4에서 다시 받아 오는 캐시라 지워도 손실 없음)
+    await supabase.from("analytics_snapshots").delete().eq("brand_id", NOT_SET);
 
     for (const [brandId, rows] of Object.entries(byBrand)) {
       const { error } = await supabase

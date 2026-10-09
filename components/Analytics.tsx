@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { useSite } from "@/lib/site-context";
+import { detectSiteId } from "@/lib/site-context";
 
 // 환경변수 끝 공백·줄바꿈 제거 + 형식 검증 — Vercel 값에 줄바꿈이 섞여 GTM 스크립트가 문법 오류로 실행되지 않은 사고 (2026-10-05)
 function cleanId(v: string | undefined, pattern: RegExp): string | undefined {
@@ -21,19 +21,20 @@ declare global {
 }
 
 export function Analytics() {
-  const { siteId } = useSite();
   const pathname = usePathname();
 
   // SPA 라우트 변경 시 GTM dataLayer에 page_view 이벤트 + brand_id 전송
+  // brand_id는 이동할 때마다 주소로 다시 판정한다 (2026-10-10) — useSite()는 첫 렌더에 'tenone'이었다가 바뀌어
+  // 모든 브랜드 첫 화면이 tenone으로 한 번 더 집계됐고, tenone.biz 안의 경로 이동(/mindle → /seoul360)은 반영되지 않았다
   useEffect(() => {
     if (pathname.startsWith("/intra")) return; // Intra 관리자 페이지 제외
     if (!GTM_ID || !window.dataLayer) return;
     window.dataLayer.push({
       event: "page_view",
       page_path: pathname,
-      brand_id: siteId ?? "tenone",
+      brand_id: detectSiteId(window.location.hostname, pathname),
     });
-  }, [pathname, siteId]);
+  }, [pathname]);
 
   // Intra 페이지에서는 스크립트 자체를 삽입하지 않음
   if (pathname.startsWith("/intra")) return null;

@@ -47,33 +47,33 @@ const pathSiteMap: Array<{ prefix: string; siteId: SiteIdentifier }> = [
     { prefix: '/namingfactory', siteId: 'namingfactory' },
 ];
 
+/** 주소 → 사이트 ID (순수 함수 — 분석 태그가 페이지 이동마다 다시 판정할 때도 쓴다) */
+export function detectSiteId(hostname: string, pathname: string): SiteIdentifier {
+    // 1. 독립 도메인 감지 (madleague.net, badak.biz 등)
+    const domainMapped = domainMap[hostname];
+    if (domainMapped) return domainMapped;
+
+    // 2. *.tenone.biz 서브도메인 감지 (badak.tenone.biz → badak)
+    const subMatch = hostname.match(/^([a-z0-9-]+)\.tenone\.biz$/);
+    if (subMatch && subMatch[1] !== 'www' && subMatch[1] in siteConfigs) return subMatch[1] as SiteIdentifier;
+
+    // 3. tenone.biz(또는 localhost) 내부에서 경로 기반 감지
+    const isTenOneDomain = hostname === 'tenone.biz' || hostname === 'www.tenone.biz' || hostname === 'localhost';
+    if (isTenOneDomain) {
+        const matched = pathSiteMap.find(({ prefix }) => pathname.startsWith(prefix));
+        if (matched) return matched.siteId;
+        // 목록에 없는 브랜드 경로(/seoul360 · /fwn · /jakka …)는 첫 경로가 사이트 ID면 그대로
+        const seg = pathname.split('/')[1] ?? '';
+        if (seg && seg in siteConfigs) return seg as SiteIdentifier;
+    }
+    return 'tenone';
+}
+
 export function SiteProvider({ children }: { children: ReactNode }) {
     const [siteId, setSiteId] = useState<SiteIdentifier>('tenone');
 
     useEffect(() => {
-        const hostname = window.location.hostname;
-        const pathname = window.location.pathname;
-
-        // 1. 독립 도메인 감지 (madleague.net, badak.biz 등)
-        const domainMapped = domainMap[hostname];
-        if (domainMapped) {
-            setSiteId(domainMapped);
-            return;
-        }
-
-        // 2. *.tenone.biz 서브도메인 감지 (badak.tenone.biz → badak)
-        const subMatch = hostname.match(/^([a-z0-9-]+)\.tenone\.biz$/);
-        if (subMatch && subMatch[1] !== 'www' && subMatch[1] in siteConfigs) {
-            setSiteId(subMatch[1] as SiteIdentifier);
-            return;
-        }
-
-        // 3. tenone.biz(또는 localhost) 내부에서 경로 기반 감지
-        const isTenOneDomain = hostname === 'tenone.biz' || hostname === 'www.tenone.biz' || hostname === 'localhost';
-        if (isTenOneDomain) {
-            const matched = pathSiteMap.find(({ prefix }) => pathname.startsWith(prefix));
-            if (matched) setSiteId(matched.siteId);
-        }
+        setSiteId(detectSiteId(window.location.hostname, window.location.pathname));
     }, []);
 
     const site = siteConfigs[siteId];

@@ -68,9 +68,13 @@ export default function AnalyticsOverviewPage() {
 
         const byBrand: Record<string, BrandSnapshot> = {};
         let lastSync: string | null = null;
+        // _all = 브랜드 구분 없는 유니버스 전체(중복 없는 세션·사용자) — 총합 카드 전용, 브랜드 목록에서는 제외
+        const total = { sessions: 0, pageviews: 0, users: 0, rows: 0 };
 
         for (const row of data) {
           if (!lastSync || row.synced_at > lastSync) lastSync = row.synced_at;
+          if (row.brand_id === "_all") { total.sessions += row.sessions; total.pageviews += row.pageviews; total.users += row.users; total.rows++; continue; }
+          if (row.brand_id === "(not set)") continue;
           if (!byBrand[row.brand_id]) {
             byBrand[row.brand_id] = { ...row, sessions: 0, pageviews: 0, users: 0, bounce_rate: 0, avg_session_duration: 0 };
           }
@@ -83,9 +87,9 @@ export default function AnalyticsOverviewPage() {
 
         const brands = Object.values(byBrand).sort((a, b) => b.sessions - a.sessions);
         setSummary({
-          total_sessions: brands.reduce((s, b) => s + b.sessions, 0),
-          total_pageviews: brands.reduce((s, b) => s + b.pageviews, 0),
-          total_users: brands.reduce((s, b) => s + b.users, 0),
+          total_sessions: total.rows ? total.sessions : brands.reduce((s, b) => s + b.sessions, 0),
+          total_pageviews: total.rows ? total.pageviews : brands.reduce((s, b) => s + b.pageviews, 0),
+          total_users: total.rows ? total.users : brands.reduce((s, b) => s + b.users, 0),
           brands,
           synced_at: lastSync,
         });

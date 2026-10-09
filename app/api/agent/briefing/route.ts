@@ -82,19 +82,20 @@ async function collectDailyContext(): Promise<string> {
         const yd = yesterday.toISOString().split('T')[0];
         const { data: snap } = await supabase
             .from('analytics_snapshots')
-            .select('total_sessions, total_users')
-            .gte('recorded_at', yd)
-            .order('recorded_at', { ascending: false })
+            .select('sessions, users')
+            .eq('brand_id', '_all')
+            .gte('date', yd)
+            .order('date', { ascending: false })
             .limit(1)
             .maybeSingle();
         if (snap) {
-            lines.push(`어제 전체 트래픽: ${snap.total_sessions?.toLocaleString() ?? '-'} 세션, ${snap.total_users?.toLocaleString() ?? '-'} 사용자`);
+            lines.push(`어제 전체 트래픽: ${snap.sessions?.toLocaleString() ?? '-'} 세션, ${snap.users?.toLocaleString() ?? '-'} 사용자`);
         }
     } catch {}
 
     return lines.length > 0
         ? lines.join('\n')
-        : '현황 데이터 없음 (DB 연동 준비 중)';
+        : '현황 데이터 없음';
 }
 
 // ── 메신저 발행 ────────────────────────────────────────────────────

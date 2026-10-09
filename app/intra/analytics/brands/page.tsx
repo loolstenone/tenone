@@ -52,6 +52,7 @@ export default function BrandsListPage() {
 
         const agg: Record<string, BrandSummary> = {};
         for (const row of data) {
+          if (row.brand_id === "_all" || row.brand_id === "(not set)") continue; // 유니버스 전체·브랜드 미지정은 브랜드 아님
           if (!agg[row.brand_id]) {
             agg[row.brand_id] = { brand_id: row.brand_id, sessions: 0, pageviews: 0, users: 0, bounce_rate: 0, last_date: row.date };
           }
