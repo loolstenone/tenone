@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, X, Briefcase, Image as ImageIcon, Settings, HelpCircle, Info, Mail } from "lucide-react";
 import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
-import { NotificationBell, LogoutButton } from "@/components/AccountControls";
+import { LogoutButton } from "@/components/AccountControls";
 import { LoginModal } from "@/components/LoginModal";
 import {
     getNotifications,
@@ -66,9 +66,8 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
                             <p className="text-[11px] text-neutral-600 truncate">{user?.email}</p>
                         </div>
                     )}
-                    {/* 알림 · 로그아웃 — 전 유니버스 공통 부품 */}
+                    {/* 로그아웃 — 전 유니버스 공통 부품. 알림은 Jakka 자체 알림(사이드바·모바일 상단)이 담당 */}
                     <span className="flex items-center gap-3 text-neutral-700">
-                        <NotificationBell align="left" />
                         <LogoutButton />
                     </span>
                 </div>
@@ -106,9 +105,8 @@ function MobileAuthButton() {
 
     if (isAuthenticated) {
         return (
-            // 모바일 상단도 같은 구성 — 알림 · 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10)
+            // 모바일 상단 — 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10). 알림은 Jakka 자체 알림
             <span className="flex items-center gap-3 text-neutral-800">
-                <NotificationBell />
                 <LogoutButton />
             </span>
         );
