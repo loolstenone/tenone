@@ -1413,7 +1413,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | 집중 브랜드 → brand-site-menus 등록 | §1.9.5 |
 | CANONICAL_HOSTS ↔ ums_sites.hosting ↔ noindex 목록 ↔ is_open 일치 | §0.1 원칙 4·6 |
 | 개인정보처리방침에 브랜드 수집 항목 | §0.1 법적 검토 |
-| **GA4 브랜드 구분**: 공식 도메인이 `site-config` domainMap에 siteId로 매핑 (없으면 방문이 전부 tenone으로 집계) · `--live`면 실서버에 GTM 태그 | 부록 G.1 |
+| **GA4 브랜드 구분**: 공식 도메인이 `lib/domain-registry.ts`에 siteId로 등록 (없으면 방문이 전부 tenone으로 집계) · `--live`면 실서버에 GTM 태그 | 부록 G.1 |
 
 ❌가 있으면 배포하지 않는다. ⚠️는 확인 후 보고. 결과 요약을 작업 보고에 포함한다.
 
@@ -1792,8 +1792,8 @@ GRANT ALL ON public.table_name TO service_role;
 #### 브랜드 구분 규칙 (2026-10-10 — 이걸 어기면 숫자가 틀린다)
 
 - `brand_id`는 **페이지를 옮길 때마다 주소로 판정** — `lib/site-context.tsx` `detectSiteId(hostname, pathname)`. ❌ `useSite()` 값을 쓰지 않는다 (첫 렌더 'tenone' → 모든 브랜드 첫 화면이 tenone으로 한 번 더 집계되던 사고)
-- 판정 순서: 독립 도메인(`domainMap`) → `*.tenone.biz` 서브도메인 → tenone.biz 경로(`pathSiteMap` → 첫 경로가 siteId면 그대로) → 그 외 tenone
-- **사이트·도메인이 바뀌면** (새 도메인, 도메인 전환, 브랜드 추가·이름 변경): ① `domainMap`에 `'www.도메인': 'siteId'` ② `npm run site:check -- {siteId} --live`의 GA4 항목 ✅ ③ GA4 실시간에서 brand_id 확인 (§2.5 6-1)
+- 판정 순서: **`lib/domain-registry.ts`(도메인 SSOT)** → site-config `domainMap`(보조) → `*.tenone.biz` 서브도메인 → tenone.biz 경로(`pathSiteMap` → registry prefix → 첫 경로가 siteId면 그대로) → 그 외 tenone
+- **사이트·도메인이 바뀌면** (새 도메인, 도메인 전환, 브랜드 추가·이름 변경): ① `lib/domain-registry.ts`에 `'www.도메인'`·`'도메인'` 등록 (siteId 정확히) ② `npm run site:check -- {siteId} --live`의 GA4 항목 ✅ ③ GA4 실시간에서 brand_id 확인 (§2.5 6-1)
 - `(not set)` = brand_id 없는 GA4 자동 이벤트 → 동기화가 저장하지 않는다. 유니버스 합계는 브랜드 행을 더하지 말고 `_all` 행을 쓴다
 - 외부 서버(호스트코코아) 옛 사이트(madleague.net·madleap.co.kr·badak.biz)는 태그 없음 — DNS 전환하면 자동 포함
 

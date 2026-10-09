@@ -154,10 +154,11 @@ async function checkSite(siteId) {
         if (canon.hosting === "vercel" && row && row.is_open === false) fail("Vercel 운영인데 ums_sites.is_open=false (가림막)");
     } else if (tier === "focus") warn("집중 브랜드인데 CANONICAL_HOSTS 미등록 (공식 주소 없음)");
 
-    // 5-1. GA4 브랜드 구분 (부록 G.1) — 공식 도메인이 domainMap에 없으면 그 사이트 방문이 전부 brand_id=tenone으로 집계된다
+    // 5-1. GA4 브랜드 구분 (부록 G.1) — 공식 도메인이 domain-registry에 이 siteId로 없으면 그 사이트 방문이 전부 brand_id=tenone으로 집계된다
     if (canon && siteId !== "tenone") {
-        const mapped = siteConfigSrc.match(new RegExp(`'${canon.host.replace(/\./g, "\\.")}':\\s*'(\\w+)'`))?.[1];
-        mapped === siteId ? ok(`GA4 brand_id: ${canon.host} → ${siteId}`) : fail(`site-config domainMap에 '${canon.host}': '${siteId}' 없음 → GA4에 tenone으로 집계됨 (부록 G.1)`);
+        const esc = canon.host.replace(/\./g, "\\.");
+        const mapped = registrySrc.match(new RegExp(`'${esc}':\\s*\\{[^}]*siteId:\\s*'(\\w+)'`))?.[1];
+        mapped === siteId ? ok(`GA4 brand_id: ${canon.host} → ${siteId}`) : fail(`lib/domain-registry.ts에 '${canon.host}' → siteId '${siteId}' 없음 → GA4에 tenone으로 집계됨 (부록 G.1)`);
     }
 
     // 6. 개인정보처리방침 (§2.4 법적 검토)

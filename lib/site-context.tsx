@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { siteConfigs, domainMap } from '@/lib/site-config';
+import { domainSiteMap, domainPrefixMap, prefixToSiteId } from '@/lib/domain-registry';
 import type { SiteIdentifier, SiteConfig } from '@/lib/site-config';
 
 interface SiteContextType {
@@ -47,9 +48,20 @@ const pathSiteMap: Array<{ prefix: string; siteId: SiteIdentifier }> = [
     { prefix: '/namingfactory', siteId: 'namingfactory' },
 ];
 
-/** 주소 → 사이트 ID (순수 함수 — 분석 태그가 페이지 이동마다 다시 판정할 때도 쓴다) */
+/**
+ * 주소 → 사이트 ID (순수 함수 — 분석 태그가 페이지 이동마다 다시 판정할 때도 쓴다)
+ *   도메인 SSOT = lib/domain-registry.ts (domainSiteMap·domainPrefixMap). site-config domainMap은 보조 —
+ *   두 곳이 어긋나 myverse.kr·seoul360.net·domo.ne.kr 방문이 tenone으로 잡히던 문제 (2026-10-10)
+ */
 export function detectSiteId(hostname: string, pathname: string): SiteIdentifier {
-    // 1. 독립 도메인 감지 (madleague.net, badak.biz 등)
+    // 1. 독립 도메인·등록된 서브도메인 (domain-registry)
+    const registered = domainSiteMap[hostname];
+    if (registered) {
+        // registry가 리라이트 때문에 'tenone'으로 둔 도메인(brandgravity 등)은 prefix의 사이트로
+        const seg = (domainPrefixMap[hostname] ?? '').split('/')[1] ?? '';
+        if (registered === 'tenone' && seg && seg in siteConfigs) return seg as SiteIdentifier;
+        return registered;
+    }
     const domainMapped = domainMap[hostname];
     if (domainMapped) return domainMapped;
 
@@ -62,8 +74,10 @@ export function detectSiteId(hostname: string, pathname: string): SiteIdentifier
     if (isTenOneDomain) {
         const matched = pathSiteMap.find(({ prefix }) => pathname.startsWith(prefix));
         if (matched) return matched.siteId;
-        // 목록에 없는 브랜드 경로(/seoul360 · /fwn · /jakka …)는 첫 경로가 사이트 ID면 그대로
+        // 목록에 없는 브랜드 경로: registry prefix(/0gamja → ogamja) → 첫 경로가 사이트 ID면 그대로(/seoul360 · /fwn · /jakka …)
         const seg = pathname.split('/')[1] ?? '';
+        const byPrefix = seg ? prefixToSiteId[`/${seg}`] : undefined;
+        if (byPrefix && byPrefix !== 'tenone') return byPrefix;
         if (seg && seg in siteConfigs) return seg as SiteIdentifier;
     }
     return 'tenone';
