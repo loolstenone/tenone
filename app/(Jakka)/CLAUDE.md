@@ -308,6 +308,7 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 
 ## 현재 상태
 
+- **2026-10-10 (세션 166)**: 우측 상단 계정 컨트롤 통일(`components/AccountControls.tsx`, CLAUDE.md §1.9.2) — 사이드바 프로필·모바일 상단 로그아웃 = 공통 `LogoutButton`(텍스트), 모바일 아바타 클릭 = 로그아웃 동작 제거. 알림은 Jakka 자체 알림(NotificationSheet — 좋아요·팔로우)이 담당해 공통 `NotificationBell`은 넣지 않음
 | 항목 | 내용 |
 |------|------|
 | **최근 변경 (2026-10-05 세션 158)** | explore 페이지 공개 폼 Turnstile(CaptchaWidget + captchaToken) — `/api/newsletter`·`/api/contact` 서버 검증 fail-closed |

@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-10-08 밤 ~ 10-10 새벽 (세션 166, 집) — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비
+
+### 장소·운영
+
+- 워크트리 `home-work-start-df2ede` → master push는 사용자 요청 때마다
+- 운영 DB (MCP, 승인 후): `program_certificates` 대장 243건 적재(전화번호 HMAC match_hash) · `member_service_links` · `mad_hero_applications` 폐지 · `ums_sites` planners tier=experiment · `sql/staff-duty-roles.sql`(직무 권한·입사 상태·자기 승격 차단) · `sql/uc-read-policies.sql`(UC 3테이블 조회 정책, 직원/비직원 JWT로 검증)
+- Vercel env: `CERT_MATCH_SECRET`(바꾸면 match_hash 전부 재계산)
+- 크롬 운영 확인: Intelligence · 권한 체계 · 입·퇴사 · 통합 관리(전체 회원 15명 실데이터·UC 거래·손익 0·개인정보 4/8·콘텐츠 점검 → 게시판) · 우측 상단 계정 컨트롤(인트라·madleague.tenone.biz·MoNTZ)
+
+### 결정 (사용자)
+
+- 연계 프로그램 = 맛보기 → 정식(그 서비스) → 연계(서비스별 동의). "텐원은 하나의 회사, 서비스만 다르다" — MADLeague가 다른 서비스를 대신 제공하지 않음
+- 인증서 우선권 = 매드리거 등록 정보(이름+전화번호) · 인증서 동의 문구에서 삭제 요청 안내 제거 · 보관은 탈퇴 공통 기준
+- Planner's 부활 (MyVerse 흡수 철회, 실험 Tier)
+- HeRo 비공개 유지 (noindex)
+- Workspace = 일하는 곳 · My = 직원 개인 기록 · ERP = 직무 권한자 · 직무 권한(인사·급여·재무·회계) 체계 승인
+- 통합 관리 "추천대로 진행" (UC 조회 정책 DB 변경 포함)
+- Ten:One™은 브랜드 요소 — 대문자·분리 표기 금지
+- 우측 상단 계정 영역 전 유니버스 통일 · 알림 전 사이트 · 로그아웃 텍스트 (§1.9.2 표준 변경)
+
+### 변경 내역
+
+- MADLeague: `ProgramDetailPage`·`ProgramCTA`·`PartnerProgramPage`·`ProgramHero` · `programs-list.ts` SSOT 확장 · 히어로·IM 에센스 308 · `HitTaste` · 인증서 `certificate/issue`·`/api/madleague/certificates/find`·`features/madleague/certificate-render.ts`·`lib/programs/ledger-match.ts`·`ledger-columns.ts`·`ledger-import.ts` · 헤더 인증서 발급 · 표기 대문자 제거
+- 인트라 인증서: 대장 행 편집·연결 해제·CSV · 경쟁 PT 회차 일괄 발급
+- Planner's: `app/(Planners)/*` · domain-registry·site-context · 프로그램 모듈 등록(PLAN) · vercel.json 없는 cron 2개 제거
+- 연계: `lib/service-links.ts`·`service-links-server.ts`·`/api/universe/service-links`·`ServiceLinkConsent`·HeRo `LinkedMadleagueCertificates`·Data_Lifecycle 3.2.3
+- HeRo layout robots noindex(is_open=false)
+- GA4: `/api/analytics/sync` 오류 노출·날짜 형식·백필 · `Analytics.tsx` brand_id = `detectSiteId()` · `_all` · GA4 동기화 운영 화면
+- Intelligence: `lib/intel/ops-health.ts`·`brand-performance.ts` · `/intra/intel`·`/intra/intel/health`·`/intra/analytics/brands` · 데이터 헬스 → 운영 상태 redirect
+- 인트라: `lib/staff-duties.ts`·`/api/intra/duties`·`DutyRolesManager` · `lib/staff-presets.ts`·`staff-lifecycle.ts`·`/api/intra/staff/{,onboard,offboard}`·`StaffWelcome`·`intra-server-gate getIntraContext` · `StaffHome`(workspace|my) · `/intra/my/*` · auth-context `systemAccessFromRoles`
+- 통합 관리: members list `brandJoins` · revenue·guests·bookings 목업 제거 · privacy 체크리스트 · sites/list 링크 · sites/content → boards · UC transaction API 정정 거래 · nav 재편
+- 표기: IntraSidebar 로고·UniverseBadge·수신거부·뉴스레터 메일 · `scripts/site-check.mjs` badMark
+- 계정 컨트롤: `components/AccountControls.tsx` · UniverseUtilityBar · IntraHeader · MoNTZ/Jakka 레이아웃 · IntraSidebar 하단 블록 삭제
+- CLAUDE.md: Intelligence 표·자동화 등록 규칙 · §1.1 비공개 noindex · §1.6 duty · §1.9 Workspace/My/ERP·입퇴사 · §1.9.2 계정 컨트롤 · §1.9.5 통합 관리 구성·금지 패턴 · §2.5·부록 G.1 GA4 브랜드 구분
+
+---
+
 ## 2026-10-08 (세션 165, 사무실) — 보안 1단계 · One ID SSO · 로그인 표준 · MADLeague 사이트 정비
 
 ### 장소·운영

@@ -155,6 +155,7 @@ montz_auditions  -- 오디션 공고 (company, role, type, deadline, pay)
 
 ## 현재 상태
 
+- **2026-10-10 (세션 166)**: 우측 상단 계정 컨트롤 통일(`components/AccountControls.tsx`, CLAUDE.md §1.9.2) — 사이드바 프로필·모바일 상단 = 공통 `NotificationBell`(유니버스 알림) + `LogoutButton`(텍스트), 모바일 아바타 클릭 = 로그아웃 동작 제거
 - **2026-10-08 (세션 165)**: 로그인 필요 화면을 `LoginRequired` 표준으로 교체(모달 X·바깥·Esc로 닫기 + 다시 열기 버튼, CLAUDE.md §1.2.1) · 업로드 화면 포함
 
 | 항목 | 내용 |

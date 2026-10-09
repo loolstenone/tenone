@@ -1,6 +1,68 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-08 (세션 165 — 보안 1단계 · One ID SSO · MADLeague 사이트 정비)
+> 마지막 업데이트: 2026-10-10 (세션 166 — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비)
+
+---
+
+## 세션 166 (2026-10-08 밤 ~ 10-10 새벽, 집) — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비
+
+> 워크트리 `home-work-start-df2ede` → master push는 사용자 "푸시" 요청 때마다. 마지막 push `c1d6bfec`는 배포·화면 확인 전에 종료.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+**MADLeague (비공개 스테이징 madleague.tenone.biz)**
+- 프로그램 메뉴 정리: 상세 7단 표준 템플릿(`ProgramDetailPage`) · CTA 통일(`ProgramCTA`) · `programs-list.ts` SSOT(그룹 도전·실전·연결·연계, 한눈에 보기) · 강조색 레드 하나 · 히어로 `/madleague/programs/hero`(옛 주소 308) · IM 에센스 `/im#essence` 흡수
+- 연계 프로그램 원칙(사용자 결정 "텐원은 하나의 회사, 서비스만 다르다"): 맛보기 → 정식(그 서비스) → 연계(서비스별 동의). HeRo·RooKie·Planner's = `PartnerProgramPage`. MADLeague 자체 HeRo 신청 폼·API·인트라 화면 삭제(`mad_hero_applications` 폐지, 승인)
+- HIT 미니(20문항 맛보기, 저장·전송 없음)
+- **경쟁 PT 인증서**: 대장 243건 `program_certificates` 적재(전화번호는 HMAC `match_hash`만) · 받기 = 로그인 필수 + 본인 확인(이름·생년월일·대학, Turnstile) + [필수] 연결 동의 · 우선권 = 매드리거 등록 정보(이름+전화번호) · PNG·PDF 캔버스 렌더 · 날짜 KST · 헤더 매드리거 › 인증서 발급 · 보관은 Data_Lifecycle §4(이름·발급일·코드만)
+- 인트라 인증서 관리: 대장 = 인트라 원본(행 편집·연결 해제·CSV 등록) · **경쟁 PT 회차 일괄 발급**(회차·명단·팀 결과 → 미리보기 → 참가·수상 확인서, 일련번호 대장 전체 고유)
+
+**Planner's 부활** (실험 Tier, planners.tenone.biz, is_open=false): `/planners/*` → MyVerse 308 해제 · 홈·훈련 프로젝트(코어 프로그램 모듈)·회차 방·인증서(코드 PLAN)·마이 · 브랜드 CLAUDE.md
+
+**서비스 간 연계 동의 코어**: `member_service_links`(동의 INSERT·철회 revoked_at·탈퇴 시 자동 철회) · `lib/service-links.ts` 레지스트리 · `ServiceLinkConsent`(제18조 고지) · 첫 연결 MADLeague 인증서 → HeRo /my "MADLeague 활동 경력"
+
+**HeRo**: 비공개 유지 결정 → is_open=false 동안 layout robots noindex (CLAUDE.md §1.1·site:check 표준화)
+
+**GA4·Intelligence**
+- GA4 동기화 0건 원인 수리(날짜 형식·오류 삼킴) · 백필(`?start=`) · brand_id를 주소로 판정(`detectSiteId`, 도메인 SSOT) · `_all` 유니버스 합계 · 수집 공백 2026-06-01~10-03 확인
+- Intelligence 3화면 재정의: 이번 주 유니버스 · 브랜드 성과(DB 1차 + GA4 보조) · **운영 상태**(`lib/intel/ops-health.ts` — 결과물 기준) → AI 분류·브리핑·Gmail 수신이 4~5개월 정지 중인 것 발견. Whole See → UMS › Mindle, 에이전트 설정 → 통합 관리
+- 외부 리소스 화면 실제 사용 현황으로
+
+**인트라 재정비**
+- Workspace(일) · My(내 기록) · ERP(회사 전체, 직무 권한) 체계 — `StaffHome mode=workspace|my`
+- 직무 권한 `duty`(hr·payroll·finance·accounting): `sql/staff-duty-roles.sql` 운영 적용 — 인사·급여·재무 데이터 = 본인 + 담당 직무, universe·system·duty 권한 부여는 super_admin만(직원 자기 승격 구멍 차단), 메뉴 접근도 member_roles에서만
+- 직원 입사·첫 로그인·퇴사: ERP › HR › 구성원 등록(초대 메일·권한 묶음·담당 브랜드) → `StaffWelcome`(인사 정보 안내·보안 서약) → 입·퇴사 화면(퇴사 = 권한 전부 회수). 고장 난 `/api/admin/create-staff` 삭제
+- **통합 관리 점검**: 목업 제거(회원 5명·손익 1,435만 원·게스트 12.3% 등) · 끊긴 링크 · **UC 3테이블 조회 정책**(`sql/uc-read-policies.sql` 운영 적용 — 화면 0건 문제) · UC 원장 금액 수정·삭제 → **정정 거래** · 메뉴 재편(통합 관리 / 시스템·기준, 커머스 숨김) · 개인정보 체크리스트 실제 상태(4/8)
+- Ten:One™ 표기 변형 제거(인트라 로고 등) + `site:check` 점검 항목
+- 사이드바 하단 프로필·로그아웃·홈 블록 제거(헤더와 중복)
+
+**전 유니버스 우측 상단 통일** (`components/AccountControls.tsx`): 알림 → 아바타 → **로그아웃 텍스트**. 브랜드 31개 헤더(UniverseUtilityBar)·인트라·MoNTZ. 인트라 가짜 알림 → 실제 알림. Jakka는 자체 알림이 있어 공통 알림 제외. CLAUDE.md §1.9.2 표준 변경(로그아웃 아이콘 → 텍스트)
+- 크롬 운영 확인: 인트라 · madleague.tenone.biz · MoNTZ ✅ (Jakka 알림 제거분은 마지막 push — 미확인)
+
+### 다음 첫 액션
+
+1. **배포 확인**: Vercel `c1d6bfec` READY → 크롬(인트라 로그인됨)으로 `jakka.tenone.biz` 사이드바 프로필에 로그아웃 글자만(알림 아이콘 없음), 사이드바 "알림" 메뉴는 그대로인지. 탭 닫기
+2. **사용자 결정 대기** (먼저 물어볼 것):
+   - 전천일 계정(lools@kakao.com): members.role=Admin인데 super_admin 없음 → 이제 Admin 화면 안 보임. 마스터 권한 줄지
+   - 김사라·김준호 직무 권한(hr·payroll·finance·accounting) 부여 — Standard › 권한 체계(`/intra/ums/standard/roles`)에서 super_admin이 부여
+   - 테스트 가상 회원 10명(`madtest-NN@example.invalid`) 삭제 — 통합 회원 15명 중 10명. "삭제"하면 `sql/test-data-madleague-adzone-demo.sql` 하단 정리 블록
+   - Mindle AI 분류 재가동(Anthropic 크레딧 고갈) — Mindle 재논의 때
+3. **10-14 처리방침** (기한 임박): 개인정보처리방침(`app/(TenOne)/privacy/page.tsx`, 버전 `lib/company-info.ts`)에 프로그램 신청·인증서(대장 해시·연결)·매드리거 등록 '하고 싶은 말'·서비스 연계(member_service_links)·직원 인사 정보 항목 반영 → 개인정보 체크리스트 "수집 목적 및 항목" 완료 처리(`app/intra/ums/members/privacy/page.tsx` COMPLIANCE_ITEMS)
+4. **운영 상태 경보 처리** (`/intra/intel/health`): Gmail 토큰 재연결 · 실패하는 RSS 소스 정리 · 분류 오류 1,116행 재시도 리셋(승인 필요) · 데일리 브리핑
+5. 통합 관리 남은 것: 게스트 자동삭제 작업 없음(체크리스트 미완) → pg_cron 만들지 정책 문구 고칠지 결정 · Standard 안 산업군/직무군 쓰기 화면 위치 정리 · 구독 테이블 이중(`wio_subscriptions` vs `subscriptions`, 모순 방지 원칙 1) · 암호화 항목 점검
+6. 실사용 검증 안 한 것: 직원 초대 메일 → 첫 로그인 StaffWelcome → active (실제 직원 1명으로) · UC 정정 거래 1건 · 경쟁 PT 회차 일괄 발급 실제 회차 · 인증서 받기 비직원 계정
+7. 이월: HeRo·Badak·MADLeap `lib/brand-site-menus.ts` 등록 + 푸터 4열 · Planner's 이월(`app/(Planners)/CLAUDE.md`) · 옛 mad_* DROP(승인) · `has_brand_admin_access()` member_roles 기준 · 세션 165 이월(One ID 실검증 등)
+
+### 주의
+
+- 로컬 tsc 기존 에러(implicit any 등, `sharp`·`@anthropic-ai/sdk` 워크트리 미설치) — 빌드는 통과, 이번 변경과 무관
+- React #418 하이드레이션 경고(인트라 헤더 날짜) — 미해결, 기능 영향 없음
+- `lib/intra-nav.ts` `ShoppingCart` import 미사용(커머스 숨김) — lint 경고만
+- UC 원장은 이제 수정·삭제 없음 — 바로잡을 땐 정정 거래(`/api/uc/admin/transaction` POST). 정정의 정정은 막혀 있음
+- 새 cron·Edge Function을 만들면 `lib/intel/ops-health.ts`에 항목 추가 (CLAUDE.md Intelligence 규칙)
+- 우측 상단 계정 컨트롤은 `components/AccountControls.tsx`만 — 헤더마다 따로 만들지 않기
+- `CERT_MATCH_SECRET`(Vercel env)을 바꾸면 대장 match_hash 전부 재계산 필요
 
 ---
 
