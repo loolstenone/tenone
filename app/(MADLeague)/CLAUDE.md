@@ -110,6 +110,7 @@
 | `app/(MADLeague)/madleague/forms/[slug]/` | 행사 참가 신청 (유니버스 공통 폼 `components/forms/FormRenderer.tsx`) |
 | `app/(MADLeague)/madleague/pt/` | 경쟁 PT 목록 · `[id]` 회차 방 · `[id]/teams` 팀 구성(임원·직원) · `join/[code]` 초대 — 화면은 `features/programs/*` 얇은 래퍼 (테마 `ProgramTheme.ts` madleague) |
 | `app/(MADLeague)/madleague/certificate/` | 인증서 발급·인쇄(`print/[code]`)·진위 확인(`verify/[code]`) — `features/programs/Certificate*` |
+| `app/(MADLeague)/madleague/certificate/issue/` | **경쟁 PT 인증서 발급 (계정 없이)** — 이름+생년월일+대학(Turnstile) → `/api/madleague/certificates/find` → 디자인 배경(`public/madleague/certificates/bg-*.png`) 위에 캔버스로 그려 PNG·PDF (`features/madleague/certificate-render.ts`, 서체 `public/fonts/Pretendard-*.subset.woff2`, PDF는 자체 생성·라이브러리 없음) |
 | `lib/programs/*` | 코어 프로그램 모듈 (access·brands(officerGroupIds·groupCandidates·brandActivityCerts)·consent·teams·certificates·paths) |
 
 ---
@@ -193,6 +194,15 @@
 - **히어로(상단)는 전부 programs-list에서** — eyebrow·제목·요약·`tagline`(한 줄, 강조색 굵게)·칩. 페이지별 히어로 카피·배경 사진 금지 (2026-10-09 통일 — 부제 스타일 4종·배경 사진이 섞여 있었다)
 - 강조색: **레드 하나**. 예외는 히어로 프로그램 골드뿐(브랜드 가이드). 마케톤 골드·RooKie 그린·Planner's 틸은 폐지 (2026-10-09)
 - 한눈에 보기 중 사실 확인 대기: 아이디어 무브먼트(연말 쇼케이스 운영 방식) · RooKie·Planner's(기수·비용 — 지금 "모집 공지 때 안내") · 경쟁 PT 회차 수(연 1~2회) · 인사이트 투어링 시기
+
+### 경쟁 PT 인증서 규칙 (2026-10-09 사용자 결정 · 원본 = 구글 시트 "수료증 관리 대장")
+
+- **참가 확인서(COA)**: 경쟁 PT에 참여한 모든 사람 · **수상 확인서(MCP)**: 본선에 오른 팀 중 수상 — 등수(1등·2등·3등·본선)별 리본 배경. 수상자는 참가 확인서도 함께
+- 코드 = 대장 그대로 `{연도}-COA 000001` · `{연도}-MCP 000052` (연도별 일련번호, 가운데 공백 1칸) — `normalizeCertCode()`가 공백·대소문자 차이 흡수. 계정 발급분(`MAD26-XXXXXX`)과 공존
+- 표기 날짜 = 대장 발급일 · 본문 = 대장 비고("리제로스 경쟁 PT") · 주최 = 비고에서 " 경쟁 PT" 뗀 이름 (샘플 이미지는 샘플일 뿐 — 대장이 SSOT)
+- 본인 확인: 이름·생년월일 정확히 + 대학 느슨하게(공백·'대학교'/'대' 차이 흡수, 캠퍼스 표기 허용). 전공은 같은 사람도 표기가 달라 열쇠로 쓰지 않는다. 어느 항목이 틀렸는지 알려주지 않는다
+- 새 회차: 대장에 행 추가 → 같은 방식으로 program_certificates INSERT (member_id NULL, cert_key `ledger:{코드}`, note '수료증 관리 대장'). 전화번호 제외
+- 대장 데이터 확인 필요: 양우진·오희수 회차마다 생년월일 다름 (조회 시 그 회차 값과 맞아야 함) · 동아리 표기 혼재(ABC마케팅/ABC, 매드립/MADLeap) — 인증서에 그대로 찍힘
 
 ### 동아리 로고
 

@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { ShieldCheck, Ban } from 'lucide-react';
-import { getPublicCertificate } from '@/lib/programs/certificates';
+import { getPublicCertificate, normalizeCertCode } from '@/lib/programs/certificates';
 import type { ProgramTheme } from '@/features/programs/ProgramTheme';
 
 /** 인증서 진위 확인 — 누구나. 이름은 가리고 생년월일·대학·전공은 보이지 않는다 (코드를 가진 사람에게 필요한 만큼만) */
 export async function CertificateVerify({ code, theme }: { code: string; theme: ProgramTheme }) {
   const cert = await getPublicCertificate(code);
-  const normalized = code.toUpperCase();
+  const normalized = normalizeCertCode(code);
 
   if (!cert) {
     return (

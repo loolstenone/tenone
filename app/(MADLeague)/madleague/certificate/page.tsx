@@ -6,8 +6,8 @@ export const metadata = { title: '활동인증서', description: 'MADLeague 활�
 // 발급 기준·절차 = 코어 program_certificates 실제 동작 (2026-10-08) — 로그인 후 본인이 직접 발급
 const criteria = [
     { label: '활동 인증서', desc: '동아리 현역으로 활동한 연도가 끝나면 그 연도의 활동 인증서' },
-    { label: '참가 확인서', desc: '경쟁 PT·프로젝트에 팀원으로 참가하고 결과가 발표된 회차' },
-    { label: '수상 확인서', desc: '참가한 회차에서 순위·상을 받은 경우 (참가 확인서 대신)' },
+    { label: '참가 확인서', desc: '경쟁 PT에 참여한 모든 사람 (프로젝트는 팀원으로 참가하고 결과가 발표된 회차)' },
+    { label: '수상 확인서', desc: '본선에 오른 팀 중 수상한 팀 — 등수(1등·2등·3등·본선)에 맞춰. 참가 확인서와 함께 받습니다' },
     { label: '진위 확인', desc: '인증서마다 고유 코드 — 누구나 진위 확인 페이지에서 확인' },
 ];
 
@@ -69,7 +69,13 @@ export default function CertificatePage() {
                                 인증서는 디지털(PDF) 형태로 발급되며, 고유번호로 진위 확인이 가능합니다.
                             </span>
                         </div>
-                        <div>
+                        <div className="flex flex-wrap gap-3">
+                            <Link
+                                href="/madleague/certificate/issue"
+                                className="inline-flex items-center gap-2 bg-[#EC1D25] px-6 py-3 text-sm font-bold tracking-wide text-white transition hover:opacity-90"
+                            >
+                                경쟁 PT 인증서 받기 (계정 없이) →
+                            </Link>
                             <Link
                                 href="/madleague/certificate/verify"
                                 className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white px-6 py-3 text-sm font-bold tracking-wide text-neutral-300 hover:text-white transition"
@@ -132,6 +138,9 @@ export default function CertificatePage() {
                         <p className="mt-3 text-white/80">매드리거라면 지금 바로 발급받을 수 있습니다.</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
+                    <Link href="/madleague/certificate/issue" className="inline-flex items-center gap-2 bg-white text-[#EC1D25] font-bold px-8 py-5 text-lg transition hover:bg-neutral-100">
+                        경쟁 PT 인증서 받기
+                    </Link>
                     <Link href="/madleague/member/certificate" className="inline-flex items-center gap-2 border border-white text-white font-bold px-8 py-5 text-lg transition hover:bg-white hover:text-[#EC1D25]">
                         내 인증서
                     </Link>

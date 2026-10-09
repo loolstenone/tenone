@@ -172,9 +172,18 @@ export interface CertificateRow {
 }
 
 /** 코드로 인증서 (대소문자 무시) — 화면별 노출 범위는 호출 측이 정한다 (진위 확인 = 마스킹·생년월일 비공개) */
+/** 코드 정규화 — URL 인코딩·대소문자·공백 흡수. 수료증 관리 대장 코드는 `2025-COA 000001` 형식(가운데 공백 1칸) */
+export function normalizeCertCode(code: string): string {
+    let c = code;
+    try { c = decodeURIComponent(code); } catch { /* 이미 디코딩됨 */ }
+    c = c.trim().toUpperCase().replace(/\s+/g, " ");
+    const ledger = c.match(/^(\d{4}-[A-Z]{3})\s?(\d{6})$/);
+    return ledger ? `${ledger[1]} ${ledger[2]}` : c;
+}
+
 export async function getCertificateByCode(code: string): Promise<CertificateRow | null> {
-    const c = code.trim().toUpperCase();
-    if (!/^[A-Z0-9-]{6,20}$/.test(c)) return null;
+    const c = normalizeCertCode(code);
+    if (!/^[A-Z0-9 -]{6,20}$/.test(c)) return null;
     const { data } = await createAdminClient().from("program_certificates")
         .select("id, brand_id, round_id, member_id, type, code, result, note, snapshot, issued_at, revoked_at, revoked_reason")
         .eq("code", c).maybeSingle();
@@ -189,8 +198,8 @@ export interface PublicCertificate {
 
 /** 진위 확인용 — 생년월일·대학·전공은 조회 자체를 하지 않는다 (개발 모드 디버그 정보에도 남지 않게) */
 export async function getPublicCertificate(code: string): Promise<PublicCertificate | null> {
-    const c = code.trim().toUpperCase();
-    if (!/^[A-Z0-9-]{6,20}$/.test(c)) return null;
+    const c = normalizeCertCode(code);
+    if (!/^[A-Z0-9 -]{6,20}$/.test(c)) return null;
     const { data } = await createAdminClient().from("program_certificates")
         .select("code, type, result, issued_at, revoked_at, revoked_reason, name:snapshot->>name, label:snapshot->>label, title:snapshot->>title, group_label:snapshot->>group_label, group_name:snapshot->>group_name, cohort:snapshot->>cohort, round_title:snapshot->>round_title, team_name:snapshot->>team_name, year:snapshot->>year, brand_name:snapshot->>brand_name")
         .eq("code", c).maybeSingle();
