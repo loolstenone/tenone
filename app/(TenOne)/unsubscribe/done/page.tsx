@@ -2,7 +2,7 @@ export default function UnsubscribeDonePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
       <div className="mb-6 inline-block bg-black text-white text-xs font-bold tracking-widest px-3 py-1.5">
-        TEN:ONE™
+        Ten:One™
       </div>
       <h1 className="text-2xl font-bold text-neutral-900 mb-3">수신거부 완료</h1>
       <p className="text-neutral-500 text-sm leading-relaxed max-w-sm">

@@ -101,8 +101,8 @@ export function IntraSidebar() {
         )}>
             {/* Logo */}
             <div className="px-5 h-14 flex items-center border-b border-neutral-800 shrink-0">
-                <Link href="/intra" className="text-lg font-bold tracking-wider text-white hover:opacity-80 transition-opacity">
-                    TEN<span className="font-light">:</span>ONE<span className="text-[8px] align-super">™</span>
+                <Link href="/intra" className="text-lg font-bold text-white hover:opacity-80 transition-opacity">
+                    Ten:One<span className="text-[8px] align-super">™</span>
                 </Link>
                 <span className="ml-2 text-[9px] tracking-widest text-neutral-500 uppercase">Intra</span>
                 <button onClick={() => setMobileOpen(false)} className="lg:hidden ml-auto p-1 text-neutral-400 hover:text-white">

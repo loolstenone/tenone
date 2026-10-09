@@ -15,8 +15,8 @@ export function UniverseBadge() {
                 rel="noopener noreferrer"
                 className="inline-flex flex-col items-center gap-1 opacity-40 hover:opacity-70 transition-opacity"
             >
-                <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400">
-                    TEN:ONE
+                <span className="text-[10px] font-bold text-neutral-400">
+                    Ten:One™
                 </span>
                 <p className="text-[10px] text-neutral-500">
                     {site.universeLabel}

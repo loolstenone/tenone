@@ -132,6 +132,10 @@ async function checkSite(siteId) {
     if (comingSoon.length) warn(`"준비 중/Coming Soon" 직접 표시 의심: ${comingSoon.slice(0, 3).join(", ")}`);
     const useSP = files.filter(f => /useSearchParams\(/.test(src[f]) && /^app\//.test(f) && /page\.tsx$/.test(f) && !/Suspense/.test(src[f]));
     if (useSP.length) fail(`page에서 useSearchParams를 Suspense 없이 사용 → 빌드 실패: ${useSP.join(", ")}`);
+    // 브랜드 표기 (부록 B) — Ten:One™ 변형 금지: TEN:ONE 대문자·™ 생략·쪼갠 TEN<span>:</span>ONE. 공용 컴포넌트·메일도 함께 본다
+    const markFiles = [...files, ...walk("components"), ...walk("lib/email")].filter((f, i, a) => a.indexOf(f) === i);
+    const badMark = markFiles.filter(f => /TEN:ONE|TEN<span|>TEN<\//.test(read(f) ?? ""));
+    badMark.length ? fail(`Ten:One™ 표기 변형 (부록 B): ${badMark.slice(0, 5).join(", ")}`) : ok("Ten:One™ 표기");
 
     // 4. 인트라 연계 (§1.9.5)
     const tier = row?.tier;

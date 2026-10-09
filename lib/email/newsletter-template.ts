@@ -44,7 +44,7 @@ export function renderNewsletterHtml(props: NewsletterTemplateProps): string {
           <tr>
             <td style="background:#000;padding:28px 40px;text-align:center;">
               <a href="${siteUrl}" style="text-decoration:none;">
-                <span style="display:inline-block;background:#fff;color:#000;font-size:11px;font-weight:800;letter-spacing:2px;padding:6px 12px;">TEN:ONE™</span>
+                <span style="display:inline-block;background:#fff;color:#000;font-size:11px;font-weight:800;padding:6px 12px;">Ten:One™</span>
               </a>
               ${issueNumber ? `<p style="margin:8px 0 0 0;color:#666;font-size:11px;letter-spacing:1px;">ISSUE #${String(issueNumber).padStart(3, '0')}</p>` : ''}
             </td>

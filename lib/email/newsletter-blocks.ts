@@ -174,7 +174,7 @@ export function renderMagazineHtml(props: MagazineEmailProps): string {
           <tr>
             <td style="background:#000;padding:16px 40px;border-bottom:1px solid #222;text-align:right;">
               <a href="${siteUrl}" style="text-decoration:none;">
-                <span style="font-size:10px;font-weight:800;letter-spacing:2px;color:#fff;">TEN:ONE™</span>
+                <span style="font-size:10px;font-weight:800;color:#fff;">Ten:One™</span>
               </a>
               ${issueNumber ? `<span style="font-size:10px;color:#666;margin-left:12px;">#${String(issueNumber).padStart(3,'0')}</span>` : ''}
             </td>
