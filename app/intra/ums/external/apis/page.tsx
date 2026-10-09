@@ -29,9 +29,10 @@ const APIS: {
         providers: [
             { name: "Anthropic Claude", purpose: "Agent Hub · 트렌드 분석 · 콘텐츠 생성 · Deutbot", env: "ANTHROPIC_API_KEY",
               url: "https://console.anthropic.com", docs: "사용 모델은 아래 실시간 에이전트 목록 참조", status: "active" },
-            { name: "OpenAI", purpose: "(미채택) GPT 대안", env: "OPENAI_API_KEY", url: "https://platform.openai.com", docs: "전면 Anthropic 선택", status: "unused" },
-            { name: "Google Gemini", purpose: "(미채택) Multi-modal 대안", env: "GEMINI_API_KEY", url: "https://aistudio.google.com", docs: "-", status: "unused" },
-            { name: "Perplexity", purpose: "(미채택) 검색 증강", env: "PERPLEXITY_API_KEY", url: "https://perplexity.ai", docs: "-", status: "unused" },
+            { name: "Claude (열시일분)", purpose: "전략·기획 대화 (상시 가동 아님)", env: "-", url: "https://claude.ai", docs: "구독", status: "active" },
+            { name: "OpenAI", purpose: "(미채택) GPT 대안", env: "OPENAI_API_KEY (Supabase Edge secret)", url: "https://platform.openai.com", docs: "전면 Anthropic 선택 — Edge Function ai-prober에 호출 코드 남음 (키 없으면 건너뜀)", status: "unused" },
+            { name: "Google Gemini", purpose: "(미채택) Multi-modal 대안", env: "GEMINI_API_KEY (Supabase Edge secret)", url: "https://aistudio.google.com", docs: "ai-prober에 호출 코드 남음 (키 없으면 건너뜀)", status: "unused" },
+            { name: "Perplexity", purpose: "(미채택) 검색 증강", env: "PERPLEXITY_API_KEY (Supabase Edge secret)", url: "https://perplexity.ai", docs: "ai-prober에 호출 코드 남음 (키 없으면 건너뜀)", status: "unused" },
         ],
     },
     {
@@ -103,6 +104,8 @@ const APIS: {
               url: "https://developers.facebook.com/docs/instagram-api", docs: "Facebook 비즈니스 계정 필요", status: "planned" },
             { name: "YouTube Data API", purpose: "(미연결) 영상 메타 수집", env: "YOUTUBE_API_KEY",
               url: "https://developers.google.com/youtube/v3", docs: "-", status: "planned" },
+            { name: "Naver 검색 API (블로그)", purpose: "Edge Function pain-collect — 블로그 검색으로 페인포인트 수집", env: "NAVER_CLIENT_ID + SECRET (Supabase Edge secret)",
+              url: "https://developers.naver.com/apps", docs: "supabase/functions/pain-collect · 키 없으면 수집 중단", status: "partial" },
             { name: "Naver Blog / Cafe API", purpose: "(미연결) 포스팅 자동화 · 공식 API 제한적", env: "NAVER_CLIENT_ID + SECRET",
               url: "https://developers.naver.com", docs: "쓰기 API 제한 · 대부분 읽기만", status: "planned" },
         ],
@@ -158,8 +161,10 @@ const APIS: {
     {
         category: "인프라 · 관리 API",
         providers: [
-            { name: "Supabase Management API", purpose: "SQL 실행 · 마이그레이션 · Edge Function 배포", env: "SUPABASE_ACCESS_TOKEN",
-              url: "https://api.supabase.com", docs: "Claude가 scripts/run-sql.js로 사용", status: "active" },
+            { name: "Supabase MCP", purpose: "SQL 실행 · 마이그레이션 · Edge Function 배포 (Claude Code)", env: "- (PAT 평문 보관 금지)",
+              url: "https://supabase.com/dashboard/project/ziotlxkdctlhiwkgmmsh", docs: "scripts/run-sql.js 등 PAT 스크립트는 2026-10-05 사용 중단", status: "active" },
+            { name: "Cloudflare Turnstile", purpose: "로그인·가입·문의·뉴스레터 폼 로봇 확인", env: "NEXT_PUBLIC_TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY",
+              url: "https://dash.cloudflare.com", docs: "새 도메인은 위젯 Hostname에 추가 — 빠지면 폼 차단", status: "active" },
             { name: "Vercel API", purpose: "(미연결) 배포 상태 조회 · Deploy Hook", env: "VERCEL_TOKEN",
               url: "https://vercel.com/docs/rest-api", docs: "Deploy Hook 미설정", status: "planned" },
             { name: "GitHub API", purpose: "(미연결) 커밋 현황 · 자동화", env: "GITHUB_TOKEN",

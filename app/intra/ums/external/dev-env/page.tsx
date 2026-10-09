@@ -1,6 +1,6 @@
 "use client";
 
-import { Cloud, Github, Database, Mail, Clock, ExternalLink, AlertCircle, Globe, Server } from "lucide-react";
+import { Cloud, Github, Database, Mail, Clock, ExternalLink, AlertCircle, Globe, Server, ShieldCheck, Sparkles, FileSpreadsheet } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { useExternalStatus, formatKst } from "@/lib/intra/use-external-status";
 
@@ -61,6 +61,32 @@ const INFRA = [
         ],
     },
     {
+        name: "Cloudflare",
+        icon: ShieldCheck,
+        color: "text-orange-500",
+        plan: "Free",
+        project: "Turnstile 위젯 \"Ten:One™\"",
+        url: "https://dash.cloudflare.com",
+        details: [
+            { k: "Turnstile", v: "로그인·가입·비밀번호 찾기·문의·뉴스레터 폼 로봇 확인 (lib/turnstile-server.ts — 키 없으면 폼 차단)" },
+            { k: "키", v: "NEXT_PUBLIC_TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY (Vercel env)" },
+            { k: "Hostname", v: "도메인 추가·전환 시 위젯 Hostname Management에 등록 — 빠지면 폼이 막힘 (콘솔 110200)" },
+        ],
+    },
+    {
+        name: "Anthropic · Claude",
+        icon: Sparkles,
+        color: "text-orange-700",
+        plan: "API 종량제 + Claude 구독",
+        project: "Agent Hub · Edge Function · 듣봇 / 열시일분(기획) · Claude Code(개발)",
+        url: "https://console.anthropic.com",
+        details: [
+            { k: "API 키", v: "ANTHROPIC_API_KEY (Vercel env · Supabase Edge secret)" },
+            { k: "열시일분", v: "https://claude.ai — 전략·기획 (상시 가동 아님)" },
+            { k: "Claude Code", v: "코드·빌드·배포 — Supabase MCP로 SQL 실행" },
+        ],
+    },
+    {
         name: "Google Cloud Platform (GCP)",
         icon: Server,
         color: "text-red-600",
@@ -82,14 +108,27 @@ const INFRA = [
         icon: Globe,
         color: "text-teal-600",
         plan: "연간 등록",
-        project: "29 도메인 DNS 관리",
-        url: "#",
+        project: "네임서버 기준 3곳 (2026-10-10 조회)",
+        url: "https://www.gabia.com",
         details: [
-            { k: "주요 도메인", v: "tenone.biz · madleague.net · madleap.co.kr · badak.biz · rook.co.kr 등" },
-            { k: "DNS 관리", v: "Vercel DNS (자동) 또는 Gabia/GoDaddy (수동 A/CNAME)" },
+            { k: "가비아", v: "tenone.biz · rook.co.kr · smarcomm.biz — 가비아 DNS에서 A·CNAME 직접 (CNAME 값 끝에 점)" },
+            { k: "Vercel DNS", v: "hero.ne.kr · youinone.com · myverse.kr · 0gamja.com · fwn.co.kr · changeup.company — Vercel이 자동 관리" },
+            { k: "호스트코코아", v: "madleague.net · madleap.co.kr · badak.biz — 외부 서버 운영 중 (https://www.hostcocoa.com). 새 사이트 오픈 시 DNS 전환" },
             { k: "서브도메인", v: "*.tenone.biz — Vercel에 와일드카드 매핑" },
-            { k: "SSL", v: "Vercel 자동 발급 (Let's Encrypt)" },
-            { k: "확인 경로", v: "UMS > Standard 관리 > 사이트·도메인" },
+            { k: "SSL", v: "Vercel 자동 발급" },
+            { k: "전환 절차", v: "CLAUDE.md §2.5 · 부록 G.2 (네임서버 먼저 조회 → Vercel 권장값)" },
+        ],
+    },
+    {
+        name: "운영 문서 (Google Sheets)",
+        icon: FileSpreadsheet,
+        color: "text-green-600",
+        plan: "Google Workspace",
+        project: "수료증 관리 대장 — 2026-10-10 동결",
+        url: "https://docs.google.com/spreadsheets/d/1Foa436Y6FLbXzDfsbZGT-D2Z01GXVCPAxSg6njV1OIY/edit",
+        details: [
+            { k: "상태", v: "동결 (읽기 참고용). 원본은 인트라 › MADLeague › 인증서 발급" },
+            { k: "새 회차", v: "인트라 회차 일괄 발급 — 코드 자동 배정 (일련번호는 대장 전체 고유값)" },
         ],
     },
 ];

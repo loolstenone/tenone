@@ -24,6 +24,7 @@ const ENV_REGISTRY: { key: string; purpose: string; scope: EnvScope; required: b
     { key: "RESEND_WEBHOOK_SECRET", purpose: "Resend Webhook 서명 검증", scope: "server-only", required: true },
     { key: "NEXT_PUBLIC_TURNSTILE_SITE_KEY", purpose: "Cloudflare Turnstile (로봇 확인)", scope: "public", required: true },
     { key: "TURNSTILE_SECRET_KEY", purpose: "Turnstile 서버 검증 (뉴스레터·문의 폼) — 없으면 폼 차단", scope: "server-only", required: true },
+    { key: "CERT_MATCH_SECRET", purpose: "인증서 대장 ↔ 매드리거 등록 매칭 해시 (없으면 등록 정보로 인증서 받기 불가)", scope: "server-only", required: true },
     { key: "NEWSLETTER_DISPATCH_ENABLED", purpose: "뉴스레터 정기 발송 (true일 때만 발송)", scope: "server-only", required: false },
     { key: "GMAIL_CLIENT_ID", purpose: "Gmail API OAuth (Whole See 뉴스레터 수집)", scope: "server-only", required: false },
     { key: "GMAIL_CLIENT_SECRET", purpose: "Gmail API OAuth", scope: "server-only", required: false },

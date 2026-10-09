@@ -9,11 +9,11 @@ import { ExternalStatusSummary } from "@/components/intra/ExternalStatusSummary"
 
 const CATEGORIES = [
     { key: "dev-env", title: "개발 환경", icon: Cloud, color: "text-blue-600", bg: "bg-blue-50",
-      desc: "Vercel · Supabase · GitHub · Resend · Cron 스케줄 · 환경변수",
-      items: ["Vercel Pro", "Supabase (ziotlxkdctlhiwkgmmsh)", "GitHub (loolstenone/tenone)", "Resend SMTP", "Vercel Cron"],
+      desc: "Vercel · Supabase · GitHub · Resend · Cloudflare · Anthropic · GCP · 도메인 · 운영 문서 · Cron · 환경변수",
+      items: ["Vercel Pro", "Supabase (ziotlxkdctlhiwkgmmsh)", "GitHub (loolstenone/tenone)", "Resend SMTP", "Cloudflare Turnstile", "가비아 · Vercel DNS · 호스트코코아", "Vercel Cron"],
       href: "/intra/ums/external/dev-env" },
     { key: "apis", title: "외부 API", icon: Key, color: "text-purple-600", bg: "bg-purple-50",
-      desc: "Anthropic Claude · OpenAI · Google OAuth · 소셜 미디어 API",
+      desc: "Anthropic Claude · Google OAuth · Naver 검색 · Turnstile · 소셜 미디어 API",
       items: ["Anthropic", "Google OAuth (Gmail)", "Resend API", "Cloudflare Turnstile"],
       href: "/intra/ums/external/apis" },
     { key: "sources", title: "크롤링 · RSS · 뉴스레터", icon: Radio, color: "text-amber-600", bg: "bg-amber-50",
