@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { PortalIcon } from "@/components/icons/PortalIcon";
+import { NotificationBell, AccountAvatar, LogoutButton } from "@/components/AccountControls";
 import { getSetting, setSetting } from "@/lib/supabase/settings";
 import {
-    Search, Bell, LogOut, ChevronDown, User, Users, Target, CalendarCheck,
+    Search, LogOut, ChevronDown, User, Users, Target, CalendarCheck,
     CreditCard, Wallet, Star, Plus, X, MessageSquareText, ListTodo, Stamp,
     FolderKanban, GripVertical, Home, Award, Receipt
 } from "lucide-react";
@@ -143,7 +144,7 @@ export function IntraHeader() {
                 <span className="text-[10px] text-neutral-400">{formatToday()}</span>
             </div>
 
-            {/* Right: search, notifications, logout, avatar, portal */}
+            {/* Right: 검색 · 알림 · 아바타 · 로그아웃 · 홈 */}
             <div className="flex items-center gap-1">
                 {/* Search */}
                 <div className="relative">
@@ -163,26 +164,15 @@ export function IntraHeader() {
                     )}
                 </div>
 
-                {/* Notifications */}
-                <button className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50 relative">
-                    <Bell className="h-4 w-4" />
-                    <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 bg-red-500 rounded-full" />
-                </button>
-
-                <div className="h-5 w-px bg-neutral-200 mx-2" />
+                {/* 알림 · 아바타 · 로그아웃 — 전 유니버스 공통 부품 (components/AccountControls) */}
+                <div className="flex items-center gap-3.5 pl-1 text-neutral-700">
+                <NotificationBell />
 
                 {/* Avatar dropdown */}
                 <div className="relative">
                     <button onClick={() => setProfileOpen(!profileOpen)}
-                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-neutral-50 transition-colors">
-                        <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold"
-                            style={{
-                                background: "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
-                                color: "#fff",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
-                            }}>
-                            {user?.avatarInitials || '?'}
-                        </div>
+                        className="flex items-center opacity-90 hover:opacity-100 transition-opacity" title={user?.name || "프로필"}>
+                        <AccountAvatar />
                     </button>
 
                     {profileOpen && (
@@ -192,7 +182,6 @@ export function IntraHeader() {
                                 <div className="px-4 py-3 border-b border-neutral-100">
                                     <p className="text-sm font-medium">{user?.name || '로딩 중...'}</p>
                                     <p className="text-[10px] text-neutral-400 mt-0.5">{user?.email || ''}</p>
-                                    <p className="text-[10px] text-neutral-400">{user?.role || ''}</p>
                                 </div>
                                 <div className="py-1">
                                     {/* My = 나에 관한 기록 (2026-10-10). 일하는 곳은 사이드바 Workspace */}
@@ -234,11 +223,8 @@ export function IntraHeader() {
                     )}
                 </div>
 
-                {/* 로그아웃 */}
-                <button onClick={async () => { sessionStorage.removeItem('tenone_intra_verified'); await logout(); window.location.href = '/intra'; }}
-                    className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded hover:bg-neutral-50" title="로그아웃">
-                    <LogOut className="h-4 w-4" />
-                </button>
+                <LogoutButton onLogout={async () => { sessionStorage.removeItem('tenone_intra_verified'); await logout(); window.location.href = '/intra'; }} />
+                </div>
 
                 {/* 홈으로 */}
                 <Link href="/" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50" title="홈으로">

@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
-import Image from "next/image";
-import { User, LogOut, Share2, Search, Shield, X, ArrowRight, Bell, Briefcase, ChevronDown, ExternalLink } from "lucide-react";
+import { Share2, Search, Shield, X, ArrowRight, Briefcase, ChevronDown, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
+import { NotificationBell, AccountAvatar, LogoutButton } from "@/components/AccountControls";
 
 // ── Workspace 레지스트리 ──────────────────────────────────────
 // 각 브랜드의 "내 워크스페이스" 경로. 사용자의 affiliations[]에 해당 brandId가 있으면 자동으로 드롭다운에 노출.
@@ -73,7 +73,6 @@ const defaultConfig: UtilityBarConfig = {
 };
 
 interface SearchResult { id: string; title: string; description?: string; href: string; type: string; }
-interface NotificationItem { id: string; title: string; body?: string; href?: string; created_at: string; read?: boolean; }
 
 export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBarConfig }) {
     const rawConfig = 'config' in props ? props.config : props;
@@ -91,12 +90,6 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
 
     // 워크스페이스 드롭다운
     const [wsOpen, setWsOpen] = useState(false);
-    // 알림 드롭다운
-    const [notiOpen, setNotiOpen] = useState(false);
-    const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-    const [notiLoading, setNotiLoading] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
-
     const isAdmin = user?.role === "Admin" || user?.accountType === "staff"
         || (config.adminEmails || []).includes(user?.email || "");
 
@@ -176,43 +169,13 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
         return () => clearTimeout(timer);
     }, [searchQuery, config.siteId]);
 
-    // 알림 — 로그인 시 1회(배지), 드롭다운 열 때 새로고침 + 읽음 처리 (본인 알림만, /api/notifications)
-    async function fetchNotifications() {
-        if (!isAuthenticated) return;
-        setNotiLoading(true);
-        try {
-            const res = await fetch("/api/notifications", { cache: "no-store" });
-            if (res.ok) {
-                const data = await res.json();
-                setNotifications(data.notifications ?? []);
-                setUnreadCount(data.unread ?? 0);
-            }
-        } catch { /* silent */
-        } finally {
-            setNotiLoading(false);
-        }
-    }
-    useEffect(() => {
-        if (isAuthenticated && !config.hideNotifications) fetchNotifications();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthenticated]);
-    useEffect(() => {
-        if (!notiOpen) return;
-        fetchNotifications().then(() => {
-            // 목록은 그대로 강조해 두고, 배지만 지운다
-            fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
-            setUnreadCount(0);
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [notiOpen]);
-
     // 외부 클릭 시 드롭다운 닫기
     useEffect(() => {
-        if (!wsOpen && !notiOpen) return;
-        const close = () => { setWsOpen(false); setNotiOpen(false); };
+        if (!wsOpen) return;
+        const close = () => setWsOpen(false);
         const t = setTimeout(() => window.addEventListener("click", close), 0);
         return () => { clearTimeout(t); window.removeEventListener("click", close); };
-    }, [wsOpen, notiOpen]);
+    }, [wsOpen]);
 
     return (
         <>
@@ -230,7 +193,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                         {!config.hideWorkspaces && workspaces.length > 0 && (
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <button
-                                    onClick={() => { setWsOpen(o => !o); setNotiOpen(false); }}
+                                    onClick={() => setWsOpen(o => !o)}
                                     className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
                                     title="내 워크스페이스"
                                 >
@@ -284,64 +247,13 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             </Link>
                         )}
 
-                        {/* 알림 */}
-                        {!config.hideNotifications && (
-                            <div className="relative" onClick={(e) => e.stopPropagation()}>
-                                <button
-                                    onClick={() => { setNotiOpen(o => !o); setWsOpen(false); }}
-                                    className="relative opacity-60 hover:opacity-100 transition-opacity"
-                                    title={`알림${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
-                                >
-                                    <Bell className="h-3.5 w-3.5" />
-                                    {unreadCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full bg-rose-500 text-white text-[8px] font-bold flex items-center justify-center">
-                                            {unreadCount > 9 ? "9+" : unreadCount}
-                                        </span>
-                                    )}
-                                </button>
-                                {notiOpen && (
-                                    <div className="absolute right-0 top-full mt-2 w-80 bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-200 overflow-hidden z-50">
-                                        <div className="px-3 py-2 border-b border-neutral-100 flex items-center justify-between">
-                                            <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">알림</span>
-                                            {notifications.some(n => !n.read) && <span className="text-[10px] text-rose-500 font-semibold">{notifications.filter(n => !n.read).length} 새 알림</span>}
-                                        </div>
-                                        <div className="max-h-80 overflow-y-auto">
-                                            {notiLoading ? (
-                                                <div className="px-4 py-8 text-center text-xs text-neutral-400">불러오는 중…</div>
-                                            ) : notifications.length === 0 ? (
-                                                <div className="px-4 py-10 text-center text-xs text-neutral-400">새 알림이 없습니다</div>
-                                            ) : notifications.map(n => (
-                                                <CrossSiteLink
-                                                    key={n.id}
-                                                    href={n.href || "#"}
-                                                    onClick={() => setNotiOpen(false)}
-                                                    className={`block px-3 py-2.5 border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors ${
-                                                        n.read ? "" : "bg-rose-50/30"
-                                                    }`}
-                                                >
-                                                    <div className="text-sm font-medium text-neutral-900 truncate">{n.title}</div>
-                                                    {n.body && <div className="text-xs text-neutral-500 mt-0.5 line-clamp-2">{n.body}</div>}
-                                                    <div className="text-[10px] text-neutral-400 mt-1">{new Date(n.created_at).toLocaleString("ko-KR")}</div>
-                                                </CrossSiteLink>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        {/* 알림 — 공통 부품 (components/AccountControls) */}
+                        {!config.hideNotifications && <NotificationBell />}
 
                         {/* 아바타 — 이미지만, 이름 텍스트 X */}
                         {config.profilePath && (
-                            <Link href={config.profilePath} className="opacity-80 hover:opacity-100 transition-opacity" title={user?.name || "프로필"}>
-                                {user?.avatarUrl ? (
-                                    <Image src={user.avatarUrl} alt="" width={24} height={24}
-                                        className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20" />
-                                ) : (
-                                    <div className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ring-1 ring-white/20"
-                                        style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
-                                        {user?.name?.charAt(0) ?? <User className="h-3 w-3" />}
-                                    </div>
-                                )}
+                            <Link href={config.profilePath} className="opacity-90 hover:opacity-100 transition-opacity" title={user?.name || "프로필"}>
+                                <AccountAvatar />
                             </Link>
                         )}
 
@@ -351,10 +263,8 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             </Link>
                         )}
 
-                        {/* 로그아웃 — 아이콘 only */}
-                        <button onClick={() => logout()} className="opacity-40 hover:opacity-80 transition-opacity" title="로그아웃">
-                            <LogOut className="h-3.5 w-3.5" />
-                        </button>
+                        {/* 로그아웃 — 텍스트 */}
+                        <LogoutButton />
                     </>
                 ) : !config.hideAuth ? (
                     <>

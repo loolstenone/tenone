@@ -1030,9 +1030,9 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
 | 1 | **About** | `hideAbout=false` (기본) | `aboutPath`로 이동 |
 | 2 | **Work Space** (Briefcase 드롭다운) | 인증 + (`workspaces[]` 또는 `user.affiliations[]`에서 자동 매칭) | 이용 중인 서비스 목록 → 각 워크스페이스 진입 |
 | 3 | **로그인 / 가입** | 비인증 | LoginModal 팝업 (또는 `loginPath` 지정 시 `/login?redirect=` 이동) |
-| 4 | **아바타** (이미지만) | 인증 | `profilePath`로 이동. **이름 텍스트 절대 노출 금지** — 이미지 없으면 이니셜 1글자. |
-| 5 | **알림** (Bell + 미확인 배지) | 인증 + `hideNotifications=false` | 드롭다운으로 `/api/notifications` 결과 노출 (미구현이면 빈 목록) |
-| 6 | **로그아웃** (LogOut 아이콘만) | 인증 | `logout()` |
+| 4 | **알림** (Bell + 미확인 배지) | 인증 + `hideNotifications=false` | 드롭다운으로 `/api/notifications` 결과 노출 (본인 알림, 생성은 `lib/notify.ts`) |
+| 5 | **아바타** (이미지만) | 인증 | `profilePath`로 이동. **이름 텍스트 절대 노출 금지** — 이미지 없으면 이니셜 1글자. |
+| 6 | **로그아웃** (텍스트 `로그아웃`) | 인증 | `logout()` |
 | 7 | **공유 / 검색** | 항상 | 공유 = 클립보드 복사·Web Share / 검색 = 풀스크린 오버레이 (`/api/search`) |
 
 ### Workspace 레지스트리
@@ -1071,7 +1071,8 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 ### 절대 하지 말 것
 
 - ❌ 아바타 옆에 이름·이메일 텍스트 직접 노출 (이미지 only가 표준)
-- ❌ 로그아웃 버튼에 "로그아웃" 텍스트 (LogOut 아이콘만)
+- ❌ 알림·아바타·로그아웃을 헤더마다 따로 만들기 — **`components/AccountControls.tsx`** (`NotificationBell`·`AccountAvatar`·`LogoutButton`)를 쓴다. 브랜드 바·인트라 헤더·Jakka/MoNTZ 레이아웃이 같은 부품 (2026-10-10 — 로그아웃 아이콘 → 텍스트 `로그아웃`, 인트라 가짜 알림 배지 교체)
+- ❌ 로그아웃을 아이콘만으로 표시 · 아바타 클릭으로 로그아웃
 - ❌ 헤더에서 `UniverseUtilityBar` 우회하고 자체 로그인·검색·공유 버튼 직접 만들기
 - ❌ `WORKSPACE_REGISTRY`에 등록 안 하고 브랜드 헤더에서 `workspacePath`만 하드코딩 (다른 사이트에서 안 보임)
 - ❌ 7요소 순서·아이콘 임의 변경 (28개 브랜드 일관성 깨짐)

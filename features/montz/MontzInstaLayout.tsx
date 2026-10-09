@@ -4,9 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings, Mail, PlusSquare } from "lucide-react";
+import { Home, Search, Megaphone, User, X, MoreHorizontal, Info, HelpCircle, Settings, Mail, PlusSquare } from "lucide-react";
 import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
+import { NotificationBell, LogoutButton } from "@/components/AccountControls";
 import { LoginModal } from "@/components/LoginModal";
 import { getCreatorByUserId } from "@/lib/supabase/montz";
 
@@ -24,7 +25,7 @@ const UPLOAD_ITEM: NavItem = { icon: PlusSquare, label: "업로드", href: "/mon
 const GOLD = "#c8a97e";
 
 function AuthSection({ compact = false }: { compact?: boolean }) {
-    const { isAuthenticated, user, logout } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
 
@@ -47,9 +48,11 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
                             <p className="text-[11px] text-neutral-500 truncate">{user?.email}</p>
                         </div>
                     )}
-                    <button onClick={() => logout()} className="p-1.5 text-neutral-400 hover:text-neutral-900 transition-colors">
-                        <LogOut className="h-4 w-4" />
-                    </button>
+                    {/* 알림 · 로그아웃 — 전 유니버스 공통 부품 */}
+                    <span className="flex items-center gap-3 text-neutral-700">
+                        <NotificationBell align="left" />
+                        <LogoutButton />
+                    </span>
                 </div>
                 <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} defaultTab={loginTab} />
             </>
@@ -80,22 +83,16 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
 }
 
 function MobileAuthButton() {
-    const { isAuthenticated, user, logout } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
 
     if (isAuthenticated) {
         return (
-            <button onClick={() => logout()} title="로그아웃" className="group">
-                <div className="w-[28px] h-[28px] rounded-full bg-neutral-200 overflow-hidden border border-neutral-300 group-hover:border-neutral-500 transition-colors">
-                    {user?.avatarUrl ? (
-                        <Image src={user.avatarUrl} alt="" width={28} height={28} className="object-cover w-full h-full" />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-neutral-600">
-                            {user?.name?.charAt(0) ?? "U"}
-                        </div>
-                    )}
-                </div>
-            </button>
+            // 모바일 상단도 같은 구성 — 알림 · 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10)
+            <span className="flex items-center gap-3 text-neutral-800">
+                <NotificationBell />
+                <LogoutButton />
+            </span>
         );
     }
 
