@@ -106,7 +106,7 @@
 | **program_certificates** | **§4 공통 정책 "수료증" 그대로**: member_id NULL(계정 연결 해제) · snapshot에서 birthdate·university·major·group_name·cohort·team_name 삭제 · match_hash·linked_by NULL · **이름·발급일·코드 유지** (+ 인증서 내용인 구분·대회·결과 — 개인정보 아님) | 진위 확인. 발급·연결 동의 문구에 고지(계정 발급 · `pt-cert-2026-10-09`). 본인 삭제 요구(제36조) 시 폐기 후 삭제. 매드리거 등록 정보(mad_applications)는 별개 — 표 3.2 기준 |
 | program_rounds · program_teams · program_notices | 유지 | 운영 콘텐츠 |
 
-- **수료증 관리 대장 인증서** (2026-10-09, `note='수료증 관리 대장'`, `cert_key='ledger:{코드}'`, member_id NULL — 비회원): 2025 대성학원·리제로스·2026 춤추는고래 경쟁 PT 참가·수상 243건. snapshot = 이름·생년월일·대학·전공·동아리·기수·팀. **전화번호는 가져오지 않음**(최소 수집). `match_hash` = HMAC(이름|전화번호, env `CERT_MATCH_SECRET`) — 전화번호 원본 미보관. 로그인 + ① 매드리거 등록 정보(이름+전화번호)로 찾기(우선권, linked_by registration) 또는 ② 직접 확인(이름+생년월일+대학, Turnstile, linked_by manual) + 동의(`pt-cert-2026-10-09`) 시 그 계정에 연결 → 이후 탈퇴 처리는 위 program_certificates 규칙(익명화) 그대로. PNG·PDF는 브라우저에서 생성(서버 보관 없음). ⚠️ **아무도 연결하지 않은 대장 행의 보관 기간 미정** — 처리방침에 항목·기간 고지 필요
+- **수료증 관리 대장 인증서** (2026-10-09, 구분 = `cert_key='ledger:{코드}'`, 원본 = 인트라 — 구글 시트 2026-10-10 동결, member_id NULL — 비회원): 2025 대성학원·리제로스·2026 춤추는고래 경쟁 PT 참가·수상 243건. snapshot = 이름·생년월일·대학·전공·동아리·기수·팀. **전화번호는 가져오지 않음**(최소 수집). `match_hash` = HMAC(이름|전화번호, env `CERT_MATCH_SECRET`) — 전화번호 원본 미보관. 로그인 + ① 매드리거 등록 정보(이름+전화번호)로 찾기(우선권, linked_by registration) 또는 ② 직접 확인(이름+생년월일+대학, Turnstile, linked_by manual) + 동의(`pt-cert-2026-10-09`) 시 그 계정에 연결 → 이후 탈퇴 처리는 위 program_certificates 규칙(익명화) 그대로. PNG·PDF는 브라우저에서 생성(서버 보관 없음). ⚠️ **아무도 연결하지 않은 대장 행의 보관 기간 미정** — 처리방침에 항목·기간 고지 필요
 
 ### 3.2.3 서비스 간 연계 동의 (`member_service_links`, 2026-10-09 — 코어)
 

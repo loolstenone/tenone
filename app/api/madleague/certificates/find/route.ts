@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { requireMember } from '@/lib/api-guard';
 import { verifyTurnstile, CAPTCHA_REQUIRED_ERROR } from '@/lib/turnstile-server';
 import { PT_CERT_CONSENT_VERSION } from '@/features/madleague/pt-certificate-consent';
-import { LEDGER_NOTE, hasMadRegistration, linkLedgerByRegistration } from '@/lib/programs/ledger-match';
+import { LEDGER_KEY_LIKE, hasMadRegistration, linkLedgerByRegistration } from '@/lib/programs/ledger-match';
 
 export const runtime = 'nodejs';
 
@@ -29,7 +29,7 @@ const toDoc = (c: Row) => ({
 
 const base = () => createAdminClient().from('program_certificates')
   .select('id, member_id, linked_by, code, type, result, issued_at, snapshot')
-  .eq('brand_id', 'madleague').eq('note', LEDGER_NOTE).is('revoked_at', null);
+  .eq('brand_id', 'madleague').like('cert_key', LEDGER_KEY_LIKE).is('revoked_at', null);
 
 /** GET — 내 계정의 경쟁 PT 인증서 + 매드리거 등록 여부 (등록 정보로 찾기 버튼 노출용) */
 export async function GET(req: NextRequest) {
