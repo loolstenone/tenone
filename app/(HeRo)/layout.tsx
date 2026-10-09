@@ -18,6 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
             type: 'website',
             ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
+        // 비공개(is_open=false, 가림막) 동안 검색 노출 차단 — 인트라에서 열면 자동 해제 (헌법 원칙 6, 2026-10-10 비공개 유지 결정)
+        ...(db?.is_open === false && { robots: { index: false, follow: false } }),
     };
 }
 

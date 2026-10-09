@@ -559,7 +559,8 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 |
 | **색 SSOT 확정 (세션 82)** | Action/Accent/State layer만 HeRo Red · `group-hover:text-[#E53935]` on `font-bold` titles = hover-only affordance = ACCEPTABLE · per-card outline red = ACCEPTABLE · semantic red = 항상 ACCEPTABLE |
 | **세션 163 (2026-10-08)** | 코어 프로그램 모듈 연결 — `/hero/programs`·`/hero/certificate`·`/intra/hero/programs` · Action Hub `program_applications`(hero) · MADLeague 프로그램 화면에 HeRo 회차 노출 |
-| **결정 대기 (세션 163)** | ① `ums_sites.is_open=false`(10-07 12:51 UTC 변경 — 세션 162 기록은 공개) 의도 확인 ② 헤더 "프로그램" 진입점 + `lib/brand-site-menus.ts` hero 등록(site:check ❌) ③ 유료 프로그램은 통신판매업 신고 전 결제 금지 · 처리방침 항목 |
+| **비공개 유지 (2026-10-10 사용자 결정)** | `ums_sites.is_open=false` 유지 — 가림막 + layout `robots noindex`(is_open=false일 때만, 인트라에서 열면 자동 해제). 공개 전 확인: 통신판매업 신고 전 결제 금지 · 처리방침 HeRo 항목 |
+| **결정 대기 (세션 163)** | ② 헤더 "프로그램" 진입점 + `lib/brand-site-menus.ts` hero 등록(site:check ❌) ③ 유료 프로그램은 통신판매업 신고 전 결제 금지 · 처리방침 항목 |
 | **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 (Tetrad) · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 · Journey 리텐션 엔진 · Talent Agency 포지셔닝 |
 
 ---

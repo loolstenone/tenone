@@ -299,6 +299,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 ```
 
+**비공개 운영(is_open=false) 브랜드**: 가림막만으로는 검색엔진이 본문을 읽을 수 있다 → 레이아웃 `generateMetadata`에 한 줄 추가 (인트라에서 열면 자동 해제, 헌법 원칙 6). 현재 적용: HeRo (2026-10-10 비공개 유지 결정)
+```tsx
+        ...(db?.is_open === false && { robots: { index: false, follow: false } }),
+```
+
 **절대 하지 말 것:**
 - ❌ 레이아웃에 `export const metadata` (정적) 사용 → 반드시 `generateMetadata()`
 - ❌ 하드코딩 fallback 문자열 → `site.meta.title` 사용

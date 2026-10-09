@@ -151,7 +151,12 @@ async function checkSite(siteId) {
         if (canon.hosting === "external" && !inNoindex) fail("외부 운영(external)인데 next.config noindex 목록에 없음 (스테이징 검색 노출)");
         if (canon.hosting === "vercel" && inNoindex) fail("Vercel 운영인데 noindex 목록에 남아 있음 (검색 노출 차단됨)");
         if (row?.hosting && row.hosting !== canon.hosting) fail(`hosting 불일치: ums_sites=${row.hosting} · CANONICAL_HOSTS=${canon.hosting}`);
-        if (canon.hosting === "vercel" && row && row.is_open === false) fail("Vercel 운영인데 ums_sites.is_open=false (가림막)");
+        if (canon.hosting === "vercel" && row && row.is_open === false) {
+            // 비공개 유지 결정 브랜드: 가림막 + layout robots(noindex)가 있으면 의도된 상태 (헌법 원칙 6)
+            /is_open\s*===\s*false[^\n]*robots/.test(layout ?? "")
+                ? warn("비공개 운영 중 (ums_sites.is_open=false · 가림막 + noindex) — 공개 결정 시 인트라에서 열기")
+                : fail("Vercel 운영인데 ums_sites.is_open=false (가림막) — 비공개 유지면 layout generateMetadata에 is_open=false → robots noindex (§1.1)");
+        }
     } else if (tier === "focus") warn("집중 브랜드인데 CANONICAL_HOSTS 미등록 (공식 주소 없음)");
 
     // 5-1. GA4 브랜드 구분 (부록 G.1) — 공식 도메인이 domain-registry에 이 siteId로 없으면 그 사이트 방문이 전부 brand_id=tenone으로 집계된다
