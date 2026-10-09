@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { Award, CalendarCheck, ChevronRight, Receipt, Target, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
-import { useAuth } from "@/lib/auth-context";
+import { StaffHome } from "@/components/intra/StaffHome";
 
 const RECORDS = [
     { href: "/intra/my/attendance", icon: CalendarCheck, label: "근태", desc: "출퇴근 기록 · 휴가" },
@@ -18,34 +18,10 @@ const RECORDS = [
     { href: "/intra/my/expenses", icon: Receipt, label: "경비", desc: "경비 신청 · 처리 상태" },
 ];
 
-function Info({ label, value }: { label: string; value?: string | null }) {
-    return (
-        <div>
-            <p className="text-[11px] text-neutral-400">{label}</p>
-            <p className="mt-0.5 text-sm text-neutral-900">{value || "-"}</p>
-        </div>
-    );
-}
-
 export default function MyPage() {
-    const { user } = useAuth();
-
     return (
         <div className="space-y-6">
             <PageHeader title="My" description="나에 관한 기록 — 본인과 담당 직무(인사·급여·재무)만 볼 수 있습니다" />
-
-            <div className="rounded-lg border border-neutral-200 bg-white p-5">
-                <p className="text-base font-semibold text-neutral-900">{user?.name ?? ""}</p>
-                <p className="text-xs text-neutral-500">{user?.email ?? ""}</p>
-                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <Info label="소속" value={user?.department} />
-                    <Info label="직위" value={user?.position} />
-                    <Info label="사번" value={user?.employeeId} />
-                </div>
-                <Link href="/profile" className="mt-4 inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900">
-                    공통 프로필 수정 <ChevronRight className="h-3 w-3" />
-                </Link>
-            </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {RECORDS.map(r => (
@@ -59,6 +35,8 @@ export default function MyPage() {
                     </Link>
                 ))}
             </div>
+
+            <StaffHome mode="my" />
         </div>
     );
 }
