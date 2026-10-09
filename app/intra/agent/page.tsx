@@ -19,6 +19,7 @@ import {
     AlertCircle, Play,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { createClient } from "@/lib/supabase/client";
 import type { AgentProfile, AgentMessage } from "@/types/agent";
 import type { RiskLevel } from "@/types/agent";
 import clsx from "clsx";
@@ -143,10 +144,21 @@ export default function AgentHubPage() {
 
     const fetchBriefings = useCallback(async () => {
         setBriefingLoading(true);
+        // 매일 브리핑 = Edge Function daily-vrief → agent_messages(vrief, payload.briefing)
+        // "지금 브리핑" = /api/agent/briefing → wio_chat_messages(브리핑 스레드) — 둘 다 읽어 최신순 (없는 /api/chat 호출로 늘 비던 문제, 2026-10-10)
         try {
-            const res = await fetch("/api/chat/thread/468a2734-1819-4eb5-8137-c5a3465a4412/messages?limit=20");
-            const json = await res.json();
-            setBriefings(json.data ?? json ?? []);
+            const sb = createClient();
+            const [daily, manual] = await Promise.all([
+                sb.from("agent_messages").select("id, created_at, payload").eq("message_type", "vrief").not("payload->briefing", "is", null)
+                    .order("created_at", { ascending: false }).limit(20),
+                sb.from("wio_chat_messages").select("id, content, created_at, sender_name").eq("thread_id", "468a2734-1819-4eb5-8137-c5a3465a4412")
+                    .order("created_at", { ascending: false }).limit(20),
+            ]);
+            const rows = [
+                ...(daily.data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, created_at: r.created_at as string, sender_name: "열시일분 · 데일리 브리핑", content: String((r.payload as { briefing?: string })?.briefing ?? "") })),
+                ...(manual.data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, created_at: r.created_at as string, sender_name: (r.sender_name as string) || "수동 브리핑", content: r.content as string })),
+            ].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 20);
+            setBriefings(rows);
         } catch {
             setBriefings([]);
         } finally {

@@ -1,24 +1,29 @@
 "use client";
 
 /**
- * Whole See — 크롤링 상태
- * 웹 크롤러·뉴스레터 수신봇·소셜 스크래퍼 상태 모니터링
+ * Whole See — 크롤링 상태 (2026-10-10 현실화)
+ *   실제 실행 기록으로 보여준다: Edge Function trend-crawl(매시간)이 남기는 agent_messages(type=trend_crawl) + collected_data 상태별 건수
+ *   ※ crawler_status 테이블은 아무도 갱신하지 않아 2026-03-26 값에 멈춰 있었다 — 더 이상 읽지 않는다
  */
 
 import { useEffect, useState } from "react";
-import { Activity, Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { Activity, Loader2, CheckCircle2, AlertCircle, Clock, Inbox } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
-interface CrawlerRow {
-    id: string;
-    crawler_name: string;
-    status: string;
-    last_run: string | null;
-    last_count: number | null;
-    error_message: string | null;
-    updated_at: string;
+interface RunPayload {
+    crawl?: { sources?: number; collected?: number; errors?: string[] };
+    process?: { total?: number; processed?: number; skipped?: number; errors?: string[] };
+    elapsedMs?: number;
 }
+interface Run { created_at: string; payload: RunPayload }
+
+const STATUSES = [
+    { key: "raw", label: "처리 대기", tone: "text-neutral-700" },
+    { key: "processed", label: "트렌드 카드 생성", tone: "text-emerald-700" },
+    { key: "rejected", label: "관련성 낮음 (제외)", tone: "text-neutral-500" },
+    { key: "error", label: "처리 오류", tone: "text-rose-600" },
+] as const;
 
 function rel(dateStr: string | null): string {
     if (!dateStr) return "-";
@@ -30,15 +35,35 @@ function rel(dateStr: string | null): string {
     return `${Math.floor(h / 24)}일 전`;
 }
 
+/** 같은 원인의 오류를 묶는다 (기사 제목 앞부분은 떼고 원인만) */
+function groupErrors(errors: string[]): { reason: string; count: number }[] {
+    const map = new Map<string, number>();
+    for (const e of errors) {
+        const credit = /credit balance is too low/i.test(e) ? "Anthropic API 크레딧 부족 — Plans & Billing에서 충전 필요" : null;
+        const reason = credit ?? e.slice(0, 160);
+        map.set(reason, (map.get(reason) ?? 0) + 1);
+    }
+    return [...map.entries()].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
+}
+
 export default function CrawlingPage() {
-    const [rows, setRows] = useState<CrawlerRow[]>([]);
+    const [runs, setRuns] = useState<Run[]>([]);
+    const [counts, setCounts] = useState<Record<string, number>>({});
+    const [lastCard, setLastCard] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function load() {
             const sb = createClient();
-            const { data } = await sb.from("crawler_status").select("*").order("updated_at", { ascending: false });
-            setRows(data ?? []);
+            const since = new Date(Date.now() - 7 * 86400000).toISOString();
+            const [{ data: runRows }, last, ...statusCounts] = await Promise.all([
+                sb.from("agent_messages").select("created_at, payload").eq("payload->>type", "trend_crawl").order("created_at", { ascending: false }).limit(24),
+                sb.from("mindle_trends").select("created_at").order("created_at", { ascending: false }).limit(1),
+                ...STATUSES.map(s => sb.from("collected_data").select("id", { count: "exact", head: true }).eq("status", s.key).gte("collected_at", since)),
+            ]);
+            setRuns((runRows ?? []) as Run[]);
+            setLastCard(last.data?.[0]?.created_at ?? null);
+            setCounts(Object.fromEntries(STATUSES.map((s, i) => [s.key, statusCounts[i].count ?? 0])));
             setLoading(false);
         }
         load();
@@ -46,88 +71,94 @@ export default function CrawlingPage() {
 
     if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-6 w-6 animate-spin text-neutral-400" /></div>;
 
-    const OK_STATUSES = ["ok", "running", "success", "active"];
-    const ERROR_STATUSES = ["error", "failed"];
-    const statusCount = {
-        ok: rows.filter(r => OK_STATUSES.includes(r.status)).length,
-        error: rows.filter(r => ERROR_STATUSES.includes(r.status)).length,
-        idle: rows.filter(r => !OK_STATUSES.includes(r.status) && !ERROR_STATUSES.includes(r.status)).length,
-    };
+    const latest = runs[0];
+    const collected24 = runs.reduce((n, r) => n + (r.payload.crawl?.collected ?? 0), 0);
+    const processed24 = runs.reduce((n, r) => n + (r.payload.process?.processed ?? 0), 0);
+    const processErrors = groupErrors(runs.flatMap(r => r.payload.process?.errors ?? []));
+    const sourceErrors = groupErrors(latest?.payload.crawl?.errors ?? []);
+    const stale = !latest || Date.now() - new Date(latest.created_at).getTime() > 2 * 3600000;
 
     return (
         <div className="space-y-6">
-            <PageHeader title="크롤링" description="Whole See 크롤러 · 뉴스레터 봇 · 소셜 스크래퍼 모니터링" />
+            <PageHeader title="크롤링" description="Whole See 수집 → 분류 → 트렌드 카드 — 매시간 실행 기록 (Edge Function trend-crawl)" />
 
-            {/* Summary */}
-            <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                        <span className="text-[11px] text-neutral-500">정상</span>
-                    </div>
-                    <p className="text-xl font-bold text-neutral-900">{statusCount.ok}</p>
-                </div>
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                        <AlertCircle className="h-4 w-4 text-rose-600" />
-                        <span className="text-[11px] text-neutral-500">오류</span>
-                    </div>
-                    <p className="text-xl font-bold text-neutral-900">{statusCount.error}</p>
-                </div>
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Clock className="h-4 w-4 text-neutral-500" />
-                        <span className="text-[11px] text-neutral-500">대기</span>
-                    </div>
-                    <p className="text-xl font-bold text-neutral-900">{statusCount.idle}</p>
-                </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Stat icon={stale ? AlertCircle : CheckCircle2} tone={stale ? "text-rose-600" : "text-emerald-600"} label="마지막 실행" value={rel(latest?.created_at ?? null)} />
+                <Stat icon={Inbox} tone="text-neutral-500" label={`수집 (최근 ${runs.length}회)`} value={collected24.toLocaleString()} />
+                <Stat icon={Activity} tone={processed24 ? "text-emerald-600" : "text-rose-600"} label={`카드 생성 (최근 ${runs.length}회)`} value={processed24.toLocaleString()} />
+                <Stat icon={Clock} tone="text-neutral-500" label="마지막 트렌드 카드" value={rel(lastCard)} />
             </div>
 
-            {/* Crawler List */}
-            <div>
-                <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-neutral-500" />
-                    크롤러 목록 ({rows.length})
+            {processErrors.length > 0 && (
+                <section className="rounded-lg border border-rose-200 bg-rose-50 p-4">
+                    <h2 className="mb-2 text-sm font-semibold text-rose-700">분류·카드 생성 오류 (최근 {runs.length}회)</h2>
+                    <ul className="space-y-1 text-xs text-rose-700">
+                        {processErrors.map(e => <li key={e.reason}>{e.count}건 · {e.reason}</li>)}
+                    </ul>
+                </section>
+            )}
+
+            <section>
+                <h2 className="mb-3 text-sm font-semibold text-neutral-900">최근 7일 수집 기사 상태</h2>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {STATUSES.map(s => (
+                        <div key={s.key} className="rounded-lg border border-neutral-200 bg-white p-4">
+                            <p className="text-[11px] text-neutral-500">{s.label}</p>
+                            <p className={`text-xl font-bold ${s.tone}`}>{(counts[s.key] ?? 0).toLocaleString()}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section>
+                <h2 className="mb-3 text-sm font-semibold text-neutral-900">
+                    수집 실패 소스 (마지막 실행 · 소스 {latest?.payload.crawl?.sources ?? 0}개 중 {sourceErrors.length}개)
                 </h2>
-                {rows.length === 0 ? (
-                    <div className="bg-neutral-50 border border-dashed border-neutral-200 rounded-lg p-8 text-center text-xs text-neutral-400">
-                        등록된 크롤러가 없습니다.
-                    </div>
+                {sourceErrors.length === 0 ? (
+                    <p className="text-xs text-neutral-400">실패한 소스 없음</p>
                 ) : (
-                    <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
-                        <table className="w-full text-xs">
-                            <thead className="bg-neutral-50 border-b border-neutral-200">
-                                <tr>
-                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">크롤러</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
-                                    <th className="text-right px-3 py-2 font-semibold text-neutral-600">최근 수집</th>
-                                    <th className="text-right px-3 py-2 font-semibold text-neutral-600">최근 실행</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-neutral-600">오류</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.map((r) => (
-                                    <tr key={r.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
-                                        <td className="px-3 py-2 font-medium text-neutral-900">{r.crawler_name}</td>
-                                        <td className="px-3 py-2">
-                                            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                                                OK_STATUSES.includes(r.status) ? "bg-emerald-100 text-emerald-700" :
-                                                ERROR_STATUSES.includes(r.status) ? "bg-rose-100 text-rose-700" :
-                                                "bg-neutral-100 text-neutral-600"
-                                            }`}>
-                                                {r.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-2 text-right text-neutral-700">{r.last_count?.toLocaleString() ?? "-"}</td>
-                                        <td className="px-3 py-2 text-right text-neutral-500">{rel(r.last_run)}</td>
-                                        <td className="px-3 py-2 text-rose-600 text-[10px] truncate max-w-[240px]">{r.error_message || "-"}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white text-xs">
+                        {sourceErrors.map(e => <li key={e.reason} className="px-3 py-2 text-neutral-700">{e.reason}</li>)}
+                    </ul>
                 )}
-            </div>
+                <p className="mt-2 text-[11px] text-neutral-400">소스 주소 수정은 Whole See › 소스 관리</p>
+            </section>
+
+            <section>
+                <h2 className="mb-3 text-sm font-semibold text-neutral-900">실행 기록</h2>
+                <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                    <table className="w-full text-xs">
+                        <thead className="border-b border-neutral-200 bg-neutral-50 text-left text-neutral-600">
+                            <tr><th className="px-3 py-2">실행</th><th className="px-3 py-2 text-right">수집</th><th className="px-3 py-2 text-right">처리</th><th className="px-3 py-2 text-right">카드</th><th className="px-3 py-2 text-right">오류</th><th className="px-3 py-2 text-right">소요</th></tr>
+                        </thead>
+                        <tbody>
+                            {runs.map(r => {
+                                const errs = (r.payload.process?.errors?.length ?? 0) + (r.payload.crawl?.errors?.length ?? 0);
+                                return (
+                                    <tr key={r.created_at} className="border-b border-neutral-100 last:border-0">
+                                        <td className="px-3 py-2 text-neutral-700">{new Date(r.created_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                                        <td className="px-3 py-2 text-right">{r.payload.crawl?.collected ?? 0}</td>
+                                        <td className="px-3 py-2 text-right">{r.payload.process?.total ?? 0}</td>
+                                        <td className={`px-3 py-2 text-right font-semibold ${r.payload.process?.processed ? "text-emerald-700" : "text-neutral-400"}`}>{r.payload.process?.processed ?? 0}</td>
+                                        <td className={`px-3 py-2 text-right ${errs ? "text-rose-600" : "text-neutral-400"}`}>{errs}</td>
+                                        <td className="px-3 py-2 text-right text-neutral-500">{r.payload.elapsedMs ? `${Math.round(r.payload.elapsedMs / 1000)}초` : "-"}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                    {runs.length === 0 && <p className="p-6 text-center text-xs text-neutral-400">실행 기록이 없습니다 — pg_cron trend-crawl-hourly 확인</p>}
+                </div>
+            </section>
+        </div>
+    );
+}
+
+function Stat({ icon: Icon, tone, label, value }: { icon: typeof Activity; tone: string; label: string; value: string }) {
+    return (
+        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+            <div className="mb-1 flex items-center gap-2"><Icon className={`h-4 w-4 ${tone}`} /><span className="text-[11px] text-neutral-500">{label}</span></div>
+            <p className="text-xl font-bold text-neutral-900">{value}</p>
         </div>
     );
 }

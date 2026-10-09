@@ -627,7 +627,7 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "Universe 전체", href: "/intra/analytics" },
                             { name: "브랜드별", href: "/intra/analytics/brands" },
-                            { name: "크로스 여정", href: "/intra/analytics/journey" },
+                            // 크로스 여정: 목업뿐 → 메뉴 숨김 (2026-10-10 Intelligence 현실화). 실제 데이터(member_brand_joins 등)로 만들 때 다시 연다
                             { name: "동기화", href: "/intra/analytics/sync" },
                         ],
                     },
@@ -640,7 +640,7 @@ export const modules: NavModule[] = [
                             { name: "콘텐츠 파이프라인", href: "/intra/intel/wholesee/pipeline" },
                             { name: "뉴스레터 수집 현황", href: "/intra/intel/wholesee/newsletter" },
                             { name: "크롤러 상태", href: "/intra/intel/wholesee/crawling" },
-                            { name: "기회 수집 (Opportunity)", href: "/intra/intel/wholesee/opportunities" },
+                            // 기회 수집: wio_opportunities 0건 → 메뉴 숨김 (2026-10-10). 수집이 돌기 시작하면 다시 연다
                             { name: "소스 관리 (편집 →)", href: "/intra/intel/wholesee/sources" },
                         ],
                     },
