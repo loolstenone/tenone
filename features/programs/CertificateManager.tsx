@@ -94,7 +94,7 @@ export function CertificateManager({ brand, printBase, verifyBase, accentColor =
                                         </label>
                                         <label className="flex cursor-pointer items-start gap-2 text-xs text-neutral-300">
                                             <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4" style={{ accentColor }} />
-                                            <span>[필수] 생년월일·출신 대학·전공을 인증서 표기와 발급 기록 확인 목적으로 수집·이용하는 데 동의합니다. 발급 기록(코드·구분·결과·발급일·이름·생년월일)은 진위 확인을 위해 영구 보관하며, 출신 대학·전공은 탈퇴 시 지웁니다. 본인이 삭제를 요청하면 인증서를 폐기하고 지웁니다.</span>
+                                            <span>[필수] 생년월일·출신 대학·전공을 인증서 표기와 발급 기록 확인 목적으로 수집·이용하는 데 동의합니다. 발급 기록은 진위 확인을 위해 보관되며, 탈퇴 시 이름·발급일·인증서 코드만 남기고 생년월일·출신 대학·전공은 지웁니다.</span>
                                         </label>
                                         <div className="flex gap-2">
                                             <button onClick={() => issue(c.key)} disabled={busy || !ready}
