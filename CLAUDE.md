@@ -32,7 +32,7 @@ Ten:One™ Universe는 하나의 코드베이스·하나의 Supabase로 **26+ �
 | **Mindle** | **트렌드 콘텐츠 브랜드** — Whole See의 정보를 가장 적극 활용해 독자에게 전달 | UMS > Mindle (사이트·회원·콘텐츠) |
 | **SmarComm** | 마케팅 자동화 OS | Marketing 섹션 ↔ SmarComm WS |
 | **WIO** | 업무 자동화 솔루션 | Universe > 구독 + WIO Orbi |
-| **AI Agent** | 6개 에이전트 운영 엔진 | INTEL > Agent Hub |
+| **AI Agent** | 6개 에이전트 운영 엔진 | Universe › 에이전트 설정 (실행 결과는 Intelligence › 운영 상태) |
 
 ### 정보 공급 엔진 — Whole See
 
@@ -46,6 +46,18 @@ INTEL 레이어에 속하며, 외부 정보를 유니버스에 들여오는 "눈
 | **기타 브랜드** | Whole See 원천을 부분 활용 (브랜드별 필요에 따라) |
 
 > **원칙**: 크롤링·분석은 Whole See(INTEL) 공동 인프라, 각 브랜드는 UMS에서 자기 콘텐츠·회원·사이트만 관리.
+> 인트라 메뉴는 Whole See를 **UMS › Mindle** 아래에 둔다 (주 소비처). AI 분류 재가동 여부는 Mindle 재논의 때 결정 (2026-10-10, Anthropic 크레딧 고갈로 정지 중).
+
+### 인트라 Intelligence = "유니버스가 잘 되고 있나" (2026-10-10 재정의)
+
+| 화면 | 경로 | 답하는 질문 | 원천 |
+|---|---|---|---|
+| 이번 주 유니버스 | `/intra/intel` | 이번 주 무엇이 늘고 줄었나 (30초 요약) | 아래 두 화면 |
+| 브랜드 성과 | `/intra/analytics/brands` | 브랜드별 방문 → 가입·문의·신청 전환 | **DB(1차)** + GA4(보조) — 집계 수만, 개인 단위 교차 분석 금지 (§0.1 데이터 계약 4) |
+| 운영 상태 | `/intra/intel/health` | 자동화가 실제로 결과를 내고 있나 | `lib/intel/ops-health.ts` — 실행 여부가 아니라 **결과물**로 판정 |
+
+- ❌ 새 cron·Edge Function·동기화를 만들고 `lib/intel/ops-health.ts`에 항목을 안 넣기 — 멈춰도 아무도 모른다 (2026-10-10 발견: AI 분류·브리핑·Gmail 수신이 4~5개월 조용히 정지)
+- ❌ Intelligence에 설정·관리 화면 두기 (에이전트 설정 → Universe 통합 관리, 수집 소스 → Mindle)
 
 ### AI Agent Team
 
@@ -1432,7 +1444,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | 4 | Supabase › Auth › URL Configuration | Redirect URLs `https://www.도메인/**`·`https://도메인/**` |
 | 5 | DB (Claude) | `ums_sites` hosting=vercel·is_open=true, CANONICAL_HOSTS·noindex 정리 → 배포 |
 | 6 | 확인 (Claude) | `npm run site:check -- {siteId} --live` 전부 ✅ + 브라우저로 로그인 모달·폼 보안 확인 통과 |
-| 6-1 | GA4 (Claude·사람) | 공식 주소 접속 → GA4 **실시간**에서 brand_id={siteId} 확인 · 다음 날 인트라 Intelligence › 타겟 행동 데이터에 행 생김 (부록 G.1). 새 도메인이면 GA4 › 데이터 스트림 › 태그 설정 › **도메인 구성**에 추가 |
+| 6-1 | GA4 (Claude·사람) | 공식 주소 접속 → GA4 **실시간**에서 brand_id={siteId} 확인 · 다음 날 인트라 Intelligence › 브랜드 성과에 행 생김 (부록 G.1). 새 도메인이면 GA4 › 데이터 스트림 › 태그 설정 › **도메인 구성**에 추가 |
 | 7 | 옛 서버 | 종료 절차 §0.1 ①~⑦ (회원 있으면 30일 전 공지, 데이터 파기) |
 
 ---
@@ -1790,7 +1802,7 @@ GRANT ALL ON public.table_name TO service_role;
 | 계정/컨테이너 | accounts/6349483070/containers/249197853 |
 | GA4 측정 ID | `G-6N89DJMB7C` |
 | 연동 방식 | `components/Analytics.tsx` → dataLayer push → GTM → GA4 |
-| 인트라 집계 | Vercel Cron `/api/cron/analytics-sync` (매일 03:00 KST) → `/api/analytics/sync` → `analytics_snapshots` (브랜드별 행 + `_all` = 유니버스 전체 중복 없는 세션·사용자) → Intelligence › 타겟 행동 데이터 |
+| 인트라 집계 | Vercel Cron `/api/cron/analytics-sync` (매일 03:00 KST) → `/api/analytics/sync` → `analytics_snapshots` (브랜드별 행 + `_all` = 유니버스 전체 중복 없는 세션·사용자) → Intelligence › 브랜드 성과 · 동기화 멈춤은 운영 상태에 표시 |
 | 동기화 자격 | Vercel env `GA4_PROPERTY_ID`(숫자 속성 ID) · `GA4_SERVICE_ACCOUNT_JSON` = GCP **TenOne Universe**(smarcomm) 서비스 계정 `ga4-sync@smarcomm.iam.gserviceaccount.com` (GA4 속성 뷰어) |
 | 백필 | `POST /api/analytics/sync?start=YYYY-MM-DD` (최대 400일, 30일 단위 분할) — 수집 공백: 2026-06-01~10-03 (GTM 스크립트 오류) |
 

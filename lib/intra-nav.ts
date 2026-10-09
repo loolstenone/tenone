@@ -15,7 +15,7 @@ import {
     ChevronDown, ChevronRight,
     FolderKanban, ClipboardList, Clock, Palette,
     Workflow, Calendar, Contact, Globe, FolderOpen,
-    Megaphone, TrendingUp, Handshake, Activity, BarChart3, Building2, Tags,
+    Megaphone, Handshake, Activity, BarChart3, Building2, Tags,
     Share2, Star, Gauge,
     UserCheck, Target, GitBranch, GraduationCap, DollarSign, CreditCard, Receipt,
     Briefcase, CalendarCheck, Wallet, Award, FileCheck, Heart,
@@ -195,6 +195,17 @@ export const modules: NavModule[] = [
                             { name: "개발 환경", href: "/intra/ums/external/dev-env" },
                             { name: "외부 API", href: "/intra/ums/external/apis" },
                             { name: "크롤링·RSS·뉴스레터", href: "/intra/ums/external/sources" },
+                        ],
+                    },
+                    {
+                        // 에이전트 설정 (2026-10-10 Intelligence에서 이동 — 실행 결과·멈춤은 Intelligence › 운영 상태)
+                        name: "에이전트 설정", href: "/intra/ums/agents", icon: Bot,
+                        children: [
+                            { name: "에이전트 현황", href: "/intra/agent" },
+                            { name: "에이전트 프로파일", href: "/intra/ums/agents" },
+                            { name: "시스템 프롬프트", href: "/intra/ums/agents/prompts" },
+                            { name: "도구·지식 참조", href: "/intra/ums/agents/tools" },
+                            { name: "실행 로그", href: "/intra/agent/logs" },
                         ],
                     },
                     {
@@ -381,6 +392,12 @@ export const modules: NavModule[] = [
                             // ── 브랜드 특화 ──
                             { name: "검수 큐", href: "/intra/ums/mindle/queue" },
                             { name: "콘텐츠 관리", href: "/intra/ums/mindle/content" },
+                            // ── Whole See (정보 수집 — 2026-10-10 Intelligence에서 이동) ──
+                            { name: "트렌드 카드", href: "/intra/intel/wholesee/trends" },
+                            { name: "콘텐츠 파이프라인", href: "/intra/intel/wholesee/pipeline" },
+                            { name: "뉴스레터 수집", href: "/intra/intel/wholesee/newsletter" },
+                            { name: "크롤링 상태", href: "/intra/intel/wholesee/crawling" },
+                            { name: "소스 관리", href: "/intra/intel/wholesee/sources" },
                             // ── 공통 탭 (마지막) ──
                             { name: "고객 문의", href: "/intra/ums/mindle/cs" },
                         ],
@@ -606,11 +623,13 @@ export const modules: NavModule[] = [
     },
 
     // ══════════════════════════════════════════════════════════
-    //  INTEL — Analytics · Mindle · Agent Hub
+    //  INTEL — 유니버스가 잘 되고 있나 (2026-10-10 3화면으로 재정의)
+    //    이번 주 유니버스 · 브랜드 성과 · 운영 상태
+    //    Whole See(정보 수집) → UMS › Mindle, 에이전트 설정 → 통합 관리 › 에이전트 설정
     // ══════════════════════════════════════════════════════════
     {
         name: "Intelligence",
-        tagline: "관측 · 정보 발굴 · AI 지휘",
+        tagline: "이번 주 유니버스 · 브랜드 성과 · 운영 상태",
         href: "/intra/intel",
         icon: Brain,
         intraModule: "universe" as IntraModule,
@@ -618,45 +637,18 @@ export const modules: NavModule[] = [
         sections: [
             {
                 items: [
-                    { name: "Intelligence 대시보드", href: "/intra/intel", icon: LayoutDashboard, exact: true },
-                    { name: "데이터 헬스", href: "/intra/intel/pipeline-health", icon: Activity },
+                    { name: "이번 주 유니버스", href: "/intra/intel", icon: LayoutDashboard, exact: true },
                     {
-                        name: "타겟 행동 데이터",
-                        href: "/intra/analytics",
+                        name: "브랜드 성과",
+                        href: "/intra/analytics/brands",
                         icon: BarChart3,
                         children: [
-                            { name: "Universe 전체", href: "/intra/analytics" },
                             { name: "브랜드별", href: "/intra/analytics/brands" },
-                            // 크로스 여정: 목업뿐 → 메뉴 숨김 (2026-10-10 Intelligence 현실화). 실제 데이터(member_brand_joins 등)로 만들 때 다시 연다
-                            { name: "동기화", href: "/intra/analytics/sync" },
+                            { name: "Universe 전체", href: "/intra/analytics" },
+                            { name: "GA4 동기화", href: "/intra/analytics/sync" },
                         ],
                     },
-                    {
-                        name: "정보 발굴 (Whole See)",
-                        href: "/intra/intel/wholesee/trends",
-                        icon: TrendingUp,
-                        children: [
-                            { name: "트렌드 카드", href: "/intra/intel/wholesee/trends" },
-                            { name: "콘텐츠 파이프라인", href: "/intra/intel/wholesee/pipeline" },
-                            { name: "뉴스레터 수집 현황", href: "/intra/intel/wholesee/newsletter" },
-                            { name: "크롤러 상태", href: "/intra/intel/wholesee/crawling" },
-                            // 기회 수집: wio_opportunities 0건 → 메뉴 숨김 (2026-10-10). 수집이 돌기 시작하면 다시 연다
-                            { name: "소스 관리 (편집 →)", href: "/intra/intel/wholesee/sources" },
-                        ],
-                    },
-                    {
-                        name: "Agent Team",
-                        href: "/intra/agent",
-                        icon: Bot,
-                        children: [
-                            { name: "에이전트 현황 (대시보드)", href: "/intra/agent" },
-                            { name: "에이전트 지시", href: "/intra/agent/comm" },
-                            { name: "에이전트 로그", href: "/intra/agent/logs" },
-                            { name: "에이전트 프로파일", href: "/intra/ums/agents" },
-                            { name: "시스템 프롬프트", href: "/intra/ums/agents/prompts" },
-                            { name: "도구·지식 참조", href: "/intra/ums/agents/tools" },
-                        ],
-                    },
+                    { name: "운영 상태", href: "/intra/intel/health", icon: Activity },
                 ],
             },
         ],
