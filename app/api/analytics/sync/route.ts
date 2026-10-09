@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const maxDuration = 120; // 장기간 백필(30일 단위 여러 번 조회)
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY_PROD)!;
 const GA4_PROPERTY_ID = process.env.GA4_PROPERTY_ID;
@@ -205,21 +207,31 @@ export async function POST(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
-  const days = Math.min(parseInt(searchParams.get("days") || "7"), 90);
+  // days(어제부터 거꾸로) 또는 start=YYYY-MM-DD(그날부터 어제까지). 최대 400일 — brand_id 등록일(2026-04-13) 이전은 (not set)뿐
+  const days = Math.min(parseInt(searchParams.get("days") || "7") || 7, 400);
+  const startParam = searchParams.get("start");
 
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1); // 어제까지
-  const startDate = new Date(endDate);
+  let startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - (days - 1));
+  if (startParam && /^\d{4}-\d{2}-\d{2}$/.test(startParam)) {
+    const s = new Date(`${startParam}T00:00:00Z`);
+    const floor = new Date(endDate); floor.setDate(floor.getDate() - 399);
+    if (!isNaN(s.getTime())) startDate = s < floor ? floor : s;
+  }
 
   // GA4 Data API는 YYYY-MM-DD만 받는다 (YYYYMMDD는 400 — 반년간 0건이던 원인)
   const fmt = (d: Date) => d.toISOString().split("T")[0];
-  const startStr = fmt(startDate);
-  const endStr = fmt(endDate);
 
   try {
     const token = await getGA4AccessToken(GA4_SERVICE_ACCOUNT_JSON);
-    const gaRows = await fetchGA4Report(token, GA4_PROPERTY_ID, startStr, endStr);
+    // 30일씩 나눠 조회 — 상위 페이지·유입 경로 보고서의 500행 제한에 긴 기간이 잘리지 않게
+    const gaRows: GA4Row[] = [];
+    for (let from = new Date(startDate); from <= endDate; from.setDate(from.getDate() + 30)) {
+      const to = new Date(from); to.setDate(to.getDate() + 29);
+      gaRows.push(...await fetchGA4Report(token, GA4_PROPERTY_ID, fmt(from), fmt(to > endDate ? endDate : to)));
+    }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
