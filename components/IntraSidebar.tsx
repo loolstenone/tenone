@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useIdentityAdapter } from "@/lib/identity-context";
 import {
-    LogOut, ChevronDown, ChevronRight, Menu, X as XIcon,
+    ChevronDown, ChevronRight, Menu, X as XIcon,
     LayoutDashboard, FileText, BarChart3, Settings,
 } from "lucide-react";
 import clsx from "clsx";
@@ -16,7 +16,7 @@ import { useSiteTiers } from "@/lib/use-site-tiers";
 export function IntraSidebar() {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isStaff, hasAccess, hasModuleAccess, logout } = useAuth();
+    const { user, isStaff, hasAccess, hasModuleAccess } = useAuth();
     const { accessibleModules, isSuperAdmin, identityLoaded } = useIdentityAdapter();
     const getSiteById = (_id: string): { name: string } | null => null;
     const getBoardsBySite = (_id: string): never[] => [];
@@ -279,33 +279,6 @@ export function IntraSidebar() {
                 })}
             </nav>
 
-            {/* Bottom */}
-            <div className="border-t border-neutral-800 shrink-0">
-                <Link
-                    href="/"
-                    className="flex items-center gap-3 px-6 py-2.5 text-xs text-neutral-500 hover:text-white transition-colors"
-                >
-                    ←
-                </Link>
-                {user && (
-                    <div className="px-4 py-3 flex items-center gap-3">
-                        <div className="h-7 w-7 rounded-full bg-neutral-700 text-white flex items-center justify-center text-[10px] font-medium shrink-0">
-                            {user.avatarInitials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-medium text-neutral-200 truncate">{user.name}</p>
-                            <p className="text-[9px] text-neutral-500 truncate">{user.role}</p>
-                        </div>
-                        <button
-                            onClick={async () => { sessionStorage.removeItem("tenone_intra_verified"); await logout(); window.location.href = "/intra"; }}
-                            className="p-1 text-neutral-600 hover:text-white transition-colors shrink-0"
-                            title="로그아웃"
-                        >
-                            <LogOut className="h-3.5 w-3.5" />
-                        </button>
-                    </div>
-                )}
-            </div>
         </aside>
         </>
     );
