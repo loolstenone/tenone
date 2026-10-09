@@ -7,6 +7,7 @@
  * 수료증 관리 대장(cert_key ledger:*, MADLeague 경쟁 PT) = 인트라가 원본 (2026-10-10): 펼쳐서 기재 사항 수정·계정 연결 해제, 새 회차는 CSV 업로드
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { RoundBatchIssue } from "@/components/intra/programs/RoundBatchIssue";
 import { Download, Search, Upload } from "lucide-react";
 import { LEDGER_COLUMNS, parseLedgerCsv } from "@/lib/programs/ledger-columns";
 
@@ -124,9 +125,10 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
 
             {ledgerImport && (
                 <p className="text-xs text-neutral-500">
-                    경쟁 PT 대장은 여기가 원본입니다 (구글 시트는 2026-10-10 동결). 새 회차는 시트와 같은 열({LEDGER_COLUMNS.join(" · ")})의 CSV로 등록 — 코드 형식 2026-COA 000001, 수상은 MCP + 결과(1등·2등·3등·본선). 전화번호는 매드리거 등록 매칭용 해시만 남기고 저장하지 않습니다. 고칠 땐 코드를 눌러 펼치세요.
+                    경쟁 PT 대장은 여기가 원본입니다 (구글 시트는 2026-10-10 동결). 새 회차는 아래 회차 일괄 발급(코드 자동 배정)이 기본, 코드가 이미 정해진 대장은 시트와 같은 열({LEDGER_COLUMNS.join(" · ")})의 CSV로 등록 — 코드 형식 2026-COA 000142 (뒤 6자리는 대장 전체 고유 일련번호 — 다시 시작하지 않음), 수상은 MCP + 결과(1등·2등·3등·본선). 전화번호는 매드리거 등록 매칭용 해시만 남기고 저장하지 않습니다. 고칠 땐 코드를 눌러 펼치세요.
                 </p>
             )}
+            {ledgerImport && fixedBrand === "madleague" && <RoundBatchIssue onDone={() => load(q)} />}
             {notice && <p className="text-sm text-emerald-700">{notice}</p>}
             {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
             {!rows ? <p className="text-sm text-neutral-400">불러오는 중…</p> : rows.length === 0 ? <p className="text-sm text-neutral-400">발급된 인증서가 없습니다.</p> : (

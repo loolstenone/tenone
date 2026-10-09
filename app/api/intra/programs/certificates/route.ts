@@ -6,11 +6,13 @@
  *   ── 수료증 관리 대장 (cert_key ledger:*, 인트라가 원본 — 2026-10-10) ──
  *   PATCH { id, ledger: { name, birthdate, university, major, group_name, cohort, team_name, phone? } }  기재 사항 수정 (전화번호는 해시만)
  *   POST  { action:'unlink', id }                     계정 연결 해제 (다른 사람이 잘못 연결한 경우)
- *   POST  { action:'import', brand, rows: LedgerRow[] }  새 회차 CSV 적재 (같은 코드는 건너뜀)
+ *   POST  { action:'import', brand, rows: LedgerRow[] }  대장 형식 CSV 적재 (코드가 있는 행, 같은 코드는 건너뜀)
+ *   POST  { action:'batch', brand, round, people, preview }  회차 일괄 발급 — 코드 자동 배정 (lib/programs/ledger-batch.ts)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { batchIssueRound } from "@/lib/programs/ledger-batch";
 import { importLedgerRows, isLedgerKey, updateLedgerSnapshot, type LedgerRow } from "@/lib/programs/ledger-import";
 
 const COLS = "id, brand_id, round_id, member_id, linked_by, cert_key, type, code, result, note, snapshot, issued_at, revoked_at, revoked_reason";
@@ -76,6 +78,12 @@ export async function POST(req: NextRequest) {
         const { error } = await admin.from("program_certificates").update({ member_id: null, linked_by: null, updated_at: now }).eq("id", id);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
         return NextResponse.json({ ok: true });
+    }
+    if (body.action === "batch") {
+        if (body.brand !== "madleague") return NextResponse.json({ error: "일괄 발급은 MADLeague만 지원합니다." }, { status: 400 });
+        const people = Array.isArray(body.people) ? body.people.slice(0, 1000) : [];
+        if (people.length === 0) return NextResponse.json({ error: "참가자 명단이 비어 있습니다." }, { status: 400 });
+        return NextResponse.json(await batchIssueRound("madleague", body.round ?? {}, people, body.preview !== false));
     }
     if (body.action === "import") {
         const brand = String(body.brand ?? "");
