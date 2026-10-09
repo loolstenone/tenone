@@ -4,7 +4,7 @@
  * CLAUDE.md §2.5 원스톱 체크리스트의 "자동 점검" 부분. 새 공통 규칙이 생기면 여기와 §2.5에 같이 추가한다.
  *
  *   npm run site:check -- rook            코드·DB 점검
- *   npm run site:check -- rook --live     + 공식 도메인 실접속 점검 (https·apex→www·파비콘·noindex)
+ *   npm run site:check -- rook --live     + 공식 도메인 실접속 점검 (https·apex→www·파비콘·noindex·GA4 태그)
  *   npm run site:check -- --all           CANONICAL_HOSTS 전체 브랜드
  *
  * 결과: ✅ 통과 / ⚠️ 확인 필요 / ❌ 위반 / 👤 사람이 해야 하는 외부 작업(자동 확인 불가)
@@ -154,6 +154,12 @@ async function checkSite(siteId) {
         if (canon.hosting === "vercel" && row && row.is_open === false) fail("Vercel 운영인데 ums_sites.is_open=false (가림막)");
     } else if (tier === "focus") warn("집중 브랜드인데 CANONICAL_HOSTS 미등록 (공식 주소 없음)");
 
+    // 5-1. GA4 브랜드 구분 (부록 G.1) — 공식 도메인이 domainMap에 없으면 그 사이트 방문이 전부 brand_id=tenone으로 집계된다
+    if (canon && siteId !== "tenone") {
+        const mapped = siteConfigSrc.match(new RegExp(`'${canon.host.replace(/\./g, "\\.")}':\\s*'(\\w+)'`))?.[1];
+        mapped === siteId ? ok(`GA4 brand_id: ${canon.host} → ${siteId}`) : fail(`site-config domainMap에 '${canon.host}': '${siteId}' 없음 → GA4에 tenone으로 집계됨 (부록 G.1)`);
+    }
+
     // 6. 개인정보처리방침 (§2.4 법적 검토)
     const name = row?.name ?? cfgBlock.match(/name:\s*'([^']+)'/)?.[1] ?? siteId;
     if (tier === "focus" || tier === "core") {
@@ -180,6 +186,12 @@ async function checkSite(siteId) {
             const r = await get(`https://${host}${f}`);
             r.status === 200 && (r.headers.get("content-type") ?? "").startsWith("image/") ? ok(`실서버 파비콘 ${f}`) : fail(`실서버 파비콘 ${f} → ${r.status} (배포 전이면 배포 후 재확인)`);
         }
+        // GA4 태그 (부록 G.1) — Vercel 운영 사이트는 공통 GTM 컨테이너가 들어가야 한다
+        if (canon.hosting === "vercel" && home.status === 200) {
+            const gtm = env("NEXT_PUBLIC_GTM_ID") ?? "GTM-";
+            const html = await home.text().catch(() => "");
+            html.includes(gtm) ? ok(`GA4 태그 ${gtm} 설치`) : fail(`공식 주소에 GTM(${gtm}) 없음 — Vercel env NEXT_PUBLIC_GTM_ID·components/Analytics.tsx 확인 (부록 G.1)`);
+        }
     }
 
     // 8. 사람이 해야 하는 외부 작업 — 자동 확인 불가, 매번 같이 안내
@@ -188,6 +200,7 @@ async function checkSite(siteId) {
         human(`Vercel Domains: ${canon.host}(Production) + ${apex}(→www 308) · View DNS configuration 권장값으로 등록업체 DNS (네임서버가 등록업체 것인지 먼저 조회)`);
         human(`Cloudflare Turnstile 위젯 Hostname에 ${apex} — 빠지면 로그인·가입·폼이 "보안 확인 중"으로 막힘 (콘솔 110200)`);
         human(`Supabase Auth Redirect URLs: https://${canon.host}/** · https://${apex}/**`);
+        human(`GA4 확인: 공식 주소 접속 → GA4 실시간 보고서에서 brand_id=${siteId} 조회 (다음 날 인트라 Intelligence › 타겟 행동 데이터에 ${siteId} 행). 도메인 추가면 GA4 관리 › 데이터 스트림 › 태그 설정 › 도메인 구성에 ${apex} 추가`);
         if (canon.hosting === "external") human("DNS 전환일: ums_sites.hosting·CANONICAL_HOSTS → vercel, noindex 해제, is_open=true, 옛 서버 종료 절차(§0.1 ①~⑦)");
     }
     return results;

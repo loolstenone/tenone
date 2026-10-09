@@ -1413,6 +1413,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | 집중 브랜드 → brand-site-menus 등록 | §1.9.5 |
 | CANONICAL_HOSTS ↔ ums_sites.hosting ↔ noindex 목록 ↔ is_open 일치 | §0.1 원칙 4·6 |
 | 개인정보처리방침에 브랜드 수집 항목 | §0.1 법적 검토 |
+| **GA4 브랜드 구분**: 공식 도메인이 `site-config` domainMap에 siteId로 매핑 (없으면 방문이 전부 tenone으로 집계) · `--live`면 실서버에 GTM 태그 | 부록 G.1 |
 
 ❌가 있으면 배포하지 않는다. ⚠️는 확인 후 보고. 결과 요약을 작업 보고에 포함한다.
 
@@ -1426,6 +1427,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | 4 | Supabase › Auth › URL Configuration | Redirect URLs `https://www.도메인/**`·`https://도메인/**` |
 | 5 | DB (Claude) | `ums_sites` hosting=vercel·is_open=true, CANONICAL_HOSTS·noindex 정리 → 배포 |
 | 6 | 확인 (Claude) | `npm run site:check -- {siteId} --live` 전부 ✅ + 브라우저로 로그인 모달·폼 보안 확인 통과 |
+| 6-1 | GA4 (Claude·사람) | 공식 주소 접속 → GA4 **실시간**에서 brand_id={siteId} 확인 · 다음 날 인트라 Intelligence › 타겟 행동 데이터에 행 생김 (부록 G.1). 새 도메인이면 GA4 › 데이터 스트림 › 태그 설정 › **도메인 구성**에 추가 |
 | 7 | 옛 서버 | 종료 절차 §0.1 ①~⑦ (회원 있으면 30일 전 공지, 데이터 파기) |
 
 ---
@@ -1783,6 +1785,17 @@ GRANT ALL ON public.table_name TO service_role;
 | 계정/컨테이너 | accounts/6349483070/containers/249197853 |
 | GA4 측정 ID | `G-6N89DJMB7C` |
 | 연동 방식 | `components/Analytics.tsx` → dataLayer push → GTM → GA4 |
+| 인트라 집계 | Vercel Cron `/api/cron/analytics-sync` (매일 03:00 KST) → `/api/analytics/sync` → `analytics_snapshots` (브랜드별 행 + `_all` = 유니버스 전체 중복 없는 세션·사용자) → Intelligence › 타겟 행동 데이터 |
+| 동기화 자격 | Vercel env `GA4_PROPERTY_ID`(숫자 속성 ID) · `GA4_SERVICE_ACCOUNT_JSON` = GCP **TenOne Universe**(smarcomm) 서비스 계정 `ga4-sync@smarcomm.iam.gserviceaccount.com` (GA4 속성 뷰어) |
+| 백필 | `POST /api/analytics/sync?start=YYYY-MM-DD` (최대 400일, 30일 단위 분할) — 수집 공백: 2026-06-01~10-03 (GTM 스크립트 오류) |
+
+#### 브랜드 구분 규칙 (2026-10-10 — 이걸 어기면 숫자가 틀린다)
+
+- `brand_id`는 **페이지를 옮길 때마다 주소로 판정** — `lib/site-context.tsx` `detectSiteId(hostname, pathname)`. ❌ `useSite()` 값을 쓰지 않는다 (첫 렌더 'tenone' → 모든 브랜드 첫 화면이 tenone으로 한 번 더 집계되던 사고)
+- 판정 순서: 독립 도메인(`domainMap`) → `*.tenone.biz` 서브도메인 → tenone.biz 경로(`pathSiteMap` → 첫 경로가 siteId면 그대로) → 그 외 tenone
+- **사이트·도메인이 바뀌면** (새 도메인, 도메인 전환, 브랜드 추가·이름 변경): ① `domainMap`에 `'www.도메인': 'siteId'` ② `npm run site:check -- {siteId} --live`의 GA4 항목 ✅ ③ GA4 실시간에서 brand_id 확인 (§2.5 6-1)
+- `(not set)` = brand_id 없는 GA4 자동 이벤트 → 동기화가 저장하지 않는다. 유니버스 합계는 브랜드 행을 더하지 말고 `_all` 행을 쓴다
+- 외부 서버(호스트코코아) 옛 사이트(madleague.net·madleap.co.kr·badak.biz)는 태그 없음 — DNS 전환하면 자동 포함
 
 #### SPA 트래킹 구조
 
@@ -1842,6 +1855,7 @@ pathname 변경
 - 트리거: `CE - page_view` (All Pages 트리거는 제거)
 - 이벤트명: `page_view`
 - 매개변수: `brand_id` = `{{DLV - brand_id}}`
+- `Google 태그`: **자동 페이지뷰 끔** (구성 매개변수 `send_page_view` = `false`) — 켜져 있으면 화면마다 brand_id 없는 page_view가 한 번 더 가서 `(not set)`·페이지뷰 2배
 
 ---
 
