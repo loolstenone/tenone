@@ -109,6 +109,8 @@ async function fetchGA4Report(
     }
   );
   const mainData = await mainRes.json();
+  // GA4 오류(권한·속성 ID·API 미사용)를 0건으로 삼키지 않는다 — 2026-10-10 동기화가 반년간 0건이던 원인 추적
+  if (!mainRes.ok) throw new Error(`GA4 Data API ${mainRes.status}: ${mainData?.error?.message ?? "응답 오류"}`);
 
   // 2. 상위 페이지 (brand_id + pagePath)
   const pageRes = await fetch(
