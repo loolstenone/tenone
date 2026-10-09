@@ -56,8 +56,9 @@ function iGa(word: string): string {
     return (c - 0xac00) % 28 ? "이" : "가";
 }
 
+/** 발급일 — 한국 시간 날짜 (DB는 UTC로 돌려준다: 2025-09-05 00:00 KST = 2025-09-04T15:00Z) */
 const dot = (iso: string) => {
-    const [y, m, d] = iso.slice(0, 10).split("-");
+    const [y, m, d] = new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }).split("-");
     return `${y}. ${m}. ${d}.`;
 };
 const birth = (iso: string) => {
