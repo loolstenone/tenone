@@ -212,7 +212,8 @@ export async function POST(req: NextRequest) {
   const startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - (days - 1));
 
-  const fmt = (d: Date) => d.toISOString().split("T")[0].replace(/-/g, "");
+  // GA4 Data API는 YYYY-MM-DD만 받는다 (YYYYMMDD는 400 — 반년간 0건이던 원인)
+  const fmt = (d: Date) => d.toISOString().split("T")[0];
   const startStr = fmt(startDate);
   const endStr = fmt(endDate);
 
