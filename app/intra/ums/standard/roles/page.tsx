@@ -115,7 +115,7 @@ export default function RolesStandardPage() {
             <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 text-[11px] text-neutral-700 space-y-1">
                 <p className="font-semibold text-neutral-900">판단 경로</p>
                 <p>· DB(RLS): member_roles 변경 → <code className="font-mono">sync_roles_to_jwt</code> 트리거 → JWT app_metadata.is_staff (staff@universe) → <code className="font-mono">auth_is_staff()</code></p>
-                <p>· 서버 API: <code className="font-mono">lib/api-guard.ts</code> requireStaff — staff·manager·super_admin 또는 인증된 @tenone.biz</p>
+                <p>· 서버 API: <code className="font-mono">lib/api-guard.ts</code> requireStaff — staff·manager·super_admin (member_roles만 — 이메일 도메인 판단은 2026-10-07 폐지) · 인사·재무 데이터는 RLS <code className="font-mono">auth_has_duty()</code></p>
                 <p>· 회원 활동 역할(멘토·현역·바닥장 등)은 권한이 아니므로 <code className="font-mono">member_capability_roles</code>에 기록. MADLeague의 <code className="font-mono">brand:madleague</code> 행은 이관 대상</p>
             </div>
 
