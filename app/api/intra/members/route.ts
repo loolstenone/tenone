@@ -30,12 +30,18 @@ export async function GET(request: NextRequest) {
     }
 
     // 구독 정보 (active), 뉴스레터 구독자, UC 잔액, member_roles 병렬 조회
-    const [subsRes, newslettersRes, ucBalancesRes, memberRolesRes] = await Promise.all([
+    // 브랜드 = member_brand_joins (헌법 원칙 1 — members.affiliations로 세지 않는다, 2026-10-10)
+    const [subsRes, newslettersRes, ucBalancesRes, memberRolesRes, joinsRes] = await Promise.all([
         admin.from('subscriptions').select('member_id, service, plan').eq('status', 'active'),
         admin.from('newsletter_subscribers').select('email').eq('status', 'active'),
         admin.from('uc_balances').select('member_id, balance'),
         admin.from('member_roles').select('member_id, role, context').eq('is_active', true),
+        admin.from('member_brand_joins').select('member_id, brand_id').is('withdrawn_at', null),
     ]);
+    const brandJoins: Record<string, string[]> = {};
+    (joinsRes.data ?? []).forEach((j: { member_id: string; brand_id: string }) => {
+        (brandJoins[j.member_id] ??= []).push(j.brand_id);
+    });
 
     const newsletterEmails = (newslettersRes.data ?? []).map((r: { email: string }) => r.email.toLowerCase());
     const ucMap: Record<string, number> = {};
@@ -58,5 +64,6 @@ export async function GET(request: NextRequest) {
         newsletterCount: newsletterEmails.length,
         ucBalances: ucMap,
         memberRoles: rolesMap,
+        brandJoins,
     });
 }

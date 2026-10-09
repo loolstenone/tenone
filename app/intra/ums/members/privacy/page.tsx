@@ -53,15 +53,16 @@ function StatusBadge({ status }: { status: DeletionRequest["status"] }) {
 }
 
 /* ── 컴플라이언스 항목 ── */
+// 실제 상태 그대로 (2026-10-10 점검) — 구현·확인되면 done을 바꾼다. 확인 안 된 항목을 완료로 표시하지 않는다
 const COMPLIANCE_ITEMS = [
-    { label: "개인정보 처리방침 고지", done: true, link: "/intra/ums/privacy-policy" },
-    { label: "수집 목적 및 항목 명시", done: true, link: null },
-    { label: "제3자 제공 동의 절차", done: true, link: null },
-    { label: "마케팅 수신 동의 분리", done: true, link: null },
-    { label: "게스트 자동삭제 (30일)", done: true, link: null },
+    { label: "개인정보 처리방침 고지", done: true, link: "/privacy" },
+    { label: "수집 목적 및 항목 명시 (브랜드별 항목 반영)", done: false, link: "/intra/ums/standard/privacy" },
+    { label: "제3자 제공 동의 절차", done: false, link: null },
+    { label: "마케팅 수신 동의 분리 (가입 시 [선택])", done: true, link: null },
+    { label: "게스트 자동삭제 (30일) — 삭제 작업 미구현", done: false, link: null },
     { label: "삭제 요청 처리 (30일 이내)", done: true, link: null },
-    { label: "접근 권한 최소화 (RLS 전면 적용)", done: true, link: null },
-    { label: "개인정보 암호화 저장", done: true, link: null },
+    { label: "접근 권한 최소화 (인사·재무 직무 권한 적용, 2026-10-10)", done: true, link: "/intra/ums/standard/roles" },
+    { label: "개인정보 암호화 저장 (항목별 점검 필요)", done: false, link: null },
 ];
 
 /* ── 신규 요청 폼 기본값 ── */

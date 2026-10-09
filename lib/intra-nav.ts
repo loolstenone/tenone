@@ -20,7 +20,7 @@ import {
     UserCheck, Target, GitBranch, GraduationCap, DollarSign, CreditCard, Receipt,
     Briefcase, CalendarCheck, Wallet, Award, FileCheck, Heart,
     Calculator, CircleDollarSign, FileSpreadsheet,
-    Stamp, Settings, Shield, GitMerge,
+    Stamp, Settings, Shield, GitMerge, KeyRound,
     Gavel, FileSignature,
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
@@ -137,6 +137,7 @@ export const modules: NavModule[] = [
         intraModule: "universe" as IntraModule,
         roles: ["staff", "manager", "super_admin"],
         sections: [
+            // 통합 관리 = 전 브랜드가 함께 쓰는 공통 기능의 운영 (2026-10-10 점검 — 회원 · 사이트 · 공통 기능 · UC)
             {
                 label: "통합 관리",
                 items: [
@@ -154,14 +155,13 @@ export const modules: NavModule[] = [
                         name: "사이트 관리", href: "/intra/ums/sites", icon: Globe,
                         children: [
                             { name: "사이트 현황", href: "/intra/ums/sites/status" },
-                            { name: "사이트 목록", href: "/intra/ums/sites/list" },
+                            { name: "사이트 설정", href: "/intra/ums/sites/list" },
                             { name: "게시판", href: "/intra/ums/sites/boards" },
-                            { name: "콘텐츠 점검", href: "/intra/ums/sites/content" },
                         ],
                     },
-                    // 코어 프로그램 모듈 — 전 브랜드 회차 (경쟁 PT·실전 프로젝트·교육 과정) · docs/Program_Module.md
                     { name: "프로그램", href: "/intra/ums/programs", icon: Trophy },
                     { name: "인증서", href: "/intra/ums/programs/certificates", icon: Award },
+                    { name: "문의 (CS 통합)", href: "/intra/ums/cs", icon: MessageCircle },
                     {
                         name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
                         children: [
@@ -173,24 +173,19 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
-                        name: "커머스", href: "/intra/ums/commerce", icon: ShoppingCart,
-                        children: [
-                            { name: "구독", href: "/intra/ums/commerce/subscriptions" },
-                            { name: "쇼핑", href: "/intra/ums/commerce/shop" },
-                            { name: "예약/이벤트", href: "/intra/ums/commerce/bookings" },
-                            { name: "프로모션", href: "/intra/ums/commerce/promotions" },
-                            { name: "손익", href: "/intra/ums/commerce/revenue" },
-                            { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
-                        ],
-                    },
-                    {
                         name: "Universe Coin", href: "/intra/ums/uc", icon: Coins,
                         children: [
                             { name: "잔액 현황", href: "/intra/ums/uc" },
                             { name: "거래 내역", href: "/intra/ums/uc/transactions" },
                         ],
                     },
-                    { name: "CS 통합", href: "/intra/ums/cs", icon: MessageCircle },
+                    // 커머스(구독·쇼핑·예약·프로모션·손익): 결제 0건 · 통신판매업 신고 전 결제 출시 금지 → 메뉴 숨김 (화면 코드 보존). 결제를 시작할 때 다시 연다
+                ],
+            },
+            // 시스템 · 기준 — 연결된 외부 서비스, 에이전트, 권한, 규칙 문서
+            {
+                label: "시스템 · 기준",
+                items: [
                     {
                         name: "외부 리소스", href: "/intra/ums/external", icon: Share2,
                         children: [
@@ -211,6 +206,7 @@ export const modules: NavModule[] = [
                             { name: "실행 로그", href: "/intra/agent/logs" },
                         ],
                     },
+                    { name: "권한 체계", href: "/intra/ums/standard/roles", icon: KeyRound },
                     {
                         name: "Standard 관리", href: "/intra/ums/standard", icon: Shield,
                         children: [
@@ -224,7 +220,6 @@ export const modules: NavModule[] = [
                             { name: "산업군/직무군", href: "/intra/ums/standard/taxonomies" },
                             { name: "News Letter", href: "/intra/ums/standard/newsletter" },
                             { name: "Capability 정의", href: "/intra/ums/standard/capabilities" },
-                            { name: "권한 체계", href: "/intra/ums/standard/roles" },
                             { name: "약관·개인정보", href: "/intra/ums/standard/privacy" },
                             { name: "사이트·도메인", href: "/intra/ums/standard/sites" },
                             { name: "접근 모델", href: "/intra/ums/standard/access-model" },

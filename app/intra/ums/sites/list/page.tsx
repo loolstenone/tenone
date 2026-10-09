@@ -329,13 +329,13 @@ export default function SitesListPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Link href={`/intra/bums/sites/${selectedSite}`}
+                                <Link href={`/intra/ums/sites/status`}
                                     className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:bg-neutral-50 transition-all">
-                                    <LayoutGrid className="h-3 w-3" /> 게시판
+                                    <LayoutGrid className="h-3 w-3" /> 메뉴·콘텐츠 현황
                                 </Link>
-                                <Link href={`/intra/bums/sites/${selectedSite}/settings`}
+                                <Link href={`/intra/ums/sites/boards`}
                                     className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:bg-neutral-50 transition-all">
-                                    <Settings className="h-3 w-3" /> 설정
+                                    <Settings className="h-3 w-3" /> 게시판
                                 </Link>
                             </div>
                         </div>

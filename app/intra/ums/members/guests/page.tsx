@@ -12,24 +12,11 @@ interface GuestRow {
     purpose: string; marketing: boolean; created: string; autoDelete: string;
 }
 
-/* ── Mock (fallback) ── */
-const mockStats: StatItem[] = [
-    { label: "전체 게스트", value: "234명", icon: UserPlus },
-    { label: "삭제 예정 (7일 이내)", value: "18명", icon: Trash2 },
-    { label: "회원 전환율", value: "12.3%", icon: ArrowRightCircle },
-];
-
-const mockGuests: GuestRow[] = [
-    { id: "1", name: "장민호", contact: "010-1234-5678", brand: "MADLeague", purpose: "DAM Party 참가", marketing: true, created: "2026-03-15", autoDelete: "2026-04-14" },
-    { id: "2", name: "안소희", contact: "sohee@email.com", brand: "ChangeUp", purpose: "스타트업 네트워킹", marketing: true, created: "2026-03-20", autoDelete: "2026-04-19" },
-    { id: "3", name: "홍진우", contact: "010-9876-5432", brand: "Badak", purpose: "CEO 라운드테이블", marketing: false, created: "2026-03-22", autoDelete: "2026-04-21" },
-    { id: "4", name: "나연수", contact: "yeonsu@email.com", brand: "Evolution School", purpose: "데이터 분석 체험", marketing: true, created: "2026-03-25", autoDelete: "2026-04-24" },
-    { id: "5", name: "이시현", contact: "010-5555-1234", brand: "SmarComm", purpose: "AI 세미나 참관", marketing: true, created: "2026-03-10", autoDelete: "2026-04-09" },
-    { id: "6", name: "권도현", contact: "dohyun@email.com", brand: "HeRo", purpose: "HIT 검사 체험", marketing: false, created: "2026-03-08", autoDelete: "2026-04-07" },
-    { id: "7", name: "문서연", contact: "010-3333-7777", brand: "MADLeap", purpose: "5기 OT 참관", marketing: true, created: "2026-03-28", autoDelete: "2026-04-27" },
-    { id: "8", name: "양현지", contact: "hyunji@email.com", brand: "Mindle", purpose: "트렌드 리포트 열람", marketing: false, created: "2026-02-28", autoDelete: "2026-03-30" },
-    { id: "9", name: "서준호", contact: "010-8888-2222", brand: "Planner's", purpose: "기획 워크숍 참관", marketing: true, created: "2026-03-01", autoDelete: "2026-03-31" },
-    { id: "10", name: "차은별", contact: "eunbyul@email.com", brand: "RooK", purpose: "AI 크리에이터 데모", marketing: true, created: "2026-03-05", autoDelete: "2026-04-04" },
+/* 데이터가 없으면 0 — 목업을 실제처럼 보이게 두지 않는다 (2026-10-10 통합 관리 점검) */
+const EMPTY_STATS: StatItem[] = [
+    { label: "전체 게스트", value: "0명", icon: UserPlus },
+    { label: "삭제 예정 (7일 이내)", value: "0명", icon: Trash2 },
+    { label: "회원 전환율", value: "-", icon: ArrowRightCircle },
 ];
 
 const brandColor: Record<string, string> = {
@@ -42,8 +29,8 @@ const brandColor: Record<string, string> = {
 
 export default function UniverseGuests() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<StatItem[]>(mockStats);
-    const [guests, setGuests] = useState<GuestRow[]>(mockGuests);
+    const [stats, setStats] = useState<StatItem[]>(EMPTY_STATS);
+    const [guests, setGuests] = useState<GuestRow[]>([]);
 
     useEffect(() => {
         async function loadData() {
@@ -87,7 +74,7 @@ export default function UniverseGuests() {
                 setStats([
                     { label: "전체 게스트", value: `${guestList.length}명`, icon: UserPlus },
                     { label: "삭제 예정 (7일 이내)", value: `${soonDelete.length}명`, icon: Trash2 },
-                    { label: "회원 전환율", value: "12.3%", icon: ArrowRightCircle }, // 전환율은 계산 복잡 → mock 유지
+                    { label: "회원 전환율", value: "-", icon: ArrowRightCircle }, // 게스트→회원 연결 기록이 생기면 계산
                 ]);
 
                 setGuests(guestList);

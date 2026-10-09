@@ -124,15 +124,6 @@ interface MemberDisplay {
     ucBalance: number;
 }
 
-/* ── Mock fallback ── */
-const mockMembers: MemberDisplay[] = [
-    { id: "1",  name: "김민지", email: "minji@example.com",    handle: "@minji",   phone: "010-1234-5678", bio: null, company: "텐원", position: "마케터", type: "복합",   brands: ["MADLeap", "SmarComm"],  subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", createdAt: "2025-01-10", roles: [], memberRoles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
-    { id: "2",  name: "이준혁", email: "junhyuk@example.com",  handle: "@junhyuk", phone: null,           bio: null, company: null,  position: null,    type: "구독",   brands: ["WIO Orbi"],            subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", createdAt: "2025-02-01", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
-    { id: "3",  name: "박서윤", email: "seoyoon@example.com",  handle: null,       phone: "010-9999-0001", bio: null, company: null,  position: null,    type: "서비스", brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", createdAt: "2025-03-05", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: "MADLeague 추천", ucBalance: 0 },
-    { id: "4",  name: "정하은", email: "haeun@example.com",    handle: "@haeun",   phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["Mindle"],              subs: [], lastActive: "2026-03-27", createdAt: "2025-04-11", roles: [], memberRoles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
-    { id: "5",  name: "최다운", email: "dawoon@example.com",   handle: null,       phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["HeRo", "Badak"],       subs: [], lastActive: "2026-03-28", createdAt: "2025-05-20", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
-];
-
 export default function UniverseMembers() {
     const [search, setSearch]           = useState("");
     const [typeFilter, setTypeFilter]   = useState<MemberType | null>(null);
@@ -140,8 +131,9 @@ export default function UniverseMembers() {
     const [roleFilter, setRoleFilter]   = useState<string | null>(null);
     const [loading, setLoading]         = useState(true);
     const [typeDefs, setTypeDefs]       = useState<TypeDef[]>([]);
-    const [members, setMembers]         = useState<MemberDisplay[]>(mockMembers);
+    const [members, setMembers]         = useState<MemberDisplay[]>([]);
     const [selected, setSelected]       = useState<MemberDisplay | null>(null);
+    const [loadError, setLoadError]     = useState("");
 
     useEffect(() => {
         async function loadData() {
@@ -149,11 +141,11 @@ export default function UniverseMembers() {
                 const res = await fetch('/api/intra/members');
                 if (!res.ok) {
                     console.error('Members API error:', res.status);
+                    setLoadError(`회원 목록을 불러오지 못했습니다 (${res.status})`);
                     return;
                 }
                 const json = await res.json();
                 const rawMembers = json.members ?? [];
-                if (!rawMembers.length) return;
 
                 const subsMap: Record<string, { service: string; plan: string }[]> = {};
                 (json.subscriptions || []).forEach((s: { member_id: string; service: string; plan: string }) => {
@@ -164,6 +156,7 @@ export default function UniverseMembers() {
                 const newsletterEmails = new Set<string>(json.newsletterEmails ?? []);
                 const ucBalances: Record<string, number> = json.ucBalances ?? {};
                 const memberRolesMap: Record<string, RoleEntry[]> = json.memberRoles ?? {};
+                const brandJoins: Record<string, string[]> = json.brandJoins ?? {};
 
                 const typeCounts: Record<MemberType, number> = { 잠재: 0, 서비스: 0, 멤버십: 0, 구독: 0, 복합: 0, 기타: 0 };
 
@@ -174,8 +167,8 @@ export default function UniverseMembers() {
                     affiliations: string[]; roles: string[]; last_login_at: string | null; created_at: string;
                     signup_source?: string | null;
                 }) => {
-                    // 브랜드: affiliations 중 유효한 brand ID + 구독 서비스명 합산
-                    const affBrands = affiliationsToBrands(m.affiliations || []);
+                    // 브랜드: 브랜드 가입(member_brand_joins) + 구독 서비스명 — affiliations는 쓰지 않는다 (헌법 원칙 1)
+                    const affBrands = affiliationsToBrands(brandJoins[m.id] ?? []);
                     const subBrands = (subsMap[m.id] || []).map(s => SUB_LABEL[s.service] ?? s.service);
                     const brands = Array.from(new Set([...affBrands, ...subBrands]));
 
@@ -207,20 +200,13 @@ export default function UniverseMembers() {
                 setTypeDefs(TYPE_ORDER.map(t => ({ id: t, ...TYPE_META[t], count: typeCounts[t] })));
             } catch (err) {
                 console.error("Members fetch error:", err);
+                setLoadError("회원 목록을 불러오지 못했습니다");
             } finally {
                 setLoading(false);
             }
         }
         loadData();
     }, []);
-
-    /* mock 기반 typeDefs 초기화 */
-    useEffect(() => {
-        if (!loading || typeDefs.length > 0) return;
-        const counts: Record<MemberType, number> = { 잠재: 0, 서비스: 0, 멤버십: 0, 구독: 0, 복합: 0, 기타: 0 };
-        mockMembers.forEach(m => counts[m.type]++);
-        setTypeDefs(TYPE_ORDER.map(t => ({ id: t, ...TYPE_META[t], count: counts[t] })));
-    }, [loading, typeDefs.length]);
 
     const totalMembers = typeDefs.reduce((s, t) => s + t.count, 0) || members.length;
 
@@ -252,6 +238,7 @@ export default function UniverseMembers() {
     return (
         <div className="space-y-6">
             <PageHeader title="통합 회원" description="전체 브랜드 통합 회원 관리" />
+            {loadError && <p className="rounded border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{loadError}</p>}
 
             {/* 유형별 분포 + 필터 통합 카드 */}
             <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-3">

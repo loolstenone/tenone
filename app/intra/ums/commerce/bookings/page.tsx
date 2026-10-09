@@ -12,25 +12,12 @@ interface BookingRow {
     event: string; date: string; location: string; amount: number; status: string;
 }
 
-/* ── Mock (fallback) ── */
-const mockStats: StatItem[] = [
-    { label: "이번달 예약", value: "47건", icon: Calendar },
-    { label: "확정", value: "38건", icon: CheckCircle },
-    { label: "취소율", value: "8.5%", icon: XCircle },
-    { label: "예약 매출", value: "₩3,200,000", icon: DollarSign },
-];
-
-const mockBookings: BookingRow[] = [
-    { id: "1", name: "김민지", memberType: "회원", brand: "MADLeap", event: "MADLeap 5기 OT", date: "2026-04-05", location: "강남 센터", amount: 0, status: "확정" },
-    { id: "2", name: "이준혁", memberType: "회원", brand: "Evolution School", event: "브랜드 전략 특강", date: "2026-04-08", location: "온라인", amount: 50000, status: "확정" },
-    { id: "3", name: "박서윤", memberType: "회원", brand: "SmarComm", event: "AI 마케팅 세미나", date: "2026-04-10", location: "삼성 컨벤션", amount: 30000, status: "대기" },
-    { id: "4", name: "장민호", memberType: "게스트", brand: "MADLeague", event: "DAM Party Season 4", date: "2026-04-12", location: "홍대 라운지", amount: 15000, status: "확정" },
-    { id: "5", name: "최다운", memberType: "회원", brand: "HeRo", event: "커리어 멘토링 데이", date: "2026-04-15", location: "역삼 오피스", amount: 0, status: "확정" },
-    { id: "6", name: "안소희", memberType: "게스트", brand: "ChangeUp", event: "스타트업 네트워킹", date: "2026-04-12", location: "판교 허브", amount: 20000, status: "대기" },
-    { id: "7", name: "홍진우", memberType: "게스트", brand: "Badak", event: "CEO 라운드테이블", date: "2026-04-18", location: "강남 센터", amount: 100000, status: "확정" },
-    { id: "8", name: "강현우", memberType: "회원", brand: "MADLeague", event: "DAM Party Season 4", date: "2026-04-12", location: "홍대 라운지", amount: 15000, status: "취소" },
-    { id: "9", name: "나연수", memberType: "게스트", brand: "Evolution School", event: "데이터 분석 체험", date: "2026-04-20", location: "온라인", amount: 0, status: "확정" },
-    { id: "10", name: "유하늘", memberType: "회원", brand: "SmarComm", event: "AI 마케팅 세미나", date: "2026-04-10", location: "삼성 컨벤션", amount: 30000, status: "완료" },
+/* 데이터가 없으면 0 — 목업을 실제처럼 보이게 두지 않는다 (2026-10-10 통합 관리 점검) */
+const EMPTY_STATS: StatItem[] = [
+    { label: "이번달 예약", value: "0건", icon: Calendar },
+    { label: "확정", value: "0건", icon: CheckCircle },
+    { label: "취소율", value: "-", icon: XCircle },
+    { label: "예약 매출", value: "₩0", icon: DollarSign },
 ];
 
 /* ── 상태 매핑 ── */
@@ -55,9 +42,9 @@ const brandColor: Record<string, string> = {
 export default function UniverseBookings() {
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<StatItem[]>(mockStats);
-    const [bookings, setBookings] = useState<BookingRow[]>(mockBookings);
-    const [eventDays, setEventDays] = useState<Set<number>>(new Set([5, 8, 10, 12, 15, 18, 20]));
+    const [stats, setStats] = useState<StatItem[]>(EMPTY_STATS);
+    const [bookings, setBookings] = useState<BookingRow[]>([]);
+    const [eventDays, setEventDays] = useState<Set<number>>(new Set<number>());
 
     useEffect(() => {
         async function loadData() {

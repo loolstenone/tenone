@@ -12,49 +12,8 @@ interface SourceRev { name: string; amount: number; pct: number; color: string }
 interface MonthTrend { month: string; revenue: number; cost: number }
 interface DetailRow { date: string; brand: string; source: string; desc: string; amount: number }
 
-/* ── Mock (fallback) ── */
-const mockPL: PLSummary = { revenue: 14350000, cost: 8720000, profit: 5630000, margin: 39.2 };
-
-const mockBrandRevenue: BrandRev[] = [
-    { name: "SmarComm", revenue: 5400000, color: "bg-neutral-900" },
-    { name: "WIO Orbi", revenue: 2800000, color: "bg-neutral-700" },
-    { name: "Evolution School", revenue: 2100000, color: "bg-neutral-600" },
-    { name: "YouInOne", revenue: 1250000, color: "bg-neutral-500" },
-    { name: "Mindle", revenue: 700000, color: "bg-neutral-400" },
-    { name: "HeRo", revenue: 680000, color: "bg-neutral-400" },
-    { name: "Badak", revenue: 320000, color: "bg-neutral-300" },
-    { name: "기타", revenue: 1100000, color: "bg-neutral-300" },
-];
-
-const mockRevenueSources: SourceRev[] = [
-    { name: "구독", amount: 8900000, pct: 62, color: "bg-neutral-900" },
-    { name: "교육", amount: 2100000, pct: 15, color: "bg-neutral-600" },
-    { name: "이벤트", amount: 1200000, pct: 8, color: "bg-neutral-400" },
-    { name: "매칭", amount: 1050000, pct: 7, color: "bg-neutral-300" },
-    { name: "콘텐츠", amount: 1100000, pct: 8, color: "bg-neutral-200" },
-];
-
-const mockMonthlyTrend: MonthTrend[] = [
-    { month: "10월", revenue: 9800000, cost: 7200000 },
-    { month: "11월", revenue: 10500000, cost: 7800000 },
-    { month: "12월", revenue: 12100000, cost: 8100000 },
-    { month: "1월", revenue: 11200000, cost: 7900000 },
-    { month: "2월", revenue: 13000000, cost: 8500000 },
-    { month: "3월", revenue: 14350000, cost: 8720000 },
-];
-
-const mockDetails: DetailRow[] = [
-    { date: "2026-03-29", brand: "SmarComm", source: "구독", desc: "HSAD Pro 연간 구독", amount: 1788000 },
-    { date: "2026-03-28", brand: "WIO Orbi", source: "구독", desc: "넥스트웨이브 Pro 월정액", amount: 149000 },
-    { date: "2026-03-28", brand: "Evolution School", source: "교육", desc: "브랜드 전략 마스터 3기 수강료", amount: 890000 },
-    { date: "2026-03-27", brand: "SmarComm", source: "구독", desc: "크리에이팁 Starter", amount: 49000 },
-    { date: "2026-03-27", brand: "HeRo", source: "매칭", desc: "인재 매칭 수수료", amount: 150000 },
-    { date: "2026-03-26", brand: "Badak", source: "이벤트", desc: "CEO 라운드테이블 참가비", amount: 100000 },
-    { date: "2026-03-26", brand: "Mindle", source: "구독", desc: "Premium 구독 x3", amount: 29700 },
-    { date: "2026-03-25", brand: "MADLeague", source: "이벤트", desc: "DAM Party Season 4", amount: 225000 },
-    { date: "2026-03-25", brand: "YouInOne", source: "구독", desc: "Team 플랜 x2", amount: 158000 },
-    { date: "2026-03-24", brand: "SmarComm", source: "콘텐츠", desc: "AI 마케팅 리포트 판매", amount: 35000 },
-];
+/* 데이터가 없으면 0 — 목업을 실제처럼 보이게 두지 않는다 (2026-10-10 통합 관리 점검) */
+const EMPTY_PL: PLSummary = { revenue: 0, cost: 0, profit: 0, margin: 0 };
 
 const brandColorMap: Record<string, string> = {
     SmarComm: "bg-neutral-900", "WIO Orbi": "bg-neutral-700", "Evolution School": "bg-neutral-600",
@@ -70,11 +29,11 @@ const sourceColorMap: Record<string, string> = {
 
 export default function UniverseRevenue() {
     const [loading, setLoading] = useState(true);
-    const [plSummary, setPlSummary] = useState<PLSummary>(mockPL);
-    const [brandRevenue, setBrandRevenue] = useState<BrandRev[]>(mockBrandRevenue);
-    const [revenueSources, setRevenueSources] = useState<SourceRev[]>(mockRevenueSources);
-    const [monthlyTrend, setMonthlyTrend] = useState<MonthTrend[]>(mockMonthlyTrend);
-    const [details, setDetails] = useState<DetailRow[]>(mockDetails);
+    const [plSummary, setPlSummary] = useState<PLSummary>(EMPTY_PL);
+    const [brandRevenue, setBrandRevenue] = useState<BrandRev[]>([]);
+    const [revenueSources, setRevenueSources] = useState<SourceRev[]>([]);
+    const [monthlyTrend, setMonthlyTrend] = useState<MonthTrend[]>([]);
+    const [details, setDetails] = useState<DetailRow[]>([]);
 
     useEffect(() => {
         async function loadData() {

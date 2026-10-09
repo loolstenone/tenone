@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/intra/IntraUI";
-import { Search, Loader2, ChevronDown, ChevronUp, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2, X, Check } from "lucide-react";
+import { Search, Loader2, ChevronDown, ChevronUp, ArrowUpCircle, ArrowDownCircle, Pencil, Undo2, X, Check } from "lucide-react";
 
 interface UCTransaction {
     id: string;
@@ -20,6 +20,7 @@ interface UCTransaction {
 }
 
 const ACTION_LABELS: Record<string, string> = {
+    correction: "정정 거래",
     signup_complete: "회원가입 완료",
     profile_complete: "프로필 완성",
     profile_advanced: "고급 프로필",
@@ -142,7 +143,7 @@ export default function UCTransactionsPage() {
             const res = await fetch("/api/uc/admin/transaction", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${await getToken()}` },
-                body: JSON.stringify({ transaction_id: editRow.id, amount: editRow.amount, note: editRow.note || null }),
+                body: JSON.stringify({ transaction_id: editRow.id, note: editRow.note }), // 금액은 바꾸지 않는다 — 정정 거래로
             });
             if (res.ok) { setEditRow(null); load(true); }
         } finally {
@@ -150,16 +151,19 @@ export default function UCTransactionsPage() {
         }
     }
 
-    async function handleDelete(id: string) {
-        if (!confirm("이 거래를 삭제하시겠습니까? 잔액이 자동으로 조정됩니다.")) return;
+    /** 원장은 지우지 않는다 — 반대 방향 정정 거래를 추가해 바로잡는다 (2026-10-10) */
+    async function handleCorrect(id: string) {
+        const reason = prompt("정정 사유 (원장에 남습니다)\n이 거래를 반대 방향 거래로 상쇄하고 잔액을 맞춥니다.");
+        if (!reason?.trim()) return;
         setActionLoading(id);
         try {
             const res = await fetch("/api/uc/admin/transaction", {
-                method: "DELETE",
+                method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${await getToken()}` },
-                body: JSON.stringify({ transaction_id: id }),
+                body: JSON.stringify({ transaction_id: id, reason }),
             });
             if (res.ok) load(true);
+            else alert((await res.json().catch(() => null))?.error ?? "정정하지 못했습니다");
         } finally {
             setActionLoading(null);
         }
@@ -279,19 +283,9 @@ export default function UCTransactionsPage() {
                                 </td>
                                 <td className="px-4 py-3 text-gray-500 text-sm">{r.brand_id ?? "—"}</td>
                                 <td className="px-4 py-3 text-right">
-                                    {editRow?.id === r.id ? (
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            value={editRow.amount}
-                                            onChange={e => setEditRow(p => p ? { ...p, amount: parseInt(e.target.value) || 0 } : p)}
-                                            className="w-20 px-2 py-1 text-xs text-right border border-amber-300 rounded focus:outline-none"
-                                        />
-                                    ) : (
-                                        <span className={`font-semibold ${r.type === "earn" ? "text-emerald-600" : "text-rose-500"}`}>
-                                            {r.type === "earn" ? "+" : "-"}{r.amount.toLocaleString()} UC
-                                        </span>
-                                    )}
+                                    <span className={`font-semibold ${r.type === "earn" ? "text-emerald-600" : "text-rose-500"}`}>
+                                        {r.type === "earn" ? "+" : "-"}{r.amount.toLocaleString()} UC
+                                    </span>
                                 </td>
                                 <td className="px-4 py-3 text-right text-xs text-gray-400 whitespace-nowrap">
                                     {formatDate(r.created_at)}
@@ -320,20 +314,22 @@ export default function UCTransactionsPage() {
                                             <button
                                                 onClick={() => handleEdit(r)}
                                                 className="p-1.5 rounded text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                                                title="수정"
+                                                title="메모 수정"
                                             >
                                                 <Pencil className="h-3.5 w-3.5" />
                                             </button>
+                                            {r.action_key !== "correction" && (
                                             <button
-                                                onClick={() => handleDelete(r.id)}
+                                                onClick={() => handleCorrect(r.id)}
                                                 disabled={actionLoading === r.id}
                                                 className="p-1.5 rounded text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
-                                                title="삭제"
+                                                title="정정 거래 (상쇄)"
                                             >
                                                 {actionLoading === r.id
                                                     ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    : <Trash2 className="h-3.5 w-3.5" />}
+                                                    : <Undo2 className="h-3.5 w-3.5" />}
                                             </button>
+                                            )}
                                         </div>
                                     )}
                                 </td>
