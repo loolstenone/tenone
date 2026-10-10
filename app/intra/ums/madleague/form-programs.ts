@@ -6,4 +6,12 @@ export const MAD_FORM_PROGRAMS: Record<string, string> = {
     markethon: "마케톤 (/madleague/programs/markethon)",
     "insight-touring": "인사이트 투어링 (/madleague/programs/insight-touring)",
     project: "PJT (/madleague/programs/project)",
+    // 동아리 부원 공동 모집 — 동아리별 지원서 1개, 응답은 그 동아리 운영진이 본다 (lib/madleague-recruit.ts)
+    "club-recruit:abc": "부원 모집 · ABC (/madleague/clubs/recruit)",
+    "club-recruit:adzone": "부원 모집 · AD Zone",
+    "club-recruit:adlle": "부원 모집 · ADlle",
+    "club-recruit:madleap": "부원 모집 · MADLeap",
+    "club-recruit:pad": "부원 모집 · P:ad",
+    "club-recruit:pam": "부원 모집 · PAM",
+    "club-recruit:suzak": "부원 모집 · SUZAK",
 };

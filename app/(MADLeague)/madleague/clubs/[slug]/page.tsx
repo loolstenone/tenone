@@ -10,6 +10,7 @@ import { canEditClubProfile, canViewClubApplications, getMadAccess } from '@/lib
 import { sortByYearDesc } from '@/lib/madleague-club-profile';
 import { archiveBadgesForClub, ledgerGroupToClubSlug, type ClubBadge } from '@/features/madleague/competition-archive';
 import { CompetitionBadge } from '@/features/madleague/CompetitionBadge';
+import { fetchClubRecruitForms, recruitPeriodLabel } from '@/lib/madleague-recruit';
 import type { ClubProfile } from '@/types/madleague-club-profile';
 
 /*
@@ -78,12 +79,14 @@ export default async function ClubDetailPage({ params }: PageProps) {
   const profile = ((club as unknown as { profile?: ClubProfile }).profile ?? {}) as ClubProfile;
 
   const sb = await createClient();
-  const [archiveRes, resultsRes, participation] = await Promise.all([
+  const [archiveRes, resultsRes, participation, recruitForms] = await Promise.all([
     sb.from('mad_archive').select('id, title, year, thumbnail_url, type, award').eq('club_id', club.id).order('year', { ascending: false }).limit(6),
     // 코어 프로그램 결과 — 발표된 회차만 RLS로 읽힘, 동아리 = context.club_id
     sb.from('program_results').select('id, team_name, rank, award_name, round_id').eq('context->>club_id', club.id).order('rank', { ascending: true }),
     competitionParticipation(club.slug),
+    fetchClubRecruitForms(),
   ]);
+  const recruitForm = recruitForms.get(club.slug) ?? null;
   const archive = (archiveRes.data ?? []) as Array<{ id: string; title: string; year: number; thumbnail_url: string | null; type: string; award: string | null }>;
   const results = (resultsRes.data ?? []) as Array<{ id: string; team_name: string; rank: number | null; award_name: string | null; round_id: string }>;
 
@@ -109,7 +112,12 @@ export default async function ClubDetailPage({ params }: PageProps) {
     ...(profile.stats ?? []),
     ...(badges.length ? [{ label: 'MAD League 경쟁 PT 수상', value: `${badges.length}회` }] : []),
   ];
-  const recruitOpen = profile.recruit?.status === 'open';
+  // 모집: 공동 모집 지원서(유니버스 폼)가 열려 있으면 그것이 우선, 아니면 운영진이 적은 안내·외부 링크
+  const formOpen = recruitForm?.availability === 'open';
+  const recruitOpen = formOpen || profile.recruit?.status === 'open';
+  const recruitPeriod = (formOpen && recruitForm ? recruitPeriodLabel(recruitForm) : null) ?? profile.recruit?.period;
+  const recruitHref = formOpen && recruitForm ? `/madleague/forms/${recruitForm.slug}` : profile.recruit?.link;
+  const showRecruit = recruitOpen || !!profile.recruit;
 
   // 동아리 관리 링크: 직원 · 이 동아리 운영진 · 담당 멘토(지원서만)
   let canManage = false;
@@ -163,7 +171,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
           {club.description && <p className="mt-6 max-w-2xl text-lg text-neutral-300 leading-relaxed break-keep">{club.description}</p>}
           {recruitOpen && (
             <a href="#recruit" className="mt-8 inline-flex items-center gap-2 bg-[#EC1D25] px-5 py-3 text-sm font-bold">
-              부원 모집 중{profile.recruit?.period ? ` · ${profile.recruit.period}` : ''} <ArrowRight className="h-4 w-4" />
+              부원 모집 중{recruitPeriod ? ` · ${recruitPeriod}` : ''} <ArrowRight className="h-4 w-4" />
             </a>
           )}
         </div>
@@ -352,20 +360,21 @@ export default async function ClubDetailPage({ params }: PageProps) {
       )}
 
       {/* 모집 안내 */}
-      {profile.recruit && (
+      {showRecruit && (
         <section id="recruit" style={{ backgroundColor: recruitOpen ? accent : undefined }} className={recruitOpen ? '' : 'bg-neutral-950 border-y border-neutral-900'}>
           <div className="mx-auto max-w-7xl px-6 py-16 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-end">
             <div>
               <div className="text-sm font-bold tracking-widest text-white/80">RECRUIT</div>
-              <div className="mt-2 text-3xl font-black">{recruitOpen ? '부원 모집 중' : '부원 모집'}{profile.recruit.period ? ` · ${profile.recruit.period}` : ''}</div>
-              {profile.recruit.target && <p className="mt-4 max-w-2xl text-white/90 break-keep"><span className="font-bold mr-2">대상</span>{profile.recruit.target}</p>}
-              {profile.recruit.process && <p className="mt-2 max-w-2xl text-white/90 whitespace-pre-line break-keep"><span className="font-bold mr-2">절차</span>{profile.recruit.process}</p>}
+              <div className="mt-2 text-3xl font-black">{recruitOpen ? '부원 모집 중' : '부원 모집'}{recruitPeriod ? ` · ${recruitPeriod}` : ''}</div>
+              {profile.recruit?.target && <p className="mt-4 max-w-2xl text-white/90 break-keep"><span className="font-bold mr-2">대상</span>{profile.recruit?.target}</p>}
+              {profile.recruit?.process && <p className="mt-2 max-w-2xl text-white/90 whitespace-pre-line break-keep"><span className="font-bold mr-2">절차</span>{profile.recruit?.process}</p>}
               {!recruitOpen && <p className="mt-4 text-sm text-neutral-400">지금은 모집 기간이 아닙니다. 아래 채널에서 다음 모집 소식을 확인하세요.</p>}
+              {formOpen && <Link href="/madleague/clubs/recruit" className="mt-4 inline-block text-sm text-white/80 underline underline-offset-4">전국 동아리 공동 모집 보기</Link>}
             </div>
-            {recruitOpen && profile.recruit.link && (
-              <a href={profile.recruit.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 transition">
-                지원하기 <ArrowUpRight className="h-4 w-4" />
-              </a>
+            {recruitOpen && recruitHref && (
+              formOpen
+                ? <Link href={recruitHref} className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 transition">지원하기 <ArrowRight className="h-4 w-4" /></Link>
+                : <a href={recruitHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 transition">지원하기 <ArrowUpRight className="h-4 w-4" /></a>
             )}
           </div>
         </section>

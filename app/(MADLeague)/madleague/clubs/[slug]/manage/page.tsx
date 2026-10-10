@@ -5,6 +5,7 @@ import { canEditClubProfile, canViewClubApplications, getMadAccess } from '@/lib
 import { ManagePanel } from './ManagePanel';
 import { ClubOfficersEditor } from '@/components/madleague/ClubOfficersEditor';
 import { ClubProfileEditor } from '@/components/madleague/ClubProfileEditor';
+import { ClubRecruitResponses } from '@/components/madleague/ClubRecruitResponses';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -66,6 +67,14 @@ export default async function ClubManagePage({ params }: PageProps) {
           </section>
         )}
 
+        {/* 부원 모집 (공동 모집) 지원서 — 운영진만 */}
+        {canProfile && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-xl font-black">부원 모집 지원서</h2>
+            <ClubRecruitResponses slug={club.slug} />
+          </section>
+        )}
+
         {/* 운영진 — 회장·부회장이 다음 임기 운영진 지정 */}
         {canProfile && (
           <section className="mb-12">
@@ -76,7 +85,7 @@ export default async function ClubManagePage({ params }: PageProps) {
 
         {canApplications && (
           <>
-            <h2 className="mb-2 text-xl font-black">지원서</h2>
+            <h2 className="mb-2 text-xl font-black">매드리거 등록 (소속 인증)</h2>
             <p className="mb-4 text-sm text-neutral-400">운영진 누구나 승인·반려할 수 있습니다. 승인하면 소속이 인증되고 매드리거 공간 이용 권한이 부여됩니다.</p>
 
             <ManagePanel

@@ -146,6 +146,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                 dropdown: [
                     { label: "매드리거 홈", path: "/madleague/madleaguer" },
                     { label: "동아리", path: "/madleague/clubs" },
+                    { label: "공동 모집", path: "/madleague/clubs/recruit" },
                     { label: "매드리거 등록", path: "/madleague/apply" },
                     { label: "인증서 발급", path: "/madleague/certificate/issue" },
                 ],
@@ -153,6 +154,8 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
             // 동아리 = 매드리거 하위 메뉴 (2026-10-08 사용자 결정 — 동아리 목록에서 각 동아리 방으로)
             { placement: "feature", location: "매드리거", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
+            // 동아리 부원 공동 모집 (2026-10-10) — 동아리별 지원서 = forms program club-recruit:{slug}, 응답은 동아리 운영진이 /clubs/{slug}/manage에서
+            { placement: "feature", location: "매드리거", label: "공동 모집", path: "/madleague/clubs/recruit", source: { kind: "static" }, adminHref: "/intra/ums/madleague/forms" },
             { placement: "feature", location: "홈·매드리거", label: "매드리거 등록", path: "/madleague/apply", source: { kind: "table", table: "mad_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/applications", unit: "건" },
             { placement: "feature", location: "매드리거", label: "인증서 발급", path: "/madleague/certificate/issue", source: { kind: "table", table: "program_certificates", eq: { brand_id: "madleague" } }, adminHref: "/intra/ums/madleague/certificates", unit: "건" },
             { placement: "feature", location: "프로그램 상세", label: "참가 신청", path: "/madleague/programs", source: { kind: "table", table: "form_responses", eq: { brand_id: "madleague" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleague/forms", unit: "건" },

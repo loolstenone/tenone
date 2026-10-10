@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { MapPin, ArrowRight, DoorOpen } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
+import { computeClubRankings } from '@/lib/madleague-club-ranking';
+import { ClubList, type ClubListRow } from '@/features/madleague/ClubList';
 
 export const revalidate = 300;
 
@@ -11,7 +12,18 @@ export const metadata = {
 };
 
 export default async function ClubsPage() {
-  const clubs = await fetchMadClubs();
+  const [clubs, rankings] = await Promise.all([fetchMadClubs(), computeClubRankings().catch(() => new Map())]);
+  // 랭킹 순위 — 점수 높은 순, 동점은 같은 순위, 0점은 순위 없음
+  const scores = clubs.map(c => rankings.get(c.slug)?.score ?? 0);
+  const rows: ClubListRow[] = clubs.map((c, i) => {
+    const r = rankings.get(c.slug);
+    const score = scores[i];
+    return {
+      slug: c.slug, name: c.name, region: c.region, logo_url: c.logo_url, color: c.color,
+      score, teams: r?.teams ?? 0, partial: r?.partial ?? false,
+      rank: score > 0 ? scores.filter(s => s > score).length + 1 : null,
+    };
+  });
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
@@ -26,48 +38,16 @@ export default async function ClubsPage() {
             수도권부터 제주까지, 대한민국 7개 권역의 대학생 광고·마케팅 동아리가
             하나의 리그로 뭉쳤다.
           </p>
+          <Link href="/madleague/clubs/recruit"
+            className="mt-10 inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] px-6 py-3 text-sm font-bold text-white transition">
+            동아리 부원 공동 모집 <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      {/* Clubs Grid */}
+      {/* 동아리 목록 — 리스트 · 항목별 정렬 · 랭킹 */}
       <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {clubs.map((club) => (
-            <div
-              key={club.slug}
-              className="group relative bg-neutral-950 border border-neutral-900 hover:border-[#EC1D25] transition p-8"
-            >
-              {club.logo_url ? (
-                <div className="h-14 w-14 mb-6 flex items-center justify-center">
-                  <Image src={club.logo_url} alt={club.name} width={56} height={56} className="object-contain" />
-                </div>
-              ) : (
-                <div className="h-14 w-14 mb-6" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
-              )}
-              <div className="text-4xl font-black text-white">{club.name}</div>
-              <div className="mt-3 flex items-center gap-1.5 text-base text-neutral-400">
-                <MapPin className="h-3.5 w-3.5" />
-                {club.region}
-              </div>
-              {club.description && (
-                <p className="mt-6 text-base text-neutral-500 leading-relaxed line-clamp-3">
-                  {club.description}
-                </p>
-              )}
-              {/* 소개(누구나) · 동아리 방(소속 매드리거·담당 멘토·관리자 — 자격은 방에서 확인) */}
-              <div className="mt-10 flex flex-wrap items-center gap-3">
-                <Link href={`/madleague/clubs/${club.slug}`}
-                  className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white px-4 py-2.5 text-sm font-bold text-neutral-300 hover:text-white transition">
-                  동아리 소개 <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href={`/madleague/clubs/${club.slug}/room`}
-                  className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] px-4 py-2.5 text-sm font-bold text-white transition">
-                  <DoorOpen className="h-4 w-4" /> 동아리 방 입장
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ClubList rows={rows} />
       </section>
 
       {/* New Club CTA */}
