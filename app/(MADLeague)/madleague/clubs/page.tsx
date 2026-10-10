@@ -57,17 +57,17 @@ export default async function ClubsPage() {
             <div>
               <div className="text-xs font-bold tracking-widest text-[#FFC000]">NEW CLUB</div>
               <h2 className="mt-3 text-2xl sm:text-3xl font-black text-white">
-                우리 학교에도 MADLeague 동아리를 만들고 싶다면
+                MADLeague 공식 동아리가 되고 싶다면
               </h2>
               <p className="mt-3 text-neutral-400">
-                신규 동아리 모집 절차와 가입 조건을 안내합니다.
+                내부 심의를 거쳐 등록 가능합니다.
               </p>
             </div>
             <Link
-              href="/madleague/about"
+              href="/madleague/contact?type=club-apply"
               className="inline-flex items-center gap-2 border border-[#FFC000] hover:bg-[#FFC000] hover:text-black text-[#FFC000] font-bold px-6 py-3 transition whitespace-nowrap"
             >
-              신규 동아리 절차
+              공식 동아리 신청
             </Link>
           </div>
         </div>
