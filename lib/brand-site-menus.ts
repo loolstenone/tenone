@@ -81,6 +81,21 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         ],
     },
     {
+        // HeRo — Talent Agency (비공개 운영, is_open=false). 헤더 = features/hero/HeRoHeader.tsx가 이 순서로 렌더 (2026-10-10 등록)
+        siteId: "hero",
+        adminBase: "/intra/hero",
+        menus: [
+            { placement: "header", label: "HIT 검사", path: "/hero/hit", source: { kind: "table", table: "hit_a_results" }, adminHref: "/intra/hero/hit", unit: "건" },
+            { placement: "header", label: "AI 상담", path: "/hero/coaching/ai", source: { kind: "static" }, adminHref: "/intra/hero/ai-counseling" },
+            { placement: "header", label: "커리어 코칭", path: "/hero/coaching", source: { kind: "table", table: "hero_coaching_sessions" }, unit: "건" },
+            { placement: "header", label: "탤런트 에이전시", path: "/hero/talent-agent", source: { kind: "table", table: "hero_talent_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/hero/talent-agent", unit: "건" },
+            { placement: "header", label: "요금 안내", path: "/hero/pricing", source: { kind: "static" } },
+            { placement: "header", label: "써치 라이트", path: "/hero/search-light", source: { kind: "table", table: "hero_tih_responses" }, adminHref: "/intra/hero/search-light", unit: "건" },
+            { placement: "feature", location: "헤더 기업 버튼", label: "기업", path: "/hero/company", source: { kind: "table", table: "hero_companies" }, adminHref: "/intra/hero/companies", unit: "개" },
+            { placement: "feature", location: "커리어 코칭", label: "코칭 대기 신청", path: "/hero/coaching", source: { kind: "table", table: "coaching_waitlist" }, unit: "건" },
+        ],
+    },
+    {
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [

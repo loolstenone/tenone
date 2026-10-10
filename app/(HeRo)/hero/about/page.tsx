@@ -6,10 +6,6 @@ import {
     Eye,
     Heart,
     ArrowRight,
-    Users,
-    Zap,
-    Award,
-    Globe,
     Calendar,
 } from "lucide-react";
 
@@ -44,12 +40,7 @@ const partners = [
     { name: "SmarComm.", desc: "AI 마케팅 커뮤니케이션", type: "Collaboration" },
 ];
 
-const stats = [
-    { icon: Users, label: "HIT 진단", value: "준비 중" },
-    { icon: Zap, label: "멘토 매칭", value: "준비 중" },
-    { icon: Award, label: "성공 사례", value: "준비 중" },
-    { icon: Globe, label: "파트너 대학", value: "준비 중" },
-];
+// 숫자 섹션(HIT 진단·멘토 매칭·성공 사례·파트너 대학)은 실제 숫자가 생기면 DB 집계로 다시 넣는다 — "준비 중" 직접 표시 금지(§1.1), 2026-10-10 제거
 
 export default function AboutPage() {
     return (
@@ -86,21 +77,6 @@ export default function AboutPage() {
                                 </div>
                                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                                 <p className="text-sm text-neutral-500">{item.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats */}
-            <section className="bg-neutral-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <stat.icon className="h-6 w-6 text-amber-500 mx-auto mb-2" />
-                                <p className="text-xl md:text-3xl font-extrabold text-neutral-900">{stat.value}</p>
-                                <p className="text-sm text-neutral-500 mt-1">{stat.label}</p>
                             </div>
                         ))}
                     </div>

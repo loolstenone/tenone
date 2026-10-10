@@ -10,15 +10,10 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { LoginModal } from "@/components/LoginModal";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
 
-const navItems = [
-    { name: "HIT 검사", href: "/hero/hit" },
-    { name: "AI 상담", href: "/hero/coaching/ai" },
-    { name: "커리어 코칭", href: "/hero/coaching" },
-    { name: "탤런트 에이전시", href: "/hero/talent-agent" },
-    { name: "요금 안내", href: "/hero/pricing" },
-    { name: "써치 라이트", href: "/hero/search-light" },
-];
+// 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서는 거기서 고친다
+const navItems = siteHeaderNav("hero");
 
 export function HeRoHeader() {
     const pathname = usePathname();
