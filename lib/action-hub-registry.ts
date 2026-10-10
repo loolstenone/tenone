@@ -136,6 +136,17 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "approval",
         priority: "normal",
     },
+    {
+        key: "madleap_form_responses",
+        label: "MADLeap 지원서",
+        table: "form_responses",
+        filter: { column: "status", value: "pending" },
+        extraFilters: [{ column: "brand_id", value: "madleap" }],
+        href: "/intra/ums/madleap/forms",
+        brand_id: "madleap",
+        category: "approval",
+        priority: "normal",
+    },
 
     // ── 개인정보 (Privacy)
     {

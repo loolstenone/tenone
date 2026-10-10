@@ -117,6 +117,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             { placement: "header", label: "스터디 룸", path: "/madleap/study-room", source: { kind: "table", table: "madleap_study_programs" }, unit: "개" },
             { placement: "header", label: "매드립 소개", path: "/madleap/about", source: { kind: "static" } },
             { placement: "header", label: "포트폴리오", path: "/madleap/portfolio", source: { kind: "table", table: "madleap_portfolios" }, unit: "개" },
+            { placement: "feature", location: "매드립 소개·스터디 룸", label: "지원하기", path: "/madleap/forms/apply", source: { kind: "table", table: "form_responses", eq: { brand_id: "madleap" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/madleap/forms", unit: "건" },
         ],
     },
     {
