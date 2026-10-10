@@ -115,6 +115,15 @@ export function officerClubIds(access: MadAccess): string[] {
         .filter((id): id is string => typeof id === "string");
 }
 
+/** 동아리 소개 페이지를 고칠 수 있는가: 직원 · 해당 동아리 운영진 전원 · (옛) 회장 (2026-10-10) */
+export function canEditClubProfile(
+    access: MadAccess,
+    memberId: string,
+    club: { id: string; president_member_id: string | null },
+): boolean {
+    return access.isStaff || officerClubIds(access).includes(club.id) || club.president_member_id === memberId;
+}
+
 /** 운영진을 지정할 수 있는가: 직원 또는 해당 동아리 회장·부회장 */
 export function canManageClubOfficers(access: MadAccess, clubId: string): boolean {
     if (access.isStaff) return true;

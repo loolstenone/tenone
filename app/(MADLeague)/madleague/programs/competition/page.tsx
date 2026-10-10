@@ -4,6 +4,7 @@ import { madProgramAsset } from '@/lib/madleague-program-assets';
 import { fetchMadHallRounds, type MadHallRound } from '@/lib/supabase/madleague';
 import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
 import { getMadProgram } from '@/features/madleague/programs-list';
+import { COMPETITION_ARCHIVE } from '@/features/madleague/competition-archive';
 
 /* 순위 색 — 경쟁 PT는 MAD Crown 없이 순위만 (2026-10-07 결정) */
 const RANK_TONE: Record<number, string> = { 1: 'text-[#FFC000] border-[#FFC000]/40', 2: 'text-neutral-200 border-neutral-500', 3: 'text-[#CD7F32] border-[#CD7F32]/40' };
@@ -66,62 +67,7 @@ const GETS = [
   { icon: Award,      title: '참가 · 수상 인증서',  desc: '회차가 끝나면 본인 화면에서 참가 확인서·수상 확인서를 직접 발급한다.' },
 ];
 
-// 인트라 결과 발표 이전의 기록 — 옛 사이트 명예의 전당 (madleague.net/pt)
-const ARCHIVE = [
-  {
-    year: 2026,
-    round: '1차',
-    client: '춤추는 고래',
-    desc: '여성용품(생리대, 팬티라이너) 브랜드 마케팅 전략 수립',
-    logo: '/logos/madleague/dancingwhale-logo.png',
-    gallery: [] as string[],
-    awards: [
-      { img: '/logos/madleague/26-1gold.png',   label: '1위' },
-      { img: '/logos/madleague/26-1silver.png', label: '2위' },
-      { img: '/logos/madleague/26-1bronze.png', label: '3위' },
-    ],
-  },
-  {
-    year: 2025,
-    round: '2차',
-    client: '리제로스',
-    desc: '자연친화 스타트업 리제로스에서 개발한 배달, 포장 음식 냉매제에 대한 시장 진출 전략',
-    logo: '/logos/madleague/rezerouslogo.png',
-    gallery: [] as string[],
-    awards: [
-      { img: '/logos/madleague/25-1gold.png',   label: '1위' },
-      { img: '/logos/madleague/25-1silver.png',  label: '2위' },
-      { img: '/logos/madleague/25-1bronze.png',  label: '3위' },
-    ],
-  },
-  {
-    year: 2025,
-    round: '1차',
-    client: '대성학원',
-    desc: '대성학원 연간 소셜 캠페인 제안',
-    logo: '/logos/madleague/daesunglogo.png',
-    gallery: [] as string[],
-    awards: [
-      { img: '/logos/madleague/25gold.png',    label: '1위' },
-      { img: '/logos/madleague/25silver.png',  label: '2위' },
-      { img: '/logos/madleague/25silver2.png', label: '3위' },
-      { img: '/logos/madleague/25silver3.png', label: '4위' },
-    ],
-  },
-  {
-    year: 2024,
-    round: '',
-    client: '지평주조',
-    desc: '지평 막걸리 100주년을 기점으로 지역을 벗어나 전국 막걸리가 되기 위한 전략 제안',
-    logo: '/logos/madleague/지평로고.png',
-    gallery: [] as string[],
-    awards: [
-      { img: '/logos/madleague/24gold.png',   label: '1위' },
-      { img: '/logos/madleague/24silver.png', label: '2위' },
-      { img: '/logos/madleague/24bronze.png', label: '3위' },
-    ],
-  },
-];
+// 인트라 결과 발표 이전의 기록 — features/madleague/competition-archive.ts (동아리 배지와 공용)
 
 export default async function CompetitionPage() {
   const hallRounds = await fetchMadHallRounds();
@@ -135,7 +81,7 @@ export default async function CompetitionPage() {
       <ProgramSection eyebrow="HALL OF FAME" title="명예의 전당">
         <div className="space-y-32">
           {hallRounds.map(r => <HallRound key={r.id} r={r} />)}
-          {ARCHIVE.map((item) => (
+          {COMPETITION_ARCHIVE.map((item) => (
             <div key={`${item.year}-${item.round}`}>
               <div className="text-sm text-neutral-500 font-bold tracking-widest mb-6">{item.year}년 {item.round}</div>
               <div className="flex flex-col lg:flex-row gap-16 items-start">

@@ -1,9 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { canViewClubApplications, getMadAccess } from '@/lib/madleague-roles';
+import { canEditClubProfile, canViewClubApplications, getMadAccess } from '@/lib/madleague-roles';
 import { ManagePanel } from './ManagePanel';
 import { ClubOfficersEditor } from '@/components/madleague/ClubOfficersEditor';
+import { ClubProfileEditor } from '@/components/madleague/ClubProfileEditor';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,18 +31,23 @@ export default async function ClubManagePage({ params }: PageProps) {
     .maybeSingle();
   if (!club) notFound();
 
-  // 권한 확인: 직원 / 이 동아리 운영진 / 담당 멘토 (지원서 = 소속 인증, 개인정보라 동아리 범위로 제한)
+  // 권한 확인: 지원서 = 직원 / 이 동아리 운영진 / 담당 멘토 (소속 인증, 개인정보라 동아리 범위로 제한)
+  //           소개 페이지 = 직원 / 이 동아리 운영진 (멘토 제외)
   const access = await getMadAccess(memberRow.id);
-  if (!canViewClubApplications(access, memberRow.id, club)) {
+  const canApplications = canViewClubApplications(access, memberRow.id, club);
+  const canProfile = canEditClubProfile(access, memberRow.id, club);
+  if (!canApplications && !canProfile) {
     redirect(`/madleague/clubs/${slug}`);
   }
 
   // 대기 중 + 완료 지원서 조회
-  const { data: applications } = await admin
-    .from('mad_applications')
-    .select('id, name, email, phone, university, major, minor, cohort, activity_year, interested_industry, interested_job, motivation, portfolio_url, status, created_at')
-    .eq('club_id', club.id)
-    .order('created_at', { ascending: false });
+  const { data: applications } = canApplications
+    ? await admin
+      .from('mad_applications')
+      .select('id, name, email, phone, university, major, minor, cohort, activity_year, interested_industry, interested_job, motivation, portfolio_url, status, created_at')
+      .eq('club_id', club.id)
+      .order('created_at', { ascending: false })
+    : { data: [] };
 
   return (
     <div className="bg-black text-white min-h-screen">
@@ -52,21 +58,35 @@ export default async function ClubManagePage({ params }: PageProps) {
           <p className="mt-1 text-sm text-neutral-400">이 동아리 운영진·담당 멘토와 MADLeague 운영진만 볼 수 있습니다.</p>
         </div>
 
+        {/* 소개 페이지 — 운영진이 직접 업데이트 */}
+        {canProfile && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-xl font-black">소개 페이지</h2>
+            <ClubProfileEditor slug={club.slug} />
+          </section>
+        )}
+
         {/* 운영진 — 회장·부회장이 다음 임기 운영진 지정 */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-xl font-black">운영진</h2>
-          <ClubOfficersEditor slug={club.slug} />
-        </section>
+        {canProfile && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-xl font-black">운영진</h2>
+            <ClubOfficersEditor slug={club.slug} />
+          </section>
+        )}
 
-        <h2 className="mb-2 text-xl font-black">지원서</h2>
-        <p className="mb-4 text-sm text-neutral-400">운영진 누구나 승인·반려할 수 있습니다. 승인하면 소속이 인증되고 매드리거 공간 이용 권한이 부여됩니다.</p>
+        {canApplications && (
+          <>
+            <h2 className="mb-2 text-xl font-black">지원서</h2>
+            <p className="mb-4 text-sm text-neutral-400">운영진 누구나 승인·반려할 수 있습니다. 승인하면 소속이 인증되고 매드리거 공간 이용 권한이 부여됩니다.</p>
 
-        <ManagePanel
-          clubId={club.id}
-          clubSlug={club.slug}
-          applications={applications ?? []}
-          accentColor={club.color ?? '#EC1D25'}
-        />
+            <ManagePanel
+              clubId={club.id}
+              clubSlug={club.slug}
+              applications={applications ?? []}
+              accentColor={club.color ?? '#EC1D25'}
+            />
+          </>
+        )}
       </div>
     </div>
   );

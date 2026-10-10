@@ -93,9 +93,9 @@ export async function fetchMadClubs(): Promise<MadClub[]> {
   const { data } = await sb
     .from('mad_clubs')
     .select('*')
-    .eq('status', 'active')
-    .order('sort_order');
-  return (data || []) as MadClub[];
+    .eq('status', 'active');
+  // 동아리 이름 알파벳순 (2026-10-10 사용자 결정 — 대소문자·공백 무시)
+  return ((data || []) as MadClub[]).sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
 }
 
 export async function fetchMadClubBySlug(slug: string): Promise<MadClub | null> {
