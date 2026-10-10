@@ -245,48 +245,28 @@ export const modules: NavModule[] = [
                     },
                     {
                         name: "Badak", href: "/intra/ums/badak", icon: Globe,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/badak" },
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1. extra = 사이트 메뉴에 없는 운영 화면
+                        children: brandAdminChildren("badak", [
                             { name: "멤버 관리", href: "/intra/ums/badak/members" },
-                            { name: "모임 관리", href: "/intra/ums/badak/groups" },
-                            { name: "커뮤니티 관리", href: "/intra/ums/badak/posts" },
-                            { name: "스토리 관리", href: "/intra/ums/badak/stories" },
-                            { name: "니즈 관리", href: "/intra/ums/badak/needs" },
-                            { name: "바닥장 심사", href: "/intra/ums/badak/applications" },
                             { name: "CS/신고", href: "/intra/ums/badak/cs" },
-                        ],
+                        ]),
                     },
                     {
                         name: "HeRo", href: "/intra/hero", icon: Globe,
-                        children: [
-                            // ── 공통 ──
-                            { name: "대시보드", href: "/intra/hero" },
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1. extra = 사이트 메뉴에 없는 운영 화면
+                        children: brandAdminChildren("hero", [
                             { name: "인재 풀", href: "/intra/hero/talent" },
                             { name: "프로그램", href: "/intra/hero/programs" },
-                            // ── 기업 측 (Tetrad) ──
-                            { name: "기업 풀", href: "/intra/hero/companies" },
-                            { name: "TIH 요청", href: "/intra/hero/search-light" },
                             { name: "JD 관리", href: "/intra/hero/jd" },
-                            // ── 인재 측 (Tetrad) ──
-                            { name: "HIT 현황", href: "/intra/hero/hit" },
                             { name: "JH 응답", href: "/intra/hero/jh" },
-                            // ── 매칭 ──
                             { name: "매칭", href: "/intra/hero/matching" },
-                            // ── 탤런트 에이전시 ──
-                            { name: "탤런트 에이전시", href: "/intra/hero/talent-agent/applications" },
-                            // ── Universe Identity ──
                             { name: "영웅 유형", href: "/intra/hero/hero-types" },
-                            // ── 콘텐츠·AI ──
                             { name: "리포트 모듈", href: "/intra/hero/report-modules" },
                             { name: "AI 프롬프트", href: "/intra/hero/ai-prompts" },
-                            // ── 분석 ──
                             { name: "Funnel 분석", href: "/intra/hero/funnel" },
-                            // ── 보조 ──
-                            { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서", href: "/intra/hero/resume" },
-                            // ── 공통 (마지막) ──
                             { name: "고객 문의", href: "/intra/hero/cs" },
-                        ],
+                        ]),
                     },
                     {
                         name: "MAD League", href: "/intra/ums/madleague", icon: Globe,
@@ -295,12 +275,12 @@ export const modules: NavModule[] = [
                     },
                     {
                         name: "MADLeap", href: "/intra/ums/madleap", icon: Globe,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/madleap" },
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1. extra = 사이트 메뉴에 없는 운영 화면
+                        children: brandAdminChildren("madleap", [
                             { name: "회원 관리", href: "/intra/ums/madleap/members" },
                             { name: "심사 관리", href: "/intra/ums/madleap/applications" },
                             { name: "고객 문의", href: "/intra/ums/madleap/cs" },
-                        ],
+                        ]),
                     },
                 ],
             },

@@ -5,7 +5,6 @@
 // - madleap.co.kr 원문 인용 (창립 스토리·핵심 철학·인재상)
 // - 검증 가능한 정보만 표기 (기수 5·창립 2023 하반기)
 
-import Link from "next/link";
 import { Target, Zap, TrendingUp, Award, Quote, ArrowRight, MailOpen, Instagram } from "lucide-react";
 
 /* ── 검증된 콘텐츠 (madleap.co.kr 원문) ── */
@@ -155,19 +154,20 @@ export default function MadLeapAboutPage() {
             </section>
 
             {/* Recruitment Note + Contact CTA */}
-            <section className="bg-neutral-50 py-20 md:py-24">
+            <section id="join" className="bg-neutral-50 py-20 md:py-24">
                 <div className="mx-auto max-w-3xl px-6 text-center">
                     <p className="text-[#4361ee] text-sm font-semibold tracking-wider uppercase mb-3">Join Us</p>
                     <h2 className="text-2xl md:text-3xl font-bold mb-4">매드립과 함께하고 싶다면</h2>
                     <p className="text-neutral-600 text-[15px] leading-relaxed mb-8">{recruitmentNote}</p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <Link
-                            href="/madleap/apply"
+                        {/* 새 사이트 지원서 화면 전까지 공식 메일로 문의 (2026-10-10 — 없는 /madleap/apply 링크 교체) */}
+                        <a
+                            href="mailto:official@madleap.co.kr?subject=%EB%A7%A4%EB%93%9C%EB%A6%BD%20%EC%A7%80%EC%9B%90%20%EB%AC%B8%EC%9D%98"
                             className="w-full sm:w-auto px-6 py-3 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-lg inline-flex items-center justify-center gap-2"
                         >
-                            지원 정보 보기 <ArrowRight className="h-4 w-4" />
-                        </Link>
+                            지원 문의하기 <ArrowRight className="h-4 w-4" />
+                        </a>
                         <a
                             href="https://instagram.com/madleap.official"
                             target="_blank"

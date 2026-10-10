@@ -104,10 +104,10 @@ export default async function MadLeapStudyRoomPage() {
                     <div className="text-center mt-8">
                         <p className="text-sm text-neutral-500 mb-4">아직 매드립 리퍼가 아니라면?</p>
                         <Link
-                            href="/madleap/apply"
+                            href="/madleap/about#join"
                             className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a2e] text-white font-medium rounded-lg hover:bg-[#1a1a2e]/90 transition-colors"
                         >
-                            5기 지원하기 <ArrowRight className="h-4 w-4" />
+                            모집 안내 보기 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>

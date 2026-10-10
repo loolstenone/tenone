@@ -43,7 +43,7 @@ export default function HeroCompanyHubPage() {
             .select("id, role, status, position_title, joined_at, invited_at, hero_companies(id, company_name, industry, size_category)")
             .eq("member_id", user.id)
             .order("invited_at", { ascending: false })
-            .then(res => {
+            .then((res: { data: unknown[] | null }) => {
                 setMyCompanies((res.data ?? []) as unknown as MyCompany[]);
                 setLoading(false);
             });
