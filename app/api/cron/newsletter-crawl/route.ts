@@ -81,6 +81,18 @@ export async function POST(request: NextRequest) {
                     needs_reconnect: false,
                 }).eq('id', tokenRow.id);
 
+                // mindle_sources 마지막 크롤링 시간·횟수 갱신 (이메일 유무 무관 — 0건이어도 실행 기록)
+                const sourceUrl = `mailto:${tokenRow.email}`;
+                const { data: source } = await supabase
+                    .from('mindle_sources')
+                    .select('crawl_count')
+                    .eq('url', sourceUrl)
+                    .maybeSingle();
+                await supabase.from('mindle_sources').update({
+                    last_crawled_at: new Date().toISOString(),
+                    crawl_count: (source?.crawl_count ?? 0) + 1,
+                }).eq('url', sourceUrl);
+
                 if (messages.length === 0) {
                     results.push({ email: tokenRow.email, found: 0, created: 0 });
                     continue;
@@ -105,14 +117,6 @@ export async function POST(request: NextRequest) {
                         // 개별 메시지 오류 무시
                     }
                 }
-
-                // mindle_sources 마지막 크롤링 시간 갱신 (이메일 유무 무관)
-                await supabase.from('mindle_sources').update({
-                    last_crawled_at: new Date().toISOString(),
-                    crawl_count: (tokenRow as Record<string, unknown>).crawl_count
-                        ? Number((tokenRow as Record<string, unknown>).crawl_count) + 1
-                        : 1,
-                }).eq('url', `mailto:${tokenRow.email}`);
 
                 if (emails.length === 0) {
                     results.push({ email: tokenRow.email, found: messages.length, created: 0 });
