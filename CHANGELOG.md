@@ -18,6 +18,7 @@
 - 10-14는 급하지 않음 (처리방침 시행일일 뿐)
 - MADLeap 지원 = 유니버스 폼 (26년 5기 양식, 27년도 유사)
 - Vercel Deployment Storage: 조치 없음
+- Gmail 토큰 보호 DB 권한 변경 승인
 
 ### 변경 내역
 
@@ -28,6 +29,8 @@
 - Badak: `BadakHeader`·`BadakFooter` · 모임 상세 MOCK 제거·없는 모임 안내·빈 상태 문구 · bacademy·contents·hero·shop → `/badak` (sitemap 제거)
 - MADLeap: `MadLeapHeader`·`MadLeapFooter` · `/madleap/forms/[slug]` · `/intra/ums/madleap/forms(/[id])` · 소개(`#join`)·스터디 룸 지원하기 버튼 (없는 `/madleap/apply` 교체)
 - 백업: `docs/audit/2026-10/mad-competition-tables-backup-2026-10-10.json`
+- Gmail 수신: `app/api/auth/gmail/start`·`callback`(requireStaff·CSRF state·XSS 제거) · `lib/gmail/client.ts`(redirect URI·state 쿠키 상수, `isRevokedTokenError`) · `app/api/cron/newsletter-crawl`(계정별 성공·실패 기록) · `lib/intel/ops-health.ts`(끊김 원인 표시) · `app/intra/intel/wholesee/newsletter/page.tsx`(다시 연결 버튼·결과 배너·토큰 비조회) · `sql/gmail-oauth-status.sql`(상태 컬럼 + 토큰 컬럼 브라우저 차단, 운영 적용)
+- 논의: Ollama·코워크(PC 상시)는 상시 자동화에 부적합 → 일괄 처리·개인정보 로컬 처리용, 주간 점검은 클라우드 예약 에이전트 제안 (WORK_STATUS 세션 167)
 
 ---
 

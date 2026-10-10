@@ -20,21 +20,29 @@
 - One ID: rook.co.kr·hero.ne.kr 허브 경유 로그인 정상 확인 (처음 실패는 10분 `t1_sso_none` 쿠키)
 - 10-14 = 이미 공지한 처리방침 시행일일 뿐, 급한 일 없음 (사용자 확인)
 - Vercel Deployment Storage 메일: 조치 불필요(30일 보존으로 축소, opt-out 누르면 과금)
+- **Gmail 뉴스레터 수신 수리**: 4/28 이후 정지(원인 미확정 — OAuth 앱 "테스트" 상태면 7일 만료 유력). ① 보안: `/api/auth/gmail/start`·`callback`이 **비인증**(누구나 자기 Gmail을 수집 파이프라인에 연결 가능) + 콜백 오류 **반사 XSS** → requireStaff + CSRF state 쿠키(.tenone.biz) + 고정 문구로 인트라 복귀 ② 크론이 계정별 `last_success_at`·`last_error`·`needs_reconnect` 기록 → 운영 상태에 "연결 끊김 — 다시 연결" ③ 뉴스레터 화면: 없던 `/api/auth/gmail/authorize` 링크 → "다시 연결 / 계정 추가" 버튼 · 연결 결과 배너 ④ DB `sql/gmail-oauth-status.sql` 적용: 상태 컬럼 + **토큰 컬럼 브라우저 조회 차단**(직원도 상태 칸만, 쓰기는 서버만 — 기존엔 직원 브라우저에서 refresh_token 조회 가능)
+- **논의 — 로컬 AI·상시 PC** (결정 아님, 방향 합의):
+  - Ollama = PC가 켜져 있을 때만 → 매일 돌아야 하는 자동화(수집·분류·브리핑)에는 부적합(서버가 PC를 못 부르고, 꺼지면 조용히 멈춤 — OpenClaw 폐기와 같은 이유). 적합: 쌓인 일 한 번에(분류 오류 1,116행 재분류), 개인정보 문서 로컬 처리(외부 위탁 없음), 프롬프트 실험. 시작 조건 = PC 그래픽카드 메모리 확인 → 한국어 모델 선택 → 재분류 스크립트
+  - 상시 자동화 AI 분류는 서버 + 저가 모델(Claude Haiku 등) — Mindle 재논의 때 결정
+  - Claude 코워크 + PC 상시 켜기 = 같은 한계. 브라우저 조작이 필요한 점검(GTM·Vercel·구글 콘솔)에 적합. 주간 점검·보고는 **Claude Code 클라우드 예약 에이전트**(PC 불필요)를 먼저 제안 — 예: 매주 월 운영 상태 확인 → 문제 알림
 
 ### 다음 첫 액션
 
-1. **배포 확인**: Vercel 최신 READY → 크롬(인트라 로그인됨)으로 인트라 사이드바 HeRo·Badak·MADLeap 메뉴가 사이트 메뉴명으로 나오는지(HeRo: 대시보드·HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면), MADLeap › 지원하기 → 폼 `apply` 편집기 열림·미리보기(직원). 탭 닫기
-2. **MADLeap 지원서 공개 준비** (사용자): 제목 기수(27년 6기) · 모집 기간 · 생년월일 → 출생연도로 줄일지 · 300자 제한 기능 필요 여부(필요하면 `types/forms.ts` FormQuestion에 `maxLength` + `lib/forms.ts` validateFormAnswers + FormRenderer 카운터 + FormEditor 입력)
-3. **처리방침 수집 항목** (시행일 10-14, 급하지 않음): `app/(TenOne)/privacy/page.tsx`·`lib/company-info.ts` 버전 — 프로그램 신청·인증서·서비스 연계·직원 인사·**MADLeap 지원서(생년월일·거주지·채널·추천인)** → 체크리스트 "수집 목적 및 항목" 완료
-4. Gmail 수신 토큰 재연결(사용자 OAuth) — 운영 상태 화면
-5. 실사용 검증: 직원 초대 → StaffWelcome → active · UC 정정 거래 1건 · 경쟁 PT 회차 일괄 발급 · React #418(인트라 헤더 날짜)
-6. 이월: 사이트 검색 자동 연결 · Standard 산업군/직무군 쓰기 화면 위치 · 서비스 연계 범위 추가(RooK·Planner's) · Planner's 이월(`app/(Planners)/CLAUDE.md`)
+1. **Gmail 재연결 (사용자 + 확인)**: 배포 READY → 인트라 › Whole See › 뉴스레터 수집(`/intra/intel/wholesee/newsletter`) › "다시 연결" → `deepdirectdrill@gmail.com` 로그인 → 초록 배너 확인. 같은 때 **구글 클라우드 › OAuth 동의 화면 게시 상태가 "테스트"면 "프로덕션"**으로(7일 만료 방지, 본인 메일만이라 심사 불필요 — 연결 시 "확인되지 않은 앱" 경고는 고급 › 계속). 다음 날 05:00 크론 뒤 운영 상태(`/intra/intel/health`) 뉴스레터 수신 = 정상인지. 실패면 운영 상태 detail에 원인이 남는다
+   - 콜백 redirect URI는 `https://tenone.biz/api/auth/gmail/callback` 그대로(구글 콘솔 등록값). state 쿠키는 `.tenone.biz`라 intra에서 시작해도 통과 — "연결 요청이 만료" 배너가 뜨면 쿠키 도메인 확인
+2. **배포 확인**: Vercel 최신 READY → 크롬(인트라 로그인됨)으로 인트라 사이드바 HeRo·Badak·MADLeap 메뉴가 사이트 메뉴명으로 나오는지(HeRo: 대시보드·HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면), MADLeap › 지원하기 → 폼 `apply` 편집기 열림·미리보기(직원). 탭 닫기
+3. **MADLeap 지원서 공개 준비** (사용자): 제목 기수(27년 6기) · 모집 기간 · 생년월일 → 출생연도로 줄일지 · 300자 제한 기능 필요 여부(필요하면 `types/forms.ts` FormQuestion에 `maxLength` + `lib/forms.ts` validateFormAnswers + FormRenderer 카운터 + FormEditor 입력)
+4. **처리방침 수집 항목** (시행일 10-14, 급하지 않음): `app/(TenOne)/privacy/page.tsx`·`lib/company-info.ts` 버전 — 프로그램 신청·인증서·서비스 연계·직원 인사·**MADLeap 지원서(생년월일·거주지·채널·추천인)** → 체크리스트 "수집 목적 및 항목" 완료
+5. **로컬 AI·예약 에이전트 (사용자 결정 후)**: ① PC 사양(그래픽카드 메모리) 알려주면 Ollama 한국어 모델 선택 + 분류 오류 1,116행 재분류 스크립트(PC에서 1회 실행, Supabase 읽기·쓰기 — service key는 `.env.local`에 두지 말고 실행 시에만) ② 클라우드 예약 에이전트 "매주 월 운영 상태 확인 → 문제 알림" 만들지 (`/schedule`)
+6. 실사용 검증: 직원 초대 → StaffWelcome → active · UC 정정 거래 1건 · 경쟁 PT 회차 일괄 발급 · React #418(인트라 헤더 날짜)
+7. 이월: 사이트 검색 자동 연결 · Standard 산업군/직무군 쓰기 화면 위치 · 서비스 연계 범위 추가(RooK·Planner's) · Planner's 이월(`app/(Planners)/CLAUDE.md`)
 
 ### 주의
 
 - 인트라 브랜드 메뉴는 이제 레지스트리에서 생성 — 집중 브랜드 메뉴를 `lib/intra-nav.ts`에 손으로 적지 않는다(사이트 메뉴에 없는 운영 화면만 `extra`)
 - `trend-crawl` 리포 코드 ≠ 배포 v10 (점수 분기 미배포) — Mindle 결정 전 재배포 금지. 배포 시 `edge-auth.ts`를 같은 폴더에 넣고 `./edge-auth.ts`로 import
 - MADLeap 새 사이트는 비공개 스테이징 — 지원서가 실제로 쓰이는 건 madleap.co.kr DNS 전환 뒤
+- Gmail 토큰(`gmail_oauth_tokens.access_token·refresh_token`)은 브라우저에서 못 읽는다 — 화면은 상태 컬럼만 select, 토큰은 서버(service_role)만
 - 워크트리 `node_modules` 없음 — tsc 기존 에러는 그대로(이번에 HeRo company 1건만 수정)
 
 ---
