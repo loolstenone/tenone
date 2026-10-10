@@ -49,7 +49,7 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
     const admin = createAdminClient();
     const since7d = new Date(Date.now() - 7 * 86400000).toISOString();
 
-    const [ga4Sync, ga4Latest, collected, lastCard, lastRuns, lastBrief, gmailCrawl, issues, signups7d, joins7d, lastJoin] = await Promise.all([
+    const [ga4Sync, ga4Latest, collected, lastCard, lastRuns, lastBrief, gmailCrawl, issues, signups7d, joins7d, lastJoin, gmailAccounts] = await Promise.all([
         latest("analytics_snapshots", "synced_at"),
         latest("analytics_snapshots", "date"),
         latest("collected_data", "collected_at"),
@@ -61,7 +61,12 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
         count("members", q => q.gte("created_at", since7d)),
         count("member_brand_joins", q => q.gte("joined_at", since7d)),
         latest("member_brand_joins", "joined_at"),
+        admin.from("gmail_oauth_tokens").select("email, last_success_at, last_error, needs_reconnect").eq("is_active", true),
     ]);
+    // Gmail: 수신 크론이 계정별 성공·실패를 남긴다 (app/api/cron/newsletter-crawl) — 끊김은 원인까지 표시
+    const gmails = (gmailAccounts.data ?? []) as { email: string; last_success_at: string | null; last_error: string | null; needs_reconnect: boolean }[];
+    const gmailLast = [gmailCrawl, ...gmails.map(g => g.last_success_at)].filter(Boolean).sort().pop() ?? null;
+    const gmailBroken = gmails.filter(g => g.needs_reconnect || g.last_error);
 
     const runs = (lastRuns.data ?? []) as { created_at: string; payload: { crawl?: { errors?: string[] }; process?: { processed?: number; errors?: string[] } } }[];
     const procErrors = runs.flatMap(r => r.payload.process?.errors ?? []);
@@ -90,9 +95,11 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
             detail: hoursSince(lastBrief) <= 26 ? "정상" : `마지막 ${ago(lastBrief)}${reasonOf(procErrors) ? ` — ${reasonOf(procErrors)} (같은 API 키)` : ""}`,
         },
         {
-            key: "gmail_newsletter", label: "뉴스레터 수신 (Gmail)", group: "Whole See (Mindle)", schedule: "매일 05:00", last_success: gmailCrawl, href: "/intra/intel/wholesee/newsletter",
-            status: hoursSince(gmailCrawl) <= 48 ? "ok" : "fail",
-            detail: hoursSince(gmailCrawl) <= 48 ? "정상" : `마지막 수신 ${ago(gmailCrawl)} — Gmail 연결(토큰) 만료 가능성, 뉴스레터 수집 화면에서 확인`,
+            key: "gmail_newsletter", label: "뉴스레터 수신 (Gmail)", group: "Whole See (Mindle)", schedule: "매일 05:00", last_success: gmailLast, href: "/intra/intel/wholesee/newsletter",
+            status: gmails.length === 0 ? "idle" : gmailBroken.length ? "fail" : hoursSince(gmailLast) <= 48 ? "ok" : "fail",
+            detail: gmails.length === 0 ? "연결된 Gmail 계정 없음 — 뉴스레터 화면에서 연결"
+                : gmailBroken.length ? gmailBroken.map(g => `${g.email}: ${g.needs_reconnect ? "연결 끊김 — 다시 연결 필요" : g.last_error}`).join(" · ")
+                : hoursSince(gmailLast) <= 48 ? "정상" : `마지막 수신 ${ago(gmailLast)} — 크론 실행 여부 확인`,
         },
         {
             key: "newsletter_dispatch", label: "뉴스레터 발송", group: "발송", schedule: "10분마다 예약 확인", last_success: null,

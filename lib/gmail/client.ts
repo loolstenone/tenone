@@ -6,6 +6,16 @@
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 
+/** OAuth redirect URI — Google 콘솔에 등록된 값과 같아야 한다 */
+export const GMAIL_REDIRECT_URI = 'https://tenone.biz/api/auth/gmail/callback';
+/** CSRF 방지 state 쿠키 (start → callback) */
+export const GMAIL_STATE_COOKIE = 't1_gmail_oauth_state';
+
+/** 연결이 끊긴 오류(재연결 필요) — 비밀번호 변경·권한 해제·테스트 모드 7일 만료·6개월 미사용 */
+export function isRevokedTokenError(message: string): boolean {
+    return /invalid_grant|Token has been expired or revoked|unauthorized_client/i.test(message);
+}
+
 interface GmailTokens {
     access_token: string;
     refresh_token: string;

@@ -1,17 +1,17 @@
 /**
  * Newsletter Crawl Cron
- * POST /api/cron/newsletter-crawl
+ * GET|POST /api/cron/newsletter-crawl (Vercel Cron 매일 05:00 KST)
  *
  * gmail_oauth_tokens에 등록된 모든 Gmail 계정에서
  * 최근 24시간 뉴스레터를 읽어 AI 요약 → mindle_trends에 저장.
  *
- * Vercel Cron: 매일 AM 9:30 KST (trend-crawl 이후)
+ * 계정별 성공·실패를 gmail_oauth_tokens(last_success_at·last_error·needs_reconnect)에 남긴다 → lib/intel/ops-health.ts
  */
 import { NextRequest } from 'next/server';
 import { internalAuthHeaders, isInternalRequest } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { searchMessages, readMessage, refreshAccessToken } from '@/lib/gmail/client';
+import { searchMessages, readMessage, refreshAccessToken, isRevokedTokenError } from '@/lib/gmail/client';
 
 function getServiceClient() {
     return createSupabaseClient(
@@ -72,6 +72,14 @@ export async function POST(request: NextRequest) {
                 const query = `after:${dateStr} category:updates -in:sent`;
 
                 const messages = await searchMessages(gmailTokens, query, 20);
+
+                // Gmail 접근 성공 = 연결 정상 (운영 상태 화면 기준)
+                await supabase.from('gmail_oauth_tokens').update({
+                    last_success_at: new Date().toISOString(),
+                    last_error: null,
+                    last_error_at: null,
+                    needs_reconnect: false,
+                }).eq('id', tokenRow.id);
 
                 if (messages.length === 0) {
                     results.push({ email: tokenRow.email, found: 0, created: 0 });
@@ -139,11 +147,20 @@ export async function POST(request: NextRequest) {
                 }
 
             } catch (e) {
+                const message = e instanceof Error ? e.message : 'Unknown error';
+                const revoked = isRevokedTokenError(message);
+                console.error(`[newsletter-crawl] ${tokenRow.email}:`, message);
+                // 실패를 버리지 않고 남긴다 — 끊김(재연결 필요)은 운영 상태에 바로 표시
+                await supabase.from('gmail_oauth_tokens').update({
+                    last_error: revoked ? 'Gmail 연결이 끊겼습니다 — 뉴스레터 화면에서 다시 연결' : message.slice(0, 500),
+                    last_error_at: new Date().toISOString(),
+                    needs_reconnect: revoked,
+                }).eq('id', tokenRow.id);
                 results.push({
                     email: tokenRow.email,
                     found: 0,
                     created: 0,
-                    error: e instanceof Error ? e.message : 'Unknown error',
+                    error: message,
                 });
             }
         }

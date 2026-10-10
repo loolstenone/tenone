@@ -1,47 +1,47 @@
 /**
- * Gmail OAuth 콜백
- * GET /api/auth/gmail/callback?code=...
+ * Gmail OAuth 콜백 — 직원 전용
+ * GET /api/auth/gmail/callback?code=...&state=...
  *
- * Google에서 code를 받아 tokens로 교환 → DB에 저장.
- * mindle_sources에 뉴스레터 소스로 자동 등록.
+ * state 확인 → code를 토큰으로 교환 → DB 저장(service_role) → mindle_sources에 뉴스레터 소스 등록(없으면)
+ * → 인트라 뉴스레터 화면으로 돌아간다 (?gmail=connected|error). 화면에 외부 입력을 그대로 그리지 않는다.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCode, getProfile } from '@/lib/gmail/client';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { exchangeCode, getProfile, GMAIL_REDIRECT_URI, GMAIL_STATE_COOKIE } from '@/lib/gmail/client';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireStaff } from '@/lib/api-guard';
+import { getCookieDomain } from '@/lib/domain-registry';
+
+const RETURN_PATH = '/intra/intel/wholesee/newsletter';
+
+function back(request: NextRequest, result: 'connected' | 'error', reason?: string) {
+    const url = new URL(RETURN_PATH, 'https://intra.tenone.biz');
+    if (process.env.VERCEL_ENV !== 'production') url.host = request.nextUrl.host;
+    url.searchParams.set('gmail', result);
+    if (reason) url.searchParams.set('reason', reason);
+    const res = NextResponse.redirect(url);
+    res.cookies.set(GMAIL_STATE_COOKIE, '', { path: '/api/auth/gmail', maxAge: 0, domain: getCookieDomain(request.nextUrl.hostname) });
+    return res;
+}
 
 export async function GET(request: NextRequest) {
-    const code = request.nextUrl.searchParams.get('code');
-    const error = request.nextUrl.searchParams.get('error');
+    const auth = await requireStaff(request);
+    if (auth instanceof NextResponse) return auth;
 
-    if (error) {
-        return new NextResponse(
-            `<html><body><h2>Gmail 인증 실패</h2><p>${error}</p><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
-            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        );
-    }
-
-    if (!code) {
-        return new NextResponse(
-            `<html><body><h2>인증 코드 없음</h2><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
-            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        );
-    }
+    const sp = request.nextUrl.searchParams;
+    const state = sp.get('state');
+    if (!state || state !== request.cookies.get(GMAIL_STATE_COOKIE)?.value) return back(request, 'error', 'state');
+    if (sp.get('error')) return back(request, 'error', 'denied');
+    const code = sp.get('code');
+    if (!code) return back(request, 'error', 'code');
 
     try {
-        const redirectUri = `https://tenone.biz/api/auth/gmail/callback`;
-
-        // code → tokens 교환
-        const tokens = await exchangeCode(code, redirectUri);
-
-        // 이메일 주소 확인
+        const tokens = await exchangeCode(code, GMAIL_REDIRECT_URI);
+        // prompt=consent라 항상 오지만, 없으면 다음 갱신 때 끊긴다 → 실패로 처리
+        if (!tokens.refresh_token) return back(request, 'error', 'no_refresh_token');
         const email = await getProfile(tokens);
 
-        // DB에 저장 (upsert) — service_role로 RLS 우회
-        const supabase = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        );
-        await supabase.from('gmail_oauth_tokens').upsert({
+        const admin = createAdminClient();
+        const { error } = await admin.from('gmail_oauth_tokens').upsert({
             email,
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
@@ -50,18 +50,16 @@ export async function GET(request: NextRequest) {
             is_active: true,
             label: `newsletter:${email}`,
             tenant_id: 'tenone',
+            needs_reconnect: false,
+            last_error: null,
+            last_error_at: null,
             updated_at: new Date().toISOString(),
         }, { onConflict: 'email' });
+        if (error) throw error;
 
-        // mindle_sources에 뉴스레터 소스 등록 (없으면)
-        const { data: existing } = await supabase
-            .from('mindle_sources')
-            .select('id')
-            .eq('url', `mailto:${email}`)
-            .limit(1);
-
-        if (!existing || existing.length === 0) {
-            await supabase.from('mindle_sources').insert({
+        const { data: existing } = await admin.from('mindle_sources').select('id').eq('url', `mailto:${email}`).limit(1);
+        if (!existing?.length) {
+            await admin.from('mindle_sources').insert({
                 name: `${email} 뉴스레터`,
                 url: `mailto:${email}`,
                 source_type: 'newsletter',
@@ -72,21 +70,9 @@ export async function GET(request: NextRequest) {
                 notes: 'Gmail OAuth 자동 등록',
             });
         }
-
-        return new NextResponse(
-            `<html><body style="font-family:sans-serif;padding:40px;text-align:center">
-                <h2>Gmail 연결 완료</h2>
-                <p><strong>${email}</strong> 계정이 Mindle 뉴스레터 수집에 연결되었습니다.</p>
-                <p style="color:#888;margin-top:20px">이제 Cron이 자동으로 뉴스레터를 수집합니다.</p>
-                <a href="/intra/intel/wholesee/sources" style="display:inline-block;margin-top:20px;padding:10px 20px;background:#111;color:#fff;text-decoration:none">RSS 소스 관리로 돌아가기</a>
-            </body></html>`,
-            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        );
+        return back(request, 'connected');
     } catch (e) {
         console.error('[Gmail OAuth] 오류:', e);
-        return new NextResponse(
-            `<html><body><h2>Gmail 인증 오류</h2><p>${e instanceof Error ? e.message : 'Unknown error'}</p><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
-            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        );
+        return back(request, 'error', 'exchange');
     }
 }

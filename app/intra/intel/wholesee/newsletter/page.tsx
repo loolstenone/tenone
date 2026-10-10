@@ -28,7 +28,22 @@ interface GmailAccount {
     expiry_date: number | null;
     created_at: string;
     updated_at: string;
+    last_success_at: string | null;
+    last_error: string | null;
+    needs_reconnect: boolean;
 }
+
+/** Gmail 연결 결과 (?gmail=connected|error&reason=) — 콜백이 돌려보낸다 */
+const GMAIL_RESULT: Record<string, string> = {
+    connected: "Gmail이 연결되었습니다. 다음 수신(매일 05:00)부터 뉴스레터를 가져옵니다.",
+    state: "연결 요청이 만료되었거나 올바르지 않습니다. 다시 연결해 주세요.",
+    denied: "Google에서 권한을 허용하지 않아 연결하지 않았습니다.",
+    code: "Google 인증 코드가 없습니다. 다시 연결해 주세요.",
+    no_refresh_token: "Google이 장기 연결 토큰을 주지 않았습니다. Google 계정 › 보안 › 타사 앱에서 이 앱 권한을 지운 뒤 다시 연결해 주세요.",
+    exchange: "토큰 교환에 실패했습니다. 잠시 후 다시 연결해 주세요.",
+};
+// 토큰(access_token·refresh_token)은 브라우저로 가져오지 않는다 — 서버만 사용
+const GMAIL_COLS = "id, email, is_active, label, expiry_date, created_at, updated_at, last_success_at, last_error, needs_reconnect";
 
 interface NewsletterSource {
     id: string;
@@ -67,12 +82,16 @@ export default function WholeSeeNewsletterPage() {
     const [sources, setSources] = useState<NewsletterSource[]>([]);
     const [collected, setCollected] = useState<CollectedNewsletter[]>([]);
     const [collectedCount, setCollectedCount] = useState(0);
+    const [gmailResult, setGmailResult] = useState<{ ok: boolean; text: string } | null>(null);
 
     useEffect(() => {
+        const sp = new URLSearchParams(window.location.search);
+        const r = sp.get("gmail");
+        if (r) setGmailResult({ ok: r === "connected", text: GMAIL_RESULT[r === "connected" ? "connected" : sp.get("reason") ?? "exchange"] ?? GMAIL_RESULT.exchange });
         async function load() {
             const sb = createClient();
             const [gRes, sRes, cRes, cntRes] = await Promise.all([
-                sb.from("gmail_oauth_tokens").select("*").order("updated_at", { ascending: false }),
+                sb.from("gmail_oauth_tokens").select(GMAIL_COLS).order("updated_at", { ascending: false }),
                 sb.from("mindle_sources").select("*").eq("source_type", "newsletter").order("last_crawled_at", { ascending: false, nullsFirst: false }),
                 sb.from("collected_data").select("id, title, author, source_name, collected_at, status, category")
                     .eq("source_type", "newsletter").order("collected_at", { ascending: false }).limit(20),
@@ -98,6 +117,12 @@ export default function WholeSeeNewsletterPage() {
                 title="뉴스레터 수집"
                 description="외부에서 받는 뉴스레터를 Gmail로 자동 수신 → Whole See 트렌드 원천으로 활용"
             />
+            {gmailResult && (
+                <div className={`flex items-start gap-2 rounded-lg border px-4 py-3 text-xs ${gmailResult.ok ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+                    {gmailResult.ok ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+                    {gmailResult.text}
+                </div>
+            )}
 
             {/* 구분 안내 */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
@@ -146,13 +171,19 @@ export default function WholeSeeNewsletterPage() {
 
             {/* Gmail 계정 */}
             <div>
-                <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-blue-500" />
-                    연결된 Gmail 계정
-                </h2>
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-blue-500" />
+                        연결된 Gmail 계정
+                    </h2>
+                    {/* 같은 계정을 다시 연결하면 토큰만 새로 받는다 (끊김 복구) */}
+                    <a href="/api/auth/gmail/start" className="inline-flex items-center gap-1 rounded border border-neutral-300 px-2.5 py-1 text-[11px] text-neutral-700 hover:bg-neutral-50">
+                        <RefreshCw className="h-3 w-3" /> {gmails.length ? "다시 연결 / 계정 추가" : "Gmail 연결하기"}
+                    </a>
+                </div>
                 {gmails.length === 0 ? (
                     <div className="bg-neutral-50 border border-dashed border-neutral-200 rounded-lg p-6 text-center text-xs text-neutral-400">
-                        연결된 Gmail 계정이 없습니다. <Link href="/api/auth/gmail/authorize" className="text-blue-600 underline">Gmail 연결하기</Link>
+                        연결된 Gmail 계정이 없습니다. 오른쪽 위 &apos;Gmail 연결하기&apos;로 수신용 계정을 연결하세요.
                     </div>
                 ) : (
                     <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
@@ -162,8 +193,7 @@ export default function WholeSeeNewsletterPage() {
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">이메일</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">라벨</th>
                                     <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
-                                    <th className="text-right px-3 py-2 font-semibold text-neutral-600">토큰 만료</th>
-                                    <th className="text-right px-3 py-2 font-semibold text-neutral-600">최근 갱신</th>
+                                    <th className="text-right px-3 py-2 font-semibold text-neutral-600">마지막 수신</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -172,18 +202,21 @@ export default function WholeSeeNewsletterPage() {
                                         <td className="px-3 py-2 font-medium text-neutral-900">{g.email}</td>
                                         <td className="px-3 py-2 text-neutral-600">{g.label || "-"}</td>
                                         <td className="px-3 py-2">
-                                            {g.is_active ? (
+                                            {!g.is_active ? (
+                                                <span className="inline-flex items-center gap-1 text-neutral-400 text-[10px]">비활성</span>
+                                            ) : g.needs_reconnect || g.last_error ? (
+                                                <span className="inline-flex items-center gap-1 text-red-600 text-[10px]" title={g.last_error ?? undefined}>
+                                                    <AlertCircle className="h-3 w-3" /> {g.needs_reconnect ? "연결 끊김 — 다시 연결" : g.last_error}
+                                                </span>
+                                            ) : g.last_success_at ? (
                                                 <span className="inline-flex items-center gap-1 text-emerald-700 text-[10px]">
-                                                    <CheckCircle2 className="h-3 w-3" /> 활성
+                                                    <CheckCircle2 className="h-3 w-3" /> 정상
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 text-neutral-400 text-[10px]">비활성</span>
+                                                <span className="inline-flex items-center gap-1 text-neutral-400 text-[10px]">첫 수신 대기</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 text-right text-neutral-500">
-                                            {g.expiry_date ? new Date(g.expiry_date).toLocaleDateString() : "-"}
-                                        </td>
-                                        <td className="px-3 py-2 text-right text-neutral-500">{rel(g.updated_at)}</td>
+                                        <td className="px-3 py-2 text-right text-neutral-500">{g.last_success_at ? rel(g.last_success_at) : "-"}</td>
                                     </tr>
                                 ))}
                             </tbody>
