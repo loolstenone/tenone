@@ -173,6 +173,14 @@ function QuestionsEditor({ form, update, setQuestions }: {
                             )}
                         </div>
                     )}
+                    {(q.type === "short" || q.type === "long") && (
+                        <label className="flex items-center gap-2 text-xs text-neutral-600">최대 글자 수
+                            <input type="number" min={1} max={5000} value={q.maxLength ?? ""} placeholder="제한 없음"
+                                onChange={e => patchQ(i, { maxLength: e.target.value ? Number(e.target.value) : undefined })}
+                                className="w-24 border border-neutral-300 rounded px-2 py-1" />
+                            <span className="text-neutral-400">비우면 제한 없음 (최대 5,000자)</span>
+                        </label>
+                    )}
                     {q.type === "file" && (
                         <label className="flex items-center gap-2 text-xs text-neutral-600">최대 파일 수
                             <select value={q.maxFiles ?? 1} onChange={e => patchQ(i, { maxFiles: Number(e.target.value) })} className="border border-neutral-300 rounded px-2 py-1">

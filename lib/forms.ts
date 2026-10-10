@@ -80,6 +80,7 @@ export function validateFormAnswers(questions: FormQuestion[], answers: FormAnsw
             continue;
         }
         if (typeof v === "string" && v.length > 5000) { errors[q.id] = "5,000자 이내로 입력해 주세요."; continue; }
+        if (typeof v === "string" && q.maxLength && v.trim().length > q.maxLength) { errors[q.id] = `${q.maxLength.toLocaleString()}자 이내로 입력해 주세요.`; continue; }
         switch (q.type) {
             case "email": if (typeof v !== "string" || !EMAIL_RE.test(v.trim())) errors[q.id] = "이메일 형식이 아닙니다."; break;
             case "phone": if (typeof v !== "string" || !/^[0-9+\-\s()]{8,20}$/.test(v.trim())) errors[q.id] = "전화번호를 확인해 주세요."; break;

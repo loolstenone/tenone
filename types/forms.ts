@@ -17,6 +17,8 @@ export interface FormQuestion {
     allowOther?: boolean;
     /** file: 최대 파일 수 (기본 1, 최대 3) */
     maxFiles?: number;
+    /** short·long: 최대 글자 수 (없으면 5,000자) */
+    maxLength?: number;
 }
 
 export interface FormSettings {

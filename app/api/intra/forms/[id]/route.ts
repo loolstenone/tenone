@@ -36,6 +36,7 @@ function cleanQuestions(raw: unknown): FormQuestion[] | string {
             if (q.allowOther && type !== "select") item.allowOther = true;
         }
         if (type === "file") item.maxFiles = Math.min(Math.max(Number(q.maxFiles) || 1, 1), FORM_FILE_MAX);
+        if ((type === "short" || type === "long") && Number(q.maxLength) > 0) item.maxLength = Math.min(Math.floor(Number(q.maxLength)), 5000);
         out.push(item);
     }
     return out;

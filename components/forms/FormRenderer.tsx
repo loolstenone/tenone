@@ -273,7 +273,10 @@ function QuestionField({ q, value, error, onChange, files, onFiles, keptFiles, t
     let field: React.ReactNode;
     switch (q.type) {
         case "long":
-            field = <textarea rows={5} className={`${inputCls} resize-y`} value={str} onChange={e => onChange(e.target.value)} />;
+            field = <textarea rows={5} className={`${inputCls} resize-y`} value={str} maxLength={q.maxLength} onChange={e => onChange(e.target.value)} />;
+            break;
+        case "short":
+            field = <input type="text" className={inputCls} value={str} maxLength={q.maxLength} onChange={e => onChange(e.target.value)} />;
             break;
         case "radio": {
             const isOther = str.startsWith(OTHER_PREFIX);
@@ -361,6 +364,9 @@ function QuestionField({ q, value, error, onChange, files, onFiles, keptFiles, t
         <div>
             {label}
             {field}
+            {q.maxLength && (q.type === "short" || q.type === "long") && (
+                <p className={`mt-1 text-right text-xs ${t.muted}`}>{str.length.toLocaleString()} / {q.maxLength.toLocaleString()}자</p>
+            )}
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
         </div>
     );
