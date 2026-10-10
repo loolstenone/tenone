@@ -266,6 +266,8 @@ function SettingsEditor({ form, update, programs }: { form: FormDef; update: (p:
 function ResponsesView({ form, responses, reload }: { form: FormDef; responses: ResponseRow[] | null; reload: () => void }) {
     const [open, setOpen] = useState<string | null>(null);
     const [filter, setFilter] = useState<string>("all");
+    const [selected, setSelected] = useState<Set<string>>(new Set());
+    const [deleting, setDeleting] = useState(false);
     const questions = form.questions.filter(q => q.type !== "section");
     const nameQ = questions.find(q => q.type === "short");
     const emailQ = questions.find(q => q.type === "email");
@@ -278,16 +280,46 @@ function ResponsesView({ form, responses, reload }: { form: FormDef; responses: 
         reload();
     };
 
+    // 영구 삭제 (응답 + 첨부파일) — 보관 기간 정리는 운영자 판단 (docs/Data_Lifecycle.md 3.2.1)
+    const remove = async (ids: string[]) => {
+        if (ids.length === 0) return;
+        if (!confirm(`응답 ${ids.length}건과 첨부파일을 영구 삭제합니다. 되돌릴 수 없습니다.\n삭제할까요?`)) return;
+        setDeleting(true);
+        const res = await fetch(`/api/intra/forms/${form.id}/responses`, {
+            method: "DELETE", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ responseIds: ids }),
+        });
+        const data = await res.json().catch(() => ({}));
+        setDeleting(false);
+        if (!res.ok) { alert(data.error ?? "삭제하지 못했습니다."); return; }
+        setSelected(new Set());
+        setOpen(null);
+        reload();
+    };
+    const toggleSel = (id: string) => setSelected(s => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+
     if (!responses) return <p className="text-sm text-neutral-400">불러오는 중…</p>;
     const list = responses.filter(r => filter === "all" || r.status === filter);
+    const allSel = list.length > 0 && list.every(r => selected.has(r.id));
     return (
         <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
                 {["all", "pending", "accepted", "rejected", "cancelled"].map(k => (
-                    <button key={k} onClick={() => setFilter(k)} className={`text-xs px-3 py-1 rounded border ${filter === k ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-300 text-neutral-600"}`}>
+                    <button key={k} onClick={() => { setFilter(k); setSelected(new Set()); }} className={`text-xs px-3 py-1 rounded border ${filter === k ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-300 text-neutral-600"}`}>
                         {k === "all" ? `전체 ${responses.length}` : `${RESPONSE_STATUS[k].label} ${responses.filter(r => r.status === k).length}`}
                     </button>
                 ))}
+                {list.length > 0 && (
+                    <label className="ml-2 flex items-center gap-1 text-xs text-neutral-600">
+                        <input type="checkbox" checked={allSel} onChange={() => setSelected(allSel ? new Set() : new Set(list.map(r => r.id)))} /> 이 목록 전체 선택
+                    </label>
+                )}
+                {selected.size > 0 && (
+                    <button onClick={() => remove([...selected])} disabled={deleting}
+                        className="inline-flex items-center gap-1 text-sm border border-red-300 text-red-600 rounded px-3 py-1.5 hover:bg-red-50 disabled:opacity-50">
+                        {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} 선택 {selected.size}건 삭제
+                    </button>
+                )}
                 <a href={`/api/intra/forms/${form.id}/responses?format=csv`} className="ml-auto inline-flex items-center gap-1 text-sm border border-neutral-300 rounded px-3 py-1.5 hover:bg-neutral-50"><Download className="h-4 w-4" /> 엑셀(CSV)</a>
             </div>
             {list.length === 0 ? <p className="text-sm text-neutral-400 py-10 text-center">응답이 없습니다.</p> : (
@@ -297,13 +329,16 @@ function ResponsesView({ form, responses, reload }: { form: FormDef; responses: 
                         const mail = r.member?.email ?? (emailQ ? formatAnswer(r.answers?.[emailQ.id]) : "") ?? "";
                         return (
                             <div key={r.id}>
-                                <button onClick={() => setOpen(open === r.id ? null : r.id)} className="w-full flex flex-wrap items-center gap-3 px-4 py-3 text-left hover:bg-neutral-50">
+                                <div className="flex items-center hover:bg-neutral-50">
+                                <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSel(r.id)} className="ml-4" aria-label="응답 선택" />
+                                <button onClick={() => setOpen(open === r.id ? null : r.id)} className="flex-1 flex flex-wrap items-center gap-3 px-4 py-3 text-left">
                                     <span className={`text-[11px] px-2 py-0.5 rounded ${RESPONSE_STATUS[r.status].tone}`}>{RESPONSE_STATUS[r.status].label}</span>
                                     <span className="font-medium text-neutral-900">{who || "(이름 없음)"}</span>
                                     <span className="text-xs text-neutral-500">{mail}</span>
                                     {r.member && <span className="text-[10px] text-sky-600">회원</span>}
                                     <span className="ml-auto text-xs text-neutral-400">{new Date(r.created_at).toLocaleString("ko-KR")}</span>
                                 </button>
+                                </div>
                                 {open === r.id && (
                                     <div className="px-4 pb-4 space-y-3 bg-neutral-50/50">
                                         <dl className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-x-4 gap-y-2 text-sm pt-2">
@@ -328,6 +363,8 @@ function ResponsesView({ form, responses, reload }: { form: FormDef; responses: 
                                             ))}
                                             <input defaultValue={r.staff_note ?? ""} placeholder="직원 메모 (엔터로 저장)" className="flex-1 min-w-[200px] border border-neutral-300 rounded px-2 py-1 text-xs"
                                                 onKeyDown={e => { if (e.key === "Enter") setStatus(r, r.status, (e.target as HTMLInputElement).value); }} />
+                                            <button onClick={() => remove([r.id])} disabled={deleting} title="응답 영구 삭제"
+                                                className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> 삭제</button>
                                         </div>
                                     </div>
                                 )}

@@ -3,10 +3,12 @@
  *   GET   /api/intra/forms/{id}/responses              응답 목록 (응답자 = members 이름·이메일 조회, 복사 저장 없음)
  *   GET   /api/intra/forms/{id}/responses?format=csv   엑셀용 CSV (BOM)
  *   PATCH /api/intra/forms/{id}/responses              { responseId, status?, staff_note? }
+ *   DELETE /api/intra/forms/{id}/responses             { responseIds[] } 응답 + 첨부파일 영구 삭제 (보관 기간 정리 = 운영자 수동, docs/Data_Lifecycle.md 3.2.1)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { CONTACT_ATTACHMENT_BUCKET } from "@/lib/contact-attachments";
 import { formatAnswer } from "@/lib/forms";
 import type { FormAttachment, FormQuestion } from "@/types/forms";
 
@@ -75,4 +77,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const { error } = await createAdminClient().from("form_responses").update(patch).eq("id", body.responseId).eq("form_id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
+}
+
+export async function DELETE(req: NextRequest, { params }: Params) {
+    const auth = await requireStaff(req);
+    if (auth instanceof NextResponse) return auth;
+    const { id } = await params;
+    const body = await req.json().catch(() => ({}));
+    const ids = (Array.isArray(body.responseIds) ? body.responseIds : []).map(String).filter(Boolean);
+    if (ids.length === 0 || ids.length > 500) return NextResponse.json({ error: "삭제할 응답을 1~500건 골라 주세요." }, { status: 400 });
+
+    const admin = createAdminClient();
+    const { data: rows, error } = await admin.from("form_responses").select("id, attachments").eq("form_id", id).in("id", ids);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!rows?.length) return NextResponse.json({ error: "응답을 찾을 수 없습니다." }, { status: 404 });
+
+    // 첨부파일 먼저 — 행을 지운 뒤엔 경로를 알 수 없어 파일만 남는다
+    const paths = rows.flatMap(r => ((r.attachments ?? []) as FormAttachment[]).map(a => a.path)).filter(Boolean);
+    if (paths.length) {
+        const { error: se } = await admin.storage.from(CONTACT_ATTACHMENT_BUCKET).remove(paths);
+        if (se) return NextResponse.json({ error: `첨부파일 삭제 실패: ${se.message}` }, { status: 500 });
+    }
+    const { error: de } = await admin.from("form_responses").delete().eq("form_id", id).in("id", rows.map(r => r.id));
+    if (de) return NextResponse.json({ error: de.message }, { status: 500 });
+    return NextResponse.json({ success: true, deleted: rows.length, files: paths.length });
 }

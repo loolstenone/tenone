@@ -91,7 +91,7 @@
 | 테이블 | 브랜드 탈퇴 | 비고 |
 |--------|-----------|------|
 | form_responses (member_id 있음) | 삭제 + 첨부파일(`contact-attachments/forms/...`) 삭제 | 해당 brand_id 응답만 |
-| form_responses (비회원, respondent_email) | 폼별 보관 기간(`consent.retention`) 경과 후 삭제 | **자동 삭제 없음 — 운영자가 판단해 수동 정리** (2026-10-10 사용자 결정). 동의서에 적은 보관 기간을 넘기지 않게 모집이 끝나면 정리 (인트라 응답 화면에 응답 삭제 기능 없음 — 필요 시 추가) |
+| form_responses (비회원, respondent_email) | 폼별 보관 기간(`consent.retention`) 경과 후 삭제 | **자동 삭제 없음 — 운영자가 판단해 수동 정리** (2026-10-10 사용자 결정). 동의서에 적은 보관 기간을 넘기지 않게 모집이 끝나면 정리 = 인트라 폼 › 응답 탭 › 선택 삭제·개별 삭제 (응답 + 첨부파일 영구 삭제) |
 | forms | 유지 | 신청서 정의 (개인정보 없음) |
 
 ### 3.2.2 코어 프로그램 모듈 (`program_*`, 2026-10-08 — MADLeague·RooK·HeRo 공용, brand_id별)
