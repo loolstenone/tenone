@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
+import { requireUser } from '@/lib/api-guard';
+import { createAdminClient } from '@/lib/supabase/admin';
+
+/*
+ * Badak 프로필 변경 인증 코드 (2026-10-11 보안 수리)
+ *   - 대상 이메일·사용자 ID는 세션에서만 — 요청 body의 email·userId는 받지 않는다 (남의 계정으로 메일 발송·코드 검증 차단)
+ *   - 실패 5회면 코드 무효화 (badak_verify_codes.attempts) · 10분 만료 · 재발송 60초 간격
+ */
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+const MAX_ATTEMPTS = 5;
+const RESEND_INTERVAL_MS = 60 * 1000;
 
 function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -39,43 +41,48 @@ function buildEmailHtml(code: string): string {
 </body></html>`;
 }
 
-// POST: 인증 코드 발송
+// POST: 인증 코드 발송 (세션 이메일로만)
 export async function POST(req: NextRequest) {
+  const auth = await requireUser(req);
+  if (auth instanceof NextResponse) return auth;
+  const email = auth.email;
+  const userId = auth.user.id;
+  if (!email) return NextResponse.json({ error: '계정에 이메일이 없습니다.' }, { status: 400 });
+
   try {
-    const { email, userId } = await req.json();
-    if (!email || !userId) {
-      return NextResponse.json({ error: '이메일과 사용자 ID가 필요합니다.' }, { status: 400 });
+    const supabase = createAdminClient();
+
+    // 재발송 간격
+    const { data: recent } = await supabase
+      .from('badak_verify_codes')
+      .select('created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recent && Date.now() - new Date(recent.created_at).getTime() < RESEND_INTERVAL_MS) {
+      return NextResponse.json({ error: '잠시 후 다시 요청해주세요.' }, { status: 429 });
     }
 
     const code = generateCode();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10분
 
-    const supabase = getAdminClient();
-
     // 기존 코드 무효화 + 새 코드 저장
-    await supabase
-      .from('badak_verify_codes')
-      .update({ used: true })
-      .eq('user_id', userId)
-      .eq('used', false);
-
+    await supabase.from('badak_verify_codes').update({ used: true }).eq('user_id', userId).eq('used', false);
     const { error: insertErr } = await supabase
       .from('badak_verify_codes')
-      .insert({ user_id: userId, email, code, expires_at: expiresAt, used: false });
-
+      .insert({ user_id: userId, email, code, expires_at: expiresAt, used: false, attempts: 0 });
     if (insertErr) {
       console.error('[Badak Verify] DB insert error:', insertErr);
       return NextResponse.json({ error: '인증 코드 저장 실패' }, { status: 500 });
     }
 
-    // 이메일 발송
     const { error: emailErr } = await resend.emails.send({
       from: 'Badak <noreply@tenone.biz>',
       to: email,
       subject: '[Badak] 프로필 변경 인증 코드',
       html: buildEmailHtml(code),
     });
-
     if (emailErr) {
       console.error('[Badak Verify] Email send error:', emailErr);
       return NextResponse.json({ error: '이메일 발송 실패' }, { status: 500 });
@@ -88,37 +95,48 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: 인증 코드 검증
+// PUT: 인증 코드 검증 (세션 사용자의 코드만)
 export async function PUT(req: NextRequest) {
+  const auth = await requireUser(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.user.id;
+
   try {
-    const { userId, code } = await req.json();
-    if (!userId || !code) {
-      return NextResponse.json({ error: '사용자 ID와 인증 코드가 필요합니다.' }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    const code = typeof body?.code === 'string' ? body.code.trim() : '';
+    if (!/^\d{6}$/.test(code)) {
+      return NextResponse.json({ error: '6자리 인증 코드를 입력해주세요.' }, { status: 400 });
     }
 
-    const supabase = getAdminClient();
-
-    const { data, error } = await supabase
+    const supabase = createAdminClient();
+    const { data: current } = await supabase
       .from('badak_verify_codes')
-      .select('*')
+      .select('id, code, attempts')
       .eq('user_id', userId)
-      .eq('code', code)
       .eq('used', false)
       .gte('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) {
-      return NextResponse.json({ error: '인증 코드가 올바르지 않거나 만료되었습니다.' }, { status: 400 });
+    if (!current) {
+      return NextResponse.json({ error: '인증 코드가 만료되었습니다. 다시 요청해주세요.' }, { status: 400 });
     }
 
-    // 코드 사용 처리
-    await supabase
-      .from('badak_verify_codes')
-      .update({ used: true })
-      .eq('id', data.id);
+    if (current.code !== code) {
+      const attempts = (current.attempts ?? 0) + 1;
+      // 실패 횟수 초과 → 코드 폐기
+      await supabase
+        .from('badak_verify_codes')
+        .update(attempts >= MAX_ATTEMPTS ? { attempts, used: true } : { attempts })
+        .eq('id', current.id);
+      return NextResponse.json(
+        { error: attempts >= MAX_ATTEMPTS ? '실패 횟수를 초과했습니다. 코드를 다시 요청해주세요.' : '인증 코드가 올바르지 않습니다.' },
+        { status: 400 },
+      );
+    }
 
+    await supabase.from('badak_verify_codes').update({ used: true }).eq('id', current.id);
     return NextResponse.json({ success: true, verified: true });
   } catch (err) {
     console.error('[Badak Verify] Unexpected error:', err);

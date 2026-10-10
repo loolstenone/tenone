@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
             } catch (e) {
                 const message = e instanceof Error ? e.message : 'Unknown error';
                 const revoked = isRevokedTokenError(message);
-                console.error(`[newsletter-crawl] ${tokenRow.email}:`, message);
+                console.error(`[newsletter-crawl] ${tokenRow.email.replace(/^(.{2}).*(@.*)$/, '$1***$2')}:`, message);
                 // 실패를 버리지 않고 남긴다 — 끊김(재연결 필요)은 운영 상태에 바로 표시
                 await supabase.from('gmail_oauth_tokens').update({
                     last_error: revoked ? 'Gmail 연결이 끊겼습니다 — 뉴스레터 화면에서 다시 연결' : message.slice(0, 500),

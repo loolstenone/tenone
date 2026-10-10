@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
                 subject: `[JAKKA] 쇼케이스 승인 요청 — ${showcaseTitle}`,
                 html: renderApprovalHtml({ showcaseTitle, organizerName, approveUrl }),
             });
-            if (error) { console.error("showcase approval email error:", email, error); fail++; }
+            if (error) { console.error("showcase approval email error:", email.replace(/^(.{2}).*(@.*)$/, "$1***$2"), error); fail++; }
             else ok++;
         }
 

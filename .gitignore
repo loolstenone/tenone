@@ -25,3 +25,7 @@ __pycache__/
 scripts/dumppdf.py
 scripts/pdf2txt.py
 scripts/vba_extract.py
+
+# env 내보내기·백업 (2026-10-11 보안 점검 — 공개 저장소)
+*vercel_env*.json
+*.env.json
