@@ -11,6 +11,7 @@ const COPIES: { top: string; accent: string }[] = [
   { top: '전략과 크리에이티브,', accent: '양손잡이 마케터' },
   { top: '세상을 바꾸는,', accent: '우리는 모두 기획자다' },
   { top: '실전이 우리를,', accent: '강하게 하리라' },
+  { top: '실전 경쟁을 통해,', accent: '경력 같은 신입이 된다' },
 ];
 
 const INTERVAL_MS = 3000;
@@ -24,7 +25,7 @@ export function HeroRotatingTitle() {
   }, []);
 
   return (
-    <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight">
+    <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight break-keep">
       <span className="sr-only">{COPIES[0].top} {COPIES[0].accent}</span>
       <span className="grid" aria-hidden>
         {COPIES.map((c, i) => {
