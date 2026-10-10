@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runFullScan, extractDomain } from '@/lib/smarcomm/run-scan';
+import { getApiUser } from '@/lib/api-guard';
+import { isPublicHttpUrl } from '@/lib/url-guard';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,12 +27,19 @@ export async function POST(request: NextRequest) {
     if (!domain) {
       return NextResponse.json({ error: '유효하지 않은 URL입니다' }, { status: 400 });
     }
+    // SSRF 차단 — 서버가 대신 접속하므로 공개 http(s) 주소만 (사설망·루프백·메타데이터 주소 거부, 2026-10-11)
+    if (!(await isPublicHttpUrl(normalizedUrl))) {
+      return NextResponse.json({ error: '공개 웹사이트 주소만 분석할 수 있습니다' }, { status: 400 });
+    }
+    // 공개 진단은 데모 테넌트에만 기록 — body의 tenant_id는 직원만 지정 가능
+    const user = await getApiUser(request);
+    const safeTenant = user?.isStaff && typeof tenant_id === 'string' ? tenant_id : undefined;
 
     const result = await runFullScan({
       url: normalizedUrl,
-      requester_email,
-      industry,
-      tenant_id,
+      requester_email: typeof requester_email === 'string' ? requester_email.slice(0, 200) : undefined,
+      industry: typeof industry === 'string' ? industry.slice(0, 100) : undefined,
+      tenant_id: safeTenant,
     });
 
     if (result.statusCode === 0) {

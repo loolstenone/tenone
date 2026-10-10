@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
+import { canReadHitResult, stripHitResult } from '@/lib/hit/result-access';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitAResult, getReportModules } from '@/lib/supabase/hit';
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -10,6 +11,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     if (!result) {
       return errorResponse('결과를 찾을 수 없습니다.', 404);
     }
+    // 회원 결과는 본인·직원만 (2026-10-11)
+    if (!(await canReadHitResult(req, result))) return errorResponse('결과를 찾을 수 없습니다.', 404);
 
     // 모듈 콘텐츠 로드 (modules_used가 있으면)
     let reportModules: Record<string, { title: string; content: string }> | null = null;
@@ -23,7 +26,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       } catch {}
     }
 
-    return successResponse({ ...result, report_modules: reportModules });
+    return successResponse({ ...stripHitResult(result), report_modules: reportModules });
   } catch (error) {
     console.error('[HIT A Result] 조회 오류:', error);
     const message = error instanceof Error ? error.message : '결과 조회 실패';

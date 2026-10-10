@@ -11,9 +11,13 @@
  */
 import DOMPurify from 'dompurify';
 
+// 스크립트는 DOMPurify 기본값이 막지만 <style>·<form>·<input>은 통과해 화면 안에 가짜 로그인 폼을 띄울 수 있다 (2026-10-11 레드팀)
+const FORBID_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select', 'link', 'meta', 'base'];
+const FORBID_ATTR = ['style', 'action', 'formaction'];
+
 export function sanitizeHtml(html: string | null | undefined): string {
     if (!html || typeof window === 'undefined') return '';
-    return DOMPurify.sanitize(html);
+    return DOMPurify.sanitize(html, { FORBID_TAGS, FORBID_ATTR });
 }
 
 const YOUTUBE_EMBED = /^https:\/\/(www\.)?(youtube\.com|youtube-nocookie\.com)\/embed\//i;
@@ -29,7 +33,8 @@ export function sanitizeRichHtml(html: string | null | undefined): string {
     const clean = DOMPurify.sanitize(html, {
         ADD_TAGS: ['iframe'],
         ADD_ATTR: ['allowfullscreen', 'frameborder'],
-        FORBID_ATTR: ['style'],
+        FORBID_TAGS,
+        FORBID_ATTR,
     });
     DOMPurify.removeHook('uponSanitizeElement');
     return clean;

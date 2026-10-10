@@ -62,23 +62,40 @@ export async function POST(request: NextRequest) {
 
         const supabase = getAdminClient();
 
-        // 1. 구독자 upsert (미인증 상태로)
-        const { data: subscriber, error } = await supabase
+        const normalizedEmail = String(email).trim().toLowerCase();
+        const safeName = typeof displayName === 'string' ? displayName.slice(0, 60) : null;
+
+        // 1. 구독자 조회 — 이미 활성 구독자면 그대로 둔다 (남의 이메일로 신청해 구독을 끊던 문제, 2026-10-11)
+        const { data: existing } = await supabase
             .from('newsletter_subscribers')
-            .upsert(
-                {
-                    email,
-                    name: displayName,
+            .select('id, is_active')
+            .eq('email', normalizedEmail)
+            .maybeSingle();
+        if (existing?.is_active) {
+            return NextResponse.json({ success: true });
+        }
+
+        let subscriber: { id: string; is_active: boolean } | null = existing ?? null;
+        if (existing) {
+            await supabase
+                .from('newsletter_subscribers')
+                .update({ name: safeName ?? undefined, member_id: memberId || undefined, source: source || undefined })
+                .eq('id', existing.id);
+        } else {
+            const { data: created, error } = await supabase
+                .from('newsletter_subscribers')
+                .insert({
+                    email: normalizedEmail,
+                    name: safeName,
                     member_id: memberId || null,
                     is_active: false,   // 확인 메일 클릭 후 활성화
                     source: source || null,
-                },
-                { onConflict: 'email' }
-            )
-            .select('id, is_active')
-            .single();
-
-        if (error) throw error;
+                })
+                .select('id, is_active')
+                .single();
+            if (error) throw error;
+            subscriber = created;
+        }
 
         // 2. 브랜드 태그 등록
         if (subscriber?.id && source) {
@@ -102,18 +119,18 @@ export async function POST(request: NextRequest) {
             const subject = getSubject(brand.name);
             const { data: sent } = await resend.emails.send({
                 from: fromHeader,
-                to: email,
+                to: normalizedEmail,
                 replyTo: REPLY_TO,
                 subject,
                 html: renderConfirmHtml({
-                    nickname: displayName || '구독자',
+                    nickname: safeName || '구독자',
                     brandName: brand.name,
                     brandColor: brand.color,
                     confirmUrl,
                     siteUrl: SITE_URL,
                 }),
                 text: renderConfirmText({
-                    nickname: displayName || '구독자',
+                    nickname: safeName || '구독자',
                     brandName: brand.name,
                     brandColor: brand.color,
                     confirmUrl,
@@ -128,7 +145,7 @@ export async function POST(request: NextRequest) {
                 subscriber_id: subscriber.id,
                 member_id: memberId || null,
                 from_addr: FROM_EMAIL,
-                to_addr: email,
+                to_addr: normalizedEmail,
                 reply_to: REPLY_TO,
                 subject,
                 resend_id: sent?.id ?? null,

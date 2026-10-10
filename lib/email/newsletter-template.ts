@@ -126,7 +126,9 @@ export interface ConfirmTemplateProps {
 }
 
 export function renderConfirmHtml(props: ConfirmTemplateProps): string {
-  const { nickname, brandName, brandColor, confirmUrl, siteUrl = 'https://tenone.biz' } = props;
+  const { nickname: rawNickname, brandName, brandColor, confirmUrl, siteUrl = 'https://tenone.biz' } = props;
+  // 구독 폼 입력값 — HTML 인젝션 차단 (2026-10-11)
+  const nickname = rawNickname.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>

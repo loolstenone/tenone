@@ -12,6 +12,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireMember } from "@/lib/api-guard";
 
 interface JHAxes {
     preferred_state?: "a" | "b" | "c" | "d";
@@ -98,11 +99,12 @@ function matchReason(jhAxes: JHAxes, jd: JDRow): string[] {
 
 export async function GET(req: NextRequest) {
     try {
+        // 본인 JH 기준으로만 — query의 memberId는 쓰지 않는다 (타인 성향 조회 차단, 2026-10-11)
+        const auth = await requireMember(req);
+        if (auth instanceof NextResponse) return auth;
+        const memberId = auth.memberId;
         const { searchParams } = new URL(req.url);
-        const memberId = searchParams.get("memberId");
         const limit = Math.min(20, Math.max(1, +(searchParams.get("limit") ?? "8")));
-
-        if (!memberId) return NextResponse.json({ error: "memberId required" }, { status: 400 });
 
         const sb = createAdminClient();
 

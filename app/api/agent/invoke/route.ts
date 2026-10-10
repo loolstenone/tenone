@@ -11,6 +11,7 @@
  * Auth: 로그인 또는 Admin API Key
  */
 import { NextRequest } from 'next/server';
+import { requireUser } from '@/lib/api-guard';
 import {
   successResponse,
   errorResponse,
@@ -64,8 +65,10 @@ function buildSynthesisPrompt(
 
 // ── 메인 핸들러 ────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
-  const { error: authErr, user } = await requireAuthOrAdmin(request);
-  if (authErr) return authErr;
+  // 세션 사용자만 (2026-10-11)
+  const auth = await requireUser(request);
+  if (!('kind' in auth)) return auth;
+  const user = auth.user;
 
   const startTotal = Date.now();
 

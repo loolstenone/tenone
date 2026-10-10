@@ -15,14 +15,13 @@ import {
     type HeroWeeklyReportProps,
 } from "@/lib/email/hero-weekly-report";
 import { buildFromHeader, DEFAULT_SENDERS } from "@/lib/email/senders";
+import { isInternalRequest } from '@/lib/api-guard';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
-    const auth = req.headers.get("authorization");
-    if (auth !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // 내부 키 검증 — 미설정 키는 거부·길이 검증 (문자열 비교는 env 비면 'Bearer undefined'로 통과, 2026-10-11)
+    if (!isInternalRequest(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
         const sb = createAdminClient();

@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { requireUser } from "@/lib/api-guard";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { escapeHtml } from "@/lib/sanitize-html";
+
+/*
+ * 쇼케이스 승인 요청 메일 (2026-10-11 보안 수리)
+ *   - 로그인한 주최자 본인의 쇼케이스만 · 수신자·토큰·제목은 body가 아니라 DB(jakka_showcase_approvals)에서
+ *   - 이전: 인증 없이 body의 수신자·제목으로 noreply@tenone.biz 명의 임의 메일 발송 가능(피싱 릴레이)
+ */
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jakka.tenone.biz";
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || "noreply@tenone.biz";
@@ -9,6 +18,8 @@ function renderApprovalHtml(opts: {
     organizerName: string;
     approveUrl: string;
 }) {
+    const title = escapeHtml(opts.showcaseTitle);
+    const organizer = escapeHtml(opts.organizerName);
     return `<!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -21,9 +32,9 @@ function renderApprovalHtml(opts: {
       </td></tr>
       <tr><td style="padding:36px 40px;">
         <p style="margin:0 0 8px;font-size:13px;color:#6b7280;font-weight:600;">쇼케이스 승인 요청</p>
-        <p style="margin:0 0 24px;font-size:22px;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.3;">${opts.showcaseTitle}</p>
+        <p style="margin:0 0 24px;font-size:22px;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.3;">${title}</p>
         <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.7;">
-          <strong>${opts.organizerName}</strong>님이 위 쇼케이스의 승인을 요청했습니다.<br>
+          <strong>${organizer}</strong>님이 위 쇼케이스의 승인을 요청했습니다.<br>
           함께 준비한 작가로서 아래 버튼을 눌러 승인 또는 거부해 주세요.
         </p>
         <p style="margin:0 0 28px;">
@@ -47,28 +58,47 @@ function renderApprovalHtml(opts: {
 }
 
 export async function POST(request: NextRequest) {
-    try {
-        const { approvals, showcaseTitle, organizerName } = await request.json() as {
-            approvals: { email: string; token: string }[];
-            showcaseTitle: string;
-            organizerName: string;
-        };
+    const auth = await requireUser(request);
+    if (auth instanceof NextResponse) return auth;
 
-        if (!approvals?.length || !showcaseTitle) {
-            return NextResponse.json({ error: "필수 항목 누락" }, { status: 400 });
+    try {
+        const { showcaseId } = (await request.json().catch(() => ({}))) as { showcaseId?: string };
+        if (!showcaseId || typeof showcaseId !== "string") {
+            return NextResponse.json({ error: "showcaseId 누락" }, { status: 400 });
         }
+
+        const admin = createAdminClient();
+        const { data: showcase } = await admin
+            .from("jakka_showcases")
+            .select("id, title, organizer:jakka_creators!jakka_showcases_organizer_id_fkey(user_id, display_name)")
+            .eq("id", showcaseId)
+            .maybeSingle();
+        const organizer = (showcase as unknown as { organizer?: { user_id: string; display_name: string } | null } | null)?.organizer ?? null;
+        if (!showcase || !organizer) return NextResponse.json({ error: "쇼케이스를 찾을 수 없습니다" }, { status: 404 });
+        if (organizer.user_id !== auth.user.id && !auth.isStaff) {
+            return NextResponse.json({ error: "주최자만 승인 요청을 보낼 수 있습니다" }, { status: 403 });
+        }
+
+        // 대기 중 승인 요청만 — 발송 기록이 없는 것 (중복 발송 방지는 responded_at·status로)
+        const { data: approvals } = await admin
+            .from("jakka_showcase_approvals")
+            .select("approver_email, token")
+            .eq("showcase_id", showcaseId)
+            .eq("status", "pending")
+            .limit(5);
+        if (!approvals?.length) return NextResponse.json({ ok: 0, fail: 0 });
 
         const resend = new Resend(process.env.RESEND_API_KEY);
         let ok = 0;
         let fail = 0;
 
-        for (const { email, token } of approvals) {
-            const approveUrl = `${SITE_URL}/jakka/showcase/approve/${token}`;
+        for (const { approver_email: email, token } of approvals) {
+            const approveUrl = `${SITE_URL}/jakka/showcase/approve/${encodeURIComponent(token)}`;
             const { error } = await resend.emails.send({
                 from: `JAKKA <${FROM_EMAIL}>`,
                 to: email,
-                subject: `[JAKKA] 쇼케이스 승인 요청 — ${showcaseTitle}`,
-                html: renderApprovalHtml({ showcaseTitle, organizerName, approveUrl }),
+                subject: `[JAKKA] 쇼케이스 승인 요청 — ${String(showcase.title).replace(/[\r\n]/g, " ")}`,
+                html: renderApprovalHtml({ showcaseTitle: showcase.title, organizerName: organizer.display_name, approveUrl }),
             });
             if (error) { console.error("showcase approval email error:", email.replace(/^(.{2}).*(@.*)$/, "$1***$2"), error); fail++; }
             else ok++;

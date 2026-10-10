@@ -17,6 +17,7 @@ export async function GET(
       badak_members!inner(id, display_name, job_function, avatar_url, profile_public)
     `)
     .eq('need_id', needId)
+    .eq('badak_members.profile_public', true) // 비공개 프로필은 관심자 목록에 안 보임 (2026-10-11)
     .limit(20);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });

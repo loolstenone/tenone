@@ -7,20 +7,26 @@
  * - 미지정 시 1001 에이전트가 라우팅 판단
  */
 import { NextRequest } from 'next/server';
-import { successResponse, errorResponse, requireAuthOrAdmin } from '@/lib/supabase/api-utils';
+import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
+import { requireUser } from '@/lib/api-guard';
 import { invokeAgent, getAgentProfile } from '@/lib/agent/claude';
 import type { AgentHubRequest, AgentHubResponse } from '@/types/agent';
 
 export async function POST(request: NextRequest) {
-  const { error: authErr } = await requireAuthOrAdmin(request);
-  if (authErr) return authErr;
+  // 대화 이력은 세션 사용자 것만 — body의 userId로 타인 대화를 프롬프트에 싣던 문제 (2026-10-11)
+  const auth = await requireUser(request);
+  if (!('kind' in auth)) return auth;
+  const userId = auth.user.id;
 
   try {
     const body: AgentHubRequest = await request.json();
-    const { message, agentName, userId, correlationId } = body;
+    const { message, agentName, correlationId } = body;
 
-    if (!message || typeof message !== 'string') {
-      return errorResponse('message 필드가 필요합니다.', 400);
+    if (!message || typeof message !== 'string' || message.length > 4000) {
+      return errorResponse('message 필드가 필요합니다. (4000자 이내)', 400);
+    }
+    if (agentName !== undefined && !/^[\w.-]{1,64}$/.test(String(agentName))) {
+      return errorResponse('agentName 형식 오류', 400);
     }
 
     // correlation ID 생성 (추적용)

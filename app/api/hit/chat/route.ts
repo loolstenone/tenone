@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitAResult } from '@/lib/supabase/hit';
+import { canReadHitResult } from '@/lib/hit/result-access';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
 import { canAccess } from '@/lib/hit/membership';
@@ -22,6 +23,9 @@ export async function POST(request: NextRequest) {
     // 회원 식별은 로그인 세션으로만 — body의 memberId는 신뢰하지 않음
     const memberId = (await getApiUser(request))?.memberId ?? null;
 
+    if (typeof message === 'string' && message.length > 2000) {
+      return new Response(JSON.stringify({ error: '메시지는 2000자 이내로 입력해주세요.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
     if (!message || !resultId || !mode) {
       return errorResponse('message, resultId, mode는 필수입니다.', 400);
     }
@@ -73,6 +77,10 @@ export async function POST(request: NextRequest) {
 
     // 결과 데이터 로드
     const result = await getHitAResult(resultId);
+    // 남의 결과 UUID로 상담 → 그 사람의 성향이 응답에 나온다. 회원 결과는 본인·직원만 (2026-10-11)
+    if (result && !(await canReadHitResult(request, result))) {
+      return new Response(JSON.stringify({ error: '결과에 접근할 수 없습니다.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    }
     const resultContext = result ? `
 내담자 HIT 결과:
 - 유형: ${result.type_code} (${result.type_name_ko})
@@ -86,10 +94,10 @@ export async function POST(request: NextRequest) {
 
     // 대화 히스토리 구성
     const messages = [
-      ...(history || []).map((h: { role: string; content: string }) => ({
-        role: h.role as 'user' | 'assistant',
-        content: h.content,
-      })),
+      ...((Array.isArray(history) ? history : []) as { role: string; content: string }[])
+        .filter(h => (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string')
+        .slice(-10)
+        .map(h => ({ role: h.role as 'user' | 'assistant', content: h.content.slice(0, 2000) })),
       { role: 'user' as const, content: message },
     ];
 

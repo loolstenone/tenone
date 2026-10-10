@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
+import { canReadHitResult, stripHitResult } from '@/lib/hit/result-access';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitBResultFull } from '@/lib/supabase/hit';
 import { selectBModules } from '@/lib/hit/report-assembler';
 import { createClient as createServerClient } from '@supabase/supabase-js';
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -12,6 +13,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     if (!resultFull) {
       return errorResponse('결과를 찾을 수 없습니다.', 404);
     }
+    // 회원 결과는 본인·직원만 (2026-10-11)
+    if (!(await canReadHitResult(req, resultFull))) return errorResponse('결과를 찾을 수 없습니다.', 404);
 
     // 클라이언트 응답에서 dark_triad + alert 필드 제거
     const { alert_n1, alert_m1, alert_p1, alert_level, ...result } = resultFull;
@@ -76,7 +79,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       }
     } catch {}
 
-    return successResponse({ ...result, report_modules: reportModules, modules_used: modulesUsed, personality_labels: personalityLabels });
+    return successResponse({ ...stripHitResult(result), report_modules: reportModules, modules_used: modulesUsed, personality_labels: personalityLabels });
   } catch (error) {
     console.error('[HIT B Result] 조회 오류:', error);
     const message = error instanceof Error ? error.message : '결과 조회 실패';

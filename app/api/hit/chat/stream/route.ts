@@ -5,6 +5,7 @@
  */
 import { NextRequest } from 'next/server';
 import { getHitAResult } from '@/lib/supabase/hit';
+import { canReadHitResult } from '@/lib/hit/result-access';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import Anthropic from '@anthropic-ai/sdk';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
@@ -22,6 +23,9 @@ export async function POST(request: NextRequest) {
     const apiUser = await getApiUser(request);
     const memberId = apiUser?.memberId ?? null;
 
+    if (typeof message === 'string' && message.length > 2000) {
+      return new Response(JSON.stringify({ error: '메시지는 2000자 이내로 입력해주세요.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
     if (!message || !resultId || !mode) {
       return new Response(JSON.stringify({ error: 'message, resultId, mode 필수' }), { status: 400 });
     }
@@ -73,6 +77,10 @@ export async function POST(request: NextRequest) {
 
     // HIT 결과 로드
     const result = await getHitAResult(resultId);
+    // 남의 결과 UUID로 상담 → 그 사람의 성향이 응답에 나온다. 회원 결과는 본인·직원만 (2026-10-11)
+    if (result && !(await canReadHitResult(request, result))) {
+      return new Response(JSON.stringify({ error: '결과에 접근할 수 없습니다.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    }
     const ufContext = result?.uf_sibling != null ? `
 - UF 기저요인: 형제관계${result.uf_sibling} 부모관계${result.uf_parent} 가정환경${result.uf_family} 또래관계${result.uf_peer} 자기개념${result.uf_self} 기질${result.uf_temperament} 경제환경${result.uf_economic} 트라우마${result.uf_trauma} 문화세대${result.uf_cultural}` : '';
 
@@ -88,10 +96,10 @@ export async function POST(request: NextRequest) {
     const systemPrompt = getHeroSystemPrompt(mode as HitMode, alertLevel || 0) + '\n\n' + resultContext;
 
     const messages = [
-      ...(history || []).map((h: { role: string; content: string }) => ({
-        role: h.role as 'user' | 'assistant',
-        content: h.content,
-      })),
+      ...((Array.isArray(history) ? history : []) as { role: string; content: string }[])
+        .filter(h => (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string')
+        .slice(-10)
+        .map(h => ({ role: h.role as 'user' | 'assistant', content: h.content.slice(0, 2000) })),
       { role: 'user' as const, content: message },
     ];
 

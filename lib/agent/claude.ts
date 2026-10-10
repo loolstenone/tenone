@@ -97,6 +97,8 @@ type HistoryMessage = { role: 'user' | 'assistant'; content: string };
  * agent_messages에서 해당 user × agent의 최근 N턴을 로드한다.
  * user_input / agent_response 타입만 대상으로 하여 중복 없이 추출.
  */
+const safeAgentName = (name: string) => name.replace(/[^\w.-]/g, '');
+
 async function loadConversationHistory(
   agentName: string,
   userId: string,
@@ -110,8 +112,9 @@ async function loadConversationHistory(
     .eq('user_id', userId)
     .in('message_type', ['user_input', 'agent_response'])
     .or(
-      `and(from_agent.eq.user,to_agent.eq.${agentName}),` +
-      `and(from_agent.eq.${agentName},to_agent.eq.user)`
+      // agentName은 PostgREST 필터 문자열에 들어간다 — 허용 문자만 (2026-10-11)
+      `and(from_agent.eq.user,to_agent.eq.${safeAgentName(agentName)}),` +
+      `and(from_agent.eq.${safeAgentName(agentName)},to_agent.eq.user)`
     )
     .order('created_at', { ascending: false })
     .limit(maxTurns * 2);   // N턴 = N*2 메시지

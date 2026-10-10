@@ -6,12 +6,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { publishContent } from '@/lib/agent/publisher';
 import type { GeneratedContent } from '@/lib/agent/writer';
 import type { RouteResult } from '@/lib/agent/router';
+import { isInternalRequest } from '@/lib/api-guard';
 
 export async function POST(request: NextRequest) {
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // 내부 키 검증 — 미설정 키는 거부·길이 검증 (문자열 비교는 env 비면 'Bearer undefined'로 통과, 2026-10-11)
+    if (!isInternalRequest(request)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const { content, route, asDraft } = await request.json() as {

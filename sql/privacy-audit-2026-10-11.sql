@@ -52,3 +52,43 @@ CREATE POLICY avatars_auth_delete ON storage.objects FOR DELETE TO authenticated
 DROP POLICY IF EXISTS avatars_auth_insert ON storage.objects;
 CREATE POLICY avatars_auth_insert ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'avatars' AND (public.storage_owns_avatar_path(name) OR auth_is_staff()));
+
+-- ===== 레드팀·블루팀 조치 (2026-10-11 2차) =====
+-- 7) badak_members: 본인 행 UPDATE가 role·등급 컬럼까지 열려 있어 일반 회원이 role='admin'으로 셀프 승격 가능했다
+--    권한·등급 컬럼은 직원만 바꿀 수 있게 트리거로 고정 (인트라 화면의 직원 수정은 그대로 동작)
+CREATE OR REPLACE FUNCTION public.badak_members_protect_privileged()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF (NEW.role IS DISTINCT FROM OLD.role
+      OR NEW.leader_level IS DISTINCT FROM OLD.leader_level
+      OR NEW.specialist_invited IS DISTINCT FROM OLD.specialist_invited
+      OR NEW.specialist_invited_at IS DISTINCT FROM OLD.specialist_invited_at
+      OR NEW.completed_groups_count IS DISTINCT FROM OLD.completed_groups_count
+      OR NEW.user_id IS DISTINCT FROM OLD.user_id)
+     AND NOT auth_is_staff() AND auth.role() IS DISTINCT FROM 'service_role' THEN
+    RAISE EXCEPTION 'badak_members: 권한·등급 컬럼은 직원만 수정할 수 있습니다';
+  END IF;
+  RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS badak_members_protect_privileged ON public.badak_members;
+CREATE TRIGGER badak_members_protect_privileged BEFORE UPDATE ON public.badak_members
+  FOR EACH ROW EXECUTE FUNCTION public.badak_members_protect_privileged();
+-- INSERT 때도 권한·등급 컬럼은 기본값으로 (비직원)
+CREATE OR REPLACE FUNCTION public.badak_members_default_privileged()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF NOT auth_is_staff() AND auth.role() IS DISTINCT FROM 'service_role' THEN
+    NEW.role := 'member';
+    NEW.leader_level := 'C';
+    NEW.specialist_invited := false;
+    NEW.specialist_invited_at := NULL;
+    NEW.completed_groups_count := 0;
+  END IF;
+  RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS badak_members_default_privileged ON public.badak_members;
+CREATE TRIGGER badak_members_default_privileged BEFORE INSERT ON public.badak_members
+  FOR EACH ROW EXECUTE FUNCTION public.badak_members_default_privileged();
+
+-- 8) timesheets: 로그인 전원 조회 정책 제거 (본인 + 직원 정책 ts_select만 남김)
+DROP POLICY IF EXISTS authenticated_read ON public.timesheets;

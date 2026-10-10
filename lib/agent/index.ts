@@ -112,13 +112,14 @@ export function parseInstruction(instruction: string): ParsedInstruction {
 export async function runAgent(
     instruction: string,
     onPhaseChange?: (phase: AgentPhase, data?: Partial<AgentTask>) => void,
+    options?: { autoPublish?: boolean },
 ): Promise<AgentTask> {
     const task: AgentTask = {
         id: crypto.randomUUID(),
         instruction,
         phase: 'parsing',
         researchOnly: false,
-        autoPublish: process.env.AGENT_AUTO_PUBLISH === 'true',
+        autoPublish: options?.autoPublish ?? process.env.AGENT_AUTO_PUBLISH === 'true',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         tokenUsage: { input: 0, output: 0 },

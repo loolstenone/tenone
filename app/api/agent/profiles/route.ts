@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import type { CreateAgentProfileRequest } from '@/types/agent';
+import { isInternalRequest } from '@/lib/api-guard';
 
 // GET /api/agent/profiles
 export async function GET() {
@@ -25,10 +26,8 @@ export async function GET() {
 // POST /api/agent/profiles
 export async function POST(request: NextRequest) {
   // 관리자 인증
-  const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-    return errorResponse('Unauthorized', 401);
-  }
+  // 내부 키 검증 — 미설정 키는 거부·길이 검증 (문자열 비교는 env 비면 'Bearer undefined'로 통과, 2026-10-11)
+  if (!isInternalRequest(request)) return errorResponse('Unauthorized', 401);
 
   try {
     const body: CreateAgentProfileRequest = await request.json();

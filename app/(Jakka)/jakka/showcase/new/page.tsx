@@ -116,16 +116,11 @@ export default function NewShowcasePage() {
             }
             await addShowcaseArtists(result.showcase.id, artistRows);
 
-            // 승인 메일 자동 발송
-            const approvalData = result.approvals.map((a) => ({ email: a.approver_email, token: a.token }));
+            // 승인 메일 자동 발송 — 수신자·제목은 서버가 DB에서 읽는다 (주최자 세션 확인)
             await fetch("/api/jakka/showcase", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    approvals: approvalData,
-                    showcaseTitle: title.trim(),
-                    organizerName: creator.display_name,
-                }),
+                body: JSON.stringify({ showcaseId: result.showcase.id }),
             });
 
             alert("신청 완료! 3명에게 승인 요청 메일을 발송했습니다.");

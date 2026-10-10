@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireStaff } from '@/lib/api-guard';
 
 const supabase = createAdminClient();
 
+// 관리자 = 직원(member_roles) — badak_members.role은 본인이 수정 가능한 컬럼이라 권한 판단에 쓰지 않는다 (2026-10-11 레드팀)
 async function requireAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const token = authHeader.replace('Bearer ', '');
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { data: member } = await supabase
-    .from('badak_members')
-    .select('role')
-    .eq('user_id', user.id)
-    .single();
-
-  if (member?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-  return { userId: user.id };
+  const auth = await requireStaff(request);
+  if (auth instanceof NextResponse) return auth;
+  return { userId: 'user' in auth ? auth.user.id : 'internal' };
 }
 
 const VALID_INQUIRY_STATUSES = ['pending', 'in_progress', 'resolved', 'closed'] as const;

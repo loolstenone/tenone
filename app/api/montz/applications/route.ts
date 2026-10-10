@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { escapeHtml } from "@/lib/sanitize-html";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -25,6 +26,9 @@ function buildApplicationEmailHtml({
     applicantEmail: string | null;
     message: string | null;
 }): string {
+    // 캐스팅 담당자(외부인)에게 가는 메일 — 응시자 입력값은 전부 이스케이프 (2026-10-11)
+    const e = escapeHtml;
+    const handleUrl = encodeURIComponent(applicantHandle);
     return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f9f9f9;font-family:sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px;">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;">
@@ -34,19 +38,19 @@ function buildApplicationEmailHtml({
 </td></tr>
 <tr><td style="padding:32px 40px;">
   <p style="margin:0 0 8px;font-size:13px;color:#888;">공고</p>
-  <p style="margin:0 0 18px;font-size:16px;color:#111;font-weight:600;">${audition.company} · ${audition.role}</p>
+  <p style="margin:0 0 18px;font-size:16px;color:#111;font-weight:600;">${e(audition.company)} · ${e(audition.role)}</p>
   <table cellpadding="0" cellspacing="0" style="margin:0 0 16px;width:100%;background:#fafafa;border-radius:8px;">
     <tr><td style="padding:14px 18px;">
       <p style="margin:0;font-size:13px;color:#888;">응시자</p>
-      <p style="margin:4px 0 0;font-size:15px;color:#111;font-weight:600;">${applicantName} · @${applicantHandle}</p>
-      ${applicantEmail ? `<p style="margin:2px 0 0;font-size:13px;color:#666;">${applicantEmail}</p>` : ""}
+      <p style="margin:4px 0 0;font-size:15px;color:#111;font-weight:600;">${e(applicantName)} · @${e(applicantHandle)}</p>
+      ${applicantEmail ? `<p style="margin:2px 0 0;font-size:13px;color:#666;">${e(applicantEmail)}</p>` : ""}
     </td></tr>
   </table>
   ${message ? `<p style="margin:0 0 8px;font-size:13px;color:#888;font-weight:600;">자기소개·메시지</p>
-  <p style="margin:0 0 24px;padding:14px 18px;background:#fafafa;border-radius:8px;font-size:14px;color:#333;line-height:1.7;white-space:pre-wrap;">${message}</p>` : ""}
+  <p style="margin:0 0 24px;padding:14px 18px;background:#fafafa;border-radius:8px;font-size:14px;color:#333;line-height:1.7;white-space:pre-wrap;">${e(message)}</p>` : ""}
   <table cellpadding="0" cellspacing="0">
     <tr><td style="background:#c8a97e;border-radius:8px;">
-      <a href="https://montz.tenone.biz/${applicantHandle}" style="display:block;padding:14px 28px;font-size:15px;font-weight:600;color:#1a1a1a;text-decoration:none;">응시자 포트폴리오 보기 →</a>
+      <a href="https://montz.tenone.biz/${handleUrl}" style="display:block;padding:14px 28px;font-size:15px;font-weight:600;color:#1a1a1a;text-decoration:none;">응시자 포트폴리오 보기 →</a>
     </td></tr>
   </table>
 </td></tr>
@@ -97,7 +101,9 @@ export async function POST(req: NextRequest) {
     if (!audition.is_active) return NextResponse.json({ error: "마감된 공고입니다" }, { status: 400 });
 
     // 3) INSERT
-    const finalEmail = applicantEmail ?? userData.user.email ?? null;
+    // 회신 주소 — 형식 검증 (replyTo 위조 차단)
+    const EMAIL_RE = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/;
+    const finalEmail = applicantEmail && EMAIL_RE.test(applicantEmail.trim()) ? applicantEmail.trim() : userData.user.email ?? null;
     const { data: inserted, error: insErr } = await supabase
         .from("montz_audition_applications")
         .insert({
@@ -122,7 +128,7 @@ export async function POST(req: NextRequest) {
             from: "MoNTZ <noreply@tenone.biz>",
             to: audition.contact_email,
             replyTo: finalEmail ?? undefined,
-            subject: `[MoNTZ] ${audition.company} ${audition.role} 새 응시자: ${creator.display_name}`,
+            subject: `[MoNTZ] ${audition.company} ${audition.role} 새 응시자: ${creator.display_name}`.replace(/[\r\n]+/g, ' '),
             html: buildApplicationEmailHtml({
                 audition: { company: audition.company, role: audition.role },
                 applicantName: creator.display_name,
