@@ -67,8 +67,9 @@ export default function MadLeagueMyPage() {
     }, [user?.id, user?.authId]);
 
     // 회장 판단(mad_clubs.president_member_id)·지원서 조회는 서버에서 — 지원서는 RLS로 클라이언트 조회 불가
+    // 매드리거 등록 여부와 무관하게 조회 — 운영진·멘토·직원도 프로필에서 바로 동아리 관리로 (2026-10-11)
     useEffect(() => {
-        if (madStatus !== 'active') return;
+        if (!isAuthenticated) return;
         fetch('/api/madleague/applications/president')
             .then(res => (res.ok ? res.json() : {}))
             .then((data: { isPresident?: boolean; applications?: { id: string; name: string; university: string; created_at: string }[]; manageClubs?: { slug: string; name: string }[] }) => {
@@ -77,7 +78,7 @@ export default function MadLeagueMyPage() {
                 setPendingApps(data.applications ?? []);
             })
             .catch(() => setPendingApps([]));
-    }, [madStatus]);
+    }, [isAuthenticated]);
 
     async function handleApprove(appId: string) {
         setProcessingId(appId);
@@ -151,6 +152,18 @@ export default function MadLeagueMyPage() {
                     )}
                 </MyProfileCard>
 
+                {/* 동아리 관리 — 운영진·담당 멘토·직원. 프로필 바로 아래 (소개 페이지·부원 모집·운영진·매드리거 등록 탭) */}
+                {manageClubs.length > 0 && (
+                    <div className="mb-6 flex flex-wrap items-center gap-2">
+                        {manageClubs.map(c => (
+                            <Link key={c.slug} href={`/madleague/clubs/${c.slug}/manage`}
+                                className="inline-flex items-center gap-1.5 bg-[#EC1D25] hover:bg-[#d01820] px-4 py-2.5 text-sm font-bold text-white transition">
+                                <Settings className="h-4 w-4" /> {manageClubs.length > 1 ? `${c.name} 관리` : '동아리 관리'}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+
                 {/* 매드리거 미가입 */}
                 {madStatus === 'none' && (
                     <div className="mb-6 bg-neutral-950 border border-[#EC1D25]/30 p-5">
@@ -180,27 +193,8 @@ export default function MadLeagueMyPage() {
 
             <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
 
-                {/* 내 동아리 관리 — 운영진(회장·부회장·총무 등)·담당 멘토. 지원서 승인·반려 + 운영진 지정 */}
-                {madStatus === 'active' && manageClubs.length > 0 && (
-                    <div className="bg-neutral-950 border border-neutral-800 p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Settings className="h-5 w-5 text-[#EC1D25]" />
-                            <h3 className="font-black text-base">내 동아리 관리</h3>
-                        </div>
-                        <p className="text-xs text-neutral-500 mb-4">지원서 승인·반려와 운영진 지정을 할 수 있어요.</p>
-                        <div className="flex flex-wrap gap-2">
-                            {manageClubs.map(c => (
-                                <Link key={c.slug} href={`/madleague/clubs/${c.slug}/manage`}
-                                    className="inline-flex items-center gap-1.5 border border-neutral-700 hover:border-[#EC1D25] px-4 py-2 text-sm font-semibold transition">
-                                    {c.name} 관리 <ArrowRight className="h-3.5 w-3.5" />
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 {/* 동아리 운영진 패널 — 대기 지원서 바로 처리 */}
-                {madStatus === 'active' && isPresident && (
+                {isPresident && (
                     <div className="bg-neutral-950 border border-neutral-800 p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Shield className="h-5 w-5 text-[#EC1D25]" />
