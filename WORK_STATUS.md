@@ -28,8 +28,8 @@
 
 ### 다음 첫 액션
 
-1. **Gmail 재연결 (사용자 + 확인)**: 배포 READY → 인트라 › Whole See › 뉴스레터 수집(`/intra/intel/wholesee/newsletter`) › "다시 연결" → `deepdirectdrill@gmail.com` 로그인 → 초록 배너 확인. 같은 때 **구글 클라우드 › OAuth 동의 화면 게시 상태가 "테스트"면 "프로덕션"**으로(7일 만료 방지, 본인 메일만이라 심사 불필요 — 연결 시 "확인되지 않은 앱" 경고는 고급 › 계속). 다음 날 05:00 크론 뒤 운영 상태(`/intra/intel/health`) 뉴스레터 수신 = 정상인지. 실패면 운영 상태 detail에 원인이 남는다
-   - 콜백 redirect URI는 `https://tenone.biz/api/auth/gmail/callback` 그대로(구글 콘솔 등록값). state 쿠키는 `.tenone.biz`라 intra에서 시작해도 통과 — "연결 요청이 만료" 배너가 뜨면 쿠키 도메인 확인
+1. ~~Gmail 재연결~~ **완료** (10-10 17:50 KST 사용자 재연결, DB 토큰 갱신 확인). 남은 것 = 05:00 크론 뒤 `gmail_oauth_tokens.last_success_at` 기록·운영 상태(`/intra/intel/health`) 뉴스레터 수신 정상 여부만 Claude가 조용히 확인 (사용자에게 다시 시키지 않는다)
+   - 위치: 인트라 **UMS › Mindle › 뉴스레터 수집** (Whole See는 Mindle 아래. 주소만 `/intra/intel/wholesee/newsletter`로 남음)
 2. **배포 확인**: Vercel 최신 READY → 크롬(인트라 로그인됨)으로 인트라 사이드바 HeRo·Badak·MADLeap 메뉴가 사이트 메뉴명으로 나오는지(HeRo: 대시보드·HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면), MADLeap › 지원하기 → 폼 `apply` 편집기 열림·미리보기(직원). 탭 닫기
 3. **MADLeap 지원서 공개 준비** (사용자): 제목 기수(27년 6기) · 모집 기간 · 생년월일 → 출생연도로 줄일지 · 300자 제한 기능 필요 여부(필요하면 `types/forms.ts` FormQuestion에 `maxLength` + `lib/forms.ts` validateFormAnswers + FormRenderer 카운터 + FormEditor 입력)
 4. **처리방침 수집 항목** (시행일 10-14, 급하지 않음): `app/(TenOne)/privacy/page.tsx`·`lib/company-info.ts` 버전 — 프로그램 신청·인증서·서비스 연계·직원 인사·**MADLeap 지원서(생년월일·거주지·채널·추천인)** → 체크리스트 "수집 목적 및 항목" 완료

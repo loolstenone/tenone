@@ -118,10 +118,11 @@ export default function BadakPage() {
         { count: needGathering },
         { count: needGroupCreated },
       ] = await Promise.all([
-        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]),
-        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]).gte("created_at", monthStart),
-        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]).gte("created_at", lastMonthStart).lt("created_at", monthStart),
-        supabase.from("members").select("id, name, email, avatar_url, avatar_initials, created_at").contains("affiliations", ["badak"]).order("created_at", { ascending: false }).limit(5),
+        // 브랜드 회원 = member_brand_joins (§1.9.5 — affiliations로 세지 않는다)
+        supabase.from("member_brand_joins").select("*", { count: "exact", head: true }).eq("brand_id", "badak").is("withdrawn_at", null),
+        supabase.from("member_brand_joins").select("*", { count: "exact", head: true }).eq("brand_id", "badak").is("withdrawn_at", null).gte("joined_at", monthStart),
+        supabase.from("member_brand_joins").select("*", { count: "exact", head: true }).eq("brand_id", "badak").is("withdrawn_at", null).gte("joined_at", lastMonthStart).lt("joined_at", monthStart),
+        supabase.from("member_brand_joins").select("joined_at, member:members!member_brand_joins_member_id_fkey(id, name, email, avatar_url, avatar_initials)").eq("brand_id", "badak").is("withdrawn_at", null).order("joined_at", { ascending: false }).limit(5),
         supabase.from("badak_groups").select("id, title, status, current_members, max_members, event_date, location, created_at").order("created_at", { ascending: false }).limit(10),
         supabase.from("badak_needs").select("id, display_text, count, interest_count, status").order("count", { ascending: false }).limit(10),
         supabase.from("badak_community_posts").select("*", { count: "exact", head: true }),
@@ -137,7 +138,11 @@ export default function BadakPage() {
         ? +((((thisMonth ?? 0) - lastMonth) / lastMonth) * 100).toFixed(1)
         : null;
       setGrowth({ totalMembers: total ?? 0, thisMonthNew: thisMonth ?? 0, lastMonthNew: lastMonth ?? 0, growthRate });
-      setRecentMembers((recent as MemberRow[]) ?? []);
+      // 최근 가입 = Badak 첫 진입(동의) 시각
+      type JoinRow = { joined_at: string; member: Omit<MemberRow, "created_at"> | null };
+      setRecentMembers(((recent ?? []) as unknown as JoinRow[])
+        .filter(r => r.member)
+        .map(r => ({ ...r.member!, created_at: r.joined_at })));
 
       const g = (groups ?? []) as GroupRow[];
       setGroupStats({
