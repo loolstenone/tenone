@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- has_brand_admin_access() → member_roles 기준 (2026-10-10, 승인 후 적용)
+-- has_brand_admin_access() → member_roles 기준 (2026-10-10 적용 — 사용자 승인)
 --   데이터 계약 2조 "권한은 한 곳에서": members.intra_access·brand_access(옛 권한 컬럼) 대신 member_roles(role=브랜드 slug, context='brand')
 --   영향 0 확인: 현재 brand_access 보유자 = Cheonil Jeon 1명, member_roles brand 8개와 완전히 같음
 --   사용처: brand_membership_applications 정책 bma_intra_admin

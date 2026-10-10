@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- 옛 MADLeague 경쟁 PT·인증서 테이블 DROP (2026-10-10 준비, 사용자 승인 후 적용)
+-- 옛 MADLeague 경쟁 PT·인증서 테이블 DROP (2026-10-10 적용 — 사용자 승인, 백업 docs/audit/2026-10/mad-competition-tables-backup-2026-10-10.json)
 --   세션 163에서 코어 프로그램 모듈(program_*)로 이전 완료 — 코드 참조 0건 (app·lib·features·components grep)
 --   mad_hero_applications는 세션 166에서 폐지 결정(사용자 승인), 0행
 --   DB 참조: 함수 mad_eligible_certificates (코드 호출 0건) → 함께 삭제
@@ -15,6 +15,9 @@
 -- UNION ALL SELECT 'mad_round_answers', jsonb_agg(to_jsonb(x)) FROM mad_round_answers x
 -- UNION ALL SELECT 'mad_round_questions', jsonb_agg(to_jsonb(x)) FROM mad_round_questions x
 -- UNION ALL SELECT 'mad_team_members', jsonb_agg(to_jsonb(x)) FROM mad_team_members x;
+
+-- mad_archive(0행·사용 중)가 competition_id FK로 참조 → 컬럼은 두고 제약만 해제
+ALTER TABLE public.mad_archive DROP CONSTRAINT IF EXISTS mad_archive_competition_id_fkey;
 
 DROP FUNCTION IF EXISTS public.mad_eligible_certificates CASCADE;
 

@@ -1,0 +1,30 @@
+{
+  "_note": "옛 MADLeague 경쟁 PT 테이블 DROP 직전 스냅샷 (2026-10-10, sql/drop-old-mad-competition-tables.sql). 데이터는 program_*로 이전 완료. 나머지 5개 테이블(mad_submission_comments·mad_submissions·mad_competition_results·mad_certificates·mad_hero_applications)은 0행.",
+  "mad_competitions": [
+    {"id":"3227690a-2422-4c0f-90b2-bb0a551e3e6c","kind":"competition","slug":"2024-jipyeong","year":2024,"title":"2024 지평주조 경쟁PT","status":"completed","client_name":"지평주조","presentation_date":"2024-11-15","tenant_id":"tenone","created_at":"2026-04-15T16:26:51.172467+00:00"},
+    {"id":"631de129-2ca3-408a-aa5e-7b18f8c0e715","kind":"competition","slug":"2025-daesung","year":2025,"title":"2025 대성학원 경쟁PT","status":"completed","client_name":"대성학원","presentation_date":"2025-06-20","tenant_id":"tenone","created_at":"2026-04-15T16:26:51.172467+00:00"},
+    {"id":"d1d15b06-c6ef-4362-951c-928ff0d6b7e2","kind":"competition","slug":"2025-rizeros","year":2025,"title":"2025 리제로스 경쟁PT","status":"completed","client_name":"리제로스","presentation_date":"2025-11-10","tenant_id":"tenone","created_at":"2026-04-15T16:26:51.172467+00:00"},
+    {"id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","kind":"competition","slug":null,"year":2027,"title":"[데모] 2027 봄 시즌 경쟁 PT","status":"ongoing","start_date":"2027-03-02","end_date":"2027-04-10","final_deadline":"2027-05-08","presentation_date":"2027-05-15","client_name":"그린루프 (가상 기업)","brief_title":"대학가 일회용품 제로 — 리필 스테이션 브랜드 런칭 캐페인","brief_content":"[가상 과제 · 데모용] 그린루프 리필 스테이션 런칭 캐페인 (타깃 인사이트·핵심 메시지·캠퍼스+SNS 실행안 3,000만 원·KPI). 예선 4/10, 본선 4팀 4/17, 본선 제출 5/8, 현장 PT 5/15","tenant_id":"tenone","created_at":"2026-10-07T16:46:58.294537+00:00"}
+  ],
+  "mad_competition_teams": [
+    {"id":"6396337c-7062-4038-9f45-7fc17b64f043","name":"P:ad · 리필러스","club_id":"2f6fd87d-fc0e-4a89-bf0c-a7dba65059c1","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false},
+    {"id":"4ef37001-062a-4b31-9bee-00a616651635","name":"AD Zone · 제로웨이브","club_id":"6df602b9-d76a-48f5-a167-48f1b5744ae3","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false},
+    {"id":"638fef21-39c5-4c33-b68b-f800f913c6b7","name":"ADlle · 채움랩","club_id":"a7516d7b-a761-4e15-a283-19601cf22312","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false},
+    {"id":"e71949be-0ee3-41fb-84e9-6e235ecea9a5","name":"PAM · 다시채움","club_id":"b1e9faa5-053e-4be6-8d59-575fcbbf4304","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false},
+    {"id":"cb175674-ab2a-41f3-9bc7-24f9584df27f","name":"SUZAK · 그린링크","club_id":"440f89cc-53d5-453c-9945-8019da50c8f9","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false},
+    {"id":"dc0e3ce6-e1e1-4c1f-871d-b7ac1b27abd4","name":"ABC · 텀블러 클럽","club_id":"c8a9c0ff-18e0-4c27-a2a2-daa304e948c7","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","is_finalist":false}
+  ],
+  "mad_round_notices": [
+    {"id":"7bdb9bba-38eb-4e2e-8487-4c51dc193a38","title":"클라이언트 OT 안내 — 3월 9일(화) 저녁 7시","pinned":true,"competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","author_member_id":"ea0d2d4f-6a18-48d9-9ab3-60aa4d04e4b3","body":"그린루프 담당자가 과제 배경과 목표를 직접 설명합니다. 온라인(Zoom) 진행, 링크는 당일 오후에 이 공지에 추가합니다. 팀당 최소 2명 참석해 주세요."},
+    {"id":"580988e1-bf95-41bd-9e49-54df21a0ae66","title":"예선 제출 형식 안내","pinned":false,"competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","author_member_id":"ea0d2d4f-6a18-48d9-9ab3-60aa4d04e4b3","body":"· PDF 1개, 20장 이내 · 파일명: 동아리_팀명.pdf · 마감 전에는 몇 번이든 다시 올릴 수 있습니다. 마지막에 꼭 ‘최종 제출’을 눌러 주세요."}
+  ],
+  "mad_round_questions": [
+    {"id":"68093e1f-64fb-4f14-a85c-2016c3cd482d","title":"예산 3,000만 원에 리필 스테이션 설치비도 포함되나요?","body":"실행안 예산 범위를 확인하고 싶습니다.","status":"answered","team_id":"6396337c-7062-4038-9f45-7fc17b64f043","competition_id":"cd7912bd-bb82-47fd-b411-7eb7009c1d9c","asker_member_id":"ea0d2d4f-6a18-48d9-9ab3-60aa4d04e4b3","is_private":false}
+  ],
+  "mad_round_answers": [
+    {"id":"3e777950-fc51-461d-9722-af6555a48012","question_id":"68093e1f-64fb-4f14-a85c-2016c3cd482d","author_role":"staff","author_member_id":"ea0d2d4f-6a18-48d9-9ab3-60aa4d04e4b3","body":"설치비는 별도입니다. 3,000만 원은 캐페인 실행비(제작·매체·현장 운영)만 기준으로 잡아 주세요."}
+  ],
+  "mad_team_members": [
+    {"id":"1ac4ce87-dee3-420f-a816-e341ef8cca6f","role":"leader","team_id":"6396337c-7062-4038-9f45-7fc17b64f043","member_id":"ea0d2d4f-6a18-48d9-9ab3-60aa4d04e4b3","joined_at":"2026-10-07T16:47:00.514432+00:00"}
+  ]
+}
