@@ -40,7 +40,7 @@ const partners = [
     { name: "SmarComm.", desc: "AI 마케팅 커뮤니케이션", type: "Collaboration" },
 ];
 
-// 숫자 섹션(HIT 진단·멘토 매칭·성공 사례·파트너 대학)은 실제 숫자가 생기면 DB 집계로 다시 넣는다 — "준비 중" 직접 표시 금지(§1.1), 2026-10-10 제거
+// 숫자 섹션(HIT 진단·멘토 매칭·성공 사례·파트너 대학)은 실제 숫자가 생기면 DB 집계로 다시 넣는다 — 빈 숫자 안내 직접 표시 금지(§1.1), 2026-10-10 제거
 
 export default function AboutPage() {
     return (

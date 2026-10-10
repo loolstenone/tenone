@@ -728,7 +728,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           ) : (
             <div className="rounded-xl px-4 py-8 text-center"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <p className="text-sm text-white/30">구성 안내가 준비 중입니다</p>
+              <p className="text-sm text-white/30">아직 등록된 구성 안내가 없습니다</p>
             </div>
           )}
         </section>
@@ -995,7 +995,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               })}
             </div>
           ) : (
-            <p className="text-sm text-white/30 text-center py-6">추천 모임을 준비 중입니다</p>
+            <p className="text-sm text-white/30 text-center py-6">추천할 다른 모임이 아직 없습니다</p>
           )}
         </section>
       </div>

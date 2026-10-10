@@ -182,7 +182,7 @@ function HitBIntroContent() {
             className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
           >
             {starting ? (
-              <><Loader2 className="h-5 w-5 animate-spin" /> 준비 중...</>
+              <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
             ) : (
               <>HIT B 시작하기 <ArrowRight className="h-5 w-5" /></>
             )}
