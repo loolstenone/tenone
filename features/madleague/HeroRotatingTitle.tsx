@@ -25,7 +25,7 @@ export function HeroRotatingTitle() {
   }, []);
 
   return (
-    <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight break-keep">
+    <h1 className="text-[2.5rem] sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight break-keep text-balance">
       <span className="sr-only">{COPIES[0].top} {COPIES[0].accent}</span>
       <span className="grid" aria-hidden>
         {COPIES.map((c, i) => {
@@ -41,9 +41,8 @@ export function HeroRotatingTitle() {
                     : 'opacity-0 translate-y-6'
               }`}
             >
-              {c.top}
-              <br />
-              <span className="text-[#EC1D25]">{c.accent}</span>
+              <span className="block">{c.top}</span>
+              <span className="block text-[#EC1D25]">{c.accent}</span>
             </span>
           );
         })}
