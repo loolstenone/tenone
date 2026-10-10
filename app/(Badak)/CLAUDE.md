@@ -134,6 +134,8 @@
 
 ## 현재 상태
 
+- **2026-10-10 (세션 167)**: `lib/brand-site-menus.ts` 등록 — 헤더·인트라 메뉴(모임·니즈 탐색·커뮤니티·스토리·바닥장 신청 + 멤버 관리·CS/신고) 레지스트리 렌더 · 푸터 4열(뉴스레터 슬롯 유지) · 모임 상세 MOCK 대체값 제거(없는 모임 = '모임을 찾을 수 없습니다') · 콘텐츠 없는 bacademy·contents·hero·shop → `/badak` redirect (열 때 실제 페이지로 교체) · `site:check badak` ❌ 0
+
 | 항목 | 내용 |
 |------|------|
 | **최근 변경 (2026-10-05 세션 158)** | 모임·스타 상세 500 수정(DOMPurify 서버 렌더 제거, `lib/sanitize-html.ts`) · 커뮤니티 관리자 숨김·삭제 API 직원 확인 추가(누구나 삭제 가능했음) · `badak_community_*`·`badak_leader_applications`·`badak_meeting_requests` 전체 개방 정책 제거(`sql/security-brand-writes.sql`) · `badak/jobs` 게시판 운영진 작성 전용(직업안정법) · 문의는 `contact_submissions`(badak_inquiry) → 인트라 BrandInquiryInbox에서 상세·응대 기록 |

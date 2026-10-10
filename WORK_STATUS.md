@@ -1,6 +1,41 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-10 (세션 166 — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비)
+> 마지막 업데이트: 2026-10-10 (세션 167 — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서)
+
+---
+
+## 세션 167 (2026-10-10, 집) — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서
+
+> 워크트리 `home-work-start-df2ede` → master push 1회(`31c60745`) + 작업 종료 push.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **권한 (운영 DB)**: 전천일 계정(lools@kakao.com) super_admin · 테스트 계정 직무 — 김사라 hr · 김준호 finance · 박명수 accounting · 김마케 module marketing · 오관리 module 관리(직무 4종에 없어 모듈 권한). 테스트 계정은 auth 계정 없음(로그인 불가) · 테스트 회원 10명 유지(사용자 결정)
+- **운영 경보**: 분류 오류 1,116행 원인 = Anthropic 크레딧 고갈로 분류기가 오류 표시 → `trend-crawl` v10 배포(rss·web 소스만, 크레딧·인증·429 오류 시 중단). 행 리셋·브리핑·AI 분류 재가동은 Mindle 재논의 때. 리포의 점수 기반 status 분기는 미배포(⚠️ 주석)
+- **통합 관리**: 구독 = `wio_subscriptions`(없는 `subscriptions` 참조 코드 수정) · `/api/subscription` 쓰기 requireStaff · RLS `subs_staff_write` 적용 · 개인정보 체크리스트(게스트 0행·제3자·암호화) 실제 상태
+- **승인 SQL 3건 적용**: 구독 쓰기 직원만 · `has_brand_admin_access()` member_roles 기준 · 옛 경쟁 PT mad_* 11개 DROP(백업 `docs/audit/2026-10/mad-competition-tables-backup-2026-10-10.json`, `mad_archive` 옛 FK만 해제 — 코드는 이미 program_rounds로 읽음)
+- **HeRo·Badak·MADLeap**: `lib/brand-site-menus.ts` 등록 → 헤더(`siteHeaderNav`)·**인트라 메뉴(`brandAdminChildren`)** 레지스트리 렌더 · 푸터 4열 · "준비 중" 직접 표시 전부 제거(HeRo About 숫자 섹션, Badak hero·shop·bacademy·contents → 홈, 모임 상세 가짜 대체값·빈 상태 문구, HIT 버튼) · HeRo 탤런트 에이전시 관리 경로 404 수정 · `site:check` 3개 ❌ 0
+- **MADLeap 지원서**: 유니버스 폼 모듈 — 사이트 `/madleap/forms/[slug]` · 인트라 MADLeap › 지원하기(`/intra/ums/madleap/forms`) · Action Hub · 소개·스터디 룸 "지원하기" 버튼. DB 폼 `madleap/apply` **초안**(26년 5기 양식 30문항)
+- One ID: rook.co.kr·hero.ne.kr 허브 경유 로그인 정상 확인 (처음 실패는 10분 `t1_sso_none` 쿠키)
+- 10-14 = 이미 공지한 처리방침 시행일일 뿐, 급한 일 없음 (사용자 확인)
+- Vercel Deployment Storage 메일: 조치 불필요(30일 보존으로 축소, opt-out 누르면 과금)
+
+### 다음 첫 액션
+
+1. **배포 확인**: Vercel 최신 READY → 크롬(인트라 로그인됨)으로 인트라 사이드바 HeRo·Badak·MADLeap 메뉴가 사이트 메뉴명으로 나오는지(HeRo: 대시보드·HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면), MADLeap › 지원하기 → 폼 `apply` 편집기 열림·미리보기(직원). 탭 닫기
+2. **MADLeap 지원서 공개 준비** (사용자): 제목 기수(27년 6기) · 모집 기간 · 생년월일 → 출생연도로 줄일지 · 300자 제한 기능 필요 여부(필요하면 `types/forms.ts` FormQuestion에 `maxLength` + `lib/forms.ts` validateFormAnswers + FormRenderer 카운터 + FormEditor 입력)
+3. **처리방침 수집 항목** (시행일 10-14, 급하지 않음): `app/(TenOne)/privacy/page.tsx`·`lib/company-info.ts` 버전 — 프로그램 신청·인증서·서비스 연계·직원 인사·**MADLeap 지원서(생년월일·거주지·채널·추천인)** → 체크리스트 "수집 목적 및 항목" 완료
+4. Gmail 수신 토큰 재연결(사용자 OAuth) — 운영 상태 화면
+5. 실사용 검증: 직원 초대 → StaffWelcome → active · UC 정정 거래 1건 · 경쟁 PT 회차 일괄 발급 · React #418(인트라 헤더 날짜)
+6. 이월: 사이트 검색 자동 연결 · Standard 산업군/직무군 쓰기 화면 위치 · 서비스 연계 범위 추가(RooK·Planner's) · Planner's 이월(`app/(Planners)/CLAUDE.md`)
+
+### 주의
+
+- 인트라 브랜드 메뉴는 이제 레지스트리에서 생성 — 집중 브랜드 메뉴를 `lib/intra-nav.ts`에 손으로 적지 않는다(사이트 메뉴에 없는 운영 화면만 `extra`)
+- `trend-crawl` 리포 코드 ≠ 배포 v10 (점수 분기 미배포) — Mindle 결정 전 재배포 금지. 배포 시 `edge-auth.ts`를 같은 폴더에 넣고 `./edge-auth.ts`로 import
+- MADLeap 새 사이트는 비공개 스테이징 — 지원서가 실제로 쓰이는 건 madleap.co.kr DNS 전환 뒤
+- 워크트리 `node_modules` 없음 — tsc 기존 에러는 그대로(이번에 HeRo company 1건만 수정)
 
 ---
 

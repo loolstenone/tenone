@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-10-10 (세션 167, 집) — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서
+
+### 장소·운영
+
+- 워크트리 `home-work-start-df2ede` → master push (`31c60745`) + 작업 종료 push
+- 운영 DB (MCP, 사용자 승인): member_roles(전천일 super_admin · 테스트 계정 duty/module) · `sql/security-wio-subscriptions-write.sql` · `sql/has-brand-admin-access-member-roles.sql` · `sql/drop-old-mad-competition-tables.sql`(백업 후, mad_archive FK 해제 포함) · forms `madleap/apply` 초안 INSERT·문항 갱신
+- Edge Function `trend-crawl` v10 (배포본 기반 + 소스 필터·크레딧 오류 중단)
+
+### 결정 (사용자)
+
+- 전천일 계정 마스터 · 테스트 계정 직무 5명 · 테스트 회원 10명 유지 · Mindle 관련은 나중에
+- 10-14는 급하지 않음 (처리방침 시행일일 뿐)
+- MADLeap 지원 = 유니버스 폼 (26년 5기 양식, 27년도 유사)
+- Vercel Deployment Storage: 조치 없음
+
+### 변경 내역
+
+- 운영 경보: `supabase/functions/trend-crawl/index.ts`
+- 통합 관리: `app/api/intra/members/route.ts`(구독 = wio_subscriptions) · `app/intra/ums/commerce/subscriptions/page.tsx` · `app/api/subscription/route.ts`(requireStaff) · `app/intra/ums/members/privacy/page.tsx`
+- 레지스트리: `lib/brand-site-menus.ts` hero·badak·madleap (+ MADLeap 지원하기, HeRo 탤런트 에이전시 경로 수정) · `lib/intra-nav.ts` 3개 브랜드 `brandAdminChildren` · `lib/action-hub-registry.ts` madleap_form_responses
+- HeRo: `HeRoHeader`·`HeRoFooter`(4열, 개인 이메일 제거) · About 숫자 섹션 제거 · HIT a~f 버튼 문구 · company 타입 오류
+- Badak: `BadakHeader`·`BadakFooter` · 모임 상세 MOCK 제거·없는 모임 안내·빈 상태 문구 · bacademy·contents·hero·shop → `/badak` (sitemap 제거)
+- MADLeap: `MadLeapHeader`·`MadLeapFooter` · `/madleap/forms/[slug]` · `/intra/ums/madleap/forms(/[id])` · 소개(`#join`)·스터디 룸 지원하기 버튼 (없는 `/madleap/apply` 교체)
+- 백업: `docs/audit/2026-10/mad-competition-tables-backup-2026-10-10.json`
+
+---
+
 ## 2026-10-08 밤 ~ 10-10 새벽 (세션 166, 집) — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비
 
 ### 장소·운영

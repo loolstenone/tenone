@@ -1,6 +1,6 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-10-10 (세션 166 — MADLeague 프로그램·인증서 · Planner's 부활 · 서비스 연계 · 인트라 재정비)
+> 마지막 업데이트: 2026-10-10 (세션 167 — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서)
 
 ---
 
@@ -10,10 +10,13 @@
 - [x] Workspace · My · ERP 체계 · 직무 권한(duty) DB 정책 · 직원 입사·첫 로그인·퇴사 절차
 - [x] 통합 관리 점검(목업 제거·UC 조회 정책·정정 거래·메뉴 재편) · 사이드바 하단 중복 제거
 - [x] 우측 상단 계정 컨트롤 전 유니버스 통일(`AccountControls` — 알림·아바타·로그아웃 텍스트)
-- [ ] 결정: 전천일 계정 마스터 권한 · 김사라·김준호 직무 권한 · 테스트 회원 10명 삭제
-- [ ] 운영 상태 경보: Gmail 토큰 · RSS 실패 소스 · 분류 오류 1,116행 리셋(승인) · 브리핑 · AI 분류(Anthropic 크레딧, Mindle 재논의)
-- [ ] 개인정보: 게스트 자동삭제 작업 · 처리방침 수집 항목(10-14) · 제3자 제공 동의 절차 · 암호화 점검
-- [ ] 구독 테이블 이중(`wio_subscriptions`·`subscriptions`) 정리 · Standard 산업군/직무군 쓰기 화면 위치
+- [x] 전천일 계정 마스터 · 테스트 계정 직무(김사라 인사·김준호 재무·박명수 회계·김마케 마케팅·오관리 관리) · 테스트 회원 10명 유지 — 세션 167
+- [x] 크롤러 오수집(rss·web만)·크레딧 오류 시 중단 (trend-crawl v10) — 세션 167
+- [ ] 운영 상태 경보 남은 것: Gmail 토큰 재연결(사용자 OAuth) · 분류 오류 1,116행 리셋·브리핑·AI 분류 = Mindle 재논의 때
+- [x] 개인정보 체크리스트: 게스트(0행·작성 경로 없음)·제3자 제공·암호화 실제 상태 반영 — 세션 167
+- [ ] 처리방침 수집 항목 반영(10-14 시행일, 급하지 않음 — 안내 박스 제거·버전) · MADLeap 지원서 항목(생년월일·거주지) 포함
+- [x] 구독 = `wio_subscriptions` 하나(`subscriptions`는 없는 테이블) · 구독 쓰기 직원만(API + RLS `subs_staff_write`) — 세션 167
+- [ ] Standard 산업군/직무군 쓰기 화면 위치
 - [ ] 실사용 검증: 직원 초대 → StaffWelcome → active · UC 정정 거래 · 회차 일괄 발급 · React #418
 
 ## 🔗 서비스 연계 · Planner's (세션 166)
@@ -21,12 +24,15 @@
 - [x] 서비스 간 연계 동의 코어(`member_service_links`) · MADLeague 인증서 → HeRo 마이페이지
 - [x] Planner's 부활(실험 Tier 스테이징) — 이월은 `app/(Planners)/CLAUDE.md`
 - [ ] 연계 범위 추가(RooK·Planner's) — `lib/service-links.ts` 레지스트리
+- [x] MADLeap 지원서 = 유니버스 폼(`/madleap/forms/apply`, 26년 5기 양식 초안) — 세션 167
+- [ ] MADLeap 지원서 공개(인트라 › MADLeap › 지원하기) · 300자 제한 기능 여부
 
 ## 🧰 공통 가이드 점검 (세션 162)
 
 - [x] `npm run site:check` + CLAUDE.md §2.5 원스톱 체크리스트 · 파비콘 404 4개 복원 · HeRo 공개
 - [x] 인트라 메뉴·목차 비직원 비전달 (서버 레이아웃 + intra-gate)
-- [ ] HeRo·Badak·MADLeap brand-site-menus 등록 (site:check ❌) + 푸터 4열 이행 + 사이트 검색 자동 연결
+- [x] HeRo·Badak·MADLeap brand-site-menus 등록 · 헤더·인트라 메뉴 레지스트리 렌더 · 푸터 4열 — 세션 167 (site:check ❌ 0)
+- [ ] 사이트 검색 자동 연결
 - [x] 유니버스 검색 복구 (메뉴·게시판·브랜드 콘텐츠·유니버스, 회원 검색 제거) · Ten:One™ 표기 규칙 — 세션 165
 - [x] 로그인 필요 화면 LoginRequired 표준(닫기 가능) 27곳 · 푸터 4열 규칙(Universe 열 폐지·사업자등록번호 숨김) · 로그인 도움(아이디·비밀번호 찾기) · 교차 브랜드 링크 CrossSiteLink — 세션 165
 - [ ] 실험·보관 독립 도메인 Turnstile 등록 여부 · 위젯 10개 초과 대비
@@ -107,7 +113,7 @@
 - [x] 긴급 보안: SmarComm CRM · 뉴스레터 발송 · board-assets · middleware .png · Badak role · HeRo talent RLS · debug-env
 - [x] ⚠️ `get_public_profile` 이메일 반환 차단 · MADLeague 포트폴리오 타 브랜드 이력 필터 — 세션 165
 - [x] 1단계 남은 보안: is_tenone_staff → auth_is_staff · USING(true) 7개 · HeRo 매칭 · 자기 승인 컬럼 · open redirect · tih · Scripts 정리 — 세션 165
-- [ ] 남은 점검 항목: `has_brand_admin_access()`가 members 컬럼으로 판단 (데이터 계약 2 위반)
+- [x] `has_brand_admin_access()` → member_roles 기준 (운영 적용) — 세션 167
 - [x] D-1 SSO → **One ID로 복구** (허브 auth.tenone.biz · 도메인별 독립 세션 · 일회용 해시 토큰 · BrandJoinGate) — 세션 165, 배포 후 독립 도메인 간 실검증
 - [ ] 결정 D-2~D-7 (보관 API · 빈 테이블 DROP · MADLeap/HeRo 순환 · CLAUDE.md 정리 · 탈퇴 · CRM 트리거)
 - [ ] 2단계 SSOT 단일화 · 3단계 정리·이상적 구조 · 점검기 확장 → 같은 6축 재점검
@@ -118,7 +124,7 @@
 - [x] 사이트 팀 구성(임원) · 초대 링크 · 팀장 팀명 · 주인 브랜드 참가 동의
 - [x] 인증서 본인 발급·다운로드·진위 확인·인트라 관리 (`program_certificates`)
 - [x] 참가 신청·선발 (`program_applications`) · 창구 공용 화면 · RooK·HeRo 연결 · Action Hub
-- [ ] 배포 확인 → 옛 mad_* 테이블 DROP (승인)
+- [x] 옛 경쟁 PT·인증서 mad_* 11개 DROP (백업 `docs/audit/2026-10/`) — 세션 167
 - [ ] 개인정보처리방침에 신청·인증서 항목 (10-14 시행 처리와 함께)
 - [ ] 개인 모드 제출 · 비직원 계정 실검증 · HeRo 진입점·brand-site-menus 등록
 - [x] 경쟁 PT 인증서 대장 243건 · 로그인 본인 확인 발급 · 등록 정보 우선권 · 인트라 대장 편집·CSV · 회차 일괄 발급 — 세션 166

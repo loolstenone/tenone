@@ -62,8 +62,13 @@
 
 ---
 
+## Action Hub Entries
+
+- `form_responses` · brand_id='madleap' · status='pending' · /intra/ums/madleap/forms · category=approval · priority=normal (`madleap_form_responses`, 2026-10-10)
+
 ## 현재 상태
 
+- **2026-10-10 (세션 167)**: `lib/brand-site-menus.ts` 등록 — 헤더·인트라 메뉴 레지스트리 렌더 · 푸터 4열 · **지원서 = 유니버스 폼**: 사이트 `/madleap/forms/[slug]`, 인트라 MADLeap › 지원하기(`/intra/ums/madleap/forms`, 공통 `FormsAdmin`/`FormEditor`), Action Hub `madleap_form_responses`. DB 폼 `madleap/apply` **초안**(26년 5기 양식 30문항 — 기본 정보·채널·경험·강점·관심·AI 툴·팀·운영진·토요일 시간·가산점 ①②③). 공개 전: 기수 제목·모집 기간·생년월일 → 출생연도 검토·300자 제한 기능 여부. 소개(`#join`)·스터디 룸 '지원하기' 버튼이 폼으로 연결 (없던 `/madleap/apply` 교체). 인트라 '심사 관리'(mad_applications club=madleap)는 그대로
 - **2026-10-08 (세션 165)**: 로그인 필요 화면을 `LoginRequired` 표준으로 교체(모달 X·바깥·Esc로 닫기 + 다시 열기 버튼, CLAUDE.md §1.2.1)
 
 | 항목 | 내용 |

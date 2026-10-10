@@ -542,6 +542,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ## 현재 상태
 
+- **2026-10-10 (세션 167)**: `lib/brand-site-menus.ts` 등록 — 헤더(`siteHeaderNav`)·인트라 메뉴(`brandAdminChildren`, 사이트 메뉴명 그대로: HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면 extra)·푸터 4열(개인 이메일 제거). About '준비 중' 숫자 섹션 제거(실제 숫자 생기면 DB 집계로) · HIT 버튼 로딩 문구 · 탤런트 에이전시 관리 = `/intra/hero/talent-agent/applications`. ❌ 인트라 HeRo 메뉴를 `lib/intra-nav.ts`에 손으로 추가 — 사이트 메뉴면 레지스트리, 운영 화면이면 extra
 - **2026-10-09 (세션 166)**: 서비스 간 연계 첫 연결 — MADLeague 인증서 → HeRo /my "MADLeague 활동 경력" (`features/hero/LinkedMadleagueCertificates.tsx` · `/api/hero/linked/madleague-certificates`). 동의 전엔 동의 카드, API가 `hasServiceLink()` 재확인 · 생년월일·대학·전공 미노출. ❌ 다른 브랜드 데이터는 연계 동의(`lib/service-links.ts`) 없이 읽지 않는다 (데이터 계약 3·4조). HeRo는 비공개 유지
 - **2026-10-08 (세션 165)**: 로그인 필요 화면 LoginRequired 표준(기업·JD·JH·마이·이력서 워크스페이스) · TIH 신청 Turnstile 필수 + INSERT만(중복 이메일 409, 덮어쓰기 차단) · talent-agent 브랜드 카드 CrossSiteLink · 매칭 inbox/journey API requireMember+assertSelf · HeRo 매칭 RLS(hero_matches·hero_companies·hero_company_members) 적용
 
