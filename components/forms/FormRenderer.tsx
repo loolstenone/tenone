@@ -219,7 +219,8 @@ export function FormRenderer({ brand, slug, accent = "#EC1D25", dark = false }: 
                 <dl className="grid grid-cols-[88px_1fr] gap-y-1.5">
                     <dt className={t.muted}>목적</dt><dd>{form.privacy?.purpose || "신청 접수·결과 안내"}</dd>
                     <dt className={t.muted}>항목</dt><dd>{items.join(", ") || "-"}</dd>
-                    <dt className={t.muted}>보관 기간</dt><dd>{form.privacy?.retention || "목적 달성 후 지체 없이 파기"}</dd>
+                    {/* 보관 기간 비우면 표시 안 함 — 폼별 운영자 결정 (예: MADLeap 지원서, 2026-10-10) */}
+                    {form.privacy?.retention && <><dt className={t.muted}>보관 기간</dt><dd>{form.privacy.retention}</dd></>}
                 </dl>
                 <p className={`mt-3 text-xs ${t.muted}`}>동의를 거부할 수 있으나, 거부 시 신청이 제한됩니다. 자세한 내용은 개인정보처리방침을 따릅니다.</p>
                 <label className={`mt-4 flex items-center gap-2 cursor-pointer ${t.text}`}>

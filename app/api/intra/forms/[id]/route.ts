@@ -104,7 +104,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         const questions = (patch.questions ?? cur?.questions ?? []) as FormQuestion[];
         const privacy = (patch.privacy ?? cur?.privacy ?? {}) as { purpose?: string; retention?: string };
         if (!questions.some(q => q.type !== "section")) return NextResponse.json({ error: "질문을 하나 이상 넣어야 열 수 있습니다." }, { status: 400 });
-        if (!privacy.purpose || !privacy.retention) return NextResponse.json({ error: "개인정보 수집 목적과 보관 기간을 넣어야 열 수 있습니다." }, { status: 400 });
+        // 보관 기간은 선택 — 비우면 동의 화면에 표시하지 않음 (운영자 결정, 2026-10-10)
+        if (!privacy.purpose) return NextResponse.json({ error: "개인정보 수집 목적을 넣어야 열 수 있습니다." }, { status: 400 });
     }
 
     const { error } = await admin.from("forms").update(patch).eq("id", id);

@@ -251,7 +251,7 @@ function SettingsEditor({ form, update, programs }: { form: FormDef; update: (p:
                     <input className={inputCls} value={p.purpose ?? ""} onChange={e => update({ privacy: { ...p, purpose: e.target.value } })} placeholder="예: DAM 파티 참가자 선정·행사 운영 연락" />
                 </label>
                 <label className="block text-xs text-neutral-600">보관 기간
-                    <input className={inputCls} value={p.retention ?? ""} onChange={e => update({ privacy: { ...p, retention: e.target.value } })} placeholder="예: 행사 종료 후 1년" />
+                    <input className={inputCls} value={p.retention ?? ""} onChange={e => update({ privacy: { ...p, retention: e.target.value } })} placeholder="예: 행사 종료 후 1년 (비우면 동의 화면에 표시 안 함)" />
                 </label>
                 <div className="text-xs text-neutral-500 bg-neutral-50 border border-neutral-200 rounded p-3">
                     <b className="text-neutral-700">수집 항목 (질문에서 자동)</b>: {consentItems(form.questions).join(", ") || "-"}
@@ -355,7 +355,7 @@ function ResponsesView({ form, responses, reload }: { form: FormDef; responses: 
                                                 </div>
                                             ))}
                                         </dl>
-                                        <p className="text-xs text-neutral-400">동의 {new Date(r.consent?.agreed_at).toLocaleString("ko-KR")} · 보관 {r.consent?.retention}</p>
+                                        <p className="text-xs text-neutral-400">동의 {new Date(r.consent?.agreed_at).toLocaleString("ko-KR")}{r.consent?.retention ? ` · 보관 ${r.consent.retention}` : ""}</p>
                                         <div className="flex flex-wrap items-center gap-2">
                                             {(["pending", "accepted", "rejected", "cancelled"] as const).map(st => (
                                                 <button key={st} onClick={() => setStatus(r, st)} disabled={r.status === st}
