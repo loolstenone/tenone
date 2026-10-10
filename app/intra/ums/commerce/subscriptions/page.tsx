@@ -36,25 +36,11 @@ export default function UniverseSubscriptions() {
             try {
                 const supabase = createClient();
 
-                // wio_subscriptions 먼저, fallback으로 기존 subscriptions
-                let rawSubs: any[] | null = null;
-                let error: any = null;
-
-                const wioRes = await supabase
+                // 구독 SSOT = wio_subscriptions 하나 (모순 방지 원칙 1 — 옛 subscriptions 테이블은 DB에 없음, 2026-10-10)
+                const { data: rawSubs, error } = await supabase
                     .from("wio_subscriptions")
                     .select("id, user_id, service, plan_key, price_paid, started_at, expires_at, status, auto_renew")
                     .order("created_at", { ascending: false });
-
-                if (!wioRes.error && wioRes.data && wioRes.data.length > 0) {
-                    rawSubs = wioRes.data;
-                } else {
-                    const legacyRes = await supabase
-                        .from("subscriptions")
-                        .select("id, member_id, service, plan, price, started_at, expires_at, status, auto_renew")
-                        .order("created_at", { ascending: false });
-                    rawSubs = legacyRes.data;
-                    error = legacyRes.error;
-                }
 
                 if (error) throw error;
                 if (!rawSubs || rawSubs.length === 0) {

@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
     // 구독 정보 (active), 뉴스레터 구독자, UC 잔액, member_roles 병렬 조회
     // 브랜드 = member_brand_joins (헌법 원칙 1 — members.affiliations로 세지 않는다, 2026-10-10)
     const [subsRes, newslettersRes, ucBalancesRes, memberRolesRes, joinsRes] = await Promise.all([
-        admin.from('subscriptions').select('member_id, service, plan').eq('status', 'active'),
+        // 구독 SSOT = wio_subscriptions (모순 방지 원칙 1). user_id = auth.users.id → members.auth_id로 회원에 연결
+        admin.from('wio_subscriptions').select('user_id, service, plan_key').eq('status', 'active'),
         admin.from('newsletter_subscribers').select('email').eq('status', 'active'),
         admin.from('uc_balances').select('member_id, balance'),
         admin.from('member_roles').select('member_id, role, context').eq('is_active', true),
@@ -41,6 +42,17 @@ export async function GET(request: NextRequest) {
     const brandJoins: Record<string, string[]> = {};
     (joinsRes.data ?? []).forEach((j: { member_id: string; brand_id: string }) => {
         (brandJoins[j.member_id] ??= []).push(j.brand_id);
+    });
+
+    const subRows = (subsRes.data ?? []) as { user_id: string; service: string; plan_key: string }[];
+    const authIds = [...new Set(subRows.map(r => r.user_id))];
+    const { data: subMembers } = authIds.length
+        ? await admin.from('members').select('id, auth_id').in('auth_id', authIds)
+        : { data: [] as { id: string; auth_id: string }[] };
+    const memberByAuth = new Map((subMembers ?? []).map(m => [m.auth_id as string, m.id as string]));
+    const subscriptions = subRows.flatMap(r => {
+        const memberId = memberByAuth.get(r.user_id);
+        return memberId ? [{ member_id: memberId, service: r.service, plan: r.plan_key }] : [];
     });
 
     const newsletterEmails = (newslettersRes.data ?? []).map((r: { email: string }) => r.email.toLowerCase());
@@ -58,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
         members: members ?? [],
-        subscriptions: subsRes.data ?? [],
+        subscriptions,
         newsletterEmails,
         totalMembersCount: totalCount ?? (members?.length ?? 0),
         newsletterCount: newsletterEmails.length,

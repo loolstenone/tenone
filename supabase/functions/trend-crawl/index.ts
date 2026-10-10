@@ -81,7 +81,8 @@ async function crawl(): Promise<{ sources: number; collected: number; errors: st
   const { data: sources, error: srcErr } = await supabase
     .from('mindle_sources')
     .select('*')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .in('source_type', ['rss', 'web']); // 뉴스레터(mailto)는 gmail-newsletter 함수가 받는다 — HTTP로 긁지 않음 (2026-10-10)
 
   if (srcErr || !sources || sources.length === 0) {
     return { sources: 0, collected: 0, errors: srcErr ? [srcErr.message] : [] };
@@ -221,6 +222,8 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
       //   7~8.x → collected (검수 큐 — /intra/marketing/mindle/queue)
       //   6~6.x → draft (편집팀 작업 후보)
       // < 6 은 위 filter 단계에서 rejected 처리되어 여기 도달 불가
+      // ⚠️ 이 점수별 분기는 운영 배포본(v10, 2026-10-10)에 없다 — 배포본은 전부 'collected'.
+      //    9+ 자동 공개 여부는 Mindle 재논의 때 결정 후 배포 (그 전엔 이 파일 그대로 배포 금지)
       const initialStatus =
         filter.relevance_score >= 9 ? 'published' :
         filter.relevance_score >= 7 ? 'collected' :
@@ -248,7 +251,11 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
       processed++;
     } catch (err) {
       const label = (item.title || '').slice(0, 30);
-      errors.push(`${label}: ${err instanceof Error ? err.message : String(err)}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`${label}: ${msg}`);
+      // API 키·크레딧·한도 문제는 기사 탓이 아니다 — 'raw'로 두고 이번 회차 중단 (재가동 때 그대로 처리됨).
+      // 2026-06 크레딧 고갈 뒤 매시간 5건씩 'error'로 찍혀 1,116건이 쌓였던 문제 (2026-10-10)
+      if (/credit balance|authentication|rate_limit|overloaded|\b(401|402|403|429|529)\b/i.test(msg)) break;
       await supabase.from('collected_data').update({ status: 'error' }).eq('id', item.id);
     }
   }

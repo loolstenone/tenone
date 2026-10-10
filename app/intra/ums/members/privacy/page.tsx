@@ -57,12 +57,12 @@ function StatusBadge({ status }: { status: DeletionRequest["status"] }) {
 const COMPLIANCE_ITEMS = [
     { label: "개인정보 처리방침 고지", done: true, link: "/privacy" },
     { label: "수집 목적 및 항목 명시 (브랜드별 항목 반영)", done: false, link: "/intra/ums/standard/privacy" },
-    { label: "제3자 제공 동의 절차", done: false, link: null },
+    { label: "제3자 제공 — 현재 제공 없음 (처리방침 4조). 인재 매칭 등 제공을 시작할 때 별도 동의 화면 필요", done: true, link: "/privacy" },
     { label: "마케팅 수신 동의 분리 (가입 시 [선택])", done: true, link: null },
-    { label: "게스트 자동삭제 (30일) — 삭제 작업 미구현", done: false, link: null },
+    { label: "게스트 자동삭제 (30일) — 현재 게스트 수집 경로 없음 (guests 0건, 쓰는 코드 없음). 수집을 시작할 때 삭제 작업 함께 만들 것", done: true, link: null },
     { label: "삭제 요청 처리 (30일 이내)", done: true, link: null },
     { label: "접근 권한 최소화 (인사·재무 직무 권한 적용, 2026-10-10)", done: true, link: "/intra/ums/standard/roles" },
-    { label: "개인정보 암호화 저장 (항목별 점검 필요)", done: false, link: null },
+    { label: "암호화 — 비밀번호 암호화(Auth) · 전 구간 HTTPS · 저장소 암호화(Supabase) · 고유식별정보(주민번호 등) 미수집 · 인증서 대장 전화번호는 해시만", done: true, link: null },
 ];
 
 /* ── 신규 요청 폼 기본값 ── */
