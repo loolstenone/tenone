@@ -8,14 +8,11 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
 import { loginHref } from "@/lib/login-href";
 
-const navItems = [
-    { name: "커뮤니티", href: "/madleap/community" },
-    { name: "스터디 룸", href: "/madleap/study-room" },
-    { name: "매드립 소개", href: "/madleap/about" },
-    { name: "포트폴리오", href: "/madleap/portfolio" },
-];
+// 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서는 거기서 고친다
+const navItems = siteHeaderNav("madleap");
 
 export function MadLeapHeader() {
     const pathname = usePathname();

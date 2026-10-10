@@ -43,8 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${baseUrl}/badak/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
         { url: `${baseUrl}/badak/join`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
         { url: `${baseUrl}/badak/stars`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
-        { url: `${baseUrl}/badak/contents`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
-        { url: `${baseUrl}/badak/bacademy`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
 
         // ── SmarComm ──
         { url: `${baseUrl}/smarcomm`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },

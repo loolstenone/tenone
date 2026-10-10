@@ -9,17 +9,12 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
+import { siteHeaderNav } from "@/lib/brand-site-menus";
 import { LoginModal } from "@/components/LoginModal";
 
-const PREFIX = '/badak';
-const navItems = [
-    { name: "모임", href: `${PREFIX}/groups` },
-    { name: "니즈 탐색", href: `${PREFIX}/explore` },
-    { name: "커뮤니티", href: `${PREFIX}/community` },
-    { name: "스토리", href: `${PREFIX}/story` },
-    { name: "모임 개설", href: `${PREFIX}/groups/create` },
-    { name: "바닥장 신청", href: `${PREFIX}/apply` },
-];
+const PREFIX = "/badak";
+// 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서는 거기서 고친다
+const navItems = siteHeaderNav("badak");
 
 export function BadakHeader() {
     const pathname = usePathname();

@@ -96,6 +96,30 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         ],
     },
     {
+        // Badak — 기획자 네트워크 (Vercel 새 사이트 스테이징, 외부 badak.biz 운영 중). 헤더 = features/badak/BadakHeader.tsx (2026-10-10 등록)
+        siteId: "badak",
+        adminBase: "/intra/ums/badak",
+        menus: [
+            { placement: "header", label: "모임", path: "/badak/groups", source: { kind: "table", table: "badak_groups" }, adminHref: "/intra/ums/badak/groups", unit: "개" },
+            { placement: "header", label: "니즈 탐색", path: "/badak/explore", source: { kind: "table", table: "badak_needs" }, adminHref: "/intra/ums/badak/needs", unit: "건" },
+            { placement: "header", label: "커뮤니티", path: "/badak/community", source: { kind: "table", table: "badak_community_posts" }, adminHref: "/intra/ums/badak/posts", unit: "글" },
+            { placement: "header", label: "스토리", path: "/badak/story", source: { kind: "table", table: "badak_stories" }, adminHref: "/intra/ums/badak/stories", unit: "글" },
+            { placement: "header", label: "모임 개설", path: "/badak/groups/create", source: { kind: "static" } },
+            { placement: "header", label: "바닥장 신청", path: "/badak/apply", source: { kind: "table", table: "badak_leader_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/ums/badak/applications", unit: "건" },
+        ],
+    },
+    {
+        // MADLeap — 실전 프로젝트 대학생 연합동아리 (Vercel 새 사이트 스테이징, 외부 madleap.co.kr 운영 중). 헤더 = features/madleap/MadLeapHeader.tsx (2026-10-10 등록)
+        siteId: "madleap",
+        adminBase: "/intra/ums/madleap",
+        menus: [
+            { placement: "header", label: "커뮤니티", path: "/madleap/community", source: { kind: "board", board: "community" }, unit: "글" },
+            { placement: "header", label: "스터디 룸", path: "/madleap/study-room", source: { kind: "table", table: "madleap_study_programs" }, unit: "개" },
+            { placement: "header", label: "매드립 소개", path: "/madleap/about", source: { kind: "static" } },
+            { placement: "header", label: "포트폴리오", path: "/madleap/portfolio", source: { kind: "table", table: "madleap_portfolios" }, unit: "개" },
+        ],
+    },
+    {
         siteId: "madleague",
         adminBase: "/intra/ums/madleague",
         menus: [

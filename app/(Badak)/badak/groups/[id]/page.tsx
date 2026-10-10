@@ -79,353 +79,7 @@ interface GroupDetail {
   related: { slug: string; title: string; current_members: number; max_members: number; tags: string[]; cover_image_url?: string | null }[];
 }
 
-// ── Mock 데이터 (slug 기반) ──────────────────────────────
-const MOCK: Record<string, GroupDetail> = {
-  'b2b-marketing-weekly': {
-    id: 'g1', slug: 'b2b-marketing-weekly',
-    title: 'B2B 마케팅 실무 모임',
-    tagline: 'B2B SaaS 마케터들의 케이스 스터디 & 실전 네트워킹',
-    notice: '다음 모임은 4/26(토) 오후 2시, 강남역 스타벅스 2층입니다. 발표자는 사전에 슬랙에 자료 공유 부탁드립니다.',
-    description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다.\n\n리드 제너레이션, ABM, 콘텐츠 마케팅, 파트너십까지 다양한 B2B 마케팅 전략을 실제 케이스 중심으로 공부합니다. 이론보다 현장에서 바로 쓸 수 있는 인사이트를 나눕니다.',
-    intro_who: '• B2B SaaS 또는 기업 솔루션 마케터\n• B2B 마케팅으로 커리어 전환을 준비 중인 분\n• 실전 케이스를 공유하고 피드백받고 싶은 분\n• 같은 고민을 나눌 동료가 필요한 분',
-    structure: [
-      { number: 1, title: '킥오프 — 소개 & 주제 선정', description: '첫 모임. 참여자 소개, 각자의 B2B 마케팅 고민 공유, 앞으로의 발표 주제 리스트 작성' },
-      { number: 2, title: '리드 제너레이션 케이스', description: '실제 집행 중인 캠페인 1건 발표. 목표 KPI, 실제 성과, 배운 것, 개선 포인트 발표 후 Q&A' },
-      { number: 3, title: 'ABM 전략 딥다이브', description: 'Account-Based Marketing 실전 사례. 타겟 선정, 콘텐츠 전략, 영업팀과의 협업 방식 공유' },
-      { number: 4, title: '콘텐츠 마케팅 케이스', description: '블로그, 웨비나, 케이스스터디 등 콘텐츠 에셋 제작 경험 공유 + 배포 전략' },
-      { number: 5, title: '파이프라인 분석 & 자유 주제', description: '실제 파이프라인 데이터 기반으로 MQL→SQL 전환율 개선 사례 + 참여자 자유 주제' },
-      { number: 6, title: '시즌 마무리 & 다음 시즌 준비', description: '지난 5회 리뷰. 가장 도움이 된 인사이트 공유, 다음 시즌 주제 투표, 네트워킹' },
-    ],
-    guide: '📍 장소\n강남역 2번 출구 도보 3분 · 스타벅스 강남점 2층 (세미 프라이빗 공간 예약)\n\n📅 일정\n매주 토요일 오후 2시~4시 (120분). 부득이한 경우 슬랙에서 사전 공지.\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 발표 순서가 돌아오면 반드시 발표 (거르면 다음 시즌 참여 불가)\n• 모임 3회 이상 무단 불참 시 제외\n• 실명 기반 (닉네임 X)\n\n🎒 준비물\n노트북 또는 태블릿. 발표 자료 PPT/Notion 가능.',
-    status: 'completed', join_type: 'firstcome', meeting_type: 'recurring',
-    season_number: 1,
-    max_members: 20, current_members: 20,
-    event_date: '2026-03-01T14:00:00', schedule: '매주 토 14:00~16:00 (6회 완료)', location: '강남역', location_detail: '스타벅스 강남점 2층',
-    fee: 0, tags: ['B2B', '마케팅', 'SaaS', '케이스스터디'],
-    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 리드 제너레이션과 ABM 전략을 직접 운영 중입니다.', avatar_url: null },
-    need: { id: 'n1', display_text: 'B2B 마케팅 같이 공부하고 싶어', count: 28 },
-    members: [
-      { id: 'm1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', avatar_url: null },
-      { id: 'm2', display_name: '그로스K', job_function: '그로스 마케터', avatar_url: null },
-      { id: 'm3', display_name: '브랜드S', job_function: '브랜드 매니저', avatar_url: null },
-      { id: 'm4', display_name: '콘텐츠Y', job_function: 'SNS 마케터', avatar_url: null },
-      { id: 'm5', display_name: '데이터P', job_function: '데이터 분석가', avatar_url: null },
-      { id: 'm6', display_name: '스타트업L', job_function: '스타트업 대표', avatar_url: null },
-    ],
-    reviews: [
-      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08', season_number: 1 },
-      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01', season_number: 1 },
-      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22', season_number: 1 },
-      { id: 'r4', author: '스타트업L', avatar_url: null, job_function: '스타트업 대표', rating: 5, content: '파이프라인 분석 회차가 가장 좋았어요. 우리 팀 SQL→MQL 전환 문제를 정확히 짚어줬고 덕분에 다음 분기 전략을 완전히 바꿨습니다.', created_at: '2026-03-29', season_number: 1 },
-      { id: 'r5', author: '브랜드S', avatar_url: null, job_function: '브랜드 매니저', rating: 4, content: 'B2B는 처음이라 걱정했는데 다들 친절하게 설명해줘서 따라갈 수 있었어요. 마케터J 바닥장이 분위기를 잘 만들어줬습니다.', created_at: '2026-04-05', season_number: 1 },
-    ],
-    related: [
-      { slug: 'b2b-marketing-weekly-s2', title: 'B2B 마케팅 실무 모임 시즌 2', current_members: 7, max_members: 20, tags: ['B2B', '마케팅', 'SaaS'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
-      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', current_members: 11, max_members: 15, tags: ['AI', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&h=120&fit=crop' },
-    ],
-  },
-  'b2b-marketing-weekly-s2': {
-    id: 'g1s2', slug: 'b2b-marketing-weekly-s2',
-    title: 'B2B 마케팅 실무 모임 시즌 2',
-    tagline: '시즌 1 참여자들의 강추로 돌아온 B2B 마케팅 케이스 스터디',
-    notice: '시즌 1 참여자 우선 신청 기간: 4/20(일)까지. 이후 일반 모집 진행합니다.',
-    description: '시즌 1에서 진행한 리드 제너레이션·ABM·콘텐츠 마케팅에 이어, 시즌 2는 더 깊은 주제를 다룹니다.\n\n이번 시즌은 실제 ICP(이상 고객 프로필) 정의와 타겟 세그멘테이션, 세일즈 인에이블먼트, 그리고 마케팅-영업 얼라인먼트를 집중적으로 파고듭니다.',
-    intro_who: '• 시즌 1 참여 경험이 있는 B2B 마케터 (우선 모집)\n• B2B SaaS 또는 기업 솔루션 마케터\n• ICP 정의부터 세일즈 협업까지 실전을 배우고 싶은 분\n• 케이스 발표 경험이 있거나 준비된 분',
-    structure: [
-      { number: 1, title: 'ICP 정의 & 세그멘테이션', description: '이상 고객 프로필(ICP)을 데이터 기반으로 정의하는 실전 방법론. 각자 ICP 초안 발표 후 피드백' },
-      { number: 2, title: '세일즈 이네이블먼트 케이스', description: '마케팅이 세일즈에 건네는 콘텐츠·도구·인사이트. 실제 배틀카드, 케이스스터디 제작 사례 공유' },
-      { number: 3, title: 'PLG vs SLG 전략 비교', description: 'Product-Led Growth와 Sales-Led Growth의 차이. SaaS 회사들의 실제 선택과 그 배경 분석' },
-      { number: 4, title: 'ABM 2.0 — 실전 계정 관리', description: '시즌 1에서 배운 ABM을 실제로 어떻게 운용하는지. 계정 리스트업, 개인화 콘텐츠, 성과 측정' },
-      { number: 5, title: '마케팅-영업 얼라인먼트', description: 'MQL 정의 충돌, 리드 퀄리티 이슈 해결 사례. 두 팀이 같은 목표를 바라보게 만드는 방법' },
-      { number: 6, title: '시즌 2 마무리 & 시즌 3 기획', description: '지난 5회 케이스 총정리. 가장 인상 깊은 인사이트 공유, 시즌 3 주제 투표, 파티' },
-    ],
-    guide: '📍 장소\n강남역 2번 출구 도보 3분 · 스타벅스 강남점 2층 (시즌 1과 동일)\n\n📅 일정\n매주 토요일 오후 2시~4시 (120분). 부득이한 경우 슬랙에서 사전 공지.\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 발표 순서가 돌아오면 반드시 발표\n• 모임 3회 이상 무단 불참 시 제외\n• 실명 기반 (닉네임 X)',
-    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
-    season_number: 2,
-    parent_group_id: 'g1',
-    parent_slug: 'b2b-marketing-weekly',
-    max_members: 20, current_members: 7,
-    event_date: '2026-04-26T14:00:00', schedule: '매주 토 14:00~16:00', location: '강남역', location_detail: '스타벅스 강남점 2층',
-    fee: 0, tags: ['B2B', '마케팅', 'SaaS', '케이스스터디', 'ABM'],
-    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 시즌 1에서 6회 전부 함께한 참여자들의 요청으로 시즌 2를 엽니다.', avatar_url: null },
-    need: { id: 'n1', display_text: 'B2B 마케팅 같이 공부하고 싶어', count: 28 },
-    members: [
-      { id: 'm1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', avatar_url: null },
-      { id: 'm2', display_name: '그로스K', job_function: '그로스 마케터', avatar_url: null },
-      { id: 'm3', display_name: '콘텐츠Y', job_function: 'SNS 마케터', avatar_url: null },
-      { id: 'm4', display_name: '데이터P', job_function: '데이터 분석가', avatar_url: null },
-      { id: 'm5', display_name: '스타트업L', job_function: '스타트업 대표', avatar_url: null },
-      { id: 'm6', display_name: '브랜드S', job_function: '브랜드 매니저', avatar_url: null },
-      { id: 'm7', display_name: '신입마케E', job_function: 'B2B 마케터', avatar_url: null },
-    ],
-    // 시즌 1 후기가 시즌 번호와 함께 표시됨
-    reviews: [
-      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08', season_number: 1 },
-      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01', season_number: 1 },
-      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22', season_number: 1 },
-      { id: 'r4', author: '스타트업L', avatar_url: null, job_function: '스타트업 대표', rating: 5, content: '파이프라인 분석 회차가 가장 좋았어요. 우리 팀 SQL→MQL 전환 문제를 정확히 짚어줬고 덕분에 다음 분기 전략을 완전히 바꿨습니다.', created_at: '2026-03-29', season_number: 1 },
-      { id: 'r5', author: '브랜드S', avatar_url: null, job_function: '브랜드 매니저', rating: 4, content: 'B2B는 처음이라 걱정했는데 다들 친절하게 설명해줘서 따라갈 수 있었어요. 마케터J 바닥장이 분위기를 잘 만들어줬습니다.', created_at: '2026-04-05', season_number: 1 },
-    ],
-    related: [
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임 시즌 1', current_members: 20, max_members: 20, tags: ['B2B', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
-      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', current_members: 11, max_members: 15, tags: ['AI', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&h=120&fit=crop' },
-    ],
-  },
-  'ai-prompt-engineering': {
-    id: 'g5', slug: 'ai-prompt-engineering',
-    title: 'AI 프롬프트 엔지니어링 스터디',
-    tagline: 'ChatGPT·Claude를 마케팅 무기로 만드는 실전 스터디',
-    notice: '4/27(일) 오후 3시, 패스트파이브 강남점. 노트북 필참!',
-    description: 'AI 도구를 마케팅에 실제로 쓰는 방법을 공부합니다.\n\n프롬프트 하나가 업무 2시간을 줄일 수 있어요. 매주 하나의 마케팅 태스크를 정해 실습하고, 서로의 프롬프트를 비교·개선합니다. 누적된 프롬프트 라이브러리는 멤버 전원이 공유합니다.',
-    intro_who: '• AI 도구를 써보려 했지만 어떻게 시작할지 모르는 분\n• 이미 ChatGPT를 쓰지만 더 잘 활용하고 싶은 마케터\n• 업무 자동화로 시간을 절약하고 싶은 분\n• 프롬프트 엔지니어링을 체계적으로 배우고 싶은 분',
-    structure: [
-      { number: 1, title: '기초 — 프롬프트의 원리', description: '좋은 프롬프트 vs 나쁜 프롬프트. 역할 지정, 컨텍스트 제공, 출력 형식 지정 실습' },
-      { number: 2, title: '콘텐츠 작성 자동화', description: 'SNS 카피, 블로그 초안, 이메일 뉴스레터를 AI로 초안 생성 + 인간 편집하는 워크플로 구축' },
-      { number: 3, title: '데이터 분석 & 인사이트 추출', description: 'GA 데이터, 고객 리뷰 등 정형/비정형 데이터를 AI로 분석하고 보고서 초안 만들기' },
-      { number: 4, title: '경쟁사 모니터링 & 리서치', description: '경쟁사 웹사이트, 광고, SNS를 AI로 분석하는 자동화 파이프라인 설계' },
-      { number: 5, title: '캠페인 기획 & A/B테스트 아이디어', description: 'AI로 광고 카피 10개 생성 → 최적 조합 선택 → 실제 테스트 결과 리뷰' },
-      { number: 6, title: '나만의 AI 워크플로 발표', description: '각자 구축한 AI 워크플로를 발표하고 라이브러리로 집대성. 시즌 2 주제 투표' },
-    ],
-    guide: '📍 장소\n패스트파이브 강남점 (강남역 1번 출구 도보 5분)\n\n📅 일정\n매주 일요일 오후 3시~5시. 부득이 온라인 전환 시 슬랙 48시간 전 공지.\n\n💰 회비\n1만원/회 (장소 대관비). 사전 송금 방식.\n\n🎒 준비물\n노트북 필참. ChatGPT Plus 또는 Claude Pro 구독 권장 (무료 버전도 가능).\n\n📋 규칙\n배운 프롬프트는 공유 노션 문서에 기록. 무단결석 2회 이상 시 다음 시즌 신청 불가.',
-    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
-    max_members: 15, current_members: 11,
-    event_date: '2026-04-27T15:00:00', schedule: '매주 일 15:00~17:00', location: '강남역', location_detail: '패스트파이브 강남점',
-    fee: 10000, tags: ['AI', '프롬프트', 'ChatGPT', '마케팅'],
-    cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l5', display_name: 'AI마스터', job_function: '그로스 마케터', experience_years: 5, bio: 'AI 마케팅 전도사. 프롬프트 엔지니어링으로 업무 효율 3배를 직접 경험하고 나눕니다.', avatar_url: null },
-    need: { id: 'n5', display_text: 'AI 마케팅 같이 공부하고 싶어', count: 45 },
-    members: [
-      { id: 'm1', display_name: 'AI마스터', job_function: '그로스 마케터', avatar_url: null },
-      { id: 'm2', display_name: '카피Q', job_function: '카피라이터', avatar_url: null },
-      { id: 'm3', display_name: '기획F', job_function: '마케팅 기획자', avatar_url: null },
-      { id: 'm4', display_name: '데이터H', job_function: '데이터 분석가', avatar_url: null },
-      { id: 'm5', display_name: 'SNS마케R', job_function: 'SNS 마케터', avatar_url: null },
-    ],
-    reviews: [
-      { id: 'r1', author: '카피Q', avatar_url: null, job_function: '카피라이터', rating: 5, content: '카피 작업 시간이 절반으로 줄었어요. 프롬프트 라이브러리를 시즌이 끝나도 계속 쓰고 있습니다.', created_at: '2026-04-10' },
-      { id: 'r2', author: '기획F', avatar_url: null, job_function: '마케팅 기획자', rating: 5, content: '단순히 ChatGPT 사용법이 아니라 워크플로로 연결하는 방법을 배운 게 핵심이었어요. 실무에서 바로 써먹었습니다.', created_at: '2026-04-03' },
-    ],
-    related: [
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
-      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스 스터디', current_members: 4, max_members: 12, tags: ['퍼포먼스'], cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=120&fit=crop' },
-    ],
-  },
-  'copywriting-practice': {
-    id: 'g2', slug: 'copywriting-practice',
-    title: '카피라이팅 같이 연습할래?',
-    tagline: '매주 써보고, 피드백받고, 실력을 키우는 카피 스터디',
-    notice: '4/20(일) 오후 7시, 성수동. 이번 주 테마: 앱스토어 리뷰 유도 카피',
-    description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.\n\n매주 하나의 테마를 정해 각자 카피를 써옵니다. 다양한 시각으로 같은 주제를 바라보며 서로의 카피에 솔직한 피드백을 주고받습니다.',
-    intro_who: '• 광고 기획자, 카피라이터 지망생\n• 브랜드 메시지를 더 날카롭게 만들고 싶은 마케터\n• "어떻게 쓰지?"에서 "이렇게 쓰면 되겠다"로 가고 싶은 분',
-    structure: [
-      { number: 1, title: '카피의 원칙', description: '좋은 카피와 나쁜 카피의 차이. 국내외 레퍼런스 분석. 첫 번째 과제 발표' },
-      { number: 2, title: '감성 카피 vs 논리 카피', description: '브랜드 성격에 따른 톤 앤 매너 설정. 각자 작성한 카피 리뷰' },
-      { number: 3, title: '한 줄 슬로건 챌린지', description: '동일한 브랜드를 10가지 방식으로 표현. 가장 강한 한 줄 선정' },
-      { number: 4, title: '디지털 광고 카피', description: 'Meta, 구글 광고 카피의 특성과 제한. 실제 광고 카피 작성 실습' },
-    ],
-    guide: '📍 장소\n성수동 (구체적 장소는 슬랙으로 확정 전달)\n\n💰 회비\n5,000원/회 (음료 제공)\n\n📋 규칙\n매주 과제 미제출 시 경고 1회. 경고 2회 시 다음 시즌 참여 불가.\n모든 피드백은 작품을 평가하는 것이지 사람을 평가하지 않습니다.',
-    status: 'confirmed', join_type: 'approval', meeting_type: 'recurring',
-    max_members: 12, current_members: 12,
-    event_date: '2026-04-20T19:00:00', schedule: '매주 일 19:00~21:00', location: '성수동', location_detail: null,
-    fee: 5000, tags: ['카피', '글쓰기', '광고'],
-    cover_image_url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l2', display_name: '카피장인', job_function: '브랜드 마케터', experience_years: 7, bio: null, avatar_url: null },
-    need: { id: 'n2', display_text: '카피라이팅 스터디', count: 35 },
-    members: [
-      { id: 'm1', display_name: '카피장인', job_function: '브랜드 마케터', avatar_url: null },
-      { id: 'm2', display_name: '글쟁이A', job_function: '카피라이터', avatar_url: null },
-      { id: 'm3', display_name: '광고기획B', job_function: '광고 기획자', avatar_url: null },
-    ],
-    reviews: [
-      { id: 'r1', author: '글쟁이A', avatar_url: null, job_function: '카피라이터', rating: 5, content: '혼자 쓰면 독이 오르는데, 여럿이 같은 주제로 쓰니까 완전히 다른 접근들을 볼 수 있었어요. 시각이 엄청 넓어졌습니다.', created_at: '2026-04-12' },
-    ],
-    related: [
-      { slug: 'sns-content-studio', title: 'SNS 콘텐츠 기획 & 제작', current_members: 6, max_members: 10, tags: ['SNS', '콘텐츠'], cover_image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200&h=120&fit=crop' },
-      { slug: 'brand-strategy-reading', title: '브랜드 전략 독서 모임', current_members: 8, max_members: 8, tags: ['브랜딩'], cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=200&h=120&fit=crop' },
-    ],
-  },
-  // 나머지 그룹들 (간략 버전)
-  'sns-content-studio': {
-    id: 'g3', slug: 'sns-content-studio',
-    title: 'SNS 콘텐츠 기획 & 제작 스터디',
-    tagline: '인스타·유튜브·틱톡 콘텐츠를 함께 만들고 성장해요',
-    notice: null,
-    description: '인스타그램·유튜브·틱톡 콘텐츠 기획부터 촬영, 편집까지 함께 배워요.\n\n매주 한 플랫폼을 집중 분석하고, 실제 콘텐츠를 만들어보고 피드백합니다.',
-    intro_who: '• SNS 마케터 또는 콘텐츠 크리에이터\n• 팔로워 성장 전략을 배우고 싶은 분\n• 실제 콘텐츠 제작을 배우고 싶은 분',
-    structure: [
-      { number: 1, title: '인스타그램 릴스 공략', description: '알고리즘 분석 + 바이럴 릴스 해부 + 직접 기획 실습' },
-      { number: 2, title: '유튜브 쇼츠 전략', description: '쇼츠 vs 일반 영상 전략 비교 + 썸네일과 제목 최적화' },
-      { number: 3, title: '틱톡 트렌드 읽기', description: '트렌드 사이클 분석 + 브랜드 활용 사례 + 직접 기획' },
-      { number: 4, title: '콘텐츠 캘린더 만들기', description: '한 달치 콘텐츠 캘린더 설계 + 서로 피드백' },
-    ],
-    guide: '📍 홍대입구 · 공유오피스 3층\n💰 무료\n📋 매주 콘텐츠 1개 제작해오기 (형식 무관)',
-    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
-    max_members: 10, current_members: 6,
-    event_date: '2026-04-25T19:30:00', schedule: '격주 금 19:30', location: '홍대입구', location_detail: '공유오피스 3층',
-    fee: 0, tags: ['SNS', '콘텐츠', '인스타그램', '유튜브'],
-    cover_image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l3', display_name: '콘텐츠크리에이터K', job_function: 'SNS 마케터', experience_years: 4, bio: '현직 SNS 마케터. 인스타 팔로워 10만 달성 노하우를 나눕니다.', avatar_url: null },
-    need: { id: 'n3', display_text: 'SNS 콘텐츠 같이 만들고 싶어', count: 22 },
-    members: [{ id: 'm1', display_name: '콘텐츠크리에이터K', job_function: 'SNS 마케터', avatar_url: null }],
-    reviews: [],
-    related: [
-      { slug: 'copywriting-practice', title: '카피라이팅 같이 연습할래?', current_members: 12, max_members: 12, tags: ['카피'], cover_image_url: null },
-      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링', current_members: 11, max_members: 15, tags: ['AI'], cover_image_url: null },
-    ],
-  },
-  'performance-case-study': {
-    id: 'g4', slug: 'performance-case-study',
-    title: '퍼포먼스 마케팅 케이스 스터디',
-    tagline: 'Facebook·Google·카카오 광고 실전 데이터를 함께 분석',
-    notice: null,
-    description: '페이스북/구글/카카오 광고 실전 케이스를 함께 분석합니다.\n\n실제 집행 데이터 기반으로 ROAS 개선 포인트를 찾고, 최적화 전략을 공유합니다.',
-    intro_who: '• 퍼포먼스 마케터, 그로스 마케터\n• 광고 효율을 높이고 싶은 분\n• 다양한 데이터를 보며 인사이트를 키우고 싶은 분',
-    structure: [
-      { number: 1, title: 'FB 광고 케이스', description: '실제 ROAS 데이터와 최적화 과정 발표' },
-      { number: 2, title: '구글 광고 케이스', description: '검색 광고 + pMax 운용 전략 비교' },
-    ],
-    guide: '📍 온라인 (Zoom)\n💰 무료\n📋 월 2회. 일정은 슬랙에서 투표로 결정',
-    status: 'needs_gathering', join_type: 'firstcome', meeting_type: 'recurring',
-    max_members: 12, current_members: 4,
-    event_date: null, schedule: '월 2회 (일정 미정)', location: '온라인', location_detail: null,
-    fee: 0, tags: ['퍼포먼스', 'Facebook광고', '구글광고', 'ROAS'],
-    cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l4', display_name: '광고전문P', job_function: '퍼포먼스 마케터', experience_years: 6, bio: null, avatar_url: null },
-    need: { id: 'n4', display_text: '퍼포먼스 마케팅 실무 배우고 싶어', count: 17 },
-    members: [{ id: 'm1', display_name: '광고전문P', job_function: '퍼포먼스 마케터', avatar_url: null }],
-    reviews: [],
-    related: [
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
-      { slug: 'data-analytics-meetup', title: '데이터 분석 마케터 모임', current_members: 10, max_members: 10, tags: ['데이터'], cover_image_url: null },
-    ],
-  },
-  'startup-marketer-club': {
-    id: 'g6', slug: 'startup-marketer-club',
-    title: '스타트업 마케터 네트워킹 클럽',
-    tagline: '리소스 없이도 성과내는 스타트업 마케터들의 모임',
-    notice: null,
-    description: '스타트업에서 일하는 마케터들의 정보 교류 모임입니다.\n\n번아웃, 리소스 부족, ROI 증명, 혼자 다 해야 하는 현실... 같은 고민을 나누는 사람들이 여기 있습니다.',
-    intro_who: '• 스타트업 또는 초기 기업의 마케터\n• 혼자 마케팅 전부를 담당하고 있는 분\n• 같은 처지의 동료를 만나고 싶은 분',
-    structure: [
-      { number: 1, title: '자기소개 & 현재 회사 이야기', description: '각자 회사 규모, 마케팅 현황, 가장 큰 고민 공유' },
-      { number: 2, title: '주제별 딥다이브', description: '당월 투표로 선정된 주제 (예: 소규모 예산 광고, 퇴사 방지 캠페인)' },
-    ],
-    guide: '📍 합정역 · 루프탑 카페\n💰 15,000원 (음료 + 스낵)\n📋 월 1회. 최대한 솔직한 이야기를 나누는 자리입니다.',
-    status: 'recruiting', join_type: 'approval', meeting_type: 'recurring',
-    max_members: 20, current_members: 14,
-    event_date: '2026-05-03T18:00:00', schedule: '월 1회 토 18:00', location: '합정역', location_detail: '루프탑 카페',
-    fee: 15000, tags: ['스타트업', '네트워킹', '마케터'],
-    cover_image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l6', display_name: '스타트업마케터S', job_function: '그로스 마케터', experience_years: 5, bio: '시리즈B 스타트업 마케팅 리드. 0→1 마케팅 경험 공유.', avatar_url: null },
-    need: { id: 'n6', display_text: '스타트업 마케터끼리 만나고 싶어', count: 33 },
-    members: [
-      { id: 'm1', display_name: '스타트업마케터S', job_function: '그로스 마케터', avatar_url: null },
-      { id: 'm2', display_name: '그로스K', job_function: '그로스 해커', avatar_url: null },
-    ],
-    reviews: [],
-    related: [
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
-      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링', current_members: 11, max_members: 15, tags: ['AI'], cover_image_url: null },
-    ],
-  },
-  'brand-strategy-reading': {
-    id: 'g7', slug: 'brand-strategy-reading',
-    title: '브랜드 전략 독서 모임',
-    tagline: '매달 한 권, 브랜드 전략을 함께 읽고 실무에 연결',
-    notice: '이번 달 책: 《포지셔닝》(알 리스/잭 트라우트). 4/28까지 읽어오세요!',
-    description: '브랜딩, 마케팅 전략 관련 책을 함께 읽고 토론합니다.\n\n매월 1권 선정 → 각자 읽고 → 인상 깊은 구절 + 실무 연결점 발표',
-    intro_who: '• 브랜딩·마케팅 전략을 깊이 공부하고 싶은 분\n• 책을 읽어도 실무 연결이 안 되는 분\n• 다른 사람의 인사이트를 통해 새 시각을 원하는 분',
-    structure: [
-      { number: 1, title: '선정 & 소개', description: '이번 달 책 선정 이유 공유. 각자 기대 포인트 이야기' },
-      { number: 2, title: '독후감 발표', description: '각자 인상 깊은 구절 1~2개 + 실무 연결 포인트 발표' },
-      { number: 3, title: '토론 & 다음 책 선정', description: '공통 인사이트 도출. 다음 달 책 투표' },
-    ],
-    guide: '📍 교대역 (장소는 슬랙 공지)\n💰 무료\n📋 책 미독 시 참여 불가 (예외 없음)',
-    status: 'confirmed', join_type: 'approval', meeting_type: 'recurring',
-    max_members: 8, current_members: 8,
-    event_date: '2026-04-28T20:00:00', schedule: '월 1회 월 20:00', location: '교대역', location_detail: null,
-    fee: 0, tags: ['브랜딩', '독서', '전략'],
-    cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l7', display_name: '브랜드스토리텔러', job_function: '브랜드 매니저', experience_years: 8, bio: '브랜드를 이야기로 만드는 사람.', avatar_url: null },
-    need: { id: 'n7', display_text: '브랜드 전략 같이 공부하고 싶어', count: 14 },
-    members: [{ id: 'm1', display_name: '브랜드스토리텔러', job_function: '브랜드 매니저', avatar_url: null }],
-    reviews: [],
-    related: [
-      { slug: 'copywriting-practice', title: '카피라이팅 같이 연습할래?', current_members: 12, max_members: 12, tags: ['카피'], cover_image_url: null },
-      { slug: 'startup-marketer-club', title: '스타트업 마케터 네트워킹', current_members: 14, max_members: 20, tags: ['네트워킹'], cover_image_url: null },
-    ],
-  },
-  'data-analytics-meetup': {
-    id: 'g8', slug: 'data-analytics-meetup',
-    title: '데이터 분석 마케터 모임',
-    tagline: 'GA4·Mixpanel·Amplitude 실전 활용 스터디',
-    notice: null,
-    description: 'GA4, Mixpanel, Amplitude 등 마케팅 분석 도구를 함께 공부합니다.\n\n데이터 드리븐 마케팅을 지향하는 분들의 실무 스터디',
-    intro_who: '• 데이터 분석에 관심 있는 마케터\n• GA4 전환 후 혼란스러운 분\n• 코호트 분석, 퍼널 분석을 배우고 싶은 분',
-    structure: [
-      { number: 1, title: 'GA4 완전 정복', description: 'UA에서 GA4로의 전환. 핵심 리포트 읽기' },
-      { number: 2, title: 'Mixpanel 실습', description: '이벤트 기반 분석. 코호트 분석 실습' },
-    ],
-    guide: '📍 삼성역 (구체 장소 슬랙 공지)\n💰 15,000원\n📋 1회성 모임. 노트북 필참',
-    status: 'confirmed', join_type: 'firstcome', meeting_type: 'onetime',
-    max_members: 10, current_members: 10,
-    event_date: '2026-04-19T14:00:00', schedule: null, location: '삼성역', location_detail: null,
-    fee: 15000, tags: ['데이터', 'GA4', '분석'],
-    cover_image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=860&h=400&fit=crop&auto=format',
-    leader: { id: 'l8', display_name: '데이터M', job_function: '데이터 분석가', experience_years: 4, bio: null, avatar_url: null },
-    need: { id: 'n8', display_text: '데이터 분석 배우고 싶어', count: 19 },
-    members: [],
-    reviews: [],
-    related: [
-      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스', current_members: 4, max_members: 12, tags: ['퍼포먼스'], cover_image_url: null },
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
-    ],
-  },
-  'career-transition-agency-inhouse': {
-    id: 'g9', slug: 'career-transition-agency-inhouse',
-    title: '이직 준비 — 에이전시↔인하우스 경험 나누기',
-    tagline: '에이전시와 인하우스를 오간 마케터들의 솔직한 이직 이야기 4회차 시리즈',
-    notice: '4/22(화) 오후 7시 30분, 강남역 3번 출구 도보 2분 · 모노하우스 B1. 노트북 없어도 됩니다.',
-    description: '에이전시와 인하우스를 오간 마케터들이 실제 이직 경험을 솔직하게 나누는 4회차 시리즈 모임입니다.\n\n"에이전시에서 인하우스로 가면 어떤 점이 달라지나요?" "반대로 인하우스에서 에이전시로 가면 어떤가요?" 이 모임은 이론이 아닌 실제 경험자들의 이야기로 채워집니다.\n\n이직을 준비 중이거나, 결정을 앞두고 고민 중인 마케터라면 누구나 환영합니다. 단, 경험을 나눌 준비가 된 분들을 위한 자리입니다.',
-    intro_who: '• 에이전시에서 인하우스로 이직을 고민 중인 마케터\n• 인하우스에서 에이전시로의 전환을 생각 중인 분\n• 이직 경험이 있고 솔직한 이야기를 나누고 싶은 분\n• 커리어 방향을 고민하는 3~7년차 마케터',
-    structure: [
-      { number: 1, title: '킥오프 — 각자의 커리어 맵 공유', description: '참여자 소개 + 에이전시·인하우스 경험 타임라인 그리기. "나는 왜 이직을 결심했나" 3분 발표', date: '2026-04-22' },
-      { number: 2, title: '실패 경험 공유 — 이직 후 현실 충격', description: '이직 후 예상과 달랐던 점, 힘들었던 순간 솔직 공유. 판단 없이 듣는 자리. 토론 중심', date: '2026-04-29' },
-      { number: 3, title: '에이전시 vs 인하우스 — 실전 비교표 만들기', description: '성장, 연봉, 워크라이프밸런스, 커리어 전문성 4가지 축으로 직접 비교. 나만의 기준 찾기', date: '2026-05-06' },
-      { number: 4, title: '성공 이직 로드맵 — 지금 해야 할 것들', description: '이직을 성공시킨 경험자들의 준비 과정 공유. 포트폴리오, 면접, 연봉 협상 실전 팁', date: '2026-05-13' },
-    ],
-    guide: '📍 장소\n강남역 3번 출구 도보 2분 · 모노하우스 B1층 세미나실\n\n📅 일정\n매주 화요일 오후 7시 30분~9시 (4회 연속). 결석 시 다음 회차부터 참여 가능 (자료 공유)\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 에이전시 또는 인하우스 마케터 경력 2년 이상\n• 4회 중 3회 이상 참석 가능한 분\n• 자신의 경험을 솔직하게 나눌 의향이 있는 분\n• 타인의 경험을 경청하고 존중하는 분',
-    status: 'recruiting', join_type: 'firstcome', meeting_type: 'series', series_count: 4,
-    max_members: 25, current_members: 23,
-    event_date: '2026-04-22T19:30:00', schedule: '매주 화 19:30~21:00 (4회)', location: '강남역', location_detail: '모노하우스 B1',
-    fee: 0, tags: ['이직', '에이전시', '인하우스', '커리어'],
-    cover_image_url: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=860&h=400&fit=crop&auto=format',
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    leader: {
-      id: 'l9', display_name: '박서연', job_function: '브랜드 마케터', experience_years: 7,
-      bio: '에이전시 4년(종합광고대행사 AE → 디지털에이전시 팀장) + 인하우스 3년(스타트업 마케팅 리드 → 현재 중견 브랜드팀 매니저)을 거친 마케터입니다.\n\n두 번의 이직 모두 "이 선택이 맞나?" 수백 번 고민했고, 실제로 실패도 했어요. 지금은 그 경험들이 제 커리어의 가장 큰 자산이 됐다고 생각합니다.\n\n이 모임을 만든 이유는 하나예요. 저처럼 고민하는 마케터들이 혼자 결정하지 않았으면 해서요. 같이 고민하면 더 좋은 선택을 할 수 있거든요.',
-      avatar_url: null,
-    },
-    need: { id: 'n9', display_text: '이직 준비 같이 하고 싶어', count: 51 },
-    members: [
-      { id: 'm1', display_name: '박서연', job_function: '브랜드 마케터', avatar_url: null },
-      { id: 'm2', display_name: '퍼포먼스T', job_function: '퍼포먼스 마케터', avatar_url: null },
-      { id: 'm3', display_name: '그로스Y', job_function: '그로스 마케터', avatar_url: null },
-      { id: 'm4', display_name: '콘텐츠H', job_function: '콘텐츠 마케터', avatar_url: null },
-      { id: 'm5', display_name: 'SNS마케L', job_function: 'SNS 마케터', avatar_url: null },
-    ],
-    reviews: [
-      { id: 'r1', author: '퍼포먼스T', avatar_url: null, job_function: '퍼포먼스 마케터', rating: 5, content: '1회차에서 각자의 커리어 맵을 그려보는 시간이 생각보다 엄청난 자극이 됐어요. 다들 솔직하게 이야기해줘서 오히려 더 깊은 대화가 됐습니다. 2회차도 엄청 기대돼요.', created_at: '2026-04-23' },
-      { id: 'r2', author: '그로스Y', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '박서연 바닥장이 판단 없이 다 들어주는 분위기를 만들어줘서 평소엔 말 못했던 이직 실패 경험도 편하게 나눌 수 있었어요. 이런 모임이 진짜 필요했습니다.', created_at: '2026-04-24' },
-    ],
-    related: [
-      { slug: 'startup-marketer-club', title: '스타트업 마케터 네트워킹 클럽', current_members: 14, max_members: 20, tags: ['스타트업', '네트워킹'], cover_image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=200&h=120&fit=crop' },
-      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
-    ],
-  },
-};
+// 모임이 없으면 '없는 모임'으로 표시한다 — 가짜 모임을 대체값으로 보여주지 않는다 (2026-10-10, CLAUDE.md §1.9.5 목업 금지)
 
 // 구 ID → 슬러그 호환 맵
 const ID_TO_SLUG: Record<string, string> = {
@@ -502,6 +156,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const slug = ID_TO_SLUG[rawSlug] || rawSlug;
 
   const [group, setGroup] = useState<GroupDetail | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<TabName>('소개');
   const [joinState, setJoinState] = useState<JoinState>('idle');
   const [applyMessage, setApplyMessage] = useState('');
@@ -548,10 +203,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             related: g.related ?? [],
           });
         } else {
-          setGroup(MOCK[slug] ?? null);
+          setNotFound(true);
         }
       })
-      .catch(() => setGroup(MOCK[slug] ?? null));
+      .catch(() => setNotFound(true));
   }, [slug]);
 
   // 좋아요 + 참여 상태 로드
@@ -652,6 +307,15 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     navigator.clipboard.writeText(window.location.href);
     setToast('링크가 복사됐어요');
     setTimeout(() => setToast(null), 2500);
+  }
+
+  if (!group && notFound) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#1a1a2e] text-white/60">
+        <p className="text-sm">모임을 찾을 수 없습니다</p>
+        <Link href="/badak/groups" className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white/80 hover:text-white">모임 목록으로</Link>
+      </div>
+    );
   }
 
   if (!group) {
