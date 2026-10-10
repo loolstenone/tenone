@@ -32,10 +32,10 @@ export default async function ClubsPage() {
         <div className="mx-auto max-w-7xl px-6 py-32">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CLUBS</div>
           <h1 className="mt-3 text-5xl sm:text-7xl font-black tracking-tight">
-            전국 {clubs.length}개 동아리
+            매드리그 공식 동아리
           </h1>
           <p className="mt-8 max-w-xl text-lg text-neutral-400 leading-relaxed">
-            수도권부터 제주까지, 대한민국 7개 권역의 대학생 광고·마케팅 동아리가
+            수도권부터 제주까지, 대한민국 7개 권역의 대학생 마케팅·광고 동아리가
             하나의 리그로 뭉쳤다.
           </p>
           <Link href="/madleague/clubs/recruit"
