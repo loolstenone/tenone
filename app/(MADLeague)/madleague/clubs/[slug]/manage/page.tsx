@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -6,13 +7,19 @@ import { ManagePanel } from './ManagePanel';
 import { ClubOfficersEditor } from '@/components/madleague/ClubOfficersEditor';
 import { ClubProfileEditor } from '@/components/madleague/ClubProfileEditor';
 import { ClubRecruitResponses } from '@/components/madleague/ClubRecruitResponses';
+import { clubRecruitProgram } from '@/lib/madleague-recruit';
+
+/* 동아리 관리 — 상단 탭으로 구분 (2026-10-11): 소개 페이지 · 부원 모집 · 운영진 · 매드리거 등록. 탭 = ?tab= (링크 공유 가능) */
+type TabKey = 'profile' | 'recruit' | 'officers' | 'applications';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }
 
-export default async function ClubManagePage({ params }: PageProps) {
+export default async function ClubManagePage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const { tab: tabParam } = await searchParams;
   const sb = await createClient();
   const admin = createAdminClient();
 
@@ -41,8 +48,35 @@ export default async function ClubManagePage({ params }: PageProps) {
     redirect(`/madleague/clubs/${slug}`);
   }
 
-  // 대기 중 + 완료 지원서 조회
-  const { data: applications } = canApplications
+  // 볼 수 있는 탭 (멘토는 매드리거 등록만)
+  const tabs: { key: TabKey; label: string }[] = [
+    ...(canProfile ? [
+      { key: 'profile' as const, label: '소개 페이지' },
+      { key: 'recruit' as const, label: '부원 모집' },
+      { key: 'officers' as const, label: '운영진' },
+    ] : []),
+    ...(canApplications ? [{ key: 'applications' as const, label: '매드리거 등록' }] : []),
+  ];
+  const tab: TabKey = tabs.find(t => t.key === tabParam)?.key ?? tabs[0].key;
+
+  // 탭 배지 — 처리 대기 수 (count만)
+  const [appPending, recruitPending] = await Promise.all([
+    canApplications
+      ? admin.from('mad_applications').select('id', { count: 'exact', head: true }).eq('club_id', club.id).eq('status', 'pending').then(r => r.count ?? 0)
+      : Promise.resolve(0),
+    canProfile
+      ? admin.from('forms').select('id').eq('brand_id', 'madleague').eq('program', clubRecruitProgram(club.slug)).then(async ({ data }) => {
+          const ids = (data ?? []).map(f => f.id);
+          if (!ids.length) return 0;
+          const { count } = await admin.from('form_responses').select('id', { count: 'exact', head: true }).in('form_id', ids).eq('status', 'pending');
+          return count ?? 0;
+        })
+      : Promise.resolve(0),
+  ]);
+  const badge: Partial<Record<TabKey, number>> = { applications: appPending, recruit: recruitPending };
+
+  // 매드리거 등록 지원서 — 그 탭일 때만 조회
+  const { data: applications } = canApplications && tab === 'applications'
     ? await admin
       .from('mad_applications')
       .select('id, name, email, phone, university, major, minor, cohort, activity_year, interested_industry, interested_job, motivation, portfolio_url, status, created_at')
@@ -59,35 +93,28 @@ export default async function ClubManagePage({ params }: PageProps) {
           <p className="mt-1 text-sm text-neutral-400">이 동아리 운영진·담당 멘토와 MADLeague 운영진만 볼 수 있습니다.</p>
         </div>
 
-        {/* 소개 페이지 — 운영진이 직접 업데이트 */}
-        {canProfile && (
-          <section className="mb-12">
-            <h2 className="mb-4 text-xl font-black">소개 페이지</h2>
-            <ClubProfileEditor slug={club.slug} />
-          </section>
-        )}
+        {/* 탭 */}
+        <nav className="mb-10 flex gap-1 overflow-x-auto border-b border-neutral-800" aria-label="동아리 관리 메뉴">
+          {tabs.map(t => (
+            <Link key={t.key} href={`/madleague/clubs/${club.slug}/manage?tab=${t.key}`} scroll={false}
+              aria-current={tab === t.key ? 'page' : undefined}
+              className={`-mb-px inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-bold transition ${tab === t.key ? 'border-[#EC1D25] text-white' : 'border-transparent text-neutral-500 hover:text-neutral-200'}`}>
+              {t.label}
+              {(badge[t.key] ?? 0) > 0 && <span className="bg-[#EC1D25] px-1.5 text-[11px] text-white tabular-nums">{badge[t.key]}</span>}
+            </Link>
+          ))}
+        </nav>
 
-        {/* 부원 모집 (공동 모집) 지원서 — 운영진만 */}
-        {canProfile && (
-          <section className="mb-12">
-            <h2 className="mb-4 text-xl font-black">부원 모집 지원서</h2>
-            <ClubRecruitResponses slug={club.slug} />
-          </section>
-        )}
+        {tab === 'profile' && <ClubProfileEditor slug={club.slug} />}
+
+        {tab === 'recruit' && <ClubRecruitResponses slug={club.slug} />}
 
         {/* 운영진 — 회장·부회장이 다음 임기 운영진 지정 */}
-        {canProfile && (
-          <section className="mb-12">
-            <h2 className="mb-4 text-xl font-black">운영진</h2>
-            <ClubOfficersEditor slug={club.slug} />
-          </section>
-        )}
+        {tab === 'officers' && <ClubOfficersEditor slug={club.slug} />}
 
-        {canApplications && (
+        {tab === 'applications' && (
           <>
-            <h2 className="mb-2 text-xl font-black">매드리거 등록 (소속 인증)</h2>
             <p className="mb-4 text-sm text-neutral-400">운영진 누구나 승인·반려할 수 있습니다. 승인하면 소속이 인증되고 매드리거 공간 이용 권한이 부여됩니다.</p>
-
             <ManagePanel
               clubId={club.id}
               clubSlug={club.slug}
