@@ -2,12 +2,13 @@
 
 /**
  * 동아리 목록 — 리스트형 (2026-10-10 사용자 결정)
- * 로고 · 동아리명 · 활동 지역 · 랭킹 · 동아리 소개 · 동아리 방 입장 — 동아리명·지역·랭킹 머리글을 눌러 정렬 (기본 = 이름 알파벳순)
+ * 로고 · 동아리명 · 활동 지역 · 랭킹 · 동아리 소개 · 동아리 방 입장 — 정렬은 우측 상단 펼침 메뉴 하나 (기본 = 이름 알파벳순)
+ * (2026-10-11 머리글 클릭 정렬 → 펼침 메뉴: 모바일·PC에서 정렬 버튼 줄이 어긋나던 문제)
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ArrowUp, ArrowDown, ArrowUpDown, DoorOpen } from 'lucide-react';
+import { ArrowRight, ChevronDown, Check, DoorOpen } from 'lucide-react';
 
 export interface ClubListRow {
   slug: string;
@@ -22,11 +23,33 @@ export interface ClubListRow {
 }
 
 type SortKey = 'name' | 'region' | 'score';
+type SortOption = { id: string; key: SortKey; dir: 1 | -1; label: string };
+
+const SORT_OPTIONS: SortOption[] = [
+  { id: 'name-asc', key: 'name', dir: 1, label: '동아리명 A → Z' },
+  { id: 'name-desc', key: 'name', dir: -1, label: '동아리명 Z → A' },
+  { id: 'region-asc', key: 'region', dir: 1, label: '활동 지역 가나다순' },
+  { id: 'region-desc', key: 'region', dir: -1, label: '활동 지역 역순' },
+  { id: 'score-desc', key: 'score', dir: -1, label: '랭킹 높은 순' },
+  { id: 'score-asc', key: 'score', dir: 1, label: '랭킹 낮은 순' },
+];
 
 const collator = new Intl.Collator('ko', { sensitivity: 'base', numeric: true });
 
 export function ClubList({ rows }: { rows: ClubListRow[] }) {
-  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'name', dir: 1 });
+  const [sortId, setSortId] = useState<string>('name-asc');
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const sort = SORT_OPTIONS.find(o => o.id === sortId) ?? SORT_OPTIONS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (!menuRef.current?.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [open]);
 
   const sorted = useMemo(() => {
     const cmp = (a: ClubListRow, b: ClubListRow) => {
@@ -36,30 +59,32 @@ export function ClubList({ rows }: { rows: ClubListRow[] }) {
     return [...rows].sort((a, b) => cmp(a, b) * sort.dir);
   }, [rows, sort]);
 
-  const toggle = (key: SortKey) => setSort(s => (s.key === key ? { key, dir: (s.dir * -1) as 1 | -1 } : { key, dir: key === 'score' ? -1 : 1 }));
-
-  const Head = ({ k, label, className = '' }: { k: SortKey; label: string; className?: string }) => {
-    const Icon = sort.key !== k ? ArrowUpDown : sort.dir === 1 ? ArrowUp : ArrowDown;
-    return (
-      <button type="button" onClick={() => toggle(k)} aria-sort={sort.key === k ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}
-        className={`inline-flex items-center gap-1 text-xs font-bold tracking-widest transition ${sort.key === k ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'} ${className}`}>
-        {label}<Icon className="h-3.5 w-3.5" />
-      </button>
-    );
-  };
-
   return (
     <div>
-      {/* 머리글 (모바일은 정렬 버튼 줄) */}
-      <div className="grid grid-cols-[3.5rem_1fr_auto] md:grid-cols-[3.5rem_1.4fr_1fr_1fr_auto] items-center gap-4 border-b border-neutral-800 pb-3">
-        <span />
-        <Head k="name" label="동아리" />
-        <Head k="region" label="활동 지역" className="hidden md:inline-flex" />
-        <Head k="score" label="랭킹" className="hidden md:inline-flex" />
-        <span className="flex gap-3 md:hidden">
-          <Head k="region" label="지역" />
-          <Head k="score" label="랭킹" />
-        </span>
+      {/* 정렬 — 우측 상단 펼침 메뉴 */}
+      <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <span className="text-xs font-bold tracking-widest text-neutral-500">{rows.length}개 동아리</span>
+        <div ref={menuRef} className="relative">
+          <button type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+            className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white px-3.5 py-2 text-sm font-bold text-neutral-200 hover:text-white transition">
+            <span className="text-neutral-500 font-normal">정렬</span>
+            {sort.label}
+            <ChevronDown className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} />
+          </button>
+          {open && (
+            <ul role="listbox" className="absolute right-0 z-20 mt-1 min-w-[12rem] border border-neutral-700 bg-black py-1 shadow-xl">
+              {SORT_OPTIONS.map(o => (
+                <li key={o.id} role="option" aria-selected={o.id === sortId}>
+                  <button type="button" onClick={() => { setSortId(o.id); setOpen(false); }}
+                    className={`flex w-full items-center justify-between gap-3 px-3.5 py-2 text-left text-sm transition hover:bg-neutral-900 ${o.id === sortId ? 'text-white font-bold' : 'text-neutral-400'}`}>
+                    {o.label}
+                    {o.id === sortId && <Check className="h-4 w-4 text-[#EC1D25]" />}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <ul className="divide-y divide-neutral-900">
