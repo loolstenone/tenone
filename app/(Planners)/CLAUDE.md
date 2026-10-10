@@ -63,6 +63,6 @@
 
 - Phase: 부활 — 실험 Tier 스테이징 (2026-10-09)
 - 이월 작업:
-  - DB: `ums_sites` planners row tier/lifecycle/hosting/is_open 확인, `brand_capabilities`(community·course) 시드
+  - ~~DB: ums_sites·brand_capabilities~~ ✅ 확인 (2026-10-10: experiment·active·vercel·is_open=false · community·course·purchase)
   - 첫 회차 개설 (`/intra/ums/planners/programs`), 파비콘·OG 이미지 전용 에셋
   - 개인정보처리방침에 Planner's 수집 항목 반영, 출시 전 `npm run site:check -- planners --live`
