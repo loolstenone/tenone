@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Swords, Activity, TrendingUp, Users, Building2, GraduationCap, Compass, ArrowRight } from 'lucide-react';
-import { MAD_PROGRAMS } from '@/features/madleague/programs-list';
+import { MAD_PROGRAMS, MAD_PROGRAM_GROUPS } from '@/features/madleague/programs-list';
 
 export const metadata = {
   title: '매드리그란',
-  description: 'Match, Act, Develop — MADLeague의 정체성과 비전',
+  description: 'Match, Active, Develop — MADLeague의 정체성과 비전',
 };
 
 const MAD = [
   { icon: Swords, title: 'Match', desc: '실제 기업의 과제와 학생의 열정을 연결한다.' },
-  { icon: Activity, title: 'Act', desc: '현장에서 움직이고, 경쟁에서 부딪힌다.' },
+  { icon: Activity, title: 'Active', desc: '현장에서 움직이고, 경쟁에서 부딪힌다.' },
   { icon: TrendingUp, title: 'Develop', desc: '실전에서 성장한다. 그게 전부다.' },
 ];
 
@@ -41,13 +41,13 @@ export default function AboutPage() {
           </h1>
           <p className="mt-8 text-xl text-neutral-300 leading-relaxed max-w-2xl">
             <span className="text-[#EC1D25] font-black">MAD</span>는
-            <strong className="text-white"> Marketing + ADvertising + Digital</strong>의 약자.
+            <strong className="text-white"> Match, Active, Develop</strong>.
             <br />
             <span className="text-[#EC1D25] font-black">League</span>는
             연맹 — 결속시키다, 경쟁하게 하다.
           </p>
           <p className="mt-6 text-neutral-400 leading-relaxed max-w-2xl">
-            전국 마케팅 광고 동아리들의 경쟁을 통한 성장.
+            전국 대학생 동아리들의 경쟁을 통한 성장.
             <br />
             클라이언트의 실제 프로젝트를 제안하고 실행한다.
             <br />
@@ -59,7 +59,7 @@ export default function AboutPage() {
       {/* Mission — MAD */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MISSION</div>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">Match · Act · Develop</h2>
+        <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">Match · Active · Develop</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {MAD.map((m) => (
             <div key={m.title} className="bg-neutral-950 border border-neutral-900 p-10">
@@ -75,7 +75,7 @@ export default function AboutPage() {
       <section className="bg-neutral-950 border-y border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MEMBERS</div>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">네 가지 자리</h2>
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">매드리그의 구성원</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {MEMBER_TYPES.map((m) => (
               <div key={m.title} className="bg-black border border-neutral-900 p-6">
@@ -88,21 +88,33 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Programs */}
+      {/* Programs — 취지·구성만 (프로그램별 설명은 프로그램 페이지에, 2026-10-11) */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">PROGRAMS</div>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">실전 프로젝트로<br />경력 같은 신입으로</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {MAD_PROGRAMS.map((p) => (
-            <Link key={p.href} href={p.href} className="group bg-neutral-950 border border-neutral-900 hover:border-[#EC1D25] p-6 transition">
-              <div className="text-lg font-black group-hover:text-[#EC1D25] transition">{p.title}</div>
-              <p className="mt-2 text-sm text-neutral-400">{p.desc}</p>
-            </Link>
-          ))}
+        <h2 className="text-3xl sm:text-5xl font-black tracking-tight">실전 프로젝트로<br />경력 같은 신입으로</h2>
+        <p className="mt-6 text-lg text-neutral-300 leading-relaxed max-w-2xl break-keep">
+          기업과 지자체의 실제 고민을 프로젝트 경쟁을 통해 해결한다.
+        </p>
+        <p className="mt-3 text-neutral-400 leading-relaxed max-w-2xl break-keep">
+          가상의 과제가 아니라 지금 누군가 풀고 있는 문제를 받는다. 동아리가 팀이 되어 경쟁하고, 현장에서 결과로 증명하고,
+          그 경험은 유니버스의 다른 서비스로, 그리고 현업과의 만남으로 이어진다. 프로그램은 세 가지 방식으로 나뉜다.
+        </p>
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
+          {MAD_PROGRAM_GROUPS.map((g, i) => {
+            const names = MAD_PROGRAMS.filter(p => p.group === g.key).map(p => p.title);
+            return (
+              <div key={g.key} className="bg-neutral-950 border border-neutral-900 p-8">
+                <div className="text-xs font-bold tracking-widest text-[#EC1D25]">0{i + 1} · {g.eyebrow}</div>
+                <div className="mt-3 text-2xl font-black">{g.label}</div>
+                <p className="mt-3 text-sm text-neutral-400 leading-relaxed break-keep">{g.desc}</p>
+                <p className="mt-5 text-xs text-neutral-500 leading-relaxed break-keep">{names.join(' · ')}</p>
+              </div>
+            );
+          })}
         </div>
         <div className="mt-8">
-          <Link href="/madleague/programs" className="inline-flex items-center text-sm font-bold text-[#EC1D25] hover:underline">
-            프로그램 전체 →
+          <Link href="/madleague/programs" className="inline-flex items-center gap-1 text-sm font-bold text-[#EC1D25] hover:underline">
+            프로그램 전체 보기 <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
