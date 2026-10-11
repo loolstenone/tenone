@@ -88,7 +88,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     corporate: true,
     madleaguerOnly: true,
     glance: {
-      who: '매드리그 공식 동아리 소속 매드리거 — 3~6인 1 팀',
+      who: '매드리그 공식 동아리 소속 매드리거 — 2~6인 1 팀',
       when: '연 1~2회 회차 (상·하반기)',
       how: '기업 RFP → 클라이언트 OT → 지역/사전 예선 → 본선 경쟁 프레젠테이션',
       fee: '무료',

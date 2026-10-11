@@ -8,7 +8,7 @@ import { ProgramCTA } from '@/features/madleague/ProgramCTA';
 /**
  * MADLeague 프로그램 상세 표준 템플릿 — 10개 프로그램이 전부 같은 뼈대로 보인다.
  *
- *   ① 히어로        eyebrow · 제목 · 한 줄 요약 · tagline · 대상/시기/참가비 칩   (전부 programs-list.ts — 페이지별 히어로 꾸밈 금지)
+ *   ① 히어로        eyebrow · 제목 · 한 줄 요약 · tagline   (전부 programs-list.ts — 페이지별 히어로 꾸밈 금지. 대상·시기·참가비 칩은 ②와 중복이라 삭제, 2026-10-11)
  *   ② 한눈에 보기    대상 · 시기 · 방식 · 참가비 · 남는 것             (programs-list.ts glance)
  *   ③ 진행 과정      steps (3~5단계)
  *   ④ 얻는 것        gets  (카드 2~3개)
@@ -119,13 +119,12 @@ export function ProgramDetailPage({
   );
 }
 
-/** ① 히어로 — 직접 운영·연계 공용. 칩: 직접 운영 = 대상·시기·참가비 / 연계 = 운영 브랜드 */
+/** ① 히어로 — 직접 운영·연계 공용. 칩: 연계 프로그램만(운영 브랜드) — 직접 운영은 ② 한눈에 보기와 중복이라 없음 */
 function ProgramHero({ p }: { p: MadProgram }) {
   const accent = p.accent ?? MAD_ACCENT;
   const group = MAD_PROGRAM_GROUPS.find((g) => g.key === p.group)!;
-  const chips: [string, string][] = p.glance
-    ? [['대상', p.glance.who], ['시기', p.glance.when], ['참가비', p.glance.fee]]
-    : p.partner ? [['MADLeague', '맛보기'], ['정식', p.partner.brand], ['계정', 'Ten:One ID 하나'], ['기록', '동의 시 연계']] : [];
+  const chips: [string, string][] = p.partner
+    ? [['MADLeague', '맛보기'], ['정식', p.partner.brand], ['계정', 'Ten:One ID 하나'], ['기록', '동의 시 연계']] : [];
   return (
     <section className="relative overflow-hidden border-b border-neutral-900">
       <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 50%, ${accent}2e, transparent 60%)` }} aria-hidden />
@@ -138,14 +137,14 @@ function ProgramHero({ p }: { p: MadProgram }) {
         <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">{p.title}</h1>
         <p className="mt-8 max-w-2xl text-xl sm:text-2xl text-neutral-300 leading-relaxed">{p.desc}</p>
         <p className="mt-6 text-lg sm:text-xl font-bold" style={{ color: accent }}>{p.tagline}</p>
-        <dl className="mt-10 flex flex-wrap gap-2">
+        {chips.length > 0 && <dl className="mt-10 flex flex-wrap gap-2">
           {chips.map(([k, v]) => (
             <div key={k} className="inline-flex items-center gap-2 border border-neutral-800 bg-black/60 px-4 py-2 text-sm">
               <dt className="font-bold" style={{ color: accent }}>{k}</dt>
               <dd className="text-neutral-300">{v}</dd>
             </div>
           ))}
-        </dl>
+        </dl>}
       </div>
     </section>
   );
