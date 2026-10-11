@@ -301,7 +301,7 @@ export default function ResumeWorkspacePage() {
                     <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-5">
                         <p className="text-sm font-semibold text-amber-800 mb-1">AI 이력서 코칭 신청</p>
                         <p className="text-xs text-amber-600 mb-3">
-                            등록된 이력서를 기반으로 AI가 개선점을 분석합니다. 결제 시스템 연동 후 이용 가능합니다.
+                            등록된 이력서를 기반으로 AI가 개선점을 분석합니다. 서비스 시작 시 안내드립니다.
                         </p>
                         <Link
                             href="/hero/resume"

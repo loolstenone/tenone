@@ -11,30 +11,19 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles } from "lucide-re
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { JH_QUESTIONS } from "@/lib/hero/jh-questions";
+import { EMPTY_PRACTICAL_FILTERS, normalizePracticalFilters, type JHPracticalFilters } from "@/lib/hero/jh-practical-filters";
 
 const HERO_RED = "#E53935";
 const LS_KEY = "hero-jh-draft";
 
 interface JHForm {
     responses: Record<string, string | string[]>;
-    practicalFilters: {
-        companySizeRanges: string[];
-        workMode: string;
-        locations: string[];
-        compensationFloor: string;
-        compensationFloorPublic: boolean;
-    };
+    practicalFilters: JHPracticalFilters; // 키는 DB·매칭 함수와 같은 snake_case (lib/hero/jh-practical-filters.ts)
 }
 
 const INIT: JHForm = {
     responses: {},
-    practicalFilters: {
-        companySizeRanges: [],
-        workMode: "",
-        locations: [],
-        compensationFloor: "",
-        compensationFloorPublic: true,
-    },
+    practicalFilters: EMPTY_PRACTICAL_FILTERS,
 };
 
 export default function JHWritePage() {
@@ -54,14 +43,15 @@ export default function JHWritePage() {
                 const ls = localStorage.getItem(LS_KEY);
                 if (ls) {
                     const parsed = JSON.parse(ls);
-                    if (parsed && parsed.responses) setForm(parsed);
+                    // 초안도 정규화 — 옛 camelCase 초안·키 누락이 있어도 화면이 죽지 않게 (2026-10-12)
+                    if (parsed && parsed.responses) setForm({ responses: parsed.responses, practicalFilters: normalizePracticalFilters(parsed.practicalFilters) });
                 }
                 const res = await fetch(`/api/hero/jh?memberId=${user.id}`);
                 const data = await res.json();
                 if (data.jh) {
                     setForm({
                         responses: data.jh.responses ?? {},
-                        practicalFilters: data.jh.practical_filters ?? INIT.practicalFilters,
+                        practicalFilters: normalizePracticalFilters(data.jh.practical_filters),
                     });
                 }
             } catch { /* ignore */ }
@@ -261,7 +251,7 @@ export default function JHWritePage() {
 
                     <div className="space-y-6">
                         <FilterPick label="수용 가능한 조직 규모 (복수)"
-                            values={form.practicalFilters.companySizeRanges}
+                            values={form.practicalFilters.company_size_ranges}
                             options={[
                                 { v: "solo", l: "1인·2~5명" },
                                 { v: "small", l: "6~30명" },
@@ -269,18 +259,18 @@ export default function JHWritePage() {
                                 { v: "large", l: "101~500명" },
                                 { v: "enterprise", l: "500명+" },
                             ]}
-                            onChange={arr => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, companySizeRanges: arr } }))}
+                            onChange={arr => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, company_size_ranges: arr } }))}
                         />
 
                         <FilterSingle label="근무 형태"
-                            value={form.practicalFilters.workMode}
+                            value={form.practicalFilters.work_mode}
                             options={[
                                 { v: "remote", l: "재택" },
                                 { v: "hybrid", l: "하이브리드" },
                                 { v: "onsite", l: "출근" },
                                 { v: "any", l: "무관" },
                             ]}
-                            onChange={v => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, workMode: v } }))}
+                            onChange={v => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, work_mode: v } }))}
                         />
 
                         <FilterPick label="지리 범위 (복수)"
@@ -300,12 +290,12 @@ export default function JHWritePage() {
                         <div>
                             <p className="text-sm font-semibold mb-2">처우 하한 (연봉 기준, 만원)</p>
                             <div className="flex items-center gap-3">
-                                <input type="number" value={form.practicalFilters.compensationFloor}
-                                    onChange={e => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, compensationFloor: e.target.value } }))}
+                                <input type="number" value={form.practicalFilters.compensation_floor}
+                                    onChange={e => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, compensation_floor: e.target.value } }))}
                                     placeholder="예: 6000" className="w-40 px-3 py-2 text-sm border border-neutral-200 rounded" />
                                 <label className="flex items-center gap-1.5 text-xs text-neutral-600">
-                                    <input type="checkbox" checked={form.practicalFilters.compensationFloorPublic}
-                                        onChange={e => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, compensationFloorPublic: e.target.checked } }))} />
+                                    <input type="checkbox" checked={form.practicalFilters.compensation_floor_public}
+                                        onChange={e => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, compensation_floor_public: e.target.checked } }))} />
                                     기업에 공개
                                 </label>
                             </div>

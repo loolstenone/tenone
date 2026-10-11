@@ -28,7 +28,7 @@ export default async function Page() {
         <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-32 sm:pt-32 sm:pb-40">
           <div className="flex items-center gap-3 text-[#EC1D25] font-bold tracking-widest text-xs mb-6">
             <span className="h-px w-8 bg-[#EC1D25]" />
-            MATCH · ACT · DEVELOP
+            MATCH · ACTIVE · DEVELOP
           </div>
           <HeroRotatingTitle />
           <p className="mt-8 max-w-xl text-lg text-neutral-300 leading-relaxed">

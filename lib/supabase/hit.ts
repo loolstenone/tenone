@@ -34,6 +34,20 @@ export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | '
   return data;
 }
 
+/** 회원의 가장 최근 진행 중 세션 — 검사 중단 후 다른 기기에서도 이어하기 (2026-10-12) */
+export async function getLatestInProgressHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', memberId: string) {
+  const { data } = await supabase
+    .from('hit_sessions')
+    .select('id, session_token, status, created_at')
+    .eq('test_type', testType)
+    .eq('member_id', memberId)
+    .eq('status', 'in_progress')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
 export async function getHitSession(sessionToken: string) {
   const { data, error } = await supabase
     .from('hit_sessions')

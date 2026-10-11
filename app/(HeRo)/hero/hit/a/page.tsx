@@ -1,39 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Users, Target, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { Brain, Users, Target, Clock, ArrowRight, Loader2, Sparkles, RotateCcw } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
+// 검사 구성·문항 수는 실제 출제(/api/hit/a/questions → hit_questions test_type A 4모듈)와 같아야 한다 (2026-10-12 — 화면마다 127·172·620으로 달랐음)
 const modules = [
   {
-    icon: Users,
-    title: "기저요인 검사",
-    desc: "성장 환경과 양육 배경을 확인합니다.",
-    count: "7문항",
-    time: "~2분",
-  },
-  {
     icon: Brain,
-    title: "성격 유형 (MBTI)",
+    title: "성격 유형 (PT)",
     desc: "인식과 판단 방식, 에너지 방향을 파악합니다.",
-    count: "80문항",
-    time: "~15분",
+    count: "62문항",
+    time: "~8분",
   },
   {
     icon: Target,
-    title: "행동 유형 (DISC)",
+    title: "행동 유형 (BT)",
     desc: "업무 상황에서의 행동 패턴을 측정합니다.",
     count: "40문항",
     time: "~5분",
   },
+  {
+    icon: Users,
+    title: "핵심 성품 (CH)",
+    desc: "일과 관계에서 드러나는 성품을 확인합니다.",
+    count: "40문항",
+    time: "~5분",
+  },
+  {
+    icon: Sparkles,
+    title: "핵심 적성 (AP)",
+    desc: "어떤 일에 자연스럽게 끌리는지 측정합니다.",
+    count: "30문항",
+    time: "~4분",
+  },
 ];
+const TOTAL_QUESTIONS = 172;
+const LAST_SESSION_KEY = "hit_a_last_session";
 
 export default function HitAIntroPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [starting, setStarting] = useState(false);
   const [pageLoadTime] = useState(Date.now());
+  // 진행 중 세션 — 검사를 중단했다 돌아온 사람이 처음부터 다시 하지 않게 (2026-10-12)
+  const [resume, setResume] = useState<{ token: string; answered: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        let token: string | null = null;
+        try { token = localStorage.getItem(LAST_SESSION_KEY); } catch { /* ignore */ }
+        if (!token && user?.id) {
+          const r = await fetch("/api/hit/a/session");
+          if (r.ok) token = (await r.json())?.sessionToken ?? null;
+        }
+        if (!token) return;
+        const r = await fetch(`/api/hit/a/session/${token}`);
+        if (!r.ok) { try { localStorage.removeItem(LAST_SESSION_KEY); } catch { /* ignore */ } return; }
+        const d = await r.json();
+        const answered = Array.isArray(d?.responses) ? d.responses.length : 0;
+        if (!cancelled && d?.session?.status === "in_progress" && answered > 0) setResume({ token, answered });
+      } catch { /* 이어하기 제안만 생략 */ }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const handleStart = async () => {
     setStarting(true);
@@ -45,6 +78,7 @@ export default function HitAIntroPage() {
       });
       const data = await res.json();
       if (data.sessionToken) {
+        try { localStorage.setItem(LAST_SESSION_KEY, data.sessionToken); } catch { /* ignore */ }
         router.push(`/hero/hit/a/test?s=${data.sessionToken}`);
       }
     } catch {
@@ -68,9 +102,9 @@ export default function HitAIntroPage() {
             64가지 영웅 유형 중 나만의 프로필을 찾습니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 20분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 25분</span>
             <span>·</span>
-            <span>127문항</span>
+            <span>{TOTAL_QUESTIONS}문항</span>
             <span>·</span>
             <span>무료</span>
           </div>
@@ -109,17 +143,35 @@ export default function HitAIntroPage() {
           <p className="text-xs text-neutral-400 mb-4">
             로그인 없이 바로 시작할 수 있습니다. 결과는 고유 URL로 저장됩니다.
           </p>
-          <button
-            onClick={handleStart}
-            disabled={starting}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
-          >
-            {starting ? (
-              <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
-            ) : (
-              <>HIT - A 시작하기 <ArrowRight className="h-5 w-5" /></>
-            )}
-          </button>
+          {resume ? (
+            <div className="flex flex-col items-center gap-3">
+              <button
+                onClick={() => router.push(`/hero/hit/a/test?s=${resume.token}`)}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl"
+              >
+                이어서 하기 <span className="text-sm font-medium opacity-80">({resume.answered}/{TOTAL_QUESTIONS} 답변)</span> <ArrowRight className="h-5 w-5" />
+              </button>
+              <button
+                onClick={handleStart}
+                disabled={starting}
+                className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
+              >
+                {starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 처음부터 다시 하기
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleStart}
+              disabled={starting}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
+            >
+              {starting ? (
+                <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
+              ) : (
+                <>HIT - A 시작하기 <ArrowRight className="h-5 w-5" /></>
+              )}
+            </button>
+          )}
         </div>
       </section>
     </div>

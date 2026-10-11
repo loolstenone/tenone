@@ -10,8 +10,12 @@ function HitTestContent() {
 
   if (!sessionToken) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-neutral-400">세션을 찾을 수 없습니다. <a href="/hero/hit/a" className="text-[#E53935] underline">다시 시작</a>해 주세요.</p>
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <div className="max-w-md w-full text-center border border-neutral-200 rounded-2xl p-8">
+          <h2 className="text-lg font-bold text-neutral-900 mb-2">검사 세션이 없습니다</h2>
+          <p className="text-sm text-neutral-500 mb-6">검사는 시작 페이지에서 세션을 만든 뒤 진행됩니다. 하던 검사가 있다면 시작 페이지에서 이어서 할 수 있습니다.</p>
+          <a href="/hero/hit/a" className="inline-flex items-center justify-center px-6 py-3 bg-[#E53935] text-white font-bold rounded-xl hover:bg-red-700 transition-colors">HIT - A 시작 페이지로</a>
+        </div>
       </div>
     );
   }

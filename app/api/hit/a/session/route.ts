@@ -1,7 +1,15 @@
 import { NextRequest } from 'next/server';
 import { getApiUser } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createHitSession } from '@/lib/supabase/hit';
+import { createHitSession, getLatestInProgressHitSession } from '@/lib/supabase/hit';
+
+/** GET — 로그인 회원의 가장 최근 진행 중 HIT A 세션 (이어서 하기 제안용, 비회원은 null) */
+export async function GET(request: NextRequest) {
+  const memberId = (await getApiUser(request))?.memberId;
+  if (!memberId) return successResponse({ sessionToken: null });
+  const s = await getLatestInProgressHitSession('A', memberId);
+  return successResponse({ sessionToken: s?.session_token ?? null });
+}
 
 // 간단한 인메모리 rate limiter (IP 기반, 분당 5회)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();

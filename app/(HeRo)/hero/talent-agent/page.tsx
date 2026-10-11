@@ -112,7 +112,7 @@ export default function TalentAgentPage() {
               {
                 n: "3",
                 title: "AI · 전문가 코칭",
-                desc: "결과를 기반으로 로드맵 · 이력서 · 포트폴리오를 설계합니다. 유료 플랜에서 확장됩니다.",
+                desc: "결과를 기반으로 로드맵 · 이력서 · 포트폴리오를 설계합니다.",
               },
               {
                 n: "4",
@@ -178,7 +178,7 @@ export default function TalentAgentPage() {
             {[
               {
                 name: "MAD League",
-                tagline: "Match · Act · Develop",
+                tagline: "Match, Active, Develop",
                 href: "/madleague",
                 desc: "실전 프로젝트 경쟁 PT로 성장하는 대학생 리그. 경쟁하고 · 행동하고 · 성장하는 무대.",
                 dot: "#D32F2F",

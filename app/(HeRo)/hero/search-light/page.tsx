@@ -155,7 +155,7 @@ export default function SearchLightPage() {
                             className="flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            인재 찾기 의뢰 · 기업 <ArrowRight className="h-4 w-4" />
+                            TIH 작성 · 기업 <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/hero/jh/write"
@@ -248,7 +248,7 @@ export default function SearchLightPage() {
                             className="inline-flex items-center gap-2 px-7 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            인재 찾기 의뢰 · 기업 <ArrowRight className="h-4 w-4" />
+                            TIH 작성 · 기업 <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/hero/jh/write"

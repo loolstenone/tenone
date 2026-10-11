@@ -94,7 +94,7 @@ export default function HitOverviewPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
                   <Clock className="h-4 w-4 text-neutral-400" />
-                  <span>UF 50 · MBTI 160 · DISC 40 · 인성 220 · 적성 150</span>
+                  <span>성격 62 · 행동 40 · 성품 40 · 적성 30 · 총 172문항 · 약 25분</span>
                 </div>
               </div>
 
@@ -137,7 +137,7 @@ export default function HitOverviewPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-400">
                   <Clock className="h-4 w-4" />
-                  <span>인성 84 · 적성 60 · 역량 48 · 취업 32 · 총 224문항</span>
+                  <span>성격 80 · 흥미 60 · 역량 48 · 준비도 32 · 총 220문항 · 약 22분</span>
                 </div>
               </div>
 

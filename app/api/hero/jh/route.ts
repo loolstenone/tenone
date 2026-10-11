@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireMember, assertSelf } from "@/lib/api-guard";
+import { normalizePracticalFilters } from "@/lib/hero/jh-practical-filters";
 
 export async function GET(req: NextRequest) {
     try {
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
             .upsert({
                 member_id: memberId,
                 responses,
-                practical_filters: practicalFilters ?? {},
+                practical_filters: normalizePracticalFilters(practicalFilters), // snake_case 표준형으로 저장 — 매칭 함수가 읽는 키 (2026-10-12)
                 derived_axes: derivedAxes,
                 status: finalStatus,
                 submitted_at: isComplete ? new Date().toISOString() : null,
