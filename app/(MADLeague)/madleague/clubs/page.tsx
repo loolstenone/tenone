@@ -1,3 +1,4 @@
+import { MadleaguerPager } from '@/features/madleague/SectionPager';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
@@ -72,6 +73,7 @@ export default async function ClubsPage() {
           </div>
         </div>
       </section>
+      <MadleaguerPager current="/madleague/clubs" />
     </div>
   );
 }

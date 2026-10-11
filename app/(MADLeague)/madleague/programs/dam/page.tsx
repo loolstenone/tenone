@@ -1,4 +1,4 @@
-import { ClipboardCheck, Mic, Beer, Handshake, Briefcase, Sparkles } from 'lucide-react';
+import { ClipboardCheck, Mic, Beer, Handshake, Briefcase, Sparkles, Search, Footprints, Link2 } from 'lucide-react';
 import { MAD_PROGRAM_IMAGES } from '@/lib/madleague-program-assets';
 import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
 import { getMadProgram } from '@/features/madleague/programs-list';
@@ -10,6 +10,13 @@ export const metadata = { title: program.title, description: program.desc };
 
 // 원본: madleague.net/DAMParty · /DAMHistory (2026-10-07 이전)
 // 원본의 개인 입금 계좌·개인 연락처·개인 이메일은 옮기지 않는다 — 회차별 안내는 신청서 설명에, 문의는 문의하기 페이지로
+
+// DAM = DISCOVER · APPROACH · MATCH (2026-10-11 사용자 지시 — 사이트 표기 통일)
+const DAM = [
+  { letter: 'D', word: 'DISCOVER', icon: Search,     title: '발견한다', desc: '이력서와 홈페이지 밖에서 — 서로의 진짜 역량과 모습을 눈으로 본다.' },
+  { letter: 'A', word: 'APPROACH', icon: Footprints, title: '다가간다', desc: '3분 스피치와 8분 기업 소개 뒤, 맥주 한잔 들고 먼저 말을 건다.' },
+  { letter: 'M', word: 'MATCH',    icon: Link2,      title: '연결된다', desc: '명함을 건네며 "같이 일해 보지 않을래요?" — 채용·사이드 프로젝트가 여기서 시작된다.' },
+];
 
 const STEPS = [
   { icon: ClipboardCheck, title: '신청 · 참가 확정',        desc: '학생·현업·기업 각각 신청. 내부 검토 후 확정된 분께 참가비·장소를 개별 안내한다.' },
@@ -31,6 +38,21 @@ export default function DamPage() {
       stepsTitle="파티는 이렇게 진행된다"
       gets={GETS}
     >
+      <ProgramSection eyebrow="D · A · M" title={<>발견하고, 다가가고, 연결된다</>}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {DAM.map(d => (
+            <div key={d.letter} className="border border-neutral-800 bg-neutral-950 p-6">
+              <div className="flex items-baseline gap-3">
+                <span className="text-5xl font-black text-[#EC1D25]">{d.letter}</span>
+                <span className="text-xs font-bold tracking-widest text-neutral-500">{d.word}</span>
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-lg font-black"><d.icon className="h-4 w-4 text-[#EC1D25]" /> {d.title}</div>
+              <p className="mt-2 text-sm text-neutral-400 leading-relaxed break-keep">{d.desc}</p>
+            </div>
+          ))}
+        </div>
+      </ProgramSection>
+
       <ProgramSection eyebrow="GUIDE" title="참가 안내">
         <ul className="space-y-3 text-lg text-neutral-300 max-w-3xl leading-relaxed">
           <li>— 신청 후 내부 검토를 통해 참가 확정되신 분께 개별로 안내드립니다. (참가비·입금 안내 포함)</li>

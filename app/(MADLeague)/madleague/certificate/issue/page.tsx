@@ -1,3 +1,4 @@
+import { MadleaguerPager } from '@/features/madleague/SectionPager';
 import { PtCertificateIssue } from '@/features/madleague/PtCertificateIssue';
 
 export const metadata = { title: '경쟁 PT 인증서 발급', description: 'MADLeague 경쟁 PT 참가 확인서·수상 확인서를 PNG·PDF로 받으세요.' };
@@ -18,6 +19,7 @@ export default function PtCertificateIssuePage() {
             <section className="mx-auto max-w-6xl px-6 py-16">
                 <PtCertificateIssue />
             </section>
+            <MadleaguerPager current="/madleague/certificate/issue" />
         </div>
     );
 }

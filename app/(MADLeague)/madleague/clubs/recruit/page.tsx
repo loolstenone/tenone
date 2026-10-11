@@ -1,3 +1,4 @@
+import { MadleaguerPager } from '@/features/madleague/SectionPager';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
@@ -87,6 +88,7 @@ export default async function ClubRecruitPage() {
           })}
         </div>
       </section>
+      <MadleaguerPager current="/madleague/clubs/recruit" />
     </div>
   );
 }

@@ -87,6 +87,7 @@
 | `features/madleague/programs-list.ts` | **프로그램 SSOT** — 순서·이름·eyebrow·한 줄 요약·3그룹(실전 경쟁·연계·연결 — 2026-10-11 실전을 실전 경쟁에 합침)·한눈에 보기(누가·언제·어떻게·참가비·남는 것)·corporate·madleaguerOnly. 탭 줄·홈·전체 목록·About·검색·상세 템플릿이 전부 여기서 렌더 |
 | `features/madleague/ProgramDetailPage.tsx` | **프로그램 상세 표준 템플릿** (2026-10-08): ① 히어로(칩은 연계 프로그램만 — 직접 운영은 한눈에 보기와 중복이라 2026-10-11 삭제) ② 한눈에 보기 ③ 진행 과정(steps) ④ 얻는 것(gets) ⑤ 자유 섹션(`ProgramSection`) ⑥ 참여 CTA ⑦ 이전·다음 프로그램. 각 page.tsx는 steps·gets·자유 섹션만 넘긴다 |
 | `features/madleague/ProgramCTA.tsx` | 상세 하단 참여 CTA 통일 — 공개 신청서(forms.program=key) 있으면 그 버튼, 없으면 매드리거 등록 · 문의하기(`?type=program`) · corporate면 기업 참여 문의(`?type=corporate`) · `primary`로 페이지 안 폼 앵커 덮어쓰기(히어로) |
+| `features/madleague/SectionPager.tsx` | **섹션 하단 좌우 이동 공용** (2026-10-11): 프로그램 상세 이전·다음(`ProgramNeighbors`) + 매드리거 메뉴 페이지 5개(`MadleaguerPager`, 순서 = 헤더 레지스트리 매드리거 상위+하위, 순환). 모바일도 한 줄 좌·가운데·우 같은 높이. 가운데 홈 링크는 좌우와 겹치면 숨김 |
 | `features/madleague/HeroRotatingTitle.tsx` | 홈 히어로 카피 3종 3초 교체 |
 | `app/(MADLeague)/madleague/programs/hero·rookie·planners/` | **연계 프로그램** (`PartnerProgramPage`) — 옛 `/madleague/hero` → 308. MADLeague 자체 HeRo 신청 폼·`/api/madleague/hero` 삭제(2026-10-09) |
 | `app/(MADLeague)/madleague/apply/` | 지원서 (로그인·캡차·동의) |
@@ -190,7 +191,7 @@
 
 - **새 프로그램·프로그램 수정은 `programs-list.ts` 한 곳** — 항목 추가 → 탭 줄·홈·전체 목록·About·검색·이전/다음에 자동 반영. `glance` 5개 키는 비우지 않는다 (사람들이 "누가·언제·얼마"를 못 찾는 게 가장 큰 이해 격차였다)
 - 직접 운영 상세 page.tsx는 `ProgramDetailPage`에 steps·gets·자유 섹션만 넘긴다. 자체 히어로·자체 CTA를 만들지 않는다 (10개 중 6개가 스텁, CTA가 6가지였던 2026-10-08 이전 상태로 돌아가지 않기)
-- 표기: 'DAM 파티'(댐 파티 ✗) · '히어로 프로그램'(히어로·HeRo 프로그램 ✗) · 'PJT'. 메뉴 레지스트리 라벨도 같게
+- 표기: 'DAM 파티'(댐 파티 ✗) · **DAM = DISCOVER · APPROACH · MATCH** (2026-10-11 사용자 지시 — Draft Assembly Meeting ✗, 상세 페이지 D·A·M 섹션) · '히어로 프로그램'(히어로·HeRo 프로그램 ✗) · 'PJT'. 메뉴 레지스트리 라벨도 같게
 - **히어로(상단)는 전부 programs-list에서** — eyebrow·제목·요약·`tagline`(한 줄, 강조색 굵게)·칩. 페이지별 히어로 카피·배경 사진 금지 (2026-10-09 통일 — 부제 스타일 4종·배경 사진이 섞여 있었다)
 - 강조색: **레드 하나**. 예외는 히어로 프로그램 골드뿐(브랜드 가이드). 마케톤 골드·RooKie 그린·Planner's 틸은 폐지 (2026-10-09)
 - 한눈에 보기 중 사실 확인 대기: 아이디어 무브먼트(연말 쇼케이스 운영 방식) · RooKie·Planner's(기수·비용 — 지금 "모집 공지 때 안내") · 경쟁 PT 회차 수(연 1~2회) · 인사이트 투어링 시기

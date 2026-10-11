@@ -116,7 +116,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     href: '/madleague/programs/dam',
     title: 'DAM 파티',
     eyebrow: 'DAM NETWORKING PARTY',
-    desc: 'Draft Assembly Meeting — 대학생·현업·기업이 직접 만나는 네트워킹 파티.',
+    desc: 'DISCOVER · APPROACH · MATCH — 대학생·현업·기업이 직접 만나는 네트워킹 파티.',
     tagline: '우리와 맞는 인재, 나와 맞는 기업 — 이력서 밖에서 만난다.',
     group: 'connect',
     corporate: true,

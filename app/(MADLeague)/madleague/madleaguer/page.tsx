@@ -1,3 +1,4 @@
+import { MadleaguerPager } from '@/features/madleague/SectionPager';
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
@@ -193,6 +194,7 @@ export default async function MadleaguerPage() {
                     </Link>
                 </section>
             </div>
+            <MadleaguerPager current="/madleague/madleaguer" />
         </div>
     );
 }

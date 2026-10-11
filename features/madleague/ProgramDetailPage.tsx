@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, MessageSquare, type LucideIcon } from 'lucide-react';
+import { ArrowRight, MessageSquare, type LucideIcon } from 'lucide-react';
+import { SectionPager } from '@/features/madleague/SectionPager';
 import { CrossSiteLink } from '@/components/CrossSiteLink';
 import { ServiceLinkConsent } from '@/components/ServiceLinkConsent';
 import { getMadProgram, getMadProgramNeighbors, MAD_ACCENT, MAD_PROGRAM_GROUPS, type MadProgram } from '@/features/madleague/programs-list';
@@ -236,25 +237,10 @@ export function PartnerProgramPage({ programKey, children }: { programKey: strin
 
 function ProgramNeighbors({ prev, next }: { prev: MadProgram; next: MadProgram }) {
   return (
-    <nav aria-label="다른 프로그램" className="border-t border-neutral-900">
-      <div className="mx-auto max-w-7xl px-6 py-12 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-center">
-        <Link href={prev.href} className="group flex items-center gap-4 text-left">
-          <ArrowLeft className="h-5 w-5 text-neutral-600 group-hover:text-[#EC1D25] transition shrink-0" />
-          <span>
-            <span className="block text-xs font-bold tracking-widest text-neutral-500">이전 프로그램</span>
-            <span className="block mt-1 text-xl font-black group-hover:text-[#EC1D25] transition">{prev.title}</span>
-          </span>
-        </Link>
-        <Link href="/madleague/programs" className="text-sm font-bold text-neutral-400 hover:text-white transition text-center">전체 프로그램</Link>
-        <Link href={next.href} className="group flex items-center justify-end gap-4 text-right">
-          <span>
-            <span className="block text-xs font-bold tracking-widest text-neutral-500">다음 프로그램</span>
-            <span className="block mt-1 text-xl font-black group-hover:text-[#EC1D25] transition">{next.title}</span>
-          </span>
-          <ArrowRight className="h-5 w-5 text-neutral-600 group-hover:text-[#EC1D25] transition shrink-0" />
-        </Link>
-      </div>
-    </nav>
+    <SectionPager label="다른 프로그램"
+      prev={{ title: prev.title, href: prev.href }}
+      next={{ title: next.title, href: next.href }}
+      center={{ title: '전체 프로그램', href: '/madleague/programs' }} />
   );
 }
 
