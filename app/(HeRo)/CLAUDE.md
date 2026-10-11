@@ -394,14 +394,12 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ### HeRo 전용 `uc_earn_rules` (brand_id='hero')
 
-> ❌ **검사 완료에는 UC를 주지 않는다** (2026-10-12 사용자 결정 — 검사는 본인을 위한 행동, 유니버스 기여 보상이 아님). `complete_hit_a~f` 규칙 운영 DB·시드에서 삭제
+> ❌ **검사·희망 직무 작성에는 UC를 주지 않는다** (2026-10-12 사용자 결정 — 본인을 위한 행동, 유니버스 기여 보상이 아님). `complete_hit_a~f`·`complete_jh`·`update_jh_quarterly` 규칙 운영 DB·시드에서 삭제
 
 > ⚠️ **현재 DB에 HeRo UC 규칙이 하나도 시드되어 있지 않다. Phase 0에서 seed SQL 작성 필요.**
 
 | action_key | 설명 | base_amount | monthly_cap | 일회성 타입 |
 |-----------|------|-----|----|---------|
-| `complete_jh` | JH 12문항 작성 완료 | 500 | — | GLOBAL |
-| `update_jh_quarterly` | JH 분기별 재작성 | 200 | — | 분기 1회 |
 | `register_tih` | 기업 TIH 제출 (담당자 회원에게 지급) | 500 | 월 1회 | — |
 | `register_jd` | 기업 JD 등록 | 300 | 월 3회 | — |
 | `match_trial_success` | 매칭 트라이얼 성공 | 5,000 | — | 건별 |
