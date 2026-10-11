@@ -15,6 +15,7 @@ import { earnUC } from "@/lib/supabase/uc";
 import { Resend } from "resend";
 import { heroStageUpHtml } from "@/lib/email/hero-stage-up";
 import { buildFromHeader, DEFAULT_SENDERS } from "@/lib/email/senders";
+import { brandSiteUrl } from "@/lib/domain-registry";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -114,7 +115,6 @@ export async function GET(req: NextRequest) {
                 .single();
 
             if (member?.email) {
-                const heroBaseUrl = process.env.NEXT_PUBLIC_HERO_URL ?? "https://hero.ne.kr";
                 resend.emails.send({
                     from: buildFromHeader(DEFAULT_SENDERS.noreply),
                     to: member.email,
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
                         fromStage,
                         toStage: s.stage,
                         ucAwarded,
-                        journeyUrl: `${heroBaseUrl}/hero/journey`,
+                        journeyUrl: brandSiteUrl("hero", "/hero/journey"), // 공식 주소 SSOT (옛 기본값 hero.ne.kr는 www가 아니었음)
                     }),
                 }).catch(() => { /* fire & forget */ });
             }

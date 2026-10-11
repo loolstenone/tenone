@@ -67,6 +67,8 @@ export default function MatchingInbox({
     const [requesting, setRequesting] = useState(false);
     const [reporting, setReporting] = useState<string | null>(null);
     const [expanded, setExpanded] = useState(false);
+    // 결과 안내는 alert 대신 카드 안 문구 (2026-10-12)
+    const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
     const isDark = theme === "dark";
     const primaryText   = isDark ? "text-neutral-100" : "text-neutral-900";
@@ -94,6 +96,7 @@ export default function MatchingInbox({
 
     async function requestMatching() {
         setRequesting(true);
+        setNotice(null);
         try {
             const res = await fetch("/api/hero/matching/request", {
                 method: "POST",
@@ -101,9 +104,9 @@ export default function MatchingInbox({
                 body: JSON.stringify({ side, memberId, companyId }),
             });
             if (!res.ok) throw new Error("요청 실패");
-            alert("상세 안내 신청이 접수되었습니다. 담당자가 곧 연락드립니다.");
+            setNotice({ tone: "ok", text: "상세 안내 신청이 접수되었습니다. 담당자가 곧 연락드립니다." });
         } catch (e) {
-            alert(e instanceof Error ? e.message : "요청 실패");
+            setNotice({ tone: "error", text: e instanceof Error ? e.message : "요청 실패" });
         } finally {
             setRequesting(false);
         }
@@ -111,6 +114,7 @@ export default function MatchingInbox({
 
     async function report(matchId: string, toStatus: string) {
         setReporting(matchId + toStatus);
+        setNotice(null);
         try {
             const res = await fetch(`/api/hero/matching/${matchId}/report`, {
                 method: "POST",
@@ -123,7 +127,7 @@ export default function MatchingInbox({
             }
             await load();
         } catch (e) {
-            alert(e instanceof Error ? e.message : "보고 실패");
+            setNotice({ tone: "error", text: e instanceof Error ? e.message : "보고 실패" });
         } finally {
             setReporting(null);
         }
@@ -268,6 +272,12 @@ export default function MatchingInbox({
                     <Sparkles className="h-5 w-5 mx-auto mb-1 opacity-50" />
                     준비가 완료되면 알려드립니다
                 </div>
+            )}
+
+            {notice && (
+                <p role="status" className={`mt-3 text-xs text-center ${notice.tone === "ok" ? "text-green-600" : "text-red-500"}`}>
+                    {notice.text}
+                </p>
             )}
 
             <p className={`text-[10px] mt-3 text-center ${mutedText}`}>

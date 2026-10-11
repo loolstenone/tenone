@@ -202,7 +202,7 @@ function JourneyMap({ status }: { status: JourneyStatus }) {
       <div className="flex items-center gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#E53935] text-xs font-bold">
           <Flame className="w-3.5 h-3.5" />
-          {status.streak}일째 방문
+          연속 체크인 {status.streak}일
         </div>
         {badge && (
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 text-xs font-bold">
@@ -379,18 +379,19 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
 function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
   // 오늘의 미션: 사용자가 다음 스테이지로 가기 위해 가장 먼저 해야 할 것
   const c = status.conditions;
-  let mission: { title: string; desc: string; href: string; reward: string } | null = null;
+  // reward는 실제로 지급되는 것만 (2026-10-12 — HIT·이력서·JH·매칭 확인은 규칙만 있고 지급 코드가 없어 약속만 하던 상태). 지급을 연결하면 그때 표기
+  let mission: { title: string; desc: string; href: string; reward: string | null } | null = null;
 
   if (!c.has_hit_a) {
-    mission = { title: "HIT A 검사", desc: "10분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: "+1,000 UC" };
+    mission = { title: "HIT A 검사", desc: "약 25분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: null };
   } else if (!c.has_hit_b) {
-    mission = { title: "HIT B 검사", desc: "역량 분포가 더해져요 (12분)", href: "/hero/hit/b", reward: "+1,500 UC" };
+    mission = { title: "HIT B 검사", desc: "역량 분포가 더해져요 (약 22분)", href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
-    mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: "+500 UC" };
+    mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
-    mission = { title: "JH 12문항 작성", desc: "매칭을 받으려면 필요해요", href: "/hero/jh/write", reward: "+500 UC" };
+    mission = { title: "희망 직무 12문항 작성", desc: "맞는 자리를 찾으려면 필요해요", href: "/hero/jh/write", reward: null };
   } else if (status.pendingMatches > 0) {
-    mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "큐레이션이 도착했어요", href: "#matching", reward: "+100 UC" };
+    mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "큐레이션이 도착했어요", href: "#matching", reward: null };
   } else {
     mission = { title: "오늘 체크인", desc: "30초면 충분해요", href: "#checkin", reward: "+50 UC" };
   }
@@ -404,7 +405,7 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
       <h3 className="text-xl font-bold mb-2">{mission.title}</h3>
       <p className="text-sm text-white/80 mb-5">{mission.desc}</p>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full">{mission.reward}</span>
+        {mission.reward ? <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full">{mission.reward}</span> : <span />}
         <CardLink
           href={mission.href}
           goTab={goTab}
