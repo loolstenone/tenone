@@ -1,3 +1,4 @@
+import { UC_PUBLIC } from '@/lib/uc-visibility';
 /**
  * HeRo 주간 리포트 이메일 HTML 템플릿
  * 매주 월요일 09:00 KST 발송
@@ -114,8 +115,8 @@ export function renderHeroWeeklyReportHtml(props: HeroWeeklyReportProps): string
                   </td>
                   <td width="4%"></td>
                   <td width="25%" style="text-align:center;padding:16px 8px;background:#f9f9f9;border-radius:8px;">
-                    <div style="font-size:26px;font-weight:800;color:${RED};">${weeklyUC.toLocaleString('ko-KR')}</div>
-                    <div style="font-size:11px;color:${GRAY};margin-top:4px;">UC 적립</div>
+                    <div style="font-size:26px;font-weight:800;color:${RED};">${UC_PUBLIC ? weeklyUC.toLocaleString('ko-KR') : streak}</div>
+                    <div style="font-size:11px;color:${GRAY};margin-top:4px;">${UC_PUBLIC ? 'UC 적립' : '연속 체크인'}</div>
                   </td>
                   <td width="4%"></td>
                   <td width="25%" style="text-align:center;padding:16px 8px;background:#f9f9f9;border-radius:8px;">

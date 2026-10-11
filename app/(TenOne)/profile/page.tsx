@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseProfile } from "@/components/UniverseProfile";
 import { ProfileComments } from "@/components/ProfileComments";
 import { UCBalanceCard } from "@/components/UCBalanceCard";
+import { UC_PUBLIC } from "@/lib/uc-visibility";
 import HeroBadgeOptIn from "@/features/hero/HeroBadgeOptIn";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +36,7 @@ export default function ProfilePage() {
                 )}
             </UniverseProfile>
             {user?.id && <HeroBadgeOptIn memberId={user.id} />}
-            <UCBalanceCard />
+            {UC_PUBLIC && <UCBalanceCard />}
         </div>
     );
 }

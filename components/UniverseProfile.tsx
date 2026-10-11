@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { UC_PUBLIC } from "@/lib/uc-visibility";
 import { useAuth } from '@/lib/auth-context';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { siteConfigs, type SiteIdentifier } from '@/lib/site-config';
@@ -421,9 +422,9 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         });
     }, [isOwner, user]);
 
-    /* ── UC 잔액 (소유자만) ── */
+    /* ── UC 잔액 (소유자만 · UC 공개 전엔 조회 안 함) ── */
     useEffect(() => {
-        if (!isOwner || !user) return;
+        if (!UC_PUBLIC || !isOwner || !user) return;
         const supabase = createClient();
         supabase.auth.getSession().then(async (res: Awaited<ReturnType<typeof supabase.auth.getSession>>) => {
             const session = res.data.session;

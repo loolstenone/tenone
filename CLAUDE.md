@@ -617,6 +617,10 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 > **1 UC = 1 KRW** | 탈퇴 시 소멸 | 재가입 시 0 재시작
 > 상세: [docs/Universe_Coin_Policy.md](docs/Universe_Coin_Policy.md)
 
+> **비공개 운영 (2026-10-12 사용자 결정)**: UC는 시스템 완성(결제 PG·사용처·규칙 재정의·약관 고지) 전까지 **사용자에게 보여주지 않고 뒤에서만 적립**한다.
+> 스위치 `lib/uc-visibility.ts` `UC_PUBLIC` (env `NEXT_PUBLIC_UC_PUBLIC=true`로 공개). 인트라는 그대로 본다.
+> ❌ 사용자 화면·이메일에 UC 잔액·적립액·"+N UC" 문구를 `UC_PUBLIC` 없이 표시 ❌ 화면에 지급액을 하드코딩 (규칙이 바뀌면 거짓말이 된다)
+
 ### 원칙
 
 | 원칙 | 내용 |
@@ -625,6 +629,8 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 | 남용 방지 | 월별 횟수 상한 (monthly_cap) 전 액션 적용 |
 | 서비스 연동 | 특정 서비스 전용은 해당 `brand_id` / 전 브랜드 공통은 `brand_id=NULL` |
 | 일회성 구분 | 전체 1회(GLOBAL) vs 브랜드별 1회(PER_BRAND) |
+| 기여 기준 | 다른 사람에게 도움이 되는 행동(콘텐츠·후기·운영·초대)에 지급. ❌ 본인을 위한 행동(검사·희망 직무 작성)에 지급 (2026-10-12 삭제) |
+| 실비 상한 | 회원 1명 **월 3,000 UC** (전 브랜드 합산, `UC_MEMBER_MONTHLY_CAP` — `earnUC`가 강제). 비활성 규칙(`is_active=false`)은 지급 안 함 |
 | 사용 제한 | 결제 건별 **최대 10%** UC 차감 (현금 환급 불가) |
 
 ### 핵심 테이블/API
@@ -642,10 +648,13 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 
 | 카테고리 | 예시 | 지급액 |
 |---------|------|--------|
-| 온보딩 | `signup_complete` / `profile_complete` / `profile_advanced` | 최대 6,500 UC (생애 1회) |
-| 커뮤니티 | `write_post` / `write_comment` / `post_featured` | 월 최대 8,000 UC |
-| 마케팅 기여 | `submit_story` / `submit_interview` / `submit_article` | 월 최대 16,000 UC |
-| 리뷰 | `write_review` | 월 1회 2,000 UC |
+| 온보딩 | `signup_complete` 1,000 / `profile_complete` 300 / `profile_advanced` 500 | 최대 1,800 UC (생애 1회) |
+| 커뮤니티 | `write_post` 50 / `write_comment` 10 / `post_featured` 200 | 글 월 5회 · 댓글 10회 · 인기글 3회 |
+| 기여 | `submit_story` · `submit_interview` · `submit_article` · `event_volunteer` | 각 1,000 (월 1회) |
+| 리뷰 | `write_review` · `write_edu_review` · `write_coaching_review` | 300 |
+| 일상 | `hero_daily_checkin` 5 · 연속 7/30/100일 50/200/1,000 | 상징 수준 |
+
+> 금액 SSOT = DB `uc_earn_rules` (변경 이력 `sql/uc-earn-rules-rebalance-2026-10.sql` — 기존 금액은 각 줄 주석). 매칭·채용 성사 보상은 비활성 (직업소개사업 미신고)
 
 ---
 

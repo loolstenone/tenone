@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { UC_PUBLIC } from "@/lib/uc-visibility";
 import Link from "next/link";
 import { Check, Sparkles, Bell } from "lucide-react";
 
@@ -130,10 +131,12 @@ export default function PricingPage() {
                         q="데이터는 누구의 것인가요?"
                         a="100% 사용자의 것. 언제든 일괄 다운로드 또는 영구 삭제가 가능합니다."
                     />
-                    <FaqItem
-                        q="유니버스 코인(UC)으로 결제 가능한가요?"
-                        a="Pro 출시 시점에 결제 건당 최대 10%까지 UC 차감 예정입니다."
-                    />
+                    {UC_PUBLIC && (
+                        <FaqItem
+                            q="유니버스 코인(UC)으로 결제 가능한가요?"
+                            a="Pro 출시 시점에 결제 건당 최대 10%까지 UC 차감 예정입니다."
+                        />
+                    )}
                     <FaqItem
                         q="Pro 가격이 변동될 수 있나요?"
                         a="현재 표시된 ₩9,900/월은 출시 예정 가격입니다. 출시 시점에 최종 확정됩니다."

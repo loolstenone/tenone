@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { UC_MEMBER_MONTHLY_CAP } from '@/lib/uc-visibility';
 
 const supabase = createAdminClient();
 
@@ -31,6 +32,7 @@ export async function earnUC(
     .from('uc_earn_rules')
     .select('amount, monthly_cap')
     .eq('action_key', actionKey)
+    .eq('is_active', true) // 비활성 규칙은 지급하지 않는다 (2026-10-12 — 전엔 is_active를 안 봐서 꺼도 지급됐음)
     .is('valid_until', null); // 만료되지 않은 룰
 
   if (brandId) {
@@ -86,6 +88,19 @@ export async function earnUC(
 
   if ((monthCount ?? 0) >= rule.monthly_cap) {
     return { granted: false, amount: 0, reason: 'monthly_cap_reached' };
+  }
+
+  // 3-1. 회원 월 총량 상한 (모든 브랜드·규칙 합산, 1 UC = 1원 실비 관리 — 2026-10-12)
+  const { data: monthRows } = await supabase
+    .from('uc_transactions')
+    .select('amount')
+    .eq('member_id', memberId)
+    .eq('type', 'earn')
+    .neq('action_key', 'redeem_restore')
+    .gte('created_at', monthStart);
+  const monthTotal = (monthRows ?? []).reduce((s, r) => s + (r.amount ?? 0), 0);
+  if (monthTotal + rule.amount > UC_MEMBER_MONTHLY_CAP) {
+    return { granted: false, amount: 0, reason: 'member_monthly_cap_reached' };
   }
 
   // 4. 트랜잭션 기록

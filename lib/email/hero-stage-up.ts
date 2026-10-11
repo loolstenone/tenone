@@ -1,3 +1,4 @@
+import { UC_PUBLIC } from '@/lib/uc-visibility';
 /**
  * HeRo Journey 스테이지 승급 축하 이메일
  */
@@ -72,6 +73,7 @@ export function heroStageUpHtml(p: HeroStageUpProps): string {
             </tr>
           </table>
 
+${UC_PUBLIC && p.ucAwarded > 0 ? `
           <!-- UC 적립 -->
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
             <tr>
@@ -82,6 +84,7 @@ export function heroStageUpHtml(p: HeroStageUpProps): string {
               </td>
             </tr>
           </table>
+` : ''}
 
           <p style="margin:0 0 28px;font-size:14px;color:${GRAY};line-height:1.6;">
             Journey를 계속 쌓아가세요. 다음 스테이지가 기다리고 있어요!

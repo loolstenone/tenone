@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { UC_PUBLIC } from "@/lib/uc-visibility";
 import {
     Target,
     Plus,
@@ -555,7 +556,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                         className="px-5 py-2 text-sm font-bold text-white rounded-lg disabled:opacity-50"
                         style={{ backgroundColor: RED }}
                     >
-                        {saving ? "저장 중..." : "체크인 +100 UC"}
+                        {saving ? "저장 중..." : UC_PUBLIC ? "체크인 · UC 적립" : "체크인"}
                     </button>
                 </div>
             </div>

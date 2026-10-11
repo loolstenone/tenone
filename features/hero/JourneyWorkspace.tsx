@@ -34,6 +34,7 @@ import { JobsTab } from "@/features/hero/JobsTab";
 import { CoachingTab } from "@/features/hero/CoachingTab";
 import { ReflectionTab } from "@/features/hero/ReflectionTab";
 import { RecordTab } from "@/features/hero/RecordTab";
+import { UC_PUBLIC } from "@/lib/uc-visibility";
 
 const RED = "#E53935";
 
@@ -393,7 +394,7 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   } else if (status.pendingMatches > 0) {
     mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "큐레이션이 도착했어요", href: "#matching", reward: null };
   } else {
-    mission = { title: "오늘 체크인", desc: "30초면 충분해요", href: "#checkin", reward: "+50 UC" };
+    mission = { title: "오늘 체크인", desc: "30초면 충분해요", href: "#checkin", reward: UC_PUBLIC ? "UC 적립" : null };
   }
 
   return (
@@ -436,7 +437,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         const data = await res.json() as { earned?: { action: string; amount: number }[] };
         const totalUC = (data.earned ?? []).reduce((s, e) => s + e.amount, 0);
         const hasStreak = (data.earned ?? []).some(e => e.action.startsWith("hero_streak_"));
-        if (totalUC > 0) {
+        if (UC_PUBLIC && totalUC > 0) {
           setToast(hasStreak ? `🎉 스트릭 달성! +${totalUC} UC 적립` : `+${totalUC} UC 적립`);
           setTimeout(() => setToast(null), 3500);
         }
@@ -487,7 +488,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         className="w-full py-3 rounded-lg text-white font-bold text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
         style={{ backgroundColor: RED }}
       >
-        {saving ? "저장 중..." : status.todayCheckedIn ? "갱신" : "저장 +50 UC"}
+        {saving ? "저장 중..." : status.todayCheckedIn ? "갱신" : "저장"}
       </button>
       {toast && (
         <div className="mt-3 px-3 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg text-center text-sm font-bold text-amber-800 animate-pulse">
@@ -642,7 +643,7 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
           </div>
 
           {/* UC 적립 */}
-          {ucAwarded > 0 && (
+          {UC_PUBLIC && ucAwarded > 0 && (
             <div className="flex items-center justify-between px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
               <div>
                 <p className="text-xs font-bold text-[#E53935] uppercase tracking-wider mb-0.5">UC 적립</p>
