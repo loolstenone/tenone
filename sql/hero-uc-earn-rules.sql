@@ -9,17 +9,14 @@
 --   ① 비회원 → 회원 전환 시 link-member로 소급 UC 지급 가능성 열어둠
 --   ② 회원 → 유료 전환 시 큰 UC 수익 (coaching 구매)
 --   ③ 매칭 성사 → 건별 대형 보상 (핵심 수익 액션)
+--
+-- 2026-10-12: HIT 검사 완료 보상(complete_hit_a~f) 삭제 — 검사는 본인을 위한 행동이라 유니버스 기여 보상 대상이 아님 (사용자 결정).
+--   운영 DB에서도 DELETE. 재실행 시 되살리지 않는다
 -- ────────────────────────────────────────────────────────────────
 
 INSERT INTO uc_earn_rules (action_key, brand_id, amount, monthly_cap, is_active, label)
 VALUES
   -- HIT 검사 완료 (생애 1회)
-  ('complete_hit_a',        'hero', 1000, 0, true, 'HIT A 검사 완료 (기저 심리)'),
-  ('complete_hit_b',        'hero', 1500, 0, true, 'HIT B 검사 완료 (역량·준비도)'),
-  ('complete_hit_c',        'hero',  800, 0, true, 'HIT C 검사 완료 (이직 동기)'),
-  ('complete_hit_d',        'hero',  800, 0, true, 'HIT D 검사 완료 (전문성·리더십)'),
-  ('complete_hit_e',        'hero',  800, 0, true, 'HIT E 검사 완료 (인생 2막)'),
-  ('complete_hit_f',        'hero',  800, 0, true, 'HIT F 검사 완료 (회복력·재진입)'),
 
   -- JH (인재의 바람) 작성
   ('complete_jh',           'hero',  500, 0,  true, 'JH 12문항 작성 완료'),
