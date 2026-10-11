@@ -41,7 +41,7 @@ interface JDRow {
     experience_range: string | null;
     derived_vector: JDDerivedVector | null;
     published_at: string | null;
-    hero_companies?: { company_name?: string | null; industry?: string | null; company_size?: string | null } | null;
+    hero_companies?: { company_name?: string | null; industry?: string | null; size_category?: string | null } | null;
 }
 
 function axisAlignmentScore(jhState?: string, jdAxisSummary?: string): number {
@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
         // published JD 리스트 + 회사 조인
         const { data: jdList, error } = await sb
             .from("hero_jd")
-            .select("id, position_title, summary, company_id, employment_type, experience_range, derived_vector, published_at, hero_companies!inner(company_name, industry, company_size)")
+            .select("id, position_title, summary, company_id, employment_type, experience_range, derived_vector, published_at, hero_companies!inner(company_name, industry, size_category)")
             .eq("status", "published")
             .order("published_at", { ascending: false })
             .limit(50);
@@ -152,7 +152,7 @@ export async function GET(req: NextRequest) {
                 summary: s.jd.summary,
                 companyName: s.jd.hero_companies?.company_name,
                 companyIndustry: s.jd.hero_companies?.industry,
-                companySize: s.jd.hero_companies?.company_size,
+                companySize: s.jd.hero_companies?.size_category, // 실제 컬럼명 size_category (2026-10-12 — company_size 조회로 탭 전체가 오류였음)
                 employmentType: s.jd.employment_type,
                 experienceRange: s.jd.experience_range,
                 publishedAt: s.jd.published_at,

@@ -191,7 +191,7 @@ BEGIN
             t.id          AS tih_id,
             t.company_id,
             c.company_name,
-            c.company_size,
+            c.size_category AS company_size,  -- hero_companies 실제 컬럼은 size_category (2026-10-12 수정)
             t.derived_guardian,
             t.derived_pioneer,
             t.derived_connector,

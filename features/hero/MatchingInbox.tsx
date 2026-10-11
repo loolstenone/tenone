@@ -4,8 +4,9 @@
  * 매칭 인박스 컴포넌트 — 기업/인재 공용 (티저 모드)
  *
  * 원칙: 매칭 결과물(큐레이션 본문·기업명·인재 식별자·주의 신호)은
- *       HeRo의 유료 수익원이므로 사용자에게 직접 노출하지 않는다.
- *       카운트와 진행 단계만 보여주고, "매칭 의뢰하기" CTA로 안내.
+ *       담당자가 직접 안내하는 내용이므로 사용자에게 직접 노출하지 않는다.
+ *       카운트와 진행 단계만 보여주고, "상세 안내 신청" CTA로 안내.
+ *       ❌ "유료"·"의뢰"·"연결해/이어드립니다" 표현 금지 — 통신판매업·직업소개 신고 전 (2026-10-12)
  *       단, contacted/interviewing/trial 상태의 진행 중 매칭은
  *       참여자 자율 상태 보고 버튼을 제공한다.
  */
@@ -100,7 +101,7 @@ export default function MatchingInbox({
                 body: JSON.stringify({ side, memberId, companyId }),
             });
             if (!res.ok) throw new Error("요청 실패");
-            alert("매칭 의뢰가 접수되었습니다. 담당자가 곧 연락드립니다.");
+            alert("상세 안내 신청이 접수되었습니다. 담당자가 곧 연락드립니다.");
         } catch (e) {
             alert(e instanceof Error ? e.message : "요청 실패");
         } finally {
@@ -150,10 +151,10 @@ export default function MatchingInbox({
 
     const sub = side === "talent"
         ? visibleCount > 0
-            ? "HeRo가 정리한 추천 내용은 매칭 의뢰를 접수하시면 전달드립니다."
-            : "희망 직무(JH)와 HIT 검사를 완성하시면 적합한 회사와 이어드립니다."
+            ? "HeRo가 정리한 추천 내용은 상세 안내를 신청하시면 전달드립니다."
+            : "희망 직무(JH)와 HIT 검사를 완성하시면 맞는 회사를 찾아 알려드립니다."
         : visibleCount > 0
-            ? "추천 인재의 상세 내용은 매칭 의뢰를 접수하시면 전달드립니다."
+            ? "추천 인재의 상세 내용은 상세 안내를 신청하시면 전달드립니다."
             : "TIH 응답과 직무 설명(JD)이 올라오면 조건에 맞는 분을 찾기 시작합니다.";
 
     return (
@@ -259,7 +260,7 @@ export default function MatchingInbox({
                 >
                     {requesting
                         ? <Loader2 className="h-4 w-4 animate-spin" />
-                        : <><Handshake className="h-4 w-4" /> 매칭 의뢰하기</>
+                        : <><Handshake className="h-4 w-4" /> 상세 안내 신청</>
                     }
                 </button>
             ) : (
@@ -271,7 +272,7 @@ export default function MatchingInbox({
 
             <p className={`text-[10px] mt-3 text-center ${mutedText}`}>
                 <MessageCircle className="inline h-3 w-3 mr-0.5" />
-                상세 큐레이션은 HeRo 담당자가 유료 서비스로 전달드립니다
+                상세 큐레이션은 HeRo 담당자가 직접 안내드립니다
             </p>
         </div>
     );

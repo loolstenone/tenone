@@ -108,6 +108,12 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // 탭은 state라 `#matching` 같은 해시 링크로는 이동하지 않는다 — 카드에서 탭을 바꿀 땐 이 콜백 (2026-10-12)
+  const goTab = useCallback((k: TabKey) => {
+    setTab(k);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-16">
@@ -151,6 +157,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
           {TABS.map((t) => (
             <button
               key={t.key}
+              data-tab={t.key}
               onClick={() => setTab(t.key)}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.key
@@ -165,7 +172,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         </div>
 
         {/* 탭 콘텐츠 */}
-        {tab === "today"    && <TodayTab status={status} memberId={memberId} onRefresh={load} />}
+        {tab === "today"    && <TodayTab status={status} memberId={memberId} onRefresh={load} goTab={goTab} />}
         {tab === "herotype" && <HeroTypeTab status={status} />}
         {tab === "goals"    && <GoalsTab memberId={memberId} />}
         {tab === "record"   && <RecordTab memberId={memberId} />}
@@ -256,22 +263,33 @@ function JourneyMap({ status }: { status: JourneyStatus }) {
 
 /* ═════════════════════════ Today 탭 ═════════════════════════ */
 
-function TodayTab({ status, memberId, onRefresh }: { status: JourneyStatus; memberId: string; onRefresh: () => void }) {
+type GoTab = (k: TabKey) => void;
+
+/** 카드 안 링크 — 탭 키(`#matching`)면 탭 전환, 그 외는 일반 링크 */
+function CardLink({ href, goTab, className, children }: { href: string; goTab: GoTab; className?: string; children: React.ReactNode }) {
+  const tabKey = href.startsWith("#") ? (TABS.find(t => t.key === href.slice(1))?.key ?? null) : null;
+  if (tabKey) {
+    return <button type="button" onClick={() => goTab(tabKey)} className={`${className ?? ""} text-left w-full`}>{children}</button>;
+  }
+  return <Link href={href} className={className}>{children}</Link>;
+}
+
+function TodayTab({ status, memberId, onRefresh, goTab }: { status: JourneyStatus; memberId: string; onRefresh: () => void; goTab: GoTab }) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-6">
-        <NextStageCard status={status} />
+        <NextStageCard status={status} goTab={goTab} />
         <CheckinCard status={status} memberId={memberId} onRefresh={onRefresh} />
       </div>
       <div className="space-y-6">
-        <TodayMissionCard status={status} />
-        <MatchingSummaryCard status={status} />
+        <TodayMissionCard status={status} goTab={goTab} />
+        <MatchingSummaryCard status={status} goTab={goTab} />
       </div>
     </div>
   );
 }
 
-function NextStageCard({ status }: { status: JourneyStatus }) {
+function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
   const nextIdx = status.stageIndex; // 다음 스테이지 (현재 index는 1-based, 다음은 그대로 0-based index)
   const next = STAGES[nextIdx];
   const conditions = status.conditions;
@@ -336,9 +354,10 @@ function NextStageCard({ status }: { status: JourneyStatus }) {
       </div>
       <div className="space-y-2">
         {items.map((it) => (
-          <Link
+          <CardLink
             key={it.label}
             href={it.href}
+            goTab={goTab}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
               it.done ? "bg-green-50 text-neutral-600" : "hover:bg-neutral-50 text-neutral-700"
             }`}
@@ -350,14 +369,14 @@ function NextStageCard({ status }: { status: JourneyStatus }) {
             )}
             <span className={`flex-1 ${it.done ? "line-through" : ""}`}>{it.label}</span>
             {!it.done && <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />}
-          </Link>
+          </CardLink>
         ))}
       </div>
     </div>
   );
 }
 
-function TodayMissionCard({ status }: { status: JourneyStatus }) {
+function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
   // 오늘의 미션: 사용자가 다음 스테이지로 가기 위해 가장 먼저 해야 할 것
   const c = status.conditions;
   let mission: { title: string; desc: string; href: string; reward: string } | null = null;
@@ -386,12 +405,13 @@ function TodayMissionCard({ status }: { status: JourneyStatus }) {
       <p className="text-sm text-white/80 mb-5">{mission.desc}</p>
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full">{mission.reward}</span>
-        <Link
+        <CardLink
           href={mission.href}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-[#E53935] text-sm font-bold rounded-lg hover:bg-neutral-100 transition-colors"
+          goTab={goTab}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-[#E53935] text-sm font-bold rounded-lg hover:bg-neutral-100 transition-colors !w-auto"
         >
           지금 시작 <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        </CardLink>
       </div>
     </div>
   );
@@ -477,7 +497,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
   );
 }
 
-function MatchingSummaryCard({ status }: { status: JourneyStatus }) {
+function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-3">
@@ -488,13 +508,13 @@ function MatchingSummaryCard({ status }: { status: JourneyStatus }) {
         <>
           <p className="text-lg font-bold text-neutral-900 mb-1">확인 안 한 매칭 {status.pendingMatches}건</p>
           <p className="text-sm text-neutral-500 mb-4">큐레이션이 도착했어요</p>
-          <Link
-            href="#matching"
-            onClick={(e) => { e.preventDefault(); document.querySelector('[data-tab="matching"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); }}
+          <button
+            type="button"
+            onClick={() => goTab("matching")}
             className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935] hover:gap-2 transition-all"
           >
             보러 가기 <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </button>
         </>
       ) : (
         <>

@@ -134,6 +134,7 @@ export function JobsTab({ memberId }: { memberId: string }) {
 function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
     const [interested, setInterested] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [expanded, setExpanded] = useState(false); // "자세히" — JD 상세 페이지가 없어 카드 안에서 펼친다 (2026-10-12)
     const pendingRef = useRef(false);
 
     const daysAgo = job.publishedAt
@@ -186,7 +187,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                         {job.title ?? "제목 미기재"}
                     </h4>
                     {job.summary && (
-                        <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{job.summary}</p>
+                        <p className={`text-sm text-neutral-500 mt-1 whitespace-pre-line ${expanded ? "" : "line-clamp-2"}`}>{job.summary}</p>
                     )}
                 </div>
                 {daysAgo !== null && daysAgo < 7 && (
@@ -234,8 +235,13 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                 >
                     {interested ? "관심 등록됨 ✓" : "관심 있어요"}
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50">
-                    자세히
+                <button
+                    type="button"
+                    onClick={() => setExpanded(v => !v)}
+                    aria-expanded={expanded}
+                    className="px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50"
+                >
+                    {expanded ? "접기" : "자세히"}
                 </button>
             </div>
         </div>
