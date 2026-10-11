@@ -314,3 +314,24 @@ magazine.contenta.co, seo.tbwakorea.com/blog
 **Document Version:** 1.0
 **Last Updated:** 2026-04-03
 **Status:** Ready for Mindle Integration
+
+---
+
+## 2026-10-11 재조사 — `web` 소스 정리
+
+`source_type='web'`로 등록된 홈페이지 15곳은 RSS 파서에 HTML을 넣고 있어 수집 0건인데 "성공"으로 집계되어 왔다 (크롤 4,000회 헛돎).
+수집기에 식별 UA를 붙이고(`trend-crawl` v11) 링크 태그·흔한 경로(/feed, /rss, /rss.xml, /?feed=rss2 …)를 다시 조사한 결과:
+
+| 소스 | 결과 | 처리 |
+|------|------|------|
+| TBWA Korea 블로그 | `https://seo.tbwakorea.com/feed/` (3건) | 주소 교체, rss |
+| 매일마케팅 | `https://www.maeilmarketing.com/rss/gns_allArticle.xml` (50건) | 주소 교체, rss |
+| 요즘IT (Wishket) | `https://yozm.wishket.com/magazine/feed/` (16건) | 주소 교체, rss |
+| 헤럴드경제 비즈 | `https://biz.heraldcorp.com/rss/google/newsAll` (235건) | 주소 교체, rss |
+| 모비인사이드 | `/feed/` 정상 14건 — 서버 500 간헐 | 유지 |
+| 디지털인사이트 | `/feed` → 홈으로 리다이렉트 (피드 폐쇄) | 비활성 |
+| innocean_blog | RSS 열리지만 항목 0건 (발행 중단 추정) | 비활성 |
+| Contagious · Wix Korea · 광고정보센터 · 디자인DB · 매거진 B · 썸트렌드 · 애드샐러드 · 오픈애즈 · 오플라 · 캐릿 · 트렌드모니터 | RSS 없음 | 비활성 (피드 생기면 재활성) |
+
+원칙: 봇 검사 우회·HTML 스크래핑으로 본문을 가져오지 않는다 (약관·저작권). RSS가 없는 매체는 뉴스레터(Gmail 수신)로 받거나 포기한다.
+소스별 현재 상태는 인트라 Whole See › 크롤링 "실패 중인 소스" 표 (`mindle_sources.last_error`).
