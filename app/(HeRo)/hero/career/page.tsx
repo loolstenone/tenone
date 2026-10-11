@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+export const metadata = { title: '커리어 로드맵', description: 'HIT 결과 기반 커리어 로드맵' };
+
 // 기존 커리어 랜딩은 Journey 워크스페이스로 통합됨.
 // 이전 링크·외부 유입 보호용 301 redirect.
 export default function CareerPage() {

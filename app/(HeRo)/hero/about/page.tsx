@@ -60,7 +60,7 @@ export default function AboutPage() {
                         </h1>
                         <p className="text-neutral-600 max-w-xl mx-auto">
                             HeRo는 인재 한 사람 한 사람을 체계적으로 성장시키고, 그들의 역량이 가장 빛날 수 있는
-                            기업과 자리에 정교하게 연결합니다. 연예 기획사가 아티스트를 발굴하고 데뷔시키듯.
+                            기업과 자리를 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우듯.
                         </p>
                     </div>
                 </div>

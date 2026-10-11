@@ -42,6 +42,8 @@ const nextConfig: NextConfig = {
       // 프로그램 주소 체계 통일 (2026-10-08) — 히어로 프로그램은 /programs/ 아래로, IM 에센스는 IM 페이지 섹션으로 흡수
       { source: '/madleague/hero', destination: '/madleague/programs/hero', permanent: true },
       { source: '/madleague/programs/im/essence', destination: '/madleague/programs/im#essence', permanent: true },
+      // HeRo 요금 안내 제거 (2026-10-12) — 통신판매업 신고 전 가격표·결제 문구 노출 금지. 사업 시작 시 복원
+      { source: '/hero/pricing', destination: '/hero/hit', permanent: false },
       // 동아리 방(비공개 카페) 폐지 — 2026-10-11. 옛 주소는 동아리 소개 페이지로
       { source: '/madleague/clubs/:slug/room', destination: '/madleague/clubs/:slug', permanent: true },
       { source: '/madleague/clubs/:slug/room/:path*', destination: '/madleague/clubs/:slug', permanent: true },

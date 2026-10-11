@@ -65,7 +65,7 @@ export default function HeroCompanyHubPage() {
                     <h1 className="text-2xl font-extrabold mb-2">찾고 있는 자리를 알려주세요</h1>
                     <p className="text-sm text-neutral-500">
                         TIH에 조직의 상황과 필요한 사람의 결을, JD에 자리의 내용을 적어 주시면<br />
-                        HeRo가 조건에 맞는 인재를 찾아 연결해 드립니다.
+                        HeRo가 조건에 맞는 인재 풀의 현황을 분석해 알려드립니다.
                     </p>
                 </div>
 

@@ -56,9 +56,9 @@ const services = [
     icon: Handshake,
     num: "03",
     title: "써치 라이트",
-    desc: "기업–인재를 연결합니다",
+    desc: "기업의 고민과 인재의 재능이 만납니다",
     detail:
-      "검증된 인재 프로필과 기업의 실제 고민을 Tetrad 매칭으로 연결합니다. 양쪽 모두에게 맞는 무대를 찾아드립니다.",
+      "검증된 인재 프로필과 기업의 실제 고민을 Tetrad 분석으로 맞춰 봅니다. 양쪽 모두에게 맞는 무대를 보여드립니다.",
     href: "/hero/search-light",
   },
 ];

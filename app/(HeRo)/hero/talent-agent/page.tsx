@@ -27,12 +27,12 @@ export default function TalentAgentPage() {
             Talent Agent
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
-            HeRo는 SM · JYP처럼<br />
+            HeRo는 연예 기획사처럼<br />
             잠재된 인재를 발굴하고<br />키워내는 기획사입니다
           </h1>
           <p className="text-base md:text-lg text-neutral-300 max-w-2xl mx-auto mb-10 leading-relaxed">
             혼자 풀기엔 벅찬 커리어의 다음 장을, HeRo가 기획사처럼 함께 설계하고 키웁니다.
-            검사로 본질을 이해하고, AI와 전문가가 경로를 그리고, 기업과 조용히 연결해 드립니다.
+            검사로 본질을 이해하고, AI와 전문가가 경로를 그리고, 기업 앞에 설 무대를 함께 준비합니다.
           </p>
           <Link
             href="/hero/talent-agent/apply"
@@ -116,8 +116,8 @@ export default function TalentAgentPage() {
               },
               {
                 n: "4",
-                title: "기업과 조용한 연결",
-                desc: "맞는 기업이 당신을 찾으면 HeRo가 먼저 의사를 확인한 뒤 비공개로 연결합니다.",
+                title: "기업 앞에 서는 무대",
+                desc: "맞는 기업이 당신에게 관심을 보이면, HeRo가 먼저 의사를 확인한 뒤 본인이 허락한 범위만 보여드립니다.",
               },
             ].map((s) => (
               <li key={s.n} className="flex gap-4 p-5 bg-white border border-neutral-200 rounded-2xl">

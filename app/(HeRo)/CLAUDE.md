@@ -542,6 +542,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ## 현재 상태
 
+- **2026-10-12 (세션 168) 사이트 점검 조치**: ① **요금 안내 제거** — 헤더 메뉴·`/hero/pricing` 페이지 삭제(→ `/hero/hit` 307, next.config)·AI 상담 요금 섹션·HIT MembershipGate 링크 교체. 통신판매업 신고 전 가격표·'1회 결제'·환불 문구 노출 금지 (사업 시작 시 git 이력에서 복원) ② **운영 DB 테스트 데이터 삭제** — 'Ten:One E2E Test Corp'(2026-04-22) + 매칭 1건 (마이페이지·Journey에 가짜 매칭이 보이던 원인) ③ **직업소개 표현 교체** — '인재를 찾아 연결해 드립니다'·'매칭해 드립니다'·'기업과 조용히 연결' → 분석·현황 안내·무대 준비 (직업안정법, 10곳) ④ **타사 상호 제거** — 'SM · JYP처럼' → '연예 기획사처럼' ⑤ **페이지 제목** — 'use client' 페이지는 폴더 `layout.tsx`에 metadata(hit·coaching·coaching/ai·talent-agent·search-light·about·company·journey·my·resume·jh), 서버 페이지는 `export const metadata`. 하위 라우트가 있는 layout은 `title: { default, template: '%s | HeRo' }` (문자열만 쓰면 자식 제목에서 '| HeRo'가 빠짐). ❌ 새 페이지에 metadata 없이 두기 — 전부 'HeRo — Talent Agency'로 보인다
 - **2026-10-10 (세션 167)**: `lib/brand-site-menus.ts` 등록 — 헤더(`siteHeaderNav`)·인트라 메뉴(`brandAdminChildren`, 사이트 메뉴명 그대로: HIT 검사·AI 상담·탤런트 에이전시·써치 라이트·기업 + 운영 화면 extra)·푸터 4열(개인 이메일 제거). About '준비 중' 숫자 섹션 제거(실제 숫자 생기면 DB 집계로) · HIT 버튼 로딩 문구 · 탤런트 에이전시 관리 = `/intra/hero/talent-agent/applications`. ❌ 인트라 HeRo 메뉴를 `lib/intra-nav.ts`에 손으로 추가 — 사이트 메뉴면 레지스트리, 운영 화면이면 extra
 - **2026-10-09 (세션 166)**: 서비스 간 연계 첫 연결 — MADLeague 인증서 → HeRo /my "MADLeague 활동 경력" (`features/hero/LinkedMadleagueCertificates.tsx` · `/api/hero/linked/madleague-certificates`). 동의 전엔 동의 카드, API가 `hasServiceLink()` 재확인 · 생년월일·대학·전공 미노출. ❌ 다른 브랜드 데이터는 연계 동의(`lib/service-links.ts`) 없이 읽지 않는다 (데이터 계약 3·4조). HeRo는 비공개 유지
 - **2026-10-08 (세션 165)**: 로그인 필요 화면 LoginRequired 표준(기업·JD·JH·마이·이력서 워크스페이스) · TIH 신청 Turnstile 필수 + INSERT만(중복 이메일 409, 덮어쓰기 차단) · talent-agent 브랜드 카드 CrossSiteLink · 매칭 inbox/journey API requireMember+assertSelf · HeRo 매칭 RLS(hero_matches·hero_companies·hero_company_members) 적용
@@ -550,7 +551,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 |------|------|
 | **Phase** | P3 완료 · 잔업 정리 진행 중 (2026-04-24 세션 83) |
 | **포지셔닝** | **HeRo = Talent Agency** · Human enhancement & Recruit Optimization · "플랫폼" 아닌 "인재 기획사" |
-| **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · /hero/pricing · /hero/talent-agent · **/hero/journey 워크스페이스 (신규)** |
+| **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · /hero/talent-agent (요금 안내는 2026-10-12 제거) · **/hero/journey 워크스페이스 (신규)** |
 | **세션 81 주요 결정** | ① Journey가 HeRo의 리텐션 엔진 — 설명이 아닌 도구 · ② 탭은 액션 단위(verb) · ③ Vrief × GPR 이중축을 목표 관리 표준 · ④ 스트릭 + 주간 체크인 + 매칭 피드 3중 루프 · ⑤ 브랜드 컨셉 "Talent Agency"로 재정의 · ⑥ 64 영웅 유형 영화 IP 제거·현대 직업 원형으로 전면 리네이밍 |
 | **신규 인프라 (세션 81)** | `hero_daily_checkins` · `hero_goals` · `hero_goal_checkins` 테이블 · `hero_journey_stage()` · `hero_streak()` 함수 · `uc_earn_rules` brand='hero' 8종 시드 · API 8개(status/checkin/goals/goals-checkin/jobs-feed) · `features/hero/JourneyWorkspace.tsx` · `GoalsTab.tsx` · `JobsTab.tsx` |
 | **사용자 측 완성 (세션 81)** | `/hero/journey` auth 분기 (비로그인 마케팅 + 로그인 워크스페이스) · 탭 6개 · Today 위젯 5개 · 스트릭 배지 + UC 토스트 · 목표 CRUD + 주간 체크인 · 채용 피드 |

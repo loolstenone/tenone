@@ -56,10 +56,10 @@ export function MembershipGate({ feature, children, fallback, blurContent = fals
 
           {/* CTA */}
           <Link
-            href="/hero/pricing"
+            href="/hero/coaching/ai"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-700 transition-colors"
           >
-            멤버십 살펴보기 <ArrowRight size={14} />
+            AI 상담 알아보기 <ArrowRight size={14} />
           </Link>
 
           {/* 서브텍스트 */}

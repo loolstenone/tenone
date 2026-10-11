@@ -143,7 +143,7 @@ export default function TIHTestPage() {
                     <CheckCircle className="h-16 w-16 mx-auto mb-6" style={{ color: HERO_RED }} />
                     <h1 className="text-2xl font-bold mb-3">TIH 작성이 완료되었습니다</h1>
                     <p className="text-neutral-500 mb-8">
-                        HeRo 팀이 검토한 뒤 조건에 맞는 인재를 찾아 연결해 드립니다.<br />
+                        HeRo 팀이 검토한 뒤 조건에 맞는 인재 풀 현황을 안내해 드립니다.<br />
                         1~2 영업일 내에 이메일로 연락 드리겠습니다.
                     </p>
                     <a href="/hero/search-light" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-lg" style={{ backgroundColor: HERO_RED }}>
@@ -508,7 +508,7 @@ export default function TIHTestPage() {
                     <div>
                         <h2 className="text-xl font-bold mb-1">찾는 사람을 한 줄로 <span className="text-sm font-normal text-neutral-400">(선택)</span></h2>
                         <p className="text-sm text-neutral-500 mb-8">
-                            찾고 있는 사람을 한 줄로 묘사해 주세요. HeRo가 이 문장까지 함께 읽어 더 정교하게 연결합니다.
+                            찾고 있는 사람을 한 줄로 묘사해 주세요. HeRo가 이 문장까지 함께 읽어 더 정교하게 분석합니다.
                         </p>
                         <textarea
                             rows={4}

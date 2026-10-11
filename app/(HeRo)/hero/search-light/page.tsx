@@ -147,7 +147,7 @@ export default function SearchLightPage() {
                     </h1>
                     <p className="text-sm text-neutral-400 max-w-sm mb-10 leading-relaxed">
                         단순 JD 등록이 아닙니다.<br />
-                        기업의 진짜 고민과 원하는 인재상을 연결합니다.
+                        기업의 진짜 고민과 원하는 인재상을 분석합니다.
                     </p>
                     <div className="flex flex-wrap gap-3">
                         <Link
