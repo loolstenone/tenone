@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-10-10 저녁 ~ 10-12 새벽 (세션 168, 집) — MADLeague 동아리·문의·탭 · 보안 점검 · Whole See · HeRo 점검·QA · UC 재정비
+
+### 장소·운영
+
+- 워크트리 `261010-work-start-fcbcb1` → 사용자 "푸시" 때마다 master push (마지막 `d160768e` 배포 READY 확인 후 `d180eb04` + 기록)
+- 운영 DB (MCP): `mad_club_posts`·`mad_post_likes` · RLS 보안 수리 다수 · `mindle_sources_last_error` 마이그레이션 + 소스 주소 교체·비활성 · `hero_match_candidates_for_jh_size_category` 마이그레이션 · 테스트 기업·매칭·이력서 삭제(승인) · `uc_earn_rules` 8개 삭제 + 49개 금액·활성 재조정(승인)
+- Edge Function `trend-crawl` v11 (식별 헤더·소스별 성공/실패 기록, 점수 분기 제외)
+
+### 결정 (사용자)
+
+- 동아리 방(비공개 카페) 폐지 → 회장단 도구 · 상위 메뉴 = 영역 홈 · MAD = Match, Active, Develop · DAM = DISCOVER·APPROACH·MATCH
+- Scrapling류 우회 크롤링은 쓰지 않음 (식별 헤더 + 실패 기록만 채택)
+- 사이트 가림막 관리자 우회 변경 반영 안 함
+- **UC**: 검사·희망 직무 작성은 보상 대상 아님(삭제) · UC는 시스템 완성 전까지 사용자 비노출, 뒤에서만 적립 · 1 UC = 1원 부담 → 지급액 현실화
+
+### 변경 내역
+
+- 폼: `types/forms.ts`·`lib/forms.ts`·FormRenderer·FormEditor(maxLength) · 인트라 응답 삭제 · `docs/Data_Lifecycle.md`
+- MADLeague: `lib/madleague-club-posts.ts` · `app/api/madleague/clubs/[slug]/posts` · `features/madleague/{ClubList,MadLeagueHeader,MadContactForm,SectionPager,ProgramsSubNav}.tsx` · `app/(MADLeague)/madleague/{about,clubs,programs/dam}` · `lib/brand-site-menus.ts` · `next.config.ts`(방 308) · `lib/contact-attachments.ts`
+- 보안: `app/api/badak/member/verify` · `app/api/jakka/showcase` · HIT 결과·상담 · agent hub/invoke · SmarComm 스캔 · DOMPurify · `.gitignore`(env 내보내기)
+- Whole See: `supabase/functions/trend-crawl/index.ts` · `sql/mindle-sources-last-error.sql` · `lib/intel/ops-health.ts` · `app/intra/intel/wholesee/crawling/page.tsx` · `docs/RSS_FEED_ANALYSIS.md`
+- HeRo: 요금 페이지 삭제(→ /hit 307) · 폴더 `layout.tsx` metadata 11곳 · `app/api/hero/jobs/feed` · `sql/hero-matching-engine-v2/v3.sql` · `features/hero/{JourneyWorkspace,JobsTab,MatchingInbox,GoalsTab}.tsx` · `lib/hero/jh-practical-filters.ts`(신규) · `app/api/hero/jh` · `app/(HeRo)/hero/{hit,hit/a,hit/a/test,my,jh/write,search-light,resume/workspace,talent-agent}` · `app/api/hit/a/session`(GET) · `lib/supabase/hit.ts`
+- UC: `app/api/uc/earn` 삭제 · `lib/uc-visibility.ts`(신규) · `lib/supabase/uc.ts`(is_active·월 총량) · `components/UniverseProfile.tsx` · `app/(TenOne)/profile` · `lib/email/hero-{stage-up,weekly-report}.ts` · MyVerse 요금 FAQ · `sql/hero-uc-earn-rules.sql` · `sql/uc-earn-rules-rebalance-2026-10.sql`(신규) · 루트 `CLAUDE.md` §1.5 · `docs/Universe_Coin_Policy.md`
+
+---
+
 ## 2026-10-10 (세션 167, 집) — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서
 
 ### 장소·운영

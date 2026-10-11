@@ -1,6 +1,38 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-10 (세션 167 — 권한 정리 · 운영 경보 · 통합 관리 · 집중 브랜드 메뉴 레지스트리 · MADLeap 지원서)
+> 마지막 업데이트: 2026-10-12 (세션 168 — MADLeague 동아리·문의·탭 · 보안 점검 · Whole See 수집 상태 · HeRo 점검·QA · UC 비공개·현실화)
+
+---
+
+## 세션 168 (2026-10-10 저녁 ~ 10-12 새벽, 집) — MADLeague 동아리·문의·탭 · 보안 점검 · Whole See · HeRo 점검·QA · UC 재정비
+
+> 워크트리 `261010-work-start-fcbcb1` → 사용자 "푸시" 때마다 master push. 마지막 배포 `d160768e` READY 확인, 이후 `d180eb04`(UC) + 작업 종료 기록 push.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **폼 모듈**: 단답·장문 최대 글자 수(MADLeap 지원 동기 300자) · 인트라 응답 삭제(첨부 포함) · 보관 기간 항목 선택화 · 비회원 응답 = 운영자 수동 정리(사용자 결정)
+- **MADLeague**: 홈 히어로 카피 · 동아리 소개 표준 템플릿·목록(리스트·정렬·랭킹·공동 모집)·관리 탭 · **동아리 방 폐지 → 회장단 도구**(홍보 게시물 `mad_club_posts`·활동 소식·공유·멤버 탭, 옛 방 주소 308) · 헤더 펼침 메뉴 하나만·하위 '홈' 삭제 · 문의하기 고도화(유형별 템플릿·첨부 3개·참고 링크) · SectionPager · DAM = DISCOVER·APPROACH·MATCH · About MAD = Match, Active, Develop · 프로그램 3그룹 · **하위 탭 줄 통일 + 활성 탭 자동 스크롤·페이드·화살표**
+- **보안 점검**(레드팀·블루팀): 추적된 env 내보내기 파일 제거 · Badak 인증 코드·관리자 판정 member_roles · Jakka 쇼케이스 메일 · HIT 결과·상담 본인만 · agent API 세션 검증 · SmarComm 스캔 SSRF · RLS 다수(badak_members·privacy·survey·avatars 등)
+- **Whole See**: 수집기 식별 헤더 + 소스별 마지막 성공·실패(`mindle_sources.last_*`, trend-crawl v11 — 점수 분기는 배포 제외 유지) · 죽은 web 소스 15곳 조사(교체 4·유지 1·비활성 13) → 실패 소스 0 · 운영 상태·크롤링 화면에 "지금 실패 중인 소스"
+- **HeRo 사이트 점검 → 저니 점검 → 사용자 관점 QA** (실서버 확인 완료): 요금 안내 제거 · 직업소개·결제 문구 정리 · 페이지별 제목 · 테스트 기업·매칭·이력서 삭제 · 채용 피드 오류(`size_category`) + 매칭 DB 함수 수정 · 저니 카드→탭 이동 · **희망 직무 작성 크래시**(practical_filters 정규화 SSOT) · HIT A 172문항 통일 · 검사 이어서 하기 · 마이페이지 과장 문구
+- **UC 재정비** (사용자 결정): 검사·희망 직무 보상 규칙 삭제(8개) · **회원 자가 적립 API(`/api/uc/earn`) 삭제** · **UC 비공개 운영**(`lib/uc-visibility.ts` `UC_PUBLIC`, 적립은 계속) · 규칙 49개 금액 1/5~1/10 + 매칭·채용 성사·SNS 공유 비활성 · `earnUC`가 `is_active` 확인 + 회원 월 3,000 UC 상한
+
+### 다음 첫 액션
+
+1. **배포 확인**: `d180eb04` 이후 Vercel READY → 크롬(로그인됨)으로 `www.hero.ne.kr/hero/journey` 체크인 버튼이 "저장"(UC 문구 없음)·목표 체크인 "체크인", `tenone.biz/profile`에 UC 카드 없음 확인. 탭 닫기
+2. **결정 대기 (사용자)**:
+   - **HIT A 기저요인(UF)**: 설계대로 복원할지 (분석 완료 — 출제 누락 + 채점표 DB 불일치 + 공개 결과 페이지 노출 + 종교 문항 민감정보 + 처리방침 AI 위탁). 복원 시 순서: 출제(첫 파트, 총 222문항) → 채점을 DB 메타로 → 종교 문항 제외 → UF는 회원 리포트에만·매칭 제외 → 처리방침·문항 수
+   - **GTM 중복 page_view**: Google 태그 `send_page_view=false` + GA4 향상된 측정 '브라우저 기록 기반 페이지 변경' 끄기 → 게시 (사용자 허락 후 크롬에서)
+3. **이월**: 처리방침 수집 항목(MADLeap 지원서 포함) · MADLeap 지원서 공개 준비(기수·모집 기간) · UC 결제 시작 전 정리(ROADMAP) · 세션 167 이월(실사용 검증·사이트 검색·Standard 쓰기 화면·서비스 연계 범위)
+
+### 주의
+
+- **UC는 사용자에게 보이지 않는다** — 화면·메일에 UC를 넣을 땐 반드시 `UC_PUBLIC`. 지급액을 화면에 하드코딩 금지 (금액 SSOT = DB `uc_earn_rules`)
+- 회원이 action_key를 골라 적립하는 API 금지 — 적립은 기능 서버 코드의 `earnUC()`만
+- HeRo practical_filters는 snake_case(`lib/hero/jh-practical-filters.ts`) · 기업 규모 컬럼은 `size_category`
+- `trend-crawl` 리포 코드 ≠ 배포 v11 (점수 분기 미배포) — Mindle 결정 전 재배포 시 분기 제외
+- 기존 UC 잔액 1명 3,000(옛 가입 보상)은 그대로 둠 (비노출)
 
 ---
 

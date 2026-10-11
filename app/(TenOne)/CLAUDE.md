@@ -164,6 +164,7 @@
 
 ## 현재 상태
 
+- **2026-10-12 (세션 168)**: `/profile`의 `UCBalanceCard`·UniverseProfile UC 잔액은 `UC_PUBLIC`일 때만 표시·조회 (UC 비공개 운영 — 적립은 계속, 인트라는 그대로, 루트 §1.5 · `lib/uc-visibility.ts`)
 - **2026-10-08 (세션 165)**: `/profile/[handle]` 본인 판정을 email → `members.auth_id`로 · 공개 프로필 RPC `get_public_profile` 공개 필드만(이메일은 privacy_settings.email 동의 시) · 서비스 프로필은 본인만 · `/my` LoginRequired
 
 | 항목 | 내용 |
