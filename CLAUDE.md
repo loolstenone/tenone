@@ -633,7 +633,7 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 |--------|------|
 | 테이블 | `uc_balances`, `uc_transactions`, `uc_rules` (`sql/universe-coin-tables.sql`) |
 | 클라이언트 | `lib/supabase/uc.ts` |
-| API | `app/api/uc/{balance,earn,redeem,restore,transactions}/route.ts` |
+| API | `app/api/uc/{balance,redeem,restore,transactions}/route.ts` — ❌ 회원이 action_key를 골라 스스로 적립하는 API 금지 (`/api/uc/earn` 2026-10-12 삭제: 로그인 회원 누구나 '매칭 추천 성사 10,000' 같은 규칙을 직접 청구할 수 있었음). 적립은 각 기능의 서버 코드가 `earnUC()` 호출, 수동 지급은 `/api/uc/admin/*` |
 | 관리 API | `app/api/uc/admin/{grant,transaction,backfill}/route.ts` |
 | UI | `components/UCBalanceCard.tsx` |
 | 인트라 관리 | `app/intra/ums/uc/`, `app/intra/ums/uc/transactions/` |
