@@ -83,8 +83,41 @@ export function CafeShell({ ctx, memberCount, active, children }: {
                 </div>
             </div>
 
-            <div className="mx-auto max-w-6xl px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <aside className="space-y-4">
+            {/* 모바일 — 사이드바 대신 한 줄 카드 + 가로 스크롤 탭 (사이드바가 화면 전체를 덮던 문제, 2026-10-11) */}
+            <div className="lg:hidden border-b border-neutral-900">
+                <div className="px-4 py-3 flex items-center gap-3">
+                    {club.logo_url
+                        ? <Image src={club.logo_url} alt={club.name} width={32} height={32} className="h-8 w-8 object-contain bg-white shrink-0" />
+                        : <div className="h-8 w-8 shrink-0" style={{ backgroundColor: accent }} />}
+                    <div className="min-w-0 flex-1 text-xs text-neutral-400 truncate">
+                        멤버 {memberCount}명 · 내 역할 <span className="text-white font-bold">{access.myRole ?? '—'}</span>
+                    </div>
+                    {ctx.madMemberId && (
+                        <Link href={`${base}/write${active !== 'home' && active !== 'members' ? `?board=${active}` : ''}`}
+                            className="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 text-xs font-bold text-white"
+                            style={{ backgroundColor: accent }}>
+                            <PenSquare className="h-3.5 w-3.5" /> 글쓰기
+                        </Link>
+                    )}
+                </div>
+                <nav className="flex gap-1 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {[
+                        { key: 'home', href: base, label: '대문' },
+                        { key: 'all', href: `${base}?board=all`, label: '전체글' },
+                        ...CAFE_BOARDS.map(b => ({ key: b.key, href: `${base}?board=${b.key}`, label: b.label })),
+                        { key: 'members', href: `${base}?tab=members`, label: '멤버' },
+                        ...(access.isOfficer ? [{ key: 'manage', href: `/madleague/clubs/${club.slug}/manage`, label: '관리' }] : []),
+                    ].map(t => (
+                        <Link key={t.key} href={t.href}
+                            className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-bold transition ${active === t.key ? 'border-white bg-white text-black' : 'border-neutral-800 text-neutral-400 hover:border-neutral-500 hover:text-white'}`}>
+                            {t.label}
+                        </Link>
+                    ))}
+                </nav>
+            </div>
+
+            <div className="mx-auto max-w-6xl px-4 lg:px-6 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <aside className="hidden lg:block space-y-4">
                     <div className="border border-neutral-800 bg-neutral-950 p-5">
                         <div className="flex items-center gap-3">
                             {club.logo_url
