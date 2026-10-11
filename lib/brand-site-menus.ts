@@ -126,6 +126,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         menus: [
             { placement: "header", label: "경쟁 PT", path: "/madleague/programs/competition", source: { kind: "table", table: "program_rounds", eq: { brand_id: "madleague" } }, adminHref: "/intra/ums/madleague/competitions", unit: "개" },
             {
+                // 상위 메뉴 이름 = 그 영역의 홈 (프로그램 → 전체 프로그램, 매드리거 → 매드리거 홈). 하위에 홈·전체 항목을 두지 않는다 (2026-10-11)
                 placement: "header", label: "프로그램", path: "/madleague/programs", source: { kind: "static" },
                 dropdown: [
                     // 이름·순서 = features/madleague/programs-list.ts (SSOT, 2026-10-08) — 경쟁 PT는 헤더 단독 메뉴로 (사용자 결정 2026-10-07)
@@ -138,13 +139,11 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                     { label: "히어로 프로그램", path: "/madleague/programs/hero" },
                     { label: "RooKie", path: "/madleague/programs/rookie" },
                     { label: "Planner's", path: "/madleague/programs/planners" },
-                    { label: "전체 프로그램", path: "/madleague/programs" },
                 ],
             },
             {
                 placement: "header", label: "매드리거", path: "/madleague/madleaguer", source: { kind: "table", table: "mad_posts" }, unit: "글",
                 dropdown: [
-                    { label: "매드리거 홈", path: "/madleague/madleaguer" },
                     { label: "동아리", path: "/madleague/clubs" },
                     { label: "공동 모집", path: "/madleague/clubs/recruit" },
                     { label: "매드리거 등록", path: "/madleague/apply" },
