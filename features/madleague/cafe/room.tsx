@@ -78,7 +78,7 @@ export function CafeShell({ ctx, memberCount, active, children }: {
             <div className="border-b border-neutral-900" style={{ background: `linear-gradient(90deg, ${accent}33, transparent 60%)` }}>
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     <Link href={base} className="text-xs font-bold tracking-widest" style={{ color: accent }}>CLUB ROOM</Link>
-                    <h1 className="mt-1 text-3xl font-black">{club.name}</h1>
+                    <h1 className="mt-1 text-3xl font-black"><Link href={base} className="hover:opacity-80 transition">{club.name}</Link></h1>
                     <p className="mt-1 text-sm text-neutral-400">{club.region ?? ''} · MADLeague 공식 동아리</p>
                 </div>
             </div>
@@ -86,9 +86,11 @@ export function CafeShell({ ctx, memberCount, active, children }: {
             {/* 모바일 — 사이드바 대신 한 줄 카드 + 가로 스크롤 탭 (사이드바가 화면 전체를 덮던 문제, 2026-10-11) */}
             <div className="lg:hidden border-b border-neutral-900">
                 <div className="px-4 py-3 flex items-center gap-3">
-                    {club.logo_url
-                        ? <Image src={club.logo_url} alt={club.name} width={32} height={32} className="h-8 w-8 object-contain bg-white shrink-0" />
-                        : <div className="h-8 w-8 shrink-0" style={{ backgroundColor: accent }} />}
+                    <Link href={base} className="shrink-0">
+                        {club.logo_url
+                            ? <Image src={club.logo_url} alt={club.name} width={32} height={32} className="h-8 w-8 object-contain bg-white" />
+                            : <div className="h-8 w-8" style={{ backgroundColor: accent }} />}
+                    </Link>
                     <div className="min-w-0 flex-1 text-xs text-neutral-400 truncate">
                         멤버 {memberCount}명 · 내 역할 <span className="text-white font-bold">{access.myRole ?? '—'}</span>
                     </div>
@@ -124,7 +126,7 @@ export function CafeShell({ ctx, memberCount, active, children }: {
                                 ? <Image src={club.logo_url} alt={club.name} width={40} height={40} className="h-10 w-10 object-contain bg-white" />
                                 : <div className="h-10 w-10" style={{ backgroundColor: accent }} />}
                             <div>
-                                <div className="font-black">{club.name}</div>
+                                <Link href={base} className="font-black hover:opacity-80 transition">{club.name}</Link>
                                 <div className="text-xs text-neutral-500">멤버 {memberCount}명</div>
                             </div>
                         </div>
