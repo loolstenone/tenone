@@ -4,17 +4,17 @@
  * 순서 = 헤더 '프로그램' 하위 메뉴 순서 — MADLeague 직접 운영 먼저, 연계(다른 브랜드 운영) 뒤 (경쟁 PT는 헤더 단독 메뉴라 맨 앞·featured).
  */
 
-export type MadProgramGroup = 'challenge' | 'practice' | 'connect' | 'partner';
+export type MadProgramGroup = 'challenge' | 'connect' | 'partner';
 
 /** 전체 프로그램 페이지의 4그룹 — 사람들이 10개를 한 번에 이해하게 묶는다.
  *  partner(연계) = 유니버스 다른 브랜드가 운영하는 프로그램 (2026-10-09 사용자 결정):
  *    MADLeague에서는 맛보기 → 정식은 그 서비스에 신청해 사용 → 경험·데이터는 본인 동의로 연계돼 풀 서비스·풀 데이터.
  *    텐원은 하나의 회사, 서비스만 다르다 — 계정(Ten:One ID)은 하나, 서비스 첫 이용 동의 + 서비스 간 연계 동의 */
 export const MAD_PROGRAM_GROUPS: { key: MadProgramGroup; label: string; eyebrow: string; desc: string }[] = [
-  { key: 'challenge', label: '도전', eyebrow: 'CHALLENGE', desc: '과제를 받고, 경쟁하고, 결과로 증명한다.' },
-  { key: 'practice', label: '실전', eyebrow: 'PRACTICE', desc: '기업·지역의 진짜 현장에서 일한다.' },
-  { key: 'connect', label: '연결', eyebrow: 'CONNECT', desc: '학생·현업·기업이 직접 만난다.' },
+  // 2026-10-11 사용자 결정: 실전 → 실전 경쟁에 합침 · 순서 실전 경쟁 → 연계 → 연결
+  { key: 'challenge', label: '실전 경쟁', eyebrow: 'CHALLENGE', desc: '기업·지역의 진짜 과제를 받고, 경쟁하고, 현장에서 결과로 증명한다.' },
   { key: 'partner', label: '연계', eyebrow: 'WITH UNIVERSE', desc: 'MADLeague에서 맛보고, 그 브랜드에서 제대로 쓴다. 경험은 이어진다.' },
+  { key: 'connect', label: '연결', eyebrow: 'CONNECT', desc: '학생·현업·기업이 직접 만난다.' },
 ];
 
 /** 한눈에 보기 — 5개 키는 모든 프로그램이 똑같이 채운다 (비어 있으면 안 됨) */
@@ -151,7 +151,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     eyebrow: 'PROJECT JOB TRAINING',
     desc: '기업의 실전 프로젝트를 현장에서 수행하는 OJT.',
     tagline: '현장에서 배우고, 현장에서 성장한다.',
-    group: 'practice',
+    group: 'challenge',
     corporate: true,
     madleaguerOnly: true,
     glance: {
@@ -186,7 +186,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
     eyebrow: 'INSIGHT TOURING',
     desc: '지역·기업을 돌며 혁신 제안. 당신의 통찰이 지역을 바꾼다.',
     tagline: '현장의 목소리를 듣고, 매드리거의 시선으로 제안한다.',
-    group: 'practice',
+    group: 'challenge',
     corporate: true,
     madleaguerOnly: true,
     glance: {

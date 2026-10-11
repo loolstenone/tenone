@@ -6,7 +6,7 @@ import { MAD_ACCENT, MAD_PROGRAM_GROUPS, MAD_PROGRAMS } from '@/features/madleag
 
 export const metadata = {
   title: '프로그램',
-  description: `MADLeague ${MAD_PROGRAMS.length}가지 실전 무대 — 도전 · 실전 · 연결 · 연계`,
+  description: `MADLeague ${MAD_PROGRAMS.length}가지 실전 무대 — 실전 경쟁 · 연계 · 연결`,
 };
 
 export default function ProgramsPage() {
@@ -20,7 +20,7 @@ export default function ProgramsPage() {
           </h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
             MADLeague는 학생이 실전을 경험할 수 있는 {MAD_PROGRAMS.length}가지 프로그램을 운영한다.
-            방식은 넷으로 나뉜다 — <span className="text-white">도전·실전·연결·연계</span>. 연계 프로그램은 MADLeague에서 맛보고, 그 브랜드에서 제대로 쓴다.
+            방식은 셋으로 나뉜다 — <span className="text-white">실전 경쟁·연계·연결</span>. 연계 프로그램은 MADLeague에서 맛보고, 그 브랜드에서 제대로 쓴다.
           </p>
           {/* 그룹 바로가기 */}
           <div className="mt-10 flex flex-wrap gap-2">
@@ -34,20 +34,21 @@ export default function ProgramsPage() {
         </div>
       </section>
 
-      {/* 4그룹 — 사람들이 10개를 한 번에 이해하게 */}
+      {/* 3그룹 — 카테고리(번호·제목·설명 한 덩어리) 아래 프로그램 카드가 들여쓰기로 소속을 드러낸다 (2026-10-11) */}
       {MAD_PROGRAM_GROUPS.map((g, gi) => {
         const items = MAD_PROGRAMS.filter((p) => p.group === g.key);
         return (
           <section key={g.key} id={g.key} className={`scroll-mt-32 ${gi > 0 ? 'border-t border-neutral-900' : ''}`}>
             <div className="mx-auto max-w-7xl px-6 py-16">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+              <div className="mb-8 flex gap-5 border-l-4 border-[#EC1D25] pl-5">
+                <div className="text-4xl sm:text-5xl font-black tabular-nums text-neutral-700 leading-none">{String(gi + 1).padStart(2, '0')}</div>
                 <div>
                   <div className="text-xs font-bold tracking-widest text-[#EC1D25]">{g.eyebrow}</div>
-                  <h2 className="mt-2 text-3xl sm:text-4xl font-black">{g.label}</h2>
+                  <h2 className="mt-1 text-3xl sm:text-4xl font-black leading-tight">{g.label}</h2>
+                  <p className="mt-2 text-neutral-400 break-keep">{g.desc} <span className="text-neutral-600">· {items.length}개 프로그램</span></p>
                 </div>
-                <p className="text-neutral-400 md:text-right">{g.desc}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:ml-10">
                 {items.map((p) => {
                   const accent = p.accent ?? MAD_ACCENT;
                   return (
