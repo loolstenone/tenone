@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Pin, Heart, ImageIcon, Paperclip } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { withMadAuthors } from '@/lib/madleague-people';
-import { getCafeMembers, cafeBoardLabel, isCafeBoard, CAFE_BOARDS } from '@/lib/madleague-club-cafe';
+import { getCafeMembers, cafeBoardLabel, isCafeBoard } from '@/lib/madleague-club-cafe';
 import { loadRoom, CafeShell } from '@/features/madleague/cafe/room';
 
 export const dynamic = 'force-dynamic';
@@ -125,15 +125,6 @@ export default async function ClubRoomPage({ params, searchParams }: PageProps) 
         </div>
         <PostTable items={listed} />
       </section>
-      {isHome && (
-        <section className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {CAFE_BOARDS.map(b => (
-            <Link key={b.key} href={`${base}?board=${b.key}`} className="border border-neutral-800 px-3 py-3 text-center text-xs font-bold text-neutral-300 hover:border-white transition">
-              {b.label}
-            </Link>
-          ))}
-        </section>
-      )}
     </CafeShell>
   );
 }
