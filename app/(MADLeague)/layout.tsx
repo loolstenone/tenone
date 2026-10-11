@@ -1,4 +1,5 @@
 import { MadLeagueHeader } from "@/features/madleague/MadLeagueHeader";
+import { ProgramsSubNav } from "@/features/madleague/ProgramsSubNav";
 import { MadLeagueFooter } from "@/features/madleague/MadLeagueFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
@@ -39,6 +40,8 @@ export default function MadLeagueLayout({
         >
             <MadLeagueHeader />
             <main className="flex-1 pt-16">
+                {/* 섹션 하위 탭 줄 (프로그램·매드리거) — 경로로 판단, 해당 없는 페이지는 안 그림 */}
+                <ProgramsSubNav />
                 {children}
             </main>
             <MadLeagueFooter />
