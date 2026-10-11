@@ -57,7 +57,7 @@ const STEPS = [
   { icon: Search,       title: '클라이언트 RFP',       desc: '실제 기업이 마케팅 과제를 RFP 형식으로 제시한다.' },
   { icon: Users,        title: '동아리별 팀 구성',       desc: '동아리 내 4~6인으로 팀을 꾸린다.' },
   { icon: Lightbulb,    title: '클라이언트 OT',         desc: '기업 담당자가 직접 과제 배경과 목표를 설명한다.' },
-  { icon: Trophy,       title: '지역 예선 → 본선 진출',  desc: '지역 예선을 통과한 팀만 본선 무대에 오른다.' },
+  { icon: Trophy,       title: '지역/사전 예선 → 본선 진출',  desc: '지역/사전 예선을 통과한 팀만 본선 무대에 오른다.' },
   { icon: Presentation, title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표하고 순위를 가린다.' },
 ];
 
