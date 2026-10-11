@@ -49,7 +49,7 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
     const admin = createAdminClient();
     const since7d = new Date(Date.now() - 7 * 86400000).toISOString();
 
-    const [ga4Sync, ga4Latest, collected, lastCard, lastRuns, lastBrief, gmailCrawl, issues, signups7d, joins7d, lastJoin, gmailAccounts] = await Promise.all([
+    const [ga4Sync, ga4Latest, collected, lastCard, lastRuns, lastBrief, gmailCrawl, issues, signups7d, joins7d, lastJoin, gmailAccounts, failingSources] = await Promise.all([
         latest("analytics_snapshots", "synced_at"),
         latest("analytics_snapshots", "date"),
         latest("collected_data", "collected_at"),
@@ -62,7 +62,11 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
         count("member_brand_joins", q => q.gte("joined_at", since7d)),
         latest("member_brand_joins", "joined_at"),
         admin.from("gmail_oauth_tokens").select("email, last_success_at, last_error, needs_reconnect").eq("is_active", true),
+        admin.from("mindle_sources").select("name, last_success_at, last_error, last_error_at").eq("is_active", true).in("source_type", ["rss", "web"]).not("last_error", "is", null),
     ]);
+    // RSS: 소스별 마지막 성공·실패 (sql/mindle-sources-last-error.sql) — 지금 실패 중 = 마지막 실패가 마지막 성공보다 뒤
+    const brokenSources = ((failingSources.data ?? []) as { name: string; last_success_at: string | null; last_error: string | null; last_error_at: string | null }[])
+        .filter(s => s.last_error_at && (!s.last_success_at || s.last_error_at > s.last_success_at));
     // Gmail: 수신 크론이 계정별 성공·실패를 남긴다 (app/api/cron/newsletter-crawl) — 끊김은 원인까지 표시
     const gmails = (gmailAccounts.data ?? []) as { email: string; last_success_at: string | null; last_error: string | null; needs_reconnect: boolean }[];
     const gmailLast = [gmailCrawl, ...gmails.map(g => g.last_success_at)].filter(Boolean).sort().pop() ?? null;
@@ -81,8 +85,10 @@ export async function computeOpsHealth(): Promise<{ items: OpsItem[]; summary: R
         },
         {
             key: "rss_collect", label: "기사 수집 (RSS)", group: "Whole See (Mindle)", schedule: "매시간", last_success: collected, href: "/intra/intel/wholesee/crawling",
-            status: hoursSince(collected) > 3 ? "fail" : crawlErrors.length ? "warn" : "ok",
-            detail: crawlErrors.length ? `수집 실패 소스 ${crawlErrors.length}개 — ${crawlErrors.map(e => e.split(":")[0]).slice(0, 4).join(" · ")}` : "정상",
+            status: hoursSince(collected) > 3 ? "fail" : brokenSources.length ? "warn" : "ok",
+            detail: brokenSources.length
+                ? `실패 중인 소스 ${brokenSources.length}개 — ${brokenSources.slice(0, 4).map(s => `${s.name}(${s.last_error})`).join(" · ")}`
+                : crawlErrors.length ? `마지막 실행에서 ${crawlErrors.length}개 실패 (지금은 복구)` : "정상",
         },
         {
             key: "ai_classify", label: "AI 분류 · 트렌드 카드", group: "Whole See (Mindle)", schedule: "매시간", last_success: lastCard, href: "/intra/intel/wholesee/crawling",

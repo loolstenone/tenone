@@ -17,7 +17,9 @@ interface RunPayload {
     elapsedMs?: number;
 }
 interface Run { created_at: string; payload: RunPayload }
+interface SourceRow { id: string; name: string; url: string; source_type: string; last_success_at: string | null; last_error: string | null; last_error_at: string | null }
 
+// (groupErrors는 분류 오류 묶음에만 쓴다 — 소스 실패는 mindle_sources.last_error 기준, 2026-10-11)
 const STATUSES = [
     { key: "raw", label: "처리 대기", tone: "text-neutral-700" },
     { key: "processed", label: "트렌드 카드 생성", tone: "text-emerald-700" },
@@ -50,19 +52,22 @@ export default function CrawlingPage() {
     const [runs, setRuns] = useState<Run[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
     const [lastCard, setLastCard] = useState<string | null>(null);
+    const [sources, setSources] = useState<SourceRow[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function load() {
             const sb = createClient();
             const since = new Date(Date.now() - 7 * 86400000).toISOString();
-            const [{ data: runRows }, last, ...statusCounts] = await Promise.all([
+            const [{ data: runRows }, last, srcRows, ...statusCounts] = await Promise.all([
                 sb.from("agent_messages").select("created_at, payload").eq("payload->>type", "trend_crawl").order("created_at", { ascending: false }).limit(24),
                 sb.from("mindle_trends").select("created_at").order("created_at", { ascending: false }).limit(1),
+                sb.from("mindle_sources").select("id, name, url, source_type, last_success_at, last_error, last_error_at").eq("is_active", true).in("source_type", ["rss", "web"]).order("name"),
                 ...STATUSES.map(s => sb.from("collected_data").select("id", { count: "exact", head: true }).eq("status", s.key).gte("collected_at", since)),
             ]);
             setRuns((runRows ?? []) as Run[]);
             setLastCard(last.data?.[0]?.created_at ?? null);
+            setSources((srcRows.data ?? []) as SourceRow[]);
             setCounts(Object.fromEntries(STATUSES.map((s, i) => [s.key, statusCounts[i].count ?? 0])));
             setLoading(false);
         }
@@ -75,7 +80,10 @@ export default function CrawlingPage() {
     const collected24 = runs.reduce((n, r) => n + (r.payload.crawl?.collected ?? 0), 0);
     const processed24 = runs.reduce((n, r) => n + (r.payload.process?.processed ?? 0), 0);
     const processErrors = groupErrors(runs.flatMap(r => r.payload.process?.errors ?? []));
-    const sourceErrors = groupErrors(latest?.payload.crawl?.errors ?? []);
+    // 소스별 상태 (sql/mindle-sources-last-error.sql): 실패 중 = 마지막 실패가 마지막 성공보다 뒤
+    const failing = sources.filter(s => s.last_error_at && (!s.last_success_at || s.last_error_at > s.last_success_at))
+        .sort((a, b) => (a.last_success_at ?? "") < (b.last_success_at ?? "") ? -1 : 1);
+    const recovered = sources.filter(s => s.last_error && !failing.includes(s));
     const stale = !latest || Date.now() - new Date(latest.created_at).getTime() > 2 * 3600000;
 
     return (
@@ -112,16 +120,33 @@ export default function CrawlingPage() {
 
             <section>
                 <h2 className="mb-3 text-sm font-semibold text-neutral-900">
-                    수집 실패 소스 (마지막 실행 · 소스 {latest?.payload.crawl?.sources ?? 0}개 중 {sourceErrors.length}개)
+                    실패 중인 소스 (활성 {sources.length}개 중 {failing.length}개)
                 </h2>
-                {sourceErrors.length === 0 ? (
-                    <p className="text-xs text-neutral-400">실패한 소스 없음</p>
+                {failing.length === 0 ? (
+                    <p className="text-xs text-neutral-400">모든 소스가 마지막 실행에서 수집됐습니다</p>
                 ) : (
-                    <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white text-xs">
-                        {sourceErrors.map(e => <li key={e.reason} className="px-3 py-2 text-neutral-700">{e.reason}</li>)}
-                    </ul>
+                    <div className="overflow-hidden rounded-lg border border-rose-200 bg-white">
+                        <table className="w-full text-xs">
+                            <thead className="border-b border-rose-100 bg-rose-50 text-left text-rose-700">
+                                <tr><th className="px-3 py-2">소스</th><th className="px-3 py-2">원인</th><th className="px-3 py-2 text-right">마지막 성공</th><th className="px-3 py-2 text-right">마지막 실패</th></tr>
+                            </thead>
+                            <tbody>
+                                {failing.map(s => (
+                                    <tr key={s.id} className="border-b border-neutral-100 last:border-0">
+                                        <td className="px-3 py-2 text-neutral-900"><a href={s.url} target="_blank" rel="noreferrer" className="hover:underline">{s.name}</a> <span className="text-neutral-400">{s.source_type}</span></td>
+                                        <td className="px-3 py-2 text-rose-700">{s.last_error}</td>
+                                        <td className={`px-3 py-2 text-right ${!s.last_success_at || Date.now() - new Date(s.last_success_at).getTime() > 3 * 86400000 ? "font-semibold text-rose-700" : "text-neutral-600"}`}>{rel(s.last_success_at)}</td>
+                                        <td className="px-3 py-2 text-right text-neutral-500">{rel(s.last_error_at)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
-                <p className="mt-2 text-[11px] text-neutral-400">소스 주소 수정은 Whole See › 소스 관리</p>
+                <p className="mt-2 text-[11px] text-neutral-400">
+                    3일 넘게 성공이 없으면 RSS 주소가 바뀌었거나 사이트가 수집기를 막은 것 — Whole See › 소스 관리에서 주소 교체 또는 비활성.
+                    {recovered.length > 0 && ` 최근 실패했다가 복구된 소스 ${recovered.length}개.`}
+                </p>
             </section>
 
             <section>

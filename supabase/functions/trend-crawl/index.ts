@@ -77,6 +77,13 @@ function parseRssItems(xml: string): RssItem[] {
 }
 
 // ── Step 1: RSS 수집 ──────────────────────────────────────────
+// 수집기 식별 — UA 없는 요청을 403으로 막는 사이트가 있다. 정직하게 누구인지 밝힌다 (2026-10-11)
+// ※ 봇 검사(Cloudflare 등) 우회는 하지 않는다 — 막힌 소스는 RSS 주소를 바꾸거나 끈다 (약관·저작권)
+const FETCH_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (compatible; TenOne-WholeSee/1.0; +https://www.tenone.biz)',
+  'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5',
+};
+
 async function crawl(): Promise<{ sources: number; collected: number; errors: string[] }> {
   const { data: sources, error: srcErr } = await supabase
     .from('mindle_sources')
@@ -93,10 +100,11 @@ async function crawl(): Promise<{ sources: number; collected: number; errors: st
 
   for (const src of sources) {
     try {
-      const res = await fetch(src.url, { signal: AbortSignal.timeout(10_000) });
+      const res = await fetch(src.url, { headers: FETCH_HEADERS, signal: AbortSignal.timeout(10_000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const xml = await res.text();
       const items = parseRssItems(xml);
+      if (items.length === 0) throw new Error('RSS 항목 0건 — 피드 형식이 바뀌었거나 RSS가 아님');
 
       for (const item of items.slice(0, 10)) {
         // pubDate 파싱 — 빈 값/잘못된 형식이면 null (RSS feed들 형식 제각각)
@@ -127,15 +135,23 @@ async function crawl(): Promise<{ sources: number; collected: number; errors: st
         }
       }
 
+      const now = new Date().toISOString();
       await supabase.from('mindle_sources').update({
-        last_crawled_at: new Date().toISOString(),
+        last_crawled_at: now,
+        last_success_at: now,
+        last_error: null,
         crawl_count: (src.crawl_count || 0) + 1,
       }).eq('id', src.id);
     } catch (err) {
-      const msg = `${src.name}: ${err instanceof Error ? err.message : String(err)}`;
+      // 타임아웃은 AbortSignal이 TimeoutError로 던진다 — 사람이 읽을 원인으로
+      const raw = err instanceof Error ? (err.name === 'TimeoutError' ? '10초 타임아웃' : err.message) : String(err);
+      const msg = `${src.name}: ${raw}`;
       errors.push(msg);
+      // 소스별 마지막 실패를 남긴다 — 인트라 크롤링 화면이 "언제부터 죽었나"를 보여준다 (sql/mindle-sources-last-error.sql)
       await supabase.from('mindle_sources').update({
         error_count: (src.error_count || 0) + 1,
+        last_error: raw.slice(0, 200),
+        last_error_at: new Date().toISOString(),
       }).eq('id', src.id);
     }
   }
