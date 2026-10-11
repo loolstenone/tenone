@@ -2,13 +2,13 @@
 
 /**
  * 동아리 목록 — 리스트형 (2026-10-10 사용자 결정)
- * 로고 · 동아리명 · 활동 지역 · 랭킹 · 동아리 소개 · 동아리 방 입장 — 정렬은 우측 상단 펼침 메뉴 하나 (기본 = 이름 알파벳순)
+ * 로고 · 동아리명 · 활동 지역 · 랭킹 · 동아리 소개 (동아리 방은 2026-10-11 폐지) — 정렬은 우측 상단 펼침 메뉴 하나 (기본 = 이름 알파벳순)
  * (2026-10-11 머리글 클릭 정렬 → 펼침 메뉴: 모바일·PC에서 정렬 버튼 줄이 어긋나던 문제)
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronDown, Check, DoorOpen } from 'lucide-react';
+import { ArrowRight, ChevronDown, Check } from 'lucide-react';
 
 export interface ClubListRow {
   slug: string;
@@ -114,12 +114,8 @@ export function ClubList({ rows }: { rows: ClubListRow[] }) {
             </div>
             <div className="col-span-2 md:col-span-1 flex flex-wrap gap-2 md:justify-end">
               <Link href={`/madleague/clubs/${club.slug}`}
-                className="inline-flex items-center gap-1.5 border border-neutral-700 hover:border-white px-3.5 py-2 text-sm font-bold text-neutral-300 hover:text-white transition whitespace-nowrap">
-                동아리 소개 <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href={`/madleague/clubs/${club.slug}/room`}
                 className="inline-flex items-center gap-1.5 bg-[#EC1D25] hover:bg-[#d01820] px-3.5 py-2 text-sm font-bold text-white transition whitespace-nowrap">
-                <DoorOpen className="h-4 w-4" /> 동아리 방 입장
+                동아리 소개 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </li>

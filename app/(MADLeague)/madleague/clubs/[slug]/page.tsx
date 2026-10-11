@@ -12,6 +12,8 @@ import { archiveBadgesForClub, ledgerGroupToClubSlug, type ClubBadge } from '@/f
 import { CompetitionBadge } from '@/features/madleague/CompetitionBadge';
 import { fetchClubRecruitForms, recruitPeriodLabel } from '@/lib/madleague-recruit';
 import type { ClubProfile } from '@/types/madleague-club-profile';
+import { ClubShareButton } from '@/components/madleague/ClubShareButton';
+import { brandSiteUrl } from '@/lib/domain-registry';
 
 /*
  * 동아리 소개 페이지 — 표준 템플릿 (2026-10-10)
@@ -119,6 +121,14 @@ export default async function ClubDetailPage({ params }: PageProps) {
   const recruitHref = formOpen && recruitForm ? `/madleague/forms/${recruitForm.slug}` : profile.recruit?.link;
   const showRecruit = recruitOpen || !!profile.recruit;
 
+  // 활동 소식 — 운영진이 올린 공개 게시물 (대외 홍보, 2026-10-11 동아리 방 대체)
+  const { data: newsRows } = await createAdminClient().from('mad_club_posts')
+    .select('id, title, content, media, is_pinned, created_at')
+    .eq('club_id', club.id).eq('is_published', true)
+    .order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(6);
+  const news = (newsRows ?? []) as { id: string; title: string; content: string; media: { url: string; type: string; name: string }[]; is_pinned: boolean; created_at: string }[];
+  const shareUrl = brandSiteUrl('madleague', `/clubs/${club.slug}`);
+
   // 동아리 관리 링크: 직원 · 이 동아리 운영진 · 담당 멘토(지원서만)
   let canManage = false;
   try {
@@ -169,11 +179,14 @@ export default async function ClubDetailPage({ params }: PageProps) {
           </div>
           {profile.slogan && <p className="mt-10 text-2xl sm:text-3xl font-black break-keep">“{profile.slogan}”</p>}
           {club.description && <p className="mt-6 max-w-2xl text-lg text-neutral-300 leading-relaxed break-keep">{club.description}</p>}
-          {recruitOpen && (
-            <a href="#recruit" className="mt-8 inline-flex items-center gap-2 bg-[#EC1D25] px-5 py-3 text-sm font-bold">
-              부원 모집 중{recruitPeriod ? ` · ${recruitPeriod}` : ''} <ArrowRight className="h-4 w-4" />
-            </a>
-          )}
+          <div className="mt-8 flex flex-wrap gap-3">
+            {recruitOpen && (
+              <a href="#recruit" className="inline-flex items-center gap-2 bg-[#EC1D25] px-5 py-3 text-sm font-bold">
+                부원 모집 중{recruitPeriod ? ` · ${recruitPeriod}` : ''} <ArrowRight className="h-4 w-4" />
+              </a>
+            )}
+            <ClubShareButton url={shareUrl} title={`${club.name} — MADLeague 공식 동아리`} text={club.description ?? undefined} />
+          </div>
         </div>
       </section>
 
@@ -189,6 +202,33 @@ export default async function ClubDetailPage({ params }: PageProps) {
             ))}
           </div>
         </section>
+      )}
+
+      {/* 활동 소식 — 운영진 공개 게시물 */}
+      {news.length > 0 && (
+        <Section eyebrow="NEWS" title="활동 소식">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {news.map(n => {
+              const img = n.media?.find(m => m.type === 'image');
+              const photos = n.media?.filter(m => m.type === 'image').length ?? 0;
+              return (
+                <article key={n.id} className="border border-neutral-800 bg-neutral-950 flex flex-col">
+                  {img && (
+                    <div className="relative aspect-[4/3] bg-neutral-900">
+                      <Image src={img.url} alt="" fill className="object-cover" sizes="(min-width:1024px) 33vw, (min-width:768px) 50vw, 100vw" />
+                      {photos > 1 && <span className="absolute right-2 top-2 bg-black/70 px-2 py-0.5 text-[11px] font-bold">+{photos - 1}</span>}
+                    </div>
+                  )}
+                  <div className="p-5 flex-1">
+                    <div className="text-xs text-neutral-500">{new Date(n.created_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                    <h3 className="mt-2 text-lg font-black break-keep">{n.title}</h3>
+                    {n.content && <p className="mt-2 text-sm text-neutral-400 leading-relaxed whitespace-pre-line break-keep line-clamp-4">{n.content}</p>}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </Section>
       )}
 
       {/* 소개 · 핵심 가치 */}

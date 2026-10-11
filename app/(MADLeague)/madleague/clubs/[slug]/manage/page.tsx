@@ -8,9 +8,12 @@ import { ClubOfficersEditor } from '@/components/madleague/ClubOfficersEditor';
 import { ClubProfileEditor } from '@/components/madleague/ClubProfileEditor';
 import { ClubRecruitResponses } from '@/components/madleague/ClubRecruitResponses';
 import { clubRecruitProgram } from '@/lib/madleague-recruit';
+import { ClubPostsEditor } from '@/components/madleague/ClubPostsEditor';
+import { getClubMembers } from '@/lib/madleague-club-members';
+import Image from 'next/image';
 
 /* 동아리 관리 — 상단 탭으로 구분 (2026-10-11): 소개 페이지 · 부원 모집 · 운영진 · 매드리거 등록. 탭 = ?tab= (링크 공유 가능) */
-type TabKey = 'profile' | 'recruit' | 'officers' | 'applications';
+type TabKey = 'posts' | 'profile' | 'recruit' | 'members' | 'officers' | 'applications';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -51,8 +54,10 @@ export default async function ClubManagePage({ params, searchParams }: PageProps
   // 볼 수 있는 탭 (멘토는 매드리거 등록만)
   const tabs: { key: TabKey; label: string }[] = [
     ...(canProfile ? [
+      { key: 'posts' as const, label: '홍보 게시물' },
       { key: 'profile' as const, label: '소개 페이지' },
       { key: 'recruit' as const, label: '부원 모집' },
+      { key: 'members' as const, label: '멤버' },
       { key: 'officers' as const, label: '운영진' },
     ] : []),
     ...(canApplications ? [{ key: 'applications' as const, label: '매드리거 등록' }] : []),
@@ -84,6 +89,8 @@ export default async function ClubManagePage({ params, searchParams }: PageProps
       .order('created_at', { ascending: false })
     : { data: [] };
 
+  const members = canProfile && tab === 'members' ? await getClubMembers(club.id) : [];
+
   return (
     <div className="bg-black text-white min-h-screen">
       <div className="mx-auto max-w-5xl px-6 py-12">
@@ -105,7 +112,30 @@ export default async function ClubManagePage({ params, searchParams }: PageProps
           ))}
         </nav>
 
+        {tab === 'posts' && <ClubPostsEditor slug={club.slug} accent={club.color ?? '#EC1D25'} />}
+
         {tab === 'profile' && <ClubProfileEditor slug={club.slug} />}
+
+        {/* 멤버 — 진행 중 활동 역할(임원·멘토·현역·OB). 명단은 운영진·직원만 */}
+        {tab === 'members' && (
+          <>
+            <p className="mb-4 text-sm text-neutral-400 break-keep">매드리거 등록을 승인하면 여기에 들어옵니다. 운영진 지정은 운영진 탭, 승인·반려는 매드리거 등록 탭에서.</p>
+            <div className="border border-neutral-800 divide-y divide-neutral-900">
+              {members.map(m => (
+                <div key={m.member_id} className="flex items-center gap-3 px-4 py-3">
+                  {m.avatar_url
+                    ? <Image src={m.avatar_url} alt="" width={32} height={32} className="h-8 w-8 object-cover" />
+                    : <div className="h-8 w-8 bg-neutral-800 flex items-center justify-center text-xs text-neutral-400">{m.name.slice(0, 1)}</div>}
+                  <div className="flex-1 min-w-0 text-sm font-semibold truncate">{m.name}</div>
+                  <span className={`text-xs px-2 py-0.5 ${m.role === '임원' ? 'bg-[#EC1D25]/15 text-[#EC1D25]' : 'bg-neutral-900 text-neutral-400'}`}>{m.position ?? m.role}</span>
+                  {m.year && <span className="text-xs text-neutral-500 w-12 text-right">{m.year}</span>}
+                </div>
+              ))}
+              {members.length === 0 && <p className="px-4 py-10 text-center text-sm text-neutral-500">아직 멤버가 없습니다.</p>}
+            </div>
+            <p className="mt-3 text-xs text-neutral-500">멤버 {members.length}명</p>
+          </>
+        )}
 
         {tab === 'recruit' && <ClubRecruitResponses slug={club.slug} />}
 

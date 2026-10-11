@@ -152,7 +152,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                 ],
             },
             { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
-            // 동아리 = 매드리거 하위 메뉴 (2026-10-08 사용자 결정 — 동아리 목록에서 각 동아리 방으로)
+            // 동아리 = 매드리거 하위 메뉴 (2026-10-08 사용자 결정 — 동아리 목록에서 각 동아리 소개 페이지로)
             { placement: "feature", location: "매드리거", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
             // 동아리 부원 공동 모집 (2026-10-10) — 동아리별 지원서 = forms program club-recruit:{slug}, 응답은 동아리 운영진이 /clubs/{slug}/manage에서
             { placement: "feature", location: "매드리거", label: "공동 모집", path: "/madleague/clubs/recruit", source: { kind: "static" }, adminHref: "/intra/ums/madleague/forms" },
