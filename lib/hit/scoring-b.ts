@@ -117,7 +117,11 @@ export function scoreEfficacy(responses: ResponseRow[]) {
   return { scores, top3Code };
 }
 
-/** 흥미(HIT A aptitude_core, "끌린다") × 효능(B, "할 수 있다") */
+/**
+ * 흥미(HIT - Archetype aptitude_core, "끌린다") × 효능(HIT - Bounce, "할 수 있다")
+ * 기준 60 (R6, 2026-10-12 유지 결정): 50 = '보통이다' 평균이라 50으로 두면 '그저 그렇다'도 끌림으로 분류된다.
+ * 60 ≈ 평균 응답 4.6 — '보통'과 '약간 그렇다' 사이를 넘어야 끌림·자신감으로 본다. 화면에도 '60 이상'으로 고지 (HitBResultView)
+ */
 export function buildInterestEfficacyMatrix(
   interest: Partial<Record<HollandType, number>> | null | undefined,
   efficacy: Record<HollandType, number>,
