@@ -146,8 +146,8 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <p className="text-xs text-neutral-400 mt-6">MBTI®는 The Myers-Briggs Company의 상표이며, HIT는 공식 MBTI 검사가 아닙니다.</p>
       </Section>
 
-      <Section id="behavior" title="행동" lead="네 가지 행동 방식이 나에게서 각각 얼마만큼씩 나타나는지(합계 100) 보여 줍니다. 가장 큰 쪽이 평소 일하는 방식입니다.">
-        <div className="rounded-2xl border border-neutral-200 p-5 sm:p-6"><DISCChart d={n("disc_d_score")} i={n("disc_i_score")} s={n("disc_s_score")} c={n("disc_c_score")} primary={discPrimary} /></div>
+      <Section id="behavior" title="행동" lead="네 가지 행동 방식이 나에게서 얼마나 강하게 나타나는지 보여 줍니다. 가장 강한 쪽이 평소 일하는 방식입니다.">
+        <div className="rounded-2xl border border-neutral-200 p-5 sm:p-6"><DISCChart d={n("disc_d_score")} i={n("disc_i_score")} s={n("disc_s_score")} c={n("disc_c_score")} primary={discPrimary} intensity={d.disc_intensity as { D: number; I: number; S: number; C: number } | null} /></div>
         <div className="mt-10"><ModuleList modules={[...pick("DISC-"), ...pick("COMM-")]} /></div>
       </Section>
 

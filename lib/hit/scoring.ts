@@ -177,7 +177,14 @@ export function scoreBT(responses: ResponseRow[]): BTScores {
       .every(v => v >= 6)
   );
 
-  return { d, i, s, c, primary, secondary, lowest, darkPattern };
+  // 강도 (R7) — 응답한 문항만 평균, 다른 점수와 같은 (평균-1)/6 척도
+  const strength = (ids: [string, boolean][]) => {
+    const vals = ids.map(([id, rev]) => getVal(id, rev)).filter(v => v > 0);
+    return vals.length ? Math.round(((vals.reduce((a, b) => a + b, 0) / vals.length) - 1) / 6 * 100) : 0;
+  };
+  const intensity = { D: strength(dIds), I: strength(iIds), S: strength(sIds), C: strength(cIds) };
+
+  return { d, i, s, c, primary, secondary, lowest, darkPattern, intensity };
 }
 
 // ── CH Core 인성 채점 (7점 리커트, 5대 영역) ──

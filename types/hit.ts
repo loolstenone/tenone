@@ -222,6 +222,8 @@ export interface BTScores {
   secondary: string;
   lowest: string;
   darkPattern: boolean; // D 과잉 패턴 탐지
+  /** 방식별 강도 0~100 = (그 방식 문항 평균 − 1) / 6 × 100 — 비중(합 100)과 달리 다른 점수와 같은 척도 (R7, 2026-10-12) */
+  intensity: { D: number; I: number; S: number; C: number };
 }
 
 // ── CH Core 인성 5대 영역 점수 ──

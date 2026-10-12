@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
       disc_i_score: disc.i,
       disc_s_score: disc.s,
       disc_c_score: disc.c,
+      disc_intensity: bt.intensity,
       base_summary: ufSummary,
       base_scores: uf ?? {},
       type_code: typeProfile.code,
