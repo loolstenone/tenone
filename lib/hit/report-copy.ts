@@ -231,7 +231,11 @@ export function toParagraphs(text: string, perParagraph = 2): string[] {
   for (const b of blocks) {
     // 목록·소제목 줄(• - · 1. / '…:'로 끝남)은 그대로 한 줄
     if (/^[•\-·▪]|^\d+[.)]\s/.test(b) || /[:：]$/.test(b)) { out.push(b); continue; }
-    const sentences = b.match(/[^.!?。]+[.!?。]+["”’)]*\s*|[^.!?。]+$/g)?.map(s => s.trim()).filter(Boolean) ?? [b];
+    const sentences = b.match(/[^.!?。]+[.!?。]+["”’')」』\]]*\s*|[^.!?。]+$/g)?.map(s => s.trim()).filter(Boolean) ?? [b];
+    // 인용문 안의 ?·! 뒤에 ", …"로 이어지는 문장은 앞 문장에 붙인다
+    for (let i = sentences.length - 1; i > 0; i--) {
+      if (/^[,，·)]/.test(sentences[i])) { sentences[i - 1] = `${sentences[i - 1]}${sentences[i]}`; sentences.splice(i, 1); }
+    }
     for (let i = 0; i < sentences.length; i += perParagraph) out.push(sentences.slice(i, i + perParagraph).join(' '));
   }
   return out;
