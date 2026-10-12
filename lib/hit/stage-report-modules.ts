@@ -3,15 +3,17 @@
  *
  * 결과 행(DB, snake_case)의 점수 → hit_report_modules id. 같은 점수면 언제나 같은 모듈이 나온다 (재현 가능).
  * 모듈 본문은 HeRo가 미리 작성·검수한 해설(인트라 › HeRo › 리포트 모듈에서 편집). AI는 관여하지 않는다.
- * 구간: 67 이상 HIGH · 34 이상 MID · 그 아래 LOW (lib/hit/report-assembler.ts getLevel과 같은 기준)
+ * 구간: 75 이상 HIGH · 50 이상 MID · 그 아래 LOW — 화면 점수 구간(report-copy BAND 75/50/25)과 같은 기준 (2026-10-12, 기존 67/34)
+ * 준비 체크리스트 기반 점수(D·E·F 준비도)가 0이면 = 아직 체크하지 않음 → '준비 부족' 해설을 붙이지 않는다
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Row = Record<string, any>;
 
-const level = (v: unknown) => { const n = Number(v ?? 0); return n >= 67 ? 'HIGH' : n >= 34 ? 'MID' : 'LOW'; };
+const level = (v: unknown) => { const n = Number(v ?? 0); return n >= 75 ? 'HIGH' : n >= 50 ? 'MID' : 'LOW'; };
 const grade = (v: unknown) => { const n = Number(v ?? 0); return n >= 75 ? 'A' : n >= 50 ? 'B' : n >= 25 ? 'C' : 'D'; };
-const tri = (v: unknown, hi: string, mid: string, lo: string) => { const n = Number(v ?? 0); return n >= 67 ? hi : n >= 34 ? mid : lo; };
+const tri = (v: unknown, hi: string, mid: string, lo: string) => { const n = Number(v ?? 0); return n >= 75 ? hi : n >= 50 ? mid : lo; };
+const started = (v: unknown) => Number(v ?? 0) > 0;
 
 export type ReportStage = 'c' | 'd' | 'e' | 'f' | 'gap';
 
@@ -37,7 +39,7 @@ export function selectStageModules(stage: ReportStage, r: Row): string[] {
       if (lt[r.leadership_type]) m.push(lt[r.leadership_type]);
       m.push(tri(r.identity_flexibility, 'DI-FLEXIBLE', 'DI-MODERATE', 'DI-RIGID'));
       m.push(`DN-STRONG-${level(r.network_quality)}`, `DN-WEAK-${level(r.network_breadth)}`);
-      m.push(`DR-${grade(r.senior_readiness)}`);
+      if (started(r.senior_readiness)) m.push(`DR-${grade(r.senior_readiness)}`);
       // 채점이 내는 역할 코드 중 해설 모듈이 없는 것은 가장 가까운 모듈로 (EXPERT→컨설팅, BOARD→어드바이저, COACH→교육·코칭)
       const roleAlias: Record<string, string> = { 'DROLE-EXPERT': 'DROLE-CONSULTING', 'DROLE-BOARD': 'DROLE-ADVISOR', 'DROLE-COACH': 'DROLE-EDUCATION' };
       const roles = (r.next_role_matrix?.possible_roles ?? []) as { code: string }[];
@@ -55,7 +57,7 @@ export function selectStageModules(stage: ReportStage, r: Row): string[] {
       if (r.legacy_scores) m.push(`ER-TRANSFER-${level(ls.transferable_legacy)}`, `ER-SHARE-${level(ls.knowledge_transfer)}`, `ER-NEW-${level(ls.new_capability)}`);
       const ss = r.social_scores ?? {};
       if (r.social_scores) m.push(`ES-BELONG-${level(ss.belonging)}`, `ES-ROLE-${level(ss.role_necessity)}`);
-      m.push(`EP-${grade(r.second_act_readiness)}`);
+      if (started(r.second_act_readiness)) m.push(`EP-${grade(r.second_act_readiness)}`);
       break;
     }
     case 'gap': {

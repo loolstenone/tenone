@@ -96,7 +96,7 @@ function viewFor(stage: StageKey, r: Row): View {
         findings: [
           { label: "2막 방향", value: dt[r.direction_type] ?? "-", note: STAGE_DIM_COPY[r.direction_type]?.what ?? "" },
           { label: "남아 있는 열정", value: `${n(r.remaining_passion)} · ${BAND_INFO[scoreBand(n(r.remaining_passion))].label}`, note: STAGE_DIM_COPY.remaining_passion.what },
-          { label: "2막 준비도", value: `${n(r.second_act_readiness)}`, note: "재정·시간·건강·관계 준비 체크리스트 완료율입니다." },
+          { label: "2막 준비도", value: n(r.second_act_readiness) > 0 ? `${n(r.second_act_readiness)}` : "체크 전", note: "재정·시간·건강·관계 준비 체크리스트 완료율입니다." },
         ],
         blocks: [
           { id: "life", title: "삶과 열정", lead: "지금의 삶에 대한 만족, 아직 하고 싶은 일의 크기, 은퇴·퇴직이라는 변화를 받아들이는 정도입니다.", items: [{ key: "life_satisfaction", value: n(r.life_satisfaction) }, { key: "remaining_passion", value: n(r.remaining_passion) }, { key: "psych_transition", value: n(r.psych_transition) }] },
@@ -173,17 +173,28 @@ export default function StageResultView({ stage, resultId, print = false }: { st
         <div className="mt-6"><ScoreGuide /></div>
       </Section>
 
-      {blocks.map(b => (
-        <Section key={b.id} id={b.id} title={b.headline ? `${b.title} — ${b.headline.replace(/^[^\d]*/, "")}` : b.title} lead={b.lead}>
+      {blocks.map(b => {
+        // 체크리스트 기반 준비도가 전부 0 = 아직 체크하지 않음 ('준비 0점'으로 읽히지 않게)
+        const notStarted = !!b.checklist && b.items.every(it => it.value === 0);
+        return (
+        <Section key={b.id} id={b.id} title={b.headline && !notStarted ? `${b.title} — ${b.headline.replace(/^[^\d]*/, "")}` : b.title} lead={b.lead}>
+          {notStarted ? (
+            <div className="rounded-2xl bg-neutral-50 p-5 sm:p-6">
+              <p className="text-[15px] font-bold text-neutral-900">아직 체크 전입니다</p>
+              <p className="text-[14px] text-neutral-600 mt-2 leading-[1.8]">나의 저니의 준비 체크리스트에서 이미 해 둔 일을 체크하면, 다음 검사부터 준비도가 반영됩니다. 0점은 &lsquo;준비가 없다&rsquo;는 뜻이 아니라 아직 체크하지 않았다는 뜻입니다.</p>
+            </div>
+          ) : (
           <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
             {[...b.items].sort((x, y) => (b.checklist ? 0 : y.value - x.value)).map(it => (
               <ScoreRow key={it.key} label={L(it.key)} value={it.value} what={STAGE_DIM_COPY[it.key]?.what} plain={STAGE_DIM_COPY[it.key]?.pref}
                 meaning={b.checklist ? undefined : STAGE_DIM_COPY[it.key] ? (it.value >= 75 ? STAGE_DIM_COPY[it.key].hi : it.value >= 50 ? STAGE_DIM_COPY[it.key].mid : STAGE_DIM_COPY[it.key].low) : undefined} />
             ))}
           </div>
+          )}
           {b.id === lastMainId && view.extra && <div className="mt-6">{view.extra}</div>}
         </Section>
-      ))}
+        );
+      })}
 
       <Section id="commentary" title="HeRo 해설" lead="점수 구간에 따라 미리 쓰고 검수한 해설입니다. 같은 점수에는 언제나 같은 해설이 나옵니다.">
         <ModuleList modules={modules} />

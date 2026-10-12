@@ -55,11 +55,12 @@ export function selectModules(scores: HitAScores): string[] {
   const lowest = discScores[3].key;
   modules.push(`DISC-LOW-${lowest}`);
 
-  // 4. MBTI 축별 (4축 × 강도)
+  // 4. MBTI 축별 (4축 × 강도) — 점수는 모두 왼쪽 성향 비율(E·S·T·J, 화면 MBTISpectrum과 같음).
+  //    2026-10-12 수정: S·T·J를 100에서 빼서 넘겨 반대 성향 해설이 나가던 결함 (ENFP에게 감각·사고·판단 해설)
   modules.push(getMbtiModule('E', 'I', scores.mbtiEScore));
-  modules.push(getMbtiModule('S', 'N', 100 - scores.mbtiSScore));
-  modules.push(getMbtiModule('T', 'F', 100 - scores.mbtiTScore));
-  modules.push(getMbtiModule('J', 'P', 100 - scores.mbtiJScore));
+  modules.push(getMbtiModule('S', 'N', scores.mbtiSScore));
+  modules.push(getMbtiModule('T', 'F', scores.mbtiTScore));
+  modules.push(getMbtiModule('J', 'P', scores.mbtiJScore));
 
   // 5. DISC×MBTI 교차 (해당되는 것만)
   if (scores.discPrimary === 'D' && scores.mbtiJScore >= 65) modules.push('CROSS-D-J');
@@ -78,7 +79,7 @@ export function selectModules(scores: HitAScores): string[] {
     const spKeyMap: Record<string, string> = {
       strategic: 'STRATEGIC', analytical: 'ANALYTIC', execution: 'EXECUTE',
       interpersonal: 'CONNECT', creativity: 'CREATE',
-      harmony: 'HARMONY', breakthrough: 'BREAK', stability: 'GUARD',
+      harmony: 'HARMONY', breakthrough: 'BREAK', guard: 'GUARD', stability: 'GUARD', // 채점 키는 guard (stability만 있어 원칙 수호 해설이 빠지던 결함, 2026-10-12)
     };
 
     // Top 3 주강점
@@ -124,17 +125,18 @@ interface HitBScores {
  */
 export function selectBModules(scores: HitBScores): string[] {
   const modules: string[] = [];
+  // 해설 모듈(COMP-*)은 옛 6영역 문안 — 핵심역량과 뜻이 맞는 것만 연결한다.
+  // PLAN(기획역량: 전략·문제 정의) ↔ 학습민첩성 연결은 뜻이 달라 제거 (2026-10-12). 학습민첩성은 화면 해석 문구(report-copy)가 담당
   const compAreas: Record<string, string[]> = {
     COMM: ['communication', 'collaboration'],
     EXEC: ['initiative', 'self_management'],
     ANAL: ['problem_solving'],
-    PLAN: ['learning_agility'],
   };
   Object.entries(compAreas).forEach(([prefix, keys]) => {
     const vals = keys.map(k => scores.competencyCommon[k] ?? 0).filter(v => v > 0);
     if (vals.length === 0) return;
     const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-    const grade = avg >= 80 ? 'A' : avg >= 60 ? 'B' : avg >= 40 ? 'C' : 'D';
+    const grade = avg >= 75 ? 'A' : avg >= 50 ? 'B' : avg >= 25 ? 'C' : 'D'; // 화면 구간·저장 등급과 같은 기준
     modules.push(`COMP-${prefix}-${grade}`);
   });
   return modules;
