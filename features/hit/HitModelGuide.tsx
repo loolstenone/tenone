@@ -44,7 +44,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         {/* HIT A 헤더 */}
         <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
           <span>HIT A</span>
-          <span className="text-center">검사의 개념 및 구조</span>
+          <span className="text-center">Archetype · 검사의 개념 및 구조</span>
           <span className="text-right">검사 항목</span>
         </div>
 
@@ -129,18 +129,18 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
 
         {/* HIT B ~ F 헤더 */}
         <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT B ~ GAP</span>
-          <span className="text-center">공통 B · 생애주기 C~F · 상황 GAP</span>
+          <span>HIT B ~ G</span>
+          <span className="text-center">공통 B · 생애주기 C~F · 상황 G</span>
           <span className="text-right">검사 항목</span>
         </div>
 
         {[
-          { k: "B", scope: "역량과 방향 (전 회원 공통)", test: "역량 · 효능감 · 이해" },
-          { k: "C", scope: "진입 — 대학생, 사회 초년", test: "준비 · 적응 · 결정" },
-          { k: "D", scope: "전환 — 경력 이직", test: "경력 자본 · 전환" },
-          { k: "E", scope: "리더십 전환 (시니어)", test: "리더십 전환 진단" },
-          { k: "F", scope: "인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
-          { k: "GAP", scope: "경력 공백 · 복귀 (상황 모듈)", test: "재진입 로드맵" },
+          { k: "B", scope: "Bounce · 역량과 방향 (전 회원 공통)", test: "역량 · 효능감 · 이해" },
+          { k: "C", scope: "Challenger · 진입 — 대학생, 사회 초년", test: "준비 · 적응 · 결정" },
+          { k: "D", scope: "Departure · 전환 — 경력 이직", test: "경력 자본 · 전환" },
+          { k: "E", scope: "Elevate · 리더십 전환 (시니어)", test: "리더십 전환 진단" },
+          { k: "F", scope: "Flourish · 인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
+          { k: "G", scope: "Gap · 경력 공백 · 복귀 (상황 모듈)", test: "재진입 로드맵" },
         ].map((r, i, arr) => (
           <div key={r.k} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
             <span className="text-[15px] font-semibold text-neutral-800">HIT {r.k}</span>
@@ -396,35 +396,35 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           {[
             {
               key: "C",
-              title: "진입 — 대학생, 사회 초년",
+              title: "Challenger · 진입 — 대학생, 사회 초년",
               tone: "text-green-700 bg-green-50",
               desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. 취업 준비 상태(자기 인식) · 첫 직무 적응 · 진로 결정 확신을 진단하고, 실제 준비는 체크리스트로 셉니다.",
               dims: ["취업 준비", "첫 직무 적응", "진로 결정"],
             },
             {
               key: "D",
-              title: "전환 — 경력 이직",
+              title: "Departure · 전환 — 경력 이직",
               tone: "text-blue-700 bg-blue-50",
               desc: "경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기(Push/Pull) · 전환 가능성을 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
               dims: ["경력 자본", "이직 동기", "전환 가능성"],
             },
             {
               key: "E",
-              title: "리더십 전환 (시니어)",
+              title: "Elevate · 리더십 전환 (시니어)",
               tone: "text-red-700 bg-red-50",
               desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크를 측정해 리더십 전환 지도를 제시합니다.",
               dims: ["전문성", "리더십", "정체성", "네트워크"],
             },
             {
               key: "F",
-              title: "인생 2막 준비 (은퇴, 퇴직)",
+              title: "Flourish · 인생 2막 준비 (은퇴, 퇴직)",
               tone: "text-amber-700 bg-amber-50",
               desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결로 인생 2막의 설계도를 그립니다.",
               dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결"],
             },
             {
-              key: "GAP",
-              title: "경력 공백 · 복귀 (상황 모듈)",
+              key: "G",
+              title: "Gap · 경력 공백 · 복귀 (상황 모듈)",
               tone: "text-violet-700 bg-violet-50",
               desc: "육아 · 학업 · 건강 등으로 비운 시간 이후 돌아오는 상황. 어느 단계에서든 해당자만. 공백 맥락 · 경력 유효성 · 회복탄력성 · 복귀 방향을 측정합니다.",
               dims: ["공백 맥락", "경력 유효성", "회복탄력성", "복귀 방향"],
@@ -453,16 +453,16 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT A</span>는 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
+          <span className="font-bold text-neutral-900">HIT A Archetype</span>은 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
           성격·행동·인성·적성을 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 기저요인은 해석 참고용입니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT B</span>는 HIT A의 결과를 기반으로
+          <span className="font-bold text-neutral-900">HIT B Bounce</span>는 HIT A의 결과를 기반으로
           핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
-          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(GAP)입니다.
+          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(HIT G · Gap)입니다.
         </p>
         <p className="text-sm text-neutral-400 leading-relaxed">
           채점 공식·해설 방식·검증 계획은 HIT 엔진 페이지(/hero/hit/method)에 공개합니다.

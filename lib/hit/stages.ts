@@ -18,7 +18,7 @@ export interface HitStageDef {
   testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP';
   /** 기호 표기 (보조) */
   code: string;
-  /** 검사 이름 — 제목 (A Archetype · B Bounce · C Challenger · D Departure · E Elevate · F Flourish · GAP Gap) */
+  /** 검사 이름 — 제목 (A Archetype · B Bounce · C Challenger · D Departure · E Elevate · F Flourish · G Gap) — 표기는 G, key·라우트·DB는 'gap' 그대로 */
   brand: string;
   /** 상황 설명 — 부제 */
   name: string;
@@ -36,7 +36,7 @@ export const HIT_STAGES: Record<HitStageKey, HitStageDef> = {
   d:   { key: 'd',   testType: 'D',   code: 'HIT D', brand: 'Departure',   name: '전환 — 경력 이직',          desc: '경력 자본 · 이직 동기 · 전환 가능성으로 어디로, 언제 움직일지 봅니다.',                              group: 'stage',     approxQuestions: 100 },
   e:   { key: 'e',   testType: 'E',   code: 'HIT E', brand: 'Elevate',   name: '리더십 전환 (시니어)',      desc: '전문성·리더십·정체성·네트워크로 리더십 전환 지도를 그립니다.',                 group: 'stage',     approxQuestions: 120 },
   f:   { key: 'f',   testType: 'F',   code: 'HIT F', brand: 'Flourish',   name: '인생 2막 준비 (은퇴, 퇴직)', desc: '삶의 만족도·잔여 열정·방향·레거시·사회적 연결로 2막을 설계합니다.',            group: 'stage',     approxQuestions: 112 },
-  gap: { key: 'gap', testType: 'GAP', code: 'HIT GAP', brand: 'Gap', name: '경력 공백 · 복귀',          desc: '공백의 맥락, 경력 유효성, 회복탄력성, 복귀 방향을 봅니다. 어느 단계에서든 해당자만.', group: 'situation', approxQuestions: 128 },
+  gap: { key: 'gap', testType: 'GAP', code: 'HIT G',   brand: 'Gap', name: '경력 공백 · 복귀',          desc: '공백의 맥락, 경력 유효성, 회복탄력성, 복귀 방향을 봅니다. 어느 단계에서든 해당자만.', group: 'situation', approxQuestions: 128 },
 };
 
 export const HIT_COMMON: HitStageDef[] = [HIT_STAGES.a, HIT_STAGES.b];
