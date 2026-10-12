@@ -168,18 +168,19 @@ export function ScoreRow({ label, value, what, meaning, plain = false }: { label
         <div className={`h-full rounded-full ${band.bar}`} style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />
       </div>
       {what && <p className="text-[13px] text-neutral-400 mt-3">{what}</p>}
-      {meaning && <p className="text-[15px] text-neutral-700 mt-2 leading-[1.85]">{meaning}</p>}
+      {meaning && <div className="mt-2 space-y-3">{toParagraphs(meaning).map((p, i) => <p key={i} className="text-[15px] text-neutral-700 leading-[1.85]">{p}</p>)}</div>}
     </div>
   );
 }
 
-/** 사전 정의(copy)로 ScoreRow 목록 — 높은 점수 순 */
-export function ScoreList({ scores, copy, sort = true }: { scores: Record<string, number>; copy: Record<string, DimensionCopy>; sort?: boolean }) {
+/** 사전 정의(copy)로 ScoreRow 목록 — 높은 점수 순
+ *  meaningOf: 차원별 해설을 DB 모듈에서 줄 때 (없으면 copy의 한 줄 해석) */
+export function ScoreList({ scores, copy, sort = true, meaningOf }: { scores: Record<string, number>; copy: Record<string, DimensionCopy>; sort?: boolean; meaningOf?: (key: string, value: number) => string | undefined }) {
   const entries = Object.entries(scores).filter(([k]) => copy[k]);
   if (sort) entries.sort((a, b) => b[1] - a[1]);
   return (
     <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
-      {entries.map(([k, v]) => <ScoreRow key={k} label={copy[k].label} value={v} what={copy[k].what} meaning={interpret(copy[k], v)} />)}
+      {entries.map(([k, v]) => <ScoreRow key={k} label={copy[k].label} value={v} what={copy[k].what} meaning={meaningOf?.(k, v) ?? interpret(copy[k], v)} />)}
     </div>
   );
 }

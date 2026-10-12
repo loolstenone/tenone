@@ -14,6 +14,18 @@ interface HitAScores {
   ufScores?: UFScores;
   /** 흥미 Top3 코드 (예: AES) — RIASEC 해설 선택 */
   apTop3Code?: string | null;
+  /** 성품 5차원 — {DIM}-HIGH/MID/LOW 해설 선택 */
+  chScores?: { integrity: number; relational: number; emotional: number; ethics: number; growth: number };
+}
+
+/** 성품 차원 → 해설 모듈 접두사 (DB hit_report_modules INTEGRITY-* 등) */
+export const CH_MODULE_KEY: Record<string, string> = {
+  integrity: 'INTEGRITY', relational: 'RELATION', emotional: 'EMOTIONAL', ethics: 'ETHICS', growth: 'GROWTH',
+};
+/** 성품 해설 id — 75/50 기준 (화면 interpret()과 같은 구간) */
+export function chModuleId(dim: string, v: number): string | null {
+  const k = CH_MODULE_KEY[dim];
+  return k ? `${k}-${v >= 75 ? 'HIGH' : v >= 50 ? 'MID' : 'LOW'}` : null;
 }
 
 /**
@@ -106,6 +118,14 @@ export function selectModules(scores: HitAScores): string[] {
   if (ap.length >= 2) {
     modules.push(`RIASEC-TOP-${ap[0]}`, `RIASEC-TOP-${ap[1]}`);
     if (ap.length >= 3) modules.push(`RIASEC-${ap.slice(0, 3)}`);
+  }
+
+  // 9. 성품 5차원 (2026-10-13) — 해설 문안 = DB 단일 원천 (이전엔 화면 상수 CH_COPY 한 줄만 나갔다)
+  if (scores.chScores) {
+    for (const [dim, v] of Object.entries(scores.chScores)) {
+      const id = chModuleId(dim, Number(v));
+      if (id) modules.push(id);
+    }
   }
 
   return modules;

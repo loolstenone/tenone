@@ -17,6 +17,7 @@ import HitModelGuide from "@/features/hit/HitModelGuide";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import { CH_COPY, DISC_COPY, HOLLAND_COPY, SPOWER_LABELS, toParagraphs } from "@/lib/hit/report-copy";
+import { chModuleId } from "@/lib/hit/report-assembler";
 import {
   ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreList, ScoreRow,
   ModuleList, AiNarrative, NextLink, ReportFooterNote, LoadingState, NotFoundState, formatDate,
@@ -104,8 +105,9 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
   const ch = { integrity: n("ch_integrity"), relational: n("ch_relational"), emotional: n("ch_emotional"), ethics: n("ch_ethics"), growth: n("ch_growth") };
   const discPrimary = String(d.disc_primary ?? "");
   const pick = (prefix: string) => mods.filter(m => m.id.startsWith(prefix));
-  const spStrength = mods.filter(m => m.id.startsWith("SP-") && !m.id.includes("GROWTH"));
-  const spGrowth = mods.filter(m => m.id.includes("GROWTH"));
+  const spStrength = mods.filter(m => m.id.startsWith("SP-") && !m.id.endsWith("-GROWTH"));
+  // SP-*-GROWTH만 — 성품 해설 GROWTH-HIGH/MID/LOW가 섞이지 않게 (2026-10-13)
+  const spGrowth = mods.filter(m => m.id.startsWith("SP-") && m.id.endsWith("-GROWTH"));
   const overview = heroType?.profile_overview ? toParagraphs(heroType.profile_overview.split("\n\n")[0] ?? "", 3) : [];
 
   return (
@@ -180,7 +182,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
       )}
 
       <Section id="character" title="성품" lead="일과 관계에서 드러나는 태도입니다. 높은 순서로 보여 드립니다.">
-        <ScoreList scores={ch} copy={CH_COPY} />
+        <ScoreList scores={ch} copy={CH_COPY} meaningOf={(k, v) => { const id = chModuleId(k, v); return mods.find(m => m.id === id)?.content; }} />
       </Section>
 
       <Section id="interest" title="흥미" lead="어떤 종류의 일에 마음이 끌리는지입니다. HIT - Bounce에서 '해낼 수 있다'는 자신감(효능감)과 겹쳐 봅니다.">

@@ -34,9 +34,15 @@ export function selectStageModules(stage: ReportStage, r: Row): string[] {
       const cs = r.capital_scores ?? {};
       m.push(`CC-DOMAIN-${level(cs.domain_expertise)}`, `CC-ACHIEVE-${level(cs.achievement)}`, `CC-RELATION-${level(cs.relational)}`, `CC-TRANSFER-${level(cs.transferable)}`);
       m.push(r.motivation_type === 'push_driven' ? 'CM-PUSH-DOMINANT' : r.motivation_type === 'pull_driven' ? 'CM-PULL-DOMINANT' : 'CM-BALANCED');
+      // 주요 동기 — 뚜렷한(75+) 것만 높은 순 최대 2개 (motivation_subs, 2026-10-13 이후 결과부터)
+      const subs = (r.motivation_subs ?? {}) as Record<string, number>;
+      const subMod: Record<string, string> = { pushGrowth: 'CM-PUSH-GROWTH', pushCulture: 'CM-PUSH-CULTURE', pullValues: 'CM-PULL-VALUES' };
+      Object.entries(subs).filter(([k, v]) => subMod[k] && Number(v) >= 75).sort((a, b) => b[1] - a[1]).slice(0, 2).forEach(([k]) => m.push(subMod[k]));
       const ts = r.transferability_scores ?? {};
       m.push(`CT-SKILL-${level(ts.skill_transfer)}`, `CT-MARKET-${level(ts.market_fit)}`, `CT-ADAPT-${level(ts.adaptation)}`);
       if (typeof r.ctype === 'string' && r.ctype.startsWith('CTYPE-')) m.push(r.ctype);
+      // 이직 준비도 = Journey 체크리스트 완료율 — E(DR)·F(EP)·GAP(FP)와 같은 방식, 체크 전(0)이면 생략 (2026-10-13 연결)
+      if (started(r.transition_readiness)) m.push(`CR-${grade(r.transition_readiness)}`);
       break;
     }
     case 'e': {

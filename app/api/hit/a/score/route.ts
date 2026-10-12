@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
       sPowerScores: sPower as unknown as Record<string, number>,
       ufScores: uf ?? undefined,
       apTop3Code: ap.top3Code,
+      chScores: { integrity: ch.integrity, relational: ch.relational, emotional: ch.emotional, ethics: ch.ethics, growth: ch.growth },
     });
 
     // 결과 저장

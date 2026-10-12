@@ -120,18 +120,21 @@ export function scoreMotivation(responses: ResponseRow[]): {
   return { push, pull, motivationType };
 }
 
-/** Push/Pull 내부 sub 영역 (CTYPE 산출용) */
-export function scorePushPullSubs(responses: ResponseRow[]): {
-  pushGrowth: number;
-  pushCulture: number;
+/** Push/Pull 내부 sub 영역 (CTYPE 산출 + 주요 동기 해설 CM-PUSH-GROWTH/CULTURE·CM-PULL-VALUES) */
+export interface PushPullSubs {
+  pushGrowth: number;   // 성장 한계 — 성장 한계·역할 괴리·반복
+  pushCulture: number;  // 조직 문화 — 상사 관계·문화 부적합·의견 미반영
   pullGrowth: number;
   pullReward: number;
-} {
+  pullValues: number;   // 가치 추구 — 가치관 맞는 조직·사회적 의미 (2026-10-13)
+}
+export function scorePushPullSubs(responses: ResponseRow[]): PushPullSubs {
   return {
     pushGrowth: avgFromIds(responses, ['c_pu01', 'c_pu02', 'c_pu09']),
     pushCulture: avgFromIds(responses, ['c_pu04', 'c_pu05', 'c_pu10']),
     pullGrowth: avgFromIds(responses, ['c_pl01', 'c_pl06', 'c_pl08']),
     pullReward: avgFromIds(responses, ['c_pl03']),
+    pullValues: avgFromIds(responses, ['c_pl04', 'c_pl09']),
   };
 }
 
@@ -272,6 +275,7 @@ export interface HitDScoreResult {
   motivationPush: number;
   motivationPull: number;
   motivationType: 'push_driven' | 'pull_driven' | 'balanced';
+  motivationSubs: PushPullSubs;
   transferabilityScores: Record<string, number>;
   transferabilityIndex: number;
   preparation: number;
@@ -319,6 +323,7 @@ export function scoreHitD(responses: ResponseRow[], opts?: { checklist?: { perce
     motivationPush: motivation.push,
     motivationPull: motivation.pull,
     motivationType: motivation.motivationType,
+    motivationSubs: pushPullSubs,
     transferabilityScores: transfer.scores,
     transferabilityIndex: transfer.transferabilityIndex,
     preparation: readiness.preparation,

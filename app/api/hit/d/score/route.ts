@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
       motivation_push: scored.motivationPush,
       motivation_pull: scored.motivationPull,
       motivation_type: scored.motivationType,
+      motivation_subs: scored.motivationSubs,
       transferability_index: scored.transferabilityIndex,
       target_job: targetJob || null,
       gap_areas: scored.gapAreas,

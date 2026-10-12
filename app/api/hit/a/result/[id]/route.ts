@@ -26,6 +26,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         mbtiEScore: n(result.mbti_e_score), mbtiSScore: n(result.mbti_s_score), mbtiTScore: n(result.mbti_t_score), mbtiJScore: n(result.mbti_j_score),
         sPowerScores: (result.s_power_scores ?? undefined) as Record<string, number> | undefined,
         apTop3Code: result.ap_top3_code ?? null,
+        chScores: result.ch_integrity != null ? {
+          integrity: n(result.ch_integrity), relational: n(result.ch_relational), emotional: n(result.ch_emotional),
+          ethics: n(result.ch_ethics), growth: n(result.ch_growth),
+        } : undefined,
         ufScores: result.uf_sibling != null ? {
           sibling: n(result.uf_sibling), parent: n(result.uf_parent), family: n(result.uf_family), peer: n(result.uf_peer), self: n(result.uf_self),
           temperament: n(result.uf_temperament), economic: n(result.uf_economic), trauma: n(result.uf_trauma), cultural: n(result.uf_cultural),

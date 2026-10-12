@@ -262,6 +262,18 @@ export function buildNextRoleMatrix(
     sp.strategic * 0.20 + bt.d * 0.15
   );
 
+  // 동급 이직 — 지금 전문성을 다른 조직에서 그대로 쓸 수 있고(재배치·깊이), 지금 역할에 대한 정체성이 단단한 사람 (2026-10-13)
+  const fit_lateral = clamp(
+    eDomains.redeployment * 0.30 + eDomains.domain_depth * 0.25 + identity.role_identity * 0.15 +
+    lScores.exec_leadership * 0.15 + sp.execution * 0.15
+  );
+
+  // 완전 전환 — 나를 새로 정의할 의지와 새 역할에 대한 개방성, 배움·돌파 성향 (2026-10-13)
+  const fit_pivot = clamp(
+    identity.self_reinvention * 0.30 + identity.change_openness * 0.25 + ch.growth * 0.20 +
+    sp.breakthrough * 0.15 + sp.creativity * 0.10
+  );
+
   const roles: NextRoleOption[] = [
     { code: 'DROLE-CXO', role: 'CxO / 경영진', fit_score: fit_cxo,
       description: '조직 전체의 전략적 방향을 설계하고 실행하는 최고 의사결정자' },
@@ -277,6 +289,10 @@ export function buildNextRoleMatrix(
       description: '조직 외부에서 독자적 전문가로 활동' },
     { code: 'DROLE-BOARD', role: '이사회 / 상임고문', fit_score: fit_board,
       description: '다수 조직에 영향력을 행사하는 고위 자문' },
+    { code: 'DROLE-LATERAL', role: '동급 이직', fit_score: fit_lateral,
+      description: '지금의 역할 수준을 유지하며 더 맞는 조직으로 이동' },
+    { code: 'DROLE-PIVOT', role: '새 분야로 전환', fit_score: fit_pivot,
+      description: '쌓아 온 경험을 바탕으로 다른 분야에서 새 역할에 도전' },
   ];
 
   roles.sort((a, b) => b.fit_score - a.fit_score);
