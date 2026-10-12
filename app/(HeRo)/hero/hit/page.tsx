@@ -16,7 +16,7 @@ export default function HitOverviewPage() {
             나를 알아가는 여정
           </h1>
           <p className="text-lg text-neutral-500 max-w-2xl mx-auto">
-            HIT A는 기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출하고,<br className="hidden sm:block" />
+            HIT A는 성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출하고(회원은 성장 배경 UF 분석 추가),<br className="hidden sm:block" />
             HIT B에서 역량과 취업준비도를 직무별로 심화합니다.
           </p>
         </div>
@@ -39,7 +39,7 @@ export default function HitOverviewPage() {
                 <span className="text-sm font-bold">나에 대한 이해</span>
                 <span className="text-[11px] px-2 py-0.5 bg-red-50 text-[#E53935] rounded-full font-medium">공통 기반</span>
               </div>
-              <p className="text-xs text-neutral-500">기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성을 교차 분석해 S-Power 강점과 64유형을 도출합니다.</p>
+              <p className="text-xs text-neutral-500">성격(MBTI) · 행동(DISC) · 인성 · 적성을 교차 분석해 S-Power 강점과 64유형을 도출합니다. 회원은 성장 배경(UF) 분석이 본인 리포트에 추가됩니다.</p>
             </div>
           </div>
 
@@ -94,7 +94,7 @@ export default function HitOverviewPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
                   <Clock className="h-4 w-4 text-neutral-400" />
-                  <span>성격 62 · 행동 40 · 성품 40 · 적성 30 · 총 172문항 · 약 25분</span>
+                  <span>성격 62 · 행동 40 · 성품 40 · 적성 30 · 총 172문항 · 약 25분 (회원은 성장 배경 49문항 추가)</span>
                 </div>
               </div>
 
@@ -351,7 +351,7 @@ export default function HitOverviewPage() {
                 <span className="text-sm font-bold">HIT - A 완료</span>
               </div>
               <p className="text-xs text-neutral-500 leading-relaxed">
-                기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power 강점과 64유형 프로필을 받습니다.
+                성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power 강점과 64유형 프로필을 받습니다. 회원은 성장 배경(UF) 분석까지.
               </p>
             </div>
 

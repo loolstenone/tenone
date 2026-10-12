@@ -1,6 +1,7 @@
 /**
  * HIT A 채점 알고리즘 v2
- * PT(성격유형) + BT(행동유형) + UF(기저요인) + CH core(인성) + AP core(적성) → S-Power 8차원
+ * PT(성격유형) + BT(행동유형) + CH core(인성) + AP core(적성) → S-Power 8차원
+ * UF(기저요인)는 회원 리포트 전용 — S-Power·매칭에 넣지 않는다 (2026-10-12)
  */
 import type {
   MBTIScores,
@@ -17,7 +18,6 @@ import type {
   APMatrixCell,
 } from '@/types/hit';
 import { findTypeMatch } from './data/type-matching';
-import { ufQuestions } from './data/base-questions';
 
 interface ResponseRow {
   module: string;
@@ -248,10 +248,19 @@ export function scoreAP(responses: ResponseRow[]): APCoreScores {
 }
 
 // ── S-Power 8차원 — 5모듈 교차 분석 ──
+/** 가중 평균 (가중치 합으로 나눔) */
+function weighted(pairs: [number, number][]): number {
+  const w = pairs.reduce((a, [, wt]) => a + wt, 0);
+  return clamp(Math.round(pairs.reduce((a, [v, wt]) => a + v * wt, 0) / (w || 1)));
+}
+
+/**
+ * S-Power 8차원 — PT·BT·CH·AP 교차.
+ * UF는 2026-10-12부터 제외 (성장 배경이 강점 점수를 깎지 않게, 회원·비회원 같은 기준). 기존 UF 가중치는 나머지에 비례 배분.
+ */
 export function calcSpower8d(
   pt: PTScores,
   bt: BTScores,
-  uf: UFScores,
   ch: CHCoreScores,
   ap: APCoreScores,
 ): SPowerScores {
@@ -262,38 +271,14 @@ export function calcSpower8d(
   const sScore = 100 - pt.nScore;
 
   return {
-    strategic: clamp(Math.round(
-      bt.d * 0.30 + pt.nScore * 0.25 + pt.tScore * 0.20 +
-      ap.E * 0.10 + uf.self * 0.10 + ch.growth * 0.05
-    )),
-    execution: clamp(Math.round(
-      bt.d * 0.30 + pt.jScore * 0.25 + sScore * 0.15 +
-      ch.integrity * 0.15 + uf.temperament * 0.10 + ap.R * 0.05
-    )),
-    creativity: clamp(Math.round(
-      bt.i * 0.25 + pt.nScore * 0.25 + pScore * 0.20 +
-      ap.A * 0.15 + ch.growth * 0.10 + uf.peer * 0.05
-    )),
-    interpersonal: clamp(Math.round(
-      bt.i * 0.25 + pt.eScore * 0.20 + fScore * 0.20 +
-      ch.relational * 0.15 + ap.S * 0.10 + uf.parent * 0.10
-    )),
-    analytical: clamp(Math.round(
-      bt.c * 0.30 + pt.tScore * 0.25 + sScore * 0.15 +
-      ap.I * 0.15 + ch.integrity * 0.10 + uf.economic * 0.05
-    )),
-    harmony: clamp(Math.round(
-      bt.s * 0.30 + fScore * 0.25 + iScore * 0.15 +
-      ch.relational * 0.15 + ch.emotional * 0.10 + uf.family * 0.05
-    )),
-    breakthrough: clamp(Math.round(
-      bt.d * 0.25 + pt.nScore * 0.20 + pScore * 0.15 +
-      ch.growth * 0.15 + uf.trauma * 0.15 + uf.self * 0.10
-    )),
-    guard: clamp(Math.round(
-      bt.s * 0.25 + bt.c * 0.20 + pt.jScore * 0.20 +
-      sScore * 0.10 + ch.ethics * 0.15 + ap.C * 0.10
-    )),
+    strategic: weighted([[bt.d, 0.30], [pt.nScore, 0.25], [pt.tScore, 0.20], [ap.E, 0.10], [ch.growth, 0.05]]),
+    execution: weighted([[bt.d, 0.30], [pt.jScore, 0.25], [sScore, 0.15], [ch.integrity, 0.15], [ap.R, 0.05]]),
+    creativity: weighted([[bt.i, 0.25], [pt.nScore, 0.25], [pScore, 0.20], [ap.A, 0.15], [ch.growth, 0.10]]),
+    interpersonal: weighted([[bt.i, 0.25], [pt.eScore, 0.20], [fScore, 0.20], [ch.relational, 0.15], [ap.S, 0.10]]),
+    analytical: weighted([[bt.c, 0.30], [pt.tScore, 0.25], [sScore, 0.15], [ap.I, 0.15], [ch.integrity, 0.10]]),
+    harmony: weighted([[bt.s, 0.30], [fScore, 0.25], [iScore, 0.15], [ch.relational, 0.15], [ch.emotional, 0.10]]),
+    breakthrough: weighted([[bt.d, 0.25], [pt.nScore, 0.20], [pScore, 0.15], [ch.growth, 0.15]]),
+    guard: weighted([[bt.s, 0.25], [bt.c, 0.20], [pt.jScore, 0.20], [sScore, 0.10], [ch.ethics, 0.15], [ap.C, 0.10]]),
   };
 }
 
@@ -323,84 +308,61 @@ export function scoreDISC(responses: ResponseRow[]): DISCScores {
 }
 
 // ── UF 기저요인 채점 (9영역 × 7점 리커트) ──
+// 문항 메타(영역·역채점·가중치)는 DB hit_questions(test_type A, module base)가 원천 — 채점 라우트가 읽어 넘긴다
 
-const UF_SUBSCALE_MAP: Record<string, keyof UFScores> = {};
-const UF_REVERSE_SET = new Set<string>();
-ufQuestions.forEach(q => {
-  UF_SUBSCALE_MAP[q.id] = q.subscale as keyof UFScores;
-  if (q.reverse) UF_REVERSE_SET.add(q.id);
-});
+export interface UFQuestionMeta {
+  id: string;
+  sub_domain: string | null;
+  reverse_scored: boolean;
+  scoring_key: unknown;
+}
 
-export function scoreUF(responses: ResponseRow[]): UFScores {
-  const uf = responses.filter(r => r.module === 'base');
-  const sums: Record<string, number[]> = {};
+const UF_AREAS = ['sibling', 'parent', 'family', 'peer', 'self', 'temperament', 'economic', 'trauma', 'cultural'] as const;
 
-  uf.forEach(r => {
-    const subscale = UF_SUBSCALE_MAP[r.question_id];
-    if (!subscale) return;
-    if (!sums[subscale]) sums[subscale] = [];
+/** UF 응답이 없으면 null (비회원 세션) */
+export function scoreUF(responses: ResponseRow[], meta: UFQuestionMeta[]): UFScores | null {
+  const metaById = new Map(meta.map(m => [m.id, m]));
+  const sums: Record<string, { total: number; weight: number }> = {};
+
+  for (const r of responses) {
+    if (r.module !== 'base') continue;
+    const m = metaById.get(r.question_id);
+    if (!m?.sub_domain) continue;
     let value = parseInt(r.option_value);
-    if (isNaN(value)) return;
-    if (UF_REVERSE_SET.has(r.question_id)) value = 8 - value;
-    sums[subscale].push(value);
-  });
+    if (isNaN(value)) continue;
+    if (m.reverse_scored) value = 8 - value;
+    const key = m.scoring_key as { weight?: number } | null;
+    const weight = typeof key?.weight === 'number' ? key.weight : 1;
+    sums[m.sub_domain] ??= { total: 0, weight: 0 };
+    sums[m.sub_domain].total += value * weight;
+    sums[m.sub_domain].weight += weight;
+  }
+  if (Object.keys(sums).length === 0) return null;
 
-  const toScore = (values: number[] | undefined): number => {
-    if (!values || values.length === 0) return 0;
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const toScore = (s: { total: number; weight: number } | undefined): number => {
+    if (!s || s.weight === 0) return 0;
+    const avg = s.total / s.weight;
     return Math.round(((avg - 1) / 6) * 100);
   };
 
-  return {
-    sibling: toScore(sums['sibling']),
-    parent: toScore(sums['parent']),
-    family: toScore(sums['family']),
-    peer: toScore(sums['peer']),
-    self: toScore(sums['self']),
-    temperament: toScore(sums['temperament']),
-    economic: toScore(sums['economic']),
-    trauma: toScore(sums['trauma']),
-    cultural: toScore(sums['cultural']),
-  };
+  return Object.fromEntries(UF_AREAS.map(a => [a, toScore(sums[a])])) as unknown as UFScores;
 }
 
-/** @deprecated scoreBase → scoreUF 사용 */
-export function scoreBase(responses: ResponseRow[]): { scores: Record<string, number>; summary: string } {
-  const uf = scoreUF(responses);
-  const sorted = Object.entries(uf).sort((a, b) => b[1] - a[1]);
-  const areaNames: Record<string, string> = {
-    sibling: '형제관계', parent: '부모관계', family: '가정환경',
-    peer: '또래관계', self: '자기개념', temperament: '기질',
-    economic: '경제환경', trauma: '전환경험', cultural: '문화맥락',
-  };
-  const top3 = sorted.slice(0, 3).map(([k]) => areaNames[k]).join(', ');
-  return {
-    scores: uf as unknown as Record<string, number>,
-    summary: `${top3} 영역에서 높은 점수를 보입니다.`,
-  };
+const UF_AREA_NAMES: Record<string, string> = {
+  sibling: '형제관계', parent: '부모관계', family: '가정환경',
+  peer: '또래관계', self: '자기개념', temperament: '기질',
+  economic: '경제환경', trauma: '전환경험', cultural: '문화맥락',
+};
+
+/** UF 상위 3영역 한 줄 요약 (회원 리포트용) */
+export function summarizeUF(uf: UFScores): string {
+  const top3 = Object.entries(uf).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => UF_AREA_NAMES[k]).join(', ');
+  return `${top3} 영역에서 높은 점수를 보입니다.`;
 }
 
 // ── 64유형 매칭 ──
 export function match64Type(mbti: MBTIScores, disc: DISCScores): TypeProfile {
   return findTypeMatch(mbti.type, disc.subtype);
-}
-
-/** @deprecated calcSpower8d 사용 권장 */
-export function deriveSPower(mbti: MBTIScores, disc: DISCScores, ufScores?: UFScores): SPowerScores {
-  const ufAvg = ufScores
-    ? Math.round(Object.values(ufScores).reduce((a, b) => a + b, 0) / 9)
-    : 50;
-
-  return {
-    strategic: clamp(Math.round(disc.d * 0.3 + (100 - mbti.sScore) * 0.3 + mbti.tScore * 0.2 + ufAvg * 0.2)),
-    execution: clamp(Math.round(disc.d * 0.3 + mbti.jScore * 0.3 + mbti.tScore * 0.2 + ufAvg * 0.2)),
-    creativity: clamp(Math.round(disc.i * 0.25 + (100 - mbti.sScore) * 0.3 + (100 - mbti.jScore) * 0.25 + ufAvg * 0.2)),
-    interpersonal: clamp(Math.round(disc.i * 0.3 + mbti.eScore * 0.3 + (100 - mbti.tScore) * 0.2 + ufAvg * 0.2)),
-    analytical: clamp(Math.round(disc.c * 0.3 + mbti.tScore * 0.3 + mbti.sScore * 0.2 + ufAvg * 0.2)),
-    harmony: clamp(Math.round(disc.s * 0.3 + (100 - mbti.tScore) * 0.25 + mbti.eScore * 0.15 + ufAvg * 0.2)),
-    breakthrough: clamp(Math.round(disc.d * 0.25 + (100 - mbti.sScore) * 0.25 + (100 - mbti.jScore) * 0.2 + ufAvg * 0.2)),
-    guard: clamp(Math.round(disc.c * 0.3 + mbti.jScore * 0.25 + mbti.tScore * 0.15 + ufAvg * 0.2)),
-  };
 }
 
 // ── CH Deep 심화 채점 (14하위영역 + 5영역 정밀 재산출 + 다크 탐지) ──

@@ -120,7 +120,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         {/* 강점 */}
         <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 bg-neutral-50">
           <span className="text-[15px] font-semibold text-neutral-800">강점</span>
-          <p className="text-center text-sm text-neutral-400">UF × MBTI × DISC × 인성 × 적성 교차분석 → S-Power 도출</p>
+          <p className="text-center text-sm text-neutral-400">MBTI × DISC × 인성 × 적성 교차분석 → S-Power 도출 · UF는 결과를 해석하는 렌즈 (회원 리포트)</p>
           <span className="text-sm text-neutral-400 text-right">종합 산출</span>
         </div>
 

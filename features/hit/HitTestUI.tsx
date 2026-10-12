@@ -16,7 +16,7 @@ const LIKERT_7_OPTIONS = [
   { label: '매우 그렇다', value: '7' },
 ];
 
-type ModuleType = 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core';
+type ModuleType = 'base' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core';
 
 interface DbQuestion {
   id: string;
@@ -45,15 +45,18 @@ interface HitTestUIProps {
 }
 
 const MODULE_NAMES: Record<ModuleType, string> = {
+  base: '성장 배경(UF) 검사',
   personality_type: '성격 유형(PT) 검사',
   behavior_type: '행동 유형(BT) 검사',
   character_core: '핵심 성품(CH) 검사',
   aptitude_core: '핵심 적성(AP) 검사',
 };
 
-const MODULE_ORDER: ModuleType[] = ['personality_type', 'behavior_type', 'character_core', 'aptitude_core'];
+// UF(base)는 회원 세션에만 출제된다 — 있으면 첫 파트 (lib/hit/a-modules.ts)
+const MODULE_ORDER: ModuleType[] = ['base', 'personality_type', 'behavior_type', 'character_core', 'aptitude_core'];
 
 const TRANSITION_MESSAGES: Record<string, string> = {
+  'base→personality_type': '성장 배경 검사가 끝났습니다. 다음은 성격 유형(PT) 검사입니다',
   'personality_type→behavior_type': '성격 유형 검사가 끝났습니다. 다음은 행동 유형(BT) 검사입니다',
   'behavior_type→character_core': '행동 유형 검사가 끝났습니다. 다음은 핵심 성품(CH) 검사입니다',
   'character_core→aptitude_core': '마지막으로 핵심 적성(AP) 검사입니다',
@@ -95,7 +98,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   useEffect(() => {
     async function loadQuestions() {
       try {
-        const res = await fetch('/api/hit/a/questions');
+        const res = await fetch(`/api/hit/a/questions?s=${encodeURIComponent(sessionToken)}`);
         if (!res.ok) throw new Error('질문 로드 실패');
         const data = await res.json();
 
@@ -119,7 +122,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       }
     }
     loadQuestions();
-  }, []);
+  }, [sessionToken]);
 
   // Restore session once questions are ready
   useEffect(() => {

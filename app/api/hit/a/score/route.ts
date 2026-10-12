@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
-import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, detectDistortion, computeCrossPatterns } from '@/lib/hit/scoring';
-// deriveSPower는 더 이상 사용하지 않음 (calcSpower8d로 대체)
+import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, summarizeUF, match64Type, calcSpower8d, scoreMBTI, scoreDISC, detectDistortion, computeCrossPatterns, type UFQuestionMeta } from '@/lib/hit/scoring';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { HIT_A_UF_MODULE } from '@/lib/hit/a-modules';
 import { selectModules } from '@/lib/hit/report-assembler';
 import { canAccess } from '@/lib/hit/membership';
 import { getMembershipTier } from '@/lib/hit/membership-server';
@@ -31,21 +32,31 @@ export async function POST(request: NextRequest) {
       return errorResponse('응답 데이터가 없습니다.', 400);
     }
 
-    // 채점 — v2: PT + BT + CH + AP + UF → S-Power 5모듈 교차
+    // 채점 — PT + BT + CH + AP → S-Power 4모듈 교차
     const pt = scorePT(responses);
     const bt = scoreBT(responses);
     const ch = scoreCH(responses);
     const ap = scoreAP(responses);
-    const uf = scoreUF(responses);
-    const base = scoreBase(responses);
+
+    // UF 기저요인 — 회원 세션만, 문항 메타는 DB 원천. 회원 리포트 전용 (S-Power·매칭 미사용, 2026-10-12)
+    let uf: ReturnType<typeof scoreUF> = null;
+    if (session.member_id) {
+      const { data: ufMeta } = await createAdminClient()
+        .from('hit_questions')
+        .select('id, sub_domain, reverse_scored, scoring_key')
+        .eq('test_type', 'A')
+        .eq('module', HIT_A_UF_MODULE);
+      uf = scoreUF(responses, (ufMeta ?? []) as UFQuestionMeta[]);
+    }
+    const ufSummary = uf ? summarizeUF(uf) : null;
 
     // 하위 호환 (64유형 매칭, 리포트 모듈 선택에 사용)
     const mbti = scoreMBTI(responses);  // PT 래핑
     const disc = scoreDISC(responses);  // BT 래핑
     const typeProfile = match64Type(mbti, disc);
 
-    // S-Power: 5모듈 교차
-    const sPower = calcSpower8d(pt, bt, uf, ch, ap);
+    // S-Power: 4모듈 교차 (UF 제외)
+    const sPower = calcSpower8d(pt, bt, ch, ap);
 
     // DISC × MBTI 교차 패턴 8개
     const crossPatterns = computeCrossPatterns(bt, pt);
@@ -91,8 +102,8 @@ export async function POST(request: NextRequest) {
             `CH(인성): 성실성${ch.integrity} 대인관계${ch.relational} 정서안정${ch.emotional} 윤리성${ch.ethics} 성장지향${ch.growth}\n` +
             `AP(적성): Top3=${ap.top3Code} (R${ap.R} I${ap.I} A${ap.A} S${ap.S} E${ap.E} C${ap.C})\n` +
             `S-Power: 전략${sPower.strategic} 실행${sPower.execution} 창의${sPower.creativity} 대인${sPower.interpersonal} 분석${sPower.analytical} 화합${sPower.harmony} 돌파${sPower.breakthrough} 원칙${sPower.guard}\n` +
-            `기저요인: ${base.summary}\n\n` +
-            `5가지 검사 결과를 통합하여 이 사람의 성격·강점·적성을 한국어로 2-3단락 분석해주세요.`,
+            (ufSummary ? `기저요인: ${ufSummary}\n` : '') + `\n` +
+            `검사 결과를 통합하여 이 사람의 성격·강점·적성을 한국어로 2-3단락 분석해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -111,7 +122,7 @@ export async function POST(request: NextRequest) {
       mbtiEScore: mbti.eScore, mbtiSScore: mbti.sScore,
       mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
       sPowerScores: sPower as unknown as Record<string, number>,
-      ufScores: uf,
+      ufScores: uf ?? undefined,
     });
 
     // 결과 저장
@@ -129,8 +140,8 @@ export async function POST(request: NextRequest) {
       disc_i_score: disc.i,
       disc_s_score: disc.s,
       disc_c_score: disc.c,
-      base_summary: base.summary,
-      base_scores: base.scores,
+      base_summary: ufSummary,
+      base_scores: uf ?? {},
       type_code: typeProfile.code,
       type_name_ko: typeProfile.nameKo,
       type_nickname: typeProfile.nickname,
@@ -140,16 +151,16 @@ export async function POST(request: NextRequest) {
       ai_narrative: aiNarrative,
       s_power_scores: sPower,
       modules_used: modulesUsed,
-      // UF 기저요인 9영역
-      uf_sibling: uf.sibling,
-      uf_parent: uf.parent,
-      uf_family: uf.family,
-      uf_peer: uf.peer,
-      uf_self: uf.self,
-      uf_temperament: uf.temperament,
-      uf_economic: uf.economic,
-      uf_trauma: uf.trauma,
-      uf_cultural: uf.cultural,
+      // UF 기저요인 9영역 (비회원 = null)
+      uf_sibling: uf?.sibling ?? null,
+      uf_parent: uf?.parent ?? null,
+      uf_family: uf?.family ?? null,
+      uf_peer: uf?.peer ?? null,
+      uf_self: uf?.self ?? null,
+      uf_temperament: uf?.temperament ?? null,
+      uf_economic: uf?.economic ?? null,
+      uf_trauma: uf?.trauma ?? null,
+      uf_cultural: uf?.cultural ?? null,
       // CH core 5영역 (신규)
       ch_integrity: ch.integrity,
       ch_relational: ch.relational,

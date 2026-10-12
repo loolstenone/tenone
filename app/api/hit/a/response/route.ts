@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, updateHitSession, upsertHitResponse } from '@/lib/supabase/hit';
+import { HIT_A_UF_MODULE } from '@/lib/hit/a-modules';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,11 @@ export async function POST(request: NextRequest) {
 
     if (session.status !== 'in_progress') {
       return errorResponse('이미 완료된 세션입니다.', 400);
+    }
+
+    // UF 기저요인은 회원 세션만 (lib/hit/a-modules.ts)
+    if (module === HIT_A_UF_MODULE && !session.member_id) {
+      return errorResponse('회원만 응답할 수 있는 문항입니다.', 403);
     }
 
     await upsertHitResponse({

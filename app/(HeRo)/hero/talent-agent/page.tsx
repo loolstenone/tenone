@@ -102,7 +102,7 @@ export default function TalentAgentPage() {
               {
                 n: "1",
                 title: "HIT 검사 · 본질 진단",
-                desc: "기저요인 · MBTI · DISC · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출합니다.",
+                desc: "MBTI · DISC · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출합니다. 회원은 성장 배경(UF) 분석 추가.",
               },
               {
                 n: "2",
