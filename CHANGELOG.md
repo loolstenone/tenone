@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-10-12 (세션 169, 집) — HeRo HIT 전면 재편 · 결과 리포트 · 검사 이름 · 해설 135개 · 이력서
+
+### 장소·운영
+
+- master 직접, 사용자 "푸시" 요청 때마다 push (마지막 `0574d95a` READY · 운영 화면 확인)
+- 운영 DB (MCP, 사용자 승인): HIT 재편 마이그레이션 · 마케팅 5트랙 문항 210 · 해설 모듈 신규 135 / 수정 4(READY-C·DR-A~D) · `hit_a_results.disc_intensity` 컬럼 + 채움 · 함수 `hit_reliability_alpha` · 더미 결과(A·B·C 4세트, D~G 1건씩, 마스터 계정) · 0점 B 더미 4건 삭제
+- GA4 스트림 설정: 브라우저 기록 기반 페이지 변경 해제
+
+### 결정 (사용자)
+
+- HIT = A·B 공통 + C~F 생애주기 + G 상황 모듈 · 모든 검사 회원 전용 · B~G 무료(결제 전까지)
+- 검사 이름: HIT - Archetype · Bounce · Challenger · Departure · Elevate · Flourish · Gap (GAP 표기 → G)
+- MADLeague HIT 미니 폐지 → HIT A · UF 복원(회원만, S-Power 제외, 종교 문항 삭제)
+- 흥미×효능 기준 60 유지
+
+### 변경 내역
+
+- 체계·채점: `lib/hit/stages.ts` · `lib/hit/scoring*.ts` · `app/api/hit/{a~f,gap}/*` · `lib/hit/stage-modules.ts` · `lib/hit/stage-report-modules.ts` · `lib/hit/report-assembler.ts`
+- 리포트: `features/hit/report/{ReportKit,HitNextSteps}.tsx` · `features/hit/{HitAResultView,HitBResultView,HitCResultView,StageResultView}.tsx` · `lib/hit/report-copy.ts` · `lib/hit/track-competency-labels.ts` · `app/api/hit/chain`
+- 차트: `features/hit/{RadarChart,DISCChart,MBTISpectrum}.tsx`
+- 이력서: `features/hero/ResumeEditor.tsx` · `types/resume.ts` · `app/(HeRo)/hero/resume/workspace/page.tsx`
+- SQL: `sql/hit-restructure-2026-10.sql` · `hit-marketing-tracks-2026-10.sql` · `hit-b-core-modules` · `hit-b-track-modules` · `hit-c-onboarding-decision-modules` · `hit-a-riasec-top-modules` · `hit-e-readiness-modules` · `hit-a-disc-intensity` · `hit-reliability-alpha` (모두 -2026-10)
+
+### 발견·교훈
+
+- 화면 모듈 이름과 채점 모듈 이름이 달라 B 핵심역량이 항상 0 → 채점은 문항 원천(DB)의 module로
+- MBTI 해설을 100에서 빼서 판정해 반대 성향 해설 → 점수 의미(왼쪽 성향 %)를 선택 규칙과 맞출 것
+- 점수 구간이 세 곳에서 달랐음(80/60·67/34·75/50/25) → 75/50/25 하나로
+- A는 같은 글자(I·E·S·C·A)가 여러 모듈에 겹침 → 집계·신뢰도는 module까지 묶을 것
+
+---
+
 ## 2026-10-10 저녁 ~ 10-12 새벽 (세션 168, 집) — MADLeague 동아리·문의·탭 · 보안 점검 · Whole See · HeRo 점검·QA · UC 재정비
 
 ### 장소·운영

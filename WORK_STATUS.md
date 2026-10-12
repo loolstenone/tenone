@@ -1,6 +1,38 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-12 (세션 168 — MADLeague 동아리·문의·탭 · 보안 점검 · Whole See 수집 상태 · HeRo 점검·QA · UC 비공개·현실화)
+> 마지막 업데이트: 2026-10-12 (세션 169 — HeRo HIT 전면 재편: 체계·채점·해설·리포트·이름·이력서)
+
+---
+
+## 세션 169 (2026-10-12, 집) — HeRo HIT 전면 재편 (체계·채점·해설·리포트·이름) · 이력서 · GTM
+
+> master 직접. 사용자 "푸시" 때마다 push — 마지막 배포 `0574d95a` READY 확인 + 운영 화면 확인 완료.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **GTM/GA4**: 브라우저 기록 기반 page_view 해제(중복 page_view)
+- **HIT 체계 재편**: A·B 공통 + C~F 생애주기 + G(경력 공백) 상황 모듈. 운영 DB 마이그레이션(`sql/hit-restructure-2026-10.sql`) · 마케팅 5트랙 문항 210 · 전 검사 회원 전용 + 무료(B~G 유료 게이트 해제) · MADLeague HIT 미니 → HIT A
+- **검사 이름**: `HIT - Archetype · Bounce · Challenger · Departure · Elevate · Flourish · Gap` (SSOT `lib/hit/stages.ts` code·brand·letter) — HeRo 전체·오류 문구·AI 프롬프트·MADLeague 연결
+- **결과·리포트 한 틀** (`features/hit/report/ReportKit`): 결과=보고서 공용(print), 표지·PDF 파일명·나의 HIT(같은 회차 A·B·생애주기)·점수 읽는 법·구간 75/50/25 통일·다음 검사 띠 분리 · 차트(레이더 라벨·DISC 강도·성격 양쪽 막대)
+- **결함 수정**: B 채점 핵심역량·이해 0점 · A MBTI 해설 반대 성향 · 원칙 수호 누락 · B 학습민첩성↔기획 오연결 · D~G 체크 전 '준비 부족' 해설 · READY-C 깨진 문장
+- **해설 135개 신규·4개 수정 (R1~R10)**: B 핵심역량 24 · 마케팅 트랙 90 · C 적응·결정 15 · A 흥미 단일 유형 6 · E 준비도 4 · DISC 강도 컬럼 · C의 A 연결 · 신뢰도 함수 `hit_reliability_alpha`
+- **이력서**: 자유 양식 → 항목형 편집(`features/hero/ResumeEditor.tsx`, content jsonb v2)
+- 문서: `docs/HIT_Structure_Consulting_2026-10.md` · `HIT_Reliability_Validity_Review_2026-10.md` · `HIT_Result_Pipeline_Review_2026-10.md` · `HIT_Result_Analysis_Review_2026-10.md`
+
+### 다음 첫 액션
+
+1. **Anthropic 키 교체 (사용자)**: 콘솔에서 새 키 → Vercel Production `ANTHROPIC_API_KEY` + `.env.local`. 로컬 키는 401(무효). 교체 후 HIT 결과 1건 다시 채점해 'AI 보조' 해설 나오는지 확인
+2. **더미 정리 결정 (사용자)**: 마스터 계정에 A·B·C 4세트(광고·퍼포먼스·전략·콘텐츠) + D·E·F·G 1건씩. 학생 안내 전 삭제하려면 결과·세션·응답 함께 삭제(hero_profiles 참조 먼저 확인)
+3. **매드리그 학생 응시 안내**: A(Archetype) → B(Bounce) → C(Challenger). 30명 이상 쌓이면 `SELECT * FROM hit_reliability_alpha(30)` (α ≥ 0.70 목표)
+4. **이월**: 처리방침 HeRo 수집 항목(성장 배경·이력서) · 17개 비마케팅 트랙 역량 해설 · 세션 168 이월
+
+### 주의
+
+- 검사 표기는 `HIT - 이름` (코드·DB·주소는 a~f·gap 그대로). 새 화면은 `HIT_STAGES[k].code`·`.name`만 쓴다
+- 점수 구간은 화면·등급·해설 모두 75/50/25 — 새 해설 모듈도 같은 기준
+- A 해설은 조회 때 점수로 다시 고른다(저장본 modules_used는 기록) — 선택 규칙만 고치면 지난 결과에도 반영
+- 해설 문안은 DB `hit_report_modules`(인트라에서 편집 가능), 화면 해석 문구는 `lib/hit/report-copy.ts`
 
 ---
 
