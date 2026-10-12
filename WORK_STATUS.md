@@ -1,6 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-12 (세션 169 — HeRo HIT 전면 재편: 체계·채점·해설·리포트·이름·이력서)
+> 마지막 업데이트: 2026-10-13 (세션 170 — HeRo HIT 완성도·해설 커버리지)
+
+---
+
+## 세션 170 (2026-10-12 ~ 10-13) — HeRo HIT 완성도 · 해설 커버리지 (나올 수 있는 결과 = 준비된 해설)
+
+> 워크트리 `261012-work-start-cbd6b9` → 작업 종료 때 master push.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **더미 정리**: 마스터 계정 HIT 더미 결과·세션·응답 전부 삭제 (사용자 결정)
+- **처리방침**: HeRo HIT 수집 항목(성장 배경·생애주기 진단·체크리스트·익명 통계) + MADLeap 지원서 — **10-13 공지 · 10-20 시행** (배포가 10-13이라 7일 전 공지를 지키려 하루 미룸)
+- **HIT 완성도 (c720ff15)**: 성격 축 극별 평균(문항 수 차이로 중립 응답이 ENFP로 기울던 결함) · 결측 응답 제외 · C 트랙 준비도 분리 · D·E 준비도 0 판정 제외 · UF 구간 75/50 · 전 response/score API 본인 세션 확인 · 이어하기·다시 하기(옛 세션 abandoned) · 나의 HIT 결과 목록(`/api/hit/results`) · D~G 미끼 문항 · 비마케팅 17트랙 역량 해설 306개 · 소요 시간 SSOT(`estimateMinutes`) · 접근성
+- **해설 커버리지 (1a7d53f1)**: 흥미 3조합 94개 추가(120 전부) · 성품 해설 DB 일원화(INTEGRITY 등 15개, ETHICS-LOW 문안 교체) · D 주요 동기 3종 연결(`hit_d_results.motivation_subs`) · D 이직 준비도 CR-A~D 연결 · E 차기 역할 동급 이직·새 분야 전환 추가 · 옛 모듈 48개 보관(`archived:*`) · **인트라 리포트 모듈 편집 화면 복구**(없는 컬럼 조회로 목록·저장 불가였음)
+
+### 다음 첫 액션
+
+1. **배포 확인**: Vercel READY → 마스터 로그인 후 `/hero/hit/a/result/{id}` 성품 칸에 4~6문장 해설·흥미 3조합 해설 표시, `/intra/hero/report-modules` 목록·편집 저장 확인 (로컬은 로그인 못 해 화면 미확인)
+2. **Anthropic 키 교체 (사용자)**: Vercel Production `ANTHROPIC_API_KEY` + `.env.local` (현재 401) → HIT 1건 재채점해 AI 해설 확인
+3. **매드리그 학생 응시 안내**: A → B → C. 30명+ → `SELECT * FROM hit_reliability_alpha(30)`
+4. **처리방침 후속**: 10-14 이후 RooK 공지 줄 삭제, 10-20 이후 HeRo·MADLeap 공지 줄 삭제 + `lib/company-info.ts` LEGAL_DOCUMENTS.privacy version·effectiveDate 갱신
+
+### 주의
+
+- 새 해설 모듈을 만들면 선택 규칙(`lib/hit/report-assembler.ts`·`stage-report-modules.ts`)에 연결하고 생성되는 id가 DB에 있는지 대조한다 — 연결 안 된 문안은 `archived:` 분류
+- E 동급 이직·새 분야 전환 적합도 가중치는 실데이터 검증 전 초안
 
 ---
 

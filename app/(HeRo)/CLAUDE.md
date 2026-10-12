@@ -208,7 +208,7 @@
 | `hero_daily_checkins` | Journey 일일 체크인 (에너지·한 줄) | 세션 81 |
 | `hero_goals` | 목표 (Vrief × GPR 이중축) | 세션 81 |
 | `hero_goal_checkins` | 목표 주간 체크인 | 세션 81 |
-| `hit_report_modules` | 리포트 조립 모듈 | 324개 시드 완료 |
+| `hit_report_modules` | 결과 해설 문안 (선택 규칙은 코드) | 사용 중 ~1,000 · 보관 48 (`archived:*`) |
 | `hit_ai_prompts` | AI 프롬프트 SSOT | 4개 시드 완료 |
 | `hit_competency_tracks` | 22개 역량 트랙 | 시드 완료 |
 | `hero_service_products` | 유료 상품 | 6개 시드 완료 |
@@ -473,7 +473,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | `/intra/hero/companies` | 기업 풀 | ✅ |
 | `/intra/hero/matching` | 매칭 관리 | ✅ |
 | `/intra/hero/hero-types` | 64 영웅 유형 편집 | ✅ |
-| `/intra/hero/report-modules` | 324 리포트 모듈 편집 | ✅ |
+| `/intra/hero/report-modules` | HIT 해설 모듈 편집 (id·분류·제목·내용, 보관 숨김) — 2026-10-13 복구 | ✅ |
 | `/intra/hero/ai-prompts` | AI 프롬프트 SSOT 관리 | ✅ |
 | `/intra/hero/funnel` | Funnel 전환율 · 비회원→회원→유료 | ✅ |
 | `/intra/hero/talent-agent/applications` | 탤런트 에이전시 신청 심사 | ✅ |
@@ -539,6 +539,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ## 현재 상태
 
+- **2026-10-12~13 (세션 170) HIT 완성도·해설 커버리지**: ① **나올 수 있는 결과 = 준비된 해설** — 흥미 3조합 120 전부(`RIASEC-XYZ`) · 성품 해설 = DB `INTEGRITY/RELATION/EMOTIONAL/ETHICS/GROWTH-HIGH/MID/LOW`(`chModuleId`, 화면 `ScoreList meaningOf` — `CH_COPY`는 이름·설명·대체 문구만) · D 주요 동기(`hit_d_results.motivation_subs` 75+ 최대 2개 → CM-PUSH-GROWTH/CULTURE·CM-PULL-VALUES) · D 이직 준비도 CR-A~D(체크 시작 시) · E 차기 역할 9종(DROLE-LATERAL·PIVOT 추가, 가중치 초안) · 비마케팅 17트랙 TRK 306 ② **보관** — 연결 안 되는 옛 문안은 삭제하지 않고 category `archived:*`(COMP-*·cross_*·PERSONALITY-* 48) ③ **인트라 › 리포트 모듈 복구** — 옛 화면이 없는 컬럼(type_code 등)을 조회해 목록·저장 불가였음. 지금은 id·category·title·content, 보관 숨김 ④ **채점** — 성격 축은 극별 평균(문항 수 차이 편향 제거) · 결측 응답 제외 · 준비도 0 = 판정 제외 ⑤ **보안·흐름** — response/score는 본인 세션만(404) · 이어하기/다시 하기(옛 세션 abandoned) · 나의 HIT 결과 목록 · D~G 미끼 문항. ❌ 새 해설 모듈을 선택 규칙 연결 없이 넣기 · ❌ 모듈 id 필터를 `includes`로 (성품 GROWTH-*가 S-Power 칸에 섞일 뻔함)
 - **2026-10-12 (세션 169) HIT 전면 재편**: ① **체계** — A·B 공통(전 회원) + C~F 생애주기(1개) + G 경력 공백(상황). SSOT `lib/hit/stages.ts` — 표기 `code` = **`HIT - Archetype · Bounce · Challenger · Departure · Elevate · Flourish · Gap`**, 부제 `name`(상황), 배지 `letter`. ❌ 화면에 'HIT A'·'GAP' 직접 쓰기 (키·주소·DB는 a~f·gap 유지) ② **접근** — 전 검사 회원 전용 + 무료(`HIT_LAYER_ONE` free, 결제 시작 전까지) ③ **결과 = 보고서 한 틀** — `features/hit/report/ReportKit`(표지·툴바·PDF 파일명 `useReportTitle`·나의 HIT `/api/hit/chain`·점수 읽는 법·ScoreRow) + `HitNextSteps`(본문과 분리된 다음 검사 띠). 검사별 `Hit{A,B,C}ResultView`·`StageResultView`가 `print` 모드로 보고서 겸용 ④ **점수 구간 75/50/25 하나** — 화면 칩·저장 등급·해설 선택 모두. 선호·방향 점수(흥미·이직 동기·리더십 유형·2막/복귀 방향)는 `ScoreRow plain`(강점 구간 표시 안 함) ⑤ **해설** — DB `hit_report_modules`가 문안(인트라 편집), 선택 규칙은 `lib/hit/report-assembler.ts`(A·B)·`lib/hit/stage-report-modules.ts`(C~G). A도 조회 때 다시 선택(저장본 modules_used는 기록). 신규: CORE-*(B 핵심역량 24) · TRK-*(마케팅 5트랙 90) · ONB-*/DEC-*(C 15) · RIASEC-TOP-*(A 흥미 6), DR-A~D 리더십 전환 문안 ⑥ **결함 교훈** — 화면 모듈명≠채점 모듈명이면 0점(B는 채점이 DB module로 재매핑) · MBTI 점수는 왼쪽 성향 %(S·T·J를 100에서 빼지 않는다) · S-Power 키는 `guard` · A는 같은 글자가 여러 모듈에 겹침(집계는 module까지) ⑦ **DISC** — `hit_a_results.disc_intensity`(강도 0~100) 막대 + 비중 보조 ⑧ **체크리스트 준비도 0 = 체크 전** — '준비 부족' 해설·표시 안 함 ⑨ **이력서** — 항목형 `features/hero/ResumeEditor.tsx`(content v2), 이름·연락처는 프로필에서 읽기만 ⑩ **남은 것** — Anthropic 키(401) · 더미 결과 정리 · 실데이터 `hit_reliability_alpha(30)` · 비마케팅 트랙 해설 · 처리방침 수집 항목
 - **2026-10-12 (세션 168) 사이트 점검 조치**: ① **요금 안내 제거** — 헤더 메뉴·`/hero/pricing` 페이지 삭제(→ `/hero/hit` 307, next.config)·AI 상담 요금 섹션·HIT MembershipGate 링크 교체. 통신판매업 신고 전 가격표·'1회 결제'·환불 문구 노출 금지 (사업 시작 시 git 이력에서 복원) ② **운영 DB 테스트 데이터 삭제** — 'Ten:One E2E Test Corp'(2026-04-22) + 매칭 1건 (마이페이지·Journey에 가짜 매칭이 보이던 원인) ③ **직업소개 표현 교체** — '인재를 찾아 연결해 드립니다'·'매칭해 드립니다'·'기업과 조용히 연결' → 분석·현황 안내·무대 준비 (직업안정법, 10곳) ④ **타사 상호 제거** — 'SM · JYP처럼' → '연예 기획사처럼' ⑤ **페이지 제목** — 'use client' 페이지는 폴더 `layout.tsx`에 metadata(hit·coaching·coaching/ai·talent-agent·search-light·about·company·journey·my·resume·jh), 서버 페이지는 `export const metadata`. 하위 라우트가 있는 layout은 `title: { default, template: '%s | HeRo' }` (문자열만 쓰면 자식 제목에서 '| HeRo'가 빠짐). ❌ 새 페이지에 metadata 없이 두기 — 전부 'HeRo — Talent Agency'로 보인다
 - **2026-10-12 (세션 168) 나의 저니 점검 조치**: ① **채용 피드 탭 오류** — `/api/hero/jobs/feed`가 `hero_companies.company_size`를 조회했으나 실제 컬럼은 `size_category` (탭 전체가 오류 화면). DB 함수 `hero_match_candidates_for_jh`도 같은 컬럼을 참조해 실행 자체가 실패 → 마이그레이션 `hero_match_candidates_for_jh_size_category` + `sql/hero-matching-engine-v2/v3.sql` 수정. ❌ 기업 규모 컬럼은 `size_category` 하나 — `company_size`로 쓰지 않는다 ② **탭 이동** — Journey 탭은 state라 `#matching` 해시 링크·`[data-tab]` 셀렉터로는 안 움직인다 → `goTab` 콜백 + `CardLink`(탭 키면 버튼, 아니면 Link). 카드에서 탭을 열 땐 이것만 쓴다 ③ 채용 카드 '자세히' = JD 상세 페이지가 없으므로 카드 안 펼침(접기) ④ **매칭 탭 문구** — '유료 서비스로 전달'·'매칭 의뢰하기'·'적합한 회사와 이어드립니다' → '직접 안내'·'상세 안내 신청'·'맞는 회사를 찾아 알려드립니다' (통신판매업·직업소개 신고 전, 사이트 점검 ③과 같은 기준). 후속 조치(같은 날): 오늘의 미션 UC 표기는 **실제 지급되는 것만** — HIT A·B·이력서·JH·매칭 확인은 `uc_earn_rules`에 규칙만 있고 `earnUC` 호출이 없다(지급 연결 시 `LIFE_ONCE_GLOBAL`에 넣어 재검사 중복 지급 막기) · '연속 체크인 N일'(방문 아님) · 매칭 인박스 `alert()` → 카드 안 문구 · 승급 메일 링크 `brandSiteUrl('hero', …)`

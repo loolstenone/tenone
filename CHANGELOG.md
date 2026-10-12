@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-10-12 ~ 10-13 (세션 170) — HeRo HIT 완성도 · 해설 커버리지
+
+### 장소·운영
+
+- 워크트리 `261012-work-start-cbd6b9`, 작업 종료 때 master push (커밋 72119b68 · c720ff15 · 1a7d53f1 + 기록)
+- 운영 DB (MCP): HIT 더미 결과 전부 삭제(사용자 결정) · 비마케팅 트랙 해설 306 + 미디어 기획 · 흥미 3조합 94 · `hit_d_results.motivation_subs` 컬럼 · ETHICS-LOW·CR-A 문안 · 옛 모듈 48개 category `archived:*`
+
+### 결정 (사용자)
+
+- 해설은 천천히 완성도 높게 — 흥미 3조합 전부 작성 · 성품 해설 DB 일원화 · 도달 불가 해설 연결·정리
+- HIT 더미 결과 전부 삭제
+
+### 변경 내역
+
+- 처리방침: `app/(TenOne)/privacy/page.tsx` HeRo HIT·MADLeap 지원서 항목 (10-13 공지 · 10-20 시행)
+- 채점: `lib/hit/scoring.ts`(PT 극별 평균·결측 제외) · `scoring-c.ts` · `scoring-d.ts`(하위 동기 pullValues·motivationSubs) · `scoring-e.ts`(LATERAL·PIVOT) · `app/api/hit/{d,e}/score`
+- 해설 선택: `lib/hit/report-assembler.ts`(성품 chScores·`chModuleId`) · `lib/hit/stage-report-modules.ts`(CM 하위·CR) · `features/hit/report/ReportKit.tsx`(ScoreList meaningOf·문단 나눔) · `features/hit/HitAResultView.tsx`
+- 보안·흐름: `app/api/hit/*/{response,score}` 본인 세션 · `lib/supabase/hit.ts` startOrResume·getResumeInfo · `features/hit/{MyHitResults,useHitResume,HitStartCTA,HitErrorRetry}.tsx` · `app/api/hit/results`
+- 인트라: `app/intra/hero/report-modules/page.tsx` 재작성
+- SQL: `sql/hit-b-media-program-planning-2026-10.sql` · `hit-b-track-modules-others-2026-10.sql` · `hit-a-riasec-triples-2026-10.sql` · `hit-report-modules-coverage-2026-10.sql`
+
+### 발견·교훈
+
+- 해설 문안이 DB에 있어도 선택 규칙이 그 id를 만들지 않으면 영원히 안 나간다 (CM 하위 3·DROLE 2·CR 4) — 문안 추가와 규칙 연결은 한 번에, 생성 id ↔ DB 대조
+- 인트라 리포트 모듈 화면이 존재하지 않는 컬럼을 조회해 "인트라에서 편집"이 실제로는 불가능했다 — 화면 쿼리는 실제 스키마와 대조
+- `id.includes("GROWTH")` 같은 느슨한 필터가 새 모듈(성품 GROWTH-*)을 엉뚱한 칸에 끌어들인다 — 접두사로 한정
+- 처리방침 시행일은 실제 배포일 기준으로 7일 전 공지를 계산한다 (커밋일 ≠ 공지일)
+
+---
+
 ## 2026-10-12 (세션 169, 집) — HeRo HIT 전면 재편 · 결과 리포트 · 검사 이름 · 해설 135개 · 이력서
 
 ### 장소·운영

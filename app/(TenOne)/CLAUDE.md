@@ -164,6 +164,7 @@
 
 ## 현재 상태
 
+- **2026-10-13 (세션 170)**: 처리방침 HeRo HIT 수집 항목·MADLeap 지원서 추가 — **10-13 공지 · 10-20 시행** (배포일 기준 7일 전 공지; 커밋일이 아니라 실제 배포일로 계산). 후속: 10-14 이후 RooK 공지 줄, 10-20 이후 HeRo·MADLeap 공지 줄 삭제 + `lib/company-info.ts` LEGAL_DOCUMENTS.privacy version·effectiveDate 갱신
 - **2026-10-12 (세션 168)**: `/profile`의 `UCBalanceCard`·UniverseProfile UC 잔액은 `UC_PUBLIC`일 때만 표시·조회 (UC 비공개 운영 — 적립은 계속, 인트라는 그대로, 루트 §1.5 · `lib/uc-visibility.ts`)
 - **2026-10-08 (세션 165)**: `/profile/[handle]` 본인 판정을 email → `members.auth_id`로 · 공개 프로필 RPC `get_public_profile` 공개 필드만(이메일은 privacy_settings.email 동의 시) · 서비스 프로필은 본인만 · `/my` LoginRequired
 
