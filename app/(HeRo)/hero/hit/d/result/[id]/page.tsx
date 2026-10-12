@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   ArrowRight, Copy, Check, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
-  Microscope, Crown, Shuffle, Globe, TrendingUp,
+  Briefcase, Target, TrendingUp, AlertTriangle,
 } from "lucide-react";
 
 function cleanMarkdown(text: string): string {
@@ -21,45 +21,50 @@ function cleanMarkdown(text: string): string {
     .trim();
 }
 
-interface NextRoleOption {
-  role: string;
-  fit_score: number;
-  description: string;
-}
-
 interface HitDResult {
   id: string;
-  session_id: string;
-  member_id: string | null;
-  hit_a_result_id: string | null;
-  expertise_depth: number;
-  expertise_domains: Record<string, number>;
-  leadership_type: string;
-  leadership_scores: Record<string, number>;
-  identity_flexibility: number;
-  network_quality: number;
-  network_breadth: number;
-  senior_readiness: number;
-  next_role_matrix: { current_role: string; possible_roles: NextRoleOption[] };
-  ai_report: string;
-  journey_stage: string;
-  created_at: string;
+  sessionId: string;
+  memberId: string | null;
+  hitAResultId: string | null;
+  // Capital scores
+  capitalExpertise: number;
+  capitalNetwork: number;
+  capitalOrgUnderstanding: number;
+  capitalCompetencies: number;
+  capitalTotal: number;
+  // Motivation
+  motivationPush: number;
+  motivationPull: number;
+  motivationBalance: string; // 'push_dominant' | 'pull_dominant' | 'balanced'
+  // Transferability
+  transferabilitySkillPortability: number;
+  transferabilityIndustryAdaptability: number;
+  transferabilityLearningAgility: number;
+  transferabilityIndex: number;
+  // Readiness
+  readinessPreparation: number;
+  readinessGapAwareness: number;
+  readinessTotal: number;
+  readinessGrade: string;
+  // Gaps & AI
+  gapAreas: string[];
+  aiReport: string;
+  reportModules: Record<string, { title: string; content: string }>;
+  createdAt: string;
 }
 
-const LEADERSHIP_LABELS: Record<string, { label: string; desc: string; color: string }> = {
-  visionary: { label: '비전 제시형', desc: '큰 그림과 방향을 제시하며 사람들에게 영감을 주는 리더', color: 'text-purple-600 bg-purple-50' },
-  coaching: { label: '코칭형', desc: '팀원의 잠재력을 발견하고 성장을 이끄는 리더', color: 'text-green-600 bg-green-50' },
-  democratic: { label: '민주형', desc: '다양한 의견을 수렴하고 합의를 이끌어내는 리더', color: 'text-blue-600 bg-blue-50' },
-  commanding: { label: '지시형', desc: '명확한 지시와 실행력으로 위기를 돌파하는 리더', color: 'text-orange-600 bg-orange-50' },
+const MOTIVATION_LABELS: Record<string, { label: string; color: string }> = {
+  push_dominant: { label: 'Push 우세 (불만족 동기)', color: 'text-orange-600 bg-orange-50' },
+  pull_dominant: { label: 'Pull 우세 (기회 동기)', color: 'text-green-600 bg-green-50' },
+  balanced: { label: '균형 동기', color: 'text-blue-600 bg-blue-50' },
 };
 
-const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  ready_for_transition: { label: '전환 준비 완료', color: 'text-green-600 bg-green-50' },
-  almost_ready: { label: '거의 준비됨', color: 'text-blue-600 bg-blue-50' },
-  building_bridge: { label: '브릿지 구축 중', color: 'text-indigo-600 bg-indigo-50' },
-  deepening_expertise: { label: '전문성 심화 중', color: 'text-yellow-600 bg-yellow-50' },
-  exploring_options: { label: '옵션 탐색 중', color: 'text-orange-600 bg-orange-50' },
-  early_reflection: { label: '초기 성찰 단계', color: 'text-neutral-600 bg-neutral-100' },
+const READINESS_GRADE_INFO: Record<string, { label: string; color: string }> = {
+  A: { label: '전환 준비 완료', color: 'text-green-600 bg-green-50' },
+  B: { label: '거의 준비됨', color: 'text-blue-600 bg-blue-50' },
+  C: { label: '준비 진행 중', color: 'text-yellow-600 bg-yellow-50' },
+  D: { label: '준비 필요', color: 'text-orange-600 bg-orange-50' },
+  F: { label: '전환 재검토', color: 'text-red-600 bg-red-50' },
 };
 
 const TOTAL_PAGES = 5;
@@ -78,7 +83,32 @@ export default function HitDResultPage() {
       .then(r => r.json())
       .then(data => {
         if (data.error) { setLoading(false); return; }
-        setResult(data);
+        setResult({
+          id: data.id,
+          sessionId: data.session_id,
+          memberId: data.member_id,
+          hitAResultId: data.hit_a_result_id,
+          capitalExpertise: data.capital_expertise ?? 0,
+          capitalNetwork: data.capital_network ?? 0,
+          capitalOrgUnderstanding: data.capital_org_understanding ?? 0,
+          capitalCompetencies: data.capital_competencies ?? 0,
+          capitalTotal: data.capital_total ?? 0,
+          motivationPush: data.motivation_push ?? 0,
+          motivationPull: data.motivation_pull ?? 0,
+          motivationBalance: data.motivation_balance ?? 'balanced',
+          transferabilitySkillPortability: data.transferability_skill_portability ?? 0,
+          transferabilityIndustryAdaptability: data.transferability_industry_adaptability ?? 0,
+          transferabilityLearningAgility: data.transferability_learning_agility ?? 0,
+          transferabilityIndex: data.transferability_index ?? 0,
+          readinessPreparation: data.readiness_preparation ?? 0,
+          readinessGapAwareness: data.readiness_gap_awareness ?? 0,
+          readinessTotal: data.readiness_total ?? 0,
+          readinessGrade: data.readiness_grade ?? 'C',
+          gapAreas: data.gap_areas ?? [],
+          aiReport: data.ai_report ?? '',
+          reportModules: data.report_modules ?? {},
+          createdAt: data.created_at,
+        });
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -125,11 +155,17 @@ export default function HitDResultPage() {
     );
   }
 
-  const leadershipInfo = LEADERSHIP_LABELS[result.leadership_type] || LEADERSHIP_LABELS.visionary;
-  const journeyInfo = JOURNEY_LABELS[result.journey_stage] || JOURNEY_LABELS.early_reflection;
-  const pageLabels = ["종합 요약", "전문성 & 리더십", "정체성 유연성", "네트워크 & 다음 역할", "다음 단계"];
+  const motivationInfo = MOTIVATION_LABELS[result.motivationBalance] || MOTIVATION_LABELS.balanced;
+  const gradeInfo = READINESS_GRADE_INFO[result.readinessGrade] || READINESS_GRADE_INFO.C;
+  const pageLabels = ["종합 요약", "경력 자본", "이직 동기", "전환 가능성 & 준비도", "다음 단계"];
 
-  // Score bar renderer
+  // Report module filters
+  const capitalMods = Object.entries(result.reportModules).filter(([k]) => k.startsWith('CAPITAL-'));
+  const motivationMods = Object.entries(result.reportModules).filter(([k]) => k.startsWith('MOTIV-'));
+  const transferMods = Object.entries(result.reportModules).filter(([k]) => k.startsWith('TRANS-'));
+  const readyMods = Object.entries(result.reportModules).filter(([k]) => k.startsWith('READY-'));
+
+  // Simple bar renderer
   const ScoreBar = ({ label, value, max = 100 }: { label: string; value: number; max?: number }) => (
     <div className="mb-3">
       <div className="flex justify-between text-xs mb-1">
@@ -142,20 +178,25 @@ export default function HitDResultPage() {
     </div>
   );
 
-  // Leadership Radar (4 axes)
-  const leadershipData = [
-    { label: '비전', value: result.leadership_scores.visionary || 0 },
-    { label: '코칭', value: result.leadership_scores.coaching || 0 },
-    { label: '민주', value: result.leadership_scores.democratic || 0 },
-    { label: '지시', value: result.leadership_scores.commanding || 0 },
+  // Radar chart for capital (SVG inline)
+  const capitalData = [
+    { label: '전문성', value: result.capitalExpertise },
+    { label: '네트워크', value: result.capitalNetwork },
+    { label: '조직이해', value: result.capitalOrgUnderstanding },
+    { label: '핵심역량', value: result.capitalCompetencies },
   ];
 
-  const RadarLeadership = () => {
+  const RadarCapital = () => {
     const cx = 120, cy = 120, maxR = 90;
-    const n = leadershipData.length;
+    const n = capitalData.length;
     const angleStep = (2 * Math.PI) / n;
 
-    const pointsValue = leadershipData.map((d, i) => {
+    const pointsMax = capitalData.map((_, i) => {
+      const angle = angleStep * i - Math.PI / 2;
+      return `${cx + maxR * Math.cos(angle)},${cy + maxR * Math.sin(angle)}`;
+    }).join(' ');
+
+    const pointsValue = capitalData.map((d, i) => {
       const angle = angleStep * i - Math.PI / 2;
       const r = (d.value / 100) * maxR;
       return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
@@ -163,9 +204,11 @@ export default function HitDResultPage() {
 
     return (
       <svg viewBox="0 0 240 240" className="w-full max-w-[240px] mx-auto">
+        {/* Grid lines */}
         {[0.25, 0.5, 0.75, 1].map((scale) => (
-          <polygon key={scale}
-            points={leadershipData.map((_, i) => {
+          <polygon
+            key={scale}
+            points={capitalData.map((_, i) => {
               const angle = angleStep * i - Math.PI / 2;
               const r = scale * maxR;
               return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
@@ -173,25 +216,86 @@ export default function HitDResultPage() {
             fill="none" stroke="#e5e5e5" strokeWidth="0.5"
           />
         ))}
-        {leadershipData.map((_, i) => {
+        {/* Axes */}
+        {capitalData.map((_, i) => {
           const angle = angleStep * i - Math.PI / 2;
-          return <line key={i} x1={cx} y1={cy} x2={cx + maxR * Math.cos(angle)} y2={cy + maxR * Math.sin(angle)} stroke="#e5e5e5" strokeWidth="0.5" />;
+          return (
+            <line key={i} x1={cx} y1={cy}
+              x2={cx + maxR * Math.cos(angle)} y2={cy + maxR * Math.sin(angle)}
+              stroke="#e5e5e5" strokeWidth="0.5"
+            />
+          );
         })}
+        {/* Value polygon */}
         <polygon points={pointsValue} fill="rgba(229,57,53,0.15)" stroke="#E53935" strokeWidth="2" />
-        {leadershipData.map((d, i) => {
+        {/* Value dots */}
+        {capitalData.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
           const r = (d.value / 100) * maxR;
           return <circle key={i} cx={cx + r * Math.cos(angle)} cy={cy + r * Math.sin(angle)} r="3" fill="#E53935" />;
         })}
-        {leadershipData.map((d, i) => {
+        {/* Labels */}
+        {capitalData.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
           const lr = maxR + 20;
+          const x = cx + lr * Math.cos(angle);
+          const y = cy + lr * Math.sin(angle);
           return (
-            <text key={i} x={cx + lr * Math.cos(angle)} y={cy + lr * Math.sin(angle)} textAnchor="middle" dominantBaseline="middle"
-              className="text-[10px] fill-neutral-500">{d.label}</text>
+            <text key={i} x={x} y={y} textAnchor="middle" dominantBaseline="middle"
+              className="text-[10px] fill-neutral-500">
+              {d.label}
+            </text>
           );
         })}
       </svg>
+    );
+  };
+
+  // Push vs Pull bar
+  const PushPullBar = () => {
+    const total = result.motivationPush + result.motivationPull;
+    const pushPct = total > 0 ? Math.round((result.motivationPush / total) * 100) : 50;
+    const pullPct = 100 - pushPct;
+    return (
+      <div>
+        <div className="flex justify-between text-xs mb-2">
+          <span className="text-orange-600 font-medium">Push {pushPct}%</span>
+          <span className="text-green-600 font-medium">Pull {pullPct}%</span>
+        </div>
+        <div className="h-3 bg-neutral-100 rounded-full overflow-hidden flex">
+          <div className="h-full bg-orange-400 transition-all duration-500" style={{ width: `${pushPct}%` }} />
+          <div className="h-full bg-green-400 transition-all duration-500" style={{ width: `${pullPct}%` }} />
+        </div>
+        <div className="flex justify-between text-[10px] text-neutral-400 mt-1">
+          <span>불만족 동기</span>
+          <span>기회 동기</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Transferability gauge
+  const TransferGauge = () => {
+    const value = result.transferabilityIndex;
+    const rotation = (value / 100) * 180 - 90;
+    return (
+      <div className="text-center">
+        <svg viewBox="0 0 200 120" className="w-full max-w-[200px] mx-auto">
+          {/* Background arc */}
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e5e5" strokeWidth="12" strokeLinecap="round" />
+          {/* Value arc */}
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E53935" strokeWidth="12" strokeLinecap="round"
+            strokeDasharray={`${(value / 100) * 251.2} 251.2`} />
+          {/* Needle */}
+          <line x1="100" y1="100" x2="100" y2="30"
+            stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"
+            transform={`rotate(${rotation} 100 100)`} />
+          <circle cx="100" cy="100" r="4" fill="#1a1a1a" />
+          {/* Value text */}
+          <text x="100" y="95" textAnchor="middle" className="text-2xl font-extrabold fill-neutral-900">{value}%</text>
+        </svg>
+        <p className="text-xs text-neutral-400 mt-1">전환 가능성 지수</p>
+      </div>
     );
   };
 
@@ -204,176 +308,168 @@ export default function HitDResultPage() {
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
               <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - D 결과</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">리더십 전환 (시니어)</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold">경력전환 분석</h1>
             </div>
             <div className="flex justify-center mb-6">
-              <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${journeyInfo.color}`}>
-                {journeyInfo.label}
+              <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${gradeInfo.color}`}>
+                {gradeInfo.label}
               </span>
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Crown className="h-4 w-4 text-neutral-400" />
+                <Briefcase className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">리더십 유형:</span> {leadershipInfo.label}
+                  <span className="font-bold">경력 자본:</span> {result.capitalTotal}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Microscope className="h-4 w-4 text-neutral-400" />
+                <Target className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">전문성 깊이:</span> {result.expertise_depth}%
+                  <span className="font-bold">동기 유형:</span> {motivationInfo.label}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Shuffle className="h-4 w-4 text-neutral-400" />
+                <TrendingUp className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">정체성 유연성:</span> {result.identity_flexibility}%
+                  <span className="font-bold">전환 가능성:</span> {result.transferabilityIndex}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Globe className="h-4 w-4 text-neutral-400" />
+                <AlertTriangle className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">시니어 준비도:</span> {result.senior_readiness}%
+                  <span className="font-bold">준비도:</span> {result.readinessGrade}등급 ({result.readinessTotal}%)
                 </p>
               </div>
             </div>
-            {/* Top recommended role */}
-            {result.next_role_matrix?.possible_roles?.[0] && (
-              <div className="mt-4 p-4 border-2 border-[#E53935] rounded-xl bg-red-50/50">
-                <p className="text-xs font-bold text-[#E53935] mb-1">추천 다음 역할 #1</p>
-                <p className="text-lg font-extrabold text-neutral-900">
-                  {result.next_role_matrix.possible_roles[0].role}
-                </p>
-                <p className="text-xs text-neutral-500 mt-1">
-                  적합도 {result.next_role_matrix.possible_roles[0].fit_score}%
-                </p>
+          </div>
+        );
+
+      // ── Page 2: 경력 자본 ──
+      case 1:
+        return (
+          <div key="p1">
+            <h2 className="text-lg font-bold mb-4">경력 자본</h2>
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
+              <RadarCapital />
+            </div>
+            <div className="space-y-1 mb-6">
+              <ScoreBar label="전문성 깊이" value={result.capitalExpertise} />
+              <ScoreBar label="인적 네트워크" value={result.capitalNetwork} />
+              <ScoreBar label="조직 이해력" value={result.capitalOrgUnderstanding} />
+              <ScoreBar label="핵심 역량" value={result.capitalCompetencies} />
+            </div>
+            {capitalMods.length > 0 && (
+              <div className="space-y-5">
+                {capitalMods.map(([id, m]) => (
+                  <div key={id} className="border-l-2 border-neutral-300 pl-4">
+                    <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                    <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         );
 
-      // ── Page 2: 전문성 & 리더십 ──
-      case 1:
-        return (
-          <div key="p1">
-            <h2 className="text-lg font-bold mb-4">전문성 & 리더십</h2>
-
-            {/* Expertise bars */}
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <h3 className="text-sm font-bold text-neutral-700 mb-4">전문성</h3>
-              <ScoreBar label="전문 분야 깊이" value={result.expertise_depth} />
-              <ScoreBar label="도메인 확장성" value={result.expertise_domains?.breadth ?? 0} />
-            </div>
-
-            {/* Leadership radar */}
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-neutral-700">리더십 스타일</h3>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${leadershipInfo.color}`}>
-                  {leadershipInfo.label}
-                </span>
-              </div>
-              <RadarLeadership />
-              <div className="mt-4 space-y-1">
-                <ScoreBar label="비전 제시형" value={result.leadership_scores.visionary || 0} />
-                <ScoreBar label="코칭형" value={result.leadership_scores.coaching || 0} />
-                <ScoreBar label="민주형" value={result.leadership_scores.democratic || 0} />
-                <ScoreBar label="지시형" value={result.leadership_scores.commanding || 0} />
-              </div>
-            </div>
-
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              {leadershipInfo.desc}
-            </p>
-          </div>
-        );
-
-      // ── Page 3: 정체성 유연성 ──
+      // ── Page 3: 이직 동기 ──
       case 2:
         return (
           <div key="p2">
-            <h2 className="text-lg font-bold mb-4">정체성 유연성</h2>
+            <h2 className="text-lg font-bold mb-4">이직 동기 분석</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="text-center mb-6">
-                <p className="text-4xl font-extrabold text-neutral-900">{result.identity_flexibility}%</p>
-                <p className="text-xs text-neutral-400 mt-1">정체성 유연성 지수</p>
+              <div className="flex justify-center mb-4">
+                <span className={`px-4 py-2 rounded-full text-xs font-bold ${motivationInfo.color}`}>
+                  {motivationInfo.label}
+                </span>
               </div>
-              {/* Identity sub-scores — we need to derive from expertise_domains or separate fields */}
-              {/* Since we store identity_flexibility as single number, show related network/expertise */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                  <span className="text-sm text-neutral-600">역할에 묶이지 않는 정체성</span>
-                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 60 ? '유연' : result.identity_flexibility >= 40 ? '보통' : '경직'}</span>
+              <PushPullBar />
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-xs font-bold text-orange-700 mb-1">Push 요인</p>
+                  <p className="text-2xl font-extrabold text-orange-600">{result.motivationPush}%</p>
+                  <p className="text-[10px] text-orange-500">현직 불만족</p>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                  <span className="text-sm text-neutral-600">변화에 대한 태도</span>
-                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 65 ? '적극 수용' : result.identity_flexibility >= 45 ? '선택적 수용' : '회피 경향'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                  <span className="text-sm text-neutral-600">자기 재발명 의지</span>
-                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 70 ? '높음' : result.identity_flexibility >= 50 ? '보통' : '낮음'}</span>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-xs font-bold text-green-700 mb-1">Pull 요인</p>
+                  <p className="text-2xl font-extrabold text-green-600">{result.motivationPull}%</p>
+                  <p className="text-[10px] text-green-500">새로운 기회</p>
                 </div>
               </div>
             </div>
-
-            {/* Insight */}
-            <div className="bg-neutral-50 p-4 rounded-xl">
-              <p className="text-xs text-neutral-500 leading-relaxed">
-                {result.identity_flexibility >= 65
-                  ? '높은 정체성 유연성은 시니어 전환의 핵심 자산입니다. 역할이 바뀌어도 자신의 핵심 가치를 유지하면서 새로운 맥락에 적응할 수 있습니다.'
-                  : result.identity_flexibility >= 45
-                    ? '보통 수준의 정체성 유연성입니다. 시니어 전환을 위해 현재 역할을 넘어선 자기 정의를 연습해보는 것이 도움됩니다.'
-                    : '현재 역할에 대한 강한 동일시가 있습니다. 시니어 전환 시 가장 큰 심리적 도전이 될 수 있으며, 점진적인 역할 확장을 권합니다.'}
-              </p>
-            </div>
+            {motivationMods.length > 0 && motivationMods.map(([id, m]) => (
+              <div key={id} className="border-l-2 border-orange-400 pl-4 mb-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
           </div>
         );
 
-      // ── Page 4: 네트워크 & 다음 역할 ──
+      // ── Page 4: 전환 가능성 & 준비도 ──
       case 3:
         return (
           <div key="p3">
-            <h2 className="text-lg font-bold mb-4">네트워크 & 다음 역할</h2>
+            <h2 className="text-lg font-bold mb-4">전환 가능성 & 준비도</h2>
 
-            {/* Network scores */}
+            {/* Transferability */}
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <h3 className="text-sm font-bold text-neutral-700 mb-4">네트워크</h3>
-              <ScoreBar label="네트워크 질" value={result.network_quality} />
-              <ScoreBar label="네트워크 폭" value={result.network_breadth} />
-              <ScoreBar label="시니어 준비도" value={result.senior_readiness} />
-            </div>
-
-            {/* Next Role Matrix */}
-            <div className="mb-6">
-              <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">다음 역할 매트릭스</h3>
-              {result.next_role_matrix?.current_role && (
-                <p className="text-xs text-neutral-500 mb-4">
-                  현재 추정 역할: <span className="font-bold text-neutral-700">{result.next_role_matrix.current_role}</span>
-                </p>
-              )}
-              <div className="space-y-3">
-                {(result.next_role_matrix?.possible_roles || []).map((role, i) => (
-                  <div key={i} className={`p-4 rounded-xl border ${i === 0 ? 'border-[#E53935] bg-red-50/30' : 'border-neutral-200'}`}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        {i === 0 && <TrendingUp className="h-4 w-4 text-[#E53935]" />}
-                        <p className="font-bold text-sm text-neutral-800">{role.role}</p>
-                      </div>
-                      <span className={`text-sm font-mono font-bold ${i === 0 ? 'text-neutral-800' : 'text-neutral-500'}`}>{role.fit_score}%</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">{role.description}</p>
-                    {/* Fit bar */}
-                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mt-2">
-                      <div className={`h-full rounded-full transition-all duration-500 ${i === 0 ? 'bg-[#E53935]' : 'bg-neutral-300'}`}
-                        style={{ width: `${role.fit_score}%` }} />
-                    </div>
-                  </div>
-                ))}
+              <TransferGauge />
+              <div className="mt-4 space-y-1">
+                <ScoreBar label="스킬 이동성" value={result.transferabilitySkillPortability} />
+                <ScoreBar label="산업 적응력" value={result.transferabilityIndustryAdaptability} />
+                <ScoreBar label="학습 민첩성" value={result.transferabilityLearningAgility} />
               </div>
             </div>
 
+            {transferMods.length > 0 && transferMods.map(([id, m]) => (
+              <div key={id} className="border-l-2 border-purple-400 pl-4 mb-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+
+            {/* Readiness */}
+            <div className="border border-neutral-200 rounded-xl p-6 mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-neutral-700">전환 준비도</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${gradeInfo.color}`}>
+                  {result.readinessGrade}등급
+                </span>
+              </div>
+              <ScoreBar label="준비 정도" value={result.readinessPreparation} />
+              <ScoreBar label="갭 인식" value={result.readinessGapAwareness} />
+              <div className="mt-2 pt-2 border-t border-neutral-100">
+                <div className="flex justify-between text-sm">
+                  <span className="font-bold text-neutral-700">종합 준비도</span>
+                  <span className="font-extrabold text-neutral-900">{result.readinessTotal}%</span>
+                </div>
+              </div>
+            </div>
+
+            {readyMods.length > 0 && readyMods.map(([id, m]) => (
+              <div key={id} className="mt-4 border-l-2 border-blue-400 pl-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+
+            {/* Gap Areas */}
+            {result.gapAreas.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">주요 갭 영역</h3>
+                <div className="space-y-2">
+                  {result.gapAreas.map((gap, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-neutral-100 px-3 py-2 rounded-lg">
+                      <AlertTriangle className="h-3.5 w-3.5 text-neutral-400 flex-shrink-0" />
+                      <span className="text-xs text-neutral-700">{gap}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* AI Report */}
-            {result.ai_report && (
+            {result.aiReport && (
               <div className="mt-6">
                 <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" />
@@ -381,7 +477,7 @@ export default function HitDResultPage() {
                 </h3>
                 <div className="bg-neutral-50 p-5 rounded-xl">
                   <p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">
-                    {cleanMarkdown(result.ai_report)}
+                    {cleanMarkdown(result.aiReport)}
                   </p>
                 </div>
               </div>
@@ -395,14 +491,14 @@ export default function HitDResultPage() {
           <div key="p4">
             <h2 className="text-lg font-bold mb-6">다음 단계</h2>
             <div className="space-y-4">
-              {result.hit_a_result_id && (
+              {result.hitAResultId && (
                 <Link href={`/hero/hit/profile/${result.id}`}
                   className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+D</div>
+                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+C</div>
                     <div className="flex-1">
                       <p className="font-bold text-neutral-800">통합 프로필 보기</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + D 결과를 한눈에</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + C 결과를 한눈에</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-[#E53935]" />
                   </div>
@@ -424,8 +520,8 @@ export default function HitDResultPage() {
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
-                    <p className="font-bold text-neutral-800">AI 시니어 전환 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">리더십 전환, 역할 설계, 레거시 구축 전략</p>
+                    <p className="font-bold text-neutral-800">AI 경력전환 상담</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">이직 전략, 갭 분석, 액션 플랜 수립</p>
                   </div>
                   <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 →</Link>
                 </div>
@@ -435,7 +531,7 @@ export default function HitDResultPage() {
                   <Users className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">전문가 대면 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 시니어 멘토가 전환을 함께 설계합니다</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 경력전환을 함께 설계합니다</p>
                   </div>
                   <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 →</Link>
                 </div>

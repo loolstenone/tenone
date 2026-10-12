@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { UC_PUBLIC } from "@/lib/uc-visibility";
+import { StageChecklistCard } from "@/features/hero/StageChecklistCard";
 import {
     Target,
     Plus,
@@ -100,6 +101,9 @@ export function GoalsTab({ memberId }: { memberId: string }) {
                     </div>
                 )}
             </div>
+
+            {/* 준비 체크리스트 — 검사에서 분리한 상태형 항목 (2026-10-12) */}
+            <StageChecklistCard />
 
             {createOpen && (
                 <CreateGoalModal

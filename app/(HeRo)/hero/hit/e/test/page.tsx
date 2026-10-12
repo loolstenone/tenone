@@ -5,8 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { STAGE_SUBDOMAIN_MODULE } from "@/lib/hit/stage-modules";
 
-type EModuleType = 'satisfaction' | 'direction' | 'legacy' | 'social' | 'readiness' | 'social_readiness';
+type EModuleType = 'expertise' | 'leadership' | 'identity' | 'network' | 'seniorReadiness';
 
 interface QuestionItem {
   module: EModuleType;
@@ -22,22 +23,21 @@ interface Response {
 }
 
 const MODULE_NAMES: Record<EModuleType, string> = {
-  satisfaction: '삶의 만족도 & 열정',
-  direction: '방향 탐색',
-  legacy: '레거시 스킬',
-  social: '사회적 연결 필요도',
-  readiness: '2막 준비도',
-  social_readiness: '사회적 연결 & 준비도',
+  expertise: '전문성 자산',
+  leadership: '리더십 유형',
+  identity: '경력 정체성 유연성',
+  network: '네트워크 자본',
+  seniorReadiness: '고년차 이직 준비도',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'satisfaction→direction': '다음은 인생 2막의 방향을 탐색합니다',
-  'direction→legacy': '수십 년의 경험, 레거시 스킬을 평가합니다',
-  'legacy→social': '사회적 연결 필요도를 확인합니다',
-  'social→readiness': '마지막! 2막 준비도를 확인합니다',
+  'expertise→leadership': '다음은 리더십 유형을 분석합니다',
+  'leadership→identity': '경력 정체성 유연성을 평가합니다',
+  'identity→network': '네트워크 자본을 확인합니다',
+  'network→seniorReadiness': '마지막! 고년차 이직 준비도를 확인합니다',
 };
 
-const MODULE_ORDER: EModuleType[] = ['satisfaction', 'direction', 'legacy', 'social', 'readiness'];
+const MODULE_ORDER: EModuleType[] = ['expertise', 'leadership', 'identity', 'network', 'seniorReadiness'];
 
 const AVG_SECONDS_PER_QUESTION = 6;
 
@@ -70,7 +70,7 @@ function HitETestContent() {
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = allQuestions.length;
   const currentQuestion = allQuestions[currentIndex];
-  const currentModule = currentQuestion?.module ?? 'satisfaction';
+  const currentModule = currentQuestion?.module ?? 'expertise';
   const answeredCount = responses.size;
 
   // Load questions from DB then restore session
@@ -88,7 +88,8 @@ function HitETestContent() {
 
       const grouped = new Map<EModuleType, QuestionItem[]>(MODULE_ORDER.map((m) => [m, []]));
       for (const row of rows) {
-        const mod = row.module as EModuleType;
+        const mod = STAGE_SUBDOMAIN_MODULE.e[row.sub_domain ?? ''] as EModuleType | undefined;
+        if (!mod) continue;
         grouped.get(mod)?.push({
           module: mod,
           id: row.id,
@@ -253,7 +254,7 @@ function HitETestContent() {
       <div className="min-h-[60vh] flex items-center justify-center">
         <p className="text-neutral-400">
           세션을 찾을 수 없습니다.{" "}
-          <a href="/hero/hit/e" className="text-amber-700 underline">
+          <a href="/hero/hit/e" className="text-[#E53935] underline">
             다시 시작
           </a>
           해 주세요.
@@ -265,7 +266,7 @@ function HitETestContent() {
   if (!isRestored) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -273,8 +274,8 @@ function HitETestContent() {
   if (isSubmitting || isComplete) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="w-8 h-8 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" />
-        <p className="text-neutral-500 text-sm">인생 2막 분석 리포트를 생성하고 있습니다...</p>
+        <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
+        <p className="text-neutral-500 text-sm">시니어 리더십 전환 리포트를 생성하고 있습니다...</p>
         <p className="text-neutral-400 text-xs">AI가 분석 중이므로 약 30초 소요됩니다</p>
       </div>
     );
@@ -305,7 +306,7 @@ function HitETestContent() {
           </div>
           <div className="h-1 w-full bg-neutral-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-amber-700 transition-all duration-300 ease-out rounded-full"
+              className="h-full bg-[#E53935] transition-all duration-300 ease-out rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -354,7 +355,7 @@ function HitETestContent() {
                             rounded-xl text-base font-bold
                             transition-all duration-200
                             ${isSelected
-                              ? 'bg-amber-700 text-white scale-110 shadow-lg shadow-amber-200'
+                              ? 'bg-[#E53935] text-white scale-110 shadow-lg shadow-red-200'
                               : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'
                             }
                             ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}
@@ -399,7 +400,7 @@ function HitETestPageInner() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="h-8 w-8 border-2 border-neutral-200 border-t-amber-700 rounded-full animate-spin" />
+          <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
         </div>
       }
     >

@@ -8,7 +8,7 @@ const supabase = createAdminClient();
 
 // ── 세션 ──
 
-export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', memberId?: string) {
+export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP', memberId?: string) {
   const sessionToken = crypto.randomUUID();
   const firstModule: Record<string, string> = {
     A: 'base',
@@ -35,7 +35,7 @@ export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | '
 }
 
 /** 회원의 가장 최근 진행 중 세션 — 검사 중단 후 다른 기기에서도 이어하기 (2026-10-12) */
-export async function getLatestInProgressHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', memberId: string) {
+export async function getLatestInProgressHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP', memberId: string) {
   const { data } = await supabase
     .from('hit_sessions')
     .select('id, session_token, status, created_at')
@@ -231,24 +231,16 @@ export async function getLatestHitAResult(memberId?: string) {
 
 // ── Hero Profile ──
 
-// ── HIT C 결과 ──
+// ── HIT C 결과 (진입 — 2026-10-12 신설) ──
 
 export async function createHitCResult(result: Record<string, unknown>) {
-  const { data, error } = await supabase
-    .from('hit_c_results')
-    .insert(result)
-    .select()
-    .single();
+  const { data, error } = await supabase.from('hit_c_results').insert(result).select().single();
   if (error) throw error;
   return data;
 }
 
 export async function getHitCResult(resultId: string) {
-  const { data, error } = await supabase
-    .from('hit_c_results')
-    .select('*')
-    .eq('id', resultId)
-    .maybeSingle();
+  const { data, error } = await supabase.from('hit_c_results').select('*').eq('id', resultId).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -312,6 +304,28 @@ export async function createHitFResult(result: Record<string, unknown>) {
 export async function getHitFResult(resultId: string) {
   const { data, error } = await supabase
     .from('hit_f_results')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// ── HIT GAP 결과 ──
+
+export async function createHitGapResult(result: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from('hit_gap_results')
+    .insert(result)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getHitGapResult(resultId: string) {
+  const { data, error } = await supabase
+    .from('hit_gap_results')
     .select('*')
     .eq('id', resultId)
     .maybeSingle();

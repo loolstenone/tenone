@@ -11,8 +11,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('sessionToken, questionId, module은 필수입니다.', 400);
     }
 
-    if (module !== 'character_deep' && module !== 'aptitude_deep') {
-      return errorResponse('심화 응답 모듈이 아닙니다.', 400);
+    // optionValue 검증: 1-7 Likert 또는 subscale:value 형식
+    const numValue = parseInt(optionValue, 10);
+    if (isNaN(numValue) || numValue < 1 || numValue > 7) {
+      const parts = optionValue.split(':');
+      if (parts.length < 2) {
+        return errorResponse('optionValue는 1-7 범위이거나 subscale:value 형식이어야 합니다.', 400);
+      }
     }
 
     const session = await getHitSession(sessionToken);
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse({ success: true });
   } catch (error) {
-    console.error('[HIT A Deep Response] 저장 오류:', error);
+    console.error('[HIT GAP Response] 저장 오류:', error);
     const message = error instanceof Error ? error.message : '응답 저장 실패';
     return errorResponse(message, 500);
   }

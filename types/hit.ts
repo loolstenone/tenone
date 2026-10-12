@@ -41,9 +41,9 @@ export type HitQuestion = MBTIQuestion | DISCQuestion | BaseQuestion;
 
 // ── 세션 ──
 
-export type HitTestType = 'A' | 'B';
+export type HitTestType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP';
 export type HitSessionStatus = 'in_progress' | 'completed' | 'abandoned';
-export type HitModule = 'base' | 'mbti' | 'disc' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core' | 'character_deep' | 'aptitude_deep' | 'personality' | 'riasec' | 'competency' | 'readiness';
+export type HitModule = 'base' | 'mbti' | 'disc' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core' | 'character_deep' | 'aptitude_deep' | 'competency_core' | 'competency' | 'efficacy' | 'career_insight' | 'readiness' | 'readiness_track' | 'onboarding' | 'career_decision' | string;
 
 export interface HitSession {
   id: string;
@@ -259,32 +259,26 @@ export interface CompetencyQuestion extends LikertQuestion {
   track?: string;
 }
 
-export type CompetencyTrack = 'marketing_strategy' | 'branding' | 'advertising' | 'content' | 'data_performance';
+/** 직무 트랙 id — DB hit_competency_tracks가 원천 (문자열) */
+export type CompetencyTrack = string;
 
+export type HitMatrixCell = '최적영역' | '탐색학습필요' | '소진리스크' | '비관심영역' | '미측정';
+
+/** HIT B "역량과 방향" 결과 (2026-10-12 재정의) */
 export interface HitBResult {
   id: string;
   sessionId: string;
   memberId: string | null;
   hitAResultId: string | null;
-  personalityScores: Record<string, number>;
-  darkTriadFlags: Record<string, boolean>;
-  riasecR: number;
-  riasecI: number;
-  riasecA: number;
-  riasecS: number;
-  riasecE: number;
-  riasecC: number;
-  hollandCode: string;
   competencyCommon: Record<string, number>;
   competencyTrack: string;
   competencyTrackScores: Record<string, number>;
-  readinessSelf: number;
-  readinessPortfolio: number;
-  readinessInterview: number;
-  readinessNetwork: number;
-  readinessTotal: number;
-  readinessGrade: string;
-  readinessGaps: string[];
+  efficacyScores: Record<string, number>;
+  efficacyTop3: string;
+  matrix: { cells: Record<string, HitMatrixCell>; optimal: string[]; explore: string[]; burnout: string[] } | null;
+  insightSelf: number;
+  insightJob: number;
+  insightTotal: number;
   aiReport: string | null;
   journeyStage: string;
   createdAt: string;

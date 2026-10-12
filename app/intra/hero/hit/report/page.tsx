@@ -22,19 +22,19 @@ interface MemberHitRow {
   mbti_type: string | null;
   hit_a_at: string | null;
   hit_b_id: string | null;
-  hit_c_id: string | null;
   hit_d_id: string | null;
   hit_e_id: string | null;
   hit_f_id: string | null;
+  hit_gap_id: string | null;
 }
 
 const LAYERS: { key: keyof MemberHitRow; label: string; path: string }[] = [
   { key: "hit_a_id", label: "A", path: "a" },
   { key: "hit_b_id", label: "B", path: "b" },
-  { key: "hit_c_id", label: "C", path: "c" },
-  { key: "hit_d_id", label: "D", path: "d" },
-  { key: "hit_e_id", label: "E", path: "e" },
-  { key: "hit_f_id", label: "F", path: "f" },
+  { key: "hit_d_id", label: "C", path: "c" },
+  { key: "hit_e_id", label: "D", path: "d" },
+  { key: "hit_f_id", label: "E", path: "e" },
+  { key: "hit_gap_id", label: "F", path: "f" },
 ];
 
 function completedCount(row: MemberHitRow) {
@@ -179,10 +179,10 @@ export default function HitMemberListPage() {
         created_at,
         hit_a_results(id, type_code, disc_primary, mbti_type, created_at),
         hit_b_results(id),
-        hit_c_results(id),
         hit_d_results(id),
         hit_e_results(id),
-        hit_f_results(id)
+        hit_f_results(id),
+        hit_gap_results(id)
       `)
       .order("created_at", { ascending: false })
       .limit(200)
@@ -203,10 +203,10 @@ export default function HitMemberListPage() {
             mbti_type: a ? (a.mbti_type as string | null) : null,
             hit_a_at: a ? (a.created_at as string | null) : null,
             hit_b_id: ((m.hit_b_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
-            hit_c_id: ((m.hit_c_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
             hit_d_id: ((m.hit_d_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
             hit_e_id: ((m.hit_e_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
             hit_f_id: ((m.hit_f_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
+            hit_gap_id: ((m.hit_gap_results as Record<string, unknown>[] | null)?.[0]?.id as string) ?? null,
           };
         });
         setRows(mapped);

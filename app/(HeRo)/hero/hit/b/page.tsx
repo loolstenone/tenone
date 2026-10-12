@@ -3,43 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Brain, Compass, Target, Shield, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { Compass, Target, Shield, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
+import { HIT_STAGES } from "@/lib/hit/stages";
+
+// 검사 구성·문항 수는 실제 출제(/api/hit/b/questions → hit_questions test_type B)와 같아야 한다 (2026-10-12 재정의 — 전 회원 공통 "역량과 방향")
 const modules = [
-  {
-    icon: Brain,
-    title: "성격 특성 검사",
-    desc: "15가지 성격 하위척도를 심층 측정합니다.",
-    count: "80문항",
-    time: "~8분",
-  },
-  {
-    icon: Compass,
-    title: "직업 흥미 (RIASEC)",
-    desc: "6가지 직업 흥미 유형을 분석합니다.",
-    count: "60문항",
-    time: "~6분",
-  },
-  {
-    icon: Target,
-    title: "역량 검사",
-    desc: "공통 역량 + 전문 트랙 역량을 평가합니다.",
-    count: "48문항",
-    time: "~5분",
-  },
-  {
-    icon: Shield,
-    title: "커리어 준비도",
-    desc: "취업/커리어 전환 준비 상태를 진단합니다.",
-    count: "32문항",
-    time: "~3분",
-  },
+  { icon: Target, title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: "~7분" },
+  { icon: Shield, title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. HIT A의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: "~4분" },
+  { icon: Compass, title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: "~2분" },
 ];
+const TOTAL_QUESTIONS = 112;
 
 function HitBIntroContent() {
   const router = useRouter();
-  const { user } = useAuth();
   const searchParams = useSearchParams();
   const hitAResultId = searchParams.get("a");
   const [starting, setStarting] = useState(false);
@@ -71,7 +48,7 @@ function HitBIntroContent() {
       const res = await fetch("/api/hit/b/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hitAResultId, memberId: user?.id }),
+        body: JSON.stringify({ hitAResultId }),
       });
       const data = await res.json();
       if (data.sessionToken) {
@@ -100,20 +77,18 @@ function HitBIntroContent() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            HIT B · Career Assessment
-          </div>
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{HIT_STAGES.b.code} · 공통 기반</p>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            나의 커리어를 설계하세요
+            {HIT_STAGES.b.name}
           </h1>
           <p className="text-neutral-500 mb-2">
-            성격, 흥미, 역량, 준비도를 종합 분석하여<br />
-            맞춤형 커리어 리포트를 제공합니다.
+            무엇을 할 수 있고, 어디로 가고 싶은지.<br />
+            역량·효능감·자기와 직무에 대한 이해를 진단합니다. HIT A와 함께 모든 회원의 공통 기반입니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 22분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 13분</span>
             <span>·</span>
-            <span>220문항</span>
+            <span>{TOTAL_QUESTIONS}문항</span>
             <span>·</span>
             <span>7점 척도</span>
           </div>
@@ -129,8 +104,8 @@ function HitBIntroContent() {
               <div>
                 <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
                 <p className="text-xs text-amber-600 mt-1">
-                  HIT - B는 HIT - A 결과를 기반으로 종합 분석합니다.
-                  아직 HIT - A를 완료하지 않으셨다면 먼저 진행해주세요.
+                  효능감을 HIT A의 흥미 결과와 겹쳐 분석합니다.
+                  아직 HIT A를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
                   onClick={() => router.push('/hero/hit/a')}
@@ -184,7 +159,7 @@ function HitBIntroContent() {
             {starting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
             ) : (
-              <>HIT B 시작하기 <ArrowRight className="h-5 w-5" /></>
+              <>{HIT_STAGES.b.name} 시작하기 <ArrowRight className="h-5 w-5" /></>
             )}
           </button>
         </div>

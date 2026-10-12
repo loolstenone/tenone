@@ -14,8 +14,8 @@ interface TalentRow {
   member_id: string | null;
   created_at: string;
   // B results (joined)
-  holland_code: string | null;
-  readiness_grade: string | null;
+  efficacy_top3: string | null;
+  journey_stage: string | null;
   competency_track: string | null;
   alert_level: number;
   alert_n1: number;
@@ -48,16 +48,16 @@ export default function TalentDashboardPage() {
           const rows: TalentRow[] = [];
           for (const a of aResults) {
             const { data: bResult } = await sb.from('hit_b_results')
-              .select('holland_code, readiness_grade, competency_track, alert_level, alert_n1, alert_m1, alert_p1')
+              .select('efficacy_top3, journey_stage, competency_track, alert_level, alert_n1, alert_m1, alert_p1')
               .eq('member_id', a.member_id)
               .order('created_at', { ascending: false })
               .limit(1)
               .maybeSingle();
 
             rows.push({
-              ...(a as Omit<TalentRow, 'holland_code' | 'readiness_grade' | 'competency_track' | 'alert_level' | 'alert_n1' | 'alert_m1' | 'alert_p1'>),
-              holland_code: (bResult?.holland_code as string) || null,
-              readiness_grade: (bResult?.readiness_grade as string) || null,
+              ...(a as Omit<TalentRow, 'efficacy_top3' | 'journey_stage' | 'competency_track' | 'alert_level' | 'alert_n1' | 'alert_m1' | 'alert_p1'>),
+              efficacy_top3: (bResult?.efficacy_top3 as string) || null,
+              journey_stage: (bResult?.journey_stage as string) || null,
               competency_track: (bResult?.competency_track as string) || null,
               alert_level: (bResult?.alert_level as number) || 0,
               alert_n1: (bResult?.alert_n1 as number) || 0,
@@ -117,9 +117,9 @@ export default function TalentDashboardPage() {
               <tr className="bg-neutral-50 text-left">
                 <th className="px-4 py-3 font-semibold text-neutral-500">유형</th>
                 <th className="px-4 py-3 font-semibold text-neutral-500">캐릭터</th>
-                <th className="px-4 py-3 font-semibold text-neutral-500">적성</th>
+                <th className="px-4 py-3 font-semibold text-neutral-500">효능감</th>
                 <th className="px-4 py-3 font-semibold text-neutral-500">역량</th>
-                <th className="px-4 py-3 font-semibold text-neutral-500">준비도</th>
+                <th className="px-4 py-3 font-semibold text-neutral-500">단계</th>
                 <th className="px-4 py-3 font-semibold text-neutral-500 text-center">신호</th>
                 <th className="px-4 py-3 font-semibold text-neutral-500">날짜</th>
               </tr>
@@ -139,18 +139,11 @@ export default function TalentDashboardPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-neutral-600">{t.type_nickname || t.type_name_ko}</td>
-                  <td className="px-4 py-3 text-neutral-500">{t.holland_code || '—'}</td>
+                  <td className="px-4 py-3 text-neutral-500">{t.efficacy_top3 || '—'}</td>
                   <td className="px-4 py-3 text-neutral-500">{t.competency_track || '—'}</td>
                   <td className="px-4 py-3">
-                    {t.readiness_grade ? (
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                        t.readiness_grade === 'A' ? 'bg-green-50 text-green-600' :
-                        t.readiness_grade === 'B' ? 'bg-yellow-50 text-yellow-600' :
-                        t.readiness_grade === 'C' ? 'bg-orange-50 text-orange-600' :
-                        'bg-red-50 text-red-600'
-                      }`}>
-                        {t.readiness_grade}
-                      </span>
+                    {t.journey_stage ? (
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{t.journey_stage}</span>
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3 text-center">

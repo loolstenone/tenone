@@ -1,164 +1,71 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import { Briefcase, Target, RefreshCw, CheckCircle, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ListChecks, Sprout, Compass, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { HIT_STAGES } from "@/lib/hit/stages";
 
+// 검사 구성·문항 수는 실제 출제(/api/hit/c/questions → hit_questions test_type C)와 같아야 한다 (2026-10-12 신설)
 const modules = [
-  {
-    icon: Briefcase,
-    title: "경력 자본",
-    desc: "전문성, 네트워크, 조직 이해력, 핵심 역량을 종합 측정합니다.",
-    count: "20문항",
-    time: "~4분",
-  },
-  {
-    icon: Target,
-    title: "이직 동기",
-    desc: "현직 불만족(Push) vs 새로운 기회(Pull) 동기를 분석합니다.",
-    count: "15문항",
-    time: "~3분",
-  },
-  {
-    icon: RefreshCw,
-    title: "전환 가능성",
-    desc: "스킬 이동성, 산업 적응력, 학습 민첩성을 평가합니다.",
-    count: "15문항",
-    time: "~3분",
-  },
-  {
-    icon: CheckCircle,
-    title: "준비도",
-    desc: "경력전환 준비 정도와 갭 인식 수준을 진단합니다.",
-    count: "10문항",
-    time: "~2분",
-  },
+  { icon: ListChecks, title: "취업 준비 상태", desc: "자기 이해·포트폴리오·면접·네트워킹·스킬·실행 준비 + 희망 트랙 준비도. 자기 인식 점수이며, 실제 완료는 Journey 체크리스트에서 셉니다.", count: "48문항", time: "~5분" },
+  { icon: Sprout, title: "첫 직무 적응", desc: "조직 적응·학습 속도·관계 형성·피드백 수용 — 첫 회사에서 잘 자리 잡는 힘.", count: "20문항", time: "~2분" },
+  { icon: Compass, title: "진로 결정 확신", desc: "첫 직무를 얼마나 분명하게, 내 판단으로 정했는지.", count: "10문항", time: "~1분" },
 ];
 
-function HitCIntroContent() {
+export default function HitCIntroPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const hitAResultId = searchParams.get("a");
   const [starting, setStarting] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const [hasHitA, setHasHitA] = useState(false);
-
-  useEffect(() => {
-    async function checkHitA() {
-      if (hitAResultId) {
-        try {
-          const res = await fetch(`/api/hit/a/result/${hitAResultId}`);
-          if (res.ok) {
-            setHasHitA(true);
-          }
-        } catch {
-          // ignore
-        }
-      }
-      setChecking(false);
-    }
-    checkHitA();
-  }, [hitAResultId]);
+  const [error, setError] = useState<string | null>(null);
+  const stage = HIT_STAGES.c;
 
   const handleStart = async () => {
     setStarting(true);
+    setError(null);
     try {
-      const res = await fetch("/api/hit/c/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hitAResultId, memberId: user?.id }),
-      });
+      const res = await fetch("/api/hit/c/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       const data = await res.json();
-      if (data.sessionToken) {
-        const aParam = hitAResultId ? `&a=${hitAResultId}` : '';
-        router.push(`/hero/hit/c/test?s=${data.sessionToken}${aParam}`);
-      } else if (data.error) {
-        setHasHitA(false);
-        setStarting(false);
-      }
+      if (data.sessionToken) router.push(`/hero/hit/c/test?s=${data.sessionToken}`);
+      else { setError(data.error ?? "시작할 수 없습니다."); setStarting(false); }
     } catch {
+      setError("시작할 수 없습니다. 잠시 후 다시 시도해 주세요.");
       setStarting(false);
     }
   };
 
-  if (checking) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div>
-      {/* Hero */}
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            HIT C · Career Transition
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            어디로 이직할까?
-          </h1>
-          <p className="text-neutral-500 mb-2">
-            경력 자본, 이직 동기, 전환 가능성, 준비도를 종합 분석하여<br />
-            맞춤형 경력전환 리포트를 제공합니다.
-          </p>
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{stage.code} · 생애주기</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">{stage.name}</h1>
+          <p className="text-neutral-500 mb-2">{stage.desc}</p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 12분</span>
-            <span>·</span>
-            <span>60문항</span>
-            <span>·</span>
-            <span>7점 척도</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 9분</span><span>·</span><span>{stage.approxQuestions}문항</span><span>·</span><span>7점 척도</span>
           </div>
         </div>
       </section>
 
-      {/* HIT A Required Notice */}
-      {!hasHitA && !hitAResultId && (
+      {error && (
         <section className="bg-amber-50 border-y border-amber-200">
-          <div className="mx-auto max-w-3xl px-6 py-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
-                <p className="text-xs text-amber-600 mt-1">
-                  HIT - C는 HIT - A 결과를 기반으로 경력전환을 분석합니다.
-                  아직 HIT - A를 완료하지 않으셨다면 먼저 진행해주세요.
-                </p>
-                <button
-                  onClick={() => router.push('/hero/hit/a')}
-                  className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900"
-                >
-                  HIT - A 시작하기 →
-                </button>
-              </div>
+          <div className="mx-auto max-w-3xl px-6 py-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-amber-800">{error}</p>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">HIT A 시작하기 →</button>
             </div>
           </div>
         </section>
       )}
 
-      {/* Modules */}
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-6 py-12">
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6">검사 구성</h2>
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <m.icon className="h-5 w-5" />
-                </div>
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0"><m.icon className="h-5 w-5" /></div>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm">{m.title}</h3>
-                    <div className="flex items-center gap-2 text-xs text-neutral-400">
-                      <span>{m.count}</span>
-                      <span>{m.time}</span>
-                    </div>
-                  </div>
+                  <div className="flex items-center justify-between"><h3 className="font-bold text-sm">{m.title}</h3><div className="flex items-center gap-2 text-xs text-neutral-400"><span>{m.count}</span><span>{m.time}</span></div></div>
                   <p className="text-xs text-neutral-500 mt-1">{m.desc}</p>
                 </div>
               </div>
@@ -167,45 +74,14 @@ function HitCIntroContent() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-          <p className="text-xs text-neutral-400 mb-4">
-            각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다. 정답은 없습니다.
-          </p>
-          <button
-            onClick={handleStart}
-            disabled={starting}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
-          >
-            {starting ? (
-              <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
-            ) : (
-              <>진단 시작하기 <ArrowRight className="h-5 w-5" /></>
-            )}
+          <p className="text-xs text-neutral-400 mb-4">HIT A·B를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
+          <button onClick={handleStart} disabled={starting} className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50">
+            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{stage.name} 시작하기 <ArrowRight className="h-5 w-5" /></>}
           </button>
         </div>
       </section>
     </div>
-  );
-}
-
-function HitCIntroPageInner() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
-      </div>
-    }>
-      <HitCIntroContent />
-    </Suspense>
-  );
-}
-
-export default function HitCIntroPage() {
-  return (
-    <Suspense>
-      <HitCIntroPageInner />
-    </Suspense>
   );
 }

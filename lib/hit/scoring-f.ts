@@ -1,25 +1,16 @@
 /**
- * HIT F 채점 알고리즘 — 경력 공백 복귀 분석
- * 7점 리커트 척도 기반 · 154문항 (152 + 미끼 2)
- *
- * 모듈1: latent_capability    — disruption_context, hidden_competency, gap_activities
- * 모듈2: career_viability     — job_viability, skill_currency, market_reentry
- * 모듈3: resilience           — self_narrative, self_esteem, retry_willingness
- * 모듈4: direction_bifurcation — career_restoration, career_pivot, fresh_start
- * 모듈5: reentry_readiness    — skill_update, network, self_presentation, field_language
- * 미끼: DECOY                 — f_val01, f_val02
- *
- * CVI (Career Validity Index) 통합
- * 심화: CH Deep F맞춤 + AP Deep F맞춤 (scoreChDeepB/scoreApDeepB 재사용)
+ * HIT F 채점 알고리즘 — 인생전환검사 (140 + 미끼 2)
+ * 7점 리커트 척도 기반
+ * 모듈1: satisfaction — life_satisfaction, residual_passion, psych_transition
+ * 모듈2: direction — re_employment, entrepreneurship, social_contribution, mentoring, leisure
+ * 모듈3: legacy — transferable_legacy, knowledge_transfer, new_capability
+ * 모듈4: social — belonging, role_necessity
+ * 모듈5: readiness — time_readiness, energy_readiness, financial_readiness, relationship_readiness
+ * 미끼: decoy (DECOY)
+ * 심화(CH/AP Deep) 재사용은 2026-10-12 폐지 — 성품은 A, 효능감은 B에서 한 번만
  */
 
-import { calculateCVI } from '@/lib/hit/cvi';
-
-// CH/AP Deep 채점은 B와 동일 구조 (character_deep/aptitude_deep 모듈 필터)
-import { scoreChDeepB, scoreApDeepB } from './scoring-b';
-export { scoreChDeepB as scoreChDeepF, scoreApDeepB as scoreApDeepF } from './scoring-b';
-export type { CHDeepBSubscale as CHDeepFSubscale, HollandType } from './data/b-deep-questions';
-import type { CviGrade, FNextRoute } from '@/lib/hit/cvi';
+export type HollandType = 'R' | 'I' | 'A' | 'S' | 'E' | 'C';
 
 interface ResponseRow {
   module: string;
@@ -59,342 +50,190 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 미끼 탐지 ──────────────────────────────────────────────────────
+// ── 삶의 만족도 & 잔여 열정 채점 ──
 
-/**
- * 미끼 문항 신뢰도 탐지
- * f_val01, f_val02: 7점(완전 동의)이면 사회적 바람직성 편향
- */
-export function scoreDecoyF(responses: ResponseRow[]): {
-  fakingFlag: boolean;
-  decoyDetail: { val01: number; val02: number };
+export function scoreLifeSatisfaction(responses: ResponseRow[]): {
+  lifeSatisfaction: number;
+  remainingPassion: number;
+  psychTransition: number;
 } {
-  const getDecoyValue = (qid: string): number => {
-    const row = responses.find(r => r.question_id === qid);
-    if (!row) return 0;
-    const parts = row.option_value.split(':');
-    return parseInt(parts.length >= 2 ? parts[1] : parts[0], 10) || 0;
-  };
-
-  const val01 = getDecoyValue('f_val01');
-  const val02 = getDecoyValue('f_val02');
-
-  // 둘 다 6~7점이면 신뢰도 의심
-  const fakingFlag = val01 >= 6 && val02 >= 6;
-
-  return { fakingFlag, decoyDetail: { val01, val02 } };
-}
-
-// ── 공백 맥락 채점 (break_context 모듈) ──────────────────────────
-
-export function scoreBreakContext(responses: ResponseRow[]): {
-  disruptionContext: number;
-  hiddenCompetency: number;
-  gapActivities: number;
-  breakContextScore: number;
-  breakReasonScore: number;
-  overallContext: number;
-} {
-  const ctx = responses.filter(r => r.module === 'latent_capability');
-  const subscaleMap = buildSubscaleMap(ctx);
-
-  const disruptionContext = scaleToHundred(subscaleMap['disruption_context'] || []);
-  const hiddenCompetency = scaleToHundred(subscaleMap['hidden_competency'] || []);
-  const gapActivities = scaleToHundred(subscaleMap['gap_activities'] || []);
-
-  // breakContextScore: 단절 맥락 명확성 (맥락 + 활동 평균)
-  const breakContextScore = Math.round((disruptionContext + gapActivities) / 2);
-  // breakReasonScore: 공백기 숨겨진 역량
-  const breakReasonScore = hiddenCompetency;
-
-  const overallContext = Math.round(breakContextScore * 0.5 + breakReasonScore * 0.5);
+  const satisfaction = responses.filter(r => r.module === 'satisfaction');
+  const subscaleMap = buildSubscaleMap(satisfaction);
 
   return {
-    disruptionContext,
-    hiddenCompetency,
-    gapActivities,
-    breakContextScore,
-    breakReasonScore,
-    overallContext,
+    lifeSatisfaction: scaleToHundred(subscaleMap['life_satisfaction'] || []),
+    remainingPassion: scaleToHundred(subscaleMap['residual_passion'] || []),
+    psychTransition: scaleToHundred(subscaleMap['psych_transition'] || []),
   };
 }
 
-// ── 경력 유효성 채점 (viability 모듈) ────────────────────────────
+// ── 2막 방향 탐색 채점 ──
 
-export function scoreViability(responses: ResponseRow[]): {
-  scores: Record<string, number>;
-  latentScore: number;
-} {
-  const viab = responses.filter(r => r.module === 'career_viability');
-  const subscaleMap = buildSubscaleMap(viab);
+export type DirectionType = 're_employment' | 'entrepreneurship' | 'social_contribution' | 'mentoring' | 'leisure';
 
-  const scores: Record<string, number> = {
-    job_viability:  scaleToHundred(subscaleMap['job_viability']  || []),
-    skill_currency: scaleToHundred(subscaleMap['skill_currency'] || []),
-    market_reentry: scaleToHundred(subscaleMap['market_reentry'] || []),
-  };
-
-  // 경력 유효성 종합: 직무유효성 40% + 스킬현재성 30% + 시장재진입 30%
-  const latentScore = Math.round(
-    scores.job_viability  * 0.4 +
-    scores.skill_currency * 0.3 +
-    scores.market_reentry * 0.3,
-  );
-
-  return { scores, latentScore };
-}
-
-/** @deprecated scoreViability 사용 권장 */
-export const scoreLatentSkills = scoreViability;
-
-// ── 심리적 회복력 채점 (resilience 모듈) ─────────────────────────
-
-export function scoreResilience(responses: ResponseRow[]): {
-  scores: Record<string, number>;
-  resilienceScore: number;
-} {
-  const res = responses.filter(r => r.module === 'resilience');
-  const subscaleMap = buildSubscaleMap(res);
-
-  const scores: Record<string, number> = {
-    self_narrative:     scaleToHundred(subscaleMap['self_narrative']     || []),
-    self_esteem:        scaleToHundred(subscaleMap['self_esteem']        || []),
-    retry_willingness:  scaleToHundred(subscaleMap['retry_willingness']  || []),
-  };
-
-  // 회복탄력성 종합: 자기서사 30% + 자존감 35% + 재도전의지 35%
-  const resilienceScore = Math.round(
-    scores.self_narrative    * 0.3 +
-    scores.self_esteem       * 0.35 +
-    scores.retry_willingness * 0.35,
-  );
-
-  return { scores, resilienceScore };
-}
-
-// ── 방향 채점 (direction 모듈) ───────────────────────────────────
-
-const DIRECTION_LABELS: Record<string, string> = {
-  career_restoration: '경력 복원',
-  career_pivot:       '경력 전환',
-  fresh_start:        '새 출발',
+const DIRECTION_LABELS: Record<DirectionType, string> = {
+  re_employment: '재취업',
+  entrepreneurship: '창업·독립',
+  social_contribution: '봉사·사회공헌',
+  mentoring: '멘토링·교육',
+  leisure: '여가·자기실현',
 };
 
-export function scoreDirection(responses: ResponseRow[]): {
-  directionScores: Record<string, number>;
-  directionTop: { code: string; label: string; score: number };
-  reentryMotivation: number;
+export interface DirectionResult {
+  directionType: DirectionType;
+  directionScores: Record<DirectionType, number>;
+  directionTop2: Array<{ code: DirectionType; label: string; score: number }>;
+}
+
+export function scoreDirection(responses: ResponseRow[]): DirectionResult {
+  const direction = responses.filter(r => r.module === 'direction');
+  const subscaleMap = buildSubscaleMap(direction);
+
+  const directionScores: Record<DirectionType, number> = {
+    re_employment: scaleToHundred(subscaleMap['re_employment'] || []),
+    entrepreneurship: scaleToHundred(subscaleMap['entrepreneurship'] || []),
+    social_contribution: scaleToHundred(subscaleMap['social_contribution'] || []),
+    mentoring: scaleToHundred(subscaleMap['mentoring'] || []),
+    leisure: scaleToHundred(subscaleMap['leisure'] || []),
+  };
+
+  const sorted = (Object.entries(directionScores) as [DirectionType, number][])
+    .sort((a, b) => b[1] - a[1]);
+
+  const directionType: DirectionType = sorted[0]?.[0] ?? 're_employment';
+  const directionTop2 = sorted.slice(0, 2).map(([code, score]) => ({
+    code,
+    label: DIRECTION_LABELS[code],
+    score,
+  }));
+
+  return { directionType, directionScores, directionTop2 };
+}
+
+// ── 역량 재활용 진단 채점 ──
+
+export function scoreLegacy(responses: ResponseRow[]): {
+  legacySkillScore: number;
+  legacyAreas: string[];
 } {
-  const dir = responses.filter(r => r.module === 'direction_bifurcation');
-  const subscaleMap = buildSubscaleMap(dir);
+  const legacy = responses.filter(r => r.module === 'legacy');
+  const subscaleMap = buildSubscaleMap(legacy);
 
-  const career_restoration = scaleToHundred(subscaleMap['career_restoration'] || []);
-  const career_pivot       = scaleToHundred(subscaleMap['career_pivot']       || []);
-  const fresh_start        = scaleToHundred(subscaleMap['fresh_start']        || []);
+  const transferable_legacy = scaleToHundred(subscaleMap['transferable_legacy'] || []);
+  const knowledge_transfer = scaleToHundred(subscaleMap['knowledge_transfer'] || []);
+  const new_capability = scaleToHundred(subscaleMap['new_capability'] || []);
 
-  const directionScores = { career_restoration, career_pivot, fresh_start };
-
-  // Top 1 방향
-  const topCode = Object.entries(directionScores).reduce((a, b) => (a[1] >= b[1] ? a : b))[0] as keyof typeof directionScores;
-  const directionTop = {
-    code:  topCode,
-    label: DIRECTION_LABELS[topCode] ?? topCode,
-    score: directionScores[topCode],
-  };
-
-  // 재진입 동기: 3방향 중 최대값
-  const reentryMotivation = Math.max(career_restoration, career_pivot, fresh_start);
-
-  return { directionScores, directionTop, reentryMotivation };
-}
-
-// ── 재진입 준비도 채점 (readiness 모듈) ──────────────────────────
-
-export function scoreReadiness(responses: ResponseRow[]): {
-  readinessScores: Record<string, number>;
-  practicalReadiness: number;
-  reentryReadiness: number;
-} {
-  const ready = responses.filter(r => r.module === 'reentry_readiness');
-  const subscaleMap = buildSubscaleMap(ready);
-
-  const readinessScores: Record<string, number> = {
-    skill_update:      scaleToHundred(subscaleMap['skill_update']      || []),
-    network:           scaleToHundred(subscaleMap['network']           || []),
-    self_presentation: scaleToHundred(subscaleMap['self_presentation'] || []),
-    field_language:    scaleToHundred(subscaleMap['field_language']    || []),
-  };
-
-  // 실질 준비도: 4항목 평균
-  const practicalReadiness = Math.round(
-    (readinessScores.skill_update +
-     readinessScores.network +
-     readinessScores.self_presentation +
-     readinessScores.field_language) / 4,
+  const legacySkillScore = Math.round(
+    transferable_legacy * 0.4 +
+    knowledge_transfer * 0.3 +
+    new_capability * 0.3
   );
 
-  // 재진입 준비도 (direction 없이 순수 준비 점수)
-  const reentryReadiness = practicalReadiness;
+  const legacyAreas: string[] = [];
+  if (transferable_legacy >= 70) legacyAreas.push('이전 가능 역량 우수');
+  if (knowledge_transfer >= 70) legacyAreas.push('지식 전수 역량 우수');
+  if (new_capability >= 70) legacyAreas.push('신규 역량 개발 의지 높음');
+  if (transferable_legacy < 40) legacyAreas.push('이전 가능 역량 개발 필요');
+  if (knowledge_transfer < 40) legacyAreas.push('지식 전수 방법 모색 필요');
+  if (new_capability < 40) legacyAreas.push('새로운 역량 학습 필요');
 
-  return { readinessScores, practicalReadiness, reentryReadiness };
+  return { legacySkillScore, legacyAreas };
 }
 
-// ── 라우팅 근거 ──────────────────────────────────────────────────
+// ── 사회적 연결 & 2막 준비도 채점 ──
 
-export function buildRoutingRationale(
-  cviGrade: CviGrade,
-  nextRoute: FNextRoute,
-  latentScore: number,
-  resilienceScore: number,
-  reentryReadiness: number,
-  directionTop: { code: string; label: string },
-): string {
-  const parts: string[] = [];
-
-  if (cviGrade === 'HIGH') {
-    parts.push('경력 유효성이 높아 빠른 복귀가 가능합니다.');
-  } else if (cviGrade === 'MID') {
-    parts.push('경력 유효성이 보통 수준으로, 전략적 전환이 권장됩니다.');
-  } else {
-    parts.push('경력 유효성이 낮아 기초 역량 점검이 필요합니다.');
-  }
-
-  if (latentScore >= 70) parts.push('경력 유효성 진단이 양호합니다.');
-  else if (latentScore < 40) parts.push('직무 유효성 및 스킬 현재성 보강이 시급합니다.');
-
-  if (resilienceScore >= 70) parts.push('심리적 회복력이 높아 복귀 과정을 잘 견딜 수 있습니다.');
-  else if (resilienceScore < 40) parts.push('자존감 회복과 재도전 의지 강화가 우선입니다.');
-
-  if (reentryReadiness >= 70) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
-  else if (reentryReadiness < 40) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
-
-  parts.push(`주도 방향: ${directionTop.label}`);
-
-  const routeLabel = nextRoute === 'recovery' ? 'Recovery(복귀)' : nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)';
-  parts.push(`추천 경로: ${routeLabel}`);
-
-  return parts.join(' ');
-}
-
-// ── 통합 결과 타입 ─────────────────────────────────────────────
-
-export interface HitFScoreResult {
-  // 공백 맥락
-  disruptionContext:  number;
-  hiddenCompetency:   number;
-  gapActivities:      number;
-  breakContextScore:  number;
-  breakReasonScore:   number;
-  overallContext:     number;
-  // 경력 유효성
-  latentScores:  Record<string, number>;
-  latentScore:   number;
-  // 심리적 회복력
-  resilienceScores: Record<string, number>;
-  resilienceScore:  number;
-  // 방향
-  directionScores: Record<string, number>;
-  directionTop:    { code: string; label: string; score: number };
-  reentryMotivation: number;
-  // 준비도
-  readinessScores:  Record<string, number>;
-  practicalReadiness: number;
-  reentryReadiness:   number;
-  // CVI
-  cviRaw:    number;
-  cviGrade:  CviGrade;
-  nextRoute: FNextRoute;
-  // 라우팅
-  routingRationale: string;
-  // 미끼
-  fakingFlag:   boolean;
-  decoyDetail:  { val01: number; val02: number };
-  // CH Deep F맞춤 / AP Deep F맞춤 (심화 레이어 응답 있을 때)
-  chDeepScores?: {
-    scores: Record<string, number>;
-    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
-    overallScore: number;
-    overallGrade: 'A' | 'B' | 'C' | 'D';
-    decoyScore: number;
-    alertFlags: { NR: number; PP: number; MK: number; SP: number };
-  };
-  apDeepScores?: {
-    scores: Record<string, number>;
-    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
-    top3Code: string;
-    top3Labels: string[];
-    dominantType: string;
+export interface SocialReadinessResult {
+  socialNeedScore: number;
+  secondActReadiness: number;
+  readinessScores: {
+    time: number;
+    energy: number;
+    finance: number;
+    relationship: number;
+    total: number;
   };
 }
 
-// ── 통합 채점 ──────────────────────────────────────────────────
-
-export function scoreHitF(responses: ResponseRow[]): HitFScoreResult {
-  const context    = scoreBreakContext(responses);
-  const viability  = scoreViability(responses);
-  const resilience = scoreResilience(responses);
-  const direction  = scoreDirection(responses);
-  const readiness  = scoreReadiness(responses);
-  const decoy      = scoreDecoyF(responses);
-
-  // CVI 계산 — 설계서 확정 공식: (직무유효성×0.35) + (기술유효성×0.35) + (시장재진입×0.30)
-  const cviResult = calculateCVI({
-    jobViability:  viability.scores.job_viability,
-    skillCurrency: viability.scores.skill_currency,
-    marketReentry: viability.scores.market_reentry,
-  });
-
-  // 재진입 준비도 통합: 실질준비 55% + 복귀동기 45%
-  const reentryReadinessFinal = Math.round(
-    readiness.practicalReadiness * 0.55 + direction.reentryMotivation * 0.45,
+export function scoreSocialReadiness(responses: ResponseRow[]): SocialReadinessResult {
+  // 기존 'social_readiness' + 신규 'social'/'readiness' 모두 수용
+  const socialReadiness = responses.filter(r =>
+    r.module === 'social_readiness' || r.module === 'social' || r.module === 'readiness'
   );
+  const subscaleMap = buildSubscaleMap(socialReadiness);
 
-  const routingRationale = buildRoutingRationale(
-    cviResult.cviGrade,
-    cviResult.nextRoute,
-    viability.latentScore,
-    resilience.resilienceScore,
-    reentryReadinessFinal,
-    direction.directionTop,
-  );
+  const belonging = scaleToHundred(subscaleMap['belonging'] || []);
+  const role_necessity = scaleToHundred(subscaleMap['role_necessity'] || []);
 
-  // CH Deep F / AP Deep F — 심화 응답 있을 때만
-  const hasChDeep = responses.some(r => r.module === 'character_deep');
-  const hasApDeep = responses.some(r => r.module === 'aptitude_deep');
+  const time = scaleToHundred(subscaleMap['time_readiness'] || []);
+  const energy = scaleToHundred(subscaleMap['energy_readiness'] || []);
+  const finance = scaleToHundred(subscaleMap['financial_readiness'] || []);
+  const relationship = scaleToHundred(subscaleMap['relationship_readiness'] || []);
+
+  const socialNeedScore = Math.round((belonging + role_necessity) / 2);
+  const total = Math.round((time + energy + finance + relationship) / 4);
+  const secondActReadiness = total;
 
   return {
-    // 공백 맥락
-    disruptionContext: context.disruptionContext,
-    hiddenCompetency:  context.hiddenCompetency,
-    gapActivities:     context.gapActivities,
-    breakContextScore: context.breakContextScore,
-    breakReasonScore:  context.breakReasonScore,
-    overallContext:    context.overallContext,
-    // 경력 유효성
-    latentScores: viability.scores,
-    latentScore:  viability.latentScore,
-    // 심리적 회복력
-    resilienceScores: resilience.scores,
-    resilienceScore:  resilience.resilienceScore,
-    // 방향
-    directionScores:   direction.directionScores,
-    directionTop:      direction.directionTop,
-    reentryMotivation: direction.reentryMotivation,
-    // 준비도
-    readinessScores:    readiness.readinessScores,
-    practicalReadiness: readiness.practicalReadiness,
-    reentryReadiness:   reentryReadinessFinal,
-    // CVI
-    cviRaw:    cviResult.cviRaw,
-    cviGrade:  cviResult.cviGrade,
-    nextRoute: cviResult.nextRoute,
-    // 라우팅
-    routingRationale,
-    // 미끼
-    fakingFlag:  decoy.fakingFlag,
-    decoyDetail: decoy.decoyDetail,
-    // 심화
-    ...(hasChDeep && { chDeepScores: scoreChDeepB(responses) }),
-    ...(hasApDeep && { apDeepScores: scoreApDeepB(responses) }),
+    socialNeedScore,
+    secondActReadiness,
+    readinessScores: { time, energy, finance, relationship, total },
+  };
+}
+
+// ── 미끼 (faking) 채점 ──
+
+export function scoreDecoyF(responses: ResponseRow[]): boolean {
+  const getVal = (id: string): number => {
+    const r = responses.find(x => x.question_id === id);
+    if (!r) return 0;
+    const parts = r.option_value.split(':');
+    return parseInt(parts[1] || parts[0], 10) || 0;
+  };
+  return getVal('e_val01') >= 6 && getVal('e_val02') >= 6;
+}
+
+// ── 통합 채점 ──
+
+export interface HitFScoreResult {
+  lifeSatisfaction: number;
+  remainingPassion: number;
+  psychTransition: number;
+  directionType: DirectionType;
+  directionScores: Record<DirectionType, number>;
+  directionTop2: Array<{ code: DirectionType; label: string; score: number }>;
+  legacySkillScore: number;
+  legacyAreas: string[];
+  socialNeedScore: number;
+  secondActReadiness: number;
+  readinessScores: {
+    time: number;
+    energy: number;
+    finance: number;
+    relationship: number;
+    total: number;
+  };
+  fakingFlag: boolean;
+}
+
+export function scoreHitF(responses: ResponseRow[]): HitFScoreResult {
+  const satisfaction = scoreLifeSatisfaction(responses);
+  const direction = scoreDirection(responses);
+  const legacy = scoreLegacy(responses);
+  const social = scoreSocialReadiness(responses);
+  const fakingFlag = scoreDecoyF(responses);
+
+  return {
+    lifeSatisfaction: satisfaction.lifeSatisfaction,
+    remainingPassion: satisfaction.remainingPassion,
+    psychTransition: satisfaction.psychTransition,
+    directionType: direction.directionType,
+    directionScores: direction.directionScores,
+    directionTop2: direction.directionTop2,
+    legacySkillScore: legacy.legacySkillScore,
+    legacyAreas: legacy.legacyAreas,
+    socialNeedScore: social.socialNeedScore,
+    secondActReadiness: social.secondActReadiness,
+    readinessScores: social.readinessScores,
+    fakingFlag,
   };
 }

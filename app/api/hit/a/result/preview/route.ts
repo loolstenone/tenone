@@ -120,8 +120,6 @@ export async function GET(_: NextRequest) {
     },
 
     // ── 심화 미완료 (CTA 표시용) ──
-    ch_deep_scores: null,
-    ap_deep_scores: null,
   };
 
   return successResponse(mockResult);

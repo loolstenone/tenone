@@ -3,86 +3,43 @@ import { canReadHitResult, stripHitResult } from '@/lib/hit/result-access';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitBResultFull } from '@/lib/supabase/hit';
 import { selectBModules } from '@/lib/hit/report-assembler';
-import { createClient as createServerClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
+/** GET /api/hit/b/result/[id] — 본인·직원만. 리포트 모듈(COMP-*)은 핵심역량 점수로 선택 */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const result = await getHitBResultFull(id);
+    if (!result) return errorResponse('결과를 찾을 수 없습니다.', 404);
+    if (!(await canReadHitResult(req, result))) return errorResponse('결과를 찾을 수 없습니다.', 404);
 
-    const resultFull = await getHitBResultFull(id);
-    if (!resultFull) {
-      return errorResponse('결과를 찾을 수 없습니다.', 404);
-    }
-    // 회원 결과는 본인·직원만 (2026-10-11)
-    if (!(await canReadHitResult(req, resultFull))) return errorResponse('결과를 찾을 수 없습니다.', 404);
-
-    // 클라이언트 응답에서 dark_triad + alert 필드 제거
-    const { alert_n1, alert_m1, alert_p1, alert_level, ...result } = resultFull;
-    if (result.personality_scores) {
-      const safe = { ...result.personality_scores };
-      delete safe.narcissism_dark;
-      delete safe.psychopathy_dark;
-      delete safe.machiavellianism_dark;
-      result.personality_scores = safe;
-    }
-    if (result.dark_triad_flags) {
-      result.dark_triad_flags = {}; // 빈 객체로 전달
-    }
-
-    // 모듈 선택 (원본 점수로)
-    const modulesUsed = selectBModules({
-      personalityScores: resultFull.personality_scores || {},
-      hollandCode: resultFull.holland_code || '',
-      competencyCommon: resultFull.competency_common || {},
-      readinessGrade: resultFull.readiness_grade || 'D',
-    });
-
-    // 모듈 콘텐츠 조회
-    let reportModules: Record<string, { title: string; content: string }> = {};
+    const modulesUsed = selectBModules({ competencyCommon: result.competency_common || {} });
+    const reportModules: Record<string, { title: string; content: string }> = {};
     if (modulesUsed.length > 0) {
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const sb = createServerClient(supabaseUrl, supabaseKey);
-        const { data: mods } = await sb
-          .from('hit_report_modules')
-          .select('id, title, content')
-          .in('id', modulesUsed);
-
-        if (mods) {
-          mods.forEach((m: { id: string; title: string; content: string }) => {
-            // 점수 플레이스홀더 치환
-            let title = m.title;
-            let content = m.content;
-            // {score} 치환은 개별 모듈마다 다르므로 제거
-            title = title.replace(/\{score\}/g, '').replace(/\{[^}]+\}/g, '').replace(/\s*%\s*/g, ' ').replace(/\s+/g, ' ');
-            content = content.replace(/\{score\}/g, '').replace(/\{[^}]+\}/g, '');
-            reportModules[m.id] = { title: title.trim(), content: content.trim() };
-          });
+        const { data: mods } = await createAdminClient().from('hit_report_modules').select('id, title, content').in('id', modulesUsed);
+        for (const m of (mods ?? []) as { id: string; title: string; content: string }[]) {
+          reportModules[m.id] = {
+            title: m.title.replace(/\{[^}]+\}/g, '').replace(/\s*%\s*/g, ' ').replace(/\s+/g, ' ').trim(),
+            content: m.content.replace(/\{[^}]+\}/g, '').trim(),
+          };
         }
-      } catch {}
+      } catch { /* 모듈 없이도 결과는 표시 */ }
     }
 
-    // PERSONALITY-LABELS 로드 (DB에서 한글 라벨)
-    let personalityLabels: Record<string, string> = {};
-    try {
-      const supabaseUrl2 = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseKey2 = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const sb2 = createServerClient(supabaseUrl2, supabaseKey2);
-      const { data: labelMod } = await sb2
-        .from('hit_report_modules')
-        .select('content')
-        .eq('id', 'PERSONALITY-LABELS')
-        .maybeSingle();
-      if (labelMod?.content) {
-        personalityLabels = JSON.parse(labelMod.content);
-      }
-    } catch {}
+    // 트랙 표시명 (hit_competency_tracks가 원천)
+    let trackName: string | null = null;
+    if (result.competency_track) {
+      const { data: t } = await createAdminClient().from('hit_competency_tracks').select('name_ko').eq('id', result.competency_track).maybeSingle();
+      trackName = (t?.name_ko as string | undefined) ?? null;
+    }
 
-    return successResponse({ ...stripHitResult(result), report_modules: reportModules, modules_used: modulesUsed, personality_labels: personalityLabels });
+    // 관리자 전용 컬럼은 응답에서 제거 (옛 alert_*·dark_triad_flags 포함)
+    const { alert_n1: _a1, alert_m1: _a2, alert_p1: _a3, alert_level: _a4, dark_triad_flags: _d, ...safe } = result;
+    void _a1; void _a2; void _a3; void _a4; void _d;
+    return successResponse({ ...stripHitResult(safe), track_name: trackName, report_modules: reportModules, modules_used: modulesUsed });
   } catch (error) {
     console.error('[HIT B Result] 조회 오류:', error);
-    const message = error instanceof Error ? error.message : '결과 조회 실패';
-    return errorResponse(message, 500);
+    return errorResponse(error instanceof Error ? error.message : '결과 조회 실패', 500);
   }
 }

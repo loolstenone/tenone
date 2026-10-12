@@ -468,28 +468,29 @@ export default function HitAReportPage() {
         </div>
 
         <div className="text-center mb-8">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">HIT A + 심화</p>
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">다음 검사</p>
           <h3 className="text-xl font-extrabold text-neutral-900 mb-2">여기서 한 걸음 더</h3>
           <p className="text-sm text-neutral-500 leading-relaxed">
-            지금 내 상황에 맞는 검사 하나를 골라 다음을 설계하세요.
+            먼저 공통 검사 B를, 그다음 지금 내 생애주기에 맞는 검사 하나를 고르세요.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
-            { k: "B", title: "대학생, 사회 초년", dims: "직무 역량 · 취업준비도", tone: "border-green-200 hover:border-green-400" },
-            { k: "C", title: "경력 이직 고민", dims: "경력 자본 · 이직 동기 · 전환 가능성", tone: "border-blue-200 hover:border-blue-400" },
-            { k: "D", title: "리더십 전환 (시니어)", dims: "전문성 · 리더십 · 정체성 · 네트워크", tone: "border-red-200 hover:border-red-400" },
-            { k: "E", title: "인생 2막 준비 (은퇴, 퇴직)", dims: "삶의 만족도 · 방향 탐색 · 레거시", tone: "border-amber-200 hover:border-amber-400" },
-            { k: "F", title: "경력 공백 · 복귀", dims: "공백 맥락 · 잠재 역량 · 회복탄력성", tone: "border-violet-200 hover:border-violet-400" },
+            { k: "b", code: "HIT B", title: "역량과 방향 (공통)", dims: "핵심역량 · 효능감 × 흥미 · 자기/직무 이해", tone: "border-[#E53935] hover:border-red-600" },
+            { k: "c", code: "HIT C", title: "진입 — 대학생, 사회 초년", dims: "취업 준비 · 첫 직무 적응 · 진로 결정", tone: "border-green-200 hover:border-green-400" },
+            { k: "d", code: "HIT D", title: "전환 — 경력 이직", dims: "경력 자본 · 이직 동기 · 전환 가능성", tone: "border-blue-200 hover:border-blue-400" },
+            { k: "e", code: "HIT E", title: "리더십 전환 (시니어)", dims: "전문성 · 리더십 · 정체성 · 네트워크", tone: "border-red-200 hover:border-red-400" },
+            { k: "f", code: "HIT F", title: "인생 2막 준비 (은퇴, 퇴직)", dims: "삶의 만족도 · 방향 탐색 · 레거시", tone: "border-amber-200 hover:border-amber-400" },
+            { k: "gap", code: "HIT GAP", title: "경력 공백 · 복귀 (상황)", dims: "공백 맥락 · 경력 유효성 · 회복탄력성", tone: "border-violet-200 hover:border-violet-400" },
           ].map((t) => (
             <Link
               key={t.k}
-              href={`/hero/hit/${t.k.toLowerCase()}`}
+              href={`/hero/hit/${t.k}`}
               className={`group flex items-center gap-4 p-5 border-2 rounded-xl bg-white transition-colors ${t.tone}`}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">HIT {t.k}</p>
+                <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{t.code}</p>
                 <p className="text-sm font-bold text-neutral-900">{t.title}</p>
                 <p className="text-xs text-neutral-500 mt-0.5 truncate">{t.dims}</p>
               </div>

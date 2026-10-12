@@ -4,11 +4,12 @@ import { getHitSession, getHitResponses, updateHitSession, createHitFResult, ups
 import { scoreHitF } from '@/lib/hit/scoring-f';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionToken, hitAResultId, breakMonths, jobCategory } = body;
+    const { sessionToken, hitAResultId } = body;
 
     if (!sessionToken) {
       return errorResponse('sessionToken은 필수입니다.', 400);
@@ -16,10 +17,6 @@ export async function POST(request: NextRequest) {
 
     if (!hitAResultId) {
       return errorResponse('hitAResultId는 필수입니다.', 400);
-    }
-
-    if (!breakMonths || !jobCategory) {
-      return errorResponse('breakMonths와 jobCategory는 필수입니다.', 400);
     }
 
     const session = await getHitSession(sessionToken);
@@ -48,17 +45,32 @@ export async function POST(request: NextRequest) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
     }
 
-    // 채점 (CVI + 미끼 탐지 포함)
+    // 채점
     const scored = scoreHitF(responses);
+
+    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트에서 — 완료율을 준비도 점수로 (2026-10-12)
+    const checklist = await getStageChecklistProgress(createClient(), session.member_id!, 'f');
+    scored.secondActReadiness = checklist.percent;
+    scored.readinessScores = { ...scored.readinessScores, total: checklist.percent };
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
-      scored.cviGrade,
-      scored.resilienceScore,
-      scored.reentryReadiness,
+      scored.secondActReadiness,
+      scored.lifeSatisfaction,
+      scored.remainingPassion,
+      scored.directionType,
     );
 
-    // AI 리포트 (Claude Sonnet) -- 경력 공백 복귀 분석
+    // 방향 유형 한글 라벨
+    const directionLabels: Record<string, string> = {
+      re_employment: '재취업형',
+      entrepreneurship: '창업/사업형',
+      social_contribution: '사회 공헌형',
+      mentoring: '멘토링/교육형',
+      leisure: '여가/취미형',
+    };
+
+    // AI 리포트 (Claude Sonnet) — 인생 2막 분석
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -67,36 +79,32 @@ export async function POST(request: NextRequest) {
       const msg = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
         max_tokens: 2000,
-        system: `당신은 HeRo 인재 기획사의 경력 공백 복귀 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 경력 복귀 분석 리포트를 작성합니다.
+        system: `당신은 HeRo 인재 기획사의 인생 2막 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 인생 2막 분석 리포트를 작성합니다.
 
 규칙:
-- 경력 공백 기간, CVI(경력유효성지수), 잠재 역량, 회복탄력성, 재진입 준비도를 통합 분석
-- 경력 단절자가 자신감을 회복할 수 있도록 긍정적이면서도 현실적인 조언 제공
+- 현재 삶 만족도, 열정, 방향성, 레거시 스킬, 사회적 준비도를 통합 분석
+- 구체적인 2막 설계 전략과 액션 플랜 제시
 - 절대 이모지, 이모티콘, 특수문자 사용 금지
 - 마크다운 헤딩(#) 사용 금지
-- CVI 등급(HIGH/MID/LOW)에 따른 맞춤형 복귀 전략 제시
-- 잠재 역량을 강점으로 활용하는 방안 구체화
-- 주도 방향(경력복원/경력전환/새출발) 맞춤 전략 포함
-- 마지막에 복귀를 위한 구체적 액션 아이템 3가지 제시`,
+- 방향 유형(사회공헌/창업/교육/여가)에 맞는 구체적 제안
+- 레거시 스킬을 새로운 영역에 활용하는 방안 제시
+- 마지막에 인생 2막을 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT F 경력 공백 복귀 분석 결과:\n` +
-            `경력 공백: ${breakMonths}개월\n` +
-            `직군: ${jobCategory}\n` +
-            `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
-            `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)'}\n` +
-            `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
-            `방향 점수: 경력복원 ${scored.directionScores.career_restoration} / 경력전환 ${scored.directionScores.career_pivot} / 새출발 ${scored.directionScores.fresh_start}\n` +
-            `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +
-            `회복탄력성: ${scored.resilienceScore}점 (자기서사 ${scored.resilienceScores.self_narrative}, 자존감 ${scored.resilienceScores.self_esteem}, 재도전의지 ${scored.resilienceScores.retry_willingness})\n` +
-            `재진입 준비도: ${scored.reentryReadiness}점 (실질준비 ${scored.practicalReadiness}, 동기 ${scored.reentryMotivation})\n` +
-            `준비 상세: 스킬업데이트 ${scored.readinessScores.skill_update} / 네트워크 ${scored.readinessScores.network} / 자기표현 ${scored.readinessScores.self_presentation} / 현장언어 ${scored.readinessScores.field_language}\n` +
-            `공백 맥락: ${scored.overallContext}점\n` +
-            `라우팅 근거: ${scored.routingRationale}\n` +
-            (scored.chDeepScores ? `CH 심화(재도전맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
-            (scored.apDeepScores ? `AP 심화(복귀역량 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
+          content: `${hitAContext}HIT F 인생 2막 분석 결과:\n` +
+            `삶의 만족도: ${scored.lifeSatisfaction}점\n` +
+            `남은 열정: ${scored.remainingPassion}점\n` +
+            `심리적 전환: ${scored.psychTransition}점\n` +
+            `방향 유형(Top1): ${directionLabels[scored.directionType] || scored.directionType}\n` +
+            `2막 방향 Top2: ${scored.directionTop2.map(t => `${t.label}(${t.score}점)`).join(', ')}\n` +
+            `방향별 점수: ${JSON.stringify(scored.directionScores)}\n` +
+            `레거시 스킬: ${scored.legacySkillScore}점\n` +
+            `레거시 영역: ${scored.legacyAreas.join(', ') || '없음'}\n` +
+            `사회적 필요: ${scored.socialNeedScore}점\n` +
+            `2막 준비도 총합: ${scored.secondActReadiness}점\n` +
+            `2막 준비도 세부: 시간 ${scored.readinessScores.time}, 에너지 ${scored.readinessScores.energy}, 재정 ${scored.readinessScores.finance}, 관계 ${scored.readinessScores.relationship}\n` +
             `여정 단계: ${journeyStage}\n` +
-            `\n위 결과를 통합하여 4-5문단의 경력 복귀 분석 리포트를 작성해주세요. CVI 해석, 주도 방향에 맞는 전략, 잠재 역량 활용, 회복탄력성 평가, 구체적 액션 아이템을 포함해주세요.`,
+            `\n위 결과를 통합하여 4-5문단의 인생 2막 분석 리포트를 작성해주세요. 현재 삶 진단, 방향성 해석(Top2 비교), 레거시 스킬 활용 전략, 4대 준비도 중 가장 약한 영역 보완 방안, 구체적 액션 아이템을 포함해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -107,79 +115,44 @@ export async function POST(request: NextRequest) {
       console.error('[HIT F Score] AI 리포트 생성 실패:', aiError);
     }
 
-    // CH Deep 다크 플래그 — admin-only
-    if (scored.chDeepScores?.alertFlags) {
-      const af = scored.chDeepScores.alertFlags;
-      const darkScore = af.NR + af.MK;
-      if (darkScore >= 50) {
-        try {
-          const { createAdminClient: serverClient } = await import('@/lib/supabase/admin');
-          const supabaseAdmin = await serverClient();
-          await supabaseAdmin.from('hit_admin_flags').insert({
-            member_id: session.member_id || null,
-            session_id: session.id,
-            flag_type: 'dark_triad',
-            flag_score: darkScore,
-            flag_detail: { ...af, source: 'ch_deep_f', layer: 'F' },
-          });
-        } catch (flagErr) {
-          console.warn('[HIT F Score] CH Deep 플래그 저장 실패:', flagErr);
-        }
-      }
-    }
-
     // 결과 저장
     const result = await createHitFResult({
       session_id: session.id,
       member_id: session.member_id || null,
       hit_a_result_id: hitAResultId,
-      break_months: breakMonths,
-      latent_score: scored.latentScore,
-      cvi_raw: scored.cviRaw,
-      cvi_grade: scored.cviGrade,
-      next_route: scored.nextRoute === 'recovery' ? 'R' : scored.nextRoute,
-      resilience_score: scored.resilienceScore,
-      reentry_readiness: scored.reentryReadiness,
-      routing_rationale: scored.routingRationale,
+      life_satisfaction: scored.lifeSatisfaction,
+      remaining_passion: scored.remainingPassion,
+      direction_type: scored.directionType,
+      direction_scores: scored.directionScores,
+      legacy_skill_score: scored.legacySkillScore,
+      legacy_areas: scored.legacyAreas,
+      social_need_score: scored.socialNeedScore,
+      second_act_readiness: scored.secondActReadiness,
       ai_report: aiReport,
       journey_stage: journeyStage,
-      // 상세 점수 JSON
-      latent_scores: scored.latentScores,
-      resilience_scores: scored.resilienceScores,
-      break_context_score: scored.breakContextScore,
-      break_reason_score: scored.breakReasonScore,
-      practical_readiness: scored.practicalReadiness,
-      reentry_motivation: scored.reentryMotivation,
-      job_category: jobCategory,
-      // Phase 9 신규: 방향/준비도 상세 + 미끼 플래그
-      direction_scores:   scored.directionScores,
-      direction_dominant: scored.directionTop.code,
-      readiness_scores:   scored.readinessScores,
-      faking_flag:        scored.fakingFlag,
-      break_context_scores: {
-        disruption_context: scored.disruptionContext,
-        hidden_competency:  scored.hiddenCompetency,
-        gap_activities:     scored.gapActivities,
-      },
-      // CH Deep F / AP Deep F
-      ...(scored.chDeepScores && {
-        ch_deep_scores: {
-          scores: scored.chDeepScores.scores,
-          grades: scored.chDeepScores.grades,
-          overallScore: scored.chDeepScores.overallScore,
-          overallGrade: scored.chDeepScores.overallGrade,
-        },
-      }),
-      ...(scored.apDeepScores && {
-        ap_deep_scores: {
-          scores: scored.apDeepScores.scores,
-          grades: scored.apDeepScores.grades,
-          top3Code: scored.apDeepScores.top3Code,
-          top3Labels: scored.apDeepScores.top3Labels,
-          dominantType: scored.apDeepScores.dominantType,
-        },
-      }),
+      // HIT_E_Final.md 신규 필드
+      direction_top2: scored.directionTop2,
+      readiness_scores: scored.readinessScores,
+      psych_transition: scored.psychTransition,
+      faking_flag: scored.fakingFlag,
     });
+
+    // 미끼 플래그가 켜지면 hit_admin_flags 기록
+    if (scored.fakingFlag) {
+      try {
+        const { createAdminClient: createServerClient } = await import('@/lib/supabase/admin');
+        const serverSupabase = await createServerClient();
+        await serverSupabase.from('hit_admin_flags').insert({
+          member_id: session.member_id || null,
+          session_id: session.id,
+          flag_type: 'distortion',
+          flag_score: 90,
+          flag_detail: { source: 'HIT_E', e_val01: true, e_val02: true },
+        });
+      } catch (e) {
+        console.warn('[HIT F Score] faking flag 저장 실패:', e);
+      }
+    }
 
     // hero_profiles 링크
     if (session.member_id) {
@@ -205,27 +178,30 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 경력 공백 복귀 여정 단계 결정
+ * 인생 2막 여정 단계 결정
  */
 function determineJourneyStage(
-  cviGrade: string,
-  resilienceScore: number,
-  reentryReadiness: number,
+  readiness: number,
+  lifeSatisfaction: number,
+  passion: number,
+  directionType: string,
 ): string {
-  if (cviGrade === 'HIGH' && reentryReadiness >= 70) {
-    return 'ready_to_return';
+  const combined = (readiness + passion) / 2;
+
+  if (combined >= 75 && lifeSatisfaction >= 60) {
+    return 'ready_to_launch';  // 2막 시작 준비 완료
   }
-  if (cviGrade === 'HIGH' && reentryReadiness < 70) {
-    return 'skill_ready_prep_needed';
+  if (combined >= 60) {
+    return 'almost_ready';  // 거의 준비됨
   }
-  if (cviGrade === 'MID' && resilienceScore >= 60) {
-    return 'strategic_transition';
+  if (combined >= 40 && passion >= 50) {
+    return 'direction_found';  // 방향은 잡힘
   }
-  if (cviGrade === 'MID' && resilienceScore < 60) {
-    return 'resilience_building';
+  if (passion >= 40) {
+    return 'exploring';  // 탐색 중
   }
-  if (resilienceScore >= 50) {
-    return 'foundation_rebuilding';
+  if (lifeSatisfaction < 40) {
+    return 'needs_reflection';  // 성찰 필요
   }
-  return 'early_recovery';
+  return 'early_awareness';  // 초기 인식
 }

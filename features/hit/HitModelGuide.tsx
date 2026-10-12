@@ -26,7 +26,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           HIT A는 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
           성격유형(MBTI) · 행동유형(DISC) · 인성 · 적성까지 통합 측정하고,
           이 결과를 AI 알고리즘으로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
-          <strong className="text-neutral-900">HIT B ~ F</strong>는 HIT A의 결과를 기반으로
+          <strong className="text-neutral-900">HIT B</strong>는 역량과 방향을 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT C ~ F</strong>는 그 위에서
           신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
@@ -129,17 +129,18 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
 
         {/* HIT B ~ F 헤더 */}
         <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT B ~ F</span>
-          <span className="text-center">생애주기별 심화 진단</span>
+          <span>HIT B ~ GAP</span>
+          <span className="text-center">공통 B · 생애주기 C~F · 상황 GAP</span>
           <span className="text-right">검사 항목</span>
         </div>
 
         {[
-          { k: "B", scope: "대학생, 사회 초년", test: "취업준비도 · 역량" },
-          { k: "C", scope: "경력 이직 고민", test: "이직 전환 진단" },
-          { k: "D", scope: "리더십 전환 (시니어)", test: "리더십 전환 진단" },
-          { k: "E", scope: "인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
-          { k: "F", scope: "경력 공백 · 복귀", test: "재진입 로드맵" },
+          { k: "B", scope: "역량과 방향 (전 회원 공통)", test: "역량 · 효능감 · 이해" },
+          { k: "C", scope: "진입 — 대학생, 사회 초년", test: "준비 · 적응 · 결정" },
+          { k: "D", scope: "전환 — 경력 이직", test: "경력 자본 · 전환" },
+          { k: "E", scope: "리더십 전환 (시니어)", test: "리더십 전환 진단" },
+          { k: "F", scope: "인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
+          { k: "GAP", scope: "경력 공백 · 복귀 (상황 모듈)", test: "재진입 로드맵" },
         ].map((r, i, arr) => (
           <div key={r.k} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
             <span className="text-[15px] font-semibold text-neutral-800">HIT {r.k}</span>
@@ -385,49 +386,49 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-12">
         <div className="text-center mb-8">
           <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">심화 검사</p>
-          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT B ~ F · 생애주기별 특화 진단</h3>
+          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT C ~ F · 생애주기별 특화 진단</h3>
           <p className="text-sm text-neutral-500 leading-relaxed">
-            HIT A 완료 이후, 지금 내 국면의 구체적 질문에 맞춰 다음 한 걸음을 설계하는 심화 진단입니다.
-            현재 상황에 맞는 1~2개만 선택해도 충분합니다.
+            공통 검사(A·B)를 마친 뒤, 지금 내 생애주기에 맞는 하나를 고릅니다. 이력서·면접·재정 같은 준비 항목은 검사가 아니라
+            나의 저니 체크리스트에서 관리하고, 그 완료율이 준비도 점수가 됩니다. 경력 공백·복귀는 단계와 무관한 상황 모듈입니다.
           </p>
         </div>
 
         <div className="space-y-4">
           {[
             {
-              key: "B",
-              title: "대학생, 사회 초년",
-              tone: "text-green-700 bg-green-50",
-              desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. HIT A의 적성과 희망 직무를 기반으로 직무별 역량(48문항)과 취업준비도(32문항)를 진단해 어디서부터 채워야 할지 방향을 잡아줍니다.",
-              dims: ["직무 역량", "취업준비도", "자기 PR", "포트폴리오"],
-            },
-            {
               key: "C",
-              title: "경력 이직 고민",
-              tone: "text-blue-700 bg-blue-50",
-              desc: "1~3년 경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기 · 전환 가능성 · 준비도를 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
-              dims: ["경력 자본", "이직 동기", "전환 가능성", "준비도"],
+              title: "진입 — 대학생, 사회 초년",
+              tone: "text-green-700 bg-green-50",
+              desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. 취업 준비 상태(자기 인식) · 첫 직무 적응 · 진로 결정 확신을 진단하고, 실제 준비는 체크리스트로 셉니다.",
+              dims: ["취업 준비", "첫 직무 적응", "진로 결정"],
             },
             {
               key: "D",
-              title: "리더십 전환 (시니어)",
-              tone: "text-red-700 bg-red-50",
-              desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크 · 준비도를 측정해 리더십 전환 지도를 제시합니다.",
-              dims: ["전문성", "리더십", "정체성", "네트워크", "준비도"],
+              title: "전환 — 경력 이직",
+              tone: "text-blue-700 bg-blue-50",
+              desc: "경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기(Push/Pull) · 전환 가능성을 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
+              dims: ["경력 자본", "이직 동기", "전환 가능성"],
             },
             {
               key: "E",
-              title: "인생 2막 준비 (은퇴, 퇴직)",
-              tone: "text-amber-700 bg-amber-50",
-              desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결 · 준비도로 인생 2막의 설계도를 그립니다.",
-              dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결", "준비도"],
+              title: "리더십 전환 (시니어)",
+              tone: "text-red-700 bg-red-50",
+              desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크를 측정해 리더십 전환 지도를 제시합니다.",
+              dims: ["전문성", "리더십", "정체성", "네트워크"],
             },
             {
               key: "F",
-              title: "경력 공백 · 복귀 준비",
+              title: "인생 2막 준비 (은퇴, 퇴직)",
+              tone: "text-amber-700 bg-amber-50",
+              desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결로 인생 2막의 설계도를 그립니다.",
+              dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결"],
+            },
+            {
+              key: "GAP",
+              title: "경력 공백 · 복귀 (상황 모듈)",
               tone: "text-violet-700 bg-violet-50",
-              desc: "육아 · 학업 · 건강 등으로 비운 시간 이후 돌아오는 시기. 공백 맥락 · 잠재 역량 · 회복탄력성 · 재진입 준비도를 측정해 재진입 로드맵을 만듭니다.",
-              dims: ["공백 맥락", "잠재 역량", "회복탄력성", "재진입 준비도"],
+              desc: "육아 · 학업 · 건강 등으로 비운 시간 이후 돌아오는 상황. 어느 단계에서든 해당자만. 공백 맥락 · 경력 유효성 · 회복탄력성 · 복귀 방향을 측정합니다.",
+              dims: ["공백 맥락", "경력 유효성", "회복탄력성", "복귀 방향"],
             },
           ].map((t) => (
             <div key={t.key} className="border border-neutral-200 rounded-xl p-5">
@@ -446,7 +447,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         <p className="text-center text-xs text-neutral-400 mt-6">
-          HIT B ~ F는 HIT A가 완료된 상태에서만 의미 있게 해석됩니다.
+          HIT B 이후 검사는 HIT A·B가 완료된 상태에서만 의미 있게 해석됩니다.
         </p>
       </div>
 
@@ -458,7 +459,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           <span className="font-bold text-neutral-900">HIT B</span>는 HIT A의 결과를 기반으로
-          직무별 역량과 취업준비도를 심화 분석합니다.
+          핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 심화 진단으로,

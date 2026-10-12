@@ -4,6 +4,7 @@ import { getHitSession, getHitResponses, updateHitSession, createHitEResult, ups
 import { scoreHitE } from '@/lib/hit/scoring-e';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,63 +45,91 @@ export async function POST(request: NextRequest) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
     }
 
+    // A 결과 컨텍스트
+    const aCtx = {
+      bt: {
+        d: hitAData.disc_d_score || 50,
+        i: hitAData.disc_i_score || 50,
+        s: hitAData.disc_s_score || 50,
+        c: hitAData.disc_c_score || 50,
+      },
+      sp: hitAData.s_power_scores || {
+        strategic: 50, execution: 50, creativity: 50, interpersonal: 50,
+        analytical: 50, harmony: 50, breakthrough: 50, guard: 50,
+      },
+      ch: {
+        integrity: hitAData.ch_integrity || 50,
+        relational: hitAData.ch_relational || 50,
+        emotional: hitAData.ch_emotional || 50,
+        ethics: hitAData.ch_ethics || 50,
+        growth: hitAData.ch_growth || 50,
+      },
+      ap: hitAData.ap_scores || { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 },
+      uf: {
+        self: hitAData.uf_self || 50,
+        parent: hitAData.uf_parent || 50,
+        peer: hitAData.uf_peer || 50,
+      },
+    };
+
     // 채점
-    const scored = scoreHitE(responses);
+    const scored = scoreHitE(responses, aCtx);
+
+    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트에서 — 완료율을 준비도 점수로 (2026-10-12)
+    const checklist = await getStageChecklistProgress(createClient(), session.member_id!, 'e');
+    scored.senior_readiness = checklist.percent;
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
-      scored.secondActReadiness,
-      scored.lifeSatisfaction,
-      scored.remainingPassion,
-      scored.directionType,
+      scored.senior_readiness,
+      scored.identity_flexibility,
+      scored.expertise_depth,
+      scored.leadership_type,
     );
 
-    // 방향 유형 한글 라벨
-    const directionLabels: Record<string, string> = {
-      re_employment: '재취업형',
-      entrepreneurship: '창업/사업형',
-      social_contribution: '사회 공헌형',
-      mentoring: '멘토링/교육형',
-      leisure: '여가/취미형',
+    // 리더십 유형 한글 라벨
+    const leadershipLabels: Record<string, string> = {
+      exec_leadership: '실행형',
+      strategic_leadership: '전략형',
+      coaching_leadership: '코칭형',
+      independent_leadership: '독립형',
     };
 
-    // AI 리포트 (Claude Sonnet) — 인생 2막 분석
+    // AI 리포트 (Claude Sonnet) — 시니어 리더십 전환 분석
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
       const hitAContext = `HIT A 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
 
+      const topRoles = scored.next_role_matrix.possible_roles.slice(0, 3)
+        .map(r => `${r.role}(${r.fit_score}%)`).join(', ');
+
       const msg = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
         max_tokens: 2000,
-        system: `당신은 HeRo 인재 기획사의 인생 2막 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 인생 2막 분석 리포트를 작성합니다.
+        system: `당신은 HeRo 인재 기획사의 시니어 리더십 전환 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 시니어 리더십 전환 분석 리포트를 작성합니다.
 
 규칙:
-- 현재 삶 만족도, 열정, 방향성, 레거시 스킬, 사회적 준비도를 통합 분석
-- 구체적인 2막 설계 전략과 액션 플랜 제시
+- 전문성 깊이, 리더십 스타일, 정체성 유연성, 네트워크 & 시니어 준비도를 통합 분석
+- 현재 리더십 유형의 장단점과 시니어 단계에서의 활용법 제시
+- 다음 역할 매트릭스 상위 3개에 대한 구체적 전환 전략 제시
 - 절대 이모지, 이모티콘, 특수문자 사용 금지
 - 마크다운 헤딩(#) 사용 금지
-- 방향 유형(사회공헌/창업/교육/여가)에 맞는 구체적 제안
-- 레거시 스킬을 새로운 영역에 활용하는 방안 제시
-- 마지막에 인생 2막을 위한 구체적 액션 아이템 3가지 제시`,
+- 시니어 단계 특유의 과제(정체성 전환, 권력 내려놓기, 레거시 구축)에 대한 인사이트 포함
+- 마지막에 시니어 리더십 전환을 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT E 인생 2막 분석 결과:\n` +
-            `삶의 만족도: ${scored.lifeSatisfaction}점\n` +
-            `남은 열정: ${scored.remainingPassion}점\n` +
-            `심리적 전환: ${scored.psychTransition}점\n` +
-            `방향 유형(Top1): ${directionLabels[scored.directionType] || scored.directionType}\n` +
-            `2막 방향 Top2: ${scored.directionTop2.map(t => `${t.label}(${t.score}점)`).join(', ')}\n` +
-            `방향별 점수: ${JSON.stringify(scored.directionScores)}\n` +
-            `레거시 스킬: ${scored.legacySkillScore}점\n` +
-            `레거시 영역: ${scored.legacyAreas.join(', ') || '없음'}\n` +
-            `사회적 필요: ${scored.socialNeedScore}점\n` +
-            `2막 준비도 총합: ${scored.secondActReadiness}점\n` +
-            `2막 준비도 세부: 시간 ${scored.readinessScores.time}, 에너지 ${scored.readinessScores.energy}, 재정 ${scored.readinessScores.finance}, 관계 ${scored.readinessScores.relationship}\n` +
-            (scored.chDeepScores ? `CH 심화(인생전환맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
-            (scored.apDeepScores ? `AP 심화(2막역량 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
+          content: `${hitAContext}HIT E 시니어 리더십 전환 분석 결과:\n` +
+            `전문성 깊이: ${scored.expertise_depth}점 / 도메인 확장성: ${scored.expertise_breadth}점\n` +
+            `리더십 유형: ${leadershipLabels[scored.leadership_type]} (${scored.leadership_type})\n` +
+            `리더십 점수: ${JSON.stringify(scored.leadership_scores)}\n` +
+            `정체성 유연성: ${scored.identity_flexibility}점 (역할정체성 ${scored.role_identity}, 변화개방성 ${scored.change_openness}, 자기재발명 ${scored.self_reinvention})\n` +
+            `네트워크 질: ${scored.network_quality}점 / 네트워크 폭: ${scored.network_breadth}점\n` +
+            `시니어 준비도: ${scored.senior_readiness}점\n` +
+            `추천 다음 역할 Top 3: ${topRoles}\n` +
+            `현재 추정 역할: ${scored.next_role_matrix.current_role}\n` +
             `여정 단계: ${journeyStage}\n` +
-            `\n위 결과를 통합하여 4-5문단의 인생 2막 분석 리포트를 작성해주세요. 현재 삶 진단, 방향성 해석(Top2 비교), 레거시 스킬 활용 전략, 4대 준비도 중 가장 약한 영역 보완 방안, 구체적 액션 아이템을 포함해주세요.`,
+            `\n위 결과를 통합하여 4-5문단의 시니어 리더십 전환 분석 리포트를 작성해주세요. 전문성 진단, 리더십 스타일 분석, 정체성 유연성 평가, 다음 역할 전환 전략, 구체적 액션 아이템을 포함해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -111,69 +140,27 @@ export async function POST(request: NextRequest) {
       console.error('[HIT E Score] AI 리포트 생성 실패:', aiError);
     }
 
-    // CH Deep 다크 플래그 — admin-only
-    if (scored.chDeepScores?.alertFlags) {
-      const af = scored.chDeepScores.alertFlags;
-      const darkScore = af.NR + af.MK;
-      if (darkScore >= 50) {
-        try {
-          const { createAdminClient: serverClient } = await import('@/lib/supabase/admin');
-          const supabaseAdmin = await serverClient();
-          await supabaseAdmin.from('hit_admin_flags').insert({
-            member_id: session.member_id || null,
-            session_id: session.id,
-            flag_type: 'dark_triad',
-            flag_score: darkScore,
-            flag_detail: { ...af, source: 'ch_deep_e', layer: 'E' },
-          });
-        } catch (flagErr) {
-          console.warn('[HIT E Score] CH Deep 플래그 저장 실패:', flagErr);
-        }
-      }
-    }
-
     // 결과 저장
     const result = await createHitEResult({
       session_id: session.id,
       member_id: session.member_id || null,
       hit_a_result_id: hitAResultId,
-      life_satisfaction: scored.lifeSatisfaction,
-      remaining_passion: scored.remainingPassion,
-      direction_type: scored.directionType,
-      direction_scores: scored.directionScores,
-      legacy_skill_score: scored.legacySkillScore,
-      legacy_areas: scored.legacyAreas,
-      social_need_score: scored.socialNeedScore,
-      second_act_readiness: scored.secondActReadiness,
+      expertise_depth: scored.expertise_depth,
+      expertise_domains: scored.expertise_domains,
+      leadership_type: scored.leadership_type,
+      leadership_scores: scored.leadership_scores,
+      identity_flexibility: scored.identity_flexibility,
+      network_quality: scored.network_quality,
+      network_breadth: scored.network_breadth,
+      senior_readiness: scored.senior_readiness,
+      next_role_matrix: scored.next_role_matrix,
       ai_report: aiReport,
       journey_stage: journeyStage,
-      // HIT_E_Final.md 신규 필드
-      direction_top2: scored.directionTop2,
-      readiness_scores: scored.readinessScores,
-      psych_transition: scored.psychTransition,
-      faking_flag: scored.fakingFlag,
-      // CH Deep E / AP Deep E
-      ...(scored.chDeepScores && {
-        ch_deep_scores: {
-          scores: scored.chDeepScores.scores,
-          grades: scored.chDeepScores.grades,
-          overallScore: scored.chDeepScores.overallScore,
-          overallGrade: scored.chDeepScores.overallGrade,
-        },
-      }),
-      ...(scored.apDeepScores && {
-        ap_deep_scores: {
-          scores: scored.apDeepScores.scores,
-          grades: scored.apDeepScores.grades,
-          top3Code: scored.apDeepScores.top3Code,
-          top3Labels: scored.apDeepScores.top3Labels,
-          dominantType: scored.apDeepScores.dominantType,
-        },
-      }),
+      faking_flag: scored.faking_flag,
     });
 
-    // 미끼 플래그가 켜지면 hit_admin_flags 기록
-    if (scored.fakingFlag) {
+    // 미끼 통과(조작 의심) 시 어드민 플래그 등록
+    if (scored.faking_flag) {
       try {
         const { createAdminClient: createServerClient } = await import('@/lib/supabase/admin');
         const serverSupabase = await createServerClient();
@@ -182,7 +169,7 @@ export async function POST(request: NextRequest) {
           session_id: session.id,
           flag_type: 'distortion',
           flag_score: 90,
-          flag_detail: { source: 'HIT_E', e_val01: true, e_val02: true },
+          flag_detail: { source: 'HIT_D', d_val01: true, d_val02: true },
         });
       } catch (e) {
         console.warn('[HIT E Score] faking flag 저장 실패:', e);
@@ -213,30 +200,24 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 인생 2막 여정 단계 결정
+ * 시니어 리더십 전환 여정 단계 결정
  */
 function determineJourneyStage(
-  readiness: number,
-  lifeSatisfaction: number,
-  passion: number,
-  directionType: string,
+  seniorReadiness: number,
+  identityFlexibility: number,
+  expertiseDepth: number,
+  leadershipType: string,
 ): string {
-  const combined = (readiness + passion) / 2;
+  const combined = (seniorReadiness + identityFlexibility + expertiseDepth) / 3;
 
-  if (combined >= 75 && lifeSatisfaction >= 60) {
-    return 'ready_to_launch';  // 2막 시작 준비 완료
+  if (combined >= 75) {
+    return seniorReadiness >= 70 ? 'ready_for_transition' : 'almost_ready';
   }
-  if (combined >= 60) {
-    return 'almost_ready';  // 거의 준비됨
+  if (combined >= 55) {
+    return identityFlexibility >= 60 ? 'building_bridge' : 'deepening_expertise';
   }
-  if (combined >= 40 && passion >= 50) {
-    return 'direction_found';  // 방향은 잡힘
+  if (combined >= 35) {
+    return 'exploring_options';
   }
-  if (passion >= 40) {
-    return 'exploring';  // 탐색 중
-  }
-  if (lifeSatisfaction < 40) {
-    return 'needs_reflection';  // 성찰 필요
-  }
-  return 'early_awareness';  // 초기 인식
+  return 'early_reflection';
 }

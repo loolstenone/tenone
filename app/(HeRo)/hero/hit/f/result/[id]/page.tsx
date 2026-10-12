@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   ArrowRight, Copy, Check, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
-  Timer, Brain, Battery, Rocket, Navigation,
+  Sun, Compass, Award, Heart, AlertTriangle,
 } from "lucide-react";
 
 function cleanMarkdown(text: string): string {
@@ -26,47 +26,33 @@ interface HitFResult {
   sessionId: string;
   memberId: string | null;
   hitAResultId: string | null;
-  breakMonths: number;
-  jobChangeVelocity: number;
-  latentScore: number;
-  cviRaw: number;
-  cviGrade: string;
-  nextRoute: string;
-  resilienceScore: number;
-  reentryReadiness: number;
-  routingRationale: string;
+  lifeSatisfaction: number;
+  remainingPassion: number;
+  directionType: string;
+  directionScores: Record<string, number>;
+  legacySkillScore: number;
+  legacyAreas: string[];
+  socialNeedScore: number;
+  secondActReadiness: number;
   aiReport: string;
   journeyStage: string;
-  // detail scores
-  latentScores: Record<string, number>;
-  resilienceScores: Record<string, number>;
-  breakContextScore: number;
-  breakReasonScore: number;
-  practicalReadiness: number;
-  reentryMotivation: number;
-  jobCategory: string;
   createdAt: string;
 }
 
-const CVI_GRADE_INFO: Record<string, { label: string; color: string; bgColor: string }> = {
-  HIGH: { label: '높음 - 복귀 가능', color: 'text-green-700', bgColor: 'bg-green-50' },
-  MID: { label: '보통 - 전략 필요', color: 'text-yellow-700', bgColor: 'bg-yellow-50' },
-  LOW: { label: '낮음 - 기초부터', color: 'text-red-700', bgColor: 'bg-red-50' },
+const DIRECTION_LABELS: Record<string, { label: string; desc: string; color: string }> = {
+  social_contribution: { label: '사회 공헌형', desc: '경험으로 사회에 기여하기', color: 'text-green-600 bg-green-50' },
+  entrepreneurship: { label: '창업/사업형', desc: '새로운 사업에 도전하기', color: 'text-blue-600 bg-blue-50' },
+  education: { label: '교육/멘토링형', desc: '지식과 경험을 전수하기', color: 'text-purple-600 bg-purple-50' },
+  leisure: { label: '여가/취미형', desc: '자유롭게 삶을 즐기기', color: 'text-orange-600 bg-orange-50' },
 };
 
-const ROUTE_INFO: Record<string, { label: string; desc: string; color: string }> = {
-  R: { label: 'Recovery (복귀)', desc: '기존 경력 기반 빠른 복귀', color: 'text-green-600 bg-green-50' },
-  C: { label: 'HIT C (전환)', desc: '새로운 방향으로 경력 전환', color: 'text-blue-600 bg-blue-50' },
-  B: { label: 'HIT B (기본)', desc: '기초 역량 점검부터 시작', color: 'text-orange-600 bg-orange-50' },
-};
-
-const JOURNEY_LABELS: Record<string, string> = {
-  ready_to_return: '복귀 준비 완료',
-  skill_ready_prep_needed: '역량 준비 OK, 실행 준비 필요',
-  strategic_transition: '전략적 전환 단계',
-  resilience_building: '회복탄력성 강화 단계',
-  foundation_rebuilding: '기반 재구축 단계',
-  early_recovery: '초기 회복 단계',
+const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
+  ready_to_launch: { label: '2막 시작 준비 완료', color: 'text-green-600 bg-green-50' },
+  almost_ready: { label: '거의 준비됨', color: 'text-blue-600 bg-blue-50' },
+  direction_found: { label: '방향 탐색 완료', color: 'text-purple-600 bg-purple-50' },
+  exploring: { label: '탐색 중', color: 'text-yellow-600 bg-yellow-50' },
+  needs_reflection: { label: '성찰 필요', color: 'text-orange-600 bg-orange-50' },
+  early_awareness: { label: '초기 인식', color: 'text-neutral-600 bg-neutral-100' },
 };
 
 const TOTAL_PAGES = 5;
@@ -90,24 +76,16 @@ export default function HitFResultPage() {
           sessionId: data.session_id,
           memberId: data.member_id,
           hitAResultId: data.hit_a_result_id,
-          breakMonths: data.break_months ?? 0,
-          jobChangeVelocity: data.job_change_velocity ?? 0,
-          latentScore: data.latent_score ?? 0,
-          cviRaw: data.cvi_raw ?? 0,
-          cviGrade: data.cvi_grade ?? 'MID',
-          nextRoute: data.next_route ?? 'C',
-          resilienceScore: data.resilience_score ?? 0,
-          reentryReadiness: data.reentry_readiness ?? 0,
-          routingRationale: data.routing_rationale ?? '',
+          lifeSatisfaction: data.life_satisfaction ?? 0,
+          remainingPassion: data.remaining_passion ?? 0,
+          directionType: data.direction_type ?? 'social_contribution',
+          directionScores: data.direction_scores ?? {},
+          legacySkillScore: data.legacy_skill_score ?? 0,
+          legacyAreas: data.legacy_areas ?? [],
+          socialNeedScore: data.social_need_score ?? 0,
+          secondActReadiness: data.second_act_readiness ?? 0,
           aiReport: data.ai_report ?? '',
-          journeyStage: data.journey_stage ?? 'early_recovery',
-          latentScores: data.latent_scores ?? {},
-          resilienceScores: data.resilience_scores ?? {},
-          breakContextScore: data.break_context_score ?? 0,
-          breakReasonScore: data.break_reason_score ?? 0,
-          practicalReadiness: data.practical_readiness ?? 0,
-          reentryMotivation: data.reentry_motivation ?? 0,
-          jobCategory: data.job_category ?? '',
+          journeyStage: data.journey_stage ?? 'exploring',
           createdAt: data.created_at,
         });
         setLoading(false);
@@ -140,7 +118,7 @@ export default function HitFResultPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
+        <div className="h-10 w-10 border-2 border-neutral-200 border-t-amber-700 rounded-full animate-spin" />
       </div>
     );
   }
@@ -150,19 +128,18 @@ export default function HitFResultPage() {
       <div className="min-h-[60vh] flex items-center justify-center text-center">
         <div>
           <p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p>
-          <Link href="/hero/hit/f" className="text-[#E53935] underline text-sm">다시 검사하기</Link>
+          <Link href="/hero/hit/f" className="text-amber-700 underline text-sm">다시 검사하기</Link>
         </div>
       </div>
     );
   }
 
-  const cviInfo = CVI_GRADE_INFO[result.cviGrade] || CVI_GRADE_INFO.MID;
-  const routeInfo = ROUTE_INFO[result.nextRoute] || ROUTE_INFO.C;
-  const journeyLabel = JOURNEY_LABELS[result.journeyStage] || result.journeyStage;
-  const pageLabels = ["종합 요약", "CVI 분석", "잠재 역량", "회복탄력성 & 준비도", "다음 단계"];
+  const dirInfo = DIRECTION_LABELS[result.directionType] || DIRECTION_LABELS.social_contribution;
+  const journeyInfo = JOURNEY_LABELS[result.journeyStage] || JOURNEY_LABELS.exploring;
+  const pageLabels = ["종합 요약", "삶의 만족도 & 열정", "방향 탐색", "레거시 스킬 & 준비도", "다음 단계"];
 
-  // Score bar
-  const ScoreBar = ({ label, value, max = 100, color = 'bg-[#E53935]' }: { label: string; value: number; max?: number; color?: string }) => (
+  // Simple bar renderer
+  const ScoreBar = ({ label, value, color = 'bg-amber-700', max = 100 }: { label: string; value: number; color?: string; max?: number }) => (
     <div className="mb-3">
       <div className="flex justify-between text-xs mb-1">
         <span className="text-neutral-600">{label}</span>
@@ -174,65 +151,50 @@ export default function HitFResultPage() {
     </div>
   );
 
-  // CVI Gauge
-  const CviGauge = () => {
-    const value = result.cviRaw;
-    const gradeColor = result.cviGrade === 'HIGH' ? '#22c55e' : result.cviGrade === 'MID' ? '#eab308' : '#ef4444';
+  // Life Satisfaction Gauge (SVG)
+  const SatisfactionGauge = ({ value, label }: { value: number; label: string }) => {
+    const rotation = (value / 100) * 180 - 90;
     return (
       <div className="text-center">
-        <svg viewBox="0 0 200 120" className="w-full max-w-[200px] mx-auto">
-          {/* Background arc */}
-          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e5e5" strokeWidth="14" strokeLinecap="round" />
-          {/* Color zones: LOW (red), MID (yellow), HIGH (green) */}
-          <path d="M 20 100 A 80 80 0 0 1 73.3 28.5" fill="none" stroke="#fecaca" strokeWidth="14" strokeLinecap="round" />
-          <path d="M 73.3 28.5 A 80 80 0 0 1 126.7 28.5" fill="none" stroke="#fef3c7" strokeWidth="14" strokeLinecap="round" />
-          <path d="M 126.7 28.5 A 80 80 0 0 1 180 100" fill="none" stroke="#dcfce7" strokeWidth="14" strokeLinecap="round" />
-          {/* Needle */}
-          {(() => {
-            const rotation = (value / 100) * 180 - 90;
-            return (
-              <>
-                <line x1="100" y1="100" x2="100" y2="30"
-                  stroke={gradeColor} strokeWidth="2.5" strokeLinecap="round"
-                  transform={`rotate(${rotation} 100 100)`} />
-                <circle cx="100" cy="100" r="5" fill={gradeColor} />
-              </>
-            );
-          })()}
-          {/* Value text */}
-          <text x="100" y="92" textAnchor="middle" className="text-2xl font-extrabold" fill={gradeColor}>
-            {value.toFixed(1)}
-          </text>
+        <svg viewBox="0 0 200 120" className="w-full max-w-[180px] mx-auto">
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e5e5" strokeWidth="12" strokeLinecap="round" />
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#b45309" strokeWidth="12" strokeLinecap="round"
+            strokeDasharray={`${(value / 100) * 251.2} 251.2`} />
+          <line x1="100" y1="100" x2="100" y2="30"
+            stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"
+            transform={`rotate(${rotation} 100 100)`} />
+          <circle cx="100" cy="100" r="4" fill="#1a1a1a" />
+          <text x="100" y="95" textAnchor="middle" className="text-2xl font-extrabold fill-neutral-900">{value}%</text>
         </svg>
-        <p className="text-xs text-neutral-400 mt-1">CVI (경력유효성지수)</p>
+        <p className="text-xs text-neutral-400 mt-1">{label}</p>
       </div>
     );
   };
 
-  // Latent skills radar
-  const latentData = [
-    { label: '기술 유지', value: result.latentScores.technical_retention ?? 0 },
-    { label: '소프트 스킬', value: result.latentScores.soft_skill_retention ?? 0 },
-    { label: '지속 학습', value: result.latentScores.continuous_learning ?? 0 },
-  ];
-
-  const LatentRadar = () => {
+  // Direction Radar (SVG)
+  const DirectionRadar = () => {
+    const directions = [
+      { label: '사회공헌', key: 'social_contribution' },
+      { label: '창업/사업', key: 'entrepreneurship' },
+      { label: '교육/멘토링', key: 'education' },
+      { label: '여가/취미', key: 'leisure' },
+    ];
     const cx = 120, cy = 120, maxR = 90;
-    const n = latentData.length;
+    const n = directions.length;
     const angleStep = (2 * Math.PI) / n;
 
-    const pointsValue = latentData.map((d, i) => {
+    const pointsValue = directions.map((d, i) => {
       const angle = angleStep * i - Math.PI / 2;
-      const r = (d.value / 100) * maxR;
+      const r = ((result.directionScores[d.key] || 0) / 100) * maxR;
       return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
     }).join(' ');
 
     return (
-      <svg viewBox="0 0 240 240" className="w-full max-w-[220px] mx-auto">
+      <svg viewBox="0 0 240 240" className="w-full max-w-[240px] mx-auto">
         {[0.25, 0.5, 0.75, 1].map((scale) => (
           <polygon
             key={scale}
-            points={latentData.map((_, i) => {
+            points={directions.map((_, i) => {
               const angle = angleStep * i - Math.PI / 2;
               const r = scale * maxR;
               return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
@@ -240,7 +202,7 @@ export default function HitFResultPage() {
             fill="none" stroke="#e5e5e5" strokeWidth="0.5"
           />
         ))}
-        {latentData.map((_, i) => {
+        {directions.map((_, i) => {
           const angle = angleStep * i - Math.PI / 2;
           return (
             <line key={i} x1={cx} y1={cy}
@@ -249,15 +211,15 @@ export default function HitFResultPage() {
             />
           );
         })}
-        <polygon points={pointsValue} fill="rgba(229,57,53,0.15)" stroke="#E53935" strokeWidth="2" />
-        {latentData.map((d, i) => {
+        <polygon points={pointsValue} fill="rgba(180,83,9,0.15)" stroke="#b45309" strokeWidth="2" />
+        {directions.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
-          const r = (d.value / 100) * maxR;
-          return <circle key={i} cx={cx + r * Math.cos(angle)} cy={cy + r * Math.sin(angle)} r="3" fill="#E53935" />;
+          const r = ((result.directionScores[d.key] || 0) / 100) * maxR;
+          return <circle key={i} cx={cx + r * Math.cos(angle)} cy={cy + r * Math.sin(angle)} r="3" fill="#b45309" />;
         })}
-        {latentData.map((d, i) => {
+        {directions.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
-          const lr = maxR + 22;
+          const lr = maxR + 20;
           const x = cx + lr * Math.cos(angle);
           const y = cy + lr * Math.sin(angle);
           return (
@@ -279,158 +241,128 @@ export default function HitFResultPage() {
           <div key="p0">
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-              <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - F 결과</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">경력 공백 복귀 분석</h1>
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2">HIT - F 결과</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold">인생 2막 분석</h1>
             </div>
             <div className="flex justify-center mb-6">
-              <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${cviInfo.color} ${cviInfo.bgColor}`}>
-                CVI {result.cviGrade} - {cviInfo.label}
+              <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${journeyInfo.color}`}>
+                {journeyInfo.label}
               </span>
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Timer className="h-4 w-4 text-neutral-400" />
+                <Sun className="h-4 w-4 text-amber-700" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">공백 기간:</span> {result.breakMonths}개월
+                  <span className="font-bold">삶의 만족도:</span> {result.lifeSatisfaction}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Brain className="h-4 w-4 text-neutral-400" />
+                <Heart className="h-4 w-4 text-amber-700" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">잠재 역량:</span> {result.latentScore}%
+                  <span className="font-bold">남은 열정:</span> {result.remainingPassion}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Battery className="h-4 w-4 text-neutral-400" />
+                <Compass className="h-4 w-4 text-amber-700" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">회복탄력성:</span> {result.resilienceScore}%
+                  <span className="font-bold">방향 유형:</span> {dirInfo.label}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Rocket className="h-4 w-4 text-neutral-400" />
+                <Award className="h-4 w-4 text-amber-700" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">재진입 준비도:</span> {result.reentryReadiness}%
+                  <span className="font-bold">레거시 스킬:</span> {result.legacySkillScore}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Navigation className="h-4 w-4 text-neutral-400" />
+                <Users className="h-4 w-4 text-amber-700" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">추천 경로:</span> {routeInfo.label}
+                  <span className="font-bold">2막 준비도:</span> {result.secondActReadiness}%
                 </p>
               </div>
-            </div>
-            <div className="mt-4 bg-neutral-50 p-4 rounded-xl">
-              <p className="text-xs font-bold text-neutral-400 mb-1">여정 단계</p>
-              <p className="text-sm font-bold text-neutral-800">{journeyLabel}</p>
             </div>
           </div>
         );
 
-      // ── Page 2: CVI 분석 ──
+      // ── Page 2: 삶의 만족도 & 열정 ──
       case 1:
         return (
           <div key="p1">
-            <h2 className="text-lg font-bold mb-4">CVI 경력유효성지수</h2>
+            <h2 className="text-lg font-bold mb-4">삶의 만족도 & 열정</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <CviGauge />
-              <div className="flex justify-center mt-4">
-                <span className={`px-4 py-2 rounded-full text-xs font-bold ${cviInfo.color} ${cviInfo.bgColor}`}>
-                  {result.cviGrade} 등급
-                </span>
+              <div className="grid grid-cols-2 gap-4">
+                <SatisfactionGauge value={result.lifeSatisfaction} label="삶의 만족도" />
+                <SatisfactionGauge value={result.remainingPassion} label="남은 열정" />
               </div>
             </div>
-
-            {/* CVI 구성 요소 */}
-            <div className="space-y-4 mb-6">
-              <div className="bg-neutral-50 p-4 rounded-xl">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-neutral-600">경력 공백</span>
-                  <span className="font-bold text-neutral-800">{result.breakMonths}개월</span>
-                </div>
-                <p className="text-[10px] text-neutral-400">공백이 길수록 CVI가 낮아집니다</p>
-              </div>
-              <div className="bg-neutral-50 p-4 rounded-xl">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-neutral-600">직무변화속도</span>
-                  <span className="font-bold text-neutral-800">{result.jobChangeVelocity}</span>
-                </div>
-                <p className="text-[10px] text-neutral-400">변화가 빠른 직군일수록 CVI에 더 큰 영향</p>
-              </div>
-              <div className="bg-neutral-50 p-4 rounded-xl">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-neutral-600">잠재 역량 점수</span>
-                  <span className="font-bold text-neutral-800">{result.latentScore}%</span>
-                </div>
-                <p className="text-[10px] text-neutral-400">역량 유지도가 높으면 CVI를 보완합니다</p>
-              </div>
+            <div className="space-y-1">
+              <ScoreBar label="삶의 만족도" value={result.lifeSatisfaction} />
+              <ScoreBar label="남은 열정" value={result.remainingPassion} />
             </div>
-
-            {/* 추천 경로 */}
-            <div className={`border-2 rounded-xl p-5 ${result.nextRoute === 'R' ? 'border-green-300' : result.nextRoute === 'C' ? 'border-blue-300' : 'border-orange-300'}`}>
-              <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">추천 경로</p>
-              <div className="flex items-center gap-3">
-                <span className={`px-3 py-1.5 rounded-lg text-sm font-bold ${routeInfo.color}`}>
-                  {routeInfo.label}
-                </span>
-              </div>
-              <p className="text-sm text-neutral-600 mt-2">{routeInfo.desc}</p>
-              <p className="text-xs text-neutral-400 mt-2">{result.routingRationale}</p>
+            <div className="mt-6 bg-amber-50 p-4 rounded-xl">
+              <p className="text-sm text-amber-800">
+                {result.lifeSatisfaction >= 70 && result.remainingPassion >= 70
+                  ? '높은 삶의 만족도와 열정을 가지고 계십니다. 인생 2막에 대한 에너지가 충분합니다.'
+                  : result.lifeSatisfaction >= 50
+                  ? '삶에 대한 기본적인 만족이 있으며, 새로운 도전에 대한 준비가 가능합니다.'
+                  : '현재 삶에서 변화가 필요한 시점입니다. 새로운 방향 설정이 중요합니다.'}
+              </p>
             </div>
           </div>
         );
 
-      // ── Page 3: 잠재 역량 ──
+      // ── Page 3: 방향 탐색 ──
       case 2:
         return (
           <div key="p2">
-            <h2 className="text-lg font-bold mb-4">잠재 역량</h2>
+            <h2 className="text-lg font-bold mb-4">방향 탐색</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <LatentRadar />
-              <div className="text-center mt-2">
-                <span className="text-2xl font-extrabold text-neutral-900">{result.latentScore}%</span>
-                <p className="text-xs text-neutral-400">종합 잠재 역량</p>
+              <div className="flex justify-center mb-4">
+                <span className={`px-4 py-2 rounded-full text-xs font-bold ${dirInfo.color}`}>
+                  {dirInfo.label}
+                </span>
               </div>
+              <p className="text-xs text-neutral-500 text-center mb-4">{dirInfo.desc}</p>
+              <DirectionRadar />
             </div>
-            <div className="space-y-1 mb-6">
-              <ScoreBar label="기술적 역량 유지" value={result.latentScores.technical_retention ?? 0} />
-              <ScoreBar label="소프트 스킬 유지" value={result.latentScores.soft_skill_retention ?? 0} />
-              <ScoreBar label="지속적 학습" value={result.latentScores.continuous_learning ?? 0} />
-            </div>
-
-            {/* 공백 맥락 */}
-            <div className="border border-neutral-200 rounded-xl p-5 mt-6">
-              <h3 className="text-sm font-bold text-neutral-700 mb-3">공백 맥락 분석</h3>
-              <ScoreBar label="단절 상황 인식" value={result.breakContextScore} color="bg-neutral-400" />
-              <ScoreBar label="단절 사유 수용" value={result.breakReasonScore} color="bg-neutral-400" />
+            <div className="space-y-1">
+              <ScoreBar label="사회 공헌" value={result.directionScores.social_contribution || 0} color="bg-green-500" />
+              <ScoreBar label="창업/사업" value={result.directionScores.entrepreneurship || 0} color="bg-blue-500" />
+              <ScoreBar label="교육/멘토링" value={result.directionScores.education || 0} color="bg-purple-500" />
+              <ScoreBar label="여가/취미" value={result.directionScores.leisure || 0} color="bg-orange-500" />
             </div>
           </div>
         );
 
-      // ── Page 4: 회복탄력성 & 준비도 ──
+      // ── Page 4: 레거시 스킬 & 준비도 ──
       case 3:
         return (
           <div key="p3">
-            <h2 className="text-lg font-bold mb-4">회복탄력성 & 재진입 준비도</h2>
+            <h2 className="text-lg font-bold mb-4">레거시 스킬 & 준비도</h2>
 
-            {/* Resilience bars */}
+            {/* Legacy Skill */}
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-neutral-700">회복탄력성</h3>
-                <span className="text-xl font-extrabold text-neutral-900">{result.resilienceScore}%</span>
+              <div className="text-center mb-4">
+                <p className="text-3xl font-extrabold text-amber-700">{result.legacySkillScore}%</p>
+                <p className="text-xs text-neutral-400 mt-1">레거시 스킬 종합</p>
               </div>
-              <ScoreBar label="정서적 회복력" value={result.resilienceScores.emotional_resilience ?? 0} color="bg-purple-500" />
-              <ScoreBar label="자신감" value={result.resilienceScores.confidence ?? 0} color="bg-blue-500" />
-              <ScoreBar label="적응력" value={result.resilienceScores.adaptability ?? 0} color="bg-teal-500" />
+              {result.legacyAreas.length > 0 && (
+                <div className="space-y-2 mt-4">
+                  {result.legacyAreas.map((area, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg">
+                      <Award className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+                      <span className="text-xs text-amber-800">{area}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Reentry readiness */}
+            {/* Social & Readiness */}
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-neutral-700">재진입 준비도</h3>
-                <span className="text-xl font-extrabold text-neutral-900">{result.reentryReadiness}%</span>
-              </div>
-              <ScoreBar label="실질적 준비" value={result.practicalReadiness} color="bg-emerald-500" />
-              <ScoreBar label="복귀 동기" value={result.reentryMotivation} color="bg-amber-500" />
+              <h3 className="text-sm font-bold text-neutral-700 mb-4">사회적 연결 & 2막 준비도</h3>
+              <ScoreBar label="사회적 필요" value={result.socialNeedScore} />
+              <ScoreBar label="2막 준비도" value={result.secondActReadiness} />
             </div>
 
             {/* AI Report */}
@@ -456,45 +388,19 @@ export default function HitFResultPage() {
           <div key="p4">
             <h2 className="text-lg font-bold mb-6">다음 단계</h2>
             <div className="space-y-4">
-              {/* 추천 경로 바로가기 */}
-              {result.nextRoute === 'R' && (
-                <div className="block border-2 border-green-400 rounded-xl p-5 bg-green-50">
+              {result.hitAResultId && (
+                <Link href={`/hero/hit/profile/${result.id}`}
+                  className="block border-2 border-amber-700 rounded-xl p-5 hover:bg-amber-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-600 text-white rounded-lg flex items-center justify-center font-bold text-xs">복귀</div>
+                    <div className="w-10 h-10 bg-amber-700 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+E</div>
                     <div className="flex-1">
-                      <p className="font-bold text-neutral-800">Recovery 경로 추천</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">기존 경력 기반으로 빠르게 복귀할 수 있습니다</p>
+                      <p className="font-bold text-neutral-800">통합 프로필 보기</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + E 결과를 한눈에</p>
                     </div>
-                  </div>
-                </div>
-              )}
-              {result.nextRoute === 'C' && (
-                <Link href={`/hero/hit/c?a=${result.hitAResultId}`}
-                  className="block border-2 border-blue-400 rounded-xl p-5 hover:bg-blue-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-xs">C</div>
-                    <div className="flex-1">
-                      <p className="font-bold text-neutral-800">HIT C (경력전환) 추천</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">새로운 방향으로의 경력 전환을 분석해보세요</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-blue-500" />
+                    <ArrowRight className="h-4 w-4 text-amber-700" />
                   </div>
                 </Link>
               )}
-              {result.nextRoute === 'B' && (
-                <Link href="/hero/hit/b"
-                  className="block border-2 border-orange-400 rounded-xl p-5 hover:bg-orange-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-600 text-white rounded-lg flex items-center justify-center font-bold text-xs">B</div>
-                    <div className="flex-1">
-                      <p className="font-bold text-neutral-800">HIT B (기본 진단) 추천</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">기초 역량부터 점검해보세요</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-orange-500" />
-                  </div>
-                </Link>
-              )}
-
               {/* 풀 보고서 */}
               <Link href={`/hero/hit/f/report/${resultId}`}
                 className="block border border-neutral-200 rounded-xl p-5 hover:bg-neutral-50 transition-colors">
@@ -507,25 +413,24 @@ export default function HitFResultPage() {
                   <ArrowRight className="h-4 w-4 text-neutral-400" />
                 </div>
               </Link>
-
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-neutral-400" />
+                  <Sparkles className="h-5 w-5 text-amber-700" />
                   <div className="flex-1">
-                    <p className="font-bold text-neutral-800">AI 복귀 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">맞춤형 복귀 전략, 역량 보강 계획 수립</p>
+                    <p className="font-bold text-neutral-800">AI 인생 2막 상담</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">방향 설정, 레거시 활용, 액션 플랜 수립</p>
                   </div>
-                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 &rarr;</Link>
+                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-amber-700 font-medium">시작 →</Link>
                 </div>
               </div>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-neutral-400" />
+                  <Users className="h-5 w-5 text-amber-700" />
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">전문가 대면 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 복귀를 함께 설계합니다</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 인생 2막을 함께 설계합니다</p>
                   </div>
-                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 &rarr;</Link>
+                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-amber-700 font-medium">예약 →</Link>
                 </div>
               </div>
               <div className="pt-4 space-y-2">
@@ -556,7 +461,7 @@ export default function HitFResultPage() {
             key={i}
             onClick={() => setCurrentPage(i)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentPage ? 'w-6 bg-[#E53935]' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
+              i === currentPage ? 'w-6 bg-amber-700' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
             }`}
             title={label}
           />

@@ -115,82 +115,28 @@ function getMbtiModule(high: string, low: string, score: number): string {
 // ══════════════════════════════════════
 
 interface HitBScores {
-  personalityScores: Record<string, number>;
-  hollandCode: string;
   competencyCommon: Record<string, number>;
-  readinessGrade: string;
 }
 
-function getLevel(score: number): string {
-  if (score >= 67) return 'HIGH';
-  if (score >= 34) return 'MID';
-  return 'LOW';
-}
-
+/**
+ * HIT B 리포트 모듈 선택 (2026-10-12 재정의 — 핵심역량 6으로만. 성격·RIASEC·준비도 모듈은 폐지)
+ * COMP-{영역}-{등급}: COMM 소통·협업 / EXEC 주도·자기관리 / ANAL 문제해결 / PLAN 학습민첩성
+ */
 export function selectBModules(scores: HitBScores): string[] {
   const modules: string[] = [];
-
-  // 1. 인성 모듈 (personality) — 5개 영역
-  const personalityAreas: Record<string, { key: string; modulePrefix: string }> = {
-    emotional: { key: 'emotional', modulePrefix: 'EMOTIONAL' },
-    ethics: { key: 'ethics', modulePrefix: 'ETHICS' },
-    growth: { key: 'growth', modulePrefix: 'GROWTH' },
-    integrity: { key: 'integrity', modulePrefix: 'INTEGRITY' },
-    relation: { key: 'relation', modulePrefix: 'RELATION' },
-  };
-
-  // personalityScores에서 영역별 평균으로 매핑
-  const pScores = scores.personalityScores;
-  const emotionalAvg = Math.round(((pScores.tension || 50) + (100 - (pScores.suspicion || 50))) / 2);
-  const ethicsAvg = Math.round((pScores.conscience || 50));
-  const growthAvg = Math.round(((pScores.openness || 50) + (pScores.adventure || 50)) / 2);
-  const integrityAvg = Math.round(((pScores.self_discipline || 50) + (pScores.perfectionism || 50)) / 2);
-  const relationAvg = Math.round(((pScores.warmth || 50) + (pScores.social_boldness || 50)) / 2);
-
-  modules.push(`EMOTIONAL-${getLevel(emotionalAvg)}`);
-  modules.push(`ETHICS-${getLevel(ethicsAvg)}`);
-  modules.push(`GROWTH-${getLevel(growthAvg)}`);
-  modules.push(`INTEGRITY-${getLevel(integrityAvg)}`);
-  modules.push(`RELATION-${getLevel(relationAvg)}`);
-
-  // 2. RIASEC 모듈 — Holland Code로 매핑 (정확한 3글자 + 순열 fallback)
-  if (scores.hollandCode && scores.hollandCode.length === 3) {
-    const h = scores.hollandCode;
-    // 정확한 매칭 시도 + 6가지 순열
-    const permutations = [
-      h,
-      h[0]+h[2]+h[1], h[1]+h[0]+h[2], h[1]+h[2]+h[0], h[2]+h[0]+h[1], h[2]+h[1]+h[0],
-    ];
-    for (const p of permutations) {
-      modules.push(`RIASEC-${p}`);
-    }
-  }
-
-  // 3. 역량 모듈 — 6개 핵심 역량 등급
   const compAreas: Record<string, string[]> = {
-    COMM: ['communication', 'collaboration', 'persuasion'],
-    ANAL: ['analytics', 'data_driven', 'market_analysis'],
-    CREATE: ['storytelling', 'visual_sense', 'creative_concept', 'content_creation'],
-    EXEC: ['campaign_mgmt', 'self_management', 'initiative', 'consistency'],
-    LEAD: ['stakeholder_mgmt', 'strategic_thinking'],
-    PLAN: ['planning', 'reporting', 'seo'],
+    COMM: ['communication', 'collaboration'],
+    EXEC: ['initiative', 'self_management'],
+    ANAL: ['problem_solving'],
+    PLAN: ['learning_agility'],
   };
-
   Object.entries(compAreas).forEach(([prefix, keys]) => {
     const vals = keys.map(k => scores.competencyCommon[k] ?? 0).filter(v => v > 0);
     if (vals.length === 0) return;
     const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-    let grade: string;
-    if (avg >= 80) grade = 'A';
-    else if (avg >= 60) grade = 'B';
-    else if (avg >= 40) grade = 'C';
-    else grade = 'D';
+    const grade = avg >= 80 ? 'A' : avg >= 60 ? 'B' : avg >= 40 ? 'C' : 'D';
     modules.push(`COMP-${prefix}-${grade}`);
   });
-
-  // 4. 준비도 모듈
-  modules.push(`READY-${scores.readinessGrade}`);
-
   return modules;
 }
 

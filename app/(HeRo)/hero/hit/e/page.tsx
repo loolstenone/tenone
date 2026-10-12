@@ -3,37 +3,37 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Sun, Compass, Award, Users, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Microscope, Crown, RefreshCw, Globe, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
-    icon: Sun,
-    title: "삶의 만족도 & 열정",
-    desc: "현재 삶의 만족감과 남아있는 열정, 에너지를 종합 측정합니다.",
-    count: "15문항",
-    time: "~3분",
-  },
-  {
-    icon: Compass,
-    title: "방향 탐색",
-    desc: "사회공헌, 창업, 교육/멘토링, 여가 중 나에게 맞는 방향을 탐색합니다.",
+    icon: Microscope,
+    title: "전문성 깊이 & 도메인",
+    desc: "전문 분야의 깊이와 도메인 확장성을 측정합니다.",
     count: "20문항",
     time: "~4분",
   },
   {
-    icon: Award,
-    title: "레거시 스킬",
-    desc: "수십 년간 쌓은 경험과 전문성의 이전 가능성을 평가합니다.",
+    icon: Crown,
+    title: "리더십 스타일",
+    desc: "비전형, 코칭형, 민주형, 지시형 리더십 성향을 분석합니다.",
+    count: "20문항",
+    time: "~4분",
+  },
+  {
+    icon: RefreshCw,
+    title: "정체성 유연성",
+    desc: "역할 정체성, 변화 개방성, 자기 재발명 역량을 평가합니다.",
     count: "15문항",
     time: "~3분",
   },
   {
-    icon: Users,
-    title: "사회적 연결 & 준비도",
-    desc: "사회적 관계 유지 욕구와 인생 2막 준비 정도를 진단합니다.",
-    count: "10문항",
-    time: "~2분",
+    icon: Globe,
+    title: "네트워크 & 시니어 준비도",
+    desc: "네트워크의 질과 폭, 시니어 역할 준비도를 진단합니다.",
+    count: "15문항",
+    time: "~3분",
   },
 ];
 
@@ -95,22 +95,22 @@ function HitEIntroContent() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-amber-50 via-white to-neutral-50">
+      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full mb-6">
-            HIT E · Second Act
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
+            HIT E · Senior Leadership
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            인생 2막?
+            시니어 리더십 전환?
           </h1>
           <p className="text-neutral-500 mb-2">
-            삶의 만족도, 남은 열정, 방향성, 레거시 스킬을 종합 분석하여<br />
-            나만의 인생 2막 설계 리포트를 제공합니다.
+            전문성, 리더십 스타일, 정체성 유연성, 네트워크를 종합 분석하여<br />
+            다음 시니어 역할 전환 로드맵을 제공합니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 12분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 15분</span>
             <span>·</span>
-            <span>60문항</span>
+            <span>70문항</span>
             <span>·</span>
             <span>7점 척도</span>
           </div>
@@ -126,7 +126,7 @@ function HitEIntroContent() {
               <div>
                 <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
                 <p className="text-xs text-amber-600 mt-1">
-                  HIT - E는 HIT - A 결과를 기반으로 인생 2막을 분석합니다.
+                  HIT - D는 HIT - A 결과를 기반으로 시니어 리더십 전환을 분석합니다.
                   아직 HIT - A를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
@@ -148,7 +148,7 @@ function HitEIntroContent() {
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-amber-50 text-amber-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <m.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
@@ -176,7 +176,7 @@ function HitEIntroContent() {
           <button
             onClick={handleStart}
             disabled={starting}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-amber-700 text-white font-bold text-lg hover:bg-amber-800 transition-colors rounded-xl disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
           >
             {starting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
@@ -194,7 +194,7 @@ function HitEIntroPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-neutral-200 border-t-amber-700 rounded-full animate-spin" />
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
       </div>
     }>
       <HitEIntroContent />

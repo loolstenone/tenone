@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   ArrowRight, Copy, Check, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
-  Sun, Compass, Award, Heart, AlertTriangle,
+  Microscope, Crown, Shuffle, Globe, TrendingUp,
 } from "lucide-react";
 
 function cleanMarkdown(text: string): string {
@@ -21,38 +21,45 @@ function cleanMarkdown(text: string): string {
     .trim();
 }
 
-interface HitEResult {
-  id: string;
-  sessionId: string;
-  memberId: string | null;
-  hitAResultId: string | null;
-  lifeSatisfaction: number;
-  remainingPassion: number;
-  directionType: string;
-  directionScores: Record<string, number>;
-  legacySkillScore: number;
-  legacyAreas: string[];
-  socialNeedScore: number;
-  secondActReadiness: number;
-  aiReport: string;
-  journeyStage: string;
-  createdAt: string;
+interface NextRoleOption {
+  role: string;
+  fit_score: number;
+  description: string;
 }
 
-const DIRECTION_LABELS: Record<string, { label: string; desc: string; color: string }> = {
-  social_contribution: { label: '사회 공헌형', desc: '경험으로 사회에 기여하기', color: 'text-green-600 bg-green-50' },
-  entrepreneurship: { label: '창업/사업형', desc: '새로운 사업에 도전하기', color: 'text-blue-600 bg-blue-50' },
-  education: { label: '교육/멘토링형', desc: '지식과 경험을 전수하기', color: 'text-purple-600 bg-purple-50' },
-  leisure: { label: '여가/취미형', desc: '자유롭게 삶을 즐기기', color: 'text-orange-600 bg-orange-50' },
+interface HitEResult {
+  id: string;
+  session_id: string;
+  member_id: string | null;
+  hit_a_result_id: string | null;
+  expertise_depth: number;
+  expertise_domains: Record<string, number>;
+  leadership_type: string;
+  leadership_scores: Record<string, number>;
+  identity_flexibility: number;
+  network_quality: number;
+  network_breadth: number;
+  senior_readiness: number;
+  next_role_matrix: { current_role: string; possible_roles: NextRoleOption[] };
+  ai_report: string;
+  journey_stage: string;
+  created_at: string;
+}
+
+const LEADERSHIP_LABELS: Record<string, { label: string; desc: string; color: string }> = {
+  visionary: { label: '비전 제시형', desc: '큰 그림과 방향을 제시하며 사람들에게 영감을 주는 리더', color: 'text-purple-600 bg-purple-50' },
+  coaching: { label: '코칭형', desc: '팀원의 잠재력을 발견하고 성장을 이끄는 리더', color: 'text-green-600 bg-green-50' },
+  democratic: { label: '민주형', desc: '다양한 의견을 수렴하고 합의를 이끌어내는 리더', color: 'text-blue-600 bg-blue-50' },
+  commanding: { label: '지시형', desc: '명확한 지시와 실행력으로 위기를 돌파하는 리더', color: 'text-orange-600 bg-orange-50' },
 };
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  ready_to_launch: { label: '2막 시작 준비 완료', color: 'text-green-600 bg-green-50' },
+  ready_for_transition: { label: '전환 준비 완료', color: 'text-green-600 bg-green-50' },
   almost_ready: { label: '거의 준비됨', color: 'text-blue-600 bg-blue-50' },
-  direction_found: { label: '방향 탐색 완료', color: 'text-purple-600 bg-purple-50' },
-  exploring: { label: '탐색 중', color: 'text-yellow-600 bg-yellow-50' },
-  needs_reflection: { label: '성찰 필요', color: 'text-orange-600 bg-orange-50' },
-  early_awareness: { label: '초기 인식', color: 'text-neutral-600 bg-neutral-100' },
+  building_bridge: { label: '브릿지 구축 중', color: 'text-indigo-600 bg-indigo-50' },
+  deepening_expertise: { label: '전문성 심화 중', color: 'text-yellow-600 bg-yellow-50' },
+  exploring_options: { label: '옵션 탐색 중', color: 'text-orange-600 bg-orange-50' },
+  early_reflection: { label: '초기 성찰 단계', color: 'text-neutral-600 bg-neutral-100' },
 };
 
 const TOTAL_PAGES = 5;
@@ -71,23 +78,7 @@ export default function HitEResultPage() {
       .then(r => r.json())
       .then(data => {
         if (data.error) { setLoading(false); return; }
-        setResult({
-          id: data.id,
-          sessionId: data.session_id,
-          memberId: data.member_id,
-          hitAResultId: data.hit_a_result_id,
-          lifeSatisfaction: data.life_satisfaction ?? 0,
-          remainingPassion: data.remaining_passion ?? 0,
-          directionType: data.direction_type ?? 'social_contribution',
-          directionScores: data.direction_scores ?? {},
-          legacySkillScore: data.legacy_skill_score ?? 0,
-          legacyAreas: data.legacy_areas ?? [],
-          socialNeedScore: data.social_need_score ?? 0,
-          secondActReadiness: data.second_act_readiness ?? 0,
-          aiReport: data.ai_report ?? '',
-          journeyStage: data.journey_stage ?? 'exploring',
-          createdAt: data.created_at,
-        });
+        setResult(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -118,7 +109,7 @@ export default function HitEResultPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-10 w-10 border-2 border-neutral-200 border-t-amber-700 rounded-full animate-spin" />
+        <div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,73 +119,53 @@ export default function HitEResultPage() {
       <div className="min-h-[60vh] flex items-center justify-center text-center">
         <div>
           <p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p>
-          <Link href="/hero/hit/e" className="text-amber-700 underline text-sm">다시 검사하기</Link>
+          <Link href="/hero/hit/e" className="text-[#E53935] underline text-sm">다시 검사하기</Link>
         </div>
       </div>
     );
   }
 
-  const dirInfo = DIRECTION_LABELS[result.directionType] || DIRECTION_LABELS.social_contribution;
-  const journeyInfo = JOURNEY_LABELS[result.journeyStage] || JOURNEY_LABELS.exploring;
-  const pageLabels = ["종합 요약", "삶의 만족도 & 열정", "방향 탐색", "레거시 스킬 & 준비도", "다음 단계"];
+  const leadershipInfo = LEADERSHIP_LABELS[result.leadership_type] || LEADERSHIP_LABELS.visionary;
+  const journeyInfo = JOURNEY_LABELS[result.journey_stage] || JOURNEY_LABELS.early_reflection;
+  const pageLabels = ["종합 요약", "전문성 & 리더십", "정체성 유연성", "네트워크 & 다음 역할", "다음 단계"];
 
-  // Simple bar renderer
-  const ScoreBar = ({ label, value, color = 'bg-amber-700', max = 100 }: { label: string; value: number; color?: string; max?: number }) => (
+  // Score bar renderer
+  const ScoreBar = ({ label, value, max = 100 }: { label: string; value: number; max?: number }) => (
     <div className="mb-3">
       <div className="flex justify-between text-xs mb-1">
         <span className="text-neutral-600">{label}</span>
         <span className="text-neutral-400 font-mono">{value}%</span>
       </div>
       <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-        <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${Math.min(value, max)}%` }} />
+        <div className="h-full bg-[#E53935] rounded-full transition-all duration-500" style={{ width: `${Math.min(value, max)}%` }} />
       </div>
     </div>
   );
 
-  // Life Satisfaction Gauge (SVG)
-  const SatisfactionGauge = ({ value, label }: { value: number; label: string }) => {
-    const rotation = (value / 100) * 180 - 90;
-    return (
-      <div className="text-center">
-        <svg viewBox="0 0 200 120" className="w-full max-w-[180px] mx-auto">
-          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e5e5" strokeWidth="12" strokeLinecap="round" />
-          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#b45309" strokeWidth="12" strokeLinecap="round"
-            strokeDasharray={`${(value / 100) * 251.2} 251.2`} />
-          <line x1="100" y1="100" x2="100" y2="30"
-            stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"
-            transform={`rotate(${rotation} 100 100)`} />
-          <circle cx="100" cy="100" r="4" fill="#1a1a1a" />
-          <text x="100" y="95" textAnchor="middle" className="text-2xl font-extrabold fill-neutral-900">{value}%</text>
-        </svg>
-        <p className="text-xs text-neutral-400 mt-1">{label}</p>
-      </div>
-    );
-  };
+  // Leadership Radar (4 axes)
+  const leadershipData = [
+    { label: '비전', value: result.leadership_scores.visionary || 0 },
+    { label: '코칭', value: result.leadership_scores.coaching || 0 },
+    { label: '민주', value: result.leadership_scores.democratic || 0 },
+    { label: '지시', value: result.leadership_scores.commanding || 0 },
+  ];
 
-  // Direction Radar (SVG)
-  const DirectionRadar = () => {
-    const directions = [
-      { label: '사회공헌', key: 'social_contribution' },
-      { label: '창업/사업', key: 'entrepreneurship' },
-      { label: '교육/멘토링', key: 'education' },
-      { label: '여가/취미', key: 'leisure' },
-    ];
+  const RadarLeadership = () => {
     const cx = 120, cy = 120, maxR = 90;
-    const n = directions.length;
+    const n = leadershipData.length;
     const angleStep = (2 * Math.PI) / n;
 
-    const pointsValue = directions.map((d, i) => {
+    const pointsValue = leadershipData.map((d, i) => {
       const angle = angleStep * i - Math.PI / 2;
-      const r = ((result.directionScores[d.key] || 0) / 100) * maxR;
+      const r = (d.value / 100) * maxR;
       return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
     }).join(' ');
 
     return (
       <svg viewBox="0 0 240 240" className="w-full max-w-[240px] mx-auto">
         {[0.25, 0.5, 0.75, 1].map((scale) => (
-          <polygon
-            key={scale}
-            points={directions.map((_, i) => {
+          <polygon key={scale}
+            points={leadershipData.map((_, i) => {
               const angle = angleStep * i - Math.PI / 2;
               const r = scale * maxR;
               return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
@@ -202,31 +173,22 @@ export default function HitEResultPage() {
             fill="none" stroke="#e5e5e5" strokeWidth="0.5"
           />
         ))}
-        {directions.map((_, i) => {
+        {leadershipData.map((_, i) => {
           const angle = angleStep * i - Math.PI / 2;
-          return (
-            <line key={i} x1={cx} y1={cy}
-              x2={cx + maxR * Math.cos(angle)} y2={cy + maxR * Math.sin(angle)}
-              stroke="#e5e5e5" strokeWidth="0.5"
-            />
-          );
+          return <line key={i} x1={cx} y1={cy} x2={cx + maxR * Math.cos(angle)} y2={cy + maxR * Math.sin(angle)} stroke="#e5e5e5" strokeWidth="0.5" />;
         })}
-        <polygon points={pointsValue} fill="rgba(180,83,9,0.15)" stroke="#b45309" strokeWidth="2" />
-        {directions.map((d, i) => {
+        <polygon points={pointsValue} fill="rgba(229,57,53,0.15)" stroke="#E53935" strokeWidth="2" />
+        {leadershipData.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
-          const r = ((result.directionScores[d.key] || 0) / 100) * maxR;
-          return <circle key={i} cx={cx + r * Math.cos(angle)} cy={cy + r * Math.sin(angle)} r="3" fill="#b45309" />;
+          const r = (d.value / 100) * maxR;
+          return <circle key={i} cx={cx + r * Math.cos(angle)} cy={cy + r * Math.sin(angle)} r="3" fill="#E53935" />;
         })}
-        {directions.map((d, i) => {
+        {leadershipData.map((d, i) => {
           const angle = angleStep * i - Math.PI / 2;
           const lr = maxR + 20;
-          const x = cx + lr * Math.cos(angle);
-          const y = cy + lr * Math.sin(angle);
           return (
-            <text key={i} x={x} y={y} textAnchor="middle" dominantBaseline="middle"
-              className="text-[10px] fill-neutral-500">
-              {d.label}
-            </text>
+            <text key={i} x={cx + lr * Math.cos(angle)} y={cy + lr * Math.sin(angle)} textAnchor="middle" dominantBaseline="middle"
+              className="text-[10px] fill-neutral-500">{d.label}</text>
           );
         })}
       </svg>
@@ -241,8 +203,8 @@ export default function HitEResultPage() {
           <div key="p0">
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2">HIT - E 결과</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">인생 2막 분석</h1>
+              <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - E 결과</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold">리더십 전환 (시니어)</h1>
             </div>
             <div className="flex justify-center mb-6">
               <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${journeyInfo.color}`}>
@@ -251,122 +213,167 @@ export default function HitEResultPage() {
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Sun className="h-4 w-4 text-amber-700" />
+                <Crown className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">삶의 만족도:</span> {result.lifeSatisfaction}%
+                  <span className="font-bold">리더십 유형:</span> {leadershipInfo.label}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Heart className="h-4 w-4 text-amber-700" />
+                <Microscope className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">남은 열정:</span> {result.remainingPassion}%
+                  <span className="font-bold">전문성 깊이:</span> {result.expertise_depth}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Compass className="h-4 w-4 text-amber-700" />
+                <Shuffle className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">방향 유형:</span> {dirInfo.label}
+                  <span className="font-bold">정체성 유연성:</span> {result.identity_flexibility}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Award className="h-4 w-4 text-amber-700" />
+                <Globe className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
-                  <span className="font-bold">레거시 스킬:</span> {result.legacySkillScore}%
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Users className="h-4 w-4 text-amber-700" />
-                <p className="text-sm text-neutral-600">
-                  <span className="font-bold">2막 준비도:</span> {result.secondActReadiness}%
+                  <span className="font-bold">시니어 준비도:</span> {result.senior_readiness}%
                 </p>
               </div>
             </div>
+            {/* Top recommended role */}
+            {result.next_role_matrix?.possible_roles?.[0] && (
+              <div className="mt-4 p-4 border-2 border-[#E53935] rounded-xl bg-red-50/50">
+                <p className="text-xs font-bold text-[#E53935] mb-1">추천 다음 역할 #1</p>
+                <p className="text-lg font-extrabold text-neutral-900">
+                  {result.next_role_matrix.possible_roles[0].role}
+                </p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  적합도 {result.next_role_matrix.possible_roles[0].fit_score}%
+                </p>
+              </div>
+            )}
           </div>
         );
 
-      // ── Page 2: 삶의 만족도 & 열정 ──
+      // ── Page 2: 전문성 & 리더십 ──
       case 1:
         return (
           <div key="p1">
-            <h2 className="text-lg font-bold mb-4">삶의 만족도 & 열정</h2>
+            <h2 className="text-lg font-bold mb-4">전문성 & 리더십</h2>
+
+            {/* Expertise bars */}
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="grid grid-cols-2 gap-4">
-                <SatisfactionGauge value={result.lifeSatisfaction} label="삶의 만족도" />
-                <SatisfactionGauge value={result.remainingPassion} label="남은 열정" />
+              <h3 className="text-sm font-bold text-neutral-700 mb-4">전문성</h3>
+              <ScoreBar label="전문 분야 깊이" value={result.expertise_depth} />
+              <ScoreBar label="도메인 확장성" value={result.expertise_domains?.breadth ?? 0} />
+            </div>
+
+            {/* Leadership radar */}
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-neutral-700">리더십 스타일</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${leadershipInfo.color}`}>
+                  {leadershipInfo.label}
+                </span>
+              </div>
+              <RadarLeadership />
+              <div className="mt-4 space-y-1">
+                <ScoreBar label="비전 제시형" value={result.leadership_scores.visionary || 0} />
+                <ScoreBar label="코칭형" value={result.leadership_scores.coaching || 0} />
+                <ScoreBar label="민주형" value={result.leadership_scores.democratic || 0} />
+                <ScoreBar label="지시형" value={result.leadership_scores.commanding || 0} />
               </div>
             </div>
-            <div className="space-y-1">
-              <ScoreBar label="삶의 만족도" value={result.lifeSatisfaction} />
-              <ScoreBar label="남은 열정" value={result.remainingPassion} />
+
+            <p className="text-xs text-neutral-500 leading-relaxed">
+              {leadershipInfo.desc}
+            </p>
+          </div>
+        );
+
+      // ── Page 3: 정체성 유연성 ──
+      case 2:
+        return (
+          <div key="p2">
+            <h2 className="text-lg font-bold mb-4">정체성 유연성</h2>
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
+              <div className="text-center mb-6">
+                <p className="text-4xl font-extrabold text-neutral-900">{result.identity_flexibility}%</p>
+                <p className="text-xs text-neutral-400 mt-1">정체성 유연성 지수</p>
+              </div>
+              {/* Identity sub-scores — we need to derive from expertise_domains or separate fields */}
+              {/* Since we store identity_flexibility as single number, show related network/expertise */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                  <span className="text-sm text-neutral-600">역할에 묶이지 않는 정체성</span>
+                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 60 ? '유연' : result.identity_flexibility >= 40 ? '보통' : '경직'}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                  <span className="text-sm text-neutral-600">변화에 대한 태도</span>
+                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 65 ? '적극 수용' : result.identity_flexibility >= 45 ? '선택적 수용' : '회피 경향'}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                  <span className="text-sm text-neutral-600">자기 재발명 의지</span>
+                  <span className="text-sm font-bold text-neutral-900">{result.identity_flexibility >= 70 ? '높음' : result.identity_flexibility >= 50 ? '보통' : '낮음'}</span>
+                </div>
+              </div>
             </div>
-            <div className="mt-6 bg-amber-50 p-4 rounded-xl">
-              <p className="text-sm text-amber-800">
-                {result.lifeSatisfaction >= 70 && result.remainingPassion >= 70
-                  ? '높은 삶의 만족도와 열정을 가지고 계십니다. 인생 2막에 대한 에너지가 충분합니다.'
-                  : result.lifeSatisfaction >= 50
-                  ? '삶에 대한 기본적인 만족이 있으며, 새로운 도전에 대한 준비가 가능합니다.'
-                  : '현재 삶에서 변화가 필요한 시점입니다. 새로운 방향 설정이 중요합니다.'}
+
+            {/* Insight */}
+            <div className="bg-neutral-50 p-4 rounded-xl">
+              <p className="text-xs text-neutral-500 leading-relaxed">
+                {result.identity_flexibility >= 65
+                  ? '높은 정체성 유연성은 시니어 전환의 핵심 자산입니다. 역할이 바뀌어도 자신의 핵심 가치를 유지하면서 새로운 맥락에 적응할 수 있습니다.'
+                  : result.identity_flexibility >= 45
+                    ? '보통 수준의 정체성 유연성입니다. 시니어 전환을 위해 현재 역할을 넘어선 자기 정의를 연습해보는 것이 도움됩니다.'
+                    : '현재 역할에 대한 강한 동일시가 있습니다. 시니어 전환 시 가장 큰 심리적 도전이 될 수 있으며, 점진적인 역할 확장을 권합니다.'}
               </p>
             </div>
           </div>
         );
 
-      // ── Page 3: 방향 탐색 ──
-      case 2:
-        return (
-          <div key="p2">
-            <h2 className="text-lg font-bold mb-4">방향 탐색</h2>
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="flex justify-center mb-4">
-                <span className={`px-4 py-2 rounded-full text-xs font-bold ${dirInfo.color}`}>
-                  {dirInfo.label}
-                </span>
-              </div>
-              <p className="text-xs text-neutral-500 text-center mb-4">{dirInfo.desc}</p>
-              <DirectionRadar />
-            </div>
-            <div className="space-y-1">
-              <ScoreBar label="사회 공헌" value={result.directionScores.social_contribution || 0} color="bg-green-500" />
-              <ScoreBar label="창업/사업" value={result.directionScores.entrepreneurship || 0} color="bg-blue-500" />
-              <ScoreBar label="교육/멘토링" value={result.directionScores.education || 0} color="bg-purple-500" />
-              <ScoreBar label="여가/취미" value={result.directionScores.leisure || 0} color="bg-orange-500" />
-            </div>
-          </div>
-        );
-
-      // ── Page 4: 레거시 스킬 & 준비도 ──
+      // ── Page 4: 네트워크 & 다음 역할 ──
       case 3:
         return (
           <div key="p3">
-            <h2 className="text-lg font-bold mb-4">레거시 스킬 & 준비도</h2>
+            <h2 className="text-lg font-bold mb-4">네트워크 & 다음 역할</h2>
 
-            {/* Legacy Skill */}
+            {/* Network scores */}
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <div className="text-center mb-4">
-                <p className="text-3xl font-extrabold text-amber-700">{result.legacySkillScore}%</p>
-                <p className="text-xs text-neutral-400 mt-1">레거시 스킬 종합</p>
-              </div>
-              {result.legacyAreas.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  {result.legacyAreas.map((area, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg">
-                      <Award className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
-                      <span className="text-xs text-amber-800">{area}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <h3 className="text-sm font-bold text-neutral-700 mb-4">네트워크</h3>
+              <ScoreBar label="네트워크 질" value={result.network_quality} />
+              <ScoreBar label="네트워크 폭" value={result.network_breadth} />
+              <ScoreBar label="시니어 준비도" value={result.senior_readiness} />
             </div>
 
-            {/* Social & Readiness */}
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <h3 className="text-sm font-bold text-neutral-700 mb-4">사회적 연결 & 2막 준비도</h3>
-              <ScoreBar label="사회적 필요" value={result.socialNeedScore} />
-              <ScoreBar label="2막 준비도" value={result.secondActReadiness} />
+            {/* Next Role Matrix */}
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">다음 역할 매트릭스</h3>
+              {result.next_role_matrix?.current_role && (
+                <p className="text-xs text-neutral-500 mb-4">
+                  현재 추정 역할: <span className="font-bold text-neutral-700">{result.next_role_matrix.current_role}</span>
+                </p>
+              )}
+              <div className="space-y-3">
+                {(result.next_role_matrix?.possible_roles || []).map((role, i) => (
+                  <div key={i} className={`p-4 rounded-xl border ${i === 0 ? 'border-[#E53935] bg-red-50/30' : 'border-neutral-200'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        {i === 0 && <TrendingUp className="h-4 w-4 text-[#E53935]" />}
+                        <p className="font-bold text-sm text-neutral-800">{role.role}</p>
+                      </div>
+                      <span className={`text-sm font-mono font-bold ${i === 0 ? 'text-neutral-800' : 'text-neutral-500'}`}>{role.fit_score}%</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">{role.description}</p>
+                    {/* Fit bar */}
+                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mt-2">
+                      <div className={`h-full rounded-full transition-all duration-500 ${i === 0 ? 'bg-[#E53935]' : 'bg-neutral-300'}`}
+                        style={{ width: `${role.fit_score}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* AI Report */}
-            {result.aiReport && (
+            {result.ai_report && (
               <div className="mt-6">
                 <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" />
@@ -374,7 +381,7 @@ export default function HitEResultPage() {
                 </h3>
                 <div className="bg-neutral-50 p-5 rounded-xl">
                   <p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">
-                    {cleanMarkdown(result.aiReport)}
+                    {cleanMarkdown(result.ai_report)}
                   </p>
                 </div>
               </div>
@@ -388,16 +395,16 @@ export default function HitEResultPage() {
           <div key="p4">
             <h2 className="text-lg font-bold mb-6">다음 단계</h2>
             <div className="space-y-4">
-              {result.hitAResultId && (
+              {result.hit_a_result_id && (
                 <Link href={`/hero/hit/profile/${result.id}`}
-                  className="block border-2 border-amber-700 rounded-xl p-5 hover:bg-amber-50 transition-colors">
+                  className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-amber-700 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+E</div>
+                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+D</div>
                     <div className="flex-1">
                       <p className="font-bold text-neutral-800">통합 프로필 보기</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + E 결과를 한눈에</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + D 결과를 한눈에</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-amber-700" />
+                    <ArrowRight className="h-4 w-4 text-[#E53935]" />
                   </div>
                 </Link>
               )}
@@ -415,22 +422,22 @@ export default function HitEResultPage() {
               </Link>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-amber-700" />
+                  <Sparkles className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
-                    <p className="font-bold text-neutral-800">AI 인생 2막 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">방향 설정, 레거시 활용, 액션 플랜 수립</p>
+                    <p className="font-bold text-neutral-800">AI 시니어 전환 상담</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">리더십 전환, 역할 설계, 레거시 구축 전략</p>
                   </div>
-                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-amber-700 font-medium">시작 →</Link>
+                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 →</Link>
                 </div>
               </div>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-amber-700" />
+                  <Users className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">전문가 대면 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 인생 2막을 함께 설계합니다</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 시니어 멘토가 전환을 함께 설계합니다</p>
                   </div>
-                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-amber-700 font-medium">예약 →</Link>
+                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 →</Link>
                 </div>
               </div>
               <div className="pt-4 space-y-2">
@@ -461,7 +468,7 @@ export default function HitEResultPage() {
             key={i}
             onClick={() => setCurrentPage(i)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentPage ? 'w-6 bg-amber-700' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
+              i === currentPage ? 'w-6 bg-[#E53935]' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
             }`}
             title={label}
           />

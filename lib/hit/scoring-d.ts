@@ -1,18 +1,16 @@
 /**
- * HIT D 채점 알고리즘 — 시니어 리더십 전환
- * 7점 리커트 척도 기반
- * 모듈1: expertise — domain_depth, tacit_knowledge, redeployment, personal_brand
- * 모듈2: leadership — exec_leadership, strategic_leadership, coaching_leadership, independent_leadership
- * 모듈3: identity — identity_strength, new_role, identity_recon
- * 모듈4: network — strong_ties, weak_ties
- * 모듈5: seniorReadiness — positioning, compensation, reference, senior_psych
- * 심화: CH Deep D맞춤 + AP Deep D맞춤 (scoreChDeepB/scoreApDeepB 재사용)
+ * HIT D 채점 알고리즘 — 경력전환 분석 (HIT_C_Final.md 기반)
+ * 7점 리커트 척도 기반 · 122문항 (120 + 미끼 2)
+ *
+ * 모듈1 capital — domain_expertise, achievement, relational, transferable
+ * 모듈2 motivation — push, pull
+ * 모듈3 transferability — skill_transfer, market_fit, adaptation
+ * 모듈4 readiness — doc, interview, timing, psychological
+ * 추가: CTYPE 산출, decoy(faking) 검출
+ * 심화(CH/AP Deep) 재사용은 2026-10-12 폐지 — 성품은 A, 효능감은 B에서 한 번만
  */
 
-// CH/AP Deep 채점은 B와 동일 구조 (character_deep/aptitude_deep 모듈 필터)
-import { scoreChDeepB, scoreApDeepB } from './scoring-b';
-export { scoreChDeepB as scoreChDeepD, scoreApDeepB as scoreApDeepD } from './scoring-b';
-export type { CHDeepBSubscale as CHDeepDSubscale, HollandType } from './data/b-deep-questions';
+export type HollandType = 'R' | 'I' | 'A' | 'S' | 'E' | 'C';
 
 interface ResponseRow {
   module: string;
@@ -38,7 +36,7 @@ function buildSubscaleMap(responses: ResponseRow[]): Record<string, number[]> {
     }
 
     if (isNaN(value)) continue;
-    if (reverse) value = 8 - value;  // 7점 역채점: 1→7, 7→1
+    if (reverse) value = 8 - value;  // 7점 역채점
 
     if (!map[subscale]) map[subscale] = [];
     map[subscale].push(value);
@@ -52,312 +50,277 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 전문성 자산 채점 ──
-
-export function scoreExpertise(responses: ResponseRow[]): {
-  expertise_depth: number;
-  expertise_breadth: number;
-  expertise_domains: Record<string, number>;
-} {
-  const expertise = responses.filter(r => r.module === 'expertise');
-  const subscaleMap = buildSubscaleMap(expertise);
-
-  const domain_depth = scaleToHundred(subscaleMap['domain_depth'] || []);
-  const tacit_knowledge = scaleToHundred(subscaleMap['tacit_knowledge'] || []);
-  const redeployment = scaleToHundred(subscaleMap['redeployment'] || []);
-  const personal_brand = scaleToHundred(subscaleMap['personal_brand'] || []);
-
-  // expertise_depth: 도메인 깊이 + 암묵지 평균
-  const expertise_depth = Math.round((domain_depth + tacit_knowledge) / 2);
-  // expertise_breadth: 재배치 가능성 + 퍼스널 브랜드 평균
-  const expertise_breadth = Math.round((redeployment + personal_brand) / 2);
-
-  const expertise_domains: Record<string, number> = {
-    domain_depth,
-    tacit_knowledge,
-    redeployment,
-    personal_brand,
-  };
-
-  return { expertise_depth, expertise_breadth, expertise_domains };
-}
-
-// ── 리더십 유형 채점 ──
-
-export type LeadershipType = 'exec_leadership' | 'strategic_leadership' | 'coaching_leadership' | 'independent_leadership';
-
-export function scoreLeadership(responses: ResponseRow[]): {
-  leadership_type: LeadershipType;
-  leadership_scores: Record<LeadershipType, number>;
-} {
-  const leadership = responses.filter(r => r.module === 'leadership');
-  const subscaleMap = buildSubscaleMap(leadership);
-
-  const leadership_scores: Record<LeadershipType, number> = {
-    exec_leadership: scaleToHundred(subscaleMap['exec_leadership'] || []),
-    strategic_leadership: scaleToHundred(subscaleMap['strategic_leadership'] || []),
-    coaching_leadership: scaleToHundred(subscaleMap['coaching_leadership'] || []),
-    independent_leadership: scaleToHundred(subscaleMap['independent_leadership'] || []),
-  };
-
-  // 최고 점수 유형을 leadership_type으로 결정
-  let leadership_type: LeadershipType = 'exec_leadership';
-  let maxScore = 0;
-  for (const [type, score] of Object.entries(leadership_scores)) {
-    if (score > maxScore) {
-      maxScore = score;
-      leadership_type = type as LeadershipType;
-    }
+/** 단일 응답 raw 값 추출 (역채점 적용 후 1~7) */
+function rawValue(r: ResponseRow | undefined): number | null {
+  if (!r) return null;
+  const parts = r.option_value.split(':');
+  let value = NaN;
+  let reverse = false;
+  if (parts.length >= 2) {
+    value = parseInt(parts[1], 10);
+    reverse = parts[2] === 'r';
+  } else {
+    value = parseInt(parts[0], 10);
   }
-
-  return { leadership_type, leadership_scores };
+  if (isNaN(value)) return null;
+  if (reverse) value = 8 - value;
+  return value;
 }
 
-// ── 경력 정체성 유연성 채점 ──
+function avgFromIds(responses: ResponseRow[], ids: string[]): number {
+  const vals: number[] = [];
+  for (const id of ids) {
+    const v = rawValue(responses.find(r => r.question_id === id));
+    if (v !== null) vals.push(v);
+  }
+  return scaleToHundred(vals);
+}
 
-export function scoreIdentity(responses: ResponseRow[]): {
-  role_identity: number;
-  change_openness: number;
-  self_reinvention: number;
-  identity_flexibility: number;
+// ── 경력 자본 ──
+
+export function scoreCapital(responses: ResponseRow[]): {
+  scores: Record<string, number>;
+  overall: number;
 } {
-  const identity = responses.filter(r => r.module === 'identity');
-  const subscaleMap = buildSubscaleMap(identity);
+  const capital = responses.filter(r => r.module === 'careerCapital');
+  const subscaleMap = buildSubscaleMap(capital);
 
-  const role_identity = scaleToHundred(subscaleMap['identity_strength'] || []);
-  const change_openness = scaleToHundred(subscaleMap['new_role'] || []);
-  const self_reinvention = scaleToHundred(subscaleMap['identity_recon'] || []);
+  const scores: Record<string, number> = {
+    domain_expertise: scaleToHundred(subscaleMap['domain_expertise'] || []),
+    achievement: scaleToHundred(subscaleMap['achievement'] || []),
+    relational: scaleToHundred(subscaleMap['relational'] || []),
+    transferable: scaleToHundred(subscaleMap['transferable'] || []),
+  };
 
-  // 정체성 유연성 지수 (HIT_D_Final.md):
-  // ((100 - role_identity) + new_role + identity_recon) / 3
-  const identity_flexibility = Math.round(
-    ((100 - role_identity) + change_openness + self_reinvention) / 3
+  const overall = Math.round(
+    Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length,
   );
 
-  return { role_identity, change_openness, self_reinvention, identity_flexibility };
+  return { scores, overall };
 }
 
-// ── 네트워크 자본 채점 ──
+// ── 이직 동기 ──
 
-export function scoreNetwork(responses: ResponseRow[]): {
-  network_quality: number;
-  network_breadth: number;
+export function scoreMotivation(responses: ResponseRow[]): {
+  push: number;
+  pull: number;
+  motivationType: 'push_driven' | 'pull_driven' | 'balanced';
 } {
-  const network = responses.filter(r => r.module === 'network');
-  const subscaleMap = buildSubscaleMap(network);
+  const motivation = responses.filter(r => r.module === 'motivation');
+  const subscaleMap = buildSubscaleMap(motivation);
 
-  const network_quality = scaleToHundred(subscaleMap['strong_ties'] || []);
-  const network_breadth = scaleToHundred(subscaleMap['weak_ties'] || []);
+  const push = scaleToHundred(subscaleMap['push'] || []);
+  const pull = scaleToHundred(subscaleMap['pull'] || []);
 
-  return { network_quality, network_breadth };
+  let motivationType: 'push_driven' | 'pull_driven' | 'balanced';
+  if (push - pull > 15) motivationType = 'push_driven';
+  else if (pull - push > 15) motivationType = 'pull_driven';
+  else motivationType = 'balanced';
+
+  return { push, pull, motivationType };
 }
 
-// ── 고년차 이직 준비도 채점 ──
-
-export function scoreSeniorReadiness(responses: ResponseRow[]): {
-  senior_readiness: number;
-  senior_readiness_scores: Record<string, number>;
+/** Push/Pull 내부 sub 영역 (CTYPE 산출용) */
+export function scorePushPullSubs(responses: ResponseRow[]): {
+  pushGrowth: number;
+  pushCulture: number;
+  pullGrowth: number;
+  pullReward: number;
 } {
-  const readiness = responses.filter(r => r.module === 'seniorReadiness');
+  return {
+    pushGrowth: avgFromIds(responses, ['c_pu01', 'c_pu02', 'c_pu09']),
+    pushCulture: avgFromIds(responses, ['c_pu04', 'c_pu05', 'c_pu10']),
+    pullGrowth: avgFromIds(responses, ['c_pl01', 'c_pl06', 'c_pl08']),
+    pullReward: avgFromIds(responses, ['c_pl03']),
+  };
+}
+
+// ── 전환 가능성 ──
+
+export function scoreTransferability(responses: ResponseRow[]): {
+  scores: Record<string, number>;
+  transferabilityIndex: number;
+} {
+  const transferability = responses.filter(r => r.module === 'transferability');
+  const subscaleMap = buildSubscaleMap(transferability);
+
+  const scores: Record<string, number> = {
+    skill_transfer: scaleToHundred(subscaleMap['skill_transfer'] || []),
+    market_fit: scaleToHundred(subscaleMap['market_fit'] || []),
+    adaptation: scaleToHundred(subscaleMap['adaptation'] || []),
+  };
+
+  const transferabilityIndex = Math.round(
+    scores.skill_transfer * 0.4 +
+    scores.market_fit * 0.3 +
+    scores.adaptation * 0.3,
+  );
+
+  return { scores, transferabilityIndex };
+}
+
+// ── 준비도 ──
+
+export function scoreReadiness(responses: ResponseRow[]): {
+  doc: number;
+  interview: number;
+  timing: number;
+  psychological: number;
+  total: number;
+  preparation: number;
+  gapAwareness: number;
+  transitionReadiness: number;
+} {
+  const readiness = responses.filter(r => r.module === 'readiness');
   const subscaleMap = buildSubscaleMap(readiness);
 
-  const senior_readiness_scores: Record<string, number> = {
-    positioning: scaleToHundred(subscaleMap['positioning'] || []),
-    compensation: scaleToHundred(subscaleMap['compensation'] || []),
-    reference: scaleToHundred(subscaleMap['reference'] || []),
-    senior_psych: scaleToHundred(subscaleMap['senior_psych'] || []),
-  };
+  // 신규 키 우선, 구버전 키 fallback
+  const doc = scaleToHundred(subscaleMap['doc'] || subscaleMap['doc_readiness'] || []);
+  const interview = scaleToHundred(subscaleMap['interview'] || subscaleMap['interview_readiness'] || []);
+  const timing = scaleToHundred(subscaleMap['timing'] || []);
+  const psychological = scaleToHundred(subscaleMap['psychological'] || subscaleMap['psych_readiness'] || []);
 
-  const senior_readiness = Math.round(
-    Object.values(senior_readiness_scores).reduce((a, b) => a + b, 0) /
-    Object.keys(senior_readiness_scores).length
-  );
+  const total = Math.round((doc + interview + timing + psychological) / 4);
 
-  return { senior_readiness, senior_readiness_scores };
+  // 기존 호환
+  const preparation = Math.round((doc + interview + timing) / 3);
+  const gapAwareness = psychological;
+  const transitionReadiness = Math.round(preparation * 0.6 + gapAwareness * 0.4);
+
+  return { doc, interview, timing, psychological, total, preparation, gapAwareness, transitionReadiness };
 }
 
-// ── 미끼 채점 (validity / faking flag) ──
+// ── 갭 영역 ──
 
-export function scoreDecoyD(responses: ResponseRow[]): boolean {
-  const getVal = (id: string): number => {
-    const r = responses.find(x => x.question_id === id);
-    if (!r) return 0;
-    const parts = r.option_value.split(':');
-    return parseInt(parts[1] || parts[0], 10) || 0;
-  };
-  return getVal('d_val01') >= 6 && getVal('d_val02') >= 6;
+export function identifyGapAreas(
+  capitalScores: Record<string, number>,
+  transferScores: Record<string, number>,
+  preparation: number,
+): string[] {
+  const gaps: string[] = [];
+  const threshold = 50;
+
+  if (capitalScores.domain_expertise < threshold) gaps.push('전문성 심화 필요');
+  if (capitalScores.achievement < threshold) gaps.push('성과 수량화 필요');
+  if (capitalScores.relational < threshold) gaps.push('업계 네트워크 확장 필요');
+  if (capitalScores.transferable < threshold) gaps.push('이전 가능 역량 개발 필요');
+  if (transferScores.skill_transfer < threshold) gaps.push('스킬 이전 가능성 강화 필요');
+  if (transferScores.market_fit < threshold) gaps.push('목표 시장 이해도 제고 필요');
+  if (transferScores.adaptation < threshold) gaps.push('적응력 개발 필요');
+  if (preparation < threshold) gaps.push('이직 준비(이력서/면접/재정) 보강 필요');
+
+  return gaps;
 }
 
-// ── 다음 역할 매트릭스 ──
+// ── CTYPE (전환유형) ──
 
-export interface NextRoleOption {
-  code: string;       // 'DROLE-CXO' (신규)
-  role: string;       // 한글 라벨 (기존 호환)
-  fit_score: number;
-  description: string;
+export type CType = 'CTYPE-STRATEGIC' | 'CTYPE-GROWTH' | 'CTYPE-ESCAPE' | 'CTYPE-EXPLORER';
+
+export function scoreCType(params: {
+  capitalScores: { domain_expertise: number; achievement: number; relational: number; transferable: number };
+  motivationPush: number;
+  motivationPull: number;
+  pullGrowth: number;
+  pushGrowth: number;
+  transferScores: { skill_transfer: number; market_fit: number; adaptation: number };
+}): CType {
+  const cc_domain = params.capitalScores.domain_expertise;
+  const HIGH = 67;
+  const MID_HIGH = 50;
+
+  // STRATEGIC: domain HIGH + pushGrowth HIGH + skill_transfer HIGH
+  if (cc_domain >= HIGH && params.pushGrowth >= HIGH && params.transferScores.skill_transfer >= HIGH) {
+    return 'CTYPE-STRATEGIC';
+  }
+
+  // GROWTH: domain MID + pullGrowth HIGH + adaptation HIGH
+  if (cc_domain >= MID_HIGH && cc_domain < HIGH && params.pullGrowth >= HIGH && params.transferScores.adaptation >= HIGH) {
+    return 'CTYPE-GROWTH';
+  }
+
+  // ESCAPE: push >= 70 AND pull < 50
+  if (params.motivationPush >= 70 && params.motivationPull < 50) {
+    return 'CTYPE-ESCAPE';
+  }
+
+  // EXPLORER: 둘 다 낮으면서 적응력 높음
+  if (params.motivationPush < 50 && params.motivationPull < 50 && params.transferScores.adaptation >= HIGH) {
+    return 'CTYPE-EXPLORER';
+  }
+
+  // 기본: 가장 강한 신호
+  if (params.motivationPush > params.motivationPull + 15) return 'CTYPE-ESCAPE';
+  if (params.pullGrowth >= HIGH) return 'CTYPE-GROWTH';
+  if (cc_domain >= HIGH) return 'CTYPE-STRATEGIC';
+  return 'CTYPE-EXPLORER';
 }
 
-export interface AContext {
-  bt: { d: number; i: number; s: number; c: number };
-  sp: {
-    strategic: number; execution: number; creativity: number; interpersonal: number;
-    analytical: number; harmony: number; breakthrough: number; guard: number;
-  };
-  ch: { integrity: number; relational: number; emotional: number; ethics: number; growth: number };
-  ap: { R: number; I: number; A: number; S: number; E: number; C: number };
-  uf: { self: number; parent: number; peer: number };
-}
+// ── 미끼 (faking) 판정 ──
 
-export function buildNextRoleMatrix(
-  expertise: ReturnType<typeof scoreExpertise>,
-  leadership: ReturnType<typeof scoreLeadership>,
-  identity: ReturnType<typeof scoreIdentity>,
-  seniorReadiness: ReturnType<typeof scoreSeniorReadiness>,
-  aCtx?: AContext,
-): { current_role: string; possible_roles: NextRoleOption[] } {
-  const bt = aCtx?.bt ?? { d: 50, i: 50, s: 50, c: 50 };
-  const sp = aCtx?.sp ?? {
-    strategic: 50, execution: 50, creativity: 50, interpersonal: 50,
-    analytical: 50, harmony: 50, breakthrough: 50, guard: 50,
-  };
-  const ch = aCtx?.ch ?? { integrity: 50, relational: 50, emotional: 50, ethics: 50, growth: 50 };
-  const ap = aCtx?.ap ?? { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 };
-  const uf = aCtx?.uf ?? { self: 50, parent: 50, peer: 50 };
-
-  const lScores = leadership.leadership_scores;
-  const eDomains = expertise.expertise_domains;
-  const identityFlex = identity.identity_flexibility;
-
-  const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
-
-  const fit_cxo = clamp(
-    lScores.strategic_leadership * 0.30 + eDomains.personal_brand * 0.25 + bt.d * 0.20 +
-    identityFlex * 0.15 + sp.strategic * 0.10
-  );
-
-  const fit_advisor = clamp(
-    eDomains.domain_depth * 0.30 + eDomains.tacit_knowledge * 0.25 + lScores.coaching_leadership * 0.20 +
-    sp.analytical * 0.15 + uf.self * 0.10
-  );
-
-  const fit_startup = clamp(
-    lScores.exec_leadership * 0.25 + identityFlex * 0.25 + sp.breakthrough * 0.20 +
-    ch.growth * 0.15 + ap.E * 0.15
-  );
-
-  const fit_consulting = clamp(
-    eDomains.domain_depth * 0.25 + eDomains.tacit_knowledge * 0.20 + sp.analytical * 0.20 +
-    sp.strategic * 0.20 + lScores.independent_leadership * 0.15
-  );
-
-  const fit_coach = clamp(
-    lScores.coaching_leadership * 0.30 + eDomains.personal_brand * 0.20 + ap.S * 0.20 +
-    bt.i * 0.15 + ch.relational * 0.15
-  );
-
-  const fit_expert = clamp(
-    eDomains.tacit_knowledge * 0.25 + lScores.independent_leadership * 0.25 + sp.guard * 0.20 +
-    eDomains.domain_depth * 0.20 + ap.C * 0.10
-  );
-
-  const fit_board = clamp(
-    eDomains.domain_depth * 0.25 + eDomains.personal_brand * 0.25 + expertise.expertise_depth * 0.15 +
-    sp.strategic * 0.20 + bt.d * 0.15
-  );
-
-  const roles: NextRoleOption[] = [
-    { code: 'DROLE-CXO', role: 'CxO / 경영진', fit_score: fit_cxo,
-      description: '조직 전체의 전략적 방향을 설계하고 실행하는 최고 의사결정자' },
-    { code: 'DROLE-ADVISOR', role: '사외이사 / 자문역', fit_score: fit_advisor,
-      description: '깊은 전문성과 경험을 바탕으로 조직에 전략적 조언을 제공' },
-    { code: 'DROLE-STARTUP', role: '스타트업 조인', fit_score: fit_startup,
-      description: '축적된 경험으로 초기 단계 사업의 성장을 가속' },
-    { code: 'DROLE-CONSULTING', role: '전문 컨설턴트', fit_score: fit_consulting,
-      description: '분석적 사고와 깊은 전문성을 바탕으로 문제 해결' },
-    { code: 'DROLE-COACH', role: '코치 / 교육자', fit_score: fit_coach,
-      description: '후배 리더 육성과 조직 코칭에 전문성을 발휘' },
-    { code: 'DROLE-EXPERT', role: '독립 전문가 / 프리랜서', fit_score: fit_expert,
-      description: '조직 외부에서 독자적 전문가로 활동' },
-    { code: 'DROLE-BOARD', role: '이사회 / 상임고문', fit_score: fit_board,
-      description: '다수 조직에 영향력을 행사하는 고위 자문' },
-  ];
-
-  roles.sort((a, b) => b.fit_score - a.fit_score);
-
-  // 현재 역할 추정
-  let current_role = '시니어 관리자';
-  if (seniorReadiness.senior_readiness >= 70 && expertise.expertise_depth >= 70) current_role = '임원급';
-  else if (expertise.expertise_depth >= 60) current_role = '팀장 / 디렉터급';
-
-  return { current_role, possible_roles: roles };
+export function scoreCDecoy(responses: ResponseRow[]): boolean {
+  const v1 = rawValue(responses.find(r => r.question_id === 'c_val01'));
+  const v2 = rawValue(responses.find(r => r.question_id === 'c_val02'));
+  if (v1 === null || v2 === null) return false;
+  return v1 >= 6 && v2 >= 6;
 }
 
 // ── 통합 채점 ──
 
 export interface HitDScoreResult {
-  expertise_depth: number;
-  expertise_breadth: number;
-  expertise_domains: Record<string, number>;
-  leadership_type: LeadershipType;
-  leadership_scores: Record<LeadershipType, number>;
-  role_identity: number;
-  change_openness: number;
-  self_reinvention: number;
-  identity_flexibility: number;
-  network_quality: number;
-  network_breadth: number;
-  senior_readiness: number;
-  senior_readiness_scores: Record<string, number>;
-  next_role_matrix: { current_role: string; possible_roles: NextRoleOption[] };
-  faking_flag: boolean;
-  // CH Deep D맞춤 / AP Deep D맞춤 (심화 레이어 응답 있을 때)
-  chDeepScores?: {
-    scores: Record<string, number>;
-    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
-    overallScore: number;
-    overallGrade: 'A' | 'B' | 'C' | 'D';
-    decoyScore: number;
-    alertFlags: { NR: number; PP: number; MK: number; SP: number };
-  };
-  apDeepScores?: {
-    scores: Record<string, number>;
-    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
-    top3Code: string;
-    top3Labels: string[];
-    dominantType: string;
-  };
+  capitalScores: Record<string, number>;
+  capitalOverall: number;
+  motivationPush: number;
+  motivationPull: number;
+  motivationType: 'push_driven' | 'pull_driven' | 'balanced';
+  transferabilityScores: Record<string, number>;
+  transferabilityIndex: number;
+  preparation: number;
+  gapAwareness: number;
+  transitionReadiness: number;
+  gapAreas: string[];
+  readinessScores: { doc: number; interview: number; timing: number; psychological: number; total: number };
+  ctype: CType;
+  fakingFlag: boolean;
 }
 
-export function scoreHitD(responses: ResponseRow[], aCtx?: AContext): HitDScoreResult {
-  const expertise = scoreExpertise(responses);
-  const leadership = scoreLeadership(responses);
-  const identity = scoreIdentity(responses);
-  const network = scoreNetwork(responses);
-  const seniorReadiness = scoreSeniorReadiness(responses);
-  const next_role_matrix = buildNextRoleMatrix(expertise, leadership, identity, seniorReadiness, aCtx);
-  const faking_flag = scoreDecoyD(responses);
+export function scoreHitD(responses: ResponseRow[]): HitDScoreResult {
+  const capital = scoreCapital(responses);
+  const motivation = scoreMotivation(responses);
+  const transfer = scoreTransferability(responses);
+  const readiness = scoreReadiness(responses);
+  const gapAreas = identifyGapAreas(capital.scores, transfer.scores, readiness.preparation);
 
-  // CH Deep D / AP Deep D — 심화 응답 있을 때만
-  const hasChDeep = responses.some(r => r.module === 'character_deep');
-  const hasApDeep = responses.some(r => r.module === 'aptitude_deep');
+  const pushPullSubs = scorePushPullSubs(responses);
+  const ctype = scoreCType({
+    capitalScores: capital.scores as { domain_expertise: number; achievement: number; relational: number; transferable: number },
+    motivationPush: motivation.push,
+    motivationPull: motivation.pull,
+    pushGrowth: pushPullSubs.pushGrowth,
+    pullGrowth: pushPullSubs.pullGrowth,
+    transferScores: transfer.scores as { skill_transfer: number; market_fit: number; adaptation: number },
+  });
+  const fakingFlag = scoreCDecoy(responses);
 
   return {
-    expertise_depth: expertise.expertise_depth,
-    expertise_breadth: expertise.expertise_breadth,
-    expertise_domains: expertise.expertise_domains,
-    leadership_type: leadership.leadership_type,
-    leadership_scores: leadership.leadership_scores,
-    role_identity: identity.role_identity,
-    change_openness: identity.change_openness,
-    self_reinvention: identity.self_reinvention,
-    identity_flexibility: identity.identity_flexibility,
-    network_quality: network.network_quality,
-    network_breadth: network.network_breadth,
-    senior_readiness: seniorReadiness.senior_readiness,
-    senior_readiness_scores: seniorReadiness.senior_readiness_scores,
-    next_role_matrix,
-    faking_flag,
-    ...(hasChDeep && { chDeepScores: scoreChDeepB(responses) }),
-    ...(hasApDeep && { apDeepScores: scoreApDeepB(responses) }),
+    capitalScores: capital.scores,
+    capitalOverall: capital.overall,
+    motivationPush: motivation.push,
+    motivationPull: motivation.pull,
+    motivationType: motivation.motivationType,
+    transferabilityScores: transfer.scores,
+    transferabilityIndex: transfer.transferabilityIndex,
+    preparation: readiness.preparation,
+    gapAwareness: readiness.gapAwareness,
+    transitionReadiness: readiness.transitionReadiness,
+    gapAreas,
+    readinessScores: {
+      doc: readiness.doc,
+      interview: readiness.interview,
+      timing: readiness.timing,
+      psychological: readiness.psychological,
+      total: readiness.total,
+    },
+    ctype,
+    fakingFlag,
   };
 }

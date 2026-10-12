@@ -9,10 +9,10 @@ import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
-import PersonalityRadar from "@/features/hit/PersonalityRadar";
 import RIASECChart from "@/features/hit/RIASECChart";
 import CompetencyChart from "@/features/hit/CompetencyChart";
-import ReadinessGauge from "@/features/hit/ReadinessGauge";
+import InterestEfficacyMatrix from "@/features/hit/InterestEfficacyMatrix";
+import { mapHitBResult } from "@/features/hit/hit-b-result-mapper";
 import type { HitAResult, HitBResult } from "@/types/hit";
 
 function cleanMarkdown(text: string): string {
@@ -46,7 +46,7 @@ export default function IntegratedProfilePage() {
   const hitBResultId = params.id as string;
 
   const [hitA, setHitA] = useState<HitAResult | null>(null);
-  const [hitB, setHitB] = useState<HitBResult | null>(null);
+  const [hitB, setHitB] = useState<(HitBResult & { trackName: string }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -60,34 +60,7 @@ export default function IntegratedProfilePage() {
         const bData = await bRes.json();
         if (bData.error) { setLoading(false); return; }
 
-        const bResult: HitBResult = {
-          id: bData.id,
-          sessionId: bData.session_id,
-          memberId: bData.member_id,
-          hitAResultId: bData.hit_a_result_id,
-          personalityScores: bData.personality_scores || {},
-          darkTriadFlags: bData.dark_triad_flags || {},
-          riasecR: bData.riasec_r,
-          riasecI: bData.riasec_i,
-          riasecA: bData.riasec_a,
-          riasecS: bData.riasec_s,
-          riasecE: bData.riasec_e,
-          riasecC: bData.riasec_c,
-          hollandCode: bData.holland_code,
-          competencyCommon: bData.competency_common || {},
-          competencyTrack: bData.competency_track,
-          competencyTrackScores: bData.competency_track_scores || {},
-          readinessSelf: bData.readiness_self,
-          readinessPortfolio: bData.readiness_portfolio,
-          readinessInterview: bData.readiness_interview,
-          readinessNetwork: bData.readiness_network,
-          readinessTotal: bData.readiness_total,
-          readinessGrade: bData.readiness_grade,
-          readinessGaps: bData.readiness_gaps || [],
-          aiReport: bData.ai_report,
-          journeyStage: bData.journey_stage,
-          createdAt: bData.created_at,
-        };
+        const bResult = mapHitBResult(bData);
         setHitB(bResult);
 
         // Load HIT A if linked
@@ -170,7 +143,7 @@ export default function IntegratedProfilePage() {
     { label: "분석적 판단", value: hitA.sPowerScores.analytical },
   ] : [];
 
-  const trackDisplayName = TRACK_DISPLAY_NAMES[hitB.competencyTrack] || hitB.competencyTrack;
+  const trackDisplayName = hitB.trackName || TRACK_DISPLAY_NAMES[hitB.competencyTrack] || hitB.competencyTrack;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -179,7 +152,7 @@ export default function IntegratedProfilePage() {
         <Image src="/hero-logo.png" alt="HeRo" width={56} height={56} className="h-14 w-14 mx-auto mb-3" />
         <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">Integrated Hero Profile</p>
         <h1 className="text-2xl md:text-3xl font-extrabold">통합 영웅 프로필</h1>
-        <p className="text-sm text-neutral-500 mt-2">HIT - A + HIT - B 종합</p>
+        <p className="text-sm text-neutral-500 mt-2">HIT A + HIT B 종합 (공통 기반)</p>
       </div>
 
       {/* ── HIT A Section ── */}
@@ -247,58 +220,29 @@ export default function IntegratedProfilePage() {
         </div>
       </div>
 
-      {/* Personality */}
-      <section className="mt-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">성격 특성</h2>
-        <div className="border border-neutral-200 rounded-xl p-6">
-          <PersonalityRadar
-            scores={hitB.personalityScores}
-            darkTriadFlags={hitB.darkTriadFlags}
-          />
-        </div>
-      </section>
-
-      {/* RIASEC */}
-      <section className="mt-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">직업 흥미</h2>
-        <div className="border border-neutral-200 rounded-xl p-6">
-          <RIASECChart
-            r={hitB.riasecR}
-            i={hitB.riasecI}
-            a={hitB.riasecA}
-            s={hitB.riasecS}
-            e={hitB.riasecE}
-            c={hitB.riasecC}
-            hollandCode={hitB.hollandCode}
-          />
-        </div>
-      </section>
-
       {/* Competency */}
       <section className="mt-6">
         <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">역량</h2>
         <div className="border border-neutral-200 rounded-xl p-6">
-          <CompetencyChart
-            common={hitB.competencyCommon}
-            trackScores={hitB.competencyTrackScores}
-            trackName={trackDisplayName}
-          />
+          <CompetencyChart common={hitB.competencyCommon} trackScores={hitB.competencyTrackScores} trackName={trackDisplayName} />
         </div>
       </section>
 
-      {/* Readiness */}
+      {/* Efficacy × Interest */}
       <section className="mt-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">커리어 준비도</h2>
-        <div className="border border-neutral-200 rounded-xl p-6">
-          <ReadinessGauge
-            self={hitB.readinessSelf}
-            portfolio={hitB.readinessPortfolio}
-            interview={hitB.readinessInterview}
-            network={hitB.readinessNetwork}
-            total={hitB.readinessTotal}
-            grade={hitB.readinessGrade}
-            gaps={hitB.readinessGaps}
-          />
+        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">효능감 × 흥미</h2>
+        <div className="border border-neutral-200 rounded-xl p-6 mb-4">
+          <RIASECChart r={hitB.efficacyScores.R ?? 0} i={hitB.efficacyScores.I ?? 0} a={hitB.efficacyScores.A ?? 0} s={hitB.efficacyScores.S ?? 0} e={hitB.efficacyScores.E ?? 0} c={hitB.efficacyScores.C ?? 0} hollandCode={hitB.efficacyTop3} />
+        </div>
+        <InterestEfficacyMatrix matrix={hitB.matrix} efficacy={hitB.efficacyScores} />
+      </section>
+
+      {/* Insight */}
+      <section className="mt-6">
+        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">자기·직무 이해</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="border border-neutral-200 rounded-xl p-5"><p className="text-xs text-neutral-400">자기 이해</p><p className="text-2xl font-extrabold mt-1">{hitB.insightSelf}</p></div>
+          <div className="border border-neutral-200 rounded-xl p-5"><p className="text-xs text-neutral-400">직무 이해</p><p className="text-2xl font-extrabold mt-1">{hitB.insightJob}</p></div>
         </div>
       </section>
 

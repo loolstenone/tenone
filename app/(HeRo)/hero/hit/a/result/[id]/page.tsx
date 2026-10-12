@@ -13,9 +13,9 @@ import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
+import { HIT_STAGES } from "@/lib/hit/stages";
 import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
-import { HitADeepCTA } from "@/features/hit/HitADeepCTA";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import { useAuth } from "@/lib/auth-context";
 import type { HitAResult } from "@/types/hit";
@@ -48,7 +48,6 @@ export default function HitAResultPage() {
   const [result, setResult] = useState<HitAResult | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
-  const [hasDeep, setHasDeep] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
@@ -85,7 +84,6 @@ export default function HitAResultPage() {
           createdAt: data.created_at,
         });
         if (data.report_modules) setReportModules(data.report_modules);
-        if (data.ch_deep_scores || data.ap_deep_scores) setHasDeep(true);
 
         // 무료 회원 AI 채팅 남은 횟수 조회
         if (data.member_id) {
@@ -565,35 +563,15 @@ export default function HitAResultPage() {
         </button>
       </div>
 
-      {/* 비회원 — 가입 CTA · 회원 — 심화 검사 CTA */}
-      {isAuthenticated ? (
-        <HitADeepCTA resultId={resultId} hasDeep={hasDeep} />
-      ) : (
-        <section className="mt-16 mb-10">
-          <div className="rounded-2xl border border-[#E53935]/30 bg-[#E53935]/5 p-8 text-center">
-            <div className="mx-auto mb-4 w-11 h-11 rounded-full bg-[#E53935]/10 flex items-center justify-center">
-              <Lock size={18} className="text-[#E53935]" />
-            </div>
-            <p className="text-sm text-neutral-500 mb-1">지금 보신 요약 너머에</p>
-            <p className="text-xl font-bold text-neutral-900 mb-2">
-              전체 통합 보고서가 준비되어 있습니다
-            </p>
-            <p className="text-xs text-neutral-500 mb-6 leading-relaxed">
-              DISC 행동 해설 · MBTI 스펙트럼 · 교차 분석<br />
-              S-Power 주강점 · 성장 영역 · 소통 스타일까지
-            </p>
-            <Link
-              href={`/signup?from=hit&resultId=${resultId}`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E53935] text-white text-sm font-medium hover:bg-red-700 transition-colors"
-            >
-              무료 회원가입하고 전체 보기 <ArrowRight size={16} />
-            </Link>
-            <p className="text-[11px] text-neutral-400 mt-3">
-              지금 본 검사 결과가 자동으로 연결됩니다
-            </p>
-          </div>
-        </section>
-      )}
+      {/* 다음 검사 — 공통 B (HIT는 회원 전용, 2026-10-12) */}
+      <section className="mt-16 mb-10">
+        <Link href={`/hero/hit/b?a=${resultId}`} className="block rounded-2xl border-2 border-[#E53935] bg-white p-6 hover:shadow-lg transition-shadow">
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{HIT_STAGES.b.code} · 공통 기반</p>
+          <p className="text-lg font-bold text-neutral-900 mt-1">{HIT_STAGES.b.name}</p>
+          <p className="text-sm text-neutral-500 mt-1">{HIT_STAGES.b.desc}</p>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#E53935] mt-4">이어서 시작 <ArrowRight size={16} /></span>
+        </Link>
+      </section>
 
       {/* CSS Animation */}
       {/* 히어로 AI 채팅 */}

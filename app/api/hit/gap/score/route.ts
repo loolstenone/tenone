@@ -1,0 +1,196 @@
+import { NextRequest } from 'next/server';
+import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
+import { getHitSession, getHitResponses, updateHitSession, createHitGapResult, upsertHeroProfile } from '@/lib/supabase/hit';
+import { scoreHitGap } from '@/lib/hit/scoring-gap';
+import { createAdminClient as createClient } from '@/lib/supabase/admin';
+import Anthropic from '@anthropic-ai/sdk';
+import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { sessionToken, hitAResultId, breakMonths, jobCategory } = body;
+
+    if (!sessionToken) {
+      return errorResponse('sessionToken은 필수입니다.', 400);
+    }
+
+    if (!hitAResultId) {
+      return errorResponse('hitAResultId는 필수입니다.', 400);
+    }
+
+    if (!breakMonths || !jobCategory) {
+      return errorResponse('breakMonths와 jobCategory는 필수입니다.', 400);
+    }
+
+    const session = await getHitSession(sessionToken);
+    if (!session) {
+      return errorResponse('세션을 찾을 수 없습니다.', 404);
+    }
+
+    if (session.status !== 'in_progress') {
+      return errorResponse('이미 완료된 세션입니다.', 400);
+    }
+
+    const responses = await getHitResponses(session.id);
+    if (responses.length === 0) {
+      return errorResponse('응답 데이터가 없습니다.', 400);
+    }
+
+    // HIT A 결과 가져오기
+    const supabase = createClient();
+    const { data: hitAData } = await supabase
+      .from('hit_a_results')
+      .select('*')
+      .eq('id', hitAResultId)
+      .maybeSingle();
+
+    if (!hitAData) {
+      return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
+    }
+
+    // 채점 (CVI + 미끼 탐지 포함)
+    const scored = scoreHitGap(responses);
+
+    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트에서 — 완료율을 준비도 점수로 (2026-10-12)
+    const checklist = await getStageChecklistProgress(createClient(), session.member_id!, 'gap');
+    scored.practicalReadiness = checklist.percent;
+    scored.reentryReadiness = Math.round(checklist.percent * 0.55 + scored.reentryMotivation * 0.45);
+
+    // 여정 단계 결정
+    const journeyStage = determineJourneyStage(
+      scored.cviGrade,
+      scored.resilienceScore,
+      scored.reentryReadiness,
+    );
+
+    // AI 리포트 (Claude Sonnet) -- 경력 공백 복귀 분석
+    let aiReport: string | null = null;
+    try {
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const hitAContext = `HIT A 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
+
+      const msg = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250514',
+        max_tokens: 2000,
+        system: `당신은 HeRo 인재 기획사의 경력 공백 복귀 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 경력 복귀 분석 리포트를 작성합니다.
+
+규칙:
+- 경력 공백 기간, CVI(경력유효성지수), 잠재 역량, 회복탄력성, 재진입 준비도를 통합 분석
+- 경력 단절자가 자신감을 회복할 수 있도록 긍정적이면서도 현실적인 조언 제공
+- 절대 이모지, 이모티콘, 특수문자 사용 금지
+- 마크다운 헤딩(#) 사용 금지
+- CVI 등급(HIGH/MID/LOW)에 따른 맞춤형 복귀 전략 제시
+- 잠재 역량을 강점으로 활용하는 방안 구체화
+- 주도 방향(경력복원/경력전환/새출발) 맞춤 전략 포함
+- 마지막에 복귀를 위한 구체적 액션 아이템 3가지 제시`,
+        messages: [{
+          role: 'user',
+          content: `${hitAContext}HIT GAP 경력 공백 복귀 분석 결과:\n` +
+            `경력 공백: ${breakMonths}개월\n` +
+            `직군: ${jobCategory}\n` +
+            `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
+            `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT D(전환)' : 'HIT B(기본)'}\n` +
+            `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
+            `방향 점수: 경력복원 ${scored.directionScores.career_restoration} / 경력전환 ${scored.directionScores.career_pivot} / 새출발 ${scored.directionScores.fresh_start}\n` +
+            `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +
+            `회복탄력성: ${scored.resilienceScore}점 (자기서사 ${scored.resilienceScores.self_narrative}, 자존감 ${scored.resilienceScores.self_esteem}, 재도전의지 ${scored.resilienceScores.retry_willingness})\n` +
+            `재진입 준비도: ${scored.reentryReadiness}점 (실질준비 ${scored.practicalReadiness}, 동기 ${scored.reentryMotivation})\n` +
+            `준비 상세: 스킬업데이트 ${scored.readinessScores.skill_update} / 네트워크 ${scored.readinessScores.network} / 자기표현 ${scored.readinessScores.self_presentation} / 현장언어 ${scored.readinessScores.field_language}\n` +
+            `공백 맥락: ${scored.overallContext}점\n` +
+            `라우팅 근거: ${scored.routingRationale}\n` +
+            `여정 단계: ${journeyStage}\n` +
+            `\n위 결과를 통합하여 4-5문단의 경력 복귀 분석 리포트를 작성해주세요. CVI 해석, 주도 방향에 맞는 전략, 잠재 역량 활용, 회복탄력성 평가, 구체적 액션 아이템을 포함해주세요.`,
+        }],
+      });
+      const textBlock = msg.content.find(b => b.type === 'text');
+      if (textBlock && textBlock.type === 'text') {
+        aiReport = textBlock.text;
+      }
+    } catch (aiError) {
+      console.error('[HIT GAP Score] AI 리포트 생성 실패:', aiError);
+    }
+
+    // 결과 저장
+    const result = await createHitGapResult({
+      session_id: session.id,
+      member_id: session.member_id || null,
+      hit_a_result_id: hitAResultId,
+      break_months: breakMonths,
+      latent_score: scored.latentScore,
+      cvi_raw: scored.cviRaw,
+      cvi_grade: scored.cviGrade,
+      next_route: scored.nextRoute === 'recovery' ? 'R' : scored.nextRoute,
+      resilience_score: scored.resilienceScore,
+      reentry_readiness: scored.reentryReadiness,
+      routing_rationale: scored.routingRationale,
+      ai_report: aiReport,
+      journey_stage: journeyStage,
+      // 상세 점수 JSON
+      latent_scores: scored.latentScores,
+      resilience_scores: scored.resilienceScores,
+      break_context_score: scored.breakContextScore,
+      break_reason_score: scored.breakReasonScore,
+      practical_readiness: scored.practicalReadiness,
+      reentry_motivation: scored.reentryMotivation,
+      job_category: jobCategory,
+      // Phase 9 신규: 방향/준비도 상세 + 미끼 플래그
+      direction_scores:   scored.directionScores,
+      direction_dominant: scored.directionTop.code,
+      readiness_scores:   scored.readinessScores,
+      faking_flag:        scored.fakingFlag,
+      break_context_scores: {
+        disruption_context: scored.disruptionContext,
+        hidden_competency:  scored.hiddenCompetency,
+        gap_activities:     scored.gapActivities,
+      },
+    });
+
+    // hero_profiles 링크
+    if (session.member_id) {
+      try {
+        await upsertHeroProfile({ member_id: session.member_id, hit_gap_result_id: result.id });
+      } catch (e) {
+        console.warn('[HIT GAP Score] hero_profile 업데이트 실패:', e);
+      }
+    }
+
+    // 세션 완료
+    await updateHitSession(sessionToken, {
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+    });
+
+    return successResponse({ resultId: result.id }, 201);
+  } catch (error) {
+    console.error('[HIT GAP Score] 채점 오류:', error);
+    const message = error instanceof Error ? error.message : '채점 처리 실패';
+    return errorResponse(message, 500);
+  }
+}
+
+/**
+ * 경력 공백 복귀 여정 단계 결정
+ */
+function determineJourneyStage(
+  cviGrade: string,
+  resilienceScore: number,
+  reentryReadiness: number,
+): string {
+  if (cviGrade === 'HIGH' && reentryReadiness >= 70) {
+    return 'ready_to_return';
+  }
+  if (cviGrade === 'HIGH' && reentryReadiness < 70) {
+    return 'skill_ready_prep_needed';
+  }
+  if (cviGrade === 'MID' && resilienceScore >= 60) {
+    return 'strategic_transition';
+  }
+  if (cviGrade === 'MID' && resilienceScore < 60) {
+    return 'resilience_building';
+  }
+  if (resilienceScore >= 50) {
+    return 'foundation_rebuilding';
+  }
+  return 'early_recovery';
+}

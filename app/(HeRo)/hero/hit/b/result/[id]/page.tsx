@@ -4,53 +4,27 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight, Copy, Check, Sparkles, Users,
-  RefreshCw, ChevronLeft, ChevronRight,
-} from "lucide-react";
-import PersonalityRadar from "@/features/hit/PersonalityRadar";
+import { ArrowRight, Sparkles, Users, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import RIASECChart from "@/features/hit/RIASECChart";
 import CompetencyChart from "@/features/hit/CompetencyChart";
-import ReadinessGauge from "@/features/hit/ReadinessGauge";
+import InterestEfficacyMatrix from "@/features/hit/InterestEfficacyMatrix";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
+import { mapHitBResult, B_STAGE_INFO, cleanMarkdown } from "@/features/hit/hit-b-result-mapper";
+import { CORE_COMPETENCY_LABELS, type CoreCompetency } from "@/lib/hit/scoring-b";
+import { HIT_STAGES, HIT_LIFE_STAGES, HIT_SITUATIONS } from "@/lib/hit/stages";
 import type { HitBResult } from "@/types/hit";
 
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/#{1,6}\s/g, '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`(.+?)`/g, '$1')
-    .replace(/^[-*]\s/gm, '')
-    .replace(/^\d+\.\s/gm, '')
-    .trim();
-}
-
-const TRACK_NAMES: Record<string, string> = {
-  marketing_strategy: '마케팅전략', branding: '브랜딩',
-  advertising: '광고기획', content: '콘텐츠', data_performance: '데이터/퍼포먼스',
-};
-
-const STAGE_INFO: Record<string, { label: string; color: string }> = {
-  ready: { label: '실전 준비 완료', color: 'text-green-600 bg-green-50' },
-  developing: { label: '역량 개발 중', color: 'text-yellow-600 bg-yellow-50' },
-  exploring: { label: '탐색 단계', color: 'text-orange-600 bg-orange-50' },
-  discovering: { label: '발견 단계', color: 'text-red-600 bg-red-50' },
-};
-
-const TOTAL_PAGES = 6;
+const TOTAL_PAGES = 5;
+const PAGE_LABELS = ["요약", "역량", "효능감 × 흥미", "자기·직무 이해", "다음 단계"];
 
 export default function HitBResultPage() {
   const params = useParams();
   const resultId = params.id as string;
-  const [result, setResult] = useState<HitBResult | null>(null);
+  const [result, setResult] = useState<(HitBResult & { trackName: string }) | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }>>({});
-  const [personalityLabels, setPersonalityLabels] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
-  const [copied, setCopied] = useState(false);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
 
   useEffect(() => {
     if (!resultId) return;
@@ -58,38 +32,15 @@ export default function HitBResultPage() {
       .then(r => r.json())
       .then(data => {
         if (data.error) { setLoading(false); return; }
-        setResult({
-          id: data.id, sessionId: data.session_id, memberId: data.member_id,
-          hitAResultId: data.hit_a_result_id,
-          personalityScores: data.personality_scores || {},
-          darkTriadFlags: data.dark_triad_flags || {},
-          riasecR: data.riasec_r, riasecI: data.riasec_i, riasecA: data.riasec_a,
-          riasecS: data.riasec_s, riasecE: data.riasec_e, riasecC: data.riasec_c,
-          hollandCode: data.holland_code,
-          competencyCommon: data.competency_common || {},
-          competencyTrack: data.competency_track,
-          competencyTrackScores: data.competency_track_scores || {},
-          readinessSelf: data.readiness_self, readinessPortfolio: data.readiness_portfolio,
-          readinessInterview: data.readiness_interview, readinessNetwork: data.readiness_network,
-          readinessTotal: data.readiness_total, readinessGrade: data.readiness_grade,
-          readinessGaps: data.readiness_gaps || [],
-          aiReport: data.ai_report, journeyStage: data.journey_stage,
-          createdAt: data.created_at,
-        });
+        setResult(mapHitBResult(data));
         if (data.report_modules) setReportModules(data.report_modules);
-        if (data.personality_labels) setPersonalityLabels(data.personality_labels);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [resultId]);
 
-  const goNext = useCallback(() => {
-    if (currentPage < TOTAL_PAGES - 1) { setDirection('next'); setCurrentPage(p => p + 1); }
-  }, [currentPage]);
-  const goPrev = useCallback(() => {
-    if (currentPage > 0) { setDirection('prev'); setCurrentPage(p => p - 1); }
-  }, [currentPage]);
-
+  const goNext = useCallback(() => { if (currentPage < TOTAL_PAGES - 1) setCurrentPage(p => p + 1); }, [currentPage]);
+  const goPrev = useCallback(() => { if (currentPage > 0) setCurrentPage(p => p - 1); }, [currentPage]);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
@@ -99,83 +50,53 @@ export default function HitBResultPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [goNext, goPrev]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="min-h-[60vh] flex items-center justify-center"><div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" /></div>;
   }
-
   if (!result) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-center">
-        <div>
-          <p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p>
-          <Link href="/hero/hit/b" className="text-[#E53935] underline text-sm">다시 검사하기</Link>
-        </div>
+        <div><p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p><Link href="/hero/hit/b" className="text-[#E53935] underline text-sm">다시 검사하기</Link></div>
       </div>
     );
   }
 
-  const stageInfo = STAGE_INFO[result.journeyStage] || STAGE_INFO.discovering;
-  const trackName = TRACK_NAMES[result.competencyTrack] || result.competencyTrack;
-  const pageLabels = ["여정 단계", "성격 특성", "RIASEC", "역량", "준비도", "다음 단계"];
-
-  // 모듈 카테고리별 필터
-  const personalityMods = Object.entries(reportModules).filter(([k]) => /^(EMOTIONAL|ETHICS|GROWTH|INTEGRITY|RELATION)/.test(k));
-  const riasecMods = Object.entries(reportModules).filter(([k]) => k.startsWith('RIASEC-'));
+  const stageInfo = B_STAGE_INFO[result.journeyStage] || B_STAGE_INFO.discovering;
   const compMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMP-'));
-  const readyMods = Object.entries(reportModules).filter(([k]) => k.startsWith('READY-'));
+  const topCore = (Object.entries(result.competencyCommon) as [CoreCompetency, number][]).sort((a, b) => b[1] - a[1])[0];
+  const eff = result.efficacyScores;
 
   const renderPage = () => {
     switch (currentPage) {
-      // ── Page 1: 여정 단계 + 요약 ──
       case 0:
         return (
           <div key="p0">
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-              <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - B 결과</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">종합 커리어 진단</h1>
+              <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-1">{HIT_STAGES.b.code}</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold">{HIT_STAGES.b.name}</h1>
             </div>
-            <div className="flex justify-center mb-6">
-              <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${stageInfo.color}`}>
-                {stageInfo.label}
-              </span>
-            </div>
-            <div className="bg-neutral-50 p-5 rounded-xl space-y-2">
-              <p className="text-sm text-neutral-600">
-                <span className="font-bold">Holland 코드:</span> {result.hollandCode}
-              </p>
-              <p className="text-sm text-neutral-600">
-                <span className="font-bold">전문 트랙:</span> {trackName}
-              </p>
-              <p className="text-sm text-neutral-600">
-                <span className="font-bold">준비도:</span> {result.readinessGrade}등급 ({result.readinessTotal}%)
-              </p>
+            <div className="flex justify-center mb-6"><span className={`px-5 py-2.5 rounded-full text-sm font-bold ${stageInfo.color}`}>{stageInfo.label}</span></div>
+            <div className="bg-neutral-50 p-5 rounded-xl space-y-2 text-sm text-neutral-600">
+              <p><span className="font-bold">가장 강한 역량:</span> {topCore ? `${CORE_COMPETENCY_LABELS[topCore[0]] ?? topCore[0]} ${topCore[1]}` : '-'}</p>
+              <p><span className="font-bold">직무 트랙:</span> {result.trackName}</p>
+              <p><span className="font-bold">효능감 Top3:</span> {result.efficacyTop3 || '-'}</p>
+              {result.matrix && result.matrix.optimal.length > 0 && <p><span className="font-bold">최적 영역:</span> {result.matrix.optimal.join(' · ')}</p>}
+              <p><span className="font-bold">자기·직무 이해:</span> {result.insightTotal}</p>
             </div>
           </div>
         );
-
-      // ── Page 2: 성격 특성 ──
       case 1:
         return (
           <div key="p1">
-            <h2 className="text-lg font-bold mb-4">성격 특성</h2>
+            <h2 className="text-lg font-bold mb-4">역량</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <PersonalityRadar scores={result.personalityScores} labels={personalityLabels} />
+              <CompetencyChart common={result.competencyCommon} trackScores={result.competencyTrackScores} trackName={result.trackName} />
             </div>
-            {personalityMods.length > 0 && (
+            {compMods.length > 0 && (
               <div className="space-y-5">
-                {personalityMods.map(([id, m]) => (
-                  <div key={id} className="border-l-2 border-neutral-300 pl-4">
+                {compMods.map(([id, m]) => (
+                  <div key={id} className={`border-l-2 ${id.endsWith('-A') ? 'border-green-400' : id.endsWith('-D') ? 'border-red-300' : 'border-neutral-300'} pl-4`}>
                     <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
                     <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
                   </div>
@@ -184,158 +105,67 @@ export default function HitBResultPage() {
             )}
           </div>
         );
-
-      // ── Page 3: RIASEC ──
       case 2:
         return (
           <div key="p2">
-            <h2 className="text-lg font-bold mb-4">직업 흥미 (RIASEC)</h2>
+            <h2 className="text-lg font-bold mb-1">효능감 × 흥미</h2>
+            <p className="text-xs text-neutral-500 mb-4">"끌린다"(HIT A 흥미)와 "할 수 있다"(효능감)를 겹쳐 보면 중심에 둘 일과 배우면 되는 일이 나뉩니다.</p>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <RIASECChart
-                r={result.riasecR} i={result.riasecI} a={result.riasecA}
-                s={result.riasecS} e={result.riasecE} c={result.riasecC}
-                hollandCode={result.hollandCode}
-              />
+              <RIASECChart r={eff.R ?? 0} i={eff.I ?? 0} a={eff.A ?? 0} s={eff.S ?? 0} e={eff.E ?? 0} c={eff.C ?? 0} hollandCode={result.efficacyTop3} />
             </div>
-            {riasecMods.length > 0 && riasecMods.map(([id, m]) => (
-              <div key={id} className="border-l-2 border-purple-400 pl-4 mb-4">
-                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
-                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
-              </div>
-            ))}
+            <InterestEfficacyMatrix matrix={result.matrix} efficacy={eff} />
           </div>
         );
-
-      // ── Page 4: 역량 ──
       case 3:
         return (
           <div key="p3">
-            <h2 className="text-lg font-bold mb-4">역량 진단</h2>
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <CompetencyChart
-                common={result.competencyCommon}
-                trackScores={result.competencyTrackScores}
-                trackName={trackName}
-              />
+            <h2 className="text-lg font-bold mb-4">자기·직무 이해</h2>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {[['자기 이해', result.insightSelf, '내 강점·가치·맞는 환경을 아는 정도'], ['직무 이해', result.insightJob, '희망 직무의 일·요구 역량·경로를 아는 정도']].map(([l, v, d]) => (
+                <div key={String(l)} className="border border-neutral-200 rounded-xl p-5">
+                  <p className="text-xs text-neutral-400">{l}</p>
+                  <p className="text-3xl font-extrabold text-neutral-900 mt-1">{v}</p>
+                  <p className="text-[11px] text-neutral-500 mt-2 leading-snug">{d}</p>
+                </div>
+              ))}
             </div>
-            {compMods.length > 0 && (
-              <div className="space-y-5">
-                {compMods.map(([id, m]) => {
-                  const isA = id.endsWith('-A');
-                  const isD = id.endsWith('-D');
-                  const borderColor = isA ? 'border-green-400' : isD ? 'border-red-300' : 'border-neutral-300';
-                  return (
-                    <div key={id} className={`border-l-2 ${borderColor} pl-4`}>
-                      <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
-                      <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  );
-                })}
+            {result.aiReport && (
+              <div>
+                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" /> HeRo의 종합 분석
+                </h3>
+                <div className="bg-neutral-50 p-5 rounded-xl"><p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">{cleanMarkdown(result.aiReport)}</p></div>
               </div>
             )}
           </div>
         );
-
-      // ── Page 5: 준비도 ──
       case 4:
         return (
           <div key="p4">
-            <h2 className="text-lg font-bold mb-4">커리어 준비도</h2>
-            <div className="border border-neutral-200 rounded-xl p-6">
-              <ReadinessGauge
-                self={result.readinessSelf} portfolio={result.readinessPortfolio}
-                interview={result.readinessInterview} network={result.readinessNetwork}
-                total={result.readinessTotal} grade={result.readinessGrade}
-                gaps={result.readinessGaps}
-              />
-            </div>
-            {readyMods.length > 0 && readyMods.map(([id, m]) => (
-              <div key={id} className="mt-6 border-l-2 border-blue-400 pl-4">
-                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
-                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
-              </div>
-            ))}
-            {result.aiReport && (
-              <div className="mt-6">
-                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" />
-                  HeRo의 종합 분석
-                </h3>
-                <div className="bg-neutral-50 p-5 rounded-xl">
-                  <p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">
-                    {cleanMarkdown(result.aiReport)}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      // ── Page 6: 다음 단계 ──
-      case 5:
-        return (
-          <div key="p5">
-            <h2 className="text-lg font-bold mb-6">다음 단계</h2>
-            <div className="space-y-4">
-              {result.hitAResultId && (
-                <Link href={`/hero/hit/profile/${result.id}`}
-                  className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
+            <h2 className="text-lg font-bold mb-2">다음 단계</h2>
+            <p className="text-xs text-neutral-500 mb-5">A·B로 공통 기반이 끝났습니다. 지금 내 상황에 맞는 검사 하나를 고르세요.</p>
+            <div className="space-y-3">
+              {[...HIT_LIFE_STAGES, ...HIT_SITUATIONS].map(s => (
+                <Link key={s.key} href={`/hero/hit/${s.key}?b=${resultId}`} className="block border border-neutral-200 rounded-xl p-4 hover:border-neutral-400 hover:bg-neutral-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+B</div>
-                    <div className="flex-1">
-                      <p className="font-bold text-neutral-800">통합 프로필 보기</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">HIT A + B 결과를 한눈에</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{s.code}{s.group === 'situation' ? ' · 상황 모듈' : ''}</p>
+                      <p className="font-bold text-neutral-900">{s.name}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5 truncate">{s.desc}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-[#E53935]" />
+                    <ArrowRight className="h-4 w-4 text-neutral-400" />
                   </div>
                 </Link>
-              )}
-              {/* 풀 보고서 */}
-              <Link href={`/hero/hit/b/report/${resultId}`}
-                className="block border border-neutral-200 rounded-xl p-5 hover:bg-neutral-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">PDF</div>
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">전체 보고서 보기</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HIT B 상세 분석 + 인쇄/PDF 저장</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-neutral-400" />
-                </div>
+              ))}
+              <Link href={`/hero/hit/b/report/${resultId}`} className="block border border-neutral-200 rounded-xl p-4 hover:bg-neutral-50 transition-colors">
+                <div className="flex items-center gap-3"><div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">PDF</div><div className="flex-1"><p className="font-bold text-neutral-800">전체 보고서 보기</p><p className="text-xs text-neutral-500 mt-0.5">상세 분석 + 인쇄/PDF 저장</p></div><ArrowRight className="h-4 w-4 text-neutral-400" /></div>
               </Link>
-              <div className="border border-neutral-200 rounded-xl p-5">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-neutral-400" />
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">AI 맞춤 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">A×B 교차 분석, 직무 적합도, 성장 로드맵</p>
-                  </div>
-                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 →</Link>
-                </div>
-              </div>
-              <div className="border border-neutral-200 rounded-xl p-5">
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-neutral-400" />
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">전문가 대면 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 커리어를 함께 설계합니다</p>
-                  </div>
-                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 →</Link>
-                </div>
-              </div>
-              <div className="pt-4 space-y-2">
-                <button onClick={handleCopy}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 border border-neutral-200 rounded-lg text-sm hover:bg-neutral-50 transition-colors">
-                  {copied ? <><Check className="h-3.5 w-3.5 text-green-500" /> 복사됨</> : <><Copy className="h-3.5 w-3.5" /> 결과 링크 복사</>}
-                </button>
-                <Link href="/hero/hit/b"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 text-xs text-neutral-400 hover:text-neutral-600">
-                  <RefreshCw className="h-3 w-3" /> 다시 검사하기
-                </Link>
-              </div>
+              <div className="border border-neutral-200 rounded-xl p-4"><div className="flex items-center gap-3"><Sparkles className="h-5 w-5 text-neutral-400" /><div className="flex-1"><p className="font-bold text-neutral-800">AI 맞춤 상담</p><p className="text-xs text-neutral-500 mt-0.5">A×B 교차 분석, 직무 적합도, 성장 로드맵</p></div><Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 →</Link></div></div>
+              <div className="border border-neutral-200 rounded-xl p-4"><div className="flex items-center gap-3"><Users className="h-5 w-5 text-neutral-400" /><div className="flex-1"><p className="font-bold text-neutral-800">전문가 대면 상담</p><p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 커리어를 함께 설계합니다</p></div><Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 →</Link></div></div>
+              <Link href="/hero/hit/b" className="flex items-center justify-center gap-2 w-full py-2.5 text-xs text-neutral-400 hover:text-neutral-600"><RefreshCw className="h-3 w-3" /> 다시 검사하기</Link>
             </div>
           </div>
         );
-
       default:
         return null;
     }
@@ -343,62 +173,24 @@ export default function HitBResultPage() {
 
   return (
     <div className="mx-auto max-w-lg px-6 py-8 min-h-[70vh] flex flex-col">
-      {/* 페이지 인디케이터 */}
       <div className="flex items-center justify-center gap-1.5 mb-6">
-        {pageLabels.map((label, i) => (
-          <button
-            key={i}
-            onClick={() => { setDirection(i > currentPage ? 'next' : 'prev'); setCurrentPage(i); }}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentPage ? 'w-6 bg-[#E53935]' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
-            }`}
-            title={label}
-          />
+        {PAGE_LABELS.map((label, i) => (
+          <button key={i} onClick={() => setCurrentPage(i)} className={`h-1.5 rounded-full transition-all duration-300 ${i === currentPage ? 'w-6 bg-[#E53935]' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'}`} title={label} />
         ))}
       </div>
-
-      {/* 콘텐츠 */}
-      <div className="flex-1">
-        <div key={currentPage} style={{ animation: 'fadeIn 0.3s ease-out' }}>
-          {renderPage()}
-        </div>
-      </div>
-
-      {/* 네비게이션 */}
+      <div className="flex-1"><div key={currentPage} style={{ animation: 'fadeIn 0.3s ease-out' }}>{renderPage()}</div></div>
       <div className="flex items-center justify-between mt-8 pt-4 border-t border-neutral-100">
-        <button onClick={goPrev} disabled={currentPage === 0}
-          className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-          <ChevronLeft className="h-4 w-4" /> 이전
-        </button>
+        <button onClick={goPrev} disabled={currentPage === 0} className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"><ChevronLeft className="h-4 w-4" /> 이전</button>
         <span className="text-xs text-neutral-300 font-mono">{currentPage + 1} / {TOTAL_PAGES}</span>
-        <button onClick={goNext} disabled={currentPage === TOTAL_PAGES - 1}
-          className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-          다음 <ChevronRight className="h-4 w-4" />
-        </button>
+        <button onClick={goNext} disabled={currentPage === TOTAL_PAGES - 1} className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">다음 <ChevronRight className="h-4 w-4" /></button>
       </div>
-
-      {/* 히어로 AI 채팅 */}
-      {result && (
-        <HeroChatPanel
-          resultId={resultId}
-          mode={result.hitAResultId ? 'AB_FULL' : 'B_ONLY'}
-          greeting={getHeroGreeting(
-            result.hitAResultId ? 'AB_FULL' : 'B_ONLY',
-            { hollandCode: result.hollandCode, topCompetency: TRACK_NAMES[result.competencyTrack] }
-          )}
-          quickQuestions={result.hitAResultId
-            ? ['직무 적합도 분석', '성격과 역량 연결', '3개월 성장 플랜', '면접 강점 어필']
-            : ['적성에 맞는 직무는?', '역량 올리려면?', '취업 준비 어디서부터?', '면접 준비']
-          }
-        />
-      )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      <HeroChatPanel
+        resultId={resultId}
+        mode={result.hitAResultId ? 'AB_FULL' : 'B_ONLY'}
+        greeting={getHeroGreeting(result.hitAResultId ? 'AB_FULL' : 'B_ONLY', { hollandCode: result.efficacyTop3, topCompetency: topCore ? CORE_COMPETENCY_LABELS[topCore[0]] : undefined })}
+        quickQuestions={result.hitAResultId ? ['직무 적합도 분석', '성격과 역량 연결', '3개월 성장 플랜', '배우면 되는 영역은?'] : ['적성에 맞는 직무는?', '역량 올리려면?', '어디서부터 시작할까?', '효능감이 낮은 이유']}
+      />
+      <style jsx>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     </div>
   );
 }

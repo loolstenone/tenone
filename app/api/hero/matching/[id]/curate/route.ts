@@ -45,7 +45,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
             sb.from("hero_profiles").select("hit_b_result_id").eq("member_id", match.profile_member_id).maybeSingle()
                 .then(async p => {
                     if (!p.data?.hit_b_result_id) return { data: null };
-                    return sb.from("hit_b_results").select("holland_code, readiness_grade, competency_track").eq("id", p.data.hit_b_result_id).maybeSingle();
+                    return sb.from("hit_b_results").select("efficacy_top3, journey_stage, competency_track, competency_common, efficacy_scores, interest_efficacy_matrix").eq("id", p.data.hit_b_result_id).maybeSingle();
                 }),
             sb.from("hit_ai_prompts").select("*").eq("id", "tetrad_match_v1").maybeSingle(),
         ]);

@@ -5,8 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { STAGE_SUBDOMAIN_MODULE } from "@/lib/hit/stage-modules";
 
-type DModuleType = 'expertise' | 'leadership' | 'identity' | 'network' | 'seniorReadiness';
+type DModuleType = 'careerCapital' | 'motivation' | 'transferability' | 'readiness';
 
 interface QuestionItem {
   module: DModuleType;
@@ -22,21 +23,19 @@ interface Response {
 }
 
 const MODULE_NAMES: Record<DModuleType, string> = {
-  expertise: '전문성 자산',
-  leadership: '리더십 유형',
-  identity: '경력 정체성 유연성',
-  network: '네트워크 자본',
-  seniorReadiness: '고년차 이직 준비도',
+  careerCapital: '경력 자본',
+  motivation: '이직 동기',
+  transferability: '전직 가능성',
+  readiness: '이직 준비도',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'expertise→leadership': '다음은 리더십 유형을 분석합니다',
-  'leadership→identity': '경력 정체성 유연성을 평가합니다',
-  'identity→network': '네트워크 자본을 확인합니다',
-  'network→seniorReadiness': '마지막! 고년차 이직 준비도를 확인합니다',
+  'careerCapital→motivation': '다음은 이직 동기를 분석합니다',
+  'motivation→transferability': '전직 가능성을 평가합니다',
+  'transferability→readiness': '마지막! 이직 준비도를 확인합니다',
 };
 
-const MODULE_ORDER: DModuleType[] = ['expertise', 'leadership', 'identity', 'network', 'seniorReadiness'];
+const MODULE_ORDER: DModuleType[] = ['careerCapital', 'motivation', 'transferability', 'readiness'];
 
 const AVG_SECONDS_PER_QUESTION = 6;
 
@@ -69,7 +68,7 @@ function HitDTestContent() {
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = allQuestions.length;
   const currentQuestion = allQuestions[currentIndex];
-  const currentModule = currentQuestion?.module ?? 'expertise';
+  const currentModule = currentQuestion?.module ?? 'careerCapital';
   const answeredCount = responses.size;
 
   // Load questions from DB then restore session
@@ -87,7 +86,8 @@ function HitDTestContent() {
 
       const grouped = new Map<DModuleType, QuestionItem[]>(MODULE_ORDER.map((m) => [m, []]));
       for (const row of rows) {
-        const mod = row.module as DModuleType;
+        const mod = STAGE_SUBDOMAIN_MODULE.d[row.sub_domain ?? ''] as DModuleType | undefined;
+        if (!mod) continue;
         grouped.get(mod)?.push({
           module: mod,
           id: row.id,
@@ -273,7 +273,7 @@ function HitDTestContent() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
-        <p className="text-neutral-500 text-sm">시니어 리더십 전환 리포트를 생성하고 있습니다...</p>
+        <p className="text-neutral-500 text-sm">경력전환 분석 리포트를 생성하고 있습니다...</p>
         <p className="text-neutral-400 text-xs">AI가 분석 중이므로 약 30초 소요됩니다</p>
       </div>
     );

@@ -3,37 +3,37 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Microscope, Crown, RefreshCw, Globe, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Briefcase, Target, RefreshCw, CheckCircle, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
-    icon: Microscope,
-    title: "전문성 깊이 & 도메인",
-    desc: "전문 분야의 깊이와 도메인 확장성을 측정합니다.",
+    icon: Briefcase,
+    title: "경력 자본",
+    desc: "전문성, 네트워크, 조직 이해력, 핵심 역량을 종합 측정합니다.",
     count: "20문항",
     time: "~4분",
   },
   {
-    icon: Crown,
-    title: "리더십 스타일",
-    desc: "비전형, 코칭형, 민주형, 지시형 리더십 성향을 분석합니다.",
-    count: "20문항",
-    time: "~4분",
+    icon: Target,
+    title: "이직 동기",
+    desc: "현직 불만족(Push) vs 새로운 기회(Pull) 동기를 분석합니다.",
+    count: "15문항",
+    time: "~3분",
   },
   {
     icon: RefreshCw,
-    title: "정체성 유연성",
-    desc: "역할 정체성, 변화 개방성, 자기 재발명 역량을 평가합니다.",
+    title: "전환 가능성",
+    desc: "스킬 이동성, 산업 적응력, 학습 민첩성을 평가합니다.",
     count: "15문항",
     time: "~3분",
   },
   {
-    icon: Globe,
-    title: "네트워크 & 시니어 준비도",
-    desc: "네트워크의 질과 폭, 시니어 역할 준비도를 진단합니다.",
-    count: "15문항",
-    time: "~3분",
+    icon: CheckCircle,
+    title: "준비도",
+    desc: "경력전환 준비 정도와 갭 인식 수준을 진단합니다.",
+    count: "10문항",
+    time: "~2분",
   },
 ];
 
@@ -98,19 +98,19 @@ function HitDIntroContent() {
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            HIT D · Senior Leadership
+            HIT D · Career Transition
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            시니어 리더십 전환?
+            어디로 이직할까?
           </h1>
           <p className="text-neutral-500 mb-2">
-            전문성, 리더십 스타일, 정체성 유연성, 네트워크를 종합 분석하여<br />
-            다음 시니어 역할 전환 로드맵을 제공합니다.
+            경력 자본, 이직 동기, 전환 가능성, 준비도를 종합 분석하여<br />
+            맞춤형 경력전환 리포트를 제공합니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 15분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 12분</span>
             <span>·</span>
-            <span>70문항</span>
+            <span>60문항</span>
             <span>·</span>
             <span>7점 척도</span>
           </div>
@@ -126,7 +126,7 @@ function HitDIntroContent() {
               <div>
                 <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
                 <p className="text-xs text-amber-600 mt-1">
-                  HIT - D는 HIT - A 결과를 기반으로 시니어 리더십 전환을 분석합니다.
+                  HIT - C는 HIT - A 결과를 기반으로 경력전환을 분석합니다.
                   아직 HIT - A를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button

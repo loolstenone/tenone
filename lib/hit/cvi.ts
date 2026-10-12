@@ -5,7 +5,7 @@
 
 export type CviGrade = 'HIGH' | 'MID' | 'LOW'
 
-// HIGH → F 자체 리포트(복귀), MID → HIT C(전환), LOW → HIT B(기초 재설계)
+// HIGH → F 자체 리포트(복귀), MID → HIT D(전환), LOW → HIT B(기초 재설계)
 export type FNextRoute = 'B' | 'C' | 'recovery'
 
 export interface CviInput {
@@ -29,12 +29,12 @@ export interface CviResult {
  * CVI 산출 (설계서 확정 공식 — 변경 금지)
  * CVI = (직무유효성 × 0.35) + (기술유효성 × 0.35) + (시장재진입 × 0.30)
  *
- * 각 subscale 점수는 scoring-f.ts의 buildSubscaleMap에서
+ * 각 subscale 점수는 scoring-gap.ts의 buildSubscaleMap에서
  * 역문항 역산 후 0~100으로 정규화된 값을 입력한다.
  *
  * 등급:
  *   ≥ 67 → HIGH  : 경력 복구 가능성 높음 → F 자체 리포트
- *   34~66 → MID  : 부분 전환 필요 → HIT C 연결
+ *   34~66 → MID  : 부분 전환 필요 → HIT D 연결
  *   ≤ 33 → LOW   : 새 출발이 현실적 → HIT B 연결
  */
 export function calculateCVI(input: CviInput): CviResult {

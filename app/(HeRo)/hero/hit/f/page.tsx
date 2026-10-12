@@ -3,35 +3,35 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Clock as ClockIcon, Timer, Brain, Battery, Rocket, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Sun, Compass, Award, Users, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
-    icon: Timer,
-    title: "공백 맥락",
-    desc: "경력 단절 상황과 사유를 분석하여 공백의 맥락을 파악합니다.",
-    count: "10문항",
-    time: "~2분",
-  },
-  {
-    icon: Brain,
-    title: "잠재 역량",
-    desc: "기술 유지도, 소프트 스킬, 지속적 학습 활동을 종합 측정합니다.",
-    count: "20문항",
-    time: "~4분",
-  },
-  {
-    icon: Battery,
-    title: "회복탄력성",
-    desc: "정서적 회복력, 자신감, 적응력을 평가합니다.",
+    icon: Sun,
+    title: "삶의 만족도 & 열정",
+    desc: "현재 삶의 만족감과 남아있는 열정, 에너지를 종합 측정합니다.",
     count: "15문항",
     time: "~3분",
   },
   {
-    icon: Rocket,
-    title: "재진입 준비도",
-    desc: "실질적 복귀 준비와 동기 수준을 진단합니다.",
+    icon: Compass,
+    title: "방향 탐색",
+    desc: "사회공헌, 창업, 교육/멘토링, 여가 중 나에게 맞는 방향을 탐색합니다.",
+    count: "20문항",
+    time: "~4분",
+  },
+  {
+    icon: Award,
+    title: "레거시 스킬",
+    desc: "수십 년간 쌓은 경험과 전문성의 이전 가능성을 평가합니다.",
+    count: "15문항",
+    time: "~3분",
+  },
+  {
+    icon: Users,
+    title: "사회적 연결 & 준비도",
+    desc: "사회적 관계 유지 욕구와 인생 2막 준비 정도를 진단합니다.",
     count: "10문항",
     time: "~2분",
   },
@@ -95,23 +95,23 @@ function HitFIntroContent() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+      <section className="bg-gradient-to-br from-amber-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            HIT F &middot; Career Break Recovery
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full mb-6">
+            HIT F · Second Act
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            경력 공백, 복귀할 수 있을까?
+            인생 2막?
           </h1>
           <p className="text-neutral-500 mb-2">
-            경력 유효성(CVI), 잠재 역량, 회복탄력성, 재진입 준비도를<br />
-            종합 분석하여 맞춤형 복귀 전략을 제시합니다.
+            삶의 만족도, 남은 열정, 방향성, 레거시 스킬을 종합 분석하여<br />
+            나만의 인생 2막 설계 리포트를 제공합니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><ClockIcon className="h-3.5 w-3.5" /> 약 10분</span>
-            <span>&middot;</span>
-            <span>55문항</span>
-            <span>&middot;</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 12분</span>
+            <span>·</span>
+            <span>60문항</span>
+            <span>·</span>
             <span>7점 척도</span>
           </div>
         </div>
@@ -126,14 +126,14 @@ function HitFIntroContent() {
               <div>
                 <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
                 <p className="text-xs text-amber-600 mt-1">
-                  HIT - F는 HIT - A 결과를 기반으로 경력 공백 복귀를 분석합니다.
+                  HIT - E는 HIT - A 결과를 기반으로 인생 2막을 분석합니다.
                   아직 HIT - A를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
                   onClick={() => router.push('/hero/hit/a')}
                   className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900"
                 >
-                  HIT - A 시작하기 &rarr;
+                  HIT - A 시작하기 →
                 </button>
               </div>
             </div>
@@ -148,7 +148,7 @@ function HitFIntroContent() {
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-amber-50 text-amber-700 rounded-lg flex items-center justify-center flex-shrink-0">
                   <m.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
@@ -176,7 +176,7 @@ function HitFIntroContent() {
           <button
             onClick={handleStart}
             disabled={starting}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-amber-700 text-white font-bold text-lg hover:bg-amber-800 transition-colors rounded-xl disabled:opacity-50"
           >
             {starting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
@@ -194,7 +194,7 @@ function HitFIntroPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-amber-700 rounded-full animate-spin" />
       </div>
     }>
       <HitFIntroContent />
