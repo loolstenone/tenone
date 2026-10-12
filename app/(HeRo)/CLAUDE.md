@@ -41,7 +41,7 @@
 
 | 단계 | 접근 | 산출물 | 목적 |
 |------|------|--------|------|
-| **① 비회원** | 이메일만 입력 | HIT 간략 결과 (티저) · 공유 가능 | 리드 확보 · 바이럴 |
+| ~~① 비회원~~ | — | **폐지 (2026-10-12)** — HIT 전 검사 회원 전용 | — |
 | **② 회원** | 이메일/SNS 가입 | HIT 풀 리포트 · 유형 badge · JH 작성 | funnel 중간 · Universe 진입 |
 | **③ 유료** | 결제 (Stripe/Toss) | PDF 다운로드 · AI 상담 · HIT B/C/D/E/F 심화 | 수익화 · 매칭 대상 등록 |
 
@@ -496,7 +496,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 ### Funnel 게이트
 
-- **비회원 결과 조회 허용**: `/hero/hit/{type}/result/[id]` — 티저
+- **HIT 검사는 회원 전용** (2026-10-12 사용자 결정 "모든 조사는 회원만"): `/hero/hit/{a~f}/*` 폴더 layout이 `HitMemberGate`(LoginRequired)로 감싸고, `/api/hit/{a~f}/session`은 `requireMember`, `/api/hit/a/questions`는 `requireUser`. 결과 조회는 본인·직원만(`lib/hit/result-access.ts`, member_id 없는 옛 결과는 직원만). 비회원 티저·`/api/hit/link-member` 흐름은 사실상 폐지
 - **회원 전용**: `/hero/hit/{type}/report/[id]` — 풀 리포트
 - **유료 gate**: PDF 다운로드·AI 상담
 - 게이트 누락 시 수익 전환 실패 → **각 페이지 접근 제어 필수**

@@ -52,7 +52,7 @@ const MODULE_NAMES: Record<ModuleType, string> = {
   aptitude_core: '핵심 적성(AP) 검사',
 };
 
-// UF(base)는 회원 세션에만 출제된다 — 있으면 첫 파트 (lib/hit/a-modules.ts)
+// UF(base) 성장 배경이 첫 파트 (lib/hit/a-modules.ts) — HIT는 회원 전용
 const MODULE_ORDER: ModuleType[] = ['base', 'personality_type', 'behavior_type', 'character_core', 'aptitude_core'];
 
 const TRANSITION_MESSAGES: Record<string, string> = {
@@ -98,7 +98,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   useEffect(() => {
     async function loadQuestions() {
       try {
-        const res = await fetch(`/api/hit/a/questions?s=${encodeURIComponent(sessionToken)}`);
+        const res = await fetch('/api/hit/a/questions');
         if (!res.ok) throw new Error('질문 로드 실패');
         const data = await res.json();
 

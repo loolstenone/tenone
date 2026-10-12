@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Users, Target, Clock, ArrowRight, Loader2, Sparkles, RotateCcw, Sprout } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { HIT_A_CORE_COUNT, HIT_A_UF_COUNT } from "@/lib/hit/a-modules";
+import { HIT_A_UF_COUNT, HIT_A_TOTAL_COUNT } from "@/lib/hit/a-modules";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/a/questions → hit_questions test_type A)와 같아야 한다 (2026-10-12 — 화면마다 127·172·620으로 달랐음)
-// UF(성장 배경)는 회원만 출제 — lib/hit/a-modules.ts
+// HIT는 회원 전용 — UF(성장 배경)가 첫 파트. lib/hit/a-modules.ts
 const ufModule = {
   icon: Sprout,
   title: "성장 배경 (UF)",
@@ -50,9 +50,8 @@ const LAST_SESSION_KEY = "hit_a_last_session";
 export default function HitAIntroPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const isMember = !!user?.id;
-  const TOTAL_QUESTIONS = isMember ? HIT_A_CORE_COUNT + HIT_A_UF_COUNT : HIT_A_CORE_COUNT;
-  const shownModules = isMember ? [ufModule, ...modules] : modules;
+  const TOTAL_QUESTIONS = HIT_A_TOTAL_COUNT;
+  const shownModules = [ufModule, ...modules];
   const [starting, setStarting] = useState(false);
   const [pageLoadTime] = useState(Date.now());
   // 진행 중 세션 — 검사를 중단했다 돌아온 사람이 처음부터 다시 하지 않게 (2026-10-12)
@@ -113,7 +112,7 @@ export default function HitAIntroPage() {
             64가지 영웅 유형 중 나만의 프로필을 찾습니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 {isMember ? 30 : 25}분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 30분</span>
             <span>·</span>
             <span>{TOTAL_QUESTIONS}문항</span>
             <span>·</span>
@@ -152,9 +151,7 @@ export default function HitAIntroPage() {
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
           <p className="text-xs text-neutral-400 mb-4">
-            {isMember
-              ? "결과는 내 계정에 저장되며 본인만 볼 수 있습니다."
-              : "로그인 없이 바로 시작할 수 있습니다. 결과는 고유 URL로 저장됩니다. 로그인하면 성장 배경(UF) 분석이 추가됩니다."}
+            결과는 내 계정에 저장되며 본인만 볼 수 있습니다.
           </p>
           {resume ? (
             <div className="flex flex-col items-center gap-3">
