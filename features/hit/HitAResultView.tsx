@@ -7,15 +7,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { RefreshCw, Printer, ArrowLeft, Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
-import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
-import HitModelGuideModal from "@/features/hit/HitModelGuideModal";
 import HitModelGuide from "@/features/hit/HitModelGuide";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
@@ -23,6 +21,7 @@ import { CH_COPY, DISC_COPY, HOLLAND_COPY, SPOWER_LABELS, toParagraphs } from "@
 import {
   ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreList, ScoreRow,
   ModuleList, AiNarrative, NextLink, ReportFooterNote, LoadingState, NotFoundState, formatDate,
+  ReportToolbar, ReportCover, FullReportLink, useReportTitle, isoDay,
 } from "@/features/hit/report/ReportKit";
 import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
 
@@ -92,6 +91,8 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
       .catch(() => setLoading(false));
   }, [resultId, print]);
 
+  useReportTitle([`HeRo ${HIT_STAGES.a.code} ${HIT_STAGES.a.name}`, d?.type_code as string, isoDay(d?.created_at as string)], !!d);
+
   if (loading) return <LoadingState />;
   if (!d) return <NotFoundState retryHref="/hero/hit/a" />;
 
@@ -111,16 +112,9 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
     <>
     <div className={print ? "hit-report-container" : ""}>
     <ReportShell>
-      {print && (
-        <div className="no-print flex items-center justify-between gap-2 mb-10">
-          <Link href={`/hero/hit/a/result/${resultId}`} className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700"><ArrowLeft className="h-4 w-4" /> 결과 페이지로</Link>
-          <div className="flex items-center gap-2">
-            <HitModelGuideModal />
-            <button onClick={() => window.print()} className="print-keep inline-flex items-center gap-2 px-4 py-2 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"><Printer className="h-4 w-4" /> 인쇄 / PDF</button>
-          </div>
-        </div>
-      )}
-      <ReportHeader code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />
+      {print && <ReportToolbar backHref={`/hero/hit/a/result/${resultId}`} />}
+      {print && <ReportCover code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} headline={typeCode} sub={typeName} date={formatDate(d.created_at as string)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />}
       {!print && <HitChain type="a" id={resultId} />}
       {!print && <SectionNav items={NAV} />}
 
@@ -197,7 +191,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
 
       <Section id="interest" title="흥미" lead="어떤 종류의 일에 마음이 끌리는지입니다. HIT B에서 '해낼 수 있다'는 자신감(효능감)과 겹쳐 봅니다.">
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
-          {ap.map(([t, v]) => HOLLAND_COPY[t] && <ScoreRow key={t} label={HOLLAND_COPY[t].label} value={v} what={HOLLAND_COPY[t].what} />)}
+          {ap.map(([t, v]) => HOLLAND_COPY[t] && <ScoreRow key={t} label={HOLLAND_COPY[t].label} value={v} what={HOLLAND_COPY[t].what} plain />)}
         </div>
       </Section>
 
@@ -238,17 +232,17 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
     </ReportShell>
     </div>
 
-    <HitNextSteps from="a" aId={resultId}>
-      <div className="space-y-3">
-        <NextLink href={`/hero/coaching?type=ai&resultId=${resultId}`} title="AI 맞춤 상담" desc="성격과 행동의 교차 해석, 맞는 직무, 성장 방법을 물어보세요" />
-      </div>
-      {!print && (
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <HitPdfButton resultId={resultId} typeCode={typeCode} />
+    {!print && (
+      <HitNextSteps from="a" aId={resultId}>
+        <div className="space-y-3">
+          <NextLink href={`/hero/coaching?type=ai&resultId=${resultId}`} title="AI 맞춤 상담" desc="성격과 행동의 교차 해석, 맞는 직무, 성장 방법을 물어보세요" />
+          <FullReportLink href={`/hero/hit/a/report/${resultId}`} />
+        </div>
+        <div className="mt-8 flex justify-center">
           <Link href="/hero/hit/a" className="inline-flex items-center gap-2 text-xs text-neutral-400 hover:text-neutral-600"><RefreshCw className="h-3 w-3" /> 다시 검사하기</Link>
         </div>
-      )}
-    </HitNextSteps>
+      </HitNextSteps>
+    )}
     {print && (
       <Link href={`/hero/coaching/ai?resultId=${resultId}`} className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white font-bold rounded-full shadow-lg hover:bg-neutral-700 transition-colors">
         <Sparkles className="h-5 w-5" /> AI 상담

@@ -3,12 +3,12 @@
 /** HIT C "진입" 결과 — 결과 페이지(화면)와 보고서(인쇄) 공용. 틀·점수 기준은 features/hit/report/ReportKit (A·B와 같음) */
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Printer } from "lucide-react";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { READINESS_COPY, ONBOARDING_COPY, DECISION_COPY, STAGE_LABELS, STAGE_DESC, BAND_INFO, scoreBand } from "@/lib/hit/report-copy";
 import {
   ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreList,
   ModuleList, AiNarrative, NextLink, ReportFooterNote, LoadingState, NotFoundState, formatDate,
+  ReportToolbar, ReportCover, FullReportLink, useReportTitle, isoDay,
 } from "@/features/hit/report/ReportKit";
 import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
 
@@ -41,6 +41,8 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
     fetch(`/api/hit/c/result/${resultId}`).then(x => x.json()).then(d => { if (!d.error) setR(d); setLoading(false); }).catch(() => setLoading(false));
   }, [resultId]);
 
+  useReportTitle([`HeRo ${HIT_STAGES.c.code} ${HIT_STAGES.c.name}`, r ? `준비도 ${r.readiness_total}` : null, isoDay(r?.created_at)], !!r);
+
   if (loading) return <LoadingState />;
   if (!r) return <NotFoundState retryHref="/hero/hit/c" />;
 
@@ -51,14 +53,10 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
   return (
     <>
     <ReportShell>
-      {print && (
-        <div className="no-print flex items-center justify-between mb-8">
-          <Link href={`/hero/hit/c/result/${resultId}`} className="text-sm text-neutral-500 hover:text-neutral-700">← 결과 페이지로</Link>
-          <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-4 py-2 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700"><Printer className="h-4 w-4" /> 인쇄 / PDF</button>
-        </div>
-      )}
-      <ReportHeader code={`${HIT_STAGES.c.code} · 생애주기`} title={HIT_STAGES.c.name} date={formatDate(r.created_at)}
-        stage={STAGE_LABELS[r.journey_stage]} stageDesc={STAGE_DESC[r.journey_stage]} />
+      {print && <ReportToolbar backHref={`/hero/hit/c/result/${resultId}`} />}
+      {print && <ReportCover code={`${HIT_STAGES.c.code} · 생애주기`} title={HIT_STAGES.c.name} headline={`취업 준비도 ${r.readiness_total}`} sub={STAGE_LABELS[r.journey_stage]} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`${HIT_STAGES.c.code} · 생애주기`} title={HIT_STAGES.c.name} date={formatDate(r.created_at)}
+        stage={STAGE_LABELS[r.journey_stage]} stageDesc={STAGE_DESC[r.journey_stage]} />}
       {!print && <HitChain type="c" id={resultId} />}
       {!print && <SectionNav items={NAV} />}
 
@@ -101,7 +99,7 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
         </div>
         <div className="space-y-3">
           <NextLink href="/hero/journey" title="나의 저니에서 준비 체크하기" desc="목표 · 체크인 · 준비 체크리스트" primary />
-          <NextLink href={`/hero/hit/c/report/${resultId}`} title="보고서 보기 · 인쇄" />
+          <FullReportLink href={`/hero/hit/c/report/${resultId}`} />
         </div>
       </HitNextSteps>
     )}

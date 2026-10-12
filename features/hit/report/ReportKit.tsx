@@ -8,7 +8,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, ArrowLeft, Printer } from "lucide-react";
+import HitModelGuideModal from "@/features/hit/HitModelGuideModal";
 import { BAND_INFO, SCORE_GUIDE, scoreBand, toParagraphs, interpret, type DimensionCopy } from "@/lib/hit/report-copy";
 import { HIT_STAGES } from "@/lib/hit/stages";
 
@@ -141,13 +142,14 @@ export function BandChip({ value }: { value: number }) {
 }
 
 /** 점수 한 줄 — 이름·구간·점수 / 막대 / 무엇을 보나 / 이 점수의 의미 */
-export function ScoreRow({ label, value, what, meaning }: { label: string; value: number; what?: string; meaning?: string }) {
-  const band = BAND_INFO[scoreBand(value)];
+export function ScoreRow({ label, value, what, meaning, plain = false }: { label: string; value: number; what?: string; meaning?: string; plain?: boolean }) {
+  // plain = 강점·약점이 아닌 '선호·방향' 점수 (흥미·이직 동기·2막 방향 등) — 구간 표시 없이 중립색
+  const band = plain ? { bar: "bg-neutral-400" } : BAND_INFO[scoreBand(value)];
   return (
     <div className="py-5 border-b border-neutral-100 last:border-0">
       <div className="flex items-center gap-2">
         <span className="text-[15px] font-semibold text-neutral-900">{label}</span>
-        <BandChip value={value} />
+        {!plain && <BandChip value={value} />}
         <span className="ml-auto text-lg font-extrabold text-neutral-900 tabular-nums">{value}</span>
       </div>
       <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mt-3">
@@ -238,4 +240,67 @@ export function NotFoundState({ retryHref }: { retryHref: string }) {
 
 export function formatDate(iso: string | undefined | null) {
   return iso ? new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" }) : "";
+}
+
+/**
+ * 보고서 파일명 — 브라우저는 인쇄·PDF 저장 때 document.title을 파일명으로 쓴다.
+ * 예: HeRo HIT A 나에 대한 이해 - D-ENTJ - 2026-10-12
+ */
+export function useReportTitle(parts: (string | null | undefined)[], ready: boolean) {
+  const title = parts.filter(Boolean).join(" - ");
+  useEffect(() => {
+    if (!ready || !title) return;
+    const prev = document.title;
+    document.title = title;
+    return () => { document.title = prev; };
+  }, [ready, title]);
+}
+
+export function isoDay(iso: string | undefined | null) {
+  return iso ? new Date(iso).toISOString().slice(0, 10) : "";
+}
+
+/** 보고서(인쇄) 상단 도구 — 결과 화면으로 · 검사 설명 · 인쇄/PDF (인쇄 시 숨김) */
+export function ReportToolbar({ backHref }: { backHref: string }) {
+  return (
+    <div className="no-print flex items-center justify-between gap-2 mb-10">
+      <Link href={backHref} className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700"><ArrowLeft className="h-4 w-4" /> 결과 화면으로</Link>
+      <div className="flex items-center gap-2">
+        <HitModelGuideModal />
+        <button onClick={() => window.print()} className="print-keep inline-flex items-center gap-2 px-4 py-2 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"><Printer className="h-4 w-4" /> 인쇄 / PDF</button>
+      </div>
+    </div>
+  );
+}
+
+/** 보고서 표지 — 화면에서는 첫 카드, 인쇄에서는 한 장 전체 */
+export function ReportCover({ code, title, headline, sub, date, reportNo }: { code: string; title: string; headline?: string; sub?: string; date?: string; reportNo?: string }) {
+  return (
+    <section className="hit-cover rounded-3xl border border-neutral-200 px-8 py-16 sm:py-20 text-center mb-12 print:border-0 print:rounded-none print:flex print:flex-col print:justify-center print:min-h-[260mm] print:mb-0" style={{ breakAfter: "page" }}>
+      <Image src="/hero-logo.png" alt="HeRo" width={64} height={64} className="h-16 w-16 mx-auto" />
+      <p className="text-xs font-semibold text-neutral-400 tracking-[0.2em] mt-8">HeRo INTEGRATED TEST · 결과 보고서</p>
+      <p className="text-sm font-semibold text-neutral-500 mt-10">{code}</p>
+      <h1 className="text-[34px] sm:text-[40px] font-extrabold text-neutral-900 mt-2 leading-tight break-keep">{title}</h1>
+      {headline && <p className="text-2xl font-bold text-neutral-900 mt-10">{headline}</p>}
+      {sub && <p className="text-[15px] text-neutral-500 mt-2">{sub}</p>}
+      <div className="mt-14 space-y-1 text-sm text-neutral-400">
+        {date && <p>검사일 {date}</p>}
+        {reportNo && <p>보고서 번호 {reportNo}</p>}
+      </div>
+      <p className="text-xs text-neutral-300 mt-14">HeRo · Ten:One™ Universe</p>
+    </section>
+  );
+}
+
+/** 결과 화면 → 전체 보고서 (새 탭) */
+export function FullReportLink({ href }: { href: string }) {
+  return (
+    <a href={href} target="_blank" rel="noopener" className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-5 transition-shadow hover:shadow-md">
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-neutral-900">전체 보고서 보기</p>
+        <p className="text-[13px] text-neutral-500 mt-1">표지 포함 · 인쇄 / PDF 저장</p>
+      </div>
+      <ArrowRight className="h-4 w-4 shrink-0 text-neutral-400" />
+    </a>
+  );
 }

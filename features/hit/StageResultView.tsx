@@ -1,52 +1,62 @@
 "use client";
 
 /**
- * 생애주기·상황 검사(D 전환 · E 리더십 · F 2막 · GAP 복귀) 결과 화면 — 결과 페이지와 보고서(인쇄) 공용 (2026-10-12)
- *
- * 화면이 읽는 필드 = 채점 API가 저장하는 컬럼 (app/api/hit/{x}/score). 옛 결과 페이지는 저장하지 않는 필드를 읽어
- * 점수가 전부 0으로 보이거나(D) 유형 라벨이 비는(E·F) 문제가 있었다.
- * 해설은 규칙 기반 리포트 모듈(lib/hit/stage-report-modules.ts)이 주, AI 문단은 보조.
+ * 생애주기·상황 검사(D 전환 · E 리더십 · F 2막 · GAP 복귀) 결과 — 결과 화면과 보고서(인쇄·PDF) 공용
+ * 틀·점수 기준은 features/hit/report/ReportKit (A·B·C와 같음, 2026-10-12 재구성)
+ * 화면이 읽는 필드 = 채점 API가 저장하는 컬럼 (app/api/hit/{x}/score). 해설은 규칙 기반 모듈이 주, AI는 보조.
  */
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Printer, ShieldCheck } from "lucide-react";
-import { StageChecklistCard } from "@/features/hero/StageChecklistCard";
 import { HIT_STAGES } from "@/lib/hit/stages";
-import { cleanMarkdown } from "@/features/hit/hit-b-result-mapper";
+import { STAGE_DIM_COPY, BAND_INFO, scoreBand } from "@/lib/hit/report-copy";
+import {
+  ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreRow,
+  ModuleList, AiNarrative, NextLink, ReportFooterNote, LoadingState, NotFoundState, formatDate,
+  ReportToolbar, ReportCover, FullReportLink, useReportTitle, isoDay,
+} from "@/features/hit/report/ReportKit";
+import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
 
 type StageKey = "d" | "e" | "f" | "gap";
-type Row = Record<string, any>;
-interface Item { label: string; value: number }
-interface Section { title: string; caption?: string; items: Item[]; headline?: string }
+type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+interface Item { key: string; value: number }
+interface Block { id: string; title: string; lead: string; items: Item[]; checklist?: boolean; headline?: string }
+interface View {
+  journey: Record<string, string>;
+  cover: { headline: string; sub: string };
+  findings: { label: string; value: string; note: string }[];
+  blocks: Block[];
+  extra?: React.ReactNode;
+}
 
 const n = (v: unknown) => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : 0);
-const items = (obj: Row | null | undefined, labels: Record<string, string>): Item[] =>
-  Object.entries(labels).filter(([k]) => obj && k in obj).map(([k, label]) => ({ label, value: n(obj![k]) }));
+const pick = (obj: Row | null | undefined, keys: string[]): Item[] => keys.filter(k => obj && k in obj).map(k => ({ key: k, value: n(obj![k]) }));
+const top = (items: Item[]) => [...items].sort((a, b) => b.value - a.value)[0];
+const L = (k: string) => STAGE_DIM_COPY[k]?.label ?? k;
+const CHECKLIST_LEAD = "검사 문항이 아니라, 나의 저니 준비 체크리스트를 얼마나 해 두었는지(완료율)입니다. 체크할수록 올라갑니다.";
 
-const JOURNEY: Record<StageKey, Record<string, string>> = {
-  d: { ready_to_leap: "도약 준비 완료", almost_ready: "거의 준비됨", urgent_but_unprepared: "급하지만 준비가 더 필요", building_foundation: "기반을 다지는 중", exploring: "탐색 단계", early_awareness: "초기 인식" },
-  e: { ready_for_transition: "전환 준비 완료", almost_ready: "거의 준비됨", building_bridge: "브릿지 구축 중", deepening_expertise: "전문성 심화 중", exploring_options: "옵션 탐색 중", early_reflection: "초기 성찰 단계" },
-  f: { ready_to_launch: "2막 시작 준비 완료", almost_ready: "거의 준비됨", direction_found: "방향이 잡힘", exploring: "탐색 중", needs_reflection: "성찰 필요", early_awareness: "초기 인식" },
-  gap: { ready_to_return: "복귀 준비 완료", skill_ready_prep_needed: "역량은 준비됨 · 실행 준비 필요", strategic_transition: "전략적 전환 단계", resilience_building: "회복탄력성 강화 단계", foundation_rebuilding: "기반 재구축 단계", early_recovery: "초기 회복 단계" },
-};
-
-function sectionsFor(stage: StageKey, r: Row): { sections: Section[]; badges: string[]; extra?: React.ReactNode } {
+function viewFor(stage: StageKey, r: Row): View {
   switch (stage) {
     case "d": {
-      const mt: Record<string, string> = { push_driven: "이탈 요인(Push) 우세", pull_driven: "유인 요인(Pull) 우세", balanced: "균형" };
+      const mt: Record<string, string> = { push_driven: "떠나고 싶은 이유가 큼 (Push)", pull_driven: "가고 싶은 곳이 끌림 (Pull)", balanced: "떠날 이유와 끌림이 균형" };
+      const capital = pick(r.capital_scores, ["domain_expertise", "achievement", "relational", "transferable"]);
+      const best = top(capital);
       return {
-        badges: [mt[r.motivation_type] ?? "", r.target_job ? `희망 직무: ${r.target_job}` : ""].filter(Boolean),
-        sections: [
-          { title: "경력 자본", items: items(r.capital_scores, { domain_expertise: "도메인 전문성", achievement: "성과", relational: "관계 자본", transferable: "이전 가능 역량" }) },
-          { title: "이직 동기", items: [{ label: "이탈 요인 (Push)", value: n(r.motivation_push) }, { label: "유인 요인 (Pull)", value: n(r.motivation_pull) }] },
-          { title: "전환 가능성", headline: `전환 가능성 지수 ${n(r.transferability_index)}`, items: items(r.transferability_scores, { skill_transfer: "역량 이전", market_fit: "시장 적합", adaptation: "적응력" }) },
-          { title: "이직 준비", caption: "검사가 아니라 준비 체크리스트 완료율입니다", headline: `전환 준비도 ${n(r.transition_readiness)}`, items: items(r.readiness_scores, { doc: "서류", interview: "면접", timing: "타이밍", psychological: "지지·확신" }) },
+        journey: { ready_to_leap: "도약 준비 완료", almost_ready: "거의 준비됨", urgent_but_unprepared: "급하지만 준비가 더 필요", building_foundation: "기반을 다지는 중", exploring: "탐색 단계", early_awareness: "초기 인식" },
+        cover: { headline: `전환 가능성 ${n(r.transferability_index)}`, sub: r.target_job ? `희망 직무 ${r.target_job}` : (mt[r.motivation_type] ?? "") },
+        findings: [
+          { label: "전환 가능성", value: `${n(r.transferability_index)} · ${BAND_INFO[scoreBand(n(r.transferability_index))].label}`, note: "지금의 경력이 새 자리에서 통할 가능성입니다." },
+          { label: "이직 동기", value: mt[r.motivation_type] ?? "-", note: `떠날 이유 ${n(r.motivation_push)} · 끌림 ${n(r.motivation_pull)}` },
+          { label: "가장 큰 경력 자본", value: best ? `${L(best.key)} ${best.value}` : "-", note: best ? STAGE_DIM_COPY[best.key]?.what ?? "" : "" },
+        ],
+        blocks: [
+          { id: "capital", title: "경력 자본", lead: "지금까지의 경력에서 쌓아 온, 다음 자리로 가져갈 수 있는 자산입니다.", items: capital },
+          { id: "motivation", title: "이직 동기", lead: "지금 자리를 떠나고 싶은 이유(Push)와 새 자리에 끌리는 이유(Pull)입니다. 끌림이 클수록 이직 후 만족이 오래갑니다.", items: [{ key: "motivation_push", value: n(r.motivation_push) }, { key: "motivation_pull", value: n(r.motivation_pull) }] },
+          { id: "transfer", title: "전환 가능성", lead: "내 역량이 다른 회사·직무로 옮겨 갔을 때 통하는 정도입니다.", items: pick(r.transferability_scores, ["skill_transfer", "market_fit", "adaptation"]), headline: `전환 가능성 지수 ${n(r.transferability_index)}` },
+          { id: "ready", title: "이직 준비", lead: CHECKLIST_LEAD, items: pick(r.readiness_scores, ["doc", "interview", "timing", "psychological"]), checklist: true, headline: `전환 준비도 ${n(r.transition_readiness)}` },
         ],
         extra: Array.isArray(r.gap_areas) && r.gap_areas.length > 0 ? (
-          <div className="border border-neutral-200 rounded-xl p-5">
-            <p className="text-sm font-bold mb-2">보완할 영역</p>
-            <ul className="list-disc pl-5 text-sm text-neutral-600 space-y-1">{r.gap_areas.map((g: string) => <li key={g}>{g}</li>)}</ul>
+          <div className="rounded-2xl bg-neutral-50 p-5 sm:p-6">
+            <p className="text-[15px] font-bold text-neutral-900">먼저 보완할 영역</p>
+            <ul className="mt-3 space-y-2">{r.gap_areas.map((g: string) => <li key={g} className="flex gap-3 text-[15px] text-neutral-700"><span className="text-neutral-300">—</span>{g}</li>)}</ul>
           </div>
         ) : null,
       };
@@ -54,25 +64,26 @@ function sectionsFor(stage: StageKey, r: Row): { sections: Section[]; badges: st
     case "e": {
       const lt: Record<string, string> = { exec_leadership: "실행형 리더", strategic_leadership: "전략형 리더", coaching_leadership: "코치형 리더", independent_leadership: "독립형 전문가" };
       const roles = (r.next_role_matrix?.possible_roles ?? []) as { code: string; role: string; fit_score: number; description: string }[];
+      const expertise = pick(r.expertise_domains, ["domain_depth", "tacit_knowledge", "redeployment", "personal_brand"]);
+      const best = top(expertise);
       return {
-        badges: [lt[r.leadership_type] ?? "", r.next_role_matrix?.current_role ? `현재 위치: ${r.next_role_matrix.current_role}` : ""].filter(Boolean),
-        sections: [
-          { title: "전문성 자산", items: items(r.expertise_domains, { domain_depth: "도메인 깊이", tacit_knowledge: "암묵지", redeployment: "재배치 가능성", personal_brand: "퍼스널 브랜드" }) },
-          { title: "리더십 유형", items: items(r.leadership_scores, { exec_leadership: "실행형", strategic_leadership: "전략형", coaching_leadership: "코치형", independent_leadership: "독립형" }) },
-          { title: "정체성 · 네트워크", items: [{ label: "정체성 유연성", value: n(r.identity_flexibility) }, { label: "강한 연결 (신뢰 관계)", value: n(r.network_quality) }, { label: "약한 연결 (폭)", value: n(r.network_breadth) }] },
-          { title: "전환 준비", caption: "검사가 아니라 준비 체크리스트 완료율입니다", items: [{ label: "전환 준비도", value: n(r.senior_readiness) }] },
+        journey: { ready_for_transition: "전환 준비 완료", almost_ready: "거의 준비됨", building_bridge: "브릿지 구축 중", deepening_expertise: "전문성 심화 중", exploring_options: "옵션 탐색 중", early_reflection: "초기 성찰 단계" },
+        cover: { headline: lt[r.leadership_type] ?? "리더십 전환", sub: roles[0] ? `차기 역할 1순위 ${roles[0].role}` : "" },
+        findings: [
+          { label: "리더십 유형", value: lt[r.leadership_type] ?? "-", note: STAGE_DIM_COPY[r.leadership_type]?.what ?? "" },
+          { label: "가장 잘 맞는 다음 역할", value: roles[0] ? `${roles[0].role} ${n(roles[0].fit_score)}` : "-", note: roles[0]?.description ?? "" },
+          { label: "가장 큰 전문성 자산", value: best ? `${L(best.key)} ${best.value}` : "-", note: best ? STAGE_DIM_COPY[best.key]?.what ?? "" : "" },
+        ],
+        blocks: [
+          { id: "expertise", title: "전문성 자산", lead: "오랜 경력이 남긴, 다음 역할에서도 쓸 수 있는 자산입니다.", items: expertise },
+          { id: "leadership", title: "리더십 유형", lead: "사람과 일을 이끄는 네 가지 방식 중 어느 쪽이 강한지입니다. 가장 높은 쪽이 나의 리더십 유형입니다.", items: pick(r.leadership_scores, ["exec_leadership", "strategic_leadership", "coaching_leadership", "independent_leadership"]) },
+          { id: "identity", title: "정체성 · 네트워크", lead: "직함 없이도 나를 설명할 수 있는지, 그리고 전환을 도와줄 관계가 있는지입니다.", items: [{ key: "identity_flexibility", value: n(r.identity_flexibility) }, { key: "network_quality", value: n(r.network_quality) }, { key: "network_breadth", value: n(r.network_breadth) }] },
+          { id: "ready", title: "전환 준비", lead: CHECKLIST_LEAD, items: [{ key: "senior_readiness", value: n(r.senior_readiness) }], checklist: true },
         ],
         extra: roles.length > 0 ? (
-          <div className="border border-neutral-200 rounded-xl p-5">
-            <p className="text-sm font-bold mb-3">차기 역할 적합도</p>
-            <div className="space-y-3">
-              {roles.slice(0, 5).map(role => (
-                <div key={role.code}>
-                  <div className="flex items-center justify-between text-sm"><span className="font-semibold text-neutral-800">{role.role}</span><span className="text-neutral-500">{n(role.fit_score)}</span></div>
-                  <p className="text-xs text-neutral-500 mt-0.5">{role.description}</p>
-                </div>
-              ))}
-            </div>
+          <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
+            <p className="text-[15px] font-bold text-neutral-900 pt-5">차기 역할 적합도</p>
+            {roles.slice(0, 5).map(role => <ScoreRow key={role.code} label={role.role} value={n(role.fit_score)} meaning={role.description} />)}
           </div>
         ) : null,
       };
@@ -80,125 +91,117 @@ function sectionsFor(stage: StageKey, r: Row): { sections: Section[]; badges: st
     case "f": {
       const dt: Record<string, string> = { re_employment: "재취업형", entrepreneurship: "창업·독립형", social_contribution: "사회 공헌형", mentoring: "멘토링·교육형", leisure: "여가·자기실현형" };
       return {
-        badges: [dt[r.direction_type] ?? ""].filter(Boolean),
-        sections: [
-          { title: "삶과 열정", items: [{ label: "삶의 만족도", value: n(r.life_satisfaction) }, { label: "잔여 열정", value: n(r.remaining_passion) }, { label: "심리적 전환", value: n(r.psych_transition) }] },
-          { title: "2막 방향", items: items(r.direction_scores, { re_employment: "재취업", entrepreneurship: "창업·독립", social_contribution: "사회 공헌", mentoring: "멘토링·교육", leisure: "여가·자기실현" }) },
-          { title: "레거시 · 사회적 연결", headline: `레거시 역량 ${n(r.legacy_skill_score)}`, items: [...items(r.legacy_scores, { transferable_legacy: "이전 가능한 경험", knowledge_transfer: "지식 전수", new_capability: "새 역량 의지" }), ...items(r.social_scores, { belonging: "소속 욕구", role_necessity: "역할 필요" })] },
-          { title: "2막 준비", caption: "검사가 아니라 준비 체크리스트 완료율입니다", headline: `2막 준비도 ${n(r.second_act_readiness)}`, items: items(r.readiness_scores, { finance: "재정", time: "시간", energy: "건강", relationship: "관계" }) },
+        journey: { ready_to_launch: "2막 시작 준비 완료", almost_ready: "거의 준비됨", direction_found: "방향이 잡힘", exploring: "탐색 중", needs_reflection: "성찰 필요", early_awareness: "초기 인식" },
+        cover: { headline: dt[r.direction_type] ?? "인생 2막", sub: `2막 준비도 ${n(r.second_act_readiness)}` },
+        findings: [
+          { label: "2막 방향", value: dt[r.direction_type] ?? "-", note: STAGE_DIM_COPY[r.direction_type]?.what ?? "" },
+          { label: "남아 있는 열정", value: `${n(r.remaining_passion)} · ${BAND_INFO[scoreBand(n(r.remaining_passion))].label}`, note: STAGE_DIM_COPY.remaining_passion.what },
+          { label: "2막 준비도", value: `${n(r.second_act_readiness)}`, note: "재정·시간·건강·관계 준비 체크리스트 완료율입니다." },
+        ],
+        blocks: [
+          { id: "life", title: "삶과 열정", lead: "지금의 삶에 대한 만족, 아직 하고 싶은 일의 크기, 은퇴·퇴직이라는 변화를 받아들이는 정도입니다.", items: [{ key: "life_satisfaction", value: n(r.life_satisfaction) }, { key: "remaining_passion", value: n(r.remaining_passion) }, { key: "psych_transition", value: n(r.psych_transition) }] },
+          { id: "direction", title: "2막 방향", lead: "다섯 가지 2막의 모습 중 어디에 마음이 가는지입니다. 높은 두 가지를 함께 설계해 보세요.", items: pick(r.direction_scores, ["re_employment", "entrepreneurship", "social_contribution", "mentoring", "leisure"]) },
+          { id: "legacy", title: "레거시 · 사회적 연결", lead: "내 경험을 다음 세대와 새 일에 이어 줄 힘, 그리고 계속 어딘가에 속하고 역할을 맡고 싶은 마음입니다.", items: [...pick(r.legacy_scores, ["transferable_legacy", "knowledge_transfer", "new_capability"]), ...pick(r.social_scores, ["belonging", "role_necessity"])], headline: `레거시 역량 ${n(r.legacy_skill_score)}` },
+          { id: "ready", title: "2막 준비", lead: CHECKLIST_LEAD, items: pick(r.readiness_scores, ["finance", "time", "energy", "relationship"]), checklist: true, headline: `2막 준비도 ${n(r.second_act_readiness)}` },
         ],
       };
     }
     case "gap": {
-      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.name} 추천`, B: `${HIT_STAGES.b.name}부터 점검` };
-      const cvi: Record<string, string> = { HIGH: "경력 유효성 높음", MID: "경력 유효성 보통", LOW: "경력 유효성 낮음" };
+      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.name} 검사 추천`, B: `${HIT_STAGES.b.name}부터 다시 점검` };
+      const cvi: Record<string, string> = { HIGH: "경력이 지금도 잘 통함", MID: "경력이 부분적으로 통함", LOW: "경력 업데이트가 필요함" };
+      const res = pick(r.resilience_scores, ["self_narrative", "self_esteem", "retry_willingness"]);
+      const bestRes = top(res);
       return {
-        badges: [cvi[r.cvi_grade] ?? "", route[r.next_route] ? `추천 경로: ${route[r.next_route]}` : "", r.break_months ? `공백 ${n(r.break_months)}개월` : ""].filter(Boolean),
-        sections: [
-          { title: "경력 유효성 (CVI)", headline: `CVI ${n(r.cvi_raw)}`, caption: "직무 유효성 35% · 스킬 현재성 35% · 시장 재진입 30% 가중", items: items(r.latent_scores, { job_viability: "직무 유효성", skill_currency: "스킬 현재성", market_reentry: "시장 재진입" }) },
-          { title: "회복탄력성", items: items(r.resilience_scores, { self_narrative: "자기 서사", self_esteem: "자존감", retry_willingness: "재도전 의지" }) },
-          { title: "복귀 방향", items: items(r.direction_scores, { career_restoration: "경력 복원", career_pivot: "경력 전환", fresh_start: "새 출발" }) },
-          { title: "복귀 준비", caption: "검사가 아니라 준비 체크리스트 완료율입니다", headline: `재진입 준비도 ${n(r.reentry_readiness)}`, items: items(r.readiness_scores, { skill_update: "스킬", network: "네트워크", self_presentation: "자기 표현", field_language: "현장 감각" }) },
+        journey: { ready_to_return: "복귀 준비 완료", skill_ready_prep_needed: "역량은 준비됨 · 실행 준비 필요", strategic_transition: "전략적 전환 단계", resilience_building: "회복탄력성 강화 단계", foundation_rebuilding: "기반 재구축 단계", early_recovery: "초기 회복 단계" },
+        cover: { headline: route[r.next_route] ?? "복귀 설계", sub: r.break_months ? `공백 ${n(r.break_months)}개월 · CVI ${n(r.cvi_raw)}` : `CVI ${n(r.cvi_raw)}` },
+        findings: [
+          { label: "경력 유효성 (CVI)", value: `${n(r.cvi_raw)} · ${cvi[r.cvi_grade] ?? ""}`, note: "예전 경력이 지금 시장에서 통하는 정도입니다." },
+          { label: "추천 복귀 경로", value: route[r.next_route] ?? "-", note: r.break_months ? `공백 ${n(r.break_months)}개월 기준` : "" },
+          { label: "가장 단단한 힘", value: bestRes ? `${L(bestRes.key)} ${bestRes.value}` : "-", note: bestRes ? STAGE_DIM_COPY[bestRes.key]?.what ?? "" : "" },
         ],
-        extra: r.routing_rationale ? <div className="bg-neutral-50 rounded-xl p-5 text-sm text-neutral-700 leading-relaxed">{r.routing_rationale}</div> : null,
+        blocks: [
+          { id: "cvi", title: "경력 유효성 (CVI)", lead: "예전 직무·스킬이 지금도 통하는지입니다. 직무 유효성 35% · 스킬 현재성 35% · 시장 재진입 30%로 계산합니다.", items: pick(r.latent_scores, ["job_viability", "skill_currency", "market_reentry"]), headline: `CVI ${n(r.cvi_raw)}` },
+          { id: "resilience", title: "회복탄력성", lead: "공백을 어떻게 이야기하고, 나를 얼마나 믿고, 다시 도전할 마음이 있는지입니다.", items: res },
+          { id: "direction", title: "복귀 방향", lead: "원래 경력으로 돌아갈지, 다른 경력으로 옮길지, 완전히 새로 시작할지 — 마음이 가는 쪽입니다.", items: pick(r.direction_scores, ["career_restoration", "career_pivot", "fresh_start"]) },
+          { id: "ready", title: "복귀 준비", lead: CHECKLIST_LEAD, items: pick(r.readiness_scores, ["skill_update", "network", "self_presentation", "field_language"]), checklist: true, headline: `재진입 준비도 ${n(r.reentry_readiness)}` },
+        ],
+        extra: r.routing_rationale ? (
+          <div className="rounded-2xl bg-neutral-50 p-5 sm:p-6">
+            <p className="text-[15px] font-bold text-neutral-900">추천 경로의 이유</p>
+            <p className="text-[15px] text-neutral-700 mt-2 leading-[1.85]">{r.routing_rationale}</p>
+          </div>
+        ) : null,
       };
     }
   }
-}
-
-function Bar({ label, value }: Item) {
-  return (
-    <div>
-      <div className="flex items-center justify-between text-sm mb-1"><span className="text-neutral-700">{label}</span><span className="font-bold text-neutral-900">{value}</span></div>
-      <div className="h-2 bg-neutral-100 rounded-full overflow-hidden"><div className="h-full bg-[#E53935] rounded-full" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} /></div>
-    </div>
-  );
 }
 
 export default function StageResultView({ stage, resultId, print = false }: { stage: StageKey; resultId: string; print?: boolean }) {
   const [r, setR] = useState<Row | null>(null);
   const [loading, setLoading] = useState(true);
   const def = HIT_STAGES[stage];
+  const groupLabel = def.group === "situation" ? "상황 모듈" : "생애주기";
 
   useEffect(() => {
     fetch(`/api/hit/${stage}/result/${resultId}`).then(x => x.json()).then(d => { if (!d.error) setR(d); setLoading(false); }).catch(() => setLoading(false));
   }, [stage, resultId]);
 
-  if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" /></div>;
-  if (!r) return <div className="min-h-[60vh] flex items-center justify-center text-center"><div><p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p><Link href={`/hero/hit/${stage}`} className="text-[#E53935] underline text-sm">다시 검사하기</Link></div></div>;
+  const view = r ? viewFor(stage, r) : null;
+  useReportTitle([`HeRo ${def.code} ${def.name}`, view?.cover.headline, isoDay(r?.created_at)], !!view);
 
-  const { sections, badges, extra } = sectionsFor(stage, r);
+  if (loading) return <LoadingState />;
+  if (!r || !view) return <NotFoundState retryHref={`/hero/hit/${stage}`} />;
+
+  const blocks = view.blocks.filter(b => b.items.length > 0);
   const modules = (r.report_modules ?? []) as { id: string; title: string; content: string }[];
-  const date = r.created_at ? new Date(r.created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" }) : "";
-  const journey = JOURNEY[stage][r.journey_stage] ?? null;
+  const journey = view.journey[r.journey_stage];
+  const lastMainId = [...blocks].reverse().find(b => !b.checklist)?.id;
+  const nav = [{ id: "summary", label: "한눈에" }, ...blocks.map(b => ({ id: b.id, label: b.title })), { id: "commentary", label: "해설" }];
 
   return (
-    <div className={`mx-auto ${print ? "max-w-[210mm] px-8 py-10" : "max-w-2xl px-6 py-8"}`}>
-      {print && (
-        <div className="no-print flex items-center justify-between mb-8">
-          <Link href={`/hero/hit/${stage}/result/${resultId}`} className="text-sm text-neutral-500 hover:text-neutral-700">← 결과 페이지로</Link>
-          <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-4 py-2 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700"><Printer className="h-4 w-4" /> 인쇄 / PDF</button>
-        </div>
-      )}
+    <>
+    <div className={print ? "hit-report-container" : ""}>
+    <ReportShell>
+      {print && <ReportToolbar backHref={`/hero/hit/${stage}/result/${resultId}`} />}
+      {print && <ReportCover code={`${def.code} · ${groupLabel}`} title={def.name} headline={view.cover.headline} sub={view.cover.sub} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`${def.code} · ${groupLabel}`} title={def.name} date={formatDate(r.created_at)} stage={journey} />}
+      {!print && <HitChain type={stage} id={resultId} />}
+      {!print && <SectionNav items={nav} />}
 
-      <div className="text-center mb-8">
-        <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-        <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-1">{def.code}{def.group === "situation" ? " · 상황 모듈" : ""}</p>
-        <h1 className="text-2xl md:text-3xl font-extrabold break-keep">{def.name}</h1>
-        {date && <p className="text-xs text-neutral-400 mt-2">{date}</p>}
-        <div className="flex flex-wrap justify-center gap-2 mt-4">
-          {journey && <span className="px-4 py-1.5 rounded-full text-sm font-bold bg-red-50 text-[#E53935]">{journey}</span>}
-          {badges.map(b => <span key={b} className="px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-700">{b}</span>)}
-        </div>
-      </div>
+      <Section id="summary" title="한눈에" lead={print && journey ? `현재 단계: ${journey}` : "이번 검사에서 가장 먼저 알아 두면 좋은 세 가지입니다."}>
+        <KeyFindings items={view.findings} />
+        <div className="mt-6"><ScoreGuide /></div>
+      </Section>
 
-      <div className="space-y-6 mb-8">
-        {sections.filter(s => s.items.length > 0).map(s => (
-          <section key={s.title}>
-            <div className="flex items-baseline justify-between mb-2">
-              <h2 className="text-lg font-bold">{s.title}</h2>
-              {s.headline && <span className="text-sm font-semibold text-neutral-500">{s.headline}</span>}
-            </div>
-            {s.caption && <p className="text-xs text-neutral-500 mb-2">{s.caption}</p>}
-            <div className="space-y-3 border border-neutral-200 rounded-xl p-5">{s.items.map(it => <Bar key={it.label} {...it} />)}</div>
-          </section>
-        ))}
-        {extra}
-      </div>
-
-      {modules.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-bold mb-1">HeRo 해설</h2>
-          <p className="text-xs text-neutral-500 mb-4">점수 구간에 따라 미리 작성·검수된 해설이 선택됩니다. 같은 점수에는 언제나 같은 해설이 나옵니다.</p>
-          <div className="space-y-5">
-            {modules.map(m => (
-              <div key={m.id} className="border-l-2 border-neutral-300 pl-4">
-                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
-                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
-              </div>
+      {blocks.map(b => (
+        <Section key={b.id} id={b.id} title={b.headline ? `${b.title} — ${b.headline.replace(/^[^\d]*/, "")}` : b.title} lead={b.lead}>
+          <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
+            {[...b.items].sort((x, y) => (b.checklist ? 0 : y.value - x.value)).map(it => (
+              <ScoreRow key={it.key} label={L(it.key)} value={it.value} what={STAGE_DIM_COPY[it.key]?.what} plain={STAGE_DIM_COPY[it.key]?.pref}
+                meaning={b.checklist ? undefined : STAGE_DIM_COPY[it.key] ? (it.value >= 75 ? STAGE_DIM_COPY[it.key].hi : it.value >= 50 ? STAGE_DIM_COPY[it.key].mid : STAGE_DIM_COPY[it.key].low) : undefined} />
             ))}
           </div>
-        </section>
-      )}
+          {b.id === lastMainId && view.extra && <div className="mt-6">{view.extra}</div>}
+        </Section>
+      ))}
 
-      {r.ai_report && (
-        <section className="mb-8">
-          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" /> 종합 해설 (AI 보조)</h2>
-          <p className="text-[11px] text-neutral-400 mb-3">위 점수를 바탕으로 AI가 쓴 읽기용 요약입니다. 점수·유형·등급을 바꾸지 않습니다.</p>
-          <div className="bg-neutral-50 p-5 rounded-xl"><p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">{cleanMarkdown(String(r.ai_report))}</p></div>
-        </section>
-      )}
+      <Section id="commentary" title="HeRo 해설" lead="점수 구간에 따라 미리 쓰고 검수한 해설입니다. 같은 점수에는 언제나 같은 해설이 나옵니다.">
+        <ModuleList modules={modules} />
+        <div className="mt-10"><AiNarrative text={r.ai_report as string | null} /></div>
+      </Section>
 
-      {!print && (
-        <>
-          <section className="mb-8"><StageChecklistCard stage={stage} compact /></section>
-          <section className="space-y-3">
-            <Link href={`/hero/hit/${stage}/report/${resultId}`} className="block border border-neutral-200 rounded-xl p-4 hover:bg-neutral-50 transition-colors"><div className="flex items-center gap-3"><p className="flex-1 font-bold text-neutral-800">보고서 보기 · 인쇄</p><ArrowRight className="h-4 w-4 text-neutral-400" /></div></Link>
-            <Link href="/hero/hit/method" className="block border border-neutral-200 rounded-xl p-4 hover:bg-neutral-50 transition-colors"><div className="flex items-center gap-3"><ShieldCheck className="h-5 w-5 text-neutral-400" /><div className="flex-1"><p className="font-bold text-neutral-800">이 결과는 어떻게 만들어졌나요</p><p className="text-xs text-neutral-500 mt-0.5">HIT 엔진 — 채점·해설·품질 관리</p></div><ArrowRight className="h-4 w-4 text-neutral-400" /></div></Link>
-            <Link href="/hero/journey" className="block border border-neutral-200 rounded-xl p-4 hover:bg-neutral-50 transition-colors"><div className="flex items-center gap-3"><p className="flex-1 font-bold text-neutral-800">나의 저니로</p><ArrowRight className="h-4 w-4 text-neutral-400" /></div></Link>
-          </section>
-        </>
-      )}
+      <ReportFooterNote />
+    </ReportShell>
     </div>
+
+    {!print && (
+      <HitNextSteps from="stage">
+        <div className="space-y-3">
+          <NextLink href="/hero/journey" title="나의 저니에서 준비 체크하기" desc="준비 체크리스트를 채울수록 준비도가 올라갑니다" primary />
+          <FullReportLink href={`/hero/hit/${stage}/report/${resultId}`} />
+        </div>
+      </HitNextSteps>
+    )}
+    </>
   );
 }

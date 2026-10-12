@@ -9,12 +9,14 @@ import {
     ChevronRight, Clock, ArrowLeft, Save, X,
 } from "lucide-react";
 import Link from "next/link";
+import ResumeEditor, { cleanResumeContent } from "@/features/hero/ResumeEditor";
+import type { ResumeContent } from "@/types/resume";
 
 interface Resume {
     id: string;
     member_id: string;
     title: string;
-    content: { text?: string; [key: string]: unknown };
+    content: ResumeContent;
     is_primary: boolean;
     created_at: string;
     updated_at: string;
@@ -29,7 +31,7 @@ export default function ResumeWorkspacePage() {
     const [view, setView] = useState<"list" | "edit" | "new">("list");
     const [editing, setEditing] = useState<Resume | null>(null);
     const [formTitle, setFormTitle] = useState("");
-    const [formText, setFormText] = useState("");
+    const [formContent, setFormContent] = useState<ResumeContent>({});
     const [saving, setSaving] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export default function ResumeWorkspacePage() {
 
     const openNew = () => {
         setFormTitle("");
-        setFormText("");
+        setFormContent({ experiences: [], educations: [{ school: "", major: "", start: "", end: "", status: "졸업 예정" }], activities: [] });
         setEditing(null);
         setView("new");
     };
@@ -59,7 +61,7 @@ export default function ResumeWorkspacePage() {
     const openEdit = (r: Resume) => {
         setEditing(r);
         setFormTitle(r.title);
-        setFormText(r.content?.text || "");
+        setFormContent(r.content ?? {});
         setView("edit");
     };
 
@@ -76,7 +78,7 @@ export default function ResumeWorkspacePage() {
                 const { error } = await supabase.from("resumes").insert({
                     member_id: user.id,
                     title: formTitle.trim(),
-                    content: { text: formText },
+                    content: cleanResumeContent(formContent),
                     is_primary: resumes.length === 0,
                 });
                 if (error) throw error;
@@ -85,7 +87,7 @@ export default function ResumeWorkspacePage() {
                     .from("resumes")
                     .update({
                         title: formTitle.trim(),
-                        content: { text: formText },
+                        content: cleanResumeContent(formContent),
                         updated_at: new Date().toISOString(),
                     })
                     .eq("id", editing.id);
@@ -148,33 +150,16 @@ export default function ResumeWorkspacePage() {
                         {view === "new" ? "새 이력서 등록" : "이력서 수정"}
                     </h1>
 
-                    <div className="bg-white border border-neutral-200 rounded-2xl p-6 space-y-5">
-                        <div>
-                            <label className="text-sm font-medium text-neutral-700 mb-1.5 block">
-                                이름 / 제목
-                            </label>
-                            <input
-                                value={formTitle}
-                                onChange={e => setFormTitle(e.target.value)}
-                                placeholder="예) 홍길동 이력서 · 마케터 지원용"
-                                className="w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400"
-                            />
-                        </div>
+                    <ResumeEditor
+                        title={formTitle}
+                        onTitle={setFormTitle}
+                        content={formContent}
+                        onContent={setFormContent}
+                        profile={{ name: user?.name, email: user?.email, phone: user?.phone }}
+                    />
 
-                        <div>
-                            <label className="text-sm font-medium text-neutral-700 mb-1.5 block">
-                                이력서 내용 <span className="text-neutral-400 font-normal">(자유 양식 — 복사·붙여넣기 가능)</span>
-                            </label>
-                            <textarea
-                                value={formText}
-                                onChange={e => setFormText(e.target.value)}
-                                placeholder={"이름: 홍길동\n연락처: 010-0000-0000\n\n[경력]\n2022~현재  ○○회사 마케팅팀\n\n[학력]\n○○대학교 경영학과 졸업\n\n[자기소개]\n..."}
-                                rows={18}
-                                className="w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-amber-400 resize-y"
-                            />
-                        </div>
+                    <div className="sticky bottom-0 mt-6 -mx-4 px-4 py-4 bg-neutral-50/95 backdrop-blur border-t border-neutral-200 flex flex-wrap items-center gap-3">
 
-                        <div className="flex items-center gap-3 pt-2">
                             <button
                                 onClick={handleSave}
                                 disabled={saving || !formTitle.trim()}
@@ -189,7 +174,7 @@ export default function ResumeWorkspacePage() {
                             >
                                 <X className="h-4 w-4" /> 취소
                             </button>
-                        </div>
+                        {!formTitle.trim() && <span className="text-xs text-neutral-400">이력서 이름을 입력하면 저장할 수 있어요</span>}
                     </div>
                 </div>
             </div>
@@ -251,11 +236,11 @@ export default function ResumeWorkspacePage() {
                                         <div className="flex items-center gap-1.5 text-xs text-neutral-400">
                                             <Clock className="h-3 w-3" />
                                             {new Date(r.updated_at || r.created_at).toLocaleDateString("ko-KR")}
-                                            {r.content?.text && (
+                                            {(r.content?.experiences?.length || r.content?.activities?.length) ? (
                                                 <span className="ml-2 text-neutral-300">
-                                                    {String(r.content.text).length.toLocaleString()} 자
+                                                    경력 {r.content?.experiences?.length ?? 0} · 활동 {r.content?.activities?.length ?? 0}
                                                 </span>
-                                            )}
+                                            ) : null}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1">
@@ -287,9 +272,9 @@ export default function ResumeWorkspacePage() {
                                         </button>
                                     </div>
                                 </div>
-                                {r.content?.text && (
-                                    <p className="mt-3 text-xs text-neutral-400 line-clamp-2 font-mono">
-                                        {String(r.content.text).slice(0, 200)}
+                                {(r.content?.headline || r.content?.text) && (
+                                    <p className="mt-3 text-xs text-neutral-500 line-clamp-2">
+                                        {r.content?.headline || String(r.content?.text ?? "").slice(0, 200)}
                                     </p>
                                 )}
                             </div>
