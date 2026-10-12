@@ -12,11 +12,12 @@ export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | '
   const sessionToken = crypto.randomUUID();
   const firstModule: Record<string, string> = {
     A: 'base',
-    B: 'personality',
-    C: 'capital',
-    D: 'expertise',
-    E: 'satisfaction',
-    F: 'break_context',
+    B: 'competency_core',
+    C: 'readiness',
+    D: 'careerCapital',
+    E: 'expertise',
+    F: 'satisfaction',
+    GAP: 'latent_capability',
   };
   const { data, error } = await supabase
     .from('hit_sessions')
