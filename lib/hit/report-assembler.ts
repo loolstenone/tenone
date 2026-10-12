@@ -119,27 +119,20 @@ interface HitBScores {
   competencyCommon: Record<string, number>;
 }
 
+export const CORE_MODULE_KEY: Record<string, string> = {
+  problem_solving: 'PROBLEM', communication: 'COMM', initiative: 'INIT',
+  collaboration: 'COLLAB', self_management: 'SELF', learning_agility: 'AGILE',
+};
+
 /**
- * HIT B 리포트 모듈 선택 (2026-10-12 재정의 — 핵심역량 6으로만. 성격·RIASEC·준비도 모듈은 폐지)
- * COMP-{영역}-{등급}: COMM 소통·협업 / EXEC 주도·자기관리 / ANAL 문제해결 / PLAN 학습민첩성
+ * HIT - Bounce 해설 — 핵심역량 6 × 4등급 (CORE-{역량}-{A..D}, sql/hit-b-core-modules-2026-10.sql, R1 2026-10-12)
+ * 등급 = 화면 구간 75/50/25. 점수 높은 순으로 돌려준다. (옛 COMP-* 6영역 문안은 쓰지 않음)
  */
 export function selectBModules(scores: HitBScores): string[] {
-  const modules: string[] = [];
-  // 해설 모듈(COMP-*)은 옛 6영역 문안 — 핵심역량과 뜻이 맞는 것만 연결한다.
-  // PLAN(기획역량: 전략·문제 정의) ↔ 학습민첩성 연결은 뜻이 달라 제거 (2026-10-12). 학습민첩성은 화면 해석 문구(report-copy)가 담당
-  const compAreas: Record<string, string[]> = {
-    COMM: ['communication', 'collaboration'],
-    EXEC: ['initiative', 'self_management'],
-    ANAL: ['problem_solving'],
-  };
-  Object.entries(compAreas).forEach(([prefix, keys]) => {
-    const vals = keys.map(k => scores.competencyCommon[k] ?? 0).filter(v => v > 0);
-    if (vals.length === 0) return;
-    const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-    const grade = avg >= 75 ? 'A' : avg >= 50 ? 'B' : avg >= 25 ? 'C' : 'D'; // 화면 구간·저장 등급과 같은 기준
-    modules.push(`COMP-${prefix}-${grade}`);
-  });
-  return modules;
+  return Object.entries(scores.competencyCommon)
+    .filter(([k]) => CORE_MODULE_KEY[k])
+    .sort((x, y) => y[1] - x[1])
+    .map(([k, v]) => `CORE-${CORE_MODULE_KEY[k]}-${v >= 75 ? 'A' : v >= 50 ? 'B' : v >= 25 ? 'C' : 'D'}`);
 }
 
 /**

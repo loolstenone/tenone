@@ -7,6 +7,7 @@ import { mapHitBResult } from "@/features/hit/hit-b-result-mapper";
 import { CORE_COMPETENCY_LABELS, type CoreCompetency } from "@/lib/hit/scoring-b";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
+import { CORE_MODULE_KEY } from "@/lib/hit/report-assembler";
 import { CORE_COPY, INSIGHT_COPY, HOLLAND_COPY, EFFICACY_INFO, STAGE_LABELS, STAGE_DESC, scoreBand } from "@/lib/hit/report-copy";
 import { TRACK_COMPETENCY_LABELS, trackCompetencyLabel } from "@/lib/hit/track-competency-labels";
 import {
@@ -49,7 +50,10 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
         if (!data.error) {
           setResult(mapHitBResult(data));
           const mods = (data.report_modules ?? {}) as Record<string, { title: string; content: string }>;
-          setModules(Object.entries(mods).filter(([k]) => k.startsWith("COMP-")).map(([id, m]) => ({ id, ...m })));
+          // 핵심역량 해설 — 점수 높은 순 (API는 DB 순서로 돌려줌)
+          const common = (data.competency_common ?? {}) as Record<string, number>;
+          const scoreOf = (id: string) => common[Object.keys(CORE_MODULE_KEY).find(k => id.startsWith(`CORE-${CORE_MODULE_KEY[k]}-`)) ?? ""] ?? 0;
+          setModules(Object.entries(mods).filter(([k]) => k.startsWith("CORE-")).map(([id, m]) => ({ id, ...m })).sort((a, b) => scoreOf(b.id) - scoreOf(a.id)));
         }
         setLoading(false);
       })
@@ -139,7 +143,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
         <ScoreList scores={{ self_understanding: result.insightSelf, job_understanding: result.insightJob }} copy={INSIGHT_COPY} sort={false} />
       </Section>
 
-      <Section id="commentary" title="HeRo 해설" lead="점수 구간에 따라 미리 쓰고 검수한 해설입니다.">
+      <Section id="commentary" title="HeRo 해설" lead="핵심역량 여섯 가지 각각에 대해, 점수 구간에 맞춰 미리 쓰고 검수한 해설입니다. 강한 역량부터 보여 드립니다.">
         <ModuleList modules={modules} />
         <div className="mt-10"><AiNarrative text={result.aiReport} /></div>
       </Section>
