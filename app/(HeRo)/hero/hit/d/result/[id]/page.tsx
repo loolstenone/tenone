@@ -204,7 +204,7 @@ export default function HitDResultPage() {
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
               <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - D 결과</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">시니어 리더십 전환</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold">리더십 전환 (시니어)</h1>
             </div>
             <div className="flex justify-center mb-6">
               <span className={`px-5 py-2.5 rounded-full text-sm font-bold ${journeyInfo.color}`}>

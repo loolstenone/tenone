@@ -190,7 +190,7 @@ export default function HitDReportPage() {
               <Image src="/hero-logo.png" alt="HeRo" width={56} height={56} className="h-14 w-14 object-contain" />
               <div>
                 <p className="text-xs font-bold text-[#E53935] uppercase tracking-[0.2em] mb-1">HeRo Integrated Test</p>
-                <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900">HIT D 시니어 리더십 전환 보고서</h1>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900">HIT D 리더십 전환 (시니어) 보고서</h1>
               </div>
             </div>
             <div className="text-right text-xs text-neutral-400">

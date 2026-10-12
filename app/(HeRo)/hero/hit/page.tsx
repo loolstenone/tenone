@@ -16,7 +16,7 @@ export default function HitOverviewPage() {
             나를 알아가는 여정
           </h1>
           <p className="text-lg text-neutral-500 max-w-2xl mx-auto">
-            HIT A는 성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출하고(회원은 성장 배경 UF 분석 추가),<br className="hidden sm:block" />
+            HIT A는 성격(MBTI) · 행동(DISC) · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출하고,<br className="hidden sm:block" />
             HIT B에서 역량과 취업준비도를 직무별로 심화합니다.
           </p>
         </div>
@@ -30,13 +30,12 @@ export default function HitOverviewPage() {
           </p>
 
           {/* 공통 기반: A */}
-          <div className="rounded-xl border-2 border-[#E53935] bg-red-50/40 p-5 mb-4 flex items-center gap-4">
-            <div className="w-11 h-11 shrink-0 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold">
-              A
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-sm font-bold">나에 대한 이해</span>
+          {/* 검사 이름(무엇을 아는 검사인지)이 먼저, 기호(HIT A~F)는 보조 표기 (2026-10-12) */}
+          <div className="rounded-xl border-2 border-[#E53935] bg-red-50/40 p-5 mb-4">
+            <div>
+              <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-1">HIT A</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base font-bold">나에 대한 이해</span>
                 <span className="text-[11px] px-2 py-0.5 bg-red-50 text-[#E53935] rounded-full font-medium">공통 기반</span>
               </div>
               <p className="text-xs text-neutral-500">성격(MBTI) · 행동(DISC) · 인성 · 적성을 교차 분석해 S-Power 강점과 64유형을 도출합니다. 회원은 성장 배경(UF) 분석이 본인 리포트에 추가됩니다.</p>
@@ -46,17 +45,15 @@ export default function HitOverviewPage() {
           {/* 생애주기별 심화: B / C / D / E / F */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { k: "B", t: "신입 · 사회 초년" },
+              { k: "B", t: "대학생, 사회 초년" },
               { k: "C", t: "경력 이직 고민" },
-              { k: "D", t: "시니어 리더십 전환" },
-              { k: "E", t: "인생 2막 준비" },
+              { k: "D", t: "리더십 전환 (시니어)" },
+              { k: "E", t: "인생 2막 준비 (은퇴, 퇴직)" },
               { k: "F", t: "경력 공백 · 복귀" },
             ].map(item => (
-              <div key={item.k} className="rounded-xl border border-neutral-200 p-4 text-center">
-                <div className="w-9 h-9 mx-auto mb-2 bg-neutral-100 text-neutral-600 rounded-lg flex items-center justify-center font-bold text-sm">
-                  {item.k}
-                </div>
-                <p className="text-xs text-neutral-600 leading-snug">{item.t}</p>
+              <div key={item.k} className="rounded-xl border border-neutral-200 p-4 text-center flex flex-col justify-center">
+                <p className="text-sm font-bold text-neutral-800 leading-snug break-keep">{item.t}</p>
+                <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mt-1.5">HIT {item.k}</p>
               </div>
             ))}
           </div>

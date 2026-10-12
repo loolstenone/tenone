@@ -135,10 +135,10 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         {[
-          { k: "B", scope: "신입 · 사회 초년", test: "취업준비도 · 역량" },
+          { k: "B", scope: "대학생, 사회 초년", test: "취업준비도 · 역량" },
           { k: "C", scope: "경력 이직 고민", test: "이직 전환 진단" },
-          { k: "D", scope: "시니어 리더십 전환", test: "리더십 전환 진단" },
-          { k: "E", scope: "인생 2막 준비", test: "인생 2막 설계" },
+          { k: "D", scope: "리더십 전환 (시니어)", test: "리더십 전환 진단" },
+          { k: "E", scope: "인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
           { k: "F", scope: "경력 공백 · 복귀", test: "재진입 로드맵" },
         ].map((r, i, arr) => (
           <div key={r.k} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
@@ -396,7 +396,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           {[
             {
               key: "B",
-              title: "신입 · 사회 초년",
+              title: "대학생, 사회 초년",
               tone: "text-green-700 bg-green-50",
               desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. HIT A의 적성과 희망 직무를 기반으로 직무별 역량(48문항)과 취업준비도(32문항)를 진단해 어디서부터 채워야 할지 방향을 잡아줍니다.",
               dims: ["직무 역량", "취업준비도", "자기 PR", "포트폴리오"],
@@ -410,14 +410,14 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
             },
             {
               key: "D",
-              title: "시니어 리더십 전환",
+              title: "리더십 전환 (시니어)",
               tone: "text-red-700 bg-red-50",
               desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크 · 준비도를 측정해 리더십 전환 지도를 제시합니다.",
               dims: ["전문성", "리더십", "정체성", "네트워크", "준비도"],
             },
             {
               key: "E",
-              title: "인생 2막 준비",
+              title: "인생 2막 준비 (은퇴, 퇴직)",
               tone: "text-amber-700 bg-amber-50",
               desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결 · 준비도로 인생 2막의 설계도를 그립니다.",
               dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결", "준비도"],

@@ -477,10 +477,10 @@ export default function HitAReportPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
-            { k: "B", title: "신입 · 사회 초년", dims: "직무 역량 · 취업준비도", tone: "border-green-200 hover:border-green-400" },
+            { k: "B", title: "대학생, 사회 초년", dims: "직무 역량 · 취업준비도", tone: "border-green-200 hover:border-green-400" },
             { k: "C", title: "경력 이직 고민", dims: "경력 자본 · 이직 동기 · 전환 가능성", tone: "border-blue-200 hover:border-blue-400" },
-            { k: "D", title: "시니어 리더십 전환", dims: "전문성 · 리더십 · 정체성 · 네트워크", tone: "border-red-200 hover:border-red-400" },
-            { k: "E", title: "인생 2막 준비", dims: "삶의 만족도 · 방향 탐색 · 레거시", tone: "border-amber-200 hover:border-amber-400" },
+            { k: "D", title: "리더십 전환 (시니어)", dims: "전문성 · 리더십 · 정체성 · 네트워크", tone: "border-red-200 hover:border-red-400" },
+            { k: "E", title: "인생 2막 준비 (은퇴, 퇴직)", dims: "삶의 만족도 · 방향 탐색 · 레거시", tone: "border-amber-200 hover:border-amber-400" },
             { k: "F", title: "경력 공백 · 복귀", dims: "공백 맥락 · 잠재 역량 · 회복탄력성", tone: "border-violet-200 hover:border-violet-400" },
           ].map((t) => (
             <Link
@@ -488,10 +488,8 @@ export default function HitAReportPage() {
               href={`/hero/hit/${t.k.toLowerCase()}`}
               className={`group flex items-center gap-4 p-5 border-2 rounded-xl bg-white transition-colors ${t.tone}`}
             >
-              <div className="w-11 h-11 shrink-0 rounded-lg bg-neutral-100 text-neutral-700 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center font-bold text-base transition-colors">
-                {t.k}
-              </div>
               <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">HIT {t.k}</p>
                 <p className="text-sm font-bold text-neutral-900">{t.title}</p>
                 <p className="text-xs text-neutral-500 mt-0.5 truncate">{t.dims}</p>
               </div>
