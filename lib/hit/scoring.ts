@@ -33,6 +33,7 @@ function score100(values: number[]): number {
 }
 
 // ── PT 성격유형 채점 (7점 리커트) ──
+// 2026-10-12: 역채점 플래그는 DB hit_questions.reverse_scored와 같아야 한다. 부정 정서 표현(불편·스트레스)은 역문항이 아니다 — 축을 그대로 가리키는 문항은 정방향.
 export function scorePT(responses: ResponseRow[]): PTScores {
   const ptRes = responses.filter(r => r.module === 'personality_type');
   const getVal = (id: string, rev: boolean): number | null => {
@@ -55,11 +56,11 @@ export function scorePT(responses: ResponseRow[]): PTScores {
   // N축
   const nIds: [string, boolean][] = [
     ['pt_n01', false], ['pt_n02', false], ['pt_n03', false], ['pt_n04', false],
-    ['pt_n05', false], ['pt_n06', false], ['pt_n07', false], ['pt_n08', true],
+    ['pt_n05', false], ['pt_n06', false], ['pt_n07', false], ['pt_n08', false],
   ];
   const sIds: [string, boolean][] = [
     ['pt_s01', false], ['pt_s02', false], ['pt_s03', false], ['pt_s04', false],
-    ['pt_s05', false], ['pt_s06', false], ['pt_s07', true],
+    ['pt_s05', false], ['pt_s06', false], ['pt_s07', false],
   ];
   const nRaw = nIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
   const sRaw = sIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
@@ -72,7 +73,7 @@ export function scorePT(responses: ResponseRow[]): PTScores {
   ];
   const fIds: [string, boolean][] = [
     ['pt_f01', false], ['pt_f02', false], ['pt_f03', false], ['pt_f04', false],
-    ['pt_f05', false], ['pt_f06', false], ['pt_f07', true], ['pt_f08', false],
+    ['pt_f05', false], ['pt_f06', false], ['pt_f07', false], ['pt_f08', false],
   ];
   const tRaw = tIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
   const fRaw = fIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
@@ -80,12 +81,12 @@ export function scorePT(responses: ResponseRow[]): PTScores {
 
   // J축
   const jIds: [string, boolean][] = [
-    ['pt_j01', false], ['pt_j02', false], ['pt_j03', true], ['pt_j04', true],
+    ['pt_j01', false], ['pt_j02', false], ['pt_j03', false], ['pt_j04', false],
     ['pt_j05', false], ['pt_j06', false], ['pt_j07', false],
   ];
   const pIds: [string, boolean][] = [
     ['pt_p01', false], ['pt_p02', false], ['pt_p03', false], ['pt_p04', false],
-    ['pt_p05', true], ['pt_p06', false], ['pt_p07', false], ['pt_p08', false],
+    ['pt_p05', false], ['pt_p06', false], ['pt_p07', false], ['pt_p08', false],
   ];
   const jRaw = jIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
   const pRaw = pIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
@@ -142,13 +143,13 @@ export function scoreBT(responses: ResponseRow[]): BTScores {
   ];
   const sIds: [string, boolean][] = [
     ['bt_s_01', false], ['bt_s_02', false], ['bt_s_03', false], ['bt_s_04', false],
-    ['bt_s_05', false], ['bt_s_06', false], ['bt_s_07', false], ['bt_s_08', true],
+    ['bt_s_05', false], ['bt_s_06', false], ['bt_s_07', false], ['bt_s_08', false],
     ['bt_s_09', false], ['bt_s_10', false],
   ];
   const cIds: [string, boolean][] = [
-    ['bt_c_01', false], ['bt_c_02', false], ['bt_c_03', false], ['bt_c_04', true],
+    ['bt_c_01', false], ['bt_c_02', false], ['bt_c_03', false], ['bt_c_04', false],
     ['bt_c_05', false], ['bt_c_06', false], ['bt_c_07', false], ['bt_c_08', false],
-    ['bt_c_09', false], ['bt_c_10', true],
+    ['bt_c_09', false], ['bt_c_10', false],
   ];
 
   const dRaw = dIds.reduce((s, [id, rev]) => s + getVal(id, rev), 0);
