@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createHitSession } from '@/lib/supabase/hit';
+import { createHitSession, getLatestHitAResult } from '@/lib/supabase/hit';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import { gateApi } from '@/lib/hit/membership-server';
 
@@ -14,17 +14,14 @@ export async function POST(request: NextRequest) {
     if (auth instanceof Response) return auth;
     const memberId = auth.memberId;
 
-    // HIT A 완료 확인 (필수)
-    if (!hitAResultId) {
-      return errorResponse('hitAResultId는 필수입니다. HIT A를 먼저 완료해주세요.', 400);
-    }
-
+    // HIT A 완료 확인 — 본인 것만. ?a= 가 없으면 본인 최신 A (2026-10-12)
     const supabase = createClient();
-    const { data: aResult } = await supabase
-      .from('hit_a_results')
-      .select('id')
-      .eq('id', hitAResultId)
-      .maybeSingle();
+    let aResult: { id: string } | null = null;
+    if (hitAResultId) {
+      const { data } = await supabase.from('hit_a_results').select('id').eq('id', hitAResultId).eq('member_id', memberId).maybeSingle();
+      aResult = data;
+    }
+    if (!aResult) aResult = await getLatestHitAResult(memberId);
 
     if (!aResult) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다. 먼저 HIT A를 완료해주세요.', 400);

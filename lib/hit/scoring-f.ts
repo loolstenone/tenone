@@ -115,6 +115,7 @@ export function scoreDirection(responses: ResponseRow[]): DirectionResult {
 export function scoreLegacy(responses: ResponseRow[]): {
   legacySkillScore: number;
   legacyAreas: string[];
+  legacyScores: { transferable_legacy: number; knowledge_transfer: number; new_capability: number };
 } {
   const legacy = responses.filter(r => r.module === 'legacy');
   const subscaleMap = buildSubscaleMap(legacy);
@@ -137,13 +138,14 @@ export function scoreLegacy(responses: ResponseRow[]): {
   if (knowledge_transfer < 40) legacyAreas.push('지식 전수 방법 모색 필요');
   if (new_capability < 40) legacyAreas.push('새로운 역량 학습 필요');
 
-  return { legacySkillScore, legacyAreas };
+  return { legacySkillScore, legacyAreas, legacyScores: { transferable_legacy, knowledge_transfer, new_capability } };
 }
 
 // ── 사회적 연결 & 2막 준비도 채점 ──
 
 export interface SocialReadinessResult {
   socialNeedScore: number;
+  socialScores?: { belonging: number; role_necessity: number };
   secondActReadiness: number;
   readinessScores: {
     time: number;
@@ -175,6 +177,7 @@ export function scoreSocialReadiness(responses: ResponseRow[]): SocialReadinessR
 
   return {
     socialNeedScore,
+    socialScores: { belonging, role_necessity },
     secondActReadiness,
     readinessScores: { time, energy, finance, relationship, total },
   };
@@ -203,7 +206,9 @@ export interface HitFScoreResult {
   directionTop2: Array<{ code: DirectionType; label: string; score: number }>;
   legacySkillScore: number;
   legacyAreas: string[];
+  legacyScores: { transferable_legacy: number; knowledge_transfer: number; new_capability: number };
   socialNeedScore: number;
+  socialScores: { belonging: number; role_necessity: number };
   secondActReadiness: number;
   readinessScores: {
     time: number;
@@ -215,11 +220,21 @@ export interface HitFScoreResult {
   fakingFlag: boolean;
 }
 
-export function scoreHitF(responses: ResponseRow[]): HitFScoreResult {
+/** 2막 준비도(재정·시간·건강·관계)는 Journey 체크리스트 완료율 (stage f) */
+export function scoreHitF(responses: ResponseRow[], opts?: { checklist?: { percent: number; byGroup: Record<string, number> } }): HitFScoreResult {
   const satisfaction = scoreLifeSatisfaction(responses);
   const direction = scoreDirection(responses);
   const legacy = scoreLegacy(responses);
-  const social = scoreSocialReadiness(responses);
+  const socialRaw = scoreSocialReadiness(responses);
+  const cl = opts?.checklist;
+  const social = cl
+    ? {
+        socialNeedScore: socialRaw.socialNeedScore,
+        socialScores: socialRaw.socialScores,
+        secondActReadiness: cl.percent,
+        readinessScores: { time: cl.byGroup['시간'] ?? 0, energy: cl.byGroup['건강'] ?? 0, finance: cl.byGroup['재정'] ?? 0, relationship: cl.byGroup['관계'] ?? 0, total: cl.percent },
+      }
+    : socialRaw;
   const fakingFlag = scoreDecoyF(responses);
 
   return {
@@ -231,7 +246,9 @@ export function scoreHitF(responses: ResponseRow[]): HitFScoreResult {
     directionTop2: direction.directionTop2,
     legacySkillScore: legacy.legacySkillScore,
     legacyAreas: legacy.legacyAreas,
+    legacyScores: legacy.legacyScores,
     socialNeedScore: social.socialNeedScore,
+    socialScores: social.socialScores ?? { belonging: 0, role_necessity: 0 },
     secondActReadiness: social.secondActReadiness,
     readinessScores: social.readinessScores,
     fakingFlag,

@@ -14,6 +14,9 @@ export type ChecklistStage = 'c' | 'd' | 'e' | 'f' | 'gap';
 
 export interface ChecklistItem { key: string; group: string; text: string }
 
+/** 생애주기 채점이 받는 체크리스트 완료율 — 준비도 점수의 원천 (검사 응답이 아님) */
+export interface ChecklistProgress { total: number; done: number; percent: number; byGroup: Record<string, number> }
+
 const C: ChecklistItem[] = [
   { key: 'b_ar01', group: '서류', text: '이력서가 최신 상태로 준비되어 있다' },
   { key: 'b_ar02', group: '서류', text: '자기소개서를 기업별로 맞춤 작성할 수 있다' },
@@ -109,7 +112,7 @@ export async function getStageChecklistProgress(
   sb: SupabaseClient,
   memberId: string,
   stage: ChecklistStage,
-): Promise<{ total: number; done: number; percent: number }> {
+): Promise<ChecklistProgress> {
   const items = JOURNEY_CHECKLISTS[stage];
   const { data } = await sb
     .from('hero_journey_checklist_items')
@@ -119,5 +122,10 @@ export async function getStageChecklistProgress(
     .not('checked_at', 'is', null);
   const keys = new Set((data ?? []).map((r: { item_key: string }) => r.item_key));
   const done = items.filter(i => keys.has(i.key)).length;
-  return { total: items.length, done, percent: items.length ? Math.round((done / items.length) * 100) : 0 };
+  const byGroup: Record<string, number> = {};
+  for (const g of new Set(items.map(i => i.group))) {
+    const gi = items.filter(i => i.group === g);
+    byGroup[g] = Math.round((gi.filter(i => keys.has(i.key)).length / gi.length) * 100);
+  }
+  return { total: items.length, done, percent: items.length ? Math.round((done / items.length) * 100) : 0, byGroup };
 }

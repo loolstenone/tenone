@@ -24,6 +24,7 @@ interface CResult {
   journey_stage: string;
   track_id: string | null;
   created_at: string;
+  report_modules?: { id: string; title: string; content: string }[];
 }
 
 const STAGE_LABEL: Record<string, string> = { ready: '출발 준비 완료', developing: '준비 진행 중', exploring: '탐색 단계', discovering: '발견 단계' };
@@ -86,9 +87,19 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
         <div className="border border-neutral-200 rounded-xl p-5"><Bar label="첫 직무를 분명히, 내 판단으로 정했는가" value={r.career_decision} /></div>
       </section>
 
+      {(r.report_modules ?? []).length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-lg font-bold mb-1">HeRo 해설</h2>
+          <p className="text-xs text-neutral-500 mb-4">점수 구간에 따라 미리 작성·검수된 해설이 선택됩니다.</p>
+          <div className="space-y-5">{(r.report_modules ?? []).map(m => (
+            <div key={m.id} className="border-l-2 border-neutral-300 pl-4"><p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p><p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p></div>
+          ))}</div>
+        </section>
+      )}
+
       {r.ai_report && (
         <section className="mb-8">
-          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2"><Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" /> HeRo의 종합 분석</h2>
+          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2"><Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" /> 종합 해설 (AI 보조)</h2>
           <div className="bg-neutral-50 p-5 rounded-xl"><p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">{cleanMarkdown(r.ai_report)}</p></div>
         </section>
       )}

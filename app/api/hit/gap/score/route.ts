@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses, updateHitSession, createHitGapResult, upsertHeroProfile } from '@/lib/supabase/hit';
+import { getHitSession, getHitResponses, updateHitSession, createHitGapResult, upsertHeroProfile, getLatestHitAResult } from '@/lib/supabase/hit';
 import { scoreHitGap } from '@/lib/hit/scoring-gap';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
+import { JOB_VELOCITY_TABLE } from '@/lib/hit/cvi';
 import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 
 export async function POST(request: NextRequest) {
@@ -13,10 +15,6 @@ export async function POST(request: NextRequest) {
 
     if (!sessionToken) {
       return errorResponse('sessionToken은 필수입니다.', 400);
-    }
-
-    if (!hitAResultId) {
-      return errorResponse('hitAResultId는 필수입니다.', 400);
     }
 
     if (!breakMonths || !jobCategory) {
@@ -37,25 +35,24 @@ export async function POST(request: NextRequest) {
       return errorResponse('응답 데이터가 없습니다.', 400);
     }
 
-    // HIT A 결과 가져오기
-    const supabase = createClient();
-    const { data: hitAData } = await supabase
-      .from('hit_a_results')
-      .select('*')
-      .eq('id', hitAResultId)
-      .maybeSingle();
+    if (!session.member_id) return errorResponse('회원 세션만 채점할 수 있습니다.', 403);
 
+    // HIT A 결과 — 본인 것만. ?a= 가 없거나 남의 것이면 본인 최신 A (2026-10-12)
+    const supabase = createClient();
+    let hitAData: Record<string, any> | null = null;
+    if (hitAResultId) {
+      const { data } = await supabase.from('hit_a_results').select('*').eq('id', hitAResultId).eq('member_id', session.member_id).maybeSingle();
+      hitAData = data;
+    }
+    if (!hitAData) hitAData = await getLatestHitAResult(session.member_id);
     if (!hitAData) {
-      return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
+      return errorResponse('HIT A를 먼저 완료해야 합니다.', 400);
     }
 
     // 채점 (CVI + 미끼 탐지 포함)
-    const scored = scoreHitGap(responses);
-
-    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트에서 — 완료율을 준비도 점수로 (2026-10-12)
+    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트 완료율 — 채점에 넘겨 파생값(갭·경로·차기 역할)도 같은 값으로 (2026-10-12)
     const checklist = await getStageChecklistProgress(createClient(), session.member_id!, 'gap');
-    scored.practicalReadiness = checklist.percent;
-    scored.reentryReadiness = Math.round(checklist.percent * 0.55 + scored.reentryMotivation * 0.45);
+    const scored = scoreHitGap(responses, { checklist });
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
@@ -71,7 +68,7 @@ export async function POST(request: NextRequest) {
       const hitAContext = `HIT A 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
 
       const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250514',
+        model: HIT_REPORT_MODEL,
         max_tokens: 2000,
         system: `당신은 HeRo 인재 기획사의 경력 공백 복귀 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 경력 복귀 분석 리포트를 작성합니다.
 
@@ -115,7 +112,7 @@ export async function POST(request: NextRequest) {
     const result = await createHitGapResult({
       session_id: session.id,
       member_id: session.member_id || null,
-      hit_a_result_id: hitAResultId,
+      hit_a_result_id: hitAData.id,
       break_months: breakMonths,
       latent_score: scored.latentScore,
       cvi_raw: scored.cviRaw,
@@ -134,6 +131,7 @@ export async function POST(request: NextRequest) {
       practical_readiness: scored.practicalReadiness,
       reentry_motivation: scored.reentryMotivation,
       job_category: jobCategory,
+      job_change_velocity: JOB_VELOCITY_TABLE[jobCategory] ?? JOB_VELOCITY_TABLE.default,
       // Phase 9 신규: 방향/준비도 상세 + 미끼 플래그
       direction_scores:   scored.directionScores,
       direction_dominant: scored.directionTop.code,

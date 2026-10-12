@@ -309,12 +309,16 @@ export interface HitEScoreResult {
   faking_flag: boolean;
 }
 
-export function scoreHitE(responses: ResponseRow[], aCtx?: AContext): HitEScoreResult {
+/** 준비도(포지셔닝·보상·레퍼런스)는 Journey 체크리스트 완료율 (stage e) — 차기 역할 매트릭스도 같은 값으로 */
+export function scoreHitE(responses: ResponseRow[], aCtx?: AContext, opts?: { checklist?: { percent: number; byGroup: Record<string, number> } }): HitEScoreResult {
   const expertise = scoreExpertise(responses);
   const leadership = scoreLeadership(responses);
   const identity = scoreIdentity(responses);
   const network = scoreNetwork(responses);
-  const seniorReadiness = scoreSeniorReadiness(responses);
+  const cl = opts?.checklist;
+  const seniorReadiness = cl
+    ? { senior_readiness: cl.percent, senior_readiness_scores: { positioning: cl.byGroup['포지셔닝'] ?? 0, compensation: cl.byGroup['보상'] ?? 0, reference: cl.byGroup['레퍼런스·절차'] ?? 0 } }
+    : scoreSeniorReadiness(responses);
   const next_role_matrix = buildNextRoleMatrix(expertise, leadership, identity, seniorReadiness, aCtx);
   const faking_flag = scoreDecoyE(responses);
 

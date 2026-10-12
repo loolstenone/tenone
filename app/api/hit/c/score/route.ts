@@ -5,6 +5,7 @@ import { scoreHitC, READINESS_LABELS, ONBOARDING_LABELS } from '@/lib/hit/scorin
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 import Anthropic from '@anthropic-ai/sdk';
+import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
 
 /** POST /api/hit/c/score — 진입(대학생·사회 초년) 채점 */
 export async function POST(request: NextRequest) {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       const rd = Object.entries(scored.readinessScores).map(([k, v]) => `${READINESS_LABELS[k] ?? k} ${v}`).join(' · ');
       const ob = Object.entries(scored.onboardingScores).map(([k, v]) => `${ONBOARDING_LABELS[k] ?? k} ${v}`).join(' · ');
       const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: HIT_REPORT_MODEL,
         max_tokens: 1600,
         system: '당신은 HeRo 인재 기획사의 커리어 컨설턴트입니다. 대학생·사회 초년생에게 한국어로 따뜻하고 구체적으로 씁니다. 이모지·특수문자·마크다운 헤딩 금지. 준비가 부족한 영역은 비난이 아니라 "다음에 할 일"로. 마지막에 이번 달 할 일 3가지.',
         messages: [{

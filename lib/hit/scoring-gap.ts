@@ -310,12 +310,20 @@ export interface HitGapScoreResult {
 
 // ── 통합 채점 ──────────────────────────────────────────────────
 
-export function scoreHitGap(responses: ResponseRow[]): HitGapScoreResult {
+/** 실질 준비도(스킬·네트워크·자기 표현·현장 감각)는 Journey 체크리스트 완료율 (stage gap) — 경로 근거도 같은 값으로 */
+export function scoreHitGap(responses: ResponseRow[], opts?: { checklist?: { percent: number; byGroup: Record<string, number> } }): HitGapScoreResult {
   const context    = scoreBreakContext(responses);
   const viability  = scoreViability(responses);
   const resilience = scoreResilience(responses);
   const direction  = scoreDirection(responses);
-  const readiness  = scoreReadiness(responses);
+  const cl = opts?.checklist;
+  const readiness = cl
+    ? {
+        readinessScores: { skill_update: cl.byGroup['스킬'] ?? 0, network: cl.byGroup['네트워크'] ?? 0, self_presentation: cl.byGroup['자기 표현'] ?? 0, field_language: cl.byGroup['현장 감각'] ?? 0 },
+        practicalReadiness: cl.percent,
+        reentryReadiness: cl.percent,
+      }
+    : scoreReadiness(responses);
   const decoy      = scoreDecoyGap(responses);
 
   // CVI 계산 — 설계서 확정 공식: (직무유효성×0.35) + (기술유효성×0.35) + (시장재진입×0.30)

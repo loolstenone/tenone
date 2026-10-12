@@ -283,11 +283,23 @@ export interface HitDScoreResult {
   fakingFlag: boolean;
 }
 
-export function scoreHitD(responses: ResponseRow[]): HitDScoreResult {
+/**
+ * 준비도(서류·면접·타이밍·지지)는 2026-10-12부터 검사 문항이 아니라 Journey 체크리스트 완료율 (lib/hero/journey-checklists.ts stage d)
+ * — opts.checklist가 오면 그것으로 계산하고, 갭 영역·전환 준비도도 같은 값을 쓴다
+ */
+export function scoreHitD(responses: ResponseRow[], opts?: { checklist?: { percent: number; byGroup: Record<string, number> } }): HitDScoreResult {
   const capital = scoreCapital(responses);
   const motivation = scoreMotivation(responses);
   const transfer = scoreTransferability(responses);
-  const readiness = scoreReadiness(responses);
+  const cl = opts?.checklist;
+  const readiness = cl
+    ? (() => {
+        const g = cl.byGroup;
+        const doc = g['서류'] ?? 0, interview = g['면접'] ?? 0, timing = g['타이밍'] ?? 0, psychological = g['지지'] ?? 0;
+        const preparation = Math.round((doc + interview + timing) / 3);
+        return { doc, interview, timing, psychological, total: cl.percent, preparation, gapAwareness: psychological, transitionReadiness: cl.percent };
+      })()
+    : scoreReadiness(responses);
   const gapAreas = identifyGapAreas(capital.scores, transfer.scores, readiness.preparation);
 
   const pushPullSubs = scorePushPullSubs(responses);

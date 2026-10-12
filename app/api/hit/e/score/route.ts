@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses, updateHitSession, createHitEResult, upsertHeroProfile } from '@/lib/supabase/hit';
+import { getHitSession, getHitResponses, updateHitSession, createHitEResult, upsertHeroProfile, getLatestHitAResult } from '@/lib/supabase/hit';
 import { scoreHitE } from '@/lib/hit/scoring-e';
 import { createAdminClient as createClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
 import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 
 export async function POST(request: NextRequest) {
@@ -13,10 +14,6 @@ export async function POST(request: NextRequest) {
 
     if (!sessionToken) {
       return errorResponse('sessionToken은 필수입니다.', 400);
-    }
-
-    if (!hitAResultId) {
-      return errorResponse('hitAResultId는 필수입니다.', 400);
     }
 
     const session = await getHitSession(sessionToken);
@@ -33,16 +30,18 @@ export async function POST(request: NextRequest) {
       return errorResponse('응답 데이터가 없습니다.', 400);
     }
 
-    // HIT A 결과 가져오기
-    const supabase = createClient();
-    const { data: hitAData } = await supabase
-      .from('hit_a_results')
-      .select('*')
-      .eq('id', hitAResultId)
-      .maybeSingle();
+    if (!session.member_id) return errorResponse('회원 세션만 채점할 수 있습니다.', 403);
 
+    // HIT A 결과 — 본인 것만. ?a= 가 없거나 남의 것이면 본인 최신 A (2026-10-12)
+    const supabase = createClient();
+    let hitAData: Record<string, any> | null = null;
+    if (hitAResultId) {
+      const { data } = await supabase.from('hit_a_results').select('*').eq('id', hitAResultId).eq('member_id', session.member_id).maybeSingle();
+      hitAData = data;
+    }
+    if (!hitAData) hitAData = await getLatestHitAResult(session.member_id);
     if (!hitAData) {
-      return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
+      return errorResponse('HIT A를 먼저 완료해야 합니다.', 400);
     }
 
     // A 결과 컨텍스트
@@ -73,11 +72,9 @@ export async function POST(request: NextRequest) {
     };
 
     // 채점
-    const scored = scoreHitE(responses, aCtx);
-
-    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트에서 — 완료율을 준비도 점수로 (2026-10-12)
+    // 준비도(상태형 항목)는 검사가 아니라 Journey 체크리스트 완료율 — 채점에 넘겨 파생값(갭·경로·차기 역할)도 같은 값으로 (2026-10-12)
     const checklist = await getStageChecklistProgress(createClient(), session.member_id!, 'e');
-    scored.senior_readiness = checklist.percent;
+    const scored = scoreHitE(responses, aCtx, { checklist });
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
@@ -105,7 +102,7 @@ export async function POST(request: NextRequest) {
         .map(r => `${r.role}(${r.fit_score}%)`).join(', ');
 
       const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250514',
+        model: HIT_REPORT_MODEL,
         max_tokens: 2000,
         system: `당신은 HeRo 인재 기획사의 시니어 리더십 전환 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 시니어 리더십 전환 분석 리포트를 작성합니다.
 
@@ -144,7 +141,7 @@ export async function POST(request: NextRequest) {
     const result = await createHitEResult({
       session_id: session.id,
       member_id: session.member_id || null,
-      hit_a_result_id: hitAResultId,
+      hit_a_result_id: hitAData.id,
       expertise_depth: scored.expertise_depth,
       expertise_domains: scored.expertise_domains,
       leadership_type: scored.leadership_type,

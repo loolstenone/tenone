@@ -4,6 +4,7 @@ import { getHitSession, getHitResponses, updateHitSession, createHitBResult, get
 import { scoreHitB, CORE_COMPETENCY_LABELS, HOLLAND_LABELS, type HollandType, type CoreCompetency } from '@/lib/hit/scoring-b';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
 
 /**
  * POST /api/hit/b/score — HIT B "역량과 방향" 채점 (2026-10-12 재정의)
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
         ? `HIT A 프로필: ${hitAData.type_code} "${hitAData.type_name_ko}" · MBTI ${hitAData.mbti_type} · DISC ${hitAData.disc_primary} · 흥미 Top3 ${hitAData.ap_top3_code ?? '-'}\n`
         : 'HIT A 결과 없음 (흥미×효능 매트릭스는 미측정)\n';
       const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: HIT_REPORT_MODEL,
         max_tokens: 1800,
         system: `당신은 HeRo 인재 기획사의 커리어 컨설턴트입니다. 한국어로 따뜻하고 구체적으로 씁니다.
 규칙: 이모지·특수문자·마크다운 헤딩 금지. 역량의 강점에서 출발해 방향을 제안. 흥미는 높은데 효능감이 낮은 영역은 "배우면 되는 영역"으로, 효능감은 높은데 흥미가 낮은 영역은 "소진 주의"로 설명. 마지막에 지금 할 수 있는 행동 3가지.`,

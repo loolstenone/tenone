@@ -42,6 +42,11 @@ ALTER TABLE public.hero_profiles RENAME CONSTRAINT hero_profiles_hit_e_result_id
 ALTER TABLE public.hero_profiles RENAME CONSTRAINT hero_profiles_hit_d_result_id_fkey TO hero_profiles_hit_e_result_id_fkey;
 ALTER TABLE public.hero_profiles RENAME CONSTRAINT hero_profiles_hit_c_result_id_fkey TO hero_profiles_hit_d_result_id_fkey;
 
+-- 2-1. F(2막, 옛 E) 세부 점수 — 리포트 모듈(ER·ES) 선택에 필요 (2026-10-12 결과 점검)
+ALTER TABLE public.hit_f_results
+  ADD COLUMN IF NOT EXISTS legacy_scores jsonb,
+  ADD COLUMN IF NOT EXISTS social_scores jsonb;
+
 -- ─────────────────────────────────────────────────────────────
 -- 3. C 진입 결과 테이블 (신설)
 -- ─────────────────────────────────────────────────────────────
