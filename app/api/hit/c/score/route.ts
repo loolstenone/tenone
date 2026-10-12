@@ -11,7 +11,7 @@ import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionToken, trackId } = body;
+    const { sessionToken, trackId, hitAResultId } = body;
     if (!sessionToken) return errorResponse('sessionToken은 필수입니다.', 400);
 
     const session = await getHitSession(sessionToken);
@@ -25,7 +25,20 @@ export async function POST(request: NextRequest) {
     const scored = scoreHitC(responses);
     const sb = createAdminClient();
     const checklist = await getStageChecklistProgress(sb, session.member_id, 'c');
-    const hitA = await getLatestHitAResult(session.member_id);
+    // 같은 회차의 A를 잇는다 (R9, 2026-10-12): ① 요청에 온 본인 A → ② 최근 B가 기준으로 삼은 A → ③ 최근 A
+    let hitA: Awaited<ReturnType<typeof getLatestHitAResult>> = null;
+    if (hitAResultId) {
+      const { data } = await sb.from('hit_a_results').select('*').eq('id', hitAResultId).eq('member_id', session.member_id).maybeSingle();
+      hitA = data;
+    }
+    if (!hitA) {
+      const { data: lastB } = await sb.from('hit_b_results').select('hit_a_result_id').eq('member_id', session.member_id).not('hit_a_result_id', 'is', null).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (lastB?.hit_a_result_id) {
+        const { data } = await sb.from('hit_a_results').select('*').eq('id', lastB.hit_a_result_id).eq('member_id', session.member_id).maybeSingle();
+        hitA = data;
+      }
+    }
+    if (!hitA) hitA = await getLatestHitAResult(session.member_id);
 
     let aiReport: string | null = null;
     try {
