@@ -14,7 +14,7 @@ export function HitNextSteps({ from, aId, bId, children }: { from: "a" | "b" | "
   const lead = from === "a"
     ? "먼저 공통 검사 B를 마치고, 그다음 지금 내 상황에 맞는 검사 하나를 고르세요."
     : from === "b"
-      ? "공통 검사(A·B)를 마쳤습니다. 지금 내 상황에 맞는 검사 하나를 고르세요."
+      ? "공통 검사(HIT - Archetype · Bounce)를 마쳤습니다. 지금 내 상황에 맞는 검사 하나를 고르세요."
       : "상황이 바뀌면 다른 단계 검사를 다시 할 수 있습니다.";
 
   return (

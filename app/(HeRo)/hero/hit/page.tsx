@@ -36,7 +36,7 @@ export default function HitOverviewPage() {
           <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HeRo Integrated Test</p>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">나를 알아가는 여정</h1>
           <p className="text-lg text-neutral-500 max-w-2xl mx-auto break-keep">
-            모든 회원이 같은 두 검사로 시작합니다 — 나는 누구인가(A), 무엇을 할 수 있는가(B).
+            모든 회원이 같은 두 검사로 시작합니다 — 나는 누구인가(HIT - Archetype), 무엇을 할 수 있는가(HIT - Bounce).
             그다음 지금 내 생애주기에 맞는 검사 하나를 고릅니다.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function HitOverviewPage() {
         <div className="mx-auto max-w-5xl px-6 py-14">
           <div className="text-center mb-8">
             <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">공통 기반 · 전 회원</p>
-            <h2 className="text-2xl font-extrabold tracking-tight">A 다음 B, 순서대로</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight">Archetype 다음 Bounce, 순서대로</h2>
             <p className="text-sm text-neutral-500 mt-2">B의 효능감은 A의 흥미와 겹쳐 분석하므로 A를 먼저 합니다. 회원 전용이며 결과는 내 계정에 남습니다.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -62,7 +62,7 @@ export default function HitOverviewPage() {
           <div className="text-center mb-8">
             <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">생애주기 · 1인 1개 선택</p>
             <h2 className="text-2xl font-extrabold tracking-tight">지금 내 단계에 맞는 검사</h2>
-            <p className="text-sm text-neutral-500 mt-2">A·B를 마친 뒤, 현재 상황에 맞는 하나를 고릅니다. 상황이 바뀌면 다른 단계를 다시 할 수 있습니다.</p>
+            <p className="text-sm text-neutral-500 mt-2">Archetype·Bounce를 마친 뒤, 현재 상황에 맞는 하나를 고릅니다. 상황이 바뀌면 다른 단계를 다시 할 수 있습니다.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {HIT_LIFE_STAGES.map(s => <StageCard key={s.key} s={s} />)}
@@ -101,7 +101,7 @@ export default function HitOverviewPage() {
               {HIT_STAGES.a.code} 시작하기 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/hero/jh/write" className="inline-flex items-center gap-2 px-5 py-3 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-xl hover:border-neutral-400 transition-colors">
-              A·B를 마쳤다면 · 희망 직무 등록
+              Archetype·Bounce를 마쳤다면 · 희망 직무 등록
             </Link>
           </div>
         </div>
