@@ -91,7 +91,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
       .catch(() => setLoading(false));
   }, [resultId, print]);
 
-  useReportTitle([`HeRo ${HIT_STAGES.a.code} ${HIT_STAGES.a.name}`, d?.type_code as string, isoDay(d?.created_at as string)], !!d);
+  useReportTitle([`HeRo ${HIT_STAGES.a.code} ${HIT_STAGES.a.brand} ${HIT_STAGES.a.name}`, d?.type_code as string, isoDay(d?.created_at as string)], !!d);
 
   if (loading) return <LoadingState />;
   if (!d) return <NotFoundState retryHref="/hero/hit/a" />;
@@ -113,8 +113,8 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
     <div className={print ? "hit-report-container" : ""}>
     <ReportShell>
       {print && <ReportToolbar backHref={`/hero/hit/a/result/${resultId}`} />}
-      {print && <ReportCover code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} headline={typeCode} sub={typeName} date={formatDate(d.created_at as string)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
-      {!print && <ReportHeader code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />}
+      {print && <ReportCover code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.brand} subtitle={HIT_STAGES.a.name} headline={typeCode} sub={typeName} date={formatDate(d.created_at as string)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.brand} subtitle={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />}
       {!print && <HitChain type="a" id={resultId} />}
       {!print && <SectionNav items={NAV} />}
 

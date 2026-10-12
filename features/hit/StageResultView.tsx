@@ -107,7 +107,7 @@ function viewFor(stage: StageKey, r: Row): View {
       };
     }
     case "gap": {
-      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.name} 검사 추천`, B: `${HIT_STAGES.b.name}부터 다시 점검` };
+      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.brand}(이직) 검사 추천`, B: `${HIT_STAGES.b.brand}(역량과 방향)부터 다시 점검` };
       const cvi: Record<string, string> = { HIGH: "경력이 지금도 잘 통함", MID: "경력이 부분적으로 통함", LOW: "경력 업데이트가 필요함" };
       const res = pick(r.resilience_scores, ["self_narrative", "self_esteem", "retry_willingness"]);
       const bestRes = top(res);
@@ -147,7 +147,7 @@ export default function StageResultView({ stage, resultId, print = false }: { st
   }, [stage, resultId]);
 
   const view = r ? viewFor(stage, r) : null;
-  useReportTitle([`HeRo ${def.code} ${def.name}`, view?.cover.headline, isoDay(r?.created_at)], !!view);
+  useReportTitle([`HeRo ${def.code} ${def.brand} ${def.name}`, view?.cover.headline, isoDay(r?.created_at)], !!view);
 
   if (loading) return <LoadingState />;
   if (!r || !view) return <NotFoundState retryHref={`/hero/hit/${stage}`} />;
@@ -163,8 +163,8 @@ export default function StageResultView({ stage, resultId, print = false }: { st
     <div className={print ? "hit-report-container" : ""}>
     <ReportShell>
       {print && <ReportToolbar backHref={`/hero/hit/${stage}/result/${resultId}`} />}
-      {print && <ReportCover code={`${def.code} · ${groupLabel}`} title={def.name} headline={view.cover.headline} sub={view.cover.sub} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
-      {!print && <ReportHeader code={`${def.code} · ${groupLabel}`} title={def.name} date={formatDate(r.created_at)} stage={journey} />}
+      {print && <ReportCover code={`${def.code} · ${groupLabel}`} title={def.brand} subtitle={def.name} headline={view.cover.headline} sub={view.cover.sub} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`${def.code} · ${groupLabel}`} title={def.brand} subtitle={def.name} date={formatDate(r.created_at)} stage={journey} />}
       {!print && <HitChain type={stage} id={resultId} />}
       {!print && <SectionNav items={nav} />}
 

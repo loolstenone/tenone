@@ -79,8 +79,9 @@ function HitBIntroContent() {
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{HIT_STAGES.b.code} · 공통 기반</p>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            {HIT_STAGES.b.name}
+            {HIT_STAGES.b.brand}
           </h1>
+          <p className="text-lg font-semibold text-neutral-600 -mt-2 mb-4">{HIT_STAGES.b.name}</p>
           <p className="text-neutral-500 mb-2">
             무엇을 할 수 있고, 어디로 가고 싶은지.<br />
             역량·효능감·자기와 직무에 대한 이해를 진단합니다. HIT A와 함께 모든 회원의 공통 기반입니다.
@@ -159,7 +160,7 @@ function HitBIntroContent() {
             {starting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
             ) : (
-              <>{HIT_STAGES.b.name} 시작하기 <ArrowRight className="h-5 w-5" /></>
+              <>{HIT_STAGES.b.brand} 시작하기 <ArrowRight className="h-5 w-5" /></>
             )}
           </button>
         </div>

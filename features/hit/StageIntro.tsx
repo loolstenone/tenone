@@ -40,7 +40,8 @@ export default function StageIntro({ stage, modules, note }: { stage: Extract<Hi
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{def.code} · {def.group === "situation" ? "상황 모듈" : "생애주기"}</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 break-keep">{def.name}</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">{def.brand}</h1>
+          <p className="text-lg font-semibold text-neutral-600 mb-4 break-keep">{def.name}</p>
           <p className="text-neutral-500 mb-2 break-keep">{def.desc}</p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
             <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 {minutes}분</span><span>·</span><span>{total}문항</span><span>·</span><span>7점 척도</span>
@@ -54,7 +55,7 @@ export default function StageIntro({ stage, modules, note }: { stage: Extract<Hi
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-bold text-amber-800">{error}</p>
-              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.name} 시작하기 →</button>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.brand} 시작하기 →</button>
             </div>
           </div>
         </section>
@@ -84,11 +85,11 @@ export default function StageIntro({ stage, modules, note }: { stage: Extract<Hi
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
           <p className="text-xs text-neutral-400 mb-4 break-keep">
-            공통 검사({HIT_STAGES.a.name} · {HIT_STAGES.b.name})를 먼저 하면 결과가 더 깊어집니다. {HIT_STAGES.a.name}는 필수입니다.<br />
+            공통 검사({HIT_STAGES.a.brand} · {HIT_STAGES.b.brand})를 먼저 하면 결과가 더 깊어집니다. {HIT_STAGES.a.brand}({HIT_STAGES.a.name})는 필수입니다.<br />
             각 문항에 1(전혀 아니다)~7(매우 그렇다)로 응답합니다. 정답은 없습니다.
           </p>
           <button onClick={start} disabled={starting} className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50">
-            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{def.name} 시작하기 <ArrowRight className="h-5 w-5" /></>}
+            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{def.brand} 시작하기 <ArrowRight className="h-5 w-5" /></>}
           </button>
           <div className="mt-6">
             <Link href="/hero/hit/method" className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800"><ShieldCheck className="h-3.5 w-3.5" /> 결과는 어떻게 만들어지나요</Link>

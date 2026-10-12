@@ -17,12 +17,13 @@ export function ReportShell({ children, wide = false }: { children: ReactNode; w
   return <div className={`mx-auto ${wide ? "max-w-3xl" : "max-w-2xl"} px-5 sm:px-6 pt-10 pb-24`}>{children}</div>;
 }
 
-export function ReportHeader({ code, title, date, stage, stageDesc }: { code: string; title: string; date?: string; stage?: string; stageDesc?: string }) {
+export function ReportHeader({ code, title, subtitle, date, stage, stageDesc }: { code: string; title: string; subtitle?: string; date?: string; stage?: string; stageDesc?: string }) {
   return (
     <header className="text-center">
       <Image src="/hero-logo.png" alt="HeRo" width={40} height={40} className="h-10 w-10 mx-auto mb-4" />
       <p className="text-xs font-semibold text-neutral-400 tracking-wide">{code}</p>
-      <h1 className="text-[28px] sm:text-[32px] font-extrabold text-neutral-900 mt-2 leading-tight">{title}</h1>
+      <h1 className="text-[32px] sm:text-[36px] font-extrabold text-neutral-900 mt-2 leading-tight">{title}</h1>
+      {subtitle && <p className="text-[16px] font-semibold text-neutral-600 mt-2 break-keep">{subtitle}</p>}
       {date && <p className="text-sm text-neutral-400 mt-3">{date}</p>}
       {stage && (
         <div className="mt-6">
@@ -46,11 +47,11 @@ export function HitChain({ type, id }: { type: string; id: string }) {
   if (!d) return <div className="mt-10 h-[88px]" />;
 
   const items: { key: string; code: string; name: string; data: ChainItem; href: string; start: string }[] = [
-    { key: "a", code: "A", name: HIT_STAGES.a.name, data: d.a, href: d.a ? `/hero/hit/a/result/${d.a.id}` : "/hero/hit/a", start: "/hero/hit/a" },
-    { key: "b", code: "B", name: HIT_STAGES.b.name, data: d.b, href: d.b ? `/hero/hit/b/result/${d.b.id}` : `/hero/hit/b${d.a ? `?a=${d.a.id}` : ""}`, start: "/hero/hit/b" },
+    { key: "a", code: "A", name: HIT_STAGES.a.brand, data: d.a, href: d.a ? `/hero/hit/a/result/${d.a.id}` : "/hero/hit/a", start: "/hero/hit/a" },
+    { key: "b", code: "B", name: HIT_STAGES.b.brand, data: d.b, href: d.b ? `/hero/hit/b/result/${d.b.id}` : `/hero/hit/b${d.a ? `?a=${d.a.id}` : ""}`, start: "/hero/hit/b" },
     d.stage
       ? { key: d.stage.key, code: HIT_STAGES[d.stage.key as keyof typeof HIT_STAGES].code.replace("HIT ", ""), name: d.stage.name, data: d.stage, href: `/hero/hit/${d.stage.key}/result/${d.stage.id}`, start: "" }
-      : { key: "stage", code: "C~F", name: "생애주기 검사", data: null, href: "/hero/hit", start: "/hero/hit" },
+      : { key: "stage", code: "C~F", name: "생애주기 검사 선택", data: null, href: "/hero/hit", start: "/hero/hit" },
   ];
 
   return (
@@ -66,7 +67,7 @@ export function HitChain({ type, id }: { type: string; id: string }) {
                 <span className={`inline-flex h-5 min-w-5 px-1 items-center justify-center rounded text-[10px] font-bold ${it.data ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-400"}`}>{it.code}</span>
                 {it.data && !current && <Check className="h-3 w-3 text-neutral-400" />}
               </div>
-              <p className="text-[11px] text-neutral-400 mt-2 truncate">{it.name}</p>
+              <p className="text-[12px] font-semibold text-neutral-500 mt-2 truncate">{it.name}</p>
               {it.data ? (
                 <>
                   <p className="text-[13px] font-bold text-neutral-900 mt-0.5 truncate">{it.data.headline}</p>
@@ -274,13 +275,14 @@ export function ReportToolbar({ backHref }: { backHref: string }) {
 }
 
 /** 보고서 표지 — 화면에서는 첫 카드, 인쇄에서는 한 장 전체 */
-export function ReportCover({ code, title, headline, sub, date, reportNo }: { code: string; title: string; headline?: string; sub?: string; date?: string; reportNo?: string }) {
+export function ReportCover({ code, title, subtitle, headline, sub, date, reportNo }: { code: string; title: string; subtitle?: string; headline?: string; sub?: string; date?: string; reportNo?: string }) {
   return (
     <section className="hit-cover rounded-3xl border border-neutral-200 px-8 py-16 sm:py-20 text-center mb-12 print:border-0 print:rounded-none print:flex print:flex-col print:justify-center print:min-h-[260mm] print:mb-0" style={{ breakAfter: "page" }}>
       <Image src="/hero-logo.png" alt="HeRo" width={64} height={64} className="h-16 w-16 mx-auto" />
       <p className="text-xs font-semibold text-neutral-400 tracking-[0.2em] mt-8">HeRo INTEGRATED TEST · 결과 보고서</p>
       <p className="text-sm font-semibold text-neutral-500 mt-10">{code}</p>
-      <h1 className="text-[34px] sm:text-[40px] font-extrabold text-neutral-900 mt-2 leading-tight break-keep">{title}</h1>
+      <h1 className="text-[40px] sm:text-[48px] font-extrabold text-neutral-900 mt-2 leading-tight break-keep">{title}</h1>
+      {subtitle && <p className="text-lg font-semibold text-neutral-600 mt-2 break-keep">{subtitle}</p>}
       {headline && <p className="text-2xl font-bold text-neutral-900 mt-10">{headline}</p>}
       {sub && <p className="text-[15px] text-neutral-500 mt-2">{sub}</p>}
       <div className="mt-14 space-y-1 text-sm text-neutral-400">

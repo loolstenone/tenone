@@ -28,7 +28,7 @@ export function HitNextSteps({ from, aId, bId, children }: { from: "a" | "b" | "
           <Link href={`/hero/hit/b${aId ? `?a=${aId}` : ""}`} className="mt-10 flex items-center gap-4 rounded-2xl border-2 border-[#E53935] bg-white p-5 hover:shadow-md transition-shadow">
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold text-neutral-400">{HIT_STAGES.b.code} · 공통 · 다음 순서</p>
-              <p className="font-bold text-neutral-900 mt-0.5">{HIT_STAGES.b.name}</p>
+              <p className="font-bold text-neutral-900 mt-0.5">{HIT_STAGES.b.brand} <span className="font-medium text-neutral-500">· {HIT_STAGES.b.name}</span></p>
               <p className="text-[13px] text-neutral-500 mt-1 leading-relaxed">{HIT_STAGES.b.desc}</p>
             </div>
             <ArrowRight className="h-4 w-4 text-[#E53935] shrink-0" />
@@ -41,7 +41,8 @@ export function HitNextSteps({ from, aId, bId, children }: { from: "a" | "b" | "
             <Link key={s.key} href={`/hero/hit/${s.key}${query}`} className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-5 hover:shadow-md transition-shadow">
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-semibold text-neutral-400">{s.code}{s.group === "situation" ? " · 상황" : ""}</p>
-                <p className="text-[15px] font-bold text-neutral-900 mt-0.5">{s.name}</p>
+                <p className="text-[16px] font-bold text-neutral-900 mt-0.5">{s.brand}</p>
+                <p className="text-[13px] text-neutral-500 mt-0.5 break-keep">{s.name}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-neutral-300 group-hover:text-neutral-700 transition-colors shrink-0" />
             </Link>

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       .select('id, module')
       .in('id', rawResponses.map((r: { question_id: string }) => r.question_id));
     const moduleById = new Map((qMeta ?? []).map(q => [q.id as string, q.module as string]));
-    const responses = rawResponses.map((r: { question_id: string; module: string }) => ({ ...r, module: moduleById.get(r.question_id) ?? r.module }));
+    const responses = rawResponses.map((r: { question_id: string; module: string; option_value: string }) => ({ ...r, module: moduleById.get(r.question_id) ?? r.module }));
 
     // HIT A 결과 (흥미 점수 → 매트릭스) — 본인 것만
     let hitAData: Record<string, unknown> | null = null;
