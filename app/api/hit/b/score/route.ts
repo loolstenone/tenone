@@ -22,11 +22,20 @@ export async function POST(request: NextRequest) {
     if (session.status !== 'in_progress') return errorResponse('이미 완료된 세션입니다.', 400);
     if (!session.member_id) return errorResponse('회원 세션만 채점할 수 있습니다.', 403);
 
-    const responses = await getHitResponses(session.id);
-    if (responses.length === 0) return errorResponse('응답 데이터가 없습니다.', 400);
+    const rawResponses = await getHitResponses(session.id);
+    if (rawResponses.length === 0) return errorResponse('응답 데이터가 없습니다.', 400);
+
+    // 모듈은 문항 원천(DB)에서 — 화면은 핵심·트랙 역량을 'competency', 이해를 'insight'로 묶어 보내므로
+    // 그대로 쓰면 핵심역량·자기/직무 이해가 0이 된다 (2026-10-12 발견)
+    const supabase = createAdminClient();
+    const { data: qMeta } = await supabase
+      .from('hit_questions')
+      .select('id, module')
+      .in('id', rawResponses.map((r: { question_id: string }) => r.question_id));
+    const moduleById = new Map((qMeta ?? []).map(q => [q.id as string, q.module as string]));
+    const responses = rawResponses.map((r: { question_id: string; module: string }) => ({ ...r, module: moduleById.get(r.question_id) ?? r.module }));
 
     // HIT A 결과 (흥미 점수 → 매트릭스) — 본인 것만
-    const supabase = createAdminClient();
     let hitAData: Record<string, unknown> | null = null;
     if (hitAResultId) {
       const { data } = await supabase.from('hit_a_results').select('*').eq('id', hitAResultId).eq('member_id', session.member_id).maybeSingle();
