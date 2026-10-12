@@ -267,7 +267,7 @@ export function buildRoutingRationale(
 
   parts.push(`주도 방향: ${directionTop.label}`);
 
-  const routeLabel = nextRoute === 'recovery' ? 'Recovery(복귀)' : nextRoute === 'C' ? 'HIT D(전환)' : 'HIT B(기본)';
+  const routeLabel = nextRoute === 'recovery' ? 'Recovery(복귀)' : nextRoute === 'C' ? 'HIT - Departure(전환)' : 'HIT - Bounce(기본)';
   parts.push(`추천 경로: ${routeLabel}`);
 
   return parts.join(' ');

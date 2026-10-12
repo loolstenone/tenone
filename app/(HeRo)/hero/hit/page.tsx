@@ -16,8 +16,8 @@ function StageCard({ s, primary = false, href }: { s: HitStageDef; primary?: boo
       href={href ?? `/hero/hit/${s.key}`}
       className={`group block rounded-2xl p-6 bg-white transition-shadow hover:shadow-lg ${primary ? "border-2 border-[#E53935]" : "border border-neutral-200"}`}
     >
-      <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{s.code}{s.group === "situation" ? " · 상황 모듈" : ""}</p>
-      <h3 className="text-xl font-extrabold text-neutral-900 mt-1">{s.brand}</h3>
+      <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{s.group === "common" ? "공통 기반" : s.group === "situation" ? "상황 모듈" : "생애주기"}</p>
+      <h3 className="text-xl font-extrabold text-neutral-900 mt-1">{s.code}</h3>
       <p className="text-[15px] font-semibold text-neutral-600 mt-0.5 break-keep">{s.name}</p>
       <p className="text-sm text-neutral-500 mt-2 leading-relaxed">{s.desc}</p>
       <div className="flex items-center justify-between mt-5">
@@ -98,7 +98,7 @@ export default function HitOverviewPage() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href={`/hero/hit/${HIT_STAGES.a.key}`} className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
-              {HIT_STAGES.a.brand} 시작하기 <ArrowRight className="h-4 w-4" />
+              {HIT_STAGES.a.code} 시작하기 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/hero/jh/write" className="inline-flex items-center gap-2 px-5 py-3 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-xl hover:border-neutral-400 transition-colors">
               A·B를 마쳤다면 · 희망 직무 등록

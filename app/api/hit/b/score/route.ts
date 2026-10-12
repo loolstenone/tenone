@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
       const matrixText = (Object.entries(scored.matrix.cells) as [HollandType, string][])
         .map(([k, v]) => `${HOLLAND_LABELS[k]}:${v}`).join(', ');
       const hitAContext = hitAData
-        ? `HIT A 프로필: ${hitAData.type_code} "${hitAData.type_name_ko}" · MBTI ${hitAData.mbti_type} · DISC ${hitAData.disc_primary} · 흥미 Top3 ${hitAData.ap_top3_code ?? '-'}\n`
-        : 'HIT A 결과 없음 (흥미×효능 매트릭스는 미측정)\n';
+        ? `HIT - Archetype 프로필: ${hitAData.type_code} "${hitAData.type_name_ko}" · MBTI ${hitAData.mbti_type} · DISC ${hitAData.disc_primary} · 흥미 Top3 ${hitAData.ap_top3_code ?? '-'}\n`
+        : 'HIT - Archetype 결과 없음 (흥미×효능 매트릭스는 미측정)\n';
       const msg = await anthropic.messages.create({
         model: HIT_REPORT_MODEL,
         max_tokens: 1800,

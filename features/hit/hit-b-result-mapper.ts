@@ -36,7 +36,7 @@ export const MATRIX_CELL_INFO: Record<string, { label: string; hint: string; ton
   탐색학습필요: { label: '배우면 되는 영역', hint: '끌리지만 아직 자신이 없다 — 학습으로 메울 수 있다', tone: 'bg-blue-50 text-blue-700 border-blue-200' },
   소진리스크: { label: '소진 주의', hint: '할 수 있지만 끌리지 않는다 — 오래 하면 지친다', tone: 'bg-amber-50 text-amber-700 border-amber-200' },
   비관심영역: { label: '비관심 영역', hint: '지금은 우선순위가 아니다', tone: 'bg-neutral-50 text-neutral-500 border-neutral-200' },
-  미측정: { label: '미측정', hint: 'HIT A 흥미 결과가 있어야 교차할 수 있다', tone: 'bg-neutral-50 text-neutral-400 border-dashed border-neutral-200' },
+  미측정: { label: '미측정', hint: 'HIT - Archetype 흥미 결과가 있어야 교차할 수 있다', tone: 'bg-neutral-50 text-neutral-400 border-dashed border-neutral-200' },
 };
 
 export function cleanMarkdown(text: string): string {

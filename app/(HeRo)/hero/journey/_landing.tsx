@@ -24,7 +24,7 @@ const stages = [
       "당신의 잠재력은 아직 측정되지 않았을 뿐입니다. HIT 진단으로 숨겨진 강점을 발견하세요. 10분이면 충분합니다.",
       "Dreamer 단계에서는 자기 인식이 핵심입니다. 나는 무엇을 잘하고, 무엇이 부족한지. HIT가 그 거울이 됩니다.",
     ],
-    cta: { label: "HIT A 시작하기", href: "/hero/hit/a" },
+    cta: { label: "HIT - Archetype 시작하기", href: "/hero/hit/a" },
     align: "left" as const,
   },
   {

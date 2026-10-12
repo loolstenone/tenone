@@ -145,7 +145,7 @@ export default function TalentAgentPage() {
 
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              "HIT A 검사 · 전체 웹 보고서 · PDF 1회",
+              "HIT - Archetype 검사 · 전체 웹 보고서 · PDF 1회",
               "희망 직무 등록 · 비공개 매칭 후보 등록",
               "AI 상담 체험 · 하루 3턴 · 3일",
               "나에게 맞는 기업·자리 조용한 추천",

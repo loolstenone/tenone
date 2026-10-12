@@ -41,7 +41,7 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
     fetch(`/api/hit/c/result/${resultId}`).then(x => x.json()).then(d => { if (!d.error) setR(d); setLoading(false); }).catch(() => setLoading(false));
   }, [resultId]);
 
-  useReportTitle([`HeRo ${HIT_STAGES.c.code} ${HIT_STAGES.c.brand} ${HIT_STAGES.c.name}`, r ? `준비도 ${r.readiness_total}` : null, isoDay(r?.created_at)], !!r);
+  useReportTitle([`HeRo ${HIT_STAGES.c.code} ${HIT_STAGES.c.name}`, r ? `준비도 ${r.readiness_total}` : null, isoDay(r?.created_at)], !!r);
 
   if (loading) return <LoadingState />;
   if (!r) return <NotFoundState retryHref="/hero/hit/c" />;
@@ -54,8 +54,8 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
     <>
     <ReportShell>
       {print && <ReportToolbar backHref={`/hero/hit/c/result/${resultId}`} />}
-      {print && <ReportCover code={`${HIT_STAGES.c.code} · 생애주기`} title={HIT_STAGES.c.brand} subtitle={HIT_STAGES.c.name} headline={`취업 준비도 ${r.readiness_total}`} sub={STAGE_LABELS[r.journey_stage]} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
-      {!print && <ReportHeader code={`${HIT_STAGES.c.code} · 생애주기`} title={HIT_STAGES.c.brand} subtitle={HIT_STAGES.c.name} date={formatDate(r.created_at)}
+      {print && <ReportCover code={`생애주기`} title={HIT_STAGES.c.code} subtitle={HIT_STAGES.c.name} headline={`취업 준비도 ${r.readiness_total}`} sub={STAGE_LABELS[r.journey_stage]} date={formatDate(r.created_at)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`생애주기`} title={HIT_STAGES.c.code} subtitle={HIT_STAGES.c.name} date={formatDate(r.created_at)}
         stage={STAGE_LABELS[r.journey_stage]} stageDesc={STAGE_DESC[r.journey_stage]} />}
       {!print && <HitChain type="c" id={resultId} />}
       {!print && <SectionNav items={NAV} />}

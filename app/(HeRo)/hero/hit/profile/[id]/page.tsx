@@ -152,7 +152,7 @@ export default function IntegratedProfilePage() {
         <Image src="/hero-logo.png" alt="HeRo" width={56} height={56} className="h-14 w-14 mx-auto mb-3" />
         <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">Integrated Hero Profile</p>
         <h1 className="text-2xl md:text-3xl font-extrabold">통합 영웅 프로필</h1>
-        <p className="text-sm text-neutral-500 mt-2">HIT A + HIT B 종합 (공통 기반)</p>
+        <p className="text-sm text-neutral-500 mt-2">HIT - Archetype + HIT - Bounce 종합 (공통 기반)</p>
       </div>
 
       {/* ── HIT A Section ── */}

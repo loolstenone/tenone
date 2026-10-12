@@ -10,7 +10,7 @@ import { HIT_STAGES } from "@/lib/hit/stages";
 // 검사 구성·문항 수는 실제 출제(/api/hit/b/questions → hit_questions test_type B)와 같아야 한다 (2026-10-12 재정의 — 전 회원 공통 "역량과 방향")
 const modules = [
   { icon: Target, title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: "~7분" },
-  { icon: Shield, title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. HIT A의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: "~4분" },
+  { icon: Shield, title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. HIT - Archetype의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: "~4분" },
   { icon: Compass, title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: "~2분" },
 ];
 const TOTAL_QUESTIONS = 112;
@@ -77,14 +77,14 @@ function HitBIntroContent() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{HIT_STAGES.b.code} · 공통 기반</p>
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">공통 기반</p>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            {HIT_STAGES.b.brand}
+            {HIT_STAGES.b.code}
           </h1>
           <p className="text-lg font-semibold text-neutral-600 -mt-2 mb-4">{HIT_STAGES.b.name}</p>
           <p className="text-neutral-500 mb-2">
             무엇을 할 수 있고, 어디로 가고 싶은지.<br />
-            역량·효능감·자기와 직무에 대한 이해를 진단합니다. HIT A와 함께 모든 회원의 공통 기반입니다.
+            역량·효능감·자기와 직무에 대한 이해를 진단합니다. HIT - Archetype과 함께 모든 회원의 공통 기반입니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
             <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 13분</span>
@@ -103,16 +103,16 @@ function HitBIntroContent() {
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-800">HIT - A를 먼저 완료해주세요</p>
+                <p className="text-sm font-bold text-amber-800">HIT - Archetype을 먼저 완료해주세요</p>
                 <p className="text-xs text-amber-600 mt-1">
-                  효능감을 HIT A의 흥미 결과와 겹쳐 분석합니다.
-                  아직 HIT A를 완료하지 않으셨다면 먼저 진행해주세요.
+                  효능감을 HIT - Archetype의 흥미 결과와 겹쳐 분석합니다.
+                  아직 HIT - Archetype을 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
                   onClick={() => router.push('/hero/hit/a')}
                   className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900"
                 >
-                  HIT - A 시작하기 →
+                  HIT - Archetype 시작하기 →
                 </button>
               </div>
             </div>
@@ -160,7 +160,7 @@ function HitBIntroContent() {
             {starting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
             ) : (
-              <>{HIT_STAGES.b.brand} 시작하기 <ArrowRight className="h-5 w-5" /></>
+              <>{HIT_STAGES.b.code} 시작하기 <ArrowRight className="h-5 w-5" /></>
             )}
           </button>
         </div>

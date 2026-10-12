@@ -25,13 +25,13 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!aResult) {
-        return errorResponse('HIT A 결과를 찾을 수 없습니다. 먼저 HIT A를 완료해주세요.', 400);
+        return errorResponse('HIT - Archetype 결과를 찾을 수 없습니다. 먼저 HIT - Archetype을 완료해주세요.', 400);
       }
     } else {
       // memberId로 최근 HIT A 결과 검색
       const aResult = await getLatestHitAResult(memberId);
       if (!aResult) {
-        return errorResponse('HIT A를 먼저 완료해야 합니다.', 400);
+        return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
       }
     }
 

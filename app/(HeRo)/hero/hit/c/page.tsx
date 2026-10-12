@@ -36,8 +36,8 @@ export default function HitCIntroPage() {
     <div>
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">{stage.code} · 생애주기</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">{stage.brand}</h1>
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">생애주기</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">{stage.code}</h1>
           <p className="text-lg font-semibold text-neutral-600 mb-4 break-keep">{stage.name}</p>
           <p className="text-neutral-500 mb-2">{stage.desc}</p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
@@ -52,7 +52,7 @@ export default function HitCIntroPage() {
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-bold text-amber-800">{error}</p>
-              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">HIT A 시작하기 →</button>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">HIT - Archetype 시작하기 →</button>
             </div>
           </div>
         </section>
@@ -77,9 +77,9 @@ export default function HitCIntroPage() {
 
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-          <p className="text-xs text-neutral-400 mb-4">HIT A·B를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
+          <p className="text-xs text-neutral-400 mb-4">HIT - Archetype · Bounce를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
           <button onClick={handleStart} disabled={starting} className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50">
-            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{stage.brand} 시작하기 <ArrowRight className="h-5 w-5" /></>}
+            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{stage.code} 시작하기 <ArrowRight className="h-5 w-5" /></>}
           </button>
         </div>
       </section>

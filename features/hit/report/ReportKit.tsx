@@ -47,11 +47,11 @@ export function HitChain({ type, id }: { type: string; id: string }) {
   if (!d) return <div className="mt-10 h-[88px]" />;
 
   const items: { key: string; code: string; name: string; data: ChainItem; href: string; start: string }[] = [
-    { key: "a", code: "A", name: HIT_STAGES.a.brand, data: d.a, href: d.a ? `/hero/hit/a/result/${d.a.id}` : "/hero/hit/a", start: "/hero/hit/a" },
-    { key: "b", code: "B", name: HIT_STAGES.b.brand, data: d.b, href: d.b ? `/hero/hit/b/result/${d.b.id}` : `/hero/hit/b${d.a ? `?a=${d.a.id}` : ""}`, start: "/hero/hit/b" },
+    { key: "a", code: HIT_STAGES.a.letter, name: HIT_STAGES.a.code, data: d.a, href: d.a ? `/hero/hit/a/result/${d.a.id}` : "/hero/hit/a", start: "/hero/hit/a" },
+    { key: "b", code: HIT_STAGES.b.letter, name: HIT_STAGES.b.code, data: d.b, href: d.b ? `/hero/hit/b/result/${d.b.id}` : `/hero/hit/b${d.a ? `?a=${d.a.id}` : ""}`, start: "/hero/hit/b" },
     d.stage
-      ? { key: d.stage.key, code: HIT_STAGES[d.stage.key as keyof typeof HIT_STAGES].code.replace("HIT ", ""), name: d.stage.name, data: d.stage, href: `/hero/hit/${d.stage.key}/result/${d.stage.id}`, start: "" }
-      : { key: "stage", code: "C~F", name: "생애주기 검사 선택", data: null, href: "/hero/hit", start: "/hero/hit" },
+      ? { key: d.stage.key, code: HIT_STAGES[d.stage.key as keyof typeof HIT_STAGES].letter, name: d.stage.name, data: d.stage, href: `/hero/hit/${d.stage.key}/result/${d.stage.id}`, start: "" }
+      : { key: "stage", code: "C~G", name: "생애주기 검사 선택", data: null, href: "/hero/hit", start: "/hero/hit" },
   ];
 
   return (

@@ -85,8 +85,8 @@ export const INSIGHT_COPY: Record<string, DimensionCopy> = {
   self_understanding: {
     label: '자기 이해', what: '내 강점·가치·맞는 환경을 알고 설명할 수 있는 정도',
     hi: '내가 어떤 사람이고 무엇을 원하는지 분명합니다. 자기소개와 면접에서 설득력이 생깁니다.',
-    mid: '대략은 알고 있습니다. HIT A 결과를 내 말로 세 문장 요약해 보면 훨씬 선명해집니다.',
-    low: '아직 나를 설명할 말이 부족할 수 있어요. HIT A의 강점과 유형을 먼저 읽어 보는 것이 출발점입니다.',
+    mid: '대략은 알고 있습니다. HIT - Archetype 결과를 내 말로 세 문장 요약해 보면 훨씬 선명해집니다.',
+    low: '아직 나를 설명할 말이 부족할 수 있어요. HIT - Archetype의 강점과 유형을 먼저 읽어 보는 것이 출발점입니다.',
   },
   job_understanding: {
     label: '직무 이해', what: '희망 직무가 실제로 하는 일·필요한 역량·성장 경로를 아는 정도',
@@ -97,7 +97,7 @@ export const INSIGHT_COPY: Record<string, DimensionCopy> = {
 };
 
 export const EFFICACY_INFO = {
-  what: '효능감은 "이 분야의 일을 내가 해낼 수 있다"는 자신감입니다. HIT A의 흥미("끌린다")와 겹쳐 보면 어디에 힘을 쓸지 보입니다.',
+  what: '효능감은 "이 분야의 일을 내가 해낼 수 있다"는 자신감입니다. HIT - Archetype의 흥미("끌린다")와 겹쳐 보면 어디에 힘을 쓸지 보입니다.',
 };
 
 export const HOLLAND_COPY: Record<string, { label: string; what: string }> = {
@@ -114,7 +114,7 @@ export const READINESS_COPY: Record<string, DimensionCopy> = {
   self: {
     label: '진로 자기 이해', what: '왜 이 직무인지, 나와 어떻게 맞는지 설명할 수 있는 정도',
     hi: '지원 동기를 내 경험으로 설명할 수 있습니다.', mid: '방향은 있습니다. "왜 이 직무인가"를 내 경험 하나와 연결해 적어 보세요.',
-    low: '왜 이 직무인지 아직 말로 하기 어려울 수 있어요. HIT A·B 결과에서 근거를 찾아보세요.',
+    low: '왜 이 직무인지 아직 말로 하기 어려울 수 있어요. HIT - Archetype · Bounce 결과에서 근거를 찾아보세요.',
   },
   portfolio: {
     label: '포트폴리오', what: '내 역량을 보여 줄 결과물이 정리되어 있는 정도',
@@ -173,7 +173,7 @@ export const ONBOARDING_COPY: Record<string, DimensionCopy> = {
 export const DECISION_COPY: DimensionCopy = {
   label: '진로 결정 확신', what: '첫 직무를 분명히, 내 판단으로 정했는가',
   hi: '가고 싶은 방향이 분명하고 스스로 정했습니다.', mid: '방향은 정했지만 확신이 더 필요합니다. 직무 경험(인턴·프로젝트)으로 확인해 보세요.',
-  low: '아직 방향을 고르는 중입니다. 괜찮습니다 — HIT A·B 결과의 "최적 영역"부터 좁혀 보세요.',
+  low: '아직 방향을 고르는 중입니다. 괜찮습니다 — HIT - Archetype · Bounce 결과의 "최적 영역"부터 좁혀 보세요.',
 };
 
 // ── HIT A ──

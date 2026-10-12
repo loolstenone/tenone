@@ -56,7 +56,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
       .catch(() => setLoading(false));
   }, [resultId]);
 
-  useReportTitle([`HeRo ${HIT_STAGES.b.code} ${HIT_STAGES.b.brand} ${HIT_STAGES.b.name}`, result?.trackName, isoDay(result?.createdAt)], !!result);
+  useReportTitle([`HeRo ${HIT_STAGES.b.code} ${HIT_STAGES.b.name}`, result?.trackName, isoDay(result?.createdAt)], !!result);
 
   if (loading) return <LoadingState />;
   if (!result) return <NotFoundState retryHref="/hero/hit/b" />;
@@ -74,8 +74,8 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
     <div className={print ? "hit-report-container" : ""}>
     <ReportShell>
       {print && <ReportToolbar backHref={`/hero/hit/b/result/${resultId}`} />}
-      {print && <ReportCover code={`${HIT_STAGES.b.code} · 공통 기반`} title={HIT_STAGES.b.brand} subtitle={HIT_STAGES.b.name} headline={result.trackName} sub={STAGE_LABELS[result.journeyStage]} date={formatDate(result.createdAt)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
-      {!print && <ReportHeader code={`${HIT_STAGES.b.code} · 공통 기반`} title={HIT_STAGES.b.brand} subtitle={HIT_STAGES.b.name} date={formatDate(result.createdAt)}
+      {print && <ReportCover code={`공통 기반`} title={HIT_STAGES.b.code} subtitle={HIT_STAGES.b.name} headline={result.trackName} sub={STAGE_LABELS[result.journeyStage]} date={formatDate(result.createdAt)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
+      {!print && <ReportHeader code={`공통 기반`} title={HIT_STAGES.b.code} subtitle={HIT_STAGES.b.name} date={formatDate(result.createdAt)}
         stage={STAGE_LABELS[result.journeyStage]} stageDesc={STAGE_DESC[result.journeyStage]} />}
       {print && <div className="text-center mb-4"><span className="inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-red-50 text-[#E53935]">{STAGE_LABELS[result.journeyStage]}</span><p className="text-[15px] text-neutral-600 mt-4 leading-[1.8]">{STAGE_DESC[result.journeyStage]}</p></div>}
       {!print && <HitChain type="b" id={resultId} />}
@@ -125,7 +125,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
             })}
           </div>
         ) : (
-          <p className="text-[15px] text-neutral-500">HIT A 흥미 결과가 없어 교차 분석은 생략했습니다. 아래 효능감만 참고하세요.</p>
+          <p className="text-[15px] text-neutral-500">HIT - Archetype 흥미 결과가 없어 교차 분석은 생략했습니다. 아래 효능감만 참고하세요.</p>
         )}
         <h3 className="text-[15px] font-bold text-neutral-900 mt-10 mb-2">분야별 효능감</h3>
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">

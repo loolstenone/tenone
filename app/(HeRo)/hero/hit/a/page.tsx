@@ -103,7 +103,7 @@ export default function HitAIntroPage() {
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            {HIT_STAGES.a.code} {HIT_STAGES.a.brand} · 공통 기반
+            {HIT_STAGES.a.code} · 공통 기반
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
             내가 누구인지 알아보세요
@@ -179,7 +179,7 @@ export default function HitAIntroPage() {
               {starting ? (
                 <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
               ) : (
-                <>{HIT_STAGES.a.brand} 시작하기 <ArrowRight className="h-5 w-5" /></>
+                <>{HIT_STAGES.a.code} 시작하기 <ArrowRight className="h-5 w-5" /></>
               )}
             </button>
           )}

@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
     if (!hitAData) hitAData = await getLatestHitAResult(session.member_id);
     if (!hitAData) {
-      return errorResponse('HIT A를 먼저 완료해야 합니다.', 400);
+      return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
     }
 
     // 채점
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-      const hitAContext = `HIT A 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
+      const hitAContext = `HIT - Archetype 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
 
       const msg = await anthropic.messages.create({
         model: HIT_REPORT_MODEL,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 - 마지막에 인생 2막을 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT F 인생 2막 분석 결과:\n` +
+          content: `${hitAContext}HIT - Flourish 인생 2막 분석 결과:\n` +
             `삶의 만족도: ${scored.lifeSatisfaction}점\n` +
             `남은 열정: ${scored.remainingPassion}점\n` +
             `심리적 전환: ${scored.psychTransition}점\n` +

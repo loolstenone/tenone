@@ -52,9 +52,9 @@ const pricing = [
     plan: "체험",
     price: "무료",
     priceNum: 0,
-    desc: "HIT A/B 기본 결과",
+    desc: "HIT - Archetype · Bounce 기본 결과",
     features: [
-      "HIT A/B 검사",
+      "HIT - Archetype · Bounce 검사",
       "기본 결과 리포트 (웹)",
       "회원 가입 시 풀 버전 PDF 제공",
     ],
@@ -304,10 +304,10 @@ function AICounselingContent() {
                   <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT A 검사를 먼저 완료해주세요</h3>
-                  <p className="text-sm text-neutral-500 mb-6">성격/강점 진단(HIT A)을 완료해야 맞춤 상담이 가능합니다.</p>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Archetype 검사를 먼저 완료해주세요</h3>
+                  <p className="text-sm text-neutral-500 mb-6">성격/강점 진단(HIT - Archetype)을 완료해야 맞춤 상담이 가능합니다.</p>
                   <Link href="/hero/hit/a" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
-                    HIT A 시작하기 <ArrowRight className="h-4 w-4" />
+                    HIT - Archetype 시작하기 <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}
@@ -316,10 +316,10 @@ function AICounselingContent() {
                   <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT B 검사를 완료하면 더 정확합니다</h3>
-                  <p className="text-sm text-neutral-500 mb-6">역량/적성 진단(HIT B)까지 완료하면 교차 분석이 가능합니다.</p>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Bounce 검사를 완료하면 더 정확합니다</h3>
+                  <p className="text-sm text-neutral-500 mb-6">역량/적성 진단(HIT - Bounce)까지 완료하면 교차 분석이 가능합니다.</p>
                   <Link href="/hero/hit/b" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
-                    HIT B 시작하기 <ArrowRight className="h-4 w-4" />
+                    HIT - Bounce 시작하기 <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}

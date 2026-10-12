@@ -27,7 +27,7 @@ export function getHeroSystemPrompt(mode: HitMode, alertLevel: number = 0): stri
 ## 검사 모델 기준 (HIT 구조)
 HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 이해하고 상담에 적용한다.
 
-### HIT A 구조
+### HIT - Archetype 구조
 1. 기저요인검사(UF test) — 50문항, 7점 리커트, 9영역
    - 형제관계(sibling), 부모관계(parent), 가정환경(family), 또래관계(peer), 자기개념(self)
    - 기질(temperament), 경제환경(economic), 트라우마(trauma), 문화세대(cultural)
@@ -38,7 +38,7 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 4. S-Power — MBTI x DISC x UF 교차분석으로 산출한 8가지 핵심 강점
    - strategic, execution, creativity, interpersonal, analytical, harmony, breakthrough, guard
 
-### HIT B 구조 (완료 시)
+### HIT - Bounce 구조 (완료 시)
 1. 인성검사 — Big Five 기반, 다크 트라이어드 내부 플래그 (절대 노출 금지)
 2. 기초직무적성검사 — RIASEC Holland 코드
 3. 기초직무역량검사 — 직무별 분기
@@ -71,7 +71,7 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 
   const modePrompts: Record<HitMode, string> = {
     A_ONLY: `
-## 모드: HIT A만 완료
+## 모드: HIT - Archetype만 완료
 
 ### 답변 가능
 - DISC 행동 특성 해석
@@ -82,13 +82,13 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 - 적합 환경 제안
 
 ### 답변 제한
-직무 매칭, 역량 진단, 준비도 → "HIT B를 받으시면 더 정확한 분석이 가능합니다"
+직무 매칭, 역량 진단, 준비도 → "HIT - Bounce를 받으시면 더 정확한 분석이 가능합니다"
 
 ### 빠른 질문 예시
 [DISC 결과 궁금해요] [직장에서 어떻게 나타나나요?] [잘 맞는 유형은?] [성장 방법]`,
 
     B_ONLY: `
-## 모드: HIT B만 완료
+## 모드: HIT - Bounce만 완료
 
 ### 답변 가능
 - 인성 프로필 해석
@@ -97,13 +97,13 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 - 준비도 분석 + 실행 계획
 
 ### 답변 제한
-성격 유형, DISC×역량 교차, 기저요인 → "HIT A를 받으시면 통합 분석이 가능합니다"
+성격 유형, DISC×역량 교차, 기저요인 → "HIT - Archetype을 받으시면 통합 분석이 가능합니다"
 
 ### 빠른 질문 예시
 [적성에 맞는 직무는?] [역량 올리려면?] [취업 준비 어디서부터?] [면접 준비]`,
 
     AB_FULL: `
-## 모드: HIT A + B 모두 완료
+## 모드: HIT - Archetype + Bounce 모두 완료
 
 ### 답변 가능
 전체 영역 + A×B 교차 분석 + 직무 적합도(%) + 성장 로드맵
@@ -154,10 +154,10 @@ export function getHeroGreeting(mode: HitMode, data: {
 }): string {
   switch (mode) {
     case 'A_ONLY':
-      return `안녕하세요. HIT A 결과를 확인했습니다.\n${data.typeCode} 유형으로 ${data.typeNameKo || ''} 성향이 나타나고 있네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. HIT - Archetype 결과를 확인했습니다.\n${data.typeCode} 유형으로 ${data.typeNameKo || ''} 성향이 나타나고 있네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
     case 'B_ONLY':
-      return `안녕하세요. HIT B 결과를 확인했습니다.\nRIASEC 적성은 ${data.hollandCode || ''}이고, ${data.topCompetency || ''} 역량이 눈에 띄네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. HIT - Bounce 결과를 확인했습니다.\nRIASEC 적성은 ${data.hollandCode || ''}이고, ${data.topCompetency || ''} 역량이 눈에 띄네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
     case 'AB_FULL':
-      return `안녕하세요. HIT A와 B 결과를 모두 확인했습니다.\n${data.typeCode} 유형에, RIASEC은 ${data.hollandCode || ''}이시네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. HIT - Archetype과 HIT - Bounce 결과를 모두 확인했습니다.\n${data.typeCode} 유형에, RIASEC은 ${data.hollandCode || ''}이시네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
   }
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { HIT_BY_LETTER } from "@/lib/hit/stages";
+
 interface HitModelGuideProps {
   mode?: "modal" | "print";
 }
@@ -23,10 +25,10 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           각 검사를 따로 해석하는 대신 <strong className="text-neutral-900">정해진 규칙으로 교차 분석</strong>합니다. 같은 응답에는 언제나 같은 결과가 나옵니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          HIT A는 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
+          HIT - Archetype은 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
           성격유형(MBTI) · 행동유형(DISC) · 인성 · 적성까지 통합 측정하고,
           성격·행동·성품·적성 점수를 정해진 가중치로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
-          <strong className="text-neutral-900">HIT B</strong>는 역량과 방향을 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT C ~ F</strong>는 그 위에서
+          <strong className="text-neutral-900">HIT - Bounce</strong>는 역량과 방향을 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT - Challenger ~ Flourish</strong>는 그 위에서
           신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
@@ -42,14 +44,14 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* ══ 모델 구조표 ══ */}
       <div className="border border-neutral-200 rounded-xl overflow-hidden mb-10">
         {/* HIT A 헤더 */}
-        <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT A</span>
-          <span className="text-center">Archetype · 검사의 개념 및 구조</span>
+        <div className="grid grid-cols-[130px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
+          <span>HIT - Archetype</span>
+          <span className="text-center">검사의 개념 및 구조</span>
           <span className="text-right">검사 항목</span>
         </div>
 
         {/* 기질 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+        <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800">기질</span>
           <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
             <span className="bg-neutral-100 px-3 py-1 rounded text-xs">타고나는 기질</span>
@@ -65,7 +67,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         {/* 성격유형 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-start px-6 py-5 border-b border-neutral-100">
+        <div className="grid grid-cols-[130px_1fr_120px] items-start px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800 pt-1">성격유형</span>
           <div className="space-y-2.5">
             {[
@@ -90,7 +92,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         {/* 행동유형 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+        <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800">행동유형</span>
           <div className="flex justify-center gap-3">
             {[
@@ -104,21 +106,21 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         {/* 인성 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+        <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800">인성</span>
           <p className="text-center text-sm text-neutral-500">진정성 · 관계성 · 정서 · 윤리 · 성장</p>
           <span className="text-sm font-semibold text-neutral-700 text-right">인성 검사</span>
         </div>
 
         {/* 적성 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+        <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800">적성</span>
           <p className="text-center text-sm text-neutral-500">Holland RIASEC 6 차원</p>
           <span className="text-sm font-semibold text-neutral-700 text-right">기초 적성검사</span>
         </div>
 
         {/* 강점 */}
-        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 bg-neutral-50">
+        <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-4 bg-neutral-50">
           <span className="text-[15px] font-semibold text-neutral-800">강점</span>
           <p className="text-center text-sm text-neutral-400">MBTI × DISC × 인성 × 적성 교차분석 → S-Power 도출 · UF는 결과를 해석하는 렌즈 (회원 리포트)</p>
           <span className="text-sm text-neutral-400 text-right">종합 산출</span>
@@ -127,23 +129,23 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         {/* 구분선 */}
         <div className="border-t-2 border-neutral-300" />
 
-        {/* HIT B ~ F 헤더 */}
-        <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT B ~ G</span>
+        {/* HIT - Bounce ~ Flourish 헤더 */}
+        <div className="grid grid-cols-[130px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
+          <span>HIT - Bounce ~ Gap</span>
           <span className="text-center">공통 B · 생애주기 C~F · 상황 G</span>
           <span className="text-right">검사 항목</span>
         </div>
 
         {[
-          { k: "B", scope: "Bounce · 역량과 방향 (전 회원 공통)", test: "역량 · 효능감 · 이해" },
-          { k: "C", scope: "Challenger · 진입 — 대학생, 사회 초년", test: "준비 · 적응 · 결정" },
-          { k: "D", scope: "Departure · 전환 — 경력 이직", test: "경력 자본 · 전환" },
-          { k: "E", scope: "Elevate · 리더십 전환 (시니어)", test: "리더십 전환 진단" },
-          { k: "F", scope: "Flourish · 인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
-          { k: "G", scope: "Gap · 경력 공백 · 복귀 (상황 모듈)", test: "재진입 로드맵" },
+          { k: "B", scope: "역량과 방향 (전 회원 공통)", test: "역량 · 효능감 · 이해" },
+          { k: "C", scope: "진입 — 대학생, 사회 초년", test: "준비 · 적응 · 결정" },
+          { k: "D", scope: "전환 — 경력 이직", test: "경력 자본 · 전환" },
+          { k: "E", scope: "리더십 전환 (시니어)", test: "리더십 전환 진단" },
+          { k: "F", scope: "인생 2막 준비 (은퇴, 퇴직)", test: "인생 2막 설계" },
+          { k: "G", scope: "경력 공백 · 복귀 (상황 모듈)", test: "재진입 로드맵" },
         ].map((r, i, arr) => (
-          <div key={r.k} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
-            <span className="text-[15px] font-semibold text-neutral-800">HIT {r.k}</span>
+          <div key={r.k} className={`grid grid-cols-[130px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
+            <span className="text-[15px] font-semibold text-neutral-800">{HIT_BY_LETTER[r.k]?.code ?? `HIT ${r.k}`}</span>
             <span className="text-sm text-neutral-500 text-center">{r.scope}</span>
             <span className="text-sm font-semibold text-neutral-700 text-right">{r.test}</span>
           </div>
@@ -157,7 +159,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* UF 기저요인 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">기저요인검사 (UF test)</span>
           <span className="text-sm text-neutral-400 ml-auto">49문항 · 회원 리포트 전용</span>
         </div>
@@ -202,7 +204,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* MBTI */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">성격유형 (4축)</span>
           <span className="text-sm text-neutral-400 ml-auto">62문항</span>
         </div>
@@ -248,7 +250,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* DISC */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">DISC 행동유형검사</span>
           <span className="text-sm text-neutral-400 ml-auto">40문항</span>
         </div>
@@ -284,7 +286,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 인성 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">인성검사</span>
           <span className="text-sm text-neutral-400 ml-auto">5 차원</span>
         </div>
@@ -312,7 +314,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 적성 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">기초 적성검사</span>
           <span className="text-sm text-neutral-400 ml-auto">RIASEC 6 차원</span>
         </div>
@@ -355,7 +357,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* S-Power */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700">HIT A</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700">HIT - Archetype</span>
           <span className="text-lg font-bold text-neutral-900">S-Power 핵심 강점</span>
           <span className="text-sm text-neutral-400 ml-auto">종합 산출</span>
         </div>
@@ -381,11 +383,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 구분선 */}
       <div className="border-t border-neutral-200 my-12" />
 
-      {/* HIT B ~ F — 생애주기별 심화 */}
+      {/* HIT - Bounce ~ Flourish — 생애주기별 심화 */}
       <div className="mb-12">
         <div className="text-center mb-8">
           <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">심화 검사</p>
-          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT C ~ F · 생애주기별 특화 진단</h3>
+          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Challenger ~ Flourish · 생애주기별 특화 진단</h3>
           <p className="text-sm text-neutral-500 leading-relaxed">
             공통 검사(A·B)를 마친 뒤, 지금 내 생애주기에 맞는 하나를 고릅니다. 이력서·면접·재정 같은 준비 항목은 검사가 아니라
             나의 저니 체크리스트에서 관리하고, 그 완료율이 준비도 점수가 됩니다. 경력 공백·복귀는 단계와 무관한 상황 모듈입니다.
@@ -396,35 +398,35 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           {[
             {
               key: "C",
-              title: "Challenger · 진입 — 대학생, 사회 초년",
+              title: "진입 — 대학생, 사회 초년",
               tone: "text-green-700 bg-green-50",
               desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. 취업 준비 상태(자기 인식) · 첫 직무 적응 · 진로 결정 확신을 진단하고, 실제 준비는 체크리스트로 셉니다.",
               dims: ["취업 준비", "첫 직무 적응", "진로 결정"],
             },
             {
               key: "D",
-              title: "Departure · 전환 — 경력 이직",
+              title: "전환 — 경력 이직",
               tone: "text-blue-700 bg-blue-50",
               desc: "경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기(Push/Pull) · 전환 가능성을 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
               dims: ["경력 자본", "이직 동기", "전환 가능성"],
             },
             {
               key: "E",
-              title: "Elevate · 리더십 전환 (시니어)",
+              title: "리더십 전환 (시니어)",
               tone: "text-red-700 bg-red-50",
               desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크를 측정해 리더십 전환 지도를 제시합니다.",
               dims: ["전문성", "리더십", "정체성", "네트워크"],
             },
             {
               key: "F",
-              title: "Flourish · 인생 2막 준비 (은퇴, 퇴직)",
+              title: "인생 2막 준비 (은퇴, 퇴직)",
               tone: "text-amber-700 bg-amber-50",
               desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결로 인생 2막의 설계도를 그립니다.",
               dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결"],
             },
             {
               key: "G",
-              title: "Gap · 경력 공백 · 복귀 (상황 모듈)",
+              title: "경력 공백 · 복귀 (상황 모듈)",
               tone: "text-violet-700 bg-violet-50",
               desc: "육아 · 학업 · 건강 등으로 비운 시간 이후 돌아오는 상황. 어느 단계에서든 해당자만. 공백 맥락 · 경력 유효성 · 회복탄력성 · 복귀 방향을 측정합니다.",
               dims: ["공백 맥락", "경력 유효성", "회복탄력성", "복귀 방향"],
@@ -432,7 +434,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           ].map((t) => (
             <div key={t.key} className="border border-neutral-200 rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
-                <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${t.tone}`}>HIT {t.key}</span>
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${t.tone}`}>{HIT_BY_LETTER[t.key]?.code ?? `HIT ${t.key}`}</span>
                 <span className="text-base font-bold text-neutral-900">{t.title}</span>
               </div>
               <p className="text-sm text-neutral-600 leading-relaxed mb-3">{t.desc}</p>
@@ -446,23 +448,23 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         <p className="text-center text-xs text-neutral-400 mt-6">
-          HIT B 이후 검사는 HIT A·B가 완료된 상태에서만 의미 있게 해석됩니다.
+          HIT - Bounce 이후 검사는 HIT - Archetype · Bounce가 완료된 상태에서만 의미 있게 해석됩니다.
         </p>
       </div>
 
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT A Archetype</span>은 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
+          <span className="font-bold text-neutral-900">HIT - Archetype</span>은 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
           성격·행동·인성·적성을 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 기저요인은 해석 참고용입니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT B Bounce</span>는 HIT A의 결과를 기반으로
+          <span className="font-bold text-neutral-900">HIT - Bounce</span>는 HIT - Archetype의 결과를 기반으로
           핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
-          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(HIT G · Gap)입니다.
+          <span className="font-bold text-neutral-900">HIT - Challenger ~ Flourish</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
+          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(HIT - Gap)입니다.
         </p>
         <p className="text-sm text-neutral-400 leading-relaxed">
           채점 공식·해설 방식·검증 계획은 HIT 엔진 페이지(/hero/hit/method)에 공개합니다.

@@ -29,6 +29,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import MatchingInbox from "@/features/hero/MatchingInbox";
+import { HIT_STAGES } from "@/lib/hit/stages";
 import { GoalsTab } from "@/features/hero/GoalsTab";
 import { JobsTab } from "@/features/hero/JobsTab";
 import { CoachingTab } from "@/features/hero/CoachingTab";
@@ -297,15 +298,15 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
 
   const checklistByStage: Record<string, { label: string; done: boolean; href: string }[]> = {
     Challenger: [
-      { label: "HIT A 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
+      { label: "HIT - Archetype 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
     ],
     Trainee: [
-      { label: "HIT A 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
-      { label: "HIT B 검사 완료", done: conditions.has_hit_b, href: "/hero/hit/b" },
+      { label: "HIT - Archetype 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
+      { label: "HIT - Bounce 검사 완료", done: conditions.has_hit_b, href: "/hero/hit/b" },
       { label: "이력서 작성", done: conditions.has_resume, href: "/hero/resume/workspace" },
     ],
     Debut: [
-      { label: "HIT A+B 완료", done: conditions.has_hit_a && conditions.has_hit_b, href: "/hero/hit" },
+      { label: "HIT - Archetype + Bounce 완료", done: conditions.has_hit_a && conditions.has_hit_b, href: "/hero/hit" },
       { label: "이력서 작성", done: conditions.has_resume, href: "/hero/resume/workspace" },
       { label: "JH 12문항 작성", done: conditions.has_jh, href: "/hero/jh/write" },
       { label: "첫 매칭 수신", done: conditions.has_match, href: "#matching" },
@@ -384,9 +385,9 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   let mission: { title: string; desc: string; href: string; reward: string | null } | null = null;
 
   if (!c.has_hit_a) {
-    mission = { title: "HIT A 검사", desc: "약 25분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: null };
+    mission = { title: "HIT - Archetype 검사", desc: "약 25분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: null };
   } else if (!c.has_hit_b) {
-    mission = { title: "HIT B 역량과 방향", desc: "역량·효능감이 더해져요 (약 13분)", href: "/hero/hit/b", reward: null };
+    mission = { title: "HIT - Bounce 역량과 방향", desc: "역량·효능감이 더해져요 (약 13분)", href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
     mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
@@ -540,14 +541,11 @@ function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: 
 /* ═════════════════════════ Hero Type 탭 ═════════════════════════ */
 
 function HeroTypeTab({ status }: { status: JourneyStatus }) {
-  const tests = [
-    { key: "a", label: "HIT A",  subtitle: "본질 · 영웅 유형",     done: status.conditions.has_hit_a },
-    { key: "b", label: "HIT B",  subtitle: "역량 · 준비도",          done: status.conditions.has_hit_b },
-    { key: "c", label: "HIT C",  subtitle: "경력 전환 (심화)",       done: false },
-    { key: "d", label: "HIT D",  subtitle: "시니어 커리어 (심화)",  done: false },
-    { key: "e", label: "HIT E",  subtitle: "2막 설계 (심화)",        done: false },
-    { key: "f", label: "HIT F",  subtitle: "복귀 설계 (심화)",       done: false },
-  ];
+  // 검사 체계 SSOT (lib/hit/stages.ts) — 손으로 적던 옛 목록(C=경력 전환 …)은 재편 전 체계였음 (2026-10-12)
+  const tests = Object.values(HIT_STAGES).map(st => ({
+    key: st.key, label: st.code, subtitle: st.name,
+    done: st.key === "a" ? status.conditions.has_hit_a : st.key === "b" ? status.conditions.has_hit_b : false,
+  }));
   return (
     <div className="space-y-6">
       <div className="bg-white border border-neutral-200 rounded-2xl p-6">

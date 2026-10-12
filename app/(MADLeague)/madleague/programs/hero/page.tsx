@@ -14,13 +14,13 @@ export default function HeroProgramPage() {
       <ProgramSection
         id="hit"
         eyebrow="HIT"
-        title="나의 영웅 유형 — HIT A"
+        title="나의 영웅 유형 — HIT - Archetype"
         intro="성격·행동·성품·적성과 성장 배경을 한 번에 보는 HeRo의 기본 검사. 회원이면 같은 Ten:One ID로 바로 시작하고, 결과는 내 계정에 남는다."
         tone="dark"
       >
         <div className="flex flex-wrap items-center gap-4">
           <CrossSiteLink href="/hero/hit/a" className="inline-flex items-center gap-3 bg-[#E53935] hover:bg-red-700 text-white font-bold px-8 py-4 text-lg transition">
-            HIT A 시작하기 <ArrowRight className="h-5 w-5" />
+            HIT - Archetype 시작하기 <ArrowRight className="h-5 w-5" />
           </CrossSiteLink>
           <p className="text-sm text-neutral-400">약 30분 · 221문항 · 무료 · 로그인 필요</p>
         </div>

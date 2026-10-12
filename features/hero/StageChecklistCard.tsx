@@ -69,7 +69,7 @@ export function StageChecklistCard({ stage: initialStage, compact = false }: { s
                     {STAGE_KEYS.map(k => (
                         <button key={k} type="button" onClick={() => setStage(k)}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${stage === k ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-200 text-neutral-600 hover:border-neutral-400"}`}>
-                            {HIT_STAGES[k].brand} · {HIT_STAGES[k].name}
+                            {HIT_STAGES[k].code} · {HIT_STAGES[k].name}
                         </button>
                     ))}
                 </div>
