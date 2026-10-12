@@ -62,7 +62,7 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
         setTracks(matchedTracks);
         setStep('track');
       } else {
-        // 3단계 폴백 전부 없음 → 준비 중
+        // 3단계 폴백 전부 없음 → 종합 트랙으로 진행 안내
         setStep('inactive');
       }
     } catch {
@@ -179,16 +179,16 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
             {selectedIndustryName} x {selectedJobFunctionName}
           </h3>
           <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
-            이 분야의 역량 검사는 현재 준비 중입니다.
+            이 분야 전용 직무 역량 문항은 아직 없습니다.
             <br />
-            지금까지의 검사 결과(인성 + RIASEC)로 기본 방향을 안내해드립니다.
+            공통 문항(핵심역량 · 효능감 · 자기·직무 이해)과 종합 트랙 기준으로 진행합니다.
           </p>
           <div className="flex flex-col gap-3">
             <button
               onClick={() => onSelect(selectedIndustry, selectedJobFunction, null)}
               className="px-6 py-3 bg-[#E53935] text-white font-bold rounded-xl hover:bg-red-700 transition-colors"
             >
-              기본 결과 보기
+              종합 트랙으로 진행
             </button>
             <button
               onClick={() => { setStep('industry'); setSelectedIndustry(''); setSelectedJobFunction(''); }}

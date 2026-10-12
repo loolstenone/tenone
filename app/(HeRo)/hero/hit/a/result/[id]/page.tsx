@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight, Sparkles, Users,
-  RefreshCw, ChevronLeft, ChevronRight, Lock,
+  RefreshCw, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
@@ -17,7 +17,6 @@ import { HIT_STAGES } from "@/lib/hit/stages";
 import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
-import { useAuth } from "@/lib/auth-context";
 import type { HitAResult } from "@/types/hit";
 
 // 마크다운 → 순수 텍스트
@@ -44,7 +43,6 @@ const TOTAL_PAGES = 6;
 export default function HitAResultPage() {
   const params = useParams();
   const resultId = params.id as string;
-  const { isAuthenticated } = useAuth();
   const [result, setResult] = useState<HitAResult | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
@@ -177,7 +175,7 @@ export default function HitAResultPage() {
           <div key="p0">
             <div className="text-center mb-6">
               <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-              <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - A 결과</p>
+              <p className="text-xs font-bold text-[#E53935] tracking-widest mb-2">{HIT_STAGES.a.code} · {HIT_STAGES.a.name}</p>
               <h1 className="text-2xl md:text-3xl font-extrabold">나의 영웅 유형</h1>
             </div>
             <HeroTypeCard
@@ -271,10 +269,10 @@ export default function HitAResultPage() {
           </div>
         );
 
-      // ── Page 5: 통합 보고서 (회원) or 안내 (비회원) ──
+      // ── Page 5: 통합 보고서 ──
       case 4:
         // 회원 + 모듈 콘텐츠가 있으면 실제 보고서 렌더링
-        if (isAuthenticated && reportModules && Object.keys(reportModules).length > 0) {
+        if (reportModules && Object.keys(reportModules).length > 0) {
           // 카테고리별 그룹핑
           const discMods = Object.entries(reportModules).filter(([k]) => k.startsWith('DISC-'));
           const mbtiMods = Object.entries(reportModules).filter(([k]) => k.startsWith('MBTI-'));
@@ -376,64 +374,14 @@ export default function HitAResultPage() {
           );
         }
 
-        // 비회원: 미리보기 + 잠금
+        // 해설 모듈을 못 불러온 경우 (HIT는 회원 전용 — 옛 비회원 잠금·가입 유도 화면은 2026-10-12 제거)
         return (
           <div key="p4">
             <h2 className="text-lg font-bold mb-1">HIT 통합 보고서</h2>
-            <p className="text-xs text-neutral-400 mb-6">보고서 일부를 먼저 보여드립니다</p>
-
-            {/* 첫 강점 공개 */}
-            {heroType?.strengths?.[0] && (
-              <div className="mb-4 p-4 bg-neutral-50 border-l-2 border-neutral-800 rounded-r-lg">
-                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">핵심 강점 #1</p>
-                <p className="text-sm font-semibold text-neutral-800 mb-1.5">{heroType.strengths[0].title}</p>
-                <p className="text-xs text-neutral-600 leading-relaxed">
-                  {cleanMarkdown(heroType.strengths[0].desc || "").slice(0, 90)}…
-                </p>
-              </div>
-            )}
-
-            {/* 나머지 항목 — 흐림 처리 */}
-            <div className="relative mb-6">
-              <div className="space-y-1.5 blur-[3px] pointer-events-none select-none opacity-70">
-                {(heroType?.strengths || []).slice(1, 3).map((s, i) => (
-                  <div key={i} className="p-3 bg-neutral-50 rounded-lg">
-                    <p className="text-[11px] text-neutral-400 mb-0.5">핵심 강점 #{i + 2}</p>
-                    <p className="text-sm font-semibold text-neutral-700">{s.title}</p>
-                  </div>
-                ))}
-                {(heroType?.cautions || []).slice(0, 2).map((c, i) => (
-                  <div key={`c${i}`} className="p-3 bg-neutral-50 rounded-lg">
-                    <p className="text-[11px] text-neutral-400 mb-0.5">주의점 #{i + 1}</p>
-                    <p className="text-sm font-semibold text-neutral-700">{c.title}</p>
-                  </div>
-                ))}
-                <div className="p-3 bg-neutral-50 rounded-lg">
-                  <p className="text-[11px] text-neutral-400 mb-0.5">소통 · 적합 방향</p>
-                  <p className="text-sm font-semibold text-neutral-700">업무에서 나타나는 스타일과 잘 맞는 역할</p>
-                </div>
-              </div>
-              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
-            </div>
-
-            {/* 가입 CTA */}
-            <div className="border border-neutral-200 rounded-xl p-6 text-center bg-white">
-              <Lock className="h-5 w-5 text-neutral-400 mx-auto mb-3" />
-              <p className="text-[15px] font-bold text-neutral-900 mb-2">
-                전체 보고서는 회원에게 공개됩니다
-              </p>
-              <p className="text-xs text-neutral-500 leading-relaxed mb-5">
-                DISC 행동 해설 · MBTI 스펙트럼 · 교차 분석<br />
-                S-Power 주강점 · 성장 영역 · 소통 스타일
-              </p>
-              <Link href={`/signup?from=hit&resultId=${resultId}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
-                무료 회원가입 <ArrowRight className="h-4 w-4" />
-              </Link>
-              <p className="text-[11px] text-neutral-400 mt-3">
-                지금 본 검사 결과가 자동으로 연결됩니다
-              </p>
-            </div>
+            <p className="text-sm text-neutral-500 mb-6">해설을 불러오지 못했습니다. 전체 보고서 페이지에서 다시 확인해 주세요.</p>
+            <Link href={`/hero/hit/a/report/${resultId}`} className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
+              전체 보고서 보기 <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         );
 
@@ -445,13 +393,13 @@ export default function HitAResultPage() {
 
             <div className="space-y-4">
               {/* HIT B */}
-              <Link href="/hero/hit/b"
+              <Link href={`/hero/hit/b?a=${resultId}`}
                 className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold">B</div>
                   <div className="flex-1">
-                    <p className="font-bold text-neutral-800">HIT - B 이어서 받기</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">적성, 역량, 준비도까지 확인하세요</p>
+                    <p className="font-bold text-neutral-800">{HIT_STAGES.b.name} 이어서 받기 ({HIT_STAGES.b.code} · 공통)</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{HIT_STAGES.b.desc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-[#E53935]" />
                 </div>

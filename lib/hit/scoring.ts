@@ -27,9 +27,11 @@ interface ResponseRow {
 
 function reverseScore(v: number): number { return 8 - v; }
 function clamp(v: number, min = 0, max = 100): number { return Math.max(min, Math.min(max, v)); }
+/** 7점 평균 → 0~100: (평균 − 1) ÷ 6 × 100. 전 모듈 공통 (2026-10-12 — 바닥이 14이던 합/(n×7) 방식 폐지, /hero/hit/method 공개 공식과 같아야 한다) */
 function score100(values: number[]): number {
   if (!values.length) return 0;
-  return Math.round(values.reduce((a, b) => a + b, 0) / (values.length * 7) * 100);
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  return Math.round(((avg - 1) / 6) * 100);
 }
 
 // ── PT 성격유형 채점 (7점 리커트) ──

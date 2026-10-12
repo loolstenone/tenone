@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Brain, Users, Target, Clock, ArrowRight, Loader2, Sparkles, RotateCcw, Sprout } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { HIT_A_UF_COUNT, HIT_A_TOTAL_COUNT } from "@/lib/hit/a-modules";
+import { HIT_STAGES } from "@/lib/hit/stages";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/a/questions → hit_questions test_type A)와 같아야 한다 (2026-10-12 — 화면마다 127·172·620으로 달랐음)
 // HIT는 회원 전용 — UF(성장 배경)가 첫 파트. lib/hit/a-modules.ts
@@ -102,7 +103,7 @@ export default function HitAIntroPage() {
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
-            HIT - A · Personality Assessment
+            {HIT_STAGES.a.code} · 공통 기반
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
             내가 누구인지 알아보세요
@@ -178,7 +179,7 @@ export default function HitAIntroPage() {
               {starting ? (
                 <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
               ) : (
-                <>HIT - A 시작하기 <ArrowRight className="h-5 w-5" /></>
+                <>{HIT_STAGES.a.name} 시작하기 <ArrowRight className="h-5 w-5" /></>
               )}
             </button>
           )}

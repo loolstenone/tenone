@@ -162,30 +162,14 @@ export async function POST(request: NextRequest) {
       pt_grades: ptGrades,
     });
 
-    // 관리자 전용 플래그 저장 — 내담자 절대 비노출
-    const hasAdminFlag = ch.darkPreFlag || bt.darkPattern ||
-      distortion.fakingFlag || distortion.inconsistencyFlag || distortion.patternFlag;
+    // 응답 품질 신호 — 운영자 전용, 결과·매칭에 쓰지 않는다 (/hero/hit/method 5항)
+    // '다크 트라이어드' 사전 플래그는 2026-10-12 폐지: 주도성 문항 몇 개로 성격장애 경향을 추정하는 것은 타당도 근거가 없다
+    const hasAdminFlag = distortion.fakingFlag || distortion.inconsistencyFlag || distortion.patternFlag;
 
     if (hasAdminFlag) {
       try {
         const { createAdminClient: createClient } = await import('@/lib/supabase/admin');
         const supabase = await createClient();
-
-        // 다크 트라이어드 사전 탐지
-        if (ch.darkPreFlag || bt.darkPattern) {
-          await supabase.from('hit_admin_flags').insert({
-            member_id: session.member_id || null,
-            session_id: session.id,
-            flag_type: 'dark_triad',
-            flag_score: bt.darkPattern ? 85 : 50,
-            flag_detail: {
-              ch_dark: ch.darkPreFlag,
-              bt_dark: bt.darkPattern,
-              ch_ethics: ch.ethics,
-              ch_relational: ch.relational,
-            },
-          });
-        }
 
         // 왜곡 탐지: faking + inconsistency + pattern
         if (distortion.fakingFlag || distortion.inconsistencyFlag || distortion.patternFlag) {

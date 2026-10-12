@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Clock, ListChecks } from "lucide-react";
+import { ArrowRight, Clock, ListChecks, ShieldCheck } from "lucide-react";
 import { HIT_STAGES, HIT_COMMON, HIT_LIFE_STAGES, HIT_SITUATIONS, type HitStageDef } from "@/lib/hit/stages";
 
 /**
@@ -85,6 +85,15 @@ export default function HitOverviewPage() {
             </div>
             <Link href="/hero/journey" className="inline-flex items-center gap-2 px-5 py-3 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-xl hover:border-neutral-400 transition-colors shrink-0">나의 저니 <ArrowRight className="h-4 w-4" /></Link>
           </div>
+
+          <Link href="/hero/hit/method" className="mt-4 rounded-2xl border border-neutral-200 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-5 hover:border-neutral-400 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-neutral-100 text-neutral-600 flex items-center justify-center shrink-0"><ShieldCheck className="h-6 w-6" /></div>
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-neutral-900">HIT 엔진 — 결과는 이렇게 만들어집니다</h3>
+              <p className="text-sm text-neutral-500 mt-1 leading-relaxed break-keep">점수는 서버의 정해진 채점 규칙이, 해설은 미리 검수한 324개 모듈이 만듭니다. AI는 읽기용 요약만 돕습니다. 채점 공식·품질 관리·검증 계획을 공개합니다.</p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-neutral-400 shrink-0" />
+          </Link>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href={`/hero/hit/${HIT_STAGES.a.key}`} className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">

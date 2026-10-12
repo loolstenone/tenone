@@ -19,20 +19,20 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-12">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-5">
           HIT(HeRo Integrated Test)는 사람을 깊이 있게 이해하기 위해 설계된 <strong className="text-neutral-900">통합 심리검사 모델</strong>입니다.
-          기존에 널리 사용되어 온 MBTI(성격유형), DISC(행동유형) 등 검증된 검사 방법론을 기반으로 하되,
-          각 검사를 독립적으로 해석하는 기존 방식의 한계를 넘어 <strong className="text-neutral-900">인공지능 기반의 교차분석</strong>을 적용합니다.
+          성격유형(Jung 유형론 4축) · 행동유형(DISC) · 성품 · 직업흥미(RIASEC)처럼 널리 쓰여 온 이론 틀을 바탕으로 HeRo가 자체 문항을 만들고,
+          각 검사를 따로 해석하는 대신 <strong className="text-neutral-900">정해진 규칙으로 교차 분석</strong>합니다. 같은 응답에는 언제나 같은 결과가 나옵니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
           HIT A는 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
           성격유형(MBTI) · 행동유형(DISC) · 인성 · 적성까지 통합 측정하고,
-          이 결과를 AI 알고리즘으로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
+          성격·행동·성품·적성 점수를 정해진 가중치로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
           <strong className="text-neutral-900">HIT B</strong>는 역량과 방향을 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT C ~ F</strong>는 그 위에서
           신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
         <div className="border border-neutral-200 rounded-xl p-5 bg-neutral-50">
           <p className="text-sm text-neutral-500 leading-relaxed">
-            <strong className="text-neutral-600">안내</strong> — 본 검사 결과는 인공지능 알고리즘에 의해 산출된 참고 자료이며, 의학적/심리학적 진단이 아닙니다.
+            <strong className="text-neutral-600">안내</strong> — 본 검사 결과는 HeRo 서버의 채점 규칙으로 산출된 참고 자료이며(종합 해설 문단만 AI 보조), 의학적·심리학적 진단이 아닙니다. MBTI®는 The Myers-Briggs Company의 상표이며, HIT는 공식 MBTI 검사가 아닙니다 — 같은 4축 이론 틀을 쓴 HeRo 자체 문항입니다.
             검사 결과를 바탕으로 자신을 이해하는 출발점으로 활용하되,
             진로/적성/심리 관련 중요한 의사결정은 반드시 <strong className="text-neutral-600">전문 상담사 또는 전문가와의 대면 상담</strong>을 통해 보완하시기 바랍니다.
           </p>
@@ -159,7 +159,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">HIT A</span>
           <span className="text-lg font-bold text-neutral-900">기저요인검사 (UF test)</span>
-          <span className="text-sm text-neutral-400 ml-auto">50문항 · 7점 리커트</span>
+          <span className="text-sm text-neutral-400 ml-auto">49문항 · 회원 리포트 전용</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
           모든 성격과 행동의 뿌리에는 기저요인이 있습니다. 타고난 기질(temperament)은
@@ -193,10 +193,9 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="border-l-2 border-purple-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
           <span className="font-semibold text-neutral-800">기저요인 → 성격유형</span> :
-          기저요인은 MBTI의 선호 강도에 직접 영향을 미칩니다.
-          부모의 감정 수용도가 높았던 환경(UF 부모관계 HIGH)은 F(감정) 축의 발달을 촉진하고,
-          또래 리더 경험(UF 또래관계 HIGH)은 E(외향) 성향을 강화합니다.
-          기질적으로 반응 역치가 높은 사람(UF 기질)은 T(사고) 기반 판단을 발달시키는 경향이 있습니다.
+          기저요인은 성격유형 결과를 읽을 때 함께 보는 배경입니다. 예를 들어 감정 표현을 받아 주던 환경에서 자랐는지,
+          또래 사이에서 이끄는 역할을 해 왔는지가 지금의 성향과 어떻게 이어지는지를 본인 리포트에서 함께 살펴봅니다.
+          기저요인은 점수 계산(S-Power·유형)에는 들어가지 않으며, 성장 배경이 성향을 결정한다고 보지 않습니다.
         </p>
       </div>
 
@@ -204,8 +203,8 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">HIT A</span>
-          <span className="text-lg font-bold text-neutral-900">MBTI 성격유형검사</span>
-          <span className="text-sm text-neutral-400 ml-auto">160문항</span>
+          <span className="text-lg font-bold text-neutral-900">성격유형 (4축)</span>
+          <span className="text-sm text-neutral-400 ml-auto">62문항</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           Jung의 심리유형론에 기반한 4개 축을 측정합니다.
@@ -345,11 +344,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 교차분석 → S-Power 연결 */}
       <div className="border-l-2 border-amber-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          <span className="font-semibold text-neutral-800">UF × MBTI × DISC × 인성 × 적성 교차분석 → S-Power</span> :
+          <span className="font-semibold text-neutral-800">성격 × 행동 × 인성 × 적성 교차분석 → S-Power</span> :
           다섯 축의 교차점에서 개인 고유의 핵심 강점이 드러납니다.
           DISC D(주도) + MBTI T(사고)의 교차는 <strong>냉철한 결단력</strong>으로,
           I(사교) + A(예술)의 교차는 <strong>창의적 설득력</strong>으로 발현됩니다.
-          여기에 기저요인(UF)과 인성의 결이 가중치로 작용해 "같은 강점도 다르게 쓰이는" 맥락을 만듭니다.
+          여기에 인성과 적성 점수가 정해진 가중치로 더해져 "같은 강점도 다르게 쓰이는" 맥락을 만듭니다.
         </p>
       </div>
 
@@ -361,7 +360,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           <span className="text-sm text-neutral-400 ml-auto">종합 산출</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          UF · MBTI · DISC · 인성 · 적성 다섯 축을 교차 가중해 8가지 핵심 역량 차원을 산출합니다.
+          성격 · 행동 · 인성 · 적성 네 축을 정해진 가중치로 교차해 8가지 핵심 강점 차원을 산출합니다.
           상위 3개 강점이 핵심 경쟁력으로, 하위 2개가 성장 영역으로 리포트에 반영됩니다.
         </p>
         <div className="grid grid-cols-4 gap-4">
@@ -454,25 +453,25 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT A</span>는 기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성 다섯 축을 통합 측정하고,
-          이 결과를 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다.
+          <span className="font-bold text-neutral-900">HIT A</span>는 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
+          성격·행동·인성·적성을 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 기저요인은 해석 참고용입니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           <span className="font-bold text-neutral-900">HIT B</span>는 HIT A의 결과를 기반으로
           핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 심화 진단으로,
-          이직 · 리더십 전환 · 인생 2막 · 경력 공백 복귀 같은 구체적 국면에서 다음 한 걸음을 설계합니다.
+          <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
+          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(GAP)입니다.
         </p>
         <p className="text-sm text-neutral-400 leading-relaxed">
-          HeRo만의 통합적이고 일관적인 검사 방법을 통해 미래의 가치를 만들어낼 잠재인재를 발굴합니다.
+          채점 공식·해설 방식·검증 계획은 HIT 엔진 페이지(/hero/hit/method)에 공개합니다.
         </p>
       </div>
 
       {/* 푸터 */}
       <p className="text-center text-xs text-neutral-300 pt-4 border-t border-neutral-100">
-        HeRo Integrated Test — Ten:One Universe
+        HeRo Integrated Test — Ten:One™ Universe
       </p>
     </div>
   );

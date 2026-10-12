@@ -386,7 +386,7 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   if (!c.has_hit_a) {
     mission = { title: "HIT A 검사", desc: "약 25분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: null };
   } else if (!c.has_hit_b) {
-    mission = { title: "HIT B 검사", desc: "역량 분포가 더해져요 (약 22분)", href: "/hero/hit/b", reward: null };
+    mission = { title: "HIT B 역량과 방향", desc: "역량·효능감이 더해져요 (약 13분)", href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
     mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
