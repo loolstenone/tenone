@@ -210,7 +210,7 @@ export const MAD_PROGRAMS: MadProgram[] = [
       brand: 'HeRo',
       href: '/hero',
       linkLabel: 'HeRo에서 시작하기',
-      taste: ['HIT 미니 — 20문항·3분, 나의 영웅 유형 미리보기 (이 페이지에서 바로)', '매드리거 대상 커리어 특강·상담 회차'],
+      taste: ['HIT A — 나의 영웅 유형 검사 (HeRo, 같은 Ten:One ID로 바로)', '매드리거 대상 커리어 특강·상담 회차'],
       full: ['HIT 풀 리포트·심화 진단', 'AI 커리어 상담', '현업 멘토 커리어 코칭', 'Journey — 목표·데일리 체크인'],
       link: ['경쟁 PT 수상·활동 인증서 → HeRo 커리어 프로필', 'HIT 진단 결과 → 매드리그 팀 구성·포트폴리오'],
       linkScopes: ['madleague.certificates>hero.profile', 'hero.hit_type>madleague.portfolio'],
