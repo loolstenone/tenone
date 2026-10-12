@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
       sPowerScores: sPower as unknown as Record<string, number>,
       ufScores: uf ?? undefined,
+      apTop3Code: ap.top3Code,
     });
 
     // 결과 저장

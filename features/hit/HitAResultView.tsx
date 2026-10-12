@@ -193,6 +193,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
           {ap.map(([t, v]) => HOLLAND_COPY[t] && <ScoreRow key={t} label={HOLLAND_COPY[t].label} value={v} what={HOLLAND_COPY[t].what} plain />)}
         </div>
+        <div className="mt-10"><ModuleList modules={[...pick("RIASEC-TOP-"), ...mods.filter(m => /^RIASEC-[RIASEC]{3}$/.test(m.id))]} /></div>
       </Section>
 
       <Section id="background" title="성장 배경" lead="지금의 나를 만든 가족·또래·환경의 영향입니다. 나만 볼 수 있으며, 매칭이나 다른 사람에게 쓰지 않습니다.">

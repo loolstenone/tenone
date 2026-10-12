@@ -12,6 +12,8 @@ interface HitAScores {
   mbtiEScore: number; mbtiSScore: number; mbtiTScore: number; mbtiJScore: number;
   sPowerScores?: Record<string, number>;
   ufScores?: UFScores;
+  /** 흥미 Top3 코드 (예: AES) — RIASEC 해설 선택 */
+  apTop3Code?: string | null;
 }
 
 /**
@@ -97,6 +99,13 @@ export function selectModules(scores: HitAScores): string[] {
 
   // 7. 소통 스타일
   modules.push(`COMM-${scores.discPrimary}`);
+
+  // 8. 흥미 (R4, 2026-10-12) — 상위 2개 유형 해설 + 정확히 맞는 Top3 조합 해설(있을 때만, 없으면 조회에서 빠짐)
+  const ap = (scores.apTop3Code ?? '').toUpperCase().replace(/[^RIASEC]/g, '');
+  if (ap.length >= 2) {
+    modules.push(`RIASEC-TOP-${ap[0]}`, `RIASEC-TOP-${ap[1]}`);
+    if (ap.length >= 3) modules.push(`RIASEC-${ap.slice(0, 3)}`);
+  }
 
   return modules;
 }
