@@ -136,6 +136,17 @@ export function selectBModules(scores: HitBScores): string[] {
 }
 
 /**
+ * HIT - Bounce 직무 트랙 역량 해설 (TRK-{sub_domain}-{H|M|L}, sql/hit-b-track-modules-2026-10.sql, R2 2026-10-12)
+ * H 75+ · M 50~74 · L 50 미만. 현재 마케팅 5트랙만 작성 — DB에 없는 id는 조회 때 건너뛰고 화면 공통 문장을 쓴다.
+ */
+export function trackModuleId(subDomain: string, v: number): string {
+  return `TRK-${subDomain}-${v >= 75 ? 'H' : v >= 50 ? 'M' : 'L'}`;
+}
+export function selectBTrackModules(trackScores: Record<string, number> | null | undefined): string[] {
+  return Object.entries(trackScores ?? {}).map(([k, v]) => trackModuleId(k, Number(v)));
+}
+
+/**
  * 모듈 콘텐츠에서 점수 플레이스홀더를 치환
  */
 export function interpolateModule(content: string, scores: HitAScores): string {

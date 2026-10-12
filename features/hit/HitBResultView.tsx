@@ -7,7 +7,7 @@ import { mapHitBResult } from "@/features/hit/hit-b-result-mapper";
 import { CORE_COMPETENCY_LABELS, type CoreCompetency } from "@/lib/hit/scoring-b";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
-import { CORE_MODULE_KEY } from "@/lib/hit/report-assembler";
+import { CORE_MODULE_KEY, trackModuleId } from "@/lib/hit/report-assembler";
 import { CORE_COPY, INSIGHT_COPY, HOLLAND_COPY, EFFICACY_INFO, STAGE_LABELS, STAGE_DESC, scoreBand } from "@/lib/hit/report-copy";
 import { TRACK_COMPETENCY_LABELS, trackCompetencyLabel } from "@/lib/hit/track-competency-labels";
 import {
@@ -40,6 +40,7 @@ const MATRIX_GROUPS = [
 export default function HitBResultView({ resultId, print = false }: { resultId: string; print?: boolean }) {
   const [result, setResult] = useState<(HitBResult & { trackName: string }) | null>(null);
   const [modules, setModules] = useState<{ id: string; title: string; content: string }[]>([]);
+  const [trackMods, setTrackMods] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
           // 핵심역량 해설 — 점수 높은 순 (API는 DB 순서로 돌려줌)
           const common = (data.competency_common ?? {}) as Record<string, number>;
           const scoreOf = (id: string) => common[Object.keys(CORE_MODULE_KEY).find(k => id.startsWith(`CORE-${CORE_MODULE_KEY[k]}-`)) ?? ""] ?? 0;
+          setTrackMods(Object.fromEntries(Object.entries(mods).filter(([k]) => k.startsWith("TRK-")).map(([k, m]) => [k, m.content])));
           setModules(Object.entries(mods).filter(([k]) => k.startsWith("CORE-")).map(([id, m]) => ({ id, ...m })).sort((a, b) => scoreOf(b.id) - scoreOf(a.id)));
         }
         setLoading(false);
@@ -101,7 +103,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
       <Section id="track" title={`직무 역량 — ${result.trackName}`} lead="희망 직무에서 실제로 요구하는 여섯 가지 역량입니다. 강점은 내세우고, 낮은 곳은 다음 준비 목표로 삼으세요.">
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
           {track.map(([k, v]) => (
-            <ScoreRow key={k} label={trackCompetencyLabel(k)} value={v} what={TRACK_COMPETENCY_LABELS[k]?.what} meaning={TRACK_MEANING[scoreBand(v)]} />
+            <ScoreRow key={k} label={trackCompetencyLabel(k)} value={v} what={TRACK_COMPETENCY_LABELS[k]?.what} meaning={trackMods[trackModuleId(k, v)] ?? TRACK_MEANING[scoreBand(v)]} />
           ))}
         </div>
       </Section>

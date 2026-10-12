@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { canReadHitResult, stripHitResult } from '@/lib/hit/result-access';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitBResultFull } from '@/lib/supabase/hit';
-import { selectBModules } from '@/lib/hit/report-assembler';
+import { selectBModules, selectBTrackModules } from '@/lib/hit/report-assembler';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 /** GET /api/hit/b/result/[id] — 본인·직원만. 리포트 모듈(COMP-*)은 핵심역량 점수로 선택 */
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!result) return errorResponse('결과를 찾을 수 없습니다.', 404);
     if (!(await canReadHitResult(req, result))) return errorResponse('결과를 찾을 수 없습니다.', 404);
 
-    const modulesUsed = selectBModules({ competencyCommon: result.competency_common || {} });
+    const modulesUsed = [...selectBModules({ competencyCommon: result.competency_common || {} }), ...selectBTrackModules(result.competency_track_scores)];
     const reportModules: Record<string, { title: string; content: string }> = {};
     if (modulesUsed.length > 0) {
       try {
