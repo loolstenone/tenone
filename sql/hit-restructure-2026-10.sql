@@ -1,5 +1,5 @@
 -- hit-restructure-2026-10.sql
--- 적용: (승인 후 기입) — MCP apply_migration `hit_restructure_2026_10`
+-- 적용: 2026-10-12 (세션 169, 사용자 승인) — MCP apply_migration `hit_restructure_2026_10`
 --
 -- HIT 체계 재편 (사용자 결정 2026-10-12, docs/HIT_Structure_Consulting_2026-10.md)
 --   공통  A 정체성 · B 역량과 방향 (전 회원)
@@ -23,10 +23,51 @@ ALTER TABLE public.hit_sessions ADD CONSTRAINT hit_sessions_test_type_check
 -- ─────────────────────────────────────────────────────────────
 -- 2. 결과 테이블 문자 재배치 (충돌 방지: F→GAP → E→F → D→E → C→D)
 -- ─────────────────────────────────────────────────────────────
+-- 테이블 이름과 함께 제약·인덱스·트리거 이름도 옮긴다 (안 옮기면 새 hit_c_results의 hit_c_results_pkey가 충돌).
+-- hero_profiles 동기화 트리거(sync_hero_profile_from_hit_result)는 TG_TABLE_NAME으로 컬럼을 정하므로 아래 컬럼 rename과 함께 그대로 맞는다.
 ALTER TABLE public.hit_f_results RENAME TO hit_gap_results;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_pkey TO hit_gap_results_pkey;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_hit_a_result_id_fkey TO hit_gap_results_hit_a_result_id_fkey;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_member_id_fkey TO hit_gap_results_member_id_fkey;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_session_id_fkey TO hit_gap_results_session_id_fkey;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_cvi_grade_check TO hit_gap_results_cvi_grade_check;
+ALTER TABLE public.hit_gap_results RENAME CONSTRAINT hit_f_results_next_route_check TO hit_gap_results_next_route_check;
+ALTER INDEX IF EXISTS public.idx_hit_f_results_hit_a_result_id RENAME TO idx_hit_gap_results_hit_a_result_id;
+ALTER INDEX IF EXISTS public.idx_hit_f_results_member RENAME TO idx_hit_gap_results_member;
+ALTER INDEX IF EXISTS public.idx_hit_f_results_session RENAME TO idx_hit_gap_results_session;
+ALTER INDEX IF EXISTS public.idx_hit_f_results_cvi_grade RENAME TO idx_hit_gap_results_cvi_grade;
+ALTER INDEX IF EXISTS public.idx_hit_f_results_next_route RENAME TO idx_hit_gap_results_next_route;
+ALTER TRIGGER sync_hero_profile_hit_f ON public.hit_gap_results RENAME TO sync_hero_profile_hit_gap;
+
 ALTER TABLE public.hit_e_results RENAME TO hit_f_results;
+ALTER TABLE public.hit_f_results RENAME CONSTRAINT hit_e_results_pkey TO hit_f_results_pkey;
+ALTER TABLE public.hit_f_results RENAME CONSTRAINT hit_e_results_hit_a_result_id_fkey TO hit_f_results_hit_a_result_id_fkey;
+ALTER TABLE public.hit_f_results RENAME CONSTRAINT hit_e_results_member_id_fkey TO hit_f_results_member_id_fkey;
+ALTER TABLE public.hit_f_results RENAME CONSTRAINT hit_e_results_session_id_fkey TO hit_f_results_session_id_fkey;
+ALTER INDEX IF EXISTS public.idx_hit_e_results_hit_a_result_id RENAME TO idx_hit_f_results_hit_a_result_id;
+ALTER INDEX IF EXISTS public.idx_hit_e_results_member RENAME TO idx_hit_f_results_member;
+ALTER INDEX IF EXISTS public.idx_hit_e_results_session RENAME TO idx_hit_f_results_session;
+ALTER TRIGGER sync_hero_profile_hit_e ON public.hit_f_results RENAME TO sync_hero_profile_hit_f;
+
 ALTER TABLE public.hit_d_results RENAME TO hit_e_results;
+ALTER TABLE public.hit_e_results RENAME CONSTRAINT hit_d_results_pkey TO hit_e_results_pkey;
+ALTER TABLE public.hit_e_results RENAME CONSTRAINT hit_d_results_hit_a_result_id_fkey TO hit_e_results_hit_a_result_id_fkey;
+ALTER TABLE public.hit_e_results RENAME CONSTRAINT hit_d_results_member_id_fkey TO hit_e_results_member_id_fkey;
+ALTER TABLE public.hit_e_results RENAME CONSTRAINT hit_d_results_session_id_fkey TO hit_e_results_session_id_fkey;
+ALTER INDEX IF EXISTS public.idx_hit_d_results_hit_a_result_id RENAME TO idx_hit_e_results_hit_a_result_id;
+ALTER INDEX IF EXISTS public.idx_hit_d_results_member RENAME TO idx_hit_e_results_member;
+ALTER INDEX IF EXISTS public.idx_hit_d_results_session RENAME TO idx_hit_e_results_session;
+ALTER TRIGGER sync_hero_profile_hit_d ON public.hit_e_results RENAME TO sync_hero_profile_hit_e;
+
 ALTER TABLE public.hit_c_results RENAME TO hit_d_results;
+ALTER TABLE public.hit_d_results RENAME CONSTRAINT hit_c_results_pkey TO hit_d_results_pkey;
+ALTER TABLE public.hit_d_results RENAME CONSTRAINT hit_c_results_hit_a_result_id_fkey TO hit_d_results_hit_a_result_id_fkey;
+ALTER TABLE public.hit_d_results RENAME CONSTRAINT hit_c_results_member_id_fkey TO hit_d_results_member_id_fkey;
+ALTER TABLE public.hit_d_results RENAME CONSTRAINT hit_c_results_session_id_fkey TO hit_d_results_session_id_fkey;
+ALTER INDEX IF EXISTS public.idx_hit_c_results_hit_a_result_id RENAME TO idx_hit_d_results_hit_a_result_id;
+ALTER INDEX IF EXISTS public.idx_hit_c_results_member RENAME TO idx_hit_d_results_member;
+ALTER INDEX IF EXISTS public.idx_hit_c_results_session RENAME TO idx_hit_d_results_session;
+ALTER TRIGGER sync_hero_profile_hit_c ON public.hit_d_results RENAME TO sync_hero_profile_hit_d;
 
 ALTER POLICY hit_f_results_own_read ON public.hit_gap_results RENAME TO hit_gap_results_own_read;
 ALTER POLICY hit_e_results_own_read ON public.hit_f_results   RENAME TO hit_f_results_own_read;
@@ -81,6 +122,10 @@ GRANT SELECT ON public.hit_c_results TO anon;
 GRANT ALL ON public.hit_c_results TO service_role;
 
 ALTER TABLE public.hero_profiles ADD COLUMN IF NOT EXISTS hit_c_result_id uuid REFERENCES public.hit_c_results(id) ON DELETE SET NULL;
+
+DROP TRIGGER IF EXISTS sync_hero_profile_hit_c ON public.hit_c_results;
+CREATE TRIGGER sync_hero_profile_hit_c AFTER INSERT OR UPDATE OF member_id ON public.hit_c_results
+  FOR EACH ROW EXECUTE FUNCTION public.sync_hero_profile_from_hit_result();
 
 -- ─────────────────────────────────────────────────────────────
 -- 4. B 결과 — 재정의 컬럼 (옛 personality/riasec/readiness 컬럼은 nullable로 남김)
