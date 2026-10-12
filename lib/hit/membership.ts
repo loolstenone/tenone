@@ -25,7 +25,8 @@ export type HitFeature =
 
 const TIER_FEATURES: Record<MembershipTier, HitFeature[]> = {
   guest: ['HIT_A_TAKE', 'HIT_A_RESULT_TEASER'],
-  free: ['HIT_A_TAKE', 'HIT_A_RESULT_FULL', 'HIT_A_PDF_SCORES', 'HIT_AI_CHAT_BASIC'],
+  // B~GAP 검사(HIT_LAYER_ONE)는 결제 시작 전까지 전 회원 무료 (2026-10-12 사용자 결정 — 안내 "모든 회원이 A·B로 시작"과 일치)
+  free: ['HIT_A_TAKE', 'HIT_A_RESULT_FULL', 'HIT_A_PDF_SCORES', 'HIT_AI_CHAT_BASIC', 'HIT_LAYER_ONE'],
   premium: [
     'HIT_A_TAKE',
     'HIT_A_RESULT_FULL',
@@ -72,7 +73,7 @@ export function getUpgradeMessage(currentTier: MembershipTier, requiredFeature: 
     HIT_A_PDF_SCORES: 'free',
     HIT_AI_CHAT_BASIC: 'free',
     HIT_DEEP: 'premium',
-    HIT_LAYER_ONE: 'premium',
+    HIT_LAYER_ONE: 'free',
     HIT_LAYER_UNLIMITED: 'professional',
     HIT_CROSS_REPORT: 'premium',
     HIT_A_PDF_FULL: 'premium',
