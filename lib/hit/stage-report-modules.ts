@@ -20,9 +20,16 @@ export type ReportStage = 'c' | 'd' | 'e' | 'f' | 'gap';
 export function selectStageModules(stage: ReportStage, r: Row): string[] {
   const m: string[] = [];
   switch (stage) {
-    case 'c':
+    case 'c': {
       m.push(`READY-${grade(r.readiness_total)}`);
+      // 진로 결정 확신 + 첫 직무 적응 4영역 (R3, sql/hit-c-onboarding-decision-modules-2026-10.sql) — 적응은 높은 순
+      const hml = (v: unknown) => { const n = Number(v ?? 0); return n >= 75 ? 'H' : n >= 50 ? 'M' : 'L'; };
+      m.push(`DEC-${hml(r.career_decision)}`);
+      const ob = (r.onboarding_scores ?? {}) as Record<string, number>;
+      const obKey: Record<string, string> = { org_adaptation: 'ORG', learning_speed: 'LEARN', relationship_building: 'REL', feedback_acceptance: 'FEEDBACK' };
+      Object.entries(ob).filter(([k]) => obKey[k]).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => m.push(`ONB-${obKey[k]}-${hml(v)}`));
       break;
+    }
     case 'd': {
       const cs = r.capital_scores ?? {};
       m.push(`CC-DOMAIN-${level(cs.domain_expertise)}`, `CC-ACHIEVE-${level(cs.achievement)}`, `CC-RELATION-${level(cs.relational)}`, `CC-TRANSFER-${level(cs.transferable)}`);
