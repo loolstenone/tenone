@@ -17,6 +17,8 @@ export default function RadarChart({ data, size = 300 }: RadarChartProps) {
   const labelOffset = size * 0.46;
   const n = data.length;
   const levels = 5;
+  // 긴 한글 라벨(예: 분석적 판단)이 잘리지 않게 바깥 여백
+  const pad = 44;
 
   // Get vertex coordinates at given radius
   function getPoint(index: number, r: number): [number, number] {
@@ -56,10 +58,10 @@ export default function RadarChart({ data, size = 300 }: RadarChartProps) {
 
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      className="mx-auto"
+      width={size + pad * 2}
+      height={size + pad * 2}
+      viewBox={`${-pad} ${-pad} ${size + pad * 2} ${size + pad * 2}`}
+      className="mx-auto max-w-full h-auto"
     >
       {/* Grid */}
       {gridPolygons.map((points, i) => (

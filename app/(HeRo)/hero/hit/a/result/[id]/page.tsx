@@ -1,54 +1,42 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  ArrowRight, Sparkles, Users,
-  RefreshCw, ChevronLeft, ChevronRight,
-} from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
-import { HIT_STAGES } from "@/lib/hit/stages";
 import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
+import { HIT_STAGES } from "@/lib/hit/stages";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
-import type { HitAResult } from "@/types/hit";
+import { CH_COPY, DISC_COPY, HOLLAND_COPY, SPOWER_LABELS, toParagraphs } from "@/lib/hit/report-copy";
+import {
+  ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreList, ScoreRow,
+  ModuleList, AiNarrative, NextLink, ReportFooterNote, LoadingState, NotFoundState, formatDate,
+} from "@/features/hit/report/ReportKit";
+import { HitNextSteps } from "@/features/hit/report/HitNextSteps";
 
-// 마크다운 → 순수 텍스트
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/#{1,6}\s/g, '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`(.+?)`/g, '$1')
-    .replace(/^[-*]\s/gm, '')
-    .replace(/^\d+\.\s/gm, '')
-    .trim();
-}
+type Row = Record<string, unknown>;
+type Mod = { id: string; title: string; content: string };
+interface HeroTypeData { character_name?: string; profile_overview?: string }
 
-interface HeroTypeData {
-  strengths: { title: string; desc: string }[];
-  cautions: { title: string; desc: string }[];
-  fit_direction: string;
-  profile_overview: string;
-}
-
-const TOTAL_PAGES = 6;
+const NAV = [
+  { id: "summary", label: "한눈에" }, { id: "personality", label: "성격" }, { id: "behavior", label: "행동" },
+  { id: "strength", label: "강점" }, { id: "character", label: "성품" }, { id: "interest", label: "흥미" },
+  { id: "background", label: "성장 배경" }, { id: "commentary", label: "해설" },
+];
 
 export default function HitAResultPage() {
   const params = useParams();
   const resultId = params.id as string;
-  const [result, setResult] = useState<HitAResult | null>(null);
+  const [d, setD] = useState<Row | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
-  const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
+  const [mods, setMods] = useState<Mod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
   const [chatRemaining, setChatRemaining] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -57,492 +45,126 @@ export default function HitAResultPage() {
       .then(r => r.json())
       .then(async (data) => {
         if (data.error) { setLoading(false); return; }
-        let htData: { character_name?: string } | null = null;
         if (data.type_code) {
           try {
             const { createClient } = await import("@/lib/supabase/client");
-            const sb = createClient();
-            const { data: ht } = await sb.from("hit_hero_types").select("character_name,strengths,cautions,fit_direction,profile_overview").eq("type_code", data.type_code).maybeSingle();
-            if (ht) { setHeroType(ht); htData = ht; }
-          } catch {}
+            const { data: ht } = await createClient().from("hit_hero_types").select("character_name,profile_overview").eq("type_code", data.type_code).maybeSingle();
+            if (ht) setHeroType(ht);
+          } catch { /* 유형 설명 없이도 결과 표시 */ }
         }
-        setResult({
-          id: data.id, sessionId: data.session_id, memberId: data.member_id,
-          mbtiType: data.mbti_type,
-          mbtiEScore: data.mbti_e_score, mbtiSScore: data.mbti_s_score,
-          mbtiTScore: data.mbti_t_score, mbtiJScore: data.mbti_j_score,
-          discPrimary: data.disc_primary, discSubtype: data.disc_subtype,
-          discDScore: data.disc_d_score, discIScore: data.disc_i_score,
-          discSScore: data.disc_s_score, discCScore: data.disc_c_score,
-          baseSummary: data.base_summary, baseScores: data.base_scores || {},
-          typeCode: data.type_code, typeNameKo: htData?.character_name ?? data.type_name_ko,
-          typeNickname: data.type_nickname, typeCategory: data.type_category,
-          typeTraits: data.type_traits, typeCareers: data.type_careers,
-          aiNarrative: data.ai_narrative, sPowerScores: data.s_power_scores,
-          createdAt: data.created_at,
-        });
-        if (data.report_modules) setReportModules(data.report_modules);
-
-        // 무료 회원 AI 채팅 남은 횟수 조회
-        if (data.member_id) {
-          fetch('/api/hit/membership')
-            .then(r => r.json())
-            .then(mData => {
-              if (mData.data?.tier && mData.data.tier !== 'premium' && mData.data.tier !== 'professional') {
-                // 현재 사용 횟수 조회
-                fetch(`/api/hit/chat/usage?memberId=${data.member_id}`)
-                  .then(r => r.json())
-                  .then(uData => {
-                    if (uData.data !== undefined) {
-                      setChatRemaining(Math.max(0, 3 - uData.data));
-                    }
-                  })
-                  .catch(() => setChatRemaining(3));
-              }
-              // premium/professional은 undefined = 무제한
-            })
-            .catch(() => {});
-        }
-
+        setD(data);
+        setMods(Object.entries((data.report_modules ?? {}) as Record<string, { title: string; content: string }>).map(([id, m]) => ({ id, ...m })));
+        // 무료 회원 AI 상담 남은 횟수
+        fetch("/api/hit/membership").then(r => r.json()).then(m => {
+          if (m.data?.tier && m.data.tier !== "premium" && m.data.tier !== "professional") {
+            fetch(`/api/hit/chat/usage?memberId=${data.member_id ?? ""}`).then(r => r.json()).then(u => { if (u.data !== undefined) setChatRemaining(Math.max(0, 3 - u.data)); }).catch(() => setChatRemaining(3));
+          }
+        }).catch(() => {});
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [resultId]);
 
-  const goNext = useCallback(() => {
-    if (currentPage < TOTAL_PAGES - 1) {
-      setDirection('next');
-      setCurrentPage(p => p + 1);
-    }
-  }, [currentPage]);
+  if (loading) return <LoadingState />;
+  if (!d) return <NotFoundState retryHref="/hero/hit/a" />;
 
-  const goPrev = useCallback(() => {
-    if (currentPage > 0) {
-      setDirection('prev');
-      setCurrentPage(p => p - 1);
-    }
-  }, [currentPage]);
-
-  // 키보드
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [goNext, goPrev]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-10 w-10 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!result) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center text-center">
-        <div>
-          <p className="text-neutral-400 mb-4">결과를 찾을 수 없습니다.</p>
-          <Link href="/hero/hit/a" className="text-[#E53935] underline text-sm">다시 검사하기</Link>
-        </div>
-      </div>
-    );
-  }
-
-  const spData = result.sPowerScores ? [
-    { label: "전략적 사고", value: result.sPowerScores.strategic },
-    { label: "실행 추진력", value: result.sPowerScores.execution },
-    { label: "창의성", value: result.sPowerScores.creativity },
-    { label: "대인관계", value: result.sPowerScores.interpersonal },
-    { label: "분석적 판단", value: result.sPowerScores.analytical },
-    { label: "조직 화합", value: result.sPowerScores.harmony ?? 0 },
-    { label: "돌파 의지", value: result.sPowerScores.breakthrough ?? 0 },
-    { label: "원칙 수호", value: result.sPowerScores.guard ?? 0 },
-  ].filter(d => d.value > 0) : [];
-
-  const narrativeParagraphs = result.aiNarrative?.split('\n').filter(p => p.trim()) ?? [];
-
-  const pageLabels = ["영웅 유형", "DISC", "MBTI", "S-Power", "강점·주의점", "다음 단계"];
-
-  const renderPage = () => {
-    switch (currentPage) {
-      // ── Page 1: 영웅 유형 ──
-      case 0:
-        return (
-          <div key="p0">
-            <div className="text-center mb-6">
-              <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
-              <p className="text-xs font-bold text-[#E53935] tracking-widest mb-2">{HIT_STAGES.a.code} · {HIT_STAGES.a.name}</p>
-              <h1 className="text-2xl md:text-3xl font-extrabold">나의 영웅 유형</h1>
-            </div>
-            <HeroTypeCard
-              typeCode={result.typeCode} nameKo={result.typeNameKo}
-              nickname={result.typeNickname} category={result.typeCategory}
-              traits={result.typeTraits} careers={result.typeCareers}
-            />
-            {heroType?.profile_overview && (
-              <div className="mt-6 bg-neutral-50 p-5 rounded-xl">
-                <p className="text-sm text-neutral-600 leading-relaxed">
-                  {cleanMarkdown(heroType.profile_overview.split('\n')[0])}
-                </p>
-              </div>
-            )}
-            {/* Share buttons */}
-            <div className="mt-6 flex flex-col items-center gap-1.5">
-              <p className="text-xs text-neutral-400">결과 공유하기</p>
-              <HitShareButtons
-                typeCode={result.typeCode}
-                typeNameKo={result.typeNameKo}
-                typeNickname={result.typeNickname}
-                resultId={resultId}
-                variant="compact"
-              />
-            </div>
-          </div>
-        );
-
-      // ── Page 2: DISC + 기저요인 ──
-      case 1:
-        return (
-          <div key="p1">
-            <h2 className="text-lg font-bold mb-4">DISC 행동유형</h2>
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <DISCChart d={result.discDScore} i={result.discIScore} s={result.discSScore} c={result.discCScore} primary={result.discPrimary} />
-            </div>
-            {result.baseSummary && (
-              <>
-                <h2 className="text-lg font-bold mb-3">기저요인</h2>
-                <p className="text-sm text-neutral-600 leading-relaxed bg-neutral-50 p-4 rounded-xl">
-                  {result.baseSummary}
-                </p>
-              </>
-            )}
-          </div>
-        );
-
-      // ── Page 3: MBTI ──
-      case 2:
-        return (
-          <div key="p2">
-            <h2 className="text-lg font-bold mb-4">MBTI 성향 스펙트럼</h2>
-            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <MBTISpectrum eScore={result.mbtiEScore} sScore={result.mbtiSScore} tScore={result.mbtiTScore} jScore={result.mbtiJScore} />
-            </div>
-            <div className="bg-neutral-50 p-5 rounded-xl">
-              <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">유형: {result.mbtiType}</p>
-              <p className="text-sm text-neutral-600 leading-relaxed">
-                {result.mbtiType?.includes('I') ? '에너지를 혼자만의 시간에서 충전하며, 깊이 있는 사고를 선호합니다.' : '다양한 사람과의 교류에서 에너지를 얻으며, 적극적으로 소통합니다.'}
-                {' '}
-                {result.mbtiType?.includes('N') ? '패턴과 가능성을 먼저 파악하며, 미래 지향적 사고가 특징입니다.' : '구체적인 사실과 현실적 정보를 중시합니다.'}
-              </p>
-            </div>
-          </div>
-        );
-
-      // ── Page 4: S-Power + AI ──
-      case 3:
-        return (
-          <div key="p3">
-            <h2 className="text-lg font-bold mb-4">S-Power 강점</h2>
-            {spData.length > 0 && (
-              <div className="border border-neutral-200 rounded-xl p-6 flex justify-center mb-6">
-                <RadarChart data={spData} size={260} />
-              </div>
-            )}
-            {narrativeParagraphs.length > 0 && (
-              <>
-                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                  <Image src="/hero-logo-wide.png" alt="" width={28} height={14} className="h-4 w-auto" />
-                  HeRo의 분석
-                </h2>
-                <div className="bg-neutral-50 p-5 rounded-xl">
-                  <p className="text-sm text-neutral-700 leading-relaxed">{cleanMarkdown(narrativeParagraphs[0])}</p>
-                  {narrativeParagraphs.length > 1 && (
-                    <p className="text-xs text-neutral-400 mt-3 italic">DISC·MBTI 교차 해석과 상세 분석은 다음 페이지에서 확인하세요.</p>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        );
-
-      // ── Page 5: 통합 보고서 ──
-      case 4:
-        // 회원 + 모듈 콘텐츠가 있으면 실제 보고서 렌더링
-        if (reportModules && Object.keys(reportModules).length > 0) {
-          // 카테고리별 그룹핑
-          const discMods = Object.entries(reportModules).filter(([k]) => k.startsWith('DISC-'));
-          const mbtiMods = Object.entries(reportModules).filter(([k]) => k.startsWith('MBTI-'));
-          const crossMods = Object.entries(reportModules).filter(([k]) => k.startsWith('CROSS-'));
-          const spMods = Object.entries(reportModules).filter(([k]) => k.startsWith('SP-') && !k.includes('GROWTH'));
-          const spGrowth = Object.entries(reportModules).filter(([k]) => k.includes('GROWTH'));
-          const commMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMM-'));
-
-          return (
-            <div key="p4">
-              <h2 className="text-lg font-bold mb-6">HIT 통합 보고서</h2>
-
-              {/* 모듈 영역 */}
-              <div className="space-y-6">
-                {/* DISC 해설 */}
-                {discMods.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">DISC 행동 특성</h3>
-                    {discMods.map(([id, m]) => (
-                      <div key={id} className="mb-4">
-                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* MBTI 해설 */}
-                {mbtiMods.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">MBTI 성향 해설</h3>
-                    {mbtiMods.map(([id, m]) => (
-                      <div key={id} className="mb-3">
-                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 교차 해석 */}
-                {crossMods.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">교차 해석</h3>
-                    {crossMods.map(([id, m]) => (
-                      <div key={id} className="mb-3">
-                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* S-Power 강점 */}
-                {spMods.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">S-Power 주강점</h3>
-                    {spMods.map(([id, m]) => (
-                      <div key={id} className="mb-3">
-                        <p className="text-sm font-bold text-green-600 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 성장 영역 */}
-                {spGrowth.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">성장 영역</h3>
-                    {spGrowth.map(([id, m]) => (
-                      <div key={id} className="mb-3">
-                        <p className="text-sm font-bold text-amber-600 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 소통 스타일 */}
-                {commMods.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">소통 스타일</h3>
-                    {commMods.map(([id, m]) => (
-                      <div key={id} className="mb-3">
-                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                        <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{cleanMarkdown(m.content)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 푸터 */}
-              <div className="mt-8 pt-4 border-t border-neutral-100 text-center">
-                <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
-              </div>
-            </div>
-          );
-        }
-
-        // 해설 모듈을 못 불러온 경우 (HIT는 회원 전용 — 옛 비회원 잠금·가입 유도 화면은 2026-10-12 제거)
-        return (
-          <div key="p4">
-            <h2 className="text-lg font-bold mb-1">HIT 통합 보고서</h2>
-            <p className="text-sm text-neutral-500 mb-6">해설을 불러오지 못했습니다. 전체 보고서 페이지에서 다시 확인해 주세요.</p>
-            <Link href={`/hero/hit/a/report/${resultId}`} className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
-              전체 보고서 보기 <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        );
-
-      // ── Page 6: 다음 단계 ──
-      case 5:
-        return (
-          <div key="p5">
-            <h2 className="text-lg font-bold mb-6">다음 단계</h2>
-
-            <div className="space-y-4">
-              {/* HIT B */}
-              <Link href={`/hero/hit/b?a=${resultId}`}
-                className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold">B</div>
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">{HIT_STAGES.b.name} 이어서 받기 ({HIT_STAGES.b.code} · 공통)</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{HIT_STAGES.b.desc}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-[#E53935]" />
-                </div>
-              </Link>
-
-              {/* AI 상담 */}
-              <div className="border border-neutral-200 rounded-xl p-5">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-neutral-400" />
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">AI 맞춤 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">DISC×MBTI 교차 해석, 직무 적합도, 성장 로드맵</p>
-                  </div>
-                  <Link href={`/hero/coaching?type=ai&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">시작 →</Link>
-                </div>
-              </div>
-
-              {/* 대면 상담 */}
-              <div className="border border-neutral-200 rounded-xl p-5">
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-neutral-400" />
-                  <div className="flex-1">
-                    <p className="font-bold text-neutral-800">전문가 대면 상담</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 커리어를 함께 설계합니다</p>
-                  </div>
-                  <Link href={`/hero/coaching?type=mentor&resultId=${resultId}`} className="text-xs text-[#E53935] font-medium">예약 →</Link>
-                </div>
-              </div>
-
-              {/* 전체 보고서 */}
-              {result.memberId && (
-                <div className="border border-neutral-200 rounded-xl p-5 text-center">
-                  <p className="text-xs text-neutral-500 mb-3">전체 분석 결과를 보고서로 저장하세요</p>
-                  <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
-                </div>
-              )}
-
-              {/* 공유 + 재시도 */}
-              <div className="pt-4 space-y-2">
-                <HitShareButtons
-                  typeCode={result.typeCode}
-                  typeNameKo={result.typeNameKo}
-                  typeNickname={result.typeNickname}
-                  resultId={resultId}
-                  variant="full"
-                />
-                <Link href="/hero/hit/a"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 text-xs text-neutral-400 hover:text-neutral-600">
-                  <RefreshCw className="h-3 w-3" /> 다시 검사하기
-                </Link>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const n = (k: string) => Number(d[k] ?? 0);
+  const typeCode = String(d.type_code ?? "");
+  const typeName = heroType?.character_name ?? String(d.type_name_ko ?? "");
+  const sp = Object.entries((d.s_power_scores ?? {}) as Record<string, number>).filter(([k, v]) => SPOWER_LABELS[k] && v > 0).sort((a, b) => b[1] - a[1]);
+  const ap = Object.entries((d.ap_scores ?? {}) as Record<string, number>).sort((a, b) => b[1] - a[1]);
+  const ch = { integrity: n("ch_integrity"), relational: n("ch_relational"), emotional: n("ch_emotional"), ethics: n("ch_ethics"), growth: n("ch_growth") };
+  const discPrimary = String(d.disc_primary ?? "");
+  const pick = (prefix: string) => mods.filter(m => m.id.startsWith(prefix));
+  const spStrength = mods.filter(m => m.id.startsWith("SP-") && !m.id.includes("GROWTH"));
+  const spGrowth = mods.filter(m => m.id.includes("GROWTH"));
+  const overview = heroType?.profile_overview ? toParagraphs(heroType.profile_overview.split("\n\n")[0] ?? "", 3) : [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10 min-h-[70vh] flex flex-col">
-      {/* ── 섹션 탭 ── */}
-      <div className="flex items-center justify-center gap-1 mb-8 overflow-x-auto">
-        {pageLabels.map((label, i) => (
-          <button
-            key={i}
-            onClick={() => { setDirection(i > currentPage ? 'next' : 'prev'); setCurrentPage(i); }}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-              i === currentPage
-                ? 'bg-[#E53935] text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-            title={label}
-          >
-            {label}
-          </button>
-        ))}
+    <>
+    <ReportShell>
+      <ReportHeader code={`${HIT_STAGES.a.code} · 공통 기반`} title={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />
+      <HitChain type="a" id={resultId} />
+      <SectionNav items={NAV} />
+
+      <Section id="summary" title="한눈에" lead="성격·행동·성품·흥미를 겹쳐 본 나의 영웅 유형입니다.">
+        <HeroTypeCard typeCode={typeCode} nameKo={typeName} nickname={d.type_nickname as string} category={d.type_category as string}
+          traits={d.type_traits as string} careers={d.type_careers as string} />
+        {overview.length > 0 && <div className="mt-6 space-y-4">{overview.map((p, i) => <p key={i} className="text-[15px] text-neutral-700 leading-[1.9]">{p}</p>)}</div>}
+        <div className="mt-8">
+          <KeyFindings items={[
+            { label: "대표 강점", value: sp[0] ? `${SPOWER_LABELS[sp[0][0]]} ${sp[0][1]}` : "-", note: sp[1] ? `다음 강점: ${SPOWER_LABELS[sp[1][0]]} ${sp[1][1]}` : "" },
+            { label: "일하는 방식", value: DISC_COPY[discPrimary] ? `${DISC_COPY[discPrimary].label} (${discPrimary})` : "-", note: DISC_COPY[discPrimary]?.what ?? "" },
+            { label: "끌리는 분야", value: ap.slice(0, 2).map(([t]) => HOLLAND_COPY[t]?.label).join(" · ") || "-", note: ap[0] ? HOLLAND_COPY[ap[0][0]]?.what ?? "" : "" },
+          ]} />
+        </div>
+        <div className="mt-6"><ScoreGuide /></div>
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-xs text-neutral-400">결과 공유하기</p>
+          <HitShareButtons typeCode={typeCode} typeNameKo={typeName} typeNickname={d.type_nickname as string} resultId={resultId} variant="compact" />
+        </div>
+      </Section>
+
+      <Section id="personality" title="성격" lead="네 가지 축에서 어느 쪽으로 기우는지 보여 줍니다. 가운데(50)에서 멀수록 그 성향이 뚜렷합니다. 좋고 나쁨이 아니라 방향입니다.">
+        <div className="rounded-2xl border border-neutral-200 p-5 sm:p-6"><MBTISpectrum eScore={n("mbti_e_score")} sScore={n("mbti_s_score")} tScore={n("mbti_t_score")} jScore={n("mbti_j_score")} /></div>
+        <div className="mt-10"><ModuleList modules={pick("MBTI-")} /></div>
+        <p className="text-xs text-neutral-400 mt-6">MBTI®는 The Myers-Briggs Company의 상표이며, HIT는 공식 MBTI 검사가 아닙니다.</p>
+      </Section>
+
+      <Section id="behavior" title="행동" lead="네 가지 행동 방식이 나에게서 각각 얼마만큼씩 나타나는지(합계 100) 보여 줍니다. 가장 큰 쪽이 평소 일하는 방식입니다.">
+        <div className="rounded-2xl border border-neutral-200 p-5 sm:p-6"><DISCChart d={n("disc_d_score")} i={n("disc_i_score")} s={n("disc_s_score")} c={n("disc_c_score")} primary={discPrimary} /></div>
+        <div className="mt-10"><ModuleList modules={[...pick("DISC-"), ...pick("COMM-")]} /></div>
+      </Section>
+
+      <Section id="strength" title="강점 — S-Power" lead="성격·행동·성품·흥미를 함께 계산한 여덟 가지 강점입니다. 위쪽이 지금 가장 잘 쓰는 힘입니다.">
+        {sp.length > 0 && <div className="rounded-2xl border border-neutral-200 p-5 sm:p-6 flex justify-center"><RadarChart data={sp.map(([k, v]) => ({ label: SPOWER_LABELS[k], value: v }))} size={260} /></div>}
+        <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6 mt-4">
+          {sp.map(([k, v]) => <ScoreRow key={k} label={SPOWER_LABELS[k]} value={v} />)}
+        </div>
+        <div className="mt-10"><ModuleList modules={spStrength} /></div>
+        {spGrowth.length > 0 && <div className="mt-10"><p className="text-xs font-semibold text-neutral-400 mb-4">키우면 좋은 힘</p><ModuleList modules={spGrowth} /></div>}
+      </Section>
+
+      <Section id="character" title="성품" lead="일과 관계에서 드러나는 태도입니다. 높은 순서로 보여 드립니다.">
+        <ScoreList scores={ch} copy={CH_COPY} />
+      </Section>
+
+      <Section id="interest" title="흥미" lead="어떤 종류의 일에 마음이 끌리는지입니다. HIT B에서 '해낼 수 있다'는 자신감(효능감)과 겹쳐 봅니다.">
+        <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
+          {ap.map(([t, v]) => HOLLAND_COPY[t] && <ScoreRow key={t} label={HOLLAND_COPY[t].label} value={v} what={HOLLAND_COPY[t].what} />)}
+        </div>
+      </Section>
+
+      <Section id="background" title="성장 배경" lead="지금의 나를 만든 가족·또래·환경의 영향입니다. 나만 볼 수 있으며, 매칭이나 다른 사람에게 쓰지 않습니다.">
+        {d.base_summary ? <p className="text-[15px] text-neutral-700 leading-[1.9] mb-8">{String(d.base_summary)}</p> : null}
+        <ModuleList modules={pick("UF-")} />
+      </Section>
+
+      <Section id="commentary" title="HeRo 해설" lead="성격과 행동을 겹쳐 본 해석입니다.">
+        <ModuleList modules={pick("CROSS-")} />
+        <div className="mt-10"><AiNarrative text={d.ai_narrative as string | null} /></div>
+      </Section>
+
+      <ReportFooterNote />
+
+      <HeroChatPanel
+        resultId={resultId}
+        mode="A_ONLY"
+        greeting={getHeroGreeting("A_ONLY", { typeCode, typeNameKo: typeName })}
+        quickQuestions={["DISC 결과 궁금해요", "직장에서 어떻게 나타나나요?", "잘 맞는 유형은?", "성장 방법"]}
+        memberId={(d.member_id as string | undefined) ?? undefined}
+        chatRemaining={chatRemaining}
+      />
+    </ReportShell>
+    <HitNextSteps from="a" aId={resultId}>
+      <div className="space-y-3">
+        <NextLink href={`/hero/coaching?type=ai&resultId=${resultId}`} title="AI 맞춤 상담" desc="성격과 행동의 교차 해석, 맞는 직무, 성장 방법을 물어보세요" />
       </div>
-
-      {/* ── 콘텐츠 ── */}
-      <div
-        key={currentPage}
-        style={{ animation: 'fadeIn 0.3s ease-out' }}
-      >
-        {renderPage()}
+      <div className="mt-8 flex flex-col items-center gap-4">
+        <HitPdfButton resultId={resultId} typeCode={typeCode} />
+        <Link href="/hero/hit/a" className="inline-flex items-center gap-2 text-xs text-neutral-400 hover:text-neutral-600"><RefreshCw className="h-3 w-3" /> 다시 검사하기</Link>
       </div>
-
-      {/* ── 네비게이션 ── */}
-      <div className="flex items-center justify-between mt-10 pt-4 border-t border-neutral-100">
-        <button
-          onClick={goPrev}
-          disabled={currentPage === 0}
-          className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft className="h-4 w-4" /> 이전
-        </button>
-
-        <span className="text-xs text-neutral-300 font-mono">
-          {currentPage + 1} / {TOTAL_PAGES}
-        </span>
-
-        <button
-          onClick={goNext}
-          disabled={currentPage === TOTAL_PAGES - 1}
-          className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          다음 <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* 다음 검사 — 공통 B (HIT는 회원 전용, 2026-10-12) */}
-      <section className="mt-16 mb-10">
-        <Link href={`/hero/hit/b?a=${resultId}`} className="block rounded-2xl border-2 border-[#E53935] bg-white p-6 hover:shadow-lg transition-shadow">
-          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide">{HIT_STAGES.b.code} · 공통 기반</p>
-          <p className="text-lg font-bold text-neutral-900 mt-1">{HIT_STAGES.b.name}</p>
-          <p className="text-sm text-neutral-500 mt-1">{HIT_STAGES.b.desc}</p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#E53935] mt-4">이어서 시작 <ArrowRight size={16} /></span>
-        </Link>
-      </section>
-
-      {/* CSS Animation */}
-      {/* 히어로 AI 채팅 */}
-      {result && (
-        <HeroChatPanel
-          resultId={resultId}
-          mode="A_ONLY"
-          greeting={getHeroGreeting('A_ONLY', {
-            typeCode: result.typeCode,
-            typeNameKo: result.typeNameKo,
-          })}
-          quickQuestions={['DISC 결과 궁금해요', '직장에서 어떻게 나타나나요?', '잘 맞는 유형은?', '성장 방법']}
-          memberId={result.memberId}
-          chatRemaining={chatRemaining}
-        />
-      )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </div>
+    </HitNextSteps>
+    </>
   );
 }
