@@ -36,28 +36,39 @@ export function ReportHeader({ code, title, subtitle, date, stage, stageDesc }: 
 }
 
 type ChainItem = { id: string; headline: string; sub: string } | null;
-type ChainData = { a: ChainItem; b: ChainItem; stage: (ChainItem & { key: string; name: string }) | null };
+type ChainStage = NonNullable<ChainItem> & { key: string; name: string };
+type ChainData = { a: ChainItem; b: ChainItem; stage: ChainStage | null; stages?: ChainStage[] };
 
 /** 나의 HIT — 같은 회차의 A·B·생애주기 결과를 한 줄로. 현재 보고 있는 검사를 표시 */
 export function HitChain({ type, id }: { type: string; id: string }) {
   const [d, setD] = useState<ChainData | null>(null);
+  const [state, setState] = useState<"loading" | "ok" | "error">("loading");
   useEffect(() => {
-    fetch(`/api/hit/chain?type=${type}&id=${id}`).then(r => r.ok ? r.json() : null).then(setD).catch(() => setD(null));
+    let alive = true;
+    setState("loading");
+    fetch(`/api/hit/chain?type=${type}&id=${id}`)
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(j => { if (alive) { setD(j); setState("ok"); } })
+      .catch(() => { if (alive) setState("error"); });
+    return () => { alive = false; };
   }, [type, id]);
-  if (!d) return <div className="mt-10 h-[88px]" />;
+  if (state === "error") return null; // 보조 정보 — 실패해도 결과 본문은 그대로
+  if (!d) return <div className="mt-10 h-[88px] animate-pulse rounded-xl bg-neutral-50" aria-hidden />;
 
   const items: { key: string; code: string; name: string; data: ChainItem; href: string; start: string }[] = [
     { key: "a", code: HIT_STAGES.a.letter, name: HIT_STAGES.a.code, data: d.a, href: d.a ? `/hero/hit/a/result/${d.a.id}` : "/hero/hit/a", start: "/hero/hit/a" },
     { key: "b", code: HIT_STAGES.b.letter, name: HIT_STAGES.b.code, data: d.b, href: d.b ? `/hero/hit/b/result/${d.b.id}` : `/hero/hit/b${d.a ? `?a=${d.a.id}` : ""}`, start: "/hero/hit/b" },
-    d.stage
-      ? { key: d.stage.key, code: HIT_STAGES[d.stage.key as keyof typeof HIT_STAGES].letter, name: d.stage.name, data: d.stage, href: `/hero/hit/${d.stage.key}/result/${d.stage.id}`, start: "" }
-      : { key: "stage", code: "C~G", name: "생애주기 검사 선택", data: null, href: "/hero/hit", start: "/hero/hit" },
+    ...((d.stages && d.stages.length ? d.stages : d.stage ? [d.stage] : []).map(st => ({
+      key: st.key, code: HIT_STAGES[st.key as keyof typeof HIT_STAGES].letter, name: st.name, data: st as ChainItem,
+      href: `/hero/hit/${st.key}/result/${st.id}`, start: "",
+    }))),
+    ...((d.stages && d.stages.length) || d.stage ? [] : [{ key: "stage", code: "C~G", name: "생애주기 검사 선택", data: null as ChainItem, href: "/hero/hit", start: "/hero/hit" }]),
   ];
 
   return (
     <nav aria-label="나의 HIT" className="mt-10">
       <p className="text-xs font-semibold text-neutral-400 mb-3">나의 HIT — 공통(Archetype · Bounce) + 지금 단계</p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {items.map(it => {
           const current = it.key === type;
           return (
@@ -67,7 +78,7 @@ export function HitChain({ type, id }: { type: string; id: string }) {
                 <span className={`inline-flex h-5 min-w-5 px-1 items-center justify-center rounded text-[10px] font-bold ${it.data ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-400"}`}>{it.code}</span>
                 {it.data && !current && <Check className="h-3 w-3 text-neutral-400" />}
               </div>
-              <p className="text-[12px] font-semibold text-neutral-500 mt-2 truncate">{it.name}</p>
+              <p className="text-[12px] font-semibold text-neutral-500 mt-2 break-keep">{it.name}</p>
               {it.data ? (
                 <>
                   <p className="text-[13px] font-bold text-neutral-900 mt-0.5 truncate">{it.data.headline}</p>
@@ -258,7 +269,8 @@ export function useReportTitle(parts: (string | null | undefined)[], ready: bool
 }
 
 export function isoDay(iso: string | undefined | null) {
-  return iso ? new Date(iso).toISOString().slice(0, 10) : "";
+  // 한국 시간 기준 날짜 (toISOString은 UTC라 새벽 0~9시 결과가 전날로 찍혔다, 2026-10-12)
+  return iso ? new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }) : "";
 }
 
 /** 보고서(인쇄) 상단 도구 — 결과 화면으로 · 검사 설명 · 인쇄/PDF (인쇄 시 숨김) */

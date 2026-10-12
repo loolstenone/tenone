@@ -91,7 +91,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
         <KeyFindings items={[
           { label: "가장 강한 기본기", value: topCore ? `${CORE_COMPETENCY_LABELS[topCore[0]]} ${topCore[1]}` : "-", note: topCore ? CORE_COPY[topCore[0]].what : "" },
           { label: `${result.trackName} 직무 역량`, value: topTrack ? `${trackCompetencyLabel(topTrack[0])} ${topTrack[1]}` : "-", note: lowTrack && lowTrack !== topTrack ? `채울 곳: ${trackCompetencyLabel(lowTrack[0])} ${lowTrack[1]}` : "" },
-          { label: "중심에 둘 분야", value: center.map(t => HOLLAND_COPY[t]?.label ?? t).join(" · ") || "-", note: center[0] ? HOLLAND_COPY[center[0]]?.what ?? "" : "" },
+          { label: result.matrix?.optimal?.length ? "중심에 둘 분야" : "자신 있는 분야", value: center.map(t => HOLLAND_COPY[t]?.label ?? t).join(" · ") || "-", note: center[0] ? HOLLAND_COPY[center[0]]?.what ?? "" : "" },
         ]} />
         <div className="mt-6"><ScoreGuide /></div>
       </Section>

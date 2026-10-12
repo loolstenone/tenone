@@ -29,7 +29,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import MatchingInbox from "@/features/hero/MatchingInbox";
-import { HIT_STAGES } from "@/lib/hit/stages";
+import { HIT_STAGES, hitStageMinutesLabel } from "@/lib/hit/stages";
 import { GoalsTab } from "@/features/hero/GoalsTab";
 import { JobsTab } from "@/features/hero/JobsTab";
 import { CoachingTab } from "@/features/hero/CoachingTab";
@@ -385,9 +385,9 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   let mission: { title: string; desc: string; href: string; reward: string | null } | null = null;
 
   if (!c.has_hit_a) {
-    mission = { title: "HIT - Archetype 검사", desc: "약 25분이면 영웅 유형이 나와요", href: "/hero/hit/a", reward: null };
+    mission = { title: "HIT - Archetype 검사", desc: `${hitStageMinutesLabel("a")}이면 영웅 유형이 나와요`, href: "/hero/hit/a", reward: null };
   } else if (!c.has_hit_b) {
-    mission = { title: "HIT - Bounce 역량과 방향", desc: "역량·효능감이 더해져요 (약 13분)", href: "/hero/hit/b", reward: null };
+    mission = { title: "HIT - Bounce 역량과 방향", desc: `역량·효능감이 더해져요 (${hitStageMinutesLabel("b")})`, href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
     mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
@@ -541,34 +541,56 @@ function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: 
 /* ═════════════════════════ Hero Type 탭 ═════════════════════════ */
 
 function HeroTypeTab({ status }: { status: JourneyStatus }) {
-  // 검사 체계 SSOT (lib/hit/stages.ts) — 손으로 적던 옛 목록(C=경력 전환 …)은 재편 전 체계였음 (2026-10-12)
-  const tests = Object.values(HIT_STAGES).map(st => ({
-    key: st.key, label: st.code, subtitle: st.name,
-    done: st.key === "a" ? status.conditions.has_hit_a : st.key === "b" ? status.conditions.has_hit_b : false,
-  }));
+  // 결과는 /api/hit/results (세션 기준) — 단계별 가장 최근 결과로 바로 연결
+  const [latest, setLatest] = useState<Record<string, string> | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/hit/results")
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(d => {
+        if (!alive) return;
+        const m: Record<string, string> = {};
+        for (const it of (d.results ?? []) as { stage: string; id: string }[]) if (!m[it.stage]) m[it.stage] = it.id; // 최신순
+        setLatest(m);
+      })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, []);
+
+  // 검사 체계 SSOT (lib/hit/stages.ts)
+  const tests = Object.values(HIT_STAGES).map(st => {
+    const resultId = latest?.[st.key];
+    const done = !!resultId || (failed && (st.key === "a" ? status.conditions.has_hit_a : st.key === "b" ? status.conditions.has_hit_b : false));
+    return {
+      key: st.key, label: st.code, subtitle: st.name, done,
+      href: resultId ? `/hero/hit/${st.key}/result/${resultId}` : `/hero/hit/${st.key}`,
+    };
+  });
   return (
     <div className="space-y-6">
       <div className="bg-white border border-neutral-200 rounded-2xl p-6">
         <h3 className="text-lg font-bold text-neutral-900 mb-1">HIT 검사 관리</h3>
         <p className="text-sm text-neutral-500 mb-6">검사를 완료할수록 당신의 데이터는 두꺼워지고, 매칭·코칭 정확도가 올라갑니다.</p>
+        {failed && <p className="text-xs text-amber-700 mb-3">결과 목록을 불러오지 못해 일부 검사는 완료 여부가 정확하지 않을 수 있습니다.</p>}
         <div className="grid md:grid-cols-2 gap-3">
           {tests.map((t) => (
             <Link
               key={t.key}
-              href={`/hero/hit/${t.key}`}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+              href={t.href}
+              className={`flex items-center justify-between gap-3 p-4 rounded-xl border transition-all ${
                 t.done ? "border-green-200 bg-green-50" : "border-neutral-200 hover:border-[#E53935] hover:shadow-sm"
               }`}
             >
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-neutral-900">{t.label}</span>
-                  {t.done && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+                  {t.done && <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />}
                 </div>
-                <p className="text-xs text-neutral-500 mt-0.5">{t.subtitle}</p>
+                <p className="text-xs text-neutral-500 mt-0.5 break-keep">{t.subtitle}</p>
               </div>
-              <span className="text-xs font-bold" style={{ color: RED }}>
-                {t.done ? "결과 보기" : "시작"} →
+              <span className="text-xs font-bold shrink-0" style={{ color: RED }}>
+                {!latest && !failed ? "" : t.done ? "결과 보기 →" : "시작 →"}
               </span>
             </Link>
           ))}

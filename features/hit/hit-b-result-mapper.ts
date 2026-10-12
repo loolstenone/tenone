@@ -2,7 +2,10 @@ import type { HitBResult } from '@/types/hit';
 
 /** /api/hit/b/result/[id] 응답 → 화면 모델 (결과·보고서 페이지 공용) */
 export function mapHitBResult(data: Record<string, unknown>): HitBResult & { trackName: string } {
-  const matrix = data.interest_efficacy_matrix as HitBResult['matrix'] | null | undefined;
+  const raw = data.interest_efficacy_matrix as HitBResult['matrix'] | null | undefined;
+  // 흥미(HIT - Archetype) 없이 채점되면 칸이 전부 '미측정' → 교차 분석 없음으로 본다 (2026-10-12 — 빈 표만 그려지고 안내 문구가 안 나왔다)
+  const cells = Object.values(raw?.cells ?? {});
+  const matrix = raw && cells.some(c => c !== '미측정') ? raw : null;
   return {
     id: String(data.id),
     sessionId: String(data.session_id),

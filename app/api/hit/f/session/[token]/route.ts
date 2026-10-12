@@ -1,22 +1,16 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses } from '@/lib/supabase/hit';
+import { getOwnedHitSessionPayload } from '@/lib/supabase/hit';
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+/** GET — 세션 소유 회원만 (member_id는 응답에서 제외, 2026-10-12) */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params;
-
-    const session = await getHitSession(token);
-    if (!session) {
-      return errorResponse('세션을 찾을 수 없습니다.', 404);
-    }
-
-    const responses = await getHitResponses(session.id);
-
-    return successResponse({ session, responses });
+    const r = await getOwnedHitSessionPayload(request, token);
+    if ('error' in r) return r.error;
+    return successResponse(r.payload);
   } catch (error) {
     console.error('[HIT F Session] 조회 오류:', error);
-    const message = error instanceof Error ? error.message : '세션 조회 실패';
-    return errorResponse(message, 500);
+    return errorResponse('세션을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.', 500);
   }
 }

@@ -61,12 +61,15 @@ export const ONBOARDING_LABELS: Record<string, string> = {
 };
 
 export function scoreReadiness(responses: ResponseRow[]) {
-  const map = buildSubscaleMap(responses.filter(r => r.module === 'readiness'));
+  // 트랙 문항(ready_{트랙약어}_NNN)도 sub_domain이 self·portfolio 등 공통 이름이라 subscale로는 못 가른다 (2026-10-12 —
+  // 트랙 문항이 공통 차원 평균에 섞이고 '직무 트랙 준비'가 한 번도 안 나왔다). 문항 id로 가른다: 공통 = ready_c_* · b_*
+  const readiness = responses.filter(r => r.module === 'readiness');
+  const isCommon = (id: string) => id.startsWith('ready_c_') || id.startsWith('b_');
+  const map = buildSubscaleMap(readiness.filter(r => isCommon(r.question_id)));
   const common = ['self', 'portfolio', 'interview', 'network', 'skill_readiness', 'action_readiness'];
   const scores: Record<string, number> = {};
   for (const k of common) if (map[k]?.length) scores[k] = scaleToHundred(map[k]);
-  // 트랙 준비도 = 공통 키가 아닌 나머지 subscale 평균
-  const trackVals = Object.entries(map).filter(([k]) => !common.includes(k) && k !== 'unknown').flatMap(([, v]) => v);
+  const trackVals = Object.values(buildSubscaleMap(readiness.filter(r => !isCommon(r.question_id)))).flat();
   if (trackVals.length) scores.track = scaleToHundred(trackVals);
   const total = avg(Object.values(scores));
   const gaps = Object.entries(scores).filter(([, v]) => v < 50).map(([k]) => READINESS_LABELS[k] ?? k);

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Shield, FileText, TrendingUp, Palette, Users, ChevronRight } from 'lucide-react';
 
 interface HitResult {
+  id: string;
   typeCode: string;
   typeNameKo: string;
   typeNickname: string;
@@ -13,6 +14,7 @@ interface HitResult {
 }
 
 interface HitBResult {
+  id: string;
   hollandCode: string;
   readinessGrade: string;
   competencyTrack: string;
@@ -34,6 +36,7 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
   const [hitB, setHitB] = useState<HitBResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!memberId) { setLoading(false); return; }
@@ -59,14 +62,16 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
 
       // HIT A 결과
       sb.from('hit_a_results')
-        .select('type_code, type_name_ko, type_nickname, disc_primary, mbti_type')
+        .select('id, type_code, type_name_ko, type_nickname, disc_primary, mbti_type')
         .eq('member_id', memberId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-        .then(({ data }: { data: Record<string, unknown> | null }) => {
+        .then(({ data, error }: { data: Record<string, unknown> | null; error?: unknown }) => {
+          if (error) setFailed(true);
           if (data) {
             setHitA({
+              id: data.id as string,
               typeCode: data.type_code as string,
               typeNameKo: data.type_name_ko as string,
               typeNickname: data.type_nickname as string,
@@ -75,18 +80,20 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
             });
           }
         })
-        .catch(() => {});
+        .catch(() => setFailed(true));
 
       // HIT B 결과
       sb.from('hit_b_results')
-        .select('holland_code, readiness_grade, competency_track')
+        .select('id, holland_code, readiness_grade, competency_track')
         .eq('member_id', memberId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-        .then(({ data }: { data: Record<string, unknown> | null }) => {
+        .then(({ data, error }: { data: Record<string, unknown> | null; error?: unknown }) => {
+          if (error) setFailed(true);
           if (data) {
             setHitB({
+              id: data.id as string,
               hollandCode: data.holland_code as string,
               readinessGrade: data.readiness_grade as string,
               competencyTrack: data.competency_track as string,
@@ -94,12 +101,21 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
           }
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch(() => { setFailed(true); setLoading(false); });
     });
   }, [memberId]);
 
   if (loading) return null;
   if (hidden) return null; // respectOptIn=true이고 사용자가 off 한 경우
+
+  // 조회 실패 — 결과가 있는 회원에게 '검사 시작'을 보여주지 않는다
+  if (!hitA && !hitB && failed) {
+    return (
+      <div className="px-4 py-3 border border-neutral-200 rounded-xl text-xs text-neutral-500">
+        HIT 결과를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.
+      </div>
+    );
+  }
 
   // HIT 결과 없으면 검사 유도
   if (!hitA && !hitB) {
@@ -124,8 +140,8 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
 
   // 서비스 이용 내역
   const services = [
-    hitA && { icon: Shield, label: `${hitA.typeCode} · ${hitA.typeNickname}`, sub: hitA.typeNameKo, href: '/hero/hit', color: discColor },
-    hitB && { icon: TrendingUp, label: `Holland ${hitB.hollandCode}`, sub: `준비도 ${hitB.readinessGrade}등급 · ${hitB.competencyTrack || ''}`, href: '/hero/hit/b', color: '#E53935' },
+    hitA && { icon: Shield, label: `${hitA.typeCode} · ${hitA.typeNickname}`, sub: hitA.typeNameKo, href: `/hero/hit/a/result/${hitA.id}`, color: discColor },
+    hitB && { icon: TrendingUp, label: `Holland ${hitB.hollandCode}`, sub: `준비도 ${hitB.readinessGrade}등급 · ${hitB.competencyTrack || ''}`, href: `/hero/hit/b/result/${hitB.id}`, color: '#E53935' },
   ].filter(Boolean) as { icon: typeof Shield; label: string; sub: string; href: string; color: string }[];
 
   // 추가 서비스 링크 (아직 이용 안 한 것도 표시)

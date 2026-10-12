@@ -5,33 +5,37 @@
  * 문항 수·모듈 이름은 실제 출제(hit_questions → lib/hit/stage-modules.ts 매핑)·채점(lib/hit/scoring-{x}.ts)과 같아야 한다.
  * 옛 소개 페이지는 문항 수(60 vs 실제 100 등)·이전 문자(HIT - C)·없는 리더십 유형을 적고 있었다.
  */
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Clock, ArrowRight, Loader2, AlertCircle, ListChecks, ShieldCheck } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Clock, AlertCircle, ListChecks, ShieldCheck } from "lucide-react";
 import { HIT_STAGES, type HitStageKey } from "@/lib/hit/stages";
+import HitStartCTA from "./HitStartCTA";
+import { useHitResume, postHitSession } from "./useHitResume";
 
 export interface StageIntroModule { title: string; desc: string; count: number }
 
-export default function StageIntro({ stage, modules, note }: { stage: Extract<HitStageKey, "d" | "e" | "f" | "gap">; modules: StageIntroModule[]; note?: string }) {
+type StageIntroProps = { stage: Extract<HitStageKey, "d" | "e" | "f" | "gap">; modules: StageIntroModule[]; note?: string };
+
+function StageIntroContent({ stage, modules, note }: StageIntroProps) {
   const router = useRouter();
+  // 어느 HIT A 회차를 잇는지 (2026-10-12) — 세션 시작·테스트 화면·채점까지 그대로 전달
+  const hitAResultId = useSearchParams().get("a");
+  const aParam = hitAResultId ? `&a=${hitAResultId}` : "";
+  const resume = useHitResume(stage);
   const def = HIT_STAGES[stage];
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const total = modules.reduce((a, m) => a + m.count, 0);
+  // 응답 신뢰도 점검 문항 2개가 섞여 출제된다 (2026-10-12) — 총 문항 수에 포함
+  const total = modules.reduce((a, m) => a + m.count, 0) + 2;
   const minutes = Math.round((total * 6) / 60);
 
-  const start = async () => {
+  const start = async (restart = false) => {
     setStarting(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/hit/${stage}/session`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-      const data = await res.json();
-      if (data.sessionToken) { router.push(`/hero/hit/${stage}/test?s=${data.sessionToken}`); return; }
-      setError(data.error ?? data.message ?? "시작할 수 없습니다.");
-    } catch {
-      setError("시작할 수 없습니다. 잠시 후 다시 시도해 주세요.");
-    }
+    const r = await postHitSession(stage, { hitAResultId, restart });
+    if (r.error === null) { router.push(`/hero/hit/${stage}/test?s=${r.token}${aParam}`); return; }
+    setError(r.error);
     setStarting(false);
   };
 
@@ -49,12 +53,12 @@ export default function StageIntro({ stage, modules, note }: { stage: Extract<Hi
         </div>
       </section>
 
-      {error && (
+      {error && /Archetype/.test(error) && (
         <section className="bg-amber-50 border-y border-amber-200">
           <div className="mx-auto max-w-3xl px-6 py-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-amber-800">{error}</p>
+              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.code}을 먼저 완료해주세요</p>
               <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.code} 시작하기 →</button>
             </div>
           </div>
@@ -88,14 +92,28 @@ export default function StageIntro({ stage, modules, note }: { stage: Extract<Hi
             공통 검사({HIT_STAGES.a.code} · {HIT_STAGES.b.code})를 먼저 하면 결과가 더 깊어집니다. {HIT_STAGES.a.code}({HIT_STAGES.a.name})는 필수입니다.<br />
             각 문항에 1(전혀 아니다)~7(매우 그렇다)로 응답합니다. 정답은 없습니다.
           </p>
-          <button onClick={start} disabled={starting} className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50">
-            {starting ? <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</> : <>{def.code} 시작하기 <ArrowRight className="h-5 w-5" /></>}
-          </button>
+          <HitStartCTA
+            label={`${def.code} 시작하기`}
+            resume={resume}
+            total={total}
+            starting={starting}
+            error={error}
+            onStart={start}
+            onResume={() => resume && router.push(`/hero/hit/${stage}/test?s=${resume.token}${aParam}`)}
+          />
           <div className="mt-6">
             <Link href="/hero/hit/method" className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800"><ShieldCheck className="h-3.5 w-3.5" /> 결과는 어떻게 만들어지나요</Link>
           </div>
         </div>
       </section>
     </div>
+  );
+}
+
+export default function StageIntro(props: StageIntroProps) {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" /></div>}>
+      <StageIntroContent {...props} />
+    </Suspense>
   );
 }

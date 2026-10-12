@@ -21,6 +21,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return successResponse({ ...stripHitResult(safe), report_modules: reportModules, modules_used: moduleIds });
   } catch (error) {
     console.error('[HIT E Result] 조회 오류:', error);
-    return errorResponse(error instanceof Error ? error.message : '결과 조회 실패', 500);
+    return errorResponse('결과 조회 실패', 500);
   }
 }

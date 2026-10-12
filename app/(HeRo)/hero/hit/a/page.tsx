@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { Brain, Users, Target, Clock, ArrowRight, Loader2, Sparkles, RotateCcw, Sprout } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { HIT_A_UF_COUNT, HIT_A_TOTAL_COUNT } from "@/lib/hit/a-modules";
-import { HIT_STAGES } from "@/lib/hit/stages";
+import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
+import HitErrorRetry from "@/features/hit/HitErrorRetry";
+import { RESTART_CONFIRM } from "@/features/hit/useHitResume";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/a/questions → hit_questions test_type A)와 같아야 한다 (2026-10-12 — 화면마다 127·172·620으로 달랐음)
 // HIT는 회원 전용 — UF(성장 배경)가 첫 파트. lib/hit/a-modules.ts
@@ -14,7 +16,7 @@ const ufModule = {
   title: "성장 배경 (UF)",
   desc: "가정·또래·경험 등 지금의 나를 만든 배경을 돌아봅니다. 결과는 본인 리포트에만 표시되고, 강점 점수·기업 매칭에는 쓰지 않습니다.",
   count: `${HIT_A_UF_COUNT}문항`,
-  time: "~6분",
+  time: `~${estimateMinutes(HIT_A_UF_COUNT)}분`,
 };
 const modules = [
   {
@@ -22,28 +24,28 @@ const modules = [
     title: "성격 유형 (PT)",
     desc: "인식과 판단 방식, 에너지 방향을 파악합니다.",
     count: "62문항",
-    time: "~8분",
+    time: `~${estimateMinutes(62)}분`,
   },
   {
     icon: Target,
     title: "행동 유형 (BT)",
     desc: "업무 상황에서의 행동 패턴을 측정합니다.",
     count: "40문항",
-    time: "~5분",
+    time: `~${estimateMinutes(40)}분`,
   },
   {
     icon: Users,
     title: "핵심 성품 (CH)",
     desc: "일과 관계에서 드러나는 성품을 확인합니다.",
     count: "40문항",
-    time: "~5분",
+    time: `~${estimateMinutes(40)}분`,
   },
   {
     icon: Sparkles,
     title: "핵심 적성 (AP)",
     desc: "어떤 일에 자연스럽게 끌리는지 측정합니다.",
     count: "30문항",
-    time: "~4분",
+    time: `~${estimateMinutes(30)}분`,
   },
 ];
 const LAST_SESSION_KEY = "hit_a_last_session";
@@ -54,6 +56,7 @@ export default function HitAIntroPage() {
   const TOTAL_QUESTIONS = HIT_A_TOTAL_COUNT;
   const shownModules = [ufModule, ...modules];
   const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
   const [pageLoadTime] = useState(Date.now());
   // 진행 중 세션 — 검사를 중단했다 돌아온 사람이 처음부터 다시 하지 않게 (2026-10-12)
   const [resume, setResume] = useState<{ token: string; answered: number } | null>(null);
@@ -79,22 +82,30 @@ export default function HitAIntroPage() {
     return () => { cancelled = true; };
   }, [user?.id]);
 
-  const handleStart = async () => {
+  // restart=true: 진행 중이던 세션을 닫고 새로 시작 (확인 필수)
+  const handleStart = async (restart = false) => {
+    if (restart && !window.confirm(RESTART_CONFIRM)) return;
     setStarting(true);
+    setStartError(null);
     try {
       const res = await fetch("/api/hit/a/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberId: user?.id, _ts: pageLoadTime, _hp: "" }),
+        body: JSON.stringify({ restart, _ts: pageLoadTime, _hp: "" }),
       });
-      const data = await res.json();
-      if (data.sessionToken) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.sessionToken) {
         try { localStorage.setItem(LAST_SESSION_KEY, data.sessionToken); } catch { /* ignore */ }
+        // 새로 시작이면 이전 세션의 임시 저장 답변을 버린다
+        if (restart) { try { localStorage.removeItem(`hit_a_${resume?.token}`); } catch { /* ignore */ } }
         router.push(`/hero/hit/a/test?s=${data.sessionToken}`);
+        return;
       }
+      setStartError(res.status === 401 ? "로그인이 필요합니다. 로그인 후 다시 시도해 주세요." : (data.message || data.error || "시작할 수 없습니다. 잠시 후 다시 시도해 주세요."));
     } catch {
-      setStarting(false);
+      setStartError("네트워크 오류로 시작할 수 없습니다. 연결을 확인하고 다시 시도해 주세요.");
     }
+    setStarting(false);
   };
 
   return (
@@ -113,7 +124,7 @@ export default function HitAIntroPage() {
             64가지 영웅 유형 중 나만의 프로필을 찾습니다.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 약 30분</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {hitStageMinutesLabel("a")}</span>
             <span>·</span>
             <span>{TOTAL_QUESTIONS}문항</span>
             <span>·</span>
@@ -154,6 +165,7 @@ export default function HitAIntroPage() {
           <p className="text-xs text-neutral-400 mb-4">
             결과는 내 계정에 저장되며 본인만 볼 수 있습니다.
           </p>
+          {startError && <HitErrorRetry message={startError} onRetry={() => handleStart(false)} className="mb-4" />}
           {resume ? (
             <div className="flex flex-col items-center gap-3">
               <button
@@ -163,7 +175,7 @@ export default function HitAIntroPage() {
                 이어서 하기 <span className="text-sm font-medium opacity-80">({resume.answered}/{TOTAL_QUESTIONS} 답변)</span> <ArrowRight className="h-5 w-5" />
               </button>
               <button
-                onClick={handleStart}
+                onClick={() => handleStart(true)}
                 disabled={starting}
                 className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
               >
@@ -172,7 +184,7 @@ export default function HitAIntroPage() {
             </div>
           ) : (
             <button
-              onClick={handleStart}
+              onClick={() => handleStart(false)}
               disabled={starting}
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
             >

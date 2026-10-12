@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { ArrowRight, Clock, ListChecks, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import MyHitResults from "@/features/hit/MyHitResults";
 import { HIT_STAGES, HIT_COMMON, HIT_LIFE_STAGES, HIT_SITUATIONS, type HitStageDef } from "@/lib/hit/stages";
 
 /**
@@ -29,6 +31,7 @@ function StageCard({ s, primary = false, href }: { s: HitStageDef; primary?: boo
 }
 
 export default function HitOverviewPage() {
+  const { isAuthenticated } = useAuth();
   return (
     <div>
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
@@ -41,6 +44,16 @@ export default function HitOverviewPage() {
           </p>
         </div>
       </section>
+
+      {/* 나의 HIT — 로그인 회원만 */}
+      {isAuthenticated && (
+        <section className="bg-white border-b border-neutral-100">
+          <div className="mx-auto max-w-5xl px-6 py-10">
+            <h2 className="text-xl font-extrabold tracking-tight mb-4">나의 HIT 결과</h2>
+            <MyHitResults />
+          </div>
+        </section>
+      )}
 
       {/* 공통 */}
       <section className="bg-white border-b border-neutral-100">
@@ -91,7 +104,7 @@ export default function HitOverviewPage() {
             <div className="w-12 h-12 rounded-xl bg-neutral-100 text-neutral-600 flex items-center justify-center shrink-0"><ShieldCheck className="h-6 w-6" /></div>
             <div className="flex-1">
               <h3 className="text-base font-bold text-neutral-900">HIT 엔진 — 결과는 이렇게 만들어집니다</h3>
-              <p className="text-sm text-neutral-500 mt-1 leading-relaxed break-keep">점수는 서버의 정해진 채점 규칙이, 해설은 미리 검수한 324개 모듈이 만듭니다. AI는 읽기용 요약만 돕습니다. 채점 공식·품질 관리·검증 계획을 공개합니다.</p>
+              <p className="text-sm text-neutral-500 mt-1 leading-relaxed break-keep">점수는 서버의 정해진 채점 규칙이, 해설은 미리 검수한 600개 이상의 모듈이 만듭니다. AI는 읽기용 요약만 돕습니다. 채점 공식·품질 관리·검증 계획을 공개합니다.</p>
             </div>
             <ArrowRight className="h-5 w-5 text-neutral-400 shrink-0" />
           </Link>

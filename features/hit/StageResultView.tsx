@@ -92,7 +92,7 @@ function viewFor(stage: StageKey, r: Row): View {
       const dt: Record<string, string> = { re_employment: "재취업형", entrepreneurship: "창업·독립형", social_contribution: "사회 공헌형", mentoring: "멘토링·교육형", leisure: "여가·자기실현형" };
       return {
         journey: { ready_to_launch: "2막 시작 준비 완료", almost_ready: "거의 준비됨", direction_found: "방향이 잡힘", exploring: "탐색 중", needs_reflection: "성찰 필요", early_awareness: "초기 인식" },
-        cover: { headline: dt[r.direction_type] ?? "인생 2막", sub: `2막 준비도 ${n(r.second_act_readiness)}` },
+        cover: { headline: dt[r.direction_type] ?? "인생 2막", sub: n(r.second_act_readiness) > 0 ? `2막 준비도 ${n(r.second_act_readiness)}` : "2막 준비도 체크 전" },
         findings: [
           { label: "2막 방향", value: dt[r.direction_type] ?? "-", note: STAGE_DIM_COPY[r.direction_type]?.what ?? "" },
           { label: "남아 있는 열정", value: `${n(r.remaining_passion)} · ${BAND_INFO[scoreBand(n(r.remaining_passion))].label}`, note: STAGE_DIM_COPY.remaining_passion.what },

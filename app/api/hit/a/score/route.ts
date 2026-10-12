@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
 import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, summarizeUF, match64Type, calcSpower8d, scoreMBTI, scoreDISC, detectDistortion, computeCrossPatterns, type UFQuestionMeta } from '@/lib/hit/scoring';
@@ -23,6 +24,10 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return errorResponse('세션을 찾을 수 없습니다.', 404);
     }
+    // 본인 세션만 채점 (2026-10-12)
+    const auth = await requireMember(request);
+    if (auth instanceof Response) return auth;
+    if (session.member_id !== auth.memberId) return errorResponse('세션을 찾을 수 없습니다.', 404);
 
     if (session.status !== 'in_progress') {
       return errorResponse('이미 완료된 세션입니다.', 400);
@@ -210,7 +215,6 @@ export async function POST(request: NextRequest) {
     return successResponse({ resultId: result.id, resultMode, tier }, 201);
   } catch (error) {
     console.error('[HIT A Score] 채점 오류:', error);
-    const message = error instanceof Error ? error.message : '채점 처리 실패';
-    return errorResponse(message, 500);
+    return errorResponse('채점 처리 실패', 500); // 내부 오류 문구는 로그로만 (2026-10-12)
   }
 }

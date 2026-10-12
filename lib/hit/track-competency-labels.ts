@@ -115,8 +115,9 @@ export const TRACK_COMPETENCY_LABELS: Record<string, { label: string; what: stri
   supply_chain: { label: '공급망', what: '원자재와 협력사를 관리하는 힘' },
   safety_env: { label: '안전·환경', what: '현장 안전과 환경 기준을 지키는 힘' },
   mfg_leadership: { label: '현장 리더십', what: '생산 인력을 이끄는 힘' },
-  // 미디어·방송
-  production_media: { label: '제작', what: '프로그램·영상을 기획하고 만드는 힘' },
+  // 미디어·방송 (program_planning = 2026-10-12 광고 트랙 media_planning과 키가 겹쳐 분리)
+  program_planning: { label: '프로그램 기획', what: '시청자를 분석해 프로그램·영상 기획안을 쓰는 힘' },
+  production_media: { label: '촬영·현장 제작', what: '카메라·조명·음향으로 현장을 담아내는 힘' },
   post_production: { label: '후반 작업', what: '편집·그래픽으로 완성도를 높이는 힘' },
   journalism: { label: '취재·보도', what: '사실을 확인하고 전달하는 힘' },
   digital_media: { label: '디지털 미디어', what: '디지털 채널에 맞게 콘텐츠를 다루는 힘' },

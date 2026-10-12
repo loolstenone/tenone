@@ -1,14 +1,11 @@
 import { NextRequest } from 'next/server';
-import { getApiUser, requireMember } from '@/lib/api-guard';
+import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createHitSession, getLatestInProgressHitSession } from '@/lib/supabase/hit';
+import { startOrResumeHitSession, getResumeInfo } from '@/lib/supabase/hit';
 
 /** GET — 로그인 회원의 가장 최근 진행 중 HIT A 세션 (이어서 하기 제안용, 비회원은 null) */
 export async function GET(request: NextRequest) {
-  const memberId = (await getApiUser(request))?.memberId;
-  if (!memberId) return successResponse({ sessionToken: null });
-  const s = await getLatestInProgressHitSession('A', memberId);
-  return successResponse({ sessionToken: s?.session_token ?? null });
+  return successResponse(await getResumeInfo(request, 'A'));
 }
 
 // 간단한 인메모리 rate limiter (IP 기반, 분당 5회)
@@ -54,15 +51,16 @@ export async function POST(request: NextRequest) {
     const auth = await requireMember(request);
     if (auth instanceof Response) return auth;
     const memberId = auth.memberId;
-    const session = await createHitSession('A', memberId);
+    // 진행 중 세션이 있으면 이어서, restart면 옛 세션을 닫고 새로 (2026-10-12)
+    const session = await startOrResumeHitSession('A', memberId, body.restart === true);
 
     return successResponse({
-      sessionId: session.id,
-      sessionToken: session.session_token,
+      sessionId: session.sessionId,
+      sessionToken: session.sessionToken,
+      resumed: session.resumed,
     }, 201);
   } catch (error) {
     console.error('[HIT A Session] 생성 오류:', error);
-    const message = error instanceof Error ? error.message : '세션 생성 실패';
-    return errorResponse(message, 500);
+    return errorResponse('세션을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.', 500);
   }
 }

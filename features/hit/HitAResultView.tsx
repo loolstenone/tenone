@@ -13,7 +13,6 @@ import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
-import HitShareButtons from "@/features/hit/HitShareButtons";
 import HitModelGuide from "@/features/hit/HitModelGuide";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
@@ -81,8 +80,9 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         if (!print) {
           // 무료 회원 AI 상담 남은 횟수
           fetch("/api/hit/membership").then(r => r.json()).then(m => {
-            if (m.data?.tier && m.data.tier !== "premium" && m.data.tier !== "professional") {
-              fetch(`/api/hit/chat/usage?memberId=${data.member_id ?? ""}`).then(r => r.json()).then(u => { if (u.data !== undefined) setChatRemaining(Math.max(0, 3 - u.data)); }).catch(() => setChatRemaining(3));
+            // /api/hit/membership는 { tier }를 그대로 돌려준다 (data로 감싸지 않음). 사용량은 로그인 세션 기준
+            if (m.tier && m.tier !== "premium" && m.tier !== "professional") {
+              fetch("/api/hit/chat/usage").then(r => r.json()).then(u => { if (u.data !== undefined) setChatRemaining(Math.max(0, 3 - u.data)); }).catch(() => setChatRemaining(3));
             }
           }).catch(() => {});
         }
@@ -130,12 +130,6 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
           ]} />
         </div>
         <div className="mt-6"><ScoreGuide /></div>
-        {!print && (
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <p className="text-xs text-neutral-400">결과 공유하기</p>
-            <HitShareButtons typeCode={typeCode} typeNameKo={typeName} typeNickname={d.type_nickname as string} resultId={resultId} variant="compact" />
-          </div>
-        )}
       </Section>
 
       {print && <div className="hidden print:block mt-16"><HitModelGuide mode="print" /></div>}
@@ -196,7 +190,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <div className="mt-10"><ModuleList modules={[...pick("RIASEC-TOP-"), ...mods.filter(m => /^RIASEC-[RIASEC]{3}$/.test(m.id))]} /></div>
       </Section>
 
-      <Section id="background" title="성장 배경" lead="지금의 나를 만든 가족·또래·환경의 영향입니다. 나만 볼 수 있으며, 매칭이나 다른 사람에게 쓰지 않습니다.">
+      <Section id="background" title="성장 배경" lead="지금의 나를 만든 가족·또래·환경의 영향입니다. 나만 볼 수 있습니다. 매칭에 쓰지 않고 다른 사람에게 보여 주지 않습니다. AI 해설을 만들 때 요약만 전달됩니다 (이름·연락처 제외).">
         {d.base_summary ? <p className="text-[15px] text-neutral-700 leading-[1.9] mb-8">{String(d.base_summary)}</p> : null}
         <ModuleList modules={pick("UF-")} />
       </Section>
@@ -213,7 +207,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
           <div className="flex items-center justify-center" style={{ height: "calc(100vh - 40px)" }}>
             <div className="text-center">
               <Image src="/hero-logo-black-wide.png" alt="HeRo" width={400} height={200} className="w-80 mx-auto opacity-[0.06]" />
-              <p className="text-sm text-neutral-300 mt-10 tracking-widest">HeRo Integrated Test</p>
+              <p className="text-sm text-neutral-300 mt-10 tracking-widest">{HIT_STAGES.a.code}</p>
               <p className="text-xs text-neutral-300 mt-2">Ten:One™ Universe</p>
             </div>
           </div>

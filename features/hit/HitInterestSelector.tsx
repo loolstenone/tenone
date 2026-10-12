@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Building2, Briefcase, ChevronRight, AlertCircle } from "lucide-react";
+import HitErrorRetry from "./HitErrorRetry";
 
 interface Industry { id: string; name_ko: string; icon?: string }
 interface JobFunction { id: string; name_ko: string; icon?: string }
@@ -9,6 +10,7 @@ interface Track { id: string; name_ko: string; description?: string; is_active: 
 
 interface HitInterestSelectorProps {
   onSelect: (industry: string, jobFunction: string, trackId: string | null) => void;
+  /** 분야 목록을 못 불러올 때 '스타트업 종합' 트랙으로 계속하는 길 (2026-10-12) */
   onSkip?: () => void;
 }
 
@@ -22,18 +24,29 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
   const [selectedIndustryName, setSelectedIndustryName] = useState('');
   const [selectedJobFunctionName, setSelectedJobFunctionName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [loadTick, setLoadTick] = useState(0);
+  const [trackError, setTrackError] = useState<string | null>(null);
 
-  // 산업군/직군 로드
+  // 산업군/직군 로드 — 실패하거나 비어 있으면 오류 화면 (빈 화면으로 멈추지 않게, 2026-10-12)
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
     fetch('/api/hit/b/tracks')
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('load'); return r.json(); })
       .then(data => {
-        setIndustries(data.industries || []);
-        setJobFunctions(data.jobFunctions || []);
+        if (cancelled) return;
+        const inds: Industry[] = data.industries || [];
+        const jfs: JobFunction[] = data.jobFunctions || [];
+        setIndustries(inds);
+        setJobFunctions(jfs);
+        if (inds.length === 0 || jfs.length === 0) setLoadError(true);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, []);
+      .catch(() => { if (!cancelled) { setLoadError(true); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [loadTick]);
 
   // 산업군 선택
   const handleIndustry = (id: string) => {
@@ -48,10 +61,12 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
     const jf = jobFunctions.find(j => j.id === id);
     setSelectedJobFunction(id);
     setSelectedJobFunctionName(jf?.name_ko || id);
+    setTrackError(null);
 
     // 매칭 트랙 조회
     try {
       const res = await fetch(`/api/hit/b/tracks?industry=${selectedIndustry}&jobFunction=${id}`);
+      if (!res.ok) throw new Error('tracks');
       const data = await res.json();
       const matchedTracks: Track[] = data.tracks || [];
       const matchType: string = data.matchType || 'none';
@@ -66,7 +81,8 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
         setStep('inactive');
       }
     } catch {
-      setStep('inactive');
+      // 네트워크 오류를 '전용 트랙 없음'으로 오인하지 않는다
+      setTrackError('트랙을 불러오지 못했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -79,6 +95,20 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="max-w-lg mx-auto px-6 py-16 flex flex-col items-center gap-6">
+        <HitErrorRetry message="관심 분야 목록을 불러오지 못했습니다." onRetry={() => setLoadTick(n => n + 1)} />
+        {onSkip && (
+          <div className="text-center">
+            <p className="text-xs text-neutral-400 mb-2 break-keep">분야를 고르지 않고 공통 문항과 &lsquo;스타트업 종합&rsquo; 트랙의 직무 역량 문항으로 진행할 수도 있습니다.</p>
+            <button onClick={onSkip} className="text-sm font-bold text-neutral-700 underline hover:text-neutral-900">스타트업 종합 트랙으로 진행</button>
+          </div>
+        )}
       </div>
     );
   }
@@ -143,8 +173,9 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
               </button>
             ))}
           </div>
+          {trackError && <HitErrorRetry className="mt-4" message={trackError} onRetry={() => handleJobFunction(selectedJobFunction)} />}
           <button
-            onClick={() => { setStep('industry'); setSelectedIndustry(''); }}
+            onClick={() => { setStep('industry'); setSelectedIndustry(''); setTrackError(null); }}
             className="mt-4 text-xs text-neutral-400 hover:text-neutral-600 mx-auto block"
           >
             산업군 다시 선택
@@ -181,14 +212,14 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
           <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
             이 분야 전용 직무 역량 문항은 아직 없습니다.
             <br />
-            공통 문항(핵심역량 · 효능감 · 자기·직무 이해)과 종합 트랙 기준으로 진행합니다.
+            공통 문항(핵심역량 · 효능감 · 자기·직무 이해)과 &lsquo;스타트업 종합&rsquo; 트랙의 직무 역량 문항으로 진행합니다.
           </p>
           <div className="flex flex-col gap-3">
             <button
               onClick={() => onSelect(selectedIndustry, selectedJobFunction, null)}
               className="px-6 py-3 bg-[#E53935] text-white font-bold rounded-xl hover:bg-red-700 transition-colors"
             >
-              종합 트랙으로 진행
+              스타트업 종합 트랙으로 진행
             </button>
             <button
               onClick={() => { setStep('industry'); setSelectedIndustry(''); setSelectedJobFunction(''); }}

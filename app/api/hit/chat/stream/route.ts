@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           JSON.stringify({
             error: 'chat_limit_reached',
             tier,
-            message: `무료 회원은 AI 상담을 ${FREE_CHAT_LIMIT}회까지 이용할 수 있습니다. Premium으로 업그레이드하세요.`,
+            message: `무료 회원은 AI 상담을 ${FREE_CHAT_LIMIT}회까지 이용할 수 있습니다.`,
             usageCount: count,
             limit: FREE_CHAT_LIMIT,
           }),

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STAGE_SUBDOMAIN_MODULE } from "@/lib/hit/stage-modules";
+import HitErrorRetry from "@/features/hit/HitErrorRetry";
 
 type FModuleType = 'satisfaction' | 'direction' | 'legacy' | 'social' | 'readiness' | 'social_readiness';
 
@@ -15,6 +16,8 @@ interface QuestionItem {
   text: string;
   subscale: string;
   reverse?: boolean;
+  /** 저장할 module 이름 — 신뢰도 점검(DECOY) 문항은 'validity' (모듈 점수에 섞이지 않게, 채점은 question_id로 찾는다) */
+  saveModule?: string;
 }
 
 interface Response {
@@ -67,6 +70,9 @@ function HitFTestContent() {
   const [isComplete, setIsComplete] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   const [isRestored, setIsRestored] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadTick, setLoadTick] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = allQuestions.length;
@@ -77,20 +83,32 @@ function HitFTestContent() {
   // Load questions from DB then restore session
   useEffect(() => {
     async function init() {
+      setLoadError(null);
+      setIsRestored(false);
       const sb = createClient();
-      const { data: rows } = await sb
+      // 신뢰도 점검(DECOY) 문항은 DB test_type이 'F_checklist' — 같이 가져와 섞어 출제한다 (2026-10-12)
+      const { data: rows, error } = await sb
         .from('hit_questions')
-        .select('id, module, question_text, sub_domain, reverse_scored')
-        .eq('test_type', 'F')
+        .select('id, module, test_type, question_text, sub_domain, reverse_scored')
+        .in('test_type', ['F', 'F_checklist'])
         .order('module')
         .order('question_index');
 
-      if (!rows) { setIsRestored(true); return; }
+      if (error || !rows) {
+        setLoadError('문항을 불러오지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.');
+        setIsRestored(true);
+        return;
+      }
 
       const grouped = new Map<FModuleType, QuestionItem[]>(MODULE_ORDER.map((m) => [m, []]));
+      const decoys: { id: string; text: string }[] = [];
       for (const row of rows) {
+        if (row.sub_domain === 'DECOY') {
+          if (row.test_type === 'F_checklist') decoys.push({ id: row.id, text: row.question_text });
+          continue;
+        }
         const mod = STAGE_SUBDOMAIN_MODULE.f[row.sub_domain ?? ''] as FModuleType | undefined;
-        if (!mod) continue;
+        if (!mod || row.test_type !== 'F') continue;
         grouped.get(mod)?.push({
           module: mod,
           id: row.id,
@@ -101,6 +119,17 @@ function HitFTestContent() {
       }
       const questions: QuestionItem[] = [];
       for (const mod of MODULE_ORDER) questions.push(...shuffle(grouped.get(mod)!));
+      if (questions.length === 0) {
+        setLoadError('문항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        setIsRestored(true);
+        return;
+      }
+      // 미끼 문항을 1/3·2/3 지점에 끼운다 (맨 끝에 두면 눈에 띄고, 이어하기 때 건너뛰기 쉽다). 화면 표시 모듈은 앞 문항을 따른다.
+      shuffle(decoys).forEach((d, i, arr) => {
+        const pos = Math.min(questions.length, Math.floor((questions.length * (i + 1)) / (arr.length + 1)));
+        const host = questions[Math.max(0, pos - 1)];
+        questions.splice(pos, 0, { module: host.module, id: d.id, text: d.text, subscale: 'DECOY', reverse: false, saveModule: 'validity' });
+      });
       setAllQuestions(questions);
 
       if (!sessionToken) { setIsRestored(true); return; }
@@ -118,19 +147,22 @@ function HitFTestContent() {
             const firstUnanswered = questions.findIndex((q) => !restored.has(q.id));
             if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
           }
+        } else {
+          // 내 세션이 아니거나 없는 세션 — 답해도 저장되지 않으므로 안내한다
+          setLoadError('검사 세션을 찾을 수 없습니다. 소개 화면에서 다시 시작해 주세요.');
         }
       } catch {
-        // Continue fresh
+        setLoadError('검사 세션을 불러오지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.');
       } finally {
         setIsRestored(true);
       }
     }
     init();
-  }, [sessionToken]);
+  }, [sessionToken, loadTick]);
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (transitionMessage || isSubmitting || isComplete) return;
+    if (transitionMessage || isSubmitting || isComplete || submitError) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft') {
@@ -177,6 +209,7 @@ function HitFTestContent() {
 
   const submitResults = useCallback(async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await fetch('/api/hit/f/score', {
         method: 'POST',
@@ -191,9 +224,12 @@ function HitFTestContent() {
         setIsComplete(true);
         router.push(`/hero/hit/f/result/${data.resultId}`);
       } else {
+        const err = await res.json().catch(() => ({}));
+        setSubmitError(err?.error || '결과 생성에 실패했습니다. 다시 시도해 주세요.');
         setIsSubmitting(false);
       }
     } catch {
+      setSubmitError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
       setIsSubmitting(false);
     }
   }, [sessionToken, hitAResultId, router]);
@@ -212,7 +248,7 @@ function HitFTestContent() {
         return next;
       });
 
-      fireAndForgetSave(q.id, q.module, currentIndex, likertValue - 1, optionValue);
+      fireAndForgetSave(q.id, q.saveModule ?? q.module, currentIndex, likertValue - 1, optionValue);
 
       if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
 
@@ -264,10 +300,26 @@ function HitFTestContent() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <HitErrorRetry message={loadError} onRetry={() => setLoadTick((n) => n + 1)} />
+      </div>
+    );
+  }
+
   if (!isRestored) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-6 h-6 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (submitError && !isSubmitting) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <HitErrorRetry message={submitError} onRetry={submitResults} />
       </div>
     );
   }
@@ -277,7 +329,7 @@ function HitFTestContent() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="w-8 h-8 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" />
         <p className="text-neutral-500 text-sm">인생 2막 분석 리포트를 생성하고 있습니다...</p>
-        <p className="text-neutral-400 text-xs">AI가 분석 중이므로 약 30초 소요됩니다</p>
+        <p className="text-neutral-400 text-xs">리포트를 만들고 있습니다 (약 30초)</p>
       </div>
     );
   }

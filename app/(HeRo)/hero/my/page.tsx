@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
+import MyHitResults from "@/features/hit/MyHitResults";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { LinkedMadleagueCertificates } from "@/features/hero/LinkedMadleagueCertificates";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
-import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Compass, Building2 } from "lucide-react";
+import { FileText, Settings, LogOut, ChevronRight, Eye, Compass, Building2 } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -20,7 +21,7 @@ export default function HeRoMyPage() {
     const { user, isAuthenticated, isLoading, logout } = useAuth();
     const router = useRouter();
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
-    const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
+    const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
     const [jhStatus, setJhStatus] = useState<"none" | "draft" | "active" | null>(null);
 
     useEffect(() => {
@@ -37,7 +38,6 @@ export default function HeRoMyPage() {
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
-        { id: "bookmarks" as const, label: "북마크", icon: Bookmark, count: 0 },
         { id: "settings" as const, label: "설정", icon: Settings },
     ];
 
@@ -71,6 +71,14 @@ export default function HeRoMyPage() {
                         <ChevronRight className="h-4 w-4 text-neutral-500" />
                     </Link>
                 )}
+
+                <div className="mb-8">
+                    <h2 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span>나의 HIT 결과</span>
+                        <span className="h-px flex-1 bg-neutral-800" />
+                    </h2>
+                    <MyHitResults theme="dark" />
+                </div>
 
                 <MyProfileCard accentColor="#E53935" />
 
@@ -129,7 +137,6 @@ export default function HeRoMyPage() {
                         ))}
                     </div>
                 )}
-                {activeTab === "bookmarks" && <div className="py-16 text-center text-neutral-500"><Bookmark className="h-8 w-8 mx-auto mb-3 opacity-50" /><p className="text-sm">북마크가 없습니다.</p></div>}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
                         <button onClick={() => { logout(); router.push("/"); }} className="w-full flex items-center gap-3 p-4 rounded-lg bg-neutral-800 text-red-400 hover:opacity-80">

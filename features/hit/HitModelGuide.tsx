@@ -21,14 +21,14 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-12">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-5">
           HIT(HeRo Integrated Test)는 사람을 깊이 있게 이해하기 위해 설계된 <strong className="text-neutral-900">통합 심리검사 모델</strong>입니다.
-          성격유형(Jung 유형론 4축) · 행동유형(DISC) · 성품 · 직업흥미(RIASEC)처럼 널리 쓰여 온 이론 틀을 바탕으로 HeRo가 자체 문항을 만들고,
+          성격 유형(Jung 유형론 4축) · 행동 유형(DISC) · 성품 · 직업 흥미(RIASEC)처럼 널리 쓰여 온 이론 틀을 바탕으로 HeRo가 자체 문항을 만들고,
           각 검사를 따로 해석하는 대신 <strong className="text-neutral-900">정해진 규칙으로 교차 분석</strong>합니다. 같은 응답에는 언제나 같은 결과가 나옵니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          HIT - Archetype은 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
-          성격유형(MBTI) · 행동유형(DISC) · 인성 · 적성까지 통합 측정하고,
-          성격·행동·성품·적성 점수를 정해진 가중치로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
-          <strong className="text-neutral-900">HIT - Bounce</strong>는 역량과 방향을 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT - Challenger ~ Flourish</strong>는 그 위에서
+          HIT - Archetype은 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
+          네 영역의 점수를 정해진 가중치로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
+          회원에게는 성장 배경(UF)도 함께 물어 본인 리포트의 해석 참고로만 보여 줍니다.
+          <strong className="text-neutral-900">HIT - Bounce</strong>는 핵심역량·직무 트랙 역량·효능감·이해를 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT - Challenger ~ Flourish</strong>는 그 위에서
           신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
@@ -52,7 +52,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
 
         {/* 기질 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
-          <span className="text-[15px] font-semibold text-neutral-800">기질</span>
+          <span className="text-[15px] font-semibold text-neutral-800">성장 배경</span>
           <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
             <span className="bg-neutral-100 px-3 py-1 rounded text-xs">타고나는 기질</span>
             <span className="text-neutral-300">→</span>
@@ -61,14 +61,14 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
             <span className="bg-neutral-100 px-3 py-1 rounded text-xs">성장환경·교육·경험</span>
           </div>
           <div className="text-right">
-            <p className="text-sm font-semibold text-neutral-700">기저요인검사</p>
-            <p className="text-xs text-neutral-400">UF test</p>
+            <p className="text-sm font-semibold text-neutral-700">성장 배경 (UF)</p>
+            <p className="text-xs text-neutral-400">회원 리포트 전용</p>
           </div>
         </div>
 
         {/* 성격유형 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-start px-6 py-5 border-b border-neutral-100">
-          <span className="text-[15px] font-semibold text-neutral-800 pt-1">성격유형</span>
+          <span className="text-[15px] font-semibold text-neutral-800 pt-1">성격 유형</span>
           <div className="space-y-2.5">
             {[
               { l: "I", ln: "내향", fn: "주의초점", rn: "외향", r: "E" },
@@ -88,12 +88,12 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
               </div>
             ))}
           </div>
-          <span className="text-sm font-semibold text-neutral-700 text-right pt-1">MBTI 검사</span>
+          <span className="text-sm font-semibold text-neutral-700 text-right pt-1">성격 유형 (PT)</span>
         </div>
 
         {/* 행동유형 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
-          <span className="text-[15px] font-semibold text-neutral-800">행동유형</span>
+          <span className="text-[15px] font-semibold text-neutral-800">행동 유형</span>
           <div className="flex justify-center gap-3">
             {[
               { c: "D", bg: "#2C2C2A" }, { c: "I", bg: "#E24B4A" },
@@ -102,27 +102,27 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
               <span key={d.c} className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: d.bg }}>{d.c}</span>
             ))}
           </div>
-          <span className="text-sm font-semibold text-neutral-700 text-right">DISC 검사</span>
+          <span className="text-sm font-semibold text-neutral-700 text-right">행동 유형 (DISC)</span>
         </div>
 
-        {/* 인성 */}
+        {/* 성품 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
-          <span className="text-[15px] font-semibold text-neutral-800">인성</span>
-          <p className="text-center text-sm text-neutral-500">진정성 · 관계성 · 정서 · 윤리 · 성장</p>
-          <span className="text-sm font-semibold text-neutral-700 text-right">인성 검사</span>
+          <span className="text-[15px] font-semibold text-neutral-800">성품</span>
+          <p className="text-center text-sm text-neutral-500">성실성 · 대인관계 · 정서 안정 · 윤리성 · 성장 지향</p>
+          <span className="text-sm font-semibold text-neutral-700 text-right">핵심 성품 (CH)</span>
         </div>
 
         {/* 적성 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
           <span className="text-[15px] font-semibold text-neutral-800">적성</span>
           <p className="text-center text-sm text-neutral-500">Holland RIASEC 6 차원</p>
-          <span className="text-sm font-semibold text-neutral-700 text-right">기초 적성검사</span>
+          <span className="text-sm font-semibold text-neutral-700 text-right">핵심 적성 (AP)</span>
         </div>
 
         {/* 강점 */}
         <div className="grid grid-cols-[130px_1fr_120px] items-center px-6 py-4 bg-neutral-50">
           <span className="text-[15px] font-semibold text-neutral-800">강점</span>
-          <p className="text-center text-sm text-neutral-400">MBTI × DISC × 인성 × 적성 교차분석 → S-Power 도출 · UF는 결과를 해석하는 렌즈 (회원 리포트)</p>
+          <p className="text-center text-sm text-neutral-400">성격 × 행동 × 성품 × 적성 교차 분석 → S-Power 도출 · 성장 배경(UF)은 S-Power에 넣지 않고 본인 리포트 해석에만 참고</p>
           <span className="text-sm text-neutral-400 text-right">종합 산출</span>
         </div>
 
@@ -160,13 +160,12 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">기저요인검사 (UF test)</span>
-          <span className="text-sm text-neutral-400 ml-auto">49문항 · 회원 리포트 전용</span>
+          <span className="text-lg font-bold text-neutral-900">성장 배경 (UF)</span>
+          <span className="text-sm text-neutral-400 ml-auto">회원 리포트 전용 · S-Power 제외</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          모든 성격과 행동의 뿌리에는 기저요인이 있습니다. 타고난 기질(temperament)은
-          무의식의 영역을 거쳐 성장환경, 교육, 경험과 상호작용하며 현재의 나를 형성합니다.
-          HIT는 이 보이지 않는 토대를 먼저 측정합니다.
+          성격과 행동은 타고난 기질(temperament)이 성장 환경, 교육, 경험과 만나며 형성됩니다.
+          HIT는 가족·또래·환경 경험을 물어 지금의 나를 읽는 배경으로 보여 줍니다.
         </p>
         <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
           <span className="font-semibold text-neutral-600">이론적 근거</span> — Thomas &amp; Chess의 기질 이론,
@@ -174,8 +173,8 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           Tedeschi의 외상 후 성장(PTG) 모델을 통합 적용합니다.
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          기저요인은 성격/행동 검사 결과를 해석하는 렌즈 역할을 합니다.
-          같은 DISC D형이라도 안정적 가정환경에서 자란 D형과 트라우마를 겪은 D형의 리더십 패턴은 질적으로 다릅니다.
+          성장 배경은 성격·행동 결과를 읽을 때 참고하는 배경이며, 점수 계산에는 들어가지 않습니다.
+          성장 배경이 성향을 결정한다고 보지 않으며, 종교 등 민감정보는 묻지 않습니다.
         </p>
         <div className="grid grid-cols-3 gap-4">
           {[
@@ -194,10 +193,10 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* UF → MBTI 연결 */}
       <div className="border-l-2 border-purple-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          <span className="font-semibold text-neutral-800">기저요인 → 성격유형</span> :
-          기저요인은 성격유형 결과를 읽을 때 함께 보는 배경입니다. 예를 들어 감정 표현을 받아 주던 환경에서 자랐는지,
+          <span className="font-semibold text-neutral-800">성장 배경 → 성격 유형</span> :
+          성장 배경은 성격 유형 결과를 읽을 때 함께 보는 배경입니다. 예를 들어 감정 표현을 받아 주던 환경에서 자랐는지,
           또래 사이에서 이끄는 역할을 해 왔는지가 지금의 성향과 어떻게 이어지는지를 본인 리포트에서 함께 살펴봅니다.
-          기저요인은 점수 계산(S-Power·유형)에는 들어가지 않으며, 성장 배경이 성향을 결정한다고 보지 않습니다.
+          성장 배경은 점수 계산(S-Power·유형)에는 들어가지 않으며, 성향을 결정한다고 보지 않습니다. 이 영역은 회원에게만 제공되며 매칭에 쓰지 않습니다.
         </p>
       </div>
 
@@ -205,17 +204,17 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">성격유형 (4축)</span>
-          <span className="text-sm text-neutral-400 ml-auto">62문항</span>
+          <span className="text-lg font-bold text-neutral-900">성격 유형 (PT · 4축)</span>
+          <span className="text-sm text-neutral-400 ml-auto">Jung 유형론 4축</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           Jung의 심리유형론에 기반한 4개 축을 측정합니다.
           어느 쪽이 더 좋다가 아니라 에너지가 어디로 향하는가를 파악합니다.
-          HIT는 단순 유형 분류를 넘어 각 축의 선호 강도(%)까지 산출하여 연속 스펙트럼으로 해석합니다.
+          HIT는 단순 유형 분류를 넘어 각 축의 선호 강도(%)까지 산출하여 연속 스펙트럼으로 보여 줍니다.
         </p>
         <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
           <span className="font-semibold text-neutral-600">이론적 근거</span> — Carl Jung의 심리유형론(1921),
-          Myers-Briggs 유형 지표를 기반으로 하되, 이분법적 분류의 한계를 보완하기 위해 연속 스펙트럼 방식을 적용합니다.
+          널리 알려진 4축 유형 틀을 바탕으로 하되, 이분법적 분류의 한계를 보완하기 위해 연속 스펙트럼 방식을 적용합니다.
         </div>
         <div className="border border-neutral-200 rounded-xl divide-y divide-neutral-100 overflow-hidden">
           {[
@@ -238,12 +237,12 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* MBTI → DISC 연결 */}
       <div className="border-l-2 border-blue-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          <span className="font-semibold text-neutral-800">MBTI → DISC 연결</span> :
-          성격유형(사고 패턴)은 행동유형(표현 패턴)의 기반이 됩니다.
-          MBTI가 어떻게 생각하고 판단하는가를 측정한다면,
-          DISC는 그 사고가 행동으로 어떻게 나타나는가를 측정합니다.
+          <span className="font-semibold text-neutral-800">성격 유형 → 행동 유형 연결</span> :
+          성격 유형(사고 패턴)은 행동 유형(표현 패턴)의 기반이 됩니다.
+          성격 유형이 어떻게 생각하고 판단하는가를 측정한다면,
+          행동 유형(DISC)은 그 사고가 행동으로 어떻게 나타나는가를 측정합니다.
           내면의 T(사고) 성향이 반드시 D(주도) 행동으로 나타나지는 않습니다
-          — 두 검사를 교차분석해야 내면과 외면의 일치/불일치를 파악할 수 있습니다.
+          — 두 영역을 교차 분석해야 내면과 외면의 일치/불일치를 파악할 수 있습니다.
         </p>
       </div>
 
@@ -251,8 +250,8 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">DISC 행동유형검사</span>
-          <span className="text-sm text-neutral-400 ml-auto">40문항</span>
+          <span className="text-lg font-bold text-neutral-900">행동 유형 (DISC)</span>
+          <span className="text-sm text-neutral-400 ml-auto">4가지 행동 에너지</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           Marston의 행동 모델에 기반하여 관찰 가능한 행동 경향성을 4차원으로 측정합니다.
@@ -279,28 +278,28 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           ))}
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          HIT에서는 4유형 중 하나로 분류하는 것이 아니라, 4가지 행동 에너지의 배합 비율을 산출합니다.
+          HIT에서는 4유형 중 하나로 분류하는 것이 아니라, 4가지 행동 에너지의 배합 비율(합 100)과 방식별 강도(0~100)를 보여 줍니다.
         </p>
       </div>
 
-      {/* 인성 */}
+      {/* 성품 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">인성검사</span>
+          <span className="text-lg font-bold text-neutral-900">핵심 성품 (CH)</span>
           <span className="text-sm text-neutral-400 ml-auto">5 차원</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          성격·행동으로 드러나는 외면 너머, 사람이 일과 관계에서 보여주는 <strong className="text-neutral-800">내면의 결</strong>을 측정합니다.
-          동일한 DISC D형이라도 인성의 결이 다르면 조직에서 발휘하는 영향은 전혀 다릅니다.
+          성격·행동으로 드러나는 모습 너머, 사람이 일과 관계에서 보여 주는 <strong className="text-neutral-800">태도의 결</strong>을 봅니다.
+          같은 행동 유형이라도 성품의 결이 다르면 조직에서 발휘하는 영향은 달라집니다. 임상적 진단이 아니라 일하는 태도에 대한 자기보고입니다.
         </p>
         <div className="grid grid-cols-5 gap-3">
           {[
-            { n: "진정성", e: "Integrity", d: "말과 행동의 일치" },
-            { n: "관계성", e: "Relational", d: "타인과의 연결 감수성" },
-            { n: "정서", e: "Emotional", d: "감정 조절·회복력" },
-            { n: "윤리", e: "Ethics", d: "원칙·책임" },
-            { n: "성장", e: "Growth", d: "학습·변화 의지" },
+            { n: "성실성", e: "Integrity", d: "책임지고 끝까지 해냄" },
+            { n: "대인관계", e: "Relational", d: "배려하고 관계를 맺음" },
+            { n: "정서 안정", e: "Emotional", d: "압박 속 균형 유지" },
+            { n: "윤리성", e: "Ethics", d: "원칙·책임" },
+            { n: "성장 지향", e: "Growth", d: "학습·도전 의지" },
           ].map((c) => (
             <div key={c.e} className="bg-neutral-50 rounded-lg p-3 text-center">
               <p className="text-sm font-semibold text-neutral-700 mb-0.5">{c.n}</p>
@@ -315,11 +314,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">기초 적성검사</span>
+          <span className="text-lg font-bold text-neutral-900">핵심 적성 (AP)</span>
           <span className="text-sm text-neutral-400 ml-auto">RIASEC 6 차원</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          Holland의 직업 흥미 이론(RIASEC)에 기반해 어떤 환경에서 에너지가 솟고, 어떤 활동에 몰입하는지를 측정합니다.
+          Holland의 직업 흥미 이론(RIASEC)에 기반해 어떤 환경에서 에너지가 솟고, 어떤 활동에 몰입하는지를 봅니다.
           상위 3 코드(Holland Code)가 직무·환경 매칭의 기준점이 됩니다.
         </p>
         <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
@@ -346,11 +345,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 교차분석 → S-Power 연결 */}
       <div className="border-l-2 border-amber-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          <span className="font-semibold text-neutral-800">성격 × 행동 × 인성 × 적성 교차분석 → S-Power</span> :
-          다섯 축의 교차점에서 개인 고유의 핵심 강점이 드러납니다.
-          DISC D(주도) + MBTI T(사고)의 교차는 <strong>냉철한 결단력</strong>으로,
+          <span className="font-semibold text-neutral-800">성격 × 행동 × 성품 × 적성 교차 분석 → S-Power</span> :
+          네 영역의 교차점에서 개인 고유의 핵심 강점이 드러납니다.
+          행동 D(주도) + 성격 T(사고)의 교차는 <strong>냉철한 결단력</strong>으로,
           I(사교) + A(예술)의 교차는 <strong>창의적 설득력</strong>으로 발현됩니다.
-          여기에 인성과 적성 점수가 정해진 가중치로 더해져 "같은 강점도 다르게 쓰이는" 맥락을 만듭니다.
+          여기에 성품과 적성 점수가 정해진 가중치로 더해져 "같은 강점도 다르게 쓰이는" 맥락을 만듭니다.
         </p>
       </div>
 
@@ -362,8 +361,8 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           <span className="text-sm text-neutral-400 ml-auto">종합 산출</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          성격 · 행동 · 인성 · 적성 네 축을 정해진 가중치로 교차해 8가지 핵심 강점 차원을 산출합니다.
-          상위 3개 강점이 핵심 경쟁력으로, 하위 2개가 성장 영역으로 리포트에 반영됩니다.
+          성격 · 행동 · 성품 · 적성 네 영역을 정해진 가중치로 교차해 8가지 핵심 강점 차원을 산출합니다.
+          상위 3개 강점이 핵심 경쟁력으로, 하위 2개가 성장 영역으로 리포트에 반영됩니다. 성장 배경(UF)은 S-Power 계산에 넣지 않습니다.
         </p>
         <div className="grid grid-cols-4 gap-4">
           {[
@@ -455,11 +454,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT - Archetype</span>은 기저요인(UF) · 성격 · 행동(DISC) · 인성 · 적성 다섯 영역을 측정하고,
-          성격·행동·인성·적성을 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 기저요인은 해석 참고용입니다.
+          <span className="font-bold text-neutral-900">HIT - Archetype</span>은 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
+          이 네 영역을 교차 분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 성장 배경(UF)은 회원에게만 제공되는 해석 참고용이며 S-Power에서 제외됩니다. 점수와 유형은 정해진 규칙으로 계산되고, AI는 종합 해설 문단만 보조합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT - Bounce</span>는 HIT - Archetype의 결과를 기반으로
+          <span className="font-bold text-neutral-900">HIT - Bounce</span>는 HIT - Archetype과 함께
           핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">

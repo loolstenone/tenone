@@ -32,8 +32,9 @@ export function selectModules(scores: HitAScores): string[] {
     (Object.keys(ufModuleKeyMap) as (keyof UFScores)[]).forEach(key => {
       const score = scores.ufScores![key];
       const mk = ufModuleKeyMap[key];
-      if (score >= 67) modules.push(`UF-${mk}-HIGH`);
-      else if (score >= 34) modules.push(`UF-${mk}-MID`);
+      // 75/50 — 화면 점수 구간(report-copy 75/50/25)·C~GAP 모듈 선택과 같은 기준 (2026-10-12, 기존 67/34)
+      if (score >= 75) modules.push(`UF-${mk}-HIGH`);
+      else if (score >= 50) modules.push(`UF-${mk}-MID`);
       else modules.push(`UF-${mk}-LOW`);
     });
   }
@@ -146,7 +147,8 @@ export function selectBModules(scores: HitBScores): string[] {
 
 /**
  * HIT - Bounce 직무 트랙 역량 해설 (TRK-{sub_domain}-{H|M|L}, sql/hit-b-track-modules-2026-10.sql, R2 2026-10-12)
- * H 75+ · M 50~74 · L 50 미만. 현재 마케팅 5트랙만 작성 — DB에 없는 id는 조회 때 건너뛰고 화면 공통 문장을 쓴다.
+ * H 75+ · M 50~74 · L 50 미만. 22개 트랙 전부 작성(비마케팅 17트랙 = sql/hit-b-track-modules-others-2026-10.sql)
+ * — sub_domain은 트랙 사이에 겹치면 안 된다(겹치면 다른 트랙 해설이 나옴). DB에 없는 id는 화면 공통 문장으로 대체.
  */
 export function trackModuleId(subDomain: string, v: number): string {
   return `TRK-${subDomain}-${v >= 75 ? 'H' : v >= 50 ? 'M' : 'L'}`;

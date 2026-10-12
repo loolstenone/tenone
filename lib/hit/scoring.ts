@@ -29,9 +29,11 @@ function reverseScore(v: number): number { return 8 - v; }
 function clamp(v: number, min = 0, max = 100): number { return Math.max(min, Math.min(max, v)); }
 /** 7점 평균 → 0~100: (평균 − 1) ÷ 6 × 100. 전 모듈 공통 (2026-10-12 — 바닥이 14이던 합/(n×7) 방식 폐지, /hero/hit/method 공개 공식과 같아야 한다) */
 function score100(values: number[]): number {
-  if (!values.length) return 0;
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
-  return Math.round(((avg - 1) / 6) * 100);
+  // 응답 없는 문항(getVal 0)은 빼고 평균 — 0을 넣으면 평균이 1 아래로 내려가 음수 점수가 나왔다
+  const answered = values.filter(v => v >= 1 && v <= 7);
+  if (!answered.length) return 0;
+  const avg = answered.reduce((a, b) => a + b, 0) / answered.length;
+  return clamp(Math.round(((avg - 1) / 6) * 100));
 }
 
 // ── PT 성격유형 채점 (7점 리커트) ──
@@ -44,6 +46,12 @@ export function scorePT(responses: ResponseRow[]): PTScores {
     const v = parseInt(r.option_value);
     return isNaN(v) ? null : (rev ? reverseScore(v) : v);
   };
+  // 극별 평균 (2026-10-12): 두 극의 문항 수가 8:7이라 합계 비율이면 전 문항 '보통'(4)이 E53·N53·F47·P47 → 모두 ENFP로 기울었다.
+  // 응답한 문항만 평균 — 빠진 문항을 0으로 세지 않는다.
+  const poleMean = (items: [string, boolean][]): number => {
+    const vals = items.map(([id, rev]) => getVal(id, rev)).filter((v): v is number => v !== null);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+  };
 
   // E축 (E방향 8개 / I방향 7개)
   const eIds = ['pt_e01', 'pt_e02', 'pt_e03', 'pt_e04', 'pt_e05', 'pt_e06', 'pt_e07', 'pt_e08'];
@@ -51,8 +59,8 @@ export function scorePT(responses: ResponseRow[]): PTScores {
     ['pt_i01', false], ['pt_i02', false], ['pt_i03', false], ['pt_i04', false],
     ['pt_i05', false], ['pt_i06', false], ['pt_i07', false],
   ];
-  const eRaw = eIds.reduce((s, id) => { const v = getVal(id, false); return s + (v ?? 0); }, 0);
-  const iRaw = iIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
+  const eRaw = poleMean(eIds.map(id => [id, false] as [string, boolean]));
+  const iRaw = poleMean(iIds);
   const ePct = Math.round(eRaw / (eRaw + iRaw || 1) * 100);
 
   // N축
@@ -64,8 +72,8 @@ export function scorePT(responses: ResponseRow[]): PTScores {
     ['pt_s01', false], ['pt_s02', false], ['pt_s03', false], ['pt_s04', false],
     ['pt_s05', false], ['pt_s06', false], ['pt_s07', false],
   ];
-  const nRaw = nIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
-  const sRaw = sIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
+  const nRaw = poleMean(nIds);
+  const sRaw = poleMean(sIds);
   const nPct = Math.round(nRaw / (nRaw + sRaw || 1) * 100);
 
   // T축
@@ -77,8 +85,8 @@ export function scorePT(responses: ResponseRow[]): PTScores {
     ['pt_f01', false], ['pt_f02', false], ['pt_f03', false], ['pt_f04', false],
     ['pt_f05', false], ['pt_f06', false], ['pt_f07', false], ['pt_f08', false],
   ];
-  const tRaw = tIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
-  const fRaw = fIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
+  const tRaw = poleMean(tIds);
+  const fRaw = poleMean(fIds);
   const tPct = Math.round(tRaw / (tRaw + fRaw || 1) * 100);
 
   // J축
@@ -90,8 +98,8 @@ export function scorePT(responses: ResponseRow[]): PTScores {
     ['pt_p01', false], ['pt_p02', false], ['pt_p03', false], ['pt_p04', false],
     ['pt_p05', false], ['pt_p06', false], ['pt_p07', false], ['pt_p08', false],
   ];
-  const jRaw = jIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
-  const pRaw = pIds.reduce((s, [id, rev]) => { const v = getVal(id, rev); return s + (v ?? 0); }, 0);
+  const jRaw = poleMean(jIds);
+  const pRaw = poleMean(pIds);
   const jPct = Math.round(jRaw / (jRaw + pRaw || 1) * 100);
 
   // 강도 등급

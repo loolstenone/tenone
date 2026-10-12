@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitCResult, getLatestHitAResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitC, READINESS_LABELS, ONBOARDING_LABELS } from '@/lib/hit/scoring-c';
@@ -16,6 +17,10 @@ export async function POST(request: NextRequest) {
 
     const session = await getHitSession(sessionToken);
     if (!session) return errorResponse('세션을 찾을 수 없습니다.', 404);
+    // 본인 세션만 채점 (2026-10-12)
+    const auth = await requireMember(request);
+    if (auth instanceof Response) return auth;
+    if (session.member_id !== auth.memberId) return errorResponse('세션을 찾을 수 없습니다.', 404);
     if (session.status !== 'in_progress') return errorResponse('이미 완료된 세션입니다.', 400);
     if (!session.member_id) return errorResponse('회원 세션만 채점할 수 있습니다.', 403);
 
@@ -82,6 +87,6 @@ export async function POST(request: NextRequest) {
     return successResponse({ resultId: result.id }, 201);
   } catch (error) {
     console.error('[HIT C Score] 채점 오류:', error);
-    return errorResponse(error instanceof Error ? error.message : '채점 처리 실패', 500);
+    return errorResponse('채점 처리 실패', 500);
   }
 }

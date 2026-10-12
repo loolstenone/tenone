@@ -60,3 +60,26 @@ export function hitStagePath(key: HitStageKey): string {
 export function hitStageByTestType(testType: string): HitStageDef | undefined {
   return Object.values(HIT_STAGES).find(s => s.testType === testType);
 }
+
+/** 문항당 평균 응답 시간(초) — 소요 시간 안내의 단일 기준 */
+export const HIT_SECONDS_PER_ITEM = 6;
+
+/** 문항 수 → 예상 소요 분 (올림) */
+export function estimateMinutes(questionCount: number): number {
+  return Math.ceil((questionCount * HIT_SECONDS_PER_ITEM) / 60);
+}
+
+/** 단계별 예상 소요 분 */
+export function hitStageMinutes(key: HitStageKey): number {
+  return estimateMinutes(HIT_STAGES[key].approxQuestions);
+}
+
+/** 화면 표기 — "약 23분" */
+export function hitStageMinutesLabel(key: HitStageKey): string {
+  return `약 ${hitStageMinutes(key)}분`;
+}
+
+/** 단계별 문항 수 */
+export function hitStageQuestionCount(key: HitStageKey): number {
+  return HIT_STAGES[key].approxQuestions;
+}

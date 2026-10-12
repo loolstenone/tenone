@@ -47,7 +47,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return successResponse({ ...stripHitResult(result), report_modules: reportModules });
   } catch (error) {
     console.error('[HIT A Result] 조회 오류:', error);
-    const message = error instanceof Error ? error.message : '결과 조회 실패';
-    return errorResponse(message, 500);
+    return errorResponse('결과 조회 실패', 500); // 내부 오류 문구는 로그로만 (2026-10-12)
   }
 }

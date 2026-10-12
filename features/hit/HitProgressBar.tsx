@@ -17,7 +17,15 @@ export default function HitProgressBar({ current, total, moduleName }: HitProgre
           {current}/{total}
         </span>
       </div>
-      <div className="h-1 w-full bg-neutral-100 rounded-full overflow-hidden">
+      <div
+        role="progressbar"
+        aria-label={`${moduleName} 진행률`}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-valuenow={current}
+        aria-valuetext={`${total}문항 중 ${current}문항`}
+        className="h-1 w-full bg-neutral-100 rounded-full overflow-hidden"
+      >
         <div
           className="h-full bg-[#E53935] transition-all duration-300 ease-out rounded-full"
           style={{ width: `${percent}%` }}

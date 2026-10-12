@@ -6,6 +6,7 @@ import { ArrowLeft, Clock } from 'lucide-react';
 import HitProgressBar from './HitProgressBar';
 import LikertScale from './LikertScale';
 import HitInterestSelector from './HitInterestSelector';
+import HitErrorRetry from './HitErrorRetry';
 
 /**
  * HIT B "역량과 방향" 검사 UI (2026-10-12 재정의)
@@ -69,7 +70,27 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const [isComplete, setIsComplete] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   const [isRestored, setIsRestored] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loadTick, setLoadTick] = useState(0);
+  const [selReady, setSelReady] = useState(false);
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 이어하기 — 고른 분야·트랙을 이 기기에 기억해 선택 화면을 다시 거치지 않게 한다 (2026-10-12)
+  const selKey = `hit_b_sel_${sessionToken}`;
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(selKey);
+      if (saved) {
+        const p = JSON.parse(saved) as { industry?: string; jobFunction?: string; track?: string };
+        if (p.track) {
+          setSelectedIndustry(p.industry ?? '');
+          setSelectedJobFunction(p.jobFunction ?? '');
+          setSelectedTrack(p.track);
+        }
+      }
+    } catch { /* ignore */ }
+    setSelReady(true);
+  }, [selKey]);
 
   // 트랙 선택 후 문항 로드 (모듈 안에서만 섞고, 모듈 순서는 고정)
   useEffect(() => {
@@ -77,8 +98,9 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
     type ApiQ = { id: string; text: string; subscale: string; reverse: boolean; track: string | null };
     const toItem = (mod: ModuleType) => (q: ApiQ): QuestionItem =>
       ({ module: mod, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track ?? undefined });
+    setQuestionsLoaded(false);
     fetch(`/api/hit/b/questions?trackId=${encodeURIComponent(selectedTrack)}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('questions'); return r.json(); })
       .then(data => {
         setAllQuestions([
           ...shuffle(((data.competency ?? []) as ApiQ[]).map(toItem('competency'))),
@@ -88,7 +110,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
       })
       .catch(() => setAllQuestions([]))
       .finally(() => setQuestionsLoaded(true));
-  }, [selectedTrack]);
+  }, [selectedTrack, loadTick]);
 
   // 진행 중 세션 복원
   useEffect(() => {
@@ -115,7 +137,8 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const total = allQuestions.length;
   const currentQuestion = allQuestions[currentIndex];
   const currentModule = currentQuestion?.module ?? 'competency';
-  const answeredCount = responses.size;
+  // 현재 출제 문항 중 답한 수 (다른 트랙으로 답했던 분량은 세지 않는다)
+  const answeredCount = allQuestions.filter(q => responses.has(q.id)).length;
 
   const goBack = useCallback(() => {
     if (currentIndex > 0) {
@@ -137,6 +160,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
 
   const submitResults = useCallback(async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await fetch('/api/hit/b/score', {
         method: 'POST',
@@ -148,9 +172,12 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
         setIsComplete(true);
         router.push(`/hero/hit/b/result/${data.resultId}`);
       } else {
+        const err = await res.json().catch(() => ({}));
+        setSubmitError(err?.error || '결과 생성에 실패했습니다. 다시 시도해 주세요.');
         setIsSubmitting(false);
       }
     } catch {
+      setSubmitError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
       setIsSubmitting(false);
     }
   }, [sessionToken, selectedTrack, hitAResultId, selectedIndustry, selectedJobFunction, router]);
@@ -182,7 +209,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
 
   // 키보드: 1~7 응답, ← 이전
   useEffect(() => {
-    if (transitionMessage || isSubmitting || isComplete || !selectedTrack) return;
+    if (transitionMessage || isSubmitting || isComplete || !selectedTrack || submitError) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft') { goBack(); return; }
       const n = parseInt(e.key, 10);
@@ -190,7 +217,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [transitionMessage, isSubmitting, isComplete, selectedTrack, goBack, handleLikertSelect]);
+  }, [transitionMessage, isSubmitting, isComplete, selectedTrack, submitError, goBack, handleLikertSelect]);
 
   const remaining = total - answeredCount;
   const estimatedMinutes = Math.max(1, Math.ceil((remaining * AVG_SECONDS_PER_QUESTION) / 60));
@@ -198,6 +225,10 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const currentLikertValue = useMemo(() => (currentResponse ? currentResponse.selectedOption + 1 : null), [currentResponse]);
 
   // 1) 트랙 선택
+  if (!selReady) {
+    return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" /></div>;
+  }
+
   if (!selectedTrack) {
     return (
       <div className="min-h-screen bg-white">
@@ -205,14 +236,20 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
           onSelect={(industry, jobFunction, trackId) => {
             setSelectedIndustry(industry);
             setSelectedJobFunction(jobFunction);
-            setSelectedTrack(trackId ?? 'startup_general'); // 맞는 트랙이 없으면 종합 트랙
+            const track = trackId ?? 'startup_general'; // 맞는 트랙이 없으면 '스타트업 종합' 트랙 (선택 화면에서 그렇게 안내함)
+            try { localStorage.setItem(selKey, JSON.stringify({ industry, jobFunction, track })); } catch { /* ignore */ }
+            setSelectedTrack(track);
+          }}
+          onSkip={() => {
+            try { localStorage.setItem(selKey, JSON.stringify({ industry: '', jobFunction: '', track: 'startup_general' })); } catch { /* ignore */ }
+            setSelectedTrack('startup_general');
           }}
         />
       </div>
     );
   }
 
-  if (!questionsLoaded || !isRestored) {
+  if (!questionsLoaded || (total > 0 && !isRestored)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
@@ -223,7 +260,15 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   if (total === 0) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-6 text-center">
-        <p className="text-sm text-neutral-500">문항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
+        <HitErrorRetry message="문항을 불러오지 못했습니다." onRetry={() => { setIsRestored(false); setLoadTick(n => n + 1); }} />
+      </div>
+    );
+  }
+
+  if (submitError && !isSubmitting) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <HitErrorRetry message={submitError} onRetry={submitResults} />
       </div>
     );
   }
@@ -232,8 +277,8 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
-        <p className="text-neutral-500 text-sm">역량과 방향 리포트를 만들고 있습니다...</p>
-        <p className="text-neutral-400 text-xs">AI 분석에 약 30초 걸립니다</p>
+        <p className="text-neutral-500 text-sm">역량과 방향 결과를 정리하고 있습니다...</p>
+        <p className="text-neutral-400 text-xs">리포트를 만들고 있습니다 (약 30초)</p>
       </div>
     );
   }

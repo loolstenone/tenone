@@ -4,7 +4,7 @@
  * 결과 행(DB, snake_case)의 점수 → hit_report_modules id. 같은 점수면 언제나 같은 모듈이 나온다 (재현 가능).
  * 모듈 본문은 HeRo가 미리 작성·검수한 해설(인트라 › HeRo › 리포트 모듈에서 편집). AI는 관여하지 않는다.
  * 구간: 75 이상 HIGH · 50 이상 MID · 그 아래 LOW — 화면 점수 구간(report-copy BAND 75/50/25)과 같은 기준 (2026-10-12, 기존 67/34)
- * 준비 체크리스트 기반 점수(D·E·F 준비도)가 0이면 = 아직 체크하지 않음 → '준비 부족' 해설을 붙이지 않는다
+ * 준비 체크리스트 기반 점수(D·E·F·GAP 준비도)가 0이면 = 아직 체크하지 않음 → '준비 부족' 해설을 붙이지 않는다
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -77,7 +77,7 @@ export function selectStageModules(stage: ReportStage, r: Row): string[] {
       if (['HIGH', 'MID', 'LOW'].includes(r.cvi_grade)) m.push(`FV-${r.cvi_grade}`);
       const lt = r.latent_scores ?? {};
       m.push(tri(lt.job_viability, 'FV-JOB-VALID', 'FV-JOB-EVOLVED', 'FV-JOB-OBSOLETE'), tri(lt.skill_currency, 'FV-SKILL-CURRENT', 'FV-SKILL-GAP', 'FV-SKILL-OUTDATED'));
-      m.push(`FP-${grade(r.reentry_readiness)}`);
+      if (started(r.reentry_readiness)) m.push(`FP-${grade(r.reentry_readiness)}`);
       break;
     }
   }

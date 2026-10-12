@@ -51,14 +51,17 @@ export async function GET(req: NextRequest) {
 
     const b = type === 'b' ? (self as Row) : await pick('hit_b_results', aId);
 
-    let stage: { key: string; row: Row } | null = null;
-    if (type !== 'a' && type !== 'b') stage = { key: type, row: self as Row };
-    else {
-      for (const s of STAGE_TABLES) {
-        const row = await pick(s.table, aId);
-        if (row && (!stage || String(row.created_at) > String(stage.row.created_at))) stage = { key: s.key, row };
-      }
+    // 생애주기·상황 결과 — 같은 회차의 단계별 최신을 모두 모은다 (C 다음 D를 해도 C가 사라지지 않게).
+    // 보고 있는 결과가 생애주기면 그 결과 자신을 우선한다.
+    const found: { key: string; row: Row }[] = [];
+    if (type !== 'a' && type !== 'b') found.push({ key: type, row: self as Row });
+    for (const s of STAGE_TABLES) {
+      if (s.key === type) continue;
+      const row = await pick(s.table, aId);
+      if (row) found.push({ key: s.key, row });
     }
+    found.sort((x, y) => (x.key === type ? -1 : y.key === type ? 1 : String(y.row.created_at).localeCompare(String(x.row.created_at))));
+    const stage = found[0] ?? null;
 
     // A 이름 = 64유형 SSOT의 캐릭터명
     let aName = (a?.type_name_ko as string | undefined) ?? '';
@@ -76,16 +79,20 @@ export async function GET(req: NextRequest) {
       bLine = [top ? `강점 ${CORE_COMPETENCY_LABELS[top[0]] ?? top[0]} ${top[1]}` : null, track || null].filter(Boolean).join(' · ');
     }
 
-    const stageMeta = stage ? STAGE_TABLES.find(s => s.key === stage!.key)! : null;
+    const shape = (f: { key: string; row: Row }) => {
+      const meta = STAGE_TABLES.find(t => t.key === f.key)!;
+      return {
+        key: f.key, id: f.row.id,
+        name: HIT_STAGES[f.key as keyof typeof HIT_STAGES]?.code ?? '',
+        headline: `준비도 ${Number(f.row[meta.score] ?? 0)}`,
+        sub: STAGE_LABELS[String(f.row.journey_stage)] ?? '',
+      };
+    };
     return successResponse({
       a: a ? { id: a.id, headline: `${a.type_code ?? ''}`, sub: aName } : null,
       b: b ? { id: b.id, headline: bLine ?? '', sub: STAGE_LABELS[String(b.journey_stage)] ?? '' } : null,
-      stage: stage && stageMeta ? {
-        key: stage.key, id: stage.row.id,
-        name: HIT_STAGES[stage.key as keyof typeof HIT_STAGES]?.code ?? '',
-        headline: `준비도 ${Number(stage.row[stageMeta.score] ?? 0)}`,
-        sub: STAGE_LABELS[String(stage.row.journey_stage)] ?? '',
-      } : null,
+      stage: stage ? shape(stage) : null,
+      stages: found.map(shape),
     });
   } catch (error) {
     console.error('[HIT chain] 조회 오류:', error);

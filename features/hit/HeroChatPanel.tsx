@@ -66,7 +66,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
           setRemaining(0);
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: errData.message || '무료 AI 상담 횟수를 모두 사용했습니다. Premium으로 업그레이드하시면 무제한 이용 가능합니다.',
+            content: '무료 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.',
           }]);
           setLoading(false);
           return;
@@ -210,13 +210,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
       <div className="px-3 py-2 border-t border-neutral-100">
         {limitReached ? (
           <div className="text-center py-2">
-            <p className="text-xs text-neutral-500 mb-2">무료 AI 상담 3회를 모두 사용했습니다.</p>
-            <a
-              href="/hero/membership"
-              className="inline-block text-xs px-4 py-1.5 bg-[#E53935] text-white rounded-full hover:bg-red-700 transition-colors"
-            >
-              Premium으로 업그레이드
-            </a>
+            <p className="text-xs text-neutral-500">무료 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.</p>
           </div>
         ) : (
           <form

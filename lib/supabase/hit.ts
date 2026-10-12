@@ -2,7 +2,10 @@
  * HIT 검사 Supabase CRUD — 서버 전용 (app/api/hit/* 에서만 사용)
  * 검사 테이블은 본인·직원만 읽을 수 있으므로(RLS) 비회원 검사 흐름은 서버가 서비스 롤로 처리한다.
  */
+import type { NextRequest } from 'next/server';
 import { createAdminClient } from './admin';
+import { getApiUser, requireMember } from '@/lib/api-guard';
+import { errorResponse } from './api-utils';
 
 const supabase = createAdminClient();
 
@@ -35,18 +38,68 @@ export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | '
   return data;
 }
 
+type HitTestType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP';
+
+/** 이어하기 대상 기간 — 이보다 오래된 진행 중 세션은 새로 시작 (2026-10-12) */
+const RESUME_WINDOW_DAYS = 30;
+
 /** 회원의 가장 최근 진행 중 세션 — 검사 중단 후 다른 기기에서도 이어하기 (2026-10-12) */
-export async function getLatestInProgressHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'GAP', memberId: string) {
+export async function getLatestInProgressHitSession(testType: HitTestType, memberId: string) {
+  const since = new Date(Date.now() - RESUME_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from('hit_sessions')
     .select('id, session_token, status, created_at')
     .eq('test_type', testType)
     .eq('member_id', memberId)
     .eq('status', 'in_progress')
+    .gte('created_at', since)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   return data;
+}
+
+/**
+ * 세션 시작 — 진행 중 세션이 있으면 그것을 돌려주고(이어하기), restart면 옛 세션을 abandoned로 닫고 새로 만든다 (2026-10-12)
+ * 닫는 것은 본인의 같은 검사 진행 중 세션뿐. 응답 row는 보존한다.
+ */
+export async function startOrResumeHitSession(testType: HitTestType, memberId: string, restart = false) {
+  if (!restart) {
+    const existing = await getLatestInProgressHitSession(testType, memberId);
+    if (existing) return { sessionId: existing.id as string, sessionToken: existing.session_token as string, resumed: true };
+  } else {
+    await supabase
+      .from('hit_sessions')
+      .update({ status: 'abandoned' })
+      .eq('test_type', testType)
+      .eq('member_id', memberId)
+      .eq('status', 'in_progress');
+  }
+  const created = await createHitSession(testType, memberId);
+  return { sessionId: created.id as string, sessionToken: created.session_token as string, resumed: false };
+}
+
+/** GET /session 공용 — 로그인 회원의 진행 중 세션 토큰 + 답변 수 (이어서 하기 제안용, 비회원은 null) */
+export async function getResumeInfo(request: NextRequest, testType: HitTestType) {
+  const memberId = (await getApiUser(request))?.memberId;
+  if (!memberId) return { sessionToken: null, answered: 0 };
+  const s = await getLatestInProgressHitSession(testType, memberId);
+  if (!s) return { sessionToken: null, answered: 0 };
+  const { count } = await supabase.from('hit_responses').select('id', { count: 'exact', head: true }).eq('session_id', s.id);
+  return { sessionToken: s.session_token as string, answered: count ?? 0 };
+}
+
+/** GET /session/[token] 공용 — 세션 소유 회원만 조회. member_id는 응답에서 뺀다 (2026-10-12) */
+export async function getOwnedHitSessionPayload(request: NextRequest, token: string) {
+  const auth = await requireMember(request);
+  if (auth instanceof Response) return { error: auth };
+  const session = await getHitSession(token);
+  // 남의 세션도 '없음'과 같은 응답 — 토큰 존재 여부를 알려주지 않는다
+  if (!session || session.member_id !== auth.memberId) return { error: errorResponse('세션을 찾을 수 없습니다.', 404) };
+  const responses = await getHitResponses(session.id);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { member_id: _omit, ...safeSession } = session;
+  return { payload: { session: safeSession, responses } };
 }
 
 export async function getHitSession(sessionToken: string) {

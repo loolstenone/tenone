@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitDResult, upsertHeroProfile, getLatestHitAResult } from '@/lib/supabase/hit';
 import { scoreHitD } from '@/lib/hit/scoring-d';
@@ -20,6 +21,10 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return errorResponse('세션을 찾을 수 없습니다.', 404);
     }
+    // 본인 세션만 채점 (2026-10-12)
+    const auth = await requireMember(request);
+    if (auth instanceof Response) return auth;
+    if (session.member_id !== auth.memberId) return errorResponse('세션을 찾을 수 없습니다.', 404);
 
     if (session.status !== 'in_progress') {
       return errorResponse('이미 완료된 세션입니다.', 400);
@@ -152,8 +157,7 @@ export async function POST(request: NextRequest) {
     return successResponse({ resultId: result.id }, 201);
   } catch (error) {
     console.error('[HIT D Score] 채점 오류:', error);
-    const message = error instanceof Error ? error.message : '채점 처리 실패';
-    return errorResponse(message, 500);
+    return errorResponse('채점 처리 실패', 500); // 내부 오류 문구는 로그로만 (2026-10-12)
   }
 }
 
@@ -166,7 +170,8 @@ function determineJourneyStage(
   motivationType: string,
 ): string {
   // 준비도 + 자본 합산 기반 단계 결정
-  const combined = (readiness + capitalOverall) / 2;
+  // 준비도 0 = 체크리스트를 아직 안 함 → 판정에서 빼고 자본만 본다 (2026-10-12 — 0을 넣으면 단계가 한두 칸 낮게 나왔다)
+  const combined = readiness > 0 ? (readiness + capitalOverall) / 2 : capitalOverall;
 
   if (combined >= 75) {
     return motivationType === 'pull_driven' ? 'ready_to_leap' : 'almost_ready';
