@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       b: b ? { id: b.id, headline: bLine ?? '', sub: STAGE_LABELS[String(b.journey_stage)] ?? '' } : null,
       stage: stage && stageMeta ? {
         key: stage.key, id: stage.row.id,
-        name: HIT_STAGES[stage.key as keyof typeof HIT_STAGES]?.brand ?? '',
+        name: HIT_STAGES[stage.key as keyof typeof HIT_STAGES]?.code ?? '',
         headline: `준비도 ${Number(stage.row[stageMeta.score] ?? 0)}`,
         sub: STAGE_LABELS[String(stage.row.journey_stage)] ?? '',
       } : null,
