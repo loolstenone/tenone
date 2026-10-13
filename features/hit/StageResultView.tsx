@@ -114,7 +114,7 @@ function viewFor(stage: StageKey, r: Row): View {
       const res = pick(r.resilience_scores, ["self_narrative", "self_esteem", "retry_willingness"]);
       const bestRes = top(res);
       return {
-        journey: { ready_to_return: "복귀 준비 완료", skill_ready_prep_needed: "역량은 준비됨 · 실행 준비 필요", strategic_transition: "전략적 전환 단계", resilience_building: "회복탄력성 강화 단계", foundation_rebuilding: "기반 재구축 단계", early_recovery: "초기 회복 단계" },
+        journey: { ready_to_return: "복귀 준비 완료", skill_ready_prep_needed: "경력이 여전히 유효함", strategic_transition: "전략적 전환 단계", resilience_building: "회복탄력성 강화 단계", foundation_rebuilding: "기반 재구축 단계", early_recovery: "초기 회복 단계" },
         cover: { headline: route[r.next_route] ?? "복귀 설계", sub: r.break_months ? `공백 ${n(r.break_months)}개월 · CVI ${n(r.cvi_raw)}` : `CVI ${n(r.cvi_raw)}` },
         findings: [
           { label: "경력 유효성 (CVI)", value: `${n(r.cvi_raw)} · ${cvi[r.cvi_grade] ?? ""}`, note: "예전 경력이 지금 시장에서 통하는 정도입니다." },

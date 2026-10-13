@@ -82,7 +82,8 @@ export function selectStageModules(stage: ReportStage, r: Row): string[] {
       m.push(tri(rs.self_narrative, 'FR-NARRATIVE-POS', 'FR-NARRATIVE-MIX', 'FR-NARRATIVE-NEG'), `FR-ESTEEM-${level(rs.self_esteem)}`, `FR-RETRY-${level(rs.retry_willingness)}`);
       if (['HIGH', 'MID', 'LOW'].includes(r.cvi_grade)) m.push(`FV-${r.cvi_grade}`);
       const lt = r.latent_scores ?? {};
-      m.push(tri(lt.job_viability, 'FV-JOB-VALID', 'FV-JOB-EVOLVED', 'FV-JOB-OBSOLETE'), tri(lt.skill_currency, 'FV-SKILL-CURRENT', 'FV-SKILL-GAP', 'FV-SKILL-OUTDATED'));
+      // 기술 유효성: 보통 = 업데이트 필요(OUTDATED, 3~6개월), 낮음 = 갭 큼(GAP) — 둘이 뒤바뀌어 있었다 (2026-10-13)
+      m.push(tri(lt.job_viability, 'FV-JOB-VALID', 'FV-JOB-EVOLVED', 'FV-JOB-OBSOLETE'), tri(lt.skill_currency, 'FV-SKILL-CURRENT', 'FV-SKILL-OUTDATED', 'FV-SKILL-GAP'));
       if (started(r.reentry_readiness)) m.push(`FP-${grade(r.reentry_readiness)}`);
       break;
     }

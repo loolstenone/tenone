@@ -110,7 +110,7 @@ VALUES
   ('f_cr06', 'layer_f', 'F', 102, '이전 직무가 나에게 가장 잘 맞는다고 여전히 믿는다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["AP:방향유지"]}'::jsonb),
   ('f_cr07', 'layer_f', 'F', 103, '빠르게 원래 수준으로 돌아갈 수 있다는 자신감이 있다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["UF:self","SP:Execution"]}'::jsonb),
   ('f_cr08', 'layer_f', 'F', 104, '경력 단절 전의 루틴으로 복귀하는 것이 편할 것이다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["BT:S","PT:J"]}'::jsonb),
-  ('f_cr09', 'layer_f', 'F', 105, '"원래 하던 일"이 아닌 새로운 시도는 부담스럽다.', 'career_restoration', 'likert7', true, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["CH:growth(low)"]}'::jsonb),
+  ('f_cr09', 'layer_f', 'F', 105, '"원래 하던 일"이 아닌 새로운 시도는 부담스럽다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["CH:growth(low)"]}'::jsonb),
   ('f_cr10', 'layer_f', 'F', 106, '이전 직무에 대한 열정이 아직 식지 않았다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["AP:유지"]}'::jsonb),
   ('f_cr11', 'layer_f', 'F', 107, '복귀 후 안정적으로 일할 수 있는 환경을 원한다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["BT:S"]}'::jsonb),
   ('f_cr12', 'layer_f', 'F', 108, '경력 복구가 가장 현실적이고 효율적인 선택이다.', 'career_restoration', 'likert7', false, '{"section":"direction_bifurcation","subscale":"career_restoration","crossTags":["PT:S","SP:Strategic"]}'::jsonb),

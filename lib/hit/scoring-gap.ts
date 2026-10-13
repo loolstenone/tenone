@@ -256,14 +256,15 @@ export function buildRoutingRationale(
     parts.push('경력 유효성이 낮아 기초 역량 점검이 필요합니다.');
   }
 
-  if (latentScore >= 70) parts.push('경력 유효성 진단이 양호합니다.');
-  else if (latentScore < 40) parts.push('직무 유효성 및 스킬 현재성 보강이 시급합니다.');
+  // 기준 75/50 — 화면 점수 구간과 같게 (2026-10-13, 기존 70/40). 준비도 0 = 체크 전이라 언급하지 않는다
+  if (latentScore >= 75) parts.push('경력 유효성 진단이 양호합니다.');
+  else if (latentScore < 50) parts.push('직무 유효성 및 스킬 현재성 보강이 필요합니다.');
 
-  if (resilienceScore >= 70) parts.push('심리적 회복력이 높아 복귀 과정을 잘 견딜 수 있습니다.');
-  else if (resilienceScore < 40) parts.push('자존감 회복과 재도전 의지 강화가 우선입니다.');
+  if (resilienceScore >= 75) parts.push('심리적 회복력이 높아 복귀 과정을 잘 견딜 수 있습니다.');
+  else if (resilienceScore < 50) parts.push('자존감 회복과 재도전 의지를 먼저 챙기면 좋습니다.');
 
-  if (reentryReadiness >= 70) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
-  else if (reentryReadiness < 40) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
+  if (reentryReadiness >= 75) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
+  else if (reentryReadiness > 0 && reentryReadiness < 50) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
 
   parts.push(`주도 방향: ${directionTop.label}`);
 
@@ -334,7 +335,10 @@ export function scoreHitGap(responses: ResponseRow[], opts?: { checklist?: { per
   });
 
   // 재진입 준비도 통합: 실질준비 55% + 복귀동기 45%
-  const reentryReadinessFinal = Math.round(
+  // 체크리스트를 아직 체크하지 않았으면(완료율 0) 0 = '체크 전' — 복귀 동기만으로 낮은 준비도가 생겨
+  // '준비 부족' 해설·'복귀 준비 활동 필요' 문구가 붙던 결함 (2026-10-13, D~F와 같은 규칙)
+  const unchecked = !!cl && cl.percent === 0;
+  const reentryReadinessFinal = unchecked ? 0 : Math.round(
     readiness.practicalReadiness * 0.55 + direction.reentryMotivation * 0.45,
   );
 
