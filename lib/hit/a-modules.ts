@@ -8,5 +8,5 @@ export const HIT_A_CORE_MODULES = ['personality_type', 'behavior_type', 'charact
 export const HIT_A_UF_MODULE = 'base';
 
 export const HIT_A_CORE_COUNT = 172; // PT 62 · BT 40 · CH 40 · AP 30
-export const HIT_A_UF_COUNT = 49;    // 9영역 (종교 문항 삭제 후)
-export const HIT_A_TOTAL_COUNT = HIT_A_CORE_COUNT + HIT_A_UF_COUNT; // 221
+export const HIT_A_UF_COUNT = 45;    // 9영역 (2026-10-13 개정: 외동 보조·성향·전환점 중복 4문항 삭제)
+export const HIT_A_TOTAL_COUNT = HIT_A_CORE_COUNT + HIT_A_UF_COUNT; // 217

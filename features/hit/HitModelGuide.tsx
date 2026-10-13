@@ -180,7 +180,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           {[
             { n: "형제관계", d: "협력·경쟁 패턴" }, { n: "부모관계", d: "정서적 안전기지" }, { n: "가정환경", d: "자원·자율성·지지" },
             { n: "또래관계", d: "사회적 위치·소속감" }, { n: "자기개념", d: "자아인식·회복탄력성" }, { n: "기질", d: "선천적 반응 양식" },
-            { n: "경제환경", d: "기회·제약 경험" }, { n: "트라우마", d: "전환점·성장 계기" }, { n: "문화·세대", d: "가치관·교육 영향" },
+            { n: "경제환경", d: "기회·제약 경험" }, { n: "전환점", d: "큰 위기 경험과 회복" }, { n: "문화·세대 영향", d: "환경 영향 인식" },
           ].map((u) => (
             <div key={u.n} className="bg-neutral-50 rounded-lg p-4">
               <p className="text-sm font-semibold text-neutral-700 mb-1">{u.n}</p>

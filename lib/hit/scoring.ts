@@ -8,6 +8,7 @@ import type {
   DISCScores,
   SPowerScores,
   UFScores,
+  UFResult,
   TypeProfile,
   PTScores,
   BTScores,
@@ -209,17 +210,19 @@ export function scoreCH(responses: ResponseRow[]): CHCoreScores {
     getVal('ch_c01', false), getVal('ch_c02', false), getVal('ch_c03', false), getVal('ch_c04', false),
     getVal('ch_c05', false), getVal('ch_c06', true),  getVal('ch_c07', false), getVal('ch_c08', true),
   ];
+  // 2026-10-13: 외향성 문항(r03·r07, 성격 E/I와 이중 측정)·소신 문항(r05 → 윤리성 x09) 제외, 배려·공감 r09~r11 추가
   const relationalVals = [
-    getVal('ch_r01', false), getVal('ch_r02', false), getVal('ch_r03', false), getVal('ch_r04', false),
-    getVal('ch_r05', false), getVal('ch_r06', true),  getVal('ch_r07', true),  getVal('ch_r08', false),
+    getVal('ch_r01', false), getVal('ch_r02', false), getVal('ch_r04', false), getVal('ch_r06', true),
+    getVal('ch_r08', false), getVal('ch_r09', false), getVal('ch_r10', false), getVal('ch_r11', false),
   ];
   const emotionalVals = [
     getVal('ch_e01', true),  getVal('ch_e02', false), getVal('ch_e03', false), getVal('ch_e04', false),
     getVal('ch_e05', true),  getVal('ch_e06', false), getVal('ch_e07', false), getVal('ch_e08', true),
   ];
+  // 2026-10-13: 타인 신뢰 문항(x05·x06·x08 — 신중한 사람이 '윤리성 낮음'을 받던 결함) 제외. 척도 = 원칙·정직·소신 (x09 = 옛 r05, x10 역, x11)
   const ethicsVals = [
     getVal('ch_x01', false), getVal('ch_x02', false), getVal('ch_x03', false), getVal('ch_x04', false),
-    getVal('ch_x05', true),  getVal('ch_x06', false), getVal('ch_x07', false), getVal('ch_x08', true),
+    getVal('ch_x07', false), getVal('ch_x09', false), getVal('ch_x10', true),  getVal('ch_x11', false),
   ];
   const growthVals = [
     getVal('ch_g01', false), getVal('ch_g02', false), getVal('ch_g03', false), getVal('ch_g04', false),
@@ -339,45 +342,64 @@ export interface UFQuestionMeta {
 }
 
 const UF_AREAS = ['sibling', 'parent', 'family', 'peer', 'self', 'temperament', 'economic', 'trauma', 'cultural'] as const;
+/** '해당 없음 · 답하지 않음' 선택지의 option_value — 점수에 넣지 않는다 (2026-10-13, 형제 없음·사적 문항 선택 응답) */
+export const UF_SKIP_VALUE = '0';
+/** 영역 점수를 내는 데 필요한 최소 응답 수 — 전환점은 회복 자원 2문항뿐이라 1개 */
+const UF_MIN_ANSWERS: Partial<Record<(typeof UF_AREAS)[number], number>> = { trauma: 1 };
 
-/** UF 응답이 없으면 null (비회원 세션) */
-export function scoreUF(responses: ResponseRow[], meta: UFQuestionMeta[]): UFScores | null {
+/**
+ * UF 응답이 없으면 null (비회원 세션).
+ * - '해당 없음'(0)·결측 문항은 빼고 가중 평균. 영역 응답이 2개 미만이면 그 영역은 null (해설 생략).
+ * - 전환점: scoring_key.role='gate'(uf_041 큰 위기 경험)가 4 이상일 때만 나머지 문항으로 점수. 3 이하 = 큰 위기 없음(traumaExposure=false).
+ */
+export function scoreUF(responses: ResponseRow[], meta: UFQuestionMeta[]): UFResult | null {
   const metaById = new Map(meta.map(m => [m.id, m]));
-  const sums: Record<string, { total: number; weight: number }> = {};
+  const sums: Record<string, { total: number; weight: number; n: number }> = {};
+  let gate: number | null = null;
+  let sawBase = false;
 
   for (const r of responses) {
     if (r.module !== 'base') continue;
+    sawBase = true;
     const m = metaById.get(r.question_id);
     if (!m?.sub_domain) continue;
     let value = parseInt(r.option_value);
-    if (isNaN(value)) continue;
+    if (isNaN(value) || value < 1 || value > 7) continue; // 해당 없음(0)·깨진 값
+    const key = m.scoring_key as { weight?: number; role?: string } | null;
+    if (key?.role === 'gate') { gate = value; continue; }
     if (m.reverse_scored) value = 8 - value;
-    const key = m.scoring_key as { weight?: number } | null;
     const weight = typeof key?.weight === 'number' ? key.weight : 1;
-    sums[m.sub_domain] ??= { total: 0, weight: 0 };
+    sums[m.sub_domain] ??= { total: 0, weight: 0, n: 0 };
     sums[m.sub_domain].total += value * weight;
     sums[m.sub_domain].weight += weight;
+    sums[m.sub_domain].n += 1;
   }
-  if (Object.keys(sums).length === 0) return null;
+  if (!sawBase) return null;
 
-  const toScore = (s: { total: number; weight: number } | undefined): number => {
-    if (!s || s.weight === 0) return 0;
-    const avg = s.total / s.weight;
-    return Math.round(((avg - 1) / 6) * 100);
+  const toScore = (area: (typeof UF_AREAS)[number]): number | null => {
+    const s = sums[area];
+    if (!s || s.weight === 0 || s.n < (UF_MIN_ANSWERS[area] ?? 2)) return null;
+    return Math.round(((s.total / s.weight - 1) / 6) * 100);
   };
 
-  return Object.fromEntries(UF_AREAS.map(a => [a, toScore(sums[a])])) as unknown as UFScores;
+  const traumaExposure = gate === null ? null : gate >= 4;
+  const scores = Object.fromEntries(UF_AREAS.map(a => [a, toScore(a)])) as unknown as UFScores;
+  if (traumaExposure !== true) scores.trauma = null; // 큰 위기 없음·미응답이면 회복 자원 점수는 의미 없음
+  return { ...scores, traumaExposure };
 }
 
 const UF_AREA_NAMES: Record<string, string> = {
   sibling: '형제관계', parent: '부모관계', family: '가정환경',
   peer: '또래관계', self: '자기개념', temperament: '기질',
-  economic: '경제환경', trauma: '전환경험', cultural: '문화맥락',
+  economic: '경제환경', trauma: '전환점', cultural: '문화·세대 영향',
 };
 
-/** UF 상위 3영역 한 줄 요약 (회원 리포트용) */
+/** UF 상위 3영역 한 줄 요약 (회원 리포트용) — 점수 없는 영역은 제외, 남는 영역이 없으면 빈 문자열 */
 export function summarizeUF(uf: UFScores): string {
-  const top3 = Object.entries(uf).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => UF_AREA_NAMES[k]).join(', ');
+  // '높은 점수'라고 말하므로 50 이상인 영역만 (전환점 9점이 '높은 점수'로 요약되던 것 방지)
+  const scored = Object.entries(uf).filter((e): e is [string, number] => typeof e[1] === 'number' && e[1] >= 50 && e[0] in UF_AREA_NAMES);
+  if (scored.length === 0) return '';
+  const top3 = scored.sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => UF_AREA_NAMES[k]).join(', ');
   return `${top3} 영역에서 높은 점수를 보입니다.`;
 }
 

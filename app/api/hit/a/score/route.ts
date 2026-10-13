@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         .eq('module', HIT_A_UF_MODULE);
       uf = scoreUF(responses, (ufMeta ?? []) as UFQuestionMeta[]);
     }
-    const ufSummary = uf ? summarizeUF(uf) : null;
+    const ufSummary = uf ? (summarizeUF(uf) || null) : null;
 
     // 하위 호환 (64유형 매칭, 리포트 모듈 선택에 사용)
     const mbti = scoreMBTI(responses);  // PT 래핑
@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
       mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
       sPowerScores: sPower as unknown as Record<string, number>,
       ufScores: uf ?? undefined,
+      ufTraumaExposure: uf?.traumaExposure ?? null,
       apTop3Code: ap.top3Code,
       chScores: { integrity: ch.integrity, relational: ch.relational, emotional: ch.emotional, ethics: ch.ethics, growth: ch.growth },
     });
@@ -156,6 +157,7 @@ export async function POST(request: NextRequest) {
       uf_economic: uf?.economic ?? null,
       uf_trauma: uf?.trauma ?? null,
       uf_cultural: uf?.cultural ?? null,
+      uf_trauma_exposure: uf?.traumaExposure ?? null, // 전환점 게이트 (2026-10-13)
       // CH core 5영역 (신규)
       ch_integrity: ch.integrity,
       ch_relational: ch.relational,

@@ -15,6 +15,7 @@ const LIKERT_7_OPTIONS = [
   { label: '그렇다', value: '6' },
   { label: '매우 그렇다', value: '7' },
 ];
+const UF_OPTIONS = [...LIKERT_7_OPTIONS, { label: '해당 없음 · 답하지 않음', value: '0' }];
 
 type ModuleType = 'base' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core';
 
@@ -106,7 +107,8 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
         for (const q of (data.questions ?? []) as DbQuestion[]) {
           const mod = q.module as ModuleType;
           grouped[mod] ??= [];
-          grouped[mod]!.push({ module: mod, id: q.id, text: q.question_text, options: LIKERT_7_OPTIONS });
+          // 성장 배경은 사적인 문항이라 선택 응답 — '해당 없음 · 답하지 않음'(0)은 점수에서 뺀다 (2026-10-13, 최소 수집)
+          grouped[mod]!.push({ module: mod, id: q.id, text: q.question_text, options: mod === 'base' ? UF_OPTIONS : LIKERT_7_OPTIONS });
         }
 
         const ordered: QuestionItem[] = [];

@@ -40,7 +40,10 @@ export default function HitQuestionCard({
   }, [questionText, questionNumber, displayedQuestion]);
 
   const isGrid = options.length === 2;
-  const isLikert = options.length === 7;
+  // 7점 척도 + (선택) 뒤에 붙는 '해당 없음' 같은 건너뛰기 선택지 — 척도 아래 작은 버튼으로 (2026-10-13)
+  const likertOptions = options.slice(0, 7);
+  const skipOptions = options.length > 7 ? options.slice(7) : [];
+  const isLikert = options.length >= 7 && likertOptions.every((o, i) => o.value === String(i + 1));
 
   return (
     <div
@@ -63,7 +66,7 @@ export default function HitQuestionCard({
             <span>매우 그렇다</span>
           </div>
           <div className="flex gap-2 justify-center">
-            {options.map((option, idx) => {
+            {likertOptions.map((option, idx) => {
               const isSelected = selectedIndex === idx;
               const size = idx === 3
                 ? 'w-10 h-10'       // 보통(4) — 중간
@@ -87,6 +90,25 @@ export default function HitQuestionCard({
               );
             })}
           </div>
+          {skipOptions.length > 0 && (
+            <div className="flex justify-center gap-2 mt-5">
+              {skipOptions.map((option, i) => {
+                const idx = 7 + i;
+                const isSelected = selectedIndex === idx;
+                return (
+                  <button
+                    key={`${displayedNumber}-${idx}`}
+                    type="button"
+                    onClick={() => onSelect(idx)}
+                    className={`px-4 py-2 rounded-full border text-xs font-medium transition-colors
+                      ${isSelected ? 'border-neutral-800 bg-neutral-800 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400 hover:text-neutral-700'}`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
         <div className={isGrid ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2.5'}>

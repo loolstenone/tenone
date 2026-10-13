@@ -99,27 +99,11 @@ export const chCoreQuestions: CHCoreQuestion[] = [
     reverse: false,
   },
   {
-    id: 'ch_r03',
-    module: 'character_core',
-    area: 'relational',
-    subDomain: 'social_boldness',
-    text: '많은 사람 앞에서 자기 의견을 말하는 것이 어렵지 않다.',
-    reverse: false,
-  },
-  {
     id: 'ch_r04',
     module: 'character_core',
     area: 'relational',
     subDomain: 'warmth',
     text: '누군가 기뻐하면 나도 덩달아 기분이 좋아진다.',
-    reverse: false,
-  },
-  {
-    id: 'ch_r05',
-    module: 'character_core',
-    area: 'relational',
-    subDomain: 'social_boldness',
-    text: '불합리한 상황에서 이의를 제기하는 편이다.',
     reverse: false,
   },
   {
@@ -132,19 +116,37 @@ export const chCoreQuestions: CHCoreQuestion[] = [
     darkTag: 'PP',
   },
   {
-    id: 'ch_r07',
-    module: 'character_core',
-    area: 'relational',
-    subDomain: 'social_boldness',
-    text: '처음 보는 그룹에서 대화를 시작하는 것이 어렵다.',
-    reverse: true,
-  },
-  {
     id: 'ch_r08',
     module: 'character_core',
     area: 'relational',
     subDomain: 'sensitivity',
     text: '다른 사람이 비판받는 것을 보면 내 일처럼 마음이 아프다.',
+    reverse: false,
+  },
+
+  // 2026-10-13 개정: 외향성 문항(r03·r07)·소신 문항(r05 → ch_x09) 제외, 배려·공감 추가
+  {
+    id: 'ch_r09',
+    module: 'character_core',
+    area: 'relational',
+    subDomain: 'perspective',
+    text: '갈등이 생기면 상대의 입장을 먼저 정리해 본다.',
+    reverse: false,
+  },
+  {
+    id: 'ch_r10',
+    module: 'character_core',
+    area: 'relational',
+    subDomain: 'consideration',
+    text: '내 의견이 관철될 때도 상대가 체면을 잃지 않게 신경 쓴다.',
+    reverse: false,
+  },
+  {
+    id: 'ch_r11',
+    module: 'character_core',
+    area: 'relational',
+    subDomain: 'warmth',
+    text: '팀에서 소외되는 사람이 없도록 챙기는 편이다.',
     reverse: false,
   },
 
@@ -248,23 +250,6 @@ export const chCoreQuestions: CHCoreQuestion[] = [
     reverse: false,
   },
   {
-    id: 'ch_x05',
-    module: 'character_core',
-    area: 'ethics',
-    subDomain: 'suspicion',
-    text: '처음 만난 사람의 친절에 숨은 의도가 있을 수 있다고 생각한다.',
-    reverse: true,
-    darkTag: 'MK',
-  },
-  {
-    id: 'ch_x06',
-    module: 'character_core',
-    area: 'ethics',
-    subDomain: 'suspicion',
-    text: '사람은 기본적으로 선하다고 믿는다.',
-    reverse: false,
-  },
-  {
     id: 'ch_x07',
     module: 'character_core',
     area: 'ethics',
@@ -272,14 +257,31 @@ export const chCoreQuestions: CHCoreQuestion[] = [
     text: '상사의 지시라도 납득이 안 되면 의문을 제기한다.',
     reverse: false,
   },
+
+  // 2026-10-13 개정: 타인 신뢰 문항(x05·x06·x08) 제외 — 척도 = 원칙·정직·소신
   {
-    id: 'ch_x08',
+    id: 'ch_x09',
     module: 'character_core',
     area: 'ethics',
-    subDomain: 'suspicion',
-    text: '다른 사람의 말을 쉽게 믿지 않는 편이다.',
+    subDomain: 'independence',
+    text: '불합리한 상황에서 이의를 제기하는 편이다.',
+    reverse: false,
+  },
+  {
+    id: 'ch_x10',
+    module: 'character_core',
+    area: 'ethics',
+    subDomain: 'conscience',
+    text: '남이 보지 않으면 작은 규칙은 어겨도 된다고 생각한다.',
     reverse: true,
-    darkTag: 'MK',
+  },
+  {
+    id: 'ch_x11',
+    module: 'character_core',
+    area: 'ethics',
+    subDomain: 'conscience',
+    text: '잘못을 알게 되면 불이익이 있어도 바로잡는다.',
+    reverse: false,
   },
 
   // ── 성장지향성 growth (8문항) ──

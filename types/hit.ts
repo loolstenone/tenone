@@ -104,16 +104,22 @@ export interface SPowerScores {
 }
 
 /** UF (Underlying Factors) 기저요인 9영역 점수 (0~100) */
+/** 성장 배경 9영역 — null = 응답이 부족해(해당 없음 선택 등) 점수를 내지 않은 영역 (2026-10-13) */
 export interface UFScores {
-  sibling: number;       // 형제관계·협력
-  parent: number;        // 부모관계·정서
-  family: number;        // 가정정서·자원
-  peer: number;          // 또래·학교
-  self: number;          // 자기개념·사회역량
-  temperament: number;   // 기질적 본능
-  economic: number;      // 경제적 환경
-  trauma: number;        // 트라우마·전환점
-  cultural: number;      // 문화·세대·교육
+  sibling: number | null;       // 형제관계·협력
+  parent: number | null;        // 부모관계·정서
+  family: number | null;        // 가정정서·자원
+  peer: number | null;          // 또래·학교
+  self: number | null;          // 자기개념·사회역량
+  temperament: number | null;   // 기질적 본능
+  economic: number | null;      // 경제적 환경
+  trauma: number | null;        // 전환점 — 큰 위기 경험(uf_041 게이트)이 있을 때만 회복 자원 점수
+  cultural: number | null;      // 문화·세대 영향 인식
+}
+export type UFArea = keyof UFScores;
+/** scoreUF 결과 — 점수 + 전환점 게이트 (false = 큰 위기 없음 → UF-TRAUMA-NONE, null = 미응답) */
+export interface UFResult extends UFScores {
+  traumaExposure: boolean | null;
 }
 
 // ── 64유형 프로필 ──

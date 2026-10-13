@@ -32,7 +32,7 @@ export interface HitStageDef {
 }
 
 export const HIT_STAGES: Record<HitStageKey, HitStageDef> = {
-  a:   { key: 'a',   testType: 'A',   letter: 'A', code: 'HIT - Archetype', brand: 'Archetype',   name: '나에 대한 이해',           desc: '성격·행동·성품·적성·성장 배경을 교차 분석해 S-Power 강점과 64유형을 도출합니다.', group: 'common',    approxQuestions: 221 },
+  a:   { key: 'a',   testType: 'A',   letter: 'A', code: 'HIT - Archetype', brand: 'Archetype',   name: '나에 대한 이해',           desc: '성격·행동·성품·적성·성장 배경을 교차 분석해 S-Power 강점과 64유형을 도출합니다.', group: 'common',    approxQuestions: 217 },
   b:   { key: 'b',   testType: 'B',   letter: 'B', code: 'HIT - Bounce', brand: 'Bounce',   name: '역량과 방향',               desc: '핵심역량·직무 트랙 역량·할 수 있다는 효능감·자기와 직무에 대한 이해를 진단합니다.', group: 'common',    approxQuestions: 112 },
   c:   { key: 'c',   testType: 'C',   letter: 'C', code: 'HIT - Challenger', brand: 'Challenger',   name: '진입 — 대학생, 사회 초년',  desc: '첫 직무 적응, 진로 결정, 취업 준비 상태를 진단합니다.',                     group: 'stage',     approxQuestions: 78 },
   d:   { key: 'd',   testType: 'D',   letter: 'D', code: 'HIT - Departure', brand: 'Departure',   name: '전환 — 경력 이직',          desc: '경력 자본 · 이직 동기 · 전환 가능성으로 어디로, 언제 움직일지 봅니다.',                              group: 'stage',     approxQuestions: 100 },

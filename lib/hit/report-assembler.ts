@@ -3,7 +3,7 @@
  * Layer 3 (64유형 고유) + Layer 2 (모듈 라이브러리) + Layer 1 (AI 동적)
  */
 
-import type { UFScores } from '@/types/hit';
+import type { UFArea, UFScores } from '@/types/hit';
 
 interface HitAScores {
   discD: number; discI: number; discS: number; discC: number;
@@ -12,6 +12,8 @@ interface HitAScores {
   mbtiEScore: number; mbtiSScore: number; mbtiTScore: number; mbtiJScore: number;
   sPowerScores?: Record<string, number>;
   ufScores?: UFScores;
+  /** 전환점 게이트 — false면 UF-TRAUMA-NONE, null이면 전환점 해설 생략 (2026-10-13) */
+  ufTraumaExposure?: boolean | null;
   /** 흥미 Top3 코드 (예: AES) — RIASEC 해설 선택 */
   apTop3Code?: string | null;
   /** 성품 5차원 — {DIM}-HIGH/MID/LOW 해설 선택 */
@@ -34,16 +36,19 @@ export function chModuleId(dim: string, v: number): string | null {
 export function selectModules(scores: HitAScores): string[] {
   const modules: string[] = [];
 
-  // 0. UF 기저요인 모듈 (9영역 × HIGH/MID/LOW)
+  // 0. UF 기저요인 모듈 (9영역 × HIGH/MID/LOW) — 점수 없는 영역(해당 없음·응답 부족)은 해설 생략 (2026-10-13)
   if (scores.ufScores) {
-    const ufModuleKeyMap: Record<keyof UFScores, string> = {
+    const ufModuleKeyMap: Record<UFArea, string> = {
       sibling: 'SIBLING', parent: 'PARENT', family: 'FAMILY',
       peer: 'PEER', self: 'SELF', temperament: 'TEMPER',
       economic: 'ECON', trauma: 'TRAUMA', cultural: 'CULTURE',
     };
-    (Object.keys(ufModuleKeyMap) as (keyof UFScores)[]).forEach(key => {
-      const score = scores.ufScores![key];
+    (Object.keys(ufModuleKeyMap) as UFArea[]).forEach(key => {
       const mk = ufModuleKeyMap[key];
+      // 전환점: 큰 위기 경험 없음 → NONE. 있으면 회복 자원 점수로 분기
+      if (key === 'trauma' && scores.ufTraumaExposure === false) { modules.push('UF-TRAUMA-NONE'); return; }
+      const score = scores.ufScores![key];
+      if (score === null || score === undefined) return;
       // 75/50 — 화면 점수 구간(report-copy 75/50/25)·C~GAP 모듈 선택과 같은 기준 (2026-10-12, 기존 67/34)
       if (score >= 75) modules.push(`UF-${mk}-HIGH`);
       else if (score >= 50) modules.push(`UF-${mk}-MID`);
