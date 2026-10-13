@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 기업 허브 (2026-10-13 확장)
+ * 인재 찾기 (헤더 오른쪽 기업 서비스 첫 메뉴 — 옛 이름 기업 허브, 2026-10-13)
  * - 첫 화면 PageHero → (로그인) 내 기업 → 하는 일 4단계(등록 → 인재상·인원 → 제안 → 응한 인재) → 인재 정보 보호 → 자주 묻는 질문
  * - 인재 제안 흐름: lib/hero/offers.ts · /hero/company/[id]/talent · 유료직업소개사업 등록 전제 (발송 스위치 HERO_OFFERS_LIVE)
  * - 비로그인도 소개는 볼 수 있다 · 가격·요금 문구 금지
@@ -32,7 +32,7 @@ interface MyCompany {
     } | null;
 }
 
-/* ── 기업 허브에서 하는 일 — 실제 화면이 있는 것만 ── */
+/* ── 인재 찾기 진행 — 실제 화면이 있는 것만 ── */
 const STEPS = [
     {
         icon: Building2,
@@ -62,7 +62,7 @@ const STEPS = [
 
 const FAQ = [
     {
-        q: "누가 기업 허브를 쓸 수 있나요?",
+        q: "누가 인재 찾기를 쓸 수 있나요?",
         a: "기업 대표나 채용 담당자라면 회원 가입 후 기업을 등록할 수 있습니다. 등록하면 바로 기업 고민 설문과 채용 공고를 쓸 수 있습니다.",
     },
     {
@@ -115,7 +115,7 @@ export default function HeroCompanyHubPage() {
     return (
         <div className="bg-white">
             <PageHero
-                label="기업 허브"
+                label="인재 찾기"
                 title={<>원하는 인재상을 고르면<br />맞는 인재가 몇 명인지 보입니다</>}
                 desc="직무·경력·조건을 고르면 HeRo에 등록된 인재 중 조건에 맞는 사람의 수를 바로 보여 드립니다. 면접·인터뷰를 제안하면, 원하는 인재가 이력서와 함께 응합니다."
                 cta={hasCompany
@@ -184,10 +184,10 @@ export default function HeroCompanyHubPage() {
                 </section>
             )}
 
-            {/* ── 기업 허브에서 하는 일 ── */}
+            {/* ── 진행 순서 ── */}
             <section className="border-b border-neutral-100">
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
-                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3">기업 허브에서 하는 일</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3">이렇게 진행됩니다</h2>
                     <p className="text-neutral-600 mb-10 break-keep">네 단계로 진행합니다. 응할지는 인재가 정하고, 응한 인재만 기업에 드러납니다.</p>
                     <ol className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {STEPS.map((s, i) => (

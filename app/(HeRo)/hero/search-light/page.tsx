@@ -139,30 +139,73 @@ export default function SearchLightPage() {
 
                 {/* 텍스트 콘텐츠 — 좌하단 */}
                 <div className="relative flex flex-col justify-end h-screen pb-20 px-10 md:px-16" style={{ zIndex: 20, maxWidth: "640px" }}>
-                    <p className="text-[10px] tracking-[0.3em] uppercase text-red-400/70 mb-5 font-medium">
-                        Search Light
-                    </p>
-                    <h1 className="text-3xl md:text-4xl font-black text-white mb-5 leading-tight">
-                        어떤 사람이 필요한지<br />먼저 정리해 보세요
+                    <p className="text-sm font-bold text-red-400 mb-4">써치 라이트</p>
+                    <h1 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight break-keep">
+                        인재와 기업이<br />서로를 비추는 곳
                     </h1>
-                    <p className="text-sm text-neutral-400 max-w-sm mb-10 leading-relaxed">
-                        채용 공고만 올리는 곳이 아닙니다.<br />
-                        기업의 고민과 원하는 사람을 함께 정리합니다.
+                    <p className="text-sm md:text-base text-neutral-400 max-w-md mb-10 leading-relaxed break-keep">
+                        인재는 내 프로필에 맞는 기업을 찾고, 기업은 원하는 인재상을 찾습니다.
+                        양쪽의 빛이 겹치는 곳에서 만납니다.
                     </p>
                     <div className="flex flex-wrap gap-3">
-                        <Link
-                            href="/hero/search-light/tih"
+                        <a
+                            href="#talent"
                             className="flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            기업 고민 설문 작성 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link
-                            href="/hero/jh/write"
+                            나에게 맞는 기업 찾기 <ArrowRight className="h-4 w-4" />
+                        </a>
+                        <a
+                            href="#company"
                             className="flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg backdrop-blur-sm border border-white/20 transition-colors"
                         >
-                            희망 직무 설문 작성 · 개인 <ArrowRight className="h-4 w-4" />
-                        </Link>
+                            원하는 인재 찾기 · 기업 <ArrowRight className="h-4 w-4" />
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── 두 방향 — 왼쪽 인재 · 오른쪽 기업, 가운데서 만난다 (2026-10-13) ── */}
+            <section className="py-20 bg-white border-b border-neutral-100">
+                <div className="mx-auto max-w-5xl px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
+                        <div id="talent" className="scroll-mt-24 border border-neutral-200 rounded-2xl p-7 flex flex-col">
+                            <p className="text-xs font-bold text-neutral-500 mb-2">인재</p>
+                            <h2 className="text-xl font-extrabold mb-2">나에게 맞는 기업 찾기</h2>
+                            <p className="text-sm text-neutral-600 leading-relaxed break-keep mb-6 flex-1">
+                                희망 직무 설문에 하고 싶은 일과 조건을 쓰면, 내 검사 결과와 함께 맞는 기업을 찾아 성장 기록의 채용 피드에 보여 드립니다.
+                                제안 받기를 켜 두면 조건에 맞는 기업이 먼저 면접을 제안합니다.
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                <Link href="/hero/jh/write" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
+                                    희망 직무 설문 쓰기 <ArrowRight className="h-4 w-4 text-neutral-400" />
+                                </Link>
+                                <Link href="/hero/offers/settings" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
+                                    제안 받기 켜기 <ArrowRight className="h-4 w-4 text-neutral-400" />
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="hidden md:flex flex-col items-center justify-center text-neutral-300">
+                            <span className="h-16 w-px bg-gradient-to-b from-transparent to-neutral-300" />
+                            <span className="my-3 text-xs font-bold text-neutral-400 [writing-mode:vertical-rl]">만나는 곳</span>
+                            <span className="h-16 w-px bg-gradient-to-t from-transparent to-neutral-300" />
+                        </div>
+                        <div id="company" className="scroll-mt-24 border border-neutral-200 rounded-2xl p-7 flex flex-col">
+                            <p className="text-xs font-bold text-neutral-500 mb-2">기업</p>
+                            <h2 className="text-xl font-extrabold mb-2">원하는 인재 찾기</h2>
+                            <p className="text-sm text-neutral-600 leading-relaxed break-keep mb-6 flex-1">
+                                인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지 바로 보이고, 면접·인터뷰를 제안할 수 있습니다.
+                                기업 고민 설문에 조직의 속사정을 적어 주시면 더 잘 맞는 사람을 찾는 데 씁니다.
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                <Link href="/hero/company" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
+                                    인재 찾기 <ArrowRight className="h-4 w-4 text-neutral-400" />
+                                </Link>
+                                <Link href="/hero/search-light/tih" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
+                                    기업 고민 설문 쓰기 <ArrowRight className="h-4 w-4 text-neutral-400" />
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

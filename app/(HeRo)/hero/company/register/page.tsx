@@ -91,7 +91,7 @@ export default function CompanyRegisterPage() {
                     </p>
                     <button onClick={() => router.push("/hero/company")}
                         className="px-6 py-3 text-white font-semibold rounded-lg" style={{ backgroundColor: HERO_RED }}>
-                        기업 허브로
+                        인재 찾기로
                     </button>
                 </div>
             </div>

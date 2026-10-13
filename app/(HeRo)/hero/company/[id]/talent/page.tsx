@@ -87,7 +87,7 @@ export default function CompanyTalentPage() {
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
-    if (forbidden) return <div className="min-h-screen pt-32 text-center text-sm text-neutral-500">이 기업의 담당자만 볼 수 있습니다. <Link href="/hero/company" className="underline">기업 허브</Link></div>;
+    if (forbidden) return <div className="min-h-screen pt-32 text-center text-sm text-neutral-500">이 기업의 담당자만 볼 수 있습니다. <Link href="/hero/company" className="underline">인재 찾기</Link></div>;
 
     const set = <K extends keyof OfferCriteria>(k: K, v: OfferCriteria[K]) => { setCriteria(c => ({ ...c, [k]: v })); setDone(false); };
 
@@ -115,7 +115,7 @@ export default function CompanyTalentPage() {
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
             <div className="max-w-3xl mx-auto px-6 space-y-6">
                 <Link href="/hero/company" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700">
-                    <ArrowLeft className="h-3.5 w-3.5" /> 기업 허브
+                    <ArrowLeft className="h-3.5 w-3.5" /> 인재 찾기
                 </Link>
                 <div>
                     <p className="text-sm font-bold text-[#E53935] mb-2">인재 찾기</p>

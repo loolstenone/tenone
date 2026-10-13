@@ -35,6 +35,8 @@ export interface HeaderMenu extends MenuBase {
     placement: "header";
     /** 헤더 드롭다운 하위 링크 */
     dropdown?: { label: string; path: string }[];
+    /** 헤더 안 위치 묶음 (선택) — HeRo: 왼쪽 인재 서비스 · 가운데 만남(써치 라이트) · 오른쪽 기업 서비스 */
+    side?: "talent" | "meet" | "company";
 }
 
 /** 페이지 안 기능 (버튼·폼·푸터 링크) — 인트라 이름 = 버튼 문구 그대로, 위치는 현황표 보조 정보로만 */
@@ -85,14 +87,18 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         siteId: "hero",
         adminBase: "/intra/hero",
         menus: [
-            { placement: "header", label: "HIT 검사", path: "/hero/hit", source: { kind: "table", table: "hit_a_results" }, adminHref: "/intra/hero/hit", unit: "건" },
-            { placement: "header", label: "AI 상담", path: "/hero/coaching/ai", source: { kind: "static" }, adminHref: "/intra/hero/ai-counseling" },
-            { placement: "header", label: "커리어 코칭", path: "/hero/coaching", source: { kind: "table", table: "hero_coaching_sessions" }, unit: "건" },
-            { placement: "header", label: "탤런트 에이전시", path: "/hero/talent-agent", source: { kind: "table", table: "hero_talent_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/hero/talent-agent/applications", unit: "건" },
-            { placement: "header", label: "써치 라이트", path: "/hero/search-light", source: { kind: "table", table: "hero_tih_responses" }, adminHref: "/intra/hero/search-light", unit: "건" },
-            { placement: "feature", location: "헤더 기업 버튼", label: "기업", path: "/hero/company", source: { kind: "table", table: "hero_companies" }, adminHref: "/intra/hero/companies", unit: "개" },
+            // 왼쪽 = 인재 서비스 · 가운데 = 써치 라이트(인재와 기업이 만나는 곳) · 오른쪽 = 기업 서비스 (2026-10-13 사용자 결정)
+            { placement: "header", side: "talent", label: "HIT 검사", path: "/hero/hit", source: { kind: "table", table: "hit_a_results" }, adminHref: "/intra/hero/hit", unit: "건" },
+            { placement: "header", side: "talent", label: "AI 상담", path: "/hero/coaching/ai", source: { kind: "static" }, adminHref: "/intra/hero/ai-counseling" },
+            { placement: "header", side: "talent", label: "커리어 코칭", path: "/hero/coaching", source: { kind: "table", table: "hero_coaching_sessions" }, unit: "건" },
+            { placement: "header", side: "talent", label: "탤런트 에이전시", path: "/hero/talent-agent", source: { kind: "table", table: "hero_talent_applications", pendingEq: { status: "pending" } }, adminHref: "/intra/hero/talent-agent/applications", unit: "건" },
+            { placement: "header", side: "meet", label: "써치 라이트", path: "/hero/search-light", source: { kind: "table", table: "hero_tih_responses" }, adminHref: "/intra/hero/search-light", unit: "건" },
+            { placement: "header", side: "company", label: "인재 찾기", path: "/hero/company", source: { kind: "table", table: "hero_offers", pendingEq: { status: "requested" } }, adminHref: "/intra/hero/offers", unit: "건" },
+            { placement: "header", side: "company", label: "팀 진단", path: "/hero/team", source: { kind: "table", table: "hero_business_inquiries", eq: { service: "team_diagnosis" }, pendingEq: { status: "pending" } }, adminHref: "/intra/hero/business-requests?service=team_diagnosis", unit: "건" },
+            { placement: "header", side: "company", label: "인재 풀 리포트", path: "/hero/talent-report", source: { kind: "table", table: "hero_business_inquiries", eq: { service: "talent_report" }, pendingEq: { status: "pending" } }, adminHref: "/intra/hero/business-requests?service=talent_report", unit: "건" },
+            { placement: "header", side: "company", label: "헤드헌팅", path: "/hero/headhunting", source: { kind: "table", table: "hero_business_inquiries", eq: { service: "headhunting" }, pendingEq: { status: "pending" } }, adminHref: "/intra/hero/business-requests?service=headhunting", unit: "건" },
+            { placement: "feature", location: "인재 찾기", label: "기업 등록", path: "/hero/company/register", source: { kind: "table", table: "hero_companies" }, adminHref: "/intra/hero/companies", unit: "개" },
             { placement: "feature", location: "커리어 코칭", label: "코칭 대기 신청", path: "/hero/coaching", source: { kind: "table", table: "coaching_waitlist" }, unit: "건" },
-            { placement: "feature", location: "기업 허브", label: "인재 찾기", path: "/hero/company", source: { kind: "table", table: "hero_offers", pendingEq: { status: "requested" } }, adminHref: "/intra/hero/offers", unit: "건" },
             { placement: "feature", location: "마이페이지", label: "받은 제안", path: "/hero/offers", source: { kind: "table", table: "hero_offer_settings", eq: { is_open: true } }, unit: "명" },
         ],
     },
@@ -174,12 +180,13 @@ export function siteMenuTitle(m: SiteMenu): string {
 }
 
 /** 사이트 헤더 메뉴 — 브랜드 헤더 컴포넌트가 이걸로 렌더 (이름·순서 SSOT) */
-export function siteHeaderNav(siteId: string): { name: string; href: string; dropdown?: { name: string; href: string }[] }[] {
+export function siteHeaderNav(siteId: string): { name: string; href: string; side?: HeaderMenu["side"]; dropdown?: { name: string; href: string }[] }[] {
     return (getBrandSiteMenus(siteId)?.menus ?? [])
         .filter((m): m is HeaderMenu => m.placement === "header")
         .map(m => ({
             name: m.label,
             href: m.path,
+            ...(m.side && { side: m.side }),
             ...(m.dropdown && { dropdown: m.dropdown.map(d => ({ name: d.label, href: d.path })) }),
         }));
 }

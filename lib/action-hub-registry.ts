@@ -216,6 +216,18 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "high",
     },
 
+    // ── HeRo 기업 서비스 신청 (팀 진단 · 인재 풀 리포트 · 헤드헌팅, 2026-10-13)
+    {
+        key: "hero_business_requests",
+        label: "HeRo 기업 서비스 신청",
+        table: "hero_business_inquiries",
+        filter: { column: "status", value: "pending" },
+        href: "/intra/hero/business-requests",
+        brand_id: "hero",
+        category: "cs",
+        priority: "high",
+    },
+
     // ── 비즈니스 기회 (Opportunity) — Whole See 수집 → ERP 운영
     {
         key: "opportunity_new",

@@ -259,7 +259,6 @@ export const modules: NavModule[] = [
                             { name: "프로그램", href: "/intra/hero/programs" },
                             { name: "JD 관리", href: "/intra/hero/jd" },
                             { name: "JH 응답", href: "/intra/hero/jh" },
-                            { name: "인재 제안", href: "/intra/hero/offers" },
                             { name: "매칭", href: "/intra/hero/matching" },
                             { name: "영웅 유형", href: "/intra/hero/hero-types" },
                             { name: "리포트 모듈", href: "/intra/hero/report-modules" },

@@ -61,7 +61,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                     <h1 className="text-xl font-bold mb-2">접근 권한이 없습니다</h1>
                     <p className="text-sm text-neutral-500 mb-6">이 기업의 담당자로 등록된 회원만 JD를 관리할 수 있습니다.</p>
                     <Link href="/hero/company" className="inline-block px-4 py-2 text-sm text-white rounded-lg" style={{ backgroundColor: HERO_RED }}>
-                        기업 허브로
+                        인재 찾기로
                     </Link>
                 </div>
             </div>
@@ -72,7 +72,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
             <div className="max-w-3xl mx-auto px-6">
                 <Link href="/hero/company" className="flex items-center gap-1 text-xs text-neutral-500 mb-4 hover:text-neutral-700">
-                    <ArrowLeft className="h-3.5 w-3.5" /> 기업 허브
+                    <ArrowLeft className="h-3.5 w-3.5" /> 인재 찾기
                 </Link>
 
                 <div className="flex items-start justify-between mb-8 flex-wrap gap-3">
