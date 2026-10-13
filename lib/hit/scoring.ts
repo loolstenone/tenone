@@ -103,9 +103,11 @@ export function scorePT(responses: ResponseRow[]): PTScores {
   const pRaw = poleMean(pIds);
   const jPct = Math.round(jRaw / (jRaw + pRaw || 1) * 100);
 
-  // 강도 등급
-  const grade = (pct: number): 'STRONG' | 'MID' | 'WEAK' =>
-    pct >= 76 ? 'STRONG' : pct >= 56 ? 'MID' : 'WEAK';
+  // 강도 등급 — 어느 쪽으로든 50에서 멀수록 뚜렷 (2026-10-13: 왼쪽 극 비율만 봐서 I·S·F·P 쪽은 항상 WEAK였던 결함). 해설 선택(getMbtiModule)과 같은 76/61 기준
+  const grade = (pct: number): 'STRONG' | 'MID' | 'WEAK' => {
+    const strength = Math.max(pct, 100 - pct);
+    return strength >= 76 ? 'STRONG' : strength >= 61 ? 'MID' : 'WEAK';
+  };
 
   const type =
     (ePct >= 51 ? 'E' : 'I') +

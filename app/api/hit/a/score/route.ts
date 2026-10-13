@@ -10,6 +10,7 @@ import { canAccess } from '@/lib/hit/membership';
 import { getMembershipTier } from '@/lib/hit/membership-server';
 import Anthropic from '@anthropic-ai/sdk';
 import { HIT_NARRATIVE_MODEL } from '@/lib/hit/ai';
+import { applyHeroTypeFromDb } from '@/lib/hit/hero-type';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     // 하위 호환 (64유형 매칭, 리포트 모듈 선택에 사용)
     const mbti = scoreMBTI(responses);  // PT 래핑
     const disc = scoreDISC(responses);  // BT 래핑
-    const typeProfile = match64Type(mbti, disc);
+    const typeProfile = await applyHeroTypeFromDb(match64Type(mbti, disc)); // 유형 이름·별명·특성·방향 = DB hit_hero_types (2026-10-13)
 
     // S-Power: 4모듈 교차 (UF 제외)
     const sPower = calcSpower8d(pt, bt, ch, ap);
