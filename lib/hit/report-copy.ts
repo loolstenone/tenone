@@ -143,7 +143,7 @@ export const READINESS_COPY: Record<string, DimensionCopy> = {
   },
   track: {
     label: '직무 트랙 준비', what: '희망 직무 트랙에서 요구하는 준비를 갖춘 정도',
-    hi: '희망 직무 트랙의 준비가 탄탄합니다.', mid: '트랙 준비가 진행 중입니다.', low: '트랙에 맞춘 준비를 더 쌓아 보세요.',
+    hi: '희망 직무가 요구하는 자격·경험·결과물이 탄탄합니다. 지원서에 이 직무만의 근거로 내세우세요.', mid: '직무에 맞춘 준비가 진행 중입니다. 채용 공고의 우대 사항 중 하나를 골라 이번 학기에 채워 보세요.', low: '직무에 맞춘 준비는 이제 시작입니다. 이 직무 현직자가 신입 때 무엇을 했는지 찾아보고 한 가지를 따라 해 보세요.',
   },
 };
 
@@ -155,7 +155,7 @@ export const ONBOARDING_COPY: Record<string, DimensionCopy> = {
   },
   learning_speed: {
     label: '학습 속도', what: '업무를 빠르게 익히는 힘',
-    hi: '업무를 빨리 익힙니다.', mid: '배우면 해냅니다. 배운 것을 바로 메모로 남기는 습관이 속도를 올립니다.',
+    hi: '새 업무를 빨리 익힙니다. 배운 것을 업무 노트로 정리해 두면 더 탄탄해집니다.', mid: '배우면 해냅니다. 배운 것을 바로 메모로 남기는 습관이 속도를 올립니다.',
     low: '처음엔 익히는 데 시간이 걸릴 수 있어요. 모르는 것을 모아 두었다가 한 번에 묻는 방법이 좋습니다.',
   },
   relationship_building: {
@@ -173,7 +173,7 @@ export const ONBOARDING_COPY: Record<string, DimensionCopy> = {
 export const DECISION_COPY: DimensionCopy = {
   label: '진로 결정 확신', what: '첫 직무를 분명히, 내 판단으로 정했는가',
   hi: '가고 싶은 방향이 분명하고 스스로 정했습니다.', mid: '방향은 정했지만 확신이 더 필요합니다. 직무 경험(인턴·프로젝트)으로 확인해 보세요.',
-  low: '아직 방향을 고르는 중입니다. 괜찮습니다 — HIT - Archetype · Bounce 결과의 "최적 영역"부터 좁혀 보세요.',
+  low: '아직 방향을 고르는 중입니다. 괜찮습니다 — HIT - Bounce 결과의 "중심에 둘 분야"부터 좁혀 보세요.',
 };
 
 // ── HIT A ──
