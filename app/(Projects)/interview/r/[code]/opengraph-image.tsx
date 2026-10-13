@@ -27,8 +27,8 @@ export default async function Image({ params }: { params: Promise<{ code: string
                         </div>
                         <div style={{ fontSize: 22, color: "#777", display: "flex", alignItems: "flex-end" }}>{n?.applicantNo ?? ""}</div>
                     </div>
-                    <div style={{ fontSize: 66, color: "#111", marginBottom: 16, maxWidth: 820, lineHeight: 1.15 }}>{title}</div>
-                    <div style={{ fontSize: 30, color: "#333", maxWidth: 820, lineHeight: 1.4 }}>{summary}</div>
+                    <div style={{ fontSize: 66, color: "#111", marginBottom: 16, maxWidth: 640, lineHeight: 1.15 }}>{title}</div>
+                    <div style={{ fontSize: 30, color: "#333", maxWidth: 640, lineHeight: 1.4 }}>{summary}</div>
                     <div style={{ position: "absolute", right: 56, top: 190, transform: "rotate(-14deg)", border: "6px solid #D7263D", color: "#D7263D", borderRadius: 10, padding: "8px 22px", fontSize: 56 }}>
                         {status}
                     </div>
