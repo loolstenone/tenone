@@ -128,6 +128,15 @@
 
 ---
 
+## Ten:One™ 프로젝트 (사회 이슈 바이럴 사이트, 2026-10-13 사용자 결정)
+
+- **주소**: `{프로젝트}.tenone.biz` 서브도메인 — 도메인 비용 0. `lib/domain-registry.ts`에 `siteId: 'tenone'`으로 등록 (브랜드 아님 → `ums_sites`·`siteConfigs` 없음), 화면은 `app/(Projects)/{프로젝트}/`, 데이터는 `lib/projects/`
+- **기록**: 출시하면 tenone.biz **Works**에 올린다 (Works 메뉴 유지). 크게 터지면 그때 단독 도메인·매각 검토
+- **Ten:One 노출**: 결과 화면 아래 'Presented by Ten:One™' 한 곳만 — 광고처럼 보이지 않게
+- **규칙**: 입력은 저장하지 않는다(필요하면 URL 코드로 결과 재현) · 실존 기업·인물·제품 이름, 정부·공공기관 사칭 금지 · "재미로 보는 풍자, 실제와 무관" 고지 · 신상 공개형 금지 · 결과 공유 미리보기 이미지는 `opengraph-image.tsx` + `lib/projects/og-font.ts`(한글 글꼴)
+- **외부 작업** (서브도메인마다): Vercel › Domains에 `{프로젝트}.tenone.biz` 추가 → 가비아 DNS에 Vercel 권장 CNAME (tenone.biz 네임서버 = 가비아)
+- **1호 — AI 면접 예행연습** `interview.tenone.biz` (`app/(Projects)/interview`, `lib/projects/interview.ts`): '인간 지원자 사전 검수' — AI 면접관 HR-0이 7문항을 묻고 고른 답을 조합해 결과 통지서(판정 5종·판정 사유 3·AI 대체 가능성). 결과 주소 `/r/{코드 7자}`. 판정이 고르게 나오도록 동점 우선순위 조정(전 16,384 조합 점검)
+
 ## 개발 주의사항
 
 ### 유니버스 프로필 (members 테이블)
