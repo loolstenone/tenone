@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * 팀 진단 (2026-10-13) — 자동 리포트
- * 기업 담당자가 팀 진단을 만들고 초대 링크를 팀원에게 보냄 → 팀원이 동의하고 참여(HIT 기본 성향 검사 필요)
- * → 검사를 마친 참여자가 5명 이상이면 팀 리포트가 자동으로 열린다 (/hero/team/[id])
- * ❌ 개인 결과·이름은 기업에 가지 않는다 — 비율·평균·해석뿐
+ * 팀 진단 (2026-10-13) — 기업용 팀 빌딩 서비스, 자동 리포트
+ * 팀장(기업 회원)이 신청 → 초대 링크로 팀장·팀원이 동시에 팀 설문 (+ HIT 기본 성향 검사)
+ * → 팀원 5명 이상이면 단합·문제점·인식 차이 리포트, 검사 완료 5명 이상이면 성향 구성(케미) — 팀장·참여 팀원이 함께 본다
+ * '개인 HIT 결과는 본인만' 원칙의 예외 (사용자 결정) — 참여 동의, 묶음 통계만. ❌ 개인 응답·결과·이름
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -15,24 +15,24 @@ import { hitStageMinutes } from "@/lib/hit/stages";
 
 interface Diagnosis {
     id: string; company_id: string; name: string; invite_code: string; status: string; created_at: string;
-    participants: number; tested: number; ready: boolean;
+    participants: number; tested: number; surveyed: number; leaderJoined: boolean; ready: boolean;
 }
 
 const DELIVERABLES = [
-    { icon: Users, title: "역할 분포", desc: "추진·소통·안정·분석 네 가지 역할이 팀에 얼마나 있는지 비율로 봅니다." },
-    { icon: Puzzle, title: "비어 있는 역할", desc: "팀에 적은 역할을 짚고, 다음 채용에서 어떤 사람을 찾으면 좋을지 제안합니다." },
-    { icon: MessagesSquare, title: "함께 일하는 법", desc: "일하는 방식이 한쪽으로 쏠린 곳과 회의·피드백 방식 조언을 리더용으로 정리합니다." },
+    { icon: MessagesSquare, title: "말하기 어려웠던 것", desc: "신뢰·솔직함·역할·갈등·업무 부담·인정·팀장과의 관계를 팀원 평균으로 보고, 이름 없는 이야기로 바뀌었으면 하는 것을 듣습니다." },
+    { icon: Puzzle, title: "팀장과 팀원의 인식 차이", desc: "팀장과 팀원이 같은 질문에 답해, 서로 보는 눈이 다른 곳과 문제점, 팀 빌딩 방법을 짚어 드립니다." },
+    { icon: Users, title: "팀 케미", desc: "HIT 기본 성향 검사로 팀의 역할 분포, 비어 있는 역할, 일하는 방식이 쏠린 곳을 봅니다." },
 ];
 
 const STEPS = [
-    { title: "팀 진단 만들기", desc: "기업 회원이 팀 이름을 정하면 초대 링크가 만들어집니다." },
-    { title: "팀원 참여", desc: `팀원은 링크로 들어와 동의하고 참여합니다. HIT 기본 성향 검사(약 ${hitStageMinutes("a")}분)를 받지 않았다면 먼저 받습니다.` },
-    { title: "자동 리포트", desc: "검사를 마친 팀원이 5명이 되면 리포트가 열리고, 참여자가 늘수록 자동으로 갱신됩니다." },
+    { title: "팀장이 신청", desc: "기업 회원인 팀장이 팀 이름을 정하면 초대 링크가 만들어집니다." },
+    { title: "팀장·팀원 동시 설문", desc: `링크로 들어와 동의하고 같은 설문(약 5분)에 답합니다. HIT 기본 성향 검사(약 ${hitStageMinutes("a")}분)도 받으면 팀 케미까지 봅니다.` },
+    { title: "자동 리포트", desc: "팀원 5명이 설문을 마치면 리포트가 열리고, 팀장과 참여한 팀원이 함께 봅니다. 참여자가 늘수록 자동으로 갱신됩니다." },
 ];
 
 const PRINCIPLES = [
-    { title: "팀 전체의 비율만", desc: "회사에는 팀 전체의 비율·평균과 해석만 보입니다. 누가 어떤 결과인지는 보이지 않습니다." },
-    { title: "5명부터", desc: "결과가 특정인으로 짐작되지 않도록 검사를 마친 참여자가 5명 이상일 때만 리포트를 만듭니다." },
+    { title: "누가 답했는지 모릅니다", desc: "팀 전체의 평균과 이름 없는 이야기(무작위 순서)만 보입니다. 팀장도 누가 어떻게 답했는지 볼 수 없습니다." },
+    { title: "5명부터", desc: "결과가 특정인으로 짐작되지 않도록 팀원 5명 이상이 답했을 때만 리포트를 만듭니다." },
     { title: "참여는 자유, 평가엔 쓰지 않기", desc: "참여하지 않아도 불이익이 없어야 하고, 성향 검사는 맞고 틀림이 없으니 인사 평가에 쓰지 않습니다." },
 ];
 
@@ -53,8 +53,8 @@ export default function TeamDiagnosisPage() {
         <div className="bg-white">
             <PageHero
                 label="팀 진단"
-                title={<>우리 팀은 어떤 사람들로<br />이루어져 있을까요</>}
-                desc="팀원들이 HIT 기본 성향 검사를 받으면 팀의 역할 분포, 일하는 방식, 비어 있는 역할을 자동 리포트로 보여 드립니다. 다음에 어떤 사람을 뽑아야 할지도 여기서 보입니다."
+                title={<>서로 말하기 어려웠던 것을<br />팀이 함께 봅니다</>}
+                desc="팀장이 신청하면 팀원들과 동시에 설문하고 검사합니다. 팀의 케미와 단합, 문제점, 팀장과 팀원의 인식 차이를 자동 리포트로 보여 드리고 팀 빌딩 방법을 제안합니다."
                 cta={hasCompany ? { label: "팀 진단 만들기", href: "#my-teams" } : { label: "기업 등록하기", href: "/hero/company/register" }}
                 secondary={{ label: "기업 회원", href: "/hero/company" }}
             />
@@ -188,11 +188,16 @@ function DiagnosisRow({ d, company, multi }: { d: Diagnosis; company: string; mu
             <div className="flex-1 min-w-0">
                 <p className="font-bold">{d.name}{multi && <span className="ml-2 text-xs font-normal text-neutral-500">{company}</span>}</p>
                 <p className="text-xs text-neutral-500 mt-1">
-                    참여 {d.participants}명 · 검사 완료 {d.tested}명{d.status !== "open" && " · 참여 마감"}
-                    {!d.ready && ` · 리포트까지 ${Math.max(0, 5 - d.tested)}명 더`}
+                    참여 {d.participants}명 · 팀원 설문 {d.surveyed}명 · 검사 완료 {d.tested}명{d.status !== "open" && " · 참여 마감"}
+                    {!d.ready && ` · 리포트까지 팀원 ${Math.max(0, 5 - d.surveyed)}명 더`}
                 </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+                {d.status === "open" && !d.leaderJoined && (
+                    <Link href={`/hero/team/join/${d.invite_code}`} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E53935] text-[#E53935] text-sm font-semibold hover:bg-red-50">
+                        팀장 설문하기
+                    </Link>
+                )}
                 {d.status === "open" && (
                     <button onClick={copy} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-200 text-sm hover:bg-neutral-50">
                         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "복사됨" : "초대 링크"}

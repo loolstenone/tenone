@@ -55,3 +55,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.hero_team_diagnoses    TO authent
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.hero_team_participants TO authenticated;
 GRANT ALL ON public.hero_team_diagnoses    TO service_role;
 GRANT ALL ON public.hero_team_participants TO service_role;
+
+-- ── 팀 설문 (2026-10-13 적용, MCP apply_migration hero_team_survey)
+-- 팀장이 신청 → 팀장·팀원이 같은 설문에 동시에 답한다 (신뢰·솔직함·역할·목표·갈등·업무 부담·인정·팀장과의 관계 + 서술 2)
+-- 개인 응답은 누구에게도 보이지 않는다 — 팀원 5명 이상일 때 영역별 평균·팀장과의 인식 차이·무작위 순서 서술로만 리포트
+ALTER TABLE public.hero_team_participants
+  ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'member' CHECK (role IN ('leader', 'member')),
+  ADD COLUMN IF NOT EXISTS survey jsonb,
+  ADD COLUMN IF NOT EXISTS survey_at timestamptz;

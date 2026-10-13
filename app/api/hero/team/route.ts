@@ -23,10 +23,12 @@ export async function GET(req: NextRequest) {
     const { data: diags } = await sb.from("hero_team_diagnoses").select("id, company_id, name, invite_code, status, created_at")
         .in("company_id", companies.map(c => c.id)).order("created_at", { ascending: false });
     const items = await Promise.all((diags ?? []).map(async d => {
-        const { data: parts } = await sb.from("hero_team_participants").select("member_id").eq("diagnosis_id", d.id);
+        const { data: parts } = await sb.from("hero_team_participants").select("member_id, role, survey_at").eq("diagnosis_id", d.id);
         const ids = (parts ?? []).map(p => p.member_id as string);
         const tested = (await latestHitA(sb, ids)).length;
-        return { ...d, participants: ids.length, tested, ready: tested >= GROUP_FLOOR };
+        const surveyed = (parts ?? []).filter(p => p.role === "member" && p.survey_at).length;
+        const leaderJoined = (parts ?? []).some(p => p.role === "leader");
+        return { ...d, participants: ids.length, tested, surveyed, leaderJoined, ready: surveyed >= GROUP_FLOOR || tested >= GROUP_FLOOR };
     }));
     return NextResponse.json({ companies, items, floor: GROUP_FLOOR });
 }

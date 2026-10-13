@@ -72,7 +72,7 @@
 | hero_offer_settings | 삭제 | 제안 받기 설정·동의 기록 (회원 삭제 시 CASCADE) |
 | hero_offer_recipients | 익명화 (member 연결 제거, FK SET NULL) | 제안·응답 기록은 기업 측 기록이자 직업소개 장부 — 이력서·연락처는 응답일 + 180일 뒤 기업 화면에서 닫힘(destroy_due), 응답 철회 시 즉시 |
 | hero_offers (기업 측) | 기업 유지 | 담당자 탈퇴 시 sender_member_id만 NULL |
-| hero_team_participants | 삭제 | 팀 진단 참여·동의 기록 (회원 삭제 시 CASCADE, '나가기'도 즉시 삭제) — 리포트는 저장하지 않고 조회 때 계산하므로 빠지면 통계에서 바로 사라짐 |
+| hero_team_participants | 삭제 | 팀 진단 참여·동의·역할(팀장/팀원)·팀 설문 응답 (회원 삭제 시 CASCADE, '나가기'도 즉시 삭제) — 리포트는 저장하지 않고 조회 때 계산하므로 빠지면 통계·서술에서 바로 사라짐 |
 | hero_team_diagnoses (기업 측) | 기업 유지 | 담당자 탈퇴 시 created_by만 NULL |
 | hero_company_members | 삭제 (기업은 유지) | 기업 계정은 다른 담당자에게 승계 |
 | hero_coaching_sessions | 결제 연관분 5년 원본 보관 후 익명화 | 전자상거래법 계약·결제 기록 5년 |
