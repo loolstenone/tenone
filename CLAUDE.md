@@ -1469,7 +1469,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 
 | 순서 | 어디서 | 할 일 |
 |---|---|---|
-| 1 | Vercel › Domains › Add Existing | `www.도메인`(Production) + `도메인`(→ www 308) |
+| 1 | Vercel 프로젝트 도메인 (Claude가 Vercel MCP로 — 사용자 승인 후, 부록 G.2) | `www.도메인`(Production) + `도메인`(→ www 308) · 서브도메인 하나면 그것만 |
 | 2 | 등록업체 | 네임서버가 그 업체 것인지 먼저 조회 → Vercel **View DNS configuration 권장값**으로 A·CNAME (부록 G.2) |
 | 3 | Cloudflare › Turnstile › 위젯 › Hostname | `도메인` 추가 — 빠지면 로그인·가입·폼 전부 막힘 (콘솔 110200) |
 | 4 | Supabase › Auth › URL Configuration | Redirect URLs `https://www.도메인/**`·`https://도메인/**` |
@@ -1914,18 +1914,20 @@ pathname 변경
 | 항목 | 내용 |
 |------|------|
 | 배포 트리거 | `git push origin master` → 자동 빌드 |
-| 환경변수 관리 | Vercel Dashboard > Project > Settings > Environment Variables |
+| 프로젝트 | `tenone` (`prj_FRP2TCrQgq3z6OMo7aiKtlNynmac`) · 팀 `team_nN7rmwjBybV96jlsxLSWSGrt` (Pro) |
+| 대시보드 (2026-10 UI) | 팀 단위 **왼쪽 사이드바**: Deployments · Logs · Analytics · Observability · Firewall · CDN · Environment Variables · **Domains** · Integrations · Storage · Flags · Agent · AI Gateway · Usage · Settings. 옛 '프로젝트 상단 탭 › Settings › Domains' 경로로 안내하지 않는다 — 메뉴는 자주 바뀌니 위치를 기억으로 쓰지 말고, 가능하면 아래 MCP로 Claude가 처리 |
+| Vercel MCP (Claude) | 연결됨 — `get_domain_config`(DNS 권장값·정상 여부 `misconfigured`) · `get_project_domain`(프로젝트에 붙었는지) · `add_project_domain`(추가) · 배포·로그 조회. **도메인 추가·환경변수·설정 변경은 사용자 승인 후**, 조회는 바로 |
 | On-Demand 상한 | $100 설정됨 |
-| 도메인 연결 | Vercel Dashboard > Project > Settings > Domains |
 
-#### 새 도메인 추가 3단계
+#### 새 도메인 추가 순서
 
 1. `lib/domain-registry.ts` 에 도메인 등록
-2. Vercel Dashboard > Domains > **Add Existing**으로 도메인 추가 (`www.` = Production, apex = www로 308 Redirect)
-3. 각 도메인 **View DNS configuration**에 나온 **권장값**으로 등록업체 DNS 설정 — 값을 기억으로 쓰지 않는다 (`76.76.21.21`·`cname.vercel-dns.com`은 레거시, "DNS Change Recommended" 경고. 2026-10 권장 예: A `216.150.1.1`, CNAME `{해시}.vercel-dns-017.com.`)
+2. Vercel 프로젝트에 도메인 추가 — Claude가 MCP `add_project_domain` (승인 후). 사람이 할 땐 사이드바 **Domains**에서 추가하고 tenone 프로젝트에 연결 (`www.` = Production, apex = www로 308 Redirect). ⚠️ DNS만 맞추고 프로젝트에 안 붙이면 인증서가 안 나와 접속 자체가 실패한다 (2026-10-13 ai-interview.tenone.biz)
+3. MCP `get_domain_config`의 **권장값**(`recommendedCNAME`·`recommendedIPv4` rank 1)으로 등록업체 DNS 설정 — 값을 기억으로 쓰지 않는다 (`76.76.21.21`·`cname.vercel-dns.com`은 레거시, "DNS Change Recommended" 경고. 2026-10 권장 예: A `216.150.1.1`, CNAME `{해시}.vercel-dns-017.com.`)
    - 먼저 네임서버가 그 등록업체 것인지 조회 (`nslookup -type=ns 도메인`, .kr은 `b.dns.kr`) — 외부 빌더(아임웹 등) 네임서버면 레코드를 고쳐도 반영 안 됨 → 등록업체 기본 네임서버로 변경
    - 가비아 CNAME 값은 끝에 점(.) 필요
-   - SSL은 DNS 확인 후 자동 발급 (apex·www 따로, 수 분). 그 사이 `ERR_CERT_COMMON_NAME_INVALID`는 정상
+   - SSL은 DNS 확인 + 프로젝트 연결 후 자동 발급 (apex·www 따로, 수 분). 그 사이 `ERR_CERT_COMMON_NAME_INVALID`는 정상 · 확인은 `get_domain_config`의 `misconfigured: false` + `get_project_domain`의 `verified: true`
+   - tenone.biz 서브도메인(`{프로젝트}.tenone.biz`): 네임서버 = 가비아 → 가비아에 CNAME 한 줄 + 프로젝트 연결. Turnstile·Supabase는 tenone.biz 등록으로 이미 포함
 4. Supabase Auth > Redirect URLs에 `https://새도메인/**` 추가
 5. **Cloudflare Turnstile** > 위젯 > Hostname Management에 새 도메인 추가 (apex 하나면 www 포함) — 빠지면 로그인·가입·문의 폼이 "보안 확인 중"으로 막힌다 (콘솔 `Turnstile Error: 110200`, 2026-10-07 rook.co.kr 전환 때 발생)
 
