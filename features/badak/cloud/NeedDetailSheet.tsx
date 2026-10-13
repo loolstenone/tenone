@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Crown, ChevronRight, Plus, ArrowLeft, Share2, Users, Coffee } from 'lucide-react';
 import type { CloudWord, CloudGroup } from '@/types/badak';
-import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
 import { MemberProfileSheet } from '@/features/badak/MemberProfileSheet';
@@ -33,9 +32,9 @@ interface NeedDetailSheetProps {
   onSelectWord?: (word: CloudWord) => void;
 }
 
-/** fallback: needId 없는 mock 데이터용 — 단순 인기순 */
+/** needId 없는 니즈용 — 단순 인기순 */
 function getPopularWords(word: CloudWord, allWords?: CloudWord[]): CloudWord[] {
-  const pool = allWords?.length ? allWords : CLOUD_WORDS;
+  const pool = allWords ?? [];
   return pool
     .filter((w) => w.text !== word.text)
     .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { CloudWord } from '@/types/badak';
-import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { CloudBubble } from '@/features/badak/cloud/CloudBubble';
 import { NeedsInput } from '@/features/badak/cloud/NeedsInput';
 import { FeedSection } from '@/features/badak/cloud/FeedSection';
@@ -18,9 +17,7 @@ export default function BadakNextStage() {
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
   const [sending, setSending] = useState(false);
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
-  const [cloudWords, setCloudWords] = useState<CloudWord[]>(
-    [...CLOUD_WORDS].sort((a, b) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
-  );
+  const [cloudWords, setCloudWords] = useState<CloudWord[]>([]); // DB 니즈만 (목업 대체값 금지)
   const [sphereRadius, setSphereRadius] = useState(180);
 
   const SUB_COPIES = [
@@ -307,8 +304,8 @@ export default function BadakNextStage() {
             }}
           >
             <div ref={sphereRef} className="absolute inset-0">
-              {/* 중앙 레이블 */}
-              <div
+              {/* 중앙 레이블 — 니즈가 있을 때만 */}
+              {sortedWords.length > 0 && <div
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
                 style={{ zIndex: 0 }}
               >
@@ -322,8 +319,13 @@ export default function BadakNextStage() {
                 >
                   Needs
                 </span>
-              </div>
+              </div>}
 
+              {sortedWords.length === 0 && (
+                <p className="absolute inset-x-6 top-1/2 -translate-y-1/2 text-center text-sm text-white/60" style={{ zIndex: 1 }}>
+                  아직 올라온 니즈가 없습니다. 아래 칸에 첫 니즈를 올려 주세요.
+                </p>
+              )}
               {sortedWords.map((word, i) => (
                 <CloudBubble
                   key={word.needId ?? word.text}

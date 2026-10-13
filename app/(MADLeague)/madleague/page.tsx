@@ -18,7 +18,7 @@ const ROUND_STATUS: Record<string, string> = { upcoming: '예정', ongoing: '진
 
 export default async function Page() {
   const [recentRounds, hallRounds, articles] = await Promise.all([
-    fetchMadCompetitions({ limit: 5 }),
+    fetchMadCompetitions({ limit: 6 }).then((rs) => rs.filter((r) => !r.title.startsWith('[데모]')).slice(0, 5)), // 데모 회차는 기능 시험용 — 홈에 안 띄움
     fetchMadHallRounds(),
     fetchMadArticles({ limit: 4 }),
   ]);

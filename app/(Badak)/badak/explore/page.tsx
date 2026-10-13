@@ -1,12 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import {
   Search, Users, TrendingUp, Sparkles,
   Flame, BarChart3, UserPlus, Target,
   Handshake, Crown, ChevronRight, ChevronLeft, Clock,
 } from 'lucide-react';
-import { CLOUD_WORDS as FALLBACK_WORDS } from '@/lib/badak-cloud-data';
 import type { CloudWord } from '@/types/badak';
 import { NeedDetailSheet } from '@/features/badak/cloud/NeedDetailSheet';
 import { useAuth } from '@/lib/auth-context';
@@ -55,9 +55,9 @@ export default function ExplorePage() {
         const res = await fetch('/api/badak/needs?limit=200');
         const data = await res.json();
         const fetched = (data.words as CloudWord[]) ?? [];
-        setWords(fetched.length > 0 ? fetched : FALLBACK_WORDS);
+        setWords(fetched);
       } catch {
-        setWords(FALLBACK_WORDS);
+        setWords([]);
       } finally {
         setLoading(false);
       }
@@ -213,6 +213,10 @@ export default function ExplorePage() {
               <div className="flex items-center justify-center py-20">
                 <span className="text-sm text-mute">불러오는 중</span>
               </div>
+            ) : words.length === 0 ? (
+              <p className="py-16 text-center text-sm text-white/60">
+                아직 올라온 니즈가 없습니다. <Link href="/badak" className="underline">홈</Link>에서 첫 니즈를 올려 주세요.
+              </p>
             ) : (
               <>
                 {/* Hot 니즈 */}
