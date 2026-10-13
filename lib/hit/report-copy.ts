@@ -242,7 +242,14 @@ export function toParagraphs(text: string, perParagraph = 2): string[] {
         sentences[i - 1] = `${sentences[i - 1]}${glue}${sentences[i]}`; sentences.splice(i, 1);
       }
     }
-    for (let i = 0; i < sentences.length; i += perParagraph) out.push(sentences.slice(i, i + perParagraph).join(' '));
+    const chunks: string[][] = [];
+    for (let i = 0; i < sentences.length; i += perParagraph) chunks.push(sentences.slice(i, i + perParagraph));
+    // 마지막 문단이 한 문장만 남으면 앞 문단에 붙인다 ("면접에서 가장 설득력 있는 근거가 됩니다." 홀로 남던 것, 2026-10-13)
+    if (chunks.length > 1 && chunks[chunks.length - 1].length === 1 && perParagraph > 1) {
+      const last = chunks.pop()!;
+      chunks[chunks.length - 1] = [...chunks[chunks.length - 1], ...last];
+    }
+    for (const c of chunks) out.push(c.join(' '));
   }
   return out;
 }

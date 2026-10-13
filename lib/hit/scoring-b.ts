@@ -152,10 +152,15 @@ export function scoreCareerInsight(responses: ResponseRow[]) {
 
 // ── 종합 ──
 
-export function determineBStage(coreOverall: number, insightTotal: number): string {
-  if (coreOverall >= 75 && insightTotal >= 75) return 'ready';
-  if (coreOverall >= 50 && insightTotal >= 50) return 'developing';
-  if (insightTotal >= 25) return 'exploring';
+/**
+ * 자기 이해·직무 이해는 평균이 아니라 둘 다 기준을 넘어야 다음 단계 (2026-10-13).
+ * 평균이면 자기 67 · 직무 33 → 50 → '방향은 잡혔고 준비 진행 중'이 나와, 직무를 모르는데 방향이 잡혔다고 말했다.
+ */
+export function determineBStage(coreOverall: number, insightSelf: number, insightJob: number): string {
+  const low = Math.min(insightSelf, insightJob);
+  if (coreOverall >= 75 && low >= 75) return 'ready';
+  if (coreOverall >= 50 && low >= 50) return 'developing';
+  if (Math.max(insightSelf, insightJob) >= 25) return 'exploring';
   return 'discovering';
 }
 
@@ -202,6 +207,6 @@ export function scoreHitB(
     insightJob: insight.job,
     insightTotal: insight.total,
     insightGrade: insight.grade,
-    journeyStage: determineBStage(core.overallScore, insight.total),
+    journeyStage: determineBStage(core.overallScore, insight.self, insight.job),
   };
 }
