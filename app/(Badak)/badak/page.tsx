@@ -98,7 +98,7 @@ export default function BadakNextStage() {
   // Animation loop — pure DOM mutation, zero React re-renders
   useEffect(() => {
     const FRICTION = 0.985;
-    const IDLE_SPEED = 0.002;
+    const IDLE_SPEED = 0; // 혼자 돌지 않는다 — 끌 때만 움직임 (tenone-ui 2.5, 2026-10-14)
     const MIN_VELOCITY = 0.0001;
     let lastTime = performance.now();
 
@@ -190,10 +190,8 @@ export default function BadakNextStage() {
         el.style.opacity = opacity.toFixed(3);
         el.style.zIndex = String(Math.round(depth * 100));
         el.style.fontSize = `${fontSize.toFixed(1)}px`;
-        el.style.fontWeight = depth > 0.6 ? '700' : '500';
+        el.style.fontWeight = depth > 0.6 ? '700' : '400';
         el.style.color = color;
-        el.style.textShadow = depth > 0.7 ? '0 1px 6px rgba(0,0,0,0.4)' : 'none';
-        el.style.filter = depth < 0.35 ? `blur(${((1 - depth * 3) * 2).toFixed(1)}px)` : 'none';
       }
 
       autoRef.current = requestAnimationFrame(animate);
@@ -275,7 +273,7 @@ export default function BadakNextStage() {
         style={{ minHeight: 'calc(100vh - 56px)', background: skyBg }}
       >
         {/* Slogan */}
-        <div className="px-6 pt-12 text-center sm:pt-16" style={{ animation: 'badak-fadeUp 0.6s ease both' }}>
+        <div className="px-6 pt-12 text-center sm:pt-16">
           <h1
             className="text-[20px] font-bold leading-[1.3] text-white sm:text-[26px]"
             style={{ letterSpacing: '-0.04em' }}

@@ -2,8 +2,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import {
-  fetchMadClubs,
   fetchMadArticles,
+  fetchMadCompetitions,
+  fetchMadHallRounds,
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
 import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
@@ -13,17 +14,22 @@ import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribe
 
 export const revalidate = 300; // 5분 캐시
 
+const ROUND_STATUS: Record<string, string> = { upcoming: '예정', ongoing: '진행 중', completed: '종료', cancelled: '취소' };
+
 export default async function Page() {
-  const [clubs, articles] = await Promise.all([
-    fetchMadClubs(),
+  const [recentRounds, hallRounds, articles] = await Promise.all([
+    fetchMadCompetitions({ limit: 5 }),
+    fetchMadHallRounds(),
     fetchMadArticles({ limit: 4 }),
   ]);
+  // 1위는 결과가 공개된 회차만
+  const winnerOf = new Map(hallRounds.map((h) => [h.id, h.results.find((x) => x.rank === 1)]));
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* ─── Hero ─────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-32 sm:pt-32 sm:pb-40">
+        <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-16 sm:pt-24 sm:pb-24">
           <div className="flex items-center gap-3 text-[#EC1D25] font-bold tracking-widest text-xs mb-6">
             <span className="h-px w-8 bg-[#EC1D25]" />
             MATCH · ACTIVE · DEVELOP
@@ -52,6 +58,32 @@ export default async function Page() {
           </div>
         </div>
       </section>
+
+      {/* ─── 경쟁 PT 기록 — 첫 화면 바로 아래 실제 데이터 (tenone-ui 4.1) ─── */}
+      {recentRounds.length > 0 && (
+        <section className="border-t border-neutral-900">
+          <div className="mx-auto max-w-7xl px-6 py-16">
+            <div className="flex items-baseline justify-between border-b border-neutral-800 pb-3">
+              <h2 className="text-lg font-bold">최근 경쟁 PT</h2>
+              <Link href="/madleague/pt" className="text-sm text-neutral-400 underline">전체 보기</Link>
+            </div>
+            <ul>
+              {recentRounds.map((r) => {
+                const winner = winnerOf.get(r.id);
+                return (
+                  <li key={r.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-neutral-900 py-4 text-sm">
+                    <span className="w-24 shrink-0 text-neutral-500">{r.presentation_date ? r.presentation_date.slice(0, 10).replaceAll('-', '.') : r.year}</span>
+                    <span className="font-bold text-white">{r.client_name ?? r.title}</span>
+                    {r.brief_title && <span className="text-neutral-400">{r.brief_title}</span>}
+                    <span className="text-neutral-500">{ROUND_STATUS[r.status] ?? ''}</span>
+                    {winner && <span className="text-neutral-500">1위 {winner.team_name}{winner.club ? ` · ${winner.club.name}` : ''}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* ─── 동아리 지도 ─────────────────────────── */}
       <section className="bg-neutral-950 border-y border-neutral-900">

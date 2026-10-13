@@ -10,16 +10,6 @@ import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribe
 const RED = "#E53935";
 
 /* ── 파트너 기업 (서비스 오픈 후 실 파트너로 업데이트 예정) ── */
-const partners = [
-  "스타트업",
-  "중소기업",
-  "마케팅 에이전시",
-  "테크 스타트업",
-  "콘텐츠 기업",
-  "이커머스",
-  "SaaS 기업",
-];
-
 /* ── 서비스 3종 ── */
 const services = [
   {
@@ -70,58 +60,17 @@ const previewTypes = [
   { code: "C-ISTP", name: "관찰로 문제를 푸는 엔지니어", alias: "The Analytic Engineer" },
 ];
 
-/* ── 파트너 캐러셀 ── */
-function PartnerCarousel() {
-  const doubled = [...partners, ...partners];
-  return (
-    <div className="overflow-hidden relative mt-12">
-      <div className="flex animate-scroll gap-6">
-        {doubled.map((name, i) => (
-          <span
-            key={`${name}-${i}`}
-            className="flex-shrink-0 px-6 py-2.5 bg-neutral-100 text-neutral-500 text-sm font-normal rounded-none whitespace-nowrap"
-          >
-            {name}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-/* ── 슬로건 — 한국어·영어가 번갈아 바뀐다 (2026-10-13). 움직임 줄이기 설정이면 한국어만 ── */
-const slogans = [
-  { lang: "ko", lines: ["당신의 재능을", "믿습니다"] },
-  { lang: "en", lines: ["We believe in", "your talent."] },
-] as const;
-
+/* ── 슬로건 — 고정 (2026-10-14: 자동 교체 중단, tenone-ui 2.5). 영어는 aria 보조로만 ── */
 function SloganRotator() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = setInterval(() => setIdx((p) => (p + 1) % slogans.length), 4000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <h1
       aria-label="당신의 재능을 믿습니다 — We believe in your talent."
-      className="grid mb-5 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 leading-tight"
+      className="mb-5 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 leading-tight"
     >
-      {slogans.map((s, i) => (
-        <span
-          key={s.lang}
-          lang={s.lang}
-          aria-hidden="true"
-          className={`[grid-area:1/1] transition-all duration-700 ease-out ${
-            i === idx ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
-          }`}
-        >
-          {s.lines[0]}
-          <br />
-          {s.lines[1]}
-        </span>
-      ))}
+      당신의 재능을
+      <br />
+      믿습니다
     </h1>
   );
 }
@@ -139,33 +88,8 @@ export default function HeRoHomePage() {
     setHeroChar(heroChars[Math.floor(Math.random() * heroChars.length)]);
   }, []);
 
-  /* 자동 여정 단계 순환 */
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveJourney((prev) => (prev + 1) % journey.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <div className="bg-white">
-      {/* ── 캐러셀 애니메이션 ── */}
-      <style jsx global>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll 20s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
 
       {/* ━━━ 1. Hero Section ━━━ */}
       <section className="relative min-h-screen overflow-hidden bg-white">
@@ -265,7 +189,7 @@ export default function HeRoHomePage() {
               서비스
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
-              세 가지 핵심 서비스
+              HIT 검사 · 커리어 코칭 · 써치 라이트
             </h2>
           </div>
 
@@ -438,10 +362,10 @@ export default function HeRoHomePage() {
       <section style={{ backgroundColor: RED }}>
         <div className="mx-auto max-w-5xl px-6 py-24 text-center">
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
-            지금 시작해 볼까요?
+            HIT 검사부터 받아 보세요
           </h2>
           <p className="text-white/70 mb-12 max-w-xl mx-auto text-lg leading-relaxed">
-            검사로 나를 알고, 코칭으로 실력을 키우세요.
+            검사 결과가 코칭·탤런트 에이전시·써치 라이트의 출발점이 됩니다.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
@@ -449,7 +373,7 @@ export default function HeRoHomePage() {
               className="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xs hover:bg-neutral-100 transition-colors"
               style={{ color: RED }}
             >
-              HIT 검사 시작 <ArrowRight className="h-4 w-4" />
+              HIT 검사 응시 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/hero/talent-agent/apply"

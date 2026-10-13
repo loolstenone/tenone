@@ -6,39 +6,24 @@
 // - madleap.co.kr 원문: "선배님 저 정말..." 3가지 학생 목소리·"매년 2~3월 2년 활동"·5대 가치 원문 순서
 // - 검증 가능 콘텐츠만: 5대 가치·MAD 의미·활동 4축·Universe 파트너 3·연락처
 
-"use client";
-
 import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
-import {
-    ArrowRight,
-    Expand,
-    Link2,
-    Footprints,
-    BarChart3,
-    Lightbulb,
-    Users,
-    Trophy,
-    Star,
-    Quote,
-    Instagram,
-    Mail,
-    ExternalLink,
-} from "lucide-react";
+import { ArrowRight, Star, Instagram, Mail, ExternalLink } from "lucide-react";
 
 const values = [
-    { icon: Expand, title: "확장하다", desc: "기존 광고 동아리의 '광고·크리에이티브' 틀에서 벗어나 마케팅·커뮤니케이션·데이터로 확장한다." },
-    { icon: Link2, title: "연결하다", desc: "국내 여러 광고 동아리와 지속적으로 관계를 구축하고, 현업 선배와 소통하며 프로젝트를 진행한다." },
-    { icon: Footprints, title: "발로 뛰다", desc: "주어진 과제에 만족하지 않고 직접 발로 뛰며 본질적 문제 해결책을 발굴한다." },
-    { icon: Lightbulb, title: "세상을 기획하는 기획자가 되다", desc: "AE·AP가 아닌, 일이 되게끔 만드는 기획. 생각을 세상에 꺼내 결과를 만든다." },
-    { icon: BarChart3, title: "결과로 말하다", desc: "큰 혁신을 불러올 잠재력을 실전 프로젝트로 증명한다. 과정도 중요하지만 결과로 말한다." },
+    { title: "확장하다", desc: "기존 광고 동아리의 '광고·크리에이티브' 틀에서 벗어나 마케팅·커뮤니케이션·데이터로 확장한다." },
+    { title: "연결하다", desc: "국내 여러 광고 동아리와 지속적으로 관계를 구축하고, 현업 선배와 소통하며 프로젝트를 진행한다." },
+    { title: "발로 뛰다", desc: "주어진 과제에 만족하지 않고 직접 발로 뛰며 본질적 문제 해결책을 발굴한다." },
+    { title: "세상을 기획하는 기획자가 되다", desc: "AE·AP가 아닌, 일이 되게끔 만드는 기획. 생각을 세상에 꺼내 결과를 만든다." },
+    { title: "결과로 말하다", desc: "큰 혁신을 불러올 잠재력을 실전 프로젝트로 증명한다. 과정도 중요하지만 결과로 말한다." },
 ];
 
 const activities = [
-    { icon: BarChart3, title: "스터디", desc: "마케팅·광고·커뮤니케이션·데이터 분야별 스터디 그룹 운영" },
-    { icon: Trophy, title: "프로젝트", desc: "실제 브랜드 RFP 수주·제안·실행 경험" },
-    { icon: Users, title: "네트워킹", desc: "현업 선배 멘토링 + 광고 동아리 연합 교류" },
-    { icon: Star, title: "온보딩 매듭", desc: "신입 기수 온보딩 프로그램 — 실전 기획 첫 경험" },
+    { title: "스터디", desc: "마케팅·광고·커뮤니케이션·데이터 분야별 스터디 그룹 운영" },
+    { title: "프로젝트", desc: "실제 브랜드 RFP 수주·제안·실행 경험" },
+    { title: "네트워킹", desc: "현업 선배 멘토링 + 광고 동아리 연합 교류" },
+    { title: "온보딩 매듭", desc: "신입 기수 온보딩 프로그램 — 실전 기획 첫 경험" },
 ];
 
 const partners = [
@@ -53,27 +38,35 @@ const studentVoices = [
     "선배님, 이론은 이제 지겨워요. 실무가 너무 궁금해요",
 ];
 
-export default function MadLeapHome() {
+type RecentPortfolio = { id: string; title: string; gen: string | null; client: string | null; award: string | null };
+
+async function fetchRecentPortfolios(): Promise<RecentPortfolio[]> {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+        .from("madleap_portfolios")
+        .select("id, title, gen, client, award")
+        .eq("is_published", true)
+        .order("gen_num", { ascending: false })
+        .order("sort_order", { ascending: false })
+        .limit(5);
+    if (error) {
+        console.error("[madleap/home] portfolio fetch failed:", error.message);
+        return [];
+    }
+    return (data ?? []) as RecentPortfolio[];
+}
+
+export const revalidate = 300;
+
+export default async function MadLeapHome() {
+    const portfolios = await fetchRecentPortfolios();
     return (
         <>
             {/* ── Hero ── */}
-            <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-[#1a1a2e]">
+            <section className="relative py-24 md:py-32 flex items-center justify-center overflow-hidden bg-[#1a1a2e]">
                 <div className="absolute inset-0 bg-[#1a1a2e]/60" />
                 <div className="absolute inset-0 opacity-30">
                     <div className="absolute inset-0 bg-[url('/brands/madleap/hero-bg.jpg')] bg-cover bg-center" />
-                </div>
-                <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(6)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute w-1 h-1 bg-[#4361ee]/60 rounded-none animate-pulse"
-                            style={{
-                                top: `${15 + i * 15}%`,
-                                left: `${10 + i * 16}%`,
-                                animationDelay: `${i * 0.4}s`,
-                            }}
-                        />
-                    ))}
                 </div>
 
                 <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
@@ -107,13 +100,29 @@ export default function MadLeapHome() {
                         </Link>
                     </div>
                 </div>
-
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-                    <div className="w-6 h-10 border-2 border-white/30 rounded-none flex items-start justify-center pt-2">
-                        <div className="w-1.5 h-1.5 bg-white/50 rounded-none" />
-                    </div>
-                </div>
             </section>
+
+            {/* ── 최근 포트폴리오 — 첫 화면 바로 아래 실제 데이터 (tenone-ui 4.1) ── */}
+            {portfolios.length > 0 && (
+                <section className="bg-[#1a1a2e] text-white border-t border-white/10">
+                    <div className="mx-auto max-w-5xl px-6 py-16">
+                        <div className="flex items-baseline justify-between border-b border-white/15 pb-3">
+                            <h2 className="text-lg font-bold">최근 포트폴리오</h2>
+                            <Link href="/madleap/portfolio" className="text-sm text-white/60 underline">전체 보기</Link>
+                        </div>
+                        <ul>
+                            {portfolios.map((p) => (
+                                <li key={p.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-white/10 py-4 text-sm">
+                                    <span className="w-16 shrink-0 text-white/50">{p.gen ?? ""}</span>
+                                    <span className="font-bold">{p.title}</span>
+                                    {p.client && <span className="text-white/60">{p.client}</span>}
+                                    {p.award && <span className="text-white/60">{p.award}</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+            )}
 
             {/* ── About Preview (madleap.co.kr 원문 인용) ── */}
             <section className="bg-[#1a1a2e] text-white py-16 md:py-24">
@@ -124,7 +133,6 @@ export default function MadLeapHome() {
                     <div className="space-y-3 mb-10 text-left">
                         {studentVoices.map((v) => (
                             <div key={v} className="rounded-xs bg-white/[0.04] border border-white/10 px-5 py-4">
-                                <Quote className="inline h-4 w-4 text-[#4361ee] mr-2 -mt-0.5" />
                                 <span className="text-white/80 text-[15px]">{v}</span>
                             </div>
                         ))}
@@ -164,9 +172,7 @@ export default function MadLeapHome() {
                             <div
                                 key={act.title}
                                 className="border border-neutral-200 rounded-xs p-6 hover:border-[#4361ee]/30 transition-all group"
-                            >
-                                <act.icon className="h-8 w-8 text-[#4361ee] mb-3 group- transition-transform" />
-                                <h3 className="font-bold text-lg mb-2 text-neutral-900">{act.title}</h3>
+                            > <h3 className="font-bold text-lg mb-2 text-neutral-900">{act.title}</h3>
                                 <p className="text-neutral-500 text-sm leading-relaxed">{act.desc}</p>
                             </div>
                         ))}
@@ -186,9 +192,7 @@ export default function MadLeapHome() {
                         {values.map((v, i) => (
                             <div key={v.title} className="flex gap-4">
                                 <div className="shrink-0">
-                                    <div className="w-10 h-10 rounded-xs bg-[#4361ee]/10 flex items-center justify-center">
-                                        <v.icon className="h-5 w-5 text-[#4361ee]" />
-                                    </div>
+                                    <div className="w-10 h-10 rounded-xs bg-[#4361ee]/10 flex items-center justify-center"> </div>
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-xs text-[#4361ee]/60 font-bold mb-1">0{i + 1}</p>

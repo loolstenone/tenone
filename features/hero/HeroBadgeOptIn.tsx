@@ -113,7 +113,7 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
                 <div className="flex-1">
                     <p className="text-sm font-bold text-neutral-700">유니버스 배지</p>
                     <p className="text-xs text-neutral-500 mt-0.5">
-                        HeRo HIT 검사로 당신의 영웅 유형을 발견하면 배지로 프로필에 표시됩니다
+                        HIT 기본 성향 검사를 마치면 내 유형을 배지로 프로필에 표시할 수 있습니다
                     </p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-neutral-400" />

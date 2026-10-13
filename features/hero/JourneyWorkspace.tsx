@@ -550,7 +550,7 @@ function HeroTypeTab({ status }: { status: JourneyStatus }) {
     <div className="space-y-6">
       <div className="bg-white border border-neutral-200 rounded-xs p-6">
         <h3 className="text-lg font-bold text-neutral-900 mb-1">HIT 검사 관리</h3>
-        <p className="text-sm text-neutral-500 mb-6">검사를 완료할수록 당신의 데이터는 두꺼워지고, 매칭·코칭 정확도가 올라갑니다.</p>
+        <p className="text-sm text-neutral-500 mb-6">마친 검사가 많을수록 코칭과 해설이 내 상황에 더 가까워집니다.</p>
         {failed && <p className="text-xs text-neutral-700 mb-3">결과 목록을 불러오지 못해 일부 검사는 완료 여부가 정확하지 않을 수 있습니다.</p>}
         <div className="grid md:grid-cols-2 gap-3">
           {tests.map((t) => (

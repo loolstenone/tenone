@@ -36,7 +36,7 @@ const ESSENCE_STEPS = [
   { step: '01', title: '본질을 꿰뚫어 본다', desc: '표면 너머의 근본 이유를 탐구한다.' },
   { step: '02', title: '문제를 정의한다',   desc: '핵심을 포착해 진짜 질문을 세운다.' },
   { step: '03', title: '아이디어를 실행한다', desc: '명확한 아이디어로 구체적 방안을 만든다.' },
-  { step: '04', title: '세상을 바꾼다',     desc: '실행이 쌓여 현실을 변화시킨다.' },
+  { step: '04', title: '결과를 확인한다',   desc: '실행한 뒤 무엇이 달라졌는지 확인한다.' },
 ];
 
 export default function IdeaMovementPage() {
@@ -109,7 +109,7 @@ export default function IdeaMovementPage() {
         <div className="mt-16">
           <div className="text-xs font-bold tracking-widest text-neutral-500 mb-3">본질 → 아이디어 → 변화</div>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-8">
-            본질을 이해하면 문제의 핵심이 보이고, 핵심이 보이면 아이디어가 명확해진다. 그리고 명확한 아이디어만이 세상을 바꿀 수 있다.
+            본질을 이해하면 문제의 핵심이 보이고, 핵심이 보이면 아이디어가 명확해진다. 그리고 명확한 아이디어여야 실행할 수 있다.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ESSENCE_STEPS.map((item) => (

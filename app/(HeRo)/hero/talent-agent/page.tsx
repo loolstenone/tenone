@@ -217,7 +217,7 @@ export default function TalentAgentPage() {
           <div className="rounded-xs bg-[#E53935] text-white p-10 md:p-12">
             <Users className="h-8 w-8 mx-auto mb-4 opacity-90" />
             <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
-              당신의 커리어를 함께 키웁니다
+              HeRo 탤런트 에이전시 지원
             </h2>
             <p className="text-white/90 mb-8 leading-relaxed">
               신청하면 HIT 검사부터 차례로 안내해 드립니다. 내 속도에 맞춰 천천히 진행됩니다.
