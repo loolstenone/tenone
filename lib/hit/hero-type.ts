@@ -6,6 +6,7 @@
  */
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { TypeProfile } from '@/types/hit';
+import { firstJobLine } from './hero-type-copy';
 
 interface HeroTypeRow {
   character_name: string | null;
@@ -36,6 +37,6 @@ export async function applyHeroTypeFromDb(profile: TypeProfile): Promise<TypePro
     nickname: row.character_label || profile.nickname,
     // 카드 '특성' = 빛나는 순간, '커리어 방향' = 성장 경로 (핵심 문장은 카드 아래 개요로 따로 나간다)
     traits: overviewLine(row.profile_overview, '빛나는 순간') ?? overviewLine(row.profile_overview, '핵심') ?? profile.traits,
-    careers: row.fit_direction || profile.careers,
+    careers: firstJobLine(row.fit_direction) || profile.careers,
   };
 }

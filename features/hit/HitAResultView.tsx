@@ -17,6 +17,7 @@ import HitModelGuide from "@/features/hit/HitModelGuide";
 import { HIT_STAGES } from "@/lib/hit/stages";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import { CH_COPY, DISC_COPY, HOLLAND_COPY, SPOWER_LABELS, toParagraphs } from "@/lib/hit/report-copy";
+import { firstJobLine } from "@/lib/hit/hero-type-copy";
 import { chModuleId } from "@/lib/hit/report-assembler";
 import {
   ReportShell, ReportHeader, HitChain, SectionNav, Section, KeyFindings, ScoreGuide, ScoreList, ScoreRow,
@@ -130,7 +131,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
       <Section id="summary" title="한눈에" lead="성격·행동·성품·흥미를 겹쳐 본 나의 영웅 유형입니다.">
         {/* 별명·방향은 DB 유형표 우선 — 저장본은 채점 시점 기록 (옛 결과엔 MBTI 공용 문구가 남아 있을 수 있음, 2026-10-13) */}
         <HeroTypeCard typeCode={typeCode} nameKo={typeName} nickname={heroType?.character_label ?? (d.type_nickname as string)} category={d.type_category as string}
-          traits={d.type_traits as string} careers={heroType?.fit_direction ?? (d.type_careers as string)} />
+          traits={d.type_traits as string} careers={firstJobLine(heroType?.fit_direction) ?? (d.type_careers as string)} />
         {overview.length > 0 && <div className="mt-6 space-y-4">{overview.map((p, i) => <p key={i} className="text-[15px] text-neutral-700 leading-[1.9]">{p}</p>)}</div>}
         <div className="mt-8">
           <KeyFindings items={[
