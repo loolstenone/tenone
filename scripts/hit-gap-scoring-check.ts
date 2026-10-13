@@ -12,8 +12,15 @@ const SPEC: [string, string, string, number][] = [
   ['resilience', 'self_narrative', 'f_sn', 10], ['resilience', 'self_esteem', 'f_se', 8], ['resilience', 'retry_willingness', 'f_rw', 10],
   ['direction_bifurcation', 'career_restoration', 'f_cr', 12], ['direction_bifurcation', 'career_pivot', 'f_cp', 10], ['direction_bifurcation', 'fresh_start', 'f_fs', 10],
 ];
+// 2026-10-13 문항 재검토: f_jv11·f_sc08 삭제 · f_jv12 → 경력 복원
+const DROP = new Set(['f_jv11', 'f_sc08']);
+const MOVE: Record<string, [string, string]> = { f_jv12: ['direction_bifurcation', 'career_restoration'] };
 const build = (pick: (sub: string) => number): Row[] => SPEC.flatMap(([module, sub, prefix, n]) =>
-  Array.from({ length: n }, (_, i) => ({ module, question_id: `${prefix}${String(i + 1).padStart(2, '0')}`, option_value: `${sub}:${pick(sub)}` })));
+  Array.from({ length: n }, (_, i) => {
+    const id = `${prefix}${String(i + 1).padStart(2, '0')}`;
+    const [m2, s2] = MOVE[id] ?? [module, sub];
+    return { module: m2, question_id: id, option_value: `${s2}:${pick(s2)}` };
+  }).filter(r => !DROP.has(r.question_id)));
 
 let fails = 0;
 const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? '✅' : '❌'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) fails++; };
@@ -38,6 +45,13 @@ const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? 
 {
   const r = scoreHitGap(build(sub => sub === 'career_restoration' ? 7 : 4));
   check('복원 방향 우세', r.directionTop.code === 'career_restoration', r.directionTop.code);
+}
+
+{
+  // f_jv12('유사 분야에서 일하고 싶다')는 직무 유효성이 아니라 경력 복원 — 희망이 유효성을 올리지 않는다
+  const rows = build(() => 4).map(r => r.question_id === 'f_jv12' ? { ...r, option_value: 'career_restoration:7' } : r);
+  const r = scoreHitGap(rows);
+  check('f_jv12=7 → 직무 유효성 50 유지·복원 상승', r.latentScores.job_viability === 50 && r.directionScores.career_restoration > 50, `${r.latentScores.job_viability} / ${r.directionScores.career_restoration}`);
 }
 
 console.log(fails === 0 ? '\n모두 통과' : `\n실패 ${fails}건`);

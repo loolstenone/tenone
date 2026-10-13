@@ -130,7 +130,8 @@ export interface PushPullSubs {
 }
 export function scorePushPullSubs(responses: ResponseRow[]): PushPullSubs {
   return {
-    pushGrowth: avgFromIds(responses, ['c_pu01', 'c_pu02', 'c_pu09']),
+    // c_de05 '더 배울 것이 없다' — 전문성(역채점)에서 이탈·성장 한계로 이동 (2026-10-13)
+    pushGrowth: avgFromIds(responses, ['c_pu01', 'c_pu02', 'c_pu09', 'c_de05']),
     pushCulture: avgFromIds(responses, ['c_pu04', 'c_pu05', 'c_pu10']),
     pullGrowth: avgFromIds(responses, ['c_pl01', 'c_pl06', 'c_pl08']),
     pullReward: avgFromIds(responses, ['c_pl03']),

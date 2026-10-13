@@ -11,7 +11,7 @@ VALUES
   ('c_de02', 'layer_c', 'C', 1, '내 전문 분야에서 최신 트렌드를 꾸준히 파악하고 있다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["PT:N","UF:intellect"]}'::jsonb),
   ('c_de03', 'layer_c', 'C', 2, '업무에서 남들이 쉽게 따라하기 어려운 나만의 노하우가 있다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["SP:Guard","BT:C"]}'::jsonb),
   ('c_de04', 'layer_c', 'C', 3, '현재 직무에서 3년 전보다 확실히 성장했다고 느낀다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["UF:self","CH:growth"]}'::jsonb),
-  ('c_de05', 'layer_c', 'C', 4, '현재 역할에서 더 배울 것이 없다고 느낄 때가 있다.', 'domain_expertise', 'likert7', true, '{"section":"capital","subscale":"domain_expertise","crossTags":["SP:Breakthrough"]}'::jsonb),
+  ('c_de05', 'layer_c', 'C', 4, '현재 역할에서 더 배울 것이 없다고 느낄 때가 있다.', 'push', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["SP:Breakthrough"]}'::jsonb),
   ('c_de06', 'layer_c', 'C', 5, '내 전문성이 현재 회사 밖에서도 통할 것이라 자신한다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["SP:Strategic","UF:self"]}'::jsonb),
   ('c_de07', 'layer_c', 'C', 6, '업무 관련 자격증, 교육, 인증을 지속적으로 취득하고 있다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["CH:integrity","PT:J"]}'::jsonb),
   ('c_de08', 'layer_c', 'C', 7, '내 업무 경험을 체계적으로 정리할 수 있다.', 'domain_expertise', 'likert7', false, '{"section":"capital","subscale":"domain_expertise","crossTags":["BT:C","PT:J"]}'::jsonb),
@@ -81,7 +81,7 @@ VALUES
   ('c_st08', 'layer_c', 'C', 71, '현재 직무 경험이 목표 직무에서 차별화 요소가 될 수 있다.', 'skill_transfer', 'likert7', false, '{"section":"transferability","subscale":"skill_transfer","crossTags":["SP:Strategic"]}'::jsonb),
   ('c_st09', 'layer_c', 'C', 72, '목표 직무를 수행하는 사람과 대화하거나 정보를 수집한 적이 있다.', 'skill_transfer', 'likert7', false, '{"section":"transferability","subscale":"skill_transfer","crossTags":["BT:I","PT:E"]}'::jsonb),
   ('c_st10', 'layer_c', 'C', 73, '경력 전환에 필요한 자격증이나 교육을 확인해보았다.', 'skill_transfer', 'likert7', false, '{"section":"transferability","subscale":"skill_transfer","crossTags":["PT:J","BT:C"]}'::jsonb),
-  ('c_st11', 'layer_c', 'C', 74, '전혀 다른 분야로의 전환도 고려 중이다.', 'skill_transfer', 'likert7', false, '{"section":"transferability","subscale":"skill_transfer","crossTags":["SP:Breakthrough","CH:adventure"]}'::jsonb),
+  -- (c_st11 삭제 2026-10-13: sql/hit-d-gap-items-review-2026-10.sql)
   ('c_st12', 'layer_c', 'C', 75, '역량 갭을 메우는 데 필요한 시간과 비용을 현실적으로 예측할 수 있다.', 'skill_transfer', 'likert7', false, '{"section":"transferability","subscale":"skill_transfer","crossTags":["PT:S","PT:J","SP:Analytical"]}'::jsonb),
   ('c_mf01', 'layer_c', 'C', 76, '목표 직무의 채용 시장이 활발하다고 판단한다.', 'market_fit', 'likert7', false, '{"section":"transferability","subscale":"market_fit","crossTags":["PT:N"]}'::jsonb),
   ('c_mf02', 'layer_c', 'C', 77, '내 경력 수준에 맞는 포지션이 시장에 존재한다.', 'market_fit', 'likert7', false, '{"section":"transferability","subscale":"market_fit","crossTags":["SP:Strategic"]}'::jsonb),

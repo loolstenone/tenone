@@ -12,12 +12,16 @@ const SUBS: Record<string, [string, string, number][]> = {
   motivation: [['push', 'c_pu', 12], ['pull', 'c_pl', 12]],
   transferability: [['skill_transfer', 'c_st', 12], ['market_fit', 'c_mf', 12], ['adaptation', 'c_ad', 12]],
 };
-const REV = new Set(['c_ac05', 'c_de05', 'c_ad05']);
+const REV = new Set(['c_ac05', 'c_ad05']);
+// 2026-10-13 문항 재검토: c_st11 삭제 · c_de05 → 이탈(push)·정방향
+const DROP = new Set(['c_st11']);
+const MOVE: Record<string, [string, string]> = { c_de05: ['motivation', 'push'] };
 const build = (pick: (sub: string, id: string) => number): Row[] => Object.entries(SUBS).flatMap(([module, list]) =>
   list.flatMap(([sub, prefix, n]) => Array.from({ length: n }, (_, i) => {
     const id = `${prefix}${String(i + 1).padStart(2, '0')}`;
-    return { module, question_id: id, option_value: `${sub}:${pick(sub, id)}${REV.has(id) ? ':r' : ''}` };
-  })));
+    const [m2, s2] = MOVE[id] ?? [module, sub];
+    return { module: m2, question_id: id, option_value: `${s2}:${pick(s2, id)}${REV.has(id) ? ':r' : ''}` };
+  })).filter(r => !DROP.has(r.question_id)));
 
 let fails = 0;
 const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? '✅' : '❌'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) fails++; };
@@ -29,7 +33,7 @@ const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? 
 }
 {
   // 전략형: 전문성 높음 + 성장 한계(c_pu01·02·09) 높음 + 역량 이전 높음
-  const r = scoreHitD(build((sub, id) => sub === 'domain_expertise' || sub === 'skill_transfer' ? 7 : ['c_pu01', 'c_pu02', 'c_pu09'].includes(id) ? 7 : 4));
+  const r = scoreHitD(build((sub, id) => sub === 'domain_expertise' || sub === 'skill_transfer' ? 7 : ['c_pu01', 'c_pu02', 'c_pu09', 'c_de05'].includes(id) ? 7 : 4));
   check('전략형 판정', r.ctype === 'CTYPE-STRATEGIC', r.ctype);
 }
 {
@@ -55,6 +59,12 @@ const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? 
   const none = scoreHitD(build(() => 4), { checklist: { percent: 0, byGroup: {} } });
   const low = scoreHitD(build(() => 4), { checklist: { percent: 20, byGroup: { 서류: 20, 면접: 20, 타이밍: 20, 지지: 20 } } });
   check('체크 전 → 준비 보완 없음 / 체크 후 낮음 → 있음', !none.gapAreas.some(g => g.startsWith('이직 준비')) && low.gapAreas.some(g => g.startsWith('이직 준비')), `${none.gapAreas.length}/${low.gapAreas.length}`);
+}
+
+{
+  // c_de05('더 배울 것이 없다')는 이제 성장 한계(이탈)에 들어가고 전문성을 깎지 않는다
+  const r = scoreHitD(build((sub, id) => id === 'c_de05' ? 7 : 4));
+  check('c_de05=7 → 전문성 50 유지·성장 한계 상승', r.capitalScores.domain_expertise === 50 && r.motivationSubs.pushGrowth > 50, `${r.capitalScores.domain_expertise} / ${r.motivationSubs.pushGrowth}`);
 }
 
 console.log(fails === 0 ? '\n모두 통과' : `\n실패 ${fails}건`);

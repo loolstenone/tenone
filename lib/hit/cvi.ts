@@ -9,7 +9,7 @@ export type CviGrade = 'HIGH' | 'MID' | 'LOW'
 export type FNextRoute = 'B' | 'C' | 'recovery'
 
 export interface CviInput {
-  jobViability:   number  // 직무유효성 0~100 (f_jv01~f_jv12)
+  jobViability:   number  // 직무유효성 0~100 (f_jv01~f_jv10 — f_jv11 삭제·f_jv12 경력 복원으로 이동, 2026-10-13)
   skillCurrency:  number  // 기술유효성 0~100 (f_sc01~f_sc12)
   marketReentry:  number  // 시장재진입 0~100 (f_mr01~f_mr12)
 }

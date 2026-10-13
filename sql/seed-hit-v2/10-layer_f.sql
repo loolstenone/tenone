@@ -48,8 +48,8 @@ VALUES
   ('f_jv08', 'layer_f', 'F', 40, '이전 직무의 핵심 업무 방식이 근본적으로 바뀌었다.', 'job_viability', 'likert7', true, '{"section":"career_viability","subscale":"job_viability","crossTags":["PT:N"]}'::jsonb),
   ('f_jv09', 'layer_f', 'F', 41, '내가 했던 업무를 다시 설명하면 현재 고용주도 이해할 것이다.', 'job_viability', 'likert7', false, '{"section":"career_viability","subscale":"job_viability","crossTags":["BT:I","PT:T"]}'::jsonb),
   ('f_jv10', 'layer_f', 'F', 42, '이전 직무 경험이 "경력"으로 인정받을 수 있다고 확신한다.', 'job_viability', 'likert7', false, '{"section":"career_viability","subscale":"job_viability","crossTags":["UF:self"]}'::jsonb),
-  ('f_jv11', 'layer_f', 'F', 43, '단절 기간이 채용 과정에서 불이익이 될 것이 걱정된다.', 'job_viability', 'likert7', true, '{"section":"career_viability","subscale":"job_viability","crossTags":["CH:emotional"]}'::jsonb),
-  ('f_jv12', 'layer_f', 'F', 44, '이전 직무와 유사한 분야에서 일하고 싶다.', 'job_viability', 'likert7', false, '{"section":"career_viability","subscale":"job_viability","crossTags":["AP:방향유지"]}'::jsonb),
+  -- (f_jv11 삭제 2026-10-13: sql/hit-d-gap-items-review-2026-10.sql)
+  ('f_jv12', 'layer_f', 'F', 44, '이전 직무와 유사한 분야에서 일하고 싶다.', 'career_restoration', 'likert7', false, '{"section":"career_viability","subscale":"job_viability","crossTags":["AP:방향유지"]}'::jsonb),
   ('f_sc01', 'layer_f', 'F', 45, '이전 직무에서 사용하던 도구와 기술을 지금도 다룰 수 있다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["SP:Execution","BT:C"]}'::jsonb),
   ('f_sc02', 'layer_f', 'F', 46, '이전 직무의 새로운 도구·기술·트렌드를 파악하고 있다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["CH:growth","PT:N"]}'::jsonb),
   ('f_sc03', 'layer_f', 'F', 47, '단절 기간 동안 업무 관련 스킬이 눈에 띄게 퇴화했다고 느낀다.', 'skill_currency', 'likert7', true, '{"section":"career_viability","subscale":"skill_currency","crossTags":["UF:self"]}'::jsonb),
@@ -57,7 +57,7 @@ VALUES
   ('f_sc05', 'layer_f', 'F', 49, '이전에 쌓은 전문 지식이 여전히 유효하다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["SP:Guard"]}'::jsonb),
   ('f_sc06', 'layer_f', 'F', 50, '업계의 기술 변화 속도가 나의 공백 기간보다 빠르다.', 'skill_currency', 'likert7', true, '{"section":"career_viability","subscale":"skill_currency","crossTags":["PT:N"]}'::jsonb),
   ('f_sc07', 'layer_f', 'F', 51, '복귀 전 업데이트해야 할 기술 목록을 파악하고 있다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["PT:J","BT:C"]}'::jsonb),
-  ('f_sc08', 'layer_f', 'F', 52, '이전 직무의 "하드 스킬"보다 "소프트 스킬"이 더 유효하다고 본다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["SP:Interpersonal"]}'::jsonb),
+  -- (f_sc08 삭제 2026-10-13: sql/hit-d-gap-items-review-2026-10.sql)
   ('f_sc09', 'layer_f', 'F', 53, '관련 자격증이나 인증이 유효 기간 내에 있다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["BT:C"]}'::jsonb),
   ('f_sc10', 'layer_f', 'F', 54, '단절 기간에 관련 분야 공부를 계속했다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["CH:growth"]}'::jsonb),
   ('f_sc11', 'layer_f', 'F', 55, '기술 격차를 메우는 데 3개월이면 충분하다고 생각한다.', 'skill_currency', 'likert7', false, '{"section":"career_viability","subscale":"skill_currency","crossTags":["UF:self"]}'::jsonb),
