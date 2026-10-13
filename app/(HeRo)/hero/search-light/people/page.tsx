@@ -4,7 +4,7 @@
  * 써치 라이트 — 기업이 좋은 사람을 찾는 화면 (2026-10-13, 옛 /hero/company/[id]/talent)
  * ① 인재상 조건 → 조건에 맞고 '제안 받기'를 켠 인원(익명, 5명 미만은 '5명 미만') + 인재 풀 리포트(자동 묶음 통계)
  * ② 제안 작성 → 요청(운영자 검토·결제 확인 후 발송) ③ 보낸 제안 목록
- * ❌ 개인의 HIT 검사 내용은 기업에 주지 않는다 — 리포트는 비율·평균뿐
+ * ⛔ 개인 HIT 결과는 본인만 (2026-10-13 원칙) — 기업에는 '원하는 성향의 사람이 어느 정도 있나'만 (TraitWishCard)
  * ❌ 가격 문구 · '연결해 드립니다' 표현
  */
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -18,7 +18,8 @@ import {
     OFFER_TYPES, WORK_MODES, labelOf, type OfferCriteria,
 } from "@/lib/hero/offers";
 import { ChipPick, ChipSingle, Field } from "@/features/hero/offers/OfferUI";
-import { TalentPoolReport, type TalentPoolReportData } from "@/features/hero/report/TalentPoolReport";
+import { TalentPoolReport, TraitWishCard, type TalentPoolReportData } from "@/features/hero/report/TalentPoolReport";
+import { EMPTY_TRAIT_WISH, type TraitWish } from "@/lib/hero/group-stats";
 
 const HERO_RED = "#E53935";
 
@@ -39,6 +40,7 @@ export default function SearchLightPeoplePage() {
     const [companies, setCompanies] = useState<{ id: string; name: string }[] | null>(null);
     const [companyId, setCompanyId] = useState("");
     const [report, setReport] = useState<TalentPoolReportData | null>(null);
+    const [traits, setTraits] = useState<TraitWish>(EMPTY_TRAIT_WISH);
     const [criteria, setCriteria] = useState<OfferCriteria>(EMPTY_CRITERIA);
     const [count, setCount] = useState<{ label: string; enough: boolean } | null>(null);
     const [counting, setCounting] = useState(false);
@@ -88,7 +90,7 @@ export default function SearchLightPeoplePage() {
             try {
                 const res = await fetch("/api/hero/talent-pool", {
                     method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ companyId, criteria }),
+                    body: JSON.stringify({ companyId, criteria, traits }),
                 });
                 const d = await res.json();
                 if (res.status === 403) setForbidden(true);
@@ -98,7 +100,7 @@ export default function SearchLightPeoplePage() {
             }
         }, 400);
         return () => { if (timer.current) clearTimeout(timer.current); };
-    }, [criteria, companyId, isAuthenticated]);
+    }, [criteria, traits, companyId, isAuthenticated]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
@@ -142,8 +144,8 @@ export default function SearchLightPeoplePage() {
                     <p className="text-sm font-bold text-[#E53935] mb-2">써치 라이트 · 기업</p>
                     <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">좋은 사람을 찾습니다</h1>
                     <p className="text-sm text-neutral-600 break-keep">
-                        원하는 인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 어떤 성향과 조건을 가진 사람들인지 바로 보여 드립니다.
-                        개인의 검사 내용은 보이지 않으며, 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다.
+                        원하는 인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 원하는 성향의 사람이 어느 정도 있는지 바로 보여 드립니다.
+                        개인의 검사 결과는 본인만 보며, 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다.
                     </p>
                 </div>
 
@@ -192,6 +194,7 @@ export default function SearchLightPeoplePage() {
 
                 {/* 인재 풀 리포트 — 자동 묶음 통계 */}
                 {report && <TalentPoolReport report={report} />}
+                {report && <TraitWishCard value={traits} onChange={setTraits} result={report.traits} />}
 
                 {/* ② 제안 작성 */}
                 <div className={clsx("bg-white border border-neutral-200 rounded-xl p-6 space-y-5", !count?.enough && "opacity-60")}>

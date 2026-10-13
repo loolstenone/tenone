@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import {
     EMPTY_SETTINGS, LOCATIONS, OFFER_CAREER_LEVELS, OFFER_INDUSTRIES, OFFER_JOB_FUNCTIONS,
-    SETTINGS_CONSENT, WORK_MODES, type OfferSettings,
+    SETTINGS_CONSENT, TRAITS_CONSENT, WORK_MODES, type OfferSettings,
 } from "@/lib/hero/offers";
 import { ChipPick, ChipSingle, Field } from "@/features/hero/offers/OfferUI";
 
@@ -25,6 +25,8 @@ export default function OfferSettingsPage() {
     const [hasResume, setHasResume] = useState(true);
     const [hasHitA, setHasHitA] = useState(true);
     const [consent, setConsent] = useState(false);
+    const [traitsConsent, setTraitsConsent] = useState(false);
+    const [traitsSaved, setTraitsSaved] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export default function OfferSettingsPage() {
     useEffect(() => {
         if (!isAuthenticated) return;
         fetch("/api/hero/offers/settings").then(r => r.json()).then(d => {
-            if (d.settings) setS(d.settings);
+            if (d.settings) { setS(d.settings); setTraitsSaved(!!d.settings.share_traits); }
             setHasResume(!!d.hasResume);
             setHasHitA(!!d.hasHitA);
         }).catch(() => undefined).finally(() => setLoading(false));
@@ -51,7 +53,7 @@ export default function OfferSettingsPage() {
             const res = await fetch("/api/hero/offers/settings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...s, is_open: open, consent }),
+                body: JSON.stringify({ ...s, is_open: open, consent, traitsConsent }),
             });
             const d = await res.json();
             if (!res.ok) throw new Error(d.error || "저장하지 못했습니다.");
@@ -97,9 +99,31 @@ export default function OfferSettingsPage() {
                         {(!hasResume || !hasHitA) && (
                             <div className="text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded-lg p-3 space-y-1">
                                 {!hasResume && <p>• 제안에 응하려면 이력서가 있어야 합니다. <Link href="/hero/resume/workspace" className="underline font-semibold">이력서 쓰기</Link></p>}
-                                {!hasHitA && <p>• 기본 성향 검사를 마친 인재만 찾는 기업도 있습니다. <Link href="/hero/hit" className="underline font-semibold">검사 받기</Link></p>}
+                                {!hasHitA && <p>• 기본 성향 검사를 마친 인재만 찾는 기업도 있습니다 (검사 결과는 보이지 않습니다). <Link href="/hero/hit" className="underline font-semibold">검사 받기</Link></p>}
                             </div>
                         )}
+
+                        {/* [선택] 성향 통계 — 개인 HIT 결과는 나만 본다. 기업엔 묶음 통계만, 동의한 경우에만 */}
+                        <div className="border border-neutral-200 rounded-lg p-4 text-xs text-neutral-600 space-y-2">
+                            <label className="flex items-start gap-2 text-sm text-neutral-900 cursor-pointer">
+                                <input type="checkbox" className="mt-0.5" checked={s.share_traits}
+                                    onChange={e => { set("share_traits", e.target.checked); if (!e.target.checked) setTraitsConsent(false); }} />
+                                <span><b>[선택]</b> 내 성향을 익명 통계에 포함하기</span>
+                            </label>
+                            <p>HIT 검사 결과는 나만 봅니다. 켜면 &lsquo;기업이 원하는 성향의 인재가 HeRo에 어느 정도 있는지&rsquo;를 보여 주는 묶음 통계에만 들어갑니다.</p>
+                            {s.share_traits && !traitsSaved && (
+                                <div className="pt-2 space-y-1">
+                                    <p>• 목적: {TRAITS_CONSENT.purpose}</p>
+                                    <p>• 항목: {TRAITS_CONSENT.items}</p>
+                                    <p>• 보유 기간: {TRAITS_CONSENT.retention}</p>
+                                    <p className="text-neutral-500">{TRAITS_CONSENT.note}</p>
+                                    <label className="flex items-center gap-2 pt-1 text-sm text-neutral-900 cursor-pointer">
+                                        <input type="checkbox" checked={traitsConsent} onChange={e => setTraitsConsent(e.target.checked)} />
+                                        위 내용에 동의합니다
+                                    </label>
+                                </div>
+                            )}
+                        </div>
 
                         {needConsent && (
                             <div className="border border-neutral-200 rounded-lg p-4 text-xs text-neutral-600 space-y-2">
@@ -118,7 +142,7 @@ export default function OfferSettingsPage() {
                         {error && <p className="text-sm text-red-600">{error}</p>}
 
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button onClick={() => save(true)} disabled={saving || (needConsent && !consent)}
+                            <button onClick={() => save(true)} disabled={saving || (needConsent && !consent) || (s.share_traits && !traitsSaved && !traitsConsent)}
                                 className="px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                                 {saving ? "저장 중..." : s.is_open ? "저장" : "제안 받기 켜기"}
                             </button>

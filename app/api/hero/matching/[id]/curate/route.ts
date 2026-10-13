@@ -6,6 +6,8 @@
  * - TIH + JD + HIT(A/B) + JH 데이터 수집
  * - Claude API 호출 → for_company / for_talent / signal_notes
  * - hero_matches.ai_match_report 저장 + status='curated' 로 전이 (proposed인 경우)
+ * ⛔ 개인 HIT 결과는 본인만 (2026-10-13 원칙) — HIT가 들어간 서술은 인재 본인용(for_talent)만 저장한다.
+ *    for_company는 버린다 (프롬프트가 만들어도 저장·노출하지 않음)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -93,7 +95,8 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
 
         // 5. 저장 + status 전이 (proposed → curated)
         const newStatus = match.match_status === "proposed" ? "curated" : match.match_status;
-        const reportJson = JSON.stringify(curation);
+        const { for_company: _dropped, ...talentOnly } = curation;
+        const reportJson = JSON.stringify(talentOnly);
 
         const { error: updErr } = await sb
             .from("hero_matches")
@@ -111,7 +114,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
             ok: true,
             matchId,
             status: newStatus,
-            curation,
+            curation: talentOnly,
             tokens_used: response.usage,
         });
     } catch (e: unknown) {

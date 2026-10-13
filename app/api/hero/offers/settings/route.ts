@@ -2,11 +2,12 @@
  * 인재 — 제안 받기 설정
  * GET  /api/hero/offers/settings  → 본인 설정
  * POST /api/hero/offers/settings  → 저장. 켤 때는 consent=true 필수 (개인정보보호법 제15조 — 동의 시각·버전 기록)
+ *   share_traits(선택)를 켤 때는 traitsConsent=true 필수 — 개인 HIT 결과는 본인만, 기업엔 묶음 통계만 (2026-10-13 원칙)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireMember } from "@/lib/api-guard";
-import { normalizeSettings, SETTINGS_CONSENT_VERSION } from "@/lib/hero/offers";
+import { normalizeSettings, SETTINGS_CONSENT_VERSION, TRAITS_CONSENT_VERSION } from "@/lib/hero/offers";
 
 export async function GET(req: NextRequest) {
     const auth = await requireMember(req);
@@ -37,11 +38,16 @@ export async function POST(req: NextRequest) {
     }
 
     const sb = createAdminClient();
-    const { data: prev } = await sb.from("hero_offer_settings").select("consented_at, consent_version")
+    const { data: prev } = await sb.from("hero_offer_settings").select("consented_at, consent_version, traits_consent_version")
         .eq("member_id", auth.memberId).maybeSingle();
     const alreadyConsented = !!prev?.consented_at && prev.consent_version === SETTINGS_CONSENT_VERSION;
     if (s.is_open && !consent && !alreadyConsented) {
         return NextResponse.json({ error: "제안 받기를 켜려면 개인정보 수집·이용에 동의해 주세요." }, { status: 400 });
+    }
+
+    const traitsAlready = prev?.traits_consent_version === TRAITS_CONSENT_VERSION;
+    if (s.share_traits && body?.traitsConsent !== true && !traitsAlready) {
+        return NextResponse.json({ error: "성향 통계에 포함하려면 동의해 주세요." }, { status: 400 });
     }
 
     const now = new Date().toISOString();
@@ -53,6 +59,9 @@ export async function POST(req: NextRequest) {
         career_level: s.career_level || null,
         work_mode: s.work_mode || null,
         locations: s.locations,
+        share_traits: s.share_traits,
+        ...(s.share_traits && !traitsAlready ? { traits_consented_at: now, traits_consent_version: TRAITS_CONSENT_VERSION } : {}),
+        ...(!s.share_traits ? { traits_consented_at: null, traits_consent_version: null } : {}),
         ...(s.is_open && !alreadyConsented ? { consented_at: now, consent_version: SETTINGS_CONSENT_VERSION } : {}),
         updated_at: now,
     }, { onConflict: "member_id" });

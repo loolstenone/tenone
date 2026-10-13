@@ -143,3 +143,11 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION public.hero_offer_candidates(jsonb, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.hero_offer_candidates(jsonb, uuid) TO service_role;
+
+-- ── [선택] 성향 통계 포함 동의 (2026-10-13 적용, MCP apply_migration hero_offer_settings_share_traits)
+-- 원칙: 개인 HIT 결과는 본인만 본다(자기 개발·성장용). 기업에는 '원하는 성향의 인재가 어느 정도인지' 묶음 통계만,
+-- 그것도 본인이 따로 동의한 경우에만 포함 (기본 off)
+ALTER TABLE public.hero_offer_settings
+  ADD COLUMN IF NOT EXISTS share_traits boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS traits_consented_at timestamptz,
+  ADD COLUMN IF NOT EXISTS traits_consent_version text;

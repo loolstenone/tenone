@@ -193,8 +193,8 @@ export default function SearchLightPage() {
                             <p className="text-xs font-bold text-neutral-500 mb-2">기업</p>
                             <h2 className="text-xl font-extrabold mb-2">기업은 좋은 사람을 찾는다</h2>
                             <p className="text-sm text-neutral-600 leading-relaxed break-keep mb-6 flex-1">
-                                인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 어떤 성향과 조건을 가진 사람들인지 인재 풀 리포트로 바로 보이고, 면접·인터뷰를 제안할 수 있습니다.
-                                개인의 검사 내용은 기업에 보이지 않습니다.
+                                인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 원하는 성향의 사람이 어느 정도 있는지 인재 풀 리포트로 바로 보이고, 면접·인터뷰를 제안할 수 있습니다.
+                                개인의 검사 결과는 본인만 봅니다.
                             </p>
                             <div className="flex flex-col gap-2">
                                 <Link href="/hero/search-light/people" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">

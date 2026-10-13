@@ -85,10 +85,12 @@ export interface OfferSettings {
     work_mode: string;
     locations: string[];
     consented_at: string | null;
+    /** [선택] 내 성향을 기업용 익명 묶음 통계에 포함 — 기본 off (TRAITS_CONSENT) */
+    share_traits: boolean;
 }
 
 export const EMPTY_SETTINGS: OfferSettings = {
-    is_open: false, job_functions: [], industries: [], career_level: "", work_mode: "", locations: [], consented_at: null,
+    is_open: false, job_functions: [], industries: [], career_level: "", work_mode: "", locations: [], consented_at: null, share_traits: false,
 };
 
 export function normalizeSettings(raw: unknown): OfferSettings {
@@ -101,18 +103,31 @@ export function normalizeSettings(raw: unknown): OfferSettings {
         work_mode: typeof r.work_mode === "string" && WORK_MODES.some(w => w.v === r.work_mode) ? r.work_mode : "",
         locations: pickList(r.locations, LOCATIONS.map(l => l.v)),
         consented_at: typeof r.consented_at === "string" ? r.consented_at : null,
+        share_traits: r.share_traits === true,
     };
 }
 
 /* ── 동의 문안 (개인정보보호법) — 문안을 바꾸면 버전을 올린다 ── */
 
 /** 제안 받기 — 수집·이용 동의 (제15조) */
-export const SETTINGS_CONSENT_VERSION = "2026-10-13b"; // b: 인재 풀 리포트(익명 통계) 목적 추가
+export const SETTINGS_CONSENT_VERSION = "2026-10-13c"; // c: HIT 결과는 별도 선택 동의로 분리
 export const SETTINGS_CONSENT = {
-    purpose: "기업의 면접·인터뷰 제안 알림, 인재 풀 리포트(직무별 익명 통계) 작성",
+    purpose: "기업의 면접·인터뷰 제안 알림, 인재 풀 리포트(희망 조건의 익명 통계) 작성",
     items: "희망 직무·산업·경력 구간·근무 형태·지역, HIT 기본 성향 검사 완료 여부",
     retention: "제안 받기를 끄거나 탈퇴할 때까지",
-    note: "기업에는 조건에 맞는 인원수와 묶음 통계만 익명으로 보이며, 이름·연락처·이력서는 내가 제안에 응할 때만 그 기업에 제공됩니다. HIT 검사 내용은 어떤 경우에도 기업에 제공하지 않습니다. 동의하지 않으면 제안을 받을 수 없을 뿐 다른 서비스 이용에는 영향이 없습니다.",
+    note: "기업에는 조건에 맞는 인원수와 희망 조건의 묶음 통계만 익명으로 보이며, 이름·연락처·이력서는 내가 제안에 응할 때만 그 기업에 제공됩니다. HIT 검사 결과는 나만 보며 기업에 제공하지 않습니다. 동의하지 않으면 제안을 받을 수 없을 뿐 다른 서비스 이용에는 영향이 없습니다.",
+};
+
+/**
+ * [선택] 성향 통계 포함 — 개인 HIT 결과는 본인만 본다(자기 개발·성장용, 2026-10-13 원칙).
+ * 동의한 경우에만 '기업이 원하는 성향의 인재가 어느 정도인지' 묶음 통계에 들어간다. 기본 off
+ */
+export const TRAITS_CONSENT_VERSION = "2026-10-13";
+export const TRAITS_CONSENT = {
+    purpose: "기업이 원하는 성향의 인재가 HeRo에 어느 정도 있는지 보여 주는 익명 묶음 통계",
+    items: "HIT 기본 성향 검사 결과 중 행동 유형·일하는 방식·흥미 유형",
+    retention: "동의를 끄거나 제안 받기를 끄거나 탈퇴할 때까지",
+    note: "기업에는 대략적인 인원(5명 단위)과 많고 적음만 보이고, 누가 어떤 결과인지는 보이지 않습니다. 성향은 제안 대상을 고르는 데 쓰지 않습니다. 동의하지 않아도 제안 받기와 다른 서비스 이용에 영향이 없습니다.",
 };
 
 /** 제안에 응할 때 — 제3자 제공 동의 (제17조) */
