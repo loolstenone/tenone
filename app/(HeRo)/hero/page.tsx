@@ -77,7 +77,7 @@ const journey = [
 const previewTypes = [
   { code: "D-ENTJ", name: "큰 그림을 짜는 경영 전략가", alias: "The Global Executive" },
   { code: "I-ENFP", name: "마음을 여는 이야기꾼", alias: "The Brand Storyteller" },
-  { code: "S-ISFJ", name: "자리에서 빛을 내는 헌신가", alias: "The Devoted Caregiver" },
+  { code: "S-ISFJ", name: "맡은 일을 끝까지 지키는 헌신가", alias: "The Devoted Caregiver" },
   { code: "C-INTJ", name: "철저히 설계하는 전략가", alias: "The Precision Architect" },
   { code: "D-ENFP", name: "열정으로 새 판을 여는 개척자", alias: "The Founder Evangelist" },
   { code: "I-INFJ", name: "깊은 통찰로 곁을 지키는 상담가", alias: "The Quiet Counselor" },

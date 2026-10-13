@@ -35,8 +35,8 @@ export async function applyHeroTypeFromDb(profile: TypeProfile): Promise<TypePro
     ...profile,
     nameKo: row.character_name || profile.nameKo,
     nickname: row.character_label || profile.nickname,
-    // 카드 '특성' = 빛나는 순간, '커리어 방향' = 성장 경로 (핵심 문장은 카드 아래 개요로 따로 나간다)
-    traits: overviewLine(row.profile_overview, '빛나는 순간') ?? overviewLine(row.profile_overview, '핵심') ?? profile.traits,
+    // 카드 '특성' = 강점이 드러나는 일(옛 표제 '빛나는 순간'), '커리어 방향' = 성장 경로 (핵심 문장은 카드 아래 개요로 따로 나간다)
+    traits: overviewLine(row.profile_overview, '강점이 드러나는 일') ?? overviewLine(row.profile_overview, '빛나는 순간') ?? overviewLine(row.profile_overview, '핵심') ?? profile.traits,
     careers: firstJobLine(row.fit_direction) || profile.careers,
   };
 }
