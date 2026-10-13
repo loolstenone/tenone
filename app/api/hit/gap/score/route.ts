@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
             `경력 공백: ${breakMonths}개월\n` +
             `직군: ${jobCategory}\n` +
             `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
-            `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT - Departure(전환)' : 'HIT - Bounce(기본)'}\n` +
+            `추천 경로: ${scored.nextRoute === 'recovery' ? '기존 경력으로 복귀' : scored.nextRoute === 'C' ? 'HIT - Departure(이직)' : 'HIT - Bounce(역량과 방향) 재점검'}\n` +
             `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
             `방향 점수: 경력복원 ${scored.directionScores.career_restoration} / 경력전환 ${scored.directionScores.career_pivot} / 새출발 ${scored.directionScores.fresh_start}\n` +
             `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +

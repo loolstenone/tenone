@@ -248,28 +248,33 @@ export function buildRoutingRationale(
 ): string {
   const parts: string[] = [];
 
+  // 문장으로 읽히게 (2026-10-13) — 경로 이름은 결과 화면 '추천 복귀 경로'와 같게
   if (cviGrade === 'HIGH') {
-    parts.push('경력 유효성이 높아 빠른 복귀가 가능합니다.');
+    parts.push('경력 유효성이 높아, 원래 하던 일로 비교적 빠르게 돌아갈 수 있습니다.');
   } else if (cviGrade === 'MID') {
-    parts.push('경력 유효성이 보통 수준으로, 전략적 전환이 권장됩니다.');
+    parts.push('경력 유효성이 보통이라, 예전 일을 그대로 잇기보다 경험을 살려 방향을 조정하는 것이 현실적입니다.');
   } else {
-    parts.push('경력 유효성이 낮아 기초 역량 점검이 필요합니다.');
+    parts.push('경력 유효성이 낮은 편이라, 지금의 역량과 방향부터 다시 점검하는 것이 좋습니다.');
   }
 
   // 기준 75/50 — 화면 점수 구간과 같게 (2026-10-13, 기존 70/40). 준비도 0 = 체크 전이라 언급하지 않는다
-  if (latentScore >= 75) parts.push('경력 유효성 진단이 양호합니다.');
-  else if (latentScore < 50) parts.push('직무 유효성 및 스킬 현재성 보강이 필요합니다.');
+  if (latentScore >= 75) parts.push('직무·스킬·시장 조건이 전반적으로 갖춰져 있습니다.');
+  else if (latentScore < 50) parts.push('직무 유효성과 스킬 현재성을 먼저 보강하면 좋습니다.');
 
-  if (resilienceScore >= 75) parts.push('심리적 회복력이 높아 복귀 과정을 잘 견딜 수 있습니다.');
-  else if (resilienceScore < 50) parts.push('자존감 회복과 재도전 의지를 먼저 챙기면 좋습니다.');
+  if (resilienceScore >= 75) parts.push('마음의 회복력도 높아 복귀 과정을 잘 견딜 수 있습니다.');
+  else if (resilienceScore < 50) parts.push('자존감과 재도전 의지를 먼저 챙기면 좋습니다.');
 
-  if (reentryReadiness >= 75) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
-  else if (reentryReadiness > 0 && reentryReadiness < 50) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
+  if (reentryReadiness >= 75) parts.push('실제 복귀 준비도 잘 되어 있습니다.');
+  else if (reentryReadiness > 0 && reentryReadiness < 50) parts.push('구체적인 복귀 준비를 조금 더 해 두면 좋습니다.');
 
-  parts.push(`주도 방향: ${directionTop.label}`);
+  parts.push(`마음이 가장 가는 쪽은 '${directionTop.label}'입니다.`);
 
-  const routeLabel = nextRoute === 'recovery' ? 'Recovery(복귀)' : nextRoute === 'C' ? 'HIT - Departure(전환)' : 'HIT - Bounce(기본)';
-  parts.push(`추천 경로: ${routeLabel}`);
+  const routeLabel = nextRoute === 'recovery'
+    ? '그래서 기존 경력으로 복귀하는 길을 추천합니다.'
+    : nextRoute === 'C'
+      ? '그래서 다음 검사로 HIT - Departure(이직)를 추천합니다.'
+      : '그래서 HIT - Bounce(역량과 방향)부터 다시 점검하기를 추천합니다.';
+  parts.push(routeLabel);
 
   return parts.join(' ');
 }
