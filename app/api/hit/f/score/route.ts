@@ -190,12 +190,14 @@ function determineJourneyStage(
   passion: number,
   directionType: string,
 ): string {
-  const combined = (readiness + passion) / 2;
+  // 준비도 0 = 체크리스트를 아직 안 함 (D·E와 같은 규칙, 2026-10-13) — 평균에서 빼고, '준비 완료·거의 준비됨'은 체크한 사람만
+  const checked = readiness > 0;
+  const combined = checked ? (readiness + passion) / 2 : passion;
 
-  if (combined >= 75 && lifeSatisfaction >= 60) {
+  if (checked && combined >= 75 && lifeSatisfaction >= 60) {
     return 'ready_to_launch';  // 2막 시작 준비 완료
   }
-  if (combined >= 60) {
+  if (checked && combined >= 60) {
     return 'almost_ready';  // 거의 준비됨
   }
   if (combined >= 40 && passion >= 50) {

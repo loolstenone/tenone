@@ -130,13 +130,14 @@ export function scoreLegacy(responses: ResponseRow[]): {
     new_capability * 0.3
   );
 
+  // 화면 구간(75 뚜렷 / 50 미만 보완)과 같은 기준 (2026-10-13, 기존 70/40)
   const legacyAreas: string[] = [];
-  if (transferable_legacy >= 70) legacyAreas.push('이전 가능 역량 우수');
-  if (knowledge_transfer >= 70) legacyAreas.push('지식 전수 역량 우수');
-  if (new_capability >= 70) legacyAreas.push('신규 역량 개발 의지 높음');
-  if (transferable_legacy < 40) legacyAreas.push('이전 가능 역량 개발 필요');
-  if (knowledge_transfer < 40) legacyAreas.push('지식 전수 방법 모색 필요');
-  if (new_capability < 40) legacyAreas.push('새로운 역량 학습 필요');
+  if (transferable_legacy >= 75) legacyAreas.push('이전 가능 역량 우수');
+  if (knowledge_transfer >= 75) legacyAreas.push('지식 전수 역량 우수');
+  if (new_capability >= 75) legacyAreas.push('신규 역량 개발 의지 높음');
+  if (transferable_legacy < 50) legacyAreas.push('이전 가능 역량 개발 필요');
+  if (knowledge_transfer < 50) legacyAreas.push('지식 전수 방법 모색 필요');
+  if (new_capability < 50) legacyAreas.push('새로운 역량 학습 필요');
 
   return { legacySkillScore, legacyAreas, legacyScores: { transferable_legacy, knowledge_transfer, new_capability } };
 }
