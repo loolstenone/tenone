@@ -1,38 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Search, Lightbulb, Shield, Eye, Users } from "lucide-react";
+import { ArrowRight, Shield, Eye, Users } from "lucide-react";
 
 const HERO_RED = "#E53935";
 
-const matchFlow = [
-    {
-        step: "1단계 · 기업",
-        name: "기업 고민 설문",
-        desc: "조직의 상황과 필요한 사람을 22문항으로 정리합니다. 채용 공고가 '무슨 일을 하는가'라면, 이 설문은 '왜 사람이 필요한가'를 담습니다.",
-        icon: Lightbulb,
-        color: "from-amber-500 to-orange-500",
-    },
-    {
-        step: "2단계 · 기업",
-        name: "채용 공고",
-        desc: "자격 요건 목록이 아니라, 이 일이 왜 필요한지, 어떤 문제를 푸는지, 어떤 사람이 맞는지를 적습니다.",
-        icon: Search,
-        color: "from-sky-500 to-blue-600",
-    },
-    {
-        step: "3단계 · HeRo",
-        name: "함께 살펴보기",
-        desc: "기업 고민 설문·채용 공고와 인재의 HIT 결과·희망 직무를 AI와 전문가가 함께 살펴보고 분석해 드립니다.",
-        icon: Eye,
-        color: "from-violet-500 to-purple-600",
-    },
+// 기업이 쓰는 두 가지 + 인재가 쓰는 두 가지를 HeRo가 함께 본다 (구 '4방향 매칭', 2026-10-14 표현 정리)
+const matchInputs = [
+    { side: "기업", label: "기업이 쓰는 것", items: [
+        { name: "기업 고민 설문", desc: "왜 사람이 필요한지 — 조직의 상황과 찾는 사람의 결" },
+        { name: "채용 공고", desc: "무슨 일을 맡기는지 — 이 일이 푸는 문제와 맞는 사람" },
+    ] },
+    { side: "인재", label: "인재가 쓰는 것", items: [
+        { name: "HIT 검사 결과", desc: "어떤 사람인지 — 성향·역량·지금의 준비 상태" },
+        { name: "희망 직무 설문", desc: "무엇을 하고 싶은지 — 원하는 일과 조건" },
+    ] },
 ];
 
 const principles = [
-    { icon: Shield, title: "개인 검사는 기업에 가지 않습니다", desc: "기업은 조건에 맞는 인재 전체의 비율만 봅니다. 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다." },
-    { icon: Users, title: "필요한 사람을 세 가지로", desc: "지키는 사람·새로 여는 사람·잇는 사람이 각각 얼마나 필요한지 나눠 적어, 원하는 사람을 분명히 합니다." },
-    { icon: Eye, title: "조직 상태도 함께", desc: "설문 답에서 조직이 지금 어떤 상태인지도 함께 보입니다. 좋은 조직이 좋은 사람을 만납니다." },
+    { icon: Shield, title: "개인 검사 결과는 기업에 보내지 않습니다", desc: "기업은 조건에 맞는 인재가 몇 명인지, 원하는 성향이 어느 정도인지만 봅니다. 이름과 연락처는 인재가 제안을 받아들일 때 이력서와 함께 전달됩니다." },
+    { icon: Users, title: "찾는 사람의 결을 비율로 적습니다", desc: "기준을 지키는 수호자, 새 길을 여는 개척자, 사람을 잇는 결속자가 각각 얼마나 필요한지 나눠 적어 찾는 사람을 분명히 합니다." },
+    { icon: Eye, title: "자리도 함께 봅니다", desc: "설문 답으로 조직이 지금 어떤 시기인지, 팀이 어떻게 일하는지도 정리합니다. 사람과 자리가 함께 맞아야 오래 갑니다." },
 ];
 
 export default function SearchLightPage() {
@@ -211,27 +199,28 @@ export default function SearchLightPage() {
                 </div>
             </section>
 
-            {/* ── 매칭 구조 ── */}
+            {/* ── 함께 보는 네 가지 정보 ── */}
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-14">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-3">4방향 매칭</h2>
-                        <p className="text-neutral-500">기업 쪽 두 가지, 인재 쪽 두 가지 정보를 함께 봅니다</p>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-3">네 가지를 함께 봅니다</h2>
+                        <p className="text-neutral-500">기업이 쓴 두 가지와 인재가 쓴 두 가지를 HeRo가 함께 보고 분석해 드립니다</p>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                        {matchFlow.map((item) => (
-                            <div key={item.step} className="bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-md transition-shadow">
-                                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center mb-4`}>
-                                    <item.icon className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="text-xs font-bold tracking-wider text-neutral-400 uppercase mb-1">{item.step}</div>
-                                <h3 className="font-bold text-base mb-2">{item.name}</h3>
-                                <p className="text-sm text-neutral-600">{item.desc}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {matchInputs.map((g) => (
+                            <div key={g.side} className="bg-white rounded-xl border border-neutral-200 p-6">
+                                <p className="text-xs font-bold text-neutral-500 mb-4">{g.label}</p>
+                                <ul className="space-y-4">
+                                    {g.items.map((it) => (
+                                        <li key={it.name}>
+                                            <h3 className="font-bold text-base">{it.name}</h3>
+                                            <p className="text-sm text-neutral-600 mt-1">{it.desc}</p>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         ))}
                     </div>
-
                 </div>
             </section>
 
@@ -239,8 +228,7 @@ export default function SearchLightPage() {
             <section className="py-20">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-14">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-3">써치 라이트 원칙</h2>
-                        <p className="text-neutral-500">솔직하게 적을수록 잘 맞는 만남이 됩니다</p>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-3">써치 라이트가 지키는 것</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {principles.map((p) => (
@@ -260,24 +248,24 @@ export default function SearchLightPage() {
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-4xl px-6">
                     <div className="text-center mb-10">
-                        <h2 className="text-2xl font-bold mb-3">기업 고민 설문이란?</h2>
+                        <h2 className="text-2xl font-bold mb-3">기업 고민 설문</h2>
                         <p className="text-neutral-500 text-sm max-w-xl mx-auto">
-                            기업의 고민을 22문항으로 정리합니다. 7~8분 걸립니다.
+                            일곱 묶음, 필수 22문항과 선택 1문항입니다. 7~8분 걸립니다.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                         {[
-                            { section: "0", label: "어떤 직무인가", q: "3문항", time: "30초" },
-                            { section: "1", label: "지금의 고민", q: "4문항", time: "1분 30초" },
-                            { section: "2", label: "필요한 사람 비중", q: "1문항", time: "1분" },
-                            { section: "3", label: "맡을 일", q: "6문항", time: "2분" },
-                            { section: "4", label: "일하는 방식", q: "6문항", time: "2분" },
-                            { section: "5", label: "피하고 싶은 유형", q: "1문항", time: "20초" },
-                            { section: "6", label: "한 줄로 설명", q: "선택", time: "1분" },
-                            { section: "합계", label: "필수 22 + 선택 1", q: "", time: "7~8분" },
+                            // 이름은 설문 화면 제목 그대로 (search-light/tih)
+                            { section: "1", label: "어떤 사람을 찾나요", q: "3문항", time: "30초" },
+                            { section: "2", label: "지금 조직의 상황", q: "4문항", time: "1분 30초" },
+                            { section: "3", label: "어떤 결의 사람인가", q: "1문항", time: "1분" },
+                            { section: "4", label: "필요한 사람의 모습", q: "6문항", time: "2분" },
+                            { section: "5", label: "팀의 일하는 방식", q: "6문항", time: "2분" },
+                            { section: "6", label: "피하고 싶은 유형", q: "1문항", time: "20초" },
+                            { section: "7", label: "한 줄로 (선택)", q: "1문항", time: "1분" },
                         ].map((item, i) => (
-                            <div key={i} className={`bg-white rounded-lg border p-3 ${i === 7 ? "border-red-300 bg-red-50" : "border-neutral-200"}`}>
+                            <div key={i} className="bg-white rounded-lg border border-neutral-200 p-3">
                                 <p className="text-[10px] text-neutral-400 font-mono mb-1">{item.section}</p>
                                 <p className="text-xs font-bold text-neutral-800">{item.label}</p>
                                 {item.q && <p className="text-xs text-neutral-500 mt-0.5">{item.q}</p>}
@@ -288,17 +276,17 @@ export default function SearchLightPage() {
 
                     <div className="flex flex-wrap items-center justify-center gap-3">
                         <Link
+                            href="/hero/jh/write"
+                            className="inline-flex items-center gap-2 px-7 py-3 border border-neutral-300 text-neutral-800 font-bold rounded-lg hover:bg-neutral-50 transition-colors"
+                        >
+                            희망 직무 설문 작성 · 개인 <ArrowRight className="h-4 w-4" />
+                        </Link>
+                        <Link
                             href="/hero/search-light/tih"
                             className="inline-flex items-center gap-2 px-7 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
                             기업 고민 설문 작성 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link
-                            href="/hero/jh/write"
-                            className="inline-flex items-center gap-2 px-7 py-3 border border-neutral-300 text-neutral-800 font-bold rounded-lg hover:bg-neutral-50 transition-colors"
-                        >
-                            희망 직무 설문 작성 · 개인 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
