@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, MessageSquare } from 'lucide-react';
+import { ArrowRight, MessageSquare, type LucideIcon } from 'lucide-react';
 import { SectionPager } from '@/features/madleague/SectionPager';
 import { CrossSiteLink } from '@/components/CrossSiteLink';
 import { ServiceLinkConsent } from '@/components/ServiceLinkConsent';
@@ -19,9 +19,8 @@ import { ProgramCTA } from '@/features/madleague/ProgramCTA';
  *
  * 내용(steps·gets·자유 섹션)은 각 page.tsx가 넘기고, 구조·순서·CTA는 여기서만 정한다.
  */
-// 장식 아이콘 없음 (tenone-ui — 단계는 번호, 얻는 것은 제목·설명만, 2026-10-14)
-export type ProgramStep = { title: string; desc: string };
-export type ProgramGet = { title: string; desc: string };
+export type ProgramStep = { title: string; desc: string; icon?: LucideIcon };
+export type ProgramGet = { title: string; desc: string; icon?: LucideIcon };
 
 export function ProgramDetailPage({
   programKey,
@@ -56,7 +55,7 @@ export function ProgramDetailPage({
       <section className="border-b border-neutral-900 bg-neutral-950">
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest mb-4" style={{ color: accent }}>AT A GLANCE</div>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-10">한눈에 보기</h2>
+          <h2 className="text-3xl sm:text-4xl font-black mb-10">한눈에 보기</h2>
           <dl className="grid grid-cols-1 md:grid-cols-5 gap-px bg-neutral-900 border border-neutral-900">
             {[
               ['누가', glance.who],
@@ -77,12 +76,15 @@ export function ProgramDetailPage({
       {/* ③ 진행 과정 */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-neutral-500 mb-4">HOW IT WORKS</div>
-        <h2 className="text-3xl sm:text-4xl font-bold mb-14">{stepsTitle ?? '이렇게 진행된다'}</h2>
+        <h2 className="text-3xl sm:text-4xl font-black mb-14">{stepsTitle ?? '이렇게 진행된다'}</h2>
         <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {steps.map((s, i) => (
             <li key={s.title} className="bg-neutral-950 border border-neutral-900 p-10">
-              <div className="mb-6 h-10 w-10 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: accent, color: accent === MAD_ACCENT ? "#fff" : "#000" }}>{String(i + 1).padStart(2, "0")}</div>
-              <div className="text-xl font-bold">{s.title}</div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-10 w-10 flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: accent, color: accent === MAD_ACCENT ? "#fff" : "#000" }}>{i + 1}</div>
+                {s.icon && <s.icon className="h-6 w-6 text-neutral-500" />}
+              </div>
+              <div className="text-xl font-black">{s.title}</div>
               <p className="mt-3 text-base text-neutral-500 leading-relaxed">{s.desc}</p>
             </li>
           ))}
@@ -93,11 +95,12 @@ export function ProgramDetailPage({
       <section className="border-t border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-neutral-500 mb-4">WHAT YOU GET</div>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-14">{getsTitle ?? '끝나면 남는 것'}</h2>
+          <h2 className="text-3xl sm:text-4xl font-black mb-14">{getsTitle ?? '끝나면 남는 것'}</h2>
           <div className={`grid grid-cols-1 gap-8 ${gets.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             {gets.map((g) => (
               <div key={g.title} className="bg-neutral-950 border border-neutral-900 p-12">
-                <div className="text-2xl sm:text-3xl font-bold">{g.title}</div>
+                {g.icon && <g.icon className="h-10 w-10" style={{ color: accent }} />}
+                <div className={`${g.icon ? 'mt-8' : ''} text-2xl sm:text-3xl font-black`}>{g.title}</div>
                 <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{g.desc}</p>
               </div>
             ))}
@@ -125,13 +128,14 @@ function ProgramHero({ p }: { p: MadProgram }) {
     ? [['MADLeague', '맛보기'], ['정식', p.partner.brand], ['계정', 'Ten:One ID 하나'], ['기록', '동의 시 연계']] : [];
   return (
     <section className="relative overflow-hidden border-b border-neutral-900">
+      <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 50%, ${accent}2e, transparent 60%)` }} aria-hidden />
       <div className="relative mx-auto max-w-5xl px-6 py-28 sm:py-36">
         <div className="flex items-center gap-3 text-xs font-bold tracking-widest">
           <span style={{ color: accent }}>{p.eyebrow}</span>
           <span className="text-neutral-700">/</span>
           <span className="text-neutral-500">{group.label} 프로그램</span>
         </div>
-        <h1 className="mt-4 text-5xl sm:text-7xl font-bold tracking-tight leading-tight">{p.title}</h1>
+        <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">{p.title}</h1>
         <p className="mt-8 max-w-2xl text-xl sm:text-2xl text-neutral-300 leading-relaxed">{p.desc}</p>
         <p className="mt-6 text-lg sm:text-xl font-bold" style={{ color: accent }}>{p.tagline}</p>
         {chips.length > 0 && <dl className="mt-10 flex flex-wrap gap-2">
@@ -170,7 +174,7 @@ export function PartnerProgramPage({ programKey, children }: { programKey: strin
       {/* ② 맛보기 → 정식 → 연계 */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-neutral-500 mb-4">TASTE · FULL · LINK</div>
-        <h2 className="text-3xl sm:text-4xl font-bold mb-6">MADLeague에서 맛보고, {partner.brand}에서 제대로</h2>
+        <h2 className="text-3xl sm:text-4xl font-black mb-6">MADLeague에서 맛보고, {partner.brand}에서 제대로</h2>
         <p className="max-w-3xl text-lg text-neutral-400 leading-relaxed mb-14">
           매드리그 안에서는 가볍게 경험해 본다. 정식으로는 같은 Ten:One ID로 {partner.brand}를 쓴다 — 새로 가입할 필요 없다. 동의하면 두 서비스의 경험과 기록이 이어진다.
         </p>
@@ -182,8 +186,8 @@ export function PartnerProgramPage({ programKey, children }: { programKey: strin
           ].map((col) => (
             <li key={col.label} className="bg-neutral-950 border border-neutral-900 p-10" style={col.n === 2 ? { borderColor: accent } : undefined}>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: accent, color: onLight ? '#000' : '#fff' }}>{col.n}</div>
-                <div className="text-lg font-bold">{col.label}</div>
+                <div className="h-10 w-10 flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: accent, color: onLight ? '#000' : '#fff' }}>{col.n}</div>
+                <div className="text-lg font-black">{col.label}</div>
               </div>
               <ul className="mt-6 space-y-3 text-neutral-300 leading-relaxed">
                 {col.items.map((t) => <li key={t}>— {t}</li>)}
@@ -210,7 +214,7 @@ export function PartnerProgramPage({ programKey, children }: { programKey: strin
       <section id="join" style={{ backgroundColor: accent }}>
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className={`text-sm font-bold tracking-widest mb-3 ${onLight ? 'text-black/60' : 'text-white/70'}`}>NEXT STEP</div>
-          <h2 className={`text-3xl sm:text-4xl font-bold ${onLight ? 'text-black' : 'text-white'}`}>정식으로는 {partner.brand}에서</h2>
+          <h2 className={`text-3xl sm:text-4xl font-black ${onLight ? 'text-black' : 'text-white'}`}>정식으로는 {partner.brand}에서</h2>
           <div className="mt-8 flex flex-wrap gap-3">
             {partner.href ? (
               <CrossSiteLink href={partner.href} className="inline-flex items-center gap-3 bg-black hover:bg-neutral-900 text-white font-bold px-8 py-4 text-lg transition">
@@ -253,7 +257,7 @@ export function ProgramSection({ id, eyebrow, title, intro, tone = 'black', chil
     <section id={id} className={`border-t border-neutral-900 ${tone === 'dark' ? 'bg-neutral-950' : ''}`}>
       <div className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">{eyebrow}</div>
-        <h2 className="text-3xl sm:text-4xl font-bold leading-tight">{title}</h2>
+        <h2 className="text-3xl sm:text-4xl font-black leading-tight">{title}</h2>
         {intro && <div className="mt-6 max-w-3xl text-lg text-neutral-400 leading-relaxed">{intro}</div>}
         {children && <div className="mt-12">{children}</div>}
       </div>

@@ -157,9 +157,9 @@ function ApplyPageInner() {
     return (
       <div className="min-h-screen bg-[#1a1a2e] pt-14">
         <div className="mx-auto flex max-w-md flex-col items-center px-4 py-20 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-none"
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full"
             style={{ background: 'rgba(74,222,128,0.1)' }}>
-            <Check className="h-8 w-8 text-neutral-400" />
+            <Check className="h-8 w-8 text-green-400" />
           </div>
           <h1 className="mb-2 text-xl font-bold text-white">신청이 접수되었습니다</h1>
           <p className="mb-2 text-sm text-white/50">
@@ -169,7 +169,7 @@ function ApplyPageInner() {
             보통 3~5일 영업일 이내에 결과를 안내해 드립니다.
           </p>
           <Link href="/badak"
-            className="rounded-xs px-6 py-3 text-sm font-bold"
+            className="rounded-xl px-6 py-3 text-sm font-bold"
             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
             바닥으로 돌아가기
           </Link>
@@ -183,19 +183,19 @@ function ApplyPageInner() {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(15,15,35,0.75)', backdropFilter: 'blur(4px)' }} />
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 pointer-events-none">
-        <div className="flex flex-col items-center rounded-xs border border-white/10 px-10 py-10 pointer-events-auto"
+        <div className="flex flex-col items-center rounded-2xl border border-white/10 px-10 py-10 pointer-events-auto"
           style={{ background: 'rgba(26,26,46,0.95)' }}>
-          <Crown className="mb-4 h-10 w-10 text-neutral-400/60" />
+          <Crown className="mb-4 h-10 w-10 text-amber-400/60" />
           <p className="mb-1 text-base font-bold text-white">로그인이 필요합니다</p>
           <p className="mb-6 text-sm text-white/40 text-center">바닥장 신청은 회원 로그인 후 이용할 수 있습니다</p>
           <div className="flex gap-3">
             <button onClick={() => setShowLogin(true)}
-              className="rounded-xs border-none px-6 py-2.5 text-sm font-bold"
+              className="rounded-xl border-none px-6 py-2.5 text-sm font-semibold"
               style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
               로그인
             </button>
             <Link href="/badak/onboard"
-              className="rounded-xs border border-white/15 px-6 py-2.5 text-sm font-bold text-white/70 hover:bg-white/5">
+              className="rounded-xl border border-white/15 px-6 py-2.5 text-sm font-semibold text-white/70 hover:bg-white/5">
               회원가입
             </Link>
           </div>
@@ -216,7 +216,7 @@ function ApplyPageInner() {
             <ArrowLeft className="h-3.5 w-3.5" /> 바닥 홈
           </Link>
           <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-neutral-400" />
+            <Crown className="h-5 w-5 text-amber-400" />
             <h1 className="text-xl font-bold text-white">바닥장 신청</h1>
           </div>
           <p className="mt-1 text-xs text-white/40">
@@ -226,11 +226,11 @@ function ApplyPageInner() {
 
         {/* 연결된 니즈 컨텍스트 */}
         {needId && (
-          <div className="mb-4 rounded-xs border border-neutral-400/20 p-4 flex items-start gap-3"
+          <div className="mb-4 rounded-xl border border-amber-400/20 p-4 flex items-start gap-3"
             style={{ background: 'rgba(255,217,61,0.06)' }}>
-            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400/60" />
+            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/60" />
             <div>
-              <p className="text-xs font-bold text-neutral-300/80">니즈 기반 바닥장 신청</p>
+              <p className="text-xs font-semibold text-amber-300/80">니즈 기반 바닥장 신청</p>
               <p className="mt-0.5 text-xs text-white/40">
                 특정 니즈와 연결된 바닥장 신청입니다. 승인 시 해당 니즈의 공식 바닥장이 됩니다.
               </p>
@@ -239,7 +239,7 @@ function ApplyPageInner() {
         )}
 
         {/* 바닥장이란 */}
-        <div className="mb-6 rounded-xs border border-white/8 p-5" style={{ background: 'rgba(255,255,255,0.02)' }}>
+        <div className="mb-6 rounded-2xl border border-white/8 p-5" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <h2 className="mb-1 text-sm font-bold text-white/70">바닥장이란?</h2>
           <p className="text-xs leading-relaxed text-white/35">
             바닥장은 특정 니즈를 가진 사람들의 모임을 만들고 이끄는 리더입니다.
@@ -251,9 +251,9 @@ function ApplyPageInner() {
         {/* 바닥장 혜택 */}
         <div className="mb-8 grid grid-cols-2 gap-2">
           {BENEFITS.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xs border border-white/6 p-3.5"
+            <div key={title} className="rounded-xl border border-white/6 p-3.5"
               style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <Icon className="mb-2 h-4 w-4 text-neutral-400/50" />
+              <Icon className="mb-2 h-4 w-4 text-amber-400/50" />
               <h3 className="mb-0.5 text-xs font-bold text-white/60">{title}</h3>
               <p className="text-[10px] text-white/25">{desc}</p>
             </div>
@@ -266,27 +266,27 @@ function ApplyPageInner() {
 
           {/* 이름/닉네임 */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal text-white/40">이름 또는 닉네임 *</label>
+            <label className="mb-1.5 block text-xs font-medium text-white/40">이름 또는 닉네임 *</label>
             <input value={name} onChange={(e) => setName(e.target.value)}
               placeholder="바닥에서 불릴 이름"
-              className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+              className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
           </div>
 
           {/* 이메일 + 연락처 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-normal text-white/40">이메일</label>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">이메일</label>
               <input value={email} readOnly
-                className="w-full rounded-xs border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/40 outline-none cursor-default" />
+                className="w-full rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/40 outline-none cursor-default" />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-normal text-white/40">연락처 *</label>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">연락처 *</label>
               <input
                 value={contact}
                 onChange={(e) => setContact(formatPhone(e.target.value))}
                 placeholder="010-0000-0000"
                 inputMode="tel"
-                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
               />
             </div>
           </div>
@@ -294,29 +294,29 @@ function ApplyPageInner() {
           {/* 산업군/경력 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-normal text-white/40">산업군 *</label>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">산업군 *</label>
               <input value={industry} onChange={(e) => setIndustry(e.target.value)}
                 placeholder="예: IT, 광고, 제조"
-                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-normal text-white/40">경력 *</label>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">경력 *</label>
               <input value={experience} onChange={(e) => setExperience(e.target.value)}
                 placeholder="예: 마케팅 5년차"
-                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
           </div>
 
           {/* 이끌고 싶은 분야 */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal text-white/40">
+            <label className="mb-1.5 block text-xs font-medium text-white/40">
               이끌고 싶은 분야 * <span className="text-white/20">(최대 5개, 직접 입력 가능)</span>
             </label>
 
             {interests.length > 0 && (
               <div className="mb-2 flex flex-wrap gap-1.5">
                 {interests.map((item) => (
-                  <span key={item} className="flex items-center gap-1 rounded-none px-3 py-1 text-xs font-normal"
+                  <span key={item} className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
                     style={{
                       background: isCustom(item) ? 'rgba(116,185,255,0.12)' : 'rgba(255,217,61,0.12)',
                       color: isCustom(item) ? '#74b9ff' : '#ffd93d',
@@ -335,7 +335,7 @@ function ApplyPageInner() {
               {SUGGEST_INTERESTS.filter((item) => !interests.includes(item)).map((item) => (
                 <button key={item} onClick={() => toggleInterest(item)}
                   disabled={interests.length >= 5}
-                  className="rounded-none px-3 py-1.5 text-[11px] font-normal transition-all"
+                  className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-all"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     color: interests.length >= 5 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.4)',
@@ -363,21 +363,21 @@ function ApplyPageInner() {
                   }
                 }}
                 placeholder="없는 분야는 직접 입력 (Enter 또는 ,)"
-                className="w-full rounded-xs border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#74b9ff]/40" />
+                className="w-full rounded-xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#74b9ff]/40" />
             )}
             {interests.length === 5 && (
-              <p className="mt-1.5 text-[10px] font-bold" style={{ color: '#ffd93d' }}>
+              <p className="mt-1.5 text-[10px] font-semibold" style={{ color: '#ffd93d' }}>
                 ✓ 5개 선택 완료 — 원하면 태그를 눌러 교체할 수 있어요
               </p>
             )}
             {interests.some(isCustom) && interests.length < 5 && (
-              <p className="mt-1.5 text-[10px] text-neutral-400/50">
+              <p className="mt-1.5 text-[10px] text-blue-400/50">
                 <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
                 직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
               </p>
             )}
             {interests.some(isCustom) && interests.length === 5 && (
-              <p className="mt-0.5 text-[10px] text-neutral-400/50">
+              <p className="mt-0.5 text-[10px] text-blue-400/50">
                 <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
                 직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
               </p>
@@ -386,19 +386,19 @@ function ApplyPageInner() {
 
           {/* 바닥장 지원 동기 */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal text-white/40">
+            <label className="mb-1.5 block text-xs font-medium text-white/40">
               바닥장 지원 동기 * <span className="text-white/20">(20자 이상)</span>
             </label>
             <textarea value={reason} onChange={(e) => setReason(e.target.value)}
               rows={4}
               placeholder="왜 바닥장을 하고 싶은지, 어떤 모임을 만들고 싶은지 자유롭게 적어주세요"
-              className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+              className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             <p className="mt-1 text-right text-[10px] text-white/20">{reason.length}자</p>
           </div>
 
           {/* 운영 계획 (선택) */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal text-white/40">
+            <label className="mb-1.5 block text-xs font-medium text-white/40">
               운영 계획 <span className="text-white/20">(선택)</span>
             </label>
             {/* 작성 가이드 힌트 */}
@@ -408,7 +408,7 @@ function ApplyPageInner() {
                   key={label}
                   type="button"
                   onClick={() => appendPlanHint(label)}
-                  className="rounded-none border border-white/10 px-3 py-1.5 text-[11px] text-white/45 hover:border-white/20 hover:text-white/65 transition-colors"
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/45 hover:border-white/20 hover:text-white/65 transition-colors"
                   style={{ background: 'rgba(255,255,255,0.03)' }}>
                   + {label}
                 </button>
@@ -417,11 +417,11 @@ function ApplyPageInner() {
             <textarea value={plan} onChange={(e) => setPlan(e.target.value)}
               rows={4}
               placeholder="모임 주기, 형태, 대상 등 구체적인 계획이 있다면 적어주세요"
-              className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+              className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
           </div>
 
           {/* 안내 */}
-          <div className="rounded-xs border border-white/6 p-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <div className="rounded-xl border border-white/6 p-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
             <p className="text-[11px] leading-relaxed text-white/30">
               신청서는 바닥 운영팀이 검토합니다. 승인 시 바닥장 권한이 부여되며,
               모임 개설 및 운영에 필요한 가이드를 안내받으실 수 있습니다.
@@ -431,7 +431,7 @@ function ApplyPageInner() {
 
           {/* 에러 */}
           {error && (
-            <div className="rounded-xs border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
               {error}
             </div>
           )}
@@ -439,9 +439,9 @@ function ApplyPageInner() {
           {/* 제출 버튼 */}
           <button onClick={handleSubmit}
             disabled={!canSubmit || submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold transition-all"
+            className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all"
             style={{
-              background: canSubmit && !submitting ? '#ffd93d' : 'rgba(255,255,255,0.06)',
+              background: canSubmit && !submitting ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)',
               color: canSubmit && !submitting ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
               cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed',
             }}>

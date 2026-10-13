@@ -33,7 +33,7 @@ export default async function WritePage() {
 
       <section className="mx-auto max-w-4xl px-6 py-12">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">NEW ARTICLE</div>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">아티클 투고</h1>
+        <h1 className="text-4xl sm:text-5xl font-black tracking-tight">아티클 투고</h1>
         <p className="mt-4 text-sm text-neutral-400 leading-relaxed">
           작성한 글은 <strong className="text-white">초안으로 저장</strong>하거나 <strong className="text-white">제출</strong>할 수 있습니다.
           제출된 글은 운영진 검토 후 MADzine에 발행됩니다.
@@ -53,7 +53,7 @@ export default async function WritePage() {
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 ${
                       item.status === 'draft' ? 'bg-neutral-800 text-neutral-400' :
-                      item.status === 'pending_review' ? 'bg-neutral-900 text-neutral-300' :
+                      item.status === 'pending_review' ? 'bg-amber-900 text-amber-300' :
                       'bg-red-900 text-red-300'
                     }`}>
                       {item.status === 'draft' ? '초안' : item.status === 'pending_review' ? '검토중' : '반려'}

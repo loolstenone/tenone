@@ -24,8 +24,8 @@ export function ChipPick({ options, values, onChange, max }: {
                     <button key={v} type="button" disabled={disabled}
                         onClick={() => onChange(on ? values.filter(x => x !== v) : [...values, v])}
                         className={clsx(
-                            "px-3 py-1.5 rounded-none text-sm border transition-colors",
-                            on ? "bg-red-50 border-[#E53935] text-[#E53935] font-bold"
+                            "px-3 py-1.5 rounded-full text-sm border transition-colors",
+                            on ? "bg-red-50 border-[#E53935] text-[#E53935] font-semibold"
                                 : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-400",
                             disabled && "opacity-40 cursor-not-allowed hover:border-neutral-200",
                         )}>
@@ -48,7 +48,7 @@ export function ChipSingle({ options, value, onChange }: {
 export function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
         <div>
-            <p className="text-sm font-bold text-neutral-900 mb-1">{label}</p>
+            <p className="text-sm font-semibold text-neutral-900 mb-1">{label}</p>
             {hint && <p className="text-xs text-neutral-500 mb-2">{hint}</p>}
             {children}
         </div>
@@ -63,7 +63,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
             {title && <p className="font-bold text-base">{title}</p>}
             {(c.headline || c.desired_job) && (
                 <div>
-                    {c.headline && <p className="font-bold">{c.headline}</p>}
+                    {c.headline && <p className="font-semibold">{c.headline}</p>}
                     {c.desired_job && <p className="text-neutral-500">희망 직무: {c.desired_job}</p>}
                 </div>
             )}
@@ -72,7 +72,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
                 <Section title="경력">
                     {c.experiences.map((x, i) => (
                         <div key={i}>
-                            <p className="font-bold">{x.company} · {x.role}</p>
+                            <p className="font-semibold">{x.company} · {x.role}</p>
                             <p className="text-xs text-neutral-500">{period(x.start, x.end, x.current)}</p>
                             {x.description && <p className="mt-1 whitespace-pre-line text-neutral-700">{x.description}</p>}
                         </div>
@@ -82,7 +82,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
             {!!c.educations?.length && (
                 <Section title="학력">
                     {c.educations.map((x, i) => (
-                        <p key={i}><span className="font-bold">{x.school}</span> {x.major} <span className="text-xs text-neutral-500">{period(x.start, x.end)} {x.status}</span></p>
+                        <p key={i}><span className="font-semibold">{x.school}</span> {x.major} <span className="text-xs text-neutral-500">{period(x.start, x.end)} {x.status}</span></p>
                     ))}
                 </Section>
             )}
@@ -90,7 +90,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
                 <Section title="활동">
                     {c.activities.map((x, i) => (
                         <div key={i}>
-                            <p className="font-bold">{x.name}{x.org && ` · ${x.org}`}</p>
+                            <p className="font-semibold">{x.name}{x.org && ` · ${x.org}`}</p>
                             <p className="text-xs text-neutral-500">{period(x.start, x.end)}</p>
                             {x.description && <p className="mt-1 whitespace-pre-line text-neutral-700">{x.description}</p>}
                         </div>
@@ -104,7 +104,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
             )}
             {!!c.skills?.length && (
                 <Section title="기술">
-                    <div className="flex flex-wrap gap-1.5">{c.skills.map(s => <span key={s} className="px-2 py-0.5 rounded-none bg-neutral-100 text-neutral-600 text-xs">{s}</span>)}</div>
+                    <div className="flex flex-wrap gap-1.5">{c.skills.map(s => <span key={s} className="px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 text-xs">{s}</span>)}</div>
                 </Section>
             )}
             {!!c.links?.length && (
@@ -113,7 +113,7 @@ export function ResumeReadView({ title, content, fileUrl }: { title?: string | n
                 </Section>
             )}
             {c.text && <p className="whitespace-pre-line text-neutral-700 leading-relaxed">{c.text}</p>}
-            {fileUrl && <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-bold underline">첨부 파일 열기</a>}
+            {fileUrl && <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-semibold underline">첨부 파일 열기</a>}
         </div>
     );
 }

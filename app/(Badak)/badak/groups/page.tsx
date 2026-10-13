@@ -68,7 +68,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '소셜미디어', count: 22 },
   },
   {
-    id: 'g4', slug: 'startup-marketer-club', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지.',
+    id: 'g4', slug: 'startup-marketer-club', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지!',
     status: 'recruiting', max_members: 8, current_members: 5,
     event_date: '2026-05-10T10:00:00', location: '온라인 (Zoom)', fee: 0,
     tags: ['사이드프로젝트', '기획', '런칭'],
@@ -222,14 +222,14 @@ function SlideSection({ title, icon, groups, emptyText }: {
         <div className="flex gap-1.5">
           <button
             onClick={() => scroll('left')}
-            className="rounded-none border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
+            className="rounded-full border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
             aria-label="이전"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="rounded-none border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
+            className="rounded-full border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
             aria-label="다음"
           >
             <ChevronRight className="h-4 w-4" />
@@ -288,7 +288,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
       href={`/badak/groups/${g.slug || g.id}`}
       onClick={(e) => { if (hasDragged?.current) e.preventDefault(); }}
       draggable={false}
-      className="block w-[280px] shrink-0 overflow-hidden rounded-xs border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[300px]"
+      className="block w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[300px]"
       style={{
         background: 'rgba(255,255,255,0.04)',
         scrollSnapAlign: 'start',
@@ -303,9 +303,9 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
         </div>
       ) : (
         <div className="flex h-16 items-end px-3 pb-2"
-          style={{ background: 'rgba(255,255,255,0.04)' }}>
+          style={{ background: `linear-gradient(135deg, rgba(255,217,61,0.08), rgba(255,107,107,0.08))` }}>
           {g.need && (
-            <span className="rounded-none px-2 py-0.5 text-[9px] text-white/30" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <span className="rounded-full px-2 py-0.5 text-[9px] text-white/30" style={{ background: 'rgba(255,255,255,0.08)' }}>
               {g.need.display_text}
             </span>
           )}
@@ -315,20 +315,20 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
       <div className="p-5">
         {/* 상태 뱃지 */}
         <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          <span title={statusStyle.tip} className="rounded-none px-2.5 py-1 text-[11px] font-bold cursor-default" style={{ background: statusStyle.bg, color: statusStyle.color }}>
+          <span title={statusStyle.tip} className="rounded-full px-2.5 py-1 text-[11px] font-semibold cursor-default" style={{ background: statusStyle.bg, color: statusStyle.color }}>
             {statusStyle.label}
           </span>
           {isClosingSoon && (
-            <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>마감임박</span>
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>🔥 마감임박</span>
           )}
           {isHot && !isClosingSoon && (
-            <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>Hot</span>
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>Hot</span>
           )}
           {isNew && (
-            <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80' }}>New</span>
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80' }}>New</span>
           )}
           {g.fee === 0 ? (
-            <span className="text-xs text-neutral-400/70">무료</span>
+            <span className="text-xs text-green-400/70">무료</span>
           ) : (
             <span className="text-xs text-white/40">{g.fee.toLocaleString()}원</span>
           )}
@@ -353,11 +353,11 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
             <span className="text-white/45">{g.current_members}/{g.max_members}명</span>
             <span className="text-white/30">{isFull ? '마감' : `잔여 ${remaining}석`}</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-none bg-white/8">
-            <div className="h-full rounded-none transition-all"
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
+            <div className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min(100, (g.current_members / g.max_members) * 100)}%`,
-                background: isFull ? '#ef4444' : remaining <= 3 ? '#ffd93d' : '#ffffff',
+                background: isFull ? '#ef4444' : remaining <= 3 ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'linear-gradient(90deg, #22c55e, #16a34a)',
               }}
             />
           </div>
@@ -368,15 +368,15 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
           <div className="flex items-center gap-2 pt-0.5">
             {g.leader.avatar_url ? (
               <Image src={g.leader.avatar_url} alt={g.leader.display_name} width={24} height={24}
-                className="h-6 w-6 rounded-none object-cover shrink-0" />
+                className="h-6 w-6 rounded-full object-cover shrink-0" />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-[11px] font-bold"
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                 style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
                 {g.leader.display_name.charAt(0)}
               </div>
             )}
             <span className="text-xs text-white/55">
-              <Crown className="mr-0.5 inline h-3 w-3 text-neutral-400/60" />
+              <Crown className="mr-0.5 inline h-3 w-3 text-amber-400/60" />
               {g.leader.display_name}
             </span>
             <span className="text-[11px] text-white/30">· {g.leader.job_function}</span>
@@ -498,8 +498,8 @@ export default function GroupsPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/badak/groups/create"
-              className="flex items-center gap-2 rounded-xs px-5 py-3 text-sm font-bold no-underline"
-              style={{ background: '#ffd93d', color: '#1a1a2e' }}
+              className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold no-underline"
+              style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
             >
               <Plus className="h-4 w-4" /> 모임 만들기
             </Link>
@@ -513,13 +513,13 @@ export default function GroupsPage() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); if (e.target.value) setShowAll(true); }}
             placeholder="모임명, 태그, 바닥장 검색"
-            className="w-full rounded-xs border border-white/10 bg-white/5 py-3.5 pl-12 pr-4 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/30"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-3.5 pl-12 pr-4 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/30"
           />
         </div>
 
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <span className="text-sm text-mute">불러오는 중</span>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
           </div>
         )}
 
@@ -529,7 +529,7 @@ export default function GroupsPage() {
             {recommendedGroups.length > 0 && (
               <SlideSection
                 title="추천 모임"
-                icon={<Sparkles className="h-5 w-5 text-neutral-400" />}
+                icon={<Sparkles className="h-5 w-5 text-amber-400" />}
                 groups={recommendedGroups}
                 emptyText=""
               />
@@ -538,7 +538,7 @@ export default function GroupsPage() {
             {/* Hot 모임 */}
             <SlideSection
               title="Hot 모임"
-              icon={<Flame className="h-5 w-5 text-neutral-400" />}
+              icon={<Flame className="h-5 w-5 text-orange-400" />}
               groups={hotGroups}
               emptyText="모집 중인 모임이 없습니다"
             />
@@ -546,7 +546,7 @@ export default function GroupsPage() {
             {/* 최신 모임 */}
             <SlideSection
               title="최신 모임"
-              icon={<Clock className="h-5 w-5 text-neutral-400" />}
+              icon={<Clock className="h-5 w-5 text-blue-400" />}
               groups={latestGroups}
               emptyText="등록된 모임이 없습니다"
             />
@@ -566,14 +566,14 @@ export default function GroupsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowAll(true)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xs border border-white/10 py-4 text-sm font-normal text-white/50 transition-all hover:border-white/25 hover:text-white/75"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 py-4 text-sm font-medium text-white/50 transition-all hover:border-white/25 hover:text-white/75"
                 >
                   전체 모임 보기 <ArrowRight className="h-4 w-4" />
                 </button>
                 <button
                   title="리스트 보기"
                   onClick={() => setShowAll(true)}
-                  className="flex items-center justify-center rounded-xs border border-white/10 p-4 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
+                  className="flex items-center justify-center rounded-xl border border-white/10 p-4 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
                 >
                   <LayoutList className="h-5 w-5" />
                 </button>
@@ -593,13 +593,13 @@ export default function GroupsPage() {
                 <button
                   title="슬라이드 보기"
                   onClick={() => { setShowAll(false); setSearch(''); setCategory('all'); }}
-                  className="flex items-center justify-center rounded-xs border border-white/10 p-1.5 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
+                  className="flex items-center justify-center rounded-lg border border-white/10 p-1.5 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
                 <button
                   title="리스트 보기"
-                  className="flex items-center justify-center rounded-xs border border-[#ffd93d]/40 bg-[#ffd93d]/10 p-1.5 text-[#ffd93d]/70"
+                  className="flex items-center justify-center rounded-lg border border-[#ffd93d]/40 bg-[#ffd93d]/10 p-1.5 text-[#ffd93d]/70"
                   disabled
                 >
                   <LayoutList className="h-4 w-4" />
@@ -613,7 +613,7 @@ export default function GroupsPage() {
                 <button
                   key={cat.key}
                   onClick={() => setCategory(cat.key)}
-                  className="shrink-0 rounded-none px-3.5 py-1.5 text-xs font-normal transition-all"
+                  className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all"
                   style={{
                     background: category === cat.key ? '#ffd93d' : 'rgba(255,255,255,0.07)',
                     color: category === cat.key ? '#1a1a2e' : 'rgba(255,255,255,0.45)',
@@ -628,11 +628,11 @@ export default function GroupsPage() {
             {allFiltered.length === 0 ? (
               <div className="py-20 text-center">
                 <SlidersHorizontal className="mx-auto mb-4 h-12 w-12 text-white/15" />
-                <p className="mb-1.5 text-base font-normal text-white/50">
+                <p className="mb-1.5 text-base font-medium text-white/50">
                   {search ? '검색 결과가 없습니다' : '아직 모임이 없습니다'}
                 </p>
                 <p className="text-sm text-white/30">
-                  {search ? '다른 키워드로 검색해보세요' : '첫 바닥장이 되어 주세요.'}
+                  {search ? '다른 키워드로 검색해보세요' : '첫 번째 바닥장이 되어보세요!'}
                 </p>
               </div>
             ) : (
@@ -651,7 +651,7 @@ export default function GroupsPage() {
 
                   return (
                     <Link key={g.id} href={`/badak/groups/${g.slug || g.id}`}
-                      className="flex gap-3 overflow-hidden rounded-xs border border-white/8 no-underline transition-all hover:border-white/15"
+                      className="flex gap-3 overflow-hidden rounded-xl border border-white/8 no-underline transition-all hover:border-white/15"
                       style={{ background: 'rgba(255,255,255,0.03)' }}>
                       {/* 커버 썸네일 */}
                       {g.cover_image_url && (
@@ -661,15 +661,15 @@ export default function GroupsPage() {
                       )}
                       <div className={`flex flex-1 min-w-0 flex-col justify-center py-3 ${!g.cover_image_url ? 'px-4' : 'pr-3'}`}>
                         <div className="mb-1 flex items-center gap-1.5">
-                          <span title={st.tip} className="rounded-none px-2 py-0.5 text-[10px] font-bold cursor-default" style={{ background: st.bg, color: st.color }}>
+                          <span title={st.tip} className="rounded-full px-2 py-0.5 text-[10px] font-semibold cursor-default" style={{ background: st.bg, color: st.color }}>
                             {st.label}
                           </span>
                           {g.fee === 0
-                            ? <span className="text-[10px] text-neutral-400/70">무료</span>
+                            ? <span className="text-[10px] text-green-400/70">무료</span>
                             : <span className="text-[10px] text-white/30">{g.fee.toLocaleString()}원</span>
                           }
                           {!isFull && remaining <= 3 && (
-                            <span className="text-[10px] text-neutral-400/70">잔여 {remaining}석</span>
+                            <span className="text-[10px] text-orange-400/70">잔여 {remaining}석</span>
                           )}
                         </div>
                         <h3 className="mb-1 text-[14px] font-bold text-white line-clamp-1">{g.title}</h3>

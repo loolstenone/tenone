@@ -25,8 +25,8 @@ export function SearchLightNav({ href, label, active, className }: { href: strin
     return (
         <Link href={href} className={clsx("hero-sl relative inline-flex items-center whitespace-nowrap px-1 py-1", className)}
             style={{ ["--sl-w" as string]: `${w}px` }} aria-current={active ? "page" : undefined}>
-            {w > 0 && <span aria-hidden className="hero-sl-spot pointer-events-none absolute left-1 top-1/2 rounded-none" />}
-            <span ref={ref} className={clsx("relative text-sm font-bold", active ? "text-[#E53935]" : "text-neutral-600")}>{label}</span>
+            {w > 0 && <span aria-hidden className="hero-sl-spot pointer-events-none absolute left-1 top-1/2 rounded-full" />}
+            <span ref={ref} className={clsx("relative text-sm font-semibold", active ? "text-[#E53935]" : "text-neutral-600")}>{label}</span>
             <style jsx global>{`
                 .hero-sl-spot {
                     width: 2.2em;

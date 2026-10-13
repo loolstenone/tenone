@@ -70,7 +70,7 @@ export default async function PublicProfilePage({ params }: Props) {
         return (
             <div className="max-w-2xl mx-auto py-16 px-4 text-center">
                 <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 rounded-none bg-neutral-100 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center">
                         <Lock className="h-7 w-7 text-neutral-400" />
                     </div>
                 </div>
@@ -108,7 +108,7 @@ export default async function PublicProfilePage({ params }: Props) {
                 {!isLoggedIn && (
                     <Link
                         href={`/login?redirect=/@${h}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-normal tn-text-sub hover:tn-text border tn-border rounded-xs px-3 py-1.5 transition-colors"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium tn-text-sub hover:tn-text border tn-border rounded-lg px-3 py-1.5 transition-colors"
                     >
                         <LogIn className="h-3.5 w-3.5" />
                         로그인

@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Mail, Phone, ChevronDown } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, Phone, ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { COMPANY_STATUS, OFFER_STATUS_LABEL, OFFER_TYPES, countLabel, labelOf } from "@/lib/hero/offers";
@@ -50,7 +50,7 @@ export default function CompanyOfferDetailPage() {
 
     useEffect(() => { if (isAuthenticated) load(); }, [isAuthenticated, load]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     async function patch(body: Record<string, unknown>) {
@@ -80,14 +80,14 @@ export default function CompanyOfferDetailPage() {
                 </Link>
 
                 {loading ? (
-                    <div className="py-16 flex justify-center"><span className="text-sm text-mute">불러오는 중</span></div>
+                    <div className="py-16 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
                 ) : !d || !o ? (
                     <p className="py-16 text-center text-sm text-neutral-500">제안을 찾을 수 없습니다.</p>
                 ) : (
                     <>
-                        <div className="bg-white border border-neutral-200 rounded-xs p-6">
+                        <div className="bg-white border border-neutral-200 rounded-xl p-6">
                             <p className="text-sm font-bold text-[#E53935] mb-2">{labelOf(OFFER_TYPES, o.offer_type)} · {OFFER_STATUS_LABEL[o.status] ?? o.status}</p>
-                            <h1 className="text-2xl font-bold tracking-tight mb-1 break-keep">{o.title}</h1>
+                            <h1 className="text-2xl font-extrabold tracking-tight mb-1 break-keep">{o.title}</h1>
                             <p className="text-xs text-neutral-500 mb-4">
                                 {o.hero_companies?.company_name}{o.hero_jd && ` · ${o.hero_jd.position_title}`}{o.respond_by && ` · 응답 기한 ${o.respond_by}`}
                             </p>
@@ -97,11 +97,11 @@ export default function CompanyOfferDetailPage() {
                             <div className="mt-5 flex gap-3">
                                 {o.status === "requested" && (
                                     <button onClick={() => patch({ action: "cancel" })} disabled={busy}
-                                        className="px-5 py-2.5 rounded-none border border-neutral-300 text-sm font-bold hover:border-neutral-500">요청 취소</button>
+                                        className="px-5 py-2.5 rounded-full border border-neutral-300 text-sm font-semibold hover:border-neutral-500">요청 취소</button>
                                 )}
                                 {o.status === "sent" && (
                                     <button onClick={() => patch({ action: "close" })} disabled={busy}
-                                        className="px-5 py-2.5 rounded-none border border-neutral-300 text-sm font-bold hover:border-neutral-500">제안 마감</button>
+                                        className="px-5 py-2.5 rounded-full border border-neutral-300 text-sm font-semibold hover:border-neutral-500">제안 마감</button>
                                 )}
                             </div>
                         </div>
@@ -114,9 +114,9 @@ export default function CompanyOfferDetailPage() {
                                     { l: "응함", v: `${d.stats.accepted}명` },
                                     { l: "거절", v: countLabel(d.stats.declined) },
                                 ].map(s => (
-                                    <div key={s.l} className="bg-white border border-neutral-200 rounded-xs p-4">
+                                    <div key={s.l} className="bg-white border border-neutral-200 rounded-xl p-4">
                                         <p className="text-xs text-neutral-500">{s.l}</p>
-                                        <p className="text-lg font-bold">{s.v}</p>
+                                        <p className="text-lg font-extrabold">{s.v}</p>
                                     </div>
                                 ))}
                             </div>
@@ -126,7 +126,7 @@ export default function CompanyOfferDetailPage() {
 
                         {d.applicants.length > 0 && (
                             <section className="space-y-3">
-                                <h2 className="text-lg font-bold tracking-tight">응한 인재</h2>
+                                <h2 className="text-lg font-extrabold tracking-tight">응한 인재</h2>
                                 {d.applicants.map(a => <ApplicantCard key={a.id} a={a} busy={busy} onPatch={patch} />)}
                             </section>
                         )}
@@ -141,13 +141,13 @@ function ApplicantCard({ a, busy, onPatch }: { a: Applicant; busy: boolean; onPa
     const [note, setNote] = useState(a.companyNote ?? "");
     if (a.expired) {
         return (
-            <div className="bg-white border border-neutral-200 rounded-xs p-5 text-sm text-neutral-500">
+            <div className="bg-white border border-neutral-200 rounded-xl p-5 text-sm text-neutral-500">
                 열람 기한이 지나 지원자 정보를 볼 수 없습니다 (응답일 {a.respondedAt?.slice(0, 10)})
             </div>
         );
     }
     return (
-        <details className="group bg-white border border-neutral-200 rounded-xs">
+        <details className="group bg-white border border-neutral-200 rounded-xl">
             <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none">
                 <div className="min-w-0">
                     <p className="font-bold">{a.name ?? "이름 없음"}</p>
@@ -156,7 +156,7 @@ function ApplicantCard({ a, busy, onPatch }: { a: Applicant; busy: boolean; onPa
                     </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs px-2.5 py-1 rounded-none bg-neutral-100 text-neutral-600">{labelOf(COMPANY_STATUS, a.companyStatus)}</span>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-600">{labelOf(COMPANY_STATUS, a.companyStatus)}</span>
                     <ChevronDown className="h-4 w-4 text-neutral-400 transition-transform group-open:rotate-180" />
                 </div>
             </summary>
@@ -165,7 +165,7 @@ function ApplicantCard({ a, busy, onPatch }: { a: Applicant; busy: boolean; onPa
                     {a.email && <a href={`mailto:${a.email}`} className="inline-flex items-center gap-1.5 underline"><Mail className="h-4 w-4 text-neutral-400" />{a.email}</a>}
                     {a.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-4 w-4 text-neutral-400" />{a.phone}</span>}
                 </div>
-                {a.message && <p className="text-sm bg-neutral-50 rounded-xs p-3 whitespace-pre-line">{a.message}</p>}
+                {a.message && <p className="text-sm bg-neutral-50 rounded-lg p-3 whitespace-pre-line">{a.message}</p>}
                 <ResumeReadView title={a.resume?.title} content={a.resume?.content ?? null} />
                 <div className="border-t border-neutral-100 pt-4 space-y-3">
                     <p className="text-xs font-bold text-neutral-500">진행 상태 (기업 내부용 — 인재에게 보이지 않음)</p>
@@ -173,16 +173,16 @@ function ApplicantCard({ a, busy, onPatch }: { a: Applicant; busy: boolean; onPa
                         {COMPANY_STATUS.map(s => (
                             <button key={s.v} disabled={busy} onClick={() => onPatch({ recipientId: a.id, companyStatus: s.v })}
                                 className={a.companyStatus === s.v
-                                    ? "px-3 py-1.5 rounded-none text-sm bg-red-50 border border-[#E53935] text-[#E53935] font-bold"
-                                    : "px-3 py-1.5 rounded-none text-sm border border-neutral-200 hover:border-neutral-400"}>
+                                    ? "px-3 py-1.5 rounded-full text-sm bg-red-50 border border-[#E53935] text-[#E53935] font-semibold"
+                                    : "px-3 py-1.5 rounded-full text-sm border border-neutral-200 hover:border-neutral-400"}>
                                 {s.l}
                             </button>
                         ))}
                     </div>
                     <textarea value={note} onChange={e => setNote(e.target.value)} rows={2} maxLength={1000} placeholder="메모"
-                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs" />
+                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg" />
                     <button disabled={busy} onClick={() => onPatch({ recipientId: a.id, companyNote: note })}
-                        className="px-4 py-2 rounded-none border border-neutral-300 text-sm font-bold hover:border-neutral-500">메모 저장</button>
+                        className="px-4 py-2 rounded-full border border-neutral-300 text-sm font-semibold hover:border-neutral-500">메모 저장</button>
                     {a.destroyDue && <p className="text-xs text-neutral-500">이 지원자 정보는 {a.destroyDue}까지 볼 수 있습니다.</p>}
                 </div>
             </div>

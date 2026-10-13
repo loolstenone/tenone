@@ -21,31 +21,31 @@ const QUESTIONS = [
         key: "q1" as const,
         label: "이번 달 가장 잘한 것",
         placeholder: "스스로 칭찬할 행동, 성과, 결정을 적어보세요.",
-        emoji: "",
+        emoji: "🏆",
     },
     {
         key: "q2" as const,
         label: "이번 달 가장 크게 배운 것",
         placeholder: "새로 알게 된 것, 깨달은 것, 관점이 바뀐 것.",
-        emoji: "",
+        emoji: "💡",
     },
     {
         key: "q3" as const,
         label: "아쉬웠던 점 · 다음엔 어떻게?",
         placeholder: "실수나 아쉬운 점을 솔직하게, 그리고 개선 방법까지.",
-        emoji: "",
+        emoji: "🔧",
     },
     {
         key: "q4" as const,
         label: "다음 달 핵심 목표 하나",
         placeholder: "측정 가능하고 구체적인 목표 한 가지.",
-        emoji: "",
+        emoji: "🎯",
     },
     {
         key: "q5" as const,
         label: "이달의 나에게 한마디",
         placeholder: "격려, 다짐, 또는 미래의 나에게 전하고 싶은 말.",
-        emoji: "",
+        emoji: "💬",
     },
 ] as const;
 
@@ -142,22 +142,22 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
     return (
         <div className="space-y-6">
             {/* 월 선택 헤더 */}
-            <div className="bg-white border border-neutral-200 rounded-xs p-6">
+            <div className="bg-white border border-neutral-200 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setMonth(m => offsetMonth(m, -1))}
-                            className="p-1.5 rounded-xs hover:bg-neutral-100 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
                         >
                             <ChevronLeft className="w-4 h-4 text-neutral-500" />
                         </button>
-                        <h3 className="text-lg font-bold text-neutral-900 min-w-[120px] text-center">
+                        <h3 className="text-lg font-black text-neutral-900 min-w-[120px] text-center">
                             {toMonthLabel(month)}
                         </h3>
                         <button
                             onClick={() => setMonth(m => offsetMonth(m, 1))}
                             disabled={month >= currentMonth()}
-                            className="p-1.5 rounded-xs hover:bg-neutral-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-1.5 rounded-lg hover:bg-neutral-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                             <ChevronRight className="w-4 h-4 text-neutral-500" />
                         </button>
@@ -165,10 +165,10 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
 
                     <div className="flex items-center gap-3">
                         {/* 작성 진행률 */}
-                        <span className="text-xs text-neutral-400 font-normal">{filledCount}/5</span>
+                        <span className="text-xs text-neutral-400 font-medium">{filledCount}/5</span>
 
                         {saved && !saving && (
-                            <span className="flex items-center gap-1 text-xs font-bold text-neutral-600">
+                            <span className="flex items-center gap-1 text-xs font-bold text-green-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" /> 저장됨
                             </span>
                         )}
@@ -176,7 +176,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                         <button
                             onClick={handleSave}
                             disabled={saving || isFuture || filledCount === 0}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xs text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition-opacity"
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: RED }}
                         >
                             <Save className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                 </div>
 
                 {savedToast && (
-                    <div className="mt-3 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xs text-center text-sm font-bold text-neutral-700">
+                    <div className="mt-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-center text-sm font-bold text-green-700">
                         회고가 저장되었습니다 ✓
                     </div>
                 )}
@@ -200,14 +200,15 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
             {loading ? (
                 <div className="space-y-4 animate-pulse">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className="h-32 bg-neutral-100 rounded-xs" />
+                        <div key={i} className="h-32 bg-neutral-100 rounded-2xl" />
                     ))}
                 </div>
             ) : (
                 <div className="space-y-4">
                     {QUESTIONS.map((q, idx) => (
-                        <div key={q.key} className="bg-white border border-neutral-200 rounded-xs p-6">
+                        <div key={q.key} className="bg-white border border-neutral-200 rounded-2xl p-6">
                             <div className="flex items-center gap-2 mb-3">
+                                <span className="text-lg">{q.emoji}</span>
                                 <div>
                                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mr-2">
                                         Q{idx + 1}
@@ -215,7 +216,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                                     <span className="text-sm font-bold text-neutral-900">{q.label}</span>
                                 </div>
                                 {answers[q.key].trim() && (
-                                    <CheckCircle2 className="w-4 h-4 text-neutral-500 ml-auto shrink-0" />
+                                    <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto shrink-0" />
                                 )}
                             </div>
                             <textarea
@@ -225,7 +226,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                                 disabled={isFuture}
                                 maxLength={500}
                                 rows={3}
-                                className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-xs resize-none focus:outline-none focus:border-[#E53935] disabled:bg-neutral-50 disabled:text-neutral-400 transition-colors leading-relaxed"
+                                className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-xl resize-none focus:outline-none focus:border-[#E53935] disabled:bg-neutral-50 disabled:text-neutral-400 transition-colors leading-relaxed"
                             />
                             <div className="text-right text-[11px] text-neutral-300 mt-1">
                                 {answers[q.key].length}/500
@@ -237,7 +238,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
 
             {/* 지난 회고 히스토리 */}
             {history.length > 0 && (
-                <div className="bg-white border border-neutral-200 rounded-xs p-6">
+                <div className="bg-white border border-neutral-200 rounded-2xl p-6">
                     <div className="flex items-center gap-2 mb-4">
                         <Clock className="w-4 h-4" style={{ color: RED }} />
                         <h4 className="text-sm font-bold text-neutral-700">지난 회고</h4>
@@ -247,7 +248,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                             <button
                                 key={h.month}
                                 onClick={() => setMonth(h.month)}
-                                className={`px-3 py-1.5 rounded-xs text-xs font-bold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                                     h.month === month
                                         ? "text-white"
                                         : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
@@ -262,7 +263,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
             )}
 
             {history.length === 0 && !loading && (
-                <div className="text-center py-10 border border-dashed border-neutral-200 rounded-xs">
+                <div className="text-center py-10 border border-dashed border-neutral-200 rounded-2xl">
                     <BookOpen className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
                     <p className="text-sm text-neutral-400">첫 월간 회고를 작성해보세요.</p>
                     <p className="text-xs text-neutral-300 mt-1">매달 5문항으로 성장을 기록합니다.</p>

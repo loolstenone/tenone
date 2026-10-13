@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import {
@@ -40,7 +40,7 @@ export default function OfferSettingsPage() {
         }).catch(() => undefined).finally(() => setLoading(false));
     }, [isAuthenticated]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     const needConsent = !s.consented_at;
@@ -71,15 +71,15 @@ export default function OfferSettingsPage() {
                     <ArrowLeft className="h-3.5 w-3.5" /> 받은 제안
                 </Link>
                 <p className="text-sm font-bold text-[#E53935] mb-2">제안 받기 설정</p>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">어떤 제안을 받고 싶으세요?</h1>
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">어떤 제안을 받고 싶으세요?</h1>
                 <p className="text-sm text-neutral-600 mb-8 break-keep">
                     아래 조건에 맞는 기업만 나에게 면접·인터뷰를 제안할 수 있습니다. 기업에는 조건에 맞는 인원수만 익명으로 보입니다.
                 </p>
 
                 {loading ? (
-                    <div className="py-16 flex justify-center"><span className="text-sm text-mute">불러오는 중</span></div>
+                    <div className="py-16 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
                 ) : (
-                    <div className="bg-white border border-neutral-200 rounded-xs p-6 space-y-7">
+                    <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-7">
                         <Field label="희망 직무 (최대 3개)">
                             <ChipPick options={OFFER_JOB_FUNCTIONS} values={s.job_functions} onChange={v => set("job_functions", v)} max={3} />
                         </Field>
@@ -97,14 +97,14 @@ export default function OfferSettingsPage() {
                         </Field>
 
                         {(!hasResume || !hasHitA) && (
-                            <div className="text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded-xs p-3 space-y-1">
-                                {!hasResume && <p>• 제안에 응하려면 이력서가 있어야 합니다. <Link href="/hero/resume/workspace" className="underline font-bold">이력서 쓰기</Link></p>}
-                                {!hasHitA && <p>• 기본 성향 검사를 마친 인재만 찾는 기업도 있습니다 (검사 결과는 보이지 않습니다). <Link href="/hero/hit" className="underline font-bold">검사 받기</Link></p>}
+                            <div className="text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded-lg p-3 space-y-1">
+                                {!hasResume && <p>• 제안에 응하려면 이력서가 있어야 합니다. <Link href="/hero/resume/workspace" className="underline font-semibold">이력서 쓰기</Link></p>}
+                                {!hasHitA && <p>• 기본 성향 검사를 마친 인재만 찾는 기업도 있습니다 (검사 결과는 보이지 않습니다). <Link href="/hero/hit" className="underline font-semibold">검사 받기</Link></p>}
                             </div>
                         )}
 
                         {/* [선택] 성향 통계 — 개인 HIT 결과는 나만 본다. 기업엔 묶음 통계만, 동의한 경우에만 */}
-                        <div className="border border-neutral-200 rounded-xs p-4 text-xs text-neutral-600 space-y-2">
+                        <div className="border border-neutral-200 rounded-lg p-4 text-xs text-neutral-600 space-y-2">
                             <label className="flex items-start gap-2 text-sm text-neutral-900 cursor-pointer">
                                 <input type="checkbox" className="mt-0.5" checked={s.share_traits}
                                     onChange={e => { set("share_traits", e.target.checked); if (!e.target.checked) setTraitsConsent(false); }} />
@@ -126,7 +126,7 @@ export default function OfferSettingsPage() {
                         </div>
 
                         {needConsent && (
-                            <div className="border border-neutral-200 rounded-xs p-4 text-xs text-neutral-600 space-y-2">
+                            <div className="border border-neutral-200 rounded-lg p-4 text-xs text-neutral-600 space-y-2">
                                 <p className="font-bold text-neutral-900 text-sm">개인정보 수집·이용 동의 (필수)</p>
                                 <p>• 목적: {SETTINGS_CONSENT.purpose}</p>
                                 <p>• 항목: {SETTINGS_CONSENT.items}</p>
@@ -143,12 +143,12 @@ export default function OfferSettingsPage() {
 
                         <div className="flex flex-wrap gap-3 pt-2">
                             <button onClick={() => save(true)} disabled={saving || (needConsent && !consent) || (s.share_traits && !traitsSaved && !traitsConsent)}
-                                className="px-6 py-3 rounded-none bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                                className="px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                                 {saving ? "저장 중..." : s.is_open ? "저장" : "제안 받기 켜기"}
                             </button>
                             {s.is_open && (
                                 <button onClick={() => save(false)} disabled={saving}
-                                    className="px-6 py-3 rounded-none border border-neutral-300 text-neutral-700 text-sm font-bold hover:border-neutral-500 transition-colors">
+                                    className="px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 text-sm font-semibold hover:border-neutral-500 transition-colors">
                                     제안 받기 끄기
                                 </button>
                             )}

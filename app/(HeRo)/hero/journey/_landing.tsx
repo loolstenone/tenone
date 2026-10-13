@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { PageHero } from "@/features/hero/PageHero";
 import { loginHref } from "@/lib/login-href";
-import { ArrowRight } from "lucide-react";
+import {
+  Sparkles,
+  DoorOpen,
+  Swords,
+  Rocket,
+  Crown,
+  ArrowRight,
+} from "lucide-react";
 
 const HERO_RED = "#E53935";
 
@@ -11,6 +18,7 @@ const HERO_RED = "#E53935";
 const stages = [
   {
     number: "01",
+    icon: Sparkles,
     title: "꿈꾸는 사람",
     subtitle: "어디서 시작할지 찾는 사람",
     paragraphs: [
@@ -18,11 +26,12 @@ const stages = [
       "아직 내 강점을 재 본 적이 없을 뿐입니다. HIT 검사로 몰랐던 강점을 찾아보세요.",
       "이 단계에서는 나를 아는 것이 가장 중요합니다. 무엇을 잘하고 무엇이 부족한지 HIT 결과로 확인해 보세요.",
     ],
-    cta: { label: "기본 성향 검사 응시", href: "/hero/hit/a" },
+    cta: { label: "기본 성향 검사 시작하기", href: "/hero/hit/a" },
     align: "left" as const,
   },
   {
     number: "02",
+    icon: DoorOpen,
     title: "도전자",
     subtitle: "문을 두드리는 사람",
     paragraphs: [
@@ -34,6 +43,7 @@ const stages = [
   },
   {
     number: "03",
+    icon: Swords,
     title: "연습생",
     subtitle: "실력을 쌓는 사람",
     paragraphs: [
@@ -46,6 +56,7 @@ const stages = [
   },
   {
     number: "04",
+    icon: Rocket,
     title: "데뷔",
     subtitle: "무대에 서는 사람",
     paragraphs: [
@@ -57,13 +68,14 @@ const stages = [
   },
   {
     number: "05",
+    icon: Crown,
     title: "스타 → 레전드",
     subtitle: "인정받고, 다음 사람의 길을 여는 사람",
     paragraphs: [
       "레전드 단계에 오르면 길을 직접 고릅니다. 임원으로 합류하거나, 내 사업을 시작하거나, HeRo 멘토가 되어 후배를 도울 수 있습니다.",
       "내 경험이 다음 사람에게 길잡이가 됩니다.",
     ],
-    cta: { label: "HIT 검사 응시", href: "/hero/hit/a" },
+    cta: { label: "HIT 검사로 시작하기", href: "/hero/hit/a" },
     align: "left" as const,
   },
 ];
@@ -76,7 +88,7 @@ export function JourneyLanding() {
         label="나의 성장 기록"
         title="꿈꾸는 사람에서 레전드까지"
         desc="연예 기획사가 연습생을 발굴하고 훈련시켜 데뷔시키는 것처럼, HeRo는 내 강점을 찾고 실력을 키워 일할 준비를 돕습니다."
-        note={<>이미 시작하셨나요? <Link href={loginHref("/hero/journey")} className="font-bold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.</>}
+        note={<>이미 시작하셨나요? <Link href={loginHref("/hero/journey")} className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.</>}
       />
 
       {/* ── 5단계 여정 ── */}
@@ -90,11 +102,17 @@ export function JourneyLanding() {
             >
               <div className="shrink-0 flex flex-col items-center md:items-start">
                 <span
-                  className="text-7xl md:text-8xl font-bold leading-none"
+                  className="text-7xl md:text-8xl font-black leading-none"
                   style={{ color: `${HERO_RED}15` }}
                 >
                   {s.number}
                 </span>
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center -mt-4"
+                  style={{ backgroundColor: HERO_RED }}
+                >
+                  <s.icon className="w-7 h-7 text-white" />
+                </div>
               </div>
 
               <div className="flex-1">
@@ -102,7 +120,7 @@ export function JourneyLanding() {
                   {s.title}
                 </h2>
                 <p
-                  className="text-lg font-normal mb-6"
+                  className="text-lg font-medium mb-6"
                   style={{ color: HERO_RED }}
                 >
                   {s.subtitle}
@@ -117,7 +135,7 @@ export function JourneyLanding() {
                 {s.cta && (
                   <Link
                     href={s.cta.href}
-                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-xs text-white font-bold hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: HERO_RED }}
                   >
                     {s.cta.label}
@@ -142,7 +160,7 @@ export function JourneyLanding() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/hero/hit/a"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xs text-white font-bold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
               style={{ backgroundColor: HERO_RED }}
             >
               HIT 검사 시작
@@ -150,7 +168,7 @@ export function JourneyLanding() {
             </Link>
             <Link
               href="/hero/audition"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xs font-bold border-2 hover:bg-neutral-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold border-2 hover:bg-neutral-50 transition-colors"
               style={{ borderColor: HERO_RED, color: HERO_RED }}
             >
               오디션 지원

@@ -148,7 +148,7 @@ export function ProfileEditor({ initial }: { initial: Initial }) {
 
       {error && <div className="bg-red-950 border border-red-900 text-red-200 text-sm px-4 py-3">저장 실패: {error}</div>}
       {saved && (
-        <div className="bg-neutral-950 border border-neutral-900 text-neutral-200 text-sm px-4 py-3 inline-flex items-center gap-2">
+        <div className="bg-emerald-950 border border-emerald-900 text-emerald-200 text-sm px-4 py-3 inline-flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4" /> 저장되었습니다.
         </div>
       )}

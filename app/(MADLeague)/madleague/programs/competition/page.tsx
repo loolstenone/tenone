@@ -1,5 +1,5 @@
 import Image from 'next/image';
-
+import { Trophy, Users, Search, Lightbulb, Presentation, Medal, Award, FolderOpen } from 'lucide-react';
 import { madProgramAsset } from '@/lib/madleague-program-assets';
 import { fetchMadHallRounds, type MadHallRound } from '@/lib/supabase/madleague';
 import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
@@ -20,17 +20,18 @@ function HallRound({ r }: { r: MadHallRound }) {
             {r.client_logo_url
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={r.client_logo_url} alt={r.client_name ?? r.title} className="object-contain object-left max-h-16 w-auto" />
-              : <span className="text-3xl font-bold">{r.client_name ?? r.title}</span>}
+              : <span className="text-3xl font-black">{r.client_name ?? r.title}</span>}
           </div>
           {r.brief_title && <p className="mt-6 text-lg text-neutral-400 leading-relaxed">{r.brief_title}</p>}
         </div>
         <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
           {r.results.map((x, i) => (
             <div key={i} className={`border bg-neutral-950 p-6 ${x.rank ? RANK_TONE[x.rank] ?? 'border-neutral-800 text-neutral-400' : 'border-neutral-800 text-neutral-400'}`}>
-              <div className="flex items-center gap-2 text-sm font-bold">
+              <div className="flex items-center gap-2 text-sm font-black">
+                <Medal className="h-5 w-5" />
                 {x.rank ? `${x.rank}위` : ''}{x.award_name ? `${x.rank ? ' · ' : ''}${x.award_name}` : ''}
               </div>
-              <div className="mt-4 text-xl font-bold text-white">{x.team_name}</div>
+              <div className="mt-4 text-xl font-black text-white">{x.team_name}</div>
               {x.club && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-neutral-500">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -53,17 +54,17 @@ const program = getMadProgram('competition');
 export const metadata = { title: `${program.title} — 명예의 전당`, description: program.desc };
 
 const STEPS = [
-  { title: '클라이언트 RFP',       desc: '실제 기업이 마케팅 과제를 RFP 형식으로 제시한다.' },
-  { title: '동아리별 팀 구성',       desc: '동아리 내 4~6인으로 팀을 꾸린다.' },
-  { title: '클라이언트 OT',         desc: '기업 담당자가 직접 과제 배경과 목표를 설명한다.' },
-  { title: '지역/사전 예선 → 본선 진출',  desc: '지역/사전 예선을 통과한 팀만 본선 무대에 오른다.' },
-  { title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표하고 순위를 가린다.' },
+  { icon: Search,       title: '클라이언트 RFP',       desc: '실제 기업이 마케팅 과제를 RFP 형식으로 제시한다.' },
+  { icon: Users,        title: '동아리별 팀 구성',       desc: '동아리 내 4~6인으로 팀을 꾸린다.' },
+  { icon: Lightbulb,    title: '클라이언트 OT',         desc: '기업 담당자가 직접 과제 배경과 목표를 설명한다.' },
+  { icon: Trophy,       title: '지역/사전 예선 → 본선 진출',  desc: '지역/사전 예선을 통과한 팀만 본선 무대에 오른다.' },
+  { icon: Presentation, title: '본선 경쟁 프레젠테이션', desc: '현업 심사위원단 앞에서 전략을 발표하고 순위를 가린다.' },
 ];
 
 const GETS = [
-  { title: '순위 · 명예의 전당', desc: '본선 결과는 명예의 전당에 영구 기록된다. 제안에서 끝나지 않고 실행까지 이어진다.' },
-  { title: '포트폴리오 자동 반영', desc: '참가·수상 기록이 매드리거 포트폴리오에 자동으로 쌓인다.' },
-  { title: '참가 · 수상 인증서',  desc: '회차가 끝나면 본인 화면에서 참가 확인서·수상 확인서를 직접 발급한다.' },
+  { icon: Trophy,     title: '순위 · 명예의 전당', desc: '본선 결과는 명예의 전당에 영구 기록된다. 제안에서 끝나지 않고 실행까지 이어진다.' },
+  { icon: FolderOpen, title: '포트폴리오 자동 반영', desc: '참가·수상 기록이 매드리거 포트폴리오에 자동으로 쌓인다.' },
+  { icon: Award,      title: '참가 · 수상 인증서',  desc: '회차가 끝나면 본인 화면에서 참가 확인서·수상 확인서를 직접 발급한다.' },
 ];
 
 // 인트라 결과 발표 이전의 기록 — features/madleague/competition-archive.ts (동아리 배지와 공용)

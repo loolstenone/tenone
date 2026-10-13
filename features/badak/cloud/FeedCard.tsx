@@ -46,7 +46,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
         {/* Badge */}
         <div className="mb-2.5">
           <span
-            className="inline-block rounded-none px-2.5 py-0.5 text-[11px] font-bold"
+            className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
             style={{ background: bs.bg, color: bs.color, border: `1px solid ${bs.border}` }}
           >
             {item.badge}
@@ -54,7 +54,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
         </div>
 
         {/* Title */}
-        <h3 className="mb-3 text-[15px] font-bold leading-[1.45] text-white/85" style={{ letterSpacing: '-0.03em' }}>
+        <h3 className="mb-3 text-[15px] font-semibold leading-[1.45] text-white/85" style={{ letterSpacing: '-0.03em' }}>
           {item.title}
         </h3>
 
@@ -65,20 +65,20 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
             <button
               type="button"
               onClick={onLeaderClick}
-              className="flex items-center gap-2 rounded-xs px-2 py-1.5 -mx-2 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 -mx-2 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
             >
               <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-none text-xs font-bold"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                 style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}
               >
                 {leaderName.charAt(0)}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold text-white/80 truncate">{leaderName}</span>
+                  <span className="text-[13px] font-semibold text-white/80 truncate">{leaderName}</span>
                   {isLeader && (
                     <span
-                      className="shrink-0 rounded-none px-1.5 py-px text-[9px] font-bold"
+                      className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold"
                       style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.2)' }}
                     >
                       바닥장
@@ -90,10 +90,10 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
             </button>
 
             <div className="flex flex-wrap gap-3 text-xs text-white/35">
-              {item.date && <span>{item.date}</span>}
-              {item.location && <span>{item.location}</span>}
+              {item.date && <span>📅 {item.date}</span>}
+              {item.location && <span>📍 {item.location}</span>}
               <span style={{ color: (item.members ?? 0) / (item.max ?? 1) > 0.9 ? '#f87171' : undefined }}>
-                {item.members ?? 0}/{item.max ?? 0}
+                👥 {item.members ?? 0}/{item.max ?? 0}
               </span>
             </div>
             {/* 상세 보기 화살표 힌트 — 링크 있을 때만 */}
@@ -113,7 +113,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
                 className="h-full rounded-sm transition-[width] duration-1000"
                 style={{
                   width: `${((item.count ?? 0) / (item.threshold ?? 1)) * 100}%`,
-                  background: '#ffd93d',
+                  background: 'linear-gradient(90deg, #ffd93d, #ff6b6b)',
                 }}
               />
             </div>
@@ -134,7 +134,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
         {item.tags && item.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {item.tags.map((tag) => (
-              <span key={tag} className="rounded-xs px-2 py-0.5 text-[11px] text-white/30"
+              <span key={tag} className="rounded-xl px-2 py-0.5 text-[11px] text-white/30"
                 style={{ background: 'rgba(255,255,255,0.05)' }}>
                 #{tag}
               </span>
@@ -149,7 +149,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
 export function FeedCard({ item, index }: FeedCardProps) {
   const [showProfile, setShowProfile] = useState(false);
 
-  const baseClass = "mb-3 block overflow-hidden rounded-xs border border-white/8 transition-colors hover:border-white/15 hover:bg-white/[0.05]";
+  const baseClass = "mb-3 block overflow-hidden rounded-2xl border border-white/8 transition-colors hover:border-white/15 hover:bg-white/[0.05]";
   const style = {
     background: 'rgba(255,255,255,0.03)',
     animation: 'badak-fadeUp 0.5s ease both',

@@ -31,7 +31,7 @@ export default async function CommunityPage({ searchParams }: PageProps) {
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · 게시판</div>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-bold">매드리거만 접근 가능합니다</h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 접근 가능합니다</h1>
           <p className="mt-6 text-neutral-400">로그인 후 매드리거 연동을 완료하면 커뮤니티에 참여할 수 있습니다.</p>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
@@ -52,7 +52,7 @@ export default async function CommunityPage({ searchParams }: PageProps) {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-6xl px-6 py-12">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · 게시판</div>
-          <h1 className="mt-3 text-3xl sm:text-5xl font-bold tracking-tight">자유 게시판</h1>
+          <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">자유 게시판</h1>
           <p className="mt-4 text-sm text-neutral-400">동아리 구분 없이 전체 매드리거가 소통하는 공간. 글은 승인된 매드리거만 볼 수 있습니다.</p>
         </div>
       </section>

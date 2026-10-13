@@ -157,9 +157,9 @@ export function MadContactForm({ initialTopic }: { initialTopic?: string }) {
     return (
       <div className="bg-neutral-950 border border-[#EC1D25] p-12 text-center">
         <CheckCircle2 className="h-12 w-12 text-[#EC1D25] mx-auto" />
-        <h2 className="mt-6 text-2xl font-bold">문의가 접수되었습니다</h2>
+        <h2 className="mt-6 text-2xl font-black">문의가 접수되었습니다</h2>
         <p className="mt-3 text-sm text-neutral-400">입력하신 이메일로 회신드리겠습니다.</p>
-        {error && <p className="mt-4 text-sm text-neutral-300">{error}</p>}
+        {error && <p className="mt-4 text-sm text-amber-300">{error}</p>}
       </div>
     );
   }

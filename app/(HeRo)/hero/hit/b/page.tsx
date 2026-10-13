@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Clock, AlertCircle } from "lucide-react";
+import { Compass, Target, Shield, Clock, AlertCircle } from "lucide-react";
 
 import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
 import HitStartCTA from "@/features/hit/HitStartCTA";
@@ -11,9 +11,9 @@ import { useHitResume, postHitSession } from "@/features/hit/useHitResume";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/b/questions → hit_questions test_type B)와 같아야 한다 (2026-10-12 재정의 — 전 회원 공통 "역량과 방향")
 const modules = [
-  { title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: `~${estimateMinutes(60)}분` },
-  { title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. 기본 성향 검사의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: `~${estimateMinutes(36)}분` },
-  { title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: `~${estimateMinutes(16)}분` },
+  { icon: Target, title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: `~${estimateMinutes(60)}분` },
+  { icon: Shield, title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. 기본 성향 검사의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: `~${estimateMinutes(36)}분` },
+  { icon: Compass, title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: `~${estimateMinutes(16)}분` },
 ];
 const TOTAL_QUESTIONS = 112;
 
@@ -70,7 +70,7 @@ function HitBIntroContent() {
   if (checking) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <span className="text-sm text-mute">불러오는 중</span>
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
       </div>
     );
   }
@@ -78,13 +78,13 @@ function HitBIntroContent() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-white border-b border-neutral-200">
+      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-[11px] font-bold text-neutral-400 tracking-wide mb-3">공통 기반</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">공통 기반</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
             {HIT_STAGES.b.code}
           </h1>
-          <p className="text-lg font-bold text-neutral-600 -mt-2 mb-4">{HIT_STAGES.b.name}</p>
+          <p className="text-lg font-semibold text-neutral-600 -mt-2 mb-4">{HIT_STAGES.b.name}</p>
           <p className="text-neutral-500 mb-2">
             무엇을 할 수 있고, 어디로 가고 싶은지.<br />
             역량·효능감·자기와 직무에 대한 이해를 진단합니다. 기본 성향 검사와 함께 모든 회원의 공통 기반입니다.
@@ -101,21 +101,21 @@ function HitBIntroContent() {
 
       {/* HIT A Required Notice */}
       {hasHitA === "no" && (
-        <section className="bg-neutral-50 border-y border-neutral-200">
+        <section className="bg-amber-50 border-y border-amber-200">
           <div className="mx-auto max-w-3xl px-6 py-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-neutral-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-neutral-800">기본 성향 검사를 먼저 완료해주세요</p>
-                <p className="text-xs text-neutral-600 mt-1">
+                <p className="text-sm font-bold text-amber-800">기본 성향 검사를 먼저 완료해주세요</p>
+                <p className="text-xs text-amber-600 mt-1">
                   효능감을 기본 성향 검사의 흥미 결과와 겹쳐 분석합니다.
                   아직 기본 성향 검사를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
                   onClick={() => router.push('/hero/hit/a')}
-                  className="mt-2 text-xs font-bold text-neutral-700 underline hover:text-neutral-900"
+                  className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900"
                 >
-                  기본 성향 검사 응시 →
+                  기본 성향 검사 시작하기 →
                 </button>
               </div>
             </div>
@@ -129,7 +129,10 @@ function HitBIntroContent() {
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6">검사 구성</h2>
           <div className="space-y-4">
             {modules.map((m, i) => (
-              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
+              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <m.icon className="h-5 w-5" />
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm">{m.title}</h3>
@@ -153,7 +156,7 @@ function HitBIntroContent() {
             각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다. 정답은 없습니다.
           </p>
           <HitStartCTA
-            label={`${HIT_STAGES.b.ko} 응시`}
+            label={`${HIT_STAGES.b.ko} 시작하기`}
             resume={resume}
             total={TOTAL_QUESTIONS}
             starting={starting}
@@ -171,7 +174,7 @@ function HitBIntroPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
-        <span className="text-sm text-mute">불러오는 중</span>
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
       </div>
     }>
       <HitBIntroContent />

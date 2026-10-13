@@ -60,7 +60,7 @@ export function GoalsTab({ memberId }: { memberId: string }) {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white border border-neutral-200 rounded-xs p-6">
+            <div className="bg-white border border-neutral-200 rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-6">
                     <div>
                         <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
@@ -73,7 +73,7 @@ export function GoalsTab({ memberId }: { memberId: string }) {
                     </div>
                     <button
                         onClick={() => setCreateOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xs text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: RED }}
                     >
                         <Plus className="w-4 h-4" /> 새 목표 쓰기
@@ -82,11 +82,11 @@ export function GoalsTab({ memberId }: { memberId: string }) {
 
                 {loading ? (
                     <div className="space-y-3 animate-pulse">
-                        <div className="h-32 bg-neutral-100 rounded-xs" />
-                        <div className="h-32 bg-neutral-100 rounded-xs" />
+                        <div className="h-32 bg-neutral-100 rounded-xl" />
+                        <div className="h-32 bg-neutral-100 rounded-xl" />
                     </div>
                 ) : goals.length === 0 ? (
-                    <div className="text-center py-12 px-6 border border-dashed border-neutral-200 rounded-xs">
+                    <div className="text-center py-12 px-6 border border-dashed border-neutral-200 rounded-xl">
                         <Target className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
                         <p className="text-sm text-neutral-500 mb-4">아직 설정된 목표가 없어요.</p>
                         <p className="text-xs text-neutral-400">
@@ -148,7 +148,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
         : null;
 
     return (
-        <div className="border border-neutral-200 rounded-xs p-5 hover:border-neutral-300 transition-colors">
+        <div className="border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 transition-colors">
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-neutral-900 text-base leading-tight">{goal.title}</h4>
@@ -167,7 +167,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                 </div>
             </div>
 
-            <div className="h-1.5 bg-neutral-100 rounded-none overflow-hidden mb-4">
+            <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mb-4">
                 <div className="h-full transition-all" style={{ width: `${goal.progress_percent}%`, backgroundColor: RED }} />
             </div>
 
@@ -178,7 +178,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         {goal.vrief_targets.map((v) => (
-                            <span key={v.code} className="text-[11px] px-2 py-0.5 bg-neutral-50 text-neutral-700 rounded-none">
+                            <span key={v.code} className="text-[11px] px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">
                                 {v.label} {v.from}→{v.to}
                             </span>
                         ))}
@@ -193,7 +193,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         {goal.gpr_targets.map((g, i) => (
-                            <span key={i} className="text-[11px] px-2 py-0.5 bg-neutral-50 text-neutral-700 rounded-none">
+                            <span key={i} className="text-[11px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full">
                                 {g.label}
                                 {g.current !== undefined && g.target !== undefined && ` (${g.current}/${g.target})`}
                             </span>
@@ -205,14 +205,14 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
             <div className="flex items-center gap-2 pt-3 border-t border-neutral-100">
                 <button
                     onClick={onCheckin}
-                    className="flex-1 py-2 rounded-xs text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                    className="flex-1 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: RED }}
                 >
                     주간 체크인
                 </button>
                 <button
                     onClick={handleComplete}
-                    className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                    className="p-2 text-neutral-400 hover:text-green-600 transition-colors"
                     title="완료 처리"
                 >
                     <CheckCircle2 className="w-4 h-4" />
@@ -263,7 +263,7 @@ function CreateGoalModal({ memberId, onClose, onCreated }: { memberId: string; o
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
-            <div className="bg-white rounded-xs w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
                     <h3 className="text-lg font-bold text-neutral-900">새 목표 쓰기</h3>
                     <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900">
@@ -276,7 +276,7 @@ function CreateGoalModal({ memberId, onClose, onCreated }: { memberId: string; o
                         <input
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full px-3 py-2 border border-neutral-200 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+                            className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-[#E53935]"
                             placeholder="이번 분기 가장 중요한 목표는?"
                         />
                     </Field>
@@ -286,7 +286,7 @@ function CreateGoalModal({ memberId, onClose, onCreated }: { memberId: string; o
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={2}
-                            className="w-full px-3 py-2 border border-neutral-200 rounded-xs text-sm focus:outline-none focus:border-[#E53935] resize-none"
+                            className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-[#E53935] resize-none"
                         />
                     </Field>
 
@@ -295,7 +295,7 @@ function CreateGoalModal({ memberId, onClose, onCreated }: { memberId: string; o
                             type="date"
                             value={deadline}
                             onChange={(e) => setDeadline(e.target.value)}
-                            className="px-3 py-2 border border-neutral-200 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+                            className="px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-[#E53935]"
                         />
                     </Field>
 
@@ -308,7 +308,7 @@ function CreateGoalModal({ memberId, onClose, onCreated }: { memberId: string; o
                     <button
                         onClick={save}
                         disabled={saving || !title.trim()}
-                        className="px-5 py-2 text-sm font-bold text-white rounded-xs disabled:opacity-50"
+                        className="px-5 py-2 text-sm font-bold text-white rounded-lg disabled:opacity-50"
                         style={{ backgroundColor: RED }}
                     >
                         {saving ? "저장 중..." : "목표 쓰기"}
@@ -330,17 +330,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: VriefTarget[]) => void }) {
     return (
-        <div className="border border-neutral-100 bg-neutral-50/30 rounded-xs p-4">
+        <div className="border border-blue-100 bg-blue-50/30 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5" /> Vrief — 키울 역량
                     </label>
                     <p className="text-[11px] text-neutral-500 mt-0.5">현재 수준 → 목표 수준 (0~5)</p>
                 </div>
                 <button
                     onClick={() => onChange([...value, { code: `vr_${Date.now()}`, label: "", from: 3, to: 4 }])}
-                    className="text-xs text-neutral-700 hover:text-neutral-900 font-bold flex items-center gap-1"
+                    className="text-xs text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1"
                 >
                     <Plus className="w-3.5 h-3.5" /> 추가
                 </button>
@@ -357,7 +357,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 onChange(next);
                             }}
                             placeholder="역량명 (예: 시장 분석)"
-                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white"
+                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-400 bg-white"
                         />
                         <input
                             type="number"
@@ -367,7 +367,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 const next = [...value]; next[i] = { ...next[i], from: +e.target.value };
                                 onChange(next);
                             }}
-                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
+                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-400 bg-white text-center"
                         />
                         <span className="text-neutral-400">→</span>
                         <input
@@ -378,7 +378,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 const next = [...value]; next[i] = { ...next[i], to: +e.target.value };
                                 onChange(next);
                             }}
-                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
+                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-400 bg-white text-center"
                         />
                         <button
                             onClick={() => onChange(value.filter((_, j) => j !== i))}
@@ -395,17 +395,17 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
 
 function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprTarget[]) => void }) {
     return (
-        <div className="border border-neutral-100 bg-neutral-50/30 rounded-xs p-4">
+        <div className="border border-emerald-100 bg-emerald-50/30 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
                         <Activity className="w-3.5 h-3.5" /> GPR — 낼 업적
                     </label>
                     <p className="text-[11px] text-neutral-500 mt-0.5">목표값이 있으면 진행률 자동 계산</p>
                 </div>
                 <button
                     onClick={() => onChange([...value, { label: "", metric: `gpr_${Date.now()}`, target: 100, current: 0 }])}
-                    className="text-xs text-neutral-700 hover:text-neutral-900 font-bold flex items-center gap-1"
+                    className="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1"
                 >
                     <Plus className="w-3.5 h-3.5" /> 추가
                 </button>
@@ -421,7 +421,7 @@ function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprT
                                 onChange(next);
                             }}
                             placeholder="업적 (예: 월간 리드 200건)"
-                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white"
+                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-emerald-400 bg-white"
                         />
                         <input
                             type="number"
@@ -431,7 +431,7 @@ function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprT
                                 onChange(next);
                             }}
                             placeholder="목표"
-                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
+                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-emerald-400 bg-white text-center"
                         />
                         <button
                             onClick={() => onChange(value.filter((_, j) => j !== i))}
@@ -479,7 +479,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
-            <div className="bg-white rounded-xs w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
                     <div>
                         <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">주간 체크인</p>
@@ -493,14 +493,14 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                 <div className="px-6 py-5 space-y-5">
                     {goal.vrief_targets.length > 0 && (
                         <div>
-                            <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
+                            <label className="text-xs font-bold text-blue-700 flex items-center gap-1.5 mb-3">
                                 <TrendingUp className="w-3.5 h-3.5" /> 이번 주 Vrief 체감
                             </label>
                             <div className="space-y-3">
                                 {goal.vrief_targets.map((v) => (
                                     <div key={v.code} className="flex items-center gap-3">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-normal text-neutral-700 truncate">{v.label}</p>
+                                            <p className="text-sm font-medium text-neutral-700 truncate">{v.label}</p>
                                             <p className="text-[11px] text-neutral-400">목표 {v.from} → {v.to}</p>
                                         </div>
                                         <input
@@ -508,7 +508,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                                             step="0.5" min="0" max="5"
                                             value={vriefLevels[v.code] ?? v.from}
                                             onChange={(e) => setVriefLevels({ ...vriefLevels, [v.code]: +e.target.value })}
-                                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 text-center"
+                                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-400 text-center"
                                         />
                                     </div>
                                 ))}
@@ -518,21 +518,21 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
 
                     {goal.gpr_targets.filter((g) => g.metric).length > 0 && (
                         <div>
-                            <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
+                            <label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 mb-3">
                                 <Activity className="w-3.5 h-3.5" /> 이번 주 GPR 누적값
                             </label>
                             <div className="space-y-3">
                                 {goal.gpr_targets.filter((g) => g.metric).map((g) => (
                                     <div key={g.metric} className="flex items-center gap-3">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-normal text-neutral-700 truncate">{g.label}</p>
+                                            <p className="text-sm font-medium text-neutral-700 truncate">{g.label}</p>
                                             <p className="text-[11px] text-neutral-400">목표 {g.target}</p>
                                         </div>
                                         <input
                                             type="number"
                                             value={gprCurrents[g.metric!] ?? 0}
                                             onChange={(e) => setGprCurrents({ ...gprCurrents, [g.metric!]: +e.target.value })}
-                                            className="w-24 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 text-center"
+                                            className="w-24 px-2 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-emerald-400 text-center"
                                         />
                                     </div>
                                 ))}
@@ -547,7 +547,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                             onChange={(e) => setNote(e.target.value)}
                             rows={2}
                             placeholder="잘된 점 · 막힌 점 · 다음 주 방향"
-                            className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#E53935] resize-none"
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#E53935] resize-none"
                         />
                     </div>
                 </div>
@@ -557,7 +557,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                     <button
                         onClick={save}
                         disabled={saving}
-                        className="px-5 py-2 text-sm font-bold text-white rounded-xs disabled:opacity-50"
+                        className="px-5 py-2 text-sm font-bold text-white rounded-lg disabled:opacity-50"
                         style={{ backgroundColor: RED }}
                     >
                         {saving ? "저장 중..." : UC_PUBLIC ? "체크인 · UC 적립" : "체크인"}

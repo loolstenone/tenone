@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, FlaskConical, AlertCircle } from "lucide-react";
+import { ArrowRight, ListChecks, Calculator, BookOpenCheck, Sparkles, ShieldCheck, Lock, FlaskConical, AlertCircle } from "lucide-react";
 import { HIT_STAGES } from "@/lib/hit/stages";
 
 export const metadata: Metadata = {
@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 
 const STEPS = [
   {
+    icon: ListChecks,
     title: "1. 문항 — 같은 형식, 섞인 순서",
     body: [
       "모든 문항은 1(전혀 아니다)~7(매우 그렇다)의 7점 척도 하나로 답합니다.",
@@ -26,6 +27,7 @@ const STEPS = [
     ],
   },
   {
+    icon: Calculator,
     title: "2. 채점 — 서버의 정해진 규칙",
     body: [
       "점수는 HeRo 서버의 채점 규칙이 계산합니다. 같은 응답에는 언제나 같은 점수가 나옵니다.",
@@ -37,6 +39,7 @@ const STEPS = [
     ],
   },
   {
+    icon: BookOpenCheck,
     title: "3. 해설 — 미리 쓰고 검수한 해설 모듈",
     body: [
       "결과 해설의 중심은 HeRo가 미리 작성하고 검수한 600개 이상의 해설 모듈입니다 (64유형 · 성격 · 행동 · 성품 · 적성 · 역량 · 생애주기별).",
@@ -45,6 +48,7 @@ const STEPS = [
     ],
   },
   {
+    icon: Sparkles,
     title: "4. AI 해설 — 보조 역할만",
     body: [
       "결과 마지막의 \"종합 해설\"은 AI가 위 점수를 받아 읽기 쉽게 정리한 문단입니다.",
@@ -53,6 +57,7 @@ const STEPS = [
     ],
   },
   {
+    icon: ShieldCheck,
     title: "5. 응답 품질 관리",
     body: [
       "누구나 \"아니다\"라고 답할 만한 확인 문항, 같은 답을 길게 반복한 응답 등 응답 성실도 신호를 기록합니다.",
@@ -60,6 +65,7 @@ const STEPS = [
     ],
   },
   {
+    icon: Lock,
     title: "6. 개인정보 원칙",
     body: [
       "HIT 검사는 회원만 할 수 있고, 결과는 본인과 HeRo 운영자만 열람합니다. 결과 링크를 안다고 다른 사람이 볼 수 없습니다.",
@@ -72,10 +78,10 @@ const STEPS = [
 export default function HitMethodPage() {
   return (
     <div>
-      <section className="bg-white border-b border-neutral-200">
+      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HIT 채점 방식</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>
           <p className="text-neutral-500 max-w-xl mx-auto break-keep">
             HIT의 점수와 유형은 AI가 만들어 내는 것이 아니라, 정해진 채점 규칙과 미리 검수한 해설로 만들어집니다. 그 과정을 그대로 공개합니다.
           </p>
@@ -87,8 +93,8 @@ export default function HitMethodPage() {
           {/* 흐름 요약 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
             {[["응답", "7점 척도 · 순서 섞기"], ["채점", "서버 규칙 · 재현 가능"], ["해설", "검수된 모듈 600개+"], ["AI", "읽기용 요약 · 보조"]].map(([t, d], i) => (
-              <div key={t} className="rounded-xs border border-neutral-200 p-4 text-center">
-                <p className="text-[11px] font-bold text-neutral-400">{i + 1}</p>
+              <div key={t} className="rounded-xl border border-neutral-200 p-4 text-center">
+                <p className="text-[11px] font-semibold text-neutral-400">{i + 1}</p>
                 <p className="text-sm font-bold text-neutral-900 mt-1">{t}</p>
                 <p className="text-[11px] text-neutral-500 mt-1 break-keep">{d}</p>
               </div>
@@ -98,7 +104,7 @@ export default function HitMethodPage() {
           <div className="space-y-10">
             {STEPS.map(s => (
               <div key={s.title}>
-                <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900 mb-3"> {s.title}</h2>
+                <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900 mb-3"><s.icon className="h-5 w-5 text-neutral-400" /> {s.title}</h2>
                 <ul className="space-y-2">
                   {s.body.map(b => <li key={b} className="text-sm text-neutral-600 leading-relaxed pl-4 border-l-2 border-neutral-200 break-keep">{b}</li>)}
                 </ul>
@@ -118,7 +124,7 @@ export default function HitMethodPage() {
               </ul>
             </div>
 
-            <div className="rounded-xs bg-neutral-50 border border-neutral-200 p-6">
+            <div className="rounded-2xl bg-neutral-50 border border-neutral-200 p-6">
               <h2 className="flex items-center gap-2 text-base font-bold text-neutral-900 mb-2"><AlertCircle className="h-5 w-5 text-neutral-400" /> HIT를 읽을 때</h2>
               <ul className="space-y-1.5 text-sm text-neutral-600 leading-relaxed list-disc pl-5 break-keep">
                 <li>HIT는 스스로 답하는 자기보고 검사입니다. 그 순간의 자기 인식을 보여 주며, 능력을 시험으로 측정한 것이 아닙니다.</li>
@@ -130,7 +136,7 @@ export default function HitMethodPage() {
           </div>
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/hero/hit" className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-normal rounded-xs hover:bg-red-700 transition-colors">HIT 검사 보기 <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/hero/hit" className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">HIT 검사 보기 <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>

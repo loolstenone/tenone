@@ -19,7 +19,7 @@ export default async function MemberPage() {
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MEMBER</div>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">매드리거만의 공간</h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black tracking-tight">매드리거만의 공간</h1>
           <p className="mt-6 text-neutral-400 leading-relaxed">
             매드리거 대시보드는 로그인 후 이용할 수 있습니다.<br />
             아직 매드리그 멤버가 아니라면 지원서를 제출해주세요.
@@ -51,7 +51,7 @@ export default async function MemberPage() {
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MEMBER</div>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">아직 매드리거가 아닙니다</h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black tracking-tight">아직 매드리거가 아닙니다</h1>
           <p className="mt-6 text-neutral-400 leading-relaxed">
             <strong className="text-white">{user.email}</strong> 계정으로 로그인되었지만,
             이 계정에 연결된 매드리거 기록을 찾을 수 없습니다.
@@ -81,15 +81,16 @@ export default async function MemberPage() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-neutral-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-16">
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#EC1D25] mb-4">
             MEMBER · {member.role === 'club_leader' ? '동아리장' : member.role === 'staff' ? '운영진' : '매드리거'}
           </div>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">{core?.name}</h1>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight">{core?.name}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-neutral-400">
             {club && (
               <span className="inline-flex items-center gap-2">
-                <span className="inline-block h-3 w-3 rounded-none" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+                <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
                 <strong className="text-white">{club.name}</strong>
                 <span className="text-neutral-500"><MapPin className="h-3 w-3 inline" /> {club.region}</span>
               </span>
@@ -145,7 +146,7 @@ export default async function MemberPage() {
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#FFC000] mb-3">
             <Sparkles className="h-4 w-4" /> COMING SOON · Phase 2
           </div>
-          <h2 className="text-2xl font-bold mb-6">곧 추가될 기능</h2>
+          <h2 className="text-2xl font-black mb-6">곧 추가될 기능</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link href="/madleague/member/projects" className="bg-black border border-neutral-800 hover:border-neutral-600 p-4 transition group">
               <div className="font-bold group-hover:text-white">프로젝트 <span className="text-[10px] font-bold text-[#EC1D25] ml-1">NEW</span></div>
@@ -175,7 +176,7 @@ function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-neutral-950 border border-neutral-900 p-6">
       <div className="text-xs font-bold tracking-wider text-neutral-500">{label}</div>
-      <div className="mt-2 text-xl font-bold">{value}</div>
+      <div className="mt-2 text-xl font-black">{value}</div>
     </div>
   );
 }

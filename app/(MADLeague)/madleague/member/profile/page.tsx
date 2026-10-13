@@ -14,7 +14,7 @@ export default async function ProfileEditPage() {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="text-4xl font-bold">로그인이 필요합니다</h1>
+          <h1 className="text-4xl font-black">로그인이 필요합니다</h1>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
       </div>
@@ -31,7 +31,7 @@ export default async function ProfileEditPage() {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="text-4xl font-bold">매드리거 연동이 필요합니다</h1>
+          <h1 className="text-4xl font-black">매드리거 연동이 필요합니다</h1>
           <Link href="/madleague/member" className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">매드리거 페이지로</Link>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default async function ProfileEditPage() {
       </div>
       <section className="mx-auto max-w-3xl px-6 py-12">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">PROFILE</div>
-        <h1 className="text-4xl font-bold tracking-tight">프로필 편집</h1>
+        <h1 className="text-4xl font-black tracking-tight">프로필 편집</h1>
         <p className="mt-3 text-sm text-neutral-400">이름·동아리·기수는 운영진만 수정할 수 있습니다.</p>
 
         <div className="mt-10">

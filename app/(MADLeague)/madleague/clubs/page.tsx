@@ -32,7 +32,7 @@ export default async function ClubsPage() {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-32">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CLUBS</div>
-          <h1 className="mt-3 text-5xl sm:text-7xl font-bold tracking-tight">
+          <h1 className="mt-3 text-5xl sm:text-7xl font-black tracking-tight">
             매드리그 공식 동아리
           </h1>
           <p className="mt-8 max-w-xl text-lg text-neutral-400 leading-relaxed">
@@ -57,7 +57,7 @@ export default async function ClubsPage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <div className="text-xs font-bold tracking-widest text-[#FFC000]">NEW CLUB</div>
-              <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white">
+              <h2 className="mt-3 text-2xl sm:text-3xl font-black text-white">
                 MADLeague 공식 동아리가 되고 싶다면
               </h2>
               <p className="mt-3 text-neutral-400">

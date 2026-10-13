@@ -77,7 +77,7 @@ export function UniverseMobileMenu({
             {/* 슬라이드 패널 — 2/3 너비, 최대 384px */}
             <div
                 className={clsx(
-                    "fixed top-0 right-0 bottom-0 z-[9999] w-2/3 max-w-sm flex flex-col",
+                    "fixed top-0 right-0 bottom-0 z-[9999] w-2/3 max-w-sm flex flex-col shadow-2xl",
                     bgClass,
                     hasOpened && "transition-transform duration-300 ease-out",
                     open ? "translate-x-0" : "translate-x-full"
@@ -93,7 +93,7 @@ export function UniverseMobileMenu({
                     isDark ? "border-white/10" : "border-neutral-200"
                 )}>
                     <span className={clsx(
-                        "text-sm font-bold",
+                        "text-sm font-semibold",
                         isDark ? "text-white/70" : "text-neutral-700"
                     )}>
                         {brandNode ?? brandName}
@@ -101,7 +101,7 @@ export function UniverseMobileMenu({
                     <button
                         onClick={onClose}
                         className={clsx(
-                            "p-1.5 rounded-xs transition-colors",
+                            "p-1.5 rounded-md transition-colors",
                             isDark
                                 ? "text-white/50 hover:text-white hover:bg-white/5"
                                 : "text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100"
@@ -155,7 +155,7 @@ export function UniverseMobileMenuLink({
             href={href}
             onClick={onClick}
             className={clsx(
-                "flex items-center rounded-xs px-4 py-2.5 text-base font-normal transition-colors",
+                "flex items-center rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
                 active
                     ? isDark ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-900"
                     : isDark ? "text-neutral-300 hover:bg-white/5 hover:text-white" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"

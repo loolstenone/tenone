@@ -52,15 +52,15 @@ export default async function ArchiveDetailPage({ params }: PageProps) {
             <>
               <span>·</span>
               <span className="flex items-center gap-1 text-white">
-                <span className="inline-block h-2 w-2 rounded-none" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
                 {club.name}
               </span>
             </>
           )}
         </div>
-        <h1 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight leading-tight">{item.title}</h1>
+        <h1 className="mt-4 text-3xl sm:text-5xl font-black tracking-tight leading-tight">{item.title}</h1>
         {item.award && (
-          <div className="mt-4 inline-flex items-center gap-2 bg-[#FFC000] text-black text-sm font-bold px-3 py-1.5">
+          <div className="mt-4 inline-flex items-center gap-2 bg-[#FFC000] text-black text-sm font-black px-3 py-1.5">
             <Trophy className="h-4 w-4" /> {item.award}
           </div>
         )}
@@ -78,7 +78,7 @@ export default async function ArchiveDetailPage({ params }: PageProps) {
         {comp && (
           <div className="bg-neutral-950 border border-neutral-900 p-6">
             <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-2">COMPETITION</div>
-            <div className="text-xl font-bold">{comp.client_name ?? comp.title}</div>
+            <div className="text-xl font-black">{comp.client_name ?? comp.title}</div>
             <div className="mt-1 text-sm text-neutral-400">{comp.year} · {comp.title}</div>
             <Link
               href={`/madleague/programs/competition?year=${comp.year}`}

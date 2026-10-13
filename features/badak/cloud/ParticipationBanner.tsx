@@ -75,15 +75,16 @@ export function ParticipationBanner({ offset = 0 }: ParticipationBannerProps) {
 
   return (
     <div
-      className="my-5 rounded-xs px-5 py-5"
+      className="my-5 rounded-2xl px-5 py-5"
       style={{
-        background: 'rgba(255,255,255,0.04)',
+        background: 'linear-gradient(135deg, rgba(255,217,61,0.07) 0%, rgba(96,165,250,0.04) 100%)',
         border: '1px solid rgba(255,217,61,0.15)',
       }}
     >
       {/* 아이콘 + 라벨 */}
       <div className="mb-3 flex items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,217,61,0.4)' }}>
+        <span className="text-[13px]">💡</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,217,61,0.4)' }}>
           Badak 이야기
         </span>
       </div>

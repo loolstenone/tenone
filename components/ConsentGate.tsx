@@ -37,13 +37,13 @@ export function ConsentGate() {
 
     return (
         <div className="fixed inset-0 z-[99998] flex items-center justify-center bg-black/60 px-4">
-            <div className="w-full max-w-sm bg-white rounded-xs p-6">
+            <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
                 <h2 className="text-lg font-bold text-neutral-900">서비스 이용 동의</h2>
                 <p className="text-sm text-neutral-500 mt-1 mb-4">계속 이용하려면 아래 항목에 동의해주세요.</p>
                 <SignupConsent value={value} onChange={setValue} />
-                {error && <p className="text-sm text-state-bad mt-3">{error}</p>}
+                {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
                 <button onClick={handleSubmit} disabled={saving}
-                    className="w-full mt-4 py-2.5 rounded-xs text-sm font-bold text-white bg-neutral-900 disabled:opacity-50">
+                    className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-neutral-900 disabled:opacity-50">
                     {saving ? "저장 중..." : "동의하고 계속하기"}
                 </button>
                 <button onClick={() => logout()}

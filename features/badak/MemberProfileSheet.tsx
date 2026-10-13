@@ -100,7 +100,7 @@ export function MemberProfileSheet({
 
       {/* 바텀 시트 */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[9999] mx-auto w-full max-w-[860px] overflow-hidden rounded-t-xs"
+        className="fixed bottom-0 left-0 right-0 z-[9999] mx-auto w-full max-w-[860px] overflow-hidden rounded-t-2xl"
         style={{
           background: '#1a1a2e',
           border: '1px solid rgba(255,255,255,0.08)',
@@ -113,13 +113,13 @@ export function MemberProfileSheet({
       >
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-none" style={{ background: 'rgba(255,255,255,0.12)' }} />
+          <div className="h-1 w-10 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
         </div>
 
         {/* 닫기 버튼 */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-none p-1.5 text-white/30 hover:text-white/70 transition-colors"
+          className="absolute right-4 top-4 rounded-full p-1.5 text-white/30 hover:text-white/70 transition-colors"
           style={{ background: 'rgba(255,255,255,0.06)' }}
         >
           <X className="h-4 w-4" />
@@ -130,7 +130,7 @@ export function MemberProfileSheet({
           <div className="flex items-start gap-4">
             {/* 아바타 */}
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xs text-2xl font-bold"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold"
               style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
               {avatarLetter}
@@ -142,7 +142,7 @@ export function MemberProfileSheet({
                 <span className="text-[18px] font-bold text-white leading-tight">{name}</span>
                 {isLeader && (
                   <span
-                    className="rounded-none px-2 py-0.5 text-[10px] font-bold"
+                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.25)' }}
                   >
                     바닥장
@@ -150,7 +150,7 @@ export function MemberProfileSheet({
                 )}
                 {profile?.isActive && (
                   <span className="flex items-center gap-1 text-xs" style={{ color: '#4ade80' }}>
-                    <span className="h-1.5 w-1.5 rounded-none bg-neutral-400 inline-block" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
                     활동 중
                   </span>
                 )}
@@ -167,7 +167,7 @@ export function MemberProfileSheet({
           {/* 로딩 중 */}
           {loading && (
             <div className="mt-5 flex items-center justify-center gap-2 text-[12px] text-white/25">
-              <span className="text-sm text-mute">불러오는 중</span>
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-white/15 border-t-amber-400/50 animate-spin" />
               프로필 불러오는 중...
             </div>
           )}
@@ -184,10 +184,10 @@ export function MemberProfileSheet({
             <div className="mt-4 space-y-3">
               {profile.lookingFor.length > 0 && (
                 <div>
-                  <div className="mb-1.5 text-[11px] font-bold text-white/30">원하는 것</div>
+                  <div className="mb-1.5 text-[11px] font-semibold text-white/30">원하는 것</div>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.lookingFor.map((t) => (
-                      <span key={t} className="rounded-none px-2.5 py-1 text-[11px]"
+                      <span key={t} className="rounded-full px-2.5 py-1 text-[11px]"
                         style={{ background: 'rgba(96,165,250,0.1)', color: '#93c5fd', border: '1px solid rgba(96,165,250,0.2)' }}>
                         {t}
                       </span>
@@ -197,10 +197,10 @@ export function MemberProfileSheet({
               )}
               {profile.canOffer.length > 0 && (
                 <div>
-                  <div className="mb-1.5 text-[11px] font-bold text-white/30">줄 수 있는 것</div>
+                  <div className="mb-1.5 text-[11px] font-semibold text-white/30">줄 수 있는 것</div>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.canOffer.map((t) => (
-                      <span key={t} className="rounded-none px-2.5 py-1 text-[11px]"
+                      <span key={t} className="rounded-full px-2.5 py-1 text-[11px]"
                         style={{ background: 'rgba(74,222,128,0.1)', color: '#86efac', border: '1px solid rgba(74,222,128,0.2)' }}>
                         {t}
                       </span>
@@ -215,7 +215,7 @@ export function MemberProfileSheet({
           {profile && profile.interestTags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {profile.interestTags.map((t) => (
-                <span key={t} className="rounded-xs px-2 py-0.5 text-[11px] text-white/30"
+                <span key={t} className="rounded-xl px-2 py-0.5 text-[11px] text-white/30"
                   style={{ background: 'rgba(255,255,255,0.05)' }}>
                   #{t}
                 </span>
@@ -227,7 +227,7 @@ export function MemberProfileSheet({
         {/* 개설한 모임 */}
         {groups.length > 0 && (
           <div className="border-t border-white/6 px-6 py-4">
-            <div className="mb-3 flex items-center gap-1.5 text-[11px] font-bold text-white/35 uppercase tracking-wider">
+            <div className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-white/35 uppercase tracking-wider">
               <Users className="h-3.5 w-3.5" />
               개설한 모임 {groups.length}
             </div>
@@ -237,11 +237,11 @@ export function MemberProfileSheet({
                   key={g.id}
                   href={`/badak/groups/${g.id}`}
                   onClick={onClose}
-                  className="flex items-start justify-between rounded-xs p-3 transition-colors"
+                  className="flex items-start justify-between rounded-xl p-3 transition-colors"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13px] font-bold text-white/80">{g.title}</div>
+                    <div className="truncate text-[13px] font-semibold text-white/80">{g.title}</div>
                     <div className="mt-1 flex items-center gap-3 text-xs text-white/30">
                       {g.location && (
                         <span className="flex items-center gap-0.5">

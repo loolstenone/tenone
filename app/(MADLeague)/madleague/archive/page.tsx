@@ -52,7 +52,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARCHIVE</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-bold tracking-tight">모든 기록</h1>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">모든 기록</h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
             2023년부터 지금까지, MADLeague가 만들어낸 모든 것. 경쟁PT 수상작부터 프로그램 활동까지.
           </p>
@@ -103,14 +103,14 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                   <div className="aspect-[4/3] bg-neutral-900 relative">
                     {item.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.thumbnail_url} alt={item.title} className="h-full w-full object-cover group- transition" />
+                      <img src={item.thumbnail_url} alt={item.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-neutral-600 text-xs tracking-widest">
                         {(TYPE_LABELS[item.type] ?? item.type).toUpperCase()}
                       </div>
                     )}
                     {item.award && (
-                      <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-[#FFC000] text-black text-xs font-bold px-2 py-1">
+                      <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-[#FFC000] text-black text-xs font-black px-2 py-1">
                         <Trophy className="h-3 w-3" /> {item.award}
                       </div>
                     )}
@@ -124,7 +124,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                         <>
                           <span>·</span>
                           <span className="flex items-center gap-1">
-                            <span className="inline-block h-1.5 w-1.5 rounded-none" style={{ backgroundColor: itemClub.color ?? '#EC1D25' }} />
+                            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: itemClub.color ?? '#EC1D25' }} />
                             {itemClub.name}
                           </span>
                         </>
@@ -152,7 +152,7 @@ function FilterChip({ href, active, children, color, gold }: { href: string; act
           : 'bg-black border-neutral-800 text-neutral-400 hover:border-white hover:text-white'
       }`}
     >
-      {color && <span className="inline-block h-2 w-2 rounded-none" style={{ backgroundColor: color }} />}
+      {color && <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />}
       {children}
     </Link>
   );

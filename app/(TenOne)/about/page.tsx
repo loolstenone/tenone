@@ -72,10 +72,11 @@ function AboutContent() {
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         About
                     </p>
-                    <h1 className="text-[28px] leading-9 md:text-[40px] md:leading-[48px] font-bold">
-                        가치로 연결된 세계관을 만드는 사람들
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight">
+                        가치로 연결된<br />
+                        <span className="font-bold">세계관을 만드는 사람들</span>
                     </h1>
-                    <p className="mt-4 text-sm leading-5 tn-text-sub max-w-2xl">
+                    <p className="mt-6 text-lg tn-text-sub max-w-2xl">
                         Ten:One™은 인재를 발굴하고, 연결하고, 기업과 사회의 문제를 해결합니다.
                     </p>
                 </div>
@@ -90,7 +91,7 @@ function AboutContent() {
                             <button key={tab.id} onClick={() => selectTab(tab.id)}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
-                                        ? 'border-current tn-text font-bold'
+                                        ? 'border-neutral-900 tn-text font-medium'
                                         : 'border-transparent tn-text-sub hover:tn-text-sub'
                                 }`}>
                                 {tab.label}
@@ -104,11 +105,11 @@ function AboutContent() {
             {activeTab === 'philosophy' && (
                 <>
                     {/* Origin Story */}
-                    <section className="py-16 px-6">
-                        <div className="max-w-[720px] mx-auto">
+                    <section className="py-24 px-6">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Origin</p>
-                                <h2 className="text-xl md:text-3xl font-normal leading-relaxed">
+                                <h2 className="text-xl md:text-3xl font-light leading-relaxed">
                                     우연히 시계를 봤을 때<br />
                                     <span className="font-bold">10시 01분</span>일 확률은<br />
                                     얼마나 될까?
@@ -123,11 +124,17 @@ function AboutContent() {
                                     Ten:One™ Universe가 시작되었습니다.
                                 </p>
                             </div>
+                            <div className="aspect-[4/3] tn-bg-alt flex items-center justify-center overflow-hidden">
+                                <div className="text-center">
+                                    <p className="text-3xl font-light tracking-tight text-neutral-300">10:01</p>
+                                    <p className="text-xs mt-1 text-neutral-400">The moment it all began</p>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
                     {/* Mission / Vision */}
-                    <section className="tn-card py-16 md:py-16 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
+                    <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                         <div className="max-w-7xl mx-auto">
                             <div className="grid md:grid-cols-2 gap-8 md:gap-16">
                                 <div>
@@ -158,35 +165,36 @@ function AboutContent() {
                     </section>
 
                     {/* Core Value */}
-                    <section className="py-16 px-6">
+                    <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Core Value</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 변하지 않을 가치에 집중하여 <span className="font-bold">빠르게 가치를 창출한다</span>
                             </h2>
-                            <ol className="max-w-[720px]">
+                            <div className="grid md:grid-cols-3 gap-6 md:gap-12">
                                 {[
-                                    { num: "01", title: "본질", en: "Essence", desc: "변하지 않을 가치에 집요하게 집중한다. 트렌드에 흔들리지 않는 근본적인 가치를 찾는다." },
-                                    { num: "02", title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
-                                    { num: "03", title: "이행", en: "Carry Out", desc: "본질이 확인된다면 바로 실행에 옮긴다. 실현되지 않으면 아이디어가 아니다." },
+                                    { num: "01", symbol: "◆", title: "본질", en: "Essence", desc: "변하지 않을 가치에 집요하게 집중한다. 트렌드에 흔들리지 않는 근본적인 가치를 찾는다." },
+                                    { num: "02", symbol: "→", title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
+                                    { num: "03", symbol: "■", title: "이행", en: "Carry Out", desc: "본질이 확인된다면 바로 실행에 옮긴다. 실현되지 않으면 아이디어가 아니다." },
                                 ].map((val) => (
-                                    <li key={val.num} className="flex gap-6 py-4 border-t tn-border">
-                                        <span className="text-sm tn-text-sub w-8 shrink-0">{val.num}</span>
-                                        <div>
-                                            <h3 className="text-lg leading-[26px] font-bold">{val.title} <span className="text-sm font-normal tn-text-sub">{val.en}</span></h3>
-                                            <p className="text-sm leading-5 tn-text-sub mt-1">{val.desc}</p>
-                                        </div>
-                                    </li>
+                                    <div key={val.num} className="border-t tn-border pt-8">
+                                        <span className="text-sm tn-text-muted font-mono">{val.num}</span>
+                                        <h3 className="text-2xl font-bold mt-3">
+                                            <span className="tn-text-muted mr-2">{val.symbol}</span>{val.title}
+                                        </h3>
+                                        <p className="text-sm tn-text-sub mt-1">{val.en}</p>
+                                        <p className="text-sm tn-text-sub mt-4 leading-relaxed">{val.desc}</p>
+                                    </div>
                                 ))}
-                            </ol>
+                            </div>
                         </div>
                     </section>
 
                     {/* Principle 10 */}
-                    <section className="tn-bg-alt py-16 md:py-16 px-6">
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Principle 10</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 우리가 <span className="font-bold">믿는 것들</span>
                             </h2>
                             <div className="space-y-6">
@@ -214,7 +222,7 @@ function AboutContent() {
                     </section>
 
                     {/* Founder */}
-                    <section className="py-16 px-6">
+                    <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <div className="max-w-2xl">
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
@@ -238,10 +246,10 @@ function AboutContent() {
             {activeTab === 'universe' && (
                 <>
                     {/* Universe Intro */}
-                    <section className="py-16 px-6">
+                    <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-normal leading-relaxed max-w-3xl">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light leading-relaxed max-w-3xl">
                                 각 유니버스는 고유한 <span className="font-bold">본질(Essence)</span>을 가지고 있으며,
                                 하나의 거대한 선순환 생태계로 연결되어 있습니다.
                             </h2>
@@ -249,10 +257,10 @@ function AboutContent() {
                     </section>
 
                     {/* Brand Ecosystem — 8 역할 그룹 (SSOT: lib/universe-map.ts) */}
-                    <section className="tn-bg-alt py-16 md:py-16 px-6">
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Ecosystem</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 <span className="font-bold">{UNIVERSE_ROLE_GROUPS.length}개 역할 그룹</span>의 {TOTAL_BRAND_COUNT}개 브랜드가 하나의 생태계를 이룹니다.
                             </h2>
                             <div className="space-y-3">
@@ -260,7 +268,7 @@ function AboutContent() {
                                     <div key={group.num} className="border overflow-hidden" style={{ borderColor: "var(--tn-border)", backgroundColor: "var(--tn-surface)" }}>
                                         <div className="flex items-center gap-3 px-5 py-3 border-b" style={{ borderColor: "var(--tn-border)", borderLeftWidth: 3, borderLeftColor: group.color }}>
                                             <span className="text-[11px] font-mono" style={{ color: group.color }}>{group.num}</span>
-                                            <span className="text-xs font-normal tn-text-sub">{group.role}</span>
+                                            <span className="text-xs font-medium tn-text-sub">{group.role}</span>
                                             <span className="ml-auto text-[10px] tn-text-muted">{group.brands.length}개</span>
                                         </div>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
@@ -268,7 +276,7 @@ function AboutContent() {
                                                 const inner = (
                                                     <div style={{ backgroundColor: "var(--tn-surface)" }} className="h-full p-4 hover:opacity-80 transition-opacity">
                                                         <div className="flex items-start gap-2">
-                                                            <div className="w-1.5 h-1.5 rounded-none mt-1.5 flex-shrink-0" style={{ backgroundColor: group.color }} />
+                                                            <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: group.color }} />
                                                             <div>
                                                                 <p className="text-sm font-bold tn-text leading-tight">{brand.name}</p>
                                                                 {brand.kr && <p className="text-[10px] tn-text-muted">{brand.kr}</p>}
@@ -291,10 +299,10 @@ function AboutContent() {
                     </section>
 
                     {/* Flywheel */}
-                    <section className="tn-card py-16 md:py-16 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
+                    <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] tn-text-sub mb-4">Ten:One™ Flywheel</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 실행은 연결을 가속하고, <span className="font-bold">연결은 더 많은 기회를 만든다.</span>
                             </h2>
                             <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
@@ -311,10 +319,10 @@ function AboutContent() {
                     </section>
 
                     {/* Connection Model */}
-                    <section className="py-16 px-6">
+                    <section className="py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Connection Model</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 브랜드는 <span className="font-bold">4가지 방식</span>으로 연결됩니다.
                             </h2>
                             <div className="grid md:grid-cols-2 gap-8">
@@ -340,10 +348,10 @@ function AboutContent() {
             {activeTab === 'brands' && (
                 <>
                     {/* Intro */}
-                    <section className="py-16 px-6">
+                    <section className="py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Roles</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-4">
+                            <h2 className="text-xl md:text-3xl font-light mb-4">
                                 리더와 팔로어는 <span className="font-bold">역할이지 직급이 아니다</span>
                             </h2>
                             <p className="text-sm tn-text-sub leading-relaxed max-w-2xl">
@@ -411,12 +419,12 @@ function AboutContent() {
                                 <div key={gi}>
                                     <div className="flex items-center gap-3 mb-4 pb-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
                                         <span className="text-[10px] font-mono tn-text-sub">{String(gi + 1).padStart(2, '0')}</span>
-                                        <h3 className="text-sm font-bold tracking-wide">{group.label}</h3>
+                                        <h3 className="text-sm font-semibold tracking-wide">{group.label}</h3>
                                     </div>
                                     <div className="grid gap-px sm:grid-cols-2" style={{ backgroundColor: "var(--tn-border)" }}>
                                         {group.brands.map((b, bi) => (
                                             <div key={bi} className="p-5" style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
-                                                <span className="font-bold tn-text text-[15px]">{b.name}</span>
+                                                <span className="font-semibold tn-text text-[15px]">{b.name}</span>
                                                 <p className="text-sm tn-text-sub leading-relaxed mt-1">{b.role}</p>
                                                 <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--tn-text-muted)" }}>{b.note}</p>
                                             </div>
@@ -428,10 +436,10 @@ function AboutContent() {
                     </section>
 
                     {/* Synergy Flows */}
-                    <section className="tn-bg-alt py-16 md:py-16 px-6">
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Synergy Flows</p>
-                            <h2 className="text-xl md:text-3xl font-normal mb-10 md:mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 역할들이 만나는 <span className="font-bold">시너지 흐름</span>
                             </h2>
                             <div className="space-y-8">
@@ -444,7 +452,7 @@ function AboutContent() {
                                         <div className="flex items-center gap-2 flex-wrap mb-3">
                                             {flow.nodes.map((node, ni) => (
                                                 <span key={ni} className="flex items-center gap-2">
-                                                    <span className="text-sm font-normal px-3 py-1 border" style={{ borderColor: "var(--tn-border)" }}>{node}</span>
+                                                    <span className="text-sm font-medium px-3 py-1 border" style={{ borderColor: "var(--tn-border)" }}>{node}</span>
                                                     {ni < flow.sep.length && (
                                                         <span className="text-xs tn-text-sub">{flow.sep[ni]}</span>
                                                     )}
@@ -471,12 +479,12 @@ function AboutContent() {
 
             {/* ===== History Tab ===== */}
             {activeTab === 'history' && (
-                <section className="py-16 px-6">
+                <section className="py-24 px-6">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex items-end justify-between mb-12">
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">History</p>
-                                <h2 className="text-xl md:text-3xl font-normal">
+                                <h2 className="text-xl md:text-3xl font-light">
                                     유니버스 <span className="font-bold">연대기</span>
                                 </h2>
                             </div>
@@ -523,9 +531,9 @@ function AboutContent() {
             )}
 
             {/* CTA */}
-            <section className="tn-card py-16 md:py-16 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
+            <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-xl md:text-3xl font-normal">
+                    <h2 className="text-xl md:text-3xl font-light">
                         <span className="font-bold">너, 나의 동료가 되라.</span>
                     </h2>
                     <p className="mt-4 tn-text-sub">Ten:One™ Universe는 언제나 열려있습니다.</p>

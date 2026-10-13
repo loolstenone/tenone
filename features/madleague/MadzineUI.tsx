@@ -33,7 +33,7 @@ function Thumb({ src, alt, ratio, category }: { src: string | null; alt: string;
     <div className={`${ratio} bg-neutral-900 overflow-hidden`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} className="h-full w-full object-cover grayscale-[15%] group-hover:grayscale-0 group- transition duration-700" />
+        <img src={src} alt={alt} className="h-full w-full object-cover grayscale-[15%] group-hover:grayscale-0 group-hover:scale-[1.03] transition duration-700" />
       ) : (
         <div className={`h-full w-full flex items-center justify-center text-neutral-700 text-3xl italic ${MZ_DISPLAY}`}>
           {madzineCategoryLabel(category)}

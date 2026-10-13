@@ -64,7 +64,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
     <div>
       {/* 요약 배너 */}
       {pendingCount > 0 && (
-        <div className="mb-6 flex items-center gap-3 border border-neutral-600/40 bg-neutral-950/30 px-4 py-3 text-sm text-neutral-300">
+        <div className="mb-6 flex items-center gap-3 border border-amber-600/40 bg-amber-950/30 px-4 py-3 text-sm text-amber-300">
           <Clock className="h-4 w-4 shrink-0" />
           대기 중인 지원서 <strong>{pendingCount}건</strong>이 있습니다. 검토 후 승인 또는 거절해주세요.
         </div>
@@ -85,7 +85,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
             {tab.label}
             {tab.count > 0 && (
               <span className={`ml-2 text-xs px-1.5 py-0.5 ${
-                tab.key === 'pending' ? 'bg-neutral-600 text-white' : 'bg-neutral-700 text-neutral-300'
+                tab.key === 'pending' ? 'bg-amber-600 text-white' : 'bg-neutral-700 text-neutral-300'
               }`}>{tab.count}</span>
             )}
           </button>
@@ -178,7 +178,7 @@ export function ManagePanel({ clubId, clubSlug, applications: initial, accentCol
                   )}
 
                   {app.status === 'accepted' && (
-                    <div className="flex items-center gap-2 text-sm text-neutral-400">
+                    <div className="flex items-center gap-2 text-sm text-green-400">
                       <CheckCircle2 className="h-4 w-4" /> 승인 완료 — 매드리거 커뮤니티 접근 가능
                     </div>
                   )}

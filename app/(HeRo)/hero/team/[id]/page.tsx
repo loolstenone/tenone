@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Copy, Check } from "lucide-react";
+import { ArrowLeft, Loader2, Copy, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { BalanceBars, ReportCard, ShareBars } from "@/features/hero/report/StatBars";
@@ -66,10 +66,10 @@ export default function TeamReportPage() {
         }
     }
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor="#E53935" /></div>;
     if (missing) return <div className="min-h-screen pt-32 text-center text-sm text-neutral-500">팀 진단을 찾을 수 없습니다. <Link href="/hero/team" className="underline">팀 진단</Link></div>;
-    if (!d) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
+    if (!d) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
 
     const s = d.survey;
     const r = d.report;
@@ -83,7 +83,7 @@ export default function TeamReportPage() {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
                         <p className="text-sm font-bold text-[#E53935] mb-2">팀 진단 · {d.diagnosis.hero_companies?.company_name}</p>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{d.diagnosis.name}</h1>
+                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{d.diagnosis.name}</h1>
                         <p className="text-sm text-neutral-500 mt-2">
                             참여 {d.participants}명 · 팀원 설문 {d.surveyed}명 · 팀장 설문 {d.leaderSurveyed ? "완료" : "전"} · 검사 완료 {d.tested}명
                             {d.diagnosis.status !== "open" && " · 참여 마감"}
@@ -92,11 +92,11 @@ export default function TeamReportPage() {
                     {d.canManage && (
                         <div className="flex gap-2 shrink-0">
                             {d.diagnosis.status === "open" && d.diagnosis.invite_code && (
-                                <button onClick={() => copy(d.diagnosis.invite_code!)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xs border border-neutral-200 bg-white text-sm hover:bg-neutral-50">
+                                <button onClick={() => copy(d.diagnosis.invite_code!)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm hover:bg-neutral-50">
                                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "복사됨" : "초대 링크"}
                                 </button>
                             )}
-                            <button onClick={toggle} disabled={busy} className="px-3 py-2 rounded-xs border border-neutral-200 bg-white text-sm hover:bg-neutral-50 disabled:opacity-40">
+                            <button onClick={toggle} disabled={busy} className="px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm hover:bg-neutral-50 disabled:opacity-40">
                                 {d.diagnosis.status === "open" ? "참여 마감" : "참여 다시 열기"}
                             </button>
                         </div>
@@ -113,11 +113,11 @@ export default function TeamReportPage() {
                                 {s.dims.map(x => (
                                     <li key={x.key}>
                                         <div className="flex items-baseline justify-between text-sm mb-1">
-                                            <span className="font-bold">{x.label}</span>
+                                            <span className="font-semibold">{x.label}</span>
                                             <span className="text-neutral-600 tabular-nums">팀원 {x.team}{x.leader !== null && <span className="text-neutral-400"> · 팀장 {x.leader}</span>}</span>
                                         </div>
-                                        <div className="relative h-2 rounded-none bg-neutral-100">
-                                            <div className="absolute inset-y-0 left-0 rounded-none bg-neutral-800" style={{ width: `${x.team}%` }} />
+                                        <div className="relative h-2 rounded-full bg-neutral-100">
+                                            <div className="absolute inset-y-0 left-0 rounded-full bg-neutral-800" style={{ width: `${x.team}%` }} />
                                             {x.leader !== null && <div className="absolute -inset-y-1 w-0.5 bg-[#E53935]" style={{ left: `${x.leader}%` }} title="팀장" />}
                                         </div>
                                     </li>
@@ -130,7 +130,7 @@ export default function TeamReportPage() {
                             <ReportCard title="서로 보는 눈이 다른 곳" desc="팀장과 팀원 평균이 20점 이상 차이 나는 영역 — 서로 말하기 어려웠던 부분일 수 있습니다">
                                 <ul className="space-y-3">
                                     {s.blindSpots.map(b => (
-                                        <li key={b.label} className="text-sm"><p className="font-bold mb-1">{b.label}</p><p className="text-neutral-600 break-keep">{b.text}</p></li>
+                                        <li key={b.label} className="text-sm"><p className="font-semibold mb-1">{b.label}</p><p className="text-neutral-600 break-keep">{b.text}</p></li>
                                     ))}
                                 </ul>
                             </ReportCard>
@@ -143,9 +143,9 @@ export default function TeamReportPage() {
                                 <ul className="space-y-5">
                                     {s.issues.map(i => (
                                         <li key={i.label} className="text-sm">
-                                            <p className="font-bold mb-1">{i.label}</p>
+                                            <p className="font-semibold mb-1">{i.label}</p>
                                             <p className="text-neutral-600 break-keep mb-2">{i.text}</p>
-                                            <p className="bg-neutral-50 rounded-xs px-3 py-2 break-keep"><span className="font-bold">해 볼 것 · </span>{i.tip}</p>
+                                            <p className="bg-neutral-50 rounded-lg px-3 py-2 break-keep"><span className="font-semibold">해 볼 것 · </span>{i.tip}</p>
                                         </li>
                                     ))}
                                 </ul>
@@ -178,18 +178,18 @@ export default function TeamReportPage() {
                             {r.gaps.length > 0 && (
                                 <ul className="mt-6 space-y-3">
                                     {r.gaps.map(g => (
-                                        <li key={g.key} className="text-sm"><p className="font-bold mb-1">{g.role}이(가) 적습니다</p><p className="text-neutral-600 break-keep">{g.text}</p></li>
+                                        <li key={g.key} className="text-sm"><p className="font-semibold mb-1">{g.role}이(가) 적습니다</p><p className="text-neutral-600 break-keep">{g.text}</p></li>
                                     ))}
                                 </ul>
                             )}
-                            <p className="mt-5 text-sm font-bold bg-neutral-50 rounded-xs px-4 py-3 break-keep">{r.hireSuggestion}</p>
+                            <p className="mt-5 text-sm font-semibold bg-neutral-50 rounded-lg px-4 py-3 break-keep">{r.hireSuggestion}</p>
                         </ReportCard>
                         <ReportCard title="일하는 방식" desc="양쪽 성향의 팀 평균">
                             <BalanceBars items={r.axes} />
                             {r.skews.length > 0 && (
                                 <ul className="mt-6 space-y-3">
                                     {r.skews.map(x => (
-                                        <li key={x.axis} className="text-sm"><p className="font-bold mb-1">{x.axis}으로 쏠림</p><p className="text-neutral-600 break-keep">{x.text}</p></li>
+                                        <li key={x.axis} className="text-sm"><p className="font-semibold mb-1">{x.axis}으로 쏠림</p><p className="text-neutral-600 break-keep">{x.text}</p></li>
                                     ))}
                                 </ul>
                             )}
@@ -212,7 +212,7 @@ export default function TeamReportPage() {
 
 function Waiting({ title, now }: { title: string; now: string }) {
     return (
-        <div className="bg-white border border-neutral-200 rounded-xs p-6 text-center">
+        <div className="bg-white border border-neutral-200 rounded-xl p-6 text-center">
             <p className="font-bold mb-1 break-keep">{title}</p>
             <p className="text-sm text-neutral-500">{now} · 결과가 특정인으로 짐작되지 않도록 정한 기준입니다</p>
         </div>
@@ -222,10 +222,10 @@ function Waiting({ title, now }: { title: string; now: string }) {
 function Quotes({ title, items }: { title: string; items: string[] }) {
     return (
         <div>
-            <p className="text-sm font-bold mb-3">{title}</p>
+            <p className="text-sm font-semibold mb-3">{title}</p>
             {items.length === 0 ? <p className="text-sm text-neutral-400">아직 없습니다</p> : (
                 <ul className="space-y-2">
-                    {items.map((t, i) => <li key={`${i}:${t}`} className="text-sm text-neutral-700 bg-neutral-50 rounded-xs px-3 py-2 break-keep whitespace-pre-line">{t}</li>)}
+                    {items.map((t, i) => <li key={`${i}:${t}`} className="text-sm text-neutral-700 bg-neutral-50 rounded-lg px-3 py-2 break-keep whitespace-pre-line">{t}</li>)}
                 </ul>
             )}
         </div>

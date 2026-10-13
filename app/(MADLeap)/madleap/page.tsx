@@ -6,24 +6,39 @@
 // - madleap.co.kr 원문: "선배님 저 정말..." 3가지 학생 목소리·"매년 2~3월 2년 활동"·5대 가치 원문 순서
 // - 검증 가능 콘텐츠만: 5대 가치·MAD 의미·활동 4축·Universe 파트너 3·연락처
 
+"use client";
+
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
-import { ArrowRight, Star, Instagram, Mail, ExternalLink } from "lucide-react";
+import {
+    ArrowRight,
+    Expand,
+    Link2,
+    Footprints,
+    BarChart3,
+    Lightbulb,
+    Users,
+    Trophy,
+    Star,
+    Quote,
+    Instagram,
+    Mail,
+    ExternalLink,
+} from "lucide-react";
 
 const values = [
-    { title: "확장하다", desc: "기존 광고 동아리의 '광고·크리에이티브' 틀에서 벗어나 마케팅·커뮤니케이션·데이터로 확장한다." },
-    { title: "연결하다", desc: "국내 여러 광고 동아리와 지속적으로 관계를 구축하고, 현업 선배와 소통하며 프로젝트를 진행한다." },
-    { title: "발로 뛰다", desc: "주어진 과제에 만족하지 않고 직접 발로 뛰며 본질적 문제 해결책을 발굴한다." },
-    { title: "세상을 기획하는 기획자가 되다", desc: "AE·AP가 아닌, 일이 되게끔 만드는 기획. 생각을 세상에 꺼내 결과를 만든다." },
-    { title: "결과로 말하다", desc: "큰 혁신을 불러올 잠재력을 실전 프로젝트로 증명한다. 과정도 중요하지만 결과로 말한다." },
+    { icon: Expand, title: "확장하다", desc: "기존 광고 동아리의 '광고·크리에이티브' 틀에서 벗어나 마케팅·커뮤니케이션·데이터로 확장한다." },
+    { icon: Link2, title: "연결하다", desc: "국내 여러 광고 동아리와 지속적으로 관계를 구축하고, 현업 선배와 소통하며 프로젝트를 진행한다." },
+    { icon: Footprints, title: "발로 뛰다", desc: "주어진 과제에 만족하지 않고 직접 발로 뛰며 본질적 문제 해결책을 발굴한다." },
+    { icon: Lightbulb, title: "세상을 기획하는 기획자가 되다", desc: "AE·AP가 아닌, 일이 되게끔 만드는 기획. 생각을 세상에 꺼내 결과를 만든다." },
+    { icon: BarChart3, title: "결과로 말하다", desc: "큰 혁신을 불러올 잠재력을 실전 프로젝트로 증명한다. 과정도 중요하지만 결과로 말한다." },
 ];
 
 const activities = [
-    { title: "스터디", desc: "마케팅·광고·커뮤니케이션·데이터 분야별 스터디 그룹 운영" },
-    { title: "프로젝트", desc: "실제 브랜드 RFP 수주·제안·실행 경험" },
-    { title: "네트워킹", desc: "현업 선배 멘토링 + 광고 동아리 연합 교류" },
-    { title: "온보딩 매듭", desc: "신입 기수 온보딩 프로그램 — 실전 기획 첫 경험" },
+    { icon: BarChart3, title: "스터디", desc: "마케팅·광고·커뮤니케이션·데이터 분야별 스터디 그룹 운영" },
+    { icon: Trophy, title: "프로젝트", desc: "실제 브랜드 RFP 수주·제안·실행 경험" },
+    { icon: Users, title: "네트워킹", desc: "현업 선배 멘토링 + 광고 동아리 연합 교류" },
+    { icon: Star, title: "온보딩 매듭", desc: "신입 기수 온보딩 프로그램 — 실전 기획 첫 경험" },
 ];
 
 const partners = [
@@ -38,45 +53,37 @@ const studentVoices = [
     "선배님, 이론은 이제 지겨워요. 실무가 너무 궁금해요",
 ];
 
-type RecentPortfolio = { id: string; title: string; gen: string | null; client: string | null; award: string | null };
-
-async function fetchRecentPortfolios(): Promise<RecentPortfolio[]> {
-    const admin = createAdminClient();
-    const { data, error } = await admin
-        .from("madleap_portfolios")
-        .select("id, title, gen, client, award")
-        .eq("is_published", true)
-        .order("gen_num", { ascending: false })
-        .order("sort_order", { ascending: false })
-        .limit(5);
-    if (error) {
-        console.error("[madleap/home] portfolio fetch failed:", error.message);
-        return [];
-    }
-    return (data ?? []) as RecentPortfolio[];
-}
-
-export const revalidate = 300;
-
-export default async function MadLeapHome() {
-    const portfolios = await fetchRecentPortfolios();
+export default function MadLeapHome() {
     return (
         <>
             {/* ── Hero ── */}
-            <section className="relative py-24 md:py-32 flex items-center justify-center overflow-hidden bg-[#1a1a2e]">
-                <div className="absolute inset-0 bg-[#1a1a2e]/60" />
+            <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-[#1a1a2e]">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a2e]/30 via-[#1a1a2e]/60 to-[#1a1a2e]" />
                 <div className="absolute inset-0 opacity-30">
                     <div className="absolute inset-0 bg-[url('/brands/madleap/hero-bg.jpg')] bg-cover bg-center" />
+                </div>
+                <div className="absolute inset-0 overflow-hidden">
+                    {[...Array(6)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-1 h-1 bg-[#4361ee]/60 rounded-full animate-pulse"
+                            style={{
+                                top: `${15 + i * 15}%`,
+                                left: `${10 + i * 16}%`,
+                                animationDelay: `${i * 0.4}s`,
+                            }}
+                        />
+                    ))}
                 </div>
 
                 <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
                     <div className="mb-6">
-                        <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tight">
+                        <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
                             M<span className="text-[#4361ee]">A</span>D
                         </h1>
                         <div className="flex items-center justify-center gap-4 -mt-2">
                             <div className="h-px w-16 bg-white/60" />
-                            <span className="text-xl md:text-3xl font-normal text-white tracking-[0.3em]">L E A P</span>
+                            <span className="text-xl md:text-3xl font-light text-white tracking-[0.3em]">L E A P</span>
                             <div className="h-px w-16 bg-white/60" />
                         </div>
                     </div>
@@ -87,52 +94,37 @@ export default async function MadLeapHome() {
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                         <Link
                             href="/madleap/about"
-                            className="w-full sm:w-auto px-8 py-3.5 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-xs flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-lg flex items-center justify-center gap-2"
                         >
                             매드립 알아보기
                             <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/madleap/portfolio"
-                            className="w-full sm:w-auto px-8 py-3.5 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs text-center"
+                            className="w-full sm:w-auto px-8 py-3.5 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg text-center"
                         >
                             포트폴리오 보기
                         </Link>
                     </div>
                 </div>
-            </section>
 
-            {/* ── 최근 포트폴리오 — 첫 화면 바로 아래 실제 데이터 (tenone-ui 4.1) ── */}
-            {portfolios.length > 0 && (
-                <section className="bg-[#1a1a2e] text-white border-t border-white/10">
-                    <div className="mx-auto max-w-5xl px-6 py-16">
-                        <div className="flex items-baseline justify-between border-b border-white/15 pb-3">
-                            <h2 className="text-lg font-bold">최근 포트폴리오</h2>
-                            <Link href="/madleap/portfolio" className="text-sm text-white/60 underline">전체 보기</Link>
-                        </div>
-                        <ul>
-                            {portfolios.map((p) => (
-                                <li key={p.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-white/10 py-4 text-sm">
-                                    <span className="w-16 shrink-0 text-white/50">{p.gen ?? ""}</span>
-                                    <span className="font-bold">{p.title}</span>
-                                    {p.client && <span className="text-white/60">{p.client}</span>}
-                                    {p.award && <span className="text-white/60">{p.award}</span>}
-                                </li>
-                            ))}
-                        </ul>
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+                    <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center pt-2">
+                        <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
                     </div>
-                </section>
-            )}
+                </div>
+            </section>
 
             {/* ── About Preview (madleap.co.kr 원문 인용) ── */}
             <section className="bg-[#1a1a2e] text-white py-16 md:py-24">
                 <div className="mx-auto max-w-3xl px-6 text-center">
-                    <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Our Origin</p>
+                    <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Our Origin</p>
                     <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-10">우리의 시작은 기웃거림이었습니다.</h2>
 
                     <div className="space-y-3 mb-10 text-left">
                         {studentVoices.map((v) => (
-                            <div key={v} className="rounded-xs bg-white/[0.04] border border-white/10 px-5 py-4">
+                            <div key={v} className="rounded-xl bg-white/[0.04] border border-white/10 px-5 py-4">
+                                <Quote className="inline h-4 w-4 text-[#4361ee] mr-2 -mt-0.5" />
                                 <span className="text-white/80 text-[15px]">{v}</span>
                             </div>
                         ))}
@@ -142,16 +134,16 @@ export default async function MadLeapHome() {
                         그렇게 마케팅·광고가 하고 싶은 학생들의 열정이 현업 선배에게 닿았습니다.
                         선배들은 손을 잡아 주었고, 함께 마케팅·광고 동아리계의 새로운 패러다임을 만들었습니다.
                     </p>
-                    <p className="text-[#4361ee] font-bold text-lg md:text-xl leading-relaxed">
+                    <p className="text-[#4361ee] font-semibold text-lg md:text-xl leading-relaxed">
                         디지털과 AI가 모든 경계를 허문 지금,<br />
                         매드립은 한 번 더 도약합니다.
                     </p>
 
                     <Link
                         href="/madleap/about"
-                        className="inline-flex items-center gap-2 mt-10 px-6 py-3 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs"
+                        className="inline-flex items-center gap-2 mt-10 px-6 py-3 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg"
                     >
-                        소개 <ArrowRight className="h-4 w-4" />
+                        더 알아보기 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -160,7 +152,7 @@ export default async function MadLeapHome() {
             <section className="bg-white py-16 md:py-24">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-10 md:mb-14">
-                        <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Activities</p>
+                        <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Activities</p>
                         <h2 className="text-2xl md:text-3xl font-bold mb-3">매드립은 이런 일을 합니다</h2>
                         <p className="text-neutral-500 text-sm md:text-base max-w-2xl mx-auto">
                             대학생들과 현업 선배가 멘토가 되어 함께 만들어 갑니다.
@@ -171,8 +163,10 @@ export default async function MadLeapHome() {
                         {activities.map((act) => (
                             <div
                                 key={act.title}
-                                className="border border-neutral-200 rounded-xs p-6 hover:border-[#4361ee]/30 transition-all group"
-                            > <h3 className="font-bold text-lg mb-2 text-neutral-900">{act.title}</h3>
+                                className="border border-neutral-200 rounded-xl p-6 hover:border-[#4361ee]/30 hover:shadow-md transition-all group"
+                            >
+                                <act.icon className="h-8 w-8 text-[#4361ee] mb-3 group-hover:scale-110 transition-transform" />
+                                <h3 className="font-bold text-lg mb-2 text-neutral-900">{act.title}</h3>
                                 <p className="text-neutral-500 text-sm leading-relaxed">{act.desc}</p>
                             </div>
                         ))}
@@ -184,7 +178,7 @@ export default async function MadLeapHome() {
             <section className="bg-neutral-50 py-16 md:py-24">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="mb-10 md:mb-14 text-center">
-                        <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Our Values</p>
+                        <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Our Values</p>
                         <h2 className="text-2xl md:text-3xl font-bold">5대 운영 가치</h2>
                     </div>
 
@@ -192,7 +186,9 @@ export default async function MadLeapHome() {
                         {values.map((v, i) => (
                             <div key={v.title} className="flex gap-4">
                                 <div className="shrink-0">
-                                    <div className="w-10 h-10 rounded-xs bg-[#4361ee]/10 flex items-center justify-center"> </div>
+                                    <div className="w-10 h-10 rounded-lg bg-[#4361ee]/10 flex items-center justify-center">
+                                        <v.icon className="h-5 w-5 text-[#4361ee]" />
+                                    </div>
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-xs text-[#4361ee]/60 font-bold mb-1">0{i + 1}</p>
@@ -208,7 +204,7 @@ export default async function MadLeapHome() {
             {/* ── 모집 안내 (madleap.co.kr 원문) ── */}
             <section className="bg-[#1a1a2e] py-16 md:py-20">
                 <div className="mx-auto max-w-3xl px-6 text-center">
-                    <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Recruiting</p>
+                    <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Recruiting</p>
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-5">함께 도약할 리퍼를 찾습니다</h2>
                     <p className="text-neutral-300 text-base md:text-lg leading-relaxed mb-3">
                         매년 <strong className="text-[#4361ee]">2~3월</strong>, 2년 활동을 기준으로
@@ -223,14 +219,14 @@ export default async function MadLeapHome() {
                             href="https://instagram.com/madleap.official"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full sm:w-auto px-6 py-3 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-xs inline-flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-6 py-3 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-lg inline-flex items-center justify-center gap-2"
                         >
                             <Instagram className="h-4 w-4" />
                             인스타그램 팔로우
                         </a>
                         <a
                             href="mailto:official@madleap.co.kr"
-                            className="w-full sm:w-auto px-6 py-3 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs inline-flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-6 py-3 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg inline-flex items-center justify-center gap-2"
                         >
                             <Mail className="h-4 w-4" />
                             문의: official@madleap.co.kr
@@ -242,12 +238,12 @@ export default async function MadLeapHome() {
             {/* ── Partners (Universe 내부 3) ── */}
             <section className="bg-white py-12 md:py-16">
                 <div className="mx-auto max-w-5xl px-6">
-                    <h2 className="text-sm font-bold text-neutral-400 text-center mb-8 uppercase tracking-wider">Partners</h2>
+                    <h2 className="text-sm font-semibold text-neutral-400 text-center mb-8 uppercase tracking-wider">Partners</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {partners.map((p) => (
                             <div
                                 key={p.name}
-                                className="px-5 py-4 bg-neutral-50 border border-neutral-200 rounded-xs"
+                                className="px-5 py-4 bg-neutral-50 border border-neutral-200 rounded-lg"
                             >
                                 <div className="font-bold text-sm text-neutral-900">{p.name}</div>
                                 <div className="text-xs text-neutral-500 mt-0.5">{p.role}</div>
@@ -260,18 +256,18 @@ export default async function MadLeapHome() {
             {/* ── 채널 (madleap.co.kr 공식 채널) ── */}
             <section className="bg-neutral-50 py-12">
                 <div className="mx-auto max-w-3xl px-6">
-                    <h2 className="text-sm font-bold text-neutral-400 text-center mb-6 uppercase tracking-wider">Channels</h2>
+                    <h2 className="text-sm font-semibold text-neutral-400 text-center mb-6 uppercase tracking-wider">Channels</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <a
                             href="https://instagram.com/madleap.official"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
                         >
                             <Instagram className="h-5 w-5 text-neutral-700" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Instagram</div>
-                                <div className="text-sm font-bold text-neutral-800 truncate">@madleap.official</div>
+                                <div className="text-sm font-semibold text-neutral-800 truncate">@madleap.official</div>
                             </div>
                             <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
                         </a>
@@ -279,23 +275,23 @@ export default async function MadLeapHome() {
                             href="https://blog.naver.com/madleap"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
                         >
-                            <Star className="h-5 w-5 text-neutral-600" />
+                            <Star className="h-5 w-5 text-green-600" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Naver Blog</div>
-                                <div className="text-sm font-bold text-neutral-800 truncate">blog.naver.com/madleap</div>
+                                <div className="text-sm font-semibold text-neutral-800 truncate">blog.naver.com/madleap</div>
                             </div>
                             <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
                         </a>
                         <a
                             href="mailto:official@madleap.co.kr"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
                         >
                             <Mail className="h-5 w-5 text-neutral-700" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Email</div>
-                                <div className="text-sm font-bold text-neutral-800 truncate">official@madleap.co.kr</div>
+                                <div className="text-sm font-semibold text-neutral-800 truncate">official@madleap.co.kr</div>
                             </div>
                         </a>
                     </div>
@@ -314,7 +310,7 @@ export default async function MadLeapHome() {
                     <p className="text-white/80 mb-8">매년 2~3월, 새로운 기수를 모집합니다.</p>
                     <Link
                         href="/madleap/about"
-                        className="inline-block px-8 py-3.5 bg-white text-[#4361ee] font-bold hover:bg-neutral-100 transition-colors rounded-xs"
+                        className="inline-block px-8 py-3.5 bg-white text-[#4361ee] font-bold hover:bg-neutral-100 transition-colors rounded-lg"
                     >
                         매드립 알아보기
                     </Link>

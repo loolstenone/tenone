@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Download, FileText, Lock } from "lucide-react";
+import { Download, FileText, Loader2, Lock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
@@ -64,14 +64,14 @@ export function PtCertificateIssue() {
         }
     }
 
-    if (isLoading) return <span className="text-sm text-mute">불러오는 중</span>;
+    if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />;
 
     // ── 비로그인: 로그인·가입 유도 ──
     if (!isAuthenticated) {
         return (
             <div className="max-w-xl border border-neutral-800 bg-neutral-950 p-8">
                 <Lock className="h-6 w-6" style={{ color: ACCENT }} />
-                <h2 className="mt-4 text-2xl font-bold">Ten:One ID로 로그인하고 받으세요</h2>
+                <h2 className="mt-4 text-2xl font-black">Ten:One ID로 로그인하고 받으세요</h2>
                 <ul className="mt-6 space-y-2 text-sm text-neutral-400 leading-relaxed">
                     <li>· 한 번 본인 확인하면 인증서가 내 계정에 보관됩니다 — 다음부터는 로그인만 하면 바로</li>
                     <li>· PNG·PDF로 언제든 다시 받을 수 있고, 인증서 코드로 누구나 진위를 확인할 수 있습니다</li>
@@ -86,7 +86,7 @@ export function PtCertificateIssue() {
         );
     }
 
-    if (!certs) return <span className="text-sm text-mute">불러오는 중</span>;
+    if (!certs) return <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />;
 
     return (
         <div>
@@ -104,7 +104,7 @@ export function PtCertificateIssue() {
                             <div key={c.code} className="border border-neutral-800 bg-neutral-950">
                                 <div className="aspect-[720/1040] bg-neutral-900 flex items-center justify-center">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    {c.preview ? <img src={c.preview} alt={`${c.title} ${c.type === "award" ? c.result : "참가"} 인증서`} className="w-full h-full object-contain" /> : <span className="text-sm text-mute">불러오는 중</span>}
+                                    {c.preview ? <img src={c.preview} alt={`${c.title} ${c.type === "award" ? c.result : "참가"} 인증서`} className="w-full h-full object-contain" /> : <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />}
                                 </div>
                                 <div className="p-4">
                                     <div className="font-bold">{c.title} · {c.type === "award" ? c.result : "참가"}</div>
@@ -114,7 +114,7 @@ export function PtCertificateIssue() {
                                             <button key={k} disabled={!!working} onClick={() => download(c, k)}
                                                 className="inline-flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-white disabled:opacity-40"
                                                 style={{ backgroundColor: k === "png" ? ACCENT : "#262626" }}>
-                                                {working === `${c.code}:${k}` ? <span className="text-xs">처리 중</span> : k === "png" ? <Download className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                                                {working === `${c.code}:${k}` ? <Loader2 className="h-4 w-4 animate-spin" /> : k === "png" ? <Download className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                                                 {k.toUpperCase()}
                                             </button>
                                         ))}

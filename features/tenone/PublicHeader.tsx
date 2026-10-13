@@ -31,7 +31,7 @@ export function PublicHeader() {
 
     return (
         <>
-        <header className="fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300"
+        <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
             style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
                 <Link href="/" className="flex items-center"
@@ -55,7 +55,7 @@ export function PublicHeader() {
                                     {item.name}
                                 </Link>
                                 <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                                    <div className="py-2 min-w-[160px] border rounded-xs"
+                                    <div className="py-2 min-w-[160px] border rounded-lg shadow-lg"
                                         style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
                                         {item.sub.map(sub => (
                                             <Link key={sub.name} href={sub.href}
@@ -128,7 +128,7 @@ export function PublicHeader() {
                 <div key={item.name}>
                     <Link href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block rounded-xs px-4 py-2.5 text-base font-normal transition-colors hover:opacity-70"
+                        className="block rounded-lg px-4 py-2.5 text-base font-medium transition-colors hover:opacity-70"
                         style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-sub)" }}>
                         {item.name}
                     </Link>

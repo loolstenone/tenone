@@ -72,23 +72,23 @@ export default function TalentAgentApplyPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-6 py-20">
         <div className="max-w-md w-full text-center">
-          <div className="w-14 h-14 rounded-none bg-red-50 flex items-center justify-center mx-auto mb-5">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="h-7 w-7 text-[#E53935]" />
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">신청이 접수됐습니다</h1>
+          <h1 className="text-2xl font-extrabold text-neutral-900 mb-2">신청이 접수됐습니다</h1>
           <p className="text-sm text-neutral-500 leading-relaxed mb-8">
             HeRo의 발굴 프로세스가 시작됩니다. 입력하신 이메일로 다음 단계를 안내드리겠습니다.
           </p>
           <div className="flex flex-col gap-2">
             <Link
               href="/hero/hit/a"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xs bg-[#E53935] text-white text-sm font-bold hover:bg-red-700"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#E53935] text-white text-sm font-bold hover:bg-red-700"
             >
-              HIT 검사 응시
+              HIT 검사 시작하기
             </Link>
             <Link
               href="/hero/my"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xs border border-neutral-300 text-neutral-700 text-sm font-bold hover:bg-neutral-50"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-neutral-300 text-neutral-700 text-sm font-semibold hover:bg-neutral-50"
             >
               마이페이지로
             </Link>
@@ -105,11 +105,11 @@ export default function TalentAgentApplyPage() {
       </Link>
 
       <div className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-red-50 text-[11px] font-bold tracking-widest uppercase text-[#E53935] mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[11px] font-semibold tracking-widest uppercase text-[#E53935] mb-4">
           <Megaphone className="h-3.5 w-3.5" />
           탤런트 에이전시
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">탤런트 에이전시 신청</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 mb-3">탤런트 에이전시 신청</h1>
         <p className="text-sm text-neutral-500 leading-relaxed">
           간단한 정보만 알려주시면 HeRo가 당신을 이해하기 시작합니다. 신청 이후 HIT 검사 · AI 상담 · 전문가 매칭으로 이어집니다.
         </p>
@@ -118,7 +118,7 @@ export default function TalentAgentApplyPage() {
       <form onSubmit={submit} className="space-y-5">
         {/* 이름 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">
             이름 <span className="text-[#E53935]">*</span>
           </label>
           <input
@@ -126,13 +126,13 @@ export default function TalentAgentApplyPage() {
             value={form.name}
             onChange={update("name")}
             required
-            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935]"
           />
         </div>
 
         {/* 이메일 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">
             이메일 <span className="text-[#E53935]">*</span>
           </label>
           <input
@@ -140,34 +140,34 @@ export default function TalentAgentApplyPage() {
             value={form.email}
             onChange={update("email")}
             required
-            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935]"
           />
         </div>
 
         {/* 전화 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">전화번호 <span className="text-neutral-400 font-normal">(선택)</span></label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">전화번호 <span className="text-neutral-400 font-normal">(선택)</span></label>
           <input
             type="tel"
             value={form.phone}
             onChange={update("phone")}
             placeholder="010-0000-0000"
-            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935]"
           />
         </div>
 
         {/* 분야 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">희망 분야</label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">희망 분야</label>
           <div className="flex flex-wrap gap-2">
             {FIELDS.map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setForm((p) => ({ ...p, field: f }))}
-                className={`text-xs px-3 py-1.5 rounded-none border transition-colors ${
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                   form.field === f
-                    ? "border-[#E53935] bg-red-50 text-[#E53935] font-bold"
+                    ? "border-[#E53935] bg-red-50 text-[#E53935] font-semibold"
                     : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
                 }`}
               >
@@ -179,16 +179,16 @@ export default function TalentAgentApplyPage() {
 
         {/* 단계 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">현재 단계</label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">현재 단계</label>
           <div className="flex flex-wrap gap-2">
             {STAGES.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setForm((p) => ({ ...p, stage: s }))}
-                className={`text-xs px-3 py-1.5 rounded-none border transition-colors ${
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                   form.stage === s
-                    ? "border-[#E53935] bg-red-50 text-[#E53935] font-bold"
+                    ? "border-[#E53935] bg-red-50 text-[#E53935] font-semibold"
                     : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
                 }`}
               >
@@ -200,49 +200,49 @@ export default function TalentAgentApplyPage() {
 
         {/* 자기 소개 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">간단한 자기 소개 <span className="text-neutral-400 font-normal">(선택)</span></label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">간단한 자기 소개 <span className="text-neutral-400 font-normal">(선택)</span></label>
           <textarea
             value={form.intro}
             onChange={update("intro")}
             rows={3}
             placeholder="지금 어디에서 무엇을 하고 있는지 알려 주세요"
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935] resize-none leading-relaxed"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935] resize-none leading-relaxed"
           />
         </div>
 
         {/* 원하는 방향 */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">원하는 다음 걸음 <span className="text-neutral-400 font-normal">(선택)</span></label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">원하는 다음 걸음 <span className="text-neutral-400 font-normal">(선택)</span></label>
           <textarea
             value={form.goal}
             onChange={update("goal")}
             rows={3}
             placeholder="어떤 자리 · 어떤 방향 · 어떤 고민이 있는지 편하게 적어 주세요"
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935] resize-none leading-relaxed"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935] resize-none leading-relaxed"
           />
         </div>
 
         {/* 포트폴리오 URL */}
         <div>
-          <label className="block text-xs font-bold text-neutral-600 mb-1.5">포트폴리오 링크 <span className="text-neutral-400 font-normal">(선택)</span></label>
+          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">포트폴리오 링크 <span className="text-neutral-400 font-normal">(선택)</span></label>
           <input
             type="url"
             value={form.portfolio_url}
             onChange={update("portfolio_url")}
             placeholder="https://..."
-            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xs text-sm focus:outline-none focus:border-[#E53935]"
+            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-[#E53935]"
           />
         </div>
 
         {error && (
-          <div className="p-3 rounded-xs bg-red-50 border border-red-200 text-sm text-red-700">{error}</div>
+          <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{error}</div>
         )}
 
         <div className="pt-2">
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3.5 rounded-xs bg-[#E53935] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-xl bg-[#E53935] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? "접수 중…" : "신청하기"}
           </button>

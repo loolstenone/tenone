@@ -57,7 +57,7 @@ export default async function RooKHomePage() {
                 <div className="relative">
                     <p className="text-[18px] md:text-[24px]">브랜드에 최적화된 인공지능 모델</p>
                     <p className="mt-4 text-[48px] md:text-[72px] font-bold leading-none">RooK</p>
-                    <p className="mt-2 text-[28px] md:text-[40px] font-normal">AI Model</p>
+                    <p className="mt-2 text-[28px] md:text-[40px] font-light">AI Model</p>
                     <Link href="/rook/artist" className="mt-8 inline-block border border-white px-8 py-2.5 text-[18px] md:text-[24px] hover:bg-white hover:text-black transition-colors">
                         모델 확인
                     </Link>

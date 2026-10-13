@@ -32,15 +32,15 @@ export function QuoteBanner() {
 
   return (
     <div
-      className="my-4 rounded-xs px-5 py-5"
+      className="my-4 rounded-2xl px-5 py-5"
       style={{
-        background: 'rgba(255,255,255,0.04)',
+        background: 'linear-gradient(135deg, rgba(255,217,61,0.05) 0%, rgba(255,107,107,0.04) 100%)',
         border: '1px solid rgba(255,217,61,0.12)',
       }}
     >
       {/* 격언 텍스트 + 따옴표 */}
       <p
-        className="text-[14px] font-normal leading-[1.7] text-white/70"
+        className="text-[14px] font-medium leading-[1.7] text-white/70"
         style={{ letterSpacing: '-0.02em' }}
       >
         <span className="mr-1 text-[20px] font-serif leading-none" style={{ color: 'rgba(255,217,61,0.3)', verticalAlign: '-0.1em' }}>&ldquo;</span>

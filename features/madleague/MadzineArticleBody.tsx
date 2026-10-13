@@ -7,7 +7,7 @@ import { sanitizeRichHtml } from "@/lib/sanitize-html";
 const RICH =
     "text-[17px] leading-[1.95] text-neutral-300 break-keep " +
     "[&_p]:my-5 [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-neutral-100 " +
-    "[&_strong]:font-bold [&_strong]:text-white [&_b]:text-white [&_em]:italic " +
+    "[&_strong]:font-semibold [&_strong]:text-white [&_b]:text-white [&_em]:italic " +
     "[&_h2]:mt-14 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:text-white [&_h2]:font-[family-name:var(--font-mz-serif)] " +
     "[&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:text-white [&_h3]:font-[family-name:var(--font-mz-serif)] " +
     "[&_blockquote]:my-10 [&_blockquote]:border-l-2 [&_blockquote]:border-[#EC1D25] [&_blockquote]:pl-6 [&_blockquote]:text-xl [&_blockquote]:italic [&_blockquote]:text-white [&_blockquote]:font-[family-name:var(--font-mz-serif)] " +

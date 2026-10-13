@@ -96,13 +96,13 @@ export default function TermsPage() {
         <div className="min-h-screen pt-24 pb-20" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
             <div className="max-w-3xl mx-auto px-6">
                 <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Terms of Service</p>
-                <h1 className="text-3xl font-normal tracking-tight mb-4">Ten:One 이용약관</h1>
+                <h1 className="text-3xl font-light tracking-tight mb-4">Ten:One 이용약관</h1>
                 <p className="text-xs mb-10" style={{ color: "var(--tn-text-sub)" }}>시행일: {doc.effectiveDate}</p>
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
                     {ARTICLES.map(a => (
                         <section key={a.title}>
-                            <h2 className="text-base font-normal mb-3" style={{ color: "var(--tn-text)" }}>{a.title}</h2>
+                            <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>{a.title}</h2>
                             {a.body.map((b, i) => Array.isArray(b) ? (
                                 <ol key={i} className="list-decimal pl-5 space-y-1">
                                     {b.map(li => <li key={li}>{li}</li>)}
@@ -114,7 +114,7 @@ export default function TermsPage() {
                     ))}
 
                     <section>
-                        <h2 className="text-base font-normal mb-3" style={{ color: "var(--tn-text)" }}>부칙</h2>
+                        <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>부칙</h2>
                         <ul className="list-disc pl-5 space-y-0.5">
                             <li>이 약관은 {doc.effectiveDate}부터 시행합니다.</li>
                             <li>2026년 10월 5일: Ten:One 통합 이용약관으로 전면 개정 (전 서비스·도메인 공통 적용, 서비스별 추가 약관·서비스 종료·유니버스 코인·게시물·서비스별 탈퇴 조항 신설)</li>

@@ -85,7 +85,7 @@ function TeamPanel({ team, comp }: { team: Team; comp: Competition }) {
             </span>
             {team.isFinalist && <span className="text-[10px] font-bold px-2 py-0.5 bg-[#FFC000]/15 text-[#FFC000]">본선 진출</span>}
           </div>
-          <h3 className="text-xl font-bold">{team.name}</h3>
+          <h3 className="text-xl font-black">{team.name}</h3>
           {team.description && <p className="text-sm text-neutral-500 mt-1">{team.description}</p>}
         </div>
         {team.result && <ResultBadge result={team.result} />}
@@ -146,7 +146,7 @@ export default async function PTWorkspacePage() {
       <div className="bg-black text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER · PT</div>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-bold">매드리거만 입장 가능합니다</h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 입장 가능합니다</h1>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
       </div>
@@ -256,6 +256,7 @@ export default async function PTWorkspacePage() {
     <div className="bg-black text-white min-h-screen">
       {/* 헤더 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_60%,rgba(236,29,37,0.15),transparent_55%)]" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-6 py-16">
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-500 mb-4">
             <Link href="/madleague/madleaguer" className="hover:text-white transition">MADLEAGUER</Link>
@@ -264,7 +265,7 @@ export default async function PTWorkspacePage() {
           </div>
           <div className="flex items-center gap-3 mb-3">
             <Trophy className="h-7 w-7 text-[#EC1D25]" />
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">경쟁PT 워크스페이스</h1>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight">경쟁PT 워크스페이스</h1>
           </div>
           <p className="text-sm text-neutral-400 max-w-lg">
             경쟁 PT 참여 팀의 작업 공간.
@@ -278,7 +279,7 @@ export default async function PTWorkspacePage() {
         {allComps.length === 0 ? (
           <section className="bg-neutral-950 border border-neutral-900 p-16 text-center">
             <Trophy className="h-12 w-12 text-neutral-700 mx-auto mb-6" />
-            <div className="text-xl font-bold mb-3">현재 진행 중인 경쟁PT가 없습니다</div>
+            <div className="text-xl font-black mb-3">현재 진행 중인 경쟁PT가 없습니다</div>
             <p className="text-sm text-neutral-500 mb-8 max-w-sm mx-auto">
               다음 경쟁PT 일정은 MADLeague 공지를 확인하세요.
               지난 수상작은 아카이브에서 볼 수 있습니다.
@@ -306,7 +307,7 @@ export default async function PTWorkspacePage() {
                       <span className="text-[11px] font-bold px-2.5 py-1 bg-white/5 text-white/60">{PROGRAM_KIND_LABEL[comp.kind] ?? comp.kind}</span>
                       <span className="text-xs text-neutral-600">{comp.year}년</span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold">{comp.title}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-black">{comp.title}</h2>
                     {comp.client_name && (
                       <p className="text-sm text-neutral-500 mt-1">클라이언트 · {comp.client_name}</p>
                     )}
@@ -382,7 +383,7 @@ export default async function PTWorkspacePage() {
             className="group bg-neutral-950 border border-neutral-900 hover:border-[#FFC000]/40 p-6 transition-all"
           >
             <Medal className="h-5 w-5 text-[#FFC000] mb-3" />
-            <div className="font-bold mb-1">명예의 전당</div>
+            <div className="font-black mb-1">명예의 전당</div>
             <p className="text-sm text-neutral-500 mb-4">역대 경쟁PT 수상작 아카이브</p>
             <div className="flex items-center gap-1.5 text-sm font-bold text-neutral-400 group-hover:text-[#FFC000] group-hover:gap-3 transition-all">
               아카이브 보기 <ArrowRight className="h-4 w-4" />

@@ -23,9 +23,10 @@ export default function CertificatePage() {
         <div className="bg-[var(--mad-black,#000)] text-white">
             {/* Hero */}
             <section className="relative overflow-hidden border-b border-neutral-900">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.12),transparent_60%)]" aria-hidden />
                 <div className="relative mx-auto max-w-5xl px-6 py-24 sm:py-32">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CERTIFICATE</div>
-                    <h1 className="mt-4 text-5xl sm:text-7xl font-bold tracking-tight leading-tight">활동인증서</h1>
+                    <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-tight">활동인증서</h1>
                     <p className="mt-8 max-w-2xl text-xl text-neutral-300 leading-relaxed">
                         MADLeague 활동을 공식적으로 인증하는 활동인증서를 발급받으세요.
                     </p>
@@ -39,7 +40,7 @@ export default function CertificatePage() {
                     <div className="bg-neutral-950 border border-neutral-900 p-10 flex flex-col items-center justify-center aspect-[3/4]">
                         <FileCheck className="h-16 w-16 text-[#EC1D25]/40 mb-6" />
                         <div className="text-center space-y-2">
-                            <p className="text-2xl font-bold tracking-tight">활 동 인 증 서</p>
+                            <p className="text-2xl font-black tracking-tight">활 동 인 증 서</p>
                             <p className="text-xs text-neutral-500 tracking-widest">MAD League 제 8기</p>
                             <div className="mt-6 pt-6 border-t border-neutral-800 space-y-1 text-sm text-neutral-400">
                                 <p>성명: 홍길동</p>
@@ -56,7 +57,7 @@ export default function CertificatePage() {
 
                     {/* 설명 */}
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold tracking-tight">활동인증서란?</h2>
+                        <h2 className="text-3xl font-black tracking-tight">활동인증서란?</h2>
                         <p className="text-neutral-400 leading-relaxed">
                             MADLeague 인증서는 동아리 활동·경쟁 PT 참가·수상을 공식적으로 확인하는 문서입니다.
                             MADLeague에서의 경험을
@@ -90,13 +91,13 @@ export default function CertificatePage() {
             <section className="border-t border-neutral-900 py-20">
                 <div className="mx-auto max-w-7xl px-6">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">CRITERIA</div>
-                    <h2 className="text-4xl font-bold tracking-tight mb-12">발급 기준</h2>
+                    <h2 className="text-4xl font-black tracking-tight mb-12">발급 기준</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {criteria.map((c) => (
                             <div key={c.label} className="flex items-start gap-4 bg-neutral-950 border border-neutral-900 p-6">
                                 <CheckCircle className="h-5 w-5 text-[#EC1D25] shrink-0 mt-0.5" />
                                 <div>
-                                    <h3 className="font-bold text-white text-sm mb-1">{c.label}</h3>
+                                    <h3 className="font-black text-white text-sm mb-1">{c.label}</h3>
                                     <p className="text-xs text-neutral-500">{c.desc}</p>
                                 </div>
                             </div>
@@ -109,14 +110,14 @@ export default function CertificatePage() {
             <section className="border-t border-neutral-900 py-20">
                 <div className="mx-auto max-w-7xl px-6">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">PROCESS</div>
-                    <h2 className="text-4xl font-bold tracking-tight mb-12">발급 절차</h2>
+                    <h2 className="text-4xl font-black tracking-tight mb-12">발급 절차</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {steps.map((s) => (
                             <div key={s.step} className="bg-neutral-950 border border-neutral-900 p-8">
-                                <div className="w-10 h-10 bg-[#EC1D25] flex items-center justify-center text-white font-bold text-lg mb-6">
+                                <div className="w-10 h-10 bg-[#EC1D25] flex items-center justify-center text-white font-black text-lg mb-6">
                                     {s.step}
                                 </div>
-                                <h3 className="font-bold text-white mb-2">{s.title}</h3>
+                                <h3 className="font-black text-white mb-2">{s.title}</h3>
                                 <p className="text-sm text-neutral-500 leading-relaxed">{s.desc}</p>
                             </div>
                         ))}
@@ -133,7 +134,7 @@ export default function CertificatePage() {
                 <div className="mx-auto max-w-7xl px-6 py-24 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div>
                         <div className="text-sm font-bold tracking-widest text-white/70 mb-3">APPLY</div>
-                        <div className="text-3xl sm:text-4xl font-bold text-white">활동 기록을 공식 인증서로</div>
+                        <div className="text-3xl sm:text-4xl font-black text-white">활동 기록을 공식 인증서로</div>
                         <p className="mt-3 text-white/80">매드리거라면 지금 바로 발급받을 수 있습니다.</p>
                     </div>
                     <div className="flex flex-wrap gap-3">

@@ -72,7 +72,7 @@ export function ClubList({ rows }: { rows: ClubListRow[] }) {
             <ChevronDown className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} />
           </button>
           {open && (
-            <ul role="listbox" className="absolute right-0 z-20 mt-1 min-w-[12rem] border border-neutral-700 bg-black py-1">
+            <ul role="listbox" className="absolute right-0 z-20 mt-1 min-w-[12rem] border border-neutral-700 bg-black py-1 shadow-xl">
               {SORT_OPTIONS.map(o => (
                 <li key={o.id} role="option" aria-selected={o.id === sortId}>
                   <button type="button" onClick={() => { setSortId(o.id); setOpen(false); }}
@@ -98,7 +98,7 @@ export function ClubList({ rows }: { rows: ClubListRow[] }) {
               <div className="h-14 w-14" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
             )}
             <div className="min-w-0">
-              <Link href={`/madleague/clubs/${club.slug}`} className="text-2xl font-bold hover:text-[#EC1D25] transition">{club.name}</Link>
+              <Link href={`/madleague/clubs/${club.slug}`} className="text-2xl font-black hover:text-[#EC1D25] transition">{club.name}</Link>
               <div className="mt-1 text-sm text-neutral-400 md:hidden">
                 {club.region} · {club.rank ? `${club.rank}위 · ${club.score}점` : '기록 없음'}
               </div>
@@ -107,7 +107,7 @@ export function ClubList({ rows }: { rows: ClubListRow[] }) {
             <div className="hidden md:block">
               {club.rank ? (
                 <span title={`경쟁 PT ${club.teams}팀 참가${club.partial ? ' (팀 정보가 없는 회차는 최소 1팀으로 계산)' : ''}`}>
-                  <span className="text-xl font-bold tabular-nums">{club.rank}위</span>
+                  <span className="text-xl font-black tabular-nums">{club.rank}위</span>
                   <span className="ml-2 text-sm text-neutral-400 tabular-nums">{club.score}점</span>
                 </span>
               ) : <span className="text-sm text-neutral-600">기록 없음</span>}

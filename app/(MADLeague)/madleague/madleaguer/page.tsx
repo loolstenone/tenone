@@ -29,7 +29,7 @@ export default async function MadleaguerPage() {
             <div className="bg-black text-white min-h-[60vh]">
                 <div className="mx-auto max-w-3xl px-6 py-24">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADLEAGUER</div>
-                    <h1 className="mt-3 text-4xl sm:text-5xl font-bold">매드리거만 입장 가능합니다</h1>
+                    <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 입장 가능합니다</h1>
                     <p className="mt-6 text-neutral-400">로그인 후 매드리거 연동을 완료하면 매드리거 공간에 입장할 수 있습니다.</p>
                     <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
                 </div>
@@ -91,7 +91,7 @@ export default async function MadleaguerPage() {
             <section className="border-b border-neutral-900">
                 <div className="mx-auto max-w-6xl px-6 py-16">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MAD LEAGUE · MADLEAGUER</div>
-                    <h1 className="mt-3 text-4xl sm:text-6xl font-bold tracking-tight">매드리거</h1>
+                    <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">매드리거</h1>
                     <p className="mt-4 text-sm text-neutral-400 max-w-lg">
                         내 동아리, 참여 중인 프로그램, 매드리거 소통을 한곳에서.
                     </p>
@@ -103,7 +103,7 @@ export default async function MadleaguerPage() {
                 <section className="bg-neutral-950 border border-neutral-800 p-8">
                     <div className="flex items-center gap-3 mb-6">
                         <Users className="h-5 w-5 text-[#EC1D25]" />
-                        <h2 className="font-bold text-lg">내 동아리</h2>
+                        <h2 className="font-black text-lg">내 동아리</h2>
                     </div>
                     {(clubs ?? []).length === 0 ? (
                         <div className="text-sm text-neutral-500 leading-relaxed">
@@ -123,7 +123,7 @@ export default async function MadleaguerPage() {
                                             <div className="h-12 w-12" style={{ backgroundColor: c.color ?? '#EC1D25' }} />
                                         )}
                                         <div>
-                                            <div className="font-bold group-hover:text-[#EC1D25] transition">{c.name}</div>
+                                            <div className="font-black group-hover:text-[#EC1D25] transition">{c.name}</div>
                                             <div className="mt-0.5 flex items-center gap-1 text-xs text-neutral-500">
                                                 <MapPin className="h-3 w-3" /> {c.region ?? '—'} · {roleByClub.get(c.id)}
                                             </div>
@@ -139,7 +139,7 @@ export default async function MadleaguerPage() {
                 <section className="bg-neutral-950 border border-neutral-800 p-8">
                     <div className="flex items-center gap-3 mb-6">
                         <Trophy className="h-5 w-5 text-[#EC1D25]" />
-                        <h2 className="font-bold text-lg">내 프로그램</h2>
+                        <h2 className="font-black text-lg">내 프로그램</h2>
                     </div>
                     {programs.length === 0 ? (
                         <div className="text-sm text-neutral-500 leading-relaxed">
@@ -153,7 +153,7 @@ export default async function MadleaguerPage() {
                             {programs.map(p => (
                                 <li key={p.teamId}>
                                     <Link href="/madleague/pt" className="group block">
-                                        <div className="font-bold group-hover:text-[#EC1D25] transition">{p.compTitle}</div>
+                                        <div className="font-black group-hover:text-[#EC1D25] transition">{p.compTitle}</div>
                                         <div className="mt-0.5 text-xs text-neutral-500">
                                             {p.teamName} · {p.role === 'leader' ? '팀장' : '팀원'}
                                             {p.status !== 'completed' && p.presentationDate && ` · 발표 ${new Date(p.presentationDate).toLocaleDateString('ko-KR')}`}
@@ -173,7 +173,7 @@ export default async function MadleaguerPage() {
                 <section className="bg-neutral-950 border border-neutral-800 p-8">
                     <div className="flex items-center gap-3 mb-6">
                         <MessageSquare className="h-5 w-5 text-[#EC1D25]" />
-                        <h2 className="font-bold text-lg">자유 게시판</h2>
+                        <h2 className="font-black text-lg">자유 게시판</h2>
                     </div>
                     {(posts ?? []).length === 0 ? (
                         <p className="text-sm text-neutral-500">아직 글이 없습니다. 첫 글을 남겨 보세요.</p>

@@ -37,7 +37,7 @@ const TRANSITION_MESSAGES: Record<string, string> = {
   'expertise→leadership': '다음은 리더십 유형을 분석합니다',
   'leadership→identity': '경력 정체성 유연성을 평가합니다',
   'identity→network': '네트워크 자본을 확인합니다',
-  'network→seniorReadiness': '마지막 단계: 고년차 이직 준비도를 확인합니다',
+  'network→seniorReadiness': '마지막! 고년차 이직 준비도를 확인합니다',
 };
 
 const MODULE_ORDER: EModuleType[] = ['expertise', 'leadership', 'identity', 'network', 'seniorReadiness'];
@@ -310,7 +310,7 @@ function HitETestContent() {
   if (!isRestored) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-sm text-mute">불러오는 중</span>
+        <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -326,7 +326,7 @@ function HitETestContent() {
   if (isSubmitting || isComplete) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <span className="text-sm text-mute">불러오는 중</span>
+        <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
         <p className="text-neutral-500 text-sm">시니어 리더십 전환 리포트를 생성하고 있습니다...</p>
         <p className="text-neutral-400 text-xs">리포트를 만들고 있습니다 (약 30초)</p>
       </div>
@@ -337,7 +337,7 @@ function HitETestContent() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-xl md:text-2xl font-normal text-neutral-900 animate-pulse whitespace-pre-line">
+          <p className="text-xl md:text-2xl font-medium text-neutral-900 animate-pulse whitespace-pre-line">
             {transitionMessage}
           </p>
         </div>
@@ -348,7 +348,7 @@ function HitETestContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Progress */}
-      <div className="sticky top-0 z-10 bg-white/95 px-4 pt-4 pb-2">
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm px-4 pt-4 pb-2">
         <div className="w-full max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[11px] text-neutral-400 tracking-wide">{MODULE_NAMES[currentModule]}</span>
@@ -356,9 +356,9 @@ function HitETestContent() {
               {answeredCount}/{total}
             </span>
           </div>
-          <div className="h-1 w-full bg-neutral-100 rounded-none overflow-hidden">
+          <div className="h-1 w-full bg-neutral-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#E53935] transition-all duration-300 ease-out rounded-none"
+              className="h-full bg-[#E53935] transition-all duration-300 ease-out rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -382,10 +382,10 @@ function HitETestContent() {
           {currentQuestion && (
             <div className="transition-opacity duration-200">
               <div className="text-center mb-10">
-                <span className="inline-block px-3 py-1 rounded-none bg-neutral-100 text-xs text-neutral-500 font-normal mb-4">
+                <span className="inline-block px-3 py-1 rounded-full bg-neutral-100 text-xs text-neutral-500 font-medium mb-4">
                   Q{currentIndex + 1}
                 </span>
-                <p className="text-lg md:text-xl font-normal text-neutral-900 leading-relaxed">
+                <p className="text-lg md:text-xl font-medium text-neutral-900 leading-relaxed">
                   {currentQuestion.text}
                 </p>
               </div>
@@ -404,10 +404,10 @@ function HitETestContent() {
                           className={`
                             flex items-center justify-center
                             min-w-[44px] min-h-[44px] w-full
-                            rounded-xs text-base font-bold
+                            rounded-xl text-base font-bold
                             transition-all duration-200
                             ${isSelected
-                              ? 'bg-[#E53935] text-white scale-110'
+                              ? 'bg-[#E53935] text-white scale-110 shadow-lg shadow-red-200'
                               : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'
                             }
                             ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}
@@ -452,7 +452,7 @@ function HitETestPageInner() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <span className="text-sm text-mute">불러오는 중</span>
+          <div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" />
         </div>
       }
     >

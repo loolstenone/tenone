@@ -664,7 +664,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
 
     /* ── 배너 칩 표시용 ── */
     const bannerChips: { label: string; color: string }[] = [];
-    if (heroType) bannerChips.push({ label: `${heroType}`, color: '#dc2626' });
+    if (heroType) bannerChips.push({ label: `⚔ ${heroType}`, color: '#dc2626' });
     if (badakProfile?.fields?.['직무']) bannerChips.push({ label: String(badakProfile.fields['직무']), color: '#f59e0b' });
     (profile.interestsJob || []).slice(0, 2).forEach(j => bannerChips.push({ label: j, color: '#3b82f6' }));
     (profile.interestsIndustry || []).slice(0, 2).forEach(i => bannerChips.push({ label: i, color: '#8b5cf6' }));
@@ -1046,6 +1046,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                     </div>
                                     {isOwner && ucBalance !== null && (
                                         <div className="mt-4 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-700/30 w-fit">
+                                            <span className="text-base leading-none">🪙</span>
                                             <div>
                                                 <div className="text-[10px] font-medium uppercase tracking-wider text-amber-700/70 dark:text-amber-400/70">Universe Coin</div>
                                                 <div className="text-sm font-bold text-amber-700 dark:text-amber-300">
@@ -1169,7 +1170,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                         <div className="flex items-start gap-4">
                             {heroType && (
                                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-2xl"
-                                    style={{ background: 'rgba(220,38,38,0.1)' }}></div>
+                                    style={{ background: 'rgba(220,38,38,0.1)' }}>⚔</div>
                             )}
                             <div className="flex-1 min-w-0">
                                 {heroType && <div className="text-base font-bold tn-text mb-1">{String(heroType)}</div>}

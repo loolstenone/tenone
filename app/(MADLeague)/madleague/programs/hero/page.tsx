@@ -21,7 +21,7 @@ export default function HeroProgramPage() {
       >
         <div className="flex flex-wrap items-center gap-4">
           <CrossSiteLink href="/hero/hit/a" className="inline-flex items-center gap-3 bg-[#E53935] hover:bg-red-700 text-white font-bold px-8 py-4 text-lg transition">
-            기본 성향 검사 응시 <ArrowRight className="h-5 w-5" />
+            기본 성향 검사 시작하기 <ArrowRight className="h-5 w-5" />
           </CrossSiteLink>
           <p className="text-sm text-neutral-400">{hitStageMinutesLabel('a')} · {HIT_STAGES.a.approxQuestions}문항 · 무료 · 로그인 필요</p>
         </div>

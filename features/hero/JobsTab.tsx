@@ -63,7 +63,7 @@ export function JobsTab({ memberId }: { memberId: string }) {
         return (
             <div className="space-y-3 animate-pulse">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-32 bg-neutral-100 rounded-xs" />
+                    <div key={i} className="h-32 bg-neutral-100 rounded-xl" />
                 ))}
             </div>
         );
@@ -71,9 +71,9 @@ export function JobsTab({ memberId }: { memberId: string }) {
 
     if (error || !feed) {
         return (
-            <div className="bg-neutral-50 border border-neutral-200 rounded-xs p-6 text-center">
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
                 <p className="text-sm text-neutral-600">{error ?? "데이터를 불러올 수 없습니다"}</p>
-                <button onClick={load} className="mt-3 px-3 py-1.5 bg-[#E53935] text-white text-sm rounded-xs">다시 시도</button>
+                <button onClick={load} className="mt-3 px-3 py-1.5 bg-[#E53935] text-white text-sm rounded-lg">다시 시도</button>
             </div>
         );
     }
@@ -81,16 +81,16 @@ export function JobsTab({ memberId }: { memberId: string }) {
     return (
         <div className="space-y-6">
             {!feed.hasJH && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-xs p-5">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
                     <div className="flex items-center gap-2 mb-2">
-                        <Sparkles className="w-4 h-4 text-neutral-700" />
-                        <span className="text-xs font-bold text-neutral-700 uppercase tracking-wider">희망 직무 설문 필요</span>
+                        <Sparkles className="w-4 h-4 text-amber-700" />
+                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">희망 직무 설문 필요</span>
                     </div>
                     <h3 className="font-bold text-neutral-900 mb-1">나와 맞는 회사를 보려면 희망 직무 설문이 필요해요</h3>
                     <p className="text-sm text-neutral-600 mb-3">희망 직무 설문 12문항 · 약 5분. 작성하면 매칭 정확도가 올라갑니다.</p>
                     <Link
                         href="/hero/jh/write"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xs text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: RED }}
                     >
                         희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
@@ -98,7 +98,7 @@ export function JobsTab({ memberId }: { memberId: string }) {
                 </div>
             )}
 
-            <div className="bg-white border border-neutral-200 rounded-xs p-6">
+            <div className="bg-white border border-neutral-200 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-5">
                     <div>
                         <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
@@ -114,7 +114,7 @@ export function JobsTab({ memberId }: { memberId: string }) {
                 </div>
 
                 {feed.items.length === 0 ? (
-                    <div className="text-center py-12 border border-dashed border-neutral-200 rounded-xs">
+                    <div className="text-center py-12 border border-dashed border-neutral-200 rounded-xl">
                         <Briefcase className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
                         <p className="text-sm text-neutral-500">아직 게시된 JD가 없어요.</p>
                         <p className="text-xs text-neutral-400 mt-1">기업이 JD를 발행하면 여기에 표시됩니다.</p>
@@ -162,7 +162,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
     }
 
     return (
-        <div className="border border-neutral-200 rounded-xs p-5 hover:border-neutral-300 transition-all">
+        <div className="border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 hover:shadow-sm transition-all">
             <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -173,12 +173,12 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                             </span>
                         )}
                         {job.companyIndustry && (
-                            <span className="text-[11px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-none">
+                            <span className="text-[11px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full">
                                 {job.companyIndustry}
                             </span>
                         )}
                         {job.companySize && (
-                            <span className="text-[11px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-none">
+                            <span className="text-[11px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full">
                                 {job.companySize}
                             </span>
                         )}
@@ -191,7 +191,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                     )}
                 </div>
                 {daysAgo !== null && daysAgo < 7 && (
-                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 bg-red-50 text-[#E53935] rounded-none">
+                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 bg-red-50 text-[#E53935] rounded-full">
                         {daysAgo === 0 ? "오늘" : `${daysAgo}일 전`}
                     </span>
                 )}
@@ -213,7 +213,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
             </div>
 
             {job.reasons.length > 0 && (
-                <div className="p-3 bg-rose-50/60 rounded-xs mb-3">
+                <div className="p-3 bg-rose-50/60 rounded-lg mb-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-[#E53935] mb-1.5">왜 맞는가</p>
                     <ul className="space-y-1">
                         {job.reasons.map((r, i) => (
@@ -230,7 +230,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                 <button
                     onClick={handleInterest}
                     disabled={interested || loading}
-                    className="flex-1 py-2 rounded-xs text-white text-sm font-bold transition-all"
+                    className="flex-1 py-2 rounded-lg text-white text-sm font-bold transition-all"
                     style={{ backgroundColor: interested ? "#9E9E9E" : RED, opacity: loading ? 0.7 : 1 }}
                 >
                     {interested ? "관심 등록됨 ✓" : "관심 있어요"}
@@ -239,7 +239,7 @@ function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
                     type="button"
                     onClick={() => setExpanded(v => !v)}
                     aria-expanded={expanded}
-                    className="px-4 py-2 rounded-xs border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50"
+                    className="px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50"
                 >
                     {expanded ? "접기" : "자세히"}
                 </button>

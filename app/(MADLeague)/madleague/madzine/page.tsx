@@ -62,7 +62,7 @@ export default async function MadzinePage({ searchParams }: PageProps) {
             <span className="hidden sm:inline">Vol. {issueYear} · {articles.length} Stories</span>
           </div>
           <div className="py-14 sm:py-20 text-center">
-            <h1 className={`text-7xl sm:text-9xl italic font-bold tracking-tight text-white ${MZ_DISPLAY}`}>
+            <h1 className={`text-7xl sm:text-9xl italic font-black tracking-tight text-white ${MZ_DISPLAY}`}>
               MAD<span className="text-[#EC1D25]">zine</span>
             </h1>
             <p className={`mt-6 text-lg sm:text-xl text-neutral-300 ${MZ_SERIF}`}>진짜들이 쓰는 기록</p>
@@ -120,13 +120,13 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                   {cover.thumbnail_url && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cover.thumbnail_url} alt={cover.title}
-                      className="h-full w-full object-cover group- transition duration-1000" />
+                      className="h-full w-full object-cover group-hover:scale-[1.02] transition duration-1000" />
                   )}
                 </div>
-                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-12 max-w-3xl">
                   <div className={`${MZ_KICKER} text-[#EC1D25]`}>Cover Story · {madzineCategoryLabel(cover.category)}</div>
-                  <h2 className={`mt-4 text-3xl sm:text-5xl font-bold leading-tight text-white ${MZ_SERIF}`}>{cover.title}</h2>
+                  <h2 className={`mt-4 text-3xl sm:text-5xl font-black leading-tight text-white ${MZ_SERIF}`}>{cover.title}</h2>
                   {(cover.subtitle ?? cover.excerpt) && (
                     <p className="mt-4 text-sm sm:text-base leading-relaxed text-neutral-300 line-clamp-2">{cover.subtitle ?? cover.excerpt}</p>
                   )}

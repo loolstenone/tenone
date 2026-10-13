@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, CheckCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { JH_QUESTIONS } from "@/lib/hero/jh-questions";
@@ -66,7 +66,7 @@ export default function JHWritePage() {
     }, [form, hydrated]);
 
     if (isLoading || !hydrated) {
-        return <div className="min-h-screen flex items-center justify-center bg-white"><span className="text-sm text-mute">불러오는 중</span></div>;
+        return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     }
     if (!isAuthenticated) {
         return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
@@ -135,10 +135,10 @@ export default function JHWritePage() {
                         어울릴 만한 회사가 있으면 HeRo 팀이 알려 드립니다.
                     </p>
                     <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => router.push("/hero/my")} className="px-5 py-2.5 text-white font-bold rounded-xs" style={{ backgroundColor: HERO_RED }}>
+                        <button onClick={() => router.push("/hero/my")} className="px-5 py-2.5 text-white font-semibold rounded-lg" style={{ backgroundColor: HERO_RED }}>
                             마이페이지로
                         </button>
-                        <button onClick={() => setDone(false)} className="px-5 py-2.5 text-neutral-600 border border-neutral-200 rounded-xs hover:bg-neutral-50">
+                        <button onClick={() => setDone(false)} className="px-5 py-2.5 text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50">
                             다시 검토
                         </button>
                     </div>
@@ -156,10 +156,10 @@ export default function JHWritePage() {
                 </button>
 
                 <div className="mb-8">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-none mb-3" style={{ color: HERO_RED }}>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
                         <Sparkles className="h-3.5 w-3.5" /> Job Hope — 희망 직무
                     </div>
-                    <h1 className="text-2xl font-bold mb-2">당신은 어떤 문제를 풀러 왔고, 어디로 가고 싶은가</h1>
+                    <h1 className="text-2xl font-extrabold mb-2">당신은 어떤 문제를 풀러 왔고, 어디로 가고 싶은가</h1>
                     <p className="text-sm text-neutral-500">
                         구직 조건(규모·연봉·근무형태)은 뒤의 실무 필드에서 따로 받습니다.
                         12문항으로 원하는 일의 방향을 정리합니다. 4~7분 정도 걸립니다.
@@ -170,10 +170,10 @@ export default function JHWritePage() {
                 <div className="mb-6 sticky top-20 bg-neutral-50 py-2 z-10">
                     <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs text-neutral-500">필수 {completedCount}/{required.length}</span>
-                        <span className="text-xs font-bold" style={{ color: HERO_RED }}>{pct}%</span>
+                        <span className="text-xs font-semibold" style={{ color: HERO_RED }}>{pct}%</span>
                     </div>
-                    <div className="w-full bg-neutral-200 rounded-none h-1.5">
-                        <div className="h-1.5 rounded-none transition-all" style={{ width: `${pct}%`, backgroundColor: HERO_RED }} />
+                    <div className="w-full bg-neutral-200 rounded-full h-1.5">
+                        <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: HERO_RED }} />
                     </div>
                 </div>
 
@@ -196,17 +196,17 @@ export default function JHWritePage() {
                                 {q.type === "text" ? (
                                     <textarea value={(val as string) ?? ""} onChange={e => setResp(q.key, e.target.value)}
                                         placeholder={q.placeholder} rows={3}
-                                        className="w-full px-4 py-3 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 resize-none" />
+                                        className="w-full px-4 py-3 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 resize-none" />
                                 ) : q.type === "single" ? (
                                     <div className="space-y-2">
                                         {q.options!.map(opt => (
                                             <label key={opt.value}
-                                                className={`block p-3 rounded-xs border cursor-pointer transition-colors ${
+                                                className={`block p-3 rounded-lg border cursor-pointer transition-colors ${
                                                     val === opt.value ? "border-red-500 bg-red-50" : "border-neutral-200 hover:border-neutral-300 bg-white"
                                                 }`}>
                                                 <input type="radio" name={q.key} value={opt.value} checked={val === opt.value}
                                                     onChange={() => setResp(q.key, opt.value)} className="sr-only" />
-                                                <p className="text-sm text-neutral-800 font-normal">{opt.label}</p>
+                                                <p className="text-sm text-neutral-800 font-medium">{opt.label}</p>
                                                 {opt.hint && <p className="text-xs text-neutral-400 mt-0.5">{opt.hint}</p>}
                                             </label>
                                         ))}
@@ -220,7 +220,7 @@ export default function JHWritePage() {
                                             const disabled = !checked && arr.length >= max;
                                             return (
                                                 <label key={opt.value}
-                                                    className={`block p-3 rounded-xs border cursor-pointer transition-colors ${
+                                                    className={`block p-3 rounded-lg border cursor-pointer transition-colors ${
                                                         checked ? "border-red-500 bg-red-50"
                                                             : disabled ? "border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed"
                                                             : "border-neutral-200 hover:border-neutral-300 bg-white"
@@ -229,7 +229,7 @@ export default function JHWritePage() {
                                                         onChange={() => togglePick(q.key, opt.value, max)} className="sr-only" />
                                                     <div className="flex items-center justify-between">
                                                         <div>
-                                                            <p className="text-sm text-neutral-800 font-normal">{opt.label}</p>
+                                                            <p className="text-sm text-neutral-800 font-medium">{opt.label}</p>
                                                             {opt.hint && <p className="text-xs text-neutral-400 mt-0.5">{opt.hint}</p>}
                                                         </div>
                                                         {checked && <CheckCircle className="h-4 w-4 shrink-0" style={{ color: HERO_RED }} />}
@@ -288,7 +288,7 @@ export default function JHWritePage() {
                         />
 
                         <div>
-                            <p className="text-sm font-bold mb-2">처우 하한 (연봉 기준, 만원)</p>
+                            <p className="text-sm font-semibold mb-2">처우 하한 (연봉 기준, 만원)</p>
                             <div className="flex items-center gap-3">
                                 <input type="number" value={form.practicalFilters.compensation_floor}
                                     onChange={e => setForm(f => ({ ...f, practicalFilters: { ...f.practicalFilters, compensation_floor: e.target.value } }))}
@@ -307,9 +307,9 @@ export default function JHWritePage() {
                 <div className="mt-10 space-y-3">
                     {error && <p className="text-sm text-red-500 text-center">{error}</p>}
                     <button onClick={submit} disabled={submitting || completedCount < required.length}
-                        className="w-full flex items-center justify-center gap-2 py-4 text-white font-bold rounded-xs transition-opacity disabled:opacity-40"
+                        className="w-full flex items-center justify-center gap-2 py-4 text-white font-bold rounded-lg transition-opacity disabled:opacity-40"
                         style={{ backgroundColor: HERO_RED }}>
-                        {submitting ? <span className="text-xs">처리 중</span> : <ArrowRight className="h-4 w-4" />}
+                        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                         {submitting ? "제출 중..." : "제출하기"}
                     </button>
                     <p className="text-xs text-neutral-400 text-center">
@@ -330,13 +330,13 @@ function FilterPick({ label, values, options, onChange }: {
     const toggle = (v: string) => onChange(values.includes(v) ? values.filter(x => x !== v) : [...values, v]);
     return (
         <div>
-            <p className="text-sm font-bold mb-2">{label}</p>
+            <p className="text-sm font-semibold mb-2">{label}</p>
             <div className="flex flex-wrap gap-2">
                 {options.map(o => {
                     const on = values.includes(o.v);
                     return (
                         <button key={o.v} onClick={() => toggle(o.v)}
-                            className={`px-3 py-1.5 text-xs rounded-none border transition-colors ${
+                            className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
                                 on ? "border-red-500 bg-red-50 text-red-700" : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
                             }`}>
                             {o.l}
@@ -356,11 +356,11 @@ function FilterSingle({ label, value, options, onChange }: {
 }) {
     return (
         <div>
-            <p className="text-sm font-bold mb-2">{label}</p>
+            <p className="text-sm font-semibold mb-2">{label}</p>
             <div className="flex flex-wrap gap-2">
                 {options.map(o => (
                     <button key={o.v} onClick={() => onChange(o.v)}
-                        className={`px-3 py-1.5 text-xs rounded-none border transition-colors ${
+                        className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
                             value === o.v ? "border-red-500 bg-red-50 text-red-700" : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
                         }`}>
                         {o.l}

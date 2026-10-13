@@ -93,16 +93,16 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
 
   return (
     <div
-      className="rounded-xs border p-5"
+      className="rounded-2xl border p-5"
       style={{
-        background: 'rgba(255,255,255,0.03)',
+        background: `linear-gradient(135deg, ${modeStyle.color}08, rgba(255,255,255,0.02))`,
         borderColor: `${modeStyle.color}30`,
       }}
     >
       {/* 모드 배지 */}
       <div className="mb-3 flex items-center justify-between">
         <span
-          className="rounded-none px-2.5 py-1 text-[11px] font-bold"
+          className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
           style={{ background: `${modeStyle.color}20`, color: modeStyle.color }}
         >
           {modeStyle.label}
@@ -115,7 +115,7 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
 
       {/* 제안 제목 (AI 생성 예정) */}
       <h3 className="mb-3 text-[17px] font-bold leading-snug text-white">
-        {want.suggestedTitle}
+        💡 {want.suggestedTitle}
       </h3>
 
       {/* 공유 니즈 */}
@@ -124,7 +124,7 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
           {want.needTexts.map((t, i) => (
             <span
               key={i}
-              className="rounded-xs px-2 py-1 text-[11.5px] text-white/60"
+              className="rounded-md px-2 py-1 text-[11.5px] text-white/60"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             >
               #{t}
@@ -143,13 +143,13 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
                 key={p.userId}
                 src={p.avatarUrl}
                 alt=""
-                className="h-8 w-8 rounded-none border-2 object-cover"
+                className="h-8 w-8 rounded-full border-2 object-cover"
                 style={{ borderColor: '#1a1a2e' }}
               />
             ) : (
               <div
                 key={p.userId}
-                className="flex h-8 w-8 items-center justify-center rounded-none border-2 text-[11px] font-bold"
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-bold"
                 style={{
                   background: 'rgba(255,255,255,0.1)',
                   color: 'rgba(255,255,255,0.7)',
@@ -172,8 +172,8 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
 
       {/* 매칭 근거 (Top 2) */}
       {want.reasons.length > 0 && (
-        <div className="mb-5 rounded-xs border border-white/5 bg-white/3 px-3 py-2.5">
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/35">
+        <div className="mb-5 rounded-xl border border-white/5 bg-white/3 px-3 py-2.5">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/35">
             왜 이 사람과?
           </div>
           <div className="space-y-0.5 text-[11.5px] text-white/55">
@@ -189,14 +189,14 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
         <button
           onClick={handleCreateGroup}
           disabled={creating}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xs py-2.5 text-sm font-bold disabled:opacity-50"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
           style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
         >
           <Users className="h-4 w-4" /> {creating ? '생성 중...' : '모임 만들기'}
         </button>
         <button
           onClick={() => onStartDm(want.others[0]?.userId ?? '')}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xs border border-white/10 py-2.5 text-sm font-bold text-white/65 hover:border-white/25 hover:text-white/90"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2.5 text-sm font-semibold text-white/65 hover:border-white/25 hover:text-white/90"
         >
           <MessageCircle className="h-4 w-4" /> 대화 신청
           <ArrowRight className="h-3 w-3" />

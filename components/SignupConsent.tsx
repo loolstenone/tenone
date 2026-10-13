@@ -56,9 +56,9 @@ export function SignupConsent({ value, onChange, accentColor = "#171717", dark =
     );
 
     return (
-        <div className={`rounded-xs border ${border} p-3 space-y-2`}>
+        <div className={`rounded-xl border ${border} p-3 space-y-2`}>
             <Row checked={all} onToggle={() => onChange(all ? EMPTY_CONSENT : { age: true, terms: true, marketing: true })}>
-                <span className="font-bold">전체 동의</span>
+                <span className="font-semibold">전체 동의</span>
             </Row>
             <div className={`border-t ${border}`} />
             <Row checked={value.age} onToggle={() => onChange({ ...value, age: !value.age })}>

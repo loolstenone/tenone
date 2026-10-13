@@ -50,7 +50,7 @@ export function StageChecklistCard({ stage: initialStage, compact = false }: { s
     const groups = Array.from(new Set(items.map(i => i.group)));
 
     return (
-        <div className="bg-white border border-neutral-200 rounded-xs p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6">
             <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
@@ -59,7 +59,7 @@ export function StageChecklistCard({ stage: initialStage, compact = false }: { s
                     {!compact && <p className="text-sm text-neutral-500 mt-1">검사가 아니라 할 일입니다. 완료할수록 준비도가 올라갑니다.</p>}
                 </div>
                 <div className="text-right">
-                    <p className="text-2xl font-bold text-neutral-900">{percent}%</p>
+                    <p className="text-2xl font-extrabold text-neutral-900">{percent}%</p>
                     <p className="text-[11px] text-neutral-400">완료</p>
                 </div>
             </div>
@@ -68,28 +68,28 @@ export function StageChecklistCard({ stage: initialStage, compact = false }: { s
                 <div className="flex flex-wrap gap-1.5 mb-4">
                     {STAGE_KEYS.map(k => (
                         <button key={k} type="button" onClick={() => setStage(k)}
-                            className={`px-3 py-1.5 rounded-none text-xs font-bold border transition-colors ${stage === k ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-200 text-neutral-600 hover:border-neutral-400"}`}>
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${stage === k ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-200 text-neutral-600 hover:border-neutral-400"}`}>
                             {HIT_STAGES[k].code} · {HIT_STAGES[k].name}
                         </button>
                     ))}
                 </div>
             )}
 
-            <div className="h-1.5 bg-neutral-100 rounded-none overflow-hidden mb-5">
-                <div className="h-full rounded-none transition-all" style={{ width: `${percent}%`, backgroundColor: RED }} />
+            <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mb-5">
+                <div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, backgroundColor: RED }} />
             </div>
 
             {loading ? (
-                <div className="h-24 bg-neutral-50 rounded-xs animate-pulse" />
+                <div className="h-24 bg-neutral-50 rounded-xl animate-pulse" />
             ) : (
                 <div className="space-y-4">
                     {groups.map(g => (
                         <div key={g}>
-                            <p className="text-[11px] font-bold text-neutral-400 tracking-wide mb-1.5">{g}</p>
+                            <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-1.5">{g}</p>
                             <ul className="space-y-1">
                                 {items.filter(i => i.group === g).map(i => (
                                     <li key={i.key}>
-                                        <button type="button" onClick={() => toggle(i)} className="w-full flex items-start gap-2.5 text-left px-2 py-1.5 rounded-xs hover:bg-neutral-50 transition-colors">
+                                        <button type="button" onClick={() => toggle(i)} className="w-full flex items-start gap-2.5 text-left px-2 py-1.5 rounded-lg hover:bg-neutral-50 transition-colors">
                                             {i.checkedAt ? <CheckSquare className="w-4 h-4 mt-0.5 shrink-0" style={{ color: RED }} /> : <Square className="w-4 h-4 mt-0.5 shrink-0 text-neutral-300" />}
                                             <span className={`text-sm ${i.checkedAt ? "text-neutral-400 line-through" : "text-neutral-700"}`}>{i.text}</span>
                                         </button>

@@ -35,7 +35,7 @@ export default async function ClubRecruitPage() {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-28">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">RECRUIT</div>
-          <h1 className="mt-3 text-5xl sm:text-7xl font-bold tracking-tight break-keep">동아리 부원 공동 모집</h1>
+          <h1 className="mt-3 text-5xl sm:text-7xl font-black tracking-tight break-keep">동아리 부원 공동 모집</h1>
           <p className="mt-8 max-w-2xl text-lg text-neutral-400 leading-relaxed break-keep">
             전국 {clubs.length}개 MADLeague 동아리가 함께 부원을 모집합니다. 내 지역·관심에 맞는 동아리를 골라 지원하세요.
             지원서는 지원한 동아리 운영진과 MAD League 운영진만 봅니다.
@@ -58,7 +58,7 @@ export default async function ClubRecruitPage() {
                       ? <div className="h-14 w-14 flex items-center justify-center bg-white shrink-0"><Image src={club.logo_url} alt={club.name} width={56} height={56} className="object-contain" /></div>
                       : <div className="h-14 w-14 shrink-0" style={{ backgroundColor: club.color ?? '#EC1D25' }} />}
                     <div>
-                      <div className="text-3xl font-bold">{club.name}</div>
+                      <div className="text-3xl font-black">{club.name}</div>
                       <div className="mt-1 flex items-center gap-1.5 text-sm text-neutral-400"><MapPin className="h-3.5 w-3.5" />{club.region}</div>
                     </div>
                   </div>

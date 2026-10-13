@@ -25,9 +25,10 @@ export default function NewsletterConfirmedPage({
                     </>
                 ) : (
                     <>
-                        <h1 className="text-lg font-bold mb-2">구독을 확인했습니다.</h1>
+                        <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                        <h1 className="text-xl font-bold mb-2">구독이 완료되었습니다!</h1>
                         <p className="text-sm tn-text-sub mb-6">
-                            다음 호부터 Ten:One™ 뉴스레터를 메일로 보냅니다.
+                            Ten:One™ Universe의 소식을 가장 먼저 받아보실 수 있습니다.
                         </p>
                         <Link href="/" className="text-sm underline underline-offset-2 tn-text-sub hover:text-neutral-700">
                             홈으로 →

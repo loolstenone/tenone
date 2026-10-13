@@ -49,7 +49,7 @@ const LS_KEY = "hero-tih-draft";
 /* ── Radio component ── */
 function Radio({ name, value, label, selected, onChange }: { name: string; value: string; label: string; selected: string; onChange: (v: string) => void }) {
     return (
-        <label className={`flex items-start gap-3 p-3 rounded-xs border cursor-pointer transition-colors ${selected === value ? "border-red-500 bg-red-50" : "border-neutral-200 hover:border-neutral-300"}`}>
+        <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected === value ? "border-red-500 bg-red-50" : "border-neutral-200 hover:border-neutral-300"}`}>
             <input type="radio" name={name} value={value} checked={selected === value} onChange={() => onChange(value)} className="mt-0.5 accent-red-600 shrink-0" />
             <span className="text-sm text-neutral-700">{label}</span>
         </label>
@@ -60,8 +60,8 @@ function Radio({ name, value, label, selected, onChange }: { name: string; value
 function Progress({ step }: { step: number }) {
     const pct = Math.round((step / TOTAL_STEPS) * 100);
     return (
-        <div className="w-full bg-neutral-100 rounded-none h-1.5 mb-2">
-            <div className="h-1.5 rounded-none transition-all" style={{ width: `${pct}%`, backgroundColor: HERO_RED }} />
+        <div className="w-full bg-neutral-100 rounded-full h-1.5 mb-2">
+            <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: HERO_RED }} />
         </div>
     );
 }
@@ -146,7 +146,7 @@ export default function TIHTestPage() {
                         HeRo 팀이 검토한 뒤 조건에 맞는 인재 풀 현황을 안내해 드립니다.<br />
                         1~2 영업일 내에 이메일로 연락 드리겠습니다.
                     </p>
-                    <a href="/hero/search-light" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xs" style={{ backgroundColor: HERO_RED }}>
+                    <a href="/hero/search-light" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-lg" style={{ backgroundColor: HERO_RED }}>
                         Search Light로 돌아가기
                     </a>
                 </div>
@@ -175,17 +175,17 @@ export default function TIHTestPage() {
 
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-bold mb-2">산업</label>
+                                <label className="block text-sm font-semibold mb-2">산업</label>
                                 <select value={data.s0.industry} onChange={(e) => update("s0", { industry: e.target.value })}
-                                    className="w-full border border-neutral-300 rounded-xs px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30">
+                                    className="w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30">
                                     <option value="">선택해 주세요</option>
                                     {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-2">직무</label>
+                                <label className="block text-sm font-semibold mb-2">직무</label>
                                 <select value={data.s0.jobFunction} onChange={(e) => update("s0", { jobFunction: e.target.value })}
-                                    className="w-full border border-neutral-300 rounded-xs px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30">
+                                    className="w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30">
                                     <option value="">선택해 주세요</option>
                                     {JOB_FUNCTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
                                 </select>
@@ -202,7 +202,7 @@ export default function TIHTestPage() {
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-bold mb-3">지금 조직의 상황에 가장 가까운 것은?</p>
+                                <p className="text-sm font-semibold mb-3">지금 조직의 상황에 가장 가까운 것은?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "지켜야 할 때 — 지금 잘 돌아가는 걸 흔들리지 않게 유지해야 한다" },
@@ -214,7 +214,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">이 자리가 필요해진 가장 큰 이유는?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리가 필요해진 가장 큰 이유는?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "지금 업무가 제대로 돌아가지 않는다" },
@@ -228,7 +228,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">새로 올 사람이 팀에 어떤 변화를 줬으면 하나요?</p>
+                                <p className="text-sm font-semibold mb-3">새로 올 사람이 팀에 어떤 변화를 줬으면 하나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "조용히 빈 역할을 채워 주길 바란다" },
@@ -240,7 +240,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">얼마나 오래 함께할 생각인가요?</p>
+                                <p className="text-sm font-semibold mb-3">얼마나 오래 함께할 생각인가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "눈앞의 문제가 풀릴 때까지 (프로젝트성)" },
@@ -265,7 +265,7 @@ export default function TIHTestPage() {
                         </div>
 
                         {/* 분배 시각화 바 */}
-                        <div className="flex rounded-none overflow-hidden h-4 mb-8 gap-0.5">
+                        <div className="flex rounded-full overflow-hidden h-4 mb-8 gap-0.5">
                             <div className="transition-all duration-200" style={{ width: `${data.s2.guardian}%`, backgroundColor: "#E53935" }} />
                             <div className="transition-all duration-200" style={{ width: `${data.s2.pioneer}%`, backgroundColor: "#FF7043" }} />
                             <div className="transition-all duration-200" style={{ width: `${data.s2.connector}%`, backgroundColor: "#FFA726" }} />
@@ -277,7 +277,7 @@ export default function TIHTestPage() {
                                 { key: "connector" as const, label: "결속자", color: "#FFA726" },
                             ].map(({ key, label, color }) => (
                                 <div key={key} className="flex items-center gap-1">
-                                    <div className="w-2.5 h-2.5 rounded-none" style={{ backgroundColor: color }} />
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
                                     <span className="text-neutral-500">{label} <span className="font-bold text-neutral-700">{data.s2[key]}점</span></span>
                                 </div>
                             ))}
@@ -292,10 +292,10 @@ export default function TIHTestPage() {
                                 <div key={key}>
                                     <div className="flex items-center justify-between mb-2">
                                         <div>
-                                            <span className="font-bold text-sm">{label}</span>
+                                            <span className="font-semibold text-sm">{label}</span>
                                             <span className="text-xs text-neutral-400 ml-2">{desc}</span>
                                         </div>
-                                        <span className="text-xl font-bold tabular-nums" style={{ color }}>{data.s2[key]}</span>
+                                        <span className="text-xl font-black tabular-nums" style={{ color }}>{data.s2[key]}</span>
                                     </div>
                                     <input
                                         type="range"
@@ -335,7 +335,7 @@ export default function TIHTestPage() {
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-bold mb-3">이 사람에게 맡길 결정 범위는 어디까지인가요?</p>
+                                <p className="text-sm font-semibold mb-3">이 사람에게 맡길 결정 범위는 어디까지인가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "주어진 업무를 실행한다" },
@@ -347,7 +347,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">이 사람에게 가장 필요한 힘 두 가지를 골라 주세요 (8가지 중 택 2)</p>
+                                <p className="text-sm font-semibold mb-3">이 사람에게 가장 필요한 힘 두 가지를 골라 주세요 (8가지 중 택 2)</p>
                                 <div className="grid grid-cols-4 gap-2">
                                     {sPowers.map((sp) => {
                                         const sel = data.s3.q2_a === sp || data.s3.q2_b === sp;
@@ -365,7 +365,7 @@ export default function TIHTestPage() {
                                                         update("s3", { q2_b: sp });
                                                     }
                                                 }}
-                                                className={`py-2 text-sm rounded-xs border font-normal transition-colors ${sel ? "text-white border-transparent" : "border-neutral-200 text-neutral-600 hover:border-neutral-300"}`}
+                                                className={`py-2 text-sm rounded-lg border font-medium transition-colors ${sel ? "text-white border-transparent" : "border-neutral-200 text-neutral-600 hover:border-neutral-300"}`}
                                                 style={sel ? { backgroundColor: HERO_RED } : undefined}
                                             >
                                                 {sp}
@@ -379,7 +379,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">이 사람에게 어울리는 일하는 방식은?</p>
+                                <p className="text-sm font-semibold mb-3">이 사람에게 어울리는 일하는 방식은?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "빠르게 판단하고 밀고 나간다" },
@@ -391,7 +391,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">일할 때 어디에 먼저 무게를 두나요?</p>
+                                <p className="text-sm font-semibold mb-3">일할 때 어디에 먼저 무게를 두나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "구체적인 사실과 데이터를 먼저 본다" },
@@ -401,7 +401,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">이 자리의 직속 리더는 어떤 스타일인가요?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리의 직속 리더는 어떤 스타일인가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "지시가 분명하고 성과를 중시한다" },
@@ -423,7 +423,7 @@ export default function TIHTestPage() {
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-bold mb-3">팀이 일하는 속도와 리듬은 어떤가요?</p>
+                                <p className="text-sm font-semibold mb-3">팀이 일하는 속도와 리듬은 어떤가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "짧게 끊어 빠르게 달리는 방식이 반복된다" },
@@ -435,7 +435,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">같은 자리의 이전 담당자는 왜 자리를 비웠나요?</p>
+                                <p className="text-sm font-semibold mb-3">같은 자리의 이전 담당자는 왜 자리를 비웠나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "사내 다른 역할로 옮겼다" },
@@ -449,7 +449,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">조직에서 의사결정은 얼마나 빠르게 되나요?</p>
+                                <p className="text-sm font-semibold mb-3">조직에서 의사결정은 얼마나 빠르게 되나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "사안에 따라 다르지만, 필요하면 바로 결정한다" },
@@ -461,7 +461,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">리더와 구성원 사이 분위기는 어떤가요?</p>
+                                <p className="text-sm font-semibold mb-3">리더와 구성원 사이 분위기는 어떤가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "친구처럼 격의 없고 수평적이다" },
@@ -473,7 +473,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-bold mb-3">실수가 생겼을 때 팀의 첫 반응은 어떤가요?</p>
+                                <p className="text-sm font-semibold mb-3">실수가 생겼을 때 팀의 첫 반응은 어떤가요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "원인을 함께 짚고 다음을 준비한다" },
@@ -515,7 +515,7 @@ export default function TIHTestPage() {
                             placeholder="예: '조직의 혼란 속에서 방향을 잡고, 사람들을 이끌어 결과를 만드는 사람'"
                             value={data.s6.q1}
                             onChange={(e) => update("s6", { q1: e.target.value })}
-                            className="w-full border border-neutral-300 rounded-xs px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 resize-none"
+                            className="w-full border border-neutral-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 resize-none"
                         />
                         <p className="text-xs text-neutral-400 mt-2">비워 두고 넘어가도 됩니다.</p>
                     </div>
@@ -529,27 +529,27 @@ export default function TIHTestPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold mb-1">기업명 *</label>
+                                <label className="block text-sm font-semibold mb-1">기업명 *</label>
                                 <input type="text" required value={data.contactCompany}
                                     onChange={(e) => setData((p) => ({ ...p, contactCompany: e.target.value }))}
-                                    className="w-full border border-neutral-300 rounded-xs px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+                                    className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">담당자명 *</label>
+                                <label className="block text-sm font-semibold mb-1">담당자명 *</label>
                                 <input type="text" required value={data.contactName}
                                     onChange={(e) => setData((p) => ({ ...p, contactName: e.target.value }))}
-                                    className="w-full border border-neutral-300 rounded-xs px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+                                    className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">이메일 *</label>
+                                <label className="block text-sm font-semibold mb-1">이메일 *</label>
                                 <input type="email" required value={data.contactEmail}
                                     onChange={(e) => setData((p) => ({ ...p, contactEmail: e.target.value }))}
-                                    className="w-full border border-neutral-300 rounded-xs px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+                                    className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30" />
                             </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-neutral-50 rounded-xs text-xs text-neutral-500">
-                            <p className="font-bold text-neutral-700 mb-1">개인정보 안내</p>
+                        <div className="mt-6 p-4 bg-neutral-50 rounded-lg text-xs text-neutral-500">
+                            <p className="font-semibold text-neutral-700 mb-1">개인정보 안내</p>
                             <p>입력하신 정보는 HeRo의 인재 매칭에만 사용되며, 외부에 공개되지 않습니다.</p>
                         </div>
                     </div>
@@ -564,7 +564,7 @@ export default function TIHTestPage() {
 
                 {/* 제출 오류 */}
                 {submitError && (
-                    <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-xs text-sm text-red-600">
+                    <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
                         {submitError}
                     </div>
                 )}
@@ -574,7 +574,7 @@ export default function TIHTestPage() {
                     <button
                         onClick={() => setStep((s) => s - 1)}
                         disabled={step === 0}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-normal text-neutral-600 border border-neutral-300 rounded-xs hover:bg-neutral-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-neutral-600 border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                         <ArrowLeft className="h-4 w-4" /> 이전
                     </button>
@@ -583,7 +583,7 @@ export default function TIHTestPage() {
                         <button
                             onClick={() => { setStep((s) => s + 1); window.scrollTo({ top: 0, behavior: "instant" }); }}
                             disabled={!canNext()}
-                            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xs hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{ backgroundColor: HERO_RED }}
                         >
                             다음 <ArrowRight className="h-4 w-4" />
@@ -592,7 +592,7 @@ export default function TIHTestPage() {
                         <button
                             onClick={handleSubmit}
                             disabled={!canNext() || submitting}
-                            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xs hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{ backgroundColor: HERO_RED }}
                         >
                             {submitting ? "제출 중..." : "검사 완료 →"}

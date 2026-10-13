@@ -2,6 +2,7 @@ import { BadakHeader } from "@/features/badak/BadakHeader";
 import { BadakFooter } from "@/features/badak/BadakFooter";
 import { BadakAnalytics } from "@/features/badak/BadakAnalytics";
 import { BadakOnboardingGate } from "@/features/badak/BadakOnboardingGate";
+import { UniverseChatbot } from "@/components/UniverseChatbot";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -37,6 +38,7 @@ export default function BadakLayout({
                 {children}
             </main>
             <BadakFooter />
+            <UniverseChatbot siteId="badak" siteName="바닥" />
         </div>
     );
 }

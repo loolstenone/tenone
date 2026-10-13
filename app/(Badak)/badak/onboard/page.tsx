@@ -116,11 +116,11 @@ export default function OnboardPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6">
         <div className="text-center">
-          <div className="mb-2 text-3xl font-bold" style={{ color: ACCENT }}>바닥</div>
+          <div className="mb-2 text-3xl font-black" style={{ color: ACCENT }}>바닥</div>
           <p className="mb-6 text-sm text-neutral-400">로그인이 필요합니다</p>
           <button
             onClick={() => setShowLogin(true)}
-            className="rounded-xs px-6 py-3 text-sm font-bold text-black"
+            className="rounded-xl px-6 py-3 text-sm font-bold text-black"
             style={{ backgroundColor: ACCENT }}
           >
             로그인 / 가입하기
@@ -138,11 +138,11 @@ export default function OnboardPage() {
         <div />
 
         <div className="w-full max-w-[400px] text-center">
-          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xs text-3xl font-bold"
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black"
             style={{ backgroundColor: ACCENT + '20', color: ACCENT }}>
             바
           </div>
-          <h1 className="mb-3 text-3xl font-bold leading-tight text-white" style={{ letterSpacing: '-0.04em' }}>
+          <h1 className="mb-3 text-3xl font-black leading-tight text-white" style={{ letterSpacing: '-0.04em' }}>
             회사 밖에서 통하는<br />
             <span style={{ color: ACCENT }}>내 업계 사람들</span>
           </h1>
@@ -155,11 +155,11 @@ export default function OnboardPage() {
 
           <div className="mt-10 grid grid-cols-3 gap-3">
             {[
-              { icon: '', label: '업계 네트워킹' },
-              { icon: '', label: '취업·이직 정보' },
-              { icon: '', label: '사이드 프로젝트' },
+              { icon: '🤝', label: '업계 네트워킹' },
+              { icon: '💼', label: '취업·이직 정보' },
+              { icon: '🚀', label: '사이드 프로젝트' },
             ].map(({ icon, label }) => (
-              <div key={label} className="rounded-xs bg-neutral-900 py-3 px-2 text-center">
+              <div key={label} className="rounded-xl bg-neutral-900 py-3 px-2 text-center">
                 <div className="mb-1 text-xl">{icon}</div>
                 <div className="text-[11px] text-neutral-400">{label}</div>
               </div>
@@ -170,7 +170,7 @@ export default function OnboardPage() {
         <div className="w-full max-w-[400px]">
           <button
             onClick={() => setStep(1)}
-            className="w-full rounded-xs py-4 text-base font-bold text-black transition-opacity hover:opacity-90"
+            className="w-full rounded-2xl py-4 text-base font-bold text-black transition-opacity hover:opacity-90"
             style={{ backgroundColor: ACCENT }}
           >
             프로필 만들기 →
@@ -187,16 +187,16 @@ export default function OnboardPage() {
   return (
     <div className="min-h-screen bg-[#0d0d0d]">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800/60 bg-[#0d0d0d]/90 px-4 py-3">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800/60 bg-[#0d0d0d]/90 px-4 py-3 backdrop-blur">
         <button onClick={() => setStep(0)} className="p-1 text-neutral-500 hover:text-neutral-300">
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <span className="text-xs font-normal text-neutral-500">프로필 설정</span>
+        <span className="text-xs font-medium text-neutral-500">프로필 설정</span>
         <div className="w-7" />
       </div>
 
       <div ref={formRef} className="mx-auto max-w-[480px] px-5 pb-32 pt-6">
-        <h1 className="mb-1 text-2xl font-bold text-white" style={{ letterSpacing: '-0.04em' }}>
+        <h1 className="mb-1 text-2xl font-black text-white" style={{ letterSpacing: '-0.04em' }}>
           나를 소개해요
         </h1>
         <p className="mb-8 text-sm text-neutral-500">
@@ -206,7 +206,7 @@ export default function OnboardPage() {
         <div className="space-y-6">
           {/* 닉네임 */}
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
               닉네임 *
             </label>
             <input
@@ -214,23 +214,23 @@ export default function OnboardPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="바닥에서 불릴 이름"
               maxLength={20}
-              className="w-full rounded-xs border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
             />
           </div>
 
           {/* 핸들 */}
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
               핸들 (선택)
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-normal text-neutral-500">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-neutral-500">@</span>
               <input
                 value={handle}
                 onChange={(e) => handleHandleChange(e.target.value)}
                 placeholder="my_handle"
                 maxLength={20}
-                className="w-full rounded-xs border border-neutral-800 bg-neutral-900 py-3 pl-8 pr-4 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
+                className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-8 pr-4 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
                 style={handle && !handleError ? { borderColor: ACCENT + '60' } : {}}
               />
             </div>
@@ -246,7 +246,7 @@ export default function OnboardPage() {
           {/* 산업군 */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+              <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                 업계 *
               </label>
               <div className="flex gap-1">
@@ -254,7 +254,7 @@ export default function OnboardPage() {
                   <button
                     key={t}
                     onClick={() => setIndustryType(t)}
-                    className="rounded-none px-3 py-1 text-[11px] font-normal transition-colors"
+                    className="rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
                     style={industryType === t
                       ? { backgroundColor: ACCENT + '20', color: ACCENT }
                       : { backgroundColor: 'transparent', color: '#6b7280' }}
@@ -271,7 +271,7 @@ export default function OnboardPage() {
                   <button
                     key={ind}
                     onClick={() => setIndustry(sel ? '' : ind)}
-                    className="rounded-xs px-3 py-2 text-sm font-normal transition-all"
+                    className="rounded-lg px-3 py-2 text-sm font-medium transition-all"
                     style={sel
                       ? { backgroundColor: ACCENT, color: '#000', fontWeight: 700 }
                       : { backgroundColor: '#1a1a1a', color: '#9ca3af', border: '1px solid #2a2a2a' }}
@@ -286,7 +286,7 @@ export default function OnboardPage() {
           {/* 직무 */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+              <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                 직무 *
               </label>
               <div className="flex gap-1">
@@ -294,7 +294,7 @@ export default function OnboardPage() {
                   <button
                     key={t}
                     onClick={() => setJobFunctionType(t)}
-                    className="rounded-none px-3 py-1 text-[11px] font-normal transition-colors"
+                    className="rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
                     style={jobFunctionType === t
                       ? { backgroundColor: ACCENT + '20', color: ACCENT }
                       : { backgroundColor: 'transparent', color: '#6b7280' }}
@@ -311,7 +311,7 @@ export default function OnboardPage() {
                   <button
                     key={jf}
                     onClick={() => setJobFunction(sel ? '' : jf)}
-                    className="rounded-xs px-3 py-2 text-sm font-normal transition-all"
+                    className="rounded-lg px-3 py-2 text-sm font-medium transition-all"
                     style={sel
                       ? { backgroundColor: ACCENT, color: '#000', fontWeight: 700 }
                       : { backgroundColor: '#1a1a1a', color: '#9ca3af', border: '1px solid #2a2a2a' }}
@@ -325,7 +325,7 @@ export default function OnboardPage() {
 
           {/* 전화번호 */}
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
               전화번호 *
             </label>
             <input
@@ -335,26 +335,26 @@ export default function OnboardPage() {
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
               placeholder="010-1234-5678"
               maxLength={13}
-              className="w-full rounded-xs border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
             />
             <p className="mt-1.5 text-[11px] text-neutral-600">모임 확정 시 안내 문자만 발송돼요. 공개되지 않아요.</p>
           </div>
         </div>
 
         {error && (
-          <div className="mt-6 rounded-xs border border-red-800/50 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+          <div className="mt-6 rounded-xl border border-red-800/50 bg-red-900/20 px-4 py-3 text-sm text-red-400">
             {error}
           </div>
         )}
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-800/60 bg-[#0d0d0d]/95 px-5 py-4">
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-800/60 bg-[#0d0d0d]/95 px-5 py-4 backdrop-blur">
         <div className="mx-auto max-w-[480px]">
           <button
             onClick={handleSubmit}
             disabled={!canSubmit() || submitting}
-            className="w-full rounded-xs py-4 text-base font-bold text-black transition-opacity disabled:opacity-30"
+            className="w-full rounded-2xl py-4 text-base font-bold text-black transition-opacity disabled:opacity-30"
             style={{ backgroundColor: ACCENT }}
           >
             {submitting ? '저장 중...' : '바닥 입장하기'}

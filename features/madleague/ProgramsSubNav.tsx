@@ -76,13 +76,13 @@ function TabStrip({ tabs, active }: { tabs: Tab[]; active: string | null }) {
         {/* 양끝 페이드 + 화살표 — 넘치는 쪽에만 */}
         {edge.left && (
           <button type="button" aria-label="이전 메뉴 보기" onClick={() => nudge(-1)}
-            className="absolute left-0 top-0 z-10 flex h-full w-14 items-center justify-start pl-1 bg-neutral-950 text-neutral-400 hover:text-white">
+            className="absolute left-0 top-0 z-10 flex h-full w-14 items-center justify-start pl-1 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent text-neutral-400 hover:text-white">
             <ChevronLeft className="h-4 w-4" />
           </button>
         )}
         {edge.right && (
           <button type="button" aria-label="다음 메뉴 보기" onClick={() => nudge(1)}
-            className="absolute right-0 top-0 z-10 flex h-full w-14 items-center justify-end pr-1 bg-neutral-950 text-neutral-400 hover:text-white">
+            className="absolute right-0 top-0 z-10 flex h-full w-14 items-center justify-end pr-1 bg-gradient-to-l from-neutral-950 via-neutral-950/90 to-transparent text-neutral-400 hover:text-white">
             <ChevronRight className="h-4 w-4" />
           </button>
         )}

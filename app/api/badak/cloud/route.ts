@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET() {
-  // DB 니즈만 — 없으면 빈 목록 (목업 대체값 금지, 2026-10-14)
+  // Phase 1: DB에서 실제 니즈 데이터 로드, 없으면 Mock 폴백
   if (url && key) {
     try {
       const supabase = createClient(url, key);
@@ -27,8 +28,9 @@ export async function GET() {
         }));
         return NextResponse.json({ needs, source: 'db' });
       }
-    } catch (e) { console.error('[badak/cloud]', e); }
+    } catch { /* fallback to mock */ }
   }
 
-  return NextResponse.json({ needs: [], source: 'db' });
+  // Mock 폴백
+  return NextResponse.json({ needs: CLOUD_WORDS, source: 'mock' });
 }

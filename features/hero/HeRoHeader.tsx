@@ -62,9 +62,9 @@ export function HeRoHeader() {
                         {talentNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
                     </div>
                     <div className="flex-1 flex items-center justify-center gap-3 px-4">
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-neutral-300" />
+                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-r from-transparent to-neutral-300" />
                         {meetNav.map(item => <SearchLightNav key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-neutral-300" />
+                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-l from-transparent to-neutral-300" />
                     </div>
                     <div className="flex items-center gap-4 2xl:gap-6">
                         {companyNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
@@ -91,9 +91,9 @@ export function HeRoHeader() {
                         <Link href="/hero/my" className="p-1.5">
                             {user?.avatarUrl ? (
                                 <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                    className="h-7 w-7 rounded-none object-cover" />
+                                    className="h-7 w-7 rounded-full object-cover" />
                             ) : (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-none bg-neutral-200 text-xs font-bold text-neutral-700">
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
                                     {user?.name?.charAt(0) ?? '?'}
                                 </div>
                             )}
@@ -123,15 +123,15 @@ export function HeRoHeader() {
             textTone="dark"
             footer={
                 isAuthenticated ? (
-                    <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="block text-sm font-normal text-neutral-700 hover:text-neutral-900">마이페이지</Link>
+                    <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-700 hover:text-neutral-900">마이페이지</Link>
                 ) : (
                     <div className="flex flex-col gap-2">
                         <button type="button" onClick={() => openLogin("login")}
-                            className="rounded-xs border border-neutral-200 px-4 py-2 text-center text-sm text-neutral-600 hover:text-neutral-900">
+                            className="rounded-lg border border-neutral-200 px-4 py-2 text-center text-sm text-neutral-600 hover:text-neutral-900">
                             로그인
                         </button>
                         <button type="button" onClick={() => openLogin("signup")}
-                            className="rounded-xs px-4 py-2 text-center text-sm font-bold text-white"
+                            className="rounded-lg px-4 py-2 text-center text-sm font-semibold text-white"
                             style={{ backgroundColor: "#E53935" }}>
                             가입하기
                         </button>
@@ -144,7 +144,7 @@ export function HeRoHeader() {
                     href="/hero/journey"
                     onClick={() => setMobileOpen(false)}
                     className={clsx(
-                        "block rounded-xs px-4 py-2.5 text-base font-bold transition-colors mb-2",
+                        "block rounded-lg px-4 py-2.5 text-base font-bold transition-colors mb-2",
                         pathname.startsWith("/hero/journey")
                             ? "bg-[#E53935] text-white"
                             : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
@@ -159,7 +159,7 @@ export function HeRoHeader() {
             <Link
                 href="/hero/about"
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-xs px-4 py-2.5 text-base font-normal text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
             >
                 About
             </Link>
@@ -172,7 +172,7 @@ export function HeRoHeader() {
 
 function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
     return (
-        <Link href={href} className={clsx("text-sm font-normal transition-colors whitespace-nowrap",
+        <Link href={href} className={clsx("text-sm font-medium transition-colors whitespace-nowrap",
             active ? "text-[#E53935]" : "text-neutral-500 hover:text-neutral-900")}>
             {label}
         </Link>
@@ -188,10 +188,10 @@ function MobileGroup({ title, items, isActive, onNavigate }: {
     if (items.length === 0) return null;
     return (
         <div className="mt-4 first:mt-0">
-            <p className="px-4 mb-1 text-xs font-bold text-neutral-400">{title}</p>
+            <p className="px-4 mb-1 text-xs font-semibold text-neutral-400">{title}</p>
             {items.map(item => (
                 <Link key={item.href} href={item.href} onClick={onNavigate}
-                    className={clsx("block rounded-xs px-4 py-2.5 text-base font-normal transition-colors",
+                    className={clsx("block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
                         isActive(item.href) ? "bg-red-50 text-[#E53935]" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900")}>
                     {item.name}
                 </Link>

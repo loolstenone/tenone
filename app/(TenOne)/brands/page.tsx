@@ -10,10 +10,9 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 const categories = ['All', 'Corporate', 'Platform', 'Marketing', 'Consulting', 'Education', 'Community', 'Project Group', 'Network', 'Content', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Startup', 'Wellness'];
 
 const statusColor: Record<string, string> = {
-    // 태그 = 테두리 텍스트, 배경색 없음 (tenone-ui 3)
-    Active: 'border border-current font-bold',
-    Development: 'border border-current',
-    Hiatus: 'border border-current opacity-50',
+    Active: 'bg-emerald-500/10 text-emerald-400',
+    Development: 'bg-amber-500/10 text-amber-400',
+    Hiatus: 'bg-neutral-800 text-neutral-500',
 };
 
 export default function BrandsPage() {
@@ -30,7 +29,7 @@ export default function BrandsPage() {
             <div className="mx-auto max-w-7xl px-6 pt-16 pb-16 space-y-8">
                 <div>
                     <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Brand Portfolio</p>
-                    <h1 className="text-3xl font-normal tracking-tight mb-2">Brands</h1>
+                    <h1 className="text-3xl font-light tracking-tight mb-2">Brands</h1>
                     <p className="text-sm" style={{ color: "var(--tn-text-sub)" }}>Ten:One&trade; Universe를 구성하는 {brands.length}개 브랜드</p>
                 </div>
 
@@ -54,7 +53,7 @@ export default function BrandsPage() {
                     {filtered.map(brand => (
                         <div key={brand.id} className="group p-5 transition-all hover:opacity-100 opacity-80" style={{ backgroundColor: "var(--tn-bg)" }}>
                             <div className="flex items-start justify-between mb-3">
-                                <div className="h-10 w-10 flex items-center justify-center text-xs font-normal border" style={{ borderColor: "var(--tn-border)" }}>
+                                <div className="h-10 w-10 flex items-center justify-center text-xs font-medium border" style={{ borderColor: "var(--tn-border)" }}>
                                     {brand.name.slice(0, 2)}
                                 </div>
                                 <span className={`text-[9px] px-2 py-0.5 ${statusColor[brand.status] || statusColor.Hiatus}`}>
@@ -62,7 +61,7 @@ export default function BrandsPage() {
                                 </span>
                             </div>
 
-                            <h3 className="text-sm font-normal">{brand.name}</h3>
+                            <h3 className="text-sm font-medium">{brand.name}</h3>
                             <p className="text-[10px] mt-0.5" style={{ color: "var(--tn-text-sub)" }}>{brand.category}</p>
                             {brand.domain && <p className="text-[10px] mt-0.5" style={{ color: "var(--tn-text-muted)" }}>{brand.domain}</p>}
 

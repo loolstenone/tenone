@@ -31,7 +31,7 @@ export function LoginRequired({ accentColor = "#171717", defaultTab = "login", m
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className={`inline-flex items-center gap-2 ${square ? "" : "rounded-xs"} px-5 py-2.5 text-sm font-bold transition-opacity hover:opacity-90`}
+                className={`inline-flex items-center gap-2 ${square ? "" : "rounded-xl"} px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90`}
                 style={{ backgroundColor: accentColor, color: readableOn(accentColor) }}
             >
                 <LogIn className="h-4 w-4" /> 로그인

@@ -2,9 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import {
+  fetchMadClubs,
   fetchMadArticles,
-  fetchMadCompetitions,
-  fetchMadHallRounds,
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
 import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
@@ -14,22 +13,19 @@ import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribe
 
 export const revalidate = 300; // 5분 캐시
 
-const ROUND_STATUS: Record<string, string> = { upcoming: '예정', ongoing: '진행 중', completed: '종료', cancelled: '취소' };
-
 export default async function Page() {
-  const [recentRounds, hallRounds, articles] = await Promise.all([
-    fetchMadCompetitions({ limit: 6 }).then((rs) => rs.filter((r) => !r.title.startsWith('[데모]')).slice(0, 5)), // 데모 회차는 기능 시험용 — 홈에 안 띄움
-    fetchMadHallRounds(),
+  const [clubs, articles] = await Promise.all([
+    fetchMadClubs(),
     fetchMadArticles({ limit: 4 }),
   ]);
-  // 1위는 결과가 공개된 회차만
-  const winnerOf = new Map(hallRounds.map((h) => [h.id, h.results.find((x) => x.rank === 1)]));
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* ─── Hero ─────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-16 sm:pt-24 sm:pb-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#EC1D25]/20 via-black to-black" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.15),transparent_50%)]" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-32 sm:pt-32 sm:pb-40">
           <div className="flex items-center gap-3 text-[#EC1D25] font-bold tracking-widest text-xs mb-6">
             <span className="h-px w-8 bg-[#EC1D25]" />
             MATCH · ACTIVE · DEVELOP
@@ -58,32 +54,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
-      {/* ─── 경쟁 PT 기록 — 첫 화면 바로 아래 실제 데이터 (tenone-ui 4.1) ─── */}
-      {recentRounds.length > 0 && (
-        <section className="border-t border-neutral-900">
-          <div className="mx-auto max-w-7xl px-6 py-16">
-            <div className="flex items-baseline justify-between border-b border-neutral-800 pb-3">
-              <h2 className="text-lg font-bold">최근 경쟁 PT</h2>
-              <Link href="/madleague/pt" className="text-sm text-neutral-400 underline">전체 보기</Link>
-            </div>
-            <ul>
-              {recentRounds.map((r) => {
-                const winner = winnerOf.get(r.id);
-                return (
-                  <li key={r.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-neutral-900 py-4 text-sm">
-                    <span className="w-24 shrink-0 text-neutral-500">{r.presentation_date ? r.presentation_date.slice(0, 10).replaceAll('-', '.') : r.year}</span>
-                    <span className="font-bold text-white">{r.client_name ?? r.title}</span>
-                    {r.brief_title && <span className="text-neutral-400">{r.brief_title}</span>}
-                    <span className="text-neutral-500">{ROUND_STATUS[r.status] ?? ''}</span>
-                    {winner && <span className="text-neutral-500">1위 {winner.team_name}{winner.club ? ` · ${winner.club.name}` : ''}</span>}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </section>
-      )}
 
       {/* ─── 동아리 지도 ─────────────────────────── */}
       <section className="bg-neutral-950 border-y border-neutral-900">
@@ -124,7 +94,7 @@ export default async function Page() {
                     <span className="text-xs text-neutral-500 font-bold tracking-wider w-24 shrink-0">
                       {c.region}
                     </span>
-                    <span className="font-bold text-2xl text-white">
+                    <span className="font-black text-2xl text-white">
                       {c.name}
                       <span className="ml-2 text-sm font-normal text-neutral-500">({c.sub})</span>
                     </span>
@@ -177,9 +147,9 @@ export default async function Page() {
                   <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
                     {a.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group- transition" />
+                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
                     ) : (
-                      <div className="h-full w-full bg-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
+                      <div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
                         {madzineCategoryLabel(a.category)}
                       </div>
                     )}
@@ -209,7 +179,7 @@ export default async function Page() {
         <div className="mx-auto max-w-7xl px-6 py-20 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1">
             <div className="text-sm font-bold tracking-widest text-white/80">DAMbe 들이 기다린다</div>
-            <div className="mt-2 text-3xl sm:text-4xl font-bold text-white">담비라 세상아!</div>
+            <div className="mt-2 text-3xl sm:text-4xl font-black text-white">담비라 세상아!</div>
           </div>
 
           {/* 담비 캐릭터 */}
@@ -219,7 +189,7 @@ export default async function Page() {
               alt="트로피를 든 DAMbe 캐릭터"
               sizes="160px"
               fill
-              className="object-contain object-bottom drop-"
+              className="object-contain object-bottom drop-shadow-2xl"
             />
           </div>
 
@@ -251,7 +221,7 @@ function SectionHeader({
     <div className="flex items-end justify-between flex-wrap gap-4">
       <div>
         <div className="text-xs font-bold tracking-widest text-[#EC1D25]">{eyebrow}</div>
-        <h2 className={`mt-2 text-4xl sm:text-6xl font-bold tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
+        <h2 className={`mt-2 text-4xl sm:text-6xl font-black tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
           {title}
         </h2>
       </div>
@@ -287,7 +257,7 @@ function ProgramCard({
           : 'bg-black border-neutral-900 hover:border-[#EC1D25]'
       }`}
     >
-      <div className="text-3xl font-bold text-white">{title}</div>
+      <div className="text-3xl font-black text-white">{title}</div>
       <div className={`mt-4 text-base leading-relaxed ${featured ? 'text-white/80' : 'text-neutral-400'}`}>
         {desc}
       </div>

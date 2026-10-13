@@ -87,7 +87,7 @@ export default async function PostDetailPage({ params }: PageProps) {
             <>
               <span className="text-neutral-600">·</span>
               <span className="inline-flex items-center gap-1 text-neutral-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-none" style={{ backgroundColor: typed.mad_clubs.color ?? '#EC1D25' }} />
+                <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: typed.mad_clubs.color ?? '#EC1D25' }} />
                 {typed.mad_clubs.name}
               </span>
             </>
@@ -95,9 +95,9 @@ export default async function PostDetailPage({ params }: PageProps) {
           <span className="text-neutral-600">·</span>
           <span className="text-neutral-500">{new Date(typed.created_at).toLocaleString('ko-KR')}</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{typed.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{typed.title}</h1>
         <div className="mt-4 flex items-center gap-2 text-sm text-neutral-400">
-          <span className="font-normal">{typed.mad_members?.name ?? '익명'}</span>
+          <span className="font-medium">{typed.mad_members?.name ?? '익명'}</span>
         </div>
 
         <div className="mt-8 whitespace-pre-wrap text-neutral-200 leading-relaxed">

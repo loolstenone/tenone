@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { CloudWord } from '@/types/badak';
+import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { CloudBubble } from '@/features/badak/cloud/CloudBubble';
 import { NeedsInput } from '@/features/badak/cloud/NeedsInput';
 import { FeedSection } from '@/features/badak/cloud/FeedSection';
@@ -17,7 +18,9 @@ export default function BadakNextStage() {
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
   const [sending, setSending] = useState(false);
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
-  const [cloudWords, setCloudWords] = useState<CloudWord[]>([]); // DB 니즈만 (목업 대체값 금지)
+  const [cloudWords, setCloudWords] = useState<CloudWord[]>(
+    [...CLOUD_WORDS].sort((a, b) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
+  );
   const [sphereRadius, setSphereRadius] = useState(180);
 
   const SUB_COPIES = [
@@ -95,7 +98,7 @@ export default function BadakNextStage() {
   // Animation loop — pure DOM mutation, zero React re-renders
   useEffect(() => {
     const FRICTION = 0.985;
-    const IDLE_SPEED = 0; // 혼자 돌지 않는다 — 끌 때만 움직임 (tenone-ui 2.5, 2026-10-14)
+    const IDLE_SPEED = 0.002;
     const MIN_VELOCITY = 0.0001;
     let lastTime = performance.now();
 
@@ -187,8 +190,10 @@ export default function BadakNextStage() {
         el.style.opacity = opacity.toFixed(3);
         el.style.zIndex = String(Math.round(depth * 100));
         el.style.fontSize = `${fontSize.toFixed(1)}px`;
-        el.style.fontWeight = depth > 0.6 ? '700' : '400';
+        el.style.fontWeight = depth > 0.6 ? '700' : '500';
         el.style.color = color;
+        el.style.textShadow = depth > 0.7 ? '0 1px 6px rgba(0,0,0,0.4)' : 'none';
+        el.style.filter = depth < 0.35 ? `blur(${((1 - depth * 3) * 2).toFixed(1)}px)` : 'none';
       }
 
       autoRef.current = requestAnimationFrame(animate);
@@ -270,13 +275,13 @@ export default function BadakNextStage() {
         style={{ minHeight: 'calc(100vh - 56px)', background: skyBg }}
       >
         {/* Slogan */}
-        <div className="px-6 pt-12 text-center sm:pt-16">
+        <div className="px-6 pt-12 text-center sm:pt-16" style={{ animation: 'badak-fadeUp 0.6s ease both' }}>
           <h1
-            className="text-[20px] font-bold leading-[1.3] text-white sm:text-[26px]"
+            className="text-[20px] font-black leading-[1.3] text-white sm:text-[26px]"
             style={{ letterSpacing: '-0.04em' }}
           >
             독서도 취미도 다 좋은데<br />
-            난 좀 더 <span className="text-neutral-400">성장</span>하고 싶어
+            난 좀 더 <span className="text-amber-400">성장</span>하고 싶어
           </h1>
           <p
             className="mt-2 text-[12px] text-white/40 sm:text-[14px]"
@@ -304,13 +309,13 @@ export default function BadakNextStage() {
             }}
           >
             <div ref={sphereRef} className="absolute inset-0">
-              {/* 중앙 레이블 — 니즈가 있을 때만 */}
-              {sortedWords.length > 0 && <div
+              {/* 중앙 레이블 */}
+              <div
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
                 style={{ zIndex: 0 }}
               >
                 <span
-                  className="font-bold tracking-widest uppercase"
+                  className="font-black tracking-widest uppercase"
                   style={{
                     fontSize: `${Math.round(sphereRadius * 0.18)}px`,
                     color: 'rgba(255,255,255,0.06)',
@@ -319,13 +324,8 @@ export default function BadakNextStage() {
                 >
                   Needs
                 </span>
-              </div>}
+              </div>
 
-              {sortedWords.length === 0 && (
-                <p className="absolute inset-x-6 top-1/2 -translate-y-1/2 text-center text-sm text-white/60" style={{ zIndex: 1 }}>
-                  아직 올라온 니즈가 없습니다. 아래 칸에 첫 니즈를 올려 주세요.
-                </p>
-              )}
               {sortedWords.map((word, i) => (
                 <CloudBubble
                   key={word.needId ?? word.text}
@@ -340,7 +340,7 @@ export default function BadakNextStage() {
         </div>
 
         {/* Needs Input */}
-        <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'rgba(26,26,46,0.95)' }}>
+        <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'linear-gradient(transparent 0%, rgba(26,26,46,0.95) 30%)' }}>
           <div ref={inputAreaRef} className="mx-auto max-w-[500px]">
             <NeedsInput onSend={handleSend as (text: string) => Promise<{ status: string; count?: number; id?: string }>} sending={sending} cloudWords={cloudWords} />
           </div>
@@ -361,7 +361,7 @@ export default function BadakNextStage() {
       {/* Spark animation */}
       {spark && (
         <div
-          className="pointer-events-none fixed z-[999] h-2 w-2 rounded-none"
+          className="pointer-events-none fixed z-[999] h-2 w-2 rounded-full"
           style={{
             left: spark.x,
             top: spark.y,

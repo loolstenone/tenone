@@ -4,12 +4,6 @@ import { listProgramForms } from '@/lib/forms-server';
 import { AVAILABILITY_LABEL } from '@/lib/forms';
 import { MAD_ACCENT, type MadProgram } from '@/features/madleague/programs-list';
 
-/** 은/는 — 마지막 글자 받침 기준 (한글 아니면 '는') */
-function topicJosa(word: string): '은' | '는' {
-  const code = word.trim().charCodeAt(word.trim().length - 1) - 0xac00;
-  return code >= 0 && code <= 11171 && code % 28 !== 0 ? '은' : '는';
-}
-
 /**
  * 프로그램 상세 하단 "참여" CTA — 10개 프로그램이 똑같이 쓴다 (2026-10-08 통일).
  *
@@ -35,8 +29,8 @@ export async function ProgramCTA({ program, primary }: { program: MadProgram; pr
     <section id="join" style={{ backgroundColor: accent }}>
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className={`text-sm font-bold tracking-widest ${sub} mb-3`}>JOIN</div>
-        <h2 className={`text-3xl sm:text-4xl font-bold ${text}`}>
-          {program.madleaguerOnly ? `${program.title}${topicJosa(program.title)} 매드리거의 무대다` : `${program.title}에 참여하기`}
+        <h2 className={`text-3xl sm:text-4xl font-black ${text}`}>
+          {program.madleaguerOnly ? `${program.title}는 매드리거의 무대다` : `${program.title}에 참여하기`}
         </h2>
         <p className={`mt-3 text-lg ${sub}`}>
           {program.madleaguerOnly

@@ -96,7 +96,7 @@ export default function MadLeagueMyPage() {
 
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-black">
-            <span className="text-sm text-mute">불러오는 중</span>
+            <div className="h-6 w-6 border-2 border-neutral-600 border-t-[#EC1D25] rounded-full animate-spin" />
         </div>
     );
 
@@ -127,25 +127,25 @@ export default function MadLeagueMyPage() {
                             {madInfo.club_name && (
                                 <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">소속 동아리</p>
-                                    <p className="text-sm font-bold">{madInfo.club_name}</p>
+                                    <p className="text-sm font-semibold">{madInfo.club_name}</p>
                                 </div>
                             )}
                             {madInfo.cohort && (
                                 <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">기수</p>
-                                    <p className="text-sm font-bold">{madInfo.cohort}기</p>
+                                    <p className="text-sm font-semibold">{madInfo.cohort}기</p>
                                 </div>
                             )}
                             {madInfo.university && (
                                 <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">대학교</p>
-                                    <p className="text-sm font-bold">{madInfo.university}</p>
+                                    <p className="text-sm font-semibold">{madInfo.university}</p>
                                 </div>
                             )}
                             {madInfo.activity_years && madInfo.activity_years.length > 0 && (
                                 <div className="bg-neutral-800/50 px-3 py-2">
                                     <p className="text-xs text-neutral-500 mb-0.5">활동연도</p>
-                                    <p className="text-sm font-bold">{madInfo.activity_years.join(', ')}</p>
+                                    <p className="text-sm font-semibold">{madInfo.activity_years.join(', ')}</p>
                                 </div>
                             )}
                         </div>
@@ -198,7 +198,7 @@ export default function MadLeagueMyPage() {
                     <div className="bg-neutral-950 border border-neutral-800 p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Shield className="h-5 w-5 text-[#EC1D25]" />
-                            <h3 className="font-bold text-base">{madInfo?.club_name ?? "동아리"} · 신청서 대기</h3>
+                            <h3 className="font-black text-base">{madInfo?.club_name ?? "동아리"} · 신청서 대기</h3>
                             {pendingApps.length > 0 && (
                                 <span className="ml-auto bg-[#EC1D25] text-white text-xs font-bold px-2 py-0.5">
                                     {pendingApps.length}
@@ -212,12 +212,12 @@ export default function MadLeagueMyPage() {
                                 {pendingApps.map(app => (
                                     <div key={app.id} className="py-3 flex items-center justify-between gap-4">
                                         <div>
-                                            <p className="text-sm font-bold">{app.name}</p>
+                                            <p className="text-sm font-semibold">{app.name}</p>
                                             <p className="text-xs text-neutral-500 mt-0.5">{app.university} · {app.created_at?.substring(0, 10)}</p>
                                         </div>
                                         <div className="flex gap-2 shrink-0">
                                             <button onClick={() => handleApprove(app.id)} disabled={processingId === app.id}
-                                                className="flex items-center gap-1 bg-neutral-700 hover:bg-neutral-600 disabled:opacity-50 text-white text-xs font-bold px-3 py-1.5 transition">
+                                                className="flex items-center gap-1 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold px-3 py-1.5 transition">
                                                 <UserCheck className="h-3.5 w-3.5" /> 승인
                                             </button>
                                             <button onClick={() => handleReject(app.id)} disabled={processingId === app.id}
@@ -242,7 +242,7 @@ export default function MadLeagueMyPage() {
                                 <p className="text-xs text-neutral-500 mt-0.5">게시판·프로젝트·경쟁PT 워크스페이스</p>
                             </div>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-[#EC1D25] group- transition-transform" />
+                        <ArrowRight className="h-4 w-4 text-[#EC1D25] group-hover:translate-x-1 transition-transform" />
                     </Link>
                 )}
 

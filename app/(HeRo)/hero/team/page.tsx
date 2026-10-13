@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Copy, Check, ArrowRight, Plus } from "lucide-react";
+import { Users, Puzzle, MessagesSquare, Loader2, Copy, Check, ArrowRight, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { PageHero } from "@/features/hero/PageHero";
 import { hitStageMinutes } from "@/lib/hit/stages";
@@ -19,9 +19,9 @@ interface Diagnosis {
 }
 
 const DELIVERABLES = [
-    { title: "말하기 어려웠던 것", desc: "신뢰·솔직함·역할·갈등·업무 부담·인정·팀장과의 관계를 팀원 평균으로 보고, 이름 없는 이야기로 바뀌었으면 하는 것을 듣습니다." },
-    { title: "팀장과 팀원의 인식 차이", desc: "팀장과 팀원이 같은 질문에 답해, 서로 보는 눈이 다른 곳과 문제점, 팀 빌딩 방법을 짚어 드립니다." },
-    { title: "팀 케미", desc: "HIT 기본 성향 검사로 팀의 역할 분포, 비어 있는 역할, 일하는 방식이 쏠린 곳을 봅니다." },
+    { icon: MessagesSquare, title: "말하기 어려웠던 것", desc: "신뢰·솔직함·역할·갈등·업무 부담·인정·팀장과의 관계를 팀원 평균으로 보고, 이름 없는 이야기로 바뀌었으면 하는 것을 듣습니다." },
+    { icon: Puzzle, title: "팀장과 팀원의 인식 차이", desc: "팀장과 팀원이 같은 질문에 답해, 서로 보는 눈이 다른 곳과 문제점, 팀 빌딩 방법을 짚어 드립니다." },
+    { icon: Users, title: "팀 케미", desc: "HIT 기본 성향 검사로 팀의 역할 분포, 비어 있는 역할, 일하는 방식이 쏠린 곳을 봅니다." },
 ];
 
 const STEPS = [
@@ -62,7 +62,7 @@ export default function TeamDiagnosisPage() {
             {isAuthenticated && hasCompany && data && (
                 <section id="my-teams" className="scroll-mt-24 border-b border-neutral-100 bg-neutral-50">
                     <div className="mx-auto max-w-5xl px-6 lg:px-8 py-14 space-y-5">
-                        <h2 className="text-xl font-bold tracking-tight">우리 회사 팀 진단</h2>
+                        <h2 className="text-xl font-extrabold tracking-tight">우리 회사 팀 진단</h2>
                         <CreateForm companies={data.companies} onCreated={load} />
                         {data.items.length === 0 ? (
                             <p className="text-sm text-neutral-500">아직 만든 팀 진단이 없습니다.</p>
@@ -79,10 +79,12 @@ export default function TeamDiagnosisPage() {
 
             <section className="border-b border-neutral-100">
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-10">리포트에 담기는 것</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-10">리포트에 담기는 것</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {DELIVERABLES.map(x => (
-                            <div key={x.title} className="border border-neutral-200 rounded-xs p-6"> <p className="font-bold mb-2">{x.title}</p>
+                            <div key={x.title} className="border border-neutral-200 rounded-xl p-6">
+                                <x.icon className="h-6 w-6 text-neutral-400 mb-3" />
+                                <p className="font-bold mb-2">{x.title}</p>
                                 <p className="text-sm text-neutral-600 leading-relaxed break-keep">{x.desc}</p>
                             </div>
                         ))}
@@ -92,11 +94,11 @@ export default function TeamDiagnosisPage() {
 
             <section className="border-b border-neutral-100 bg-neutral-50">
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-10">이렇게 진행됩니다</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-10">이렇게 진행됩니다</h2>
                     <ol className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {STEPS.map((s, i) => (
-                            <li key={s.title} className="bg-white border border-neutral-200 rounded-xs p-6">
-                                <span className="w-7 h-7 rounded-none bg-neutral-900 text-white text-xs font-bold flex items-center justify-center mb-3">{i + 1}</span>
+                            <li key={s.title} className="bg-white border border-neutral-200 rounded-xl p-6">
+                                <span className="w-7 h-7 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center mb-3">{i + 1}</span>
                                 <p className="font-bold mb-2">{s.title}</p>
                                 <p className="text-sm text-neutral-600 leading-relaxed break-keep">{s.desc}</p>
                             </li>
@@ -107,10 +109,10 @@ export default function TeamDiagnosisPage() {
 
             <section>
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-10">팀원의 정보는 이렇게 다룹니다</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-10">팀원의 정보는 이렇게 다룹니다</h2>
                     <ul className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {PRINCIPLES.map(p => (
-                            <li key={p.title} className="border border-neutral-200 rounded-xs p-6">
+                            <li key={p.title} className="border border-neutral-200 rounded-xl p-6">
                                 <p className="font-bold mb-2">{p.title}</p>
                                 <p className="text-sm text-neutral-600 leading-relaxed break-keep">{p.desc}</p>
                             </li>
@@ -148,18 +150,18 @@ function CreateForm({ companies, onCreated }: { companies: { id: string; name: s
     }
 
     return (
-        <div className="bg-white border border-neutral-200 rounded-xs p-5">
+        <div className="bg-white border border-neutral-200 rounded-xl p-5">
             <div className="flex flex-col sm:flex-row gap-2">
                 {companies.length > 1 && (
-                    <select value={companyId} onChange={e => setCompanyId(e.target.value)} className="px-3 py-2 text-sm border border-neutral-200 rounded-xs bg-white">
+                    <select value={companyId} onChange={e => setCompanyId(e.target.value)} className="px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white">
                         {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 )}
                 <input value={name} onChange={e => setName(e.target.value)} maxLength={50} placeholder="팀 이름 (예: 마케팅팀)"
-                    className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-xs" />
+                    className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg" />
                 <button onClick={create} disabled={busy || !name.trim()}
-                    className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xs bg-[#E53935] text-white text-sm font-bold disabled:opacity-40">
-                    {busy ? <span className="text-xs">처리 중</span> : <Plus className="h-4 w-4" />} 만들기
+                    className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg bg-[#E53935] text-white text-sm font-bold disabled:opacity-40">
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} 만들기
                 </button>
             </div>
             {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
@@ -182,7 +184,7 @@ function DiagnosisRow({ d, company, multi }: { d: Diagnosis; company: string; mu
     }
 
     return (
-        <li className="bg-white border border-neutral-200 rounded-xs p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <li className="bg-white border border-neutral-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
                 <p className="font-bold">{d.name}{multi && <span className="ml-2 text-xs font-normal text-neutral-500">{company}</span>}</p>
                 <p className="text-xs text-neutral-500 mt-1">
@@ -192,16 +194,16 @@ function DiagnosisRow({ d, company, multi }: { d: Diagnosis; company: string; mu
             </div>
             <div className="flex flex-wrap gap-2">
                 {d.status === "open" && !d.leaderJoined && (
-                    <Link href={`/hero/team/join/${d.invite_code}`} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xs border border-[#E53935] text-[#E53935] text-sm font-bold hover:bg-red-50">
+                    <Link href={`/hero/team/join/${d.invite_code}`} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E53935] text-[#E53935] text-sm font-semibold hover:bg-red-50">
                         팀장 설문하기
                     </Link>
                 )}
                 {d.status === "open" && (
-                    <button onClick={copy} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xs border border-neutral-200 text-sm hover:bg-neutral-50">
+                    <button onClick={copy} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-200 text-sm hover:bg-neutral-50">
                         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "복사됨" : "초대 링크"}
                     </button>
                 )}
-                <Link href={`/hero/team/${d.id}`} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xs bg-neutral-900 text-white text-sm font-bold">
+                <Link href={`/hero/team/${d.id}`} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-neutral-900 text-white text-sm font-semibold">
                     {d.ready ? "리포트" : "현황"} <ArrowRight className="h-4 w-4" />
                 </Link>
             </div>

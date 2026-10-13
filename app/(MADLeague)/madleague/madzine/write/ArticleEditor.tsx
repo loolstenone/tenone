@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MADZINE_CATEGORIES } from '@/lib/madzine-categories';
-import { Save, Send, X, Plus } from 'lucide-react';
+import { Save, Send, X, Plus, Loader2 } from 'lucide-react';
 
 const inputCls = 'w-full bg-[#0a0a0a] border border-neutral-800 px-4 py-3 text-white outline-none transition focus:border-[#EC1D25]';
 
@@ -118,12 +118,12 @@ export function ArticleEditor({ initial }: Props) {
       <div className="flex items-center gap-3 pt-4 border-t border-neutral-900">
         <button type="button" onClick={() => save('draft')} disabled={!!submitting}
           className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-6 py-3 disabled:opacity-50">
-          {submitting === 'draft' ? <span className="text-xs">처리 중</span> : <Save className="h-4 w-4" />}
+          {submitting === 'draft' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           초안 저장
         </button>
         <button type="button" onClick={() => save('submit')} disabled={!!submitting}
           className="ml-auto inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] disabled:bg-neutral-700 text-white font-bold px-8 py-3">
-          {submitting === 'submit' ? <span className="text-xs">처리 중</span> : <Send className="h-4 w-4" />}
+          {submitting === 'submit' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           검토 제출
         </button>
       </div>

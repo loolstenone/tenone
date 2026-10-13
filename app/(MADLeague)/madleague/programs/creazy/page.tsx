@@ -1,4 +1,4 @@
-
+import { Users, Lightbulb, Hammer, Send, Globe, Award, Megaphone } from 'lucide-react';
 import { ProgramDetailPage, ProgramSection } from '@/features/madleague/ProgramDetailPage';
 import { getMadProgram } from '@/features/madleague/programs-list';
 
@@ -9,16 +9,16 @@ export const metadata = { title: program.title, description: program.desc };
 
 // 원본: madleague.net/creazy · /creazy_signup (2026-10-07 이전)
 const STEPS = [
-  { title: '워밍업 — 팀 빌딩',     desc: '글로벌 어워드 소개, 팀 빌딩, 아이데이션. 팀별 핵심 주제를 정하고 일하는 방식을 맞춘다. (1~3주차)' },
-  { title: '아이데이션 · 제작',    desc: '팀별 아이데이션 후 케이스 필름·인쇄 등 제작. 업계 선배가 멘토링한다. (4~9주차)' },
-  { title: '브리프 태클',          desc: '깐느 퓨처 라이온즈 또는 원쇼 브리프에 도전한다. (10~11주차)' },
-  { title: '런 웨이 — 출품',       desc: '광고제별 지원 계획을 세우고 선정 주제 제작물을 완성해 출품한다.' },
+  { icon: Users,     title: '워밍업 — 팀 빌딩',     desc: '글로벌 어워드 소개, 팀 빌딩, 아이데이션. 팀별 핵심 주제를 정하고 일하는 방식을 맞춘다. (1~3주차)' },
+  { icon: Lightbulb, title: '아이데이션 · 제작',    desc: '팀별 아이데이션 후 케이스 필름·인쇄 등 제작. 업계 선배가 멘토링한다. (4~9주차)' },
+  { icon: Hammer,    title: '브리프 태클',          desc: '깐느 퓨처 라이온즈 또는 원쇼 브리프에 도전한다. (10~11주차)' },
+  { icon: Send,      title: '런 웨이 — 출품',       desc: '광고제별 지원 계획을 세우고 선정 주제 제작물을 완성해 출품한다.' },
 ];
 
 const GETS = [
-  { title: '국제 광고제 출품작',   desc: '오픈 브리프 1개 + 브리프 태클 1개 + α, 총 2~3개 작품을 제대로 만든다.' },
-  { title: '업계 선배 멘토링',     desc: '강의가 아니다. 광고 전문가와 함께 하는 8개월짜리 프로젝트다.' },
-  { title: '수상 도전',           desc: '국제 광고제 수상으로 자신의 역량을 세계 무대에서 인정받는다.' },
+  { icon: Globe,     title: '국제 광고제 출품작',   desc: '오픈 브리프 1개 + 브리프 태클 1개 + α, 총 2~3개 작품을 제대로 만든다.' },
+  { icon: Megaphone, title: '업계 선배 멘토링',     desc: '강의가 아니다. 광고 전문가와 함께 하는 8개월짜리 프로젝트다.' },
+  { icon: Award,     title: '수상 도전',           desc: '국제 광고제 수상으로 자신의 역량을 세계 무대에서 인정받는다.' },
 ];
 
 const RUN = [
@@ -57,7 +57,7 @@ export default function CreazyPage() {
         <div className="divide-y divide-neutral-900 border-y border-neutral-900">
           {RUN.map(r => (
             <div key={r.k} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 py-8">
-              <div className="font-bold text-[#EC1D25]">{r.k}</div>
+              <div className="font-black text-[#EC1D25]">{r.k}</div>
               <ul className="space-y-2 text-neutral-300">{r.v.map(v => <li key={v}>{v}</li>)}</ul>
             </div>
           ))}

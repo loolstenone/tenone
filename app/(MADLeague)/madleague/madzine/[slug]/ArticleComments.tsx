@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 interface Comment {
@@ -72,7 +72,7 @@ export function ArticleComments({ articleId, canComment }: { articleId: string; 
       )}
 
       {loading ? (
-        <div className="flex justify-center py-10"><span className="text-sm text-mute">불러오는 중</span></div>
+        <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>
       ) : comments.length === 0 ? (
         <div className="text-center py-10 text-sm text-neutral-500">아직 댓글이 없습니다.</div>
       ) : (

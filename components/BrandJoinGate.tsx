@@ -65,14 +65,14 @@ export function BrandJoinGate() {
 
     return (
         <div className="fixed inset-0 z-[99997] flex items-center justify-center bg-black/60 px-4">
-            <div className="w-full max-w-sm bg-white rounded-xs p-6">
-                <p className="flex items-center gap-1 text-[11px] font-bold tracking-wide text-neutral-400">Ten:One™ Universe One ID <OneIdHelp size={12} /></p>
+            <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
+                <p className="flex items-center gap-1 text-[11px] font-semibold tracking-wide text-neutral-400">Ten:One™ Universe One ID <OneIdHelp size={12} /></p>
                 <h2 className="mt-1 text-lg font-bold text-neutral-900">{brandName}을(를) 처음 이용하시네요</h2>
                 <p className="mt-1 text-sm text-neutral-500">
-                    가지고 계신 One ID로 {brandName}을(를) 이용할 수 있습니다. 아래 약관에 동의해 주세요.
+                    가지고 계신 One ID로 {brandName}을(를) 바로 이용할 수 있어요. 시작하기 전에 아래 항목을 확인해주세요.
                 </p>
 
-                <ul className="mt-4 space-y-1.5 rounded-xs bg-neutral-50 p-3 text-xs text-neutral-600">
+                <ul className="mt-4 space-y-1.5 rounded-xl bg-neutral-50 p-3 text-xs text-neutral-600">
                     <li>· 이름·프로필 사진 등 공통 프로필이 {brandName}에서 사용됩니다.</li>
                     <li>· 다른 서비스에서의 활동 내역은 {brandName}에 공유되지 않습니다.</li>
                 </ul>
@@ -87,10 +87,10 @@ export function BrandJoinGate() {
                     </span>
                 </label>
 
-                {error && <p className="text-sm text-state-bad mt-3">{error}</p>}
+                {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
                 <button onClick={handleAgree} disabled={saving}
-                    className="w-full mt-4 py-2.5 rounded-xs text-sm font-bold text-white bg-neutral-900 disabled:opacity-50">
-                    {saving ? "저장 중" : "동의"}
+                    className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-neutral-900 disabled:opacity-50">
+                    {saving ? "저장 중..." : `동의하고 ${brandName} 시작하기`}
                 </button>
                 <button onClick={handleDecline}
                     className="w-full mt-2 text-center text-xs text-neutral-400 hover:text-neutral-600">

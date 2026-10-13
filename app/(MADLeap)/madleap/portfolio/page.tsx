@@ -34,23 +34,23 @@ export default async function MadLeapPortfolioPage() {
             {/* Hero */}
             <section className="bg-[#1a1a2e] text-white py-20 md:py-24">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <p className="text-[#4361ee] text-sm font-bold tracking-wider uppercase mb-3">Portfolio</p>
+                    <p className="text-[#4361ee] text-sm font-semibold tracking-wider uppercase mb-3">Portfolio</p>
                     <h1 className="text-2xl md:text-4xl font-bold mb-4">매드립 리퍼들의 실전 프로젝트</h1>
                     <p className="text-neutral-400">실제 브랜드와 함께한 결과물</p>
 
                     <div className="flex items-center justify-center gap-8 mt-8">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-[#4361ee]">{portfolios.length}</div>
+                            <div className="text-2xl font-black text-[#4361ee]">{portfolios.length}</div>
                             <div className="text-xs text-neutral-400">프로젝트</div>
                         </div>
                         <div className="w-px h-8 bg-white/10" />
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-[#4361ee]">{awardCount}</div>
+                            <div className="text-2xl font-black text-[#4361ee]">{awardCount}</div>
                             <div className="text-xs text-neutral-400">수상작</div>
                         </div>
                         <div className="w-px h-8 bg-white/10" />
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-[#4361ee]">{genCount}</div>
+                            <div className="text-2xl font-black text-[#4361ee]">{genCount}</div>
                             <div className="text-xs text-neutral-400">기수</div>
                         </div>
                     </div>
@@ -72,7 +72,7 @@ export default async function MadLeapPortfolioPage() {
                 <div className="mx-auto max-w-3xl px-6 text-center">
                     <h2 className="text-xl font-bold mb-3">나의 프로젝트를 추가하고 싶다면?</h2>
                     <p className="text-neutral-500 text-sm mb-6">매드립 리퍼라면 누구나 포트폴리오를 등록할 수 있습니다</p>
-                    <Link href="/madleap/my" className="px-6 py-3 bg-[#4361ee] text-white font-normal hover:bg-[#3451de] transition-colors rounded-xs inline-flex items-center gap-2">
+                    <Link href="/madleap/my" className="px-6 py-3 bg-[#4361ee] text-white font-medium hover:bg-[#3451de] transition-colors rounded-lg inline-flex items-center gap-2">
                         포트폴리오 등록 <ExternalLink className="h-4 w-4" />
                     </Link>
                 </div>
