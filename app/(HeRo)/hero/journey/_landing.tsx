@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { PageHero } from "@/features/hero/PageHero";
+import { loginHref } from "@/lib/login-href";
 import {
   Sparkles,
   DoorOpen,
@@ -82,27 +84,13 @@ export function JourneyLanding() {
   return (
     <div className="bg-white min-h-screen">
       {/* ── 인트로 ── */}
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-5xl px-6 text-center">
-          <p
-            className="text-sm font-bold tracking-widest uppercase mb-4"
-            style={{ color: HERO_RED }}
-          >
-            히어로의 성장 단계
-          </p>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-6">
-            꿈꾸는 사람에서 레전드까지
-          </h1>
-          <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-            연예 기획사가 연습생을 발굴하고 훈련시켜 데뷔시키는 것처럼,
-            <br className="hidden md:block" />
-            HeRo는 내 강점을 찾고 실력을 키워 일할 준비를 돕습니다.
-          </p>
-          <p className="mt-8 text-sm text-neutral-500">
-            이미 시작하셨나요? <Link href="/signup" className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        align="center"
+        label="히어로의 성장 단계"
+        title="꿈꾸는 사람에서 레전드까지"
+        desc="연예 기획사가 연습생을 발굴하고 훈련시켜 데뷔시키는 것처럼, HeRo는 내 강점을 찾고 실력을 키워 일할 준비를 돕습니다."
+        note={<>이미 시작하셨나요? <Link href={loginHref("/hero/journey")} className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.</>}
+      />
 
       {/* ── 5단계 여정 ── */}
       {stages.map((s) => (

@@ -154,7 +154,7 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
     <div className="border border-neutral-200 rounded-xl overflow-hidden">
       {/* HeRo 헤더 */}
       <div className="px-4 py-2.5 bg-neutral-50 border-b border-neutral-100 flex items-center justify-between">
-        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">HeRo Talent</span>
+        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">HeRo 인재 유형</span>
         <Link href="/hero" className="text-[10px] text-neutral-400 hover:text-[#E53935] transition-colors">
           바로가기 →
         </Link>

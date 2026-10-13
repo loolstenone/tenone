@@ -328,7 +328,7 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
       <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-2">
           <Crown className="w-5 h-5 text-amber-600" />
-          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Legend</span>
+          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">레전드</span>
         </div>
         <h3 className="text-lg font-bold text-neutral-900 mb-2">마지막 단계에 올랐습니다</h3>
         <p className="text-sm text-neutral-600">이제 당신이 다음 세대의 영웅을 만들 차례입니다.</p>

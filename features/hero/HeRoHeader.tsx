@@ -52,7 +52,8 @@ export function HeRoHeader() {
                 </Link>
 
                 {/* Desktop Nav — 로고와 분리 */}
-                <div className="hidden lg:flex items-center gap-8">
+                {/* 1024px에서 메뉴와 유틸리티 바가 붙지 않게 — 간격을 화면 폭에 맞춰 줄이고 오른쪽과 띄운다 (2026-10-13) */}
+                <div className="hidden lg:flex items-center gap-5 xl:gap-8 min-w-0">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
@@ -83,9 +84,10 @@ export function HeRoHeader() {
                 </div>
 
                 {/* Right side — 우측 끝 */}
-                <div className="hidden lg:flex items-center ml-auto">
+                <div className="hidden lg:flex items-center ml-auto pl-6 shrink-0">
                     <UniverseUtilityBar
                         aboutPath="/hero/about"
+                        aboutLabel="소개"
                         profilePath="/hero/my"
                         workspacePath="/hero/journey"
                         workspaceLabel="나의 성장 기록"

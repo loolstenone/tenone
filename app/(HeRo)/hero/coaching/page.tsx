@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -168,33 +169,12 @@ export default function CoachingPage() {
     return (
         <div>
             {/* ── Page Hero ── */}
-            <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28">
-                    <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <TrendingUp className="h-5 w-5" style={{ color: HERO_RED }} />
-                            <span className="text-sm font-bold uppercase tracking-wider" style={{ color: HERO_RED }}>
-                                HeRo Coaching
-                            </span>
-                        </div>
-                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
-                            이력서, 멘토링, 로드맵, 브랜딩을
-                            <br />
-                            <span>하나의 코칭</span>으로
-                        </h1>
-                        <p className="text-lg text-neutral-600 mb-8">
-                            HIT 검사 결과를 바탕으로 이력서부터 브랜딩까지 한곳에서 코칭합니다.
-                        </p>
-                        <Link
-                            href="/hero/hit"
-                            className="inline-flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg transition-colors hover:opacity-90"
-                            style={{ backgroundColor: HERO_RED }}
-                        >
-                            HIT 검사 시작하기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            <PageHero
+                label="커리어 코칭"
+                title={<>이력서, 멘토링, 로드맵, 브랜딩을<br />하나의 코칭으로</>}
+                desc="HIT 검사 결과를 바탕으로 이력서부터 브랜딩까지 한곳에서 코칭합니다."
+                cta={{ label: "HIT 검사 시작하기", href: "/hero/hit" }}
+            />
 
             {/* ── Tab Navigation (스크롤 시 헤더 아래 고정) ── */}
             <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200 shadow-sm">
@@ -610,7 +590,7 @@ function BrandingSection() {
                             <div>
                                 <p className="text-xs uppercase tracking-wider mb-1" style={{ color: HERO_RED }}>HeRo 캐릭터</p>
                                 <h3 className="text-xl font-bold mb-1">비전을 제시하는 전략가</h3>
-                                <p className="text-sm text-neutral-500 italic mb-3">The Visionary Strategist</p>
+                                <p className="text-sm text-neutral-500 italic mb-3">예시 캐릭터</p>
                                 <p className="text-sm text-neutral-600">큰 그림을 그리고 사람을 모으는 리더형 인재입니다.</p>
                             </div>
                         </div>

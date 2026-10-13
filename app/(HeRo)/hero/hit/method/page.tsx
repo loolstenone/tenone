@@ -80,7 +80,7 @@ export default function HitMethodPage() {
     <div>
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HIT Engine</p>
+          <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HIT 채점 방식</p>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>
           <p className="text-neutral-500 max-w-xl mx-auto break-keep">
             HIT의 점수와 유형은 AI가 만들어 내는 것이 아니라, 정해진 채점 규칙과 미리 검수한 해설로 만들어집니다. 그 과정을 그대로 공개합니다.

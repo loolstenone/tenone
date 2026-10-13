@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
 import {
     Target,
@@ -46,25 +47,12 @@ export default function AboutPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28 text-center">
-                    <div className="max-w-3xl mx-auto">
-                        <span className="text-2xl md:text-4xl font-extrabold tracking-tight mb-2 block">
-                            <span className="text-amber-500">He</span>
-                            <span className="text-neutral-900">Ro</span>
-                        </span>
-                        <p className="text-lg text-neutral-500 mb-2">Human enhancement &amp; Recruit Optimization</p>
-                        <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#E53935] mb-4">Talent Agency</p>
-                        <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6">
-                            사람이 크도록 돕고<br />맞는 일을 찾게 돕는 인재 기획사
-                        </h1>
-                        <p className="text-neutral-600 max-w-xl mx-auto">
-                            HeRo는 한 사람 한 사람이 계획을 세워 성장하고, 자기 역량을 가장 잘 쓸 수 있는
-                            회사와 일을 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우는 것처럼요.
-                        </p>
-                    </div>
-                </div>
-            </section>
+            <PageHero
+                align="center"
+                label="HeRo 소개"
+                title={<>사람이 크도록 돕고<br />맞는 일을 찾게 돕는 인재 기획사</>}
+                desc="HeRo(Human enhancement & Recruit Optimization)는 한 사람 한 사람이 계획을 세워 성장하고, 자기 역량을 가장 잘 쓸 수 있는 회사와 일을 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우는 것처럼요."
+            />
 
             {/* Vision / Mission / Values */}
             <section className="bg-white">

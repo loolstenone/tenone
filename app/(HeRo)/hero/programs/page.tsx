@@ -13,7 +13,7 @@ export default function HeroProgramsPage() {
     const t = PROGRAM_THEMES.hero;
     return (
         <div className="mx-auto max-w-5xl px-6 py-12 md:py-16">
-            <div className="text-xs font-bold tracking-widest text-[#E53935]">PROGRAMS</div>
+            <div className="text-xs font-bold tracking-widest text-[#E53935]">프로그램</div>
             <h1 className="mt-2 text-3xl font-black text-neutral-900 sm:text-4xl">HeRo 프로그램</h1>
             <p className="mt-3 max-w-2xl break-keep text-neutral-600">
                 커리어 성장을 위한 HeRo 프로그램에 신청하세요. 운영진이 검토 후 참가자를 선발하고 회차 방에서 안내합니다.

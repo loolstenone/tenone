@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -147,48 +148,12 @@ function AICounselingContent() {
   return (
     <div className="bg-white">
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-white to-neutral-50" />
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5" style={{ color: RED }} />
-              <span className="text-sm font-bold uppercase tracking-wider" style={{ color: RED }}>
-                AI Counseling
-              </span>
-            </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-5 leading-tight">
-              나를 가장 잘 아는
-              <br />
-              <span style={{ color: RED }}>AI 상담사</span>와 대화하세요
-            </h1>
-            <p className="text-lg text-neutral-500 mb-8 leading-relaxed">
-              내 HIT 검사 결과를 읽은 AI가 강점, 성장 방향,
-              커리어 고민을 1:1로 함께 이야기합니다.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {resultId ? (
-                <Link
-                  href={`/hero/hit/a/result/${resultId}`}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-xl transition-all hover:scale-[1.02]"
-                  style={{ backgroundColor: RED }}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  상담 시작하기
-                </Link>
-              ) : (
-                <Link
-                  href="/hero/hit"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-xl transition-all hover:scale-[1.02]"
-                  style={{ backgroundColor: RED }}
-                >
-                  HIT 검사 먼저 받기 <ArrowRight className="h-4 w-4" />
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        label="AI 상담"
+        title={<>나를 가장 잘 아는<br />AI 상담사와 대화하세요</>}
+        desc="내 HIT 검사 결과를 읽은 AI가 강점, 성장 방향, 커리어 고민을 1:1로 함께 이야기합니다."
+        cta={resultId ? { label: "상담 시작하기", href: `/hero/hit/a/result/${resultId}` } : { label: "HIT 검사 먼저 받기", href: "/hero/hit" }}
+      />
 
       {/* ── 이런 상담이 가능합니다 ── */}
       <section className="py-20 border-t border-neutral-100">

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
 import {
     FileText,
@@ -85,32 +86,12 @@ export default function ResumePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28">
-                    <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <FileText className="h-5 w-5 text-amber-500" />
-                            <span className="text-sm font-bold text-amber-600 uppercase tracking-wider">
-                                Resume Consulting
-                            </span>
-                        </div>
-                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
-                            이력서를<br />
-                            <span className="text-amber-500">한 단계 더</span> 다듬습니다
-                        </h1>
-                        <p className="text-lg text-neutral-600 mb-8">
-                            AI 분석과 전문가 의견으로 이력서를 더 좋게 고쳐 보세요.
-                            고치기 전과 후를 비교해 무엇이 나아졌는지 바로 확인할 수 있습니다.
-                        </p>
-                        <Link
-                            href="/hero/resume/workspace"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"
-                        >
-                            이력서 등록·분석 신청 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            <PageHero
+                label="이력서 컨설팅"
+                title={<>이력서를<br />한 단계 더 다듬습니다</>}
+                desc="AI 분석과 전문가 의견으로 이력서를 더 좋게 고쳐 보세요. 고치기 전과 후를 비교해 무엇이 나아졌는지 바로 확인할 수 있습니다."
+                cta={{ label: "이력서 등록·분석 신청", href: "/hero/resume/workspace" }}
+            />
 
             {/* Features */}
             <section className="bg-white">

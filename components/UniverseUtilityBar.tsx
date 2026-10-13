@@ -38,6 +38,8 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
 
 export interface UtilityBarConfig {
     aboutPath: string;
+    /** About 표기 — 기본 'ABOUT'. 한국어 우선 브랜드는 '소개' (2026-10-13 HeRo). 위치·모양은 그대로 */
+    aboutLabel?: string;
     profilePath?: string;
     /** 단일 워크스페이스 (legacy 호환). workspaces 배열을 우선 쓰되, 비어있으면 affiliations 기반 자동 노출. */
     workspacePath?: string | null;
@@ -183,7 +185,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                 {/* About */}
                 {!config.hideAbout && (
                     <Link href={config.aboutPath} className="text-xs font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                        ABOUT
+                        {config.aboutLabel ?? "ABOUT"}
                     </Link>
                 )}
 

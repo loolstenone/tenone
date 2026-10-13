@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
 import { ArrowRight, Megaphone, Sparkles, Users, Compass, ShieldCheck, CheckCircle } from "lucide-react";
@@ -13,38 +14,13 @@ export default function TalentAgentPage() {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-neutral-900 text-white">
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 15% 20%, #E53935 0%, transparent 45%), radial-gradient(circle at 85% 80%, #E53935 0%, transparent 45%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-4xl px-6 py-24 md:py-32 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[11px] font-semibold tracking-widest uppercase mb-6">
-            <Megaphone className="h-3.5 w-3.5" />
-            Talent Agent
-          </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
-            HeRo는 연예 기획사처럼<br />
-            숨은 인재를 찾아<br />키우는 기획사입니다
-          </h1>
-          <p className="text-base md:text-lg text-neutral-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            혼자 정하기 어려운 커리어의 다음 단계를 HeRo가 기획사처럼 함께 계획합니다.
-            검사로 나를 알고, AI와 전문가가 갈 길을 함께 정하고, 회사에 나를 보여 줄 준비를 같이 합니다.
-          </p>
-          <Link
-            href="/hero/talent-agent/apply"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#E53935] text-white font-bold hover:bg-red-700 transition-colors"
-          >
-            탤런트 에이전시 신청하기 <ArrowRight className="h-4 w-4" />
-          </Link>
-          <p className="text-xs text-neutral-400 mt-4">
-            무료 · HIT 검사와 희망 직무 작성으로 바로 시작
-          </p>
-        </div>
-      </section>
+      <PageHero
+        label="탤런트 에이전시"
+        title={<>HeRo는 연예 기획사처럼<br />숨은 인재를 찾아 키웁니다</>}
+        desc="혼자 정하기 어려운 커리어의 다음 단계를 HeRo가 함께 계획합니다. 검사로 나를 알고, AI와 전문가가 갈 길을 함께 정하고, 회사에 나를 보여 줄 준비를 같이 합니다."
+        cta={{ label: "탤런트 에이전시 신청하기", href: "/hero/talent-agent/apply" }}
+        note="무료 · HIT 검사와 희망 직무 설문으로 바로 시작합니다"
+      />
 
       {/* Why HeRo */}
       <section className="py-20">
@@ -93,7 +69,7 @@ export default function TalentAgentPage() {
       <section className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">How it works</p>
+            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">진행 방법</p>
             <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">진행 과정</h2>
           </div>
 

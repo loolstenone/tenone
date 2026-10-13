@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
 import { ArrowRight, Clock, ListChecks, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -34,16 +35,12 @@ export default function HitOverviewPage() {
   const { isAuthenticated } = useAuth();
   return (
     <div>
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
-        <div className="mx-auto max-w-5xl px-6 py-20 lg:py-28 text-center">
-          <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HeRo 통합 검사</p>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">나를 알아보는 검사</h1>
-          <p className="text-lg text-neutral-500 max-w-2xl mx-auto break-keep">
-            모든 회원이 같은 두 검사로 시작합니다. 나는 어떤 사람인가(기본 성향 검사), 무엇을 할 수 있는가(역량·방향 검사).
-            그다음 지금 내 생애주기에 맞는 검사 하나를 고릅니다.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        align="center"
+        label="HIT 검사"
+        title="나를 알아보는 검사"
+        desc="모든 회원이 같은 두 검사로 시작합니다. 나는 어떤 사람인가(기본 성향 검사), 무엇을 할 수 있는가(역량·방향 검사). 그다음 지금 내 생애주기에 맞는 검사 하나를 고릅니다."
+      />
 
       {/* 나의 HIT — 로그인 회원만 */}
       {isAuthenticated && (

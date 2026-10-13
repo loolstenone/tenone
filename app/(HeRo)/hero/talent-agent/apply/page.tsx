@@ -107,7 +107,7 @@ export default function TalentAgentApplyPage() {
       <div className="mb-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[11px] font-semibold tracking-widest uppercase text-[#E53935] mb-4">
           <Megaphone className="h-3.5 w-3.5" />
-          Talent Agent
+          탤런트 에이전시
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 mb-3">탤런트 에이전시 신청</h1>
         <p className="text-sm text-neutral-500 leading-relaxed">
