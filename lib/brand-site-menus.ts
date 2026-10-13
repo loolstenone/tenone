@@ -92,6 +92,8 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
             { placement: "header", label: "써치 라이트", path: "/hero/search-light", source: { kind: "table", table: "hero_tih_responses" }, adminHref: "/intra/hero/search-light", unit: "건" },
             { placement: "feature", location: "헤더 기업 버튼", label: "기업", path: "/hero/company", source: { kind: "table", table: "hero_companies" }, adminHref: "/intra/hero/companies", unit: "개" },
             { placement: "feature", location: "커리어 코칭", label: "코칭 대기 신청", path: "/hero/coaching", source: { kind: "table", table: "coaching_waitlist" }, unit: "건" },
+            { placement: "feature", location: "기업 허브", label: "인재 찾기", path: "/hero/company", source: { kind: "table", table: "hero_offers", pendingEq: { status: "requested" } }, adminHref: "/intra/hero/offers", unit: "건" },
+            { placement: "feature", location: "마이페이지", label: "받은 제안", path: "/hero/offers", source: { kind: "table", table: "hero_offer_settings", eq: { is_open: true } }, unit: "명" },
         ],
     },
     {

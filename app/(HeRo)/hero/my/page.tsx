@@ -11,7 +11,7 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 import { LinkedMadleagueCertificates } from "@/features/hero/LinkedMadleagueCertificates";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
-import { FileText, Settings, LogOut, ChevronRight, Eye, Compass, Building2 } from "lucide-react";
+import { FileText, Settings, LogOut, ChevronRight, Eye, Compass, Building2, Mail } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -72,6 +72,19 @@ export default function HeRoMyPage() {
                     </Link>
                 )}
 
+                {/* 받은 제안 — 기업의 면접·인터뷰 제안 (lib/hero/offers.ts) */}
+                <Link href="/hero/offers"
+                    className="mb-6 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xl transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                        <Mail className="h-5 w-5 text-neutral-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-neutral-100">받은 제안</p>
+                        <p className="text-xs text-neutral-400">제안 받기를 켜 두면 조건에 맞는 기업이 면접·인터뷰를 제안합니다</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-neutral-500" />
+                </Link>
+
                 <div className="mb-8">
                     <h2 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <span>나의 HIT 결과</span>
@@ -106,7 +119,7 @@ export default function HeRoMyPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-100">기업으로 인재를 찾으시나요?</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">회사를 등록하고 필요한 사람을 적어 주시면 HeRo가 인재 풀 현황을 분석해 드립니다</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">원하는 인재상을 고르면 조건에 맞는 인재가 몇 명인지 보이고, 면접을 제안할 수 있습니다</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-neutral-500" />
                 </Link>

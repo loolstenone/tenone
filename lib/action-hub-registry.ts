@@ -204,6 +204,18 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "high",
     },
 
+    // ── HeRo 인재 제안 — 기업 요청 → 운영자 검토·결제 확인 후 발송 (2026-10-13)
+    {
+        key: "hero_offers_requested",
+        label: "HeRo 인재 제안 검토",
+        table: "hero_offers",
+        filter: { column: "status", value: "requested" },
+        href: "/intra/hero/offers",
+        brand_id: "hero",
+        category: "approval",
+        priority: "high",
+    },
+
     // ── 비즈니스 기회 (Opportunity) — Whole See 수집 → ERP 운영
     {
         key: "opportunity_new",

@@ -69,6 +69,9 @@
 | hit_*_results · hit_sessions · hit_chat_messages · hit_admin_flags | 삭제 | 진단 결과 (민감) |
 | hero_talent_applications · hero_matching_requests · hero_jh_responses · hero_tih_responses | 익명화 후 영구 보관 | 직무·산업·결과 등 통계는 남기고 이름·연락처·member 연결 제거 (2026-10-05 결정). 직업소개사업 등록 시 법정 장부 보존기간만 원본 보관 |
 | hero_matches | 익명화 | 상대방(기업) 기록 보존 |
+| hero_offer_settings | 삭제 | 제안 받기 설정·동의 기록 (회원 삭제 시 CASCADE) |
+| hero_offer_recipients | 익명화 (member 연결 제거, FK SET NULL) | 제안·응답 기록은 기업 측 기록이자 직업소개 장부 — 이력서·연락처는 응답일 + 180일 뒤 기업 화면에서 닫힘(destroy_due), 응답 철회 시 즉시 |
+| hero_offers (기업 측) | 기업 유지 | 담당자 탈퇴 시 sender_member_id만 NULL |
 | hero_company_members | 삭제 (기업은 유지) | 기업 계정은 다른 담당자에게 승계 |
 | hero_coaching_sessions | 결제 연관분 5년 원본 보관 후 익명화 | 전자상거래법 계약·결제 기록 5년 |
 | coaching_waitlist · hero_search_light_waitlist · hero_business_inquiries | 삭제 | 이메일 기반 대기·문의 |

@@ -2,23 +2,20 @@
 
 /**
  * 기업 허브 (2026-10-13 확장)
- * - 첫 화면 PageHero → (로그인) 내 기업·승인 대기 → 하는 일 4단계 → 4방향으로 보는 법 → 인재 정보 보호 → 자주 묻는 질문
- * - 비로그인도 소개는 볼 수 있다. 등록·설문·공고 작성은 각 페이지가 로그인 확인
- * - 직업소개 표현 금지: '연결·매칭해 드립니다' 대신 '분석해 알려 드립니다' · 가격·요금 문구 금지
+ * - 첫 화면 PageHero → (로그인) 내 기업 → 하는 일 4단계(등록 → 인재상·인원 → 제안 → 응한 인재) → 인재 정보 보호 → 자주 묻는 질문
+ * - 인재 제안 흐름: lib/hero/offers.ts · /hero/company/[id]/talent · 유료직업소개사업 등록 전제 (발송 스위치 HERO_OFFERS_LIVE)
+ * - 비로그인도 소개는 볼 수 있다 · 가격·요금 문구 금지
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     Building2, Plus, Loader2, ArrowRight, Clock, CheckCircle2, FileText, Compass,
-    BarChart3, ShieldCheck, Brain, Target, ChevronDown,
+    ShieldCheck, ChevronDown, Users, Send,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
-import MatchingInbox from "@/features/hero/MatchingInbox";
 import { PageHero } from "@/features/hero/PageHero";
-
-const HERO_RED = "#E53935";
 
 interface MyCompany {
     id: string;
@@ -40,40 +37,28 @@ const STEPS = [
     {
         icon: Building2,
         title: "기업 등록",
-        desc: "기업명·산업·규모와 담당자 정보를 등록합니다. 등록하면 바로 기업 고민 설문과 채용 공고를 쓸 수 있습니다.",
+        desc: "기업명·산업·규모와 담당자 정보를 등록합니다. 등록하면 바로 인재 찾기를 쓸 수 있습니다.",
         meta: "약 3분",
     },
     {
-        icon: Compass,
-        title: "기업 고민 설문",
-        desc: "조직이 지금 풀어야 할 고민과 어떤 사람이 필요한지를 정리합니다. 채용 공고에 다 담기 어려운 속사정을 적는 곳입니다.",
-        meta: "22문항 · 약 7~8분",
+        icon: Users,
+        title: "인재상 입력 · 인원 확인",
+        desc: "직무·경력·산업·근무 형태·지역을 고르면, 조건에 맞고 '제안 받기'를 켠 인재가 몇 명인지 바로 보여 드립니다.",
+        meta: "익명 인원수",
+    },
+    {
+        icon: Send,
+        title: "면접·인터뷰 제안",
+        desc: "제안 내용을 쓰면 HeRo 운영자가 확인한 뒤 조건에 맞는 인재에게 알림으로 보냅니다.",
+        meta: "운영자 확인 후 발송",
     },
     {
         icon: FileText,
-        title: "채용 공고",
-        desc: "맡을 일, 필요한 역량, 일하는 방식과 조건을 항목별로 씁니다. 같은 틀로 쓰기 때문에 비교와 분석이 쉬워집니다.",
-        meta: "7개 항목 · 500~800자",
-    },
-    {
-        icon: BarChart3,
-        title: "인재 풀 분석",
-        desc: "두 문서를 바탕으로, 조건에 맞는 인재 풀이 어떤 성향·역량 분포를 보이는지 분석해 알려 드립니다.",
-        meta: "익명 통계",
+        title: "응한 인재 확인",
+        desc: "제안에 응한 인재의 이름·연락처·이력서를 받아 면접을 진행합니다. 원하는 인재는 기본 성향 검사 요약도 함께 보냅니다.",
+        meta: "응답일부터 180일 열람",
     },
 ];
-
-/* ── 4방향으로 보는 법 — 기업 문서 2 × 인재 문서 2 ── */
-const TETRAD = {
-    company: [
-        { icon: Compass, title: "기업 고민 설문", desc: "조직의 상황과 원하는 사람" },
-        { icon: FileText, title: "채용 공고", desc: "맡을 일과 조건" },
-    ],
-    talent: [
-        { icon: Brain, title: "HIT 검사", desc: "성향·역량·생애주기" },
-        { icon: Target, title: "희망 직무 설문", desc: "하고 싶은 일과 조건" },
-    ],
-};
 
 const FAQ = [
     {
@@ -81,8 +66,12 @@ const FAQ = [
         a: "기업 대표나 채용 담당자라면 회원 가입 후 기업을 등록할 수 있습니다. 등록하면 바로 기업 고민 설문과 채용 공고를 쓸 수 있습니다.",
     },
     {
-        q: "써치 라이트와는 무엇이 다른가요?",
-        a: "써치 라이트는 기업 고민 설문을 소개하고 바로 써 볼 수 있는 곳입니다. 기업 허브는 등록한 기업의 설문·채용 공고·분석 현황을 한곳에서 관리하는 곳입니다.",
+        q: "기업 고민 설문과 채용 공고는 꼭 써야 하나요?",
+        a: "인재 찾기와 제안은 없어도 됩니다. 다만 채용 공고를 제안에 함께 붙이면 인재가 맡을 일을 더 정확히 알고 응할 수 있고, 기업 고민 설문은 HeRo가 기업에 맞는 사람을 이해하는 데 쓰입니다.",
+    },
+    {
+        q: "제안은 몇 명에게 가나요?",
+        a: "제안 요청 시점이 아니라 운영자 확인이 끝난 시점에, 고른 조건에 맞고 '제안 받기'를 켠 인재 전원에게 갑니다. 응할지는 인재가 정합니다.",
     },
     {
         q: "한 회사에 담당자가 여러 명이어도 되나요?",
@@ -90,11 +79,11 @@ const FAQ = [
     },
     {
         q: "인재의 이름이나 연락처를 볼 수 있나요?",
-        a: "아니요. 기업 허브에서 보는 것은 조건에 맞는 인재 풀의 익명 분석입니다. 인재 개인의 정보는 본인이 동의하지 않는 한 기업에 공개하지 않습니다.",
+        a: "제안에 응한 인재만 볼 수 있습니다. 인재가 응하면서 이 기업에 정보 제공을 동의해야 이름·연락처·이력서가 보이고, 응답일로부터 180일이 지나면 다시 보이지 않습니다. 응하지 않은 인재는 인원수만 보입니다.",
     },
     {
         q: "작성한 내용은 어디에 쓰이나요?",
-        a: "기업이 쓴 설문과 채용 공고는 인재 풀 분석에만 씁니다. 다른 기업에 공개하지 않습니다.",
+        a: "제안 내용은 조건에 맞는 인재에게만 보이고, 기업 고민 설문과 채용 공고는 HeRo의 검토와 제안에만 씁니다. 다른 기업에 공개하지 않습니다.",
     },
 ];
 
@@ -127,10 +116,10 @@ export default function HeroCompanyHubPage() {
         <div className="bg-white">
             <PageHero
                 label="기업 허브"
-                title={<>어떤 사람이 필요한지 정리하면<br />맞는 인재가 보입니다</>}
-                desc="기업 고민 설문에 조직의 상황과 필요한 사람을, 채용 공고에 맡을 일을 적어 주세요. HeRo가 조건에 맞는 인재 풀의 현황을 분석해 알려 드립니다."
+                title={<>원하는 인재상을 고르면<br />맞는 인재가 몇 명인지 보입니다</>}
+                desc="직무·경력·조건을 고르면 HeRo에 등록된 인재 중 조건에 맞는 사람의 수를 바로 보여 드립니다. 면접·인터뷰를 제안하면, 원하는 인재가 이력서와 함께 응합니다."
                 cta={hasCompany
-                    ? { label: "기업 고민 설문 작성", href: `/hero/search-light/tih?company=${active[0].hero_companies?.id ?? ""}` }
+                    ? { label: "인재 찾기", href: `/hero/company/${active[0].hero_companies?.id ?? ""}/talent` }
                     : { label: "기업 등록하기", href: "/hero/company/register" }}
                 secondary={{ label: "써치 라이트 알아보기", href: "/hero/search-light" }}
             />
@@ -158,16 +147,11 @@ export default function HeroCompanyHubPage() {
                                                 <CheckCircle2 className="h-3 w-3" /> {roleLabel(c.role)}
                                             </span>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-                                            <HubLink href={`/hero/search-light/tih?company=${c.hero_companies?.id}`} icon={Compass} label="기업 고민 설문 작성" />
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <HubLink href={`/hero/company/${c.hero_companies?.id}/talent`} icon={Users} label="인재 찾기 · 보낸 제안" />
                                             <HubLink href={`/hero/company/${c.hero_companies?.id}/jd`} icon={FileText} label="채용 공고 관리" />
+                                            <HubLink href={`/hero/search-light/tih?company=${c.hero_companies?.id}`} icon={Compass} label="기업 고민 설문" />
                                         </div>
-                                        {user?.id && c.hero_companies?.id && (
-                                            <div className="pt-4 border-t border-neutral-100">
-                                                <p className="text-xs font-bold text-neutral-500 mb-2">분석 현황</p>
-                                                <MatchingInbox side="company" memberId={user.id} companyId={c.hero_companies.id} accentColor={HERO_RED} />
-                                            </div>
-                                        )}
                                     </div>
                                 ))}
 
@@ -204,7 +188,7 @@ export default function HeroCompanyHubPage() {
             <section className="border-b border-neutral-100">
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
                     <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3">기업 허브에서 하는 일</h2>
-                    <p className="text-neutral-600 mb-10 break-keep">네 단계로 진행합니다. 두 문서를 모두 써 주시면 더 정확하게 분석할 수 있습니다.</p>
+                    <p className="text-neutral-600 mb-10 break-keep">네 단계로 진행합니다. 응할지는 인재가 정하고, 응한 인재만 기업에 드러납니다.</p>
                     <ol className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {STEPS.map((s, i) => (
                             <li key={s.title} className="border border-neutral-200 rounded-xl p-6">
@@ -221,28 +205,6 @@ export default function HeroCompanyHubPage() {
                 </div>
             </section>
 
-            {/* ── 4방향으로 봅니다 ── */}
-            <section className="border-b border-neutral-100 bg-neutral-50">
-                <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20">
-                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3">4방향으로 봅니다</h2>
-                    <p className="text-neutral-600 mb-10 break-keep max-w-2xl">
-                        채용 공고 한 장으로는 조직이 정말 원하는 사람이 다 드러나지 않습니다.
-                        기업이 쓴 두 문서와 인재가 쓴 두 문서를 마주 놓고, 겉으로 드러난 조건과 속에 있는 바람을 함께 봅니다.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                        <TetradSide title="기업이 쓰는 것" items={TETRAD.company} />
-                        <div className="flex md:flex-col items-center justify-center gap-1 text-neutral-400 text-xs font-semibold py-2">
-                            <span className="hidden md:block">↔</span>
-                            <span>마주 놓고 비교</span>
-                        </div>
-                        <TetradSide title="인재가 쓰는 것" items={TETRAD.talent} />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm text-neutral-600">
-                        <p className="bg-white border border-neutral-200 rounded-lg p-4 break-keep"><strong className="text-neutral-900">속마음끼리</strong> — 기업 고민 설문 ↔ HIT 검사: 조직이 바라는 사람과 인재의 성향·역량</p>
-                        <p className="bg-white border border-neutral-200 rounded-lg p-4 break-keep"><strong className="text-neutral-900">조건끼리</strong> — 채용 공고 ↔ 희망 직무 설문: 맡을 일·조건과 하고 싶은 일·조건</p>
-                    </div>
-                </div>
-            </section>
 
             {/* ── 인재 정보 보호 ── */}
             <section className="border-b border-neutral-100">
@@ -253,9 +215,9 @@ export default function HeroCompanyHubPage() {
                     </div>
                     <ul className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
                         {[
-                            { t: "익명 분석", d: "기업에 보여 드리는 것은 인재 풀의 성향·역량 분포입니다. 개인을 알아볼 수 있는 정보는 넣지 않습니다." },
-                            { t: "본인 동의 우선", d: "인재 개인의 정보는 본인이 동의한 범위 안에서만 다룹니다. 동의 없이 기업에 공개하지 않습니다." },
-                            { t: "목적 밖 사용 금지", d: "기업이 쓴 설문과 채용 공고는 인재 풀 분석에만 쓰고, 다른 기업에 공개하지 않습니다." },
+                            { t: "인원수는 익명으로", d: "조건에 맞는 인재는 숫자로만 보여 드리고, 5명 미만이면 '5명 미만'으로만 표시합니다. 조건을 좁혀 특정인을 알아낼 수 없습니다." },
+                            { t: "응한 인재만, 동의한 만큼", d: "인재가 제안에 응하면서 이 기업에 정보 제공을 동의해야 이름·연락처·이력서가 전달됩니다. 성장 배경 응답이나 세부 검사 점수는 보내지 않습니다." },
+                            { t: "기한이 지나면 닫힙니다", d: "응한 인재의 정보는 응답일로부터 180일 동안만 볼 수 있습니다. 인재가 응답을 철회하면 그 즉시 볼 수 없습니다." },
                         ].map(x => (
                             <li key={x.t} className="border border-neutral-200 rounded-xl p-6">
                                 <p className="font-bold mb-2">{x.t}</p>
@@ -287,11 +249,11 @@ export default function HeroCompanyHubPage() {
             {/* ── 마무리 ── */}
             <section>
                 <div className="mx-auto max-w-5xl px-6 lg:px-8 py-20 text-center">
-                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3 break-keep">필요한 사람, 먼저 정리해 보세요</h2>
-                    <p className="text-neutral-600 mb-8">기업 등록부터 시작합니다.</p>
-                    <Link href={hasCompany ? `/hero/company/${active[0].hero_companies?.id ?? ""}/jd` : "/hero/company/register"}
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3 break-keep">우리 회사에 맞는 인재, 몇 명인지 확인해 보세요</h2>
+                    <p className="text-neutral-600 mb-8">{hasCompany ? "조건만 고르면 바로 보입니다." : "기업 등록부터 시작합니다."}</p>
+                    <Link href={hasCompany ? `/hero/company/${active[0].hero_companies?.id ?? ""}/talent` : "/hero/company/register"}
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-neutral-300 text-neutral-800 text-sm font-semibold hover:border-neutral-500 transition-colors">
-                        {hasCompany ? "채용 공고 관리" : "기업 등록하기"} <ArrowRight className="h-4 w-4" />
+                        {hasCompany ? "인재 찾기" : "기업 등록하기"} <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -311,26 +273,6 @@ function HubLink({ href, icon: Icon, label }: { href: string; icon: typeof Compa
     );
 }
 
-function TetradSide({ title, items }: { title: string; items: { icon: typeof Compass; title: string; desc: string }[] }) {
-    return (
-        <div className="bg-white border border-neutral-200 rounded-xl p-5">
-            <p className="text-xs font-bold text-neutral-500 mb-3">{title}</p>
-            <div className="space-y-3">
-                {items.map(it => (
-                    <div key={it.title} className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
-                            <it.icon className="h-4 w-4 text-neutral-500" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-sm">{it.title}</p>
-                            <p className="text-xs text-neutral-500">{it.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 function roleLabel(role: string) {
     switch (role) {
