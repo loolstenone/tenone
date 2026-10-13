@@ -36,7 +36,6 @@ export default function HitOverviewPage() {
   return (
     <div>
       <PageHero
-        align="center"
         label="HIT 검사"
         title="나를 알아보는 검사"
         desc="모든 회원이 같은 두 검사로 시작합니다. 나는 어떤 사람인가(기본 성향 검사), 무엇을 할 수 있는가(역량·방향 검사). 그다음 지금 내 생애주기에 맞는 검사 하나를 고릅니다."

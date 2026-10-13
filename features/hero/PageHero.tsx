@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 /**
  * HeRo 페이지 첫 화면 표준 (2026-10-13) — 작은 한국어 라벨 → 제목 → 설명 → 빨간 주 버튼 하나.
- * 흰 배경이 기본. 어두운 첫 화면은 홈·써치 라이트 두 곳만 쓴다.
+ * 흰 배경·왼쪽 정렬이 표준 (2026-10-13 메뉴 간 통일 — align="center"는 쓰지 않는다). 어두운 첫 화면은 써치 라이트만, 홈은 캐릭터 + 슬로건 별도.
  * 빨강은 라벨 1곳 + 주 버튼 1개 (app/(HeRo)/CLAUDE.md 색 규약).
  */
 export interface PageHeroAction { label: string; href: string }

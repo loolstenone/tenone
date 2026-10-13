@@ -104,6 +104,43 @@ function PartnerCarousel() {
   );
 }
 
+/* ── 슬로건 — 한국어·영어가 번갈아 바뀐다 (2026-10-13). 움직임 줄이기 설정이면 한국어만 ── */
+const slogans = [
+  { lang: "ko", lines: ["당신의 재능을", "믿습니다"] },
+  { lang: "en", lines: ["We believe in", "your talent."] },
+] as const;
+
+function SloganRotator() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setInterval(() => setIdx((p) => (p + 1) % slogans.length), 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <h1
+      aria-label="당신의 재능을 믿습니다 — We believe in your talent."
+      className="grid mb-5 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 leading-tight"
+    >
+      {slogans.map((s, i) => (
+        <span
+          key={s.lang}
+          lang={s.lang}
+          aria-hidden="true"
+          className={`[grid-area:1/1] transition-all duration-700 ease-out ${
+            i === idx ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
+          }`}
+        >
+          {s.lines[0]}
+          <br />
+          {s.lines[1]}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 /* ── 히어로 캐릭터 (랜덤) ── */
 const heroChars = [
   { src: "/hero-char-boy.png", alt: "HeRo Male" },
@@ -165,11 +202,7 @@ export default function HeRoHomePage() {
         <div className="relative z-10 min-h-screen flex items-center">
           <div className="mx-auto max-w-7xl w-full px-6 lg:px-8">
             <div className="ml-auto w-full md:w-[55%] lg:w-[50%] text-center md:text-left md:pl-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-5 leading-tight">
-                당신의 재능을
-                <br />
-                <span>믿습니다</span>
-              </h1>
+              <SloganRotator />
 
               <p className="text-sm md:text-base text-neutral-500 mb-8 leading-relaxed max-w-md mx-auto md:mx-0">
                 인재 기획사 HeRo.
