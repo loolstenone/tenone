@@ -40,7 +40,8 @@ function viewFor(stage: StageKey, r: Row): View {
       const capital = pick(r.capital_scores, ["domain_expertise", "achievement", "relational", "transferable"]);
       const best = top(capital);
       return {
-        journey: { ready_to_leap: "도약 준비 완료", almost_ready: "거의 준비됨", urgent_but_unprepared: "급하지만 준비가 더 필요", building_foundation: "기반을 다지는 중", exploring: "탐색 단계", early_awareness: "초기 인식" },
+        // 단계는 경력 자본(+체크리스트 준비도, 체크했을 때만)과 이직 동기로 정한다 — 준비도를 체크하지 않았으면 '준비' 판정을 말하지 않는다 (2026-10-13)
+        journey: { ready_to_leap: "경력 자본이 탄탄하고 가고 싶은 곳이 분명", almost_ready: "경력 자본이 탄탄함", urgent_but_unprepared: "떠날 마음이 앞서 있음", building_foundation: "기반을 다지는 중", exploring: "탐색 단계", early_awareness: "이직을 생각하기 시작함" },
         cover: { headline: `전환 가능성 ${n(r.transferability_index)}`, sub: r.target_job ? `희망 직무 ${r.target_job}` : (mt[r.motivation_type] ?? "") },
         findings: [
           { label: "전환 가능성", value: `${n(r.transferability_index)} · ${BAND_INFO[scoreBand(n(r.transferability_index))].label}`, note: "지금의 경력이 새 자리에서 통할 가능성입니다." },

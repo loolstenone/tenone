@@ -50,5 +50,12 @@ const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? 
   check('해설 id', ids.join(' ') === 'CC-DOMAIN-HIGH CC-ACHIEVE-MID CC-RELATION-LOW CC-TRANSFER-MID CM-PUSH-DOMINANT CM-PUSH-GROWTH CM-PUSH-CULTURE CT-SKILL-HIGH CT-MARKET-LOW CT-ADAPT-MID CTYPE-STRATEGIC CR-C', ids.join(' '));
 }
 
+{
+  // 체크리스트 체크 전(0) → '이직 준비 보강 필요'를 보완 영역에 넣지 않는다. 체크했는데 낮으면 넣는다
+  const none = scoreHitD(build(() => 4), { checklist: { percent: 0, byGroup: {} } });
+  const low = scoreHitD(build(() => 4), { checklist: { percent: 20, byGroup: { 서류: 20, 면접: 20, 타이밍: 20, 지지: 20 } } });
+  check('체크 전 → 준비 보완 없음 / 체크 후 낮음 → 있음', !none.gapAreas.some(g => g.startsWith('이직 준비')) && low.gapAreas.some(g => g.startsWith('이직 준비')), `${none.gapAreas.length}/${low.gapAreas.length}`);
+}
+
 console.log(fails === 0 ? '\n모두 통과' : `\n실패 ${fails}건`);
 process.exit(fails === 0 ? 0 : 1);

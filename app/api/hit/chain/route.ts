@@ -84,7 +84,8 @@ export async function GET(req: NextRequest) {
       return {
         key: f.key, id: f.row.id,
         name: HIT_STAGES[f.key as keyof typeof HIT_STAGES]?.code ?? '',
-        headline: `준비도 ${Number(f.row[meta.score] ?? 0)}`,
+        // D~G 준비도는 체크리스트 완료율 — 0은 '체크 전'이지 '준비 0'이 아니다 (2026-10-13)
+        headline: Number(f.row[meta.score] ?? 0) > 0 || f.key === 'c' ? `준비도 ${Number(f.row[meta.score] ?? 0)}` : '준비도 체크 전',
         sub: STAGE_LABELS[String(f.row.journey_stage)] ?? '',
       };
     };

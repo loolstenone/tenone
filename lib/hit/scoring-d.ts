@@ -198,7 +198,7 @@ export function scoreReadiness(responses: ResponseRow[]): {
 export function identifyGapAreas(
   capitalScores: Record<string, number>,
   transferScores: Record<string, number>,
-  preparation: number,
+  preparation: number | null,
 ): string[] {
   const gaps: string[] = [];
   const threshold = 50;
@@ -210,7 +210,8 @@ export function identifyGapAreas(
   if (transferScores.skill_transfer < threshold) gaps.push('스킬 이전 가능성 강화 필요');
   if (transferScores.market_fit < threshold) gaps.push('목표 시장 이해도 제고 필요');
   if (transferScores.adaptation < threshold) gaps.push('적응력 개발 필요');
-  if (preparation < threshold) gaps.push('이직 준비(이력서/면접/재정) 보강 필요');
+  // 준비도(체크리스트)를 아직 체크하지 않았으면(null) 준비 부족으로 단정하지 않는다 (2026-10-13)
+  if (preparation !== null && preparation < threshold) gaps.push('이직 준비(이력서/면접/재정) 보강 필요');
 
   return gaps;
 }
@@ -304,7 +305,7 @@ export function scoreHitD(responses: ResponseRow[], opts?: { checklist?: { perce
         return { doc, interview, timing, psychological, total: cl.percent, preparation, gapAwareness: psychological, transitionReadiness: cl.percent };
       })()
     : scoreReadiness(responses);
-  const gapAreas = identifyGapAreas(capital.scores, transfer.scores, readiness.preparation);
+  const gapAreas = identifyGapAreas(capital.scores, transfer.scores, cl && cl.percent === 0 ? null : readiness.preparation);
 
   const pushPullSubs = scorePushPullSubs(responses);
   const ctype = scoreCType({
