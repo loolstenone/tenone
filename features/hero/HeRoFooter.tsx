@@ -9,7 +9,17 @@ export function HeRoFooter() {
         <UniverseFooter
             siteId="hero"
             brandName="HeRo"
-            tagline="Human enhancement & Recruit Optimization · Talent Agency"
+            tagline={
+                <>
+                    <p>Talent Agency</p>
+                    {/* 브랜드명 HeRo의 출처 — H·e·R·o 글자만 굵게 (2026-10-13) */}
+                    <p className="mt-1">
+                        <b className="font-bold text-white">H</b>uman <b className="font-bold text-white">e</b>nhancement &amp;
+                        <br />
+                        <b className="font-bold text-white">R</b>ecruit <b className="font-bold text-white">O</b>ptimization
+                    </p>
+                </>
+            }
             accentColor="#E53935"
             dark={true}
             actions={[

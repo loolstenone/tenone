@@ -35,8 +35,8 @@ interface FooterColumn { title: string; links: FooterLink[]; }
 export interface UniverseFooterProps {
     /** 브랜드 이름 (1열) */
     brandName: string;
-    /** 컨셉 또는 슬로건 (1열) */
-    tagline?: string;
+    /** 컨셉 또는 슬로건 (1열) — 줄바꿈·강조가 필요하면 JSX */
+    tagline?: ReactNode;
     /** 브랜드 메인 컬러 */
     accentColor?: string;
     /** 어두운 배경(검정 계열) 사용 여부 — 텍스트 톤 자동 결정 */
@@ -108,7 +108,7 @@ export function UniverseFooter({
                     {/* 1열 — 브랜드 */}
                     <div className="md:col-span-4">
                         <div className={clsx("text-xl font-bold tracking-tight", textPrimary)}>{brandName}</div>
-                        {tagline && <p className={clsx("mt-2 text-sm", textSecondary)}>{tagline}</p>}
+                        {tagline && <div className={clsx("mt-2 text-sm leading-relaxed", textSecondary)}>{tagline}</div>}
                         <div className="mt-4 text-xs">
                             <a href="https://www.tenone.biz" className="underline-offset-2 hover:underline" style={{ color: accentColor }}>Ten:One™ Universe</a>
                         </div>
