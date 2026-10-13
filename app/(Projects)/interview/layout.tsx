@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE } from "@/lib/projects/interview";
 
 // Ten:One™ 프로젝트 — 브랜드 사이트가 아니라 ums_sites·siteConfigs에 없다 (siteId=tenone, lib/domain-registry.ts).
-// 공식 주소는 interview.tenone.biz 하나 (tenone.biz/interview는 같은 화면이지만 canonical은 서브도메인)
+// 공식 주소는 ai-interview.tenone.biz 하나 (tenone.biz/interview는 같은 화면이지만 canonical은 서브도메인)
 export const metadata: Metadata = {
     metadataBase: new URL(SITE.url),
     title: { absolute: `${SITE.eyebrow} — ${SITE.title}`, template: `%s | ${SITE.eyebrow}` },

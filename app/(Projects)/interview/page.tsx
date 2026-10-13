@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AI 면접 예행연습 — 면접 화면 (interview.tenone.biz)
+ * AI 면접 예행연습 — 면접 화면 (ai-interview.tenone.biz)
  * 시작 → 면접관 메시지 타이핑 → 답 고르기 ×7 → '판정 중' 연출 → 결과 통지서 /r/{code}
  * 답변은 저장하지 않는다 — 결과는 URL 코드로만 (lib/projects/interview.ts)
  */

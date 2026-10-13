@@ -1,5 +1,5 @@
 /**
- * Ten:One™ 프로젝트 — AI 면접 예행연습 (interview.tenone.biz, 2026-10-13)
+ * Ten:One™ 프로젝트 — AI 면접 예행연습 (ai-interview.tenone.biz, 2026-10-13)
  * AI 시대 신입 채용 실종을 풍자하는 바이럴 테스트. 면접관인 척 질문 → 고른 답을 조합해 '결과 통지서'를 만든다
  *
  * 규칙
@@ -172,8 +172,8 @@ export function buildNotice(code: string) {
 export type Notice = ReturnType<typeof buildNotice>;
 
 export const SITE = {
-    host: "interview.tenone.biz",
-    url: "https://interview.tenone.biz",
+    host: "ai-interview.tenone.biz",
+    url: "https://ai-interview.tenone.biz",
     eyebrow: "AI 면접 예행연습",
     title: "인간 지원자 사전 검수",
     tagline: "실전 AI 면접 전에, 미리 떨어져 보세요.",

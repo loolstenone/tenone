@@ -87,7 +87,7 @@ const registry: Record<string, DomainEntry> = {
     'www.brandgravity.co.kr':   { prefix: '/brandgravity', siteId: 'tenone' },
     'brandgravity.tenone.biz':  { prefix: '/brandgravity', siteId: 'tenone' },
     // Ten:One™ 프로젝트 — 사회 이슈 바이럴 프로젝트는 {프로젝트}.tenone.biz 서브도메인 (2026-10-13 사용자 결정, 결과는 tenone.biz Works에 기록)
-    'interview.tenone.biz':     { prefix: '/interview',  siteId: 'tenone' },
+    'ai-interview.tenone.biz':  { prefix: '/interview',  siteId: 'tenone' },
     // Auth Hub
     'auth.tenone.biz':          { prefix: '/auth-hub',   siteId: 'tenone' },
     // Intra (내부 관리자)
