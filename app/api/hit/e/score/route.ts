@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { normalizeHitResponses } from '@/lib/hit/normalize-responses';
 import { requireMember } from '@/lib/api-guard';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitEResult, upsertHeroProfile, getLatestHitAResult } from '@/lib/supabase/hit';
@@ -30,7 +31,8 @@ export async function POST(request: NextRequest) {
       return errorResponse('이미 완료된 세션입니다.', 400);
     }
 
-    const responses = await getHitResponses(session.id);
+    // 모듈(sub_domain → 채점 모듈)·척도·역채점은 DB에서 — 브라우저가 보낸 module·척도는 믿지 않는다 (lib/hit/normalize-responses.ts, 2026-10-13)
+    const responses = await normalizeHitResponses(createClient(), 'E', await getHitResponses(session.id), { stage: 'e' });
     if (responses.length === 0) {
       return errorResponse('응답 데이터가 없습니다.', 400);
     }
