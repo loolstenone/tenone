@@ -235,9 +235,11 @@ export function toParagraphs(text: string, perParagraph = 2): string[] {
     // 인용문 안의 ?·! 뒤에 ", …"로 이어지는 문장은 앞 문장에 붙인다
     for (let i = sentences.length - 1; i > 0; i--) {
       if (/^[,，·)]/.test(sentences[i])) { sentences[i - 1] = `${sentences[i - 1]}${sentences[i]}`; sentences.splice(i, 1); continue; }
-      // 인용한 질문 뒤에 조사로 이어지는 문장("…느낄까?"를 / "…생각해?" 라는)도 앞 문장에 붙인다
-      if (/[?!]["”’'」』]$/.test(sentences[i - 1]) && /^(를|을|라는|라고|이라는|이라고|이지만|이고|이며|인지|와|과|가|는|은|도|처럼|하고|고|며|라며|로|으로|에|만)(?=[\s,.]|$)/.test(sentences[i])) {
-        sentences[i - 1] = `${sentences[i - 1]}${sentences[i]}`; sentences.splice(i, 1);
+      // 인용한 질문·감탄("…느낄까?"를 / "…뭘까?" 한마디를)으로 끝난 조각은 문장 끝이 아니다 — 다음 조각과 붙인다.
+      // 해설 문안에서 인용문으로 문장을 끝내는 경우는 없고, 조사 목록으로는 '한마디를' 같은 명사 시작을 놓쳤다 (2026-10-13)
+      if (/[?!]["”’'」』]$/.test(sentences[i - 1])) {
+        const glue = /^(를|을|라는|라고|이라는|이라고|이지만|이고|이며|인지|와|과|가|는|은|도|처럼|하고|고|며|라며|로|으로|에|만)(?=[\s,.]|$)/.test(sentences[i]) ? '' : ' ';
+        sentences[i - 1] = `${sentences[i - 1]}${glue}${sentences[i]}`; sentences.splice(i, 1);
       }
     }
     for (let i = 0; i < sentences.length; i += perParagraph) out.push(sentences.slice(i, i + perParagraph).join(' '));
