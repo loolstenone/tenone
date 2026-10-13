@@ -19,7 +19,7 @@ export default function TalentAgentPage() {
         title={<>HeRo는 연예 기획사처럼<br />숨은 인재를 찾아 키웁니다</>}
         desc="혼자 정하기 어려운 커리어의 다음 단계를 HeRo가 함께 계획합니다. 검사로 나를 알고, AI와 전문가가 갈 길을 함께 정하고, 회사에 나를 보여 줄 준비를 같이 합니다."
         cta={{ label: "탤런트 에이전시 신청하기", href: "/hero/talent-agent/apply" }}
-        note="무료 · HIT 검사와 희망 직무 설문으로 바로 시작합니다"
+        note="HIT 검사와 희망 직무 설문으로 바로 시작합니다"
       />
 
       {/* Why HeRo */}
@@ -121,7 +121,7 @@ export default function TalentAgentPage() {
 
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              "기본 성향 검사 · 전체 웹 보고서 · PDF 1회",
+              "기본 성향 검사 · 전체 웹 보고서",
               "희망 직무 등록 · 비공개 인재 풀 등록",
               "AI 상담 체험 · 하루 3번 · 3일",
               "나와 맞을 만한 회사 정보 안내",

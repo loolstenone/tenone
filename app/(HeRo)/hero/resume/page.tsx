@@ -54,33 +54,6 @@ const beforeAfterExamples = [
     },
 ];
 
-const plans = [
-    {
-        name: "AI 이력서 코칭",
-        price: "9,900원",
-        features: [
-            "AI 종합 점수",
-            "개선 포인트 무제한",
-            "Before/After 비교",
-            "HIT 결과 연계 분석 (A+B 완료 시)",
-            "맞춤 템플릿",
-        ],
-        highlight: true,
-        note: "HIT 검사를 받으시면 성격/강점 기반 맞춤 피드백이 추가됩니다",
-    },
-    {
-        name: "전문가 컨설팅",
-        price: "89,000원",
-        features: [
-            "AI 이력서 코칭 전체 포함",
-            "전문가 1:1 피드백",
-            "화상 컨설팅 30분",
-            "수정 후 재검토",
-        ],
-        highlight: false,
-        note: null,
-    },
-];
 
 export default function ResumePage() {
     return (
@@ -146,54 +119,13 @@ export default function ResumePage() {
                 </div>
             </section>
 
-            {/* 이용 요금 — 통신판매업 신고 전 가격 노출 금지 (2026-10-12 결정, AI 상담과 같은 기준). 사업 시작 시 hidden 해제 */}
-            <section className="hidden">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-14">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">이용 요금</h2>
-                        <p className="text-neutral-500">필요에 맞는 플랜을 선택하세요</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                        {plans.map((plan) => (
-                            <div
-                                key={plan.name}
-                                className={`border rounded-2xl p-8 ${plan.highlight ? "border-[#E53935] ring-2 ring-red-100" : "border-neutral-200"}`}
-                            >
-                                {plan.highlight && (
-                                    <span className="text-xs px-3 py-1 bg-red-50 text-[#E53935] rounded-full font-medium mb-4 inline-block">
-                                        추천
-                                    </span>
-                                )}
-                                <h3 className="text-lg font-bold mb-1">{plan.name}</h3>
-                                <p className="text-3xl font-extrabold text-neutral-900 mb-2">{plan.price}</p>
-                                <ul className="space-y-3 mb-6">
-                                    {plan.features.map((f) => (
-                                        <li key={f} className="flex items-start gap-2">
-                                            <CheckCircle className="h-4 w-4 mt-0.5 text-[#E53935] flex-shrink-0" />
-                                            <span className="text-sm text-neutral-600">{f}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                {plan.note && (
-                                    <p className="text-xs text-neutral-400 mb-4 border-t border-neutral-100 pt-4">{plan.note}</p>
-                                )}
-                                <Link
-                                    href="/hero/resume/workspace"
-                                    className={`w-full block text-center py-3 rounded-xl text-sm font-bold transition-colors ${plan.highlight ? "bg-[#E53935] text-white hover:bg-red-700" : "border border-neutral-300 text-neutral-700 hover:bg-neutral-50"}`}
-                                >
-                                    신청하기
-                                </Link>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            {/* 요금 안내 없음 — 통신판매업 신고 전 가격 정보는 화면·소스 어디에도 두지 않는다 (2026-10-13). 사업 시작 시 git 이력에서 복원 */}
 
             {/* CTA */}
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
                     <h2 className="text-2xl font-bold mb-3">이력서를 분석해보세요</h2>
-                    <p className="text-neutral-500 mb-8">AI 기본 분석은 무료로 이용할 수 있습니다</p>
+                    <p className="text-neutral-500 mb-8">이력서를 올리면 AI가 먼저 살펴봅니다</p>
                     <Link
                         href="/hero/resume/workspace"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"

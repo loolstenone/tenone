@@ -127,8 +127,6 @@ export default function HitAIntroPage() {
             <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {hitStageMinutesLabel("a")}</span>
             <span>·</span>
             <span>{TOTAL_QUESTIONS}문항</span>
-            <span>·</span>
-            <span>무료</span>
           </div>
         </div>
       </section>

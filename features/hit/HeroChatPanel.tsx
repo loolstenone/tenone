@@ -66,7 +66,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
           setRemaining(0);
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: '무료 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.',
+            content: '오늘 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.',
           }]);
           setLoading(false);
           return;
@@ -210,7 +210,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
       <div className="px-3 py-2 border-t border-neutral-100">
         {limitReached ? (
           <div className="text-center py-2">
-            <p className="text-xs text-neutral-500">무료 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.</p>
+            <p className="text-xs text-neutral-500">오늘 상담 횟수를 모두 사용했습니다. 결과 리포트와 해설을 다시 읽어 보세요.</p>
           </div>
         ) : (
           <form

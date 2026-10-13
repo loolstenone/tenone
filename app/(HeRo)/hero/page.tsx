@@ -461,7 +461,7 @@ export default function HeRoHomePage() {
               className="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xl hover:bg-neutral-100 transition-colors"
               style={{ color: RED }}
             >
-              HIT 무료 검사 <ArrowRight className="h-4 w-4" />
+              HIT 검사 시작 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/hero/talent-agent/apply"
