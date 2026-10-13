@@ -172,7 +172,7 @@ export function renderHeroWeeklyReportHtml(props: HeroWeeklyReportProps): string
           <tr>
             <td style="padding:24px 40px;text-align:center;">
               <p style="margin:0 0 4px 0;font-size:11px;color:#aaa;">
-                HeRo — Human enhancement &amp; Recruit Optimization
+                HeRo — Human enhancement &amp; Recruit optimization
               </p>
               <p style="margin:0;font-size:11px;color:#ccc;">
                 <a href="https://hero.ne.kr" style="color:#aaa;text-decoration:none;">hero.ne.kr</a>

@@ -51,7 +51,7 @@ export default function AboutPage() {
                 align="center"
                 label="HeRo 소개"
                 title={<>사람이 크도록 돕고<br />맞는 일을 찾게 돕는 인재 기획사</>}
-                desc="HeRo(Human enhancement & Recruit Optimization)는 한 사람 한 사람이 계획을 세워 성장하고, 자기 역량을 가장 잘 쓸 수 있는 회사와 일을 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우는 것처럼요."
+                desc="HeRo(Human enhancement & Recruit optimization)는 한 사람 한 사람이 계획을 세워 성장하고, 자기 역량을 가장 잘 쓸 수 있는 회사와 일을 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우는 것처럼요."
             />
 
             {/* Vision / Mission / Values */}

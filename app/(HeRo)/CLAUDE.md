@@ -552,7 +552,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | 항목 | 내용 |
 |------|------|
 | **Phase** | P3 완료 · 잔업 정리 진행 중 (2026-04-24 세션 83) |
-| **포지셔닝** | **HeRo = Talent Agency** · Human enhancement & Recruit Optimization · "플랫폼" 아닌 "인재 기획사" |
+| **포지셔닝** | **HeRo = Talent Agency** · Human enhancement & Recruit optimization · "플랫폼" 아닌 "인재 기획사" |
 | **운영 중** | HIT 7종(기본 성향~경력 공백 복귀) · 이력서 · 4방향 매칭(Tetrad) · /hero/talent-agent (요금 안내는 2026-10-12 제거) · **/hero/journey 워크스페이스 (신규)** |
 | **세션 81 주요 결정** | ① Journey가 HeRo의 리텐션 엔진 — 설명이 아닌 도구 · ② 탭은 액션 단위(verb) · ③ Vrief × GPR 이중축을 목표 관리 표준 · ④ 스트릭 + 주간 체크인 + 매칭 피드 3중 루프 · ⑤ 브랜드 컨셉 "Talent Agency"로 재정의 · ⑥ 64 영웅 유형 영화 IP 제거·현대 직업 원형으로 전면 리네이밍 |
 | **신규 인프라 (세션 81)** | `hero_daily_checkins` · `hero_goals` · `hero_goal_checkins` 테이블 · `hero_journey_stage()` · `hero_streak()` 함수 · `uc_earn_rules` brand='hero' 8종 시드 · API 8개(status/checkin/goals/goals-checkin/jobs-feed) · `features/hero/JourneyWorkspace.tsx` · `GoalsTab.tsx` · `JobsTab.tsx` |

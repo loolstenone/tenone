@@ -16,7 +16,7 @@ export function HeRoFooter() {
                     <p className="mt-1">
                         <b className="font-bold text-white">H</b>uman <b className="font-bold text-white">e</b>nhancement &amp;
                         <br />
-                        <b className="font-bold text-white">R</b>ecruit <b className="font-bold text-white">O</b>ptimization
+                        <b className="font-bold text-white">R</b>ecruit <b className="font-bold text-white">o</b>ptimization
                     </p>
                 </>
             }
