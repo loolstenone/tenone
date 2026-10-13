@@ -14,7 +14,7 @@ import { siteHeaderNav } from "@/lib/brand-site-menus";
 import { SearchLightNav } from "@/features/hero/SearchLightNav";
 
 // 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서·위치(side)는 거기서 고친다
-// 왼쪽 = 인재 서비스 · 가운데 = 써치 라이트(인재와 기업이 만나는 곳) · 오른쪽 = 기업 서비스 (2026-10-13)
+// 순서 = 인재 서비스 → 써치 라이트(인재와 기업이 만나는 곳) → 기업 서비스, 로고 옆 왼쪽 정렬 한 줄 (2026-10-14)
 const navItems = siteHeaderNav("hero");
 const talentNav = navItems.filter(i => i.side === "talent");
 const meetNav = navItems.filter(i => i.side === "meet");
@@ -57,22 +57,19 @@ export function HeRoHeader() {
                 </Link>
 
                 {/* Desktop Nav — 메뉴 9개라 1280px부터 펼친다 (그 아래는 햄버거) */}
-                <div className="hidden xl:flex items-center flex-1 min-w-0">
-                    <div className="flex items-center gap-4 2xl:gap-6">
-                        {talentNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
-                    </div>
-                    <div className="flex-1 flex items-center justify-center gap-3 px-4">
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-r from-transparent to-neutral-300" />
+                {/* 메뉴는 로고 옆에 왼쪽 정렬로 붙인다 — 인재 · 써치 라이트 · 기업 (2026-10-14, 가운데 벌림 폐지) */}
+                <div className="hidden xl:flex items-center gap-4 2xl:gap-6 min-w-0">
+                    {talentNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
+                    <span className="flex items-center gap-2">
+                        <span aria-hidden className="h-px w-3 bg-neutral-300" />
                         {meetNav.map(item => <SearchLightNav key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-l from-transparent to-neutral-300" />
-                    </div>
-                    <div className="flex items-center gap-4 2xl:gap-6">
-                        {companyNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
-                    </div>
+                        <span aria-hidden className="h-px w-3 bg-neutral-300" />
+                    </span>
+                    {companyNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
                 </div>
 
-                {/* Right side — 우측 끝 */}
-                <div className="hidden xl:flex items-center pl-6 shrink-0">
+                {/* Right side — 우측 끝, 메뉴와 거리를 둔다 */}
+                <div className="hidden xl:flex items-center ml-auto pl-10 shrink-0">
                     <UniverseUtilityBar
                         aboutPath="/hero/about"
                         profilePath="/hero/my"

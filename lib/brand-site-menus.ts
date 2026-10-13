@@ -35,7 +35,7 @@ export interface HeaderMenu extends MenuBase {
     placement: "header";
     /** 헤더 드롭다운 하위 링크 */
     dropdown?: { label: string; path: string }[];
-    /** 헤더 안 위치 묶음 (선택) — HeRo: 왼쪽 인재 서비스 · 가운데 만남(써치 라이트) · 오른쪽 기업 서비스 */
+    /** 헤더 안 묶음 (선택) — HeRo: 인재 서비스 → 만남(써치 라이트) → 기업 서비스 순서, 왼쪽 정렬 한 줄 (2026-10-14) */
     side?: "talent" | "meet" | "company";
 }
 
