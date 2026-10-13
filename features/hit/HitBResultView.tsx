@@ -74,6 +74,9 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
   const lowTrack = track[track.length - 1];
   const center = result.matrix?.optimal?.length ? result.matrix.optimal : result.efficacyTop3.split("").slice(0, 2);
   const eff = result.efficacyScores;
+  // matrix = null이면 HIT A 미측정(mapper가 처리). 흥미·효능 모두 60 미만이면 세 그룹이 다 비어 빈 구역만 보이던 결함 (2026-10-13)
+  const matrixMeasured = !!result.matrix;
+  const matrixHasGroup = matrixMeasured && MATRIX_GROUPS.some(g => result.matrix![g.key].length > 0);
 
   return (
     <>
@@ -109,7 +112,9 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
       </Section>
 
       <Section id="efficacy" title="효능감 × 흥미" lead={EFFICACY_INFO.what}>
-        {result.matrix ? (
+        {matrixMeasured && !matrixHasGroup ? (
+          <p className="text-[15px] text-neutral-600 leading-[1.8]">흥미와 효능감이 모두 60을 넘는 분야가 아직 없습니다. 끌리는 일과 자신 있는 일이 뚜렷하게 정해지지 않은 단계라는 뜻이에요. 아래 효능감이 가장 높은 분야부터 작은 경험을 쌓아 보면 방향이 선명해집니다.</p>
+        ) : matrixMeasured ? (
           <div className="space-y-4">
             {MATRIX_GROUPS.map(g => {
               const types = result.matrix![g.key];
