@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * 기업 — 인재 찾기·제안 (2026-10-13)
- * ① 인재상 조건 → 조건에 맞고 '제안 받기'를 켠 인원(익명, 5명 미만은 '5명 미만')
+ * 써치 라이트 — 기업이 좋은 사람을 찾는 화면 (2026-10-13, 옛 /hero/company/[id]/talent)
+ * ① 인재상 조건 → 조건에 맞고 '제안 받기'를 켠 인원(익명, 5명 미만은 '5명 미만') + 인재 풀 리포트(자동 묶음 통계)
  * ② 제안 작성 → 요청(운영자 검토·결제 확인 후 발송) ③ 보낸 제안 목록
+ * ❌ 개인의 HIT 검사 내용은 기업에 주지 않는다 — 리포트는 비율·평균뿐
  * ❌ 가격 문구 · '연결해 드립니다' 표현
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import clsx from "clsx";
 import { Loader2, ArrowLeft, Users, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -18,6 +18,7 @@ import {
     OFFER_TYPES, WORK_MODES, labelOf, type OfferCriteria,
 } from "@/lib/hero/offers";
 import { ChipPick, ChipSingle, Field } from "@/features/hero/offers/OfferUI";
+import { TalentPoolReport, type TalentPoolReportData } from "@/features/hero/report/TalentPoolReport";
 
 const HERO_RED = "#E53935";
 
@@ -33,9 +34,11 @@ const plusDays = (n: number) => {
     return d.toISOString().slice(0, 10);
 };
 
-export default function CompanyTalentPage() {
-    const { id: companyId } = useParams<{ id: string }>();
+export default function SearchLightPeoplePage() {
     const { user, isLoading, isAuthenticated } = useAuth();
+    const [companies, setCompanies] = useState<{ id: string; name: string }[] | null>(null);
+    const [companyId, setCompanyId] = useState("");
+    const [report, setReport] = useState<TalentPoolReportData | null>(null);
     const [criteria, setCriteria] = useState<OfferCriteria>(EMPTY_CRITERIA);
     const [count, setCount] = useState<{ label: string; enough: boolean } | null>(null);
     const [counting, setCounting] = useState(false);
@@ -48,7 +51,19 @@ export default function CompanyTalentPage() {
     const [done, setDone] = useState(false);
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // 내가 담당하는 기업 (활성) — 여러 곳이면 고른다
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        fetch("/api/hero/company/mine").then(r => r.json()).then(d => {
+            const list = (d.companies ?? []) as { id: string; name: string }[];
+            setCompanies(list);
+            const q = new URLSearchParams(window.location.search).get("company");
+            setCompanyId(list.find(c => c.id === q)?.id ?? list[0]?.id ?? "");
+        }).catch(() => setCompanies([]));
+    }, [isAuthenticated]);
+
     const loadOffers = useCallback(async () => {
+        if (!companyId) return;
         const res = await fetch(`/api/hero/offers?companyId=${companyId}`);
         if (res.status === 403) { setForbidden(true); return; }
         const d = await res.json();
@@ -56,7 +71,7 @@ export default function CompanyTalentPage() {
     }, [companyId]);
 
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.id || !companyId) return;
         loadOffers();
         fetch(`/api/hero/jd?companyId=${companyId}&memberId=${user.id}`).then(r => r.json())
             .then(d => setJds((d.jds ?? []).map((j: { id: string; position_title: string }) => ({ id: j.id, position_title: j.position_title }))))
@@ -65,19 +80,19 @@ export default function CompanyTalentPage() {
 
     // 조건이 바뀌면 0.4초 뒤 인원 다시 세기
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!isAuthenticated || !companyId) return;
         if (timer.current) clearTimeout(timer.current);
-        if (criteria.job_functions.length === 0) { setCount(null); return; }
+        if (criteria.job_functions.length === 0) { setCount(null); setReport(null); return; }
         timer.current = setTimeout(async () => {
             setCounting(true);
             try {
-                const res = await fetch("/api/hero/offers/count", {
+                const res = await fetch("/api/hero/talent-pool", {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ companyId, criteria }),
                 });
                 const d = await res.json();
                 if (res.status === 403) setForbidden(true);
-                else setCount({ label: d.label, enough: !!d.enough });
+                else { setCount({ label: d.label, enough: !!d.enough }); setReport(d.report ?? null); }
             } finally {
                 setCounting(false);
             }
@@ -87,7 +102,13 @@ export default function CompanyTalentPage() {
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
-    if (forbidden) return <div className="min-h-screen pt-32 text-center text-sm text-neutral-500">이 기업의 담당자만 볼 수 있습니다. <Link href="/hero/company" className="underline">인재 찾기</Link></div>;
+    if (companies === null) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (forbidden || companies.length === 0) return (
+        <div className="min-h-screen pt-32 px-6 text-center">
+            <p className="text-sm text-neutral-600 mb-4">기업 회원으로 등록하면 원하는 인재상을 찾을 수 있습니다.</p>
+            <Link href="/hero/company/register" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700">기업 등록하기 <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+    );
 
     const set = <K extends keyof OfferCriteria>(k: K, v: OfferCriteria[K]) => { setCriteria(c => ({ ...c, [k]: v })); setDone(false); };
 
@@ -114,16 +135,24 @@ export default function CompanyTalentPage() {
     return (
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
             <div className="max-w-3xl mx-auto px-6 space-y-6">
-                <Link href="/hero/company" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700">
-                    <ArrowLeft className="h-3.5 w-3.5" /> 인재 찾기
+                <Link href="/hero/search-light" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700">
+                    <ArrowLeft className="h-3.5 w-3.5" /> 써치 라이트
                 </Link>
                 <div>
-                    <p className="text-sm font-bold text-[#E53935] mb-2">인재 찾기</p>
-                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">원하는 인재상을 골라 보세요</h1>
+                    <p className="text-sm font-bold text-[#E53935] mb-2">써치 라이트 · 기업</p>
+                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">좋은 사람을 찾습니다</h1>
                     <p className="text-sm text-neutral-600 break-keep">
-                        조건에 맞고 &lsquo;제안 받기&rsquo;를 켠 인재가 몇 명인지 바로 보여 드립니다. 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다.
+                        원하는 인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 어떤 성향과 조건을 가진 사람들인지 바로 보여 드립니다.
+                        개인의 검사 내용은 보이지 않으며, 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다.
                     </p>
                 </div>
+
+                {companies.length > 1 && (
+                    <select value={companyId} onChange={e => { setCompanyId(e.target.value); setOffers([]); }}
+                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white">
+                        {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                )}
 
                 {/* ① 조건 */}
                 <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-7">
@@ -160,6 +189,9 @@ export default function CompanyTalentPage() {
                         </p>
                     </div>
                 </div>
+
+                {/* 인재 풀 리포트 — 자동 묶음 통계 */}
+                {report && <TalentPoolReport report={report} />}
 
                 {/* ② 제안 작성 */}
                 <div className={clsx("bg-white border border-neutral-200 rounded-xl p-6 space-y-5", !count?.enough && "opacity-60")}>

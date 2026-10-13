@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         await sb.from("hero_offers").update({ status: "rejected", review_note: note, reviewed_by: reviewer, reviewed_at: now, updated_at: now }).eq("id", id);
         await notify([offer.sender_member_id], {
             brandId: "hero", type: "hero_offer_rejected",
-            title: `'${offer.title}' 제안이 반려되었습니다`, message: note, link: "/hero/company",
+            title: `'${offer.title}' 제안이 반려되었습니다`, message: note, link: `/hero/search-light/people?company=${offer.company_id}`,
         });
         return NextResponse.json({ ok: true });
     }

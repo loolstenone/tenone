@@ -2,7 +2,7 @@
 
 /**
  * 기업 — 보낸 제안 상세 (2026-10-13)
- * 응한 인재만 이름·연락처·이력서·(동의 시) HIT 요약. 열람 기한(응답일 + 180일)이 지나면 비공개 (채용절차법)
+ * 응한 인재만 이름·연락처·이력서. 열람 기한(응답일 + 180일)이 지나면 비공개 (채용절차법) · HIT 검사 내용은 없음
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -22,7 +22,6 @@ interface Applicant {
     respondedAt: string | null; destroyDue?: string | null;
     companyStatus: string; companyNote: string | null;
     resume?: { title: string | null; content: ResumeContent | null } | null;
-    hit?: { typeCode: string | null; typeName: string | null; characterName: string | null; strengths: string[]; interest: string | null } | null;
 }
 
 interface OfferDetail {
@@ -76,8 +75,8 @@ export default function CompanyOfferDetailPage() {
     return (
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
             <div className="max-w-3xl mx-auto px-6 space-y-5">
-                <Link href={o ? `/hero/company/${o.company_id}/talent` : "/hero/company"} className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700">
-                    <ArrowLeft className="h-3.5 w-3.5" /> 인재 찾기
+                <Link href={o ? `/hero/search-light/people?company=${o.company_id}` : "/hero/company"} className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700">
+                    <ArrowLeft className="h-3.5 w-3.5" /> 써치 라이트
                 </Link>
 
                 {loading ? (
@@ -167,18 +166,6 @@ function ApplicantCard({ a, busy, onPatch }: { a: Applicant; busy: boolean; onPa
                     {a.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-4 w-4 text-neutral-400" />{a.phone}</span>}
                 </div>
                 {a.message && <p className="text-sm bg-neutral-50 rounded-lg p-3 whitespace-pre-line">{a.message}</p>}
-                {a.hit && (
-                    <div className="border border-neutral-200 rounded-lg p-4 text-sm">
-                        <p className="text-xs font-bold text-neutral-500 mb-1">기본 성향 검사 요약</p>
-                        <p className="font-semibold">{a.hit.typeCode} {a.hit.typeName}</p>
-                        {a.hit.strengths.length > 0 && (
-                            <ul className="mt-2 space-y-1 text-neutral-600 list-disc pl-4">
-                                {a.hit.strengths.map(s => <li key={s}>{s}</li>)}
-                            </ul>
-                        )}
-                        {a.hit.interest && <p className="text-neutral-600">흥미 유형: {a.hit.interest}</p>}
-                    </div>
-                )}
                 <ResumeReadView title={a.resume?.title} content={a.resume?.content ?? null} />
                 <div className="border-t border-neutral-100 pt-4 space-y-3">
                     <p className="text-xs font-bold text-neutral-500">진행 상태 (기업 내부용 — 인재에게 보이지 않음)</p>

@@ -74,7 +74,7 @@ export default function IntraHeroOffersPage() {
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-white">{adminTitle("/intra/hero/offers", "인재 찾기")} — 제안 검토</h1>
+                <h1 className="text-2xl font-bold text-white">{adminTitle("/intra/hero/offers", "좋은 사람 찾기")} — 제안 검토</h1>
                 <p className="text-neutral-400 text-sm mt-1">기업이 요청한 면접·인터뷰 제안을 확인하고 발송합니다. 제안 내용이 채용 목적에 맞는지, 차별·허위 내용이 없는지 확인하세요.</p>
             </div>
 

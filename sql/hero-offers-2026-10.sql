@@ -65,7 +65,6 @@ CREATE TABLE IF NOT EXISTS public.hero_offer_recipients (
     status            text NOT NULL DEFAULT 'sent'
                       CHECK (status IN ('sent', 'viewed', 'accepted', 'declined', 'expired')),
     resume_id         uuid REFERENCES public.resumes(id) ON DELETE SET NULL,
-    share_hit         boolean NOT NULL DEFAULT false,
     talent_message    text,
     provision_consent jsonb,                                 -- {recipient, purpose, items[], retention, version, agreed_at}
     viewed_at         timestamptz,

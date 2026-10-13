@@ -1,7 +1,8 @@
 /**
  * 인재 — 받은 제안 하나
  * GET  /api/hero/offers/inbox/:id  → 제안 상세 (처음 열면 viewed) + 내 이력서 목록
- * POST /api/hero/offers/inbox/:id  → { action: 'accept' | 'decline' | 'withdraw', resumeId?, shareHit?, message?, consent? }
+ * POST /api/hero/offers/inbox/:id  → { action: 'accept' | 'decline' | 'withdraw', resumeId?, message?, consent? }
+ *   HIT 검사 내용은 기업에 제공하지 않는다 (이력서·연락처만)
  *   accept = 제3자 제공 동의(제17조) 필수 — 받는 자·목적·항목·기간을 provision_consent에 기록
  *   withdraw = 동의 철회 → 기업 열람 즉시 중단
  */
@@ -34,11 +35,9 @@ export async function GET(req: NextRequest, { params }: Ctx) {
         await sb.from("hero_offer_recipients").update({ status: "viewed", viewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", id);
         row.status = "viewed";
     }
-    const [{ data: resumes }, { count: hitCount }] = await Promise.all([
-        sb.from("resumes").select("id, title, is_primary, updated_at").eq("member_id", auth.memberId).order("updated_at", { ascending: false }),
-        sb.from("hit_a_results").select("id", { count: "exact", head: true }).eq("member_id", auth.memberId),
-    ]);
-    return NextResponse.json({ item: row, resumes: resumes ?? [], hasHitA: (hitCount ?? 0) > 0 });
+    const { data: resumes } = await sb.from("resumes").select("id, title, is_primary, updated_at")
+        .eq("member_id", auth.memberId).order("updated_at", { ascending: false });
+    return NextResponse.json({ item: row, resumes: resumes ?? [] });
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
@@ -77,15 +76,14 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const { data: resume } = await sb.from("resumes").select("id").eq("id", resumeId).eq("member_id", auth.memberId).maybeSingle();
     if (!resume) return NextResponse.json({ error: "제출할 이력서를 골라 주세요." }, { status: 400 });
 
-    const shareHit = body?.shareHit === true;
     const companyName = offer.hero_companies?.company_name ?? "기업";
-    const consentText = provisionConsentText(companyName, shareHit);
+    const consentText = provisionConsentText(companyName);
     const message = typeof body?.message === "string" ? body.message.slice(0, 1000) : null;
 
     const { error } = await sb.from("hero_offer_recipients").update({
         status: "accepted",
         resume_id: resume.id,
-        share_hit: shareHit,
+        share_hit: false,
         talent_message: message,
         provision_consent: { ...consentText, version: PROVISION_CONSENT_VERSION, agreed_at: now },
         responded_at: now,

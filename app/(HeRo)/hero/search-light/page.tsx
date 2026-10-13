@@ -30,7 +30,7 @@ const matchFlow = [
 ];
 
 const principles = [
-    { icon: Shield, title: "점수는 공개하지 않습니다", desc: "분석 점수와 순위는 기업에도 인재에도 보여 주지 않습니다. 점수를 맞추려고 답을 꾸미지 않게 하려는 것입니다." },
+    { icon: Shield, title: "개인 검사는 기업에 가지 않습니다", desc: "기업은 조건에 맞는 인재 전체의 비율만 봅니다. 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다." },
     { icon: Users, title: "필요한 사람을 세 가지로", desc: "지키는 사람·새로 여는 사람·잇는 사람이 각각 얼마나 필요한지 나눠 적어, 원하는 사람을 분명히 합니다." },
     { icon: Eye, title: "조직 상태도 함께", desc: "설문 답에서 조직이 지금 어떤 상태인지도 함께 보입니다. 좋은 조직이 좋은 사람을 만납니다." },
 ];
@@ -141,11 +141,10 @@ export default function SearchLightPage() {
                 <div className="relative flex flex-col justify-end h-screen pb-20 px-10 md:px-16" style={{ zIndex: 20, maxWidth: "640px" }}>
                     <p className="text-sm font-bold text-red-400 mb-4">써치 라이트</p>
                     <h1 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight break-keep">
-                        인재와 기업이<br />서로를 비추는 곳
+                        기업은 좋은 사람을 찾고,<br />사람은 좋은 기업을 찾는다
                     </h1>
                     <p className="text-sm md:text-base text-neutral-400 max-w-md mb-10 leading-relaxed break-keep">
-                        인재는 내 프로필에 맞는 기업을 찾고, 기업은 원하는 인재상을 찾습니다.
-                        양쪽의 빛이 겹치는 곳에서 만납니다.
+                        양쪽에서 비춘 빛이 겹치는 곳에서 만납니다.
                     </p>
                     <div className="flex flex-wrap gap-3">
                         <a
@@ -153,13 +152,13 @@ export default function SearchLightPage() {
                             className="flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            나에게 맞는 기업 찾기 <ArrowRight className="h-4 w-4" />
+                            좋은 기업 찾기 <ArrowRight className="h-4 w-4" />
                         </a>
                         <a
                             href="#company"
                             className="flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg backdrop-blur-sm border border-white/20 transition-colors"
                         >
-                            원하는 인재 찾기 · 기업 <ArrowRight className="h-4 w-4" />
+                            좋은 사람 찾기 · 기업 <ArrowRight className="h-4 w-4" />
                         </a>
                     </div>
                 </div>
@@ -171,7 +170,7 @@ export default function SearchLightPage() {
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
                         <div id="talent" className="scroll-mt-24 border border-neutral-200 rounded-2xl p-7 flex flex-col">
                             <p className="text-xs font-bold text-neutral-500 mb-2">인재</p>
-                            <h2 className="text-xl font-extrabold mb-2">나에게 맞는 기업 찾기</h2>
+                            <h2 className="text-xl font-extrabold mb-2">사람은 좋은 기업을 찾는다</h2>
                             <p className="text-sm text-neutral-600 leading-relaxed break-keep mb-6 flex-1">
                                 희망 직무 설문에 하고 싶은 일과 조건을 쓰면, 내 검사 결과와 함께 맞는 기업을 찾아 성장 기록의 채용 피드에 보여 드립니다.
                                 제안 받기를 켜 두면 조건에 맞는 기업이 먼저 면접을 제안합니다.
@@ -192,14 +191,14 @@ export default function SearchLightPage() {
                         </div>
                         <div id="company" className="scroll-mt-24 border border-neutral-200 rounded-2xl p-7 flex flex-col">
                             <p className="text-xs font-bold text-neutral-500 mb-2">기업</p>
-                            <h2 className="text-xl font-extrabold mb-2">원하는 인재 찾기</h2>
+                            <h2 className="text-xl font-extrabold mb-2">기업은 좋은 사람을 찾는다</h2>
                             <p className="text-sm text-neutral-600 leading-relaxed break-keep mb-6 flex-1">
-                                인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지 바로 보이고, 면접·인터뷰를 제안할 수 있습니다.
-                                기업 고민 설문에 조직의 속사정을 적어 주시면 더 잘 맞는 사람을 찾는 데 씁니다.
+                                인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 어떤 성향과 조건을 가진 사람들인지 인재 풀 리포트로 바로 보이고, 면접·인터뷰를 제안할 수 있습니다.
+                                개인의 검사 내용은 기업에 보이지 않습니다.
                             </p>
                             <div className="flex flex-col gap-2">
-                                <Link href="/hero/company" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
-                                    인재 찾기 <ArrowRight className="h-4 w-4 text-neutral-400" />
+                                <Link href="/hero/search-light/people" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
+                                    좋은 사람 찾기 <ArrowRight className="h-4 w-4 text-neutral-400" />
                                 </Link>
                                 <Link href="/hero/search-light/tih" className="flex items-center justify-between px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-sm font-semibold transition-colors">
                                     기업 고민 설문 쓰기 <ArrowRight className="h-4 w-4 text-neutral-400" />

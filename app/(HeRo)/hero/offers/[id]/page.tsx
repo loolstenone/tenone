@@ -2,7 +2,7 @@
 
 /**
  * 인재 — 받은 제안 상세·응답 (2026-10-13)
- * 응하기 = 이력서 선택 + (선택) HIT 결과 요약 공유 + 제3자 제공 동의(제17조, 문안 SSOT lib/hero/offers.ts)
+ * 응하기 = 이력서 선택 + 제3자 제공 동의(제17조, 문안 SSOT lib/hero/offers.ts) · HIT 검사 내용은 기업에 주지 않는다
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -32,11 +32,9 @@ export default function OfferDetailPage() {
     const { isLoading, isAuthenticated } = useAuth();
     const [item, setItem] = useState<Detail | null>(null);
     const [resumes, setResumes] = useState<{ id: string; title: string | null; is_primary: boolean }[]>([]);
-    const [hasHitA, setHasHitA] = useState(false);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [resumeId, setResumeId] = useState("");
-    const [shareHit, setShareHit] = useState(false);
     const [message, setMessage] = useState("");
     const [consent, setConsent] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -48,7 +46,6 @@ export default function OfferDetailPage() {
         const d = await res.json();
         setItem(d.item);
         setResumes(d.resumes ?? []);
-        setHasHitA(!!d.hasHitA);
         setResumeId((d.resumes ?? []).find((r: { is_primary: boolean }) => r.is_primary)?.id ?? d.resumes?.[0]?.id ?? "");
         setLoading(false);
     }, [id]);
@@ -65,7 +62,7 @@ export default function OfferDetailPage() {
             const res = await fetch(`/api/hero/offers/inbox/${id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action, resumeId, shareHit, message, consent }),
+                body: JSON.stringify({ action, resumeId, message, consent }),
             });
             const d = await res.json();
             if (!res.ok) throw new Error(d.error || "처리하지 못했습니다.");
@@ -81,7 +78,7 @@ export default function OfferDetailPage() {
     const company = o?.hero_companies;
     const today = new Date().toISOString().slice(0, 10);
     const canRespond = !!item && ["sent", "viewed"].includes(item.status) && o?.status === "sent" && (!o.respond_by || o.respond_by >= today);
-    const consentText = provisionConsentText(company?.company_name ?? "기업", shareHit);
+    const consentText = provisionConsentText(company?.company_name ?? "기업");
 
     return (
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
@@ -150,12 +147,7 @@ export default function OfferDetailPage() {
                                         </select>
                                     </div>
                                 )}
-                                {hasHitA && (
-                                    <label className="flex items-start gap-2 text-sm cursor-pointer">
-                                        <input type="checkbox" className="mt-1" checked={shareHit} onChange={e => setShareHit(e.target.checked)} />
-                                        <span>기본 성향 검사 결과 요약(유형·강점)도 함께 보냅니다 <span className="text-neutral-500">— 성장 배경 응답과 세부 점수는 보내지 않습니다</span></span>
-                                    </label>
-                                )}
+                                <p className="text-xs text-neutral-500">HIT 검사 내용은 기업에 보내지 않습니다. 이력서와 연락처만 전달됩니다.</p>
                                 <div>
                                     <p className="text-sm font-semibold mb-2">한마디 (선택)</p>
                                     <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} maxLength={1000}

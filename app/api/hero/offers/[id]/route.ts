@@ -1,6 +1,6 @@
 /**
  * 기업 — 제안 하나
- * GET   /api/hero/offers/:id  → 제안 + 응한 인재(이름·연락처·이력서·HIT 요약). 열람 기한(destroy_due) 지나면 신상 비공개
+ * GET   /api/hero/offers/:id  → 제안 + 응한 인재(이름·연락처·이력서). 열람 기한(destroy_due) 지나면 비공개 · HIT 검사 내용은 주지 않는다
  * PATCH /api/hero/offers/:id  → { action: 'cancel' } (검토 중일 때) | { action: 'close' } (발송 후 마감)
  *                               | { recipientId, companyStatus?, companyNote? } (응답자 진행 상태)
  * 응하지 않은 인재(sent·viewed·declined)는 수만 보인다
@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireMember } from "@/lib/api-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPANY_STATUS } from "@/lib/hero/offers";
-import { companyAccess, hitSummary } from "@/lib/hero/offers-server";
+import { companyAccess } from "@/lib/hero/offers-server";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     if (!offer) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { data: recs } = await sb.from("hero_offer_recipients")
-        .select("id, member_id, status, resume_id, share_hit, talent_message, responded_at, company_status, company_note, destroy_due")
+        .select("id, member_id, status, resume_id, talent_message, responded_at, company_status, company_note, destroy_due")
         .eq("offer_id", id);
     const all = recs ?? [];
     const today = new Date().toISOString().slice(0, 10);
@@ -39,17 +39,16 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     const applicants = await Promise.all(accepted.map(async r => {
         const expired = !r.member_id || (!!r.destroy_due && r.destroy_due < today); // 탈퇴(연결 끊김)·열람 기한 경과
         if (expired) return { id: r.id, expired: true, respondedAt: r.responded_at, companyStatus: r.company_status, companyNote: r.company_note };
-        const [{ data: m }, { data: resume }, hit] = await Promise.all([
+        const [{ data: m }, { data: resume }] = await Promise.all([
             sb.from("members").select("name, email, phone").eq("id", r.member_id).maybeSingle(),
             r.resume_id ? sb.from("resumes").select("title, content, updated_at").eq("id", r.resume_id).maybeSingle() : Promise.resolve({ data: null }),
-            r.share_hit ? hitSummary(sb, r.member_id) : Promise.resolve(null),
         ]);
         return {
             id: r.id, expired: false,
             name: m?.name ?? null, email: m?.email ?? null, phone: m?.phone ?? null,
             message: r.talent_message, respondedAt: r.responded_at, destroyDue: r.destroy_due,
             companyStatus: r.company_status, companyNote: r.company_note,
-            resume, hit,
+            resume,
         };
     }));
 

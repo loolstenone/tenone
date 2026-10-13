@@ -33,24 +33,6 @@ export async function candidateIds(criteria: OfferCriteria, companyId: string | 
     return ((data ?? []) as { member_id: string }[]).map(r => r.member_id);
 }
 
-/** 기업 화면에 보여 줄 HIT 요약 — 성장 배경(UF)·세부 점수는 넣지 않는다 */
-export async function hitSummary(sb: SupabaseClient, memberId: string) {
-    const { data: r } = await sb.from("hit_a_results")
-        .select("type_code, type_name_ko, mbti_type, disc_primary, ap_top3_code, created_at")
-        .eq("member_id", memberId).order("created_at", { ascending: false }).limit(1).maybeSingle();
-    if (!r) return null;
-    const { data: t } = await sb.from("hit_hero_types").select("character_name, character_label, strengths")
-        .eq("type_code", r.type_code).maybeSingle();
-    return {
-        typeCode: r.type_code as string | null,
-        typeName: (t?.character_label as string | null) ?? (r.type_name_ko as string | null),
-        characterName: (t?.character_name as string | null) ?? null,
-        strengths: Array.isArray(t?.strengths) ? (t!.strengths as unknown[]).slice(0, 3).map(s => (typeof s === "string" ? s : (s as { title?: string })?.title ?? "")).filter(Boolean) : [],
-        interest: r.ap_top3_code as string | null,
-        testedAt: r.created_at as string,
-    };
-}
-
 export const todayPlusDays = (days: number) => {
     const d = new Date();
     d.setDate(d.getDate() + days);

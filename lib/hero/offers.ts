@@ -6,6 +6,7 @@
  *  - 제안 발송은 서버 스위치 HERO_OFFERS_LIVE=true 일 때만 (offers-server `offersLive()`)
  *  - ❌ 가격·요금 문구를 화면·소스에 두지 않는다 (결제는 운영자 확인 → 사업 시작 시 PG)
  *  - 인원수는 익명 숫자만, 5명 미만은 '5명 미만'으로 (특정 방지)
+ *  - ❌ 개인의 HIT 검사 내용은 기업에 제공하지 않는다 (2026-10-13 사용자 결정) — 기업은 인원수·묶음 통계만
  */
 import { JOB_FUNCTIONS, INDUSTRIES, JOB_LEVELS } from "@/lib/badak-constants";
 
@@ -106,21 +107,21 @@ export function normalizeSettings(raw: unknown): OfferSettings {
 /* ── 동의 문안 (개인정보보호법) — 문안을 바꾸면 버전을 올린다 ── */
 
 /** 제안 받기 — 수집·이용 동의 (제15조) */
-export const SETTINGS_CONSENT_VERSION = "2026-10-13";
+export const SETTINGS_CONSENT_VERSION = "2026-10-13b"; // b: 인재 풀 리포트(익명 통계) 목적 추가
 export const SETTINGS_CONSENT = {
-    purpose: "기업의 면접·인터뷰 제안 알림",
+    purpose: "기업의 면접·인터뷰 제안 알림, 인재 풀 리포트(직무별 익명 통계) 작성",
     items: "희망 직무·산업·경력 구간·근무 형태·지역, HIT 기본 성향 검사 완료 여부",
     retention: "제안 받기를 끄거나 탈퇴할 때까지",
-    note: "기업에는 조건에 맞는 인원수만 익명으로 보이며, 이름·연락처·이력서는 내가 제안에 응할 때만 그 기업에 제공됩니다. 동의하지 않으면 제안을 받을 수 없을 뿐 다른 서비스 이용에는 영향이 없습니다.",
+    note: "기업에는 조건에 맞는 인원수와 묶음 통계만 익명으로 보이며, 이름·연락처·이력서는 내가 제안에 응할 때만 그 기업에 제공됩니다. HIT 검사 내용은 어떤 경우에도 기업에 제공하지 않습니다. 동의하지 않으면 제안을 받을 수 없을 뿐 다른 서비스 이용에는 영향이 없습니다.",
 };
 
 /** 제안에 응할 때 — 제3자 제공 동의 (제17조) */
 export const PROVISION_CONSENT_VERSION = "2026-10-13";
-export function provisionConsentText(companyName: string, shareHit: boolean) {
+export function provisionConsentText(companyName: string) {
     return {
         recipient: companyName,
         purpose: "채용 면접·인터뷰 검토 및 연락",
-        items: ["이름", "이메일", "연락처", "선택한 이력서", ...(shareHit ? ["HIT 검사 결과 요약"] : [])],
+        items: ["이름", "이메일", "연락처", "선택한 이력서"],
         retention: `채용 절차 종료 시까지 (응답일로부터 최대 ${COMPANY_VIEW_DAYS}일)`,
         note: "동의하지 않으면 이 제안에 응할 수 없습니다. 응답 후에도 철회할 수 있으며, 철회하면 기업은 더 이상 내 정보를 볼 수 없습니다.",
     };
