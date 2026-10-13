@@ -287,16 +287,19 @@ export function calcSpower8d(
   const fScore = 100 - pt.tScore;
   const iScore = 100 - pt.eScore;
   const sScore = 100 - pt.nScore;
+  // DISC는 강도(0~100, 보통=50)를 쓴다 — 비중(d·i·s·c, 합 100·평균 25)을 섞으면 전 문항 '보통'이 S-Power 42·원칙 수호 39로 깎여
+  // 누구나 '보완하면 좋음'이 되던 결함 (2026-10-13). 강도가 없는 옛 결과는 비중을 0~100 근사(×2)로 대체.
+  const disc = bt.intensity ?? { D: bt.d * 2, I: bt.i * 2, S: bt.s * 2, C: bt.c * 2 };
 
   return {
-    strategic: weighted([[bt.d, 0.30], [pt.nScore, 0.25], [pt.tScore, 0.20], [ap.E, 0.10], [ch.growth, 0.05]]),
-    execution: weighted([[bt.d, 0.30], [pt.jScore, 0.25], [sScore, 0.15], [ch.integrity, 0.15], [ap.R, 0.05]]),
-    creativity: weighted([[bt.i, 0.25], [pt.nScore, 0.25], [pScore, 0.20], [ap.A, 0.15], [ch.growth, 0.10]]),
-    interpersonal: weighted([[bt.i, 0.25], [pt.eScore, 0.20], [fScore, 0.20], [ch.relational, 0.15], [ap.S, 0.10]]),
-    analytical: weighted([[bt.c, 0.30], [pt.tScore, 0.25], [sScore, 0.15], [ap.I, 0.15], [ch.integrity, 0.10]]),
-    harmony: weighted([[bt.s, 0.30], [fScore, 0.25], [iScore, 0.15], [ch.relational, 0.15], [ch.emotional, 0.10]]),
-    breakthrough: weighted([[bt.d, 0.25], [pt.nScore, 0.20], [pScore, 0.15], [ch.growth, 0.15]]),
-    guard: weighted([[bt.s, 0.25], [bt.c, 0.20], [pt.jScore, 0.20], [sScore, 0.10], [ch.ethics, 0.15], [ap.C, 0.10]]),
+    strategic: weighted([[disc.D, 0.30], [pt.nScore, 0.25], [pt.tScore, 0.20], [ap.E, 0.10], [ch.growth, 0.05]]),
+    execution: weighted([[disc.D, 0.30], [pt.jScore, 0.25], [sScore, 0.15], [ch.integrity, 0.15], [ap.R, 0.05]]),
+    creativity: weighted([[disc.I, 0.25], [pt.nScore, 0.25], [pScore, 0.20], [ap.A, 0.15], [ch.growth, 0.10]]),
+    interpersonal: weighted([[disc.I, 0.25], [pt.eScore, 0.20], [fScore, 0.20], [ch.relational, 0.15], [ap.S, 0.10]]),
+    analytical: weighted([[disc.C, 0.30], [pt.tScore, 0.25], [sScore, 0.15], [ap.I, 0.15], [ch.integrity, 0.10]]),
+    harmony: weighted([[disc.S, 0.30], [fScore, 0.25], [iScore, 0.15], [ch.relational, 0.15], [ch.emotional, 0.10]]),
+    breakthrough: weighted([[disc.D, 0.25], [pt.nScore, 0.20], [pScore, 0.15], [ch.growth, 0.15]]),
+    guard: weighted([[disc.S, 0.25], [disc.C, 0.20], [pt.jScore, 0.20], [sScore, 0.10], [ch.ethics, 0.15], [ap.C, 0.10]]),
   };
 }
 
