@@ -135,7 +135,9 @@
 - **Ten:One 노출**: 결과 화면 아래 'Presented by Ten:One™' 한 곳만 — 광고처럼 보이지 않게
 - **규칙**: 입력은 저장하지 않는다(필요하면 URL 코드로 결과 재현) · 실존 기업·인물·제품 이름, 정부·공공기관 사칭 금지 · "재미로 보는 풍자, 실제와 무관" 고지 · 신상 공개형 금지 · 결과 공유 미리보기 이미지는 `opengraph-image.tsx` + `lib/projects/og-font.ts`(한글 글꼴)
 - **외부 작업** (서브도메인마다): Vercel › Domains에 `{프로젝트}.tenone.biz` 추가 → 가비아 DNS에 Vercel 권장 CNAME (tenone.biz 네임서버 = 가비아)
-- **1호 — AI 면접 예행연습** `ai-interview.tenone.biz` (`app/(Projects)/interview`, `lib/projects/interview.ts`): '인간 지원자 사전 검수' — AI 면접관 HR-0이 7문항을 묻고 고른 답을 조합해 결과 통지서(판정 5종·판정 사유 3·AI 대체 가능성). 결과 주소 `/r/{코드 7자}`. 판정이 고르게 나오도록 동점 우선순위 조정(전 16,384 조합 점검)
+- **1호 — AI 면접 예행연습** `ai-interview.tenone.biz` (`app/(Projects)/interview`, `lib/projects/interview.ts`): '인간 지원자 사전 검수' — AI 면접관 HR-0이 7문항을 묻고 고른 답을 조합해 결과 통지서(판정 5종·판정 사유 3·AI 대체 가능성). 결과 주소 `/r/{코드 7자}`. 판정이 고르게 나오도록 동점 우선순위 조정(전 16,384 조합 점검). **2026-10-14 공개** (Vercel 연결·인증서·결과 페이지·공유 이미지 실서버 확인). 남은 것: Works 게시글 · 판정 사유를 7문항 전체에서 고를지(통지서 문구 245 → 더 다양하게) 결정
+  - ❌ 공유 이미지 본문 폭을 도장 영역까지 넓히기 — 긴 도장('예비 999번')이 문장을 덮는다 (본문 maxWidth 640)
+- **푸터 (2026-10-13)**: 슬로건 '기획하고, 연결하고, 확장한다.' · Universe 열 = 주력 개발 사이트(Badak·MADLeague·MADLeap·HeRo) — `features/tenone/PublicFooter.tsx`
 
 ## 개발 주의사항
 

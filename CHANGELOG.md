@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-10-13 ~ 10-14 (세션 172) — HeRo 써치 라이트·HIT 본인 원칙·팀 진단 · Ten:One™ 프로젝트 1호
+
+### 장소·운영
+
+- 워크트리 `261013-work-start-c1f59e`, "배포해" push 1회(`38e1469c` READY) + 작업 종료 push
+- 운영 DB (MCP): `hero_offer_settings_share_traits` · `hero_team_survey` · `hero_journey_stage_offers`
+- Vercel: `ai-interview.tenone.biz` tenone 프로젝트 연결(사용자) · 가비아 CNAME
+
+### 결정 (사용자)
+
+- 인재 찾기 = 써치 라이트("기업은 좋은 사람을 찾고, 사람은 좋은 기업을 찾는다"), 인재 풀 리포트는 써치 라이트 안에서 자동, 헤드헌팅 삭제
+- 개인 HIT 결과는 개인만(자기 개발·성장), 기업에는 원하는 성향의 사람이 어느 정도 있는지만 · 직원 열람은 지금처럼
+- 처리방침 일반/기업 회원 분리, 개발 중이라 7일 전 공지 없음
+- 팀 진단 유지 = 팀장 신청 + 팀원 동시 설문(말하기 껄끄러운 것) + 팀 빌딩
+- 매칭 인박스는 받은 제안으로 통합 · Mindle 기업 정보는 Mindle 작업 때
+- TenOne 푸터 슬로건·Universe 열 정리 · YouInOne 유지 · 사회 이슈 프로젝트는 tenone.biz 서브도메인 + Works 기록
+- 프로젝트 1호 AI 면접 예행연습, 주소 ai-interview
+
+### 변경 내역
+
+- HeRo: `app/(HeRo)/hero/search-light/*` · `app/api/hero/talent-pool` · `features/hero/report/TalentPoolReport.tsx` · `lib/hero/group-stats.ts`(TRAIT_FLOOR·traitEstimate) · `lib/hero/offers.ts`·`/api/hero/offers/settings`(share_traits) · `lib/hero/team-survey.ts`(신규)·`team-report.ts` · `app/api/hero/team/*` · `app/(HeRo)/hero/team/*` · `features/hero/JourneyWorkspace.tsx`(받은 제안 탭) · 삭제: `MatchingInbox`·`/api/hero/matching/inbox`·`[id]/report`
+- 처리방침 `app/(TenOne)/privacy/page.tsx` · `docs/Data_Lifecycle.md`
+- TenOne: `features/tenone/PublicFooter.tsx`
+- 프로젝트: `app/(Projects)/interview/*` · `lib/projects/interview.ts`·`og-font.ts` · `features/projects/interview/*` · `lib/domain-registry.ts`
+- SQL: `sql/hero-offers-2026-10.sql` · `sql/hero-team-diagnosis-2026-10.sql` · `sql/hero-journey-stage-offers-2026-10.sql`
+- 문서: `CLAUDE.md` 부록 G.2·§2.5 · `app/(HeRo)/CLAUDE.md` 최상위 원칙 · `app/(TenOne)/CLAUDE.md` 프로젝트 섹션
+
+### 발견·교훈
+
+- Vercel MCP는 조회 전용 — 도메인 추가는 403. 문서에 '추가 가능'으로 적었다가 정정 (확인 전 문서화 금지)
+- DNS만 맞추고 프로젝트에 연결 안 하면 인증서가 안 나와 접속 자체 실패
+- 판정 동점 우선순위가 한쪽(AI)으로 쏠렸다 — 전 조합(16,384)을 돌려 분포를 보고 조정
+- 공유 이미지는 실서버에서 내려받아 눈으로 확인 — 긴 도장이 문장을 덮는 것은 실제 렌더에서만 보였다
+
+---
+
 ## 2026-10-13 (세션 171) — HeRo HIT 단계별 고도화 · 한국어 우선 용어·문구·UI 정비
 
 ### 장소·운영
