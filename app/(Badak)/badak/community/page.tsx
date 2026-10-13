@@ -310,7 +310,7 @@ export default function CommunityPage() {
 
           <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-white/30">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[9px] font-bold text-white/50">
+              <div className="flex h-5 w-5 items-center justify-center rounded-none bg-white/10 text-[9px] font-bold text-white/50">
                 {author?.display_name?.charAt(0) || '?'}
               </div>
               <span>{author?.display_name || '익명'}</span>
@@ -333,20 +333,20 @@ export default function CommunityPage() {
 
           {/* 삭제 확인 배너 */}
           {pendingDeletePostId === selectedPost.id && (
-            <div className="mt-3 rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)' }}>
-              <p className="mb-1.5 text-[12px] font-semibold text-red-400/90">이 글을 삭제하시겠습니까?</p>
+            <div className="mt-3 rounded-xs px-4 py-3" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)' }}>
+              <p className="mb-1.5 text-[12px] font-bold text-red-400/90">이 글을 삭제하시겠습니까?</p>
               <p className="mb-3 text-[11px] text-white/35">삭제된 글은 복구할 수 없습니다. 댓글도 함께 삭제됩니다.</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleDeletePost(selectedPost.id)}
-                  className="flex-1 rounded-lg py-1.5 text-[11px] font-semibold transition-colors"
+                  className="flex-1 rounded-xs py-1.5 text-[11px] font-bold transition-colors"
                   style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171' }}
                 >
                   삭제
                 </button>
                 <button
                   onClick={() => setPendingDeletePostId(null)}
-                  className="rounded-lg border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
+                  className="rounded-xs border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
                 >
                   취소
                 </button>
@@ -357,7 +357,7 @@ export default function CommunityPage() {
           {selectedPost.tags?.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {selectedPost.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-white/40">#{tag}</span>
+                <span key={tag} className="rounded-none bg-white/8 px-2 py-0.5 text-[10px] text-white/40">#{tag}</span>
               ))}
             </div>
           )}
@@ -378,10 +378,10 @@ export default function CommunityPage() {
             <h3 className="mb-3 text-sm font-bold text-white/60">댓글 {comments.length}</h3>
             <div className="space-y-2">
               {comments.map(c => (
-                <div key={c.id} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <div key={c.id} className="rounded-xs p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs text-white/30">
-                      <span className="font-medium text-white/50">{c.member?.display_name || '익명'}</span>
+                      <span className="font-normal text-white/50">{c.member?.display_name || '익명'}</span>
                       <span>{timeAgo(c.created_at)}</span>
                     </div>
                     {user?.id === c.user_id && (
@@ -400,10 +400,10 @@ export default function CommunityPage() {
                   onChange={e => setNewComment(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSubmitComment()}
                   placeholder="댓글 입력"
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30"
+                  className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30"
                 />
                 <button onClick={handleSubmitComment} disabled={!newComment.trim() || submittingComment}
-                  className="rounded-lg p-2.5 disabled:opacity-30" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                  className="rounded-xs p-2.5 disabled:opacity-30" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                   <Send className="h-4 w-4" />
                 </button>
               </div>
@@ -430,10 +430,10 @@ export default function CommunityPage() {
             const isActive = activeBoard === board.key;
             return (
               <button key={board.key} onClick={() => setActiveBoard(board.key)}
-                className="flex-1 rounded-xl border px-3 py-3 text-left transition-all"
+                className="flex-1 rounded-xs border px-3 py-3 text-left transition-all"
                 style={{ background: isActive ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.03)', borderColor: isActive ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.06)' }}>
                 <div className="mb-1" style={{ color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>{BOARD_ICONS[board.key]}</div>
-                <div className="text-xs font-semibold" style={{ color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.7)' }}>{board.label}</div>
+                <div className="text-xs font-bold" style={{ color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.7)' }}>{board.label}</div>
                 <div className="text-[10px]" style={{ color: isActive ? 'rgba(255,217,61,0.5)' : 'rgba(255,255,255,0.25)' }}>{counts[board.key]}개 글</div>
               </button>
             );
@@ -447,10 +447,10 @@ export default function CommunityPage() {
             <span className="text-xs">{activeInfo.desc}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowSearch(!showSearch)} className="rounded-lg p-1.5 text-white/30 hover:bg-white/5 hover:text-white/50">
+            <button onClick={() => setShowSearch(!showSearch)} className="rounded-xs p-1.5 text-white/30 hover:bg-white/5 hover:text-white/50">
               <Search className="h-4 w-4" />
             </button>
-            <button onClick={handleWrite} className="flex items-center gap-1.5 rounded-lg border-none px-3 py-1.5 text-xs font-semibold transition-colors"
+            <button onClick={handleWrite} className="flex items-center gap-1.5 rounded-xs border-none px-3 py-1.5 text-xs font-bold transition-colors"
               style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
               <PenLine className="h-3.5 w-3.5" /> 글쓰기
             </button>
@@ -465,7 +465,7 @@ export default function CommunityPage() {
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="제목, 내용, 태그 검색..."
               autoFocus
-              className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+              className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
             />
           </div>
         )}
@@ -473,7 +473,7 @@ export default function CommunityPage() {
         {/* 게시글 목록 */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+            <span className="text-sm text-mute">불러오는 중</span>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="py-20 text-center">
@@ -487,10 +487,10 @@ export default function CommunityPage() {
               const author = post.member;
               return (
                 <button key={post.id} onClick={() => openPost(post)}
-                  className="group w-full rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.06]">
+                  className="group w-full rounded-xs border border-white/8 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.06]">
                   {post.tags?.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-1.5">
-                      {post.tags.map(tag => <span key={tag} className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-white/40">#{tag}</span>)}
+                      {post.tags.map(tag => <span key={tag} className="rounded-none bg-white/8 px-2 py-0.5 text-[10px] text-white/40">#{tag}</span>)}
                     </div>
                   )}
                   {post.board === 'review' && post.rating && (
@@ -500,17 +500,17 @@ export default function CommunityPage() {
                       ))}
                     </div>
                   )}
-                  <h3 className="mb-1 text-sm font-semibold text-white/90 group-hover:text-white">{post.title}</h3>
+                  <h3 className="mb-1 text-sm font-bold text-white/90 group-hover:text-white">{post.title}</h3>
                   <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-white/40">{post.content}</p>
                   {post.board === 'proposal' && post.target_members && (
                     <div className="mb-3 flex items-center justify-between text-[10px]">
                       <span className="text-white/30">목표 인원</span>
-                      <span className="font-medium text-white/50">{post.target_members}명</span>
+                      <span className="font-normal text-white/50">{post.target_members}명</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[9px] font-bold text-white/50">{author?.display_name?.charAt(0) || '?'}</div>
+                      <div className="flex h-5 w-5 items-center justify-center rounded-none bg-white/10 text-[9px] font-bold text-white/50">{author?.display_name?.charAt(0) || '?'}</div>
                       <span className="text-[11px] text-white/50">{author?.display_name || '익명'}</span>
                       {author?.job_function && <><span className="text-[10px] text-white/20">·</span><span className="text-[10px] text-white/25">{author.job_function}</span></>}
                     </div>
@@ -531,18 +531,18 @@ export default function CommunityPage() {
       {/* 글쓰기/수정 모달 */}
       {showWrite && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-white/10 bg-[#1e1e38] p-5" style={{ maxHeight: '85vh', overflowY: 'auto' }}>
+          <div className="w-full max-w-lg rounded-t-xs sm:rounded-xs border border-white/10 bg-[#1e1e38] p-5" style={{ maxHeight: '85vh', overflowY: 'auto' }}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-bold text-white/80">{editingPost ? '글 수정' : `${activeInfo.label} 글쓰기`}</h2>
               <button onClick={() => { setShowWrite(false); setEditingPost(null); }} className="text-white/30 hover:text-white/50"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
               <input value={writeTitle} onChange={e => setWriteTitle(e.target.value)} placeholder="제목"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
               <textarea value={writeContent} onChange={e => setWriteContent(e.target.value)} placeholder="내용을 입력하세요" rows={6}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
               <input value={writeTags} onChange={e => setWriteTags(e.target.value)} placeholder="태그 (쉼표로 구분)"
-                className="w-full rounded-xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30" />
+                className="w-full rounded-xs border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30" />
               {activeBoard === 'review' && (
                 <div>
                   <label className="mb-1.5 block text-xs text-white/40">모임 평점</label>
@@ -557,10 +557,10 @@ export default function CommunityPage() {
               )}
               {activeBoard === 'proposal' && (
                 <input value={writeTarget} onChange={e => setWriteTarget(e.target.value)} placeholder="목표 인원수" type="number"
-                  className="w-full rounded-xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30" />
+                  className="w-full rounded-xs border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30" />
               )}
               <button onClick={handleSubmitPost} disabled={!writeTitle.trim() || !writeContent.trim() || submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-30"
+                className="flex w-full items-center justify-center gap-2 rounded-xs py-3 text-sm font-bold transition-all disabled:opacity-30"
                 style={{ background: writeTitle.trim() && writeContent.trim() ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)', color: writeTitle.trim() && writeContent.trim() ? '#1a1a2e' : 'rgba(255,255,255,0.2)' }}>
                 <Send className="h-4 w-4" />
                 {submitting ? '등록 중...' : editingPost ? '수정하기' : '등록하기'}

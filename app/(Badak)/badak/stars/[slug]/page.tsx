@@ -20,7 +20,7 @@ export default function StarDetailPage() {
   }, [slug]);
 
   if (loading) {
-    return <div className="flex min-h-[calc(100vh-56px)] items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-blue-600 rounded-full animate-spin" /></div>;
+    return <div className="flex min-h-[calc(100vh-56px)] items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
   }
 
   if (!star) {
@@ -40,7 +40,7 @@ export default function StarDetailPage() {
         </Link>
 
         {star.coverImageUrl && (
-          <div className="mb-6 rounded-2xl overflow-hidden">
+          <div className="mb-6 rounded-xs overflow-hidden">
             <img src={star.coverImageUrl} alt="" className="w-full" />
           </div>
         )}
@@ -54,7 +54,7 @@ export default function StarDetailPage() {
 
         {star.featuredProfile && (
           <div className="mt-10 border-t border-neutral-200 pt-8">
-            <h3 className="text-sm font-semibold text-neutral-500 mb-3">이 글의 주인공</h3>
+            <h3 className="text-sm font-bold text-neutral-500 mb-3">이 글의 주인공</h3>
             <ProfileCard profile={star.featuredProfile} variant="compact" />
           </div>
         )}

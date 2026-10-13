@@ -35,7 +35,7 @@ export default async function EditPage({ params }: PageProps) {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="text-3xl font-black">접근 권한이 없습니다</h1>
+          <h1 className="text-3xl font-bold">접근 권한이 없습니다</h1>
           <p className="mt-3 text-neutral-400">본인 글만 편집할 수 있습니다.</p>
         </div>
       </div>
@@ -45,7 +45,7 @@ export default async function EditPage({ params }: PageProps) {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="text-3xl font-black">편집 불가</h1>
+          <h1 className="text-3xl font-bold">편집 불가</h1>
           <p className="mt-3 text-neutral-400">검토 중이거나 이미 발행된 글은 편집할 수 없습니다.</p>
           <Link href="/madleague/madzine/write" className="mt-8 inline-block border border-neutral-700 hover:border-white px-6 py-3 text-white font-bold">돌아가기</Link>
         </div>
@@ -66,7 +66,7 @@ export default async function EditPage({ params }: PageProps) {
             <strong>반려 사유:</strong> {a.reject_reason}
           </div>
         )}
-        <h1 className="text-3xl font-black tracking-tight mb-8">아티클 편집</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">아티클 편집</h1>
         <ArticleEditor initial={{
           id: a.id, title: a.title, subtitle: a.subtitle, content: a.content,
           category: a.category, thumbnail_url: a.thumbnail_url, tags: a.tags,

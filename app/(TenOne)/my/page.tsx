@@ -50,7 +50,7 @@ export default function MyPage() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--tn-bg)" }}>
-                <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
+                <span className="text-sm text-mute">불러오는 중</span>
             </div>
         );
     }
@@ -93,7 +93,7 @@ export default function MyPage() {
                             <tab.icon className="h-4 w-4" />
                             {tab.label}
                             {tab.count !== undefined && (
-                                <span className="text-xs px-1.5 py-0.5 rounded-full"
+                                <span className="text-xs px-1.5 py-0.5 rounded-none"
                                     style={{ backgroundColor: "var(--tn-bg-alt)", color: "var(--tn-text-muted)" }}>
                                     {tab.count}
                                 </span>
@@ -114,7 +114,7 @@ export default function MyPage() {
                             myPosts.map(post => (
                                 <div key={post.id} className="py-4 flex items-center justify-between group cursor-pointer hover:opacity-80 transition-opacity">
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm truncate">{post.title}</p>
+                                        <p className="font-normal text-sm truncate">{post.title}</p>
                                         <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: "var(--tn-text-muted)" }}>
                                             <span>{post.board}</span>
                                             <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {post.view_count}</span>
@@ -140,7 +140,7 @@ export default function MyPage() {
                 {/* 설정 */}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <Link href="/profile" className="flex items-center justify-between p-4 rounded-lg transition-colors hover:opacity-80"
+                        <Link href="/profile" className="flex items-center justify-between p-4 rounded-xs transition-colors hover:opacity-80"
                             style={{ backgroundColor: "var(--tn-bg-alt)" }}>
                             <div className="flex items-center gap-3">
                                 <User className="h-5 w-5" style={{ color: "var(--tn-text-muted)" }} />
@@ -149,7 +149,7 @@ export default function MyPage() {
                             <ChevronRight className="h-4 w-4" style={{ color: "var(--tn-text-muted)" }} />
                         </Link>
                         <button onClick={() => { logout(); router.push("/"); }}
-                            className="w-full flex items-center gap-3 p-4 rounded-lg text-red-500 transition-colors hover:opacity-80"
+                            className="w-full flex items-center gap-3 p-4 rounded-xs text-red-500 transition-colors hover:opacity-80"
                             style={{ backgroundColor: "var(--tn-bg-alt)" }}>
                             <LogOut className="h-5 w-5" />
                             <span className="text-sm">로그아웃</span>

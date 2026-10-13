@@ -44,22 +44,22 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
 
     // 테마별 클래스
     const cardCls = isLight
-        ? "rounded-2xl border border-neutral-200 bg-white overflow-hidden mb-8 shadow-sm"
-        : "rounded-2xl border border-neutral-700/50 bg-neutral-900/50 overflow-hidden mb-8";
+        ? "rounded-xs border border-neutral-200 bg-white overflow-hidden mb-8"
+        : "rounded-xs border border-neutral-700/50 bg-neutral-900/50 overflow-hidden mb-8";
     const nameCls = isLight ? "text-lg font-bold text-neutral-900 truncate" : "text-lg font-bold text-white truncate";
     const emailCls = isLight ? "text-sm text-neutral-500 truncate" : "text-sm text-neutral-400 truncate";
     const handleCls = isLight ? "text-xs text-neutral-400 hover:text-neutral-700 transition-colors shrink-0" : "text-xs text-neutral-500 hover:text-neutral-300 transition-colors shrink-0";
     const handleEmptyCls = isLight ? "text-xs text-neutral-500 hover:text-amber-600 transition-colors shrink-0 border border-neutral-300 rounded px-1.5 py-0.5" : "text-xs text-neutral-600 hover:text-amber-400 transition-colors shrink-0 border border-neutral-700 rounded px-1.5 py-0.5";
-    const staffBadgeCls = isLight ? "text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-900/8 text-neutral-700" : "text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white";
+    const staffBadgeCls = isLight ? "text-xs font-bold px-2 py-0.5 rounded-none bg-neutral-900/8 text-neutral-700" : "text-xs font-bold px-2 py-0.5 rounded-none bg-white/10 text-white";
     const companyCls = isLight ? "text-xs text-neutral-500 flex items-center gap-1" : "text-xs text-neutral-500 flex items-center gap-1";
-    const infoBoxCls = isLight ? "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-50 mb-4" : "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-800/50 mb-4";
-    const childrenBoxCls = isLight ? "p-4 rounded-xl bg-neutral-50 mb-4" : "p-4 rounded-xl bg-neutral-800/50 mb-4";
-    const universeLinkCls = isLight ? "flex items-center gap-3 p-3 rounded-xl border border-neutral-200 hover:border-neutral-400 transition-colors group" : "flex items-center gap-3 p-3 rounded-xl border border-neutral-700/50 hover:border-neutral-500 transition-colors group";
+    const infoBoxCls = isLight ? "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xs bg-neutral-50 mb-4" : "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xs bg-neutral-800/50 mb-4";
+    const childrenBoxCls = isLight ? "p-4 rounded-xs bg-neutral-50 mb-4" : "p-4 rounded-xs bg-neutral-800/50 mb-4";
+    const universeLinkCls = isLight ? "flex items-center gap-3 p-3 rounded-xs border border-neutral-200 hover:border-neutral-400 transition-colors group" : "flex items-center gap-3 p-3 rounded-xs border border-neutral-700/50 hover:border-neutral-500 transition-colors group";
     const universeIconCls = isLight ? "h-4 w-4 text-neutral-400 group-hover:text-neutral-700 transition-colors" : "h-4 w-4 text-neutral-500 group-hover:text-white transition-colors";
-    const universePrimaryCls = isLight ? "text-xs font-medium text-neutral-600 group-hover:text-neutral-900 transition-colors" : "text-xs font-medium text-neutral-400 group-hover:text-white transition-colors";
+    const universePrimaryCls = isLight ? "text-xs font-normal text-neutral-600 group-hover:text-neutral-900 transition-colors" : "text-xs font-normal text-neutral-400 group-hover:text-white transition-colors";
     const universeSecondaryCls = isLight ? "text-xs text-neutral-400" : "text-xs text-neutral-600";
     const universeChevronCls = isLight ? "h-3.5 w-3.5 text-neutral-400 group-hover:text-neutral-600 transition-colors" : "h-3.5 w-3.5 text-neutral-600 group-hover:text-neutral-400 transition-colors";
-    const deleteBtnCls = isLight ? "text-xs text-neutral-400 hover:text-rose-500 transition-colors flex items-center gap-1 ml-auto" : "text-xs text-neutral-600 hover:text-rose-400 transition-colors flex items-center gap-1 ml-auto";
+    const deleteBtnCls = isLight ? "text-xs text-neutral-400 hover:text-state-bad transition-colors flex items-center gap-1 ml-auto" : "text-xs text-neutral-600 hover:text-state-bad transition-colors flex items-center gap-1 ml-auto";
     const router = useRouter();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState('');
@@ -103,9 +103,9 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
                     {/* 아바타 */}
                     {user.avatarUrl ? (
                         <Image src={user.avatarUrl} alt={user.name || ''} width={72} height={72}
-                            className="w-[72px] h-[72px] rounded-full object-cover shrink-0" />
+                            className="w-[72px] h-[72px] rounded-none object-cover shrink-0" />
                     ) : (
-                        <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+                        <div className="w-[72px] h-[72px] rounded-none flex items-center justify-center text-xl font-bold shrink-0"
                             style={{ backgroundColor: accentColor + '20', color: accentColor }}>
                             {initials}
                         </div>
@@ -129,7 +129,7 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
                                 <span className={staffBadgeCls}>Staff</span>
                             )}
                             {siteBadge && (
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-none"
                                     style={{ backgroundColor: accentColor + '20', color: accentColor }}>
                                     {siteBadge}
                                 </span>
@@ -185,33 +185,33 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
             {/* 탈퇴 확인 모달 */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                    <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 w-full max-w-sm">
+                    <div className="bg-neutral-900 border border-neutral-700 rounded-xs p-6 w-full max-w-sm">
                         <h3 className="text-base font-bold text-white mb-1">계정 탈퇴</h3>
                         <p className="text-xs text-neutral-400 mb-4">
                             탈퇴하면 모든 데이터가 삭제되며 복구할 수 없습니다.<br />
-                            확인하려면 아래에 <span className="text-white font-semibold">탈퇴</span>를 입력하세요.
+                            확인하려면 아래에 <span className="text-white font-bold">탈퇴</span>를 입력하세요.
                         </p>
                         <input
                             type="text"
                             value={deleteConfirm}
                             onChange={e => setDeleteConfirm(e.target.value)}
                             placeholder="탈퇴"
-                            className="w-full px-3 py-2 text-sm bg-neutral-800 border border-neutral-600 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-rose-500 mb-3"
+                            className="w-full px-3 py-2 text-sm bg-neutral-800 border border-neutral-600 rounded-xs text-white placeholder-neutral-600 focus:outline-none focus:border-state-bad mb-3"
                         />
                         {deleteError && (
-                            <p className="text-xs text-rose-400 mb-3">{deleteError}</p>
+                            <p className="text-xs text-state-bad mb-3">{deleteError}</p>
                         )}
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="flex-1 py-2 text-sm text-neutral-400 border border-neutral-700 rounded-lg hover:border-neutral-500 transition-colors"
+                                className="flex-1 py-2 text-sm text-neutral-400 border border-neutral-700 rounded-xs hover:border-neutral-500 transition-colors"
                             >
                                 취소
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={deleteConfirm !== '탈퇴' || deleting}
-                                className="flex-1 py-2 text-sm font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white rounded-lg transition-colors"
+                                className="flex-1 py-2 text-sm font-bold bg-state-bad hover:opacity-90 disabled:opacity-40 text-white rounded-xs transition-colors"
                             >
                                 {deleting ? '처리 중...' : '탈퇴하기'}
                             </button>
@@ -224,7 +224,7 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
 }
 
 function InfoCell({ label, value, theme = "dark" }: { label: string; value: string; theme?: "light" | "dark" }) {
-    const labelCls = theme === "light" ? "text-xs font-medium text-neutral-500 mb-0.5" : "text-xs font-medium text-neutral-500 mb-0.5";
+    const labelCls = theme === "light" ? "text-xs font-normal text-neutral-500 mb-0.5" : "text-xs font-normal text-neutral-500 mb-0.5";
     const valueCls = theme === "light" ? "text-sm text-neutral-900" : "text-sm text-neutral-300";
     return (
         <div>

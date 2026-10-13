@@ -41,7 +41,7 @@ function Section({ eyebrow, title, children, tinted }: { eyebrow: string; title:
     <section className={tinted ? 'bg-neutral-950 border-y border-neutral-900' : ''}>
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">{eyebrow}</div>
-        <h2 className="text-3xl sm:text-4xl font-black mb-10">{title}</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-10">{title}</h2>
         {children}
       </div>
     </section>
@@ -153,7 +153,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
         {canManage && (
           <Link
             href={`/madleague/clubs/${slug}/manage`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:border-neutral-400 hover:text-white transition"
+            className="inline-flex items-center gap-1.5 text-xs font-normal px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:border-neutral-400 hover:text-white transition"
           >
             <Settings className="h-3.5 w-3.5" /> 동아리 관리
           </Link>
@@ -171,13 +171,13 @@ export default async function ClubDetailPage({ params }: PageProps) {
           ) : (
             <div className="h-20 w-20 mb-8" style={{ backgroundColor: accent }} />
           )}
-          <h1 className="text-5xl sm:text-7xl font-black tracking-tight">{club.name}</h1>
+          <h1 className="text-5xl sm:text-7xl font-bold tracking-tight">{club.name}</h1>
           {profile.full_name && <p className="mt-3 text-lg text-neutral-300">{profile.full_name}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-neutral-400">
             <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" />{club.region}</span>
             {profile.universities && <span className="text-sm">{profile.universities}</span>}
           </div>
-          {profile.slogan && <p className="mt-10 text-2xl sm:text-3xl font-black break-keep">“{profile.slogan}”</p>}
+          {profile.slogan && <p className="mt-10 text-2xl sm:text-3xl font-bold break-keep">“{profile.slogan}”</p>}
           {club.description && <p className="mt-6 max-w-2xl text-lg text-neutral-300 leading-relaxed break-keep">{club.description}</p>}
           <div className="mt-8 flex flex-wrap gap-3">
             {recruitOpen && (
@@ -197,7 +197,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
             {stats.map(s => (
               <div key={s.label}>
                 <div className="text-xs font-bold tracking-widest text-neutral-500 mb-2">{s.label}</div>
-                <div className="text-2xl sm:text-3xl font-black break-keep">{s.value}</div>
+                <div className="text-2xl sm:text-3xl font-bold break-keep">{s.value}</div>
               </div>
             ))}
           </div>
@@ -221,7 +221,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
                   )}
                   <div className="p-5 flex-1">
                     <div className="text-xs text-neutral-500">{new Date(n.created_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                    <h3 className="mt-2 text-lg font-black break-keep">{n.title}</h3>
+                    <h3 className="mt-2 text-lg font-bold break-keep">{n.title}</h3>
                     {n.content && <p className="mt-2 text-sm text-neutral-400 leading-relaxed whitespace-pre-line break-keep line-clamp-4">{n.content}</p>}
                   </div>
                 </article>
@@ -239,7 +239,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
               {profile.values.map(v => (
                 <div key={v.title} className="border border-neutral-900 bg-neutral-950 p-6">
-                  <div className="text-xl font-black">{v.title}</div>
+                  <div className="text-xl font-bold">{v.title}</div>
                   {v.desc && <p className="mt-3 text-sm text-neutral-400 leading-relaxed break-keep">{v.desc}</p>}
                 </div>
               ))}
@@ -290,7 +290,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {profile.teams.map(t => (
               <div key={t.name} className="border border-neutral-900 bg-neutral-950 p-6">
-                <div className="text-xl font-black" style={{ color: accent }}>{t.name}</div>
+                <div className="text-xl font-bold" style={{ color: accent }}>{t.name}</div>
                 {t.desc && <p className="mt-3 text-sm text-neutral-300 leading-relaxed whitespace-pre-line break-keep">{t.desc}</p>}
                 {t.fit && <p className="mt-4 text-xs text-neutral-500">{t.fit}</p>}
               </div>
@@ -306,7 +306,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {profile.programs.map(p => (
                 <div key={p.title} className="border border-neutral-900 bg-black p-6">
-                  <div className="text-lg font-black">{p.title}</div>
+                  <div className="text-lg font-bold">{p.title}</div>
                   {p.desc && <p className="mt-2 text-sm text-neutral-400 leading-relaxed whitespace-pre-line break-keep">{p.desc}</p>}
                 </div>
               ))}
@@ -336,7 +336,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
               <div key={i} className="border border-neutral-900 bg-neutral-950 p-6 flex flex-col">
                 <div className="text-xs text-neutral-500">{[p.year, p.type].filter(Boolean).join(' · ')}</div>
                 <div className="mt-2 text-sm font-bold text-neutral-300">{p.client}</div>
-                <div className="mt-1 text-lg font-black break-keep">{p.title}</div>
+                <div className="mt-1 text-lg font-bold break-keep">{p.title}</div>
                 {p.result && <div className="mt-3 text-sm font-bold" style={{ color: accent }}>{p.result}</div>}
                 {p.link && (
                   <a href={p.link} target="_blank" rel="noopener noreferrer" className="mt-auto pt-4 inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white">
@@ -405,7 +405,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
           <div className="mx-auto max-w-7xl px-6 py-16 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-end">
             <div>
               <div className="text-sm font-bold tracking-widest text-white/80">RECRUIT</div>
-              <div className="mt-2 text-3xl font-black">{recruitOpen ? '부원 모집 중' : '부원 모집'}{recruitPeriod ? ` · ${recruitPeriod}` : ''}</div>
+              <div className="mt-2 text-3xl font-bold">{recruitOpen ? '부원 모집 중' : '부원 모집'}{recruitPeriod ? ` · ${recruitPeriod}` : ''}</div>
               {profile.recruit?.target && <p className="mt-4 max-w-2xl text-white/90 break-keep"><span className="font-bold mr-2">대상</span>{profile.recruit?.target}</p>}
               {profile.recruit?.process && <p className="mt-2 max-w-2xl text-white/90 whitespace-pre-line break-keep"><span className="font-bold mr-2">절차</span>{profile.recruit?.process}</p>}
               {!recruitOpen && <p className="mt-4 text-sm text-neutral-400">지금은 모집 기간이 아닙니다. 아래 채널에서 다음 모집 소식을 확인하세요.</p>}
@@ -443,7 +443,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
         <div className="mx-auto max-w-7xl px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="text-sm font-bold tracking-widest text-neutral-500">{club.name} 부원이라면</div>
-            <div className="mt-2 text-2xl sm:text-3xl font-black">매드리거로 등록하세요</div>
+            <div className="mt-2 text-2xl sm:text-3xl font-bold">매드리거로 등록하세요</div>
           </div>
           <Link
             href={`/madleague/apply?club=${club.slug}`}

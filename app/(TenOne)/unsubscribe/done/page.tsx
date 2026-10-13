@@ -10,7 +10,7 @@ export default function UnsubscribeDonePage() {
         언제든지 다시 구독하실 수 있습니다.
       </p>
       <a href="/"
-        className="mt-8 inline-block bg-black text-white text-sm font-medium px-6 py-3 hover:bg-neutral-800 transition-colors">
+        className="mt-8 inline-block bg-black text-white text-sm font-normal px-6 py-3 hover:bg-neutral-800 transition-colors">
         홈으로 →
       </a>
     </div>

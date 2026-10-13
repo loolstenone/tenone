@@ -20,9 +20,9 @@ export default function UnderConstruction({
     <div className="flex min-h-screen flex-col bg-[#0f0f17]">
       {/* 히어로 섹션 */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5">
-          <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
-          <span className="text-[11px] font-medium tracking-widest text-white/40">Ten:One™ Universe</span>
+        <div className="mb-6 inline-flex items-center gap-2 rounded-none border border-white/10 px-4 py-1.5">
+          <div className="h-1.5 w-1.5 rounded-none" style={{ backgroundColor: accentColor }} />
+          <span className="text-[11px] font-normal tracking-widest text-white/40">Ten:One™ Universe</span>
         </div>
 
         <h1 className="mb-4 text-5xl font-bold tracking-tight text-white sm:text-7xl">
@@ -38,14 +38,14 @@ export default function UnderConstruction({
         <div className="flex items-center gap-4">
           <a
             href="mailto:lools@tenone.biz"
-            className="rounded-full px-7 py-3 text-sm font-medium transition-all hover:opacity-90"
+            className="rounded-none px-7 py-3 text-sm font-normal transition-all hover:opacity-90"
             style={{ backgroundColor: accentColor, color: '#0f0f17' }}
           >
             문의하기
           </a>
           <Link
             href="/"
-            className="rounded-full border border-white/15 px-7 py-3 text-sm text-white/50 transition-all hover:border-white/30 hover:text-white/70"
+            className="rounded-none border border-white/15 px-7 py-3 text-sm text-white/50 transition-all hover:border-white/30 hover:text-white/70"
           >
             Universe 홈
           </Link>

@@ -62,10 +62,10 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
       <div className="mb-3 flex items-center justify-between px-1">
         <h2 className="text-sm font-bold text-white/70">니즈 맞춤 공지</h2>
         <div className="flex gap-1">
-          <button onClick={() => scroll('left')} className="rounded-full border border-white/10 p-1 text-white/30 hover:text-white/60">
+          <button onClick={() => scroll('left')} className="rounded-none border border-white/10 p-1 text-white/30 hover:text-white/60">
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => scroll('right')} className="rounded-full border border-white/10 p-1 text-white/30 hover:text-white/60">
+          <button onClick={() => scroll('right')} className="rounded-none border border-white/10 p-1 text-white/30 hover:text-white/60">
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -99,7 +99,7 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
               )}
               <div className="p-4">
                 <span
-                  className="mb-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  className="mb-2 inline-block rounded-none px-2 py-0.5 text-[10px] font-bold"
                   style={{ color: h.labelColor, background: 'rgba(255,255,255,0.08)' }}
                 >
                   {h.label}
@@ -125,7 +125,7 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
             </>
           );
 
-          const sharedClass = "w-[240px] shrink-0 overflow-hidden rounded-xl border border-white/8 transition-colors hover:border-white/20";
+          const sharedClass = "w-[240px] shrink-0 overflow-hidden rounded-xs border border-white/8 transition-colors hover:border-white/20";
 
           if (isGroupLink) {
             return (

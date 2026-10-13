@@ -61,7 +61,7 @@ export default function IdeaMovementPage() {
                 <span className="text-xs font-bold text-[#EC1D25]">0{i + 1}</span>
                 <item.icon className="h-5 w-5 text-white/40" />
               </div>
-              <h3 className="text-xl font-black mb-3">{item.title}</h3>
+              <h3 className="text-xl font-bold mb-3">{item.title}</h3>
               <p className="text-sm text-neutral-400 leading-relaxed">{item.desc}</p>
             </div>
           ))}
@@ -69,15 +69,15 @@ export default function IdeaMovementPage() {
 
         <div className="mt-16 grid grid-cols-3 gap-4 max-w-2xl">
           <div className="bg-black border border-neutral-900 p-8 text-center">
-            <div className="text-5xl font-black text-neutral-700 mb-3">X</div>
+            <div className="text-5xl font-bold text-neutral-700 mb-3">X</div>
             <p className="text-xs text-neutral-500">아이디어를 위한 아이디어</p>
           </div>
           <div className="bg-black border border-neutral-800 p-8 text-center">
-            <div className="text-5xl font-black text-[#FFC000]/40 mb-3">!</div>
+            <div className="text-5xl font-bold text-[#FFC000]/40 mb-3">!</div>
             <p className="text-xs text-neutral-400">본질에 집중</p>
           </div>
           <div className="bg-black border border-[#EC1D25]/30 p-8 text-center">
-            <div className="text-5xl font-black text-[#EC1D25] mb-3">O</div>
+            <div className="text-5xl font-bold text-[#EC1D25] mb-3">O</div>
             <p className="text-xs text-white font-bold">문제 해결을 위한 적합한 아이디어</p>
           </div>
         </div>
@@ -99,12 +99,12 @@ export default function IdeaMovementPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-neutral-950 border border-neutral-900 p-8 flex flex-col items-center justify-center aspect-square text-center">
               <Triangle className="h-14 w-14 text-[#EC1D25]/40 mb-6" />
-              <p className="font-black text-white">본체 = 정의(定義)</p>
+              <p className="font-bold text-white">본체 = 정의(定義)</p>
               <p className="text-xs text-neutral-500 mt-2">그것이 그것이게 하는 것</p>
             </div>
             <div className="bg-neutral-950 border border-neutral-900 p-8 flex flex-col items-center justify-center aspect-square text-center">
               <Flame className="h-14 w-14 text-[#EC1D25]/40 mb-6" />
-              <p className="font-black text-white">왜 불이 생기는가?</p>
+              <p className="font-bold text-white">왜 불이 생기는가?</p>
               <p className="text-xs text-neutral-500 mt-2">표면적 "왜"를 넘어<br />궁극의 이유를 탐구한다</p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function IdeaMovementPage() {
               <div key={item.step} className="bg-neutral-950 border border-neutral-900 p-8">
                 <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-6">{item.step}</div>
                 <item.icon className="h-8 w-8 text-neutral-600 mb-4" />
-                <h3 className="font-black text-white mb-2">{item.title}</h3>
+                <h3 className="font-bold text-white mb-2">{item.title}</h3>
                 <p className="text-xs text-neutral-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
@@ -133,7 +133,7 @@ export default function IdeaMovementPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TERMS.map((item) => (
             <div key={item.term} className="bg-black border border-neutral-900 p-8">
-              <h3 className="text-3xl font-black mb-1">{item.term}</h3>
+              <h3 className="text-3xl font-bold mb-1">{item.term}</h3>
               <p className="text-[#EC1D25] text-sm font-bold mb-1">{item.pronunciation}</p>
               <p className="text-neutral-600 text-xs mb-4">{item.meaning}</p>
               <p className="text-neutral-400 text-sm leading-relaxed">{item.desc}</p>

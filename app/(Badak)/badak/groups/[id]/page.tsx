@@ -123,12 +123,12 @@ function Avatar({ name, avatarUrl, idx, size = 40 }: {
   if (avatarUrl) {
     return (
       <Image src={avatarUrl} alt={name} width={size} height={size}
-        className="rounded-full object-cover shrink-0"
+        className="rounded-none object-cover shrink-0"
         style={{ width: size, height: size }} />
     );
   }
   return (
-    <div className="flex shrink-0 items-center justify-center rounded-full font-bold"
+    <div className="flex shrink-0 items-center justify-center rounded-none font-bold"
       style={{ width: size, height: size, fontSize: size * 0.35, background: color.bg, color: color.text }}>
       {name.charAt(0)}
     </div>
@@ -313,7 +313,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#1a1a2e] text-white/60">
         <p className="text-sm">모임을 찾을 수 없습니다</p>
-        <Link href="/badak/groups" className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white/80 hover:text-white">모임 목록으로</Link>
+        <Link href="/badak/groups" className="rounded-xs border border-white/15 px-4 py-2 text-sm text-white/80 hover:text-white">모임 목록으로</Link>
       </div>
     );
   }
@@ -321,7 +321,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   if (!group) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-amber-400" />
+        <span className="text-sm text-mute">불러오는 중</span>
       </div>
     );
   }
@@ -488,19 +488,19 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         {/* 상단 액션 바 */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-16">
           <Link href="/badak/groups"
-            className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+            className="flex h-8 w-8 items-center justify-center rounded-none"
             style={{ background: 'rgba(0,0,0,0.35)' }}>
             <ArrowLeft className="h-4 w-4 text-white/80" />
           </Link>
           <div className="flex gap-1.5">
             <button onClick={handleBookmark} disabled={isBookmarkLoading}
-              className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+              className="flex h-8 w-8 items-center justify-center rounded-none"
               style={{ background: 'rgba(0,0,0,0.35)' }}>
               <Bookmark className="h-4 w-4"
                 style={{ color: isBookmarked ? '#ffd93d' : 'rgba(255,255,255,0.7)', fill: isBookmarked ? '#ffd93d' : 'none' }} />
             </button>
             <button onClick={handleShare}
-              className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+              className="flex h-8 w-8 items-center justify-center rounded-none"
               style={{ background: 'rgba(0,0,0,0.35)' }}>
               <Share2 className="h-4 w-4 text-white/70" />
             </button>
@@ -510,37 +510,37 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         {/* 히어로 하단 — 타이틀 + 배지 */}
         <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
           <div className="mb-2 flex flex-wrap gap-1.5">
-            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+            <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
               style={{ background: statusMeta.bg, color: statusMeta.color }}>
               {statusMeta.label}
             </span>
             {group.meeting_type && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs backdrop-blur-sm"
+              <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs"
                 style={{ background: 'rgba(0,0,0,0.35)', color: 'rgba(255,255,255,0.55)' }}>
                 {group.meeting_type === 'recurring' ? '정기 모임' : group.meeting_type === 'series' ? `${group.series_count ?? ''}회 시리즈` : '1회 모임'}
               </span>
             )}
             {group.join_type === 'approval' && (
-              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs backdrop-blur-sm"
+              <span className="inline-flex items-center gap-1 rounded-none px-2.5 py-1 text-xs"
                 style={{ background: 'rgba(0,0,0,0.35)', color: 'rgba(255,255,255,0.45)' }}>
                 <Lock className="h-3 w-3" />승인제
               </span>
             )}
             {isClosingSoon && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur-sm"
+              <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
                 style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>🔥 마감임박</span>
             )}
             {isHot && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+              <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
                 style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>Hot</span>
             )}
             {isNew && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+              <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
                 style={{ background: 'rgba(74,222,128,0.15)', color: '#4ade80' }}>New</span>
             )}
           </div>
-          <h1 className="text-xl font-extrabold leading-tight text-white drop-shadow">{group.title}</h1>
-          {group.tagline && <p className="mt-1 text-sm text-white/55 drop-shadow">{group.tagline}</p>}
+          <h1 className="text-xl font-bold leading-tight text-white drop-">{group.title}</h1>
+          {group.tagline && <p className="mt-1 text-sm text-white/55 drop-">{group.tagline}</p>}
         </div>
       </div>
 
@@ -559,14 +559,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         ].filter(Boolean).map((item, i) => (item &&
           <div key={i} className="flex flex-1 items-center justify-center gap-1.5 py-3">
             <span style={{ color: (item as {color: string}).color, opacity: 0.7 }}>{item.icon}</span>
-            <span className="text-xs font-medium" style={{ color: (item as {color: string}).color }}>{item.label}</span>
+            <span className="text-xs font-normal" style={{ color: (item as {color: string}).color }}>{item.label}</span>
           </div>
         ))}
       </div>
 
       {/* ── 잔여석 강조 바 ── */}
       {!isFull && !isClosed && (
-        <div className="mx-4 mt-3 flex items-center justify-between rounded-xl px-4 py-2.5"
+        <div className="mx-4 mt-3 flex items-center justify-between rounded-xs px-4 py-2.5"
           style={{ background: isClosingSoon ? 'rgba(251,146,60,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isClosingSoon ? 'rgba(251,146,60,0.3)' : 'rgba(255,255,255,0.09)'}` }}>
           <span className="text-xs" style={{ color: isClosingSoon ? '#fb923c' : 'rgba(255,255,255,0.45)' }}>
             {isClosingSoon ? '🔥 마감임박 · 서두르세요!' : '잔여석'}
@@ -579,7 +579,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* ── 주요 공지 ── */}
       {group.notice && showNotice && (
-        <div className="mx-4 mt-4 flex gap-3 rounded-xl px-4 py-3"
+        <div className="mx-4 mt-4 flex gap-3 rounded-xs px-4 py-3"
           style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
           <Bell className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
           <p className="flex-1 text-sm leading-relaxed text-white/70">{group.notice}</p>
@@ -590,7 +590,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       )}
 
       {/* ── 정원 프로그레스 ── */}
-      <div className="mx-4 mt-4 rounded-xl px-4 py-3"
+      <div className="mx-4 mt-4 rounded-xs px-4 py-3"
         style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="mb-1.5 flex justify-between text-xs">
           <span className="text-white/40">모집 현황</span>
@@ -599,20 +599,20 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             {!isFull && !isClosed && <span className="ml-1.5 text-white/25">· {group.max_members - group.current_members}자리 남음</span>}
           </span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
-          <div className="h-full rounded-full"
+        <div className="h-1.5 overflow-hidden rounded-none" style={{ background: 'rgba(255,255,255,0.07)' }}>
+          <div className="h-full rounded-none"
             style={{ width: `${fillPct}%`, background: isFull ? 'linear-gradient(90deg,#f87171,#fb923c)' : 'linear-gradient(90deg,#ffd93d,#ff9f43)', transition: 'width 0.7s' }} />
         </div>
       </div>
 
       {/* ── 일시·장소 요약 ── */}
       {(group.event_date || group.schedule || group.location) && (
-        <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl px-4 py-3"
+        <div className="mx-4 mt-3 flex items-center gap-3 rounded-xs px-4 py-3"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
           {(group.event_date || group.schedule) && (
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <Calendar className="h-4 w-4 shrink-0 text-amber-400/70" />
-              <span className="truncate text-sm font-medium text-white/75">
+              <span className="truncate text-sm font-normal text-white/75">
                 {group.schedule ?? new Date(group.event_date!).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
               </span>
             </div>
@@ -620,7 +620,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.location && (
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
-              <span className="truncate text-sm font-medium text-white/75">
+              <span className="truncate text-sm font-normal text-white/75">
                 {group.location}{group.location_detail ? ` · ${group.location_detail}` : ''}
               </span>
             </div>
@@ -634,7 +634,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex">
           {TABS.map(tab => (
             <button key={tab} onClick={() => scrollToTab(tab)}
-              className="flex-1 py-3 text-sm font-medium transition-colors text-center"
+              className="flex-1 py-3 text-sm font-normal transition-colors text-center"
               style={{
                 color: activeTab === tab ? '#ffd93d' : 'rgba(255,255,255,0.4)',
                 borderBottom: activeTab === tab ? '2px solid #ffd93d' : '2px solid transparent',
@@ -655,7 +655,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* 모임 설명 */}
           {group.description && (
-            <div className="mb-4 rounded-xl px-4 py-4"
+            <div className="mb-4 rounded-xs px-4 py-4"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <p className="text-sm leading-7 text-white/60 whitespace-pre-line">{group.description}</p>
             </div>
@@ -663,18 +663,18 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* 이런 분께 추천 */}
           {group.intro_who && (
-            <div className="mb-4 rounded-xl px-4 py-4"
+            <div className="mb-4 rounded-xs px-4 py-4"
               style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-amber-400/50">이런 분께 추천해요</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-amber-400/50">이런 분께 추천해요</div>
               <p className="text-sm leading-7 text-white/60 whitespace-pre-line">{group.intro_who}</p>
             </div>
           )}
 
           {/* 연결된 니즈 */}
           {group.need && (
-            <div className="mb-4 rounded-xl px-4 py-3"
+            <div className="mb-4 rounded-xs px-4 py-3"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/25">연결된 니즈</div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/25">연결된 니즈</div>
               <p className="text-sm text-white/65">"{group.need.display_text}"</p>
               <p className="mt-0.5 text-[11px] text-amber-400/50">{group.need.count}명이 같은 니즈를 가지고 있어요</p>
             </div>
@@ -683,13 +683,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {/* 바닥장 */}
           {group.leader && (
             <button type="button" onClick={() => setShowLeaderProfile(true)}
-              className="w-full flex items-start gap-3.5 rounded-xl p-4 text-left transition-colors hover:border-amber-400/20"
+              className="w-full flex items-start gap-3.5 rounded-xs p-4 text-left transition-colors hover:border-amber-400/20"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <Avatar name={group.leader.display_name} avatarUrl={group.leader.avatar_url} idx={0} size={48} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white/85">{group.leader.display_name}</span>
-                  <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">바닥장</span>
+                  <span className="text-sm font-bold text-white/85">{group.leader.display_name}</span>
+                  <span className="rounded-none bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">바닥장</span>
                 </div>
                 <div className="mt-0.5 text-xs text-white/35">{group.leader.job_function} · {group.leader.experience_years}년차</div>
                 {group.leader_career && <p className="mt-1 text-xs text-white/40 line-clamp-1">{group.leader_career}</p>}
@@ -712,12 +712,12 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 {group.structure.map(session => (
                   <div key={session.number} className="flex gap-4">
                     {/* 번호 원 */}
-                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold z-10"
+                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-none text-xs font-bold z-10"
                       style={{ background: '#1a1a2e', border: '1.5px solid rgba(255,217,61,0.3)', color: '#ffd93d' }}>
                       {session.number}
                     </div>
                     <div className="flex-1 pb-6 pt-1.5">
-                      <div className="text-sm font-semibold text-white/80">{session.title}</div>
+                      <div className="text-sm font-bold text-white/80">{session.title}</div>
                       <div className="mt-1 text-xs leading-relaxed text-white/45">{session.description}</div>
                       {session.date && <div className="mt-1 text-[11px] text-amber-400/40">{session.date}</div>}
                     </div>
@@ -726,7 +726,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           ) : (
-            <div className="rounded-xl px-4 py-8 text-center"
+            <div className="rounded-xs px-4 py-8 text-center"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <p className="text-sm text-white/30">아직 등록된 구성 안내가 없습니다</p>
             </div>
@@ -738,7 +738,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           <h2 className="mb-4 text-base font-bold text-white/85">상세 안내</h2>
 
           {/* 모임 정보 그리드 */}
-          <div className="mb-4 rounded-xl px-4 py-4 space-y-3"
+          <div className="mb-4 rounded-xs px-4 py-4 space-y-3"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
             {[
               group.event_date && {
@@ -754,7 +754,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               { icon: <Users className="h-3.5 w-3.5 text-amber-400/60" />, label: `최대 ${group.max_members}명` },
             ].filter(Boolean).map((item, i) => (item &&
               <div key={i} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-lg shrink-0"
+                <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-xs shrink-0"
                   style={{ background: 'rgba(255,217,61,0.08)' }}>{item.icon}</div>
                 <span className="text-sm text-white/60">{item.label}</span>
               </div>
@@ -763,10 +763,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* 상세 안내 텍스트 */}
           {group.guide && (
-            <div className="rounded-xl px-4 py-4"
+            <div className="rounded-xs px-4 py-4"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <div className="text-sm leading-7 text-white/55 whitespace-pre-line"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(group.guide.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/75 font-medium">$1</strong>')) }} />
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(group.guide.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/75 font-normal">$1</strong>')) }} />
             </div>
           )}
 
@@ -774,7 +774,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.tags?.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-1.5">
               {group.tags.map(tag => (
-                <span key={tag} className="rounded-full px-3 py-1.5 text-xs text-white/40"
+                <span key={tag} className="rounded-none px-3 py-1.5 text-xs text-white/40"
                   style={{ background: 'rgba(255,255,255,0.05)' }}>#{tag}</span>
               ))}
             </div>
@@ -799,7 +799,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {/* 후기 작성 버튼 — 종료된 모임 + 참여자만 */}
           {isAuthenticated && group.status === 'completed' && (joinState === 'joined' || !groupId) && !showReviewForm && (
             <button onClick={() => setShowReviewForm(true)}
-              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium"
+              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xs py-3 text-sm font-normal"
               style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)', color: 'rgba(255,217,61,0.75)' }}>
               <Star className="h-4 w-4" />후기 남기기
             </button>
@@ -807,10 +807,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* 후기 작성 폼 */}
           {showReviewForm && (
-            <div className="mb-4 rounded-xl px-4 py-4 space-y-3"
+            <div className="mb-4 rounded-xs px-4 py-4 space-y-3"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,217,61,0.15)' }}>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-white/75">후기 작성</span>
+                <span className="text-sm font-normal text-white/75">후기 작성</span>
                 <button onClick={() => setShowReviewForm(false)} className="text-white/25 hover:text-white/50">
                   <X className="h-4 w-4" />
                 </button>
@@ -826,10 +826,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               </div>
               <textarea value={reviewContent} onChange={e => setReviewContent(e.target.value)}
                 placeholder="모임 참여 경험을 솔직하게 남겨주세요"
-                className="w-full rounded-xl px-3 py-2.5 text-sm text-white/70 placeholder-white/25 resize-none outline-none"
+                className="w-full rounded-xs px-3 py-2.5 text-sm text-white/70 placeholder-white/25 resize-none outline-none"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', minHeight: 80 }} />
               <button onClick={handleSubmitReview} disabled={!reviewContent.trim() || reviewSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold disabled:opacity-30"
+                className="flex w-full items-center justify-center gap-2 rounded-xs py-3 text-sm font-bold disabled:opacity-30"
                 style={{ background: '#ffd93d', color: '#1a1a2e' }}>
                 <Send className="h-4 w-4" />
                 {reviewSubmitting ? '제출 중...' : '후기 등록'}
@@ -839,7 +839,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* 이전 시즌 후기 포함 안내 배너 */}
           {group.parent_group_id && group.reviews.length > 0 && (
-            <div className="mb-3 flex items-center gap-2 rounded-lg px-3 py-2.5"
+            <div className="mb-3 flex items-center gap-2 rounded-xs px-3 py-2.5"
               style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
               <span className="text-[11px] text-amber-400/60">
                 시즌 {(group.season_number ?? 2) - 1} 참여자들의 후기가 함께 표시됩니다
@@ -858,7 +858,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               {group.reviews.map((review, i) => {
                 const isInherited = group.parent_group_id && review.season_number != null && review.season_number < (group.season_number ?? 1);
                 return (
-                  <div key={review.id} className="rounded-xl px-4 py-4 space-y-2"
+                  <div key={review.id} className="rounded-xs px-4 py-4 space-y-2"
                     style={{
                       background: isInherited ? 'rgba(255,217,61,0.025)' : 'rgba(255,255,255,0.02)',
                       border: `1px solid ${isInherited ? 'rgba(255,217,61,0.08)' : 'rgba(255,255,255,0.07)'}`,
@@ -867,14 +867,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                       <Avatar name={review.author} avatarUrl={review.avatar_url} idx={i + 1} size={32} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-white/75">{review.author}</span>
+                          <span className="text-sm font-normal text-white/75">{review.author}</span>
                           {review.job_function && <span className="text-[11px] text-white/30">{review.job_function}</span>}
                         </div>
                         <StarRating rating={review.rating} />
                       </div>
                       <div className="ml-auto flex flex-col items-end gap-1">
                         {isInherited && (
-                          <span className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                          <span className="rounded-none px-1.5 py-0.5 text-[10px] font-normal"
                             style={{ background: 'rgba(255,217,61,0.1)', color: 'rgba(255,217,61,0.6)', border: '1px solid rgba(255,217,61,0.15)' }}>
                             시즌 {review.season_number}
                           </span>
@@ -890,7 +890,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               })}
             </div>
           ) : (
-            <div className="rounded-xl px-4 py-10 text-center"
+            <div className="rounded-xs px-4 py-10 text-center"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <MessageCircle className="mx-auto mb-2 h-8 w-8 text-white/10" />
               <p className="text-sm text-white/30">아직 후기가 없어요</p>
@@ -908,7 +908,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
           {!isAuthenticated ? (
-            <div className="rounded-xl px-4 py-10 text-center"
+            <div className="rounded-xs px-4 py-10 text-center"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-white/10" />
               <p className="text-sm text-white/30">로그인하면 내 참여 이력을 볼 수 있어요</p>
@@ -916,7 +916,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           ) : myPastLoading ? (
             <div className="space-y-2">
               {[0, 1].map(i => (
-                <div key={i} className="h-16 animate-pulse rounded-xl"
+                <div key={i} className="h-16 animate-pulse rounded-xs"
                   style={{ background: 'rgba(255,255,255,0.04)' }} />
               ))}
             </div>
@@ -924,7 +924,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <div className="space-y-2">
               {myPastGroups.map(pg => (
                 <Link key={pg.id} href={`/badak/groups/${pg.slug}`}
-                  className="flex items-center gap-3 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+                  className="flex items-center gap-3 overflow-hidden rounded-xs transition-opacity hover:opacity-80"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                   {pg.cover_image_url ? (
                     <img src={pg.cover_image_url} alt="" className="h-14 w-20 shrink-0 object-cover" />
@@ -933,13 +933,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                       style={{ background: 'rgba(255,255,255,0.05)' }} />
                   )}
                   <div className="flex-1 min-w-0 py-2">
-                    <p className="truncate text-sm font-medium text-white/75">{pg.title}</p>
+                    <p className="truncate text-sm font-normal text-white/75">{pg.title}</p>
                     {pg.schedule && (
                       <p className="mt-0.5 truncate text-[11px] text-white/30">{pg.schedule}</p>
                     )}
                   </div>
                   <div className="shrink-0 pr-3 text-right">
-                    <span className="rounded-full px-2 py-0.5 text-[10px]"
+                    <span className="rounded-none px-2 py-0.5 text-[10px]"
                       style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
                       종료됨
                     </span>
@@ -953,7 +953,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               ))}
             </div>
           ) : (
-            <div className="rounded-xl px-4 py-10 text-center"
+            <div className="rounded-xs px-4 py-10 text-center"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-white/10" />
               <p className="text-sm text-white/30">아직 완료한 모임이 없어요</p>
@@ -971,7 +971,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 const relFull = rel.current_members >= rel.max_members;
                 return (
                   <Link key={rel.slug} href={`/badak/groups/${rel.slug}`}
-                    className="flex items-center gap-3 overflow-hidden rounded-xl transition-colors"
+                    className="flex items-center gap-3 overflow-hidden rounded-xs transition-colors"
                     style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
                     {rel.cover_image_url && (
                       <img src={rel.cover_image_url} alt="" className="h-16 w-20 shrink-0 object-cover" />
@@ -1005,10 +1005,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         <div className="fixed inset-0 z-40 flex items-end"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={e => { if (e.target === e.currentTarget) setJoinState('idle'); }}>
-          <div className="w-full max-w-[640px] mx-auto rounded-t-2xl px-5 pb-10 pt-5 space-y-4"
+          <div className="w-full max-w-[640px] mx-auto rounded-t-xs px-5 pb-10 pt-5 space-y-4"
             style={{ background: '#1e1e38', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-white/85">참여 신청 — {group.title}</h3>
+              <h3 className="font-bold text-white/85">참여 신청 — {group.title}</h3>
               <button onClick={() => setJoinState('idle')} className="text-white/30 hover:text-white/60">
                 <X className="h-5 w-5" />
               </button>
@@ -1016,23 +1016,23 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <p className="text-xs text-white/40">
               이 모임은 <span className="text-amber-400/70">승인제</span>입니다. 간단한 자기소개와 참여 동기를 남겨주세요.
             </p>
-            <div className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px]"
+            <div className="flex items-center justify-center gap-1.5 rounded-xs px-3 py-2.5 text-[11px]"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <span className="text-white/55 font-medium">신청 제출</span>
+              <span className="text-white/55 font-normal">신청 제출</span>
               <span className="text-white/20">→</span>
-              <span className="text-white/55 font-medium">바닥장 검토 (1~2일)</span>
+              <span className="text-white/55 font-normal">바닥장 검토 (1~2일)</span>
               <span className="text-white/20">→</span>
-              <span className="text-white/55 font-medium">참여 확정 알림</span>
+              <span className="text-white/55 font-normal">참여 확정 알림</span>
             </div>
             <textarea value={applyMessage} onChange={e => setApplyMessage(e.target.value)}
               placeholder="예: 퍼포먼스 마케터 3년차입니다. B2B SaaS 케이스를 함께 공부하고 싶어 신청합니다."
-              className="w-full rounded-xl px-4 py-3 text-sm text-white/75 placeholder-white/25 resize-none outline-none"
+              className="w-full rounded-xs px-4 py-3 text-sm text-white/75 placeholder-white/25 resize-none outline-none"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', minHeight: 100 }} />
             <button onClick={handleApplySubmit}
               disabled={!applyMessage.trim() || isJoining}
-              className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-30"
+              className="flex w-full items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold disabled:opacity-30"
               style={{ background: '#ffd93d', color: '#1a1a2e' }}>
-              {isJoining ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a1a2e]/30 border-t-[#1a1a2e]" /> : <Send className="h-4 w-4" />}
+              {isJoining ? <span className="text-xs">처리 중</span> : <Send className="h-4 w-4" />}
               {isJoining ? '처리 중…' : '신청 보내기'}
             </button>
           </div>
@@ -1044,28 +1044,28 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         style={{ background: 'linear-gradient(to top, #1a1a2e 70%, transparent 100%)' }}>
         <div className="mx-auto max-w-[640px]">
           {joinState === 'submitted' && (
-            <div className="mb-2.5 rounded-xl px-4 py-3"
+            <div className="mb-2.5 rounded-xs px-4 py-3"
               style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-400" />
-                <p className="text-xs font-semibold text-indigo-300">신청 완료</p>
+                <p className="text-xs font-bold text-indigo-300">신청 완료</p>
               </div>
               {/* 신청 → 검토 → 확정 흐름 */}
               <div className="flex items-center gap-1.5">
-                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                   style={{ background: 'rgba(99,102,241,0.25)', color: '#a5b4fc' }}>① 신청 완료</span>
                 <span className="text-white/20 text-xs">→</span>
-                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)' }}>② 바닥장 검토</span>
                 <span className="text-white/20 text-xs">→</span>
-                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }}>③ 알림 발송</span>
               </div>
               <p className="mt-2 text-[11px] text-indigo-300/50">승인되면 알림으로 알려드릴게요. 보통 1~2일 내 검토됩니다.</p>
             </div>
           )}
           {joinState === 'waitlisted' && (
-            <div className="mb-2.5 flex items-center gap-2 rounded-xl px-4 py-2.5"
+            <div className="mb-2.5 flex items-center gap-2 rounded-xs px-4 py-2.5"
               style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)' }}>
               <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-400" />
               <p className="text-xs text-amber-400/70">관심 등록 완료! 모임 개설 시 알림으로 알려드릴게요.</p>
@@ -1074,7 +1074,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           <div className="flex gap-2">
             {/* 좋아요 버튼 */}
             <button onClick={handleLike}
-              className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl px-3 transition-colors"
+              className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xs px-3 transition-colors"
               style={{
                 background: isLiked ? 'rgba(255,100,130,0.12)' : 'rgba(255,255,255,0.06)',
                 border: isLiked ? '1px solid rgba(255,100,130,0.25)' : '1px solid rgba(255,255,255,0.1)',
@@ -1082,14 +1082,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               <Heart className="h-5 w-5"
                 style={{ color: isLiked ? '#ff6482' : 'rgba(255,255,255,0.35)', fill: isLiked ? '#ff6482' : 'none' }} />
               {likeCount > 0 && (
-                <span className="text-xs font-medium" style={{ color: isLiked ? '#ff6482' : 'rgba(255,255,255,0.3)' }}>
+                <span className="text-xs font-normal" style={{ color: isLiked ? '#ff6482' : 'rgba(255,255,255,0.3)' }}>
                   {likeCount}
                 </span>
               )}
             </button>
             {/* 잔여 석 */}
             {!isClosed && !isFull && (
-              <div className="flex h-12 shrink-0 items-center justify-center rounded-xl px-3"
+              <div className="flex h-12 shrink-0 items-center justify-center rounded-xs px-3"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <span className="text-xs text-white/40">잔여</span>
                 <span className="ml-1 text-sm font-bold text-white/65">{group.max_members - group.current_members}</span>
@@ -1098,13 +1098,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             )}
             {/* 참여 CTA */}
             <button onClick={handleJoin} disabled={ctaDisabled || ctaDone || isJoining}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold disabled:cursor-default"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold disabled:cursor-default"
               style={{
                 background: ctaDone ? 'rgba(255,255,255,0.06)' : ctaDisabled ? 'rgba(255,255,255,0.05)' : '#ffd93d',
                 color: ctaDone ? 'rgba(255,255,255,0.35)' : ctaDisabled ? 'rgba(255,255,255,0.2)' : '#1a1a2e',
                 border: ctaDone || ctaDisabled ? '1px solid rgba(255,255,255,0.08)' : 'none',
               }}>
-              {isJoining ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a1a2e]/30 border-t-[#1a1a2e]" /> : ctaDone ? <CheckCircle2 className="h-4 w-4" /> : isNeedsGathering ? <Bell className="h-4 w-4" /> : group.join_type === 'approval' ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+              {isJoining ? <span className="text-xs">처리 중</span> : ctaDone ? <CheckCircle2 className="h-4 w-4" /> : isNeedsGathering ? <Bell className="h-4 w-4" /> : group.join_type === 'approval' ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}
               {isJoining ? '처리 중…' : ctaLabel}
             </button>
           </div>
@@ -1123,7 +1123,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* ── 토스트 ── */}
       {toast && (
-        <div className="fixed bottom-28 left-1/2 z-50 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-medium text-white/90 shadow-xl"
+        <div className="fixed bottom-28 left-1/2 z-50 -translate-x-1/2 rounded-none px-4 py-2 text-sm font-normal text-white/90"
           style={{ background: 'rgba(30,30,56,0.95)', border: '1px solid rgba(255,255,255,0.12)', whiteSpace: 'nowrap' }}>
           {toast}
         </div>

@@ -16,11 +16,12 @@ interface NewsletterIssue {
 }
 
 const categoryStyle: Record<string, string> = {
-    MADLeague: "bg-violet-50 text-violet-600",
-    LUKI: "bg-blue-50 text-blue-600",
-    Badak: "bg-neutral-100 text-neutral-600",
-    Culture: "bg-amber-50 text-amber-600",
-    Universe: "bg-neutral-900 text-white",
+    // 태그 = 테두리 텍스트 (tenone-ui 3) — 브랜드별 색 구분 없음
+    MADLeague: "border border-current",
+    LUKI: "border border-current",
+    Badak: "border border-current",
+    Culture: "border border-current",
+    Universe: "border border-current font-bold",
 };
 
 export default function NewsletterPage() {
@@ -86,16 +87,16 @@ export default function NewsletterPage() {
                 ) : isAuthenticated && !sent ? (
                     <div className="text-center py-2">
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            <div className="h-8 w-8 rounded-full bg-neutral-900 flex items-center justify-center text-white text-xs font-bold">
+                            <div className="h-8 w-8 rounded-none bg-neutral-900 flex items-center justify-center text-white text-xs font-bold">
                                 {user?.avatarInitials}
                             </div>
                             <div className="text-left">
-                                <p className="text-sm font-medium">{user?.name}</p>
+                                <p className="text-sm font-normal">{user?.name}</p>
                                 <p className="text-xs tn-text-sub">{user?.email}</p>
                             </div>
                         </div>
                         <button onClick={handleMemberSubscribe} disabled={submitting}
-                            className="px-8 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 mx-auto disabled:opacity-40">
+                            className="px-8 py-3 bg-neutral-900 text-white text-sm font-normal hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 mx-auto disabled:opacity-40">
                             <Mail className="h-4 w-4" /> {submitting ? "처리 중..." : "뉴스레터 구독하기"}
                         </button>
                         <p className="text-[10px] tn-text-muted mt-3">신청 후 이메일로 확인 절차가 진행됩니다</p>
@@ -117,7 +118,7 @@ export default function NewsletterPage() {
                 {pastIssues.length === 0 ? (
                     <div className="border tn-border tn-surface p-10 text-center">
                         <Mail className="h-8 w-8 tn-text-muted mx-auto mb-3" />
-                        <p className="text-sm font-medium mb-1">아직 발행된 뉴스레터가 없습니다</p>
+                        <p className="text-sm font-normal mb-1">아직 발행된 뉴스레터가 없습니다</p>
                         <p className="text-xs tn-text-sub">구독하시면 첫 번째 뉴스레터가 발행될 때 알려드립니다.</p>
                     </div>
                 ) : (
@@ -127,14 +128,14 @@ export default function NewsletterPage() {
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${categoryStyle[issue.category] || "bg-neutral-100 tn-text-sub"}`}>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-normal ${categoryStyle[issue.category] || "bg-neutral-100 tn-text-sub"}`}>
                                                 {issue.category}
                                             </span>
                                             <span className="flex items-center gap-1 text-[10px] tn-text-sub">
                                                 <Calendar className="h-3 w-3" /> {issue.date}
                                             </span>
                                         </div>
-                                        <h3 className="text-sm font-medium group-hover:text-neutral-600 transition-colors">{issue.title}</h3>
+                                        <h3 className="text-sm font-normal group-hover:text-neutral-600 transition-colors">{issue.title}</h3>
                                     </div>
                                     {issue.url && <ExternalLink className="h-4 w-4 tn-text-muted group-hover:tn-text-sub transition-colors shrink-0 mt-1" />}
                                 </div>

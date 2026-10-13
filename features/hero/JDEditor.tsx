@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Send, Archive, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Send, Archive } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const HERO_RED = "#E53935";
@@ -97,7 +97,7 @@ export default function JDEditor({
                 </Link>
 
                 <div className="mb-8">
-                    <h1 className="text-2xl font-extrabold mb-1">
+                    <h1 className="text-2xl font-bold mb-1">
                         {form.id ? "채용 공고 편집" : "새 채용 공고 작성"}
                     </h1>
                     <p className="text-sm text-neutral-500">
@@ -211,19 +211,19 @@ export default function JDEditor({
                 {error && <p className="mt-6 text-sm text-red-500">{error}</p>}
                 <div className="mt-8 flex items-center gap-2 flex-wrap">
                     <button onClick={() => save("draft")} disabled={saving}
-                        className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-neutral-300 rounded-lg hover:bg-neutral-100 disabled:opacity-40">
-                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                        className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border border-neutral-300 rounded-xs hover:bg-neutral-100 disabled:opacity-40">
+                        {saving ? <span className="text-xs">처리 중</span> : <Save className="h-3.5 w-3.5" />}
                         초안 저장
                     </button>
                     <button onClick={() => save("published")} disabled={saving}
-                        className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-white rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-white rounded-xs disabled:opacity-40"
                         style={{ backgroundColor: HERO_RED }}>
-                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                        {saving ? <span className="text-xs">처리 중</span> : <Send className="h-3.5 w-3.5" />}
                         발행
                     </button>
                     {form.id && form.status !== "archived" && (
                         <button onClick={() => save("archived")} disabled={saving}
-                            className="flex items-center gap-1.5 px-4 py-2.5 text-sm text-neutral-500 border border-neutral-200 rounded-lg hover:bg-neutral-100 ml-auto">
+                            className="flex items-center gap-1.5 px-4 py-2.5 text-sm text-neutral-500 border border-neutral-200 rounded-xs hover:bg-neutral-100 ml-auto">
                             <Archive className="h-3.5 w-3.5" /> 보관
                         </button>
                     )}
@@ -233,12 +233,12 @@ export default function JDEditor({
     );
 }
 
-const H3_INPUT = "w-full px-3 py-2.5 text-lg font-bold border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400";
-const TEXT_INPUT = "w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 resize-none";
+const H3_INPUT = "w-full px-3 py-2.5 text-lg font-bold border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400";
+const TEXT_INPUT = "w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 resize-none";
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
     return (
-        <div className="bg-white border border-neutral-200 rounded-xl p-5">
+        <div className="bg-white border border-neutral-200 rounded-xs p-5">
             <div className="mb-3">
                 <h3 className="text-sm font-bold">{title}</h3>
                 {hint && <p className="text-xs text-neutral-400 mt-0.5">{hint}</p>}
@@ -251,7 +251,7 @@ function Card({ title, hint, children }: { title: string; hint?: string; childre
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
         <div>
-            <label className="text-xs font-semibold text-neutral-600 block mb-1">{label}</label>
+            <label className="text-xs font-bold text-neutral-600 block mb-1">{label}</label>
             {hint && <p className="text-[11px] text-neutral-400 mb-1.5">{hint}</p>}
             {children}
         </div>
@@ -271,7 +271,7 @@ function ArrayInput({ value, onChange, placeholder }: { value: string[]; onChang
                 <input value={input} onChange={e => setInput(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
                     placeholder={placeholder} className={TEXT_INPUT} />
-                <button onClick={add} className="px-3 py-2 text-xs text-white rounded-lg shrink-0" style={{ backgroundColor: HERO_RED }}>
+                <button onClick={add} className="px-3 py-2 text-xs text-white rounded-xs shrink-0" style={{ backgroundColor: HERO_RED }}>
                     추가
                 </button>
             </div>

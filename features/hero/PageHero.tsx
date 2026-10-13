@@ -36,19 +36,19 @@ export function PageHero({
         <section className="bg-gradient-to-b from-red-50/70 to-white border-b border-neutral-100">
             <div className={clsx("mx-auto max-w-5xl px-6 lg:px-8 py-16 md:py-24", center && "text-center")}>
                 <p className="text-sm font-bold text-[#E53935] mb-3">{label}</p>
-                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-neutral-900 leading-tight break-keep">{title}</h1>
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 leading-tight break-keep">{title}</h1>
                 {desc && (
                     <p className={clsx("mt-5 text-base md:text-lg text-neutral-600 leading-relaxed break-keep max-w-2xl", center && "mx-auto")}>{desc}</p>
                 )}
                 {(cta || secondary || children) && (
                     <div className={clsx("mt-8 flex flex-wrap gap-3", center && "justify-center")}>
                         {cta && (
-                            <Link href={cta.href} className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors">
+                            <Link href={cta.href} className="inline-flex items-center gap-2 px-6 py-3 rounded-none bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors">
                                 {cta.label} <ArrowRight className="h-4 w-4" />
                             </Link>
                         )}
                         {secondary && (
-                            <Link href={secondary.href} className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 text-sm font-semibold hover:border-neutral-500 transition-colors">
+                            <Link href={secondary.href} className="inline-flex items-center gap-2 px-6 py-3 rounded-none border border-neutral-300 text-neutral-700 text-sm font-bold hover:border-neutral-500 transition-colors">
                                 {secondary.label}
                             </Link>
                         )}

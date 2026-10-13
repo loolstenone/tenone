@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Building2, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Building2, CheckCircle } from "lucide-react";
 import { INDUSTRIES } from "@/lib/badak-constants";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
@@ -40,7 +40,7 @@ export default function CompanyRegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<{ companyId: string; status: string; message?: string } | null>(null);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     async function submit() {
@@ -90,7 +90,7 @@ export default function CompanyRegisterPage() {
                             : "기존 등록 기업이 있어 담당자 추가 요청이 접수되었습니다. 대표의 승인을 기다려주세요.")}
                     </p>
                     <button onClick={() => router.push("/hero/company")}
-                        className="px-6 py-3 text-white font-semibold rounded-lg" style={{ backgroundColor: HERO_RED }}>
+                        className="px-6 py-3 text-white font-bold rounded-xs" style={{ backgroundColor: HERO_RED }}>
                         인재 찾기로
                     </button>
                 </div>
@@ -106,16 +106,16 @@ export default function CompanyRegisterPage() {
                 </button>
 
                 <div className="mb-8">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-none mb-3" style={{ color: HERO_RED }}>
                         <Building2 className="h-3.5 w-3.5" /> 기업 신규 등록
                     </div>
-                    <h1 className="text-2xl font-extrabold mb-2">우리 회사를 등록합니다</h1>
+                    <h1 className="text-2xl font-bold mb-2">우리 회사를 등록합니다</h1>
                     <p className="text-sm text-neutral-500">
                         등록을 마친 뒤 기업 고민 설문과 채용 공고를 올리면 매칭에 필요한 기업 쪽 정보가 채워집니다.
                     </p>
                 </div>
 
-                <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-5">
+                <div className="bg-white border border-neutral-200 rounded-xs p-6 space-y-5">
                     <Section title="기업 정보">
                         <Field label="기업명" required>
                             <input value={form.companyName} onChange={e => setForm({ ...form, companyName: e.target.value })}
@@ -172,9 +172,9 @@ export default function CompanyRegisterPage() {
                 {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
                 <button onClick={submit} disabled={submitting}
-                    className="mt-6 w-full flex items-center justify-center gap-2 py-4 text-white font-bold rounded-lg disabled:opacity-40"
+                    className="mt-6 w-full flex items-center justify-center gap-2 py-4 text-white font-bold rounded-xs disabled:opacity-40"
                     style={{ backgroundColor: HERO_RED }}>
-                    {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {submitting && <span className="text-xs">처리 중</span>}
                     {submitting ? "등록 중..." : "등록하기"}
                 </button>
 
@@ -186,7 +186,7 @@ export default function CompanyRegisterPage() {
     );
 }
 
-const INPUT = "w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400";
+const INPUT = "w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -200,7 +200,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
     return (
         <div>
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">
+            <label className="text-xs font-bold text-neutral-600 mb-1 block">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             {children}

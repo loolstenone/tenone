@@ -37,7 +37,7 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
 
   return (
     <div
-      className="rounded-2xl border p-5"
+      className="rounded-xs border p-5"
       style={{
         background: 'rgba(255,255,255,0.03)',
         borderColor: 'rgba(255,255,255,0.08)',
@@ -50,11 +50,11 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
           <img
             src={match.avatarUrl}
             alt={match.displayName}
-            className="h-14 w-14 shrink-0 rounded-2xl object-cover"
+            className="h-14 w-14 shrink-0 rounded-xs object-cover"
           />
         ) : (
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-xl font-bold"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xs text-xl font-bold"
             style={{
               background: 'rgba(255,255,255,0.08)',
               color: 'rgba(255,255,255,0.7)',
@@ -81,7 +81,7 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
       {/* 매칭 근거 */}
       {topReasons.length > 0 && (
         <div className="mt-4 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-400/70">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-400/70">
             <Sparkles className="h-3 w-3" />
             매칭 근거
           </div>
@@ -89,7 +89,7 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
             {topReasons.map((r, i) => (
               <span
                 key={i}
-                className="rounded-full px-2.5 py-1 text-[11.5px]"
+                className="rounded-none px-2.5 py-1 text-[11.5px]"
                 style={{
                   background: 'rgba(255,217,61,0.08)',
                   color: '#fcd34d',
@@ -107,13 +107,13 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
       <div className="mt-5 flex gap-2">
         <button
           onClick={onProfile}
-          className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm font-semibold text-white/60 hover:border-white/25 hover:text-white/85"
+          className="flex-1 rounded-xs border border-white/10 py-2.5 text-sm font-bold text-white/60 hover:border-white/25 hover:text-white/85"
         >
           프로필 보기
         </button>
         <button
           onClick={onConnect}
-          className="flex-1 rounded-xl py-2.5 text-sm font-semibold"
+          className="flex-1 rounded-xs py-2.5 text-sm font-bold"
           style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
         >
           관심 보내기

@@ -117,19 +117,19 @@ function MiniCalendar({ selectedDates, onToggle, maxSelections }: {
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="rounded-xl border border-white/10 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+    <div className="rounded-xs border border-white/10 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
       <div className="flex items-center justify-between mb-3">
         <button onClick={prevMonth} className="p-1 text-white/40 hover:text-white">
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <span className="text-sm font-semibold text-white/70">{viewYear}년 {viewMonth + 1}월</span>
+        <span className="text-sm font-bold text-white/70">{viewYear}년 {viewMonth + 1}월</span>
         <button onClick={nextMonth} className="p-1 text-white/40 hover:text-white">
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
       <div className="grid grid-cols-7 mb-1">
         {DAY_NAMES.map((d, i) => (
-          <div key={d} className={`text-center text-[10px] font-medium py-1 ${
+          <div key={d} className={`text-center text-[10px] font-normal py-1 ${
             i === 0 ? 'text-red-400/60' : i === 6 ? 'text-blue-400/60' : 'text-white/30'
           }`}>{d}</div>
         ))}
@@ -147,7 +147,7 @@ function MiniCalendar({ selectedDates, onToggle, maxSelections }: {
             <button key={i} type="button"
               onClick={() => !isPast && !isFull && onToggle(str)}
               disabled={isPast || isFull}
-              className="flex items-center justify-center rounded-lg text-[12px] font-medium py-1.5 transition-all"
+              className="flex items-center justify-center rounded-xs text-[12px] font-normal py-1.5 transition-all"
               style={{
                 background: isSelected ? 'rgba(255,217,61,0.2)' : isToday ? 'rgba(255,255,255,0.08)' : 'transparent',
                 color: isPast ? 'rgba(255,255,255,0.15)' : isSelected ? '#ffd93d' : isFull ? 'rgba(255,255,255,0.2)' : dow === 0 ? 'rgba(255,150,150,0.8)' : dow === 6 ? 'rgba(150,180,255,0.8)' : 'rgba(255,255,255,0.7)',
@@ -575,7 +575,7 @@ function CreateGroupPageInner() {
 
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+      <span className="text-sm text-mute">불러오는 중</span>
     </div>
   );
 
@@ -583,14 +583,14 @@ function CreateGroupPageInner() {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(15,15,35,0.75)', backdropFilter: 'blur(4px)' }} />
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 pointer-events-none">
-        <div className="flex flex-col items-center rounded-2xl border border-white/10 px-10 py-10 pointer-events-auto"
+        <div className="flex flex-col items-center rounded-xs border border-white/10 px-10 py-10 pointer-events-auto"
           style={{ background: 'rgba(26,26,46,0.95)' }}>
           <ShieldCheck className="mb-4 h-10 w-10 text-white/30" />
           <p className="mb-1 text-base font-bold text-white">로그인이 필요합니다</p>
           <p className="mb-6 text-sm text-white/40 text-center">바닥장이 되어 모임을 열려면 먼저 로그인하세요</p>
           <button
             onClick={() => setShowLogin(true)}
-            className="rounded-xl border-none px-6 py-2.5 text-sm font-semibold"
+            className="rounded-xs border-none px-6 py-2.5 text-sm font-bold"
             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
           >
             로그인
@@ -604,7 +604,7 @@ function CreateGroupPageInner() {
   const Chip = ({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) => (
     <button
       onClick={onClick}
-      className="rounded-lg border px-3 py-2 text-xs font-medium transition-all"
+      className="rounded-xs border px-3 py-2 text-xs font-normal transition-all"
       style={{
         borderColor: selected ? '#ffd93d' : 'rgba(255,255,255,0.1)',
         background: selected ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.03)',
@@ -637,13 +637,13 @@ function CreateGroupPageInner() {
     <div className="fixed inset-0 z-[9999] flex items-start justify-center px-4 py-6 overflow-y-auto" onClick={() => setShowPreview(false)}>
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} />
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 shadow-2xl"
+        className="relative w-full max-w-md overflow-hidden rounded-xs border border-white/10"
         style={{ background: '#1e1e38' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => setShowPreview(false)}
-          className="absolute top-3 right-3 z-10 rounded-full p-1.5 text-white/40 hover:text-white"
+          className="absolute top-3 right-3 z-10 rounded-none p-1.5 text-white/40 hover:text-white"
           style={{ background: 'rgba(0,0,0,0.4)' }}
         >
           <X className="h-4 w-4" />
@@ -661,13 +661,13 @@ function CreateGroupPageInner() {
         <div className="p-5 space-y-4">
           {/* 배지 + 제목 */}
           <div>
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wide text-white/30">상세 미리보기</div>
+            <div className="mb-1 text-[10px] font-normal uppercase tracking-wide text-white/30">상세 미리보기</div>
             <div className="mb-2 flex items-center gap-1.5">
-              <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                 style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
                 {{ onetime: '1회 단발', series: `${seriesCount}회 연속` }[meetingType]}
               </span>
-              <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                 style={{
                   background: joinType === 'approval' ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
                   color: joinType === 'approval' ? '#fbbf24' : '#4ade80',
@@ -682,7 +682,7 @@ function CreateGroupPageInner() {
           </div>
 
           {/* 일정/장소/비용 */}
-          <div className="rounded-xl border border-white/8 p-3 space-y-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
+          <div className="rounded-xs border border-white/8 p-3 space-y-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
             {previewSchedule && (
               <div className="flex items-center gap-2 text-xs text-white/60">
                 <Calendar className="h-3.5 w-3.5 shrink-0 text-amber-400/60" />
@@ -699,7 +699,7 @@ function CreateGroupPageInner() {
               <Users className="h-3.5 w-3.5 shrink-0 text-amber-400/60" />
               <span>최대 {maxMembers}명</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: fee === 0 ? 'rgba(74,222,128,0.8)' : 'rgba(255,217,61,0.8)' }}>
+            <div className="flex items-center gap-2 text-xs font-bold" style={{ color: fee === 0 ? 'rgba(74,222,128,0.8)' : 'rgba(255,217,61,0.8)' }}>
               <span className="h-3.5 w-3.5 shrink-0 text-center text-[10px]">₩</span>
               <span>{previewFee}</span>
             </div>
@@ -708,7 +708,7 @@ function CreateGroupPageInner() {
           {/* 이런 분께 추천 */}
           {introWho && (
             <div>
-              <div className="mb-1.5 text-[10px] font-semibold text-white/35">이런 분께 추천</div>
+              <div className="mb-1.5 text-[10px] font-bold text-white/35">이런 분께 추천</div>
               <div className="whitespace-pre-line text-xs text-white/55">{introWho}</div>
             </div>
           )}
@@ -716,16 +716,16 @@ function CreateGroupPageInner() {
           {/* 모임 구성 (세션) */}
           {sessions.some((s) => s.title.trim()) && (
             <div>
-              <div className="mb-2 text-[10px] font-semibold text-white/35">모임 구성</div>
+              <div className="mb-2 text-[10px] font-bold text-white/35">모임 구성</div>
               <div className="space-y-2">
                 {sessions.filter((s) => s.title.trim()).map((s, i) => (
                   <div key={i} className="flex gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-none text-[10px] font-bold"
                       style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                       {i + 1}
                     </span>
                     <div>
-                      <div className="text-xs font-medium text-white/75">{s.title}</div>
+                      <div className="text-xs font-normal text-white/75">{s.title}</div>
                       {s.description && <div className="mt-0.5 text-[10px] text-white/40">{s.description}</div>}
                     </div>
                   </div>
@@ -738,10 +738,10 @@ function CreateGroupPageInner() {
           {(tagList.length > 0 || selectedNeed) && (
             <div className="flex flex-wrap gap-1.5">
               {tagList.map((t) => (
-                <span key={t} className="rounded-full px-2 py-0.5 text-[10px] text-white/40" style={{ background: 'rgba(255,255,255,0.05)' }}>#{t}</span>
+                <span key={t} className="rounded-none px-2 py-0.5 text-[10px] text-white/40" style={{ background: 'rgba(255,255,255,0.05)' }}>#{t}</span>
               ))}
               {selectedNeed && (
-                <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-amber-400/60" style={{ background: 'rgba(255,217,61,0.06)' }}>
+                <span className="flex items-center gap-1 rounded-none px-2 py-0.5 text-[10px] text-amber-400/60" style={{ background: 'rgba(255,217,61,0.06)' }}>
                   <Target className="h-2.5 w-2.5" />{selectedNeed.text}
                 </span>
               )}
@@ -751,20 +751,20 @@ function CreateGroupPageInner() {
           {/* 바닥장 소개 */}
           {(leaderProfile || leaderReason || leaderCareer) && (
             <div className="border-t border-white/8 pt-4 space-y-2.5">
-              <div className="text-[10px] font-semibold text-white/35">바닥장 소개</div>
+              <div className="text-[10px] font-bold text-white/35">바닥장 소개</div>
               {leaderProfile && (
                 <div className="flex items-center gap-2.5">
                   {leaderProfile.avatarUrl ? (
                     <Image src={leaderProfile.avatarUrl} alt={leaderProfile.displayName} width={36} height={36}
-                      className="h-9 w-9 rounded-full object-cover shrink-0" />
+                      className="h-9 w-9 rounded-none object-cover shrink-0" />
                   ) : (
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none text-sm font-bold"
                       style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                       {leaderProfile.displayName?.charAt(0) ?? '?'}
                     </div>
                   )}
                   <div>
-                    <div className="text-xs font-semibold text-white/80">{leaderProfile.displayName}</div>
+                    <div className="text-xs font-bold text-white/80">{leaderProfile.displayName}</div>
                     {(leaderProfile.jobFunction || leaderProfile.industry) && (
                       <div className="text-[10px] text-white/35">
                         {[leaderProfile.jobFunction, leaderProfile.industry].filter(Boolean).join(' · ')}
@@ -777,7 +777,7 @@ function CreateGroupPageInner() {
                 <div className="text-[11px] leading-relaxed text-white/50">{leaderCareer}</div>
               )}
               {leaderReason && (
-                <div className="rounded-lg px-3 py-2.5" style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
+                <div className="rounded-xs px-3 py-2.5" style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
                   <div className="mb-1 text-[9px] text-white/25">바닥장의 한마디</div>
                   <div className="text-xs italic text-white/50">
                     &ldquo;{leaderReason.slice(0, 100)}{leaderReason.length > 100 ? '...' : ''}&rdquo;
@@ -814,7 +814,7 @@ function CreateGroupPageInner() {
         {!showPreStep && (
           <button
             onClick={() => setShowPreview(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
+            className="flex items-center gap-1.5 rounded-xs border border-white/12 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
             style={{ background: 'rgba(255,255,255,0.04)' }}
           >
             <Eye className="h-3.5 w-3.5" /> 미리보기
@@ -829,10 +829,10 @@ function CreateGroupPageInner() {
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1">
               <div
-                className="h-1.5 rounded-full transition-all"
+                className="h-1.5 rounded-none transition-all"
                 style={{ background: i <= step ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.1)' }}
               />
-              <div className={`mt-2.5 text-[13px] font-medium ${i <= step ? 'text-white/80' : 'text-white/35'}`}>{s}</div>
+              <div className={`mt-2.5 text-[13px] font-normal ${i <= step ? 'text-white/80' : 'text-white/35'}`}>{s}</div>
             </div>
           ))}
         </div>
@@ -840,19 +840,19 @@ function CreateGroupPageInner() {
 
       {/* 바닥장 여부 안내 */}
       {!isBadakjang && !showPreStep && (
-        <div className="mx-6 mb-6 rounded-xl border p-5"
+        <div className="mx-6 mb-6 rounded-xs border p-5"
           style={{ background: 'rgba(255,217,61,0.04)', borderColor: 'rgba(255,217,61,0.15)' }}>
           <div className="flex items-start gap-3">
             <Crown className="mt-0.5 h-5 w-5 shrink-0 text-amber-400/60" />
             <div>
-              <p className="text-sm font-semibold text-white/70">
+              <p className="text-sm font-bold text-white/70">
                 지금은 <span className="text-amber-400">1회 단발 모임</span>만 개설할 수 있어요
               </p>
               <p className="mt-1.5 text-xs leading-relaxed text-white/45">
                 바닥장이 되면 연속 모임도 자유롭게 개설할 수 있습니다.
               </p>
               <Link href="/badak/apply"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-400/80 hover:text-amber-400">
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-amber-400/80 hover:text-amber-400">
                 바닥장 신청하기 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -872,19 +872,19 @@ function CreateGroupPageInner() {
             {/* 새로운 모임 */}
             <button
               onClick={() => setCreationType('new')}
-              className="w-full rounded-2xl border p-5 text-left transition-all"
+              className="w-full rounded-xs border p-5 text-left transition-all"
               style={{
                 borderColor: creationType === 'new' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                 background: creationType === 'new' ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.02)',
               }}
             >
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-none border"
                   style={{ borderColor: creationType === 'new' ? '#ffd93d' : 'rgba(255,255,255,0.2)' }}>
-                  {creationType === 'new' && <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />}
+                  {creationType === 'new' && <div className="h-2.5 w-2.5 rounded-none bg-amber-400" />}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white/80 mb-1">새로운 모임</div>
+                  <div className="text-sm font-bold text-white/80 mb-1">새로운 모임</div>
                   <div className="text-xs text-white/40 leading-relaxed">완전히 새로운 주제나 형식의 모임을 열어요. 이전 모임의 후기를 이 모임에 함께 보여줄 수도 있어요.</div>
                 </div>
               </div>
@@ -892,19 +892,19 @@ function CreateGroupPageInner() {
                 <div className="mt-4 ml-8">
                   <button
                     onClick={(e) => { e.stopPropagation(); setShowLeaderReviews((v) => !v); }}
-                    className="flex items-center gap-2.5 rounded-xl border p-3 w-full transition-all"
+                    className="flex items-center gap-2.5 rounded-xs border p-3 w-full transition-all"
                     style={{
                       borderColor: showLeaderReviews ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)',
                       background: showLeaderReviews ? 'rgba(255,217,61,0.05)' : 'transparent',
                     }}
                   >
-                    <div className="relative h-5 w-9 shrink-0 rounded-full transition-colors"
+                    <div className="relative h-5 w-9 shrink-0 rounded-none transition-colors"
                       style={{ background: showLeaderReviews ? '#ffd93d' : 'rgba(255,255,255,0.15)' }}>
-                      <div className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all"
+                      <div className="absolute top-0.5 h-4 w-4 rounded-none bg-white transition-all"
                         style={{ left: showLeaderReviews ? '17px' : '2px' }} />
                     </div>
                     <div className="text-left">
-                      <div className="text-xs font-medium text-white/70">이전 모임 후기 함께 보여주기</div>
+                      <div className="text-xs font-normal text-white/70">이전 모임 후기 함께 보여주기</div>
                       <div className="text-[10px] text-white/35 mt-0.5">바닥장으로서의 지난 후기가 이 모임 페이지에 표시됩니다</div>
                     </div>
                   </button>
@@ -915,19 +915,19 @@ function CreateGroupPageInner() {
             {/* 기존 모임 다음 시즌 */}
             <button
               onClick={() => setCreationType('continuation')}
-              className="w-full rounded-2xl border p-5 text-left transition-all"
+              className="w-full rounded-xs border p-5 text-left transition-all"
               style={{
                 borderColor: creationType === 'continuation' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                 background: creationType === 'continuation' ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.02)',
               }}
             >
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-none border"
                   style={{ borderColor: creationType === 'continuation' ? '#ffd93d' : 'rgba(255,255,255,0.2)' }}>
-                  {creationType === 'continuation' && <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />}
+                  {creationType === 'continuation' && <div className="h-2.5 w-2.5 rounded-none bg-amber-400" />}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white/80 mb-1">기존 모임 다음 시즌</div>
+                  <div className="text-sm font-bold text-white/80 mb-1">기존 모임 다음 시즌</div>
                   <div className="text-xs text-white/40 leading-relaxed">이전 시즌의 연장선으로 모임을 이어가요. 이전 시즌 후기가 자동으로 이어집니다.</div>
                 </div>
               </div>
@@ -942,18 +942,18 @@ function CreateGroupPageInner() {
                           setParentGroupId(g.id);
                           setSeasonNumber(g.season_number + 1);
                         }}
-                        className="flex w-full items-center justify-between rounded-xl border p-3 transition-all"
+                        className="flex w-full items-center justify-between rounded-xs border p-3 transition-all"
                         style={{
                           borderColor: isSelected ? '#ffd93d' : 'rgba(255,255,255,0.08)',
                           background: isSelected ? 'rgba(255,217,61,0.05)' : 'transparent',
                         }}
                       >
                         <div className="text-left">
-                          <div className="text-xs font-medium text-white/70">{g.title}</div>
+                          <div className="text-xs font-normal text-white/70">{g.title}</div>
                           <div className="text-[10px] text-white/35 mt-0.5">시즌 {g.season_number} 완료</div>
                         </div>
                         {isSelected && (
-                          <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          <span className="shrink-0 rounded-none px-2 py-0.5 text-[10px] font-bold"
                             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                             시즌 {seasonNumber}로 개설
                           </span>
@@ -973,7 +973,7 @@ function CreateGroupPageInner() {
               setShowPreStep(false);
             }}
             disabled={!creationType || (creationType === 'continuation' && !parentGroupId)}
-            className="w-full rounded-2xl py-4 text-sm font-semibold transition-all"
+            className="w-full rounded-xs py-4 text-sm font-bold transition-all"
             style={{
               background: (!creationType || (creationType === 'continuation' && !parentGroupId))
                 ? 'rgba(255,255,255,0.06)'
@@ -995,11 +995,11 @@ function CreateGroupPageInner() {
           <div className="space-y-9">
             {/* 커버 이미지 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">커버 이미지 (선택)</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">커버 이미지 (선택)</label>
               {coverImage ? (
                 <div className="space-y-2">
                   {/* 이미지 프리뷰 + 드래그 위치 조절 */}
-                  <div className="relative h-40 overflow-hidden rounded-xl cursor-move select-none"
+                  <div className="relative h-40 overflow-hidden rounded-xs cursor-move select-none"
                     onMouseDown={(e) => {
                       setIsDraggingCover(true);
                       coverDragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: coverPosition.x, startPosY: coverPosition.y };
@@ -1020,14 +1020,14 @@ function CreateGroupPageInner() {
                     {/* 드래그 힌트 */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
                       style={{ background: 'rgba(0,0,0,0.25)' }}>
-                      <div className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-white font-medium"
+                      <div className="flex items-center gap-1.5 rounded-none px-3 py-1.5 text-xs text-white font-normal"
                         style={{ background: 'rgba(0,0,0,0.5)' }}>
                         <Move className="h-3.5 w-3.5" /> 드래그해서 위치 조정
                       </div>
                     </div>
                     {/* 삭제 버튼 */}
                     <button onClick={(e) => { e.stopPropagation(); setCoverImage(null); setCoverFile(null); setCoverPosition({ x: 50, y: 50 }); }}
-                      className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70">
+                      className="absolute top-2 right-2 rounded-none bg-black/50 p-1.5 text-white hover:bg-black/70">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
@@ -1036,12 +1036,12 @@ function CreateGroupPageInner() {
               ) : (
                 <div className="relative">
                   <button onClick={() => setShowCoverDropdown(!showCoverDropdown)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 py-8 text-sm text-white/30 hover:border-white/25 hover:text-white/50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xs border border-dashed border-white/15 py-8 text-sm text-white/30 hover:border-white/25 hover:text-white/50"
                     style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <ImagePlus className="h-5 w-5" /> 이미지 추가
                   </button>
                   {showCoverDropdown && (
-                    <div className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-xl border border-white/15 shadow-2xl"
+                    <div className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-xs border border-white/15"
                       style={{ background: '#1e1e38' }}>
                       <button onClick={() => { fileInputRef.current?.click(); setShowCoverDropdown(false); }}
                         className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5">
@@ -1057,7 +1057,7 @@ function CreateGroupPageInner() {
                     <div className="mt-2 flex gap-2">
                       <input value={coverUrlInput} onChange={(e) => setCoverUrlInput(e.target.value)}
                         placeholder="https://example.com/image.jpg"
-                        className="flex-1 rounded-xl border border-white/12 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30" />
+                        className="flex-1 rounded-xs border border-white/12 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30" />
                       <button onClick={() => {
                         if (coverUrlInput.trim()) {
                           setCoverImage(coverUrlInput.trim());
@@ -1067,12 +1067,12 @@ function CreateGroupPageInner() {
                         setShowUrlInput(false);
                         setCoverUrlInput('');
                       }}
-                        className="rounded-xl px-3 py-2.5 text-sm font-medium"
+                        className="rounded-xs px-3 py-2.5 text-sm font-normal"
                         style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                         삽입
                       </button>
                       <button onClick={() => { setShowUrlInput(false); setCoverUrlInput(''); }}
-                        className="rounded-xl px-2.5 text-white/30 hover:text-white/50">
+                        className="rounded-xs px-2.5 text-white/30 hover:text-white/50">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
@@ -1084,34 +1084,34 @@ function CreateGroupPageInner() {
 
             {/* 모임 제목 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">모임 제목 *</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">모임 제목 *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)}
                 placeholder="예: AI 실무 프롬프트 스터디"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 한 줄 소개 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">한 줄 소개</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">한 줄 소개</label>
               <input value={tagline} onChange={(e) => setTagline(e.target.value)}
                 maxLength={60}
                 placeholder="예: 에이전시↔인하우스를 오간 마케터들의 솔직한 이직 이야기"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
               <p className="mt-1.5 text-xs text-white/30">모임 상세 페이지 제목 아래에 표시됩니다 ({tagline.length}/60)</p>
             </div>
 
             {/* 모임 소개 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">모임 소개</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">모임 소개</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)}
                 placeholder={'이 모임에서 무엇을 하나요?\n어떤 사람에게 좋나요?'}
                 rows={4}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 운영방식 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">운영방식</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">운영방식</label>
               <div className="flex flex-wrap gap-2">
                 {([
                   { id: 'networking', label: '네트워킹' },
@@ -1123,7 +1123,7 @@ function CreateGroupPageInner() {
                   { id: 'workshop', label: '워크숍/세미나' },
                 ]).map(({ id, label }) => (
                   <button key={id} onClick={() => setGroupCategory(id)}
-                    className="rounded-full px-4 py-2 text-sm font-medium transition-all"
+                    className="rounded-none px-4 py-2 text-sm font-normal transition-all"
                     style={{
                       background: groupCategory === id ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
                       color: groupCategory === id ? '#ffd93d' : 'rgba(255,255,255,0.5)',
@@ -1137,7 +1137,7 @@ function CreateGroupPageInner() {
 
             {/* 모임 유형 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">모임 유형</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">모임 유형</label>
               <div className="grid grid-cols-2 gap-3">
                 {([
                   { id: 'onetime' as const, icon: Zap, label: '1회 단발' },
@@ -1148,7 +1148,7 @@ function CreateGroupPageInner() {
                     <button key={id}
                       onClick={() => !disabled && setMeetingType(id)}
                       disabled={disabled}
-                      className="relative flex items-center justify-center gap-2.5 rounded-xl border px-4 py-4 text-sm font-semibold transition-all"
+                      className="relative flex items-center justify-center gap-2.5 rounded-xs border px-4 py-4 text-sm font-bold transition-all"
                       style={{
                         borderColor: meetingType === id ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                         background: meetingType === id ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -1157,7 +1157,7 @@ function CreateGroupPageInner() {
                       }}>
                       <Icon className="h-4 w-4" /> {label}
                       {disabled && (
-                        <span className="absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        <span className="absolute -top-2 -right-2 rounded-none px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}>
                           바닥장
                         </span>
@@ -1174,17 +1174,17 @@ function CreateGroupPageInner() {
               {!isBadakjang && (
                 <Link
                   href="/badak/apply"
-                  className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors hover:bg-amber-400/10"
+                  className="mt-3 flex items-center justify-between gap-3 rounded-xs border px-4 py-3 transition-colors hover:bg-amber-400/10"
                   style={{ background: 'rgba(255,217,61,0.05)', borderColor: 'rgba(255,217,61,0.2)' }}
                 >
                   <div className="flex items-center gap-2.5">
                     <Crown className="h-4 w-4 text-amber-400/80" />
                     <div>
-                      <div className="text-sm font-semibold text-amber-400">연속 모임도 열고 싶다면</div>
+                      <div className="text-sm font-bold text-amber-400">연속 모임도 열고 싶다면</div>
                       <div className="mt-0.5 text-xs text-white/45">바닥장 권한 신청하고 모든 모임 유형을 잠금 해제하세요</div>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-amber-400">신청 <ArrowRight className="h-3.5 w-3.5" /></div>
+                  <div className="flex shrink-0 items-center gap-1 text-sm font-bold text-amber-400">신청 <ArrowRight className="h-3.5 w-3.5" /></div>
                 </Link>
               )}
 
@@ -1194,7 +1194,7 @@ function CreateGroupPageInner() {
                   <div className="flex gap-1.5">
                     {[2, 3, 4, 5, 6, 7, 8].map((n) => (
                       <button key={n} onClick={() => setSeriesCount(n)}
-                        className="flex-1 rounded-lg border py-2 text-xs font-semibold transition-all"
+                        className="flex-1 rounded-xs border py-2 text-xs font-bold transition-all"
                         style={{
                           borderColor: seriesCount === n ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                           background: seriesCount === n ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -1210,10 +1210,10 @@ function CreateGroupPageInner() {
 
             {/* 참여 방식 */}
             <div>
-              <label className="mb-2 block text-xs font-medium text-white/40">참여 방식</label>
+              <label className="mb-2 block text-xs font-normal text-white/40">참여 방식</label>
               <div className="flex gap-2">
                 <button onClick={() => setJoinType('approval')}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-3 text-xs font-semibold transition-all"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xs border px-3 py-3 text-xs font-bold transition-all"
                   style={{
                     borderColor: joinType === 'approval' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                     background: joinType === 'approval' ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -1222,7 +1222,7 @@ function CreateGroupPageInner() {
                   <ShieldCheck className="h-3.5 w-3.5" /> 승인제
                 </button>
                 <button onClick={() => setJoinType('firstcome')}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-3 text-xs font-semibold transition-all"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xs border px-3 py-3 text-xs font-bold transition-all"
                   style={{
                     borderColor: joinType === 'firstcome' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                     background: joinType === 'firstcome' ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -1240,7 +1240,7 @@ function CreateGroupPageInner() {
 
             {/* 연결 니즈 */}
             <div ref={needDropdownRef} className="relative">
-              <label className="mb-3 block text-[15px] font-medium text-white/75">
+              <label className="mb-3 block text-[15px] font-normal text-white/75">
                 연결 니즈 (선택)
                 {title.trim().length >= 2 && (
                   <span className="ml-2 text-[10px] text-amber-400/60">제목 기반 추천순</span>
@@ -1248,14 +1248,14 @@ function CreateGroupPageInner() {
               </label>
               <button type="button"
                 onClick={() => setNeedDropdownOpen(!needDropdownOpen)}
-                className="flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-all"
+                className="flex w-full items-center justify-between rounded-xs border px-4 py-3 text-left text-sm transition-all"
                 style={{
                   borderColor: needDropdownOpen ? 'rgba(255,217,61,0.4)' : selectedNeed ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.12)',
                   background: selectedNeed ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.04)',
                 }}>
                 {selectedNeed ? (
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
+                    <span className="shrink-0 rounded-none px-1.5 py-0.5 text-[9px] font-bold"
                       style={{
                         background: selectedNeed.members >= 15 ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.1)',
                         color: selectedNeed.members >= 15 ? '#ffd93d' : 'rgba(255,255,255,0.5)',
@@ -1272,18 +1272,18 @@ function CreateGroupPageInner() {
               </button>
 
               {needDropdownOpen && (
-                <div className="absolute left-0 right-0 bottom-full z-50 mb-1 overflow-hidden rounded-xl border border-white/15 shadow-2xl"
+                <div className="absolute left-0 right-0 bottom-full z-50 mb-1 overflow-hidden rounded-xs border border-white/15"
                   style={{ background: '#1e1e38' }}>
                   <div className="border-b border-white/8 p-2">
                     <input value={needSearch} onChange={(e) => setNeedSearch(e.target.value)}
                       placeholder="니즈 검색..." autoFocus
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/25 focus:border-amber-400/30" />
+                      className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/25 focus:border-amber-400/30" />
                   </div>
                   <button type="button"
                     onClick={() => { setNeedId(''); setNeedDropdownOpen(false); setNeedSearch(''); }}
                     className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs transition-colors hover:bg-white/5"
                     style={{ color: !needId ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
+                    <span className="flex h-5 w-5 items-center justify-center rounded-none text-[10px]"
                       style={{ background: 'rgba(255,255,255,0.08)' }}>∞</span>
                     제한 없음, 모두에게
                     {!needId && <Check className="ml-auto h-3.5 w-3.5 text-amber-400" />}
@@ -1300,7 +1300,7 @@ function CreateGroupPageInner() {
                             onClick={() => { setNeedId(n.id); setNeedDropdownOpen(false); setNeedSearch(''); }}
                             className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
                             style={{ background: isSelected ? 'rgba(255,217,61,0.08)' : undefined }}>
-                            <div className="flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded-full"
+                            <div className="flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded-none"
                               style={{
                                 background: n.members >= 15 ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.06)',
                                 border: `1px solid ${n.members >= 15 ? 'rgba(255,217,61,0.25)' : 'rgba(255,255,255,0.1)'}`,
@@ -1333,11 +1333,11 @@ function CreateGroupPageInner() {
 
             {/* 태그 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">태그 * <span className="text-xs text-white/30 font-normal">(최대 5개)</span></label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">태그 * <span className="text-xs text-white/30 font-normal">(최대 5개)</span></label>
               {tagList.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {tagList.map((tag) => (
-                    <span key={tag} className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                    <span key={tag} className="flex items-center gap-1 rounded-none px-3 py-1 text-xs font-normal"
                       style={{ background: 'rgba(255,217,61,0.1)', color: '#ffd93d' }}>
                       #{tag}
                       <button onClick={() => removeTag(tag)} className="ml-0.5 opacity-50 hover:opacity-100"><X className="h-3 w-3" /></button>
@@ -1353,7 +1353,7 @@ function CreateGroupPageInner() {
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter' && tagInput.trim()) { e.preventDefault(); addTag(tagInput); } }}
                 placeholder=",로 구분 (최대 5개)"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
           </div>
         )}
@@ -1365,18 +1365,18 @@ function CreateGroupPageInner() {
             {meetingType === 'onetime' && (
               <>
                 <div>
-                  <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/40">
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-normal text-white/40">
                     <Calendar className="h-3.5 w-3.5" /> 날짜 *
                   </label>
                   <div className="mb-2 flex flex-wrap gap-2">
                     {QUICK_DATES.map((d) => <Chip key={d.value} selected={eventDate === d.value} onClick={() => setEventDate(d.value)}>{d.label}</Chip>)}
                   </div>
                   <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
-                    className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none" />
+                    className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none" />
                   {eventDate && <p className="mt-1.5 text-xs text-white/35">{formatDate(eventDate)}</p>}
                 </div>
                 <div>
-                  <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/40">
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-normal text-white/40">
                     <Clock className="h-3.5 w-3.5" /> 시간
                   </label>
                   <div className="mb-2 flex flex-wrap gap-2">
@@ -1385,7 +1385,7 @@ function CreateGroupPageInner() {
                     ))}
                   </div>
                   <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)}
-                    className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none" />
+                    className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none" />
                 </div>
               </>
             )}
@@ -1393,7 +1393,7 @@ function CreateGroupPageInner() {
             {/* ─ 연속 모임: 달력 + 회차 목록 ─ */}
             {meetingType === 'series' && (
               <div>
-                <label className="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/40">
+                <label className="mb-3 flex items-center gap-1.5 text-xs font-normal text-white/40">
                   <Repeat className="h-3.5 w-3.5" /> 회차별 일정 ({seriesCount}회) *
                 </label>
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -1418,13 +1418,13 @@ function CreateGroupPageInner() {
                   {/* 회차 목록 */}
                   <div className="flex-1 space-y-2">
                     {seriesDates.map((sd, i) => (
-                      <div key={sd.date} className="rounded-xl border border-white/10 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <div key={sd.date} className="rounded-xs border border-white/10 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
                         <div className="mb-2 flex items-center gap-2">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-[10px] font-bold"
                             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                             {i + 1}
                           </span>
-                          <span className="flex-1 text-xs font-medium text-white/70">{formatDate(sd.date)}</span>
+                          <span className="flex-1 text-xs font-normal text-white/70">{formatDate(sd.date)}</span>
                           <button
                             type="button"
                             onClick={() => setSeriesDates(seriesDates.filter((x) => x.date !== sd.date))}
@@ -1440,7 +1440,7 @@ function CreateGroupPageInner() {
                               next[i] = { ...next[i], time: e.target.value };
                               setSeriesDates(next);
                             }}
-                            className="w-28 rounded-lg border border-white/10 bg-transparent px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#ffd93d]/40" />
+                            className="w-28 rounded-xs border border-white/10 bg-transparent px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#ffd93d]/40" />
                           <input type="text" value={sd.location}
                             onChange={(e) => {
                               const next = [...seriesDates];
@@ -1448,7 +1448,7 @@ function CreateGroupPageInner() {
                               setSeriesDates(next);
                             }}
                             placeholder="장소 (미입력시 기본 장소)"
-                            className="flex-1 rounded-lg border border-white/10 bg-transparent px-2.5 py-1.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/40" />
+                            className="flex-1 rounded-xs border border-white/10 bg-transparent px-2.5 py-1.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/40" />
                         </div>
                         {sd.time && (
                           <div className="mt-1.5 ml-8 text-[10px] text-white/30">
@@ -1460,9 +1460,9 @@ function CreateGroupPageInner() {
 
                     {/* 빈 슬롯 */}
                     {Array.from({ length: seriesCount - seriesDates.length }).map((_, i) => (
-                      <div key={`empty-${i}`} className="flex items-center gap-2 rounded-xl border border-dashed border-white/8 px-3 py-3"
+                      <div key={`empty-${i}`} className="flex items-center gap-2 rounded-xs border border-dashed border-white/8 px-3 py-3"
                         style={{ background: 'rgba(255,255,255,0.01)' }}>
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white/20"
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-[10px] font-bold text-white/20"
                           style={{ background: 'rgba(255,255,255,0.06)' }}>
                           {seriesDates.length + i + 1}
                         </span>
@@ -1477,7 +1477,7 @@ function CreateGroupPageInner() {
 
             {/* 장소 */}
             <div>
-              <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/40">
+              <label className="mb-2 flex items-center gap-1.5 text-xs font-normal text-white/40">
                 <MapPin className="h-3.5 w-3.5" /> 기본 장소 *
               </label>
               <div className="mb-2 flex flex-wrap gap-2">
@@ -1485,25 +1485,25 @@ function CreateGroupPageInner() {
               </div>
               <input value={location} onChange={(e) => setLocation(e.target.value)}
                 placeholder="직접 입력"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 상세 주소 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">상세 주소 (선택)</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">상세 주소 (선택)</label>
               <input value={locationDetail} onChange={(e) => setLocationDetail(e.target.value)}
                 placeholder="카페명, 건물명, 층수 등"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 참여비 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">참여비</label>
+              <label className="mb-3 block text-[15px] font-normal text-white/75">참여비</label>
               <div className="space-y-3">
                 <p className="text-xs" style={{ color: 'rgba(255,217,61,0.6)' }}>1회 모임 3~7만원 권장</p>
                 {/* 별도비용 청구 금지 안내 */}
-                <div className="rounded-lg px-3.5 py-3 text-[11px] leading-relaxed" style={{ background: 'rgba(255,100,100,0.07)', border: '1px solid rgba(255,100,100,0.18)', color: 'rgba(255,180,180,0.7)' }}>
-                  <span className="font-semibold" style={{ color: 'rgba(255,130,130,0.9)' }}>별도 비용 청구 불가</span> — 교재·실습·재료비 등 모임에서 발생하는 모든 비용은 참가비에 포함되어야 합니다. 참가자에게 현장에서 추가 비용을 요구할 수 없습니다.
+                <div className="rounded-xs px-3.5 py-3 text-[11px] leading-relaxed" style={{ background: 'rgba(255,100,100,0.07)', border: '1px solid rgba(255,100,100,0.18)', color: 'rgba(255,180,180,0.7)' }}>
+                  <span className="font-bold" style={{ color: 'rgba(255,130,130,0.9)' }}>별도 비용 청구 불가</span> — 교재·실습·재료비 등 모임에서 발생하는 모든 비용은 참가비에 포함되어야 합니다. 참가자에게 현장에서 추가 비용을 요구할 수 없습니다.
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Chip selected={fee === 0} onClick={() => setFee(0)}>무료</Chip>
@@ -1514,7 +1514,7 @@ function CreateGroupPageInner() {
                 <div className="relative">
                   <input type="number" value={fee || ''} onChange={(e) => setFee(Number(e.target.value))}
                     placeholder="직접 입력 (0이면 무료)"
-                    className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                    className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">원</span>
                 </div>
                 {fee > 0 && meetingType === 'series' && (
@@ -1530,12 +1530,12 @@ function CreateGroupPageInner() {
 
             {/* 최대 인원 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">
+              <label className="mb-3 block text-[15px] font-normal text-white/75">
                 <Users className="mr-1 inline h-3 w-3" />최대 인원
               </label>
               <div className="relative">
                 <input type="number" value={maxMembers} onChange={(e) => setMaxMembers(Number(e.target.value))} min={2} max={100}
-                  className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none" />
+                  className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none" />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">명</span>
               </div>
             </div>
@@ -1548,8 +1548,8 @@ function CreateGroupPageInner() {
               const platformCut = Math.round(totalRevenue * platformRate / 100);
               const leaderCut = totalRevenue - platformCut - rentalCost - otherCost;
               return (
-                <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
-                  <p className="text-xs font-semibold" style={{ color: 'rgba(255,217,61,0.8)' }}>예상 수익 ({maxMembers}명 전원 참여 기준)</p>
+                <div className="rounded-xs p-4 space-y-2.5" style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
+                  <p className="text-xs font-bold" style={{ color: 'rgba(255,217,61,0.8)' }}>예상 수익 ({maxMembers}명 전원 참여 기준)</p>
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
                       <span style={{ color: 'rgba(255,255,255,0.4)' }}>총 참가비 수입</span>
@@ -1564,7 +1564,7 @@ function CreateGroupPageInner() {
                       <div className="relative flex-1">
                         <input type="number" value={rentalCost || ''} onChange={(e) => setRentalCost(Number(e.target.value))}
                           placeholder="0"
-                          className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
+                          className="w-full rounded-xs border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white/25">원</span>
                       </div>
                       {rentalCost > 0 && <span style={{ color: 'rgba(255,100,100,0.7)' }}>−{rentalCost.toLocaleString()}원</span>}
@@ -1574,13 +1574,13 @@ function CreateGroupPageInner() {
                       <div className="relative flex-1">
                         <input type="number" value={otherCost || ''} onChange={(e) => setOtherCost(Number(e.target.value))}
                           placeholder="0"
-                          className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
+                          className="w-full rounded-xs border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white/25">원</span>
                       </div>
                       {otherCost > 0 && <span style={{ color: 'rgba(255,100,100,0.7)' }}>−{otherCost.toLocaleString()}원</span>}
                     </div>
                     <div className="my-1 border-t" style={{ borderColor: 'rgba(255,217,61,0.12)' }} />
-                    <div className="flex justify-between text-xs font-semibold">
+                    <div className="flex justify-between text-xs font-bold">
                       <span style={{ color: 'rgba(255,217,61,0.9)' }}>바닥장 예상 수익</span>
                       <span style={{ color: leaderCut >= 0 ? 'rgba(255,217,61,0.9)' : 'rgba(255,100,100,0.8)' }}>{leaderCut.toLocaleString()}원</span>
                     </div>
@@ -1596,18 +1596,18 @@ function CreateGroupPageInner() {
           <div className="space-y-9">
             {/* 이런 분께 추천 */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-white/75">이런 분께 추천 (선택)</label>
+              <label className="mb-1.5 block text-sm font-normal text-white/75">이런 분께 추천 (선택)</label>
               <p className="mb-2 text-xs text-white/30">어떤 분들이 이 모임에 어울리는지 적어주세요</p>
               <textarea value={introWho} onChange={(e) => setIntroWho(e.target.value)}
                 placeholder={'예: B2B SaaS 마케팅 실무자\n퍼포먼스 마케팅을 처음 배우는 분\n마케터와 네트워킹을 원하는 분'}
                 rows={3}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 모임 구성 (세션) — 모임유형과 연동 */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-white/75">
+                <label className="text-sm font-normal text-white/75">
                   모임 구성
                   {meetingType === 'onetime' && <span className="ml-2 text-[10px] text-white/30">1회 단발</span>}
                   {meetingType === 'series' && <span className="ml-2 text-[10px] text-amber-400/50">{seriesCount}회 연속 — 회차별 입력</span>}
@@ -1635,7 +1635,7 @@ function CreateGroupPageInner() {
                   return (
                     <div key={i} className="flex gap-2">
                       <div className="flex flex-col items-center">
-                        <div className="mt-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                        <div className="mt-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-[11px] font-bold"
                           style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                           {i + 1}
                         </div>
@@ -1659,14 +1659,14 @@ function CreateGroupPageInner() {
                           value={session.title}
                           onChange={(e) => { const next = [...sessions]; next[i] = { ...next[i], title: e.target.value }; setSessions(next); }}
                           placeholder={`${i + 1}회차 제목`}
-                          className="w-full rounded-lg border border-white/12 bg-white/6 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+                          className="w-full rounded-xs border border-white/12 bg-white/6 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
                         />
                         <textarea
                           value={session.description}
                           onChange={(e) => { const next = [...sessions]; next[i] = { ...next[i], description: e.target.value }; setSessions(next); }}
                           placeholder="간단한 내용 설명"
                           rows={2}
-                          className="w-full resize-none rounded-lg border border-white/12 bg-white/6 px-3 py-2 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+                          className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-3 py-2 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
                         />
                       </div>
                       {meetingType !== 'series' && sessions.length > 1 && (
@@ -1686,21 +1686,21 @@ function CreateGroupPageInner() {
 
             {/* 상세 안내 */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-white/75">상세 안내 (선택)</label>
+              <label className="mb-1.5 block text-sm font-normal text-white/75">상세 안내 (선택)</label>
               <p className="mb-2 text-xs text-white/30">준비물, 진행 방식, 참고 사항 등을 자유롭게 적어주세요</p>
               <textarea value={guide} onChange={(e) => setGuide(e.target.value)}
                 placeholder={'예: 노트북 지참 필수\n오픈채팅방 참여 후 참석 확정'}
                 rows={4}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 주요 공지 */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-white/75">주요 공지 (선택)</label>
+              <label className="mb-1.5 block text-sm font-normal text-white/75">주요 공지 (선택)</label>
               <p className="mb-2 text-xs text-white/30">상세 페이지 상단에 눈에 띄게 표시될 공지사항입니다</p>
               <input value={notice} onChange={(e) => setNotice(e.target.value)}
                 placeholder="예: 4/26 정원이 거의 찼습니다. 서둘러 신청하세요!"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xs border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
             </div>
           </div>
         )}
@@ -1710,18 +1710,18 @@ function CreateGroupPageInner() {
           <div className="space-y-6">
             {/* 바닥장 프로필 카드 */}
             {leaderProfile && (
-              <div className="flex items-center gap-3 rounded-xl border border-white/8 p-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="flex items-center gap-3 rounded-xs border border-white/8 p-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 {leaderProfile.avatarUrl ? (
                   <Image src={leaderProfile.avatarUrl} alt={leaderProfile.displayName} width={48} height={48}
-                    className="h-12 w-12 rounded-full object-cover shrink-0" />
+                    className="h-12 w-12 rounded-none object-cover shrink-0" />
                 ) : (
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-bold"
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none text-base font-bold"
                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                     {leaderProfile.displayName?.charAt(0) ?? '?'}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-white">{leaderProfile.displayName}</div>
+                  <div className="text-sm font-bold text-white">{leaderProfile.displayName}</div>
                   {(leaderProfile.jobFunction || leaderProfile.industry) && (
                     <div className="mt-0.5 text-xs text-white/45">
                       {[leaderProfile.jobFunction, leaderProfile.industry].filter(Boolean).join(' · ')}
@@ -1735,12 +1735,12 @@ function CreateGroupPageInner() {
             {/* 개인 이력 */}
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-[15px] font-medium text-white/75">개인 이력 *</label>
+                <label className="text-[15px] font-normal text-white/75">개인 이력 *</label>
                 {leaderProfile?.career && (
                   <button
                     type="button"
                     onClick={importCareerFromProfile}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+                    className="flex items-center gap-1.5 rounded-xs px-3 py-1.5 text-xs font-normal transition-all"
                     style={{
                       background: 'rgba(255,255,255,0.05)',
                       color: 'rgba(255,255,255,0.4)',
@@ -1756,19 +1756,19 @@ function CreateGroupPageInner() {
                 onChange={(e) => setLeaderCareer(e.target.value)}
                 placeholder="주요 경력, 전문 분야, 성과 등을 적어주세요"
                 rows={3}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
               />
             </div>
 
             {/* 바닥장 소개 */}
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-[15px] font-medium text-white/75">바닥장 소개 * <span className="text-xs text-white/30 font-normal">(10자 이상)</span></label>
+                <label className="text-[15px] font-normal text-white/75">바닥장 소개 * <span className="text-xs text-white/30 font-normal">(10자 이상)</span></label>
                 {leaderProfile?.bio && (
                   <button
                     type="button"
                     onClick={importBioFromProfile}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+                    className="flex items-center gap-1.5 rounded-xs px-3 py-1.5 text-xs font-normal transition-all"
                     style={{
                       background: 'rgba(255,255,255,0.05)',
                       color: 'rgba(255,255,255,0.4)',
@@ -1784,13 +1784,13 @@ function CreateGroupPageInner() {
                 onChange={(e) => setLeaderReason(e.target.value)}
                 placeholder="왜 이 모임을 열고 싶은지, 참여자에게 어떤 도움이 되는지 적어주세요"
                 rows={5}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
+                className="w-full resize-none rounded-xs border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
               />
               <div className="mt-1 text-right text-[10px] text-white/20">{leaderReason.length}자</div>
             </div>
 
             {/* 마이페이지에도 저장 */}
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/8 px-4 py-3.5"
+            <label className="flex cursor-pointer items-center gap-3 rounded-xs border border-white/8 px-4 py-3.5"
               style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div
                 onClick={() => setSaveToProfile(!saveToProfile)}
@@ -1805,7 +1805,7 @@ function CreateGroupPageInner() {
               <span className="text-xs text-white/50">이 내용을 마이페이지 이력·소개에도 저장하기</span>
             </label>
 
-            <div className="rounded-xl border border-white/8 px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div className="rounded-xs border border-white/8 px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <p className="text-xs text-white/35 leading-relaxed">
                 바닥장 소개는 모임 상세 페이지에 공개됩니다. 참여자가 신뢰할 수 있도록 솔직하게 작성해주세요.
               </p>
@@ -1823,7 +1823,7 @@ function CreateGroupPageInner() {
         {step < 3 ? (
           <>
             <button onClick={() => setStep(step + 1)} disabled={!canNext()}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
+              className="flex w-full items-center justify-center gap-2 rounded-xs py-4 text-[15px] font-bold transition-all disabled:opacity-30"
               style={{
                 background: canNext() ? 'linear-gradient(135deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.08)',
                 color: canNext() ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
@@ -1839,7 +1839,7 @@ function CreateGroupPageInner() {
         ) : (
           <>
             <button onClick={handleSubmit} disabled={!canNext() || submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
+              className="flex w-full items-center justify-center gap-2 rounded-xs py-4 text-[15px] font-bold transition-all disabled:opacity-30"
               style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}>
               {submitting ? '생성 중...' : '모임 개설하기'} <Check className="h-4 w-4" />
             </button>

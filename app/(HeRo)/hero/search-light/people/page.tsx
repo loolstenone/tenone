@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Loader2, ArrowLeft, Users, ArrowRight } from "lucide-react";
+import { ArrowLeft, Users, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import {
@@ -102,13 +102,13 @@ export default function SearchLightPeoplePage() {
         return () => { if (timer.current) clearTimeout(timer.current); };
     }, [criteria, traits, companyId, isAuthenticated]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
-    if (companies === null) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (companies === null) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (forbidden || companies.length === 0) return (
         <div className="min-h-screen pt-32 px-6 text-center">
             <p className="text-sm text-neutral-600 mb-4">기업 회원으로 등록하면 원하는 인재상을 찾을 수 있습니다.</p>
-            <Link href="/hero/company/register" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700">기업 등록하기 <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/hero/company/register" className="inline-flex items-center gap-2 px-6 py-3 rounded-none bg-[#E53935] text-white text-sm font-bold hover:bg-red-700">기업 등록하기 <ArrowRight className="h-4 w-4" /></Link>
         </div>
     );
 
@@ -142,7 +142,7 @@ export default function SearchLightPeoplePage() {
                 </Link>
                 <div>
                     <p className="text-sm font-bold text-[#E53935] mb-2">써치 라이트 · 기업</p>
-                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">좋은 사람을 찾습니다</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">좋은 사람을 찾습니다</h1>
                     <p className="text-sm text-neutral-600 break-keep">
                         원하는 인재상을 고르면 조건에 맞는 HeRo 인재가 몇 명인지, 원하는 성향의 사람이 어느 정도 있는지 바로 보여 드립니다.
                         개인의 검사 결과는 본인만 보며, 이름·연락처는 인재가 제안에 응할 때만 이력서와 함께 전달됩니다.
@@ -151,13 +151,13 @@ export default function SearchLightPeoplePage() {
 
                 {companies.length > 1 && (
                     <select value={companyId} onChange={e => { setCompanyId(e.target.value); setOffers([]); }}
-                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white">
+                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs bg-white">
                         {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 )}
 
                 {/* ① 조건 */}
-                <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-7">
+                <div className="bg-white border border-neutral-200 rounded-xs p-6 space-y-7">
                     <Field label="직무 (필수)">
                         <ChipPick options={OFFER_JOB_FUNCTIONS} values={criteria.job_functions} onChange={v => set("job_functions", v)} />
                     </Field>
@@ -180,14 +180,14 @@ export default function SearchLightPeoplePage() {
                 </div>
 
                 {/* 인원 */}
-                <div className="bg-white border border-neutral-200 rounded-xl p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+                <div className="bg-white border border-neutral-200 rounded-xs p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xs bg-neutral-100 flex items-center justify-center shrink-0">
                         <Users className="h-6 w-6 text-neutral-500" />
                     </div>
                     <div>
                         <p className="text-xs text-neutral-500">조건에 맞는 인재</p>
-                        <p className="text-2xl font-extrabold tracking-tight">
-                            {counting ? <Loader2 className="h-5 w-5 animate-spin text-neutral-300" /> : count ? count.label : "직무를 골라 주세요"}
+                        <p className="text-2xl font-bold tracking-tight">
+                            {counting ? <span className="text-xs">처리 중</span> : count ? count.label : "직무를 골라 주세요"}
                         </p>
                     </div>
                 </div>
@@ -197,7 +197,7 @@ export default function SearchLightPeoplePage() {
                 {report && <TraitWishCard value={traits} onChange={setTraits} result={report.traits} />}
 
                 {/* ② 제안 작성 */}
-                <div className={clsx("bg-white border border-neutral-200 rounded-xl p-6 space-y-5", !count?.enough && "opacity-60")}>
+                <div className={clsx("bg-white border border-neutral-200 rounded-xs p-6 space-y-5", !count?.enough && "opacity-60")}>
                     <h2 className="font-bold text-lg">이 인재들에게 제안하기</h2>
                     <Field label="제안 종류">
                         <ChipSingle options={OFFER_TYPES} value={form.offerType} onChange={v => setForm(f => ({ ...f, offerType: v || "interview" }))} />
@@ -205,7 +205,7 @@ export default function SearchLightPeoplePage() {
                     {jds.length > 0 && (
                         <Field label="연결할 채용 공고 (선택)">
                             <select value={form.jdId} onChange={e => setForm(f => ({ ...f, jdId: e.target.value }))}
-                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white">
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs bg-white">
                                 <option value="">선택 안 함</option>
                                 {jds.map(j => <option key={j.id} value={j.id}>{j.position_title}</option>)}
                             </select>
@@ -213,15 +213,15 @@ export default function SearchLightPeoplePage() {
                     )}
                     <Field label="제목">
                         <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} maxLength={100}
-                            placeholder="예: 브랜드 마케터 1차 면접 제안" className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg" />
+                            placeholder="예: 브랜드 마케터 1차 면접 제안" className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs" />
                     </Field>
                     <Field label="제안 내용 (30자 이상)" hint="맡을 일, 왜 이 조건의 인재를 찾는지, 면접 방식과 일정을 적어 주세요">
                         <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} rows={6} maxLength={2000}
-                            className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg" />
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs" />
                     </Field>
                     <Field label="응답 기한">
                         <input type="date" value={form.respondBy} min={plusDays(3)} onChange={e => setForm(f => ({ ...f, respondBy: e.target.value }))}
-                            className="px-3 py-2 text-sm border border-neutral-200 rounded-lg" />
+                            className="px-3 py-2 text-sm border border-neutral-200 rounded-xs" />
                     </Field>
                     <p className="text-xs text-neutral-500 break-keep">
                         보내기 전에 HeRo 운영자가 내용을 확인합니다. 확인이 끝나면 조건에 맞는 인재에게 알림이 가고, 응한 인재의 이력서는 응답일로부터 180일 동안 볼 수 있습니다.
@@ -229,25 +229,25 @@ export default function SearchLightPeoplePage() {
                     {error && <p className="text-sm text-red-600">{error}</p>}
                     {done && <p className="text-sm text-emerald-700">제안을 요청했습니다. 운영자 확인 후 발송됩니다.</p>}
                     <button onClick={submit} disabled={sending || !count?.enough || !form.title.trim() || form.message.trim().length < 30}
-                        className="px-6 py-3 rounded-full bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                        className="px-6 py-3 rounded-none bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                         {sending ? "요청 중..." : "제안 요청하기"}
                     </button>
                 </div>
 
                 {/* ③ 보낸 제안 */}
                 <div>
-                    <h2 className="text-lg font-extrabold tracking-tight mb-3">보낸 제안</h2>
+                    <h2 className="text-lg font-bold tracking-tight mb-3">보낸 제안</h2>
                     {offers.length === 0 ? (
-                        <p className="text-sm text-neutral-500 py-8 text-center border border-dashed border-neutral-200 rounded-xl bg-white">아직 보낸 제안이 없습니다.</p>
+                        <p className="text-sm text-neutral-500 py-8 text-center border border-dashed border-neutral-200 rounded-xs bg-white">아직 보낸 제안이 없습니다.</p>
                     ) : (
                         <ul className="space-y-3">
                             {offers.map(o => (
                                 <li key={o.id}>
                                     <Link href={`/hero/company/offers/${o.id}`}
-                                        className="flex items-center justify-between gap-4 p-5 bg-white border border-neutral-200 rounded-xl hover:shadow-md transition-shadow">
+                                        className="flex items-center justify-between gap-4 p-5 bg-white border border-neutral-200 rounded-xs transition-">
                                         <div className="min-w-0">
                                             <p className="text-xs text-neutral-500">{labelOf(OFFER_TYPES, o.offer_type)} · {OFFER_STATUS_LABEL[o.status] ?? o.status}{o.respond_by && ` · ${o.respond_by}까지`}</p>
-                                            <p className="font-semibold truncate">{o.title}</p>
+                                            <p className="font-bold truncate">{o.title}</p>
                                             {o.status === "rejected" && o.review_note && <p className="text-xs text-red-600 mt-1">반려 사유: {o.review_note}</p>}
                                         </div>
                                         <div className="text-right shrink-0">

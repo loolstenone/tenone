@@ -94,7 +94,7 @@ export default async function Page() {
                     <span className="text-xs text-neutral-500 font-bold tracking-wider w-24 shrink-0">
                       {c.region}
                     </span>
-                    <span className="font-black text-2xl text-white">
+                    <span className="font-bold text-2xl text-white">
                       {c.name}
                       <span className="ml-2 text-sm font-normal text-neutral-500">({c.sub})</span>
                     </span>
@@ -147,7 +147,7 @@ export default async function Page() {
                   <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
                     {a.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
+                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group- transition" />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
                         {madzineCategoryLabel(a.category)}
@@ -179,7 +179,7 @@ export default async function Page() {
         <div className="mx-auto max-w-7xl px-6 py-20 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1">
             <div className="text-sm font-bold tracking-widest text-white/80">DAMbe 들이 기다린다</div>
-            <div className="mt-2 text-3xl sm:text-4xl font-black text-white">담비라 세상아!</div>
+            <div className="mt-2 text-3xl sm:text-4xl font-bold text-white">담비라 세상아!</div>
           </div>
 
           {/* 담비 캐릭터 */}
@@ -189,7 +189,7 @@ export default async function Page() {
               alt="트로피를 든 DAMbe 캐릭터"
               sizes="160px"
               fill
-              className="object-contain object-bottom drop-shadow-2xl"
+              className="object-contain object-bottom drop-"
             />
           </div>
 
@@ -221,7 +221,7 @@ function SectionHeader({
     <div className="flex items-end justify-between flex-wrap gap-4">
       <div>
         <div className="text-xs font-bold tracking-widest text-[#EC1D25]">{eyebrow}</div>
-        <h2 className={`mt-2 text-4xl sm:text-6xl font-black tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
+        <h2 className={`mt-2 text-4xl sm:text-6xl font-bold tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
           {title}
         </h2>
       </div>
@@ -257,7 +257,7 @@ function ProgramCard({
           : 'bg-black border-neutral-900 hover:border-[#EC1D25]'
       }`}
     >
-      <div className="text-3xl font-black text-white">{title}</div>
+      <div className="text-3xl font-bold text-white">{title}</div>
       <div className={`mt-4 text-base leading-relaxed ${featured ? 'text-white/80' : 'text-neutral-400'}`}>
         {desc}
       </div>

@@ -177,7 +177,7 @@ export default function ExplorePage() {
             <button
               key={id}
               onClick={() => setTab(id)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xs border px-3 py-2.5 text-sm font-bold transition-colors"
               style={{
                 background: tab === id ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.03)',
                 borderColor: tab === id ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)',
@@ -200,7 +200,7 @@ export default function ExplorePage() {
                 { label: '관심 대기', value: totalNeeds - withGroup, icon: UserPlus, accent: '#60a5fa' },
                 { label: '총 관심', value: totalMembers, icon: TrendingUp, accent: '#f472b6' },
               ].map(({ label, value, icon: Icon, accent }) => (
-                <div key={label} className="flex flex-1 flex-col items-center rounded-xl border border-white/8 py-3"
+                <div key={label} className="flex flex-1 flex-col items-center rounded-xs border border-white/8 py-3"
                   style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <Icon className="mb-1 h-4 w-4" style={{ color: accent }} />
                   <div className="text-sm font-bold text-white">{value}</div>
@@ -211,7 +211,7 @@ export default function ExplorePage() {
 
             {loading && words.length === 0 ? (
               <div className="flex items-center justify-center py-20">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : (
               <>
@@ -261,7 +261,7 @@ export default function ExplorePage() {
                 <div className="mt-2 px-4 sm:px-6">
                   <button
                     onClick={() => setTab('wants')}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-sm text-white/40 transition-colors hover:border-white/20 hover:text-white/60"
+                    className="flex w-full items-center justify-center gap-2 rounded-xs border border-white/10 py-3 text-sm text-white/40 transition-colors hover:border-white/20 hover:text-white/60"
                   >
                     <Search className="h-4 w-4" />
                     전체 니즈 탐색하기
@@ -287,7 +287,7 @@ export default function ExplorePage() {
                 <button
                   key={label}
                   onClick={() => setPeriod(id)}
-                  className="rounded-full px-3 py-1 text-[11px] font-medium transition-all"
+                  className="rounded-none px-3 py-1 text-[11px] font-normal transition-all"
                   style={{
                     background: period === id ? 'rgba(96,165,250,0.15)' : 'rgba(255,255,255,0.04)',
                     color: period === id ? '#93c5fd' : 'rgba(255,255,255,0.35)',
@@ -298,7 +298,7 @@ export default function ExplorePage() {
                 </button>
               ))}
               {period && periodLoading && (
-                <div className="h-3 w-3 animate-spin rounded-full border border-white/20 border-t-blue-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               )}
             </div>
 
@@ -309,15 +309,15 @@ export default function ExplorePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="어떤 니즈를 찾고 있나요?"
-                className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/30"
+                className="w-full rounded-xs border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/30"
               />
             </div>
 
             {/* 내 관심사 매칭 배너 */}
             {isAuthenticated && !myTagsLoading && matchedNeeds.length > 0 && !search && (
-              <div className="mb-4 flex items-center justify-between rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3">
+              <div className="mb-4 flex items-center justify-between rounded-xs border border-amber-400/20 bg-amber-400/5 px-4 py-3">
                 <div>
-                  <div className="text-[12px] font-semibold text-amber-400">
+                  <div className="text-[12px] font-bold text-amber-400">
                     내 관심사와 맞는 니즈 {matchedNeeds.length}개
                   </div>
                   <div className="mt-0.5 text-[10.5px] text-white/40">
@@ -332,7 +332,7 @@ export default function ExplorePage() {
                       return next;
                     });
                   }}
-                  className="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all"
+                  className="shrink-0 rounded-none px-3 py-1.5 text-[11px] font-bold transition-all"
                   style={{
                     background: filters.has('similar') ? 'rgba(255,217,61,0.2)' : 'rgba(255,217,61,0.08)',
                     color: '#ffd93d',
@@ -346,11 +346,11 @@ export default function ExplorePage() {
 
             {/* 비로그인 매칭 안내 */}
             {!isAuthenticated && !search && (
-              <div className="mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/3 px-4 py-3">
+              <div className="mb-4 flex items-center justify-between rounded-xs border border-white/8 bg-white/3 px-4 py-3">
                 <div className="text-[12px] text-white/40">로그인하면 내 관심사 매칭이 보여요</div>
                 <button
                   onClick={() => setShowLogin(true)}
-                  className="shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-[11px] text-white/50 transition-colors hover:text-white/70"
+                  className="shrink-0 rounded-none border border-white/15 px-3 py-1.5 text-[11px] text-white/50 transition-colors hover:text-white/70"
                 >
                   로그인
                 </button>
@@ -368,7 +368,7 @@ export default function ExplorePage() {
                 const active = filters.has(id);
                 return (
                   <button key={id} onClick={() => toggleFilter(id)}
-                    className="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-medium transition-all"
+                    className="shrink-0 rounded-none px-3 py-1.5 text-[11px] font-normal transition-all"
                     style={{
                       background: active ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
                       color: active ? '#ffd93d' : 'rgba(255,255,255,0.5)',
@@ -381,7 +381,7 @@ export default function ExplorePage() {
               {filters.size > 0 && (
                 <button
                   onClick={() => setFilters(new Set())}
-                  className="ml-auto shrink-0 rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/40 transition-colors hover:text-white/60"
+                  className="ml-auto shrink-0 rounded-none border border-white/10 px-3 py-1.5 text-[11px] text-white/40 transition-colors hover:text-white/60"
                 >
                   초기화
                 </button>
@@ -393,26 +393,26 @@ export default function ExplorePage() {
               <span className="text-[12px] text-white/30">
                 {search ? `"${search}" 검색 결과` : filters.size > 0 ? '필터 결과' : period ? { '1w': '1주일', '1m': '1개월', '3m': '3개월' }[period] + ' 내 니즈' : '전체 니즈'}
                 {' '}
-                <span className="font-semibold text-white/50">{filtered.length}</span>
+                <span className="font-bold text-white/50">{filtered.length}</span>
               </span>
             </div>
 
             {/* 니즈 리스트 */}
             {(loading && words.length === 0) || periodLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : filtered.length === 0 ? (
               <div className="py-12 text-center">
                 <Search className="mx-auto mb-3 h-8 w-8 text-white/15" />
-                <p className="mb-1 text-sm font-medium text-white/40">
+                <p className="mb-1 text-sm font-normal text-white/40">
                   {search ? `"${search}"에 해당하는 니즈가 없어요` : '해당 조건의 니즈가 없어요'}
                 </p>
                 <p className="mb-5 text-xs text-white/25">다른 키워드나 필터를 써보세요</p>
                 {(search || filters.size > 0) && (
                   <button
                     onClick={() => { setSearch(''); setFilters(new Set()); }}
-                    className="rounded-xl px-4 py-2 text-xs font-semibold"
+                    className="rounded-xs px-4 py-2 text-xs font-bold"
                     style={{ background: 'rgba(255,217,61,0.1)', color: '#ffd93d' }}
                   >
                     초기화
@@ -476,11 +476,11 @@ function SlideSection({ title, subtitle, icon, words, onSelect }: {
         </div>
         <div className="hidden sm:flex items-center gap-1">
           <button onClick={() => scroll('left')} disabled={!canLeft}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5">
+            className="flex h-7 w-7 items-center justify-center rounded-none border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5">
             <ChevronLeft className="h-4 w-4 text-white/60" />
           </button>
           <button onClick={() => scroll('right')} disabled={!canRight}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5">
+            className="flex h-7 w-7 items-center justify-center rounded-none border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5">
             <ChevronRight className="h-4 w-4 text-white/60" />
           </button>
         </div>
@@ -503,27 +503,27 @@ function NeedSlideCard({ word: w, onClick }: { word: CloudWord; onClick: () => v
 
   return (
     <button onClick={onClick}
-      className="w-[220px] shrink-0 rounded-xl border p-3.5 text-left transition-all hover:border-white/20 sm:w-[240px]"
+      className="w-[220px] shrink-0 rounded-xs border p-3.5 text-left transition-all hover:border-white/20 sm:w-[240px]"
       style={{
         background: w.hasGroup ? 'rgba(255,200,87,0.04)' : 'rgba(255,255,255,0.03)',
         borderColor: w.hasGroup ? 'rgba(255,200,87,0.15)' : 'rgba(255,255,255,0.08)',
       }}>
       <div className="mb-2 flex items-center gap-1.5">
         {w.hasGroup ? (
-          <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold"
+          <span className="rounded-none px-2 py-0.5 text-[9px] font-bold"
             style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>모임 개설됨</span>
         ) : w.members >= 15 ? (
-          <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold"
+          <span className="rounded-none px-2 py-0.5 text-[9px] font-bold"
             style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }}>바닥장 모집중</span>
         ) : (
-          <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold"
+          <span className="rounded-none px-2 py-0.5 text-[9px] font-bold"
             style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>관심 모집중</span>
         )}
         <span className="text-[10px] text-white/30">{w.members}명</span>
       </div>
-      <p className="mb-2.5 line-clamp-2 text-xs font-semibold leading-snug text-white/80">{w.text}</p>
-      <div className="mb-1.5 h-1 overflow-hidden rounded-full bg-white/8">
-        <div className="h-full rounded-full" style={{
+      <p className="mb-2.5 line-clamp-2 text-xs font-bold leading-snug text-white/80">{w.text}</p>
+      <div className="mb-1.5 h-1 overflow-hidden rounded-none bg-white/8">
+        <div className="h-full rounded-none" style={{
           width: `${progress}%`,
           background: w.hasGroup
             ? 'linear-gradient(90deg, #22c55e, #16a34a)'
@@ -552,7 +552,7 @@ function NeedCard({ word: w, isMatched, onClick }: {
 
   return (
     <button onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all hover:border-white/15"
+      className="flex w-full items-center gap-3 rounded-xs border p-3 text-left transition-all hover:border-white/15"
       style={{
         background: w.hasGroup ? 'rgba(255,200,87,0.03)' : 'rgba(255,255,255,0.02)',
         borderColor: isMatched
@@ -560,7 +560,7 @@ function NeedCard({ word: w, isMatched, onClick }: {
           : w.hasGroup ? 'rgba(255,200,87,0.12)' : 'rgba(255,255,255,0.06)',
       }}>
       {/* 관심 인원 */}
-      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-full"
+      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-none"
         style={{
           background: w.hasGroup ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.06)',
           border: `1px solid ${w.hasGroup ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.1)'}`,
@@ -574,16 +574,16 @@ function NeedCard({ word: w, isMatched, onClick }: {
       {/* 본문 */}
       <div className="flex-1 min-w-0">
         <div className="mb-0.5 flex items-center gap-1.5">
-          <p className="truncate text-[13px] font-semibold text-white/80">{w.text}</p>
+          <p className="truncate text-[13px] font-bold text-white/80">{w.text}</p>
           {isMatched && (
-            <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[8px] font-bold"
+            <span className="shrink-0 rounded-none px-1.5 py-0.5 text-[8px] font-bold"
               style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>매칭</span>
           )}
         </div>
         <div className="flex items-center gap-2 text-[10px] text-white/30">
           {w.hasGroup && g ? (
             <>
-              <span className="rounded-full px-1.5 py-0.5 text-[9px] font-medium"
+              <span className="rounded-none px-1.5 py-0.5 text-[9px] font-normal"
                 style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>모임</span>
               <span>{g.title}</span>
             </>

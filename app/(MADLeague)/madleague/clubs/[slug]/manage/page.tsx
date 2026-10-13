@@ -96,7 +96,7 @@ export default async function ClubManagePage({ params, searchParams }: PageProps
       <div className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-8">
           <p className="text-xs font-bold tracking-widest text-[#EC1D25]">CLUB MANAGE</p>
-          <h1 className="mt-2 text-3xl font-black">{club.name} 동아리 관리</h1>
+          <h1 className="mt-2 text-3xl font-bold">{club.name} 동아리 관리</h1>
           <p className="mt-1 text-sm text-neutral-400">이 동아리 운영진·담당 멘토와 MADLeague 운영진만 볼 수 있습니다.</p>
         </div>
 
@@ -126,7 +126,7 @@ export default async function ClubManagePage({ params, searchParams }: PageProps
                   {m.avatar_url
                     ? <Image src={m.avatar_url} alt="" width={32} height={32} className="h-8 w-8 object-cover" />
                     : <div className="h-8 w-8 bg-neutral-800 flex items-center justify-center text-xs text-neutral-400">{m.name.slice(0, 1)}</div>}
-                  <div className="flex-1 min-w-0 text-sm font-semibold truncate">{m.name}</div>
+                  <div className="flex-1 min-w-0 text-sm font-bold truncate">{m.name}</div>
                   <span className={`text-xs px-2 py-0.5 ${m.role === '임원' ? 'bg-[#EC1D25]/15 text-[#EC1D25]' : 'bg-neutral-900 text-neutral-400'}`}>{m.position ?? m.role}</span>
                   {m.year && <span className="text-xs text-neutral-500 w-12 text-right">{m.year}</span>}
                 </div>

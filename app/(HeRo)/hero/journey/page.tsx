@@ -16,7 +16,7 @@ export default function JourneyPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-neutral-200 border-t-[#E53935] animate-spin" />
+        <span className="text-sm text-mute">불러오는 중</span>
       </div>
     );
   }

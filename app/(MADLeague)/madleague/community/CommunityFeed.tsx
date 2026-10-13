@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { MessageCircle, Heart, Pin, Loader2, Plus, X, Paperclip, ImageIcon, Film, FileText, AlertCircle } from 'lucide-react';
+import { MessageCircle, Heart, Pin, Plus, X, Paperclip, ImageIcon, Film, FileText, AlertCircle } from 'lucide-react';
 
 export interface MediaItem {
   url: string;
@@ -99,7 +99,7 @@ export function CommunityFeed({ initialCategory }: Props) {
   }
 
   if (loading) {
-    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-neutral-500" /></div>;
+    return <div className="flex justify-center py-12"><span className="text-sm text-mute">불러오는 중</span></div>;
   }
 
   return (
@@ -140,7 +140,7 @@ export function CommunityFeed({ initialCategory }: Props) {
                         <>
                           <span className="text-neutral-600">·</span>
                           <span className="inline-flex items-center gap-1 text-neutral-400">
-                            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: post.mad_clubs.color ?? '#EC1D25' }} />
+                            <span className="inline-block h-1.5 w-1.5 rounded-none" style={{ backgroundColor: post.mad_clubs.color ?? '#EC1D25' }} />
                             {post.mad_clubs.name}
                           </span>
                         </>
@@ -290,7 +290,7 @@ function WriteModal({ onClose, onCreated }: { onClose: () => void; onCreated: ()
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
       <div className="bg-neutral-950 border border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-neutral-900">
-          <h2 className="text-lg font-black text-white">새 글 작성</h2>
+          <h2 className="text-lg font-bold text-white">새 글 작성</h2>
           <button onClick={onClose} className="text-neutral-500 hover:text-white"><X className="h-5 w-5" /></button>
         </div>
         <form onSubmit={submit} className="p-6 space-y-4">
@@ -356,7 +356,7 @@ function WriteModal({ onClose, onCreated }: { onClose: () => void; onCreated: ()
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-white truncate">{u.result.name}</div>
+                          <div className="text-xs font-normal text-white truncate">{u.result.name}</div>
                           <div className="text-xs text-neutral-500">{formatBytes(u.result.size)}</div>
                         </div>
                       </>
@@ -366,17 +366,17 @@ function WriteModal({ onClose, onCreated }: { onClose: () => void; onCreated: ()
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-white truncate">{u.file.name}</div>
+                          <div className="text-xs font-normal text-white truncate">{u.file.name}</div>
                           <div className="text-xs text-red-400">{u.error}</div>
                         </div>
                       </>
                     ) : (
                       <>
                         <div className="h-10 w-10 bg-neutral-900 flex items-center justify-center shrink-0">
-                          <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
+                          <span className="text-sm text-mute">불러오는 중</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-white truncate">{u.file.name}</div>
+                          <div className="text-xs font-normal text-white truncate">{u.file.name}</div>
                           <div className="text-xs text-neutral-500">업로드 중...</div>
                         </div>
                       </>

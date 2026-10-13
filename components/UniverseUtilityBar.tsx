@@ -184,7 +184,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
             <div className="flex items-center gap-3.5">
                 {/* About */}
                 {!config.hideAbout && (
-                    <Link href={config.aboutPath} className="text-xs font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                    <Link href={config.aboutPath} className="text-xs font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                         {config.aboutLabel ?? "ABOUT"}
                     </Link>
                 )}
@@ -196,7 +196,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => setWsOpen(o => !o)}
-                                    className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
+                                    className="flex items-center gap-1 text-xs font-bold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
                                     title="내 워크스페이스"
                                 >
                                     <Briefcase className="h-4 w-4" />
@@ -205,8 +205,8 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${wsOpen ? "rotate-180" : ""}`} />
                                 </button>
                                 {wsOpen && (
-                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-200 overflow-hidden z-50">
-                                        <div className="px-3 py-2 border-b border-neutral-100 text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white text-neutral-900 rounded-xs border border-neutral-200 overflow-hidden z-50">
+                                        <div className="px-3 py-2 border-b border-neutral-100 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
                                             이용 중인 서비스
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
@@ -219,7 +219,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                                 >
                                                     <Briefcase className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
                                                     <div className="min-w-0 flex-1">
-                                                        <div className="text-sm font-medium truncate">{w.label}</div>
+                                                        <div className="text-sm font-normal truncate">{w.label}</div>
                                                         {w.description && <div className="text-[10px] text-neutral-500 truncate">{w.description}</div>}
                                                     </div>
                                                     <ExternalLink className="h-3 w-3 text-neutral-300 group-hover:text-neutral-700 shrink-0" />
@@ -233,7 +233,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                                     className="flex items-center gap-2 px-3 py-2 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
                                                 >
                                                     <Briefcase className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
-                                                    <div className="text-sm font-medium">{config.workspaceLabel}</div>
+                                                    <div className="text-sm font-normal">{config.workspaceLabel}</div>
                                                 </Link>
                                             )}
                                         </div>
@@ -243,7 +243,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                         )}
                         {/* legacy 단일 workspacePath만 있고 affiliations이 비어있을 때 */}
                         {workspaces.length === 0 && config.workspacePath && (
-                            <Link href={config.workspacePath} className="flex items-center gap-1 text-[11px] font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity">
+                            <Link href={config.workspacePath} className="flex items-center gap-1 text-[11px] font-bold tracking-wider opacity-80 hover:opacity-100 transition-opacity">
                                 <Briefcase className="h-3.5 w-3.5" />
                                 {config.workspaceLabel}
                             </Link>
@@ -260,7 +260,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                         )}
 
                         {config.adminPath && isAdmin && (
-                            <Link href={config.adminPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1" title="Admin">
+                            <Link href={config.adminPath} className="text-[11px] font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1" title="Admin">
                                 <Shield className="h-3 w-3" /> ADMIN
                             </Link>
                         )}
@@ -271,11 +271,11 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                 ) : !config.hideAuth ? (
                     <>
                         {config.loginPath ? (
-                            <Link href={config.loginPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">로그인</Link>
+                            <Link href={config.loginPath} className="text-[11px] font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity">로그인</Link>
                         ) : (
-                            <button onClick={() => { setLoginTab("login"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">로그인</button>
+                            <button onClick={() => { setLoginTab("login"); setLoginOpen(true); }} className="text-[11px] font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity">로그인</button>
                         )}
-                        <button onClick={() => { setLoginTab("signup"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">가입</button>
+                        <button onClick={() => { setLoginTab("signup"); setLoginOpen(true); }} className="text-[11px] font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity">가입</button>
                     </>
                 ) : null}
 
@@ -290,7 +290,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
 
             {/* 전체화면 검색 오버레이 */}
             {searchOpen && (
-                <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: 'rgba(10,10,25,0.97)', backdropFilter: 'blur(8px)' }}>
+                <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: 'rgba(0,0,0,0.96)' }}>
                     <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
                         <Search className="h-5 w-5 shrink-0 opacity-40" />
                         <input
@@ -310,7 +310,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             <p className="text-center text-sm text-white/25 mt-16">검색어를 입력하세요</p>
                         ) : searching ? (
                             <div className="flex justify-center mt-16">
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+                                <p className="text-sm text-white/40">불러오는 중</p>
                             </div>
                         ) : (
                             <div className="mx-auto max-w-2xl space-y-8">
@@ -325,13 +325,13 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                         <div className="space-y-1">
                                             {siteResults.map((r) => (
                                                 <Link key={r.id} href={r.href} onClick={closeSearch}
-                                                    className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 hover:bg-white/5 transition-colors group">
+                                                    className="flex items-start justify-between gap-3 rounded-xs px-4 py-3 hover:bg-white/5 transition-colors group">
                                                     <div className="min-w-0">
-                                                        <div className="text-sm font-medium text-white group-hover:text-white truncate">{r.title}</div>
+                                                        <div className="text-sm font-normal text-white group-hover:text-white truncate">{r.title}</div>
                                                         {r.description && <div className="text-xs text-white/40 mt-0.5 truncate">{r.description}</div>}
                                                     </div>
                                                     <div className="flex items-center gap-2 shrink-0">
-                                                        <span className="text-[10px] text-white/25 font-medium">{r.type}</span>
+                                                        <span className="text-[10px] text-white/25 font-normal">{r.type}</span>
                                                         <ArrowRight className="h-3.5 w-3.5 text-white/20 group-hover:text-white/60 transition-colors" />
                                                     </div>
                                                 </Link>
@@ -351,13 +351,13 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                         <div className="space-y-1">
                                             {universeResults.map((r) => (
                                                 <CrossSiteLink key={r.id} href={r.href} onClick={closeSearch}
-                                                    className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 hover:bg-white/5 transition-colors group">
+                                                    className="flex items-start justify-between gap-3 rounded-xs px-4 py-3 hover:bg-white/5 transition-colors group">
                                                     <div className="min-w-0">
-                                                        <div className="text-sm font-medium text-white/80 group-hover:text-white truncate">{r.title}</div>
+                                                        <div className="text-sm font-normal text-white/80 group-hover:text-white truncate">{r.title}</div>
                                                         {r.description && <div className="text-xs text-white/35 mt-0.5 truncate">{r.description}</div>}
                                                     </div>
                                                     <div className="flex items-center gap-2 shrink-0">
-                                                        <span className="text-[10px] text-white/25 font-medium">{r.type}</span>
+                                                        <span className="text-[10px] text-white/25 font-normal">{r.type}</span>
                                                         <ArrowRight className="h-3.5 w-3.5 text-white/20 group-hover:text-white/60 transition-colors" />
                                                     </div>
                                                 </CrossSiteLink>
@@ -372,7 +372,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
             )}
 
             {shareToast && (
-                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-neutral-800 text-white text-sm rounded-lg shadow-lg pointer-events-none">
+                <div className="fixed bottom-6 left-6 z-[60] px-4 py-2 bg-black text-white text-sm pointer-events-none">
                     링크가 복사되었습니다
                 </div>
             )}

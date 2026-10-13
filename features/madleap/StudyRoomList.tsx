@@ -66,23 +66,23 @@ export default function StudyRoomList({ items }: { items: StudyProgram[] }) {
                 return (
                     <div
                         key={s.id}
-                        className={`border rounded-xl overflow-hidden transition-all ${
-                            isExpanded ? "border-[#4361ee]/30 shadow-md" : "border-neutral-200 hover:border-neutral-300"
+                        className={`border rounded-xs overflow-hidden transition-all ${
+                            isExpanded ? "border-[#4361ee]/30" : "border-neutral-200 hover:border-neutral-300"
                         }`}
                     >
                         <button
                             onClick={() => setExpanded(isExpanded ? null : s.id)}
                             className="w-full text-left p-5 md:p-6 flex items-start gap-4"
                         >
-                            <div className="w-12 h-12 bg-[#4361ee]/10 rounded-xl flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 bg-[#4361ee]/10 rounded-xs flex items-center justify-center shrink-0">
                                 <Icon className="h-6 w-6 text-[#4361ee]" />
                             </div>
 
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap mb-1">
                                     <h3 className="font-bold text-lg">{s.title}</h3>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${style.color}`}>
-                                        <span className={`w-1.5 h-1.5 rounded-full ${style.dot} ${s.status === "recruiting" ? "animate-pulse" : ""}`} />
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-none font-normal flex items-center gap-1 ${style.color}`}>
+                                        <span className={`w-1.5 h-1.5 rounded-none ${style.dot} ${s.status === "recruiting" ? "animate-pulse" : ""}`} />
                                         {STATUS_LABEL[s.status]}
                                     </span>
                                 </div>
@@ -113,9 +113,9 @@ export default function StudyRoomList({ items }: { items: StudyProgram[] }) {
 
                                 {s.capacity > 0 && (
                                     <div className="mt-3 flex items-center gap-3">
-                                        <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-1.5 bg-neutral-100 rounded-none overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full transition-all ${
+                                                className={`h-full rounded-none transition-all ${
                                                     fillPct >= 100 ? "bg-neutral-400" : fillPct >= 80 ? "bg-orange-400" : "bg-[#4361ee]"
                                                 }`}
                                                 style={{ width: `${Math.min(fillPct, 100)}%` }}
@@ -156,31 +156,31 @@ export default function StudyRoomList({ items }: { items: StudyProgram[] }) {
                                     )}
 
                                     <div className="space-y-4">
-                                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                                        <div className="bg-white rounded-xs border border-neutral-200 p-4">
                                             <h4 className="text-sm font-bold mb-3">스터디 정보</h4>
                                             <div className="space-y-2 text-sm">
                                                 {s.schedule && (
                                                     <div className="flex justify-between">
                                                         <span className="text-neutral-400">일정</span>
-                                                        <span className="font-medium">{s.schedule}</span>
+                                                        <span className="font-normal">{s.schedule}</span>
                                                     </div>
                                                 )}
                                                 {s.capacity > 0 && (
                                                     <div className="flex justify-between">
                                                         <span className="text-neutral-400">정원</span>
-                                                        <span className="font-medium">{s.current_count} / {s.capacity}명</span>
+                                                        <span className="font-normal">{s.current_count} / {s.capacity}명</span>
                                                     </div>
                                                 )}
                                                 {s.semester && (
                                                     <div className="flex justify-between">
                                                         <span className="text-neutral-400">운영기간</span>
-                                                        <span className="font-medium">{s.semester}</span>
+                                                        <span className="font-normal">{s.semester}</span>
                                                     </div>
                                                 )}
                                                 {s.leader_name && (
                                                     <div className="flex justify-between">
                                                         <span className="text-neutral-400">스터디 리더</span>
-                                                        <span className="font-medium">
+                                                        <span className="font-normal">
                                                             {s.leader_name}{s.leader_school ? ` (${s.leader_school})` : ""}
                                                         </span>
                                                     </div>
@@ -199,16 +199,16 @@ export default function StudyRoomList({ items }: { items: StudyProgram[] }) {
                                         )}
 
                                         {s.status === "recruiting" ? (
-                                            <button className="w-full py-3 bg-[#4361ee] text-white font-medium rounded-lg hover:bg-[#3451de] transition-colors flex items-center justify-center gap-2">
+                                            <button className="w-full py-3 bg-[#4361ee] text-white font-normal rounded-xs hover:bg-[#3451de] transition-colors flex items-center justify-center gap-2">
                                                 스터디 신청하기
                                                 <ArrowRight className="h-4 w-4" />
                                             </button>
                                         ) : s.status === "closed" ? (
-                                            <button className="w-full py-3 bg-neutral-200 text-neutral-500 font-medium rounded-lg cursor-not-allowed" disabled>
+                                            <button className="w-full py-3 bg-neutral-200 text-neutral-500 font-normal rounded-xs cursor-not-allowed" disabled>
                                                 모집 마감
                                             </button>
                                         ) : (
-                                            <button className="w-full py-3 bg-neutral-100 text-neutral-600 font-medium rounded-lg cursor-default" disabled>
+                                            <button className="w-full py-3 bg-neutral-100 text-neutral-600 font-normal rounded-xs cursor-default" disabled>
                                                 진행중 (다음 기수에 신청 가능)
                                             </button>
                                         )}

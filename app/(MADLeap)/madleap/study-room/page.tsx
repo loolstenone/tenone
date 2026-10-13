@@ -35,7 +35,7 @@ export default async function MadLeapStudyRoomPage() {
             {/* Hero */}
             <section className="bg-[#1a1a2e] text-white py-20 md:py-24">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <p className="text-[#4361ee] text-sm font-semibold tracking-wider uppercase mb-3">Study Room</p>
+                    <p className="text-[#4361ee] text-sm font-bold tracking-wider uppercase mb-3">Study Room</p>
                     <h1 className="text-2xl md:text-4xl font-bold mb-4">함께 공부하고, 함께 성장합니다</h1>
                     {studies.length > 0 ? (
                         <p className="text-neutral-400">
@@ -48,17 +48,17 @@ export default async function MadLeapStudyRoomPage() {
                     {studies.length > 0 && (
                         <div className="flex items-center justify-center gap-8 mt-8">
                             <div className="text-center">
-                                <div className="text-2xl font-black text-[#4361ee]">{studies.length}</div>
+                                <div className="text-2xl font-bold text-[#4361ee]">{studies.length}</div>
                                 <div className="text-xs text-neutral-400">스터디</div>
                             </div>
                             <div className="w-px h-8 bg-white/10" />
                             <div className="text-center">
-                                <div className="text-2xl font-black text-[#4361ee]">{totalMembers}</div>
+                                <div className="text-2xl font-bold text-[#4361ee]">{totalMembers}</div>
                                 <div className="text-xs text-neutral-400">참여 중</div>
                             </div>
                             <div className="w-px h-8 bg-white/10" />
                             <div className="text-center">
-                                <div className="text-2xl font-black text-green-400">{openCount}</div>
+                                <div className="text-2xl font-bold text-green-400">{openCount}</div>
                                 <div className="text-xs text-neutral-400">모집중</div>
                             </div>
                         </div>
@@ -93,9 +93,9 @@ export default async function MadLeapStudyRoomPage() {
                             { step: "03", title: "신청", desc: "'스터디 신청하기' 버튼으로 바로 신청" },
                             { step: "04", title: "함께 성장", desc: "정기 모임에 참여하며 실력을 키웁니다" },
                         ].map((item) => (
-                            <div key={item.step} className="bg-white p-6 rounded-xl border border-neutral-200 text-center">
-                                <div className="text-2xl font-black text-[#4361ee] mb-2">{item.step}</div>
-                                <h3 className="font-semibold mb-1">{item.title}</h3>
+                            <div key={item.step} className="bg-white p-6 rounded-xs border border-neutral-200 text-center">
+                                <div className="text-2xl font-bold text-[#4361ee] mb-2">{item.step}</div>
+                                <h3 className="font-bold mb-1">{item.title}</h3>
                                 <p className="text-xs text-neutral-500">{item.desc}</p>
                             </div>
                         ))}
@@ -105,7 +105,7 @@ export default async function MadLeapStudyRoomPage() {
                         <p className="text-sm text-neutral-500 mb-4">아직 매드립 리퍼가 아니라면?</p>
                         <Link
                             href="/madleap/forms/apply"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a2e] text-white font-medium rounded-lg hover:bg-[#1a1a2e]/90 transition-colors"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a2e] text-white font-normal rounded-xs hover:bg-[#1a1a2e]/90 transition-colors"
                         >
                             지원하기 <ArrowRight className="h-4 w-4" />
                         </Link>

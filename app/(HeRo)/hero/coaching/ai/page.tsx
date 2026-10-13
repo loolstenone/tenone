@@ -83,7 +83,7 @@ function AICounselingContent() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {topics.map((topic) => (
-              <div key={topic} className="border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 transition-colors">
+              <div key={topic} className="border border-neutral-200 rounded-xs p-5 hover:border-neutral-300 transition-colors">
                 <p className="text-sm text-neutral-700 leading-relaxed">{topic}</p>
               </div>
             ))}
@@ -100,7 +100,7 @@ function AICounselingContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {features.map((f) => (
               <div key={f.title} className="flex gap-5">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${RED}10` }}>
+                <div className="w-12 h-12 rounded-xs flex items-center justify-center shrink-0" style={{ backgroundColor: `${RED}10` }}>
                   <f.icon className="h-6 w-6" style={{ color: RED }} />
                 </div>
                 <div>
@@ -129,7 +129,7 @@ function AICounselingContent() {
               { step: 4, icon: Users, title: "대면 상담", desc: "필요 시 전문가를 만납니다" },
             ].map((s, i) => (
               <div key={s.step} className="text-center">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold" style={{ backgroundColor: RED }}>
+                <div className="w-14 h-14 rounded-none flex items-center justify-center mx-auto mb-4 text-white font-bold" style={{ backgroundColor: RED }}>
                   <s.icon className="h-6 w-6" />
                 </div>
                 <p className="text-sm font-bold text-neutral-900 mb-1">{s.title}</p>
@@ -143,14 +143,14 @@ function AICounselingContent() {
       {/* ── 안내 ── */}
       <section className="py-16 border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <div className="bg-neutral-50 rounded-2xl p-8">
+          <div className="bg-neutral-50 rounded-xs p-8">
             <p className="text-sm text-neutral-500 leading-relaxed mb-4">
               AI 상담은 HeRo 통합 검사(HIT) 결과를 바탕으로 한 참고용 상담입니다.
               의학적·심리학적 진단이 아닙니다. 중요한 결정은 전문 상담사와 직접 만나 상의해 보시길 권합니다.
             </p>
             <Link
               href="/hero/coaching"
-              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
+              className="inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all"
               style={{ color: RED }}
             >
               전문가 대면 상담 보기 <ArrowRight className="h-4 w-4" />

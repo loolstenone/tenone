@@ -66,7 +66,7 @@ export default function MadLeapHome() {
                     {[...Array(6)].map((_, i) => (
                         <div
                             key={i}
-                            className="absolute w-1 h-1 bg-[#4361ee]/60 rounded-full animate-pulse"
+                            className="absolute w-1 h-1 bg-[#4361ee]/60 rounded-none animate-pulse"
                             style={{
                                 top: `${15 + i * 15}%`,
                                 left: `${10 + i * 16}%`,
@@ -78,12 +78,12 @@ export default function MadLeapHome() {
 
                 <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
                     <div className="mb-6">
-                        <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
+                        <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tight">
                             M<span className="text-[#4361ee]">A</span>D
                         </h1>
                         <div className="flex items-center justify-center gap-4 -mt-2">
                             <div className="h-px w-16 bg-white/60" />
-                            <span className="text-xl md:text-3xl font-light text-white tracking-[0.3em]">L E A P</span>
+                            <span className="text-xl md:text-3xl font-normal text-white tracking-[0.3em]">L E A P</span>
                             <div className="h-px w-16 bg-white/60" />
                         </div>
                     </div>
@@ -94,14 +94,14 @@ export default function MadLeapHome() {
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                         <Link
                             href="/madleap/about"
-                            className="w-full sm:w-auto px-8 py-3.5 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-lg flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-xs flex items-center justify-center gap-2"
                         >
                             매드립 알아보기
                             <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/madleap/portfolio"
-                            className="w-full sm:w-auto px-8 py-3.5 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg text-center"
+                            className="w-full sm:w-auto px-8 py-3.5 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs text-center"
                         >
                             포트폴리오 보기
                         </Link>
@@ -109,8 +109,8 @@ export default function MadLeapHome() {
                 </div>
 
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-                    <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center pt-2">
-                        <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                    <div className="w-6 h-10 border-2 border-white/30 rounded-none flex items-start justify-center pt-2">
+                        <div className="w-1.5 h-1.5 bg-white/50 rounded-none" />
                     </div>
                 </div>
             </section>
@@ -118,12 +118,12 @@ export default function MadLeapHome() {
             {/* ── About Preview (madleap.co.kr 원문 인용) ── */}
             <section className="bg-[#1a1a2e] text-white py-16 md:py-24">
                 <div className="mx-auto max-w-3xl px-6 text-center">
-                    <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Our Origin</p>
+                    <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Our Origin</p>
                     <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-10">우리의 시작은 기웃거림이었습니다.</h2>
 
                     <div className="space-y-3 mb-10 text-left">
                         {studentVoices.map((v) => (
-                            <div key={v} className="rounded-xl bg-white/[0.04] border border-white/10 px-5 py-4">
+                            <div key={v} className="rounded-xs bg-white/[0.04] border border-white/10 px-5 py-4">
                                 <Quote className="inline h-4 w-4 text-[#4361ee] mr-2 -mt-0.5" />
                                 <span className="text-white/80 text-[15px]">{v}</span>
                             </div>
@@ -134,14 +134,14 @@ export default function MadLeapHome() {
                         그렇게 마케팅·광고가 하고 싶은 학생들의 열정이 현업 선배에게 닿았습니다.
                         선배들은 손을 잡아 주었고, 함께 마케팅·광고 동아리계의 새로운 패러다임을 만들었습니다.
                     </p>
-                    <p className="text-[#4361ee] font-semibold text-lg md:text-xl leading-relaxed">
+                    <p className="text-[#4361ee] font-bold text-lg md:text-xl leading-relaxed">
                         디지털과 AI가 모든 경계를 허문 지금,<br />
                         매드립은 한 번 더 도약합니다.
                     </p>
 
                     <Link
                         href="/madleap/about"
-                        className="inline-flex items-center gap-2 mt-10 px-6 py-3 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg"
+                        className="inline-flex items-center gap-2 mt-10 px-6 py-3 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs"
                     >
                         더 알아보기 <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -152,7 +152,7 @@ export default function MadLeapHome() {
             <section className="bg-white py-16 md:py-24">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-10 md:mb-14">
-                        <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Activities</p>
+                        <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Activities</p>
                         <h2 className="text-2xl md:text-3xl font-bold mb-3">매드립은 이런 일을 합니다</h2>
                         <p className="text-neutral-500 text-sm md:text-base max-w-2xl mx-auto">
                             대학생들과 현업 선배가 멘토가 되어 함께 만들어 갑니다.
@@ -163,9 +163,9 @@ export default function MadLeapHome() {
                         {activities.map((act) => (
                             <div
                                 key={act.title}
-                                className="border border-neutral-200 rounded-xl p-6 hover:border-[#4361ee]/30 hover:shadow-md transition-all group"
+                                className="border border-neutral-200 rounded-xs p-6 hover:border-[#4361ee]/30 transition-all group"
                             >
-                                <act.icon className="h-8 w-8 text-[#4361ee] mb-3 group-hover:scale-110 transition-transform" />
+                                <act.icon className="h-8 w-8 text-[#4361ee] mb-3 group- transition-transform" />
                                 <h3 className="font-bold text-lg mb-2 text-neutral-900">{act.title}</h3>
                                 <p className="text-neutral-500 text-sm leading-relaxed">{act.desc}</p>
                             </div>
@@ -178,7 +178,7 @@ export default function MadLeapHome() {
             <section className="bg-neutral-50 py-16 md:py-24">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="mb-10 md:mb-14 text-center">
-                        <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Our Values</p>
+                        <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Our Values</p>
                         <h2 className="text-2xl md:text-3xl font-bold">5대 운영 가치</h2>
                     </div>
 
@@ -186,7 +186,7 @@ export default function MadLeapHome() {
                         {values.map((v, i) => (
                             <div key={v.title} className="flex gap-4">
                                 <div className="shrink-0">
-                                    <div className="w-10 h-10 rounded-lg bg-[#4361ee]/10 flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded-xs bg-[#4361ee]/10 flex items-center justify-center">
                                         <v.icon className="h-5 w-5 text-[#4361ee]" />
                                     </div>
                                 </div>
@@ -204,7 +204,7 @@ export default function MadLeapHome() {
             {/* ── 모집 안내 (madleap.co.kr 원문) ── */}
             <section className="bg-[#1a1a2e] py-16 md:py-20">
                 <div className="mx-auto max-w-3xl px-6 text-center">
-                    <p className="text-[#4361ee] text-xs font-semibold tracking-widest uppercase mb-3">Recruiting</p>
+                    <p className="text-[#4361ee] text-xs font-bold tracking-widest uppercase mb-3">Recruiting</p>
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-5">함께 도약할 리퍼를 찾습니다</h2>
                     <p className="text-neutral-300 text-base md:text-lg leading-relaxed mb-3">
                         매년 <strong className="text-[#4361ee]">2~3월</strong>, 2년 활동을 기준으로
@@ -219,14 +219,14 @@ export default function MadLeapHome() {
                             href="https://instagram.com/madleap.official"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full sm:w-auto px-6 py-3 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-lg inline-flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-6 py-3 bg-[#4361ee] text-white text-sm font-bold hover:bg-[#3451de] transition-all rounded-xs inline-flex items-center justify-center gap-2"
                         >
                             <Instagram className="h-4 w-4" />
                             인스타그램 팔로우
                         </a>
                         <a
                             href="mailto:official@madleap.co.kr"
-                            className="w-full sm:w-auto px-6 py-3 border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-all rounded-lg inline-flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-6 py-3 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs inline-flex items-center justify-center gap-2"
                         >
                             <Mail className="h-4 w-4" />
                             문의: official@madleap.co.kr
@@ -238,12 +238,12 @@ export default function MadLeapHome() {
             {/* ── Partners (Universe 내부 3) ── */}
             <section className="bg-white py-12 md:py-16">
                 <div className="mx-auto max-w-5xl px-6">
-                    <h2 className="text-sm font-semibold text-neutral-400 text-center mb-8 uppercase tracking-wider">Partners</h2>
+                    <h2 className="text-sm font-bold text-neutral-400 text-center mb-8 uppercase tracking-wider">Partners</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {partners.map((p) => (
                             <div
                                 key={p.name}
-                                className="px-5 py-4 bg-neutral-50 border border-neutral-200 rounded-lg"
+                                className="px-5 py-4 bg-neutral-50 border border-neutral-200 rounded-xs"
                             >
                                 <div className="font-bold text-sm text-neutral-900">{p.name}</div>
                                 <div className="text-xs text-neutral-500 mt-0.5">{p.role}</div>
@@ -256,18 +256,18 @@ export default function MadLeapHome() {
             {/* ── 채널 (madleap.co.kr 공식 채널) ── */}
             <section className="bg-neutral-50 py-12">
                 <div className="mx-auto max-w-3xl px-6">
-                    <h2 className="text-sm font-semibold text-neutral-400 text-center mb-6 uppercase tracking-wider">Channels</h2>
+                    <h2 className="text-sm font-bold text-neutral-400 text-center mb-6 uppercase tracking-wider">Channels</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <a
                             href="https://instagram.com/madleap.official"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
                         >
                             <Instagram className="h-5 w-5 text-neutral-700" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Instagram</div>
-                                <div className="text-sm font-semibold text-neutral-800 truncate">@madleap.official</div>
+                                <div className="text-sm font-bold text-neutral-800 truncate">@madleap.official</div>
                             </div>
                             <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
                         </a>
@@ -275,23 +275,23 @@ export default function MadLeapHome() {
                             href="https://blog.naver.com/madleap"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
                         >
                             <Star className="h-5 w-5 text-green-600" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Naver Blog</div>
-                                <div className="text-sm font-semibold text-neutral-800 truncate">blog.naver.com/madleap</div>
+                                <div className="text-sm font-bold text-neutral-800 truncate">blog.naver.com/madleap</div>
                             </div>
                             <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
                         </a>
                         <a
                             href="mailto:official@madleap.co.kr"
-                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-lg hover:border-[#4361ee]/30 hover:shadow-sm transition-all"
+                            className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
                         >
                             <Mail className="h-5 w-5 text-neutral-700" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Email</div>
-                                <div className="text-sm font-semibold text-neutral-800 truncate">official@madleap.co.kr</div>
+                                <div className="text-sm font-bold text-neutral-800 truncate">official@madleap.co.kr</div>
                             </div>
                         </a>
                     </div>
@@ -310,7 +310,7 @@ export default function MadLeapHome() {
                     <p className="text-white/80 mb-8">매년 2~3월, 새로운 기수를 모집합니다.</p>
                     <Link
                         href="/madleap/about"
-                        className="inline-block px-8 py-3.5 bg-white text-[#4361ee] font-bold hover:bg-neutral-100 transition-colors rounded-lg"
+                        className="inline-block px-8 py-3.5 bg-white text-[#4361ee] font-bold hover:bg-neutral-100 transition-colors rounded-xs"
                     >
                         매드립 알아보기
                     </Link>

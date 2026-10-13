@@ -57,7 +57,7 @@ export default function CreazyPage() {
         <div className="divide-y divide-neutral-900 border-y border-neutral-900">
           {RUN.map(r => (
             <div key={r.k} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 py-8">
-              <div className="font-black text-[#EC1D25]">{r.k}</div>
+              <div className="font-bold text-[#EC1D25]">{r.k}</div>
               <ul className="space-y-2 text-neutral-300">{r.v.map(v => <li key={v}>{v}</li>)}</ul>
             </div>
           ))}

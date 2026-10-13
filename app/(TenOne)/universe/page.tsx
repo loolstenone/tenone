@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink, Zap, Globe, Layers, Sparkles, Building2, Briefcase } from "lucide-react";
-import { siteConfigs } from "@/lib/site-config";
+import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink, Zap, Globe, Layers, Building2, Briefcase } from "lucide-react";
 
-const BRAND_COUNT = Object.keys(siteConfigs).length;
-const ROLE_GROUP_COUNT = 8;
 
 const businesses = [
     { id: "madleague", name: "MADLeague", role: "전국 대학생 동아리 연합", category: "Community", tags: ["wio", "yio"],
@@ -60,38 +57,31 @@ const businesses = [
 ];
 
 const tagConfig: Record<string, { label: string; border: string }> = {
-    wio: { label: "WIO", border: "border-indigo-500/40 text-indigo-400" },
-    yio: { label: "YIO", border: "border-emerald-500/40 text-emerald-400" },
-    rev: { label: "수익화", border: "border-amber-500/40 text-amber-400" },
+    wio: { label: "WIO", border: "border-neutral-500 " },
+    yio: { label: "YIO", border: "border-neutral-500 " },
+    rev: { label: "수익화", border: "border-neutral-500 " },
     edu: { label: "교육", border: "border-rose-500/40 text-rose-400" },
 };
 
 const synergyChains = [
     { name: "인재 파이프라인", icon: Users, desc: "발굴 → 성장 → 매칭 → 실전", nodes: [
-        { name: "MADLeague", sub: "발굴", accent: "border-emerald-600/50" },
+        { name: "MADLeague", sub: "발굴", accent: "border-neutral-500" },
         { name: "HeRo", sub: "역량+연결", accent: "border-orange-600/50" },
-        { name: "Badak", sub: "현업 입성", accent: "border-emerald-600/50" },
-        { name: "SmarComm", sub: "실전 수익", accent: "border-amber-600/50" },
+        { name: "Badak", sub: "현업 입성", accent: "border-neutral-500" },
+        { name: "SmarComm", sub: "실전 수익", accent: "border-neutral-500" },
     ]},
     { name: "트렌드-비즈니스 연계", icon: TrendingUp, desc: "발견 → 전략 → 브랜딩 → 실행", nodes: [
-        { name: "Mindle", sub: "트렌드 발견", accent: "border-blue-600/50" },
-        { name: "SmarComm", sub: "마케팅 전략", accent: "border-amber-600/50" },
-        { name: "Brand Gravity", sub: "브랜딩", accent: "border-amber-600/50" },
-        { name: "RooK", sub: "AI 크리에이티브", accent: "border-amber-600/50" },
+        { name: "Mindle", sub: "트렌드 발견", accent: "border-neutral-500" },
+        { name: "SmarComm", sub: "마케팅 전략", accent: "border-neutral-500" },
+        { name: "Brand Gravity", sub: "브랜딩", accent: "border-neutral-500" },
+        { name: "RooK", sub: "AI 크리에이티브", accent: "border-neutral-500" },
     ]},
     { name: "교육 사다리", icon: GraduationCap, desc: "입문 → 스킬업 → 전문화 → 커리어", nodes: [
-        { name: "MADLeague", sub: "대학생", accent: "border-emerald-600/50" },
+        { name: "MADLeague", sub: "대학생", accent: "border-neutral-500" },
         { name: "Planner's", sub: "기획 도구", accent: "border-orange-600/50" },
         { name: "Evo School", sub: "직무 교육", accent: "border-orange-600/50" },
         { name: "HeRo", sub: "기업 데뷔", accent: "border-orange-600/50" },
     ]},
-];
-
-const stats = [
-    { value: String(BRAND_COUNT), label: "브랜드", desc: "독립적으로 운영되는 사업" },
-    { value: String(ROLE_GROUP_COUNT), label: "역할 그룹", desc: "기능별 분류" },
-    { value: "3", label: "핵심 자원", desc: "사람 · 돈 · 시간" },
-    { value: "∞", label: "시너지", desc: "브랜드 간 연결 가치" },
 ];
 
 export default function UniversePage() {
@@ -107,25 +97,14 @@ export default function UniversePage() {
                     <p className="text-xs tracking-[0.3em] uppercase mb-6" style={{ color: "var(--tn-text-sub)" }}>
                         Ten:One&trade; Universe
                     </p>
-                    <h1 className="text-3xl sm:text-5xl font-light tracking-tight leading-snug mb-8">
-                        가치로 연결된<br />
-                        <span className="font-normal">하나의 거대한 세계관</span>
+                    <h1 className="text-[28px] leading-9 font-bold mb-8">
+                        가치로 연결된 하나의 세계관
                     </h1>
                     <p className="text-sm sm:text-base leading-relaxed max-w-2xl" style={{ color: "var(--tn-text-sub)" }}>
                         사람, 돈, 시간 &mdash; 세 가지 자원을 기준으로 모든 사업이 연결됩니다.
-                        각 브랜드는 독립적으로 작동하되, <strong className="font-medium" style={{ color: "var(--tn-text)" }}>WIO</strong>와 <strong className="font-medium" style={{ color: "var(--tn-text)" }}>YouInOne</strong>이라는 두 인프라 위에서 시너지를 만듭니다.
+                        각 브랜드는 독립적으로 작동하되, <strong className="font-bold" style={{ color: "var(--tn-text)" }}>WIO</strong>와 <strong className="font-bold" style={{ color: "var(--tn-text)" }}>YouInOne</strong>이라는 두 인프라 위에서 시너지를 만듭니다.
                     </p>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px mt-12" style={{ backgroundColor: "var(--tn-border)" }}>
-                        {stats.map(s => (
-                            <div key={s.label} className="p-5 text-center" style={{ backgroundColor: "var(--tn-bg)" }}>
-                                <div className="text-2xl sm:text-3xl font-light tracking-tight">{s.value}</div>
-                                <div className="text-xs font-medium mt-1">{s.label}</div>
-                                <div className="text-[10px] mt-0.5 opacity-50">{s.desc}</div>
-                            </div>
-                        ))}
-                    </div>
                 </section>
 
                 {/* Three Resources */}
@@ -141,7 +120,7 @@ export default function UniversePage() {
                         ].map(r => (
                             <div key={r.label} className="p-6 text-center" style={{ backgroundColor: "var(--tn-bg)" }}>
                                 <r.icon className="w-5 h-5 mx-auto mb-3 opacity-40" />
-                                <div className="text-sm font-light">{r.label}</div>
+                                <div className="text-sm font-normal">{r.label}</div>
                                 <div className="text-[10px] mt-1" style={{ color: "var(--tn-text-sub)" }}>{r.desc}</div>
                                 <div className="text-[9px] mt-2 opacity-30">{r.examples}</div>
                             </div>
@@ -155,7 +134,7 @@ export default function UniversePage() {
                         Universe Structure
                     </p>
                     <div className="inline-block px-12 py-6 border" style={{ borderColor: "var(--tn-border)" }}>
-                        <h2 className="text-2xl font-light tracking-tight">Ten:One&trade;</h2>
+                        <h2 className="text-2xl font-normal tracking-tight">Ten:One&trade;</h2>
                         <p className="text-xs mt-1" style={{ color: "var(--tn-text-sub)" }}>지주사 &middot; 인큐베이터 &middot; Universe 허브</p>
                     </div>
                     <div className="text-xs my-4" style={{ color: "var(--tn-text-sub)" }}>&darr; 전 사업에 적용</div>
@@ -163,17 +142,15 @@ export default function UniversePage() {
 
                 {/* Two OS */}
                 <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
-                    <Link href="/wio" className="group p-6 border transition-all hover:border-indigo-500/60 text-center hover:-translate-y-0.5"
+                    <Link href="/wio" className="group p-6 border transition-colors hover:border-neutral-500 text-center"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: "transparent" }}>
-                        <Sparkles className="w-4 h-4 mx-auto mb-2 text-indigo-400 opacity-60" />
-                        <h3 className="text-lg font-light tracking-wide text-indigo-400">WIO</h3>
+                        <h3 className="">WIO</h3>
                         <p className="text-[11px] mt-1" style={{ color: "var(--tn-text-sub)" }}>IT 솔루션 인프라</p>
                         <p className="text-[10px] mt-1 opacity-40">Project &middot; CRM &middot; Content &middot; AI</p>
                     </Link>
-                    <Link href="/youinone" className="group p-6 border transition-all hover:border-emerald-500/60 text-center hover:-translate-y-0.5"
+                    <Link href="/youinone" className="group p-6 border transition-colors hover:border-neutral-500 text-center"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: "transparent" }}>
-                        <Users className="w-4 h-4 mx-auto mb-2 text-emerald-400 opacity-60" />
-                        <h3 className="text-lg font-light tracking-wide text-emerald-400">YouInOne</h3>
+                        <h3 className="">YouInOne</h3>
                         <p className="text-[11px] mt-1" style={{ color: "var(--tn-text-sub)" }}>인간 솔루션 인프라</p>
                         <p className="text-[10px] mt-1 opacity-40">팀 구성 &middot; 역할 &middot; 협업 &middot; 성과</p>
                     </Link>
@@ -192,11 +169,11 @@ export default function UniversePage() {
                             <button
                                 key={b.id}
                                 onClick={() => setSelected(selected === b.id ? null : b.id)}
-                                className={`text-left p-4 transition-all ${selected === b.id ? "opacity-100 ring-1 ring-inset ring-white/10" : "opacity-70 hover:opacity-100"}`}
+                                className={`text-left p-4 transition-colors ${selected === b.id ? "opacity-100 ring-1 ring-inset ring-white/10" : "opacity-70 hover:opacity-100"}`}
                                 style={{ backgroundColor: "var(--tn-bg)" }}
                             >
                                 <div className="flex items-center justify-between">
-                                    <div className="text-sm font-light tracking-wide">{b.name}</div>
+                                    <div className="text-sm font-normal tracking-wide">{b.name}</div>
                                     <span className="text-[8px] opacity-30">{b.category}</span>
                                 </div>
                                 <div className="text-[10px] mt-0.5" style={{ color: "var(--tn-text-sub)" }}>{b.role}</div>
@@ -212,10 +189,10 @@ export default function UniversePage() {
                     </div>
 
                     {selectedBiz && (
-                        <div className="mt-6 p-6 border animate-in fade-in duration-200" style={{ borderColor: "var(--tn-border)" }}>
+                        <div className="mt-6 p-6 border" style={{ borderColor: "var(--tn-border)" }}>
                             <div className="flex items-center justify-between mb-5">
                                 <div>
-                                    <h4 className="text-sm font-light tracking-wide">{selectedBiz.name}</h4>
+                                    <h4 className="text-sm font-normal tracking-wide">{selectedBiz.name}</h4>
                                     <p className="text-[10px] mt-0.5" style={{ color: "var(--tn-text-sub)" }}>{selectedBiz.role}</p>
                                 </div>
                                 {selectedBiz.href !== "#" && (
@@ -225,14 +202,14 @@ export default function UniversePage() {
                                 )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                                <div className="border-l-2 border-indigo-500/40 pl-4">
-                                    <div className="text-[9px] tracking-[0.15em] uppercase text-indigo-400 mb-2">WIO (IT 솔루션)</div>
+                                <div className="border-l-2 border-neutral-500 pl-4">
+                                    <div className="text-[9px] tracking-[0.15em] uppercase  mb-2">WIO (IT 솔루션)</div>
                                     {selectedBiz.wio.map(w => (
                                         <div key={w} className="text-xs py-1.5 border-b last:border-0" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>{w}</div>
                                     ))}
                                 </div>
-                                <div className="border-l-2 border-emerald-500/40 pl-4">
-                                    <div className="text-[9px] tracking-[0.15em] uppercase text-emerald-400 mb-2">YouInOne (인간 솔루션)</div>
+                                <div className="border-l-2 border-neutral-500 pl-4">
+                                    <div className="text-[9px] tracking-[0.15em] uppercase  mb-2">YouInOne (인간 솔루션)</div>
                                     {selectedBiz.yio.map(y => (
                                         <div key={y} className="text-xs py-1.5 border-b last:border-0" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>{y}</div>
                                     ))}
@@ -256,13 +233,13 @@ export default function UniversePage() {
                             <div key={chain.name}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <chain.icon className="w-3.5 h-3.5 opacity-50" />
-                                    <span className="text-xs font-light">{chain.name}</span>
+                                    <span className="text-xs font-normal">{chain.name}</span>
                                 </div>
                                 <p className="text-[10px] mb-3 ml-5" style={{ color: "var(--tn-text-sub)" }}>{chain.desc}</p>
                                 <div className="grid grid-cols-4 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
                                     {chain.nodes.map((node, i) => (
                                         <div key={i} className={`p-3 text-center border-t-2 ${node.accent}`} style={{ backgroundColor: "var(--tn-bg)" }}>
-                                            <div className="text-xs font-light">{node.name}</div>
+                                            <div className="text-xs font-normal">{node.name}</div>
                                             <div className="text-[9px] mt-0.5" style={{ color: "var(--tn-text-sub)" }}>{node.sub}</div>
                                         </div>
                                     ))}
@@ -275,21 +252,20 @@ export default function UniversePage() {
                 {/* CTA */}
                 <section className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
                     <Link href="/about"
-                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide transition-all hover:opacity-90"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide transition-colors hover:opacity-90"
                         style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                         Philosophy &middot; History
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link href="/brands"
-                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-all hover:opacity-80"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-colors hover:opacity-80"
                         style={{ borderColor: "var(--tn-border)", color: "var(--tn-text)" }}>
                         <Globe className="w-4 h-4" />
                         전체 브랜드 보기
                     </Link>
                     <Link href="/wio/app"
-                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-all hover:border-indigo-500/60"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-colors hover:border-neutral-500"
                         style={{ borderColor: "var(--tn-border)", color: "var(--tn-text)" }}>
-                        <Sparkles className="w-4 h-4" />
                         WIO 체험하기
                     </Link>
                 </section>

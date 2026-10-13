@@ -58,8 +58,8 @@ export default function AboutPage() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {visionItems.map((item) => (
-                            <div key={item.title} className="border border-neutral-200 rounded-xl p-6 text-center">
-                                <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div key={item.title} className="border border-neutral-200 rounded-xs p-6 text-center">
+                                <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-none flex items-center justify-center mx-auto mb-4">
                                     <item.icon className="h-7 w-7" />
                                 </div>
                                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>
@@ -81,7 +81,7 @@ export default function AboutPage() {
                         <div className="relative pl-8 border-l-2 border-amber-200 space-y-10">
                             {milestones.map((m) => (
                                 <div key={m.year} className="relative">
-                                    <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-amber-500 border-4 border-amber-100" />
+                                    <div className="absolute -left-[25px] w-4 h-4 rounded-none bg-amber-500 border-4 border-amber-100" />
                                     <div className="ml-4">
                                         <div className="flex items-center gap-2 mb-3">
                                             <Calendar className="h-4 w-4 text-amber-500" />
@@ -90,7 +90,7 @@ export default function AboutPage() {
                                         <ul className="space-y-2">
                                             {m.events.map((event) => (
                                                 <li key={event} className="flex items-start gap-2">
-                                                    <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mt-1.5 flex-shrink-0" />
+                                                    <span className="w-1.5 h-1.5 bg-amber-400 rounded-none mt-1.5 flex-shrink-0" />
                                                     <span className="text-sm text-neutral-600">{event}</span>
                                                 </li>
                                             ))}
@@ -112,8 +112,8 @@ export default function AboutPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {partners.map((partner) => (
-                            <div key={partner.name} className="bg-white border border-neutral-200 rounded-xl p-5 text-center">
-                                <span className="text-xs px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full font-medium">
+                            <div key={partner.name} className="bg-white border border-neutral-200 rounded-xs p-5 text-center">
+                                <span className="text-xs px-2 py-0.5 bg-amber-50 text-amber-600 rounded-none font-normal">
                                     {partner.type}
                                 </span>
                                 <h3 className="text-base font-bold mt-3 mb-1">{partner.name}</h3>
@@ -132,13 +132,13 @@ export default function AboutPage() {
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link
                             href="/hero/hit"
-                            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-amber-600 font-bold hover:bg-amber-50 transition-colors rounded-lg"
+                            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-amber-600 font-bold hover:bg-amber-50 transition-colors rounded-xs"
                         >
                             HIT 진단 시작 <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/signup"
-                            className="inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white font-bold hover:bg-amber-600 transition-colors rounded-lg"
+                            className="inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white font-bold hover:bg-amber-600 transition-colors rounded-xs"
                         >
                             회원가입
                         </Link>

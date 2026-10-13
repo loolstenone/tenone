@@ -81,7 +81,7 @@ export default function HitMethodPage() {
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HIT 채점 방식</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>
           <p className="text-neutral-500 max-w-xl mx-auto break-keep">
             HIT의 점수와 유형은 AI가 만들어 내는 것이 아니라, 정해진 채점 규칙과 미리 검수한 해설로 만들어집니다. 그 과정을 그대로 공개합니다.
           </p>
@@ -93,8 +93,8 @@ export default function HitMethodPage() {
           {/* 흐름 요약 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
             {[["응답", "7점 척도 · 순서 섞기"], ["채점", "서버 규칙 · 재현 가능"], ["해설", "검수된 모듈 600개+"], ["AI", "읽기용 요약 · 보조"]].map(([t, d], i) => (
-              <div key={t} className="rounded-xl border border-neutral-200 p-4 text-center">
-                <p className="text-[11px] font-semibold text-neutral-400">{i + 1}</p>
+              <div key={t} className="rounded-xs border border-neutral-200 p-4 text-center">
+                <p className="text-[11px] font-bold text-neutral-400">{i + 1}</p>
                 <p className="text-sm font-bold text-neutral-900 mt-1">{t}</p>
                 <p className="text-[11px] text-neutral-500 mt-1 break-keep">{d}</p>
               </div>
@@ -124,7 +124,7 @@ export default function HitMethodPage() {
               </ul>
             </div>
 
-            <div className="rounded-2xl bg-neutral-50 border border-neutral-200 p-6">
+            <div className="rounded-xs bg-neutral-50 border border-neutral-200 p-6">
               <h2 className="flex items-center gap-2 text-base font-bold text-neutral-900 mb-2"><AlertCircle className="h-5 w-5 text-neutral-400" /> HIT를 읽을 때</h2>
               <ul className="space-y-1.5 text-sm text-neutral-600 leading-relaxed list-disc pl-5 break-keep">
                 <li>HIT는 스스로 답하는 자기보고 검사입니다. 그 순간의 자기 인식을 보여 주며, 능력을 시험으로 측정한 것이 아닙니다.</li>
@@ -136,7 +136,7 @@ export default function HitMethodPage() {
           </div>
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/hero/hit" className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">HIT 검사 보기 <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/hero/hit" className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-normal rounded-xs hover:bg-red-700 transition-colors">HIT 검사 보기 <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>

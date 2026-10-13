@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, Users, Calendar, FileText, ExternalLink, Crown, Medal, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, FileText, ExternalLink, Crown, Medal } from 'lucide-react';
 import { MadLoginButton } from '@/features/madleague/MadLoginButton';
 
 interface Competition {
@@ -99,7 +99,7 @@ function EmptyState() {
   return (
     <div className="bg-neutral-950 border border-neutral-900 p-12 text-center">
       <Trophy className="h-10 w-10 text-neutral-700 mx-auto mb-4" />
-      <div className="text-lg font-black mb-2">아직 참여한 프로젝트가 없습니다</div>
+      <div className="text-lg font-bold mb-2">아직 참여한 프로젝트가 없습니다</div>
       <p className="text-sm text-neutral-500 mb-6">
         경쟁PT·마케톤·아이디어 무브먼트 등 MADLeague 프로그램에 참가하면<br />
         이곳에 이력이 자동으로 기록됩니다.
@@ -146,7 +146,7 @@ export default function ProjectsPage() {
             <ArrowLeft className="h-3.5 w-3.5" /> 매드리거로 돌아가기
           </Link>
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MEMBER · PROJECTS</div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">참여 프로젝트</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">참여 프로젝트</h1>
           <p className="mt-3 text-sm text-neutral-400">
             경쟁PT · 마케톤 · 아이디어 무브먼트 등 참가 이력이 자동으로 기록됩니다.
           </p>
@@ -157,7 +157,7 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-5xl px-6 py-12">
         {loading ? (
           <div className="flex items-center justify-center py-24 gap-3 text-neutral-500">
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="text-sm text-mute">불러오는 중</span>
             <span className="text-sm">불러오는 중...</span>
           </div>
         ) : error ? (
@@ -213,7 +213,7 @@ export default function ProjectsPage() {
                             </span>
                           )}
                         </div>
-                        <h2 className="text-xl font-black">{team.name}</h2>
+                        <h2 className="text-xl font-bold">{team.name}</h2>
                         {team.description && (
                           <p className="mt-1 text-sm text-neutral-400">{team.description}</p>
                         )}
@@ -227,14 +227,14 @@ export default function ProjectsPage() {
                     {comp && (
                       <div>
                         <div className="text-neutral-600 mb-1">대회</div>
-                        <div className="text-white font-medium">{comp.title}</div>
+                        <div className="text-white font-normal">{comp.title}</div>
                         {comp.client_name && <div className="text-neutral-500">{comp.client_name}</div>}
                       </div>
                     )}
                     {comp && (
                       <div>
                         <div className="text-neutral-600 mb-1">연도</div>
-                        <div className="text-white font-medium flex items-center gap-1.5">
+                        <div className="text-white font-normal flex items-center gap-1.5">
                           <Calendar className="h-3 w-3" />
                           {comp.year}
                           {comp.presentation_date && (
@@ -248,9 +248,9 @@ export default function ProjectsPage() {
                     {club && (
                       <div>
                         <div className="text-neutral-600 mb-1">동아리</div>
-                        <div className="flex items-center gap-1.5 text-white font-medium">
+                        <div className="flex items-center gap-1.5 text-white font-normal">
                           <span
-                            className="h-2.5 w-2.5 rounded-full inline-block"
+                            className="h-2.5 w-2.5 rounded-none inline-block"
                             style={{ backgroundColor: club.color ?? '#EC1D25' }}
                           />
                           {club.name}
@@ -259,7 +259,7 @@ export default function ProjectsPage() {
                     )}
                     <div>
                       <div className="text-neutral-600 mb-1">팀원</div>
-                      <div className="text-white font-medium flex items-center gap-1.5">
+                      <div className="text-white font-normal flex items-center gap-1.5">
                         <Users className="h-3 w-3" />
                         {team.memberCount}명
                       </div>
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
                       <div className="bg-black border border-neutral-900 p-4 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2 text-sm">
                           <FileText className="h-4 w-4 text-neutral-500" />
-                          <span className="font-medium">{sub.title}</span>
+                          <span className="font-normal">{sub.title}</span>
                           <span className={`text-[10px] px-1.5 py-0.5 ${
                             sub.status === 'submitted' ? 'bg-green-950/40 text-green-400' : 'bg-neutral-900 text-neutral-500'
                           }`}>

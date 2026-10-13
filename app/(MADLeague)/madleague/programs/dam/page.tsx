@@ -43,10 +43,10 @@ export default function DamPage() {
           {DAM.map(d => (
             <div key={d.letter} className="border border-neutral-800 bg-neutral-950 p-6">
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-black text-[#EC1D25]">{d.letter}</span>
+                <span className="text-5xl font-bold text-[#EC1D25]">{d.letter}</span>
                 <span className="text-xs font-bold tracking-widest text-neutral-500">{d.word}</span>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-lg font-black"><d.icon className="h-4 w-4 text-[#EC1D25]" /> {d.title}</div>
+              <div className="mt-4 flex items-center gap-2 text-lg font-bold"><d.icon className="h-4 w-4 text-[#EC1D25]" /> {d.title}</div>
               <p className="mt-2 text-sm text-neutral-400 leading-relaxed break-keep">{d.desc}</p>
             </div>
           ))}
@@ -79,9 +79,9 @@ export default function DamPage() {
         <div className="max-w-4xl space-y-6 text-lg text-neutral-300 leading-relaxed">
           <p>DAM 파티의 처음 아이디어는 프로 구단의 신인 선수 지명전(Draft)이었습니다.</p>
           <p>취업을 열심히 준비한 대학생들이 막상 취업을 하고자 하면 어떤 회사를 선택해야 할지 알 수가 없다는 것입니다. 기업도 마찬가지입니다. 채용 공고를 내도 사람들의 지원이 없습니다. 특히 소규모의 회사는 더욱 심각합니다.</p>
-          <p className="text-xl font-black text-white">가장 중요한 것이 빠졌다는 생각이 들었습니다.</p>
+          <p className="text-xl font-bold text-white">가장 중요한 것이 빠졌다는 생각이 들었습니다.</p>
           <p>사람도, 기업도, 매칭 서비스도 많고 정보도 많지만 서로를 잘 알지 못한다는 것이었습니다. 미식축구나 농구 등 프로구단에서는 될성 싶은 신인 선수를 학생 시절부터 관찰하고 체크를 합니다. 앞으로 기업은 그 노력을 더 많이 해야 한다는 것입니다.</p>
-          <p className="text-xl font-black text-white">같이 일해 보지 않을래요?</p>
+          <p className="text-xl font-bold text-white">같이 일해 보지 않을래요?</p>
           <p>서로의 살아온 길과 하고 싶은 이야기를 듣습니다. 맥주나 음료를 들고 자유롭게 서로에 대해 묻고 답하면서 서로를 더 깊이 알아 갑니다. 대학생, 취준생은 자신의 역량을 어필하고 선배, 기업은 손을 내밀어 함께 일하자고 명함을 내미는 파티 — 바로 DAM 네트워킹 파티입니다.</p>
           <p>이력서만으로는 서로를 알기에 부족합니다. 서로의 진실한 역량과 모습을 보여주는 DAM Party. 대학생, 취준생 여러분 그리고 현업 선배, 기업 여러분 많은 관심과 응원 부탁드립니다.</p>
         </div>

@@ -277,7 +277,7 @@ export default function BadakNextStage() {
         {/* Slogan */}
         <div className="px-6 pt-12 text-center sm:pt-16" style={{ animation: 'badak-fadeUp 0.6s ease both' }}>
           <h1
-            className="text-[20px] font-black leading-[1.3] text-white sm:text-[26px]"
+            className="text-[20px] font-bold leading-[1.3] text-white sm:text-[26px]"
             style={{ letterSpacing: '-0.04em' }}
           >
             독서도 취미도 다 좋은데<br />
@@ -315,7 +315,7 @@ export default function BadakNextStage() {
                 style={{ zIndex: 0 }}
               >
                 <span
-                  className="font-black tracking-widest uppercase"
+                  className="font-bold tracking-widest uppercase"
                   style={{
                     fontSize: `${Math.round(sphereRadius * 0.18)}px`,
                     color: 'rgba(255,255,255,0.06)',
@@ -361,7 +361,7 @@ export default function BadakNextStage() {
       {/* Spark animation */}
       {spark && (
         <div
-          className="pointer-events-none fixed z-[999] h-2 w-2 rounded-full"
+          className="pointer-events-none fixed z-[999] h-2 w-2 rounded-none"
           style={{
             left: spark.x,
             top: spark.y,

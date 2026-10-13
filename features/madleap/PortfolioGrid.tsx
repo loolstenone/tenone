@@ -44,7 +44,7 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
     return (
         <>
             {/* Filter */}
-            <section className="border-b border-neutral-200 sticky top-16 bg-white z-30 shadow-sm">
+            <section className="border-b border-neutral-200 sticky top-16 bg-white z-30">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="flex items-center gap-6 py-4">
                         <div className="flex items-center gap-1.5 overflow-x-auto shrink-0">
@@ -53,7 +53,7 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
                                 <button
                                     key={gen}
                                     onClick={() => setSelectedGen(gen)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${selectedGen === gen ? "bg-[#1a1a2e] text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}
+                                    className={`px-3 py-1.5 text-xs font-normal rounded-none whitespace-nowrap transition-colors ${selectedGen === gen ? "bg-[#1a1a2e] text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}
                                 >
                                     {gen}
                                 </button>
@@ -67,7 +67,7 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
                                 <button
                                     key={cat}
                                     onClick={() => setSelectedCat(cat)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${selectedCat === cat ? "bg-[#4361ee] text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}
+                                    className={`px-3 py-1.5 text-xs font-normal rounded-none whitespace-nowrap transition-colors ${selectedCat === cat ? "bg-[#4361ee] text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}
                                 >
                                     {cat}
                                 </button>
@@ -104,14 +104,14 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filtered.map(p => (
-                                <div key={p.id} className="group border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#4361ee]/20 transition-all">
+                                <div key={p.id} className="group border border-neutral-200 rounded-xs overflow-hidden hover:border-[#4361ee]/20 transition-all">
                                     <div className={`aspect-video bg-gradient-to-br ${p.gradient} relative flex items-center justify-center overflow-hidden`}>
                                         <div className="text-center z-10">
-                                            <span className="text-white/90 text-xl md:text-2xl font-black drop-shadow-sm">{p.team}</span>
+                                            <span className="text-white/90 text-xl md:text-2xl font-bold drop-">{p.team}</span>
                                             <p className="text-white/60 text-xs mt-1">{p.client}</p>
                                         </div>
                                         {p.award && (
-                                            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-yellow-400 text-yellow-900 rounded-full text-[10px] font-bold">
+                                            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-yellow-400 text-yellow-900 rounded-none text-[10px] font-bold">
                                                 <Award className="h-3 w-3" />
                                                 {p.award}
                                             </div>
@@ -119,8 +119,8 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
                                     </div>
                                     <div className="p-5">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className="text-[10px] px-2 py-0.5 bg-[#4361ee]/10 text-[#4361ee] rounded font-medium">{p.category}</span>
-                                            <span className="text-[10px] px-2 py-0.5 bg-[#1a1a2e]/10 text-[#1a1a2e] rounded font-medium">{p.gen}</span>
+                                            <span className="text-[10px] px-2 py-0.5 bg-[#4361ee]/10 text-[#4361ee] rounded font-normal">{p.category}</span>
+                                            <span className="text-[10px] px-2 py-0.5 bg-[#1a1a2e]/10 text-[#1a1a2e] rounded font-normal">{p.gen}</span>
                                             <span className="text-[10px] text-neutral-400 ml-auto">{p.client}</span>
                                         </div>
                                         <h3 className="font-bold text-[15px] mb-2 group-hover:text-[#4361ee] transition-colors line-clamp-2">{p.title}</h3>

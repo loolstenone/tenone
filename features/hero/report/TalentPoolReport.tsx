@@ -55,14 +55,14 @@ export function TraitWishCard({ value, onChange, result }: {
         if (work[key] === side) delete work[key]; else work[key] = side;
         onChange({ ...value, work });
     };
-    const chip = (on: boolean) => clsx("px-3 py-1.5 rounded-full text-xs border transition-colors",
-        on ? "bg-red-50 border-[#E53935] text-[#E53935] font-semibold" : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-400");
+    const chip = (on: boolean) => clsx("px-3 py-1.5 rounded-none text-xs border transition-colors",
+        on ? "bg-red-50 border-[#E53935] text-[#E53935] font-bold" : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-400");
 
     return (
         <ReportCard title="원하는 성향의 인재가 어느 정도 있나요" desc="HIT 검사 결과는 본인만 봅니다. 성향 통계에 따로 동의한 인재만 세고, 대략적인 인원과 많고 적음만 보여 드립니다.">
             <div className="space-y-5">
                 <div>
-                    <p className="text-xs font-semibold text-neutral-500 mb-2">팀에서 맡을 역할 (하나라도 맞으면)</p>
+                    <p className="text-xs font-bold text-neutral-500 mb-2">팀에서 맡을 역할 (하나라도 맞으면)</p>
                     <div className="flex flex-wrap gap-2">
                         {DISC_ROLES.map(d => (
                             <button key={d.key} type="button" onClick={() => toggle("roles", d.key)} className={chip(value.roles.includes(d.key))} title={d.desc}>{d.role}</button>
@@ -70,7 +70,7 @@ export function TraitWishCard({ value, onChange, result }: {
                     </div>
                 </div>
                 <div>
-                    <p className="text-xs font-semibold text-neutral-500 mb-2">일하는 방식 (원하는 쪽만)</p>
+                    <p className="text-xs font-bold text-neutral-500 mb-2">일하는 방식 (원하는 쪽만)</p>
                     <div className="space-y-2">
                         {WORK_AXES.map(a => (
                             <div key={a.key} className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export function TraitWishCard({ value, onChange, result }: {
                     </div>
                 </div>
                 <div>
-                    <p className="text-xs font-semibold text-neutral-500 mb-2">끌리는 일 (하나라도 맞으면)</p>
+                    <p className="text-xs font-bold text-neutral-500 mb-2">끌리는 일 (하나라도 맞으면)</p>
                     <div className="flex flex-wrap gap-2">
                         {INTERESTS.map(i => (
                             <button key={i.key} type="button" onClick={() => toggle("interests", i.key)} className={chip(value.interests.includes(i.key))} title={i.desc}>{i.label}</button>
@@ -91,7 +91,7 @@ export function TraitWishCard({ value, onChange, result }: {
                 </div>
 
                 {result && (
-                    <div className="rounded-lg bg-neutral-50 border border-neutral-200 px-4 py-3 text-sm break-keep">
+                    <div className="rounded-xs bg-neutral-50 border border-neutral-200 px-4 py-3 text-sm break-keep">
                         {result.available ? (
                             <p>성향 통계에 동의한 인재 {result.base} 중 원하는 성향에 맞는 사람은 <b>{result.label}</b>, <b>{result.level}</b>입니다.</p>
                         ) : (

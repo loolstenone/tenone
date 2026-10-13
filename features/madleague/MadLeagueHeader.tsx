@@ -40,7 +40,7 @@ export function MadLeagueHeader() {
                 {/* Logo */}
                 <Link href="/madleague" className="shrink-0">
                     {logoError ? (
-                        <span className="text-white font-extrabold text-lg tracking-tight">MAD LEAGUE</span>
+                        <span className="text-white font-bold text-lg tracking-tight">MAD LEAGUE</span>
                     ) : (
                         <Image
                             src="/logos/madleague/madleague-circle-sq.png"
@@ -69,7 +69,7 @@ export function MadLeagueHeader() {
                                 aria-haspopup={item.dropdown ? "menu" : undefined}
                                 aria-expanded={item.dropdown ? opened : undefined}
                                 className={clsx(
-                                    "flex h-16 items-center gap-1 text-sm font-medium transition-colors whitespace-nowrap",
+                                    "flex h-16 items-center gap-1 text-sm font-normal transition-colors whitespace-nowrap",
                                     isActive(item.href) || opened ? "text-white" : "text-neutral-400 hover:text-white"
                                 )}
                             >
@@ -77,7 +77,7 @@ export function MadLeagueHeader() {
                                 {item.dropdown && <ChevronDown className={clsx("h-3.5 w-3.5 transition-transform", opened && "rotate-180")} />}
                             </Link>
                             {item.dropdown && opened && (
-                                <div className="absolute left-0 top-full min-w-44 border border-neutral-800 bg-neutral-900 py-2 shadow-xl">
+                                <div className="absolute left-0 top-full min-w-44 border border-neutral-800 bg-neutral-900 py-2">
                                     {item.dropdown.map(d => (
                                         <Link key={d.href} href={d.href}
                                             className={clsx("block px-4 py-2 text-sm whitespace-nowrap hover:bg-white/5 hover:text-white",
@@ -142,7 +142,7 @@ export function MadLeagueHeader() {
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={clsx(
-                            "block px-4 py-2.5 text-base font-medium transition-colors",
+                            "block px-4 py-2.5 text-base font-normal transition-colors",
                             isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
                         )}
                     >
@@ -153,7 +153,7 @@ export function MadLeagueHeader() {
                             key={d.href}
                             href={d.href}
                             onClick={() => setMobileOpen(false)}
-                            className="block py-2 pl-8 pr-4 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition"
+                            className="block py-2 pl-8 pr-4 text-sm font-normal text-neutral-400 hover:bg-white/5 hover:text-white transition"
                         >
                             {d.name}
                         </Link>

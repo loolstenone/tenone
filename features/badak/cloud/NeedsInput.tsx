@@ -78,7 +78,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
     return (
       <div className="mx-auto" style={{ width: '90%' }}>
         <div
-          className="flex flex-col gap-3 rounded-2xl px-4 py-4"
+          className="flex flex-col gap-3 rounded-xs px-4 py-4"
           style={{
             border: '1px solid rgba(255,217,61,0.3)',
             background: 'linear-gradient(135deg, rgba(255,217,61,0.08) 0%, rgba(255,168,0,0.04) 100%)',
@@ -102,7 +102,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           {/* Rank context — merged */}
           {isMerged && (
             <div
-              className="rounded-xl px-3 py-2.5 flex flex-col gap-1.5"
+              className="rounded-xs px-3 py-2.5 flex flex-col gap-1.5"
               style={{ background: 'rgba(0,0,0,0.25)' }}
             >
               {neighborAbove ? (
@@ -116,7 +116,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
               ) : null}
 
               <div
-                className="flex items-center justify-between text-[12px] font-semibold rounded-lg px-2.5 py-1.5"
+                className="flex items-center justify-between text-[12px] font-bold rounded-xs px-2.5 py-1.5"
                 style={{ background: 'rgba(255,217,61,0.14)', color: '#ffd93d' }}
               >
                 <span className="flex items-center gap-1.5 min-w-0">
@@ -141,7 +141,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           {/* Top needs — new */}
           {!isMerged && topNeeds.length > 0 && (
             <div
-              className="rounded-xl px-3 py-2.5 flex flex-col gap-1.5"
+              className="rounded-xs px-3 py-2.5 flex flex-col gap-1.5"
               style={{ background: 'rgba(0,0,0,0.2)' }}
             >
               <p className="text-xs text-white/30 mb-0.5">지금 가장 많은 니즈</p>
@@ -161,7 +161,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           {isMerged && (result.count ?? 0) >= 5 ? (
             <Link
               href={`/badak/apply${result.id ? `?needId=${result.id}` : ''}`}
-              className="flex items-center justify-center rounded-full py-2 text-xs font-bold transition-opacity hover:opacity-80"
+              className="flex items-center justify-center rounded-none py-2 text-xs font-bold transition-opacity hover:opacity-80"
               style={{
                 background: 'rgba(255,217,61,0.18)',
                 color: '#ffd93d',
@@ -173,7 +173,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
             </Link>
           ) : isMerged ? (
             <div
-              className="flex items-center justify-center gap-1.5 rounded-full py-2 text-xs"
+              className="flex items-center justify-center gap-1.5 rounded-none py-2 text-xs"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 color: 'rgba(255,255,255,0.3)',
@@ -187,7 +187,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           ) : (
             <Link
               href="/badak/apply"
-              className="flex items-center justify-center rounded-full py-2 text-xs font-bold transition-opacity hover:opacity-80"
+              className="flex items-center justify-center rounded-none py-2 text-xs font-bold transition-opacity hover:opacity-80"
               style={{
                 background: 'rgba(255,255,255,0.06)',
                 color: 'rgba(255,255,255,0.45)',
@@ -230,13 +230,13 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder={PLACEHOLDERS[promptIndex]}
           maxLength={60}
-          className="w-full rounded-full border border-white/15 bg-white/8 py-3 pl-4 pr-12 text-sm font-medium text-white outline-none placeholder:text-white/30 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/10"
+          className="w-full rounded-none border border-white/15 bg-white/8 py-3 pl-4 pr-12 text-sm font-normal text-white outline-none placeholder:text-white/30 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/10"
           style={{ letterSpacing: '-0.02em' }}
         />
         <button
           onClick={handleSend}
           disabled={sending || !hasText}
-          className="absolute right-1.5 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-none text-sm font-bold transition-all duration-300"
+          className="absolute right-1.5 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-none border-none text-sm font-bold transition-all duration-300"
           style={{
             background: hasText ? '#ffd93d' : 'rgba(255,255,255,0.1)',
             color: hasText ? '#1a1a2e' : 'rgba(255,255,255,0.2)',

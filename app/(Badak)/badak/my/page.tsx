@@ -132,7 +132,7 @@ function StatusBadge({ status }: { status: string }) {
   };
   const s = styles[status] || styles.pending;
   return (
-    <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: s.bg, color: s.color }}>
+    <span className="rounded-none px-2 py-0.5 text-[10px] font-bold" style={{ background: s.bg, color: s.color }}>
       {s.label}
     </span>
   );
@@ -198,27 +198,27 @@ function GroupManageCard({
   };
 
   return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] overflow-hidden">
+    <div className="rounded-xs border border-white/8 bg-white/[0.03] overflow-hidden">
       <button onClick={() => setExpanded(!expanded)} className="flex w-full items-center justify-between p-4 text-left">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center gap-2">
             <StatusBadge status={group.status} />
-            <span className="rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-white/30">
+            <span className="rounded-none bg-white/6 px-2 py-0.5 text-[10px] text-white/30">
               {group.type === 'recurring' ? '정기' : '1회'}
             </span>
             {pendingCount > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-none bg-red-500 px-1 text-[9px] font-bold text-white">
                 {pendingCount}
               </span>
             )}
             {dDay && (
-              <span className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+              <span className="rounded-none px-2 py-0.5 text-[10px] font-normal"
                 style={{ background: dDay === '마감' ? 'rgba(255,255,255,0.06)' : 'rgba(255,107,107,0.15)', color: dDay === '마감' ? 'rgba(255,255,255,0.25)' : '#ff6b6b' }}>
                 승인 {dDay}
               </span>
             )}
           </div>
-          <h3 className="text-sm font-semibold text-white/90">{group.title}</h3>
+          <h3 className="text-sm font-bold text-white/90">{group.title}</h3>
           <div className="mt-1 flex items-center gap-3 text-[10px] text-white/30">
             <span className="flex items-center gap-0.5"><Users className="h-3 w-3" /> {group.currentMembers}/{group.maxMembers}</span>
             <span className="flex items-center gap-0.5"><CalendarDays className="h-3 w-3" /> {group.schedule}</span>
@@ -242,9 +242,9 @@ function GroupManageCard({
                   {togglingJoinType ? (
                     <span className="text-[11px] text-white/30">변경 중...</span>
                   ) : group.joinType === 'approval' ? (
-                    <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-medium text-amber-400">승인제</span></>
+                    <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-normal text-amber-400">승인제</span></>
                   ) : (
-                    <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-medium text-green-400">선착순</span></>
+                    <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-normal text-green-400">선착순</span></>
                   )}
                 </button>
               </div>
@@ -253,8 +253,8 @@ function GroupManageCard({
               )}
             </div>
             {pendingJoinType && (
-              <div className="mx-3 mb-2.5 rounded-xl px-4 py-3" style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
-                <p className="mb-2.5 text-[12px] font-semibold text-amber-300/90">
+              <div className="mx-3 mb-2.5 rounded-xs px-4 py-3" style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
+                <p className="mb-2.5 text-[12px] font-bold text-amber-300/90">
                   {pendingJoinType === 'firstcome' ? '승인제 → 선착순으로 변경하시겠습니까?' : '선착순 → 승인제로 변경하시겠습니까?'}
                 </p>
                 <p className="mb-3 text-[11px] leading-relaxed text-white/40">
@@ -265,14 +265,14 @@ function GroupManageCard({
                 <div className="flex gap-2">
                   <button
                     onClick={confirmToggleJoinType}
-                    className="flex-1 rounded-lg py-1.5 text-[11px] font-semibold"
+                    className="flex-1 rounded-xs py-1.5 text-[11px] font-bold"
                     style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
                   >
                     변경
                   </button>
                   <button
                     onClick={() => setPendingJoinType(null)}
-                    className="rounded-lg border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
+                    className="rounded-xs border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
                   >
                     취소
                   </button>
@@ -290,7 +290,7 @@ function GroupManageCard({
               <button
                 key={sec.id}
                 onClick={() => setActiveSection(sec.id)}
-                className="flex-1 py-2 text-[11px] font-medium transition-colors"
+                className="flex-1 py-2 text-[11px] font-normal transition-colors"
                 style={{
                   color: activeSection === sec.id ? '#ffd93d' : 'rgba(255,255,255,0.3)',
                   borderBottom: activeSection === sec.id ? '2px solid #ffd93d' : '2px solid transparent',
@@ -315,7 +315,7 @@ function GroupManageCard({
                       const count = group.applicants.filter((a) => a.status === s).length;
                       const labels = { pending: '대기', approved: '승인', rejected: '거절' };
                       return (
-                        <div key={s} className="flex-1 rounded-lg bg-white/[0.04] px-2 py-1.5 text-center">
+                        <div key={s} className="flex-1 rounded-xs bg-white/[0.04] px-2 py-1.5 text-center">
                           <div className="text-sm font-bold text-white/70">{count}</div>
                           <div className="text-[9px] text-white/25">{labels[s]}</div>
                         </div>
@@ -323,7 +323,7 @@ function GroupManageCard({
                     })}
                   </div>
                   {group.applicants.map((app) => (
-                    <div key={app.id} className="rounded-lg p-3 transition-colors"
+                    <div key={app.id} className="rounded-xs p-3 transition-colors"
                       style={{
                         background: actionFeedback?.id === app.id
                           ? actionFeedback.action === 'approved' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.08)'
@@ -335,18 +335,18 @@ function GroupManageCard({
                       {actionFeedback?.id === app.id && (
                         <div className="mb-2 flex items-center gap-1.5">
                           <Check className="h-3 w-3 shrink-0" style={{ color: actionFeedback.action === 'approved' ? '#4ade80' : '#f87171' }} />
-                          <span className="text-[11px] font-semibold" style={{ color: actionFeedback.action === 'approved' ? '#4ade80' : '#f87171' }}>
+                          <span className="text-[11px] font-bold" style={{ color: actionFeedback.action === 'approved' ? '#4ade80' : '#f87171' }}>
                             {actionFeedback.action === 'approved' ? '승인 완료' : '거절 완료'}
                           </span>
                         </div>
                       )}
                       <div className="mb-1.5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-white/60">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-none bg-white/10 text-[10px] font-bold text-white/60">
                             {app.name.charAt(0)}
                           </div>
                           <div>
-                            <span className="text-xs font-medium text-white/80">{app.name}</span>
+                            <span className="text-xs font-normal text-white/80">{app.name}</span>
                             <span className="ml-1.5 text-[10px] text-white/30">{app.job}</span>
                           </div>
                         </div>
@@ -365,7 +365,7 @@ function GroupManageCard({
                           <button
                             onClick={() => handleApplicantAction(app.id, 'approved')}
                             disabled={processingId === app.id}
-                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border-none py-1.5 text-[11px] font-semibold disabled:opacity-50"
+                            className="flex flex-1 items-center justify-center gap-1 rounded-xs border-none py-1.5 text-[11px] font-bold disabled:opacity-50"
                             style={{ background: 'rgba(34,197,94,0.12)', color: '#4ade80' }}
                           >
                             <UserCheck className="h-3 w-3" /> {processingId === app.id ? '처리중...' : '승인'}
@@ -373,7 +373,7 @@ function GroupManageCard({
                           <button
                             onClick={() => handleApplicantAction(app.id, 'rejected')}
                             disabled={processingId === app.id}
-                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/8 bg-transparent py-1.5 text-[11px] text-white/35 disabled:opacity-50"
+                            className="flex flex-1 items-center justify-center gap-1 rounded-xs border border-white/8 bg-transparent py-1.5 text-[11px] text-white/35 disabled:opacity-50"
                           >
                             <UserX className="h-3 w-3" /> 거절
                           </button>
@@ -392,13 +392,13 @@ function GroupManageCard({
                 <p className="py-6 text-center text-xs text-white/25">참여 멤버가 없습니다</p>
               ) : (
                 group.members.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2.5">
+                  <div key={m.id} className="flex items-center justify-between rounded-xs bg-white/[0.03] px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-white/60">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-none bg-white/10 text-[10px] font-bold text-white/60">
                         {m.name.charAt(0)}
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-white/80">{m.name}</span>
+                        <span className="text-xs font-normal text-white/80">{m.name}</span>
                         <span className="ml-1.5 text-[10px] text-white/30">{m.job}</span>
                       </div>
                     </div>
@@ -412,8 +412,8 @@ function GroupManageCard({
           {activeSection === 'notice' && (
             <div className="p-3">
               {group.notice ? (
-                <div className="rounded-lg bg-amber-400/5 border border-amber-400/10 p-3">
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-amber-400">
+                <div className="rounded-xs bg-amber-400/5 border border-amber-400/10 p-3">
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-400">
                     <Megaphone className="h-3 w-3" /> 모임 공지
                   </div>
                   <p className="text-[11px] leading-relaxed text-white/60">{group.notice}</p>
@@ -534,19 +534,19 @@ function ProfileBoostCard({
     setCareerForm({ ...EMPTY_CAREER_FORM });
   };
 
-  const inputCls = "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30";
-  const selectCls = "rounded-lg border border-white/10 bg-[#1a1a2e] px-2 py-1.5 text-xs text-white/70 outline-none";
+  const inputCls = "w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30";
+  const selectCls = "rounded-xs border border-white/10 bg-[#1a1a2e] px-2 py-1.5 text-xs text-white/70 outline-none";
 
   return (
     <>
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: hasData ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.08)', background: hasData ? 'rgba(255,217,61,0.03)' : 'rgba(255,255,255,0.02)' }}>
+    <div className="rounded-xs border overflow-hidden" style={{ borderColor: hasData ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.08)', background: hasData ? 'rgba(255,217,61,0.03)' : 'rgba(255,255,255,0.02)' }}>
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between p-4 text-left">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: 'rgba(255,217,61,0.1)' }}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-none" style={{ background: 'rgba(255,217,61,0.1)' }}>
             <Crown className="h-4 w-4" style={{ color: '#ffd93d' }} />
           </div>
           <div>
-            <p className="text-sm font-semibold" style={{ color: hasData ? '#ffd93d' : 'rgba(255,255,255,0.6)' }}>
+            <p className="text-sm font-bold" style={{ color: hasData ? '#ffd93d' : 'rgba(255,255,255,0.6)' }}>
               {hasData ? '프로필 완성됨' : '프로필 보강하기'}
             </p>
             <p className="text-[11px] text-white/30">
@@ -566,9 +566,9 @@ function ProfileBoostCard({
             <div className="flex items-center gap-4">
               <div className="relative h-16 w-16 shrink-0">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+                  <img src={avatarUrl} alt="" className="h-16 w-16 rounded-none object-cover" />
                 ) : (
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold"
+                  <div className="flex h-16 w-16 items-center justify-center rounded-none text-xl font-bold"
                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                     {displayName.charAt(0)}
                   </div>
@@ -578,7 +578,7 @@ function ProfileBoostCard({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-lg border border-white/15 px-3 py-1.5 text-[11px] text-white/60 hover:border-white/30 transition-colors"
+                  className="rounded-xs border border-white/15 px-3 py-1.5 text-[11px] text-white/60 hover:border-white/30 transition-colors"
                 >
                   사진 변경
                 </button>
@@ -586,7 +586,7 @@ function ProfileBoostCard({
                   <button
                     type="button"
                     onClick={() => onAvatarChange(null)}
-                    className="rounded-lg border border-white/8 px-3 py-1.5 text-[11px] text-white/30 hover:text-red-400 transition-colors"
+                    className="rounded-xs border border-white/8 px-3 py-1.5 text-[11px] text-white/30 hover:text-red-400 transition-colors"
                   >
                     제거
                   </button>
@@ -602,13 +602,13 @@ function ProfileBoostCard({
             <div className="flex flex-wrap gap-1.5">
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((yr) => (
                 <button key={yr} onClick={() => setExperienceYears(yr)}
-                  className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                  className="rounded-none border px-2.5 py-1 text-[10px] transition-colors"
                   style={{ background: experienceYears === yr ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: experienceYears === yr ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: experienceYears === yr ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>
                   {yr === 0 ? '신입' : `${yr}년차`}
                 </button>
               ))}
               <button onClick={() => setExperienceYears(11)}
-                className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                className="rounded-none border px-2.5 py-1 text-[10px] transition-colors"
                 style={{ background: (experienceYears ?? -1) >= 11 ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: (experienceYears ?? -1) >= 11 ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: (experienceYears ?? -1) >= 11 ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>
                 10년차+
               </button>
@@ -620,7 +620,7 @@ function ProfileBoostCard({
             <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><FileText className="h-3 w-3" /> 한 줄 소개</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
               placeholder="나를 한마디로 소개해보세요. 모임에서 어떤 사람인지 알 수 있어요."
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none" />
+              className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none" />
           </div>
 
           {/* ── 이력 ── */}
@@ -630,7 +630,7 @@ function ProfileBoostCard({
               <button
                 type="button"
                 onClick={() => openCareerForm()}
-                className="rounded-lg border border-white/10 px-2.5 py-1 text-[10px] text-white/50 hover:border-amber-400/30 hover:text-amber-400 transition-colors"
+                className="rounded-xs border border-white/10 px-2.5 py-1 text-[10px] text-white/50 hover:border-amber-400/30 hover:text-amber-400 transition-colors"
               >
                 + 이력 추가
               </button>
@@ -642,12 +642,12 @@ function ProfileBoostCard({
                 {career.map((c) => (
                   <div
                     key={c.id}
-                    className="rounded-xl border border-white/8 px-3 py-3"
+                    className="rounded-xs border border-white/8 px-3 py-3"
                     style={{ background: 'rgba(255,255,255,0.03)' }}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-semibold text-white/80">{c.company}</div>
+                        <div className="text-xs font-bold text-white/80">{c.company}</div>
                         <div className="text-[11px] text-amber-400/70">{c.title}</div>
                         <div className="mt-0.5 text-[10px] text-white/30">{formatPeriod(c)}</div>
                         {c.description && (
@@ -678,8 +678,8 @@ function ProfileBoostCard({
 
             {/* 이력 추가/수정 폼 */}
             {showCareerForm && (
-              <div className="rounded-xl border border-amber-400/15 px-4 py-4 space-y-3" style={{ background: 'rgba(255,217,61,0.03)' }}>
-                <p className="text-[11px] font-semibold text-amber-400/60">{editingId ? '이력 수정' : '이력 추가'}</p>
+              <div className="rounded-xs border border-amber-400/15 px-4 py-4 space-y-3" style={{ background: 'rgba(255,217,61,0.03)' }}>
+                <p className="text-[11px] font-bold text-amber-400/60">{editingId ? '이력 수정' : '이력 추가'}</p>
 
                 <input
                   placeholder="회사/조직"
@@ -739,7 +739,7 @@ function ProfileBoostCard({
                   value={careerForm.description}
                   onChange={(e) => setCareerForm(f => ({ ...f, description: e.target.value }))}
                   rows={3}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none"
+                  className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none"
                 />
 
                 <div className="flex gap-2">
@@ -747,7 +747,7 @@ function ProfileBoostCard({
                     type="button"
                     onClick={submitCareer}
                     disabled={!careerForm.company.trim() || !careerForm.title.trim()}
-                    className="flex-1 rounded-xl py-2 text-xs font-semibold disabled:opacity-40 transition-colors"
+                    className="flex-1 rounded-xs py-2 text-xs font-bold disabled:opacity-40 transition-colors"
                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                   >
                     {editingId ? '수정 완료' : '추가'}
@@ -755,7 +755,7 @@ function ProfileBoostCard({
                   <button
                     type="button"
                     onClick={() => { setShowCareerForm(false); setEditingId(null); }}
-                    className="rounded-xl border border-white/10 px-4 py-2 text-xs text-white/40"
+                    className="rounded-xs border border-white/10 px-4 py-2 text-xs text-white/40"
                   >
                     취소
                   </button>
@@ -776,7 +776,7 @@ function ProfileBoostCard({
                   <button
                     key={exp}
                     onClick={() => onToggleLookingFor(exp)}
-                    className="rounded-full border px-3 py-1.5 text-[11.5px] transition-colors"
+                    className="rounded-none border px-3 py-1.5 text-[11.5px] transition-colors"
                     style={{
                       background: sel ? 'rgba(96,165,250,0.12)' : 'transparent',
                       borderColor: sel ? 'rgba(96,165,250,0.3)' : 'rgba(255,255,255,0.1)',
@@ -792,7 +792,7 @@ function ProfileBoostCard({
                 <button
                   key={exp}
                   onClick={() => onToggleLookingFor(exp)}
-                  className="group inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11.5px]"
+                  className="group inline-flex items-center gap-1 rounded-none border px-3 py-1.5 text-[11.5px]"
                   style={{
                     background: 'rgba(96,165,250,0.18)',
                     borderColor: 'rgba(96,165,250,0.4)',
@@ -820,7 +820,7 @@ function ProfileBoostCard({
                 }}
                 maxLength={MAX_CUSTOM_LEN}
                 placeholder="직접 입력 (Enter 또는 ,)"
-                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-blue-400/40"
+                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-blue-400/40"
               />
               <button
                 type="button"
@@ -828,7 +828,7 @@ function ProfileBoostCard({
                   addCustomItem(lookingForInput, lookingFor, onToggleLookingFor);
                   setLookingForInput('');
                 }}
-                className="rounded-lg border border-white/10 px-3 py-2 text-[11.5px] font-semibold text-white/60 hover:border-blue-400/30 hover:text-blue-300"
+                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-blue-400/30 hover:text-blue-300"
               >
                 추가
               </button>
@@ -847,7 +847,7 @@ function ProfileBoostCard({
                   <button
                     key={exp}
                     onClick={() => onToggleCanOffer(exp)}
-                    className="rounded-full border px-3 py-1.5 text-[11.5px] transition-colors"
+                    className="rounded-none border px-3 py-1.5 text-[11.5px] transition-colors"
                     style={{
                       background: sel ? 'rgba(74,222,128,0.12)' : 'transparent',
                       borderColor: sel ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.1)',
@@ -863,7 +863,7 @@ function ProfileBoostCard({
                 <button
                   key={exp}
                   onClick={() => onToggleCanOffer(exp)}
-                  className="group inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11.5px]"
+                  className="group inline-flex items-center gap-1 rounded-none border px-3 py-1.5 text-[11.5px]"
                   style={{
                     background: 'rgba(74,222,128,0.18)',
                     borderColor: 'rgba(74,222,128,0.4)',
@@ -891,7 +891,7 @@ function ProfileBoostCard({
                 }}
                 maxLength={MAX_CUSTOM_LEN}
                 placeholder="직접 입력 (Enter 또는 ,)"
-                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-green-400/40"
+                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-green-400/40"
               />
               <button
                 type="button"
@@ -899,7 +899,7 @@ function ProfileBoostCard({
                   addCustomItem(canOfferInput, canOffer, onToggleCanOffer);
                   setCanOfferInput('');
                 }}
-                className="rounded-lg border border-white/10 px-3 py-2 text-[11.5px] font-semibold text-white/60 hover:border-green-400/30 hover:text-green-300"
+                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-green-400/30 hover:text-green-300"
               >
                 추가
               </button>
@@ -925,7 +925,7 @@ function ProfileBoostCard({
                     value={s.value}
                     onChange={(e) => s.setter(e.target.value)}
                     placeholder={s.placeholder}
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+                    className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
                   />
                 </div>
               ))}
@@ -966,7 +966,7 @@ function ProfileBoostCard({
               ].map((m) => (
                 <label
                   key={m.key}
-                  className="flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors"
+                  className="flex cursor-pointer items-start gap-3 rounded-xs border px-4 py-3 transition-colors"
                   style={{
                     background: m.checked ? `${m.color}11` : 'rgba(255,255,255,0.03)',
                     borderColor: m.checked ? `${m.color}40` : 'rgba(255,255,255,0.08)',
@@ -980,7 +980,7 @@ function ProfileBoostCard({
                     style={{ accentColor: m.color }}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="text-[13px] font-semibold text-white/85">{m.label}</div>
+                    <div className="text-[13px] font-bold text-white/85">{m.label}</div>
                     <div className="mt-0.5 text-[11.5px] text-white/45">{m.desc}</div>
                   </div>
                 </label>
@@ -990,7 +990,7 @@ function ProfileBoostCard({
 
           {/* ── 프로필 정보 공개 여부 ── */}
           <div
-            className="rounded-xl border px-4 py-3.5"
+            className="rounded-xs border px-4 py-3.5"
             style={{
               background: profilePublic ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.03)',
               borderColor: profilePublic ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)',
@@ -1004,7 +1004,7 @@ function ProfileBoostCard({
                 className="mt-0.5 h-4 w-4 shrink-0 accent-green-400"
               />
               <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-semibold text-white/80">
+                <div className="text-[13px] font-bold text-white/80">
                   프로필 정보 공개
                 </div>
                 <div className="mt-1 text-[11.5px] leading-relaxed text-white/45">
@@ -1027,12 +1027,12 @@ function ProfileBoostCard({
             <button
               type="button"
               onClick={() => setShowPreview(true)}
-              className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-white/50 hover:border-amber-400/20 hover:text-amber-400 transition-colors"
+              className="flex-1 rounded-xs border border-white/10 py-2.5 text-xs font-bold text-white/50 hover:border-amber-400/20 hover:text-amber-400 transition-colors"
             >
               미리보기
             </button>
             <button onClick={onSave} disabled={saving}
-              className="flex-1 rounded-xl py-2.5 text-xs font-semibold disabled:opacity-50"
+              className="flex-1 rounded-xs py-2.5 text-xs font-bold disabled:opacity-50"
               style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
               {saving ? '저장 중...' : '프로필 저장'}
             </button>
@@ -1046,12 +1046,12 @@ function ProfileBoostCard({
       <div className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center" onClick={() => setShowPreview(false)}>
         <div className="absolute inset-0 bg-black/70" />
         <div
-          className="relative z-10 w-full max-w-sm rounded-t-2xl sm:rounded-2xl px-6 py-7 mx-0 sm:mx-4"
+          className="relative z-10 w-full max-w-sm rounded-t-xs sm:rounded-xs px-6 py-7 mx-0 sm:mx-4"
           style={{ background: '#1e1e36', border: '1px solid rgba(255,255,255,0.08)' }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-400/60">간략 프로필 미리보기</span>
+            <span className="text-xs font-bold text-amber-400/60">간략 프로필 미리보기</span>
             <button onClick={() => setShowPreview(false)} className="p-1 text-white/30 hover:text-white">
               <X className="h-4 w-4" />
             </button>
@@ -1060,9 +1060,9 @@ function ProfileBoostCard({
           {/* 아바타 + 이름 */}
           <div className="flex items-center gap-4 mb-4">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+              <img src={avatarUrl} alt="" className="h-16 w-16 rounded-none object-cover" />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold"
+              <div className="flex h-16 w-16 items-center justify-center rounded-none text-xl font-bold"
                 style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                 {displayName.charAt(0)}
               </div>
@@ -1085,10 +1085,10 @@ function ProfileBoostCard({
           {/* 이력 목록 */}
           {career.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-white/25 mb-2">이력</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-white/25 mb-2">이력</div>
               {career.map((c) => (
-                <div key={c.id} className="rounded-lg px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                  <div className="text-xs font-semibold text-white/80">{c.company}</div>
+                <div key={c.id} className="rounded-xs px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <div className="text-xs font-bold text-white/80">{c.company}</div>
                   <div className="text-[11px] text-amber-400/60">{c.title}</div>
                   <div className="mt-0.5 text-[10px] text-white/25">{formatPeriod(c)}</div>
                 </div>
@@ -1349,7 +1349,7 @@ function BadakMyPageInner() {
 
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+      <span className="text-sm text-mute">불러오는 중</span>
     </div>
   );
 
@@ -1357,7 +1357,7 @@ function BadakMyPageInner() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#1a1a2e] px-6">
       <Shield className="mx-auto mb-4 h-10 w-10 text-white/30" />
       <p className="mb-4 text-sm text-white/50">로그인이 필요합니다</p>
-      <button onClick={() => setShowLogin(true)} className="rounded-xl border-none px-6 py-2.5 text-sm font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>로그인</button>
+      <button onClick={() => setShowLogin(true)} className="rounded-xs border-none px-6 py-2.5 text-sm font-bold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>로그인</button>
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
   );
@@ -1558,19 +1558,19 @@ function BadakMyPageInner() {
             <div className="grid grid-cols-2 gap-3">
               {jobFunction && (
                 <div>
-                  <div className="text-xs font-medium text-neutral-500 mb-0.5">직무</div>
+                  <div className="text-xs font-normal text-neutral-500 mb-0.5">직무</div>
                   <div className="text-sm text-neutral-300">{jobFunction}</div>
                 </div>
               )}
               {industry && (
                 <div>
-                  <div className="text-xs font-medium text-neutral-500 mb-0.5">산업군</div>
+                  <div className="text-xs font-normal text-neutral-500 mb-0.5">산업군</div>
                   <div className="text-sm text-neutral-300">{industry}</div>
                 </div>
               )}
               {experienceYears !== null && (
                 <div>
-                  <div className="text-xs font-medium text-neutral-500 mb-0.5">경력</div>
+                  <div className="text-xs font-normal text-neutral-500 mb-0.5">경력</div>
                   <div className="text-sm text-neutral-300">{experienceYears}년차</div>
                 </div>
               )}
@@ -1581,7 +1581,7 @@ function BadakMyPageInner() {
       </div>
 
       {/* ── 스탯 스트립 ── */}
-      <div className="mx-4 mb-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+      <div className="mx-4 mb-5 rounded-xs" style={{ background: 'rgba(255,255,255,0.04)' }}>
         <div className="flex divide-x divide-white/6">
           {[
             { label: '내 모임', value: totalGroupCount },
@@ -1605,17 +1605,17 @@ function BadakMyPageInner() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex shrink-0 items-center gap-1 px-4 py-3.5 text-[13px] font-medium transition-colors"
+                className="relative flex shrink-0 items-center gap-1 px-4 py-3.5 text-[13px] font-normal transition-colors"
                 style={{ color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}
               >
                 {tab.label}
                 {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-none bg-red-500 px-1 text-[9px] font-bold text-white">
                     {tab.badge}
                   </span>
                 )}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full" style={{ background: '#ffd93d' }} />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-none" style={{ background: '#ffd93d' }} />
                 )}
               </button>
             );
@@ -1632,13 +1632,13 @@ function BadakMyPageInner() {
             {/* 개설한 모임 */}
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+                <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">
                   개설한 모임
                   {pendingApplicants > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingApplicants}건</span>}
                 </h2>
                 <button
                   onClick={() => router.push('/badak/groups/create')}
-                  className="flex items-center gap-1 rounded-lg border-none px-3 py-1.5 text-[11px] font-semibold"
+                  className="flex items-center gap-1 rounded-xs border-none px-3 py-1.5 text-[11px] font-bold"
                   style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}
                 >
                   <UserPlus className="h-3 w-3" /> 새 모임 개설
@@ -1646,15 +1646,15 @@ function BadakMyPageInner() {
               </div>
 
               {myGroups.length === 0 ? (
-                <div className="rounded-2xl border border-white/6 py-12 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,217,61,0.08)' }}>
+                <div className="rounded-xs border border-white/6 py-12 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(255,217,61,0.08)' }}>
                     <Crown className="h-6 w-6 text-amber-400/40" />
                   </div>
-                  <p className="mb-1 text-sm font-medium text-white/40">아직 개설한 모임이 없어요</p>
+                  <p className="mb-1 text-sm font-normal text-white/40">아직 개설한 모임이 없어요</p>
                   <p className="mb-4 text-xs text-white/20">같은 니즈를 가진 사람들을 모아보세요</p>
                   <button
                     onClick={() => router.push('/badak/groups/create')}
-                    className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                    className="rounded-none border-none px-5 py-2 text-xs font-bold"
                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                   >
                     첫 모임 개설하기
@@ -1677,17 +1677,17 @@ function BadakMyPageInner() {
 
             {/* 참여 중인 모임 */}
             <div>
-              <h2 className="mb-3 text-xs font-semibold text-white/40 uppercase tracking-wider">참여 중인 모임</h2>
+              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-wider">참여 중인 모임</h2>
               {joinedGroups.length === 0 ? (
-                <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(99,102,241,0.08)' }}>
+                <div className="rounded-xs border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(99,102,241,0.08)' }}>
                     <Users className="h-6 w-6 text-indigo-400/40" />
                   </div>
-                  <p className="mb-1 text-sm font-medium text-white/40">참여한 모임이 없어요</p>
+                  <p className="mb-1 text-sm font-normal text-white/40">참여한 모임이 없어요</p>
                   <p className="mb-4 text-xs text-white/20">바닥 니즈 클라우드에서 모임을 찾아보세요</p>
                   <button
                     onClick={() => router.push('/badak')}
-                    className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                    className="rounded-none border-none px-5 py-2 text-xs font-bold"
                     style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}
                   >
                     모임 탐색하러 가기
@@ -1696,10 +1696,10 @@ function BadakMyPageInner() {
               ) : (
                 <div className="space-y-2">
                   {joinedGroups.map((j) => (
-                    <div key={j.id} className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3">
+                    <div key={j.id} className="flex items-center justify-between rounded-xs border border-white/6 bg-white/[0.03] px-4 py-3">
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-sm font-medium text-white/80">{j.title}</span>
+                          <span className="text-sm font-normal text-white/80">{j.title}</span>
                           <StatusBadge status={j.myStatus} />
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-white/25">
@@ -1710,7 +1710,7 @@ function BadakMyPageInner() {
                       {j.nextDate && j.myStatus === 'approved' && (
                         <div className="text-right">
                           <div className="text-[10px] text-white/30">다음 모임</div>
-                          <div className="text-xs font-semibold text-green-400">{j.nextDate}</div>
+                          <div className="text-xs font-bold text-green-400">{j.nextDate}</div>
                         </div>
                       )}
                     </div>
@@ -1726,33 +1726,33 @@ function BadakMyPageInner() {
           <div className="space-y-5">
             {connectionsLoading ? (
               <div className="flex justify-center py-16">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : (
               <>
                 {/* 받은 제안 */}
                 <div>
-                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+                  <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-white/40">
                     받은 제안
                     {pendingIncomingCount > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingIncomingCount}건</span>}
                   </h2>
                   {connections.received.length === 0 ? (
-                    <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <div className="rounded-xs border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
                       <Heart className="mx-auto mb-3 h-8 w-8 text-white/10" />
                       <p className="text-sm text-white/30">받은 제안이 없어요</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {connections.received.map((c) => (
-                        <div key={c.id} className="rounded-xl border border-white/6 bg-white/[0.03] p-4">
+                        <div key={c.id} className="rounded-xs border border-white/6 bg-white/[0.03] p-4">
                           <div className="mb-3 flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
                               {c.peer.displayName.substring(0, 1)}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-white/90">{c.peer.displayName}</span>
-                                <span className="rounded-full px-2 py-0.5 text-[10px]" style={{
+                                <span className="text-sm font-bold text-white/90">{c.peer.displayName}</span>
+                                <span className="rounded-none px-2 py-0.5 text-[10px]" style={{
                                   background: c.type === 'partner' ? 'rgba(99,102,241,0.15)' : c.type === 'network' ? 'rgba(34,197,94,0.12)' : 'rgba(255,217,61,0.12)',
                                   color: c.type === 'partner' ? '#a5b4fc' : c.type === 'network' ? '#4ade80' : '#ffd93d',
                                 }}>
@@ -1764,7 +1764,7 @@ function BadakMyPageInner() {
                             </div>
                           </div>
                           {c.message && (
-                            <p className="mb-3 rounded-lg px-3 py-2 text-xs text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                            <p className="mb-3 rounded-xs px-3 py-2 text-xs text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
                               &ldquo;{c.message}&rdquo;
                             </p>
                           )}
@@ -1772,14 +1772,14 @@ function BadakMyPageInner() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleConnectionRespond(c.id, 'accepted')}
-                                className="flex-1 rounded-lg py-2 text-xs font-semibold"
+                                className="flex-1 rounded-xs py-2 text-xs font-bold"
                                 style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                               >
                                 수락하기
                               </button>
                               <button
                                 onClick={() => handleConnectionRespond(c.id, 'declined')}
-                                className="rounded-lg px-4 py-2 text-xs text-white/30 hover:text-white/50"
+                                className="rounded-xs px-4 py-2 text-xs text-white/30 hover:text-white/50"
                                 style={{ background: 'rgba(255,255,255,0.04)' }}
                               >
                                 거절
@@ -1789,7 +1789,7 @@ function BadakMyPageInner() {
                           {c.status === 'accepted' && (
                             <button
                               onClick={() => { setActiveTab('talks'); }}
-                              className="w-full rounded-lg py-2 text-xs font-semibold"
+                              className="w-full rounded-xs py-2 text-xs font-bold"
                               style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' }}
                             >
                               대화 보기
@@ -1803,14 +1803,14 @@ function BadakMyPageInner() {
 
                 {/* 보낸 제안 */}
                 <div>
-                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">보낸 제안</h2>
+                  <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-white/40">보낸 제안</h2>
                   {connections.sent.length === 0 ? (
-                    <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <div className="rounded-xs border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
                       <UserCheck className="mx-auto mb-3 h-8 w-8 text-white/10" />
                       <p className="mb-1 text-sm text-white/30">보낸 제안이 없어요</p>
                       <button
                         onClick={() => router.push('/badak/explore')}
-                        className="mt-3 rounded-full px-4 py-1.5 text-xs font-semibold"
+                        className="mt-3 rounded-none px-4 py-1.5 text-xs font-bold"
                         style={{ background: 'rgba(255,217,61,0.1)', color: '#ffd93d' }}
                       >
                         탐색하러 가기
@@ -1819,14 +1819,14 @@ function BadakMyPageInner() {
                   ) : (
                     <div className="space-y-2">
                       {connections.sent.map((c) => (
-                        <div key={c.id} className="flex items-center gap-3 rounded-xl border border-white/6 bg-white/[0.03] p-4">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                        <div key={c.id} className="flex items-center gap-3 rounded-xs border border-white/6 bg-white/[0.03] p-4">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none text-sm font-bold" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
                             {c.peer.displayName.substring(0, 1)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold text-white/80">{c.peer.displayName}</span>
-                              <span className="rounded-full px-2 py-0.5 text-[10px]" style={{
+                              <span className="text-sm font-bold text-white/80">{c.peer.displayName}</span>
+                              <span className="rounded-none px-2 py-0.5 text-[10px]" style={{
                                 background: c.type === 'partner' ? 'rgba(99,102,241,0.15)' : c.type === 'network' ? 'rgba(34,197,94,0.12)' : 'rgba(255,217,61,0.12)',
                                 color: c.type === 'partner' ? '#a5b4fc' : c.type === 'network' ? '#4ade80' : '#ffd93d',
                               }}>
@@ -1851,16 +1851,16 @@ function BadakMyPageInner() {
           <div>
             {talksLoading ? (
               <div className="flex justify-center py-16">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : threads.length === 0 ? (
-              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <div className="rounded-xs border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
                 <MessageCircle className="mx-auto mb-3 h-10 w-10 text-white/10" />
-                <p className="mb-1 text-sm font-medium text-white/40">아직 대화가 없어요</p>
+                <p className="mb-1 text-sm font-normal text-white/40">아직 대화가 없어요</p>
                 <p className="mb-4 text-xs text-white/20">관심 제안을 수락하면 대화가 시작돼요</p>
                 <button
                   onClick={() => setActiveTab('connections')}
-                  className="rounded-full px-5 py-2 text-xs font-semibold"
+                  className="rounded-none px-5 py-2 text-xs font-bold"
                   style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}
                 >
                   제안 확인하기
@@ -1874,17 +1874,17 @@ function BadakMyPageInner() {
                     <button
                       key={t.id}
                       onClick={() => setActiveThreadId(t.id)}
-                      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors"
+                      className="flex w-full items-center gap-3 rounded-xs p-3 text-left transition-colors"
                       style={{
                         background: activeThreadId === t.id ? 'rgba(255,217,61,0.08)' : 'rgba(255,255,255,0.03)',
                         border: `1px solid ${activeThreadId === t.id ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.06)'}`,
                       }}
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
                         {t.peerName.substring(0, 1)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="truncate text-sm font-semibold text-white/80">{t.peerName}</div>
+                        <div className="truncate text-sm font-bold text-white/80">{t.peerName}</div>
                         {t.lastMessagePreview && (
                           <div className="truncate text-[11px] text-white/30">{t.lastMessagePreview}</div>
                         )}
@@ -1895,13 +1895,13 @@ function BadakMyPageInner() {
 
                 {/* 메시지 영역 */}
                 {activeThreadId ? (
-                  <div className="flex flex-1 flex-col rounded-2xl border border-white/6 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="flex flex-1 flex-col rounded-xs border border-white/6 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
                     {/* 헤더 */}
                     <div className="flex items-center gap-2 border-b border-white/6 px-4 py-3">
                       <button onClick={() => setActiveThreadId(null)} className="sm:hidden mr-1 text-white/40 hover:text-white/60">
                         <ChevronRight className="h-4 w-4 rotate-180" />
                       </button>
-                      <span className="text-sm font-semibold text-white/80">
+                      <span className="text-sm font-bold text-white/80">
                         {threads.find((t) => t.id === activeThreadId)?.peerName || '대화'}
                       </span>
                       <span className="text-[11px] text-white/30">
@@ -1920,7 +1920,7 @@ function BadakMyPageInner() {
                         return (
                           <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                             <div
-                              className="max-w-[75%] rounded-2xl px-3 py-2 text-sm"
+                              className="max-w-[75%] rounded-xs px-3 py-2 text-sm"
                               style={{
                                 background: isMine ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.06)',
                                 color: isMine ? '#ffd93d' : 'rgba(255,255,255,0.8)',
@@ -1942,17 +1942,17 @@ function BadakMyPageInner() {
                         onChange={(e) => setMessageText(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
                         placeholder="메시지 입력..."
-                        className="flex-1 rounded-xl px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none"
+                        className="flex-1 rounded-xs px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none"
                         style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
                       />
                       <button
                         onClick={handleSendMessage}
                         disabled={!messageText.trim() || sendingMessage}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full disabled:opacity-30"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none disabled:opacity-30"
                         style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
                       >
                         {sendingMessage ? (
-                          <div className="h-3 w-3 animate-spin rounded-full border border-amber-400 border-t-transparent" />
+                          <span className="text-sm text-mute">불러오는 중</span>
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
@@ -1960,7 +1960,7 @@ function BadakMyPageInner() {
                     </div>
                   </div>
                 ) : (
-                  <div className="hidden sm:flex flex-1 items-center justify-center rounded-2xl border border-white/6" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="hidden sm:flex flex-1 items-center justify-center rounded-xs border border-white/6" style={{ background: 'rgba(255,255,255,0.02)' }}>
                     <p className="text-sm text-white/20">대화를 선택해주세요</p>
                   </div>
                 )}
@@ -1974,30 +1974,30 @@ function BadakMyPageInner() {
           <div className="space-y-2">
             {myPostsLoading ? (
               <div className="flex justify-center py-16">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : myPosts.length === 0 ? (
-              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div className="rounded-xs border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <FileText className="h-6 w-6 text-white/20" />
                 </div>
-                <p className="mb-1 text-sm font-medium text-white/40">작성한 글이 없어요</p>
+                <p className="mb-1 text-sm font-normal text-white/40">작성한 글이 없어요</p>
                 <p className="mb-4 text-xs text-white/20">업계 이야기를 나눠보세요</p>
                 <button
                   onClick={() => router.push('/badak/community')}
-                  className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                  className="rounded-none border-none px-5 py-2 text-xs font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}
                 >
                   커뮤니티 가기
                 </button>
               </div>
             ) : myPosts.map((post) => (
-              <div key={post.id} className="rounded-xl border border-white/6 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]">
+              <div key={post.id} className="rounded-xs border border-white/6 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="rounded bg-white/8 px-1.5 py-0.5 text-[10px] text-white/40">{post.boardLabel}</span>
                   <span className="text-[10px] text-white/20">{post.createdAt}</span>
                 </div>
-                <h3 className="mb-2 text-sm font-semibold text-white/90">{post.title}</h3>
+                <h3 className="mb-2 text-sm font-bold text-white/90">{post.title}</h3>
                 <div className="flex items-center gap-3 text-[10px] text-white/25">
                   <span className="flex items-center gap-0.5"><Eye className="h-3 w-3" /> {formatNumber(post.views)}</span>
                   <span className="flex items-center gap-0.5"><Heart className="h-3 w-3" /> {post.likes}</span>
@@ -2013,11 +2013,11 @@ function BadakMyPageInner() {
           <div className="space-y-2">
             {myNeedsLoading ? (
               <div className="flex justify-center py-16">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : myNeeds.length === 0 ? (
               <div className="py-16 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none bg-white/5">
                   <FileText className="h-5 w-5 text-white/20" />
                 </div>
                 <p className="text-sm text-white/35">관심 표명한 니즈가 없어요</p>
@@ -2029,16 +2029,16 @@ function BadakMyPageInner() {
               myNeeds.map((need) => (
                 <Link href="/badak/explore" key={need.id}>
                   <div
-                    className="flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors hover:bg-white/[0.04]"
+                    className="flex items-center justify-between rounded-xs px-4 py-3.5 transition-colors hover:bg-white/[0.04]"
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-white/85">{need.displayText ?? '(텍스트 없음)'}</p>
+                      <p className="truncate text-sm font-normal text-white/85">{need.displayText ?? '(텍스트 없음)'}</p>
                       <div className="mt-0.5 flex items-center gap-2 text-[10px] text-white/35">
                         <span>{need.count}명 관심</span>
                         {need.status && need.status !== 'active' && (
                           <span
-                            className="rounded-full px-1.5 py-px text-[9px] font-semibold"
+                            className="rounded-none px-1.5 py-px text-[9px] font-bold"
                             style={
                               need.status === 'launched'
                                 ? { background: 'rgba(34,197,94,0.15)', color: '#4ade80' }
@@ -2063,28 +2063,28 @@ function BadakMyPageInner() {
           <div className="space-y-2">
             {bookmarksLoading ? (
               <div className="flex justify-center py-16">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                <span className="text-sm text-mute">불러오는 중</span>
               </div>
             ) : bookmarks.length === 0 ? (
-              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div className="rounded-xs border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <Bookmark className="h-6 w-6 text-white/20" />
                 </div>
-                <p className="mb-1 text-sm font-medium text-white/40">북마크한 항목이 없어요</p>
+                <p className="mb-1 text-sm font-normal text-white/40">북마크한 항목이 없어요</p>
                 <p className="mb-4 text-xs text-white/20">니즈, 모임, 게시글을 저장해보세요</p>
                 <button
                   onClick={() => router.push('/badak')}
-                  className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                  className="rounded-none border-none px-5 py-2 text-xs font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}
                 >
                   바닥 탐색하기
                 </button>
               </div>
             ) : bookmarks.map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.03] p-4 hover:bg-white/[0.06]">
+              <div key={item.id} className="flex items-center justify-between rounded-xs border border-white/6 bg-white/[0.03] p-4 hover:bg-white/[0.06]">
                 <div>
                   <div className="mb-1 flex items-center gap-2">
-                    <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{
+                    <span className="rounded px-1.5 py-0.5 text-[10px] font-normal" style={{
                       background: item.type === 'need' ? 'rgba(255,217,61,0.1)' : item.type === 'group' ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.06)',
                       color: item.type === 'need' ? '#ffd93d' : item.type === 'group' ? '#a5b4fc' : 'rgba(255,255,255,0.5)',
                     }}>
@@ -2092,7 +2092,7 @@ function BadakMyPageInner() {
                     </span>
                     <span className="text-[10px] text-white/20">{item.createdAt}</span>
                   </div>
-                  <h3 className="text-sm font-medium text-white/80">{item.title}</h3>
+                  <h3 className="text-sm font-normal text-white/80">{item.title}</h3>
                   <p className="mt-0.5 text-[11px] text-white/30">{item.subtitle}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 shrink-0 text-white/15" />
@@ -2127,11 +2127,11 @@ function BadakMyPageInner() {
             )}
             <div className="space-y-2">
               {notifications.length === 0 ? (
-                <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <div className="rounded-xs border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(255,255,255,0.04)' }}>
                     <Bell className="h-6 w-6 text-white/20" />
                   </div>
-                  <p className="text-sm font-medium text-white/40">알림이 없어요</p>
+                  <p className="text-sm font-normal text-white/40">알림이 없어요</p>
                   <p className="mt-1 text-xs text-white/20">모임 참여 신청이 오면 여기서 확인할 수 있어요</p>
                 </div>
               ) : notifications.map((noti) => {
@@ -2180,7 +2180,7 @@ function BadakMyPageInner() {
                 return (
                   <div key={noti.id}
                     onClick={handleNotiClick}
-                    className="rounded-xl border p-4 transition-colors"
+                    className="rounded-xs border p-4 transition-colors"
                     style={{
                       background: noti.read ? 'rgba(255,255,255,0.02)' : 'rgba(255,217,61,0.02)',
                       borderColor: noti.read ? 'rgba(255,255,255,0.06)' : 'rgba(255,217,61,0.1)',
@@ -2188,12 +2188,12 @@ function BadakMyPageInner() {
                     }}>
                     <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {!noti.read && <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
-                        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: s.bg, color: s.color }}>{s.label}</span>
+                        {!noti.read && <span className="h-1.5 w-1.5 rounded-none bg-amber-400" />}
+                        <span className="rounded px-1.5 py-0.5 text-[10px] font-normal" style={{ background: s.bg, color: s.color }}>{s.label}</span>
                       </div>
                       <span className="text-[10px] text-white/20">{ago}</span>
                     </div>
-                    <p className="text-xs font-medium text-white/70">{noti.title}</p>
+                    <p className="text-xs font-normal text-white/70">{noti.title}</p>
                     {noti.body && <p className="mt-0.5 text-[11px] text-white/40">{noti.body}</p>}
                     {noti.link && (
                       <p className="mt-1.5 text-[10px]" style={{ color: 'rgba(255,217,61,0.4)' }}>확인하기 →</p>
@@ -2209,20 +2209,20 @@ function BadakMyPageInner() {
         {activeTab === 'settings' && (
           <div className="space-y-4">
             {saveSuccess && (
-              <div className="flex items-center gap-2 rounded-xl bg-green-500/10 px-4 py-3 text-xs text-green-400">
+              <div className="flex items-center gap-2 rounded-xs bg-green-500/10 px-4 py-3 text-xs text-green-400">
                 <Check className="h-4 w-4" /> 프로필이 저장되었습니다
               </div>
             )}
 
-            <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+            <div className="rounded-xs border border-white/8 bg-white/[0.03] p-4">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white/80">프로필 정보</h3>
+                <h3 className="text-sm font-bold text-white/80">프로필 정보</h3>
                 {!editMode ? (
-                  <button onClick={() => setEditMode(true)} className="rounded-lg border border-white/10 bg-transparent px-3 py-1 text-[11px] text-white/50 hover:text-white/70">수정</button>
+                  <button onClick={() => setEditMode(true)} className="rounded-xs border border-white/10 bg-transparent px-3 py-1 text-[11px] text-white/50 hover:text-white/70">수정</button>
                 ) : (
                   <div className="flex gap-2">
-                    <button onClick={handleCancelEdit} className="rounded-lg border border-white/10 bg-transparent px-3 py-1 text-[11px] text-white/40">취소</button>
-                    <button onClick={handleSave} className="rounded-lg border-none px-3 py-1 text-[11px] font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>저장</button>
+                    <button onClick={handleCancelEdit} className="rounded-xs border border-white/10 bg-transparent px-3 py-1 text-[11px] text-white/40">취소</button>
+                    <button onClick={handleSave} className="rounded-xs border-none px-3 py-1 text-[11px] font-bold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>저장</button>
                   </div>
                 )}
               </div>
@@ -2230,18 +2230,18 @@ function BadakMyPageInner() {
               {/* 닉네임 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Briefcase className="h-3 w-3" /> 닉네임</label>
-                {editMode ? <input value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
+                {editMode ? <input value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
                   : <p className="text-xs text-white/70">{nickname || '미설정'}</p>}
               </div>
               {/* 이메일 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Mail className="h-3 w-3" /> 이메일</label>
-                <p className="flex items-center gap-1.5 text-xs text-white/70">{user?.email}<span className="flex items-center gap-0.5 rounded-full bg-green-500/10 px-1.5 py-0.5 text-[9px] text-green-400"><Check className="h-2.5 w-2.5" /> 인증됨</span></p>
+                <p className="flex items-center gap-1.5 text-xs text-white/70">{user?.email}<span className="flex items-center gap-0.5 rounded-none bg-green-500/10 px-1.5 py-0.5 text-[9px] text-green-400"><Check className="h-2.5 w-2.5" /> 인증됨</span></p>
               </div>
               {/* 연락처 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Phone className="h-3 w-3" /> 연락처</label>
-                {editMode ? <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
+                {editMode ? <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
                   : <p className="text-xs text-white/70">{phone || '미설정'}</p>}
               </div>
               {/* 산업군 */}
@@ -2250,7 +2250,7 @@ function BadakMyPageInner() {
                 {editMode ? (
                   <div className="flex flex-wrap gap-1.5">
                     {INDUSTRIES.map((ind) => (
-                      <button key={ind} onClick={() => setIndustry(ind)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                      <button key={ind} onClick={() => setIndustry(ind)} className="rounded-none border px-2.5 py-1 text-[10px] transition-colors"
                         style={{ background: industry === ind ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: industry === ind ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: industry === ind ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>{ind}</button>
                     ))}
                   </div>
@@ -2262,7 +2262,7 @@ function BadakMyPageInner() {
                 {editMode ? (
                   <div className="flex flex-wrap gap-1.5">
                     {JOB_FUNCTIONS.map((job) => (
-                      <button key={job} onClick={() => setJobFunction(job)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                      <button key={job} onClick={() => setJobFunction(job)} className="rounded-none border px-2.5 py-1 text-[10px] transition-colors"
                         style={{ background: jobFunction === job ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: jobFunction === job ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: jobFunction === job ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>{job}</button>
                     ))}
                   </div>
@@ -2275,13 +2275,13 @@ function BadakMyPageInner() {
                   <div className="flex flex-wrap gap-1.5">
                     {EXPECTATIONS.map((exp) => {
                       const selected = interests.includes(exp);
-                      return <button key={exp} onClick={() => handleToggleInterest(exp)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                      return <button key={exp} onClick={() => handleToggleInterest(exp)} className="rounded-none border px-2.5 py-1 text-[10px] transition-colors"
                         style={{ background: selected ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: selected ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: selected ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>{exp}</button>;
                     })}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
-                    {interests.length > 0 ? interests.map((i) => <span key={i} className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-white/50">{i}</span>)
+                    {interests.length > 0 ? interests.map((i) => <span key={i} className="rounded-none bg-white/8 px-2 py-0.5 text-[10px] text-white/50">{i}</span>)
                       : <p className="text-xs text-white/40">미설정</p>}
                   </div>
                 )}
@@ -2312,34 +2312,34 @@ function BadakMyPageInner() {
 
             {/* 이메일 인증 플로우 */}
             {verifyStep === 'confirm' && (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4">
-                <div className="mb-2 flex items-center gap-2"><Shield className="h-4 w-4 text-amber-400" /><span className="text-xs font-semibold text-amber-400">프로필 변경 인증</span></div>
+              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4">
+                <div className="mb-2 flex items-center gap-2"><Shield className="h-4 w-4 text-amber-400" /><span className="text-xs font-bold text-amber-400">프로필 변경 인증</span></div>
                 <p className="mb-1 text-[11px] text-white/60">프로필 정보 변경을 위해 본인 인증이 필요합니다.</p>
-                <p className="mb-4 text-[11px] text-white/40">가입 이메일 <span className="font-medium text-white/60">{user?.email}</span> 로 인증 코드를 보내드립니다.</p>
+                <p className="mb-4 text-[11px] text-white/40">가입 이메일 <span className="font-normal text-white/60">{user?.email}</span> 로 인증 코드를 보내드립니다.</p>
                 <div className="flex gap-2">
-                  <button onClick={() => setVerifyStep('idle')} className="flex-1 rounded-lg border border-white/10 bg-transparent py-2.5 text-xs text-white/40">취소</button>
-                  <button onClick={handleSendCode} className="flex-1 rounded-lg border-none py-2.5 text-xs font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}><Mail className="mr-1.5 inline h-3.5 w-3.5" />인증 코드 보내기</button>
+                  <button onClick={() => setVerifyStep('idle')} className="flex-1 rounded-xs border border-white/10 bg-transparent py-2.5 text-xs text-white/40">취소</button>
+                  <button onClick={handleSendCode} className="flex-1 rounded-xs border-none py-2.5 text-xs font-bold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}><Mail className="mr-1.5 inline h-3.5 w-3.5" />인증 코드 보내기</button>
                 </div>
               </div>
             )}
             {verifyStep === 'sending' && (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-center">
-                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-amber-400/20 border-t-amber-400" /><p className="text-xs text-white/50">인증 코드를 발송하고 있습니다...</p>
+              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4 text-center">
+                <span className="text-sm text-mute">불러오는 중</span><p className="text-xs text-white/50">인증 코드를 발송하고 있습니다...</p>
               </div>
             )}
             {verifyStep === 'input' && (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4">
-                <div className="mb-2 flex items-center gap-2"><Mail className="h-4 w-4 text-amber-400" /><span className="text-xs font-semibold text-amber-400">인증 코드 발송 완료</span></div>
-                <p className="mb-1 text-[11px] text-white/60"><span className="font-medium text-white/70">{user?.email}</span> 로 인증 코드를 보냈습니다.</p>
+              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4">
+                <div className="mb-2 flex items-center gap-2"><Mail className="h-4 w-4 text-amber-400" /><span className="text-xs font-bold text-amber-400">인증 코드 발송 완료</span></div>
+                <p className="mb-1 text-[11px] text-white/60"><span className="font-normal text-white/70">{user?.email}</span> 로 인증 코드를 보냈습니다.</p>
                 <p className="mb-4 text-[10px] text-white/30">메일함에서 인증 코드 6자리를 확인 후 아래에 입력해주세요.</p>
                 <div className="mb-3">
                   <input value={verificationCode} onChange={(e) => { setVerificationCode(e.target.value.replace(/[^0-9]/g, '')); setVerifyError(''); }}
                     placeholder="인증 코드 6자리 입력" maxLength={6} inputMode="numeric"
-                    className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-center text-base font-bold tracking-[0.3em] text-white/90 outline-none focus:border-amber-400/40" />
+                    className="w-full rounded-xs border border-white/15 bg-white/5 px-4 py-3 text-center text-base font-bold tracking-[0.3em] text-white/90 outline-none focus:border-amber-400/40" />
                   {verifyError && <p className="mt-1.5 text-[11px] text-red-400">{verifyError}</p>}
                 </div>
                 <button onClick={handleVerifyAndSave} disabled={verificationCode.length < 6}
-                  className="mb-3 w-full rounded-lg border-none py-2.5 text-xs font-semibold transition-opacity disabled:opacity-30" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>변경 확인</button>
+                  className="mb-3 w-full rounded-xs border-none py-2.5 text-xs font-bold transition-opacity disabled:opacity-30" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>변경 확인</button>
                 <div className="flex items-center justify-between text-[10px]">
                   <button onClick={() => setVerifyStep('idle')} className="text-white/30 hover:text-white/50">취소</button>
                   <button onClick={handleSendCode} disabled={codeResendCooldown > 0} className="text-white/30 hover:text-white/50 disabled:opacity-30">
@@ -2349,14 +2349,14 @@ function BadakMyPageInner() {
               </div>
             )}
             {verifyStep === 'verifying' && (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-center">
-                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-amber-400/20 border-t-amber-400" /><p className="text-xs text-white/50">인증 확인 중...</p>
+              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4 text-center">
+                <span className="text-sm text-mute">불러오는 중</span><p className="text-xs text-white/50">인증 확인 중...</p>
               </div>
             )}
 
             <button
               onClick={() => { logout(); router.push('/badak'); }}
-              className="flex w-full items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-xs text-red-400/70 hover:bg-white/[0.06]"
+              className="flex w-full items-center gap-2 rounded-xs border border-white/8 bg-white/[0.03] px-4 py-3.5 text-xs text-red-400/70 hover:bg-white/[0.06]"
             >
               <LogOut className="h-4 w-4" /> 로그아웃
             </button>

@@ -20,7 +20,7 @@ export function SectionPager({ label, prev, next, center }: {
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-neutral-600 group-hover:text-[#EC1D25] transition shrink-0" />
           <span className="min-w-0">
             <span className="block text-[10px] sm:text-xs font-bold tracking-widest text-neutral-500">이전</span>
-            <span className="block mt-0.5 sm:mt-1 text-sm sm:text-xl font-black group-hover:text-[#EC1D25] transition break-keep">{prev.title}</span>
+            <span className="block mt-0.5 sm:mt-1 text-sm sm:text-xl font-bold group-hover:text-[#EC1D25] transition break-keep">{prev.title}</span>
           </span>
         </Link>
         {center
@@ -29,7 +29,7 @@ export function SectionPager({ label, prev, next, center }: {
         <Link href={next.href} className="group flex items-center justify-end gap-2 sm:gap-4 text-right min-w-0">
           <span className="min-w-0">
             <span className="block text-[10px] sm:text-xs font-bold tracking-widest text-neutral-500">다음</span>
-            <span className="block mt-0.5 sm:mt-1 text-sm sm:text-xl font-black group-hover:text-[#EC1D25] transition break-keep">{next.title}</span>
+            <span className="block mt-0.5 sm:mt-1 text-sm sm:text-xl font-bold group-hover:text-[#EC1D25] transition break-keep">{next.title}</span>
           </span>
           <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-neutral-600 group-hover:text-[#EC1D25] transition shrink-0" />
         </Link>

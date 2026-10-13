@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Loader2, ArrowRight, Building2, Settings2 } from "lucide-react";
+import { ArrowRight, Building2, Settings2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { PageHero } from "@/features/hero/PageHero";
@@ -42,7 +42,7 @@ export default function HeroOffersPage() {
         }).catch(() => undefined).finally(() => setLoading(false));
     }, [isAuthenticated]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     const open = settings?.is_open === true;
@@ -59,15 +59,15 @@ export default function HeroOffersPage() {
 
             <div className="mx-auto max-w-5xl px-6 lg:px-8 py-12 space-y-10">
                 {loading ? (
-                    <div className="py-16 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
+                    <div className="py-16 flex justify-center"><span className="text-sm text-mute">불러오는 중</span></div>
                 ) : (
                     <>
                         <Link href="/hero/offers/settings"
-                            className="flex items-center justify-between p-5 border border-neutral-200 rounded-xl hover:shadow-md transition-shadow">
+                            className="flex items-center justify-between p-5 border border-neutral-200 rounded-xs transition-">
                             <div className="flex items-center gap-3">
                                 <Settings2 className="h-5 w-5 text-neutral-400" />
                                 <div>
-                                    <p className="font-semibold">제안 받기 {open ? "켜짐" : "꺼짐"}</p>
+                                    <p className="font-bold">제안 받기 {open ? "켜짐" : "꺼짐"}</p>
                                     <p className="text-xs text-neutral-500">
                                         {open && settings
                                             ? `${settings.job_functions.join(" · ")} · ${settings.career_level}`
@@ -79,9 +79,9 @@ export default function HeroOffersPage() {
                         </Link>
 
                         <section>
-                            <h2 className="text-xl font-extrabold tracking-tight mb-4">받은 제안</h2>
+                            <h2 className="text-xl font-bold tracking-tight mb-4">받은 제안</h2>
                             {items.length === 0 ? (
-                                <p className="text-sm text-neutral-500 py-10 text-center border border-dashed border-neutral-200 rounded-xl">
+                                <p className="text-sm text-neutral-500 py-10 text-center border border-dashed border-neutral-200 rounded-xs">
                                     아직 받은 제안이 없습니다.
                                 </p>
                             ) : (
@@ -92,7 +92,7 @@ export default function HeroOffersPage() {
                                         return (
                                             <li key={it.id}>
                                                 <Link href={`/hero/offers/${it.id}`}
-                                                    className="flex items-center justify-between gap-4 p-5 border border-neutral-200 rounded-xl hover:shadow-md transition-shadow">
+                                                    className="flex items-center justify-between gap-4 p-5 border border-neutral-200 rounded-xs transition-">
                                                     <div className="flex items-start gap-3 min-w-0">
                                                         <Building2 className="h-5 w-5 text-neutral-400 shrink-0 mt-0.5" />
                                                         <div className="min-w-0">
@@ -100,11 +100,11 @@ export default function HeroOffersPage() {
                                                                 {o?.hero_companies?.company_name} · {labelOf(OFFER_TYPES, o?.offer_type)}
                                                                 {o?.respond_by && ` · ${o.respond_by}까지`}
                                                             </p>
-                                                            <p className="font-semibold truncate">{o?.title}</p>
+                                                            <p className="font-bold truncate">{o?.title}</p>
                                                         </div>
                                                     </div>
-                                                    <span className={clsx("text-xs px-2.5 py-1 rounded-full shrink-0",
-                                                        isNew ? "bg-red-50 text-[#E53935] font-semibold" : "bg-neutral-100 text-neutral-600")}>
+                                                    <span className={clsx("text-xs px-2.5 py-1 rounded-none shrink-0",
+                                                        isNew ? "bg-red-50 text-[#E53935] font-bold" : "bg-neutral-100 text-neutral-600")}>
                                                         {RECIPIENT_STATUS_LABEL[it.status] ?? it.status}
                                                     </span>
                                                 </Link>

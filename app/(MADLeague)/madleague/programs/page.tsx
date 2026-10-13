@@ -15,7 +15,7 @@ export default function ProgramsPage() {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">PROGRAMS</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
+          <h1 className="mt-3 text-4xl sm:text-6xl font-bold tracking-tight">
             {MAD_PROGRAMS.length}가지 실전 무대
           </h1>
           <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
@@ -41,10 +41,10 @@ export default function ProgramsPage() {
           <section key={g.key} id={g.key} className={`scroll-mt-32 ${gi > 0 ? 'border-t border-neutral-900' : ''}`}>
             <div className="mx-auto max-w-7xl px-6 py-16">
               <div className="mb-8 flex gap-5 border-l-4 border-[#EC1D25] pl-5">
-                <div className="text-4xl sm:text-5xl font-black tabular-nums text-neutral-700 leading-none">{String(gi + 1).padStart(2, '0')}</div>
+                <div className="text-4xl sm:text-5xl font-bold tabular-nums text-neutral-700 leading-none">{String(gi + 1).padStart(2, '0')}</div>
                 <div>
                   <div className="text-xs font-bold tracking-widest text-[#EC1D25]">{g.eyebrow}</div>
-                  <h2 className="mt-1 text-3xl sm:text-4xl font-black leading-tight">{g.label}</h2>
+                  <h2 className="mt-1 text-3xl sm:text-4xl font-bold leading-tight">{g.label}</h2>
                   <p className="mt-2 text-neutral-400 break-keep">{g.desc} <span className="text-neutral-600">· {items.length}개 프로그램</span></p>
                 </div>
               </div>
@@ -62,7 +62,7 @@ export default function ProgramsPage() {
                       }`}
                     >
                       <div className="text-xs font-bold tracking-widest" style={{ color: p.featured ? 'rgba(255,255,255,0.7)' : accent }}>{p.eyebrow}</div>
-                      <div className="mt-3 text-3xl font-black text-white">{p.title}</div>
+                      <div className="mt-3 text-3xl font-bold text-white">{p.title}</div>
                       <div className={`mt-4 text-sm leading-relaxed ${p.featured ? 'text-white/90' : 'text-neutral-400'}`}>{p.desc}</div>
                       <dl className={`mt-6 space-y-1 text-xs ${p.featured ? 'text-white/80' : 'text-neutral-500'}`}>
                         {p.glance ? (

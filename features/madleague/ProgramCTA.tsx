@@ -29,7 +29,7 @@ export async function ProgramCTA({ program, primary }: { program: MadProgram; pr
     <section id="join" style={{ backgroundColor: accent }}>
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className={`text-sm font-bold tracking-widest ${sub} mb-3`}>JOIN</div>
-        <h2 className={`text-3xl sm:text-4xl font-black ${text}`}>
+        <h2 className={`text-3xl sm:text-4xl font-bold ${text}`}>
           {program.madleaguerOnly ? `${program.title}는 매드리거의 무대다` : `${program.title}에 참여하기`}
         </h2>
         <p className={`mt-3 text-lg ${sub}`}>

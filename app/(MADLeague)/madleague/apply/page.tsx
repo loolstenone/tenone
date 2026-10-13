@@ -22,7 +22,7 @@ export default async function ApplyPage({ searchParams }: PageProps) {
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-3xl px-6 py-20">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">REGISTER</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">매드리거 등록</h1>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-bold tracking-tight">매드리거 등록</h1>
         </div>
       </section>
 

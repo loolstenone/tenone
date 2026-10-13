@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Users, Target, Clock, ArrowRight, Loader2, Sparkles, RotateCcw, Sprout } from "lucide-react";
+import { Brain, Users, Target, Clock, ArrowRight, Sparkles, RotateCcw, Sprout } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { HIT_A_UF_COUNT, HIT_A_TOTAL_COUNT } from "@/lib/hit/a-modules";
 import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
@@ -113,10 +113,10 @@ export default function HitAIntroPage() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-none mb-6">
             {HIT_STAGES.a.code} · 공통 기반
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             내가 누구인지 알아보세요
           </h1>
           <p className="text-neutral-500 mb-2">
@@ -137,8 +137,8 @@ export default function HitAIntroPage() {
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6">검사 구성</h2>
           <div className="space-y-4">
             {shownModules.map((m, i) => (
-              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center flex-shrink-0">
                   <m.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
@@ -168,26 +168,26 @@ export default function HitAIntroPage() {
             <div className="flex flex-col items-center gap-3">
               <button
                 onClick={() => router.push(`/hero/hit/a/test?s=${resume.token}`)}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xs"
               >
-                이어서 하기 <span className="text-sm font-medium opacity-80">({resume.answered}/{TOTAL_QUESTIONS} 답변)</span> <ArrowRight className="h-5 w-5" />
+                이어서 하기 <span className="text-sm font-normal opacity-80">({resume.answered}/{TOTAL_QUESTIONS} 답변)</span> <ArrowRight className="h-5 w-5" />
               </button>
               <button
                 onClick={() => handleStart(true)}
                 disabled={starting}
                 className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
               >
-                {starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 처음부터 다시 하기
+                {starting ? <span className="text-xs">처리 중</span> : <RotateCcw className="h-4 w-4" />} 처음부터 다시 하기
               </button>
             </div>
           ) : (
             <button
               onClick={() => handleStart(false)}
               disabled={starting}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xl disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#E53935] text-white font-bold text-lg hover:bg-red-700 transition-colors rounded-xs disabled:opacity-50"
             >
               {starting ? (
-                <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
+                <><span className="text-sm text-mute">불러오는 중</span> 시작하는 중...</>
               ) : (
                 <>{HIT_STAGES.a.ko} 시작하기 <ArrowRight className="h-5 w-5" /></>
               )}

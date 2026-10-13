@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Shield, Loader2, Check, X, Sparkles, ArrowRight } from "lucide-react";
+import { Shield, Check, X, Sparkles, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Props {
@@ -96,8 +96,8 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 text-xs text-neutral-400 py-3 px-4 border border-neutral-200 rounded-lg">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> 영웅 유형 확인 중...
+            <div className="flex items-center gap-2 text-xs text-neutral-400 py-3 px-4 border border-neutral-200 rounded-xs">
+                <span className="text-sm text-mute">불러오는 중</span> 영웅 유형 확인 중...
             </div>
         );
     }
@@ -106,12 +106,12 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
     if (!heroType) {
         return (
             <Link href="/hero/hit/a"
-                className="flex items-center gap-3 p-4 border border-dashed border-neutral-300 hover:border-rose-400 rounded-lg transition-colors bg-white">
-                <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
+                className="flex items-center gap-3 p-4 border border-dashed border-neutral-300 hover:border-rose-400 rounded-xs transition-colors bg-white">
+                <div className="w-10 h-10 rounded-xs bg-neutral-100 flex items-center justify-center">
                     <Shield className="h-5 w-5 text-neutral-400" />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-semibold text-neutral-700">유니버스 배지</p>
+                    <p className="text-sm font-bold text-neutral-700">유니버스 배지</p>
                     <p className="text-xs text-neutral-500 mt-0.5">
                         HeRo HIT 검사로 당신의 영웅 유형을 발견하면 배지로 프로필에 표시됩니다
                     </p>
@@ -123,13 +123,13 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
 
     // HIT A 완료 — 토글 노출
     return (
-        <div className="p-4 border border-neutral-200 rounded-lg bg-gradient-to-br from-white to-rose-50/30">
+        <div className="p-4 border border-neutral-200 rounded-xs bg-gradient-to-br from-white to-rose-50/30">
             <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-100 to-amber-50 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xs bg-gradient-to-br from-rose-100 to-amber-50 flex items-center justify-center shrink-0">
                     <Sparkles className="h-5 w-5 text-rose-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800">유니버스 배지</p>
+                    <p className="text-sm font-bold text-neutral-800">유니버스 배지</p>
                     <p className="text-xs text-neutral-500 mt-0.5">
                         당신의 영웅 유형: <span className="font-mono text-rose-600">{heroType.type_code}</span>
                         {" · "}{heroType.character_name}
@@ -140,18 +140,18 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
 
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-neutral-100">
                 <div className="min-w-0">
-                    <p className="text-xs font-semibold text-neutral-700">전 Universe 브랜드에 배지 표시</p>
+                    <p className="text-xs font-bold text-neutral-700">전 Universe 브랜드에 배지 표시</p>
                     <p className="text-[11px] text-neutral-400 mt-0.5">
                         Badak · MADLeague · Jakka 등 모든 브랜드 프로필 카드에 배지로 노출됩니다
                     </p>
                 </div>
                 <button onClick={toggle} disabled={saving}
-                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${isPublic ? "bg-rose-500" : "bg-neutral-300"} disabled:opacity-60`}
+                    className={`relative w-11 h-6 rounded-none transition-colors shrink-0 ${isPublic ? "bg-rose-500" : "bg-neutral-300"} disabled:opacity-60`}
                     aria-label="badge toggle">
-                    <span className={`absolute top-0.5 h-5 w-5 bg-white rounded-full shadow transition-transform flex items-center justify-center ${
+                    <span className={`absolute top-0.5 h-5 w-5 bg-white rounded-none transition-transform flex items-center justify-center ${
                         isPublic ? "translate-x-5" : "translate-x-0.5"
                     }`}>
-                        {saving ? <Loader2 className="h-3 w-3 animate-spin text-neutral-500" /> : isPublic ? <Check className="h-3 w-3 text-rose-500" /> : <X className="h-3 w-3 text-neutral-400" />}
+                        {saving ? <span className="text-xs">처리 중</span> : isPublic ? <Check className="h-3 w-3 text-rose-500" /> : <X className="h-3 w-3 text-neutral-400" />}
                     </span>
                 </button>
             </div>

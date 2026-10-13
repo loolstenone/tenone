@@ -118,7 +118,7 @@ export function UniverseFooter({
                     <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
                         {columns.map(col => (
                             <div key={col.title}>
-                                <div className={clsx("text-xs font-semibold uppercase tracking-wider mb-3", textPrimary)}>{col.title}</div>
+                                <div className={clsx("text-xs font-bold uppercase tracking-wider mb-3", textPrimary)}>{col.title}</div>
                                 <ul className="space-y-2">
                                     {col.links.map(link => (
                                         <li key={link.label + link.href}>

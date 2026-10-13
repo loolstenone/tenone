@@ -33,13 +33,13 @@ const BRAND_ITEMS = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <section>
-            <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>{title}</h2>
+            <h2 className="text-base font-normal mb-3" style={{ color: "var(--tn-text)" }}>{title}</h2>
             {children}
         </section>
     );
 }
 
-const th = "text-left font-medium py-2 pr-3 align-top";
+const th = "text-left font-normal py-2 pr-3 align-top";
 const td = "py-2 pr-3 align-top border-t";
 
 export default function PrivacyPage() {
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         <div className="min-h-screen pt-24 pb-20" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
             <div className="max-w-3xl mx-auto px-6">
                 <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Privacy Policy</p>
-                <h1 className="text-3xl font-light tracking-tight mb-4">개인정보처리방침</h1>
+                <h1 className="text-3xl font-normal tracking-tight mb-4">개인정보처리방침</h1>
                 <p className="text-xs mb-3" style={{ color: "var(--tn-text-sub)" }}>시행일: {EFFECTIVE_DATE}</p>
                 {/* 변경 예정 공지 — 시행 7일 전부터 (12조). 시행일이 지나면 공지를 지우고 LEGAL_DOCUMENTS.privacy 버전·시행일 갱신 */}
                 <p className="text-xs mb-10 px-3 py-2 border" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>

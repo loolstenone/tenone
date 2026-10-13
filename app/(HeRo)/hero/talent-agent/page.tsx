@@ -26,8 +26,8 @@ export default function TalentAgentPage() {
       <section className="py-20">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">왜 HeRo인가</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900 mb-3">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">왜 HeRo인가</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
               기획사처럼 움직입니다
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
@@ -53,8 +53,8 @@ export default function TalentAgentPage() {
                 desc: "내 정보는 공개되지 않습니다. 회사에 보여 줄지는 내가 정합니다.",
               },
             ].map((t) => (
-              <div key={t.title} className="border border-neutral-200 rounded-2xl p-6">
-                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center mb-4">
+              <div key={t.title} className="border border-neutral-200 rounded-xs p-6">
+                <div className="w-10 h-10 rounded-xs bg-red-50 flex items-center justify-center mb-4">
                   <t.icon className="h-5 w-5 text-[#E53935]" />
                 </div>
                 <h3 className="font-bold text-neutral-900 mb-2">{t.title}</h3>
@@ -69,8 +69,8 @@ export default function TalentAgentPage() {
       <section className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">진행 방법</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">진행 과정</h2>
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">진행 방법</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">진행 과정</h2>
           </div>
 
           <ol className="space-y-5">
@@ -96,8 +96,8 @@ export default function TalentAgentPage() {
                 desc: "맞는 기업이 당신에게 관심을 보이면, HeRo가 먼저 의사를 확인한 뒤 본인이 허락한 범위만 보여드립니다.",
               },
             ].map((s) => (
-              <li key={s.n} className="flex gap-4 p-5 bg-white border border-neutral-200 rounded-2xl">
-                <div className="w-9 h-9 shrink-0 rounded-full bg-neutral-900 text-white font-bold flex items-center justify-center">
+              <li key={s.n} className="flex gap-4 p-5 bg-white border border-neutral-200 rounded-xs">
+                <div className="w-9 h-9 shrink-0 rounded-none bg-neutral-900 text-white font-bold flex items-center justify-center">
                   {s.n}
                 </div>
                 <div>
@@ -114,8 +114,8 @@ export default function TalentAgentPage() {
       <section className="py-20">
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">무엇이 포함되나요</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">탤런트 에이전시 기본 혜택</h2>
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">무엇이 포함되나요</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">탤런트 에이전시 기본 혜택</h2>
             <p className="text-sm text-neutral-500 mt-3">신청만으로 받을 수 있는 것들입니다.</p>
           </div>
 
@@ -128,7 +128,7 @@ export default function TalentAgentPage() {
               "커리어 상담 콘텐츠 · 주간 뉴스레터",
               "HeRo 파운더 커뮤니티 (소수 초대)",
             ].map((f) => (
-              <li key={f} className="flex items-start gap-2 p-4 border border-neutral-200 rounded-xl">
+              <li key={f} className="flex items-start gap-2 p-4 border border-neutral-200 rounded-xs">
                 <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[#E53935]" />
                 <span className="text-sm text-neutral-700 leading-relaxed">{f}</span>
               </li>
@@ -141,8 +141,8 @@ export default function TalentAgentPage() {
       <section className="py-20 bg-neutral-900 text-white overflow-hidden">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-red-400/80 uppercase tracking-widest mb-2">유니버스 성장 단계</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
+            <p className="text-xs font-bold text-red-400/80 uppercase tracking-widest mb-2">유니버스 성장 단계</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
               HeRo와 함께하는<br className="md:hidden" /> 유니버스 브랜드
             </h2>
             <p className="text-neutral-400 max-w-xl mx-auto leading-relaxed">
@@ -198,14 +198,14 @@ export default function TalentAgentPage() {
               <CrossSiteLink
                 key={s.name}
                 href={s.href}
-                className="group flex flex-col p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 transition-colors min-h-full"
+                className="group flex flex-col p-5 rounded-xs bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 transition-colors min-h-full"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.dot }} />
+                  <span className="w-2 h-2 rounded-none shrink-0" style={{ backgroundColor: s.dot }} />
                   <p className="text-base font-bold">{s.name}</p>
                   <ArrowRight className="h-3.5 w-3.5 text-neutral-500 group-hover:text-white transition-colors ml-auto" />
                 </div>
-                <p className="text-[11px] text-red-400/70 font-medium mb-2 uppercase tracking-wider">{s.tagline}</p>
+                <p className="text-[11px] text-red-400/70 font-normal mb-2 uppercase tracking-wider">{s.tagline}</p>
                 <p className="text-xs text-neutral-400 leading-relaxed">{s.desc}</p>
               </CrossSiteLink>
             ))}
@@ -220,9 +220,9 @@ export default function TalentAgentPage() {
       {/* CTA */}
       <section className="pt-20 pb-24">
         <div className="mx-auto max-w-3xl px-6">
-          <div className="rounded-3xl bg-gradient-to-br from-[#E53935] to-red-700 text-white p-10 md:p-12 text-center">
+          <div className="rounded-xs bg-gradient-to-br from-[#E53935] to-red-700 text-white p-10 md:p-12 text-center">
             <Users className="h-8 w-8 mx-auto mb-4 opacity-90" />
-            <h2 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
               당신의 커리어를 함께 키웁니다
             </h2>
             <p className="text-white/90 mb-8 leading-relaxed">
@@ -230,7 +230,7 @@ export default function TalentAgentPage() {
             </p>
             <Link
               href="/hero/talent-agent/apply"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#E53935] font-bold hover:bg-neutral-100 transition-colors"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xs bg-white text-[#E53935] font-bold hover:bg-neutral-100 transition-colors"
             >
               탤런트 에이전시 신청하기 <ArrowRight className="h-4 w-4" />
             </Link>

@@ -6,7 +6,7 @@ import { FeedCard } from './FeedCard';
 import { FeedHighlights } from './FeedHighlights';
 import { QuoteBanner } from './QuoteBanner';
 import { ParticipationBanner } from './ParticipationBanner';
-import { X, Loader2, CheckCircle } from 'lucide-react';
+import { X, CheckCircle } from 'lucide-react';
 
 const TABS = ['전체', '모임 확정', '니즈 모이는 중', '마감 임박', '스토리'];
 const PAGE_SIZE = 4; // 첫 로드 수
@@ -76,7 +76,7 @@ export function FeedSection() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="shrink-0 cursor-pointer whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium"
+              className="shrink-0 cursor-pointer whitespace-nowrap rounded-none border px-3.5 py-1.5 text-xs font-normal"
               style={{
                 border: isActive ? '1px solid rgba(255,217,61,0.4)' : '1px solid rgba(255,255,255,0.1)',
                 background: isActive ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -118,11 +118,7 @@ export function FeedSection() {
         <div ref={sentinelRef} className="py-6 flex justify-center">
           {loadingMore ? (
             <div className="flex items-center gap-2 text-[12px] text-white/25">
-              <span
-                className="h-3.5 w-3.5 rounded-full border-2 border-white/20 border-t-amber-400/60 animate-spin"
-                style={{ animationDuration: '0.8s' }}
-              />
-              불러오는 중...
+              불러오는 중
             </div>
           ) : (
             <div className="h-1 w-1" /> // 보이지 않는 센티넬
@@ -148,7 +144,7 @@ export function FeedSection() {
         <p className="text-[11px] text-white/20 mb-2">궁금한 점이 있으신가요?</p>
         <button
           onClick={() => setShowInquiry(true)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-none border border-white/10 px-4 py-1.5 text-xs text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
           style={{ background: 'rgba(255,255,255,0.04)' }}
         >
           문의하기
@@ -210,7 +206,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-[480px] rounded-t-2xl sm:rounded-2xl p-5 pb-8 sm:pb-5"
+        className="w-full max-w-[480px] rounded-t-xs sm:rounded-xs p-5 pb-8 sm:pb-5"
         style={{ background: '#1e1e30', border: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center justify-between mb-5">
@@ -223,11 +219,11 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
         {done ? (
           <div className="text-center py-6">
             <CheckCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-white mb-1">문의가 접수됐어요</p>
+            <p className="text-sm font-bold text-white mb-1">문의가 접수됐어요</p>
             <p className="text-xs text-white/40">빠른 시일 내에 답변드릴게요</p>
             <button
               onClick={onClose}
-              className="mt-5 px-6 py-2 rounded-full text-sm font-medium text-white/60 border border-white/10 hover:border-white/20 transition-colors"
+              className="mt-5 px-6 py-2 rounded-none text-sm font-normal text-white/60 border border-white/10 hover:border-white/20 transition-colors"
             >
               닫기
             </button>
@@ -241,7 +237,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="홍길동"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
               />
             </div>
 
@@ -252,7 +248,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder="email@example.com 또는 010-0000-0000"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
               />
             </div>
 
@@ -263,7 +259,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                   <button
                     key={c}
                     onClick={() => setCategory(c)}
-                    className="px-2.5 py-1 rounded-full text-[11px] border transition-colors"
+                    className="px-2.5 py-1 rounded-none text-[11px] border transition-colors"
                     style={{
                       border: category === c ? '1px solid rgba(255,217,61,0.4)' : '1px solid rgba(255,255,255,0.1)',
                       background: category === c ? 'rgba(255,217,61,0.1)' : 'transparent',
@@ -283,7 +279,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="궁금한 점이나 불편한 점을 자유롭게 적어주세요"
                 rows={4}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40 resize-none"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40 resize-none"
               />
             </div>
 
@@ -292,13 +288,13 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
             <button
               onClick={handleSubmit}
               disabled={!canSubmit || submitting}
-              className="w-full rounded-xl py-2.5 text-sm font-bold transition-all"
+              className="w-full rounded-xs py-2.5 text-sm font-bold transition-all"
               style={{
                 background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #f59e0b)' : 'rgba(255,255,255,0.08)',
                 color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
               }}
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : '문의 보내기'}
+              {submitting ? <span className="text-xs">처리 중</span> : '문의 보내기'}
             </button>
           </div>
         )}

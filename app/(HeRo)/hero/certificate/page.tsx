@@ -14,7 +14,7 @@ export default async function Page() {
     <div className="min-h-[70vh] bg-black text-white">
       <section className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-3 text-xs font-bold tracking-widest" style={{ color: t.accent }}>수료증·확인서</div>
-        <h1 className="text-4xl font-black tracking-tight">인증서 발급</h1>
+        <h1 className="text-4xl font-bold tracking-tight">인증서 발급</h1>
         <p className="mt-4 max-w-2xl text-neutral-400">참가한 HeRo 프로그램의 결과가 발표되면 직접 발급할 수 있습니다. 인증서마다 고유 코드로 진위를 확인할 수 있습니다.</p>
       </section>
       <section className="mx-auto max-w-5xl px-6 pb-20">

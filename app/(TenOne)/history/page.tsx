@@ -18,9 +18,9 @@ export default function HistoryPage() {
             <section className="pt-16 pb-10 px-6 text-center">
                 <div className="max-w-7xl mx-auto">
                     <p className="text-xs tracking-[0.3em] mb-3" style={{ color: "var(--tn-text-sub)" }}>HISTORY</p>
-                    <h1 className="text-3xl md:text-4xl font-black mb-3">Universe Chronicle</h1>
+                    <h1 className="text-[28px] leading-9 font-bold mb-3">연혁</h1>
                     <p className="text-sm max-w-2xl mx-auto" style={{ color: "var(--tn-text-sub)" }}>
-                        유니버스 연대기 — Ten:One™이 걸어온 발자취
+                        Ten:One™이 해 온 일을 연도별로 적습니다.
                     </p>
                 </div>
             </section>
@@ -71,7 +71,7 @@ export default function HistoryPage() {
 
                                     {/* Card */}
                                     <div className="border p-5 transition-colors" style={{ borderColor: "var(--tn-border)", backgroundColor: "var(--tn-surface)" }}>
-                                        <h3 className="text-base font-semibold">{event.title}</h3>
+                                        <h3 className="text-base font-bold">{event.title}</h3>
                                         <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>{event.description}</p>
                                         {brandName && (
                                             <span className="inline-block mt-3 text-xs px-2.5 py-0.5 border" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>

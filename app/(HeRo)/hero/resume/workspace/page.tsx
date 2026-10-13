@@ -122,7 +122,7 @@ export default function ResumeWorkspacePage() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="h-6 w-6 border-2 border-neutral-200 border-t-amber-500 rounded-full animate-spin" />
+                <span className="text-sm text-mute">불러오는 중</span>
             </div>
         );
     }
@@ -158,19 +158,19 @@ export default function ResumeWorkspacePage() {
                         profile={{ name: user?.name, email: user?.email, phone: user?.phone }}
                     />
 
-                    <div className="sticky bottom-0 mt-6 -mx-4 px-4 py-4 bg-neutral-50/95 backdrop-blur border-t border-neutral-200 flex flex-wrap items-center gap-3">
+                    <div className="sticky bottom-0 mt-6 -mx-4 px-4 py-4 bg-neutral-50/95 border-t border-neutral-200 flex flex-wrap items-center gap-3">
 
                             <button
                                 onClick={handleSave}
                                 disabled={saving || !formTitle.trim()}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 disabled:opacity-50 transition-colors"
                             >
                                 <Save className="h-4 w-4" />
                                 {saving ? "저장 중..." : "저장"}
                             </button>
                             <button
                                 onClick={cancelEdit}
-                                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-300 text-neutral-600 rounded-lg text-sm hover:bg-neutral-50 transition-colors"
+                                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-300 text-neutral-600 rounded-xs text-sm hover:bg-neutral-50 transition-colors"
                             >
                                 <X className="h-4 w-4" /> 취소
                             </button>
@@ -194,7 +194,7 @@ export default function ResumeWorkspacePage() {
                     </div>
                     <button
                         onClick={openNew}
-                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 transition-colors"
                     >
                         <Plus className="h-4 w-4" /> 새 이력서
                     </button>
@@ -202,16 +202,16 @@ export default function ResumeWorkspacePage() {
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="h-6 w-6 border-2 border-neutral-200 border-t-amber-500 rounded-full animate-spin" />
+                        <span className="text-sm text-mute">불러오는 중</span>
                     </div>
                 ) : resumes.length === 0 ? (
-                    <div className="bg-white border-2 border-dashed border-neutral-200 rounded-2xl p-16 text-center">
+                    <div className="bg-white border-2 border-dashed border-neutral-200 rounded-xs p-16 text-center">
                         <FileText className="h-12 w-12 text-neutral-200 mx-auto mb-4" />
-                        <p className="text-sm font-medium text-neutral-600 mb-1">등록된 이력서가 없습니다</p>
+                        <p className="text-sm font-normal text-neutral-600 mb-1">등록된 이력서가 없습니다</p>
                         <p className="text-xs text-neutral-400 mb-6">이력서를 등록하면 AI 분석 신청에 활용할 수 있습니다</p>
                         <button
                             onClick={openNew}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 transition-colors"
                         >
                             <Plus className="h-4 w-4" /> 첫 이력서 등록
                         </button>
@@ -221,17 +221,17 @@ export default function ResumeWorkspacePage() {
                         {resumes.map(r => (
                             <div
                                 key={r.id}
-                                className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-amber-200 transition-colors"
+                                className="bg-white border border-neutral-200 rounded-xs p-5 hover:border-amber-200 transition-colors"
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             {r.is_primary && (
-                                                <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">
+                                                <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-none font-normal">
                                                     기본
                                                 </span>
                                             )}
-                                            <span className="text-sm font-semibold truncate">{r.title}</span>
+                                            <span className="text-sm font-bold truncate">{r.title}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-xs text-neutral-400">
                                             <Clock className="h-3 w-3" />
@@ -283,14 +283,14 @@ export default function ResumeWorkspacePage() {
                 )}
 
                 {resumes.length > 0 && (
-                    <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-5">
-                        <p className="text-sm font-semibold text-amber-800 mb-1">AI 이력서 코칭 신청</p>
+                    <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xs p-5">
+                        <p className="text-sm font-bold text-amber-800 mb-1">AI 이력서 코칭 신청</p>
                         <p className="text-xs text-amber-600 mb-3">
                             등록된 이력서를 기반으로 AI가 개선점을 분석합니다. 서비스 시작 시 안내드립니다.
                         </p>
                         <Link
                             href="/hero/resume"
-                            className="flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900"
+                            className="flex items-center gap-1 text-xs font-normal text-amber-700 hover:text-amber-900"
                         >
                             서비스 안내 보기 <ChevronRight className="h-3.5 w-3.5" />
                         </Link>
@@ -301,19 +301,19 @@ export default function ResumeWorkspacePage() {
             {/* 삭제 확인 모달 */}
             {deleteId && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+                    <div className="bg-white rounded-xs p-6 max-w-sm w-full">
                         <h3 className="text-base font-bold mb-2">이력서를 삭제할까요?</h3>
                         <p className="text-sm text-neutral-500 mb-5">삭제된 이력서는 복구할 수 없습니다.</p>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => handleDelete(deleteId)}
-                                className="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600"
+                                className="flex-1 py-2.5 bg-red-500 text-white rounded-xs text-sm font-normal hover:bg-red-600"
                             >
                                 삭제
                             </button>
                             <button
                                 onClick={() => setDeleteId(null)}
-                                className="flex-1 py-2.5 border border-neutral-200 text-neutral-600 rounded-lg text-sm hover:bg-neutral-50"
+                                className="flex-1 py-2.5 border border-neutral-200 text-neutral-600 rounded-xs text-sm hover:bg-neutral-50"
                             >
                                 취소
                             </button>

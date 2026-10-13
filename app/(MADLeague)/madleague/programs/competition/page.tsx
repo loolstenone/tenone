@@ -20,18 +20,18 @@ function HallRound({ r }: { r: MadHallRound }) {
             {r.client_logo_url
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={r.client_logo_url} alt={r.client_name ?? r.title} className="object-contain object-left max-h-16 w-auto" />
-              : <span className="text-3xl font-black">{r.client_name ?? r.title}</span>}
+              : <span className="text-3xl font-bold">{r.client_name ?? r.title}</span>}
           </div>
           {r.brief_title && <p className="mt-6 text-lg text-neutral-400 leading-relaxed">{r.brief_title}</p>}
         </div>
         <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
           {r.results.map((x, i) => (
             <div key={i} className={`border bg-neutral-950 p-6 ${x.rank ? RANK_TONE[x.rank] ?? 'border-neutral-800 text-neutral-400' : 'border-neutral-800 text-neutral-400'}`}>
-              <div className="flex items-center gap-2 text-sm font-black">
+              <div className="flex items-center gap-2 text-sm font-bold">
                 <Medal className="h-5 w-5" />
                 {x.rank ? `${x.rank}위` : ''}{x.award_name ? `${x.rank ? ' · ' : ''}${x.award_name}` : ''}
               </div>
-              <div className="mt-4 text-xl font-black text-white">{x.team_name}</div>
+              <div className="mt-4 text-xl font-bold text-white">{x.team_name}</div>
               {x.club && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-neutral-500">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

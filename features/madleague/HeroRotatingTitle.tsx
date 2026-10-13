@@ -25,7 +25,7 @@ export function HeroRotatingTitle() {
   }, []);
 
   return (
-    <h1 className="text-[2.5rem] sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight break-keep text-balance">
+    <h1 className="text-[2.5rem] sm:text-7xl lg:text-8xl font-bold leading-tight tracking-tight break-keep text-balance">
       <span className="sr-only">{COPIES[0].top} {COPIES[0].accent}</span>
       <span className="grid" aria-hidden>
         {COPIES.map((c, i) => {

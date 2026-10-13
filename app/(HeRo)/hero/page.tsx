@@ -94,7 +94,7 @@ function PartnerCarousel() {
         {doubled.map((name, i) => (
           <span
             key={`${name}-${i}`}
-            className="flex-shrink-0 px-6 py-2.5 bg-neutral-100 text-neutral-500 text-sm font-medium rounded-full whitespace-nowrap"
+            className="flex-shrink-0 px-6 py-2.5 bg-neutral-100 text-neutral-500 text-sm font-normal rounded-none whitespace-nowrap"
           >
             {name}
           </span>
@@ -213,7 +213,7 @@ export default function HeRoHomePage() {
               <div className="flex flex-wrap justify-center md:justify-start">
                 <Link
                   href="/hero/hit"
-                  className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xs transition-all"
                   style={{ backgroundColor: RED }}
                 >
                   HIT 검사 받기 <ArrowRight className="h-4 w-4" />
@@ -229,7 +229,7 @@ export default function HeRoHomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
           {/* 인재 */}
           <div className="relative flex flex-col items-center justify-center px-8 py-20 bg-white group">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-neutral-100">
+            <div className="w-16 h-16 rounded-xs flex items-center justify-center mb-6 bg-neutral-100">
               <Users className="h-8 w-8 text-neutral-500" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-neutral-900 mb-3">
@@ -242,7 +242,7 @@ export default function HeRoHomePage() {
             </p>
             <Link
               href="/hero/hit"
-              className="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl text-white transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xs text-white transition-all"
               style={{ backgroundColor: RED }}
             >
               HIT 검사 받기 <ArrowRight className="h-4 w-4" />
@@ -251,7 +251,7 @@ export default function HeRoHomePage() {
 
           {/* 기업 */}
           <div className="relative flex flex-col items-center justify-center px-8 py-20 bg-neutral-900 group">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+            <div className="w-16 h-16 rounded-xs bg-white/10 flex items-center justify-center mb-6">
               <Building2 className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
@@ -264,7 +264,7 @@ export default function HeRoHomePage() {
             </p>
             <Link
               href="/hero/search-light"
-              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-neutral-900 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-bold rounded-xs hover:bg-white hover:text-neutral-900 transition-all"
             >
               써치 라이트 알아보기 <ArrowRight className="h-4 w-4" />
             </Link>
@@ -289,27 +289,27 @@ export default function HeRoHomePage() {
               <Link
                 key={svc.href}
                 href={svc.href}
-                className="group relative border border-neutral-200 rounded-2xl p-8 hover:border-[#E53935] hover:shadow-xl transition-all"
+                className="group relative border border-neutral-200 rounded-xs p-8 hover:border-[#E53935] transition-all"
               >
                 <span
-                  className="text-5xl font-black block mb-6"
+                  className="text-5xl font-bold block mb-6"
                   style={{ color: `${RED}15` }}
                 >
                   {svc.num}
                 </span>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-neutral-100">
+                <div className="w-12 h-12 rounded-xs flex items-center justify-center mb-4 bg-neutral-100">
                   <svc.icon className="h-6 w-6 text-neutral-500" />
                 </div>
                 <h3 className="text-xl font-bold text-neutral-900 mb-1 group-hover:text-[#E53935] transition-colors">
                   {svc.title}
                 </h3>
-                <p className="text-sm font-medium text-neutral-400 mb-4">
+                <p className="text-sm font-normal text-neutral-400 mb-4">
                   {svc.desc}
                 </p>
                 <p className="text-sm text-neutral-500 leading-relaxed">
                   {svc.detail}
                 </p>
-                <div className="mt-6 flex items-center gap-1 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                <div className="mt-6 flex items-center gap-1 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ color: RED }}
                 >
                   자세히 보기 <ChevronRight className="h-4 w-4" />
@@ -359,9 +359,9 @@ export default function HeRoHomePage() {
                   >
                     {/* 노드 */}
                     <div
-                      className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${
+                      className={`w-16 h-16 rounded-none flex items-center justify-center mb-4 transition-all duration-300 ${
                         isActive
-                          ? "scale-110 shadow-lg"
+                          ? "scale-110"
                           : isPast
                           ? ""
                           : "bg-neutral-100"
@@ -438,9 +438,9 @@ export default function HeRoHomePage() {
               <Link
                 key={t.code}
                 href="/hero/hit"
-                className="border border-neutral-200 rounded-2xl p-6 text-center hover:border-[#E53935] hover:shadow-md transition-all group"
+                className="border border-neutral-200 rounded-xs p-6 text-center hover:border-[#E53935] transition-all group"
               >
-                <div className="inline-flex px-3 h-7 items-center rounded-full mx-auto mb-4 text-[11px] font-mono font-bold bg-neutral-100 text-neutral-700">
+                <div className="inline-flex px-3 h-7 items-center rounded-none mx-auto mb-4 text-[11px] font-mono font-bold bg-neutral-100 text-neutral-700">
                   {t.code}
                 </div>
                 <p className="text-sm font-bold text-neutral-900 group-hover:text-[#E53935] transition-colors leading-snug">
@@ -454,7 +454,7 @@ export default function HeRoHomePage() {
           <div className="text-center mt-12">
             <Link
               href="/hero/hit"
-              className="inline-flex items-center gap-2 px-6 py-3 border-2 font-bold rounded-xl hover:text-white transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 font-bold rounded-xs hover:text-white transition-all"
               style={{
                 borderColor: RED,
                 color: RED,
@@ -491,20 +491,20 @@ export default function HeRoHomePage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/hero/hit"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xl hover:bg-neutral-100 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xs hover:bg-neutral-100 transition-colors"
               style={{ color: RED }}
             >
               HIT 검사 시작 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/hero/talent-agent/apply"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-bold rounded-xs hover:bg-white/10 transition-colors"
             >
               HeRo 오디션 지원 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/hero/search-light"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/50 text-white/90 font-bold rounded-xl hover:border-white hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/50 text-white/90 font-bold rounded-xs hover:border-white hover:text-white transition-colors"
             >
               기업 문의 <ArrowRight className="h-4 w-4" />
             </Link>

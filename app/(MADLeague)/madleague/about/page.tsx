@@ -36,14 +36,14 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ABOUT</div>
-          <h1 className="mt-3 text-5xl sm:text-7xl font-black tracking-tight">
+          <h1 className="mt-3 text-5xl sm:text-7xl font-bold tracking-tight">
             매드리그란
           </h1>
           <p className="mt-8 text-xl text-neutral-300 leading-relaxed max-w-2xl">
-            <span className="text-[#EC1D25] font-black">MAD</span>는
+            <span className="text-[#EC1D25] font-bold">MAD</span>는
             <strong className="text-white"> Match, Active, Develop</strong>.
             <br />
-            <span className="text-[#EC1D25] font-black">League</span>는
+            <span className="text-[#EC1D25] font-bold">League</span>는
             연맹 — 결속시키다, 경쟁하게 하다.
           </p>
           <p className="mt-6 text-neutral-400 leading-relaxed max-w-2xl">
@@ -59,12 +59,12 @@ export default function AboutPage() {
       {/* Mission — MAD */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MISSION</div>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">Match · Active · Develop</h2>
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-16">Match · Active · Develop</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {MAD.map((m) => (
             <div key={m.title} className="bg-neutral-950 border border-neutral-900 p-10">
               <m.icon className="h-8 w-8 text-[#EC1D25]" />
-              <div className="mt-6 text-3xl font-black">{m.title}</div>
+              <div className="mt-6 text-3xl font-bold">{m.title}</div>
               <p className="mt-3 text-sm text-neutral-400 leading-relaxed">{m.desc}</p>
             </div>
           ))}
@@ -75,12 +75,12 @@ export default function AboutPage() {
       <section className="bg-neutral-950 border-y border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MEMBERS</div>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">매드리그의 구성원</h2>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-16">매드리그의 구성원</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {MEMBER_TYPES.map((m) => (
               <div key={m.title} className="bg-black border border-neutral-900 p-6">
                 <m.icon className="h-6 w-6 text-neutral-500" />
-                <div className="mt-4 font-black">{m.title}</div>
+                <div className="mt-4 font-bold">{m.title}</div>
                 <p className="mt-2 text-xs text-neutral-500 leading-relaxed">{m.desc}</p>
               </div>
             ))}
@@ -91,7 +91,7 @@ export default function AboutPage() {
       {/* Programs — 취지·구성만 (프로그램별 설명은 프로그램 페이지에, 2026-10-11) */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">PROGRAMS</div>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight">실전 프로젝트로<br />경력 같은 신입으로</h2>
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">실전 프로젝트로<br />경력 같은 신입으로</h2>
         <p className="mt-6 text-lg text-neutral-300 leading-relaxed max-w-2xl break-keep">
           기업과 지자체의 실제 고민을 프로젝트 경쟁을 통해 해결한다.
         </p>
@@ -105,7 +105,7 @@ export default function AboutPage() {
             return (
               <div key={g.key} className="bg-neutral-950 border border-neutral-900 p-8">
                 <div className="text-xs font-bold tracking-widest text-[#EC1D25]">0{i + 1} · {g.eyebrow}</div>
-                <div className="mt-3 text-2xl font-black">{g.label}</div>
+                <div className="mt-3 text-2xl font-bold">{g.label}</div>
                 <p className="mt-3 text-sm text-neutral-400 leading-relaxed break-keep">{g.desc}</p>
                 <p className="mt-5 text-xs text-neutral-500 leading-relaxed break-keep">{names.join(' · ')}</p>
               </div>
@@ -123,24 +123,24 @@ export default function AboutPage() {
       <section className="bg-neutral-950 border-y border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">BRAND IDENTITY</div>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-16">브랜드 아이덴티티</h2>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-16">브랜드 아이덴티티</h2>
           {/* 세 원 — 바탕 줄무늬(검정·빨강·금색) 위에 색이 겹쳐 하나의 강인함을 만든다 */}
           <div className="relative overflow-hidden" style={{ background: 'linear-gradient(#000 0 30%, #EC1D25 30% 50%, #FFC000 50% 100%)' }}>
             <div className="flex items-center justify-center py-10 sm:py-14 px-4">
               {COLORS.map((c, i) => (
                 <div
                   key={c.hex}
-                  className={`relative flex aspect-square w-1/3 max-w-[260px] flex-col items-center justify-center rounded-full text-center text-white ${i > 0 ? '-ml-[6%]' : ''}`}
+                  className={`relative flex aspect-square w-1/3 max-w-[260px] flex-col items-center justify-center rounded-none text-center text-white ${i > 0 ? '-ml-[6%]' : ''}`}
                   style={{ backgroundColor: c.hex, zIndex: i + 1 }}
                 >
                   <div className="text-xs sm:text-xl font-bold">{c.hex}</div>
-                  <div className="mt-1 sm:mt-3 text-sm sm:text-2xl font-black">{c.name}</div>
+                  <div className="mt-1 sm:mt-3 text-sm sm:text-2xl font-bold">{c.name}</div>
                   <div className="mt-1 sm:mt-3 text-xs sm:text-xl font-bold">{c.word}</div>
                 </div>
               ))}
             </div>
           </div>
-          <p className="mt-12 text-2xl sm:text-4xl font-black leading-snug">
+          <p className="mt-12 text-2xl sm:text-4xl font-bold leading-snug">
             열정과 끈기 그리고 재치 발랄함
             <br />
             이 조합은 강인함을 만들어 낸다.
@@ -150,7 +150,7 @@ export default function AboutPage() {
               <div key={c.hex} className="flex items-center gap-4 bg-black border border-neutral-900 p-4">
                 <div className="h-12 w-12 shrink-0 border border-neutral-800" style={{ backgroundColor: c.hex }} />
                 <div>
-                  <div className="font-black">MAD {c.name.toUpperCase()} <span className="ml-1 font-mono text-sm text-neutral-400">{c.hex}</span></div>
+                  <div className="font-bold">MAD {c.name.toUpperCase()} <span className="ml-1 font-mono text-sm text-neutral-400">{c.hex}</span></div>
                   <div className="text-sm text-neutral-400">{c.word} · {c.ko}</div>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">CHARACTER</div>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-8">DAMbe · 담비</h2>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-8">DAMbe · 담비</h2>
             <p className="text-lg text-neutral-300 leading-relaxed">
               호랑이를 잡아먹는 담비. 작지만 무리 지어 움직이고, 물러서지 않는다.
             </p>
@@ -191,7 +191,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="text-sm font-bold tracking-widest text-white/80">CONTACT</div>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-white">문의 · 협업 · 과제 의뢰</h2>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-white">문의 · 협업 · 과제 의뢰</h2>
             <p className="mt-2 text-white/90 text-sm">공식 동아리 신청, 경쟁 PT 과제 기업, 강연 요청 모두 환영합니다.</p>
           </div>
           {/* 미식축구 담비 — 공을 들고 달리는 매드리거 */}

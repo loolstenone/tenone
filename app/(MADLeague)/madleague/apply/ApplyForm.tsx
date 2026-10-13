@@ -96,7 +96,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
     return (
       <div className="bg-neutral-950 border border-[#EC1D25] p-12 text-center">
         <CheckCircle2 className="h-12 w-12 text-[#EC1D25] mx-auto" />
-        <h2 className="mt-6 text-2xl font-black">등록이 완료되었습니다</h2>
+        <h2 className="mt-6 text-2xl font-bold">등록이 완료되었습니다</h2>
         <p className="mt-3 text-sm text-neutral-400">
           운영진이 확인 후 계정 이메일로 연락드립니다. 진행 상태는 마이페이지에서 볼 수 있습니다.
         </p>

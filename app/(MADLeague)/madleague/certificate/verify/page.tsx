@@ -13,7 +13,7 @@ export default function VerifyIndexPage() {
         <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#FFC000] mb-4">
           <ShieldCheck className="h-4 w-4" /> CERTIFICATE VERIFY
         </div>
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight">인증서 검증</h1>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">인증서 검증</h1>
         <p className="mt-6 text-neutral-400 leading-relaxed">
           MADLeague가 발급한 인증서의 진위를 확인합니다.
           인증서 하단의 고유 코드를 입력해 주세요.

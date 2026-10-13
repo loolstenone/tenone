@@ -32,7 +32,7 @@ export default function HeRoMyPage() {
         }).catch(() => setJhStatus("none"));
     }, [user?.id]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#E53935] rounded-full animate-spin" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginRequired accentColor="#E53935" /></div>;
 
     const tabs = [
@@ -51,12 +51,12 @@ export default function HeRoMyPage() {
                 {/* JH 카드 — 매칭 Tetrad 인재 측 입력 */}
                 {jhStatus && (
                     <Link href={jhStatus === "none" ? "/hero/jh/write" : "/hero/jh"}
-                        className="mb-6 flex items-center gap-3 px-4 py-3 border border-dashed border-neutral-700 rounded-xl hover:border-[#E53935] hover:bg-red-500/5 transition-colors">
-                        <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                        className="mb-6 flex items-center gap-3 px-4 py-3 border border-dashed border-neutral-700 rounded-xs hover:border-[#E53935] hover:bg-red-500/5 transition-colors">
+                        <div className="w-10 h-10 rounded-xs bg-neutral-800 flex items-center justify-center">
                             <Compass className="h-5 w-5 text-neutral-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-neutral-100">
+                            <p className="text-sm font-normal text-neutral-100">
                                 {jhStatus === "active" ? "희망 직무 · 작성 완료" : jhStatus === "draft" ? "희망 직무 · 작성 중 (이어서 쓰기)" : "희망 직무 작성하기"}
                             </p>
                             <p className="text-xs text-neutral-400">
@@ -73,12 +73,12 @@ export default function HeRoMyPage() {
 
                 {/* 받은 제안 — 기업의 면접·인터뷰 제안 (lib/hero/offers.ts) */}
                 <Link href="/hero/offers"
-                    className="mb-6 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xl transition-colors">
-                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                    className="mb-6 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xs transition-colors">
+                    <div className="w-10 h-10 rounded-xs bg-neutral-800 flex items-center justify-center">
                         <Mail className="h-5 w-5 text-neutral-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-neutral-100">받은 제안</p>
+                        <p className="text-sm font-normal text-neutral-100">받은 제안</p>
                         <p className="text-xs text-neutral-400">제안 받기를 켜 두면 조건에 맞는 기업이 면접·인터뷰를 제안합니다</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-neutral-500" />
@@ -101,12 +101,12 @@ export default function HeRoMyPage() {
 
                 {/* 기업 회원 허브 안내 */}
                 <Link href="/hero/company"
-                    className="mb-8 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xl transition-colors">
-                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                    className="mb-8 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xs transition-colors">
+                    <div className="w-10 h-10 rounded-xs bg-neutral-800 flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-neutral-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-neutral-100">기업으로 인재를 찾으시나요?</p>
+                        <p className="text-sm font-normal text-neutral-100">기업으로 인재를 찾으시나요?</p>
                         <p className="text-xs text-neutral-400 mt-0.5">원하는 인재상을 고르면 조건에 맞는 인재가 몇 명인지 보이고, 면접을 제안할 수 있습니다</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-neutral-500" />
@@ -117,7 +117,7 @@ export default function HeRoMyPage() {
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#E53935] text-[#E53935]" : "border-transparent text-neutral-500"}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
-                            {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-500">{tab.count}</span>}
+                            {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-none bg-neutral-800 text-neutral-500">{tab.count}</span>}
                         </button>
                     ))}
                 </div>
@@ -128,7 +128,7 @@ export default function HeRoMyPage() {
                             <div className="py-16 text-center text-neutral-500"><FileText className="h-8 w-8 mx-auto mb-3 opacity-50" /><p className="text-sm">아직 작성한 게시글이 없습니다.</p></div>
                         ) : myPosts.map(post => (
                             <Link key={post.id} href={`/hero/community/post/${post.id}`} className="py-4 flex items-center justify-between hover:opacity-80 transition-opacity">
-                                <div><p className="font-medium text-sm">{post.title}</p>
+                                <div><p className="font-normal text-sm">{post.title}</p>
                                     <div className="flex gap-3 mt-1 text-xs text-neutral-500">
                                         <span>{post.board}</span><span className="flex items-center gap-1"><Eye className="h-3 w-3" />{post.view_count}</span><span>{post.created_at?.substring(0, 10)}</span>
                                     </div>
@@ -140,7 +140,7 @@ export default function HeRoMyPage() {
                 )}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <button onClick={() => { logout(); router.push("/"); }} className="w-full flex items-center gap-3 p-4 rounded-lg bg-neutral-800 text-red-400 hover:opacity-80">
+                        <button onClick={() => { logout(); router.push("/"); }} className="w-full flex items-center gap-3 p-4 rounded-xs bg-neutral-800 text-red-400 hover:opacity-80">
                             <LogOut className="h-5 w-5" /><span className="text-sm">로그아웃</span>
                         </button>
                     </div>

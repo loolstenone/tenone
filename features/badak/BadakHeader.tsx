@@ -45,7 +45,7 @@ export function BadakHeader() {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
                 <Link href={PREFIX} className="shrink-0 flex items-center">
-                    <span className="text-[18px] font-black tracking-tight">Badak</span>
+                    <span className="text-[18px] font-bold tracking-tight">Badak</span>
                 </Link>
 
                 {/* Desktop Nav */}
@@ -55,7 +55,7 @@ export function BadakHeader() {
                             key={item.href}
                             href={item.href}
                             className={clsx(
-                                "min-w-[72px] px-3 py-1.5 text-sm font-medium text-center transition-colors rounded",
+                                "min-w-[72px] px-3 py-1.5 text-sm font-normal text-center transition-colors rounded",
                                 isActive(item.href)
                                     ? "text-white bg-white/10"
                                     : "text-neutral-300 hover:text-white hover:bg-white/5"
@@ -84,9 +84,9 @@ export function BadakHeader() {
                         <Link href={`${PREFIX}/my`} className="p-1.5">
                             {user?.avatarUrl ? (
                                 <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                    className="h-7 w-7 rounded-full object-cover" />
+                                    className="h-7 w-7 rounded-none object-cover" />
                             ) : (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
+                                <div className="flex h-7 w-7 items-center justify-center rounded-none text-xs font-bold"
                                     style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                                     {user?.name?.charAt(0) ?? '?'}
                                 </div>
@@ -121,20 +121,20 @@ export function BadakHeader() {
             textTone="light"
             footer={
                 isAuthenticated ? (
-                    <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-300 hover:text-white">마이페이지</Link>
+                    <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="block text-sm font-normal text-neutral-300 hover:text-white">마이페이지</Link>
                 ) : (
                     <div className="flex flex-col gap-2">
                         <button
                             type="button"
                             onClick={() => openLogin("login")}
-                            className="rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50 hover:text-white"
+                            className="rounded-xs border border-white/10 px-4 py-2 text-center text-sm text-white/50 hover:text-white"
                         >
                             로그인
                         </button>
                         <button
                             type="button"
                             onClick={() => openLogin("signup")}
-                            className="rounded-lg px-4 py-2 text-center text-sm font-semibold"
+                            className="rounded-xs px-4 py-2 text-center text-sm font-bold"
                             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                         >
                             가입하기
@@ -149,7 +149,7 @@ export function BadakHeader() {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={clsx(
-                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        "block rounded-xs px-4 py-2.5 text-base font-normal transition-colors",
                         isActive(item.href)
                             ? "bg-amber-400/10 text-amber-400"
                             : "text-neutral-300 hover:bg-white/5 hover:text-white"

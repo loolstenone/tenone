@@ -15,14 +15,14 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
 
   if (variant === 'mini') {
     return (
-      <Link href={`/badak/profile/${profile.id}`} className="flex items-center gap-2.5 rounded-lg border border-neutral-200 p-2.5 hover:bg-neutral-50 transition-colors">
+      <Link href={`/badak/profile/${profile.id}`} className="flex items-center gap-2.5 rounded-xs border border-neutral-200 p-2.5 hover:bg-neutral-50 transition-colors">
         {profile.avatarUrl ? (
-          <img src={profile.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+          <img src={profile.avatarUrl} alt="" className="h-8 w-8 rounded-none object-cover" />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">{initials}</div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-none bg-blue-600 text-xs font-bold text-white">{initials}</div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-neutral-900 truncate">{profile.displayName}</div>
+          <div className="text-sm font-bold text-neutral-900 truncate">{profile.displayName}</div>
           <div className="text-[11px] text-neutral-500 truncate">{profile.jobFunction} · {levelShort}</div>
         </div>
       </Link>
@@ -31,12 +31,12 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
 
   if (variant === 'full') {
     return (
-      <div className="rounded-xl border border-neutral-200 bg-white p-6">
+      <div className="rounded-xs border border-neutral-200 bg-white p-6">
         <div className="flex items-start gap-5">
           {profile.avatarUrl ? (
-            <img src={profile.avatarUrl} alt="" className="h-20 w-20 rounded-2xl object-cover" />
+            <img src={profile.avatarUrl} alt="" className="h-20 w-20 rounded-xs object-cover" />
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-bold text-white">{initials}</div>
+            <div className="flex h-20 w-20 items-center justify-center rounded-xs bg-blue-600 text-2xl font-bold text-white">{initials}</div>
           )}
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-neutral-900">{profile.displayName}</h1>
@@ -51,7 +51,7 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
               )}
             </div>
             {profile.industry && (
-              <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600">{profile.industry}</span>
+              <span className="mt-2 inline-block rounded-none bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600">{profile.industry}</span>
             )}
           </div>
         </div>
@@ -61,23 +61,23 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
         <div className="mt-5 space-y-3">
           {profile.lookingFor.length > 0 && (
             <div>
-              <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-blue-600"><Search size={12} />찾고 있는 것</div>
+              <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-blue-600"><Search size={12} />찾고 있는 것</div>
               <div className="flex flex-wrap gap-1.5">
-                {profile.lookingFor.map(tag => <span key={tag} className="rounded-full bg-blue-50 px-2.5 py-1 text-xs text-blue-700">{tag}</span>)}
+                {profile.lookingFor.map(tag => <span key={tag} className="rounded-none bg-blue-50 px-2.5 py-1 text-xs text-blue-700">{tag}</span>)}
               </div>
             </div>
           )}
           {profile.canOffer.length > 0 && (
             <div>
-              <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-600"><Gift size={12} />줄 수 있는 것</div>
+              <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-emerald-600"><Gift size={12} />줄 수 있는 것</div>
               <div className="flex flex-wrap gap-1.5">
-                {profile.canOffer.map(tag => <span key={tag} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">{tag}</span>)}
+                {profile.canOffer.map(tag => <span key={tag} className="rounded-none bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">{tag}</span>)}
               </div>
             </div>
           )}
           {profile.interestTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {profile.interestTags.map(tag => <span key={tag} className="rounded-full border border-neutral-200 px-2.5 py-1 text-xs text-neutral-500">#{tag}</span>)}
+              {profile.interestTags.map(tag => <span key={tag} className="rounded-none border border-neutral-200 px-2.5 py-1 text-xs text-neutral-500">#{tag}</span>)}
             </div>
           )}
         </div>
@@ -87,15 +87,15 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
 
   // compact (기본) — 탐색 그리드용
   return (
-    <Link href={`/badak/profile/${profile.id}`} className="group block rounded-xl border border-neutral-200 bg-white p-4 hover:border-blue-300 hover:shadow-sm transition-all">
+    <Link href={`/badak/profile/${profile.id}`} className="group block rounded-xs border border-neutral-200 bg-white p-4 hover:border-blue-300 transition-all">
       <div className="flex items-center gap-3">
         {profile.avatarUrl ? (
-          <img src={profile.avatarUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
+          <img src={profile.avatarUrl} alt="" className="h-12 w-12 rounded-xs object-cover" />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white">{initials}</div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xs bg-blue-600 text-lg font-bold text-white">{initials}</div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">{profile.displayName}</div>
+          <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">{profile.displayName}</div>
           <div className="text-xs text-neutral-500">{profile.jobFunction} · {levelShort} · {profile.experienceYears}년</div>
         </div>
       </div>

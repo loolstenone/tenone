@@ -41,7 +41,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
         return (
             <div className="tn-surface tn-text min-h-screen pt-32 px-6">
                 <div className="max-w-3xl mx-auto flex justify-center py-20">
-                    <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
+                    <span className="text-sm text-mute">불러오는 중</span>
                 </div>
             </div>
         );
@@ -86,7 +86,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     <div className="flex items-center gap-3 mb-10 pb-8 border-b tn-border">
                         <button onClick={handleCopyUrl}
                             className="inline-flex items-center gap-2 px-4 py-2 text-xs border tn-border tn-text-sub hover:tn-text hover:border-neutral-400 transition-colors">
-                            {copied ? <><Check className="h-3.5 w-3.5 text-green-500" /> 복사됨</> : <><Link2 className="h-3.5 w-3.5" /> URL 복사</>}
+                            {copied ? <><Check className="h-3.5 w-3.5" /> 복사됨</> : <><Link2 className="h-3.5 w-3.5" /> URL 복사</>}
                         </button>
                     </div>
 

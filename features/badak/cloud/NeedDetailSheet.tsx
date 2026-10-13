@@ -259,7 +259,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       return (
         <div className="py-6 text-center">
           <div className="mb-2 text-2xl">🙌</div>
-          <div className="text-sm font-semibold text-white/80">바닥장 신청이 완료됐어요!</div>
+          <div className="text-sm font-bold text-white/80">바닥장 신청이 완료됐어요!</div>
           <div className="mt-1 text-xs text-white/35">검토 후 3일 이내 이메일로 연락드릴게요</div>
         </div>
       );
@@ -279,7 +279,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       return (
         <div className="py-6 text-center">
           <div className="mb-2 text-2xl">🎉</div>
-          <div className="text-sm font-semibold text-white/80">참여 신청이 전달됐어요!</div>
+          <div className="text-sm font-bold text-white/80">참여 신청이 전달됐어요!</div>
           <div className="mt-1 text-xs text-white/35">바닥장이 승인하면 알림으로 알려드려요</div>
         </div>
       );
@@ -295,7 +295,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
                 <button
                   key={g.id}
                   onClick={() => setSelectedGroupIdx(i)}
-                  className="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all"
+                  className="shrink-0 rounded-none px-3 py-1.5 text-[11px] font-bold transition-all"
                   style={{
                     background: selectedGroupIdx === i ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.06)',
                     color: selectedGroupIdx === i ? '#ffd93d' : 'rgba(255,255,255,0.45)',
@@ -320,7 +320,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
           <button
             type="button"
             onClick={handleLeader}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/8 py-2.5 text-xs text-white/35 transition-all hover:border-white/15 hover:text-white/55"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xs border border-white/8 py-2.5 text-xs text-white/35 transition-all hover:border-white/15 hover:text-white/55"
           >
             <Plus className="h-3 w-3" />
             같은 니즈로 새 방 개설하기
@@ -338,9 +338,9 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
         </div>
 
         {/* 진행바 */}
-        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="mb-4 h-1.5 overflow-hidden rounded-none bg-white/10">
           <div
-            className="h-full rounded-full transition-all duration-500"
+            className="h-full rounded-none transition-all duration-500"
             style={{
               width: `${Math.min(100, (count / LAUNCH_THRESHOLD) * 100)}%`,
               background: launched
@@ -352,7 +352,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
 
         {/* 관심 등록 영역 */}
         {!interested ? (
-          <div className="mb-4 rounded-xl border border-white/10 overflow-hidden">
+          <div className="mb-4 rounded-xs border border-white/10 overflow-hidden">
             {/* 입력 영역 */}
             <div style={{ background: 'rgba(255,255,255,0.04)' }}>
               <textarea
@@ -372,7 +372,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
               <button
                 onClick={handleInterest}
                 disabled={reactLoading}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-xs px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
                 style={{ background: 'rgba(255,217,61,0.18)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.3)' }}
               >
                 ✋ 관심있어요
@@ -381,12 +381,12 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
           </div>
         ) : (
           <div
-            className="mb-4 flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold"
+            className="mb-4 flex items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold"
             style={{ background: 'rgba(255,217,61,0.1)', border: '1px solid rgba(255,217,61,0.2)', color: '#ffd93d' }}
           >
             ✋ 관심 등록됨 · {count}명
             {interestSaved && (
-              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(34,197,94,0.2)', color: '#4ade80' }}>
+              <span className="rounded-none px-2 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(34,197,94,0.2)', color: '#4ade80' }}>
                 ✓ 저장됨
               </span>
             )}
@@ -404,19 +404,19 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
               {needMembers.slice(0, 4).map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between rounded-xl px-3 py-2.5"
+                  className="flex items-center justify-between rounded-xs px-3 py-2.5"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {m.avatarUrl ? (
-                      <img src={m.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover shrink-0" />
+                      <img src={m.avatarUrl} alt="" className="h-7 w-7 rounded-none object-cover shrink-0" />
                     ) : (
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/60">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-none bg-white/10 text-xs font-bold text-white/60">
                         {(m.displayName ?? '?').charAt(0)}
                       </div>
                     )}
                     <div className="min-w-0">
-                      <div className="truncate text-xs font-semibold text-white/80">{m.displayName ?? '익명'}</div>
+                      <div className="truncate text-xs font-bold text-white/80">{m.displayName ?? '익명'}</div>
                       {m.jobFunction && <div className="truncate text-[10px] text-white/35">{m.jobFunction}</div>}
                     </div>
                   </div>
@@ -424,7 +424,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
                     type="button"
                     onClick={() => handleMeetingRequest(m.id)}
                     disabled={meetingLoading === m.id || meetingDone.has(m.id)}
-                    className="ml-2 shrink-0 flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all disabled:opacity-50"
+                    className="ml-2 shrink-0 flex items-center gap-1 rounded-xs px-2.5 py-1.5 text-[10px] font-bold transition-all disabled:opacity-50"
                     style={
                       meetingDone.has(m.id)
                         ? { background: 'rgba(34,197,94,0.12)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }
@@ -444,7 +444,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
         <button
           type="button"
           onClick={handleLeader}
-          className="w-full cursor-pointer rounded-xl py-3 text-sm font-bold tracking-tight transition-all"
+          className="w-full cursor-pointer rounded-xs py-3 text-sm font-bold tracking-tight transition-all"
           style={{
             background: launched
               ? 'linear-gradient(135deg, rgba(255,217,61,0.2), rgba(34,197,94,0.2))'
@@ -489,7 +489,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
           {hasGroups ? `모임 ${allGroups.length}개 개설됨` : '선택한 니즈'}
         </div>
         <div
-          className="mb-5 max-w-[90%] rounded-full px-5 py-2.5 text-center text-sm font-bold sm:mb-8 sm:px-8 sm:py-3 sm:text-xl"
+          className="mb-5 max-w-[90%] rounded-none px-5 py-2.5 text-center text-sm font-bold sm:mb-8 sm:px-8 sm:py-3 sm:text-xl"
           style={{
             background: hasGroups ? 'rgba(255,200,87,0.2)' : 'rgba(255,255,255,0.1)',
             border: hasGroups ? '1px solid rgba(255,200,87,0.4)' : '1px solid rgba(255,255,255,0.2)',
@@ -514,7 +514,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
                   key={w.text}
                   type="button"
                   onClick={(e) => { e.stopPropagation(); handleSelectRelated(w); }}
-                  className="rounded-full px-2.5 py-1 text-xs transition-opacity hover:opacity-80 active:opacity-60 sm:px-3 sm:py-1.5"
+                  className="rounded-none px-2.5 py-1 text-xs transition-opacity hover:opacity-80 active:opacity-60 sm:px-3 sm:py-1.5"
                   style={{
                     background: w.hasGroup ? 'rgba(255,200,87,0.1)' : 'rgba(255,255,255,0.06)',
                     border: w.hasGroup ? '1px solid rgba(255,200,87,0.2)' : '1px solid rgba(255,255,255,0.1)',
@@ -538,7 +538,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       {/* 바텀 시트 — appeared 이후 애니메이션 없음 */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full shrink-0 rounded-t-3xl"
+        className="w-full shrink-0 rounded-t-xs"
         style={{
           background: '#1a1a2e',
           padding: '16px 16px calc(env(safe-area-inset-bottom, 12px) + 12px)',
@@ -572,7 +572,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
                 }
               } catch { /* 취소 시 무시 */ }
             }}
-            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 text-white/30 transition-colors hover:border-white/25 hover:text-white/60"
+            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-none border border-white/10 text-white/30 transition-colors hover:border-white/25 hover:text-white/60"
           >
             <Share2 className="h-3.5 w-3.5" />
           </button>
@@ -641,7 +641,7 @@ function LeaderApplyForm({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-white/40 transition-colors hover:text-white/70"
+          className="flex h-7 w-7 items-center justify-center rounded-none border border-white/10 text-white/40 transition-colors hover:text-white/70"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
         </button>
@@ -657,7 +657,7 @@ function LeaderApplyForm({
       <div className="space-y-3">
         {/* 이름 */}
         <div>
-          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+          <label className="mb-1 block text-[11px] font-bold text-white/50">
             이름 <span className="text-amber-400/70">*필수</span>
           </label>
           <input
@@ -666,13 +666,13 @@ function LeaderApplyForm({
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
             placeholder="실명으로 입력해 주세요"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
           />
         </div>
 
         {/* 경력·이력 소개 */}
         <div>
-          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+          <label className="mb-1 block text-[11px] font-bold text-white/50">
             경력·이력 소개 <span className="text-amber-400/70">*필수</span>
           </label>
           <textarea
@@ -681,14 +681,14 @@ function LeaderApplyForm({
             maxLength={300}
             rows={3}
             placeholder="현재 직무, 연차, 전문 분야를 간단히 소개해 주세요"
-            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
           />
           <div className="mt-0.5 text-right text-[10px] text-white/20">{experience.length}/300</div>
         </div>
 
         {/* 신청 이유 */}
         <div>
-          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+          <label className="mb-1 block text-[11px] font-bold text-white/50">
             신청 이유 <span className="text-amber-400/70">*필수 (20자 이상)</span>
           </label>
           <textarea
@@ -697,27 +697,27 @@ function LeaderApplyForm({
             maxLength={500}
             rows={3}
             placeholder="이 니즈로 어떤 모임을 만들고 싶은지, 참여자에게 어떤 가치를 줄 수 있는지 알려주세요"
-            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
           />
           <div className={`mt-0.5 text-right text-[10px] ${reason.length >= 20 ? 'text-green-400/50' : 'text-white/20'}`}>{reason.length}/500</div>
         </div>
 
         {/* 활동 계획 (선택) */}
         <div>
-          <label className="mb-1 block text-[11px] font-semibold text-white/50">활동 계획 <span className="text-white/25">(선택)</span></label>
+          <label className="mb-1 block text-[11px] font-bold text-white/50">활동 계획 <span className="text-white/25">(선택)</span></label>
           <textarea
             value={plan}
             onChange={(e) => setPlan(e.target.value)}
             maxLength={300}
             rows={2}
             placeholder="모임 주제, 주기, 진행 방식 등 (선택)"
-            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
           />
         </div>
 
         {/* 연락처 */}
         <div>
-          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+          <label className="mb-1 block text-[11px] font-bold text-white/50">
             연락처 <span className="text-amber-400/70">*필수</span>
           </label>
           <input
@@ -726,13 +726,13 @@ function LeaderApplyForm({
             onChange={(e) => setContact(e.target.value)}
             maxLength={100}
             placeholder="이메일 또는 전화번호"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
           />
         </div>
       </div>
 
       {error && (
-        <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="mt-3 rounded-xs border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
@@ -741,7 +741,7 @@ function LeaderApplyForm({
         type="button"
         onClick={handleSubmit}
         disabled={!canSubmit || submitting}
-        className="mt-4 w-full rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-40"
+        className="mt-4 w-full rounded-xs py-3 text-sm font-bold transition-all disabled:opacity-40"
         style={{
           background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #ffb347)' : 'rgba(255,255,255,0.08)',
           color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
@@ -780,10 +780,10 @@ function GroupCard({
   return (
     <>
       {/* 모임 정보 카드 */}
-      <div className="mb-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
+      <div className="mb-3 rounded-xs p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div className="mb-2 flex items-center gap-2">
           <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            className="rounded-none px-2 py-0.5 text-[10px] font-bold"
             style={{
               background: g.type === 'recurring' ? 'rgba(99,102,241,0.2)' : 'rgba(59,130,246,0.2)',
               color: g.type === 'recurring' ? '#a5b4fc' : '#93c5fd',
@@ -792,7 +792,7 @@ function GroupCard({
             {g.type === 'recurring' ? '정기 모임' : '1회 모임'}
           </span>
           {isConfirmed && (
-            <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">확정</span>
+            <span className="rounded-none bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">확정</span>
           )}
         </div>
 
@@ -800,16 +800,16 @@ function GroupCard({
         <button
           type="button"
           onClick={() => setShowLeaderProfile(true)}
-          className="mb-2 -mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
+          className="mb-2 -mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-xs px-2 py-1.5 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
         >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/70">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-none bg-white/10 text-xs font-bold text-white/70">
             {g.leaderName.charAt(0)}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-white/90">{g.leaderName}</span>
+              <span className="text-xs font-bold text-white/90">{g.leaderName}</span>
               <span
-                className="rounded-full px-1.5 py-px text-[9px] font-bold"
+                className="rounded-none px-1.5 py-px text-[9px] font-bold"
                 style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.2)' }}
               >
                 바닥장
@@ -841,13 +841,13 @@ function GroupCard({
       <div className="mb-3">
         <div className="mb-1.5 flex items-center justify-between text-xs">
           <span className="text-white/50">참여 현황</span>
-          <span className="font-semibold text-white/80">
+          <span className="font-bold text-white/80">
             {g.currentMembers}<span className="text-white/40">/{g.maxMembers}명</span>
           </span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="h-1.5 overflow-hidden rounded-none bg-white/10">
           <div
-            className="h-full rounded-full transition-all"
+            className="h-full rounded-none transition-all"
             style={{
               width: `${Math.min(100, (g.currentMembers / g.maxMembers) * 100)}%`,
               background: isFull
@@ -868,21 +868,21 @@ function GroupCard({
         <div className="flex gap-2">
           <button
             disabled
-            className="flex-1 rounded-xl py-3 text-sm font-bold"
+            className="flex-1 rounded-xs py-3 text-sm font-bold"
             style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', cursor: 'not-allowed' }}
           >
             모집 마감
           </button>
           <button
             onClick={() => onGoGroup(g.id)}
-            className="flex items-center gap-1 rounded-xl border border-white/10 px-4 py-3 text-xs text-white/50 transition-all hover:border-white/20 hover:text-white/70"
+            className="flex items-center gap-1 rounded-xs border border-white/10 px-4 py-3 text-xs text-white/50 transition-all hover:border-white/20 hover:text-white/70"
           >
             상세 보기 <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
       ) : (
         <>
-          <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+          <div className="mb-3 overflow-hidden rounded-xs border border-white/10 bg-white/5">
             <textarea
               value={message}
               onChange={(e) => onMessageChange(e.target.value)}
@@ -895,7 +895,7 @@ function GroupCard({
               <button
                 onClick={onJoin}
                 disabled={joinLoading}
-                className="cursor-pointer rounded-lg border-none px-4 py-1.5 text-xs font-bold disabled:opacity-50"
+                className="cursor-pointer rounded-xs border-none px-4 py-1.5 text-xs font-bold disabled:opacity-50"
                 style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
               >
                 {joinLoading ? '신청 중…' : '참여 신청'}
@@ -905,7 +905,7 @@ function GroupCard({
 
           <button
             onClick={() => onGoGroup(g.id)}
-            className="flex w-full items-center justify-center gap-1 rounded-xl border border-white/8 py-2 text-[11px] text-white/35 transition-all hover:text-white/55"
+            className="flex w-full items-center justify-center gap-1 rounded-xs border border-white/8 py-2 text-[11px] text-white/35 transition-all hover:text-white/55"
           >
             모임 상세 보기 <ChevronRight className="h-3 w-3" />
           </button>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, Award, Tag, Calendar, GraduationCap, Crown, Medal, Loader2, Share2, Check } from 'lucide-react';
+import { Trophy, Award, Tag, Calendar, GraduationCap, Crown, Medal, Share2, Check } from 'lucide-react';
 
 interface Competition { title: string; year: number; status: string }
 interface Team {
@@ -75,7 +75,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
   if (loading) {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
+        <span className="text-sm text-mute">불러오는 중</span>
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-4">PORTFOLIO</div>
-          <h1 className="text-3xl font-black mb-4">포트폴리오를 찾을 수 없습니다</h1>
+          <h1 className="text-3xl font-bold mb-4">포트폴리오를 찾을 수 없습니다</h1>
           <p className="text-neutral-500 text-sm mb-8">비공개이거나 존재하지 않는 포트폴리오입니다.</p>
           <Link href="/madleague/member" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-6 py-3 text-sm transition">
             매드리거로 돌아가기
@@ -109,7 +109,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
           <div className="flex items-start gap-6">
             {/* 아바타 */}
             <div
-              className="flex-shrink-0 w-20 h-20 flex items-center justify-center text-2xl font-black"
+              className="flex-shrink-0 w-20 h-20 flex items-center justify-center text-2xl font-bold"
               style={{
                 background: club?.color ? `${club.color}22` : 'rgba(236,29,37,0.15)',
                 border: `1px solid ${club?.color ?? '#EC1D25'}40`,
@@ -121,11 +121,11 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
               }
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{member.name}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{member.name}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
                 {club && (
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+                    <span className="h-2.5 w-2.5 rounded-none" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
                     <strong className="text-white">{club.name}</strong>
                     <span className="text-neutral-600">· {club.region}</span>
                   </span>
@@ -172,15 +172,15 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
         <section className="border-b border-neutral-900">
           <div className="mx-auto max-w-5xl px-6 py-8 grid grid-cols-3 divide-x divide-neutral-900">
             <div className="text-center px-4">
-              <div className="text-3xl font-black">{teams.length}</div>
+              <div className="text-3xl font-bold">{teams.length}</div>
               <div className="text-xs text-neutral-500 mt-1">참여 프로젝트</div>
             </div>
             <div className="text-center px-4">
-              <div className="text-3xl font-black text-[#FFC000]">{crownCount}</div>
+              <div className="text-3xl font-bold text-[#FFC000]">{crownCount}</div>
               <div className="text-xs text-neutral-500 mt-1">MAD Crown</div>
             </div>
             <div className="text-center px-4">
-              <div className="text-3xl font-black">{certs.length}</div>
+              <div className="text-3xl font-bold">{certs.length}</div>
               <div className="text-xs text-neutral-500 mt-1">인증서</div>
             </div>
           </div>
@@ -193,13 +193,13 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
           <div>
             <div className="flex items-center gap-2 mb-6">
               <Trophy className="h-5 w-5 text-neutral-500" />
-              <h2 className="text-xl font-black">참여 프로젝트</h2>
+              <h2 className="text-xl font-bold">참여 프로젝트</h2>
             </div>
             <div className="space-y-3">
               {teams.map(team => (
                 <div key={team.id} className="bg-neutral-950 border border-neutral-900 p-6 flex items-center justify-between gap-4">
                   <div>
-                    <div className="font-black">{team.name}</div>
+                    <div className="font-bold">{team.name}</div>
                     {team.mad_competitions && (
                       <div className="text-xs text-neutral-500 mt-1">
                         {team.mad_competitions.title} · {team.mad_competitions.year}
@@ -233,7 +233,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
           <div>
             <div className="flex items-center gap-2 mb-6">
               <Award className="h-5 w-5 text-neutral-500" />
-              <h2 className="text-xl font-black">인증서</h2>
+              <h2 className="text-xl font-bold">인증서</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {certs.map(cert => (

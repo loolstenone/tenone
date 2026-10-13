@@ -76,7 +76,7 @@ export function CoachingTab({ memberId }: { memberId: string }) {
         return (
             <div className="space-y-3 animate-pulse">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-24 bg-neutral-100 rounded-xl" />
+                    <div key={i} className="h-24 bg-neutral-100 rounded-xs" />
                 ))}
             </div>
         );
@@ -85,7 +85,7 @@ export function CoachingTab({ memberId }: { memberId: string }) {
     return (
         <div className="space-y-6">
             {/* 헤더 */}
-            <div className="bg-white border border-neutral-200 rounded-2xl p-6">
+            <div className="bg-white border border-neutral-200 rounded-xs p-6">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
                         <BookOpen className="w-5 h-5" style={{ color: RED }} />
@@ -93,7 +93,7 @@ export function CoachingTab({ memberId }: { memberId: string }) {
                     </h3>
                     <button
                         onClick={() => setShowForm((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-bold"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xs text-white text-sm font-bold"
                         style={{ backgroundColor: RED }}
                     >
                         <Plus className="w-4 h-4" />
@@ -118,7 +118,7 @@ export function CoachingTab({ memberId }: { memberId: string }) {
 
             {/* 타임라인 */}
             {sessions.length === 0 ? (
-                <div className="text-center py-16 border border-dashed border-neutral-200 rounded-2xl">
+                <div className="text-center py-16 border border-dashed border-neutral-200 rounded-xs">
                     <BookOpen className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
                     <p className="text-sm text-neutral-500">아직 기록된 세션이 없어요.</p>
                     <p className="text-xs text-neutral-400 mt-1">첫 번째 코칭 세션을 기록해보세요.</p>
@@ -163,16 +163,16 @@ function SessionCard({ session: s, onDelete }: { session: Session; onDelete: (id
         <div className="flex gap-4 pl-2">
             {/* 타임라인 dot */}
             <div className="shrink-0 mt-1 w-[24px] flex justify-center">
-                <div className="w-3 h-3 rounded-full border-2 border-[#E53935] bg-white mt-1.5" />
+                <div className="w-3 h-3 rounded-none border-2 border-[#E53935] bg-white mt-1.5" />
             </div>
 
             {/* 카드 */}
-            <div className="flex-1 bg-white border border-neutral-200 rounded-xl overflow-hidden group">
+            <div className="flex-1 bg-white border border-neutral-200 rounded-xs overflow-hidden group">
                 <div className="flex items-start justify-between gap-3 p-4">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span className="text-xs text-neutral-400">{s.session_date}</span>
-                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${typeClass}`}>
+                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-none ${typeClass}`}>
                                 {typeLabel}
                             </span>
                             {s.coach_name && (
@@ -188,7 +188,7 @@ function SessionCard({ session: s, onDelete }: { session: Session; onDelete: (id
                         {hasDetail && (
                             <button
                                 onClick={() => setExpanded((v) => !v)}
-                                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+                                className="p-1.5 rounded-xs text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
                             >
                                 {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </button>
@@ -196,7 +196,7 @@ function SessionCard({ session: s, onDelete }: { session: Session; onDelete: (id
                         <button
                             onClick={handleDelete}
                             disabled={deleting}
-                            className="p-1.5 rounded-lg text-neutral-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                            className="p-1.5 rounded-xs text-neutral-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>
@@ -285,7 +285,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-2xl p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-xs p-6 space-y-4">
             <h4 className="font-bold text-neutral-900">새 세션 기록</h4>
 
             {/* 날짜 + 유형 */}
@@ -296,7 +296,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                         type="date"
                         value={sessionDate}
                         onChange={(e) => setSessionDate(e.target.value)}
-                        className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
+                        className="w-full border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
                     />
                 </div>
                 <div>
@@ -304,7 +304,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                     <select
                         value={sessionType}
                         onChange={(e) => setSessionType(e.target.value)}
-                        className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
+                        className="w-full border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
                     >
                         {SESSION_TYPES.map((t) => (
                             <option key={t.key} value={t.key}>{t.label}</option>
@@ -321,7 +321,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                     placeholder="코치 또는 멘토 이름"
                     value={coachName}
                     onChange={(e) => setCoachName(e.target.value)}
-                    className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
+                    className="w-full border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
                 />
             </div>
 
@@ -334,7 +334,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     maxLength={100}
-                    className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
+                    className="w-full border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
                     required
                 />
                 <p className="text-xs text-neutral-400 mt-1 text-right">{topic.length}/100</p>
@@ -349,7 +349,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                     onChange={(e) => setSummary(e.target.value)}
                     maxLength={500}
                     rows={3}
-                    className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935] resize-none"
+                    className="w-full border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935] resize-none"
                 />
                 <p className="text-xs text-neutral-400 mt-1 text-right">{summary.length}/500</p>
             </div>
@@ -367,12 +367,12 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                         value={actionItemInput}
                         onChange={(e) => setActionItemInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addActionItem(); } }}
-                        className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
+                        className="flex-1 border border-neutral-200 rounded-xs px-3 py-2 text-sm focus:outline-none focus:border-[#E53935]"
                     />
                     <button
                         type="button"
                         onClick={addActionItem}
-                        className="px-3 py-2 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-50"
+                        className="px-3 py-2 border border-neutral-200 rounded-xs text-sm text-neutral-600 hover:bg-neutral-50"
                     >
                         추가
                     </button>
@@ -380,7 +380,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                 {actionItems.length > 0 && (
                     <ul className="space-y-1">
                         {actionItems.map((item, i) => (
-                            <li key={i} className="flex items-center justify-between px-3 py-1.5 bg-neutral-50 rounded-lg text-sm text-neutral-700">
+                            <li key={i} className="flex items-center justify-between px-3 py-1.5 bg-neutral-50 rounded-xs text-sm text-neutral-700">
                                 <span className="flex items-center gap-2">
                                     <CheckSquare className="w-3.5 h-3.5 text-[#E53935] shrink-0" />
                                     {item}
@@ -404,7 +404,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-opacity disabled:opacity-60"
+                    className="flex-1 py-2.5 rounded-xs text-white text-sm font-bold transition-opacity disabled:opacity-60"
                     style={{ backgroundColor: RED }}
                 >
                     {submitting ? "저장 중…" : "저장"}
@@ -412,7 +412,7 @@ function SessionForm({ memberId, onAdded, onCancel }: {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-5 py-2.5 rounded-xl border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50"
+                    className="px-5 py-2.5 rounded-xs border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50"
                 >
                     취소
                 </button>

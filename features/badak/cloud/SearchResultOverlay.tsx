@@ -18,7 +18,7 @@ export function SearchResultOverlay({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[900] mx-auto flex max-w-[860px] flex-col items-center justify-center backdrop-blur-2xl"
+      className="fixed inset-0 z-[900] mx-auto flex max-w-[860px] flex-col items-center justify-center"
       style={{
         background: 'rgba(0,0,0,0.8)',
         padding: '40px 24px',
@@ -36,7 +36,7 @@ export function SearchResultOverlay({
               e.stopPropagation();
               onSelectWord(w);
             }}
-            className="cursor-pointer rounded-full px-4 py-2.5 text-sm font-medium"
+            className="cursor-pointer rounded-none px-4 py-2.5 text-sm font-normal"
             style={{
               background: w.hasGroup
                 ? 'rgba(255,200,87,0.15)'

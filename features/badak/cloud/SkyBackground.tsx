@@ -41,7 +41,7 @@ export function SkyBackground({
         stars.map((star) => (
           <div
             key={star.id}
-            className="absolute rounded-full bg-white"
+            className="absolute rounded-none bg-white"
             style={{
               width: `${star.width}px`,
               height: `${star.width}px`,

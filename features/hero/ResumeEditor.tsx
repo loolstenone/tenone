@@ -10,8 +10,8 @@ import Link from "next/link";
 import { Plus, Trash2, X } from "lucide-react";
 import type { ResumeContent, ResumeExperience, ResumeEducation, ResumeActivity, ResumeCertification, ResumeLink } from "@/types/resume";
 
-const input = "w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-neutral-900 bg-white";
-const label = "text-[13px] font-medium text-neutral-600 mb-1.5 block";
+const input = "w-full border border-neutral-300 rounded-xs px-3 py-2.5 text-sm focus:outline-none focus:border-neutral-900 bg-white";
+const label = "text-[13px] font-normal text-neutral-600 mb-1.5 block";
 
 const EMPTY = {
   experiences: { company: "", role: "", start: "", end: "", current: false, description: "" } as ResumeExperience,
@@ -41,12 +41,12 @@ export function cleanResumeContent(c: ResumeContent): ResumeContent {
 
 function Card({ title, desc, children, onAdd, addLabel }: { title: string; desc?: string; children: ReactNode; onAdd?: () => void; addLabel?: string }) {
   return (
-    <section className="bg-white border border-neutral-200 rounded-2xl p-5 sm:p-6">
+    <section className="bg-white border border-neutral-200 rounded-xs p-5 sm:p-6">
       <h2 className="text-[16px] font-bold text-neutral-900">{title}</h2>
       {desc && <p className="text-[13px] text-neutral-500 mt-1 leading-relaxed">{desc}</p>}
       <div className="mt-5 space-y-5">{children}</div>
       {onAdd && (
-        <button type="button" onClick={onAdd} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-neutral-700 hover:text-neutral-900">
+        <button type="button" onClick={onAdd} className="mt-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-700 hover:text-neutral-900">
           <Plus className="h-4 w-4" /> {addLabel}
         </button>
       )}
@@ -56,7 +56,7 @@ function Card({ title, desc, children, onAdd, addLabel }: { title: string; desc?
 
 function RowBox({ onRemove, children }: { onRemove: () => void; children: ReactNode }) {
   return (
-    <div className="relative rounded-xl bg-neutral-50 p-4 pr-11">
+    <div className="relative rounded-xs bg-neutral-50 p-4 pr-11">
       <button type="button" onClick={onRemove} aria-label="이 항목 삭제" className="absolute top-3 right-3 p-1.5 text-neutral-300 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
     </div>
@@ -108,7 +108,7 @@ export default function ResumeEditor({ title, onTitle, content, onContent, profi
       <Card title="기본 정보" desc="프로필에서 불러옵니다. 이력서에 따로 저장하지 않으며, 바꾸려면 프로필에서 수정하세요.">
         <div className="grid gap-3 sm:grid-cols-3 text-sm">
           {[["이름", profile.name], ["이메일", profile.email], ["연락처", profile.phone]].map(([k, v]) => (
-            <div key={k} className="rounded-xl bg-neutral-50 px-4 py-3"><p className="text-xs text-neutral-400">{k}</p><p className="text-neutral-800 mt-0.5 truncate">{v || "—"}</p></div>
+            <div key={k} className="rounded-xs bg-neutral-50 px-4 py-3"><p className="text-xs text-neutral-400">{k}</p><p className="text-neutral-800 mt-0.5 truncate">{v || "—"}</p></div>
           ))}
         </div>
         <Link href="/hero/my" className="text-[13px] text-neutral-500 underline hover:text-neutral-800">프로필 수정</Link>
@@ -171,14 +171,14 @@ export default function ResumeEditor({ title, onTitle, content, onContent, profi
       <Card title="스킬" desc="다룰 수 있는 도구·기술을 하나씩 넣어 주세요.">
         <div className="flex flex-wrap gap-2">
           {(content.skills ?? []).map(s => (
-            <span key={s} className="inline-flex items-center gap-1 rounded-full bg-neutral-100 pl-3 pr-1.5 py-1 text-sm text-neutral-700">
+            <span key={s} className="inline-flex items-center gap-1 rounded-none bg-neutral-100 pl-3 pr-1.5 py-1 text-sm text-neutral-700">
               {s}<button type="button" aria-label={`${s} 삭제`} onClick={() => set({ skills: (content.skills ?? []).filter(x => x !== s) })} className="p-0.5 text-neutral-400 hover:text-neutral-800"><X className="h-3.5 w-3.5" /></button>
             </span>
           ))}
         </div>
         <div className="flex gap-2">
           <input value={skillDraft} onChange={e => setSkillDraft(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="예) GA4 · Figma · Excel" className={input} />
-          <button type="button" onClick={addSkill} className="shrink-0 px-4 rounded-lg border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50">추가</button>
+          <button type="button" onClick={addSkill} className="shrink-0 px-4 rounded-xs border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50">추가</button>
         </div>
       </Card>
 

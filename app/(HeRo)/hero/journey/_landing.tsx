@@ -88,7 +88,7 @@ export function JourneyLanding() {
         label="나의 성장 기록"
         title="꿈꾸는 사람에서 레전드까지"
         desc="연예 기획사가 연습생을 발굴하고 훈련시켜 데뷔시키는 것처럼, HeRo는 내 강점을 찾고 실력을 키워 일할 준비를 돕습니다."
-        note={<>이미 시작하셨나요? <Link href={loginHref("/hero/journey")} className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.</>}
+        note={<>이미 시작하셨나요? <Link href={loginHref("/hero/journey")} className="font-bold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.</>}
       />
 
       {/* ── 5단계 여정 ── */}
@@ -102,13 +102,13 @@ export function JourneyLanding() {
             >
               <div className="shrink-0 flex flex-col items-center md:items-start">
                 <span
-                  className="text-7xl md:text-8xl font-black leading-none"
+                  className="text-7xl md:text-8xl font-bold leading-none"
                   style={{ color: `${HERO_RED}15` }}
                 >
                   {s.number}
                 </span>
                 <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center -mt-4"
+                  className="w-14 h-14 rounded-xs flex items-center justify-center -mt-4"
                   style={{ backgroundColor: HERO_RED }}
                 >
                   <s.icon className="w-7 h-7 text-white" />
@@ -120,7 +120,7 @@ export function JourneyLanding() {
                   {s.title}
                 </h2>
                 <p
-                  className="text-lg font-medium mb-6"
+                  className="text-lg font-normal mb-6"
                   style={{ color: HERO_RED }}
                 >
                   {s.subtitle}
@@ -135,7 +135,7 @@ export function JourneyLanding() {
                 {s.cta && (
                   <Link
                     href={s.cta.href}
-                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-xs text-white font-bold hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: HERO_RED }}
                   >
                     {s.cta.label}
@@ -160,7 +160,7 @@ export function JourneyLanding() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/hero/hit/a"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xs text-white font-bold hover:opacity-90 transition-opacity"
               style={{ backgroundColor: HERO_RED }}
             >
               HIT 검사 시작
@@ -168,7 +168,7 @@ export function JourneyLanding() {
             </Link>
             <Link
               href="/hero/audition"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold border-2 hover:bg-neutral-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xs font-bold border-2 hover:bg-neutral-50 transition-colors"
               style={{ borderColor: HERO_RED, color: HERO_RED }}
             >
               오디션 지원

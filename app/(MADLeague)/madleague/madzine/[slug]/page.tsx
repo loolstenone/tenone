@@ -102,7 +102,7 @@ export default async function ArticlePage({ params }: PageProps) {
           {club && (<><span className="text-neutral-700">/</span><Link href={`/madleague/madzine?club=${club.slug}`} className="text-neutral-400 hover:text-white">{club.name}</Link></>)}
           {article.year && (<><span className="text-neutral-700">/</span><span className="text-neutral-400">{article.year}</span></>)}
         </div>
-        <h1 className={`mt-8 text-4xl sm:text-6xl font-black leading-[1.15] tracking-tight text-white ${MZ_SERIF}`}>{article.title}</h1>
+        <h1 className={`mt-8 text-4xl sm:text-6xl font-bold leading-[1.15] tracking-tight text-white ${MZ_SERIF}`}>{article.title}</h1>
         {(article.subtitle ?? article.excerpt) && (
           <p className={`mt-8 mx-auto max-w-2xl text-lg sm:text-xl italic leading-relaxed text-neutral-400 ${MZ_SERIF}`}>
             {article.subtitle ?? article.excerpt}

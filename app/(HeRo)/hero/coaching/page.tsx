@@ -177,7 +177,7 @@ export default function CoachingPage() {
             />
 
             {/* ── Tab Navigation (스크롤 시 헤더 아래 고정) ── */}
-            <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200 shadow-sm">
+            <div className="sticky top-16 z-30 bg-white/95 border-b border-neutral-200">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="flex gap-0 overflow-x-auto">
                         {tabs.map((tab) => (
@@ -185,7 +185,7 @@ export default function CoachingPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={clsx(
-                                    "relative px-6 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap shrink-0",
+                                    "relative px-6 py-3.5 text-sm font-bold transition-colors whitespace-nowrap shrink-0",
                                     activeTab === tab.id
                                         ? "text-neutral-900"
                                         : "text-neutral-400 hover:text-neutral-600"
@@ -229,7 +229,7 @@ export default function CoachingPage() {
                     </p>
                     <Link
                         href="/hero/hit"
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-white font-bold rounded-lg transition-colors hover:bg-red-50"
+                        className="inline-flex items-center gap-2 px-8 py-3 bg-white font-bold rounded-xs transition-colors hover:bg-red-50"
                         style={{ color: HERO_RED }}
                     >
                         HIT 검사 시작하기 <ArrowRight className="h-4 w-4" />
@@ -268,7 +268,7 @@ function ResumeSection() {
                     </div>
 
                     {/* CTA Card */}
-                    <div className="max-w-2xl mx-auto mb-14 border-2 rounded-xl p-8 text-center" style={{ borderColor: HERO_RED }}>
+                    <div className="max-w-2xl mx-auto mb-14 border-2 rounded-xs p-8 text-center" style={{ borderColor: HERO_RED }}>
                         <FileText className="h-10 w-10 mx-auto mb-4" style={{ color: HERO_RED }} />
                         <h3 className="text-lg font-bold mb-2">이력서 워크스페이스로 이동</h3>
                         <p className="text-neutral-500 text-sm mb-6">
@@ -277,7 +277,7 @@ function ResumeSection() {
                         </p>
                         <Link
                             href="/hero/resume/workspace"
-                            className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xs hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
                             이력서 워크스페이스 열기 <ExternalLink className="h-4 w-4" />
@@ -287,8 +287,8 @@ function ResumeSection() {
                     {/* Features */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
                         {features.map((f) => (
-                            <div key={f.title} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors text-center">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-neutral-100 text-neutral-500">
+                            <div key={f.title} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors text-center">
+                                <div className="w-12 h-12 rounded-xs flex items-center justify-center mx-auto mb-4 bg-neutral-100 text-neutral-500">
                                     <f.icon className="h-6 w-6" />
                                 </div>
                                 <h3 className="font-bold mb-2">{f.title}</h3>
@@ -298,12 +298,12 @@ function ResumeSection() {
                     </div>
 
                     {/* Tips */}
-                    <div className="max-w-2xl mx-auto bg-neutral-50 rounded-xl p-6">
+                    <div className="max-w-2xl mx-auto bg-neutral-50 rounded-xs p-6">
                         <h3 className="font-bold text-sm text-neutral-700 mb-4">이력서 기본 원칙</h3>
                         <div className="space-y-3">
                             {tips.map((tip, i) => (
                                 <div key={i} className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-neutral-700 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                                    <div className="w-5 h-5 rounded-none bg-neutral-700 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                                         {i + 1}
                                     </div>
                                     <p className="text-sm text-neutral-700">{tip}</p>
@@ -341,7 +341,7 @@ function MentorSection({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {programSteps.map((s) => (
                             <div key={s.step} className="flex items-start gap-3">
-                                <div className="w-8 h-8 bg-neutral-700 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                <div className="w-8 h-8 bg-neutral-700 text-white rounded-none flex items-center justify-center text-sm font-bold flex-shrink-0">
                                     {s.step}
                                 </div>
                                 <div>
@@ -367,7 +367,7 @@ function MentorSection({
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={clsx(
-                                    "px-4 py-2 text-sm rounded-full transition-colors",
+                                    "px-4 py-2 text-sm rounded-none transition-colors",
                                     selectedCategory === cat
                                         ? "text-white"
                                         : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
@@ -381,9 +381,9 @@ function MentorSection({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...filteredMentors].sort((a, b) => b.matchScore - a.matchScore).map((mentor) => (
-                            <div key={mentor.id} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
+                            <div key={mentor.id} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-14 h-14 bg-neutral-100 text-neutral-700 flex items-center justify-center rounded-full text-lg font-bold flex-shrink-0">
+                                    <div className="w-14 h-14 bg-neutral-100 text-neutral-700 flex items-center justify-center rounded-none text-lg font-bold flex-shrink-0">
                                         {mentor.photo}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -404,14 +404,14 @@ function MentorSection({
                                     ))}
                                 </div>
                                 {applyStates[mentor.id] === "done" ? (
-                                    <div className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-50 text-sm font-medium rounded-lg text-green-700">
+                                    <div className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-50 text-sm font-normal rounded-xs text-green-700">
                                         <CheckCircle className="h-4 w-4" /> 신청 완료
                                     </div>
                                 ) : (
                                     <button
                                         onClick={() => applyMentor(mentor)}
                                         disabled={applyStates[mentor.id] === "loading"}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-[#E53935] text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-[#E53935] text-sm font-normal rounded-xs hover:bg-red-50 transition-colors disabled:opacity-60"
                                         style={{ color: HERO_RED }}
                                     >
                                         <MessageCircle className="h-4 w-4" />
@@ -441,7 +441,7 @@ function CareerSection() {
                         {stages.map((stage, i) => (
                             <div key={stage.label} className="flex items-center gap-3">
                                 <div
-                                    className={clsx("w-10 h-10 rounded-lg flex items-center justify-center", stage.color)}
+                                    className={clsx("w-10 h-10 rounded-xs flex items-center justify-center", stage.color)}
                                     style={stage.bg ? { backgroundColor: stage.bg } : undefined}
                                 >
                                     <stage.icon className="h-5 w-5" />
@@ -467,9 +467,9 @@ function CareerSection() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {tracks.map((track) => (
-                            <div key={track.code} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
+                            <div key={track.code} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center">
                                         <track.icon className="h-6 w-6" />
                                     </div>
                                     <div>
@@ -485,7 +485,7 @@ function CareerSection() {
                                     <div className="flex items-center gap-2 flex-wrap">
                                         {track.levels.map((level, i) => (
                                             <span key={level} className="flex items-center gap-1.5">
-                                                <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-1 rounded">{level}</span>
+                                                <span className="text-xs font-normal text-neutral-600 bg-neutral-100 px-2 py-1 rounded">{level}</span>
                                                 {i < track.levels.length - 1 && <ChevronRight className="h-3 w-3 text-neutral-300" />}
                                             </span>
                                         ))}
@@ -495,7 +495,7 @@ function CareerSection() {
                                     <p className="text-xs text-neutral-400 mb-2">핵심 역량</p>
                                     <div className="flex flex-wrap gap-1.5">
                                         {track.skills.map((skill) => (
-                                            <span key={skill} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full">{skill}</span>
+                                            <span key={skill} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-none">{skill}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -503,9 +503,9 @@ function CareerSection() {
                         ))}
                     </div>
 
-                    <div className="mt-10 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-center">
+                    <div className="mt-10 p-4 bg-neutral-50 rounded-xs border border-neutral-200 text-center">
                         <p className="text-sm text-neutral-700">
-                            <span className="font-semibold text-neutral-900">HIT 검사</span>를 마치면 나에게 맞는 길과 지금 단계를 알려 드립니다
+                            <span className="font-bold text-neutral-900">HIT 검사</span>를 마치면 나에게 맞는 길과 지금 단계를 알려 드립니다
                         </p>
                     </div>
                 </div>
@@ -527,7 +527,7 @@ function BrandingSection() {
                         {brandingProcess.map((p, i) => (
                             <div key={p.step} className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-neutral-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    <div className="w-8 h-8 bg-neutral-700 text-white rounded-none flex items-center justify-center text-xs font-bold">
                                         {p.step}
                                     </div>
                                     <div>
@@ -552,9 +552,9 @@ function BrandingSection() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {brandingPrograms.map((prog) => (
-                            <div key={prog.title} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
+                            <div key={prog.title} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center">
                                         <prog.icon className="h-6 w-6" />
                                     </div>
                                     <div>
@@ -582,9 +582,9 @@ function BrandingSection() {
                         <h2 className="text-xl md:text-3xl font-bold mb-3">HeRo 캐릭터 예시</h2>
                         <p className="text-neutral-500">HIT 검사 결과로 만드는 캐릭터 예시</p>
                     </div>
-                    <div className="max-w-2xl mx-auto bg-white border border-neutral-200 rounded-xl p-8">
+                    <div className="max-w-2xl mx-auto bg-white border border-neutral-200 rounded-xs p-8">
                         <div className="flex items-start gap-5 mb-6">
-                            <div className="w-20 h-20 text-white flex items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: HERO_RED }}>
+                            <div className="w-20 h-20 text-white flex items-center justify-center rounded-xs flex-shrink-0" style={{ backgroundColor: HERO_RED }}>
                                 <Sparkles className="h-8 w-8" />
                             </div>
                             <div>
@@ -595,14 +595,14 @@ function BrandingSection() {
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
-                            <span className="text-xs px-3 py-1 bg-neutral-900 text-white rounded-full">ENTJ</span>
-                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">D 주도성</span>
-                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">전략적 사고 92점</span>
-                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">리더십 90점</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-900 text-white rounded-none">ENTJ</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-none">D 주도성</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-none">전략적 사고 92점</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-none">리더십 90점</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {["#전략", "#연결", "#세계관", "#AI", "#브랜드", "#리더십"].map((kw) => (
-                                <span key={kw} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full font-medium">{kw}</span>
+                                <span key={kw} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-none font-normal">{kw}</span>
                             ))}
                         </div>
                     </div>

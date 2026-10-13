@@ -18,7 +18,7 @@ export default async function CertificatePage() {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="text-4xl font-black">로그인이 필요합니다</h1>
+          <h1 className="text-4xl font-bold">로그인이 필요합니다</h1>
           <p className="mt-4 text-neutral-400">활동이 끝난 뒤에도 같은 Ten:One ID로 로그인하면 인증서를 다시 받을 수 있습니다.</p>
           <MadLoginButton className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</MadLoginButton>
         </div>
@@ -36,7 +36,7 @@ export default async function CertificatePage() {
 
       <section className="mx-auto max-w-5xl px-6 py-12">
         <div className="text-xs font-bold tracking-widest text-[#FFC000] mb-3">CERTIFICATES</div>
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight">인증서 발급</h1>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">인증서 발급</h1>
         <p className="mt-6 max-w-2xl text-neutral-400 leading-relaxed">
           참가한 경쟁 PT·프로젝트의 참가 확인서·수상 확인서와 동아리 활동 인증서를 직접 발급할 수 있습니다.
           인증서마다 고유 코드가 있어

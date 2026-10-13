@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  ArrowRight, Quote, TrendingUp, Briefcase, Star,
-  Heart, Bookmark, X, Loader2, CheckCircle2,
-} from 'lucide-react';
+import { ArrowRight, Quote, TrendingUp, Briefcase, Star, Heart, Bookmark, X, CheckCircle2 } from 'lucide-react';
 
 interface Story {
   id: string;
@@ -140,7 +137,7 @@ export default function StoryPage() {
       {/* 스토리 제출 모달 */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-6" style={{ background: '#1e1e35', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-full max-w-lg rounded-t-xs sm:rounded-xs p-6" style={{ background: '#1e1e35', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-bold text-white">스토리 보내기</h2>
               <button onClick={closeModal} className="text-white/30 hover:text-white/60"><X className="h-5 w-5" /></button>
@@ -151,14 +148,14 @@ export default function StoryPage() {
                 <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-amber-400" />
                 <p className="mb-1 text-sm font-bold text-white">스토리가 접수되었습니다!</p>
                 <p className="text-xs text-white/40">검토 후 성장 스토리 페이지에 게시됩니다.</p>
-                <button onClick={closeModal} className="mt-4 rounded-xl px-5 py-2 text-xs font-bold text-amber-400" style={{ background: 'rgba(255,217,61,0.12)' }}>닫기</button>
+                <button onClick={closeModal} className="mt-4 rounded-xs px-5 py-2 text-xs font-bold text-amber-400" style={{ background: 'rgba(255,217,61,0.12)' }}>닫기</button>
               </div>
             ) : (
               <div className="space-y-3">
                 <div>
                   <label className="mb-1 block text-[10px] text-white/40">제목 *</label>
                   <input
-                    className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                    className="w-full rounded-xs px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                     placeholder="바닥에서 만남이 만든 변화를 한 줄로"
                     value={submitForm.title}
@@ -169,7 +166,7 @@ export default function StoryPage() {
                   <div className="flex-1">
                     <label className="mb-1 block text-[10px] text-white/40">Before</label>
                     <input
-                      className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                      className="w-full rounded-xs px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                       placeholder="예: 마케터"
                       value={submitForm.before_role}
@@ -180,7 +177,7 @@ export default function StoryPage() {
                   <div className="flex-1">
                     <label className="mb-1 block text-[10px] text-white/40">After</label>
                     <input
-                      className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                      className="w-full rounded-xs px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                       placeholder="예: 스타트업 대표"
                       value={submitForm.after_role}
@@ -192,7 +189,7 @@ export default function StoryPage() {
                   <label className="mb-1 block text-[10px] text-white/40">내용</label>
                   <textarea
                     rows={4}
-                    className="w-full resize-none rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                    className="w-full resize-none rounded-xs px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                     placeholder="바닥에서의 만남이 어떻게 변화를 만들었나요?"
                     value={submitForm.content}
@@ -202,10 +199,10 @@ export default function StoryPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={!submitForm.title.trim() || submitting}
-                  className="w-full rounded-xl py-3 text-sm font-bold transition-opacity disabled:opacity-40"
+                  className="w-full rounded-xs py-3 text-sm font-bold transition-opacity disabled:opacity-40"
                   style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
                 >
-                  {submitting ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : '보내기'}
+                  {submitting ? <span className="text-xs">처리 중</span> : '보내기'}
                 </button>
               </div>
             )}
@@ -229,7 +226,7 @@ export default function StoryPage() {
             { label: '직무 전환', value: '12건', icon: Briefcase },
             { label: '누적 응원', value: '248', icon: Heart },
           ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="flex flex-1 items-center gap-2 rounded-xl border border-white/8 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div key={label} className="flex flex-1 items-center gap-2 rounded-xs border border-white/8 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <Icon className="h-4 w-4 text-white/20" />
               <div>
                 <div className="text-xs font-bold text-white/70">{value}</div>
@@ -248,18 +245,18 @@ export default function StoryPage() {
             const isSaved = saved.has(story.id);
 
             return (
-              <div key={story.id} className="overflow-hidden rounded-2xl border transition-all hover:border-white/15"
+              <div key={story.id} className="overflow-hidden rounded-xs border transition-all hover:border-white/15"
                 style={{ background: c.bg, borderColor: c.border }}>
                 <div className="p-5">
                   {/* 전환 뱃지 */}
                   {story.before_role && story.after_role && (
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-medium text-white/50"
+                      <span className="rounded-none px-2.5 py-0.5 text-[10px] font-normal text-white/50"
                         style={{ background: 'rgba(255,255,255,0.08)' }}>
                         {story.before_role}
                       </span>
                       <ArrowRight className="h-3 w-3" style={{ color: c.accent }} />
-                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+                      <span className="rounded-none px-2.5 py-0.5 text-[10px] font-bold"
                         style={{ background: `${c.accent}20`, color: c.accent }}>
                         {story.after_role}
                       </span>
@@ -280,12 +277,12 @@ export default function StoryPage() {
                   {/* 하단: 프로필 + 액션 */}
                   <div className="flex items-center justify-between border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                      <div className="flex h-8 w-8 items-center justify-center rounded-none text-xs font-bold"
                         style={{ background: `${c.accent}20`, color: c.accent }}>
                         {member?.display_name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <div className="text-xs font-medium text-white/70">{member?.display_name}</div>
+                        <div className="text-xs font-normal text-white/70">{member?.display_name}</div>
                         <div className="text-[10px] text-white/30">{member?.job_function}</div>
                       </div>
                     </div>
@@ -307,13 +304,13 @@ export default function StoryPage() {
         </div>
 
         {/* 내 스토리 제출 CTA */}
-        <div className="mt-8 rounded-2xl border border-white/8 p-5 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+        <div className="mt-8 rounded-xs border border-white/8 p-5 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
           <Quote className="mx-auto mb-2 h-6 w-6 text-amber-400/30" />
           <p className="mb-1 text-sm font-bold text-white/60">당신의 성장 스토리를 들려주세요</p>
           <p className="mb-4 text-xs text-white/30">바닥에서의 경험이 누군가에게 용기가 됩니다</p>
           <button
             onClick={() => setShowModal(true)}
-            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-opacity hover:opacity-80"
+            className="rounded-xs px-5 py-2.5 text-xs font-bold transition-opacity hover:opacity-80"
             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
             스토리 보내기
           </button>

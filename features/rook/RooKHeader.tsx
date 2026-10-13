@@ -96,7 +96,7 @@ export function RooKHeader() {
                 ) : (
                     <div className="flex items-center gap-4">
                         <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/rook/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347]">가입</Link>
+                        <Link href="/rook/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-bold hover:bg-[#00b347]">가입</Link>
                     </div>
                 )
             }
@@ -107,7 +107,7 @@ export function RooKHeader() {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={clsx(
-                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        "block rounded-xs px-4 py-2.5 text-base font-normal transition-colors",
                         isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
                     )}
                 >

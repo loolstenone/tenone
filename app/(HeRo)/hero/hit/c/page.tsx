@@ -38,9 +38,9 @@ function HitCIntroContent() {
     <div>
       <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-[11px] font-semibold text-neutral-400 tracking-wide mb-3">생애주기</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">{stage.code}</h1>
-          <p className="text-lg font-semibold text-neutral-600 mb-4 break-keep">{stage.name}</p>
+          <p className="text-[11px] font-bold text-neutral-400 tracking-wide mb-3">생애주기</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{stage.code}</h1>
+          <p className="text-lg font-bold text-neutral-600 mb-4 break-keep">{stage.name}</p>
           <p className="text-neutral-500 mb-2">{stage.desc}</p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-400 mt-4">
             <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {hitStageMinutesLabel("c")}</span><span>·</span><span>{stage.approxQuestions}문항</span><span>·</span><span>7점 척도</span>
@@ -65,8 +65,8 @@ function HitCIntroContent() {
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6">검사 구성</h2>
           <div className="space-y-4">
             {modules.map((m, i) => (
-              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0"><m.icon className="h-5 w-5" /></div>
+              <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center flex-shrink-0"><m.icon className="h-5 w-5" /></div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between"><h3 className="font-bold text-sm">{m.title}</h3><div className="flex items-center gap-2 text-xs text-neutral-400"><span>{m.count}</span><span>{m.time}</span></div></div>
                   <p className="text-xs text-neutral-500 mt-1">{m.desc}</p>
@@ -97,7 +97,7 @@ function HitCIntroContent() {
 
 export default function HitCIntroPage() {
   return (
-    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-[#E53935] rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>}>
       <HitCIntroContent />
     </Suspense>
   );

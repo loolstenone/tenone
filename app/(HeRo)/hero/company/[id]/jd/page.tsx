@@ -6,7 +6,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, Loader2, Plus, Edit, ArrowRight, CheckCircle2, Clock, Archive } from "lucide-react";
+import { ArrowLeft, FileText, Plus, Edit, ArrowRight, CheckCircle2, Clock, Archive } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 
@@ -50,7 +50,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
         })();
     }, [user?.id, companyId]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-neutral-300" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>;
     if (!isAuthenticated) return <div className="min-h-screen bg-neutral-50"><LoginRequired accentColor={HERO_RED} /></div>;
 
     if (forbidden) {
@@ -60,7 +60,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                     <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-300" />
                     <h1 className="text-xl font-bold mb-2">접근 권한이 없습니다</h1>
                     <p className="text-sm text-neutral-500 mb-6">이 기업의 담당자로 등록된 회원만 JD를 관리할 수 있습니다.</p>
-                    <Link href="/hero/company" className="inline-block px-4 py-2 text-sm text-white rounded-lg" style={{ backgroundColor: HERO_RED }}>
+                    <Link href="/hero/company" className="inline-block px-4 py-2 text-sm text-white rounded-xs" style={{ backgroundColor: HERO_RED }}>
                         인재 찾기로
                     </Link>
                 </div>
@@ -77,29 +77,29 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
 
                 <div className="flex items-start justify-between mb-8 flex-wrap gap-3">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-none mb-3" style={{ color: HERO_RED }}>
                             <FileText className="h-3.5 w-3.5" /> 직무 설명 (Job Description)
                         </div>
-                        <h1 className="text-2xl font-extrabold mb-1">맡을 일을 적어 주세요</h1>
+                        <h1 className="text-2xl font-bold mb-1">맡을 일을 적어 주세요</h1>
                         <p className="text-sm text-neutral-500">
                             TIH가 "왜 사람이 필요한가"라면, 직무 설명은 "어떤 자리인가"입니다. 7개 블록, 500~800자로 지원자가 읽게 될 소개를 작성합니다.
                         </p>
                     </div>
                     <Link href={`/hero/company/${companyId}/jd/new`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-lg"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white rounded-xs"
                         style={{ backgroundColor: HERO_RED }}>
                         <Plus className="h-4 w-4" /> 새 직무 설명 작성
                     </Link>
                 </div>
 
                 {loading ? (
-                    <div className="py-20 flex items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>
+                    <div className="py-20 flex items-center justify-center"><span className="text-sm text-mute">불러오는 중</span></div>
                 ) : jds.length === 0 ? (
-                    <div className="bg-white border-2 border-dashed border-neutral-200 rounded-xl p-12 text-center">
+                    <div className="bg-white border-2 border-dashed border-neutral-200 rounded-xs p-12 text-center">
                         <FileText className="h-10 w-10 mx-auto mb-3 text-neutral-300" />
                         <p className="text-sm text-neutral-400 mb-5">아직 작성된 직무 설명이 없습니다</p>
                         <Link href={`/hero/company/${companyId}/jd/new`}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-300 text-neutral-700 hover:border-neutral-400 transition-colors">
+                            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xs border border-neutral-300 text-neutral-700 hover:border-neutral-400 transition-colors">
                             <Plus className="h-4 w-4" /> 첫 번째 직무 설명 작성
                         </Link>
                     </div>
@@ -110,13 +110,13 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                             const Icon = st.icon;
                             return (
                                 <Link key={jd.id} href={`/hero/company/${companyId}/jd/${jd.id}`}
-                                    className="block bg-white border border-neutral-200 rounded-xl p-5 hover:border-rose-300 hover:shadow-sm transition-all">
+                                    className="block bg-white border border-neutral-200 rounded-xs p-5 hover:border-rose-300 transition-all">
                                     <div className="flex items-start justify-between mb-2">
                                         <div className="min-w-0">
                                             <h3 className="font-bold text-base mb-0.5">{jd.position_title}</h3>
                                             {jd.summary && <p className="text-xs text-neutral-500 line-clamp-1">{jd.summary}</p>}
                                         </div>
-                                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${st.className}`}>
+                                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-none font-normal ${st.className}`}>
                                             <Icon className="h-3 w-3" /> {st.label}
                                         </span>
                                     </div>
@@ -134,7 +134,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                     </div>
                 )}
 
-                <div className="mt-8 p-4 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600">
+                <div className="mt-8 p-4 bg-neutral-100 border border-neutral-200 rounded-xs text-xs text-neutral-600">
                     <strong className="block mb-1">📄 채용 공고 7개 항목</strong>
                     ① 타이틀·한 줄 · ② 우리는 지금 · ③ 풀어야 하는 문제 · ④ 실제 하는 일
                     · ⑤ 어울리는 사람 · ⑥ 함께 일할 사람들 · ⑦ 조건과 환경

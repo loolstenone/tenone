@@ -25,7 +25,7 @@ export default function TagPicker({ label, options, selected, onChange, max = 5,
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-semibold text-neutral-900">{label}</span>
+        <span className="text-sm font-bold text-neutral-900">{label}</span>
         <span className="text-xs text-neutral-400">{selected.length}/{max}</span>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -34,7 +34,7 @@ export default function TagPicker({ label, options, selected, onChange, max = 5,
             key={tag}
             type="button"
             onClick={() => toggle(tag)}
-            className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${selected.includes(tag) ? colors.active : colors.inactive}`}
+            className={`rounded-none border px-3 py-1.5 text-sm transition-colors ${selected.includes(tag) ? colors.active : colors.inactive}`}
           >
             {tag}
           </button>

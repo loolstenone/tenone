@@ -26,7 +26,7 @@ export default function StarsPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20"><div className="h-8 w-8 border-2 border-neutral-200 border-t-blue-600 rounded-full animate-spin" /></div>
+          <div className="flex items-center justify-center py-20"><span className="text-sm text-mute">불러오는 중</span></div>
         ) : stars.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-3">✨</div>
@@ -37,10 +37,10 @@ export default function StarsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {stars.map(star => (
               <Link key={star.id} href={`/badak/stars/${star.slug}`}
-                className="group block rounded-xl border border-neutral-200 bg-white overflow-hidden hover:border-blue-300 hover:shadow-sm transition-all">
+                className="group block rounded-xs border border-neutral-200 bg-white overflow-hidden hover:border-blue-300 transition-all">
                 {star.coverImageUrl && (
                   <div className="aspect-[2/1] overflow-hidden">
-                    <img src={star.coverImageUrl} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img src={star.coverImageUrl} alt="" className="h-full w-full object-cover group- transition-transform duration-300" />
                   </div>
                 )}
                 <div className="p-5">

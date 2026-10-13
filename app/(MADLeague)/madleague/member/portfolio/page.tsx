@@ -113,7 +113,7 @@ export default async function PortfolioPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-3">MEMBER · PORTFOLIO</div>
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">내 포트폴리오</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">내 포트폴리오</h1>
               <p className="mt-2 text-sm text-neutral-500">
                 활동 이력이 자동으로 집계됩니다.{' '}
                 {m.portfolio_public
@@ -178,7 +178,7 @@ export default async function PortfolioPage() {
 
         {/* 기본 정보 */}
         <div className="bg-neutral-950 border border-neutral-900 p-8">
-          <h2 className="text-lg font-black mb-6 flex items-center gap-2">
+          <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
             기본 정보
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -190,7 +190,7 @@ export default async function PortfolioPage() {
               <div>
                 <div className="text-xs text-neutral-600 mb-1">동아리</div>
                 <div className="flex items-center gap-2 font-bold">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: m.mad_clubs.color ?? '#EC1D25' }} />
+                  <span className="h-2.5 w-2.5 rounded-none" style={{ backgroundColor: m.mad_clubs.color ?? '#EC1D25' }} />
                   {m.mad_clubs.name}
                   <span className="text-neutral-500 font-normal">· {m.mad_clubs.region}</span>
                 </div>
@@ -199,12 +199,12 @@ export default async function PortfolioPage() {
             {m.university && (
               <div>
                 <div className="text-xs text-neutral-600 mb-1">학교</div>
-                <div className="font-medium">{m.university}{m.major && ` · ${m.major}`}</div>
+                <div className="font-normal">{m.university}{m.major && ` · ${m.major}`}</div>
               </div>
             )}
             <div>
               <div className="text-xs text-neutral-600 mb-1">활동 연도</div>
-              <div className="font-medium">{(m.activity_years ?? []).join(', ') || '-'}</div>
+              <div className="font-normal">{(m.activity_years ?? []).join(', ') || '-'}</div>
             </div>
           </div>
           {m.bio && (
@@ -228,7 +228,7 @@ export default async function PortfolioPage() {
         {/* 프로젝트 이력 */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black flex items-center gap-2">
+            <h2 className="text-lg font-bold flex items-center gap-2">
               <Trophy className="h-5 w-5 text-neutral-500" /> 참여 프로젝트
             </h2>
             <Link href="/madleague/member/projects" className="text-xs text-neutral-500 hover:text-white transition">
@@ -269,7 +269,7 @@ export default async function PortfolioPage() {
         {/* 인증서 */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black flex items-center gap-2">
+            <h2 className="text-lg font-bold flex items-center gap-2">
               <Award className="h-5 w-5 text-neutral-500" /> 인증서
             </h2>
             <Link href="/madleague/member/certificate" className="text-xs text-neutral-500 hover:text-white transition">
