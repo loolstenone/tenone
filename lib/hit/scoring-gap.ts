@@ -272,8 +272,8 @@ export function buildRoutingRationale(
   const routeLabel = nextRoute === 'recovery'
     ? '그래서 기존 경력으로 복귀하는 길을 추천합니다.'
     : nextRoute === 'C'
-      ? '그래서 다음 검사로 HIT - Departure(이직)를 추천합니다.'
-      : '그래서 HIT - Bounce(역량과 방향)부터 다시 점검하기를 추천합니다.';
+      ? '그래서 다음 검사로 이직 검사를 추천합니다.'
+      : '그래서 역량·방향 검사부터 다시 점검하기를 추천합니다.';
   parts.push(routeLabel);
 
   return parts.join(' ');

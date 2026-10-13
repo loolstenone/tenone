@@ -17,12 +17,12 @@ const features = [
   {
     icon: Brain,
     title: "HIT 결과 기반 맞춤 상담",
-    desc: "DISC, MBTI, S-Power, 기저요인(UF) 검사 결과를 통합 분석하여 당신만의 맥락에 맞는 상담을 제공합니다.",
+    desc: "행동 유형(DISC)·성격(MBTI)·강점·성장 배경 결과를 함께 보고, 내 상황에 맞춰 상담합니다.",
   },
   {
     icon: MessageCircle,
     title: "실시간 대화형 상담",
-    desc: "채팅 형태로 자유롭게 질문하고, AI 상담사가 즉시 응답합니다. 강점, 약점, 직무 적합도, 성장 방향 등 무엇이든 물어보세요.",
+    desc: "채팅으로 편하게 물어보면 AI 상담사가 바로 답합니다. 강점, 약점, 맞는 직무, 성장 방향 등 무엇이든 물어보세요.",
   },
   {
     icon: FileText,
@@ -52,9 +52,9 @@ const pricing = [
     plan: "체험",
     price: "무료",
     priceNum: 0,
-    desc: "HIT - Archetype · Bounce 기본 결과",
+    desc: "기본 성향 검사 · 역량·방향 검사 기본 결과",
     features: [
-      "HIT - Archetype · Bounce 검사",
+      "기본 성향 검사 · 역량·방향 검사",
       "기본 결과 리포트 (웹)",
       "회원 가입 시 풀 버전 PDF 제공",
     ],
@@ -163,8 +163,8 @@ function AICounselingContent() {
               <span style={{ color: RED }}>AI 상담사</span>와 대화하세요
             </h1>
             <p className="text-lg text-neutral-500 mb-8 leading-relaxed">
-              HIT 검사 결과를 완벽히 이해한 AI가 당신의 강점, 성장 방향,
-              커리어 전략을 1:1로 상담합니다.
+              내 HIT 검사 결과를 읽은 AI가 강점, 성장 방향,
+              커리어 고민을 1:1로 함께 이야기합니다.
             </p>
             <div className="flex flex-wrap gap-3">
               {resultId ? (
@@ -195,7 +195,7 @@ function AICounselingContent() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">이런 상담이 가능합니다</h2>
-            <p className="text-neutral-500">HIT 검사 결과를 바탕으로 깊이 있는 대화를 나눌 수 있습니다</p>
+            <p className="text-neutral-500">HIT 검사 결과를 바탕으로 이런 이야기를 나눌 수 있습니다</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {topics.map((topic) => (
@@ -304,10 +304,10 @@ function AICounselingContent() {
                   <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Archetype 검사를 먼저 완료해주세요</h3>
-                  <p className="text-sm text-neutral-500 mb-6">성격/강점 진단(HIT - Archetype)을 완료해야 맞춤 상담이 가능합니다.</p>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">기본 성향 검사를 먼저 완료해주세요</h3>
+                  <p className="text-sm text-neutral-500 mb-6">기본 성향 검사를 마쳐야 내 결과에 맞춘 상담을 할 수 있습니다.</p>
                   <Link href="/hero/hit/a" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
-                    HIT - Archetype 시작하기 <ArrowRight className="h-4 w-4" />
+                    기본 성향 검사 시작하기 <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}
@@ -316,10 +316,10 @@ function AICounselingContent() {
                   <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Bounce 검사를 완료하면 더 정확합니다</h3>
-                  <p className="text-sm text-neutral-500 mb-6">역량/적성 진단(HIT - Bounce)까지 완료하면 교차 분석이 가능합니다.</p>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">역량·방향 검사를 완료하면 더 정확합니다</h3>
+                  <p className="text-sm text-neutral-500 mb-6">역량·방향 검사까지 마치면 두 결과를 함께 보고 상담합니다.</p>
                   <Link href="/hero/hit/b" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
-                    HIT - Bounce 시작하기 <ArrowRight className="h-4 w-4" />
+                    역량·방향 검사 시작하기 <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}
@@ -406,9 +406,9 @@ function AICounselingContent() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: 1, icon: Zap, title: "HIT 검사", desc: "통합 검사를 완료합니다" },
+              { step: 1, icon: Zap, title: "HIT 검사", desc: "검사를 마칩니다" },
               { step: 2, icon: FileText, title: "결과 확인", desc: "보고서를 확인합니다" },
-              { step: 3, icon: Sparkles, title: "AI 상담", desc: "상담사와 대화합니다" },
+              { step: 3, icon: Sparkles, title: "AI 상담", desc: "AI 상담사와 대화합니다" },
               { step: 4, icon: Users, title: "대면 상담", desc: "필요 시 전문가를 만납니다" },
             ].map((s, i) => (
               <div key={s.step} className="text-center">
@@ -428,8 +428,8 @@ function AICounselingContent() {
         <div className="mx-auto max-w-3xl px-6 text-center">
           <div className="bg-neutral-50 rounded-2xl p-8">
             <p className="text-sm text-neutral-500 leading-relaxed mb-4">
-              본 AI 상담 서비스는 HeRo 통합검사(HIT) 결과를 기반으로 한 참고용 상담입니다.
-              의학적/심리학적 진단이 아니며, 중요한 의사결정은 반드시 전문 상담사와의 대면 상담을 권장합니다.
+              AI 상담은 HeRo 통합 검사(HIT) 결과를 바탕으로 한 참고용 상담입니다.
+              의학적·심리학적 진단이 아닙니다. 중요한 결정은 전문 상담사와 직접 만나 상의해 보시길 권합니다.
             </p>
             <Link
               href="/hero/coaching"

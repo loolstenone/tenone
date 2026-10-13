@@ -60,17 +60,17 @@ interface JourneyStatus {
 }
 
 const STAGES: { key: Stage; label: string; subtitle: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
-  { key: "Dreamer",    label: "Dreamer",    subtitle: "꿈을 품다",     icon: Sparkles },
-  { key: "Challenger", label: "Challenger", subtitle: "도전하다",       icon: DoorOpen },
-  { key: "Trainee",    label: "Trainee",    subtitle: "훈련하다",       icon: Swords },
-  { key: "Debut",      label: "Debut",      subtitle: "데뷔하다",       icon: Rocket },
-  { key: "Star",       label: "Star",       subtitle: "빛나다",         icon: Star },
-  { key: "Legend",     label: "Legend",     subtitle: "전설이 되다",    icon: Crown },
+  { key: "Dreamer",    label: "꿈꾸는 사람", subtitle: "꿈을 품다",     icon: Sparkles },
+  { key: "Challenger", label: "도전자",     subtitle: "문을 두드리다",       icon: DoorOpen },
+  { key: "Trainee",    label: "연습생",     subtitle: "실력을 쌓다",       icon: Swords },
+  { key: "Debut",      label: "데뷔",       subtitle: "무대에 서다",       icon: Rocket },
+  { key: "Star",       label: "스타",       subtitle: "인정받다",         icon: Star },
+  { key: "Legend",     label: "레전드",     subtitle: "길을 만들다",    icon: Crown },
 ];
 
 const TABS = [
-  { key: "today",     label: "Today",     icon: Flame },
-  { key: "herotype",  label: "Hero Type", icon: Target },
+  { key: "today",     label: "오늘",     icon: Flame },
+  { key: "herotype",  label: "히어로 유형", icon: Target },
   { key: "goals",     label: "목표·성취", icon: Target },
   { key: "record",    label: "기록",      icon: FileText },
   { key: "coaching",    label: "코칭",      icon: BookOpen },
@@ -132,7 +132,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8">
-          <h3 className="font-bold text-neutral-900 mb-2">Journey 데이터를 불러올 수 없습니다</h3>
+          <h3 className="font-bold text-neutral-900 mb-2">성장 기록을 불러오지 못했습니다</h3>
           <p className="text-sm text-neutral-600 mb-4">{error ?? "알 수 없는 오류"}</p>
           <button onClick={load} className="px-4 py-2 bg-[#E53935] text-white text-sm font-bold rounded-lg">다시 시도</button>
         </div>
@@ -298,17 +298,17 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
 
   const checklistByStage: Record<string, { label: string; done: boolean; href: string }[]> = {
     Challenger: [
-      { label: "HIT - Archetype 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
+      { label: "기본 성향 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
     ],
     Trainee: [
-      { label: "HIT - Archetype 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
-      { label: "HIT - Bounce 검사 완료", done: conditions.has_hit_b, href: "/hero/hit/b" },
+      { label: "기본 성향 검사 완료", done: conditions.has_hit_a, href: "/hero/hit/a" },
+      { label: "역량·방향 검사 완료", done: conditions.has_hit_b, href: "/hero/hit/b" },
       { label: "이력서 작성", done: conditions.has_resume, href: "/hero/resume/workspace" },
     ],
     Debut: [
-      { label: "HIT - Archetype + Bounce 완료", done: conditions.has_hit_a && conditions.has_hit_b, href: "/hero/hit" },
+      { label: "기본 성향 검사 + 역량·방향 검사 완료", done: conditions.has_hit_a && conditions.has_hit_b, href: "/hero/hit" },
       { label: "이력서 작성", done: conditions.has_resume, href: "/hero/resume/workspace" },
-      { label: "JH 12문항 작성", done: conditions.has_jh, href: "/hero/jh/write" },
+      { label: "희망 직무 설문 작성", done: conditions.has_jh, href: "/hero/jh/write" },
       { label: "첫 매칭 수신", done: conditions.has_match, href: "#matching" },
     ],
     Star: [
@@ -330,7 +330,7 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
           <Crown className="w-5 h-5 text-amber-600" />
           <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Legend</span>
         </div>
-        <h3 className="text-lg font-bold text-neutral-900 mb-2">여정의 정점에 도달했습니다</h3>
+        <h3 className="text-lg font-bold text-neutral-900 mb-2">마지막 단계에 올랐습니다</h3>
         <p className="text-sm text-neutral-600">이제 당신이 다음 세대의 영웅을 만들 차례입니다.</p>
       </div>
     );
@@ -385,15 +385,15 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   let mission: { title: string; desc: string; href: string; reward: string | null } | null = null;
 
   if (!c.has_hit_a) {
-    mission = { title: "HIT - Archetype 검사", desc: `${hitStageMinutesLabel("a")}이면 영웅 유형이 나와요`, href: "/hero/hit/a", reward: null };
+    mission = { title: "기본 성향 검사", desc: `${hitStageMinutesLabel("a")}이면 영웅 유형이 나와요`, href: "/hero/hit/a", reward: null };
   } else if (!c.has_hit_b) {
-    mission = { title: "HIT - Bounce 역량과 방향", desc: `역량·효능감이 더해져요 (${hitStageMinutesLabel("b")})`, href: "/hero/hit/b", reward: null };
+    mission = { title: "역량·방향 검사", desc: `역량·효능감이 더해져요 (${hitStageMinutesLabel("b")})`, href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
     mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
-    mission = { title: "희망 직무 12문항 작성", desc: "맞는 자리를 찾으려면 필요해요", href: "/hero/jh/write", reward: null };
+    mission = { title: "희망 직무 12문항 작성", desc: "나와 맞는 회사를 알려 드리려면 필요해요", href: "/hero/jh/write", reward: null };
   } else if (status.pendingMatches > 0) {
-    mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "큐레이션이 도착했어요", href: "#matching", reward: null };
+    mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "추천이 도착했어요", href: "#matching", reward: null };
   } else {
     mission = { title: "오늘 체크인", desc: "30초면 충분해요", href: "#checkin", reward: UC_PUBLIC ? "UC 적립" : null };
   }
@@ -510,7 +510,7 @@ function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: 
       {status.pendingMatches > 0 ? (
         <>
           <p className="text-lg font-bold text-neutral-900 mb-1">확인 안 한 매칭 {status.pendingMatches}건</p>
-          <p className="text-sm text-neutral-500 mb-4">큐레이션이 도착했어요</p>
+          <p className="text-sm text-neutral-500 mb-4">추천이 도착했어요</p>
           <button
             type="button"
             onClick={() => goTab("matching")}
@@ -529,7 +529,7 @@ function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: 
               href="/hero/jh/write"
               className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935] hover:gap-2 transition-all"
             >
-              JH 작성하기 <ArrowRight className="w-3.5 h-3.5" />
+              희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           )}
         </>
@@ -611,7 +611,7 @@ function MatchingTab({ status, memberId }: { status: JourneyStatus; memberId: st
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-amber-700" />
-            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">먼저 JH 작성</span>
+            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">희망 직무 설문 먼저</span>
           </div>
           <h3 className="font-bold text-neutral-900 mb-1">매칭을 받으려면 JH가 필요해요</h3>
           <p className="text-sm text-neutral-600 mb-4">12문항 · 약 5분. 작성하면 매칭 후보에 올라갑니다.</p>
@@ -620,7 +620,7 @@ function MatchingTab({ status, memberId }: { status: JourneyStatus; memberId: st
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
             style={{ backgroundColor: RED }}
           >
-            JH 작성하기 <ArrowRight className="w-3.5 h-3.5" />
+            희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       )}
@@ -634,9 +634,11 @@ function MatchingTab({ status, memberId }: { status: JourneyStatus; memberId: st
 const STAGE_EMOJI: Record<string, string> = {
   Dreamer: "✨", Challenger: "🚪", Trainee: "⚔️", Debut: "🚀", Star: "⭐", Legend: "👑",
 };
+// 화면 표기는 한국어 (2026-10-13 — 영어 이름만으로는 이해하기 어려움). key는 DB 값 그대로
+const STAGE_LABEL: Record<string, string> = Object.fromEntries(STAGES.map(s => [s.key, s.label]));
 const STAGE_SUBTITLE: Record<string, string> = {
-  Dreamer: "꿈을 품다", Challenger: "도전하다", Trainee: "훈련하다",
-  Debut: "데뷔하다", Star: "빛나다", Legend: "전설이 되다",
+  Dreamer: "꿈을 품다", Challenger: "문을 두드리다", Trainee: "실력을 쌓다",
+  Debut: "무대에 서다", Star: "인정받다", Legend: "길을 만들다",
 };
 
 function StageUpModal({ from, to, ucAwarded, onClose }: {
@@ -650,16 +652,16 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
         <div className="bg-[#E53935] px-8 py-10 text-center">
           <p className="text-5xl mb-3">{STAGE_EMOJI[to] ?? "🎉"}</p>
           <h2 className="text-2xl font-black text-white mb-1">스테이지 승급!</h2>
-          <p className="text-white/80 text-sm">{to} · {STAGE_SUBTITLE[to] ?? ""}</p>
+          <p className="text-white/80 text-sm">{STAGE_LABEL[to] ?? to} · {STAGE_SUBTITLE[to] ?? ""}</p>
         </div>
 
         {/* 본문 */}
         <div className="px-8 py-6 space-y-4">
           {/* 승급 경로 */}
           <div className="flex items-center justify-center gap-3 py-3 bg-neutral-50 rounded-xl">
-            <span className="text-sm font-bold text-neutral-500">{from}</span>
+            <span className="text-sm font-bold text-neutral-500">{STAGE_LABEL[from] ?? from}</span>
             <span className="text-[#E53935] font-black">→</span>
-            <span className="text-sm font-black text-neutral-900">{to}</span>
+            <span className="text-sm font-black text-neutral-900">{STAGE_LABEL[to] ?? to}</span>
           </div>
 
           {/* UC 적립 */}

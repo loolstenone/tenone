@@ -28,7 +28,7 @@ const DOMAINS: { key: string; label: string }[] = [
 
 function getDomainStatus(score: number): { icon: typeof CheckCircle; label: string; color: string } {
   if (score >= 70) return { icon: CheckCircle, label: 'Ready', color: 'text-green-500' };
-  if (score >= 50) return { icon: Clock, label: 'In Progress', color: 'text-yellow-500' };
+  if (score >= 50) return { icon: Clock, label: '준비 중', color: 'text-yellow-500' };
   return { icon: AlertCircle, label: 'Gap', color: 'text-red-400' };
 }
 

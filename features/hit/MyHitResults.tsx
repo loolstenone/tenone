@@ -48,7 +48,7 @@ export default function MyHitResults({ theme = 'light' }: { theme?: 'light' | 'd
       <div className={`rounded-xl border p-6 text-center ${box}`}>
         <p className={`text-sm ${sub}`}>아직 완료한 HIT 검사가 없습니다.</p>
         <Link href={`/hero/hit/${HIT_STAGES.a.key}`} className="mt-3 inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
-          {HIT_STAGES.a.code} 시작하기 <ArrowRight className="h-4 w-4" />
+          {HIT_STAGES.a.ko} 시작하기 <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     );

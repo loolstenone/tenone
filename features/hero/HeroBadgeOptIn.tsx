@@ -111,7 +111,7 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
                     <Shield className="h-5 w-5 text-neutral-400" />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-semibold text-neutral-700">Universe Identity Badge</p>
+                    <p className="text-sm font-semibold text-neutral-700">유니버스 배지</p>
                     <p className="text-xs text-neutral-500 mt-0.5">
                         HeRo HIT 검사로 당신의 영웅 유형을 발견하면 배지로 프로필에 표시됩니다
                     </p>
@@ -129,7 +129,7 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
                     <Sparkles className="h-5 w-5 text-rose-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800">Universe Identity Badge</p>
+                    <p className="text-sm font-semibold text-neutral-800">유니버스 배지</p>
                     <p className="text-xs text-neutral-500 mt-0.5">
                         당신의 영웅 유형: <span className="font-mono text-rose-600">{heroType.type_code}</span>
                         {" · "}{heroType.character_name}

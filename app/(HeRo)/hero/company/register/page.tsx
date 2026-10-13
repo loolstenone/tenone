@@ -86,7 +86,7 @@ export default function CompanyRegisterPage() {
                     </h1>
                     <p className="text-neutral-500 mb-8">
                         {result.message || (isActive
-                            ? "이제 TIH 제출과 JD 등록이 가능합니다."
+                            ? "이제 기업 고민 설문과 채용 공고를 올릴 수 있습니다."
                             : "기존 등록 기업이 있어 담당자 추가 요청이 접수되었습니다. 대표의 승인을 기다려주세요.")}
                     </p>
                     <button onClick={() => router.push("/hero/company")}
@@ -111,7 +111,7 @@ export default function CompanyRegisterPage() {
                     </div>
                     <h1 className="text-2xl font-extrabold mb-2">우리 회사를 등록합니다</h1>
                     <p className="text-sm text-neutral-500">
-                        등록 완료 후 TIH 제출·JD 등록으로 매칭 Tetrad 기업 측 입력을 채울 수 있습니다.
+                        등록을 마친 뒤 기업 고민 설문과 채용 공고를 올리면 매칭에 필요한 기업 쪽 정보가 채워집니다.
                     </p>
                 </div>
 

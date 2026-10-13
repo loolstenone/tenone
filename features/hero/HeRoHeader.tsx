@@ -88,7 +88,7 @@ export function HeRoHeader() {
                         aboutPath="/hero/about"
                         profilePath="/hero/my"
                         workspacePath="/hero/journey"
-                        workspaceLabel="Journey"
+                        workspaceLabel="나의 성장 기록"
                         accentColor="#E53935"
                         signupPath="/hero/signup"
                         siteId="hero"
@@ -161,7 +161,7 @@ export function HeRoHeader() {
                             : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
                     )}
                 >
-                    나의 Journey
+                    나의 성장 기록
                 </Link>
             )}
             {isAuthenticated && (

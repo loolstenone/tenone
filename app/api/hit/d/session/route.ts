@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!aResult) aResult = await getLatestHitAResult(memberId);
 
     if (!aResult) {
-      return errorResponse('HIT - Archetype 결과를 찾을 수 없습니다. 먼저 HIT - Archetype을 완료해주세요.', 400);
+      return errorResponse('기본 성향 검사 결과를 찾을 수 없습니다. 먼저 기본 성향 검사를 완료해주세요.', 400);
     }
 
     const gateResult = await gateApi(memberId, 'HIT_LAYER_ONE');

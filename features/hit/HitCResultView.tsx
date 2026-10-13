@@ -93,12 +93,12 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
         <div className="rounded-2xl bg-white border border-neutral-200 p-5 sm:p-6 mb-4">
           <p className="text-[15px] font-bold text-neutral-900">준비 체크리스트는 검사 문항이 아닙니다</p>
           <p className="text-[14px] text-neutral-600 mt-2 leading-[1.8]">
-            이력서·면접처럼 &lsquo;이미 해 둔 일&rsquo;을 예/아니오로 표시하는 할 일 목록이에요. 나의 저니에서 하나씩 체크할수록 다음 검사의 준비도에 반영됩니다.
+            이력서·면접처럼 &lsquo;이미 해 둔 일&rsquo;을 예/아니오로 표시하는 할 일 목록이에요. 나의 성장 기록에서 하나씩 체크할수록 다음 검사의 준비도에 반영됩니다.
             {typeof r.checklist_percent === "number" && ` 검사 당시 완료율은 ${r.checklist_percent}%였습니다.`}
           </p>
         </div>
         <div className="space-y-3">
-          <NextLink href="/hero/journey" title="나의 저니에서 준비 체크하기" desc="목표 · 체크인 · 준비 체크리스트" primary />
+          <NextLink href="/hero/journey" title="나의 성장 기록에서 준비 체크하기" desc="목표 · 체크인 · 준비 체크리스트" primary />
           <FullReportLink href={`/hero/hit/c/report/${resultId}`} />
         </div>
       </HitNextSteps>

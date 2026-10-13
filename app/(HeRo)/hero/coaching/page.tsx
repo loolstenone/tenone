@@ -74,10 +74,10 @@ const tracks = [
 ];
 
 const stages = [
-    { icon: GraduationCap, label: "Entry", desc: "입문 단계", color: "bg-neutral-100 text-neutral-700" },
-    { icon: Briefcase, label: "Growth", desc: "성장 단계", color: "bg-neutral-200 text-neutral-800" },
-    { icon: TrendingUp, label: "Senior", desc: "시니어 단계", color: "bg-neutral-700 text-white" },
-    { icon: Crown, label: "C-Level", desc: "경영진 단계", color: "text-white", bg: HERO_RED },
+    { icon: GraduationCap, label: "입문", desc: "일을 배우는 단계", color: "bg-neutral-100 text-neutral-700" },
+    { icon: Briefcase, label: "성장", desc: "혼자 맡아 해내는 단계", color: "bg-neutral-200 text-neutral-800" },
+    { icon: TrendingUp, label: "시니어", desc: "팀을 이끄는 단계", color: "bg-neutral-700 text-white" },
+    { icon: Crown, label: "임원", desc: "회사를 이끄는 단계", color: "text-white", bg: HERO_RED },
 ];
 
 /* ===== Mentor data ===== */
@@ -103,7 +103,7 @@ const mentors: Mentor[] = [
 const mentorCategories = ["전체", "경영전략", "마케팅", "기술", "리더십", "투자", "디자인"];
 
 const programSteps = [
-    { step: 1, title: "HIT 진단 완료", desc: "인재 진단 결과를 기반으로 멘토가 매칭됩니다" },
+    { step: 1, title: "HIT 검사 완료", desc: "검사 결과에 맞는 멘토를 추천해 드립니다" },
     { step: 2, title: "멘토 선택", desc: "추천 멘토 중 희망하는 멘토를 선택합니다" },
     { step: 3, title: "1:1 멘토링", desc: "월 2회 온/오프라인 멘토링 세션을 진행합니다" },
     { step: 4, title: "성장 리포트", desc: "멘토링 종료 후 성장 리포트를 받습니다" },
@@ -111,18 +111,18 @@ const programSteps = [
 
 /* ===== Branding data ===== */
 const brandingPrograms = [
-    { icon: Sparkles, title: "HeRo 캐릭터", desc: "HIT 진단 결과 기반 나만의 퍼스널 브랜드 캐릭터를 생성합니다.", features: ["DISC 기반 성격 유형", "강점 키워드", "브랜드 스토리", "비주얼 캐릭터"] },
-    { icon: FolderOpen, title: "포트폴리오 제작", desc: "프로젝트 경험을 체계적으로 정리한 전문 포트폴리오를 제작합니다.", features: ["프로젝트 하이라이트", "성과 시각화", "디자인 템플릿", "PDF 내보내기"] },
-    { icon: Globe, title: "SNS 브랜딩", desc: "LinkedIn, Instagram 등 소셜 미디어 프로필을 최적화합니다.", features: ["프로필 컨설팅", "콘텐츠 전략", "해시태그 전략", "인사이트 분석"] },
+    { icon: Sparkles, title: "HeRo 캐릭터", desc: "HIT 검사 결과로 나를 소개하는 캐릭터를 만듭니다.", features: ["DISC 기반 성격 유형", "강점 키워드", "브랜드 스토리", "비주얼 캐릭터"] },
+    { icon: FolderOpen, title: "포트폴리오 제작", desc: "프로젝트 경험을 정리해 포트폴리오를 만듭니다.", features: ["프로젝트 하이라이트", "성과 시각화", "디자인 템플릿", "PDF 내보내기"] },
+    { icon: Globe, title: "SNS 브랜딩", desc: "링크드인·인스타그램 같은 SNS 프로필을 다듬습니다.", features: ["프로필 컨설팅", "콘텐츠 전략", "해시태그 전략", "반응 분석"] },
     { icon: Camera, title: "프로필 촬영", desc: "전문 프로필 사진 촬영 및 보정 서비스를 제공합니다.", features: ["전문 스튜디오 촬영", "리터칭 포함", "다양한 컨셉", "SNS/이력서 최적화"] },
 ];
 
 const brandingProcess = [
-    { step: 1, title: "진단 분석", desc: "HIT 결과로 브랜드 DNA 추출" },
-    { step: 2, title: "키워드 도출", desc: "나만의 브랜드 키워드 정의" },
-    { step: 3, title: "스토리 구성", desc: "브랜드 스토리 및 비전 정리" },
+    { step: 1, title: "진단 분석", desc: "HIT 결과로 나의 강점 정리" },
+    { step: 2, title: "키워드 도출", desc: "나를 설명할 키워드 고르기" },
+    { step: 3, title: "스토리 구성", desc: "나의 이야기와 목표 정리" },
     { step: 4, title: "비주얼 제작", desc: "포트폴리오/프로필 제작" },
-    { step: 5, title: "채널 배포", desc: "SNS 및 구직 플랫폼 최적화" },
+    { step: 5, title: "채널에 올리기", desc: "SNS와 구직 사이트 프로필 정리" },
 ];
 
 /* ================================================================
@@ -183,14 +183,14 @@ export default function CoachingPage() {
                             <span>하나의 코칭</span>으로
                         </h1>
                         <p className="text-lg text-neutral-600 mb-8">
-                            HIT 진단 결과를 기반으로 커리어 전 과정을 통합 코칭합니다.
+                            HIT 검사 결과를 바탕으로 이력서부터 브랜딩까지 한곳에서 코칭합니다.
                         </p>
                         <Link
                             href="/hero/hit"
                             className="inline-flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg transition-colors hover:opacity-90"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
+                            HIT 검사 시작하기 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -245,14 +245,14 @@ export default function CoachingPage() {
                         지금 HeRo 코칭을 시작하세요
                     </h2>
                     <p className="text-red-100 mb-8">
-                        HIT 진단 한 번이면 이력서·멘토링·로드맵·브랜딩까지 모두 연결됩니다
+                        HIT 검사 결과 하나로 이력서·멘토링·로드맵·브랜딩을 모두 이어서 받을 수 있습니다
                     </p>
                     <Link
                         href="/hero/hit"
                         className="inline-flex items-center gap-2 px-8 py-3 bg-white font-bold rounded-lg transition-colors hover:bg-red-50"
                         style={{ color: HERO_RED }}
                     >
-                        HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
+                        HIT 검사 시작하기 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -266,16 +266,16 @@ export default function CoachingPage() {
 function ResumeSection() {
     const features = [
         { icon: FileText, title: "이력서 등록·관리", desc: "여러 버전의 이력서를 등록하고, 기본 이력서를 지정합니다." },
-        { icon: Sparkles, title: "AI 첨삭", desc: "HIT 결과와 직무 트렌드를 바탕으로 AI가 이력서를 개선 제안합니다." },
+        { icon: Sparkles, title: "AI 첨삭", desc: "HIT 결과와 요즘 채용 흐름을 바탕으로 AI가 고칠 점을 알려 드립니다." },
         { icon: Users, title: "전문가 컨설팅", desc: "현직자·리크루터의 1:1 이력서 피드백을 받습니다." },
-        { icon: BarChart3, title: "키워드 최적화", desc: "ATS(지원자 추적 시스템) 통과율을 높이는 키워드를 제안합니다." },
+        { icon: BarChart3, title: "키워드 최적화", desc: "채용 시스템(ATS)의 서류 거름망을 통과하기 쉬운 키워드를 알려 드립니다." },
     ];
 
     const tips = [
-        "직무 중심으로, 숫자로 증명하라",
-        "단순 나열이 아닌 문제-해결-결과(PAR) 구조",
+        "지원 직무에 맞춰, 숫자로 보여 주세요",
+        "한 일 나열보다 문제 → 행동 → 결과(PAR) 순서로",
         "지원 직무 키워드를 본문에 자연스럽게 배치",
-        "1~2페이지, 읽는 사람의 시간을 배려하라",
+        "1~2쪽으로, 읽는 사람이 빨리 볼 수 있게",
     ];
 
     return (
@@ -284,7 +284,7 @@ function ResumeSection() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">이력서 코칭</h2>
-                        <p className="text-neutral-500">HIT 진단 결과와 연동된 맞춤형 이력서 전략</p>
+                        <p className="text-neutral-500">HIT 검사 결과에 맞춘 이력서 쓰는 법</p>
                     </div>
 
                     {/* CTA Card */}
@@ -319,7 +319,7 @@ function ResumeSection() {
 
                     {/* Tips */}
                     <div className="max-w-2xl mx-auto bg-neutral-50 rounded-xl p-6">
-                        <h3 className="font-bold text-sm text-neutral-700 mb-4">이력서 황금 원칙</h3>
+                        <h3 className="font-bold text-sm text-neutral-700 mb-4">이력서 기본 원칙</h3>
                         <div className="space-y-3">
                             {tips.map((tip, i) => (
                                 <div key={i} className="flex items-start gap-3">
@@ -483,7 +483,7 @@ function CareerSection() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">직무별 로드맵</h2>
-                        <p className="text-neutral-500">4가지 C-Level 트랙에서 나의 경로를 선택하세요</p>
+                        <p className="text-neutral-500">임원까지 가는 네 가지 길 중 나에게 맞는 길을 고르세요</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {tracks.map((track) => (
@@ -525,7 +525,7 @@ function CareerSection() {
 
                     <div className="mt-10 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-center">
                         <p className="text-sm text-neutral-700">
-                            <span className="font-semibold text-neutral-900">HIT 진단</span>을 완료하면 AI가 나에게 맞는 트랙과 현재 단계를 추천합니다
+                            <span className="font-semibold text-neutral-900">HIT 검사</span>를 마치면 나에게 맞는 길과 지금 단계를 알려 드립니다
                         </p>
                     </div>
                 </div>
@@ -568,7 +568,7 @@ function BrandingSection() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">브랜딩 프로그램</h2>
-                        <p className="text-neutral-500">4가지 프로그램으로 나만의 브랜드를 구축하세요</p>
+                        <p className="text-neutral-500">네 가지 프로그램으로 나를 알리는 방법을 만듭니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {brandingPrograms.map((prog) => (
@@ -600,7 +600,7 @@ function BrandingSection() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">HeRo 캐릭터 예시</h2>
-                        <p className="text-neutral-500">HIT 진단 결과를 기반으로 생성되는 캐릭터</p>
+                        <p className="text-neutral-500">HIT 검사 결과로 만드는 캐릭터 예시</p>
                     </div>
                     <div className="max-w-2xl mx-auto bg-white border border-neutral-200 rounded-xl p-8">
                         <div className="flex items-start gap-5 mb-6">
@@ -608,10 +608,10 @@ function BrandingSection() {
                                 <Sparkles className="h-8 w-8" />
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: HERO_RED }}>HeRo Character</p>
+                                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: HERO_RED }}>HeRo 캐릭터</p>
                                 <h3 className="text-xl font-bold mb-1">비전을 제시하는 전략가</h3>
                                 <p className="text-sm text-neutral-500 italic mb-3">The Visionary Strategist</p>
-                                <p className="text-sm text-neutral-600">큰 그림을 그리고, 사람을 모으며, 세계관을 설계하는 리더형 인재.</p>
+                                <p className="text-sm text-neutral-600">큰 그림을 그리고 사람을 모으는 리더형 인재입니다.</p>
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">

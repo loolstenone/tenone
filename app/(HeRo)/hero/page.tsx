@@ -40,7 +40,7 @@ const services = [
     title: "HIT 통합검사",
     desc: "나를 진단합니다",
     detail:
-      "숨겨진 강점과 마케팅 DNA를 분석하는 통합 역량 진단. AI가 당신의 64가지 유형 중 하나를 찾아냅니다.",
+      "성격·행동 유형·적성·역량을 한 번에 보는 검사입니다. 64가지 유형 중 내 유형과 강점을 알려 드립니다.",
     href: "/hero/hit",
   },
   {
@@ -49,28 +49,28 @@ const services = [
     title: "커리어 코칭",
     desc: "방향을 잡아줍니다",
     detail:
-      "CMO, CTO, CSO, CBO — 목표 C-Level까지의 체계적 성장 경로를 전문 멘토와 함께 설계합니다.",
+      "마케팅·기술·전략·사업 책임자(CMO·CTO·CSO·CBO)까지 가는 길을 멘토와 함께 단계별로 계획합니다.",
     href: "/hero/coaching",
   },
   {
     icon: Handshake,
     num: "03",
     title: "써치 라이트",
-    desc: "기업의 고민과 인재의 재능이 만납니다",
+    desc: "기업의 고민을 정리합니다",
     detail:
-      "검증된 인재 프로필과 기업의 실제 고민을 Tetrad 분석으로 맞춰 봅니다. 양쪽 모두에게 맞는 무대를 보여드립니다.",
+      "기업이 풀어야 할 고민과 원하는 사람을 설문으로 정리하고, 인재의 검사 결과·희망 직무와 함께 4방향으로 살펴봅니다.",
     href: "/hero/search-light",
   },
 ];
 
 /* ── 영웅의 여정 6단계 ── */
 const journey = [
-  { label: "Dreamer", icon: Sparkles, desc: "꿈을 품다" },
-  { label: "Challenger", icon: Zap, desc: "도전하다" },
-  { label: "Trainee", icon: Search, desc: "훈련하다" },
-  { label: "Debut", icon: Star, desc: "데뷔하다" },
-  { label: "Star", icon: Crown, desc: "빛나다" },
-  { label: "Legend", icon: Crown, desc: "전설이 되다" },
+  { label: "꿈꾸는 사람", icon: Sparkles, desc: "꿈을 품다" },
+  { label: "도전자", icon: Zap, desc: "문을 두드리다" },
+  { label: "연습생", icon: Search, desc: "실력을 쌓다" },
+  { label: "데뷔", icon: Star, desc: "무대에 서다" },
+  { label: "스타", icon: Crown, desc: "인정받다" },
+  { label: "레전드", icon: Crown, desc: "길을 만들다" },
 ];
 
 /* ── 64유형 미리보기 (대표 8개 · hit_hero_types 실제 데이터 기반) ── */
@@ -166,15 +166,15 @@ export default function HeRoHomePage() {
           <div className="mx-auto max-w-7xl w-full px-6 lg:px-8">
             <div className="ml-auto w-full md:w-[55%] lg:w-[50%] text-center md:text-left md:pl-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-5 leading-tight">
-                We believe in
+                당신의 재능을
                 <br />
-                <span>your talent</span>
+                <span>믿습니다</span>
               </h1>
 
               <p className="text-sm md:text-base text-neutral-500 mb-8 leading-relaxed max-w-md mx-auto md:mx-0">
                 인재 기획사 HeRo.
                 <br />
-                당신의 숨겨진 재능을 발견하고, 멋진 무대를 찾습니다.
+                숨은 재능을 찾고, 잘할 수 있는 일을 함께 찾습니다.
               </p>
 
               <div className="flex flex-wrap justify-center md:justify-start">
@@ -203,9 +203,9 @@ export default function HeRoHomePage() {
               인재
             </h3>
             <p className="text-neutral-500 text-center max-w-sm mb-8 leading-relaxed">
-              나를 알고, 성장하고, 무대에 서세요.
+              나를 알고, 실력을 키우고, 맞는 일을 찾으세요.
               <br />
-              HeRo가 당신의 커리어를 설계합니다.
+              HeRo가 커리어 계획을 함께 세웁니다.
             </p>
             <Link
               href="/hero/hit"
@@ -225,15 +225,15 @@ export default function HeRoHomePage() {
               기업
             </h3>
             <p className="text-neutral-400 text-center max-w-sm mb-8 leading-relaxed">
-              검증된 마케팅 인재를 만나세요.
+              어떤 사람이 필요한지 정리해 보세요.
               <br />
-              HeRo가 최적의 인재를 매칭합니다.
+              HeRo가 조직의 고민과 인재 현황을 분석해 드립니다.
             </p>
             <Link
               href="/hero/search-light"
               className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-neutral-900 transition-all"
             >
-              인재 찾기 (써치 라이트) <ArrowRight className="h-4 w-4" />
+              써치 라이트 알아보기 <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function HeRoHomePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
-              Services
+              서비스
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
               세 가지 핵심 서비스
@@ -292,13 +292,13 @@ export default function HeRoHomePage() {
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
-              Hero&apos;s Journey
+              히어로의 성장 단계
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
-              영웅의 여정
+              꿈꾸는 사람에서 레전드까지
             </h2>
             <p className="text-neutral-500 mt-3 max-w-xl mx-auto">
-              꿈꾸는 자에서 전설로. 6단계 성장 로드맵.
+              HeRo에서 성장하는 여섯 단계입니다.
             </p>
           </div>
 
@@ -390,13 +390,13 @@ export default function HeRoHomePage() {
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
-              64 Types
+              64가지 유형
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
-              64가지 영웅 유형
+              나는 어떤 유형일까요?
             </h2>
             <p className="text-neutral-500 mt-3">
-              DISC × MBTI 조합으로 당신만의 커리어 원형을 찾아드립니다.
+              행동 유형(DISC)과 성격 유형(MBTI)을 조합해 내 유형을 알려 드립니다.
             </p>
           </div>
 
@@ -450,10 +450,10 @@ export default function HeRoHomePage() {
       <section style={{ backgroundColor: RED }}>
         <div className="mx-auto max-w-5xl px-6 py-24 text-center">
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
-            당신의 무대를 찾을 준비가 되셨나요?
+            지금 시작해 볼까요?
           </h2>
           <p className="text-white/70 mb-12 max-w-xl mx-auto text-lg leading-relaxed">
-            HIT 검사로 나를 알고, 코칭으로 성장하고, 매칭으로 무대에 서세요.
+            검사로 나를 알고, 코칭으로 실력을 키우세요.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

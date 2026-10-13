@@ -62,10 +62,10 @@ export default function HeRoMyPage() {
                             </p>
                             <p className="text-xs text-neutral-400">
                                 {jhStatus === "active"
-                                    ? "맞는 자리가 생기면 알려드립니다 · 언제든 수정 가능"
+                                    ? "나와 맞을 만한 회사가 생기면 알려 드립니다 · 언제든 수정 가능"
                                     : jhStatus === "draft"
                                     ? "남은 문항을 마저 답해 주세요"
-                                    : "12문항으로 원하는 자리의 방향을 정리합니다 · 4~7분"}
+                                    : "12문항으로 원하는 일의 방향을 정리합니다 · 4~7분"}
                             </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-neutral-500" />
@@ -106,7 +106,7 @@ export default function HeRoMyPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-100">기업으로 인재를 찾으시나요?</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">회사를 등록하고 필요한 자리를 적어 주시면 HeRo가 인재 풀 현황을 분석해 드립니다</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">회사를 등록하고 필요한 사람을 적어 주시면 HeRo가 인재 풀 현황을 분석해 드립니다</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-neutral-500" />
                 </Link>

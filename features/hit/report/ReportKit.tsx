@@ -67,7 +67,7 @@ export function HitChain({ type, id }: { type: string; id: string }) {
 
   return (
     <nav aria-label="나의 HIT" className="mt-10">
-      <p className="text-xs font-semibold text-neutral-400 mb-3">나의 HIT — 공통(Archetype · Bounce) + 지금 단계</p>
+      <p className="text-xs font-semibold text-neutral-400 mb-3">나의 HIT — 공통(기본 성향 · 역량·방향) + 지금 단계</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {items.map(it => {
           const current = it.key === type;

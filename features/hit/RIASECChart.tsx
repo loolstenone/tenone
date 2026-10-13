@@ -33,7 +33,7 @@ export default function RIASECChart({ r, i, a, s, e, c, hollandCode }: RIASECCha
     <div>
       {/* Holland Code */}
       <div className="text-center mb-6">
-        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Holland Code</span>
+        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">직업 흥미 유형</span>
         <div className="flex items-center justify-center gap-1.5 mt-2">
           {hollandCode.split('').map((char, idx) => {
             const typeInfo = TYPES.find(t => t.label === char);

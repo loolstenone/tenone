@@ -7,7 +7,7 @@ import type { HitBResult } from "@/types/hit";
 /** 흥미(HIT A) × 효능감(HIT B) 6유형 매트릭스 — 결과·보고서 공용 */
 export default function InterestEfficacyMatrix({ matrix, efficacy }: { matrix: HitBResult["matrix"]; efficacy: Record<string, number> }) {
   if (!matrix) {
-    return <p className="text-sm text-neutral-500">HIT - Archetype 흥미 결과가 없어 교차 분석을 할 수 없습니다. 효능감 점수만 표시합니다.</p>;
+    return <p className="text-sm text-neutral-500">기본 성향 검사 흥미 결과가 없어 교차 분석을 할 수 없습니다. 효능감 점수만 표시합니다.</p>;
   }
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

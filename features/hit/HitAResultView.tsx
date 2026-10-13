@@ -195,7 +195,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <ScoreList scores={ch} copy={CH_COPY} meaningOf={(k, v) => { const id = chModuleId(k, v); return mods.find(m => m.id === id)?.content; }} />
       </Section>
 
-      <Section id="interest" title="흥미" lead="어떤 종류의 일에 마음이 끌리는지입니다. HIT - Bounce에서 '해낼 수 있다'는 자신감(효능감)과 겹쳐 봅니다.">
+      <Section id="interest" title="흥미" lead="어떤 종류의 일에 마음이 끌리는지입니다. 역량·방향 검사에서 '해낼 수 있다'는 자신감(효능감)과 겹쳐 봅니다.">
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
           {ap.map(([t, v]) => HOLLAND_COPY[t] && <ScoreRow key={t} label={HOLLAND_COPY[t].label} value={v} what={HOLLAND_COPY[t].what} plain />)}
         </div>

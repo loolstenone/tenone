@@ -93,12 +93,12 @@ export default function JDEditor({
         <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
             <div className="max-w-2xl mx-auto px-6">
                 <Link href={`/hero/company/${companyId}/jd`} className="flex items-center gap-1 text-xs text-neutral-500 mb-4 hover:text-neutral-700">
-                    <ArrowLeft className="h-3.5 w-3.5" /> JD 목록
+                    <ArrowLeft className="h-3.5 w-3.5" /> 채용 공고 목록
                 </Link>
 
                 <div className="mb-8">
                     <h1 className="text-2xl font-extrabold mb-1">
-                        {form.id ? "JD 편집" : "새 JD 작성"}
+                        {form.id ? "채용 공고 편집" : "새 채용 공고 작성"}
                     </h1>
                     <p className="text-sm text-neutral-500">
                         HeRo 권장: 500~800자 · 스펙 나열이 아닌 서사 · 영웅이 읽고 "내 문제다"라고 느끼게
@@ -116,13 +116,13 @@ export default function JDEditor({
                     </Card>
 
                     {/* 블록 2 */}
-                    <Card title="② 우리는 지금" hint="TIH 국면·고민을 2~3문장으로 솔직하게">
+                    <Card title="② 우리는 지금" hint="기업 고민 설문에 적은 상황과 고민을 2~3문장으로 솔직하게">
                         <textarea value={block("block2_now")} onChange={e => setBlock("block2_now", e.target.value)}
                             placeholder="창업 5년차, 직원 30명 규모입니다..." rows={4} className={TEXT_INPUT} />
                     </Card>
 
                     {/* 블록 3 */}
-                    <Card title="③ 풀어야 하는 문제" hint="TIH의 고민을 이 자리의 과제로 변환 · bullet 3~5개">
+                    <Card title="③ 풀어야 하는 문제" hint="기업 고민 설문에 적은 고민을 이 일의 과제로 바꿔 3~5개">
                         <ArrayInput value={(form.blocks["block3_problems"] as string[]) ?? []}
                             onChange={arr => setBlock("block3_problems", arr)}
                             placeholder="예: 브랜드 아이덴티티 부재에서 D2C 시작" />
@@ -138,7 +138,7 @@ export default function JDEditor({
                             <textarea value={block("block4_work_mid")} onChange={e => setBlock("block4_work_mid", e.target.value)}
                                 rows={3} className={TEXT_INPUT} />
                         </Field>
-                        <Field label="JD 외 업무 (솔직 공개)" hint="운영·관계·정치·잡일 비중. 덮을수록 의심받습니다.">
+                        <Field label="공고에 없는 업무 (솔직하게)" hint="운영·관계 조율·잡무 비중. 감출수록 지원자가 의심합니다.">
                             <textarea value={block("block4_non_jd")} onChange={e => setBlock("block4_non_jd", e.target.value)}
                                 placeholder='예: "초기 6개월은 팀 세팅과 외부 파트너 미팅에 50% 이상 시간이 갑니다."'
                                 rows={3} className={TEXT_INPUT} />
@@ -146,8 +146,8 @@ export default function JDEditor({
                     </Card>
 
                     {/* 블록 5 */}
-                    <Card title="⑤ 이 자리에 어울리는 사람">
-                        <Field label="3축 요약" hint="TIH-2-1 배분을 한 문장으로">
+                    <Card title="⑤ 이 일에 어울리는 사람">
+                        <Field label="업무 비중 요약" hint="기업 고민 설문 2-1번 답을 한 문장으로">
                             <input value={block("block5_axes_summary")} onChange={e => setBlock("block5_axes_summary", e.target.value)}
                                 placeholder='예: "개척자 60 : 결속자 30 : 수호자 10"' className={TEXT_INPUT} />
                         </Field>

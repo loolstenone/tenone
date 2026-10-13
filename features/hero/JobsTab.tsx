@@ -84,16 +84,16 @@ export function JobsTab({ memberId }: { memberId: string }) {
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
                     <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="w-4 h-4 text-amber-700" />
-                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">JH 작성 필요</span>
+                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">희망 직무 설문 필요</span>
                     </div>
-                    <h3 className="font-bold text-neutral-900 mb-1">당신에게 맞는 자리를 찾으려면 JH가 필요해요</h3>
-                    <p className="text-sm text-neutral-600 mb-3">JH 12문항 · 약 5분. 작성하면 매칭 정확도가 올라갑니다.</p>
+                    <h3 className="font-bold text-neutral-900 mb-1">나와 맞는 회사를 보려면 희망 직무 설문이 필요해요</h3>
+                    <p className="text-sm text-neutral-600 mb-3">희망 직무 설문 12문항 · 약 5분. 작성하면 매칭 정확도가 올라갑니다.</p>
                     <Link
                         href="/hero/jh/write"
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: RED }}
                     >
-                        JH 작성하기 <ArrowRight className="w-3.5 h-3.5" />
+                        희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
             )}
@@ -107,8 +107,8 @@ export function JobsTab({ memberId }: { memberId: string }) {
                         </h3>
                         <p className="text-sm text-neutral-500 mt-1">
                             {feed.hasJH
-                                ? `당신의 JH·HIT 기반으로 선별된 ${feed.items.length}건`
-                                : "현재는 최신순으로 표시. JH 작성 시 매칭도 기반 정렬"}
+                                ? `희망 직무 설문과 HIT 결과로 고른 ${feed.items.length}건`
+                                : "지금은 최신순입니다. 희망 직무 설문을 작성하면 나와 맞는 순서로 보여 드립니다."}
                         </p>
                     </div>
                 </div>

@@ -17,24 +17,24 @@ const stages = [
   {
     number: "01",
     icon: Sparkles,
-    title: "Dreamer",
-    subtitle: "꿈꾸는 사람",
+    title: "꿈꾸는 사람",
+    subtitle: "어디서 시작할지 찾는 사람",
     paragraphs: [
-      "관심은 있지만, 어디서 시작해야 할지 모르겠다. 배운 이론과 실무 사이의 간극이 너무 크다. 인턴을 해도 잡무만 한다.",
-      "당신의 잠재력은 아직 측정되지 않았을 뿐입니다. HIT 진단으로 숨겨진 강점을 발견하세요. 10분이면 충분합니다.",
-      "Dreamer 단계에서는 자기 인식이 핵심입니다. 나는 무엇을 잘하고, 무엇이 부족한지. HIT가 그 거울이 됩니다.",
+      "관심은 있는데 어디서 시작할지 모르겠다. 학교에서 배운 것과 실무가 너무 다르다. 인턴을 해도 잡무만 한다.",
+      "아직 내 강점을 재 본 적이 없을 뿐입니다. HIT 검사로 몰랐던 강점을 찾아보세요.",
+      "이 단계에서는 나를 아는 것이 가장 중요합니다. 무엇을 잘하고 무엇이 부족한지 HIT 결과로 확인해 보세요.",
     ],
-    cta: { label: "HIT - Archetype 시작하기", href: "/hero/hit/a" },
+    cta: { label: "기본 성향 검사 시작하기", href: "/hero/hit/a" },
     align: "left" as const,
   },
   {
     number: "02",
     icon: DoorOpen,
-    title: "Challenger",
+    title: "도전자",
     subtitle: "문을 두드리는 사람",
     paragraphs: [
-      "HIT 결과를 손에 들고, 여러 문 앞에 섭니다. 오디션으로 실력을 증명하거나, 특화 입구로 들어오거나, 경력이 있으면 다이렉트로.",
-      "어떤 문으로 들어오든, 기준은 하나입니다. 당신이 무엇을 할 수 있는가. 스펙이 아니라 실력. 이력서가 아니라 실전.",
+      "HIT 결과를 들고 첫 문을 두드립니다. 오디션으로 실력을 보여 주거나, 경력이 있으면 바로 시작할 수 있습니다.",
+      "어떤 길로 오든 기준은 하나입니다. 무엇을 할 수 있는가. 스펙보다 실력을 봅니다.",
     ],
     cta: { label: "오디션 지원하기", href: "/hero/audition" },
     align: "right" as const,
@@ -42,12 +42,12 @@ const stages = [
   {
     number: "03",
     icon: Swords,
-    title: "Trainee",
-    subtitle: "무기를 만드는 사람",
+    title: "연습생",
+    subtitle: "실력을 쌓는 사람",
     paragraphs: [
-      "HeRo 소속 연습생이 되면, 본격적인 훈련이 시작됩니다. Vrief 프레임워크로 핵심 역량을 체계적으로 훈련하고, GPR로 매주 성과를 측정합니다.",
-      "혼자 싸우지 않습니다. Universe의 자원이 당신의 무기가 됩니다. 당신은 성장에만 집중하면 됩니다.",
-      "3개월의 집중 트레이닝. 이 기간이 끝나면, 당신은 이전의 당신이 아닙니다.",
+      "HeRo 연습생이 되면 본격적으로 훈련을 시작합니다. 목표를 정해 핵심 역량을 키우고, 매주 성과를 점검합니다.",
+      "혼자 하지 않습니다. 유니버스의 여러 브랜드와 사람들이 함께 돕습니다.",
+      "석 달 동안 집중해서 훈련합니다.",
     ],
     cta: null,
     align: "left" as const,
@@ -55,11 +55,11 @@ const stages = [
   {
     number: "04",
     icon: Rocket,
-    title: "Debut",
+    title: "데뷔",
     subtitle: "무대에 서는 사람",
     paragraphs: [
-      "트레이닝을 마치면, 실제 기업과 연결됩니다. Rookie부터 시작해 성과에 따라 Tier가 오릅니다. 당신의 Tier는 시장이 결정합니다.",
-      "혼자가 아닙니다. HeRo의 GPR 시스템이 성과를 관리하고, Universe의 리소스가 계속 지원됩니다. 당신이 성공하면, 기업도 HeRo도 함께 성공합니다.",
+      "훈련을 마치면 실제 일을 맡아 봅니다. 신입 단계부터 시작해 성과에 따라 단계가 올라갑니다.",
+      "데뷔한 뒤에도 HeRo가 성과를 함께 점검하고 계속 돕습니다.",
     ],
     cta: null,
     align: "right" as const,
@@ -67,13 +67,13 @@ const stages = [
   {
     number: "05",
     icon: Crown,
-    title: "Star → Legend",
-    subtitle: "빛나고, 길을 만드는 사람",
+    title: "스타 → 레전드",
+    subtitle: "인정받고, 다음 사람의 길을 여는 사람",
     paragraphs: [
-      "Legend에 도달하면, 선택권이 당신에게 옵니다. 기업 C레벨로 합류할 수도, 독립해서 자기 사업을 시작할 수도, HeRo 멘토가 되어 다음 세대를 이끌 수도 있습니다.",
-      "Legend는 끝이 아니라 새로운 시작입니다. 당신의 경험은 다음 Dreamer에게 영감이 되고, 당신의 멘토링은 다음 Challenger를 만듭니다. 영웅은 영웅을 만듭니다.",
+      "레전드 단계에 오르면 길을 직접 고릅니다. 임원으로 합류하거나, 내 사업을 시작하거나, HeRo 멘토가 되어 후배를 도울 수 있습니다.",
+      "내 경험이 다음 사람에게 길잡이가 됩니다.",
     ],
-    cta: { label: "당신의 여정을 시작하세요", href: "/hero/hit/a" },
+    cta: { label: "HIT 검사로 시작하기", href: "/hero/hit/a" },
     align: "left" as const,
   },
 ];
@@ -88,18 +88,18 @@ export function JourneyLanding() {
             className="text-sm font-bold tracking-widest uppercase mb-4"
             style={{ color: HERO_RED }}
           >
-            Hero&apos;s Journey
+            히어로의 성장 단계
           </p>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-6">
-            영웅의 여정
+            꿈꾸는 사람에서 레전드까지
           </h1>
           <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-            인재 기획사가 아티스트를 발굴하고 트레이닝하고 데뷔시키듯,
+            연예 기획사가 연습생을 발굴하고 훈련시켜 데뷔시키는 것처럼,
             <br className="hidden md:block" />
-            HeRo는 당신의 커리어를 발굴하고 검증하고 무대에 세웁니다.
+            HeRo는 내 강점을 찾고 실력을 키워 일할 준비를 돕습니다.
           </p>
           <p className="mt-8 text-sm text-neutral-500">
-            이미 시작하셨나요? <Link href="/signup" className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 여정 지도로 이동합니다.
+            이미 시작하셨나요? <Link href="/signup" className="font-semibold underline" style={{ color: HERO_RED }}>로그인</Link>하면 나의 성장 기록으로 이동합니다.
           </p>
         </div>
       </section>
@@ -165,10 +165,10 @@ export function JourneyLanding() {
       <section className="py-20">
         <div className="mx-auto max-w-5xl px-6 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
-            모든 영웅에게는 시작이 있었습니다.
+            첫걸음은 나를 아는 것부터입니다.
           </h2>
           <p className="text-neutral-600 mb-8 max-w-xl mx-auto">
-            당신의 이야기는 어디서 시작되나요? HIT 진단으로 첫 걸음을 내딛어 보세요.
+            HIT 검사로 내 강점과 유형부터 확인해 보세요.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -176,7 +176,7 @@ export function JourneyLanding() {
               className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
               style={{ backgroundColor: HERO_RED }}
             >
-              HIT 진단 시작
+              HIT 검사 시작
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

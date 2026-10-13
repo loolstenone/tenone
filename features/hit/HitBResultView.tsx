@@ -136,7 +136,7 @@ export default function HitBResultView({ resultId, print = false }: { resultId: 
             })}
           </div>
         ) : (
-          <p className="text-[15px] text-neutral-500">HIT - Archetype 흥미 결과가 없어 교차 분석은 생략했습니다. 아래 효능감만 참고하세요.</p>
+          <p className="text-[15px] text-neutral-500">기본 성향 검사 흥미 결과가 없어 교차 분석은 생략했습니다. 아래 효능감만 참고하세요.</p>
         )}
         <h3 className="text-[15px] font-bold text-neutral-900 mt-10 mb-2">분야별 효능감</h3>
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">

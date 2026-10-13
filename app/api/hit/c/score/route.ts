@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         system: '당신은 HeRo 인재 기획사의 커리어 컨설턴트입니다. 대학생·사회 초년생에게 한국어로 따뜻하고 구체적으로 씁니다. 이모지·특수문자·마크다운 헤딩 금지. 준비가 부족한 영역은 비난이 아니라 "다음에 할 일"로. 마지막에 이번 달 할 일 3가지.',
         messages: [{
           role: 'user',
-          content: `${hitA ? `HIT - Archetype: ${hitA.type_code} "${hitA.type_name_ko}" · 흥미 Top3 ${hitA.ap_top3_code ?? '-'}\n` : ''}희망 트랙: ${trackId ?? '-'}\n취업 준비(자기 인식): ${rd} (종합 ${scored.readinessTotal}, ${scored.readinessGrade})\n준비 체크리스트 완료율: ${checklist.percent}% (${checklist.done}/${checklist.total})\n첫 직무 적응: ${ob} (종합 ${scored.onboardingTotal})\n진로 결정 확신: ${scored.careerDecision}\n\n3~4문단으로 진입 단계 리포트를 써 주세요.`,
+          content: `${hitA ? `기본 성향 검사: ${hitA.type_code} "${hitA.type_name_ko}" · 흥미 Top3 ${hitA.ap_top3_code ?? '-'}\n` : ''}희망 트랙: ${trackId ?? '-'}\n취업 준비(자기 인식): ${rd} (종합 ${scored.readinessTotal}, ${scored.readinessGrade})\n준비 체크리스트 완료율: ${checklist.percent}% (${checklist.done}/${checklist.total})\n첫 직무 적응: ${ob} (종합 ${scored.onboardingTotal})\n진로 결정 확신: ${scored.careerDecision}\n\n3~4문단으로 진입 단계 리포트를 써 주세요.`,
         }],
       });
       const t = msg.content.find(b => b.type === 'text');

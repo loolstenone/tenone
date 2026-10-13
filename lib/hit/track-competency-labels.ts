@@ -139,7 +139,7 @@ export const TRACK_COMPETENCY_LABELS: Record<string, { label: string; what: stri
   // 서비스·CX
   customer_empathy: { label: '고객 공감', what: '고객의 입장에서 느끼고 이해하는 힘' },
   cs_operation: { label: 'CS 운영', what: '문의와 불만을 체계적으로 처리하는 힘' },
-  cx_design: { label: 'CX 설계', what: '고객 여정의 경험을 설계하는 힘' },
+  cx_design: { label: 'CX 설계', what: '고객이 서비스를 처음 알고 쓰기까지의 경험을 설계하는 힘' },
   cx_analytics: { label: 'CX 분석', what: '고객 반응 데이터를 분석하는 힘' },
   service_resilience: { label: '서비스 회복력', what: '어려운 고객 상황에서도 흔들리지 않는 힘' },
   cx_leadership: { label: 'CX 리더십', what: '서비스 조직을 이끄는 힘' },

@@ -195,12 +195,12 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
         ))}
         {!hitA && (
           <Link href="/hero/hit/a" className="flex items-center gap-1.5 text-xs text-[#E53935] font-medium ml-auto">
-            HIT - Archetype 검사 →
+            기본 성향 검사 →
           </Link>
         )}
         {hitA && !hitB && (
           <Link href="/hero/hit/b" className="flex items-center gap-1.5 text-xs text-[#E53935] font-medium ml-auto">
-            HIT - Bounce 검사 →
+            역량·방향 검사 →
           </Link>
         )}
       </div>

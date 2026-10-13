@@ -48,13 +48,13 @@ function HitCIntroContent() {
         </div>
       </section>
 
-      {error && /Archetype/.test(error) && (
+      {error && /기본 성향 검사|Archetype/.test(error) && (
         <section className="bg-amber-50 border-y border-amber-200">
           <div className="mx-auto max-w-3xl px-6 py-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.code}을 먼저 완료해주세요</p>
-              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.code} 시작하기 →</button>
+              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.ko}를 먼저 마쳐 주세요</p>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.ko} 시작하기 →</button>
             </div>
           </div>
         </section>
@@ -79,9 +79,9 @@ function HitCIntroContent() {
 
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-          <p className="text-xs text-neutral-400 mb-4">HIT - Archetype · Bounce를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
+          <p className="text-xs text-neutral-400 mb-4">기본 성향 검사 · 역량·방향 검사를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
           <HitStartCTA
-            label={`${stage.code} 시작하기`}
+            label={`${stage.ko} 시작하기`}
             resume={resume}
             total={stage.approxQuestions}
             starting={starting}

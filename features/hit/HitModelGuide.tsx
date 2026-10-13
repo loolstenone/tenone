@@ -14,27 +14,27 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* ── 제목 ── */}
       <div className="text-center mb-10">
         <h2 className="text-2xl font-extrabold text-neutral-900 tracking-tight">HeRo 통합 검사 모델</h2>
-        <p className="text-sm text-neutral-400 mt-2 tracking-wider">HIT : HeRo Integrated Test Model</p>
+        <p className="text-sm text-neutral-400 mt-2 tracking-wider">HIT · HeRo 통합 검사 모델</p>
       </div>
 
       {/* ── 인트로 ── */}
       <div className="mb-12">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-5">
-          HIT(HeRo Integrated Test)는 사람을 깊이 있게 이해하기 위해 설계된 <strong className="text-neutral-900">통합 심리검사 모델</strong>입니다.
-          성격 유형(Jung 유형론 4축) · 행동 유형(DISC) · 성품 · 직업 흥미(RIASEC)처럼 널리 쓰여 온 이론 틀을 바탕으로 HeRo가 자체 문항을 만들고,
+          HIT(HeRo 통합 검사)는 사람을 깊이 있게 이해하기 위해 설계된 <strong className="text-neutral-900">통합 심리검사 모델</strong>입니다.
+          성격 유형(융의 유형론, 네 가지 기준) · 행동 유형(DISC) · 성품 · 직업 흥미(RIASEC)처럼 널리 쓰여 온 이론 틀을 바탕으로 HeRo가 자체 문항을 만들고,
           각 검사를 따로 해석하는 대신 <strong className="text-neutral-900">정해진 규칙으로 교차 분석</strong>합니다. 같은 응답에는 언제나 같은 결과가 나옵니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          HIT - Archetype은 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
+          기본 성향 검사는 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
           네 영역의 점수를 정해진 가중치로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
           회원에게는 성장 배경(UF)도 함께 물어 본인 리포트의 해석 참고로만 보여 줍니다.
-          <strong className="text-neutral-900">HIT - Bounce</strong>는 핵심역량·직무 트랙 역량·효능감·이해를 더해 공통 기반을 완성하고, <strong className="text-neutral-900">HIT - Challenger ~ Flourish</strong>는 그 위에서
+          <strong className="text-neutral-900">역량·방향 검사</strong>는 핵심역량·직무 트랙 역량·효능감·이해를 더해 공통 기반을 완성하고, <strong className="text-neutral-900">사회 진입 검사 ~ Flourish</strong>는 그 위에서
           신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
         <div className="border border-neutral-200 rounded-xl p-5 bg-neutral-50">
           <p className="text-sm text-neutral-500 leading-relaxed">
-            <strong className="text-neutral-600">안내</strong> — 본 검사 결과는 HeRo 서버의 채점 규칙으로 산출된 참고 자료이며(종합 해설 문단만 AI 보조), 의학적·심리학적 진단이 아닙니다. MBTI®는 The Myers-Briggs Company의 상표이며, HIT는 공식 MBTI 검사가 아닙니다 — 같은 4축 이론 틀을 쓴 HeRo 자체 문항입니다.
+            <strong className="text-neutral-600">안내</strong> — 본 검사 결과는 HeRo 서버의 채점 규칙으로 산출된 참고 자료이며(종합 해설 문단만 AI 보조), 의학적·심리학적 진단이 아닙니다. MBTI®는 The Myers-Briggs Company의 상표이며, HIT는 공식 MBTI 검사가 아닙니다 — 같은 이론 틀을 쓴 HeRo 자체 문항입니다.
             검사 결과를 바탕으로 자신을 이해하는 출발점으로 활용하되,
             진로/적성/심리 관련 중요한 의사결정은 반드시 <strong className="text-neutral-600">전문 상담사 또는 전문가와의 대면 상담</strong>을 통해 보완하시기 바랍니다.
           </p>
@@ -45,7 +45,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       <div className="border border-neutral-200 rounded-xl overflow-hidden mb-10">
         {/* HIT A 헤더 */}
         <div className="grid grid-cols-[130px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT - Archetype</span>
+          <span>기본 성향 검사</span>
           <span className="text-center">검사의 개념 및 구조</span>
           <span className="text-right">검사 항목</span>
         </div>
@@ -129,9 +129,9 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         {/* 구분선 */}
         <div className="border-t-2 border-neutral-300" />
 
-        {/* HIT - Bounce ~ Flourish 헤더 */}
+        {/* 역량·방향 검사 ~ Flourish 헤더 */}
         <div className="grid grid-cols-[130px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT - Bounce ~ Gap</span>
+          <span>역량·방향 검사 ~ 경력 공백 복귀 검사</span>
           <span className="text-center">공통 B · 생애주기 C~F · 상황 G</span>
           <span className="text-right">검사 항목</span>
         </div>
@@ -159,7 +159,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* UF 기저요인 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">HIT - Archetype</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700">기본 성향 검사</span>
           <span className="text-lg font-bold text-neutral-900">성장 배경 (UF)</span>
           <span className="text-sm text-neutral-400 ml-auto">회원 리포트 전용 · S-Power 제외</span>
         </div>
@@ -203,18 +203,18 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* MBTI */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">HIT - Archetype</span>
-          <span className="text-lg font-bold text-neutral-900">성격 유형 (PT · 4축)</span>
-          <span className="text-sm text-neutral-400 ml-auto">Jung 유형론 4축</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">기본 성향 검사</span>
+          <span className="text-lg font-bold text-neutral-900">성격 유형 (네 가지 기준)</span>
+          <span className="text-sm text-neutral-400 ml-auto">융의 유형론</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          Jung의 심리유형론에 기반한 4개 축을 측정합니다.
+          융의 심리 유형론을 바탕으로 네 가지 기준(에너지 방향·인식·판단·생활 방식)을 봅니다.
           어느 쪽이 더 좋다가 아니라 에너지가 어디로 향하는가를 파악합니다.
           HIT는 단순 유형 분류를 넘어 각 축의 선호 강도(%)까지 산출하여 연속 스펙트럼으로 보여 줍니다.
         </p>
         <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
           <span className="font-semibold text-neutral-600">이론적 근거</span> — Carl Jung의 심리유형론(1921),
-          널리 알려진 4축 유형 틀을 바탕으로 하되, 이분법적 분류의 한계를 보완하기 위해 연속 스펙트럼 방식을 적용합니다.
+          널리 알려진 성격 유형 틀을 바탕으로 하되, 이분법적 분류의 한계를 보완하기 위해 연속 스펙트럼 방식을 적용합니다.
         </div>
         <div className="border border-neutral-200 rounded-xl divide-y divide-neutral-100 overflow-hidden">
           {[
@@ -249,7 +249,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* DISC */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">HIT - Archetype</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">기본 성향 검사</span>
           <span className="text-lg font-bold text-neutral-900">행동 유형 (DISC)</span>
           <span className="text-sm text-neutral-400 ml-auto">4가지 행동 에너지</span>
         </div>
@@ -285,7 +285,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 성품 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">HIT - Archetype</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">기본 성향 검사</span>
           <span className="text-lg font-bold text-neutral-900">핵심 성품 (CH)</span>
           <span className="text-sm text-neutral-400 ml-auto">5 차원</span>
         </div>
@@ -313,13 +313,13 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 적성 */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">HIT - Archetype</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">기본 성향 검사</span>
           <span className="text-lg font-bold text-neutral-900">핵심 적성 (AP)</span>
           <span className="text-sm text-neutral-400 ml-auto">RIASEC 6 차원</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           Holland의 직업 흥미 이론(RIASEC)에 기반해 어떤 환경에서 에너지가 솟고, 어떤 활동에 몰입하는지를 봅니다.
-          상위 3 코드(Holland Code)가 직무·환경 매칭의 기준점이 됩니다.
+          상위 3개 코드(홀랜드 코드)가 직무·환경 매칭의 기준점이 됩니다.
         </p>
         <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
           <span className="font-semibold text-neutral-600">이론적 근거</span> — John L. Holland의 직업 흥미 이론(1959).
@@ -356,7 +356,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* S-Power */}
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700">HIT - Archetype</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700">기본 성향 검사</span>
           <span className="text-lg font-bold text-neutral-900">S-Power 핵심 강점</span>
           <span className="text-sm text-neutral-400 ml-auto">종합 산출</span>
         </div>
@@ -382,14 +382,14 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 구분선 */}
       <div className="border-t border-neutral-200 my-12" />
 
-      {/* HIT - Bounce ~ Flourish — 생애주기별 심화 */}
+      {/* 역량·방향 검사 ~ Flourish — 생애주기별 심화 */}
       <div className="mb-12">
         <div className="text-center mb-8">
           <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">심화 검사</p>
-          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT - Challenger ~ Flourish · 생애주기별 특화 진단</h3>
+          <h3 className="text-lg font-bold text-neutral-900 mb-2">생애주기별 검사 · 사회 진입부터 인생 2막까지</h3>
           <p className="text-sm text-neutral-500 leading-relaxed">
             공통 검사(A·B)를 마친 뒤, 지금 내 생애주기에 맞는 하나를 고릅니다. 이력서·면접·재정 같은 준비 항목은 검사가 아니라
-            나의 저니 체크리스트에서 관리하고, 그 완료율이 준비도 점수가 됩니다. 경력 공백·복귀는 단계와 무관한 상황 모듈입니다.
+            나의 성장 기록 체크리스트에서 관리하고, 그 완료율이 준비도 점수가 됩니다. 경력 공백·복귀는 단계와 무관한 상황 모듈입니다.
           </p>
         </div>
 
@@ -406,7 +406,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
               key: "D",
               title: "전환 — 경력 이직",
               tone: "text-blue-700 bg-blue-50",
-              desc: "경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기(Push/Pull) · 전환 가능성을 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
+              desc: "경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기(떠나고 싶은 이유·끌리는 이유) · 전환 가능성을 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
               dims: ["경력 자본", "이직 동기", "전환 가능성"],
             },
             {
@@ -447,23 +447,23 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </div>
 
         <p className="text-center text-xs text-neutral-400 mt-6">
-          HIT - Bounce 이후 검사는 HIT - Archetype · Bounce가 완료된 상태에서만 의미 있게 해석됩니다.
+          역량·방향 검사 이후 검사는 기본 성향 검사 · 역량·방향 검사가 완료된 상태에서만 의미 있게 해석됩니다.
         </p>
       </div>
 
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT - Archetype</span>은 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
+          <span className="font-bold text-neutral-900">기본 성향 검사</span>은 성격 유형(PT) · 행동 유형(DISC) · 핵심 성품(CH) · 핵심 적성(AP)을 측정하고,
           이 네 영역을 교차 분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다. 성장 배경(UF)은 회원에게만 제공되는 해석 참고용이며 S-Power에서 제외됩니다. 점수와 유형은 정해진 규칙으로 계산되고, AI는 종합 해설 문단만 보조합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT - Bounce</span>는 HIT - Archetype과 함께
+          <span className="font-bold text-neutral-900">역량·방향 검사</span>는 기본 성향 검사와 함께
           핵심역량 · 직무 트랙 역량 · 효능감 · 자기와 직무에 대한 이해를 진단합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT - Challenger ~ Flourish</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
-          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(HIT - Gap)입니다.
+          <span className="font-bold text-neutral-900">생애주기별 검사</span>는 생애주기별 진단(진입 · 이직 · 리더십 전환 · 인생 2막)이고,
+          경력 공백·복귀는 어느 단계에서든 더할 수 있는 상황 모듈(경력 공백 복귀 검사)입니다.
         </p>
         <p className="text-sm text-neutral-400 leading-relaxed">
           채점 공식·해설 방식·검증 계획은 HIT 엔진 페이지(/hero/hit/method)에 공개합니다.
@@ -472,7 +472,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
 
       {/* 푸터 */}
       <p className="text-center text-xs text-neutral-300 pt-4 border-t border-neutral-100">
-        HeRo Integrated Test — Ten:One™ Universe
+        HeRo 통합 검사 — Ten:One™ Universe
       </p>
     </div>
   );

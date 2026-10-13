@@ -60,11 +60,11 @@ export default function HeroCompanyHubPage() {
             <div className="max-w-3xl mx-auto px-6">
                 <div className="mb-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
-                        <Building2 className="h-3.5 w-3.5" /> 기업 회원 허브
+                        <Building2 className="h-3.5 w-3.5" /> 기업 회원
                     </div>
-                    <h1 className="text-2xl font-extrabold mb-2">찾고 있는 자리를 알려주세요</h1>
+                    <h1 className="text-2xl font-extrabold mb-2">어떤 사람이 필요한지 알려 주세요</h1>
                     <p className="text-sm text-neutral-500">
-                        TIH에 조직의 상황과 필요한 사람의 결을, JD에 자리의 내용을 적어 주시면<br />
+                        기업 고민 설문에 조직의 상황과 필요한 사람을, 채용 공고에 맡을 일을 적어 주시면<br />
                         HeRo가 조건에 맞는 인재 풀의 현황을 분석해 알려드립니다.
                     </p>
                 </div>
@@ -97,7 +97,7 @@ export default function HeroCompanyHubPage() {
                                                     className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-rose-50 rounded-lg transition-colors">
                                                     <div className="flex items-center gap-2">
                                                         <Compass className="h-4 w-4 text-rose-500" />
-                                                        <span className="text-sm font-medium">TIH 제출</span>
+                                                        <span className="text-sm font-medium">기업 고민 설문 제출</span>
                                                     </div>
                                                     <ArrowRight className="h-3.5 w-3.5 text-neutral-400" />
                                                 </Link>
@@ -105,7 +105,7 @@ export default function HeroCompanyHubPage() {
                                                     className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-rose-50 rounded-lg transition-colors">
                                                     <div className="flex items-center gap-2">
                                                         <FileText className="h-4 w-4 text-rose-500" />
-                                                        <span className="text-sm font-medium">직무 설명 관리</span>
+                                                        <span className="text-sm font-medium">채용 공고 관리</span>
                                                     </div>
                                                     <ArrowRight className="h-3.5 w-3.5 text-neutral-400" />
                                                 </Link>
@@ -152,7 +152,7 @@ export default function HeroCompanyHubPage() {
                                     </div>
                                     <div>
                                         <p className="font-semibold">기업 신규 등록</p>
-                                        <p className="text-xs text-neutral-500">우리 회사를 등록하고 필요한 인재를 찾아보세요</p>
+                                        <p className="text-xs text-neutral-500">우리 회사를 등록하고 필요한 사람을 정리해 보세요</p>
                                     </div>
                                 </div>
                                 <ArrowRight className="h-4 w-4 text-neutral-400" />
@@ -164,9 +164,9 @@ export default function HeroCompanyHubPage() {
                 {/* 안내 */}
                 <div className="mt-10 p-4 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600 space-y-2">
                     <p><strong>기업 측에서 작성하는 두 가지 문서</strong></p>
-                    <p>• <strong>TIH</strong> — 조직 상황과 원하는 사람의 결 (22문항, 약 7~8분)</p>
-                    <p>• <strong>직무 설명(JD)</strong> — 자리의 내용 (7개 블록, 500~800자)</p>
-                    <p className="text-neutral-400 mt-1">두 문서가 모두 있어야 매칭 정확도가 올라갑니다.</p>
+                    <p>• <strong>기업 고민 설문</strong> — 조직의 상황과 원하는 사람 (22문항, 약 7~8분)</p>
+                    <p>• <strong>채용 공고</strong> — 맡을 일과 조건 (7개 항목, 500~800자)</p>
+                    <p className="text-neutral-400 mt-1">두 가지를 모두 써 주시면 더 정확하게 분석할 수 있습니다.</p>
                 </div>
             </div>
         </div>

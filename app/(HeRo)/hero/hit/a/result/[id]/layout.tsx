@@ -5,8 +5,8 @@ import type { Metadata } from 'next';
  * (DB 조회 없음, 검색 노출 차단)
  */
 export const metadata: Metadata = {
-  title: 'HIT - Archetype 결과',
-  description: 'HeRo HIT - Archetype 검사 결과',
+  title: '기본 성향 검사 결과',
+  description: 'HeRo 기본 성향 검사 결과',
   robots: { index: false, follow: false },
 };
 

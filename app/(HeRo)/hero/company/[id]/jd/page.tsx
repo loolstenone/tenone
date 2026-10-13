@@ -80,7 +80,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
                             <FileText className="h-3.5 w-3.5" /> 직무 설명 (Job Description)
                         </div>
-                        <h1 className="text-2xl font-extrabold mb-1">자리의 내용을 적어 주세요</h1>
+                        <h1 className="text-2xl font-extrabold mb-1">맡을 일을 적어 주세요</h1>
                         <p className="text-sm text-neutral-500">
                             TIH가 "왜 사람이 필요한가"라면, 직무 설명은 "어떤 자리인가"입니다. 7개 블록, 500~800자로 지원자가 읽게 될 소개를 작성합니다.
                         </p>
@@ -135,7 +135,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                 )}
 
                 <div className="mt-8 p-4 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600">
-                    <strong className="block mb-1">📄 JD 7블록 구조</strong>
+                    <strong className="block mb-1">📄 채용 공고 7개 항목</strong>
                     ① 타이틀·한 줄 · ② 우리는 지금 · ③ 풀어야 하는 문제 · ④ 실제 하는 일
                     · ⑤ 어울리는 사람 · ⑥ 함께 일할 사람들 · ⑦ 조건과 환경
                 </div>

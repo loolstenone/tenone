@@ -15,22 +15,22 @@ import {
 const consultingFeatures = [
     {
         title: "AI 분석 엔진",
-        desc: "AI가 이력서를 분석하여 개선점을 자동으로 제안합니다.",
+        desc: "AI가 이력서를 읽고 고칠 점을 알려 드립니다.",
         icon: Bot,
     },
     {
-        title: "Before/After 비교",
-        desc: "개선 전후를 나란히 비교하여 명확한 차이를 보여줍니다.",
+        title: "고치기 전·후 비교",
+        desc: "고치기 전과 후를 나란히 놓고 무엇이 달라졌는지 보여 드립니다.",
         icon: Eye,
     },
     {
         title: "전문가 1:1 컨설팅",
-        desc: "AI 분석 결과를 바탕으로 전문 컨설턴트가 피드백합니다.",
+        desc: "AI 분석을 바탕으로 전문 컨설턴트가 직접 의견을 드립니다.",
         icon: Sparkles,
     },
     {
         title: "맞춤 템플릿 제공",
-        desc: "직무별 최적화된 이력서 템플릿을 제공합니다.",
+        desc: "직무에 맞는 이력서 양식을 드립니다.",
         icon: Download,
     },
 ];
@@ -96,11 +96,11 @@ export default function ResumePage() {
                         </div>
                         <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             이력서를<br />
-                            <span className="text-amber-500">완벽하게</span> 다듬습니다
+                            <span className="text-amber-500">한 단계 더</span> 다듬습니다
                         </h1>
                         <p className="text-lg text-neutral-600 mb-8">
-                            AI 분석과 전문가 컨설팅을 통해 이력서의 완성도를 높이세요.
-                            Before/After 비교로 명확한 개선 효과를 확인할 수 있습니다.
+                            AI 분석과 전문가 의견으로 이력서를 더 좋게 고쳐 보세요.
+                            고치기 전과 후를 비교해 무엇이 나아졌는지 바로 확인할 수 있습니다.
                         </p>
                         <Link
                             href="/hero/resume/workspace"
@@ -117,7 +117,7 @@ export default function ResumePage() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">컨설팅 서비스</h2>
-                        <p className="text-neutral-500">AI + 전문가가 함께하는 이력서 컨설팅</p>
+                        <p className="text-neutral-500">AI와 전문가가 함께 보는 이력서 컨설팅</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {consultingFeatures.map((f) => (
@@ -137,8 +137,8 @@ export default function ResumePage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">Before / After 사례</h2>
-                        <p className="text-neutral-500">실제 개선 사례를 확인하세요</p>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">고치기 전·후 예시</h2>
+                        <p className="text-neutral-500">이렇게 달라질 수 있습니다 (이해를 돕기 위한 예시)</p>
                     </div>
                     <div className="max-w-3xl mx-auto space-y-6">
                         {beforeAfterExamples.map((ex) => (
@@ -150,12 +150,12 @@ export default function ResumePage() {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
                                     <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
-                                        <p className="text-xs text-red-400 mb-1 font-medium">Before</p>
+                                        <p className="text-xs text-red-400 mb-1 font-medium">고치기 전</p>
                                         <p className="text-sm text-neutral-500 line-through">{ex.before}</p>
                                     </div>
                                     <ArrowRight className="h-5 w-5 text-amber-400 hidden md:block mt-4" />
                                     <div className="p-4 bg-green-50 border border-green-100 rounded-lg">
-                                        <p className="text-xs text-green-500 mb-1 font-medium">After</p>
+                                        <p className="text-xs text-green-500 mb-1 font-medium">고친 후</p>
                                         <p className="text-sm text-neutral-900 font-medium">{ex.after}</p>
                                     </div>
                                 </div>
@@ -165,8 +165,8 @@ export default function ResumePage() {
                 </div>
             </section>
 
-            {/* Pricing */}
-            <section className="bg-white">
+            {/* 이용 요금 — 통신판매업 신고 전 가격 노출 금지 (2026-10-12 결정, AI 상담과 같은 기준). 사업 시작 시 hidden 해제 */}
+            <section className="hidden">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">이용 요금</h2>

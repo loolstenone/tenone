@@ -30,12 +30,12 @@ export function getHeroSystemPrompt(mode: HitMode, alertLevel: number = 0): stri
 HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 이해하고 상담에 적용한다.
 
 ### HIT 전체 구조
-- 공통(전 회원): HIT - Archetype(나에 대한 이해) → HIT - Bounce(역량과 방향)
+- 공통(전 회원): 기본 성향 검사(나에 대한 이해) → 역량·방향 검사
 - 생애주기(1인 1개): ${HIT_STAGES.c.code}(${HIT_STAGES.c.name}) · ${HIT_STAGES.d.code}(${HIT_STAGES.d.name}) · ${HIT_STAGES.e.code}(${HIT_STAGES.e.name}) · ${HIT_STAGES.f.code}(${HIT_STAGES.f.name})
 - 상황 모듈: ${HIT_STAGES.gap.code}(${HIT_STAGES.gap.name}) — 해당자만
 - 모든 점수는 서버의 정해진 규칙으로 계산된다. 점수 구간은 75·50·25를 경계로 읽는다. AI는 점수를 바꾸지 않고 읽기 쉽게 풀어 주는 역할이다.
 
-### HIT - Archetype 구조
+### 기본 성향 검사 구조
 1. 성격 유형(PT) - 4축 연속 스펙트럼 (이분법 아님). 공식 MBTI 검사가 아니라 같은 이론 틀을 쓴 HeRo 자체 문항이다.
 2. 행동 유형(DISC) - 4가지 행동 에너지의 배합 비율과 방식별 강도 (유형 분류 아님)
 3. 핵심 성품(CH) - 성실성, 대인관계, 정서 안정, 윤리성, 성장 지향 5차원. 임상 진단이 아니라 일하는 태도에 대한 자기보고이다.
@@ -44,7 +44,7 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
    - strategic, execution, creativity, interpersonal, analytical, harmony, breakthrough, guard
 6. 성장 배경(UF) - 회원 본인 리포트 전용 9영역(형제, 부모, 가정, 또래, 자기개념, 기질, 경제환경, 트라우마, 문화세대). S-Power와 유형 계산에는 넣지 않고 해석의 배경으로만 참고한다. 성장 배경이 성향을 결정한다고 말하지 않는다.
 
-### HIT - Bounce 구조 (완료 시)
+### 역량·방향 검사 구조 (완료 시)
 1. 핵심역량 6가지 - 문제해결, 소통, 주도성, 협업, 자기관리, 학습민첩성
 2. 직무 트랙 역량 - 선택한 직무 트랙의 전문 역량
 3. 흥미 x 효능감 - Archetype의 흥미("끌린다")와 Bounce의 효능감("할 수 있다")을 겹쳐 최적 영역, 배우면 되는 영역, 소진 주의 영역으로 나눈다
@@ -85,7 +85,7 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 
   const modePrompts: Record<HitMode, string> = {
     A_ONLY: `
-## 모드: HIT - Archetype만 완료
+## 모드: 기본 성향 검사만 완료
 
 ### 답변 가능
 - DISC 행동 특성 해석
@@ -97,13 +97,13 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 - 적합 환경 제안
 
 ### 답변 제한
-직무 매칭, 역량 진단, 준비도 → "HIT - Bounce를 받으시면 더 정확한 분석이 가능합니다"
+직무 매칭, 역량 진단, 준비도 → "역량·방향 검사를 받으시면 더 정확한 분석이 가능합니다"
 
 ### 빠른 질문 예시
 [DISC 결과 궁금해요] [직장에서 어떻게 나타나나요?] [잘 맞는 유형은?] [성장 방법]`,
 
     B_ONLY: `
-## 모드: HIT - Bounce만 완료
+## 모드: 역량·방향 검사만 완료
 
 ### 답변 가능
 - 핵심역량과 직무 트랙 역량 해석
@@ -113,13 +113,13 @@ HIT는 단일 검사가 아닌 통합 모델이다. 아래 구조를 반드시 �
 - 준비도 분석 + 실행 계획
 
 ### 답변 제한
-성격 유형, DISC×역량 교차, 성품, 성장 배경 → "HIT - Archetype을 받으시면 통합 분석이 가능합니다"
+성격 유형, DISC×역량 교차, 성품, 성장 배경 → "기본 성향 검사를 받으시면 통합 분석이 가능합니다"
 
 ### 빠른 질문 예시
 [적성에 맞는 직무는?] [역량 올리려면?] [취업 준비 어디서부터?] [면접 준비]`,
 
     AB_FULL: `
-## 모드: HIT - Archetype + Bounce 모두 완료
+## 모드: 기본 성향 검사 + 역량·방향 검사 모두 완료
 
 ### 답변 가능
 전체 영역 + A×B 교차 분석 + 직무 적합도(%) + 성장 로드맵
@@ -170,10 +170,10 @@ export function getHeroGreeting(mode: HitMode, data: {
 }): string {
   switch (mode) {
     case 'A_ONLY':
-      return `안녕하세요. HIT - Archetype 결과를 확인했습니다.\n${data.typeCode} 유형으로 ${data.typeNameKo || ''} 성향이 나타나고 있네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. 기본 성향 검사 결과를 확인했습니다.\n${data.typeCode} 유형으로 ${data.typeNameKo || ''} 성향이 나타나고 있네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
     case 'B_ONLY':
-      return `안녕하세요. HIT - Bounce 결과를 확인했습니다.\nRIASEC 적성은 ${data.hollandCode || ''}이고, ${data.topCompetency || ''} 역량이 눈에 띄네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. 역량·방향 검사 결과를 확인했습니다.\nRIASEC 적성은 ${data.hollandCode || ''}이고, ${data.topCompetency || ''} 역량이 눈에 띄네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
     case 'AB_FULL':
-      return `안녕하세요. HIT - Archetype과 HIT - Bounce 결과를 모두 확인했습니다.\n${data.typeCode} 유형에, RIASEC은 ${data.hollandCode || ''}이시네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
+      return `안녕하세요. 기본 성향 검사와 역량·방향 검사 결과를 모두 확인했습니다.\n${data.typeCode} 유형에, RIASEC은 ${data.hollandCode || ''}이시네요.\n궁금하신 점이 있으면 편하게 물어보세요.`;
   }
 }

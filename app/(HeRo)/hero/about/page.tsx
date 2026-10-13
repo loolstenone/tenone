@@ -13,17 +13,17 @@ const visionItems = [
     {
         icon: Eye,
         title: "비전",
-        desc: "모든 인재가 자신의 잠재력을 발견하고, 체계적으로 성장할 수 있는 세상",
+        desc: "누구나 자기 재능을 알고, 계획을 세워 성장할 수 있는 세상",
     },
     {
         icon: Target,
         title: "미션",
-        desc: "숨겨진 인재를 발굴하고, 맞춤형 성장 프로그램으로 꿈을 현실로 만드는 플랫폼",
+        desc: "숨은 인재를 찾고, 사람마다 맞는 성장 계획을 함께 세웁니다",
     },
     {
         icon: Heart,
         title: "핵심 가치",
-        desc: "발견(Discovery), 성장(Growth), 연결(Connection), 진정성(Authenticity)",
+        desc: "발견, 성장, 연결, 솔직함",
     },
 ];
 
@@ -34,10 +34,10 @@ const milestones = [
 ];
 
 const partners = [
-    { name: "Ten:One Universe", desc: "멀티 브랜드 생태계", type: "Parent" },
-    { name: "MAD League", desc: "대학 연합 경쟁 플랫폼", type: "Collaboration" },
-    { name: "YouInOne", desc: "프로젝트 그룹", type: "Collaboration" },
-    { name: "SmarComm.", desc: "AI 마케팅 커뮤니케이션", type: "Collaboration" },
+    { name: "Ten:One™ Universe", desc: "HeRo를 운영하는 브랜드 그룹", type: "운영" },
+    { name: "MADLeague", desc: "대학 연합 마케팅 경쟁 프로그램", type: "협업" },
+    { name: "YouInOne", desc: "프로젝트 그룹", type: "협업" },
+    { name: "SmarComm.", desc: "AI 마케팅 커뮤니케이션", type: "협업" },
 ];
 
 // 숫자 섹션(HIT 진단·멘토 매칭·성공 사례·파트너 대학)은 실제 숫자가 생기면 DB 집계로 다시 넣는다 — 빈 숫자 안내 직접 표시 금지(§1.1), 2026-10-10 제거
@@ -56,11 +56,11 @@ export default function AboutPage() {
                         <p className="text-lg text-neutral-500 mb-2">Human enhancement &amp; Recruit Optimization</p>
                         <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#E53935] mb-4">Talent Agency</p>
                         <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6">
-                            사람의 성장을 설계하고<br />최적의 무대를 연결하는 인재 기획사
+                            사람이 크도록 돕고<br />맞는 일을 찾게 돕는 인재 기획사
                         </h1>
                         <p className="text-neutral-600 max-w-xl mx-auto">
-                            HeRo는 인재 한 사람 한 사람을 체계적으로 성장시키고, 그들의 역량이 가장 빛날 수 있는
-                            기업과 자리를 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우듯.
+                            HeRo는 한 사람 한 사람이 계획을 세워 성장하고, 자기 역량을 가장 잘 쓸 수 있는
+                            회사와 일을 스스로 찾아가도록 돕습니다. 연예 기획사가 아티스트를 발굴하고 키우는 것처럼요.
                         </p>
                     </div>
                 </div>
@@ -88,7 +88,7 @@ export default function AboutPage() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">연혁</h2>
-                        <p className="text-neutral-500">HeRo의 성장 스토리</p>
+                        <p className="text-neutral-500">HeRo가 걸어온 길</p>
                     </div>
                     <div className="max-w-2xl mx-auto">
                         <div className="relative pl-8 border-l-2 border-amber-200 space-y-10">
@@ -121,7 +121,7 @@ export default function AboutPage() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
                         <h2 className="text-xl md:text-3xl font-bold mb-3">파트너</h2>
-                        <p className="text-neutral-500">Ten:One Universe 생태계와 함께합니다</p>
+                        <p className="text-neutral-500">Ten:One™ Universe의 여러 브랜드와 함께합니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {partners.map((partner) => (
@@ -141,7 +141,7 @@ export default function AboutPage() {
             <section className="bg-amber-500">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
                     <h2 className="text-xl md:text-3xl font-bold text-white mb-3">HeRo에 합류하세요</h2>
-                    <p className="text-amber-100 mb-8">당신도 HeRo가 될 수 있습니다</p>
+                    <p className="text-amber-100 mb-8">나에게 맞는 일을 찾는 첫걸음, HIT 검사부터 시작해 보세요</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link
                             href="/hero/hit"

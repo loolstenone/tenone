@@ -28,11 +28,11 @@ export default function TalentAgentPage() {
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
             HeRo는 연예 기획사처럼<br />
-            잠재된 인재를 발굴하고<br />키워내는 기획사입니다
+            숨은 인재를 찾아<br />키우는 기획사입니다
           </h1>
           <p className="text-base md:text-lg text-neutral-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            혼자 풀기엔 벅찬 커리어의 다음 장을, HeRo가 기획사처럼 함께 설계하고 키웁니다.
-            검사로 본질을 이해하고, AI와 전문가가 경로를 그리고, 기업 앞에 설 무대를 함께 준비합니다.
+            혼자 정하기 어려운 커리어의 다음 단계를 HeRo가 기획사처럼 함께 계획합니다.
+            검사로 나를 알고, AI와 전문가가 갈 길을 함께 정하고, 회사에 나를 보여 줄 준비를 같이 합니다.
           </p>
           <Link
             href="/hero/talent-agent/apply"
@@ -50,12 +50,12 @@ export default function TalentAgentPage() {
       <section className="py-20">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">Why HeRo</p>
+            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">왜 HeRo인가</p>
             <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900 mb-3">
               기획사처럼 움직입니다
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              한 번의 매칭이 아닌, 인재의 성장 궤적을 함께 설계합니다.
+              한 번 소개하고 끝내지 않고, 오래 성장하도록 곁에서 돕습니다.
             </p>
           </div>
 
@@ -63,18 +63,18 @@ export default function TalentAgentPage() {
             {[
               {
                 icon: Sparkles,
-                title: "본질로 발굴",
-                desc: "이력서 키워드가 아닌, HIT 검사로 사람의 본질을 이해합니다. 숨어 있는 잠재력까지.",
+                title: "검사로 발견",
+                desc: "이력서 키워드보다 HIT 검사로 사람을 먼저 이해합니다. 아직 드러나지 않은 강점까지 봅니다.",
               },
               {
                 icon: Compass,
-                title: "경로를 설계",
+                title: "갈 길을 함께",
                 desc: "AI 커리어 코칭과 전문가 상담으로 다음 한 걸음을 함께 계획합니다.",
               },
               {
                 icon: ShieldCheck,
-                title: "조용한 연결",
-                desc: "노출 없는 비공개 매칭. 원할 때만, 맞는 기업과 조용히 이어드립니다.",
+                title: "비공개 원칙",
+                desc: "내 정보는 공개되지 않습니다. 회사에 보여 줄지는 내가 정합니다.",
               },
             ].map((t) => (
               <div key={t.title} className="border border-neutral-200 rounded-2xl p-6">
@@ -101,22 +101,22 @@ export default function TalentAgentPage() {
             {[
               {
                 n: "1",
-                title: "HIT 검사 · 본질 진단",
-                desc: "MBTI · DISC · 인성 · 적성을 통합 측정해 S-Power와 64유형을 도출합니다. 회원은 성장 배경(UF) 분석 추가.",
+                title: "HIT 검사",
+                desc: "성격(MBTI)·행동 유형(DISC)·성품·적성·성장 배경을 함께 보고 나의 강점과 64가지 유형 중 내 유형을 알려 드립니다.",
               },
               {
                 n: "2",
                 title: "희망 직무 작성",
-                desc: "어떤 자리를 원하는지, 어떤 조건이 필요한지 조용히 기록합니다. 공개되지 않습니다.",
+                desc: "어떤 일을 원하는지, 어떤 조건이 필요한지 적어 둡니다. 공개되지 않습니다.",
               },
               {
                 n: "3",
                 title: "AI · 전문가 코칭",
-                desc: "결과를 기반으로 로드맵 · 이력서 · 포트폴리오를 설계합니다.",
+                desc: "검사 결과를 바탕으로 성장 계획·이력서·포트폴리오를 함께 만듭니다.",
               },
               {
                 n: "4",
-                title: "기업 앞에 서는 무대",
+                title: "회사에 나를 보여 주기",
                 desc: "맞는 기업이 당신에게 관심을 보이면, HeRo가 먼저 의사를 확인한 뒤 본인이 허락한 범위만 보여드립니다.",
               },
             ].map((s) => (
@@ -139,16 +139,16 @@ export default function TalentAgentPage() {
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">무엇이 포함되나요</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">Talent Agent 기본 혜택</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">탤런트 에이전시 기본 혜택</h2>
             <p className="text-sm text-neutral-500 mt-3">신청만으로 받을 수 있는 것들입니다.</p>
           </div>
 
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              "HIT - Archetype 검사 · 전체 웹 보고서 · PDF 1회",
-              "희망 직무 등록 · 비공개 매칭 후보 등록",
-              "AI 상담 체험 · 하루 3턴 · 3일",
-              "나에게 맞는 기업·자리 조용한 추천",
+              "기본 성향 검사 · 전체 웹 보고서 · PDF 1회",
+              "희망 직무 등록 · 비공개 인재 풀 등록",
+              "AI 상담 체험 · 하루 3번 · 3일",
+              "나와 맞을 만한 회사 정보 안내",
               "커리어 상담 콘텐츠 · 주간 뉴스레터",
               "HeRo 파운더 커뮤니티 (소수 초대)",
             ].map((f) => (
@@ -165,57 +165,57 @@ export default function TalentAgentPage() {
       <section className="py-20 bg-neutral-900 text-white overflow-hidden">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-red-400/80 uppercase tracking-widest mb-2">Universe Stages</p>
+            <p className="text-xs font-semibold text-red-400/80 uppercase tracking-widest mb-2">유니버스 성장 단계</p>
             <h2 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
-              HeRo의 유니버스가 만들고 있는<br className="md:hidden" /> 오디션장
+              HeRo와 함께하는<br className="md:hidden" /> 유니버스 브랜드
             </h2>
             <p className="text-neutral-400 max-w-xl mx-auto leading-relaxed">
-              HeRo가 발굴한 인재는 Ten:One 유니버스의 다양한 무대에서 실력을 선보이고, 서로를 만납니다.
+              Ten:One™ Universe의 여러 브랜드에서 실력을 보여 주고, 같은 길을 가는 사람들을 만날 수 있습니다.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
-                name: "MAD League",
+                name: "MADLeague",
                 tagline: "Match, Active, Develop",
                 href: "/madleague",
-                desc: "실전 프로젝트 경쟁 PT로 성장하는 대학생 리그. 경쟁하고 · 행동하고 · 성장하는 무대.",
+                desc: "실제 기업 과제로 경쟁 PT를 하며 성장하는 대학생 리그입니다.",
                 dot: "#D32F2F",
               },
               {
                 name: "MADLeap",
                 tagline: "실전 프로젝트",
                 href: "/madleap",
-                desc: "마케팅 · 광고 · 창업을 실전으로 경험하며 도약하는 대학생 연합동아리.",
+                desc: "마케팅·광고·창업을 직접 해 보며 배우는 대학생 연합동아리입니다.",
                 dot: "#2E7D32",
               },
               {
                 name: "Badak",
                 tagline: "약한 연결의 힘",
                 href: "/badak",
-                desc: "성장을 꿈꾸는 사람들이 모이는 업계 네트워킹 커뮤니티. 약한 연결이 만드는 강한 기회.",
+                desc: "마케팅·광고 업계 사람들이 모이는 네트워킹 커뮤니티입니다. 느슨한 인맥에서 뜻밖의 기회가 생깁니다.",
                 dot: "#37474F",
               },
               {
-                name: "JAKKA",
+                name: "Jakka",
                 tagline: "Creative hands, bold voices",
                 href: "/jakka",
-                desc: "디자인 · 아트 · 크리에이티브 작업을 선보이는 창작자들의 장.",
+                desc: "디자인·아트·크리에이티브 작업을 보여 주는 창작자 커뮤니티입니다.",
                 dot: "#EC407A",
               },
               {
                 name: "MoNTZ",
                 tagline: "U.G.L.Y — Unique, Glory, Lovely, You",
                 href: "/montz",
-                desc: "모델 · 배우 · 크리에이터의 얼굴과 이야기를 담아내는 무대.",
+                desc: "모델·배우·크리에이터의 얼굴과 이야기를 담는 사진 브랜드입니다.",
                 dot: "#F59E0B",
               },
               {
                 name: "ChangeUp",
                 tagline: "미래를 만드는 일, 창업",
                 href: "/changeup",
-                desc: "아이디어가 사업이 되는 과정을 함께 만드는 창업 교육 · 실전 플랫폼.",
+                desc: "아이디어를 사업으로 만드는 과정을 함께하는 창업 교육 프로그램입니다.",
                 dot: "#1E88E5",
               },
             ].map((s) => (
@@ -236,7 +236,7 @@ export default function TalentAgentPage() {
           </div>
 
           <p className="text-center text-xs text-neutral-500 mt-8">
-            HeRo가 발굴하고 · Universe가 무대를 제공합니다
+            HeRo에서 나를 알고, 유니버스 브랜드에서 경험을 쌓습니다
           </p>
         </div>
       </section>
@@ -250,7 +250,7 @@ export default function TalentAgentPage() {
               당신의 커리어를 함께 키웁니다
             </h2>
             <p className="text-white/90 mb-8 leading-relaxed">
-              지금 신청하면 HeRo의 발굴 프로세스가 시작됩니다. 당신이 준비된 만큼 천천히 진행됩니다.
+              신청하면 HIT 검사부터 차례로 안내해 드립니다. 내 속도에 맞춰 천천히 진행됩니다.
             </p>
             <Link
               href="/hero/talent-agent/apply"

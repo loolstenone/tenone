@@ -160,7 +160,7 @@ export const CORE_MODULE_KEY: Record<string, string> = {
 };
 
 /**
- * HIT - Bounce 해설 — 핵심역량 6 × 4등급 (CORE-{역량}-{A..D}, sql/hit-b-core-modules-2026-10.sql, R1 2026-10-12)
+ * 역량·방향 검사 해설 — 핵심역량 6 × 4등급 (CORE-{역량}-{A..D}, sql/hit-b-core-modules-2026-10.sql, R1 2026-10-12)
  * 등급 = 화면 구간 75/50/25. 점수 높은 순으로 돌려준다. (옛 COMP-* 6영역 문안은 쓰지 않음)
  */
 export function selectBModules(scores: HitBScores): string[] {
@@ -171,7 +171,7 @@ export function selectBModules(scores: HitBScores): string[] {
 }
 
 /**
- * HIT - Bounce 직무 트랙 역량 해설 (TRK-{sub_domain}-{H|M|L}, sql/hit-b-track-modules-2026-10.sql, R2 2026-10-12)
+ * 역량·방향 검사 직무 트랙 역량 해설 (TRK-{sub_domain}-{H|M|L}, sql/hit-b-track-modules-2026-10.sql, R2 2026-10-12)
  * H 75+ · M 50~74 · L 50 미만. 22개 트랙 전부 작성(비마케팅 17트랙 = sql/hit-b-track-modules-others-2026-10.sql)
  * — sub_domain은 트랙 사이에 겹치면 안 된다(겹치면 다른 트랙 해설이 나옴). DB에 없는 id는 화면 공통 문장으로 대체.
  */

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
     if (!hitAData) hitAData = await getLatestHitAResult(session.member_id);
     if (!hitAData) {
-      return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
+      return errorResponse('기본 성향 검사를 먼저 완료해야 합니다.', 400);
     }
 
     // 채점 (CVI + 미끼 탐지 포함)
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-      const hitAContext = `HIT - Archetype 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
+      const hitAContext = `기본 성향 검사 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
 
       const msg = await anthropic.messages.create({
         model: HIT_REPORT_MODEL,
@@ -90,11 +90,11 @@ export async function POST(request: NextRequest) {
 - 마지막에 복귀를 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT - Gap 경력 공백 복귀 분석 결과:\n` +
+          content: `${hitAContext}경력 공백 복귀 검사 경력 공백 복귀 분석 결과:\n` +
             `경력 공백: ${breakMonths}개월\n` +
             `직군: ${jobCategory}\n` +
             `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
-            `추천 경로: ${scored.nextRoute === 'recovery' ? '기존 경력으로 복귀' : scored.nextRoute === 'C' ? 'HIT - Departure(이직)' : 'HIT - Bounce(역량과 방향) 재점검'}\n` +
+            `추천 경로: ${scored.nextRoute === 'recovery' ? '기존 경력으로 복귀' : scored.nextRoute === 'C' ? '이직 검사' : '역량·방향 검사 재점검'}\n` +
             `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
             `방향 점수: 경력복원 ${scored.directionScores.career_restoration} / 경력전환 ${scored.directionScores.career_pivot} / 새출발 ${scored.directionScores.fresh_start}\n` +
             `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +

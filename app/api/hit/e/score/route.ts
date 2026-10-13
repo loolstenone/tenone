@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
     if (!hitAData) hitAData = await getLatestHitAResult(session.member_id);
     if (!hitAData) {
-      return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
+      return errorResponse('기본 성향 검사를 먼저 완료해야 합니다.', 400);
     }
 
     // A 결과 컨텍스트 (2026-10-13)
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-      const hitAContext = `HIT - Archetype 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
+      const hitAContext = `기본 성향 검사 프로필:\n- MBTI: ${hitAData.mbti_type}\n- DISC: ${hitAData.disc_primary} (${hitAData.disc_subtype})\n- 64유형: ${hitAData.type_code} "${hitAData.type_name_ko}"\n- S-Power: ${JSON.stringify(hitAData.s_power_scores)}\n- 기저요인: ${hitAData.base_summary ?? "미측정"}\n\n`;
 
       const topRoles = scored.next_role_matrix.possible_roles.slice(0, 3)
         .map(r => `${r.role}(${r.fit_score}%)`).join(', ');
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 - 마지막에 시니어 리더십 전환을 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT - Elevate 시니어 리더십 전환 분석 결과:\n` +
+          content: `${hitAContext}리더 전환 검사 시니어 리더십 전환 분석 결과:\n` +
             `전문성 깊이: ${scored.expertise_depth}점 / 도메인 확장성: ${scored.expertise_breadth}점\n` +
             `리더십 유형: ${leadershipLabels[scored.leadership_type]} (${scored.leadership_type})\n` +
             `리더십 점수: ${JSON.stringify(scored.leadership_scores)}\n` +

@@ -353,9 +353,9 @@ function HitGapTestContent() {
       <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">HIT - Gap</p>
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">경력 공백 복귀 검사</p>
             <h1 className="text-xl font-extrabold mb-2">기본 정보 입력</h1>
-            <p className="text-sm text-neutral-500">CVI(경력유효성지수) 산출에 필요한 정보입니다.</p>
+            <p className="text-sm text-neutral-500">경력 유효성 지수(CVI) 계산에 필요한 정보입니다.</p>
           </div>
 
           <div className="space-y-6">
@@ -392,7 +392,7 @@ function HitGapTestContent() {
                 ))}
                 <option value="default">기타</option>
               </select>
-              <p className="text-[10px] text-neutral-400 mt-1">직군별 기술 변화 속도가 CVI에 반영됩니다</p>
+              <p className="text-[10px] text-neutral-400 mt-1">직군마다 기술이 바뀌는 속도가 달라 경력 유효성 지수에 반영됩니다</p>
             </div>
 
             <button

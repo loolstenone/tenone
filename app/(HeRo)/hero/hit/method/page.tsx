@@ -5,7 +5,7 @@ import { HIT_STAGES } from "@/lib/hit/stages";
 
 export const metadata: Metadata = {
   title: "HIT 엔진 — 결과는 이렇게 만들어집니다",
-  description: "HeRo Integrated Test의 문항 설계, 서버 채점, 규칙 기반 해설, AI 보조 해설, 응답 품질 관리, 개인정보 원칙을 공개합니다.",
+  description: "HeRo 통합 검사(HIT)의 문항 설계, 서버 채점, 규칙 기반 해설, AI 보조 해설, 응답 품질 관리, 개인정보 원칙을 공개합니다.",
 };
 
 /**
@@ -32,10 +32,10 @@ const STEPS = [
     body: [
       "점수는 HeRo 서버의 채점 규칙이 계산합니다. 같은 응답에는 언제나 같은 점수가 나옵니다.",
       "영역 점수 = 영역 문항 평균을 0~100으로 환산 ((평균 − 1) ÷ 6 × 100). 성장 배경은 문항별 가중치를 반영합니다.",
-      "성격 4축은 양쪽 성향 문항의 비율로, 행동 유형은 네 요인의 상대 비중으로 계산합니다.",
+      "성격 유형의 네 기준은 양쪽 성향 문항의 비율로, 행동 유형은 네 요인의 상대 비중으로 계산합니다.",
       "S-Power 8가지 강점은 성격·행동·성품·적성 점수를 정해진 가중치로 합한 값입니다. 성장 배경은 강점 점수에 넣지 않습니다.",
-      `${HIT_STAGES.b.code}(${HIT_STAGES.b.name})는 흥미("끌린다", HIT - Archetype)와 효능감("할 수 있다", HIT - Bounce)을 겹쳐 최적·배우면 되는·소진 주의 영역으로 나눕니다.`,
-      `${HIT_STAGES.gap.code}(${HIT_STAGES.gap.name})의 경력 유효성(CVI) = 직무 유효성 35% + 스킬 현재성 35% + 시장 재진입 30%.`,
+      `${HIT_STAGES.b.code}(${HIT_STAGES.b.name})는 흥미("끌린다", 기본 성향 검사)와 효능감("할 수 있다", 역량·방향 검사)을 겹쳐 최적·배우면 되는·소진 주의 영역으로 나눕니다.`,
+      `${HIT_STAGES.gap.code}(${HIT_STAGES.gap.name})의 경력 유효성 지수(CVI) = 직무 유효성 35% + 스킬 현재성 35% + 시장 재진입 30%.`,
     ],
   },
   {
@@ -128,7 +128,7 @@ export default function HitMethodPage() {
               <h2 className="flex items-center gap-2 text-base font-bold text-neutral-900 mb-2"><AlertCircle className="h-5 w-5 text-neutral-400" /> HIT를 읽을 때</h2>
               <ul className="space-y-1.5 text-sm text-neutral-600 leading-relaxed list-disc pl-5 break-keep">
                 <li>HIT는 스스로 답하는 자기보고 검사입니다. 그 순간의 자기 인식을 보여 주며, 능력을 시험으로 측정한 것이 아닙니다.</li>
-                <li>유형은 꼬리표가 아니라 경향입니다. 점수가 50 근처인 축은 양쪽 성향을 모두 쓰는 사람일 수 있습니다.</li>
+                <li>유형은 꼬리표가 아니라 경향입니다. 점수가 50 근처인 기준은 양쪽 성향을 모두 쓰는 사람일 수 있습니다.</li>
                 <li>HIT 결과는 채용·평가의 단독 판단 근거로 쓰도록 만들어지지 않았습니다. HeRo는 결과를 기업에 제공하지 않습니다.</li>
                 <li>상황이 바뀌면 결과도 달라질 수 있습니다. 다시 검사하면 이전 결과는 기록으로 남고 새 결과가 생깁니다.</li>
               </ul>

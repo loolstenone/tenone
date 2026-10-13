@@ -156,10 +156,10 @@ export default function MatchingInbox({
     const sub = side === "talent"
         ? visibleCount > 0
             ? "HeRo가 정리한 추천 내용은 상세 안내를 신청하시면 전달드립니다."
-            : "희망 직무(JH)와 HIT 검사를 완성하시면 맞는 회사를 찾아 알려드립니다."
+            : "희망 직무 설문과 HIT 검사를 마치시면 맞는 회사를 찾아 알려드립니다."
         : visibleCount > 0
             ? "추천 인재의 상세 내용은 상세 안내를 신청하시면 전달드립니다."
-            : "TIH 응답과 직무 설명(JD)이 올라오면 조건에 맞는 분을 찾기 시작합니다.";
+            : "기업 고민 설문과 채용 공고가 올라오면 조건에 맞는 분을 찾기 시작합니다.";
 
     return (
         <div className={`border rounded-xl p-5 ${cardBg}`}>
@@ -183,7 +183,7 @@ export default function MatchingInbox({
             {/* 단계 요약 */}
             {items.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                    <StageBadge label="큐레이션" count={visibleCount} theme={theme} />
+                    <StageBadge label="추천" count={visibleCount} theme={theme} />
                     <StageBadge label="진행 중"  count={activeCount}  theme={theme} />
                     <StageBadge label="누적"     count={items.length} theme={theme} />
                 </div>
@@ -282,7 +282,7 @@ export default function MatchingInbox({
 
             <p className={`text-[10px] mt-3 text-center ${mutedText}`}>
                 <MessageCircle className="inline h-3 w-3 mr-0.5" />
-                상세 큐레이션은 HeRo 담당자가 직접 안내드립니다
+                자세한 내용은 HeRo 담당자가 직접 안내해 드립니다
             </p>
         </div>
     );

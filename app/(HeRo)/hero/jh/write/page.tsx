@@ -132,7 +132,7 @@ export default function JHWritePage() {
                     <h1 className="text-2xl font-bold mb-3">희망 직무 작성 완료</h1>
                     <p className="text-neutral-500 mb-6">
                         작성하신 희망 직무가 HeRo 매칭에 반영됐습니다.
-                        HeRo 팀이 어울릴 만한 자리를 찾으면 연락드립니다.
+                        어울릴 만한 회사가 있으면 HeRo 팀이 알려 드립니다.
                     </p>
                     <div className="flex items-center justify-center gap-2">
                         <button onClick={() => router.push("/hero/my")} className="px-5 py-2.5 text-white font-semibold rounded-lg" style={{ backgroundColor: HERO_RED }}>
@@ -162,7 +162,7 @@ export default function JHWritePage() {
                     <h1 className="text-2xl font-extrabold mb-2">당신은 어떤 문제를 풀러 왔고, 어디로 가고 싶은가</h1>
                     <p className="text-sm text-neutral-500">
                         구직 조건(규모·연봉·근무형태)은 뒤의 실무 필드에서 따로 받습니다.
-                        12문항으로 어울리는 자리의 방향을 정리합니다. 4~7분 정도 걸립니다.
+                        12문항으로 원하는 일의 방향을 정리합니다. 4~7분 정도 걸립니다.
                     </p>
                 </div>
 
@@ -185,7 +185,7 @@ export default function JHWritePage() {
                             <div key={q.key}>
                                 <div className="mb-3">
                                     <h3 className="text-base font-bold mb-1">
-                                        <span className="text-neutral-400 font-mono mr-2">JH{i + 1}.</span>
+                                        <span className="text-neutral-400 font-mono mr-2">{i + 1}.</span>
                                         {q.label}
                                     </h3>
                                     {q.type === "pick2" && <p className="text-xs text-neutral-400">택 2개</p>}
@@ -247,7 +247,7 @@ export default function JHWritePage() {
                 {/* 실무 매칭 필드 (JH와 분리) */}
                 <div className="mt-14 pt-8 border-t border-neutral-200">
                     <h2 className="text-lg font-bold mb-1">실무 매칭 필드</h2>
-                    <p className="text-xs text-neutral-500 mb-6">구직 조건 — 하드 필터로만 작동합니다 (큐레이션 서술에는 등장 안 함).</p>
+                    <p className="text-xs text-neutral-500 mb-6">구직 조건 — 조건에 맞지 않는 회사를 거르는 데만 씁니다 (추천 설명에는 나오지 않습니다).</p>
 
                     <div className="space-y-6">
                         <FilterPick label="수용 가능한 조직 규모 (복수)"

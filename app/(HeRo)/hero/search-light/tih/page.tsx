@@ -141,7 +141,7 @@ export default function TIHTestPage() {
             <div className="min-h-screen bg-white flex items-center justify-center p-6">
                 <div className="max-w-md text-center">
                     <CheckCircle className="h-16 w-16 mx-auto mb-6" style={{ color: HERO_RED }} />
-                    <h1 className="text-2xl font-bold mb-3">TIH 작성이 완료되었습니다</h1>
+                    <h1 className="text-2xl font-bold mb-3">기업 고민 설문 작성이 끝났습니다</h1>
                     <p className="text-neutral-500 mb-8">
                         HeRo 팀이 검토한 뒤 조건에 맞는 인재 풀 현황을 안내해 드립니다.<br />
                         1~2 영업일 내에 이메일로 연락 드리겠습니다.
@@ -161,7 +161,7 @@ export default function TIHTestPage() {
                 <div className="mb-8">
                     <div className="flex items-center gap-2 mb-4">
                         <Lightbulb className="h-5 w-5 text-neutral-400" />
-                        <span className="text-sm font-bold uppercase tracking-wider" style={{ color: HERO_RED }}>TIH · Trust, Intent, Hiring</span>
+                        <span className="text-sm font-bold uppercase tracking-wider" style={{ color: HERO_RED }}>기업 고민 설문</span>
                     </div>
                     <Progress step={step + 1} />
                     <p className="text-xs text-neutral-400">{step + 1} / {TOTAL_STEPS} 단계</p>
@@ -231,7 +231,7 @@ export default function TIHTestPage() {
                                 <p className="text-sm font-semibold mb-3">새로 올 사람이 팀에 어떤 변화를 줬으면 하나요?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "조용히 자리를 채워 주길 바란다" },
+                                        { v: "a", l: "조용히 빈 역할을 채워 주길 바란다" },
                                         { v: "b", l: "팀 전체의 기준을 끌어올려 주길 바란다" },
                                         { v: "c", l: "팀 분위기와 관계를 바꿔 주길 바란다" },
                                         { v: "d", l: "팀이 못 보던 가능성을 열어 주길 바란다" },

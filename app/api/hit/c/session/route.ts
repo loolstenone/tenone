@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const memberId = auth.memberId;
 
     const aResult = await getLatestHitAResult(memberId);
-    if (!aResult) return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
+    if (!aResult) return errorResponse('기본 성향 검사를 먼저 완료해야 합니다.', 400);
 
     const gateResult = await gateApi(memberId, 'HIT_LAYER_ONE');
     if (gateResult) return gateResult;

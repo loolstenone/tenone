@@ -7,32 +7,32 @@ const HERO_RED = "#E53935";
 
 const matchFlow = [
     {
-        step: "TIH",
-        name: "Trust · Intent · Hiring",
-        desc: "조직의 상황과 필요한 사람의 결을 22문항으로 정리합니다. JD가 '어떤 자리인가'라면, TIH는 '왜 사람이 필요한가'를 담습니다.",
+        step: "1단계 · 기업",
+        name: "기업 고민 설문",
+        desc: "조직의 상황과 필요한 사람을 22문항으로 정리합니다. 채용 공고가 '무슨 일을 하는가'라면, 이 설문은 '왜 사람이 필요한가'를 담습니다.",
         icon: Lightbulb,
         color: "from-amber-500 to-orange-500",
     },
     {
-        step: "JD",
-        name: "Job Description",
-        desc: "스펙 나열이 아닌 서사입니다. 이 자리가 왜 존재하는지, 어떤 문제를 푸는지, 어떤 사람이 와야 하는지를 담습니다.",
+        step: "2단계 · 기업",
+        name: "채용 공고",
+        desc: "자격 요건 목록이 아니라, 이 일이 왜 필요한지, 어떤 문제를 푸는지, 어떤 사람이 맞는지를 적습니다.",
         icon: Search,
         color: "from-sky-500 to-blue-600",
     },
     {
-        step: "매칭",
-        name: "HeRo 큐레이션",
-        desc: "TIH × HIT 매칭. 기업의 고민과 인재의 본질이 맞닿는 지점을 AI와 전문가가 함께 큐레이션합니다.",
+        step: "3단계 · HeRo",
+        name: "함께 살펴보기",
+        desc: "기업 고민 설문·채용 공고와 인재의 HIT 결과·희망 직무를 AI와 전문가가 함께 살펴보고 분석해 드립니다.",
         icon: Eye,
         color: "from-violet-500 to-purple-600",
     },
 ];
 
 const principles = [
-    { icon: Shield, title: "완전 비공개 매칭", desc: "매칭 점수·순위·로직은 양쪽에 공개되지 않습니다. 진정성을 보호하는 방어막입니다." },
-    { icon: Users, title: "3축 인재 매핑", desc: "수호자·개척자·결속자 세 축의 배분으로 조직이 필요한 사람의 본질을 정의합니다." },
-    { icon: Eye, title: "조직 건강성 진단", desc: "TIH는 동시에 조직의 건강성을 간접 측정합니다. 좋은 기업만이 좋은 인재를 만납니다." },
+    { icon: Shield, title: "점수는 공개하지 않습니다", desc: "분석 점수와 순위는 기업에도 인재에도 보여 주지 않습니다. 점수를 맞추려고 답을 꾸미지 않게 하려는 것입니다." },
+    { icon: Users, title: "필요한 사람을 세 가지로", desc: "지키는 사람·새로 여는 사람·잇는 사람이 각각 얼마나 필요한지 나눠 적어, 원하는 사람을 분명히 합니다." },
+    { icon: Eye, title: "조직 상태도 함께", desc: "설문 답에서 조직이 지금 어떤 상태인지도 함께 보입니다. 좋은 조직이 좋은 사람을 만납니다." },
 ];
 
 export default function SearchLightPage() {
@@ -143,11 +143,11 @@ export default function SearchLightPage() {
                         Search Light
                     </p>
                     <h1 className="text-3xl md:text-4xl font-black text-white mb-5 leading-tight">
-                        어두운 밤,<br />영웅을 기다리는 마음
+                        어떤 사람이 필요한지<br />먼저 정리해 보세요
                     </h1>
                     <p className="text-sm text-neutral-400 max-w-sm mb-10 leading-relaxed">
-                        단순 JD 등록이 아닙니다.<br />
-                        기업의 진짜 고민과 원하는 인재상을 분석합니다.
+                        채용 공고만 올리는 곳이 아닙니다.<br />
+                        기업의 고민과 원하는 사람을 함께 정리합니다.
                     </p>
                     <div className="flex flex-wrap gap-3">
                         <Link
@@ -155,13 +155,13 @@ export default function SearchLightPage() {
                             className="flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            TIH 작성 · 기업 <ArrowRight className="h-4 w-4" />
+                            기업 고민 설문 작성 <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/hero/jh/write"
                             className="flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg backdrop-blur-sm border border-white/20 transition-colors"
                         >
-                            희망 직무 작성 · 구직자 <ArrowRight className="h-4 w-4" />
+                            희망 직무 설문 작성 · 개인 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -171,8 +171,8 @@ export default function SearchLightPage() {
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-14">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-3">Matching Tetrad</h2>
-                        <p className="text-neutral-500">기업 × 인재, 네 요소가 교차하는 매칭 구조</p>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-3">4방향 매칭</h2>
+                        <p className="text-neutral-500">기업 쪽 두 가지, 인재 쪽 두 가지 정보를 함께 봅니다</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -195,8 +195,8 @@ export default function SearchLightPage() {
             <section className="py-20">
                 <div className="mx-auto max-w-5xl px-6">
                     <div className="text-center mb-14">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-3">Search Light 원칙</h2>
-                        <p className="text-neutral-500">좋은 만남은 진정성에서 시작합니다</p>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-3">써치 라이트 원칙</h2>
+                        <p className="text-neutral-500">솔직하게 적을수록 잘 맞는 만남이 됩니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {principles.map((p) => (
@@ -216,22 +216,22 @@ export default function SearchLightPage() {
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-4xl px-6">
                     <div className="text-center mb-10">
-                        <h2 className="text-2xl font-bold mb-3">TIH 작성이란?</h2>
+                        <h2 className="text-2xl font-bold mb-3">기업 고민 설문이란?</h2>
                         <p className="text-neutral-500 text-sm max-w-xl mx-auto">
-                            Trust · Intent · Hiring — 기업의 고민을 22문항으로 구조화합니다. 7~8분 소요.
+                            기업의 고민을 22문항으로 정리합니다. 7~8분 걸립니다.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                         {[
-                            { section: "Section 0", label: "포지션 분류", q: "3문항", time: "30초" },
-                            { section: "Section 1", label: "고민의 지형", q: "4문항", time: "1분 30초" },
-                            { section: "Section 2", label: "3축 배분", q: "1문항", time: "1분" },
-                            { section: "Section 3", label: "자리의 구체", q: "6문항", time: "2분" },
-                            { section: "Section 4", label: "일하는 결", q: "6문항", time: "2분" },
-                            { section: "Section 5", label: "피하고 싶은 유형", q: "1문항", time: "20초" },
-                            { section: "Section 6", label: "한 줄 묘사", q: "선택", time: "1분" },
-                            { section: "총계", label: "22 필수 + 1 선택", q: "", time: "7~8분" },
+                            { section: "0", label: "어떤 직무인가", q: "3문항", time: "30초" },
+                            { section: "1", label: "지금의 고민", q: "4문항", time: "1분 30초" },
+                            { section: "2", label: "필요한 사람 비중", q: "1문항", time: "1분" },
+                            { section: "3", label: "맡을 일", q: "6문항", time: "2분" },
+                            { section: "4", label: "일하는 방식", q: "6문항", time: "2분" },
+                            { section: "5", label: "피하고 싶은 유형", q: "1문항", time: "20초" },
+                            { section: "6", label: "한 줄로 설명", q: "선택", time: "1분" },
+                            { section: "합계", label: "필수 22 + 선택 1", q: "", time: "7~8분" },
                         ].map((item, i) => (
                             <div key={i} className={`bg-white rounded-lg border p-3 ${i === 7 ? "border-red-300 bg-red-50" : "border-neutral-200"}`}>
                                 <p className="text-[10px] text-neutral-400 font-mono mb-1">{item.section}</p>
@@ -248,13 +248,13 @@ export default function SearchLightPage() {
                             className="inline-flex items-center gap-2 px-7 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            TIH 작성 · 기업 <ArrowRight className="h-4 w-4" />
+                            기업 고민 설문 작성 <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/hero/jh/write"
                             className="inline-flex items-center gap-2 px-7 py-3 border border-neutral-300 text-neutral-800 font-bold rounded-lg hover:bg-neutral-50 transition-colors"
                         >
-                            희망 직무 작성 · 구직자 <ArrowRight className="h-4 w-4" />
+                            희망 직무 설문 작성 · 개인 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>

@@ -50,8 +50,8 @@ export default function JHViewPage() {
                     <Compass className="h-12 w-12 mx-auto mb-5 text-neutral-300" />
                     <h1 className="text-2xl font-extrabold mb-3">Job Hope — 희망 직무</h1>
                     <p className="text-sm text-neutral-500 mb-8">
-                        당신이 풀고 싶은 문제, 원하는 자리의 방향을 12문항으로 정리합니다.<br />
-                        HeRo가 기업 쪽 정보(TIH·직무 설명)와 HIT 결과를 함께 읽어 어울릴 만한 기회를 제안합니다.
+                        풀고 싶은 문제와 원하는 일의 방향을 12문항으로 정리합니다.<br />
+                        HeRo가 기업 쪽 정보(기업 고민 설문·채용 공고)와 HIT 결과를 함께 읽어 어울릴 만한 기회를 제안합니다.
                     </p>
                     <Link href="/hero/jh/write"
                         className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-lg"
@@ -104,7 +104,7 @@ export default function JHViewPage() {
 
                         return (
                             <div key={q.key} className="bg-white border border-neutral-200 rounded-lg p-4">
-                                <p className="text-xs text-neutral-400 mb-1 font-mono">JH{i + 1}</p>
+                                <p className="text-xs text-neutral-400 mb-1 font-mono">질문 {i + 1}</p>
                                 <p className="text-sm text-neutral-700 mb-2">{q.label}</p>
                                 {q.type === "text" ? (
                                     <p className="text-sm italic text-neutral-800 pl-3 border-l-2 border-rose-300">{String(val)}</p>

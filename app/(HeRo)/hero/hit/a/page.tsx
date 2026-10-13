@@ -191,7 +191,7 @@ export default function HitAIntroPage() {
               {starting ? (
                 <><Loader2 className="h-5 w-5 animate-spin" /> 시작하는 중...</>
               ) : (
-                <>{HIT_STAGES.a.code} 시작하기 <ArrowRight className="h-5 w-5" /></>
+                <>{HIT_STAGES.a.ko} 시작하기 <ArrowRight className="h-5 w-5" /></>
               )}
             </button>
           )}

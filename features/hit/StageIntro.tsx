@@ -53,13 +53,13 @@ function StageIntroContent({ stage, modules, note }: StageIntroProps) {
         </div>
       </section>
 
-      {error && /Archetype/.test(error) && (
+      {error && /기본 성향 검사|Archetype/.test(error) && (
         <section className="bg-amber-50 border-y border-amber-200">
           <div className="mx-auto max-w-3xl px-6 py-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.code}을 먼저 완료해주세요</p>
-              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.code} 시작하기 →</button>
+              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.ko}를 먼저 마쳐 주세요</p>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.ko} 시작하기 →</button>
             </div>
           </div>
         </section>
@@ -78,7 +78,7 @@ function StageIntroContent({ stage, modules, note }: StageIntroProps) {
             <div className="p-5 rounded-xl bg-neutral-50 border border-dashed border-neutral-300 flex items-start gap-3">
               <ListChecks className="h-5 w-5 text-neutral-400 shrink-0 mt-0.5" />
               <p className="text-xs text-neutral-600 leading-relaxed break-keep">
-                <span className="font-bold text-neutral-800">준비도는 문항이 아닙니다.</span> 이력서·면접·재정 같은 준비 항목은 나의 저니의 준비 체크리스트에서 예/아니오로 관리하고, 그 완료율이 결과의 준비도 점수가 됩니다. 검사 전에 체크해 두면 결과에 바로 반영됩니다.
+                <span className="font-bold text-neutral-800">준비도는 문항이 아닙니다.</span> 이력서·면접·재정 같은 준비 항목은 나의 성장 기록의 준비 체크리스트에서 예/아니오로 관리하고, 그 완료율이 결과의 준비도 점수가 됩니다. 검사 전에 체크해 두면 결과에 바로 반영됩니다.
               </p>
             </div>
           </div>
@@ -89,11 +89,11 @@ function StageIntroContent({ stage, modules, note }: StageIntroProps) {
       <section className="bg-white border-t border-neutral-100">
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
           <p className="text-xs text-neutral-400 mb-4 break-keep">
-            공통 검사({HIT_STAGES.a.code} · {HIT_STAGES.b.code})를 먼저 하면 결과가 더 깊어집니다. {HIT_STAGES.a.code}({HIT_STAGES.a.name})는 필수입니다.<br />
+            공통 검사({HIT_STAGES.a.ko} · {HIT_STAGES.b.ko})를 먼저 하면 결과가 더 깊어집니다. {HIT_STAGES.a.ko}는 꼭 먼저 해 주세요.<br />
             각 문항에 1(전혀 아니다)~7(매우 그렇다)로 응답합니다. 정답은 없습니다.
           </p>
           <HitStartCTA
-            label={`${def.code} 시작하기`}
+            label={`${def.ko} 시작하기`}
             resume={resume}
             total={total}
             starting={starting}

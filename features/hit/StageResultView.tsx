@@ -31,12 +31,12 @@ const n = (v: unknown) => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : 
 const pick = (obj: Row | null | undefined, keys: string[]): Item[] => keys.filter(k => obj && k in obj).map(k => ({ key: k, value: n(obj![k]) }));
 const top = (items: Item[]) => [...items].sort((a, b) => b.value - a.value)[0];
 const L = (k: string) => STAGE_DIM_COPY[k]?.label ?? k;
-const CHECKLIST_LEAD = "검사 문항이 아니라, 나의 저니 준비 체크리스트를 얼마나 해 두었는지(완료율)입니다. 체크할수록 올라갑니다.";
+const CHECKLIST_LEAD = "검사 문항이 아니라, 나의 성장 기록 준비 체크리스트를 얼마나 해 두었는지(완료율)입니다. 체크할수록 올라갑니다.";
 
 function viewFor(stage: StageKey, r: Row): View {
   switch (stage) {
     case "d": {
-      const mt: Record<string, string> = { push_driven: "떠나고 싶은 이유가 큼 (Push)", pull_driven: "가고 싶은 곳이 끌림 (Pull)", balanced: "떠날 이유와 끌림이 균형" };
+      const mt: Record<string, string> = { push_driven: "떠나고 싶은 이유가 더 큼", pull_driven: "가고 싶은 곳에 더 끌림", balanced: "떠날 이유와 끌림이 균형" };
       const capital = pick(r.capital_scores, ["domain_expertise", "achievement", "relational", "transferable"]);
       const best = top(capital);
       return {
@@ -44,13 +44,13 @@ function viewFor(stage: StageKey, r: Row): View {
         journey: { ready_to_leap: "경력 자본이 탄탄하고 가고 싶은 곳이 분명", almost_ready: "경력 자본이 탄탄함", urgent_but_unprepared: "떠날 마음이 앞서 있음", building_foundation: "기반을 다지는 중", exploring: "탐색 단계", early_awareness: "이직을 생각하기 시작함" },
         cover: { headline: `전환 가능성 ${n(r.transferability_index)}`, sub: r.target_job ? `희망 직무 ${r.target_job}` : (mt[r.motivation_type] ?? "") },
         findings: [
-          { label: "전환 가능성", value: `${n(r.transferability_index)} · ${BAND_INFO[scoreBand(n(r.transferability_index))].label}`, note: "지금의 경력이 새 자리에서 통할 가능성입니다." },
+          { label: "전환 가능성", value: `${n(r.transferability_index)} · ${BAND_INFO[scoreBand(n(r.transferability_index))].label}`, note: "지금의 경력이 새 회사·새 직무에서 통할 가능성입니다." },
           { label: "이직 동기", value: mt[r.motivation_type] ?? "-", note: `떠날 이유 ${n(r.motivation_push)} · 끌림 ${n(r.motivation_pull)}` },
           { label: "가장 큰 경력 자본", value: best ? `${L(best.key)} ${best.value}` : "-", note: best ? STAGE_DIM_COPY[best.key]?.what ?? "" : "" },
         ],
         blocks: [
-          { id: "capital", title: "경력 자본", lead: "지금까지의 경력에서 쌓아 온, 다음 자리로 가져갈 수 있는 자산입니다.", items: capital },
-          { id: "motivation", title: "이직 동기", lead: "지금 자리를 떠나고 싶은 이유(Push)와 새 자리에 끌리는 이유(Pull)입니다. 끌림이 클수록 이직 후 만족이 오래갑니다.", items: [{ key: "motivation_push", value: n(r.motivation_push) }, { key: "motivation_pull", value: n(r.motivation_pull) }] },
+          { id: "capital", title: "경력 자본", lead: "지금까지 경력에서 쌓아 온, 다음 회사로 가져갈 수 있는 자산입니다.", items: capital },
+          { id: "motivation", title: "이직 동기", lead: "지금 회사를 떠나고 싶은 이유와 새 회사·새 일에 끌리는 이유입니다. 끌림이 클수록 이직 후 만족이 오래갑니다.", items: [{ key: "motivation_push", value: n(r.motivation_push) }, { key: "motivation_pull", value: n(r.motivation_pull) }] },
           { id: "transfer", title: "전환 가능성", lead: "내 역량이 다른 회사·직무로 옮겨 갔을 때 통하는 정도입니다.", items: pick(r.transferability_scores, ["skill_transfer", "market_fit", "adaptation"]), headline: `전환 가능성 지수 ${n(r.transferability_index)}` },
           { id: "ready", title: "이직 준비", lead: CHECKLIST_LEAD, items: pick(r.readiness_scores, ["doc", "interview", "timing", "psychological"]), checklist: true, headline: `전환 준비도 ${n(r.transition_readiness)}` },
         ],
@@ -109,7 +109,7 @@ function viewFor(stage: StageKey, r: Row): View {
       };
     }
     case "gap": {
-      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.code}(이직) 검사 추천`, B: `${HIT_STAGES.b.code}(역량과 방향)부터 다시 점검` };
+      const route: Record<string, string> = { R: "기존 경력으로 복귀", C: `${HIT_STAGES.d.ko} 추천`, B: `${HIT_STAGES.b.ko}부터 다시 점검` };
       const cvi: Record<string, string> = { HIGH: "경력이 지금도 잘 통함", MID: "경력이 부분적으로 통함", LOW: "경력 업데이트가 필요함" };
       const res = pick(r.resilience_scores, ["self_narrative", "self_esteem", "retry_willingness"]);
       const bestRes = top(res);
@@ -183,7 +183,7 @@ export default function StageResultView({ stage, resultId, print = false }: { st
           {notStarted ? (
             <div className="rounded-2xl bg-neutral-50 p-5 sm:p-6">
               <p className="text-[15px] font-bold text-neutral-900">아직 체크 전입니다</p>
-              <p className="text-[14px] text-neutral-600 mt-2 leading-[1.8]">나의 저니의 준비 체크리스트에서 이미 해 둔 일을 체크하면, 다음 검사부터 준비도가 반영됩니다. 0점은 &lsquo;준비가 없다&rsquo;는 뜻이 아니라 아직 체크하지 않았다는 뜻입니다.</p>
+              <p className="text-[14px] text-neutral-600 mt-2 leading-[1.8]">나의 성장 기록의 준비 체크리스트에서 이미 해 둔 일을 체크하면, 다음 검사부터 준비도가 반영됩니다. 0점은 &lsquo;준비가 없다&rsquo;는 뜻이 아니라 아직 체크하지 않았다는 뜻입니다.</p>
             </div>
           ) : (
           <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6">
@@ -210,7 +210,7 @@ export default function StageResultView({ stage, resultId, print = false }: { st
     {!print && (
       <HitNextSteps from="stage">
         <div className="space-y-3">
-          <NextLink href="/hero/journey" title="나의 저니에서 준비 체크하기" desc="준비 체크리스트를 채울수록 준비도가 올라갑니다" primary />
+          <NextLink href="/hero/journey" title="나의 성장 기록에서 준비 체크하기" desc="준비 체크리스트를 채울수록 준비도가 올라갑니다" primary />
           <FullReportLink href={`/hero/hit/${stage}/report/${resultId}`} />
         </div>
       </HitNextSteps>
