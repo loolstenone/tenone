@@ -87,7 +87,6 @@ export function HeRoHeader() {
                 <div className="hidden lg:flex items-center ml-auto pl-6 shrink-0">
                     <UniverseUtilityBar
                         aboutPath="/hero/about"
-                        aboutLabel="소개"
                         profilePath="/hero/my"
                         workspacePath="/hero/journey"
                         workspaceLabel="나의 성장 기록"

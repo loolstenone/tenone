@@ -38,7 +38,7 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
 
 export interface UtilityBarConfig {
     aboutPath: string;
-    /** About 표기 — 기본 'ABOUT'. 한국어 우선 브랜드는 '소개' (2026-10-13 HeRo). 위치·모양은 그대로 */
+    /** About 표기 — 기본 'ABOUT' — 전 브랜드 공통 (2026-10-13 사용자 결정: 이 정도 영어는 그대로). 위치·모양은 그대로 */
     aboutLabel?: string;
     profilePath?: string;
     /** 단일 워크스페이스 (legacy 호환). workspaces 배열을 우선 쓰되, 비어있으면 affiliations 기반 자동 노출. */
