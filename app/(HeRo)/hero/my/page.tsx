@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import MyHitResults from "@/features/hit/MyHitResults";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
-import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { LinkedMadleagueCertificates } from "@/features/hero/LinkedMadleagueCertificates";
 import { CapabilitySection } from "@/components/CapabilitySection";
@@ -99,17 +98,6 @@ export default function HeRoMyPage() {
 
                 {/* MADLeague 활동 경력 — 서비스 간 연계 동의 시 (lib/service-links.ts) */}
                 <LinkedMadleagueCertificates />
-
-                {/* 매칭 인박스 — 큐레이션 수신 */}
-                {user?.id && (
-                    <div className="mb-8">
-                        <h2 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <span>매칭 현황</span>
-                            <span className="h-px flex-1 bg-neutral-800" />
-                        </h2>
-                        <MatchingInbox side="talent" memberId={user.id} accentColor="#E53935" theme="dark" />
-                    </div>
-                )}
 
                 {/* 기업 회원 허브 안내 */}
                 <Link href="/hero/company"

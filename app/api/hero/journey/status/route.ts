@@ -60,12 +60,12 @@ export async function GET(req: NextRequest) {
             .eq("checkin_date", today)
             .maybeSingle();
 
-        // 받은 매칭 — 확인 안 한 것
-        const { count: pendingMatches } = await sb
-            .from("hero_matches")
+        // 받은 제안 — 아직 열어 보지 않은 것 (2026-10-13 매칭 인박스 → 받은 제안 통합)
+        const { count: pendingOffers } = await sb
+            .from("hero_offer_recipients")
             .select("id", { count: "exact", head: true })
-            .eq("profile_member_id", memberId)
-            .in("match_status", ["curated"]);
+            .eq("member_id", memberId)
+            .eq("status", "sent");
 
         const s = stageRow as {
             stage: string;
@@ -144,7 +144,7 @@ export async function GET(req: NextRequest) {
             streak: streak ?? 0,
             todayCheckedIn: !!todayCheckin,
             todayCheckin: todayCheckin ?? null,
-            pendingMatches: pendingMatches ?? 0,
+            pendingOffers: pendingOffers ?? 0,
             stageUp,
         });
     } catch (e: unknown) {

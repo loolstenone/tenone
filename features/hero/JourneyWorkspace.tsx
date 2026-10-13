@@ -3,7 +3,7 @@
 /**
  * Journey Workspace — 로그인 사용자의 커리어 빌드업 도구
  *
- * 탭: Today · Hero Type · 기록 · 매칭
+ * 탭: 오늘 · 히어로 유형 · 목표 · 기록 · 코칭 · 회고 · 채용 피드 · 받은 제안
  * 원칙: 모든 탭은 "액션 단위" (see가 아니라 do).
  */
 
@@ -13,7 +13,8 @@ import {
   Flame,
   Target,
   FileText,
-  Handshake,
+  Mail,
+  Loader2,
   Briefcase,
   Zap,
   CheckCircle2,
@@ -28,7 +29,7 @@ import {
   Plus,
   BookOpen,
 } from "lucide-react";
-import MatchingInbox from "@/features/hero/MatchingInbox";
+import { labelOf, OFFER_TYPES, RECIPIENT_STATUS_LABEL } from "@/lib/hero/offers";
 import { HIT_STAGES, hitStageMinutesLabel } from "@/lib/hit/stages";
 import { GoalsTab } from "@/features/hero/GoalsTab";
 import { JobsTab } from "@/features/hero/JobsTab";
@@ -55,7 +56,7 @@ interface JourneyStatus {
   streak: number;
   todayCheckedIn: boolean;
   todayCheckin: { id: string; energy_level: number; note: string | null } | null;
-  pendingMatches: number;
+  pendingOffers: number;
   stageUp?: { from: string; to: string; ucAwarded: number } | null;
 }
 
@@ -76,7 +77,7 @@ const TABS = [
   { key: "coaching",    label: "코칭",      icon: BookOpen },
   { key: "reflection",  label: "월간 회고", icon: FileText },
   { key: "jobs",        label: "채용 피드", icon: Briefcase },
-  { key: "matching",  label: "매칭",      icon: Handshake },
+  { key: "offers",      label: "받은 제안", icon: Mail },
 ] as const;
 
 type TabKey = typeof TABS[number]["key"];
@@ -110,7 +111,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
-  // 탭은 state라 `#matching` 같은 해시 링크로는 이동하지 않는다 — 카드에서 탭을 바꿀 땐 이 콜백 (2026-10-12)
+  // 탭은 state라 `#offers` 같은 해시 링크로는 이동하지 않는다 — 카드에서 탭을 바꿀 땐 이 콜백 (2026-10-12)
   const goTab = useCallback((k: TabKey) => {
     setTab(k);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -181,7 +182,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         {tab === "coaching"    && <CoachingTab memberId={memberId} />}
         {tab === "reflection"  && <ReflectionTab memberId={memberId} />}
         {tab === "jobs"        && <JobsTab memberId={memberId} />}
-        {tab === "matching" && <MatchingTab status={status} memberId={memberId} />}
+        {tab === "offers" && <OffersTab />}
       </div>
     </div>
   );
@@ -267,7 +268,7 @@ function JourneyMap({ status }: { status: JourneyStatus }) {
 
 type GoTab = (k: TabKey) => void;
 
-/** 카드 안 링크 — 탭 키(`#matching`)면 탭 전환, 그 외는 일반 링크 */
+/** 카드 안 링크 — 탭 키(`#offers`)면 탭 전환, 그 외는 일반 링크 */
 function CardLink({ href, goTab, className, children }: { href: string; goTab: GoTab; className?: string; children: React.ReactNode }) {
   const tabKey = href.startsWith("#") ? (TABS.find(t => t.key === href.slice(1))?.key ?? null) : null;
   if (tabKey) {
@@ -285,7 +286,7 @@ function TodayTab({ status, memberId, onRefresh, goTab }: { status: JourneyStatu
       </div>
       <div className="space-y-6">
         <TodayMissionCard status={status} goTab={goTab} />
-        <MatchingSummaryCard status={status} goTab={goTab} />
+        <OffersSummaryCard status={status} goTab={goTab} />
       </div>
     </div>
   );
@@ -309,10 +310,10 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
       { label: "기본 성향 검사 + 역량·방향 검사 완료", done: conditions.has_hit_a && conditions.has_hit_b, href: "/hero/hit" },
       { label: "이력서 작성", done: conditions.has_resume, href: "/hero/resume/workspace" },
       { label: "희망 직무 설문 작성", done: conditions.has_jh, href: "/hero/jh/write" },
-      { label: "첫 매칭 수신", done: conditions.has_match, href: "#matching" },
+      { label: "첫 제안 받기", done: conditions.has_match, href: "#offers" },
     ],
     Star: [
-      { label: "매칭 성사 (계약 또는 트라이얼)", done: conditions.has_active_match, href: "#matching" },
+      { label: "기업 제안에 응하기", done: conditions.has_active_match, href: "#offers" },
     ],
     Legend: [
       { label: "멘토 등록 / 후배 추천", done: false, href: "/hero/mentor" },
@@ -392,8 +393,8 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
     mission = { title: "이력서 작성", desc: "연습생 단계로 올라가는 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
     mission = { title: "희망 직무 12문항 작성", desc: "나와 맞는 회사를 알려 드리려면 필요해요", href: "/hero/jh/write", reward: null };
-  } else if (status.pendingMatches > 0) {
-    mission = { title: `받은 매칭 ${status.pendingMatches}건 확인`, desc: "추천이 도착했어요", href: "#matching", reward: null };
+  } else if (status.pendingOffers > 0) {
+    mission = { title: `새 제안 ${status.pendingOffers}건 확인`, desc: "기업이 면접·인터뷰를 제안했어요", href: "#offers", reward: null };
   } else {
     mission = { title: "오늘 체크인", desc: "30초면 충분해요", href: "#checkin", reward: UC_PUBLIC ? "UC 적립" : null };
   }
@@ -500,20 +501,20 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
   );
 }
 
-function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
+function OffersSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-3">
-        <Handshake className="w-4 h-4" style={{ color: RED }} />
-        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">받은 매칭</span>
+        <Mail className="w-4 h-4" style={{ color: RED }} />
+        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">받은 제안</span>
       </div>
-      {status.pendingMatches > 0 ? (
+      {status.pendingOffers > 0 ? (
         <>
-          <p className="text-lg font-bold text-neutral-900 mb-1">확인 안 한 매칭 {status.pendingMatches}건</p>
-          <p className="text-sm text-neutral-500 mb-4">추천이 도착했어요</p>
+          <p className="text-lg font-bold text-neutral-900 mb-1">새 제안 {status.pendingOffers}건</p>
+          <p className="text-sm text-neutral-500 mb-4">기업이 면접·인터뷰를 제안했어요</p>
           <button
             type="button"
-            onClick={() => goTab("matching")}
+            onClick={() => goTab("offers")}
             className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935] hover:gap-2 transition-all"
           >
             보러 가기 <ArrowRight className="w-3.5 h-3.5" />
@@ -522,16 +523,14 @@ function MatchingSummaryCard({ status, goTab }: { status: JourneyStatus; goTab: 
       ) : (
         <>
           <p className="text-sm text-neutral-500 mb-3">
-            아직 받은 매칭이 없어요. JH를 작성하면 매칭 후보에 올라갑니다.
+            아직 받은 제안이 없어요. 제안 받기를 켜 두면 조건에 맞는 기업이 먼저 면접·인터뷰를 제안합니다.
           </p>
-          {!status.conditions.has_jh && (
-            <Link
-              href="/hero/jh/write"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935] hover:gap-2 transition-all"
-            >
-              희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          )}
+          <Link
+            href="/hero/offers/settings"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935] hover:gap-2 transition-all"
+          >
+            제안 받기 설정 <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </>
       )}
     </div>
@@ -602,29 +601,49 @@ function HeroTypeTab({ status }: { status: JourneyStatus }) {
 
 
 
-/* ═════════════════════════ 매칭 탭 ═════════════════════════ */
+/* ═════════════════════════ 받은 제안 탭 (2026-10-13 매칭 인박스 통합) ═════════════════════════ */
 
-function MatchingTab({ status, memberId }: { status: JourneyStatus; memberId: string }) {
+interface OfferInboxItem {
+  id: string;
+  status: string;
+  created_at: string;
+  hero_offers: { title: string; offer_type: string; respond_by: string | null; hero_companies: { company_name: string } | null } | null;
+}
+
+function OffersTab() {
+  const [items, setItems] = useState<OfferInboxItem[] | null>(null);
+  useEffect(() => {
+    fetch("/api/hero/offers/inbox").then(r => r.json()).then(d => setItems(d.items ?? [])).catch(() => setItems([]));
+  }, []);
+
   return (
-    <div id="matching" className="space-y-6">
-      {!status.conditions.has_jh && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-amber-700" />
-            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">희망 직무 설문 먼저</span>
-          </div>
-          <h3 className="font-bold text-neutral-900 mb-1">매칭을 받으려면 JH가 필요해요</h3>
-          <p className="text-sm text-neutral-600 mb-4">12문항 · 약 5분. 작성하면 매칭 후보에 올라갑니다.</p>
-          <Link
-            href="/hero/jh/write"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: RED }}
-          >
-            희망 직무 설문 작성하기 <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+    <div id="offers" className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-neutral-600 break-keep">기업의 면접·인터뷰 제안입니다. 응하면 고른 이력서와 연락처만 그 기업에 전달되고, 검사 결과는 전달되지 않습니다.</p>
+        <Link href="/hero/offers/settings" className="text-sm font-semibold text-neutral-700 underline">제안 받기 설정</Link>
+      </div>
+      {items === null ? (
+        <div className="py-12 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-neutral-300" /></div>
+      ) : items.length === 0 ? (
+        <div className="bg-white border border-neutral-200 rounded-2xl p-8 text-center text-sm text-neutral-500">아직 받은 제안이 없어요.</div>
+      ) : (
+        <ul className="space-y-2">
+          {items.map(it => (
+            <li key={it.id}>
+              <Link href={`/hero/offers/${it.id}`} className="flex items-center justify-between gap-4 bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="min-w-0">
+                  <p className="text-xs text-neutral-500">{it.hero_offers?.hero_companies?.company_name ?? "기업"} · {labelOf(OFFER_TYPES, it.hero_offers?.offer_type ?? "")}</p>
+                  <p className="font-semibold truncate">{it.hero_offers?.title}</p>
+                </div>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${it.status === "sent" ? "bg-red-50 text-[#E53935] font-semibold" : "bg-neutral-100 text-neutral-600"}`}>
+                  {RECIPIENT_STATUS_LABEL[it.status] ?? it.status}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
-      <MatchingInbox side="talent" memberId={memberId} />
+      <Link href="/hero/offers" className="inline-flex items-center gap-1.5 text-sm font-bold text-[#E53935]">받은 제안 전체 보기 <ArrowRight className="w-3.5 h-3.5" /></Link>
     </div>
   );
 }

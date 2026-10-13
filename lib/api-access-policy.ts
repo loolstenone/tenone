@@ -16,8 +16,8 @@ const STAFF_ONLY_API: RegExp[] = [
     /^\/api\/gravity\/(?!apply(\/|$))/,
     // Mindle·TrendHunter 운영 (collect는 봇 API 키 인증 별도)
     /^\/api\/trendhunter\/(analyze|rss)(\/|$)/,
-    // HeRo 매칭 큐레이션 (intra 전용) — 사용자용 request·inbox·[id]/report 제외
-    /^\/api\/hero\/matching(\/(?!request(\/|$)|inbox(\/|$))[^/]+(\/curate)?)?\/?$/,
+    // HeRo 매칭 큐레이션 (intra 전용) — 사용자용 request 제외 (inbox·[id]/report는 2026-10-13 받은 제안으로 통합하며 삭제)
+    /^\/api\/hero\/matching(\/(?!request(\/|$))[^/]+(\/curate)?)?\/?$/,
     // 운영 도구
     /^\/api\/analytics\/(sync|env-check)(\/|$)/,
     /^\/api\/external(\/|$)/,
