@@ -68,7 +68,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '소셜미디어', count: 22 },
   },
   {
-    id: 'g4', slug: 'startup-marketer-club', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지!',
+    id: 'g4', slug: 'startup-marketer-club', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지.',
     status: 'recruiting', max_members: 8, current_members: 5,
     event_date: '2026-05-10T10:00:00', location: '온라인 (Zoom)', fee: 0,
     tags: ['사이드프로젝트', '기획', '런칭'],
@@ -303,7 +303,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
         </div>
       ) : (
         <div className="flex h-16 items-end px-3 pb-2"
-          style={{ background: `linear-gradient(135deg, rgba(255,217,61,0.08), rgba(255,107,107,0.08))` }}>
+          style={{ background: 'rgba(255,255,255,0.04)' }}>
           {g.need && (
             <span className="rounded-none px-2 py-0.5 text-[9px] text-white/30" style={{ background: 'rgba(255,255,255,0.08)' }}>
               {g.need.display_text}
@@ -319,7 +319,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
             {statusStyle.label}
           </span>
           {isClosingSoon && (
-            <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>🔥 마감임박</span>
+            <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>마감임박</span>
           )}
           {isHot && !isClosingSoon && (
             <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>Hot</span>
@@ -328,7 +328,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
             <span className="rounded-none px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80' }}>New</span>
           )}
           {g.fee === 0 ? (
-            <span className="text-xs text-green-400/70">무료</span>
+            <span className="text-xs text-neutral-400/70">무료</span>
           ) : (
             <span className="text-xs text-white/40">{g.fee.toLocaleString()}원</span>
           )}
@@ -357,7 +357,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
             <div className="h-full rounded-none transition-all"
               style={{
                 width: `${Math.min(100, (g.current_members / g.max_members) * 100)}%`,
-                background: isFull ? '#ef4444' : remaining <= 3 ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'linear-gradient(90deg, #22c55e, #16a34a)',
+                background: isFull ? '#ef4444' : remaining <= 3 ? '#ffd93d' : '#ffffff',
               }}
             />
           </div>
@@ -376,7 +376,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
               </div>
             )}
             <span className="text-xs text-white/55">
-              <Crown className="mr-0.5 inline h-3 w-3 text-amber-400/60" />
+              <Crown className="mr-0.5 inline h-3 w-3 text-neutral-400/60" />
               {g.leader.display_name}
             </span>
             <span className="text-[11px] text-white/30">· {g.leader.job_function}</span>
@@ -499,7 +499,7 @@ export default function GroupsPage() {
             <Link
               href="/badak/groups/create"
               className="flex items-center gap-2 rounded-xs px-5 py-3 text-sm font-bold no-underline"
-              style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
+              style={{ background: '#ffd93d', color: '#1a1a2e' }}
             >
               <Plus className="h-4 w-4" /> 모임 만들기
             </Link>
@@ -529,7 +529,7 @@ export default function GroupsPage() {
             {recommendedGroups.length > 0 && (
               <SlideSection
                 title="추천 모임"
-                icon={<Sparkles className="h-5 w-5 text-amber-400" />}
+                icon={<Sparkles className="h-5 w-5 text-neutral-400" />}
                 groups={recommendedGroups}
                 emptyText=""
               />
@@ -538,7 +538,7 @@ export default function GroupsPage() {
             {/* Hot 모임 */}
             <SlideSection
               title="Hot 모임"
-              icon={<Flame className="h-5 w-5 text-orange-400" />}
+              icon={<Flame className="h-5 w-5 text-neutral-400" />}
               groups={hotGroups}
               emptyText="모집 중인 모임이 없습니다"
             />
@@ -546,7 +546,7 @@ export default function GroupsPage() {
             {/* 최신 모임 */}
             <SlideSection
               title="최신 모임"
-              icon={<Clock className="h-5 w-5 text-blue-400" />}
+              icon={<Clock className="h-5 w-5 text-neutral-400" />}
               groups={latestGroups}
               emptyText="등록된 모임이 없습니다"
             />
@@ -632,7 +632,7 @@ export default function GroupsPage() {
                   {search ? '검색 결과가 없습니다' : '아직 모임이 없습니다'}
                 </p>
                 <p className="text-sm text-white/30">
-                  {search ? '다른 키워드로 검색해보세요' : '첫 번째 바닥장이 되어보세요!'}
+                  {search ? '다른 키워드로 검색해보세요' : '첫 바닥장이 되어 주세요.'}
                 </p>
               </div>
             ) : (
@@ -665,11 +665,11 @@ export default function GroupsPage() {
                             {st.label}
                           </span>
                           {g.fee === 0
-                            ? <span className="text-[10px] text-green-400/70">무료</span>
+                            ? <span className="text-[10px] text-neutral-400/70">무료</span>
                             : <span className="text-[10px] text-white/30">{g.fee.toLocaleString()}원</span>
                           }
                           {!isFull && remaining <= 3 && (
-                            <span className="text-[10px] text-orange-400/70">잔여 {remaining}석</span>
+                            <span className="text-[10px] text-neutral-400/70">잔여 {remaining}석</span>
                           )}
                         </div>
                         <h3 className="mb-1 text-[14px] font-bold text-white line-clamp-1">{g.title}</h3>

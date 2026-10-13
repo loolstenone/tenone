@@ -38,7 +38,7 @@ const TRANSITION_MESSAGES: Record<string, string> = {
   'satisfaction→direction': '다음은 인생 2막의 방향을 탐색합니다',
   'direction→legacy': '수십 년의 경험, 레거시 스킬을 평가합니다',
   'legacy→social': '사회적 연결 필요도를 확인합니다',
-  'social→readiness': '마지막! 2막 준비도를 확인합니다',
+  'social→readiness': '마지막 단계: 2막 준비도를 확인합니다',
 };
 
 const MODULE_ORDER: FModuleType[] = ['satisfaction', 'direction', 'legacy', 'social', 'readiness'];
@@ -291,7 +291,7 @@ function HitFTestContent() {
       <div className="min-h-[60vh] flex items-center justify-center">
         <p className="text-neutral-400">
           세션을 찾을 수 없습니다.{" "}
-          <a href="/hero/hit/f" className="text-amber-700 underline">
+          <a href="/hero/hit/f" className="text-neutral-700 underline">
             다시 시작
           </a>
           해 주세요.
@@ -359,7 +359,7 @@ function HitFTestContent() {
           </div>
           <div className="h-1 w-full bg-neutral-100 rounded-none overflow-hidden">
             <div
-              className="h-full bg-amber-700 transition-all duration-300 ease-out rounded-none"
+              className="h-full bg-neutral-700 transition-all duration-300 ease-out rounded-none"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -408,7 +408,7 @@ function HitFTestContent() {
                             rounded-xs text-base font-bold
                             transition-all duration-200
                             ${isSelected
-                              ? 'bg-amber-700 text-white scale-110'
+                              ? 'bg-neutral-700 text-white scale-110'
                               : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'
                             }
                             ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}

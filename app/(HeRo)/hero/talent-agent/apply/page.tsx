@@ -84,7 +84,7 @@ export default function TalentAgentApplyPage() {
               href="/hero/hit/a"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xs bg-[#E53935] text-white text-sm font-bold hover:bg-red-700"
             >
-              HIT 검사 시작하기
+              HIT 검사 응시
             </Link>
             <Link
               href="/hero/my"

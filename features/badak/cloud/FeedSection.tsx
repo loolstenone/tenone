@@ -218,7 +218,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
 
         {done ? (
           <div className="text-center py-6">
-            <CheckCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
+            <CheckCircle className="h-10 w-10 text-neutral-400 mx-auto mb-3" />
             <p className="text-sm font-bold text-white mb-1">문의가 접수됐어요</p>
             <p className="text-xs text-white/40">빠른 시일 내에 답변드릴게요</p>
             <button
@@ -237,7 +237,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="홍길동"
-                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-neutral-400/40"
               />
             </div>
 
@@ -248,7 +248,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder="email@example.com 또는 010-0000-0000"
-                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-neutral-400/40"
               />
             </div>
 
@@ -279,7 +279,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="궁금한 점이나 불편한 점을 자유롭게 적어주세요"
                 rows={4}
-                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40 resize-none"
+                className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-neutral-400/40 resize-none"
               />
             </div>
 
@@ -290,7 +290,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
               disabled={!canSubmit || submitting}
               className="w-full rounded-xs py-2.5 text-sm font-bold transition-all"
               style={{
-                background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #f59e0b)' : 'rgba(255,255,255,0.08)',
+                background: canSubmit ? '#ffd93d' : 'rgba(255,255,255,0.08)',
                 color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
               }}
             >

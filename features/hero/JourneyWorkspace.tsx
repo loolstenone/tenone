@@ -113,7 +113,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
   if (error || !status) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <div className="bg-amber-50 border border-amber-200 rounded-xs p-8">
+        <div className="bg-neutral-50 border border-neutral-200 rounded-xs p-8">
           <h3 className="font-bold text-neutral-900 mb-2">성장 기록을 불러오지 못했습니다</h3>
           <p className="text-sm text-neutral-600 mb-4">{error ?? "알 수 없는 오류"}</p>
           <button onClick={load} className="px-4 py-2 bg-[#E53935] text-white text-sm font-bold rounded-xs">다시 시도</button>
@@ -171,10 +171,10 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
 
 /* ═════════════════════════ Journey 지도 ═════════════════════════ */
 
-function streakBadge(streak: number): { label: string; emoji: string } | null {
-  if (streak >= 100) return { label: "100일 전설", emoji: "🏆" };
-  if (streak >= 30)  return { label: "30일 챔피언", emoji: "⭐" };
-  if (streak >= 7)   return { label: "7일 달성", emoji: "🔥" };
+function streakBadge(streak: number): { label: string } | null {
+  if (streak >= 100) return { label: "100일 전설" };
+  if (streak >= 30)  return { label: "30일 챔피언" };
+  if (streak >= 7)   return { label: "7일 달성" };
   return null;
 }
 
@@ -189,8 +189,7 @@ function JourneyMap({ status }: { status: JourneyStatus }) {
           연속 체크인 {status.streak}일
         </div>
         {badge && (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 text-xs font-bold">
-            <span>{badge.emoji}</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none border border-neutral-900 text-neutral-900 text-xs font-bold">
             {badge.label}
           </div>
         )}
@@ -307,10 +306,10 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
 
   if (!next) {
     return (
-      <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-xs p-6">
+      <div className="bg-white border border-neutral-200 rounded-xs p-6">
         <div className="flex items-center gap-2 mb-2">
-          <Crown className="w-5 h-5 text-amber-600" />
-          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">레전드</span>
+          <Crown className="w-5 h-5 text-neutral-600" />
+          <span className="text-xs font-bold text-neutral-700 uppercase tracking-wider">레전드</span>
         </div>
         <h3 className="text-lg font-bold text-neutral-900 mb-2">마지막 단계에 올랐습니다</h3>
         <p className="text-sm text-neutral-600">이제 당신이 다음 세대의 영웅을 만들 차례입니다.</p>
@@ -343,11 +342,11 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
             href={it.href}
             goTab={goTab}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xs text-sm transition-colors ${
-              it.done ? "bg-green-50 text-neutral-600" : "hover:bg-neutral-50 text-neutral-700"
+              it.done ? "bg-neutral-50 text-neutral-600" : "hover:bg-neutral-50 text-neutral-700"
             }`}
           >
             {it.done ? (
-              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-neutral-600 shrink-0" />
             ) : (
               <Circle className="w-4 h-4 text-neutral-300 shrink-0" />
             )}
@@ -381,7 +380,7 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   }
 
   return (
-    <div className="rounded-xs p-6 text-white" style={{ background: `linear-gradient(135deg, ${RED}, #FF6F6F)` }}>
+    <div className="rounded-xs p-6 text-white" style={{ background: RED }}>
       <div className="flex items-center gap-2 mb-3">
         <Zap className="w-4 h-4" />
         <span className="text-xs font-bold tracking-wider uppercase">오늘의 미션</span>
@@ -421,7 +420,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         const totalUC = (data.earned ?? []).reduce((s, e) => s + e.amount, 0);
         const hasStreak = (data.earned ?? []).some(e => e.action.startsWith("hero_streak_"));
         if (UC_PUBLIC && totalUC > 0) {
-          setToast(hasStreak ? `🎉 스트릭 달성! +${totalUC} UC 적립` : `+${totalUC} UC 적립`);
+          setToast(hasStreak ? `연속 체크인 +${totalUC} UC 적립` : `+${totalUC} UC 적립`);
           setTimeout(() => setToast(null), 3500);
         }
         onRefresh();
@@ -439,7 +438,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
           <h3 className="text-lg font-bold text-neutral-900">오늘 나의 에너지는?</h3>
         </div>
         {status.todayCheckedIn && (
-          <span className="text-xs font-bold text-green-600 flex items-center gap-1">
+          <span className="text-xs font-bold text-neutral-600 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> 오늘 완료
           </span>
         )}
@@ -474,7 +473,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         {saving ? "저장 중..." : status.todayCheckedIn ? "갱신" : "저장"}
       </button>
       {toast && (
-        <div className="mt-3 px-3 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xs text-center text-sm font-bold text-amber-800 animate-pulse">
+        <div className="mt-3 px-3 py-2 bg-white border border-neutral-200 rounded-xs text-center text-sm font-bold text-neutral-800 animate-pulse">
           {toast}
         </div>
       )}
@@ -552,20 +551,20 @@ function HeroTypeTab({ status }: { status: JourneyStatus }) {
       <div className="bg-white border border-neutral-200 rounded-xs p-6">
         <h3 className="text-lg font-bold text-neutral-900 mb-1">HIT 검사 관리</h3>
         <p className="text-sm text-neutral-500 mb-6">검사를 완료할수록 당신의 데이터는 두꺼워지고, 매칭·코칭 정확도가 올라갑니다.</p>
-        {failed && <p className="text-xs text-amber-700 mb-3">결과 목록을 불러오지 못해 일부 검사는 완료 여부가 정확하지 않을 수 있습니다.</p>}
+        {failed && <p className="text-xs text-neutral-700 mb-3">결과 목록을 불러오지 못해 일부 검사는 완료 여부가 정확하지 않을 수 있습니다.</p>}
         <div className="grid md:grid-cols-2 gap-3">
           {tests.map((t) => (
             <Link
               key={t.key}
               href={t.href}
               className={`flex items-center justify-between gap-3 p-4 rounded-xs border transition-all ${
-                t.done ? "border-green-200 bg-green-50" : "border-neutral-200 hover:border-[#E53935]"
+                t.done ? "border-neutral-200 bg-neutral-50" : "border-neutral-200 hover:border-[#E53935]"
               }`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-neutral-900">{t.label}</span>
-                  {t.done && <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />}
+                  {t.done && <CheckCircle2 className="w-4 h-4 text-neutral-600 shrink-0" />}
                 </div>
                 <p className="text-xs text-neutral-500 mt-0.5 break-keep">{t.subtitle}</p>
               </div>
@@ -631,9 +630,6 @@ function OffersTab() {
 
 /* ═════════════════════════ 스테이지 승급 모달 ═════════════════════════ */
 
-const STAGE_EMOJI: Record<string, string> = {
-  Dreamer: "✨", Challenger: "🚪", Trainee: "⚔️", Debut: "🚀", Star: "⭐", Legend: "👑",
-};
 // 화면 표기는 한국어 (2026-10-13 — 영어 이름만으로는 이해하기 어려움). key는 DB 값 그대로
 const STAGE_LABEL: Record<string, string> = Object.fromEntries(STAGES.map(s => [s.key, s.label]));
 const STAGE_SUBTITLE: Record<string, string> = {
@@ -650,8 +646,7 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
       <div className="relative bg-white rounded-xs max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-300">
         {/* 상단 배너 */}
         <div className="bg-[#E53935] px-8 py-10 text-center">
-          <p className="text-5xl mb-3">{STAGE_EMOJI[to] ?? "🎉"}</p>
-          <h2 className="text-2xl font-bold text-white mb-1">다음 단계로 올라갔어요!</h2>
+          <h2 className="text-2xl font-bold text-white mb-1">다음 단계로 올라갔습니다.</h2>
           <p className="text-white/80 text-sm">{STAGE_LABEL[to] ?? to} · {STAGE_SUBTITLE[to] ?? ""}</p>
         </div>
 
@@ -671,7 +666,6 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
                 <p className="text-xs font-bold text-[#E53935] uppercase tracking-wider mb-0.5">UC 적립</p>
                 <p className="text-lg font-bold text-neutral-900">+{ucAwarded.toLocaleString()} UC</p>
               </div>
-              <span className="text-2xl">🎁</span>
             </div>
           )}
 

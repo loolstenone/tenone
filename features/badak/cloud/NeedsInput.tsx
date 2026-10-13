@@ -52,7 +52,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
   };
 
   const handleShare = async (text: string) => {
-    const shareText = `Badak에서 이 니즈를 공유했어요 👇\n"${text}"\nbadak.biz`;
+    const shareText = `Badak에서 이 니즈를 공유했어요 \n"${text}"\nbadak.biz`;
     if (navigator.share) {
       try { await navigator.share({ text: shareText, url: 'https://badak.biz' }); } catch { /* cancel */ }
     } else {
@@ -81,17 +81,16 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           className="flex flex-col gap-3 rounded-xs px-4 py-4"
           style={{
             border: '1px solid rgba(255,217,61,0.3)',
-            background: 'linear-gradient(135deg, rgba(255,217,61,0.08) 0%, rgba(255,168,0,0.04) 100%)',
+            background: 'rgba(255,255,255,0.04)',
           }}
         >
           {/* Header */}
           <div className="flex items-start gap-2.5">
-            <span style={{ fontSize: '22px', lineHeight: 1 }}>{isMerged ? '🔥' : '🙌'}</span>
             <div>
-              <p className="text-sm font-bold text-amber-300 leading-snug" style={{ letterSpacing: '-0.03em' }}>
+              <p className="text-sm font-bold text-neutral-300 leading-snug" style={{ letterSpacing: '-0.03em' }}>
                 {isMerged
                   ? `${result.count}명이 같은 니즈를 갖고 있어요`
-                  : '바닥에 새 니즈를 올렸어요!'}
+                  : '니즈를 올렸습니다.'}
               </p>
               {!isMerged && (
                 <p className="text-xs text-white/35 mt-0.5">검토 후 클라우드에 공개됩니다</p>
@@ -206,7 +205,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
               className="flex items-center gap-1 text-[11px] text-white/25 hover:text-white/50 transition-colors"
             >
               {copied ? <Check className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-              {copied ? '복사됐어요!' : '공유하기'}
+              {copied ? '복사했습니다.' : '공유하기'}
             </button>
             <button
               onClick={() => setResult(null)}
@@ -230,7 +229,7 @@ export function NeedsInput({ onSend, sending, cloudWords = [] }: NeedsInputProps
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder={PLACEHOLDERS[promptIndex]}
           maxLength={60}
-          className="w-full rounded-none border border-white/15 bg-white/8 py-3 pl-4 pr-12 text-sm font-normal text-white outline-none placeholder:text-white/30 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/10"
+          className="w-full rounded-none border border-white/15 bg-white/8 py-3 pl-4 pr-12 text-sm font-normal text-white outline-none placeholder:text-white/30 focus:border-neutral-400/40 focus:ring-1 focus:ring-neutral-400/10"
           style={{ letterSpacing: '-0.02em' }}
         />
         <button

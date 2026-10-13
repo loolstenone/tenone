@@ -55,7 +55,7 @@ export default function AboutPage() {
       <section className="relative overflow-hidden px-4 py-20 text-center sm:px-6">
         {/* 배경 그라데이션 */}
         <div className="absolute inset-0 opacity-20"
-          style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,217,61,0.3) 0%, transparent 60%)' }} />
+          style={{ background: 'transparent' }} />
 
         <div className="relative mx-auto max-w-2xl">
           <p className="mb-4 text-xs font-normal tracking-widest text-white/30">NEEDS · WANTS · CONNECTION</p>
@@ -93,7 +93,7 @@ export default function AboutPage() {
               </p>
               <p className="text-white/70 font-normal">
                 죽고 못 사는 막역한 사이보다는<br />
-                나를 좋게 본 <span className="text-amber-400">약한 연결 고리</span>의 의인이<br />
+                나를 좋게 본 <span className="text-neutral-400">약한 연결 고리</span>의 의인이<br />
                 나에게 기회를 만들어 주기도 합니다.
               </p>
             </div>
@@ -103,7 +103,7 @@ export default function AboutPage() {
             <p className="text-base font-bold text-white/70">
               성장하고 싶은 사람들의 꿈을 서로 만나게 하고 싶다.
             </p>
-            <p className="mt-2 text-sm font-bold text-amber-400">
+            <p className="mt-2 text-sm font-bold text-neutral-400">
               니즈와 원츠를 만나게 하다.
             </p>
           </div>

@@ -66,7 +66,7 @@ const tagConfig: Record<string, { label: string; border: string }> = {
 const synergyChains = [
     { name: "인재 파이프라인", icon: Users, desc: "발굴 → 성장 → 매칭 → 실전", nodes: [
         { name: "MADLeague", sub: "발굴", accent: "border-neutral-500" },
-        { name: "HeRo", sub: "역량+연결", accent: "border-orange-600/50" },
+        { name: "HeRo", sub: "역량+연결", accent: "border-neutral-600/50" },
         { name: "Badak", sub: "현업 입성", accent: "border-neutral-500" },
         { name: "SmarComm", sub: "실전 수익", accent: "border-neutral-500" },
     ]},
@@ -78,9 +78,9 @@ const synergyChains = [
     ]},
     { name: "교육 사다리", icon: GraduationCap, desc: "입문 → 스킬업 → 전문화 → 커리어", nodes: [
         { name: "MADLeague", sub: "대학생", accent: "border-neutral-500" },
-        { name: "Planner's", sub: "기획 도구", accent: "border-orange-600/50" },
-        { name: "Evo School", sub: "직무 교육", accent: "border-orange-600/50" },
-        { name: "HeRo", sub: "기업 데뷔", accent: "border-orange-600/50" },
+        { name: "Planner's", sub: "기획 도구", accent: "border-neutral-600/50" },
+        { name: "Evo School", sub: "직무 교육", accent: "border-neutral-600/50" },
+        { name: "HeRo", sub: "기업 데뷔", accent: "border-neutral-600/50" },
     ]},
 ];
 

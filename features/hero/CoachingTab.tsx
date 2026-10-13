@@ -27,9 +27,9 @@ const SESSION_TYPES = [
 
 const TYPE_COLOR: Record<string, string> = {
     self:   "bg-neutral-100 text-neutral-600",
-    peer:   "bg-blue-50 text-blue-700",
-    mentor: "bg-purple-50 text-purple-700",
-    pro:    "bg-amber-50 text-amber-700",
+    peer:   "bg-neutral-50 text-neutral-700",
+    mentor: "bg-neutral-50 text-neutral-700",
+    pro:    "bg-neutral-50 text-neutral-700",
 };
 
 interface Session {

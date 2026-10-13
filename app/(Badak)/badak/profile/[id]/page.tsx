@@ -49,9 +49,8 @@ export default function ProfileDetailPage() {
   if (!profile) {
     return (
       <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center">
-        <div className="text-4xl mb-3">😕</div>
         <p className="text-neutral-500">프로필을 찾을 수 없습니다</p>
-        <Link href="/badak/explore" className="mt-3 text-sm text-blue-600 hover:underline">탐색으로 돌아가기</Link>
+        <Link href="/badak/explore" className="mt-3 text-sm text-neutral-600 hover:underline">탐색으로 돌아가기</Link>
       </div>
     );
   }
@@ -70,16 +69,16 @@ export default function ProfileDetailPage() {
               프로필 수정
             </Link>
           ) : connStatus === 'accepted' ? (
-            <div className="flex items-center gap-2 rounded-xs bg-emerald-50 px-5 py-3 text-sm text-emerald-700">
+            <div className="flex items-center gap-2 rounded-xs bg-neutral-50 px-5 py-3 text-sm text-neutral-700">
               <Check size={16} /> 연결됨
             </div>
           ) : connStatus === 'pending' ? (
-            <div className="flex items-center gap-2 rounded-xs bg-amber-50 px-5 py-3 text-sm text-amber-700">
+            <div className="flex items-center gap-2 rounded-xs bg-neutral-50 px-5 py-3 text-sm text-neutral-700">
               <Clock size={16} /> 연결 요청 대기 중
             </div>
           ) : (
             <button onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 rounded-xs bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
+              className="flex items-center gap-2 rounded-xs bg-neutral-600 px-6 py-3 text-sm font-bold text-white hover:bg-neutral-700 transition-colors">
               <MessageCircle size={16} /> 만나고 싶다
             </button>
           )}
@@ -96,12 +95,12 @@ export default function ProfileDetailPage() {
               <p className="text-sm text-neutral-500 mb-4">{profile.displayName}님에게 연결 요청을 보냅니다. 간단한 소개와 이유를 적어주세요.</p>
               <textarea value={message} onChange={e => setMessage(e.target.value)} maxLength={200} rows={4}
                 placeholder="저는 ~하고 있는데, ~에 대해 이야기 나누고 싶습니다"
-                className="w-full rounded-xs border border-neutral-200 px-3 py-2.5 text-sm resize-none focus:border-blue-600 focus:outline-none" />
+                className="w-full rounded-xs border border-neutral-200 px-3 py-2.5 text-sm resize-none focus:border-neutral-600 focus:outline-none" />
               <div className="mt-1 text-right text-xs text-neutral-400">{message.length}/200</div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={() => setShowModal(false)} className="rounded-xs border border-neutral-200 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50">취소</button>
                 <button onClick={handleConnect} disabled={!message.trim() || sending}
-                  className="rounded-xs bg-blue-600 px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-40 transition-colors">
+                  className="rounded-xs bg-neutral-600 px-5 py-2 text-sm font-bold text-white hover:bg-neutral-700 disabled:opacity-40 transition-colors">
                   {sending ? <span className="text-xs">처리 중</span> : '보내기'}
                 </button>
               </div>

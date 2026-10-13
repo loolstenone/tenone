@@ -111,7 +111,7 @@ export default function HitAIntroPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+      <section className="bg-white border-b border-neutral-200">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 text-[#E53935] text-xs font-bold rounded-none mb-6">
             {HIT_STAGES.a.code} · 공통 기반
@@ -189,7 +189,7 @@ export default function HitAIntroPage() {
               {starting ? (
                 <><span className="text-sm text-mute">불러오는 중</span> 시작하는 중...</>
               ) : (
-                <>{HIT_STAGES.a.ko} 시작하기 <ArrowRight className="h-5 w-5" /></>
+                <>{HIT_STAGES.a.ko} 응시 <ArrowRight className="h-5 w-5" /></>
               )}
             </button>
           )}

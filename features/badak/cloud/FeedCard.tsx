@@ -90,10 +90,10 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
             </button>
 
             <div className="flex flex-wrap gap-3 text-xs text-white/35">
-              {item.date && <span>📅 {item.date}</span>}
-              {item.location && <span>📍 {item.location}</span>}
+              {item.date && <span>{item.date}</span>}
+              {item.location && <span>{item.location}</span>}
               <span style={{ color: (item.members ?? 0) / (item.max ?? 1) > 0.9 ? '#f87171' : undefined }}>
-                👥 {item.members ?? 0}/{item.max ?? 0}
+                {item.members ?? 0}/{item.max ?? 0}
               </span>
             </div>
             {/* 상세 보기 화살표 힌트 — 링크 있을 때만 */}
@@ -113,7 +113,7 @@ function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
                 className="h-full rounded-sm transition-[width] duration-1000"
                 style={{
                   width: `${((item.count ?? 0) / (item.threshold ?? 1)) * 100}%`,
-                  background: 'linear-gradient(90deg, #ffd93d, #ff6b6b)',
+                  background: '#ffd93d',
                 }}
               />
             </div>

@@ -36,7 +36,7 @@ function HitCIntroContent() {
 
   return (
     <div>
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+      <section className="bg-white border-b border-neutral-200">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-[11px] font-bold text-neutral-400 tracking-wide mb-3">생애주기</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{stage.code}</h1>
@@ -49,12 +49,12 @@ function HitCIntroContent() {
       </section>
 
       {error && /기본 성향 검사|Archetype/.test(error) && (
-        <section className="bg-amber-50 border-y border-amber-200">
+        <section className="bg-neutral-50 border-y border-neutral-200">
           <div className="mx-auto max-w-3xl px-6 py-4 flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-neutral-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-amber-800">{HIT_STAGES.a.ko}를 먼저 마쳐 주세요</p>
-              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900">{HIT_STAGES.a.ko} 시작하기 →</button>
+              <p className="text-sm font-bold text-neutral-800">{HIT_STAGES.a.ko}를 먼저 마쳐 주세요</p>
+              <button onClick={() => router.push("/hero/hit/a")} className="mt-2 text-xs font-bold text-neutral-700 underline hover:text-neutral-900">{HIT_STAGES.a.ko} 응시 →</button>
             </div>
           </div>
         </section>
@@ -81,7 +81,7 @@ function HitCIntroContent() {
         <div className="mx-auto max-w-3xl px-6 py-12 text-center">
           <p className="text-xs text-neutral-400 mb-4">기본 성향 검사 · 역량·방향 검사를 마친 뒤 진행합니다. 각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다.</p>
           <HitStartCTA
-            label={`${stage.ko} 시작하기`}
+            label={`${stage.ko} 응시`}
             resume={resume}
             total={stage.approxQuestions}
             starting={starting}

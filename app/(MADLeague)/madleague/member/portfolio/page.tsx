@@ -105,7 +105,6 @@ export default async function PortfolioPage() {
     <div className="bg-[var(--mad-black,#000)] text-white min-h-screen">
       {/* 헤더 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,29,37,0.1),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-12">
           <Link href="/madleague/member" className="inline-flex items-center gap-2 text-xs text-neutral-500 hover:text-white transition mb-6">
             <ArrowLeft className="h-3.5 w-3.5" /> 매드리거로 돌아가기
@@ -117,7 +116,7 @@ export default async function PortfolioPage() {
               <p className="mt-2 text-sm text-neutral-500">
                 활동 이력이 자동으로 집계됩니다.{' '}
                 {m.portfolio_public
-                  ? <span className="text-green-400">공개 중</span>
+                  ? <span className="text-neutral-400">공개 중</span>
                   : <span className="text-neutral-500">비공개</span>
                 }
               </p>
@@ -148,12 +147,12 @@ export default async function PortfolioPage() {
         {/* 공개 설정 배너 */}
         <div className={`border p-5 flex items-center justify-between gap-4 ${
           m.portfolio_public
-            ? 'border-green-900/40 bg-green-950/20'
+            ? 'border-neutral-900/40 bg-neutral-950/20'
             : 'border-neutral-800 bg-neutral-950'
         }`}>
           <div className="flex items-center gap-3">
             {m.portfolio_public
-              ? <Eye className="h-5 w-5 text-green-400" />
+              ? <Eye className="h-5 w-5 text-neutral-400" />
               : <EyeOff className="h-5 w-5 text-neutral-500" />
             }
             <div>

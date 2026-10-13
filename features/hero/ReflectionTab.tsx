@@ -21,31 +21,31 @@ const QUESTIONS = [
         key: "q1" as const,
         label: "이번 달 가장 잘한 것",
         placeholder: "스스로 칭찬할 행동, 성과, 결정을 적어보세요.",
-        emoji: "🏆",
+        emoji: "",
     },
     {
         key: "q2" as const,
         label: "이번 달 가장 크게 배운 것",
         placeholder: "새로 알게 된 것, 깨달은 것, 관점이 바뀐 것.",
-        emoji: "💡",
+        emoji: "",
     },
     {
         key: "q3" as const,
         label: "아쉬웠던 점 · 다음엔 어떻게?",
         placeholder: "실수나 아쉬운 점을 솔직하게, 그리고 개선 방법까지.",
-        emoji: "🔧",
+        emoji: "",
     },
     {
         key: "q4" as const,
         label: "다음 달 핵심 목표 하나",
         placeholder: "측정 가능하고 구체적인 목표 한 가지.",
-        emoji: "🎯",
+        emoji: "",
     },
     {
         key: "q5" as const,
         label: "이달의 나에게 한마디",
         placeholder: "격려, 다짐, 또는 미래의 나에게 전하고 싶은 말.",
-        emoji: "💬",
+        emoji: "",
     },
 ] as const;
 
@@ -168,7 +168,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                         <span className="text-xs text-neutral-400 font-normal">{filledCount}/5</span>
 
                         {saved && !saving && (
-                            <span className="flex items-center gap-1 text-xs font-bold text-green-600">
+                            <span className="flex items-center gap-1 text-xs font-bold text-neutral-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" /> 저장됨
                             </span>
                         )}
@@ -186,7 +186,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                 </div>
 
                 {savedToast && (
-                    <div className="mt-3 px-3 py-2 bg-green-50 border border-green-200 rounded-xs text-center text-sm font-bold text-green-700">
+                    <div className="mt-3 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xs text-center text-sm font-bold text-neutral-700">
                         회고가 저장되었습니다 ✓
                     </div>
                 )}
@@ -208,7 +208,6 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                     {QUESTIONS.map((q, idx) => (
                         <div key={q.key} className="bg-white border border-neutral-200 rounded-xs p-6">
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-lg">{q.emoji}</span>
                                 <div>
                                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mr-2">
                                         Q{idx + 1}
@@ -216,7 +215,7 @@ export function ReflectionTab({ memberId }: { memberId: string }) {
                                     <span className="text-sm font-bold text-neutral-900">{q.label}</span>
                                 </div>
                                 {answers[q.key].trim() && (
-                                    <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto shrink-0" />
+                                    <CheckCircle2 className="w-4 h-4 text-neutral-500 ml-auto shrink-0" />
                                 )}
                             </div>
                             <textarea

@@ -242,9 +242,9 @@ function GroupManageCard({
                   {togglingJoinType ? (
                     <span className="text-[11px] text-white/30">변경 중...</span>
                   ) : group.joinType === 'approval' ? (
-                    <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-normal text-amber-400">승인제</span></>
+                    <><ToggleRight className="h-4 w-4 text-neutral-400" /> <span className="font-normal text-neutral-400">승인제</span></>
                   ) : (
-                    <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-normal text-green-400">선착순</span></>
+                    <><ToggleLeft className="h-4 w-4 text-neutral-400" /> <span className="font-normal text-neutral-400">선착순</span></>
                   )}
                 </button>
               </div>
@@ -254,7 +254,7 @@ function GroupManageCard({
             </div>
             {pendingJoinType && (
               <div className="mx-3 mb-2.5 rounded-xs px-4 py-3" style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
-                <p className="mb-2.5 text-[12px] font-bold text-amber-300/90">
+                <p className="mb-2.5 text-[12px] font-bold text-neutral-300/90">
                   {pendingJoinType === 'firstcome' ? '승인제 → 선착순으로 변경하시겠습니까?' : '선착순 → 승인제로 변경하시겠습니까?'}
                 </p>
                 <p className="mb-3 text-[11px] leading-relaxed text-white/40">
@@ -412,8 +412,8 @@ function GroupManageCard({
           {activeSection === 'notice' && (
             <div className="p-3">
               {group.notice ? (
-                <div className="rounded-xs bg-amber-400/5 border border-amber-400/10 p-3">
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-400">
+                <div className="rounded-xs bg-neutral-400/5 border border-neutral-400/10 p-3">
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold text-neutral-400">
                     <Megaphone className="h-3 w-3" /> 모임 공지
                   </div>
                   <p className="text-[11px] leading-relaxed text-white/60">{group.notice}</p>
@@ -534,7 +534,7 @@ function ProfileBoostCard({
     setCareerForm({ ...EMPTY_CAREER_FORM });
   };
 
-  const inputCls = "w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30";
+  const inputCls = "w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-neutral-400/30";
   const selectCls = "rounded-xs border border-white/10 bg-[#1a1a2e] px-2 py-1.5 text-xs text-white/70 outline-none";
 
   return (
@@ -620,7 +620,7 @@ function ProfileBoostCard({
             <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><FileText className="h-3 w-3" /> 한 줄 소개</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
               placeholder="나를 한마디로 소개해보세요. 모임에서 어떤 사람인지 알 수 있어요."
-              className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none" />
+              className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-neutral-400/30 resize-none" />
           </div>
 
           {/* ── 이력 ── */}
@@ -630,7 +630,7 @@ function ProfileBoostCard({
               <button
                 type="button"
                 onClick={() => openCareerForm()}
-                className="rounded-xs border border-white/10 px-2.5 py-1 text-[10px] text-white/50 hover:border-amber-400/30 hover:text-amber-400 transition-colors"
+                className="rounded-xs border border-white/10 px-2.5 py-1 text-[10px] text-white/50 hover:border-neutral-400/30 hover:text-neutral-400 transition-colors"
               >
                 + 이력 추가
               </button>
@@ -648,7 +648,7 @@ function ProfileBoostCard({
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold text-white/80">{c.company}</div>
-                        <div className="text-[11px] text-amber-400/70">{c.title}</div>
+                        <div className="text-[11px] text-neutral-400/70">{c.title}</div>
                         <div className="mt-0.5 text-[10px] text-white/30">{formatPeriod(c)}</div>
                         {c.description && (
                           <p className="mt-1.5 text-[11px] leading-relaxed text-white/40 line-clamp-2">{c.description}</p>
@@ -658,7 +658,7 @@ function ProfileBoostCard({
                         <button
                           type="button"
                           onClick={() => openCareerForm(c)}
-                          className="rounded p-1 text-white/20 hover:text-amber-400 transition-colors"
+                          className="rounded p-1 text-white/20 hover:text-neutral-400 transition-colors"
                         >
                           <Pencil className="h-3 w-3" />
                         </button>
@@ -678,8 +678,8 @@ function ProfileBoostCard({
 
             {/* 이력 추가/수정 폼 */}
             {showCareerForm && (
-              <div className="rounded-xs border border-amber-400/15 px-4 py-4 space-y-3" style={{ background: 'rgba(255,217,61,0.03)' }}>
-                <p className="text-[11px] font-bold text-amber-400/60">{editingId ? '이력 수정' : '이력 추가'}</p>
+              <div className="rounded-xs border border-neutral-400/15 px-4 py-4 space-y-3" style={{ background: 'rgba(255,217,61,0.03)' }}>
+                <p className="text-[11px] font-bold text-neutral-400/60">{editingId ? '이력 수정' : '이력 추가'}</p>
 
                 <input
                   placeholder="회사/조직"
@@ -714,7 +714,7 @@ function ProfileBoostCard({
                       type="checkbox"
                       checked={careerForm.isCurrent}
                       onChange={(e) => setCareerForm(f => ({ ...f, isCurrent: e.target.checked, endYear: e.target.checked ? null : f.endYear, endMonth: e.target.checked ? null : f.endMonth }))}
-                      className="accent-amber-400"
+                      className="accent-neutral-400"
                     />
                     현재 재직/활동 중
                   </label>
@@ -739,7 +739,7 @@ function ProfileBoostCard({
                   value={careerForm.description}
                   onChange={(e) => setCareerForm(f => ({ ...f, description: e.target.value }))}
                   rows={3}
-                  className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none"
+                  className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-neutral-400/30 resize-none"
                 />
 
                 <div className="flex gap-2">
@@ -820,7 +820,7 @@ function ProfileBoostCard({
                 }}
                 maxLength={MAX_CUSTOM_LEN}
                 placeholder="직접 입력 (Enter 또는 ,)"
-                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-blue-400/40"
+                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-neutral-400/40"
               />
               <button
                 type="button"
@@ -828,7 +828,7 @@ function ProfileBoostCard({
                   addCustomItem(lookingForInput, lookingFor, onToggleLookingFor);
                   setLookingForInput('');
                 }}
-                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-blue-400/30 hover:text-blue-300"
+                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-neutral-400/30 hover:text-neutral-300"
               >
                 추가
               </button>
@@ -891,7 +891,7 @@ function ProfileBoostCard({
                 }}
                 maxLength={MAX_CUSTOM_LEN}
                 placeholder="직접 입력 (Enter 또는 ,)"
-                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-green-400/40"
+                className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-neutral-400/40"
               />
               <button
                 type="button"
@@ -899,7 +899,7 @@ function ProfileBoostCard({
                   addCustomItem(canOfferInput, canOffer, onToggleCanOffer);
                   setCanOfferInput('');
                 }}
-                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-green-400/30 hover:text-green-300"
+                className="rounded-xs border border-white/10 px-3 py-2 text-[11.5px] font-bold text-white/60 hover:border-neutral-400/30 hover:text-neutral-300"
               >
                 추가
               </button>
@@ -913,10 +913,10 @@ function ProfileBoostCard({
             </label>
             <div className="space-y-2">
               {[
-                { icon: '📷', label: 'Instagram', value: instagramUrl, setter: setInstagramUrl, placeholder: 'https://instagram.com/닉네임' },
-                { icon: '👥', label: 'Facebook', value: facebookUrl, setter: setFacebookUrl, placeholder: 'https://facebook.com/아이디' },
-                { icon: '💼', label: 'LinkedIn', value: linkedinUrl, setter: setLinkedinUrl, placeholder: 'https://linkedin.com/in/아이디' },
-                { icon: '🌐', label: '홈페이지', value: homepageUrl, setter: setHomepageUrl, placeholder: 'https://your-site.com' },
+                { icon: '', label: 'Instagram', value: instagramUrl, setter: setInstagramUrl, placeholder: 'https://instagram.com/닉네임' },
+                { icon: '', label: 'Facebook', value: facebookUrl, setter: setFacebookUrl, placeholder: 'https://facebook.com/아이디' },
+                { icon: '', label: 'LinkedIn', value: linkedinUrl, setter: setLinkedinUrl, placeholder: 'https://linkedin.com/in/아이디' },
+                { icon: '', label: '홈페이지', value: homepageUrl, setter: setHomepageUrl, placeholder: 'https://your-site.com' },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-2">
                   <span className="w-20 shrink-0 text-[11.5px] text-white/45">{s.icon} {s.label}</span>
@@ -925,7 +925,7 @@ function ProfileBoostCard({
                     value={s.value}
                     onChange={(e) => s.setter(e.target.value)}
                     placeholder={s.placeholder}
-                    className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+                    className="flex-1 rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
                   />
                 </div>
               ))}
@@ -1001,7 +1001,7 @@ function ProfileBoostCard({
                 type="checkbox"
                 checked={profilePublic}
                 onChange={(e) => setProfilePublic(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-green-400"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-neutral-400"
               />
               <div className="min-w-0 flex-1">
                 <div className="text-[13px] font-bold text-white/80">
@@ -1027,7 +1027,7 @@ function ProfileBoostCard({
             <button
               type="button"
               onClick={() => setShowPreview(true)}
-              className="flex-1 rounded-xs border border-white/10 py-2.5 text-xs font-bold text-white/50 hover:border-amber-400/20 hover:text-amber-400 transition-colors"
+              className="flex-1 rounded-xs border border-white/10 py-2.5 text-xs font-bold text-white/50 hover:border-neutral-400/20 hover:text-neutral-400 transition-colors"
             >
               미리보기
             </button>
@@ -1051,7 +1051,7 @@ function ProfileBoostCard({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400/60">간략 프로필 미리보기</span>
+            <span className="text-xs font-bold text-neutral-400/60">간략 프로필 미리보기</span>
             <button onClick={() => setShowPreview(false)} className="p-1 text-white/30 hover:text-white">
               <X className="h-4 w-4" />
             </button>
@@ -1070,7 +1070,7 @@ function ProfileBoostCard({
             <div>
               <div className="text-sm font-bold text-white/90">{displayName || '이름 없음'}</div>
               {experienceYears !== null && (
-                <div className="mt-0.5 text-[11px] text-amber-400/60">
+                <div className="mt-0.5 text-[11px] text-neutral-400/60">
                   {experienceYears === 0 ? '신입' : experienceYears >= 11 ? '10년차+' : `${experienceYears}년차`}
                 </div>
               )}
@@ -1079,7 +1079,7 @@ function ProfileBoostCard({
 
           {/* 한 줄 소개 */}
           {bio && (
-            <p className="mb-4 text-xs leading-relaxed text-white/55 border-l-2 border-amber-400/20 pl-3">{bio}</p>
+            <p className="mb-4 text-xs leading-relaxed text-white/55 border-l-2 border-neutral-400/20 pl-3">{bio}</p>
           )}
 
           {/* 이력 목록 */}
@@ -1089,7 +1089,7 @@ function ProfileBoostCard({
               {career.map((c) => (
                 <div key={c.id} className="rounded-xs px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="text-xs font-bold text-white/80">{c.company}</div>
-                  <div className="text-[11px] text-amber-400/60">{c.title}</div>
+                  <div className="text-[11px] text-neutral-400/60">{c.title}</div>
                   <div className="mt-0.5 text-[10px] text-white/25">{formatPeriod(c)}</div>
                 </div>
               ))}
@@ -1634,7 +1634,7 @@ function BadakMyPageInner() {
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">
                   개설한 모임
-                  {pendingApplicants > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingApplicants}건</span>}
+                  {pendingApplicants > 0 && <span className="ml-2 text-neutral-400">· 대기 {pendingApplicants}건</span>}
                 </h2>
                 <button
                   onClick={() => router.push('/badak/groups/create')}
@@ -1648,7 +1648,7 @@ function BadakMyPageInner() {
               {myGroups.length === 0 ? (
                 <div className="rounded-xs border border-white/6 py-12 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(255,217,61,0.08)' }}>
-                    <Crown className="h-6 w-6 text-amber-400/40" />
+                    <Crown className="h-6 w-6 text-neutral-400/40" />
                   </div>
                   <p className="mb-1 text-sm font-normal text-white/40">아직 개설한 모임이 없어요</p>
                   <p className="mb-4 text-xs text-white/20">같은 니즈를 가진 사람들을 모아보세요</p>
@@ -1681,7 +1681,7 @@ function BadakMyPageInner() {
               {joinedGroups.length === 0 ? (
                 <div className="rounded-xs border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none" style={{ background: 'rgba(99,102,241,0.08)' }}>
-                    <Users className="h-6 w-6 text-indigo-400/40" />
+                    <Users className="h-6 w-6 text-neutral-400/40" />
                   </div>
                   <p className="mb-1 text-sm font-normal text-white/40">참여한 모임이 없어요</p>
                   <p className="mb-4 text-xs text-white/20">바닥 니즈 클라우드에서 모임을 찾아보세요</p>
@@ -1710,7 +1710,7 @@ function BadakMyPageInner() {
                       {j.nextDate && j.myStatus === 'approved' && (
                         <div className="text-right">
                           <div className="text-[10px] text-white/30">다음 모임</div>
-                          <div className="text-xs font-bold text-green-400">{j.nextDate}</div>
+                          <div className="text-xs font-bold text-neutral-400">{j.nextDate}</div>
                         </div>
                       )}
                     </div>
@@ -1734,7 +1734,7 @@ function BadakMyPageInner() {
                 <div>
                   <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-white/40">
                     받은 제안
-                    {pendingIncomingCount > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingIncomingCount}건</span>}
+                    {pendingIncomingCount > 0 && <span className="ml-2 text-neutral-400">· 대기 {pendingIncomingCount}건</span>}
                   </h2>
                   {connections.received.length === 0 ? (
                     <div className="rounded-xs border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
@@ -2188,7 +2188,7 @@ function BadakMyPageInner() {
                     }}>
                     <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {!noti.read && <span className="h-1.5 w-1.5 rounded-none bg-amber-400" />}
+                        {!noti.read && <span className="h-1.5 w-1.5 rounded-none bg-neutral-400" />}
                         <span className="rounded px-1.5 py-0.5 text-[10px] font-normal" style={{ background: s.bg, color: s.color }}>{s.label}</span>
                       </div>
                       <span className="text-[10px] text-white/20">{ago}</span>
@@ -2209,7 +2209,7 @@ function BadakMyPageInner() {
         {activeTab === 'settings' && (
           <div className="space-y-4">
             {saveSuccess && (
-              <div className="flex items-center gap-2 rounded-xs bg-green-500/10 px-4 py-3 text-xs text-green-400">
+              <div className="flex items-center gap-2 rounded-xs bg-neutral-500/10 px-4 py-3 text-xs text-neutral-400">
                 <Check className="h-4 w-4" /> 프로필이 저장되었습니다
               </div>
             )}
@@ -2230,18 +2230,18 @@ function BadakMyPageInner() {
               {/* 닉네임 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Briefcase className="h-3 w-3" /> 닉네임</label>
-                {editMode ? <input value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
+                {editMode ? <input value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-neutral-400/30" />
                   : <p className="text-xs text-white/70">{nickname || '미설정'}</p>}
               </div>
               {/* 이메일 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Mail className="h-3 w-3" /> 이메일</label>
-                <p className="flex items-center gap-1.5 text-xs text-white/70">{user?.email}<span className="flex items-center gap-0.5 rounded-none bg-green-500/10 px-1.5 py-0.5 text-[9px] text-green-400"><Check className="h-2.5 w-2.5" /> 인증됨</span></p>
+                <p className="flex items-center gap-1.5 text-xs text-white/70">{user?.email}<span className="flex items-center gap-0.5 rounded-none bg-neutral-500/10 px-1.5 py-0.5 text-[9px] text-neutral-400"><Check className="h-2.5 w-2.5" /> 인증됨</span></p>
               </div>
               {/* 연락처 */}
               <div className="mb-4">
                 <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Phone className="h-3 w-3" /> 연락처</label>
-                {editMode ? <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30" />
+                {editMode ? <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-neutral-400/30" />
                   : <p className="text-xs text-white/70">{phone || '미설정'}</p>}
               </div>
               {/* 산업군 */}
@@ -2312,8 +2312,8 @@ function BadakMyPageInner() {
 
             {/* 이메일 인증 플로우 */}
             {verifyStep === 'confirm' && (
-              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4">
-                <div className="mb-2 flex items-center gap-2"><Shield className="h-4 w-4 text-amber-400" /><span className="text-xs font-bold text-amber-400">프로필 변경 인증</span></div>
+              <div className="rounded-xs border border-neutral-400/20 bg-neutral-400/5 p-4">
+                <div className="mb-2 flex items-center gap-2"><Shield className="h-4 w-4 text-neutral-400" /><span className="text-xs font-bold text-neutral-400">프로필 변경 인증</span></div>
                 <p className="mb-1 text-[11px] text-white/60">프로필 정보 변경을 위해 본인 인증이 필요합니다.</p>
                 <p className="mb-4 text-[11px] text-white/40">가입 이메일 <span className="font-normal text-white/60">{user?.email}</span> 로 인증 코드를 보내드립니다.</p>
                 <div className="flex gap-2">
@@ -2323,19 +2323,19 @@ function BadakMyPageInner() {
               </div>
             )}
             {verifyStep === 'sending' && (
-              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4 text-center">
+              <div className="rounded-xs border border-neutral-400/20 bg-neutral-400/5 p-4 text-center">
                 <span className="text-sm text-mute">불러오는 중</span><p className="text-xs text-white/50">인증 코드를 발송하고 있습니다...</p>
               </div>
             )}
             {verifyStep === 'input' && (
-              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4">
-                <div className="mb-2 flex items-center gap-2"><Mail className="h-4 w-4 text-amber-400" /><span className="text-xs font-bold text-amber-400">인증 코드 발송 완료</span></div>
+              <div className="rounded-xs border border-neutral-400/20 bg-neutral-400/5 p-4">
+                <div className="mb-2 flex items-center gap-2"><Mail className="h-4 w-4 text-neutral-400" /><span className="text-xs font-bold text-neutral-400">인증 코드 발송 완료</span></div>
                 <p className="mb-1 text-[11px] text-white/60"><span className="font-normal text-white/70">{user?.email}</span> 로 인증 코드를 보냈습니다.</p>
                 <p className="mb-4 text-[10px] text-white/30">메일함에서 인증 코드 6자리를 확인 후 아래에 입력해주세요.</p>
                 <div className="mb-3">
                   <input value={verificationCode} onChange={(e) => { setVerificationCode(e.target.value.replace(/[^0-9]/g, '')); setVerifyError(''); }}
                     placeholder="인증 코드 6자리 입력" maxLength={6} inputMode="numeric"
-                    className="w-full rounded-xs border border-white/15 bg-white/5 px-4 py-3 text-center text-base font-bold tracking-[0.3em] text-white/90 outline-none focus:border-amber-400/40" />
+                    className="w-full rounded-xs border border-white/15 bg-white/5 px-4 py-3 text-center text-base font-bold tracking-[0.3em] text-white/90 outline-none focus:border-neutral-400/40" />
                   {verifyError && <p className="mt-1.5 text-[11px] text-red-400">{verifyError}</p>}
                 </div>
                 <button onClick={handleVerifyAndSave} disabled={verificationCode.length < 6}
@@ -2349,7 +2349,7 @@ function BadakMyPageInner() {
               </div>
             )}
             {verifyStep === 'verifying' && (
-              <div className="rounded-xs border border-amber-400/20 bg-amber-400/5 p-4 text-center">
+              <div className="rounded-xs border border-neutral-400/20 bg-neutral-400/5 p-4 text-center">
                 <span className="text-sm text-mute">불러오는 중</span><p className="text-xs text-white/50">인증 확인 중...</p>
               </div>
             )}

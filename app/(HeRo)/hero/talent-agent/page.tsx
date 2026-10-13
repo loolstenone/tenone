@@ -220,7 +220,7 @@ export default function TalentAgentPage() {
       {/* CTA */}
       <section className="pt-20 pb-24">
         <div className="mx-auto max-w-3xl px-6">
-          <div className="rounded-xs bg-gradient-to-br from-[#E53935] to-red-700 text-white p-10 md:p-12 text-center">
+          <div className="rounded-xs bg-[#E53935] text-white p-10 md:p-12">
             <Users className="h-8 w-8 mx-auto mb-4 opacity-90" />
             <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
               당신의 커리어를 함께 키웁니다

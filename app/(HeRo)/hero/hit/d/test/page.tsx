@@ -35,7 +35,7 @@ const MODULE_NAMES: Record<DModuleType, string> = {
 const TRANSITION_MESSAGES: Record<string, string> = {
   'careerCapital→motivation': '다음은 이직 동기를 분석합니다',
   'motivation→transferability': '전직 가능성을 평가합니다',
-  'transferability→readiness': '마지막! 이직 준비도를 확인합니다',
+  'transferability→readiness': '마지막 단계: 이직 준비도를 확인합니다',
 };
 
 const MODULE_ORDER: DModuleType[] = ['careerCapital', 'motivation', 'transferability', 'readiness'];

@@ -159,7 +159,7 @@ function ApplyPageInner() {
         <div className="mx-auto flex max-w-md flex-col items-center px-4 py-20 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-none"
             style={{ background: 'rgba(74,222,128,0.1)' }}>
-            <Check className="h-8 w-8 text-green-400" />
+            <Check className="h-8 w-8 text-neutral-400" />
           </div>
           <h1 className="mb-2 text-xl font-bold text-white">신청이 접수되었습니다</h1>
           <p className="mb-2 text-sm text-white/50">
@@ -185,7 +185,7 @@ function ApplyPageInner() {
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 pointer-events-none">
         <div className="flex flex-col items-center rounded-xs border border-white/10 px-10 py-10 pointer-events-auto"
           style={{ background: 'rgba(26,26,46,0.95)' }}>
-          <Crown className="mb-4 h-10 w-10 text-amber-400/60" />
+          <Crown className="mb-4 h-10 w-10 text-neutral-400/60" />
           <p className="mb-1 text-base font-bold text-white">로그인이 필요합니다</p>
           <p className="mb-6 text-sm text-white/40 text-center">바닥장 신청은 회원 로그인 후 이용할 수 있습니다</p>
           <div className="flex gap-3">
@@ -216,7 +216,7 @@ function ApplyPageInner() {
             <ArrowLeft className="h-3.5 w-3.5" /> 바닥 홈
           </Link>
           <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-amber-400" />
+            <Crown className="h-5 w-5 text-neutral-400" />
             <h1 className="text-xl font-bold text-white">바닥장 신청</h1>
           </div>
           <p className="mt-1 text-xs text-white/40">
@@ -226,11 +226,11 @@ function ApplyPageInner() {
 
         {/* 연결된 니즈 컨텍스트 */}
         {needId && (
-          <div className="mb-4 rounded-xs border border-amber-400/20 p-4 flex items-start gap-3"
+          <div className="mb-4 rounded-xs border border-neutral-400/20 p-4 flex items-start gap-3"
             style={{ background: 'rgba(255,217,61,0.06)' }}>
-            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/60" />
+            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400/60" />
             <div>
-              <p className="text-xs font-bold text-amber-300/80">니즈 기반 바닥장 신청</p>
+              <p className="text-xs font-bold text-neutral-300/80">니즈 기반 바닥장 신청</p>
               <p className="mt-0.5 text-xs text-white/40">
                 특정 니즈와 연결된 바닥장 신청입니다. 승인 시 해당 니즈의 공식 바닥장이 됩니다.
               </p>
@@ -253,7 +253,7 @@ function ApplyPageInner() {
           {BENEFITS.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xs border border-white/6 p-3.5"
               style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <Icon className="mb-2 h-4 w-4 text-amber-400/50" />
+              <Icon className="mb-2 h-4 w-4 text-neutral-400/50" />
               <h3 className="mb-0.5 text-xs font-bold text-white/60">{title}</h3>
               <p className="text-[10px] text-white/25">{desc}</p>
             </div>
@@ -371,13 +371,13 @@ function ApplyPageInner() {
               </p>
             )}
             {interests.some(isCustom) && interests.length < 5 && (
-              <p className="mt-1.5 text-[10px] text-blue-400/50">
+              <p className="mt-1.5 text-[10px] text-neutral-400/50">
                 <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
                 직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
               </p>
             )}
             {interests.some(isCustom) && interests.length === 5 && (
-              <p className="mt-0.5 text-[10px] text-blue-400/50">
+              <p className="mt-0.5 text-[10px] text-neutral-400/50">
                 <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
                 직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
               </p>
@@ -441,7 +441,7 @@ function ApplyPageInner() {
             disabled={!canSubmit || submitting}
             className="flex w-full items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold transition-all"
             style={{
-              background: canSubmit && !submitting ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)',
+              background: canSubmit && !submitting ? '#ffd93d' : 'rgba(255,255,255,0.06)',
               color: canSubmit && !submitting ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
               cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed',
             }}>

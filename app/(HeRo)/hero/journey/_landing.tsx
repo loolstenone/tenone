@@ -26,7 +26,7 @@ const stages = [
       "아직 내 강점을 재 본 적이 없을 뿐입니다. HIT 검사로 몰랐던 강점을 찾아보세요.",
       "이 단계에서는 나를 아는 것이 가장 중요합니다. 무엇을 잘하고 무엇이 부족한지 HIT 결과로 확인해 보세요.",
     ],
-    cta: { label: "기본 성향 검사 시작하기", href: "/hero/hit/a" },
+    cta: { label: "기본 성향 검사 응시", href: "/hero/hit/a" },
     align: "left" as const,
   },
   {
@@ -75,7 +75,7 @@ const stages = [
       "레전드 단계에 오르면 길을 직접 고릅니다. 임원으로 합류하거나, 내 사업을 시작하거나, HeRo 멘토가 되어 후배를 도울 수 있습니다.",
       "내 경험이 다음 사람에게 길잡이가 됩니다.",
     ],
-    cta: { label: "HIT 검사로 시작하기", href: "/hero/hit/a" },
+    cta: { label: "HIT 검사 응시", href: "/hero/hit/a" },
     align: "left" as const,
   },
 ];

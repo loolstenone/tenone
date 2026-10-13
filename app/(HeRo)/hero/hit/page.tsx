@@ -107,7 +107,7 @@ export default function HitOverviewPage() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href={`/hero/hit/${HIT_STAGES.a.key}`} className="inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white text-sm font-normal rounded-xs hover:bg-red-700 transition-colors">
-              {HIT_STAGES.a.ko} 시작하기 <ArrowRight className="h-4 w-4" />
+              {HIT_STAGES.a.ko} 응시 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/hero/jh/write" className="inline-flex items-center gap-2 px-5 py-3 border border-neutral-300 text-neutral-700 text-sm font-normal rounded-xs hover:border-neutral-400 transition-colors">
               공통 검사 두 가지(기본 성향 · 역량·방향)를 마쳤다면 · 희망 직무 등록

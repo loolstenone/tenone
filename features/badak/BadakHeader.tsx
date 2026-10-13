@@ -151,7 +151,7 @@ export function BadakHeader() {
                     className={clsx(
                         "block rounded-xs px-4 py-2.5 text-base font-normal transition-colors",
                         isActive(item.href)
-                            ? "bg-amber-400/10 text-amber-400"
+                            ? "bg-neutral-400/10 text-neutral-400"
                             : "text-neutral-300 hover:bg-white/5 hover:text-white"
                     )}
                 >

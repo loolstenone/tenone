@@ -81,7 +81,6 @@ export default async function MemberPage() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-16">
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#EC1D25] mb-4">
             MEMBER · {member.role === 'club_leader' ? '동아리장' : member.role === 'staff' ? '운영진' : '매드리거'}

@@ -27,7 +27,7 @@ export default function StarDetailPage() {
     return (
       <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center">
         <p className="text-neutral-500">아티클을 찾을 수 없습니다</p>
-        <Link href="/badak/stars" className="mt-3 text-sm text-blue-600 hover:underline">목록으로</Link>
+        <Link href="/badak/stars" className="mt-3 text-sm text-neutral-600 hover:underline">목록으로</Link>
       </div>
     );
   }

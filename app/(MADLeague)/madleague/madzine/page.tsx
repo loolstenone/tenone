@@ -123,7 +123,7 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                       className="h-full w-full object-cover group- transition duration-1000" />
                   )}
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-black/50" />
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-12 max-w-3xl">
                   <div className={`${MZ_KICKER} text-[#EC1D25]`}>Cover Story · {madzineCategoryLabel(cover.category)}</div>
                   <h2 className={`mt-4 text-3xl sm:text-5xl font-bold leading-tight text-white ${MZ_SERIF}`}>{cover.title}</h2>

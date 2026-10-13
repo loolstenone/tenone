@@ -256,7 +256,6 @@ export default async function PTWorkspacePage() {
     <div className="bg-black text-white min-h-screen">
       {/* 헤더 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_60%,rgba(236,29,37,0.15),transparent_55%)]" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-6 py-16">
           <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-500 mb-4">
             <Link href="/madleague/madleaguer" className="hover:text-white transition">MADLEAGUER</Link>

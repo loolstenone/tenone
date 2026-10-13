@@ -58,7 +58,7 @@ export default async function MadLeapStudyRoomPage() {
                             </div>
                             <div className="w-px h-8 bg-white/10" />
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-green-400">{openCount}</div>
+                                <div className="text-2xl font-bold text-neutral-400">{openCount}</div>
                                 <div className="text-xs text-neutral-400">모집중</div>
                             </div>
                         </div>

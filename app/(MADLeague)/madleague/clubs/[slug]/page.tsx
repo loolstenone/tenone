@@ -162,7 +162,6 @@ export default async function ClubDetailPage({ params }: PageProps) {
 
       {/* 히어로 */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at 20% 50%, ${accent}, transparent 60%)` }} aria-hidden />
         <div className="relative mx-auto max-w-7xl px-6 py-20">
           {club.logo_url ? (
             <div className="h-20 w-20 mb-8 flex items-center justify-center bg-white">

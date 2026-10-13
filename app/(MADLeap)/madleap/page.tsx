@@ -58,7 +58,7 @@ export default function MadLeapHome() {
         <>
             {/* ── Hero ── */}
             <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-[#1a1a2e]">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a2e]/30 via-[#1a1a2e]/60 to-[#1a1a2e]" />
+                <div className="absolute inset-0 bg-[#1a1a2e]/60" />
                 <div className="absolute inset-0 opacity-30">
                     <div className="absolute inset-0 bg-[url('/brands/madleap/hero-bg.jpg')] bg-cover bg-center" />
                 </div>
@@ -143,7 +143,7 @@ export default function MadLeapHome() {
                         href="/madleap/about"
                         className="inline-flex items-center gap-2 mt-10 px-6 py-3 border border-white/30 text-white text-sm font-normal hover:bg-white/10 transition-all rounded-xs"
                     >
-                        더 알아보기 <ArrowRight className="h-4 w-4" />
+                        소개 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -277,7 +277,7 @@ export default function MadLeapHome() {
                             rel="noopener noreferrer"
                             className="flex items-center gap-3 px-5 py-4 bg-white border border-neutral-200 rounded-xs hover:border-[#4361ee]/30 transition-all"
                         >
-                            <Star className="h-5 w-5 text-green-600" />
+                            <Star className="h-5 w-5 text-neutral-600" />
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs text-neutral-400">Naver Blog</div>
                                 <div className="text-sm font-bold text-neutral-800 truncate">blog.naver.com/madleap</div>

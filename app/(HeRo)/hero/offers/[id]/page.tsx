@@ -122,7 +122,7 @@ export default function OfferDetailPage() {
                         {item.status === "accepted" && (
                             <div className="bg-white border border-neutral-200 rounded-xs p-6">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                    <CheckCircle2 className="h-5 w-5 text-neutral-600" />
                                     <p className="font-bold">이 제안에 응했습니다</p>
                                 </div>
                                 <p className="text-sm text-neutral-600 mb-4">{company?.company_name}에서 이력서를 보고 연락드립니다. 철회하면 기업은 더 이상 내 정보를 볼 수 없습니다.</p>

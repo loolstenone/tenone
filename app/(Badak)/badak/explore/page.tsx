@@ -162,7 +162,7 @@ export default function ExplorePage() {
         {/* 헤더 */}
         <div className="mb-5 px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-amber-400" />
+            <Target className="h-5 w-5 text-neutral-400" />
             <h1 className="text-2xl font-bold text-white">니즈 탐색</h1>
           </div>
           <p className="mt-1 text-sm text-white/50">니즈와 니즈가 만나 원츠(Wants)가 된다</p>
@@ -219,7 +219,7 @@ export default function ExplorePage() {
                 <SlideSection
                   title="Hot 니즈"
                   subtitle="관심이 가장 많은 니즈"
-                  icon={<Flame className="h-4 w-4 text-orange-400" />}
+                  icon={<Flame className="h-4 w-4 text-neutral-400" />}
                   words={hotNeeds}
                   onSelect={setSelectedWord}
                 />
@@ -229,7 +229,7 @@ export default function ExplorePage() {
                   <SlideSection
                     title="최신 니즈"
                     subtitle="새로 올라온 니즈"
-                    icon={<Clock className="h-4 w-4 text-blue-400" />}
+                    icon={<Clock className="h-4 w-4 text-neutral-400" />}
                     words={latestNeeds}
                     onSelect={setSelectedWord}
                   />
@@ -240,7 +240,7 @@ export default function ExplorePage() {
                   <SlideSection
                     title="모임 개설됨"
                     subtitle="바닥장이 모임을 열었어요"
-                    icon={<Users className="h-4 w-4 text-green-400" />}
+                    icon={<Users className="h-4 w-4 text-neutral-400" />}
                     words={groupedNeeds}
                     onSelect={setSelectedWord}
                   />
@@ -251,7 +251,7 @@ export default function ExplorePage() {
                   <SlideSection
                     title="내 관심사 추천"
                     subtitle="내 관심사 태그 기반"
-                    icon={<Sparkles className="h-4 w-4 text-amber-400" />}
+                    icon={<Sparkles className="h-4 w-4 text-neutral-400" />}
                     words={matchedNeeds.slice(0, 8)}
                     onSelect={setSelectedWord}
                   />
@@ -315,9 +315,9 @@ export default function ExplorePage() {
 
             {/* 내 관심사 매칭 배너 */}
             {isAuthenticated && !myTagsLoading && matchedNeeds.length > 0 && !search && (
-              <div className="mb-4 flex items-center justify-between rounded-xs border border-amber-400/20 bg-amber-400/5 px-4 py-3">
+              <div className="mb-4 flex items-center justify-between rounded-xs border border-neutral-400/20 bg-neutral-400/5 px-4 py-3">
                 <div>
-                  <div className="text-[12px] font-bold text-amber-400">
+                  <div className="text-[12px] font-bold text-neutral-400">
                     내 관심사와 맞는 니즈 {matchedNeeds.length}개
                   </div>
                   <div className="mt-0.5 text-[10.5px] text-white/40">
@@ -526,18 +526,18 @@ function NeedSlideCard({ word: w, onClick }: { word: CloudWord; onClick: () => v
         <div className="h-full rounded-none" style={{
           width: `${progress}%`,
           background: w.hasGroup
-            ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-            : 'linear-gradient(90deg, #ffd93d, #ff6b6b)',
+            ? '#ffffff'
+            : '#ffd93d',
         }} />
       </div>
       {w.hasGroup && w.group ? (
         <div className="flex items-center gap-1 text-[10px] text-white/30">
-          <Crown className="h-2.5 w-2.5 text-amber-400/50" />
+          <Crown className="h-2.5 w-2.5 text-neutral-400/50" />
           {w.group.leaderName} · {w.group.location}
         </div>
       ) : (
         <div className="text-[10px] text-white/25">
-          {w.members >= 15 ? '15명 달성! 바닥장을 찾고 있어요' : `${15 - w.members}명 더 모이면 모임 개설 가능`}
+          {w.members >= 15 ? '15명 달성 · 바닥장을 찾고 있어요' : `${15 - w.members}명 더 모이면 모임 개설 가능`}
         </div>
       )}
     </button>

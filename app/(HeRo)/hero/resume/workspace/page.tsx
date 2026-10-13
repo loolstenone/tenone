@@ -163,7 +163,7 @@ export default function ResumeWorkspacePage() {
                             <button
                                 onClick={handleSave}
                                 disabled={saving || !formTitle.trim()}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-neutral-500 text-white rounded-xs text-sm font-normal hover:bg-neutral-600 disabled:opacity-50 transition-colors"
                             >
                                 <Save className="h-4 w-4" />
                                 {saving ? "저장 중..." : "저장"}
@@ -194,7 +194,7 @@ export default function ResumeWorkspacePage() {
                     </div>
                     <button
                         onClick={openNew}
-                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-neutral-500 text-white rounded-xs text-sm font-normal hover:bg-neutral-600 transition-colors"
                     >
                         <Plus className="h-4 w-4" /> 새 이력서
                     </button>
@@ -211,7 +211,7 @@ export default function ResumeWorkspacePage() {
                         <p className="text-xs text-neutral-400 mb-6">이력서를 등록하면 AI 분석 신청에 활용할 수 있습니다</p>
                         <button
                             onClick={openNew}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xs text-sm font-normal hover:bg-amber-600 transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-500 text-white rounded-xs text-sm font-normal hover:bg-neutral-600 transition-colors"
                         >
                             <Plus className="h-4 w-4" /> 첫 이력서 등록
                         </button>
@@ -221,13 +221,13 @@ export default function ResumeWorkspacePage() {
                         {resumes.map(r => (
                             <div
                                 key={r.id}
-                                className="bg-white border border-neutral-200 rounded-xs p-5 hover:border-amber-200 transition-colors"
+                                className="bg-white border border-neutral-200 rounded-xs p-5 hover:border-neutral-200 transition-colors"
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             {r.is_primary && (
-                                                <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-none font-normal">
+                                                <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded-none font-normal">
                                                     기본
                                                 </span>
                                             )}
@@ -248,13 +248,13 @@ export default function ResumeWorkspacePage() {
                                             <button
                                                 onClick={() => setPrimary(r.id)}
                                                 title="기본 이력서로 설정"
-                                                className="p-1.5 text-neutral-300 hover:text-amber-500 transition-colors"
+                                                className="p-1.5 text-neutral-300 hover:text-neutral-500 transition-colors"
                                             >
                                                 <StarOff className="h-4 w-4" />
                                             </button>
                                         )}
                                         {r.is_primary && (
-                                            <span className="p-1.5 text-amber-400">
+                                            <span className="p-1.5 text-neutral-400">
                                                 <Star className="h-4 w-4" />
                                             </span>
                                         )}
@@ -283,14 +283,14 @@ export default function ResumeWorkspacePage() {
                 )}
 
                 {resumes.length > 0 && (
-                    <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xs p-5">
-                        <p className="text-sm font-bold text-amber-800 mb-1">AI 이력서 코칭 신청</p>
-                        <p className="text-xs text-amber-600 mb-3">
+                    <div className="mt-8 bg-neutral-50 border border-neutral-100 rounded-xs p-5">
+                        <p className="text-sm font-bold text-neutral-800 mb-1">AI 이력서 코칭 신청</p>
+                        <p className="text-xs text-neutral-600 mb-3">
                             등록된 이력서를 기반으로 AI가 개선점을 분석합니다. 서비스 시작 시 안내드립니다.
                         </p>
                         <Link
                             href="/hero/resume"
-                            className="flex items-center gap-1 text-xs font-normal text-amber-700 hover:text-amber-900"
+                            className="flex items-center gap-1 text-xs font-normal text-neutral-700 hover:text-neutral-900"
                         >
                             서비스 안내 보기 <ChevronRight className="h-3.5 w-3.5" />
                         </Link>

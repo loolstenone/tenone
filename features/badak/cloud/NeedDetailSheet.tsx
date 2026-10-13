@@ -258,8 +258,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
     if (leaderDone) {
       return (
         <div className="py-6 text-center">
-          <div className="mb-2 text-2xl">🙌</div>
-          <div className="text-sm font-bold text-white/80">바닥장 신청이 완료됐어요!</div>
+          <div className="text-sm font-bold text-white/80">바닥장 신청을 받았습니다.</div>
           <div className="mt-1 text-xs text-white/35">검토 후 3일 이내 이메일로 연락드릴게요</div>
         </div>
       );
@@ -278,8 +277,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
     if (joinDone) {
       return (
         <div className="py-6 text-center">
-          <div className="mb-2 text-2xl">🎉</div>
-          <div className="text-sm font-bold text-white/80">참여 신청이 전달됐어요!</div>
+          <div className="text-sm font-bold text-white/80">참여 신청을 전달했습니다.</div>
           <div className="mt-1 text-xs text-white/35">바닥장이 승인하면 알림으로 알려드려요</div>
         </div>
       );
@@ -334,7 +332,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       <>
         {/* 관심 현황 */}
         <div className="mb-1.5 text-xs text-white/50">
-          {launched ? `🎉 ${count}명이 관심 — 공식 런칭 달성!` : `${count}명이 관심`}
+          {launched ? `${count}명이 관심 — 공식 런칭 기준 달성` : `${count}명이 관심`}
         </div>
 
         {/* 진행바 */}
@@ -344,8 +342,8 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
             style={{
               width: `${Math.min(100, (count / LAUNCH_THRESHOLD) * 100)}%`,
               background: launched
-                ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-                : 'linear-gradient(90deg, #ffd93d, #ff6b6b)',
+                ? '#ffffff'
+                : '#ffd93d',
             }}
           />
         </div>
@@ -375,7 +373,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
                 className="flex items-center gap-1.5 rounded-xs px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
                 style={{ background: 'rgba(255,217,61,0.18)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.3)' }}
               >
-                ✋ 관심있어요
+                관심있어요
               </button>
             </div>
           </div>
@@ -384,7 +382,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
             className="mb-4 flex items-center justify-center gap-2 rounded-xs py-3.5 text-sm font-bold"
             style={{ background: 'rgba(255,217,61,0.1)', border: '1px solid rgba(255,217,61,0.2)', color: '#ffd93d' }}
           >
-            ✋ 관심 등록됨 · {count}명
+            관심 등록됨 · {count}명
             {interestSaved && (
               <span className="rounded-none px-2 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(34,197,94,0.2)', color: '#4ade80' }}>
                 ✓ 저장됨
@@ -447,7 +445,7 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
           className="w-full cursor-pointer rounded-xs py-3 text-sm font-bold tracking-tight transition-all"
           style={{
             background: launched
-              ? 'linear-gradient(135deg, rgba(255,217,61,0.2), rgba(34,197,94,0.2))'
+              ? 'rgba(255,255,255,0.04)'
               : 'rgba(255,255,255,0.05)',
             border: launched
               ? '1px solid rgba(255,217,61,0.35)'
@@ -648,7 +646,7 @@ function LeaderApplyForm({
         <div>
           <div className="text-sm font-bold text-white">바닥장 신청</div>
           <div className="text-xs text-white/35">
-            {word?.text && <span className="text-amber-400/60">&ldquo;{word.text}&rdquo; </span>}
+            {word?.text && <span className="text-neutral-400/60">&ldquo;{word.text}&rdquo; </span>}
             관련 모임 바닥장 신청
           </div>
         </div>
@@ -658,7 +656,7 @@ function LeaderApplyForm({
         {/* 이름 */}
         <div>
           <label className="mb-1 block text-[11px] font-bold text-white/50">
-            이름 <span className="text-amber-400/70">*필수</span>
+            이름 <span className="text-neutral-400/70">*필수</span>
           </label>
           <input
             type="text"
@@ -666,14 +664,14 @@ function LeaderApplyForm({
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
             placeholder="실명으로 입력해 주세요"
-            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
           />
         </div>
 
         {/* 경력·이력 소개 */}
         <div>
           <label className="mb-1 block text-[11px] font-bold text-white/50">
-            경력·이력 소개 <span className="text-amber-400/70">*필수</span>
+            경력·이력 소개 <span className="text-neutral-400/70">*필수</span>
           </label>
           <textarea
             value={experience}
@@ -681,7 +679,7 @@ function LeaderApplyForm({
             maxLength={300}
             rows={3}
             placeholder="현재 직무, 연차, 전문 분야를 간단히 소개해 주세요"
-            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
           />
           <div className="mt-0.5 text-right text-[10px] text-white/20">{experience.length}/300</div>
         </div>
@@ -689,7 +687,7 @@ function LeaderApplyForm({
         {/* 신청 이유 */}
         <div>
           <label className="mb-1 block text-[11px] font-bold text-white/50">
-            신청 이유 <span className="text-amber-400/70">*필수 (20자 이상)</span>
+            신청 이유 <span className="text-neutral-400/70">*필수 (20자 이상)</span>
           </label>
           <textarea
             value={reason}
@@ -697,9 +695,9 @@ function LeaderApplyForm({
             maxLength={500}
             rows={3}
             placeholder="이 니즈로 어떤 모임을 만들고 싶은지, 참여자에게 어떤 가치를 줄 수 있는지 알려주세요"
-            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
           />
-          <div className={`mt-0.5 text-right text-[10px] ${reason.length >= 20 ? 'text-green-400/50' : 'text-white/20'}`}>{reason.length}/500</div>
+          <div className={`mt-0.5 text-right text-[10px] ${reason.length >= 20 ? 'text-neutral-400/50' : 'text-white/20'}`}>{reason.length}/500</div>
         </div>
 
         {/* 활동 계획 (선택) */}
@@ -711,14 +709,14 @@ function LeaderApplyForm({
             maxLength={300}
             rows={2}
             placeholder="모임 주제, 주기, 진행 방식 등 (선택)"
-            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full resize-none rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
           />
         </div>
 
         {/* 연락처 */}
         <div>
           <label className="mb-1 block text-[11px] font-bold text-white/50">
-            연락처 <span className="text-amber-400/70">*필수</span>
+            연락처 <span className="text-neutral-400/70">*필수</span>
           </label>
           <input
             type="text"
@@ -726,7 +724,7 @@ function LeaderApplyForm({
             onChange={(e) => setContact(e.target.value)}
             maxLength={100}
             placeholder="이메일 또는 전화번호"
-            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+            className="w-full rounded-xs border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-neutral-400/30"
           />
         </div>
       </div>
@@ -743,7 +741,7 @@ function LeaderApplyForm({
         disabled={!canSubmit || submitting}
         className="mt-4 w-full rounded-xs py-3 text-sm font-bold transition-all disabled:opacity-40"
         style={{
-          background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #ffb347)' : 'rgba(255,255,255,0.08)',
+          background: canSubmit ? '#ffd93d' : 'rgba(255,255,255,0.08)',
           color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
         }}
       >
@@ -792,7 +790,7 @@ function GroupCard({
             {g.type === 'recurring' ? '정기 모임' : '1회 모임'}
           </span>
           {isConfirmed && (
-            <span className="rounded-none bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">확정</span>
+            <span className="rounded-none bg-neutral-500/20 px-2 py-0.5 text-[10px] font-bold text-neutral-400">확정</span>
           )}
         </div>
 
@@ -821,8 +819,8 @@ function GroupCard({
 
         {/* 일정/장소 */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/50">
-          <span>📅 {g.type === 'recurring' ? g.schedule : g.eventDate}</span>
-          {g.location && <span>📍 {g.location}</span>}
+          <span>{g.type === 'recurring' ? g.schedule : g.eventDate}</span>
+          {g.location && <span>{g.location}</span>}
         </div>
       </div>
 
@@ -853,14 +851,14 @@ function GroupCard({
               background: isFull
                 ? '#ef4444'
                 : remaining <= 3
-                  ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)'
-                  : 'linear-gradient(90deg, #22c55e, #16a34a)',
+                  ? '#ffd93d'
+                  : '#ffffff',
             }}
           />
         </div>
         <div className="mt-1 text-right text-xs text-white/30">
           {isFull ? '모집 마감' : `잔여 ${remaining}석`}
-          {!isFull && remaining <= 3 && ' · 마감 임박!'}
+          {!isFull && remaining <= 3 && ' · 마감 임박'}
         </div>
       </div>
 
@@ -896,7 +894,7 @@ function GroupCard({
                 onClick={onJoin}
                 disabled={joinLoading}
                 className="cursor-pointer rounded-xs border-none px-4 py-1.5 text-xs font-bold disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
+                style={{ background: '#ffd93d', color: '#1a1a2e' }}
               >
                 {joinLoading ? '신청 중…' : '참여 신청'}
               </button>

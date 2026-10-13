@@ -30,9 +30,9 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
   const activeNeeds = items.filter((i) => i.type === 'needs').slice(0, 2);
 
   const highlights: HighlightCard[] = [
-    ...hotItems.map((item) => ({ type: 'hot' as const, label: '🔥 Hot', labelColor: '#f87171', bgColor: 'rgba(239,68,68,0.06)', item })),
-    ...recommendedItems.map((item) => ({ type: 'recommended' as const, label: '⭐ 추천', labelColor: '#fbbf24', bgColor: 'rgba(255,217,61,0.06)', item })),
-    ...activeNeeds.map((item) => ({ type: 'active' as const, label: '🚀 진행중', labelColor: '#60a5fa', bgColor: 'rgba(96,165,250,0.06)', item })),
+    ...hotItems.map((item) => ({ type: 'hot' as const, label: 'Hot', labelColor: '#f87171', bgColor: 'rgba(239,68,68,0.06)', item })),
+    ...recommendedItems.map((item) => ({ type: 'recommended' as const, label: '추천', labelColor: '#fbbf24', bgColor: 'rgba(255,217,61,0.06)', item })),
+    ...activeNeeds.map((item) => ({ type: 'active' as const, label: '진행중', labelColor: '#60a5fa', bgColor: 'rgba(96,165,250,0.06)', item })),
   ];
 
   if (highlights.length === 0) return null;
@@ -109,8 +109,8 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
                 </h3>
                 {h.item.type === 'group' && (
                   <div className="flex items-center gap-2 text-[11px] text-white/35">
-                    <span>📅 {h.item.date}</span>
-                    <span>👥 {h.item.members}/{h.item.max}</span>
+                    <span>{h.item.date}</span>
+                    <span>{h.item.members}/{h.item.max}</span>
                   </div>
                 )}
                 {h.item.type === 'needs' && (

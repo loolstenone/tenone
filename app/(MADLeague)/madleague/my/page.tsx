@@ -217,7 +217,7 @@ export default function MadLeagueMyPage() {
                                         </div>
                                         <div className="flex gap-2 shrink-0">
                                             <button onClick={() => handleApprove(app.id)} disabled={processingId === app.id}
-                                                className="flex items-center gap-1 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold px-3 py-1.5 transition">
+                                                className="flex items-center gap-1 bg-neutral-700 hover:bg-neutral-600 disabled:opacity-50 text-white text-xs font-bold px-3 py-1.5 transition">
                                                 <UserCheck className="h-3.5 w-3.5" /> 승인
                                             </button>
                                             <button onClick={() => handleReject(app.id)} disabled={processingId === app.id}

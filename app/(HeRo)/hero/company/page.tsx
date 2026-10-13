@@ -154,12 +154,12 @@ export default function HeroCompanyHubPage() {
                                 ))}
 
                                 {pending.map(c => (
-                                    <div key={c.id} className="bg-amber-50 border border-amber-200 rounded-xs p-4 flex items-center justify-between">
+                                    <div key={c.id} className="bg-neutral-50 border border-neutral-200 rounded-xs p-4 flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-bold">{c.hero_companies?.company_name}</p>
-                                            <p className="text-xs text-amber-700">기업 대표의 승인을 기다리고 있습니다</p>
+                                            <p className="text-xs text-neutral-700">기업 대표의 승인을 기다리고 있습니다</p>
                                         </div>
-                                        <Clock className="h-4 w-4 text-amber-600" />
+                                        <Clock className="h-4 w-4 text-neutral-600" />
                                     </div>
                                 ))}
 

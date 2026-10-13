@@ -62,9 +62,9 @@ export function HeRoHeader() {
                         {talentNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
                     </div>
                     <div className="flex-1 flex items-center justify-center gap-3 px-4">
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-r from-transparent to-neutral-300" />
+                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-neutral-300" />
                         {meetNav.map(item => <SearchLightNav key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}
-                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-gradient-to-l from-transparent to-neutral-300" />
+                        <span aria-hidden className="h-px w-6 2xl:w-10 bg-neutral-300" />
                     </div>
                     <div className="flex items-center gap-4 2xl:gap-6">
                         {companyNav.map(item => <NavLink key={item.href} href={item.href} label={item.name} active={isActive(item.href)} />)}

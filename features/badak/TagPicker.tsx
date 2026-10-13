@@ -19,8 +19,8 @@ export default function TagPicker({ label, options, selected, onChange, max = 5,
   };
 
   const colors = color === 'blue'
-    ? { active: 'bg-blue-600 text-white border-blue-600', inactive: 'bg-white text-neutral-600 border-neutral-200 hover:border-blue-300' }
-    : { active: 'bg-emerald-600 text-white border-emerald-600', inactive: 'bg-white text-neutral-600 border-neutral-200 hover:border-emerald-300' };
+    ? { active: 'bg-neutral-600 text-white border-neutral-600', inactive: 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300' }
+    : { active: 'bg-neutral-600 text-white border-neutral-600', inactive: 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300' };
 
   return (
     <div>

@@ -246,7 +246,6 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                         isDuplicate ? (
                             <div className="space-y-4">
                                 <div className="rounded-xs bg-neutral-50 border border-neutral-200 p-5 text-center">
-                                    <div className="text-2xl mb-2">🌐</div>
                                     <p className="text-sm font-bold text-neutral-900 mb-1">이미 One ID가 있습니다</p>
                                     <p className="text-xs text-neutral-500 mb-1">{email}</p>
                                     <p className="text-xs text-neutral-400">Ten:One™ Universe의 다른 서비스에서 만든 계정일 수 있어요.<br />그때 만든 비밀번호(또는 같은 소셜 계정)로 로그인하면 바로 이용할 수 있습니다.</p>

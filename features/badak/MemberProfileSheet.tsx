@@ -150,7 +150,7 @@ export function MemberProfileSheet({
                 )}
                 {profile?.isActive && (
                   <span className="flex items-center gap-1 text-xs" style={{ color: '#4ade80' }}>
-                    <span className="h-1.5 w-1.5 rounded-none bg-green-400 inline-block" />
+                    <span className="h-1.5 w-1.5 rounded-none bg-neutral-400 inline-block" />
                     활동 중
                   </span>
                 )}

@@ -178,7 +178,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         {goal.vrief_targets.map((v) => (
-                            <span key={v.code} className="text-[11px] px-2 py-0.5 bg-blue-50 text-blue-700 rounded-none">
+                            <span key={v.code} className="text-[11px] px-2 py-0.5 bg-neutral-50 text-neutral-700 rounded-none">
                                 {v.label} {v.from}→{v.to}
                             </span>
                         ))}
@@ -193,7 +193,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         {goal.gpr_targets.map((g, i) => (
-                            <span key={i} className="text-[11px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-none">
+                            <span key={i} className="text-[11px] px-2 py-0.5 bg-neutral-50 text-neutral-700 rounded-none">
                                 {g.label}
                                 {g.current !== undefined && g.target !== undefined && ` (${g.current}/${g.target})`}
                             </span>
@@ -212,7 +212,7 @@ function GoalCard({ goal, onCheckin, onChange }: { goal: Goal; onCheckin: () => 
                 </button>
                 <button
                     onClick={handleComplete}
-                    className="p-2 text-neutral-400 hover:text-green-600 transition-colors"
+                    className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
                     title="완료 처리"
                 >
                     <CheckCircle2 className="w-4 h-4" />
@@ -330,17 +330,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: VriefTarget[]) => void }) {
     return (
-        <div className="border border-blue-100 bg-blue-50/30 rounded-xs p-4">
+        <div className="border border-neutral-100 bg-neutral-50/30 rounded-xs p-4">
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5" /> Vrief — 키울 역량
                     </label>
                     <p className="text-[11px] text-neutral-500 mt-0.5">현재 수준 → 목표 수준 (0~5)</p>
                 </div>
                 <button
                     onClick={() => onChange([...value, { code: `vr_${Date.now()}`, label: "", from: 3, to: 4 }])}
-                    className="text-xs text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1"
+                    className="text-xs text-neutral-700 hover:text-neutral-900 font-bold flex items-center gap-1"
                 >
                     <Plus className="w-3.5 h-3.5" /> 추가
                 </button>
@@ -357,7 +357,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 onChange(next);
                             }}
                             placeholder="역량명 (예: 시장 분석)"
-                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-blue-400 bg-white"
+                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white"
                         />
                         <input
                             type="number"
@@ -367,7 +367,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 const next = [...value]; next[i] = { ...next[i], from: +e.target.value };
                                 onChange(next);
                             }}
-                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-blue-400 bg-white text-center"
+                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
                         />
                         <span className="text-neutral-400">→</span>
                         <input
@@ -378,7 +378,7 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
                                 const next = [...value]; next[i] = { ...next[i], to: +e.target.value };
                                 onChange(next);
                             }}
-                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-blue-400 bg-white text-center"
+                            className="w-16 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
                         />
                         <button
                             onClick={() => onChange(value.filter((_, j) => j !== i))}
@@ -395,17 +395,17 @@ function VriefEditor({ value, onChange }: { value: VriefTarget[]; onChange: (v: 
 
 function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprTarget[]) => void }) {
     return (
-        <div className="border border-emerald-100 bg-emerald-50/30 rounded-xs p-4">
+        <div className="border border-neutral-100 bg-neutral-50/30 rounded-xs p-4">
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5">
                         <Activity className="w-3.5 h-3.5" /> GPR — 낼 업적
                     </label>
                     <p className="text-[11px] text-neutral-500 mt-0.5">목표값이 있으면 진행률 자동 계산</p>
                 </div>
                 <button
                     onClick={() => onChange([...value, { label: "", metric: `gpr_${Date.now()}`, target: 100, current: 0 }])}
-                    className="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1"
+                    className="text-xs text-neutral-700 hover:text-neutral-900 font-bold flex items-center gap-1"
                 >
                     <Plus className="w-3.5 h-3.5" /> 추가
                 </button>
@@ -421,7 +421,7 @@ function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprT
                                 onChange(next);
                             }}
                             placeholder="업적 (예: 월간 리드 200건)"
-                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-emerald-400 bg-white"
+                            className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white"
                         />
                         <input
                             type="number"
@@ -431,7 +431,7 @@ function GprEditor({ value, onChange }: { value: GprTarget[]; onChange: (v: GprT
                                 onChange(next);
                             }}
                             placeholder="목표"
-                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-emerald-400 bg-white text-center"
+                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 bg-white text-center"
                         />
                         <button
                             onClick={() => onChange(value.filter((_, j) => j !== i))}
@@ -493,7 +493,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                 <div className="px-6 py-5 space-y-5">
                     {goal.vrief_targets.length > 0 && (
                         <div>
-                            <label className="text-xs font-bold text-blue-700 flex items-center gap-1.5 mb-3">
+                            <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
                                 <TrendingUp className="w-3.5 h-3.5" /> 이번 주 Vrief 체감
                             </label>
                             <div className="space-y-3">
@@ -508,7 +508,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                                             step="0.5" min="0" max="5"
                                             value={vriefLevels[v.code] ?? v.from}
                                             onChange={(e) => setVriefLevels({ ...vriefLevels, [v.code]: +e.target.value })}
-                                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-blue-400 text-center"
+                                            className="w-20 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 text-center"
                                         />
                                     </div>
                                 ))}
@@ -518,7 +518,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
 
                     {goal.gpr_targets.filter((g) => g.metric).length > 0 && (
                         <div>
-                            <label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 mb-3">
+                            <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
                                 <Activity className="w-3.5 h-3.5" /> 이번 주 GPR 누적값
                             </label>
                             <div className="space-y-3">
@@ -532,7 +532,7 @@ function CheckinModal({ memberId, goal, onClose, onSaved }: { memberId: string; 
                                             type="number"
                                             value={gprCurrents[g.metric!] ?? 0}
                                             onChange={(e) => setGprCurrents({ ...gprCurrents, [g.metric!]: +e.target.value })}
-                                            className="w-24 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-emerald-400 text-center"
+                                            className="w-24 px-2 py-1.5 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-neutral-400 text-center"
                                         />
                                     </div>
                                 ))}

@@ -173,7 +173,7 @@ export default function CoachingPage() {
                 label="커리어 코칭"
                 title={<>이력서, 멘토링, 로드맵, 브랜딩을<br />하나의 코칭으로</>}
                 desc="HIT 검사 결과를 바탕으로 이력서부터 브랜딩까지 한곳에서 코칭합니다."
-                cta={{ label: "HIT 검사 시작하기", href: "/hero/hit" }}
+                cta={{ label: "HIT 검사 응시", href: "/hero/hit" }}
             />
 
             {/* ── Tab Navigation (스크롤 시 헤더 아래 고정) ── */}
@@ -222,7 +222,7 @@ export default function CoachingPage() {
             <section style={{ backgroundColor: HERO_RED }}>
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
                     <h2 className="text-xl md:text-3xl font-bold text-white mb-3">
-                        지금 HeRo 코칭을 시작하세요
+                        코칭은 HIT 검사 결과에서 출발합니다
                     </h2>
                     <p className="text-red-100 mb-8">
                         HIT 검사 결과 하나로 이력서·멘토링·로드맵·브랜딩을 모두 이어서 받을 수 있습니다
@@ -232,7 +232,7 @@ export default function CoachingPage() {
                         className="inline-flex items-center gap-2 px-8 py-3 bg-white font-bold rounded-xs transition-colors hover:bg-red-50"
                         style={{ color: HERO_RED }}
                     >
-                        HIT 검사 시작하기 <ArrowRight className="h-4 w-4" />
+                        HIT 검사 응시 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -404,7 +404,7 @@ function MentorSection({
                                     ))}
                                 </div>
                                 {applyStates[mentor.id] === "done" ? (
-                                    <div className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-50 text-sm font-normal rounded-xs text-green-700">
+                                    <div className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-neutral-50 text-sm font-normal rounded-xs text-neutral-700">
                                         <CheckCircle className="h-4 w-4" /> 신청 완료
                                     </div>
                                 ) : (

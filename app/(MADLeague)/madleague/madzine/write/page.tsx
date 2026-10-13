@@ -53,7 +53,7 @@ export default async function WritePage() {
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 ${
                       item.status === 'draft' ? 'bg-neutral-800 text-neutral-400' :
-                      item.status === 'pending_review' ? 'bg-amber-900 text-amber-300' :
+                      item.status === 'pending_review' ? 'bg-neutral-900 text-neutral-300' :
                       'bg-red-900 text-red-300'
                     }`}>
                       {item.status === 'draft' ? '초안' : item.status === 'pending_review' ? '검토중' : '반려'}

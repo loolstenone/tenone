@@ -36,7 +36,7 @@ const MODULE_NAMES: Record<GapModuleType, string> = {
 const TRANSITION_MESSAGES: Record<string, string> = {
   'break_context\u2192latent_skills': '다음은 잠재 역량을 측정합니다',
   'latent_skills\u2192resilience': '회복탄력성을 평가합니다',
-  'resilience\u2192reentry': '마지막! 재진입 준비도를 확인합니다',
+  'resilience\u2192reentry': '마지막 단계: 재진입 준비도를 확인합니다',
 };
 
 const MODULE_ORDER: GapModuleType[] = ['latent_capability', 'career_viability', 'resilience', 'direction_bifurcation'];

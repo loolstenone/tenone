@@ -155,9 +155,9 @@ export default function OnboardPage() {
 
           <div className="mt-10 grid grid-cols-3 gap-3">
             {[
-              { icon: '🤝', label: '업계 네트워킹' },
-              { icon: '💼', label: '취업·이직 정보' },
-              { icon: '🚀', label: '사이드 프로젝트' },
+              { icon: '', label: '업계 네트워킹' },
+              { icon: '', label: '취업·이직 정보' },
+              { icon: '', label: '사이드 프로젝트' },
             ].map(({ icon, label }) => (
               <div key={label} className="rounded-xs bg-neutral-900 py-3 px-2 text-center">
                 <div className="mb-1 text-xl">{icon}</div>

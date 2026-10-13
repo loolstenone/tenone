@@ -121,7 +121,7 @@ export default function JHViewPage() {
                 </div>
 
                 <div className="mt-6 p-4 bg-neutral-100 border border-neutral-200 rounded-xs text-xs text-neutral-600">
-                    💡 희망 직무는 언제든 고쳐 쓸 수 있습니다. 성장하면서 방향이 바뀔 수 있으니까요.
+                    희망 직무는 언제든 고쳐 쓸 수 있습니다. 성장하면서 방향이 바뀔 수 있으니까요.
                 </div>
             </div>
         </div>

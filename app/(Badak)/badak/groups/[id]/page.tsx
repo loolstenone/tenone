@@ -479,11 +479,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             className={`h-64 w-full object-cover ${isClosed ? 'opacity-40 grayscale' : ''}`} />
         ) : (
           <div className="h-44 w-full"
-            style={{ background: 'linear-gradient(135deg, rgba(255,217,61,0.1),rgba(139,92,246,0.1),rgba(59,130,246,0.08))' }} />
+            style={{ background: 'rgba(255,255,255,0.04)' }} />
         )}
         {/* 그라디언트 오버레이 */}
         <div className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, #1a1a2e 0%, rgba(26,26,46,0.45) 55%, transparent 100%)' }} />
+          style={{ background: 'rgba(26,26,46,0.6)' }} />
 
         {/* 상단 액션 바 */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-16">
@@ -528,7 +528,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             )}
             {isClosingSoon && (
               <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
-                style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>🔥 마감임박</span>
+                style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>마감임박</span>
             )}
             {isHot && (
               <span className="inline-flex items-center rounded-none px-2.5 py-1 text-xs font-bold"
@@ -569,7 +569,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         <div className="mx-4 mt-3 flex items-center justify-between rounded-xs px-4 py-2.5"
           style={{ background: isClosingSoon ? 'rgba(251,146,60,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isClosingSoon ? 'rgba(251,146,60,0.3)' : 'rgba(255,255,255,0.09)'}` }}>
           <span className="text-xs" style={{ color: isClosingSoon ? '#fb923c' : 'rgba(255,255,255,0.45)' }}>
-            {isClosingSoon ? '🔥 마감임박 · 서두르세요!' : '잔여석'}
+            {isClosingSoon ? '마감 임박' : '잔여석'}
           </span>
           <span className="text-sm font-bold" style={{ color: isClosingSoon ? '#fb923c' : '#fb923c' }}>
             {remaining}자리
@@ -581,7 +581,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {group.notice && showNotice && (
         <div className="mx-4 mt-4 flex gap-3 rounded-xs px-4 py-3"
           style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
-          <Bell className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <Bell className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
           <p className="flex-1 text-sm leading-relaxed text-white/70">{group.notice}</p>
           <button onClick={() => setShowNotice(false)} className="shrink-0 text-white/20 hover:text-white/40">
             <X className="h-4 w-4" />
@@ -601,7 +601,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="h-1.5 overflow-hidden rounded-none" style={{ background: 'rgba(255,255,255,0.07)' }}>
           <div className="h-full rounded-none"
-            style={{ width: `${fillPct}%`, background: isFull ? 'linear-gradient(90deg,#f87171,#fb923c)' : 'linear-gradient(90deg,#ffd93d,#ff9f43)', transition: 'width 0.7s' }} />
+            style={{ width: `${fillPct}%`, background: isFull ? '#C62828' : '#ffd93d', transition: 'width 0.7s' }} />
         </div>
       </div>
 
@@ -611,7 +611,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
           {(group.event_date || group.schedule) && (
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Calendar className="h-4 w-4 shrink-0 text-amber-400/70" />
+              <Calendar className="h-4 w-4 shrink-0 text-neutral-400/70" />
               <span className="truncate text-sm font-normal text-white/75">
                 {group.schedule ?? new Date(group.event_date!).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
               </span>
@@ -619,7 +619,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           )}
           {group.location && (
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
+              <MapPin className="h-4 w-4 shrink-0 text-neutral-400/70" />
               <span className="truncate text-sm font-normal text-white/75">
                 {group.location}{group.location_detail ? ` · ${group.location_detail}` : ''}
               </span>
@@ -665,7 +665,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.intro_who && (
             <div className="mb-4 rounded-xs px-4 py-4"
               style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-amber-400/50">이런 분께 추천해요</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400/50">이런 분께 추천해요</div>
               <p className="text-sm leading-7 text-white/60 whitespace-pre-line">{group.intro_who}</p>
             </div>
           )}
@@ -676,24 +676,24 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/25">연결된 니즈</div>
               <p className="text-sm text-white/65">"{group.need.display_text}"</p>
-              <p className="mt-0.5 text-[11px] text-amber-400/50">{group.need.count}명이 같은 니즈를 가지고 있어요</p>
+              <p className="mt-0.5 text-[11px] text-neutral-400/50">{group.need.count}명이 같은 니즈를 가지고 있어요</p>
             </div>
           )}
 
           {/* 바닥장 */}
           {group.leader && (
             <button type="button" onClick={() => setShowLeaderProfile(true)}
-              className="w-full flex items-start gap-3.5 rounded-xs p-4 text-left transition-colors hover:border-amber-400/20"
+              className="w-full flex items-start gap-3.5 rounded-xs p-4 text-left transition-colors hover:border-neutral-400/20"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <Avatar name={group.leader.display_name} avatarUrl={group.leader.avatar_url} idx={0} size={48} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-white/85">{group.leader.display_name}</span>
-                  <span className="rounded-none bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">바닥장</span>
+                  <span className="rounded-none bg-neutral-400/10 px-2 py-0.5 text-[10px] font-bold text-neutral-400">바닥장</span>
                 </div>
                 <div className="mt-0.5 text-xs text-white/35">{group.leader.job_function} · {group.leader.experience_years}년차</div>
                 {group.leader_career && <p className="mt-1 text-xs text-white/40 line-clamp-1">{group.leader_career}</p>}
-                {group.leader_reason && <p className="mt-1 text-xs leading-relaxed text-amber-400/50 line-clamp-2">{group.leader_reason}</p>}
+                {group.leader_reason && <p className="mt-1 text-xs leading-relaxed text-neutral-400/50 line-clamp-2">{group.leader_reason}</p>}
                 {!group.leader_career && !group.leader_reason && group.leader.bio && <p className="mt-1.5 text-xs leading-relaxed text-white/40 line-clamp-2">{group.leader.bio}</p>}
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-white/20 mt-1" />
@@ -719,7 +719,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                     <div className="flex-1 pb-6 pt-1.5">
                       <div className="text-sm font-bold text-white/80">{session.title}</div>
                       <div className="mt-1 text-xs leading-relaxed text-white/45">{session.description}</div>
-                      {session.date && <div className="mt-1 text-[11px] text-amber-400/40">{session.date}</div>}
+                      {session.date && <div className="mt-1 text-[11px] text-neutral-400/40">{session.date}</div>}
                     </div>
                   </div>
                 ))}
@@ -742,16 +742,16 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
             {[
               group.event_date && {
-                icon: <Calendar className="h-3.5 w-3.5 text-amber-400/60" />,
+                icon: <Calendar className="h-3.5 w-3.5 text-neutral-400/60" />,
                 label: new Date(group.event_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' }),
               },
-              group.schedule && { icon: <Clock className="h-3.5 w-3.5 text-amber-400/60" />, label: group.schedule },
+              group.schedule && { icon: <Clock className="h-3.5 w-3.5 text-neutral-400/60" />, label: group.schedule },
               group.location && {
-                icon: <MapPin className="h-3.5 w-3.5 text-amber-400/60" />,
+                icon: <MapPin className="h-3.5 w-3.5 text-neutral-400/60" />,
                 label: `${group.location}${group.location_detail ? ` · ${group.location_detail}` : ''}`,
               },
-              { icon: <Banknote className="h-3.5 w-3.5 text-amber-400/60" />, label: group.fee > 0 ? `회비 ${group.fee.toLocaleString()}원` : '무료' },
-              { icon: <Users className="h-3.5 w-3.5 text-amber-400/60" />, label: `최대 ${group.max_members}명` },
+              { icon: <Banknote className="h-3.5 w-3.5 text-neutral-400/60" />, label: group.fee > 0 ? `회비 ${group.fee.toLocaleString()}원` : '무료' },
+              { icon: <Users className="h-3.5 w-3.5 text-neutral-400/60" />, label: `최대 ${group.max_members}명` },
             ].filter(Boolean).map((item, i) => (item &&
               <div key={i} className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-xs shrink-0"
@@ -841,12 +841,12 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.parent_group_id && group.reviews.length > 0 && (
             <div className="mb-3 flex items-center gap-2 rounded-xs px-3 py-2.5"
               style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
-              <span className="text-[11px] text-amber-400/60">
+              <span className="text-[11px] text-neutral-400/60">
                 시즌 {(group.season_number ?? 2) - 1} 참여자들의 후기가 함께 표시됩니다
               </span>
               {group.parent_slug && (
                 <Link href={`/badak/groups/${group.parent_slug}`}
-                  className="ml-auto shrink-0 text-[11px] text-amber-400/50 hover:text-amber-400/80 transition-colors">
+                  className="ml-auto shrink-0 text-[11px] text-neutral-400/50 hover:text-neutral-400/80 transition-colors">
                   시즌 1 보기 →
                 </Link>
               )}
@@ -1014,7 +1014,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               </button>
             </div>
             <p className="text-xs text-white/40">
-              이 모임은 <span className="text-amber-400/70">승인제</span>입니다. 간단한 자기소개와 참여 동기를 남겨주세요.
+              이 모임은 <span className="text-neutral-400/70">승인제</span>입니다. 간단한 자기소개와 참여 동기를 남겨주세요.
             </p>
             <div className="flex items-center justify-center gap-1.5 rounded-xs px-3 py-2.5 text-[11px]"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -1041,14 +1041,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* ── 하단 고정 CTA ── */}
       <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-3"
-        style={{ background: 'linear-gradient(to top, #1a1a2e 70%, transparent 100%)' }}>
+        style={{ background: 'rgba(26,26,46,0.6)' }}>
         <div className="mx-auto max-w-[640px]">
           {joinState === 'submitted' && (
             <div className="mb-2.5 rounded-xs px-4 py-3"
               style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-400" />
-                <p className="text-xs font-bold text-indigo-300">신청 완료</p>
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-neutral-400" />
+                <p className="text-xs font-bold text-neutral-300">신청 완료</p>
               </div>
               {/* 신청 → 검토 → 확정 흐름 */}
               <div className="flex items-center gap-1.5">
@@ -1061,14 +1061,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 <span className="rounded-none px-2 py-0.5 text-[10px] font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }}>③ 알림 발송</span>
               </div>
-              <p className="mt-2 text-[11px] text-indigo-300/50">승인되면 알림으로 알려드릴게요. 보통 1~2일 내 검토됩니다.</p>
+              <p className="mt-2 text-[11px] text-neutral-300/50">승인되면 알림으로 알려드릴게요. 보통 1~2일 내 검토됩니다.</p>
             </div>
           )}
           {joinState === 'waitlisted' && (
             <div className="mb-2.5 flex items-center gap-2 rounded-xs px-4 py-2.5"
               style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)' }}>
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-400" />
-              <p className="text-xs text-amber-400/70">관심 등록 완료! 모임 개설 시 알림으로 알려드릴게요.</p>
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-neutral-400" />
+              <p className="text-xs text-neutral-400/70">관심 등록했습니다. 모임 개설 시 알림으로 알려드릴게요.</p>
             </div>
           )}
           <div className="flex gap-2">

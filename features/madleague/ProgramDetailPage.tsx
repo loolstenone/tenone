@@ -128,7 +128,6 @@ function ProgramHero({ p }: { p: MadProgram }) {
     ? [['MADLeague', '맛보기'], ['정식', p.partner.brand], ['계정', 'Ten:One ID 하나'], ['기록', '동의 시 연계']] : [];
   return (
     <section className="relative overflow-hidden border-b border-neutral-900">
-      <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 50%, ${accent}2e, transparent 60%)` }} aria-hidden />
       <div className="relative mx-auto max-w-5xl px-6 py-28 sm:py-36">
         <div className="flex items-center gap-3 text-xs font-bold tracking-widest">
           <span style={{ color: accent }}>{p.eyebrow}</span>

@@ -23,7 +23,6 @@ export default function CertificatePage() {
         <div className="bg-[var(--mad-black,#000)] text-white">
             {/* Hero */}
             <section className="relative overflow-hidden border-b border-neutral-900">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.12),transparent_60%)]" aria-hidden />
                 <div className="relative mx-auto max-w-5xl px-6 py-24 sm:py-32">
                     <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CERTIFICATE</div>
                     <h1 className="mt-4 text-5xl sm:text-7xl font-bold tracking-tight leading-tight">활동인증서</h1>

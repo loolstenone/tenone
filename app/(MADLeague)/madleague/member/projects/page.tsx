@@ -137,7 +137,6 @@ export default function ProjectsPage() {
     <div className="bg-[var(--mad-black,#000)] text-white min-h-screen">
       {/* 헤더 */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(236,29,37,0.12),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-12">
           <Link
             href="/madleague/member"
@@ -274,7 +273,7 @@ export default function ProjectsPage() {
                           <FileText className="h-4 w-4 text-neutral-500" />
                           <span className="font-normal">{sub.title}</span>
                           <span className={`text-[10px] px-1.5 py-0.5 ${
-                            sub.status === 'submitted' ? 'bg-green-950/40 text-green-400' : 'bg-neutral-900 text-neutral-500'
+                            sub.status === 'submitted' ? 'bg-neutral-950/40 text-neutral-400' : 'bg-neutral-900 text-neutral-500'
                           }`}>
                             {sub.status === 'submitted' ? '제출완료' : '초안'}
                           </span>

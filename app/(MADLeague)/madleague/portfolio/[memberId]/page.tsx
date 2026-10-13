@@ -103,7 +103,6 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
     <div className="bg-[var(--mad-black,#000)] text-white min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.12),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-16">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-6">MADLEAGUE · PORTFOLIO</div>
           <div className="flex items-start gap-6">
@@ -148,7 +147,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ memb
               onClick={share}
               className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs border border-neutral-700 hover:border-white px-3 py-2 transition"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Share2 className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-neutral-400" /> : <Share2 className="h-3.5 w-3.5" />}
               {copied ? '복사됨' : '공유'}
             </button>
           </div>

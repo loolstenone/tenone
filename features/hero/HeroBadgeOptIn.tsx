@@ -123,9 +123,9 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
 
     // HIT A 완료 — 토글 노출
     return (
-        <div className="p-4 border border-neutral-200 rounded-xs bg-gradient-to-br from-white to-rose-50/30">
+        <div className="p-4 border border-neutral-200 rounded-xs bg-white">
             <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xs bg-gradient-to-br from-rose-100 to-amber-50 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xs border border-neutral-200 flex items-center justify-center shrink-0">
                     <Sparkles className="h-5 w-5 text-rose-500" />
                 </div>
                 <div className="flex-1 min-w-0">

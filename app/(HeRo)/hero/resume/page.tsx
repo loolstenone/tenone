@@ -75,8 +75,8 @@ export default function ResumePage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {consultingFeatures.map((f) => (
-                            <div key={f.title} className="border border-neutral-200 rounded-xs p-6 text-center hover:border-amber-300 transition-colors">
-                                <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xs flex items-center justify-center mx-auto mb-4">
+                            <div key={f.title} className="border border-neutral-200 rounded-xs p-6 text-center hover:border-neutral-300 transition-colors">
+                                <div className="w-12 h-12 bg-neutral-50 text-neutral-600 rounded-xs flex items-center justify-center mx-auto mb-4">
                                     <f.icon className="h-6 w-6" />
                                 </div>
                                 <h3 className="text-sm font-bold mb-2">{f.title}</h3>
@@ -98,7 +98,7 @@ export default function ResumePage() {
                         {beforeAfterExamples.map((ex) => (
                             <div key={ex.category} className="bg-white border border-neutral-200 rounded-xs p-6">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-xs px-2.5 py-1 bg-amber-100 text-amber-700 rounded-none font-normal">
+                                    <span className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-700 rounded-none font-normal">
                                         {ex.category}
                                     </span>
                                 </div>
@@ -107,9 +107,9 @@ export default function ResumePage() {
                                         <p className="text-xs text-red-400 mb-1 font-normal">고치기 전</p>
                                         <p className="text-sm text-neutral-500 line-through">{ex.before}</p>
                                     </div>
-                                    <ArrowRight className="h-5 w-5 text-amber-400 hidden md:block mt-4" />
-                                    <div className="p-4 bg-green-50 border border-green-100 rounded-xs">
-                                        <p className="text-xs text-green-500 mb-1 font-normal">고친 후</p>
+                                    <ArrowRight className="h-5 w-5 text-neutral-400 hidden md:block mt-4" />
+                                    <div className="p-4 bg-neutral-50 border border-neutral-100 rounded-xs">
+                                        <p className="text-xs text-neutral-500 mb-1 font-normal">고친 후</p>
                                         <p className="text-sm text-neutral-900 font-normal">{ex.after}</p>
                                     </div>
                                 </div>
@@ -128,7 +128,7 @@ export default function ResumePage() {
                     <p className="text-neutral-500 mb-8">이력서를 올리면 AI가 먼저 살펴봅니다</p>
                     <Link
                         href="/hero/resume/workspace"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-normal hover:bg-amber-600 transition-colors rounded-xs"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-500 text-white font-normal hover:bg-neutral-600 transition-colors rounded-xs"
                     >
                         이력서 등록하기 <ArrowRight className="h-4 w-4" />
                     </Link>

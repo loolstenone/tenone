@@ -95,7 +95,7 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
     <div
       className="rounded-xs border p-5"
       style={{
-        background: `linear-gradient(135deg, ${modeStyle.color}08, rgba(255,255,255,0.02))`,
+        background: 'rgba(255,255,255,0.03)',
         borderColor: `${modeStyle.color}30`,
       }}
     >
@@ -115,7 +115,7 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
 
       {/* 제안 제목 (AI 생성 예정) */}
       <h3 className="mb-3 text-[17px] font-bold leading-snug text-white">
-        💡 {want.suggestedTitle}
+        {want.suggestedTitle}
       </h3>
 
       {/* 공유 니즈 */}

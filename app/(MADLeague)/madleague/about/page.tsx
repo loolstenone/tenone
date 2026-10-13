@@ -33,7 +33,6 @@ export default function AboutPage() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-neutral-900">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(236,29,37,0.18),transparent_60%)]" aria-hidden />
         <div className="relative mx-auto max-w-5xl px-6 py-24">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ABOUT</div>
           <h1 className="mt-3 text-5xl sm:text-7xl font-bold tracking-tight">
@@ -192,7 +191,7 @@ export default function AboutPage() {
           <div>
             <div className="text-sm font-bold tracking-widest text-white/80">CONTACT</div>
             <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-white">문의 · 협업 · 과제 의뢰</h2>
-            <p className="mt-2 text-white/90 text-sm">공식 동아리 신청, 경쟁 PT 과제 기업, 강연 요청 모두 환영합니다.</p>
+            <p className="mt-2 text-white/90 text-sm">공식 동아리 신청, 경쟁 PT 과제 기업, 강연 요청을 받습니다.</p>
           </div>
           {/* 미식축구 담비 — 공을 들고 달리는 매드리거 */}
           <Image

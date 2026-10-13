@@ -47,8 +47,8 @@ const STATUS_LABEL: Record<StudyProgram["status"], string> = {
 };
 
 const STATUS_STYLE: Record<StudyProgram["status"], { color: string; dot: string }> = {
-    recruiting: { color: "bg-green-100 text-green-700", dot: "bg-green-500" },
-    in_progress: { color: "bg-blue-100 text-blue-700", dot: "bg-blue-500" },
+    recruiting: { color: "bg-neutral-100 text-neutral-700", dot: "bg-neutral-500" },
+    in_progress: { color: "bg-neutral-100 text-neutral-700", dot: "bg-neutral-500" },
     closed: { color: "bg-neutral-100 text-neutral-500", dot: "bg-neutral-400" },
 };
 
@@ -116,7 +116,7 @@ export default function StudyRoomList({ items }: { items: StudyProgram[] }) {
                                         <div className="flex-1 h-1.5 bg-neutral-100 rounded-none overflow-hidden">
                                             <div
                                                 className={`h-full rounded-none transition-all ${
-                                                    fillPct >= 100 ? "bg-neutral-400" : fillPct >= 80 ? "bg-orange-400" : "bg-[#4361ee]"
+                                                    fillPct >= 100 ? "bg-neutral-400" : fillPct >= 80 ? "bg-neutral-400" : "bg-[#4361ee]"
                                                 }`}
                                                 style={{ width: `${Math.min(fillPct, 100)}%` }}
                                             />

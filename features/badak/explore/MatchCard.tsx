@@ -81,7 +81,7 @@ export function MatchCard({ match, onProfile, onConnect }: MatchCardProps) {
       {/* 매칭 근거 */}
       {topReasons.length > 0 && (
         <div className="mt-4 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-400/70">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400/70">
             <Sparkles className="h-3 w-3" />
             매칭 근거
           </div>

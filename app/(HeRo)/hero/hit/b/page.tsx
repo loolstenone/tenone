@@ -78,7 +78,7 @@ function HitBIntroContent() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+      <section className="bg-white border-b border-neutral-200">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-[11px] font-bold text-neutral-400 tracking-wide mb-3">공통 기반</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -101,21 +101,21 @@ function HitBIntroContent() {
 
       {/* HIT A Required Notice */}
       {hasHitA === "no" && (
-        <section className="bg-amber-50 border-y border-amber-200">
+        <section className="bg-neutral-50 border-y border-neutral-200">
           <div className="mx-auto max-w-3xl px-6 py-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-neutral-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-800">기본 성향 검사를 먼저 완료해주세요</p>
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-sm font-bold text-neutral-800">기본 성향 검사를 먼저 완료해주세요</p>
+                <p className="text-xs text-neutral-600 mt-1">
                   효능감을 기본 성향 검사의 흥미 결과와 겹쳐 분석합니다.
                   아직 기본 성향 검사를 완료하지 않으셨다면 먼저 진행해주세요.
                 </p>
                 <button
                   onClick={() => router.push('/hero/hit/a')}
-                  className="mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-900"
+                  className="mt-2 text-xs font-bold text-neutral-700 underline hover:text-neutral-900"
                 >
-                  기본 성향 검사 시작하기 →
+                  기본 성향 검사 응시 →
                 </button>
               </div>
             </div>
@@ -156,7 +156,7 @@ function HitBIntroContent() {
             각 문항에 1(매우 비동의)~7(매우 동의)로 응답합니다. 정답은 없습니다.
           </p>
           <HitStartCTA
-            label={`${HIT_STAGES.b.ko} 시작하기`}
+            label={`${HIT_STAGES.b.ko} 응시`}
             resume={resume}
             total={TOTAL_QUESTIONS}
             starting={starting}

@@ -33,7 +33,7 @@ export function PageHero({
 }) {
     const center = align === "center";
     return (
-        <section className="bg-gradient-to-b from-red-50/70 to-white border-b border-neutral-100">
+        <section className="bg-white border-b border-neutral-200">
             <div className={clsx("mx-auto max-w-5xl px-6 lg:px-8 py-16 md:py-24", center && "text-center")}>
                 <p className="text-sm font-bold text-[#E53935] mb-3">{label}</p>
                 <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 leading-tight break-keep">{title}</h1>

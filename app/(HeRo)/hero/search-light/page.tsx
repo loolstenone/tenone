@@ -11,21 +11,21 @@ const matchFlow = [
         name: "기업 고민 설문",
         desc: "조직의 상황과 필요한 사람을 22문항으로 정리합니다. 채용 공고가 '무슨 일을 하는가'라면, 이 설문은 '왜 사람이 필요한가'를 담습니다.",
         icon: Lightbulb,
-        color: "from-amber-500 to-orange-500",
+        color: "from-neutral-500 to-neutral-500",
     },
     {
         step: "2단계 · 기업",
         name: "채용 공고",
         desc: "자격 요건 목록이 아니라, 이 일이 왜 필요한지, 어떤 문제를 푸는지, 어떤 사람이 맞는지를 적습니다.",
         icon: Search,
-        color: "from-sky-500 to-blue-600",
+        color: "from-neutral-500 to-neutral-600",
     },
     {
         step: "3단계 · HeRo",
         name: "함께 살펴보기",
         desc: "기업 고민 설문·채용 공고와 인재의 HIT 결과·희망 직무를 AI와 전문가가 함께 살펴보고 분석해 드립니다.",
         icon: Eye,
-        color: "from-violet-500 to-purple-600",
+        color: "from-neutral-500 to-neutral-600",
     },
 ];
 

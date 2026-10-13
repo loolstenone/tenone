@@ -71,7 +71,7 @@ function AICounselingContent() {
         label="AI 상담"
         title={<>나를 가장 잘 아는<br />AI 상담사와 대화하세요</>}
         desc="내 HIT 검사 결과를 읽은 AI가 강점, 성장 방향, 커리어 고민을 1:1로 함께 이야기합니다."
-        cta={resultId ? { label: "상담 시작하기", href: `/hero/hit/a/result/${resultId}` } : { label: "HIT 검사 먼저 받기", href: "/hero/hit" }}
+        cta={resultId ? { label: "상담 열기", href: `/hero/hit/a/result/${resultId}` } : { label: "HIT 검사 먼저 받기", href: "/hero/hit" }}
       />
 
       {/* ── 이런 상담이 가능합니다 ── */}

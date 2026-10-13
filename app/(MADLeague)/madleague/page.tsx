@@ -23,8 +23,6 @@ export default async function Page() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* ─── Hero ─────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#EC1D25]/20 via-black to-black" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.15),transparent_50%)]" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-32 sm:pt-32 sm:pb-40">
           <div className="flex items-center gap-3 text-[#EC1D25] font-bold tracking-widest text-xs mb-6">
             <span className="h-px w-8 bg-[#EC1D25]" />
@@ -149,7 +147,7 @@ export default async function Page() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group- transition" />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
+                      <div className="h-full w-full bg-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
                         {madzineCategoryLabel(a.category)}
                       </div>
                     )}

@@ -227,7 +227,7 @@ export default function SearchLightPeoplePage() {
                         보내기 전에 HeRo 운영자가 내용을 확인합니다. 확인이 끝나면 조건에 맞는 인재에게 알림이 가고, 응한 인재의 이력서는 응답일로부터 180일 동안 볼 수 있습니다.
                     </p>
                     {error && <p className="text-sm text-red-600">{error}</p>}
-                    {done && <p className="text-sm text-emerald-700">제안을 요청했습니다. 운영자 확인 후 발송됩니다.</p>}
+                    {done && <p className="text-sm text-neutral-700">제안을 요청했습니다. 운영자 확인 후 발송됩니다.</p>}
                     <button onClick={submit} disabled={sending || !count?.enough || !form.title.trim() || form.message.trim().length < 30}
                         className="px-6 py-3 rounded-none bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                         {sending ? "요청 중..." : "제안 요청하기"}

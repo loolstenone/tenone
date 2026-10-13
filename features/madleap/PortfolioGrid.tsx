@@ -105,13 +105,13 @@ export default function PortfolioGrid({ items }: { items: Portfolio[] }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filtered.map(p => (
                                 <div key={p.id} className="group border border-neutral-200 rounded-xs overflow-hidden hover:border-[#4361ee]/20 transition-all">
-                                    <div className={`aspect-video bg-gradient-to-br ${p.gradient} relative flex items-center justify-center overflow-hidden`}>
+                                    <div className={`aspect-video bg-neutral-800 relative flex items-center justify-center overflow-hidden`}>
                                         <div className="text-center z-10">
                                             <span className="text-white/90 text-xl md:text-2xl font-bold drop-">{p.team}</span>
                                             <p className="text-white/60 text-xs mt-1">{p.client}</p>
                                         </div>
                                         {p.award && (
-                                            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-yellow-400 text-yellow-900 rounded-none text-[10px] font-bold">
+                                            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-neutral-400 text-neutral-900 rounded-none text-[10px] font-bold">
                                                 <Award className="h-3 w-3" />
                                                 {p.award}
                                             </div>

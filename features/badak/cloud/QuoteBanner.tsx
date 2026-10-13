@@ -34,7 +34,7 @@ export function QuoteBanner() {
     <div
       className="my-4 rounded-xs px-5 py-5"
       style={{
-        background: 'linear-gradient(135deg, rgba(255,217,61,0.05) 0%, rgba(255,107,107,0.04) 100%)',
+        background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,217,61,0.12)',
       }}
     >

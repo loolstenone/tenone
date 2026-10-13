@@ -37,7 +37,7 @@ const TRANSITION_MESSAGES: Record<string, string> = {
   'expertise→leadership': '다음은 리더십 유형을 분석합니다',
   'leadership→identity': '경력 정체성 유연성을 평가합니다',
   'identity→network': '네트워크 자본을 확인합니다',
-  'network→seniorReadiness': '마지막! 고년차 이직 준비도를 확인합니다',
+  'network→seniorReadiness': '마지막 단계: 고년차 이직 준비도를 확인합니다',
 };
 
 const MODULE_ORDER: EModuleType[] = ['expertise', 'leadership', 'identity', 'network', 'seniorReadiness'];

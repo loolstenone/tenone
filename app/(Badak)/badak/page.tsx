@@ -281,7 +281,7 @@ export default function BadakNextStage() {
             style={{ letterSpacing: '-0.04em' }}
           >
             독서도 취미도 다 좋은데<br />
-            난 좀 더 <span className="text-amber-400">성장</span>하고 싶어
+            난 좀 더 <span className="text-neutral-400">성장</span>하고 싶어
           </h1>
           <p
             className="mt-2 text-[12px] text-white/40 sm:text-[14px]"
@@ -340,7 +340,7 @@ export default function BadakNextStage() {
         </div>
 
         {/* Needs Input */}
-        <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'linear-gradient(transparent 0%, rgba(26,26,46,0.95) 30%)' }}>
+        <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'rgba(26,26,46,0.95)' }}>
           <div ref={inputAreaRef} className="mx-auto max-w-[500px]">
             <NeedsInput onSend={handleSend as (text: string) => Promise<{ status: string; count?: number; id?: string }>} sending={sending} cloudWords={cloudWords} />
           </div>

@@ -25,7 +25,7 @@ interface JD {
 
 const STATUS: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
     draft: { label: "작성 중", icon: Edit, className: "text-neutral-500 bg-neutral-100" },
-    published: { label: "공개", icon: CheckCircle2, className: "text-emerald-700 bg-emerald-50" },
+    published: { label: "공개", icon: CheckCircle2, className: "text-neutral-700 bg-neutral-50" },
     archived: { label: "보관", icon: Archive, className: "text-neutral-400 bg-neutral-50" },
 };
 
@@ -135,7 +135,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                 )}
 
                 <div className="mt-8 p-4 bg-neutral-100 border border-neutral-200 rounded-xs text-xs text-neutral-600">
-                    <strong className="block mb-1">📄 채용 공고 7개 항목</strong>
+                    <strong className="block mb-1">채용 공고 7개 항목</strong>
                     ① 타이틀·한 줄 · ② 우리는 지금 · ③ 풀어야 하는 문제 · ④ 실제 하는 일
                     · ⑤ 어울리는 사람 · ⑥ 함께 일할 사람들 · ⑦ 조건과 환경
                 </div>

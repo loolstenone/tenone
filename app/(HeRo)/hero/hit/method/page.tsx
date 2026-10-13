@@ -78,7 +78,7 @@ const STEPS = [
 export default function HitMethodPage() {
   return (
     <div>
-      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+      <section className="bg-white border-b border-neutral-200">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">HIT 채점 방식</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">결과는 이렇게 만들어집니다</h1>

@@ -479,7 +479,7 @@ export default function CommunityPage() {
           <div className="py-20 text-center">
             <div className="mb-2 flex justify-center text-white/20">{BOARD_ICONS[activeBoard]}</div>
             <div className="text-sm text-white/40">{searchQuery ? '검색 결과가 없어요' : '아직 작성된 글이 없어요'}</div>
-            {!searchQuery && <div className="mt-1 text-xs text-white/20">첫 번째 글을 남겨보세요!</div>}
+            {!searchQuery && <div className="mt-1 text-xs text-white/20">첫 글을 남겨 주세요.</div>}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -561,7 +561,7 @@ export default function CommunityPage() {
               )}
               <button onClick={handleSubmitPost} disabled={!writeTitle.trim() || !writeContent.trim() || submitting}
                 className="flex w-full items-center justify-center gap-2 rounded-xs py-3 text-sm font-bold transition-all disabled:opacity-30"
-                style={{ background: writeTitle.trim() && writeContent.trim() ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)', color: writeTitle.trim() && writeContent.trim() ? '#1a1a2e' : 'rgba(255,255,255,0.2)' }}>
+                style={{ background: writeTitle.trim() && writeContent.trim() ? '#ffd93d' : 'rgba(255,255,255,0.06)', color: writeTitle.trim() && writeContent.trim() ? '#1a1a2e' : 'rgba(255,255,255,0.2)' }}>
                 <Send className="h-4 w-4" />
                 {submitting ? '등록 중...' : editingPost ? '수정하기' : '등록하기'}
               </button>

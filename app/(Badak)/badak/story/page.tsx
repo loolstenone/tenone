@@ -145,10 +145,10 @@ export default function StoryPage() {
 
             {submitDone ? (
               <div className="py-8 text-center">
-                <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-amber-400" />
-                <p className="mb-1 text-sm font-bold text-white">스토리가 접수되었습니다!</p>
+                <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-neutral-400" />
+                <p className="mb-1 text-sm font-bold text-white">스토리를 받았습니다.</p>
                 <p className="text-xs text-white/40">검토 후 성장 스토리 페이지에 게시됩니다.</p>
-                <button onClick={closeModal} className="mt-4 rounded-xs px-5 py-2 text-xs font-bold text-amber-400" style={{ background: 'rgba(255,217,61,0.12)' }}>닫기</button>
+                <button onClick={closeModal} className="mt-4 rounded-xs px-5 py-2 text-xs font-bold text-neutral-400" style={{ background: 'rgba(255,217,61,0.12)' }}>닫기</button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -213,7 +213,7 @@ export default function StoryPage() {
         {/* 헤더 */}
         <div className="mb-6">
           <div className="mb-1 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-amber-400" />
+            <TrendingUp className="h-5 w-5 text-neutral-400" />
             <h1 className="text-xl font-bold text-white">성장 스토리</h1>
           </div>
           <p className="text-xs text-white/40">바닥에서 만남이 만들어낸 변화의 이야기</p>
@@ -292,8 +292,8 @@ export default function StoryPage() {
                         <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-red-400 text-red-400' : ''}`} />
                         {isLiked ? '응원!' : '응원'}
                       </button>
-                      <button onClick={() => toggleSave(story.id)} className="text-white/30 transition-colors hover:text-amber-400">
-                        <Bookmark className={`h-3.5 w-3.5 ${isSaved ? 'fill-amber-400 text-amber-400' : ''}`} />
+                      <button onClick={() => toggleSave(story.id)} className="text-white/30 transition-colors hover:text-neutral-400">
+                        <Bookmark className={`h-3.5 w-3.5 ${isSaved ? 'fill-neutral-400 text-neutral-400' : ''}`} />
                       </button>
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export default function StoryPage() {
 
         {/* 내 스토리 제출 CTA */}
         <div className="mt-8 rounded-xs border border-white/8 p-5 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
-          <Quote className="mx-auto mb-2 h-6 w-6 text-amber-400/30" />
+          <Quote className="mx-auto mb-2 h-6 w-6 text-neutral-400/30" />
           <p className="mb-1 text-sm font-bold text-white/60">당신의 성장 스토리를 들려주세요</p>
           <p className="mb-4 text-xs text-white/30">바닥에서의 경험이 누군가에게 용기가 됩니다</p>
           <button
