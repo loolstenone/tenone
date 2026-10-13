@@ -43,5 +43,11 @@ const check = (name: string, ok: boolean, detail = '') => { console.log(`${ok ? 
   check('매트릭스 60 경계', m.cells.R === '최적영역' && m.cells.I === '소진리스크' && m.cells.A === '탐색학습필요' && m.cells.S === '비관심영역' && m.cells.C === '소진리스크', JSON.stringify(m.cells));
 }
 
+{
+  // 단계: 자기·직무 이해는 둘 다 기준을 넘어야 (평균 X)
+  const r = scoreHitB(build((mod, sub) => mod === 'career_insight' ? (sub === 'self_understanding' ? 5 : 3) : 5), null);
+  check('자기 67·직무 33 → exploring (developing 아님)', r.journeyStage === 'exploring', `${r.insightSelf}/${r.insightJob} ${r.journeyStage}`);
+}
+
 console.log(fails === 0 ? '\n모두 통과' : `\n실패 ${fails}건`);
 process.exit(fails === 0 ? 0 : 1);
