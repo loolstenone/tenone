@@ -51,31 +51,28 @@ export async function POST(request: NextRequest) {
       return errorResponse('HIT - Archetype을 먼저 완료해야 합니다.', 400);
     }
 
-    // A 결과 컨텍스트
+    // A 결과 컨텍스트 (2026-10-13)
+    // - DISC는 강도(disc_intensity, 0~100·보통 50) — 비중(disc_*_score, 합 100·평균 25)을 쓰면 CxO·코치·이사회 적합도가 늘 낮게 나왔다 (A S-Power와 같은 결함)
+    // - 성장 배경(UF)은 넘기지 않는다 — 방법 안내(/hero/hit/method) "성장 배경은 점수 계산에 들어가지 않는다"
+    // - 값이 0이어도 실제 점수 — `|| 50`으로 50이 되던 것을 `?? 50`으로
+    const di = (hitAData.disc_intensity ?? null) as { D: number; I: number; S: number; C: number } | null;
+    const num = (v: unknown, d = 50) => (typeof v === 'number' ? v : d);
     const aCtx = {
-      bt: {
-        d: hitAData.disc_d_score || 50,
-        i: hitAData.disc_i_score || 50,
-        s: hitAData.disc_s_score || 50,
-        c: hitAData.disc_c_score || 50,
-      },
+      bt: di
+        ? { d: di.D, i: di.I, s: di.S, c: di.C }
+        : { d: num(hitAData.disc_d_score, 25) * 2, i: num(hitAData.disc_i_score, 25) * 2, s: num(hitAData.disc_s_score, 25) * 2, c: num(hitAData.disc_c_score, 25) * 2 },
       sp: hitAData.s_power_scores || {
         strategic: 50, execution: 50, creativity: 50, interpersonal: 50,
         analytical: 50, harmony: 50, breakthrough: 50, guard: 50,
       },
       ch: {
-        integrity: hitAData.ch_integrity || 50,
-        relational: hitAData.ch_relational || 50,
-        emotional: hitAData.ch_emotional || 50,
-        ethics: hitAData.ch_ethics || 50,
-        growth: hitAData.ch_growth || 50,
+        integrity: num(hitAData.ch_integrity),
+        relational: num(hitAData.ch_relational),
+        emotional: num(hitAData.ch_emotional),
+        ethics: num(hitAData.ch_ethics),
+        growth: num(hitAData.ch_growth),
       },
       ap: hitAData.ap_scores || { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 },
-      uf: {
-        self: hitAData.uf_self || 50,
-        parent: hitAData.uf_parent || 50,
-        peer: hitAData.uf_peer || 50,
-      },
     };
 
     // 채점

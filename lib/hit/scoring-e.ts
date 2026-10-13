@@ -202,7 +202,7 @@ export interface AContext {
   };
   ch: { integrity: number; relational: number; emotional: number; ethics: number; growth: number };
   ap: { R: number; I: number; A: number; S: number; E: number; C: number };
-  uf: { self: number; parent: number; peer: number };
+  // 성장 배경(UF)은 받지 않는다 — 본인 리포트 해석 전용, 점수 계산 제외 (2026-10-13)
 }
 
 export function buildNextRoleMatrix(
@@ -219,7 +219,6 @@ export function buildNextRoleMatrix(
   };
   const ch = aCtx?.ch ?? { integrity: 50, relational: 50, emotional: 50, ethics: 50, growth: 50 };
   const ap = aCtx?.ap ?? { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 };
-  const uf = aCtx?.uf ?? { self: 50, parent: 50, peer: 50 };
 
   const lScores = leadership.leadership_scores;
   const eDomains = expertise.expertise_domains;
@@ -234,7 +233,7 @@ export function buildNextRoleMatrix(
 
   const fit_advisor = clamp(
     eDomains.domain_depth * 0.30 + eDomains.tacit_knowledge * 0.25 + lScores.coaching_leadership * 0.20 +
-    sp.analytical * 0.15 + uf.self * 0.10
+    sp.analytical * 0.15 + ch.integrity * 0.10 // 성장 배경(자기개념) 대신 성품(성실성), 2026-10-13
   );
 
   const fit_startup = clamp(
