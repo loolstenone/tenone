@@ -138,10 +138,12 @@ export default function SearchLightPage() {
                 </div>
 
                 {/* 텍스트 콘텐츠 — 좌하단 */}
-                <div className="relative flex flex-col justify-end h-screen pb-20 px-10 md:px-16" style={{ zIndex: 20, maxWidth: "640px" }}>
+                <div className="relative flex flex-col justify-end h-screen pb-20 px-6 md:px-16" style={{ zIndex: 20, maxWidth: "880px" }}>
                     <p className="text-sm font-bold text-red-400 mb-4">써치 라이트</p>
-                    <h1 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight break-keep">
-                        기업은 좋은 사람을 찾고,<br />사람은 좋은 기업을 찾는다
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
+                        {/* 두 줄 고정 — 줄 안에서 끊지 않는다 (2026-10-14 사용자 지시) */}
+                        <span className="block whitespace-nowrap">기업은 좋은 사람을 찾고,</span>
+                        <span className="block whitespace-nowrap">사람은 좋은 기업을 찾는다</span>
                     </h1>
                     <p className="text-sm md:text-base text-neutral-400 max-w-md mb-10 leading-relaxed break-keep">
                         양쪽에서 비춘 빛이 겹치는 곳에서 만납니다.
