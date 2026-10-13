@@ -4,6 +4,7 @@ import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitCResult, getLatestHitAResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitC, READINESS_LABELS, ONBOARDING_LABELS } from '@/lib/hit/scoring-c';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizeHitResponses } from '@/lib/hit/normalize-responses';
 import { getStageChecklistProgress } from '@/lib/hero/journey-checklists';
 import Anthropic from '@anthropic-ai/sdk';
 import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
@@ -24,11 +25,13 @@ export async function POST(request: NextRequest) {
     if (session.status !== 'in_progress') return errorResponse('이미 완료된 세션입니다.', 400);
     if (!session.member_id) return errorResponse('회원 세션만 채점할 수 있습니다.', 403);
 
-    const responses = await getHitResponses(session.id);
-    if (responses.length === 0) return errorResponse('응답 데이터가 없습니다.', 400);
+    const rawResponses = await getHitResponses(session.id);
+    if (rawResponses.length === 0) return errorResponse('응답 데이터가 없습니다.', 400);
 
-    const scored = scoreHitC(responses);
+    // 모듈·척도·역채점은 DB에서, 트랙 문항은 고른 트랙 것만 (2026-10-13 — B와 같은 정규화)
     const sb = createAdminClient();
+    const responses = await normalizeHitResponses(sb, 'C', rawResponses, { trackId });
+    const scored = scoreHitC(responses);
     const checklist = await getStageChecklistProgress(sb, session.member_id, 'c');
     // 같은 회차의 A를 잇는다 (R9, 2026-10-12): ① 요청에 온 본인 A → ② 최근 B가 기준으로 삼은 A → ③ 최근 A
     let hitA: Awaited<ReturnType<typeof getLatestHitAResult>> = null;

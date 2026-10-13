@@ -62,14 +62,14 @@ export default function HitCResultView({ resultId, print = false }: { resultId: 
 
       <Section id="summary" title="한눈에" lead="첫 직무를 향한 지금의 준비 상태입니다.">
         <KeyFindings items={[
-          { label: "취업 준비도", value: `${r.readiness_total} · ${BAND_INFO[scoreBand(r.readiness_total)].label}`, note: "여섯 가지 준비 영역의 평균입니다." },
+          { label: "취업 준비도", value: `${r.readiness_total} · ${BAND_INFO[scoreBand(r.readiness_total)].label}`, note: `${readiness.length}가지 준비 영역의 평균입니다.` },
           { label: "가장 준비된 곳", value: best ? `${READINESS_COPY[best[0]].label} ${best[1]}` : "-", note: best ? READINESS_COPY[best[0]].what : "" },
           { label: "먼저 채울 곳", value: weakest && weakest !== best ? `${READINESS_COPY[weakest[0]].label} ${weakest[1]}` : "-", note: weakest ? READINESS_COPY[weakest[0]].what : "" },
         ]} />
         <div className="mt-6"><ScoreGuide /></div>
       </Section>
 
-      <Section id="readiness" title="취업 준비" lead="지원 동기부터 실행까지, 첫 직무를 얻는 데 필요한 여섯 가지 준비입니다. 내가 느끼는 준비 정도를 보여 줍니다.">
+      <Section id="readiness" title="취업 준비" lead={`지원 동기부터 실행까지, 첫 직무를 얻는 데 필요한 ${readiness.length}가지 준비입니다. 내가 느끼는 준비 정도를 보여 줍니다.`}>
         <ScoreList scores={r.readiness_scores} copy={READINESS_COPY} />
       </Section>
 

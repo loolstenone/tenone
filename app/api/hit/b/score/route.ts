@@ -4,6 +4,7 @@ import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitB, CORE_COMPETENCY_LABELS, HOLLAND_LABELS, type HollandType, type CoreCompetency } from '@/lib/hit/scoring-b';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizeHitResponses } from '@/lib/hit/normalize-responses';
 import Anthropic from '@anthropic-ai/sdk';
 import { HIT_REPORT_MODEL } from '@/lib/hit/ai';
 
@@ -32,24 +33,9 @@ export async function POST(request: NextRequest) {
 
     // 모듈은 문항 원천(DB)에서 — 화면은 핵심·트랙 역량을 'competency', 이해를 'insight'로 묶어 보내므로
     // 그대로 쓰면 핵심역량·자기/직무 이해가 0이 된다 (2026-10-12 발견)
-    // 척도(sub_domain)·역채점도 DB에서 — 브라우저가 보낸 option_value('척도:점수:r')의 척도·r 표시는 믿지 않고 점수만 쓴다 (2026-10-13).
-    // 트랙 문항은 고른 트랙(competencyTrack) 것만 — 도중에 트랙을 바꾼 세션에서 두 트랙 점수가 섞이던 것 방지
+    // 모듈·척도·역채점은 DB에서, 트랙 문항은 고른 트랙 것만 (lib/hit/normalize-responses.ts, 2026-10-13)
     const supabase = createAdminClient();
-    const { data: qMeta } = await supabase
-      .from('hit_questions')
-      .select('id, module, sub_domain, reverse_scored, track_id')
-      .eq('test_type', 'B')
-      .in('id', rawResponses.map((r: { question_id: string }) => r.question_id));
-    const metaById = new Map((qMeta ?? []).map(q => [q.id as string, q as { id: string; module: string; sub_domain: string | null; reverse_scored: boolean | null; track_id: string | null }]));
-    const responses = rawResponses.flatMap((r: { question_id: string; module: string; option_value: string }) => {
-      const m = metaById.get(r.question_id);
-      if (!m?.sub_domain) return [];
-      if (m.module === 'competency' && m.track_id !== competencyTrack) return [];
-      const parts = String(r.option_value).split(':'); // '척도:점수[:r]' 또는 '점수'
-      const value = parseInt(parts.length >= 2 ? parts[1] : parts[0], 10);
-      if (isNaN(value) || value < 1 || value > 7) return [];
-      return [{ ...r, module: m.module, option_value: `${m.sub_domain}:${value}${m.reverse_scored ? ':r' : ''}` }];
-    });
+    const responses = await normalizeHitResponses(supabase, 'B', rawResponses, { trackId: competencyTrack });
 
     // HIT A 결과 (흥미 점수 → 매트릭스) — 본인 것만
     let hitAData: Record<string, unknown> | null = null;
