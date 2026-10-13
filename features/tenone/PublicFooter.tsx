@@ -4,20 +4,18 @@ export function PublicFooter() {
     return (
         <UniverseFooter
             brandName="Ten:One™"
-            tagline="Beyond the Limit, Universe of Possibilities."
+            tagline="기획하고, 연결하고, 확장한다."
             accentColor="#fff"
             dark={true}
             linkColumns={[
                 {
+                    // 지금 주로 개발하는 사이트만 (2026-10-13 사용자 결정) — 집중 브랜드가 바뀌면 여기도
                     title: "Universe",
                     links: [
                         { label: "Badak", href: "/badak" },
-                        { label: "MADLeap", href: "/madleap" },
                         { label: "MADLeague", href: "/madleague" },
-                        { label: "YouInOne", href: "/youinone" },
-                        { label: "FWN", href: "/fwn" },
-                        { label: "0gamja", href: "/0gamja" },
-                        { label: "RooK", href: "/rook" },
+                        { label: "MADLeap", href: "/madleap" },
+                        { label: "HeRo", href: "/hero" },
                     ],
                 },
                 {
