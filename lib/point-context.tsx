@@ -58,7 +58,7 @@ export function PointProvider({ children }: { children: ReactNode }) {
             // uc_balances + members 조인 — grade는 lifetime_earned 기준
             const { data: balances } = await supabase
                 .from('uc_balances')
-                .select('member_id, balance, lifetime_earned, members!inner(name, department, position)')
+                .select('member_id, balance, lifetime_earned, members!inner(name, position)')
                 .order('lifetime_earned', { ascending: false });
 
             if (balances && balances.length > 0) {

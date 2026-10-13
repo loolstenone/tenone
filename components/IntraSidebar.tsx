@@ -96,7 +96,7 @@ export function IntraSidebar() {
         )}
 
         <aside className={clsx(
-            "fixed left-0 top-0 bottom-0 w-[240px] bg-neutral-900 text-white flex flex-col z-[60] transition-transform duration-200",
+            "fixed left-0 top-0 bottom-0 w-[240px] bg-neutral-900 text-white flex flex-col z-[60] lg:z-[45] transition-transform duration-200",
             mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
             {/* Logo */}
