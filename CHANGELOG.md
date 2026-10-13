@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-10-13 (세션 171) — HeRo HIT 단계별 고도화 · 한국어 우선 용어·문구·UI 정비
+
+### 장소·운영
+
+- master 직접, 사용자 "푸시" 때마다 push (마지막 `fc68ff35` READY, 실서버 확인)
+- 운영 DB (MCP): HIT A 문항·64유형 문장·UF 해설 · B~G 역채점·해설 문안 · D·G 문항 재검토(3개 삭제·2개 이동) · `sql/hit-copy-korean-2026-10.sql`(해설·문항·유형 문구) · 테스트 결과 정리(A~G 1건씩만)
+
+### 결정 (사용자)
+
+- HIT A~G를 학생 테스트 전 단계별로 고도화 — 모든 처리 방안 "전부 추천안"
+- 한국어 서비스명 우선 (영어만으로는 이해 어려움) · AI 투 문구 제거 · 첫 화면·헤더 UI 통일
+- 푸터 1열: HeRo / Talent Agency / Human enhancement & Recruit Optimization (H·e·R·O 굵게)
+- 가격 정보는 화면·소스 어디에도 두지 않는다
+
+### 변경 내역
+
+- 채점: `lib/hit/scoring.ts`(S-Power DISC 강도·UF 게이트) · `scoring-b.ts` · `scoring-d/e/f/gap.ts` · `lib/hit/normalize-responses.ts`(신규) · `app/api/hit/*/score`
+- 해설 선택: `lib/hit/stage-report-modules.ts` · `lib/hit/report-assembler.ts` · `lib/hit/report-copy.ts` · `features/hit/StageResultView.tsx`
+- 용어: `lib/hit/stages.ts`(code·ko) · 페이지·API 오류 문구·AI 프롬프트의 'HIT - X' 일괄 교체 · `features/hero/JourneyWorkspace.tsx` 성장 단계 한국어 표기(키는 DB 값 그대로)
+- UI: `features/hero/PageHero.tsx`(신규) · `features/hero/HeRoHeader.tsx` · `components/UniverseUtilityBar.tsx`(aboutLabel) · `components/UniverseFooter.tsx`(tagline JSX) · `features/hero/HeRoFooter.tsx`
+- 가격 삭제: `app/(HeRo)/hero/coaching/ai/page.tsx` · `resume/page.tsx`
+- 회귀 점검: `scripts/hit-{a,b,c,d,e,f,gap}-scoring-check.ts`
+- SQL: `sql/hit-*-2026-10.sql` (A 문항·유형 문장·UF·C READY·D 정렬·E 역채점·F 역채점·G 문항·D·G 재검토·문구 한국어)
+
+### 발견·교훈
+
+- 역채점 방향이 측정 개념과 반대인 문항이 여러 검사에 있었다(E 직업 동일시 → '유연', F 고독 선호 → '고립 위험') — 하위 척도가 '욕구'인지 '상태'인지 먼저 정하고 문항 방향을 맞춘다
+- '의향·걱정·희망' 문항이 능력·유효성 점수를 움직였다(c_st11·f_jv11·f_jv12) — 척도와 문항 성격이 다르면 삭제·이동
+- 숨김(`className="hidden"`)은 가림이 아니다 — 가격 문구가 HTML·JS에 그대로 나간다. 비공개 정보는 코드에서 지운다
+- 영어 이름을 일괄 치환할 때 한글 조사가 붙은 경우(`Archetype은`)는 ``로 안 잡힌다 — `(?![A-Za-z])` 사용, 치환 뒤 '검사을' 같은 조사 오류 점검
+
+---
+
 ## 2026-10-12 ~ 10-13 (세션 170) — HeRo HIT 완성도 · 해설 커버리지
 
 ### 장소·운영
