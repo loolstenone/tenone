@@ -2,38 +2,25 @@
 
 import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
-import {
-    FileText,
-    Bot,
-    ArrowRight,
-    CheckCircle,
-    AlertCircle,
-    Sparkles,
-    Download,
-    Eye,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const consultingFeatures = [
     {
         title: "AI 분석 엔진",
         desc: "AI가 이력서를 읽고 고칠 점을 알려 드립니다.",
-        icon: Bot,
-    },
+        },
     {
         title: "고치기 전·후 비교",
         desc: "고치기 전과 후를 나란히 놓고 무엇이 달라졌는지 보여 드립니다.",
-        icon: Eye,
-    },
+        },
     {
         title: "전문가 1:1 컨설팅",
         desc: "AI 분석을 바탕으로 전문 컨설턴트가 직접 의견을 드립니다.",
-        icon: Sparkles,
-    },
+        },
     {
         title: "맞춤 템플릿 제공",
         desc: "직무에 맞는 이력서 양식을 드립니다.",
-        icon: Download,
-    },
+        },
 ];
 
 const beforeAfterExamples = [
@@ -76,9 +63,6 @@ export default function ResumePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {consultingFeatures.map((f) => (
                             <div key={f.title} className="border border-neutral-200 rounded-xs p-6 text-center hover:border-neutral-300 transition-colors">
-                                <div className="w-12 h-12 bg-neutral-50 text-neutral-600 rounded-xs flex items-center justify-center mx-auto mb-4">
-                                    <f.icon className="h-6 w-6" />
-                                </div>
                                 <h3 className="text-sm font-bold mb-2">{f.title}</h3>
                                 <p className="text-xs text-neutral-500">{f.desc}</p>
                             </div>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Swords, Activity, TrendingUp, Users, Building2, GraduationCap, Compass, ArrowRight } from 'lucide-react';
+import { ArrowRight } from "lucide-react";
 import { MAD_PROGRAMS, MAD_PROGRAM_GROUPS } from '@/features/madleague/programs-list';
 
 export const metadata = {
@@ -9,16 +9,16 @@ export const metadata = {
 };
 
 const MAD = [
-  { icon: Swords, title: 'Match', desc: '실제 기업의 과제와 학생의 열정을 연결한다.' },
-  { icon: Activity, title: 'Active', desc: '현장에서 움직이고, 경쟁에서 부딪힌다.' },
-  { icon: TrendingUp, title: 'Develop', desc: '실전에서 성장한다. 그게 전부다.' },
+  { title: 'Match', desc: '실제 기업의 과제와 학생의 열정을 연결한다.' },
+  { title: 'Active', desc: '현장에서 움직이고, 경쟁에서 부딪힌다.' },
+  { title: 'Develop', desc: '실전에서 성장한다. 그게 전부다.' },
 ];
 
 const MEMBER_TYPES = [
-  { icon: GraduationCap, title: '공식 동아리', desc: '내부 심사를 통해 선정된 전국 권역별 공식 동아리' },
-  { icon: Users, title: '매드리거', desc: '공식 동아리에서 실전을 쌓는 마케터' },
-  { icon: Compass, title: '멘토', desc: '현업의 시선으로 매드리거의 실전을 이끄는 선배' },
-  { icon: Building2, title: '기업 회원', desc: '경쟁 PT 과제 기업 · 채용 파트너' },
+  { title: '공식 동아리', desc: '내부 심사를 통해 선정된 전국 권역별 공식 동아리' },
+  { title: '매드리거', desc: '공식 동아리에서 실전을 쌓는 마케터' },
+  { title: '멘토', desc: '현업의 시선으로 매드리거의 실전을 이끄는 선배' },
+  { title: '기업 회원', desc: '경쟁 PT 과제 기업 · 채용 파트너' },
 ];
 
 // BI 컬러 — 열정(Red) · 끈기(Black) · 재치 발랄함(Gold)
@@ -61,9 +61,7 @@ export default function AboutPage() {
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-16">Match · Active · Develop</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {MAD.map((m) => (
-            <div key={m.title} className="bg-neutral-950 border border-neutral-900 p-10">
-              <m.icon className="h-8 w-8 text-[#EC1D25]" />
-              <div className="mt-6 text-3xl font-bold">{m.title}</div>
+            <div key={m.title} className="bg-neutral-950 border border-neutral-900 p-10"> <div className="mt-6 text-3xl font-bold">{m.title}</div>
               <p className="mt-3 text-sm text-neutral-400 leading-relaxed">{m.desc}</p>
             </div>
           ))}
@@ -77,9 +75,7 @@ export default function AboutPage() {
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-16">매드리그의 구성원</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {MEMBER_TYPES.map((m) => (
-              <div key={m.title} className="bg-black border border-neutral-900 p-6">
-                <m.icon className="h-6 w-6 text-neutral-500" />
-                <div className="mt-4 font-bold">{m.title}</div>
+              <div key={m.title} className="bg-black border border-neutral-900 p-6"> <div className="mt-4 font-bold">{m.title}</div>
                 <p className="mt-2 text-xs text-neutral-500 leading-relaxed">{m.desc}</p>
               </div>
             ))}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ListChecks, Calculator, BookOpenCheck, Sparkles, ShieldCheck, Lock, FlaskConical, AlertCircle } from "lucide-react";
+import { ArrowRight, FlaskConical, AlertCircle } from "lucide-react";
 import { HIT_STAGES } from "@/lib/hit/stages";
 
 export const metadata: Metadata = {
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
 
 const STEPS = [
   {
-    icon: ListChecks,
     title: "1. 문항 — 같은 형식, 섞인 순서",
     body: [
       "모든 문항은 1(전혀 아니다)~7(매우 그렇다)의 7점 척도 하나로 답합니다.",
@@ -27,7 +26,6 @@ const STEPS = [
     ],
   },
   {
-    icon: Calculator,
     title: "2. 채점 — 서버의 정해진 규칙",
     body: [
       "점수는 HeRo 서버의 채점 규칙이 계산합니다. 같은 응답에는 언제나 같은 점수가 나옵니다.",
@@ -39,7 +37,6 @@ const STEPS = [
     ],
   },
   {
-    icon: BookOpenCheck,
     title: "3. 해설 — 미리 쓰고 검수한 해설 모듈",
     body: [
       "결과 해설의 중심은 HeRo가 미리 작성하고 검수한 600개 이상의 해설 모듈입니다 (64유형 · 성격 · 행동 · 성품 · 적성 · 역량 · 생애주기별).",
@@ -48,7 +45,6 @@ const STEPS = [
     ],
   },
   {
-    icon: Sparkles,
     title: "4. AI 해설 — 보조 역할만",
     body: [
       "결과 마지막의 \"종합 해설\"은 AI가 위 점수를 받아 읽기 쉽게 정리한 문단입니다.",
@@ -57,7 +53,6 @@ const STEPS = [
     ],
   },
   {
-    icon: ShieldCheck,
     title: "5. 응답 품질 관리",
     body: [
       "누구나 \"아니다\"라고 답할 만한 확인 문항, 같은 답을 길게 반복한 응답 등 응답 성실도 신호를 기록합니다.",
@@ -65,7 +60,6 @@ const STEPS = [
     ],
   },
   {
-    icon: Lock,
     title: "6. 개인정보 원칙",
     body: [
       "HIT 검사는 회원만 할 수 있고, 결과는 본인과 HeRo 운영자만 열람합니다. 결과 링크를 안다고 다른 사람이 볼 수 없습니다.",
@@ -104,7 +98,7 @@ export default function HitMethodPage() {
           <div className="space-y-10">
             {STEPS.map(s => (
               <div key={s.title}>
-                <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900 mb-3"><s.icon className="h-5 w-5 text-neutral-400" /> {s.title}</h2>
+                <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900 mb-3"> {s.title}</h2>
                 <ul className="space-y-2">
                   {s.body.map(b => <li key={b} className="text-sm text-neutral-600 leading-relaxed pl-4 border-l-2 border-neutral-200 break-keep">{b}</li>)}
                 </ul>

@@ -3,19 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Search,
-  Compass,
-  Handshake,
-  Star,
-  Crown,
-  Sparkles,
-  ChevronRight,
-  Users,
-  Building2,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Users, Building2 } from "lucide-react";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── HeRo Red ── */
@@ -35,7 +23,6 @@ const partners = [
 /* ── 서비스 3종 ── */
 const services = [
   {
-    icon: Search,
     num: "01",
     title: "HIT 통합검사",
     desc: "나를 진단합니다",
@@ -44,7 +31,6 @@ const services = [
     href: "/hero/hit",
   },
   {
-    icon: Compass,
     num: "02",
     title: "커리어 코칭",
     desc: "방향을 잡아줍니다",
@@ -53,7 +39,6 @@ const services = [
     href: "/hero/coaching",
   },
   {
-    icon: Handshake,
     num: "03",
     title: "써치 라이트",
     desc: "기업의 고민을 정리합니다",
@@ -65,12 +50,12 @@ const services = [
 
 /* ── 영웅의 여정 6단계 ── */
 const journey = [
-  { label: "꿈꾸는 사람", icon: Sparkles, desc: "꿈을 품다" },
-  { label: "도전자", icon: Zap, desc: "문을 두드리다" },
-  { label: "연습생", icon: Search, desc: "실력을 쌓다" },
-  { label: "데뷔", icon: Star, desc: "무대에 서다" },
-  { label: "스타", icon: Crown, desc: "인정받다" },
-  { label: "레전드", icon: Crown, desc: "길을 만들다" },
+  { label: "꿈꾸는 사람", desc: "꿈을 품다" },
+  { label: "도전자", desc: "문을 두드리다" },
+  { label: "연습생", desc: "실력을 쌓다" },
+  { label: "데뷔", desc: "무대에 서다" },
+  { label: "스타", desc: "인정받다" },
+  { label: "레전드", desc: "길을 만들다" },
 ];
 
 /* ── 64유형 미리보기 (대표 8개 · hit_hero_types 실제 데이터 기반) ── */
@@ -297,9 +282,6 @@ export default function HeRoHomePage() {
                 >
                   {svc.num}
                 </span>
-                <div className="w-12 h-12 rounded-xs flex items-center justify-center mb-4 bg-neutral-100">
-                  <svc.icon className="h-6 w-6 text-neutral-500" />
-                </div>
                 <h3 className="text-xl font-bold text-neutral-900 mb-1 group-hover:text-[#E53935] transition-colors">
                   {svc.title}
                 </h3>
@@ -358,33 +340,6 @@ export default function HeRoHomePage() {
                     className="flex flex-col items-center text-center group cursor-pointer"
                   >
                     {/* 노드 */}
-                    <div
-                      className={`w-16 h-16 rounded-none flex items-center justify-center mb-4 transition-all duration-300 ${
-                        isActive
-                          ? "scale-110"
-                          : isPast
-                          ? ""
-                          : "bg-neutral-100"
-                      }`}
-                      style={
-                        isActive
-                          ? { backgroundColor: RED, boxShadow: `0 8px 24px ${RED}40` }
-                          : isPast
-                          ? { backgroundColor: `${RED}20` }
-                          : undefined
-                      }
-                    >
-                      <step.icon
-                        className={`h-6 w-6 transition-colors ${
-                          isActive
-                            ? "text-white"
-                            : isPast
-                            ? ""
-                            : "text-neutral-400"
-                        }`}
-                        style={isPast && !isActive ? { color: RED } : undefined}
-                      />
-                    </div>
                     <p
                       className={`text-sm font-bold transition-colors ${
                         isActive ? "" : "text-neutral-400"

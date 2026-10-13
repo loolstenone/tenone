@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Puzzle, MessagesSquare, Copy, Check, ArrowRight, Plus } from "lucide-react";
+import { Copy, Check, ArrowRight, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { PageHero } from "@/features/hero/PageHero";
 import { hitStageMinutes } from "@/lib/hit/stages";
@@ -19,9 +19,9 @@ interface Diagnosis {
 }
 
 const DELIVERABLES = [
-    { icon: MessagesSquare, title: "말하기 어려웠던 것", desc: "신뢰·솔직함·역할·갈등·업무 부담·인정·팀장과의 관계를 팀원 평균으로 보고, 이름 없는 이야기로 바뀌었으면 하는 것을 듣습니다." },
-    { icon: Puzzle, title: "팀장과 팀원의 인식 차이", desc: "팀장과 팀원이 같은 질문에 답해, 서로 보는 눈이 다른 곳과 문제점, 팀 빌딩 방법을 짚어 드립니다." },
-    { icon: Users, title: "팀 케미", desc: "HIT 기본 성향 검사로 팀의 역할 분포, 비어 있는 역할, 일하는 방식이 쏠린 곳을 봅니다." },
+    { title: "말하기 어려웠던 것", desc: "신뢰·솔직함·역할·갈등·업무 부담·인정·팀장과의 관계를 팀원 평균으로 보고, 이름 없는 이야기로 바뀌었으면 하는 것을 듣습니다." },
+    { title: "팀장과 팀원의 인식 차이", desc: "팀장과 팀원이 같은 질문에 답해, 서로 보는 눈이 다른 곳과 문제점, 팀 빌딩 방법을 짚어 드립니다." },
+    { title: "팀 케미", desc: "HIT 기본 성향 검사로 팀의 역할 분포, 비어 있는 역할, 일하는 방식이 쏠린 곳을 봅니다." },
 ];
 
 const STEPS = [
@@ -82,9 +82,7 @@ export default function TeamDiagnosisPage() {
                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-10">리포트에 담기는 것</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {DELIVERABLES.map(x => (
-                            <div key={x.title} className="border border-neutral-200 rounded-xs p-6">
-                                <x.icon className="h-6 w-6 text-neutral-400 mb-3" />
-                                <p className="font-bold mb-2">{x.title}</p>
+                            <div key={x.title} className="border border-neutral-200 rounded-xs p-6"> <p className="font-bold mb-2">{x.title}</p>
                                 <p className="text-sm text-neutral-600 leading-relaxed break-keep">{x.desc}</p>
                             </div>
                         ))}

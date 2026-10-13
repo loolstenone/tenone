@@ -5,10 +5,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, usePathname } from "next/navigation";
-import {
-  Sparkles, ArrowRight, CheckCircle, MessageCircle,
-  Shield, Clock, Brain, Users, FileText, Zap, X, AlertCircle,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { loginHref } from "@/lib/login-href";
 
@@ -16,22 +13,18 @@ const RED = "#E53935";
 
 const features = [
   {
-    icon: Brain,
     title: "HIT 결과 기반 맞춤 상담",
     desc: "행동 유형(DISC)·성격(MBTI)·강점·성장 배경 결과를 함께 보고, 내 상황에 맞춰 상담합니다.",
   },
   {
-    icon: MessageCircle,
     title: "실시간 대화형 상담",
     desc: "채팅으로 편하게 물어보면 AI 상담사가 바로 답합니다. 강점, 약점, 맞는 직무, 성장 방향 등 무엇이든 물어보세요.",
   },
   {
-    icon: FileText,
     title: "상담 기록 자동 저장",
     desc: "모든 상담 내용이 자동으로 저장되어 언제든 다시 볼 수 있습니다. 이전 상담을 이어서 진행할 수도 있습니다.",
   },
   {
-    icon: Shield,
     title: "개인정보 보호",
     desc: "상담 내용은 본인만 열람 가능하며, 제3자에게 공유되지 않습니다. 안심하고 솔직하게 상담하세요.",
   },
@@ -100,9 +93,6 @@ function AICounselingContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {features.map((f) => (
               <div key={f.title} className="flex gap-5">
-                <div className="w-12 h-12 rounded-xs flex items-center justify-center shrink-0" style={{ backgroundColor: `${RED}10` }}>
-                  <f.icon className="h-6 w-6" style={{ color: RED }} />
-                </div>
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900 mb-2">{f.title}</h3>
                   <p className="text-sm text-neutral-500 leading-relaxed">{f.desc}</p>
@@ -123,15 +113,12 @@ function AICounselingContent() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: 1, icon: Zap, title: "HIT 검사", desc: "검사를 마칩니다" },
-              { step: 2, icon: FileText, title: "결과 확인", desc: "보고서를 확인합니다" },
-              { step: 3, icon: Sparkles, title: "AI 상담", desc: "AI 상담사와 대화합니다" },
-              { step: 4, icon: Users, title: "대면 상담", desc: "필요 시 전문가를 만납니다" },
+              { step: 1, title: "HIT 검사", desc: "검사를 마칩니다" },
+              { step: 2, title: "결과 확인", desc: "보고서를 확인합니다" },
+              { step: 3, title: "AI 상담", desc: "AI 상담사와 대화합니다" },
+              { step: 4, title: "대면 상담", desc: "필요 시 전문가를 만납니다" },
             ].map((s, i) => (
               <div key={s.step} className="text-center">
-                <div className="w-14 h-14 rounded-none flex items-center justify-center mx-auto mb-4 text-white font-bold" style={{ backgroundColor: RED }}>
-                  <s.icon className="h-6 w-6" />
-                </div>
                 <p className="text-sm font-bold text-neutral-900 mb-1">{s.title}</p>
                 <p className="text-xs text-neutral-500">{s.desc}</p>
               </div>

@@ -3,7 +3,7 @@
 import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
-import { ArrowRight, Megaphone, Sparkles, Users, Compass, ShieldCheck, CheckCircle } from "lucide-react";
+import { ArrowRight, Users, CheckCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const RED = "#E53935";
@@ -38,25 +38,19 @@ export default function TalentAgentPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                icon: Sparkles,
                 title: "검사로 발견",
                 desc: "이력서 키워드보다 HIT 검사로 사람을 먼저 이해합니다. 아직 드러나지 않은 강점까지 봅니다.",
               },
               {
-                icon: Compass,
                 title: "갈 길을 함께",
                 desc: "AI 커리어 코칭과 전문가 상담으로 다음 한 걸음을 함께 계획합니다.",
               },
               {
-                icon: ShieldCheck,
                 title: "비공개 원칙",
                 desc: "내 정보는 공개되지 않습니다. 회사에 보여 줄지는 내가 정합니다.",
               },
             ].map((t) => (
               <div key={t.title} className="border border-neutral-200 rounded-xs p-6">
-                <div className="w-10 h-10 rounded-xs bg-red-50 flex items-center justify-center mb-4">
-                  <t.icon className="h-5 w-5 text-[#E53935]" />
-                </div>
                 <h3 className="font-bold text-neutral-900 mb-2">{t.title}</h3>
                 <p className="text-sm text-neutral-500 leading-relaxed">{t.desc}</p>
               </div>

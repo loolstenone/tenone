@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Users, Target, Clock, ArrowRight, Sparkles, RotateCcw, Sprout } from "lucide-react";
+import { Clock, ArrowRight, RotateCcw } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { HIT_A_UF_COUNT, HIT_A_TOTAL_COUNT } from "@/lib/hit/a-modules";
 import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
@@ -12,7 +12,6 @@ import { RESTART_CONFIRM } from "@/features/hit/useHitResume";
 // 검사 구성·문항 수는 실제 출제(/api/hit/a/questions → hit_questions test_type A)와 같아야 한다 (2026-10-12 — 화면마다 127·172·620으로 달랐음)
 // HIT는 회원 전용 — UF(성장 배경)가 첫 파트. lib/hit/a-modules.ts
 const ufModule = {
-  icon: Sprout,
   title: "성장 배경 (UF)",
   desc: "가정·또래·경험 등 지금의 나를 만든 배경을 돌아봅니다. 결과는 본인 리포트에만 표시되고, 강점 점수·기업 매칭에는 쓰지 않습니다.",
   count: `${HIT_A_UF_COUNT}문항`,
@@ -20,28 +19,24 @@ const ufModule = {
 };
 const modules = [
   {
-    icon: Brain,
     title: "성격 유형 (PT)",
     desc: "인식과 판단 방식, 에너지 방향을 파악합니다.",
     count: "62문항",
     time: `~${estimateMinutes(62)}분`,
   },
   {
-    icon: Target,
     title: "행동 유형 (BT)",
     desc: "업무 상황에서의 행동 패턴을 측정합니다.",
     count: "40문항",
     time: `~${estimateMinutes(40)}분`,
   },
   {
-    icon: Users,
     title: "핵심 성품 (CH)",
     desc: "일과 관계에서 드러나는 성품을 확인합니다.",
     count: "40문항",
     time: `~${estimateMinutes(40)}분`,
   },
   {
-    icon: Sparkles,
     title: "핵심 적성 (AP)",
     desc: "어떤 일에 자연스럽게 끌리는지 측정합니다.",
     count: "30문항",
@@ -138,9 +133,6 @@ export default function HitAIntroPage() {
           <div className="space-y-4">
             {shownModules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center flex-shrink-0">
-                  <m.icon className="h-5 w-5" />
-                </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm">{m.title}</h3>

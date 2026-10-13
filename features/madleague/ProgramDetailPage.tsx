@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, MessageSquare, type LucideIcon } from 'lucide-react';
+import { ArrowRight, MessageSquare } from 'lucide-react';
 import { SectionPager } from '@/features/madleague/SectionPager';
 import { CrossSiteLink } from '@/components/CrossSiteLink';
 import { ServiceLinkConsent } from '@/components/ServiceLinkConsent';
@@ -19,8 +19,9 @@ import { ProgramCTA } from '@/features/madleague/ProgramCTA';
  *
  * 내용(steps·gets·자유 섹션)은 각 page.tsx가 넘기고, 구조·순서·CTA는 여기서만 정한다.
  */
-export type ProgramStep = { title: string; desc: string; icon?: LucideIcon };
-export type ProgramGet = { title: string; desc: string; icon?: LucideIcon };
+// 장식 아이콘 없음 (tenone-ui — 단계는 번호, 얻는 것은 제목·설명만, 2026-10-14)
+export type ProgramStep = { title: string; desc: string };
+export type ProgramGet = { title: string; desc: string };
 
 export function ProgramDetailPage({
   programKey,
@@ -80,10 +81,7 @@ export function ProgramDetailPage({
         <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {steps.map((s, i) => (
             <li key={s.title} className="bg-neutral-950 border border-neutral-900 p-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-10 w-10 flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: accent, color: accent === MAD_ACCENT ? "#fff" : "#000" }}>{i + 1}</div>
-                {s.icon && <s.icon className="h-6 w-6 text-neutral-500" />}
-              </div>
+              <div className="mb-6 h-10 w-10 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: accent, color: accent === MAD_ACCENT ? "#fff" : "#000" }}>{String(i + 1).padStart(2, "0")}</div>
               <div className="text-xl font-bold">{s.title}</div>
               <p className="mt-3 text-base text-neutral-500 leading-relaxed">{s.desc}</p>
             </li>
@@ -99,8 +97,7 @@ export function ProgramDetailPage({
           <div className={`grid grid-cols-1 gap-8 ${gets.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             {gets.map((g) => (
               <div key={g.title} className="bg-neutral-950 border border-neutral-900 p-12">
-                {g.icon && <g.icon className="h-10 w-10" style={{ color: accent }} />}
-                <div className={`${g.icon ? 'mt-8' : ''} text-2xl sm:text-3xl font-bold`}>{g.title}</div>
+                <div className="text-2xl sm:text-3xl font-bold">{g.title}</div>
                 <p className="mt-4 text-lg text-neutral-400 leading-relaxed">{g.desc}</p>
               </div>
             ))}

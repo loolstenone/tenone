@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { PageHero } from "@/features/hero/PageHero";
 import { loginHref } from "@/lib/login-href";
-import {
-  Sparkles,
-  DoorOpen,
-  Swords,
-  Rocket,
-  Crown,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const HERO_RED = "#E53935";
 
@@ -18,7 +11,6 @@ const HERO_RED = "#E53935";
 const stages = [
   {
     number: "01",
-    icon: Sparkles,
     title: "꿈꾸는 사람",
     subtitle: "어디서 시작할지 찾는 사람",
     paragraphs: [
@@ -31,7 +23,6 @@ const stages = [
   },
   {
     number: "02",
-    icon: DoorOpen,
     title: "도전자",
     subtitle: "문을 두드리는 사람",
     paragraphs: [
@@ -43,7 +34,6 @@ const stages = [
   },
   {
     number: "03",
-    icon: Swords,
     title: "연습생",
     subtitle: "실력을 쌓는 사람",
     paragraphs: [
@@ -56,7 +46,6 @@ const stages = [
   },
   {
     number: "04",
-    icon: Rocket,
     title: "데뷔",
     subtitle: "무대에 서는 사람",
     paragraphs: [
@@ -68,7 +57,6 @@ const stages = [
   },
   {
     number: "05",
-    icon: Crown,
     title: "스타 → 레전드",
     subtitle: "인정받고, 다음 사람의 길을 여는 사람",
     paragraphs: [
@@ -107,12 +95,6 @@ export function JourneyLanding() {
                 >
                   {s.number}
                 </span>
-                <div
-                  className="w-14 h-14 rounded-xs flex items-center justify-center -mt-4"
-                  style={{ backgroundColor: HERO_RED }}
-                >
-                  <s.icon className="w-7 h-7 text-white" />
-                </div>
               </div>
 
               <div className="flex-1">

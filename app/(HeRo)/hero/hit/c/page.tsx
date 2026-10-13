@@ -2,16 +2,16 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ListChecks, Sprout, Compass, Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
 import HitStartCTA from "@/features/hit/HitStartCTA";
 import { useHitResume, postHitSession } from "@/features/hit/useHitResume";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/c/questions → hit_questions test_type C)와 같아야 한다 (2026-10-12 신설)
 const modules = [
-  { icon: ListChecks, title: "취업 준비 상태", desc: "자기 이해·포트폴리오·면접·네트워킹·스킬·실행 준비 + 희망 트랙 준비도. 자기 인식 점수이며, 실제 완료는 Journey 체크리스트에서 셉니다.", count: "48문항", time: `~${estimateMinutes(48)}분` },
-  { icon: Sprout, title: "첫 직무 적응", desc: "조직 적응·학습 속도·관계 형성·피드백 수용 — 첫 회사에서 잘 자리 잡는 힘.", count: "20문항", time: `~${estimateMinutes(20)}분` },
-  { icon: Compass, title: "진로 결정 확신", desc: "첫 직무를 얼마나 분명하게, 내 판단으로 정했는지.", count: "10문항", time: `~${estimateMinutes(10)}분` },
+  { title: "취업 준비 상태", desc: "자기 이해·포트폴리오·면접·네트워킹·스킬·실행 준비 + 희망 트랙 준비도. 자기 인식 점수이며, 실제 완료는 Journey 체크리스트에서 셉니다.", count: "48문항", time: `~${estimateMinutes(48)}분` },
+  { title: "첫 직무 적응", desc: "조직 적응·학습 속도·관계 형성·피드백 수용 — 첫 회사에서 잘 자리 잡는 힘.", count: "20문항", time: `~${estimateMinutes(20)}분` },
+  { title: "진로 결정 확신", desc: "첫 직무를 얼마나 분명하게, 내 판단으로 정했는지.", count: "10문항", time: `~${estimateMinutes(10)}분` },
 ];
 
 function HitCIntroContent() {
@@ -66,7 +66,6 @@ function HitCIntroContent() {
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center flex-shrink-0"><m.icon className="h-5 w-5" /></div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between"><h3 className="font-bold text-sm">{m.title}</h3><div className="flex items-center gap-2 text-xs text-neutral-400"><span>{m.count}</span><span>{m.time}</span></div></div>
                   <p className="text-xs text-neutral-500 mt-1">{m.desc}</p>

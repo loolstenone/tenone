@@ -3,28 +3,7 @@
 import { PageHero } from "@/features/hero/PageHero";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-    TrendingUp,
-    Zap,
-    Target,
-    ArrowRight,
-    ChevronRight,
-    BarChart3,
-    Briefcase,
-    GraduationCap,
-    Crown,
-    Users,
-    Star,
-    MessageCircle,
-    Sparkles,
-    FolderOpen,
-    Globe,
-    Camera,
-    CheckCircle,
-    Palette,
-    FileText,
-    ExternalLink,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Star, MessageCircle, Sparkles, CheckCircle, FileText, ExternalLink } from "lucide-react";
 import clsx from "clsx";
 
 const HERO_RED = "#E53935";
@@ -44,7 +23,6 @@ const tracks = [
         code: "CMO",
         fullName: "Chief Marketing Officer",
         desc: "마케팅 / 브랜드",
-        icon: BarChart3,
         levels: ["마케팅 인턴", "마케팅 매니저", "마케팅 디렉터", "CMO"],
         skills: ["SNS 운영", "퍼포먼스 마케팅", "브랜드 전략", "팀 리딩"],
     },
@@ -52,7 +30,6 @@ const tracks = [
         code: "CTO",
         fullName: "Chief Technology Officer",
         desc: "기술 / 개발",
-        icon: Zap,
         levels: ["주니어 개발자", "시니어 개발자", "테크 리드", "CTO"],
         skills: ["프로그래밍", "아키텍처 설계", "기술 전략", "R&D 총괄"],
     },
@@ -60,7 +37,6 @@ const tracks = [
         code: "CSO",
         fullName: "Chief Strategy Officer",
         desc: "전략 / 기획",
-        icon: Target,
         levels: ["전략 기획 사원", "전략 기획 매니저", "전략 디렉터", "CSO"],
         skills: ["시장 분석", "사업 모델링", "포트폴리오 전략", "비전 설계"],
     },
@@ -68,17 +44,16 @@ const tracks = [
         code: "CBO",
         fullName: "Chief Business Officer",
         desc: "사업 / 영업",
-        icon: Briefcase,
         levels: ["영업 사원", "사업개발 매니저", "사업 디렉터", "CBO"],
         skills: ["고객 관리", "파트너십", "사업 총괄", "해외 확장"],
     },
 ];
 
 const stages = [
-    { icon: GraduationCap, label: "입문", desc: "일을 배우는 단계", color: "bg-neutral-100 text-neutral-700" },
-    { icon: Briefcase, label: "성장", desc: "혼자 맡아 해내는 단계", color: "bg-neutral-200 text-neutral-800" },
-    { icon: TrendingUp, label: "시니어", desc: "팀을 이끄는 단계", color: "bg-neutral-700 text-white" },
-    { icon: Crown, label: "임원", desc: "회사를 이끄는 단계", color: "text-white", bg: HERO_RED },
+    { label: "입문", desc: "일을 배우는 단계", color: "bg-neutral-100 text-neutral-700" },
+    { label: "성장", desc: "혼자 맡아 해내는 단계", color: "bg-neutral-200 text-neutral-800" },
+    { label: "시니어", desc: "팀을 이끄는 단계", color: "bg-neutral-700 text-white" },
+    { label: "임원", desc: "회사를 이끄는 단계", color: "text-white", bg: HERO_RED },
 ];
 
 /* ===== Mentor data ===== */
@@ -112,10 +87,10 @@ const programSteps = [
 
 /* ===== Branding data ===== */
 const brandingPrograms = [
-    { icon: Sparkles, title: "HeRo 캐릭터", desc: "HIT 검사 결과로 나를 소개하는 캐릭터를 만듭니다.", features: ["DISC 기반 성격 유형", "강점 키워드", "브랜드 스토리", "비주얼 캐릭터"] },
-    { icon: FolderOpen, title: "포트폴리오 제작", desc: "프로젝트 경험을 정리해 포트폴리오를 만듭니다.", features: ["프로젝트 하이라이트", "성과 시각화", "디자인 템플릿", "PDF 내보내기"] },
-    { icon: Globe, title: "SNS 브랜딩", desc: "링크드인·인스타그램 같은 SNS 프로필을 다듬습니다.", features: ["프로필 컨설팅", "콘텐츠 전략", "해시태그 전략", "반응 분석"] },
-    { icon: Camera, title: "프로필 촬영", desc: "전문 프로필 사진 촬영 및 보정 서비스를 제공합니다.", features: ["전문 스튜디오 촬영", "리터칭 포함", "다양한 컨셉", "SNS/이력서 최적화"] },
+    { title: "HeRo 캐릭터", desc: "HIT 검사 결과로 나를 소개하는 캐릭터를 만듭니다.", features: ["DISC 기반 성격 유형", "강점 키워드", "브랜드 스토리", "비주얼 캐릭터"] },
+    { title: "포트폴리오 제작", desc: "프로젝트 경험을 정리해 포트폴리오를 만듭니다.", features: ["프로젝트 하이라이트", "성과 시각화", "디자인 템플릿", "PDF 내보내기"] },
+    { title: "SNS 브랜딩", desc: "링크드인·인스타그램 같은 SNS 프로필을 다듬습니다.", features: ["프로필 컨설팅", "콘텐츠 전략", "해시태그 전략", "반응 분석"] },
+    { title: "프로필 촬영", desc: "전문 프로필 사진 촬영 및 보정 서비스를 제공합니다.", features: ["전문 스튜디오 촬영", "리터칭 포함", "다양한 컨셉", "SNS/이력서 최적화"] },
 ];
 
 const brandingProcess = [
@@ -245,10 +220,10 @@ export default function CoachingPage() {
    ================================================================ */
 function ResumeSection() {
     const features = [
-        { icon: FileText, title: "이력서 등록·관리", desc: "여러 버전의 이력서를 등록하고, 기본 이력서를 지정합니다." },
-        { icon: Sparkles, title: "AI 첨삭", desc: "HIT 결과와 요즘 채용 흐름을 바탕으로 AI가 고칠 점을 알려 드립니다." },
-        { icon: Users, title: "전문가 컨설팅", desc: "현직자·리크루터의 1:1 이력서 피드백을 받습니다." },
-        { icon: BarChart3, title: "키워드 최적화", desc: "채용 시스템(ATS)의 서류 거름망을 통과하기 쉬운 키워드를 알려 드립니다." },
+        { title: "이력서 등록·관리", desc: "여러 버전의 이력서를 등록하고, 기본 이력서를 지정합니다." },
+        { title: "AI 첨삭", desc: "HIT 결과와 요즘 채용 흐름을 바탕으로 AI가 고칠 점을 알려 드립니다." },
+        { title: "전문가 컨설팅", desc: "현직자·리크루터의 1:1 이력서 피드백을 받습니다." },
+        { title: "키워드 최적화", desc: "채용 시스템(ATS)의 서류 거름망을 통과하기 쉬운 키워드를 알려 드립니다." },
     ];
 
     const tips = [
@@ -288,9 +263,6 @@ function ResumeSection() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
                         {features.map((f) => (
                             <div key={f.title} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors text-center">
-                                <div className="w-12 h-12 rounded-xs flex items-center justify-center mx-auto mb-4 bg-neutral-100 text-neutral-500">
-                                    <f.icon className="h-6 w-6" />
-                                </div>
                                 <h3 className="font-bold mb-2">{f.title}</h3>
                                 <p className="text-sm text-neutral-500">{f.desc}</p>
                             </div>
@@ -440,12 +412,6 @@ function CareerSection() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {stages.map((stage, i) => (
                             <div key={stage.label} className="flex items-center gap-3">
-                                <div
-                                    className={clsx("w-10 h-10 rounded-xs flex items-center justify-center", stage.color)}
-                                    style={stage.bg ? { backgroundColor: stage.bg } : undefined}
-                                >
-                                    <stage.icon className="h-5 w-5" />
-                                </div>
                                 <div>
                                     <p className="text-sm font-bold">{stage.label}</p>
                                     <p className="text-xs text-neutral-400">{stage.desc}</p>
@@ -469,9 +435,6 @@ function CareerSection() {
                         {tracks.map((track) => (
                             <div key={track.code} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center">
-                                        <track.icon className="h-6 w-6" />
-                                    </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs font-bold px-2 py-0.5 bg-neutral-900 text-white rounded">{track.code}</span>
@@ -554,9 +517,6 @@ function BrandingSection() {
                         {brandingPrograms.map((prog) => (
                             <div key={prog.title} className="border border-neutral-200 rounded-xs p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center">
-                                        <prog.icon className="h-6 w-6" />
-                                    </div>
                                     <div>
                                         <h3 className="text-lg font-bold">{prog.title}</h3>
                                         <p className="text-xs text-neutral-500">{prog.desc}</p>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Compass, Target, Shield, Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 
 import { HIT_STAGES, estimateMinutes, hitStageMinutesLabel } from "@/lib/hit/stages";
 import HitStartCTA from "@/features/hit/HitStartCTA";
@@ -11,9 +11,9 @@ import { useHitResume, postHitSession } from "@/features/hit/useHitResume";
 
 // 검사 구성·문항 수는 실제 출제(/api/hit/b/questions → hit_questions test_type B)와 같아야 한다 (2026-10-12 재정의 — 전 회원 공통 "역량과 방향")
 const modules = [
-  { icon: Target, title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: `~${estimateMinutes(60)}분` },
-  { icon: Shield, title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. 기본 성향 검사의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: `~${estimateMinutes(36)}분` },
-  { icon: Compass, title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: `~${estimateMinutes(16)}분` },
+  { title: "핵심역량 · 직무 트랙 역량", desc: "문제해결·소통·주도성·협업·자기관리·학습민첩성 6가지 + 선택한 직무 트랙의 전문 역량.", count: "60문항", time: `~${estimateMinutes(60)}분` },
+  { title: "효능감 (할 수 있다)", desc: "6가지 일의 유형(RIASEC)을 얼마나 해낼 수 있다고 느끼는지. 기본 성향 검사의 흥미(끌린다)와 겹쳐 봅니다.", count: "36문항", time: `~${estimateMinutes(36)}분` },
+  { title: "자기 이해 · 직무 이해", desc: "내 강점과 맞는 환경을 아는 정도, 희망 직무의 일과 경로를 아는 정도.", count: "16문항", time: `~${estimateMinutes(16)}분` },
 ];
 const TOTAL_QUESTIONS = 112;
 
@@ -130,9 +130,6 @@ function HitBIntroContent() {
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xs">
-                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-xs flex items-center justify-center flex-shrink-0">
-                  <m.icon className="h-5 w-5" />
-                </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm">{m.title}</h3>

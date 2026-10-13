@@ -2,27 +2,18 @@
 
 import { PageHero } from "@/features/hero/PageHero";
 import Link from "next/link";
-import {
-    Target,
-    Eye,
-    Heart,
-    ArrowRight,
-    Calendar,
-} from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 
 const visionItems = [
     {
-        icon: Eye,
         title: "비전",
         desc: "누구나 자기 재능을 알고, 계획을 세워 성장할 수 있는 세상",
     },
     {
-        icon: Target,
         title: "미션",
         desc: "숨은 인재를 찾고, 사람마다 맞는 성장 계획을 함께 세웁니다",
     },
     {
-        icon: Heart,
         title: "핵심 가치",
         desc: "발견, 성장, 연결, 솔직함",
     },
@@ -59,9 +50,6 @@ export default function AboutPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {visionItems.map((item) => (
                             <div key={item.title} className="border border-neutral-200 rounded-xs p-6 text-center">
-                                <div className="w-14 h-14 bg-neutral-50 text-neutral-600 rounded-none flex items-center justify-center mx-auto mb-4">
-                                    <item.icon className="h-7 w-7" />
-                                </div>
                                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                                 <p className="text-sm text-neutral-500">{item.desc}</p>
                             </div>
