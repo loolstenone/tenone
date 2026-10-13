@@ -213,7 +213,7 @@ function JourneyMap({ status }: { status: JourneyStatus }) {
           </div>
         )}
         <div className="text-xs text-neutral-500">
-          현재 스테이지: <span className="font-bold text-neutral-900">{STAGES[currentIdx]?.label}</span> · {STAGES[currentIdx]?.subtitle}
+          현재 단계: <span className="font-bold text-neutral-900">{STAGES[currentIdx]?.label}</span> · {STAGES[currentIdx]?.subtitle}
         </div>
       </div>
 
@@ -340,7 +340,7 @@ function NextStageCard({ status, goTab }: { status: JourneyStatus; goTab: GoTab 
     <div className="bg-white border border-neutral-200 rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">다음 스테이지</p>
+          <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">다음 단계</p>
           <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
             <next.icon className="w-5 h-5" style={{ color: RED }} />
             {next.label} <span className="text-sm font-medium text-neutral-500">· {next.subtitle}</span>
@@ -389,7 +389,7 @@ function TodayMissionCard({ status, goTab }: { status: JourneyStatus; goTab: GoT
   } else if (!c.has_hit_b) {
     mission = { title: "역량·방향 검사", desc: `역량·효능감이 더해져요 (${hitStageMinutesLabel("b")})`, href: "/hero/hit/b", reward: null };
   } else if (!c.has_resume) {
-    mission = { title: "이력서 작성", desc: "Trainee 스테이지 해금 조건", href: "/hero/resume/workspace", reward: null };
+    mission = { title: "이력서 작성", desc: "연습생 단계로 올라가는 조건", href: "/hero/resume/workspace", reward: null };
   } else if (!c.has_jh) {
     mission = { title: "희망 직무 12문항 작성", desc: "나와 맞는 회사를 알려 드리려면 필요해요", href: "/hero/jh/write", reward: null };
   } else if (status.pendingMatches > 0) {
@@ -651,7 +651,7 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
         {/* 상단 배너 */}
         <div className="bg-[#E53935] px-8 py-10 text-center">
           <p className="text-5xl mb-3">{STAGE_EMOJI[to] ?? "🎉"}</p>
-          <h2 className="text-2xl font-black text-white mb-1">스테이지 승급!</h2>
+          <h2 className="text-2xl font-black text-white mb-1">다음 단계로 올라갔어요!</h2>
           <p className="text-white/80 text-sm">{STAGE_LABEL[to] ?? to} · {STAGE_SUBTITLE[to] ?? ""}</p>
         </div>
 
@@ -676,7 +676,7 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
           )}
 
           <p className="text-sm text-neutral-500 text-center leading-relaxed">
-            Journey를 계속 쌓아가세요.<br />다음 스테이지가 기다리고 있어요!
+            성장 기록을 계속 쌓아 보세요.<br />다음 단계도 함께 준비해요.
           </p>
 
           <button
