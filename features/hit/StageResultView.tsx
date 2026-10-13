@@ -68,7 +68,8 @@ function viewFor(stage: StageKey, r: Row): View {
       const expertise = pick(r.expertise_domains, ["domain_depth", "tacit_knowledge", "redeployment", "personal_brand"]);
       const best = top(expertise);
       return {
-        journey: { ready_for_transition: "전환 준비 완료", almost_ready: "거의 준비됨", building_bridge: "브릿지 구축 중", deepening_expertise: "전문성 심화 중", exploring_options: "옵션 탐색 중", early_reflection: "초기 성찰 단계" },
+        // almost_ready는 체크리스트를 안 했을 때 정체성 유연성·전문성만으로도 나온다 — '준비'가 아니라 바탕을 말한다 (2026-10-13)
+        journey: { ready_for_transition: "전환 준비 완료", almost_ready: "전환할 바탕이 탄탄함", building_bridge: "브릿지 구축 중", deepening_expertise: "전문성 심화 중", exploring_options: "옵션 탐색 중", early_reflection: "초기 성찰 단계" },
         cover: { headline: lt[r.leadership_type] ?? "리더십 전환", sub: roles[0] ? `차기 역할 1순위 ${roles[0].role}` : "" },
         findings: [
           { label: "리더십 유형", value: lt[r.leadership_type] ?? "-", note: STAGE_DIM_COPY[r.leadership_type]?.what ?? "" },
