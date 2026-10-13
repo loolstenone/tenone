@@ -105,7 +105,13 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
   const ch = { integrity: n("ch_integrity"), relational: n("ch_relational"), emotional: n("ch_emotional"), ethics: n("ch_ethics"), growth: n("ch_growth") };
   const discPrimary = String(d.disc_primary ?? "");
   const pick = (prefix: string) => mods.filter(m => m.id.startsWith(prefix));
-  const spStrength = mods.filter(m => m.id.startsWith("SP-") && !m.id.endsWith("-GROWTH"));
+  // 강점이 모두 50 아래면 "핵심 강점"이 아니라 내 안에서 상대적으로 높은 힘 — 점수 구간(보완하면 좋음)과 제목이 어긋나지 않게 (2026-10-13)
+  const spAllLow = sp.length > 0 && sp[0][1] < 50;
+  const spStrength = mods.filter(m => m.id.startsWith("SP-") && !m.id.endsWith("-GROWTH"))
+    .map(m => spAllLow ? { ...m, title: m.title.replace("핵심 강점", "상대적 강점") } : m);
+  const commentaryMods = pick("CROSS-");
+  const hasCommentary = commentaryMods.length > 0 || !!d.ai_narrative;
+  const nav = hasCommentary ? NAV : NAV.filter(x => x.id !== "commentary");
   // SP-*-GROWTH만 — 성품 해설 GROWTH-HIGH/MID/LOW가 섞이지 않게 (2026-10-13)
   const spGrowth = mods.filter(m => m.id.startsWith("SP-") && m.id.endsWith("-GROWTH"));
   const overview = heroType?.profile_overview ? toParagraphs(heroType.profile_overview.split("\n\n")[0] ?? "", 3) : [];
@@ -118,7 +124,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
       {print && <ReportCover code={`공통 기반`} title={HIT_STAGES.a.code} subtitle={HIT_STAGES.a.name} headline={typeCode} sub={typeName} date={formatDate(d.created_at as string)} reportNo={resultId.slice(0, 8).toUpperCase()} />}
       {!print && <ReportHeader code={`공통 기반`} title={HIT_STAGES.a.code} subtitle={HIT_STAGES.a.name} date={formatDate(d.created_at as string)} />}
       {!print && <HitChain type="a" id={resultId} />}
-      {!print && <SectionNav items={NAV} />}
+      {!print && <SectionNav items={nav} />}
 
       <Section id="summary" title="한눈에" lead="성격·행동·성품·흥미를 겹쳐 본 나의 영웅 유형입니다.">
         <HeroTypeCard typeCode={typeCode} nameKo={typeName} nickname={d.type_nickname as string} category={d.type_category as string}
@@ -152,6 +158,7 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <div className="rounded-2xl border border-neutral-200 px-5 sm:px-6 mt-4">
           {sp.map(([k, v]) => <ScoreRow key={k} label={SPOWER_LABELS[k]} value={v} />)}
         </div>
+        {spAllLow && <p className="mt-6 text-sm text-neutral-500 leading-relaxed">여덟 가지가 모두 50 아래입니다. 아래 해설은 뚜렷한 강점이라기보다 내 안에서 상대적으로 높은 힘에 대한 이야기로 읽어 주세요.</p>}
         <div className="mt-10"><ModuleList modules={spStrength} /></div>
         {spGrowth.length > 0 && <div className="mt-10"><p className="text-xs font-semibold text-neutral-400 mb-4">키우면 좋은 힘</p><ModuleList modules={spGrowth} /></div>}
       </Section>
@@ -197,10 +204,12 @@ export default function HitAResultView({ resultId, print = false }: { resultId: 
         <ModuleList modules={pick("UF-")} />
       </Section>
 
-      <Section id="commentary" title="HeRo 해설" lead="성격과 행동을 겹쳐 본 해석입니다.">
-        <ModuleList modules={pick("CROSS-")} />
-        <div className="mt-10"><AiNarrative text={d.ai_narrative as string | null} /></div>
-      </Section>
+      {hasCommentary && (
+        <Section id="commentary" title="HeRo 해설" lead="성격과 행동을 겹쳐 본 해석입니다.">
+          <ModuleList modules={commentaryMods} />
+          <div className="mt-10"><AiNarrative text={d.ai_narrative as string | null} /></div>
+        </Section>
+      )}
 
       <ReportFooterNote />
 

@@ -18,7 +18,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (modulesUsed.length > 0) {
       try {
         const { data: mods } = await createAdminClient().from('hit_report_modules').select('id, title, content').in('id', modulesUsed);
-        for (const m of (mods ?? []) as { id: string; title: string; content: string }[]) {
+        // 선택 규칙 순서대로 담는다 (DB 반환 순서 X, 2026-10-13)
+        const byId = new Map(((mods ?? []) as { id: string; title: string; content: string }[]).map(m => [m.id, m]));
+        for (const m of modulesUsed.map(id => byId.get(id)).filter((x): x is { id: string; title: string; content: string } => !!x)) {
           reportModules[m.id] = {
             title: m.title.replace(/\{[^}]+\}/g, '').replace(/\s*%\s*/g, ' ').replace(/\s+/g, ' ').trim(),
             content: m.content.replace(/\{[^}]+\}/g, '').trim(),

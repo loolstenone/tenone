@@ -41,9 +41,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (modulesUsed.length > 0) {
       try {
         const modules = await getReportModules(modulesUsed);
+        // 선택 규칙 순서대로 (성격 E→S→T→J, 강점 1·2·3위) — DB 반환 순서를 쓰면 화면 순서가 섞였다 (2026-10-13)
+        const byId = new Map(modules.map(m => [m.id, m]));
         reportModules = {};
-        for (const m of modules) {
-          reportModules[m.id] = { title: m.title, content: m.content };
+        for (const id of modulesUsed) {
+          const m = byId.get(id);
+          if (m) reportModules[id] = { title: m.title, content: m.content };
         }
       } catch {}
     }
