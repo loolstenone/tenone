@@ -62,6 +62,7 @@ export function PlannersHeader() {
                         accentColor="#14B8A6"
                         siteId="planners"
                         siteName="Planner's"
+                        workspaceButtonLabel="내 플래너"
                     />
                 </div>
 

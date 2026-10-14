@@ -17,8 +17,8 @@ export function PlannersFooter() {
             accentColor="#14B8A6"
             dark={true}
             actions={[
-                { label: "플래너'스 PAD 받기", href: "/planners/pad" },
-                { label: "플래너'스 AI 알아보기", href: "/planners/ai" },
+                { label: "PAD 받기", href: "/planners/pad" },
+                { label: "AI 알아보기", href: "/planners/ai" },
                 { label: "훈련 프로젝트 보기", href: "/planners/projects" },
                 { label: "내 참여 확인서", href: "/planners/certificate" },
             ]}

@@ -6,7 +6,7 @@ import { PlannersPageHero, PLANNERS_SECTION } from "@/features/planners/PageHero
 // ❌ 가격·요금 표기 금지 (통신판매업 신고 전)
 // 앱 진입은 우측 유틸리티 바 WORK(워크스페이스)에서 — 소개 페이지에 '열기' 버튼을 다시 두지 않는다 (2026-10-14 사용자 "중복으로 또 묻는 느낌")
 export const metadata: Metadata = {
-    title: "플래너'스 AI",
+    title: "AI",
     description: "플래너'스 PAD와 같은 구조(연간·월간·주간·일간·프로젝트)를 디지털로. 할 일·프로젝트·캔버스·마인드맵·템플릿을 한곳에서, AI가 하루를 정리해 줍니다.",
 };
 
@@ -23,7 +23,7 @@ export default function PlannersAiPage() {
     return (
         <>
             <PlannersPageHero
-                eyebrow="플래너'스 AI · 인공지능 플래너"
+                eyebrow="AI · 인공지능 플래너"
                 title={<>종이에서 디지털로,<br />디지털에서 AI로</>}
                 description={<>플래너'스 PAD의 구조를 그대로 옮긴 디지털 플래너입니다. AI가 실행을 대신할수록 무엇을 할지 정하는 일은 사람의 몫으로 남습니다. 플래너'스 AI는 그 결정을 돕는 도구입니다.</>}
             />

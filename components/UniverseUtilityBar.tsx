@@ -59,6 +59,8 @@ export interface UtilityBarConfig {
     hideNotifications?: boolean;
     /** WORK 드롭다운 숨김 (브랜드 본진 사이트 — 도메인 자체가 곧 워크스페이스인 경우) */
     hideWorkspaces?: boolean;
+    /** WORK 버튼 이름 바꾸기 (예: Planner's "내 플래너"). 이용 서비스가 하나면 드롭다운 없이 바로 이동 */
+    workspaceButtonLabel?: string;
     searchPath?: string;
     siteId?: string;
     siteName?: string;
@@ -193,7 +195,12 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                 {!config.hideAuth && isAuthenticated ? (
                     <>
                         {/* Work Space 드롭다운 — affiliations 기반 자동 또는 명시적 workspaces */}
-                        {!config.hideWorkspaces && workspaces.length > 0 && (
+                        {!config.hideWorkspaces && config.workspaceButtonLabel && workspaces.length === 1 ? (
+                            <CrossSiteLink href={workspaces[0].path} className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity" title={workspaces[0].label}>
+                                <Briefcase className="h-4 w-4" />
+                                <span>{config.workspaceButtonLabel}</span>
+                            </CrossSiteLink>
+                        ) : !config.hideWorkspaces && workspaces.length > 0 && (
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => setWsOpen(o => !o)}
@@ -201,7 +208,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                     title="내 워크스페이스"
                                 >
                                     <Briefcase className="h-4 w-4" />
-                                    <span>WORK</span>
+                                    <span>{config.workspaceButtonLabel ?? "WORK"}</span>
                                     {workspaces.length > 1 && <span className="text-[10px] opacity-60">({workspaces.length})</span>}
                                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${wsOpen ? "rotate-180" : ""}`} />
                                 </button>

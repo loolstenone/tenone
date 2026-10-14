@@ -14,7 +14,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const file = await getPlannersFile((await params).id);
-    if (!file) return { title: "플래너'스 PAD" };
+    if (!file) return { title: "PAD" };
     return {
         title: file.title,
         description: file.description?.split("\n")[0] ?? `${file.category} — 굿노트·삼성노트·XODO에서 쓰는 PAD 서식`,
@@ -35,7 +35,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
     return (
         <>
             <div className={`${PLANNERS_CONTAINER} pt-10 text-sm text-neutral-500 md:pt-16`}>
-                <Link href="/planners/pad" className="hover:text-neutral-900">플래너'스 PAD</Link>
+                <Link href="/planners/pad" className="hover:text-neutral-900">PAD</Link>
                 <span className="mx-2">›</span>
                 <Link href={`/planners/pad?c=${encodeURIComponent(file.category)}`} className="hover:text-neutral-900">{file.category}</Link>
             </div>

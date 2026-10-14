@@ -95,8 +95,8 @@ export default function PlannersAboutPage() {
                 <div className="mt-32 border-t border-neutral-200 pt-16">
                     <h2 className="text-2xl font-bold">기획을 손에 익히는 방법</h2>
                     <div className="mt-6 grid gap-4 md:grid-cols-3">
-                        <NextLink href="/planners/ai" title="플래너'스 AI" desc="Plan · Do · See를 디지털로 — 인공지능 플래너" />
-                        <NextLink href="/planners/pad" title="플래너'스 PAD" desc="굿노트 등에서 손으로 쓰는 플래너와 서식" />
+                        <NextLink href="/planners/ai" title="AI" desc="Plan · Do · See를 디지털로 — 인공지능 플래너" />
+                        <NextLink href="/planners/pad" title="PAD" desc="굿노트 등에서 손으로 쓰는 플래너와 서식" />
                         <NextLink href="/planners/projects" title="프로젝트" desc="팀을 꾸려 실제 과제를 기획" />
                     </div>
                 </div>

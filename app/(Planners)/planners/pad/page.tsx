@@ -7,7 +7,7 @@ import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/featur
 
 // 플래너'스 PAD — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
 export const metadata: Metadata = {
-    title: "플래너'스 PAD",
+    title: "PAD",
     description: "아이패드·갤럭시 탭의 굿노트·삼성노트·XODO에서 쓰는 손글씨 플래너와 노트·프레임워크 서식. 로그인하면 누구나 받을 수 있습니다.",
 };
 
@@ -40,7 +40,7 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
     return (
         <>
             <PlannersPageHero
-                eyebrow="플래너'스 PAD"
+                eyebrow="PAD"
                 title="손으로 쓰는 기획자의 플래너"
                 description={<>아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다.</>}
             />

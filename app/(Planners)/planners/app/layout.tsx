@@ -46,7 +46,7 @@ export default async function PlannersAppLayout({ children }: { children: React.
                 <LoginRequired accentColor="#0F766E" message="플래너'스 AI는 로그인한 뒤 쓸 수 있습니다." />
                 <p className="-mt-16 flex justify-center gap-4 text-sm text-neutral-500">
                     <Link href="/planners" className="hover:text-[#0F766E] hover:underline">Planner&apos;s 홈</Link>
-                    <Link href="/planners/ai" className="hover:text-[#0F766E] hover:underline">플래너'스 AI 소개</Link>
+                    <Link href="/planners/ai" className="hover:text-[#0F766E] hover:underline">AI 소개</Link>
                 </p>
             </div>
         );
