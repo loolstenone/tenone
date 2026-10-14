@@ -91,7 +91,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center gap-3 mb-6">
                 <Search className="h-6 w-6 text-[var(--pp-accent)]" />
-                <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">검색</h1>
+                <h1 className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight myverse-dark:text-neutral-100">검색</h1>
             </div>
 
             <div className="relative mb-8">

@@ -48,7 +48,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
             }`}
         >
             {/* Drag handle */}
-            <button className="cursor-grab text-neutral-300 hover:text-neutral-500 shrink-0 touch-none">
+            <button className="cursor-grab text-neutral-300 hover:text-neutral-500 shrink-0 touch-none lg:opacity-0 lg:group-hover:opacity-100 focus:opacity-100 transition-opacity">
                 <GripVertical className="h-3.5 w-3.5" />
             </button>
 
@@ -70,7 +70,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                         : "border-neutral-300 text-neutral-300 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)]"
                 }`}
             >
-                {task.status === 'done' ? '✓' : task.status === 'carried' ? '→' : task.status === 'moved' ? '→' : task.status === 'hold' ? '⏸' : task.status === 'cancelled' ? '✕' : '·'}
+                {task.status === 'done' ? '✓' : task.status === 'carried' ? '→' : task.status === 'moved' ? '→' : task.status === 'hold' ? '⏸' : task.status === 'cancelled' ? '✕' : ''}
             </button>
 
             {/* Time badge */}
@@ -112,7 +112,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                     className={`text-xs shrink-0 px-1.5 py-0.5 rounded transition-colors ${
                         task.time
                             ? "text-[var(--pp-accent)] bg-[var(--pp-accent)]/10 hover:bg-[var(--pp-accent)]/20"
-                            : "text-neutral-300 hover:text-neutral-400"
+                            : "text-neutral-300 hover:text-neutral-400 lg:opacity-0 lg:group-hover:opacity-100 focus:opacity-100 transition-opacity lg:order-last"
                     }`}
                     title="시간 설정"
                 >
@@ -144,7 +144,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                         className={`shrink-0 text-xs max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
                             project
                                 ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] border-[var(--pp-accent)]/30"
-                                : "text-neutral-300 border-transparent opacity-40"
+                                : "text-neutral-300 border-transparent lg:opacity-0 opacity-60 lg:group-hover:opacity-100 focus:opacity-100 transition-opacity lg:order-last"
                         }`}
                         style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}
                     >
@@ -161,7 +161,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                 <button
                     onClick={onMove}
                     title="다른 날짜로 변경"
-                    className="text-neutral-300 hover:text-violet-500 transition-opacity shrink-0 opacity-0 group-hover:opacity-100"
+                    className="text-neutral-300 hover:text-[var(--pp-accent)] transition-opacity shrink-0 lg:opacity-0 lg:group-hover:opacity-100 focus:opacity-100 lg:order-last"
                 >
                     <CalendarDays className="h-3.5 w-3.5" />
                 </button>
@@ -170,7 +170,8 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
             {/* Remove */}
             <button
                 onClick={onRemove}
-                className="text-neutral-300 hover:text-red-500 transition-opacity shrink-0"
+                title="지우기"
+                className="text-neutral-300 hover:text-red-500 transition-opacity shrink-0 lg:opacity-0 lg:group-hover:opacity-100 focus:opacity-100 lg:order-last"
             >
                 <Trash2 className="h-3.5 w-3.5" />
             </button>

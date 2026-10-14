@@ -25,6 +25,16 @@ import { OneOnOneGrid, MeetingGrid, InterviewGrid, AarGrid } from "./template-gr
 import { BrainstormGrid, DecisionLogGrid, EmotionLogGrid, GratitudeGrid, ReadingGrid, StandupGrid, WeeklyJournalGrid, ZettelkastenGrid, MindmapGrid } from "./template-grids/journal";
 import { TimeBlockGrid, DailyDesignGrid, DeepWorkGrid, PomodoroGrid, HabitTrackerGrid, EnergyMapGrid, WeeklyReviewGrid, WeeklyWinGrid, MonthlyThemeGrid, QuarterlyGrid, YearPlanGrid, FiveYearGrid, MovingAverageGrid, ReversePlanGrid, SprintGrid } from "./template-grids/planning";
 
+// 템플릿 세부 분류 표시명 — DB 값(영문·한글 섞임)은 그대로 두고 화면에서만 한글로 (2026-10-14 영문 라벨 정리)
+const SUBCATEGORY_KO: Record<string, string> = {
+    daily: "일간", weekly: "주간", monthly: "월간", quarterly: "분기", yearly: "연간",
+    strategy: "전략", analysis: "분석", decision: "의사결정", prioritization: "우선순위", ideation: "아이디어",
+    personal: "개인", personal_os: "개인 운영", study: "공부", reading: "독서", research: "리서치",
+    product: "제품", user: "사용자", business: "비즈니스", project: "프로젝트", work: "업무",
+    retro: "회고", collaboration: "협업", alignment: "정렬", planning: "기획", risk: "리스크", meeting: "회의",
+};
+const subcategoryLabel = (v: string) => SUBCATEGORY_KO[v] ?? v;
+
 interface Template {
     id: string;
     key: string;
@@ -728,7 +738,7 @@ export function TemplatesView() {
                         return (
                             <div key={catKey}>
                                 <div className="flex items-baseline gap-2 mb-3">
-                                    <h3 className="text-xs uppercase tracking-widest text-neutral-400">{meta.label}</h3>
+                                    <h3 className="text-xs tracking-wide text-neutral-400">{meta.label}</h3>
                                     <span className="text-[10px] text-neutral-300">{items.length}</span>
                                 </div>
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -921,7 +931,7 @@ export function TemplatesView() {
                                             {meta?.icon}
                                             {meta?.label || selected.category}
                                             {selected.subcategory && (
-                                                <><ChevronRight className="h-2.5 w-2.5 opacity-50" /><span className="opacity-70">{selected.subcategory}</span></>
+                                                <><ChevronRight className="h-2.5 w-2.5 opacity-50" /><span className="opacity-70">{subcategoryLabel(selected.subcategory)}</span></>
                                             )}
                                         </div>
                                     );
@@ -1091,7 +1101,7 @@ function TemplateCard({
 
             <div className="p-4" onClick={onClick}>
                 {tpl.subcategory && (
-                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">{tpl.subcategory}</p>
+                    <p className="text-[11px] text-neutral-400 mb-1.5">{subcategoryLabel(tpl.subcategory)}</p>
                 )}
 
                 <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[var(--pp-accent)] transition-colors pr-6">

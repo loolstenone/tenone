@@ -184,7 +184,7 @@ export function IndexView() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
                 <div className="flex items-center gap-2">
                     <LayoutGrid className="h-6 w-6 text-[var(--pp-accent)]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">인덱스</h1>
+                    <h1 className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight myverse-dark:text-neutral-100">인덱스</h1>
                     <div className="flex items-center gap-0.5 ml-1">
                         <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors" aria-label="이전 해">
                             <ChevronLeft className="h-4 w-4" />

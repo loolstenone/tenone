@@ -1258,7 +1258,7 @@ export function ContactsView() {
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                     <Users className="h-6 w-6 text-[var(--pp-accent)]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">연락처</h1>
+                    <h1 className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight myverse-dark:text-neutral-100">연락처</h1>
                     {!loading && (
                         <span className="text-xs text-neutral-500 ml-1">
                             전체 {contacts.length.toLocaleString("ko-KR")}명

@@ -136,7 +136,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                     <div className="w-1 self-stretch rounded-full shrink-0" style={{ backgroundColor: project.color || "#6366F1" }} />
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2.5 flex-wrap">
-                            <h1 className="font-serif text-3xl text-neutral-900 leading-tight">{project.title || "(제목 없음)"}</h1>
+                            <h1 className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight myverse-dark:text-neutral-100">{project.title || "(제목 없음)"}</h1>
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_TONE[project.status] || STATUS_TONE.active}`}>
                                 {STATUS_LABEL[project.status] || project.status}
                             </span>

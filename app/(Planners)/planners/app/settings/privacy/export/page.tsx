@@ -40,27 +40,24 @@ export default function ExportPage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12"><div className="max-w-2xl">
             <Link href="/planners/app/settings/privacy" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800 mb-3">
-                <ArrowLeft className="h-3 w-3" /> 개인정보 설정으로
+                <ArrowLeft className="h-3 w-3" /> 사생활 설정으로
             </Link>
-            <h1 className="text-xl font-serif text-neutral-900 mb-1">내 데이터 다운로드</h1>
+            <h1 className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 mb-2">내 데이터 내려받기</h1>
             <p className="text-xs text-neutral-500 mb-6">
-                Myverse가 보관 중인 내 데이터 전체를 JSON 한 파일로 받습니다 (GDPR 데이터 이동권).
+                내 계정에 저장된 기록 전체를 한 파일(JSON)로 받습니다. 다른 서비스로 옮기거나 보관할 때 쓰세요.
             </p>
 
             <div className="rounded-2xl border border-neutral-200 bg-white p-5 space-y-4">
                 <div>
                     <p className="text-sm font-medium text-neutral-900 mb-2">포함되는 데이터</p>
                     <ul className="text-xs text-neutral-600 leading-relaxed space-y-1">
-                        <li>• 프로필 (이름·이메일·핸들·소개)</li>
-                        <li>• 모든 흔적 / 일과 / 장소 / 건강 기록</li>
-                        <li>• 프로젝트 / 캔버스 / 노트 / 작업</li>
-                        <li>• 커뮤니티 글·댓글·반응</li>
-                        <li>• 1:1 메시지 (DM)</li>
-                        <li>• 팔로우 관계 / 차단 목록</li>
-                        <li>• AI 브리핑·인사이트·주간 리포트</li>
-                        <li>• 결제·구독 이력</li>
+                        <li>• 프로필 (이름·이메일)</li>
+                        <li>• 하루 기록: 할 일 · 노트 · 하루 결과 · Top 3 · 저녁 회고</li>
+                        <li>• 일정 · 프로젝트 · 마일스톤 · 캔버스 · 템플릿</li>
+                        <li>• 정체성 · 주간 회고</li>
+                        <li>• 예전에 MyVerse를 함께 썼다면 그 기록도 포함됩니다</li>
                     </ul>
                 </div>
 
@@ -95,6 +92,6 @@ export default function ExportPage() {
                 삭제 권리(잊혀질 권리)를 행사하려면{" "}
                 <Link href="/planners/app/settings/privacy" className="underline hover:text-neutral-700">개인정보 설정</Link>에서 계정 삭제를 요청해 주세요.
             </div>
-        </div>
+        </div></div>
     );
 }

@@ -68,10 +68,10 @@ export function NotificationsView() {
     const unread = notifs.filter(n => !n.read_at);
 
     return (
-        <div className="max-w-2xl mx-auto px-5 py-8 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <LaneHeader
                 icon="notifications"
-                label="NOTIFICATIONS"
+                label=""
                 title="알림"
                 subtitle={unread.length > 0 ? `${unread.length}개의 새 알림` : "모두 확인했어요"}
                 actions={
