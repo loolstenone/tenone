@@ -5,11 +5,11 @@ import Link from "next/link";
 // ❌ 페이지마다 max-w-[980px]·max-w-5xl·py-10 등 폭·여백을 따로 정하지 않는다 → 아래 상수
 // 긴 글(기획이란 본문)만 안쪽에서 max-w-[760px]로 줄여 읽기 폭을 맞춘다
 
-/** 콘텐츠 폭 (1440px) + 좌우 여백 */
-export const PLANNERS_CONTAINER = "mx-auto w-full max-w-[1440px] px-5 md:px-12";
+/** 콘텐츠 폭 (1590px) + 좌우 여백 — 2026-10-14 사용자 "여유 있는 구성이 인간적" → 1440에서 150 넓힘 */
+export const PLANNERS_CONTAINER = "mx-auto w-full max-w-[1590px] px-6 md:px-16";
 
-/** 구간(섹션) 위아래 여백 */
-export const PLANNERS_SPACE = "py-16 md:py-28";
+/** 구간(섹션) 위아래 여백 — 150px (logrog과 같음) */
+export const PLANNERS_SPACE = "py-20 md:py-[150px]";
 
 /** 폭 + 구간 여백 */
 export const PLANNERS_SECTION = `${PLANNERS_CONTAINER} ${PLANNERS_SPACE}`;
@@ -24,11 +24,11 @@ export function PlannersPageHero({ eyebrow, title, description, children }: {
 }) {
     return (
         <section className="border-b border-neutral-100 bg-neutral-50">
-            <div className={`${PLANNERS_CONTAINER} py-20 text-center md:py-32`}>
+            <div className={`${PLANNERS_CONTAINER} py-24 text-center md:py-[170px]`}>
                 <p className="text-sm font-bold tracking-widest text-[#0F766E]">{eyebrow}</p>
-                <h1 className="mt-4 break-keep text-4xl font-black leading-tight md:text-[52px]">{title}</h1>
-                {description && <div className="mx-auto mt-6 max-w-2xl break-keep leading-relaxed text-neutral-600 md:text-lg">{description}</div>}
-                {children && <div className="mt-10 flex flex-wrap justify-center gap-3">{children}</div>}
+                <h1 className="mt-5 break-keep text-4xl font-black leading-tight md:text-6xl">{title}</h1>
+                {description && <div className="mx-auto mt-8 max-w-2xl break-keep leading-loose text-neutral-600 md:text-lg">{description}</div>}
+                {children && <div className="mt-12 flex flex-wrap justify-center gap-3">{children}</div>}
             </div>
         </section>
     );
@@ -42,10 +42,10 @@ export function PlannersSectionTitle({ title, description, href, linkLabel = "�
     linkLabel?: string;
 }) {
     return (
-        <div className="mb-12 text-center md:mb-16">
-            <h2 className="break-keep text-3xl font-bold md:text-[40px] md:leading-tight">{title}</h2>
-            {description && <p className="mx-auto mt-4 max-w-2xl break-keep text-neutral-500 md:text-lg">{description}</p>}
-            {href && <Link href={href} className="mt-5 inline-block text-sm text-neutral-500 underline-offset-4 hover:text-neutral-900 hover:underline">{linkLabel} →</Link>}
+        <div className="mb-14 text-center md:mb-24">
+            <h2 className="break-keep text-3xl font-bold md:text-5xl md:leading-tight">{title}</h2>
+            {description && <p className="mx-auto mt-5 max-w-2xl break-keep leading-relaxed text-neutral-500 md:text-lg">{description}</p>}
+            {href && <Link href={href} className="mt-6 inline-block text-sm text-neutral-500 underline-offset-4 hover:text-neutral-900 hover:underline">{linkLabel} →</Link>}
         </div>
     );
 }

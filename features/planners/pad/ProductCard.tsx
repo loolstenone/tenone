@@ -14,7 +14,7 @@ export function ProductCard({ file, priority = false, reviewCount = 0 }: { file:
                         src={file.thumbnail_url}
                         alt=""
                         loading={priority ? "eager" : "lazy"}
-                        className="h-full w-full object-contain p-6 transition-transform duration-500 group-hover:scale-[1.04] md:p-10"
+                        className="h-full w-full object-contain p-8 transition-transform duration-500 group-hover:scale-[1.04] md:p-14"
                     />
                 ) : (
                     <span className="flex h-full items-center justify-center text-sm text-neutral-400">{fileExt(file.file_name)}</span>
@@ -27,7 +27,7 @@ export function ProductCard({ file, priority = false, reviewCount = 0 }: { file:
                     </span>
                 )}
             </div>
-            <p className="mt-5 text-xs tracking-wide text-neutral-400">{file.category}</p>
+            <p className="mt-6 text-xs tracking-wide text-neutral-400">{file.category}</p>
             <p className="mt-1.5 line-clamp-2 break-keep font-medium text-neutral-900 group-hover:text-[#0F766E] md:text-[17px]">{file.title}</p>
             <p className="mt-2 text-xs text-neutral-400">
                 {fileExt(file.file_name)}
@@ -40,7 +40,7 @@ export function ProductCard({ file, priority = false, reviewCount = 0 }: { file:
 
 export function ProductGrid({ files, priorityCount = 0, reviewCounts }: { files: PlannersFile[]; priorityCount?: number; reviewCounts?: Map<string, number> }) {
     return (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:gap-x-8 md:gap-y-16 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-14 md:gap-x-12 md:gap-y-24 lg:grid-cols-3">
             {files.map((f, i) => <ProductCard key={f.id} file={f} priority={i < priorityCount} reviewCount={reviewCounts?.get(f.id) ?? 0} />)}
         </div>
     );

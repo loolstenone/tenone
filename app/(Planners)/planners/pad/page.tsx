@@ -45,7 +45,7 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
                 description={<>아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다.</>}
             />
 
-            <div className="sticky top-[60px] z-30 border-b border-neutral-200 bg-white/95 backdrop-blur md:top-[72px]">
+            <div className="sticky top-[64px] z-30 border-b border-neutral-200 bg-white/95 backdrop-blur md:top-[84px]">
                 <nav className={`${PLANNERS_CONTAINER} flex gap-1 overflow-x-auto`} aria-label="분류">
                     <Tab href={href({ c: null })} active={!category} label="전체" count={all.length} />
                     {PAD_CATEGORIES.filter((cat) => counts.get(cat)).map((cat) => (

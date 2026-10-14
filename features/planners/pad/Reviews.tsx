@@ -15,9 +15,9 @@ export function Reviews({ fileId, reviews, summary }: { fileId: string; reviews:
 
     return (
         <section id="reviews" className="border-t border-neutral-100">
-            <div className="mx-auto max-w-[960px] px-5 py-16 md:px-12 md:py-28">
+            <div className="mx-auto max-w-[1040px] px-6 py-20 md:px-16 md:py-[150px]">
                 <div className="flex flex-wrap items-end justify-between gap-3">
-                    <h2 className="text-3xl font-bold md:text-[40px]">후기 <span className="text-neutral-400">{summary.count}</span></h2>
+                    <h2 className="text-3xl font-bold md:text-5xl">후기 <span className="text-neutral-400">{summary.count}</span></h2>
                     {summary.count > 0 && (
                         <p className="flex items-center gap-1.5 text-sm text-neutral-600">
                             <Stars value={summary.average} /> <b className="text-neutral-900">{summary.average.toFixed(1)}</b> / 5

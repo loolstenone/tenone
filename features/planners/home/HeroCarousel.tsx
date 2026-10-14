@@ -32,7 +32,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     const s = slides[i];
     return (
         <section className="relative bg-[#134E4A] text-white" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
-            <div className="mx-auto grid min-h-[520px] max-w-[1440px] items-center gap-10 px-5 py-20 md:min-h-[640px] md:grid-cols-2 md:gap-16 md:px-12 md:py-24">
+            <div className="mx-auto grid min-h-[560px] max-w-[1590px] items-center gap-12 px-6 py-24 md:min-h-[800px] md:grid-cols-2 md:gap-24 md:px-16 md:py-32">
                 <div key={s.key}>
                     <h1 className="break-keep text-4xl font-black leading-tight md:text-6xl">{s.title}</h1>
                     {s.subtitle && <p className="mt-4 break-keep text-xl font-bold text-teal-200 md:text-3xl">{s.subtitle}</p>}
@@ -55,13 +55,13 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 {s.imageUrl && (
                     <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.imageUrl} alt="" className="max-h-[480px] w-full object-contain" />
+                        <img src={s.imageUrl} alt="" className="max-h-[560px] w-full object-contain" />
                     </Link>
                 )}
             </div>
 
             {n > 1 && (
-                <div className="absolute bottom-6 left-0 right-0 mx-auto flex max-w-[1440px] items-center gap-3 px-5 md:px-12">
+                <div className="absolute bottom-10 left-0 right-0 mx-auto flex max-w-[1590px] items-center gap-3 px-6 md:px-16">
                     <button onClick={() => setI((x) => (x - 1 + n) % n)} aria-label="이전 배너" className="text-white/60 hover:text-white"><ChevronLeft className="h-5 w-5" /></button>
                     <div className="flex gap-1.5">
                         {slides.map((sl, k) => (

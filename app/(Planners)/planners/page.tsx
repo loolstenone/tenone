@@ -55,8 +55,8 @@ export default async function PlannersHome() {
             <HeroCarousel slides={slides} />
 
             {/* 두 제품 */}
-            <section className={`${PLANNERS_SECTION} grid gap-6 md:grid-cols-2 md:gap-8`}>
-                <Link href="/planners/ai" className="group flex flex-col justify-between bg-neutral-50 p-8 transition-colors hover:bg-teal-50/60 md:p-14">
+            <section className={`${PLANNERS_SECTION} grid gap-6 md:grid-cols-2 md:gap-12`}>
+                <Link href="/planners/ai" className="group flex flex-col justify-between bg-neutral-50 p-10 transition-colors hover:bg-teal-50/60 md:p-20">
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">플래너'스 AI</p>
                         <h2 className="mt-2 text-3xl font-bold md:text-4xl">인공지능 플래너</h2>
@@ -67,7 +67,7 @@ export default async function PlannersHome() {
                     </ul>
                     <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
-                <Link href="/planners/pad" className="group flex flex-col justify-between bg-neutral-50 p-8 transition-colors hover:bg-teal-50/60 md:p-14">
+                <Link href="/planners/pad" className="group flex flex-col justify-between bg-neutral-50 p-10 transition-colors hover:bg-teal-50/60 md:p-20">
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
                         <h2 className="mt-2 text-3xl font-bold md:text-4xl">손글씨 플래너</h2>
@@ -94,9 +94,9 @@ export default async function PlannersHome() {
             <section className="bg-neutral-50">
                 <div className={PLANNERS_SECTION}>
                     <PlannersSectionTitle title="분류별로 찾기" description="연간 플래너부터 노트·프레임워크·플레이 서식까지" href="/planners/pad" />
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-6 lg:grid-cols-5">
                         {tiles.map(({ c, list }) => (
-                            <Link key={c} href={`/planners/pad?c=${encodeURIComponent(c)}`} className="group flex items-center gap-4 bg-white p-5 transition-shadow hover:shadow-md">
+                            <Link key={c} href={`/planners/pad?c=${encodeURIComponent(c)}`} className="group flex items-center gap-5 bg-white p-6 md:p-7 transition-shadow hover:shadow-md">
                                 {list[0].thumbnail_url && (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={list[0].thumbnail_url} alt="" className="h-16 w-16 shrink-0 object-contain" />

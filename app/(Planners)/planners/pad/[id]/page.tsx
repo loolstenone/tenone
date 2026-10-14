@@ -34,13 +34,13 @@ export default async function PlannersPadDetailPage({ params }: Props) {
 
     return (
         <>
-            <div className={`${PLANNERS_CONTAINER} pt-8 text-sm text-neutral-500 md:pt-12`}>
+            <div className={`${PLANNERS_CONTAINER} pt-10 text-sm text-neutral-500 md:pt-16`}>
                 <Link href="/planners/pad" className="hover:text-neutral-900">플래너'스 PAD</Link>
                 <span className="mx-2">›</span>
                 <Link href={`/planners/pad?c=${encodeURIComponent(file.category)}`} className="hover:text-neutral-900">{file.category}</Link>
             </div>
 
-            <section className={`${PLANNERS_CONTAINER} grid gap-10 py-8 md:grid-cols-2 md:gap-20 md:py-14`}>
+            <section className={`${PLANNERS_CONTAINER} grid gap-12 py-10 md:grid-cols-2 md:gap-28 md:py-20`}>
                 <Gallery images={file.images} title={file.title} />
 
                 <div>
@@ -80,7 +80,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
 
             {file.detail_images.length > 0 && (
                 <section className="border-t border-neutral-200">
-                    <div className={`mx-auto max-w-[960px] px-5 md:px-12 ${PLANNERS_SPACE}`}>
+                    <div className={`mx-auto max-w-[1040px] px-6 md:px-16 ${PLANNERS_SPACE}`}>
                         <PlannersSectionTitle title="상세 보기" />
                         <div className="space-y-4">
                             {file.detail_images.map((src) => (
