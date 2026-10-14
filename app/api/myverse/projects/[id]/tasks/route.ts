@@ -92,6 +92,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         id: string; text: string; status: string;
         time?: string | null; project_id?: string | null;
         priority?: string | null; source?: string;
+        estimate_min?: number | null;
     };
 
     const newTask: Task = {
@@ -102,6 +103,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         project_id: projectId,
         priority: body.priority ?? null,
         source: "project",
+        // 예상 시간(분) — AI 목표 분해에서 온 값 (2026-10-14)
+        ...(Number.isFinite(Number(body.estimate_min)) && Number(body.estimate_min) > 0 ? { estimate_min: Math.min(Math.round(Number(body.estimate_min)), 24 * 60) } : {}),
     };
 
     const existing = (row && Array.isArray((row as { tasks?: Task[] }).tasks))

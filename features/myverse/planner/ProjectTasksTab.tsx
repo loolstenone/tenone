@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus, List, LayoutGrid, BarChart3, Link2, Unlink, AlertTriangle, Wand2, Image as ImageIcon, FileImage } from "lucide-react";
 import { toPng, toSvg } from "html-to-image";
 import { localDateStr } from "@/lib/myverse/types";
+import { ProjectBreakdown } from "./ProjectBreakdown";
 
 interface TaskItem {
     date: string;
@@ -165,6 +166,9 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                     추가
                 </button>
             </section>
+
+            {/* AI 목표 분해 — 플래너'스 AI 2단계 (유료 회원 전용) */}
+            <ProjectBreakdown projectId={projectId} onAdded={load} />
 
             {isEmpty ? (
                 <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-8 px-5 text-center">
