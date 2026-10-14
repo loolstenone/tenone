@@ -4,12 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, X, Briefcase, Image as ImageIcon, Settings, HelpCircle, Info, Mail } from "lucide-react";
+import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, X, Briefcase, Image as ImageIcon, Settings, Info, Mail, Share2 } from "lucide-react";
 import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { LogoutButton } from "@/components/AccountControls";
 import { LoginModal } from "@/components/LoginModal";
 import { AccountMenu } from "@/components/AccountMenu";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { shareCurrentPage } from "@/lib/share-page";
 import {
     getNotifications,
     getUnreadCount,
@@ -91,32 +93,6 @@ function AuthSection({ compact = false, placement = "up-left" }: { compact?: boo
                 )}
             </div>
             <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} defaultTab={loginTab} />
-        </>
-    );
-}
-
-function MobileAuthButton() {
-    const { isAuthenticated } = useAuth();
-    const [loginOpen, setLoginOpen] = useState(false);
-
-    if (isAuthenticated) {
-        return (
-            // 모바일 상단 — 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10). 알림은 Jakka 자체 알림
-            <span className="flex items-center gap-3 text-neutral-800">
-                <AccountMenu profilePath="/jakka/profile" siteId="jakka" mode="sheet" />
-            </span>
-        );
-    }
-
-    return (
-        <>
-            <button
-                onClick={() => setLoginOpen(true)}
-                className="text-[13px] font-bold text-neutral-900 hover:text-neutral-500 transition-colors"
-            >
-                로그인
-            </button>
-            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
         </>
     );
 }
@@ -205,6 +181,20 @@ function NotificationSheet({ open, onClose, userId }: { open: boolean; onClose: 
     );
 }
 
+function ShareRow() {
+    const [copied, setCopied] = useState(false);
+    return (
+        <button
+            type="button"
+            onClick={async () => { if ((await shareCurrentPage()) === "copied") { setCopied(true); setTimeout(() => setCopied(false), 2000); } }}
+            className="w-full flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700"
+        >
+            <Share2 className="h-4 w-4 stroke-[1.5] text-neutral-300" />
+            {copied ? "링크 복사됨" : "공유"}
+        </button>
+    );
+}
+
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
     const [newsletterOpen, setNewsletterOpen] = useState(false);
     if (!open) return null;
@@ -251,10 +241,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                             <Info className="h-4 w-4 stroke-[1.5] text-neutral-300" />
                             JAKKA 소개
                         </Link>
-                        <Link href="/jakka/help" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700">
-                            <HelpCircle className="h-4 w-4 stroke-[1.5] text-neutral-300" />
-                            도움말
-                        </Link>
+                        <ShareRow />
                     </nav>
                 </div>
 
@@ -315,7 +302,8 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                                 </span>
                             )}
                         </button>
-                        <MobileAuthButton />
+                        {/* 유틸리티바 모바일 — 검색 · 알림 · 계정 메뉴 시트 | 로그인 (§1.9.2 피드형) */}
+                        <UniverseUtilityBar breakpoint="md" hideAbout aboutPath="/jakka/about" profilePath="/jakka/profile" accentColor="#171717" siteId="jakka" siteName="Jakka" hideNotifications />
                         <button onClick={() => setMenuOpen(true)} className="p-0.5">
                             <MoreHorizontal className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
                         </button>
@@ -381,6 +369,11 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {/* Login / Profile */}
+                {/* 사이트 도구 — 유틸리티바 About·공유·검색 (계정은 아래 AuthSection: 계정 메뉴·로그아웃) */}
+                <div className="px-3 xl:px-5 pb-3 flex justify-center xl:justify-start text-neutral-600">
+                    <span className="hidden xl:block"><UniverseUtilityBar hideAuth aboutPath="/jakka/about" siteId="jakka" siteName="Jakka" /></span>
+                    <span className="xl:hidden"><UniverseUtilityBar hideAuth hideAbout aboutPath="/jakka/about" siteId="jakka" siteName="Jakka" /></span>
+                </div>
                 <div className="px-0 xl:px-2 pb-3 border-t border-neutral-100 pt-3">
                     <div className="xl:block hidden">
                         <AuthSection />

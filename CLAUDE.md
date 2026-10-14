@@ -1083,7 +1083,7 @@ Ten:One 계정 관리                ← /profile (공통 프로필·보안·동
 |---|---|---|
 | **사이트형** | 브랜드 웹사이트 전부 | [주 행동 버튼 1개, 선택] + `<UniverseUtilityBar>` |
 | **앱형** | 로그인 후 쓰는 화면: Planner's 앱 · WIO 앱 · SmarComm 대시보드 · 인트라 | 앱 도구(검색·도움말·설정) + 알림 + `<AccountMenu>` + 로그아웃 (모바일은 `mode="sheet"`). About·공유 없음 |
-| **피드형** | Jakka · MoNTZ (좌측 사이드바) | 같은 부품을 사이드바에 — `<AccountMenu placement="up-left">` |
+| **피드형** | Jakka · MoNTZ (좌측 사이드바) | 같은 가이드를 사이드바에 — 사이드바 하단 = 사이트 도구 줄(`<UniverseUtilityBar hideAuth>`: About·공유·검색) + 계정(`<AccountMenu placement="up-left">`·로그아웃 / 비로그인 로그인·가입) · 모바일 상단 = `<UniverseUtilityBar breakpoint="md">` · 서랍 = 소개·공유. Jakka는 브랜드 자체 알림(팔로우·판매)을 쓰므로 공통 벨은 `hideNotifications` (공통 알림 `lib/notify.ts`로 옮기면 해제) |
 
 - **주 행동 버튼 1개**까지 바 왼쪽에 허용 (예: YouInOne "Members & Alliance"). 서비스 입구와 같으면 하나로
 - **메뉴는 메뉴 자리에** — 서비스·블로그·요금제 같은 사이트 메뉴를 우상단에 붙이지 않는다 (`lib/brand-site-menus.ts`)

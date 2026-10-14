@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Home, Search, Megaphone, User, X, MoreHorizontal, Info, HelpCircle, Settings, Mail, PlusSquare } from "lucide-react";
+import { Home, Search, Megaphone, User, X, MoreHorizontal, Info, Mail, PlusSquare, Share2 } from "lucide-react";
 import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { NotificationBell, LogoutButton } from "@/components/AccountControls";
 import { LoginModal } from "@/components/LoginModal";
 import { AccountMenu } from "@/components/AccountMenu";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { shareCurrentPage } from "@/lib/share-page";
 import { getCreatorByUserId } from "@/lib/supabase/montz";
 
 type NavItem = { icon: typeof Home; label: string; href: string };
@@ -77,30 +79,17 @@ function AuthSection({ compact = false, placement = "up-left" }: { compact?: boo
     );
 }
 
-function MobileAuthButton() {
-    const { isAuthenticated } = useAuth();
-    const [loginOpen, setLoginOpen] = useState(false);
-
-    if (isAuthenticated) {
-        return (
-            // 모바일 상단도 같은 구성 — 알림 · 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10)
-            <span className="flex items-center gap-3 text-neutral-800">
-                <NotificationBell />
-                <AccountMenu profilePath="/montz/profile" siteId="montz" mode="sheet" />
-            </span>
-        );
-    }
-
+function ShareRow() {
+    const [copied, setCopied] = useState(false);
     return (
-        <>
-            <button
-                onClick={() => setLoginOpen(true)}
-                className="text-[12px] font-black text-neutral-900 border border-neutral-900 px-3 py-1 hover:bg-neutral-900 hover:text-white transition-colors"
-            >
-                로그인
-            </button>
-            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
-        </>
+        <button
+            type="button"
+            onClick={async () => { if ((await shareCurrentPage()) === "copied") { setCopied(true); setTimeout(() => setCopied(false), 2000); } }}
+            className="w-full flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700"
+        >
+            <Share2 className="h-4 w-4 stroke-[1.5] text-neutral-300" />
+            {copied ? "링크 복사됨" : "공유"}
+        </button>
     );
 }
 
@@ -131,10 +120,6 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                             <Mail className="h-4 w-4 stroke-[1.5] text-neutral-400" />
                             뉴스레터 구독
                         </button>
-                        <Link href="/montz/settings" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
-                            <Settings className="h-4 w-4 stroke-[1.5] text-neutral-400" />
-                            설정
-                        </Link>
                     </nav>
 
                     <nav className="px-4 py-4 space-y-1">
@@ -142,10 +127,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                             <Info className="h-4 w-4 stroke-[1.5] text-neutral-300" />
                             MoNTZ 소개
                         </Link>
-                        <Link href="/montz/help" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700">
-                            <HelpCircle className="h-4 w-4 stroke-[1.5] text-neutral-300" />
-                            도움말
-                        </Link>
+                        <ShareRow />
                     </nav>
                 </div>
 
@@ -201,7 +183,8 @@ export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
                         M<span style={{ color: "#FFC000" }}>o</span>NTZ
                     </Link>
                     <div className="flex items-center gap-3">
-                        <MobileAuthButton />
+                        {/* 유틸리티바 모바일 — 검색 · 알림 · 계정 메뉴 시트 | 로그인 (§1.9.2 피드형) */}
+                        <UniverseUtilityBar breakpoint="md" hideAbout aboutPath="/montz/about" profilePath="/montz/profile" accentColor="#c8a97e" siteId="montz" siteName="MoNTZ" />
                         <button onClick={() => setMenuOpen(true)} className="p-0.5">
                             <MoreHorizontal className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
                         </button>
@@ -245,6 +228,11 @@ export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
+                {/* 사이트 도구 — 유틸리티바 About·공유·검색 (계정은 아래 AuthSection: 계정 메뉴·로그아웃) */}
+                <div className="px-3 xl:px-5 pb-3 flex justify-center xl:justify-start text-neutral-600">
+                    <span className="hidden xl:block"><UniverseUtilityBar hideAuth aboutPath="/montz/about" siteId="montz" siteName="MoNTZ" /></span>
+                    <span className="xl:hidden"><UniverseUtilityBar hideAuth hideAbout aboutPath="/montz/about" siteId="montz" siteName="MoNTZ" /></span>
+                </div>
                 <div className="px-0 xl:px-2 pb-3 border-t border-neutral-100 pt-3">
                     <div className="xl:block hidden">
                         <AuthSection />
