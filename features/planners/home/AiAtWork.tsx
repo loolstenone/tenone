@@ -53,32 +53,33 @@ const SCENES: Record<AiScene, { inputLabel: string; input: string; output: strin
 
 export function AiAtWork({ scene = "dump" }: { scene?: AiScene }) {
     const s = SCENES[scene];
+    // 크기는 화면 높이에 비례 (HeroCarousel과 같은 방식, 2026-10-15)
     return (
-        <div className="mx-auto w-full max-w-[520px] space-y-2 md:space-y-4" aria-hidden="true">
-            <div className="bg-white/10 px-5 py-4 md:p-8">
-                <p className="text-xs text-teal-200 md:text-sm">{s.inputLabel}</p>
-                <p className="mt-1.5 break-keep text-[15px] leading-relaxed text-white/90 md:mt-3 md:text-lg">{s.input}</p>
+        <div className="mx-auto w-full max-w-[min(100%,560px)] space-y-[clamp(6px,1.2svh,16px)] md:mx-0 lg:mx-auto lg:max-w-[clamp(320px,40vw,600px)]" aria-hidden="true">
+            <div className="bg-white/10 p-[clamp(14px,2.4svh,36px)]">
+                <p className="text-[clamp(11px,1.5svh,14px)] text-teal-200">{s.inputLabel}</p>
+                <p className="mt-[clamp(4px,0.8svh,12px)] break-keep text-[clamp(14px,2svh,19px)] leading-relaxed text-white/90">{s.input}</p>
             </div>
 
             {/* 비유의 방향: 쏟아 낸 것 → AI가 정리한 것 */}
-            <div className="flex justify-center text-teal-200/70"><ArrowDown className="h-4 w-4 md:h-5 md:w-5" /></div>
+            <div className="flex justify-center text-teal-200/70"><ArrowDown className="h-[clamp(14px,2svh,20px)] w-[clamp(14px,2svh,20px)]" /></div>
 
-            <div className="bg-white px-5 py-4 text-neutral-900 md:p-8">
-                <p className="flex items-center gap-2 text-xs font-bold text-[#0F766E] md:text-sm">
+            <div className="bg-white p-[clamp(14px,2.4svh,36px)] text-neutral-900">
+                <p className="flex items-center gap-2 text-[clamp(11px,1.5svh,14px)] font-bold text-[#0F766E]">
                     <Sparkles className="h-4 w-4" /> {s.output}
                 </p>
-                <ul className="mt-3 space-y-2 text-[15px] md:mt-5 md:space-y-3 md:text-base">
+                <ul className="mt-[clamp(8px,1.6svh,20px)] space-y-[clamp(6px,1.2svh,14px)] text-[clamp(14px,2svh,18px)]">
                     {s.rows.map((r) => (
                         <li key={r.text} className="flex items-center gap-4">
                             <span className="flex h-5 w-5 shrink-0 items-center justify-center border border-neutral-300">
                                 <Check className="h-3.5 w-3.5 text-[#0F766E]" />
                             </span>
-                            <span className="w-12 shrink-0 text-sm text-neutral-400">{r.time}</span>
+                            <span className="w-12 shrink-0 text-[0.85em] text-neutral-400">{r.time}</span>
                             <span className="break-keep">{r.text}</span>
                         </li>
                     ))}
                 </ul>
-                <p className="mt-6 hidden border-t border-neutral-100 pt-4 text-sm text-neutral-500 md:block">{s.foot}</p>
+                <p className="mt-[clamp(14px,2.4svh,28px)] hidden border-t border-neutral-100 pt-[clamp(10px,1.6svh,16px)] text-[clamp(12px,1.5svh,14px)] text-neutral-500 [@media(min-width:1024px)_and_(min-height:860px)]:block">{s.foot}</p>
             </div>
         </div>
     );

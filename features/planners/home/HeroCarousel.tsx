@@ -34,11 +34,15 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     }, [n, paused]);
 
     const s = slides[i];
+    // 크기는 단계가 아니라 화면 폭·높이에 비례해 연속으로 (2026-10-15 사용자 "디스플레이 사이즈에 맞춰 동적으로")
+    //   글자·여백·그림 = clamp(최소, min(폭 비율, 높이 비율), 최대) — 넓지만 낮은 노트북에서도, 좁고 긴 폰에서도 한 화면에 맞는다
+    //   배치만 둘: 1024px 미만 = 위아래(넘김 표시 맨 위 → 제목 → 그림 → 버튼), 이상 = 왼쪽 글·오른쪽 그림(넘김 표시 아래)
+    //   버튼 아래 한 줄·그림 설명줄은 넉넉한 화면(폭 1024 이상·높이 860 이상)에서만
     return (
         <section className="relative flex min-h-[calc(100svh-64px)] flex-col bg-[#134E4A] text-white md:min-h-[calc(100svh-84px)]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
-            {/* 넘김 표시: 모바일은 맨 위(뭐가 더 있구나 바로 알게, 2026-10-15 사용자) · 데스크톱은 아래 */}
+            {/* 넘김 표시: 1024px 미만은 맨 위(뭐가 더 있구나 바로 알게, 2026-10-15 사용자) · 그 이상은 아래 */}
             {n > 1 && (
-                <div className="mx-auto flex w-full max-w-[1590px] items-center gap-3 px-6 pt-6 md:absolute md:bottom-10 md:left-0 md:right-0 md:px-16 md:pt-0">
+                <div className="mx-auto flex w-full max-w-[1590px] items-center gap-3 px-6 pt-[clamp(16px,3svh,40px)] md:px-16 lg:absolute lg:bottom-[clamp(16px,4svh,48px)] lg:left-0 lg:right-0 lg:pt-0">
                     <button onClick={() => setI((x) => (x - 1 + n) % n)} aria-label="이전 배너" className="text-white/60 hover:text-white"><ChevronLeft className="h-5 w-5" /></button>
                     <div className="flex gap-1.5">
                         {slides.map((sl, k) => (
@@ -48,43 +52,41 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                     <button onClick={() => setI((x) => (x + 1) % n)} aria-label="다음 배너" className="text-white/60 hover:text-white"><ChevronRight className="h-5 w-5" /></button>
                 </div>
             )}
-            {/* 모바일 = 제목 → 그림 → 버튼(한 줄), 본문·아랫줄은 md부터 — 한 화면 안에 비유(쏟아 낸 생각 → AI 정리)가 보이게 (2026-10-15)
-                데스크톱 = 왼쪽 제목·본문·버튼 / 오른쪽 그림 */}
-            <div key={s.key} className="mx-auto grid w-full max-w-[1590px] flex-1 content-center gap-7 px-6 pb-12 pt-6 md:content-normal md:grid-cols-2 md:grid-rows-[1fr_auto_1fr] md:gap-x-24 md:gap-y-0 md:px-16 md:py-32">
-                <div className="md:col-start-1 md:row-start-1 md:self-end">
-                    <h1 className="break-keep text-[32px] font-black leading-tight md:text-6xl">{s.title}</h1>
-                    {s.subtitle && <p className="mt-2 break-keep text-lg font-bold leading-snug text-teal-200 md:mt-4 md:text-3xl">{s.subtitle}</p>}
+
+            <div key={s.key} className="mx-auto grid w-full max-w-[1590px] flex-1 content-center gap-[clamp(14px,3svh,44px)] px-6 pb-[clamp(24px,5svh,64px)] pt-[clamp(12px,2.5svh,32px)] md:px-16 lg:grid-cols-2 lg:grid-rows-[1fr_auto_1fr] lg:content-normal lg:gap-x-[clamp(48px,6vw,128px)] lg:gap-y-0 lg:py-[clamp(24px,7svh,140px)]">
+                <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
+                    <h1 className="break-keep text-[clamp(26px,min(8.5vw,5.2svh),56px)] font-black leading-tight lg:text-[clamp(38px,min(4.4vw,7svh),84px)]">{s.title}</h1>
+                    {s.subtitle && <p className="mt-[clamp(6px,1.2svh,18px)] break-keep text-[clamp(16px,min(4.6vw,2.6svh),28px)] font-bold leading-snug text-teal-200 lg:text-[clamp(19px,min(2vw,3.3svh),36px)]">{s.subtitle}</p>}
                 </div>
 
                 {s.visual ? (
-                    <div className="md:col-start-2 md:row-span-3 md:row-start-1 md:self-center">{s.visual}</div>
+                    <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-center">{s.visual}</div>
                 ) : s.imageUrl ? (
-                    <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block md:col-start-2 md:row-span-3 md:row-start-1 md:self-center">
+                    <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.imageUrl} alt="" className="max-h-[280px] w-full object-contain md:max-h-[560px]" />
+                        <img src={s.imageUrl} alt="" className="max-h-[clamp(180px,34svh,440px)] w-full object-contain md:object-left lg:max-h-[min(62svh,640px)] lg:object-center" />
                     </Link>
                 ) : null}
 
-                <div className="md:col-start-1 md:row-start-2">
-                    {s.body && <p className="hidden max-w-xl whitespace-pre-line break-keep leading-relaxed text-teal-50 md:mt-8 md:block md:text-lg">{s.body}</p>}
+                <div className="lg:col-start-1 lg:row-start-2">
+                    {s.body && <p className="mb-[clamp(16px,3svh,40px)] hidden max-w-xl whitespace-pre-line break-keep text-[clamp(15px,min(1.6vw,2.2svh),20px)] leading-relaxed text-teal-50 md:block lg:mb-0 lg:mt-[clamp(14px,3svh,36px)] [@media(max-height:700px)]:!hidden">{s.body}</p>}
                     {(s.primary || s.secondary) && (
-                        <div className="flex gap-2 md:mt-12 md:gap-3">
+                        <div className="flex gap-2 md:gap-3 lg:mt-[clamp(16px,4svh,52px)]">
                             {s.primary && (
-                                <Link href={s.primary.href} className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap bg-[#14B8A6] px-4 py-3 text-[15px] font-bold text-[#042F2E] hover:bg-teal-300 md:flex-none md:px-7 md:py-3.5 md:text-base">
+                                <Link href={s.primary.href} className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap bg-[#14B8A6] px-[clamp(14px,2vw,32px)] py-[clamp(10px,1.6svh,16px)] text-[clamp(14px,min(3.8vw,1.9svh),17px)] font-bold text-[#042F2E] hover:bg-teal-300 md:flex-none">
                                     {s.primary.label} <ArrowRight className="h-4 w-4" />
                                 </Link>
                             )}
                             {s.secondary && (
-                                <Link href={s.secondary.href} className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap border border-white/30 px-4 py-3 text-[15px] font-bold hover:bg-white/10 md:flex-none md:px-7 md:py-3.5 md:text-base">
+                                <Link href={s.secondary.href} className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap border border-white/30 px-[clamp(14px,2vw,32px)] py-[clamp(10px,1.6svh,16px)] text-[clamp(14px,min(3.8vw,1.9svh),17px)] font-bold hover:bg-white/10 md:flex-none">
                                     {s.secondary.label}
                                 </Link>
                             )}
                         </div>
                     )}
-                    {s.note && <p className="mt-8 hidden break-keep text-teal-200/90 md:block md:text-lg">{s.note}</p>}
+                    {s.note && <p className="mt-[clamp(16px,3svh,32px)] hidden break-keep text-[clamp(15px,1.8svh,18px)] text-teal-200/90 [@media(min-width:1024px)_and_(min-height:860px)]:block">{s.note}</p>}
                 </div>
             </div>
-
         </section>
     );
 }
