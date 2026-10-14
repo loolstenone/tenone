@@ -40,6 +40,20 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
     const [hits, setHits] = useState<SearchHit[]>([]);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+    // 일상어로 찾기 (플래너'스 AI 2단계 — /api/myverse/smart-search, 유료 회원 전용)
+    const [aiBusy, setAiBusy] = useState(false);
+    const [ai, setAi] = useState<{ answer: string; range: { from: string; to: string }; keywords: string[]; results: { id: string; type: string; date: string; title: string; snippet: string; href: string }[] } | null>(null);
+
+    async function askAi() {
+        const q = query.trim();
+        if (q.length < 2 || aiBusy) return;
+        setAiBusy(true); setAi(null);
+        try {
+            const res = await fetch("/api/myverse/smart-search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: q }) });
+            if (res.status === 402) return; // 유료 안내는 앱 쉘
+            if (res.ok) setAi(await res.json());
+        } finally { setAiBusy(false); }
+    }
 
     // Debounced search
     useEffect(() => {
@@ -85,8 +99,9 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                 <input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="오늘 · 흔적 · 무끼 · 프로젝트 · 캔버스 · 연락처 전체 검색…"
+                    onChange={(e) => { setQuery(e.target.value); setAi(null); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void askAi(); } }}
+                    placeholder="단어로 찾거나, 일상어로 물어보세요 — 예) 작년 가을 팀장님과 얘기한 신규 프로젝트 아이디어"
                     className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[var(--pp-accent)]"
                     autoFocus
                 />
@@ -94,6 +109,35 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                     <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-neutral-400" />
                 )}
             </div>
+
+            {/* 일상어로 찾기 */}
+            {query.trim().length >= 2 && (
+                <div className="-mt-5 mb-8">
+                    {!ai ? (
+                        <button onClick={askAi} disabled={aiBusy} className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--pp-accent)] hover:underline disabled:opacity-50">
+                            {aiBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden>✦</span>} AI로 찾기 — 날짜를 몰라도 일상어로
+                        </button>
+                    ) : (
+                        <div className="border border-[var(--pp-accent)]/30 bg-[var(--pp-accent)]/5 p-5">
+                            {ai.answer && <p className="break-keep text-[15px] text-neutral-800">{ai.answer}</p>}
+                            <p className="mt-2 text-xs text-neutral-500">{ai.range.from} ~ {ai.range.to} · 찾은 말: {ai.keywords.join(", ")}</p>
+                            {ai.results.length > 0 && (
+                                <ul className="mt-4 divide-y divide-neutral-200/70">
+                                    {ai.results.map((r) => (
+                                        <li key={r.id}>
+                                            <a href={r.href} className="flex items-baseline gap-3 py-2.5 hover:text-[var(--pp-accent)]">
+                                                <span className="w-20 shrink-0 font-mono text-xs text-neutral-400">{r.date}</span>
+                                                <span className="shrink-0 bg-white px-1.5 py-0.5 text-[11px] text-neutral-500">{r.type}</span>
+                                                <span className="min-w-0 flex-1 text-sm"><b className="font-medium">{r.title}</b>{r.snippet && <span className="ml-2 text-neutral-500">{r.snippet}</span>}</span>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {query.trim().length > 0 && query.trim().length < 2 && (
                 <p className="text-xs text-neutral-400 text-center">2글자 이상 입력</p>
