@@ -23,8 +23,8 @@ export function PlannersHeader() {
     // planners.tenone.biz는 prefix 없이 접속 → /projects 와 /planners/projects 모두 활성 처리
     const isActive = (href: string) => {
         const path = pathname.startsWith("/planners") ? pathname : `/planners${pathname === "/" ? "" : pathname}`;
-        // 기획이란·참여 확인서는 기획자 과정 아래 (lib/brand-site-menus.ts location)
-        if (href === "/planners/projects" && (path.startsWith("/planners/about") || path.startsWith("/planners/certificate"))) return true;
+        // 참여 확인서는 기획자 과정 아래 (lib/brand-site-menus.ts location) · 기획이란은 유틸리티바 About
+        if (href === "/planners/projects" && path.startsWith("/planners/certificate")) return true;
         return path.startsWith(href);
     };
 
@@ -38,7 +38,7 @@ export function PlannersHeader() {
                     <img src="/brands/planners/logo-white.png" alt="Planner's" width={1074} height={258} className="h-6 w-auto md:h-8" />
                 </Link>
 
-                <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-[30px]">
+                <div className="hidden xl:flex absolute left-1/2 -translate-x-1/2 items-center gap-[30px]">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
@@ -55,9 +55,8 @@ export function PlannersHeader() {
 
                 <div className="flex items-center ml-auto text-white">{/* 어두운 헤더 · 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
                     <UniverseUtilityBar
-                        breakpoint="lg"
-                        hideAbout
-                        aboutPath="/planners"
+                        breakpoint="xl"
+                        aboutPath="/planners/about"
                         profilePath="/planners/my"
                         accentColor="#14B8A6"
                         siteId="planners"
@@ -68,7 +67,7 @@ export function PlannersHeader() {
 
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="lg:hidden p-2 ml-2 text-teal-100 hover:text-white"
+                    className="xl:hidden p-2 ml-2 text-teal-100 hover:text-white"
                     aria-label="메뉴"
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -78,6 +77,7 @@ export function PlannersHeader() {
 
         <UniverseMobileMenu
             serviceEntry={{ label: "내 플래너", href: "/planners/app" }}
+            aboutPath="/planners/about"
             accentColor="#14B8A6"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
