@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Check, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginRequired } from "@/components/LoginRequired";
 import type { MyverseMode, AiTone, MyverseRole } from "@/lib/myverse/types";
 import { MYVERSE_ROLE_META } from "@/lib/myverse/types";
 import { trackMyverse } from "@/lib/myverse/analytics";
@@ -27,7 +27,6 @@ const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
 };
 
 export default function OnboardingPage() {
-    const router = useRouter();
     const { isAuthenticated, isLoading } = useAuth();
 
     const [step, setStep] = useState<Step>("welcome");
@@ -41,12 +40,6 @@ export default function OnboardingPage() {
     const [saving, setSaving] = useState(false);
     const [firstTrace, setFirstTrace] = useState("");
     const [tracePosting, setTracePosting] = useState(false);
-
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            router.replace("/login?redirect=/planners/app");
-        }
-    }, [isLoading, isAuthenticated, router]);
 
     useEffect(() => {
         if (!isAuthenticated || isLoading) return;
@@ -122,7 +115,16 @@ export default function OnboardingPage() {
         }
     }
 
-    if (isLoading || !isAuthenticated) {
+    // 비로그인 → 이 화면 위에 로그인 창 (§1.2.1 — /login 페이지로 보내지 않는다)
+    if (!isLoading && !isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-white">
+                <LoginRequired accentColor="#0F766E" message="플래너'스 AI는 로그인한 뒤 쓸 수 있습니다." />
+            </div>
+        );
+    }
+
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#08080E]">
                 <div className="w-1 h-1 rounded-full bg-teal-400 animate-ping" />
@@ -181,29 +183,29 @@ export default function OnboardingPage() {
                             <div className="space-y-8">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-                                    <span className="text-[11px] tracking-widest text-white/40">Planner&apos;s</span>
+                                    <span className="text-[11px] tracking-widest text-white/40">플래너&apos;스 AI 처음 설정</span>
                                 </div>
 
                                 <div className="space-y-3">
                                     <h1 className="text-4xl md:text-5xl font-light text-white leading-tight tracking-tight">
-                                        내 손으로,<br />
+                                        내 플래너를<br />
                                         <span className="text-transparent bg-clip-text"
                                             style={{ backgroundImage: "linear-gradient(135deg, #5EEAD4 0%, #2DD4BF 50%, #0F766E 100%)" }}>
-                                            내 뜻대로.
+                                            준비할게요.
                                         </span>
                                     </h1>
                                     <p className="text-white/40 text-base leading-relaxed max-w-sm break-keep">
-                                        생각하고 기록하고 계획하고 꾸려 가는 사람을 곁에서 돕는 인공지능 플래너, 플래너&apos;스 AI입니다.
+                                        네 가지만 고르면 바로 쓸 수 있어요. 1분이면 끝나고, 나중에 설정에서 언제든 바꿀 수 있습니다.
                                     </p>
                                 </div>
 
                                 <div className="space-y-3 border-l border-white/10 pl-4">
                                     {[
-                                        // 첫 화면 문구 = 플래너'스 AI 4동사 (/planners/ai) — MyVerse '퍼스널 블랙박스' 문구를 쓰지 않는다 (2026-10-15)
-                                        "생각하다 · 머릿속을 그대로 쏟아 내면 정리해 줍니다",
-                                        "기록하다 · 손으로 쓴 노트도 글자로 옮깁니다",
-                                        "계획하다 · 큰 목표를 오늘 할 일로 나눕니다",
-                                        "꾸려 가다 · 못 끝낸 일을 빈 시간에 다시 놓습니다",
+                                        // 무엇을 시작하는지 = 아래 설정 네 단계 (2026-10-15 사용자 "뭘 시작하자는 것인지 알려 달라") — MyVerse 문구 쓰지 않기
+                                        "쓰는 방식 · 일정 중심으로 가볍게, 또는 프로젝트까지 전부",
+                                        "하는 일 · 직장인·학생 등, 알맞은 틀을 추천합니다",
+                                        "AI 말투 · 전문적·친근함·간결함 중에서",
+                                        "비전과 미션 · 모든 계획의 기준 (비워 둬도 됩니다)",
                                     ].map((text, i) => (
                                         <div key={i} className="flex items-start gap-3">
                                             <span className="text-[10px] text-teal-400/60 mt-0.5 tabular-nums">0{i + 1}</span>
@@ -222,7 +224,7 @@ export default function OnboardingPage() {
                                         boxShadow: "0 0 32px rgba(20,184,166,0.25)",
                                     }}
                                 >
-                                    <span>시작하기</span>
+                                    <span>설정 시작하기</span>
                                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                                 </button>
                                 <button
@@ -230,7 +232,7 @@ export default function OnboardingPage() {
                                     disabled={saving}
                                     className="text-sm text-white/25 hover:text-white/50 transition-colors text-center py-2 disabled:opacity-30"
                                 >
-                                    기본 설정으로 바로 시작
+                                    설정 없이 기본값으로 바로 쓰기
                                 </button>
                             </div>
                         </div>
@@ -240,7 +242,7 @@ export default function OnboardingPage() {
                     {step === "mode" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">1 / 5</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">1 / 4</p>
                                 <h2 className="text-2xl font-light text-white">어떤 모드로 시작할까요?</h2>
                                 <p className="text-sm text-white/40 leading-relaxed">
                                     언제든 설정에서 바꿀 수 있습니다.
@@ -305,7 +307,7 @@ export default function OnboardingPage() {
                     {step === "role" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">2 / 5</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">2 / 4</p>
                                 <h2 className="text-2xl font-light text-white">주로 어떤 일을 하시나요?</h2>
                                 <p className="text-sm text-white/40 leading-relaxed">
                                     선택한 역할에 맞는 AI 브리핑과 템플릿을 제공합니다.
@@ -352,7 +354,7 @@ export default function OnboardingPage() {
                     {step === "ai" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">3 / 5</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">3 / 4</p>
                                 <h2 className="text-2xl font-light text-white">AI 파트너 설정</h2>
                                 <p className="text-sm text-white/40 leading-relaxed">
                                     매일 아침 브리핑하고, 하루를 함께 정리하는 AI입니다.
@@ -404,7 +406,7 @@ export default function OnboardingPage() {
                     {step === "identity_lite" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">4 / 5</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">4 / 4</p>
                                 <h2 className="text-2xl font-light text-white flex items-center gap-3">
                                     <Compass className="h-5 w-5 text-teal-400/60 flex-shrink-0" />
                                     당신이 도모하는 것은 무엇입니까?
@@ -441,7 +443,7 @@ export default function OnboardingPage() {
                             <Nav
                                 onBack={() => setStep("ai")}
                                 onNext={handleFinish}
-                                nextLabel={saving ? "시작 중" : "시작하기"}
+                                nextLabel={saving ? "준비 중" : "내 플래너 열기"}
                             />
                         </div>
                     )}
