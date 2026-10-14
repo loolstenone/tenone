@@ -1,0 +1,113 @@
+"use client";
+
+import { useState } from "react";
+import { Loader2, Sparkles, Check, X } from "lucide-react";
+import { VoiceRecordButton } from "@/features/myverse/planner/VoiceRecordButton";
+import { commitParsedActions, describeAction, todayKst, type ParsedAction } from "@/features/myverse/planner/ai-actions";
+
+// 생각 쏟아내기 — 플래너'스 AI 1단계 (2026-10-14)
+// "기록은 아날로그처럼 자유롭게" → 생각나는 대로 적거나 말하면 AI가 할 일·일정으로 나누고, 사람이 확인한 뒤 넣는다
+// 해석 = /api/myverse/ai/parse-input (유료 회원 전용 → 402면 앱 쉘의 AiPaidOnlyNotice가 안내) · 등록 = ai-actions.ts
+// ❌ 확인 없이 바로 넣지 않는다 (AI가 잘못 나눠도 사용자가 고른다)
+
+export function BrainDump({ date }: { date?: string }) {
+    const [text, setText] = useState("");
+    const [busy, setBusy] = useState(false);
+    const [actions, setActions] = useState<ParsedAction[] | null>(null);
+    const [picked, setPicked] = useState<boolean[]>([]);
+    const [message, setMessage] = useState<string | null>(null);
+
+    async function parse() {
+        const t = text.trim();
+        if (!t || busy) return;
+        setBusy(true); setMessage(null);
+        try {
+            const res = await fetch("/api/myverse/ai/parse-input", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: t, today: date ?? todayKst() }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if (res.status === 402) return; // 유료 안내는 앱 쉘이 띄운다
+            if (!res.ok) { setMessage("정리하지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
+            const list: ParsedAction[] = d.actions ?? [];
+            if (list.length === 0) { setMessage(d.summary ?? "등록할 항목을 찾지 못했어요."); return; }
+            setActions(list);
+            setPicked(list.map(() => true));
+        } catch {
+            setMessage("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function commit() {
+        if (!actions) return;
+        const chosen = actions.filter((_, i) => picked[i]);
+        if (chosen.length === 0) { setActions(null); return; }
+        setBusy(true);
+        const { ok, failed } = await commitParsedActions(chosen);
+        setBusy(false);
+        setActions(null);
+        if (ok > 0) setText("");
+        setMessage(failed > 0 ? `${ok}개를 넣었고 ${failed}개는 넣지 못했어요.` : `${ok}개를 플래너에 넣었어요.`);
+    }
+
+    return (
+        <section className="mb-8 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--pp-accent)]">
+                <Sparkles className="h-4 w-4" /> 생각 쏟아내기
+            </div>
+
+            {!actions ? (
+                <>
+                    <textarea
+                        value={text}
+                        onChange={(e) => { setText(e.target.value); setMessage(null); }}
+                        onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void parse(); } }}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder="생각나는 대로 적어 보세요. 예) 내일 오후 2시 외근 끝나면 카페에서 보고서 초안 잡고, 저녁엔 운동"
+                        className="mt-3 w-full resize-none border-0 bg-transparent p-0 text-[15px] leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 myverse-dark:text-neutral-100"
+                    />
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <VoiceRecordButton label="말로 하기" onTranscribed={(t) => setText((prev) => (prev ? `${prev} ${t}` : t))} />
+                        {message && <p className="text-sm text-neutral-500">{message}</p>}
+                        <button
+                            onClick={parse}
+                            disabled={busy || !text.trim()}
+                            className="ml-auto inline-flex items-center gap-1.5 bg-[var(--pp-accent)] px-4 py-2 text-sm font-bold text-white hover:bg-[var(--pp-accent-strong)] disabled:opacity-40"
+                        >
+                            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} 할 일·일정으로 정리
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <p className="mt-3 text-sm text-neutral-500">이렇게 정리했어요. 넣을 것만 고르세요.</p>
+                    <ul className="mt-3 divide-y divide-neutral-100 border-y border-neutral-100 myverse-dark:divide-white/10 myverse-dark:border-white/10">
+                        {actions.map((a, i) => {
+                            const d = describeAction(a);
+                            return (
+                                <li key={i}>
+                                    <label className="flex cursor-pointer items-center gap-3 py-3">
+                                        <input type="checkbox" checked={picked[i] ?? false} onChange={(e) => setPicked((p) => p.map((v, k) => (k === i ? e.target.checked : v)))} className="h-4 w-4 accent-[var(--pp-accent)]" />
+                                        <span className={`shrink-0 px-1.5 py-0.5 text-[11px] font-bold ${d.kind === "일정" ? "bg-[var(--pp-accent)] text-white" : "bg-neutral-100 text-neutral-600"}`}>{d.kind}</span>
+                                        <span className="min-w-0 flex-1 truncate text-[15px]">{d.title}{a.input.priority === "high" && <b className="ml-1 text-red-500">!</b>}</span>
+                                        <span className="shrink-0 text-sm text-neutral-400">{d.when}</span>
+                                    </label>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                        <button onClick={() => setActions(null)} disabled={busy} className="inline-flex items-center gap-1 px-3 py-2 text-sm text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /> 다시 쓰기</button>
+                        <button onClick={commit} disabled={busy || !picked.some(Boolean)} className="inline-flex items-center gap-1.5 bg-[var(--pp-accent)] px-4 py-2 text-sm font-bold text-white hover:bg-[var(--pp-accent-strong)] disabled:opacity-40">
+                            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} {picked.filter(Boolean).length}개 넣기
+                        </button>
+                    </div>
+                </>
+            )}
+        </section>
+    );
+}

@@ -976,6 +976,23 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
 
+    // 생각 쏟아내기·명령 팔레트가 할 일·일정을 넣은 뒤 (features/myverse/planner/ai-actions.ts)
+    // → 화면 목록을 새로 읽는다. 안 읽으면 옛 목록이 자동 저장으로 새 할 일을 덮어쓴다
+    useEffect(() => {
+        const onChanged = () => {
+            fetch(`/api/myverse/daily?date=${date}`, { cache: "no-store" })
+                .then((r) => r.ok ? r.json() : null)
+                .then((data) => { if (data?.daily) setTasks(data.daily.tasks || []); })
+                .catch(() => { /* silent */ });
+            fetch(`/api/myverse/calendar?from=${date}&to=${date}`)
+                .then((r) => r.ok ? r.json() : null)
+                .then((d) => { if (d?.entries) setCalEntries(d.entries); })
+                .catch(() => { /* silent */ });
+        };
+        window.addEventListener("planner-data-changed", onChanged);
+        return () => window.removeEventListener("planner-data-changed", onChanged);
+    }, [date]);
+
     // 모달 열릴 때 페이지 파싱
     useEffect(() => {
         if (!expandedNote) { setExpandedNotePage(0); setAllCornellPages([]); setAllHandPages([]); setImgFootprint(0); return; }

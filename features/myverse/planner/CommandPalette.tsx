@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { commitParsedActions } from "./ai-actions";
 import {
     Search, ArrowRight, LayoutGrid, Sun, CalendarDays, CalendarRange, CalendarClock,
     Compass, FolderKanban, Pen, Users, FileText, Sparkles, LayoutTemplate,
@@ -150,56 +151,12 @@ export function CommandPalette({ open, onClose }: Props) {
         }
     }, [query, aiBusy]);
 
-    // AI 결과 등록 — 각 action 별로 적절한 API 호출
+    // AI 결과 등록 — 공용 등록기 (features/myverse/planner/ai-actions.ts, 오늘 화면 '생각 쏟아내기'와 같음)
     const commitActions = useCallback(async () => {
         if (!aiResult) return;
         setAiBusy(true);
         try {
-            for (const a of aiResult.actions) {
-                if (a.tool === "create_task") {
-                    const date = (a.input.date as string) || todayStr();
-                    const text = a.input.text as string;
-                    const time = (a.input.time as string | null) ?? null;
-                    const priority = (a.input.priority as string | null) ?? null;
-                    const r = await fetch(`/api/myverse/daily?date=${date}`);
-                    const cur = r.ok ? await r.json() : null;
-                    const tasks = Array.isArray(cur?.daily?.tasks) ? cur.daily.tasks : [];
-                    tasks.push({
-                        id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-                        text, status: "todo", time, priority,
-                    });
-                    await fetch(`/api/myverse/daily`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ date, tasks }),
-                    });
-                } else if (a.tool === "create_event") {
-                    await fetch(`/api/myverse/calendar`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            entry_date: a.input.date,
-                            kind: a.input.kind || "meeting",
-                            title: a.input.title,
-                            start_time: a.input.start_time ?? null,
-                            end_time: a.input.end_time ?? null,
-                            location: a.input.location ?? null,
-                        }),
-                    });
-                } else if (a.tool === "create_note") {
-                    const date = (a.input.date as string) || todayStr();
-                    const content = a.input.content as string;
-                    const r = await fetch(`/api/myverse/daily?date=${date}`);
-                    const cur = r.ok ? await r.json() : null;
-                    const prev = (cur?.daily?.notes ?? "") as string;
-                    const next = prev ? `${prev}\n\n${content}` : content;
-                    await fetch(`/api/myverse/daily`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ date, notes: next }),
-                    });
-                }
-            }
+            await commitParsedActions(aiResult.actions);
             onClose();
         } finally {
             setAiBusy(false);

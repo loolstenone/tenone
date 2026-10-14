@@ -1,6 +1,7 @@
 // 오늘(메인) — 일간 시간 줌 슬라이스. 상단에 [일간|주간|월간|연간] 토글.
 import { DailyView } from "@/features/myverse/planner/DailyView";
 import { ViewToggle } from "@/features/myverse/planner/ViewToggle";
+import { BrainDump } from "@/features/planners/app/BrainDump";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,16 @@ export default async function DailyPage({ searchParams }: { searchParams: Promis
     const autoCompose = params.compose === "1" || params.compose === "true";
     return (
         <div>
-            <div className="mx-auto flex max-w-6xl justify-end px-4 pt-6 md:px-10 md:pt-8 -mb-2 md:-mb-6">
-                <ViewToggle current="daily" />
+            <div className="mx-auto max-w-6xl px-4 pt-6 md:px-10 md:pt-8">
+                <div className="mb-4 flex justify-end">
+                    <ViewToggle current="daily" />
+                </div>
+                {/* 생각 쏟아내기 — 적거나 말하면 AI가 할 일·일정으로 정리 (유료 회원 전용, 1단계 2026-10-14) */}
+                <BrainDump date={date} />
             </div>
-            <DailyView initialDate={date} autoCompose={autoCompose} />
+            <div className="-mt-6 md:-mt-12">
+                <DailyView initialDate={date} autoCompose={autoCompose} />
+            </div>
         </div>
     );
 }
