@@ -39,8 +39,10 @@ const CATEGORY = {
   '스타트업': ['template', '스타트업'],
   '아이디어 샤워': ['template', '아이디어 샤워'],
 };
-// 아이디어 샤워 '사례' 모음 3종은 타사 작품 모음 — 저작권 확인 전 비공개 (모두의 캠페인 4번은 공개)
-const HOLD = { ...data.unpublished, 5: '타사 작품 사례 모음 — 저작권 확인 전', 3: '타사 작품 사례 모음 — 저작권 확인 전', 2: '타사 작품 사례 모음 — 저작권 확인 전' };
+// 아이디어 샤워 4종 전부 비공개 — '사례' 모음 3종은 타사 작품(저작권 확인 전), 모두의 캠페인 4번은 2026-10-14 사용자 결정으로 숨김
+const HOLD = { ...data.unpublished, 5: '타사 작품 사례 모음 — 저작권 확인 전', 3: '타사 작품 사례 모음 — 저작권 확인 전', 2: '타사 작품 사례 모음 — 저작권 확인 전', 4: '아이디어 샤워 숨김 (사용자 결정)' };
+// 분류 바로잡기 (상품 번호 → 사이트 분류) — 168 가계부: 아임웹 '노트/스터디' → 노트 (2026-10-14 사용자 지적)
+const CATEGORY_FIX = { 168: '노트' };
 const MIME = { pdf: 'application/pdf', zip: 'application/zip', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', png: 'image/png' };
 
 /** 'Note_라인 기본' → '라인 기본' (분류가 따로 있으니 접두어는 뺀다) */
@@ -51,7 +53,8 @@ let ok = 0, missing = [];
 for (const [no, imwebCat, name] of data.items) {
   const file = files.get(no);
   if (!file) { missing.push(no); continue; }
-  const [kind, category] = CATEGORY[imwebCat];
+  const [kind, mapped] = CATEGORY[imwebCat];
+  const category = CATEGORY_FIX[no] ?? mapped;
   const originalName = file.replace(/^PP\d+__/, '');
   const ext = path.extname(originalName).slice(1).toLowerCase();
   const filePath = `badak/${no}.${ext}`;
