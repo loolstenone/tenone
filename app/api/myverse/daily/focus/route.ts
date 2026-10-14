@@ -137,7 +137,8 @@ export async function POST(req: Request) {
             system: `당신은 따뜻한 코치입니다. 하루를 마치는 사람에게 오늘을 돌아보게 하는 질문 3개를 건넵니다.
 - 그날 실제 기록에 근거한 구체적인 질문 (예: 끝낸 일 중 하나, 못 끝낸 일이 왜 밀렸는지, 일정 하나)
 - 한 개는 잘한 것·집중이 잘 된 순간, 한 개는 걸림돌, 한 개는 내일을 위한 것
-- 친구처럼 가볍게, 평가하거나 다그치지 않는다. 기록이 거의 없으면 하루 전체를 묻는 일반 질문으로.`,
+- 말투는 반드시 부드러운 존댓말(~였나요?, ~일까요?). 반말 금지. 다정하고 가볍게, 평가하거나 다그치지 않는다.
+- 기록이 거의 없으면 하루 전체를 묻는 일반 질문으로.`,
             tools: [REFLECT_TOOL], tool_choice: { type: "tool", name: REFLECT_TOOL.name },
             messages: [{ role: "user", content: `날짜 ${date}\n끝낸 일\n${done}\n\n못 끝낸 일\n${undone}\n\n일정\n${eventLines}\n\n상태: ${feel}` }],
         });
