@@ -155,10 +155,10 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                 </div>
             )}
 
-            {/* 툴바: 검색 + 뷰전환 + 정렬 */}
-            <div className="flex items-center justify-between gap-3 mb-4">
+            {/* 툴바: 검색 + 뷰전환 + 정렬 — 좁은 화면에선 두 줄 (2026-10-15 모바일에서 보기 버튼이 화면 밖으로 잘림) */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 {/* 검색 */}
-                <form onSubmit={handleSearch} className="relative flex-1 max-w-sm">
+                <form onSubmit={handleSearch} className="relative flex-1 min-w-[160px] max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 tn-text-muted" />
                     <input
                         type="text"
@@ -170,7 +170,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     />
                 </form>
 
-                <div className="flex items-center gap-2">
+                <div className="ml-auto flex items-center gap-2">
                     {/* 정렬 드롭다운 — 통계 숨김 게시판은 최신순 고정 */}
                     {showStats && <select
                         value={sort}
@@ -186,6 +186,8 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     {/* 필터 토글 */}
                     <button
                         onClick={() => setShowFilters(!showFilters)}
+                        aria-label="검색 조건"
+                        title="검색 조건"
                         className="p-2.5 min-w-[44px] min-h-[44px] rounded-lg border transition-colors flex items-center justify-center"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: showFilters ? "var(--tn-bg-alt)" : "transparent" }}
                     >
@@ -199,6 +201,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                                 key={mode}
                                 onClick={() => setViewMode(mode)}
                                 title={label}
+                                aria-label={label}
                                 className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors tn-text"
                                 style={viewMode === mode ? { backgroundColor: "var(--tn-bg-alt)" } : {}}
                             >
