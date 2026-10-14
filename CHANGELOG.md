@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-10-14 (세션 174) — Planner's 이전·몰 개편·플래너'스 AI 1~3단계·내 AI 연결(MCP)·QA
+
+### 장소·운영
+
+- master 직접 작업 · 사용자 "푸시" 여러 번 + 작업 종료 push · Anthropic 새 API 키(사용자 발급, 범위 기본 워크스페이스·만료 없음)
+- 운영 DB 변경(사용자 승인): `planners_reviews_2026_10` · `planners_home_2026_10` · `planners_ai_focus_reflection_2026_10` · 데이터: 후기 75건·공지 8건·상품 분류/숨김·사진 주소·ums_sites 파비콘·로고·meta_title·문구 줄표
+
+### 결정 (사용자)
+
+- 명명: Planner's(로고)·플래너'스(한글) + 짧은 제품명 AI·PAD · 우측 WORK → '내 플래너'
+- 여백 넉넉하게(logrog 참조, "여유 있는 구성이 인간적") · 긴 줄표 금지
+- 인공지능 기능 = 유료, 크레딧은 필요할 때 충전 · 사용자 자기 AI 연결(MCP) = 읽기 + 할 일 추가, 연결은 무료
+- 일정·시간 기록·AI 브리핑 메뉴 제거 · 사이트 공개 · 아이디어 샤워 숨김 · 가계부 노트로
+
+### 변경 내역 (주요 파일)
+
+- 사이트: `features/planners/PageHero.tsx` · `features/planners/home/HeroCarousel.tsx` · `app/(Planners)/planners/{page,ai,pad,projects,stories,about,certificate,my}` · `features/planners/PlannersHeader.tsx`(로고)
+- 인트라: `app/intra/ums/planners/{pad,reviews,banners,showcases}` · `app/api/intra/planners/{files,reviews,home}`
+- AI: `lib/myverse/ai-access.ts` · `app/api/myverse/{ai/parse-input,daily/focus,daily/carry-over,weekly-review,smart-search,handwriting,projects/[id]/breakdown}` · `features/planners/app/{BrainDump,AutoCarry,DayCoach,WeeklyReview,AiPaidOnlyNotice,ConnectedAi,PlannersMain}.tsx` · `features/myverse/planner/{ai-actions.ts,ProjectBreakdown.tsx}` · `lib/planners/{weekly-stats,mcp-data,text}.ts`
+- MCP: `app/api/planners-mcp/route.ts` · `app/api/oauth-protected-resource/route.ts`(+ next.config rewrite) · `app/oauth/consent/page.tsx` · middleware skipPaths `/oauth` · 패키지 mcp-handler·@modelcontextprotocol/sdk·zod
+- 공용 화면(MyVerse와 공유): 강조색 CSS 변수 `--pp-accent`(app/globals.css) · 화면 틀 통일 · 영문 라벨 한글화 · DailyView 3단 lg부터
+- 버그: `lib/myverse/google-calendar.ts`(복귀 도메인) · 세션 쿠키 이름 4개 라우트 · `ai-actions` 일정 저장 필드
+
+---
+
 ## 2026-10-14 (세션 173) — tenone-ui 적용 → 전체 되돌림 · HeRo 헤더·써치 라이트 · HeRo 사업 방향
 
 ### 장소·운영

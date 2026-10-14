@@ -132,7 +132,7 @@
 
 ## 현재 상태
 
-- Phase: 집중 승격 · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · ⚠️ 처리방침에 Planner's 수집 항목·AI 국외 이전 반영은 아직 (공개 상태라 우선 처리)
+- Phase: 집중 · 플래너'스 AI 1~3단계·내 AI 연결 완료, QA 2차 (세션 174, 2026-10-14) · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · ⚠️ 처리방침에 Planner's 수집 항목·AI 국외 이전 반영은 아직 (공개 상태라 우선 처리)
 - 이월 작업:
   - ~~DB: ums_sites·brand_capabilities~~ ✅ 확인 (2026-10-10: experiment·active·vercel·is_open=false · community·course·purchase)
   - 첫 회차 개설 (`/intra/ums/planners/programs`), 파비콘·OG 이미지 전용 에셋

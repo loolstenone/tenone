@@ -1,6 +1,47 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-14 (세션 173 — tenone-ui 적용 후 전체 되돌림 · HeRo 헤더·써치 라이트 문구 · HeRo 사업 방향 확정)
+> 마지막 업데이트: 2026-10-14 (세션 174 — Planner's 이전·몰 개편·플래너'스 AI 1~3단계·내 AI 연결·QA)
+
+---
+
+## 세션 174 (2026-10-14) — Planner's 이전·몰 개편·플래너'스 AI 1~3단계·내 AI 연결(MCP)·QA
+
+> master 직접 작업. 사용자 "푸시" 여러 번 + 작업 종료 push.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **바닥상회 → planners.ai.kr 이전**: PAD 서식 170개(비공개 버킷·로그인 회원 서명 URL) · 상품 사진 366장 · 구매평 75건 익명 이전(사용자 승인 예외) · 운영사 공지 8건(이야기 › 공지) · 2026 연간 PDF 제목 교체
+- **사이트 몰 개편**: 명명 체계 Planner's + **AI · PAD** · logrog 참조 넉넉한 여백(폭 1590px·구간 150px) · 공통 틀 `features/planners/PageHero.tsx` · 첫 화면 배너·진열대(인트라 관리) · 프로젝트 페이지 보강 · 로고·파비콘 · 사이트 공개(is_open=true), 앱 화면은 noindex
+- **인트라 Planner's**: PAD 상품·받기 현황·후기(답글)·배너·진열대 (아임웹 쇼핑 관리 기준) · 새 후기 알림
+- **플래너'스 AI 비전** "기록은 아날로그처럼, 관리는 비서처럼, 회고는 코치처럼"
+  - 1단계: 생각 쏟아내기(글·음성) · 못 끝낸 일 자동 재배치(빈 시간) · 오늘의 Top 3 · 저녁 회고
+  - 2단계: 목표 자동 분해 · 주간 회고(숫자 무료 + 한 주 읽기) · 일상어로 찾기
+  - 3단계: 손글씨 사진·펜슬 노트 → 할 일·일정·메모 (불렛 저널 기호, 사진 비저장, Sonnet 4.6)
+  - **인공지능 = 유료 회원 전용** (`lib/myverse/ai-access.ts`, AI 라우트 18개 · 그전엔 2개만 확인해 누구나 크레딧 소모 가능했음)
+  - **내 AI에 연결(MCP)**: `/api/planners-mcp` 도구 6개(읽기 + 할 일 추가) · Supabase OAuth 2.1 승인 화면 `/oauth/consent` · 설정 › 연동에서 연결·끊기
+- **앱 정리·QA**: 틀·색 통일(`--pp-accent` 틸) · 패드 세로 1024px 기준 · 메뉴 정리(일정·시간 기록·AI 브리핑 뺌) · 설정 기술→연동, 사생활 재작성 · 도움말 재작성(가격 문구 삭제) · 긴 줄표 제거 · MyVerse로 새는 링크 차단
+- **버그**: AI 일정 저장 안 됨(entry_date→start_date) · Google 캘린더 연결 401(세션 쿠키 이름)·복귀 도메인 myverse.kr 고정 · 향후 일정 날짜 잘림
+- DB(승인): planners_reviews · planners_banners·showcases · myverse_daily.focus·reflection · ums_sites 파비콘·로고·meta_title
+
+### 다음 첫 액션
+
+1. **사람 작업 (외부 설정)**
+   - Supabase › Authentication › OAuth Server: 켜기 · Authorization Path `/oauth/consent` · Dynamic Client Registration 켜기 → Claude 커넥터에 `https://www.planners.ai.kr/api/planners-mcp` 넣고 시험
+   - Google Cloud 콘솔 OAuth 클라이언트 › 승인된 리디렉션 URI에 `https://www.planners.ai.kr/api/myverse/integrations/google/callback` · Vercel에 GOOGLE_CLIENT_ID·SECRET 있는지 확인
+   - Vercel Domains: planners.ai.kr → www 308 · Anthropic 레거시 키 2개 정리(실서버 AI 작동 확인 후)
+   - 2026 연간 PDF 9월·10월 월 이름 바뀐 것 원본 수정 후 전달
+2. **개인정보처리방침 갱신 (공개 상태라 우선)**: Planner's 수집 항목(후기·다운로드 기록) · AI 처리 위탁·국외 이전(Anthropic, 미국) · 사진 비저장 · 연결한 AI로 제공 · 시행 7일 전 공지
+3. **실서버 확인**: www.planners.ai.kr/app/daily 에서 생각 쏟아내기 한 줄 → 새 Anthropic 키로 작동하는지
+4. **유료 체계 준비 (사용자 결정 대기)**: 제안 = 무료(플래너·자동 재배치·주간 숫자·내 AI 연결) / 플러스(내장 AI 전부, 월 4,900원·연 49,000원 내부안 + 공정 사용 한도). 결제 전 통신판매업 신고·약관·자동갱신 고지
+5. QA 남은 것: 온보딩(일반 회원 계정으로) · 외부 연동 실계정 · 템플릿·캔버스 세부 동작 · 반복 일정 빈 시간 반영 · 일상어 찾기 관련 기록 묶음 · 하드코딩 인디고 약 70곳
+6. 세션 173 이월(HeRo 설문 중복 문항 등) 그대로
+
+### 주의
+
+- ❌ 화면 문장에 긴 줄표(—) · 영문 대문자 라벨 · 가격 표시(통신판매업 신고 전)
+- ❌ AI 라우트를 `requireAiAccess` 없이 만들기 · 앱에 MyVerse 개인 OS 기능 링크 넣기
+- 앱 반응형 기준 1024px · 여백은 넉넉하게 (사용자 "여유 있는 구성이 인간적")
 
 ---
 
