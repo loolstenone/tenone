@@ -719,7 +719,7 @@ export function TemplatesView() {
                         <>
                             <UserCircle2 className="h-8 w-8 mx-auto mb-3 text-neutral-200" />
                             <p className="text-sm text-neutral-500 mb-1">
-                                {PLANNER_ROLE_META[userRole!]?.label} 맞춤 템플릿을 준비 중입니다.
+                                아직 {PLANNER_ROLE_META[userRole!]?.label}에 맞춘 템플릿이 없습니다.
                             </p>
                             <p className="text-xs text-neutral-400">전체 탭에서 다른 템플릿을 살펴보세요.</p>
                         </>

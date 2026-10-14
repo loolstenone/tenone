@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, Settings, HelpCircle, Bell } from "lucide-react";
+import { Menu, Search, Settings, HelpCircle } from "lucide-react";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { LogoutButton } from "@/components/AccountControls";
+import { LogoutButton, NotificationBell } from "@/components/AccountControls";
 import { AccountMenu } from "@/components/AccountMenu";
 import { APP_BASE, PLANNERS_APP_NAV, isAppNavActive } from "@/features/planners/app/nav";
 
@@ -28,7 +28,8 @@ export function PlannersAppTopBar() {
                 <Link href={`${APP_BASE}/daily`} className="text-lg font-bold leading-none text-teal-200 hover:text-white">AI</Link>
                 <div className="ml-auto flex items-center gap-1">
                     <Link href={`${APP_BASE}/search`} className={iconCls(`${APP_BASE}/search`)} title="검색" aria-label="검색"><Search className="h-4 w-4" /></Link>
-                    <Link href={`${APP_BASE}/notifications`} className={iconCls(`${APP_BASE}/notifications`)} title="알림" aria-label="알림"><Bell className="h-4 w-4" /></Link>
+                    {/* 알림 = 유니버스 공통 알림(§1.9.2, lib/notify.ts) — 전엔 MyVerse 소셜 알림(흔적 하트·댓글) 화면으로 가 늘 비어 있었다 (2026-10-15 QA) */}
+                    <span className="flex h-8 w-8 items-center justify-center"><NotificationBell /></span>
                     <Link href={`${APP_BASE}/help`} className={iconCls(`${APP_BASE}/help`)} title="도움말" aria-label="도움말"><HelpCircle className="h-4 w-4" /></Link>
                     <Link href={`${APP_BASE}/settings`} className={iconCls(`${APP_BASE}/settings`)} title="설정" aria-label="설정"><Settings className="h-4 w-4" /></Link>
                     {/* 계정 메뉴 (유틸리티바 표준 §1.9.2 — 앱형: 데스크톱 드롭다운 + 로그아웃, 모바일 시트에 로그아웃) */}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Sparkles, RefreshCw } from "lucide-react";
+import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
 
 // 주간 회고 리포트 — 플래너'스 AI 2단계 ② (2026-10-14)
 // 숫자(요일별 완료율·Top 3 달성·상태와 완료율)는 무료 · '코치의 한 주 읽기'는 유료 AI (/api/myverse/weekly-review)
@@ -38,11 +39,13 @@ export function WeeklyReview() {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ week: stats.week, refresh }),
             });
-            if (res.status === 402) return;
+            if (res.status === 402) { setNote(AI_BETA_ONLY_TEXT); return; }
             const d = await res.json().catch(() => ({}));
             if (!res.ok) { setNote("지금은 만들지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
             if (d.empty) setNote(d.message);
             setInsight(d.insight ?? null);
+        } catch {
+            setNote("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
         } finally { setBusy(false); }
     }
 

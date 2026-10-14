@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, Check, X, Camera } from "lucide-react";
 import { VoiceRecordButton } from "@/features/myverse/planner/VoiceRecordButton";
 import { commitParsedActions, describeAction, saveMemoNote, shrinkImage, todayKst, READ_IMAGE_EVENT, type ParsedAction } from "@/features/myverse/planner/ai-actions";
+import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
 
 // 생각 쏟아내기 — 플래너'스 AI 1단계 (2026-10-14)
 // "기록은 아날로그처럼 자유롭게" → 생각나는 대로 적거나 말하면 AI가 할 일·일정으로 나누고, 사람이 확인한 뒤 넣는다
@@ -12,6 +13,9 @@ import { commitParsedActions, describeAction, saveMemoNote, shrinkImage, todayKs
 // 3단계(2026-10-14): "사진으로" — 종이·PAD 플래너 페이지를 찍으면 /api/myverse/handwriting 이 읽는다 (불렛 저널 기호 → 상태). 사진은 브라우저에서 줄여 한 번 보내고 저장하지 않는다
 
 const MARK: Record<string, string> = { done: "끝냄", migrated: "미룸", scheduled: "일정으로", cancelled: "취소" };
+
+/** '/' 단축키 — 오늘 화면에 이미 있으면 이 이벤트로 입력 칸에 바로 커서 */
+export const COMPOSE_EVENT = "planners:compose";
 
 export function BrainDump({ date }: { date?: string }) {
     const [text, setText] = useState("");
@@ -25,6 +29,23 @@ export function BrainDump({ date }: { date?: string }) {
     const fileRef = useRef<HTMLInputElement>(null);
 
     const rootRef = useRef<HTMLElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+
+    // '/' 빠른 기록 (KeyboardShortcuts) → 이 칸으로. 다른 화면에서 오면 ?compose=1 (전엔 파라미터를 읽는 곳이 없어 오늘 화면만 열렸다, 2026-10-15 QA)
+    useEffect(() => {
+        const focus = () => {
+            rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            inputRef.current?.focus();
+        };
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("compose") === "1") {
+            focus();
+            url.searchParams.delete("compose");
+            window.history.replaceState(null, "", url.pathname + url.search);
+        }
+        window.addEventListener(COMPOSE_EVENT, focus);
+        return () => window.removeEventListener(COMPOSE_EVENT, focus);
+    }, []);
 
     // 손글씨 노트의 '글자로 바꾸기' (DailyView) → 여기서 읽는다
     useEffect(() => {
@@ -58,7 +79,7 @@ export function BrainDump({ date }: { date?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image, today: date ?? todayKst(), source }),
             });
-            if (res.status === 402) { setMessage(null); return; }
+            if (res.status === 402) { setMessage(AI_BETA_ONLY_TEXT); return; }
             const d = await res.json().catch(() => ({}));
             if (!res.ok) { setMessage(res.status === 413 ? "사진이 너무 커요. 다시 찍어 주세요." : "읽지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
             const list: ParsedAction[] = d.actions ?? [];
@@ -86,7 +107,7 @@ export function BrainDump({ date }: { date?: string }) {
                 body: JSON.stringify({ text: t, today: date ?? todayKst() }),
             });
             const d = await res.json().catch(() => ({}));
-            if (res.status === 402) return; // 유료 안내는 앱 쉘이 띄운다
+            if (res.status === 402) { setMessage(AI_BETA_ONLY_TEXT); return; } // 버튼 옆에도 늘 알린다 (앱 쉘 안내 창은 세션 첫 번째만)
             if (!res.ok) { setMessage("정리하지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
             const list: ParsedAction[] = d.actions ?? [];
             if (list.length === 0) { setMessage(d.summary ?? "등록할 항목을 찾지 못했어요."); return; }
@@ -126,6 +147,7 @@ export function BrainDump({ date }: { date?: string }) {
             {!actions ? (
                 <>
                     <textarea
+                        ref={inputRef}
                         value={text}
                         onChange={(e) => { setText(e.target.value); setMessage(null); }}
                         onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void parse(); } }}

@@ -251,7 +251,7 @@ export default function HelpPage() {
                                     <s.icon className="h-5 w-5" />
                                 </span>
                                 <div className="min-w-0">
-                                    <h2 className="font-serif text-lg md:text-xl text-neutral-900 myverse-dark:text-neutral-100 leading-tight">
+                                    <h2 className="font-bold text-lg md:text-xl text-neutral-900 myverse-dark:text-neutral-100 leading-tight">
                                         {s.title}
                                     </h2>
                                     <p className="text-sm text-neutral-600 myverse-dark:text-neutral-300 leading-relaxed mt-2">

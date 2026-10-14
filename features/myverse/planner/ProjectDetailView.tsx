@@ -492,7 +492,8 @@ function ShareField({ project }: { project: PlannerProject }) {
         } finally { setBusy(false); }
     }
 
-    const url = typeof window !== "undefined" && token ? `${window.location.origin}/myverse/p/${token}` : "";
+    // 공개 주소는 지금 쓰는 서비스 기준 — Planner's에서 /myverse/p/…를 주면 404 (2026-10-15 QA)
+    const url = typeof window !== "undefined" && token ? `${window.location.origin}/planners/p/${token}` : "";
 
     async function copyUrl() {
         if (!url) return;

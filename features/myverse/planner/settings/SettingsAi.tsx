@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Sparkles, FolderOpen, Plus, X, Check } from "lucide-react";
+import { Loader2, FolderOpen, Plus, X, Check } from "lucide-react";
 import type { AiTone } from "@/lib/myverse/types";
 import { GroupMarker } from "@/features/myverse/planner/SettingsLayout";
 
@@ -42,32 +42,12 @@ export function SettingsAi({
     const [trackingMetrics, setTrackingMetrics] = useState<string[]>(initialTrackingMetrics);
     const [noteShortcuts, setNoteShortcuts] = useState<string[]>(initialNoteShortcuts);
     const [countryPref, setCountryPref] = useState<string[]>(initialCountryPref);
-    const [sampleLoading, setSampleLoading] = useState(false);
-    const [sampleText, setSampleText] = useState<string | null>(null);
     const [projectLinks, setProjectLinks] = useState<Record<string, string | null>>(initialProjectLinks);
     const [projectPickerMetric, setProjectPickerMetric] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
     const [newProjectTitle, setNewProjectTitle] = useState("");
     const [creatingProject, setCreatingProject] = useState(false);
-
-    async function generateSample() {
-        setSampleLoading(true);
-        setSampleText(null);
-        try {
-            const res = await fetch("/api/myverse/briefing/generate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: "morning" }),
-            });
-            if (res.ok) {
-                const d = await res.json();
-                setSampleText(d.content || d.briefing?.content || "샘플 생성 완료 (내용 없음)");
-            } else {
-                setSampleText("샘플 생성에 실패했습니다. API 키 설정을 확인해 주세요.");
-            }
-        } finally { setSampleLoading(false); }
-    }
 
     async function openProjectPicker(metricKey: string) {
         setProjectPickerMetric(metricKey);
@@ -118,7 +98,7 @@ export function SettingsAi({
 
             {/* AI 비서 */}
             <section id="sec-ai" className="bg-white border border-neutral-200 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-neutral-900 mb-4">AI 비서</h2>
+                <h2 className="text-sm font-semibold text-neutral-900 mb-4">인공지능</h2>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-xs text-neutral-500 mb-2">AI 톤</label>
@@ -140,7 +120,7 @@ export function SettingsAi({
                     </div>
                     <div className="pt-2 border-t border-neutral-100">
                         <label className="block text-xs text-neutral-500 mb-1">컨텍스트 범위</label>
-                        <p className="text-[10px] text-neutral-400 mb-3">브리핑 생성 시 참조할 정보를 선택하세요</p>
+                        <p className="text-[10px] text-neutral-400 mb-3">인공지능이 답할 때 참고할 기록을 고르세요</p>
                         <div className="flex flex-wrap gap-2">
                             {[
                                 { key: "identity", label: "정체성" },
@@ -171,23 +151,6 @@ export function SettingsAi({
                                 );
                             })}
                         </div>
-                    </div>
-                    <div className="pt-2 border-t border-neutral-100">
-                        <button
-                            onClick={generateSample}
-                            disabled={sampleLoading}
-                            className="flex items-center gap-1.5 text-xs text-[var(--pp-accent)] hover:underline disabled:opacity-50"
-                        >
-                            {sampleLoading
-                                ? <Loader2 className="h-3 w-3 animate-spin" />
-                                : <Sparkles className="h-3 w-3" />}
-                            브리핑 샘플 미리보기
-                        </button>
-                        {sampleText && (
-                            <div className="mt-3 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-xs text-neutral-700 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
-                                {sampleText}
-                            </div>
-                        )}
                     </div>
                 </div>
             </section>

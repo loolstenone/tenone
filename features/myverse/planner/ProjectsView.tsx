@@ -5,14 +5,13 @@ import Link from "next/link";
 import {
     FolderKanban, Plus, Loader2,
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
-    LayoutGrid, Trash2,
+    Trash2,
 } from "lucide-react";
 import type { PlannerProject } from "@/lib/myverse/types";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/myverse/project-categories";
-import { useAuth } from "@/lib/auth-context";
 import { ConfirmSheet } from "./ConfirmSheet";
 
 const CATEGORY_ICONS: Record<string, typeof FolderKanban> = {
@@ -29,7 +28,6 @@ interface Cover {
 }
 
 export function ProjectsView() {
-    const { user } = useAuth();
     const [projects, setProjects] = useState<PlannerProject[]>([]);
     const [covers, setCovers] = useState<Map<string, Cover>>(new Map());
     const [loading, setLoading] = useState(true);
@@ -144,7 +142,6 @@ export function ProjectsView() {
     const filtered = projects
         .filter(p => filter === "all" || p.status === filter)
         .filter(p => !categoryFilter || p.category === categoryFilter);
-    const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
@@ -165,17 +162,6 @@ export function ProjectsView() {
                     </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    {hasPublicProjects && user?.id && (
-                        <Link
-                            href={`/myverse/portfolio/${user.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--pp-accent)] border border-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent)] hover:text-white transition-colors"
-                        >
-                            <LayoutGrid className="h-3.5 w-3.5" />
-                            내 포트폴리오
-                        </Link>
-                    )}
                     <PlannersUtilityLinks />
                 </div>
             </div>

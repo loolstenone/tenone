@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles, Check, X } from "lucide-react";
+import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
 
 // 목표 자동 분해 — 플래너'스 AI 2단계 ① (2026-10-14)
 // 거시적 목표("Q3 마케팅 전략 수립")를 실행 단위(조사 1h · 취합 1.5h · 슬라이드 2h …)로 쪼개고 날짜까지 제안 → 고른 것만 프로젝트 업무로 넣는다
@@ -29,10 +30,12 @@ export function ProjectBreakdown({ projectId, onAdded }: { projectId: string; on
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ goal, hoursPerDay: perDay }),
             });
-            if (res.status === 402) return;
+            if (res.status === 402) { setMsg(AI_BETA_ONLY_TEXT); return; }
             const d = await res.json().catch(() => ({}));
             if (!res.ok || !d.steps?.length) { setMsg("쪼개지 못했어요. 목표를 한 문장으로 더 적어 보세요."); return; }
             setPlan(d); setPicked(d.steps.map(() => true));
+        } catch {
+            setMsg("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
         } finally { setBusy(false); }
     }
 

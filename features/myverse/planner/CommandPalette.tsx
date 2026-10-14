@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { commitParsedActions } from "./ai-actions";
+import { aiErrorText } from "@/lib/myverse/ai-error";
 import {
     Search, ArrowRight, LayoutGrid, Sun, CalendarDays, CalendarRange, CalendarClock,
     Compass, FolderKanban, Pen, Users, FileText, Sparkles, LayoutTemplate,
@@ -134,9 +135,9 @@ export function CommandPalette({ open, onClose }: Props) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text, today: todayStr() }),
             });
-            const d = await res.json();
+            const d = await res.json().catch(() => ({}));
             if (!res.ok) {
-                setAiError(d?.error === "ai_disabled" ? "AI 키가 설정되지 않았습니다." : (d?.detail || "AI 호출 실패"));
+                setAiError(aiErrorText(res.status, d));
                 return;
             }
             if (!d.actions || d.actions.length === 0) {

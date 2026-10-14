@@ -95,14 +95,15 @@ export function FocusModeOverlay({ taskText, onClose }: FocusModeOverlayProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [running]);
 
-    // document title 업데이트
+    // 탭 제목 = 남은 시간 — 닫으면 원래 제목으로 (전엔 '마이버스'로 덮어써 Planner's 탭 제목이 바뀌었다, 2026-10-15 QA)
+    const originalTitle = useRef<string | null>(null);
     useEffect(() => {
-        if (running) {
-            document.title = `${fmt(timeLeft)} · ${MODE_LABELS[mode]}, 마이버스`;
-        } else {
-            document.title = "마이버스";
-        }
-        return () => { document.title = "마이버스"; };
+        originalTitle.current = document.title;
+        return () => { if (originalTitle.current !== null) document.title = originalTitle.current; };
+    }, []);
+    useEffect(() => {
+        if (running) document.title = `${fmt(timeLeft)} · ${MODE_LABELS[mode]}`;
+        else if (originalTitle.current !== null) document.title = originalTitle.current;
     }, [running, timeLeft, mode]);
 
     // 키보드 단축키

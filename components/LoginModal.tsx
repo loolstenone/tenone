@@ -230,7 +230,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                 <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 space-y-2">
                                     <p className="font-semibold">로그인이 계속 안 되나요?</p>
                                     <p>Google·카카오로 가입하셨다면 이메일·비밀번호가 아니라 위의 <b>Google로 로그인</b> 또는 <b>카카오로 로그인</b>을 눌러주세요.</p>
-                                    <a href="/reset-password" className="inline-block font-semibold underline">로그인 도움 — 가입 방법·비밀번호를 메일로 안내받기</a>
+                                    <a href="/reset-password" className="inline-block font-semibold underline">로그인 도움: 가입 방법·비밀번호를 메일로 안내받기</a>
                                 </div>
                             )}
                             <button type="submit" disabled={isSubmitting}

@@ -257,7 +257,7 @@ function contactToVcf(c: Contact): string {
     const lines: string[] = [];
     lines.push("BEGIN:VCARD");
     lines.push("VERSION:3.0");
-    lines.push("PRODID:-//Ten:One Universe//Myverse Contacts//KO");
+    lines.push("PRODID:-//Ten:One Universe//Planners AI Contacts//KO");
     lines.push(`FN:${escapeVcf(c.name)}`);
     lines.push(`N:${splitName(c.name).split(";").map(escapeVcf).join(";")}`);
     if (c.phone) {

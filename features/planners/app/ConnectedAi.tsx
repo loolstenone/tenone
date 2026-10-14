@@ -15,9 +15,12 @@ export function ConnectedAi() {
     const [copied, setCopied] = useState(false);
     const [grants, setGrants] = useState<Grant[] | null>(null);
     const [busy, setBusy] = useState<string | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         const { data, error } = await createClient().auth.oauth.listGrants();
+        // 못 불러온 것을 '연결한 AI 없음'으로 보이지 않게 (2026-10-15 QA)
+        setLoadError(error ? "연결한 AI 목록을 불러오지 못했어요. 잠시 뒤 새로고침해 주세요." : null);
         setGrants(error ? [] : ((data ?? []) as unknown as Grant[]));
     }, []);
     useEffect(() => { void load(); }, [load]);
@@ -25,8 +28,9 @@ export function ConnectedAi() {
     async function revoke(clientId: string) {
         if (!confirm("이 AI와의 연결을 끊을까요? 다시 쓰려면 AI 앱에서 다시 연결해야 해요.")) return;
         setBusy(clientId);
-        await createClient().auth.oauth.revokeGrant({ clientId });
+        const { error } = await createClient().auth.oauth.revokeGrant({ clientId });
         setBusy(null);
+        if (error) { alert("연결을 끊지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
         void load();
     }
 
@@ -55,6 +59,8 @@ export function ConnectedAi() {
                 <p className="text-sm font-bold">연결한 AI</p>
                 {grants === null ? (
                     <Loader2 className="mt-3 h-4 w-4 animate-spin text-neutral-300" />
+                ) : loadError ? (
+                    <p className="mt-2 text-sm text-neutral-500">{loadError}</p>
                 ) : grants.length === 0 ? (
                     <p className="mt-2 text-sm text-neutral-400">아직 연결한 AI가 없어요.</p>
                 ) : (

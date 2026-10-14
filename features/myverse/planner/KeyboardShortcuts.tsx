@@ -73,7 +73,8 @@ export function KeyboardShortcuts() {
             // / — 빠른 기록: 오늘 화면의 작성 창 (Planner's 앱 밖 MyVerse 흔적으로 보내지 않는다, 2026-10-14)
             if (e.key === "/") {
                 e.preventDefault();
-                router.push("/planners/app/daily?compose=1");
+                if (window.location.pathname.replace(/\/$/, "").endsWith("/app/daily")) window.dispatchEvent(new Event("planners:compose")); // BrainDump COMPOSE_EVENT
+                else router.push("/planners/app/daily?compose=1");
                 return;
             }
 

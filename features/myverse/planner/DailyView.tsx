@@ -769,7 +769,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
         if (!shareText.includes("\n") && !result?.trim()) return;
         try {
             if (navigator.share) {
-                await navigator.share({ title: "마이버스", text: shareText });
+                await navigator.share({ title: "플래너'스 AI", text: shareText });
             } else {
                 await navigator.clipboard.writeText(shareText);
                 setShareCopied(true);
@@ -2388,7 +2388,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xs uppercase tracking-widest text-neutral-400">일간 기록</h2>
                                     <Link
-                                        href="/planners/app/settings#tracking"
+                                        href="/planners/app/settings/behavior#tracking"
                                         className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[var(--pp-accent)] transition-colors"
                                         title="트래킹 항목 수정"
                                     >

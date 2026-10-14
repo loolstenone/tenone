@@ -1,9 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Loader2, Download, Check, ExternalLink, Archive } from "lucide-react";
-import Link from "next/link";
-import { InstallButton } from "@/features/myverse/planner/InstallButton";
+import { useState } from "react";
+import { Loader2, Download, Check } from "lucide-react";
 
 interface Sub {
     status: string;
@@ -18,27 +16,6 @@ interface Props {
 
 export function SettingsExport({ sub, showToast }: Props) {
     const [exporting, setExporting] = useState(false);
-    const [importing, setImporting] = useState(false);
-    const zipRef = useRef<HTMLInputElement | null>(null);
-
-    async function importMetaZip(file: File) {
-        setImporting(true);
-        try {
-            const form = new FormData();
-            form.append("file", file);
-            const res = await fetch("/api/myverse/moments/import-meta", { method: "POST", body: form });
-            const json = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                showToast(`백업 가져오기 실패: ${json.error || res.status}${json.hint ? " · " + json.hint : ""}`, false);
-                return;
-            }
-            showToast(`가져옴 ${json.imported ?? 0}건 · 건너뜀 ${json.skipped ?? 0}건 · 총 ${json.total ?? 0}건`);
-        } catch (e) {
-            showToast(`오류: ${(e as Error).message}`, false);
-        } finally {
-            setImporting(false);
-        }
-    }
 
     async function exportBackup() {
         setExporting(true);
@@ -69,9 +46,11 @@ export function SettingsExport({ sub, showToast }: Props) {
             const d = new Date();
             const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
             a.href = url;
-            a.download = `myverse-backup-${dateStr}.json`;
+            a.download = `planners-ai-backup-${dateStr}.json`;
             a.click();
             URL.revokeObjectURL(url);
+        } catch {
+            showToast("내보내지 못했습니다. 잠시 후 다시 시도해 주세요.", false);
         } finally {
             setExporting(false);
         }
@@ -79,28 +58,20 @@ export function SettingsExport({ sub, showToast }: Props) {
 
     return (
         <>
-            {/* 앱 설치 */}
+            {/* 홈 화면에 추가 — Planner's 앱 전용 설치 파일(매니페스트)이 아직 없어 브라우저 메뉴 안내만 (/myverse/install은 이 도메인에서 404, 2026-10-15 QA) */}
             <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-neutral-900 mb-2">앱 설치</h2>
-                <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                    사용하고 계신 브라우저의 삼점 메뉴(⋮)를 통해{" "}
-                    <span className="font-medium text-neutral-700">마이버스</span>를 홈 화면에 추가하시면 일반 앱처럼 사용하실 수 있습니다.
-                    Android · iPhone · iPad · PC 모두 지원하며, 모든 기능은 웹과 동일하게 작동합니다.
+                <h2 className="text-sm font-semibold text-neutral-900 mb-2">홈 화면에 추가</h2>
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                    브라우저 메뉴(⋮ 또는 공유 버튼)에서 &lsquo;홈 화면에 추가&rsquo;를 누르면 플래너&apos;스 AI를 앱처럼 바로 열 수 있습니다.
+                    휴대폰·태블릿·PC 모두 같은 기능으로 작동합니다.
                 </p>
-                <InstallButton
-                    hideWhenInstalled={false}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--pp-accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--pp-accent-strong)] transition-colors"
-                >
-                    <Download className="h-3.5 w-3.5" />
-                    앱 설치 상세
-                </InstallButton>
             </section>
 
             {/* 데이터 백업 */}
             <section className="bg-white border border-neutral-200 rounded-xl p-6">
                 <h2 className="text-sm font-semibold text-neutral-900 mb-1">데이터 백업</h2>
                 <p className="text-xs text-neutral-500 mb-4">
-                    설정·일별·주별·월별·연간·퍼스널·프로젝트 데이터를 JSON 파일로 내보냅니다.
+                    설정·일간·주간·월간·연간·정체성·프로젝트 기록을 JSON 파일로 내려받습니다.
                 </p>
                 <button
                     onClick={exportBackup}
@@ -112,92 +83,26 @@ export function SettingsExport({ sub, showToast }: Props) {
                 </button>
             </section>
 
-            {/* SNS 백업 가져오기 — Instagram / Facebook 미디어 자동 임포트 */}
+            {/* 이용 현황 — 지금은 베타 (가격·구매 링크 없음, CLAUDE.md §0.1 유료화는 베타 테스트를 거친다) */}
             <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-neutral-900 mb-1">SNS 백업 가져오기</h2>
-                <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                    Instagram·Facebook의 GDPR 백업 ZIP을 그대로 업로드하면, 사진·동영상이 촬영 일자와 캡션과 함께 자동으로 "오늘의 한 장면"에 등록됩니다.
-                    <br />
-                    <span className="text-neutral-400">
-                        ※ Instagram: 설정 → 정보 다운로드 → JSON 형식 / Facebook: 설정 → 정보 다운로드 → JSON
-                    </span>
-                </p>
-                <input
-                    ref={zipRef}
-                    type="file"
-                    accept=".zip,application/zip"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) importMetaZip(file);
-                        e.target.value = "";
-                    }}
-                    className="hidden"
-                />
-                <button
-                    onClick={() => zipRef.current?.click()}
-                    disabled={importing}
-                    className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200 transition-colors disabled:opacity-50"
-                >
-                    {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4" />}
-                    {importing ? "가져오는 중…" : "ZIP 선택"}
-                </button>
-            </section>
-
-            {/* 구독 현황 */}
-            <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-neutral-900 mb-4">구독 현황</h2>
-
+                <h2 className="text-sm font-semibold text-neutral-900 mb-2">이용 현황</h2>
                 {sub.status === "active" ? (
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-[var(--pp-accent)]" />
-                            <span className="text-sm font-semibold text-[var(--pp-accent)]">활성 구독</span>
-                        </div>
-                        <div className="bg-neutral-50 rounded-lg p-3 space-y-1">
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-400">이용 중</p>
-                            <p className="text-sm font-medium text-neutral-900">Planner&apos;s Planner AI · 무제한</p>
-                            <p className="text-[11px] text-neutral-600">능동 AI 비서 · 모든 템플릿 · Calendar/Notion/Slack 연동</p>
-                        </div>
+                    <div className="space-y-1">
+                        <p className="flex items-center gap-2 text-sm font-semibold text-[var(--pp-accent)]">
+                            <Check className="h-4 w-4" /> 베타 테스터 · 인공지능 기능 사용 중
+                        </p>
                         {sub.expires && (
                             <p className="text-xs text-neutral-600">
-                                만료:{" "}
-                                {new Date(sub.expires).toLocaleDateString("ko-KR", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                })}
+                                베타 기간:{" "}
+                                {new Date(sub.expires).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Seoul" })}까지
                             </p>
                         )}
-                        <Link
-                            href="/myverse/purchase"
-                            className="inline-flex items-center gap-1.5 text-xs text-[var(--pp-accent)] hover:underline"
-                        >
-                            구독 연장 <ExternalLink className="h-3 w-3" />
-                        </Link>
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        <p className="text-xs text-neutral-500">
-                            {sub.status === "expired" ? "구독이 만료되었습니다." : "아직 구독하지 않으셨습니다."}
-                        </p>
-                        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold mb-1">
-                                런칭 프로모션
-                            </p>
-                            <p className="text-sm font-semibold text-neutral-900 mb-2">첫 1년 19,000원</p>
-                            <ul className="text-[11px] text-neutral-600 space-y-0.5 mb-3">
-                                <li>• 능동 AI 비서 · 매일 아침 브리핑</li>
-                                <li>• 59종 시각 템플릿 무제한</li>
-                                <li>• Google Calendar / Notion / Slack 연동</li>
-                            </ul>
-                            <Link
-                                href="/myverse/purchase"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--pp-accent)] text-white rounded-lg text-sm hover:bg-[var(--pp-accent-strong)] transition-colors"
-                            >
-                                구독 시작
-                            </Link>
-                        </div>
-                    </div>
+                    <p className="text-xs text-neutral-500 leading-relaxed">
+                        플래너는 누구나 그대로 쓸 수 있습니다. 인공지능 기능은 지금 베타 테스터에게 먼저 열고 있습니다.
+                        {sub.status === "expired" && " 베타 기간이 끝났습니다."}
+                    </p>
                 )}
             </section>
         </>

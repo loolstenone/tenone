@@ -9,11 +9,11 @@ import { Loader2, X, Sparkles, ArrowRight } from "lucide-react";
 import type { PlannerProject, ProjectRetrospective } from "@/lib/myverse/types";
 
 const FIELDS: Array<{ key: keyof Omit<ProjectRetrospective, "completed_at">; label: string; hint: string; rows: number }> = [
-    { key: "fact",     label: "Fact (사실)",        hint: "이 프로젝트에서 실제로 무엇을 했는가? 구체적으로 1-3 문장.", rows: 3 },
-    { key: "feeling",  label: "Feeling (감정)",     hint: "어떤 감정·경험이었는가? 어려웠던 순간·뿌듯했던 순간.",       rows: 3 },
-    { key: "finding",  label: "Finding (배움)",     hint: "이 프로젝트로 무엇을 알게 됐는가? Identity 핵심 결과 후보.", rows: 4 },
-    { key: "future",   label: "Future (다음 한 수)", hint: "이 배움을 어디에 어떻게 적용할 것인가?",                    rows: 3 },
-    { key: "feedback", label: "Feedback (피드백)",  hint: "자기 자신·팀·세상에게 남기는 한 마디.",                     rows: 2 },
+    { key: "fact",     label: "사실", hint: "이 프로젝트에서 실제로 무엇을 했는가? 구체적으로 1-3 문장.", rows: 3 },
+    { key: "feeling",  label: "감정", hint: "어떤 감정·경험이었는가? 어려웠던 순간·뿌듯했던 순간.",       rows: 3 },
+    { key: "finding",  label: "배움", hint: "이 프로젝트로 무엇을 알게 됐는가? 정체성에 남길 핵심 결과 후보.", rows: 4 },
+    { key: "future",   label: "다음 한 수", hint: "이 배움을 어디에 어떻게 적용할 것인가?",                    rows: 3 },
+    { key: "feedback", label: "피드백", hint: "자기 자신·팀·세상에게 남기는 한 마디.",                     rows: 2 },
 ];
 
 export function ProjectRetroModal({ open, project, onClose, onSaved }: {

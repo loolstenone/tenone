@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowLeft, Check, Layers, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket, Sparkles, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Compass, Briefcase, GraduationCap, FlaskConical, Palette, Code2, Clapperboard, TrendingUp, Map, Dumbbell, Rocket } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import type { MyverseMode, AiTone, MyverseRole } from "@/lib/myverse/types";
 import { MYVERSE_ROLE_META } from "@/lib/myverse/types";
 import { trackMyverse } from "@/lib/myverse/analytics";
 
-type Step = "welcome" | "mode" | "role" | "ai" | "identity_lite" | "first_trace" | "done";
+type Step = "welcome" | "role" | "ai" | "identity_lite" | "done";
 
 // Planner's 앱: MyVerse '첫 흔적' 단계(개인 OS) 제외 — 정체성 단계에서 바로 시작 (2026-10-14)
-const STEPS: Step[] = ["welcome", "mode", "role", "ai", "identity_lite"];
+// '쓰는 방식'(mode) 단계는 뺐다 — Planner's 메뉴는 고정이라 골라도 달라지는 게 없었다 (2026-10-15 QA). 저장은 all_in_one
+const STEPS: Step[] = ["welcome", "role", "ai", "identity_lite"];
 
 const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -30,7 +31,7 @@ export default function OnboardingPage() {
     const { isAuthenticated, isLoading } = useAuth();
 
     const [step, setStep] = useState<Step>("welcome");
-    const [mode, setMode] = useState<MyverseMode>("weekly");
+    const mode: MyverseMode = "all_in_one";
     const [role, setRole] = useState<MyverseRole | null>(null);
     const [morningTime] = useState("08:00");
     const [eveningTime] = useState("21:00");
@@ -38,8 +39,7 @@ export default function OnboardingPage() {
     const [visionStatement, setVisionStatement] = useState("");
     const [missionStatement, setMissionStatement] = useState("");
     const [saving, setSaving] = useState(false);
-    const [firstTrace, setFirstTrace] = useState("");
-    const [tracePosting, setTracePosting] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isAuthenticated || isLoading) return;
@@ -57,34 +57,9 @@ export default function OnboardingPage() {
         if (step !== "done") trackMyverse("myverse_onboarding_step", { step });
     }, [step]);
 
-    async function handleFirstTraceSubmit() {
-        const text = firstTrace.trim();
-        if (text) {
-            setTracePosting(true);
-            try {
-                const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
-                await fetch("/api/myverse/routines", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        date: today,
-                        activity: text.slice(0, 100),
-                        note: text.length > 100 ? text : null,
-                        category: "general",
-                    }),
-                });
-                trackMyverse("myverse_onboarding_first_trace", { length: text.length });
-            } catch (e) {
-                console.warn("first trace post failed", e);
-            } finally {
-                setTracePosting(false);
-            }
-        }
-        await handleFinish();
-    }
-
     async function handleFinish() {
-        setSaving(true);
+        if (saving) return; // 두 번 눌러 두 번 저장되지 않게 (2026-10-15 QA)
+        setSaving(true); setSaveError(null);
         try {
             const res = await fetch("/api/myverse/onboarding", {
                 method: "POST",
@@ -102,7 +77,7 @@ export default function OnboardingPage() {
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 console.error("onboarding save failed", err);
-                alert(`온보딩 저장 실패: ${err.error || res.status}\n다시 시도하거나 페이지를 새로고침해 주세요.`);
+                setSaveError(res.status === 403 ? "회원가입을 마친 뒤 설정할 수 있습니다. 새로고침해 가입 창을 확인해 주세요." : "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
                 setSaving(false);
                 return;
             }
@@ -110,7 +85,7 @@ export default function OnboardingPage() {
             window.location.assign("/planners/app/daily");
         } catch (e) {
             console.error("onboarding fetch error", e);
-            alert(`네트워크 오류: ${(e as Error).message}\n다시 시도해 주세요.`);
+            setSaveError("연결이 불안정합니다. 잠시 후 다시 시도해 주세요.");
             setSaving(false);
         }
     }
@@ -195,14 +170,13 @@ export default function OnboardingPage() {
                                         </span>
                                     </h1>
                                     <p className="text-white/40 text-base leading-relaxed max-w-sm break-keep">
-                                        네 가지만 고르면 바로 쓸 수 있어요. 1분이면 끝나고, 나중에 설정에서 언제든 바꿀 수 있습니다.
+                                        세 가지만 고르면 바로 쓸 수 있어요. 1분이면 끝나고, 나중에 설정에서 언제든 바꿀 수 있습니다.
                                     </p>
                                 </div>
 
                                 <div className="space-y-3 border-l border-white/10 pl-4">
                                     {[
-                                        // 무엇을 시작하는지 = 아래 설정 네 단계 (2026-10-15 사용자 "뭘 시작하자는 것인지 알려 달라") — MyVerse 문구 쓰지 않기
-                                        "쓰는 방식 · 일정 중심으로 가볍게, 또는 프로젝트까지 전부",
+                                        // 무엇을 시작하는지 = 아래 설정 세 단계 (2026-10-15 사용자 "뭘 시작하자는 것인지 알려 달라") — MyVerse 문구 쓰지 않기
                                         "하는 일 · 직장인·학생 등, 알맞은 틀을 추천합니다",
                                         "AI 말투 · 전문적·친근함·간결함 중에서",
                                         "비전과 미션 · 모든 계획의 기준 (비워 둬도 됩니다)",
@@ -217,7 +191,7 @@ export default function OnboardingPage() {
 
                             <div className="mt-12 flex flex-col gap-3">
                                 <button
-                                    onClick={() => setStep("mode")}
+                                    onClick={() => setStep("role")}
                                     className="group flex items-center justify-between px-6 py-4 rounded-xl text-white text-sm font-medium transition-all"
                                     style={{
                                         background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
@@ -234,72 +208,8 @@ export default function OnboardingPage() {
                                 >
                                     설정 없이 기본값으로 바로 쓰기
                                 </button>
+                                {saveError && <p role="alert" className="text-center text-sm text-rose-300">{saveError}</p>}
                             </div>
-                        </div>
-                    )}
-
-                    {/* ── MODE ── */}
-                    {step === "mode" && (
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">1 / 4</p>
-                                <h2 className="text-2xl font-light text-white">어떤 모드로 시작할까요?</h2>
-                                <p className="text-sm text-white/40 leading-relaxed">
-                                    언제든 설정에서 바꿀 수 있습니다.
-                                </p>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => setMode("weekly")}
-                                    className="group text-left p-5 rounded-xl border transition-all duration-200"
-                                    style={{
-                                        borderColor: mode === "weekly" ? "rgba(20,184,166,0.5)" : "rgba(255,255,255,0.08)",
-                                        background: mode === "weekly"
-                                            ? "rgba(20,184,166,0.08)"
-                                            : "rgba(255,255,255,0.03)",
-                                        boxShadow: mode === "weekly" ? "0 0 20px rgba(20,184,166,0.1)" : "none",
-                                    }}
-                                >
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-6 h-6 rounded border border-teal-400/40 flex items-center justify-center">
-                                            <div className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
-                                        </div>
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/10 text-white/40">추천</span>
-                                    </div>
-                                    <p className="text-white text-sm font-medium mb-1">Easy mode</p>
-                                    <p className="text-xs text-white/35 leading-relaxed">
-                                        일간·주간·월간·연간 스케줄 중심으로 가볍게
-                                    </p>
-                                </button>
-
-                                <button
-                                    onClick={() => setMode("all_in_one")}
-                                    className="group text-left p-5 rounded-xl border transition-all duration-200"
-                                    style={{
-                                        borderColor: mode === "all_in_one" ? "rgba(20,184,166,0.5)" : "rgba(255,255,255,0.08)",
-                                        background: mode === "all_in_one"
-                                            ? "rgba(20,184,166,0.08)"
-                                            : "rgba(255,255,255,0.03)",
-                                        boxShadow: mode === "all_in_one" ? "0 0 20px rgba(20,184,166,0.1)" : "none",
-                                    }}
-                                >
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Layers className="h-4 w-4 text-teal-400/70" />
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/10 text-white/40">고급</span>
-                                    </div>
-                                    <p className="text-white text-sm font-medium mb-1">All in one mode</p>
-                                    <p className="text-xs text-white/35 leading-relaxed">
-                                        프로젝트·캔버스·템플릿까지 모든 기능 사용
-                                    </p>
-                                </button>
-                            </div>
-
-                            <Nav
-                                onBack={() => setStep("welcome")}
-                                onNext={() => setStep("role")}
-                                nextLabel="다음"
-                            />
                         </div>
                     )}
 
@@ -307,10 +217,10 @@ export default function OnboardingPage() {
                     {step === "role" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">2 / 4</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">1 / 3</p>
                                 <h2 className="text-2xl font-light text-white">주로 어떤 일을 하시나요?</h2>
                                 <p className="text-sm text-white/40 leading-relaxed">
-                                    선택한 역할에 맞는 AI 브리핑과 템플릿을 제공합니다.
+                                    선택한 역할에 맞는 템플릿과 인공지능 도움을 드립니다.
                                 </p>
                             </div>
 
@@ -343,7 +253,7 @@ export default function OnboardingPage() {
                             </div>
 
                             <Nav
-                                onBack={() => setStep("mode")}
+                                onBack={() => setStep("welcome")}
                                 onNext={() => setStep("ai")}
                                 nextLabel={role ? "다음" : "건너뛰기"}
                             />
@@ -354,7 +264,7 @@ export default function OnboardingPage() {
                     {step === "ai" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">3 / 4</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">2 / 3</p>
                                 <h2 className="text-2xl font-light text-white">AI 파트너 설정</h2>
                                 <p className="text-sm text-white/40 leading-relaxed">
                                     매일 아침 브리핑하고, 하루를 함께 정리하는 AI입니다.
@@ -406,7 +316,7 @@ export default function OnboardingPage() {
                     {step === "identity_lite" && (
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">4 / 4</p>
+                                <p className="text-[11px] text-white/25 tracking-widest uppercase">3 / 3</p>
                                 <h2 className="text-2xl font-light text-white flex items-center gap-3">
                                     <Compass className="h-5 w-5 text-teal-400/60 flex-shrink-0" />
                                     당신이 도모하는 것은 무엇입니까?
@@ -418,7 +328,7 @@ export default function OnboardingPage() {
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="block text-xs text-white/30 tracking-wide">Vision · 되고 싶은 것</label>
+                                    <label className="block text-xs text-white/30 tracking-wide">비전 · 되고 싶은 것</label>
                                     <input
                                         type="text"
                                         value={visionStatement}
@@ -428,7 +338,7 @@ export default function OnboardingPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs text-white/30 tracking-wide">Mission · 비전을 실현할 방법</label>
+                                    <label className="block text-xs text-white/30 tracking-wide">미션 · 비전을 이루는 방법</label>
                                     <input
                                         type="text"
                                         value={missionStatement}
@@ -443,74 +353,10 @@ export default function OnboardingPage() {
                             <Nav
                                 onBack={() => setStep("ai")}
                                 onNext={handleFinish}
-                                nextLabel={saving ? "준비 중" : "내 플래너 열기"}
+                                nextLabel={saving ? "저장 중…" : "내 플래너 열기"}
+                                disabled={saving}
                             />
-                        </div>
-                    )}
-
-                    {/* ── FIRST TRACE — 첫 흔적 남기기 ── */}
-                    {step === "first_trace" && (
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <p className="text-[11px] text-white/25 tracking-widest uppercase">5 / 5</p>
-                                <h2 className="text-2xl font-light text-white flex items-center gap-3">
-                                    <Sparkles className="h-5 w-5 text-teal-400/60 flex-shrink-0" />
-                                    오늘의 첫 흔적을 남겨볼까요?
-                                </h2>
-                                <p className="text-sm text-white/35 leading-relaxed">
-                                    한 줄이면 충분해요. 오늘 있었던 일·기분·만난 사람, 무엇이든.<br />
-                                    이 한 줄이 당신 Verse의 첫 발자국이 됩니다.
-                                </p>
-                            </div>
-
-                            <div className="space-y-3">
-                                <textarea
-                                    value={firstTrace}
-                                    onChange={(e) => setFirstTrace(e.target.value.slice(0, 200))}
-                                    placeholder="예: 오랜만에 햇살 받으며 한강 산책. 마음이 가라앉았다."
-                                    rows={4}
-                                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-teal-500/50 transition-colors resize-none"
-                                />
-                                <div className="flex items-center justify-between text-[11px]">
-                                    <span className="text-white/25">길게 쓰지 않아도 돼요. 비워둬도 괜찮아요.</span>
-                                    <span className="text-white/30 tabular-nums">{firstTrace.length}/200</span>
-                                </div>
-                            </div>
-
-                            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
-                                <p className="text-xs text-white/30 leading-relaxed">
-                                    <span className="text-teal-300/80">기본은 비공개</span>, 모든 흔적은 처음엔 나만 봅니다. 공개는 나중에 직접 선택해요.
-                                </p>
-                            </div>
-
-                            <div className="flex items-center justify-between pt-2">
-                                <button
-                                    onClick={() => setStep("identity_lite")}
-                                    className="flex items-center gap-2 px-4 py-2 text-white/30 hover:text-white/60 transition-colors text-sm"
-                                >
-                                    <ArrowLeft className="h-4 w-4" /> 뒤로
-                                </button>
-                                <button
-                                    onClick={handleFirstTraceSubmit}
-                                    disabled={saving || tracePosting}
-                                    className="flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-medium transition-all disabled:opacity-40"
-                                    style={{
-                                        background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
-                                        boxShadow: "0 0 24px rgba(20,184,166,0.3)",
-                                    }}
-                                >
-                                    {(saving || tracePosting) ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            시작 중
-                                        </>
-                                    ) : firstTrace.trim() ? (
-                                        <>남기고 시작하기 <Check className="h-4 w-4" /></>
-                                    ) : (
-                                        <>그냥 시작하기 <ArrowRight className="h-4 w-4" /></>
-                                    )}
-                                </button>
-                            </div>
+                            {saveError && <p role="alert" className="text-sm text-rose-300">{saveError}</p>}
                         </div>
                     )}
 
@@ -524,10 +370,12 @@ function Nav({
     onBack,
     onNext,
     nextLabel,
+    disabled = false,
 }: {
     onBack: () => void;
     onNext: () => void;
     nextLabel: string;
+    disabled?: boolean;
 }) {
     return (
         <div className="flex items-center justify-between pt-2">
@@ -539,7 +387,8 @@ function Nav({
             </button>
             <button
                 onClick={onNext}
-                className="group flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-medium transition-all"
+                disabled={disabled}
+                className="group flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-medium transition-all disabled:opacity-50"
                 style={{
                     background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
                     boxShadow: "0 0 24px rgba(20,184,166,0.25)",

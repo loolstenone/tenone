@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Loader2, Sun, Moon, Compass, FolderKanban, CalendarDays, CalendarRange, CalendarClock, FileText } from "lucide-react";
+import { aiErrorText } from "@/lib/myverse/ai-error";
 
 interface SearchHit {
     source: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'project' | 'project_note' | 'briefing' | 'identity';
@@ -42,16 +43,20 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
     const [searched, setSearched] = useState(false);
     // 일상어로 찾기 (플래너'스 AI 2단계 — /api/myverse/smart-search, 유료 회원 전용)
     const [aiBusy, setAiBusy] = useState(false);
+    const [aiNote, setAiNote] = useState<string | null>(null);
     const [ai, setAi] = useState<{ answer: string; range: { from: string; to: string }; keywords: string[]; results: { id: string; type: string; date: string; title: string; snippet: string; href: string }[] } | null>(null);
 
     async function askAi() {
         const q = query.trim();
         if (q.length < 2 || aiBusy) return;
-        setAiBusy(true); setAi(null);
+        setAiBusy(true); setAi(null); setAiNote(null);
         try {
             const res = await fetch("/api/myverse/smart-search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: q }) });
-            if (res.status === 402) return; // 유료 안내는 앱 쉘
-            if (res.ok) setAi(await res.json());
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok) { setAiNote(aiErrorText(res.status, d)); return; }
+            setAi(d);
+        } catch {
+            setAiNote("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
         } finally { setAiBusy(false); }
     }
 
@@ -99,7 +104,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                 <input
                     type="text"
                     value={query}
-                    onChange={(e) => { setQuery(e.target.value); setAi(null); }}
+                    onChange={(e) => { setQuery(e.target.value); setAi(null); setAiNote(null); }}
                     onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void askAi(); } }}
                     placeholder="단어로 찾거나, 일상어로 물어보세요, 예) 작년 가을 팀장님과 얘기한 신규 프로젝트 아이디어"
                     className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[var(--pp-accent)]"
@@ -114,9 +119,12 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
             {query.trim().length >= 2 && (
                 <div className="-mt-5 mb-8">
                     {!ai ? (
+                        <>
                         <button onClick={askAi} disabled={aiBusy} className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--pp-accent)] hover:underline disabled:opacity-50">
                             {aiBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden>✦</span>} AI로 찾기 · 날짜를 몰라도 일상어로
                         </button>
+                        {aiNote && <p className="mt-2 text-sm text-neutral-500">{aiNote}</p>}
+                        </>
                     ) : (
                         <div className="border border-[var(--pp-accent)]/30 bg-[var(--pp-accent)]/5 p-5">
                             {ai.answer && <p className="break-keep text-[15px] text-neutral-800">{ai.answer}</p>}

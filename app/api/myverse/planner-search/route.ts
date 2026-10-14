@@ -151,7 +151,7 @@ export async function GET(req: Request) {
             title: `${r.briefing_type === "morning" ? "아침" : r.briefing_type === "midday" ? "중간" : "저녁"} 브리핑 · ${r.briefing_date}`,
             snippet: snippet(r.content, q),
             date: r.briefing_date,
-            href: `/planners/app/ai-briefing`,
+            href: `/planners/app/daily?date=${r.briefing_date}`, // AI 브리핑 화면은 오늘로 합쳐졌다 (2026-10-14)
         });
     });
 

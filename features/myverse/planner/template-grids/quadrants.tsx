@@ -60,7 +60,7 @@ export function SwotGrid({ data, onChange }: GP) {
 export function FourPGrid({ data, onChange }: GP) {
     const cells = [
         { key: "product",   label: "Product",   sub: "제품·서비스",         tone: "primary"   as const, ph: "예: 1인 사업가용 AI 플래너 SaaS / 핵심 기능 5가지" },
-        { key: "price",     label: "Price",     sub: "가격·수익 모델",       tone: "secondary" as const, ph: "예: 월 19,900원 구독 / 연간 10% 할인 / 14일 무료" },
+        { key: "price",     label: "Price",     sub: "가격·수익 모델",       tone: "secondary" as const, ph: "예: 정기 구독 / 연간 결제 할인 / 첫 달 무료" },
         { key: "place",     label: "Place",     sub: "유통·접근",            tone: "tertiary"  as const, ph: "예: 자사 웹·PWA / B2B 파트너 채널 / 인플 추천" },
         { key: "promotion", label: "Promotion", sub: "프로모션·커뮤니케이션", tone: "muted"     as const, ph: "예: 콘텐츠 마케팅 + 인플 5명 / 뉴스레터 / 추천 보상" },
     ];

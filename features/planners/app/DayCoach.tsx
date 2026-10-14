@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Sun, Moon, RefreshCw, Check } from "lucide-react";
+import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
 
 // 아침 Top 3 · 저녁 회고 — 플래너'스 AI 1단계 ③ (2026-10-14)
 // "관리는 비서처럼 똑똑하게, 회고는 코치처럼 따뜻하게"
@@ -45,7 +46,7 @@ export function DayCoach({ date }: { date: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, mode, refresh }),
             });
-            if (res.status === 402) return; // 유료 안내는 앱 쉘
+            if (res.status === 402) { setNote(AI_BETA_ONLY_TEXT); return; }
             const d = await res.json().catch(() => ({}));
             if (!res.ok) { setNote("지금은 만들지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
             if (mode === "morning") {
@@ -54,6 +55,8 @@ export function DayCoach({ date }: { date: string }) {
             } else {
                 setReflection(d.reflection ?? null);
             }
+        } catch {
+            setNote("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
         } finally {
             setBusy(false);
         }
