@@ -112,6 +112,12 @@
 - `middleware.ts`의 `/api/planners/*` → `/api/myverse/*` rewrite는 유지 (vercel.json 크론·Google OAuth 콘솔이 호출). 페이지 `/planners/*`는 더 이상 myverse로 308 하지 않는다
 - 정적 PWA 파일 `/planners-sw.js`·`/planners-manifest.json`·`/planners-icon-*`는 MyVerse 레거시 — 건드리지 않는다
 - "준비 중/Coming Soon" 텍스트 직접 표시 금지 (§1.1)
+- **앱 메뉴는 고정** (`features/planners/app/nav.ts`) — 사용 수준(mode)·맞춤 메뉴·시간 기록 같은 '골라도 달라지는 게 없는' 설정을 화면에 두지 않는다 (2026-10-15 온보딩·설정에서 제거, 저장값 mode=all_in_one)
+- **공유 플래너 코드(`features/myverse/planner/*`)는 Planner's 기준** — `/myverse/...` 링크·'마이버스' 문구를 넣지 않는다 (planners.ai.kr에서 `/myverse/*`는 404). 공개 프로젝트는 `/planners/p/[token]`
+- **AI 실패 문구는 `lib/myverse/ai-error.ts`** (402 = "베타 테스터에게만"), 버튼 옆에 늘 표시 — 앱 쉘 안내 창은 세션 첫 번째만
+- AI 응답은 `sanitizeActions` 후 사용, 제목·시각은 `pickTitle`·`pickTime` (미리보기와 저장이 같은 규칙) · 사진은 `validateUpload`(20MB·이미지)
+- 과정 공통 화면(`features/programs/*`)은 검은 화면 기준 → Planner's는 `<div data-program-light>`로 감싼다 (`app/globals.css`)
+- 알림 = 유니버스 공통 벨(`NotificationBell`) · `/planners/app/notifications`는 오늘로 리다이렉트
 
 ## 이전 계획 — planners.ai.kr (2026-10-14 확정)
 
@@ -136,6 +142,9 @@
 
 ## 현재 상태
 
+- **2026-10-15 세션 175 QA**: 공개 화면(과정 화면 밝은 테마·신청/합류/발급 오류 처리·숨긴 후기 본인 표시·후기 한국 시간·히어로 자동 넘김 멈춤·이름 정리) · 앱 화면(가격·구매 링크·SNS 가져오기 제거, AI 402 안내, 공개 프로젝트 페이지, 공통 알림, 처음 설정 세 단계, '/' 빠른 기록, AI 응답 정리·사진 검사·마인드맵) · 온보딩 API가 동의 없이 회원을 만들던 경로 차단
+- 결정 대기: 과정 화면 영문 라벨 한글화(RooK·MADLeague 공유) · 상품명 '플래너'스 플래너 All in One' · 카카오 정지 중 버튼 숨김
+- 이월: 로그인 상태 실화면 QA(사용자 로그인 필요) · 할 일 1개 추가 API(동시 편집 덮어쓰기) · 하드코딩 인디고(ProjectDetailView 기본색 등)
 - **2026-10-14 사이트 AI 중심 개편**: 메뉴·첫 화면·AI 소개(4동사 장 + 세 가지 약속 + 베타 안내)·PAD 머리말·과정 이름(프로젝트 → 기획자 과정)·푸터·마이페이지(내 플래너 카드)·메타
 - Phase: 집중 · 플래너'스 AI 1~3단계·내 AI 연결 완료, QA 2차 (세션 174, 2026-10-14) · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · 처리방침 Planner's 항목·AI 위탁 반영 (10-14 공지 · **10-21 시행**, 시행 후 공지 줄 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신)
 - **유료화 순서 (2026-10-14 사용자 결정)**: 베타 테스트 기간 → 유료화. 베타 테스터 = 인트라에서 `myverse_users.subscription_status` 활성 + `subscription_expires_at` = 베타 종료일 (결제 없음, `lib/myverse/ai-access.ts` 그대로 통과). 유료 판매는 통신판매업 신고·약관·자동갱신 고지 후

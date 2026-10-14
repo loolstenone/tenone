@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-10-15 (세션 175) — 유틸리티바 표준 · 베타 유료화 · Planner's AI 중심 개편 · 소셜 첫 로그인 = 가입 · Planner's 전면 QA
+
+### 장소·운영
+
+- 워크트리 `261014-work-start-773f27` · 중간 "푸시"(~`10cfc507`) + 작업 종료 push
+- 운영 데이터: RooK 게시판 이미지 181장 WebP 재저장(403MB → 18MB, 원본 백업 `G:\내 드라이브\00 다운로드\rook-board-assets-backup`) · Planner's 이야기 '질문' 분류 확인
+- DB 정책 변경 **미적용(승인 대기)**: `sql/members-insert-own-row.sql`
+
+### 결정 (사용자)
+
+- 모든 요금제 베타 테스트 → 유료화 (`lib/paid-launch.ts`)
+- 유틸리티바 표준 전 브랜드 (§1.9.2) · MADLeague rounded 금지 규칙 폐지
+- Planner's = 플래너'스 AI 주인공 · PAD 곁들임 · 기획자 과정 부수, 첫 화면 카피 확정
+- **가입하지 않은 소셜 계정은 로그인되지 않는다** — 동의 전엔 회원 아님, '가입하지 않기'면 계정 자동 삭제 (auth.users 삭제 예외 승인)
+- GA4 교차 도메인 = domain-registry 독립 도메인 전부 '포함'
+
+### 변경 내역 (주요 파일)
+
+- 인증: `lib/auth-context.tsx`(pendingSignup·completeSignup·cancelSignup·무작위 핸들·조회 실패 시 임시 사용자 금지) · `components/ConsentGate.tsx` · `app/api/auth/cancel-signup/route.ts` · `middleware.ts`(쿠키 옵션) · `lib/myverse/app-auth.ts` · `app/api/sso/{publish,exchange}` · `lib/sso*.ts`(t1_sso_done) · `components/BrandJoinGate.tsx` · `components/{AccountMenu,AccountControls,LoginModal,LoginRequired}.tsx` · `app/api/myverse/onboarding/route.ts`(requireMember) · `lib/api-access-policy.ts`(/api/members)
+- 공통: `components/UniverseUtilityBar.tsx` 전 브랜드 · `lib/paid-launch.ts` · `lib/image-rules.mjs`·`scripts/storage-image-shrink.mjs` · `public/robots.txt` · `lib/cross-site.ts` `crossSiteHrefStatic` · `components/board/{BoardList,BoardPage,PostDetail}.tsx` · `app/globals.css` `[data-program-light]`
+- Planner's 사이트: `app/(Planners)/planners/{page,about,ai,pad/[id],projects/*,certificate/*,planning}` · `features/planners/{home/HeroCarousel,home/AiAtWork,pad/Reviews,DownloadButton,PlannersFooter}` · `features/programs/{ApplyButton,InviteJoin,CertificateManager,ProgramConsent,RoundTeams,ProgramTheme}` · `lib/planners/reviews.ts`
+- Planner's 앱: `app/(Planners)/planners/app/{onboarding,settings/start,notifications,contacts}` · `app/(Planners)/planners/p/[token]/page.tsx`(신규) · `features/planners/app/{AiPaidOnlyNotice,BrainDump,DayCoach,WeeklyReview,AutoCarry,ConnectedAi,PlannersAppTopBar}` · `features/myverse/planner/{ai-actions,settings/SettingsExport,settings/SettingsAi,SearchView,CommandPalette,ProjectBreakdown,ProjectsView,ProjectDetailView,FocusModeOverlay,KeyboardShortcuts,MindmapEditor,ProjectRetroModal,TemplatesView,DailyView}` · `lib/myverse/ai-error.ts`(신규)
+
+---
+
 ## 2026-10-14 (세션 174) — Planner's 이전·몰 개편·플래너'스 AI 1~3단계·내 AI 연결(MCP)·QA
 
 ### 장소·운영

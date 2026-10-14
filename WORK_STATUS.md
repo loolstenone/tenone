@@ -1,6 +1,34 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-14 (세션 174 — Planner's 이전·몰 개편·플래너'스 AI 1~3단계·내 AI 연결·QA)
+> 마지막 업데이트: 2026-10-15 (세션 175 — 유틸리티바 표준·베타 유료화 스위치·Planner's AI 중심 개편·가입 동의 강화·Planner's 전면 QA)
+
+---
+
+## 세션 175 (2026-10-14 밤 ~ 10-15) — 유틸리티바 표준 · 베타 유료화 · Planner's AI 중심 개편 · 소셜 첫 로그인 = 가입 · Planner's 전면 QA
+
+> 워크트리 `261014-work-start-773f27` → master push (중간 사용자 "푸시" + 작업 종료 push).
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **유니버스 공통**: 유틸리티바 표준 전 브랜드 적용(§1.9.2, 피드형 Jakka·MoNTZ 포함) · **모든 요금제 베타** `lib/paid-launch.ts`(결제 API 402·베타 안내) · 이미지 크기 규칙(`lib/image-rules.mjs`, RooK 이미지 403MB → 18MB, 원본 백업 G드라이브) · Bytespider 차단 · GA4 교차 도메인 16개 · SSO 교환 무한 왕복(429) 차단 · 다른 브랜드 링크를 서버 렌더에서도 공식 주소로 · 게시판 도구 줄 모바일
+- **가입·로그인 (§1.2.0 개정)**: 소셜 첫 로그인 = 회원가입 — 동의 전엔 회원 정보 안 만들고 로그인으로 안 봄, '가입하지 않기' = 방금 생긴 계정 삭제(`/api/auth/cancel-signup`, 사용자 승인 예외) · 미들웨어 세션 쿠키 옵션 유실(경로마다 세션 갈림) · 이메일 폴백으로 남의 회원 행 묶이던 경로 3곳 차단(app-auth·온보딩 API·허브 등록) · 기본 핸들 무작위(이메일 앞부분 공개 방지) · 이메일 없는 카카오 가입 · 브랜드 동의 거절 후 재로그인 반복 · 모바일 로그아웃 후 계정 메뉴 남던 문제 · `/api/members` 직원 전용
+- **Planner's 사이트**: AI 중심 개편(주인공 플래너'스 AI · 곁들임 PAD · 부수 기획자 과정) · 첫 화면 히어로(사용자 확정 카피, 화면 크기 비례) · About '플래너를 다시 만들다' · 공개 화면 QA(과정 화면 밝은 테마·동의 고지 보이게·오류 처리·숨긴 후기 본인 표시·이름 정리 등)
+- **Planner's 앱 QA**: 가격·구매 링크 제거 · AI 402 무반응 해결(`lib/myverse/ai-error.ts`) · 공개 프로젝트 `/planners/p/[token]` · 공통 알림 벨 · 초집중 탭 제목 · 효과 없던 사용 수준·시간 기록 제거(온보딩 세 단계) · '/' 빠른 기록 · AI 응답 정리·사진 검사·마인드맵 · 처음 설정 문구(MyVerse 카피 제거)
+
+### 다음 첫 액션
+
+1. **승인 대기 DB 변경**: `sql/members-insert-own-row.sql` — members INSERT를 본인 행·직원만으로 (지금은 로그인만 하면 브라우저에서 임의 회원 행 생성 가능 → 가입 동의 우회·남의 이메일 선점). 사용자 승인 후 MCP `apply_migration`
+2. **사람 작업**: Kakao Developers 앱 정지(KOE130) 사유 확인·해제 · Turnstile Hostname `planners.ai.kr` · GA4 교차 도메인 저장 확인
+3. **결정 대기**: ① 카카오 정지 동안 로그인 창 카카오 버튼 숨길지 ② 공통 과정 화면 영문 라벨(MY TEAM·CERTIFICATE VERIFY, RooK·MADLeague 공유) Planner's만 한글화할지 ③ 상품명 '플래너'스 플래너 All in One' 정리 ④ 로그아웃 = 전 브랜드 동시 로그아웃 유지할지 ⑤ SSO 교환 로그인 CSRF 보완 설계
+4. **로그인 상태 실화면 QA** (사용자가 localhost:3000/planners 로그인 후): 처음 설정 세 단계 · 생각 쏟아내기·사진 읽기(베타 아님 → 안내 문구) · 마인드맵 · 공유 링크 `/planners/p/…` · 알림 벨
+5. 할 일 저장 경합: `/api/myverse/daily`가 '읽고 전체 저장'이라 두 화면 동시 편집 시 덮어씀 → 할 일 1개 추가 API(서버에서 합치기)
+6. 세션 174 이월 그대로 (Supabase OAuth Server·Google 리디렉션 URI·처리방침 10-21 시행 정리·유료 체계)
+
+### 주의
+
+- 파일 고치는 스크립트는 줄바꿈(CRLF/LF)을 섞지 않는다 — 섞이면 Turbopack이 CSS 뒷부분을 조용히 버림 (globals.css에서 발생)
+- 회원 정보(members)를 만드는 곳은 `lib/auth-context.tsx` createMemberRow(동의 후)·`lib/staff-lifecycle.ts`뿐 — API에서 직접 만들지 않는다
 
 ---
 
