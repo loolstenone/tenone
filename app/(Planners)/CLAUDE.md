@@ -79,8 +79,8 @@
 | 2 | 기획자 정체성 화면(첫 화면·소개 = 기획론) · 메뉴 `lib/brand-site-menus.ts` 개편 (소개·플래너·템플릿·AI 플래너·프로젝트·이야기, 인증서는 푸터 참여) | ✅ 2026-10-14 |
 | 3 | PAD 자료실: `planners_files` + 비공개 버킷 `planners-files` + 로그인 회원 5분 서명 URL(`/api/planners-library/[id]/download`) + 다운로드 수만 집계 · 인트라 `/intra/ums/planners/{planner,templates}`(올리기·공개·분류·삭제, API `/api/intra/planners/files`) · 이야기 = 통합 게시판 `ums_boards` stories | ✅ 2026-10-14 (170개 업로드, 공개 164·비공개 6) |
 | 4 | AI 플래너: 소개 `/planners/ai` · 앱 `/planners/app` — MyVerse에서 핵심 화면 32개 파일을 **실제로 옮김**(today·daily·weekly·monthly·yearly·projects·tasks·canvas·templates·schedule·ai-briefing·search·settings·onboarding·help·notifications·index·time·contacts + personal 정체성 화면) · 주소 문자열 210곳 `/myverse/app/{핵심}` → `/planners/app/{핵심}` · 옛 주소는 `next.config.ts` redirects · 레이아웃 = 로그인(LoginRequired) + 온보딩만, **구독 게이트·구매 링크 없음** · 온보딩은 정체성 단계에서 끝(MyVerse '첫 흔적' 단계 제외) · 설정 '백업 가져오기' 탭 제외 · 인증 공통 `lib/myverse/app-auth.ts` · `myverse_*` 테이블·`/api/myverse/*` 그대로 | ✅ 2026-10-14 (로그인 후 화면은 사용자 확인 필요) |
-| 5 | Badak 정리: 새 Badak 사이트에 바닥상회 없음 · badak.biz DNS 전환 때 `/PlannersPlanner`·`/Template`·`/shop_view?idx=…` → planners.ai.kr 308 | |
-| 6 | 출시: 처리방침(다운로드 기록·AI 플래너) · `docs/Data_Lifecycle.md` · `npm run site:check -- planners --live` | |
+| 5 | Badak 정리: 새 Badak 사이트에 바닥상회 없음 · badak.biz DNS 전환 때 `/PlannersPlanner`·`/Template`·`/shop_view?idx=…` → planners.ai.kr 308 | ⏸ 보류 (2026-10-14 사용자 결정 — badak.biz DNS 전환 때 다시, 옛 상품 번호는 `planners_files.legacy_badak_no`) |
+| 6 | 출시: 처리방침(다운로드 기록·AI 플래너) · `docs/Data_Lifecycle.md` · `npm run site:check -- planners --live` | ⏸ 보류 (2026-10-14 사용자 결정 — 공개 전 필수: 처리방침은 시행 7일 전 공지) |
 
 **결정 (사용자 2026-10-14)**: AI 플래너 = 핵심만 · 다운로드 = 로그인 회원만 · Tier 집중 · 연간 플래너는 2026년판부터(2021~2025 제외) · Play_ 서식 포함 · 아이디어 샤워 포함 · 스타트업 질문지 포함
 
