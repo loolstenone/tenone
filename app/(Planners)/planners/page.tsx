@@ -35,17 +35,57 @@ export default async function PlannersHome() {
     const t = { ...PROGRAM_THEMES.planners, accent: "#0F766E" };
     const [banners, showcases] = await Promise.all([listActiveBanners(), listActiveShowcases(files)]);
 
-    // 첫 장 = 플래너'스 AI · 그다음 = 인트라 › Planner's › 배너
+    // 첫 화면 슬라이드 (2026-10-14 사용자): 첫 장 = "우리는 모두 기획자다 / 자기 인생에서만큼은" → 플래너'스 AI 후킹 카피 4장 → 인트라 › Planner's › 배너
+    // 버튼은 전 장 같은 두 개 — 플래너'스 AI(강조) · 플래너'스 PAD (사용자 지정 전체 이름)
+    // 본문은 줄바꿈 없이 (모바일에서 한 단어만 떨어지는 문제)
+    const planners = files.filter((f) => f.category === "연간 플래너").sort((a, b) => b.sort_order - a.sort_order);
+    const padHero = planners.find((f) => f.legacy_badak_no === 182) ?? planners[0];
+    const buttons = {
+        primary: { label: "플래너'스 AI", href: "/planners/ai" },
+        secondary: { label: "플래너'스 PAD", href: "/planners/pad" },
+    };
     const slides: HeroSlide[] = [
         {
             key: "brand",
+            title: "우리는 모두 기획자다",
+            subtitle: "자기 인생에서만큼은",
+            body: "인공지능 시대, 더욱 기획자가 되어야 한다. AI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.",
+            imageUrl: padHero?.thumbnail_url ?? null,
+            imageHref: padHero ? padPath(padHero.id) : null,
+            ...buttons,
+            note: "종이? 패드? AI? 중요한 것은 기획하는 나",
+        },
+        {
+            key: "ai-dump",
+            title: "생각은 쏟아만 내세요",
+            subtitle: "정리는 플래너'스 AI가 합니다",
+            body: "머릿속을 떠오르는 대로 적으면 할 일과 일정으로 나눠 제안합니다. 확인한 것만 플래너에 들어갑니다.",
+            visual: <AiAtWork scene="dump" />,
+            ...buttons,
+        },
+        {
+            key: "ai-carry",
+            title: "밀린 일, 다시 쓰지 마세요",
+            subtitle: "못 끝낸 일은 빈 시간에 다시 놓아 둡니다",
+            body: "종이 플래너를 그만두게 되는 가장 큰 이유, 밀린 일 옮겨 적기. 플래너'스 AI는 일정 사이 빈 시간을 찾아 알아서 다시 배치합니다.",
+            visual: <AiAtWork scene="carry" />,
+            ...buttons,
+        },
+        {
+            key: "ai-handwriting",
+            title: "손으로 쓰고, 사진 한 장",
+            subtitle: "손글씨가 그대로 디지털 플래너가 됩니다",
+            body: "펜슬로 쓴 노트, 종이 플래너 페이지를 찍으면 글자로 옮기고 할 일 상태까지 알아봅니다.",
+            visual: <AiAtWork scene="handwriting" />,
+            ...buttons,
+        },
+        {
+            key: "ai-focus",
             title: "내 손으로, 내 뜻대로",
-            subtitle: "생각하고 기록하고 계획하고 꾸려 가는 사람의 인공지능 플래너",
-            body: "플래너'스 AI는 대신 정하지 않습니다.\n쏟아 낸 생각을 할 일로 나누고, 못 끝낸 일을 다시 놓아 주고,\n하루와 한 주를 곁에서 함께 돌아봅니다.",
-            visual: <AiAtWork />,
-            primary: { label: "AI 알아보기", href: "/planners/ai" },
-            secondary: { label: "PAD 받기", href: "/planners/pad" },
-            note: "펜으로 쓰는 쪽이 좋다면, 플래너'스 PAD",
+            subtitle: "정하는 것은 나, AI는 곁에서 돕습니다",
+            body: "아침엔 오늘 꼭 할 세 가지를, 저녁과 주말엔 하루와 한 주를 함께 돌아봅니다. 플래너'스 AI는 대신 살아 주지 않습니다.",
+            visual: <AiAtWork scene="focus" />,
+            ...buttons,
         },
         ...banners.map((b) => ({
             key: b.id,
