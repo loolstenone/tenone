@@ -8,6 +8,7 @@
 // Stripe SDK 미설치 — REST API 직접 호출.
 
 import { NextResponse } from "next/server";
+import { paymentClosed } from "@/lib/paid-launch";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
 
@@ -20,6 +21,8 @@ const PLAN_TO_ENV: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
+    const closed = paymentClosed(); // 베타 테스트 기간 — 결제 없음 (lib/paid-launch.ts)
+    if (closed) return closed;
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

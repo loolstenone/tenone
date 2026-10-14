@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
+import { BetaPricingNotice } from "@/components/BetaPricingNotice";
+import { PAID_LAUNCH } from "@/lib/paid-launch";
 
 declare global {
     interface Window {
@@ -117,6 +119,8 @@ export function PurchaseView() {
                         </div>
                     )}
 
+                    <BetaPricingNotice className="mb-6" />
+
                     {/* 가격 카드 */}
                     <div className="bg-white border-2 border-[var(--pp-accent)] rounded-2xl p-8 md:p-10">
                         <div className="flex items-center gap-2 mb-2">
@@ -146,7 +150,13 @@ export function PurchaseView() {
                             ))}
                         </ul>
 
-                        {!isMyverseSubscriberActive({ subscription_status: status?.subscription_status, subscription_expires_at: status?.expires ?? null }) && (
+                        {!PAID_LAUNCH && !isMyverseSubscriberActive({ subscription_status: status?.subscription_status, subscription_expires_at: status?.expires ?? null }) && (
+                            <a href="mailto:lools@tenone.biz?subject=베타 테스트 신청"
+                                className="w-full py-4 bg-[var(--pp-accent)] text-white rounded-xl font-semibold hover:bg-[var(--pp-accent-strong)] transition-colors flex items-center justify-center">
+                                베타 테스트 신청
+                            </a>
+                        )}
+                        {PAID_LAUNCH && !isMyverseSubscriberActive({ subscription_status: status?.subscription_status, subscription_expires_at: status?.expires ?? null }) && (
                             <button
                                 onClick={handlePay}
                                 disabled={loading}
@@ -156,10 +166,12 @@ export function PurchaseView() {
                             </button>
                         )}
 
-                        <p className="text-xs text-neutral-400 text-center mt-4 leading-relaxed">
-                            Toss Payments 보안 결제 · 7일 이내 환불 가능<br />
-                            정기결제 아님 (수동 갱신)
-                        </p>
+                        {PAID_LAUNCH && (
+                            <p className="text-xs text-neutral-400 text-center mt-4 leading-relaxed">
+                                Toss Payments 보안 결제 · 7일 이내 환불 가능<br />
+                                정기결제 아님 (수동 갱신)
+                            </p>
+                        )}
                     </div>
 
                     {/* PDF 구매자 안내 */}

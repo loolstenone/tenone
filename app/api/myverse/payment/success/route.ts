@@ -2,11 +2,14 @@
 // 브라우저가 successUrl로 리디렉트 → 이 핸들러가 Toss confirm API 호출 → 구독 활성화 → 앱으로 이동
 
 import { NextResponse } from "next/server";
+import { paymentClosed } from "@/lib/paid-launch";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const TOSS_API_BASE = "https://api.tosspayments.com/v1";
 
 export async function GET(req: Request) {
+    const closed = paymentClosed(); // 베타 테스트 기간 — 결제 없음 (lib/paid-launch.ts)
+    if (closed) return closed;
     const url = new URL(req.url);
     const paymentKey = url.searchParams.get("paymentKey");
     const orderId = url.searchParams.get("orderId");

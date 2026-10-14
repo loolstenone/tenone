@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { BetaPricingNotice } from '@/components/BetaPricingNotice';
 import { ArrowLeft, Check, ArrowRight, Sparkles, Building2, Zap, Crown, Settings, Gift, Server, Mail, HardDrive } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 import { WIOFooter } from '@/features/wio/WIOFooter';
@@ -127,6 +128,7 @@ export default function PricingPage() {
             <h1 className="text-3xl md:text-4xl font-bold mb-3">WIO System 가격</h1>
             <p className="text-lg text-slate-400">필요한 트랙만 선택. 성장하면 확장.</p>
           </div>
+          <BetaPricingNotice className="mb-8" />
 
           {/* Free Trial Banner */}
           <section className="mb-10">

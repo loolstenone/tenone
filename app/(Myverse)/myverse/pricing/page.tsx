@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { UC_PUBLIC } from "@/lib/uc-visibility";
 import Link from "next/link";
+import { BetaPricingNotice } from "@/components/BetaPricingNotice";
 import { Check, Sparkles, Bell } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -56,6 +57,7 @@ export default function PricingPage() {
                         지금은 Phase 1 — 채집·정리·기본 기능을 무료로 제공합니다.
                         Pro는 Phase 2(다음 단계) 출시 시 시작됩니다.
                     </p>
+                    <BetaPricingNotice className="mt-6 text-left" />
                 </div>
 
                 {/* 두 플랜 */}

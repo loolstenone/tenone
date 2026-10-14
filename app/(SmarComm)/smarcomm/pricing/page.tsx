@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { BetaPricingNotice } from '@/components/BetaPricingNotice';
+import { PAID_LAUNCH } from '@/lib/paid-launch';
 import { Check } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
@@ -33,7 +35,7 @@ function formatPrice(price: number) {
 function getCTA(plan: Plan): { label: string; href: string } {
   if (plan.plan_key === 'business') return { label: '문의하기', href: '/meeting' };
   if (plan.plan_key === 'free') return { label: '무료 시작', href: '/signup' };
-  return { label: '시작하기', href: '/signup' };
+  return PAID_LAUNCH ? { label: '시작하기', href: '/signup' } : { label: '베타로 시작', href: '/signup' };
 }
 
 export default async function PricingPage() {
@@ -48,6 +50,7 @@ export default async function PricingPage() {
             <h1 className="mb-3 text-3xl font-extrabold text-text">요금제</h1>
             <p className="text-base text-text-sub">무료로 시작하고, 성장에 맞춰 업그레이드하세요</p>
           </div>
+          <BetaPricingNotice className="mb-8" />
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => {
