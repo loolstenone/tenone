@@ -58,7 +58,7 @@
 - `app/(Planners)/planners/projects/**` — 회차 목록·방·팀·초대 (코어 프로그램 컴포넌트 얇은 래퍼)
 - `app/(Planners)/planners/certificate/**` — 참여 확인서 발급·인쇄·진위 확인
 - `app/(Planners)/planners/my/page.tsx` — 마이페이지
-- `features/planners/PlannersHeader.tsx`, `PlannersFooter.tsx`
+- `features/planners/PlannersHeader.tsx`, `PlannersFooter.tsx` · 로고·파비콘 `public/brands/planners/` (favicon 64 · apple-touch-icon 180 · icon-512 · logo-white/black — 2026-10-14 사용자 제공 원본, 어두운 헤더·앱 상단은 logo-white) · DB `ums_sites.favicon_url`·`logo_url`도 같은 경로
 - `lib/brand-site-menus.ts` (siteId planners) · `features/programs/ProgramTheme.ts` · `lib/programs/paths.ts`
 - 인트라: `app/intra/ums/planners/programs/**`
 

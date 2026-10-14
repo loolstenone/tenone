@@ -33,8 +33,10 @@ export function PlannersHeader() {
         <>
         <header className="sticky top-0 z-50">
             <nav className="relative flex h-[64px] md:h-[84px] items-center justify-between bg-[#134E4A] px-6 md:px-16">
-                <Link href="/planners" className="shrink-0 text-xl md:text-2xl font-black tracking-tight text-white" aria-label="Planner's 홈">
-                    Planner&apos;s
+                <Link href="/planners" className="shrink-0" aria-label="Planner's 홈">
+                    {/* 공식 로고 (흰색) — 원본 public/brands/planners/logo-{white,black}.png */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brands/planners/logo-white.png" alt="Planner's" width={1074} height={258} className="h-6 w-auto md:h-8" />
                 </Link>
 
                 <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-[30px]">

@@ -20,7 +20,10 @@ export function PlannersAppTopBar() {
                 <button onClick={() => setOpen(true)} className="flex h-8 w-8 items-center justify-center md:hidden" aria-label="메뉴">
                     <Menu className="h-5 w-5" />
                 </button>
-                <Link href="/planners" className="text-base font-black tracking-tight">Planner&apos;s</Link>
+                <Link href="/planners" aria-label="Planner's 홈">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brands/planners/logo-white.png" alt="Planner's" width={1074} height={258} className="h-5 w-auto" />
+                </Link>
                 <Link href={`${APP_BASE}/daily`} className="text-sm text-teal-200 hover:text-white">플래너'스 AI</Link>
                 <div className="ml-auto flex items-center gap-1">
                     <Link href={`${APP_BASE}/search`} className={iconCls(`${APP_BASE}/search`)} title="검색" aria-label="검색"><Search className="h-4 w-4" /></Link>
