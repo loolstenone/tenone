@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
 import { listPlannersFiles, PAD_CATEGORIES, PAD_CATEGORY_DESC, sortFiles, type PadSort } from "@/lib/planners/library";
 import { reviewCountsByFile } from "@/lib/planners/reviews";
+import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/features/planners/PageHero";
 
 // 플래너스 PAD — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
 export const metadata: Metadata = {
@@ -38,18 +39,14 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
 
     return (
         <>
-            <section className="border-b border-neutral-200 bg-neutral-50">
-                <div className="mx-auto max-w-[1200px] px-4 py-10 md:px-6 md:py-14">
-                    <p className="text-sm font-bold text-[#0F766E]">플래너스 PAD</p>
-                    <h1 className="mt-2 text-3xl font-black md:text-4xl">손으로 쓰는 기획자의 플래너</h1>
-                    <p className="mt-3 max-w-2xl break-keep text-neutral-600">
-                        아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다.
-                    </p>
-                </div>
-            </section>
+            <PlannersPageHero
+                eyebrow="플래너스 PAD"
+                title="손으로 쓰는 기획자의 플래너"
+                description={<>아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다.</>}
+            />
 
             <div className="sticky top-[60px] z-30 border-b border-neutral-200 bg-white/95 backdrop-blur md:top-[72px]">
-                <nav className="mx-auto flex max-w-[1200px] gap-1 overflow-x-auto px-4 md:px-6" aria-label="분류">
+                <nav className={`${PLANNERS_CONTAINER} flex gap-1 overflow-x-auto`} aria-label="분류">
                     <Tab href={href({ c: null })} active={!category} label="전체" count={all.length} />
                     {PAD_CATEGORIES.filter((cat) => counts.get(cat)).map((cat) => (
                         <Tab key={cat} href={href({ c: cat })} active={category === cat} label={cat} count={counts.get(cat) ?? 0} />
@@ -57,7 +54,7 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
                 </nav>
             </div>
 
-            <section className="mx-auto max-w-[1200px] px-4 py-8 md:px-6 md:py-10">
+            <section className={PLANNERS_SECTION}>
                 <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
                     <div>
                         <h2 className="text-xl font-bold">{category ?? "전체"} <span className="text-base font-normal text-neutral-400">{files.length}</span></h2>

@@ -8,7 +8,7 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { AccountAvatar } from "@/components/AccountControls";
 import { APP_BASE, PLANNERS_APP_NAV, isAppNavActive } from "@/features/planners/app/nav";
 
-// AI 플래너 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
+// 플래너스 AI 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
 export function PlannersAppTopBar() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);

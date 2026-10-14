@@ -1,4 +1,4 @@
-// Planner's AI 플래너 앱 쉘 — MyVerse(동결)에서 옮겨 온 핵심 화면 (2026-10-14, app/(Planners)/CLAUDE.md '이전 계획' 4단계)
+// Planner's 플래너스 AI 앱 쉘 — MyVerse(동결)에서 옮겨 온 핵심 화면 (2026-10-14, app/(Planners)/CLAUDE.md '이전 계획' 4단계)
 //
 // - 로그인 안 됨 → 현재 페이지 위 LoginModal (§1.2.1 원칙 A) · 온보딩 안 함 → /planners/app/onboarding
 // - ❌ 구독 게이트·구매 링크 없음 (통신판매업 신고 전) — MyVerse 쉘과 다른 점
@@ -43,10 +43,10 @@ export default async function PlannersAppLayout({ children }: { children: React.
         // 앱 화면은 사이트 헤더가 없으므로 돌아갈 길을 함께 둔다
         return (
             <div className="min-h-screen bg-white">
-                <LoginRequired accentColor="#0F766E" message="AI 플래너는 로그인한 뒤 쓸 수 있습니다." />
+                <LoginRequired accentColor="#0F766E" message="플래너스 AI는 로그인한 뒤 쓸 수 있습니다." />
                 <p className="-mt-16 flex justify-center gap-4 text-sm text-neutral-500">
                     <Link href="/planners" className="hover:text-[#0F766E] hover:underline">Planner&apos;s 홈</Link>
-                    <Link href="/planners/ai" className="hover:text-[#0F766E] hover:underline">AI 플래너 소개</Link>
+                    <Link href="/planners/ai" className="hover:text-[#0F766E] hover:underline">플래너스 AI 소개</Link>
                 </p>
             </div>
         );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/features/planners/PageHero";
 
 // 원문: 구글 사이트 sites.google.com/tenone.biz/planners/planning (Planner's 기획론, 2020~) — 2026-10-14 이전하며 문장만 다듬음
 export const metadata: Metadata = {
@@ -16,21 +17,13 @@ const FORMULAS = [
 export default function PlannersAboutPage() {
     return (
         <>
-            <section className="bg-[#134E4A] text-white">
-                <div className="mx-auto max-w-[980px] px-4 py-20 md:px-[15px] md:py-24">
-                    <p className="text-sm font-bold tracking-widest text-teal-300">기획이란</p>
-                    <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
-                        우리는 모두 기획자다
-                    </h1>
-                    <p className="mt-3 text-xl text-teal-100 md:text-2xl">적어도 자기 인생에서만큼은</p>
-                    <p className="mt-8 max-w-2xl break-keep text-lg leading-relaxed text-teal-50">
-                        정부나 기업에서 하는 일만 기획이 아닙니다. 사람들은 크든 작든, 완벽하든 엉성하든
-                        일을 시작하기 전에 저마다의 계획을 세웁니다. 하고 싶은 것, 또는 해결해야 하는 무언가를 이루기 위해서입니다.
-                    </p>
-                </div>
-            </section>
+            <PlannersPageHero
+                eyebrow="기획이란"
+                title={<>우리는 모두 기획자다<span className="mt-2 block text-xl font-bold text-neutral-500 md:text-2xl">적어도 자기 인생에서만큼은</span></>}
+                description={<>정부나 기업에서 하는 일만 기획이 아닙니다. 사람들은 크든 작든, 완벽하든 엉성하든 일을 시작하기 전에 저마다의 계획을 세웁니다. 하고 싶은 것, 또는 해결해야 하는 무언가를 이루기 위해서입니다.</>}
+            />
 
-            <section className="mx-auto max-w-[980px] px-4 py-16 md:px-[15px] md:py-20">
+            <section className={PLANNERS_SECTION}>
                 <div className="grid gap-px border border-neutral-200 bg-neutral-200 md:grid-cols-3">
                     {FORMULAS.map((f) => (
                         <div key={f.label} className="bg-white p-6">
@@ -41,7 +34,8 @@ export default function PlannersAboutPage() {
                 </div>
             </section>
 
-            <article className="mx-auto max-w-[760px] px-4 pb-20 md:px-[15px]">
+            <article className={`${PLANNERS_CONTAINER} pb-20`}>
+                <div className="max-w-[760px]">
                 <Chapter title="기획이라는 말">
                     <p>
                         기획자는 유독 우리나라에서 많이 쓰는 말입니다. 해외에도 상품 기획·제품 기획(PM)처럼 매니저라는 직함으로
@@ -105,6 +99,7 @@ export default function PlannersAboutPage() {
                         <NextLink href="/planners/pad" title="플래너스 PAD" desc="굿노트 등에서 손으로 쓰는 플래너와 서식" />
                         <NextLink href="/planners/projects" title="프로젝트" desc="팀을 꾸려 실제 과제를 기획" />
                     </div>
+                </div>
                 </div>
             </article>
         </>

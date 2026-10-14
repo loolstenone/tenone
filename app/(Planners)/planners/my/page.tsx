@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
+import { PLANNERS_CONTAINER } from "@/features/planners/PageHero";
 
 const ACCENT = "#0F766E";
 
@@ -15,8 +16,8 @@ export default function PlannersMyPage() {
     if (!isAuthenticated) return <div className="min-h-screen bg-white"><LoginRequired accentColor={ACCENT} /></div>;
 
     return (
-        <div className="min-h-screen px-6 pb-20 pt-12 bg-white text-neutral-900">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-white text-neutral-900">
+            <div className={`${PLANNERS_CONTAINER} pb-20 pt-10 md:pt-14`}>
                 <MyProfileCard accentColor={ACCENT} siteBadge="Planner" />
                 {user?.id && <CapabilitySection memberId={user.id} brandId="planners" accentColor={ACCENT} className="mb-6" />}
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">

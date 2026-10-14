@@ -25,6 +25,10 @@ interface BoardPageProps {
     showStats?: boolean;
     /** 상세 하단 좋아요·북마크 버튼 */
     showReactions?: boolean;
+    /** 바깥 폭·여백 (사이트 공통 틀에 맞출 때) — 기본 max-w-7xl mx-auto px-6 */
+    containerClassName?: string;
+    /** 제목·설명을 페이지가 직접 그릴 때 (목록 위 제목 줄 생략, 글쓰기 버튼만) */
+    hideTitle?: boolean;
 }
 
 type Mode = "list" | "detail" | "write" | "edit";
@@ -48,6 +52,8 @@ function BoardPageInner({
     layout = 'default',
     showStats = true,
     showReactions = true,
+    containerClassName = "max-w-7xl mx-auto px-6",
+    hideTitle = false,
 }: BoardPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -193,7 +199,7 @@ function BoardPageInner({
     // 글쓰기 모드
     if (mode === "write") {
         return (
-            <div className="max-w-7xl mx-auto px-6">
+            <div className={containerClassName}>
                 <PostEditor
                     config={defaultConfig}
                     onSubmit={handleCreate}
@@ -207,7 +213,7 @@ function BoardPageInner({
     // 수정 모드
     if (mode === "edit" && selectedPost) {
         return (
-            <div className="max-w-7xl mx-auto px-6">
+            <div className={containerClassName}>
                 <PostEditor
                     config={defaultConfig}
                     post={selectedPost}
@@ -221,7 +227,7 @@ function BoardPageInner({
     // 상세 보기
     if (mode === "detail" && selectedPost) {
         return (
-            <div className="max-w-7xl mx-auto px-6">
+            <div className={containerClassName}>
                 {loading ? (
                     <div className="flex justify-center py-20">
                         <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
@@ -245,12 +251,14 @@ function BoardPageInner({
 
     // 목록 보기
     return (
-        <div className="max-w-7xl mx-auto px-6">
-            <div className="border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between">
+        <div className={containerClassName}>
+            <div className={hideTitle ? "mb-4 flex justify-end empty:hidden" : "border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between"}>
+                {!hideTitle && (
                 <div>
                     <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
                     {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
                 </div>
+                )}
                 {showWriteButton && canWrite && (
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                         <button

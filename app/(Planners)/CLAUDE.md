@@ -45,8 +45,12 @@
 - `app/(Planners)/planners/pad/page.tsx` — 플래너스 PAD 몰 (분류 탭 `?c=` · 정렬 `?sort=popular|new|name` · 썸네일 그리드) · `pad/[id]/page.tsx` — 상품 상세 (갤러리·파일 정보·받기·상세 이미지·같은 분류) · 옛 `/planners/planner`·`/planners/templates`는 308
 - `lib/planners/library.ts`(서버 조회 `listPlannersFiles`·`getPlannersFile`) · `library-shared.ts`(분류 `PAD_CATEGORIES`·설명·배지 NEW/BEST·정렬) · `features/planners/pad/{ProductCard,Gallery}.tsx` · `features/planners/DownloadButton.tsx`
 - 상품 사진·상세 이미지·설명 = `planners_files.images`·`detail_images`·`description` (`scripts/planners-files-media.mjs` + `scripts/data/planners-badak-mall-media.json`) — 사진 366장은 공개 버킷 `planners-media/badak/`로 옮김 (2026-10-14 사용자 승인, 18MB) · 아임웹 주소 0건 — badak.biz가 닫혀도 그대로 나온다
+- **사이트 공통 틀 `features/planners/PageHero.tsx`** (2026-10-14 사용자 지적 "레이아웃 일관성·공간이 좁다") — 모든 하위 페이지 = `PlannersPageHero`(회색 띠 · 작은 표지 · 큰 제목 · 설명 · 버튼) + 폭 `PLANNERS_CONTAINER`(1200px, px-4 md:px-6) · 본문 `PLANNERS_SECTION`. ❌ 페이지마다 980px·max-w-5xl·검은 배경 등 따로 정하기 · 게시판은 `BoardPage containerClassName="" hideTitle` · 참여 확인서는 `CertificateManager light`
+- **첫 화면 관리** (아임웹 키비주얼·기획전 자리): 배너 `planners_banners` · 진열대 `planners_showcases` (`sql/planners-home-2026-10.sql`, 공개 기간·공개 여부로 자동 노출) · 인트라 `/intra/ums/planners/{banners,showcases}` · API `/api/intra/planners/home?type=` · 조회 `lib/planners/home.ts` · 첫 슬라이드는 고정 문구, 배너는 그 뒤에
+- **새 후기 알림**: 회원 새 후기 → `notify(brandManagerIds("planners"))` (고친 후기는 알리지 않음)
+- **바닥상회 '플래너'스 플래너 사용자' 게시판 운영사 글 8건 → 이야기 '공지'** (2026-10-14, `scripts/planners-notices-import.mjs` + `scripts/data/planners-badak-notices.json`, 멱등 키 `extra_fields.legacy_badak_idx`) · 사진 19장 `planners-media/badak/notices/` · 옛 상품 링크는 같은 시리즈 2026년판으로 · 회원 댓글 6건(2023·2024 출시 글)은 옮기지 않음 (§0.1)
 - ❌ 첫 화면·PAD를 긴 글 위주(블로그형)로 되돌리지 않는다 — 사용자 지적 "너무 블로그 같다" (2026-10-14). 상품 사진·진열대 중심
-- `app/(Planners)/planners/ai/page.tsx` — AI 플래너 소개 · `app/(Planners)/planners/stories/**` — 이야기 게시판
+- `app/(Planners)/planners/ai/page.tsx` — 플래너스 AI 소개 · `app/(Planners)/planners/stories/**` — 이야기 게시판
 - `app/(Planners)/planners/app/**` — AI 플래너 앱 (layout = 로그인·온보딩 게이트 + `features/planners/app/{PlannersAppTopBar,PlannersAppSideNav}.tsx`, 메뉴 SSOT `features/planners/app/nav.ts`) · 화면 본체는 `features/myverse/planner/*` 공용 · 사이트 헤더·푸터는 앱 경로에서 숨김(`isPlannersAppPath`)
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유
 - `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로

@@ -25,7 +25,7 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
     { brandId: "jakka",        label: "Jakka",                path: "/jakka/my",        description: "창작자 마켓" },
     { brandId: "domo",         label: "Domo",                 path: "/domo/my",         description: "도시 모임" },
     { brandId: "townity",      label: "Townity",              path: "/townity/my",      description: "동네 커뮤니티" },
-    { brandId: "planners",     label: "Planner's AI 플래너", path: "/planners/app",    description: "기획자의 AI 플래너" },
+    { brandId: "planners",     label: "플래너스 AI",          path: "/planners/app",    description: "Planner's 인공지능 플래너" },
     { brandId: "rook",         label: "RooK",                 path: "/rook/my",         description: "독서 모임" },
     { brandId: "changeup",     label: "ChangeUp",             path: "/changeup/my",     description: "변화 코칭" },
     { brandId: "naturebox",    label: "NatureBox",            path: "/naturebox/my",    description: "자연 박스" },

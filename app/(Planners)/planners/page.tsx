@@ -6,6 +6,8 @@ import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
 import { listPlannersFiles, PAD_CATEGORIES, padPath, sortFiles } from "@/lib/planners/library";
 import { reviewCountsByFile } from "@/lib/planners/reviews";
+import { listActiveBanners, listActiveShowcases } from "@/lib/planners/home";
+import { HeroCarousel, type HeroSlide } from "@/features/planners/home/HeroCarousel";
 
 // 첫 화면 = 몰 (2026-10-14 개편 — "블로그 같다" → 바닥상회 몰 수준). 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은"은 사용자 확정
 export const metadata: Metadata = {
@@ -23,35 +25,33 @@ export default async function PlannersHome() {
     const popular = sortFiles(files.filter((f) => f.kind === "template"), "popular").slice(0, 8);
     const tiles = PAD_CATEGORIES.map((c) => ({ c, list: files.filter((f) => f.category === c) })).filter((t) => t.list.length > 0);
     const t = { ...PROGRAM_THEMES.planners, accent: "#0F766E" };
+    const [banners, showcases] = await Promise.all([listActiveBanners(), listActiveShowcases(files)]);
+
+    // 첫 장 = 확정 문구(바꾸지 않음) · 그다음 = 인트라 › Planner's › 배너
+    const slides: HeroSlide[] = [
+        {
+            key: "brand",
+            title: "우리는 모두 기획자다",
+            subtitle: "자기 인생에서만큼은",
+            body: "인공지능 시대, 더욱 기획자가 되어야 한다. AI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.",
+            imageUrl: hero?.thumbnail_url ?? null,
+            imageHref: hero ? padPath(hero.id) : null,
+            primary: { label: "플래너스 PAD", href: "/planners/pad" },
+            secondary: { label: "플래너스 AI", href: "/planners/ai" },
+        },
+        ...banners.map((b) => ({
+            key: b.id,
+            title: b.title,
+            body: b.subtitle,
+            imageUrl: b.image_url,
+            imageHref: b.link_url,
+            primary: b.link_url ? { label: b.button_label || "자세히 보기", href: b.link_url } : null,
+        })),
+    ];
 
     return (
         <>
-            {/* 배너 */}
-            <section className="bg-[#134E4A] text-white">
-                <div className="mx-auto grid max-w-[1200px] items-center gap-8 px-4 py-12 md:grid-cols-2 md:px-6 md:py-16">
-                    <div>
-                        <h1 className="text-4xl font-black leading-tight md:text-5xl">우리는 모두 기획자다</h1>
-                        <p className="mt-2 text-xl font-bold text-teal-200 md:text-2xl">자기 인생에서만큼은</p>
-                        <p className="mt-6 max-w-md break-keep leading-relaxed text-teal-50">
-                            인공지능 시대, 더욱 기획자가 되어야 한다. AI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.
-                        </p>
-                        <div className="mt-8 flex flex-wrap gap-3">
-                            <Link href="/planners/pad" className="inline-flex items-center gap-2 bg-[#14B8A6] px-6 py-3 font-bold text-[#042F2E] hover:bg-teal-300">
-                                플래너스 PAD 받기 <ArrowRight className="h-4 w-4" />
-                            </Link>
-                            <Link href="/planners/ai" className="inline-flex items-center gap-2 border border-white/30 px-6 py-3 font-bold hover:bg-white/10">
-                                플래너스 AI
-                            </Link>
-                        </div>
-                    </div>
-                    {hero?.thumbnail_url && (
-                        <Link href={padPath(hero.id)} className="block">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={hero.thumbnail_url} alt={hero.title} className="w-full bg-white/5 object-contain" />
-                        </Link>
-                    )}
-                </div>
-            </section>
+            <HeroCarousel slides={slides} />
 
             {/* 두 제품 */}
             <section className="mx-auto grid max-w-[1200px] gap-4 px-4 py-10 md:grid-cols-2 md:px-6">
@@ -59,12 +59,12 @@ export default async function PlannersHome() {
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">플래너스 AI</p>
                         <h2 className="mt-1 text-2xl font-bold">인공지능 플래너</h2>
-                        <p className="mt-2 break-keep text-neutral-600">PAD 플래너와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
+                        <p className="mt-2 break-keep text-neutral-600">플래너스 PAD와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
                     </div>
                     <ul className="mt-6 grid grid-cols-2 gap-2 text-sm text-neutral-700">
                         {AI_FEATURES.map((f) => <li key={f} className="bg-neutral-50 px-3 py-2">{f}</li>)}
                     </ul>
-                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">AI 플래너 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
                 <Link href="/planners/pad" className="group flex flex-col justify-between border border-neutral-200 p-6 transition-colors hover:border-[#0F766E] md:p-8">
                     <div>
@@ -82,12 +82,12 @@ export default async function PlannersHome() {
                 </Link>
             </section>
 
-            {/* 2026 플래너 */}
-            {planners.length > 0 && (
-                <Shelf title="2026 플래너'스 플래너" href={`/planners/pad?c=${encodeURIComponent("연간 플래너")}`}>
-                    <ProductGrid reviewCounts={reviewCounts} files={planners} priorityCount={4} />
+            {/* 진열대 — 인트라 › Planner's › 진열대 (아임웹 쇼핑 기획전 자리) */}
+            {showcases.map((sc, k) => (
+                <Shelf key={sc.id} title={sc.title} description={sc.description} href="/planners/pad">
+                    <ProductGrid reviewCounts={reviewCounts} files={sc.files} priorityCount={k === 0 ? 4 : 0} />
                 </Shelf>
-            )}
+            ))}
 
             {/* 분류 */}
             <section className="bg-neutral-50">
@@ -137,11 +137,14 @@ export default async function PlannersHome() {
     );
 }
 
-function Shelf({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
+function Shelf({ title, description, href, children }: { title: string; description?: string | null; href: string; children: React.ReactNode }) {
     return (
         <section className="mx-auto max-w-[1200px] px-4 py-10 md:px-6">
             <div className="mb-6 flex items-end justify-between">
-                <h2 className="text-xl font-bold">{title}</h2>
+                <div>
+                    <h2 className="text-xl font-bold">{title}</h2>
+                    {description && <p className="mt-1 break-keep text-sm text-neutral-500">{description}</p>}
+                </div>
                 <Link href={href} className="text-sm text-neutral-500 hover:text-neutral-900">전체 보기 →</Link>
             </div>
             {children}

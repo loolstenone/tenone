@@ -20,7 +20,7 @@ export function PlannersHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { isAuthenticated } = useAuth();
 
-    // AI 플래너 앱(/planners/app)은 자체 상단 바를 쓴다
+    // 플래너스 AI 앱(/planners/app)은 자체 상단 바를 쓴다
     if (isPlannersAppPath(pathname)) return null;
 
     // planners.tenone.biz는 prefix 없이 접속 → /projects 와 /planners/projects 모두 활성 처리
