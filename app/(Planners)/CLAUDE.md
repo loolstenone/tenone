@@ -57,6 +57,12 @@
 - **앱 화면 틀 통일 (2026-10-14 "레이아웃이 왔다갔다")**: 모든 화면 `max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12` · 화면별 강제 글꼴(Inter) 제거 · 일간/주간/월간/연간 전환 버튼 줄도 같은 폭 · **강조색 = CSS 변수 `--pp-accent`** (공용 화면 `features/myverse/planner·app` 900여 곳 `[#6366F1]`→`[var(--pp-accent)]`, 기본 MyVerse 인디고, Planner's 앱 레이아웃이 `:root`에서 틸로 — 모달까지) · 남은 하드코딩 색(`#6366F1` 문자열 ~70·indigo-*)은 이월
 - **MyVerse로 새는 길 차단**: `/` 단축키 → 오늘 작성창 · 정체성 '이력서' 탭 숨김 · 일정 뒤로 가기(흔적) 제거 · 설정 › 기술의 스마트폰 하단 메뉴 제거 · **시간 기록 메뉴 제거**(MyVerse 9 도메인 개인 기록 — `/planners/app/time` → 오늘)
 - **인공지능 기능 = 유료 회원 전용 (2026-10-14 사용자 결정)** — SSOT `lib/myverse/ai-access.ts` `requireAiAccess`(유료 구독 활성·직원·서버 내부 호출만, 그 외 402 `ai_paid_only`) · AI를 부르는 `/api/myverse/*` 18개 라우트 전부 적용(그전엔 2개만 확인 → 로그인 회원 누구나 크레딧 소모 가능했음) · 사용 기록 `myverse_ai_usage(kind)` → 충전 시점 판단 · 화면 안내 `features/planners/app/AiPaidOnlyNotice.tsx`(402를 앱 쉘에서 한 번 안내, 가격·결제 링크 없음) · 유료 회원 = `myverse_users.subscription_status='active'`+만료일, 결제 시작 전엔 직원 수동 활성화(인트라 PP AI 관리)만. Anthropic 크레딧은 운영사가 필요할 때 충전. ⚠️ 2026-10-14 로컬 `ANTHROPIC_API_KEY` = invalid x-api-key → 새 키 필요
+- **플래너'스 AI 비전 (2026-10-14 사용자)**: "기록은 아날로그처럼 자유롭게, 관리는 비서처럼 똑똑하게, 회고는 코치처럼 따뜻하게" — 아날로그 사용자의 이탈 원인(밀린 일 다시 쓰기·과거 검색 한계·알림 부재) 해소
+  - **1단계 ✅** ① 생각 쏟아내기 `features/planners/app/BrainDump.tsx` + `/api/myverse/ai/parse-input`(register_items 한 번에 배열, 확인 후 등록, 공용 등록기 `features/myverse/planner/ai-actions.ts`) ② 못 끝낸 일 자동 재배치 `AutoCarry.tsx`(하루 한 번, 14일, `/api/myverse/daily/carry-over` schedule — 일정 피해 빈 시간 09~21시, AI 아님·무료) ③ 아침 Top 3·저녁 회고 `DayCoach.tsx` + `/api/myverse/daily/focus` (`myverse_daily.focus`·`reflection`, 만든 결과 재사용)
+  - **2단계 ✅** ① 목표 자동 분해 `features/myverse/planner/ProjectBreakdown.tsx` + `/api/myverse/projects/[id]/breakdown`(시간 추정·평일 날짜 제안·마감 초과 경고, task `estimate_min`) ② 주간 회고 `features/planners/app/WeeklyReview.tsx` + `/api/myverse/weekly-review`(숫자 무료·한 주 읽기 유료, `myverse_weekly_reports` sources.kind=planner_review) ③ 일상어로 찾기 `/api/myverse/smart-search` + SearchView 'AI로 찾기'(임베딩 없이 질문→기간+낱말→후보→AI 선택)
+  - **3단계 (다음)**: 손글씨 PAD 사진 → 디지털(OCR, 원본 사진은 변환 후 삭제 기본) · 펜슬 불렛 기호 → 데이터
+  - 이월: 반복 일정을 빈 시간 계산에 반영 · 일상어 찾기의 관련 기록 묶음 보강 · 사진 OCR 전 처리방침(국외 이전·민감정보)
+  - 🐛 수정: AI 일정 저장 필드 `entry_date`→`start_date` (예전부터 AI 일정이 저장되지 않았음)
 - ❌ AI 라우트를 새로 만들 때 `requireAiAccess` 없이 두기 · 라우트마다 무료 한도 예외 만들기
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유
 - `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로
