@@ -101,7 +101,8 @@ Phase 3: 수익화 + B2B            [3~4주]
   1. 누구나 트렌드 피드 열람 가능 (회원가입 불필요)
   2. 뉴스레터 구독 → 이메일 입력만 (저진입)
   3. PRO 구독 → 회원가입 + Toss 결제 (Phase 3)
-- **멤버 권한**: member, subscriber (PRO), analyst (편집팀), admin
+- **멤버 권한**: member, subscriber (PRO) — 회원 활동 역할은 `member_capability_roles` (community · subscription)
+- **서비스 입구 없음 (2026-10-14 판단)**: Mindle은 사이트에서 읽는 콘텐츠 미디어 — 로그인 후 쓰는 별도 앱 화면이 없다. 구독 설정·저장한 트렌드 등 개인 기능은 마이페이지(`/mindle/my`). PRO 전용 대화형 검색처럼 독립 화면이 생기면 그때 유틸리티바 `serviceEntry` 추가 (§1.9.2)
 
 ### 가격 정책 (Phase 3 적용 예정)
 
@@ -125,9 +126,9 @@ Phase 3: 수익화 + B2B            [3~4주]
 
 ## 4. 권한 체계
 
-- **role 종류**: member · subscriber · analyst · admin
-- **context**: `brand:mindle`
-- **인트라 관리 권한**: `/intra/marketing/mindle/*`
+- **admin 정의 (2026-10-14)**: Mindle에 '사이트 관리자'는 없다. 운영(편집·검수·수집·회원·CS)은 **직원 일 = 인트라** — 권한은 `member_roles(role='mindle', context='brand')` 또는 직원(§1.6). 편집팀(analyst)도 같은 인트라 권한. 사이트 안 관리 화면(구 `/mindle/admin`, 이메일 하드코딩 판정)은 삭제
+- **회원 역할**: member · subscriber(PRO) — `member_capability_roles`
+- **인트라 관리 경로**: `/intra/ums/mindle/*` + Whole See(`/intra/intel/wholesee/*`)
 - **capability**: `community`(전 브랜드 기본) · `subscription`(Phase 3 추가)
 
 ---
@@ -159,7 +160,6 @@ Phase 3: 수익화 + B2B            [3~4주]
 | [mindle/newsletter/page.tsx](mindle/newsletter/page.tsx) | 구독 + 지난 호 | ✅ subscribers DB |
 | [mindle/about/page.tsx](mindle/about/page.tsx) | 소개 | 정직성 점검 필요 |
 | [mindle/my/page.tsx](mindle/my/page.tsx) | 마이페이지 (MyProfileCard) | 표준 패턴 |
-| [mindle/admin/page.tsx](mindle/admin/page.tsx) | 관리 | (Intra 통합 검토) |
 
 ### 컴포넌트
 
@@ -230,7 +230,7 @@ Phase 3: 수익화 + B2B            [3~4주]
 | 경로 | 역할 | 상태 |
 |---|---|---|
 | `/intra/marketing/mindle/*` | Mindle 운영 통합 | (Phase 2 신설 예정) |
-| `/mindle/admin` | 임시 관리 | 현재 mindle/admin/page.tsx |
+| ~~`/mindle/admin`~~ | 삭제 (2026-10-14) | 운영 화면 = 인트라 UMS › Mindle + Whole See (크롤링·파이프라인·기회) |
 
 ---
 

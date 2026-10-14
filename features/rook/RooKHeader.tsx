@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 import { ROOK_ASSETS } from "@/features/rook/RooKUI";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
 
@@ -19,7 +17,6 @@ const navItems = siteHeaderNav("rook");
 export function RooKHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         // rook.co.kr·rook.tenone.biz는 prefix 없이 접속 → /works 와 /rook/works 모두 활성 처리
@@ -61,8 +58,9 @@ export function RooKHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto text-white">{/* 검정 헤더 — 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
+                <div className="flex items-center ml-auto text-white">{/* 검정 헤더 — 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
                     <UniverseUtilityBar
+                        breakpoint="lg"
                         hideAbout // 메뉴에 About이 이미 있음 (원본과 동일)
                         aboutPath="/rook/about"
                         profilePath="/rook/my"
@@ -76,7 +74,7 @@ export function RooKHeader() {
                 {/* Mobile menu button */}
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="lg:hidden p-2 text-neutral-400 hover:text-white"
+                    className="lg:hidden p-2 ml-2 text-neutral-400 hover:text-white"
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -85,21 +83,12 @@ export function RooKHeader() {
         </header>
 
         <UniverseMobileMenu
+            accentColor="#00d255"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="RooK"
             bgClass="bg-black"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/rook/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/rook/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347]">가입</Link>
-                    </div>
-                )
-            }
         >
             {navItems.map((item) => (
                 <Link

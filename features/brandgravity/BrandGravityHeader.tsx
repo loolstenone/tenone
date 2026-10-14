@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
 import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
-import { loginHref } from '@/lib/login-href';
 
 const navItems = [
   { name: '서비스', href: '/brandgravity/services' },
@@ -18,7 +16,6 @@ const navItems = [
 export default function BrandGravityHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
 
   return (
     <>
@@ -55,12 +52,12 @@ export default function BrandGravityHeader() {
           >
             신청하기
           </Link>
-          <div className="hidden md:block">
+          <div className="flex items-center">
             <UniverseUtilityBar
               hideAbout
               aboutPath="/brandgravity/about"
               profilePath="/brandgravity/my"
-              workspacePath={null}
+              breakpoint="md"
               signupPath="/brandgravity/signup"
               accentColor="#f59e0b"
               siteId="brandgravity"
@@ -83,15 +80,7 @@ export default function BrandGravityHeader() {
       brandName="Brand Gravity"
       bgClass="bg-[#0A0A0A]"
       textTone="light"
-      footer={
-        <Link
-          href={isAuthenticated ? '/brandgravity/my' : loginHref(pathname)}
-          onClick={() => setMenuOpen(false)}
-          className="block text-center px-4 py-2.5 bg-amber-500 text-black text-sm rounded-lg font-bold"
-        >
-          {isAuthenticated ? '마이페이지' : '시작하기'}
-        </Link>
-      }
+      accentColor="#f59e0b"
     >
       {navItems.map(item => (
         <Link

@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "프로그램", href: "/programs" },
@@ -20,7 +18,6 @@ const navItems = [
 export function ChangeUpHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -56,10 +53,11 @@ export function ChangeUpHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         aboutPath="/changeup/about"
                         profilePath="/changeup/my"
+                        breakpoint="md"
                         accentColor="#2563EB"
                         signupPath="/changeup/signup"
                         siteId="changeup"
@@ -84,16 +82,8 @@ export function ChangeUpHeader() {
             brandName="ChangeUp"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/changeup/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/changeup/signup" onClick={() => setMobileOpen(false)} className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full">시작하기</Link>
-                    </div>
-                )
-            }
+            aboutPath="/changeup/about"
+            accentColor="#2563EB"
         >
             {navItems.map((item) => (
                 <Link

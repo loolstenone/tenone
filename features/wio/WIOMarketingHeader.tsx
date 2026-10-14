@@ -96,16 +96,13 @@ export function WIOMarketingHeader() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <Link href="/wio/app" className="hidden md:inline-flex items-center gap-1 px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg font-semibold hover:bg-indigo-500 transition-colors">
-                        Orbi 시작하기
-                    </Link>
-                    <div className="hidden md:block">
+                    <div className="flex items-center">
                         <UniverseUtilityBar
+                            breakpoint="md"
                             aboutPath="/wio/about"
-                            profilePath="/wio/app"
-                            workspacePath={null}
-                            workspaceLabel="APP"
+                            profilePath="/wio/app/my"
                             signupPath="/wio/signup"
+                            serviceEntry={{ label: "Orbi 시작하기", href: "/wio/app" }}
                             accentColor="#6366f1"
                             loginPath="/wio/login"
                             siteId="wio"
@@ -127,12 +124,10 @@ export function WIOMarketingHeader() {
             brandName="WIO"
             bgClass="bg-[#0F0F23]"
             textTone="light"
-            footer={
-                <Link href="/wio/login" onClick={() => setMobileOpen(false)}
-                    className="block text-center px-4 py-2.5 bg-indigo-600 text-white text-sm rounded-lg font-semibold">
-                    시작하기
-                </Link>
-            }
+            aboutPath="/wio/about"
+            accentColor="#6366f1"
+            serviceEntry={{ label: "Orbi 시작하기", href: "/wio/app" }}
+            loginPath="/wio/login"
         >
             {allNav.map(item => (
                 <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}

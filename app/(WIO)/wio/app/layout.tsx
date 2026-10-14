@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { AccountMenu } from '@/components/AccountMenu';
 import {
   ChevronLeft, ChevronRight, LogOut, Settings, Menu, X, KeyRound, ExternalLink,
 } from 'lucide-react';
@@ -626,7 +627,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           <header className="fixed top-0 left-0 right-0 z-50 flex h-12 items-center justify-between border-b border-white/5 bg-[#0F0F23] px-4">
             <button onClick={() => setMobileOpen(true)} className="p-1 text-slate-400 hover:text-white"><Menu size={20} /></button>
             <span className="text-sm font-bold">{tenant?.serviceName || 'Orbi'}</span>
-            <div className="w-6" />
+            {isDemo ? <div className="w-6" /> : <span className="text-slate-300"><AccountMenu profilePath="/wio/app/my" siteId="wio" mode="sheet" /></span>}
           </header>
         )}
 
@@ -658,7 +659,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         <main className="min-h-screen transition-all duration-200" style={{ marginLeft: `${sidebarWidth}px`, paddingTop: isMobile ? '48px' : '0' }}>
           {!isMobile && (
             <div className="flex items-center justify-end gap-3 px-6 py-2 border-b border-white/5">
-              <span className="text-xs text-slate-500">{member?.displayName || '체험 사용자'}</span>
+              {isDemo ? <span className="text-xs text-slate-500">체험 사용자</span> : <span className="text-slate-300"><AccountMenu profilePath="/wio/app/my" siteId="wio" /></span>}
               {isDemo ? (
                 <Link href="/wio/login" className="text-xs px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition-colors">로그인</Link>
               ) : (

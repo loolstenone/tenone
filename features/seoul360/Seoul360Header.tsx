@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "Seoul/360°", href: "/" },
@@ -21,7 +19,6 @@ const navItems = [
 export function Seoul360Header() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -61,11 +58,12 @@ export function Seoul360Header() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         hideAbout
                         aboutPath="/seoul360/about"
                         profilePath="/seoul360/my"
+                        breakpoint="lg"
                         accentColor="#1a1a2e"
                         signupPath="/seoul360/signup"
                         siteId="seoul360"
@@ -90,16 +88,7 @@ export function Seoul360Header() {
             brandName="Seoul/360°"
             bgClass="bg-[#3D3D3D]"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/seoul360/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/seoul360/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
-                    </div>
-                )
-            }
+            accentColor="#1a1a2e"
         >
             {navItems.map((item) => (
                 <Link

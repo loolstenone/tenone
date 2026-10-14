@@ -121,6 +121,15 @@ async function checkSite(siteId) {
         const lightText = /text-(white|neutral-(50|100|200)|\[#f)/.test(before);
         if (darkHeader && i > 0 && !lightText) fail(`${headerFile}: 어두운 헤더인데 UniverseUtilityBar 감싼 요소에 밝은 글자색 없음 → 로그인·가입이 안 보임 (text-white 지정)`);
         else if (i > 0) ok("유틸리티 바 글자색 대비");
+        // 유틸리티바는 데스크톱·모바일을 스스로 그린다 — 헤더가 hidden md:flex 등으로 감싸면 모바일에서 알림·계정·로그아웃이 사라진다 (2026-10-14)
+        if (i > 0) {
+            const wrapOpen = before.lastIndexOf("<div");
+            const wrapper = wrapOpen >= 0 ? before.slice(wrapOpen) : "";
+            /className="[^"]*\bhidden\b[^"]*"/.test(wrapper)
+                ? fail(`${headerFile}: UniverseUtilityBar를 감싼 요소에 hidden — 모바일에서 계정·로그아웃이 사라짐. hidden 빼고 breakpoint prop 사용 (§1.9.2)`)
+                : ok("유틸리티바 모바일 노출");
+        }
+        if (/<UniverseMobileMenu[\s\S]{0,600}?\bfooter=/.test(h)) fail(`${headerFile}: UniverseMobileMenu footer는 폐지 — 하단(About·공유·로그인)은 자동, 계정은 아바타 → 계정 메뉴 (§1.9.3)`);
     }
     const myPage = group ? read(`app/${group}/${siteId}/my/page.tsx`) : null;
     if (myPage) /MyProfileCard/.test(myPage) ? ok("마이페이지 MyProfileCard") : fail("마이페이지에 MyProfileCard 없음 (§1.3)");

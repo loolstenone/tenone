@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "필찐감자", href: "/writers" },
@@ -18,7 +16,6 @@ const navItems = [
 export function OgamjaHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -66,10 +63,11 @@ export function OgamjaHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         aboutPath="/0gamja/about"
                         profilePath="/0gamja/my"
+                        breakpoint="md"
                         accentColor="#6B21A8"
                         signupPath="/0gamja/signup"
                         siteId="ogamja"
@@ -94,16 +92,8 @@ export function OgamjaHeader() {
             brandName="공감자"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/0gamja/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/0gamja/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
-                    </div>
-                )
-            }
+            aboutPath="/0gamja/about"
+            accentColor="#6B21A8"
         >
             {navItems.map((item) => (
                 <Link

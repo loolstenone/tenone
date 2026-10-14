@@ -233,7 +233,7 @@ docs/              # 설계 문서
 | `components/SiteClosedOverlay.tsx` | `is_open=false` 사이트 전체 차단. 마스터/Staff/Admin bypass |
 | `components/UnderConstruction.tsx` | 전용 콘텐츠 없는 사이트의 브랜드 랜딩 페이지 |
 | `components/LoginModal.tsx` | 전 브랜드 공통 로그인 모달 |
-| `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 |
+| `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 (유틸리티바, §1.9.2) |
 
 ### 도메인 감지 3단계
 
@@ -1027,148 +1027,123 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
 
 ---
 
-## 1.9.2 유니버스 유틸리티 바 (UniverseUtilityBar)
+## 1.9.2 유틸리티바 (UniverseUtilityBar) — 2026-10-14 개정
 
-> **원칙**: 모든 브랜드 사이트의 헤더 우측 상단에는 **동일한 유틸리티 바**가 들어간다.
-> 사이트가 28개여도 사용자에게는 하나의 일관된 컨트롤로 느껴져야 한다.
-> SSOT 컴포넌트: `components/UniverseUtilityBar.tsx` — 직접 새로 만들지 말고 import해서 쓴다.
+> **원칙**: 모든 브랜드 화면의 우상단 묶음 = **유틸리티바**. 사이트가 28개여도 사용자에게는 하나의 일관된 컨트롤로 느껴져야 한다.
+> SSOT: `components/UniverseUtilityBar.tsx` (바) · `components/AccountMenu.tsx` (계정 메뉴) · `components/AccountControls.tsx` (알림·아바타·로그아웃 부품) · `lib/brand-services.ts` (이용 중인 서비스 목록)
+> 연구·배경: [docs/Universe_Utility_Bar.md](docs/Universe_Utility_Bar.md)
 
-### 표준 7요소 (이 순서·이 모양)
+### 요소와 역할
 
-| # | 요소 | 노출 조건 | 동작 |
-|---|------|----------|------|
-| 1 | **About** | `hideAbout=false` (기본) | `aboutPath`로 이동 |
-| 2 | **Work Space** (Briefcase 드롭다운) | 인증 + (`workspaces[]` 또는 `user.affiliations[]`에서 자동 매칭) | 이용 중인 서비스 목록 → 각 워크스페이스 진입 |
-| 3 | **로그인 / 가입** | 비인증 | LoginModal 팝업 (또는 `loginPath` 지정 시 `/login?redirect=` 이동) |
-| 4 | **알림** (Bell + 미확인 배지) | 인증 + `hideNotifications=false` | 드롭다운으로 `/api/notifications` 결과 노출 (본인 알림, 생성은 `lib/notify.ts`) |
-| 5 | **아바타** (이미지만) | 인증 | `profilePath`로 이동. **이름 텍스트 절대 노출 금지** — 이미지 없으면 이니셜 1글자. |
-| 6 | **로그아웃** (텍스트 `로그아웃`) | 인증 | `logout()` |
-| 7 | **공유 / 검색** | 항상 | 공유 = 클립보드 복사·Web Share / 검색 = 풀스크린 오버레이 (`/api/search`) |
+| 요소 | 무엇에 답하나 | 비로그인 | 로그인 |
+|---|---|---|---|
+| **About** | 이 브랜드는 뭐지? (브랜드 사이트 안 경로) | ✅ | ✅ |
+| **서비스 입구** (`serviceEntry`) | 이 사이트의 서비스를 쓰러 가기 — **로그인 후 쓰는 앱 화면이 있는 브랜드만** (Planner's "내 플래너" · HeRo "나의 성장 기록" · WIO "Orbi 시작하기" · SmarComm "워크스페이스"). 처음 쓰는 회원은 같은 버튼 → `BrandJoinGate`(브랜드 동의) → 서비스. 커뮤니티·콘텐츠 브랜드는 없음 (Mindle 포함 — 개인 기능은 마이페이지) | ✅ | ✅ |
+| **로그인 / 가입** | 들어가기 — LoginModal (§1.2.1) | ✅ | — |
+| **알림** | 나한테 온 것 (계정 단위, 본인에게만) | — | ✅ |
+| **아바타 → 계정 메뉴** | 나에 관한 모든 곳 (아래) | — | ✅ |
+| **로그아웃** | 텍스트 `로그아웃` (모바일은 계정 메뉴 맨 아래) | — | ✅ |
+| **공유 / 검색** | 이 페이지 공유 · 이 사이트 우선 검색 | ✅ | ✅ |
 
-### Workspace 레지스트리
+### 계정 메뉴 (아바타를 누르면 열림)
 
-`UniverseUtilityBar.tsx` 상단의 `WORKSPACE_REGISTRY` 배열이 SSOT.
-사용자의 `members.affiliations[]`에 brandId가 있으면 자동으로 드롭다운에 노출된다.
+**정의**: "나에 관한 곳으로 가는 목록". 아바타 하나가 **이 사이트의 나**와 **Ten:One 계정**을 함께 대표한다. 아바타 클릭은 메뉴만 연다 (바로 이동·로그아웃 금지).
 
-```typescript
-const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
-  { brandId: "planners", label: "Planner's Planner AI", path: "/planners/app", description: "능동 AI 플래너" },
-  { brandId: "badak",    label: "Badak",                path: "/badak/my",     description: "기획자 네트워크" },
-  // ...
-];
+```
+사진 · 이름 · 이메일            ← 이름은 메뉴 안에서만 (바에는 사진만)
+마이페이지                       ← 이 사이트의 나: profilePath (/{brand}/my, MyProfileCard + 브랜드 활동)
+내 공개 프로필                   ← handle 있을 때만: /profile/{handle}
+Ten:One 계정 관리                ← /profile (공통 프로필·보안·동의·탈퇴) — 모든 도메인에서 열림
+이용 중인 다른 서비스 ›          ← member_brand_joins 기준 (현재 사이트 제외) — 원칙 7: 바가 아니라 메뉴 안에만
+인트라                           ← 직원만 (member_roles → canAccessIntra)
+로그아웃                         ← 모바일 시트에만 (데스크톱은 바에 텍스트)
 ```
 
-**새 브랜드 워크스페이스 추가 시**: `WORKSPACE_REGISTRY`에 한 줄 추가 → 전 사이트 자동 노출 (개별 헤더 수정 불필요).
+### 화면 크기
+
+유틸리티바가 **데스크톱·모바일을 스스로 그린다**. `breakpoint`(md·lg·xl)를 헤더 메뉴가 펼쳐지는 너비와 맞춘다.
+
+| | 구성 |
+|---|---|
+| 데스크톱 | About · 서비스 입구 · 알림 · 아바타(계정 메뉴) · 로그아웃 \| 로그인·가입 · 공유 · 검색 |
+| 모바일 | 검색 · 알림 · 아바타(계정 메뉴 **시트**, 로그아웃 포함) \| 로그인 아이콘 + 햄버거(헤더) |
+
+### 헤더 3유형
+
+| 유형 | 대상 | 우상단 |
+|---|---|---|
+| **사이트형** | 브랜드 웹사이트 전부 | [주 행동 버튼 1개, 선택] + `<UniverseUtilityBar>` |
+| **앱형** | 로그인 후 쓰는 화면: Planner's 앱 · WIO 앱 · SmarComm 대시보드 · 인트라 | 앱 도구(검색·도움말·설정) + 알림 + `<AccountMenu>` + 로그아웃 (모바일은 `mode="sheet"`). About·공유 없음 |
+| **피드형** | Jakka · MoNTZ (좌측 사이드바) | 같은 부품을 사이드바에 — `<AccountMenu placement="up-left">` |
+
+- **주 행동 버튼 1개**까지 바 왼쪽에 허용 (예: YouInOne "Members & Alliance"). 서비스 입구와 같으면 하나로
+- **메뉴는 메뉴 자리에** — 서비스·블로그·요금제 같은 사이트 메뉴를 우상단에 붙이지 않는다 (`lib/brand-site-menus.ts`)
 
 ### 호출 패턴
 
-각 브랜드 헤더(`features/{brand}/{Brand}Header.tsx` 등)에서:
-
 ```tsx
-import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
-
-<UniverseUtilityBar
-  aboutPath="/planners/about"
-  profilePath="/planners/my"
-  accentColor="#0F766E"
-  siteId="planners"
-  siteName="Planner's"
-  // workspaces 생략 → user.affiliations 기반 자동
-  // hideNotifications={true} → 랜딩 페이지에서 알림 숨김 가능
-/>
+<div className="flex items-center ml-auto text-white">{/* 어두운 헤더면 밝은 글자색 */}
+  <UniverseUtilityBar
+    breakpoint="lg"
+    aboutPath="/planners/about"
+    profilePath="/planners/my"
+    serviceEntry={{ label: "내 플래너", href: "/planners/app" }}   // 서비스형 브랜드만
+    accentColor="#0F766E"
+    siteId="planners"
+    siteName="Planner's"
+  />
+</div>
+<button className="lg:hidden ..." onClick={() => setMobileOpen(!mobileOpen)}>☰</button>
 ```
 
 ### 절대 하지 말 것
 
-- ❌ 아바타 옆에 이름·이메일 텍스트 직접 노출 (이미지 only가 표준)
-- ❌ 알림·아바타·로그아웃을 헤더마다 따로 만들기 — **`components/AccountControls.tsx`** (`NotificationBell`·`AccountAvatar`·`LogoutButton`)를 쓴다. 브랜드 바·인트라 헤더·Jakka/MoNTZ 레이아웃이 같은 부품 (2026-10-10 — 로그아웃 아이콘 → 텍스트 `로그아웃`, 인트라 가짜 알림 배지 교체)
-- ❌ 로그아웃을 아이콘만으로 표시 · 아바타 클릭으로 로그아웃
-- ❌ 헤더에서 `UniverseUtilityBar` 우회하고 자체 로그인·검색·공유 버튼 직접 만들기
-- ❌ `WORKSPACE_REGISTRY`에 등록 안 하고 브랜드 헤더에서 `workspacePath`만 하드코딩 (다른 사이트에서 안 보임)
-- ❌ 7요소 순서·아이콘 임의 변경 (28개 브랜드 일관성 깨짐)
+- ❌ 유틸리티바를 `hidden md:flex` 등으로 감싸 모바일에서 숨기기 — 알림·계정·로그아웃이 사라진다 (2026-10-14 전수 조사: 20개 사이트 모바일 로그아웃 없음, Mindle 모바일 로그인 불가). `breakpoint` prop을 쓴다
+- ❌ 헤더에 모바일 전용 아바타·로그인 블록을 따로 만들기 (바가 모바일도 그린다)
+- ❌ 다른 브랜드 목록(구 WORK 드롭다운)·ADMIN 링크를 바에 두기 → 계정 메뉴. 브랜드 운영 화면은 인트라에만 (구 `/mindle/admin` 2026-10-14 삭제)
+- ❌ 권한·직원 판단을 이메일·`members.role` 등으로 (§1.6) — 계정 메뉴의 인트라 표시는 `canAccessIntra`(member_roles)
+- ❌ 이용 중인 서비스를 `members.affiliations`로 계산 → `member_brand_joins` (`/api/brand-join/mine`)
+- ❌ 아바타 옆 이름·이메일 텍스트, 아바타 클릭으로 바로 이동·로그아웃, 로그아웃 아이콘만
+- ❌ 알림·아바타·로그아웃을 헤더마다 따로 만들기 — `AccountControls`·`AccountMenu` 부품
 
-### 새 브랜드 헤더 만들 때 체크리스트
+### 새 브랜드 헤더 체크리스트
 
-- [ ] 헤더 우측에 `<UniverseUtilityBar />` import해서 배치
-- [ ] `accentColor` = 브랜드 메인 컬러
-- [ ] `siteId`·`siteName` 명시 (검색 결과 라벨용)
-- [ ] 워크스페이스 있으면 `WORKSPACE_REGISTRY`에 등록 (헤더에 직접 prop 넘기는 것 지양)
-- [ ] About 경로가 브랜드 사이트 내인지 확인 (외부 tenone.biz로 튕기지 않도록)
+- [ ] `<UniverseUtilityBar breakpoint=…>`를 감싸지 않고 배치, 햄버거는 그 뒤 (`{bp}:hidden`)
+- [ ] `accentColor`·`siteId`·`siteName`·`profilePath` · 서비스 화면이 있으면 `serviceEntry`
+- [ ] `lib/brand-services.ts`에 한 줄 (계정 메뉴 '이용 중인 다른 서비스')
+- [ ] `npm run site:check -- {siteId}` — "유틸리티바 모바일 노출" ✅
 
 ---
 
 ## 1.9.3 유니버스 모바일 메뉴 (UniverseMobileMenu)
 
-> **원칙**: 모든 브랜드 사이트의 모바일 메뉴는 **우측 슬라이드 패널** 방식으로 통일한다.
-> 가로 화면 전체를 덮지 않는다. 너비는 **`w-2/3 max-w-sm`** (~67%, 최대 384px).
-> SSOT 컴포넌트: `components/UniverseMobileMenu.tsx`
+> **원칙**: 모든 브랜드 사이트의 모바일 메뉴는 **우측 슬라이드 패널**. 너비 `w-2/3 max-w-sm`. SSOT: `components/UniverseMobileMenu.tsx`
 
-### 표준
+| 영역 | 내용 | 정하는 곳 |
+|---|---|---|
+| 헤더 | 브랜드명 + 닫기 X | `brandName` |
+| 본문 | 사이트 메뉴 (스크롤) | `children` (`UniverseMobileMenuLink`) |
+| 하단 | [주 행동 버튼] · 서비스 입구 · About · 공유 · (비로그인) 로그인·가입하기 | **자동** — `cta`·`serviceEntry`·`aboutPath`·`accentColor`·`loginPath` |
 
-| 항목 | 값 |
-|------|----|
-| 위치 | 우측에서 슬라이드 인 |
-| 너비 | `w-2/3 max-w-sm` (모바일 기준 ~250–280px, 태블릿에서 384px 캡) |
-| 백드롭 | `bg-black/60`, 클릭 시 닫힘 |
-| z-index | 패널 9999 / 백드롭 9998 |
-| 트랜지션 | 300ms ease-out (첫 렌더는 트랜지션 X — 끊김 방지) |
-| 헤더 | 브랜드명 + 닫기 X |
-| 본문 | 스크롤 가능 nav |
-| 푸터 | 선택 — 프로필/로그아웃 등 |
-
-### 호출 패턴
+- 계정(마이페이지·계정 관리·로그아웃)은 서랍에 넣지 않는다 → 헤더의 유틸리티바 아바타 → 계정 메뉴 시트
+- 백드롭 `bg-black/60` 클릭 시 닫힘 · z-index 패널 9999 / 백드롭 9998 · 300ms ease-out (첫 렌더는 트랜지션 X)
 
 ```tsx
-import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/UniverseMobileMenu";
-
 <UniverseMobileMenu
-  open={mobileOpen}
-  onClose={() => setMobileOpen(false)}
-  brandName="Badak"
-  bgClass="bg-[#12122a]"
-  textTone="light"
+  open={mobileOpen} onClose={() => setMobileOpen(false)}
+  brandName="Badak" bgClass="bg-[#12122a]" textTone="light"
+  aboutPath="/badak/about" accentColor="#ffd93d"
 >
-  {navItems.map(item => (
-    <UniverseMobileMenuLink
-      key={item.href}
-      href={item.href}
-      active={isActive(item.href)}
-      onClick={() => setMobileOpen(false)}
-      textTone="light"
-      accentColor="#ffd93d"
-    >
-      {item.name}
-    </UniverseMobileMenuLink>
-  ))}
+  {navItems.map(item => <UniverseMobileMenuLink key={item.href} href={item.href} ... />)}
 </UniverseMobileMenu>
 ```
 
 ### 절대 하지 말 것
 
-- ❌ 가로 화면 전체를 덮는 모바일 메뉴 (`fixed inset-0` 풀스크린)
-- ❌ 헤더 아래에 인라인 드롭다운으로 펼치는 방식 (구식, 일관성 깨짐)
-- ❌ 너비를 `w-64`·`w-72`·`w-80` 등으로 임의 지정 — 반드시 `w-2/3 max-w-sm`
-- ❌ 자체 백드롭/슬라이드 로직 직접 구현 — `UniverseMobileMenu` 사용
-
-### 마이그레이션 가이드 (인라인 드롭다운 → 슬라이드 패널)
-
-기존 헤더에서:
-```tsx
-{mobileOpen && (
-  <div className="md:hidden bg-... px-... py-...">
-    {/* nav links */}
-  </div>
-)}
-```
-
-→ 변경:
-```tsx
-<UniverseMobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} brandName="..." bgClass="...">
-  {/* UniverseMobileMenuLink 들로 교체 */}
-</UniverseMobileMenu>
-```
-
-햄버거 토글 버튼은 그대로. 패널 자체만 표준 컴포넌트로 교체.
+- ❌ 하단에 마이페이지·로그아웃을 손으로 넣기 (`footer` prop 폐지 2026-10-14 — 브랜드마다 달라져 로그아웃이 빠지던 사고)
+- ❌ 가로 화면 전체를 덮는 메뉴 (`fixed inset-0` 풀스크린) · 헤더 아래 인라인 드롭다운
+- ❌ 너비 임의 지정 (`w-64`·`w-72`·`w-80`) — 반드시 `w-2/3 max-w-sm`
+- ❌ 자체 백드롭/슬라이드 로직 — `UniverseMobileMenu` 사용
 
 ---
 
@@ -1456,7 +1431,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | siteConfigs·브랜드 그룹·ums_sites row·브랜드 CLAUDE.md | §2.4 |
 | layout generateMetadata + getSiteConfigServer, 정적 metadata 금지, og 이미지 | §1.1 |
 | **파비콘 파일 실제 존재** (`public/...` 404 금지) | §1.1 |
-| UniverseUtilityBar·MobileMenu·Footer 사용, **어두운 헤더면 유틸리티 바에 밝은 글자색** | §1.9.2~1.9.4 |
+| UniverseUtilityBar·MobileMenu·Footer 사용, **어두운 헤더면 유틸리티바에 밝은 글자색**, **유틸리티바를 hidden으로 감싸지 않음(모바일 계정·로그아웃)**, 모바일 메뉴 footer 금지 | §1.9.2~1.9.4 |
 | 마이페이지 MyProfileCard, `/login` 하드코딩 금지(loginHref), "준비 중" 직접 표시 | §1.3·§1.2.1·§1.1 |
 | page의 useSearchParams는 Suspense 필수 (없으면 빌드 실패) | Next.js |
 | 집중 브랜드 → brand-site-menus 등록 | §1.9.5 |

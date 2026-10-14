@@ -4,15 +4,12 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
 import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
-import { loginHref } from '@/lib/login-href';
 
 export default function SmarCommHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const currentPath = usePathname();
-  const { isAuthenticated } = useAuth();
 
   return (
     <>
@@ -24,18 +21,21 @@ export default function SmarCommHeader() {
           <span className="font-semibold text-text">.</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/smarcomm#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">서비스</Link>
-          <Link href="/smarcomm/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
-          <Link href="/smarcomm/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
+        <nav className="flex items-center gap-6">
+          {/* TODO(2026-10-14): 사이트 메뉴 — lib/brand-site-menus.ts 등록 후 메인 메뉴로 */}
+          <div className="hidden items-center gap-6 md:flex">
+            <Link href="/smarcomm#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">서비스</Link>
+            <Link href="/smarcomm/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
+            <Link href="/smarcomm/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
+          </div>
           <UniverseUtilityBar
             hideAbout
+            breakpoint="md"
             aboutPath="/smarcomm/about"
             profilePath="/smarcomm/dashboard/profile"
-            workspacePath="/smarcomm/dashboard"
-            workspaceLabel="워크스페이스"
             signupPath="/smarcomm/signup"
             accentColor="#171717"
+            serviceEntry={{ label: "워크스페이스", href: "/smarcomm/dashboard" }}
             siteId="smarcomm"
             siteName="SmarComm"
           />
@@ -54,21 +54,12 @@ export default function SmarCommHeader() {
       brandName="SmarComm"
       bgClass="bg-white"
       textTone="dark"
-      footer={
-        isAuthenticated ? (
-          <Link href="/smarcomm/dashboard/profile" onClick={() => setMenuOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <Link href={loginHref(currentPath)} onClick={() => setMenuOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-            <Link href="/smarcomm/signup" onClick={() => setMenuOpen(false)} className="rounded-full bg-neutral-900 px-4 py-2.5 text-center text-sm font-semibold text-white">무료 가입</Link>
-          </div>
-        )
-      }
+      accentColor="#171717"
+      serviceEntry={{ label: "워크스페이스", href: "/smarcomm/dashboard" }}
     >
       <Link href="/smarcomm#process" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">서비스</Link>
       <Link href="/smarcomm/blog" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">블로그</Link>
       <Link href="/smarcomm/pricing" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">요금제</Link>
-      <Link href={isAuthenticated ? '/smarcomm/dashboard' : '/'} onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">워크스페이스</Link>
     </UniverseMobileMenu>
     </>
   );

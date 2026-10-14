@@ -5,11 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
-import { loginHref } from "@/lib/login-href";
 
 // 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서는 거기서 고친다
 const navItems = siteHeaderNav("madleap");
@@ -17,7 +15,6 @@ const navItems = siteHeaderNav("madleap");
 export function MadLeapHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/madleap") return pathname === "/madleap" || pathname === "/";
@@ -66,8 +63,9 @@ export function MadLeapHeader() {
                 </Link>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex items-center ml-auto">
                     <UniverseUtilityBar
+                        breakpoint="md"
                         aboutPath="/madleap/about"
                         profilePath="/madleap/my"
                         accentColor="#00B8FF"
@@ -80,7 +78,7 @@ export function MadLeapHeader() {
                 {/* Mobile menu button */}
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="md:hidden p-2 text-neutral-600 hover:text-neutral-900"
+                    className="md:hidden p-2 ml-2 text-neutral-600 hover:text-neutral-900"
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -89,21 +87,13 @@ export function MadLeapHeader() {
         </header>
 
         <UniverseMobileMenu
+            aboutPath="/madleap/about"
+            accentColor="#00B8FF"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="MADLeap"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/madleap/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">Login</Link>
-                        <Link href="/madleap/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">Register</Link>
-                    </div>
-                )
-            }
         >
             <Link
                 href="/madleap"

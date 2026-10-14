@@ -5,11 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { Menu, X } from "lucide-react";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { LoginModal } from "@/components/LoginModal";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
 import { SearchLightNav } from "@/features/hero/SearchLightNav";
 
@@ -23,15 +21,6 @@ const companyNav = navItems.filter(i => i.side === "company");
 export function HeRoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
-    const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
-    const { isAuthenticated, user } = useAuth();
-
-    const openLogin = (tab: "login" | "signup" = "login") => {
-        setLoginTab(tab);
-        setMobileOpen(false);
-        setLoginOpen(true);
-    };
 
     // 가장 길게 매칭되는 nav item 하나만 활성 (접두 중복 방지)
     const activeHref = navItems
@@ -69,12 +58,12 @@ export function HeRoHeader() {
                 </div>
 
                 {/* Right side — 우측 끝, 메뉴와 거리를 둔다 */}
-                <div className="hidden xl:flex items-center ml-auto pl-10 shrink-0">
+                <div className="flex items-center ml-auto pl-4 xl:pl-10 shrink-0">
                     <UniverseUtilityBar
+                        breakpoint="xl"
                         aboutPath="/hero/about"
                         profilePath="/hero/my"
-                        workspacePath="/hero/journey"
-                        workspaceLabel="나의 성장 기록"
+                        serviceEntry={{ label: "나의 성장 기록", href: "/hero/journey" }}
                         accentColor="#E53935"
                         signupPath="/hero/signup"
                         siteId="hero"
@@ -82,87 +71,32 @@ export function HeRoHeader() {
                     />
                 </div>
 
-                {/* Mobile: 프로필 + 햄버거 */}
-                <div className="xl:hidden flex items-center gap-1 ml-auto">
-                    {isAuthenticated ? (
-                        <Link href="/hero/my" className="p-1.5">
-                            {user?.avatarUrl ? (
-                                <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                    className="h-7 w-7 rounded-full object-cover" />
-                            ) : (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
-                                    {user?.name?.charAt(0) ?? '?'}
-                                </div>
-                            )}
-                        </Link>
-                    ) : (
-                        <button type="button" onClick={() => openLogin("login")} className="p-2 text-neutral-500 hover:text-neutral-900" aria-label="로그인">
-                            <User className="h-5 w-5" />
-                        </button>
-                    )}
-                    <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="p-2 text-neutral-500 hover:text-neutral-900"
-                        aria-label="메뉴 열기"
-                    >
-                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                    </button>
-                </div>
+                <button
+                    onClick={() => setMobileOpen(!mobileOpen)}
+                    className="xl:hidden p-2 ml-2 text-neutral-500 hover:text-neutral-900"
+                    aria-label="메뉴 열기"
+                >
+                    {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
             </nav>
 
         </header>
 
         <UniverseMobileMenu
+            aboutPath="/hero/about"
+            serviceEntry={{ label: "나의 성장 기록", href: "/hero/journey" }}
+            accentColor="#E53935"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="HeRo"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-700 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex flex-col gap-2">
-                        <button type="button" onClick={() => openLogin("login")}
-                            className="rounded-lg border border-neutral-200 px-4 py-2 text-center text-sm text-neutral-600 hover:text-neutral-900">
-                            로그인
-                        </button>
-                        <button type="button" onClick={() => openLogin("signup")}
-                            className="rounded-lg px-4 py-2 text-center text-sm font-semibold text-white"
-                            style={{ backgroundColor: "#E53935" }}>
-                            가입하기
-                        </button>
-                    </div>
-                )
-            }
         >
-            {isAuthenticated && (
-                <Link
-                    href="/hero/journey"
-                    onClick={() => setMobileOpen(false)}
-                    className={clsx(
-                        "block rounded-lg px-4 py-2.5 text-base font-bold transition-colors mb-2",
-                        pathname.startsWith("/hero/journey")
-                            ? "bg-[#E53935] text-white"
-                            : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
-                    )}
-                >
-                    나의 성장 기록
-                </Link>
-            )}
             <MobileGroup title="나를 위한 서비스" items={talentNav} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
             <MobileGroup title="인재와 기업이 만나는 곳" items={meetNav} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
             <MobileGroup title="기업을 위한 서비스" items={companyNav} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
-            <Link
-                href="/hero/about"
-                onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-            >
-                About
-            </Link>
         </UniverseMobileMenu>
 
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#E53935" defaultTab={loginTab} />
         </>
     );
 }

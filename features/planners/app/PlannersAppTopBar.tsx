@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, Settings, HelpCircle, Bell } from "lucide-react";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { AccountAvatar } from "@/components/AccountControls";
+import { LogoutButton } from "@/components/AccountControls";
+import { AccountMenu } from "@/components/AccountMenu";
 import { APP_BASE, PLANNERS_APP_NAV, isAppNavActive } from "@/features/planners/app/nav";
 
 // 플래너'스 AI 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
@@ -30,7 +31,12 @@ export function PlannersAppTopBar() {
                     <Link href={`${APP_BASE}/notifications`} className={iconCls(`${APP_BASE}/notifications`)} title="알림" aria-label="알림"><Bell className="h-4 w-4" /></Link>
                     <Link href={`${APP_BASE}/help`} className={iconCls(`${APP_BASE}/help`)} title="도움말" aria-label="도움말"><HelpCircle className="h-4 w-4" /></Link>
                     <Link href={`${APP_BASE}/settings`} className={iconCls(`${APP_BASE}/settings`)} title="설정" aria-label="설정"><Settings className="h-4 w-4" /></Link>
-                    <Link href="/planners/my" className="ml-1" aria-label="마이페이지"><AccountAvatar /></Link>
+                    {/* 계정 메뉴 (유틸리티바 표준 §1.9.2 — 앱형: 데스크톱 드롭다운 + 로그아웃, 모바일 시트에 로그아웃) */}
+                    <span className="ml-1 hidden lg:flex items-center gap-3">
+                        <AccountMenu profilePath="/planners/my" siteId="planners" />
+                        <LogoutButton />
+                    </span>
+                    <span className="ml-1 lg:hidden"><AccountMenu profilePath="/planners/my" siteId="planners" mode="sheet" /></span>
                 </div>
             </header>
 

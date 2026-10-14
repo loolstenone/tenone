@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
-import { useAuth } from "@/lib/auth-context";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
@@ -22,8 +21,6 @@ const publicNav: NavItem[] = [
 
 export function PublicHeader() {
     const pathname = usePathname();
-    const router = useRouter();
-    const { user, isAuthenticated, isLoading, canAccessIntra, logout } = useAuth();
     const { isDark } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -77,22 +74,19 @@ export function PublicHeader() {
                     ))}
                 </div>
 
-                {/* Right side */}
-                <div className="hidden md:flex items-center gap-2">
+                {/* Right side — 유틸리티바가 데스크톱·모바일을 같이 그린다 (§1.9.2) */}
+                <div className="flex items-center gap-2">
                     <ThemeToggle />
                     <UniverseUtilityBar
+                        breakpoint="md"
                         aboutPath="/about"
                         hideAbout={true}
+                        profilePath="/my"
                         accentColor={isDark ? '#fff' : '#000'}
                         siteId="tenone"
                         siteName="Ten:One"
                     />
-                </div>
-
-                {/* Mobile menu button */}
-                <div className="flex md:hidden items-center gap-2">
-                    <ThemeToggle />
-                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2.5 transition-colors" style={{ color: "var(--tn-text)" }}>
+                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2.5 transition-colors" style={{ color: "var(--tn-text)" }} aria-label="메뉴 열기">
                         {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
                 </div>
@@ -101,28 +95,12 @@ export function PublicHeader() {
         </header>
 
         <UniverseMobileMenu
+            accentColor={isDark ? '#fff' : '#000'}
             open={mobileMenuOpen}
             onClose={() => setMobileMenuOpen(false)}
             brandName="Ten:One"
             bgStyle={{ background: "var(--tn-bg)" }}
             textTone={isDark ? "light" : "dark"}
-            footer={
-                !isLoading && isAuthenticated && user ? (
-                    <div className="flex flex-col gap-2">
-                        {canAccessIntra && (
-                            <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm transition-colors hover:opacity-70"
-                                style={{ color: "var(--tn-text-sub)" }}>Intra</Link>
-                        )}
-                        <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
-                            className="block text-sm transition-colors hover:opacity-70"
-                            style={{ color: "var(--tn-text-sub)" }}>프로필</Link>
-                        <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
-                            className="block text-left text-sm transition-colors hover:opacity-70"
-                            style={{ color: "var(--tn-text-muted)" }}>로그아웃</button>
-                    </div>
-                ) : null
-            }
         >
             {publicNav.map(item => (
                 <div key={item.name}>

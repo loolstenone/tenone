@@ -9,6 +9,7 @@ import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { LogoutButton } from "@/components/AccountControls";
 import { LoginModal } from "@/components/LoginModal";
+import { AccountMenu } from "@/components/AccountMenu";
 import {
     getNotifications,
     getUnreadCount,
@@ -42,7 +43,7 @@ const footerBrandLinks = [
     { name: "Myverse", href: "/myverse" },
 ];
 
-function AuthSection({ compact = false }: { compact?: boolean }) {
+function AuthSection({ compact = false, placement = "up-left" }: { compact?: boolean; placement?: "up-left" | "down-left" }) {
     const { isAuthenticated, user } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
@@ -51,15 +52,10 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
         return (
             <>
                 <div className={`flex items-center ${compact ? "gap-2 p-1" : "gap-3 p-3"}`}>
-                    <div className="w-8 h-8 rounded-full bg-neutral-200 overflow-hidden shrink-0">
-                        {user?.avatarUrl ? (
-                            <Image src={user.avatarUrl} alt={user.name || ""} width={32} height={32} className="object-cover w-full h-full" />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[12px] font-bold text-neutral-600">
-                                {user?.name?.charAt(0) ?? "U"}
-                            </div>
-                        )}
-                    </div>
+                    {/* 아바타 → 계정 메뉴 (유틸리티바 표준 §1.9.2 — 피드형은 사이드바에 같은 부품) */}
+                    <span className="shrink-0 text-neutral-700">
+                        <AccountMenu profilePath="/jakka/profile" siteId="jakka" placement={placement} />
+                    </span>
                     {!compact && (
                         <div className="flex-1 min-w-0">
                             <p className="text-[13px] font-bold text-neutral-900 truncate">{user?.name}</p>
@@ -107,7 +103,7 @@ function MobileAuthButton() {
         return (
             // 모바일 상단 — 로그아웃(텍스트). 아바타를 눌러 로그아웃되던 동작 제거 (2026-10-10). 알림은 Jakka 자체 알림
             <span className="flex items-center gap-3 text-neutral-800">
-                <LogoutButton />
+                <AccountMenu profilePath="/jakka/profile" siteId="jakka" mode="sheet" />
             </span>
         );
     }
@@ -225,7 +221,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
                 <div className="flex-1 overflow-y-auto">
                     <div className="px-4 py-5 border-b border-neutral-100">
-                        <AuthSection />
+                        <AuthSection placement="down-left" />
                     </div>
 
                     <nav className="px-4 py-4 space-y-1 border-b border-neutral-100">

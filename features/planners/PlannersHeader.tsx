@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
 import { isPlannersAppPath } from "@/features/planners/app/nav";
 
@@ -18,7 +16,6 @@ const navItems = siteHeaderNav("planners");
 export function PlannersHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     // 플래너'스 AI 앱(/planners/app)은 자체 상단 바를 쓴다
     if (isPlannersAppPath(pathname)) return null;
@@ -54,21 +51,22 @@ export function PlannersHeader() {
                     ))}
                 </div>
 
-                <div className="hidden lg:flex ml-auto text-white">{/* 어두운 헤더 · 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
+                <div className="flex items-center ml-auto text-white">{/* 어두운 헤더 · 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
                     <UniverseUtilityBar
+                        breakpoint="lg"
                         hideAbout
                         aboutPath="/planners"
                         profilePath="/planners/my"
                         accentColor="#14B8A6"
                         siteId="planners"
                         siteName="Planner's"
-                        workspaceButtonLabel="내 플래너"
+                        serviceEntry={{ label: "내 플래너", href: "/planners/app" }}
                     />
                 </div>
 
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="lg:hidden p-2 text-teal-100 hover:text-white"
+                    className="lg:hidden p-2 ml-2 text-teal-100 hover:text-white"
                     aria-label="메뉴"
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -77,18 +75,13 @@ export function PlannersHeader() {
         </header>
 
         <UniverseMobileMenu
+            serviceEntry={{ label: "내 플래너", href: "/planners/app" }}
+            accentColor="#14B8A6"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="Planner's"
             bgClass="bg-[#134E4A]"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/planners/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-100 hover:text-white">마이페이지</Link>
-                ) : (
-                    <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-teal-100 hover:text-white">로그인</Link>
-                )
-            }
         >
             {navItems.map((item) => (
                 <Link

@@ -3,7 +3,9 @@
 import { useEffect, useState, createContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star, AlertTriangle } from 'lucide-react';
+import { AccountMenu } from '@/components/AccountMenu';
+import { LogoutButton } from '@/components/AccountControls';
+import { ChevronLeft, ChevronRight, Star, AlertTriangle } from 'lucide-react';
 import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
 import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
@@ -49,7 +51,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [companyName, setCompanyName] = useState('');
   const [companyLogo, setCompanyLogo] = useState('');
   const [collapsed, setCollapsed] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [contextOpen, setContextOpen] = useState(true);
   const [favorites, setFavorites] = useState<{ path: string; label: string }[]>([]);
 
@@ -124,8 +125,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   const sidebarWidth = collapsed ? 56 : 224;
-  const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();
-  const displayEmail = user?.email || '';
 
   const handleLogout = async () => {
     await logout();
@@ -170,24 +169,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </div>
 
-        {/* 프로필 */}
-        <div className="relative">
-          <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 transition-colors hover:bg-surface">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-text text-[10px] font-bold text-white">{initial}</div>
-            <span className="text-xs text-text-sub max-w-[120px] truncate">{displayEmail}</span>
-            <ChevronDown size={11} className="text-text-muted" />
-          </button>
-
-          {profileOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border bg-white py-1.5 shadow-lg z-50">
-              <Link href="/smarcomm/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
-              <Link href="/" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>SmarComm 홈</Link>
-              <div className="my-1 border-t border-border" />
-              <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text-muted hover:bg-surface hover:text-text">
-                <LogOut size={13} /> 로그아웃
-              </button>
-            </div>
-          )}
+        {/* 설정 + 계정 메뉴 (유틸리티바 표준 §1.9.2 — 앱형) */}
+        <div className="flex items-center gap-3 text-text">
+          <Link href="/smarcomm/dashboard/profile" className="text-xs text-text-sub hover:text-text whitespace-nowrap">워크스페이스 설정</Link>
+          <span className="hidden md:flex items-center gap-3">
+            <AccountMenu profilePath="/smarcomm/my" siteId="smarcomm" />
+            <LogoutButton onLogout={handleLogout} />
+          </span>
+          <span className="md:hidden"><AccountMenu profilePath="/smarcomm/my" siteId="smarcomm" mode="sheet" /></span>
         </div>
       </div>
 

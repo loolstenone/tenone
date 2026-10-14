@@ -42,12 +42,11 @@ export function MindleHeader() {
                 </nav>
 
                 {/* Right: Utility Bar */}
-                <div className="hidden lg:flex ml-auto">
+                <div className="flex items-center ml-auto">
                     <UniverseUtilityBar
+                        breakpoint="lg"
                         aboutPath="/mindle/about"
                         profilePath="/mindle/my"
-                        adminPath="/mindle/admin"
-                        adminEmails={["cheonil@tenone.biz", "tenone@tenone.biz", "admin@tenone.biz"]}
                         accentColor="#F5C518"
                         signupPath="/mindle/signup"
                         searchPlaceholder="Search trends, reports, keywords..."
@@ -57,7 +56,7 @@ export function MindleHeader() {
                 </div>
 
                 {/* Mobile hamburger */}
-                <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-neutral-400 ml-auto">
+                <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 ml-2 text-neutral-400">
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
             </div>
@@ -65,6 +64,8 @@ export function MindleHeader() {
         </header>
 
         <UniverseMobileMenu
+            aboutPath="/mindle/about"
+            accentColor="#F5C518"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="Mindle"

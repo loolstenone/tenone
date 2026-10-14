@@ -66,12 +66,12 @@ export function MyverseHeader() {
                 </div>
 
                 {/* Right group — Utilities (PP AI 워크스페이스 진입은 UniverseUtilityBar 내부) */}
-                <div className="hidden md:flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 ml-auto">
                     {/* 비인증 사용자에게만 노출되는 시작 CTA */}
                     {!isAuthenticated && (
                         <Link
                             href={ppAiHref}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 text-sm font-semibold rounded-md hover:opacity-90 transition-opacity shadow-sm"
+                            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 text-sm font-semibold rounded-md hover:opacity-90 transition-opacity shadow-sm"
                             title="마이버스 AI 시작하기"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
@@ -79,20 +79,20 @@ export function MyverseHeader() {
                         </Link>
                     )}
                     <UniverseUtilityBar
+                        breakpoint="md"
                         aboutPath="/myverse/story"
                         profilePath="/myverse/my"
                         accentColor="#1a1a2e"
                         signupPath="/myverse/signup"
                         siteId="myverse"
                         siteName="Myverse"
-                        workspacePath="/myverse/app"
-                        workspaceLabel="Myverse"
+                        serviceEntry={{ label: "Myverse", href: "/myverse/app" }}
                     />
                 </div>
 
                 {/* Mobile toggle */}
                 <button
-                    className="md:hidden p-2 text-teal-200 hover:text-white ml-auto"
+                    className="md:hidden p-2 text-teal-200 hover:text-white"
                     onClick={() => setMobileOpen(!mobileOpen)}
                     aria-label="메뉴"
                 >
@@ -109,16 +109,9 @@ export function MyverseHeader() {
             brandName="Myverse"
             bgClass="bg-teal-950"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/myverse/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-200 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={`/myverse/login?redirect=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
-                        <Link href="/myverse/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
-                    </div>
-                )
-            }
+            aboutPath="/myverse/story"
+            accentColor="#1a1a2e"
+            serviceEntry={{ label: "Myverse", href: "/myverse/app" }}
         >
             <Link
                 href={ppAiHref}

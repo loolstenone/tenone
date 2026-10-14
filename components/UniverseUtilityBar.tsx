@@ -3,78 +3,61 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
-import { Share2, Search, Shield, X, ArrowRight, Briefcase, ChevronDown, ExternalLink } from "lucide-react";
+import { Share2, Search, X, ArrowRight, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
-import { NotificationBell, AccountAvatar, LogoutButton } from "@/components/AccountControls";
+import { NotificationBell, LogoutButton } from "@/components/AccountControls";
+import { AccountMenu } from "@/components/AccountMenu";
+import { shareCurrentPage } from "@/lib/share-page";
 
-// ── Workspace 레지스트리 ──────────────────────────────────────
-// 각 브랜드의 "내 워크스페이스" 경로. 사용자의 affiliations[]에 해당 brandId가 있으면 자동으로 드롭다운에 노출.
-// 새 브랜드 추가 시 여기 한 줄만 추가하면 전 사이트에서 자동 반영.
-// openOnOwnSite: 로그인 회원 누구나 쓰는 서비스 — 그 브랜드 사이트 안에서는 affiliations 없이도 노출 (예: 플래너'스 AI, 2026-10-14)
-interface WorkspaceEntry { brandId: string; label: string; path: string; description?: string; openOnOwnSite?: boolean; }
-const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
-    { brandId: "badak",        label: "Badak",                path: "/badak/my",        description: "기획자 네트워크" },
-    { brandId: "madleague",    label: "MAD League",           path: "/madleague/my",    description: "현역·OB" },
-    { brandId: "madleap",      label: "MADLeap",              path: "/madleap/my",      description: "교육 프로그램" },
-    { brandId: "hero",         label: "HeRo",                 path: "/hero/journey",    description: "커리어 여정" },
-    { brandId: "wio",          label: "WIO",                  path: "/wio/app",         description: "업무 자동화 OS" },
-    { brandId: "smarcomm",     label: "SmarComm",             path: "/smarcomm/dashboard", description: "마케팅 OS" },
-    { brandId: "youinone",     label: "YouInOne",             path: "/youinone/my",     description: "크루 정산" },
-    { brandId: "mindle",       label: "Mindle",               path: "/mindle/my",       description: "트렌드 콘텐츠" },
-    { brandId: "brandgravity", label: "Brand Gravity",        path: "/brandgravity/my", description: "브랜드 진단" },
-    { brandId: "jakka",        label: "Jakka",                path: "/jakka/my",        description: "창작자 마켓" },
-    { brandId: "domo",         label: "Domo",                 path: "/domo/my",         description: "도시 모임" },
-    { brandId: "townity",      label: "Townity",              path: "/townity/my",      description: "동네 커뮤니티" },
-    { brandId: "planners",     label: "플래너'스 AI",          path: "/planners/app",    description: "Planner's 인공지능 플래너", openOnOwnSite: true },
-    { brandId: "rook",         label: "RooK",                 path: "/rook/my",         description: "독서 모임" },
-    { brandId: "changeup",     label: "ChangeUp",             path: "/changeup/my",     description: "변화 코칭" },
-    { brandId: "naturebox",    label: "NatureBox",            path: "/naturebox/my",    description: "자연 박스" },
-    { brandId: "fwn",          label: "FWN",                  path: "/fwn/my",          description: "여성 네트워크" },
-    { brandId: "montz",        label: "MoNTZ",                path: "/montz/my",        description: "월간 전시" },
-    { brandId: "mullaesian",   label: "Mullaesian",           path: "/mullaesian/my",   description: "문래 커뮤니티" },
-    { brandId: "seoul360",     label: "Seoul360",             path: "/seoul360/my",     description: "서울 360도" },
-    { brandId: "ogamja",       label: "0gamja",               path: "/0gamja/my",       description: "0감자" },
-];
+// ── 유틸리티바 (CLAUDE.md §1.9.2, 2026-10-14 개정) ─────────────────
+// 모든 브랜드 헤더 우상단. 데스크톱(breakpoint 이상)과 모바일(미만)을 이 컴포넌트가 같이 그린다
+//   → 헤더에서 hidden md:flex로 감싸 숨기지 않는다 (감싸면 모바일에서 알림·계정·로그아웃이 사라진다)
+// 데스크톱: About · 서비스 입구 · 알림 · 아바타(계정 메뉴) · 로그아웃 | 로그인·가입 · 공유 · 검색
+// 모바일:   검색 · 알림 · 아바타(계정 메뉴 시트, 로그아웃 포함) | 로그인 아이콘  — About·공유·서비스 입구는 UniverseMobileMenu
+// ❌ 다른 브랜드 목록(WORK 드롭다운)·ADMIN 링크를 바에 두지 않는다 → 계정 메뉴 (components/AccountMenu.tsx)
+
+export interface ServiceEntry {
+    /** 버튼 문구 — 브랜드가 정한다 (예: "내 플래너", "Orbi 시작하기") */
+    label: string;
+    /** 서비스 화면. 이 브랜드 첫 진입이면 BrandJoinGate가 동의를 받는다 */
+    href: string;
+}
 
 export interface UtilityBarConfig {
     aboutPath: string;
-    /** About 표기 — 기본 'ABOUT' — 전 브랜드 공통 (2026-10-13 사용자 결정: 이 정도 영어는 그대로). 위치·모양은 그대로 */
+    /** About 표기 — 기본 'ABOUT' (2026-10-13 사용자 결정) */
     aboutLabel?: string;
+    hideAbout?: boolean;
+    /** 이 사이트의 마이페이지 — 계정 메뉴 첫 줄 */
     profilePath?: string;
-    /** 단일 워크스페이스 (legacy 호환). workspaces 배열을 우선 쓰되, 비어있으면 affiliations 기반 자동 노출. */
-    workspacePath?: string | null;
-    workspaceLabel?: string;
-    /** 명시적 워크스페이스 목록 (override). 비어있으면 user.affiliations로 자동 계산. */
-    workspaces?: WorkspaceEntry[];
-    adminPath?: string | null;
-    adminEmails?: string[];
+    /** 서비스 입구 — 로그인 후 쓰는 서비스 화면(앱)이 있는 브랜드만 (Planner's·WIO·SmarComm 등). 커뮤니티·콘텐츠 브랜드는 없음 */
+    serviceEntry?: ServiceEntry;
     accentColor?: string;
     signupPath?: string;
-    searchPlaceholder?: string;
     loginPath?: string;
+    searchPlaceholder?: string;
     hideAuth?: boolean;
-    hideAbout?: boolean;
     /** 알림 숨김 (랜딩 페이지 등에서) */
     hideNotifications?: boolean;
-    /** WORK 드롭다운 숨김 (브랜드 본진 사이트 — 도메인 자체가 곧 워크스페이스인 경우) */
-    hideWorkspaces?: boolean;
-    /** WORK 버튼 이름 바꾸기 (예: Planner's "내 플래너"). 이용 서비스가 하나면 드롭다운 없이 바로 이동 */
-    workspaceButtonLabel?: string;
-    searchPath?: string;
     siteId?: string;
     siteName?: string;
+    /** 데스크톱 모양이 시작되는 너비 — 헤더 메뉴가 펼쳐지는 너비와 맞춘다 (기본 md) */
+    breakpoint?: "md" | "lg" | "xl";
 }
 
-const defaultConfig: UtilityBarConfig = {
-    aboutPath: "/about",
+const BP: Record<NonNullable<UtilityBarConfig["breakpoint"]>, { desk: string; mob: string }> = {
+    md: { desk: "hidden md:flex", mob: "flex md:hidden" },
+    lg: { desk: "hidden lg:flex", mob: "flex lg:hidden" },
+    xl: { desk: "hidden xl:flex", mob: "flex xl:hidden" },
+};
+
+const defaultConfig: Partial<UtilityBarConfig> = {
     profilePath: "/profile",
-    workspacePath: null,
-    workspaceLabel: "Intra",
-    adminPath: null,
     accentColor: "#171717",
     signupPath: "/signup",
     searchPlaceholder: "검색어를 입력하세요...",
+    breakpoint: "md",
 };
 
 interface SearchResult { id: string; title: string; description?: string; href: string; type: string; }
@@ -82,7 +65,7 @@ interface SearchResult { id: string; title: string; description?: string; href: 
 export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBarConfig }) {
     const rawConfig = 'config' in props ? props.config : props;
     const config = { ...defaultConfig, ...rawConfig };
-    const { isAuthenticated, user, logout } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const [searchOpen, setSearchOpen] = useState(false);
@@ -92,43 +75,12 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
     const [universeResults, setUniverseResults] = useState<SearchResult[]>([]);
     const [searching, setSearching] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-
-    // 워크스페이스 드롭다운
-    const [wsOpen, setWsOpen] = useState(false);
-    const isAdmin = user?.role === "Admin" || user?.accountType === "staff"
-        || (config.adminEmails || []).includes(user?.email || "");
-
-    // 사용자 affiliations 기반 워크스페이스 자동 계산
-    const userAffiliations = (user?.affiliations as string[]) || [];
-    const autoWorkspaces = WORKSPACE_REGISTRY.filter(w => userAffiliations.includes(w.brandId) || (w.openOnOwnSite && config.siteId === w.brandId));
-    const workspaces: WorkspaceEntry[] = config.workspaces && config.workspaces.length > 0
-        ? config.workspaces
-        : autoWorkspaces;
+    const bp = BP[config.breakpoint ?? "md"];
 
     const handleShare = async () => {
-        if (typeof window === "undefined") return;
-        const url = window.location.href;
-        try {
-            if (navigator.share) {
-                await navigator.share({ title: document.title, url });
-            } else {
-                await navigator.clipboard.writeText(url);
-                setShareToast(true);
-                setTimeout(() => setShareToast(false), 2000);
-            }
-        } catch {
-            try {
-                const el = document.createElement("textarea");
-                el.value = url;
-                el.style.position = "fixed";
-                el.style.opacity = "0";
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand("copy");
-                document.body.removeChild(el);
-                setShareToast(true);
-                setTimeout(() => setShareToast(false), 2000);
-            } catch { /* silent */ }
+        if ((await shareCurrentPage()) === "copied") {
+            setShareToast(true);
+            setTimeout(() => setShareToast(false), 2000);
         }
     };
 
@@ -174,106 +126,26 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
         return () => clearTimeout(timer);
     }, [searchQuery, config.siteId]);
 
-    // 외부 클릭 시 드롭다운 닫기
-    useEffect(() => {
-        if (!wsOpen) return;
-        const close = () => setWsOpen(false);
-        const t = setTimeout(() => window.addEventListener("click", close), 0);
-        return () => { clearTimeout(t); window.removeEventListener("click", close); };
-    }, [wsOpen]);
-
     return (
         <>
-            <div className="flex items-center gap-3.5">
-                {/* About */}
-                {!config.hideAbout && (
+            {/* 데스크톱 */}
+            <div className={`${bp.desk} items-center gap-3.5`}>
+                {!config.hideAbout && config.aboutPath && (
                     <Link href={config.aboutPath} className="text-xs font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                         {config.aboutLabel ?? "ABOUT"}
                     </Link>
                 )}
 
+                {config.serviceEntry && (
+                    <CrossSiteLink href={config.serviceEntry.href} className="text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity whitespace-nowrap">
+                        {config.serviceEntry.label}
+                    </CrossSiteLink>
+                )}
+
                 {!config.hideAuth && isAuthenticated ? (
                     <>
-                        {/* Work Space 드롭다운 — affiliations 기반 자동 또는 명시적 workspaces */}
-                        {!config.hideWorkspaces && config.workspaceButtonLabel && workspaces.length === 1 ? (
-                            <CrossSiteLink href={workspaces[0].path} className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity" title={workspaces[0].label}>
-                                <Briefcase className="h-4 w-4" />
-                                <span>{config.workspaceButtonLabel}</span>
-                            </CrossSiteLink>
-                        ) : !config.hideWorkspaces && workspaces.length > 0 && (
-                            <div className="relative" onClick={(e) => e.stopPropagation()}>
-                                <button
-                                    onClick={() => setWsOpen(o => !o)}
-                                    className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
-                                    title="내 워크스페이스"
-                                >
-                                    <Briefcase className="h-4 w-4" />
-                                    <span>{config.workspaceButtonLabel ?? "WORK"}</span>
-                                    {workspaces.length > 1 && <span className="text-[10px] opacity-60">({workspaces.length})</span>}
-                                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${wsOpen ? "rotate-180" : ""}`} />
-                                </button>
-                                {wsOpen && (
-                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-200 overflow-hidden z-50">
-                                        <div className="px-3 py-2 border-b border-neutral-100 text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
-                                            이용 중인 서비스
-                                        </div>
-                                        <div className="max-h-80 overflow-y-auto">
-                                            {workspaces.map(w => (
-                                                <CrossSiteLink
-                                                    key={w.brandId}
-                                                    href={w.path}
-                                                    onClick={() => setWsOpen(false)}
-                                                    className="flex items-center gap-2 px-3 py-2 hover:bg-neutral-50 transition-colors group"
-                                                >
-                                                    <Briefcase className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
-                                                    <div className="min-w-0 flex-1">
-                                                        <div className="text-sm font-medium truncate">{w.label}</div>
-                                                        {w.description && <div className="text-[10px] text-neutral-500 truncate">{w.description}</div>}
-                                                    </div>
-                                                    <ExternalLink className="h-3 w-3 text-neutral-300 group-hover:text-neutral-700 shrink-0" />
-                                                </CrossSiteLink>
-                                            ))}
-                                            {/* legacy workspacePath fallback (registry에 없으나 호출자가 명시한 경우) */}
-                                            {config.workspacePath && !workspaces.some(w => w.path === config.workspacePath) && (
-                                                <Link
-                                                    href={config.workspacePath}
-                                                    onClick={() => setWsOpen(false)}
-                                                    className="flex items-center gap-2 px-3 py-2 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
-                                                >
-                                                    <Briefcase className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
-                                                    <div className="text-sm font-medium">{config.workspaceLabel}</div>
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {/* legacy 단일 workspacePath만 있고 affiliations이 비어있을 때 */}
-                        {workspaces.length === 0 && config.workspacePath && (
-                            <Link href={config.workspacePath} className="flex items-center gap-1 text-[11px] font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity">
-                                <Briefcase className="h-3.5 w-3.5" />
-                                {config.workspaceLabel}
-                            </Link>
-                        )}
-
-                        {/* 알림 — 공통 부품 (components/AccountControls) */}
                         {!config.hideNotifications && <NotificationBell />}
-
-                        {/* 아바타 — 이미지만, 이름 텍스트 X */}
-                        {config.profilePath && (
-                            <Link href={config.profilePath} className="opacity-90 hover:opacity-100 transition-opacity" title={user?.name || "프로필"}>
-                                <AccountAvatar />
-                            </Link>
-                        )}
-
-                        {config.adminPath && isAdmin && (
-                            <Link href={config.adminPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1" title="Admin">
-                                <Shield className="h-3 w-3" /> ADMIN
-                            </Link>
-                        )}
-
-                        {/* 로그아웃 — 텍스트 */}
+                        <AccountMenu profilePath={config.profilePath} siteId={config.siteId} />
                         <LogoutButton />
                     </>
                 ) : !config.hideAuth ? (
@@ -287,13 +159,33 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                     </>
                 ) : null}
 
-                {/* 공유 + 검색 — 항상 노출 */}
                 <button onClick={handleShare} className="opacity-50 hover:opacity-100 transition-opacity" title="공유">
                     <Share2 className="h-3.5 w-3.5" />
                 </button>
                 <button onClick={openSearch} className="opacity-50 hover:opacity-100 transition-opacity" title="검색">
                     <Search className="h-3.5 w-3.5" />
                 </button>
+            </div>
+
+            {/* 모바일 — 햄버거 버튼은 각 헤더가 이 옆에 둔다 */}
+            <div className={`${bp.mob} items-center gap-3`}>
+                <button onClick={openSearch} className="p-1 opacity-60 hover:opacity-100 transition-opacity" aria-label="검색">
+                    <Search className="h-4 w-4" />
+                </button>
+                {!config.hideAuth && isAuthenticated ? (
+                    <>
+                        {!config.hideNotifications && <NotificationBell />}
+                        <AccountMenu profilePath={config.profilePath} siteId={config.siteId} mode="sheet" />
+                    </>
+                ) : !config.hideAuth ? (
+                    config.loginPath ? (
+                        <Link href={config.loginPath} className="p-1 opacity-70 hover:opacity-100" aria-label="로그인"><User className="h-5 w-5" /></Link>
+                    ) : (
+                        <button onClick={() => { setLoginTab("login"); setLoginOpen(true); }} className="p-1 opacity-70 hover:opacity-100" aria-label="로그인">
+                            <User className="h-5 w-5" />
+                        </button>
+                    )
+                ) : null}
             </div>
 
             {/* 전체화면 검색 오버레이 */}

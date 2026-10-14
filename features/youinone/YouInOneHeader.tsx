@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "What We Do", href: "/whatwedo" },
@@ -20,7 +18,6 @@ const navItems = [
 export function YouInOneHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -63,8 +60,9 @@ export function YouInOneHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto items-center gap-3">
+                <div className="flex ml-auto items-center gap-3">
                     <UniverseUtilityBar
+                        breakpoint="lg"
                         hideAbout
                         aboutPath="/youinone/about"
                         profilePath="/youinone/my"
@@ -75,7 +73,7 @@ export function YouInOneHeader() {
                     />
                     <Link
                         href="/alliance"
-                        className="text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded"
+                        className="hidden lg:inline-block text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded"
                     >
                         Members &amp; Alliance
                     </Link>
@@ -98,24 +96,15 @@ export function YouInOneHeader() {
             brandName="YouInOne"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                <div className="flex flex-col gap-3">
-                    {isAuthenticated ? (
-                        <Link href="/youinone/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">마이페이지</Link>
-                    ) : (
-                        <div className="flex items-center gap-4">
-                            <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">로그인</Link>
-                            <Link href="/youinone/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">가입</Link>
-                        </div>
-                    )}
-                    <Link
-                        href="/alliance"
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-center text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] rounded transition-colors"
-                    >
-                        Members &amp; Alliance
-                    </Link>
-                </div>
+            accentColor="#1AAD64"
+            cta={
+                <Link
+                    href="/alliance"
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-center text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] rounded transition-colors"
+                >
+                    Members &amp; Alliance
+                </Link>
             }
         >
             {navItems.map((item) => (

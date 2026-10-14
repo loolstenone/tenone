@@ -8,7 +8,6 @@ import { Menu, X, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const PREFIX = '/myverse';
 // Home(logo) + 브랜드 스토리(철학+About 통합) + 가격
@@ -65,7 +64,7 @@ export function MyVerseHeader() {
                             Myverse 시작하기
                         </Link>
                     )}
-                    <div className="hidden md:flex">
+                    <div className="flex">
                         <UniverseUtilityBar
                             aboutPath="/myverse/story"
                             profilePath="/myverse/my"
@@ -75,7 +74,7 @@ export function MyVerseHeader() {
                             siteId="myverse"
                             siteName="Myverse"
                             hideAbout
-                            hideWorkspaces
+                            breakpoint="md"
                         />
                     </div>
                     <button
@@ -96,34 +95,7 @@ export function MyVerseHeader() {
             brandName="Myverse"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link
-                        href="/myverse/my"
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-sm text-neutral-500 hover:text-neutral-900"
-                    >
-                        마이페이지
-                    </Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href={loginHref(pathname)}
-                            onClick={() => setMobileOpen(false)}
-                            className="text-sm text-neutral-500 hover:text-neutral-900"
-                        >
-                            로그인
-                        </Link>
-                        <Link
-                            href="/myverse/signup"
-                            onClick={() => setMobileOpen(false)}
-                            className="text-sm text-neutral-500 hover:text-neutral-900"
-                        >
-                            가입
-                        </Link>
-                    </div>
-                )
-            }
+            accentColor="#6366f1"
         >
             {/* 앱 진입 CTA */}
             <Link

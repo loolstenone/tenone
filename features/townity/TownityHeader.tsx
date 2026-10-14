@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "타우니티란", href: "/townity#about" },
@@ -17,9 +14,7 @@ const navItems = [
 ];
 
 export function TownityHeader() {
-    const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     return (
         <>
@@ -45,9 +40,10 @@ export function TownityHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         hideAbout
+                        breakpoint="md"
                         aboutPath="/townity/about"
                         profilePath="/townity/my"
                         accentColor="#1a1a2e"
@@ -73,16 +69,7 @@ export function TownityHeader() {
             brandName="Townity"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/townity/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/townity/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
-                    </div>
-                )
-            }
+            accentColor="#1a1a2e"
         >
             {navItems.map((item) => (
                 <Link

@@ -3,14 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { Menu, X } from "lucide-react";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
-import { LoginModal } from "@/components/LoginModal";
 
 const PREFIX = "/badak";
 // 헤더 메뉴 = lib/brand-site-menus.ts (사이트·인트라·현황 SSOT, §1.9.5) — 메뉴 이름·순서는 거기서 고친다
@@ -19,15 +16,6 @@ const navItems = siteHeaderNav("badak");
 export function BadakHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
-    const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
-    const { isAuthenticated, user } = useAuth();
-
-    const openLogin = (tab: "login" | "signup" = "login") => {
-        setLoginTab(tab);
-        setMobileOpen(false);
-        setLoginOpen(true);
-    };
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -67,8 +55,9 @@ export function BadakHeader() {
                 </div>
 
                 {/* Right side — 알림은 UniverseUtilityBar의 Bell이 전담 (중복 제거) */}
-                <div className="hidden md:flex items-center gap-1 ml-auto">
+                <div className="flex items-center gap-1 ml-auto">
                     <UniverseUtilityBar
+                        breakpoint="md"
                         aboutPath="/badak/about"
                         profilePath="/badak/my"
                         accentColor="#1a1a2e"
@@ -78,70 +67,24 @@ export function BadakHeader() {
                     />
                 </div>
 
-                {/* Mobile: 프로필 + 햄버거 (알림은 UniverseUtilityBar 전담) */}
-                <div className="md:hidden flex items-center gap-1">
-                    {isAuthenticated ? (
-                        <Link href={`${PREFIX}/my`} className="p-1.5">
-                            {user?.avatarUrl ? (
-                                <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                    className="h-7 w-7 rounded-full object-cover" />
-                            ) : (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
-                                    style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
-                                    {user?.name?.charAt(0) ?? '?'}
-                                </div>
-                            )}
-                        </Link>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => openLogin("login")}
-                            className="p-2 text-neutral-300 hover:text-white"
-                            aria-label="로그인"
-                        >
-                            <User className="h-5 w-5" />
-                        </button>
-                    )}
-                    <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="p-2 text-neutral-300 hover:text-white"
-                        aria-label="메뉴 열기"
-                    >
-                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                    </button>
-                </div>
+                <button
+                    onClick={() => setMobileOpen(!mobileOpen)}
+                    className="md:hidden p-2 ml-2 text-neutral-300 hover:text-white"
+                    aria-label="메뉴 열기"
+                >
+                    {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
             </nav>
         </header>
 
         <UniverseMobileMenu
+            aboutPath="/badak/about"
+            accentColor="#ffd93d"
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             brandName="Badak"
             bgStyle={{ background: '#12122a' }}
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-300 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex flex-col gap-2">
-                        <button
-                            type="button"
-                            onClick={() => openLogin("login")}
-                            className="rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50 hover:text-white"
-                        >
-                            로그인
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => openLogin("signup")}
-                            className="rounded-lg px-4 py-2 text-center text-sm font-semibold"
-                            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
-                        >
-                            가입하기
-                        </button>
-                    </div>
-                )
-            }
         >
             {navItems.map((item) => (
                 <Link
@@ -160,12 +103,6 @@ export function BadakHeader() {
             ))}
         </UniverseMobileMenu>
 
-        <LoginModal
-            isOpen={loginOpen}
-            onClose={() => setLoginOpen(false)}
-            accentColor="#1a1a2e"
-            defaultTab={loginTab}
-        />
         </>
     );
 }

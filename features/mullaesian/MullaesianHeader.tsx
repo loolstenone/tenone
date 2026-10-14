@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "뚜르 드 문래", href: "/mullaesian#tour" },
@@ -16,9 +13,7 @@ const navItems = [
 ];
 
 export function MullaesianHeader() {
-    const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     return (
         <>
@@ -46,11 +41,12 @@ export function MullaesianHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         hideAbout
                         aboutPath="/mullaesian/about"
                         profilePath="/mullaesian/my"
+                        breakpoint="md"
                         accentColor="#1a1a2e"
                         signupPath="/mullaesian/signup"
                         siteId="mullaesian"
@@ -75,16 +71,7 @@ export function MullaesianHeader() {
             brandName="Mullaesian"
             bgClass="bg-white"
             textTone="dark"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/mullaesian/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                        <Link href="/mullaesian/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
-                    </div>
-                )
-            }
+            accentColor="#1a1a2e"
         >
             {navItems.map((item) => (
                 <Link

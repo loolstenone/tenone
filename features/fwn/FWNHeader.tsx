@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "서울", href: "/category/seoul" },
@@ -25,7 +23,6 @@ const navItems = [
 export function FWNHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -45,10 +42,11 @@ export function FWNHeader() {
                         <span className="text-neutral-400 text-xs ml-2 hidden sm:inline">패션 위크 네트워크</span>
                     </Link>
                     <div className="flex items-center gap-3">
-                        <div className="hidden lg:flex ml-auto">
+                        <div className="flex ml-auto items-center">
                             <UniverseUtilityBar
                                 aboutPath="/fwn/about"
                                 profilePath="/fwn/my"
+                                breakpoint="lg"
                                 accentColor="#000000"
                                 signupPath="/fwn/signup"
                                 siteId="fwn"
@@ -93,16 +91,8 @@ export function FWNHeader() {
             brandName="FWN"
             bgClass="bg-[#1a1a1a]"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/fwn/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/fwn/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">가입</Link>
-                    </div>
-                )
-            }
+            aboutPath="/fwn/about"
+            accentColor="#000000"
         >
             {navItems.map((item) => (
                 <Link

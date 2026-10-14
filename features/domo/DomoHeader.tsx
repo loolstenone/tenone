@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "서비스", href: "/services" },
@@ -20,7 +18,6 @@ const navItems = [
 export function DomoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -58,10 +55,11 @@ export function DomoHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto">
+                <div className="flex ml-auto items-center">
                     <UniverseUtilityBar
                         aboutPath="/domo/about"
                         profilePath="/domo/my"
+                        breakpoint="md"
                         accentColor="#1a1a2e"
                         signupPath="/domo/signup"
                         siteId="domo"
@@ -86,16 +84,8 @@ export function DomoHeader() {
             brandName="Domo"
             bgClass="bg-[#2D1B2E]"
             textTone="light"
-            footer={
-                isAuthenticated ? (
-                    <Link href="/domo/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
-                        <Link href="/domo/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">멤버 가입</Link>
-                    </div>
-                )
-            }
+            aboutPath="/domo/about"
+            accentColor="#1a1a2e"
         >
             {navItems.map((item) => (
                 <Link
