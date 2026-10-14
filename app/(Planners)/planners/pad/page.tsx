@@ -5,7 +5,7 @@ import { listPlannersFiles, PAD_CATEGORIES, PAD_CATEGORY_DESC, sortFiles, type P
 import { reviewCountsByFile } from "@/lib/planners/reviews";
 import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/features/planners/PageHero";
 
-// 플래너'스 PAD — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
+// 플래너'스 PAD (곁들임 제품, 2026-10-14 AI 중심 개편) — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
 export const metadata: Metadata = {
     title: "PAD",
     description: "아이패드·갤럭시 탭의 굿노트·삼성노트·XODO에서 쓰는 손글씨 플래너와 노트·프레임워크 서식. 로그인하면 누구나 받을 수 있습니다.",
@@ -40,9 +40,9 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
     return (
         <>
             <PlannersPageHero
-                eyebrow="PAD"
-                title="손으로 쓰는 기획자의 플래너"
-                description={<>아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다.</>}
+                eyebrow="플래너'스 PAD"
+                title="펜슬로 쓰는 플래너"
+                description={<>아이패드·갤럭시 탭의 굿노트, 삼성노트, XODO에서 쓰는 PDF 플래너와 서식 {all.length}종. Ten:One™ 계정으로 로그인하면 누구나 받을 수 있습니다. 쓴 페이지는 사진 한 장으로 <Link href="/planners/ai" className="font-bold text-[#0F766E] hover:underline">플래너'스 AI</Link>에 옮겨 이어 관리할 수 있습니다.</>}
             />
 
             <div className="sticky top-[64px] z-30 border-b border-neutral-200 bg-white/95 backdrop-blur md:top-[84px]">

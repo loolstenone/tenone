@@ -9,37 +9,43 @@ import { listPlannersFiles, PAD_CATEGORIES, padPath, sortFiles } from "@/lib/pla
 import { reviewCountsByFile } from "@/lib/planners/reviews";
 import { listActiveBanners, listActiveShowcases } from "@/lib/planners/home";
 import { HeroCarousel, type HeroSlide } from "@/features/planners/home/HeroCarousel";
+import { AiAtWork } from "@/features/planners/home/AiAtWork";
 
-// 첫 화면 = 몰 (2026-10-14 개편 — "블로그 같다" → 바닥상회 몰 수준). 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은"은 사용자 확정
+// 첫 화면 (2026-10-14 AI 중심 개편, 사용자 "기획자를 전면에 내세우면 재미가 없다")
+// 순서 = ① 플래너'스 AI(주인공) → ② 플래너'스 PAD(손글씨, 진열대·분류) → ③ 기획자 과정(부수, "우리는 모두 기획자다 / 자기 인생에서만큼은")
+// ❌ 첫 장에 앱 열기 버튼을 두지 않는다 (앱 입구 = 유틸리티바 '내 플래너')
 export const metadata: Metadata = {
-    title: "우리는 모두 기획자다",
-    description: "인공지능 시대, 더욱 기획자가 되어야 한다. 플래너'스 AI(인공지능 플래너)와 플래너'스 PAD(굿노트 등 손글씨 플래너·서식).",
+    title: { absolute: "플래너'스 AI · 내 손으로, 내 뜻대로" },
+    description: "생각하고, 기록하고, 계획하고, 꾸려 가는 사람을 돕는 인공지능 플래너 플래너'스 AI. 손으로 쓰는 플래너 플래너'스 PAD도 함께.",
 };
 
-const AI_FEATURES = ["오늘·주간·월간·연간 계획", "프로젝트·할 일·간트", "캔버스·마인드맵", "AI 브리핑"];
+// 실제 기능 이름 그대로 (app/(Planners)/CLAUDE.md 플래너'스 AI 1~3단계)
+const AI_VERBS = [
+    { verb: "생각하다", title: "생각 쏟아내기", desc: "머릿속을 그냥 적거나 말하듯 쓰면, AI가 할 일과 일정으로 나눠 제안합니다. 캔버스와 마인드맵으로 펼쳐 볼 수도 있습니다." },
+    { verb: "기록하다", title: "손글씨도 그대로", desc: "펜슬로 쓴 노트, 종이 플래너 사진을 글자로 옮깁니다. 지난 기록은 일상어로 물어 찾습니다." },
+    { verb: "계획하다", title: "목표를 오늘로", desc: "연간·월간·주간·오늘이 한 흐름으로 이어집니다. 큰 목표는 AI가 할 일과 날짜로 나눠 줍니다." },
+    { verb: "꾸려 가다", title: "밀려도 다시", desc: "못 끝낸 일은 빈 시간에 다시 놓고, 아침엔 오늘의 세 가지, 저녁과 주말엔 함께 돌아봅니다." },
+];
 
 export default async function PlannersHome() {
     const files = await listPlannersFiles();
     const reviewCounts = await reviewCountsByFile();
-    const planners = files.filter((f) => f.category === "연간 플래너").sort((a, b) => b.sort_order - a.sort_order);
-    const hero = planners.find((f) => f.legacy_badak_no === 182) ?? planners[0];
     const popular = sortFiles(files.filter((f) => f.kind === "template"), "popular").slice(0, 8);
     const tiles = PAD_CATEGORIES.map((c) => ({ c, list: files.filter((f) => f.category === c) })).filter((t) => t.list.length > 0);
     const t = { ...PROGRAM_THEMES.planners, accent: "#0F766E" };
     const [banners, showcases] = await Promise.all([listActiveBanners(), listActiveShowcases(files)]);
 
-    // 첫 장 = 확정 문구(바꾸지 않음) · 그다음 = 인트라 › Planner's › 배너
+    // 첫 장 = 플래너'스 AI · 그다음 = 인트라 › Planner's › 배너
     const slides: HeroSlide[] = [
         {
             key: "brand",
-            title: "우리는 모두 기획자다",
-            subtitle: "자기 인생에서만큼은",
-            body: "인공지능 시대, 더욱 기획자가 되어야 한다.\nAI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.\n우리가 기획자가 되어야 하는 이유다.",
-            imageUrl: hero?.thumbnail_url ?? null,
-            imageHref: hero ? padPath(hero.id) : null,
-            primary: { label: "PAD 받기", href: "/planners/pad" },
-            secondary: { label: "AI 알아보기", href: "/planners/ai" },
-            note: "종이? 패드? AI? 중요한 것은 기획하는 나",
+            title: "내 손으로, 내 뜻대로",
+            subtitle: "생각하고 기록하고 계획하고 꾸려 가는 사람의 인공지능 플래너",
+            body: "플래너'스 AI는 대신 정하지 않습니다.\n쏟아 낸 생각을 할 일로 나누고, 못 끝낸 일을 다시 놓아 주고,\n하루와 한 주를 곁에서 함께 돌아봅니다.",
+            visual: <AiAtWork />,
+            primary: { label: "AI 알아보기", href: "/planners/ai" },
+            secondary: { label: "PAD 받기", href: "/planners/pad" },
+            note: "펜으로 쓰는 쪽이 좋다면, 플래너'스 PAD",
         },
         ...banners.map((b) => ({
             key: b.id,
@@ -55,33 +61,47 @@ export default async function PlannersHome() {
         <>
             <HeroCarousel slides={slides} />
 
-            {/* 두 제품 */}
-            <section className={`${PLANNERS_SECTION} grid gap-6 md:grid-cols-2 md:gap-12`}>
-                <Link href="/planners/ai" className="group flex flex-col justify-between bg-neutral-50 p-10 transition-colors hover:bg-teal-50/60 md:p-20">
-                    <div>
-                        <p className="text-sm font-bold text-[#0F766E]">AI</p>
-                        <h2 className="mt-2 text-3xl font-bold md:text-4xl">인공지능 플래너</h2>
-                        <p className="mt-2 break-keep text-neutral-600">플래너'스 PAD와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
-                    </div>
-                    <ul className="mt-10 grid grid-cols-2 gap-2 text-sm text-neutral-700">
-                        {AI_FEATURES.map((f) => <li key={f} className="bg-white px-4 py-3">{f}</li>)}
-                    </ul>
-                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">AI 알아보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
-                </Link>
-                <Link href="/planners/pad" className="group flex flex-col justify-between bg-neutral-50 p-10 transition-colors hover:bg-teal-50/60 md:p-20">
+            {/* ① 플래너'스 AI */}
+            <section className={PLANNERS_SECTION}>
+                <PlannersSectionTitle
+                    title="기록은 자유롭게, 관리는 똑똑하게, 회고는 따뜻하게"
+                    description="종이 플래너를 쓰다 그만두게 되는 이유, 밀린 일 다시 쓰기·지난 기록 찾기·혼자 돌아보기를 AI가 덜어 줍니다."
+                    href="/planners/ai"
+                />
+                <div className="grid gap-px bg-neutral-200 md:grid-cols-2 lg:grid-cols-4">
+                    {AI_VERBS.map((v) => (
+                        <div key={v.verb} className="bg-white p-8 md:p-10">
+                            <p className="text-sm font-bold text-[#0F766E]">{v.verb}</p>
+                            <h3 className="mt-4 text-xl font-bold md:text-2xl">{v.title}</h3>
+                            <p className="mt-3 break-keep leading-relaxed text-neutral-600">{v.desc}</p>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-12 text-center">
+                    <Link href="/planners/ai" className="inline-flex items-center gap-1 font-bold text-[#0F766E] hover:underline">플래너'스 AI 더 알아보기 <ArrowRight className="h-4 w-4" /></Link>
+                </div>
+            </section>
+
+            {/* ② 플래너'스 PAD */}
+            <section className="bg-neutral-50">
+                <div className={`${PLANNERS_SECTION} grid gap-10 md:grid-cols-2 md:items-center md:gap-24`}>
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">PAD</p>
-                        <h2 className="mt-2 text-3xl font-bold md:text-4xl">손글씨 플래너</h2>
-                        <p className="mt-2 break-keep text-neutral-600">굿노트·삼성노트·XODO에서 쓰는 PDF 플래너와 서식 {files.length}종.</p>
+                        <h2 className="mt-3 break-keep text-3xl font-bold md:text-5xl">펜슬로 쓰는 플래너</h2>
+                        <p className="mt-6 break-keep leading-relaxed text-neutral-600 md:text-lg">
+                            굿노트·삼성노트·XODO에서 손으로 쓰는 PDF 플래너와 서식 {files.length}종. 플래너'스 AI와 같은 연간·월간·주간·오늘 구조라 함께 써도 어긋나지 않고, 쓴 페이지는 사진 한 장으로 AI에 옮길 수 있습니다.
+                        </p>
+                        <Link href="/planners/pad" className="mt-10 inline-flex items-center gap-1 font-bold text-[#0F766E] hover:underline">PAD 둘러보기 <ArrowRight className="h-4 w-4" /></Link>
                     </div>
-                    <div className="mt-10 grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                         {popular.slice(0, 4).map((f) => f.thumbnail_url && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img key={f.id} src={f.thumbnail_url} alt="" className="aspect-square w-full bg-white object-contain p-2" />
+                            <Link key={f.id} href={padPath(f.id)} className="block bg-white p-4">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={f.thumbnail_url} alt={f.title} className="aspect-square w-full object-contain" />
+                            </Link>
                         ))}
                     </div>
-                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">서식 둘러보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
-                </Link>
+                </div>
             </section>
 
             {/* 진열대 — 인트라 › Planner's › 진열대 (아임웹 쇼핑 기획전 자리) */}
@@ -112,28 +132,26 @@ export default async function PlannersHome() {
                 </div>
             </section>
 
-            {/* 인기 서식 */}
-            {popular.length > 0 && (
-                <Shelf title="많이 쓰는 서식" href="/planners/pad">
-                    <ProductGrid reviewCounts={reviewCounts} files={popular} />
-                </Shelf>
-            )}
-
-            {/* 기획이란 */}
-            <section className="bg-neutral-50">
-                <div className={`${PLANNERS_SECTION} flex flex-col gap-6 md:flex-row md:items-center md:justify-between`}>
+            {/* ③ 기획자 과정 (부수) */}
+            <section className="bg-[#134E4A] text-white">
+                <div className={`${PLANNERS_SECTION} grid gap-10 md:grid-cols-[1fr_auto] md:items-end`}>
                     <div>
-                        <p className="text-sm font-bold text-[#0F766E]">기획이란</p>
-                        <p className="mt-3 break-keep text-2xl font-bold md:text-3xl">기획하다 = 주도적 + 목표 설정 + 전략 수립 + 계획</p>
-                        <p className="mt-3 break-keep text-neutral-600 md:text-lg">이상과 현실의 차이를 문제로 보고, 일이 되게 하는 방법을 찾는 사람.</p>
+                        <p className="text-sm font-bold text-teal-200">기획자 과정</p>
+                        <h2 className="mt-4 break-keep text-3xl font-black md:text-5xl">우리는 모두 기획자다</h2>
+                        <p className="mt-3 break-keep text-xl font-bold text-teal-200 md:text-2xl">자기 인생에서만큼은</p>
+                        <p className="mt-8 max-w-2xl break-keep leading-relaxed text-teal-50 md:text-lg">
+                            도구만으로 모자랄 때, 실제 과제를 팀으로 기획하고 끝까지 해 보는 과정을 엽니다. 해 낸 기록은 참여 확인서로 남습니다.
+                        </p>
                     </div>
-                    <Link href="/planners/about" className="inline-flex shrink-0 items-center gap-1 font-bold text-[#0F766E] hover:underline">기획이란 읽기 <ArrowRight className="h-4 w-4" /></Link>
+                    <div className="flex flex-wrap gap-3">
+                        <Link href="/planners/projects" className="inline-flex items-center gap-2 bg-[#14B8A6] px-7 py-3.5 font-bold text-[#042F2E] hover:bg-teal-300">기획자 과정 보기 <ArrowRight className="h-4 w-4" /></Link>
+                        <Link href="/planners/about" className="inline-flex items-center gap-2 border border-white/30 px-7 py-3.5 font-bold hover:bg-white/10">기획이란</Link>
+                    </div>
                 </div>
             </section>
 
-            {/* 프로젝트 */}
-            <Shelf title="지금 모집 중인 프로젝트" href="/planners/projects">
-                <ProgramBoard theme={t} brands={["planners"]} dark={false} emptyText="지금 모집 중인 프로젝트가 없습니다. 새 프로젝트가 열리면 이곳에 안내합니다." />
+            <Shelf title="모집 중인 과정" href="/planners/projects">
+                <ProgramBoard theme={t} brands={["planners"]} dark={false} emptyText="지금 모집 중인 과정이 없습니다. 새 과정이 열리면 이곳과 '이야기 › 공지'에 안내합니다." />
             </Shelf>
         </>
     );

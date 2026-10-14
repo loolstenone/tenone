@@ -20,14 +20,18 @@ export default function PlannersMyPage() {
             <div className={`${PLANNERS_CONTAINER} pb-20 pt-10 md:pt-14`}>
                 <MyProfileCard accentColor={ACCENT} siteBadge="Planner" />
                 {user?.id && <CapabilitySection memberId={user.id} brandId="planners" accentColor={ACCENT} className="mb-6" />}
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    <Link href="/planners/app" className="border border-neutral-200 p-5 hover:border-[#0F766E]">
+                        <p className="font-bold">내 플래너</p>
+                        <p className="mt-1 text-sm text-neutral-500">플래너'스 AI에서 오늘을 계획하고 돌아봅니다.</p>
+                    </Link>
                     <Link href="/planners/projects" className="border border-neutral-200 p-5 hover:border-[#0F766E]">
-                        <p className="font-bold">훈련 프로젝트</p>
-                        <p className="mt-1 text-sm text-neutral-500">모집 중인 프로젝트를 보고 신청합니다.</p>
+                        <p className="font-bold">기획자 과정</p>
+                        <p className="mt-1 text-sm text-neutral-500">모집 중인 과정을 보고 신청합니다.</p>
                     </Link>
                     <Link href="/planners/certificate" className="border border-neutral-200 p-5 hover:border-[#0F766E]">
                         <p className="font-bold">내 참여 확인서</p>
-                        <p className="mt-1 text-sm text-neutral-500">결과가 발표된 프로젝트의 확인서를 발급합니다.</p>
+                        <p className="mt-1 text-sm text-neutral-500">결과가 발표된 과정의 확인서를 발급합니다.</p>
                     </Link>
                 </div>
             </div>

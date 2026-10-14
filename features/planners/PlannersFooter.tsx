@@ -13,13 +13,13 @@ export function PlannersFooter() {
         <UniverseFooter
             siteId="planners"
             brandName="Planner's"
-            tagline={<>우리는 모두 기획자다.<br />자기 인생에서만큼은.</>}
+            tagline={<>내 손으로, 내 뜻대로.<br />생각하고 기록하고 계획하는 사람의 인공지능 플래너.</>}
             accentColor="#14B8A6"
             dark={true}
             actions={[
-                { label: "PAD 받기", href: "/planners/pad" },
                 { label: "AI 알아보기", href: "/planners/ai" },
-                { label: "훈련 프로젝트 보기", href: "/planners/projects" },
+                { label: "PAD 받기", href: "/planners/pad" },
+                { label: "기획자 과정", href: "/planners/projects" },
                 { label: "내 참여 확인서", href: "/planners/certificate" },
             ]}
             channels={[

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
-// 첫 화면 배너 — 첫 장은 확정 문구(브랜드), 그다음은 인트라에서 올린 배너 (아임웹 키비주얼 슬라이드 자리)
+// 첫 화면 배너 — 첫 장은 플래너'스 AI(주인공, 2026-10-14), 그다음은 인트라에서 올린 배너 (아임웹 키비주얼 슬라이드 자리)
 export interface HeroSlide {
     key: string;
     title: string;
@@ -16,6 +16,8 @@ export interface HeroSlide {
     secondary?: { label: string; href: string } | null;
     /** 버튼 아래 한 줄 */
     note?: string | null;
+    /** 사진 대신 오른쪽에 그릴 화면 (첫 장 = 플래너'스 AI가 일하는 모습) */
+    visual?: ReactNode;
 }
 
 const INTERVAL = 7000;
@@ -55,7 +57,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                     )}
                     {s.note && <p className="mt-8 break-keep text-teal-200/90 md:text-lg">{s.note}</p>}
                 </div>
-                {s.imageUrl && (
+                {s.visual ? <div>{s.visual}</div> : s.imageUrl && (
                     <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={s.imageUrl} alt="" className="max-h-[560px] w-full object-contain" />

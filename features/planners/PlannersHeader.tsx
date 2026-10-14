@@ -23,6 +23,8 @@ export function PlannersHeader() {
     // planners.tenone.biz는 prefix 없이 접속 → /projects 와 /planners/projects 모두 활성 처리
     const isActive = (href: string) => {
         const path = pathname.startsWith("/planners") ? pathname : `/planners${pathname === "/" ? "" : pathname}`;
+        // 기획이란·참여 확인서는 기획자 과정 아래 (lib/brand-site-menus.ts location)
+        if (href === "/planners/projects" && (path.startsWith("/planners/about") || path.startsWith("/planners/certificate"))) return true;
         return path.startsWith(href);
     };
 

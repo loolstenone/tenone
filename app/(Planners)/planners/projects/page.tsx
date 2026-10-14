@@ -6,14 +6,14 @@ import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
 import { PlannersPageHero, PlannersSectionTitle, PLANNERS_CONTAINER, PLANNERS_SECTION, PLANNERS_SPACE, heroPrimaryBtn, heroSecondaryBtn } from "@/features/planners/PageHero";
 
 export const metadata: Metadata = {
-    title: "훈련 프로젝트",
-    description: "Planner's 실전 기획 훈련 프로젝트, 신청하고, 팀을 꾸려 실제 과제를 기획하고, 참여 이력을 확인서로 남깁니다.",
+    title: "기획자 과정",
+    description: "우리는 모두 기획자다, 자기 인생에서만큼은. Planner's 기획자 과정, 신청하고, 팀을 꾸려 실제 과제를 기획하고, 참여 이력을 확인서로 남깁니다.",
 };
 
 // 진행 방식 — 코어 프로그램 모듈(program_*)의 실제 흐름 그대로 (신청 → 선발 → 팀 → 결과 발표 → 확인서)
 // ❌ 회차마다 다른 것(기간·인원·비용·과제)은 여기에 단정해 적지 않는다 — 모집 공고에서 안내
 const STEPS = [
-    { no: "01", title: "신청", desc: "모집 중인 프로젝트에서 과제와 일정을 보고 신청합니다. Ten:One™ 계정 하나면 됩니다." },
+    { no: "01", title: "신청", desc: "모집 중인 과정에서 과제와 일정을 보고 신청합니다. Ten:One™ 계정 하나면 됩니다." },
     { no: "02", title: "선발", desc: "운영진이 신청서를 검토해 참가자를 정하고 결과를 알려 드립니다." },
     { no: "03", title: "팀 구성", desc: "참가자끼리 팀을 꾸립니다. 초대 코드로 함께할 사람을 부를 수 있습니다." },
     { no: "04", title: "기획 · 실행", desc: "문제를 정의하고(Plan) 실행하고(Do) 돌아봅니다(See). 프로젝트 북 하나에 과정을 모읍니다." },
@@ -33,23 +33,23 @@ const FOR_WHOM = [
     "자기 인생을 스스로 기획하고 싶은 누구나",
 ];
 
-/** Planner's 훈련·프로젝트 — 코어 프로그램 모듈(주인 brand planners) 회차 목록·신청. MADLeague 창구에도 같은 회차가 보일 수 있다 */
+/** Planner's 기획자 과정 (부수 서비스, 2026-10-14 AI 중심 개편) — 코어 프로그램 모듈(주인 brand planners) 회차 목록·신청. MADLeague 창구에도 같은 회차가 보일 수 있다 */
 export default function PlannersProjectsPage() {
     const t = { ...PROGRAM_THEMES.planners, accent: "#0F766E" }; // 흰 배경용 진한 틸
     return (
         <>
             <PlannersPageHero
-                eyebrow="프로젝트"
-                title="기획은 해 봐야 는다"
-                description="실제 과제를 팀으로 기획하고, 끝까지 해 낸 기록을 확인서로 남깁니다. 읽고 배우는 기획이 아니라 손으로 익히는 기획입니다."
+                eyebrow="기획자 과정"
+                title={<>우리는 모두 기획자다<span className="mt-3 block text-xl font-bold text-neutral-500 md:text-2xl">자기 인생에서만큼은</span></>}
+                description="기획은 해 봐야 늡니다. 실제 과제를 팀으로 기획하고, 끝까지 해 낸 기록을 확인서로 남깁니다. 읽고 배우는 기획이 아니라 손으로 익히는 기획입니다."
             >
-                <a href="#open" className={heroPrimaryBtn}>모집 중인 프로젝트</a>
-                <Link href={t.certificateHref} className={heroSecondaryBtn}>내 참여 확인서</Link>
+                <a href="#open" className={heroPrimaryBtn}>모집 중인 과정</a>
+                <Link href="/planners/about" className={heroSecondaryBtn}>기획이란</Link>
             </PlannersPageHero>
 
             {/* 진행 방식 */}
             <section className={PLANNERS_SECTION}>
-                <PlannersSectionTitle title="이렇게 진행됩니다" description="신청부터 확인서까지, 한 프로젝트는 다섯 단계를 거칩니다." />
+                <PlannersSectionTitle title="이렇게 진행됩니다" description="신청부터 확인서까지, 한 과정은 다섯 단계를 거칩니다." />
                 <ol className="grid gap-px bg-neutral-200 md:grid-cols-5">
                     {STEPS.map((s) => (
                         <li key={s.no} className="bg-white p-8 md:p-10">
@@ -91,14 +91,14 @@ export default function PlannersProjectsPage() {
 
             {/* 모집 중 */}
             <section id="open" className={`${PLANNERS_SECTION} scroll-mt-24`}>
-                <PlannersSectionTitle title="모집 중인 프로젝트" description="회차마다 과제·기간·인원이 다릅니다. 자세한 내용은 각 모집 공고에서 확인하세요." />
-                <ProgramBoard theme={t} brands={["planners"]} dark={false} emptyText="지금 모집 중인 프로젝트가 없습니다. 새 프로젝트가 열리면 이곳과 '이야기 › 공지'에 안내합니다." />
+                <PlannersSectionTitle title="모집 중인 과정" description="회차마다 과제·기간·인원이 다릅니다. 자세한 내용은 각 모집 공고에서 확인하세요." />
+                <ProgramBoard theme={t} brands={["planners"]} dark={false} emptyText="지금 모집 중인 과정이 없습니다. 새 과정이 열리면 이곳과 '이야기 › 공지'에 안내합니다." />
             </section>
 
             {/* 도구와 함께 */}
             <section className="bg-neutral-50">
                 <div className={PLANNERS_SECTION}>
-                    <PlannersSectionTitle title="기다리는 동안, 혼자서도" description="프로젝트에서 쓰는 도구를 지금 바로 쓸 수 있습니다." />
+                    <PlannersSectionTitle title="기다리는 동안, 혼자서도" description="과정에서 쓰는 도구를 지금 바로 쓸 수 있습니다." />
                     <div className="grid gap-6 md:grid-cols-2 md:gap-12">
                         <Link href="/planners/pad" className="group bg-white p-10 md:p-14">
                             <p className="text-sm font-bold text-[#0F766E]">PAD</p>

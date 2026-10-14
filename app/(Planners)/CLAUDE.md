@@ -1,14 +1,17 @@
 # Planner's 브랜드 가이드
 
-> **Planner's** — 기획자의 정체성·도구·훈련 브랜드. "우리는 모두 기획자다. 자기 인생에서 만큼은."
+> **Planner's** — 주인공은 **플래너'스 AI**: 자기 손으로, 자기 뜻대로 생각하고 기록하고 계획하고 꾸려 가기를 꿈꾸는 사람을 돕는 인공지능 플래너. 곁에 **플래너'스 PAD**(태블릿 손글씨 플래너), 부수로 **기획자 과정**("우리는 모두 기획자다, 자기 인생에서만큼은").
 > Tier **집중** (2026-10-14 승격) · 공식 주소 **`www.planners.ai.kr`** (CANONICAL, vercel) · `planners.tenone.biz` → 308 · 로컬 `/planners` · 공개 전 `is_open=false` + noindex
 
 ---
 
 ## 정체성
 
-- **한 줄 소개**: 기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.
-- **서비스**: 실전 전략 기획 훈련 과정 + 실전 프로젝트 (코어 프로그램 모듈 `program_*` 위에서 운영, RooK `/rook/projects`와 같은 방식)
+- **사이트 체계 (2026-10-14 사용자 결정 "기획자를 전면에 내세우면 재미가 없다")**: ① 플래너'스 AI(주인공) → ② 플래너'스 PAD(곁들임) → ③ 기획자 과정(부수). 첫 화면·메뉴·메타·푸터 모두 이 순서
+- **한 줄 소개**: 내 손으로, 내 뜻대로. 생각하고 기록하고 계획하고 꾸려 가는 사람의 인공지능 플래너
+  - AI 원칙 문구: "정하는 것은 나"(AI는 제안, 등록은 확인 후) · "내 기록은 내 것" · "쓰던 AI와도"(내 AI 연결)
+  - 기능 소개 틀 = 4동사 **생각하다·기록하다·계획하다·꾸려 가다** (첫 화면 카드·AI 페이지 장 구성)
+- **기획자 과정**: 실전 기획 과정 (코어 프로그램 모듈 `program_*`, RooK `/rook/projects`와 같은 방식) · 기획론(`/planners/about`)은 과정 아래
 - **톤앤매너**: 따뜻하고 전문적인 기획자 커뮤니티
 - **주 컬러**: 틸 `#0F766E`(흰 배경 본문·버튼) · `#14B8A6`(어두운 배경 강조) · 헤더 `#134E4A`
 - **디자인 방향**: 진한 틸 헤더/푸터 + 흰 본문, 사각 모서리
@@ -39,9 +42,9 @@
 ## 핵심 파일
 
 - `app/(Planners)/layout.tsx` — generateMetadata
-- `app/(Planners)/planners/page.tsx` — 첫 화면 (확정 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은" · 정체성·도구·훈련 · Plan·Do·See · 모집 중 프로젝트)
+- `app/(Planners)/planners/page.tsx` — 첫 화면: 히어로 "내 손으로, 내 뜻대로"(오른쪽 = `features/planners/home/AiAtWork.tsx` 생각 쏟아내기 → 제안 예시, `HeroSlide.visual`) → AI 4동사 카드 → PAD(소개·진열대·분류) → 기획자 과정 띠("우리는 모두 기획자다 / 자기 인생에서만큼은") → 모집 중인 과정
 - `app/(Planners)/planners/about/page.tsx` — 소개 = 기획론 (구글 사이트 Planning 원고)
-- **메뉴 (2026-10-14 몰 개편)**: 기획이란(`/planners/about`) · 플래너'스 AI(`/planners/ai` → 앱 `/planners/app`) · 플래너'스 PAD(`/planners/pad`) · 프로젝트 · 이야기
+- **메뉴 (2026-10-14 AI 중심 개편)**: AI(`/planners/ai`) · PAD(`/planners/pad`) · 이야기 · 기획자 과정(`/planners/projects`, 아래에 기획이란·참여 확인서 — 헤더 활성 표시도 같이) · 메타 제목 "플래너'스 AI · 내 손으로, 내 뜻대로" (DB ums_sites + site-config)
 - `app/(Planners)/planners/pad/page.tsx` — 플래너'스 PAD 몰 (분류 탭 `?c=` · 정렬 `?sort=popular|new|name` · 썸네일 그리드) · `pad/[id]/page.tsx` — 상품 상세 (갤러리·파일 정보·받기·상세 이미지·같은 분류) · 옛 `/planners/planner`·`/planners/templates`는 308
 - `lib/planners/library.ts`(서버 조회 `listPlannersFiles`·`getPlannersFile`) · `library-shared.ts`(분류 `PAD_CATEGORIES`·설명·배지 NEW/BEST·정렬) · `features/planners/pad/{ProductCard,Gallery}.tsx` · `features/planners/DownloadButton.tsx`
 - 상품 사진·상세 이미지·설명 = `planners_files.images`·`detail_images`·`description` (`scripts/planners-files-media.mjs` + `scripts/data/planners-badak-mall-media.json`) — 사진 366장은 공개 버킷 `planners-media/badak/`로 옮김 (2026-10-14 사용자 승인, 18MB) · 아임웹 주소 0건 — badak.biz가 닫혀도 그대로 나온다
@@ -132,6 +135,7 @@
 
 ## 현재 상태
 
+- **2026-10-14 사이트 AI 중심 개편**: 메뉴·첫 화면·AI 소개(4동사 장 + 세 가지 약속 + 베타 안내)·PAD 머리말·과정 이름(프로젝트 → 기획자 과정)·푸터·마이페이지(내 플래너 카드)·메타
 - Phase: 집중 · 플래너'스 AI 1~3단계·내 AI 연결 완료, QA 2차 (세션 174, 2026-10-14) · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · 처리방침 Planner's 항목·AI 위탁 반영 (10-14 공지 · **10-21 시행**, 시행 후 공지 줄 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신)
 - **유료화 순서 (2026-10-14 사용자 결정)**: 베타 테스트 기간 → 유료화. 베타 테스터 = 인트라에서 `myverse_users.subscription_status` 활성 + `subscription_expires_at` = 베타 종료일 (결제 없음, `lib/myverse/ai-access.ts` 그대로 통과). 유료 판매는 통신판매업 신고·약관·자동갱신 고지 후
 - 앱 기본 강조색 = 틸 (`MyverseThemeProvider defaultTheme="teal"`, 테마 'Teal' 값이 인디고였던 것 정정 2026-10-14)

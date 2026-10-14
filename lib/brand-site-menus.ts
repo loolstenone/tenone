@@ -73,21 +73,21 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         ],
     },
     {
-        // Planner's — 기획이란 · 플래너'스 AI(인공지능 플래너 /planners/app) · 플래너'스 PAD(굿노트 등 손글씨 플래너 몰, 바닥상회에서 옮김) · 프로젝트 · 이야기 (2026-10-14 몰 개편)
+        // Planner's — 주인공 = 플래너'스 AI(인공지능 플래너, 앱 /planners/app) · 곁들임 = 플래너'스 PAD(손글씨 플래너) · 부수 = 기획자 과정("우리는 모두 기획자다, 자기 인생에서만큼은") · 이야기 (2026-10-14 AI 중심 개편)
         siteId: "planners",
         adminBase: "/intra/ums/planners",
         menus: [
             { placement: "feature", location: "홈", label: "배너", path: "/planners", source: { kind: "table", table: "planners_banners" }, adminHref: "/intra/ums/planners/banners", unit: "개" },
             { placement: "feature", location: "홈", label: "진열대", path: "/planners", source: { kind: "table", table: "planners_showcases" }, adminHref: "/intra/ums/planners/showcases", unit: "개" },
-            { placement: "header", label: "기획이란", path: "/planners/about", source: { kind: "static" } },
             { placement: "header", label: "AI", path: "/planners/ai", source: { kind: "static" } },
             { placement: "header", label: "PAD", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "planner" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
             { placement: "feature", location: "PAD", label: "템플릿", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "template" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
             { placement: "feature", location: "PAD", label: "후기", path: "/planners/pad", source: { kind: "table", table: "planners_reviews" }, adminHref: "/intra/ums/planners/reviews", unit: "개" },
-            { placement: "header", label: "프로젝트", path: "/planners/projects", source: { kind: "table", table: "program_rounds", eq: { brand_id: "planners" } }, adminHref: "/intra/ums/planners/programs", unit: "개" },
             { placement: "header", label: "이야기", path: "/planners/stories", source: { kind: "board", board: "stories" }, adminHref: "/intra/ums/planners/stories", unit: "글" },
-            { placement: "feature", location: "프로젝트", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },
-            { placement: "feature", location: "프로젝트", label: "참가 신청", path: "/planners/projects", source: { kind: "table", table: "program_applications", eq: { brand_id: "planners" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/planners/programs", unit: "건" },
+            { placement: "header", label: "기획자 과정", path: "/planners/projects", source: { kind: "table", table: "program_rounds", eq: { brand_id: "planners" } }, adminHref: "/intra/ums/planners/programs", unit: "개" },
+            { placement: "feature", location: "기획자 과정", label: "기획이란", path: "/planners/about", source: { kind: "static" } },
+            { placement: "feature", location: "기획자 과정", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },
+            { placement: "feature", location: "기획자 과정", label: "참가 신청", path: "/planners/projects", source: { kind: "table", table: "program_applications", eq: { brand_id: "planners" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/planners/programs", unit: "건" },
         ],
     },
     {
