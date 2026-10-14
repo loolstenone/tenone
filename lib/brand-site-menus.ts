@@ -79,8 +79,8 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         menus: [
             { placement: "header", label: "기획이란", path: "/planners/about", source: { kind: "static" } },
             { placement: "header", label: "플래너스 AI", path: "/planners/ai", source: { kind: "static" } },
-            { placement: "header", label: "플래너스 PAD", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "planner" } }, adminHref: "/intra/ums/planners/planner", unit: "개" },
-            { placement: "feature", location: "플래너스 PAD", label: "템플릿", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "template" } }, adminHref: "/intra/ums/planners/templates", unit: "개" },
+            { placement: "header", label: "플래너스 PAD", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "planner" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
+            { placement: "feature", location: "플래너스 PAD", label: "템플릿", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "template" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
             { placement: "header", label: "프로젝트", path: "/planners/projects", source: { kind: "table", table: "program_rounds", eq: { brand_id: "planners" } }, adminHref: "/intra/ums/planners/programs", unit: "개" },
             { placement: "header", label: "이야기", path: "/planners/stories", source: { kind: "board", board: "stories" }, adminHref: "/intra/ums/planners/stories", unit: "글" },
             { placement: "feature", location: "프로젝트", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },

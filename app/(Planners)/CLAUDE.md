@@ -60,6 +60,12 @@
 
 ## 인트라 관리 경로
 
+- **플래너스 PAD — 아임웹 쇼핑 관리 화면 기준 (2026-10-14)**
+  - `/intra/ums/planners/pad` 상품 = 아임웹 '상품' (전체·공개·비공개 탭 · 분류·검색(상품명·파일명·옛 바닥상회 번호) · 썸네일 목록 · 바로 공개 전환 · 상품 등록)
+  - `/intra/ums/planners/pad/[id]` (`new` = 등록) 상품 편집 = 상품 사진(올리기·순서·빼기, 첫 장 썸네일) · 디지털 파일(교체 시 옛 파일 삭제) · 상품명·분류·연도·설명 · 상세 이미지 · 공개 · 삭제
+  - `/intra/ums/planners/pad/downloads` 받기 현황 = 아임웹 '주문' 자리 — 분류·상품별 다운로드 수만 (누가 받았는지 저장 안 함)
+  - 아임웹 '문의'·'구매평' 자리 = 사이트 '이야기' 게시판(질문·사용 후기) `/intra/ums/planners/stories` · 결제·배송·정기구독은 해당 없음
+  - API `/api/intra/planners/files` (직원) · 업로드 헬퍼 `features/planners/admin/upload.ts` (파일 = 비공개 `planners-files`, 사진 = 공개 `planners-media`) · 사진을 목록에서 빼도 Storage 파일은 남는다
 - `/intra/ums/planners/programs` (프로젝트 회차·신청)
 - 기존 PP AI 관리(`/intra/planners`)는 MyVerse 구독자 관리 — 그대로 유지
 

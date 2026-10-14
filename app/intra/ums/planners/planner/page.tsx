@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { PlannersFilesAdmin } from "../PlannersFilesAdmin";
-
+// 2026-10-14 — 플래너스 PAD › 상품(/intra/ums/planners/pad)으로 합침
 export default function Page() {
-    return <PlannersFilesAdmin kind="planner" />;
+    redirect("/intra/ums/planners/pad");
 }
