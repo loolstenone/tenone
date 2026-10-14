@@ -494,7 +494,7 @@ export function MindmapEditor({
     return (
         <div ref={containerRef} className={`relative w-full h-full overflow-hidden bg-neutral-50 ${className}`}>
             {/* 툴바 */}
-            <div data-mindmap-ui className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white border border-neutral-200 rounded-lg shadow-sm px-1.5 py-1 text-xs">
+            <div data-mindmap-ui className="absolute top-3 left-3 z-20 flex max-w-[calc(100%-24px)] items-center gap-1 overflow-x-auto bg-white border border-neutral-200 rounded-lg shadow-sm px-1.5 py-1 text-xs">
                 <button
                     type="button"
                     onClick={handleAddChild}
@@ -563,8 +563,8 @@ export function MindmapEditor({
                 const selLayout = layout.get(selectedId);
                 const isCustom = !!selNode.position;
                 return (
-                    <div data-mindmap-ui className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg shadow-sm px-2 py-1.5 text-xs">
-                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 mr-1">색상</span>
+                    <div data-mindmap-ui className="absolute left-3 top-14 z-20 flex items-center gap-1.5 bg-white lg:left-auto lg:right-3 lg:top-3 border border-neutral-200 rounded-lg shadow-sm px-2 py-1.5 text-xs">
+                        <span className="text-[10px] text-neutral-400 mr-1">색상</span>
                         {PALETTE.map(c => (
                             <button
                                 key={c}
@@ -780,7 +780,7 @@ export function MindmapEditor({
 
             <svg
                 ref={svgRef}
-                className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" /* 크기를 안 주면 SVG는 300×150이라 가운데 노드가 잘렸다 (2026-10-15 QA) */
                 onMouseDown={onMouseDownBg}
                 onWheel={onWheel}
                 onClick={(e) => {

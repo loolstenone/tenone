@@ -9,6 +9,9 @@ import { todayKst } from "@/features/myverse/planner/ai-actions";
 // 최근 14일의 미완료·보류를 오늘로 옮기고 빈 시간(09~21시, 일정·시각 있는 할 일 피함)에 넣는다 (/api/myverse/daily/carry-over schedule)
 // AI 호출 없음 → 무료 회원도 쓴다 · 14일보다 오래된 것은 기존 '누적 미완료' 안내에서 직접 고른다
 const RUN_KEY = "planners_autocarry_";
+// 같은 화면 안 중복 실행 막기 (개발 모드 이중 렌더 포함) — '오늘 했음' 표시는 성공한 뒤에만 남긴다
+//   전엔 요청 전에 남겨, 한 번 실패하면 그날은 다시 시도하지 않았다 (2026-10-15 QA)
+const inFlight = new Set<string>();
 
 export function AutoCarry({ date }: { date: string }) {
     const [done, setDone] = useState<{ carried: number; scheduled: number } | null>(null);
@@ -17,8 +20,9 @@ export function AutoCarry({ date }: { date: string }) {
         if (date !== todayKst()) return;
         try {
             if (localStorage.getItem(RUN_KEY + date) === "1") return;
-            localStorage.setItem(RUN_KEY + date, "1");
-        } catch { /* 저장소 없음 · 한 번만 시도 */ }
+        } catch { /* 저장소 없음 */ }
+        if (inFlight.has(date)) return;
+        inFlight.add(date);
         let cancelled = false;
         (async () => {
             const res = await fetch("/api/myverse/daily/carry-over", {
@@ -26,7 +30,10 @@ export function AutoCarry({ date }: { date: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, days: 14, schedule: true }),
             }).catch(() => null);
-            if (cancelled || !res?.ok) return;
+            inFlight.delete(date);
+            if (!res?.ok) return;
+            try { localStorage.setItem(RUN_KEY + date, "1"); } catch { /* 저장소 없음 */ }
+            if (cancelled) return;
             const d = await res.json().catch(() => null);
             if (d?.carried > 0) {
                 setDone({ carried: d.carried, scheduled: d.scheduled ?? 0 });

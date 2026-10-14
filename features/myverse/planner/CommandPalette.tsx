@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { commitParsedActions } from "./ai-actions";
+import { commitParsedActions, sanitizeActions } from "./ai-actions";
 import { aiErrorText } from "@/lib/myverse/ai-error";
 import {
     Search, ArrowRight, LayoutGrid, Sun, CalendarDays, CalendarRange, CalendarClock,
@@ -97,7 +97,7 @@ export function CommandPalette({ open, onClose }: Props) {
                             body: JSON.stringify({ text, today: todayStr() }),
                         }).then(r => r.json()).then(d => {
                             if (d?.actions?.length > 0) {
-                                setAiResult({ actions: d.actions, summary: d.summary, rawText: text });
+                                setAiResult({ actions: sanitizeActions(d.actions), summary: d.summary, rawText: text });
                             } else {
                                 setAiError(d?.summary || "추출된 항목이 없습니다.");
                             }
@@ -144,7 +144,7 @@ export function CommandPalette({ open, onClose }: Props) {
                 setAiError(d.summary || "추출된 항목이 없습니다.");
                 return;
             }
-            setAiResult({ actions: d.actions, summary: d.summary, rawText: text });
+            setAiResult({ actions: sanitizeActions(d.actions), summary: d.summary, rawText: text });
         } catch (e) {
             setAiError(e instanceof Error ? e.message : "AI 호출 실패");
         } finally {

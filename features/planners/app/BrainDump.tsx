@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, Check, X, Camera } from "lucide-react";
 import { VoiceRecordButton } from "@/features/myverse/planner/VoiceRecordButton";
-import { commitParsedActions, describeAction, saveMemoNote, shrinkImage, todayKst, READ_IMAGE_EVENT, type ParsedAction } from "@/features/myverse/planner/ai-actions";
+import { commitParsedActions, describeAction, sanitizeActions, saveMemoNote, shrinkImage, todayKst, READ_IMAGE_EVENT, type ParsedAction } from "@/features/myverse/planner/ai-actions";
 import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
 
 // 생각 쏟아내기 — 플래너'스 AI 1단계 (2026-10-14)
@@ -63,8 +63,9 @@ export function BrainDump({ date }: { date?: string }) {
     async function readPhoto(file: File) {
         try {
             await readImage(await shrinkImage(file), "photo");
-        } catch {
-            setMessage("사진을 열지 못했어요. 다른 사진으로 해 주세요.");
+        } catch (e) {
+            const msg = (e as Error).message;
+            setMessage(msg && msg !== "image" && msg !== "canvas" ? msg : "사진을 열지 못했어요. 다른 사진으로 해 주세요.");
         } finally {
             if (fileRef.current) fileRef.current.value = "";
         }
@@ -82,7 +83,7 @@ export function BrainDump({ date }: { date?: string }) {
             if (res.status === 402) { setMessage(AI_BETA_ONLY_TEXT); return; }
             const d = await res.json().catch(() => ({}));
             if (!res.ok) { setMessage(res.status === 413 ? "사진이 너무 커요. 다시 찍어 주세요." : "읽지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
-            const list: ParsedAction[] = d.actions ?? [];
+            const list: ParsedAction[] = sanitizeActions(d.actions);
             if (list.length === 0 && !d.memo) { setMessage(d.summary ?? "읽을 내용이 없었어요."); return; }
             setActions(list);
             setPicked(list.map((a) => a.input.mark !== "cancelled"));
@@ -109,7 +110,7 @@ export function BrainDump({ date }: { date?: string }) {
             const d = await res.json().catch(() => ({}));
             if (res.status === 402) { setMessage(AI_BETA_ONLY_TEXT); return; } // 버튼 옆에도 늘 알린다 (앱 쉘 안내 창은 세션 첫 번째만)
             if (!res.ok) { setMessage("정리하지 못했어요. 잠시 뒤 다시 해 주세요."); return; }
-            const list: ParsedAction[] = d.actions ?? [];
+            const list: ParsedAction[] = sanitizeActions(d.actions);
             if (list.length === 0) { setMessage(d.summary ?? "등록할 항목을 찾지 못했어요."); return; }
             setActions(list);
             setPicked(list.map(() => true));
@@ -127,13 +128,14 @@ export function BrainDump({ date }: { date?: string }) {
         const withMemo = keepMemo && memo.trim().length > 0;
         if (chosen.length === 0 && !withMemo) { setActions(null); return; }
         setBusy(true);
-        const { ok, failed } = await commitParsedActions(chosen);
+        const { ok, failed, skipped } = await commitParsedActions(chosen);
         let memoSaved = false;
         if (withMemo) memoSaved = await saveMemoNote(fromPhoto ?? date ?? todayKst(), "손글씨 메모", memo);
         setBusy(false);
         setActions(null); setMemo("");
         if (ok > 0) setText("");
-        setMessage(failed > 0 ? `${ok}개를 넣었고 ${failed}개는 넣지 못했어요.` : `${ok}개를 플래너에 넣었어요${memoSaved ? " · 메모도 노트로 남겼어요" : ""}.`);
+        const notes = [memoSaved && "메모도 노트로 남겼어요", skipped > 0 && `메모 ${skipped}개는 넣지 않았어요`].filter(Boolean).join(" · ");
+        setMessage(failed > 0 ? `${ok}개를 넣었고 ${failed}개는 넣지 못했어요.${notes ? ` ${notes}.` : ""}` : `${ok}개를 플래너에 넣었어요${notes ? ` · ${notes}` : ""}.`);
         // 노트는 오늘 화면이 들고 있는 목록과 겹치지 않게 새로 연다 (안 그러면 화면의 옛 노트 목록이 자동 저장으로 덮어쓴다)
         if (memoSaved) setTimeout(() => window.location.reload(), 900);
     }
@@ -158,7 +160,7 @@ export function BrainDump({ date }: { date?: string }) {
                     />
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                         <VoiceRecordButton label="말로 하기" onTranscribed={(t) => setText((prev) => (prev ? `${prev} ${t}` : t))} />
-                        <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void readPhoto(f); }} />
+                        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void readPhoto(f); }} />
                         <button onClick={() => fileRef.current?.click()} disabled={busy} title="종이·PAD 플래너 페이지를 찍으면 할 일·일정·메모로 읽어요 (사진은 저장하지 않아요)" className="inline-flex items-center gap-1.5 text-sm text-neutral-600 hover:text-[var(--pp-accent)] disabled:opacity-40">
                             <Camera className="h-4 w-4" /> 사진으로
                         </button>

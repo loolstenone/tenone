@@ -7,6 +7,26 @@ export interface ParsedAction {
     input: Record<string, unknown>;
 }
 
+const TOOLS = new Set(["create_task", "create_event", "create_note"]);
+
+/** AI 응답 정리 — tool·input 모양이 어긋난 항목은 버린다 (input 없는 항목 하나로 화면 전체가 멈추지 않게, 2026-10-15 QA) */
+export function sanitizeActions(raw: unknown): ParsedAction[] {
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((a): a is ParsedAction =>
+        !!a && typeof a === "object"
+        && TOOLS.has((a as { tool?: unknown }).tool as string)
+        && !!(a as { input?: unknown }).input && typeof (a as { input?: unknown }).input === "object");
+}
+
+/** 제목·시각 — 미리보기와 저장이 같은 규칙을 쓴다 (미리보기에만 보이고 저장은 빈 제목이 되던 차이 제거) */
+export function pickTitle(i: Record<string, unknown>): string {
+    return String(i.text ?? i.title ?? i.content ?? "").trim();
+}
+export function pickTime(i: Record<string, unknown>): string | null {
+    const v = i.time ?? i.start_time;
+    return typeof v === "string" && v ? v : null;
+}
+
 export function todayKst(): string {
     return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 }
@@ -15,29 +35,33 @@ export function todayKst(): string {
 export function describeAction(a: ParsedAction): { kind: string; title: string; when: string } {
     const i = a.input;
     const date = String(i.date ?? "");
-    const time = (i.time ?? i.start_time ?? "") as string;
+    const time = pickTime(i) ?? "";
     const md = date ? `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}` : "";
     return {
         kind: a.tool === "create_event" ? "일정" : a.tool === "create_task" ? "할 일" : "메모",
-        title: String(i.text ?? i.title ?? i.content ?? ""),
+        title: pickTitle(i),
         when: [md, time, i.location ? `@${i.location}` : ""].filter(Boolean).join(" "),
     };
 }
 
-/** 고른 항목을 등록 — 같은 날 할 일은 한 번에 모아 저장(덮어쓰기 경합 방지) */
-export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok: number; failed: number }> {
-    let ok = 0, failed = 0;
+/** 고른 항목을 등록 — 같은 날 할 일은 한 번에 모아 저장(덮어쓰기 경합 방지)
+ *  skipped = 여기서 넣지 않는 종류(메모) — 화면이 '넣었다'고 세지 않게 따로 돌려준다 */
+export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok: number; failed: number; skipped: number }> {
+    let ok = 0, failed = 0, skipped = 0;
     const tasksByDate = new Map<string, Record<string, unknown>[]>();
     for (const a of actions) {
+        if (a.tool === "create_note") { skipped++; continue; }
         if (a.tool !== "create_task") continue;
-        const date = (a.input.date as string) || todayKst();
+        const title = pickTitle(a.input);
+        if (!title) { failed++; continue; }
+        const date = (typeof a.input.date === "string" && a.input.date) || todayKst();
         const list = tasksByDate.get(date) ?? [];
         list.push({
             id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            text: a.input.text as string,
+            text: title,
             // 손글씨에서 × 표시로 끝낸 일은 끝냄으로 (생각 쏟아내기는 항상 todo)
             status: a.input.status === "done" ? "done" : "todo",
-            time: (a.input.time as string | null) ?? null,
+            time: pickTime(a.input),
             priority: (a.input.priority as string | null) ?? null,
         });
         tasksByDate.set(date, list);
@@ -57,6 +81,9 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
     }
     for (const a of actions) {
         if (a.tool !== "create_event") continue;
+        const title = pickTitle(a.input);
+        // 날짜·제목 없는 일정은 보내지 않는다 (start_date: undefined로 POST돼 실패하던 것)
+        if (typeof a.input.date !== "string" || !a.input.date || !title) { failed++; continue; }
         try {
             const res = await fetch(`/api/myverse/calendar`, {
                 method: "POST",
@@ -64,8 +91,8 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
                 body: JSON.stringify({
                     start_date: a.input.date,  // 캘린더 API 필드명 (예전 entry_date라 일정이 저장되지 않았음 — 2026-10-14 수정)
                     kind: a.input.kind === "anniversary" ? "anniversary" : "meeting", // 캘린더 종류는 anniversary·meeting만 받는다
-                    title: a.input.title,
-                    start_time: a.input.start_time ?? null,
+                    title,
+                    start_time: pickTime(a.input),
                     end_time: a.input.end_time ?? null,
                     location: a.input.location ?? null,
                 }),
@@ -75,7 +102,7 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
     }
     // 화면들이 새로 읽도록 알림 (오늘·주간 등)
     if (ok > 0 && typeof window !== "undefined") window.dispatchEvent(new CustomEvent("planner-data-changed"));
-    return { ok, failed };
+    return { ok, failed, skipped };
 }
 
 /** 손글씨에서 읽은 메모 → 그날 노트 하나로 추가 (오늘 화면 노트와 같은 Cornell 형식, DailyView serializeNotes와 맞춤) */
@@ -100,15 +127,27 @@ export async function saveMemoNote(date: string, title: string, text: string): P
     } catch { return false; }
 }
 
+/** 사진 올리기 전 검사 — 너무 큰 파일은 브라우저가 풀다가 멈춘다 (46MB 사진 그대로 디코딩, 2026-10-15 QA) */
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+export function validateUpload(file: Blob): string | null {
+    if (!file.type.startsWith("image/") || file.type === "image/svg+xml") return "사진 파일만 올릴 수 있어요.";
+    if (file.size > MAX_UPLOAD_BYTES) return "사진이 너무 커요 (20MB까지). 다시 찍거나 줄여서 올려 주세요.";
+    return null;
+}
+
 /** 브라우저에서 사진을 긴 변 maxSide로 줄여 JPEG data URL로 (원본은 서버로 보내지 않는다) */
 export function shrinkImage(file: Blob, maxSide = 1600, quality = 0.85): Promise<string> {
     return new Promise((resolve, reject) => {
+        const invalid = validateUpload(file);
+        if (invalid) { reject(new Error(invalid)); return; }
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
+            if (!img.width || !img.height) { URL.revokeObjectURL(url); reject(new Error("image")); return; }
             const k = Math.min(1, maxSide / Math.max(img.width, img.height));
             const c = document.createElement("canvas");
-            c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+            // 아주 긴 사진(1×16000)도 폭이 0이 되지 않게 — 0이면 빈 이미지("data:,")가 AI로 갔다
+            c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
             const ctx = c.getContext("2d");
             if (!ctx) { URL.revokeObjectURL(url); reject(new Error("canvas")); return; }
             ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
