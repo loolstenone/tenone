@@ -988,6 +988,11 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                 .then((r) => r.ok ? r.json() : null)
                 .then((d) => { if (d?.entries) setCalEntries(d.entries); })
                 .catch(() => { /* silent */ });
+            // 자동 이월(AutoCarry) 뒤 '누적 미완료' 안내도 새 숫자로
+            fetch(`/api/myverse/daily/pending-count?date=${date}&days=60`)
+                .then((r) => r.ok ? r.json() : null)
+                .then((d) => { if (d) setPendingInfo({ count: d.count ?? 0, days: d.days ?? 0, oldest: d.oldest ?? null }); })
+                .catch(() => { /* silent */ });
         };
         window.addEventListener("planner-data-changed", onChanged);
         return () => window.removeEventListener("planner-data-changed", onChanged);

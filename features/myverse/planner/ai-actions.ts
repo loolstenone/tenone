@@ -61,8 +61,8 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    entry_date: a.input.date,
-                    kind: a.input.kind || "meeting",
+                    start_date: a.input.date,  // 캘린더 API 필드명 (예전 entry_date라 일정이 저장되지 않았음 — 2026-10-14 수정)
+                    kind: a.input.kind === "anniversary" ? "anniversary" : "meeting", // 캘린더 종류는 anniversary·meeting만 받는다
                     title: a.input.title,
                     start_time: a.input.start_time ?? null,
                     end_time: a.input.end_time ?? null,

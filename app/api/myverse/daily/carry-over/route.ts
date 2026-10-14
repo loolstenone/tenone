@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const today = (body.date as string) || new Date().toISOString().slice(0, 10);
+    const today = (body.date as string) || new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // KST
     const lookbackDays = Math.min(Math.max(Number(body.days) || 60, 1), 180);
 
     // 범위 시작일: today - lookbackDays
@@ -109,6 +109,36 @@ export async function POST(req: Request) {
     // 가장 오래된 source 부터 보이도록 reverse (위에서 최신부터 push 됐음)
     newTasks.reverse();
 
+    // 빈 시간에 넣기 (schedule: true) — 플래너'스 AI 1단계 '지능형 리스케줄링' (2026-10-14)
+    // 그날 캘린더 일정·이미 시각이 있는 할 일을 피해 09~21시 빈 1시간 칸에 중요한 것부터 배치. 칸이 모자라면 시각 없이 둔다
+    // ⚠️ 반복 일정(recurrence)은 아직 반영하지 않는다 — 그날 날짜로 잡힌 일정만
+    let scheduled = 0;
+    if (body.schedule === true) {
+        const { data: events } = await admin
+            .from("myverse_calendar_entries")
+            .select("start_time, end_time")
+            .eq("member_id", memberId)
+            .eq("start_date", today)
+            .not("start_time", "is", null);
+        const toMin = (t: string) => { const [h, m] = t.slice(0, 5).split(":").map(Number); return h * 60 + (m || 0); };
+        const busy: [number, number][] = [
+            ...((events ?? []) as { start_time: string; end_time: string | null }[]).map((e) => [toMin(e.start_time), e.end_time ? toMin(e.end_time) : toMin(e.start_time) + 60] as [number, number]),
+            ...existingToday.filter((t) => t.time).map((t) => [toMin(t.time!), toMin(t.time!) + 60] as [number, number]),
+        ];
+        // 오늘이면 지금 이후부터 (KST, 다음 정시)
+        const nowKst = new Date(Date.now() + 9 * 3600 * 1000);
+        const isToday = nowKst.toISOString().slice(0, 10) === today;
+        let cursor = Math.max(9 * 60, isToday ? (nowKst.getUTCHours() + 1) * 60 : 0);
+        const order = [...newTasks].sort((a, b) => (a.priority === "high" ? 0 : 1) - (b.priority === "high" ? 0 : 1));
+        for (const t of order) {
+            while (cursor + 60 <= 21 * 60 && busy.some(([s, e]) => cursor < e && cursor + 60 > s)) cursor += 30;
+            if (cursor + 60 > 21 * 60) break;
+            t.time = `${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}`;
+            busy.push([cursor, cursor + 60]);
+            scheduled++;
+        }
+    }
+
     const mergedToday = [...existingToday, ...newTasks];
 
     // 5. DB 일괄 upsert / update
@@ -138,6 +168,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
         status: "done",
         carried: newTasks.length,
+        scheduled,
         from_days: sources.filter((s) => s.touched).map((s) => s.date),
         scanned_days: sources.length,
         to: today,
