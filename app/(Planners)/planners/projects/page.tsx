@@ -44,7 +44,7 @@ export default function PlannersProjectsPage() {
                 description="기획은 해 봐야 늡니다. 실제 과제를 팀으로 기획하고, 끝까지 해 낸 기록을 확인서로 남깁니다. 읽고 배우는 기획이 아니라 손으로 익히는 기획입니다."
             >
                 <a href="#open" className={heroPrimaryBtn}>모집 중인 과정</a>
-                <Link href="/planners/about" className={heroSecondaryBtn}>기획이란</Link>
+                <Link href="/planners/planning" className={heroSecondaryBtn}>기획이란</Link>
             </PlannersPageHero>
 
             {/* 진행 방식 */}

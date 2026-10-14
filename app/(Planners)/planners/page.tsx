@@ -185,7 +185,7 @@ export default async function PlannersHome() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                         <Link href="/planners/projects" className="inline-flex items-center gap-2 bg-[#14B8A6] px-7 py-3.5 font-bold text-[#042F2E] hover:bg-teal-300">기획자 과정 보기 <ArrowRight className="h-4 w-4" /></Link>
-                        <Link href="/planners/about" className="inline-flex items-center gap-2 border border-white/30 px-7 py-3.5 font-bold hover:bg-white/10">기획이란</Link>
+                        <Link href="/planners/planning" className="inline-flex items-center gap-2 border border-white/30 px-7 py-3.5 font-bold hover:bg-white/10">기획이란</Link>
                     </div>
                 </div>
             </section>
