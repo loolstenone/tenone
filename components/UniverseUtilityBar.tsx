@@ -11,7 +11,8 @@ import { NotificationBell, AccountAvatar, LogoutButton } from "@/components/Acco
 // ── Workspace 레지스트리 ──────────────────────────────────────
 // 각 브랜드의 "내 워크스페이스" 경로. 사용자의 affiliations[]에 해당 brandId가 있으면 자동으로 드롭다운에 노출.
 // 새 브랜드 추가 시 여기 한 줄만 추가하면 전 사이트에서 자동 반영.
-interface WorkspaceEntry { brandId: string; label: string; path: string; description?: string; }
+// openOnOwnSite: 로그인 회원 누구나 쓰는 서비스 — 그 브랜드 사이트 안에서는 affiliations 없이도 노출 (예: 플래너'스 AI, 2026-10-14)
+interface WorkspaceEntry { brandId: string; label: string; path: string; description?: string; openOnOwnSite?: boolean; }
 const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
     { brandId: "badak",        label: "Badak",                path: "/badak/my",        description: "기획자 네트워크" },
     { brandId: "madleague",    label: "MAD League",           path: "/madleague/my",    description: "현역·OB" },
@@ -25,7 +26,7 @@ const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
     { brandId: "jakka",        label: "Jakka",                path: "/jakka/my",        description: "창작자 마켓" },
     { brandId: "domo",         label: "Domo",                 path: "/domo/my",         description: "도시 모임" },
     { brandId: "townity",      label: "Townity",              path: "/townity/my",      description: "동네 커뮤니티" },
-    { brandId: "planners",     label: "플래너'스 AI",          path: "/planners/app",    description: "Planner's 인공지능 플래너" },
+    { brandId: "planners",     label: "플래너'스 AI",          path: "/planners/app",    description: "Planner's 인공지능 플래너", openOnOwnSite: true },
     { brandId: "rook",         label: "RooK",                 path: "/rook/my",         description: "독서 모임" },
     { brandId: "changeup",     label: "ChangeUp",             path: "/changeup/my",     description: "변화 코칭" },
     { brandId: "naturebox",    label: "NatureBox",            path: "/naturebox/my",    description: "자연 박스" },
@@ -97,7 +98,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
 
     // 사용자 affiliations 기반 워크스페이스 자동 계산
     const userAffiliations = (user?.affiliations as string[]) || [];
-    const autoWorkspaces = WORKSPACE_REGISTRY.filter(w => userAffiliations.includes(w.brandId));
+    const autoWorkspaces = WORKSPACE_REGISTRY.filter(w => userAffiliations.includes(w.brandId) || (w.openOnOwnSite && config.siteId === w.brandId));
     const workspaces: WorkspaceEntry[] = config.workspaces && config.workspaces.length > 0
         ? config.workspaces
         : autoWorkspaces;

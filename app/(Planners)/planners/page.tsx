@@ -66,7 +66,7 @@ export default async function PlannersHome() {
                     <ul className="mt-10 grid grid-cols-2 gap-2 text-sm text-neutral-700">
                         {AI_FEATURES.map((f) => <li key={f} className="bg-white px-4 py-3">{f}</li>)}
                     </ul>
-                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 알아보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
                 <Link href="/planners/pad" className="group flex flex-col justify-between bg-neutral-50 p-10 transition-colors hover:bg-teal-50/60 md:p-20">
                     <div>
