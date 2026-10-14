@@ -29,6 +29,11 @@ CREATE TABLE IF NOT EXISTS public.planners_files (
     updated_at      timestamptz NOT NULL DEFAULT now()
 );
 
+-- 2026-10-14 추가 (MCP `planners_files_images_2026_10`): 몰 화면용 대표 사진·상세 이미지 (바닥상회 상품 사진 원천)
+ALTER TABLE public.planners_files
+    ADD COLUMN IF NOT EXISTS images jsonb NOT NULL DEFAULT '[]'::jsonb,         -- 대표 사진 (첫 장 = 썸네일)
+    ADD COLUMN IF NOT EXISTS detail_images jsonb NOT NULL DEFAULT '[]'::jsonb;  -- 상세 설명 이미지 (내지 미리보기)
+
 CREATE INDEX IF NOT EXISTS planners_files_list_idx ON public.planners_files (kind, category, sort_order) WHERE is_published;
 
 ALTER TABLE public.planners_files ENABLE ROW LEVEL SECURITY;

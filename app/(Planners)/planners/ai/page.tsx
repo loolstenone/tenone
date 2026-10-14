@@ -4,7 +4,7 @@ import Link from "next/link";
 // AI 플래너 소개 — 앱 본체 /planners/app (MyVerse에서 옮겨 온 핵심 화면, app/(Planners)/CLAUDE.md '이전 계획' 4단계)
 // ❌ 가격·요금 표기 금지 (통신판매업 신고 전)
 export const metadata: Metadata = {
-    title: "AI 플래너",
+    title: "플래너스 AI",
     description: "PAD 플래너와 같은 구조(연간·월간·주간·일간·프로젝트)를 디지털로. 할 일·프로젝트·캔버스·마인드맵·템플릿을 한곳에서, AI가 하루를 정리해 줍니다.",
 };
 
@@ -22,7 +22,7 @@ export default function PlannersAiPage() {
         <>
             <section className="bg-[#134E4A] text-white">
                 <div className="mx-auto max-w-[980px] px-4 py-20 md:px-[15px] md:py-24">
-                    <p className="text-sm font-bold tracking-widest text-teal-300">AI 플래너</p>
+                    <p className="text-sm font-bold tracking-widest text-teal-300">플래너스 AI · 인공지능 플래너</p>
                     <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">종이에서 디지털로,<br />디지털에서 AI로</h1>
                     <p className="mt-8 max-w-2xl break-keep text-lg leading-relaxed text-teal-50">
                         PAD 플래너의 구조를 그대로 옮긴 디지털 플래너입니다. AI가 실행을 대신할수록 무엇을 할지 정하는 일은 사람의 몫으로 남습니다.
@@ -46,7 +46,7 @@ export default function PlannersAiPage() {
                     ))}
                 </div>
                 <p className="mt-10 break-keep text-neutral-600">
-                    손으로 쓰는 쪽이 편하다면 <Link href="/planners/planner" className="font-bold text-[#0F766E] hover:underline">PAD 플래너</Link>를 받아 쓰세요. 두 가지는 같은 구조라 함께 써도 어긋나지 않습니다.
+                    손으로 쓰는 쪽이 편하다면 <Link href="/planners/pad" className="font-bold text-[#0F766E] hover:underline">플래너스 PAD</Link>를 받아 쓰세요. 두 가지는 같은 구조라 함께 써도 어긋나지 않습니다.
                 </p>
             </section>
         </>

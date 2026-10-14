@@ -41,7 +41,11 @@
 - `app/(Planners)/layout.tsx` — generateMetadata
 - `app/(Planners)/planners/page.tsx` — 첫 화면 (확정 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은" · 정체성·도구·훈련 · Plan·Do·See · 모집 중 프로젝트)
 - `app/(Planners)/planners/about/page.tsx` — 소개 = 기획론 (구글 사이트 Planning 원고)
-- `app/(Planners)/planners/{planner,templates}/page.tsx` — PAD 자료실 · `lib/planners/library.ts`(서버 조회) · `library-shared.ts`(분류 SSOT) · `features/planners/{FileList,DownloadButton}.tsx`
+- **메뉴 (2026-10-14 몰 개편)**: 기획이란(`/planners/about`) · 플래너스 AI(`/planners/ai` → 앱 `/planners/app`) · 플래너스 PAD(`/planners/pad`) · 프로젝트 · 이야기
+- `app/(Planners)/planners/pad/page.tsx` — 플래너스 PAD 몰 (분류 탭 `?c=` · 정렬 `?sort=popular|new|name` · 썸네일 그리드) · `pad/[id]/page.tsx` — 상품 상세 (갤러리·파일 정보·받기·상세 이미지·같은 분류) · 옛 `/planners/planner`·`/planners/templates`는 308
+- `lib/planners/library.ts`(서버 조회 `listPlannersFiles`·`getPlannersFile`) · `library-shared.ts`(분류 `PAD_CATEGORIES`·설명·배지 NEW/BEST·정렬) · `features/planners/pad/{ProductCard,Gallery}.tsx` · `features/planners/DownloadButton.tsx`
+- 상품 사진·상세 이미지·설명 = `planners_files.images`·`detail_images`·`description` (`scripts/planners-files-media.mjs` + `scripts/data/planners-badak-mall-media.json`) — ⚠️ **지금은 바닥상회(아임웹) CDN 주소를 그대로 쓴다. badak.biz(아임웹) 종료 전에 Storage로 옮겨야 한다** (이미지 다운로드 허락 필요)
+- ❌ 첫 화면·PAD를 긴 글 위주(블로그형)로 되돌리지 않는다 — 사용자 지적 "너무 블로그 같다" (2026-10-14). 상품 사진·진열대 중심
 - `app/(Planners)/planners/ai/page.tsx` — AI 플래너 소개 · `app/(Planners)/planners/stories/**` — 이야기 게시판
 - `app/(Planners)/planners/app/**` — AI 플래너 앱 (layout = 로그인·온보딩 게이트 + `features/planners/app/{PlannersAppTopBar,PlannersAppSideNav}.tsx`, 메뉴 SSOT `features/planners/app/nav.ts`) · 화면 본체는 `features/myverse/planner/*` 공용 · 사이트 헤더·푸터는 앱 경로에서 숨김(`isPlannersAppPath`)
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유

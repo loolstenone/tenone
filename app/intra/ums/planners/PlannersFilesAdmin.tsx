@@ -8,13 +8,13 @@ import { adminTitle } from "@/lib/brand-site-menus";
 import { createClient } from "@/lib/supabase/client";
 import { PLANNER_CATEGORIES, TEMPLATE_CATEGORIES, formatFileSize, type PlannersFileKind } from "@/lib/planners/library-shared";
 
-// 사이트 /planners/planner · /planners/templates 와 1:1 (lib/brand-site-menus.ts) — 원천 planners_files
+// 사이트 플래너스 PAD(/planners/pad) — 플래너(본체) · 템플릿 (lib/brand-site-menus.ts) — 원천 planners_files
 interface Row {
     id: string; kind: PlannersFileKind; category: string; title: string; description: string | null; year: number | null;
     file_name: string; file_size: number; sort_order: number; is_published: boolean; download_count: number; legacy_badak_no: number | null;
 }
 
-const SITE_PATH: Record<PlannersFileKind, string> = { planner: "/planners/planner", template: "/planners/templates" };
+const SITE_PATH: Record<PlannersFileKind, string> = { planner: "/planners/pad?c=%EC%97%B0%EA%B0%84%20%ED%94%8C%EB%9E%98%EB%84%88", template: "/planners/pad" };
 
 export function PlannersFilesAdmin({ kind }: { kind: PlannersFileKind }) {
     const categories: readonly string[] = kind === "planner" ? PLANNER_CATEGORIES : TEMPLATE_CATEGORIES;
@@ -50,7 +50,7 @@ export function PlannersFilesAdmin({ kind }: { kind: PlannersFileKind }) {
 
     return (
         <div>
-            <PageHeader title={title} description={`사이트 ${SITE_PATH[kind]} — 로그인 회원이 내려받는 자료. 비공개는 사이트에 보이지 않습니다.`}>
+            <PageHeader title={title} description="사이트 플래너스 PAD — 로그인 회원이 내려받는 자료. 비공개는 사이트에 보이지 않습니다.">
                 <a href={brandSiteUrl("planners", SITE_PATH[kind])} target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700">
                     <ExternalLink className="h-3.5 w-3.5" /> 사이트에서 보기

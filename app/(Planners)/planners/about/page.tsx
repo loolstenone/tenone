@@ -3,7 +3,7 @@ import Link from "next/link";
 
 // 원문: 구글 사이트 sites.google.com/tenone.biz/planners/planning (Planner's 기획론, 2020~) — 2026-10-14 이전하며 문장만 다듬음
 export const metadata: Metadata = {
-    title: "소개",
+    title: "기획이란",
     description: "기획하다 = 주도적 + 목표 설정 + 전략 수립 + 계획. 이상과 현실의 차이를 문제로 보고, 그 문제를 풀어 가는 과정이 기획입니다.",
 };
 
@@ -18,7 +18,7 @@ export default function PlannersAboutPage() {
         <>
             <section className="bg-[#134E4A] text-white">
                 <div className="mx-auto max-w-[980px] px-4 py-20 md:px-[15px] md:py-24">
-                    <p className="text-sm font-bold tracking-widest text-teal-300">소개</p>
+                    <p className="text-sm font-bold tracking-widest text-teal-300">기획이란</p>
                     <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
                         우리는 모두 기획자다
                     </h1>
@@ -101,8 +101,8 @@ export default function PlannersAboutPage() {
                 <div className="mt-16 border-t border-neutral-200 pt-10">
                     <h2 className="text-2xl font-bold">기획을 손에 익히는 방법</h2>
                     <div className="mt-6 grid gap-4 md:grid-cols-3">
-                        <NextLink href="/planners/planner" title="플래너" desc="Plan · Do · See를 매일 반복하는 기획자의 플래너" />
-                        <NextLink href="/planners/templates" title="템플릿" desc="노트·프레임워크 서식으로 생각을 구조화" />
+                        <NextLink href="/planners/ai" title="플래너스 AI" desc="Plan · Do · See를 디지털로 — 인공지능 플래너" />
+                        <NextLink href="/planners/pad" title="플래너스 PAD" desc="굿노트 등에서 손으로 쓰는 플래너와 서식" />
                         <NextLink href="/planners/projects" title="프로젝트" desc="팀을 꾸려 실제 과제를 기획" />
                     </div>
                 </div>
