@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!file) return { title: "PAD" };
     return {
         title: file.title,
-        description: file.description?.split("\n")[0] ?? `${file.category} — 굿노트·삼성노트·XODO에서 쓰는 PAD 서식`,
+        description: file.description?.split("\n")[0] ?? `${file.category}, 굿노트·삼성노트·XODO에서 쓰는 PAD 서식`,
         ...(file.thumbnail_url && { openGraph: { images: [file.thumbnail_url] } }),
     };
 }

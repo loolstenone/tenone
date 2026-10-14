@@ -11,7 +11,7 @@ export const SETTINGS_TABS = [
     { key: "start",    label: "시작",          href: "/planners/app/settings/start" },
     { key: "style",    label: "스타일",        href: "/planners/app/settings/style" },
     { key: "behavior", label: "기능",          href: "/planners/app/settings/behavior" },
-    { key: "tech",     label: "기술",          href: "/planners/app/settings/tech" },
+    { key: "tech",     label: "연동",          href: "/planners/app/settings/tech" }, // 2026-10-14 기술→연동 (내 AI 연결·외부 서비스)
     { key: "privacy",  label: "사생활",        href: "/planners/app/settings/privacy" },
 ];
 
@@ -39,9 +39,9 @@ export function SettingsLayout({ children, toast }: Props) {
         <div className="pp-settings max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <LaneHeader
                 icon="tune"
-                label="SETTINGS"
+                label=""
                 title="설정"
-                subtitle="모드·스타일·기능·기술·백업·사생활을 한 곳에서 관리합니다"
+                subtitle="시작 화면·스타일·기능·연동·사생활을 한 곳에서 관리합니다"
             />
 
             {/* ── 탭 nav ── */}

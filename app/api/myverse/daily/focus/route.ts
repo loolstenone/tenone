@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
+import { noDash } from "@/lib/planners/text";
 
 const MODEL = "claude-haiku-4-5-20251001";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -112,8 +113,8 @@ export async function POST(req: Request) {
         const out = (block?.type === "tool_use" ? block.input : {}) as { items?: { task_id: string; reason: string }[]; message?: string };
         const byId = new Map(open.map((t) => [t.id, t]));
         const items = (out.items ?? []).filter((i) => byId.has(i.task_id)).slice(0, 3)
-            .map((i) => ({ task_id: i.task_id, text: byId.get(i.task_id)!.text, reason: String(i.reason ?? "").slice(0, 120) }));
-        const focus = { generated_at: now, items, message: String(out.message ?? "").slice(0, 200) };
+            .map((i) => ({ task_id: i.task_id, text: byId.get(i.task_id)!.text, reason: noDash(String(i.reason ?? "")).slice(0, 120) }));
+        const focus = { generated_at: now, items, message: noDash(String(out.message ?? "")).slice(0, 200) };
         await admin.from("myverse_daily").upsert(
             { member_id: memberId, date, focus, updated_at: now },
             { onConflict: "member_id,date" },
@@ -148,7 +149,7 @@ export async function POST(req: Request) {
     }
     const block = resp.content.find((b) => b.type === "tool_use");
     const qs = ((block?.type === "tool_use" ? (block.input as { questions?: string[] }).questions : null) ?? [])
-        .map((q) => String(q).trim().slice(0, 120)).filter(Boolean).slice(0, 3);
+        .map((q) => noDash(String(q)).slice(0, 120)).filter(Boolean).slice(0, 3);
     // 다시 받기여도 이미 쓴 답은 보존하지 않는다 (질문이 바뀌므로) — 화면에서 확인 후 요청
     const reflection = { generated_at: now, questions: qs.map((q) => ({ q, a: "" })) };
     await admin.from("myverse_daily").upsert(

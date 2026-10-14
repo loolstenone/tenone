@@ -293,7 +293,7 @@ function FeedItemCard({ item, meId, commentsOpen, onToggleComments, onChange, on
                 </Link>
                 <div className="flex-1 min-w-0">
                     <Link href={`/myverse/v/${member?.handle}`} className="block">
-                        <div className="text-sm font-medium text-neutral-900 truncate">{member?.name ?? "—"}</div>
+                        <div className="text-sm font-medium text-neutral-900 truncate">{member?.name ?? "-"}</div>
                         <div className="text-[10px] text-neutral-500 truncate">@{member?.handle} · {dateLabel}</div>
                     </Link>
                 </div>
@@ -426,7 +426,7 @@ function CommentsSection({ momentId, onChange }: { momentId: string; onChange: (
                 <div className="space-y-1.5">
                     {comments.map(c => (
                         <div key={c.id} className="text-xs">
-                            <span className="font-medium text-neutral-900">{c.member?.name ?? "—"}</span>
+                            <span className="font-medium text-neutral-900">{c.member?.name ?? "-"}</span>
                             <span className="text-neutral-400 ml-1">@{c.member?.handle}</span>
                             <span className="text-neutral-700 ml-2">{c.body}</span>
                         </div>

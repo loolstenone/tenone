@@ -27,7 +27,7 @@ function HeroSection() {
           <p className="font-medium">인공지능 시대, 더욱 기획자가 되어야 한다.</p>
           <div className="mt-6 space-y-3 text-base md:text-lg text-[#444]">
             <p>AI가 글을 쓰고, 코드를 짜고, 디자인을 만든다.</p>
-            <p>그런데 — 무엇을 쓸지, 왜 만들지, 어디로 갈지는 누가 정하는가?</p>
+            <p>그런데 · 무엇을 쓸지, 왜 만들지, 어디로 갈지는 누가 정하는가?</p>
             <p className="text-[#1a1a1a] font-medium mt-4">기획자다.</p>
             <p className="mt-4">AI가 실행을 대신할수록,</p>
             <p>방향을 정하는 힘이 곧 경쟁력이다.</p>
@@ -150,8 +150,8 @@ function AboutSection() {
           <p className="mt-4">22년이 지나 AI가 도래했다.</p>
           <p>그때 시작한 것이 드디어 가능해졌다.</p>
           <p className="mt-4 text-[#1a1a1a]">Myverse는 그 22년의 결과물이다.</p>
-          <p>20년 넘게 현장에서 기획하고, 실행하고, 검증한 것들 —</p>
-          <p>Vrief, GPR, Principle 10 —</p>
+          <p>20년 넘게 현장에서 기획하고, 실행하고, 검증한 것들</p>
+          <p>Vrief, GPR, Principle 10</p>
           <p>을 누구나 쓸 수 있게 만든 것이다.</p>
         </div>
 

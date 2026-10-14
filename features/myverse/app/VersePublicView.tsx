@@ -171,7 +171,7 @@ export function VersePublicView({ data }: { data: VerseData }) {
                     className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[var(--pp-accent)] transition-colors"
                 >
                     <Sparkles className="h-3 w-3" />
-                    Powered by Myverse — 디지털 속 나를 키운다
+                    Powered by Myverse, 디지털 속 나를 키운다
                 </Link>
             </footer>
 

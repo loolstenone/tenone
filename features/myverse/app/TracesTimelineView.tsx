@@ -281,7 +281,7 @@ export function TracesTimelineView() {
                         흔적
                     </h1>
                     <p className="text-sm text-neutral-500 mt-1.5">
-                        내가 살아낸 순간들 — 사진·영상·메모·장소·루틴으로 남는 발자국
+                        내가 살아낸 순간들 · 사진·영상·메모·장소·루틴으로 남는 발자국
                     </p>
                 </div>
                 <div className="shrink-0 flex items-center gap-1.5">
@@ -1036,7 +1036,7 @@ function TraceDetailModal({ trace, onClose, onUpdated }: {
                                     : "text-neutral-600 border border-neutral-200 hover:bg-neutral-50"
                             }`}
                         >
-                            {visibility === "public" ? "🌐 공개됨 — 클릭해 비공개로" : "🔒 비공개 — 피드에 공개하기"}
+                            {visibility === "public" ? "🌐 공개됨 · 클릭해 비공개로" : "🔒 비공개 · 피드에 공개하기"}
                         </button>
                     )}
 

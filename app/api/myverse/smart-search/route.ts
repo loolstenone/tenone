@@ -11,6 +11,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
+import { noDash } from "@/lib/planners/text";
 
 const MODEL = "claude-haiku-4-5-20251001";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -166,10 +167,10 @@ export async function POST(req: Request) {
             const out = b.input as { ids?: string[]; answer?: string };
             const valid = (out.ids ?? []).filter((i) => scored.some((x) => x.c.id === i));
             if (valid.length) ids = valid.slice(0, 8);
-            answer = String(out.answer ?? "").slice(0, 300);
+            answer = noDash(String(out.answer ?? "")).slice(0, 300);
         }
     } catch (e) {
-        console.error("[smart-search] pick 실패 — 점수 순으로", e);
+        console.error("[smart-search] pick 실패, 점수 순으로", e);
     }
     const byId = new Map(scored.map((x) => [x.c.id, x.c]));
     return NextResponse.json({ answer, range: { from, to }, keywords: words, results: ids.map((i) => strip(byId.get(i)!)) });

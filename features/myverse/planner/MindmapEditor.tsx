@@ -656,7 +656,7 @@ export function MindmapEditor({
                                             disabled={applyModal.loading}
                                             className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         >
-                                            <option value="">— 프로젝트 선택 —</option>
+                                            <option value="">프로젝트 선택</option>
                                             {projects.map(p => (
                                                 <option key={p.id} value={p.id}>{p.title}</option>
                                             ))}

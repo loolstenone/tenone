@@ -11,7 +11,7 @@ export function PlannersAppSideNav() {
     const { collapsed, toggle } = useSidebarCollapse();
 
     return (
-        <aside className={`hidden md:flex fixed top-12 left-0 bottom-0 z-30 flex-col overflow-hidden border-r border-neutral-200 bg-white transition-[width] duration-200 myverse-dark:border-white/8 myverse-dark:bg-[#0D0D15] ${collapsed ? "w-14" : "w-52"}`}>
+        <aside className={`hidden lg:flex fixed top-12 left-0 bottom-0 z-30 flex-col overflow-hidden border-r border-neutral-200 bg-white transition-[width] duration-200 myverse-dark:border-white/8 myverse-dark:bg-[#0D0D15] ${collapsed ? "w-14" : "w-52"}`}>
             <button
                 type="button"
                 onClick={toggle}

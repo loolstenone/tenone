@@ -498,7 +498,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         id: 'planners', name: "Planner's", logoText: "Planner's", logoStyle: 'text' as const,
         faviconUrl: '/brands/planners/favicon.png', appleTouchIcon: '/brands/planners/apple-touch-icon.png',
         colors: { primary: '#0F766E', primaryDark: '#134E4A', secondary: '#14B8A6', headerBg: '#134E4A', headerText: '#ffffff', footerBg: '#042F2E', footerText: '#99F6E4', accent: '#14B8A6' },
-        meta: { title: "Planner's — 우리는 모두 기획자다", description: '기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.', keywords: ['Planner', '기획자', '기획', 'Planning', 'Ten:One'] },
+        meta: { title: "Planner's · 우리는 모두 기획자다", description: '기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.', keywords: ['Planner', '기획자', '기획', 'Planning', 'Ten:One'] },
         homePath: '/planners', signupPath: '/signup', domain: 'www.planners.ai.kr',
         universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },

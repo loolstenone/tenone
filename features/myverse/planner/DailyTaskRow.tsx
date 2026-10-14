@@ -148,7 +148,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                         }`}
                         style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}
                     >
-                        <option value="">— 프로젝트 —</option>
+                        <option value="">프로젝트</option>
                         {projects.map(p => (
                             <option key={p.id} value={p.id}>{p.title}</option>
                         ))}

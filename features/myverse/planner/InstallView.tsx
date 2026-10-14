@@ -254,7 +254,7 @@ export function InstallView() {
             <div className="mt-10 p-5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-600 leading-relaxed">
                 <p className="font-semibold text-neutral-900 mb-2">설치하면 무엇이 좋아지나요?</p>
                 <ul className="space-y-1 list-disc list-inside marker:text-[var(--pp-accent)]">
-                    <li>홈 화면 아이콘으로 한 번에 진입 — 브라우저 주소창 입력 불필요</li>
+                    <li>홈 화면 아이콘으로 한 번에 진입, 브라우저 주소창 입력 불필요</li>
                     <li>전체 화면 모드 (브라우저 UI 가림) 로 노트·일정에 집중</li>
                     <li>오프라인에서도 최근에 본 페이지 열람 가능</li>
                 </ul>

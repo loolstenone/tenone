@@ -15,19 +15,19 @@ const MODE_META: Record<Mode, { label: string; icon: typeof Sparkles; ph: string
         label: "무끼",
         icon: Sparkles,
         ph: "무엇이든 물어보세요. 일정·연락처·할일은 자동으로 마이버스에 반영돼요.\n예: 5월 20일 오후 2시 LG CNS 김철중 미팅",
-        help: "묻기 모드 — 1:1 대화. 일정·할일·연락처를 말하면 자동 등록.",
+        help: "묻기 모드 · 1:1 대화. 일정·할일·연락처를 말하면 자동 등록.",
     },
     diary: {
         label: "일기",
         icon: Edit3,
         ph: "오늘 어땠어요? 한 줄이라도 좋아요.",
-        help: "일기 모드 — 흔적을 정리하고 패턴을 짚어줘요.",
+        help: "일기 모드 · 흔적을 정리하고 패턴을 짚어줘요.",
     },
     coach: {
         label: "코치",
         icon: Brain,
         ph: "지금 고민·결정할 일을 적어보세요.",
-        help: "코치 모드 — 묻지 않아도 일일/주간 리포트로 먼저 말 걸어요.",
+        help: "코치 모드 · 묻지 않아도 일일/주간 리포트로 먼저 말 걸어요.",
     },
 };
 
@@ -91,7 +91,7 @@ export function MukkiFab() {
             const actions = (data.actions as { label: string; href?: string }[] | undefined) ?? undefined;
             setTurns(prev => [...prev, { role: "mukki", text: reply, actions }]);
         } catch {
-            setTurns(prev => [...prev, { role: "mukki", text: "네트워크 오류 — 잠시 후 다시 시도해 주세요." }]);
+            setTurns(prev => [...prev, { role: "mukki", text: "네트워크 오류 · 잠시 후 다시 시도해 주세요." }]);
         } finally {
             setBusy(false);
             inputRef.current?.focus();
@@ -115,7 +115,7 @@ export function MukkiFab() {
                 <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    title="무끼 — 묻기 / 일기 / 코치"
+                    title="무끼 · 묻기 / 일기 / 코치"
                     aria-label="무끼 열기"
                     className="fixed bottom-[5.25rem] md:bottom-[4.5rem] right-5 z-[8500] w-14 h-14 rounded-full shadow-xl flex items-center justify-center bg-gradient-to-br from-[var(--pp-accent)] to-[#A855F7] text-white hover:scale-105 transition-all"
                 >

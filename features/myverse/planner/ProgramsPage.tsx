@@ -53,7 +53,7 @@ function ProgramSection() {
             <div className="space-y-2 text-sm text-[#444] leading-relaxed">
               <p>AI가 80%를 채운다.</p>
               <p>사람은 20%의 핵심 판단에 집중한다.</p>
-              <p>정보 수집, 가설 시뮬레이션, 시나리오 비교 —</p>
+              <p>정보 수집, 가설 시뮬레이션, 시나리오 비교</p>
               <p>AI가 속도를 내고, 사람이 방향을 잡는다.</p>
             </div>
           </div>

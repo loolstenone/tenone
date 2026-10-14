@@ -132,7 +132,7 @@ export default function ImportsPage() {
                 </div>
                 <h1 className="text-2xl font-serif text-neutral-900">백업 가져오기</h1>
                 <p className="text-xs text-neutral-500 mt-1">
-                    내 디지털 흔적을 마이버스로 회수합니다 — Instagram·Facebook·Apple·Google
+                    내 디지털 흔적을 마이버스로 회수합니다, Instagram·Facebook·Apple·Google
                 </p>
             </header>
 

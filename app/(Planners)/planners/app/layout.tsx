@@ -10,7 +10,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { LoginRequired } from "@/components/LoginRequired";
-import { MainContent } from "@/features/myverse/app/MainContent";
+import { PlannersMain } from "@/features/planners/app/PlannersMain";
 import { SidebarCollapseProvider } from "@/features/myverse/app/SidebarCollapseContext";
 import { AppMonthBar } from "@/features/myverse/planner/AppMonthBar";
 import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts";
@@ -24,7 +24,11 @@ import type { MyverseUser } from "@/lib/myverse/types";
 export const dynamic = "force-dynamic";
 
 // 개인 플래너 화면 — 검색 노출 안 함 (사이트 공개와 별개, 2026-10-14)
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+export const metadata: Metadata = {
+    // 앱 화면 탭 제목: 사이트 제목(…| Ten:One™로 붙던 문제) 대신 앱 이름 그대로
+    title: { absolute: "플래너'스 AI" },
+    robots: { index: false, follow: false },
+};
 
 const ONBOARDING = "/planners/app/onboarding";
 
@@ -81,8 +85,9 @@ export default async function PlannersAppLayout({ children }: { children: React.
                 <SidebarCollapseProvider>
                     <div className="flex min-h-0 flex-1 pt-12">
                         <PlannersAppSideNav />
-                        <MainContent>{children}</MainContent>
-                        <AppMonthBar />
+                        <PlannersMain>{children}</PlannersMain>
+                        {/* 월 막대: 1024px 이상에서만 (패드 세로에서는 본문 폭 확보) */}
+                        <div className="hidden lg:block"><AppMonthBar /></div>
                     </div>
                 </SidebarCollapseProvider>
             </div>

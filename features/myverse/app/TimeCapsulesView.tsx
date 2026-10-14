@@ -79,7 +79,7 @@ export function TimeCapsulesView() {
                 icon="redeem"
                 label="TIME CAPSULE"
                 title="타임 캡슐"
-                subtitle="미래의 나에게 보내는 잠긴 메시지 — 정해진 날에 다시 만나요"
+                subtitle="미래의 나에게 보내는 잠긴 메시지, 정해진 날에 다시 만나요"
                 status="phase2"
                 actions={
                     <button

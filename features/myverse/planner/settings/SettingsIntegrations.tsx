@@ -728,7 +728,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                         <p className="text-sm text-neutral-900">위치 접근</p>
                         {locationPermission === "denied" ? (
                             <p className="text-xs text-rose-500 mt-0.5">
-                                브라우저에서 위치 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
+                                브라우저에서 위치 권한이 차단됨, 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : locationPermission === "granted" ? (
                             <p className="text-xs text-[var(--pp-accent)] mt-0.5">✓ 브라우저 권한 허용됨</p>
@@ -816,7 +816,7 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                             </p>
                         ) : micPermission === "denied" ? (
                             <p className="text-xs text-rose-500 mt-0.5">
-                                브라우저에서 마이크 권한이 차단됨 — 가이드를 따라 다시 허용해 주세요
+                                브라우저에서 마이크 권한이 차단됨, 가이드를 따라 다시 허용해 주세요
                             </p>
                         ) : micPermission === "granted" ? (
                             <p className="text-xs text-[var(--pp-accent)] mt-0.5">✓ 브라우저 권한 허용됨</p>
@@ -863,11 +863,11 @@ export function SettingsIntegrations({ showToast, afterLocationSlot }: Props) {
                     <ul className="space-y-1 text-xs text-neutral-600">
                         <li className="flex items-center gap-1.5">
                             <span className="h-1 w-1 rounded-full bg-neutral-400" />
-                            <span>일간 노트 도구 — 「녹음」 버튼 (새 음성 메모 노트 생성)</span>
+                            <span>일간 노트 도구 · 「녹음」 버튼 (새 음성 메모 노트 생성)</span>
                         </li>
                         <li className="flex items-center gap-1.5">
                             <span className="h-1 w-1 rounded-full bg-neutral-400" />
-                            <span>각 노트 카드 헤더 🎤 — 기존 노트에 음성 텍스트 추가</span>
+                            <span>각 노트 카드 헤더 🎤, 기존 노트에 음성 텍스트 추가</span>
                         </li>
                     </ul>
                     <p className="text-[10px] text-neutral-400 mt-3 leading-relaxed">

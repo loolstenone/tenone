@@ -534,7 +534,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     )}
                                 </div>
                                 {kind === "anniversary" && !LUNAR_YEARS.includes(lunarYear) && (
-                                    <p className="text-[10px] text-amber-500">테이블 범위 외 — 근사 변환 적용</p>
+                                    <p className="text-[10px] text-amber-500">테이블 범위 외 · 근사 변환 적용</p>
                                 )}
                             </div>
                         )}

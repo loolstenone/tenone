@@ -167,7 +167,7 @@ function buildGuide(id: BrowserId, os: OsId, permission: PermName): BrowserGuide
             steps: [
                 "아래 주소를 복사해 새 탭 주소창에 직접 붙여넣고 이동",
                 "(보안상 브라우저는 외부에서 자동 이동을 차단함)",
-                `차단됨 목록에서 ${host} 항목 찾기 — 쓰레기통 클릭 또는 허용으로 변경`,
+                `차단됨 목록에서 ${host} 항목 찾기, 쓰레기통 클릭 또는 허용으로 변경`,
                 "이 탭으로 돌아와 새로고침 후 다시 시도",
                 "또는 빠른 방법: 주소창 왼쪽 자물쇠 🔒 → 사이트 설정에서 직접 변경",
             ],
@@ -405,7 +405,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                             </div>
                             <p className="text-[10px] text-neutral-400 mt-1.5 flex items-center gap-1">
                                 <ExternalLink className="h-2.5 w-2.5" />
-                                보안상 자동 이동이 차단됨 — 새 탭에 직접 붙여넣기
+                                보안상 자동 이동이 차단됨, 새 탭에 직접 붙여넣기
                             </p>
                         </div>
                     )}

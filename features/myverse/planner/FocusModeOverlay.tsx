@@ -98,7 +98,7 @@ export function FocusModeOverlay({ taskText, onClose }: FocusModeOverlayProps) {
     // document title 업데이트
     useEffect(() => {
         if (running) {
-            document.title = `${fmt(timeLeft)} · ${MODE_LABELS[mode]} — 마이버스`;
+            document.title = `${fmt(timeLeft)} · ${MODE_LABELS[mode]}, 마이버스`;
         } else {
             document.title = "마이버스";
         }
@@ -322,7 +322,7 @@ export function FocusModeOverlay({ taskText, onClose }: FocusModeOverlayProps) {
 
             {/* 키보드 힌트 */}
             <p className="mt-8 text-xs text-white/30">
-                Space — 시작/일시정지 · Esc — 종료
+                Space · 시작/일시정지 · Esc, 종료
             </p>
         </div>
     );

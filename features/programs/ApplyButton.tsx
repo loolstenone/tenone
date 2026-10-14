@@ -55,7 +55,7 @@ export function ApplyButton({ roundId, channel, roomHref, accentColor, dark = tr
     if (!st) return null;
 
     if (st.state === "participant" || st.state === "accepted") {
-        return <Link href={roomHref} className={btn} style={{ background: accentColor }}>{st.state === "accepted" ? "선발되었습니다 — 회차 방" : "회차 방"}</Link>;
+        return <Link href={roomHref} className={btn} style={{ background: accentColor }}>{st.state === "accepted" ? "선발되었습니다 · 회차 방" : "회차 방"}</Link>;
     }
     if (st.state === "pending") {
         return (

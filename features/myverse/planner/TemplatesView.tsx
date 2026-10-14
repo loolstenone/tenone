@@ -629,7 +629,7 @@ export function TemplatesView() {
                     <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                         dashboard_customize
                     </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-widest">TEMPLATES</span>
+                    
                 </div>
                 <h1
                     className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
@@ -756,7 +756,7 @@ export function TemplatesView() {
                                     {PLANNER_ROLE_META[userRole].label} 맞춤 템플릿
                                 </p>
                                 <p className="text-xs text-teal-600 mt-0.5">
-                                    {PLANNER_ROLE_META[userRole].desc} — {filtered.length}개 추천
+                                    {PLANNER_ROLE_META[userRole].desc} · {filtered.length}개 추천
                                 </p>
                             </div>
                         </div>
@@ -843,7 +843,7 @@ export function TemplatesView() {
                                             onChange={(e) => setApplyTargetId(e.target.value)}
                                             className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         >
-                                            <option value="">— 프로젝트 선택 —</option>
+                                            <option value="">프로젝트 선택</option>
                                             {projects.map(p => (
                                                 <option key={p.id} value={p.id}>{p.title}</option>
                                             ))}
@@ -966,7 +966,7 @@ export function TemplatesView() {
                                     <span>
                                         다음 변수가 자동 채워졌습니다: {usedVars.map((v, i) => (
                                             <span key={v} className="font-mono">
-                                                {i > 0 && ", "}<span className="text-[var(--pp-accent)]">{v}</span>={varCtx[v] || "—"}
+                                                {i > 0 && ", "}<span className="text-[var(--pp-accent)]">{v}</span>={varCtx[v] || "-"}
                                             </span>
                                         ))}
                                     </span>

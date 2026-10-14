@@ -76,7 +76,7 @@ export function DayCoach({ date }: { date: string }) {
     const btn = "inline-flex items-center gap-1.5 bg-[var(--pp-accent)] px-4 py-2 text-sm font-bold text-white hover:bg-[var(--pp-accent-strong)] disabled:opacity-40";
 
     return (
-        <section className="mb-8 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+        <section className="mb-10 border border-neutral-200 bg-white p-6 md:p-8 myverse-dark:border-white/10 myverse-dark:bg-white/5">
             <div className="flex gap-2 border-b border-neutral-100 myverse-dark:border-white/10">
                 <button onClick={() => setTab("morning")} className={tabCls(tab === "morning")}><Sun className="h-4 w-4" /> 오늘의 Top 3</button>
                 <button onClick={() => setTab("evening")} className={tabCls(tab === "evening")}><Moon className="h-4 w-4" /> 저녁 회고</button>

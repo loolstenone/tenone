@@ -46,8 +46,8 @@ export function ConnectedAi() {
             </div>
 
             <ol className="mt-4 space-y-1.5 text-sm text-neutral-600">
-                <li><b>Claude</b> — 설정 › 커넥터 › 사용자 지정 커넥터 추가 → 위 주소 붙여 넣기 → Ten:One™ 계정으로 로그인 후 허용</li>
-                <li><b>ChatGPT</b> — 설정 › 앱과 커넥터 › 커넥터 만들기(개발자 모드) → 위 주소 → 로그인 후 허용</li>
+                <li><b>Claude</b>, 설정 › 커넥터 › 사용자 지정 커넥터 추가 → 위 주소 붙여 넣기 → Ten:One™ 계정으로 로그인 후 허용</li>
+                <li><b>ChatGPT</b>, 설정 › 앱과 커넥터 › 커넥터 만들기(개발자 모드) → 위 주소 → 로그인 후 허용</li>
                 <li>연결한 뒤 예) &ldquo;오늘 할 일 정리해 줘&rdquo; · &ldquo;지난주 완료율 어땠어?&rdquo; · &ldquo;금요일에 보고서 마감 할 일 넣어 줘&rdquo;</li>
             </ol>
 

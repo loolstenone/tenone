@@ -395,7 +395,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                     {/* 1) 이달의 방향 — 테마 + 목표 통합 카드 */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-6">
                         <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">DIRECTION</span>
+                            <span className="text-[11px] tracking-wide text-[var(--pp-accent)] font-semibold">방향</span>
                             <h2 className="text-sm font-semibold text-neutral-800">이달의 방향</h2>
                         </div>
                         <div className="grid md:grid-cols-[1fr_1.3fr] gap-6 min-w-0">
@@ -479,7 +479,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                     {/* 2) 집중 영역 — 활성 프로젝트 토글 + 자유 텍스트 */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">FOCUS</span>
+                            <span className="text-[11px] tracking-wide text-[var(--pp-accent)] font-semibold">집중</span>
                             <h2 className="text-sm font-semibold text-neutral-800">집중 영역</h2>
                             <button
                                 onClick={() => setShowSuggestions(v => !v)}
@@ -529,7 +529,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         {/* 제시 항목 — 펼침 시 활성 프로젝트 표시 */}
                         {showSuggestions && (
                             <div className="mb-2 pb-2 border-b border-neutral-100">
-                                <p className="text-[10px] text-neutral-400 mb-1.5">프로젝트 — 클릭으로 추가</p>
+                                <p className="text-[10px] text-neutral-400 mb-1.5">프로젝트 · 클릭으로 추가</p>
                                 {activeProjects.length > 0 ? (
                                     <div className="flex flex-wrap gap-1.5">
                                         {activeProjects.map((p) => {
@@ -821,7 +821,7 @@ function MonthlyTasksTab({ summary }: { summary: NonNullable<MonthlyAnalyticsPro
                 {summary.canceled_tasks > 0 && <span className="bg-neutral-300" style={{ width: `${percent(summary.canceled_tasks, summary.total_tasks)}%` }} />}
             </div>
             <div className="grid grid-cols-3 gap-3 pt-3 border-t border-neutral-100">
-                <SubStat label="에너지 평균"   value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
+                <SubStat label="에너지 평균"   value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "-"} />
                 <SubStat label="일간 계획 수립" value={`${summary.days_recorded}일`} />
                 <SubStat label="완료한 프로젝트" value={`${summary.projects_completed}개`} />
             </div>
@@ -935,7 +935,7 @@ function AvgCard({ label, value, suffix, color }: { label: string; value: number
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">{label}</p>
             <p className="flex items-baseline justify-center gap-0.5">
                 <span className={`text-xl font-semibold text-neutral-900 ${color ? "" : ""}`}>
-                    {value ?? "—"}
+                    {value ?? "-"}
                 </span>
                 {value != null && <span className="text-[10px] text-neutral-400">{suffix}</span>}
             </p>

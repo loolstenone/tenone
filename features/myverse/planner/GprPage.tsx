@@ -6,7 +6,7 @@ function GPRSection() {
     <section id="gpr" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
       <div className="max-w-4xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
-          GPR — 성장의 나침반
+          GPR · 성장의 나침반
         </h2>
         <p className="mt-4 text-[#666] text-lg">
           Goal &middot; Plan &middot; Result. 목표를 세우고, 실행하고, 돌아본다.
@@ -24,7 +24,7 @@ function GPRSection() {
         {/* 3단계 */}
         <div className="mt-16 space-y-12">
           <div className="border-t border-[#d0d0d0] pt-8">
-            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Goal — 어디로 갈 것인가</h3>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Goal · 어디로 갈 것인가</h3>
             <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
               <p>명확하고 측정 가능한 목표.</p>
               <p>숫자와 기한이 있어야 한다.</p>
@@ -34,7 +34,7 @@ function GPRSection() {
           </div>
 
           <div className="border-t border-[#d0d0d0] pt-8">
-            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Plan — 어떻게 갈 것인가</h3>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Plan · 어떻게 갈 것인가</h3>
             <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
               <p>목표를 달성하기 위한 구체적 액션.</p>
               <p>누가, 무엇을, 언제까지.</p>
@@ -43,7 +43,7 @@ function GPRSection() {
           </div>
 
           <div className="border-t border-[#d0d0d0] pt-8">
-            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Result — 무엇을 배웠는가</h3>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Result · 무엇을 배웠는가</h3>
             <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
               <p>실행 결과를 기록하고 다음 사이클에 반영한다.</p>
               <p>Result는 점수가 아니다.</p>

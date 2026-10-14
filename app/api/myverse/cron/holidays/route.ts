@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
         }
 
         if (rows.length === 0) {
-            return NextResponse.json({ ok: true, year, inserted: 0, message: "no data — check API key" });
+            return NextResponse.json({ ok: true, year, inserted: 0, message: "no data · check API key" });
         }
 
         const { error } = await admin.from("myverse_calendar_entries").insert(rows);

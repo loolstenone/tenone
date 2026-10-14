@@ -63,7 +63,7 @@ export function CopyToAiButton({ title, payload, hint }: Props) {
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl max-w-lg w-full">
                         <div className="px-5 py-4 border-b border-neutral-200 flex items-center justify-between">
-                            <h3 className="font-semibold text-neutral-900">심층 검증 — 외부 AI에게 위임</h3>
+                            <h3 className="font-semibold text-neutral-900">심층 검증 · 외부 AI에게 위임</h3>
                             <button onClick={() => setOpen(false)} className="text-neutral-400 hover:text-neutral-900">
                                 <X className="h-4 w-4" />
                             </button>

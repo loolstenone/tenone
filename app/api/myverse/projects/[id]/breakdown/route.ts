@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
+import { noDash } from "@/lib/planners/text";
 
 const MODEL = "claude-haiku-4-5-20251001";
 
@@ -100,7 +101,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const block = resp.content.find((b) => b.type === "tool_use");
     const out = (block?.type === "tool_use" ? block.input : {}) as { steps?: { text: string; hours: number; milestone?: string }[]; note?: string };
     const steps = (out.steps ?? []).filter((s) => s.text?.trim()).slice(0, 12)
-        .map((s) => ({ text: s.text.trim().slice(0, 80), hours: Math.min(Math.max(Math.round((Number(s.hours) || 1) * 2) / 2, 0.5), 6), milestone: s.milestone ?? null }));
+        .map((s) => ({ text: noDash(s.text).slice(0, 80), hours: Math.min(Math.max(Math.round((Number(s.hours) || 1) * 2) / 2, 0.5), 6), milestone: s.milestone ?? null }));
 
     // 날짜 제안: 오늘(또는 시작일 중 늦은 날)부터 평일 하루 perDay시간씩 채운다
     const today = kstToday();
@@ -116,7 +117,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({
         steps: planned,
-        note: String(out.note ?? "").slice(0, 200),
+        note: noDash(String(out.note ?? "")).slice(0, 200),
         total_hours: planned.reduce((a, s) => a + s.hours, 0),
         hours_per_day: perDay,
         over_end_date: overEnd,

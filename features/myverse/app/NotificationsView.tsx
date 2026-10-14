@@ -121,7 +121,7 @@ export function NotificationsView() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm text-neutral-800">
-                                        <span className="font-medium">{n.actor?.name ?? "—"}</span>
+                                        <span className="font-medium">{n.actor?.name ?? "-"}</span>
                                         <span className="text-neutral-600">{LABELS[n.type]}</span>
                                     </p>
                                     <p className="text-[11px] text-neutral-400">{relativeTime(n.created_at)}</p>

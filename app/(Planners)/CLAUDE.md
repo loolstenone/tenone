@@ -70,6 +70,10 @@
   - 이월: 반복 일정을 빈 시간 계산에 반영 · 일상어 찾기의 관련 기록 묶음 보강 · '글자로 바꾸기' 실제 펜슬 손글씨로 시험 · **공개 전 처리방침: AI 처리 위탁·국외 이전(Anthropic, 미국), 사진 비저장 명시**
   - 🐛 수정: AI 일정 저장 필드 `entry_date`→`start_date` (예전부터 AI 일정이 저장되지 않았음)
 - ❌ AI 라우트를 새로 만들 때 `requireAiAccess` 없이 두기 · 라우트마다 무료 한도 예외 만들기
+- **화면 문장 규칙 (2026-10-14 사용자)**: 긴 줄표(—) 쓰지 않는다. 문장은 쉼표, 짧은 라벨은 가운뎃점(·), 날짜 범위는 물결(~), 빈 값은 하이픈(-) · AI가 만든 문장도 저장 전 `lib/planners/text.ts` `noDash` · 영문 대문자 눈썹 라벨(PROJECTS·TASKS 등) 대신 한글
+- **앱 반응형 기준 1024px** (`features/planners/app/PlannersMain.tsx`): 미만이면 사이드 메뉴·월 막대 숨김 → 상단 ☰ / 오늘 화면 3단은 lg부터 (패드 세로에서 1단)
+- **앱 메뉴 정리 (2026-10-14)**: '일정' 메뉴 뺌(월간·오늘·주간에서 같은 편집기로 보고 넣음, `/schedule` → 월간) · '시간 기록' 뺌 · 설정 탭 '기술' → **'연동'**(내 AI 연결 + 외부 서비스, 따로 있던 `settings/integrations` → 연동 탭) · 설정 '사생활'은 Planner's 기준으로 다시 씀(MyVerse 공개 페이지·자동 수집 동의 제거) · '퍼스널' → '정체성'
+- 🐛 수정: Google 캘린더 연결이 로그인해도 401 (세션 쿠키 이름 `tenone-auth` 누락, 같은 문제 4개 라우트) · Google 로그인 복귀 주소가 myverse.kr 고정 → 시작한 도메인으로 (⚠️ Google Cloud 콘솔 '승인된 리디렉션 URI'에 `https://www.planners.ai.kr/api/myverse/integrations/google/callback` 등록 필요)
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유
 - `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로
 - `scripts/planners-files-import.mjs` + `scripts/data/planners-badak-mall.json` — 바닥상회 원본 → 버킷·테이블 (멱등)

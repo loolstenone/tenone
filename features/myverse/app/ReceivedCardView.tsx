@@ -72,7 +72,7 @@ export function ReceivedCardView({ member }: { member: Member }) {
                     href="/myverse"
                     className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] transition-colors"
                 >
-                    Powered by <span className="font-semibold">Myverse</span> — 나를 운영하는 OS
+                    Powered by <span className="font-semibold">Myverse</span>, 나를 운영하는 OS
                 </Link>
             </div>
         </div>

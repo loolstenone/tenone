@@ -107,7 +107,7 @@ const handler = createMcpHandler(
     },
     {
         serverInfo: { name: "planners", version: "1.0.0" },
-        instructions: "Planner's(플래너'스) 플래너 — 사용자의 할 일·일정·회고 기록. 읽기와 할 일 추가만 할 수 있다. 날짜는 한국 시간 기준 YYYY-MM-DD. 사용자에게는 존댓말로, 기록에 없는 사실은 지어내지 않는다.",
+        instructions: "Planner's(플래너'스) 플래너 · 사용자의 할 일·일정·회고 기록. 읽기와 할 일 추가만 할 수 있다. 날짜는 한국 시간 기준 YYYY-MM-DD. 사용자에게는 존댓말로, 기록에 없는 사실은 지어내지 않는다.",
     },
 );
 

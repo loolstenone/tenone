@@ -143,7 +143,7 @@ export function SettingsAi({
                         <p className="text-[10px] text-neutral-400 mb-3">브리핑 생성 시 참조할 정보를 선택하세요</p>
                         <div className="flex flex-wrap gap-2">
                             {[
-                                { key: "identity", label: "퍼스널" },
+                                { key: "identity", label: "정체성" },
                                 { key: "weekly",   label: "이번 주" },
                                 { key: "monthly",  label: "이번 달" },
                                 { key: "projects", label: "프로젝트" },

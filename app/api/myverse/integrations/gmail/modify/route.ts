@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             if (res.status === 403 && /insufficient/i.test(detail)) {
                 return NextResponse.json({
                     error: "insufficient_scope",
-                    hint: "Gmail 수정 권한 누락 — 외부 연동 페이지에서 Gmail 재연결 필요",
+                    hint: "Gmail 수정 권한 누락, 외부 연동 페이지에서 Gmail 재연결 필요",
                 }, { status: 403 });
             }
             return NextResponse.json({ error: "modify_failed", status: res.status, detail }, { status: 500 });

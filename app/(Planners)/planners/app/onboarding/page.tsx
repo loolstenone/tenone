@@ -200,9 +200,9 @@ export default function OnboardingPage() {
 
                                 <div className="space-y-3 border-l border-white/10 pl-4">
                                     {[
-                                        "나를 모은다 — 흩어진 조각 구출",
-                                        "나를 쌓는다 — 현재 기록 자동 축적",
-                                        "나를 알아간다 — AI가 패턴·맥락 이해",
+                                        "나를 모은다 · 흩어진 조각 구출",
+                                        "나를 쌓는다 · 현재 기록 자동 축적",
+                                        "나를 알아간다 · AI가 패턴·맥락 이해",
                                     ].map((text, i) => (
                                         <div key={i} className="flex items-start gap-3">
                                             <span className="text-[10px] text-indigo-400/60 mt-0.5 tabular-nums">0{i + 1}</span>
@@ -415,7 +415,7 @@ export default function OnboardingPage() {
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="block text-xs text-white/30 tracking-wide">Vision — 되고 싶은 것</label>
+                                    <label className="block text-xs text-white/30 tracking-wide">Vision · 되고 싶은 것</label>
                                     <input
                                         type="text"
                                         value={visionStatement}
@@ -425,7 +425,7 @@ export default function OnboardingPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs text-white/30 tracking-wide">Mission — 비전을 실현할 방법</label>
+                                    <label className="block text-xs text-white/30 tracking-wide">Mission · 비전을 실현할 방법</label>
                                     <input
                                         type="text"
                                         value={missionStatement}
@@ -476,7 +476,7 @@ export default function OnboardingPage() {
 
                             <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                                 <p className="text-xs text-white/30 leading-relaxed">
-                                    <span className="text-indigo-300/80">기본은 비공개</span> — 모든 흔적은 처음엔 나만 봅니다. 공개는 나중에 직접 선택해요.
+                                    <span className="text-indigo-300/80">기본은 비공개</span>, 모든 흔적은 처음엔 나만 봅니다. 공개는 나중에 직접 선택해요.
                                 </p>
                             </div>
 

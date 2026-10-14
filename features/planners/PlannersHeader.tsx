@@ -54,7 +54,7 @@ export function PlannersHeader() {
                     ))}
                 </div>
 
-                <div className="hidden lg:flex ml-auto text-white">{/* 어두운 헤더 — 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
+                <div className="hidden lg:flex ml-auto text-white">{/* 어두운 헤더 · 유틸리티 바는 currentColor를 쓰므로 흰색 지정 */}
                     <UniverseUtilityBar
                         hideAbout
                         aboutPath="/planners"

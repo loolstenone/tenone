@@ -63,7 +63,7 @@ export function InviteJoin({ code, accentColor = "#EC1D25" }: { code: string; ac
                         <button onClick={() => setLoginOpen(true)} className="w-full py-3 text-sm font-bold text-white" style={{ background: accentColor }}>가입 / 로그인</button>
                     </>
                 ) : p.state === "joined" ? (
-                    <button onClick={() => router.push(p.room)} className="w-full py-3 text-sm font-bold text-white" style={{ background: accentColor }}>이미 이 팀 팀원입니다 — 회차 방으로</button>
+                    <button onClick={() => router.push(p.room)} className="w-full py-3 text-sm font-bold text-white" style={{ background: accentColor }}>이미 이 팀 팀원입니다, 회차 방으로</button>
                 ) : p.state === "other_team" ? (
                     <p className="text-sm text-neutral-400">이 회차에 이미 다른 팀으로 참가 중입니다. 팀을 옮기려면 운영진에게 요청하세요.</p>
                 ) : (

@@ -1112,7 +1112,7 @@ export function ContactsView() {
                 } else if (skipped > 0 && inserted > 0) {
                     showToast(`${fmt(inserted)}명 추가 · ${fmt(skipped)}명 중복 스킵`);
                 } else if (skipped > 0 && inserted === 0) {
-                    showToast(`전부 중복(${fmt(skipped)}명) — 추가 없음`, false);
+                    showToast(`전부 중복(${fmt(skipped)}명), 추가 없음`, false);
                 } else if (inserted > 0) {
                     showToast(`${fmt(inserted)}명 가져왔습니다.`);
                 } else {
@@ -1778,7 +1778,7 @@ export function ContactsView() {
                             {hasMore && (
                                 <div ref={sentinelRef} className="py-6 text-center text-xs text-neutral-400 border-t border-neutral-100">
                                     <Loader2 className="h-4 w-4 inline-block animate-spin mr-1.5" />
-                                    {renderedRows.length.toLocaleString("ko-KR")} / {visibleRows.length.toLocaleString("ko-KR")}명 표시 중 — 스크롤하면 더 보기
+                                    {renderedRows.length.toLocaleString("ko-KR")} / {visibleRows.length.toLocaleString("ko-KR")}명 표시 중 · 스크롤하면 더 보기
                                 </div>
                             )}
                             {!hasMore && visibleRows.length > PAGE_SIZE && (
@@ -1791,7 +1791,7 @@ export function ContactsView() {
                 </div>
 
                 {/* 가나다 사이드 인덱스 — viewport 우측에 fixed (md 이상에서 노출).
-                    클릭 시 해당 letter만 필터링 — 전체 렌더 X (성능). All = 전체 렌더 모드. */}
+                    클릭 시 해당 letter만 필터링, 전체 렌더 X (성능). All = 전체 렌더 모드. */}
                 {contacts.length > 20 && isCompactView && (
                     <div className="hidden md:flex flex-col items-center fixed right-2 top-1/2 -translate-y-1/2 z-30 bg-white rounded-lg py-2 px-1 shadow-md border border-neutral-200 text-[10px] select-none max-h-[80vh] overflow-y-auto myverse-dark:!bg-[#252525] myverse-dark:!border-[#444]">
                         {/* All — 전체 보기 */}

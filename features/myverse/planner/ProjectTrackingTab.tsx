@@ -113,9 +113,9 @@ export function ProjectTrackingTab({ projectId, projectColor }: { projectId: str
                             <>
                                 {/* 통계 */}
                                 <div className="grid grid-cols-3 gap-2 mb-4 text-center text-xs">
-                                    <Cell label="평균" value={stats.avg ?? "—"} accent={`text-[${color}]`} />
-                                    <Cell label="최소" value={stats.min ?? "—"} />
-                                    <Cell label="최대" value={stats.max ?? "—"} />
+                                    <Cell label="평균" value={stats.avg ?? "-"} accent={`text-[${color}]`} />
+                                    <Cell label="최소" value={stats.min ?? "-"} />
+                                    <Cell label="최대" value={stats.max ?? "-"} />
                                 </div>
                                 {/* 시계열 SVG */}
                                 <Sparkline points={points} color={color} />

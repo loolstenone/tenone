@@ -17,7 +17,7 @@ export function PlannersAppTopBar() {
     return (
         <>
             <header className="fixed inset-x-0 top-0 z-40 flex h-12 items-center gap-2 bg-[#134E4A] px-3 text-white md:px-4">
-                <button onClick={() => setOpen(true)} className="flex h-8 w-8 items-center justify-center md:hidden" aria-label="메뉴">
+                <button onClick={() => setOpen(true)} className="flex h-8 w-8 items-center justify-center lg:hidden" aria-label="메뉴">
                     <Menu className="h-5 w-5" />
                 </button>
                 <Link href="/planners" aria-label="Planner's 홈">

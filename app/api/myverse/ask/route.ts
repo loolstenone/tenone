@@ -119,7 +119,7 @@ function buildContext(moments: MomentRow[]): string {
             m.domain,
             m.sub_tags && m.sub_tags.length > 0 && m.sub_tags.join(","),
         ].filter(Boolean).join(" · ");
-        return `[#${i + 1} id=${m.id}] ${meta}${m.caption ? ` — "${m.caption}"` : ""}`;
+        return `[#${i + 1} id=${m.id}] ${meta}${m.caption ? `, "${m.caption}"` : ""}`;
     });
     return lines.join("\n");
 }

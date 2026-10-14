@@ -5,10 +5,10 @@ import Link from "next/link";
 const PRINCIPLES = [
     { no: 1, title: "도모(圖謀)하라", desc: "생각을 행동으로 옮기기 전, 충분히 꾀하고 헤아려라." },
     { no: 2, title: "문제를 먼저 정의하라", desc: "해결책보다 문제 정의가 먼저다. 잘못된 문제를 빠르게 푸는 것은 실패다." },
-    { no: 3, title: "Vrief — 세 번 걸러라", desc: "Vision → Reality → Issue → Execution → Feedback. 기획의 5단계." },
+    { no: 3, title: "Vrief · 세 번 걸러라", desc: "Vision → Reality → Issue → Execution → Feedback. 기획의 5단계." },
     { no: 4, title: "GPR로 기록하라", desc: "Goal을 세우고, Plan을 실행하고, Result를 돌아본다. 기록이 자산이 된다." },
     { no: 5, title: "계획과 기획을 구분하라", desc: "계획은 일정이다. 기획은 방향이다. 방향 없는 일정은 빠른 실패다." },
-    { no: 6, title: "Vridge — 다리를 놓아라", desc: "현재와 미래 사이에 실행 가능한 다리를 설계하라." },
+    { no: 6, title: "Vridge · 다리를 놓아라", desc: "현재와 미래 사이에 실행 가능한 다리를 설계하라." },
     { no: 7, title: "가설을 세우고 검증하라", desc: "확신 없이 시작하되, 검증 없이 확신하지 마라." },
     { no: 8, title: "단순하게 만들어라", desc: "복잡한 것을 단순하게 설명할 수 없다면, 아직 이해하지 못한 것이다." },
     { no: 9, title: "피드백을 환영하라", desc: "비판은 방향 수정의 기회다. 방어하는 대신 흡수하라." },
@@ -16,13 +16,13 @@ const PRINCIPLES = [
 ];
 
 const TIMELINE = [
-    { year: "2004", event: "기획자로 현장 입문 — 첫 기획서를 쓰다" },
-    { year: "2010", event: "Vrief 프레임워크 초안 정립 — 기획 실패의 공통 패턴 발견" },
-    { year: "2015", event: "GPR 성과 관리 체계 완성 — 팀 단위 검증" },
+    { year: "2004", event: "기획자로 현장 입문 · 첫 기획서를 쓰다" },
+    { year: "2010", event: "Vrief 프레임워크 초안 정립, 기획 실패의 공통 패턴 발견" },
+    { year: "2015", event: "GPR 성과 관리 체계 완성, 팀 단위 검증" },
     { year: "2018", event: "마이버스 종이 플래너 첫 출시" },
-    { year: "2022", event: "디지털 버전 출시 — 굿노트·삼성노트 호환 PDF" },
-    { year: "2024", event: "AI 비서 통합 연구 시작 — 능동적 플래너의 개념 수립" },
-    { year: "2026", event: "마이버스 AI 정식 런칭 — 아침 브리핑, 저녁 회고, 59종 템플릿" },
+    { year: "2022", event: "디지털 버전 출시 · 굿노트·삼성노트 호환 PDF" },
+    { year: "2024", event: "AI 비서 통합 연구 시작, 능동적 플래너의 개념 수립" },
+    { year: "2026", event: "마이버스 AI 정식 런칭, 아침 브리핑, 저녁 회고, 59종 템플릿" },
 ];
 
 export function AboutPage() {
@@ -52,7 +52,7 @@ export function AboutPage() {
                     </p>
                     <p>
                         답은 도구가 아니라 <strong className="text-[#1a1a1a]">사고 체계</strong>에 있었습니다.
-                        문제를 정의하는 방식, 가설을 세우는 습관, 결과를 돌아보는 루틴 —
+                        문제를 정의하는 방식, 가설을 세우는 습관, 결과를 돌아보는 루틴
                         이 세 가지가 기획자와 그렇지 않은 사람의 차이를 만들었습니다.
                     </p>
                     <p>
@@ -86,7 +86,7 @@ export function AboutPage() {
             {/* Principle 10 */}
             <section className="px-6 py-16 max-w-2xl mx-auto">
                 <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-2">Principle 10</h2>
-                <p className="text-sm text-neutral-400 mb-10">Planner&apos;s가 일하는 방식 — 10가지 원칙</p>
+                <p className="text-sm text-neutral-400 mb-10">Planner&apos;s가 일하는 방식, 10가지 원칙</p>
                 <div className="space-y-6">
                     {PRINCIPLES.map((p) => (
                         <div key={p.no} className="flex gap-4">

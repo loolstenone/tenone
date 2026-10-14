@@ -28,7 +28,7 @@ export function SwotGrid({ data, onChange }: GP) {
     ];
     return (
         <div className="my-3 select-none w-full max-w-3xl mx-auto">
-            <GuideBox><span className="font-semibold">SWOT (Albert Humphrey)</span> · 내부(S/W)와 외부(O/T) 분리. 단순 나열 X — TOWS 매칭(SO·WO·ST·WT)으로 전략 도출까지 가야 의미.</GuideBox>
+            <GuideBox><span className="font-semibold">SWOT (Albert Humphrey)</span> · 내부(S/W)와 외부(O/T) 분리. 단순 나열 X, TOWS 매칭(SO·WO·ST·WT)으로 전략 도출까지 가야 의미.</GuideBox>
             <div className="flex items-center justify-center mb-3">
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Internal</span>
                 <span className="mx-2 text-slate-300">↔</span>
@@ -66,7 +66,7 @@ export function FourPGrid({ data, onChange }: GP) {
     ];
     return (
         <div className="my-3 w-full max-w-3xl mx-auto">
-            <GuideBox><span className="font-semibold">McCarthy 4P Marketing Mix</span> · 마케팅의 4 레버. 4개 일관성이 핵심 — Premium 가격에 동네 유통 X. 7P 확장(People·Process·Physical evidence)도.</GuideBox>
+            <GuideBox><span className="font-semibold">McCarthy 4P Marketing Mix</span> · 마케팅의 4 레버. 4개 일관성이 핵심, Premium 가격에 동네 유통 X. 7P 확장(People·Process·Physical evidence)도.</GuideBox>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {cells.map(q => (
                     <div key={q.key} className={`rounded-md p-3 min-h-[140px] sm:min-h-[180px] flex flex-col ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
@@ -176,7 +176,7 @@ export function NineBoxGrid({ data, onChange }: GP) {
 export function EisenhowerGrid({ data, onChange }: GP) {
     return (
         <div className="my-2">
-            <GuideBox><span className="font-semibold">Eisenhower Matrix</span> · &quot;급한 일이 중요한 일을 죽인다.&quot; 중요·비긴급(Schedule)에 시간을 미리 확보 — 여기서 진짜 성장이 일어남.</GuideBox>
+            <GuideBox><span className="font-semibold">Eisenhower Matrix</span> · &quot;급한 일이 중요한 일을 죽인다.&quot; 중요·비긴급(Schedule)에 시간을 미리 확보, 여기서 진짜 성장이 일어남.</GuideBox>
             <QuadrantGrid
                 axisX="중요도 (Importance)" axisXLow="Low" axisXHigh="High"
                 axisY="긴급도 (Urgency)" axisYHigh="High" axisYLow="Low"
@@ -202,7 +202,7 @@ export function PestGrid({ data, onChange }: GP) {
     ];
     return (
         <div className="my-3 w-full max-w-3xl mx-auto">
-            <GuideBox><span className="font-semibold">PEST(LE) Analysis</span> · 외부 거시환경 4축. 6개월~3년 시계로 — 통제할 수 없지만 대응해야 하는 변수. 각 항목에 영향 강도(↑/→/↓)까지.</GuideBox>
+            <GuideBox><span className="font-semibold">PEST(LE) Analysis</span> · 외부 거시환경 4축. 6개월~3년 시계로, 통제할 수 없지만 대응해야 하는 변수. 각 항목에 영향 강도(↑/→/↓)까지.</GuideBox>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {cells.map(c => (
                     <div key={c.key} className={`rounded-md p-3 min-h-[140px] sm:min-h-[180px] flex flex-col ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
@@ -225,7 +225,7 @@ export function MoscowGrid({ data, onChange }: GP) {
     ];
     return (
         <div className="my-3 space-y-2 w-full max-w-2xl mx-auto">
-            <GuideBox><span className="font-semibold">DSDM MoSCoW</span> · 우선순위를 4단계로 명확히. <span className="font-semibold">Must는 60% 이내</span>로 — 그 이상이면 진짜 Must가 아님. Won&apos;t를 명시하는 게 핵심.</GuideBox>
+            <GuideBox><span className="font-semibold">DSDM MoSCoW</span> · 우선순위를 4단계로 명확히. <span className="font-semibold">Must는 60% 이내</span>로 · 그 이상이면 진짜 Must가 아님. Won&apos;t를 명시하는 게 핵심.</GuideBox>
             {cells.map(c => (
                 <div key={c.key} className={`rounded-md p-3 ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
                     <div className="flex items-baseline justify-between">
@@ -244,7 +244,7 @@ export function QuadrantBlankGrid({ data, onChange }: GP) {
     const axisY = data["q_axis_y"] ?? "";
     return (
         <div className="my-2 space-y-3 w-full max-w-3xl mx-auto">
-            <GuideBox><span className="font-semibold">자유 사분면</span> · 어떤 두 축이든 — 가치 vs 노력, 비용 vs 수익, 빈도 vs 영향 등. 옵션을 시각적으로 분류해 결정 시간 단축.</GuideBox>
+            <GuideBox><span className="font-semibold">자유 사분면</span> · 어떤 두 축이든 · 가치 vs 노력, 비용 vs 수익, 빈도 vs 영향 등. 옵션을 시각적으로 분류해 결정 시간 단축.</GuideBox>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">X축 라벨</span>

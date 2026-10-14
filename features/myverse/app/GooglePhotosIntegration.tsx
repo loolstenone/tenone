@@ -99,7 +99,7 @@ export function GooglePhotosIntegration() {
             ) : integration ? (
                 <>
                     <div className="text-xs text-neutral-600 space-y-1 mb-4 bg-neutral-50 rounded-lg p-3">
-                        <div>계정: <span className="font-medium">{integration.raw_profile?.email ?? "—"}</span></div>
+                        <div>계정: <span className="font-medium">{integration.raw_profile?.email ?? "-"}</span></div>
                         <div>연결: {new Date(integration.connected_at).toLocaleDateString("ko-KR")}</div>
                         {integration.last_sync_at && (
                             <div>마지막 동기화: {new Date(integration.last_sync_at).toLocaleString("ko-KR")} · {integration.last_sync_count}건</div>

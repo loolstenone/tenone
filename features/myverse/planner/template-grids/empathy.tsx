@@ -13,15 +13,15 @@ export function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChan
           ph: "예: \"매주 화요일 새벽 2시까지 엑셀로 정리해요\"\n\"이게 진짜 짜증나는 게…\"" },
         { key: "thinks", label: "Thinks · 생각하는 것", hint: "말은 안 하지만 행동·표정에서 추론",      color: "bg-neutral-50 border border-neutral-200", text: "text-slate-800",
           ph: "예: \"이걸 하는 게 맞나?\"\n\"동료보다 뒤처지는 거 같아\"" },
-        { key: "does",   label: "Does · 행동하는 것",   hint: "관찰 가능한 행동 — 빈도·맥락",            color: "bg-slate-50 border border-slate-300", text: "text-slate-900",
+        { key: "does",   label: "Does · 행동하는 것",   hint: "관찰 가능한 행동 · 빈도·맥락",            color: "bg-slate-50 border border-slate-300", text: "text-slate-900",
           ph: "예: 매주 화요일 야근\n월 1회 SaaS 구독 비교\n주말에 유튜브 강의 시청" },
-        { key: "feels",  label: "Feels · 느끼는 것",    hint: "감정 단어로 — 짜증·불안·자신감 등",       color: "bg-neutral-50 border border-neutral-200", text: "text-neutral-700",
+        { key: "feels",  label: "Feels · 느끼는 것",    hint: "감정 단어로 · 짜증·불안·자신감 등",       color: "bg-neutral-50 border border-neutral-200", text: "text-neutral-700",
           ph: "예: 마감 전 불안\n작업 끝나고 허무함\n동료 인정받을 때 자신감" },
     ];
     const bottom = [
         { key: "pains", label: "Pains · 고통·두려움",     hint: "장애물·짜증·실패·리스크",         color: "bg-neutral-50 border border-neutral-200", text: "text-neutral-800",
           ph: "- 도구가 너무 복잡해 시간 낭비\n- 진척도가 안 보여 동기 저하\n- 야근 누적으로 번아웃 우려" },
-        { key: "gains", label: "Gains · 바라는 것·이득", hint: "성공·기쁨·이상적 결과 — 측정 가능하게", color: "bg-neutral-50 border border-neutral-200", text: "text-neutral-800",
+        { key: "gains", label: "Gains · 바라는 것·이득", hint: "성공·기쁨·이상적 결과, 측정 가능하게", color: "bg-neutral-50 border border-neutral-200", text: "text-neutral-800",
           ph: "- 주 5시간 절감\n- 본인 성장 가시화\n- 팀에서 \"믿을 수 있는 사람\" 평가" },
     ];
     return (
@@ -35,7 +35,7 @@ export function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChan
             {/* 가이드 */}
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">Dave Gray Empathy Map</span> · 머릿속에 있는 한 사람의 입장이 되어보기.
-                Says·Does는 <span className="font-semibold">관찰</span>, Thinks·Feels는 <span className="font-semibold">추론</span> — 분리해야 가설이 명확해짐.
+                Says·Does는 <span className="font-semibold">관찰</span>, Thinks·Feels는 <span className="font-semibold">추론</span>, 분리해야 가설이 명확해짐.
             </div>
 
             {/* 4사분면 */}
@@ -63,7 +63,7 @@ export function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChan
             {/* Insights */}
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-300">
                 <p className="text-xs font-bold text-slate-900">Insights · 핵심 통찰 (제품·서비스에 줄 메시지)</p>
-                <p className="text-[10px] text-neutral-500 mb-1">6사분면을 종합 — &quot;이 사람을 위해 우리가 무엇을 할까?&quot;</p>
+                <p className="text-[10px] text-neutral-500 mb-1">6사분면을 종합 · &quot;이 사람을 위해 우리가 무엇을 할까?&quot;</p>
                 <CellTextarea cellKey="em_insights" value={data["em_insights"] ?? ""} onChange={onChange} placeholder={"- 진척도 시각화 + 자동 리포트가 핵심 차별화\n- 도구 복잡도가 진입장벽 → 첫 5분 온보딩 단순화 우선"} />
             </div>
         </div>
@@ -176,7 +176,7 @@ export function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange:
                             type="text"
                             value={data["persona_name"] ?? ""}
                             onChange={e => onChange("persona_name", e.target.value)}
-                            placeholder="이름 (예: 박지현 — 1인 마케터)"
+                            placeholder="이름 (예: 박지현 · 1인 마케터)"
                             className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-slate-200 rounded focus:outline-none focus:border-slate-700"
                         />
                         <div className="grid grid-cols-3 gap-1">
@@ -229,7 +229,7 @@ export function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* Quote */}
             <div className="rounded-xl p-3 bg-white border-l-4 border-slate-500">
                 <p className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Quote · 대표 발언 (인터뷰에서 그대로)</p>
-                <p className="text-[10px] text-neutral-500 mb-1">패러프레이즈 X — 본인 입에서 나온 표현 그대로</p>
+                <p className="text-[10px] text-neutral-500 mb-1">패러프레이즈 X · 본인 입에서 나온 표현 그대로</p>
                 <textarea
                     value={data["persona_quote"] ?? ""}
                     onChange={e => onChange("persona_quote", e.target.value)}
@@ -242,8 +242,8 @@ export function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* Scenario */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Scenario · 우리 제품을 쓰는 하루</p>
-                <p className="text-[10px] text-neutral-500 mb-1">아침 → 일과 → 저녁 — 우리 제품이 어디 끼어드는지</p>
-                <CellTextarea cellKey="persona_scenario" value={data["persona_scenario"] ?? ""} onChange={onChange} placeholder={"7AM 모닝 브리핑 받고 오늘 우선순위 확인\n10AM 클라 미팅 전 회의록 자동 정리\n6PM 일일 회고로 마감 — 야근 없이 퇴근"} />
+                <p className="text-[10px] text-neutral-500 mb-1">아침 → 일과 → 저녁, 우리 제품이 어디 끼어드는지</p>
+                <CellTextarea cellKey="persona_scenario" value={data["persona_scenario"] ?? ""} onChange={onChange} placeholder={"7AM 모닝 브리핑 받고 오늘 우선순위 확인\n10AM 클라 미팅 전 회의록 자동 정리\n6PM 일일 회고로 마감, 야근 없이 퇴근"} />
             </div>
         </div>
     );
@@ -275,7 +275,7 @@ export function JtbdGrid({ data, onChange }: { data: FrameworkData; onChange: (k
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div className="rounded-lg p-3 bg-neutral-50 border border-neutral-200 min-h-32">
                     <p className="text-xs font-bold text-slate-800">Situation · 상황</p>
-                    <p className="text-[10px] text-neutral-500 mb-1">언제·어디서·왜 — 트리거 순간</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">언제·어디서·왜 · 트리거 순간</p>
                     <CellTextarea cellKey="jtbd_situation" value={data["jtbd_situation"] ?? ""} onChange={onChange} placeholder={"- 일요일 저녁 7~10시\n- 한 주 시작 전 막막함 느낄 때\n- 노트북 앞에서 빈 화면 응시"} />
                 </div>
                 <div className="rounded-lg p-3 bg-neutral-50 border border-neutral-200 min-h-32">
@@ -402,7 +402,7 @@ export function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (k
                                             className="w-full px-1 py-1 text-xs text-center bg-transparent border border-transparent rounded focus:outline-none focus:bg-white focus:border-neutral-300" />
                                     </td>
                                     <td className={`px-2 py-1.5 text-right font-mono font-bold ${isTop ? "text-slate-900" : s > 0 ? "text-neutral-700" : "text-neutral-300"}`}>
-                                        {s > 0 ? s.toFixed(1) : "—"}
+                                        {s > 0 ? s.toFixed(1) : "-"}
                                     </td>
                                     <td className="px-1 text-center">
                                         {ensureMin.length > 1 && (
@@ -423,7 +423,7 @@ export function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (k
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">★ Top 1~3 · 다음 분기 착수</p>
                 <p className="text-[10px] text-neutral-500 mb-1">점수만 보지 말고 의존성·전략 적합도 함께 판단</p>
-                <CellTextarea cellKey="rice_top" value={data["rice_top"] ?? ""} onChange={onChange} placeholder={"1. (점수 1240) 신규 가입 자동 온보딩 — Q3 핵심 OKR\n2. (점수 980) 결제 재시도 큐 — 의존성 ↓\n3. (점수 720) 모바일 알림 — 후순위지만 빠름"} />
+                <CellTextarea cellKey="rice_top" value={data["rice_top"] ?? ""} onChange={onChange} placeholder={"1. (점수 1240) 신규 가입 자동 온보딩, Q3 핵심 OKR\n2. (점수 980) 결제 재시도 큐, 의존성 ↓\n3. (점수 720) 모바일 알림, 후순위지만 빠름"} />
             </div>
         </div>
     );
@@ -434,7 +434,7 @@ export function FiveW1HGrid({ data, onChange }: { data: FrameworkData; onChange:
         { key: "who",   label: "Who",   sub: "누가 · 대상자",      hint: "주체·관계자·청중·이해관계자",     color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "주최: 마케팅팀\n대상: 25~35세 1인 사업가\n승인: 대표" },
         { key: "what",  label: "What",  sub: "무엇을 · 핵심 행동", hint: "한 문장으로 정의된 행위·결과물",   color: "bg-neutral-50 border-neutral-200", text: "text-slate-900",
-          ph: "Q2 신규 가입 캠페인 런칭 — 광고 + 인플루언서 + 콘텐츠 3축 운영" },
+          ph: "Q2 신규 가입 캠페인 런칭, 광고 + 인플루언서 + 콘텐츠 3축 운영" },
         { key: "when",  label: "When",  sub: "언제 · 기간·시점",   hint: "시작·종료·마일스톤",               color: "bg-neutral-50 border-neutral-200", text: "text-neutral-800",
           ph: "2026-04-01 ~ 04-28 (4주)\nM1: 4/8 광고 라이브\nM2: 4/15 1차 리포트" },
         { key: "where", label: "Where", sub: "어디서 · 채널·장소", hint: "물리·디지털 채널",                 color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
@@ -452,7 +452,7 @@ export function FiveW1HGrid({ data, onChange }: { data: FrameworkData; onChange:
             </div>
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">기획·보도 5W1H</span> · 어떤 안건이든 6칸이 채워지면 누구에게 설명해도 통한다.
-                Why가 약하면 다른 칸이 다 흔들림 — Why부터 시작.
+                Why가 약하면 다른 칸이 다 흔들림, Why부터 시작.
             </div>
 
             {/* 6칸 */}
@@ -470,7 +470,7 @@ export function FiveW1HGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* Summary */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Summary · 한 줄 요약</p>
-                <p className="text-[10px] text-neutral-500 mb-1">6칸을 한 문장으로 — &quot;[Who]가 [Why] 위해 [When] [Where]에서 [What]을 [How] 한다&quot;</p>
+                <p className="text-[10px] text-neutral-500 mb-1">6칸을 한 문장으로 · &quot;[Who]가 [Why] 위해 [When] [Where]에서 [What]을 [How] 한다&quot;</p>
                 <textarea value={data["w5h1_summary"] ?? ""} onChange={e => onChange("w5h1_summary", e.target.value)}
                     placeholder="예: 마케팅팀이 MAU 정체를 깨기 위해 4월 한 달간 Meta·인플 채널에서 신규 가입 1,500명을 광고비 800만원으로 확보한다."
                     rows={2}
@@ -590,26 +590,26 @@ export function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: 
 
             {/* 교집합 4개 */}
             <div className="rounded-xl p-3 bg-white border border-neutral-200">
-                <p className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider mb-2">2원 교집합 — 4가지 상태</p>
+                <p className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider mb-2">2원 교집합 · 4가지 상태</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="rounded-lg p-2 bg-neutral-50 border border-neutral-200">
                         <p className="text-[10px] font-bold text-neutral-700">Passion · 열정 (Love × Good at)</p>
-                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 잘하지만 돈은 안 됨 — 취미·열정</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 잘하지만 돈은 안 됨, 취미·열정</p>
                         <CellTextarea cellKey="ikigai_passion" value={data["ikigai_passion"] ?? ""} onChange={onChange} />
                     </div>
                     <div className="rounded-lg p-2 bg-slate-50 border border-neutral-200">
                         <p className="text-[10px] font-bold text-neutral-800">Mission · 사명 (Love × Needs)</p>
-                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 의미 있지만 잘하진 못함 — 사명</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 의미 있지만 잘하진 못함, 사명</p>
                         <CellTextarea cellKey="ikigai_mission" value={data["ikigai_mission"] ?? ""} onChange={onChange} />
                     </div>
                     <div className="rounded-lg p-2 bg-neutral-50 border border-neutral-200">
                         <p className="text-[10px] font-bold text-slate-800">Profession · 직업 (Good at × Paid)</p>
-                        <p className="text-[10px] text-neutral-500 mb-1">잘하고 돈도 되지만 즐겁진 않음 — 일</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">잘하고 돈도 되지만 즐겁진 않음, 일</p>
                         <CellTextarea cellKey="ikigai_profession" value={data["ikigai_profession"] ?? ""} onChange={onChange} />
                     </div>
                     <div className="rounded-lg p-2 bg-slate-50 border border-slate-300">
                         <p className="text-[10px] font-bold text-slate-900">Vocation · 천직 (Needs × Paid)</p>
-                        <p className="text-[10px] text-neutral-500 mb-1">의미 있고 돈도 되지만 잘하지 못함 — 의무</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">의미 있고 돈도 되지만 잘하지 못함, 의무</p>
                         <CellTextarea cellKey="ikigai_vocation" value={data["ikigai_vocation"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
@@ -618,7 +618,7 @@ export function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: 
             {/* Core */}
             <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-700">
                 <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider text-center">IKIGAI · 삶의 이유 (4가지 모두 교집합)</p>
-                <p className="text-[10px] text-center text-neutral-600 mb-1">한 줄로 — &quot;나는 ___을 하기 위해 산다&quot;</p>
+                <p className="text-[10px] text-center text-neutral-600 mb-1">한 줄로 · &quot;나는 ___을 하기 위해 산다&quot;</p>
                 <textarea value={data["ikigai_core"] ?? ""} onChange={e => onChange("ikigai_core", e.target.value)}
                     placeholder="예: 1인 사업가가 자기다운 방식으로 일·삶을 설계하도록 돕는다"
                     rows={2}
@@ -656,7 +656,7 @@ export function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange:
                 <div className={`${cellClass} bg-neutral-50 border-neutral-200`}>
                     <p className="text-[10px] font-bold text-slate-800">New Entrants · 신규 진입</p>
                     <p className="text-[9px] text-neutral-500 mb-1">진입장벽·자본·기술·규제</p>
-                    <CellTextarea cellKey="p5_new_entrants" value={data["p5_new_entrants"] ?? ""} onChange={onChange} placeholder="예: AI로 SaaS 진입장벽 ↓ — 6개월 내 유사 서비스 5개+ 예상 [강도: 상]" />
+                    <CellTextarea cellKey="p5_new_entrants" value={data["p5_new_entrants"] ?? ""} onChange={onChange} placeholder="예: AI로 SaaS 진입장벽 ↓, 6개월 내 유사 서비스 5개+ 예상 [강도: 상]" />
                 </div>
                 <div />
 
@@ -689,7 +689,7 @@ export function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange:
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Strategy · 전략적 시사점 (어디로 갈 것인가)</p>
                 <p className="text-[10px] text-neutral-500 mb-1">5가지 힘에 어떻게 대응? 진입장벽 ↑·차별화·대체재 회피</p>
-                <CellTextarea cellKey="p5_strategy" value={data["p5_strategy"] ?? ""} onChange={onChange} placeholder={"1. AI 코치 차별화 → 데이터 학습 효과로 후발 주자 따라잡기 어려움\n2. B2B 채널 (커뮤니티·교육기관) 락인 — 대체재 회피\n3. 가격 경쟁 회피 — 가치 기반 가격 유지"} />
+                <CellTextarea cellKey="p5_strategy" value={data["p5_strategy"] ?? ""} onChange={onChange} placeholder={"1. AI 코치 차별화 → 데이터 학습 효과로 후발 주자 따라잡기 어려움\n2. B2B 채널 (커뮤니티·교육기관) 락인, 대체재 회피\n3. 가격 경쟁 회피, 가치 기반 가격 유지"} />
             </div>
         </div>
     );
@@ -727,7 +727,7 @@ export function ScamperGrid({ data, onChange }: { data: FrameworkData; onChange:
             </div>
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">Bob Eberle SCAMPER</span> · 7가지 자극으로 기존 제품·프로세스를 재발명.
-                각 글자는 &quot;질문&quot; — 정답이 아니라 가능성 탐색. <span className="font-semibold">평가는 나중</span>, 일단 많이 써라.
+                각 글자는 &quot;질문&quot;, 정답이 아니라 가능성 탐색. <span className="font-semibold">평가는 나중</span>, 일단 많이 써라.
             </div>
 
             {/* 7글자 */}
@@ -750,9 +750,9 @@ export function ScamperGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* Top idea */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Top 3 · 시도해볼 아이디어</p>
-                <p className="text-[10px] text-neutral-500 mb-1">7가지 중 가장 끌리는 3개 — 다음 스프린트에 작게 검증</p>
+                <p className="text-[10px] text-neutral-500 mb-1">7가지 중 가장 끌리는 3개, 다음 스프린트에 작게 검증</p>
                 <textarea value={data["scamper_top"] ?? ""} onChange={e => onChange("scamper_top", e.target.value)}
-                    placeholder={"1. (M) 일일 5분 스탠드업 시범 — 다음 주 월요일\n2. (C) 회의록 + 자동 액션 추적 프로토타입 — 2주 내\n3. (E) 설정 옵션 30→5 단순화 — 디자인 시안 1주"} rows={3}
+                    placeholder={"1. (M) 일일 5분 스탠드업 시범, 다음 주 월요일\n2. (C) 회의록 + 자동 액션 추적 프로토타입, 2주 내\n3. (E) 설정 옵션 30→5 단순화, 디자인 시안 1주"} rows={3}
                     className="w-full mt-1 resize-none bg-white text-xs p-2 rounded border border-neutral-200 focus:outline-none leading-relaxed" />
             </div>
         </div>
@@ -791,7 +791,7 @@ export function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: 
             </div>
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">Pareto 80/20</span> · 결과의 80%는 원인의 20%에서.
-                상위 누적 80%까지가 <span className="font-semibold">Vital Few</span> — 여기에 자원·집중을 몰아라. 나머지는 자동화하거나 버려라.
+                상위 누적 80%까지가 <span className="font-semibold">Vital Few</span>, 여기에 자원·집중을 몰아라. 나머지는 자동화하거나 버려라.
             </div>
             {/* 입력 테이블 */}
             <div className="rounded-lg border border-neutral-200 overflow-hidden">
@@ -837,7 +837,7 @@ export function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: 
                         );
                     })}
                     <p className="text-[10px] text-slate-700 mt-2 pt-2 border-t border-neutral-200">
-                        <strong>Vital Few (누적 80% 이내)</strong> — 여기에 집중하세요.
+                        <strong>Vital Few (누적 80% 이내)</strong>, 여기에 집중하세요.
                     </p>
                 </div>
             )}
@@ -871,7 +871,7 @@ export function FishboneGrid({ data, onChange }: { data: FrameworkData; onChange
             {/* Problem head */}
             <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400">
                 <p className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider">Problem · 문제 (물고기 머리)</p>
-                <p className="text-[10px] text-neutral-500 mb-1">관찰 가능한 결과·증상으로 — 5W1H로 구체화</p>
+                <p className="text-[10px] text-neutral-500 mb-1">관찰 가능한 결과·증상으로, 5W1H로 구체화</p>
                 <textarea value={data["fish_problem"] ?? ""} onChange={e => onChange("fish_problem", e.target.value)}
                     placeholder="예: 4/26 18:00~18:15 결제 API 응답 지연으로 142건 결제가 실패함"
                     rows={2}
@@ -899,7 +899,7 @@ export function FishboneGrid({ data, onChange }: { data: FrameworkData; onChange
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Top 3 · 가장 유력한 원인 + 검증 방법</p>
                 <p className="text-[10px] text-neutral-500 mb-1">데이터·실험으로 어떻게 확인할 것인가</p>
-                <CellTextarea cellKey="fish_top" value={data["fish_top"] ?? ""} onChange={onChange} placeholder={"1. (Tech) 결제 API 타임아웃 30s 너무 김 — 로그 분석으로 평균/최악 응답 시간 확인\n2. (Process) 외부 PG 장애 시 재시도 없음 — 트래픽 시뮬레이션 테스트\n3. (Measurement) 알림 미설정 — 즉시 모니터링 + 알림 룰 추가"} />
+                <CellTextarea cellKey="fish_top" value={data["fish_top"] ?? ""} onChange={onChange} placeholder={"1. (Tech) 결제 API 타임아웃 30s 너무 김, 로그 분석으로 평균/최악 응답 시간 확인\n2. (Process) 외부 PG 장애 시 재시도 없음, 트래픽 시뮬레이션 테스트\n3. (Measurement) 알림 미설정, 즉시 모니터링 + 알림 룰 추가"} />
             </div>
         </div>
     );
@@ -997,7 +997,7 @@ export function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChan
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">Top 3 · 가장 시급한 개선 기회</p>
                 <p className="text-[10px] text-neutral-500 mb-1">감정 점수가 가장 낮은 구간 우선. 담당·기한까지.</p>
-                <CellTextarea cellKey="journey_top" value={data["journey_top"] ?? ""} onChange={onChange} placeholder={"1. Onboarding 첫 5분 — 체크리스트 v1 (홍길동, ~05-10)\n2. Retention 주차별 리포트 — 자동 발송 (김영희, ~05-20)\n3. Advocacy 초대 보상 — A/B 테스트 (박철수, ~06-01)"} />
+                <CellTextarea cellKey="journey_top" value={data["journey_top"] ?? ""} onChange={onChange} placeholder={"1. Onboarding 첫 5분, 체크리스트 v1 (홍길동, ~05-10)\n2. Retention 주차별 리포트, 자동 발송 (김영희, ~05-20)\n3. Advocacy 초대 보상, A/B 테스트 (박철수, ~06-01)"} />
             </div>
         </div>
     );

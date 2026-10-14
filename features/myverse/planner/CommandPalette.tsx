@@ -196,7 +196,7 @@ export function CommandPalette({ open, onClose }: Props) {
         { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/planners/app/projects") },
         { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/planners/app/canvas") },
         { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/planners/app/contacts") },
-        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/personal") },
+        { id: "go_identity",  label: "정체성",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/personal") },
         { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/planners/app/templates") },
         { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/planners/app/search") },
         { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/planners/app/tasks") },
@@ -320,18 +320,18 @@ export function CommandPalette({ open, onClose }: Props) {
                                     <span className="flex-1">
                                         {a.tool === "create_task" && (
                                             <>
-                                                {String(a.input.date)} {a.input.time ? `· ${a.input.time}` : ""} — {String(a.input.text)}
+                                                {String(a.input.date)} {a.input.time ? `· ${a.input.time}` : ""} · {String(a.input.text)}
                                             </>
                                         )}
                                         {a.tool === "create_event" && (
                                             <>
-                                                {String(a.input.date)} {a.input.start_time ? `· ${a.input.start_time}` : ""} — {String(a.input.title)}
+                                                {String(a.input.date)} {a.input.start_time ? `· ${a.input.start_time}` : ""} · {String(a.input.title)}
                                                 {a.input.location ? ` @ ${a.input.location}` : ""}
                                             </>
                                         )}
                                         {a.tool === "create_note" && (
                                             <>
-                                                {String(a.input.date)} — {String(a.input.content).slice(0, 60)}{String(a.input.content).length > 60 ? "…" : ""}
+                                                {String(a.input.date)} · {String(a.input.content).slice(0, 60)}{String(a.input.content).length > 60 ? "…" : ""}
                                             </>
                                         )}
                                     </span>
@@ -377,7 +377,7 @@ export function CommandPalette({ open, onClose }: Props) {
                 {/* 결과 */}
                 <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-2">
                     {flat.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-xs text-neutral-400">결과 없음 — 위 AI 항목으로 자연어 등록 가능</div>
+                        <div className="px-4 py-8 text-center text-xs text-neutral-400">결과 없음 · 위 AI 항목으로 자연어 등록 가능</div>
                     ) : (
                         Object.entries(grouped).map(([section, items]) => (
                             <div key={section} className="mb-1">

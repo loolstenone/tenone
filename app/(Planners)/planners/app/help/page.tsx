@@ -26,7 +26,7 @@ const SECTIONS: Section[] = [
         intro: "플래너'스 AI는 당신이 매일 자신의 기획자로 살아가도록 곁에 둔 도구입니다. 가입과 온보딩을 한 번 마치면, 이후엔 페이지를 넘기듯 머물기만 하면 됩니다.",
         steps: [
             { label: "회원가입", detail: "이메일로 가입하면 곧장 온보딩이 시작됩니다." },
-            { label: "사용 수준 선택", detail: "Easy mode — 일·주·월·연 스케줄에만 집중. All in one mode — 프로젝트·캔버스·템플릿까지 모두 사용." },
+            { label: "사용 수준 선택", detail: "Easy mode · 일·주·월·연 스케줄에만 집중. All in one mode, 프로젝트·캔버스·템플릿까지 모두 사용." },
             { label: "+ 시간 (선택)", detail: "Time Tracking을 켜면 상단 메뉴에 「시간」 탭이 추가되어 30분 단위 행동 기록이 가능합니다." },
             { label: "역할 · 정체성", detail: "직장인·대학생·연구원 등 한 가지를 고르면 추천 템플릿과 AI 톤이 맞춰집니다. 정체성 입력은 비워 둬도 됩니다." },
         ],
@@ -35,7 +35,7 @@ const SECTIONS: Section[] = [
     {
         id: "daily",
         icon: Sunrise,
-        title: "일간 — 하루의 흐름",
+        title: "일간 · 하루의 흐름",
         intro: "오늘이라는 한 페이지. 일정·할 일·메모·자기 점검이 한 화면에 모입니다.",
         steps: [
             { label: "상단 날짜·날씨", detail: "현재 위치 기반의 날씨가 자동으로 채워집니다. 날짜 좌우 화살표로 이동, 「오늘로」 아이콘으로 즉시 복귀." },
@@ -160,7 +160,7 @@ const SECTIONS: Section[] = [
         title: "마이크 · 음성 입력",
         intro: "키보드 없이도 생각을 잡아두기 위해.",
         steps: [
-            { label: "지원 환경", detail: "Web Speech API 기반 — Chrome · Edge · Safari 권장. Firefox는 미지원." },
+            { label: "지원 환경", detail: "Web Speech API 기반, Chrome · Edge · Safari 권장. Firefox는 미지원." },
             { label: "사용처", detail: "일간 노트 도구의 「녹음」 버튼, 각 노트 카드 🎤 아이콘." },
             { label: "권한", detail: "최초 사용 시 브라우저가 마이크 권한을 묻습니다. 거부 후에는 Settings → 마이크 → 「권한 다시 켜기」 가이드를 따라 허용." },
         ],
@@ -178,12 +178,12 @@ const SECTIONS: Section[] = [
     {
         id: "personalize",
         icon: Palette,
-        title: "개인화 — 색·글꼴·모서리·모드",
+        title: "개인화 · 색·글꼴·모서리·모드",
         intro: "노트를 손에 맞게 다듬는 시간. Settings → 스타일에서 모두 즉시 미리보기.",
         steps: [
             { label: "컬러 테마", detail: "Teal · Mono · Walnut · Crimson 등 12종. 다크 모드에서도 자동으로 가독성을 보정합니다." },
             { label: "글꼴", detail: "Serif · Playfair · Sans · 고딕 · Mono · 둥근. 화면 글꼴과 입력 글꼴을 따로 지정 가능." },
-            { label: "모서리", detail: "Sharp(각짐) / Subtle / Soft(기본) — 카드 모서리 곡률 일괄 조정." },
+            { label: "모서리", detail: "Sharp(각짐) / Subtle / Soft(기본) · 카드 모서리 곡률 일괄 조정." },
             { label: "라이트 / 다크 / 시스템", detail: "원하는 모드 선택. System은 OS 설정을 따라갑니다." },
         ],
     },
@@ -262,7 +262,7 @@ export default function HelpPage() {
                 </div>
                 <p className="text-sm text-neutral-500 myverse-dark:text-neutral-400 leading-relaxed max-w-xl">
                     플래너'스 AI의 모든 기능을 한 권으로 정리했습니다.
-                    필요한 곳을 펼쳐보세요 — 머무르며 다음 페이지를 만들어 가세요.
+                    필요한 곳을 펼쳐보세요, 머무르며 다음 페이지를 만들어 가세요.
                 </p>
             </header>
 

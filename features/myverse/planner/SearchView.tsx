@@ -32,7 +32,7 @@ const SOURCE_LABEL: Record<string, string> = {
     project: "프로젝트",
     project_note: "노트",
     briefing: "브리핑",
-    identity: "퍼스널",
+    identity: "정체성",
 };
 
 export function SearchView({ initialQuery }: { initialQuery: string }) {
@@ -101,7 +101,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setAi(null); }}
                     onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void askAi(); } }}
-                    placeholder="단어로 찾거나, 일상어로 물어보세요 — 예) 작년 가을 팀장님과 얘기한 신규 프로젝트 아이디어"
+                    placeholder="단어로 찾거나, 일상어로 물어보세요, 예) 작년 가을 팀장님과 얘기한 신규 프로젝트 아이디어"
                     className="w-full bg-white border border-neutral-200 rounded-xl pl-11 pr-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[var(--pp-accent)]"
                     autoFocus
                 />
@@ -115,7 +115,7 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
                 <div className="-mt-5 mb-8">
                     {!ai ? (
                         <button onClick={askAi} disabled={aiBusy} className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--pp-accent)] hover:underline disabled:opacity-50">
-                            {aiBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden>✦</span>} AI로 찾기 — 날짜를 몰라도 일상어로
+                            {aiBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden>✦</span>} AI로 찾기 · 날짜를 몰라도 일상어로
                         </button>
                     ) : (
                         <div className="border border-[var(--pp-accent)]/30 bg-[var(--pp-accent)]/5 p-5">

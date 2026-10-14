@@ -155,7 +155,7 @@ export function ProjectsView() {
                         <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                             folder_managed
                         </span>
-                        <span className="text-[11px] font-semibold uppercase tracking-widest">PROJECTS</span>
+                        
                     </div>
                     <h1
                         className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"

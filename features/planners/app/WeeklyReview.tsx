@@ -49,7 +49,7 @@ export function WeeklyReview() {
     const move = (n: number) => { if (!week) return; const w = addDays(week, n * 7); setWeek(w); void load(w); };
 
     return (
-        <section className="mb-8 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+        <section className="mb-10 border border-neutral-200 bg-white p-6 md:p-8 myverse-dark:border-white/10 myverse-dark:bg-white/5">
             <div className="flex items-center gap-2">
                 <p className="text-sm font-bold text-[var(--pp-accent)]">주간 회고</p>
                 <div className="ml-auto flex items-center gap-1 text-sm text-neutral-500">
@@ -65,8 +65,8 @@ export function WeeklyReview() {
                 <>
                     {/* 숫자 요약 */}
                     <div className="mt-4 grid grid-cols-3 gap-px bg-neutral-100 myverse-dark:bg-white/10">
-                        <Num label="완료" value={stats.rate !== null ? `${stats.rate}%` : "—"} sub={`${stats.done}/${stats.total}`} />
-                        <Num label="Top 3 달성" value={stats.top3 ? `${stats.top3_done}/${stats.top3}` : "—"} sub={stats.top3 ? "고른 날만" : "아직 없음"} />
+                        <Num label="완료" value={stats.rate !== null ? `${stats.rate}%` : "-"} sub={`${stats.done}/${stats.total}`} />
+                        <Num label="Top 3 달성" value={stats.top3 ? `${stats.top3_done}/${stats.top3}` : "-"} sub={stats.top3 ? "고른 날만" : "아직 없음"} />
                         <Num label="회고한 날" value={`${stats.reflected_days}일`} sub="저녁 회고 답" />
                     </div>
 

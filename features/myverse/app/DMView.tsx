@@ -277,7 +277,7 @@ export function DMView({ initialMemberId, initialThreadId }: { initialMemberId?:
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-neutral-900 truncate">
-                                    {activeOther?.name || (activeOther?.handle ? `@${activeOther.handle}` : "—")}
+                                    {activeOther?.name || (activeOther?.handle ? `@${activeOther.handle}` : "-")}
                                 </p>
                                 {activeOther?.handle && activeOther?.name && (
                                     <p className="text-[11px] text-neutral-400 truncate">@{activeOther.handle}</p>

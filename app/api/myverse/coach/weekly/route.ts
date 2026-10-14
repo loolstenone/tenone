@@ -215,9 +215,9 @@ export async function POST(req: Request) {
     }
     lines.push("");
     lines.push("[집계]");
-    lines.push(`- 자주 만난 사람: ${stats.top_people.map(x => `${x.key}(${x.count})`).join(", ") || "—"}`);
-    lines.push(`- 자주 간 장소: ${stats.top_places.map(x => `${x.key}(${x.count})`).join(", ") || "—"}`);
-    lines.push(`- 주력 영역: ${stats.top_domain ? `${stats.top_domain.key}(${stats.top_domain.count})` : "—"}`);
+    lines.push(`- 자주 만난 사람: ${stats.top_people.map(x => `${x.key}(${x.count})`).join(", ") || "-"}`);
+    lines.push(`- 자주 간 장소: ${stats.top_places.map(x => `${x.key}(${x.count})`).join(", ") || "-"}`);
+    lines.push(`- 주력 영역: ${stats.top_domain ? `${stats.top_domain.key}(${stats.top_domain.count})` : "-"}`);
 
     const ai = await callClaude(lines.join("\n"));
 

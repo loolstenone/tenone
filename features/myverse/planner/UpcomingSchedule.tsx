@@ -108,7 +108,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
                         className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                     >
                         <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
-                        <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
+                        <span className="shrink-0 w-[4.5rem] whitespace-nowrap text-[11px] text-neutral-500 font-mono tabular-nums">
                             {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
                         </span>
                         <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
@@ -127,7 +127,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
                     className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                 >
                     <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${c.dot}`} />
-                    <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
+                    <span className="shrink-0 w-[4.5rem] whitespace-nowrap text-[11px] text-neutral-500 font-mono tabular-nums">
                         {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
                     </span>
                     <span className="flex-1 truncate text-xs text-neutral-700">{o.entry.title}</span>

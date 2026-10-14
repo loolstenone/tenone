@@ -346,7 +346,7 @@ function AiTab() {
                 <strong style={{ color: "var(--pp-ink)", fontWeight: 600 }}>
                     Q2 OKR 리뷰 미팅
                 </strong>
-                에 들어가세요. 에너지가 평소보다 높습니다 — 어려운 일을 먼저 처리하기 좋은 날입니다.
+                에 들어가세요. 에너지가 평소보다 높습니다, 어려운 일을 먼저 처리하기 좋은 날입니다.
             </p>
 
             <div

@@ -107,7 +107,7 @@ export function GoogleCalendarIntegration() {
             ) : integration ? (
                 <>
                     <div className="text-xs text-neutral-600 myverse-dark:text-neutral-400 space-y-1 mb-4 bg-neutral-50 myverse-dark:bg-white/5 rounded-lg p-3">
-                        <div>계정: <span className="font-medium">{integration.external_email ?? "—"}</span></div>
+                        <div>계정: <span className="font-medium">{integration.external_email ?? "-"}</span></div>
                         {integration.last_sync_at && (
                             <div>마지막 동기화: {new Date(integration.last_sync_at).toLocaleString("ko-KR")}</div>
                         )}

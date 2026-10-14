@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { exchangeCodeForTokens, fetchUserInfo } from "@/lib/myverse/google-calendar";
+import { exchangeCodeForTokens, fetchUserInfo, originOf } from "@/lib/myverse/google-calendar";
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
@@ -27,6 +27,7 @@ export async function GET(req: Request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            auth: { storageKey: "tenone-auth" }, // 유니버스 공통 세션 쿠키 이름 (lib/supabase/server.ts와 같음, 빠지면 로그인해도 401)
             cookies: {
                 getAll() { return cookieStore.getAll(); },
                 setAll() { /* read-only */ },
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
     if (!member) return NextResponse.redirect(new URL("/planners/app/settings?google_error=member_not_found", req.url));
 
     // 토큰 교환
-    const tokens = await exchangeCodeForTokens(code);
+    const tokens = await exchangeCodeForTokens(code, originOf(req));
     if (!tokens) {
         return NextResponse.redirect(new URL("/planners/app/settings?google_error=token_exchange_failed", req.url));
     }

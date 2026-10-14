@@ -1,300 +1,60 @@
-"use client";
+// 플래너'스 AI › 설정 › 사생활 — Planner's 기준으로 다시 씀 (2026-10-14)
+// 예전 화면은 MyVerse 개인 OS용(갤러리·GPS·헬스 자동 수집 동의, myverse.kr 공개 페이지, '흔적')이라 Planner's와 맞지 않았다
+// 여기서는: 내 기록은 나만 · 인공지능 처리 고지(국외 이전) · 연결한 AI · 데이터 권리(내려받기·계정)
+// ⚠️ 문구는 개인정보처리방침과 맞춰야 한다 (공개 전 처리방침 갱신 — app/(Planners)/CLAUDE.md)
 
-// 사생활 — 자동 캡처 동의 토글 + 페이지 공개 설정
-// 3티어 원칙 명시: 능동=ON / 자동=OFF·동의필수 / 상시감시=금지
-
-import { useEffect, useState } from "react";
-import { Loader2, Shield, ShieldCheck, ShieldOff, Globe, EyeOff, Eye, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { Lock, Sparkles, Plug, Download, UserCog } from "lucide-react";
 import { SettingsLayout } from "@/features/myverse/planner/SettingsLayout";
 
-interface ConsentRow {
-    key: string;
-    label: string;
-    description: string;
-    risk: "low" | "medium" | "high";
-}
-
-const ROWS: ConsentRow[] = [
-    { key: "gallery_scan",   label: "갤러리 자동 스캔",     description: "기기 사진·영상을 주기적으로 스캔해 EXIF에서 시간·위치를 추출합니다. 미디어는 기기에만 남고, 메타만 마이버스에 저장됩니다.", risk: "medium" },
-    { key: "gps_background", label: "GPS 백그라운드 추적", description: "백그라운드에서 위치 변화를 추적해 이동·거점 방문을 자동 기록합니다. 배터리 영향 있음.", risk: "high" },
-    { key: "calendar_sync",  label: "캘린더 동기화",        description: "Google·iCloud 캘린더의 일정을 마이버스 일정 영역으로 가져옵니다.", risk: "low" },
-    { key: "healthkit",      label: "Apple Health",         description: "운동·수면·식사 데이터를 BODY 영역으로 가져옵니다.", risk: "medium" },
-    { key: "google_fit",     label: "Google Fit",            description: "Android 운동·활동 데이터를 BODY 영역으로 가져옵니다.", risk: "medium" },
-    { key: "samsung_health", label: "삼성 헬스",             description: "갤럭시 헬스 데이터 동기화.", risk: "medium" },
-    { key: "email_receipts", label: "메일 영수증 임포트",   description: "메일에서 영수증을 자동 파싱해 지출 데이터를 만듭니다.", risk: "high" },
-    { key: "stt_recording",  label: "음성 자동 텍스트화",   description: "녹음한 메모를 자동으로 텍스트로 변환합니다 (서버 STT 사용).", risk: "medium" },
-    { key: "ocr_auto",       label: "이미지 OCR 자동",      description: "사진 속 글자를 자동 추출해 검색 가능하게 만듭니다.", risk: "low" },
-    { key: "vision_classify",label: "이미지 자동 분류",     description: "Vision AI로 사진을 9 영역으로 자동 분류합니다 (Claude Vision 호출).", risk: "medium" },
-];
-
-/** 비공개 상태 미리보기 카드 */
-function BlockedPreview({ handle }: { handle: string | null }) {
+export default function PlannersPrivacyPage() {
     return (
-        <div className="rounded-xl border border-neutral-200 overflow-hidden">
-            <div className="bg-neutral-50 px-3 py-2 flex items-center gap-2 border-b border-neutral-100">
-                <div className="h-2 w-2 rounded-full bg-neutral-300" />
-                <span className="text-[10px] text-neutral-400 font-mono">
-                    myverse.kr/{handle ? `@${handle}` : "@handle"}
-                </span>
-                <span className="ml-auto text-[10px] bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <EyeOff className="h-2.5 w-2.5" /> 비공개
-                </span>
-            </div>
-            <div className="bg-white px-6 py-8 flex flex-col items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                    <EyeOff className="h-5 w-5 text-neutral-300" />
+        <SettingsLayout>
+            <div className="mx-auto max-w-3xl space-y-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-neutral-900 myverse-dark:text-neutral-100">사생활</h1>
+                    <p className="mt-2 break-keep text-sm leading-relaxed text-neutral-500">내 플래너에 무엇이 남고, 어디로 가고, 어떻게 지울 수 있는지 알려 드려요.</p>
                 </div>
-                <div className="text-center">
-                    <p className="text-sm font-medium text-neutral-700">비공개 페이지</p>
-                    <p className="text-xs text-neutral-400 mt-1">
-                        이 사용자는 페이지를 일시적으로 비공개로 설정했습니다.
-                    </p>
+
+                <Card icon={<Lock className="h-5 w-5" />} title="내 기록은 나만 봐요">
+                    <p>할 일·일정·메모·회고·프로젝트는 내 계정에만 저장되고, 다른 사람에게 보이는 공개 페이지는 없어요. 운영사(Ten:One™)도 문의 처리나 법에서 정한 경우가 아니면 열어 보지 않아요.</p>
+                </Card>
+
+                <Card icon={<Sparkles className="h-5 w-5" />} title="인공지능 기능을 쓸 때">
+                    <ul className="list-disc space-y-1.5 pl-5">
+                        <li>생각 쏟아내기, 오늘의 Top 3, 저녁 회고, 한 주 읽기, 목표 쪼개기, AI로 찾기, 손글씨 읽기를 누를 때만 그 일에 필요한 기록을 인공지능(Anthropic, 미국)에 보내 처리해요. 누르지 않으면 보내지 않아요.</li>
+                        <li>사진과 손글씨 그림은 읽은 뒤 저장하지 않아요. 남는 것은 내가 고른 글자뿐이에요.</li>
+                        <li>인공지능이 만든 결과(Top 3, 회고 질문, 주간 읽기)는 내 플래너에 저장되고, 언제든 지우거나 고칠 수 있어요.</li>
+                    </ul>
+                </Card>
+
+                <Card icon={<Plug className="h-5 w-5" />} title="내 AI에 연결했을 때">
+                    <p>Claude·ChatGPT 같은 내 AI에 연결하면, 그 AI가 대화 중에 요청한 기록만 그 서비스로 전달되고 그 뒤 처리는 해당 서비스의 정책을 따라요. 연결한 AI가 할 수 있는 일은 읽기와 할 일 추가뿐이에요.</p>
+                    <Link href="/planners/app/settings/tech" className="mt-3 inline-block text-sm font-bold text-[var(--pp-accent)] hover:underline">연결한 AI 보기·끊기 →</Link>
+                </Card>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Card icon={<Download className="h-5 w-5" />} title="내 데이터 내려받기">
+                        <p>내 플래너 기록을 한 파일(JSON)로 받을 수 있어요.</p>
+                        <a href="/planners/app/settings/privacy/export" className="mt-3 inline-block text-sm font-bold text-[var(--pp-accent)] hover:underline">내려받기 →</a>
+                    </Card>
+                    <Card icon={<UserCog className="h-5 w-5" />} title="계정과 탈퇴">
+                        <p>이 서비스만 그만두거나 계정 전체를 지울 수 있어요. 탈퇴하면 플래너 기록은 지체 없이 지워요(법에서 보관하라고 정한 기록만 그 기간 동안 따로 보관).</p>
+                        <Link href="/planners/my" className="mt-3 inline-block text-sm font-bold text-[var(--pp-accent)] hover:underline">내 계정으로 →</Link>
+                    </Card>
                 </div>
             </div>
-        </div>
+        </SettingsLayout>
     );
 }
 
-export default function PrivacyPage() {
-    const [consent, setConsent] = useState<Record<string, boolean>>({});
-    const [pageVisible, setPageVisible] = useState<boolean>(true);
-    const [handle, setHandle] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState<string | null>(null);
-
-    useEffect(() => {
-        (async () => {
-            const [consentRes, settingsRes] = await Promise.all([
-                fetch("/api/myverse/consent"),
-                fetch("/api/myverse/settings"),
-            ]);
-            if (consentRes.ok) {
-                const json = await consentRes.json();
-                setConsent(json.consent ?? {});
-            }
-            if (settingsRes.ok) {
-                const json = await settingsRes.json();
-                setPageVisible(json.user?.page_visible !== false);  // default true
-                setHandle(json.handle ?? null);
-            }
-            setLoading(false);
-        })();
-    }, []);
-
-    async function togglePageVisible() {
-        const next = !pageVisible;
-        setSaving("page_visible");
-        setPageVisible(next);
-        try {
-            const res = await fetch("/api/myverse/settings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ page_visible: next }),
-            });
-            if (!res.ok) {
-                setPageVisible(!next);  // 롤백
-                const json = await res.json().catch(() => ({}));
-                alert(`변경 실패: ${json.error ?? res.status}`);
-            }
-        } finally {
-            setSaving(null);
-        }
-    }
-
-    async function toggle(key: string) {
-        const next = !consent[key];
-        setSaving(key);
-        const prev = consent;
-        setConsent({ ...consent, [key]: next });
-        try {
-            const res = await fetch("/api/myverse/consent", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ key, granted: next }),
-            });
-            if (!res.ok) {
-                setConsent(prev);
-                const json = await res.json().catch(() => ({}));
-                alert(`변경 실패: ${json.error ?? res.status}`);
-            }
-        } finally {
-            setSaving(null);
-        }
-    }
-
-    if (loading) {
-        return <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-300" /></div>;
-    }
-
+function Card({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
     return (
-        <SettingsLayout>
-        <div className="max-w-2xl mx-auto p-6">
-            <header className="mb-6">
-                <div className="flex items-center gap-2 mb-1 text-[10px] uppercase tracking-widest text-neutral-400">
-                    <Shield className="h-3 w-3" /> Privacy
-                </div>
-                <h1 className="text-2xl font-serif text-neutral-900 mb-1">사생활</h1>
-                <p className="text-sm text-neutral-500">
-                    내 디지털 흔적은 나의 것. 자동 수집은 기본 OFF, 명시 동의가 필요합니다.
-                </p>
-            </header>
-
-            {/* ── 내 페이지 공개 설정 ── */}
-            <section className="bg-white border border-neutral-200 rounded-xl p-5 mb-6">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Globe className="h-4 w-4 text-[var(--pp-accent)] shrink-0" />
-                            <h2 className="text-sm font-semibold text-neutral-900">내 페이지 공개</h2>
-                        </div>
-                        {/* URL 표시 */}
-                        {handle ? (
-                            <a
-                                href={`/myverse/@${handle}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs text-[var(--pp-accent)] hover:underline font-mono mb-1.5"
-                            >
-                                myverse.kr/@{handle}
-                                <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                        ) : (
-                            <p className="text-xs text-neutral-400 mb-1.5">핸들 미설정 — 설정에서 @handle을 먼저 등록하세요</p>
-                        )}
-                        <p className="text-xs text-neutral-500 leading-relaxed">
-                            OFF 시 방문자에게 "비공개 페이지" 안내가 표시됩니다.
-                            개인 기록은 그대로 유지됩니다.
-                        </p>
-                    </div>
-                    {/* 토글 */}
-                    <button
-                        onClick={togglePageVisible}
-                        disabled={saving === "page_visible"}
-                        aria-label={pageVisible ? "내 페이지 비공개로 전환" : "내 페이지 공개로 전환"}
-                        className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
-                            pageVisible ? "bg-[var(--pp-accent)]" : "bg-neutral-200"
-                        }`}
-                    >
-                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                            pageVisible ? "translate-x-5" : "translate-x-0.5"
-                        }`} />
-                    </button>
-                </div>
-
-                {/* 방문자 화면 미리보기 — 항상 표시 */}
-                <div className="mt-4 pt-4 border-t border-neutral-100">
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">
-                        방문자에게 보이는 화면
-                    </p>
-                    {pageVisible ? (
-                        /* 공개 상태 미리보기 */
-                        <div className="rounded-xl border border-emerald-100 overflow-hidden">
-                            <div className="bg-neutral-50 px-3 py-2 flex items-center gap-2 border-b border-neutral-100">
-                                <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                                <span className="text-[10px] text-neutral-400 font-mono">
-                                    myverse.kr/{handle ? `@${handle}` : "@handle"}
-                                </span>
-                                {handle && (
-                                    <a
-                                        href={`/myverse/@${handle}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="ml-auto text-[10px] text-[var(--pp-accent)] hover:underline flex items-center gap-0.5"
-                                    >
-                                        열기 <ExternalLink className="h-2.5 w-2.5" />
-                                    </a>
-                                )}
-                            </div>
-                            <div className="bg-white px-6 py-5 flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--pp-accent)] to-[#A855F7] flex items-center justify-center text-white text-sm font-bold shrink-0">
-                                    {handle ? handle.charAt(0).toUpperCase() : "?"}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-neutral-800">@{handle ?? "handle"}</p>
-                                    <p className="text-xs text-neutral-400">공개 흔적이 여기에 표시됩니다</p>
-                                </div>
-                                <span className="ml-auto text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <Eye className="h-2.5 w-2.5" /> 공개 중
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        /* 비공개 상태 미리보기 */
-                        <BlockedPreview handle={handle} />
-                    )}
-                </div>
-            </section>
-
-            {/* 3티어 원칙 안내 */}
-            <section className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
-                <h2 className="text-xs font-semibold text-indigo-900 mb-2 flex items-center gap-1.5">
-                    <ShieldCheck className="h-3.5 w-3.5" /> 마이버스 사생활 3원칙
-                </h2>
-                <ul className="space-y-1 text-xs text-indigo-700">
-                    <li>① <b>능동 입력</b>은 기본 ON — 직접 올린 사진·메모는 즉시 저장</li>
-                    <li>② <b>자동 수집</b>은 기본 OFF — 갤러리·GPS·헬스·메일은 명시 동의</li>
-                    <li>③ <b>상시 감시</b>는 금지 — 마이크 녹음·화면 캡처는 절대 안 함</li>
-                </ul>
-            </section>
-
-            {/* 토글 목록 */}
-            <div className="space-y-2">
-                {ROWS.map(row => {
-                    const enabled = consent[row.key] ?? false;
-                    const isSaving = saving === row.key;
-                    return (
-                        <div
-                            key={row.key}
-                            className="bg-white border border-neutral-200 rounded-lg p-4 flex items-start gap-3"
-                        >
-                            <div className="shrink-0 mt-0.5">
-                                {enabled ? (
-                                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                                ) : (
-                                    <ShieldOff className="h-4 w-4 text-neutral-300" />
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <h3 className="text-sm font-medium text-neutral-900">{row.label}</h3>
-                                    {row.risk === "high" && (
-                                        <span className="text-[9px] uppercase tracking-wider px-1.5 py-px rounded bg-rose-50 text-rose-600">민감</span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-neutral-500 leading-relaxed">{row.description}</p>
-                            </div>
-                            <button
-                                onClick={() => toggle(row.key)}
-                                disabled={isSaving}
-                                className={`shrink-0 relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                    enabled ? "bg-[var(--pp-accent)]" : "bg-neutral-200"
-                                } disabled:opacity-50`}
-                            >
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                    enabled ? "translate-x-4" : "translate-x-0.5"
-                                }`} />
-                            </button>
-                        </div>
-                    );
-                })}
-            </div>
-
-            <p className="text-[11px] text-neutral-400 mt-6 leading-relaxed">
-                동의 변경 이력은 <code>myverse_consent_log</code>에 감사 추적됩니다.
-                언제든 OFF로 되돌릴 수 있고, 모든 자동 수집 데이터는 일괄 다운로드·영구 삭제 가능합니다.
-            </p>
-
-            <div className="mt-8 pt-6 border-t border-neutral-100">
-                <p className="text-xs font-semibold text-neutral-700 mb-2">데이터 권리</p>
-                <a href="/planners/app/settings/privacy/export"
-                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-700 hover:bg-neutral-50">
-                    내 데이터 다운로드 (JSON) →
-                </a>
-                <p className="text-[11px] text-neutral-400 mt-2">
-                    GDPR 데이터 이동권 — Myverse가 보관 중인 내 모든 데이터를 한 파일로 받을 수 있습니다.
-                </p>
-            </div>
-        </div>
-        </SettingsLayout>
+        <section className="border border-neutral-200 bg-white p-6 md:p-8 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+            <h2 className="flex items-center gap-2 text-base font-bold text-neutral-900 myverse-dark:text-neutral-100">
+                <span className="text-[var(--pp-accent)]">{icon}</span> {title}
+            </h2>
+            <div className="mt-3 break-keep text-sm leading-relaxed text-neutral-600 myverse-dark:text-neutral-400">{children}</div>
+        </section>
     );
 }

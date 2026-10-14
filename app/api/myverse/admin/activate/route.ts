@@ -12,6 +12,7 @@ async function requireAdmin(): Promise<{ ok: true; memberId: string } | { ok: fa
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            auth: { storageKey: "tenone-auth" }, // 유니버스 공통 세션 쿠키 이름 (lib/supabase/server.ts와 같음, 빠지면 로그인해도 401)
             cookies: {
                 getAll() { return cookieStore.getAll(); },
                 setAll() { /* read-only */ },

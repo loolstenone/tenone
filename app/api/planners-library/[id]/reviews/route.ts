@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         await notify(await brandManagerIds("planners"), {
             brandId: "planners",
             type: "planners_review",
-            title: `새 후기 ★${rating} — ${file.title}`,
+            title: `새 후기 ★${rating} · ${file.title}`,
             message: text.slice(0, 80),
             link: "/intra/ums/planners/reviews",
         }).catch((e) => console.error("[planners-reviews] 알림 실패", e));

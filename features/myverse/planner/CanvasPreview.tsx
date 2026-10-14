@@ -93,7 +93,7 @@ export function CanvasPreview({ canvasId }: Props) {
     return (
         <div className="flex flex-col items-center justify-center h-full text-xs text-neutral-400 gap-1">
             <ImageIcon className="h-6 w-6 text-neutral-300" />
-            자유 캔버스 — 클릭해서 그리기
+            자유 캔버스 · 클릭해서 그리기
         </div>
     );
 }

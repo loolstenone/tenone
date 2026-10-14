@@ -6,7 +6,7 @@ export function MyverseFooter() {
     return (
         <UniverseFooter
             brandName="마이버스"
-            tagline="우리는 모두 기획자다 — 적어도 자기 인생에서 만큼은."
+            tagline="우리는 모두 기획자다, 적어도 자기 인생에서 만큼은."
             accentColor="#6366F1"
             dark={true}
             linkColumns={[

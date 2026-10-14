@@ -39,7 +39,7 @@ const MODE_META: Record<MukkiMode, {
     ask: {
         eyebrow: "MUKKI · ASK",
         title: "내 디지털 분신에게 묻기",
-        description: "내가 묻는 즉시 답하는 1:1 대화 — 흔적·일정·기록을 한 줄 질문으로",
+        description: "내가 묻는 즉시 답하는 1:1 대화, 흔적·일정·기록을 한 줄 질문으로",
         placeholder: "내 흔적에 대해 무엇이든 물어보세요",
         suggestions: [
             "지난 주말에 뭐 했지?",

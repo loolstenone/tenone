@@ -125,7 +125,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                         const dd = await r2.json();
                         if (dd?.note) setNotes([dd.note]);
                     }
-                } catch { /* ignore — empty 상태 그대로 */ }
+                } catch { /* ignore · empty 상태 그대로 */ }
             }
         }
         setLoading(false);
@@ -383,7 +383,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                         } finally { setSaving(false); }
                     }}
                     disabled={saving}
-                    title="자유 캔버스 — 그림·도형·텍스트"
+                    title="자유 캔버스 · 그림·도형·텍스트"
                     className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-sky-400 hover:text-sky-600 transition-colors disabled:opacity-50"
                 >
                     <ImageIcon className="h-3.5 w-3.5" /> 캔버스

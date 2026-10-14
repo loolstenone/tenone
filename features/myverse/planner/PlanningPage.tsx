@@ -87,7 +87,7 @@ function VriefSection() {
     <section id="vrief" className="px-6 md:px-16 lg:px-24 py-20 md:py-28">
       <div className="max-w-4xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
-          Vrief — 승리하는 브리프
+          Vrief · 승리하는 브리프
         </h2>
         <p className="mt-4 text-[#666] text-lg">
           Vision + Brief. 될 수 있는 방법을 찾아가는 과정.
@@ -109,7 +109,7 @@ function VriefSection() {
             <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
               <p>우리는 누구이고, 상황은 어떠한가.</p>
               <p>진짜 문제는 무엇인가.</p>
-              <p>— 클라이언트가 말하는 문제가 진짜 문제인가?</p>
+              <p>클라이언트가 말하는 문제가 진짜 문제인가?</p>
               <p>어떤 방향으로 풀 수 있을까.</p>
               <p className="mt-4 text-[#1a1a1a] italic">&ldquo;정말 그게 문제일까? 더 나은 방법은 없을까?&rdquo;</p>
             </div>
@@ -134,7 +134,7 @@ function VriefSection() {
             <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">전략 수립</h3>
             <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
               <p>차별화 전략 + 핵심 메시지.</p>
-              <p>구체적 실행 계획 — 누가, 언제, 어떻게.</p>
+              <p>구체적 실행 계획 · 누가, 언제, 어떻게.</p>
               <p>성과 측정 기준.</p>
               <p className="mt-4">여기서 나온 것이 실행된다.</p>
               <p>실현되지 않으면 아이디어가 아니다.</p>
@@ -161,7 +161,7 @@ function VriefSection() {
             <p className="mt-4">Step 1에서 AI가 정보를 수집하고 정리한다.</p>
             <p>Step 2에서 AI가 가설을 시뮬레이션하고 패턴을 찾는다.</p>
             <p>Step 3에서 AI가 시나리오를 비교하고 실행 계획을 잡는다.</p>
-            <p className="mt-4">그러나 — &ldquo;이게 진짜 문제인가?&rdquo;를 묻는 것은 사람이다.</p>
+            <p className="mt-4">그러나 · &ldquo;이게 진짜 문제인가?&rdquo;를 묻는 것은 사람이다.</p>
             <p>&ldquo;이 방향이 맞는가?&rdquo;를 결정하는 것도 사람이다.</p>
             <p className="mt-4 text-[#1a1a1a]">AI 시대일수록 Why와 What을 정하는 기획자의 가치가 올라간다.</p>
           </div>

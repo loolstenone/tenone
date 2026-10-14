@@ -67,7 +67,7 @@ export async function PATCH(req: Request) {
     // ── triage_state=task → myverse_daily.tasks 에 INSERT ──
     if (body.triage_state === "task" && !email.converted_task_id) {
         const date = todayKst();
-        const text = `${email.subject ?? "(제목 없음)"} — ${email.sender_name ?? email.sender_email ?? "메일"}`;
+        const text = `${email.subject ?? "(제목 없음)"} · ${email.sender_name ?? email.sender_email ?? "메일"}`;
         const newTaskId = crypto.randomUUID();
         const newTask = {
             id: newTaskId,

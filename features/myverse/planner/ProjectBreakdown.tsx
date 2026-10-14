@@ -80,7 +80,7 @@ export function ProjectBreakdown({ projectId, onAdded }: { projectId: string; on
                         onChange={(e) => setGoal(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") void run(); }}
                         maxLength={500}
-                        placeholder="쪼갤 목표 (비우면 프로젝트 전체) — 예) Q3 마케팅 전략 수립"
+                        placeholder="쪼갤 목표 (비우면 프로젝트 전체), 예) Q3 마케팅 전략 수립"
                         className="mt-3 w-full border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--pp-accent)] focus:outline-none"
                     />
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
@@ -112,7 +112,7 @@ export function ProjectBreakdown({ projectId, onAdded }: { projectId: string; on
                     </ul>
                     <p className="mt-2 text-xs text-neutral-500">
                         모두 {plan.total_hours}시간 · 하루 {plan.hours_per_day}시간씩 평일에 배치
-                        {plan.over_end_date && plan.end_date && <b className="ml-1 text-red-500">— 프로젝트 마감({md(plan.end_date)})을 넘겨요. 하루 시간을 늘리거나 단계를 줄이세요.</b>}
+                        {plan.over_end_date && plan.end_date && <b className="ml-1 text-red-500">프로젝트 마감({md(plan.end_date)})을 넘겨요. 하루 시간을 늘리거나 단계를 줄이세요.</b>}
                     </p>
                     <div className="mt-3 flex justify-end gap-2">
                         <button onClick={() => setPlan(null)} disabled={busy} className="px-3 py-2 text-sm text-neutral-500 hover:text-neutral-900">다시 쪼개기</button>

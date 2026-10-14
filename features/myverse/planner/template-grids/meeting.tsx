@@ -44,7 +44,7 @@ export function OneOnOneGrid({ data, onChange }: { data: FrameworkData; onChange
             </div>
 
             {/* Their agenda first — 1on1의 핵심 */}
-            <LabeledBox label="Their Agenda · 상대가 먼저 꺼낸 주제" valKey="oto_their_agenda" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-slate-900" placeholder="요즘 어떻게 지내요? — 상대가 가장 말하고 싶은 것부터" />
+            <LabeledBox label="Their Agenda · 상대가 먼저 꺼낸 주제" valKey="oto_their_agenda" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-slate-900" placeholder="요즘 어떻게 지내요?, 상대가 가장 말하고 싶은 것부터" />
 
             {/* Updates */}
             <LabeledBox label="Updates · 진행 상황·성과" valKey="oto_updates" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-slate-800" placeholder="지난 1on1 이후 진척 · 마무리한 일 · 진행 중인 일" />
@@ -147,7 +147,7 @@ export function InterviewGrid({ data, onChange }: { data: FrameworkData; onChang
             {/* Quotes — 직접 인용 (그대로) */}
             <div className="rounded-lg p-3 bg-white border-l-4 border-slate-500">
                 <p className="text-xs font-bold text-slate-700">Quotes · 인상 깊은 인용문 (그대로)</p>
-                <p className="text-[10px] text-neutral-500 mb-1">상대 입에서 나온 표현 그대로 따옴. 패러프레이즈 X — 발견 디스커션의 원료.</p>
+                <p className="text-[10px] text-neutral-500 mb-1">상대 입에서 나온 표현 그대로 따옴. 패러프레이즈 X, 발견 디스커션의 원료.</p>
                 <textarea value={data["itv_quotes"] ?? ""} onChange={e => onChange("itv_quotes", e.target.value)}
                     placeholder={'"매주 화요일 새벽 2시까지 엑셀로 정리해요…"\n"이게 진짜 짜증나는 게…"'} rows={4}
                     className="w-full mt-1 resize-none bg-transparent text-xs italic text-neutral-700 placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
@@ -169,9 +169,9 @@ export function AarGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
     const steps = [
         { key: "aar_planned", label: "계획된 것은 무엇이었나?", hint: "원래 의도·목표·예상 결과", color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: Q2 캠페인으로 신규 가입 1,500명 확보 · 4주 진행 · 광고비 800만원" },
-        { key: "aar_actual",  label: "실제로 일어난 일은?",     hint: "관찰 가능한 사실만 — 해석 X",   color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
+        { key: "aar_actual",  label: "실제로 일어난 일은?",     hint: "관찰 가능한 사실만 · 해석 X",   color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: 신규 가입 1,180명 (목표의 79%) · 4주차 광고 전환율 급락 · 콘텐츠 1편 누락" },
-        { key: "aar_diff",    label: "왜 차이가 났나?",         hint: "원인 분석 — 잘된 것·안 된 것 모두", color: "bg-neutral-50 border-neutral-200", text: "text-neutral-800",
+        { key: "aar_diff",    label: "왜 차이가 났나?",         hint: "원인 분석 · 잘된 것·안 된 것 모두", color: "bg-neutral-50 border-neutral-200", text: "text-neutral-800",
           ph: "잘된 것: 1~2주차 후킹 카피 적중 · 인플 협업 확장\n안 된 것: 3주차 크리에이티브 피로 · 검수 병목" },
         { key: "aar_lessons", label: "배운 것 · 다음에 할 것",  hint: "재현 가능한 교훈으로 일반화",     color: "bg-neutral-50 border-neutral-200", text: "text-slate-900",
           ph: "교훈: 4주 캠페인은 2주차에 크리에이티브 리프레시가 필수\n다음: [홍길동] 크리에이티브 풀 사전 확보 · 다음 캠페인 D-7" },

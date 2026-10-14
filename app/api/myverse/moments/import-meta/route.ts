@@ -186,7 +186,7 @@ export async function POST(req: Request) {
                 items.push(...parseInstagramStories(json));
                 items.push(...parseFacebookPosts(json));
             }
-        } catch { /* invalid json — skip */ }
+        } catch { /* invalid json, skip */ }
     }
 
     if (items.length === 0) {

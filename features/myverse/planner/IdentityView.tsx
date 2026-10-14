@@ -84,14 +84,14 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                         <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                             person
                         </span>
-                        <span className="text-[11px] font-semibold uppercase tracking-widest">PERSONAL</span>
+                        
                     </div>
                     <div className="flex items-center gap-3">
                         <h1
                             className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 leading-tight"
                             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                         >
-                            퍼스널
+                            정체성
                         </h1>
                         {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     </div>
@@ -108,7 +108,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
             {/* ① Roof — 비전 (한 줄) */}
             <Section
                 id="vision"
-                badge="ROOF"
+                badge="지붕"
                 title="비전"
                 hint="도달하고자 하는 최종 지점. 한 문장으로 적는다."
                 accent
@@ -124,7 +124,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
             {/* ② Walls — 미션 / 역할 */}
             <Section
                 id="mission"
-                badge="WALLS"
+                badge="벽"
                 title="미션 · 역할"
                 hint="비전을 떠받치는 역할들. 한 줄에 · 로 구분한다."
             >
@@ -141,7 +141,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                     {/* ③ Foundation — 본질 (가치관·강점) */}
                     <Section
                         id="values"
-                        badge="FOUNDATION"
+                        badge="기초"
                         title="본질"
                         hint="모든 것을 떠받치는 나의 가치관과 강점."
                     >
@@ -173,7 +173,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
                     {/* ④ Context — 외부 환경 */}
                     <Section
                         id="outside"
-                        badge="CONTEXT"
+                        badge="주변"
                         title="외부 환경"
                         hint="내가 서 있는 자리와 주변에 열려 있는 기회."
                     >
@@ -326,7 +326,7 @@ function KeyResultsSection({ items, onSave }: {
             <div className="flex items-center justify-between mb-3">
                 <div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">KEY RESULTS</span>
+                        <span className="text-[11px] tracking-wide text-[var(--pp-accent)] font-semibold">핵심 결과</span>
                         <h2 className="text-sm font-semibold text-neutral-800">올해 핵심 실행</h2>
                     </div>
                     <p className="text-xs text-neutral-500 mt-1">비전·미션을 구체 행동으로 끌어내리는 항목.</p>

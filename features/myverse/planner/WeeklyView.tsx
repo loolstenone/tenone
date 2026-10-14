@@ -364,8 +364,8 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 const eM = days[6].getMonth() + 1;
                 const eD = days[6].getDate();
                 const rangeText = sM === eM
-                    ? `${year}년 ${sM}월 ${sD}일 — ${eD}일`
-                    : `${year}년 ${sM}월 ${sD}일 — ${eM}월 ${eD}일`;
+                    ? `${year}년 ${sM}월 ${sD}일 ~ ${eD}일`
+                    : `${year}년 ${sM}월 ${sD}일 ~ ${eM}월 ${eD}일`;
                 const todayInWeek = days.some(d => dsOf(d) === today);
                 return (
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
@@ -836,7 +836,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                 <SummaryStat label="완료율" value={`${summary.completion_rate}%`} />
                                 <SummaryStat label="완료" value={`${summary.done_tasks}개`} />
                                 <SummaryStat label="이월" value={`${summary.carried_tasks}개`} />
-                                <SummaryStat label="에너지" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
+                                <SummaryStat label="에너지" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "-"} />
                             </div>
                         </section>
                     )}

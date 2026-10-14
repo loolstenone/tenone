@@ -260,7 +260,7 @@ function TemplateNoteBlock({
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full text-xs text-neutral-400">
-                        템플릿 비어 있음 — 클릭해 작성
+                        템플릿 비어 있음 · 클릭해 작성
                     </div>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -478,7 +478,7 @@ function DailyNoteCard({
         note.type === 'handwriting' ? "예: 회의 메모 · 손글씨 정리"
         : note.type === 'canvas' ? "예: 동선 스케치"
         : note.type === 'email' ? "메일 임베드"
-        : "예: AI 마케팅 특강 — 강의 구성안";
+        : "예: AI 마케팅 특강, 강의 구성안";
 
     return (
         <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
@@ -551,7 +551,7 @@ function DailyNoteCard({
                             <HandNote value={note.handwriting} onChange={() => {}} height={180} />
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-xs text-neutral-300">손글씨 비어 있음 — 클릭해 시작</div>
+                        <div className="flex items-center justify-center h-full text-xs text-neutral-300">손글씨 비어 있음 · 클릭해 시작</div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-xs text-neutral-500 flex items-center gap-1">
@@ -571,7 +571,7 @@ function DailyNoteCard({
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full text-xs text-neutral-400 gap-1">
                             <ImageIcon className="h-6 w-6 text-neutral-300" />
-                            자유 캔버스 — 클릭해서 그리기
+                            자유 캔버스 · 클릭해서 그리기
                         </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -634,7 +634,7 @@ function DailyNoteCard({
                             )}
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-xs text-neutral-400">내용 없음 — 클릭해 작성</div>
+                        <div className="flex items-center justify-center h-full text-xs text-neutral-400">내용 없음 · 클릭해 작성</div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                         <span className="text-xs text-neutral-500 flex items-center gap-1">
@@ -1237,7 +1237,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                 if (idx >= 0) queue[idx].patch = { ...queue[idx].patch, ...patch };
                 else queue.push({ date, patch });
                 localStorage.setItem(offlineQueueKey, JSON.stringify(queue));
-                setSaveError("오프라인 — 재연결 시 자동 저장됩니다.");
+                setSaveError("오프라인 · 재연결 시 자동 저장됩니다.");
                 setTimeout(() => setSaveError(null), 3000);
             } catch { /* silent */ }
             return;
@@ -1255,12 +1255,12 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
             } else {
                 const err = await res.json().catch(() => ({}));
                 console.error("daily save failed", { patch: Object.keys(patch), err });
-                setSaveError("저장 실패 — 잠시 후 다시 시도해 주세요.");
+                setSaveError("저장 실패 · 잠시 후 다시 시도해 주세요.");
                 setTimeout(() => setSaveError(null), 4000);
             }
         } catch (e) {
             console.error("daily save network error", e);
-            setSaveError("네트워크 오류 — 연결을 확인해 주세요.");
+            setSaveError("네트워크 오류 · 연결을 확인해 주세요.");
             setTimeout(() => setSaveError(null), 4000);
         } finally {
             setSaving(false);
@@ -1670,7 +1670,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         setTzMismatch(null);
                                     }}
                                     className="inline-flex items-center gap-1 text-amber-400 text-xs hover:text-amber-300 transition-colors"
-                                    title={`현재 타임존: ${tzMismatch} — 클릭하면 홈으로 저장`}
+                                    title={`현재 타임존: ${tzMismatch}, 클릭하면 홈으로 저장`}
                                 >
                                     <Globe className="h-3 w-3" />
                                     {tzMismatch.split("/").pop()?.replace(/_/g, " ")}
@@ -1786,7 +1786,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 } else {
-                                    setSaveError("캔버스 생성 실패 — 잠시 후 다시 시도해 주세요.");
+                                    setSaveError("캔버스 생성 실패 · 잠시 후 다시 시도해 주세요.");
                                     setTimeout(() => setSaveError(null), 4000);
                                 }
                             }}
@@ -1874,11 +1874,11 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
-                <div className="flex flex-col md:grid md:grid-cols-3 gap-6 md:items-start">
+                <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8 lg:gap-10 lg:items-start">
                   {/* 좌측 컬럼 (tasks + notes) — 모바일은 contents로 풀어 order 적용, 데스크톱은 flex */}
-                  <div className="contents md:flex md:flex-col md:gap-6 md:col-span-2 md:col-start-1 md:row-start-1 min-w-0">
+                  <div className="contents lg:flex lg:flex-col lg:gap-8 lg:col-span-2 lg:col-start-1 lg:row-start-1 min-w-0">
                     {/* 1. 일정 & 업무 */}
-                    <div className="order-1 md:order-none space-y-4 min-w-0">
+                    <div className="order-1 lg:order-none space-y-6 min-w-0">
                         <ExternalEventsBanner date={date} />
 
                         {/* ── 통합 타임테이블 (일정 + 업무) ── */}
@@ -2272,7 +2272,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     </div>
 
                     {/* 4. 노트 — mobile: order-3 (향후 일정 다음), desktop: 좌측 컬럼 두번째 */}
-                    <div className="order-3 md:order-none space-y-4 min-w-0">
+                    <div className="order-3 lg:order-none space-y-6 min-w-0">
                         {/* 노트 추가 — 일정&업무 바로 아래 (같은 col-span-2 컨테이너) */}
 
                         {/* 연구원 전용 — 연구노트 */}
@@ -2302,7 +2302,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         setNotesList(next);
                                         save({ notes: serializeNotes(next) });
                                     }}
-                                    title="연구노트 — 질문·가설·방법·관찰·해석·다음 스텝"
+                                    title="연구노트 · 질문·가설·방법·관찰·해석·다음 스텝"
                                     className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-600 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50 transition-colors shadow-sm"
                                 >
                                     <span className="text-sm leading-none">🔬</span>
@@ -2313,7 +2313,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
 
                         {/* Notes 목록 — 프로젝트와 동일 패턴: 전체 너비 인라인 렌더 */}
                         {notesList.length > 0 && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {notesList.map((note, noteIdx) => (
                                 <div
                                     key={note.id}
@@ -2369,7 +2369,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                   </div>{/* /좌측 컬럼 */}
 
                   {/* 우측 컬럼 — 모바일은 contents로 풀어 order 적용, 데스크톱은 flex */}
-                  <div className="contents md:flex md:flex-col md:gap-6 md:col-start-3 md:row-start-1">
+                  <div className="contents lg:flex lg:flex-col lg:gap-8 lg:col-start-3 lg:row-start-1">
 
                     {/* 달력 — tablet+ only */}
                     <div className="hidden md:block">
@@ -2377,12 +2377,12 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     </div>
 
                     {/* 2. 향후 일정 & 업무 — mobile order 2 (일정&업무 바로 다음) */}
-                    <div className="order-2 md:order-none">
+                    <div className="order-2 lg:order-none">
                         <UpcomingSchedule date={date} />
                     </div>
 
                     {/* 4. 일간 기록 — mobile order 4 (노트 다음) */}
-                    <div className="order-4 md:order-none">
+                    <div className="order-4 lg:order-none">
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
@@ -2395,7 +2395,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         <Pencil className="h-3 w-3" /> 수정
                                     </Link>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     {trackingMetrics.includes("energy") && (
                                         <TrackingRow
                                             label="에너지" hint="컨디션·체력"
@@ -2489,7 +2489,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                     </div>
 
                     {/* 5. 프로젝트 — mobile order 5 */}
-                    <div className="order-5 md:order-none">
+                    <div className="order-5 lg:order-none">
                         <DailyProjectsCard date={date} />
                     </div>
 
@@ -2685,7 +2685,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                             isTpl ? "이 템플릿으로 기록할 주제 한 줄"
                                             : isCanvas ? "예: 동선 스케치 / 와이어프레임"
                                             : isHand ? "예: 회의 메모 · 손글씨 정리"
-                                            : "예: AI 마케팅 특강 — 강의 구성안"
+                                            : "예: AI 마케팅 특강, 강의 구성안"
                                         }
                                         className={`w-full text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
                                             isAutoTitle

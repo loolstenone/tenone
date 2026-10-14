@@ -11,7 +11,7 @@
 import type { ReactNode } from "react";
 import { BetaBadge } from "./BetaBadge";
 
-const DEFAULT_ACCENT = "#6366F1";
+const DEFAULT_ACCENT = "var(--pp-accent)"; // 기본 MyVerse 인디고, Planner's 앱에서는 틸 (app/globals.css)
 
 export function LaneHeader({
     icon,
@@ -44,9 +44,11 @@ export function LaneHeader({
                     >
                         {icon}
                     </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-widest">
-                        {label}
-                    </span>
+                    {label && (
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">
+                            {label}
+                        </span>
+                    )}
                 </div>
                 <h1
                     className="text-[28px] sm:text-[32px] font-medium tracking-tight text-neutral-900 myverse-dark:text-white leading-tight flex items-center gap-2 flex-wrap"

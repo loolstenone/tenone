@@ -36,7 +36,7 @@ function fmtRange(start: string, end: string): string {
     const e = new Date(end + "T00:00:00+09:00");
     const sm = s.getMonth() + 1, sd = s.getDate();
     const em = e.getMonth() + 1, ed = e.getDate();
-    return sm === em ? `${sm}월 ${sd}일 — ${ed}일` : `${sm}월 ${sd}일 — ${em}월 ${ed}일`;
+    return sm === em ? `${sm}월 ${sd}일 ~ ${ed}일` : `${sm}월 ${sd}일 ~ ${em}월 ${ed}일`;
 }
 
 function shiftWeek(weekStart: string, n: number): string {
@@ -110,7 +110,7 @@ export function WeeklyReportView() {
                 <div className="text-center">
                     <p className="text-[10px] uppercase tracking-widest text-indigo-400">Weekly</p>
                     <p className="text-sm font-medium text-neutral-900">
-                        {weekStart && weekEnd ? fmtRange(weekStart, weekEnd) : "—"}
+                        {weekStart && weekEnd ? fmtRange(weekStart, weekEnd) : "-"}
                     </p>
                 </div>
                 <button onClick={() => weekStart && load(shiftWeek(weekStart, 1))}

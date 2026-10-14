@@ -9,6 +9,7 @@ import { SettingsIntegrations } from "@/features/myverse/planner/settings/Settin
 import { SettingsBases } from "@/features/myverse/planner/settings/SettingsBases";
 import { SettingsExport } from "@/features/myverse/planner/settings/SettingsExport";
 import { useSettingsSave } from "@/features/myverse/planner/settings/useSettingsSave";
+import { ConnectedAi } from "@/features/planners/app/ConnectedAi";
 
 function MobileNavSection() {
     const [selected, setSelected] = useState<string[]>(MOBILE_NAV_DEFAULT);
@@ -96,6 +97,8 @@ export default function SettingsTechPage() {
     return (
         <SettingsLayout toast={toastMsg}>
             <div className="space-y-5">
+                {/* 내 AI에 연결 (MCP) — 2026-10-14 */}
+                <ConnectedAi />
                 <SettingsIntegrations
                     showToast={showToast}
                     afterLocationSlot={

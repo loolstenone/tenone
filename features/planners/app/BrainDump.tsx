@@ -118,7 +118,7 @@ export function BrainDump({ date }: { date?: string }) {
     }
 
     return (
-        <section ref={rootRef} className="mb-8 scroll-mt-20 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+        <section ref={rootRef} className="mb-10 scroll-mt-20 border border-neutral-200 bg-white p-6 md:p-8 myverse-dark:border-white/10 myverse-dark:bg-white/5">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--pp-accent)]">
                 <Sparkles className="h-4 w-4" /> 생각 쏟아내기
             </div>

@@ -69,7 +69,7 @@ export function InsightsView() {
                 icon="insights"
                 label="INSIGHTS"
                 title="인사이트"
-                subtitle="내가 보지 못한 패턴 — 누구·어디·언제·무엇을"
+                subtitle="내가 보지 못한 패턴, 누구·어디·언제·무엇을"
                 status="phase2"
             />
 
@@ -306,7 +306,7 @@ function HourBars({ data }: { data: number[] }) {
                         key={h}
                         className="flex-1 bg-[var(--pp-accent)]/70 rounded-t-sm"
                         style={{ height: `${(cnt / max) * 100}%`, minHeight: cnt > 0 ? "8%" : "2%" }}
-                        title={`${h}시 — ${cnt}건`}
+                        title={`${h}시 · ${cnt}건`}
                     />
                 ))}
             </div>

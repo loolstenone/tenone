@@ -125,7 +125,7 @@ function WorkForm({ onSave, onCancel }: { onSave: (w: Work) => void; onCancel: (
                 <label className="text-[10px] text-neutral-400 uppercase tracking-wider shrink-0">분류</label>
                 <select value={quadrant} onChange={e => setQuadrant(e.target.value as Quadrant)}
                     className="text-xs text-neutral-700 border border-neutral-200 rounded px-2 py-1 focus:outline-none">
-                    {QUADRANTS.map(q => <option key={q.key} value={q.key}>{q.label} — {q.sub}</option>)}
+                    {QUADRANTS.map(q => <option key={q.key} value={q.key}>{q.label} · {q.sub}</option>)}
                 </select>
                 <input type="color" value={color} onChange={e => setColor(e.target.value)}
                     className="w-6 h-6 rounded cursor-pointer border border-neutral-200 ml-auto" />
@@ -189,7 +189,7 @@ function TaskForm({ workId, onSave, onCancel }: { workId: string; onSave: (t: Wo
             </div>
             <select value={quadrant} onChange={e => setQuadrant(e.target.value as Quadrant)}
                 className="w-full text-xs text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none">
-                {QUADRANTS.map(q => <option key={q.key} value={q.key}>{q.label} — {q.sub}</option>)}
+                {QUADRANTS.map(q => <option key={q.key} value={q.key}>{q.label} · {q.sub}</option>)}
             </select>
             <div className="flex justify-end gap-2 pt-0.5">
                 <button type="button" onClick={onCancel} className="text-xs text-neutral-500 hover:text-neutral-800 px-3 py-1.5">취소</button>
@@ -270,7 +270,7 @@ function BoardCard({ item, worksMap, onMoveQuadrant, onToggleStatus, onDelete }:
                                 {QUADRANTS.filter(q => q.key !== work.quadrant).map(q => (
                                     <button key={q.key} onClick={() => { onMoveQuadrant(item, q.key); setMenuOpen(false); }}
                                         className="w-full text-left text-xs px-3 py-2 hover:bg-neutral-50 text-neutral-700">
-                                        {q.label} <span className="text-neutral-400">— {q.sub}</span>
+                                        {q.label} <span className="text-neutral-400">{q.sub}</span>
                                     </button>
                                 ))}
                                 <div className="border-t border-neutral-100 mt-1">
@@ -337,7 +337,7 @@ function BoardCard({ item, worksMap, onMoveQuadrant, onToggleStatus, onDelete }:
                             {QUADRANTS.filter(q => q.key !== task.quadrant).map(q => (
                                 <button key={q.key} onClick={() => { onMoveQuadrant(item, q.key); setMenuOpen(false); }}
                                     className="w-full text-left text-xs px-3 py-2 hover:bg-neutral-50 text-neutral-700">
-                                    {q.label} <span className="text-neutral-400">— {q.sub}</span>
+                                    {q.label} <span className="text-neutral-400">{q.sub}</span>
                                 </button>
                             ))}
                             <div className="border-t border-neutral-100 mt-1">

@@ -82,7 +82,7 @@ export async function POST(req: Request) {
 
     if (moments.length === 0 && routines.length === 0 && places.length === 0) {
         return NextResponse.json({
-            draft: "오늘은 아직 기록이 없어 — 짧게라도 한 줄을 남겨보면 어떨까.",
+            draft: "오늘은 아직 기록이 없어, 짧게라도 한 줄을 남겨보면 어떨까.",
             empty: true,
         });
     }
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
         lines.push("[흔적]");
         for (const m of moments.slice(0, 10)) {
             const meta = [m.location, m.with_whom && `with ${m.with_whom}`, m.activity, m.domain, (m.sub_tags ?? []).join(",")].filter(Boolean).join(" · ");
-            lines.push(`- ${meta}${m.caption ? ` — "${m.caption}"` : ""}`);
+            lines.push(`- ${meta}${m.caption ? `, "${m.caption}"` : ""}`);
         }
     }
     if (routines.length > 0) {

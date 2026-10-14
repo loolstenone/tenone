@@ -129,7 +129,7 @@ export function SubmissionPanel({ teamId, stage = 'prelim' }: { teamId: string; 
           <input value={form.presentation_url} onChange={e => setForm({ ...form, presentation_url: e.target.value })} placeholder="발표자료 링크 (선택, https://)" className={inputCls} />
           <label className="flex cursor-pointer items-center gap-2 border border-dashed border-neutral-800 px-4 py-3 text-sm text-neutral-400 hover:border-neutral-600">
             <Upload className="h-4 w-4" />
-            {file ? `${file.name} (${fmtSize(file.size)})` : sub?.file_name ? `파일 교체 — 지금: ${sub.file_name}` : '발표 파일 올리기 (PDF·PPT·Keynote·ZIP 등, 50MB까지)'}
+            {file ? `${file.name} (${fmtSize(file.size)})` : sub?.file_name ? `파일 교체 · 지금: ${sub.file_name}` : '발표 파일 올리기 (PDF·PPT·Keynote·ZIP 등, 50MB까지)'}
             <input ref={fileRef} type="file" accept={ACCEPT} className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
           </label>
           <label className="flex items-start gap-2 text-xs text-neutral-400">

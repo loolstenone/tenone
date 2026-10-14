@@ -1,4 +1,5 @@
 // Planner's 플래너'스 AI 앱 메뉴 SSOT — MyVerse에서 옮겨 온 핵심 화면만 (app/(Planners)/CLAUDE.md '이전 계획' 4단계)
+// 일정(캘린더 약속·기념일)은 월간·오늘·주간에서 보고 넣는다, 별도 메뉴는 중복이라 뺐다 (2026-10-14)
 // 개인 OS 화면(캡처·흔적·일기·피드·이력서·시간 기록(9 도메인) 등)은 MyVerse(동결)에 남는다 — 여기에 넣지 않는다
 export const APP_BASE = "/planners/app";
 
@@ -13,7 +14,6 @@ export const PLANNERS_APP_NAV: AppNavGroup[] = [
             { key: "weekly", label: "주간", icon: "view_week", href: `${APP_BASE}/weekly` },
             { key: "monthly", label: "월간", icon: "calendar_month", href: `${APP_BASE}/monthly` },
             { key: "yearly", label: "연간", icon: "calendar_today", href: `${APP_BASE}/yearly` },
-            { key: "schedule", label: "일정", icon: "event", href: `${APP_BASE}/schedule` },
         ],
     },
     {

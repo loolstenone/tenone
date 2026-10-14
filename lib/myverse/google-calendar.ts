@@ -17,12 +17,23 @@ const SCOPES = [
     "https://www.googleapis.com/auth/userinfo.profile",
 ];
 
-export function getClientConfig(): { clientId: string; clientSecret: string; redirectUri: string } | null {
+// Google 로그인 후 돌아올 주소 — 연결을 시작한 도메인으로 (2026-10-14: myverse.kr 고정이라 planners.ai.kr에서 시작하면 state 쿠키가 없어 실패했음)
+// ⚠️ 여기 있는 주소마다 Google Cloud 콘솔 OAuth 클라이언트의 '승인된 리디렉션 URI'에 /api/myverse/integrations/google/callback 등록 필요
+const ALLOWED_ORIGINS = ["https://www.planners.ai.kr", "https://planners.ai.kr", "https://myverse.kr", "https://www.myverse.kr", "http://localhost:3000"];
+
+export function originOf(req: Request): string {
+    const h = req.headers;
+    const host = h.get("x-forwarded-host") ?? h.get("host");
+    const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
+    return host ? `${proto}://${host}` : new URL(req.url).origin;
+}
+
+export function getClientConfig(origin?: string): { clientId: string; clientSecret: string; redirectUri: string } | null {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     if (!clientId || !clientSecret) return null;
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://myverse.kr";
+    const baseUrl = origin && ALLOWED_ORIGINS.includes(origin) ? origin : (process.env.NEXT_PUBLIC_APP_URL || "https://myverse.kr");
     return {
         clientId,
         clientSecret,
@@ -30,8 +41,8 @@ export function getClientConfig(): { clientId: string; clientSecret: string; red
     };
 }
 
-export function buildAuthUrl(state: string): string | null {
-    const cfg = getClientConfig();
+export function buildAuthUrl(state: string, origin?: string): string | null {
+    const cfg = getClientConfig(origin);
     if (!cfg) return null;
 
     const params = new URLSearchParams({
@@ -54,8 +65,8 @@ interface TokenResponse {
     token_type: string;
 }
 
-export async function exchangeCodeForTokens(code: string): Promise<TokenResponse | null> {
-    const cfg = getClientConfig();
+export async function exchangeCodeForTokens(code: string, origin?: string): Promise<TokenResponse | null> {
+    const cfg = getClientConfig(origin);
     if (!cfg) return null;
 
     const res = await fetch(GOOGLE_TOKEN_URL, {

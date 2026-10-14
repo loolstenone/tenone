@@ -13,6 +13,7 @@ import { getApiUser } from "@/lib/api-guard";
 import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 import { buildWeekStats as buildStats, weekParam } from "@/lib/planners/weekly-stats";
 import type { NextRequest } from "next/server";
+import { noDash } from "@/lib/planners/text";
 
 const MODEL = "claude-haiku-4-5-20251001";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,8 +44,8 @@ const TOOL: Anthropic.Tool = {
         type: "object",
         properties: {
             summary: { type: "string", description: "이번 주를 한두 문장으로 (존댓말, 80자 이내)" },
-            well: { type: "string", description: "잘한 점 하나 — 숫자나 기록에 근거 (존댓말)" },
-            pattern: { type: "string", description: "보이는 패턴 하나 — 요일·상태·밀린 일 등 근거 있게 (존댓말). 근거가 약하면 '아직 기록이 적어 패턴을 단정하기 어렵다'고" },
+            well: { type: "string", description: "잘한 점 하나 · 숫자나 기록에 근거 (존댓말)" },
+            pattern: { type: "string", description: "보이는 패턴 하나 · 요일·상태·밀린 일 등 근거 있게 (존댓말). 근거가 약하면 '아직 기록이 적어 패턴을 단정하기 어렵다'고" },
             next: { type: "string", description: "다음 주에 해 볼 작은 실험 하나 (존댓말, 구체적으로)" },
         },
         required: ["summary", "well", "pattern", "next"],
@@ -92,8 +93,8 @@ export async function POST(req: Request) {
     }
     const block = resp.content.find((b) => b.type === "tool_use");
     const out = (block?.type === "tool_use" ? block.input : {}) as { summary?: string; well?: string; pattern?: string; next?: string };
-    const highlights = { well: String(out.well ?? "").slice(0, 300), pattern: String(out.pattern ?? "").slice(0, 300), next: String(out.next ?? "").slice(0, 300) };
-    const summary = String(out.summary ?? "").slice(0, 300);
+    const highlights = { well: noDash(String(out.well ?? "")).slice(0, 300), pattern: noDash(String(out.pattern ?? "")).slice(0, 300), next: noDash(String(out.next ?? "")).slice(0, 300) };
+    const summary = noDash(String(out.summary ?? "")).slice(0, 300);
     const { reflections: _x, ...savedStats } = stats;
     void _x;
     await createAdminClient().from("myverse_weekly_reports").upsert({

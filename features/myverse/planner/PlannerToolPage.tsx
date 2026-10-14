@@ -49,7 +49,7 @@ function PlannersPlannerSection() {
           </InstallButton>
         </div>
         <p className="mt-2 text-xs text-[#999] max-w-2xl">
-          앱스토어 등록 없이 1회 클릭으로 홈 화면에 추가 — 모든 기능은 웹과 100% 동일하게 작동합니다.
+          앱스토어 등록 없이 1회 클릭으로 홈 화면에 추가, 모든 기능은 웹과 100% 동일하게 작동합니다.
         </p>
 
         {/* 5-1. Planner's Planner 2026 */}
@@ -192,7 +192,7 @@ function PlannersPlannerSection() {
               <p>AI Planner&apos;s Planner는 AI가 기획을 대신하는 도구가 아니다.</p>
               <p className="text-[#1a1a1a]">기획자의 사고를 가속하는 도구다.</p>
               <p className="mt-4">AI가 80%를 채우고,</p>
-              <p>사람이 20%의 핵심 판단 — Why와 What — 을 한다.</p>
+              <p>사람이 20%의 핵심 판단, Why와 What, 을 한다.</p>
               <p className="mt-4">기획은 여전히 사람의 일이다.</p>
               <p>다만, 훨씬 빠르고 날카롭게.</p>
             </div>
@@ -206,7 +206,7 @@ function PlannersPlannerSection() {
             </div>
             <ul className="space-y-2 mb-6 text-sm text-[#444]">
               {[
-                "능동 AI 비서 — 아침 브리핑 · 저녁 정리",
+                "능동 AI 비서 · 아침 브리핑 · 저녁 정리",
                 "Personal Identity · Yearly · Monthly · Weekly · Daily",
                 "Project Book (Vrief 4단계 + GPR 7필드)",
                 "Templates 109종 · 풀텍스트 검색",
@@ -236,7 +236,7 @@ function PlannersPlannerSection() {
               종이 플래너&apos;s 플래너(2026 All In One) 구매자는{" "}
               <Link href="/myverse/purchase" className="text-[var(--pp-accent)] underline">1년 무료 제공</Link>.
               <br />
-              모든 기능은 웹에서 그대로 작동 — 별도 앱스토어 다운로드 없이 홈 화면에 추가만 하면 됩니다.
+              모든 기능은 웹에서 그대로 작동, 별도 앱스토어 다운로드 없이 홈 화면에 추가만 하면 됩니다.
             </p>
           </div>
         </div>

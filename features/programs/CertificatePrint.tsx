@@ -48,7 +48,7 @@ export async function CertificatePrint({ code, theme }: { code: string; theme: P
     <div className="min-h-screen bg-white text-neutral-900 print:min-h-0">
       <style dangerouslySetInnerHTML={{ __html: '@page { size: A4 portrait; margin: 14mm; } @media print { body { background: white !important; } .no-print { display: none !important; } header, footer, nav { display: none !important; } }' }} />
       <div className="no-print flex items-center justify-center bg-neutral-900 px-6 py-3 text-xs font-bold tracking-widest text-white">
-        인쇄 미리보기 — Ctrl+P (Mac은 Cmd+P) → &quot;PDF로 저장&quot;
+        인쇄 미리보기 · Ctrl+P (Mac은 Cmd+P) → &quot;PDF로 저장&quot;
       </div>
 
       <div className="mx-auto max-w-3xl p-8 print:p-0">
@@ -89,7 +89,7 @@ export async function CertificatePrint({ code, theme }: { code: string; theme: P
 
           <div className="mt-12 border-t border-neutral-300 pt-4 text-center text-xs text-neutral-500">
             진위 확인: {theme.verifyHost}/{cert.code}
-            {cert.revoked_at && <div className="mt-2 font-bold text-red-600">취소된 인증서입니다{cert.revoked_reason ? ` — ${cert.revoked_reason}` : ''}</div>}
+            {cert.revoked_at && <div className="mt-2 font-bold text-red-600">취소된 인증서입니다{cert.revoked_reason ? `, ${cert.revoked_reason}` : ''}</div>}
           </div>
         </div>
       </div>

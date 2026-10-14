@@ -744,7 +744,7 @@ function ProjectGanttView({
             <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg text-xs">
                 <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
                 <span className="text-rose-700">
-                    의존성 위반 <strong>{violatingTaskIds.size}개</strong> — 선행 업무 종료 전에 시작됨
+                    의존성 위반 <strong>{violatingTaskIds.size}개</strong>, 선행 업무 종료 전에 시작됨
                 </span>
                 <button
                     type="button"
@@ -926,7 +926,7 @@ function ProjectGanttView({
                                     type="button"
                                     onClick={() => setEditingTask({ id: task.id, date })}
                                     className="w-60 shrink-0 px-3 py-1.5 text-xs text-neutral-800 truncate flex items-center gap-1 hover:bg-neutral-50 text-left"
-                                    title={violatingTaskIds.has(task.id) ? "의존성 위반 — 선행 업무가 끝나기 전에 시작" : "클릭: 날짜·기간 편집"}
+                                    title={violatingTaskIds.has(task.id) ? "의존성 위반 · 선행 업무가 끝나기 전에 시작" : "클릭: 날짜·기간 편집"}
                                 >
                                     {isMilestone && <span className="text-[9px] text-[var(--pp-accent)]">◆</span>}
                                     {violatingTaskIds.has(task.id) && <AlertTriangle className="h-3 w-3 text-rose-500 shrink-0" />}

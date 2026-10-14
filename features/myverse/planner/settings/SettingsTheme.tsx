@@ -321,7 +321,7 @@ export function SettingsTheme({ save: _save, showToast: _showToast }: Props) {
                                     );
                                 })}
                             </div>
-                            <p className="text-[10px] text-neutral-400 mb-2">직접 입력 — 글꼴 이름을 입력하세요. 예: &apos;Noto Sans KR&apos;, Georgia</p>
+                            <p className="text-[10px] text-neutral-400 mb-2">직접 입력 · 글꼴 이름을 입력하세요. 예: &apos;Noto Sans KR&apos;, Georgia</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {customFonts.map((cf, idx) => {
                                     const key = `custom_${idx}`;

@@ -82,7 +82,7 @@ export function TasksView() {
                     <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                         check_box
                     </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-widest">TASKS</span>
+                    
                 </div>
                 <div className="flex items-baseline gap-3">
                     <h1

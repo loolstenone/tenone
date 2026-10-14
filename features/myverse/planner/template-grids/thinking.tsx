@@ -55,9 +55,9 @@ export function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 
 export function OodaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "ooda_observe", label: "Observe · 관찰", sub: "사실·데이터·신호 — 해석 X",            color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
+        { key: "ooda_observe", label: "Observe · 관찰", sub: "사실·데이터·신호 · 해석 X",            color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: 경쟁사 A가 가격 30% 인하 발표 / 우리 주간 전환율 2주 연속 ↓ / 고객 지원 문의 50% ↑" },
-        { key: "ooda_orient",  label: "Orient · 방향",  sub: "내 가정·선입견 점검 — 가장 중요한 단계", color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
+        { key: "ooda_orient",  label: "Orient · 방향",  sub: "내 가정·선입견 점검, 가장 중요한 단계", color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: 우리 가정 \"경쟁사는 프리미엄 시장 X\"가 흔들림 / 고객은 가격에 우리 생각보다 민감 / 1순위 차별화 = 가격 X, 자동화" },
         { key: "ooda_decide",  label: "Decide · 결정",  sub: "옵션 1~3개 중 1개 선택",                 color: "bg-neutral-50 border-neutral-200", text: "text-neutral-800",
           ph: "옵션:\nA) 가격 동결 + 자동화 메시지 강화 (선택)\nB) 가격 인하 따라가기\nC) 무대응 + 데이터 추가 수집 2주" },
@@ -75,7 +75,7 @@ export function OodaGrid({ data, onChange }: { data: FrameworkData; onChange: (k
             {/* 가이드 */}
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">John Boyd OODA Loop</span> · 공군 도그파이트에서 유래.
-                <span className="font-semibold"> 빠른 사이클이 곧 우위</span> — 상대보다 한 번 더 도는 쪽이 이긴다. <span className="font-semibold">Orient가 가장 중요</span> — 잘못된 가정 위 결정은 무용지물.
+                <span className="font-semibold"> 빠른 사이클이 곧 우위</span>, 상대보다 한 번 더 도는 쪽이 이긴다. <span className="font-semibold">Orient가 가장 중요</span>, 잘못된 가정 위 결정은 무용지물.
             </div>
 
             {/* 4단계 */}
@@ -118,7 +118,7 @@ export function CornellGrid({ data, onChange }: { data: FrameworkData; onChange:
             </div>
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">Walter Pauk Cornell Notes</span> · 듣기→정리→복습의 3단 시스템.
-                <span className="font-semibold"> 24h 안에 Cue+Summary 채우기</span>가 핵심 — 그래야 장기 기억으로 넘어감.
+                <span className="font-semibold"> 24h 안에 Cue+Summary 채우기</span>가 핵심 · 그래야 장기 기억으로 넘어감.
             </div>
 
             <div className="rounded-lg border border-neutral-300 overflow-hidden bg-white">
@@ -133,7 +133,7 @@ export function CornellGrid({ data, onChange }: { data: FrameworkData; onChange:
                     </div>
                     <div className="bg-white p-3">
                         <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Notes · 본문</p>
-                        <p className="text-[10px] text-neutral-500 mb-1">수업·강의·독서 내용 — 자유롭게</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">수업·강의·독서 내용, 자유롭게</p>
                         <textarea value={data["cornell_notes"] ?? ""} onChange={e => onChange("cornell_notes", e.target.value)}
                             placeholder={"강화학습은 시행착오로 배우는 ML 분야...\n\n핵심 3요소:\n- Agent: 행동 주체\n- Reward: 보상 신호 (양수/음수)\n- Environment: 상호작용 공간\n\n주요 도전: 즉시 보상 vs 장기 보상 균형"} rows={12}
                             className="w-full mt-1 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
@@ -142,7 +142,7 @@ export function CornellGrid({ data, onChange }: { data: FrameworkData; onChange:
                 {/* Bottom: Summary */}
                 <div className="border-t-2 border-neutral-300 bg-slate-50 p-3">
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Summary · 요약 (내 언어로)</p>
-                    <p className="text-[10px] text-neutral-500 mb-1">강의 후 24h 안에 — 한 단락으로 압축</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">강의 후 24h 안에, 한 단락으로 압축</p>
                     <textarea value={data["cornell_summary"] ?? ""} onChange={e => onChange("cornell_summary", e.target.value)}
                         placeholder='예: 강화학습은 "보상으로 행동을 학습하는 AI". 핵심은 Agent가 Environment와 상호작용하며 보상을 누적 최대화하는 정책을 찾는 것. 가장 큰 도전은 단기 보상에 집착하지 않고 장기 가치도 추구하는 균형 (Exploration ↔ Exploitation).'
                         rows={4}
@@ -201,7 +201,7 @@ export function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; on
             </div>
             <div className="rounded-lg px-3 py-2 bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-600 leading-relaxed">
                 💡 <span className="font-semibold">Weighted Decision Matrix</span> · 직감 vs 분석 사이의 다리.
-                <span className="font-semibold"> 기준 가중치 × 옵션 점수</span> · 점수 1~5(높을수록 유리). 총점 = Σ(점수 × 가중치). 1등이 직감과 다르면 — 가중치를 다시 봐라.
+                <span className="font-semibold"> 기준 가중치 × 옵션 점수</span> · 점수 1~5(높을수록 유리). 총점 = Σ(점수 × 가중치). 1등이 직감과 다르면, 가중치를 다시 봐라.
             </div>
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
                 <table className="w-full text-xs">
@@ -284,12 +284,12 @@ export function FeynmanGrid({ data, onChange }: { data: FrameworkData; onChange:
     const steps = [
         { key: "feynman_concept",  label: "1. Concept · 주제 한 줄",          hint: "가르치려는 개념·내용을 한 줄로",         color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: 강화학습이란 무엇인가? / OAuth 2.0 동작 원리 / Cash Flow Statement 읽는 법" },
-        { key: "feynman_teach",    label: "2. Teach · 6살에게 설명하듯",      hint: "전문용어·약어 금지 — 일상 단어로만",      color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
+        { key: "feynman_teach",    label: "2. Teach · 6살에게 설명하듯",      hint: "전문용어·약어 금지 · 일상 단어로만",      color: "bg-neutral-50 border-neutral-200", text: "text-slate-800",
           ph: "예: 강화학습은 강아지에게 간식 주면서 훈련시키는 것과 같아. 잘하면 점수를 주고, 못하면 점수를 안 줘. 강아지(컴퓨터)는 점수를 많이 받는 행동을 점점 더 자주 하게 돼." },
         { key: "feynman_gaps",     label: "3. Gaps · 막힌 곳·애매한 곳",      hint: "설명하다 막힌 부분 = 진짜 모르는 부분",   color: "bg-neutral-50 border-neutral-200", text: "text-neutral-700",
-          ph: "예: \"점수를 어떻게 정하지?\"에서 막힘 — Reward function 설계 원리 다시 공부\n\"왜 강화학습이 지도학습보다 어렵지?\" — Exploration vs Exploitation 이해 부족" },
+          ph: "예: \"점수를 어떻게 정하지?\"에서 막힘 · Reward function 설계 원리 다시 공부\n\"왜 강화학습이 지도학습보다 어렵지?\", Exploration vs Exploitation 이해 부족" },
         { key: "feynman_simplify", label: "4. Simplify · 비유·예시로 다시",   hint: "갭을 메운 후 더 짧고 명료하게",          color: "bg-neutral-50 border-neutral-200", text: "text-slate-900",
-          ph: "예: 강화학습 = \"시행착오로 배우는 컴퓨터\". 핵심 3요소: 행동 / 보상 / 환경. 자전거 처음 배울 때처럼 — 넘어지면 (음수 보상) 다시 시도, 잘 가면 (양수 보상) 그 방법을 기억." },
+          ph: "예: 강화학습 = \"시행착오로 배우는 컴퓨터\". 핵심 3요소: 행동 / 보상 / 환경. 자전거 처음 배울 때처럼, 넘어지면 (음수 보상) 다시 시도, 잘 가면 (양수 보상) 그 방법을 기억." },
     ];
     return (
         <div className="my-2 space-y-2">
@@ -324,7 +324,7 @@ export function FeynmanGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* Cycle again */}
             <div className="rounded-lg p-3 bg-neutral-50 border border-neutral-200">
                 <p className="text-xs font-bold text-neutral-900">5. Repeat · 다시 사이클로 돌아가기</p>
-                <p className="text-[10px] text-neutral-500 mb-1">막힘이 사라질 때까지 — 다음에 보강할 갭·읽을 자료</p>
+                <p className="text-[10px] text-neutral-500 mb-1">막힘이 사라질 때까지, 다음에 보강할 갭·읽을 자료</p>
                 <CellTextarea cellKey="feynman_repeat" value={data["feynman_repeat"] ?? ""} onChange={onChange} placeholder={"- Sutton & Barto 2장 다시 읽기\n- 동료에게 5분 발표 후 피드백\n- 1주일 뒤 다시 설명해보기"} />
             </div>
         </div>

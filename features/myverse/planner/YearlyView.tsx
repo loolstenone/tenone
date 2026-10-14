@@ -319,7 +319,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                     <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-3">Q{q}</p>
                                     <div className="space-y-1.5">
                                         {goalsByQuarter(q).length === 0 && (
-                                            <p className="text-xs text-neutral-400 py-1">—</p>
+                                            <p className="text-xs text-neutral-400 py-1">-</p>
                                         )}
                                         {goalsByQuarter(q).map((g) => (
                                             <div key={g.id} className="group flex items-start gap-2">
@@ -767,7 +767,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
         <div className="space-y-6">
             {has1to5 && (
                 <div>
-                    <p className="text-xs font-semibold text-neutral-700 mb-3">컨디션 — 월별 평균</p>
+                    <p className="text-xs font-semibold text-neutral-700 mb-3">컨디션 · 월별 평균</p>
                     <YearLineChart
                         labels={monthLabels}
                         max={5}
@@ -781,7 +781,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
             )}
             {hasExercise && (
                 <div>
-                    <p className="text-xs font-semibold text-neutral-700 mb-3">운동 — 월별 누적 시간(분)</p>
+                    <p className="text-xs font-semibold text-neutral-700 mb-3">운동 · 월별 누적 시간(분)</p>
                     <YearBarChart
                         labels={monthLabels}
                         values={months.map((m) => m.exercise_minutes)}
@@ -793,7 +793,7 @@ function YearTrackingTab({ months }: { months: YearMonthStat[] }) {
             )}
             {hasHealth && (
                 <div>
-                    <p className="text-xs font-semibold text-neutral-700 mb-3">건강 — 월별 평균</p>
+                    <p className="text-xs font-semibold text-neutral-700 mb-3">건강 · 월별 평균</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <YearLineChart
                             labels={monthLabels}

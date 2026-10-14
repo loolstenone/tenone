@@ -18,7 +18,7 @@ function GuideBox({ children }: { children: React.ReactNode }) {
 export function LeanCanvasGrid({ data, onChange }: GP) {
     return (
         <div className="my-2 space-y-1">
-            <GuideBox><span className="font-semibold">Ash Maurya Lean Canvas</span> · 1페이지로 사업 가설 전체. 채워진 칸만 보면 못 봄 — <span className="font-semibold">빈 칸이 가장 큰 위험</span>. Problem → Customer → UVP 순서로 시작.</GuideBox>
+            <GuideBox><span className="font-semibold">Ash Maurya Lean Canvas</span> · 1페이지로 사업 가설 전체. 채워진 칸만 보면 못 봄, <span className="font-semibold">빈 칸이 가장 큰 위험</span>. Problem → Customer → UVP 순서로 시작.</GuideBox>
             {/* 상단 5열 */}
             <div className="grid grid-cols-5 gap-1">
                 {/* Col 1: Problem + Existing Alt */}
@@ -170,7 +170,7 @@ export function BmcGrid({ data, onChange }: GP) {
 export function VpcGrid({ data, onChange }: GP) {
     return (
         <div className="my-2 space-y-2">
-            <GuideBox><span className="font-semibold">Strategyzer Value Proposition Canvas</span> · 우측 Customer Profile 먼저 → 좌측 Value Map 매칭. 좌·우의 <span className="font-semibold">Fit이 핵심</span> — Pain Reliever ↔ Pains, Gain Creator ↔ Gains.</GuideBox>
+            <GuideBox><span className="font-semibold">Strategyzer Value Proposition Canvas</span> · 우측 Customer Profile 먼저 → 좌측 Value Map 매칭. 좌·우의 <span className="font-semibold">Fit이 핵심</span>, Pain Reliever ↔ Pains, Gain Creator ↔ Gains.</GuideBox>
             <div className="grid md:grid-cols-2 gap-3">
             {/* 좌: Value Map (사각형) */}
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-700">

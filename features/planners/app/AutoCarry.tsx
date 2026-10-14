@@ -18,7 +18,7 @@ export function AutoCarry({ date }: { date: string }) {
         try {
             if (localStorage.getItem(RUN_KEY + date) === "1") return;
             localStorage.setItem(RUN_KEY + date, "1");
-        } catch { /* 저장소 없음 — 한 번만 시도 */ }
+        } catch { /* 저장소 없음 · 한 번만 시도 */ }
         let cancelled = false;
         (async () => {
             const res = await fetch("/api/myverse/daily/carry-over", {
