@@ -104,7 +104,7 @@ export function SettingsNotifications({
                             save({ notify_email_briefing: !notifyEmail });
                         }}
                         className={`shrink-0 relative w-10 h-6 rounded-full transition-colors ${
-                            notifyEmail ? "bg-[#6366F1]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"
+                            notifyEmail ? "bg-[var(--pp-accent)]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"
                         }`}
                     >
                         <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${
@@ -130,7 +130,7 @@ export function SettingsNotifications({
                             onClick={() => notifyPush ? disablePush() : enablePush()}
                             disabled={pushLoading}
                             className={`shrink-0 relative w-10 h-6 rounded-full transition-colors disabled:opacity-60 ${
-                                notifyPush ? "bg-[#6366F1]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"
+                                notifyPush ? "bg-[var(--pp-accent)]" : "bg-neutral-300 myverse-dark:bg-[#3a3a3a]"
                             }`}
                         >
                             <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] !bg-white rounded-full shadow-sm transition-transform ${

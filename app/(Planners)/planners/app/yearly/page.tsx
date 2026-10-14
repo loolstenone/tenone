@@ -6,7 +6,7 @@ export default async function YearlyPage({ searchParams }: { searchParams: Promi
     const year = params.year ? parseInt(params.year, 10) : new Date().getFullYear();
     return (
         <div>
-            <div className="flex justify-end px-4 pt-3">
+            <div className="mx-auto flex max-w-6xl justify-end px-4 pt-6 md:px-10 md:pt-8 -mb-2 md:-mb-6">
                 <ViewToggle current="yearly" />
             </div>
             <YearlyView initialYear={year} />

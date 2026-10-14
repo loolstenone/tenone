@@ -120,7 +120,7 @@ export function GmailIntegration() {
                     </p>
                     <a
                         href="/api/myverse/integrations/google/connect"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-300 hover:border-[#6366F1] hover:text-[#6366F1] text-neutral-700 text-xs font-medium rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-300 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] text-neutral-700 text-xs font-medium rounded-lg transition-colors"
                     >
                         Google 계정 연결
                     </a>
@@ -131,7 +131,7 @@ export function GmailIntegration() {
                         <button
                             onClick={sync}
                             disabled={syncing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-medium rounded-lg disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white text-xs font-medium rounded-lg disabled:opacity-50"
                         >
                             {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                             최근 7일 메일 가져오기
@@ -209,7 +209,7 @@ function TriageButton({ label, onClick, variant = "primary" }: { label: string; 
             onClick={onClick}
             className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                 variant === "primary"
-                    ? "text-[#6366F1] hover:bg-[#6366F1]/10"
+                    ? "text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10"
                     : "text-neutral-400 hover:bg-neutral-100"
             }`}
         >

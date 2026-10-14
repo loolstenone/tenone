@@ -194,7 +194,7 @@ function TaskForm({ workId, onSave, onCancel }: { workId: string; onSave: (t: Wo
             <div className="flex justify-end gap-2 pt-0.5">
                 <button type="button" onClick={onCancel} className="text-xs text-neutral-500 hover:text-neutral-800 px-3 py-1.5">취소</button>
                 <button type="submit" disabled={saving || !title.trim()}
-                    className="text-xs bg-[#6366F1] text-white rounded-lg px-4 py-1.5 disabled:opacity-40">
+                    className="text-xs bg-[var(--pp-accent)] text-white rounded-lg px-4 py-1.5 disabled:opacity-40">
                     {saving ? "저장 중…" : "Task 추가"}
                 </button>
             </div>
@@ -363,7 +363,7 @@ function WorkItem({
     const doneCount = work.myverse_work_tasks?.filter(t => t.status === "done").length ?? 0;
 
     return (
-        <div className={`rounded-xl border transition-all ${selected ? "border-[#6366F1] bg-[#6366F1]/5" : "border-neutral-200 bg-white hover:border-neutral-300"}`}>
+        <div className={`rounded-xl border transition-all ${selected ? "border-[var(--pp-accent)] bg-[var(--pp-accent)]/5" : "border-neutral-200 bg-white hover:border-neutral-300"}`}>
             <button onClick={onSelect} className="w-full text-left p-3">
                 <div className="flex items-start gap-2">
                     <div className="w-2.5 h-2.5 rounded-full mt-1 shrink-0" style={{ backgroundColor: work.color }} />
@@ -393,7 +393,7 @@ function WorkItem({
                             onCancel={() => setAddingTask(false)} />
                     ) : (
                         <button onClick={() => setAddingTask(true)}
-                            className="flex items-center gap-1.5 text-xs text-[#6366F1] hover:text-[#4F46E5] mt-1">
+                            className="flex items-center gap-1.5 text-xs text-[var(--pp-accent)] hover:text-[var(--pp-accent-strong)] mt-1">
                             <Plus className="h-3.5 w-3.5" /> Task 추가
                         </button>
                     )}

@@ -144,7 +144,7 @@ export default function PrivacyPage() {
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <Globe className="h-4 w-4 text-[#6366F1] shrink-0" />
+                            <Globe className="h-4 w-4 text-[var(--pp-accent)] shrink-0" />
                             <h2 className="text-sm font-semibold text-neutral-900">내 페이지 공개</h2>
                         </div>
                         {/* URL 표시 */}
@@ -153,7 +153,7 @@ export default function PrivacyPage() {
                                 href={`/myverse/@${handle}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs text-[#6366F1] hover:underline font-mono mb-1.5"
+                                className="inline-flex items-center gap-1 text-xs text-[var(--pp-accent)] hover:underline font-mono mb-1.5"
                             >
                                 myverse.kr/@{handle}
                                 <ExternalLink className="h-2.5 w-2.5" />
@@ -172,7 +172,7 @@ export default function PrivacyPage() {
                         disabled={saving === "page_visible"}
                         aria-label={pageVisible ? "내 페이지 비공개로 전환" : "내 페이지 공개로 전환"}
                         className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
-                            pageVisible ? "bg-[#6366F1]" : "bg-neutral-200"
+                            pageVisible ? "bg-[var(--pp-accent)]" : "bg-neutral-200"
                         }`}
                     >
                         <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
@@ -199,14 +199,14 @@ export default function PrivacyPage() {
                                         href={`/myverse/@${handle}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="ml-auto text-[10px] text-[#6366F1] hover:underline flex items-center gap-0.5"
+                                        className="ml-auto text-[10px] text-[var(--pp-accent)] hover:underline flex items-center gap-0.5"
                                     >
                                         열기 <ExternalLink className="h-2.5 w-2.5" />
                                     </a>
                                 )}
                             </div>
                             <div className="bg-white px-6 py-5 flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#6366F1] to-[#A855F7] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--pp-accent)] to-[#A855F7] flex items-center justify-center text-white text-sm font-bold shrink-0">
                                     {handle ? handle.charAt(0).toUpperCase() : "?"}
                                 </div>
                                 <div>
@@ -267,7 +267,7 @@ export default function PrivacyPage() {
                                 onClick={() => toggle(row.key)}
                                 disabled={isSaving}
                                 className={`shrink-0 relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                    enabled ? "bg-[#6366F1]" : "bg-neutral-200"
+                                    enabled ? "bg-[var(--pp-accent)]" : "bg-neutral-200"
                                 } disabled:opacity-50`}
                             >
                                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${

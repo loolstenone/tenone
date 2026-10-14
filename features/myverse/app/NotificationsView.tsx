@@ -78,7 +78,7 @@ export function NotificationsView() {
                     unread.length > 0 ? (
                         <button
                             onClick={markAllRead}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-700 hover:text-[#6366F1] text-xs font-medium rounded-lg"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[var(--pp-accent)] text-neutral-700 hover:text-[var(--pp-accent)] text-xs font-medium rounded-lg"
                         >
                             <Check className="h-3 w-3" />
                             모두 읽음
@@ -108,10 +108,10 @@ export function NotificationsView() {
                                 key={n.id}
                                 href={link}
                                 className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                                    n.read_at ? "hover:bg-neutral-50" : "bg-[#6366F1]/5 hover:bg-[#6366F1]/10"
+                                    n.read_at ? "hover:bg-neutral-50" : "bg-[var(--pp-accent)]/5 hover:bg-[var(--pp-accent)]/10"
                                 }`}
                             >
-                                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shrink-0">
+                                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] flex items-center justify-center shrink-0">
                                     {n.actor?.avatar_url ? (
                                         /* eslint-disable-next-line @next/next/no-img-element */
                                         <img src={n.actor.avatar_url} alt="" className="w-full h-full object-cover" />

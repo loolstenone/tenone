@@ -91,13 +91,13 @@ export function PersonView({ name }: { name: string }) {
             <div className="mb-6">
                 <Link
                     href="/planners/app/contacts"
-                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] mb-3"
+                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] mb-3"
                 >
                     <ArrowLeft className="h-3 w-3" />
                     연락처로
                 </Link>
                 <div className="flex items-end gap-4">
-                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shrink-0">
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] flex items-center justify-center shrink-0">
                         <span className="text-white text-2xl sm:text-3xl font-semibold">{name[0]}</span>
                     </div>
                     <div>

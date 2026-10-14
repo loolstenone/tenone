@@ -44,7 +44,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
             onDrop={onDrop}
             onDragEnd={onDragEnd}
             className={`group flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 rounded transition-colors ${
-                isDragOver ? "bg-neutral-50 border-t-2 border-[#6366F1]" : ""
+                isDragOver ? "bg-neutral-50 border-t-2 border-[var(--pp-accent)]" : ""
             }`}
         >
             {/* Drag handle */}
@@ -58,7 +58,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                 title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs font-bold transition-colors shrink-0 ${
                     task.status === 'done'
-                        ? "bg-[#6366F1] border-[#6366F1] text-white"
+                        ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                         : task.status === 'carried'
                         ? "bg-amber-500 border-amber-500 text-white"
                         : task.status === 'moved'
@@ -67,7 +67,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                         ? "bg-amber-200 border-amber-300 text-amber-800"
                         : task.status === 'cancelled'
                         ? "bg-neutral-300 border-neutral-300 text-white"
-                        : "border-neutral-300 text-neutral-300 hover:border-[#6366F1] hover:text-[#6366F1]"
+                        : "border-neutral-300 text-neutral-300 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)]"
                 }`}
             >
                 {task.status === 'done' ? '✓' : task.status === 'carried' ? '→' : task.status === 'moved' ? '→' : task.status === 'hold' ? '⏸' : task.status === 'cancelled' ? '✕' : '·'}
@@ -87,12 +87,12 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                                 setEditingTime(false);
                             }
                         }}
-                        className="text-xs w-[68px] border border-[#6366F1] rounded px-1 py-0.5 focus:outline-none"
+                        className="text-xs w-[68px] border border-[var(--pp-accent)] rounded px-1 py-0.5 focus:outline-none"
                     />
                     <button
                         type="button"
                         onClick={() => setEditingTime(false)}
-                        className="px-1.5 py-0.5 rounded bg-[#6366F1] text-white text-xs font-semibold hover:bg-[#4F46E5]"
+                        className="px-1.5 py-0.5 rounded bg-[var(--pp-accent)] text-white text-xs font-semibold hover:bg-[var(--pp-accent-strong)]"
                         title="확인"
                     >
                         확인
@@ -111,7 +111,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                     onClick={() => setEditingTime(true)}
                     className={`text-xs shrink-0 px-1.5 py-0.5 rounded transition-colors ${
                         task.time
-                            ? "text-[#6366F1] bg-[#6366F1]/10 hover:bg-[#6366F1]/20"
+                            ? "text-[var(--pp-accent)] bg-[var(--pp-accent)]/10 hover:bg-[var(--pp-accent)]/20"
                             : "text-neutral-300 hover:text-neutral-400"
                     }`}
                     title="시간 설정"
@@ -143,7 +143,7 @@ export function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onP
                         title={project ? `프로젝트: ${project.title}` : "프로젝트 태그"}
                         className={`shrink-0 text-xs max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
                             project
-                                ? "bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30"
+                                ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] border-[var(--pp-accent)]/30"
                                 : "text-neutral-300 border-transparent opacity-40"
                         }`}
                         style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}

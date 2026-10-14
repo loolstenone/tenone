@@ -80,7 +80,7 @@ export function InsightsView() {
                         key={p.key}
                         onClick={() => setPeriod(p.key)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                            period === p.key ? "bg-[#6366F1] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                            period === p.key ? "bg-[var(--pp-accent)] text-white" : "text-neutral-600 hover:bg-neutral-100"
                         }`}
                     >
                         {p.label}
@@ -125,10 +125,10 @@ export function InsightsView() {
                                         <li key={name}>
                                             <Link
                                                 href={`/myverse/app/with/${encodeURIComponent(name)}`}
-                                                className="flex items-center justify-between text-xs text-neutral-700 hover:text-[#6366F1] py-1 px-2 -mx-2 rounded hover:bg-[#6366F1]/5"
+                                                className="flex items-center justify-between text-xs text-neutral-700 hover:text-[var(--pp-accent)] py-1 px-2 -mx-2 rounded hover:bg-[var(--pp-accent)]/5"
                                             >
                                                 <span className="flex items-center gap-2">
-                                                    <span className="h-5 w-5 rounded-full bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white flex items-center justify-center text-[10px] font-semibold">
+                                                    <span className="h-5 w-5 rounded-full bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] text-white flex items-center justify-center text-[10px] font-semibold">
                                                         {name[0]}
                                                     </span>
                                                     {name}
@@ -158,7 +158,7 @@ export function InsightsView() {
                                                 </div>
                                                 <div className="h-1 bg-neutral-100 rounded-full overflow-hidden">
                                                     <div
-                                                        className="h-full bg-gradient-to-r from-[#6366F1] to-[#4F46E5]"
+                                                        className="h-full bg-gradient-to-r from-[var(--pp-accent)] to-[var(--pp-accent-strong)]"
                                                         style={{ width: `${pct}%` }}
                                                     />
                                                 </div>
@@ -284,7 +284,7 @@ function WeekdayBars({ data }: { data: { day: string; count: number }[] }) {
                 return (
                     <div key={d.day} className="flex-1 flex flex-col items-center justify-end gap-1">
                         <div
-                            className="w-full bg-gradient-to-t from-[#6366F1] to-[#818CF8] rounded-t-sm transition-all"
+                            className="w-full bg-gradient-to-t from-[var(--pp-accent)] to-[#818CF8] rounded-t-sm transition-all"
                             style={{ height: `${Math.max(2, h)}%`, minHeight: d.count > 0 ? "8%" : "2%" }}
                             title={`${d.count}건`}
                         />
@@ -304,7 +304,7 @@ function HourBars({ data }: { data: number[] }) {
                 {data.map((cnt, h) => (
                     <div
                         key={h}
-                        className="flex-1 bg-[#6366F1]/70 rounded-t-sm"
+                        className="flex-1 bg-[var(--pp-accent)]/70 rounded-t-sm"
                         style={{ height: `${(cnt / max) * 100}%`, minHeight: cnt > 0 ? "8%" : "2%" }}
                         title={`${h}시 — ${cnt}건`}
                     />

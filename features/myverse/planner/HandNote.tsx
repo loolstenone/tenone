@@ -1013,7 +1013,7 @@ export function HandNote({
                             type="button"
                             className={`px-2 h-6 text-xs rounded transition-colors whitespace-nowrap ${
                                 penType === t && drawEnabled && !effectiveErase && !selectMode && !lassoMode
-                                    ? "bg-[#6366F1] text-white"
+                                    ? "bg-[var(--pp-accent)] text-white"
                                     : penType === t
                                         ? "bg-neutral-200 text-neutral-700 border border-neutral-300"
                                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 border border-neutral-200"
@@ -1037,7 +1037,7 @@ export function HandNote({
                             title={c}
                             className={`rounded-full border-2 transition-all shrink-0 ${
                                 color === c && !effectiveErase
-                                    ? "ring-2 ring-offset-1 ring-[#6366F1] scale-110 border-white"
+                                    ? "ring-2 ring-offset-1 ring-[var(--pp-accent)] scale-110 border-white"
                                     : "border-white hover:scale-110"
                             }`}
                             style={{ backgroundColor: c, width: 14, height: 14 }}

@@ -334,14 +334,14 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 </button>
                                 <div
                                     className={`flex items-center gap-2 min-w-0 ${
-                                        isCurrentMonth ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
+                                        isCurrentMonth ? "underline decoration-[var(--pp-accent)] decoration-2 underline-offset-[6px]" : ""
                                     }`}
                                     title={isCurrentMonth ? "이번 달" : undefined}
                                 >
                                     <div ref={yearRef} className="relative">
                                         <button
                                             onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
-                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#6366F1] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[var(--pp-accent)] transition-colors whitespace-nowrap"
                                         >
                                             {year}년
                                         </button>
@@ -349,7 +349,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px]">
                                                 {yearRange.map(y => (
                                                     <button key={y} onClick={() => { setYear(y); setShowYearPicker(false); }}
-                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#6366F1] font-semibold" : "text-neutral-700"}`}>
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[var(--pp-accent)] font-semibold" : "text-neutral-700"}`}>
                                                         {y}년
                                                     </button>
                                                 ))}
@@ -359,7 +359,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     <div ref={monthRef} className="relative">
                                         <button
                                             onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
-                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[#6366F1] transition-colors whitespace-nowrap"
+                                            className="font-serif text-xl md:text-2xl text-neutral-900 hover:text-[var(--pp-accent)] transition-colors whitespace-nowrap"
                                         >
                                             {month}월
                                         </button>
@@ -367,7 +367,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[80px]">
                                                 {MONTHS_KO.map((label, i) => (
                                                     <button key={i} onClick={() => { setMonth(i + 1); setShowMonthPicker(false); }}
-                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${i + 1 === month ? "text-[#6366F1] font-semibold" : "text-neutral-700"}`}>
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${i + 1 === month ? "text-[var(--pp-accent)] font-semibold" : "text-neutral-700"}`}>
                                                         {label}
                                                     </button>
                                                 ))}
@@ -395,7 +395,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                     {/* 1) 이달의 방향 — 테마 + 목표 통합 카드 */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-6">
                         <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">DIRECTION</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">DIRECTION</span>
                             <h2 className="text-sm font-semibold text-neutral-800">이달의 방향</h2>
                         </div>
                         <div className="grid md:grid-cols-[1fr_1.3fr] gap-6 min-w-0">
@@ -442,7 +442,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                     <button
                                                         onClick={() => toggleGoal(g.id)}
                                                         className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
-                                                            g.done ? "bg-[#6366F1] border-[#6366F1] text-white" : "border-neutral-300 hover:border-neutral-500"
+                                                            g.done ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white" : "border-neutral-300 hover:border-neutral-500"
                                                         }`}
                                                     >
                                                         {g.done && "✓"}
@@ -479,11 +479,11 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                     {/* 2) 집중 영역 — 활성 프로젝트 토글 + 자유 텍스트 */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">FOCUS</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">FOCUS</span>
                             <h2 className="text-sm font-semibold text-neutral-800">집중 영역</h2>
                             <button
                                 onClick={() => setShowSuggestions(v => !v)}
-                                className="ml-auto flex items-center gap-0.5 text-[11px] text-neutral-400 hover:text-[#6366F1] transition-colors"
+                                className="ml-auto flex items-center gap-0.5 text-[11px] text-neutral-400 hover:text-[var(--pp-accent)] transition-colors"
                             >
                                 제시 항목 <ChevronDown className={`h-3 w-3 transition-transform ${showSuggestions ? "rotate-180" : ""}`} />
                             </button>
@@ -491,12 +491,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
 
                         {/* 선택된 집중 영역 — 위, 강조 */}
                         {(monthly?.focus_areas ?? []).length > 0 ? (
-                            <div className="mb-2 bg-[#6366F1]/5 border border-[#6366F1]/20 rounded-lg p-2">
+                            <div className="mb-2 bg-[var(--pp-accent)]/5 border border-[var(--pp-accent)]/20 rounded-lg p-2">
                                 <div className="flex flex-wrap gap-1.5">
                                     {(monthly?.focus_areas ?? []).map((f, i) => {
                                         const matched = activeProjects.find(p => p.title === f);
                                         return (
-                                            <span key={i} className="group inline-flex items-center gap-1 bg-[#6366F1] text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                            <span key={i} className="group inline-flex items-center gap-1 bg-[var(--pp-accent)] text-white text-xs px-2 py-0.5 rounded-full font-medium">
                                                 {matched ? (
                                                     <Link
                                                         href={`/planners/app/projects/${matched.id}`}
@@ -550,7 +550,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                     className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
                                                         added
                                                             ? "bg-neutral-100 border-neutral-200 text-neutral-400 line-through"
-                                                            : "bg-white border-neutral-200 text-neutral-500 hover:border-[#6366F1] hover:text-[#6366F1]"
+                                                            : "bg-white border-neutral-200 text-neutral-500 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)]"
                                                     }`}
                                                     style={!added && p.color ? { borderLeftColor: p.color, borderLeftWidth: 3 } : undefined}
                                                 >
@@ -611,7 +611,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             <div className="flex items-center justify-between gap-0.5">
                                                 <div className="flex items-center gap-1 min-w-0">
                                                     <span className={`text-sm shrink-0 ${
-                                                        isToday ? "text-[#6366F1] font-bold" :
+                                                        isToday ? "text-[var(--pp-accent)] font-bold" :
                                                         !cell.inMonth ? "text-neutral-300" :
                                                         isHoliday || isSunday ? "text-red-500 font-medium" :
                                                         "text-neutral-800"
@@ -624,7 +624,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                         </span>
                                                     )}
                                                 </div>
-                                                {isToday && <span className="text-[9px] px-1 bg-[#6366F1] text-white rounded shrink-0 leading-4">오</span>}
+                                                {isToday && <span className="text-[9px] px-1 bg-[var(--pp-accent)] text-white rounded shrink-0 leading-4">오</span>}
                                             </div>
                                             {/* Row 2+: 공휴일·절기·기념일·업무 통합 최대 3개 */}
                                             {cell.inMonth && (() => {
@@ -772,7 +772,7 @@ function MonthlyAnalytics({ summary, tracking }: MonthlyAnalyticsProps) {
                         disabled={!t.enabled}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             tab === t.k
-                                ? "text-[#6366F1] border-b-2 border-[#6366F1] -mb-px"
+                                ? "text-[var(--pp-accent)] border-b-2 border-[var(--pp-accent)] -mb-px"
                                 : t.enabled
                                     ? "text-neutral-500 hover:text-neutral-900"
                                     : "text-neutral-300 cursor-not-allowed"
@@ -887,7 +887,7 @@ function TrackingSummary({ stats, series }: { stats: TrackingStats; series: Trac
                 <div>
                     <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-2">컨디션 평균</p>
                     <div className="grid grid-cols-3 gap-3">
-                        <AvgCard label="에너지" value={stats.energy_avg} suffix="/5" color="bg-[#6366F1]" />
+                        <AvgCard label="에너지" value={stats.energy_avg} suffix="/5" color="bg-[var(--pp-accent)]" />
                         <AvgCard label="만족도" value={stats.satisfaction_avg} suffix="/5" color="bg-amber-500" />
                         <AvgCard label="기분" value={stats.mood_avg} suffix="/5" color="bg-rose-400" />
                     </div>

@@ -74,14 +74,14 @@ export function InstallView() {
                     />
                     <div>
                         <h1 className="font-serif text-3xl text-neutral-900 leading-tight">
-                            myverse<sup className="text-xs font-bold text-[#6366F1] ml-0.5">AI</sup>
+                            myverse<sup className="text-xs font-bold text-[var(--pp-accent)] ml-0.5">AI</sup>
                         </h1>
                         <p className="text-sm text-neutral-500 mt-1">홈 화면에 설치하면 앱처럼 빠르게 열립니다.</p>
                     </div>
                 </div>
 
                 {installed ? (
-                    <div className="flex items-center gap-2 px-4 py-3 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-xl text-[#6366F1] text-sm">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-[var(--pp-accent)]/10 border border-[var(--pp-accent)]/20 rounded-xl text-[var(--pp-accent)] text-sm">
                         <Check className="h-4 w-4" />
                         이미 홈 화면에 설치되어 있어요. 홈에서 아이콘을 눌러 시작하세요.
                     </div>
@@ -110,7 +110,7 @@ export function InstallView() {
                             onClick={() => setPlatform(key)}
                             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px ${
                                 active
-                                    ? "border-[#6366F1] text-[#6366F1] font-semibold"
+                                    ? "border-[var(--pp-accent)] text-[var(--pp-accent)] font-semibold"
                                     : "border-transparent text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
@@ -133,7 +133,7 @@ export function InstallView() {
                             <button
                                 onClick={triggerInstall}
                                 disabled={installing}
-                                className="w-full mt-3 px-4 py-3 bg-[#6366F1] text-white rounded-lg text-sm font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="w-full mt-3 px-4 py-3 bg-[var(--pp-accent)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--pp-accent-strong)] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                             >
                                 <Download className="h-4 w-4" />
                                 {installing ? "설치 중…" : "Myverse AI 설치"}
@@ -190,7 +190,7 @@ export function InstallView() {
                             <button
                                 onClick={triggerInstall}
                                 disabled={installing}
-                                className="w-full mt-3 px-4 py-3 bg-[#6366F1] text-white rounded-lg text-sm font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="w-full mt-3 px-4 py-3 bg-[var(--pp-accent)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--pp-accent-strong)] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                             >
                                 <Download className="h-4 w-4" />
                                 {installing ? "설치 중…" : "PC에 설치"}
@@ -223,10 +223,10 @@ export function InstallView() {
                 <div className="grid sm:grid-cols-2 gap-3">
                     <button
                         onClick={copyUrl}
-                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-colors text-left"
+                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/5 transition-colors text-left"
                     >
                         <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
-                            {copied ? <Check className="h-4 w-4 text-[#6366F1]" /> : <Copy className="h-4 w-4 text-neutral-500" />}
+                            {copied ? <Check className="h-4 w-4 text-[var(--pp-accent)]" /> : <Copy className="h-4 w-4 text-neutral-500" />}
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-neutral-900">{copied ? "복사됨" : "주소 복사"}</p>
@@ -237,7 +237,7 @@ export function InstallView() {
                         href={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(APP_URL)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-colors text-left"
+                        className="flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-xl hover:border-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/5 transition-colors text-left"
                     >
                         <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
                             <QrCode className="h-4 w-4 text-neutral-500" />
@@ -253,7 +253,7 @@ export function InstallView() {
             {/* Notes */}
             <div className="mt-10 p-5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-600 leading-relaxed">
                 <p className="font-semibold text-neutral-900 mb-2">설치하면 무엇이 좋아지나요?</p>
-                <ul className="space-y-1 list-disc list-inside marker:text-[#6366F1]">
+                <ul className="space-y-1 list-disc list-inside marker:text-[var(--pp-accent)]">
                     <li>홈 화면 아이콘으로 한 번에 진입 — 브라우저 주소창 입력 불필요</li>
                     <li>전체 화면 모드 (브라우저 UI 가림) 로 노트·일정에 집중</li>
                     <li>오프라인에서도 최근에 본 페이지 열람 가능</li>
@@ -290,7 +290,7 @@ function ActionCard({
     return (
         <div className="bg-white border border-neutral-200 rounded-xl p-5">
             <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] flex items-center justify-center shrink-0">
                     <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">

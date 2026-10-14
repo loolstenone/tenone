@@ -168,7 +168,7 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
                             }}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                                 mode === m
-                                    ? "bg-white text-[#6366F1] shadow-sm"
+                                    ? "bg-white text-[var(--pp-accent)] shadow-sm"
                                     : "text-neutral-500 hover:text-neutral-800"
                             }`}
                         >
@@ -189,7 +189,7 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
                                     key={s}
                                     onClick={() => ask(s)}
                                     disabled={loading}
-                                    className="px-3 py-1.5 text-xs text-neutral-700 bg-white border border-neutral-200 rounded-full hover:border-[#6366F1] hover:text-[#6366F1] transition-colors disabled:opacity-50"
+                                    className="px-3 py-1.5 text-xs text-neutral-700 bg-white border border-neutral-200 rounded-full hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] transition-colors disabled:opacity-50"
                                 >
                                     {s}
                                 </button>
@@ -202,14 +202,14 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
                     <div key={i} className="space-y-3">
                         {/* 질문 */}
                         <div className="flex justify-end">
-                            <div className="max-w-[80%] px-4 py-2.5 bg-[#6366F1] text-white text-sm rounded-2xl rounded-tr-sm">
+                            <div className="max-w-[80%] px-4 py-2.5 bg-[var(--pp-accent)] text-white text-sm rounded-2xl rounded-tr-sm">
                                 {t.question}
                             </div>
                         </div>
                         {/* 답변 */}
                         <div className="flex items-start gap-2">
-                            <div className="h-7 w-7 rounded-full bg-[#6366F1]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                <Sparkles className="h-3.5 w-3.5 text-[#6366F1]" />
+                            <div className="h-7 w-7 rounded-full bg-[var(--pp-accent)]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                <Sparkles className="h-3.5 w-3.5 text-[var(--pp-accent)]" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 {t.error ? (
@@ -235,7 +235,7 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
 
                 {loading && (
                     <div className="flex items-center gap-2 text-sm text-neutral-500">
-                        <Loader2 className="h-4 w-4 animate-spin text-[#6366F1]" />
+                        <Loader2 className="h-4 w-4 animate-spin text-[var(--pp-accent)]" />
                         흔적을 살펴보는 중…
                     </div>
                 )}
@@ -244,7 +244,7 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
             {/* 인풋 */}
             <form
                 onSubmit={(e) => { e.preventDefault(); ask(); }}
-                className="shrink-0 mt-2 flex items-end gap-2 bg-white border border-neutral-200 rounded-2xl p-2 focus-within:border-[#6366F1] transition-colors"
+                className="shrink-0 mt-2 flex items-end gap-2 bg-white border border-neutral-200 rounded-2xl p-2 focus-within:border-[var(--pp-accent)] transition-colors"
             >
                 <textarea
                     ref={inputRef}
@@ -261,7 +261,7 @@ export function AskMyverseView({ initialMode = "ask" }: { initialMode?: MukkiMod
                 <button
                     type="submit"
                     disabled={!question.trim() || loading}
-                    className="shrink-0 h-9 w-9 rounded-full bg-[#6366F1] hover:bg-[#4F46E5] text-white flex items-center justify-center disabled:opacity-30 transition-colors"
+                    className="shrink-0 h-9 w-9 rounded-full bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white flex items-center justify-center disabled:opacity-30 transition-colors"
                 >
                     <Send className="h-4 w-4" />
                 </button>

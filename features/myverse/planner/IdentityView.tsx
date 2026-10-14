@@ -78,7 +78,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
     return (
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
             {/* Header — Stitch 정렬 (세션 122) */}
-            <div className="mb-6 flex items-start justify-between gap-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
                         <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -218,10 +218,10 @@ function Section({ id, badge, title, hint, children, accent }: {
     id?: string; badge: string; title: string; hint?: string; children: React.ReactNode; accent?: boolean;
 }) {
     return (
-        <section id={id} className={`bg-white rounded-xl p-6 scroll-mt-28 ${accent ? "border-2 border-[#6366F1]/30" : "border border-neutral-200"}`}>
+        <section id={id} className={`bg-white rounded-xl p-6 scroll-mt-28 ${accent ? "border-2 border-[var(--pp-accent)]/30" : "border border-neutral-200"}`}>
             <div className="mb-3">
                 <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">{badge}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">{badge}</span>
                     <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
                 </div>
                 {hint && <p className="text-xs text-neutral-500 mt-1">{hint}</p>}
@@ -326,14 +326,14 @@ function KeyResultsSection({ items, onSave }: {
             <div className="flex items-center justify-between mb-3">
                 <div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] uppercase tracking-widest text-[#6366F1] font-semibold">KEY RESULTS</span>
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] font-semibold">KEY RESULTS</span>
                         <h2 className="text-sm font-semibold text-neutral-800">올해 핵심 실행</h2>
                     </div>
                     <p className="text-xs text-neutral-500 mt-1">비전·미션을 구체 행동으로 끌어내리는 항목.</p>
                 </div>
                 <button
                     onClick={add}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#6366F1] text-white text-xs rounded hover:bg-[#4F46E5] transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[var(--pp-accent)] text-white text-xs rounded hover:bg-[var(--pp-accent-strong)] transition-colors"
                 >
                     <Plus className="h-3 w-3" /> 추가
                 </button>

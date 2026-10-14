@@ -179,7 +179,7 @@ export function AppTopNav({
                 {subscriptionStatus !== "active" && (
                     <Link
                         href="/myverse/purchase"
-                        className="flex items-center gap-1 px-2 py-1 mr-1 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white rounded text-[10px] font-medium hover:opacity-90 transition-opacity"
+                        className="flex items-center gap-1 px-2 py-1 mr-1 bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] text-white rounded text-[10px] font-medium hover:opacity-90 transition-opacity"
                     >
                         <Sparkles className="h-3 w-3" />
                         <span>구독</span>
@@ -194,7 +194,7 @@ export function AppTopNav({
                     type="button"
                     onClick={toggleFullscreen}
                     title={isFullscreen ? "전체화면 종료 (Esc)" : "전체화면"}
-                    className="p-1.5 rounded text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors"
+                    className="p-1.5 rounded text-neutral-400 hover:text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 transition-colors"
                 >
                     {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </button>
@@ -229,7 +229,7 @@ export function AppTopNav({
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
                                 ) : (
-                                    <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
+                                    <span className="h-full w-full bg-[var(--pp-accent)]/10 flex items-center justify-center text-[10px] font-bold text-[var(--pp-accent)]">
                                         {userName[0]}
                                     </span>
                                 )}
@@ -277,7 +277,7 @@ export function AppTopNav({
                                         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors w-full text-left"
                                         onInstalled={() => setAvatarMenuOpen(false)}
                                     >
-                                        <Download className="h-4 w-4 text-[#6366F1]" />
+                                        <Download className="h-4 w-4 text-[var(--pp-accent)]" />
                                         <span>앱 설치</span>
                                     </InstallButton>
                                 </div>
@@ -309,7 +309,7 @@ export function AppTopNav({
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
                         ) : (
-                            <span className="h-full w-full bg-[#6366F1]/10 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
+                            <span className="h-full w-full bg-[var(--pp-accent)]/10 flex items-center justify-center text-[10px] font-bold text-[var(--pp-accent)]">
                                 {userName[0]}
                             </span>
                         )}
@@ -365,7 +365,7 @@ export function AppTopNav({
                                                 onClick={() => setMenuOpen(false)}
                                                 className={`flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                                                     active
-                                                        ? "bg-[#6366F1]/10 text-[#6366F1] font-medium"
+                                                        ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-medium"
                                                         : "text-neutral-700 hover:bg-neutral-100"
                                                 }`}
                                             >
@@ -385,15 +385,15 @@ export function AppTopNav({
                     <Link
                         href="/myverse/purchase"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-[#6366F1] bg-[#6366F1]/5 hover:bg-[#6366F1]/10"
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-[var(--pp-accent)] bg-[var(--pp-accent)]/5 hover:bg-[var(--pp-accent)]/10"
                     >
                         <Sparkles className="h-4 w-4" />
                         <span className="flex-1">구독</span>
-                        <span className="text-[10px] text-[#6366F1]/60">AI 무제한</span>
+                        <span className="text-[10px] text-[var(--pp-accent)]/60">AI 무제한</span>
                     </Link>
                 )}
                 <InstallButton className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 w-full text-left">
-                    <Download className="h-4 w-4 text-[#6366F1]" />
+                    <Download className="h-4 w-4 text-[var(--pp-accent)]" />
                     <span>앱 설치</span>
                 </InstallButton>
                 <Link href="/planners/app/search" onClick={() => setMenuOpen(false)}

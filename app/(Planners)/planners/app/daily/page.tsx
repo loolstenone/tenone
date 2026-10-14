@@ -17,7 +17,7 @@ export default async function DailyPage({ searchParams }: { searchParams: Promis
     const autoCompose = params.compose === "1" || params.compose === "true";
     return (
         <div>
-            <div className="flex justify-end px-4 pt-3">
+            <div className="mx-auto flex max-w-6xl justify-end px-4 pt-6 md:px-10 md:pt-8 -mb-2 md:-mb-6">
                 <ViewToggle current="daily" />
             </div>
             <DailyView initialDate={date} autoCompose={autoCompose} />

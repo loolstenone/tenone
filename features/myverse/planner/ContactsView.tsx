@@ -1247,7 +1247,7 @@ export function ContactsView() {
             {toast && (
                 <div
                     className={`fixed top-16 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium pointer-events-none transition-opacity ${
-                        toast.ok ? "bg-[#6366F1] text-white" : "bg-rose-500 text-white"
+                        toast.ok ? "bg-[var(--pp-accent)] text-white" : "bg-rose-500 text-white"
                     }`}
                 >
                     {toast.text}
@@ -1257,7 +1257,7 @@ export function ContactsView() {
                 선택 시 액션은 테이블 위 컨텍스트 액션바로 이동. */}
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
-                    <Users className="h-6 w-6 text-[#6366F1]" />
+                    <Users className="h-6 w-6 text-[var(--pp-accent)]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">연락처</h1>
                     {!loading && (
                         <span className="text-xs text-neutral-500 ml-1">
@@ -1267,13 +1267,13 @@ export function ContactsView() {
                     )}
                     <a
                         href="/planners/app/contacts/companies"
-                        className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] text-neutral-600 hover:text-[#6366F1] border border-neutral-200 rounded-md hover:border-[#6366F1]/40 transition-colors"
+                        className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] text-neutral-600 hover:text-[var(--pp-accent)] border border-neutral-200 rounded-md hover:border-[var(--pp-accent)]/40 transition-colors"
                         title="회사 엔티티 관리"
                     >
                         <Building2 className="h-3 w-3" /> 회사 {companies.length > 0 && <span className="text-neutral-400">({companies.length})</span>}
                     </a>
                     {companyFilter && filterCompanyName && (
-                        <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/30 rounded-md">
+                        <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] border border-[var(--pp-accent)]/30 rounded-md">
                             <Building2 className="h-3 w-3" />
                             {filterCompanyName}
                             <button
@@ -1323,7 +1323,7 @@ export function ContactsView() {
                     >CSV</button>
                     <button
                         onClick={openNew}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white text-sm rounded-lg hover:bg-[#4F46E5] transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[var(--pp-accent)] text-white text-sm rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors"
                     >
                         <Plus className="h-4 w-4" />
                         추가
@@ -1340,7 +1340,7 @@ export function ContactsView() {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="이름·전화·이메일·회사 검색 (한글 초성 ㅇㅎㅂ도 가능)"
-                        className="w-full pl-9 pr-9 py-2.5 text-sm bg-neutral-100 rounded-full focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#6366F1]/30 transition-all"
+                        className="w-full pl-9 pr-9 py-2.5 text-sm bg-neutral-100 rounded-full focus:outline-none focus:bg-white focus:ring-2 focus:ring-[var(--pp-accent)]/30 transition-all"
                     />
                     {search && (
                         <button
@@ -1360,7 +1360,7 @@ export function ContactsView() {
                     {/* CTA */}
                     <button
                         onClick={openNew}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#6366F1] text-white text-sm font-medium rounded-lg hover:bg-[#4F46E5] transition-colors mb-2 shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--pp-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors mb-2 shadow-sm"
                     >
                         <Plus className="h-4 w-4" /> 연락처 만들기
                     </button>
@@ -1373,7 +1373,7 @@ export function ContactsView() {
                             onChange={(e) => setQuickInput(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") quickAdd(); }}
                             placeholder="빠른 추가: 홍길동 010-... hong@..."
-                            className="w-full text-xs bg-neutral-100 rounded-md px-2.5 py-1.5 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#6366F1] transition-all placeholder:text-neutral-400"
+                            className="w-full text-xs bg-neutral-100 rounded-md px-2.5 py-1.5 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[var(--pp-accent)] transition-all placeholder:text-neutral-400"
                             disabled={quickAdding}
                             title="이름·전화·이메일·회사·직책을 한 줄로 입력 후 Enter"
                         />
@@ -1423,7 +1423,7 @@ export function ContactsView() {
                             {allLabels.map(l => (
                                 <SidebarItem
                                     key={`label:${l}`}
-                                    icon={<span className="h-2 w-2 rounded-full bg-[#6366F1] inline-block" />}
+                                    icon={<span className="h-2 w-2 rounded-full bg-[var(--pp-accent)] inline-block" />}
                                     label={l}
                                     count={labelCounts[l]}
                                     active={view === `label:${l}`}
@@ -1544,7 +1544,7 @@ export function ContactsView() {
 
                     {/* 컨텍스트 액션바 — 선택된 항목이 있을 때만 등장. 헤더와 분리되어 명확. */}
                     {selectedIds.size > 0 && (
-                        <div className="mb-3 px-4 py-2.5 bg-[#6366F1] rounded-lg flex items-center gap-2 text-sm text-white shadow-sm sticky top-12 z-20 flex-wrap">
+                        <div className="mb-3 px-4 py-2.5 bg-[var(--pp-accent)] rounded-lg flex items-center gap-2 text-sm text-white shadow-sm sticky top-12 z-20 flex-wrap">
                             <CheckSquare className="h-4 w-4 shrink-0" />
                             <span className="flex-1 font-medium min-w-0">{selectedIds.size.toLocaleString("ko-KR")}명 선택됨</span>
                             <div className="relative">
@@ -1637,17 +1637,17 @@ export function ContactsView() {
                                 <span className="ml-2 text-neutral-400">총 {sortedRows.length.toLocaleString("ko-KR")}명</span>
                             </span>
                             {isCompactView && letterFilter !== "top" && letterFilter !== "all" && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1] font-semibold">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-semibold">
                                     {letterFilter} ({visibleRows.length.toLocaleString("ko-KR")}명)
-                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[#6366F1]/20 rounded p-0.5" title="기본 화면으로">
+                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[var(--pp-accent)]/20 rounded p-0.5" title="기본 화면으로">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
                             )}
                             {isCompactView && letterFilter === "all" && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#6366F1]/10 text-[#6366F1] font-semibold">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-semibold">
                                     All ({visibleRows.length.toLocaleString("ko-KR")}명)
-                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[#6366F1]/20 rounded p-0.5" title="기본 화면으로">
+                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[var(--pp-accent)]/20 rounded p-0.5" title="기본 화면으로">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1723,7 +1723,7 @@ export function ContactsView() {
                             {/* 안내 */}
                             <div className="rounded-lg p-4 bg-neutral-50 border border-dashed border-neutral-300 text-xs text-neutral-500 text-center">
                                 전체 {sortedRows.length.toLocaleString("ko-KR")}명 중 즐겨찾기·최근 사용한 사람만 표시 중.
-                                <br/>우측 인덱스에서 <span className="font-semibold text-[#6366F1]">All</span> 또는 가나다·알파벳을 누르면 해당 그룹만 표시됩니다.
+                                <br/>우측 인덱스에서 <span className="font-semibold text-[var(--pp-accent)]">All</span> 또는 가나다·알파벳을 누르면 해당 그룹만 표시됩니다.
                             </div>
                         </div>
                     ) : (
@@ -1734,11 +1734,11 @@ export function ContactsView() {
                                     <button
                                         onClick={toggleSelectAllVisible}
                                         title="표시 중인 연락처 전체 선택"
-                                        className="hover:text-[#6366F1] transition-colors"
+                                        className="hover:text-[var(--pp-accent)] transition-colors"
                                     >
                                         {renderedRows.length > 0 && renderedRows.every(c => selectedIds.has(c.id))
-                                            ? <CheckSquare className="h-4 w-4 text-[#6366F1]" />
-                                            : <Square className="h-4 w-4 text-neutral-300 hover:text-[#6366F1]" />}
+                                            ? <CheckSquare className="h-4 w-4 text-[var(--pp-accent)]" />
+                                            : <Square className="h-4 w-4 text-neutral-300 hover:text-[var(--pp-accent)]" />}
                                     </button>
                                 </div>
                                 <div></div>
@@ -1799,8 +1799,8 @@ export function ContactsView() {
                             onClick={() => setLetterFilter(letterFilter === "all" ? "top" : "all")}
                             className={`leading-tight px-1.5 py-0.5 mb-0.5 rounded font-bold transition-colors ${
                                 letterFilter === "all"
-                                    ? "bg-[#6366F1] text-white"
-                                    : "text-[#6366F1] hover:bg-[#6366F1]/10"
+                                    ? "bg-[var(--pp-accent)] text-white"
+                                    : "text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10"
                             }`}
                             title="전체 연락처 보기"
                         >All</button>
@@ -1816,9 +1816,9 @@ export function ContactsView() {
                                     title={active ? `${ch} (${initialCounts[ch] || 0}명)` : undefined}
                                     className={`leading-tight px-1.5 py-0.5 transition-colors rounded ${
                                         selected
-                                            ? "bg-[#6366F1] text-white font-bold"
+                                            ? "bg-[var(--pp-accent)] text-white font-bold"
                                             : active
-                                                ? "text-neutral-900 hover:text-[#6366F1] hover:bg-[#6366F1]/10 cursor-pointer font-semibold myverse-dark:!text-neutral-100"
+                                                ? "text-neutral-900 hover:text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 cursor-pointer font-semibold myverse-dark:!text-neutral-100"
                                                 : "text-neutral-500 cursor-default myverse-dark:!text-neutral-400"
                                     }`}
                                 >{ch}</button>
@@ -1964,7 +1964,7 @@ function BulkEditModal({
                     type="checkbox"
                     checked={!!enabled[k]}
                     onChange={(e) => setEnabled(prev => ({ ...prev, [k]: e.target.checked }))}
-                    className="mt-2 accent-[#6366F1]"
+                    className="mt-2 accent-[var(--pp-accent)]"
                 />
                 <div className="flex-1">
                     <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
@@ -2019,7 +2019,7 @@ function BulkEditModal({
                 </div>
                 <div className="px-6 py-4 border-t border-neutral-100 flex justify-end gap-3">
                     <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-600 border border-neutral-300 rounded-lg hover:bg-neutral-50">취소</button>
-                    <button onClick={applyHandler} className="px-4 py-2 text-sm text-white bg-[#6366F1] rounded-lg hover:bg-[#4F46E5]">{count.toLocaleString("ko-KR")}명에 적용</button>
+                    <button onClick={applyHandler} className="px-4 py-2 text-sm text-white bg-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent-strong)]">{count.toLocaleString("ko-KR")}명에 적용</button>
                 </div>
             </div>
         </div>
@@ -2086,11 +2086,11 @@ function MergeModal({
                 <div className="px-6 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center gap-3 text-xs">
                     <span className="text-neutral-500">유지할 row ID:</span>
                     <label className="flex items-center gap-1 cursor-pointer">
-                        <input type="radio" checked={keepId === a.id} onChange={() => setKeepId(a.id)} className="accent-[#6366F1]" />
+                        <input type="radio" checked={keepId === a.id} onChange={() => setKeepId(a.id)} className="accent-[var(--pp-accent)]" />
                         <span className="font-mono">A ({a.id.slice(0, 8)})</span>
                     </label>
                     <label className="flex items-center gap-1 cursor-pointer">
-                        <input type="radio" checked={keepId === b.id} onChange={() => setKeepId(b.id)} className="accent-[#6366F1]" />
+                        <input type="radio" checked={keepId === b.id} onChange={() => setKeepId(b.id)} className="accent-[var(--pp-accent)]" />
                         <span className="font-mono">B ({b.id.slice(0, 8)})</span>
                     </label>
                 </div>
@@ -2110,13 +2110,13 @@ function MergeModal({
                                     <button
                                         onClick={() => setPicks(p => ({ ...p, [f.key as string]: "a" }))}
                                         className={`px-4 py-2 border-b border-l border-neutral-100 text-left ${
-                                            picks[f.key as string] === "a" ? "bg-[#6366F1]/10 text-[#6366F1] font-medium" : "hover:bg-neutral-50"
+                                            picks[f.key as string] === "a" ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-medium" : "hover:bg-neutral-50"
                                         }`}
                                     >{aStr || <span className="text-neutral-300">(비어있음)</span>}</button>
                                     <button
                                         onClick={() => setPicks(p => ({ ...p, [f.key as string]: "b" }))}
                                         className={`px-4 py-2 border-b border-l border-neutral-100 text-left ${
-                                            picks[f.key as string] === "b" ? "bg-[#6366F1]/10 text-[#6366F1] font-medium" : "hover:bg-neutral-50"
+                                            picks[f.key as string] === "b" ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-medium" : "hover:bg-neutral-50"
                                         }`}
                                     >{bStr || <span className="text-neutral-300">(비어있음)</span>}</button>
                                 </div>
@@ -2132,7 +2132,7 @@ function MergeModal({
 
                 <div className="px-6 py-4 border-t border-neutral-100 flex justify-end gap-3">
                     <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-600 border border-neutral-300 rounded-lg hover:bg-neutral-50">취소</button>
-                    <button onClick={applyMerge} className="px-4 py-2 text-sm text-white bg-[#6366F1] rounded-lg hover:bg-[#4F46E5]">병합 실행 (1명 → 1명)</button>
+                    <button onClick={applyMerge} className="px-4 py-2 text-sm text-white bg-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent-strong)]">병합 실행 (1명 → 1명)</button>
                 </div>
             </div>
         </div>
@@ -2229,11 +2229,11 @@ function ContactRow({
         <div data-initial={dataInitial} className="relative group">
             {/* 선택된 행 좌측 teal bar */}
             {isSelected && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6366F1]" />
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--pp-accent)]" />
             )}
             <div
                 className={`md:grid md:grid-cols-[40px_28px_1.5fr_1.2fr_1.5fr_1.2fr_80px] gap-3 px-4 py-2 items-center transition-colors cursor-pointer flex ${
-                    isSelected ? "bg-[#6366F1]/10" : "hover:bg-neutral-50"
+                    isSelected ? "bg-[var(--pp-accent)]/10" : "hover:bg-neutral-50"
                 }`}
                 onClick={() => anySelected ? onToggleSelect() : onEdit()}
             >
@@ -2244,8 +2244,8 @@ function ContactRow({
                         title={isSelected ? "선택 해제" : "선택"}
                     >
                         {isSelected
-                            ? <CheckSquare className="h-5 w-5 text-[#6366F1]" />
-                            : <Square className="h-5 w-5 text-neutral-300 hover:text-[#6366F1] transition-colors" />}
+                            ? <CheckSquare className="h-5 w-5 text-[var(--pp-accent)]" />
+                            : <Square className="h-5 w-5 text-neutral-300 hover:text-[var(--pp-accent)] transition-colors" />}
                     </button>
                 </div>
 
@@ -2266,7 +2266,7 @@ function ContactRow({
                 {/* 컬럼 3: 이름 + 아바타 */}
                 <div className="flex items-center gap-2.5 min-w-0 flex-1 md:flex-none">
                     <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
-                        c.is_favorite ? "bg-amber-100 text-amber-700" : "bg-[#6366F1]/10 text-[#6366F1]"
+                        c.is_favorite ? "bg-amber-100 text-amber-700" : "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)]"
                     }`}>
                         {c.name?.[0] || <User className="h-3.5 w-3.5" />}
                     </div>
@@ -2284,13 +2284,13 @@ function ContactRow({
                             <a
                                 href={`tel:${c.phone}`}
                                 onClick={(e) => { e.stopPropagation(); onRecordContact(); }}
-                                className="text-sm text-neutral-700 truncate font-mono hover:text-[#6366F1]"
+                                className="text-sm text-neutral-700 truncate font-mono hover:text-[var(--pp-accent)]"
                             >
                                 {phoneFmt}
                             </a>
                             <button
                                 onClick={(e) => { e.stopPropagation(); onCopy(phoneFmt, phoneCopyKey); }}
-                                className="opacity-0 group-hover/cell:opacity-100 transition-opacity p-0.5 text-neutral-400 hover:text-[#6366F1] shrink-0"
+                                className="opacity-0 group-hover/cell:opacity-100 transition-opacity p-0.5 text-neutral-400 hover:text-[var(--pp-accent)] shrink-0"
                                 title="복사"
                             >
                                 {copiedKey === phoneCopyKey ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
@@ -2306,13 +2306,13 @@ function ContactRow({
                             <a
                                 href={`mailto:${c.email}`}
                                 onClick={(e) => { e.stopPropagation(); onRecordContact(); }}
-                                className="text-sm text-neutral-700 truncate hover:text-[#6366F1]"
+                                className="text-sm text-neutral-700 truncate hover:text-[var(--pp-accent)]"
                             >
                                 {c.email}
                             </a>
                             <button
                                 onClick={(e) => { e.stopPropagation(); onCopy(c.email!, emailCopyKey); }}
-                                className="opacity-0 group-hover/cell:opacity-100 transition-opacity p-0.5 text-neutral-400 hover:text-[#6366F1] shrink-0"
+                                className="opacity-0 group-hover/cell:opacity-100 transition-opacity p-0.5 text-neutral-400 hover:text-[var(--pp-accent)] shrink-0"
                                 title="복사"
                             >
                                 {copiedKey === emailCopyKey ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
@@ -2333,7 +2333,7 @@ function ContactRow({
                         {c.labels && c.labels.length > 0 && (
                             <div className="flex gap-1 mt-0.5 flex-wrap">
                                 {c.labels.slice(0, 2).map(l => (
-                                    <span key={l} className="text-[9px] px-1.5 py-0 bg-[#6366F1]/10 text-[#6366F1] rounded-full">{l}</span>
+                                    <span key={l} className="text-[9px] px-1.5 py-0 bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] rounded-full">{l}</span>
                                 ))}
                                 {c.labels.length > 2 && <span className="text-[9px] text-neutral-400">+{c.labels.length - 2}</span>}
                             </div>
@@ -2345,7 +2345,7 @@ function ContactRow({
                 <div className="hidden md:flex items-center gap-1 justify-end shrink-0">
                     <button
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/10 rounded"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-neutral-400 hover:text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 rounded"
                         title="수정"
                     >
                         <Pencil className="h-3.5 w-3.5" />
@@ -2385,7 +2385,7 @@ function SidebarItem({
                 onClick={onClick}
                 className={`flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-r-full transition-colors text-left w-full ${
                     active
-                        ? "bg-[#6366F1]/15 text-[#6366F1] font-medium"
+                        ? "bg-[var(--pp-accent)]/15 text-[var(--pp-accent)] font-medium"
                         : "text-neutral-700 hover:bg-neutral-100"
                 }`}
             >
@@ -2403,7 +2403,7 @@ function SidebarItem({
                         <span className="text-neutral-400 text-base leading-none">⋯</span>
                     </span>
                 )}
-                <span className={`text-xs ${active ? "text-[#6366F1]" : "text-neutral-400"} ${hasMenu ? "ml-1" : ""}`}>{count.toLocaleString("ko-KR")}</span>
+                <span className={`text-xs ${active ? "text-[var(--pp-accent)]" : "text-neutral-400"} ${hasMenu ? "ml-1" : ""}`}>{count.toLocaleString("ko-KR")}</span>
             </button>
             {menuOpen && hasMenu && (
                 <>
@@ -2487,7 +2487,7 @@ function LabelApplyPopover({
                             }
                         }}
                         autoFocus
-                        className="w-full text-sm border border-neutral-300 rounded px-2 py-1 focus:outline-none focus:border-[#6366F1]"
+                        className="w-full text-sm border border-neutral-300 rounded px-2 py-1 focus:outline-none focus:border-[var(--pp-accent)]"
                     />
                 </div>
                 <div className="max-h-60 overflow-y-auto">
@@ -2506,7 +2506,7 @@ function LabelApplyPopover({
                             >
                                 <span className="shrink-0 w-4 flex items-center justify-center">
                                     {willHave
-                                        ? <CheckSquare className="h-4 w-4 text-[#6366F1]" />
+                                        ? <CheckSquare className="h-4 w-4 text-[var(--pp-accent)]" />
                                         : <Square className="h-4 w-4 text-neutral-300" />}
                                 </span>
                                 <span className="flex-1 truncate">{l}</span>
@@ -2526,7 +2526,7 @@ function LabelApplyPopover({
                     >취소</button>
                     <button
                         onClick={applyChanges}
-                        className="px-3 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#4F46E5]"
+                        className="px-3 py-1 text-xs bg-[var(--pp-accent)] text-white rounded hover:bg-[var(--pp-accent-strong)]"
                     >적용</button>
                 </div>
             </div>
@@ -2558,14 +2558,14 @@ function ExportMenu({
                 <div className="ml-7 mt-1 mb-1 flex flex-col bg-white border border-neutral-200 rounded-lg shadow-sm overflow-hidden">
                     <button
                         onClick={() => { onExport("vcard"); setOpen(false); }}
-                        className="px-3 py-2 text-xs text-left text-neutral-700 hover:bg-[#6366F1]/10 hover:text-[#6366F1] flex items-center gap-2"
+                        className="px-3 py-2 text-xs text-left text-neutral-700 hover:bg-[var(--pp-accent)]/10 hover:text-[var(--pp-accent)] flex items-center gap-2"
                     >
                         <span className="text-[10px] font-mono px-1.5 py-0.5 bg-neutral-100 rounded">vcf</span>
                         vCard <span className="text-neutral-400">(iOS·Google)</span>
                     </button>
                     <button
                         onClick={() => { onExport("csv"); setOpen(false); }}
-                        className="px-3 py-2 text-xs text-left text-neutral-700 hover:bg-[#6366F1]/10 hover:text-[#6366F1] flex items-center gap-2 border-t border-neutral-100"
+                        className="px-3 py-2 text-xs text-left text-neutral-700 hover:bg-[var(--pp-accent)]/10 hover:text-[var(--pp-accent)] flex items-center gap-2 border-t border-neutral-100"
                     >
                         <span className="text-[10px] font-mono px-1.5 py-0.5 bg-neutral-100 rounded">csv</span>
                         CSV <span className="text-neutral-400">(Excel·Sheets)</span>
@@ -2589,7 +2589,7 @@ function FilterPill({
             onClick={onClick}
             className={`shrink-0 px-3 py-1.5 text-xs rounded-full border transition-colors ${
                 active
-                    ? "bg-[#6366F1] text-white border-[#6366F1]"
+                    ? "bg-[var(--pp-accent)] text-white border-[var(--pp-accent)]"
                     : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
             }`}
         >
@@ -2705,7 +2705,7 @@ function ContactModal({ form, setForm, editing, saving, onSave, onClose }: {
                     <button
                         onClick={onSave}
                         disabled={saving || !form.name.trim()}
-                        className="px-4 py-2 text-sm text-white bg-[#6366F1] rounded-lg hover:bg-[#4F46E5] disabled:opacity-50 transition-colors"
+                        className="px-4 py-2 text-sm text-white bg-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 transition-colors"
                     >
                         {saving ? "저장 중…" : "저장"}
                     </button>
@@ -2715,7 +2715,7 @@ function ContactModal({ form, setForm, editing, saving, onSave, onClose }: {
     );
 }
 
-const INPUT = "w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]";
+const INPUT = "w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)]";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
@@ -2740,11 +2740,11 @@ function LabelInput({ value, onChange }: { value: string[]; onChange: (v: string
         onChange(value.filter(l => l !== label));
     }
     return (
-        <div className="flex flex-wrap gap-1.5 px-2 py-1.5 border border-neutral-300 rounded-lg focus-within:border-[#6366F1]">
+        <div className="flex flex-wrap gap-1.5 px-2 py-1.5 border border-neutral-300 rounded-lg focus-within:border-[var(--pp-accent)]">
             {value.map(l => (
-                <span key={l} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#6366F1]/10 text-[#6366F1] text-xs rounded-full">
+                <span key={l} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] text-xs rounded-full">
                     {l}
-                    <button type="button" onClick={() => remove(l)} className="text-[#6366F1]/70 hover:text-[#6366F1]">
+                    <button type="button" onClick={() => remove(l)} className="text-[var(--pp-accent)]/70 hover:text-[var(--pp-accent)]">
                         <X className="h-3 w-3" />
                     </button>
                 </span>

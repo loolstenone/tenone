@@ -63,7 +63,7 @@ export function CoverPicker({
                                     onClick={() => { onSelect(c); onClose(); }}
                                     className={`relative p-2 rounded-lg transition-all ${
                                         currentCoverId === c.key
-                                            ? "bg-[#6366F1]/10 ring-2 ring-[#6366F1]"
+                                            ? "bg-[var(--pp-accent)]/10 ring-2 ring-[var(--pp-accent)]"
                                             : "hover:bg-neutral-50"
                                     }`}
                                 >
@@ -72,7 +72,7 @@ export function CoverPicker({
                                     </div>
                                     <p className="text-[10px] text-neutral-600 text-center mt-2 truncate">{c.label}</p>
                                     {currentCoverId === c.key && (
-                                        <Check className="absolute top-1 right-1 h-4 w-4 text-[#6366F1]" />
+                                        <Check className="absolute top-1 right-1 h-4 w-4 text-[var(--pp-accent)]" />
                                     )}
                                 </button>
                             ))}

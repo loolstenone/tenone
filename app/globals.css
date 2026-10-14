@@ -12,6 +12,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* 플래너 화면 공용 강조색 — 기본 MyVerse 인디고. Planner's 앱 쉘(.planners-app)이 틸로 바꾼다 (2026-10-14) */
+  --pp-accent: #6366F1;
+  --pp-accent-strong: #4F46E5;
+}
+.planners-app {
+  --pp-accent: #0F766E;
+  --pp-accent-strong: #134E4A;
 }
 
 @theme inline {

@@ -142,7 +142,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
                     {!embed && (
-                        <Link href="/planners/app/canvas" className="text-sm text-[#6366F1] hover:underline">
+                        <Link href="/planners/app/canvas" className="text-sm text-[var(--pp-accent)] hover:underline">
                             목록으로
                         </Link>
                     )}
@@ -189,7 +189,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                         {saving || titleDirty ? (
                             <Loader2 className="h-3.5 w-3.5 text-neutral-400 animate-spin" />
                         ) : savedAt ? (
-                            <Check className="h-3.5 w-3.5 text-[#6366F1]" />
+                            <Check className="h-3.5 w-3.5 text-[var(--pp-accent)]" />
                         ) : null}
                     </div>
 

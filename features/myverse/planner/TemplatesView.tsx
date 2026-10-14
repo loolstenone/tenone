@@ -296,7 +296,7 @@ function renderMd(md: string): React.ReactNode {
                 const text = lines[i].slice(6);
                 items.push(
                     <li key={i} className="flex items-start gap-2 py-0.5">
-                        <span className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded border-2 flex items-center justify-center text-[9px] font-bold ${checked ? "bg-[#6366F1] border-[#6366F1] text-white" : "border-neutral-300"}`}>
+                        <span className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded border-2 flex items-center justify-center text-[9px] font-bold ${checked ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white" : "border-neutral-300"}`}>
                             {checked && ""}
                         </span>
                         <span className={`text-xs leading-snug ${checked ? "line-through text-neutral-400" : "text-neutral-700"}`}>{inlineRender(text)}</span>
@@ -623,7 +623,7 @@ export function TemplatesView() {
     const hasData = Object.values(tplData).some(v => v.trim());
 
     return (
-        <div className="max-w-6xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
                     <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -650,7 +650,7 @@ export function TemplatesView() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="이름·설명 검색"
-                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
+                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[var(--pp-accent)]"
                 />
             </div>
 
@@ -664,7 +664,7 @@ export function TemplatesView() {
                             onClick={() => setCat(tab.id)}
                             className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
-                                    ? "text-[#6366F1] font-semibold"
+                                    ? "text-[var(--pp-accent)] font-semibold"
                                     : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
@@ -673,7 +673,7 @@ export function TemplatesView() {
                                 <span className="ml-1 opacity-60 text-xs">({counts[tab.id]})</span>
                             )}
                             {isActive && (
-                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />
+                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[var(--pp-accent)]" />
                             )}
                         </button>
                     );
@@ -786,7 +786,7 @@ export function TemplatesView() {
                         <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
                             <div>
                                 <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                                    <Target className="h-4 w-4 text-[#6366F1]" />
+                                    <Target className="h-4 w-4 text-[var(--pp-accent)]" />
                                     프로젝트로 적용
                                 </h3>
                                 <p className="text-xs text-neutral-500 mt-1">
@@ -802,7 +802,7 @@ export function TemplatesView() {
                                             name="apply-mode"
                                             checked={applyMode === "milestones"}
                                             onChange={() => setApplyMode("milestones")}
-                                            className="accent-[#6366F1]"
+                                            className="accent-[var(--pp-accent)]"
                                         />
                                         <span>
                                             <strong className="block">마일스톤으로</strong>
@@ -815,7 +815,7 @@ export function TemplatesView() {
                                             name="apply-mode"
                                             checked={applyMode === "note"}
                                             onChange={() => setApplyMode("note")}
-                                            className="accent-[#6366F1]"
+                                            className="accent-[var(--pp-accent)]"
                                         />
                                         <span>
                                             <strong className="block">프로젝트 노트로</strong>
@@ -827,7 +827,7 @@ export function TemplatesView() {
 
                             {applyResult ? (
                                 <div className="text-center py-4">
-                                    <Check className="h-8 w-8 text-[#6366F1] mx-auto mb-2" />
+                                    <Check className="h-8 w-8 text-[var(--pp-accent)] mx-auto mb-2" />
                                     <p className="text-sm text-neutral-700">
                                         {applyResult.count > 0
                                             ? (applyMode === "note" ? "프로젝트 노트로 저장됨" : `마일스톤 ${applyResult.count}개 추가됨`)
@@ -841,7 +841,7 @@ export function TemplatesView() {
                                         <select
                                             value={applyTargetId}
                                             onChange={(e) => setApplyTargetId(e.target.value)}
-                                            className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                            className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         >
                                             <option value="">— 프로젝트 선택 —</option>
                                             {projects.map(p => (
@@ -858,7 +858,7 @@ export function TemplatesView() {
                                                     <li className="text-[11px] text-neutral-400 italic">## 헤딩 또는 - [ ] 체크박스가 없습니다. "프로젝트 노트로" 모드를 사용하세요.</li>
                                                 ) : candidates.map((c, i) => (
                                                     <li key={i} className="flex items-center gap-2 text-xs text-neutral-700">
-                                                        <span className="text-[#6366F1] shrink-0">◆</span>
+                                                        <span className="text-[var(--pp-accent)] shrink-0">◆</span>
                                                         <span className="flex-1 truncate">{c.title}</span>
                                                         {c.due_date && <span className="text-[10px] text-neutral-500 font-mono shrink-0">{c.due_date}</span>}
                                                     </li>
@@ -889,7 +889,7 @@ export function TemplatesView() {
                                     <button
                                         onClick={applyAsMilestones}
                                         disabled={applying || !applyTargetId || (applyMode === "milestones" && candidates.length === 0)}
-                                        className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50 flex items-center gap-1.5"
+                                        className="text-xs px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-md hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 flex items-center gap-1.5"
                                     >
                                         {applying && <Loader2 className="h-3 w-3 animate-spin" />}
                                         적용
@@ -961,12 +961,12 @@ export function TemplatesView() {
                         {/* 본문 */}
                         <div className="overflow-y-auto flex-1 px-6 py-5">
                             {usedVars.length > 0 && (
-                                <div className="mb-3 px-3 py-2 bg-[#6366F1]/[0.06] border border-[#6366F1]/15 rounded-md text-[11px] text-[#4338CA] flex items-start gap-2">
+                                <div className="mb-3 px-3 py-2 bg-[var(--pp-accent)]/[0.06] border border-[var(--pp-accent)]/15 rounded-md text-[11px] text-[#4338CA] flex items-start gap-2">
                                     <span className="font-mono shrink-0 mt-0.5">{`{{ }}`}</span>
                                     <span>
                                         다음 변수가 자동 채워졌습니다: {usedVars.map((v, i) => (
                                             <span key={v} className="font-mono">
-                                                {i > 0 && ", "}<span className="text-[#6366F1]">{v}</span>={varCtx[v] || "—"}
+                                                {i > 0 && ", "}<span className="text-[var(--pp-accent)]">{v}</span>={varCtx[v] || "—"}
                                             </span>
                                         ))}
                                     </span>
@@ -1017,7 +1017,7 @@ export function TemplatesView() {
                                             setApplyMode(extractMilestones(expandedBodyMd).length > 0 ? "milestones" : "note");
                                             setShowApplyModal(true);
                                         }}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[var(--pp-accent)]/30 text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/5 transition-colors"
                                         title="프로젝트에 마일스톤 또는 노트로 적용"
                                     >
                                         <Target className="h-3 w-3" />
@@ -1027,7 +1027,7 @@ export function TemplatesView() {
                                 <button
                                     onClick={visualizeAsMindmap}
                                     disabled={visualizing}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/5 transition-colors disabled:opacity-50"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[var(--pp-accent)]/30 text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/5 transition-colors disabled:opacity-50"
                                     title="템플릿 본문을 마인드맵 캔버스로 자동 변환 후 이동"
                                 >
                                     {visualizing ? <Loader2 className="h-3 w-3 animate-spin" /> : <GitBranch className="h-3 w-3" />}
@@ -1037,14 +1037,14 @@ export function TemplatesView() {
                                     onClick={promoteToTask}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
                                 >
-                                    {promoted ? <Check className="h-3 w-3 text-[#6366F1]" /> : <ArrowUpFromLine className="h-3 w-3" />}
+                                    {promoted ? <Check className="h-3 w-3 text-[var(--pp-accent)]" /> : <ArrowUpFromLine className="h-3 w-3" />}
                                     {promoted ? "승격됨" : "태스크로 승격"}
                                 </button>
                                 <button
                                     onClick={copyToClipboard}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
                                 >
-                                    {copied ? <Check className="h-3 w-3 text-[#6366F1]" /> : <Copy className="h-3 w-3" />}
+                                    {copied ? <Check className="h-3 w-3 text-[var(--pp-accent)]" /> : <Copy className="h-3 w-3" />}
                                     {copied ? "복사됨" : hasData ? "내용 복사" : "마크다운 복사"}
                                 </button>
                             </div>
@@ -1076,7 +1076,7 @@ function TemplateCard({
         .filter(Boolean);
 
     return (
-        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[#6366F1]/40 hover:shadow-sm transition-all cursor-pointer">
+        <div className="group relative bg-white border border-neutral-200 rounded-xl hover:border-[var(--pp-accent)]/40 hover:shadow-sm transition-all cursor-pointer">
             <button
                 onClick={onToggleFavorite}
                 className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all z-10 ${
@@ -1094,7 +1094,7 @@ function TemplateCard({
                     <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">{tpl.subcategory}</p>
                 )}
 
-                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[#6366F1] transition-colors pr-6">
+                <h4 className="font-semibold text-neutral-900 text-sm leading-snug mb-1.5 group-hover:text-[var(--pp-accent)] transition-colors pr-6">
                     {tpl.label}
                 </h4>
 

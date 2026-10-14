@@ -84,7 +84,7 @@ export function TimeCapsulesView() {
                 actions={
                     <button
                         onClick={() => setComposing(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white rounded-lg text-xs font-medium transition-colors"
                     >
                         <Plus className="h-3.5 w-3.5" />
                         새 캡슐
@@ -130,7 +130,7 @@ function Section({ title, subtitle, highlight, children }: { title: string; subt
     return (
         <section>
             <div className="flex items-baseline gap-2 mb-2">
-                <h2 className={`text-sm font-semibold ${highlight ? "text-[#6366F1]" : "text-neutral-700"}`}>{title}</h2>
+                <h2 className={`text-sm font-semibold ${highlight ? "text-[var(--pp-accent)]" : "text-neutral-700"}`}>{title}</h2>
                 {subtitle && <span className="text-xs text-neutral-400">{subtitle}</span>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>
@@ -143,7 +143,7 @@ function CapsuleCard({ c, onOpen, onChange }: { c: Capsule; onOpen: () => void; 
     const Icon = c.status === "ready" ? Unlock : c.status === "opened" ? Mail : Lock;
     const tone =
         c.status === "ready"
-            ? "border-[#6366F1] bg-[#6366F1]/5 hover:bg-[#6366F1]/10"
+            ? "border-[var(--pp-accent)] bg-[var(--pp-accent)]/5 hover:bg-[var(--pp-accent)]/10"
             : c.status === "opened"
                 ? "border-neutral-200 bg-white hover:bg-neutral-50"
                 : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100";
@@ -161,7 +161,7 @@ function CapsuleCard({ c, onOpen, onChange }: { c: Capsule; onOpen: () => void; 
             className={`group text-left rounded-xl border p-4 transition-colors ${tone}`}
         >
             <div className="flex items-start justify-between gap-2 mb-2">
-                <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${c.status === "ready" ? "text-[#6366F1]" : "text-neutral-400"}`} />
+                <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${c.status === "ready" ? "text-[var(--pp-accent)]" : "text-neutral-400"}`} />
                 <button
                     onClick={del}
                     className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-rose-500 p-0.5"
@@ -189,8 +189,8 @@ function CapsuleCard({ c, onOpen, onChange }: { c: Capsule; onOpen: () => void; 
 function EmptyState({ onCreate }: { onCreate: () => void }) {
     return (
         <div className="border border-dashed border-neutral-300 rounded-xl py-16 px-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-[#6366F1]/10 flex items-center justify-center mx-auto mb-3">
-                <Mail className="h-5 w-5 text-[#6366F1]" />
+            <div className="h-12 w-12 rounded-full bg-[var(--pp-accent)]/10 flex items-center justify-center mx-auto mb-3">
+                <Mail className="h-5 w-5 text-[var(--pp-accent)]" />
             </div>
             <h3 className="text-base font-medium text-neutral-800 mb-1">아직 보낸 캡슐이 없어요</h3>
             <p className="text-sm text-neutral-500 mb-5 max-w-md mx-auto">
@@ -199,7 +199,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
             </p>
             <button
                 onClick={onCreate}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white rounded-lg text-sm font-medium transition-colors"
             >
                 <Plus className="h-4 w-4" />
                 첫 캡슐 보내기
@@ -252,7 +252,7 @@ function ComposeModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                             onChange={e => setTitle(e.target.value)}
                             placeholder="예: 30살의 나에게"
                             maxLength={200}
-                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-400"
+                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] placeholder:text-neutral-400"
                         />
                     </div>
                     <div>
@@ -264,7 +264,7 @@ function ComposeModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                                     onClick={() => setOpenAt(dateAfter(p.days))}
                                     className={`px-2.5 py-1 text-[11px] rounded-full border transition-colors ${
                                         openAt === dateAfter(p.days)
-                                            ? "bg-[#6366F1] border-[#6366F1] text-white"
+                                            ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                                             : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300"
                                     }`}
                                 >
@@ -277,7 +277,7 @@ function ComposeModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                             value={openAt}
                             min={dateAfter(1)}
                             onChange={e => setOpenAt(e.target.value)}
-                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#6366F1]"
+                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)]"
                         />
                         <p className="text-[11px] text-neutral-500 mt-1">
                             {fmt(openAt)} · {daysUntil(openAt)}일 후
@@ -291,7 +291,7 @@ function ComposeModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                             placeholder="지금의 나에 대해, 미래의 나에게 들려주고 싶은 이야기…"
                             rows={10}
                             maxLength={5000}
-                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-400 resize-y"
+                            className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] placeholder:text-neutral-400 resize-y"
                         />
                         <p className="text-[10px] text-neutral-400 mt-1 text-right">{message.length} / 5000</p>
                     </div>
@@ -303,7 +303,7 @@ function ComposeModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                     <button
                         onClick={save}
                         disabled={!title.trim() || !message.trim() || saving}
-                        className="px-4 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-medium rounded-lg disabled:opacity-40 inline-flex items-center gap-1.5"
+                        className="px-4 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white text-sm font-medium rounded-lg disabled:opacity-40 inline-flex items-center gap-1.5"
                     >
                         {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                         잠금 저장
@@ -385,7 +385,7 @@ function CapsuleDetailModal({ id, onClose, onChanged }: { id: string; onClose: (
                                 {fmt(data.created_at)} → {fmt(data.open_at)}
                                 {data.opened_at && ` · ${fmt(data.opened_at)} 열람`}
                             </div>
-                            <div className="text-sm text-neutral-800 whitespace-pre-wrap leading-relaxed bg-[#6366F1]/[0.03] border border-[#6366F1]/15 rounded-lg p-4">
+                            <div className="text-sm text-neutral-800 whitespace-pre-wrap leading-relaxed bg-[var(--pp-accent)]/[0.03] border border-[var(--pp-accent)]/15 rounded-lg p-4">
                                 {data.message}
                             </div>
                             {data.status === "ready" && !data.opened_at && (
@@ -399,7 +399,7 @@ function CapsuleDetailModal({ id, onClose, onChanged }: { id: string; onClose: (
                                         rows={3}
                                         placeholder="그때의 나에게 답장…"
                                         maxLength={1000}
-                                        className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-400 resize-none"
+                                        className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] placeholder:text-neutral-400 resize-none"
                                     />
                                 </div>
                             )}
@@ -417,7 +417,7 @@ function CapsuleDetailModal({ id, onClose, onChanged }: { id: string; onClose: (
                         <button
                             onClick={openCapsule}
                             disabled={opening}
-                            className="px-4 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-medium rounded-lg inline-flex items-center gap-1.5 disabled:opacity-40"
+                            className="px-4 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white text-sm font-medium rounded-lg inline-flex items-center gap-1.5 disabled:opacity-40"
                         >
                             {opening ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unlock className="h-3.5 w-3.5" />}
                             영구 열림으로 표시

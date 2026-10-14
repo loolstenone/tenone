@@ -180,7 +180,7 @@ export function VoiceRecordButton({ onTranscribed, className, label = "녹음" }
                     </span>
                     <button
                         onClick={() => stop(true)}
-                        className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#6366F1] text-white hover:bg-[#4F46E5] transition-colors"
+                        className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--pp-accent)] text-white hover:bg-[var(--pp-accent-strong)] transition-colors"
                     >
                         완료
                     </button>

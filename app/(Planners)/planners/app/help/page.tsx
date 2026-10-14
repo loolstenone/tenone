@@ -255,7 +255,7 @@ export default function HelpPage() {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <header className="mb-8 md:mb-12">
                 <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="h-6 w-6 text-[#6366F1] myverse-dark:text-[#A5B4FC]" />
+                    <BookOpen className="h-6 w-6 text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100">
                         사용 가이드
                     </h1>
@@ -280,8 +280,8 @@ export default function HelpPage() {
                                         href={`#${s.id}`}
                                         className={`flex items-center gap-2 text-xs py-1.5 px-2 -mx-2 rounded transition-colors ${
                                             active
-                                                ? "text-[#6366F1] myverse-dark:text-[#A5B4FC] font-medium bg-[#6366F1]/5"
-                                                : "text-neutral-500 myverse-dark:text-neutral-400 hover:text-[#6366F1]"
+                                                ? "text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC] font-medium bg-[var(--pp-accent)]/5"
+                                                : "text-neutral-500 myverse-dark:text-neutral-400 hover:text-[var(--pp-accent)]"
                                         }`}
                                     >
                                         <s.icon className="h-3 w-3 shrink-0" />
@@ -301,7 +301,7 @@ export default function HelpPage() {
                             className="scroll-mt-24 bg-white myverse-dark:bg-white/[0.03] border border-neutral-200 myverse-dark:border-white/8 rounded-xl px-5 py-6 md:px-7 md:py-7"
                         >
                             <div className="flex items-start gap-3 mb-3">
-                                <span className="shrink-0 mt-1 text-[#6366F1] myverse-dark:text-[#A5B4FC]">
+                                <span className="shrink-0 mt-1 text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC]">
                                     <s.icon className="h-5 w-5" />
                                 </span>
                                 <div className="min-w-0">
@@ -319,7 +319,7 @@ export default function HelpPage() {
                                     {s.steps.map((step, i) => (
                                         <li key={i} className="text-sm">
                                             <div className="flex items-start gap-2">
-                                                <ChevronRight className="h-3.5 w-3.5 text-[#6366F1] myverse-dark:text-[#A5B4FC] mt-1 shrink-0" />
+                                                <ChevronRight className="h-3.5 w-3.5 text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC] mt-1 shrink-0" />
                                                 <div className="min-w-0">
                                                     <span className="font-medium text-neutral-800 myverse-dark:text-neutral-200">{step.label}</span>
                                                     {step.detail && (
@@ -341,17 +341,17 @@ export default function HelpPage() {
                             )}
 
                             {s.tip && (
-                                <div className="mt-5 ml-8 px-3 py-2.5 bg-[#6366F1]/5 border-l-2 border-[#6366F1]/40 rounded-r text-xs text-neutral-700 myverse-dark:text-neutral-300 leading-relaxed">
-                                    <span className="font-medium text-[#6366F1] myverse-dark:text-[#A5B4FC] mr-1.5">팁</span>
+                                <div className="mt-5 ml-8 px-3 py-2.5 bg-[var(--pp-accent)]/5 border-l-2 border-[var(--pp-accent)]/40 rounded-r text-xs text-neutral-700 myverse-dark:text-neutral-300 leading-relaxed">
+                                    <span className="font-medium text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC] mr-1.5">팁</span>
                                     {s.tip}
                                 </div>
                             )}
                         </section>
                     ))}
 
-                    <section className="bg-[#6366F1]/5 border border-[#6366F1]/20 rounded-xl px-5 py-6 md:px-7 md:py-7">
+                    <section className="bg-[var(--pp-accent)]/5 border border-[var(--pp-accent)]/20 rounded-xl px-5 py-6 md:px-7 md:py-7">
                         <div className="flex items-start gap-3">
-                            <Mail className="h-5 w-5 text-[#6366F1] myverse-dark:text-[#A5B4FC] mt-0.5 shrink-0" />
+                            <Mail className="h-5 w-5 text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC] mt-0.5 shrink-0" />
                             <div>
                                 <h2 className="font-serif text-lg text-neutral-900 myverse-dark:text-neutral-100">
                                     더 궁금한 것이 있다면
@@ -362,7 +362,7 @@ export default function HelpPage() {
                                 </p>
                                 <a
                                     href="mailto:lools@tenone.biz"
-                                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-[#6366F1] myverse-dark:text-[#A5B4FC] hover:underline font-medium"
+                                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC] hover:underline font-medium"
                                 >
                                     <Mail className="h-3.5 w-3.5" />
                                     lools@tenone.biz

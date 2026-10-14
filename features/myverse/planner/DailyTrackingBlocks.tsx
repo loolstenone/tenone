@@ -10,7 +10,7 @@ export interface ExerciseBlockProps {
 }
 
 export function ExerciseBlock({ type, minutes, distance, note, onChange, onSave }: ExerciseBlockProps) {
-    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]";
+    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]";
     return (
         <div>
             <p className="text-xs font-semibold text-neutral-700 mb-2">운동 <span className="text-[10px] text-neutral-400 ml-1 font-normal">종류·시간·거리</span></p>
@@ -31,7 +31,7 @@ export interface HealthBlockProps {
 }
 
 export function HealthBlock({ sys, dia, sugar, weight, temp, note, onChange, onSave }: HealthBlockProps) {
-    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1]";
+    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]";
     const onlyNum = (v: string, dec = false) => v.replace(dec ? /[^0-9.]/g : /[^0-9]/g, "");
     return (
         <div>
@@ -121,7 +121,7 @@ export function TrackingRowWithNote(p: TrackingRowWithNoteProps) {
                 onChange={(e) => p.onNoteChange(e.target.value)}
                 onBlur={p.onNoteBlur}
                 placeholder={p.placeholder}
-                className="w-full mt-1.5 text-xs border border-neutral-200 rounded px-2 py-1 placeholder:text-neutral-300 placeholder:italic focus:outline-none focus:border-[#6366F1]"
+                className="w-full mt-1.5 text-xs border border-neutral-200 rounded px-2 py-1 placeholder:text-neutral-300 placeholder:italic focus:outline-none focus:border-[var(--pp-accent)]"
             />
         </div>
     );

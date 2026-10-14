@@ -29,8 +29,8 @@ const MODE_LABELS: Record<FocusMode, string> = {
 
 const MODE_COLORS: Record<FocusMode, { bg: string; ring: string; text: string; btn: string }> = {
     work: {
-        bg:   "from-[#4F46E5] to-[#6366F1]",
-        ring: "ring-[#6366F1]/40",
+        bg:   "from-[var(--pp-accent-strong)] to-[var(--pp-accent)]",
+        ring: "ring-[var(--pp-accent)]/40",
         text: "text-indigo-100",
         btn:  "bg-white/20 hover:bg-white/30",
     },

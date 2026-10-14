@@ -23,6 +23,9 @@ export const dynamic = "force-dynamic";
 
 const ONBOARDING = "/planners/app/onboarding";
 
+// 공용 플래너 화면(features/myverse/planner)의 강조색을 Planner's 틸로 — 모달·팝업(포털)까지 닿도록 :root에서 바꾼다 (app/globals.css --pp-accent)
+const ACCENT_STYLE = ":root{--pp-accent:#0F766E;--pp-accent-strong:#134E4A}";
+
 export default async function PlannersAppLayout({ children }: { children: React.ReactNode }) {
     const pathname = (await headers()).get("x-pathname") || "";
     const isOnboarding = pathname === ONBOARDING || pathname.startsWith(`${ONBOARDING}/`);
@@ -36,7 +39,7 @@ export default async function PlannersAppLayout({ children }: { children: React.
                 return <ClientRedirect to="/planners/app/daily" />;
             }
         }
-        return <>{children}</>;
+        return <><style>{ACCENT_STYLE}</style>{children}</>;
     }
 
     if (state.kind === "no_session") {
@@ -66,8 +69,9 @@ export default async function PlannersAppLayout({ children }: { children: React.
             />
             {/* 다크모드·사이드바 접힘 깜빡임 방지 — 저장 키는 MyVerse와 공유 */}
             <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('myverse_theme_mode')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('myverse-dark');var c=localStorage.getItem('myverse_sidebar_collapsed')==='true';if(c)document.documentElement.classList.add('myverse-sidebar-collapsed');}catch(e){}})()` }} />
+            <style>{ACCENT_STYLE}</style>
             <MyverseThemeProvider />
-            <div className="myverse-app-shell flex min-h-screen flex-col bg-neutral-50 myverse-dark:bg-[#08080E]">
+            <div className="planners-app myverse-app-shell flex min-h-screen flex-col bg-neutral-50 myverse-dark:bg-[#08080E]">
                 <PlannersAppTopBar />
                 <SidebarCollapseProvider>
                     <div className="flex min-h-0 flex-1 pt-12">

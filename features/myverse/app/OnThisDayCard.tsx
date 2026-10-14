@@ -67,11 +67,11 @@ export function OnThisDayCard({ date, onMomentClick }: Props) {
     const dateLabel = new Date(active.date + "T00:00:00").toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
     return (
-        <section className="mb-6 bg-gradient-to-br from-[#6366F1]/[0.04] via-white to-[#6366F1]/[0.04] border border-[#6366F1]/15 rounded-xl p-4 sm:p-5">
+        <section className="mb-6 bg-gradient-to-br from-[var(--pp-accent)]/[0.04] via-white to-[var(--pp-accent)]/[0.04] border border-[var(--pp-accent)]/15 rounded-xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-[#6366F1]/10 flex items-center justify-center shrink-0">
-                        <Sparkles className="h-3.5 w-3.5 text-[#6366F1]" />
+                    <div className="h-7 w-7 rounded-full bg-[var(--pp-accent)]/10 flex items-center justify-center shrink-0">
+                        <Sparkles className="h-3.5 w-3.5 text-[var(--pp-accent)]" />
                     </div>
                     <div>
                         <div className="text-sm font-semibold text-neutral-900">{yearLabel}</div>
@@ -109,7 +109,7 @@ export function OnThisDayCard({ date, onMomentClick }: Props) {
                         <button
                             key={m.id}
                             onClick={() => onMomentClick?.(m.id)}
-                            className="group relative shrink-0 w-24 sm:w-28 aspect-square rounded-lg overflow-hidden bg-neutral-100 hover:ring-2 hover:ring-[#6366F1] transition-all"
+                            className="group relative shrink-0 w-24 sm:w-28 aspect-square rounded-lg overflow-hidden bg-neutral-100 hover:ring-2 hover:ring-[var(--pp-accent)] transition-all"
                         >
                             {m.media_type === "image" ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */

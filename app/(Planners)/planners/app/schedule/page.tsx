@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, Calendar, Plus, X, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { DomainBackLink } from "@/features/myverse/app/DomainBackLink";
 import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 interface CalEvent {
@@ -93,15 +92,14 @@ export default function SchedulePage() {
     const upcoming = events.filter(e => e.date >= today).slice(0, 10);
 
     return (
-        <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            <header className="px-5 sm:px-10 pt-8 pb-4 border-b border-neutral-200 bg-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+            <header className="pb-4 border-b border-neutral-200">
                 <LaneHeader
                     icon="event"
                     label="SCHEDULE"
                     title="일정"
                     subtitle="캘린더 약속·기념일"
                     accent="#0F766E"
-                    backLink={<DomainBackLink domain="schedule" />}
                     actions={
                         <button onClick={() => { setSelectedDate(today); setAddOpen(true); }}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-teal-600 text-white hover:bg-teal-700 rounded-lg">

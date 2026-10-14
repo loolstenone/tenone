@@ -1,5 +1,5 @@
 // Planner's 플래너'스 AI 앱 메뉴 SSOT — MyVerse에서 옮겨 온 핵심 화면만 (app/(Planners)/CLAUDE.md '이전 계획' 4단계)
-// 개인 OS 화면(캡처·흔적·일기·피드·이력서 등)은 MyVerse(동결)에 남는다 — 여기에 넣지 않는다
+// 개인 OS 화면(캡처·흔적·일기·피드·이력서·시간 기록(9 도메인) 등)은 MyVerse(동결)에 남는다 — 여기에 넣지 않는다
 export const APP_BASE = "/planners/app";
 
 export interface AppNavItem { key: string; label: string; icon: string; href: string }
@@ -21,7 +21,6 @@ export const PLANNERS_APP_NAV: AppNavGroup[] = [
         items: [
             { key: "projects", label: "프로젝트", icon: "folder_managed", href: `${APP_BASE}/projects` },
             { key: "tasks", label: "할 일", icon: "checklist", href: `${APP_BASE}/tasks` },
-            { key: "time", label: "시간 기록", icon: "timer", href: `${APP_BASE}/time` },
         ],
     },
     {

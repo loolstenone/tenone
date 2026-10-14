@@ -35,7 +35,7 @@ export function CalendarEntryList({ entries, view, from, to, onAdd, onEdit, labe
                 {onAdd && (
                     <button
                         onClick={onAdd}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#6366F1] hover:bg-[#6366F1]/10"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10"
                     >
                         <Plus className="h-3 w-3" /> 추가
                     </button>

@@ -74,10 +74,10 @@ export function PageHeader({
                         <ChevronLeft className="h-5 w-5" />
                     </button>
                 )}
-                {icon && <span className="text-[#6366F1] myverse-dark:text-[#5EEAD4] shrink-0 inline-flex items-center">{icon}</span>}
+                {icon && <span className="text-[var(--pp-accent)] myverse-dark:text-[#5EEAD4] shrink-0 inline-flex items-center">{icon}</span>}
                 <h1
                     className={`font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100 whitespace-nowrap ${
-                        state ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
+                        state ? "underline decoration-[var(--pp-accent)] decoration-2 underline-offset-[6px]" : ""
                     }`}
                     title={state ? STATE_LABEL[state] : undefined}
                 >

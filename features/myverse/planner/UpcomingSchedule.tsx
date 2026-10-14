@@ -112,7 +112,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
                             {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
                         </span>
                         <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
-                        {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[#6366F1]/10 text-[#6366F1]">MS</span>}
+                        {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[var(--pp-accent)]/10 text-[var(--pp-accent)]">MS</span>}
                         <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">{dStr}</span>
                     </a>
                 </li>
@@ -154,7 +154,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
                     {offset !== 0 && (
                         <button
                             onClick={() => setOffset(0)}
-                            className="text-[9px] text-neutral-400 hover:text-[#6366F1] transition-colors mt-0.5"
+                            className="text-[9px] text-neutral-400 hover:text-[var(--pp-accent)] transition-colors mt-0.5"
                         >
                             오늘로 ↺
                         </button>

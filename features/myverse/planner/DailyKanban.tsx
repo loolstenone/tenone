@@ -17,7 +17,7 @@ type ColKey = "planned" | "doing" | "done";
 const COLS: Array<{ key: ColKey; label: string; bar: string; chip: string }> = [
     { key: "planned", label: "계획", bar: "bg-neutral-400",  chip: "bg-neutral-200 text-neutral-700 myverse-dark:bg-white/10 myverse-dark:text-neutral-200" },
     { key: "doing",   label: "진행", bar: "bg-amber-400",     chip: "bg-amber-100 text-amber-800 myverse-dark:bg-amber-500/20 myverse-dark:text-amber-300" },
-    { key: "done",    label: "완료", bar: "bg-[#6366F1]",     chip: "bg-[#6366F1]/15 text-[#6366F1] myverse-dark:bg-[#6366F1]/25 myverse-dark:text-[#A5B4FC]" },
+    { key: "done",    label: "완료", bar: "bg-[var(--pp-accent)]",     chip: "bg-[var(--pp-accent)]/15 text-[var(--pp-accent)] myverse-dark:bg-[var(--pp-accent)]/25 myverse-dark:text-[#A5B4FC]" },
 ];
 
 // 상태 → 컬럼 매핑 (단일 진실):
@@ -117,10 +117,10 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                 onClick={() => onChangeStatus(t.id, cycle[t.status] ?? "todo")}
                 className={`shrink-0 ${cls} rounded-sm border mt-0.5 flex items-center justify-center font-bold ${
                     t.status === "done"
-                        ? "bg-[#6366F1] border-[#6366F1] text-white"
+                        ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                         : t.status === "doing"
                         ? "bg-amber-400 border-amber-400 text-white"
-                        : "border-neutral-400 myverse-dark:border-white/30 hover:border-[#6366F1]"
+                        : "border-neutral-400 myverse-dark:border-white/30 hover:border-[var(--pp-accent)]"
                 }`}
                 title="클릭: 상태 순환 (계획→진행→완료)"
             >
@@ -144,7 +144,7 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                     isMilestone
                         ? "border-violet-300 myverse-dark:border-violet-500/40"
                         : "border-neutral-200 myverse-dark:border-white/10"
-                } hover:border-[#6366F1]/40 ${dragId === t.id ? "opacity-40" : ""}`}
+                } hover:border-[var(--pp-accent)]/40 ${dragId === t.id ? "opacity-40" : ""}`}
             >
                 {project && (
                     <div
@@ -233,7 +233,7 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                 }}
                 className={`flex-1 min-w-0 flex flex-col rounded-lg border transition-colors ${
                     isDragOver
-                        ? "border-[#6366F1] bg-[#6366F1]/5"
+                        ? "border-[var(--pp-accent)] bg-[var(--pp-accent)]/5"
                         : "border-neutral-200 bg-neutral-50/60 myverse-dark:border-white/10 myverse-dark:bg-white/[0.02]"
                 }`}
             >
@@ -254,7 +254,7 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                                     className="w-full flex items-center gap-1.5 text-left px-1.5 py-1 rounded hover:bg-white myverse-dark:hover:bg-white/5 transition-colors"
                                     title="미팅 편집"
                                 >
-                                    <span className="text-[10px] font-mono font-semibold text-[#6366F1] myverse-dark:text-[#A5B4FC]">{meta.time}</span>
+                                    <span className="text-[10px] font-mono font-semibold text-[var(--pp-accent)] myverse-dark:text-[#A5B4FC]">{meta.time}</span>
                                     {meta.location && (
                                         <span className="flex items-center gap-0.5 text-[10px] text-neutral-500 myverse-dark:text-neutral-400">
                                             <MapPin className="h-2.5 w-2.5" />{meta.location}
@@ -263,7 +263,7 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                                     <span className="text-[10px] text-neutral-600 myverse-dark:text-neutral-300 truncate flex-1">{meta.title}</span>
                                 </button>
                                 {items.length > 0 ? (
-                                    <div className="space-y-1 pl-2 border-l-2 border-[#6366F1]/30 myverse-dark:border-[#A5B4FC]/30">
+                                    <div className="space-y-1 pl-2 border-l-2 border-[var(--pp-accent)]/30 myverse-dark:border-[#A5B4FC]/30">
                                         {items.map(renderParentCard)}
                                     </div>
                                 ) : col === "planned" ? (
@@ -302,7 +302,7 @@ export function DailyKanban({ tasks, meetings, projects = [], onChangeStatus, on
                     <button
                         type="button"
                         onClick={onAddTask}
-                        className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 hover:text-[#6366F1] myverse-dark:hover:text-[#A5B4FC] py-1.5 border-t border-dashed border-neutral-200 myverse-dark:border-white/10"
+                        className="text-[10px] text-neutral-500 myverse-dark:text-neutral-400 hover:text-[var(--pp-accent)] myverse-dark:hover:text-[#A5B4FC] py-1.5 border-t border-dashed border-neutral-200 myverse-dark:border-white/10"
                     >
                         + 빠른 업무 추가
                     </button>

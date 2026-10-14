@@ -127,7 +127,7 @@ export default function ImportsPage() {
         <SettingsLayout>
         <div>
             <header className="px-6 pt-6 pb-3 border-b border-neutral-200 bg-white">
-                <div className="flex items-center gap-2 mb-1 text-[10px] uppercase tracking-widest text-[#6366F1]">
+                <div className="flex items-center gap-2 mb-1 text-[10px] uppercase tracking-widest text-[var(--pp-accent)]">
                     <Archive className="h-3 w-3" /> Imports
                 </div>
                 <h1 className="text-2xl font-serif text-neutral-900">백업 가져오기</h1>
@@ -145,7 +145,7 @@ export default function ImportsPage() {
                     return (
                         <div key={t.key} className="bg-white border border-neutral-200 rounded-lg p-4">
                             <div className="flex items-start gap-3 mb-3">
-                                <Icon className="h-5 w-5 text-[#6366F1] shrink-0 mt-0.5" />
+                                <Icon className="h-5 w-5 text-[var(--pp-accent)] shrink-0 mt-0.5" />
                                 <div className="flex-1">
                                     <h3 className="text-sm font-semibold text-neutral-900">{t.label}</h3>
                                     <p className="text-xs text-neutral-500 mt-0.5">{t.description}</p>

@@ -116,7 +116,7 @@ export function GoogleCalendarIntegration() {
                         <button
                             onClick={sync}
                             disabled={syncing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-medium rounded-lg disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white text-xs font-medium rounded-lg disabled:opacity-50"
                         >
                             {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                             지금 동기화
@@ -134,7 +134,7 @@ export function GoogleCalendarIntegration() {
             ) : (
                 <a
                     href="/api/myverse/integrations/google/connect"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white myverse-dark:bg-white/5 border border-neutral-300 myverse-dark:border-white/10 hover:border-[#6366F1] hover:text-[#6366F1] text-neutral-700 myverse-dark:text-neutral-300 text-xs font-medium rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white myverse-dark:bg-white/5 border border-neutral-300 myverse-dark:border-white/10 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] text-neutral-700 myverse-dark:text-neutral-300 text-xs font-medium rounded-lg transition-colors"
                 >
                     Google 계정으로 연결
                 </a>

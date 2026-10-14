@@ -22,7 +22,7 @@ const ROUTE_KEYS: Record<string, string> = {
 const SHORTCUTS_LIST = [
     { keys: ["⌘K", "Ctrl+K"], desc: "명령 팔레트 열기" },
     { keys: ["?"], desc: "이 단축키 치트시트" },
-    { keys: ["/"], desc: "빠른 기록 (흔적 작성)" },
+    { keys: ["/"], desc: "빠른 기록 (오늘에 추가)" },
     { keys: ["I"], desc: "인덱스로 이동" },
     { keys: ["T"], desc: "일간으로 이동" },
     { keys: ["W"], desc: "주간으로 이동" },
@@ -70,10 +70,10 @@ export function KeyboardShortcuts() {
                 return;
             }
 
-            // / — 빠른 기록(Traces 작성 모드 직행) — 노션 슬래시 명령 패턴
+            // / — 빠른 기록: 오늘 화면의 작성 창 (Planner's 앱 밖 MyVerse 흔적으로 보내지 않는다, 2026-10-14)
             if (e.key === "/") {
                 e.preventDefault();
-                router.push("/myverse/app/traces?compose=1");
+                router.push("/planners/app/daily?compose=1");
                 return;
             }
 
@@ -118,7 +118,7 @@ export function KeyboardShortcuts() {
                     >
                         <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
                             <div className="flex items-center gap-2">
-                                <Keyboard className="h-4 w-4 text-[#6366F1]" />
+                                <Keyboard className="h-4 w-4 text-[var(--pp-accent)]" />
                                 <h2 className="font-serif text-lg text-neutral-900">단축키</h2>
                             </div>
                             <button

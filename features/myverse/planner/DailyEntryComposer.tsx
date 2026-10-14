@@ -516,14 +516,14 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                 <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#6366F1] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
                 >
                     <Camera className="h-3.5 w-3.5" /> 사진
                 </button>
                 <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[#6366F1] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] hover:bg-white myverse-dark:hover:bg-[#252525] rounded transition-colors"
                 >
                     <Video className="h-3.5 w-3.5" /> 동영상
                 </button>
@@ -559,7 +559,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                                 key={b.id}
                                 type="button"
                                 onClick={() => setPlaceName(b.name)}
-                                className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-600 myverse-dark:text-neutral-300 hover:bg-[#6366F1]/10 hover:text-[#6366F1] transition-colors"
+                                className="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-600 myverse-dark:text-neutral-300 hover:bg-[var(--pp-accent)]/10 hover:text-[var(--pp-accent)] transition-colors"
                             >
                                 {b.name}
                             </button>
@@ -576,7 +576,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     step={1800}
-                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
+                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[var(--pp-accent)]"
                 />
                 <span className="text-[10px] text-neutral-300">~</span>
                 <input
@@ -584,7 +584,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     step={1800}
-                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[#6366F1]"
+                    className="text-xs bg-white myverse-dark:bg-[#111] border border-neutral-200 myverse-dark:border-[#2A2A2A] rounded px-2 py-0.5 text-neutral-700 myverse-dark:text-neutral-200 focus:outline-none focus:border-[var(--pp-accent)]"
                 />
             </div>
 
@@ -597,7 +597,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                         onClick={() => setCategory(c.key)}
                         className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
                             category === c.key
-                                ? "bg-[#6366F1] text-white"
+                                ? "bg-[var(--pp-accent)] text-white"
                                 : "bg-neutral-200 myverse-dark:bg-[#2A2A2A] text-neutral-500 hover:bg-neutral-300"
                         }`}
                     >
@@ -972,7 +972,7 @@ export function DailyEntryComposer({ date, onClose, onSaved, initialImage }: Pro
                     type="button"
                     onClick={save}
                     disabled={saving}
-                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[var(--pp-accent)] text-white rounded hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 transition-colors"
                 >
                     {saving && <Loader2 className="h-3 w-3 animate-spin" />}
                     {saving ? "등록 중…" : "등록"}

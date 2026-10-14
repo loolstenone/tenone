@@ -118,7 +118,7 @@ export function SocialFeedView() {
                     href="/myverse/app/dm"
                     title="메시지"
                     aria-label="메시지"
-                    className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100 hover:text-[#6366F1] transition-colors mt-1"
+                    className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100 hover:text-[var(--pp-accent)] transition-colors mt-1"
                 >
                     <Send className="h-5 w-5" />
                 </Link>
@@ -130,7 +130,7 @@ export function SocialFeedView() {
                     onClick={() => setMode("following")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                         mode === "following"
-                            ? "border-[#6366F1] text-[#6366F1]"
+                            ? "border-[var(--pp-accent)] text-[var(--pp-accent)]"
                             : "border-transparent text-neutral-500 hover:text-neutral-700"
                     }`}
                 >
@@ -140,7 +140,7 @@ export function SocialFeedView() {
                     onClick={() => setMode("discover")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                         mode === "discover"
-                            ? "border-[#6366F1] text-[#6366F1]"
+                            ? "border-[var(--pp-accent)] text-[var(--pp-accent)]"
                             : "border-transparent text-neutral-500 hover:text-neutral-700"
                     }`}
                 >
@@ -149,7 +149,7 @@ export function SocialFeedView() {
                 <button
                     onClick={() => load(true)}
                     title="새로고침"
-                    className="ml-auto px-3 text-neutral-400 hover:text-[#6366F1]"
+                    className="ml-auto px-3 text-neutral-400 hover:text-[var(--pp-accent)]"
                 >
                     <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
                 </button>
@@ -167,9 +167,9 @@ export function SocialFeedView() {
                             <Link
                                 key={u.id}
                                 href={`/myverse/v/${u.handle}`}
-                                className="shrink-0 w-32 bg-white border border-neutral-200 rounded-xl p-3 hover:border-[#6366F1] transition-colors"
+                                className="shrink-0 w-32 bg-white border border-neutral-200 rounded-xl p-3 hover:border-[var(--pp-accent)] transition-colors"
                             >
-                                <div className="h-12 w-12 rounded-full mx-auto mb-2 overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center">
+                                <div className="h-12 w-12 rounded-full mx-auto mb-2 overflow-hidden bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] flex items-center justify-center">
                                     {u.avatar_url ? (
                                         /* eslint-disable-next-line @next/next/no-img-element */
                                         <img src={u.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -179,7 +179,7 @@ export function SocialFeedView() {
                                 </div>
                                 <div className="text-xs font-medium text-neutral-900 text-center truncate">{u.name}</div>
                                 <div className="text-[10px] text-neutral-500 text-center truncate">@{u.handle}</div>
-                                <div className="text-[10px] text-[#6366F1] text-center mt-1">공개 흔적 {u.public_count}</div>
+                                <div className="text-[10px] text-[var(--pp-accent)] text-center mt-1">공개 흔적 {u.public_count}</div>
                             </Link>
                         ))}
                     </div>
@@ -210,7 +210,7 @@ export function SocialFeedView() {
                     <button
                         onClick={() => load(false)}
                         disabled={loading}
-                        className="px-4 py-2 bg-white border border-neutral-200 hover:border-[#6366F1] hover:text-[#6366F1] text-neutral-700 text-xs rounded-lg disabled:opacity-50 inline-flex items-center gap-1.5"
+                        className="px-4 py-2 bg-white border border-neutral-200 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] text-neutral-700 text-xs rounded-lg disabled:opacity-50 inline-flex items-center gap-1.5"
                     >
                         {loading && <Loader2 className="h-3 w-3 animate-spin" />}
                         더 보기
@@ -224,8 +224,8 @@ export function SocialFeedView() {
 function EmptyFeed({ mode, onSwitch }: { mode: Mode; onSwitch: () => void }) {
     return (
         <div className="border border-dashed border-neutral-300 rounded-xl py-14 px-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-[#6366F1]/10 flex items-center justify-center mx-auto mb-3">
-                <Compass className="h-5 w-5 text-[#6366F1]" />
+            <div className="h-12 w-12 rounded-full bg-[var(--pp-accent)]/10 flex items-center justify-center mx-auto mb-3">
+                <Compass className="h-5 w-5 text-[var(--pp-accent)]" />
             </div>
             {mode === "following" ? (
                 <>
@@ -235,7 +235,7 @@ function EmptyFeed({ mode, onSwitch }: { mode: Mode; onSwitch: () => void }) {
                     </p>
                     <button
                         onClick={onSwitch}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-xs font-medium"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white rounded-lg text-xs font-medium"
                     >
                         <Compass className="h-3.5 w-3.5" />
                         탐색 둘러보기
@@ -283,7 +283,7 @@ function FeedItemCard({ item, meId, commentsOpen, onToggleComments, onChange, on
         <article className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
             {/* 헤더 */}
             <div className="flex items-center gap-2 p-3">
-                <Link href={`/myverse/v/${member?.handle}`} className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shrink-0">
+                <Link href={`/myverse/v/${member?.handle}`} className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] flex items-center justify-center shrink-0">
                     {member?.avatar_url ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={member.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -334,7 +334,7 @@ function FeedItemCard({ item, meId, commentsOpen, onToggleComments, onChange, on
                     </button>
                     <button
                         onClick={onToggleComments}
-                        className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-[#6366F1] transition-colors"
+                        className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-[var(--pp-accent)] transition-colors"
                     >
                         <MessageCircle className="h-5 w-5" />
                         {item.comments_count > 0 && <span className="text-xs tabular-nums">{item.comments_count}</span>}
@@ -441,12 +441,12 @@ function CommentsSection({ momentId, onChange }: { momentId: string; onChange: (
                     onKeyDown={e => { if (e.key === "Enter") post(); }}
                     placeholder="댓글 달기…"
                     maxLength={500}
-                    className="flex-1 text-xs bg-neutral-50 border border-neutral-200 rounded-full px-3 py-1.5 focus:outline-none focus:border-[#6366F1] placeholder:text-neutral-400"
+                    className="flex-1 text-xs bg-neutral-50 border border-neutral-200 rounded-full px-3 py-1.5 focus:outline-none focus:border-[var(--pp-accent)] placeholder:text-neutral-400"
                 />
                 <button
                     onClick={post}
                     disabled={!text.trim() || posting}
-                    className="text-xs font-medium text-[#6366F1] disabled:opacity-30"
+                    className="text-xs font-medium text-[var(--pp-accent)] disabled:opacity-30"
                 >
                     게시
                 </button>

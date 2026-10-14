@@ -313,7 +313,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 <button
                     onClick={addBlankNote}
                     disabled={saving}
-                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] transition-colors disabled:opacity-50"
                 >
                     <Plus className="h-3.5 w-3.5" /> 기본 노트
                 </button>
@@ -337,7 +337,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                     }}
                     disabled={saving}
                     title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
-                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#6366F1] hover:text-[#6366F1] transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] transition-colors disabled:opacity-50"
                 >
                     <Pencil className="h-3.5 w-3.5" /> 손글씨
                 </button>
@@ -475,7 +475,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">
-                                <LayoutTemplate className="h-4 w-4 text-[#6366F1]" />
+                                <LayoutTemplate className="h-4 w-4 text-[var(--pp-accent)]" />
                                 <span className="font-semibold text-sm text-neutral-900">템플릿에서 삽입</span>
                             </div>
                             <button onClick={() => setPicker(false)} className="text-xs text-neutral-400 hover:text-neutral-700 transition-colors">닫기</button>
@@ -534,11 +534,11 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                             <div key={tpl.id} className="flex items-stretch gap-0">
                                                 <button
                                                     onClick={() => insertFromTemplate(tpl)}
-                                                    className="flex-1 text-left flex items-start gap-3 p-3 rounded-l-xl border border-r-0 border-neutral-200 hover:border-[#6366F1] hover:bg-[#6366F1]/5 transition-colors group"
+                                                    className="flex-1 text-left flex items-start gap-3 p-3 rounded-l-xl border border-r-0 border-neutral-200 hover:border-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/5 transition-colors group"
                                                 >
                                                     <div className={`w-1 self-stretch rounded-full shrink-0 ${barColor}`} />
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-neutral-900 group-hover:text-[#6366F1] transition-colors">
+                                                        <p className="text-sm font-medium text-neutral-900 group-hover:text-[var(--pp-accent)] transition-colors">
                                                             {tpl.label}
                                                         </p>
                                                         {tpl.description && (
@@ -550,7 +550,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <Plus className="h-4 w-4 text-neutral-300 group-hover:text-[#6366F1] shrink-0 mt-0.5 transition-colors" />
+                                                    <Plus className="h-4 w-4 text-neutral-300 group-hover:text-[var(--pp-accent)] shrink-0 mt-0.5 transition-colors" />
                                                 </button>
                                                 <button
                                                     onClick={() => toggleFav(tpl.id)}
@@ -656,7 +656,7 @@ function NoteCard({
 
     return (
         <section
-            className="group/card bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#6366F1] hover:shadow-sm transition-all cursor-pointer"
+            className="group/card bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[var(--pp-accent)] hover:shadow-sm transition-all cursor-pointer"
             onClick={onExpand}
         >
             {/* ── 프리뷰 영역 (4:3 비율) ── */}
@@ -685,7 +685,7 @@ function NoteCard({
                             <div className="space-y-1">
                                 {cornellData.rows.slice(0, 6).map((r) => (
                                     <div key={r.id} className="flex gap-1.5">
-                                        {r.cue && <span className="text-[#6366F1] font-medium shrink-0 w-14 truncate">{r.cue}</span>}
+                                        {r.cue && <span className="text-[var(--pp-accent)] font-medium shrink-0 w-14 truncate">{r.cue}</span>}
                                         <span className="text-neutral-600 line-clamp-1">{r.note}</span>
                                     </div>
                                 ))}
@@ -931,7 +931,7 @@ function NoteExpandModal({
             <div className="pp-view bg-white rounded-xl w-full h-full flex flex-col shadow-2xl">
                 {/* Header */}
                 <div className="px-6 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-3">
-                    {isTpl && <LayoutTemplate className="h-4 w-4 text-[#6366F1] shrink-0" />}
+                    {isTpl && <LayoutTemplate className="h-4 w-4 text-[var(--pp-accent)] shrink-0" />}
                     {isCanvas && <ImageIcon className="h-4 w-4 text-sky-500 shrink-0" />}
                     {(() => {
                         const isAutoTitle = !title || /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(title) || title === tplInfo?.label;
@@ -950,7 +950,7 @@ function NoteExpandModal({
                                     className={`w-full text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
                                         isAutoTitle
                                             ? "italic font-light text-neutral-400"
-                                            : isTpl ? "font-semibold text-[#6366F1]" : isCanvas ? "font-semibold text-sky-700" : "font-semibold text-neutral-900"
+                                            : isTpl ? "font-semibold text-[var(--pp-accent)]" : isCanvas ? "font-semibold text-sky-700" : "font-semibold text-neutral-900"
                                     }`}
                                 />
                             </div>
@@ -981,7 +981,7 @@ function NoteExpandModal({
                     </button>
                     <button
                         onClick={handleClose}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-lg text-sm hover:bg-[var(--pp-accent-strong)] transition-colors"
                     >
                         저장 후 닫기
                     </button>
@@ -1009,7 +1009,7 @@ function NoteExpandModal({
                                         <ChevronRight className="h-3.5 w-3.5" />
                                     </button>
                                 </div>
-                                <button onClick={addHandPage} className="flex items-center gap-1 text-xs text-[#6366F1] hover:text-[#4F46E5] transition-colors">
+                                <button onClick={addHandPage} className="flex items-center gap-1 text-xs text-[var(--pp-accent)] hover:text-[var(--pp-accent-strong)] transition-colors">
                                     <Plus className="h-3 w-3" /> 새 페이지
                                 </button>
                             </div>
@@ -1036,7 +1036,7 @@ function NoteExpandModal({
                                     <ChevronRight className="h-3.5 w-3.5" />
                                 </button>
                             </div>
-                            <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#6366F1] hover:text-[#4F46E5] transition-colors">
+                            <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[var(--pp-accent)] hover:text-[var(--pp-accent-strong)] transition-colors">
                                 <Plus className="h-3 w-3" /> 새 페이지
                             </button>
                         </div>

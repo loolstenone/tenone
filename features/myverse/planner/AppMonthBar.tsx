@@ -50,9 +50,9 @@ function MonthBarInner() {
                         onClick={() => handleClick(month)}
                         className={`text-[10px] font-medium w-8 h-7 rounded transition-colors ${
                             isActive
-                                ? "bg-[#6366F1] text-white"
+                                ? "bg-[var(--pp-accent)] text-white"
                                 : isNow
-                                    ? "text-[#6366F1] font-semibold hover:bg-[#6366F1]/10"
+                                    ? "text-[var(--pp-accent)] font-semibold hover:bg-[var(--pp-accent)]/10"
                                     : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50"
                         }`}
                     >

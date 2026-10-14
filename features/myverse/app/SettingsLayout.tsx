@@ -95,11 +95,11 @@ export function SettingsLayout({ children }: Props) {
                                 key={g.key}
                                 onClick={() => jumpTo(g)}
                                 className={`relative shrink-0 px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
-                                    active ? "text-[#6366F1] font-semibold" : "text-neutral-500 hover:text-neutral-900"
+                                    active ? "text-[var(--pp-accent)] font-semibold" : "text-neutral-500 hover:text-neutral-900"
                                 }`}
                             >
                                 {g.label}
-                                {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />}
+                                {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[var(--pp-accent)]" />}
                             </button>
                         );
                     })}

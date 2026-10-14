@@ -524,7 +524,7 @@ export function MindmapEditor({
                     type="button"
                     onClick={() => setApplyModal({ open: true, projectId: "", loading: false })}
                     disabled={doc.root.children.length === 0}
-                    className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[#6366F1]/10 text-[#6366F1] disabled:opacity-40"
+                    className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] disabled:opacity-40"
                     title="1단계 자식 노드를 선택한 프로젝트의 마일스톤으로 일괄 변환"
                 >
                     <Target className="h-3 w-3" /> 프로젝트로
@@ -587,7 +587,7 @@ export function MindmapEditor({
                             <button
                                 type="button"
                                 onClick={() => resetNodePosition(selectedId)}
-                                className="text-[10px] text-[#6366F1] hover:bg-[#6366F1]/10 ml-1 px-1.5 py-0.5 rounded border border-[#6366F1]/30"
+                                className="text-[10px] text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 ml-1 px-1.5 py-0.5 rounded border border-[var(--pp-accent)]/30"
                                 title="자동 레이아웃으로 위치 복귀"
                             >
                                 위치 리셋
@@ -627,7 +627,7 @@ export function MindmapEditor({
                         <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
-                                    <Target className="h-4 w-4 text-[#6366F1]" />
+                                    <Target className="h-4 w-4 text-[var(--pp-accent)]" />
                                     프로젝트로 적용
                                 </h3>
                                 <button type="button" onClick={() => setApplyModal(null)} className="text-neutral-400 hover:text-neutral-700">
@@ -641,7 +641,7 @@ export function MindmapEditor({
 
                             {applyModal.result ? (
                                 <div className="text-center py-3">
-                                    <Check className="h-7 w-7 text-[#6366F1] mx-auto mb-1" />
+                                    <Check className="h-7 w-7 text-[var(--pp-accent)] mx-auto mb-1" />
                                     <p className="text-sm text-neutral-700">
                                         {applyModal.result.count > 0 ? `마일스톤 ${applyModal.result.count}개 추가됨` : "변환 실패"}
                                     </p>
@@ -654,7 +654,7 @@ export function MindmapEditor({
                                             value={applyModal.projectId}
                                             onChange={(e) => setApplyModal({ ...applyModal, projectId: e.target.value })}
                                             disabled={applyModal.loading}
-                                            className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                            className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         >
                                             <option value="">— 프로젝트 선택 —</option>
                                             {projects.map(p => (
@@ -668,7 +668,7 @@ export function MindmapEditor({
                                         ) : milestones.map((m, i) => (
                                             <div key={m.id} className="text-xs">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-[#6366F1] shrink-0">◆</span>
+                                                    <span className="text-[var(--pp-accent)] shrink-0">◆</span>
                                                     <span className="font-medium text-neutral-700">{i + 1}. {m.text}</span>
                                                 </div>
                                                 {m.children.length > 0 && (
@@ -699,7 +699,7 @@ export function MindmapEditor({
                                         type="button"
                                         onClick={applyToProject}
                                         disabled={applyModal.loading || !applyModal.projectId || milestones.length === 0}
-                                        className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50 flex items-center gap-1.5"
+                                        className="text-xs px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-md hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 flex items-center gap-1.5"
                                     >
                                         {applyModal.loading && <Loader2 className="h-3 w-3 animate-spin" />}
                                         적용
@@ -717,7 +717,7 @@ export function MindmapEditor({
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
-                                <FileInput className="h-4 w-4 text-[#6366F1]" />
+                                <FileInput className="h-4 w-4 text-[var(--pp-accent)]" />
                                 텍스트에서 마인드맵 import
                             </h3>
                             <button type="button" onClick={() => setImportModal(null)} className="text-neutral-400 hover:text-neutral-700">
@@ -731,7 +731,7 @@ export function MindmapEditor({
                             value={importModal.text}
                             onChange={(e) => setImportModal({ ...importModal, text: e.target.value, error: undefined })}
                             placeholder={`예: 마크다운\n# 마이버스 OS\n## 채집\n### 사진\n### GPS\n## 분류\n\n또는 들여쓰기\n마이버스 OS\n  채집\n    사진\n    GPS\n  분류`}
-                            className="w-full h-44 text-xs font-mono border border-neutral-200 rounded-md px-2 py-2 focus:outline-none focus:border-[#6366F1] resize-none"
+                            className="w-full h-44 text-xs font-mono border border-neutral-200 rounded-md px-2 py-2 focus:outline-none focus:border-[var(--pp-accent)] resize-none"
                         />
                         {importModal.error && (
                             <p className="text-[11px] text-rose-600">{importModal.error}</p>
@@ -743,7 +743,7 @@ export function MindmapEditor({
                                     name="import-mode"
                                     checked={importModal.mode === "append"}
                                     onChange={() => setImportModal({ ...importModal, mode: "append" })}
-                                    className="accent-[#6366F1]"
+                                    className="accent-[var(--pp-accent)]"
                                 />
                                 현재 root에 추가
                             </label>
@@ -753,7 +753,7 @@ export function MindmapEditor({
                                     name="import-mode"
                                     checked={importModal.mode === "replace"}
                                     onChange={() => setImportModal({ ...importModal, mode: "replace" })}
-                                    className="accent-[#6366F1]"
+                                    className="accent-[var(--pp-accent)]"
                                 />
                                 전체 교체
                             </label>
@@ -769,7 +769,7 @@ export function MindmapEditor({
                                 type="button"
                                 onClick={doImport}
                                 disabled={!importModal.text.trim()}
-                                className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50"
+                                className="text-xs px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-md hover:bg-[var(--pp-accent-strong)] disabled:opacity-50"
                             >
                                 import
                             </button>

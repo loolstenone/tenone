@@ -73,7 +73,7 @@ export function VersePublicView({ data }: { data: VerseData }) {
         <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
             {/* 프로필 헤더 */}
             <header className="flex flex-col sm:flex-row items-start sm:items-end gap-5 mb-8">
-                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#4F46E5] shrink-0 flex items-center justify-center">
+                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden bg-gradient-to-br from-[var(--pp-accent)] to-[var(--pp-accent-strong)] shrink-0 flex items-center justify-center">
                     {member.avatar_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover" />
@@ -82,7 +82,7 @@ export function VersePublicView({ data }: { data: VerseData }) {
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#6366F1] mb-1">
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[var(--pp-accent)] mb-1">
                         <Sparkles className="h-3 w-3" />
                         VERSE
                     </div>
@@ -102,7 +102,7 @@ export function VersePublicView({ data }: { data: VerseData }) {
                     <FollowButton handle={member.handle} />
                     <button
                         onClick={share}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-700 hover:text-[#6366F1] rounded-lg text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200 hover:border-[var(--pp-accent)] text-neutral-700 hover:text-[var(--pp-accent)] rounded-lg text-xs font-medium transition-colors"
                     >
                         <Share2 className="h-3.5 w-3.5" />
                         공유
@@ -168,7 +168,7 @@ export function VersePublicView({ data }: { data: VerseData }) {
             <footer className="mt-12 pt-6 border-t border-neutral-100 text-center">
                 <Link
                     href="/myverse"
-                    className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[var(--pp-accent)] transition-colors"
                 >
                     <Sparkles className="h-3 w-3" />
                     Powered by Myverse — 디지털 속 나를 키운다

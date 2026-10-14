@@ -30,17 +30,17 @@ export function ThisWeekCard({ date }: { date: string }) {
     const hasContent = weekly?.vrief_what || weekly?.vrief_why || weekly?.vrief_how;
 
     return (
-        <section className="bg-gradient-to-br from-[#6366F1]/5 to-[#6366F1]/10 border border-[#6366F1]/20 rounded-xl p-5">
+        <section className="bg-gradient-to-br from-[var(--pp-accent)]/5 to-[var(--pp-accent)]/10 border border-[var(--pp-accent)]/20 rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <CalendarDays className="h-3.5 w-3.5 text-[#6366F1]" />
-                    <h2 className="text-xs uppercase tracking-widest text-[#6366F1] font-semibold">
+                    <CalendarDays className="h-3.5 w-3.5 text-[var(--pp-accent)]" />
+                    <h2 className="text-xs uppercase tracking-widest text-[var(--pp-accent)] font-semibold">
                         W{String(week).padStart(2, "0")} Vrief
                     </h2>
                 </div>
                 <Link
                     href={`/planners/app/weekly?year=${year}&week=${week}`}
-                    className="text-[10px] text-[#6366F1] hover:underline inline-flex items-center gap-0.5"
+                    className="text-[10px] text-[var(--pp-accent)] hover:underline inline-flex items-center gap-0.5"
                 >
                     열기 <ArrowRight className="h-3 w-3" />
                 </Link>
@@ -72,10 +72,10 @@ export function ThisWeekCard({ date }: { date: string }) {
             ) : (
                 <Link
                     href={`/planners/app/weekly?year=${year}&week=${week}`}
-                    className="block text-xs text-neutral-600 leading-relaxed hover:text-[#6366F1] transition-colors"
+                    className="block text-xs text-neutral-600 leading-relaxed hover:text-[var(--pp-accent)] transition-colors"
                 >
                     이번 주의 핵심을 아직 쓰지 않았어요.<br />
-                    <span className="text-[#6366F1] font-medium">Weekly로 가서 What·Why·How 채우기 →</span>
+                    <span className="text-[var(--pp-accent)] font-medium">Weekly로 가서 What·Why·How 채우기 →</span>
                 </Link>
             )}
         </section>

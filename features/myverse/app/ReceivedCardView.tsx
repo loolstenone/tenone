@@ -39,10 +39,10 @@ export function ReceivedCardView({ member }: { member: Member }) {
             {/* 상단 브랜드 — 받는 사람이 Myverse를 인지 */}
             <div className="max-w-xl mx-auto mb-6 flex items-center justify-between">
                 <Link href="/myverse" className="flex items-center gap-2 group">
-                    <div className="h-7 w-7 rounded-md bg-gradient-to-br from-[#6366F1] to-[#A855F7] flex items-center justify-center text-white text-xs font-bold">
+                    <div className="h-7 w-7 rounded-md bg-gradient-to-br from-[var(--pp-accent)] to-[#A855F7] flex items-center justify-center text-white text-xs font-bold">
                         M
                     </div>
-                    <span className="text-sm font-semibold text-neutral-900 tracking-tight group-hover:text-[#6366F1] transition-colors">
+                    <span className="text-sm font-semibold text-neutral-900 tracking-tight group-hover:text-[var(--pp-accent)] transition-colors">
                         myverse
                     </span>
                 </Link>
@@ -70,7 +70,7 @@ export function ReceivedCardView({ member }: { member: Member }) {
             <div className="max-w-xl mx-auto mt-8 text-center">
                 <Link
                     href="/myverse"
-                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] transition-colors"
                 >
                     Powered by <span className="font-semibold">Myverse</span> — 나를 운영하는 OS
                 </Link>

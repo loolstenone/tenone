@@ -330,8 +330,8 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                         <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                                 {guide.formFactor === "mobile"
-                                    ? <Smartphone className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />
-                                    : <Monitor className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />}
+                                    ? <Smartphone className="h-3.5 w-3.5 text-[var(--pp-accent)] shrink-0" />
+                                    : <Monitor className="h-3.5 w-3.5 text-[var(--pp-accent)] shrink-0" />}
                                 <div className="min-w-0">
                                     <p className="text-[10px] uppercase tracking-wider text-neutral-400">
                                         {overrideId ? "수동 선택" : "자동 감지된 환경"}
@@ -343,7 +343,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                             </div>
                             <button
                                 onClick={() => setShowPicker(p => !p)}
-                                className="shrink-0 flex items-center gap-1 text-[10px] text-neutral-500 myverse-dark:text-neutral-400 hover:text-[#6366F1] transition-colors px-2 py-1 rounded border border-neutral-200 myverse-dark:border-white/8"
+                                className="shrink-0 flex items-center gap-1 text-[10px] text-neutral-500 myverse-dark:text-neutral-400 hover:text-[var(--pp-accent)] transition-colors px-2 py-1 rounded border border-neutral-200 myverse-dark:border-white/8"
                             >
                                 다른 브라우저인가요?
                                 <ChevronDown className={`h-3 w-3 transition-transform ${showPicker ? "rotate-180" : ""}`} />
@@ -359,7 +359,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                                             onClick={() => { setOverrideId(b.id); setShowPicker(false); }}
                                             className={`text-left text-[11px] px-2 py-1.5 rounded transition-colors ${
                                                 selected
-                                                    ? "bg-[#6366F1]/10 text-[#6366F1] font-medium"
+                                                    ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] font-medium"
                                                     : "text-neutral-600 myverse-dark:text-neutral-300 hover:bg-neutral-50 myverse-dark:hover:bg-white/[0.04]"
                                             }`}
                                         >
@@ -370,7 +370,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                                 {overrideId && (
                                     <button
                                         onClick={() => { setOverrideId(null); setShowPicker(false); }}
-                                        className="col-span-2 text-[10px] text-neutral-400 hover:text-[#6366F1] py-1"
+                                        className="col-span-2 text-[10px] text-neutral-400 hover:text-[var(--pp-accent)] py-1"
                                     >
                                         ↺ 자동 감지로 되돌리기
                                     </button>
@@ -380,9 +380,9 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     </div>
 
                     {/* 자동 감지 안내 */}
-                    <div className="flex items-start gap-2 px-3 py-2 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-lg">
-                        <Info className="h-3.5 w-3.5 text-[#6366F1] mt-0.5 shrink-0" />
-                        <p className="text-[11px] text-[#6366F1] leading-relaxed">
+                    <div className="flex items-start gap-2 px-3 py-2 bg-[var(--pp-accent)]/10 border border-[var(--pp-accent)]/20 rounded-lg">
+                        <Info className="h-3.5 w-3.5 text-[var(--pp-accent)] mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-[var(--pp-accent)] leading-relaxed">
                             아래 단계대로 권한을 허용하면 <strong>이 창이 자동으로 닫힙니다</strong>. 별도 새로고침 없이 즉시 인식됩니다.
                         </p>
                     </div>
@@ -400,7 +400,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                                     className="shrink-0 p-1.5 rounded hover:bg-neutral-100 myverse-dark:hover:bg-white/[0.06] text-neutral-500 transition-colors"
                                     title="주소 복사"
                                 >
-                                    {copied ? <Check className="h-3.5 w-3.5 text-[#6366F1]" /> : <Copy className="h-3.5 w-3.5" />}
+                                    {copied ? <Check className="h-3.5 w-3.5 text-[var(--pp-accent)]" /> : <Copy className="h-3.5 w-3.5" />}
                                 </button>
                             </div>
                             <p className="text-[10px] text-neutral-400 mt-1.5 flex items-center gap-1">
@@ -414,7 +414,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     <ol className="space-y-2.5">
                         {guide.steps.map((step, i) => (
                             <li key={i} className="flex gap-3">
-                                <span className="shrink-0 w-5 h-5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[11px] font-semibold flex items-center justify-center mt-0.5">
+                                <span className="shrink-0 w-5 h-5 rounded-full bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] text-[11px] font-semibold flex items-center justify-center mt-0.5">
                                     {i + 1}
                                 </span>
                                 <span className="text-xs text-neutral-700 myverse-dark:text-neutral-300 leading-relaxed">{step}</span>
@@ -426,7 +426,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     {currentState && (
                         <div className="text-[10px] text-neutral-400 text-center pt-2">
                             현재 상태: <span className={`font-medium ${
-                                currentState === "granted" ? "text-[#6366F1]"
+                                currentState === "granted" ? "text-[var(--pp-accent)]"
                                 : currentState === "denied" ? "text-rose-500"
                                 : "text-amber-500"
                             }`}>
@@ -450,7 +450,7 @@ export function PermissionGuideModal({ open, onClose, onRetry, permission, onGra
                     <button
                         onClick={handleRetry}
                         disabled={retrying}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[var(--pp-accent)] text-white rounded-lg text-sm hover:bg-[var(--pp-accent-strong)] transition-colors disabled:opacity-60"
                     >
                         {retrying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                         지금 다시 시도

@@ -1554,7 +1554,7 @@ export default function CanvasEditor({ initialDoc, onSave, onPromoteText, classN
                 const barY = (selGeo.bbox.y - viewport.y) * zoom - 44;
                 const barX = ((selGeo.bbox.x + selGeo.bbox.width / 2) - viewport.x) * zoom;
                 const btn  = "flex items-center justify-center w-7 h-7 rounded transition-colors text-xs font-medium";
-                const on   = "bg-[#6366F1] text-white";
+                const on   = "bg-[var(--pp-accent)] text-white";
                 const off  = "text-neutral-300 hover:bg-white/10";
                 const sep  = <div className="w-px h-5 bg-white/15 mx-0.5" />;
                 return (

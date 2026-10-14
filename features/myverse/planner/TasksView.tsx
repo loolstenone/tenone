@@ -14,7 +14,7 @@ type SortKey = "time_asc" | "time_desc" | "alpha";
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode; color: string }[] = [
     { key: "todo",      label: "미완",  icon: <Clock className="h-3.5 w-3.5" />,        color: "text-neutral-600" },
-    { key: "done",      label: "완료",  icon: <CheckSquare className="h-3.5 w-3.5" />,  color: "text-[#6366F1]" },
+    { key: "done",      label: "완료",  icon: <CheckSquare className="h-3.5 w-3.5" />,  color: "text-[var(--pp-accent)]" },
     { key: "carried",   label: "이월",  icon: <ArrowRight className="h-3.5 w-3.5" />,   color: "text-blue-500" },
     { key: "cancelled", label: "취소",  icon: <X className="h-3.5 w-3.5" />,            color: "text-neutral-400" },
 ];
@@ -75,7 +75,7 @@ export function TasksView() {
     const byDate = groupByDate(current).map(([date, tasks]) => [date, sortTasks(tasks)] as [string, TaskWithDate[]]);
 
     return (
-        <div className="max-w-2xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Stitch 디자인 정렬 (세션 122) */}
             <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2" style={{ color: "#6366F1" }}>
@@ -106,18 +106,18 @@ export function TasksView() {
                             onClick={() => setActiveTab(tab.key)}
                             className={`relative flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap transition-colors ${
                                 active
-                                    ? "text-[#6366F1] font-semibold"
+                                    ? "text-[var(--pp-accent)] font-semibold"
                                     : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
-                            <span className={active ? "text-[#6366F1]" : tab.color}>{tab.icon}</span>
+                            <span className={active ? "text-[var(--pp-accent)]" : tab.color}>{tab.icon}</span>
                             {tab.label}
                             <span className={`text-xs px-1.5 py-0.5 rounded-full font-mono ${
-                                active ? "bg-[#6366F1]/10 text-[#6366F1]" : "bg-neutral-100 text-neutral-400"
+                                active ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)]" : "bg-neutral-100 text-neutral-400"
                             }`}>
                                 {count}
                             </span>
-                            {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />}
+                            {active && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[var(--pp-accent)]" />}
                         </button>
                     );
                 })}
@@ -166,7 +166,7 @@ export function TasksView() {
                             <div className="flex items-center gap-2 mb-2">
                                 <Link
                                     href={`/planners/app/daily?date=${date}`}
-                                    className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors group"
+                                    className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] transition-colors group"
                                 >
                                     <span className="font-mono">{formatDate(date)}</span>
                                     <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -177,7 +177,7 @@ export function TasksView() {
                                 {tasks.map((task) => (
                                     <li key={task.id} className="flex items-start gap-2.5">
                                         <span className={`text-xs font-mono mt-0.5 shrink-0 w-4 text-center ${
-                                            task.status === "done" ? "text-[#6366F1]" :
+                                            task.status === "done" ? "text-[var(--pp-accent)]" :
                                             task.status === "carried" ? "text-blue-400" :
                                             task.status === "cancelled" ? "text-neutral-300" :
                                             "text-neutral-400"

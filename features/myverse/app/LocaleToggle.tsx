@@ -13,7 +13,7 @@ export function LocaleToggle({ compact = false }: { compact?: boolean }) {
             <button
                 onClick={() => setLocale(locale === "ko" ? "en" : "ko")}
                 title="언어 / Language"
-                className="p-1.5 rounded text-neutral-400 hover:text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors inline-flex items-center gap-1"
+                className="p-1.5 rounded text-neutral-400 hover:text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 transition-colors inline-flex items-center gap-1"
             >
                 <Languages className="h-4 w-4" />
                 <span className="text-[10px] font-medium uppercase">{locale}</span>

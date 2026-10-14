@@ -24,7 +24,7 @@ function SectionCard({ icon: Icon, title, hint, children }: {
     return (
         <div>
             <div className="flex items-center gap-2 mb-2 px-1">
-                <Icon className="h-3.5 w-3.5 text-[#6366F1]" />
+                <Icon className="h-3.5 w-3.5 text-[var(--pp-accent)]" />
                 <h2 className="text-xs tracking-widest text-neutral-500 font-semibold">{title}</h2>
                 {hint && <span className="text-[10px] text-neutral-300 ml-1">{hint}</span>}
             </div>
@@ -40,7 +40,7 @@ const STATUS_LABEL: Record<string, string> = {
     archived: "보관",
 };
 const STATUS_TONE: Record<string, string> = {
-    active: "bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20",
+    active: "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] border border-[var(--pp-accent)]/20",
     paused: "bg-amber-50 text-amber-700 border border-amber-200",
     completed: "bg-slate-100 text-slate-700 border border-slate-200",
     archived: "bg-neutral-100 text-neutral-500 border border-neutral-200",
@@ -205,7 +205,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                         onClick={() => setActiveTab(key)}
                         className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                             activeTab === key
-                                ? "border-[#6366F1] text-[#6366F1]"
+                                ? "border-[var(--pp-accent)] text-[var(--pp-accent)]"
                                 : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-200"
                         }`}
                     >
@@ -340,7 +340,7 @@ function CoverTab({ project, save, userRole }: { project: PlannerProject; save: 
                 )}
                 <button
                     onClick={() => setPickerOpen(true)}
-                    className="mt-4 w-full px-4 py-2 bg-white border border-neutral-300 text-neutral-700 rounded-lg text-sm hover:border-[#6366F1] hover:text-[#6366F1] transition-colors"
+                    className="mt-4 w-full px-4 py-2 bg-white border border-neutral-300 text-neutral-700 rounded-lg text-sm hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] transition-colors"
                 >
                     커버 디자인 변경
                 </button>
@@ -447,7 +447,7 @@ function CoverTab({ project, save, userRole }: { project: PlannerProject; save: 
                                     }}
                                     className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                                         active
-                                            ? "bg-[#6366F1] text-white border-[#6366F1]"
+                                            ? "bg-[var(--pp-accent)] text-white border-[var(--pp-accent)]"
                                             : "bg-white border-neutral-200 text-neutral-500 hover:bg-neutral-50"
                                     }`}
                                 >
@@ -511,7 +511,7 @@ function ShareField({ project }: { project: PlannerProject }) {
                     <button
                         onClick={makePublic}
                         disabled={busy}
-                        className="px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] disabled:opacity-50 shrink-0"
+                        className="px-3 py-1.5 text-xs bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 shrink-0"
                     >
                         공개로 전환
                     </button>
@@ -523,7 +523,7 @@ function ShareField({ project }: { project: PlannerProject }) {
                             value={url}
                             readOnly
                             onFocus={(e) => e.currentTarget.select()}
-                            className="flex-1 text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#6366F1] font-mono"
+                            className="flex-1 text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)] font-mono"
                         />
                         <button
                             onClick={copyUrl}
@@ -623,11 +623,11 @@ function CollaboratorField({ project, save }: { project: PlannerProject; save: (
                         onChange={(e) => setNewEmail(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") add(); }}
                         placeholder="email@example.com"
-                        className="flex-1 text-xs border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-[#6366F1]"
+                        className="flex-1 text-xs border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-[var(--pp-accent)]"
                     />
                     <button
                         onClick={add}
-                        className="px-3 py-1 text-xs bg-[#6366F1] text-white rounded hover:bg-[#4F46E5]"
+                        className="px-3 py-1 text-xs bg-[var(--pp-accent)] text-white rounded hover:bg-[var(--pp-accent-strong)]"
                     >
                         초대
                     </button>

@@ -44,7 +44,7 @@ function MobileNavSection() {
                 </div>
                 <button
                     onClick={() => { setSelected(MOBILE_NAV_DEFAULT); localStorage.setItem(MOBILE_NAV_STORAGE_KEY, JSON.stringify(MOBILE_NAV_DEFAULT)); window.dispatchEvent(new CustomEvent("myverse-mobile-nav-change")); }}
-                    className="text-[11px] text-neutral-400 hover:text-[#6366F1]"
+                    className="text-[11px] text-neutral-400 hover:text-[var(--pp-accent)]"
                 >기본값으로</button>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -56,9 +56,9 @@ function MobileNavSection() {
                             onClick={() => toggle(opt.id)}
                             disabled={!on && full}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
-                                on ? "bg-[#6366F1] text-white border-[#6366F1]"
+                                on ? "bg-[var(--pp-accent)] text-white border-[var(--pp-accent)]"
                                 : full ? "bg-neutral-50 text-neutral-300 border-neutral-100 cursor-not-allowed"
-                                : "bg-white text-neutral-600 border-neutral-200 hover:border-[#6366F1]"
+                                : "bg-white text-neutral-600 border-neutral-200 hover:border-[var(--pp-accent)]"
                             }`}
                         >
                             <span className={`w-2 h-2 rounded-full shrink-0 ${on ? "bg-white" : "bg-neutral-300"}`} />
@@ -103,7 +103,7 @@ export default function SettingsTechPage() {
                     }
                 />
                 <SettingsExport sub={sub} showToast={showToast} />
-                <MobileNavSection />
+                {/* 스마트폰 하단 메뉴 설정은 MyVerse 하단 바용 — Planner's 앱에는 하단 바가 없어 뺌 (2026-10-14) */}
             </div>
         </SettingsLayout>
     );

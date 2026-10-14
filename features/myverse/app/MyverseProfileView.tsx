@@ -61,7 +61,7 @@ export function MyverseProfileView({ dark = true, fullPage = true }: { dark?: bo
                 <div className={`flex items-center gap-1 mb-8 border-b ${tabBorder}`}>
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#6366F1] text-[#6366F1]" : `border-transparent ${tabInactive}`}`}>
+                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[var(--pp-accent)] text-[var(--pp-accent)]" : `border-transparent ${tabInactive}`}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
                             {tab.count !== undefined && <span className={`text-xs px-1.5 py-0.5 rounded-full ${countBg}`}>{tab.count}</span>}
                         </button>

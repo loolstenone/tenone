@@ -124,7 +124,7 @@ export function CanvasEditorToolbar({
     const isText   = tool.mode === "text";
 
     const base   = "flex items-center justify-center w-8 h-8 rounded-lg transition-colors";
-    const active  = "bg-[#6366F1] text-white";
+    const active  = "bg-[var(--pp-accent)] text-white";
     const idle    = "text-neutral-400 hover:text-white hover:bg-white/10";
     const divider = <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />;
 
@@ -315,7 +315,7 @@ export function CanvasEditorToolbar({
                                 onClick={() => { onBgChange(t); setBgOpen(false); }}
                                 className={`w-full text-left px-3 py-1.5 text-xs transition-colors hover:bg-white/5 ${
                                     t === background
-                                        ? "text-[#6366F1] font-semibold"
+                                        ? "text-[var(--pp-accent)] font-semibold"
                                         : "text-neutral-300"
                                 }`}
                             >

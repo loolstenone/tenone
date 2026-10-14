@@ -291,7 +291,7 @@ export function TracesTimelineView() {
                             target="_blank"
                             rel="noopener"
                             title="내 공개 핸들 페이지"
-                            className="inline-flex items-center gap-1 px-2.5 py-2 bg-white border border-neutral-200 hover:border-[#6366F1] text-neutral-600 hover:text-[#6366F1] rounded-lg text-xs font-medium transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-2 bg-white border border-neutral-200 hover:border-[var(--pp-accent)] text-neutral-600 hover:text-[var(--pp-accent)] rounded-lg text-xs font-medium transition-colors"
                         >
                             <Globe className="h-3.5 w-3.5" />
                             내 페이지
@@ -300,7 +300,7 @@ export function TracesTimelineView() {
                     <button
                         onClick={() => fileRef.current?.click()}
                         disabled={!!uploading}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-lg text-xs font-medium disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white rounded-lg text-xs font-medium disabled:opacity-50 transition-colors"
                     >
                         {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                         {uploading ? `${uploading.current}/${uploading.total}` : "일괄 추가"}
@@ -321,12 +321,12 @@ export function TracesTimelineView() {
             </div>
 
             {uploading && (
-                <div className="mb-4 px-3 py-2 bg-[#6366F1]/5 border border-[#6366F1]/20 rounded-lg text-xs text-[#6366F1] flex items-center gap-2">
+                <div className="mb-4 px-3 py-2 bg-[var(--pp-accent)]/5 border border-[var(--pp-accent)]/20 rounded-lg text-xs text-[var(--pp-accent)] flex items-center gap-2">
                     <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                     <span className="flex-1">업로드 중 · {uploading.current} / {uploading.total} · 업로드 후 AI가 자동 분류합니다</span>
-                    <div className="w-24 h-1 bg-[#6366F1]/15 rounded-full overflow-hidden">
+                    <div className="w-24 h-1 bg-[var(--pp-accent)]/15 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-[#6366F1] transition-all"
+                            className="h-full bg-[var(--pp-accent)] transition-all"
                             style={{ width: `${(uploading.current / uploading.total) * 100}%` }}
                         />
                     </div>
@@ -361,7 +361,7 @@ export function TracesTimelineView() {
                             onClick={() => setPeriod(p.key)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                                 period === p.key
-                                    ? "bg-[#6366F1] text-white"
+                                    ? "bg-[var(--pp-accent)] text-white"
                                     : "text-neutral-600 hover:bg-neutral-100"
                             }`}
                         >
@@ -376,7 +376,7 @@ export function TracesTimelineView() {
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         placeholder="장소·사람·활동·메모 검색"
-                        className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-3 py-2 text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:border-[#6366F1]"
+                        className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-3 py-2 text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:border-[var(--pp-accent)]"
                     />
                 </div>
                 {/* View 토글 */}
@@ -482,7 +482,7 @@ export function TracesTimelineView() {
                                         onClick={() => setPersonFilter(personFilter === name ? null : name)}
                                         className={`px-2.5 py-1 text-[11px] font-medium ${
                                             personFilter === name
-                                                ? "bg-[#6366F1] text-white"
+                                                ? "bg-[var(--pp-accent)] text-white"
                                                 : "bg-white text-neutral-600 hover:text-neutral-900"
                                         }`}
                                     >
@@ -491,7 +491,7 @@ export function TracesTimelineView() {
                                     <Link
                                         href={`/myverse/app/with/${encodeURIComponent(name)}`}
                                         title={`${name}와의 모든 흔적 보기`}
-                                        className="px-1.5 flex items-center text-neutral-400 hover:text-[#6366F1] border-l border-neutral-200 bg-white"
+                                        className="px-1.5 flex items-center text-neutral-400 hover:text-[var(--pp-accent)] border-l border-neutral-200 bg-white"
                                     >
                                         →
                                     </Link>
@@ -521,7 +521,7 @@ export function TracesTimelineView() {
                     {hasActiveFilters && (
                         <button
                             onClick={clearFilters}
-                            className="text-[11px] text-[#6366F1] hover:underline inline-flex items-center gap-0.5"
+                            className="text-[11px] text-[var(--pp-accent)] hover:underline inline-flex items-center gap-0.5"
                         >
                             <X className="h-3 w-3" />
                             필터 모두 지우기 ({filtered.length}/{traces.length})
@@ -619,7 +619,7 @@ function MediaMomentTile({ t, onClick }: { t: UnifiedTrace; onClick: () => void 
     return (
         <button
             onClick={onClick}
-            className="group relative aspect-square rounded-md overflow-hidden bg-neutral-100 hover:ring-2 hover:ring-[#6366F1] transition-all"
+            className="group relative aspect-square rounded-md overflow-hidden bg-neutral-100 hover:ring-2 hover:ring-[var(--pp-accent)] transition-all"
         >
             {t.media_type === "image" ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -680,7 +680,7 @@ function TextTraceTile({ t, onClick }: { t: UnifiedTrace; onClick: () => void })
         ? "bg-indigo-950 hover:ring-indigo-500"
         : isRoutine
             ? "bg-neutral-800 hover:ring-neutral-500"
-            : "bg-neutral-900 hover:ring-[#6366F1]";
+            : "bg-neutral-900 hover:ring-[var(--pp-accent)]";
 
     const preview = t.body || t.caption || t.activity || t.location || "";
 
@@ -994,7 +994,7 @@ function TraceDetailModal({ trace, onClose, onUpdated }: {
                                 </span>
                             )}
                             {aiSuggestion && (
-                                <p className="text-[11px] text-[#6366F1] italic mt-2">
+                                <p className="text-[11px] text-[var(--pp-accent)] italic mt-2">
                                     💡 추천 캡션: &ldquo;{aiSuggestion}&rdquo;
                                 </p>
                             )}
@@ -1020,7 +1020,7 @@ function TraceDetailModal({ trace, onClose, onUpdated }: {
                         <button
                             onClick={runClassify}
                             disabled={classifying}
-                            className="w-full mt-4 px-3 py-2 text-xs font-medium text-[#6366F1] border border-[#6366F1]/30 hover:bg-[#6366F1]/10 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                            className="w-full mt-4 px-3 py-2 text-xs font-medium text-[var(--pp-accent)] border border-[var(--pp-accent)]/30 hover:bg-[var(--pp-accent)]/10 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
                         >
                             <Sparkles className="h-3 w-3" />
                             {classifying ? "분석 중…" : trace.domain ? "AI 다시 분석" : "AI로 자동 분류"}
@@ -1075,7 +1075,7 @@ function FacetChip({ active, onClick, icon, color, children }: {
             style={style}
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                 active
-                    ? color ? "" : "bg-[#6366F1] border-[#6366F1] text-white"
+                    ? color ? "" : "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                     : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900"
             }`}
         >
@@ -1126,8 +1126,8 @@ function SkeletonGrid() {
 function EmptyState() {
     return (
         <div className="border border-dashed border-neutral-300 rounded-xl py-16 px-6 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-[#6366F1]/10 flex items-center justify-center mb-3">
-                <Camera className="h-5 w-5 text-[#6366F1]" />
+            <div className="w-12 h-12 mx-auto rounded-full bg-[var(--pp-accent)]/10 flex items-center justify-center mb-3">
+                <Camera className="h-5 w-5 text-[var(--pp-accent)]" />
             </div>
             <h3 className="text-base font-medium text-neutral-800 mb-1">아직 남긴 흔적이 없어요</h3>
             <p className="text-sm text-neutral-500 mb-5 max-w-md mx-auto">
@@ -1137,7 +1137,7 @@ function EmptyState() {
             <div className="flex items-center justify-center gap-2 flex-wrap">
                 <Link
                     href="/planners/app/daily"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-xs font-medium hover:bg-[#4F46E5] transition-colors"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--pp-accent)] text-white rounded-lg text-xs font-medium hover:bg-[var(--pp-accent-strong)] transition-colors"
                 >
                     <Camera className="h-3.5 w-3.5" />
                     일간에서 추가
@@ -1165,7 +1165,7 @@ function NoSearchResult({ query, onClear }: { query: string; onClear: () => void
             </p>
             <button
                 onClick={onClear}
-                className="mt-3 text-xs text-[#6366F1] hover:underline"
+                className="mt-3 text-xs text-[var(--pp-accent)] hover:underline"
             >
                 검색 지우기
             </button>

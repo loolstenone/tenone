@@ -27,7 +27,7 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     teal:     { hex: "#6366F1", dark: "#4F46E5" },
     emerald:  { hex: "#047857", dark: "#065F46" },
     olive:    { hex: "#4D7C0F", dark: "#3F6212" },
-    // Myverse 브랜드 인디고 (기본값) — `bg-[#6366F1]` 클래스를 인디고로 오버라이드
+    // Myverse 브랜드 인디고 (기본값) — `bg-[var(--pp-accent)]` 클래스를 인디고로 오버라이드
     myverse:  { hex: "#6366F1", dark: "#4F46E5" },
 };
 

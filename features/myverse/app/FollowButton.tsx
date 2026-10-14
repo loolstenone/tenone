@@ -68,7 +68,7 @@ export function FollowButton({ handle }: Props) {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${
                     status.is_following
                         ? "bg-white border border-neutral-200 text-neutral-700 hover:border-rose-200 hover:text-rose-600"
-                        : "bg-[#6366F1] hover:bg-[#4F46E5] text-white"
+                        : "bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white"
                 }`}
             >
                 {busy ? <Loader2 className="h-3 w-3 animate-spin" /> :

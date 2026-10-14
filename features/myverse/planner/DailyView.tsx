@@ -348,7 +348,7 @@ export function CornellRowsInline({
                                 onBlur={onCommit}
                                 placeholder="키워드"
                                 data-cornell-cue={ri === 0 ? "first" : undefined}
-                                className="text-sm text-[#6366F1] font-medium bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light py-1"
+                                className="text-sm text-[var(--pp-accent)] font-medium bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light py-1"
                             />
                             <textarea
                                 value={r.note}
@@ -367,7 +367,7 @@ export function CornellRowsInline({
                                 <button
                                     onClick={() => promoteToTask(r)}
                                     title="Task로 보내기 (오늘 할 일에 추가)"
-                                    className="text-neutral-300 hover:text-[#6366F1] p-1"
+                                    className="text-neutral-300 hover:text-[var(--pp-accent)] p-1"
                                 >
                                     <span className="material-symbols-outlined text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 0" }}>
                                         playlist_add_check
@@ -388,7 +388,7 @@ export function CornellRowsInline({
             {/* 행 추가 */}
             <button
                 onClick={addRow}
-                className="w-full mt-2 py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#6366F1] hover:not-italic border border-dashed border-neutral-200 hover:border-[#6366F1] rounded transition-colors"
+                className="w-full mt-2 py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[var(--pp-accent)] hover:not-italic border border-dashed border-neutral-200 hover:border-[var(--pp-accent)] rounded transition-colors"
             >
                 + 행 추가
             </button>
@@ -501,7 +501,7 @@ function DailyNoteCard({
                         <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                 </div>
-                {note.type === 'handwriting' && <PenLine className="h-3.5 w-3.5 text-[#6366F1] shrink-0" />}
+                {note.type === 'handwriting' && <PenLine className="h-3.5 w-3.5 text-[var(--pp-accent)] shrink-0" />}
                 {note.type === 'canvas' && <ImageIcon className="h-3.5 w-3.5 text-sky-500 shrink-0" />}
                 {note.type === 'email' && <Mail className="h-3.5 w-3.5 text-rose-500 shrink-0" />}
                 <input
@@ -603,7 +603,7 @@ function DailyNoteCard({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-neutral-400 hover:text-[#6366F1] shrink-0"
+                                className="text-neutral-400 hover:text-[var(--pp-accent)] shrink-0"
                                 title="Gmail에서 열기"
                             >
                                 <Maximize2 className="h-3.5 w-3.5" />
@@ -624,7 +624,7 @@ function DailyNoteCard({
                         <div className="space-y-1.5">
                             {note.rows.map((r) => (
                                 <div key={r.id} className="grid grid-cols-[140px_1fr] gap-3 text-sm">
-                                    <span className="text-[#6366F1] font-medium truncate">{r.cue || <span className="text-neutral-300 italic">키워드</span>}</span>
+                                    <span className="text-[var(--pp-accent)] font-medium truncate">{r.cue || <span className="text-neutral-300 italic">키워드</span>}</span>
                                     <span className="text-neutral-700 whitespace-pre-wrap line-clamp-2">{r.note || <span className="text-neutral-300 italic">노트</span>}</span>
                                 </div>
                             ))}
@@ -1619,7 +1619,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                         <div className="flex items-center gap-2 flex-wrap">
                             <h1
                                 className={`font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap ${
-                                    isToday ? "underline decoration-[#6366F1] decoration-2 underline-offset-[6px]" : ""
+                                    isToday ? "underline decoration-[var(--pp-accent)] decoration-2 underline-offset-[6px]" : ""
                                 }`}
                                 title={isToday ? "오늘" : undefined}
                             >
@@ -1699,7 +1699,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                         {/* + 할 일 */}
                         <button
                             onClick={() => { setCalEditing(null); setCalEditorOpen(true); }}
-                            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-600 hover:border-[#6366F1] hover:text-[#6366F1] hover:bg-indigo-50 transition-colors shadow-sm"
+                            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-600 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] hover:bg-indigo-50 transition-colors shadow-sm"
                         >
                             <Plus className="h-4 w-4" />
                             <span className="font-medium">할 일</span>
@@ -1711,7 +1711,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 setFocusTaskText(first?.text ?? undefined);
                                 setFocusModeOpen(true);
                             }}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl text-sm text-white hover:opacity-90 active:scale-95 transition-all shadow-sm font-semibold"
+                            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[var(--pp-accent-strong)] to-[var(--pp-accent)] rounded-xl text-sm text-white hover:opacity-90 active:scale-95 transition-all shadow-sm font-semibold"
                         >
                             <Target className="h-4 w-4" />
                             <span>초집중 시작</span>
@@ -1923,7 +1923,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                             <button
                                                 onClick={() => { setCalEditing(null); setCalEditorOpen(true); }}
                                                 title="일정·업무 추가 (상세 모달)"
-                                                className="p-1.5 rounded text-neutral-300 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors"
+                                                className="p-1.5 rounded text-neutral-300 hover:text-[var(--pp-accent)] hover:bg-neutral-100 transition-colors"
                                             >
                                                 <Plus className="h-3.5 w-3.5" />
                                             </button>
@@ -1980,11 +1980,11 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                             onClick={() => cycleEntryStatus(entry)}
                                                             title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
                                                             className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 mt-0.5 ${
-                                                                st === 'done'      ? 'bg-[#6366F1] border-[#6366F1] text-white'
+                                                                st === 'done'      ? 'bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white'
                                                                 : st === 'hold'    ? 'bg-amber-200 border-amber-300 text-amber-800'
                                                                 : st === 'canceled'? 'bg-neutral-300 border-neutral-300 text-white'
                                                                 : st === 'moved'   ? 'bg-violet-500 border-violet-500 text-white'
-                                                                : 'border-sky-300 hover:border-[#6366F1]'
+                                                                : 'border-sky-300 hover:border-[var(--pp-accent)]'
                                                             }`}
                                                         >
                                                             {st === 'done' ? '✓' : st === 'hold' ? '⏸' : st === 'canceled' ? '✕' : st === 'moved' ? '→' : ''}
@@ -2041,11 +2041,11 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                             onClick={() => cycleEntryStatus(item.entry)}
                                                             title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
                                                             className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 mt-0.5 ${
-                                                                st === 'done'      ? 'bg-[#6366F1] border-[#6366F1] text-white'
+                                                                st === 'done'      ? 'bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white'
                                                                 : st === 'hold'    ? 'bg-amber-200 border-amber-300 text-amber-800'
                                                                 : st === 'canceled'? 'bg-neutral-300 border-neutral-300 text-white'
                                                                 : st === 'moved'   ? 'bg-violet-500 border-violet-500 text-white'
-                                                                : `${c.ring} border-sky-300 hover:border-[#6366F1]`
+                                                                : `${c.ring} border-sky-300 hover:border-[var(--pp-accent)]`
                                                             }`}
                                                         >
                                                             {st === 'done' ? '✓' : st === 'hold' ? '⏸' : st === 'canceled' ? '✕' : st === 'moved' ? '→' : ''}
@@ -2093,12 +2093,12 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                             onClick={() => cycleStatus(t.id)}
                                                             title="클릭: 미완 → 완료 → 보류 → 취소 (반복) · 변경은 우측 캘린더 아이콘"
                                                             className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 ${
-                                                                t.status === "done"      ? "bg-[#6366F1] border-[#6366F1] text-white"
+                                                                t.status === "done"      ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                                                                 : t.status === "carried" ? "bg-amber-500 border-amber-500 text-white"
                                                                 : t.status === "moved"   ? "bg-violet-500 border-violet-500 text-white"
                                                                 : t.status === "hold"    ? "bg-amber-200 border-amber-300 text-amber-800"
                                                                 : t.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
-                                                                : "border-neutral-300 hover:border-[#6366F1]"
+                                                                : "border-neutral-300 hover:border-[var(--pp-accent)]"
                                                             }`}
                                                         >
                                                             {t.status === "done" ? "✓" : t.status === "carried" ? "→" : t.status === "moved" ? "→" : t.status === "hold" ? "⏸" : t.status === "cancelled" ? "✕" : ""}
@@ -2366,7 +2366,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                     <h2 className="text-xs uppercase tracking-widest text-neutral-400">일간 기록</h2>
                                     <Link
                                         href="/planners/app/settings#tracking"
-                                        className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#6366F1] transition-colors"
+                                        className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[var(--pp-accent)] transition-colors"
                                         title="트래킹 항목 수정"
                                     >
                                         <Pencil className="h-3 w-3" /> 수정
@@ -2376,7 +2376,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                     {trackingMetrics.includes("energy") && (
                                         <TrackingRow
                                             label="에너지" hint="컨디션·체력"
-                                            value={energy} activeColor="bg-[#6366F1]"
+                                            value={energy} activeColor="bg-[var(--pp-accent)]"
                                             onPick={(n) => { setEnergy(n); save({ energy_level: n }); }}
                                             onClear={() => { setEnergy(null); save({ energy_level: null }); }}
                                         />
@@ -2679,7 +2679,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 </button>
                                 <button
                                     onClick={() => saveAndClose()}
-                                    className="shrink-0 px-3 py-1.5 bg-[#6366F1] text-white rounded-lg text-sm hover:bg-[#4F46E5] transition-colors font-medium"
+                                    className="shrink-0 px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-lg text-sm hover:bg-[var(--pp-accent-strong)] transition-colors font-medium"
                                 >
                                     저장
                                 </button>
@@ -2711,7 +2711,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 <ChevronRight className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
-                                        <button onClick={addHandPage} className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors font-medium">
+                                        <button onClick={addHandPage} className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 transition-colors font-medium">
                                             <Plus className="h-3 w-3" /> 새 페이지
                                         </button>
                                     </div>
@@ -2860,7 +2860,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                         const rows = [...(expandedNote.rows ?? []), { id: `r_${Date.now()}`, cue: '', note: '' }];
                                                         setExpandedNote({ ...expandedNote, rows });
                                                     }}
-                                                    className="w-full py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#6366F1] hover:not-italic transition-colors"
+                                                    className="w-full py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[var(--pp-accent)] hover:not-italic transition-colors"
                                                 >
                                                     + 행 추가
                                                 </button>
@@ -2903,7 +2903,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                 </button>
                                             </div>
                                             <div className="flex justify-end">
-                                                <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[#6366F1] hover:text-[#4F46E5] transition-colors">
+                                                <button onClick={addCornellPage} className="flex items-center gap-1 text-xs text-[var(--pp-accent)] hover:text-[var(--pp-accent-strong)] transition-colors">
                                                     <Plus className="h-3 w-3" /> 새 페이지
                                                 </button>
                                                 <ConfirmSheet
@@ -3021,7 +3021,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                                             >
                                                                 {isSub ? (
                                                                     <span className={`shrink-0 w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] font-bold ${
-                                                                        task.status === "done" ? "bg-[#6366F1] border-[#6366F1] text-white"
+                                                                        task.status === "done" ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                                                                         : task.status === "doing" ? "bg-amber-400 border-amber-400 text-white"
                                                                         : task.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
                                                                         : "border-neutral-300"
@@ -3252,11 +3252,11 @@ function SubtaskRow({ task, onCycle, onRemove }: { task: PlannerTask; onCycle: (
                 onClick={onCycle}
                 title="클릭: 미완 → 완료 → 보류 → 취소 (반복)"
                 className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center text-[9px] font-bold transition-colors shrink-0 ${
-                    task.status === "done"     ? "bg-[#6366F1] border-[#6366F1] text-white"
+                    task.status === "done"     ? "bg-[var(--pp-accent)] border-[var(--pp-accent)] text-white"
                     : task.status === "doing"  ? "bg-amber-400 border-amber-400 text-white"
                     : task.status === "hold"   ? "bg-amber-200 border-amber-300 text-amber-800"
                     : task.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
-                    : "border-neutral-300 hover:border-[#6366F1]"
+                    : "border-neutral-300 hover:border-[var(--pp-accent)]"
                 }`}
             >
                 {task.status === "done" ? "✓" : task.status === "doing" ? "·" : task.status === "hold" ? "⏸" : task.status === "cancelled" ? "✕" : ""}

@@ -106,7 +106,7 @@ export function CanvasListView() {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <Pencil className="h-6 w-6 text-[#6366F1]" />
+                    <Pencil className="h-6 w-6 text-[var(--pp-accent)]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">캔버스</h1>
                 </div>
                 <PlannersUtilityLinks />
@@ -121,7 +121,7 @@ export function CanvasListView() {
                 <button
                     onClick={() => createNew("mindmap")}
                     disabled={creating}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-white border border-[#6366F1]/30 text-[#6366F1] rounded-lg hover:bg-[#6366F1]/5 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-white border border-[var(--pp-accent)]/30 text-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent)]/5 transition-colors disabled:opacity-50"
                 >
                     {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <GitBranch className="h-3.5 w-3.5" />}
                     새 마인드맵
@@ -129,7 +129,7 @@ export function CanvasListView() {
                 <button
                     onClick={() => createNew("canvas")}
                     disabled={creating}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors disabled:opacity-50"
                 >
                     {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     {creating ? "생성 중…" : "새 캔버스"}
@@ -153,13 +153,13 @@ export function CanvasListView() {
                         <Link
                             key={row.id}
                             href={`/planners/app/canvas/${row.id}`}
-                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#6366F1] hover:shadow-sm transition-all"
+                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[var(--pp-accent)] hover:shadow-sm transition-all"
                         >
                             {/* Thumbnail */}
                             <div className="aspect-[4/3] bg-neutral-50 border-b border-neutral-100 relative overflow-hidden">
                                 {/* 카드 종류 배지 (썸네일 좌상단) */}
                                 {row.kind === "mindmap" && (
-                                    <span className="absolute top-2 left-2 z-20 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#6366F1] text-white shadow-sm">
+                                    <span className="absolute top-2 left-2 z-20 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--pp-accent)] text-white shadow-sm">
                                         <GitBranch className="h-2.5 w-2.5" />
                                         마인드맵
                                     </span>
@@ -179,18 +179,18 @@ export function CanvasListView() {
                                             <rect width="100%" height="100%" fill={`url(#grid-${row.id})`} />
                                         </svg>
                                         {row.kind === "mindmap" ? (
-                                            <GitBranch className="h-7 w-7 text-[#6366F1]/40 group-hover:text-[#6366F1]/60 transition-colors relative z-10" />
+                                            <GitBranch className="h-7 w-7 text-[var(--pp-accent)]/40 group-hover:text-[var(--pp-accent)]/60 transition-colors relative z-10" />
                                         ) : (
-                                            <Pencil className="h-7 w-7 text-neutral-200 group-hover:text-[#6366F1]/30 transition-colors relative z-10" />
+                                            <Pencil className="h-7 w-7 text-neutral-200 group-hover:text-[var(--pp-accent)]/30 transition-colors relative z-10" />
                                         )}
-                                        <span className="text-[10px] text-neutral-300 group-hover:text-[#6366F1]/40 transition-colors relative z-10">미리보기 없음</span>
+                                        <span className="text-[10px] text-neutral-300 group-hover:text-[var(--pp-accent)]/40 transition-colors relative z-10">미리보기 없음</span>
                                     </div>
                                 )}
                             </div>
                             {/* Footer */}
                             <div className="px-3 py-2.5 flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-neutral-900 truncate group-hover:text-[#6366F1] leading-snug">{row.title}</p>
+                                    <p className="text-sm font-medium text-neutral-900 truncate group-hover:text-[var(--pp-accent)] leading-snug">{row.title}</p>
                                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                         <OriginBadge origin={row.origin ?? { type: "standalone" }} />
                                         <span className="text-[10px] text-neutral-300">

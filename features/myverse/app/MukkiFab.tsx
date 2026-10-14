@@ -117,7 +117,7 @@ export function MukkiFab() {
                     onClick={() => setOpen(true)}
                     title="무끼 — 묻기 / 일기 / 코치"
                     aria-label="무끼 열기"
-                    className="fixed bottom-[5.25rem] md:bottom-[4.5rem] right-5 z-[8500] w-14 h-14 rounded-full shadow-xl flex items-center justify-center bg-gradient-to-br from-[#6366F1] to-[#A855F7] text-white hover:scale-105 transition-all"
+                    className="fixed bottom-[5.25rem] md:bottom-[4.5rem] right-5 z-[8500] w-14 h-14 rounded-full shadow-xl flex items-center justify-center bg-gradient-to-br from-[var(--pp-accent)] to-[#A855F7] text-white hover:scale-105 transition-all"
                 >
                     <Sparkles className="h-6 w-6" />
                 </button>
@@ -132,7 +132,7 @@ export function MukkiFab() {
                     >
                         {/* Header */}
                         <div className="px-4 pt-3 pb-2 border-b border-neutral-100 myverse-dark:border-white/10 flex items-center gap-2 shrink-0">
-                            <Sparkles className="h-4 w-4 text-[#6366F1]" />
+                            <Sparkles className="h-4 w-4 text-[var(--pp-accent)]" />
                             <span className="text-sm font-semibold text-neutral-900 myverse-dark:text-white">무끼</span>
                             <span className="text-[10px] text-neutral-400">대화는 저장되지 않아요 · 의도는 자동 반영</span>
                             <button onClick={() => setOpen(false)} className="ml-auto w-7 h-7 rounded-full hover:bg-neutral-100 myverse-dark:hover:bg-white/10 flex items-center justify-center text-neutral-500">
@@ -152,7 +152,7 @@ export function MukkiFab() {
                                         onClick={() => setMode(m)}
                                         className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                                             active
-                                                ? "bg-[#6366F1] text-white shadow-sm"
+                                                ? "bg-[var(--pp-accent)] text-white shadow-sm"
                                                 : "text-neutral-500 hover:bg-neutral-100 myverse-dark:hover:bg-white/5"
                                         }`}
                                     >
@@ -174,14 +174,14 @@ export function MukkiFab() {
                                 <div key={i} className={`flex ${t.role === "user" ? "justify-end" : "justify-start"}`}>
                                     <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
                                         t.role === "user"
-                                            ? "bg-[#6366F1] text-white rounded-br-md"
+                                            ? "bg-[var(--pp-accent)] text-white rounded-br-md"
                                             : "bg-neutral-100 myverse-dark:bg-white/8 text-neutral-800 myverse-dark:text-neutral-200 rounded-bl-md"
                                     }`}>
                                         {t.text}
                                         {t.actions && t.actions.length > 0 && (
                                             <div className="mt-2 flex flex-wrap gap-1.5">
                                                 {t.actions.map((a, ai) => a.href ? (
-                                                    <a key={ai} href={a.href} className="text-xs px-2 py-1 rounded-full bg-white text-[#6366F1] hover:bg-[#6366F1]/10 transition-colors">
+                                                    <a key={ai} href={a.href} className="text-xs px-2 py-1 rounded-full bg-white text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 transition-colors">
                                                         {a.label} →
                                                     </a>
                                                 ) : (
@@ -211,7 +211,7 @@ export function MukkiFab() {
                                     onKeyDown={onKeyDown}
                                     placeholder={MODE_META[mode].ph}
                                     rows={1}
-                                    className="flex-1 max-h-32 resize-none bg-neutral-50 myverse-dark:bg-white/5 border border-neutral-200 myverse-dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-900 myverse-dark:text-white placeholder:text-neutral-300 focus:outline-none focus:border-[#6366F1] transition-colors"
+                                    className="flex-1 max-h-32 resize-none bg-neutral-50 myverse-dark:bg-white/5 border border-neutral-200 myverse-dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-900 myverse-dark:text-white placeholder:text-neutral-300 focus:outline-none focus:border-[var(--pp-accent)] transition-colors"
                                     style={{ height: "auto" }}
                                     onInput={e => {
                                         const el = e.currentTarget;
@@ -222,7 +222,7 @@ export function MukkiFab() {
                                 <button
                                     onClick={send}
                                     disabled={!input.trim() || busy}
-                                    className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[#6366F1] text-white hover:bg-[#4F46E5] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--pp-accent)] text-white hover:bg-[var(--pp-accent-strong)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     title="전송 (Enter)"
                                     aria-label="전송"
                                 >

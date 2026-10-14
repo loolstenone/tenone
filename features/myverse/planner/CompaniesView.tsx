@@ -124,13 +124,13 @@ export function CompaniesView() {
             <div className="mb-6">
                 <Link
                     href="/planners/app/contacts"
-                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] mb-3 transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[var(--pp-accent)] mb-3 transition-colors"
                 >
                     <ArrowLeft className="h-3 w-3" /> 연락처로 돌아가기
                 </Link>
                 <div className="flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
-                        <Building2 className="h-6 w-6 text-[#6366F1]" />
+                        <Building2 className="h-6 w-6 text-[var(--pp-accent)]" />
                         <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">회사</h1>
                         {!loading && (
                             <span className="text-xs text-neutral-500 ml-1">
@@ -140,7 +140,7 @@ export function CompaniesView() {
                     </div>
                     <button
                         onClick={() => setShowNew(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5]"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)]"
                     >
                         <Plus className="h-3.5 w-3.5" /> 새 회사
                     </button>
@@ -158,7 +158,7 @@ export function CompaniesView() {
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
                     placeholder="회사명·도메인·산업군 검색"
-                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[#6366F1]"
+                    className="w-full bg-white border border-neutral-200 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[var(--pp-accent)]"
                 />
             </div>
 
@@ -215,7 +215,7 @@ export function CompaniesView() {
                                 {c.contact_count > 0 && (
                                     <Link
                                         href={`/planners/app/contacts?company=${c.id}`}
-                                        className="p-1.5 text-neutral-400 hover:text-[#6366F1] rounded inline-flex items-center"
+                                        className="p-1.5 text-neutral-400 hover:text-[var(--pp-accent)] rounded inline-flex items-center"
                                         title={`소속 연락처 ${c.contact_count}명 보기`}
                                     >
                                         <ExternalLink className="h-3.5 w-3.5" />
@@ -223,7 +223,7 @@ export function CompaniesView() {
                                 )}
                                 <button
                                     onClick={() => setEditing(c)}
-                                    className="p-1.5 text-neutral-400 hover:text-[#6366F1] rounded"
+                                    className="p-1.5 text-neutral-400 hover:text-[var(--pp-accent)] rounded"
                                     title="편집"
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
@@ -337,7 +337,7 @@ function CompanyEditModal({
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Ten:One"
-                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]"
+                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)]"
                             autoFocus
                         />
                     </div>
@@ -348,7 +348,7 @@ function CompanyEditModal({
                             value={domain}
                             onChange={(e) => setDomain(e.target.value)}
                             placeholder="tenone.biz"
-                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] font-mono"
+                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] font-mono"
                         />
                     </div>
                     <div>
@@ -358,7 +358,7 @@ function CompanyEditModal({
                             value={industry}
                             onChange={(e) => setIndustry(e.target.value)}
                             placeholder="브랜드 컨설팅"
-                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]"
+                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)]"
                         />
                     </div>
                     <div>
@@ -368,7 +368,7 @@ function CompanyEditModal({
                             value={logoUrl}
                             onChange={(e) => setLogoUrl(e.target.value)}
                             placeholder="https://…"
-                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] font-mono text-xs"
+                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] font-mono text-xs"
                         />
                     </div>
                     <div>
@@ -385,7 +385,7 @@ function CompanyEditModal({
                                 value={color ?? ""}
                                 onChange={(e) => setColor(e.target.value)}
                                 placeholder="#6366F1"
-                                className="flex-1 text-sm font-mono border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1]"
+                                className="flex-1 text-sm font-mono border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)]"
                             />
                         </div>
                     </div>
@@ -395,7 +395,7 @@ function CompanyEditModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             rows={3}
-                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#6366F1] resize-none"
+                            className="w-full text-sm border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--pp-accent)] resize-none"
                         />
                     </div>
                 </div>
@@ -411,7 +411,7 @@ function CompanyEditModal({
                             color: color || null,
                         })}
                         disabled={!canSave}
-                        className="text-xs px-3 py-1.5 bg-[#6366F1] text-white rounded-md hover:bg-[#4F46E5] disabled:opacity-50 flex items-center gap-1.5"
+                        className="text-xs px-3 py-1.5 bg-[var(--pp-accent)] text-white rounded-md hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 flex items-center gap-1.5"
                     >
                         {saving && <Loader2 className="h-3 w-3 animate-spin" />}
                         저장

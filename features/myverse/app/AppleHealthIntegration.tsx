@@ -96,14 +96,14 @@ export function AppleHealthIntegration() {
             <button
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-300 hover:border-[#6366F1] hover:text-[#6366F1] text-neutral-700 text-xs font-medium rounded-lg disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-300 hover:border-[var(--pp-accent)] hover:text-[var(--pp-accent)] text-neutral-700 text-xs font-medium rounded-lg disabled:opacity-50"
             >
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                 {uploading ? "임포트 중…" : "Export ZIP 업로드"}
             </button>
 
             {progress && (
-                <p className="mt-2 text-[11px] text-[#6366F1]">
+                <p className="mt-2 text-[11px] text-[var(--pp-accent)]">
                     {progress.imported}일 / {progress.total}일 처리됨
                 </p>
             )}

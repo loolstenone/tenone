@@ -147,7 +147,7 @@ export function ProjectsView() {
     const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
-        <div className="max-w-6xl mx-auto px-5 md:px-10 py-8" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Stitch 정렬 (세션 122) */}
             <div className="flex items-start justify-between mb-8 gap-3">
                 <div>
@@ -170,7 +170,7 @@ export function ProjectsView() {
                             href={`/myverse/portfolio/${user.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#6366F1] border border-[#6366F1] rounded-lg hover:bg-[#6366F1] hover:text-white transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--pp-accent)] border border-[var(--pp-accent)] rounded-lg hover:bg-[var(--pp-accent)] hover:text-white transition-colors"
                         >
                             <LayoutGrid className="h-3.5 w-3.5" />
                             내 포트폴리오
@@ -184,7 +184,7 @@ export function ProjectsView() {
             <div className="flex justify-end mb-2">
                 <button
                     onClick={() => setShowForm(v => !v)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors shrink-0"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors shrink-0"
                 >
                     <Plus className="h-3.5 w-3.5" /> 새 프로젝트
                 </button>
@@ -199,13 +199,13 @@ export function ProjectsView() {
                             onClick={() => setFilter(f)}
                             className={`relative px-4 py-2.5 text-sm whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
-                                    ? "text-[#6366F1] font-semibold"
+                                    ? "text-[var(--pp-accent)] font-semibold"
                                     : "text-neutral-500 hover:text-neutral-900"
                             }`}
                         >
                             {f === "active" ? "진행중" : f === "completed" ? "완료" : f === "archived" ? "보관" : "전체"}
                             {isActive && (
-                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[#6366F1]" />
+                                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-[var(--pp-accent)]" />
                             )}
                         </button>
                     );
@@ -253,7 +253,7 @@ export function ProjectsView() {
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
                             <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                                <FolderKanban className="h-4 w-4 text-[#6366F1]" />
+                                <FolderKanban className="h-4 w-4 text-[var(--pp-accent)]" />
                                 새 프로젝트
                             </h3>
                             <button
@@ -286,7 +286,7 @@ export function ProjectsView() {
                         <button
                             onClick={createProject}
                             disabled={creating || !newTitle.trim()}
-                            className="px-4 py-1.5 text-sm bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-50"
+                            className="px-4 py-1.5 text-sm bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors disabled:opacity-50"
                         >
                             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
                         </button>
@@ -326,7 +326,7 @@ export function ProjectsView() {
                                 type="date"
                                 value={newStartDate}
                                 onChange={(e) => setNewStartDate(e.target.value)}
-                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                             />
                         </div>
                         <div>
@@ -335,7 +335,7 @@ export function ProjectsView() {
                                 type="date"
                                 value={newEndDate}
                                 onChange={(e) => setNewEndDate(e.target.value)}
-                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                className="w-full text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                             />
                         </div>
                     </div>
@@ -347,7 +347,7 @@ export function ProjectsView() {
                             value={newGoal}
                             onChange={(e) => setNewGoal(e.target.value)}
                             placeholder="이 프로젝트를 끝내면 무엇이 달라지는가"
-                            className="w-full text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                            className="w-full text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                         />
                     </div>
 
@@ -358,7 +358,7 @@ export function ProjectsView() {
                             <button
                                 type="button"
                                 onClick={() => setNewMilestones(prev => [...prev, { title: "", due_date: newEndDate || newStartDate || "" }])}
-                                className="text-[10px] text-[#6366F1] hover:text-[#4F46E5] flex items-center gap-0.5"
+                                className="text-[10px] text-[var(--pp-accent)] hover:text-[var(--pp-accent-strong)] flex items-center gap-0.5"
                             >
                                 <Plus className="h-3 w-3" /> 마일스톤 추가
                             </button>
@@ -374,13 +374,13 @@ export function ProjectsView() {
                                             value={m.title}
                                             onChange={(e) => setNewMilestones(prev => prev.map((x, j) => j === i ? { ...x, title: e.target.value } : x))}
                                             placeholder="마일스톤 이름"
-                                            className="flex-1 text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                            className="flex-1 text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         />
                                         <input
                                             type="date"
                                             value={m.due_date}
                                             onChange={(e) => setNewMilestones(prev => prev.map((x, j) => j === i ? { ...x, due_date: e.target.value } : x))}
-                                            className="text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[#6366F1]"
+                                            className="text-sm border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-[var(--pp-accent)]"
                                         />
                                         <button
                                             type="button"
@@ -411,7 +411,7 @@ export function ProjectsView() {
                         <Link
                             key={p.id}
                             href={`/planners/app/projects/${p.id}`}
-                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#6366F1] hover:shadow-sm transition-all group relative"
+                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[var(--pp-accent)] hover:shadow-sm transition-all group relative"
                         >
                             {/* 호버 시 삭제 버튼 — 우상단 */}
                             <button
@@ -431,7 +431,7 @@ export function ProjectsView() {
                                     />
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-neutral-900 group-hover:text-[#6366F1] transition-colors">
+                                    <h3 className="font-semibold text-neutral-900 group-hover:text-[var(--pp-accent)] transition-colors">
                                         {p.title}
                                     </h3>
                                     <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500 flex-wrap">

@@ -75,7 +75,7 @@ function SideNavLink({
             title={collapsed ? label : undefined}
             className={`relative group flex items-center ${collapsed ? "justify-center" : "gap-2.5"} px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
                 active
-                    ? "bg-[#6366F1]/10 text-[#6366F1] myverse-dark:bg-[#6366F1]/15"
+                    ? "bg-[var(--pp-accent)]/10 text-[var(--pp-accent)] myverse-dark:bg-[var(--pp-accent)]/15"
                     : "text-neutral-600 myverse-dark:text-neutral-400 hover:bg-neutral-100 myverse-dark:hover:bg-white/5 hover:text-neutral-900 myverse-dark:hover:text-neutral-200"
             }`}
         >

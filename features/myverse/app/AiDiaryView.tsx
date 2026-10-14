@@ -135,9 +135,9 @@ export function AiDiaryView() {
             <p className="text-xs text-neutral-500 mb-3">{fmtDate(date)}</p>
 
             {/* AI 초안 카드 */}
-            <div className="bg-gradient-to-br from-[#6366F1]/[0.04] via-white to-[#6366F1]/[0.04] border border-[#6366F1]/20 rounded-xl p-4 mb-4">
+            <div className="bg-gradient-to-br from-[var(--pp-accent)]/[0.04] via-white to-[var(--pp-accent)]/[0.04] border border-[var(--pp-accent)]/20 rounded-xl p-4 mb-4">
                 <div className="flex items-center justify-between mb-2">
-                    <div className="text-[10px] uppercase tracking-widest text-[#6366F1] flex items-center gap-1">
+                    <div className="text-[10px] uppercase tracking-widest text-[var(--pp-accent)] flex items-center gap-1">
                         <Sparkles className="h-2.5 w-2.5" />
                         AI 초안
                         {sources && (
@@ -149,7 +149,7 @@ export function AiDiaryView() {
                     <button
                         onClick={generate}
                         disabled={loading}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#6366F1] hover:bg-[#6366F1]/10 rounded-lg transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 rounded-lg transition-colors disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                         {draft ? "다시 만들기" : "초안 만들기"}
@@ -191,7 +191,7 @@ export function AiDiaryView() {
                     <button
                         onClick={save}
                         disabled={saving || !text.trim()}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-medium rounded-lg disabled:opacity-40"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--pp-accent)] hover:bg-[var(--pp-accent-strong)] text-white text-xs font-medium rounded-lg disabled:opacity-40"
                     >
                         {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                         저장

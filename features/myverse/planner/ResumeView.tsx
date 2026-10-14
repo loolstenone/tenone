@@ -306,7 +306,7 @@ export function ResumeView() {
             {/* ── 상단 헤더 ─────────────────────────────── */}
             <div className="resume-no-print">
                 <div className="flex items-center gap-3 flex-wrap">
-                    <FileText className="h-5 w-5 text-[#6366F1]" />
+                    <FileText className="h-5 w-5 text-[var(--pp-accent)]" />
                     <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 myverse-dark:text-neutral-100">이력서</h1>
                     {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
                     <div className="ml-auto flex items-center gap-2">
@@ -318,7 +318,7 @@ export function ResumeView() {
                         </button>
                         <button
                             onClick={handleShare}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--pp-accent)] text-white rounded-lg hover:bg-[var(--pp-accent-strong)] transition-colors"
                         >
                             <Share2 className="h-3.5 w-3.5" /> 공유
                         </button>
@@ -351,7 +351,7 @@ export function ResumeView() {
                                 disabled={s.required}
                                 className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
                                     active
-                                        ? "bg-[#6366F1] text-white"
+                                        ? "bg-[var(--pp-accent)] text-white"
                                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 myverse-dark:bg-neutral-800 myverse-dark:text-neutral-400 myverse-dark:hover:bg-neutral-700"
                                 } ${s.required ? "opacity-70 cursor-default" : "cursor-pointer"}`}
                             >
@@ -385,7 +385,7 @@ export function ResumeView() {
                                             disabled={s.required}
                                             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                                                 active
-                                                    ? "bg-[#6366F1] text-white"
+                                                    ? "bg-[var(--pp-accent)] text-white"
                                                     : "bg-white text-neutral-500 border border-neutral-200 myverse-dark:bg-neutral-700 myverse-dark:border-neutral-600 myverse-dark:text-neutral-300"
                                             } ${s.required ? "opacity-70 cursor-default" : ""}`}
                                         >
@@ -406,7 +406,7 @@ export function ResumeView() {
             </div>
 
             {/* ── 01 인적 사항 (필수) ──────────────────── */}
-            <Section title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[#6366F1]" />}>
+            <Section title="인적 사항" icon={<User className="h-3.5 w-3.5 text-[var(--pp-accent)]" />}>
                 <PersonalBlock
                     value={resume.personal ?? {}}
                     onSave={(p) => updateResume({ personal: p })}
@@ -766,7 +766,7 @@ function PersonalBlock({ value, onSave, userId }: {
                         <button
                             onClick={confirmPhoto}
                             disabled={uploading}
-                            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-[#6366F1] text-white rounded hover:bg-[#4F46E5] disabled:opacity-50"
+                            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-[var(--pp-accent)] text-white rounded hover:bg-[var(--pp-accent-strong)] disabled:opacity-50"
                         >
                             {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
                             저장
@@ -879,7 +879,7 @@ function ListBlock<T extends { id: string; status?: string }>({
     return (
         <div>
             <div className="add-btn flex justify-end mb-2 resume-no-print">
-                <button onClick={add} className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#6366F1] hover:bg-[#6366F1]/10 rounded transition-colors">
+                <button onClick={add} className="flex items-center gap-1 px-2 py-1 text-[11px] text-[var(--pp-accent)] hover:bg-[var(--pp-accent)]/10 rounded transition-colors">
                     <Plus className="h-3 w-3" /> 추가
                 </button>
             </div>
