@@ -35,7 +35,8 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
         list.push({
             id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             text: a.input.text as string,
-            status: "todo",
+            // 손글씨에서 × 표시로 끝낸 일은 끝냄으로 (생각 쏟아내기는 항상 todo)
+            status: a.input.status === "done" ? "done" : "todo",
             time: (a.input.time as string | null) ?? null,
             priority: (a.input.priority as string | null) ?? null,
         });
@@ -75,4 +76,47 @@ export async function commitParsedActions(actions: ParsedAction[]): Promise<{ ok
     // 화면들이 새로 읽도록 알림 (오늘·주간 등)
     if (ok > 0 && typeof window !== "undefined") window.dispatchEvent(new CustomEvent("planner-data-changed"));
     return { ok, failed };
+}
+
+/** 손글씨에서 읽은 메모 → 그날 노트 하나로 추가 (오늘 화면 노트와 같은 Cornell 형식, DailyView serializeNotes와 맞춤) */
+export async function saveMemoNote(date: string, title: string, text: string): Promise<boolean> {
+    const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return false;
+    try {
+        const r = await fetch(`/api/myverse/daily?date=${date}`, { cache: "no-store" });
+        const cur = r.ok ? await r.json() : null;
+        let list: unknown[] = [];
+        try { const p = JSON.parse(cur?.daily?.notes || "[]"); if (Array.isArray(p)) list = p; } catch { /* 옛 글 형식이면 새 목록으로 시작하지 않고 보존 */
+            if (cur?.daily?.notes) list = [{ id: `n_legacy_${Date.now()}`, type: "cornell", title: "노트", cue: "", content: JSON.stringify({ _cornell: true, rows: [{ id: "r1", cue: "", note: String(cur.daily.notes) }], summary: "" }), summary: "" }];
+        }
+        const rows = lines.map((note, i) => ({ id: `r${i + 1}`, cue: "", note }));
+        list.push({ id: `n_hw_${Date.now()}`, type: "cornell", title, cue: "", content: JSON.stringify({ _cornell: true, rows, summary: "" }), summary: "" });
+        const res = await fetch(`/api/myverse/daily`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date, notes: JSON.stringify(list) }),
+        });
+        return res.ok;
+    } catch { return false; }
+}
+
+/** 브라우저에서 사진을 긴 변 maxSide로 줄여 JPEG data URL로 (원본은 서버로 보내지 않는다) */
+export function shrinkImage(file: Blob, maxSide = 1600, quality = 0.85): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            const k = Math.min(1, maxSide / Math.max(img.width, img.height));
+            const c = document.createElement("canvas");
+            c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+            const ctx = c.getContext("2d");
+            if (!ctx) { URL.revokeObjectURL(url); reject(new Error("canvas")); return; }
+            ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            URL.revokeObjectURL(url);
+            resolve(c.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image")); };
+        img.src = url;
+    });
 }
