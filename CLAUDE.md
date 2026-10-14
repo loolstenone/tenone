@@ -372,7 +372,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 | 상황 | 규칙 |
 |------|------|
-| 브랜드 보호 페이지 비인증 접근 | `<LoginRequired accentColor="#..." />` 렌더 (`components/LoginRequired.tsx` — 모달 즉시 표시·닫기 가능·다시 열기 버튼). MADLeague는 `square` (rounded 금지) |
+| 브랜드 보호 페이지 비인증 접근 | `<LoginRequired accentColor="#..." />` 렌더 (`components/LoginRequired.tsx` — 모달 즉시 표시·닫기 가능·다시 열기 버튼). |
 | 공용 `<AuthGate>` 래퍼 선택 가능 | `components/AuthGate.tsx` (내부가 LoginRequired) — `<AuthGate accentColor bgClassName>` 으로 감싸도 됨 |
 | `/login`으로 이동하는 Link·버튼 (헤더, 푸터, CTA) | 반드시 `loginHref(pathname)` 사용 (`?redirect=` 전달) |
 | `router.push('/login')` / `redirect('/login')` | 반드시 `loginHref(pathname)` 또는 `currentLoginHref()` 사용 |

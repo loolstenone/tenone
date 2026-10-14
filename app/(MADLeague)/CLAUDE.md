@@ -177,7 +177,6 @@
 - "지원하기" → **"매드리거 등록"** (사이트·인트라 메뉴명 모두). 헤더 메뉴: 매드리거 ▸ 매드리거 홈·동아리·매드리거 등록·인증서 발급(`/madleague/certificate/issue`, 2026-10-10) / 프로그램 ▸ … RooKie·Planner's
 - 경쟁 PT 페이지는 프로그램 탭 줄을 숨긴다(헤더 단독 메뉴) · 공개 페이지에 개인 이메일·카카오 링크 금지 → 문의하기 페이지로
 - 푸터 4열: 참여(매드리거 등록·공식 동아리 신청·문의하기·마이페이지) · 채널(HeRo·RooK·Planner's — Planner's는 지금 MADLeague 프로그램 페이지로 연결, MyVerse로 보낼지 미결정)
-- BI 세 원은 디자인 규칙(rounded 금지)의 예외 — BI 그림 자체
 
 ### 연계 프로그램 — 맛보기·정식·연계 (2026-10-09 사용자 결정)
 
@@ -230,7 +229,7 @@
 
 ### 디자인 규칙
 
-- `rounded-*` 금지 (예외: `h-3` 이하 컬러 도트 `rounded-full`, 로딩 스피너)
+- ~~`rounded-*` 금지~~ — 2026-10-14 사용자 결정으로 폐지 (공통 부품의 둥근 모서리 그대로 사용, 기존 각진 화면은 고칠 때 자유)
 - `<style>` 블록 금지 → `inputCls` Tailwind 상수
 - `inputCls`: `'w-full bg-black border border-neutral-800 px-[14px] py-[10px] text-white outline-none transition focus:border-[#EC1D25] [color-scheme:dark]'`
 - **MADzine 에디토리얼** (2026-10-06): 목록·기사 모두 검정 바탕 · 헤드라인 세리프(Playfair Display 이탤릭 로고 + Noto Serif KR, `madzine/layout.tsx`에서만 로드) · 자간 넓은 대문자 라벨(`MZ_KICKER`) · `border-white/15` 얇은 선 · 4:5 세로 카드 · 번호 아카이브. 새 MADzine 화면은 `MadzineUI.tsx` 상수·카드를 쓴다 (흰 배경 화면 만들지 않음)

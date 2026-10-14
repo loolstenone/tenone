@@ -102,7 +102,7 @@ export default function MadLeagueMyPage() {
 
     if (!isAuthenticated) return (
         <div className="min-h-screen bg-black">
-            <LoginRequired accentColor="#EC1D25" square />
+            <LoginRequired accentColor="#EC1D25" />
         </div>
     );
 

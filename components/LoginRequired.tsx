@@ -17,10 +17,8 @@ function readableOn(hex: string): string {
     return lum > 0.6 ? "#111" : "#fff";
 }
 
-export function LoginRequired({ accentColor = "#171717", defaultTab = "login", message = "로그인이 필요한 페이지입니다.", square = false }: {
+export function LoginRequired({ accentColor = "#171717", defaultTab = "login", message = "로그인이 필요한 페이지입니다." }: {
     accentColor?: string;
-    /** 모서리 없는 버튼 (MADLeague 디자인 규칙: rounded 금지) */
-    square?: boolean;
     defaultTab?: "login" | "signup";
     message?: string;
 }) {
@@ -31,7 +29,7 @@ export function LoginRequired({ accentColor = "#171717", defaultTab = "login", m
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className={`inline-flex items-center gap-2 ${square ? "" : "rounded-xl"} px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90`}
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: accentColor, color: readableOn(accentColor) }}
             >
                 <LogIn className="h-4 w-4" /> 로그인
