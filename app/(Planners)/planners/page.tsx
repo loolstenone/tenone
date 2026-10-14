@@ -12,7 +12,7 @@ import { HeroCarousel, type HeroSlide } from "@/features/planners/home/HeroCarou
 // 첫 화면 = 몰 (2026-10-14 개편 — "블로그 같다" → 바닥상회 몰 수준). 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은"은 사용자 확정
 export const metadata: Metadata = {
     title: "우리는 모두 기획자다",
-    description: "인공지능 시대, 더욱 기획자가 되어야 한다. 플래너스 AI(인공지능 플래너)와 플래너스 PAD(굿노트 등 손글씨 플래너·서식).",
+    description: "인공지능 시대, 더욱 기획자가 되어야 한다. 플래너'스 AI(인공지능 플래너)와 플래너'스 PAD(굿노트 등 손글씨 플래너·서식).",
 };
 
 const AI_FEATURES = ["오늘·주간·월간·연간 계획", "프로젝트·할 일·간트", "캔버스·마인드맵", "AI 브리핑"];
@@ -36,8 +36,8 @@ export default async function PlannersHome() {
             body: "인공지능 시대, 더욱 기획자가 되어야 한다. AI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.",
             imageUrl: hero?.thumbnail_url ?? null,
             imageHref: hero ? padPath(hero.id) : null,
-            primary: { label: "플래너스 PAD", href: "/planners/pad" },
-            secondary: { label: "플래너스 AI", href: "/planners/ai" },
+            primary: { label: "플래너'스 PAD", href: "/planners/pad" },
+            secondary: { label: "플래너'스 AI", href: "/planners/ai" },
         },
         ...banners.map((b) => ({
             key: b.id,
@@ -57,18 +57,18 @@ export default async function PlannersHome() {
             <section className="mx-auto grid max-w-[1200px] gap-4 px-4 py-10 md:grid-cols-2 md:px-6">
                 <Link href="/planners/ai" className="group flex flex-col justify-between border border-neutral-200 p-6 transition-colors hover:border-[#0F766E] md:p-8">
                     <div>
-                        <p className="text-sm font-bold text-[#0F766E]">플래너스 AI</p>
+                        <p className="text-sm font-bold text-[#0F766E]">플래너'스 AI</p>
                         <h2 className="mt-1 text-2xl font-bold">인공지능 플래너</h2>
-                        <p className="mt-2 break-keep text-neutral-600">플래너스 PAD와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
+                        <p className="mt-2 break-keep text-neutral-600">플래너'스 PAD와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
                     </div>
                     <ul className="mt-6 grid grid-cols-2 gap-2 text-sm text-neutral-700">
                         {AI_FEATURES.map((f) => <li key={f} className="bg-neutral-50 px-3 py-2">{f}</li>)}
                     </ul>
-                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
                 <Link href="/planners/pad" className="group flex flex-col justify-between border border-neutral-200 p-6 transition-colors hover:border-[#0F766E] md:p-8">
                     <div>
-                        <p className="text-sm font-bold text-[#0F766E]">플래너스 PAD</p>
+                        <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
                         <h2 className="mt-1 text-2xl font-bold">손글씨 플래너</h2>
                         <p className="mt-2 break-keep text-neutral-600">굿노트·삼성노트·XODO에서 쓰는 PDF 플래너와 서식 {files.length}종.</p>
                     </div>

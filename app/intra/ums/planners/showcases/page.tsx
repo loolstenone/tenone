@@ -8,7 +8,7 @@ import { adminTitle } from "@/lib/brand-site-menus";
 import { plannersApi } from "@/features/planners/admin/upload";
 import { homeApi, fromLocalInput, liveState, toLocalInput } from "@/features/planners/admin/homeApi";
 
-// Planner's › 진열대 — 첫 화면 상품 진열대 (아임웹 '쇼핑 기획전' 자리). 상품은 플래너스 PAD에서 골라 순서대로
+// Planner's › 진열대 — 첫 화면 상품 진열대 (아임웹 '쇼핑 기획전' 자리). 상품은 플래너'스 PAD에서 골라 순서대로
 interface Showcase { id: string; title: string; description: string | null; file_ids: string[]; sort_order: number; is_published: boolean; starts_at: string | null; ends_at: string | null }
 interface Product { id: string; title: string; category: string; thumbnail_url: string | null; is_published: boolean }
 

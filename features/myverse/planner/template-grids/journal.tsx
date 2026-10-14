@@ -301,7 +301,7 @@ export function StandupGrid({ data, onChange }: { data: FrameworkData; onChange:
             {/* 메타 */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-1 md:grid-cols-2 gap-2">
                 <LabeledInput label="Date" valKey="su_date" data={data} onChange={onChange} placeholder="2026-04-27 (월) 9:00" />
-                <LabeledInput label="Team·Project" valKey="su_team" data={data} onChange={onChange} placeholder="플래너스 코어 / Q2 캠페인" />
+                <LabeledInput label="Team·Project" valKey="su_team" data={data} onChange={onChange} placeholder="플래너'스 코어 / Q2 캠페인" />
             </div>
 
             {/* 가이드 */}

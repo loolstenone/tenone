@@ -1,4 +1,4 @@
-// 플래너스 PAD 후기 (planners_reviews) — 서버 전용 조회. 브라우저 직접 읽기 없음(RLS) → member_id는 밖으로 내보내지 않는다
+// 플래너'스 PAD 후기 (planners_reviews) — 서버 전용 조회. 브라우저 직접 읽기 없음(RLS) → member_id는 밖으로 내보내지 않는다
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface PublicReview {

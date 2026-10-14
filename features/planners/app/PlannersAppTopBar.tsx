@@ -8,7 +8,7 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { AccountAvatar } from "@/components/AccountControls";
 import { APP_BASE, PLANNERS_APP_NAV, isAppNavActive } from "@/features/planners/app/nav";
 
-// 플래너스 AI 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
+// 플래너'스 AI 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
 export function PlannersAppTopBar() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
@@ -21,7 +21,7 @@ export function PlannersAppTopBar() {
                     <Menu className="h-5 w-5" />
                 </button>
                 <Link href="/planners" className="text-base font-black tracking-tight">Planner&apos;s</Link>
-                <Link href={`${APP_BASE}/daily`} className="text-sm text-teal-200 hover:text-white">플래너스 AI</Link>
+                <Link href={`${APP_BASE}/daily`} className="text-sm text-teal-200 hover:text-white">플래너'스 AI</Link>
                 <div className="ml-auto flex items-center gap-1">
                     <Link href={`${APP_BASE}/search`} className={iconCls(`${APP_BASE}/search`)} title="검색" aria-label="검색"><Search className="h-4 w-4" /></Link>
                     <Link href={`${APP_BASE}/notifications`} className={iconCls(`${APP_BASE}/notifications`)} title="알림" aria-label="알림"><Bell className="h-4 w-4" /></Link>
@@ -31,7 +31,7 @@ export function PlannersAppTopBar() {
                 </div>
             </header>
 
-            <UniverseMobileMenu open={open} onClose={() => setOpen(false)} brandName="플래너스 AI" bgClass="bg-[#134E4A]" textTone="light">
+            <UniverseMobileMenu open={open} onClose={() => setOpen(false)} brandName="플래너'스 AI" bgClass="bg-[#134E4A]" textTone="light">
                 {PLANNERS_APP_NAV.map((group) => (
                     <div key={group.label} className="mb-3">
                         <p className="px-4 pb-1 text-xs text-teal-300">{group.label}</p>

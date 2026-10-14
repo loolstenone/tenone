@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 
-// 인트라 플래너스 PAD 관리 — 브라우저 → Storage 직접 업로드 (서명 URL은 /api/intra/planners/files 가 직원에게만 준다)
+// 인트라 플래너'스 PAD 관리 — 브라우저 → Storage 직접 업로드 (서명 URL은 /api/intra/planners/files 가 직원에게만 준다)
 const API = "/api/intra/planners/files";
 
 export interface UploadedFile { path: string; name: string; size: number; type: string; publicUrl: string | null }

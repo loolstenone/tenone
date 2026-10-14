@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import type { PublicReview, ReviewSummary } from "@/lib/planners/reviews";
 
-// 플래너스 PAD 상품 후기 — 아임웹 '구매평' 자리. 바닥상회에서 옮긴 후기는 이름을 가려 표시 (app/(Planners)/CLAUDE.md)
+// 플래너'스 PAD 상품 후기 — 아임웹 '구매평' 자리. 바닥상회에서 옮긴 후기는 이름을 가려 표시 (app/(Planners)/CLAUDE.md)
 export function Reviews({ fileId, reviews, summary }: { fileId: string; reviews: PublicReview[]; summary: ReviewSummary }) {
     const mine = reviews.find((r) => r.mine);
     const [showAll, setShowAll] = useState(false);

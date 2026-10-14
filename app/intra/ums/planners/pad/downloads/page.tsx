@@ -7,7 +7,7 @@ import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/Int
 import { PAD_CATEGORIES } from "@/lib/planners/library-shared";
 import { plannersApi } from "@/features/planners/admin/upload";
 
-// 플래너스 PAD › 받기 현황 — 아임웹 '주문' 자리. 무료 자료라 주문·결제가 없고,
+// 플래너'스 PAD › 받기 현황 — 아임웹 '주문' 자리. 무료 자료라 주문·결제가 없고,
 // 누가 받았는지는 저장하지 않는다(개인정보 최소 수집) → 상품·분류별 다운로드 수만
 interface Row { id: string; category: string; title: string; is_published: boolean; download_count: number; thumbnail_url: string | null }
 
@@ -32,7 +32,7 @@ export default function PlannersPadDownloadsPage() {
 
     return (
         <div>
-            <PageHeader title="받기 현황" description="플래너스 PAD 상품을 내려받은 수 — 누가 받았는지는 저장하지 않고 수만 셉니다." />
+            <PageHeader title="받기 현황" description="플래너'스 PAD 상품을 내려받은 수 — 누가 받았는지는 저장하지 않고 수만 셉니다." />
 
             <div className="mb-8 grid grid-cols-3 gap-4">
                 <StatCard label="전체 받기" value={`${total.toLocaleString()}회`} icon={<Download className="h-4 w-4" />} />

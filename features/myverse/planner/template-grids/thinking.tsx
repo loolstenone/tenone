@@ -20,7 +20,7 @@ export function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
             {/* 메타 */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200 grid grid-cols-3 gap-2">
                 <LabeledInput label="Sprint·기간" valKey="kpt_sprint" data={data} onChange={onChange} placeholder="W18 · 2026-04-21~04-27" />
-                <LabeledInput label="Team·팀" valKey="kpt_team" data={data} onChange={onChange} placeholder="플래너스 코어팀" />
+                <LabeledInput label="Team·팀" valKey="kpt_team" data={data} onChange={onChange} placeholder="플래너'스 코어팀" />
                 <LabeledInput label="Facilitator·진행" valKey="kpt_facilitator" data={data} onChange={onChange} placeholder="이름" />
             </div>
 

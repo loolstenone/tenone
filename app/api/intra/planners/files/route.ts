@@ -1,5 +1,5 @@
 /**
- * 플래너스 PAD 상품 관리 (직원) — 인트라 /intra/ums/planners/pad (아임웹 쇼핑 › 상품 화면 기준, 2026-10-14)
+ * 플래너'스 PAD 상품 관리 (직원) — 인트라 /intra/ums/planners/pad (아임웹 쇼핑 › 상품 화면 기준, 2026-10-14)
  *   GET    ?id=                       → 상품 1건 (비공개 포함)
  *   GET    [?kind=planner|template]   → 목록 (비공개 포함)
  *   POST   { action:'prepare', target:'file'|'media', file:{name,size,type} } → 서명 업로드 URL (브라우저가 Storage에 직접 올림)

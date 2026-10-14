@@ -1,4 +1,4 @@
-// Planner's 플래너스 AI 앱 메뉴 SSOT — MyVerse에서 옮겨 온 핵심 화면만 (app/(Planners)/CLAUDE.md '이전 계획' 4단계)
+// Planner's 플래너'스 AI 앱 메뉴 SSOT — MyVerse에서 옮겨 온 핵심 화면만 (app/(Planners)/CLAUDE.md '이전 계획' 4단계)
 // 개인 OS 화면(캡처·흔적·일기·피드·이력서 등)은 MyVerse(동결)에 남는다 — 여기에 넣지 않는다
 export const APP_BASE = "/planners/app";
 
@@ -45,7 +45,7 @@ export function isAppNavActive(pathname: string, href: string): boolean {
     return pathname === href || pathname.startsWith(href + "/");
 }
 
-/** 플래너스 AI 앱 화면인가 — 사이트 헤더·푸터를 숨길 때 (공식 도메인에서 /app/* 로 들어와도 같은 화면) */
+/** 플래너'스 AI 앱 화면인가 — 사이트 헤더·푸터를 숨길 때 (공식 도메인에서 /app/* 로 들어와도 같은 화면) */
 export function isPlannersAppPath(pathname: string): boolean {
     return /^\/(planners\/)?app(\/|$)/.test(pathname);
 }

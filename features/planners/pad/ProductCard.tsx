@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fileBadges, fileExt, padPath, type PlannersFile } from "@/lib/planners/library-shared";
 
-/** 플래너스 PAD 상품 카드 — 썸네일 · 분류 · 이름 · 형식 · 배지 (바닥상회 몰 카드와 같은 구성, 가격 대신 형식) */
+/** 플래너'스 PAD 상품 카드 — 썸네일 · 분류 · 이름 · 형식 · 배지 (바닥상회 몰 카드와 같은 구성, 가격 대신 형식) */
 export function ProductCard({ file, priority = false, reviewCount = 0 }: { file: PlannersFile; priority?: boolean; reviewCount?: number }) {
     const badges = fileBadges(file);
     return (

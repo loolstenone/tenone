@@ -1,4 +1,4 @@
-// Planner's 자료실(플래너스 PAD) — 서버·클라이언트 공용 (분류 SSOT · 배지 · 표시 형식). 조회는 lib/planners/library.ts(서버)
+// Planner's 자료실(플래너'스 PAD) — 서버·클라이언트 공용 (분류 SSOT · 배지 · 표시 형식). 조회는 lib/planners/library.ts(서버)
 export type PlannersFileKind = "planner" | "template";
 
 export interface PlannersFile {
@@ -21,7 +21,7 @@ export interface PlannersFile {
 /** 분류 표시 순서 (scripts/planners-files-import.mjs CATEGORY와 같은 이름) */
 export const PLANNER_CATEGORIES = ["연간 플래너", "프로젝트 북", "노트 북"] as const;
 export const TEMPLATE_CATEGORIES = ["노트", "스케줄", "프레임워크", "스터디", "스타트업", "아이디어 샤워", "플레이"] as const;
-/** 플래너스 PAD 몰 분류 탭 순서 */
+/** 플래너'스 PAD 몰 분류 탭 순서 */
 export const PAD_CATEGORIES = [...PLANNER_CATEGORIES, ...TEMPLATE_CATEGORIES] as const;
 
 export const PAD_CATEGORY_DESC: Record<string, string> = {

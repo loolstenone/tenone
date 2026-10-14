@@ -1,5 +1,5 @@
 /**
- * 플래너스 PAD 후기 관리 (직원) — 인트라 /intra/ums/planners/reviews (아임웹 '구매평' 화면 기준)
+ * 플래너'스 PAD 후기 관리 (직원) — 인트라 /intra/ums/planners/reviews (아임웹 '구매평' 화면 기준)
  *   GET                         → 전체 후기 (숨김 포함, 최신순)
  *   PATCH  { id, is_visible?, admin_reply? }   → 숨기기·보이기 · 운영자 답글 (빈 문자열 = 답글 지움)
  *   DELETE ?id=

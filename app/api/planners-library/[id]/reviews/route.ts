@@ -1,5 +1,5 @@
 /**
- * 플래너스 PAD 후기 쓰기 — 로그인 회원 (상품 1개당 1개, 다시 쓰면 고침)
+ * 플래너'스 PAD 후기 쓰기 — 로그인 회원 (상품 1개당 1개, 다시 쓰면 고침)
  *   POST   /api/planners-library/{id}/reviews  { rating:1~5, body }
  *   DELETE /api/planners-library/{id}/reviews  → 내 후기 삭제
  * 저장 = member_id만 (이름은 읽을 때 가려서 만든다 — lib/planners/reviews.ts)

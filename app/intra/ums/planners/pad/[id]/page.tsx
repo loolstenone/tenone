@@ -9,7 +9,7 @@ import { brandSiteUrl } from "@/lib/domain-registry";
 import { PAD_CATEGORIES, formatFileSize, padPath } from "@/lib/planners/library-shared";
 import { plannersApi, uploadPlannersAsset, type UploadedFile } from "@/features/planners/admin/upload";
 
-// 플래너스 PAD › 상품 등록·편집 — 아임웹 상품 편집 화면 기준 (사진 · 디지털 파일 · 상품명 · 분류 · 설명 · 상세 이미지 · 공개)
+// 플래너'스 PAD › 상품 등록·편집 — 아임웹 상품 편집 화면 기준 (사진 · 디지털 파일 · 상품명 · 분류 · 설명 · 상세 이미지 · 공개)
 interface Product {
     id: string; category: string; title: string; description: string | null; year: number | null;
     file_name: string; file_size: number; images: string[]; detail_images: string[];
@@ -80,7 +80,7 @@ export default function PlannersPadEditPage({ params }: { params: Promise<{ id: 
 
     return (
         <div className="max-w-4xl">
-            <PageHeader title={isNew ? "상품 등록" : p.title || "상품 편집"} description={isNew ? "플래너스 PAD에 새 플래너·서식을 올립니다." : `플래너스 PAD 상품${p.legacy_badak_no ? ` · 옛 바닥상회 #${p.legacy_badak_no}` : ""} · ${p.download_count.toLocaleString()}회 받음`}>
+            <PageHeader title={isNew ? "상품 등록" : p.title || "상품 편집"} description={isNew ? "플래너'스 PAD에 새 플래너·서식을 올립니다." : `플래너'스 PAD 상품${p.legacy_badak_no ? ` · 옛 바닥상회 #${p.legacy_badak_no}` : ""} · ${p.download_count.toLocaleString()}회 받음`}>
                 <div className="flex items-center gap-3">
                     <Link href="/intra/ums/planners/pad" className="text-xs text-neutral-400 hover:text-neutral-700">← 상품 목록</Link>
                     {!isNew && (

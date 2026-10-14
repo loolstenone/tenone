@@ -6,7 +6,7 @@ import { Loader2, Search, Star } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { adminTitle } from "@/lib/brand-site-menus";
 
-// 플래너스 PAD › 후기 — 아임웹 쇼핑 › 구매평 화면 기준 (전체·답글 대기·숨김 · 검색 · 운영자 답글 · 숨기기)
+// 플래너'스 PAD › 후기 — 아임웹 쇼핑 › 구매평 화면 기준 (전체·답글 대기·숨김 · 검색 · 운영자 답글 · 숨기기)
 interface Review {
     id: string; fileId: string; source: "badak" | "site"; name: string; edition: string | null; rating: number; body: string;
     isVisible: boolean; adminReply: string | null; createdAt: string; fileTitle: string; thumbnail: string | null;
@@ -47,7 +47,7 @@ export default function PlannersReviewsAdmin() {
 
     return (
         <div>
-            <PageHeader title={adminTitle("/intra/ums/planners/reviews", "후기")} description="플래너스 PAD 상품 후기 — 바닥상회에서 옮긴 후기(이름 가림)와 사이트 회원 후기. 숨기면 사이트에 보이지 않습니다." />
+            <PageHeader title={adminTitle("/intra/ums/planners/reviews", "후기")} description="플래너'스 PAD 상품 후기 — 바닥상회에서 옮긴 후기(이름 가림)와 사이트 회원 후기. 숨기면 사이트에 보이지 않습니다." />
             {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
             <div className="mb-4 flex gap-1 border-b border-neutral-200 text-sm">

@@ -50,7 +50,7 @@ export const UNIVERSE_ROLE_GROUPS: ReadonlyArray<UniverseRoleGroup> = [
         num: "04", role: "사람을 키우고 연결하는", color: "#D85A30",
         brands: [
             { name: "HeRo", kr: "히어로", desc: "데이터 기반 인재 발굴·매칭", href: "/hero" },
-            { name: "Planner's", kr: "플래너스", desc: "AI 시대 기획자 교육", href: "/planners" },
+            { name: "Planner's", kr: "플래너'스", desc: "AI 시대 기획자 교육", href: "/planners" },
         ]
     },
     {

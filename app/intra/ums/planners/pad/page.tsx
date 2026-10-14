@@ -9,7 +9,7 @@ import { adminTitle } from "@/lib/brand-site-menus";
 import { PAD_CATEGORIES, fileBadges, fileExt, formatFileSize, padPath } from "@/lib/planners/library-shared";
 import { plannersApi } from "@/features/planners/admin/upload";
 
-// 플래너스 PAD › 상품 — 아임웹 쇼핑 › 상품 화면 기준 (상태 탭 · 검색 · 썸네일 목록 · 바로 공개 전환). 원천 planners_files
+// 플래너'스 PAD › 상품 — 아임웹 쇼핑 › 상품 화면 기준 (상태 탭 · 검색 · 썸네일 목록 · 바로 공개 전환). 원천 planners_files
 interface Row {
     id: string; category: string; title: string; year: number | null; file_name: string; file_size: number;
     thumbnail_url: string | null; images: string[]; is_published: boolean; download_count: number; legacy_badak_no: number | null;
@@ -50,7 +50,7 @@ export default function PlannersPadProductsPage() {
 
     return (
         <div>
-            <PageHeader title={adminTitle("/intra/ums/planners/pad", "플래너스 PAD")} description="상품 — 사이트 플래너스 PAD 몰에 진열되는 플래너·서식. 비공개는 사이트에 보이지 않습니다.">
+            <PageHeader title={adminTitle("/intra/ums/planners/pad", "플래너'스 PAD")} description="상품 — 사이트 플래너'스 PAD 몰에 진열되는 플래너·서식. 비공개는 사이트에 보이지 않습니다.">
                 <div className="flex items-center gap-3">
                     <a href={brandSiteUrl("planners", "/planners/pad")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700">
                         <ExternalLink className="h-3.5 w-3.5" /> 사이트에서 보기
