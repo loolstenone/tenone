@@ -77,7 +77,7 @@ async function generateUniqueHandle(
         handle = safeBase + suffix;
         suffix++;
     }
-    return safeBase + Date.now().toString().slice(-4);
+    return safeBase.slice(0, 16) + Date.now().toString().slice(-4);
 }
 
 /**
