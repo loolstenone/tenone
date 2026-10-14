@@ -46,7 +46,7 @@ export function ConsentGate() {
                 <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
                     <h2 className="text-lg font-bold text-neutral-900">Ten:One 회원가입</h2>
                     <p className="text-sm text-neutral-500 mt-1 break-keep">
-                        <span className="font-medium text-neutral-800">{pendingSignup.email}</span> 계정은 아직 가입하지 않았습니다.
+                        <span className="font-medium text-neutral-800">{pendingSignup.email || "이 소셜"}</span> 계정은 아직 가입하지 않았습니다.
                         가입하면 이 계정 하나로 Ten:One™ Universe의 서비스를 이용할 수 있습니다.
                     </p>
                     <div className="mt-4">

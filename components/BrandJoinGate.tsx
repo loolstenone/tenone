@@ -60,6 +60,9 @@ export function BrandJoinGate() {
     const handleDecline = async () => {
         // 이 도메인 세션만 종료 (scope local) — 다른 사이트 로그인은 유지
         await createClient().auth.signOut({ scope: "local" }).catch(() => {});
+        // 10분 동안 허브에서 로그인을 다시 넘겨받지 않는다 — 그러지 않으면 새로고침 직후 로그인 창이 SSO로 다시 로그인시켜
+        // 이 동의 창이 또 뜨는 반복이 된다 (2026-10-15 QA, lib/sso.ts shouldTrySso)
+        document.cookie = "t1_sso_none=1; path=/; max-age=600; samesite=lax; secure";
         window.location.reload();
     };
 

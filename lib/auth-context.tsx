@@ -63,28 +63,24 @@ function loadUserFromStorage(): User | null {
     }
 }
 
-/** 이메일로 고유 handle 생성 (중복이면 suffix 추가) */
+/**
+ * 기본 핸들 = 무작위 (예: u_k3f9x2m1) — 이메일 앞부분으로 만들면 공개 프로필 주소(/profile/{handle})에
+ * 이메일 일부가 동의 없이 드러난다 (2026-10-15 QA). 사용자는 프로필에서 원하는 핸들로 바꿀 수 있다.
+ * DB 제약 members_handle_format = ^[a-z0-9_]{3,20}$
+ */
 async function generateUniqueHandle(
-    email: string,
+    _seed: string,
     supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>,
 ): Promise<string> {
-    // DB 제약 members_handle_format = ^[a-z0-9_]{3,20}$ — 점·하이픈을 남기거나 20자를 넘기면 회원 생성 자체가 실패한다
-    // (2026-10-15 이메일에 점이 있는 Google 계정이 로그인은 되는데 회원·동의 기록이 만들어지지 않던 사고). 숫자 꼬리 3자리 자리를 남겨 17자
-    const base = email.split('@')[0]
-        .toLowerCase()
-        .replace(/[.-]/g, '_')
-        .replace(/[^a-z0-9_]/g, '')
-        .slice(0, 17);
-    const safeBase = base.length >= 3 ? base : (base + '0000').slice(0, 4);
-    let handle = safeBase;
-    let suffix = 2;
-    while (suffix < 1000) {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const bytes = new Uint8Array(8);
+        crypto.getRandomValues(bytes);
+        const handle = 'u_' + Array.from(bytes, b => alphabet[b % alphabet.length]).join('');
         const { data } = await supabase.from('members').select('id').eq('handle', handle).maybeSingle();
         if (!data) return handle;
-        handle = safeBase + suffix;
-        suffix++;
     }
-    return safeBase.slice(0, 16) + Date.now().toString().slice(-4);
+    return 'u_' + Date.now().toString(36).slice(-10);
 }
 
 /**
@@ -204,7 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .from('members')
             .insert({
                 auth_id: sessionUser.id,
-                email: sessionUser.email || '',
+                // 이메일을 주지 않은 카카오 계정 — members.email은 필수·고유라 빈 값이면 두 번째부터 가입 실패 → 계정별 자리표시 주소(.invalid는 발송 불가 도메인)
+                email: sessionUser.email || `${sessionUser.id}@no-email.invalid`,
                 name: userName,
                 handle: oauthHandle,
                 account_type: initialType,
@@ -340,8 +337,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         syncUserFromSession(session.user),
                         new Promise(r => setTimeout(r, 3000))
                     ]);
-                } else {
-                    // 세션 없음 or 타임아웃 → localStorage에 남은 stale 데이터 정리
+                } else if (sessionResult !== null) {
+                    // 세션 없음 → localStorage에 남은 stale 데이터 정리
+                    // (타임아웃은 '없음'이 아니다 — 느린 네트워크에서 로그인 회원을 로그아웃으로 보이게 하지 않는다, 2026-10-15)
                     if (localStorage.getItem(STORAGE_KEY)) {
                         setUser(null);
                         localStorage.removeItem(STORAGE_KEY);
