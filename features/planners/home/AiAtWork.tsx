@@ -1,4 +1,4 @@
-import { Check, Sparkles } from "lucide-react";
+import { ArrowDown, Check, Sparkles } from "lucide-react";
 
 // 첫 화면 슬라이드 오른쪽 — 플래너'스 AI가 실제로 하는 일을 그림으로 (앱 화면 캡처가 아닌 설명용 예시)
 // 장면 = 실제 기능 그대로: 생각 쏟아내기(BrainDump) · 못 끝낸 일 다시 놓기(AutoCarry) · 손글씨 옮기기(handwriting) · 오늘의 세 가지(DayCoach)
@@ -54,17 +54,20 @@ const SCENES: Record<AiScene, { inputLabel: string; input: string; output: strin
 export function AiAtWork({ scene = "dump" }: { scene?: AiScene }) {
     const s = SCENES[scene];
     return (
-        <div className="mx-auto w-full max-w-[520px] space-y-4" aria-hidden="true">
-            <div className="bg-white/10 p-6 md:p-8">
-                <p className="text-sm text-teal-200">{s.inputLabel}</p>
-                <p className="mt-3 break-keep leading-relaxed text-white/90 md:text-lg">{s.input}</p>
+        <div className="mx-auto w-full max-w-[520px] space-y-2 md:space-y-4" aria-hidden="true">
+            <div className="bg-white/10 px-5 py-4 md:p-8">
+                <p className="text-xs text-teal-200 md:text-sm">{s.inputLabel}</p>
+                <p className="mt-1.5 break-keep text-[15px] leading-relaxed text-white/90 md:mt-3 md:text-lg">{s.input}</p>
             </div>
 
-            <div className="bg-white p-6 text-neutral-900 md:p-8">
-                <p className="flex items-center gap-2 text-sm font-bold text-[#0F766E]">
+            {/* 비유의 방향: 쏟아 낸 것 → AI가 정리한 것 */}
+            <div className="flex justify-center text-teal-200/70"><ArrowDown className="h-4 w-4 md:h-5 md:w-5" /></div>
+
+            <div className="bg-white px-5 py-4 text-neutral-900 md:p-8">
+                <p className="flex items-center gap-2 text-xs font-bold text-[#0F766E] md:text-sm">
                     <Sparkles className="h-4 w-4" /> {s.output}
                 </p>
-                <ul className="mt-5 space-y-3">
+                <ul className="mt-3 space-y-2 text-[15px] md:mt-5 md:space-y-3 md:text-base">
                     {s.rows.map((r) => (
                         <li key={r.text} className="flex items-center gap-4">
                             <span className="flex h-5 w-5 shrink-0 items-center justify-center border border-neutral-300">
@@ -75,7 +78,7 @@ export function AiAtWork({ scene = "dump" }: { scene?: AiScene }) {
                         </li>
                     ))}
                 </ul>
-                <p className="mt-6 border-t border-neutral-100 pt-4 text-sm text-neutral-500">{s.foot}</p>
+                <p className="mt-6 hidden border-t border-neutral-100 pt-4 text-sm text-neutral-500 md:block">{s.foot}</p>
             </div>
         </div>
     );
