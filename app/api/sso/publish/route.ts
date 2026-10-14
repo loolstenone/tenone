@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/lib/login-href';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { isAllowedSiteOrigin, mintSsoToken, ssoSupabase, SSO_HUB_ORIGIN } from '@/lib/sso-server';
 
 /**
@@ -17,6 +18,10 @@ export async function GET(request: NextRequest) {
 
     const { data: { user } } = await ssoSupabase(request, NextResponse.next()).auth.getUser();
     if (!user?.email) return fallback;
+
+    // 회원가입(동의)을 마친 계정만 허브에 등록 — 소셜 첫 로그인 직후(가입 화면 전)에는 다른 사이트로 로그인을 넘기지 않는다 (2026-10-15)
+    const { data: member } = await createAdminClient().from('members').select('id').eq('auth_id', user.id).maybeSingle();
+    if (!member) return fallback;
 
     const token = await mintSsoToken({
         userId: user.id,

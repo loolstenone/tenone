@@ -299,20 +299,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return u;
             }
 
-            // members 조회/생성 실패 → 최소 로그인 처리
-            const fallbackUser: User = {
-                id: sessionUser.id,
-                name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || '사용자',
-                email: sessionUser.email || '',
-                role: 'Member' as const,
-                accountType: 'member' as const,
-                avatarInitials: (sessionUser.email?.substring(0, 2) || 'U').toUpperCase(),
-                brandAccess: [],
-                systemAccess: [],
-            };
-            setUser(fallbackUser);
-            saveUserToStorage(fallbackUser);
-            return fallbackUser;
+            // 조회 실패(네트워크 등) → 지금 상태(캐시)를 그대로 두고 다음 기회에 다시 확인
+            // 생성 실패 → 로그인으로 보지 않는다. 회원 정보 없는 임시 사용자를 만들면 동의·활동이 어디에도 저장되지 않는다 (2026-10-15)
+            if (lookupError) {
+                console.error('[Auth] 회원 조회 실패:', lookupError.message);
+                return user;
+            }
+            setUser(null);
+            localStorage.removeItem(STORAGE_KEY);
+            return null;
         } catch {
             return null;
         } finally {
@@ -525,37 +520,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 프로필 업데이트
     const updateProfile = useCallback((updates: Partial<User>) => {
-        setUser(prev => {
-            if (!prev) return prev;
-            const updated = { ...prev, ...updates };
-            saveUserToStorage(updated);
-
-            // Supabase members 테이블도 업데이트 (비동기, 에러 무시)
-            supabase.from('members')
-                .update({
-                    name: updated.name,
-                    phone: updates.phone,
-                    bio: updates.bio,
-                    company: updates.company,
-                    avatar_initials: updates.avatarInitials,
-                    avatar_url: updates.avatarUrl,
-                    newsletter_subscribed: updates.newsletterSubscribed,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('email', updated.email)
-                .then(() => {});
-
-            return updated;
-        });
-    }, [supabase]);
+        if (!user) return;
+        const updated = { ...user, ...updates };
+        setUser(updated);
+        saveUserToStorage(updated);
+        // members 행은 id로 찾는다 — 이메일로 찾으면 같은 이메일의 다른 행을 고칠 수 있다 (데이터 계약 1, 2026-10-15)
+        // DB 호출은 setState 밖에서 (StrictMode에서 두 번 실행되지 않게)
+        supabase.from('members')
+            .update({
+                name: updated.name,
+                phone: updates.phone,
+                bio: updates.bio,
+                company: updates.company,
+                avatar_initials: updates.avatarInitials,
+                avatar_url: updates.avatarUrl,
+                newsletter_subscribed: updates.newsletterSubscribed,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', user.id)
+            .then(({ error }: { error: { message: string } | null }) => { if (error) console.error('[Auth] 프로필 저장 실패:', error.message); });
+    }, [supabase, user]);
 
     // 동의 기록 (소셜 첫 가입·기존 회원) — ConsentGate에서 호출
     const recordConsent = useCallback(async (consent: MemberConsent) => {
         if (!user) return { success: false, error: '로그인이 필요합니다.' };
-        const { error } = await supabase.from('members')
+        const { data: rows, error } = await supabase.from('members')
             .update({ consent, newsletter_subscribed: consent.marketing, updated_at: new Date().toISOString() })
-            .eq('id', user.id);
-        if (error) return { success: false, error: '동의 저장에 실패했습니다. 다시 시도해주세요.' };
+            .eq('id', user.id)
+            .select('id');
+        // 바뀐 행이 없으면 실패 — 오류 없이 0행이면 저장된 것처럼 보이던 문제 (2026-10-15)
+        if (error || !rows?.length) return { success: false, error: '동의 저장에 실패했습니다. 다시 시도해주세요.' };
         const updated = { ...user, consent, newsletterSubscribed: consent.marketing };
         setUser(updated);
         saveUserToStorage(updated);

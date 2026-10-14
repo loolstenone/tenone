@@ -159,7 +159,7 @@ export async function middleware(request: NextRequest) {
                 url.pathname = '/intra-gate';
                 url.search = '';
                 const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-                response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+                response.cookies.getAll().forEach(c => rw.cookies.set(c));
                 rw.headers.set('Cache-Control', 'private, no-store');
                 return rw;
             }
@@ -177,7 +177,7 @@ export async function middleware(request: NextRequest) {
             ? `/myverse/${atHandleMatch[1]}`
             : `/profile/${atHandleMatch[1]}`;
         const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-        response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c));
         return rewrite;
     }
 
@@ -187,7 +187,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone();
         url.pathname = `/myverse/${myverseAtMatch[1]}${myverseAtMatch[2] ?? ""}`;
         const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-        response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c));
         return rewrite;
     }
 
@@ -197,7 +197,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone();
         url.pathname = `/profile/${atProfileMatch[1]}`;
         const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-        response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c));
         return rewrite;
     }
 
@@ -230,7 +230,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone();
         url.pathname = '/myverse/login';
         const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-        response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+        response.cookies.getAll().forEach(c => rw.cookies.set(c));
         return rw;
     }
 
@@ -250,7 +250,7 @@ export async function middleware(request: NextRequest) {
             const url = request.nextUrl.clone();
             url.pathname = `/myverse/app${pathname}`;
             const rw = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-            response.cookies.getAll().forEach(c => rw.cookies.set(c.name, c.value));
+            response.cookies.getAll().forEach(c => rw.cookies.set(c));
             return rw;
         }
     }
@@ -266,7 +266,7 @@ export async function middleware(request: NextRequest) {
     const rewriteResponse = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     // 세션 쿠키를 rewrite 응답에도 복사
     response.cookies.getAll().forEach(cookie => {
-        rewriteResponse.cookies.set(cookie.name, cookie.value);
+        rewriteResponse.cookies.set(cookie); // path·maxAge·sameSite 등 옵션까지 (이름·값만 넘기면 Path가 요청 디렉터리로 저장돼 세션이 경로마다 갈림, 2026-10-15)
     });
     return rewriteResponse;
 }

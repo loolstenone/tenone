@@ -41,14 +41,15 @@ export async function getAuthState(): Promise<AuthState> {
         baseMember = adminMember;
     }
 
-    // 3) auth_id 미매핑 → email로 fallback
-    if (!baseMember && user.email) {
+    // 3) auth_id 미매핑 → email로 fallback — api-guard와 같은 규칙: 아직 계정이 연결되지 않은 행 + 인증된 이메일일 때만
+    //    (그전엔 다른 계정에 묶인 행도 이메일만 같으면 가져와 남의 회원 정보로 앱이 열릴 수 있었음 — 데이터 계약 1, 2026-10-15)
+    if (!baseMember && user.email && user.email_confirmed_at) {
         const { data: byEmail } = await admin
             .from("members").select(BASE)
             .eq("email", user.email)
-            .order("created_at", { ascending: false })
-            .limit(1);
-        baseMember = byEmail?.[0] ?? null;
+            .is("auth_id", null)
+            .maybeSingle();
+        baseMember = byEmail ?? null;
     }
 
     if (!baseMember) return { kind: "no_member", email: user.email! };

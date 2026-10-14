@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { publishLoginToHub } from "@/lib/sso";
 import {
     SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent,
     type SignupConsentValue,
@@ -31,7 +32,8 @@ export function ConsentGate() {
             const result = await completeSignup(buildMemberConsent(value, "social"));
             setSaving(false);
             if (!result.success) { setError(result.error || "가입 처리에 실패했습니다."); return; }
-            router.refresh(); // 서버가 로그인 여부를 판단하는 화면도 바로 회원으로
+            // 독립 도메인이면 허브에도 등록(다른 유니버스 사이트에서 다시 로그인 불필요) — 그 외엔 서버 판단 화면을 다시 그린다
+            if (!publishLoginToHub()) router.refresh();
         };
         const leave = async () => {
             setSaving(true);

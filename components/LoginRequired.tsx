@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LogIn } from "lucide-react";
 import { LoginModal } from "@/components/LoginModal";
+import { useAuth } from "@/lib/auth-context";
 
 /**
  * 로그인이 필요한 화면 표준 (CLAUDE.md §1.2.1 원칙 A) — 현재 페이지 위에 LoginModal을 바로 띄운다.
@@ -23,6 +24,7 @@ export function LoginRequired({ accentColor = "#171717", defaultTab = "login", m
     message?: string;
 }) {
     const [open, setOpen] = useState(true);
+    const { pendingSignup } = useAuth();
     return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
             <p className="text-sm text-neutral-500">{message}</p>
@@ -34,7 +36,8 @@ export function LoginRequired({ accentColor = "#171717", defaultTab = "login", m
             >
                 <LogIn className="h-4 w-4" /> 로그인
             </button>
-            <LoginModal isOpen={open} onClose={() => setOpen(false)} accentColor={accentColor} defaultTab={defaultTab} />
+            {/* 회원가입 화면(소셜 첫 로그인)이 떠 있으면 로그인 창을 겹쳐 띄우지 않는다 */}
+            <LoginModal isOpen={open && !pendingSignup} onClose={() => setOpen(false)} accentColor={accentColor} defaultTab={defaultTab} />
         </div>
     );
 }
