@@ -7,7 +7,7 @@ import { PlannersPageHero, PlannersSectionTitle, PLANNERS_SECTION } from "@/feat
 // 기능 이름·설명은 실제 기능 그대로 (app/(Planners)/CLAUDE.md 플래너'스 AI 1~3단계 · 내 AI에 연결)
 // ❌ 가격·요금 표기 금지 (베타 테스트) · ❌ '열기' 버튼 (앱 입구 = 유틸리티바 '내 플래너', 사용자 "중복으로 또 묻는 느낌")
 export const metadata: Metadata = {
-    title: "AI",
+    title: "플래너'스 AI",
     description: "생각하고, 기록하고, 계획하고, 꾸려 가는 사람을 돕는 인공지능 플래너. 생각 쏟아내기, 손글씨 옮기기, 목표 나누기, 못 끝낸 일 다시 놓기, 하루와 한 주 돌아보기.",
 };
 

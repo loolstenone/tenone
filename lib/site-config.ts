@@ -503,8 +503,8 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         universeLabel: 'Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
         nav: [
-            { name: 'AI', href: '/planners/ai' },
-            { name: 'PAD', href: '/planners/pad' },
+            { name: "플래너'스 AI", href: '/planners/ai' },
+            { name: "플래너'스 PAD", href: '/planners/pad' },
             { name: '이야기', href: '/planners/stories' },
             { name: '기획자 과정', href: '/planners/projects' },
         ],

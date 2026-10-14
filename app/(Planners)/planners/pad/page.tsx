@@ -7,7 +7,7 @@ import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/featur
 
 // 플래너'스 PAD (곁들임 제품, 2026-10-14 AI 중심 개편) — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
 export const metadata: Metadata = {
-    title: "PAD",
+    title: "플래너'스 PAD",
     description: "아이패드·갤럭시 탭의 굿노트·삼성노트·XODO에서 쓰는 손글씨 플래너와 노트·프레임워크 서식. 로그인하면 누구나 받을 수 있습니다.",
 };
 
