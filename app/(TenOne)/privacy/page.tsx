@@ -15,7 +15,7 @@ const PROCESSORS = [
     { name: "Cloudflare, Inc.", country: "미국", task: "자동 가입·로그인 방지 (봇 탐지)", items: "IP, 브라우저·기기 정보" },
     { name: "Resend, Inc.", country: "미국", task: "이메일 발송 (가입 인증·서비스 안내·뉴스레터)", items: "이메일, 이름" },
     { name: "Google LLC", country: "미국", task: "방문 통계 분석 (Google Analytics)", items: "쿠키 식별자, 서비스 이용 기록, 접속 정보" },
-    { name: "Anthropic, PBC · OpenAI, L.L.C.", country: "미국", task: "AI 기능 제공 (진단 결과 해석, AI 코칭·요약 등) — 해당 기능 이용 시에만", items: "이용자가 AI 기능에 입력하거나 해당 기능 처리에 필요한 정보" },
+    { name: "Anthropic, PBC · OpenAI, L.L.C.", country: "미국", task: "AI 기능 제공 (진단 결과 해석, AI 코칭·요약, 플래너 기록 정리·회고 등) — 해당 기능 이용 시에만", items: "이용자가 AI 기능에 입력하거나 해당 기능 처리에 필요한 정보 (손글씨·노트 사진 포함 — 회사는 사진을 저장하지 않음)" },
 ];
 
 const BRAND_ITEMS = [
@@ -27,6 +27,7 @@ const BRAND_ITEMS = [
     { brand: "Badak", items: "직무·산업·경력 수준, 모임·커뮤니티 활동 기록" },
     { brand: "뉴스레터", items: "이메일 (회원 가입 없이 구독 가능)" },
     { brand: "RooK (2026년 10월 14일 시행)", items: "RooKie 지원: 이름·이메일·연락처, 이력서·포트폴리오 파일, 참고 URL · 상담 / 문의: 이름·이메일·연락처·회사, 문의 내용" },
+    { brand: "Planner's (2026년 10월 21일 시행)", items: "플래너 기록: 연간·월간·주간·일간 계획, 할 일·일정·메모, 프로젝트·목표, 회고 · PAD 후기: 별점·내용 (후기에는 이름을 가려 표시하며, 서식을 누가 받았는지는 기록하지 않고 받은 횟수만 셉니다) · [선택] AI 기능(유료 회원): 생각 쏟아내기에 입력한 글, 손글씨·노트 사진(정리 후 저장하지 않음) · [선택] 외부 캘린더 연동: 연동 인증 정보와 가져온 일정 · [선택] 내 AI에 연결: 이용자가 직접 연결한 AI 서비스(Claude·ChatGPT 등)에 이용자의 요청에 따라 플래너 기록을 읽기·할 일 추가 범위로 전달하며, 연결은 설정에서 언제든 끊을 수 있음 · 음성 입력은 이용자 브라우저의 음성 인식 기능을 사용하며 회사는 음성을 받지 않음" },
     { brand: "문의·제안", items: "이름, 이메일, 연락처, 소속, 문의 내용" },
 ];
 
@@ -49,14 +50,14 @@ export default function PrivacyPage() {
                 <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Privacy Policy</p>
                 <h1 className="text-3xl font-light tracking-tight mb-4">개인정보처리방침</h1>
                 <p className="text-xs mb-3" style={{ color: "var(--tn-text-sub)" }}>시행일: {EFFECTIVE_DATE}</p>
-                {/* 변경 예정 공지 — 시행 7일 전부터 (12조). 시행일이 지나면 공지를 지우고 LEGAL_DOCUMENTS.privacy 버전·시행일 갱신 */}
+                {/* 변경 예정 공지 — 시행 7일 전부터 (12조). 시행일이 지나면 공지를 지우고 LEGAL_DOCUMENTS.privacy 버전·시행일 갱신 · 다음: 10-21 Planner's 시행 */}
                 <p className="text-xs mb-10 px-3 py-2 border" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
-                    변경 예정 공지 (2026년 10월 7일): 2026년 10월 14일부터 RooK 서비스의 수집 항목(RooKie 지원 서류 등)과 행사·프로그램 참가 신청서 항목이 추가됩니다.
+                    변경 예정 공지 (2026년 10월 14일): 2026년 10월 21일부터 Planner&apos;s 서비스의 수집 항목(플래너 기록, PAD 후기, AI 기능·외부 캘린더 연동·내 AI 연결 시 처리 정보)과 AI 기능 처리 위탁 업무(플래너 기록 정리·회고, 손글씨·노트 사진 인식)가 추가됩니다.
                 </p>
 
                 <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--tn-text-sub)" }}>
                     <p>
-                        {COMPANY_INFO.legalName}({COMPANY_INFO.brandName}, 사업자등록번호 {COMPANY_INFO.businessNumber}, 이하 &quot;회사&quot;)은 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak 등
+                        {COMPANY_INFO.legalName}({COMPANY_INFO.brandName}, 사업자등록번호 {COMPANY_INFO.businessNumber}, 이하 &quot;회사&quot;)은 회사가 운영하는 모든 서비스(tenone.biz 및 HeRo, MADLeague, MADLeap, Badak, RooK, Planner&apos;s 등
                         회사가 운영하는 각 브랜드 서비스와 그 도메인, 이하 &quot;서비스&quot;)에 이 개인정보처리방침을 공통으로 적용합니다.
                         회사는 「개인정보 보호법」 등 관련 법령을 준수하며, 하나의 Ten:One 계정으로 여러 서비스를 이용하더라도
                         각 서비스는 그 서비스의 목적 범위 안에서만 개인정보를 처리합니다.
@@ -190,6 +191,7 @@ export default function PrivacyPage() {
                     <Section title="12. 개인정보처리방침의 변경">
                         <p>이 방침을 변경하는 경우 시행 7일 전(이용자 권리에 중요한 변경은 30일 전)부터 서비스 화면에 공지합니다.</p>
                         <ul className="list-disc pl-5 mt-2 space-y-0.5">
+                            <li>2026년 10월 21일 (10월 14일 공지): Planner&apos;s 서비스 수집 항목 추가 (플래너 기록, PAD 후기, AI 기능·외부 캘린더 연동·내 AI 연결 선택 항목) · AI 처리 위탁 업무에 플래너 기록 정리·회고, 손글씨·노트 사진 인식(사진 비저장) 추가</li>
                             <li>2026년 10월 13일 (서비스 공개 전 개발 단계 변경): HeRo 일반 회원·기업 회원 항목 분리 · 진단(HIT) 수집 항목 구체화·추가 (성장 배경 자기 응답, 생애주기별 진단, 준비 체크리스트) · 진단 결과의 본인 전용 원칙 · 검사 응답의 익명 통계 이용(검사 신뢰도·타당도 개선) · 제안 받기·팀 진단(선택) · 면접·인터뷰 제안 응답 시 기업 제공 · MADLeap 지원서 항목 추가</li>
                             <li>2026년 10월 14일 (10월 7일 공지): RooK 서비스 수집 항목 추가 (RooKie 지원 이력서·포트폴리오 파일·참고 URL, 상담 / 문의) · 행사·프로그램 참가 신청서(신청서별 고지 항목) 추가</li>
                             <li>2026년 10월 5일: 유니버스 전 서비스 공통 적용, 처리 위탁·국외 이전, 서비스별 수집 항목, 보유 기간 세분화, 만 14세 미만, 안전성 확보 조치, 쿠키 항목 추가</li>
