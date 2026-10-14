@@ -5,13 +5,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PROGRAM_CONSENT_ITEMS } from "@/lib/programs/consent-text";
 
-export function ConsentItems() {
+/** dark=false(밝은 배경)에서도 읽히게 — 동의 고지가 안 보이는 채로 동의를 받지 않는다 (2026-10-15 Planner's 신청 폼) */
+export function ConsentItems({ dark = true }: { dark?: boolean }) {
     return (
-        <dl className="space-y-2 border border-neutral-800 p-4 text-xs leading-relaxed">
+        <dl className={`space-y-2 border p-4 text-xs leading-relaxed ${dark ? "border-neutral-800" : "border-neutral-200"}`}>
             {PROGRAM_CONSENT_ITEMS.map(i => (
                 <div key={i.label} className="flex gap-3">
-                    <dt className="w-10 shrink-0 font-bold text-neutral-400">{i.label}</dt>
-                    <dd className="text-neutral-300">{i.value}</dd>
+                    <dt className={`w-10 shrink-0 font-bold ${dark ? "text-neutral-400" : "text-neutral-500"}`}>{i.label}</dt>
+                    <dd className={dark ? "text-neutral-300" : "text-neutral-700"}>{i.value}</dd>
                 </div>
             ))}
         </dl>

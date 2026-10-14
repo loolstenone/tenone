@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User, Lock, X, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import CommentSection from "./CommentSection";
 import type { Post, Attachment } from "@/types/board";
@@ -81,7 +82,7 @@ export default function PostDetail({
     const [likeCount, setLikeCount] = useState(post.likeCount);
     const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
     const [shareToast, setShareToast] = useState(false);
-    const [loginToast, setLoginToast] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false); // 비로그인 좋아요·북마크 = 그 자리에서 로그인 창 (§1.2.1, 2026-10-15)
 
     // Lightbox
     const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -117,7 +118,7 @@ export default function PostDetail({
     }, []);
 
     const handleLike = async () => {
-        if (!user) { setLoginToast(true); setTimeout(() => setLoginToast(false), 2000); return; }
+        if (!user) { setLoginOpen(true); return; }
         try {
             const res = await fetch("/api/board/like", {
                 method: "POST",
@@ -135,7 +136,7 @@ export default function PostDetail({
     };
 
     const handleBookmark = async () => {
-        if (!user) { setLoginToast(true); setTimeout(() => setLoginToast(false), 2000); return; }
+        if (!user) { setLoginOpen(true); return; }
         try {
             const res = await fetch("/api/board/bookmark", {
                 method: "POST",
@@ -438,11 +439,7 @@ export default function PostDetail({
                     URL이 복사되었습니다
                 </div>
             )}
-            {loginToast && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 text-sm rounded-lg shadow-lg z-50 bg-neutral-800 text-white">
-                    로그인이 필요합니다
-                </div>
-            )}
+            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor={accentColor} />
         </div>
     );
 }

@@ -27,7 +27,8 @@ export function InviteJoin({ code, accentColor = "#EC1D25" }: { code: string; ac
     const [busy, setBusy] = useState(false);
 
     const load = useCallback(async () => {
-        const res = await fetch(`/api/programs/invite?code=${encodeURIComponent(code)}`);
+        const res = await fetch(`/api/programs/invite?code=${encodeURIComponent(code)}`).catch(() => null);
+        if (!res) { setError("연결이 끊겼습니다. 잠시 후 새로고침해 주세요."); return; }
         const d = await res.json().catch(() => ({}));
         if (!res.ok) { setError(d.error ?? "초대 정보를 불러오지 못했습니다."); return; }
         setP(d);
@@ -37,11 +38,16 @@ export function InviteJoin({ code, accentColor = "#EC1D25" }: { code: string; ac
 
     const join = async () => {
         setBusy(true); setError("");
-        const res = await fetch("/api/programs/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, consent: agree }) });
-        const d = await res.json().catch(() => ({}));
-        setBusy(false);
-        if (!res.ok) { setError(d.error ?? "합류하지 못했습니다."); return; }
-        router.push(d.room);
+        try {
+            const res = await fetch("/api/programs/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, consent: agree }) });
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok) { setError(d.error ?? "합류하지 못했습니다."); return; }
+            router.push(d.room);
+        } catch {
+            setError("연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.");
+        } finally {
+            setBusy(false);
+        }
     };
 
     if (error && !p) return <Box><h1 className="text-2xl font-black">초대 링크를 열 수 없습니다</h1><p className="mt-3 text-sm text-neutral-500">{error}</p></Box>;

@@ -6,5 +6,5 @@ export const metadata = { title: '인증서 진위 확인', robots: { index: fal
 
 export default async function Page({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  return <CertificateVerify code={code} theme={PROGRAM_THEMES.planners} />;
+  return <div data-program-light><CertificateVerify code={code} theme={PROGRAM_THEMES.planners} /></div>;
 }

@@ -1,6 +1,7 @@
 /** 팀 구성·관리 화면 (서버 컴포넌트) — 창구 사이트 공용. 권한은 API(/api/programs/rounds/{id}/teams)가 판단 */
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getRound } from '@/lib/programs/access';
@@ -11,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
 
 export async function RoundTeams({ id, theme }: { id: string; theme: ProgramTheme }) {
   const round = await getRound(id);
-  if (!round) return null;
+  if (!round) notFound(); // 없는 회차 = 404 (빈 화면으로 두지 않는다, 2026-10-15)
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
   const style = { '--pa': theme.accent } as CSSProperties;

@@ -131,7 +131,7 @@ export default async function PlannersHome() {
                         <p className="mt-6 break-keep leading-relaxed text-neutral-600 md:text-lg">
                             굿노트·삼성노트·XODO에서 손으로 쓰는 PDF 플래너와 서식 {files.length}종. 플래너'스 AI와 같은 연간·월간·주간·오늘 구조라 함께 써도 어긋나지 않고, 쓴 페이지는 사진 한 장으로 AI에 옮길 수 있습니다.
                         </p>
-                        <Link href="/planners/pad" className="mt-10 inline-flex items-center gap-1 font-bold text-[#0F766E] hover:underline">PAD 둘러보기 <ArrowRight className="h-4 w-4" /></Link>
+                        <Link href="/planners/pad" className="mt-10 inline-flex items-center gap-1 font-bold text-[#0F766E] hover:underline">플래너'스 PAD 둘러보기 <ArrowRight className="h-4 w-4" /></Link>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         {popular.slice(0, 4).map((f) => f.thumbnail_url && (

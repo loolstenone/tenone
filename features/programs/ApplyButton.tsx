@@ -26,26 +26,32 @@ export function ApplyButton({ roundId, channel, roomHref, accentColor, dark = tr
     const [error, setError] = useState("");
 
     const load = useCallback(async () => {
-        const res = await fetch(`/api/programs/rounds/${roundId}/apply`);
-        if (res.ok) setSt(await res.json());
+        const res = await fetch(`/api/programs/rounds/${roundId}/apply`).catch(() => null);
+        if (res?.ok) setSt(await res.json());
     }, [roundId]);
     useEffect(() => { if (!isLoading) load(); }, [isLoading, isAuthenticated, load]);
     useEffect(() => { if (isAuthenticated && login) { setLogin(false); setForm(true); } }, [isAuthenticated, login]);
 
     const submit = async () => {
         setBusy(true); setError("");
-        const res = await fetch(`/api/programs/rounds/${roundId}/apply`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ motivation, portfolio_url: url, consent: agree, channel }),
-        });
-        const d = await res.json().catch(() => ({}));
-        setBusy(false);
-        if (!res.ok) { setError(d.error ?? "신청하지 못했습니다."); return; }
-        setForm(false); await load();
+        try {
+            const res = await fetch(`/api/programs/rounds/${roundId}/apply`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ motivation, portfolio_url: url, consent: agree, channel }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok) { setError(d.error ?? "신청하지 못했습니다."); return; }
+            setForm(false); await load();
+        } catch {
+            setError("연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.");
+        } finally {
+            setBusy(false); // 네트워크 오류에도 버튼이 '신청 중'에 멈추지 않게 (2026-10-15 QA)
+        }
     };
     const withdraw = async () => {
         if (!confirm("신청을 취소할까요?")) return;
-        await fetch(`/api/programs/rounds/${roundId}/apply`, { method: "DELETE" });
+        const res = await fetch(`/api/programs/rounds/${roundId}/apply`, { method: "DELETE" }).catch(() => null);
+        if (!res?.ok) { alert("신청을 취소하지 못했습니다. 잠시 후 다시 시도해 주세요."); return; }
         await load();
     };
 
@@ -83,7 +89,7 @@ export function ApplyButton({ roundId, channel, roomHref, accentColor, dark = tr
                     </label>
                     {!st.consent && (
                         <>
-                            <ConsentItems />
+                            <ConsentItems dark={dark} />
                             <label className="flex cursor-pointer items-start gap-2 text-xs">
                                 <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4" style={{ accentColor }} />
                                 <span>[필수] {st.round.brand_name} 프로그램 참가를 위한 개인정보 수집·이용에 동의합니다.</span>

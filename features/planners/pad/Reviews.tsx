@@ -37,7 +37,8 @@ export function Reviews({ fileId, reviews, summary }: { fileId: string; reviews:
                                     <Stars value={r.rating} />
                                     <span className="font-medium">{r.name}</span>
                                     {r.mine && <span className="bg-[#0F766E]/10 px-1.5 text-xs text-[#0F766E]">내 후기</span>}
-                                    <span className="text-xs text-neutral-400">{new Date(r.createdAt).toLocaleDateString("ko-KR")}</span>
+                                    {r.hidden && <span className="bg-neutral-100 px-1.5 text-xs text-neutral-500">운영 정책으로 숨겨져 나에게만 보입니다</span>}
+                                    <span className="text-xs text-neutral-400">{new Date(r.createdAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}</span>
                                     {r.edition && <span className="text-xs text-neutral-400">· {r.edition}</span>}
                                 </div>
                                 <p className="mt-2 whitespace-pre-line break-keep text-[15px] leading-relaxed text-neutral-800">{r.body}</p>
@@ -74,7 +75,7 @@ function Stars({ value }: { value: number }) {
 }
 
 function ReviewForm({ fileId, mine }: { fileId: string; mine?: PublicReview }) {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
@@ -97,9 +98,10 @@ function ReviewForm({ fileId, mine }: { fileId: string; mine?: PublicReview }) {
 
     async function remove() {
         if (!confirm("내 후기를 지울까요?")) return;
-        setBusy(true);
-        await fetch(`/api/planners-library/${fileId}/reviews`, { method: "DELETE" });
+        setBusy(true); setError(null);
+        const res = await fetch(`/api/planners-library/${fileId}/reviews`, { method: "DELETE" }).catch(() => null);
         setBusy(false);
+        if (!res?.ok) { setError("후기를 지우지 못했습니다. 잠시 후 다시 시도해 주세요."); return; }
         router.refresh();
     }
 
@@ -107,12 +109,17 @@ function ReviewForm({ fileId, mine }: { fileId: string; mine?: PublicReview }) {
         return (
             <div className="mt-4 flex gap-2">
                 <button
-                    onClick={() => (isAuthenticated ? setOpen(true) : setLoginOpen(true))}
+                    disabled={isLoading}
+                    onClick={() => {
+                        if (!isAuthenticated) { setLoginOpen(true); return; }
+                        setRating(mine?.rating ?? 5); setBody(mine?.body ?? ""); setOpen(true);
+                    }}
                     className="border border-[#0F766E] px-4 py-2 text-sm font-bold text-[#0F766E] hover:bg-[#0F766E]/5"
                 >
                     {mine ? "내 후기 고치기" : "후기 쓰기"}
                 </button>
                 {mine && <button onClick={remove} disabled={busy} className="px-3 py-2 text-sm text-neutral-400 hover:text-red-600">내 후기 지우기</button>}
+                {error && <p className="self-center text-sm text-red-600">{error}</p>}
                 <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#0F766E" />
             </div>
         );

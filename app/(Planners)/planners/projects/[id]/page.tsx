@@ -5,5 +5,5 @@ export const metadata = { title: '실전 프로젝트 · 회차 방', robots: { 
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <RoundRoom id={id} theme={PROGRAM_THEMES.planners} />;
+  return <div data-program-light><RoundRoom id={id} theme={PROGRAM_THEMES.planners} /></div>;
 }

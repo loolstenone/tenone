@@ -97,7 +97,7 @@ export default function PlannersAboutPage() {
                     <div className="mt-6 grid gap-4 md:grid-cols-3">
                         <NextLink href="/planners/ai" title="플래너'스 AI" desc="Plan · Do · See를 디지털로, 인공지능 플래너" />
                         <NextLink href="/planners/pad" title="플래너'스 PAD" desc="굿노트 등에서 손으로 쓰는 플래너와 서식" />
-                        <NextLink href="/planners/projects" title="프로젝트" desc="팀을 꾸려 실제 과제를 기획" />
+                        <NextLink href="/planners/projects" title="기획자 과정" desc="팀을 꾸려 실제 과제를 기획" />
                     </div>
                 </div>
                 </div>

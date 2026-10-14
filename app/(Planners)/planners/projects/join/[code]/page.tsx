@@ -7,7 +7,7 @@ export const metadata = { title: '팀 초대', robots: { index: false, follow: f
 export default async function Page({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   return (
-    <div className="min-h-[70vh] bg-black px-4 py-16 text-white sm:px-6" style={{ '--pa': PROGRAM_THEMES.planners.accent } as CSSProperties}>
+    <div data-program-light className="min-h-[70vh] px-4 py-16 sm:px-6" style={{ '--pa': PROGRAM_THEMES.planners.accent } as CSSProperties}>
       <InviteJoin code={code} accentColor={PROGRAM_THEMES.planners.accent} />
     </div>
   );

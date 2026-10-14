@@ -42,7 +42,8 @@ export function CertificateManager({ brand, printBase, verifyBase, accentColor =
     const [busy, setBusy] = useState(false);
 
     const load = useCallback(async () => {
-        const res = await fetch(`/api/programs/certificates?brand=${brand}`);
+        const res = await fetch(`/api/programs/certificates?brand=${brand}`).catch(() => null);
+        if (!res) { setError("연결이 끊겼습니다. 잠시 후 새로고침해 주세요."); return; }
         const d = await res.json().catch(() => ({}));
         if (!res.ok) { setError(d.error ?? "불러오지 못했습니다."); return; }
         setCerts(d.certificates);
@@ -57,16 +58,25 @@ export function CertificateManager({ brand, printBase, verifyBase, accentColor =
 
     const issue = async (key: string) => {
         setBusy(true); setError("");
-        const res = await fetch("/api/programs/certificates", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ brand, key, profile, consent }),
-        });
-        const d = await res.json().catch(() => ({}));
-        setBusy(false);
-        if (!res.ok) { setError(d.error ?? "발급하지 못했습니다."); return; }
-        setOpen(null); setConsent(false);
-        await load();
-        window.open(`${printBase}/${d.code}`, "_blank", "noopener");
+        // 창은 클릭 순간에 연다 — 응답을 기다린 뒤 열면 브라우저가 팝업으로 막는다 (2026-10-15 QA)
+        const win = window.open("", "_blank");
+        try {
+            const res = await fetch("/api/programs/certificates", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ brand, key, profile, consent }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok) { win?.close(); setError(d.error ?? "발급하지 못했습니다."); return; }
+            setOpen(null); setConsent(false);
+            const url = `${printBase}/${d.code}`;
+            if (win) { win.opener = null; win.location.href = url; } else window.location.href = url;
+            await load();
+        } catch {
+            win?.close();
+            setError("연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.");
+        } finally {
+            setBusy(false);
+        }
     };
 
     if (!certs) {

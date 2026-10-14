@@ -14,9 +14,9 @@ export default async function Page() {
   return (
     <>
       <PlannersPageHero
-        eyebrow="프로젝트 · 참여 확인서"
+        eyebrow="기획자 과정 · 참여 확인서"
         title="참여 확인서 발급"
-        description="참가한 실전 프로젝트의 결과가 발표되면 직접 발급할 수 있습니다. 확인서마다 고유 코드로 진위를 확인할 수 있습니다."
+        description="참가한 기획자 과정의 결과가 발표되면 직접 발급할 수 있습니다. 확인서마다 고유 코드로 진위를 확인할 수 있습니다."
       />
       <section className={PLANNERS_SECTION}>
         {user

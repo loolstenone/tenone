@@ -7,7 +7,7 @@ import { LoginModal } from "@/components/LoginModal";
 
 /** 자료실 내려받기 — 로그인 회원만 (비로그인은 현재 페이지 위 LoginModal, §1.2.1 원칙 A) */
 export function DownloadButton({ fileId, label = "받기" }: { fileId: string; label?: string }) {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function DownloadButton({ fileId, label = "받기" }: { fileId: string; l
             <button
                 type="button"
                 onClick={onClick}
-                disabled={busy}
+                disabled={busy || isLoading /* 로그인 확인 전 클릭이 로그인 창을 띄우지 않게 */}
                 className="inline-flex items-center gap-1.5 bg-[#0F766E] px-3 py-1.5 text-sm font-bold text-white hover:bg-[#134E4A] disabled:opacity-60"
             >
                 <Download className="h-4 w-4" /> {busy ? "여는 중" : label}

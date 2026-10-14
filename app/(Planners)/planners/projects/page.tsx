@@ -104,13 +104,13 @@ export default function PlannersProjectsPage() {
                             <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
                             <h3 className="mt-2 text-2xl font-bold md:text-3xl">프로젝트 북 · 프레임워크 서식</h3>
                             <p className="mt-3 break-keep leading-relaxed text-neutral-600">Frame + Work + Book, 프로젝트 하나를 한 권에 담는 손글씨 서식과 기획 프레임워크.</p>
-                            <span className="mt-8 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">PAD 받기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                            <span className="mt-8 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 PAD 받기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                         </Link>
                         <Link href="/planners/ai" className="group bg-white p-10 md:p-14">
                             <p className="text-sm font-bold text-[#0F766E]">플래너'스 AI</p>
                             <h3 className="mt-2 text-2xl font-bold md:text-3xl">프로젝트 · 마일스톤 · 할 일</h3>
                             <p className="mt-3 break-keep leading-relaxed text-neutral-600">목표부터 할 일까지 디지털로, 리스트·칸반·간트로 프로젝트를 끌고 갑니다.</p>
-                            <span className="mt-8 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">AI 알아보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                            <span className="mt-8 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 알아보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                         </Link>
                     </div>
                 </div>

@@ -104,7 +104,12 @@ function BoardPageInner({
         setLoading(true);
         try {
             const res = await fetch(`/api/board/posts/${postId}`);
-            if (res.ok) {
+            if (!res.ok) {
+                // 지워졌거나 볼 수 없는 글 — 조용히 목록에 머물지 않고 알린다 (2026-10-15 QA)
+                alert(res.status === 404 ? "삭제되었거나 없는 글입니다." : "글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+                return;
+            }
+            {
                 const data = await res.json();
                 setSelectedPost(data.post || data);
                 setMode("detail");
@@ -115,6 +120,7 @@ function BoardPageInner({
             }
         } catch (err) {
             console.error("게시글 로딩 실패:", err);
+            alert("글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
         } finally {
             setLoading(false);
         }

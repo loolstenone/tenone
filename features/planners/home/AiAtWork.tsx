@@ -57,7 +57,8 @@ export function AiAtWork({ scene = "dump" }: { scene?: AiScene }) {
     return (
         <div className="mx-auto w-full max-w-[min(100%,560px)] space-y-[clamp(6px,1.2svh,16px)] md:mx-0 lg:mx-auto lg:max-w-[clamp(320px,40vw,600px)]" aria-hidden="true">
             <div className="bg-white/10 p-[clamp(14px,2.4svh,36px)]">
-                <p className="text-[clamp(11px,1.5svh,14px)] text-teal-200">{s.inputLabel}</p>
+                {/* 실제 앱 화면이 아니라는 표시 — 화면 캡처로 오해하지 않게 (2026-10-15 QA) */}
+                <p className="flex justify-between gap-2 text-[clamp(11px,1.5svh,14px)] text-teal-200">{s.inputLabel}<span className="text-teal-200/60">예시</span></p>
                 <p className="mt-[clamp(4px,0.8svh,12px)] break-keep text-[clamp(14px,2svh,19px)] leading-relaxed text-white/90">{s.input}</p>
             </div>
 

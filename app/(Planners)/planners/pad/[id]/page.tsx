@@ -6,7 +6,7 @@ import { DownloadButton } from "@/features/planners/DownloadButton";
 import { Gallery } from "@/features/planners/pad/Gallery";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
 import { Reviews } from "@/features/planners/pad/Reviews";
-import { listFileReviews } from "@/lib/planners/reviews";
+import { listFileReviews, reviewCountsByFile } from "@/lib/planners/reviews";
 import { sessionMemberId } from "@/lib/programs/access";
 import { fileBadges, fileExt, formatFileSize, getPlannersFile, listPlannersFiles, sortFiles } from "@/lib/planners/library";
 
@@ -18,7 +18,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
         title: file.title,
         description: file.description?.split("\n")[0] ?? `${file.category}, 굿노트·삼성노트·XODO에서 쓰는 PAD 서식`,
-        ...(file.thumbnail_url && { openGraph: { images: [file.thumbnail_url] } }),
+        // openGraph는 레이아웃 값을 통째로 덮어쓴다 — 사이트 이름·형식까지 같이 적는다 (2026-10-15)
+        openGraph: {
+            title: file.title,
+            siteName: "Ten:One™ Universe",
+            type: "website",
+            ...(file.thumbnail_url && { images: [file.thumbnail_url] }),
+        },
     };
 }
 
@@ -28,7 +34,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
     const file = await getPlannersFile((await params).id);
     if (!file) notFound();
     const related = sortFiles((await listPlannersFiles(file.kind)).filter((f) => f.category === file.category && f.id !== file.id), "popular").slice(0, 8);
-    const { reviews, summary } = await listFileReviews(file.id, await sessionMemberId());
+    const [{ reviews, summary }, reviewCounts] = await Promise.all([listFileReviews(file.id, await sessionMemberId()), reviewCountsByFile()]);
     const badges = fileBadges(file);
     const isPdf = fileExt(file.file_name) === "PDF";
 
@@ -85,7 +91,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
                         <div className="space-y-4">
                             {file.detail_images.map((src) => (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img key={src} src={src} alt="" loading="lazy" className="w-full border border-neutral-100" />
+                                <img key={src} src={src} alt={`${file.title} 상세 이미지`} loading="lazy" className="w-full border border-neutral-100" />
                             ))}
                         </div>
                     </div>
@@ -98,7 +104,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
                 <section className="bg-neutral-50">
                     <div className={PLANNERS_SECTION}>
                         <PlannersSectionTitle title="같은 분류의 서식" href={`/planners/pad?c=${encodeURIComponent(file.category)}`} />
-                        <ProductGrid files={related} />
+                        <ProductGrid files={related} reviewCounts={reviewCounts} />
                     </div>
                 </section>
             )}

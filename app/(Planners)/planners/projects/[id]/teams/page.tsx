@@ -5,5 +5,5 @@ export const metadata = { title: '팀 구성', robots: { index: false, follow: f
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <RoundTeams id={id} theme={PROGRAM_THEMES.planners} />;
+  return <div data-program-light><RoundTeams id={id} theme={PROGRAM_THEMES.planners} /></div>;
 }

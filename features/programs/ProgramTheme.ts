@@ -35,8 +35,8 @@ export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
         verifyHost: "hero.ne.kr/certificate/verify",
     },
     planners: {
-        site: "planners", accent: "#14B8A6", listHref: "/planners/projects", listLabel: "PROJECTS", roomBase: "/planners/projects",
+        site: "planners", accent: "#14B8A6", listHref: "/planners/projects", listLabel: "기획자 과정", roomBase: "/planners/projects",
         certificateHref: "/planners/certificate", printBase: "/planners/certificate/print", verifyBase: "/planners/certificate/verify",
-        verifyHost: "planners.tenone.biz/certificate/verify",
+        verifyHost: "www.planners.ai.kr/certificate/verify",
     },
 };

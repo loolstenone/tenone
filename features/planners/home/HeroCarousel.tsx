@@ -25,13 +25,17 @@ const INTERVAL = 7000;
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     const [i, setI] = useState(0);
     const [paused, setPaused] = useState(false);
+    // 직접 넘기면 자동 넘김을 멈춘다 — 읽는 도중 바뀌지 않게 (모바일은 마우스 올림이 없다, 2026-10-15 QA)
+    const [stopped, setStopped] = useState(false);
     const n = slides.length;
+    const go = (k: number) => { setStopped(true); setI(((k % n) + n) % n); };
 
     useEffect(() => {
-        if (n < 2 || paused) return;
+        if (n < 2 || paused || stopped) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; // 움직임 줄이기 설정 존중
         const t = setInterval(() => setI((x) => (x + 1) % n), INTERVAL);
         return () => clearInterval(t);
-    }, [n, paused]);
+    }, [n, paused, stopped]);
 
     const s = slides[i];
     // 크기는 단계가 아니라 화면 폭·높이에 비례해 연속으로 (2026-10-15 사용자 "디스플레이 사이즈에 맞춰 동적으로")
@@ -39,17 +43,17 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     //   배치만 둘: 1024px 미만 = 위아래(넘김 표시 맨 위 → 제목 → 그림 → 버튼), 이상 = 왼쪽 글·오른쪽 그림(넘김 표시 아래)
     //   버튼 아래 한 줄·그림 설명줄은 넉넉한 화면(폭 1024 이상·높이 860 이상)에서만
     return (
-        <section className="relative flex min-h-[calc(100svh-64px)] flex-col bg-[#134E4A] text-white md:min-h-[calc(100svh-84px)]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
+        <section className="relative flex min-h-[calc(100svh-64px)] flex-col bg-[#134E4A] text-white md:min-h-[calc(100svh-84px)]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)} aria-roledescription="carousel">
             {/* 넘김 표시: 1024px 미만은 맨 위(뭐가 더 있구나 바로 알게, 2026-10-15 사용자) · 그 이상은 아래 */}
             {n > 1 && (
                 <div className="mx-auto flex w-full max-w-[1590px] items-center gap-3 px-6 pt-[clamp(16px,3svh,40px)] md:px-16 lg:absolute lg:bottom-[clamp(16px,4svh,48px)] lg:left-0 lg:right-0 lg:pt-0">
-                    <button onClick={() => setI((x) => (x - 1 + n) % n)} aria-label="이전 배너" className="text-white/60 hover:text-white"><ChevronLeft className="h-5 w-5" /></button>
+                    <button onClick={() => go(i - 1)} aria-label="이전 배너" className="text-white/60 hover:text-white"><ChevronLeft className="h-5 w-5" /></button>
                     <div className="flex gap-1.5">
                         {slides.map((sl, k) => (
-                            <button key={sl.key} onClick={() => setI(k)} aria-label={`배너 ${k + 1}`} className={`h-1.5 transition-all ${k === i ? "w-6 bg-white" : "w-1.5 bg-white/40"}`} />
+                            <button key={sl.key} onClick={() => go(k)} aria-current={k === i} aria-label={`배너 ${k + 1}`} className={`h-1.5 transition-all ${k === i ? "w-6 bg-white" : "w-1.5 bg-white/40"}`} />
                         ))}
                     </div>
-                    <button onClick={() => setI((x) => (x + 1) % n)} aria-label="다음 배너" className="text-white/60 hover:text-white"><ChevronRight className="h-5 w-5" /></button>
+                    <button onClick={() => go(i + 1)} aria-label="다음 배너" className="text-white/60 hover:text-white"><ChevronRight className="h-5 w-5" /></button>
                 </div>
             )}
 
@@ -61,12 +65,14 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
                 {s.visual ? (
                     <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-center">{s.visual}</div>
-                ) : s.imageUrl ? (
-                    <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.imageUrl} alt="" className="max-h-[clamp(180px,34svh,440px)] w-full object-contain md:object-left lg:max-h-[min(62svh,640px)] lg:object-center" />
-                    </Link>
-                ) : null}
+                ) : s.imageUrl ? (() => {
+                    const href = s.imageHref ?? s.primary?.href;
+                    // eslint-disable-next-line @next/next/no-img-element
+                    const img = <img src={s.imageUrl} alt={s.title} className="max-h-[clamp(180px,34svh,440px)] w-full object-contain md:object-left lg:max-h-[min(62svh,640px)] lg:object-center" />;
+                    const cls = "block lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-center";
+                    // 연결할 곳이 없으면 링크로 만들지 않는다 ('#'로 가면 맨 위로 튄다)
+                    return href ? <Link href={href} className={cls}>{img}</Link> : <div className={cls}>{img}</div>;
+                })() : null}
 
                 <div className="lg:col-start-1 lg:row-start-2">
                     {s.body && <p className="mb-[clamp(16px,3svh,40px)] hidden max-w-xl whitespace-pre-line break-keep text-[clamp(15px,min(1.6vw,2.2svh),20px)] leading-relaxed text-teal-50 md:block lg:mb-0 lg:mt-[clamp(14px,3svh,36px)] [@media(max-height:700px)]:!hidden">{s.body}</p>}
