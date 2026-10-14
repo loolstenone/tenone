@@ -67,6 +67,11 @@ VALUES ('planners-files', 'planners-files', FALSE, 62914560, ARRAY[
 ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public, file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
 -- storage.objects 정책 없음 = 브라우저 직접 접근 불가, 서버(service_role) 서명 URL로만
 
+-- 상품 사진 공개 버킷 (2026-10-14 MCP `planners_media_bucket_2026_10`) — 몰 썸네일·상세 이미지, 누구나 보기 · 쓰기는 서버(service_role)만
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('planners-media', 'planners-media', TRUE, 10485760, ARRAY['image/png','image/jpeg','image/gif','image/webp']::text[])
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public, file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
+
 -- GRANT (부록 D — 2026-10-30 정책)
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.planners_files TO authenticated;
 GRANT SELECT ON public.planners_files TO anon;
