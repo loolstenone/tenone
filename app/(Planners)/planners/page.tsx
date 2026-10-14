@@ -5,6 +5,7 @@ import { ProgramBoard } from "@/features/programs/ProgramBoard";
 import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
 import { listPlannersFiles, PAD_CATEGORIES, padPath, sortFiles } from "@/lib/planners/library";
+import { reviewCountsByFile } from "@/lib/planners/reviews";
 
 // 첫 화면 = 몰 (2026-10-14 개편 — "블로그 같다" → 바닥상회 몰 수준). 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은"은 사용자 확정
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ const AI_FEATURES = ["오늘·주간·월간·연간 계획", "프로젝트·할
 
 export default async function PlannersHome() {
     const files = await listPlannersFiles();
+    const reviewCounts = await reviewCountsByFile();
     const planners = files.filter((f) => f.category === "연간 플래너").sort((a, b) => b.sort_order - a.sort_order);
     const hero = planners.find((f) => f.legacy_badak_no === 182) ?? planners[0];
     const popular = sortFiles(files.filter((f) => f.kind === "template"), "popular").slice(0, 8);
@@ -83,7 +85,7 @@ export default async function PlannersHome() {
             {/* 2026 플래너 */}
             {planners.length > 0 && (
                 <Shelf title="2026 플래너'스 플래너" href={`/planners/pad?c=${encodeURIComponent("연간 플래너")}`}>
-                    <ProductGrid files={planners} priorityCount={4} />
+                    <ProductGrid reviewCounts={reviewCounts} files={planners} priorityCount={4} />
                 </Shelf>
             )}
 
@@ -111,7 +113,7 @@ export default async function PlannersHome() {
             {/* 인기 서식 */}
             {popular.length > 0 && (
                 <Shelf title="많이 쓰는 서식" href="/planners/pad">
-                    <ProductGrid files={popular} />
+                    <ProductGrid reviewCounts={reviewCounts} files={popular} />
                 </Shelf>
             )}
 

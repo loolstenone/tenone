@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { DownloadButton } from "@/features/planners/DownloadButton";
 import { Gallery } from "@/features/planners/pad/Gallery";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
+import { Reviews } from "@/features/planners/pad/Reviews";
+import { listFileReviews } from "@/lib/planners/reviews";
+import { sessionMemberId } from "@/lib/programs/access";
 import { fileBadges, fileExt, formatFileSize, getPlannersFile, listPlannersFiles, sortFiles } from "@/lib/planners/library";
 
 type Props = { params: Promise<{ id: string }> };
@@ -24,6 +27,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
     const file = await getPlannersFile((await params).id);
     if (!file) notFound();
     const related = sortFiles((await listPlannersFiles(file.kind)).filter((f) => f.category === file.category && f.id !== file.id), "popular").slice(0, 8);
+    const { reviews, summary } = await listFileReviews(file.id, await sessionMemberId());
     const badges = fileBadges(file);
     const isPdf = fileExt(file.file_name) === "PDF";
 
@@ -46,6 +50,11 @@ export default async function PlannersPadDetailPage({ params }: Props) {
                     )}
                     <p className="text-sm text-[#0F766E]">{file.category}</p>
                     <h1 className="mt-1 break-keep text-2xl font-bold leading-snug md:text-3xl">{file.title}</h1>
+                    {summary.count > 0 && (
+                        <a href="#reviews" className="mt-2 inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900">
+                            <span className="text-amber-500">★</span> {summary.average.toFixed(1)} · 후기 {summary.count}개
+                        </a>
+                    )}
 
                     <dl className="mt-6 divide-y divide-neutral-100 border-y border-neutral-200 text-sm">
                         <Row label="파일 형식">{fileExt(file.file_name)} · {formatFileSize(file.file_size)}</Row>
@@ -81,6 +90,8 @@ export default async function PlannersPadDetailPage({ params }: Props) {
                     </div>
                 </section>
             )}
+
+            <Reviews fileId={file.id} reviews={reviews} summary={summary} />
 
             {related.length > 0 && (
                 <section className="border-t border-neutral-200 bg-neutral-50">

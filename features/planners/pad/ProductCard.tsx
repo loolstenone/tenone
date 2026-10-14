@@ -2,7 +2,7 @@ import Link from "next/link";
 import { fileBadges, fileExt, padPath, type PlannersFile } from "@/lib/planners/library-shared";
 
 /** 플래너스 PAD 상품 카드 — 썸네일 · 분류 · 이름 · 형식 · 배지 (바닥상회 몰 카드와 같은 구성, 가격 대신 형식) */
-export function ProductCard({ file, priority = false }: { file: PlannersFile; priority?: boolean }) {
+export function ProductCard({ file, priority = false, reviewCount = 0 }: { file: PlannersFile; priority?: boolean; reviewCount?: number }) {
     const badges = fileBadges(file);
     return (
         <Link href={padPath(file.id)} className="group block">
@@ -31,16 +31,17 @@ export function ProductCard({ file, priority = false }: { file: PlannersFile; pr
             <p className="mt-0.5 line-clamp-2 break-keep text-sm font-medium text-neutral-900 group-hover:text-[#0F766E]">{file.title}</p>
             <p className="mt-1 text-xs text-neutral-400">
                 {fileExt(file.file_name)}
+                {reviewCount > 0 && ` · 후기 ${reviewCount}`}
                 {file.download_count > 0 && ` · ${file.download_count.toLocaleString()}회 받음`}
             </p>
         </Link>
     );
 }
 
-export function ProductGrid({ files, priorityCount = 0 }: { files: PlannersFile[]; priorityCount?: number }) {
+export function ProductGrid({ files, priorityCount = 0, reviewCounts }: { files: PlannersFile[]; priorityCount?: number; reviewCounts?: Map<string, number> }) {
     return (
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-            {files.map((f, i) => <ProductCard key={f.id} file={f} priority={i < priorityCount} />)}
+            {files.map((f, i) => <ProductCard key={f.id} file={f} priority={i < priorityCount} reviewCount={reviewCounts?.get(f.id) ?? 0} />)}
         </div>
     );
 }

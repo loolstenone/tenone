@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductGrid } from "@/features/planners/pad/ProductCard";
 import { listPlannersFiles, PAD_CATEGORIES, PAD_CATEGORY_DESC, sortFiles, type PadSort } from "@/lib/planners/library";
+import { reviewCountsByFile } from "@/lib/planners/reviews";
 
 // 플래너스 PAD — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ const SORTS: { key: PadSort; label: string }[] = [
 export default async function PlannersPadPage({ searchParams }: { searchParams: Promise<{ c?: string; sort?: string }> }) {
     const { c, sort: sortParam } = await searchParams;
     const all = await listPlannersFiles();
+    const reviewCounts = await reviewCountsByFile();
     const category = c && (PAD_CATEGORIES as readonly string[]).includes(c) ? c : null;
     const sort: PadSort = sortParam === "new" || sortParam === "name" ? sortParam : "popular";
     const files = sortFiles(category ? all.filter((f) => f.category === category) : all, sort);
@@ -69,7 +71,7 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
                         ))}
                     </div>
                 </div>
-                {files.length === 0 ? <p className="py-20 text-center text-neutral-400">자료가 없습니다.</p> : <ProductGrid files={files} priorityCount={8} />}
+                {files.length === 0 ? <p className="py-20 text-center text-neutral-400">자료가 없습니다.</p> : <ProductGrid reviewCounts={reviewCounts} files={files} priorityCount={8} />}
             </section>
         </>
     );
