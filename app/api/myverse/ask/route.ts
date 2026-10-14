@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
 import { embed } from "@/lib/myverse/embeddings";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -166,6 +167,9 @@ async function callClaude(question: string, context: string): Promise<{ answer: 
 }
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "ask");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

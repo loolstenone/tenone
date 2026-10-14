@@ -16,6 +16,7 @@ import { KeyboardShortcuts } from "@/features/myverse/planner/KeyboardShortcuts"
 import { MyverseThemeProvider } from "@/features/myverse/app/MyverseThemeProvider";
 import { PlannersAppTopBar } from "@/features/planners/app/PlannersAppTopBar";
 import { PlannersAppSideNav } from "@/features/planners/app/PlannersAppSideNav";
+import { AiPaidOnlyNotice } from "@/features/planners/app/AiPaidOnlyNotice";
 import { getAuthState, isPrivileged, type RoleRow } from "@/lib/myverse/app-auth";
 import type { MyverseUser } from "@/lib/myverse/types";
 
@@ -82,6 +83,7 @@ export default async function PlannersAppLayout({ children }: { children: React.
                 </SidebarCollapseProvider>
             </div>
             <KeyboardShortcuts />
+            <AiPaidOnlyNotice />
         </>
     );
 }

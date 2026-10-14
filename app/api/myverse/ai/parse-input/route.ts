@@ -8,6 +8,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 const MODEL = "claude-haiku-4-5-20251001";
 
@@ -85,6 +86,9 @@ interface ParseAction {
 
 // ── 핸들러 ─────────────────────────────────────────────────────
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "parse_input");
     const memberId = await getMemberId();
     if (!memberId) {
         return NextResponse.json({ error: "unauthorized" }, { status: 401 });

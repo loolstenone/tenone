@@ -56,6 +56,8 @@
 - **앱 진입 = 우측 유틸리티 바 '내 플래너'** (워크스페이스) — `WORKSPACE_REGISTRY` planners `openOnOwnSite: true`라 Planner's 사이트에서는 로그인 회원 누구나 보인다 (affiliations 불필요). ❌ 소개 페이지·첫 화면에 '플래너'스 AI 열기' 버튼을 다시 두지 않는다 — 사용자 "중복으로 또 묻는 느낌" (2026-10-14). 사이트 안의 링크는 소개(`/planners/ai`, "알아보기")로
 - **앱 화면 틀 통일 (2026-10-14 "레이아웃이 왔다갔다")**: 모든 화면 `max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12` · 화면별 강제 글꼴(Inter) 제거 · 일간/주간/월간/연간 전환 버튼 줄도 같은 폭 · **강조색 = CSS 변수 `--pp-accent`** (공용 화면 `features/myverse/planner·app` 900여 곳 `[#6366F1]`→`[var(--pp-accent)]`, 기본 MyVerse 인디고, Planner's 앱 레이아웃이 `:root`에서 틸로 — 모달까지) · 남은 하드코딩 색(`#6366F1` 문자열 ~70·indigo-*)은 이월
 - **MyVerse로 새는 길 차단**: `/` 단축키 → 오늘 작성창 · 정체성 '이력서' 탭 숨김 · 일정 뒤로 가기(흔적) 제거 · 설정 › 기술의 스마트폰 하단 메뉴 제거 · **시간 기록 메뉴 제거**(MyVerse 9 도메인 개인 기록 — `/planners/app/time` → 오늘)
+- **인공지능 기능 = 유료 회원 전용 (2026-10-14 사용자 결정)** — SSOT `lib/myverse/ai-access.ts` `requireAiAccess`(유료 구독 활성·직원·서버 내부 호출만, 그 외 402 `ai_paid_only`) · AI를 부르는 `/api/myverse/*` 18개 라우트 전부 적용(그전엔 2개만 확인 → 로그인 회원 누구나 크레딧 소모 가능했음) · 사용 기록 `myverse_ai_usage(kind)` → 충전 시점 판단 · 화면 안내 `features/planners/app/AiPaidOnlyNotice.tsx`(402를 앱 쉘에서 한 번 안내, 가격·결제 링크 없음) · 유료 회원 = `myverse_users.subscription_status='active'`+만료일, 결제 시작 전엔 직원 수동 활성화(인트라 PP AI 관리)만. Anthropic 크레딧은 운영사가 필요할 때 충전. ⚠️ 2026-10-14 로컬 `ANTHROPIC_API_KEY` = invalid x-api-key → 새 키 필요
+- ❌ AI 라우트를 새로 만들 때 `requireAiAccess` 없이 두기 · 라우트마다 무료 한도 예외 만들기
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유
 - `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로
 - `scripts/planners-files-import.mjs` + `scripts/data/planners-badak-mall.json` — 바닥상회 원본 → 버킷·테이블 (멱등)

@@ -11,6 +11,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Anthropic from "@anthropic-ai/sdk";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 interface Body {
     mode?: "ask" | "diary" | "coach";
@@ -597,6 +598,9 @@ async function tryWithLLM(memberId: string, text: string, mode: string): Promise
 // ── 라우트 ────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "mukki_intent");
     const memberId = await getMember();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

@@ -7,6 +7,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 1024;
@@ -98,6 +99,9 @@ async function gatherContext(memberId: string, today: string): Promise<string> {
 }
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "ai_chat");
     const member = await getMember();
     if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 

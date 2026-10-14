@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getMemberId } from "@/lib/myverse/auth";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ const INTENSITY_CALORIES: Record<string, number> = {
 };
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "analyze_exercise");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

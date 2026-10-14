@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateBriefing, inferBriefingType, type BriefingType } from "@/lib/myverse/briefing";
 import { getMemberId } from "@/lib/myverse/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const maxDuration = 60;
 
@@ -15,6 +16,9 @@ function todayKST(): string {
 }
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "briefing");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

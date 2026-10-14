@@ -4,10 +4,14 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "ai_summary");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

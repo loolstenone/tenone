@@ -6,6 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { getMemberId } from "@/lib/myverse/auth";
 import { getValidAccessToken } from "@/lib/myverse/google-calendar";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -117,7 +118,10 @@ function autoCategorize(subject: string, snippet: string, sender: string | null)
     return { category: null, amount: null };
 }
 
-export async function POST() {
+export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "gmail_sync");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

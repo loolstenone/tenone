@@ -2,13 +2,14 @@
 // POST /api/myverse/chat { messages: [{role, content}], scope?: { days?: number } }
 //
 // 사용자 본인 데이터를 컨텍스트로 Haiku 4.5에게 질문 답변.
-// 무료 사용자는 일일 5회 한도. 구독자는 무제한.
+// 유료 회원 전용 (2026-10-14, lib/myverse/ai-access.ts).
 
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
 import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
+import { requireAiAccess, isAiDenied } from "@/lib/myverse/ai-access";
 import {
     fetchDomainStats,
     fetchTopPeople,
@@ -44,6 +45,9 @@ interface ChatMessage {
 }
 
 export async function POST(req: Request) {
+    // 유료 회원 전용 (lib/myverse/ai-access.ts) — 아래 무료 일일 한도는 이 관문 뒤라 실제로는 구독자만 지난다
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 

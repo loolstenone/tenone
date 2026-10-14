@@ -14,6 +14,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/myverse/auth";
 import { DOMAIN_KEYS } from "@/lib/myverse/domains";
 import type { DomainKey } from "@/lib/myverse/domains";
+import { requireAiAccess, isAiDenied, logAiUsage } from "@/lib/myverse/ai-access";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -40,6 +41,9 @@ const SYSTEM_PROMPT = `당신은 일상 사진을 9 영역으로 분류하는 �
 {"domain":"body","description":"헬스장에서 데드리프트하는 모습","tags":["운동","데드리프트","헬스장"],"confidence":0.85}`;
 
 export async function POST(req: Request) {
+    const aiAccess = await requireAiAccess(req);
+    if (isAiDenied(aiAccess)) return aiAccess;
+    await logAiUsage(aiAccess, "vision");
     const memberId = await getMemberId();
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
