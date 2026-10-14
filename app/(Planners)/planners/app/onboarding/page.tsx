@@ -186,23 +186,24 @@ export default function OnboardingPage() {
 
                                 <div className="space-y-3">
                                     <h1 className="text-4xl md:text-5xl font-light text-white leading-tight tracking-tight">
-                                        여기에<br />
+                                        내 손으로,<br />
                                         <span className="text-transparent bg-clip-text"
                                             style={{ backgroundImage: "linear-gradient(135deg, #5EEAD4 0%, #2DD4BF 50%, #0F766E 100%)" }}>
-                                            내가 있다.
+                                            내 뜻대로.
                                         </span>
                                     </h1>
-                                    <p className="text-white/40 text-base leading-relaxed max-w-sm">
-                                        디지털 속 나를 하나로 모아 키워가는<br />
-                                        퍼스널 블랙박스.
+                                    <p className="text-white/40 text-base leading-relaxed max-w-sm break-keep">
+                                        생각하고 기록하고 계획하고 꾸려 가는 사람을 곁에서 돕는 인공지능 플래너, 플래너&apos;스 AI입니다.
                                     </p>
                                 </div>
 
                                 <div className="space-y-3 border-l border-white/10 pl-4">
                                     {[
-                                        "나를 모은다 · 흩어진 조각 구출",
-                                        "나를 쌓는다 · 현재 기록 자동 축적",
-                                        "나를 알아간다 · AI가 패턴·맥락 이해",
+                                        // 첫 화면 문구 = 플래너'스 AI 4동사 (/planners/ai) — MyVerse '퍼스널 블랙박스' 문구를 쓰지 않는다 (2026-10-15)
+                                        "생각하다 · 머릿속을 그대로 쏟아 내면 정리해 줍니다",
+                                        "기록하다 · 손으로 쓴 노트도 글자로 옮깁니다",
+                                        "계획하다 · 큰 목표를 오늘 할 일로 나눕니다",
+                                        "꾸려 가다 · 못 끝낸 일을 빈 시간에 다시 놓습니다",
                                     ].map((text, i) => (
                                         <div key={i} className="flex items-start gap-3">
                                             <span className="text-[10px] text-teal-400/60 mt-0.5 tabular-nums">0{i + 1}</span>
