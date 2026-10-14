@@ -5,6 +5,7 @@
 // - 데이터·API는 MyVerse와 같다 (myverse_* 테이블 · /api/myverse/*)
 // - server redirect() 대신 ClientRedirect (Next.js 16 dev router prefetch 루프 회피 — MyVerse 쉘과 같은 이유)
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { ClientRedirect } from "@/components/ClientRedirect";
@@ -21,6 +22,9 @@ import { getAuthState, isPrivileged, type RoleRow } from "@/lib/myverse/app-auth
 import type { MyverseUser } from "@/lib/myverse/types";
 
 export const dynamic = "force-dynamic";
+
+// 개인 플래너 화면 — 검색 노출 안 함 (사이트 공개와 별개, 2026-10-14)
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 const ONBOARDING = "/planners/app/onboarding";
 

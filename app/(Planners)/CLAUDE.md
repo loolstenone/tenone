@@ -84,7 +84,7 @@
   - **바닥상회 구매평 75건 이전 = §0.1 '회원 데이터 이전 없음'의 사용자 승인 예외 (2026-10-14, 후기만)** — 이름 '첫 글자+**'로 가림 · 회원 코드·주문 번호 미수집 · 운영자 답글 15건 포함 · 옛 연도 판 후기는 2026년판에 `edition`(원래 판 이름)으로 연결 · 원본 JSON은 저장소 밖(`scripts/planners-reviews-import.mjs`) · 문의(1:1·상품 Q&A)는 옮기지 않음
   - 아임웹 '문의' 자리 = 사이트 '이야기' 게시판(질문) · 결제·배송·정기구독은 해당 없음
   - ⚠️ 사이트 회원 후기(member_id+글)는 새 수집 항목 — 공개 전 처리방침 반영 (6단계)
-  - ⚠️ 바닥상회에서 받은 미처리 제보: **2026 연간(가로형) PDF 제목이 '2025'로 표기** (2026-01-02 문의, 원본 수정 후 인트라 '파일 교체' 필요) · All in One 인덱스 이동 방식 문의 미답변
+  - 2026 연간(가로형) PDF: 제목 2025→2026 **교체 완료** (2026-10-14 사용자 원본) · ⚠️ **9월·10월 월 이름이 서로 바뀐 채** (Oct 줄=9월 내용, Sep 줄=10월 내용) — 원본 수정 후 다시 교체 · All in One 인덱스 이동 방식 문의 미답변
   - API `/api/intra/planners/files` (직원) · 업로드 헬퍼 `features/planners/admin/upload.ts` (파일 = 비공개 `planners-files`, 사진 = 공개 `planners-media`) · 사진을 목록에서 빼도 Storage 파일은 남는다
 - `/intra/ums/planners/programs` (프로젝트 회차·신청)
 - 기존 PP AI 관리(`/intra/planners`)는 MyVerse 구독자 관리 — 그대로 유지
@@ -121,7 +121,7 @@
 
 ## 현재 상태
 
-- Phase: 집중 승격 · planners.ai.kr 이전 1단계 완료 (2026-10-14)
+- Phase: 집중 승격 · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · ⚠️ 처리방침에 Planner's 수집 항목·AI 국외 이전 반영은 아직 (공개 상태라 우선 처리)
 - 이월 작업:
   - ~~DB: ums_sites·brand_capabilities~~ ✅ 확인 (2026-10-10: experiment·active·vercel·is_open=false · community·course·purchase)
   - 첫 회차 개설 (`/intra/ums/planners/programs`), 파비콘·OG 이미지 전용 에셋
