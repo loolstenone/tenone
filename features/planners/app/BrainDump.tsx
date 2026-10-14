@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, Check, X, Camera } from "lucide-react";
 import { VoiceRecordButton } from "@/features/myverse/planner/VoiceRecordButton";
-import { commitParsedActions, describeAction, saveMemoNote, shrinkImage, todayKst, type ParsedAction } from "@/features/myverse/planner/ai-actions";
+import { commitParsedActions, describeAction, saveMemoNote, shrinkImage, todayKst, READ_IMAGE_EVENT, type ParsedAction } from "@/features/myverse/planner/ai-actions";
 
 // 생각 쏟아내기 — 플래너'스 AI 1단계 (2026-10-14)
 // "기록은 아날로그처럼 자유롭게" → 생각나는 대로 적거나 말하면 AI가 할 일·일정으로 나누고, 사람이 확인한 뒤 넣는다
@@ -24,15 +24,39 @@ export function BrainDump({ date }: { date?: string }) {
     const [fromPhoto, setFromPhoto] = useState<string | null>(null); // 사진에서 읽은 페이지 날짜
     const fileRef = useRef<HTMLInputElement>(null);
 
+    const rootRef = useRef<HTMLElement>(null);
+
+    // 손글씨 노트의 '글자로 바꾸기' (DailyView) → 여기서 읽는다
+    useEffect(() => {
+        const onRead = (e: Event) => {
+            const d = (e as CustomEvent<{ image: string; source: string }>).detail;
+            if (!d?.image) return;
+            rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            void readImage(d.image, d.source === "pencil" ? "pencil" : "photo");
+        };
+        window.addEventListener(READ_IMAGE_EVENT, onRead);
+        return () => window.removeEventListener(READ_IMAGE_EVENT, onRead);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [date]);
+
     async function readPhoto(file: File) {
-        if (busy) return;
-        setBusy(true); setMessage("사진을 읽고 있어요…");
         try {
-            const image = await shrinkImage(file);
+            await readImage(await shrinkImage(file), "photo");
+        } catch {
+            setMessage("사진을 열지 못했어요. 다른 사진으로 해 주세요.");
+        } finally {
+            if (fileRef.current) fileRef.current.value = "";
+        }
+    }
+
+    async function readImage(image: string, source: "photo" | "pencil") {
+        if (busy) return;
+        setBusy(true); setMessage(source === "pencil" ? "손글씨를 읽고 있어요…" : "사진을 읽고 있어요…");
+        try {
             const res = await fetch("/api/myverse/handwriting", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image, today: date ?? todayKst(), source: "photo" }),
+                body: JSON.stringify({ image, today: date ?? todayKst(), source }),
             });
             if (res.status === 402) { setMessage(null); return; }
             const d = await res.json().catch(() => ({}));
@@ -45,10 +69,9 @@ export function BrainDump({ date }: { date?: string }) {
             setFromPhoto(d.page_date ?? null);
             setMessage(null);
         } catch {
-            setMessage("사진을 열지 못했어요. 다른 사진으로 해 주세요.");
+            setMessage("연결이 불안정해요. 잠시 뒤 다시 해 주세요.");
         } finally {
             setBusy(false);
-            if (fileRef.current) fileRef.current.value = "";
         }
     }
 
@@ -95,7 +118,7 @@ export function BrainDump({ date }: { date?: string }) {
     }
 
     return (
-        <section className="mb-8 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
+        <section ref={rootRef} className="mb-8 scroll-mt-20 border border-neutral-200 bg-white p-5 md:p-6 myverse-dark:border-white/10 myverse-dark:bg-white/5">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--pp-accent)]">
                 <Sparkles className="h-4 w-4" /> 생각 쏟아내기
             </div>

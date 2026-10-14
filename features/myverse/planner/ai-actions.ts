@@ -120,3 +120,28 @@ export function shrinkImage(file: Blob, maxSide = 1600, quality = 0.85): Promise
         img.src = url;
     });
 }
+
+/** 앱 안 펜슬 손글씨(획 좌표) → 흰 바탕 JPEG data URL (3단계 '글자로 바꾸기') */
+export function renderStrokes(data: { strokes: { points: number[][]; color: string; size: number; penType?: string }[]; width: number; height: number }, maxSide = 1600): string | null {
+    if (!data?.strokes?.length) return null;
+    const k = Math.min(2, maxSide / Math.max(data.width || 600, data.height || 320));
+    const c = document.createElement("canvas");
+    c.width = Math.round((data.width || 600) * k); c.height = Math.round((data.height || 320) * k);
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    for (const st of data.strokes) {
+        if (!st.points?.length) continue;
+        ctx.strokeStyle = st.penType === "highlighter" ? "rgba(250,204,21,0.35)" : (st.color || "#111");
+        ctx.lineWidth = Math.max(1.5, (st.size || 3) * k);
+        ctx.beginPath();
+        st.points.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x * k, y * k) : ctx.lineTo(x * k, y * k)));
+        if (st.points.length === 1) ctx.lineTo(st.points[0][0] * k + 0.1, st.points[0][1] * k);
+        ctx.stroke();
+    }
+    return c.toDataURL("image/jpeg", 0.9);
+}
+
+/** 손글씨 노트 → 생각 쏟아내기(BrainDump)로 보내 읽게 한다 */
+export const READ_IMAGE_EVENT = "planner-read-image";

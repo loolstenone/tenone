@@ -60,8 +60,8 @@
 - **플래너'스 AI 비전 (2026-10-14 사용자)**: "기록은 아날로그처럼 자유롭게, 관리는 비서처럼 똑똑하게, 회고는 코치처럼 따뜻하게" — 아날로그 사용자의 이탈 원인(밀린 일 다시 쓰기·과거 검색 한계·알림 부재) 해소
   - **1단계 ✅** ① 생각 쏟아내기 `features/planners/app/BrainDump.tsx` + `/api/myverse/ai/parse-input`(register_items 한 번에 배열, 확인 후 등록, 공용 등록기 `features/myverse/planner/ai-actions.ts`) ② 못 끝낸 일 자동 재배치 `AutoCarry.tsx`(하루 한 번, 14일, `/api/myverse/daily/carry-over` schedule — 일정 피해 빈 시간 09~21시, AI 아님·무료) ③ 아침 Top 3·저녁 회고 `DayCoach.tsx` + `/api/myverse/daily/focus` (`myverse_daily.focus`·`reflection`, 만든 결과 재사용)
   - **2단계 ✅** ① 목표 자동 분해 `features/myverse/planner/ProjectBreakdown.tsx` + `/api/myverse/projects/[id]/breakdown`(시간 추정·평일 날짜 제안·마감 초과 경고, task `estimate_min`) ② 주간 회고 `features/planners/app/WeeklyReview.tsx` + `/api/myverse/weekly-review`(숫자 무료·한 주 읽기 유료, `myverse_weekly_reports` sources.kind=planner_review) ③ 일상어로 찾기 `/api/myverse/smart-search` + SearchView 'AI로 찾기'(임베딩 없이 질문→기간+낱말→후보→AI 선택)
-  - **3단계 (다음)**: 손글씨 PAD 사진 → 디지털(OCR, 원본 사진은 변환 후 삭제 기본) · 펜슬 불렛 기호 → 데이터
-  - 이월: 반복 일정을 빈 시간 계산에 반영 · 일상어 찾기의 관련 기록 묶음 보강 · 사진 OCR 전 처리방침(국외 이전·민감정보)
+  - **3단계 ✅** 손글씨 → 디지털 `/api/myverse/handwriting` (Sonnet 4.6 — Haiku는 글자 오독) · 불렛 저널 기호 •×><○−★·취소선 → 상태 · 페이지 날짜 인식 · ① 생각 쏟아내기 '사진으로'(브라우저에서 1600px로 줄여 한 번 보내고 **저장 안 함**) ② 손글씨 노트 '글자로 바꾸기'(획 → 이미지 `renderStrokes`, 이벤트 `planner-read-image`로 BrainDump가 받음) · 메모는 그날 Cornell 노트로(`saveMemoNote`, 저장 후 화면 새로 열기 — DailyView 노트 목록 덮어쓰기 방지) · 취소선 항목은 기본 해제
+  - 이월: 반복 일정을 빈 시간 계산에 반영 · 일상어 찾기의 관련 기록 묶음 보강 · '글자로 바꾸기' 실제 펜슬 손글씨로 시험 · **공개 전 처리방침: AI 처리 위탁·국외 이전(Anthropic, 미국), 사진 비저장 명시**
   - 🐛 수정: AI 일정 저장 필드 `entry_date`→`start_date` (예전부터 AI 일정이 저장되지 않았음)
 - ❌ AI 라우트를 새로 만들 때 `requireAiAccess` 없이 두기 · 라우트마다 무료 한도 예외 만들기
 - ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유

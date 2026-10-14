@@ -42,6 +42,7 @@ import type { ExerciseBlockProps, HealthBlockProps, TrackingRowWithNoteProps, Tr
 
 // UpcomingSchedule → UpcomingSchedule.tsx로 이동
 import { UpcomingSchedule } from "./UpcomingSchedule";
+import { renderStrokes, READ_IMAGE_EVENT } from "./ai-actions";
 export type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = {
     id: string;
@@ -2693,6 +2694,20 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                         }`}
                                     />
                                 </div>
+                                {isHand && (
+                                    <button
+                                        onClick={() => {
+                                            // 플래너'스 AI 3단계 — 펜슬 손글씨를 글자로 (생각 쏟아내기에서 확인 후 넣기, 유료 AI)
+                                            const img = expandedNote.handwriting ? renderStrokes(expandedNote.handwriting) : null;
+                                            saveAndClose();
+                                            if (img) window.dispatchEvent(new CustomEvent(READ_IMAGE_EVENT, { detail: { image: img, source: "pencil" } }));
+                                        }}
+                                        title="손으로 쓴 할 일·일정·메모를 글자로 읽어 플래너에 넣어요"
+                                        className="shrink-0 px-3 py-1.5 border border-[var(--pp-accent)]/40 text-[var(--pp-accent)] rounded-lg text-sm hover:bg-[var(--pp-accent)]/5 transition-colors"
+                                    >
+                                        글자로 바꾸기
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setExpandedNote(null)}
                                     className="shrink-0 px-3 py-1.5 border border-neutral-200 text-neutral-500 rounded-lg text-sm hover:bg-neutral-50 transition-colors"
