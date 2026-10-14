@@ -123,7 +123,7 @@ export function CompaniesView() {
             {/* 헤더 */}
             <div className="mb-6">
                 <Link
-                    href="/myverse/app/contacts"
+                    href="/planners/app/contacts"
                     className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] mb-3 transition-colors"
                 >
                     <ArrowLeft className="h-3 w-3" /> 연락처로 돌아가기
@@ -214,7 +214,7 @@ export function CompaniesView() {
                                 </button>
                                 {c.contact_count > 0 && (
                                     <Link
-                                        href={`/myverse/app/contacts?company=${c.id}`}
+                                        href={`/planners/app/contacts?company=${c.id}`}
                                         className="p-1.5 text-neutral-400 hover:text-[#6366F1] rounded inline-flex items-center"
                                         title={`소속 연락처 ${c.contact_count}명 보기`}
                                     >

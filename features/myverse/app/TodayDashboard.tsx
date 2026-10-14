@@ -137,10 +137,10 @@ export function TodayDashboard({ initialDate, userName }: { initialDate?: string
                 {/* ── 시간 줌 링크 (일/주/월/연) ───────────────────────── */}
                 <nav className="flex justify-end gap-1 mb-4 text-xs">
                     {[
-                        { label: "일간", href: "/myverse/app/daily" },
-                        { label: "주간", href: "/myverse/app/weekly" },
-                        { label: "월간", href: "/myverse/app/monthly" },
-                        { label: "연간", href: "/myverse/app/yearly" },
+                        { label: "일간", href: "/planners/app/daily" },
+                        { label: "주간", href: "/planners/app/weekly" },
+                        { label: "월간", href: "/planners/app/monthly" },
+                        { label: "연간", href: "/planners/app/yearly" },
                     ].map(z => (
                         <Link
                             key={z.href}
@@ -313,7 +313,7 @@ export function TodayDashboard({ initialDate, userName }: { initialDate?: string
                             다음 4시간
                         </h3>
                         <Link
-                            href={`/myverse/app/schedule`}
+                            href={`/planners/app/schedule`}
                             className="text-xs font-semibold tracking-wider uppercase hover:underline"
                             style={{ color: ACCENT }}
                         >
@@ -327,7 +327,7 @@ export function TodayDashboard({ initialDate, userName }: { initialDate?: string
                         >
                             지금부터 4시간 안에 예정된 일정이 없습니다.
                             <Link
-                                href="/myverse/app/schedule"
+                                href="/planners/app/schedule"
                                 className="block mt-3 text-xs font-semibold tracking-wider uppercase"
                                 style={{ color: ACCENT }}
                             >

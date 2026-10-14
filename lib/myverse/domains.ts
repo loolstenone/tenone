@@ -112,7 +112,7 @@ export const DOMAINS: Record<DomainKey, DomainMeta> = {
         color_tw: "teal",
         icon_name: "Calendar",
         description: "캘린더 약속·기념일·공휴일",
-        app_href: "/myverse/app/schedule",
+        app_href: "/planners/app/schedule",
         rule_hints: [
             "캘린더 직접 입력",
             "공휴일·기념일 등 시간 의미 강한 항목",
@@ -214,7 +214,7 @@ export const LANES: LaneMeta[] = [
         key: "today",
         label_ko: "오늘",
         icon_name: "Sunrise",
-        app_href: "/myverse/app/daily",
+        app_href: "/planners/app/daily",
         description: "오늘·일간 통합 — 흔적, 할일, 일정, 노트, 프로젝트 한 화면",
     },
     {
@@ -242,28 +242,28 @@ export const LANES: LaneMeta[] = [
         key: "work",
         label_ko: "도구",
         icon_name: "LayoutTemplate",
-        app_href: "/myverse/app/projects",
+        app_href: "/planners/app/projects",
         description: "프로젝트·캔버스·작업·템플릿 — Planner's 자산 (Easy 모드 숨김 가능)",
     },
 ];
 
 /** Lane 키 → 그 lane에 속하는 페이지 경로 prefix들 — 활성 상태 판정용 */
 export const LANE_PATHS: Record<LaneKey, string[]> = {
-    today: ["/myverse/app/daily", "/myverse/app/today", "/myverse/app/index"],
+    today: ["/planners/app/daily", "/planners/app/today", "/planners/app/index"],
     record: [
         "/myverse/app/traces",
         "/myverse/app/lifestyle",
         "/myverse/app/body", "/myverse/app/work", "/myverse/app/study",
-        "/myverse/app/relation", "/myverse/app/schedule", "/myverse/app/move",
+        "/myverse/app/relation", "/planners/app/schedule", "/myverse/app/move",
         "/myverse/app/travel", "/myverse/app/with",
-        "/myverse/app/weekly", "/myverse/app/monthly", "/myverse/app/yearly",
-        "/myverse/app/time",
+        "/planners/app/weekly", "/planners/app/monthly", "/planners/app/yearly",
+        "/planners/app/time",
     ],
-    ai: ["/myverse/app/ask", "/myverse/app/coach", "/myverse/app/diary", "/myverse/app/insights", "/myverse/app/capsules", "/myverse/app/ai-briefing"],
-    connect: ["/myverse/app/feed", "/myverse/app/dm", "/myverse/app/verse", "/myverse/app/notifications"],
+    ai: ["/myverse/app/ask", "/myverse/app/coach", "/myverse/app/diary", "/myverse/app/insights", "/myverse/app/capsules", "/planners/app/ai-briefing"],
+    connect: ["/myverse/app/feed", "/myverse/app/dm", "/myverse/app/verse", "/planners/app/notifications"],
     work: [
-        "/myverse/app/projects", "/myverse/app/canvas", "/myverse/app/tasks",
-        "/myverse/app/templates", "/myverse/app/contacts", "/myverse/app/personal",
+        "/planners/app/projects", "/planners/app/canvas", "/planners/app/tasks",
+        "/planners/app/templates", "/planners/app/contacts", "/planners/app/personal",
     ],
 };
 

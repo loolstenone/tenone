@@ -74,6 +74,7 @@ function getDefaultBoard(site: SiteCode): string {
         rook: 'content',
         ogamja: 'content',
         changeup: 'community',
+        planners: 'stories',
     };
     return defaults[site] || 'general';
 }

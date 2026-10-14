@@ -8,7 +8,7 @@ import { requireStaff } from '@/lib/api-guard';
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile', '/privacy', '/terms'];
 
 // Myverse 앱 라우트 SSOT — myverse.kr 도메인에서 prefix 없이 노출되는 앱 첫 세그먼트 목록
-// 예: myverse.kr/today → 내부 /myverse/app/today
+// 예: myverse.kr/today → 내부 /planners/app/today
 const MYVERSE_APP_ROUTES = new Set([
     'today', 'traces', 'ask', 'coach', 'diary', 'insights', 'capsules',
     'feed', 'dm', 'verse', 'notifications',

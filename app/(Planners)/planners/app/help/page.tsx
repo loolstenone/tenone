@@ -23,7 +23,7 @@ const SECTIONS: Section[] = [
         id: "start",
         icon: Compass,
         title: "시작하기",
-        intro: "마이버스 AI는 당신이 매일 자신의 기획자로 살아가도록 곁에 둔 도구입니다. 가입과 온보딩을 한 번 마치면, 이후엔 페이지를 넘기듯 머물기만 하면 됩니다.",
+        intro: "AI 플래너는 당신이 매일 자신의 기획자로 살아가도록 곁에 둔 도구입니다. 가입과 온보딩을 한 번 마치면, 이후엔 페이지를 넘기듯 머물기만 하면 됩니다.",
         steps: [
             { label: "회원가입", detail: "이메일로 가입하면 곧장 온보딩이 시작됩니다." },
             { label: "사용 수준 선택", detail: "Easy mode — 일·주·월·연 스케줄에만 집중. All in one mode — 프로젝트·캔버스·템플릿까지 모두 사용." },
@@ -172,7 +172,7 @@ const SECTIONS: Section[] = [
         intro: "필요한 만큼만, 원하는 곳에서.",
         steps: [
             { label: "이메일", detail: "아침·저녁 브리핑 도착 알림. Settings → 알림 → 이메일 토글." },
-            { label: "푸시 (PWA)", detail: "홈 화면에 설치된 마이버스 AI에 즉시 푸시. 브라우저별 권한 허용 후 작동." },
+            { label: "푸시 (PWA)", detail: "홈 화면에 설치된 AI 플래너에 즉시 푸시. 브라우저별 권한 허용 후 작동." },
         ],
     },
     {
@@ -261,7 +261,7 @@ export default function HelpPage() {
                     </h1>
                 </div>
                 <p className="text-sm text-neutral-500 myverse-dark:text-neutral-400 leading-relaxed max-w-xl">
-                    마이버스 AI의 모든 기능을 한 권으로 정리했습니다.
+                    AI 플래너의 모든 기능을 한 권으로 정리했습니다.
                     필요한 곳을 펼쳐보세요 — 머무르며 다음 페이지를 만들어 가세요.
                 </p>
             </header>

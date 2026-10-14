@@ -8,12 +8,11 @@ import { SettingsLivePreview } from "./SettingsLivePreview";
 import { LaneHeader } from "@/features/myverse/app/LaneHeader";
 
 export const SETTINGS_TABS = [
-    { key: "start",    label: "시작",          href: "/myverse/app/settings/start" },
-    { key: "style",    label: "스타일",        href: "/myverse/app/settings/style" },
-    { key: "behavior", label: "기능",          href: "/myverse/app/settings/behavior" },
-    { key: "tech",     label: "기술",          href: "/myverse/app/settings/tech" },
-    { key: "imports",  label: "백업 가져오기", href: "/myverse/app/settings/imports" },
-    { key: "privacy",  label: "사생활",        href: "/myverse/app/settings/privacy" },
+    { key: "start",    label: "시작",          href: "/planners/app/settings/start" },
+    { key: "style",    label: "스타일",        href: "/planners/app/settings/style" },
+    { key: "behavior", label: "기능",          href: "/planners/app/settings/behavior" },
+    { key: "tech",     label: "기술",          href: "/planners/app/settings/tech" },
+    { key: "privacy",  label: "사생활",        href: "/planners/app/settings/privacy" },
 ];
 
 // 하위 호환 — 기존 SETTINGS_GROUPS 를 import 하는 곳이 있으면 빈 배열로 fallback

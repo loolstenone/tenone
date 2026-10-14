@@ -10,7 +10,8 @@ import { trackMyverse } from "@/lib/myverse/analytics";
 
 type Step = "welcome" | "mode" | "role" | "ai" | "identity_lite" | "first_trace" | "done";
 
-const STEPS: Step[] = ["welcome", "mode", "role", "ai", "identity_lite", "first_trace"];
+// Planner's 앱: MyVerse '첫 흔적' 단계(개인 OS) 제외 — 정체성 단계에서 바로 시작 (2026-10-14)
+const STEPS: Step[] = ["welcome", "mode", "role", "ai", "identity_lite"];
 
 const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -43,7 +44,7 @@ export default function OnboardingPage() {
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.replace("/login?redirect=/myverse/app");
+            router.replace("/login?redirect=/planners/app");
         }
     }, [isLoading, isAuthenticated, router]);
 
@@ -53,7 +54,7 @@ export default function OnboardingPage() {
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (d?.user?.onboarding_completed) {
-                    window.location.replace("/myverse/app/capture");
+                    window.location.replace("/planners/app/daily");
                 }
             })
             .catch(() => {});
@@ -113,7 +114,7 @@ export default function OnboardingPage() {
                 return;
             }
             trackMyverse("myverse_onboarding_complete", { mode, ai_tone: tone });
-            window.location.assign("/myverse/app/capture");
+            window.location.assign("/planners/app/daily");
         } catch (e) {
             console.error("onboarding fetch error", e);
             alert(`네트워크 오류: ${(e as Error).message}\n다시 시도해 주세요.`);
@@ -180,7 +181,7 @@ export default function OnboardingPage() {
                             <div className="space-y-8">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                                    <span className="text-[11px] tracking-widest text-white/40 uppercase">Myverse</span>
+                                    <span className="text-[11px] tracking-widest text-white/40">Planner&apos;s</span>
                                 </div>
 
                                 <div className="space-y-3">
@@ -438,8 +439,8 @@ export default function OnboardingPage() {
 
                             <Nav
                                 onBack={() => setStep("ai")}
-                                onNext={() => setStep("first_trace")}
-                                nextLabel="다음"
+                                onNext={handleFinish}
+                                nextLabel={saving ? "시작 중" : "시작하기"}
                             />
                         </div>
                     )}

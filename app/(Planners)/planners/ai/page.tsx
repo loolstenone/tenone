@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-// AI 플래너 소개 — 앱 본체(/planners/app)는 MyVerse에서 옮겨 오는 중 (app/(Planners)/CLAUDE.md '이전 계획' 4단계)
+// AI 플래너 소개 — 앱 본체 /planners/app (MyVerse에서 옮겨 온 핵심 화면, app/(Planners)/CLAUDE.md '이전 계획' 4단계)
 // ❌ 가격·요금 표기 금지 (통신판매업 신고 전)
 export const metadata: Metadata = {
     title: "AI 플래너",
@@ -28,6 +28,11 @@ export default function PlannersAiPage() {
                         PAD 플래너의 구조를 그대로 옮긴 디지털 플래너입니다. AI가 실행을 대신할수록 무엇을 할지 정하는 일은 사람의 몫으로 남습니다.
                         AI 플래너는 그 결정을 돕는 도구입니다.
                     </p>
+                    <div className="mt-10">
+                        <Link href="/planners/app" className="inline-flex items-center bg-[#14B8A6] px-6 py-3 font-bold text-[#042F2E] hover:bg-teal-300">
+                            AI 플래너 열기
+                        </Link>
+                    </div>
                 </div>
             </section>
 

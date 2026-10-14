@@ -593,10 +593,10 @@ export function CaptureView() {
 
             {/* 퀵 메뉴 — 도크 밑 가로 스크롤 칩 */}
             <div className="flex flex-wrap gap-1.5 mb-5">
-                <QuickLink href="/myverse/app/canvas"   icon={Brush}    label="캔버스" />
-                <QuickLink href="/myverse/app/contacts" icon={Contact}  label="연락처" />
+                <QuickLink href="/planners/app/canvas"   icon={Brush}    label="캔버스" />
+                <QuickLink href="/planners/app/contacts" icon={Contact}  label="연락처" />
                 <QuickLink href="/myverse/app/mail"     icon={Mail}     label="메일" />
-                <QuickLink href="/myverse/app/personal" icon={Castle}   label="퍼스널" />
+                <QuickLink href="/planners/app/personal" icon={Castle}   label="퍼스널" />
                 <QuickLink href="/myverse/app/insights" icon={Lightbulb} label="인사이트" />
             </div>
 

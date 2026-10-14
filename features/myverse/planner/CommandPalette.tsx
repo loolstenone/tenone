@@ -221,7 +221,7 @@ export function CommandPalette({ open, onClose }: Props) {
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/myverse/app/canvas/${d.canvas.id}`);
+                router.push(`/planners/app/canvas/${d.canvas.id}`);
                 onClose();
             }
         } finally {
@@ -231,25 +231,25 @@ export function CommandPalette({ open, onClose }: Props) {
 
     const commands: Command[] = useMemo(() => [
         // 이동
-        { id: "go_index",     label: "인덱스",        icon: LayoutGrid,      section: "이동", shortcut: "I", keywords: "index 인덱스 홈", run: () => go("/myverse/app/index") },
-        { id: "go_daily",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/myverse/app/daily") },
-        { id: "go_weekly",    label: "주간",          icon: CalendarDays,    section: "이동", shortcut: "W", keywords: "weekly 주간", run: () => go("/myverse/app/weekly") },
-        { id: "go_monthly",   label: "월간",          icon: CalendarRange,   section: "이동", shortcut: "M", keywords: "monthly 월간", run: () => go("/myverse/app/monthly") },
-        { id: "go_yearly",    label: "연간",          icon: CalendarClock,   section: "이동", shortcut: "Y", keywords: "yearly 연간", run: () => go("/myverse/app/yearly") },
-        { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/myverse/app/projects") },
-        { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/myverse/app/canvas") },
-        { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/myverse/app/contacts") },
-        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/myverse/app/personal") },
-        { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/myverse/app/templates") },
-        { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/myverse/app/search") },
-        { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/myverse/app/tasks") },
-        { id: "go_settings",  label: "설정",          icon: SettingsIcon,    section: "이동",            keywords: "settings 설정", run: () => go("/myverse/app/settings") },
-        { id: "go_help",      label: "도움말",        icon: HelpCircle,      section: "이동",            keywords: "help 도움말 헬프", run: () => go("/myverse/app/help") },
+        { id: "go_index",     label: "인덱스",        icon: LayoutGrid,      section: "이동", shortcut: "I", keywords: "index 인덱스 홈", run: () => go("/planners/app/index") },
+        { id: "go_daily",     label: "일간",          icon: Sun,             section: "이동", shortcut: "T", keywords: "today daily 일간 오늘", run: () => go("/planners/app/daily") },
+        { id: "go_weekly",    label: "주간",          icon: CalendarDays,    section: "이동", shortcut: "W", keywords: "weekly 주간", run: () => go("/planners/app/weekly") },
+        { id: "go_monthly",   label: "월간",          icon: CalendarRange,   section: "이동", shortcut: "M", keywords: "monthly 월간", run: () => go("/planners/app/monthly") },
+        { id: "go_yearly",    label: "연간",          icon: CalendarClock,   section: "이동", shortcut: "Y", keywords: "yearly 연간", run: () => go("/planners/app/yearly") },
+        { id: "go_projects",  label: "프로젝트",      icon: FolderKanban,    section: "이동", shortcut: "P", keywords: "projects 프로젝트", run: () => go("/planners/app/projects") },
+        { id: "go_canvas",    label: "캔버스",        icon: Pen,             section: "이동",            keywords: "canvas 캔버스 그림 손글씨", run: () => go("/planners/app/canvas") },
+        { id: "go_contacts",  label: "연락처",        icon: Users,           section: "이동", shortcut: "C", keywords: "contacts 연락처 사람", run: () => go("/planners/app/contacts") },
+        { id: "go_identity",  label: "퍼스널",        icon: Compass,         section: "이동",            keywords: "personal identity pi 정체성 비전 퍼스널", run: () => go("/planners/app/personal") },
+        { id: "go_templates", label: "템플릿",        icon: LayoutTemplate,  section: "이동",            keywords: "templates 템플릿", run: () => go("/planners/app/templates") },
+        { id: "go_search",    label: "검색",          icon: Search,          section: "이동",            keywords: "search 검색 찾기", run: () => go("/planners/app/search") },
+        { id: "go_tasks",     label: "할 일",         icon: FileText,        section: "이동",            keywords: "tasks 할일 todo", run: () => go("/planners/app/tasks") },
+        { id: "go_settings",  label: "설정",          icon: SettingsIcon,    section: "이동",            keywords: "settings 설정", run: () => go("/planners/app/settings") },
+        { id: "go_help",      label: "도움말",        icon: HelpCircle,      section: "이동",            keywords: "help 도움말 헬프", run: () => go("/planners/app/help") },
 
         // 만들기
         { id: "new_canvas",   label: "새 캔버스 만들기",   icon: Pen,           section: "만들기", keywords: "canvas new 새 캔버스 그림", run: createCanvas },
-        { id: "new_project",  label: "새 프로젝트 만들기", icon: FolderKanban,  section: "만들기", keywords: "project new 새 프로젝트", run: () => go("/myverse/app/projects?new=1") },
-        { id: "new_contact",  label: "새 연락처 추가",    icon: Users,         section: "만들기", keywords: "contact new 새 연락처", run: () => go("/myverse/app/contacts?new=1") },
+        { id: "new_project",  label: "새 프로젝트 만들기", icon: FolderKanban,  section: "만들기", keywords: "project new 새 프로젝트", run: () => go("/planners/app/projects?new=1") },
+        { id: "new_contact",  label: "새 연락처 추가",    icon: Users,         section: "만들기", keywords: "contact new 새 연락처", run: () => go("/planners/app/contacts?new=1") },
 
         // 도움말
         { id: "shortcuts",    label: "단축키 보기",        icon: Keyboard,      section: "도움말", keywords: "shortcuts keyboard 단축키 키보드", run: () => { window.dispatchEvent(new CustomEvent("pp-show-shortcuts")); onClose(); } },

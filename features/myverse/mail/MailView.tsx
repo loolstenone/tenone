@@ -528,7 +528,7 @@ export function MailView() {
                             <AlertCircle className="h-6 w-6 text-amber-500 mx-auto mb-2" />
                             <p className="text-xs text-neutral-600 myverse-dark:text-neutral-300">Gmail 연결 필요</p>
                             <a
-                                href="/myverse/app/settings"
+                                href="/planners/app/settings"
                                 className="inline-block mt-3 text-[11px] text-[#6366F1] hover:underline"
                             >
                                 설정 → 외부 연동에서 연결

@@ -20,10 +20,10 @@ export async function GET(req: Request) {
     const error = url.searchParams.get("error");
 
     if (error) {
-        return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?error=${encodeURIComponent(error)}`);
+        return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?error=${encodeURIComponent(error)}`);
     }
     if (!code || !stateRaw) {
-        return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?error=missing_params`);
+        return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?error=missing_params`);
     }
 
     let memberId: string;
@@ -31,13 +31,13 @@ export async function GET(req: Request) {
         const decoded = JSON.parse(Buffer.from(stateRaw, "base64url").toString("utf8"));
         memberId = decoded.memberId;
     } catch {
-        return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?error=invalid_state`);
+        return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?error=invalid_state`);
     }
 
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     if (!clientId || !clientSecret) {
-        return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?error=missing_oauth_config`);
+        return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?error=missing_oauth_config`);
     }
 
     const redirectUri = `${url.origin}/api/myverse/integrations/google-photos/callback`;
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
     if (!tokenRes.ok) {
         const errText = await tokenRes.text();
         console.error("[google-photos callback] token exchange failed:", errText);
-        return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?error=token_exchange_failed`);
+        return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?error=token_exchange_failed`);
     }
 
     const token = (await tokenRes.json()) as TokenResponse;
@@ -86,5 +86,5 @@ export async function GET(req: Request) {
             raw_profile: profile,
         }, { onConflict: "member_id,provider" });
 
-    return NextResponse.redirect(`${url.origin}/myverse/app/settings/integrations?connected=google_photos`);
+    return NextResponse.redirect(`${url.origin}/planners/app/settings/integrations?connected=google_photos`);
 }

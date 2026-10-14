@@ -181,7 +181,7 @@ async function tryCalendar(memberId: string, text: string): Promise<IntentResult
         handled: true,
         reply: `📅 일정에 추가했어요\n\n${dateP.date}${timeStr}\n${title}${with_whom ? `\n\n👤 ${with_whom}` : ""}`,
         actions: [
-            { label: "캘린더에서 보기", href: `/myverse/app/monthly?date=${dateP.date}` },
+            { label: "캘린더에서 보기", href: `/planners/app/monthly?date=${dateP.date}` },
         ],
     };
 }
@@ -343,7 +343,7 @@ async function executeTool(
             return {
                 handled: true,
                 reply: `📅 일정 추가했어요\n\n${start_date}${timeStr}\n${title}${with_whom ? `\n👤 ${with_whom}` : ""}${location ? `\n📍 ${location}` : ""}`,
-                actions: [{ label: "캘린더에서 보기", href: `/myverse/app/monthly?date=${start_date}` }],
+                actions: [{ label: "캘린더에서 보기", href: `/planners/app/monthly?date=${start_date}` }],
             };
         }
 
@@ -381,7 +381,7 @@ async function executeTool(
             return {
                 handled: true,
                 reply: `✅ 할 일 추가했어요\n\n${text}${tag ? ` [${tag}]` : ""}`,
-                actions: [{ label: "오늘 할 일 보기", href: `/myverse/app/today` }],
+                actions: [{ label: "오늘 할 일 보기", href: `/planners/app/today` }],
             };
         }
 
@@ -524,7 +524,7 @@ async function executeTool(
             return {
                 handled: true,
                 reply: `🔁 루틴 기록했어요\n\n${activity}${timeRange}${note ? `\n💬 ${note}` : ""}`,
-                actions: [{ label: "오늘 루틴 보기", href: `/myverse/app/today` }],
+                actions: [{ label: "오늘 루틴 보기", href: `/planners/app/today` }],
             };
         }
 

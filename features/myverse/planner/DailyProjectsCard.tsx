@@ -46,7 +46,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                     프로젝트
                 </h2>
                 <Link
-                    href="/myverse/app/projects"
+                    href="/planners/app/projects"
                     className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#6366F1]"
                     title="프로젝트 목록"
                 >
@@ -60,7 +60,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                 </div>
             ) : projects.length === 0 ? (
                 <Link
-                    href="/myverse/app/projects"
+                    href="/planners/app/projects"
                     className="block w-full py-3 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-400 text-center hover:border-[#6366F1] hover:text-[#6366F1] transition-colors"
                 >
                     + 첫 프로젝트 만들기
@@ -73,7 +73,7 @@ export function DailyProjectsCard({ date }: { date?: string }) {
                         return (
                             <Link
                                 key={p.id}
-                                href={`/myverse/app/projects/${p.id}`}
+                                href={`/planners/app/projects/${p.id}`}
                                 className="group relative block bg-white border border-neutral-200 rounded-xl p-3 hover:border-neutral-300 hover:shadow-sm transition-all"
                             >
                                 {/* 카테고리 뱃지 + 화살표 */}

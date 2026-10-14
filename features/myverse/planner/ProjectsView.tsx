@@ -410,7 +410,7 @@ export function ProjectsView() {
                     {filtered.map((p) => (
                         <Link
                             key={p.id}
-                            href={`/myverse/app/projects/${p.id}`}
+                            href={`/planners/app/projects/${p.id}`}
                             className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#6366F1] hover:shadow-sm transition-all group relative"
                         >
                             {/* 호버 시 삭제 버튼 — 우상단 */}

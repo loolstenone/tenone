@@ -16,14 +16,14 @@ export const MOBILE_NAV_DEFAULT: string[] = ["projects", "today", "capture", "fe
 export const ALL_NAV_OPTIONS = [
     // ── INSIDE / ENGINE
     { id: "capture",   label: "캡쳐",    icon: "bolt",           href: "/myverse/app/capture" },
-    { id: "today",     label: "오늘",     icon: "wb_twilight",    href: "/myverse/app/daily" },
-    { id: "projects",  label: "프로젝트", icon: "folder_managed", href: "/myverse/app/projects" },
-    { id: "canvas",    label: "캔버스",   icon: "draw",           href: "/myverse/app/canvas" },
-    { id: "templates", label: "템플릿",   icon: "frame_source",   href: "/myverse/app/templates" },
-    { id: "contacts",  label: "연락처",   icon: "contacts",       href: "/myverse/app/contacts" },
+    { id: "today",     label: "오늘",     icon: "wb_twilight",    href: "/planners/app/daily" },
+    { id: "projects",  label: "프로젝트", icon: "folder_managed", href: "/planners/app/projects" },
+    { id: "canvas",    label: "캔버스",   icon: "draw",           href: "/planners/app/canvas" },
+    { id: "templates", label: "템플릿",   icon: "frame_source",   href: "/planners/app/templates" },
+    { id: "contacts",  label: "연락처",   icon: "contacts",       href: "/planners/app/contacts" },
     { id: "mail",      label: "메일",     icon: "mail",           href: "/myverse/app/mail" },
     // ── INSIDE / PERSONAL
-    { id: "personal",  label: "비전",     icon: "castle",         href: "/myverse/app/personal" },
+    { id: "personal",  label: "비전",     icon: "castle",         href: "/planners/app/personal" },
     { id: "resume",    label: "이력서",   icon: "description",    href: "/myverse/app/personal/resume" },
     { id: "portfolio", label: "포폴",     icon: "photo_album",    href: "/myverse/app/portfolio" },
     // ── INSIDE / BLACKBOX
@@ -39,8 +39,8 @@ export const ALL_NAV_OPTIONS = [
     { id: "dm",        label: "DM",       icon: "chat_bubble",    href: "/myverse/app/dm" },
     { id: "card",      label: "명함",     icon: "contact_page",   href: "/myverse/app/card" },
     // ── 시스템
-    { id: "search",    label: "검색",     icon: "search",         href: "/myverse/app/search" },
-    { id: "settings",  label: "설정",     icon: "tune",           href: "/myverse/app/settings" },
+    { id: "search",    label: "검색",     icon: "search",         href: "/planners/app/search" },
+    { id: "settings",  label: "설정",     icon: "tune",           href: "/planners/app/settings" },
 ] as const;
 
 export type NavOptionId = typeof ALL_NAV_OPTIONS[number]["id"];
@@ -90,8 +90,8 @@ export function MobileBottomNav() {
                         pathname === item.href ||
                         pathname.startsWith(item.href + "/") ||
                         pathname.startsWith(item.href + "?") ||
-                        (item.id === "today" && (pathname === "/myverse/app" || pathname.startsWith("/myverse/app/daily") || pathname.startsWith("/myverse/app/index"))) ||
-                        (item.id === "personal" && pathname === "/myverse/app/personal");
+                        (item.id === "today" && (pathname === "/myverse/app" || pathname.startsWith("/planners/app/daily") || pathname.startsWith("/planners/app/index"))) ||
+                        (item.id === "personal" && pathname === "/planners/app/personal");
                     // 5개 슬롯의 가운데(index 2) — Primary 액션 강조 (캡쳐 등)
                     const isCenterEmphasis = navItems.length === 5 && idx === 2;
 

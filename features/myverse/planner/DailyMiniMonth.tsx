@@ -89,7 +89,7 @@ export function DailyMiniMonth({ date }: Props) {
                     <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
                 <Link
-                    href={`/myverse/app/monthly?year=${year}&month=${month}`}
+                    href={`/planners/app/monthly?year=${year}&month=${month}`}
                     className="text-xs font-semibold text-neutral-700 hover:text-[#6366F1]"
                 >
                     {year}년 {month}월
@@ -116,7 +116,7 @@ export function DailyMiniMonth({ date }: Props) {
                     return (
                         <div key={rowIdx} className="grid grid-cols-[20px_repeat(7,1fr)] gap-0.5">
                             <Link
-                                href={`/myverse/app/weekly?year=${weekYear}&week=${week}`}
+                                href={`/planners/app/weekly?year=${weekYear}&week=${week}`}
                                 title={`W${week} 주간 보기`}
                                 className="flex items-center justify-center text-[8px] text-neutral-300 hover:text-[#6366F1] font-mono leading-none"
                             >
@@ -133,7 +133,7 @@ export function DailyMiniMonth({ date }: Props) {
                                 return (
                                     <Link
                                         key={c.date}
-                                        href={`/myverse/app/daily?date=${c.date}`}
+                                        href={`/planners/app/daily?date=${c.date}`}
                                         className={`relative flex items-center justify-center text-[11px] rounded-md py-1.5 transition-colors
                                             ${isToday ? "bg-[#6366F1] text-white font-semibold"
                                             : !c.inMonth ? "text-neutral-200"

@@ -186,7 +186,7 @@ export function AppTopNav({
                     </Link>
                 )}
 
-                <Link href="/myverse/app/search" className={iconCls(pathname === "/myverse/app/search")} title="검색">
+                <Link href="/planners/app/search" className={iconCls(pathname === "/planners/app/search")} title="검색">
                     <Search className="h-4 w-4" />
                 </Link>
 
@@ -201,8 +201,8 @@ export function AppTopNav({
 
                 {/* 알림 (Bell) — 아바타에서 분리 */}
                 <Link
-                    href="/myverse/app/notifications"
-                    className={`relative ${iconCls(pathname.startsWith("/myverse/app/notifications"))}`}
+                    href="/planners/app/notifications"
+                    className={`relative ${iconCls(pathname.startsWith("/planners/app/notifications"))}`}
                     title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
                 >
                     <Bell className="h-4 w-4" />
@@ -258,7 +258,7 @@ export function AppTopNav({
                                         <span>프로필</span>
                                     </Link>
                                     <Link
-                                        href="/myverse/app/settings"
+                                        href="/planners/app/settings"
                                         onClick={() => setAvatarMenuOpen(false)}
                                         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors"
                                     >
@@ -266,7 +266,7 @@ export function AppTopNav({
                                         <span>설정</span>
                                     </Link>
                                     <Link
-                                        href="/myverse/app/help"
+                                        href="/planners/app/help"
                                         onClick={() => setAvatarMenuOpen(false)}
                                         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors"
                                     >
@@ -301,7 +301,7 @@ export function AppTopNav({
             <div className="md:hidden flex items-center gap-1.5 shrink-0 pl-1 ml-auto border-l border-neutral-100">
                 {userName && (
                     <Link
-                        href="/myverse/app/notifications"
+                        href="/planners/app/notifications"
                         title={unread > 0 ? `미확인 알림 ${unread}건` : "알림"}
                         className="relative h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
                     >
@@ -396,17 +396,17 @@ export function AppTopNav({
                     <Download className="h-4 w-4 text-[#6366F1]" />
                     <span>앱 설치</span>
                 </InstallButton>
-                <Link href="/myverse/app/search" onClick={() => setMenuOpen(false)}
+                <Link href="/planners/app/search" onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100">
                     <Search className="h-4 w-4 text-neutral-400" />
                     <span>검색</span>
                 </Link>
-                <Link href="/myverse/app/help" onClick={() => setMenuOpen(false)}
+                <Link href="/planners/app/help" onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100">
                     <HelpCircle className="h-4 w-4 text-neutral-400" />
                     <span>도움말</span>
                 </Link>
-                <Link href="/myverse/app/settings" onClick={() => setMenuOpen(false)}
+                <Link href="/planners/app/settings" onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100">
                     <Settings className="h-4 w-4 text-neutral-400" />
                     <span>설정</span>

@@ -38,7 +38,7 @@ export default function BlocksPage() {
 
     return (
         <div className="max-w-2xl mx-auto px-6 py-8">
-            <Link href="/myverse/app/settings" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800 mb-3">
+            <Link href="/planners/app/settings" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800 mb-3">
                 <ArrowLeft className="h-3 w-3" /> 설정으로
             </Link>
             <h1 className="text-xl font-serif text-neutral-900 mb-1">차단 관리</h1>

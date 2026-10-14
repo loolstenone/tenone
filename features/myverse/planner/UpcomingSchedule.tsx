@@ -104,7 +104,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
             return (
                 <li key={`task-${o.date}-${o.task.id}-${i}`}>
                     <a
-                        href={`/myverse/app/daily?date=${o.date}`}
+                        href={`/planners/app/daily?date=${o.date}`}
                         className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                     >
                         <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
@@ -123,7 +123,7 @@ export function UpcomingSchedule({ date }: { date: string }) {
         return (
             <li key={`cal-${o.date}-${o.entry.id}-${i}`}>
                 <a
-                    href={`/myverse/app/daily?date=${o.date}`}
+                    href={`/planners/app/daily?date=${o.date}`}
                     className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
                 >
                     <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${c.dot}`} />

@@ -41,7 +41,7 @@ export default function ExportPage() {
 
     return (
         <div className="max-w-2xl mx-auto px-6 py-8">
-            <Link href="/myverse/app/settings/privacy" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800 mb-3">
+            <Link href="/planners/app/settings/privacy" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800 mb-3">
                 <ArrowLeft className="h-3 w-3" /> 개인정보 설정으로
             </Link>
             <h1 className="text-xl font-serif text-neutral-900 mb-1">내 데이터 다운로드</h1>
@@ -93,7 +93,7 @@ export default function ExportPage() {
             <div className="mt-4 text-[11px] text-neutral-400 leading-relaxed">
                 다운로드 시점의 스냅샷입니다. 이후 데이터 변경 사항은 포함되지 않습니다.
                 삭제 권리(잊혀질 권리)를 행사하려면{" "}
-                <Link href="/myverse/app/settings/privacy" className="underline hover:text-neutral-700">개인정보 설정</Link>에서 계정 삭제를 요청해 주세요.
+                <Link href="/planners/app/settings/privacy" className="underline hover:text-neutral-700">개인정보 설정</Link>에서 계정 삭제를 요청해 주세요.
             </div>
         </div>
     );

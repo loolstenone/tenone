@@ -10,6 +10,7 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
+import { isPlannersAppPath } from "@/features/planners/app/nav";
 
 // 메뉴 SSOT = lib/brand-site-menus.ts (CLAUDE.md §1.9.5)
 const navItems = siteHeaderNav("planners");
@@ -18,6 +19,9 @@ export function PlannersHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
     const { isAuthenticated } = useAuth();
+
+    // AI 플래너 앱(/planners/app)은 자체 상단 바를 쓴다
+    if (isPlannersAppPath(pathname)) return null;
 
     // planners.tenone.biz는 prefix 없이 접속 → /projects 와 /planners/projects 모두 활성 처리
     const isActive = (href: string) => {

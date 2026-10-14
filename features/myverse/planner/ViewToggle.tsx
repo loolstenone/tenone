@@ -3,10 +3,10 @@ import Link from "next/link";
 // 시간 줌 토글 — 일간/주간/월간/연간
 // 일간 = 메인 (/daily). /today는 redirect 유지 (레거시 호환).
 const VIEWS = [
-    { label: "일간", href: "/myverse/app/daily",   key: "daily" },
-    { label: "주간", href: "/myverse/app/weekly",  key: "weekly" },
-    { label: "월간", href: "/myverse/app/monthly", key: "monthly" },
-    { label: "연간", href: "/myverse/app/yearly",  key: "yearly" },
+    { label: "일간", href: "/planners/app/daily",   key: "daily" },
+    { label: "주간", href: "/planners/app/weekly",  key: "weekly" },
+    { label: "월간", href: "/planners/app/monthly", key: "monthly" },
+    { label: "연간", href: "/planners/app/yearly",  key: "yearly" },
 ] as const;
 
 type ViewKey = typeof VIEWS[number]["key"];

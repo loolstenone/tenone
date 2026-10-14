@@ -1041,7 +1041,7 @@ function TraceDetailModal({ trace, onClose, onUpdated }: {
                     )}
 
                     <Link
-                        href={`/myverse/app/daily?date=${trace.date}`}
+                        href={`/planners/app/daily?date=${trace.date}`}
                         className="block mt-2 px-3 py-2 text-center text-xs font-medium text-neutral-600 border border-neutral-200 hover:bg-neutral-50 rounded-lg transition-colors"
                     >
                         이날의 오늘 보기 →
@@ -1136,14 +1136,14 @@ function EmptyState() {
             </p>
             <div className="flex items-center justify-center gap-2 flex-wrap">
                 <Link
-                    href="/myverse/app/daily"
+                    href="/planners/app/daily"
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-xs font-medium hover:bg-[#4F46E5] transition-colors"
                 >
                     <Camera className="h-3.5 w-3.5" />
                     일간에서 추가
                 </Link>
                 <Link
-                    href="/myverse/app/settings/imports"
+                    href="/planners/app/settings/imports"
                     className="inline-flex items-center gap-1.5 px-4 py-2 border border-neutral-200 text-neutral-700 rounded-lg text-xs font-medium hover:bg-neutral-50 transition-colors"
                 >
                     <Sparkles className="h-3.5 w-3.5" />

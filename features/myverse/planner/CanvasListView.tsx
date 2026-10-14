@@ -90,7 +90,7 @@ export function CanvasListView() {
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/myverse/app/canvas/${d.canvas.id}`);
+                router.push(`/planners/app/canvas/${d.canvas.id}`);
             }
         } finally {
             setCreating(false);
@@ -152,7 +152,7 @@ export function CanvasListView() {
                     {rows.map(row => (
                         <Link
                             key={row.id}
-                            href={`/myverse/app/canvas/${row.id}`}
+                            href={`/planners/app/canvas/${row.id}`}
                             className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-[#6366F1] hover:shadow-sm transition-all"
                         >
                             {/* Thumbnail */}

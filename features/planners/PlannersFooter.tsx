@@ -1,9 +1,14 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { UniverseFooter } from "@/components/UniverseFooter";
+import { isPlannersAppPath } from "@/features/planners/app/nav";
 
 // 푸터 규칙 CLAUDE.md §1.9.4 — 메뉴는 헤더 레지스트리에서 자동(siteId), 참여·채널만 여기서
 export function PlannersFooter() {
+    const pathname = usePathname();
+    // AI 플래너 앱(/planners/app)은 사이트 푸터 없이 전체 화면
+    if (isPlannersAppPath(pathname)) return null;
     return (
         <UniverseFooter
             siteId="planners"

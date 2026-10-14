@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 import { Plus, X, ListTodo, FileText, Pen, Loader2 } from "lucide-react";
 
 const HIDDEN_PATHS = [
-    "/myverse/app/canvas/", // 캔버스 에디터에서는 숨김
-    "/myverse/app/onboarding",
+    "/planners/app/canvas/", // 캔버스 에디터에서는 숨김
+    "/planners/app/onboarding",
     "/myverse/purchase",
 ];
 
@@ -135,7 +135,7 @@ export function QuickCapture() {
             });
             if (res.ok) {
                 const d = await res.json();
-                router.push(`/myverse/app/canvas/${d.canvas.id}`);
+                router.push(`/planners/app/canvas/${d.canvas.id}`);
                 setOpen(false);
             }
         } finally {

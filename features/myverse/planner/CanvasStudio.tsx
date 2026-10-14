@@ -107,7 +107,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
     // ─── 삭제 ──────────────────────────────────────────────────────────────
     async function deleteCanvas() {
         await fetch(`/api/myverse/canvases/${canvasId}`, { method: "DELETE" });
-        window.location.href = "/myverse/app/canvas";
+        window.location.href = "/planners/app/canvas";
     }
 
     // ─── 텍스트 → 태스크 승격 ─────────────────────────────────────────────
@@ -142,7 +142,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
                     {!embed && (
-                        <Link href="/myverse/app/canvas" className="text-sm text-[#6366F1] hover:underline">
+                        <Link href="/planners/app/canvas" className="text-sm text-[#6366F1] hover:underline">
                             목록으로
                         </Link>
                     )}
@@ -160,7 +160,7 @@ export function CanvasStudio({ canvasId, embed = false }: { canvasId: string; em
             {!embed && (
                 <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
                     <Link
-                        href="/myverse/app/canvas"
+                        href="/planners/app/canvas"
                         className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0"
                     >
                         <ChevronLeft className="h-4 w-4" />

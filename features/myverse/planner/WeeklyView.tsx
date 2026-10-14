@@ -708,7 +708,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             </span>
                                             <span className={`text-xs font-medium ${dayColor}`}>{DAYS_KO[d.getDay()]}</span>
                                             <Link
-                                                href={`/myverse/app/daily?date=${ds}`}
+                                                href={`/planners/app/daily?date=${ds}`}
                                                 title="Daily 보기"
                                                 className="ml-auto p-0.5 rounded text-neutral-300 hover:text-[#6366F1] hover:bg-neutral-100 transition-colors shrink-0"
                                             >

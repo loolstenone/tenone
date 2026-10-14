@@ -1266,7 +1266,7 @@ export function ContactsView() {
                         </span>
                     )}
                     <a
-                        href="/myverse/app/contacts/companies"
+                        href="/planners/app/contacts/companies"
                         className="ml-2 inline-flex items-center gap-1 px-2 py-1 text-[11px] text-neutral-600 hover:text-[#6366F1] border border-neutral-200 rounded-md hover:border-[#6366F1]/40 transition-colors"
                         title="회사 엔티티 관리"
                     >
@@ -1278,7 +1278,7 @@ export function ContactsView() {
                             {filterCompanyName}
                             <button
                                 type="button"
-                                onClick={() => router.push("/myverse/app/contacts")}
+                                onClick={() => router.push("/planners/app/contacts")}
                                 className="ml-0.5 hover:text-rose-500"
                                 title="필터 해제"
                             >

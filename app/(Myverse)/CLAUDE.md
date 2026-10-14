@@ -20,6 +20,8 @@
 - **메인 도메인**: `myverse.kr` (개인 공개 페이지: `myverse.kr/@handle`)
 - ~~**단일 브랜드 통합**: Planner's Planner의 모든 기능을 흡수하여 Myverse 단일 앱으로 통합 진행 중 (세션 107~)~~
 - **2026-10-14 되돌림 (사용자 결정)**: MyVerse 동결(frozen·사용자 1명) 상태에서 **AI 플래너 핵심**(오늘·일간·주간·월간·연간·프로젝트·할 일·캔버스·마인드맵·템플릿·일정·정체성·AI 브리핑·검색·설정)을 Planner's(`/planners/app`)로 옮긴다. 개인 OS 기능(body·diary·dm·feed·capsules·lifestyle·mail·moments 등)은 MyVerse에 동결 상태로 남는다. `myverse_*` 테이블은 이름 유지·소유 브랜드만 planners — 상세 `app/(Planners)/CLAUDE.md` '이전 계획'
+  - ✅ 2026-10-14 이전 완료: 핵심 화면은 `app/(Planners)/planners/app/`에 있다. `/myverse/app/{핵심}` 옛 주소는 `next.config.ts`가 `/planners/app/*`로 넘긴다. MyVerse 앱에 남은 화면: capture·traces·capsules·insights·ask·diary·coach·feed·profile·card·dm·mail·body·study·lifestyle·work·travel·move·relation·with·personal/resume·personal/brand
+  - 인증 공통 `lib/myverse/app-auth.ts` (두 앱 레이아웃이 같이 씀)
 
 ---
 

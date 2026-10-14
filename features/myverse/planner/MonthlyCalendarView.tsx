@@ -97,7 +97,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                     return (
                         <div key={mIdx}>
                             {/* Month name → monthly detail */}
-                            <Link href={`/myverse/app/monthly?year=${year}&month=${mIdx + 1}`}>
+                            <Link href={`/planners/app/monthly?year=${year}&month=${mIdx + 1}`}>
                                 <div className="bg-neutral-500 text-white text-center text-[11px] font-semibold py-1 hover:bg-[#6366F1] transition-colors">
                                     {monthName}
                                 </div>
@@ -121,7 +121,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                                 <div key={ri} className="grid grid-cols-[26px_repeat(7,1fr)]">
                                     {/* Week number → weekly view */}
                                     <Link
-                                        href={`/myverse/app/weekly?year=${year}&week=${row[0].week}`}
+                                        href={`/planners/app/weekly?year=${year}&week=${row[0].week}`}
                                         className="flex items-center justify-end pr-1 text-[8px] text-neutral-300 hover:text-[#6366F1] transition-colors leading-5"
                                     >
                                         W{String(row[0].week).padStart(2, "0")}
@@ -134,7 +134,7 @@ export function MonthlyCalendarView({ initialYear }: { initialYear: number }) {
                                         return (
                                             <Link
                                                 key={ci}
-                                                href={`/myverse/app/daily?date=${cell.date}`}
+                                                href={`/planners/app/daily?date=${cell.date}`}
                                                 className={`text-center text-[10px] leading-5 rounded-sm transition-colors hover:bg-neutral-100 ${
                                                     isToday
                                                         ? "bg-[#6366F1]/10 text-[#6366F1] font-bold"

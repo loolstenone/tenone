@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const origin = new URL(req.url).origin;
     const params = new URLSearchParams();
     params.append("customer", member.stripe_customer_id);
-    params.append("return_url", `${origin}/myverse/app/settings`);
+    params.append("return_url", `${origin}/planners/app/settings`);
 
     const res = await fetch("https://api.stripe.com/v1/billing_portal/sessions", {
         method: "POST",

@@ -13,7 +13,8 @@ export type SiteCode =
     | 'hero'
     | 'rook'
     | 'ogamja'
-    | 'changeup';
+    | 'changeup'
+    | 'planners';
 
 // ── 게시판 설정 ──
 

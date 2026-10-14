@@ -170,7 +170,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                 <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-8 px-5 text-center">
                     <p className="text-sm text-neutral-500 mb-1">아직 연결된 업무가 없어요.</p>
                     <p className="text-xs text-neutral-400 leading-relaxed">
-                        위에서 직접 추가하거나, <Link href="/myverse/app/daily" className="text-[#6366F1] hover:underline">일간</Link>·<Link href="/myverse/app/weekly" className="text-[#6366F1] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
+                        위에서 직접 추가하거나, <Link href="/planners/app/daily" className="text-[#6366F1] hover:underline">일간</Link>·<Link href="/planners/app/weekly" className="text-[#6366F1] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
                     </p>
                 </div>
             ) : (
@@ -265,7 +265,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="text-xs font-semibold text-neutral-500 font-mono">{date}</h3>
                                     <Link
-                                        href={`/myverse/app/daily?date=${date}`}
+                                        href={`/planners/app/daily?date=${date}`}
                                         className="inline-flex items-center gap-0.5 text-[10px] text-neutral-400 hover:text-[#6366F1] transition-colors"
                                     >
                                         일간 <ArrowUpRight className="h-2.5 w-2.5" />

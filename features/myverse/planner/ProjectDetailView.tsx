@@ -124,7 +124,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Breadcrumb + utility */}
             <div className="flex items-center justify-between mb-5">
-                <Link href="/myverse/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                <Link href="/planners/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                     <ChevronLeft className="h-4 w-4" /> 프로젝트
                 </Link>
                 <PlannersUtilityLinks />
@@ -286,7 +286,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                     setConfirmDeleteOpen(false);
                     const res = await fetch(`/api/myverse/projects/${projectId}`, { method: "DELETE" });
                     if (res.ok) {
-                        window.location.href = "/myverse/app/projects";
+                        window.location.href = "/planners/app/projects";
                     } else {
                         const d = await res.json().catch(() => ({}));
                         alert(`삭제 실패: ${d.message || d.error || res.status}`);

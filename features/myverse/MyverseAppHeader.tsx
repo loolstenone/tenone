@@ -21,7 +21,7 @@ export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
             <div className="flex items-center justify-between px-4 h-12">
-                <Link href="/myverse/app/daily" className="flex items-center gap-2 group">
+                <Link href="/planners/app/daily" className="flex items-center gap-2 group">
                     <div className="h-7 w-7 rounded-md bg-gradient-to-br from-[#6366F1] to-[#A855F7] flex items-center justify-center text-white text-xs font-bold">
                         M
                     </div>
@@ -52,7 +52,7 @@ export function MyverseAppHeader({ name, handle, avatarUrl }: Props) {
                         <Bell className="h-4 w-4" />
                     </button>
                     <Link
-                        href={handle ? `/myverse/${handle}` : "/myverse/app/settings/handle"}
+                        href={handle ? `/myverse/${handle}` : "/planners/app/settings/handle"}
                         title={handle ? `@${handle} 공개 페이지` : "핸들 등록"}
                         className="ml-1 flex items-center gap-1.5"
                     >

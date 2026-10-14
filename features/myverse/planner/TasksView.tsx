@@ -165,7 +165,7 @@ export function TasksView() {
                         <div key={date}>
                             <div className="flex items-center gap-2 mb-2">
                                 <Link
-                                    href={`/myverse/app/daily?date=${date}`}
+                                    href={`/planners/app/daily?date=${date}`}
                                     className="flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] transition-colors group"
                                 >
                                     <span className="font-mono">{formatDate(date)}</span>

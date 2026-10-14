@@ -253,7 +253,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         if (newMonth < 1) { newYear -= 1; newMonth = 12; }
         if (newMonth > 12) { newYear += 1; newMonth = 1; }
         // URL과 state 동시 갱신 — 좌측 월 바도 함께 업데이트
-        router.push(`/myverse/app/monthly?year=${newYear}&month=${newMonth}`);
+        router.push(`/planners/app/monthly?year=${newYear}&month=${newMonth}`);
     }
 
     // 스와이프 내비게이션
@@ -499,7 +499,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                             <span key={i} className="group inline-flex items-center gap-1 bg-[#6366F1] text-white text-xs px-2 py-0.5 rounded-full font-medium">
                                                 {matched ? (
                                                     <Link
-                                                        href={`/myverse/app/projects/${matched.id}`}
+                                                        href={`/planners/app/projects/${matched.id}`}
                                                         title="프로젝트로 이동"
                                                         className="hover:underline inline-flex items-center gap-0.5"
                                                     >
@@ -602,7 +602,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                     return (
                                         <Link
                                             key={cell.date}
-                                            href={`/myverse/app/daily?date=${cell.date}`}
+                                            href={`/planners/app/daily?date=${cell.date}`}
                                             className={`min-h-[88px] md:min-h-[120px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}

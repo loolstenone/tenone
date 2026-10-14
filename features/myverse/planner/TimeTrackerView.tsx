@@ -814,7 +814,7 @@ export function TimeTrackerView({ initialDate }: { initialDate: string }) {
                                     Google Calendar를 연동하면 일정이 자동으로 타임라인에 표시됩니다.
                                 </p>
                                 <a
-                                    href="/myverse/app/settings"
+                                    href="/planners/app/settings"
                                     className="mt-2 block text-center text-[10px] text-blue-300 hover:text-blue-200 transition-colors"
                                 >
                                     설정에서 연동하기 →

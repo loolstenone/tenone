@@ -90,7 +90,7 @@ export function PersonView({ name }: { name: string }) {
             {/* 헤더 */}
             <div className="mb-6">
                 <Link
-                    href="/myverse/app/contacts"
+                    href="/planners/app/contacts"
                     className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-[#6366F1] mb-3"
                 >
                     <ArrowLeft className="h-3 w-3" />

@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // AI 플래너 핵심 화면 MyVerse → Planner's 이전 (2026-10-14, app/(Planners)/CLAUDE.md '이전 계획' 4단계)
+      // 개인 OS 화면(캡처·흔적·일기·피드·이력서 등)은 /myverse/app 에 그대로 남는다
+      {
+        source: '/myverse/app/:page(today|daily|weekly|monthly|yearly|projects|tasks|canvas|templates|schedule|ai-briefing|search|settings|onboarding|help|notifications|index|time|contacts)/:rest*',
+        destination: '/planners/app/:page/:rest*',
+        permanent: false,
+      },
+      { source: '/myverse/app/personal', destination: '/planners/app/personal', permanent: false },
       // 삭제된 페이지 — 301 리다이렉트
       { source: '/goods', destination: '/', permanent: true },
       { source: '/goods/:path*', destination: '/', permanent: true },

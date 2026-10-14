@@ -39,7 +39,7 @@ export function ThisWeekCard({ date }: { date: string }) {
                     </h2>
                 </div>
                 <Link
-                    href={`/myverse/app/weekly?year=${year}&week=${week}`}
+                    href={`/planners/app/weekly?year=${year}&week=${week}`}
                     className="text-[10px] text-[#6366F1] hover:underline inline-flex items-center gap-0.5"
                 >
                     열기 <ArrowRight className="h-3 w-3" />
@@ -71,7 +71,7 @@ export function ThisWeekCard({ date }: { date: string }) {
                 </div>
             ) : (
                 <Link
-                    href={`/myverse/app/weekly?year=${year}&week=${week}`}
+                    href={`/planners/app/weekly?year=${year}&week=${week}`}
                     className="block text-xs text-neutral-600 leading-relaxed hover:text-[#6366F1] transition-colors"
                 >
                     이번 주의 핵심을 아직 쓰지 않았어요.<br />

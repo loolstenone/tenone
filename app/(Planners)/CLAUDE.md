@@ -43,6 +43,8 @@
 - `app/(Planners)/planners/about/page.tsx` — 소개 = 기획론 (구글 사이트 Planning 원고)
 - `app/(Planners)/planners/{planner,templates}/page.tsx` — PAD 자료실 · `lib/planners/library.ts`(서버 조회) · `library-shared.ts`(분류 SSOT) · `features/planners/{FileList,DownloadButton}.tsx`
 - `app/(Planners)/planners/ai/page.tsx` — AI 플래너 소개 · `app/(Planners)/planners/stories/**` — 이야기 게시판
+- `app/(Planners)/planners/app/**` — AI 플래너 앱 (layout = 로그인·온보딩 게이트 + `features/planners/app/{PlannersAppTopBar,PlannersAppSideNav}.tsx`, 메뉴 SSOT `features/planners/app/nav.ts`) · 화면 본체는 `features/myverse/planner/*` 공용 · 사이트 헤더·푸터는 앱 경로에서 숨김(`isPlannersAppPath`)
+- ⚠️ 앱 화면에 개인 OS 기능(캡처·흔적·일기·피드·이력서)으로 가는 링크를 새로 넣지 않는다 — 그건 MyVerse(동결) 소유
 - `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로
 - `scripts/planners-files-import.mjs` + `scripts/data/planners-badak-mall.json` — 바닥상회 원본 → 버킷·테이블 (멱등)
 - `app/(Planners)/planners/projects/**` — 회차 목록·방·팀·초대 (코어 프로그램 컴포넌트 얇은 래퍼)
@@ -76,7 +78,7 @@
 | 1 | 주소·틀: domain-registry·CANONICAL·site-config·ums_sites(focus·www.planners.ai.kr)·레이아웃 noindex | ✅ 2026-10-14 (외부: apex A `216.150.1.1` + apex → www 308은 사용자) |
 | 2 | 기획자 정체성 화면(첫 화면·소개 = 기획론) · 메뉴 `lib/brand-site-menus.ts` 개편 (소개·플래너·템플릿·AI 플래너·프로젝트·이야기, 인증서는 푸터 참여) | ✅ 2026-10-14 |
 | 3 | PAD 자료실: `planners_files` + 비공개 버킷 `planners-files` + 로그인 회원 5분 서명 URL(`/api/planners-library/[id]/download`) + 다운로드 수만 집계 · 인트라 `/intra/ums/planners/{planner,templates}`(올리기·공개·분류·삭제, API `/api/intra/planners/files`) · 이야기 = 통합 게시판 `ums_boards` stories | ✅ 2026-10-14 (170개 업로드, 공개 164·비공개 6) |
-| 4 | AI 플래너: 소개 `/planners/ai` ✅ · 앱 `/myverse/app/*` 핵심만 `/planners/app/*`로 — 설계: 앱 경로를 컨텍스트(`useAppBase`)로 바꿔 MyVerse(동결)와 같은 코드를 함께 씀 (하드코딩 `/myverse/app` 64개 파일) · Planner's 앱 레이아웃 = 로그인(LoginRequired) + 온보딩만, **구독 게이트·구매 링크 없음** · `myverse_*` 테이블·`/api/myverse/*` 그대로 | 진행 중 |
+| 4 | AI 플래너: 소개 `/planners/ai` · 앱 `/planners/app` — MyVerse에서 핵심 화면 32개 파일을 **실제로 옮김**(today·daily·weekly·monthly·yearly·projects·tasks·canvas·templates·schedule·ai-briefing·search·settings·onboarding·help·notifications·index·time·contacts + personal 정체성 화면) · 주소 문자열 210곳 `/myverse/app/{핵심}` → `/planners/app/{핵심}` · 옛 주소는 `next.config.ts` redirects · 레이아웃 = 로그인(LoginRequired) + 온보딩만, **구독 게이트·구매 링크 없음** · 온보딩은 정체성 단계에서 끝(MyVerse '첫 흔적' 단계 제외) · 설정 '백업 가져오기' 탭 제외 · 인증 공통 `lib/myverse/app-auth.ts` · `myverse_*` 테이블·`/api/myverse/*` 그대로 | ✅ 2026-10-14 (로그인 후 화면은 사용자 확인 필요) |
 | 5 | Badak 정리: 새 Badak 사이트에 바닥상회 없음 · badak.biz DNS 전환 때 `/PlannersPlanner`·`/Template`·`/shop_view?idx=…` → planners.ai.kr 308 | |
 | 6 | 출시: 처리방침(다운로드 기록·AI 플래너) · `docs/Data_Lifecycle.md` · `npm run site:check -- planners --live` | |
 

@@ -82,7 +82,7 @@ function renderBriefingHtml({ name, type, content, date }: { name?: string | nul
     <p style="margin-top:24px;font-size:11px;color:#9CA3AF;text-align:center;line-height:1.6;">
       <a href="https://myverse.kr/myverse/app" style="color:#0F766E;text-decoration:none;">앱에서 보기</a>
       &nbsp;·&nbsp;
-      <a href="https://myverse.kr/myverse/app/settings" style="color:#6B7280;text-decoration:none;">알림 설정</a>
+      <a href="https://myverse.kr/planners/app/settings" style="color:#6B7280;text-decoration:none;">알림 설정</a>
     </p>
     <p style="margin-top:16px;font-size:10px;color:#D1D5DB;text-align:center;font-style:italic;">
       생각한대로 살지 않으면, 사는대로 생각하게 된다.
@@ -174,7 +174,7 @@ export async function sendPushBriefing(params: {
                     JSON.stringify({
                         title: `[PP AI] ${title}`,
                         body,
-                        url: "/myverse/app/ai-briefing",
+                        url: "/planners/app/ai-briefing",
                     })
                 );
                 success++;

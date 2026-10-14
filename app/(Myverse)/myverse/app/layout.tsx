@@ -4,8 +4,8 @@
 // 트리거하므로 인증 게이트는 ClientRedirect 컴포넌트로 처리. server는 항상 200 응답.
 
 import { Suspense } from "react";
-import { createServerClient } from "@supabase/ssr";
-import { cookies, headers } from "next/headers";
+import { getAuthState, isPrivileged, type RoleRow } from "@/lib/myverse/app-auth";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientRedirect } from "@/components/ClientRedirect";
 import { AppTopNav } from "@/features/myverse/planner/AppTopNav";
@@ -25,87 +25,13 @@ import { isMyverseSubscriberActive } from "@/lib/myverse/subscription";
 
 export const dynamic = "force-dynamic";
 
-type AuthState =
-    | { kind: "no_session" }
-    | { kind: "no_member"; email: string }
-    | { kind: "ok"; member: Record<string, unknown> };
-
-async function getAuthState(): Promise<AuthState> {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return cookieStore.getAll(); },
-                setAll() { /* read-only */ },
-            },
-            auth: { storageKey: "tenone-auth" },
-        }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { kind: "no_session" };
-
-    const admin = createAdminClient();
-
-    // members 기본 쿼리 — FK join 없이 안정적으로 조회
-    const BASE = "id, name, email, avatar_url, handle, auth_id";
-
-    // 1) 세션 기반 anon client로 조회 — RLS: auth.uid() = auth_id (SERVICE_ROLE_KEY 불필요)
-    let { data: baseMember, error: anonErr } = await supabase.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
-
-    // 2) anon 실패 시 admin client로 재시도
-    if (!baseMember) {
-        if (anonErr) console.error("[myverse/app/layout] members anon lookup error:", anonErr.message);
-        const { data: adminMember, error: adminErr } = await admin.from("members").select(BASE).eq("auth_id", user.id).maybeSingle();
-        if (adminErr) console.error("[myverse/app/layout] members admin lookup error:", adminErr.message);
-        baseMember = adminMember;
-    }
-
-    // 3) auth_id 미매핑 → email로 fallback
-    if (!baseMember && user.email) {
-        const { data: byEmail } = await admin
-            .from("members").select(BASE)
-            .eq("email", user.email)
-            .order("created_at", { ascending: false })
-            .limit(1);
-        baseMember = byEmail?.[0] ?? null;
-    }
-
-    if (!baseMember) return { kind: "no_member", email: user.email! };
-
-    // member_roles + myverse_users 별도 조회
-    const [{ data: roles, error: rolesErr }, { data: myverseRows, error: myverseErr }] = await Promise.all([
-        admin.from("member_roles").select("role,is_active").eq("member_id", baseMember.id),
-        admin.from("myverse_users").select("*").eq("member_id", baseMember.id).limit(1),
-    ]);
-
-    if (rolesErr) console.error("[myverse/app/layout] member_roles error:", rolesErr.message);
-    if (myverseErr) console.error("[myverse/app/layout] myverse_users error:", myverseErr.message);
-
-    const member = {
-        ...baseMember,
-        member_roles: roles ?? [],
-        myverse_users: myverseRows ?? [],
-    };
-
-    return { kind: "ok", member };
-}
-
-const PRIVILEGED = new Set(["super_admin", "staff", "manager"]);
-type RoleRow = { role: string; is_active: boolean };
-
-function isPrivileged(member: { member_roles?: RoleRow[] | null } | null): boolean {
-    if (!member?.member_roles) return false;
-    return member.member_roles.some(r => r.is_active && PRIVILEGED.has(r.role));
-}
 
 export default async function MyverseAppLayout({ children }: { children: React.ReactNode }) {
     // 온보딩은 layout 인증 게이트·앱 셸을 우회 (자체 페이지에서 클라이언트 인증 처리)
-    // 이렇게 하면 /myverse/app/onboarding URL을 유지하면서 layout 무한 redirect 루프를 회피.
+    // 이렇게 하면 /planners/app/onboarding URL을 유지하면서 layout 무한 redirect 루프를 회피.
     const h = await headers();
     const pathname = h.get('x-pathname') || '';
-    const isOnboarding = pathname === '/myverse/app/onboarding' || pathname.startsWith('/myverse/app/onboarding/');
+    const isOnboarding = pathname === '/planners/app/onboarding' || pathname.startsWith('/planners/app/onboarding/');
     if (isOnboarding) {
         // 이미 완료한 사용자 또는 privileged → today로 바로
         const s = await getAuthState();
@@ -129,9 +55,9 @@ export default async function MyverseAppLayout({ children }: { children: React.R
     // 단, 이미 onboarding URL에 있으면 무한 루프 — children 그대로 렌더
     if (state.kind === "no_member") {
         const currentPath = (await headers()).get('x-pathname') || '';
-        const alreadyOnboarding = currentPath === '/myverse/app/onboarding' || currentPath.startsWith('/myverse/app/onboarding/') || currentPath === '/app/onboarding';
+        const alreadyOnboarding = currentPath === '/planners/app/onboarding' || currentPath.startsWith('/planners/app/onboarding/') || currentPath === '/app/onboarding';
         if (alreadyOnboarding) return <>{children}</>;
-        return <ClientRedirect to="/myverse/app/onboarding" />;
+        return <ClientRedirect to="/planners/app/onboarding" />;
     }
 
     const data = state.member as {
@@ -149,7 +75,7 @@ export default async function MyverseAppLayout({ children }: { children: React.R
 
     if (!privileged) {
         if (!myverseUser || !myverseUser.onboarding_completed) {
-            return <ClientRedirect to="/myverse/app/onboarding" />;
+            return <ClientRedirect to="/planners/app/onboarding" />;
         }
         // 만료 검증 (SSOT 헬퍼)
         if (myverseUser.subscription_status === "active" && !isMyverseSubscriberActive(myverseUser)) {

@@ -1575,7 +1575,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
         d.setDate(d.getDate() + deltaDays);
         const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         setDate(newDate);
-        router.replace(`/myverse/app/daily?date=${newDate}`);
+        router.replace(`/planners/app/daily?date=${newDate}`);
     }
 
     // 스와이프 내비게이션 (모바일 터치)
@@ -2365,7 +2365,7 @@ export function DailyView({ initialDate, autoCompose }: { initialDate: string; a
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xs uppercase tracking-widest text-neutral-400">일간 기록</h2>
                                     <Link
-                                        href="/myverse/app/settings#tracking"
+                                        href="/planners/app/settings#tracking"
                                         className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#6366F1] transition-colors"
                                         title="트래킹 항목 수정"
                                     >

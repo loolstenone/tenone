@@ -230,7 +230,7 @@ export function AiBriefingView() {
                             })}
                         </div>
                         <p className="text-[10px] text-neutral-400 mt-2 italic">
-                            이메일/푸시는 <Link href="/myverse/app/settings" className="underline hover:text-neutral-700">설정</Link>에서 따로 켤 수 있습니다.
+                            이메일/푸시는 <Link href="/planners/app/settings" className="underline hover:text-neutral-700">설정</Link>에서 따로 켤 수 있습니다.
                         </p>
                     </div>
                 </div>
