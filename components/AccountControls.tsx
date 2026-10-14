@@ -5,7 +5,8 @@
  *   순서: 알림 → 아바타 → 로그아웃(텍스트). 브랜드 사이트(UniverseUtilityBar) · 인트라(IntraHeader) · 인스타형 레이아웃이 같은 부품을 쓴다
  *   색은 부모 글자색(currentColor)을 따른다 — 밝은·어두운 헤더 모두 그대로 쓴다
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Bell, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -111,11 +112,24 @@ export function AccountAvatar() {
 }
 
 /** 로그아웃 — 텍스트 (2026-10-10 아이콘 → 텍스트) */
-export function LogoutButton({ onLogout }: { onLogout?: () => void | Promise<void> }) {
+/**
+ * 로그아웃 + 화면 다시 그리기 — 서버에서 로그인 여부를 판단하는 화면(Planner's 앱·SmarComm 대시보드·WIO 앱 등)은
+ * 브라우저 세션만 지우면 로그인 화면으로 바뀌지 않고 그대로 남는다 (2026-10-15 Planner's 앱 모바일에서 로그아웃 후에도 계정 메뉴가 남음)
+ */
+export function useLogoutAndRefresh() {
     const { logout } = useAuth();
+    const router = useRouter();
+    return useCallback(async () => {
+        await logout();
+        router.refresh();
+    }, [logout, router]);
+}
+
+export function LogoutButton({ onLogout }: { onLogout?: () => void | Promise<void> }) {
+    const logoutAndRefresh = useLogoutAndRefresh();
     return (
         <button
-            onClick={() => (onLogout ? onLogout() : logout())}
+            onClick={() => (onLogout ? onLogout() : logoutAndRefresh())}
             className="text-[11px] font-semibold tracking-wider whitespace-nowrap opacity-60 hover:opacity-100 transition-opacity"
         >
             로그아웃

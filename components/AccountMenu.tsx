@@ -18,7 +18,7 @@ import Link from "next/link";
 import { ChevronRight, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
-import { AccountAvatar } from "@/components/AccountControls";
+import { AccountAvatar, useLogoutAndRefresh } from "@/components/AccountControls";
 import { servicesForJoins, type BrandService } from "@/lib/brand-services";
 
 const PLACEMENT = {
@@ -42,7 +42,8 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
     /** 드롭다운 위치 — 헤더 우상단은 down-right, 좌측 사이드바(Jakka·MoNTZ)는 up-left */
     placement?: "down-right" | "down-left" | "up-left";
 }) {
-    const { user, canAccessIntra, logout } = useAuth();
+    const { user, canAccessIntra } = useAuth();
+    const logoutAndRefresh = useLogoutAndRefresh();
     const [open, setOpen] = useState(false);
     const [services, setServices] = useState<BrandService[] | null>(null);
     const ref = useRef<HTMLDivElement>(null);
@@ -69,6 +70,13 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
         window.addEventListener("mousedown", onClick);
         return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousedown", onClick); };
     }, [open, mode]);
+
+    // 로그아웃되면 열린 메뉴를 닫고 이용 중 서비스 목록도 비운다 (다음 사람에게 남지 않게)
+    useEffect(() => {
+        if (user) return;
+        setOpen(false);
+        setServices(null);
+    }, [user]);
 
     const close = () => setOpen(false);
     const row = "flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50 transition-colors";
@@ -110,11 +118,14 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
 
             {mode === "sheet" && (
                 <div className={section}>
-                    <button onClick={() => { close(); void logout(); }} className={`${row} w-full text-left text-neutral-500`}>로그아웃</button>
+                    <button onClick={() => { close(); void logoutAndRefresh(); }} className={`${row} w-full text-left text-neutral-500`}>로그아웃</button>
                 </div>
             )}
         </>
     );
+
+    // 비로그인에게는 계정 메뉴가 없다 (로그인 버튼은 바·화면이 따로 보여 준다)
+    if (!user) return null;
 
     return (
         <div ref={ref} className="relative">
