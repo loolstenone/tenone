@@ -22,6 +22,8 @@ const STAFF_ONLY_API: RegExp[] = [
     /^\/api\/analytics\/(sync|env-check)(\/|$)/,
     /^\/api\/external(\/|$)/,
     /^\/api\/ums(\/|$)/,
+    // 회원 목록·임의 생성 — 호출하는 화면 없음. 로그인만 하면 아무 회원 행이나 만들 수 있던 경로 (2026-10-15 QA, 가입 동의 우회)
+    /^\/api\/members\/?$/,
     // 뉴스레터 발송 — 핸들러도 requireStaff (이중 방어)
     /^\/api\/newsletter\/send(\/|$)/,
 ];
