@@ -3,6 +3,7 @@ import { DailyView } from "@/features/myverse/planner/DailyView";
 import { ViewToggle } from "@/features/myverse/planner/ViewToggle";
 import { BrainDump } from "@/features/planners/app/BrainDump";
 import { AutoCarry } from "@/features/planners/app/AutoCarry";
+import { DayCoach } from "@/features/planners/app/DayCoach";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,8 @@ export default async function DailyPage({ searchParams }: { searchParams: Promis
                 <AutoCarry date={date} />
                 {/* 생각 쏟아내기 — 적거나 말하면 AI가 할 일·일정으로 정리 (유료 회원 전용, 1단계 2026-10-14) */}
                 <BrainDump date={date} />
+                {/* 아침 Top 3 · 저녁 회고 (유료 회원 전용) */}
+                <DayCoach date={date} />
             </div>
             <div className="-mt-6 md:-mt-12">
                 <DailyView initialDate={date} autoCompose={autoCompose} />
