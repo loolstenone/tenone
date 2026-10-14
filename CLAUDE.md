@@ -354,13 +354,14 @@ export async function generateMetadata(): Promise<Metadata> {
 - 이메일 인증: OTP `{{ .TokenHash }}` 방식 (PKCE 아님) → `/auth/confirm` 라우트
 - 이메일 발송: Resend SMTP (`Ten:One™ Universe <noreply@tenone.biz>`)
 - 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
-- **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접
+- **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접. 예외(서비스가 정해진 규칙으로 자동 처리): 탈퇴(`/api/account/delete`) · 가입하지 않기(`/api/auth/cancel-signup`, §1.2.0) — 2026-10-15 사용자 승인
 
 ### 1.2.0 가입 동의 표준 (2026-10-05)
 
 - 모든 가입 경로(/signup · LoginModal · 소셜 첫 로그인)는 `components/SignupConsent.tsx` 사용: [필수] 만 14세 이상 · [필수] 이용약관 · [선택] 광고성 정보 수신. 개인정보처리방침은 고지 링크
 - 기록: `members.consent` (jsonb — terms_version·privacy_version·marketing·agreed_at·channel·origin_site). 이메일 가입은 signUp `user_metadata.consent` → 인증 후 members 생성 시 이관
-- 동의 기록 없는 로그인 회원(소셜·기존)은 `components/ConsentGate.tsx`(루트 레이아웃)가 1회 동의 받음
+- **소셜 첫 로그인 = 회원가입** (2026-10-15): Supabase가 Google·Kakao 확인만으로 계정을 먼저 만들어도, 동의 전에는 회원 정보(members)를 만들지 않고 로그인으로 보지 않는다(`isAuthenticated=false`, `pendingSignup`). `ConsentGate`가 "Ten:One 회원가입" 화면 → 동의하면 `completeSignup`(members 생성) / "가입하지 않기"면 `/api/auth/cancel-signup`이 방금 생긴 계정 삭제(본인·회원 정보 없음·동의 기록 없음일 때만) 후 로그아웃
+- 동의 기록 없는 기존 회원은 `components/ConsentGate.tsx`(루트 레이아웃)가 1회 동의 받음
 - ❌ `newsletter_subscribed: true` 기본값·하드코딩 금지 (정보통신망법 제50조 — 사전 동의 필수)
 - ❌ 가입 폼에 `captchaToken` 누락 금지
 

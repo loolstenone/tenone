@@ -18,7 +18,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTab = "login" }: LoginModalProps) {
-    const { login, register, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading } = useAuth();
+    const { login, register, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading, pendingSignup } = useAuth();
     const captcha = useCaptcha();
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
@@ -39,10 +39,11 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     // One ID — 독립 도메인에서는 모달을 열기 전에 허브(auth.tenone.biz)에 로그인 기록이 있는지 먼저 확인.
     // 있으면 비밀번호 없이 이 사이트에도 로그인, 없으면 돌아와서 이 모달을 그대로 연다 (lib/sso-server.ts)
     useEffect(() => {
-        if (!isOpen || isLoading || isAuthenticated || ssoTried.current) return;
+        // 회원가입 화면(소셜 첫 로그인)이 떠 있는 동안은 허브로 보내지 않는다
+        if (!isOpen || isLoading || isAuthenticated || pendingSignup || ssoTried.current) return;
         ssoTried.current = true;
         if (shouldTrySso()) { setSsoChecking(true); startSso(); }
-    }, [isOpen, isLoading, isAuthenticated]);
+    }, [isOpen, isLoading, isAuthenticated, pendingSignup]);
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
     useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);

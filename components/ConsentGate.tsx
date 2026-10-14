@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import {
     SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent,
@@ -9,17 +9,60 @@ import {
 } from "@/components/SignupConsent";
 
 /**
- * 동의 기록이 없는 로그인 회원(소셜 첫 가입·기존 회원)에게 1회 동의를 받는다.
+ * ① 소셜 첫 로그인(회원 정보 없음) → "Ten:One 회원가입" — 동의하면 회원 정보 생성, 가입하지 않으면 방금 생긴 계정 삭제 (2026-10-15)
+ * ② 동의 기록이 없는 기존 회원 → 1회 동의를 받는다.
  * members.consent.terms_version이 있으면 렌더하지 않음. 약관·방침 페이지는 읽을 수 있도록 제외.
  */
 const EXEMPT_PATHS = ["/terms", "/privacy", "/auth"];
 
 export function ConsentGate() {
-    const { user, isAuthenticated, isLoading, recordConsent, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, recordConsent, logout, pendingSignup, completeSignup, cancelSignup } = useAuth();
+    const router = useRouter();
     const pathname = usePathname() ?? "";
     const [value, setValue] = useState<SignupConsentValue>(EMPTY_CONSENT);
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
+
+    if (pendingSignup && !EXEMPT_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`))) {
+        const join = async () => {
+            if (!isConsentValid(value)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
+            setSaving(true);
+            setError("");
+            const result = await completeSignup(buildMemberConsent(value, "social"));
+            setSaving(false);
+            if (!result.success) { setError(result.error || "가입 처리에 실패했습니다."); return; }
+            router.refresh(); // 서버가 로그인 여부를 판단하는 화면도 바로 회원으로
+        };
+        const leave = async () => {
+            setSaving(true);
+            await cancelSignup();
+            setSaving(false);
+            router.refresh();
+        };
+        return (
+            <div className="fixed inset-0 z-[99998] flex items-center justify-center bg-black/60 px-4">
+                <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
+                    <h2 className="text-lg font-bold text-neutral-900">Ten:One 회원가입</h2>
+                    <p className="text-sm text-neutral-500 mt-1 break-keep">
+                        <span className="font-medium text-neutral-800">{pendingSignup.email}</span> 계정은 아직 가입하지 않았습니다.
+                        가입하면 이 계정 하나로 Ten:One™ Universe의 서비스를 이용할 수 있습니다.
+                    </p>
+                    <div className="mt-4">
+                        <SignupConsent value={value} onChange={setValue} />
+                    </div>
+                    {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
+                    <button onClick={join} disabled={saving}
+                        className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-neutral-900 disabled:opacity-50">
+                        {saving ? "처리 중..." : "동의하고 가입하기"}
+                    </button>
+                    <button onClick={leave} disabled={saving}
+                        className="w-full mt-2 text-center text-xs text-neutral-400 hover:text-neutral-600 disabled:opacity-50">
+                        가입하지 않기 (받은 이메일·이름은 바로 삭제합니다)
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading || !isAuthenticated || !user) return null;
     if (user.consent?.terms_version) return null;

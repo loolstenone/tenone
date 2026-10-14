@@ -19,6 +19,10 @@ interface AuthContextType {
     login: (email: string, password: string, captchaToken?: string) => Promise<{ success: boolean; error?: string; user?: User }>;
     register: (name: string, email: string, password: string, consent: MemberConsent, captchaToken?: string) => Promise<{ success: boolean; error?: string; memberId?: string }>;
     recordConsent: (consent: MemberConsent) => Promise<{ success: boolean; error?: string }>;
+    /** 소셜 첫 로그인 — 회원가입(동의) 전 상태. 이 동안은 로그인으로 보지 않는다 (isAuthenticated=false) */
+    pendingSignup: PendingSignup | null;
+    completeSignup: (consent: MemberConsent) => Promise<{ success: boolean; error?: string }>;
+    cancelSignup: () => Promise<void>;
     loginWithGoogle: () => Promise<void>;
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
@@ -26,6 +30,9 @@ interface AuthContextType {
     resetPassword: (email: string, captchaToken?: string) => Promise<{ success: boolean; error?: string }>;
     updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
+
+/** 소셜 로그인은 Supabase가 계정을 먼저 만든다 → 동의 전까지 회원 정보(members)를 만들지 않고 가입 화면을 띄운다 (2026-10-15, 개인정보보호법 제15조) */
+export interface PendingSignup { authId: string; email: string; name: string; avatarUrl: string | null }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -171,75 +178,101 @@ function memberToUser(member: Record<string, unknown>): User {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
-    const isSyncingRef = useRef(false);       // syncUserFromSession 동시 호출 방어
+    const isSyncingRef = useRef(false);
+    const logoutRef = useRef<(() => Promise<void>) | null>(null);       // syncUserFromSession 동시 호출 방어
     const isInitializedRef = useRef(false);   // 초기화 완료 전 onAuthStateChange 중복 방어
 
     // Supabase 세션에서 members 조회 → User 설정 (동시 호출 방어)
+    // 회원 정보 생성 — 동의(consent)가 있을 때만 부른다
+    const createMemberRow = useCallback(async (
+        sessionUser: { id: string; email?: string; user_metadata?: Record<string, unknown> },
+        consent: MemberConsent,
+        oauthAvatarUrl: string | null,
+    ) => {
+        const userName = (sessionUser.user_metadata?.full_name as string)
+            || (sessionUser.user_metadata?.name as string)
+            || sessionUser.email?.split('@')[0]
+            || '사용자';
+        const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
+        const { defaultModuleAccess } = await import('@/types/auth');
+        const initialType = 'member' as const;
+        const oauthHandle = await generateUniqueHandle(sessionUser.email || userName, supabase);
+        const { data: newMember, error } = await supabase
+            .from('members')
+            .insert({
+                auth_id: sessionUser.id,
+                email: sessionUser.email || '',
+                name: userName,
+                handle: oauthHandle,
+                account_type: initialType,
+                primary_type: initialType,
+                roles: [initialType],
+                avatar_initials: userName.substring(0, 2).toUpperCase(),
+                avatar_url: oauthAvatarUrl || null,
+                role: 'Member',
+                origin_site: originSite,
+                intra_access: false,
+                module_access: defaultModuleAccess[initialType] || [],
+                affiliations: [],
+                onboarding_completed: false,
+                consent,
+                newsletter_subscribed: consent.marketing === true,
+            })
+            .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type), member_roles!member_roles_member_id_fkey(role,context,is_active)')
+            .single();
+        if (error) console.error('[Auth] 회원 정보 생성 실패:', error.message);
+
+        // 3계층: member_roles에도 기본 역할 추가 (트리거가 JWT 갱신)
+        if (newMember) {
+            supabase.from('member_roles').insert({
+                member_id: newMember.id,
+                role: 'member',
+                context: 'universe',
+            }).then(() => {});
+        }
+        return newMember;
+    }, [supabase]);
+
     const syncUserFromSession = useCallback(async (sessionUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }) => {
         // 이미 sync 중이면 대기 없이 현재 user 반환 (race condition 방어)
         if (isSyncingRef.current) return user;
         isSyncingRef.current = true;
         try {
-            let { data: member } = await supabase
+            const { data: found, error: lookupError } = await supabase
                 .from('members')
                 .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type), member_roles!member_roles_member_id_fkey(role,context,is_active)')
                 .eq('auth_id', sessionUser.id)
-                .single();
+                .maybeSingle();
+            let member = found;
 
             // OAuth 메타데이터에서 아바타 URL 추출 (Google: picture/avatar_url, Kakao: picture)
             const oauthAvatarUrl = (sessionUser.user_metadata?.avatar_url as string)
                 || (sessionUser.user_metadata?.picture as string)
                 || null;
 
-            // 소셜 로그인 첫 가입 → 자동 프로필 생성
-            if (!member) {
-                const userName = (sessionUser.user_metadata?.full_name as string)
-                    || (sessionUser.user_metadata?.name as string)
-                    || sessionUser.email?.split('@')[0]
-                    || '사용자';
-                const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
-                const { defaultModuleAccess } = await import('@/types/auth');
-                const initialType = 'member' as const;
-
-                // 이메일 가입자는 signUp 때 받은 동의를 user_metadata로 넘겨받는다. 소셜 첫 가입은 비어 있음 → ConsentGate
+            // 회원 정보 없음 = 처음 온 계정
+            //   이메일 가입: signUp 때 받은 동의가 user_metadata에 있다 → 바로 회원 정보 생성
+            //   소셜 첫 로그인(또는 동의 없이 남은 옛 계정): 회원가입 화면(SignupGate)에서 동의를 받은 뒤에만 생성 — 그 전엔 로그인으로 보지 않는다
+            // 조회 자체가 실패(네트워크 등)하면 '없음'으로 보지 않는다 — 기존 회원에게 가입 화면이 뜨면 안 됨
+            if (!member && !lookupError) {
                 const metaConsent = sessionUser.user_metadata?.consent as MemberConsent | undefined;
-                const oauthHandle = await generateUniqueHandle(sessionUser.email || userName, supabase);
-                const { data: newMember } = await supabase
-                    .from('members')
-                    .insert({
-                        auth_id: sessionUser.id,
+                if (!metaConsent?.terms_version) {
+                    setUser(null);
+                    localStorage.removeItem(STORAGE_KEY);
+                    setPendingSignup({
+                        authId: sessionUser.id,
                         email: sessionUser.email || '',
-                        name: userName,
-                        handle: oauthHandle,
-                        account_type: initialType,
-                        primary_type: initialType,
-                        roles: [initialType],
-                        avatar_initials: userName.substring(0, 2).toUpperCase(),
-                        avatar_url: oauthAvatarUrl || null,
-                        role: 'Member',
-                        origin_site: originSite,
-                        intra_access: false,
-                        module_access: defaultModuleAccess[initialType] || [],
-                        affiliations: [],
-                        onboarding_completed: false,
-                        consent: metaConsent?.terms_version ? metaConsent : {},
-                        newsletter_subscribed: metaConsent?.marketing === true,
-                    })
-                    .select()
-                    .single();
-                member = newMember;
-
-                // 3계층: member_roles에도 기본 역할 추가 (트리거가 JWT 갱신)
-                if (newMember) {
-                    supabase.from('member_roles').insert({
-                        member_id: newMember.id,
-                        role: 'member',
-                        context: 'universe',
-                    }).then(() => {});
+                        name: (sessionUser.user_metadata?.full_name as string) || (sessionUser.user_metadata?.name as string) || sessionUser.email?.split('@')[0] || '',
+                        avatarUrl: oauthAvatarUrl,
+                    });
+                    return null;
                 }
+                member = await createMemberRow(sessionUser, metaConsent, oauthAvatarUrl);
             }
+            setPendingSignup(null);
 
             if (member) {
                 const u = memberToUser(member);
@@ -285,7 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
             isSyncingRef.current = false;
         }
-    }, [supabase, user]);
+    }, [supabase, user, createMemberRow]);
 
     // 초기화: localStorage 즉시 표시 → Supabase 세션 검증 → 불일치 시 정리
     useEffect(() => {
@@ -529,6 +562,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: true };
     }, [supabase, user]);
 
+    // 회원가입 완료 (SignupGate) — 동의를 받은 뒤에만 회원 정보 생성
+    const completeSignup = useCallback(async (consent: MemberConsent) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return { success: false, error: '로그인 정보가 없습니다. 다시 로그인해 주세요.' };
+        const oauthAvatarUrl = (session.user.user_metadata?.avatar_url as string) || (session.user.user_metadata?.picture as string) || null;
+        const created = await createMemberRow(session.user, consent, oauthAvatarUrl);
+        if (!created) return { success: false, error: '가입 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.' };
+        const u = memberToUser(created);
+        setPendingSignup(null);
+        setUser(u);
+        saveUserToStorage(u);
+        return { success: true };
+    }, [supabase, createMemberRow]);
+
+    // 회원가입 취소 — 방금 생긴 Ten:One 계정 삭제(서버가 회원 정보·동의 기록 없음을 확인) 후 로그아웃
+    const cancelSignup = useCallback(async () => {
+        try { await fetch('/api/auth/cancel-signup', { method: 'POST' }); } catch { /* 아래 로그아웃은 그대로 */ }
+        setPendingSignup(null);
+        await logoutRef.current?.();
+    }, []);
+
     // Google 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithGoogle = useCallback(async () => {
         const pathname = window.location.pathname;
@@ -603,6 +657,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //   refresh_token이 서버에서 무효화되므로 다음 갱신 시 자동 만료됨
     const logout = useCallback(async () => {
         setUser(null);
+        setPendingSignup(null);
         localStorage.removeItem(STORAGE_KEY);
         try {
             // signOut이 잠금 대기로 멈춰도 로그아웃은 완료되도록 3초 상한 (쿠키는 아래에서 강제 삭제)
@@ -623,6 +678,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 인트라 검증 캐시도 클리어
         try { sessionStorage.removeItem('tenone_intra_verified'); } catch { /* ignore */ }
     }, [supabase]);
+
+    logoutRef.current = logout;
 
     const isStaff = user?.accountType === 'staff';
     const isInternal = user?.accountType === 'staff' || user?.accountType === 'partner' || user?.accountType === 'alliance';
@@ -652,6 +709,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user, isAuthenticated: !!user, isLoading,
             isStaff, isInternal, canAccessIntra,
             hasAccess, hasModuleAccess,
+            pendingSignup, completeSignup, cancelSignup,
             login, register, recordConsent, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
         }}>
             {children}
