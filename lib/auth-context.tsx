@@ -61,10 +61,13 @@ async function generateUniqueHandle(
     email: string,
     supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>,
 ): Promise<string> {
+    // DB 제약 members_handle_format = ^[a-z0-9_]{3,20}$ — 점·하이픈을 남기거나 20자를 넘기면 회원 생성 자체가 실패한다
+    // (2026-10-15 이메일에 점이 있는 Google 계정이 로그인은 되는데 회원·동의 기록이 만들어지지 않던 사고). 숫자 꼬리 3자리 자리를 남겨 17자
     const base = email.split('@')[0]
         .toLowerCase()
-        .replace(/[^a-z0-9_.-]/g, '')
-        .slice(0, 25);
+        .replace(/[.-]/g, '_')
+        .replace(/[^a-z0-9_]/g, '')
+        .slice(0, 17);
     const safeBase = base.length >= 3 ? base : (base + '0000').slice(0, 4);
     let handle = safeBase;
     let suffix = 2;
