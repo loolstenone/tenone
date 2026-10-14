@@ -34,11 +34,12 @@ export default async function PlannersHome() {
             key: "brand",
             title: "우리는 모두 기획자다",
             subtitle: "자기 인생에서만큼은",
-            body: "인공지능 시대, 더욱 기획자가 되어야 한다. AI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.",
+            body: "인공지능 시대, 더욱 기획자가 되어야 한다.\nAI가 실행을 대신할수록 방향을 정하는 힘이 곧 경쟁력이다.\n우리가 기획자가 되어야 하는 이유다.",
             imageUrl: hero?.thumbnail_url ?? null,
             imageHref: hero ? padPath(hero.id) : null,
             primary: { label: "플래너'스 PAD", href: "/planners/pad" },
             secondary: { label: "플래너'스 AI", href: "/planners/ai" },
+            note: "종이? 패드? AI? 중요한 것은 기획하는 나",
         },
         ...banners.map((b) => ({
             key: b.id,

@@ -14,6 +14,8 @@ export interface HeroSlide {
     imageHref?: string | null;
     primary?: { label: string; href: string } | null;
     secondary?: { label: string; href: string } | null;
+    /** 버튼 아래 한 줄 */
+    note?: string | null;
 }
 
 const INTERVAL = 7000;
@@ -36,7 +38,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 <div key={s.key}>
                     <h1 className="break-keep text-4xl font-black leading-tight md:text-6xl">{s.title}</h1>
                     {s.subtitle && <p className="mt-4 break-keep text-xl font-bold text-teal-200 md:text-3xl">{s.subtitle}</p>}
-                    {s.body && <p className="mt-8 max-w-md whitespace-pre-line break-keep leading-relaxed text-teal-50 md:text-lg">{s.body}</p>}
+                    {s.body && <p className="mt-8 max-w-xl whitespace-pre-line break-keep leading-relaxed text-teal-50 md:text-lg">{s.body}</p>}
                     {(s.primary || s.secondary) && (
                         <div className="mt-12 flex flex-wrap gap-3">
                             {s.primary && (
@@ -51,6 +53,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                             )}
                         </div>
                     )}
+                    {s.note && <p className="mt-8 break-keep text-teal-200/90 md:text-lg">{s.note}</p>}
                 </div>
                 {s.imageUrl && (
                     <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block">
