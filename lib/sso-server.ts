@@ -25,6 +25,10 @@ export const SSO_HUB_ORIGIN = "https://auth.tenone.biz";
 /** 허브에 세션이 없다고 확인된 뒤 이 시간 동안은 다시 묻지 않는다 (로그인 버튼마다 허브 왕복 방지) */
 export const SSO_NONE_COOKIE = "t1_sso_none";
 export const SSO_NONE_MAX_AGE = 60 * 10;
+/** 허브에서 세션을 막 넘겨받았다는 표시 — 이 시간 안에는 다시 허브로 보내지 않는다 (2026-10-15 planners.ai.kr에서
+ *  교환 → 페이지가 여전히 비로그인 → 모달 → 다시 교환이 1초에 2번씩 돌다 Supabase 429로 막힌 사고) */
+export const SSO_DONE_COOKIE = "t1_sso_done";
+export const SSO_DONE_MAX_AGE = 60 * 2;
 
 type Direction = "to_site" | "to_hub";
 

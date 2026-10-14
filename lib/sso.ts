@@ -9,6 +9,8 @@ import { isExternalDomain as checkExternalDomain } from '@/lib/domain-registry';
 
 const HUB_ORIGIN = 'https://auth.tenone.biz';
 const NONE_COOKIE = 't1_sso_none';
+/** 허브에서 막 넘겨받음 (exchange가 2분 동안 설정) — 그래도 비로그인이면 일반 로그인 모달로, 다시 허브로 보내지 않는다 */
+const DONE_COOKIE = 't1_sso_done';
 
 /** 현재 페이지가 SSO 대상 독립 도메인(https)인지 */
 export function isSsoDomain(): boolean {
@@ -19,7 +21,10 @@ export function isSsoDomain(): boolean {
 /** 로그인 버튼을 눌렀을 때 허브에 먼저 물어볼지 — 허브에 세션 없음이 최근 확인됐으면 바로 로그인 모달 */
 export function shouldTrySso(): boolean {
     if (!isSsoDomain()) return false;
-    return !document.cookie.split(';').some(c => c.trim().startsWith(`${NONE_COOKIE}=`));
+    return !document.cookie.split(';').some(c => {
+        const t = c.trim();
+        return t.startsWith(`${NONE_COOKIE}=`) || t.startsWith(`${DONE_COOKIE}=`);
+    });
 }
 
 function currentPath(): string {

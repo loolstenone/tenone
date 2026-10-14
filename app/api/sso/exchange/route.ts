@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/lib/login-href';
-import { consumeSsoToken, establishSession, SSO_NONE_COOKIE, SSO_NONE_MAX_AGE } from '@/lib/sso-server';
+import { consumeSsoToken, establishSession, SSO_DONE_COOKIE, SSO_DONE_MAX_AGE, SSO_NONE_COOKIE, SSO_NONE_MAX_AGE } from '@/lib/sso-server';
 
 /**
  * SSO Exchange — 사이트(독립 도메인)에서 실행. 허브가 발급한 일회용 토큰으로 이 도메인에 독립 세션을 만든다.
@@ -21,5 +21,8 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(new URL(safeRedirect(row.final_path), origin));
     const ok = await establishSession(request, response, row.otp_hash, row.user_id);
-    return ok ? response : giveUp(row.final_path);
+    if (!ok) return giveUp(row.final_path);
+    // 세션을 만들었는데도 페이지가 비로그인으로 보면 모달이 다시 허브로 보내 무한 왕복한다 → 잠시 SSO 금지
+    response.cookies.set(SSO_DONE_COOKIE, '1', { path: '/', maxAge: SSO_DONE_MAX_AGE, sameSite: 'lax', secure: true });
+    return response;
 }
