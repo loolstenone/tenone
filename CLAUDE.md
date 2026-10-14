@@ -1688,6 +1688,8 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ RLS 정책을 `roles=public` + `USING (true)`로 "service role용"이라 만들기 — service_role은 RLS를 우회하므로 불필요하고, 실제로는 anon에게 전부 열린다 (2026-10-05 사고: 듣봇 대화·발송 메일 공개)
 - ❌ 트리거 함수가 RLS 걸린 다른 테이블에 쓰는데 SECURITY INVOKER — 사용자 INSERT 전체가 롤백됨 (세션 156 members 생성 장애 원인)
 
+- ❌ 공개 버킷에 원본 이미지를 그대로 올리기 — 긴 변 2000px · WebP로 줄여서 (SSOT `lib/image-rules.mjs` `shrinkImage`, 서버 업로드 API·이전 스크립트가 사용 / 브라우저 직접 업로드는 `shrinkImageFile`). 이미 올라간 큰 파일은 `scripts/storage-image-shrink.mjs`(같은 경로에 덮어씀, 원본은 저장소 밖 백업). 2026-10-15 아임웹에서 원본째 옮긴 RooK 이미지(1~16MB)를 크롤러가 하루 1GB씩 받아 Supabase Free 전송량(Cached Egress 5GB) 초과
+
 ### 프로필·메타
 - ❌ `UniverseMembership` 사용 (레거시)
 - ❌ 각 브랜드 마이페이지에서 아바타/이름/이메일 직접 표시 (MyProfileCard 전담)

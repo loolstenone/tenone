@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import sharp from 'sharp';
 import { createClient } from '@/lib/supabase/server';
+import { shrinkImage } from '@/lib/image-rules.mjs';
 
 export const runtime = 'nodejs';
 
@@ -34,12 +36,14 @@ export async function POST(req: Request) {
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'FILE_TOO_LARGE' }, { status: 400 });
   if (!ALLOWED_MIME.has(file.type)) return NextResponse.json({ error: 'INVALID_FILE_TYPE' }, { status: 400 });
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin';
+  // 이미지는 공개 이미지 크기 규칙대로 줄여서 (lib/image-rules.mjs) — 문서·영상은 그대로
+  const original = Buffer.from(await file.arrayBuffer());
+  const shrunk = file.type.startsWith('image/') ? await shrinkImage(sharp, original) : null;
+  const ext = shrunk ? 'webp' : (file.name.split('.').pop()?.toLowerCase() ?? 'bin');
   const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  const buffer = new Uint8Array(await file.arrayBuffer());
-  const { error: uploadError } = await sb.storage.from('mad-community').upload(path, buffer, {
-    contentType: file.type,
+  const { error: uploadError } = await sb.storage.from('mad-community').upload(path, shrunk ?? original, {
+    contentType: shrunk ? 'image/webp' : file.type,
     upsert: false,
   });
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });

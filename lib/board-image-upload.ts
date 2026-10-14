@@ -10,7 +10,8 @@ const SKIP_BELOW_BYTES = 800 * 1024;  // 작은 파일은 그대로
 const SERVER_LIMIT = 4 * 1024 * 1024;
 const TARGET_BYTES = 3 * 1024 * 1024;
 
-async function compressImage(file: File): Promise<File> {
+/** 브라우저에서 이미지 축소 (공개 이미지 크기 규칙 lib/image-rules.mjs와 같은 2000px · WebP) — Storage에 직접 올리는 화면도 이걸 거친다 */
+export async function shrinkImageFile(file: File): Promise<File> {
     // GIF(애니메이션)·SVG는 캔버스로 바꾸면 손상 → 그대로
     if (file.type === "image/gif" || file.type === "image/svg+xml") return file;
     if (file.size <= SKIP_BELOW_BYTES) return file;
@@ -38,7 +39,7 @@ async function compressImage(file: File): Promise<File> {
 /** 이미지 업로드 → 공개 URL. 실패 시 사용자에게 보여줄 메시지로 Error */
 export async function uploadBoardImage(file: File, site: string): Promise<string> {
     if (!file.type.startsWith("image/")) throw new Error("이미지 파일만 올릴 수 있습니다.");
-    const optimized = await compressImage(file);
+    const optimized = await shrinkImageFile(file);
     if (optimized.size > SERVER_LIMIT) throw new Error("이미지가 너무 큽니다. 4MB 이하로 줄여서 올려 주세요.");
 
     const fd = new FormData();

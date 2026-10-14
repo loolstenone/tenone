@@ -7,6 +7,7 @@
  * 작성자 표시는 members에서 조인 (이름·사진을 게시판 테이블에 복사하지 않음 — 데이터 계약 1조)
  */
 import { createAdminClient } from './admin';
+import { shrinkImage } from '@/lib/image-rules.mjs';
 import type {
     Post, Comment, Attachment, BoardConfig,
     PostListParams, PostListResponse,
@@ -621,10 +622,14 @@ function extractFirstImage(html: string): string {
 const BUCKET = 'board-assets';
 
 export async function uploadImage(file: File, path?: string): Promise<string> {
-    const ext = file.name.split('.').pop() || 'png';
+    // 공개 이미지 크기 규칙 (lib/image-rules.mjs)
+    const original = Buffer.from(await file.arrayBuffer());
+    const shrunk = await shrinkImage((await import('sharp')).default, original);
+    const ext = shrunk ? 'webp' : (file.name.split('.').pop() || 'png');
     const filePath = path || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const { error } = await supabase.storage.from(BUCKET).upload(filePath, file, {
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, shrunk ?? original, {
+        contentType: shrunk ? 'image/webp' : file.type,
         cacheControl: '3600',
         upsert: false,
     });
@@ -659,13 +664,14 @@ export async function uploadBase64Image(base64: string, filename?: string): Prom
     const match = base64.match(/^data:image\/([a-z+]+);base64,(.+)$/i);
     if (!match) throw new Error('Invalid base64 image');
 
-    const ext = match[1].toLowerCase() === 'svg+xml' ? 'svg' : match[1].toLowerCase();
-    const data = match[2];
-    const buffer = Buffer.from(data, 'base64');
+    const original = Buffer.from(match[2], 'base64');
+    // 공개 이미지 크기 규칙 (lib/image-rules.mjs) — SVG 등 못 읽는 형식만 그대로
+    const shrunk = await shrinkImage((await import('sharp')).default, original);
+    const ext = shrunk ? 'webp' : (match[1].toLowerCase() === 'svg+xml' ? 'svg' : match[1].toLowerCase());
     const filePath = filename || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const { error } = await supabase.storage.from(BUCKET).upload(filePath, buffer, {
-        contentType: `image/${match[1].toLowerCase()}`,
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, shrunk ?? original, {
+        contentType: shrunk ? 'image/webp' : `image/${match[1].toLowerCase()}`,
         cacheControl: '3600',
         upsert: false,
     });

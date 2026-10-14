@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { shrinkImage } from '@/lib/image-rules.mjs';
 
 const supabase = createAdminClient();
 
@@ -21,14 +23,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
   }
 
-  const ext = file.name.split('.').pop() || 'jpg';
+  // 공개 이미지 크기 규칙 (lib/image-rules.mjs) — 원본 그대로 올리지 않는다
+  const original = Buffer.from(await file.arrayBuffer());
+  const shrunk = file.type.startsWith('image/') ? await shrinkImage(sharp, original) : null;
+  const ext = shrunk ? 'webp' : (file.name.split('.').pop() || 'jpg');
   const fileName = `badak/${user.id}/${Date.now()}.${ext}`;
 
   const { data, error } = await supabase.storage
     .from('uploads')
-    .upload(fileName, file, {
+    .upload(fileName, shrunk ?? original, {
       cacheControl: '3600',
-      contentType: file.type,
+      contentType: shrunk ? 'image/webp' : file.type,
       upsert: false,
     });
 

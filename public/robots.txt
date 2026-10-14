@@ -1,3 +1,7 @@
+# Bytespider(바이트댄스) — 원본 이미지를 반복 수집해 Supabase 전송량 초과 (2026-10-15)
+User-agent: Bytespider
+Disallow: /
+
 User-agent: *
 Allow: /
 Disallow: /intra/

@@ -3,6 +3,7 @@
  * 크리에이터 프로필, 작업(포트폴리오), 팔로우, 좋아요
  */
 import { createClient } from './client';
+import { shrinkImageFile } from "@/lib/board-image-upload";
 
 const supabase = createClient();
 
@@ -219,7 +220,8 @@ export async function deleteWork(workId: string, userId: string): Promise<boolea
 // ── 이미지 업로드 ─────────────────────────────────────────────
 
 /** 작업 이미지를 Storage에 업로드. 공개 URL 반환. */
-export async function uploadWorkImage(userId: string, file: File): Promise<string | null> {
+export async function uploadWorkImage(userId: string, original: File): Promise<string | null> {
+    const file = await shrinkImageFile(original);
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `${userId}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage

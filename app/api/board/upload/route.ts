@@ -2,8 +2,7 @@
  * 이미지 업로드 API (자동 최적화)
  * POST /api/board/upload (multipart/form-data)
  *
- * - 최대 1280px로 리사이즈
- * - WebP 변환 (80% 용량 절감)
+ * - 공개 이미지 크기 규칙 lib/image-rules.mjs (긴 변 2000px · WebP · 움직이는 GIF 유지)
  * - 원본 5MB 제한
  * - 로그인 회원만 (비로그인 업로드로 저장소 남용 방지)
  */
@@ -11,12 +10,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireMember } from '@/lib/api-guard';
+import { shrinkImage } from '@/lib/image-rules.mjs';
 
 const supabase = createAdminClient();
 
 const BUCKET = 'board-assets';
-const MAX_WIDTH = 1280;
-const WEBP_QUALITY = 80;
 
 export async function POST(request: NextRequest) {
     try {
@@ -41,24 +39,10 @@ export async function POST(request: NextRequest) {
         const site = String(formData.get('site') || 'general').replace(/[^a-z0-9_-]/gi, '').slice(0, 40) || 'general';
         const buffer = Buffer.from(await file.arrayBuffer());
 
-        // sharp로 리사이즈 + WebP 변환
-        let optimized: Buffer;
-        let ext = 'webp';
-        try {
-            const image = sharp(buffer);
-            const metadata = await image.metadata();
-
-            // 1280px 이하면 리사이즈 안 함
-            if (metadata.width && metadata.width > MAX_WIDTH) {
-                optimized = await image.resize(MAX_WIDTH, null, { withoutEnlargement: true }).webp({ quality: WEBP_QUALITY }).toBuffer();
-            } else {
-                optimized = await image.webp({ quality: WEBP_QUALITY }).toBuffer();
-            }
-        } catch {
-            // sharp 실패 시 원본 그대로 업로드
-            optimized = buffer;
-            ext = file.name.split('.').pop() || 'png';
-        }
+        // 크기 규칙대로 줄이기 — 읽지 못하는 형식(SVG 등)만 원본 그대로
+        const shrunk = await shrinkImage(sharp, buffer);
+        const optimized: Buffer = shrunk ?? buffer;
+        const ext = shrunk ? 'webp' : (file.name.split('.').pop() || 'png');
 
         const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
         const filePath = `${site}/${Date.now()}-${baseName}.${ext}`;
@@ -66,7 +50,7 @@ export async function POST(request: NextRequest) {
         const { error } = await supabase.storage
             .from(BUCKET)
             .upload(filePath, optimized, {
-                contentType: ext === 'webp' ? 'image/webp' : `image/${ext}`,
+                contentType: shrunk ? 'image/webp' : file.type,
                 upsert: false,
             });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { shrinkImageFile } from "@/lib/board-image-upload";
 import Image from "next/image";
 import {
     Plus, X, Save, Loader2, ExternalLink, GripVertical,
@@ -97,8 +98,9 @@ function NoticeEditor({
         onChange({ ...draft, [key]: val });
     }
 
-    async function handleImageUpload(file: File) {
+    async function handleImageUpload(original: File) {
         setUploading(true);
+        const file = await shrinkImageFile(original);
         const supabase = createClient();
         const ext = file.name.split(".").pop() ?? "jpg";
         const path = `notices/${Date.now()}.${ext}`;

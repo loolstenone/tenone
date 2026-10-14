@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { shrinkImageFile } from "@/lib/board-image-upload";
 
 export type MontzCreatorType = "model" | "actor" | "both";
 export type MontzAvailability = "active" | "selective" | "inactive";
@@ -426,8 +427,9 @@ export async function deleteMontzAudition(id: string): Promise<void> {
 // ── 작품 업로드 (공급자: 모델·배우) ─────────────────────────────────
 
 /** 클라이언트에서 이미지를 montz-works 버킷에 업로드하고 public URL 반환 */
-export async function uploadWorkImage(userId: string, file: File): Promise<string> {
+export async function uploadWorkImage(userId: string, original: File): Promise<string> {
     const supabase = createClient();
+    const file = await shrinkImageFile(original);
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("montz-works").upload(path, file, {
