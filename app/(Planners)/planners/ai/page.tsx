@@ -99,7 +99,7 @@ export default function PlannersAiPage() {
                 <PlannersSectionTitle title="지금은 베타 테스트 중" description="로그인하면 플래너는 바로 쓸 수 있습니다. 인공지능 기능은 베타 테스터에게 먼저 열고 있습니다. 시작은 오른쪽 위 '내 플래너'에서." />
                 <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
                     <Link href="/planners/pad" className="group bg-neutral-50 p-10">
-                        <p className="text-sm font-bold text-[#0F766E]">PAD</p>
+                        <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
                         <p className="mt-3 break-keep text-xl font-bold">펜슬로 쓰는 쪽이 좋다면</p>
                         <p className="mt-2 break-keep text-neutral-600">같은 구조의 손글씨 플래너. 쓴 페이지는 사진으로 AI에 옮깁니다.</p>
                         <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">PAD 받기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>

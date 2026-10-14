@@ -35,7 +35,7 @@ export default async function PlannersPadDetailPage({ params }: Props) {
     return (
         <>
             <div className={`${PLANNERS_CONTAINER} pt-10 text-sm text-neutral-500 md:pt-16`}>
-                <Link href="/planners/pad" className="hover:text-neutral-900">PAD</Link>
+                <Link href="/planners/pad" className="hover:text-neutral-900">플래너'스 PAD</Link>
                 <span className="mx-2">›</span>
                 <Link href={`/planners/pad?c=${encodeURIComponent(file.category)}`} className="hover:text-neutral-900">{file.category}</Link>
             </div>

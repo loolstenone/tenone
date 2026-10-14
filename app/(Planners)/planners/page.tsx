@@ -126,7 +126,7 @@ export default async function PlannersHome() {
             <section className="bg-neutral-50">
                 <div className={`${PLANNERS_SECTION} grid gap-10 md:grid-cols-2 md:items-center md:gap-24`}>
                     <div>
-                        <p className="text-sm font-bold text-[#0F766E]">PAD</p>
+                        <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
                         <h2 className="mt-3 break-keep text-3xl font-bold md:text-5xl">펜슬로 쓰는 플래너</h2>
                         <p className="mt-6 break-keep leading-relaxed text-neutral-600 md:text-lg">
                             굿노트·삼성노트·XODO에서 손으로 쓰는 PDF 플래너와 서식 {files.length}종. 플래너'스 AI와 같은 연간·월간·주간·오늘 구조라 함께 써도 어긋나지 않고, 쓴 페이지는 사진 한 장으로 AI에 옮길 수 있습니다.
