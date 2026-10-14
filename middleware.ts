@@ -50,7 +50,12 @@ export async function middleware(request: NextRequest) {
         let target: string | null = null;
         let status = 308;
 
-        if (isTenoneMain && firstSeg === 'intra') {
+        // 공식 주소의 apex(www 없는 주소) → www 308. Vercel 도메인 리다이렉트를 빠뜨려도 중복 주소가 생기지 않게 (2026-10-14 planners.ai.kr)
+        const apexOf = Object.values(CANONICAL_HOSTS).find(c => c.hosting === 'vercel' && c.host === `www.${reqHost}`);
+
+        if (apexOf) {
+            target = `https://${apexOf.host}${pathname}${request.nextUrl.search}`;
+        } else if (isTenoneMain && firstSeg === 'intra') {
             target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;
         } else {
             const subBrand = reqHost.endsWith('.tenone.biz') ? reqHost.slice(0, -'.tenone.biz'.length) : null;
