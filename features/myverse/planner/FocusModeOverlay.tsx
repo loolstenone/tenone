@@ -31,7 +31,7 @@ const MODE_COLORS: Record<FocusMode, { bg: string; ring: string; text: string; b
     work: {
         bg:   "from-[var(--pp-accent-strong)] to-[var(--pp-accent)]",
         ring: "ring-[var(--pp-accent)]/40",
-        text: "text-indigo-100",
+        text: "text-white/90",
         btn:  "bg-white/20 hover:bg-white/30",
     },
     break: {
@@ -225,7 +225,7 @@ export function FocusModeOverlay({ taskText, onClose }: FocusModeOverlayProps) {
                         onClick={() => setMode(m)}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                             mode === m
-                                ? "bg-white text-indigo-700 shadow"
+                                ? "bg-white text-[var(--pp-accent-strong)] shadow"
                                 : "text-white/70 hover:text-white"
                         }`}
                     >
@@ -303,7 +303,7 @@ export function FocusModeOverlay({ taskText, onClose }: FocusModeOverlayProps) {
                 <button
                     onClick={toggleRun}
                     title={running ? "일시정지 (Space)" : "시작 (Space)"}
-                    className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-indigo-700 hover:scale-105 active:scale-95 transition-transform"
+                    className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-[var(--pp-accent-strong)] hover:scale-105 active:scale-95 transition-transform"
                 >
                     {running
                         ? <Pause className="h-7 w-7" />

@@ -71,7 +71,7 @@ export default function ExportPage() {
                 <button
                     onClick={startDownload}
                     disabled={downloading}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--pp-accent)] text-white text-sm font-medium hover:bg-[var(--pp-accent-strong)] disabled:opacity-50 transition-colors"
                 >
                     {downloading ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> 데이터 모으는 중…</>

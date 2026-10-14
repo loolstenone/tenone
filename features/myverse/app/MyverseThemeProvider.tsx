@@ -24,7 +24,7 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     sky:      { hex: "#0369A1", dark: "#075985" },
     walnut:   { hex: "#D4A062", dark: "#B8803E" },
     // 청록 · 녹색
-    teal:     { hex: "#6366F1", dark: "#4F46E5" },
+    teal:     { hex: "#0F766E", dark: "#134E4A" },   // 2026-10-14: 이름만 Teal이고 인디고였던 값 정정 (Planner's 기본색)
     emerald:  { hex: "#047857", dark: "#065F46" },
     olive:    { hex: "#4D7C0F", dark: "#3F6212" },
     // Myverse 브랜드 인디고 (기본값) — `bg-[var(--pp-accent)]` 클래스를 인디고로 오버라이드
@@ -225,9 +225,10 @@ export function applyMyverseThemeMode(mode: MyverseThemeMode) {
     root.dataset.myverseMode = mode;
 }
 
-export function MyverseThemeProvider() {
+// defaultTheme: 저장된 색이 없을 때 — MyVerse 인디고("myverse"), Planner's 앱은 틸("teal")
+export function MyverseThemeProvider({ defaultTheme = "myverse" }: { defaultTheme?: string } = {}) {
     useEffect(() => {
-        const storedTheme = localStorage.getItem("myverse_color_theme") || "myverse";
+        const storedTheme = localStorage.getItem("myverse_color_theme") || defaultTheme;
         const storedFont = localStorage.getItem("myverse_font_family") || "sans";
         const storedUserFont = localStorage.getItem("myverse_user_font") || "serif";
         const storedMode = (localStorage.getItem("myverse_theme_mode") as MyverseThemeMode) || "system";
@@ -260,7 +261,7 @@ export function MyverseThemeProvider() {
                 delete document.documentElement.dataset.myverseMode;
             }
         };
-    }, []);
+    }, [defaultTheme]);
 
     return null;
 }

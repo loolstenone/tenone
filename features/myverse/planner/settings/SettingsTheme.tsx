@@ -36,7 +36,7 @@ const COLOR_THEMES = [
     { key: "indigo",   label: "Indigo",  hex: "#4338CA" },
     { key: "navy",     label: "Navy",    hex: "#1E40AF" },
     { key: "sky",      label: "Sky",     hex: "#0369A1" },
-    { key: "teal",     label: "Teal",    hex: "#6366F1" },
+    { key: "teal",     label: "Teal",    hex: "#0F766E" },
     { key: "emerald",  label: "Emerald", hex: "#047857" },
     { key: "olive",    label: "Olive",   hex: "#4D7C0F" },
 ];

@@ -125,7 +125,7 @@ export default function OnboardingPage() {
     if (isLoading || !isAuthenticated) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#08080E]">
-                <div className="w-1 h-1 rounded-full bg-indigo-400 animate-ping" />
+                <div className="w-1 h-1 rounded-full bg-teal-400 animate-ping" />
             </div>
         );
     }
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
             <div
                 className="pointer-events-none fixed inset-0"
                 style={{
-                    background: "radial-gradient(ellipse 60% 40% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%)",
+                    background: "radial-gradient(ellipse 60% 40% at 50% -10%, rgba(20,184,166,0.12) 0%, transparent 70%)",
                 }}
             />
 
@@ -159,9 +159,9 @@ export default function OnboardingPage() {
                                     style={{
                                         width: done || active ? "100%" : "0%",
                                         background: done
-                                            ? "rgba(99,102,241,0.7)"
+                                            ? "rgba(20,184,166,0.7)"
                                             : active
-                                                ? "linear-gradient(90deg, #818CF8, #6366F1)"
+                                                ? "linear-gradient(90deg, #2DD4BF, #0F766E)"
                                                 : "transparent",
                                     }}
                                 />
@@ -180,7 +180,7 @@ export default function OnboardingPage() {
                         <div className="min-h-[70vh] flex flex-col justify-between">
                             <div className="space-y-8">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
                                     <span className="text-[11px] tracking-widest text-white/40">Planner&apos;s</span>
                                 </div>
 
@@ -188,7 +188,7 @@ export default function OnboardingPage() {
                                     <h1 className="text-4xl md:text-5xl font-light text-white leading-tight tracking-tight">
                                         여기에<br />
                                         <span className="text-transparent bg-clip-text"
-                                            style={{ backgroundImage: "linear-gradient(135deg, #A5B4FC 0%, #818CF8 50%, #6366F1 100%)" }}>
+                                            style={{ backgroundImage: "linear-gradient(135deg, #5EEAD4 0%, #2DD4BF 50%, #0F766E 100%)" }}>
                                             내가 있다.
                                         </span>
                                     </h1>
@@ -205,7 +205,7 @@ export default function OnboardingPage() {
                                         "나를 알아간다 · AI가 패턴·맥락 이해",
                                     ].map((text, i) => (
                                         <div key={i} className="flex items-start gap-3">
-                                            <span className="text-[10px] text-indigo-400/60 mt-0.5 tabular-nums">0{i + 1}</span>
+                                            <span className="text-[10px] text-teal-400/60 mt-0.5 tabular-nums">0{i + 1}</span>
                                             <p className="text-white/50 text-sm">{text}</p>
                                         </div>
                                     ))}
@@ -217,8 +217,8 @@ export default function OnboardingPage() {
                                     onClick={() => setStep("mode")}
                                     className="group flex items-center justify-between px-6 py-4 rounded-xl text-white text-sm font-medium transition-all"
                                     style={{
-                                        background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
-                                        boxShadow: "0 0 32px rgba(99,102,241,0.25)",
+                                        background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
+                                        boxShadow: "0 0 32px rgba(20,184,166,0.25)",
                                     }}
                                 >
                                     <span>시작하기</span>
@@ -251,16 +251,16 @@ export default function OnboardingPage() {
                                     onClick={() => setMode("weekly")}
                                     className="group text-left p-5 rounded-xl border transition-all duration-200"
                                     style={{
-                                        borderColor: mode === "weekly" ? "rgba(99,102,241,0.5)" : "rgba(255,255,255,0.08)",
+                                        borderColor: mode === "weekly" ? "rgba(20,184,166,0.5)" : "rgba(255,255,255,0.08)",
                                         background: mode === "weekly"
-                                            ? "rgba(99,102,241,0.08)"
+                                            ? "rgba(20,184,166,0.08)"
                                             : "rgba(255,255,255,0.03)",
-                                        boxShadow: mode === "weekly" ? "0 0 20px rgba(99,102,241,0.1)" : "none",
+                                        boxShadow: mode === "weekly" ? "0 0 20px rgba(20,184,166,0.1)" : "none",
                                     }}
                                 >
                                     <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-6 h-6 rounded border border-indigo-400/40 flex items-center justify-center">
-                                            <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" />
+                                        <div className="w-6 h-6 rounded border border-teal-400/40 flex items-center justify-center">
+                                            <div className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
                                         </div>
                                         <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/10 text-white/40">추천</span>
                                     </div>
@@ -274,15 +274,15 @@ export default function OnboardingPage() {
                                     onClick={() => setMode("all_in_one")}
                                     className="group text-left p-5 rounded-xl border transition-all duration-200"
                                     style={{
-                                        borderColor: mode === "all_in_one" ? "rgba(99,102,241,0.5)" : "rgba(255,255,255,0.08)",
+                                        borderColor: mode === "all_in_one" ? "rgba(20,184,166,0.5)" : "rgba(255,255,255,0.08)",
                                         background: mode === "all_in_one"
-                                            ? "rgba(99,102,241,0.08)"
+                                            ? "rgba(20,184,166,0.08)"
                                             : "rgba(255,255,255,0.03)",
-                                        boxShadow: mode === "all_in_one" ? "0 0 20px rgba(99,102,241,0.1)" : "none",
+                                        boxShadow: mode === "all_in_one" ? "0 0 20px rgba(20,184,166,0.1)" : "none",
                                     }}
                                 >
                                     <div className="flex items-center gap-2 mb-4">
-                                        <Layers className="h-4 w-4 text-indigo-400/70" />
+                                        <Layers className="h-4 w-4 text-teal-400/70" />
                                         <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/10 text-white/40">고급</span>
                                     </div>
                                     <p className="text-white text-sm font-medium mb-1">All in one mode</p>
@@ -322,12 +322,12 @@ export default function OnboardingPage() {
                                             onClick={() => setRole(active ? null : r)}
                                             className="text-left p-4 rounded-xl border transition-all duration-200"
                                             style={{
-                                                borderColor: active ? "rgba(99,102,241,0.5)" : "rgba(255,255,255,0.07)",
-                                                background: active ? "rgba(99,102,241,0.08)" : "rgba(255,255,255,0.03)",
-                                                boxShadow: active ? "0 0 16px rgba(99,102,241,0.1)" : "none",
+                                                borderColor: active ? "rgba(20,184,166,0.5)" : "rgba(255,255,255,0.07)",
+                                                background: active ? "rgba(20,184,166,0.08)" : "rgba(255,255,255,0.03)",
+                                                boxShadow: active ? "0 0 16px rgba(20,184,166,0.1)" : "none",
                                             }}
                                         >
-                                            <Icon className={`h-4 w-4 mb-3 transition-colors ${active ? "text-indigo-400" : "text-white/25"}`} />
+                                            <Icon className={`h-4 w-4 mb-3 transition-colors ${active ? "text-teal-400" : "text-white/25"}`} />
                                             <p className={`text-sm font-medium transition-colors ${active ? "text-white" : "text-white/60"}`}>
                                                 {meta.label}
                                             </p>
@@ -371,11 +371,11 @@ export default function OnboardingPage() {
                                             onClick={() => setTone(t.key)}
                                             className="py-3 px-3 rounded-lg text-left transition-all duration-200"
                                             style={{
-                                                background: tone === t.key ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.04)",
-                                                border: `1px solid ${tone === t.key ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)"}`,
+                                                background: tone === t.key ? "rgba(20,184,166,0.15)" : "rgba(255,255,255,0.04)",
+                                                border: `1px solid ${tone === t.key ? "rgba(20,184,166,0.4)" : "rgba(255,255,255,0.07)"}`,
                                             }}
                                         >
-                                            <p className={`text-sm font-medium mb-0.5 ${tone === t.key ? "text-indigo-300" : "text-white/60"}`}>
+                                            <p className={`text-sm font-medium mb-0.5 ${tone === t.key ? "text-teal-300" : "text-white/60"}`}>
                                                 {t.label}
                                             </p>
                                             <p className="text-[10px] text-white/25">{t.desc}</p>
@@ -405,7 +405,7 @@ export default function OnboardingPage() {
                             <div className="space-y-2">
                                 <p className="text-[11px] text-white/25 tracking-widest uppercase">4 / 5</p>
                                 <h2 className="text-2xl font-light text-white flex items-center gap-3">
-                                    <Compass className="h-5 w-5 text-indigo-400/60 flex-shrink-0" />
+                                    <Compass className="h-5 w-5 text-teal-400/60 flex-shrink-0" />
                                     당신이 도모하는 것은 무엇입니까?
                                 </h2>
                                 <p className="text-sm text-white/35 leading-relaxed">
@@ -421,7 +421,7 @@ export default function OnboardingPage() {
                                         value={visionStatement}
                                         onChange={(e) => setVisionStatement(e.target.value)}
                                         placeholder="예: 1만 명의 기획자에게 영감을 주는 플랫폼을 만든다"
-                                        className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 transition-colors"
+                                        className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-teal-500/50 transition-colors"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -431,7 +431,7 @@ export default function OnboardingPage() {
                                         value={missionStatement}
                                         onChange={(e) => setMissionStatement(e.target.value)}
                                         placeholder="예: 매일 한 명의 기획자와 깊은 대화를 나눈다"
-                                        className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 transition-colors"
+                                        className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-teal-500/50 transition-colors"
                                     />
                                 </div>
                                 <p className="text-xs text-white/20">비워두고 진행해도 됩니다.</p>
@@ -451,7 +451,7 @@ export default function OnboardingPage() {
                             <div className="space-y-2">
                                 <p className="text-[11px] text-white/25 tracking-widest uppercase">5 / 5</p>
                                 <h2 className="text-2xl font-light text-white flex items-center gap-3">
-                                    <Sparkles className="h-5 w-5 text-indigo-400/60 flex-shrink-0" />
+                                    <Sparkles className="h-5 w-5 text-teal-400/60 flex-shrink-0" />
                                     오늘의 첫 흔적을 남겨볼까요?
                                 </h2>
                                 <p className="text-sm text-white/35 leading-relaxed">
@@ -466,7 +466,7 @@ export default function OnboardingPage() {
                                     onChange={(e) => setFirstTrace(e.target.value.slice(0, 200))}
                                     placeholder="예: 오랜만에 햇살 받으며 한강 산책. 마음이 가라앉았다."
                                     rows={4}
-                                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 transition-colors resize-none"
+                                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-teal-500/50 transition-colors resize-none"
                                 />
                                 <div className="flex items-center justify-between text-[11px]">
                                     <span className="text-white/25">길게 쓰지 않아도 돼요. 비워둬도 괜찮아요.</span>
@@ -476,7 +476,7 @@ export default function OnboardingPage() {
 
                             <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                                 <p className="text-xs text-white/30 leading-relaxed">
-                                    <span className="text-indigo-300/80">기본은 비공개</span>, 모든 흔적은 처음엔 나만 봅니다. 공개는 나중에 직접 선택해요.
+                                    <span className="text-teal-300/80">기본은 비공개</span>, 모든 흔적은 처음엔 나만 봅니다. 공개는 나중에 직접 선택해요.
                                 </p>
                             </div>
 
@@ -492,8 +492,8 @@ export default function OnboardingPage() {
                                     disabled={saving || tracePosting}
                                     className="flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-medium transition-all disabled:opacity-40"
                                     style={{
-                                        background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
-                                        boxShadow: "0 0 24px rgba(99,102,241,0.3)",
+                                        background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
+                                        boxShadow: "0 0 24px rgba(20,184,166,0.3)",
                                     }}
                                 >
                                     {(saving || tracePosting) ? (
@@ -538,8 +538,8 @@ function Nav({
                 onClick={onNext}
                 className="group flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-medium transition-all"
                 style={{
-                    background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
-                    boxShadow: "0 0 24px rgba(99,102,241,0.25)",
+                    background: "linear-gradient(135deg, #0F766E 0%, #134E4A 100%)",
+                    boxShadow: "0 0 24px rgba(20,184,166,0.25)",
                 }}
             >
                 {nextLabel} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
