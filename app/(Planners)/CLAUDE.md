@@ -42,7 +42,7 @@
 ## 핵심 파일
 
 - `app/(Planners)/layout.tsx` — generateMetadata
-- `app/(Planners)/planners/page.tsx` — 첫 화면: 히어로 슬라이드 = ① "우리는 모두 기획자다 / 자기 인생에서만큼은"(PAD 사진) → 플래너'스 AI 후킹 카피 4장(생각은 쏟아만 내세요 · 밀린 일, 다시 쓰지 마세요 · 손으로 쓰고, 사진 한 장 · 내 손으로, 내 뜻대로 — 오른쪽 = `features/planners/home/AiAtWork.tsx` 장면 dump·carry·handwriting·focus) → 인트라 배너. **버튼은 전 장 같은 두 개 "플래너'스 AI"(강조)·"플래너'스 PAD"** (2026-10-14 사용자 지정, 짧은 이름 규칙의 예외) · 본문에 줄바꿈 넣지 않기(모바일에서 한 단어만 떨어짐) → AI 4동사 카드 → PAD(소개·진열대·분류) → 기획자 과정 띠("우리는 모두 기획자다 / 자기 인생에서만큼은") → 모집 중인 과정
+- `app/(Planners)/planners/page.tsx` — 첫 화면: 히어로 슬라이드 = ① "우리는 모두 기획자다 / 자기 인생에서만큼은"(PAD 사진) → 플래너'스 AI 후킹 카피 4장(생각을 쏟아 내세요 · 밀린 일, 다시 옮겨 적지 마세요 · 손으로 쓰고, 말로 하면 · 내 손으로, 내 뜻대로 — 사용자 확정 카피 — 오른쪽 = `features/planners/home/AiAtWork.tsx` 장면 dump·carry·handwriting·focus) → 인트라 배너. **버튼은 전 장 같은 두 개 "플래너'스 AI"(강조)·"플래너'스 PAD"** (2026-10-14 사용자 지정, 짧은 이름 규칙의 예외) · 본문에 줄바꿈 넣지 않기(모바일에서 한 단어만 떨어짐) → AI 4동사 카드 → PAD(소개·진열대·분류) → 기획자 과정 띠("우리는 모두 기획자다 / 자기 인생에서만큼은") → 모집 중인 과정
 - `app/(Planners)/planners/about/page.tsx` — 소개 = 기획론 (구글 사이트 Planning 원고)
 - **메뉴 (2026-10-14 AI 중심 개편)**: AI(`/planners/ai`) · PAD(`/planners/pad`) · 이야기 · 기획자 과정(`/planners/projects`, 아래에 기획이란·참여 확인서 — 헤더 활성 표시도 같이) · 메타 제목 "플래너'스 AI · 내 손으로, 내 뜻대로" (DB ums_sites + site-config)
 - `app/(Planners)/planners/pad/page.tsx` — 플래너'스 PAD 몰 (분류 탭 `?c=` · 정렬 `?sort=popular|new|name` · 썸네일 그리드) · `pad/[id]/page.tsx` — 상품 상세 (갤러리·파일 정보·받기·상세 이미지·같은 분류) · 옛 `/planners/planner`·`/planners/templates`는 308
