@@ -92,7 +92,7 @@ export default function PlannersAboutPage() {
                     <Formula>문제 분석 · 목표 설정 · 계획 → 끝까지 실행</Formula>
                 </Chapter>
 
-                <div className="mt-16 border-t border-neutral-200 pt-10">
+                <div className="mt-32 border-t border-neutral-200 pt-16">
                     <h2 className="text-2xl font-bold">기획을 손에 익히는 방법</h2>
                     <div className="mt-6 grid gap-4 md:grid-cols-3">
                         <NextLink href="/planners/ai" title="플래너'스 AI" desc="Plan · Do · See를 디지털로 — 인공지능 플래너" />
@@ -108,15 +108,15 @@ export default function PlannersAboutPage() {
 
 function Chapter({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <section className="mt-14 first:mt-0">
-            <h2 className="border-l-4 border-[#0F766E] pl-4 text-2xl font-bold">{title}</h2>
-            <div className="mt-5 space-y-4 break-keep text-[17px] leading-[1.85] text-neutral-700">{children}</div>
+        <section className="mt-24 first:mt-0 md:mt-32">
+            <h2 className="border-l-4 border-[#0F766E] pl-5 text-2xl font-bold md:text-3xl">{title}</h2>
+            <div className="mt-10 space-y-8 break-keep text-[17px] leading-[1.95] text-neutral-700 md:text-lg">{children}</div>
         </section>
     );
 }
 
 function Formula({ children }: { children: React.ReactNode }) {
-    return <p className="border border-neutral-200 bg-neutral-50 px-5 py-4 text-center font-bold text-neutral-900">{children}</p>;
+    return <p className="!my-12 border border-neutral-200 bg-neutral-50 px-6 py-8 text-center font-bold text-neutral-900 md:text-xl">{children}</p>;
 }
 
 function NextLink({ href, title, desc }: { href: string; title: string; desc: string }) {
