@@ -1,7 +1,7 @@
 # Planner's 브랜드 가이드
 
-> **Planner's** — 기획자 훈련 브랜드. "우리는 모두 기획자다"
-> Tier **실험** · 주소 `planners.tenone.biz` (로컬 `/planners`) · 공식 주소(CANONICAL) 없음 — 스테이징 성격
+> **Planner's** — 기획자의 정체성·도구·훈련 브랜드. "우리는 모두 기획자다. 자기 인생에서 만큼은."
+> Tier **집중** (2026-10-14 승격) · 공식 주소 **`www.planners.ai.kr`** (CANONICAL, vercel) · `planners.tenone.biz` → 308 · 로컬 `/planners` · 공개 전 `is_open=false` + noindex
 
 ---
 
@@ -39,7 +39,12 @@
 ## 핵심 파일
 
 - `app/(Planners)/layout.tsx` — generateMetadata
-- `app/(Planners)/planners/page.tsx` — 랜딩 (모집 중 프로젝트 ProgramBoard)
+- `app/(Planners)/planners/page.tsx` — 첫 화면 (확정 문구 "우리는 모두 기획자다 / 자기 인생에서만큼은" · 정체성·도구·훈련 · Plan·Do·See · 모집 중 프로젝트)
+- `app/(Planners)/planners/about/page.tsx` — 소개 = 기획론 (구글 사이트 Planning 원고)
+- `app/(Planners)/planners/{planner,templates}/page.tsx` — PAD 자료실 · `lib/planners/library.ts`(서버 조회) · `library-shared.ts`(분류 SSOT) · `features/planners/{FileList,DownloadButton}.tsx`
+- `app/(Planners)/planners/ai/page.tsx` — AI 플래너 소개 · `app/(Planners)/planners/stories/**` — 이야기 게시판
+- `app/api/planners-library/[id]/download/route.ts` — ⚠️ `/api/planners/*`는 middleware가 `/api/myverse/*`로 재작성하므로 다른 경로
+- `scripts/planners-files-import.mjs` + `scripts/data/planners-badak-mall.json` — 바닥상회 원본 → 버킷·테이블 (멱등)
 - `app/(Planners)/planners/projects/**` — 회차 목록·방·팀·초대 (코어 프로그램 컴포넌트 얇은 래퍼)
 - `app/(Planners)/planners/certificate/**` — 참여 확인서 발급·인쇄·진위 확인
 - `app/(Planners)/planners/my/page.tsx` — 마이페이지
@@ -54,14 +59,37 @@
 
 ## 개발 주의사항
 
-- **MyVerse와 분리**: 과거 Planner's Planner AI 앱은 MyVerse로 흡수되었다. `features/myverse/planner/Planners*.tsx`는 고아 파일 — 재사용·import 금지
+- ~~**MyVerse와 분리**: `features/myverse/planner/Planners*.tsx` 재사용·import 금지~~ → **2026-10-14 사용자 결정으로 되돌림**: AI 플래너 핵심을 Planner's로 옮긴다 (아래 '이전 계획' 4단계). 옛 소개 화면 `PlannersHomePage·AboutPage·PlannerToolPage.tsx`는 문구 원천으로만 쓰고 그대로 import하지 않는다 (가격 19,000원 등 들어 있음)
+- **가격·요금 표기 금지** — 통신판매업 신고 전. AI 플래너 구독(옛 Toss 19,000원/연)·멤버십 가격을 화면·소스에 두지 않는다 (HeRo와 같은 원칙)
+- **바닥상회 원본 파일은 저장소(git)에 넣지 않는다** — 비공개 Storage 버킷 + 로그인 회원 서명 URL
 - `middleware.ts`의 `/api/planners/*` → `/api/myverse/*` rewrite는 유지 (vercel.json 크론·Google OAuth 콘솔이 호출). 페이지 `/planners/*`는 더 이상 myverse로 308 하지 않는다
 - 정적 PWA 파일 `/planners-sw.js`·`/planners-manifest.json`·`/planners-icon-*`는 MyVerse 레거시 — 건드리지 않는다
 - "준비 중/Coming Soon" 텍스트 직접 표시 금지 (§1.1)
 
+## 이전 계획 — planners.ai.kr (2026-10-14 확정)
+
+> 사이트 = **① 기획자 정체성**("우리는 모두 기획자다", 기획은 꾀하고 계획은 세운다) + **② 도구**(PAD 플래너 ↔ AI 플래너, 같은 연간·월간·주간·일간·프로젝트 북 구조) + **③ 훈련**(실전 프로젝트·참여 확인서, 지금 있는 것)
+> 원천 자료: 사용자 문서 `Planners_Business_Model.md`(2026-03-30, "1만 명의 기획자"·Evolution School) · `Planners_Dev_Guide_v1.md`(2026-03-25, LEARN/TOOL/RESOURCE·이관 목록) — `G:\내 드라이브\00 다운로드` · 구글 사이트 `sites.google.com/tenone.biz/planners`(Planning 기획론·Planner's Planner 작동 방식·Frame+Work+Book) · 2027년판 pptx 시안(같은 폴더)
+
+| 단계 | 내용 | 상태 |
+|---|---|---|
+| 1 | 주소·틀: domain-registry·CANONICAL·site-config·ums_sites(focus·www.planners.ai.kr)·레이아웃 noindex | ✅ 2026-10-14 (외부: apex A `216.150.1.1` + apex → www 308은 사용자) |
+| 2 | 기획자 정체성 화면(첫 화면·소개 = 기획론) · 메뉴 `lib/brand-site-menus.ts` 개편 (소개·플래너·템플릿·AI 플래너·프로젝트·이야기, 인증서는 푸터 참여) | ✅ 2026-10-14 |
+| 3 | PAD 자료실: `planners_files` + 비공개 버킷 `planners-files` + 로그인 회원 5분 서명 URL(`/api/planners-library/[id]/download`) + 다운로드 수만 집계 · 인트라 `/intra/ums/planners/{planner,templates}`(올리기·공개·분류·삭제, API `/api/intra/planners/files`) · 이야기 = 통합 게시판 `ums_boards` stories | ✅ 2026-10-14 (170개 업로드, 공개 164·비공개 6) |
+| 4 | AI 플래너: 소개 `/planners/ai` ✅ · 앱 `/myverse/app/*` 핵심만 `/planners/app/*`로 — 설계: 앱 경로를 컨텍스트(`useAppBase`)로 바꿔 MyVerse(동결)와 같은 코드를 함께 씀 (하드코딩 `/myverse/app` 64개 파일) · Planner's 앱 레이아웃 = 로그인(LoginRequired) + 온보딩만, **구독 게이트·구매 링크 없음** · `myverse_*` 테이블·`/api/myverse/*` 그대로 | 진행 중 |
+| 5 | Badak 정리: 새 Badak 사이트에 바닥상회 없음 · badak.biz DNS 전환 때 `/PlannersPlanner`·`/Template`·`/shop_view?idx=…` → planners.ai.kr 308 | |
+| 6 | 출시: 처리방침(다운로드 기록·AI 플래너) · `docs/Data_Lifecycle.md` · `npm run site:check -- planners --live` | |
+
+**결정 (사용자 2026-10-14)**: AI 플래너 = 핵심만 · 다운로드 = 로그인 회원만 · Tier 집중 · 연간 플래너는 2026년판부터(2021~2025 제외) · Play_ 서식 포함 · 아이디어 샤워 포함 · 스타트업 질문지 포함
+
+**바닥상회 원본** (아임웹 관리자 API로 2026-10-14 수집, 170개 · 약 120MB) → `G:\내 드라이브\00 다운로드\badak-mall-planners\PP{상품번호}__{원본 파일명}` (182번 All in One은 같은 폴더 상위에 원래 이름)
+- 분류: 연간 플래너(2026 3) · 노트 북 8 · 프로젝트 북 1(zip) · 노트 56 · 노트/스터디 12 · 스케쥴 14 · 프레임 워크 43 · 플레이 22 · 스타트업 7(docx) · 아이디어 샤워 4
+- 바로잡을 것: 142번 '리갈 패드 그레이 100'에 그린 파일 · 54/55번 같은 파일(생각 피라미드/토너먼트) · 153/154번 같은 파일(로드 스톤 140/100) · 70번은 png · 151번은 pptx
+- ⚠️ 아이디어 샤워(쇼핑백·명함·앰비언트 "101가지 사례")는 타사 작품 모음 — 공개 전 저작권 확인 (사용자 포함 결정, 공개 방식은 별도 확인)
+
 ## 현재 상태
 
-- Phase: 부활 — 실험 Tier 스테이징 (2026-10-09)
+- Phase: 집중 승격 · planners.ai.kr 이전 1단계 완료 (2026-10-14)
 - 이월 작업:
   - ~~DB: ums_sites·brand_capabilities~~ ✅ 확인 (2026-10-10: experiment·active·vercel·is_open=false · community·course·purchase)
   - 첫 회차 개설 (`/intra/ums/planners/programs`), 파비콘·OG 이미지 전용 에셋

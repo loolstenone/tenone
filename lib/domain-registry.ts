@@ -75,6 +75,9 @@ const registry: Record<string, DomainEntry> = {
     'townity.tenone.biz':       { prefix: '/townity',    siteId: 'townity' },
     'naturebox.tenone.biz':     { prefix: '/naturebox',  siteId: 'naturebox' },
     'jakka.tenone.biz':         { prefix: '/jakka',      siteId: 'jakka' },
+    // Planner's — 2026-10-14 집중 승격, 공식 주소 www.planners.ai.kr
+    'planners.ai.kr':           { prefix: '/planners',    siteId: 'planners' },
+    'www.planners.ai.kr':       { prefix: '/planners',    siteId: 'planners' },
     'planners.tenone.biz':      { prefix: '/planners',    siteId: 'planners' },
     'wio.tenone.biz':           { prefix: '/wio',        siteId: 'wio' },
     'wiki.tenone.biz':          { prefix: '/wiki',       siteId: 'wiki' },
@@ -106,6 +109,7 @@ export const CANONICAL_HOSTS: Record<string, { host: string; hosting: 'vercel' |
     madleap:   { host: 'www.madleap.co.kr', hosting: 'external' },
     badak:     { host: 'www.badak.biz',     hosting: 'external' },
     rook:      { host: 'www.rook.co.kr',    hosting: 'vercel' },   // 2026-10-07 아임웹 → Vercel DNS 전환
+    planners:  { host: 'www.planners.ai.kr', hosting: 'vercel' },  // 2026-10-14 — 공개 전까지 is_open=false + noindex(레이아웃)
 };
 
 /**

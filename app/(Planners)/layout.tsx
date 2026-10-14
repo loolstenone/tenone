@@ -18,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: 'website',
             ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
+        ...(db?.is_open === false && { robots: { index: false, follow: false } }),
     };
 }
 

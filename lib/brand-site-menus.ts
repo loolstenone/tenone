@@ -73,12 +73,17 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         ],
     },
     {
-        // Planner's — 기획자 훈련 브랜드. 훈련·프로젝트는 코어 프로그램 모듈(program_*, 주인 brand planners)
+        // Planner's — 기획자의 정체성·도구·훈련 (2026-10-14 planners.ai.kr 개편: 소개 = 기획론 · 플래너·템플릿 = 바닥상회에서 옮긴 PAD 자료 · AI 플래너 · 프로젝트 = 코어 프로그램 모듈)
         siteId: "planners",
         adminBase: "/intra/ums/planners",
         menus: [
+            { placement: "header", label: "소개", path: "/planners/about", source: { kind: "static" } },
+            { placement: "header", label: "플래너", path: "/planners/planner", source: { kind: "table", table: "planners_files", eq: { kind: "planner" } }, adminHref: "/intra/ums/planners/planner", unit: "개" },
+            { placement: "header", label: "템플릿", path: "/planners/templates", source: { kind: "table", table: "planners_files", eq: { kind: "template" } }, adminHref: "/intra/ums/planners/templates", unit: "개" },
+            { placement: "header", label: "AI 플래너", path: "/planners/ai", source: { kind: "static" } },
             { placement: "header", label: "프로젝트", path: "/planners/projects", source: { kind: "table", table: "program_rounds", eq: { brand_id: "planners" } }, adminHref: "/intra/ums/planners/programs", unit: "개" },
-            { placement: "header", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },
+            { placement: "header", label: "이야기", path: "/planners/stories", source: { kind: "board", board: "stories" }, adminHref: "/intra/ums/planners/stories", unit: "글" },
+            { placement: "feature", location: "프로젝트", label: "인증서", path: "/planners/certificate", source: { kind: "table", table: "program_certificates", eq: { brand_id: "planners" } }, unit: "건" },
             { placement: "feature", location: "프로젝트", label: "참가 신청", path: "/planners/projects", source: { kind: "table", table: "program_applications", eq: { brand_id: "planners" }, pendingEq: { status: "pending" } }, adminHref: "/intra/ums/planners/programs", unit: "건" },
         ],
     },

@@ -416,12 +416,12 @@ export const modules: NavModule[] = [
                     },
                     {
                         name: "Planner's", href: "/intra/ums/planners", icon: Globe,
-                        children: [
-                            { name: "프로그램", href: "/intra/ums/planners/programs" },
+                        // 사이트 메뉴 레지스트리(lib/brand-site-menus.ts)에서 생성 — 사이트 메뉴와 1:1 (2026-10-14 집중 승격)
+                        children: brandAdminChildren("planners", [
                             { name: "PP AI 관리", href: "/intra/planners" },
                             { name: "베타 피드백", href: "/intra/planners/feedback" },
                             { name: "Evolution School", href: "/intra/evolution-school" },
-                        ],
+                        ]),
                     },
                     {
                         name: "RooK", href: "/intra/ums/rook", icon: Globe,

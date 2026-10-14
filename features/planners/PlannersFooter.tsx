@@ -8,10 +8,11 @@ export function PlannersFooter() {
         <UniverseFooter
             siteId="planners"
             brandName="Planner's"
-            tagline="우리는 모두 기획자다"
+            tagline="우리는 모두 기획자다. 자기 인생에서만큼은."
             accentColor="#14B8A6"
             dark={true}
             actions={[
+                { label: "플래너 받기", href: "/planners/planner" },
                 { label: "훈련 프로젝트 보기", href: "/planners/projects" },
                 { label: "내 참여 확인서", href: "/planners/certificate" },
             ]}
