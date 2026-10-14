@@ -3,7 +3,7 @@
 import { useEffect, useState, type AnchorHTMLAttributes, type ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { crossSiteHref } from "@/lib/cross-site";
+import { crossSiteHref, crossSiteHrefStatic } from "@/lib/cross-site";
 
 /**
  * 다른 브랜드·TenOne 페이지로 가는 링크. 서버 렌더는 상대 경로, 마운트 후 현재 도메인에 맞는 주소로 바꾼다
@@ -12,7 +12,7 @@ import { crossSiteHref } from "@/lib/cross-site";
  */
 export function CrossSiteLink({ href, children, ...rest }: { href: string; children: ReactNode } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
     const { isAuthenticated } = useAuth();
-    const [resolved, setResolved] = useState(href);
+    const [resolved, setResolved] = useState(() => crossSiteHrefStatic(href));
     useEffect(() => { setResolved(crossSiteHref(href, { loggedIn: isAuthenticated })); }, [href, isAuthenticated]);
     return resolved.startsWith("/")
         ? <Link href={resolved} {...rest}>{children}</Link>

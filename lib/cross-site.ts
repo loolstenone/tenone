@@ -28,3 +28,14 @@ export function crossSiteHref(path: string, opts: { loggedIn?: boolean } = {}): 
     }
     return `${target.origin}${path}`;
 }
+
+/**
+ * 서버 렌더·첫 화면용 — 브라우저 정보 없이 대상 사이트 절대 주소. 독립 도메인에서 상대 경로가 그대로 HTML에 나가면
+ * middleware가 현재 사이트 prefix를 붙여 404가 된다 (2026-10-15 www.planners.ai.kr 푸터 /madleague·/rook — 검색엔진·화면 뜨기 전 클릭)
+ * 화면이 뜬 뒤 crossSiteHref가 도메인에 맞게 다시 고친다 (localhost는 상대 경로로 돌아감)
+ */
+export function crossSiteHrefStatic(path: string): string {
+    if (!path.startsWith('/') || path.startsWith('//')) return path;
+    if (SHARED_PATHS.some(p => path === p || path.startsWith(`${p}/`) || path.startsWith(`${p}?`))) return path;
+    return `${siteOriginForPath(path)}${path}`;
+}
