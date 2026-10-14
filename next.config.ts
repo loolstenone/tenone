@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
     return [
       // tenone.biz/@handle → /profile/@handle (유니버스 프로필 단축 URL)
       { source: '/@:handle', destination: '/profile/@:handle' },
+      // 플래너'스 AI 연결(MCP) — OAuth 보호 자원 메타데이터 (RFC 9728). 연결 서버 /api/planners-mcp 가 어느 로그인 서버를 쓰는지 알려 준다
+      { source: '/.well-known/oauth-protected-resource', destination: '/api/oauth-protected-resource' },
+      { source: '/.well-known/oauth-protected-resource/:path*', destination: '/api/oauth-protected-resource' },
     ];
   },
 

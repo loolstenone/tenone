@@ -61,6 +61,12 @@
   - **1단계 ✅** ① 생각 쏟아내기 `features/planners/app/BrainDump.tsx` + `/api/myverse/ai/parse-input`(register_items 한 번에 배열, 확인 후 등록, 공용 등록기 `features/myverse/planner/ai-actions.ts`) ② 못 끝낸 일 자동 재배치 `AutoCarry.tsx`(하루 한 번, 14일, `/api/myverse/daily/carry-over` schedule — 일정 피해 빈 시간 09~21시, AI 아님·무료) ③ 아침 Top 3·저녁 회고 `DayCoach.tsx` + `/api/myverse/daily/focus` (`myverse_daily.focus`·`reflection`, 만든 결과 재사용)
   - **2단계 ✅** ① 목표 자동 분해 `features/myverse/planner/ProjectBreakdown.tsx` + `/api/myverse/projects/[id]/breakdown`(시간 추정·평일 날짜 제안·마감 초과 경고, task `estimate_min`) ② 주간 회고 `features/planners/app/WeeklyReview.tsx` + `/api/myverse/weekly-review`(숫자 무료·한 주 읽기 유료, `myverse_weekly_reports` sources.kind=planner_review) ③ 일상어로 찾기 `/api/myverse/smart-search` + SearchView 'AI로 찾기'(임베딩 없이 질문→기간+낱말→후보→AI 선택)
   - **3단계 ✅** 손글씨 → 디지털 `/api/myverse/handwriting` (Sonnet 4.6 — Haiku는 글자 오독) · 불렛 저널 기호 •×><○−★·취소선 → 상태 · 페이지 날짜 인식 · ① 생각 쏟아내기 '사진으로'(브라우저에서 1600px로 줄여 한 번 보내고 **저장 안 함**) ② 손글씨 노트 '글자로 바꾸기'(획 → 이미지 `renderStrokes`, 이벤트 `planner-read-image`로 BrainDump가 받음) · 메모는 그날 Cornell 노트로(`saveMemoNote`, 저장 후 화면 새로 열기 — DailyView 노트 목록 덮어쓰기 방지) · 취소선 항목은 기본 해제
+  - **내 AI에 연결 (MCP) ✅ 2026-10-14** — 사용자가 자기 Claude·ChatGPT에 Planner's를 연결 (AI 비용은 사용자 부담, 연결은 무료). 범위 = **읽기 + 할 일 추가** (사용자 결정, 지우기·고치기 없음)
+    - 연결 서버 `app/api/planners-mcp/route.ts` (mcp-handler + zod, 주소 `https://www.planners.ai.kr/api/planners-mcp`) · 도구 get_day·list_tasks·search_records·weekly_summary·list_projects·add_task · 데이터 `lib/planners/mcp-data.ts` (본인 기록만) · 주간 숫자 공용 `lib/planners/weekly-stats.ts`
+    - 로그인 승인 = **Supabase OAuth 2.1 서버**(자동 클라이언트 등록·PKCE) · 보호 자원 메타데이터 `/.well-known/oauth-protected-resource`(next.config rewrite → `app/api/oauth-protected-resource`) · 승인 화면 `app/oauth/consent/page.tsx`(middleware skipPaths `/oauth`) · 연결 목록·끊기 = 앱 설정 › 연동 `features/planners/app/ConnectedAi.tsx`(listGrants/revokeGrant)
+    - 사용 기록 `myverse_ai_usage` kind `mcp_*` · 도구는 Anthropic을 부르지 않는다
+    - ⚠️ 켜려면 Supabase 대시보드 Authentication › OAuth Server: 사용 켜기 · Authorization Path `/oauth/consent` · Dynamic Client Registration 켜기 (사람)
+    - ⚠️ 처리방침: '사용자가 연결을 승인한 AI 서비스로 사용자가 요청한 기록 제공, 연결 해제 시 중단' 명시
   - 이월: 반복 일정을 빈 시간 계산에 반영 · 일상어 찾기의 관련 기록 묶음 보강 · '글자로 바꾸기' 실제 펜슬 손글씨로 시험 · **공개 전 처리방침: AI 처리 위탁·국외 이전(Anthropic, 미국), 사진 비저장 명시**
   - 🐛 수정: AI 일정 저장 필드 `entry_date`→`start_date` (예전부터 AI 일정이 저장되지 않았음)
 - ❌ AI 라우트를 새로 만들 때 `requireAiAccess` 없이 두기 · 라우트마다 무료 한도 예외 만들기
