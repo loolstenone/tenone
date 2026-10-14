@@ -132,8 +132,10 @@
 
 ## 현재 상태
 
-- Phase: 집중 · 플래너'스 AI 1~3단계·내 AI 연결 완료, QA 2차 (세션 174, 2026-10-14) · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · ⚠️ 처리방침에 Planner's 수집 항목·AI 국외 이전 반영은 아직 (공개 상태라 우선 처리)
+- Phase: 집중 · 플래너'스 AI 1~3단계·내 AI 연결 완료, QA 2차 (세션 174, 2026-10-14) · **사이트 공개 (2026-10-14 사용자 결정, is_open=true·색인 허용)** · 앱 화면(`/planners/app/*`)은 noindex · 처리방침 Planner's 항목·AI 위탁 반영 (10-14 공지 · **10-21 시행**, 시행 후 공지 줄 삭제·LEGAL_DOCUMENTS.privacy 버전 갱신)
+- **유료화 순서 (2026-10-14 사용자 결정)**: 베타 테스트 기간 → 유료화. 베타 테스터 = 인트라에서 `myverse_users.subscription_status` 활성 + `subscription_expires_at` = 베타 종료일 (결제 없음, `lib/myverse/ai-access.ts` 그대로 통과). 유료 판매는 통신판매업 신고·약관·자동갱신 고지 후
+- 앱 기본 강조색 = 틸 (`MyverseThemeProvider defaultTheme="teal"`, 테마 'Teal' 값이 인디고였던 것 정정 2026-10-14)
 - 이월 작업:
   - ~~DB: ums_sites·brand_capabilities~~ ✅ 확인 (2026-10-10: experiment·active·vercel·is_open=false · community·course·purchase)
   - 첫 회차 개설 (`/intra/ums/planners/programs`), 파비콘·OG 이미지 전용 에셋
-  - 개인정보처리방침에 Planner's 수집 항목 반영, 출시 전 `npm run site:check -- planners --live`
+  - ~~개인정보처리방침에 Planner's 수집 항목 반영~~ ✅ 10-14 · `npm run site:check -- planners --live`
