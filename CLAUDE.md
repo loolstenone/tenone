@@ -1460,7 +1460,7 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 | 4 | Supabase › Auth › URL Configuration | Redirect URLs `https://www.도메인/**`·`https://도메인/**` |
 | 5 | DB (Claude) | `ums_sites` hosting=vercel·is_open=true, CANONICAL_HOSTS·noindex 정리 → 배포 |
 | 6 | 확인 (Claude) | `npm run site:check -- {siteId} --live` 전부 ✅ + 브라우저로 로그인 모달·폼 보안 확인 통과 |
-| 6-1 | GA4 (Claude·사람) | 공식 주소 접속 → GA4 **실시간**에서 brand_id={siteId} 확인 · 다음 날 인트라 Intelligence › 브랜드 성과에 행 생김 (부록 G.1). 새 도메인이면 GA4 › 데이터 스트림 › 태그 설정 › **도메인 구성**에 추가 |
+| 6-1 | GA4 (Claude·사람) | 공식 주소 접속 → GA4 **실시간**에서 brand_id={siteId} 확인 · 다음 날 인트라 Intelligence › 브랜드 성과에 행 생김 (부록 G.1). 새 도메인이면 GA4 › 데이터 스트림 › 태그 설정 › **도메인 구성**에 추가 (목록 = `lib/domain-registry.ts` 독립 도메인 전부 + tenone.biz, 일치 유형 **'다음 값을 포함'** — 2026-10-15 16개로 정리) |
 | 7 | 옛 서버 | 종료 절차 §0.1 ①~⑦ (회원 있으면 30일 전 공지, 데이터 파기) |
 
 ---
