@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PLANNERS_SECTION, PlannersSectionTitle } from "@/features/planners/PageHero";
 import { ArrowRight } from "lucide-react";
 import { ProgramBoard } from "@/features/programs/ProgramBoard";
 import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
@@ -54,31 +55,31 @@ export default async function PlannersHome() {
             <HeroCarousel slides={slides} />
 
             {/* 두 제품 */}
-            <section className="mx-auto grid max-w-[1200px] gap-4 px-4 py-10 md:grid-cols-2 md:px-6">
-                <Link href="/planners/ai" className="group flex flex-col justify-between border border-neutral-200 p-6 transition-colors hover:border-[#0F766E] md:p-8">
+            <section className={`${PLANNERS_SECTION} grid gap-6 md:grid-cols-2 md:gap-8`}>
+                <Link href="/planners/ai" className="group flex flex-col justify-between bg-neutral-50 p-8 transition-colors hover:bg-teal-50/60 md:p-14">
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">플래너'스 AI</p>
-                        <h2 className="mt-1 text-2xl font-bold">인공지능 플래너</h2>
+                        <h2 className="mt-2 text-3xl font-bold md:text-4xl">인공지능 플래너</h2>
                         <p className="mt-2 break-keep text-neutral-600">플래너'스 PAD와 같은 구조를 디지털로. AI가 하루를 정리해 줍니다.</p>
                     </div>
-                    <ul className="mt-6 grid grid-cols-2 gap-2 text-sm text-neutral-700">
-                        {AI_FEATURES.map((f) => <li key={f} className="bg-neutral-50 px-3 py-2">{f}</li>)}
+                    <ul className="mt-10 grid grid-cols-2 gap-2 text-sm text-neutral-700">
+                        {AI_FEATURES.map((f) => <li key={f} className="bg-white px-4 py-3">{f}</li>)}
                     </ul>
-                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">플래너'스 AI 열기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
-                <Link href="/planners/pad" className="group flex flex-col justify-between border border-neutral-200 p-6 transition-colors hover:border-[#0F766E] md:p-8">
+                <Link href="/planners/pad" className="group flex flex-col justify-between bg-neutral-50 p-8 transition-colors hover:bg-teal-50/60 md:p-14">
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">플래너'스 PAD</p>
-                        <h2 className="mt-1 text-2xl font-bold">손글씨 플래너</h2>
+                        <h2 className="mt-2 text-3xl font-bold md:text-4xl">손글씨 플래너</h2>
                         <p className="mt-2 break-keep text-neutral-600">굿노트·삼성노트·XODO에서 쓰는 PDF 플래너와 서식 {files.length}종.</p>
                     </div>
-                    <div className="mt-6 grid grid-cols-4 gap-2">
+                    <div className="mt-10 grid grid-cols-4 gap-2">
                         {popular.slice(0, 4).map((f) => f.thumbnail_url && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img key={f.id} src={f.thumbnail_url} alt="" className="aspect-square w-full border border-neutral-100 bg-neutral-50 object-contain p-1" />
+                            <img key={f.id} src={f.thumbnail_url} alt="" className="aspect-square w-full bg-white object-contain p-2" />
                         ))}
                     </div>
-                    <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">서식 둘러보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                    <span className="mt-10 inline-flex items-center gap-1 text-sm font-bold text-[#0F766E]">서식 둘러보기 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
             </section>
 
@@ -91,14 +92,14 @@ export default async function PlannersHome() {
 
             {/* 분류 */}
             <section className="bg-neutral-50">
-                <div className="mx-auto max-w-[1200px] px-4 py-10 md:px-6">
-                    <h2 className="mb-6 text-xl font-bold">분류별로 찾기</h2>
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                <div className={PLANNERS_SECTION}>
+                    <PlannersSectionTitle title="분류별로 찾기" description="연간 플래너부터 노트·프레임워크·플레이 서식까지" href="/planners/pad" />
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                         {tiles.map(({ c, list }) => (
-                            <Link key={c} href={`/planners/pad?c=${encodeURIComponent(c)}`} className="group flex items-center gap-3 border border-neutral-200 bg-white p-3 hover:border-[#0F766E]">
+                            <Link key={c} href={`/planners/pad?c=${encodeURIComponent(c)}`} className="group flex items-center gap-4 bg-white p-5 transition-shadow hover:shadow-md">
                                 {list[0].thumbnail_url && (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={list[0].thumbnail_url} alt="" className="h-12 w-12 shrink-0 object-contain" />
+                                    <img src={list[0].thumbnail_url} alt="" className="h-16 w-16 shrink-0 object-contain" />
                                 )}
                                 <span>
                                     <span className="block text-sm font-bold group-hover:text-[#0F766E]">{c}</span>
@@ -118,12 +119,12 @@ export default async function PlannersHome() {
             )}
 
             {/* 기획이란 */}
-            <section className="border-y border-neutral-200">
-                <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-6">
+            <section className="bg-neutral-50">
+                <div className={`${PLANNERS_SECTION} flex flex-col gap-6 md:flex-row md:items-center md:justify-between`}>
                     <div>
                         <p className="text-sm font-bold text-[#0F766E]">기획이란</p>
-                        <p className="mt-1 break-keep text-lg font-bold">기획하다 = 주도적 + 목표 설정 + 전략 수립 + 계획</p>
-                        <p className="mt-1 break-keep text-sm text-neutral-600">이상과 현실의 차이를 문제로 보고, 일이 되게 하는 방법을 찾는 사람.</p>
+                        <p className="mt-3 break-keep text-2xl font-bold md:text-3xl">기획하다 = 주도적 + 목표 설정 + 전략 수립 + 계획</p>
+                        <p className="mt-3 break-keep text-neutral-600 md:text-lg">이상과 현실의 차이를 문제로 보고, 일이 되게 하는 방법을 찾는 사람.</p>
                     </div>
                     <Link href="/planners/about" className="inline-flex shrink-0 items-center gap-1 font-bold text-[#0F766E] hover:underline">기획이란 읽기 <ArrowRight className="h-4 w-4" /></Link>
                 </div>
@@ -139,14 +140,8 @@ export default async function PlannersHome() {
 
 function Shelf({ title, description, href, children }: { title: string; description?: string | null; href: string; children: React.ReactNode }) {
     return (
-        <section className="mx-auto max-w-[1200px] px-4 py-10 md:px-6">
-            <div className="mb-6 flex items-end justify-between">
-                <div>
-                    <h2 className="text-xl font-bold">{title}</h2>
-                    {description && <p className="mt-1 break-keep text-sm text-neutral-500">{description}</p>}
-                </div>
-                <Link href={href} className="text-sm text-neutral-500 hover:text-neutral-900">전체 보기 →</Link>
-            </div>
+        <section className={PLANNERS_SECTION}>
+            <PlannersSectionTitle title={title} description={description} href={href} />
             {children}
         </section>
     );

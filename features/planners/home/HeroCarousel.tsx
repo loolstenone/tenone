@@ -32,20 +32,20 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     const s = slides[i];
     return (
         <section className="relative bg-[#134E4A] text-white" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
-            <div className="mx-auto grid min-h-[420px] max-w-[1200px] items-center gap-8 px-4 py-12 md:grid-cols-2 md:px-6 md:py-16">
+            <div className="mx-auto grid min-h-[520px] max-w-[1440px] items-center gap-10 px-5 py-20 md:min-h-[640px] md:grid-cols-2 md:gap-16 md:px-12 md:py-24">
                 <div key={s.key}>
-                    <h1 className="break-keep text-4xl font-black leading-tight md:text-5xl">{s.title}</h1>
-                    {s.subtitle && <p className="mt-2 break-keep text-xl font-bold text-teal-200 md:text-2xl">{s.subtitle}</p>}
-                    {s.body && <p className="mt-6 max-w-md whitespace-pre-line break-keep leading-relaxed text-teal-50">{s.body}</p>}
+                    <h1 className="break-keep text-4xl font-black leading-tight md:text-6xl">{s.title}</h1>
+                    {s.subtitle && <p className="mt-4 break-keep text-xl font-bold text-teal-200 md:text-3xl">{s.subtitle}</p>}
+                    {s.body && <p className="mt-8 max-w-md whitespace-pre-line break-keep leading-relaxed text-teal-50 md:text-lg">{s.body}</p>}
                     {(s.primary || s.secondary) && (
-                        <div className="mt-8 flex flex-wrap gap-3">
+                        <div className="mt-12 flex flex-wrap gap-3">
                             {s.primary && (
-                                <Link href={s.primary.href} className="inline-flex items-center gap-2 bg-[#14B8A6] px-6 py-3 font-bold text-[#042F2E] hover:bg-teal-300">
+                                <Link href={s.primary.href} className="inline-flex items-center gap-2 bg-[#14B8A6] px-7 py-3.5 font-bold text-[#042F2E] hover:bg-teal-300">
                                     {s.primary.label} <ArrowRight className="h-4 w-4" />
                                 </Link>
                             )}
                             {s.secondary && (
-                                <Link href={s.secondary.href} className="inline-flex items-center gap-2 border border-white/30 px-6 py-3 font-bold hover:bg-white/10">
+                                <Link href={s.secondary.href} className="inline-flex items-center gap-2 border border-white/30 px-7 py-3.5 font-bold hover:bg-white/10">
                                     {s.secondary.label}
                                 </Link>
                             )}
@@ -55,13 +55,13 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 {s.imageUrl && (
                     <Link href={s.imageHref ?? s.primary?.href ?? "#"} className="block">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.imageUrl} alt="" className="max-h-[360px] w-full object-contain" />
+                        <img src={s.imageUrl} alt="" className="max-h-[480px] w-full object-contain" />
                     </Link>
                 )}
             </div>
 
             {n > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 mx-auto flex max-w-[1200px] items-center gap-3 px-4 md:px-6">
+                <div className="absolute bottom-6 left-0 right-0 mx-auto flex max-w-[1440px] items-center gap-3 px-5 md:px-12">
                     <button onClick={() => setI((x) => (x - 1 + n) % n)} aria-label="이전 배너" className="text-white/60 hover:text-white"><ChevronLeft className="h-5 w-5" /></button>
                     <div className="flex gap-1.5">
                         {slides.map((sl, k) => (

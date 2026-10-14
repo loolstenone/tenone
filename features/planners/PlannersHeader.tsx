@@ -32,7 +32,7 @@ export function PlannersHeader() {
     return (
         <>
         <header className="sticky top-0 z-50">
-            <nav className="relative flex h-[60px] md:h-[72px] items-center justify-between bg-[#134E4A] px-4 md:px-[35px]">
+            <nav className="relative flex h-[60px] md:h-[72px] items-center justify-between bg-[#134E4A] px-5 md:px-12">
                 <Link href="/planners" className="shrink-0 text-xl md:text-2xl font-black tracking-tight text-white" aria-label="Planner's 홈">
                     Planner&apos;s
                 </Link>

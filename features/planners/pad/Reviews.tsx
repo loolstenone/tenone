@@ -14,10 +14,10 @@ export function Reviews({ fileId, reviews, summary }: { fileId: string; reviews:
     const shown = showAll ? reviews : reviews.slice(0, 5);
 
     return (
-        <section id="reviews" className="border-t border-neutral-200">
-            <div className="mx-auto max-w-[860px] px-4 py-10 md:px-6">
+        <section id="reviews" className="border-t border-neutral-100">
+            <div className="mx-auto max-w-[960px] px-5 py-16 md:px-12 md:py-28">
                 <div className="flex flex-wrap items-end justify-between gap-3">
-                    <h2 className="text-lg font-bold">후기 <span className="text-neutral-400">{summary.count}</span></h2>
+                    <h2 className="text-3xl font-bold md:text-[40px]">후기 <span className="text-neutral-400">{summary.count}</span></h2>
                     {summary.count > 0 && (
                         <p className="flex items-center gap-1.5 text-sm text-neutral-600">
                             <Stars value={summary.average} /> <b className="text-neutral-900">{summary.average.toFixed(1)}</b> / 5

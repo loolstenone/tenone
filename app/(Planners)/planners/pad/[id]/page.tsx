@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PLANNERS_CONTAINER, PLANNERS_SECTION, PLANNERS_SPACE, PlannersSectionTitle } from "@/features/planners/PageHero";
 import { notFound } from "next/navigation";
 import { DownloadButton } from "@/features/planners/DownloadButton";
 import { Gallery } from "@/features/planners/pad/Gallery";
@@ -33,13 +34,13 @@ export default async function PlannersPadDetailPage({ params }: Props) {
 
     return (
         <>
-            <div className="mx-auto max-w-[1200px] px-4 pt-6 text-sm text-neutral-500 md:px-6">
+            <div className={`${PLANNERS_CONTAINER} pt-8 text-sm text-neutral-500 md:pt-12`}>
                 <Link href="/planners/pad" className="hover:text-neutral-900">플래너'스 PAD</Link>
                 <span className="mx-2">›</span>
                 <Link href={`/planners/pad?c=${encodeURIComponent(file.category)}`} className="hover:text-neutral-900">{file.category}</Link>
             </div>
 
-            <section className="mx-auto grid max-w-[1200px] gap-8 px-4 py-6 md:grid-cols-2 md:gap-12 md:px-6 md:py-10">
+            <section className={`${PLANNERS_CONTAINER} grid gap-10 py-8 md:grid-cols-2 md:gap-20 md:py-14`}>
                 <Gallery images={file.images} title={file.title} />
 
                 <div>
@@ -79,8 +80,8 @@ export default async function PlannersPadDetailPage({ params }: Props) {
 
             {file.detail_images.length > 0 && (
                 <section className="border-t border-neutral-200">
-                    <div className="mx-auto max-w-[860px] px-4 py-10 md:px-6">
-                        <h2 className="mb-6 text-lg font-bold">상세 보기</h2>
+                    <div className={`mx-auto max-w-[960px] px-5 md:px-12 ${PLANNERS_SPACE}`}>
+                        <PlannersSectionTitle title="상세 보기" />
                         <div className="space-y-4">
                             {file.detail_images.map((src) => (
                                 // eslint-disable-next-line @next/next/no-img-element
@@ -94,12 +95,9 @@ export default async function PlannersPadDetailPage({ params }: Props) {
             <Reviews fileId={file.id} reviews={reviews} summary={summary} />
 
             {related.length > 0 && (
-                <section className="border-t border-neutral-200 bg-neutral-50">
-                    <div className="mx-auto max-w-[1200px] px-4 py-10 md:px-6">
-                        <div className="mb-6 flex items-end justify-between">
-                            <h2 className="text-lg font-bold">같은 분류의 서식</h2>
-                            <Link href={`/planners/pad?c=${encodeURIComponent(file.category)}`} className="text-sm text-neutral-500 hover:text-neutral-900">전체 보기 →</Link>
-                        </div>
+                <section className="bg-neutral-50">
+                    <div className={PLANNERS_SECTION}>
+                        <PlannersSectionTitle title="같은 분류의 서식" href={`/planners/pad?c=${encodeURIComponent(file.category)}`} />
                         <ProductGrid files={related} />
                     </div>
                 </section>
