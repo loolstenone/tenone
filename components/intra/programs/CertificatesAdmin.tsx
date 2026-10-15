@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * 인트라 인증서 관리 — 구분 · 코드 · 발급일 · 비고 · 결과 (+ 발급 시점 정보)
- * 발급은 회원 본인이 사이트에서 한다. 여기서는 확인·비고·결과 수정·취소/복원·CSV.
+ * 인트라 인증서 관리 — 종류 · 소속 동아리 · 코드 · 발급일 · 프로그램 · 팀 · 결과 · 비고 · 상태 (+ 발급 시점 정보)
+ * 프로그램 인증서는 회원이 사이트에서 직접 발급, 대장 인증서는 직원이 등록(회차 일괄·CSV) 후 회원이 본인 확인해 내려받는다. 여기서는 확인·비고·결과 수정·발급 취소/복원·CSV.
  * 개인정보(생년월일·대학·전공)는 펼쳐야 보이고, CSV는 직원 업무용 — 외부 공유 금지
  * 수료증 관리 대장(cert_key ledger:*, MADLeague 경쟁 PT) = 인트라가 원본 (2026-10-10): 펼쳐서 기재 사항 수정·계정 연결 해제, 새 회차는 CSV 업로드
  */
@@ -73,11 +73,11 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
 
     const csv = () => {
         if (!rows?.length) return;
-        const head = ["구분", "코드", "발급일", "이름", "생년월일", "출신 대학", "전공", "소속", "기수", "프로그램", "출전팀", "결과", "비고", "상태"];
+        const head = ["종류", "코드", "발급일", "이름", "생년월일", "출신 대학", "전공", "소속", "기수", "프로그램", "출전팀", "결과", "비고", "상태"];
         const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
         const lines = rows.map(r => [
             r.snapshot.label, r.code, kstDay(r.issued_at), r.snapshot.name, r.snapshot.birthdate, r.snapshot.university, r.snapshot.major,
-            r.snapshot.group_name, r.snapshot.cohort, r.snapshot.round_title ?? r.snapshot.title, r.snapshot.team_name, r.result, r.note,
+            r.snapshot.group_name, r.snapshot.cohort, r.snapshot.round_title ?? r.snapshot.title, r.snapshot.team_name, r.result, r.note === LEDGER_NOTE ? "" : r.note,
             r.revoked_at ? `취소(${r.revoked_reason ?? ""})` : "유효",
         ].map(esc).join(","));
         const blob = new Blob(["﻿" + [head.map(esc).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
@@ -95,7 +95,7 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
             <div>
                 <h1 className="text-2xl font-bold text-neutral-900">{title}</h1>
                 <p className="mt-1 text-sm text-neutral-500">
-                    회원이 사이트에서 로그인해 직접 발급합니다 (참가·수상 확인서 = 결과 발표 후, 활동 인증서 = 활동 연도 종료 후). 발급 시점 정보로 고정되며, 잘못 발급된 건은 취소 후 회원이 다시 발급합니다.
+                    대장 등록 = 직원이 회차 명단으로 일괄 등록하고, 회원은 로그인해 본인 확인 후 내려받습니다. 회원 발급 = 회원이 사이트에서 직접 발급합니다 (참가·수상 확인서는 결과 발표 후, 활동 인증서는 활동 연도 종료 후). 잘못된 건은 발급 취소 후 다시 발급합니다.
                 </p>
             </div>
 
@@ -125,7 +125,7 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
 
             {ledgerImport && (
                 <p className="text-xs text-neutral-500">
-                    경쟁 PT 대장은 여기가 원본입니다 (구글 시트는 2026-10-10 동결). 새 회차는 아래 회차 일괄 발급(코드 자동 배정)이 기본, 코드가 이미 정해진 대장은 시트와 같은 열({LEDGER_COLUMNS.join(" · ")})의 CSV로 등록 — 코드 형식 2026-COA 000142 (뒤 6자리는 대장 전체 고유 일련번호 — 다시 시작하지 않음), 수상은 MCP + 결과(1등·2등·3등·본선). 전화번호는 매드리거 등록 매칭용 해시만 남기고 저장하지 않습니다. 고칠 땐 코드를 눌러 펼치세요.
+                    경쟁 PT 대장은 여기가 원본입니다 (구글 시트는 2026-10-10 동결). 새 회차는 아래 회차 일괄 발급(코드 자동 배정)이 기본, 코드가 이미 정해진 대장은 시트와 같은 열({LEDGER_COLUMNS.join(" · ")})의 CSV로 등록 - 코드 형식 2026-COA 000142 (뒤 6자리는 대장 전체 고유 일련번호 - 다시 시작하지 않음), 수상은 MCP + 결과(1등·2등·3등·본선). 전화번호는 매드리거 등록 매칭용 해시만 남기고 저장하지 않습니다. 고칠 땐 코드를 눌러 펼치세요.
                 </p>
             )}
             {ledgerImport && fixedBrand === "madleague" && <RoundBatchIssue onDone={() => load(q)} />}
@@ -133,12 +133,12 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
             {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
             {!rows ? <p className="text-sm text-neutral-400">불러오는 중…</p> : rows.length === 0 ? <p className="text-sm text-neutral-400">발급된 인증서가 없습니다.</p> : (
                 <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-                    <table className="w-full min-w-[900px] text-sm">
+                    <table className="w-full min-w-[1100px] text-sm">
                         <thead className="bg-neutral-50 text-left text-xs text-neutral-500">
                             <tr>
-                                <th className="px-3 py-2">구분</th><th className="px-3 py-2">코드</th><th className="px-3 py-2">발급일</th>
-                                <th className="px-3 py-2">이름</th><th className="px-3 py-2">프로그램 · 팀</th>
-                                <th className="px-3 py-2">결과</th><th className="px-3 py-2">비고</th><th className="px-3 py-2">상태</th>
+                                <th className="px-3 py-2">종류</th><th className="px-3 py-2">소속 동아리</th><th className="px-3 py-2">코드</th><th className="px-3 py-2">발급일</th>
+                                <th className="px-3 py-2">이름</th><th className="px-3 py-2">프로그램</th><th className="px-3 py-2">팀</th>
+                                <th className="px-3 py-2">결과</th><th className="px-3 py-2">비고</th><th className="px-3 py-2">상태</th><th className="px-3 py-2"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-100">
@@ -159,21 +159,29 @@ function CertRow({ r, showBrand, brandName, open, onToggle, call }: {
     call: (m: "PATCH" | "POST", b: Record<string, unknown>) => Promise<void>;
 }) {
     const [result, setResult] = useState(r.result ?? "");
-    const [note, setNote] = useState(r.note ?? "");
+    const ledger = r.cert_key.startsWith("ledger:");
+    // 대장 적재 때 비고에 넣은 출처 표시("수료증 관리 대장")는 비고가 아니다 - 종류 칸의 '대장 등록'으로 보여 준다
+    const initNote = r.note === LEDGER_NOTE ? "" : (r.note ?? "");
+    const [note, setNote] = useState(initNote);
     const s = r.snapshot;
-    const dirty = result !== (r.result ?? "") || note !== (r.note ?? "");
+    const dirty = result !== (r.result ?? "") || note !== initNote;
     const inp = "w-full rounded border border-neutral-200 px-2 py-1 text-sm";
     return (
         <>
             <tr className={r.revoked_at ? "bg-neutral-50 text-neutral-400" : ""}>
-                <td className="px-3 py-2">
-                    {showBrand && <span className="mr-1 rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600">{brandName}</span>}
+                <td className="px-3 py-2 text-xs">
                     {s.label ?? r.type}
+                    <span className="block text-[10px] text-neutral-400">{ledger ? "대장 등록" : "회원 발급"}</span>
                 </td>
-                <td className="px-3 py-2 font-mono text-xs"><button onClick={onToggle} className="underline-offset-2 hover:underline">{r.code}</button></td>
-                <td className="px-3 py-2 text-xs">{kstDay(r.issued_at)}</td>
-                <td className="px-3 py-2">{s.name ?? "(탈퇴)"}</td>
-                <td className="px-3 py-2 text-xs">{s.round_title ?? s.title}{s.team_name ? ` · ${s.team_name}` : ""}</td>
+                <td className="px-3 py-2 text-xs">{[s.group_name, s.cohort].filter(Boolean).join(" ") || "-"}</td>
+                <td className="px-3 py-2 font-mono text-xs whitespace-nowrap"><button onClick={onToggle} className="underline-offset-2 hover:underline">{r.code}</button></td>
+                <td className="px-3 py-2 text-xs whitespace-nowrap">{kstDay(r.issued_at)}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{s.name ?? "(탈퇴)"}</td>
+                <td className="px-3 py-2 text-xs">
+                    {s.round_title ?? s.title}
+                    {showBrand && <span className="block text-[10px] text-neutral-400">{brandName}</span>}
+                </td>
+                <td className="px-3 py-2 text-xs">{s.team_name ?? "-"}</td>
                 <td className="px-3 py-2"><input value={result} onChange={e => setResult(e.target.value)} className={inp} /></td>
                 <td className="px-3 py-2">
                     <div className="flex gap-1">
@@ -182,18 +190,23 @@ function CertRow({ r, showBrand, brandName, open, onToggle, call }: {
                     </div>
                 </td>
                 <td className="px-3 py-2 text-xs">
+                    {r.revoked_at
+                        ? <span className="rounded bg-neutral-200 px-1.5 py-0.5 text-neutral-600" title={r.revoked_reason ?? ""}>취소됨</span>
+                        : <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">유효</span>}
+                </td>
+                <td className="px-3 py-2 text-xs whitespace-nowrap">
                     {r.revoked_at ? (
-                        <button onClick={() => call("POST", { action: "restore", id: r.id })} className="text-neutral-500 underline" title={r.revoked_reason ?? ""}>취소됨 · 복원</button>
+                        <button onClick={() => call("POST", { action: "restore", id: r.id })} className="rounded border border-neutral-300 px-2 py-1 text-neutral-600">복원</button>
                     ) : (
-                        <button onClick={() => { const reason = prompt("취소 사유"); if (reason) call("POST", { action: "revoke", id: r.id, reason }); }} className="text-red-600">유효 · 취소</button>
+                        <button onClick={() => { const reason = prompt("발급 취소 사유"); if (reason) call("POST", { action: "revoke", id: r.id, reason }); }} className="rounded border border-red-200 px-2 py-1 text-red-600">발급 취소</button>
                     )}
                 </td>
             </tr>
             {open && (
                 <tr className="bg-neutral-50">
-                    <td colSpan={8} className="px-3 py-3 text-xs text-neutral-600">
-                        {r.cert_key.startsWith("ledger:") ? <LedgerEdit r={r} call={call} /> : (
-                            <>생년월일 {s.birthdate ?? "—"} · {s.university ?? "—"} {s.major ?? ""} · {[s.group_name, s.cohort].filter(Boolean).join(" ") || "소속 —"}</>
+                    <td colSpan={11} className="px-3 py-3 text-xs text-neutral-600">
+                        {ledger ? <LedgerEdit r={r} call={call} /> : (
+                            <>생년월일 {s.birthdate ?? "-"} · {s.university ?? "-"} {s.major ?? ""}</>
                         )}
                         {r.revoked_reason && <span className="ml-3 text-red-500">취소 사유: {r.revoked_reason}</span>}
                     </td>
@@ -203,6 +216,7 @@ function CertRow({ r, showBrand, brandName, open, onToggle, call }: {
     );
 }
 
+const LEDGER_NOTE = "수료증 관리 대장";
 const LINKED_BY: Record<string, string> = { registration: "매드리거 등록 정보", manual: "본인 직접 확인", admin: "직원" };
 
 /** 대장 인증서 기재 사항 수정 · 계정 연결 상태 */
@@ -227,7 +241,7 @@ function LedgerEdit({ r, call }: { r: Row; call: (m: "PATCH" | "POST", b: Record
             </div>
             <div className="flex flex-wrap items-center gap-3">
                 <button disabled={!dirty} onClick={() => call("PATCH", { id: r.id, ledger: f })} className="rounded bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-30">기재 사항 저장</button>
-                <span className="text-neutral-500">계정 연결: {r.member_id ? `연결됨 (${LINKED_BY[r.linked_by ?? ""] ?? "—"})` : "없음"}</span>
+                <span className="text-neutral-500">계정 연결: {r.member_id ? `연결됨 (${LINKED_BY[r.linked_by ?? ""] ?? "-"})` : "없음"}</span>
                 {r.member_id && (
                     <button onClick={() => { if (confirm("이 인증서의 계정 연결을 해제합니다. 다른 사람이 잘못 연결한 경우에만 쓰세요.")) call("POST", { action: "unlink", id: r.id }); }} className="text-red-600 underline">연결 해제</button>
                 )}
