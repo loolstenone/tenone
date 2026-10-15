@@ -1,9 +1,10 @@
 -- =====================================================================================
 -- WIO Core v0 — 기본 단위 8 + event_log + 기록 트리거 + 단일 행위 함수 (초안)
 -- =====================================================================================
--- 대상 DB : WIO 전용 Supabase 프로젝트 (2026-10-15 현재 없음 — 만들기 전 사용자 승인 필요)
+-- 대상 DB : WIO 전용 Supabase 프로젝트 "WIO" (xyfnjklkszykkrlqdkwh · 서울 · 2026-10-15 생성, 무료)
 --           ⛔ 유니버스 DB(ziotlxkdctlhiwkgmmsh)에 적용하지 않는다.
--- 상태    : 초안 · 미적용 · 재실행 가능(IF NOT EXISTS / OR REPLACE / DROP IF EXISTS)
+-- 상태    : 초안 · 2026-10-15 적용 (마이그레이션 wio_core_v0 + wio_core_v0_search_path) · 보안 어드바이저 경고 0
+--           재실행 가능(IF NOT EXISTS / OR REPLACE / DROP IF EXISTS) · 테넌트는 아직 없음 (bootstrap_tenant 미실행)
 -- 근거    : docs/WIO 백서 Way It Operates.md 3장(원칙)·4장(기본 단위)·11장(A등급)·14장(상태 전이는 DB 함수로만)
 --           docs/WIO 기본 설계 AI 업무 통제 플랫폼.md 3장(event_log 필드)·4장(handoff)·12장(A등급 10개)
 --           docs/wio/Intra_Approval_State_Map.md (현재 앱의 결재·상태 전이 위치 — 옮겨 올 대상 목록)
@@ -951,18 +952,8 @@ begin
 end $$;
 
 -- =====================================================================================
--- 부트스트랩 — 시스템 Actor 시드, 테넌트 개설 (service_role 전용 · 이것도 event_log에 남는다)
+-- 부트스트랩 — 테넌트 개설 (service_role 전용 · 이것도 event_log에 남는다). 시스템 Actor 시드는 파일 맨 끝
 -- =====================================================================================
-do $$
-begin
-  if not exists (select 1 from wio.actors where id = '00000000-0000-0000-0000-0000000000a1') then
-    perform wio._ctx_open(jsonb_build_object('actor_id', '00000000-0000-0000-0000-0000000000a1',
-                                             'action_key', 'actor.bootstrap', 'op', 'create'));
-    insert into wio.actors (id, type, label) values ('00000000-0000-0000-0000-0000000000a1', 'system', 'WIO system');
-    perform wio._ctx_close();
-  end if;
-end $$;
-
 create or replace function wio.bootstrap_tenant(p_name text, p_owner_auth_user uuid, p_owner_person_id uuid)
 returns uuid language plpgsql security definer set search_path = wio, extensions, pg_temp as $$
 declare
@@ -1054,3 +1045,26 @@ grant execute on function wio.my_tenants()    to authenticated;
 grant execute on function wio.current_actor() to authenticated;
 grant execute on function wio.bootstrap_tenant(text, uuid, uuid) to service_role;
 revoke update, delete, truncate on wio.event_log from service_role;
+
+-- search_path 고정 (Supabase 보안 어드바이저 0011 — 함수 안 이름이 다른 스키마 객체로 바뀌치기 되는 것 방지)
+do $$
+declare f regprocedure;
+begin
+  for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'wio' and p.proconfig is null loop
+    execute format('alter function %s set search_path = wio, extensions, pg_temp', f);
+  end loop;
+end $$;
+
+-- =====================================================================================
+-- 시스템 Actor 시드 — 맨 끝에 둔다 (event_log 지연 FK가 걸린 뒤 같은 트랜잭션에서 ALTER TABLE 하면 55006 오류)
+-- =====================================================================================
+do $$
+begin
+  if not exists (select 1 from wio.actors where id = '00000000-0000-0000-0000-0000000000a1') then
+    perform wio._ctx_open(jsonb_build_object('actor_id', '00000000-0000-0000-0000-0000000000a1',
+                                             'action_key', 'actor.bootstrap', 'op', 'create'));
+    insert into wio.actors (id, type, label) values ('00000000-0000-0000-0000-0000000000a1', 'system', 'WIO system');
+    perform wio._ctx_close();
+  end if;
+end $$;
