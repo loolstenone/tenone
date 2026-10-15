@@ -1,0 +1,101 @@
+# 인트라 결재·상태 전이 코드 위치 (Intra 진단 7번)
+
+> 조사일 2026-10-15 · 기준 커밋 2dadd2a5 · WIO 백서 기본 단위 이관 준비용 (읽기 전용 조사, 코드·DB 변경 없음)
+> 라인 번호 `~`는 근사치. SQL은 repo 기준이며 실제 DB 적용 여부는 검증하지 않음.
+
+## 요약
+
+- **결재 체계가 둘 공존**: (a) `wio_approvals` 단순 결재(pending→approved/rejected) (b) `approval_requests` + `wio_workflow_*` 다단계 엔진. 레거시 `approvals`는 SQL에만 언급.
+- **공용 상태 전이 헬퍼 없음** — 도메인마다 각자 `.update({ status })`.
+- **전이 이력을 남기는 곳은 세 곳뿐**: `wio_workflow_instances.step_history`(JSON) · `contact_submissions.handling_log`(JSON) · `badak_level_history`(레벨만). `audit_log`·`sys_audit_logs`·`history_events`·`wio_events` 등 테이블은 있으나 결재·심사 경로에서 쓰지 않음.
+- **현재 상태 가드 없는 전이 다수** (accepted→rejected, rejected→approved 등 역전 가능).
+
+## 1. 결재 핵심
+
+| 위치 | 테이블 | 전이 | 이력 | 권한 |
+|---|---|---|---|---|
+| `app/api/approvals/[id]/route.ts:6-17` PATCH | wio_approvals | body 전체 update (임의 status) | 없음 | **없음** (RLS 테넌트 멤버 FOR ALL만) |
+| `app/api/approvals/route.ts:18-38` POST | wio_approvals | insert (status 포함 body spread), doc_no = count+1 | 없음 | requireAuth만 |
+| `lib/supabase/wio.ts:412-415` updateApprovalStatus | wio_approvals | →approved/rejected | 없음 | 클라이언트 RLS |
+| `lib/supabase/erp.ts:47-58` updateApprovalStatus | wio_approvals | →임의 | 없음 | 클라이언트 RLS |
+| `lib/supabase/erp.ts:163-170` updateExpenseByApproval | wio_expenses | 결재 결과 미러링 (비원자) | 없음 | 클라이언트 RLS |
+| `app/intra/erp/approval/page.tsx:42-54` | wio_approvals → wio_expenses | pending→approved/rejected | 없음 | 결재자 검증 없음 |
+| `app/(WIO)/wio/app/my/approval/page.tsx:205-222` | wio_approvals | approved/rejected (에러 무시) | 없음 | 쓰기 시 결재자 검증 없음 |
+| `app/(WIO)/wio/app/approval/page.tsx:255-273` | approval_requests + instances | 생성 pending/running | step_history | 없음 |
+| 같은 파일 `:441-505` handleAction | approval_requests + instances | advanceStep 후 approval_requests 별도 update (비원자) | step_history | 현재 스텝 담당자 미검증, actorId 클라이언트 값 |
+| `lib/workflow-engine.ts:225-267` startWorkflow | wio_workflow_instances | insert running | - | 없음 |
+| `lib/workflow-engine.ts:277-377` advanceStep | instances | running→rejected/completed, step++ | **step_history append** | 없음 · condition/parallel 미평가 |
+| `lib/workflow-engine.ts:472-491` markSLATimeout | instances | running→timeout | completed_at만 | 없음 (호출처 미확인) |
+| `lib/workflow-engine.ts:498-538` cancelWorkflow | instances | running→cancelled | step_history | approval_requests 미갱신 |
+| `lib/workflow-engine.ts:171-212` upsertWorkflowDefinition | definitions.is_active | 토글 | 없음 | 없음 |
+
+- RLS: `supabase/wio-sprint2.sql:147` wio_approvals 테넌트 FOR ALL · `supabase/orbi-modules-remaining.sql:493` workflow_instances `USING (true)` (적용 시 전원 쓰기)
+- `sql/security-protect-review-columns.sql:9-10` — wio_approvals 자기 결재 방지·필드 화이트리스트를 "후속 과제"로 남김 = 현재 미보호
+- 기안 생성: `app/intra/erp/approval/draft/{page,report,expenditure}` → `lib/supabase/erp.ts:37-45` createApproval · `app/intra/myverse/expenses/page.tsx:92-101`
+- 값 불일치: `app/intra/erp/finance/expenses/page.tsx:59,70,94,103` — 'pending'으로 쓰고 '대기'로 필터
+- 결재선 템플릿: `sql/approval_templates.sql` · `app/intra/erp/settings/approval-line/page.tsx:65-87`
+
+## 2. 인사·재무
+
+| 위치 | 테이블 | 전이 | 이력 | 권한 |
+|---|---|---|---|---|
+| `sql/staff-duty-roles.sql` ~140-165 트리거 | tenone_staff_profiles | invited→onboarding→active→offboarded | 없음 | 본인 변경 차단(hr duty만) |
+| `app/api/intra/staff/onboard/route.ts:10-18` | staff profile | onboarding→active | - | requireMember + 서약 |
+| `app/api/intra/staff/offboard/route.ts:9-21` | staff profile·member_roles | →offboarded | - | requireStaff + 인사/마스터 |
+| `app/api/intra/duties/route.ts:42-63` | member_roles.is_active | grant/revoke | member_role_history 기록 여부 미확인 | requireStaff(+super_admin) |
+| `lib/supabase/erp.ts:470-478` updatePaymentStatus | payments | →paid | 없음 | RLS staff |
+| `app/intra/erp/finance/billing/page.tsx:222` | invoices | →paid | 없음 | RLS staff |
+| `app/api/intra/jakka/settlements/route.ts:180-220` | jakka_settlements | draft/confirmed/paid 임의(역전 허용) | 타임스탬프만 | middleware staff |
+| `app/api/myverse/payment/success/route.ts:23-79` | myverse_payments | pending→paid/failed → 구독 활성 | meta | 이미 paid 재호출 가드 없음 |
+| `app/api/myverse/billing/webhook/route.ts` ~97-120 | myverse_subscriptions | Stripe status upsert/canceled | stripe_events.processed | 서명 검증 미확인 |
+
+휴가 결재 워크플로우는 없음(폼 라벨만).
+
+## 3. 브랜드 신청·심사
+
+| 위치 | 테이블 | 전이 | 가드·이력 |
+|---|---|---|---|
+| `app/api/madleague/admin/applications/route.ts` ~36-59 | mad_applications | accept=`lib/madleague-roles.ts:249`(pending\|reviewing 가드) · reject/reviewing 직접 update | reject 상태 가드 없음, reviewer_note 덮어쓰기 |
+| `app/api/madleague/applications/[id]/approve` · `/reject` | mad_applications | accepted / rejected | reject는 pending 가드, note 없음 |
+| `sql/madleague-members-core-link.sql:20-50` 트리거 | →mad_members | accepted 시 생성 (구버전 `madleague_phase2_members.sql:76-108` 중복) | |
+| `app/api/badak/apply/route.ts:90-157` PATCH | badak leader 신청 | approved/rejected → role='leader' | 상태 가드 없음 |
+| `app/api/badak/groups/review/route.ts` | badak groups·needs | pending_review→recruiting/rejected, →completed | badak_level_history만 |
+| `app/api/badak/needs/review/route.ts:31-52` | badak_needs | pending_review→gathering/rejected | 가드·이력 없음 |
+| `app/api/badak/groups/[id]/members/route.ts:55-75` | 모임 멤버 | applied→action | 가드 있음 |
+| `app/api/intra/jakka/sellers/route.ts` ~95-140 | jakka_seller_applications·creators | pending→approved/rejected | **reviewerId를 body에서 받음** |
+| `app/api/intra/jakka/showcases/route.ts` ~55-85 | jakka_showcases | approve/reject/end | 가드 없음 |
+| `sql/jakka-showcases-table.sql:102-137` 트리거 | jakka_showcases | 승인 3→approved, 거절 1→rejected | |
+| `lib/supabase/jakka.ts:1766-1779` · `sql/jakka-orders.sql:43-53` | jakka_orders | 임의 OrderStatus · status_changed_at | 이력 없음 |
+| `app/api/intra/hero/offers/[id]/route.ts:26-63` | hero_offers | requested→rejected/sent | 사전 조회 가드(비원자) |
+| `app/api/hero/offers/[id]/route.ts` ~70-95 | hero_offers·recipients | requested→canceled, sent→closed, →expired | |
+| `app/api/hero/offers/inbox/[id]/route.ts` | recipients | sent→viewed/declined/accepted, accepted→declined | 기한·중복 가드 |
+| `app/api/hero/matching/[id]/curate/route.ts:97-103` | 매칭 | proposed→curated | staff 정책 |
+| `app/api/intra/mindle/queue/[id]/route.ts:66-95` | mindle_trends | collected→* | collected 가드(409) |
+| `app/api/crawler/route.ts` | collected_data | raw→processed/error/rejected | |
+| `lib/brand-join.ts:34-44` | member_brand_joins | active / withdrawn_at | `trg_approve_membership_fn` 정의가 repo에 없음 |
+| `sql/ums-task2-members.sql:50-90` 트리거 | members·subscriptions | active 승격·만료 강등 | |
+| `sql/smarcomm-campaign-assetize-trigger.sql:13` | smarcomm 캠페인 | Completed 시 자산화 | |
+| `app/api/intra/forms/[id]/route.ts:102-111` | forms | draft→open | |
+| `app/api/forms/[brand]/[slug]/route.ts:96-154` | 응답 | →cancelled (본인) | |
+| `app/api/intra/programs/rounds/[id]/route.ts:180-200` | program_applications | accepted/declined | 상태 가드 없음, decided_by |
+| `app/api/intra/myverse/reports/[id]/route.ts:14-45` | 제보 | open→reviewing/resolved/dismissed | |
+| `app/api/intra/planners/feedback/route.ts:53-61` | 피드백 | →임의 | |
+
+## 4. CS·개인정보
+
+- `app/api/intra/contact-submissions/[id]/route.ts:37-62` — **handling_log에 {at, by, channel, status, note} append** (유일한 CS 이력) · resolved는 note 필수
+- `app/api/badak/inquiries/route.ts:85` — 같은 테이블, 이력 없음
+- `app/api/account/delete/route.ts` · `app/api/auth/cancel-signup/route.ts` — 상태 전이가 아닌 익명화·삭제
+
+## 5. 우선 점검 (event_log·단일 행위 함수로 옮길 때 먼저)
+
+1. `app/api/approvals/[id]` PATCH — 무가드 임의 update (자기 결재 가능)
+2. 클라이언트 직접 결재 update (`intra/erp/approval`, `wio/app/my/approval`)
+3. `lib/workflow-engine.ts` advanceStep — 담당자 미검증·비원자
+4. MADLeague admin reject · Badak apply · programs rounds — 현재 상태 가드 없음
+5. Jakka `reviewerId` body 신뢰
+6. MyVerse 결제 콜백 재호출 가드
+7. HeRo 제안 승인 비원자
+8. 경비 status 값 불일치
+
+**미추적**: features/·components/ 대부분, app/intra/ums/* 페이지, madleague president, staff onboard/offboard 헬퍼 내부, HeRo 기업 승인 경로, 웹훅 서명.
