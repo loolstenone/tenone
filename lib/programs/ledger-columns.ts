@@ -33,7 +33,11 @@ export function parseCsvObjects(text: string): { head: string[]; rows: Record<st
 
 /** 대장 형식(코드 포함) CSV */
 export function parseLedgerCsv(text: string): { rows: LedgerRow[]; missing: string[] } {
-    const { head, rows } = parseCsvObjects(text);
+    const parsed = parseCsvObjects(text);
+    // 시트 열 이름 변경 흡수 (2026-10-15 시트: 출전팀 → 출전팀명)
+    const ALIAS: Record<string, string> = { "출전팀명": "출전팀" };
+    const head = parsed.head.map(h => ALIAS[h] ?? h);
+    const rows = parsed.rows.map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [ALIAS[k] ?? k, v])));
     const missing = LEDGER_COLUMNS.filter(c => c !== "결과" && c !== "출전팀" && !head.includes(c));
     return { rows: rows as LedgerRow[], missing };
 }
