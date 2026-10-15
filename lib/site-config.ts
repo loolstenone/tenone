@@ -517,7 +517,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     wio: {
         id: 'wio', name: 'WIO', logoText: 'WIO', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#6366F1', bgDark: '#0F0F23',
         colors: { primary: '#6366F1', primaryDark: '#4F46E5', secondary: '#818CF8', headerBg: '#0F0F23', headerText: '#ffffff', footerBg: '#0F0F23', footerText: '#94A3B8', accent: '#6366F1' },
         meta: { title: 'WIO - Work In One', description: '프로젝트 중심으로 사람·일·돈·지식이 하나의 시스템에서 돌아가는 통합 운영 플랫폼. 솔루션 구축과 컨설팅.', keywords: ['WIO', 'Work In One', '프로젝트 관리', 'ERP', 'GPR', 'Vrief', 'Ten:One'] },
@@ -533,7 +533,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     brandgravity: {
         id: 'brandgravity', name: 'Brand Gravity™', logoText: 'Brand Gravity™', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#1E3A5F', bgDark: '#0D1B2A',
         colors: { primary: '#1E3A5F', primaryDark: '#162D4A', secondary: '#3D5A80', headerBg: '#0D1B2A', headerText: '#ffffff', footerBg: '#0D1B2A', footerText: '#94A3B8', accent: '#E0A458' },
         meta: { title: 'Brand Gravity™ - 브랜딩 컨설팅', description: '브랜드의 중력을 만드는 전략 컨설팅. Brand Gravity™는 Ten:One™ Universe의 브랜딩 전문 서비스입니다.', keywords: ['Brand Gravity', '브랜딩', '컨설팅', '브랜드 전략', 'Ten:One'] },
@@ -548,7 +548,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     wiki: {
         id: 'wiki', name: 'Universe Wiki', logoText: 'Wiki', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#10B981', bgDark: '#064E3B',
         colors: { primary: '#10B981', primaryDark: '#059669', secondary: '#34D399', headerBg: '#064E3B', headerText: '#ffffff', footerBg: '#064E3B', footerText: '#94A3B8', accent: '#10B981' },
         meta: { title: 'Universe Wiki - 지식 허브', description: 'Ten:One™ Universe의 공개 지식 허브. 브랜드, 프로젝트, 운영 노하우를 공유합니다.', keywords: ['Wiki', '지식', 'Ten:One', 'Universe', '위키'] },
@@ -562,7 +562,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     dokdae: {
         id: 'dokdae', name: '독대', logoText: '독대', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#60A5FA', bgDark: '#0F172A',
         colors: { primary: '#60A5FA', primaryDark: '#3B82F6', secondary: '#93C5FD', headerBg: '#0F172A', headerText: '#ffffff', footerBg: '#0F172A', footerText: '#94A3B8', accent: '#60A5FA' },
         meta: { title: '독대 - AI Agent 메시징 채널', description: 'AI Agent(열시일분 등)와 메시지를 주고받는 채널. Ten:One™ Universe.', keywords: ['독대', 'AI Agent', '메시징', '열시일분', 'Ten:One'] },
@@ -573,7 +573,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     evschool: {
         id: 'evschool', name: 'Evolution School', logoText: 'Evolution School', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#F87171', bgDark: '#1C1917',
         colors: { primary: '#F87171', primaryDark: '#EF4444', secondary: '#FCA5A5', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#F87171' },
         meta: { title: 'Evolution School - 실무 교육 플랫폼', description: '실전 중심 교육으로 진짜 실력을 키우는 곳. Evolution School은 Ten:One™ Universe의 교육 브랜드입니다.', keywords: ['Evolution School', '교육', '실무', 'Ten:One'] },
@@ -584,7 +584,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     },
     namingfactory: {
         id: 'namingfactory', name: 'Naming Factory', logoText: 'Naming Factory', logoStyle: 'text' as const,
-        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        faviconUrl: '/icon.png', appleTouchIcon: '/icon.png',
         accentColor: '#FCD34D', bgDark: '#1C1917',
         colors: { primary: '#FCD34D', primaryDark: '#FBBF24', secondary: '#FDE68A', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#FCD34D' },
         meta: { title: 'Naming Factory - 네이밍 서비스', description: '브랜드, 제품, 서비스의 이름을 짓는 전문 네이밍 서비스. Ten:One™ Universe.', keywords: ['Naming Factory', '네이밍', '브랜드명', 'Ten:One'] },

@@ -69,9 +69,15 @@ export function IntraSidebar() {
         });
     };
 
+    // 메뉴 주소 전체 — 상위 주소 메뉴(/programs)와 하위 주소 메뉴(/programs/certificates)가 함께 켜지지 않게,
+    // 현재 주소에 맞는 메뉴 중 가장 긴(구체적인) 주소 하나만 활성으로 본다
+    // (하위 탭 children은 사이드바 항목이 아니므로 비교에서 뺀다 — 넣으면 '사이트 관리'가 /sites/status에서 꺼진다)
+    const allHrefs = modules.flatMap(m => m.sections.flatMap(s => s.items.map(i => i.href)));
+    const matches = (href: string) => pathname === href || pathname.startsWith(href + "/");
     const isActive = (href: string, exact?: boolean) => {
         if (exact) return pathname === href;
-        return pathname === href || pathname.startsWith(href + "/");
+        if (!matches(href)) return false;
+        return !allHrefs.some(h => h.length > href.length && h.startsWith(href + "/") && matches(h));
     };
 
     // 모듈 접근 필터
