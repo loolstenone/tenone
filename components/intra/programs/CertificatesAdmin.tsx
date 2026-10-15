@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RoundBatchIssue } from "@/components/intra/programs/RoundBatchIssue";
-import { Download, Search, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Search, Upload } from "lucide-react";
 import { LEDGER_COLUMNS, parseLedgerCsv } from "@/lib/programs/ledger-columns";
 
 interface Snapshot {
@@ -21,6 +21,22 @@ interface Row {
     snapshot: Snapshot; issued_at: string; revoked_at: string | null; revoked_reason: string | null;
 }
 
+/** 머리글 정렬 — 열별 비교 값. 코드는 대장 일련번호(뒤 6자리) 기준, 없으면 코드 문자열 */
+type SortKey = "type" | "group" | "code" | "issued" | "name" | "program" | "team" | "result" | "note" | "status";
+const codeSerial = (c: string) => { const m = c.match(/^\d{4}-(?:COA|MCP) (\d{6})$/i); return m ? m[1] : `z${c}`; };
+const SORT_VALUE: Record<SortKey, (r: Row) => string> = {
+    type: r => r.snapshot.label ?? r.type,
+    group: r => [r.snapshot.group_name, r.snapshot.cohort].filter(Boolean).join(" "),
+    code: r => codeSerial(r.code),
+    issued: r => r.issued_at,
+    name: r => r.snapshot.name ?? "",
+    program: r => r.snapshot.round_title ?? r.snapshot.title ?? "",
+    team: r => r.snapshot.team_name ?? "",
+    result: r => r.result ?? "",
+    note: r => (r.note === "수료증 관리 대장" ? "" : r.note ?? ""),
+    status: r => (r.revoked_at ? "1" : "0"),
+};
+
 /** 한국 시간 날짜 (YYYY-MM-DD) */
 const kstDay = (iso: string) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
 
@@ -29,6 +45,7 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
     const [brand, setBrand] = useState(fixedBrand ?? "");
     const [q, setQ] = useState("");
     const [open, setOpen] = useState<string | null>(null);
+    const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "code", dir: 1 }); // 기본 = 발급 코드순
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const fileRef = useRef<HTMLInputElement>(null);
@@ -90,6 +107,18 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
     // 소속 칸 제목 = 인증서에 기록된 소속 이름표 (MADLeague '소속 동아리' 등). 브랜드마다 다르면 '소속'
     const groupLabels = new Set((rows ?? []).map(r => r.snapshot.group_label).filter(Boolean));
     const groupHead = groupLabels.size === 1 ? [...groupLabels][0] : "소속";
+    const sorted = rows ? [...rows].sort((a, b) => {
+        const va = SORT_VALUE[sort.key](a), vb = SORT_VALUE[sort.key](b);
+        return (va.localeCompare(vb, "ko", { numeric: true }) || codeSerial(a.code).localeCompare(codeSerial(b.code))) * sort.dir;
+    }) : null;
+    const th = (key: SortKey, label: string) => (
+        <th className="px-3 py-2">
+            <button onClick={() => setSort(s => ({ key, dir: s.key === key ? (s.dir === 1 ? -1 : 1) : 1 }))} className="inline-flex items-center gap-0.5 whitespace-nowrap hover:text-neutral-900">
+                {label}
+                {sort.key === key && (sort.dir === 1 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+            </button>
+        </th>
+    );
     const brandName = (slug: string) => brands?.find(b => b.slug === slug)?.name ?? slug;
     const cls = "rounded border border-neutral-300 px-3 py-2 text-sm";
 
@@ -139,13 +168,13 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
                     <table className="w-full min-w-[1100px] text-sm">
                         <thead className="bg-neutral-50 text-left text-xs text-neutral-500">
                             <tr>
-                                <th className="px-3 py-2">종류</th><th className="px-3 py-2">{groupHead}</th><th className="px-3 py-2">코드</th><th className="px-3 py-2">발급일</th>
-                                <th className="px-3 py-2">이름</th><th className="px-3 py-2">프로그램</th><th className="px-3 py-2">팀</th>
-                                <th className="px-3 py-2">결과</th><th className="px-3 py-2">비고</th><th className="px-3 py-2">상태</th><th className="px-3 py-2"></th>
+                                {th("type", "종류")}{th("group", groupHead ?? "소속")}{th("code", "코드")}{th("issued", "발급일")}
+                                {th("name", "이름")}{th("program", "프로그램")}{th("team", "팀")}
+                                {th("result", "결과")}{th("note", "비고")}{th("status", "상태")}<th className="px-3 py-2"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-100">
-                            {rows.map(r => (
+                            {sorted!.map(r => (
                                 <CertRow key={r.id} r={r} showBrand={!brand} brandName={brandName(r.brand_id)}
                                     open={open === r.id} onToggle={() => setOpen(o => (o === r.id ? null : r.id))} call={call} />
                             ))}
