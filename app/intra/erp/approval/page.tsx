@@ -20,6 +20,8 @@ export default function ApprovalPendingPage() {
     const [items, setItems] = useState<PendingApproval[]>([]);
     const [loading, setLoading] = useState(true);
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+    const [busy, setBusy] = useState<string | null>(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         setLoading(true);
@@ -40,19 +42,21 @@ export default function ApprovalPendingPage() {
             .finally(() => setLoading(false));
     }, [user?.id]);
 
-    const handleApprove = (docNo: string) => {
-        setItems((prev) => prev.filter((item) => item.docNo !== docNo));
-        erpDb.updateApprovalStatus(docNo, 'approved')
-            .then(() => erpDb.updateExpenseByApproval(docNo, 'approved'))
-            .catch(() => {});
+    // 자기 결재 금지·끝난 결재 잠금·경비 상태 동기화는 DB가 처리한다. 거부되면 그 사유를 그대로 보여준다
+    const decide = async (docNo: string, status: 'approved' | 'rejected') => {
+        setError("");
+        setBusy(docNo);
+        try {
+            await erpDb.updateApprovalStatus(docNo, status);
+            setItems((prev) => prev.filter((item) => item.docNo !== docNo));
+        } catch (e) {
+            setError((e as { message?: string })?.message || "처리하지 못했습니다. 다시 시도해 주세요.");
+        } finally {
+            setBusy(null);
+        }
     };
-
-    const handleReject = (docNo: string) => {
-        setItems((prev) => prev.filter((item) => item.docNo !== docNo));
-        erpDb.updateApprovalStatus(docNo, 'rejected')
-            .then(() => erpDb.updateExpenseByApproval(docNo, 'rejected'))
-            .catch(() => {});
-    };
+    const handleApprove = (docNo: string) => decide(docNo, 'approved');
+    const handleReject = (docNo: string) => decide(docNo, 'rejected');
 
     if (loading) return <Spinner />;
 
@@ -68,6 +72,10 @@ export default function ApprovalPendingPage() {
                     <span className="text-sm font-semibold">{items.length}건</span>
                 </div>
             </div>
+
+            {error && (
+                <p role="alert" className="px-3 py-2 text-xs text-red-600 border border-red-200 bg-red-50">{error}</p>
+            )}
 
             {/* 테이블 */}
             <Card padding={false}>
@@ -102,14 +110,15 @@ export default function ApprovalPendingPage() {
                                     <Badge label={item.status} variant="warning" />
                                 </td>
                                 <td className="px-4 py-2.5 text-right">
-                                    {hoveredIdx === idx && (
+                                    {(hoveredIdx === idx || busy === item.docNo) && (
                                         <div className="flex gap-1.5 justify-end">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleApprove(item.docNo);
                                                 }}
-                                                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                                                disabled={busy !== null}
+                                                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50"
                                             >
                                                 <CheckCircle className="w-3 h-3" />
                                                 승인
@@ -119,7 +128,8 @@ export default function ApprovalPendingPage() {
                                                     e.stopPropagation();
                                                     handleReject(item.docNo);
                                                 }}
-                                                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                                                disabled={busy !== null}
+                                                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
                                             >
                                                 <XCircle className="w-3 h-3" />
                                                 반려

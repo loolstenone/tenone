@@ -1686,6 +1686,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ 비밀번호 인증 폼(signUp·signInWithPassword·resetPasswordForEmail)에 CAPTCHA 누락 — `useCaptcha()` + `captchaToken` (Supabase Bot Protection ON 시 토큰 없으면 실패)
 - ❌ 인트라 접근을 클라이언트 확인에만 의존 — middleware 1b가 `/intra/*`·intra.tenone.biz 전 페이지를 `requireStaff`로 서버에서 막는다 (비직원 → `app/intra-gate` rewrite, 로그인 화면만). **인트라 메뉴·목차도 기업 보안** — `app/intra/layout.tsx`(서버)가 직원에게만 껍데기를 그리고, 비직원 라우트(`app/intra-gate`·`IntraLoginScreen`)는 사이드바·intra-nav를 import하지 않는다 (같은 라우트에서 조건부 렌더만 하면 JS 번들로 새어 나감, 2026-10-07). 새 게이트 우회 경로 만들지 말 것
 - ❌ `NEXT_PUBLIC_*`에 관리자 키 — 브라우저 번들에 그대로 박힌다. 인트라 → 자기 API는 세션 쿠키로 인증(`requireStaff`)
+- ❌ 결재 결과를 앱이 다른 테이블에 따로 update해 동기화하기 · 끝난 결재를 앱에서 되돌리기 — 결재 규칙(자기 결재 금지·완료 잠금·경비 동기화)은 DB 트리거가 강제한다 (`sql/intra-record-and-approval-guard.sql`, WIO 백서 14장). 결재·재무·급여·인사·권한 테이블을 새로 만들면 `zz_record_change` 트리거를 건다 — `audit_log`는 추가만 가능, 직접 쓰지 않는다 (2026-10-15)
 - ❌ RLS 정책을 `roles=public` + `USING (true)`로 "service role용"이라 만들기 — service_role은 RLS를 우회하므로 불필요하고, 실제로는 anon에게 전부 열린다 (2026-10-05 사고: 듣봇 대화·발송 메일 공개)
 - ❌ 트리거 함수가 RLS 걸린 다른 테이블에 쓰는데 SECURITY INVOKER — 사용자 INSERT 전체가 롤백됨 (세션 156 members 생성 장애 원인)
 

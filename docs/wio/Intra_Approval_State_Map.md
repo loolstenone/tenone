@@ -10,6 +10,19 @@
 - **전이 이력을 남기는 곳은 세 곳뿐**: `wio_workflow_instances.step_history`(JSON) · `contact_submissions.handling_log`(JSON) · `badak_level_history`(레벨만). `audit_log`·`sys_audit_logs`·`history_events`·`wio_events` 등 테이블은 있으나 결재·심사 경로에서 쓰지 않음.
 - **현재 상태 가드 없는 전이 다수** (accepted→rejected, rejected→approved 등 역전 가능).
 
+## 반영 현황 (2026-10-15, 백서 1단계 "기록 켜기 + 결재 구멍 막기")
+
+| 항목 | 조치 |
+|---|---|
+| 변경 기록 없음 | `sql/intra-record-and-approval-guard.sql` — `audit_log`를 추가 전용 원장으로, `record_change()` 트리거를 결재·재무·급여·인사·권한 15개 테이블에 |
+| `app/api/approvals` 무가드 PATCH·POST | **삭제** (호출처 없음, 컬럼도 안 맞아 동작하지 않던 경로) |
+| 인트라 ERP 결재·경비가 WIO 제품 테이블(`wio_approvals`·`wio_expenses`)을 가리킴 → 저장 불가 | `lib/supabase/erp.ts`를 인트라 테이블 `approvals`·`expenses`로 |
+| 자기 결재 · 끝난 결재 되돌리기 | DB 트리거 `guard_approval_decision` (approvals·wio_approvals·approval_requests). super_admin 본인 결재만 예외로 허용하고 기록에 `self_approval` |
+| 결재 승인 후 경비 상태를 앱이 따로 update (비원자·에러 무시) | DB 트리거 `sync_expense_from_approval` — 같은 트랜잭션 |
+| 결재 화면이 실패를 숨기고 목록에서 먼저 지움 | `app/intra/erp/approval/page.tsx` — 저장 성공 후 제거, 거부 사유 표시 |
+
+남은 것: 아래 목록의 브랜드 심사·HeRo·Jakka·MyVerse 결제 경로, `lib/workflow-engine.ts`, 상태 전이 DB 함수화(백서 14장).
+
 ## 0. Intra 진단(`docs/Intra 진단 WIO 기본 설계 기준 대비.md`)과 대조
 
 진단은 DB만 봤고 "앱 소스로 결재·상태 전이 위치를 맞춰 보라"(9장 끝)고 남겼다. 앱 코드로 확인한 결과:

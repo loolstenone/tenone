@@ -20,7 +20,8 @@ export async function fetchApprovals(options?: {
     limit?: number;
     tenantId?: string;
 }) {
-    let query = supabase.from('wio_approvals').select('*, drafter:members!wio_approvals_drafter_id_fkey(name)', { count: 'exact' });
+    // 인트라 결재 = approvals (wio_approvals는 WIO 제품 테넌트용 — requester가 wio_members라 인트라 회원으로는 저장 불가)
+    let query = supabase.from('approvals').select('*, drafter:members!approvals_drafter_id_fkey(name)', { count: 'exact' });
 
     query = query.eq('tenant_id', options?.tenantId ?? DEFAULT_TENANT);
     if (options?.status && options.status !== 'all') query = query.eq('status', options.status);
@@ -35,8 +36,9 @@ export async function fetchApprovals(options?: {
 }
 
 export async function createApproval(approval: Record<string, unknown>) {
+    // drafter_id를 빠뜨리면 DB 기본값(auth_member_id())이 로그인한 회원으로 채운다
     const { data, error } = await supabase
-        .from('wio_approvals')
+        .from('approvals')
         .insert(approval)
         .select()
         .single();
@@ -44,12 +46,14 @@ export async function createApproval(approval: Record<string, unknown>) {
     return data;
 }
 
-export async function updateApprovalStatus(id: string, status: string, memo?: string) {
-    const updates: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
-    if (memo) updates.memo = memo;
+/**
+ * 승인·반려. 규칙은 DB가 강제한다 (sql/intra-record-and-approval-guard.sql):
+ * 자기 결재 금지 · 끝난 결재 잠금 · 판단 시각 기록 · 연결된 경비 상태 동기화 · audit_log 기록
+ */
+export async function updateApprovalStatus(id: string, status: 'approved' | 'rejected') {
     const { data, error } = await supabase
-        .from('wio_approvals')
-        .update(updates)
+        .from('approvals')
+        .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
@@ -137,7 +141,7 @@ export async function createNotification(notif: {
 // ── Expenses (경비) ──
 
 export async function fetchExpenses(params?: { memberId?: string; projectId?: string; status?: string; limit?: number; tenantId?: string }) {
-    let query = supabase.from('wio_expenses').select('*').order('expense_date', { ascending: false });
+    let query = supabase.from('expenses').select('*').order('expense_date', { ascending: false });
     query = query.eq('tenant_id', params?.tenantId ?? DEFAULT_TENANT);
     if (params?.memberId) query = query.eq('member_id', params.memberId);
     if (params?.projectId) query = query.eq('project_id', params.projectId);
@@ -149,25 +153,17 @@ export async function fetchExpenses(params?: { memberId?: string; projectId?: st
 }
 
 export async function createExpense(input: Record<string, unknown>) {
-    const { data, error } = await supabase.from('wio_expenses').insert(input).select().single();
+    const { data, error } = await supabase.from('expenses').insert(input).select().single();
     if (error) throw error;
     return data;
 }
 
 export async function updateExpense(id: string, input: Record<string, unknown>) {
-    const { data, error } = await supabase.from('wio_expenses').update(input).eq('id', id).select().single();
+    const { data, error } = await supabase.from('expenses').update(input).eq('id', id).select().single();
     if (error) throw error;
     return data;
 }
 
-export async function updateExpenseByApproval(approvalId: string, status: string) {
-    // approvals.reference_id → expenses.id 연결: 결재 승인/반려 시 경비 상태 동기화
-    const { data: approval } = await supabase.from('wio_approvals').select('reference_id, reference_type').eq('id', approvalId).single();
-    if (approval?.reference_type === 'expense' && approval?.reference_id) {
-        const expenseStatus = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status;
-        await supabase.from('wio_expenses').update({ status: expenseStatus, updated_at: new Date().toISOString() }).eq('id', approval.reference_id);
-    }
-}
 
 // ── GPR Goals ──
 
