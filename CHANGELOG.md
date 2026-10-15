@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-10-15 ~ 10-16 (세션 177) — 인증서 화면 · MADLeague 대시보드 현실화 · 사이드바 동시 선택 · 파비콘
+
+### 장소·운영
+
+- 워크트리 `vigorous-meitner-783ab2` → push: 인증서 표 3커밋(사용자 "푸시") · 사이드바·파비콘(사용자 "푸시", 빌드 실패 = 구글 글꼴 다운로드 → 빈 커밋 재배포 READY) · 작업 종료
+- **유니버스 DB 쓰기 (사용자 요청·승인)**: `ums_sites.favicon_url` 6행 `/favicon.ico`→`/icon.png` · `program_certificates` 61행 추가(비아르 경쟁 PT, 2026-COA 000244~000304, 발급일 2026-11-01, 전화번호는 해시만)
+
+### 결정 (사용자)
+
+- 대장 이름 '찬미에체리툰'은 실명 — 고치지 않음 · 인증서 목록 정렬 = 발급 코드 기준 · 비아르 발급일 11월 1일, 대회명 '비아르 경쟁 PT'
+- 통합 관리와 사이트별 관리 원칙을 지킬 것 → CLAUDE.md §1.9.5에 명문화
+- MAD League 인트라 대시보드의 MAD Crown 카드 제거 ("필요하면 나중에 만든다")
+
+### 변경 내역 (주요 파일)
+
+- `components/intra/programs/CertificatesAdmin.tsx` — 종류·소속(group_label)·프로그램·팀 분리, 상태 배지 + 발급 취소/복원 버튼, 출처 표시, 열별 정렬, CSV에 브랜드·소속 구분
+- `app/api/intra/programs/certificates/route.ts` — 목록 발급 코드(대장 일련번호)순
+- `lib/programs/ledger-columns.ts` — 대장 CSV 열 `출전팀명` 별칭
+- `app/intra/ums/madleague/page.tsx` — 대시보드 서버 컴포넌트로 재작성(실제 데이터 카드, 테스트 제외, 중복 탭·Crown 제거, 회장 = 운영진 지정)
+- `components/IntraSidebar.tsx` — 가장 구체적인 메뉴 하나만 활성
+- `lib/site-config.ts` · `public/favicon.ico` — 저해상도 파비콘 교체
+- `CLAUDE.md` §1.9.5 — 통합 화면 vs 브랜드 화면
+
+### 미결
+
+- 사이트 MAD Crown 표기 제거 여부 · 경쟁 PT 현실화 DB 4건(회차 2개·인증서 회차 연결·팀 이름·데모 회차 삭제) · 테스트 데이터 삭제 — WORK_STATUS 세션 177 "다음 첫 액션"
+
+---
+
 ## 2026-10-15 (세션 176) — WIO 백서 기준 인트라 반영 (기록 켜기 · 결재·심사 구멍 · 퇴사 원자화 · 결재 권한 · MyVerse 결제)
 
 ### 장소·운영

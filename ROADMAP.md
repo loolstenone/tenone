@@ -131,6 +131,15 @@
 - [ ] security_definer 뷰 9 · 유출 비번 차단 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
+## 🎓 경쟁 PT·인증서 현실화 (세션 177 — 2026-10-16)
+
+- [x] 인증서 표 칸 정리(소속·프로그램·팀·상태/버튼 분리) · 열별 정렬 · 발급 코드순
+- [x] 대장 비아르 경쟁 PT 61건 추가 (대장 304건)
+- [x] MAD League 인트라 대시보드 실제 데이터 중심 · MAD Crown 카드 제거
+- [ ] 경쟁 PT 회차 현실화 DB 4건 (회차 2개·인증서 회차 연결·팀 이름·데모 회차 삭제) — 사용자 승인 대기
+- [ ] 사이트 MAD Crown 표기 제거 여부 결정
+- [ ] 테스트 데이터 삭제 (데모 운영진·현역 9 · 테스트 지원서 2 · AD Zone 가상 회원 10)
+
 ## 🧭 WIO 백서 기준 인트라 반영 (세션 176 — 2026-10-15, 목록 `docs/wio/Intra_Approval_State_Map.md`)
 
 - [x] WIO 전용 Supabase 프로젝트 `xyfnjklkszykkrlqdkwh` + 코어 v0 (`sql/wio-core-v0.sql`, 테넌트 없음)
