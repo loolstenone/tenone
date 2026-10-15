@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-10-15 (세션 176) — WIO 백서 기준 인트라 반영 (기록 켜기 · 결재·심사 구멍 · 퇴사 원자화 · 결재 권한 · MyVerse 결제)
+
+### 장소·운영
+
+- 워크트리 `infallible-montalcini-2c4ed0` (세션 175에서 분기한 작업 세션) → 작업 종료 push
+- **유니버스 DB 마이그레이션 (사용자 승인 후 적용)**: `intra_record_and_approval_guard` · `intra_audit_log_readable_invoker` · `intra_record_change_fk_fix` · `intra_review_guard` · `staff_offboard` · `intra_live_roles_and_approval_authority` · `intra_live_roles_tighten`
+- **WIO 전용 Supabase 프로젝트 생성** `xyfnjklkszykkrlqdkwh` (서울, $0) — `wio_core_v0` · `wio_core_v0_search_path`
+- 백서·설계·진단 원문(`docs/WIO 백서 …md` 등)은 저장소 공개 상태라 커밋하지 않음 (메인 체크아웃에만)
+- 사고: `intra_record_and_approval_guard` 적용 직후 `audit_log` FK(members) 때문에 15개 테이블 쓰기 전부 실패 → 즉시 `intra_record_change_fk_fix` (로그상 실패는 검증 쿼리뿐)
+
+### 결정 (사용자)
+
+- WIO는 천천히 개발 — 백서 기준을 먼저 인트라에 반영
+- 직원은 가계정뿐 — 논리·기술 검증으로 확인
+- 결재 = 권한 있는 사람이 한다: ERP = 마스터·결재 직무(신설)·경비는 재무 직무 / WIO = 회사 owner·admin·manager
+- 퇴사자 토큰 1시간 틈 막기 (직원 전체 조회 최악 약 2.5배 느려짐 감수) · MyVerse 결제 보호 · HeRo 기업 승인은 기능 만들 때
+
+### 변경 내역 (주요 파일)
+
+- SQL: `sql/wio-core-v0.sql`(WIO 프로젝트) · `sql/intra-record-and-approval-guard.sql` · `sql/intra-review-guard.sql` · `sql/staff-offboard.sql` · `sql/intra-live-roles-and-approval-authority.sql`
+- 결재: `lib/supabase/erp.ts`(approvals·expenses 테이블로) · `app/intra/erp/approval/page.tsx` · `app/api/approvals/*` 삭제(미사용·무가드)
+- 심사: `app/api/badak/apply/route.ts` · `app/intra/ums/badak/members/page.tsx` · `app/api/intra/jakka/sellers/route.ts` · `app/intra/ums/jakka/sellers/page.tsx` · `app/api/madleague/admin/applications/route.ts` · `app/api/madleague/applications/[id]/reject/route.ts` · `lib/madleague-roles.ts` · `app/api/intra/programs/rounds/[id]/route.ts` · `app/api/intra/youinone/applications/route.ts`(신규) · `app/intra/ums/youinone/applications/page.tsx`
+- 인사: `lib/staff-lifecycle.ts`(퇴사 = DB 함수, 재입사 upsert) · `lib/staff-duties.ts`(결재 직무)
+- MyVerse: `app/api/myverse/payment/success/route.ts` · `app/api/myverse/billing/webhook/route.ts`
+- 문서: `docs/wio/Intra_Approval_State_Map.md` · `CLAUDE.md`(§1.6 결재 직무·권한 즉시 반영, 부록 A 결재 규칙)
+
+---
+
 ## 2026-10-15 (세션 175) — 유틸리티바 표준 · 베타 유료화 · Planner's AI 중심 개편 · 소셜 첫 로그인 = 가입 · Planner's 전면 QA
 
 ### 장소·운영

@@ -131,6 +131,17 @@
 - [ ] security_definer 뷰 9 · 유출 비번 차단 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
+## 🧭 WIO 백서 기준 인트라 반영 (세션 176 — 2026-10-15, 목록 `docs/wio/Intra_Approval_State_Map.md`)
+
+- [x] WIO 전용 Supabase 프로젝트 `xyfnjklkszykkrlqdkwh` + 코어 v0 (`sql/wio-core-v0.sql`, 테넌트 없음)
+- [x] 1단계: 변경 기록(`audit_log` 추가 전용 + `zz_record_change`) · 자기 결재 금지·끝난 결재 잠금·경비 동기화 DB 강제 · ERP 결재가 엉뚱한 테이블을 보던 문제
+- [x] 2단계-1: 브랜드 심사(바닥장·MADLeague·프로그램·Jakka·YouInOne) 끝난 심사 잠금·셀프 승인 차단·조건부 처리 · 역할 이력 UPDATE 금지 DB 강제
+- [x] 2단계-2: 퇴사 처리 DB 함수 `staff_offboard()` · 재입사 권한 부여 실패 수정
+- [x] 2단계-3: 결재 권한(결재 직무 신설) · 권한 회수 즉시 반영(`auth_live_roles`) · MyVerse 결제 없이 구독 켜기 차단·결제 완료 1회 처리·Stripe 서명 시각
+- [ ] 화면 실사용 확인: 바닥장·YouInOne·Jakka 심사, 결재함, 퇴사 처리 (배포 후)
+- [ ] HeRo 기업 승인 — 기능 만들 때 같은 보호(끝난 심사 잠금·직원 확인·기록)
+- [ ] 상태 전이 DB 함수화 (백서 14장) · WIO 워크플로 엔진은 WIO 전용 프로젝트에서 다시 (지금 코드는 DB 컬럼 불일치로 동작 안 함)
+
 ## 🏛 플랫폼 헌법·데이터·법무 (세션 157 — 2026-10-05)
 
 - [x] 공식 주소 단일화 (CANONICAL_HOSTS 308/302, 외부 브랜드 스테이징 noindex) · 인트라 로그아웃 → /intra
