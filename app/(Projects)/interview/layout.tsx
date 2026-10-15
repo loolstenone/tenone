@@ -5,11 +5,11 @@ import { SITE } from "@/lib/projects/interview";
 // 공식 주소는 ai-interview.tenone.biz 하나 (tenone.biz/interview는 같은 화면이지만 canonical은 서브도메인)
 export const metadata: Metadata = {
     metadataBase: new URL(SITE.url),
-    title: { absolute: `${SITE.eyebrow} — ${SITE.title}`, template: `%s | ${SITE.eyebrow}` },
+    title: { absolute: `${SITE.eyebrow} - ${SITE.title}`, template: `%s | ${SITE.eyebrow}` },
     description: `${SITE.tagline} ${SITE.meta}`,
     alternates: { canonical: "/" },
     openGraph: {
-        title: `${SITE.eyebrow} — ${SITE.title}`,
+        title: `${SITE.eyebrow} - ${SITE.title}`,
         description: SITE.tagline,
         siteName: "Ten:One™",
         type: "website",

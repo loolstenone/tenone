@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Ten:One™ — Value Connector | 가치로 연결된 브랜드 유니버스",
+    default: "Ten:One™ - Value Connector | 가치로 연결된 브랜드 유니버스",
     template: "%s | Ten:One™",
   },
   description: "Ten:One™ Universe는 기업과 사회의 문제를 해결하는 다양한 프로젝트를 기획·운영하는 멀티 브랜드 생태계입니다. LUKI, MAD League, RooK, Badak 등 19개 브랜드를 운영합니다.",
@@ -35,12 +35,12 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: "https://tenone.biz",
     siteName: "Ten:One™",
-    title: "Ten:One™ — Value Connector",
+    title: "Ten:One™ - Value Connector",
     description: "가치로 연결된 거대한 세계관을 만들기로 했다. 기업과 사회의 문제를 해결하는 다양한 프로젝트.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ten:One™ — Value Connector",
+    title: "Ten:One™ - Value Connector",
     description: "가치로 연결된 거대한 세계관을 만들기로 했다.",
   },
   robots: {
