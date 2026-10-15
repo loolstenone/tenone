@@ -30,7 +30,18 @@ export async function GET(req: NextRequest) {
     }
     const { data, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ certificates: data ?? [] });
+    return NextResponse.json({ certificates: [...(data ?? [])].sort(byCode) });
+}
+
+/** 정렬 = 발급 코드순 (2026-10-15 사용자 결정, 대장과 같은 순서).
+ *  대장 코드 `2026-COA 000142`는 뒤 6자리가 대장 전체 일련번호라 연도·COA/MCP 무관하게 그 번호순. 그 외 코드는 뒤에 문자열순 */
+function byCode(a: { code: string }, b: { code: string }) {
+    const serial = (c: string) => { const m = c.match(/^\d{4}-(?:COA|MCP) (\d{6})$/i); return m ? Number(m[1]) : null; };
+    const sa = serial(a.code), sb = serial(b.code);
+    if (sa !== null && sb !== null) return sa - sb;
+    if (sa !== null) return -1;
+    if (sb !== null) return 1;
+    return a.code.localeCompare(b.code);
 }
 
 export async function PATCH(req: NextRequest) {
