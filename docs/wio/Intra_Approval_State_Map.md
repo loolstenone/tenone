@@ -10,6 +10,20 @@
 - **전이 이력을 남기는 곳은 세 곳뿐**: `wio_workflow_instances.step_history`(JSON) · `contact_submissions.handling_log`(JSON) · `badak_level_history`(레벨만). `audit_log`·`sys_audit_logs`·`history_events`·`wio_events` 등 테이블은 있으나 결재·심사 경로에서 쓰지 않음.
 - **현재 상태 가드 없는 전이 다수** (accepted→rejected, rejected→approved 등 역전 가능).
 
+## 0. Intra 진단(`docs/Intra 진단 WIO 기본 설계 기준 대비.md`)과 대조
+
+진단은 DB만 봤고 "앱 소스로 결재·상태 전이 위치를 맞춰 보라"(9장 끝)고 남겼다. 앱 코드로 확인한 결과:
+
+| 진단 내용 | 앱 코드 확인 |
+|---|---|
+| 상태 전이 DB 함수 없음, 앱이 status를 직접 바꿈 (3장) | **맞음** — 공용 헬퍼도 없고, 서버 API·인트라 화면(브라우저 직접)·lib 클라이언트 함수가 각자 `.update({status})` |
+| 결재 세 방식: approved_by 컬럼 / `approvals` reference_id / workflow 엔진 (3장) | 앱이 실제로 쓰는 것은 **`wio_approvals`**(단순 승인·반려) + **`approval_requests` + `wio_workflow_instances`**(`lib/workflow-engine.ts`). `approvals` 테이블은 앱 코드에서 안 씀. 엔진과 결재 요청은 앱이 따로 update해 동기화(비원자) |
+| 워크플로 인스턴스가 대상과 연결 안 됨 (3장) | 맞음 — 엔진 단계 담당자(assigneeRule)도 검사하지 않음 |
+| 기록 테이블은 있으나 기록 경로 없음 (7장) | **맞음** — `member_role_history`·`audit_log` 등을 결재·심사 경로에서 쓰지 않음. 이력은 JSON 컬럼 2곳(`step_history`, `handling_log`)뿐 |
+| 에이전트는 service_role로 권한 검사 밖 (6장) | 앱에서도 관리 API가 `createAdminClient()` 후 상태를 바꾸는 패턴이 다수 (Jakka 판매자 승인은 reviewerId까지 body 값) |
+
+→ WIO 쪽 초안: `sql/wio-core-v0.sql` (단위 8 + event_log + 기록 트리거 + `wio.act()` 단일 쓰기 경로). 이 목록의 각 경로가 옮겨 갈 때 `wio.act(…, 'transition', …)` 한 줄로 바뀐다.
+
 ## 1. 결재 핵심
 
 | 위치 | 테이블 | 전이 | 이력 | 권한 |
