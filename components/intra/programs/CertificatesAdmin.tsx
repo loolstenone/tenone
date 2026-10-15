@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 인트라 인증서 관리 — 종류 · 소속 동아리 · 코드 · 발급일 · 프로그램 · 팀 · 결과 · 비고 · 상태 (+ 발급 시점 정보)
+ * 인트라 인증서 관리 — 종류 · 소속(브랜드별 이름표 snapshot.group_label) · 코드 · 발급일 · 프로그램 · 팀 · 결과 · 비고 · 상태 (+ 발급 시점 정보)
  * 프로그램 인증서는 회원이 사이트에서 직접 발급, 대장 인증서는 직원이 등록(회차 일괄·CSV) 후 회원이 본인 확인해 내려받는다. 여기서는 확인·비고·결과 수정·발급 취소/복원·CSV.
  * 개인정보(생년월일·대학·전공)는 펼쳐야 보이고, CSV는 직원 업무용 — 외부 공유 금지
  * 수료증 관리 대장(cert_key ledger:*, MADLeague 경쟁 PT) = 인트라가 원본 (2026-10-10): 펼쳐서 기재 사항 수정·계정 연결 해제, 새 회차는 CSV 업로드
@@ -13,7 +13,7 @@ import { LEDGER_COLUMNS, parseLedgerCsv } from "@/lib/programs/ledger-columns";
 
 interface Snapshot {
     name?: string; birthdate?: string | null; university?: string | null; major?: string | null;
-    group_name?: string | null; cohort?: string | null; team_name?: string | null; round_title?: string | null;
+    group_label?: string | null; group_name?: string | null; cohort?: string | null; team_name?: string | null; round_title?: string | null;
     title?: string; label?: string; brand_name?: string;
 }
 interface Row {
@@ -73,11 +73,11 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
 
     const csv = () => {
         if (!rows?.length) return;
-        const head = ["종류", "코드", "발급일", "이름", "생년월일", "출신 대학", "전공", "소속", "기수", "프로그램", "출전팀", "결과", "비고", "상태"];
+        const head = ["브랜드", "종류", "코드", "발급일", "이름", "생년월일", "출신 대학", "전공", "소속 구분", "소속", "기수", "프로그램", "출전팀", "결과", "비고", "상태"];
         const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
         const lines = rows.map(r => [
-            r.snapshot.label, r.code, kstDay(r.issued_at), r.snapshot.name, r.snapshot.birthdate, r.snapshot.university, r.snapshot.major,
-            r.snapshot.group_name, r.snapshot.cohort, r.snapshot.round_title ?? r.snapshot.title, r.snapshot.team_name, r.result, r.note === LEDGER_NOTE ? "" : r.note,
+            brandName(r.brand_id), r.snapshot.label, r.code, kstDay(r.issued_at), r.snapshot.name, r.snapshot.birthdate, r.snapshot.university, r.snapshot.major,
+            r.snapshot.group_label, r.snapshot.group_name, r.snapshot.cohort, r.snapshot.round_title ?? r.snapshot.title, r.snapshot.team_name, r.result, r.note === LEDGER_NOTE ? "" : r.note,
             r.revoked_at ? `취소(${r.revoked_reason ?? ""})` : "유효",
         ].map(esc).join(","));
         const blob = new Blob(["﻿" + [head.map(esc).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
@@ -87,6 +87,9 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
         a.click();
     };
 
+    // 소속 칸 제목 = 인증서에 기록된 소속 이름표 (MADLeague '소속 동아리' 등). 브랜드마다 다르면 '소속'
+    const groupLabels = new Set((rows ?? []).map(r => r.snapshot.group_label).filter(Boolean));
+    const groupHead = groupLabels.size === 1 ? [...groupLabels][0] : "소속";
     const brandName = (slug: string) => brands?.find(b => b.slug === slug)?.name ?? slug;
     const cls = "rounded border border-neutral-300 px-3 py-2 text-sm";
 
@@ -136,7 +139,7 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
                     <table className="w-full min-w-[1100px] text-sm">
                         <thead className="bg-neutral-50 text-left text-xs text-neutral-500">
                             <tr>
-                                <th className="px-3 py-2">종류</th><th className="px-3 py-2">소속 동아리</th><th className="px-3 py-2">코드</th><th className="px-3 py-2">발급일</th>
+                                <th className="px-3 py-2">종류</th><th className="px-3 py-2">{groupHead}</th><th className="px-3 py-2">코드</th><th className="px-3 py-2">발급일</th>
                                 <th className="px-3 py-2">이름</th><th className="px-3 py-2">프로그램</th><th className="px-3 py-2">팀</th>
                                 <th className="px-3 py-2">결과</th><th className="px-3 py-2">비고</th><th className="px-3 py-2">상태</th><th className="px-3 py-2"></th>
                             </tr>
