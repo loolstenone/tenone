@@ -34,7 +34,18 @@
 | 회원 역할 이력 UPDATE 금지(§1.3.1)가 규칙뿐 | DB 트리거 `guard_capability_role_update` — 진행 중 역할의 종료(`valid_until` 설정)만 허용 |
 | 심사·역할 변경 기록 없음 | `zz_record_change`를 5개 테이블에 추가, 계좌·연락처·이메일 원문은 기록에서 `***` |
 
-남은 것: HeRo·MyVerse 결제 경로, `lib/workflow-engine.ts`, 퇴사 처리 원자화, 상태 전이 DB 함수화(백서 14장).
+### 2단계-2 (2026-10-15) 퇴사 처리 — `sql/staff-offboard.sql` (마이그레이션 staff_offboard)
+
+| 항목 | 조치 |
+|---|---|
+| 권한 회수·기본 권한·직원 상태·회원 유형을 앱이 차례로 update (중간 실패 시 일부 권한만 회수, 뒤 단계 에러 무시) | DB 함수 `staff_offboard(member, left_at, by)` 한 트랜잭션. 서버(service_role)만 실행 |
+| 처리자 자격을 API만 확인 | 함수가 실시간 `member_roles`로 다시 확인 (인사 직무·마스터) · 본인·마스터·이미 퇴사 거부 |
+| 서버 키로 실행되면 기록에 처리자가 없음 | `record_change`가 함수가 넘긴 처리자(`intra.actor`)를 기록 |
+| 재입사 시 권한 부여 실패 (회수된 행이 남아 유일키 충돌) | `grantRoles`를 upsert로 — 회수된 행을 다시 켠다 |
+
+⚠️ 남는 틈: 퇴사자에게 이미 발급된 로그인 토큰은 만료(최대 1시간)까지 브라우저 → DB 조회에서 직원으로 통과할 수 있다 (인트라 화면·API는 즉시 차단).
+
+남은 것: HeRo·MyVerse 결제 경로, `lib/workflow-engine.ts`, 상태 전이 DB 함수화(백서 14장).
 
 ## 0. Intra 진단(`docs/Intra 진단 WIO 기본 설계 기준 대비.md`)과 대조
 

@@ -2,7 +2,7 @@
  * 직원 입사 · 첫 로그인 · 퇴사 (서버 전용, 2026-10-10)
  *   입사: 계정 초대(비밀번호는 본인이 설정) + 직원 정보 + 권한 묶음 → 상태 invited
  *   첫 로그인: 인사 처리 안내 확인 + 보안 서약 → 상태 active (app/intra/layout.tsx가 그 전까지 StaffWelcome만 보여준다)
- *   퇴사: member_roles 전부 회수(일반 회원만 남김) → 상태 offboarded · 퇴사일 기록. 인트라는 middleware가 요청마다 member_roles를 보므로 즉시 차단
+ *   퇴사: DB 함수 staff_offboard() 한 번 — member_roles 전부 회수(일반 회원만 남김) + 상태 offboarded + 퇴사일. 인트라는 middleware가 요청마다 member_roles를 보므로 즉시 차단
  *   입사·퇴사 처리는 인사(hr) 직무 또는 마스터만
  */
 import { Resend } from "resend";
@@ -26,12 +26,13 @@ export interface InviteInput {
 }
 
 async function grantRoles(admin: Admin, memberId: string, grants: { role: string; context: string }[], by: string | null) {
+    // 퇴사 때 회수된 권한은 행이 남아 있다(is_active=false) — 재입사면 그 행을 다시 켠다 (member_id·role·context 유일)
     const { data: existing } = await admin.from("member_roles").select("role, context").eq("member_id", memberId).eq("is_active", true);
     const have = new Set((existing ?? []).map(r => `${r.role}:${r.context}`));
     const rows = grants.filter(g => !have.has(`${g.role}:${g.context}`))
-        .map(g => ({ member_id: memberId, role: g.role, context: g.context, is_active: true, granted_by: by }));
+        .map(g => ({ member_id: memberId, role: g.role, context: g.context, is_active: true, expires_at: null, granted_by: by, granted_at: new Date().toISOString() }));
     if (rows.length) {
-        const { error } = await admin.from("member_roles").insert(rows);
+        const { error } = await admin.from("member_roles").upsert(rows, { onConflict: "member_id,role,context" });
         if (error) throw new Error(`권한 부여 실패: ${error.message}`);
     }
 }
@@ -109,24 +110,12 @@ export async function completeOnboarding(memberId: string, consent: { hr_notice_
     if (error) throw new Error(error.message);
 }
 
-/** 퇴사 — 일반 회원(member@universe)만 남기고 모든 권한 회수 */
+/** 퇴사 — 일반 회원(member@universe)만 남기고 모든 권한 회수. DB 함수 하나로 처리 (sql/staff-offboard.sql)
+ *  처리자 자격(인사 직무·마스터)·본인/마스터 금지·이미 퇴사 여부도 DB가 확인하고, 처리자는 변경 기록에 남는다 */
 export async function offboardStaff(memberId: string, leftAt: string, by: string | null) {
-    const admin = createAdminClient();
-    const { data: roles } = await admin.from("member_roles").select("id, role, context").eq("member_id", memberId).eq("is_active", true);
-    if ((roles ?? []).some(r => r.role === "super_admin" && r.context === "universe")) throw new Error("마스터 계정은 퇴사 처리할 수 없습니다");
-    if (memberId === by) throw new Error("본인은 퇴사 처리할 수 없습니다");
-
-    const revoke = (roles ?? []).filter(r => !(r.role === "member" && r.context === "universe")).map(r => r.id);
-    if (revoke.length) {
-        const { error } = await admin.from("member_roles").update({ is_active: false, expires_at: new Date().toISOString() }).in("id", revoke);
-        if (error) throw new Error(`권한 회수 실패: ${error.message}`);
-    }
-    if (!(roles ?? []).some(r => r.role === "member" && r.context === "universe")) {
-        await admin.from("member_roles").insert({ member_id: memberId, role: "member", context: "universe", is_active: true, granted_by: by });
-    }
-    await admin.from("tenone_staff_profiles").update({ status: "offboarded", left_at: leftAt }).eq("member_id", memberId);
-    await admin.from("members").update({ account_type: "member" }).eq("id", memberId);
-    return { revoked: revoke.length };
+    const { data, error } = await createAdminClient().rpc("staff_offboard", { p_member: memberId, p_left_at: leftAt, p_by: by });
+    if (error) throw new Error(error.message);
+    return { revoked: (data as { revoked?: number } | null)?.revoked ?? 0 };
 }
 
 function escapeHtml(s: string) {
