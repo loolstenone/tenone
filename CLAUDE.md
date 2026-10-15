@@ -682,13 +682,14 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 | `system` | `intra_access` | 인트라 메뉴 표시 플래그 (권한 판단은 staff) |
 | `module` | `{모듈명}` (erp·hero·wiki·smarcomm·project …) | 인트라 모듈 접근 |
 | `brand` | `{브랜드 slug}` (badak·madleague·tenone …) | 해당 브랜드 인트라 관리 |
-| `duty` | `hr` · `payroll` · `finance` · `accounting` | 직무 권한 — 전 직원 인사·급여·재무·회계 데이터. JWT `hr:duty` → RLS `auth_has_duty('hr')`. SSOT `lib/staff-duties.ts` (2026-10-10) |
+| `duty` | `hr` · `payroll` · `finance` · `approval` · `accounting` | 직무 권한 — 전 직원 인사·급여·재무·회계 데이터, `approval` = ERP 결재 승인·반려 (2026-10-15). JWT `hr:duty` → RLS `auth_has_duty('hr')`. SSOT `lib/staff-duties.ts` (2026-10-10) |
 
 - **부여 권한**: `universe`·`system`·`duty`는 **super_admin만** 부여·회수 (member_roles RLS + `/api/intra/duties`, 화면 = Standard › 권한 체계). `brand`·`module`은 직원 (2026-10-10 — 직원이 자기에게 super_admin을 줄 수 있던 구멍 차단)
 - **인사·재무 데이터 = 본인 + 담당 직무만** (개인정보보호법 제29조): 급여·인센티브 `payroll`(+`accounting` 조회) · 근태·GPR·직원 정보 수정·교육·포인트 `hr` · 경비·카드·청구·지급·사업계획 `finance`(+`accounting` 조회). ❌ 이런 테이블에 `auth_is_staff()`만으로 전원 조회 허용 금지 (`sql/staff-duty-roles.sql`)
 - 인트라 메뉴 접근(`user.systemAccess`)도 `member_roles`(duty·module·super_admin)에서만 도출 — ❌ `members.system_access`·`members.role`(본인 수정 가능 컬럼)으로 메뉴·Admin 판단 금지
 
 - 직원 판단 SSOT: `lib/api-guard.ts` `isStaffMember` = `member_roles` staff·manager·super_admin @universe (활성·미만료). `requireStaff`·`getMadAccess`·MyVerse 인트라가 사용, DB는 같은 정의로 JWT `is_staff` 동기화(`sync_roles_to_jwt`) → RLS `auth_is_staff()`. ❌ 이메일 도메인으로 직원 판단 금지 (2026-10-07 폐지)
+- RLS `auth_is_staff()`·`auth_is_super_admin()`·`auth_has_duty()`는 JWT가 직원이라고 해도 `member_roles`를 요청마다 다시 확인한다 (`auth_live_roles()`, 요청당 1회) — 퇴사·권한 회수가 토큰 만료를 기다리지 않고 즉시 반영 (2026-10-15, `sql/intra-live-roles-and-approval-authority.sql`)
 - 마스터: `super_admin@universe` (lools@tenone.biz)
 - ❌ 회원 활동 역할(멘토·현역·바닥장·구독자 등)을 member_roles에 넣지 않는다 → `member_capability_roles` (§1.3.1)
   - MADLeague 이관 완료 (2026-10-06): 현역·임원(회장)·멘토 = `club`, 기업(과제기업·채용 파트너) = `showcase/host {type:corporate}` · 헬퍼 `lib/madleague-roles.ts`
@@ -1686,7 +1687,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - ❌ 비밀번호 인증 폼(signUp·signInWithPassword·resetPasswordForEmail)에 CAPTCHA 누락 — `useCaptcha()` + `captchaToken` (Supabase Bot Protection ON 시 토큰 없으면 실패)
 - ❌ 인트라 접근을 클라이언트 확인에만 의존 — middleware 1b가 `/intra/*`·intra.tenone.biz 전 페이지를 `requireStaff`로 서버에서 막는다 (비직원 → `app/intra-gate` rewrite, 로그인 화면만). **인트라 메뉴·목차도 기업 보안** — `app/intra/layout.tsx`(서버)가 직원에게만 껍데기를 그리고, 비직원 라우트(`app/intra-gate`·`IntraLoginScreen`)는 사이드바·intra-nav를 import하지 않는다 (같은 라우트에서 조건부 렌더만 하면 JS 번들로 새어 나감, 2026-10-07). 새 게이트 우회 경로 만들지 말 것
 - ❌ `NEXT_PUBLIC_*`에 관리자 키 — 브라우저 번들에 그대로 박힌다. 인트라 → 자기 API는 세션 쿠키로 인증(`requireStaff`)
-- ❌ 결재 결과를 앱이 다른 테이블에 따로 update해 동기화하기 · 끝난 결재를 앱에서 되돌리기 — 결재 규칙(자기 결재 금지·완료 잠금·경비 동기화)은 DB 트리거가 강제한다 (`sql/intra-record-and-approval-guard.sql`, WIO 백서 14장). 결재·재무·급여·인사·권한 테이블을 새로 만들면 `zz_record_change` 트리거를 건다 — `audit_log`는 추가만 가능, 직접 쓰지 않는다 (2026-10-15)
+- ❌ 결재 결과를 앱이 다른 테이블에 따로 update해 동기화하기 · 끝난 결재를 앱에서 되돌리기 — 결재 규칙(결재 권한 = 마스터·`approval` 직무·경비는 `finance` 직무 / WIO는 회사 owner·admin·manager, 자기 결재 금지·완료 잠금·경비 동기화)은 DB 트리거가 강제한다 (`sql/intra-record-and-approval-guard.sql`, WIO 백서 14장). 결재·재무·급여·인사·권한 테이블을 새로 만들면 `zz_record_change` 트리거를 건다 — `audit_log`는 추가만 가능, 직접 쓰지 않는다 (2026-10-15)
 - ❌ RLS 정책을 `roles=public` + `USING (true)`로 "service role용"이라 만들기 — service_role은 RLS를 우회하므로 불필요하고, 실제로는 anon에게 전부 열린다 (2026-10-05 사고: 듣봇 대화·발송 메일 공개)
 - ❌ 트리거 함수가 RLS 걸린 다른 테이블에 쓰는데 SECURITY INVOKER — 사용자 INSERT 전체가 롤백됨 (세션 156 members 생성 장애 원인)
 

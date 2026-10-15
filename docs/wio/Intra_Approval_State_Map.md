@@ -43,9 +43,19 @@
 | 서버 키로 실행되면 기록에 처리자가 없음 | `record_change`가 함수가 넘긴 처리자(`intra.actor`)를 기록 |
 | 재입사 시 권한 부여 실패 (회수된 행이 남아 유일키 충돌) | `grantRoles`를 upsert로 — 회수된 행을 다시 켠다 |
 
-⚠️ 남는 틈: 퇴사자에게 이미 발급된 로그인 토큰은 만료(최대 1시간)까지 브라우저 → DB 조회에서 직원으로 통과할 수 있다 (인트라 화면·API는 즉시 차단).
+### 2단계-3 (2026-10-15) 결재 권한 · 권한 즉시 반영 · MyVerse 결제 — `sql/intra-live-roles-and-approval-authority.sql`
 
-남은 것: HeRo·MyVerse 결제 경로, `lib/workflow-engine.ts`, 상태 전이 DB 함수화(백서 14장).
+| 항목 | 조치 |
+|---|---|
+| 결재를 직원이면 누구나 승인 | `guard_approval_decision`에 결재 권한: ERP = 마스터·`approval` 직무(신설)·경비는 `finance` 직무 / WIO = 같은 회사 owner·admin·manager |
+| 퇴사·권한 회수 후 토큰 만료(최대 1시간)까지 RLS가 직원으로 통과 | `auth_is_staff`·`auth_is_super_admin`·`auth_has_duty`가 `member_roles`를 요청당 1회 다시 확인 (`auth_live_roles`). 직원 전체 조회 최악 약 2.5배(4만 행 327→835ms), 일반 회원 영향 없음 |
+| MyVerse 회원이 자기 구독 상태·만료일을 직접 수정 가능 · 구독 활성화 함수를 누구나 호출 가능 → 결제 없이 유료 구독 | `protect_myverse_billing_columns` 트리거 · 활성화 함수 서버 전용 |
+| 토스 결제 완료 콜백 새로고침 시 다시 승인 요청 → 거절 응답으로 결제 완료 기록을 실패로 덮음 · 동시 요청 시 구독 2번 연장 | 대기 중일 때만 처리 + `myverse_complete_toss_payment()` (결제 기록·구독 활성화 한 번에, 같은 주문 1회) + 토스 Idempotency-Key |
+| Stripe 웹훅 서명 시각 확인 없음 (오래된 이벤트 재전송) · v1 서명 여러 개 미처리 | 5분 허용 오차 + 모든 v1 비교 |
+
+`lib/workflow-engine.ts`(WIO 앱 워크플로): 코드가 쓰는 컬럼(`definition_name`·`current_step_index`·`step_history`·`sla_deadline`·`is_active` 등)이 DB에 없어 지금은 동작하지 않는다 (인스턴스 0건). WIO 전용 프로젝트의 `wio.act()`(정책 판정)로 다시 만들 때 함께 정리 — 유니버스 DB에서는 손대지 않음.
+
+남은 것: HeRo 기업 승인(기능 만들 때 같은 보호), 상태 전이 DB 함수화(백서 14장).
 
 ## 0. Intra 진단(`docs/Intra 진단 WIO 기본 설계 기준 대비.md`)과 대조
 

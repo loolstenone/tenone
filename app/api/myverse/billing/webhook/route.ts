@@ -25,21 +25,25 @@ interface StripeEvent {
     data: { object: Record<string, unknown> };
 }
 
+const SIG_TOLERANCE_SEC = 300; // Stripe 권장 — 오래된 서명 이벤트 재전송(재생 공격) 거부
+
 function verifySig(payload: string, sigHeader: string, secret: string): boolean {
-    // Stripe-Signature: t=...,v1=...,v0=...
-    const parts = sigHeader.split(",").reduce<Record<string, string>>((acc, p) => {
-        const [k, v] = p.split("=");
-        acc[k] = v;
-        return acc;
-    }, {});
-    const t = parts.t;
-    const v1 = parts.v1;
-    if (!t || !v1) return false;
-    const signed = `${t}.${payload}`;
-    const expected = crypto.createHmac("sha256", secret).update(signed).digest("hex");
-    try {
-        return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(v1));
-    } catch { return false; }
+    // Stripe-Signature: t=...,v1=...,v1=...,v0=... (비밀키 교체 중에는 v1이 여러 개)
+    let t = "";
+    const v1s: string[] = [];
+    for (const part of sigHeader.split(",")) {
+        const [k, v] = part.split("=");
+        if (k === "t") t = v;
+        else if (k === "v1" && v) v1s.push(v);
+    }
+    if (!t || v1s.length === 0) return false;
+    const ts = Number(t);
+    if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > SIG_TOLERANCE_SEC) return false;
+    const expected = Buffer.from(crypto.createHmac("sha256", secret).update(`${t}.${payload}`).digest("hex"));
+    return v1s.some(v => {
+        const got = Buffer.from(v);
+        return got.length === expected.length && crypto.timingSafeEqual(expected, got);
+    });
 }
 
 function planFromPriceId(priceId: string): string {

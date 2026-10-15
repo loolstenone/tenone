@@ -1,5 +1,5 @@
 /**
- * 직무 권한(duty) SSOT — 인사·급여·재무·회계 (2026-10-10)
+ * 직무 권한(duty) SSOT — 인사·급여·재무·결재·회계 (2026-10-10, 결재 2026-10-15)
  *   member_roles(role=duty key, context='duty') → JWT 'hr:duty' → RLS auth_has_duty('hr') (sql/staff-duty-roles.sql)
  *   직원이면 누구나가 아니라, 담당 직무가 있는 사람만 전원의 인사·재무 데이터를 본다 (개인정보보호법 제29조 접근권한 최소화)
  *   본인 기록은 직무와 상관없이 본인이 본다 (인트라 › My). super_admin은 모든 직무를 가진 것으로 본다
@@ -23,6 +23,12 @@ export const STAFF_DUTIES = [
         label: "재무",
         scope: "경비 승인 · 법인카드 · 청구·지급 · 사업계획·월별 전망 (작성·수정)",
         menus: "ERP › Finance",
+    },
+    {
+        key: "approval",
+        label: "결재",
+        scope: "ERP 결재함 승인·반려 (경비 결재는 재무 직무도 가능, 자기 결재는 불가) - DB가 강제 (sql/intra-live-roles-and-approval-authority.sql)",
+        menus: "Workspace › 결재함",
     },
     {
         key: "accounting",
