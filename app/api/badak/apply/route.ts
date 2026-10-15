@@ -87,10 +87,11 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH: 관리자 심사 결과 반영 (approved / rejected)
+// 대기 중인 신청만 바꾼다. 끝난 심사 잠금·신청자 셀프 승인 차단·승인 시 바닥장 역할 부여는 DB 트리거가 한다
+// (sql/intra-review-guard.sql) — 인트라 화면도 이 API 하나만 쓴다
 export async function PATCH(request: NextRequest) {
   const auth = await requireAdmin(request);
   if (auth instanceof NextResponse) return auth;
-  const { userId } = auth;
 
   const body = await request.json();
   const { id, status, note } = body;
@@ -98,56 +99,42 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'id and valid status required' }, { status: 400 });
   }
 
-  const updates: Record<string, unknown> = { status, reviewed_by: userId, reviewed_at: new Date().toISOString() };
-  if (note) updates.note = note;
+  const updates: Record<string, unknown> = { status, reviewed_at: new Date().toISOString() };
+  if (note) updates.reviewer_note = note;
 
   const { data, error } = await supabase
     .from('badak_leader_applications')
     .update(updates)
     .eq('id', id)
+    .eq('status', 'pending')
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (!data) return NextResponse.json({ error: '이미 처리된 신청입니다' }, { status: 409 });
 
-  // 승인 시 후속 처리 (non-blocking)
-  if (status === 'approved' && data?.user_id) {
-    (async () => {
-      try {
-        // 바닥장 역할 부여
-        await supabase
-          .from('badak_members')
-          .update({ role: 'leader' })
-          .eq('user_id', data.user_id);
-
-        // 신청자 알림
-        await supabase.from('badak_notifications').insert({
-          user_id: data.user_id,
-          type: 'leader_approved',
-          title: '바닥장 신청이 승인됐습니다 🎉',
-          body: data.need_text
-            ? `"${data.need_text}" 니즈의 공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!`
-            : '공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!',
-          link: '/badak',
-          metadata: { applicationId: data.id, needId: data.need_id },
-        });
-      } catch { /* 알림 실패는 무시 */ }
-    })();
-  } else if (status === 'rejected' && data?.user_id) {
-    (async () => {
-      try {
-        await supabase.from('badak_notifications').insert({
-          user_id: data.user_id,
-          type: 'leader_rejected',
-          title: '바닥장 신청 결과 안내',
-          body: note
-            ? `아쉽게도 이번 신청은 승인되지 않았습니다. 사유: ${note}`
-            : '아쉽게도 이번 신청은 승인되지 않았습니다. 다음에 다시 도전해보세요!',
-          link: '/badak/apply',
-          metadata: { applicationId: data.id },
-        });
-      } catch { /* 알림 실패는 무시 */ }
-    })();
+  if (data.user_id) {
+    const approved = status === 'approved';
+    const { error: notifyError } = await supabase.from('badak_notifications').insert(approved ? {
+      user_id: data.user_id,
+      type: 'leader_approved',
+      title: '바닥장 신청이 승인됐습니다 🎉',
+      body: data.need_text
+        ? `"${data.need_text}" 니즈의 공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!`
+        : '공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!',
+      link: '/badak',
+      metadata: { applicationId: data.id, needId: data.need_id },
+    } : {
+      user_id: data.user_id,
+      type: 'leader_rejected',
+      title: '바닥장 신청 결과 안내',
+      body: note
+        ? `아쉽게도 이번 신청은 승인되지 않았습니다. 사유: ${note}`
+        : '아쉽게도 이번 신청은 승인되지 않았습니다. 다음에 다시 도전해보세요!',
+      link: '/badak/apply',
+      metadata: { applicationId: data.id },
+    });
+    if (notifyError) console.error('[badak/apply] 심사 알림 실패:', notifyError.message);
   }
 
   return NextResponse.json({ application: data });

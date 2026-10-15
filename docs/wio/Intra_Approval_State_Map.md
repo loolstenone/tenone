@@ -21,7 +21,20 @@
 | 결재 승인 후 경비 상태를 앱이 따로 update (비원자·에러 무시) | DB 트리거 `sync_expense_from_approval` — 같은 트랜잭션 |
 | 결재 화면이 실패를 숨기고 목록에서 먼저 지움 | `app/intra/erp/approval/page.tsx` — 저장 성공 후 제거, 거부 사유 표시 |
 
-남은 것: 아래 목록의 브랜드 심사·HeRo·Jakka·MyVerse 결제 경로, `lib/workflow-engine.ts`, 상태 전이 DB 함수화(백서 14장).
+### 2단계-1 (2026-10-15) 브랜드 심사 경로 — `sql/intra-review-guard.sql` (마이그레이션 intra_review_guard)
+
+| 항목 | 조치 |
+|---|---|
+| 끝난 심사(승인·반려·선발·거절)를 다시 바꿀 수 있음 | DB 트리거 `guard_review_status` — 바닥장·MADLeague·프로그램·Jakka 판매자 신청 (service_role도 막힘) |
+| Jakka 신청자가 자기 신청을 `approved`로 바꿀 수 있음 (UPDATE 정책 WITH CHECK 없음) · 바닥장 신청을 `approved`로 바로 INSERT 가능 | `protect_review_columns` 트리거 — 직원 아니면 상태·심사 컬럼 고정 |
+| 바닥장 승인 경로 2개가 서로 다름 (API는 없는 컬럼·`role='leader'`로 항상 실패, 인트라는 브라우저 직접 2단계) | 인트라 화면 → `PATCH /api/badak/apply` 하나로. 역할 부여(`badakjang`·C)는 DB 트리거 `badak_promote_on_leader_approval` |
+| Jakka 심사자 = 요청 본문 `reviewerId` | 세션의 직원 ID (`requireStaff`), GET도 직원 확인 |
+| 승인 API가 대기 여부 확인 후 조건 없이 update (동시 클릭 시 이중 처리) | Badak·Jakka·MADLeague(승인·반려·인트라)·프로그램 신청 모두 `.eq('status','pending')` 조건부 update → 0행이면 409 |
+| YouInOne 심사 화면이 브라우저에서 `member_capability_roles`를 직접 읽고 씀 (RLS로 동작 안 함) | `/api/intra/youinone/applications` (직원 전용) |
+| 회원 역할 이력 UPDATE 금지(§1.3.1)가 규칙뿐 | DB 트리거 `guard_capability_role_update` — 진행 중 역할의 종료(`valid_until` 설정)만 허용 |
+| 심사·역할 변경 기록 없음 | `zz_record_change`를 5개 테이블에 추가, 계좌·연락처·이메일 원문은 기록에서 `***` |
+
+남은 것: HeRo·MyVerse 결제 경로, `lib/workflow-engine.ts`, 퇴사 처리 원자화, 상태 전이 DB 함수화(백서 14장).
 
 ## 0. Intra 진단(`docs/Intra 진단 WIO 기본 설계 기준 대비.md`)과 대조
 

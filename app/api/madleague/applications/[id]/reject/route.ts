@@ -43,11 +43,15 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { error } = await admin
+  const { data: changed, error } = await admin
     .from('mad_applications')
-    .update({ status: 'rejected' })
-    .eq('id', id);
+    .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle();
   if (error) return NextResponse.json({ error: 'UPDATE_FAILED' }, { status: 500 });
+  if (!changed) return NextResponse.json({ error: 'ALREADY_PROCESSED' }, { status: 409 });
 
   return NextResponse.json({ ok: true });
 }

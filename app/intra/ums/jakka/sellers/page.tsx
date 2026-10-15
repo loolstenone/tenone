@@ -61,7 +61,6 @@ export default function IntraJakkaSellersPage() {
                 applicationId: selected.id,
                 action,
                 note: note.trim() || undefined,
-                reviewerId: user.id,
             }),
         });
         setSubmitting(false);

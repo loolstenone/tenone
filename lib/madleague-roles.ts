@@ -257,11 +257,16 @@ export async function acceptMadApplication(appId: string, reviewerNote?: string 
     if (app.status !== "pending" && app.status !== "reviewing") return { ok: false, error: "ALREADY_PROCESSED", status: 400 };
 
     // 상태 변경 → 트리거가 mad_members 1행 생성 (member_id 있을 때)
-    const { error: updateErr } = await admin
+    // 대기·검토 중일 때만 — 동시에 두 번 눌러도 역할이 두 번 생기지 않게
+    const { data: changed, error: updateErr } = await admin
         .from("mad_applications")
         .update({ status: "accepted", reviewed_at: new Date().toISOString(), ...(reviewerNote !== undefined && { reviewer_note: reviewerNote }) })
-        .eq("id", appId);
+        .eq("id", appId)
+        .in("status", ["pending", "reviewing"])
+        .select("id")
+        .maybeSingle();
     if (updateErr) return { ok: false, error: "UPDATE_FAILED", status: 500 };
+    if (!changed) return { ok: false, error: "ALREADY_PROCESSED", status: 409 };
 
     if (!app.member_id) return { ok: true };
     const { data: applicant } = await admin.from("members").select("id, auth_id").eq("id", app.member_id).maybeSingle();

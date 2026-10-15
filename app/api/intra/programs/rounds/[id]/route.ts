@@ -182,15 +182,18 @@ export async function POST(req: NextRequest, { params }: Params) {
         case "decline_application": {
             const { data: app } = await admin.from("program_applications").select("id, member_id, status").eq("id", String(body.application_id ?? "")).eq("round_id", id).maybeSingle();
             if (!app) return NextResponse.json({ error: "신청을 찾을 수 없습니다." }, { status: 404 });
+            // 대기 중인 신청만 결정한다 (끝난 결정 잠금은 DB 트리거 — sql/intra-review-guard.sql)
+            if (app.status !== "pending") return NextResponse.json({ error: "이미 처리된 신청입니다." }, { status: 409 });
             const accept = body.action === "accept_application";
             if (accept) {
                 const { error: pErr } = await admin.from("program_participants").insert({ brand_id: brand, round_id: id, team_id: null, member_id: app.member_id, role: "member", joined_via: "apply" });
                 if (pErr && pErr.code !== "23505") return NextResponse.json({ error: pErr.message }, { status: 500 });
             }
-            const { error } = await admin.from("program_applications").update({
+            const { data: decided, error } = await admin.from("program_applications").update({
                 status: accept ? "accepted" : "declined", decided_at: new Date().toISOString(), decided_by: ("memberId" in auth ? auth.memberId : null) ?? null, updated_at: new Date().toISOString(),
-            }).eq("id", app.id);
+            }).eq("id", app.id).eq("status", "pending").select("id").maybeSingle();
             if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+            if (!decided) return NextResponse.json({ error: "이미 처리된 신청입니다." }, { status: 409 });
             await notify([app.member_id], accept
                 ? { brandId: brand, type: "program_application", title: `${round.title} 참가자로 선발되었습니다`, message: "회차 방에서 공지를 확인하세요. 팀 배정은 운영진이 안내합니다.", link: programRoomPath(round) }
                 : { brandId: brand, type: "program_application", title: `${round.title} 신청 결과 안내`, message: "이번 회차에는 함께하지 못하게 되었습니다. 다음 모집에서 만나요.", link: null });

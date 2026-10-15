@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { requireStaff } from "@/lib/api-guard";
 
 function getAdmin() {
     return createClient(
@@ -14,6 +15,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // GET /api/intra/jakka/sellers?status=pending
 export async function GET(req: NextRequest) {
+    const auth = await requireStaff(req);
+    if (auth instanceof NextResponse) return auth;
     const supabaseAdmin = getAdmin();
     const status = req.nextUrl.searchParams.get("status") ?? "pending";
     const { data, error } = await supabaseAdmin
@@ -90,19 +93,23 @@ function buildReviewEmailHtml({ displayName, isApprove, note }: {
 </body></html>`;
 }
 
-// POST /api/intra/jakka/sellers — { applicationId, action: 'approve'|'reject', note?, reviewerId }
+// POST /api/intra/jakka/sellers — { applicationId, action: 'approve'|'reject', note? }
+// 심사자 = 로그인한 직원 (요청 본문의 reviewerId는 믿지 않는다). 대기 중인 신청만 처리 — 끝난 심사 잠금은 DB 트리거
 export async function POST(req: NextRequest) {
+    const auth = await requireStaff(req);
+    if (auth instanceof NextResponse) return auth;
+    const reviewerId = "user" in auth ? auth.user.id : null;
+
     const supabaseAdmin = getAdmin();
     const body = await req.json();
-    const { applicationId, action, note, reviewerId } = body as {
+    const { applicationId, action, note } = body as {
         applicationId: string;
         action: "approve" | "reject";
         note?: string;
-        reviewerId: string;
     };
 
-    if (!applicationId || !action || !reviewerId) {
-        return NextResponse.json({ error: "applicationId, action, reviewerId required" }, { status: 400 });
+    if (!applicationId || !["approve", "reject"].includes(action)) {
+        return NextResponse.json({ error: "applicationId, action required" }, { status: 400 });
     }
 
     const { data: app, error: fetchErr } = await supabaseAdmin
@@ -111,12 +118,12 @@ export async function POST(req: NextRequest) {
         .eq("id", applicationId)
         .single();
     if (fetchErr || !app) return NextResponse.json({ error: "application not found" }, { status: 404 });
-    if (app.status !== "pending") return NextResponse.json({ error: "already reviewed" }, { status: 400 });
+    if (app.status !== "pending") return NextResponse.json({ error: "already reviewed" }, { status: 409 });
 
     const newAppStatus = action === "approve" ? "approved" : "rejected";
     const newCreatorStatus = action === "approve" ? "approved" : "rejected";
 
-    const { error: updErr } = await supabaseAdmin
+    const { data: updated, error: updErr } = await supabaseAdmin
         .from("jakka_seller_applications")
         .update({
             status: newAppStatus,
@@ -124,8 +131,12 @@ export async function POST(req: NextRequest) {
             reviewer_note: note ?? null,
             reviewed_at: new Date().toISOString(),
         })
-        .eq("id", applicationId);
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select("id")
+        .maybeSingle();
     if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+    if (!updated) return NextResponse.json({ error: "already reviewed" }, { status: 409 });
 
     const updatePayload: Record<string, unknown> = { seller_status: newCreatorStatus };
     if (action === "approve") updatePayload.seller_approved_at = new Date().toISOString();

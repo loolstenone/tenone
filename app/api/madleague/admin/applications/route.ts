@@ -51,10 +51,15 @@ export async function PATCH(req: NextRequest) {
   }
 
   const sb = getAdminClient();
-  const { error } = await sb
+  // 대기·검토 중인 신청만 바꾼다 (끝난 심사 잠금은 DB 트리거 — sql/intra-review-guard.sql)
+  const { data: changed, error } = await sb
     .from('mad_applications')
     .update({ status: newStatus, reviewed_at: new Date().toISOString(), reviewer_note: body.note ?? null })
-    .eq('id', body.id);
+    .eq('id', body.id)
+    .in('status', ['pending', 'reviewing'])
+    .select('id')
+    .maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!changed) return NextResponse.json({ error: 'ALREADY_DECIDED' }, { status: 409 });
   return NextResponse.json({ ok: true, status: newStatus });
 }

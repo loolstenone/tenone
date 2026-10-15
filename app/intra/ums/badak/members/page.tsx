@@ -132,23 +132,27 @@ export default function BadakMembersPage() {
     }
   }
 
+  // 심사는 API 한 곳에서 — 대기 중인 신청만 처리되고, 승인 시 바닥장 역할은 DB가 부여한다
   async function handleApplicationStatus(appId: string, status: "approved" | "rejected") {
     setProcessingId(appId);
     try {
-      const supabase = createClient();
-      await supabase.from("badak_leader_applications").update({ status }).eq("id", appId);
+      const res = await fetch("/api/badak/apply", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: appId, status }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(json.error || "처리하지 못했습니다. 다시 시도해 주세요.");
+        return;
+      }
       if (status === "approved") {
         const app = applications.find(a => a.id === appId);
-        if (app) {
-          // user_id로 직접 매칭, 없으면 member_id→auth_id 경유
-          const bm = badakMembers.find(b =>
-            (app.user_id && b.user_id === app.user_id) ||
-            (app.member_id && members.find(m => m.id === app.member_id)?.auth_id === b.user_id)
-          );
-          if (bm) {
-            await supabase.from("badak_members").update({ role: "badakjang", leader_level: "C" }).eq("id", bm.id);
-            setBadakMembers(prev => prev.map(m => m.id === bm.id ? { ...m, role: "badakjang", leader_level: "C" } : m));
-          }
+        const bm = app && badakMembers.find(b =>
+          (app.member_id && b.id === app.member_id) || (!app.member_id && app.user_id && b.user_id === app.user_id)
+        );
+        if (bm && bm.role === "member") {
+          setBadakMembers(prev => prev.map(m => m.id === bm.id ? { ...m, role: "badakjang", leader_level: m.leader_level || "C" } : m));
         }
       }
       setApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
