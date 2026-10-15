@@ -98,4 +98,35 @@
 7. HeRo 제안 승인 비원자
 8. 경비 status 값 불일치
 
-**미추적**: features/·components/ 대부분, app/intra/ums/* 페이지, madleague president, staff onboard/offboard 헬퍼 내부, HeRo 기업 승인 경로, 웹훅 서명.
+## 6. 보강 조사 (2차)
+
+### 클라이언트 직접 상태 쓰기 (서버 검증 없음, RLS만)
+
+| 위치 | 테이블 | 전이 | 비고 |
+|---|---|---|---|
+| `app/intra/ums/badak/members/page.tsx:135-158` | badak_leader_applications · badak_members | →approved/rejected, 승인 시 role='badakjang'·leader_level='C' | 비원자, 에러 미확인. `app/api/badak/apply` PATCH와 **승인 경로 중복** |
+| `app/intra/ums/youinone/applications/page.tsx:25-39` | member_capability_roles | applicant valid_until=now + approved_member insert | 현재 상태 조건 없음, 비원자 |
+| `app/intra/ums/commerce/shop/page.tsx:92-100` | shop_orders · shop_products | status 임의 | 가드·이력 없음 |
+| `app/intra/ums/commerce/promotions/page.tsx:81-84` | promotions | status 임의 | 가드·이력 없음 |
+| `lib/supabase/erp.ts:431-440` updateInvoiceStatus | invoices | 임의, paid면 paid_at | 호출 `app/intra/erp/finance/billing/page.tsx:222` |
+| `lib/supabase/montz.ts:538-554` updateContactStatus | montz_contact_requests | seen/accepted/declined 임의 | creator 본인 범위만 |
+| `lib/supabase/montz.ts:380-385` setHeroCreator | montz_creators.is_hero | false→true 두 번 update | 비원자 |
+| `components/ProfileComments.tsx:90` | profile_comments.is_hidden | →true | 모더레이션 플래그 |
+| `features/montz/VerificationModal.tsx:42-51` | montz_verification_requests | insert pending | 이후 전이 경로 없음 |
+
+### 서버 경로
+
+- `app/api/badak/groups/[id]/members/route.ts:13-123` — requireMember 아님(Bearer 직접 파싱 + 모임장 확인), applied→approved/rejected **가드 있음(409)**, 정원 확인 비원자, rpc 결과 미확인, 이력 없음
+- `lib/staff-lifecycle.ts:101-110` completeOnboarding — invited|onboarding→active **가드 있음**, 이력 없음
+- `lib/staff-lifecycle.ts:113-130` offboardStaff — 상태 가드 없음, member_roles 일괄 비활성·status offboarded·account_type 여러 update 비트랜잭션, **이력 없음**
+- `lib/staff-lifecycle.ts:66-72` 초대 upsert — 이미 active인 직원을 invited로 되돌릴 수 있음
+- `app/api/intra/duties/route.ts:41-67` — **member_role_history 기록 안 함** (테이블은 `supabase/identity-architecture.sql:30-46`에만)
+- `app/api/madleague/applications/president/route.ts` — GET 전용, 전이 없음
+- HeRo 기업 승인(hero_companies pending→active) — **경로 없음** (`app/intra/hero/companies/page.tsx:118` 헤더에만 '담당자 승인')
+- MoNTZ 오디션 지원 — pending 이후 전이 경로 없음
+- `app/api/myverse/billing/webhook/route.ts:28-62` — Stripe 서명 검증 있음, **타임스탬프 허용 범위 검사 없음(재전송 가능)**, 멱등 처리 비원자
+- `app/api/crawler/route.ts:91-94` requireStaff · `app/api/cron/smarcomm-airm-verify/route.ts:36-39` 내부 키만 (`lib/api-guard.ts:58-59` 비교가 `includes()` — 상수 시간 아님)
+
+### API 호출만 확인 (서버 핸들러 미추적)
+
+`components/madleague/ClubRecruitResponses.tsx:51-55` → `/api/madleague/clubs/[slug]/recruit` · `components/intra/forms/FormEditor.tsx:66-69,275-278` → `/api/intra/forms/[id]`(·`/responses`) · `features/myverse/planner/ProjectRetroModal.tsx:57-63` → `/api/myverse/projects/[id]` · `features/hero/GoalsTab.tsx:136` · ums의 badak/groups·needs-queue·madleap/applications·uc/transactions·standard/taxonomies PATCH
