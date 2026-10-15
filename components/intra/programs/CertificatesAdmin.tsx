@@ -98,7 +98,7 @@ export function CertificatesAdmin({ brands, brand: fixedBrand, title = "인증�
             <div>
                 <h1 className="text-2xl font-bold text-neutral-900">{title}</h1>
                 <p className="mt-1 text-sm text-neutral-500">
-                    대장 등록 = 직원이 회차 명단으로 일괄 등록하고, 회원은 로그인해 본인 확인 후 내려받습니다. 회원 발급 = 회원이 사이트에서 직접 발급합니다 (참가·수상 확인서는 결과 발표 후, 활동 인증서는 활동 연도 종료 후). 잘못된 건은 발급 취소 후 다시 발급합니다.
+                    회원 발급 = 회원이 사이트에서 직접 발급 (참가·수상 확인서는 결과 발표 후, 활동 인증서는 활동 연도 종료 후). 직원 등록 = 브랜드 관리 화면에서 직원이 명단으로 등록하고, 회원은 로그인해 본인 확인 후 내려받습니다. 잘못된 건은 발급 취소 후 다시 발급합니다.
                 </p>
             </div>
 
@@ -163,7 +163,7 @@ function CertRow({ r, showBrand, brandName, open, onToggle, call }: {
 }) {
     const [result, setResult] = useState(r.result ?? "");
     const ledger = r.cert_key.startsWith("ledger:");
-    // 대장 적재 때 비고에 넣은 출처 표시("수료증 관리 대장")는 비고가 아니다 - 종류 칸의 '대장 등록'으로 보여 준다
+    // 대장 적재 때 비고에 넣은 출처 표시("수료증 관리 대장")는 비고가 아니다 - 종류 칸의 '직원 등록'으로 보여 준다
     const initNote = r.note === LEDGER_NOTE ? "" : (r.note ?? "");
     const [note, setNote] = useState(initNote);
     const s = r.snapshot;
@@ -174,7 +174,7 @@ function CertRow({ r, showBrand, brandName, open, onToggle, call }: {
             <tr className={r.revoked_at ? "bg-neutral-50 text-neutral-400" : ""}>
                 <td className="px-3 py-2 text-xs">
                     {s.label ?? r.type}
-                    <span className="block text-[10px] text-neutral-400">{ledger ? "대장 등록" : "회원 발급"}</span>
+                    <span className="block text-[10px] text-neutral-400">{ledger ? "직원 등록" : "회원 발급"}</span>
                 </td>
                 <td className="px-3 py-2 text-xs">{[s.group_name, s.cohort].filter(Boolean).join(" ") || "-"}</td>
                 <td className="px-3 py-2 font-mono text-xs whitespace-nowrap"><button onClick={onToggle} className="underline-offset-2 hover:underline">{r.code}</button></td>
