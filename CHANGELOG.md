@@ -26,6 +26,15 @@
 - MADLeague: `features/madleague/MadHomeHero.tsx` · `madzine/page.tsx` · `madzine/contest/*` · `lib/supabase/madleague-contest.ts` · `lib/madleague-legacy-redirects.ts` · `scripts/madleague-pinboard-import.mjs` · 공통 게시판 `types/board.ts`·`lib/supabase/board.ts`·`BoardContentList`
 - 검색 노출: `lib/site-seo.ts` · `app/sitemap.ts` · `app/robots.txt/route.ts` · `app/llms.txt/route.ts` · `app/api/intra/sites/seo/route.ts` · `components/intra/SiteSeoPanel.tsx` · `components/SiteJsonLd.tsx` · `sql/site-seo-settings.sql` · 삭제 `public/robots.txt`
 
+### 종료 후 추가 (같은 날, 사용자 지적 반영)
+
+- 마이페이지 17곳 '내 게시글'이 사이트 전체 글을 보이던 버그(작성자 필터 TODO 방치) → `author_id`
+- `/profile` 개편: 내용(왼쪽) / 공개 설정(오른쪽 `components/profile/ProfileVisibilityRail.tsx`) 분리 · 핸들은 패널에서만 · `ProfilePublishPanel` 삭제 · 그라데이션 배너·색 칩 제거 · 미리보기에 공유 버튼 없음(`UniverseProfile preview`)
+- MADLeague 마이페이지 2단 + `BrandProfilePanel` 스위치형 개편 · 공용 `components/profile/RailParts.tsx`
+- DB: `profile_public_payload`가 `privacy_settings.interests=false`면 관심 분야 제외 (`sql/profile-interests-toggle.sql`, 사용자 지시·롤백 시뮬레이션 후 적용)
+- `MyProfileCard` 색 띠 제거·링크 'Ten:One 프로필 · 계정'(/profile) · `AccountMenu` 항목 하나로 · 공유 기간 select 옵션 글자색
+- 캡차: Cloudflare 오류(600010) 시 무한 재시도 대신 실패 안내 + 다시 시도 (앱 미리보기 창 = 자동화 브라우저라 로그인 불가)
+
 ### 발견·교훈
 
 - 모든 도메인이 tenone.biz robots·sitemap을 내보내고 있었다 (rook.co.kr에서도 tenone 주소 목록)

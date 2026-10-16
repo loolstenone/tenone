@@ -175,6 +175,7 @@
 
 ## 현재 상태
 
+- **2026-10-16 (세션 178)**: 마이페이지 '내 게시글'이 사이트 전체 글을 보여 주던 버그 수정 — `author_id`(members.id)로 내 글만. 마이페이지 카드 색 띠 제거·'Ten:One 프로필 · 계정'(/profile) 링크로 통일 (루트 CLAUDE.md §1.3 공개 프로필) · **`/profile` 개편** = 왼쪽 프로필 내용 + 오른쪽 공개 설정 패널(`ProfileVisibilityRail` — 공개·주소(핸들)·보일 항목(관심 분야 포함)·검색 노출·미리보기·공유) · 계정 메뉴 '내 공개 프로필'·'계정 관리' → 'Ten:One 프로필 · 계정' 하나 · 도메인별 robots·sitemap·llms.txt(`lib/site-seo.ts`)
 - **2026-10-13 (세션 170)**: 처리방침 HeRo HIT 수집 항목·MADLeap 지원서 추가 — **10-13 공지 · 10-20 시행** (배포일 기준 7일 전 공지; 커밋일이 아니라 실제 배포일로 계산). 후속: 10-14 이후 RooK 공지 줄, 10-20 이후 HeRo·MADLeap 공지 줄 삭제 + `lib/company-info.ts` LEGAL_DOCUMENTS.privacy version·effectiveDate 갱신
 - **2026-10-12 (세션 168)**: `/profile`의 `UCBalanceCard`·UniverseProfile UC 잔액은 `UC_PUBLIC`일 때만 표시·조회 (UC 비공개 운영 — 적립은 계속, 인트라는 그대로, 루트 §1.5 · `lib/uc-visibility.ts`)
 - **2026-10-08 (세션 165)**: `/profile/[handle]` 본인 판정을 email → `members.auth_id`로 · 공개 프로필 RPC `get_public_profile` 공개 필드만(이메일은 privacy_settings.email 동의 시) · 서비스 프로필은 본인만 · `/my` LoginRequired

@@ -137,6 +137,8 @@
 - [x] 첫 방문 SSO 자동 확인 · 캡차 UX(자동 진행·실패 안내)
 - [x] MADLeague 홈 A안 · 공모전/프로젝트(외부 등록·승인) · 옛 madleague.net 주소 308
 - [x] 도메인별 robots·sitemap·llms.txt + 인트라 검색 노출 설정
+- [x] 프로필 화면 개편 — 내용/공개 설정 분리(유니버스·MADLeague), 관심 분야 공개 선택, 마이페이지 내 게시글 버그
+- [ ] 프로필 개편 로그인 실검증 (크롬)
 - [ ] madleague.net DNS 전환 (도메인 기관 이전 후) + Search Console 사이트맵 제출
 - [ ] HeRo·MADLeap·Badak 공개 프로필 (브랜드 추가 3곳)
 - [ ] 다른 브랜드 레이아웃에 `<SiteJsonLd>` 연결

@@ -308,6 +308,7 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 
 ## 현재 상태
 
+- **2026-10-16 (세션 178)**: 마이페이지 '내 게시글'이 사이트 전체 글을 보여 주던 버그 수정 — `author_id`(members.id)로 내 글만. 마이페이지 카드 색 띠 제거·'Ten:One 프로필 · 계정'(/profile) 링크로 통일 (루트 CLAUDE.md §1.3 공개 프로필)
 - **2026-10-11 (세션 168) 보안**: 쇼케이스 생성 시 알림 메일은 **주최자 세션 + DB 값 기준**으로만 발송(요청 body의 수신자·내용 불신) · `jakka_creators.email` 비로그인 조회 차단(RLS). ❌ API가 body로 받은 이메일·이름으로 메일을 보내지 않는다
 - **2026-10-10 (세션 166)**: 우측 상단 계정 컨트롤 통일(`components/AccountControls.tsx`, CLAUDE.md §1.9.2) — 사이드바 프로필·모바일 상단 로그아웃 = 공통 `LogoutButton`(텍스트), 모바일 아바타 클릭 = 로그아웃 동작 제거. 알림은 Jakka 자체 알림(NotificationSheet — 좋아요·팔로우)이 담당해 공통 `NotificationBell`은 넣지 않음
 | 항목 | 내용 |
