@@ -55,7 +55,7 @@ export function ShareLinksSection({ scope, buildUrl, tone, onChanged }: {
     const [links, setLinks] = useState<ShareLink[]>([]);
     const [days, setDays] = useState(7);
     const [label, setLabel] = useState("");
-    const [newLink, setNewLink] = useState<string | null>(null);
+    const [newLink, setNewLink] = useState<{ id: string; url: string } | null>(null);
     const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [notice, setNotice] = useState("");
@@ -74,8 +74,8 @@ export function ShareLinksSection({ scope, buildUrl, tone, onChanged }: {
         const { data, error } = await createClient().rpc("create_profile_share_link", { p_days: days, p_label: label || null, p_scope: scope });
         setBusy(false);
         if (error || !data) { setNotice(friendlyDbError(error, "공유 링크를 만들지 못했습니다.")); return; }
-        const d = data as { token: string; handle: string };
-        setNewLink(buildUrl(d.handle, d.token));
+        const d = data as { id: string; token: string; handle: string };
+        setNewLink({ id: d.id, url: buildUrl(d.handle, d.token) });
         setLabel("");
         load(); onChanged?.();
     }
@@ -84,6 +84,8 @@ export function ShareLinksSection({ scope, buildUrl, tone, onChanged }: {
         setNotice("");
         const { error } = await createClient().rpc("revoke_profile_share_link", { p_id: id });
         if (error) { setNotice("링크를 회수하지 못했습니다."); return; }
+        // 방금 만든 링크를 회수했으면 '한 번만 보이는' 주소·QR도 치운다 (닫힌 주소가 남아 있으면 아직 쓸 수 있는 것처럼 보인다)
+        if (newLink?.id === id) { setNewLink(null); setQrUrl(null); }
         load();
     }
 
@@ -111,13 +113,13 @@ export function ShareLinksSection({ scope, buildUrl, tone, onChanged }: {
             {newLink && (
                 <div className="rounded-xl border border-amber-400/60 p-3 space-y-2">
                     <p className="text-[11px] text-amber-500">이 주소는 지금 한 번만 보입니다. 복사해 두세요.</p>
-                    <code className={`block text-[11px] break-all ${tone.text}`}>{newLink}</code>
+                    <code className={`block text-[11px] break-all ${tone.text}`}>{newLink.url}</code>
                     <div className="flex gap-2">
-                        <button onClick={() => navigator.clipboard.writeText(newLink).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })}
+                        <button onClick={() => navigator.clipboard.writeText(newLink.url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })}
                             className={`flex items-center gap-1 text-[11px] border px-2.5 py-1 rounded-lg ${tone.border} ${tone.sub}`}>
                             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} 복사
                         </button>
-                        <button onClick={() => setQrUrl(newLink)} className={`flex items-center gap-1 text-[11px] border px-2.5 py-1 rounded-lg ${tone.border} ${tone.sub}`}>
+                        <button onClick={() => setQrUrl(newLink.url)} className={`flex items-center gap-1 text-[11px] border px-2.5 py-1 rounded-lg ${tone.border} ${tone.sub}`}>
                             <QrCode className="h-3 w-3" /> QR
                         </button>
                     </div>

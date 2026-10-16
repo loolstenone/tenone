@@ -128,7 +128,8 @@ export default function MadLeagueMyPage() {
                     </div>
                 )}
                 <MyProfileCard accentColor="#EC1D25" siteBadge={roleLabel}>
-                    {madStatus === 'active' && madInfo && (
+                    {/* 칸이 하나도 없으면 빈 상자만 남는다 — 값이 있을 때만 */}
+                    {madStatus === 'active' && madInfo && (madInfo.club_name || madInfo.cohort || madInfo.university || (madInfo.activity_years?.length ?? 0) > 0) && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
                             {madInfo.club_name && (
                                 <div className="bg-neutral-800/50 px-3 py-2">

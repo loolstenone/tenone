@@ -141,7 +141,13 @@ export default function HitProfileBadge({ memberId, respectOptIn = false }: { me
   // 서비스 이용 내역
   const services = [
     hitA && { icon: Shield, label: `${hitA.typeCode} · ${hitA.typeNickname}`, sub: hitA.typeNameKo, href: `/hero/hit/a/result/${hitA.id}`, color: discColor },
-    hitB && { icon: TrendingUp, label: `Holland ${hitB.hollandCode}`, sub: `준비도 ${hitB.readinessGrade}등급 · ${hitB.competencyTrack || ''}`, href: `/hero/hit/b/result/${hitB.id}`, color: '#E53935' },
+    // 값이 비어 있는 결과(중간 저장 등)에 'null'이 찍히지 않게 있는 것만 잇는다
+    hitB && {
+      icon: TrendingUp,
+      label: hitB.hollandCode ? `Holland ${hitB.hollandCode}` : '역량·방향 검사',
+      sub: [hitB.readinessGrade && `준비도 ${hitB.readinessGrade}등급`, hitB.competencyTrack].filter(Boolean).join(' · ') || '결과 보기',
+      href: `/hero/hit/b/result/${hitB.id}`, color: '#E53935',
+    },
   ].filter(Boolean) as { icon: typeof Shield; label: string; sub: string; href: string; color: string }[];
 
   // 추가 서비스 링크 (아직 이용 안 한 것도 표시)
