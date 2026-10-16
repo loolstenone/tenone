@@ -354,6 +354,8 @@ export async function generateMetadata(): Promise<Metadata> {
 - 이메일 인증: OTP `{{ .TokenHash }}` 방식 (PKCE 아님) → `/auth/confirm` 라우트
 - 이메일 발송: Resend SMTP (`Ten:One™ Universe <noreply@tenone.biz>`)
 - 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
+- **사이트 간 로그인 유지 (One ID)**: `*.tenone.biz`는 `.tenone.biz` 쿠키 공유 · 독립 도메인은 허브 `auth.tenone.biz`를 거쳐 도메인마다 독립 세션 (`lib/sso-server.ts`). 넘어가는 길 3가지 — ① 유니버스 안 링크 `CrossSiteLink`(로그인 상태면 허브 경유) ② 로그인 버튼(허브에 먼저 물음) ③ **첫 방문 자동 확인** `lib/sso-auto.ts`(middleware — 즐겨찾기·검색·카톡 링크로 바로 와도 유지, 6시간에 한 번 `t1_sso_auto`, 로봇·API·RSC 제외, 2026-10-16)
+  - ❌ 독립 도메인 간 링크를 `https://…` 하드코딩 (`CrossSiteLink`·`crossSiteHref` 사용) ❌ 페이지 렌더마다 허브 왕복 (무한 교환 → Supabase 429, 2026-10-15)
 - **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접. 예외(서비스가 정해진 규칙으로 자동 처리): 탈퇴(`/api/account/delete`) · 가입하지 않기(`/api/auth/cancel-signup`, §1.2.0) — 2026-10-15 사용자 승인
 
 ### 1.2.0 가입 동의 표준 (2026-10-05)

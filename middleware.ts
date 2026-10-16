@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS } from '@/lib/domain-registry';
 import { brandProfileByPrefix } from '@/lib/profile/brand-profiles';
+import { autoSsoRedirect } from '@/lib/sso-auto';
 import { getApiAccessRule } from '@/lib/api-access-policy';
 import { requireStaff } from '@/lib/api-guard';
 
@@ -82,6 +83,12 @@ export async function middleware(request: NextRequest) {
             if (isPrefetch) return new NextResponse(null, { status: 204 });
             return NextResponse.redirect(target, status);
         }
+    }
+
+    // 0-SSO. 독립 도메인 첫 방문 = 허브에서 로그인 확인 한 번 (lib/sso-auto.ts — 즐겨찾기·카톡 링크로 와도 로그인 유지)
+    {
+        const sso = autoSsoRedirect(request, reqHost, isPrefetch);
+        if (sso) return sso;
     }
 
     // 0-API. 관리·운영 API 접근 게이트 (lib/api-access-policy.ts SSOT)
